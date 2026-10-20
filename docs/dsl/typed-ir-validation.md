@@ -22,11 +22,16 @@
   同一玩家的 stage 輸出會交給其後續 stage，包含選取 binding、骰值及 receipt，
   但不會流到迴圈外。每個 stage 保留自己的 scope 與 choice 限制；後續
   ChoiceProcedure 不會繼承前一 stage 的 NonChoiceSimultaneous 限制。
-  BP13-043 與 BP06-110 的合成種子只驗證這項交接，不宣稱完整卡片可以執行。
+  BP13-043 種子涵蓋先指定、後依明示順序交付及交付各自的場容量前提；
+  BP06-110 種子涵蓋 fanfare 本文：各玩家擲骰，1–3 抽二、4–6 隨機捨二，
+  擲骰、抽牌與捨牌的 actor 都是該次玩家。BP06-110 另有下述整卡結構種子，
+  包含自身入場與印刷進化能力；兩卡的實際結算仍未驗收。
 - simultaneous 的 choice stages 先於成員提交；同 stage 的 decision 讀共同入口，
   後一 stage 可讀前一 stage 的公開不可變 Nat 回答。成員共用完成 choices 後的環境，不能讀 sibling
   的結果。choice bindings 只在批次內可見，成員輸出與 receipt 完成整批檢查後公開。
-  空批次拒絕；批次 choice stage 的帶前提 decision 尚未接受。
+  空批次拒絕。帶前提 decision 必須與唯一 member 的完整 guard 相等，
+  包含 kind、reason、predicate 與 protects；其回答只交給該 member，不能流至其他 stage
+  或 sibling。所有 member guard 在共同批次開始環境檢查，不能讀本批 choices 或產出。
   批次成員與 NonChoiceSimultaneous player stage 不能藏入數值 declare，
   也不能藏入 draw／look 的 UpToStepwise（逐張決定）；
   each-object 的 Chosen 順序也尚未接受。
@@ -35,18 +40,24 @@
   AfterIteration 的終止條件可見；Count 與 BeforeIteration 不能使用它。
   collect 只在迴圈後可見，並保留 `ReceiptList<T>` 的元素型別。
 - instruction precondition 的 `protects` 必須是該 instruction，述詞在其輸出與
-  receipt 公開前檢查。一般 body 不接受 Cost instruction。
+  receipt 公開前檢查。帶前提的指示不匯出新 binding，因為可能沒有開始；
+  包含單獨指示、guarded pair 與 batch member。receipt 保留，由執行器表示未開始的結果。
+  一般 body 不接受 Cost instruction。
 
 ## 接受的形狀
 
 接受 sequence、if、simultaneous、直接 body 的 repeat、each-object、each-player
 與下述結算付款、May 和模式；instruction 接受 draw、look、counter、reveal、flip-down、posture、
-初次擲骰、數值 declare 與下述 discard。UpToStepwise 的決定描述及逐張協定見下節。
+初次擲骰、數值 declare、life、resource、transfer，以及下述 discard、damage、token。UpToStepwise 的決定描述及逐張協定見下節。
+本文的 resource 不接受 Pay；Pay 只屬於 K.pay 的成本步驟。draw 與 discard 目前只接受
+actor 就是抽牌者／捨牌者。擲骰者只由 instruction actor 表示，checker 無法對照卡文，
+lowering 必須寫入實際擲骰的玩家。
 capture 只接受 Int、Nat、Bool、
-Selector 的 `AtResolution`，且必須位於 root body 開頭連續的 capture 前綴：
+Selector 的 `AtResolution`，且必須位於 root body 開頭連續的 capture 前綴；
+有打出付款時，前綴位於 `K.pay PlayParameter` 之後：
 AtResolution 在進入執行時一次凍結，之後的節點會看到本體自己造成的變更，
 巢狀 sequence／if 也不是新的解算。前綴各 capture 同時凍結，輸入只能用入口
-可見的值（能力入口包含已選參數），不能引用同前綴的其他 capture。本文其他位置回報 `UnsupportedShape`，
+可見的值（能力入口包含已選參數與已完成的打出付款結果），不能引用同前綴的其他 capture。本文其他位置回報 `UnsupportedShape`，
 scope 不是 root 回報 `WrongScope`。
 
 值檢查涵蓋這些形狀使用的 signed arithmetic、明示 Nat 轉換、條件值、部分 Live
@@ -58,7 +69,7 @@ FloorDivide 只接受可靜態確認的正整數常值除數，其他動態除�
 InformationOrZero 接受 Cost／Stats 的 Original／Effective 特徵讀值；LastKnown 與
 ProspectiveEntry 尚未接受，不能用一般讀值替代 LKI 或入場取代情境。
 
-其餘形狀一律拒絕，包含分配傷害、移動／search／replacement、
+其餘形狀一律拒絕，包含一般移動／search／replacement、
 未驗的事件投影、effect 安裝及下述範圍以外的能力宣告。未承載的 decision／付款時點回報 `DecisionTiming`，
 其餘未驗形狀回報 `UnsupportedShape`。
 拒絕形狀的程式不會得到已驗包裝。這個拒絕不是「語法無效」或「引擎已實作」的宣稱。
@@ -77,7 +88,8 @@ min=0 仍是選擇，不能省掉。MayDecline 必須由 `K.may` 提供 Execute 
 帶 precondition 的 decision 必須緊接其受保護的 instruction，兩者保存相同前提，
 `protects` 指向該 instruction；前提不能讀其尚未產生的回答。這是一個指示開始點，
 不是提前詢問再於 instruction 重讀前提。回答只在該 instruction 可用，之後保留
-receipt；不能越過其他節點、跨 stage 或外洩回答。BP13-043 獨立指定的選擇不應掛上
+receipt；不能越過其他節點、跨 stage 或外洩回答。受保護的 instruction 可能未開始，
+因此它的 Reveal 不公開證據，它的 FlipDown 仍視為可能已執行。BP13-043 獨立指定的選擇不應掛上
 後續交付的前提。
 
 discard 接受 Chosen、Random、All、DownTo。Chosen 群組必須 disjoint；群組、population、
@@ -86,27 +98,76 @@ eligible 透過目前手牌的 zone、filter、difference、union 或有手牌�
 目前只接受 actor 就是手牌持有者。選擇域的公開 zone 白名單為 Field、Ex、Cemetery、
 Resolution、Race、Drive、Trigger、Equipment；Hand 只容許持有者私有可見性，包含
 述詞內巢狀集合讀取。Deck、Evolve、Banish 一律拒絕；Evolve 的私有牌組與 Banish
-的裏向物件需另有可見性證據，不能把整區當公開。
+的裏向物件需另有可見性證據，不能把整區當公開。限定進化入口的私有 Face 選擇
+是下節明列的例外，不放寬一般選擇域。
 
-選擇域拒絕未驗可見性的 bound／capture／receipt 集合來源；bound 物件也只接受本次
-選擇域述詞內建立的 candidate，不能從外層 each-object 帶入未知可見性的物件。
-Int／Nat／Bool 的 capture 與未知來源 bound 亦拒絕；唯有先前 Public Integer decision
-產生的不可變 Nat 回答可供後續選擇使用。此限制包含 aggregate bounds、群組述詞和
-Random discard 的 count；例如私有或 declare 來源的 X 張隨機捨棄目前會被拒。
-這些限制不取代 executor 的 Observation 投影與動態合法性驗證。
+選擇域要求來源證據：物件／整數回答保留該 decision 的 visibility，Look receipt 只給
+viewer；沒有 start guard 的 Reveal 直接公開一個 bound／captured 集合或 Look receipt 後，
+該集合可作 Public 選擇域。帶 guard 的 Reveal，包括 guarded decision 之後的受保護指示與
+batch 成員，可能沒有執行，不授權。動態 zone 的 Reveal 不自動授權後來重新求值的整區。
+Token 的 created 集合是公開的。
+AtResolution／AtSelection／AtPlay capture 依輸入傳遞 Public 或特定玩家的證據；
+私有集合計數不能透過 scalar capture 公開。EachObject 的元素繼承集合證據；
+repeat 的 iteration／collect 繼承 local receipt 的證據。
 
-`K.pay` 目前只接受 ResolutionChoice 的非空 Ordered costs。每個 step 必須是 Cost，
-已驗成本形狀為 discard、移除 counter 與 act；其他成本及 alternatives 尚未接受。
-Optional 的「付不付」與成本內 discard 的材料選取都歸這個 K.pay 程序所有，
-materials 只建立同一次選取的結果 binding；這不是 K.may，也不經獨立 DecisionId
-或額外的 `Node::Decision`。獨立 MayDecline 仍未接受。materials 與成本 receipt 僅對後續成本及 on_paid 可見。
-PaymentResult 在成本檢查後才對 on_paid 與付款節點之後公開，不能從成本讀尚未完成的
-付款結果。付款完成、物理實際量與選取結果仍是不同型別。
+FlipDown 採 fail-closed 子集：同一能力依檢查順序一旦可能執行 FlipDown，
+之後一律不接受物件證據，包括 bound、capture、receipt、collect 與迴圈元素。
+repeat、each-object 與 each-player stage 的本文含 FlipDown 時，從該迴圈開始就不接受，
+因為下一輪在本輪翻面之後。之後新的 Look、Reveal、Token 或選取也不能恢復物件證據；
+這不是只撤銷被翻面的成員。不可變的 scalar 回答與 scalar capture 保留原本證據。
+翻面後重新觀察的授權（觀察 epoch）尚未承載。
 
-repeat 可以匯出 PaymentResult，終止式可讀本輪 complete，迴圈後可以讀 collected
-payments 的 All／Any complete。相同本輪 receipt 可匯出到不同 iteration bindings；
-每個 binding 仍獨立檢查 scope 與 producer 型別。這些都是結構檢查，完整付款、原子
-消耗與重播中回答一次等執行語意仍須 executor 驗證。
+這是保守的靜態來源證明，不取代 executor 的 Observation、
+世代、當時區域與快照檢查。手牌 Bound／Objects 即使已知，仍要與當時手牌相交才能當 discard 材料。
+
+`K.pay` 接受 Ordered（包含空串列）與非空 Alternative；所有分支都驗證，替代分支的
+materials／receipt 不隱含 join。Optional 的「付不付」、alternative 與成本材料是同一
+付款程序，不能拆成第二次任意回答。材料 binding 只引用該成本指示原本的選取。
+已驗成本為 discard、移除 counter、act、常值非負 Resource Pay（PP、PP 最大值、EP、SEP
+同一形狀）、常值非正 Life Add；
+其他成本保守拒絕。Cost 不得帶可略過指示的 precondition。Ordered 的材料／receipt
+只對後續成本及 on_paid 可見，付款 receipt 在所有成本檢查完才公開。
+
+PlaySpec.costs 接受同一 CostSpec 檢查。`K.pay PlayParameter` 僅可放在有 play 入口的
+root body 前綴，on_paid 必須為空；打出付款在結算開始前完成，付款結果可供其後的
+AtResolution capture 與結算本文判斷，capture 之後不能再出現打出付款。這個位置是
+打出付款的內部承載，不是到了結算時重新付款。一般 body、巢狀區段、本文動作之後
+皆拒絕。獨立 CostMaterials／OptionalCost decision 仍未接受，避免與 CostStep 內的材料
+或 optional 回答重複詢問；卡片固有 PP 費用仍須 lowering 明示為 PlaySpec.costs。
+
+repeat 可匯出 PaymentResult；本輪 complete 與 collected payments 的 All／Any complete
+保留型別。**完整付款不是從 actual>0 推論**：零費用依法完成；合法取代後原費用視為
+執行，但不能偽造原動作的物理事件（CR10.6.2.5.2–.3）。本 checker 不執行付款，
+executor 必須先證明整個被選 CostSpec 可付，按規則處理取代，材料只選一次，任何一步
+失敗不得留下部分消耗；非法 play 的 rollback 也包含事件、待機及使用額度。
+PaymentResult 的建構、zero／replaced 投影、動態費用與完整 rollback 尚未接入。
+
+## 分配與 producer
+
+RecipientSet 接受 Objects、Leaders、Union、Explicit 與已定義的 Bound；空集合與空
+Union 都合法。每個成員遞迴驗證，沒有從靜態語法捏造 runtime membership。
+Distribution 是一次完整回答，ResolutionChoice 的外層 cardinality 固定 1；
+PlayParameter Distribution 也可承載。Damage Allocation 只能讀支配它的分配 binding，
+且 recipients 必須與該分配域精確相等，不能改成其他集合或同 slot 不同型別。
+目前不驗分配 binding 的消耗者數量；沒有消耗者或多次引用也不在此層拒絕。
+lowering 必須依卡文產生正確數量的傷害指示，不能將本檢查當成一次消耗的證明。
+結算時 Distribution 的實際卡例與最低量仍須在 lowering 驗收，不外推打出目標的最低量規則。
+
+`ResolvedRecipients` 只正規化已求值的成員，依物件 ID＋世代／玩家去重，保留空集合。
+`accepts_answer(total, minimum, answer)` 檢查每個成員恰出現一次、沒有外來世代、每項
+最低量與總和（含溢位）；selected play targets 的 minimum 必須為 1（CR10.6.2.4.2、Q1070）。
+空集合接受空結果，不問分配、不執行該分配傷害，無論 total 為何（CR10.6.2.4.1、Q1069）。
+這不是動態合法性證明；executor 必須用正確 snapshot 求域與 total，先適用分配取代，
+把同一 membership 交給傷害 producer，不能重新求值成另一批 recipients。
+
+Damage 目前接受 Ability flags、Instruction batch、Current source，uniform signed
+amount 或 Allocation；不接受攻擊／交戰來源或 LKI。結果為 DamageQuantityOutcome，
+可讀 quantity、repeat export／collect，不能冒充 Cards receipt。
+Token 檢查所有模板的常值名稱、數量、Field／Ex 單一目的區及可選 StackCounters；
+空模板串列、未驗 entry_effects、allocated destination 與動態名稱拒絕。output 在輸入
+檢查後才定義，receipt 為 TokenOutcome；同 batch 的 sibling 看不到它，批次結束才公開。
+模板身分／名稱相符、實際建立世代、共享容量裁切與入場事件由 executor 驗證。
+一般目的區滿不自動成為 P.start；BP13-043 的 transfer 前提是個別卡文，不能泛用到 token。
 
 ## 診斷
 
@@ -114,6 +175,8 @@ payments 的 All／Any complete。相同本輪 receipt 可匯出到不同 iterat
 最近 `Located` 節點的來源座標與內部 IR path。來源座標由呼叫者提供，沿用
 `SourceSpan` 的公開座標契約；`Display` 只輸出 stage、reason 與程式內路徑，
 不輸出卡文、表達式值或來源欄位內容。
+選擇域目前先檢查可見性再檢查引用；缺少 binding／receipt 證據時，可能先回報
+`UnsupportedShape`，不保證一定是 `UnavailableBinding`／`UnavailableReceipt`。
 
 ## 能力與程序入口
 
@@ -149,8 +212,44 @@ PlayParameter 目前接受 Public 的 Targets→Objects、X→Integer。Targets 
 SelectionSnapshot 為 AtDecision；Inline 的 actor 必須等於 play controller，Handoff 只
 接受相對該 controller、基數恰好 1..1 的 RequireOne(Opponents)，不以不相等的符號猜測異玩家。
 X 影響模式數或任意追加費用的形狀尚未接受（CR10.6.2.2.1），不能外推模式一律先於 X。
-Modes 由 ModeDecision 承載；CostMaterials、Distribution、OptionalCost、Face 與非空
-PlaySpec.costs 尚未接受。本文 K.pay PlayParameter 也仍是未實作，不能據此宣稱規格禁止。
+Modes 由 ModeDecision 承載；Distribution 與費用承載見上節。獨立 CostMaterials、
+OptionalCost 仍未接受；Face 僅接受下述限定進化入口，不能據此宣稱作者語法禁止其他形狀。
+
+### 單面進化與自身入場
+
+BP06-110 的整卡種子包含兩個能力。Fanfare keyword 入口限自身 EnterField、
+AfterEntry、active_zones=[Field]；述詞固定為
+`ObjectEquals(Frozen EnterFieldObject(event), Frozen SourceHolder)`，event 必須是該 pattern
+自己的事件 binding。這個比較只在 EnterField trigger 的 pattern 述詞中以完整形狀辨識，
+非 keyword 的 EnterField trigger 也可使用；AtEvent capture、本文條件與其他 ObjectEquals
+一律拒絕，不放行其他未驗事件投影。
+
+進化入口只接受 Printed 的 Evolution keyword、Activated、SourceHolder、
+Controller 與 active_zones=[Field]，採下列封閉形狀：
+
+1. 唯一 Face PlayParameter：AtDecision、Current、Inline、Only(Controller)，沒有 capture。
+   Objects 域恰選一張自己的 Evolve 卡，唯一群組也為 exact 1；沒有 roles、distinct_by 或 aggregate bounds。
+   述詞為目前候選卡名稱與 SourceHolder 名稱的 NamesIntersect，不接受未過濾的整個進化牌組。
+2. 唯一 Ordered 費用：先 Reveal 同一選取 binding，再 Pay 非負常值的 PpCurrent。
+   兩步都是 Controller 的 Cost 指示，無 guard、無材料再選；不接受 EP Alternative。
+3. 本文用 EachObject 對該 exact-one 集合取元素，唯一指示為 Evolve：
+   subject=SourceHolder、form.object=該元素、固定 FaceId、mode=Normal，產生新的 link binding。
+   不接受 Super／Effect 或 Face 回答的其他用途。
+
+EachObject 是既有型別內的暫時單元素投影，會多出該 capability 需求；它不是卡文的逐物件效果。
+未來 exact-one 型別投影應取代它。此處不驗資料庫中的面數或 FaceId：
+lowering／准入必須證明選取域只含單面進化牌，固定 FaceId 是該面的識別；雙面卡不能套用此形狀。
+
+Normal 在此入口表示印刷進化的基底程序，不是「永遠禁止超進化」：
+未來規則執行器須在整個打出交易中，依序適用替代／固定值／增減，再提供 EP 代付
+（CR12.2.3）與合法的 SEP 超進化選項（CR12.2.4）。選擇超進化時，執行計畫須升級為 Super，
+支付 SEP、增加攻體並產生超進化事件，不能照 Normal 動作執行卻漏掉這些效果。
+這些選項屬規則，不能抄成每張卡的印刷 Alternative。
+尚未提供這個程序的 executor 不得因本結構通過就接受進化執行。
+每回合額度（CR8.3.2.1）、進化卡上的進化能力不得打出（12.2.5）、形態合法性、
+同世代關聯（5.16）及雙面選面（4.6.4）同樣須在規則／准入層驗證。
+
+### 其他入口
 
 Trigger 暫接受 PerFact、無 limit，並限定 EnterField／EnterEx 的 AfterEntry，及
 LeaveField／Discard／Destroy 的 BeforeExit；各 pattern 述詞遞迴檢查。
@@ -178,7 +277,8 @@ domain 必須為該 actor 的 QuickActionOrPass，
 Execute body 不得再出現選擇，包括獨立 decision、Chosen／DownTo discard、declare、
 UpToStepwise、optional pay、mode 與巢狀 May；有選取的 payload 必須併入同一次回答。
 沒有選取的 may 使用空 compound，不能拿 Integer 0..1 代替 Execute／Decline。
-目前 Bound 手牌材料的可見性尚未驗證，因此 BP19-072 並非完整卡片執行驗收。
+Bound 手牌材料可沿同次回答傳遞可見性，但仍須當時手牌相交證明；
+BP19-072 的實際付款、捨棄取代及成功判斷並非完整卡片執行驗收。
 
 roles 只接受 PlayParameter Targets。每個 role ID 與 binding 唯一，由同次回答產生；
 目前接受一個 IfNonempty(1) 與至多一個 Remainder。若無 remainder，目標上限不得大於 1；

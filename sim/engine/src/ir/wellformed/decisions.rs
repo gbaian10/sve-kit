@@ -6,6 +6,7 @@ use crate::ir::{
     PlayerRef, PlayerRelation, Posture, Program, ReceiptId, RoleCardinality, RuleProcedure,
     SelectionConstraint, SelectionView, Selector, TargetRoleSpec, Visibility, ZoneKind,
 };
+use crate::ir::{Expr, Int, NumericChange, ObjectReceipt, ObjectReceiptList, ResourceOperation};
 use alloc::collections::BTreeSet;
 
 #[expect(
@@ -30,7 +31,7 @@ impl Checker {
                 | Node::Capture { .. } => None,
             };
             let bindings = self.env.bindings.clone();
-            let public_scalars = self.env.public_scalars.clone();
+            let access = self.env.access.clone();
             self.at(&index.to_string(), |checker| {
                 checker.located(step, Self::node)
             })?;
@@ -54,12 +55,15 @@ impl Checker {
                         {
                             return Err(checker.error(WellFormedReason::PreconditionTiming));
                         }
-                        checker.node(node)
+                        checker.guarded_instruction(instruction)
                     })
                 })?;
                 // A skipped instruction never supplies its guarded selection to later nodes.
                 self.env.bindings = bindings;
-                self.env.public_scalars = public_scalars;
+                self.env.access = access;
+                self.env
+                    .distributions
+                    .retain(|key, _| self.env.bindings.contains_key(key));
             }
         }
         Ok(())
@@ -126,9 +130,7 @@ impl Checker {
         self.env.chooser = None;
         self.env.private_choice = false;
         result?;
-        if decision.visibility == (Visibility::Public {}) {
-            self.public_answers(&decision.domain);
-        }
+        self.answer_access(&decision.domain, &decision.visibility);
         self.at("captures", |checker| {
             checker.captures(
                 &decision.captures,
@@ -137,26 +139,6 @@ impl Checker {
                 },
             )
         })
-    }
-
-    fn public_answers(&mut self, domain: &ChoiceDomain) {
-        match domain {
-            ChoiceDomain::Integer { binding, .. } => {
-                self.env.public_scalars.insert(binding.key());
-            }
-            ChoiceDomain::Compound { domains } => {
-                for child in domains {
-                    self.public_answers(child);
-                }
-            }
-            ChoiceDomain::Objects { .. }
-            | ChoiceDomain::EndPhaseGuardAct { .. }
-            | ChoiceDomain::Modes { .. }
-            | ChoiceDomain::Order { .. }
-            | ChoiceDomain::Distribution { .. }
-            | ChoiceDomain::Names { .. }
-            | ChoiceDomain::QuickActionOrPass { .. } => {}
-        }
     }
 
     pub(super) fn visibility(&mut self, visibility: &Visibility) -> Checked {
@@ -210,14 +192,36 @@ impl Checker {
                     self.env = start.clone();
                     self.at(&index.to_string(), |checker| checker.domain(child, None))?;
                     after.bindings.extend(self.env.bindings.clone());
+                    after.distributions.extend(self.env.distributions.clone());
                 }
                 self.env = after;
+                Ok(())
+            }
+            ChoiceDomain::Distribution {
+                recipients,
+                total,
+                binding,
+            } => {
+                if cardinality.is_some_and(|value| {
+                    value
+                        != (Cardinality {
+                            minimum: Nat(1),
+                            maximum: Some(Nat(1)),
+                        })
+                }) {
+                    return Err(self.error(WellFormedReason::DecisionCardinality));
+                }
+                self.recipients(recipients)?;
+                self.natural(total)?;
+                self.define(*binding, BindingKind::Value)?;
+                self.env
+                    .distributions
+                    .insert(binding.key(), recipients.clone());
                 Ok(())
             }
             ChoiceDomain::EndPhaseGuardAct { .. }
             | ChoiceDomain::Modes { .. }
             | ChoiceDomain::Order { .. }
-            | ChoiceDomain::Distribution { .. }
             | ChoiceDomain::Names { .. }
             | ChoiceDomain::QuickActionOrPass { .. } => self.reject(),
         }
@@ -239,7 +243,8 @@ impl Checker {
         }
         match (slot, &decision.domain) {
             (PlaySlot::Targets, ChoiceDomain::Objects { .. })
-            | (PlaySlot::X, ChoiceDomain::Integer { .. }) => {}
+            | (PlaySlot::X, ChoiceDomain::Integer { .. })
+            | (PlaySlot::Distribution, ChoiceDomain::Distribution { .. }) => {}
             _ => return self.reject(),
         }
         self.decision_header(decision)?;
@@ -396,12 +401,32 @@ impl Checker {
                 zone: ZoneKind::Deck | ZoneKind::Evolve | ZoneKind::Banish,
                 ..
             }
-            | Selector::Ordered { .. }
-            | Selector::Bound { .. }
-            | Selector::Captured { .. }
-            | Selector::ReceiptMembers { .. }
-            | Selector::CollectedMembers { .. }
-            | Selector::Created { .. } => self.reject(),
+            | Selector::Ordered { .. } => self.reject(),
+            Selector::CollectedMembers { receipts, .. } => match receipts {
+                ObjectReceiptList::Look { receipts } => {
+                    self.visible_object(self.env.access.get(&receipts.key()))
+                }
+                ObjectReceiptList::Token { receipts } => {
+                    self.visible_object(self.env.access.get(&receipts.key()))
+                }
+                ObjectReceiptList::Flip { .. } | ObjectReceiptList::Batch { .. } => self.reject(),
+            },
+            Selector::Bound { reference } => {
+                self.visible_object(self.env.access.get(&reference.key()))
+            }
+            Selector::Captured { reference } => {
+                self.visible_object(self.env.access.get(&reference.binding.key()))
+            }
+            Selector::Created { receipt } => self.visible_receipt(receipt),
+            Selector::ReceiptMembers { receipt, .. } => match receipt {
+                ObjectReceipt::Look { receipt } => self.visible_receipt(receipt),
+                ObjectReceipt::Token { receipt } => self.visible_receipt(receipt),
+                ObjectReceipt::Batch { .. }
+                | ObjectReceipt::TransformBanished { .. }
+                | ObjectReceipt::TransformCreated { .. }
+                | ObjectReceipt::Movement { .. }
+                | ObjectReceipt::Flip { .. } => self.reject(),
+            },
             Selector::MoveAfterAll { .. }
             | Selector::MoveAfter { .. }
             | Selector::Zone {
@@ -477,41 +502,64 @@ impl Checker {
         on_paid: &Program,
         receipt: ReceiptId,
     ) -> Checked {
-        if at != PaymentTime::ResolutionChoice {
+        if at == PaymentTime::PlayParameter
+            && (self.env.play_payments != Some(self.root)
+                || self.env.scope != self.root
+                || !on_paid.steps.is_empty())
+        {
             return Err(self.error(WellFormedReason::DecisionTiming));
         }
         if !self.env.choices && optional == PaymentOptionality::Optional {
             return self.reject();
         }
-        let CostSpec::Ordered { steps } = costs else {
-            return self.reject();
-        };
-        if steps.is_empty() {
-            return self.reject();
-        }
         self.isolated(|checker| {
             checker.env.scope = on_paid.scope;
-            checker.at("costs", |checker| {
+            checker.env.play_payments = None;
+            checker.at("costs", |checker| checker.costs(costs))?;
+            checker.produce(receipt, TypeId::of::<PaymentResult>())?;
+            checker.at("on_paid", |checker| checker.program(on_paid))
+        })?;
+        self.env
+            .receipts
+            .insert(receipt, TypeId::of::<PaymentResult>());
+        Ok(())
+    }
+
+    pub(super) fn costs(&mut self, costs: &CostSpec) -> Checked {
+        match costs {
+            CostSpec::Alternative { alternatives } => {
+                if !self.env.choices || alternatives.is_empty() {
+                    return self.reject();
+                }
+                for (index, alternative) in alternatives.iter().enumerate() {
+                    self.at(&format!("alternatives/{index}"), |checker| {
+                        checker.isolated(|checker| checker.costs(alternative))
+                    })?;
+                }
+            }
+            CostSpec::Ordered { steps } => {
                 for (index, step) in steps.iter().enumerate() {
-                    checker.at(&index.to_string(), |checker| {
+                    self.at(&index.to_string(), |checker| {
                         if step.instruction.context != InstructionContext::Cost {
                             return Err(checker.error(WellFormedReason::ExpectedCost));
                         }
-                        if !matches!(
-                            &step.instruction.action,
+                        if step.instruction.precondition.is_some() {
+                            return Err(checker.error(WellFormedReason::PreconditionTiming));
+                        }
+                        let valid = matches!(&step.instruction.action,
                             Action::Discard { .. }
-                                | Action::Counter {
-                                    operation: CounterOperation::Remove {},
-                                    ..
-                                }
-                                | Action::Posture {
-                                    posture: Posture::Acted,
-                                    ..
-                                }
-                        ) {
+                            | Action::Counter { operation: CounterOperation::Remove {}, .. }
+                            | Action::Posture { posture: Posture::Acted, .. })
+                            || matches!(&step.instruction.action, Action::Resource { operation: ResourceOperation::Pay, amount: Expr::Literal(Int(value)), .. } if *value >= 0)
+                            || matches!(&step.instruction.action, Action::Life { change: NumericChange::Add { amount: Expr::Literal(Int(value)) }, .. } if *value <= 0);
+                        if !valid {
                             return checker.reject();
                         }
-                        checker.instruction_in(&step.instruction, InstructionContext::Cost)?;
+                        checker.instruction_in(
+                            &step.instruction,
+                            InstructionContext::Cost,
+                            false,
+                        )?;
                         if let Some(materials) = step.materials {
                             if !matches!(
                                 step.instruction.action,
@@ -524,14 +572,8 @@ impl Checker {
                         Ok(())
                     })?;
                 }
-                Ok(())
-            })?;
-            checker.produce(receipt, TypeId::of::<PaymentResult>())?;
-            checker.at("on_paid", |checker| checker.program(on_paid))
-        })?;
-        self.env
-            .receipts
-            .insert(receipt, TypeId::of::<PaymentResult>());
+            }
+        }
         Ok(())
     }
 }

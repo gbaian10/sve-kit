@@ -104,12 +104,7 @@ impl Checker {
                     })?;
                 }
                 // Resolution locals may be read by the selected body, never by play-time inputs.
-                checker.env.bindings.extend(original.bindings.clone());
-                checker.env.receipts.extend(original.receipts.clone());
-                checker
-                    .env
-                    .public_scalars
-                    .extend(original.public_scalars.clone());
+                checker.env.inherit_values(&original);
                 checker.at("body", |checker| checker.program(&mode.body))
             })?;
         }

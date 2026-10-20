@@ -7,6 +7,7 @@ use super::{
 use crate::ir::{
     BoolFrozen, CaptureTime, CharacteristicView, ExecutionRef, NumberRead, PaymentReference,
 };
+use crate::ir::{CardKind, KindRead};
 
 #[expect(
     clippy::multiple_inherent_impl,
@@ -17,13 +18,13 @@ impl Checker {
         if self.event_capture() && matches!(expression, Expr::Live(_)) {
             return self.reject();
         }
-        if self.env.chooser.is_some() && matches!(expression, Expr::Captured(_)) {
-            return self.reject();
-        }
         match expression {
             Expr::Literal(_) => Ok(()),
             Expr::Bound(binding) => self.scalar(*binding),
-            Expr::Captured(reference) => self.reference(reference.binding, BindingKind::Capture),
+            Expr::Captured(reference) => {
+                self.reference(reference.binding, BindingKind::Capture)?;
+                self.visible(self.env.access.get(&reference.binding.key()))
+            }
             Expr::Live(read) => match read.as_ref() {
                 IntRead::PlayerResource { player, .. } => self.player(player),
                 IntRead::HistorySum { .. } => self.reject(),
@@ -100,13 +101,13 @@ impl Checker {
         if self.event_capture() && matches!(expression, Expr::Live(_)) {
             return self.reject();
         }
-        if self.env.chooser.is_some() && matches!(expression, Expr::Captured(_)) {
-            return self.reject();
-        }
         match expression {
             Expr::Literal(_) => Ok(()),
             Expr::Bound(binding) => self.scalar(*binding),
-            Expr::Captured(reference) => self.reference(reference.binding, BindingKind::Capture),
+            Expr::Captured(reference) => {
+                self.reference(reference.binding, BindingKind::Capture)?;
+                self.visible(self.env.access.get(&reference.binding.key()))
+            }
             Expr::Frozen(read) => match read.as_ref() {
                 NatFrozen::ReceiptActual { receipt } => self.measured(receipt),
                 NatFrozen::SpellChain {
@@ -178,13 +179,13 @@ impl Checker {
         if self.event_capture() && matches!(expression, Expr::Live(_)) {
             return self.reject();
         }
-        if self.env.chooser.is_some() && matches!(expression, Expr::Captured(_)) {
-            return self.reject();
-        }
         match expression {
             Expr::Literal(_) => Ok(()),
             Expr::Bound(binding) => self.scalar(*binding),
-            Expr::Captured(reference) => self.reference(reference.binding, BindingKind::Capture),
+            Expr::Captured(reference) => {
+                self.reference(reference.binding, BindingKind::Capture)?;
+                self.visible(self.env.access.get(&reference.binding.key()))
+            }
             Expr::Live(read) => match read.as_ref() {
                 BoolRead::Awakening { player } | BoolRead::OwnTurn { player } => {
                     self.player(player)
@@ -227,6 +228,10 @@ impl Checker {
                 self.natural(right)
             }
             Predicate::Exists { objects } => self.selector(objects),
+            Predicate::KindEquals { left, right } => {
+                self.card_kind(left)?;
+                self.card_kind(right)
+            }
             Predicate::MemberOf { object, set } => {
                 self.object(object)?;
                 self.selector(set)
@@ -269,11 +274,31 @@ impl Checker {
             | Predicate::HasAbility { .. }
             | Predicate::HasTrait { .. }
             | Predicate::NamesIntersect { .. }
-            | Predicate::KindEquals { .. }
             | Predicate::ClassEquals { .. }
             | Predicate::HasInfo { .. }
             | Predicate::NameEquals { .. }
             | Predicate::NameContains { .. } => self.reject(),
+        }
+    }
+
+    fn card_kind(&self, value: &Expr<CardKind>) -> Checked {
+        match value {
+            Expr::Literal(_) => Ok(()),
+            Expr::Live(read) if !self.event_capture() => {
+                let KindRead::Kind { object, view } = read.as_ref();
+                if !matches!(
+                    view,
+                    CharacteristicView::Original | CharacteristicView::Effective
+                ) {
+                    return self.reject();
+                }
+                self.view(object)
+            }
+            Expr::Live(_)
+            | Expr::Frozen(_)
+            | Expr::Captured(_)
+            | Expr::Bound(_)
+            | Expr::Compute(_) => self.reject(),
         }
     }
 
@@ -282,10 +307,7 @@ impl Checker {
         T: 'static,
     {
         self.reference(binding, BindingKind::Value)?;
-        if self.env.chooser.is_some() && !self.env.public_scalars.contains(&binding.key()) {
-            return self.reject();
-        }
-        Ok(())
+        self.visible(self.env.access.get(&binding.key()))
     }
 
     pub(super) fn player(&mut self, player: &PlayerRef) -> Checked {
@@ -331,7 +353,7 @@ impl Checker {
                 if self.env.chooser.is_some()
                     && !self.env.choice_candidates.contains(&binding.key())
                 {
-                    return self.reject();
+                    self.visible_object(self.env.access.get(&binding.key()))?;
                 }
                 Ok(())
             }
@@ -342,7 +364,7 @@ impl Checker {
         }
     }
 
-    fn view(&self, view: &ObjectView) -> Checked {
+    pub(super) fn view(&self, view: &ObjectView) -> Checked {
         match view {
             ObjectView::Current { object } if !self.event_capture() => self.object(object),
             ObjectView::EventSnapshot {

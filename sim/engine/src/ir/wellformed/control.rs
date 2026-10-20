@@ -3,7 +3,11 @@ use super::{
     IterationCheck, Program, ReceiptExport, ReceiptList, ReceiptLocation, ReceiptReference,
     RepeatBody, ScopeId, Termination, TypeId, WellFormedReason,
 };
-use crate::ir::{Decision, DecisionKind, Declinable, IterationOrder, ReceiptId, StageMode};
+use crate::ir::{
+    Decision, DecisionKind, Declinable, IterationOrder, PlayerRef, PlayerStage, ReceiptId,
+    StageMode,
+};
+use alloc::collections::BTreeMap;
 
 impl Checker {
     pub(super) fn control(&mut self, control: &Control) -> Checked {
@@ -55,10 +59,13 @@ impl Checker {
                 if *order == Some(IterationOrder::Chosen) {
                     return self.reject();
                 }
+                let access = self.infer_access(|checker| checker.selector(input));
                 self.selector(input)?;
+                self.revoke_before_loop(body);
                 self.isolated(|checker| {
                     checker.env.scope = body.scope;
                     checker.define(*binding, BindingKind::Value)?;
+                    checker.save_access(binding.key(), access);
                     checker.program(body)
                 })
             }
@@ -69,31 +76,7 @@ impl Checker {
                 ..
             } => {
                 self.players(players)?;
-                self.isolated(|checker| {
-                    let scope = player.key().0;
-                    if stages.is_empty() {
-                        return checker.reject();
-                    }
-                    if checker.scopes.contains(&scope) {
-                        return Err(checker.error(WellFormedReason::DuplicateScope));
-                    }
-                    if !stages.iter().any(|stage| stage.body.scope == scope) {
-                        checker.scopes.insert(scope);
-                    }
-                    checker.env.scope = scope;
-                    checker.define(*player, BindingKind::Value)?;
-                    for (index, stage) in stages.iter().enumerate() {
-                        checker.at(&format!("stages/{index}/body"), |checker| {
-                            let choices = checker.env.choices;
-                            checker.env.choices &=
-                                stage.mode != StageMode::NonChoiceSimultaneous {};
-                            checker.program(&stage.body)?;
-                            checker.env.choices = choices;
-                            Ok(())
-                        })?;
-                    }
-                    Ok(())
-                })
+                self.isolated(|checker| checker.each_player(*player, stages))
             }
             Control::Pay {
                 at,
@@ -115,6 +98,33 @@ impl Checker {
             } => self.modes(modes, count, chosen, *choice_kind),
             Control::Match { .. } | Control::Repeat { .. } => self.reject(),
         }
+    }
+
+    fn each_player(&mut self, player: Binding<PlayerRef>, stages: &[PlayerStage]) -> Checked {
+        let scope = player.key().0;
+        if stages.is_empty() {
+            return self.reject();
+        }
+        if self.scopes.contains(&scope) {
+            return Err(self.error(WellFormedReason::DuplicateScope));
+        }
+        if !stages.iter().any(|stage| stage.body.scope == scope) {
+            self.scopes.insert(scope);
+        }
+        self.env.scope = scope;
+        self.define(player, BindingKind::Value)?;
+        for (index, stage) in stages.iter().enumerate() {
+            // One player's flip precedes the next player's turn at this stage.
+            self.revoke_before_loop(&stage.body);
+            self.at(&format!("stages/{index}/body"), |checker| {
+                let choices = checker.env.choices;
+                checker.env.choices &= stage.mode != StageMode::NonChoiceSimultaneous {};
+                checker.program(&stage.body)?;
+                checker.env.choices = choices;
+                Ok(())
+            })?;
+        }
+        Ok(())
     }
 
     fn optional(&mut self, body: &Program, choice: &Decision, receipt: ReceiptId) -> Checked {
@@ -142,7 +152,11 @@ impl Checker {
         if batch.members.is_empty() {
             return Err(self.error(WellFormedReason::EmptyBatch));
         }
-        let mut committed = self.env.clone();
+        let entry = self.env.clone();
+        let mut committed = entry.clone();
+        let mut guarded = BTreeMap::<_, Environment>::new();
+        self.batch_guards(batch, &entry)?;
+        self.env = entry;
         for (index, stage) in batch.choice_stages.iter().enumerate() {
             let start = self.env.clone();
             let mut after = start.clone();
@@ -150,41 +164,103 @@ impl Checker {
                 self.env = start.clone();
                 self.at(
                     &format!("choice_stages/{index}/decisions/{decision_index}"),
-                    |checker| {
-                        if matches!(
-                            decision.kind,
-                            DecisionKind::ResolutionChoice {
-                                precondition: Some(_),
-                                ..
-                            }
-                        ) {
-                            return checker.reject();
-                        }
-                        checker.decision(decision)
-                    },
+                    |checker| checker.batch_decision(batch, decision),
                 )?;
-                after.bindings.extend(self.env.bindings.clone());
-                after.public_scalars.extend(self.env.public_scalars.clone());
+                if let DecisionKind::ResolutionChoice {
+                    precondition: Some(guard),
+                    ..
+                } = &decision.kind
+                {
+                    let target = guarded
+                        .entry(guard.protects)
+                        .or_insert_with(|| start.clone());
+                    target.bindings.extend(self.env.bindings.clone());
+                    target.access.extend(self.env.access.clone());
+                    target.distributions.extend(self.env.distributions.clone());
+                } else {
+                    after.bindings.extend(self.env.bindings.clone());
+                    after.access.extend(self.env.access.clone());
+                    after.distributions.extend(self.env.distributions.clone());
+                }
             }
             self.env = after;
         }
         let start = self.env.clone();
         for (index, member) in batch.members.iter().enumerate() {
             self.env = start.clone();
+            if let Some(answers) = guarded.get(&member.node.id) {
+                self.env.bindings.extend(answers.bindings.clone());
+                self.env.distributions.extend(answers.distributions.clone());
+                self.env.access.extend(answers.access.clone());
+            }
+            let inputs = self.env.bindings.clone();
             self.env.choices = false;
             self.at(&format!("members/{index}"), |checker| {
-                checker.located(member, Self::instruction)
+                checker.located(member, Self::guarded_instruction)
             })?;
             committed.bindings.extend(
                 self.env
                     .bindings
                     .iter()
-                    .filter(|(key, _)| !start.bindings.contains_key(key))
+                    .filter(|(key, _)| !inputs.contains_key(key))
                     .map(|(key, slot)| (*key, *slot)),
             );
             committed.receipts.extend(self.env.receipts.clone());
+            committed
+                .receipt_access
+                .extend(self.env.receipt_access.clone());
+            committed.access.extend(
+                self.env
+                    .access
+                    .iter()
+                    .filter(|(key, _)| !inputs.contains_key(key))
+                    .map(|(key, access)| (*key, access.clone())),
+            );
         }
         self.env = committed;
+        Ok(())
+    }
+
+    fn batch_decision(&mut self, batch: &InstructionBatch, decision: &Decision) -> Checked {
+        if let DecisionKind::ResolutionChoice {
+            precondition: Some(guard),
+            ..
+        } = &decision.kind
+        {
+            let mut members = batch
+                .members
+                .iter()
+                .filter(|member| member.node.id == guard.protects);
+            let Some(member) = members.next() else {
+                return Err(self.error(WellFormedReason::PreconditionTiming));
+            };
+            if members.next().is_some() || member.node.precondition.as_ref() != Some(guard) {
+                return Err(self.error(WellFormedReason::PreconditionTiming));
+            }
+            let mut unguarded = decision.clone();
+            if let DecisionKind::ResolutionChoice { precondition, .. } = &mut unguarded.kind {
+                *precondition = None;
+            }
+            self.decision(&unguarded)
+        } else {
+            self.decision(decision)
+        }
+    }
+
+    fn batch_guards(&mut self, batch: &InstructionBatch, entry: &Environment) -> Checked {
+        for (index, member) in batch.members.iter().enumerate() {
+            if let Some(guard) = &member.node.precondition {
+                self.env = entry.clone();
+                self.at(&format!("members/{index}/precondition"), |checker| {
+                    checker.located(member, |checker, instruction| {
+                        if guard.protects != instruction.id {
+                            return Err(checker.error(WellFormedReason::PreconditionTiming));
+                        }
+                        checker.boolean(&guard.predicate)
+                    })
+                })?;
+            }
+        }
         Ok(())
     }
 
@@ -202,6 +278,7 @@ impl Checker {
         let mut after = self.env.clone();
         let mut iteration = after.clone();
         iteration.scope = scope;
+        self.revoke_before_loop(body);
         self.at("body", |checker| checker.program(body))?;
         let produced = self.env.clone();
         for (index, export) in exports.iter().enumerate() {
@@ -281,14 +358,17 @@ impl Checker {
         if after.receipts.contains_key(id) {
             return Err(self.error(WellFormedReason::InvalidExport));
         }
+        let access = body.receipt_access.get(id).cloned();
         self.env = body.clone();
         self.receipt(source)?;
         self.env = iteration_env.clone();
         self.define(iteration, BindingKind::Iteration)?;
+        self.save_access(iteration.key(), access.clone());
         *iteration_env = self.env.clone();
         if let Some(collect) = collect {
             self.env = after.clone();
             self.define(collect, BindingKind::Value)?;
+            self.save_access(collect.key(), access);
             *after = self.env.clone();
         }
         Ok(())

@@ -667,14 +667,17 @@ fn each_player_carries_same_player_outputs_across_stages() {
                 PlayerStage {
                     body: body(
                         3,
-                        vec![instruction(
-                            Action::Draw {
-                                player: PlayerRef::Bound { binding: player },
-                                count,
-                                mode: StepwiseMode::Exact,
-                            },
-                            2,
-                            "synthetic",
+                        vec![with_instruction(
+                            instruction(
+                                Action::Draw {
+                                    player: PlayerRef::Bound { binding: player },
+                                    count,
+                                    mode: StepwiseMode::Exact,
+                                },
+                                2,
+                                "synthetic",
+                            ),
+                            |instruction| instruction.actor = PlayerRef::Bound { binding: player },
                         )],
                     ),
                     mode: StageMode::NonChoiceSimultaneous {},
@@ -719,7 +722,9 @@ fn unchecked_connections_fail_closed_instead_of_minting_a_certificate() {
             1,
             vec![control(Control::Pay {
                 at: PaymentTime::ResolutionChoice,
-                costs: CostSpec::Ordered { steps: vec![] },
+                costs: CostSpec::Alternative {
+                    alternatives: vec![],
+                },
                 optional: PaymentOptionality::Required,
                 on_paid: body(2, vec![]),
                 receipt: ReceiptId(1),
