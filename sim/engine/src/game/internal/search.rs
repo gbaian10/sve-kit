@@ -6,13 +6,17 @@ use super::{
 };
 use crate::ir::{
     Action, Binding, Bool, CardKind, Cardinality, CharacteristicView, Expr, Instruction, KindRead,
-    MoveDestination, MoveMethod, MoveResult, NamesRead, Nat, ObjectOperand, ObjectProperty,
-    ObjectRef, ObjectView, OwnerZone, PlayerId, PlayerRelation, Predicate, RuntimeObjectView,
-    RuntimeZoneRef, SearchDestination, SearchOutcome, SearchPartition, SearchPartitionAnswer,
-    SearchSelectionAnswer, SelectionView, Selector, SnapshotId, TraitsRead, ZoneKind, ZoneRef,
+    MoveDestination, MoveMethod, MoveResult, MoveSpec, NamesRead, Nat, ObjectOperand,
+    ObjectProperty, ObjectRef, ObjectView, OwnerZone, PlayerId, PlayerRelation, Predicate,
+    RuntimeObjectView, RuntimeZoneRef, SearchDestination, SearchOutcome, SearchPartition,
+    SearchPartitionAnswer, SearchSelectionAnswer, SelectionView, Selector, SnapshotId, TraitsRead,
+    ZoneKind, ZoneRef,
 };
 use alloc::collections::{BTreeSet, VecDeque};
 use serde_json::{Value, json};
+
+mod replacement;
+pub(super) use replacement::ReplacementWait;
 
 /// Frozen selection constraints visible only to the authenticated searcher.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -145,6 +149,7 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
         groups,
         destination,
         cardinality,
+        continuation,
         ..
     } = action
     else {
@@ -179,6 +184,24 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
     }
     let movement = match destination {
         Some(SearchDestination::Single { movement }) => movement,
+        Some(SearchDestination::OptionalSelfReplacement {
+            predicate,
+            movement,
+            ..
+        }) if cardinality.maximum.is_some_and(|maximum| maximum.0 <= 1)
+            && matches!(
+                &movement.to,
+                MoveDestination::Shared {
+                    zone: ZoneRef {
+                        kind: ZoneKind::Field,
+                        ..
+                    }
+                }
+            ) =>
+        {
+            replacement::check_predicate(predicate, continuation.found)?;
+            movement
+        }
         Some(SearchDestination::Partition { destinations })
             if matches!(destinations.as_slice(), [hand, cemetery]
                 if hand.zone == (MoveDestination::Owners { zone: OwnerZone::Hand })
@@ -192,24 +215,7 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
         }
         _ => return Err(unsupported("search destination or incomplete allocation")),
     };
-    if movement.position.is_some()
-        || movement.order.is_some()
-        || movement.initial_posture.is_some()
-        || !movement.entry_effects.is_empty()
-        || !matches!(
-            &movement.to,
-            MoveDestination::Owners {
-                zone: OwnerZone::Hand | OwnerZone::Cemetery
-            } | MoveDestination::Shared {
-                zone: ZoneRef {
-                    kind: ZoneKind::Ex | ZoneKind::Field,
-                    ..
-                }
-            }
-        )
-    {
-        return Err(unsupported("search movement"));
-    }
+    check_movement(movement)?;
     // Whether a found spell stays in the deck is unadmitted; a count-only search could be forced to pick one.
     if !conditional
         && groups.is_none()
@@ -228,6 +234,28 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
     Ok(())
 }
 
+fn check_movement(movement: &MoveSpec) -> Result<()> {
+    if movement.position.is_some()
+        || movement.order.is_some()
+        || movement.initial_posture.is_some()
+        || !movement.entry_effects.is_empty()
+        || !matches!(
+            &movement.to,
+            MoveDestination::Owners {
+                zone: OwnerZone::Hand | OwnerZone::Cemetery
+            } | MoveDestination::Shared {
+                zone: ZoneRef {
+                    kind: ZoneKind::Ex | ZoneKind::Field,
+                    ..
+                }
+            }
+        )
+    {
+        return Err(unsupported("search movement"));
+    }
+    Ok(())
+}
+
 /// Search-only requirement codes must never authorize private reads elsewhere in a program.
 pub(super) fn private_requirement(code: &str) -> bool {
     matches!(
@@ -236,6 +264,10 @@ pub(super) fn private_requirement(code: &str) -> bool {
             | "action.search"
             | "shape.SearchDestination.Single"
             | "shape.SearchDestination.Partition"
+            | "shape.SearchDestination.OptionalSelfReplacement"
+            | "shape.Predicate.SearchFoundAny"
+            | "shape.NumberRead.Cost"
+            | "read.cost"
             | "shape.Predicate.NamesIntersect"
             | "predicate.names-intersect"
             | "shape.NamesRead.Names"
@@ -379,6 +411,10 @@ impl Game {
                 matches!(zone, ZoneKind::Ex | ZoneKind::Field).then_some(zone)
             }
             Some(SearchDestination::Partition { .. }) => None,
+            Some(SearchDestination::OptionalSelfReplacement { movement, .. }) => {
+                self.internal_search_destination(execution, &movement.to, player)?;
+                None
+            }
             _ => return Err(unsupported("search destination")),
         };
         // A missing capacity protocol must not be replaced by asking the searcher to find fewer cards.
@@ -603,6 +639,12 @@ impl Game {
                     next_handle: u64::try_from(wait.domain.cards.len()).map_err(invalid)?,
                 },
             ),
+            Action::Search {
+                destination: Some(SearchDestination::OptionalSelfReplacement { .. }),
+                ..
+            } => {
+                self.internal_search_replacement(execution, &wait.instruction, wait.player, outcome)
+            }
             _ => Err(unsupported("search movement continuation")),
         }
     }

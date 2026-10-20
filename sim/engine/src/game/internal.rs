@@ -16,8 +16,8 @@ use crate::ir::{
     ObjectView, OrderOutcome, PlayerId, PlayerRef, PlayerRelation, PlayerResource, PlayerSet,
     PositiveInt, Predicate, Program, ReceiptId, ReceiptLocation, RecipientSet, Requirements,
     ResolvedRecipients, RuntimeAbilitySource, RuntimeDamageRecipient, RuntimeObjectView, ScopeId,
-    SearchOutcome, Selector, SnapshotId, SourceSpan, StepwiseAnswer, StepwiseMode, Visibility,
-    WellFormedProgram, ZoneKind,
+    SearchOutcome, SearchReplacementAnswer, Selector, SnapshotId, SourceSpan, StepwiseAnswer,
+    StepwiseMode, Visibility, WellFormedProgram, ZoneKind,
 };
 use crate::{EngineFailure, Result, invalid};
 use alloc::collections::{BTreeMap, VecDeque};
@@ -108,6 +108,8 @@ pub enum InputDomain {
     SearchPartition(SearchPartitionDomain),
     /// Frozen recipients addressed only by this question's handles.
     Distribution(DistributionDomain),
+    /// Keep the original hand movement or apply the checked optional replacement.
+    SearchReplacement,
 }
 
 /// Internal answer, checked against actor and the entire decision token.
@@ -125,6 +127,8 @@ pub enum Answer {
     SearchPartition(Vec<u64>),
     /// Exactly one nonnegative share per frozen recipient.
     Distribution(Vec<DamageShare>),
+    /// Destination choice for the already frozen found set; never another selection.
+    SearchReplacement(SearchReplacementAnswer),
 }
 
 /// Typed instruction outcomes retained only by the authority.
@@ -216,6 +220,7 @@ enum Wait {
     Order(ordering::OrderWait),
     Search(search::SearchWait),
     SearchPartition(search::PartitionWait),
+    SearchReplacement(search::ReplacementWait),
     Integer {
         binding: Binding<Nat>,
         bounds: Cardinality,
@@ -425,6 +430,10 @@ impl Game {
     ///
     /// # Errors
     /// Invalid answers and subsequent execution failures restore the complete authority.
+    #[expect(
+        clippy::too_many_lines,
+        reason = "All answer variants share one transaction and its two authoritative rollback scopes."
+    )]
     pub fn answer_internal(
         &mut self,
         actor: PlayerId,
@@ -457,6 +466,9 @@ impl Game {
                 }
                 (Wait::SearchPartition(wait), Answer::SearchPartition(handles)) => {
                     self.internal_search_partition_answer(&mut execution, &wait, &handles)?;
+                }
+                (Wait::SearchReplacement(wait), Answer::SearchReplacement(answer)) => {
+                    self.internal_search_replacement_answer(&mut execution, &wait, answer)?;
                 }
                 (Wait::Integer { binding, bounds }, Answer::Integer(number))
                     if contains(bounds, number) =>
@@ -552,6 +564,7 @@ impl Game {
                 InputDomain::Search(domain) => search::packet(&domain),
                 InputDomain::SearchPartition(domain) => json!({"kind":"search-partition","cards":domain.cards.iter().map(|card| json!({"handle":card.handle,"card":card.card,"name":card.name})).collect::<Vec<_>>(),"minimum":domain.cardinality.minimum.0,"maximum":domain.cardinality.maximum.map(|value| value.0)}),
                 InputDomain::Distribution(domain) => allocation::packet(&domain),
+                InputDomain::SearchReplacement => json!({"kind":"search-replacement","options":["original","replacement"]}),
             };
             json!({"by":seat_name(question.actor).unwrap_or_default(),"execution":question.token.execution.0,"decision":question.token.decision.0,"epoch":question.token.epoch,"domain":domain})
         })

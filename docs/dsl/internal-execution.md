@@ -209,7 +209,7 @@ found 不變，after／actual_to 為空。手牌新 slot 不提供對手持續�
 輸入，因此可找到的最大張數可能超過正數空位時，在讀取隱藏候選前拒絕情境；零空位
 可記零成功移動。スペル置於場的結果尚未准入：張數限定搜尋進場在開始前整棵拒絕，
 條件搜尋的回答若選到スペル即拒絕並維持待答。position／order、entry_effects、
-OptionalSelfReplacement、成功投影與減費安裝仍拒絕。完整 CardProgram、lowering 與公開
+成功投影與減費安裝仍拒絕。完整 CardProgram、lowering 與公開
 capability 沒有擴充。
 
 Partition 僅准入 Owners(Hand)→Owners(Cemetery) 兩段，且搜尋有明示 maximum，兩段
@@ -222,6 +222,29 @@ snapshot 與新 handle，上一題 handle 不可沿用；錯答完整保留當�
 一次。私有 domain 與 token 僅搜尋者可見，公開證據不給對手手牌固定位置。
 合成測試驗零／一／兩張、兩席、錯答與末段後失敗的可觀察 RNG 回復；CP03-SL07 的
 NameContains 尚未獲 D0 准入，不能將此程序宣稱成整張卡或其完整搜尋片段。
+
+OptionalSelfReplacement 准入搜尋上限至多一張、替代目的地為搜尋者自己的 Shared(Field)
+且無 placement／entry_effects 的片段。條件限布林常值，或 SearchFoundAny 的局部
+Current 物件之 Effective Cost 經 InformationOrZero 與常值比較「以下」。先固定 found、
+依搜尋規則公開證據，再讀有效費用；該私有讀取不授權一般 If／capture／Move。
+有效費用使用目前物件的 cost 資訊，沒有覆寫時取 Catalog。Catalog 的費用只有「-」、null
+或缺欄位視為無資訊而得 0；超出 i64、非整數或其他格式拒絕該回答並保持搜尋待答，
+不當成 0。目前 typed numeric 僅修改
+Attack／Life，原型能力、keyword 與 continuous 仍由 context 拒絕。放寬這些前提時須
+重新驗證有效特徵讀取，不能把此處的 fallback 當成完整費用層。
+
+零 found 或條件為假不問目的地，直接依原指示回 Owners(Hand)，最後仍洗來源一次。
+條件為真且非空時先以隔離副本確認兩個目的地皆可執行，才發獨立 DecisionId／epoch／
+snapshot 的 SearchReplacement 問題；答案只有 Original／Replacement，不重選牌。
+Original 回 Owners(Hand)，Replacement 採既定 movement，沒有失敗後自動回手。
+滿場、スペル入場或需要特殊卡片移動規則時拒絕該回答並恢復搜尋待答；零張或條件為假
+不受滿場限制。兩種回答共用最終洗牌與 SearchOutcome，found／revealed 留舊世代，
+moved 才保存成功 after；選項與續體只向搜尋者／Referee 提供。
+
+BP03-002 コスモスファング只驗搜尋獣、公開、找到物件的有效費用條件、可選回手／入場及
+最後洗牌片段；印刷資料由公開輸入產生器提供，沒有承載進化、攻擊時能力、完整取代鏈、
+場滿時可選替代的裁定或整卡准入。錯答及選擇後失敗均完整回復待答，RNG 回復以錯答後
+重答成功洗牌與同種子控制局比對，不能只比較 Debug 字串。
 
 CP04-060 僅驗排除同名的ドラゴンズネスト搜尋、公開、進 EX 與洗牌，未接 UB、進化程序、
 成功 after 減費及其他能力；BP13-035 僅驗已支付追加費用後的三組各一張搜尋、進場與
