@@ -254,6 +254,17 @@ html:has([data-card-list]) {
   text-align: center;
 }
 
+:where([data-card-list] [data-list-location]),
+:where([data-list-heading="location"]),
+:where([data-card-list] [data-list-type]),
+:where([data-list-heading="type"]) {
+  text-align: center;
+}
+
+:where([data-card-list] [data-list-location] [data-location-badges]) {
+  justify-content: center;
+}
+
 :where([data-list-heading="rarity"]) {
   min-width: var(--rarity-column-min-width);
   font-size: var(--rarity-badge-height);

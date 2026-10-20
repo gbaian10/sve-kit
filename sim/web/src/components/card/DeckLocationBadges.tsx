@@ -29,15 +29,7 @@ export function DeckLocationBadges({
           alt={decorative ? "" : t(`locationFilter.${location}`)}
           title={decorative ? undefined : t(`locationFilter.${location}`)}
           aria-hidden={decorative || undefined}
-          className={
-            location === "leader"
-              ? decorative
-                ? "h-7 w-auto shrink-0"
-                : "h-6 w-auto shrink-0"
-              : decorative
-                ? "h-5 w-auto shrink-0"
-                : "h-4 w-auto shrink-0"
-          }
+          className={decorative ? "h-5 w-auto shrink-0" : "h-4 w-auto shrink-0"}
         />
       ))}
     </span>

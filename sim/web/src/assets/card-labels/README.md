@@ -1,39 +1,35 @@
-# Card labels
+# Card labels — independent redraw
 
-These hand-drawn SVGs are modelled individually on official printed labels, not
-crops of official images. All printings and both regions use the same ordinary
-appearance for each label. The drawings were produced with Codex gpt-6.1-sol.
+Seven vector reconstructions of official printed labels. The official designs remain the property of their respective owners. The bundled font licenses cover font software and derived glyph outlines, not the official card designs.
 
-| File           | Appearance and visual references                                                                                                                      | Letter outlines    |
-| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
-| `evolve.svg`   | Dark plaque, silver bevel, curled upper ornaments and yellow capitals. JP SP01-049 (GR, 2024); the rainbow rim of SP01-SL07 is deliberately excluded. | Marcellus Regular  |
-| `advance.svg`  | Dark red plaque, hooked gold frame and separate lower scrollwork. JP BP21-PR13 (2026).                                                                | Cinzel, weight 500 |
-| `leader.svg`   | Blue-teal cartouche, open gold wings and mixed-case light lettering. JP SD06-LD01 (2022), also checked against BP20-LD01 (2026).                      | Marcellus Regular  |
-| `token.svg`    | Pale grey rounded plaque with dark mixed-case lettering. JP SD07-T02 (2025).                                                                          | Marcellus Regular  |
-| `follower.svg` | Red rounded plaque with light mixed-case lettering. JP BP01-029 (2022); newer BP21-T01 retains the same shape.                                        | Marcellus Regular  |
-| `spell.svg`    | Purple version of the same rounded plaque. JP BP01-063 (2022), also checked against BP21-012 (2026).                                                  | Marcellus Regular  |
-| `amulet.svg`   | Muted teal-green version of the same rounded plaque. JP BP01-150 (2022), also checked against BP21-018 (2026).                                        | Marcellus Regular  |
+All glyphs are paths from SIL Open Font License 1.1 fonts:
 
-The rounded type and Token plaques have the same aspect ratio, independent of
-word length. Gradients and subtle vector patterns approximate printed texture;
-the silhouettes, colours, ornaments, case and lettering proportions follow each
-label's own reference. No official bitmap data is embedded in the SVGs.
+- **Caudex Version 1.01** — [source](https://github.com/google/fonts/tree/main/ofl/caudex); [OFL-caudex.txt](OFL-caudex.txt).
+- **Libre Caslon Text Version 2.000** — [source](https://github.com/google/fonts/tree/main/ofl/librecaslontext); [OFL-librecaslontext.txt](OFL-librecaslontext.txt).
+- **Lusitana Version 1.001** — [source](https://github.com/google/fonts/tree/main/ofl/lusitana); [OFL-lusitana.txt](OFL-lusitana.txt).
+- **Marcellus Version 1.000** — [source](https://github.com/google/fonts/tree/main/ofl/marcellus); [OFL-marcellus.txt](OFL-marcellus.txt).
+- **Philosopher Version 2.001; ttfautohint (v1.8.4.7-5d5b)** — [source](https://github.com/google/fonts/tree/main/ofl/philosopher); [OFL-philosopher.txt](OFL-philosopher.txt).
 
-References use the images linked from official card pages:
-[SP01-049](https://shadowverse-evolve.com/cardlist/cardsearch/?cardno=SP01-049),
-[BP21-PR13](https://shadowverse-evolve.com/cardlist/cardsearch/?cardno=BP21-PR13),
-[SD06-LD01](https://shadowverse-evolve.com/cardlist/cardsearch/?cardno=SD06-LD01),
-[SD07-T02](https://shadowverse-evolve.com/cardlist/cardsearch/?cardno=SD07-T02),
-[BP21-012](https://shadowverse-evolve.com/cardlist/cardsearch/?cardno=BP21-012),
-[BP21-018](https://shadowverse-evolve.com/cardlist/cardsearch/?cardno=BP21-018).
+| Asset          | Typeface / true weight / additional path stroke | References                                        |
+| -------------- | ----------------------------------------------- | ------------------------------------------------- |
+| `evolve.svg`   | Lusitana 400 + 0.45px native-card-px            | SP01-049, SP01-005, SP01-007, SP01-009            |
+| `advance.svg`  | Philosopher 400 + 0.55px native-card-px         | BP21-PR13, BP10-110, BP14-019, BP15-042, BP13-002 |
+| `leader.svg`   | Libre Caslon Text 600 + 0.00px native-card-px   | SD06-LD01, BP20-LD01                              |
+| `token.svg`    | Caudex 700 + 0.00px native-card-px              | SD07-T02, SD07-T01, BP21-T01                      |
+| `follower.svg` | Philosopher 700 + 0.00px native-card-px         | BP01-029, SP01-051, SP01-053                      |
+| `spell.svg`    | Libre Caslon Text 400 + 0.15px native-card-px   | BP01-063, BP21-012                                |
+| `amulet.svg`   | Marcellus 400 + 0.00px native-card-px           | BP01-150, BP21-018                                |
 
-Our drawings use Apache-2.0. The imitated official designs are excluded from the
-project's license grants; see [LICENSING.md](../../../../../LICENSING.md).
+Leader includes only the central plaque. Evolve uses the ordinary silver frame. No font loading or raster embedding is needed. Stroke widths scale with the viewBox. Gradient fills and inner rims follow sampled official colors; textures are vector approximations.
 
-Glyphs are paths converted from **Marcellus Regular 1.000** and **Cinzel 2.000**
-(the variable font at weight 500), both distributed under SIL Open Font License
-1.1. Sources: [Marcellus](https://github.com/google/fonts/tree/main/ofl/marcellus),
-[Cinzel](https://github.com/google/fonts/tree/main/ofl/cinzel).
-Font copyright and license texts are included (with trailing whitespace removed) in
-[OFL-Marcellus.txt](OFL-Marcellus.txt) and [OFL-Cinzel.txt](OFL-Cinzel.txt).
-No font file or runtime font lookup is needed.
+The drawings were produced with Codex gpt-6.1-sol and are distributed under
+Apache-2.0. The imitated official designs are excluded from the project license
+grants; see [LICENSING.md](../../../../../LICENSING.md). Font copyright and
+license notices above are included with trailing whitespace removed.
+
+EVOLVE and ADVANCE retain the supplied ordinary silver and red-gold frames.
+Their lettering is enlarged to occupy more of the inner plate, with a brighter
+pale-yellow fill and a small same-colour outline for legibility at 18–24 px.
+The typefaces remain Lusitana 400 and Philosopher 400; the additional outline
+is 0.45 and 0.55 native-card pixels respectively. These two assets deliberately
+prioritize small UI sizes over the exact printed text-to-frame ratio.
