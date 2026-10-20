@@ -13,6 +13,7 @@ from sve_carddb.contracts.four_layer import Code
 from sve_carddb.core.json import canonical, object_value, parse
 from sve_carddb.core.models import Text, UInt
 
+from .author_cost_cases import COST_NAMES, COSTS
 from .author_history_cases import HISTORY, HISTORY_NAMES
 from .author_numeric_cases import NUMERIC, NUMERIC_DEPENDENCIES, NUMERIC_NAMES
 from .author_parent_cases import PARENT_NAMES, PARENTS
@@ -178,6 +179,7 @@ def test_every_implemented_definition_has_a_python_type() -> None:
             | RECIPIENTS
             | PARENTS
             | HISTORY
+            | COSTS
         ).keys()
     )
     assert object_value(INDEX_SCHEMA["$defs"]).keys() == INDEX.keys()
@@ -209,9 +211,9 @@ def test_count_query_type_drift(name: str) -> None:
 
 
 def assert_selector_definition(schema: dict[str, JsonValue], name: str) -> None:
-    python = (SELECTORS | RECIPIENTS | PARENTS | COUNTS | NUMERIC | RECEIPTS | HISTORY)[
-        name
-    ].json_schema()
+    python = (
+        SELECTORS | RECIPIENTS | PARENTS | COUNTS | NUMERIC | RECEIPTS | HISTORY | COSTS
+    )[name].json_schema()
     names = (
         SELECTOR_NAMES
         | RECIPIENT_NAMES
@@ -220,6 +222,7 @@ def assert_selector_definition(schema: dict[str, JsonValue], name: str) -> None:
         | PARENT_NAMES
         | HISTORY_NAMES
         | RECEIPT_NAMES
+        | COST_NAMES
     )
     python_names = {value: key for key, value in names.items()}
     # Expand the root once; only internal recursive references preserve names.
@@ -234,7 +237,7 @@ def assert_selector_definition(schema: dict[str, JsonValue], name: str) -> None:
     ) == _shape(body, python, python_names)
 
 
-@pytest.mark.parametrize("name", SELECTORS | RECIPIENTS | PARENTS | HISTORY)
+@pytest.mark.parametrize("name", SELECTORS | RECIPIENTS | PARENTS | HISTORY | COSTS)
 def test_selector_type_drift(name: str) -> None:
     assert_selector_definition(NODES, name)
 

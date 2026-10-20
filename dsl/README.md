@@ -45,14 +45,16 @@ without duplicate branches. The [selection shape matrix](../docs/dsl/author-sele
 defines Target role declarations and the named `RecipientSel` sum, and distinguishes quantity
 rules for each position. The [quantity matrix](../docs/dsl/author-quantity-shapes-1.0.md)
 defines closed single-group Target/choose/search quantity variants and counter costs.
-Their source and binding/destination fields are present; groups and other documented
-extensions remain outside these fragments. Counter holder quantities are separate
+Their source and binding/destination fields are present. The
+[cost and target matrix](../docs/dsl/author-cost-target-shapes-1.0.md) adds ordered Cost
+steps, payment wrappers, material variants, X declarations and grouped Targets.
+Choose/search groups and other action extensions remain outside these fragments. Counter holder quantities are separate
 from counter amounts, and only selection n/upto accept direct selection parameters.
 DeckSlice accepts a player or player set and shares the same nonnegative-literal
 Quantity as cost bounds and counter quantities. NumericExpr and Quantity reference
 one shared NumericOperation union. CounterName has no parameter permission.
 DeckSlice consumers are documented at action-level top; the complete move/banish/look/reveal
-parents and cost.banish are not implemented. ObjectSel and Ref reject top/bottom aliases.
+parents are not implemented; cost.banish.top uses DeckSlice. ObjectSel and Ref reject top/bottom aliases.
 Selector-level slices remain registered in prose pending independent consumer evidence.
 Event object references currently admit
 only `holder`; other typed event projections are outside this subset.
@@ -82,8 +84,9 @@ do not imply identical body hashes. Consumer role and batch semantics still requ
 lowering. The [event and history matrix](../docs/dsl/author-history-shapes-1.0.md)
 registers event/history narrowing, history_count/history_sum, event numeric reads,
 LKI operands, capture wrappers, chosen, paid, x_paid, dice, PlayerExpr equality,
-material filter extensions and agg.hp. Full Sel, Cost/Target and author entry
-contracts remain incomplete; enclosing-context and capability checks require C1/D0.
+material filter extensions and agg.hp. Cost/Target nodes do not constitute complete
+ability headers or author entry contracts; full Sel and enclosing-context and
+capability checks still require further contracts and C1/D0.
 Snapshot count/exists do not establish hash equivalence with count_of/did. This recursive graph is not an expanded profile;
 Rust decoding and execution have not been validated by this fragment.
 [effects-index.schema.json](effects-index.schema.json) defines the complete

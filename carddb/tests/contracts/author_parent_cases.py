@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 from pydantic import TypeAdapter
 
-from sve_carddb.contracts import author_counter_costs as costs
+from sve_carddb.contracts import author_costs as costs
 from sve_carddb.contracts import author_leaves as leaves
 from sve_carddb.contracts import author_quantities as quantities
 from sve_carddb.contracts import author_queries as queries
@@ -16,6 +16,11 @@ if TYPE_CHECKING:
     from pydantic import JsonValue
 
 PARENTS: dict[str, TypeAdapter[object]] = {
+    "A.target.group-filter": TypeAdapter(parents.TargetGroupFilter, config=CONFIG),
+    "A.target.grouped.exact": TypeAdapter(parents.TargetGroupedExact, config=CONFIG),
+    "A.target.grouped.up-to": TypeAdapter(parents.TargetGroupedUpTo, config=CONFIG),
+    "A.target.grouped.any": TypeAdapter(parents.TargetGroupedAny, config=CONFIG),
+    "A.targets": TypeAdapter(parents.Targets, config=CONFIG),
     "A.quantity": TypeAdapter(queries.Quantity, config=CONFIG),
     "A.selection-quantity": TypeAdapter(quantities.SelectionQuantity, config=CONFIG),
     "A.deck-slice": TypeAdapter(quantities.DeckSlice),
@@ -49,6 +54,11 @@ PARENTS: dict[str, TypeAdapter[object]] = {
     "A.cost.counter": TypeAdapter(costs.CounterCost, config=CONFIG),
 }
 PARENT_NAMES = {
+    "A.target.group-filter": "TargetGroupFilter",
+    "A.target.grouped.exact": "TargetGroupedExact",
+    "A.target.grouped.up-to": "TargetGroupedUpTo",
+    "A.target.grouped.any": "TargetGroupedAny",
+    "A.targets": "Targets",
     "A.quantity": "Quantity",
     "A.selection-quantity": "SelectionQuantity",
     "A.deck-slice": "DeckSlice",

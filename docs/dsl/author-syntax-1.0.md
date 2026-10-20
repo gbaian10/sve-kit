@@ -90,14 +90,14 @@ evolve:
 
 ## 3. 費用、目標與打出程序
 
-| 位置                                                                          | 表達                            | 時點與依據                                                                                               |
-| ----------------------------------------------------------------------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| 起動／進化／憑依／食事、fanfare                                               | 頭的 `cost`                     | PlayParameter，CR 10.6.2.5、契約 36                                                                      |
-| evolve_time、super_evolve_time、attack_time、race_time、drive_time 後直接冒號 | 頭的 `cost`                     | PlayParameter，R-0001（generalized）；先選目標再付款，拒付或不能付不產生適正 play                        |
-| lastword、一般長寫 auto 的冒號                                                | 本文 `pay: {cost, do, result?}` | ResolutionChoice，CR 10.4.7.3、契約 36                                                                   |
-| spell 本文／チョイス選項內冒號                                                | optional_cost（所選分支各一組） | PlayParameter，R-0006（official，2026-10-09）；先決定模式／目標／X／是否付款，再合計支付，依卡面順序結算 |
-| 明寫「プレイする際」、独立前綴土の秘術                                        | optional_cost                   | PlayParameter，CR 10.4.7.2、13.3.3.2；R-0005、R-0006                                                     |
-| 明寫必要追加費用                                                              | additional_cost                 | PlayParameter，optional=false（BP17-116）                                                                |
+| 位置 | 表達 | 時點與依據 |
+| --- | --- | --- |
+| 起動／進化／憑依／食事、fanfare | 頭的 `cost` | PlayParameter，CR 10.6.2.5、契約 36 |
+| evolve_time、super_evolve_time、attack_time、race_time、drive_time 後直接冒號 | 頭的 `cost` | PlayParameter，R-0001（generalized）；先選目標再付款，拒付或不能付不產生適正 play |
+| lastword、一般長寫 auto 的冒號 | 本文 `pay: {cost, do, result?}` | ResolutionChoice，CR 10.4.7.3、契約 36 |
+| spell 本文／チョイス選項內冒號 | optional_cost（所選分支各一組） | PlayParameter，R-0006（official，2026-10-09）；依 CR 順序決定 X／是否付款／模式／目標，再合計支付，依卡面順序結算 |
+| 明寫「プレイする際」、独立前綴土の秘術 | optional_cost | PlayParameter，CR 10.4.7.2、13.3.3.2；R-0005、R-0006 |
+| 明寫必要追加費用 | additional_cost | PlayParameter，optional=false（BP17-116） |
 
 刪除頭的 `timing: pending|play|resolution` 與任填 `ruling` 就改時點的入口。例外需先登錄新裁定、更新 typed lowering；R-0001 不覆蓋選項內本文費用。`A.cost-timing-override` 僅是遷移診斷，不是可執行構造。
 
@@ -105,9 +105,10 @@ evolve:
 
 roles 的逐 variant 形狀與數量位置分型見[角色與選取位置矩陣](author-selection-shapes-1.0.md)。
 單組 Target／choose／search 與 counter 的數量父變體見[要求量矩陣](author-quantity-shapes-1.0.md)；
-groups 與完整動作欄位仍未全部接入，不表示完整作者樹已實作。
+Cost、wrapper 與 Target.groups 已定形，見[費用與目標矩陣](author-cost-target-shapes-1.0.md)；
+choose／search groups 與完整動作欄位仍未全部接入，不表示完整作者樹已實作。
 
-`A.cost` 保留 v0 的 pp、ep、act_self、self_to_cemetery、banish_self、discard、banish、to_cemetery、return_to_hand、reveal、counter、flip_down、flip_up、leader_life、lesson、earth_rite、stack_counter_from；增加 §13 的 act、to_ex、to_deck_bottom、to_deck、pp_max、skip_turn、one_of。外層有兩種互斥形狀：
+`A.cost` 保留 v0 的 pp、ep、act_self、self_to_cemetery、banish_self、discard、banish、to_cemetery、return_to_hand、reveal、counter、flip_down、flip_up、leader_life、lesson、earth_rite、stack_counter_from；增加 §13 的 act、to_ex、to_deck_bottom、to_deck、pp_max、skip_turn、one_of。其中 stack_counter_from 只保留舊名稱登錄、沒有接受形狀，不是獨立付款操作。外層有兩種互斥形狀：
 
 | 形狀 | 費用操作與順序 | 拒絕 |
 | --- | --- | --- |
@@ -118,9 +119,11 @@ groups 與完整動作欄位仍未全部接入，不表示完整作者樹已實�
 
 `targets` 陣列保持卡文順序，不能排序；`roles` 的 mapping 鍵序不建立選取順序，`groups` 的陣列位置不把同時選取改成逐組貪婪。`play` 的 additional_cost／optional_cost／alt_cost 等不同欄位，以及能力頭的 cost／optional_cost，依各自規則合併與付款，不能從 mapping 鍵序推導跨欄位順序。若需表達卡文要求的跨欄位特定順序，須先登錄明示陣列構造，不得借鍵序補上。
 
-選材料格式 `{sel, n|upto|any, groups?, distinct_by?, result?}`，top 切片不額外選身份。材料組 groups 共用 disjoint=true 與整體限制；不是逐組貪婪選。K.pay 全付或全不付；合法零費用、合法取代依 CR 10.6.2.5.2–.3 可算完整付款，但不製造原動作事件。
+選材料為 `{sel,n|upto|any}` 或 `{groups:[{sel,n|upto|any},…]}`（至少兩組），兩形互斥；共通選填 distinct_by、cost_sum_ge（總原費用下限）、result。top 切片不額外選身份。材料組 groups 共用 disjoint=true 與整體限制；不是逐組貪婪選。K.pay 全付或全不付；合法零費用、合法取代依 CR 10.6.2.5.2–.3 可算完整付款，但不製造原動作事件。
 
-`optional_cost / additional_cost` 可帶 `result`，是已付款 receipt；付款前不得讀 paid。`x: {min?, max?}` 為 D.play-param X。可變材料數直接由材料選擇決定，不另問一次數字；`x: {from_payment: receipt}` 是付款量別名，與自由宣告 X 互斥，詳 §13 GAP-A-041。
+`optional_cost / additional_cost` 可帶 `result`，是已付款 receipt；付款前不得讀 paid。optional_cost 單組可帶 option；多組用至少兩項的陣列，每項 option 必填、各自決定與付款。C1 驗 option 嚴格遞增、互異及所屬 choice 存在性；多組不使用裸 paid:optional。`x: {min?, max?}` 為 D.play-param X。可變材料數直接由材料選擇決定，不另問一次數字；`x: {from_payment: receipt}` 是付款量別名，與自由宣告 X 互斥，詳 §13 GAP-A-041。
+
+to_deck 的材料 payload 必填 shuffle:true。discard 的 random 只接受 `{sel,n,random:true,result?}`，不收其他材料約束；include_self 沒有接受形狀，自身用 ref:this、自身加其他材料用 groups。
 
 ## 4. 決定與控制流程
 
@@ -1150,7 +1153,7 @@ fanfare:
 
 ### GAP-A-042
 
-新增 skip_turn: {who}、pp_max: N（減少 N）、discard 的 ref/include_self/random；下文列所有子項。skip_turn 付款建立排程承諾，不等待下一回合才算付完。
+新增 skip_turn: {who}、pp_max: N（減少 N）、discard 的 ref/random；include_self 僅保留舊登錄、沒有接受形狀；下文列所有子項。skip_turn 付款建立排程承諾，不等待下一回合才算付完。
 
 真實卡例：**BP20-R13 安息の絶傑・マーウィン**；來源 `BP20-R13#0/text/1`，句型 `T3658b61e88`。
 

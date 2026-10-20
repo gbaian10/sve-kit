@@ -3,6 +3,7 @@
 本表細化[語法 §3–7](author-syntax-1.0.md#3-費用目標與打出程序)的數量位置，
 機器語法以 [author-nodes.schema.json](../../dsl/author-nodes.schema.json) 為準。
 Target、choose、search 的**單組數量父變體**包含來源與必要的 binding／目的地；
+Target.groups 與其餘 Cost 另見[費用與目標矩陣](author-cost-target-shapes-1.0.md)。
 不是可放進任意父節點的數量 mapping。這些型別仍不提供完整作者入口或執行准入。
 
 ## 共用數量與參數
@@ -115,9 +116,9 @@ who 為 PlayerSet 時，n 表每位玩家各 n 張；不從玩家列舉建立跨
 | banish.top | 同上；BP05-020 的上半副牌庫 |
 | look.top | 同上；BP06-108 |
 | reveal.top | 同上；CP03-105 |
-| cost.banish.top | 同上；GAP-A-010，等完整 Cost 接入 |
+| cost.banish.top | 同上；GAP-A-010，已接入 Cost 的 BanishTop |
 
-本片只提供 DeckSlice 與以上位置契約，**四個完整動作父節點與 cost.banish 尚未實作**。
+DeckSlice 已接入 cost.banish；**四個完整動作父節點尚未實作**。
 後續父節點不可默收 `ref:{top:…}` 或 `ref:{bottom:…}` 別名。
 ObjectSel、RecipientSel、Ref 目前都拒絕 top／bottom；不新增一套排除切片的 selector。
 語法 §5 的頂底切片登錄仍保留；獨立 Sel 消費位置未有卡例前，不加入 ObjectAtom。
@@ -155,11 +156,9 @@ ECP01-038 的 DeckSlice 為 `{who:opponents,n:20}`；
 
 | 父節點 | 尚未接入 |
 | --- | --- |
-| Target | groups |
 | choose | groups、position |
 | search | groups 變體、entry_effects、instead、to.partition、precondition |
 | move／banish／look／reveal | 整個父動作及其附加欄位；本片只定 top 的 DeckSlice |
-| Cost | 除本表 counter 外的費用變體、metadata 位置與整體結構；付款順序已由語法 §3 的 steps 陣列定形 |
 
 例如 CP03-SL07 的 to.partition、CP04-P68 的分組與 entry_effects 仍是已定語法，
 本片單組 search 尚不能接受；不以任意 JSON 子樹補洞。
