@@ -242,7 +242,11 @@ DeckSlice 的型別已定，四個完整父動作仍待接入；費用 banish.to
 
 `history: {event,who?,zone?,from?,to?,sel?,where?,window:this_turn|game|{since:BindingName},at_least?,distinct?:facts|subjects,exclude?}` 是條件；`history_count` 回數量；`history_sum: {… ,field}` 回 typed payload 總量。事件鍵取上表的非 state 事件加 history-only payment（骰子統一 dice_rolled）；where 只接該事件登錄欄位，phase.which 在歷史不收 param。完整封閉形狀見[事件與歷史形狀](author-history-shapes-1.0.md)。exclude=this_execution 排除本次 AbilityExecutionId，不排除同卡過去執行或外層執行。UB 在適正打出完成的 E.play 記一次發動，內層查詢已可見外層；另見 IR §13 GAP-S-015。所有歷史保存事件當時特徵，不查目前卡片；內部歷史身份不洩漏隱藏牌固定 ID。
 
+逐事件 required／optional／enum 與 history.where 對照見[事件矩陣](author-event-matrix-1.0.md)。
+
 ## 9. 效果、取代與期限
+
+各鍵必填／選填、cannot 變體及安裝上下文見[效果形狀](author-effect-shapes-1.0.md)。C0 目前接受 26 鍵片段；grant 尚待完整能力頭與 Steps，仍拒絕，不以空 payload 占位。
 
 `A.effect` 可用於 static.effects、player_effect.effect、apply.effect；apply.on 預設在指示開始捕捉集合，可依明確證據用 capture:play，static selector 隨狀態求值。保留 stat/set_stat、keywords/grant/lose_abilities、also_named/add_trait/remove_trait/make_type、cost_mod、damage_mod、banish_instead、cannot、must_attack、play_permission、no_trigger、unlimited_evolve、rule_override；補 prevent、damage_cap、evolve_cost_mod、enters_acted、reroll、ignore_ward、choice_any、extra_trigger、must_target。各鍵只接受配對 IR 封閉變體；無語義的 boxed 宣告改本文 box。
 
@@ -250,7 +254,7 @@ DeckSlice 的型別已定，四個完整父動作仍待接入；費用 banish.to
 
 `cannot.attack.target` 的「相手を攻撃できない」標準為 `{who: opp, kind: follower, leader_or: true}`，同時涵蓋對手從者與領袖（BP04-SL08、Q581）；CSD03b-014 使用同一述詞。只有卡文明寫「相手のリーダー」才縮成 `{leaders: opponents}`。
 
-`prevent: {on?,kind:any|combat|ability,source?}`；`damage_mod: {on?,source?,kind?,delta或multiply,next_only?}`；`damage_cap: {on?,threshold,set}` 在 amount>=threshold 時改為 set，不默認 min；`cost_mod: {when_playing,delta或set,next_only?}`；`evolve_cost_mod: {on,delta或set}`；`ignore_ward: {on}`；`reroll: {who,times}`；`choice_any: {who}`。期限與使用額度分開。`cost_mod.when_playing.in` 接 ObjectSet 或 `{follow: ReceiptId|ReceiptList}`；於效果安裝時保存獲授權的新世代集合，不因之後同卡號入場而新增成員。`player_effect` 的 next_only 共用一個 UsageId，整組下一次符合的適正 play 消耗一次；`apply` 對各物件安裝時則各有 UsageId。付款交易失敗須回復額度，普通費用預覽不消耗。BP14-046 使用前者，不能每張各免費一次（依日文語法與 CP04-003 同句型推論，無直接 Q&A；`strength: inferred`）。
+`prevent: {on?,kind:any|combat|ability,source?,next_only?}`；`damage_mod: {on?,source?,kind?:any|attack|combat|ability,delta或multiply,next_only?}`；`damage_cap: {on?,threshold,set}` 在 amount>=threshold 時改為 set，不默認 min；`cost_mod: {when_playing,delta或set,next_only?}`；`evolve_cost_mod: {on,delta或set}`；`ignore_ward: {on}`；`reroll: {who,times}`；`choice_any: {who}`。期限與使用額度分開。`cost_mod.when_playing.in` 接 ObjectSet 或 `{follow: ReceiptId|ReceiptList}`；於效果安裝時保存獲授權的新世代集合，不因之後同卡號入場而新增成員。`player_effect` 的 next_only 共用一個 UsageId，整組下一次符合的適正 play 消耗一次；`apply` 對各物件安裝時則各有 UsageId。付款交易失敗須回復額度，普通費用預覽不消耗。BP14-046 使用前者，不能每張各免費一次（依日文語法與 CP04-003 同句型推論，無直接 Q&A；`strength: inferred`）。
 
 `enters_acted:{on}` 是入場姿態取代。自身 static 在 ProspectiveEntry 以目的區資訊求值（CR 10.9.3），因此預設 active_zones=field 仍能在入場當下生效，毋須擴成手牌／墓地皆有效；不產生額外 act 事件。
 
@@ -1230,7 +1234,7 @@ evolve_time:
 
 `ability.kind: activated` 依 CR 12.2.1 包含進化能力；只有卡文明寫「進化以外」時才填 `except: [evolution]`。
 
-ability:{kind:activated,except:evolution} 與 keyword:fanfare 是 AbilityPredicate；本例為所有 activated，不能擴成禁止全部能力。
+ability:{kind:activated,except:[evolution]} 與 keyword:fanfare 是 AbilityPredicate；本例為所有 activated，不能擴成禁止全部能力。
 
 真實卡例：**CP02-005 喜多見柚**；來源 `CP02-005#0/text/2`，句型 `T7887b26969`。
 
@@ -2150,7 +2154,7 @@ evolve_time:
 
 ### 欄位正規化補充
 
-`Sel.in` 接 ObjectRef 或物件 binding，單一 ref 正規化為 singleton；`traits_all` 是集合包含全部指定種族。`token:true` 是 TokenStatus 的別名；`zone` 可為集合，降低 S.combine Union。`zone_free:{who,zone}` 在 Expr 位置回 Nat，在 Cond 位置須有 ge/eq 比較。cost.counter.n/upto/any 均接受，holders 預設 this 時唯一、有 Sel 時要求明示數量；on:this 不再問 holder。`effect.on` 省略時使用 apply 的 affected；static 不可省略需明確範圍的 on。
+`Sel.in` 接 ObjectRef 或物件 binding，單一 ref 正規化為 singleton；`traits_all` 是集合包含全部指定種族。`token:true` 是 TokenStatus 的別名；`zone` 可為集合，降低 S.combine Union。`zone_free:{who,zone}` 在 Expr 位置回 Nat，在 Cond 位置須有 ge/eq 比較。cost.counter.n/upto/any 均接受，holders 預設 this 時唯一、有 Sel 時要求明示數量；on:this 不再問 holder。只有原本 optional 的 `effect.on` 才能由 apply 提供 affected；必填 on 仍須明寫。damage_mod 帶 source、缺 on 時跨上下文表示所有符合的接受者；完整範圍表見[效果形狀](author-effect-shapes-1.0.md#4-安裝位置與範圍)。
 
 `play.optional_cost.result` 與 `additional_cost.result` 可以在同 execution 用 V.receipt-field；入場衍生的 fanfare 則用 entry_payment:additional 明確跨 execution provenance。`history_sum` 允許 field=amount/delta/removed_stack，必須先按事件與 cost_kind 窄化。`damage` 的來源篩選與 recipient 的世代、LKI 壽命見 IR §13 S-023。
 
@@ -2212,7 +2216,7 @@ auto:
   do: [{ damage: { to: { leaders: opponents }, n: 3 } }]
 ```
 
-此能力掛在 grant.abilities 的接受者（裝備者），不是闇斧ナハトファング或裝備提供者自身。`no_trigger.on` 接 Ref/Binding；`search.entry_effects` 與 move 相同，在入場掃描前作用。`extra_trigger:{phase,who,n}` 降 TriggerMultiplicity，N 是附加次數。`ignore_ward` 只略過守護目標限制。`choice_any` 是 ChooseMode 的數量自我取代：原本至少一個才適用；BP20-P65 替代後「好きな数」可為 0（依 CR 1.3.5／5.18.2.2 推論，無此卡直接 Q&A；`strength: inferred`），不套「Nつまで」的 1 下限。
+此能力掛在 grant.abilities 的接受者（裝備者），不是闇斧ナハトファング或裝備提供者自身。`no_trigger` 的 on:Ref/Binding 與 who:PlayerRef/PlayerSet 恰一，who 指能力控制者；`search.entry_effects` 與 move 相同，在入場掃描前作用。`extra_trigger:{phase,who,n}` 降 TriggerMultiplicity，N 是附加次數。`ignore_ward` 只略過守護目標限制。`choice_any` 是 ChooseMode 的數量自我取代：原本至少一個才適用；BP20-P65 替代後「好きな数」可為 0（依 CR 1.3.5／5.18.2.2 推論，無此卡直接 Q&A；`strength: inferred`），不套「Nつまで」的 1 下限。
 
 `A.by-kind` 為 by_kind 的 canonical ID；`A.define`、`A.either` 是新增組合／宣告 ID，其他新原子（apply、sep）依 A.act.<鍵>。v0 的 A.declare、A.order、A.distribute、A.place-acted 分類 ID 保留；動作表的 order 使用 A.order，不另建立第二個 canonical A.act.order。
 

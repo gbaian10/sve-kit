@@ -14,6 +14,7 @@ from sve_carddb.core.json import canonical, object_value, parse
 from sve_carddb.core.models import Text, UInt
 
 from .author_cost_cases import COST_NAMES, COSTS
+from .author_effect_cases import EFFECT_NAMES, EFFECTS
 from .author_history_cases import HISTORY, HISTORY_NAMES
 from .author_numeric_cases import NUMERIC, NUMERIC_DEPENDENCIES, NUMERIC_NAMES
 from .author_parent_cases import PARENT_NAMES, PARENTS
@@ -180,6 +181,7 @@ def test_every_implemented_definition_has_a_python_type() -> None:
             | PARENTS
             | HISTORY
             | COSTS
+            | EFFECTS
         ).keys()
     )
     assert object_value(INDEX_SCHEMA["$defs"]).keys() == INDEX.keys()
@@ -212,7 +214,15 @@ def test_count_query_type_drift(name: str) -> None:
 
 def assert_selector_definition(schema: dict[str, JsonValue], name: str) -> None:
     python = (
-        SELECTORS | RECIPIENTS | PARENTS | COUNTS | NUMERIC | RECEIPTS | HISTORY | COSTS
+        SELECTORS
+        | RECIPIENTS
+        | PARENTS
+        | COUNTS
+        | NUMERIC
+        | RECEIPTS
+        | HISTORY
+        | COSTS
+        | EFFECTS
     )[name].json_schema()
     names = (
         SELECTOR_NAMES
@@ -223,6 +233,7 @@ def assert_selector_definition(schema: dict[str, JsonValue], name: str) -> None:
         | HISTORY_NAMES
         | RECEIPT_NAMES
         | COST_NAMES
+        | EFFECT_NAMES
     )
     python_names = {value: key for key, value in names.items()}
     # Expand the root once; only internal recursive references preserve names.
@@ -237,7 +248,9 @@ def assert_selector_definition(schema: dict[str, JsonValue], name: str) -> None:
     ) == _shape(body, python, python_names)
 
 
-@pytest.mark.parametrize("name", SELECTORS | RECIPIENTS | PARENTS | HISTORY | COSTS)
+@pytest.mark.parametrize(
+    "name", SELECTORS | RECIPIENTS | PARENTS | HISTORY | COSTS | EFFECTS
+)
 def test_selector_type_drift(name: str) -> None:
     assert_selector_definition(NODES, name)
 
@@ -962,6 +975,51 @@ NAMED_HISTORY_ROLES = [
     )
 ]
 
+NAMED_EFFECT_ROLES = [
+    ("A.effect.keywords", "list", "Concept", "items"),
+    ("A.effect.also-named", "name", "CardName", "value"),
+    ("A.effect.trait", "trait", "Concept", "value"),
+    ("A.effect.make-type", "type", "CardKind", "value"),
+    *[
+        ("A.effect.card-predicate", field, leaf, position)
+        for field, leaf, position in (
+            ("kind", "CardKind", "union"),
+            ("name", "CardName", "union"),
+            ("class", "Concept", "value"),
+            ("not_class", "Concept", "value"),
+            ("trait", "Concept", "value"),
+            ("not_trait", "Concept", "value"),
+            ("keyword", "Concept", "value"),
+            ("traits_any", "Concept", "items"),
+            ("traits_all", "Concept", "items"),
+            ("names", "CardName", "items"),
+        )
+    ],
+]
+
+
+def _effect_role_leaf(
+    definitions: dict[str, JsonValue], name: str, field: str, position: str
+) -> dict[str, JsonValue]:
+    node = object_value(
+        object_value(object_value(definitions[name])["properties"])[field]
+    )
+    if position == "items":
+        return object_value(node["items"])
+    if position == "union":
+        branches = node["anyOf"]
+        assert isinstance(branches, list)
+        return object_value(branches[0])
+    assert position == "value"
+    return node
+
+
+def _assert_effect_names_are_referenced(definitions: dict[str, JsonValue]) -> None:
+    for name, field, leaf, position in NAMED_EFFECT_ROLES:
+        assert _effect_role_leaf(definitions, name, field, position) == {
+            "$ref": "#/$defs/" + leaf
+        }
+
 
 def _assert_shared_definitions_are_referenced(schema: dict[str, JsonValue]) -> None:
     definitions = object_value(schema["$defs"])
@@ -997,6 +1055,7 @@ def _assert_shared_definitions_are_referenced(schema: dict[str, JsonValue]) -> N
         if array:
             node = object_value(node["items"])
         assert node == {"$ref": "#/$defs/" + leaf}
+    _assert_effect_names_are_referenced(definitions)
     construction = object_value(definitions["A.cond.construction"])
     assert object_value(construction["properties"])["construction"] == {
         "$ref": "#/$defs/Title"
@@ -1044,6 +1103,19 @@ def test_inlining_history_role_names_fails_structural_check(
         object_value(properties[field])["items"] = deepcopy(definitions[leaf])
     else:
         properties[field] = deepcopy(definitions[leaf])
+    with pytest.raises(AssertionError):
+        _assert_shared_definitions_are_referenced(changed)
+
+
+@pytest.mark.parametrize(("name", "field", "leaf", "position"), NAMED_EFFECT_ROLES)
+def test_inlining_effect_role_names_fails_structural_check(
+    name: str, field: str, leaf: str, position: str
+) -> None:
+    changed = deepcopy(NODES)
+    definitions = object_value(changed["$defs"])
+    node = _effect_role_leaf(definitions, name, field, position)
+    node.clear()
+    node.update(deepcopy(object_value(definitions[leaf])))
     with pytest.raises(AssertionError):
         _assert_shared_definitions_are_referenced(changed)
 
