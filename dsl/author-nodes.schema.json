@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:sve-kit:author-nodes:1.0",
   "title": "SVE author 1.0 shared leaf and reference definitions",
-  "$comment": "Leaf, reference-atom, target-role and numeric-core fragment library. All numeric variants have partial operand domains, not full Expr/Cond. The root rejects standalone documents; select a $defs entry. Full authored/expanded profiles are not implemented.",
+  "$comment": "Leaf, reference-atom, target-role, numeric and receipt fragment library. Numeric/condition operands and material predicates have partial domains, not full Expr/Cond/Sel. Snapshot reads grant no operation authority. The root rejects standalone documents; select a $defs entry. Full authored/expanded profiles are not implemented.",
   "not": {},
   "$defs": {
     "Int": {
@@ -1036,6 +1036,9 @@
         },
         {
           "$ref": "#/$defs/A.expr.zone-free"
+        },
+        {
+          "$ref": "#/$defs/A.expr.count-of"
         }
       ]
     },
@@ -1136,6 +1139,9 @@
         },
         {
           "$ref": "#/$defs/A.cond.not"
+        },
+        {
+          "$ref": "#/$defs/A.cond.did"
         }
       ]
     },
@@ -1184,6 +1190,135 @@
       "additionalProperties": {
         "$ref": "#/$defs/A.target.role-value"
       }
+    },
+    "A.expr.objects-of": {
+      "type": "object",
+      "properties": {
+        "objects_of": {
+          "$ref": "#/$defs/A.receipt-ref"
+        },
+        "view": {
+          "type": "string",
+          "enum": [
+            "before",
+            "after"
+          ]
+        }
+      },
+      "required": [
+        "objects_of",
+        "view"
+      ],
+      "additionalProperties": false
+    },
+    "A.snapshot-read": {
+      "$ref": "#/$defs/A.expr.objects-of"
+    },
+    "A.same-as": {
+      "type": "object",
+      "properties": {
+        "same_as": {
+          "$ref": "#/$defs/A.snapshot-read"
+        }
+      },
+      "required": [
+        "same_as"
+      ],
+      "additionalProperties": false
+    },
+    "A.material-filter": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/CardName"
+        },
+        "zone": {
+          "$ref": "#/$defs/Zone"
+        },
+        "orig_cost_eq": {
+          "$ref": "#/$defs/Nat"
+        }
+      },
+      "minProperties": 1,
+      "additionalProperties": false
+    },
+    "A.expr.count-of-filtered": {
+      "type": "object",
+      "properties": {
+        "receipt": {
+          "$ref": "#/$defs/A.receipt-ref"
+        },
+        "where": {
+          "$ref": "#/$defs/A.material-filter"
+        },
+        "view": {
+          "type": "string",
+          "enum": [
+            "before",
+            "after"
+          ]
+        }
+      },
+      "required": [
+        "receipt",
+        "where",
+        "view"
+      ],
+      "additionalProperties": false
+    },
+    "A.expr.count-of": {
+      "type": "object",
+      "properties": {
+        "count_of": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/A.receipt-ref"
+            },
+            {
+              "$ref": "#/$defs/A.expr.count-of-filtered"
+            }
+          ]
+        }
+      },
+      "required": [
+        "count_of"
+      ],
+      "additionalProperties": false
+    },
+    "A.cond.did-filtered": {
+      "type": "object",
+      "properties": {
+        "result": {
+          "$ref": "#/$defs/A.receipt-ref"
+        },
+        "where": {
+          "$ref": "#/$defs/A.material-filter"
+        }
+      },
+      "required": [
+        "result",
+        "where"
+      ],
+      "additionalProperties": false
+    },
+    "A.cond.did": {
+      "type": "object",
+      "properties": {
+        "did": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/A.receipt-ref"
+            },
+            {
+              "$ref": "#/$defs/A.cond.did-filtered"
+            }
+          ]
+        }
+      },
+      "required": [
+        "did"
+      ],
+      "additionalProperties": false
     }
   }
 }

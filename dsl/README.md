@@ -50,6 +50,11 @@ The [numeric shape matrix](../docs/dsl/author-expression-shapes-1.0.md) covers
 `A.expr.numeric-core`, `A.cond.numeric-core` and their variants: signed arithmetic,
 object/player numeric reads, and `cmp`/`all`/`any`/`not`. Every variant's operand
 domain is also partial; these definitions are not complete Expr/Cond types.
+The same recursive unions include `count_of` and `did`. Separate `objects_of`
+snapshots require an explicit `before`/`after` view; `same_as` reads those snapshots.
+Material predicates admit a nonempty combination of `name`, `zone` and
+`orig_cost_eq` constants, without selector parameter permissions. Receipt types,
+units, available material projections and typed success predicates require lowering.
 Only the registered plus/minus offset positions accept parameters. Nested
 arithmetic must still be checked against the full source operand path.
 Selector/count roles, event/history narrowing and capture placement are outside
@@ -72,6 +77,11 @@ maps, invalid names and booleans masquerading as the integer literal 1.
 Numeric drift checks preserve named reference targets and compare every recursive
 definition individually. Numeric acceptance tests check signed bounds, arity,
 exclusive operators, parameter placement and wire-key round trips.
+Receipt shapes in `contracts/author_receipts.py` have matching drift and acceptance
+tests. Material fields remain absent when omitted and reject explicit nulls.
+The drift checker rejects unsupported constraints beside `$ref` rather than
+silently ignoring them. Index format literals reject booleans and floating points
+in the Python contract as well as at the public reader boundary.
 
 The reader rejects non-JSON YAML values, unsafe numbers, duplicate/non-string
 keys, unknown fields, wrong envelope versions and duplicate index card/scope
