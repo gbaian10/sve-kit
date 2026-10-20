@@ -46,6 +46,7 @@ Schema 與規格不一致時要修到一致，不能讓任一邊默默降級。
 ## 執行與驗收
 
 - [引擎邊界](engine-boundaries.md)：權威狀態、投影、付款回復與跨玩家程序
+- [內部 typed IR 良構邊界](typed-ir-validation.md)：封閉程式體的作用域、結果型別與明確拒絕範圍
 - [驗收規格](validation.md)：分層證據、正反例與資格失效
 
 ## 裁定
