@@ -160,7 +160,10 @@ enum Slot {
     Integer(Int),
     Natural(Nat),
     Boolean(Bool),
-    Objects(Vec<ObjectRef>),
+    Objects {
+        members: Vec<ObjectRef>,
+        on_field_at_capture: bool,
+    },
 }
 
 #[derive(Clone, Debug)]
@@ -628,6 +631,11 @@ impl Game {
             } => {
                 let recipients = execution.recipients(self, recipients)?;
                 let amount = execution.integer(self, amount)?;
+                let requested = amount
+                    .0
+                    .max(0)
+                    .checked_mul(i64::try_from(recipients.members().len()).map_err(invalid)?)
+                    .ok_or_else(|| invalid("damage requested overflow"))?;
                 let source = execution.object(self, source_object)?;
                 let source_id = execution.object_id(source)?.to_owned();
                 if self.object(&source_id)?.generation != source.generation.0 {
@@ -646,12 +654,15 @@ impl Game {
                         RuntimeDamageRecipient::Object { object } => {
                             let id = execution.object_id(object)?;
                             let current = self.object(id)?;
-                            if current.generation != object.generation.0 || current.zone != "field"
-                            {
+                            // Requested units for non-follower members are not admitted yet.
+                            if !self.object_type(id)?.contains("フォロワー") {
+                                return Err(unsupported("non-follower damage recipient"));
+                            }
+                            if current.generation != object.generation.0 {
                                 continue;
                             }
-                            if !self.object_type(id)?.contains("フォロワー") {
-                                continue;
+                            if current.zone != "field" {
+                                return Err(unsupported("non-field damage recipient"));
                             }
                             id.to_owned()
                         }
@@ -659,6 +670,7 @@ impl Game {
                     if let Ok(positive) =
                         NonZeroU64::try_from(u64::try_from(amount.0).unwrap_or_default())
                     {
+                        self.internal_damage_arithmetic(&target, amount.0)?;
                         actual = actual
                             .checked_add(positive.get())
                             .ok_or_else(|| invalid("damage outcome overflow"))?;
@@ -681,7 +693,7 @@ impl Game {
                 execution.receipts.insert(
                     instruction.receipt,
                     InstructionOutcome::Damage(DamageQuantityOutcome {
-                        requested: amount,
+                        requested: Int(requested),
                         actual: Nat(actual),
                     }),
                 );
@@ -708,6 +720,23 @@ impl Game {
                     .insert(instruction.receipt, InstructionOutcome::Installed(objects));
             }
             _ => return Err(unsupported("instruction")),
+        }
+        Ok(())
+    }
+
+    fn internal_damage_arithmetic(&self, target: &str, amount: i64) -> Result<()> {
+        // The shared prototype primitive saturates; typed execution must reject overflow first.
+        let valid = if let Some(seat) = target.strip_suffix(".leader") {
+            int(&self.player(seat)?.leader["life"])
+                .checked_sub(amount)
+                .is_some()
+        } else {
+            let object = self.object(target)?;
+            int(&object.state["hp"]).checked_sub(amount).is_some()
+                && int(&object.state["damage"]).checked_add(amount).is_some()
+        };
+        if !valid {
+            return Err(invalid("damage state arithmetic overflow"));
         }
         Ok(())
     }

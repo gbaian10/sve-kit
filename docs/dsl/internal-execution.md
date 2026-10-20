@@ -13,8 +13,8 @@ capability code／version 及節點形狀都必須在封閉支援集合內。附
 
 支援 Sequence、If、root AtResolution 的 Int／Nat／Bool／Selector capture，以及 bounded
 integer ResolutionChoice。數值支援常值、已驗 binding／capture、公開玩家資源、公開區域
-計數、checked Nat 轉換、Add／Subtract／Multiply／Minimum／Maximum、條件值與 Draw 的 Cards
-quantity receipt 投影；布林支援比較、And／Or／Not／Exists。selector 只接受公開 Field／Ex／Cemetery／Banish
+計數、checked Nat 轉換、Add／Subtract／Multiply／Minimum／Maximum、條件值與 Draw 的 Cards、Damage 的
+同型 Requested／Actual quantity receipt 投影；布林支援比較、And／Or／Not／Exists。selector 只接受公開 Field／Ex／Cemetery／Banish
 的 Current view、SourceHolder、Objects／Union 及明示 capture；未准入的 read／selector 不以零或空集合代替。
 一般隱藏資訊 If、Repeat、付款、模式及下節以外的安裝／action 都在執行前整棵拒絕。
 
@@ -34,13 +34,17 @@ UpToStepwise 每張前只詢問該抽牌者 Continue／Stop；每次問答都有
 
 Damage 只接受 Ability flags、Instruction batch、Current source 及 Uniform signed amount。
 同指示開始時求值 recipients／amount；Union 依物件 ID＋世代或玩家去重。
-不對非從者物件、已換世代或已離場者給傷害；非正量不產生 DamageEvent。
+物件成員無法確認為從者時整次拒絕，不推定非從者是否計入 requested；這是內部准入限制。
+目前世代不在場上的成員、或捕捉時不全在場上的集合，也整次拒絕；capture slot 保存當時的場上來源證據，
+不以「後來已換世代」冒充原本合法的場上選取。從場上捕捉後才失效的從者仍依下述聚合契約處理。
+已換世代或已離場的從者成員不受傷害；非正量不產生 DamageEvent。
 所有正量 hit 共用原型的 `apply_damage` 提交原語；typed DamageEvent 保留來源 snapshot、接受者、
 量及控制者。致死與抽空的規則檢查在整段解算完成後執行，指示間不自行插入清場時點。
-authority 的 `DamageQuantityOutcome` 記錄 Uniform 的原始有號 amount（requested）與實際正量合計
-（actual），只作執行紀錄，尚不符合[執行語義 §1.3](runtime-semantics.md#13-damage-requestedactual-投影)
-的整指示聚合契約。任何讀 Damage receipt 的投影（requested 或 actual）仍在入口整棵拒絕，
-須完成聚合實作與局面驗收後才可解除。
+authority 的 `DamageQuantityOutcome` 依[執行語義 §1.3](runtime-semantics.md#13-damage-requestedactual-投影)
+記錄整指示聚合量：requested 為凍結去重成員各項 `max(0, amount)` 的合計，actual 為有效成員
+實際正量的合計，不以剩餘生命封頂。捕捉後失效的從者成員仍計 requested；指示開始的動態集合
+已無該物件則不計。聚合、轉型、體力扣除與累積傷害加法皆 checked；溢位回復整份 authority。
+同型 Damage Requested／Actual 投影在指示完整提交後可供後續指示讀取，不能當成 Cards。
 
 Allocation／Distribution 仍在入口拒絕。IR 已以 `Distribution.minimum: Nat` 承載明示最低量；
 本入口尚未執行它。來源、凍結、無解拒絕及 selected play targets 的最低 1 點限制依
@@ -54,8 +58,10 @@ Continue 之後的問題不能重用舊 token；錯 actor、錯 payload、過期
 抽牌後對手的目前手牌 slot 不帶固定 ID；過去已見資訊不會因此定位新的隱藏 slot。
 
 `internal_ir` 測試使用合成局面，並以公開輸入產生器提供的印刷資料驗 BP01-065 抽二與
-BP01-006 四點傷害片段。這些測試不包含 BP01-065 的 SpellChain／PP 回復，也不包含
-BP01-006 的打出時目標選取與整卡准入；不宣稱兩張卡已遷移完成。BP06-110 未准入。
+BP01-006 四點傷害與 BP02-052 固定手札數為 3 的 Uniform 傷害片段。BP02-052 的局面只放對手從者，
+不承載混合護符的篩選、動態手札計數、進化、棄牌或打出程序。這些測試不包含 BP01-065 的
+SpellChain／PP 回復，也不包含 BP01-006 的打出時目標選取與整卡准入；不宣稱整卡已遷移完成。
+BP06-110 未准入。
 
 ## 公開區域移動與破壞
 
