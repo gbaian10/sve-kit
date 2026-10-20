@@ -57,8 +57,8 @@ Selector-level slices remain registered in prose pending independent consumer ev
 Event object references currently admit
 only `holder`; other typed event projections are outside this subset.
 The [numeric shape matrix](../docs/dsl/author-expression-shapes-1.0.md) covers
-`A.expr.numeric-core`, `A.cond.numeric-core` and their variants: signed arithmetic,
-object/player numeric reads, and `cmp`/`all`/`any`/`not`. Every variant's operand
+`A.expr.numeric`, `A.cond` and their variants: signed arithmetic,
+object/player and aggregate numeric reads, nonhistory predicates, and `cmp`/`all`/`any`/`not`. Every variant's operand
 domain is also partial; these definitions are not complete Expr/Cond types.
 The same recursive unions include `count_of` and `did`. Separate `objects_of`
 snapshots require an explicit `before`/`after` view; `same_as` reads those snapshots.
@@ -69,8 +69,10 @@ Only the registered plus/minus arithmetic operand positions accept parameters. N
 arithmetic must still be checked against the full source operand path.
 The [object query matrix](../docs/dsl/author-object-query-shapes-1.0.md) defines
 zone and binding/snapshot object sources, object `any_of` unions, `except`, `where`/`as`, and a closed
-attribute subset. `count` uses separate counted-owner/zone queries and a deduplicated
-count union. These queries have their own leaf parameter positions; role checks,
+attribute subset. `count` accepts zone or binding/snapshot sources, `except`, `where` and `as`.
+CountAtom combines counted-owner/zone queries with CollectionIn; count unions deduplicate
+membership. CollectionSource serves aggregate/distinct reads and count exclusions, without
+the direct counted-owner/zone parameter permission. Nested counts retain their own roles. These queries have their own leaf parameter positions; role checks,
 scope, identity and operation authority still require lowering. Object selections
 exclude leader recipients. `RecipientSel` adds the existing leader atoms, strict
 `leader_or` and unions containing at least one leader limb. The array-level
@@ -78,7 +80,11 @@ exclude leader recipients. `RecipientSel` adds the existing leader atoms, strict
 deduplicate membership without creating object order; equivalent author spellings
 do not imply identical body hashes. Consumer role and batch semantics still require
 lowering. Full Sel, event/history narrowing and capture placement
-remain outside this fragment. Neither numeric union is an expanded profile.
+remain outside this fragment. Unimplemented constructs include history/history_count/history_sum,
+event, lki_of, at, chosen, paid, x_paid, dice, nonnumeric cmp, material filter extensions
+and agg.hp. Snapshot count/exists do not establish coverage of pending material examples or
+hash equivalence with count_of/did. This recursive graph is not an expanded profile;
+Rust decoding and execution have not been validated by this fragment.
 [effects-index.schema.json](effects-index.schema.json) defines the complete
 `format: 1, kind: effects_index` envelope and record syntax. Both use JSON Schema
 2020-12. The `AuthorSchemas` reader in
@@ -87,7 +93,7 @@ directory and validates leaf and index inputs with local resources only.
 It does not expose a reader for the reference atoms, target roles or numeric fragments.
 Python types in
 `contracts/author_leaves.py`, `contracts/author_references.py` and
-`contracts/author_expressions.py`, plus target roles in `contracts/author_selections.py`, are checked
+`contracts/author_queries.py`, plus target roles in `contracts/author_selections.py`, are checked
 against every implemented definition by structural drift tests. Reference
 acceptance tests also check reserved-name separation, required fields, exclusive
 variants and nested rejection of parameter nodes.
@@ -99,7 +105,7 @@ definition individually. Numeric acceptance tests check signed bounds, arity,
 exclusive operators, parameter placement and wire-key round trips.
 Receipt shapes in `contracts/author_receipts.py` have matching drift and acceptance
 tests. Material fields remain absent when omitted and reject explicit nulls.
-Object and recipient shapes in `contracts/author_selectors.py` and
+Object and recipient shapes in `contracts/author_queries.py` and
 `contracts/author_recipients.py` share recursive drift and acceptance checks,
 including negative mutations of union membership and `contains`.
 The drift checker rejects unsupported constraints beside `$ref` rather than
