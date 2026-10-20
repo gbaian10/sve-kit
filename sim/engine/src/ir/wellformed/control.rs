@@ -207,6 +207,9 @@ impl Checker {
             );
             committed.receipts.extend(self.env.receipts.clone());
             committed
+                .movement_before_access
+                .extend(self.env.movement_before_access.clone());
+            committed
                 .receipt_access
                 .extend(self.env.receipt_access.clone());
             committed.access.extend(

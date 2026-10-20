@@ -1,8 +1,9 @@
 use super::{BindingKind, Checked, Checker, WellFormedReason};
 use crate::ir::{
-    ActionPattern, Binding, ContinuousLayer, CostChange, Duration, DurationEnd, Effect,
-    EffectReference, EffectTarget, ExecutionRef, Expr, InstallationSubjects, InstallationTime,
-    Interval, PermissionSubject, Polarity, Selector, TimeAnchor, TimestampBasis, UsageScope,
+    ActionPattern, Binding, CharacteristicPatch, ContinuousLayer, CostChange, Duration,
+    DurationEnd, Effect, EffectReference, EffectTarget, ExecutionRef, Expr, InstallationSubjects,
+    InstallationTime, Interval, PermissionSubject, Polarity, Selector, TimeAnchor, TimestampBasis,
+    UsageScope,
 };
 
 #[expect(
@@ -10,6 +11,36 @@ use crate::ir::{
     reason = "Installed effects share the structural checker's closed environment."
 )]
 impl Checker {
+    pub(super) fn modify(
+        &mut self,
+        subjects: &Selector,
+        patch: &CharacteristicPatch,
+        expires: &Duration,
+        source: EffectReference,
+    ) -> Checked {
+        self.at("subjects", |checker| checker.selector(subjects))?;
+        self.at("source", |checker| match source {
+            EffectReference::CurrentInstallation {} => Ok(()),
+            EffectReference::Bound { binding } => checker.reference(binding, BindingKind::Value),
+        })?;
+        // No consumption rule exists for characteristic modifications.
+        if expires.usage.is_some() {
+            return self.reject();
+        }
+        self.at("expires", |checker| checker.installed_duration(expires))?;
+        self.at("patch", |checker| match patch {
+            CharacteristicPatch::SetKind { .. } => Ok(()),
+            CharacteristicPatch::Numeric { .. } | CharacteristicPatch::Combined { .. } => {
+                checker.patch(patch, ContinuousLayer::Numeric)
+            }
+            CharacteristicPatch::GrantAbility { .. }
+            | CharacteristicPatch::SuppressAbility { .. }
+            | CharacteristicPatch::AddName { .. }
+            | CharacteristicPatch::AddTrait { .. }
+            | CharacteristicPatch::RemoveTrait { .. } => checker.reject(),
+        })
+    }
+
     pub(super) fn install(
         &mut self,
         subjects: &InstallationSubjects,

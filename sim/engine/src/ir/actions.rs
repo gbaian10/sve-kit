@@ -119,7 +119,7 @@ tags!(DamageFlags {
 variants!(ShuffleScope { FullZone {} => [], Subset { cards: Selector } => ["shuffle.subset"] });
 record!(Placement {
     cards: Selector,
-    zone: ZoneRef,
+    zone: MoveDestination,
     position: Position
 });
 record!(EvolutionCardRef {
@@ -207,10 +207,10 @@ record!(TokenCount {
     count: Nat
 });
 record!(#[derive(Copy)] SearchContinuation { found: Binding<SearchFound>, revealed: Binding<SearchRevealed> });
-/// Search-only continuation binding; not an object selector or a moved result.
+/// Search-only selected objects, before any movement and without follow permission.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum SearchFound {}
-/// Search-only public proof binding; not an object selector or a moved result.
+/// Search-only public proof of selected objects, before any movement.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum SearchRevealed {}
 

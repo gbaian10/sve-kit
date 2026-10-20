@@ -213,6 +213,7 @@ struct Environment {
     distributions: BTreeMap<Key, super::RecipientSet>,
     access: BTreeMap<Key, super::Visibility>,
     receipt_access: BTreeMap<ReceiptId, super::Visibility>,
+    movement_before_access: BTreeMap<ReceiptId, super::Visibility>,
     bindings: BTreeMap<Key, Slot>,
     receipts: BTreeMap<ReceiptId, TypeId>,
 }
@@ -222,6 +223,8 @@ impl Environment {
         self.receipts.extend(other.receipts.clone());
         self.access.extend(other.access.clone());
         self.receipt_access.extend(other.receipt_access.clone());
+        self.movement_before_access
+            .extend(other.movement_before_access.clone());
         self.distributions.extend(other.distributions.clone());
     }
 }
@@ -268,6 +271,7 @@ impl Checker {
             distributions: BTreeMap::new(),
             access: BTreeMap::new(),
             receipt_access: BTreeMap::new(),
+            movement_before_access: BTreeMap::new(),
             bindings: BTreeMap::new(),
             receipts: BTreeMap::new(),
         };
@@ -504,7 +508,10 @@ impl Checker {
             .map(|_| (self.env.bindings.clone(), self.env.access.clone()));
         // The action publishes its output only after all of its inputs were checked.
         let previous_source = self.ability_source.replace(instruction.source.clone());
-        let result = self.at("action", |checker| checker.action(&instruction.action));
+        let before_access = self.movement_input_access(&instruction.action);
+        let result = self.at("action", |checker| {
+            checker.action(&instruction.action, &instruction.actor)
+        });
         self.ability_source = previous_source;
         result?;
         if let Action::Discard { player, .. }
@@ -515,6 +522,11 @@ impl Checker {
             return self.reject();
         }
         self.produce(instruction.receipt, outcome(&instruction.action))?;
+        if let Some(access) = before_access {
+            self.env
+                .movement_before_access
+                .insert(instruction.receipt, access);
+        }
         self.observation(instruction);
         if let Some((bindings, access)) = guarded_inputs {
             // A skipped instruction has a receipt, but its output values were never produced.
@@ -549,7 +561,7 @@ impl Checker {
         clippy::too_many_lines,
         reason = "Exhaustive action dispatch keeps unvalidated variants explicitly rejected."
     )]
-    fn action(&mut self, action: &Action) -> Checked {
+    fn action(&mut self, action: &Action, instruction_actor: &PlayerRef) -> Checked {
         match action {
             Action::Draw {
                 player,
@@ -658,8 +670,10 @@ impl Checker {
                 movement,
                 reason,
             } => {
-                self.selector(objects)?;
-                self.movement(movement, Some(*reason))
+                if movement.order.is_none() {
+                    self.selector(objects)?;
+                }
+                self.movement(movement, Some(*reason), objects, instruction_actor)
             }
             Action::Search {
                 player,
@@ -686,13 +700,28 @@ impl Checker {
                 effect,
                 duration,
             } => self.install(subjects, *capture, effect, duration),
+            Action::Modify {
+                subjects,
+                patch,
+                expires,
+                source,
+            } => self.modify(subjects, patch, expires, *source),
+            Action::Order {
+                cards,
+                destinations,
+                chooser,
+                visibility,
+            } => {
+                if chooser != instruction_actor {
+                    return self.reject();
+                }
+                self.order(cards, destinations, chooser, visibility)
+            }
             Action::RevealUntil { .. }
             | Action::Shuffle { .. }
-            | Action::Order { .. }
             | Action::Evolve { .. }
             | Action::Transform { .. }
             | Action::FlipUp { .. }
-            | Action::Modify { .. }
             | Action::Grant { .. }
             | Action::RemoveAbility { .. }
             | Action::Delay { .. }
@@ -852,13 +881,13 @@ const fn outcome(action: &Action) -> TypeId {
         Action::Destroy { .. } => TypeId::of::<super::DestroyOutcome>(),
         Action::Banish { .. } => TypeId::of::<super::BanishOutcome>(),
         Action::Search { .. } => TypeId::of::<super::SearchOutcome>(),
+        Action::Order { .. } => TypeId::of::<super::OrderOutcome>(),
         Action::InstallEffect { .. }
         | Action::Transfer { .. }
         | Action::Life { .. }
         | Action::Reveal { .. }
         | Action::RevealUntil { .. }
         | Action::Shuffle { .. }
-        | Action::Order { .. }
         | Action::Evolve { .. }
         | Action::Transform { .. }
         | Action::FlipUp { .. }

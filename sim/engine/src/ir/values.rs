@@ -366,6 +366,8 @@ variants!(ObjectOperand {
     Moved { reference: MovedRef } => ["reference.follow-generation", "receipt.move-after"]
 });
 variants!(Selector {
+    SearchFound { found: Binding<super::SearchFound> } => [],
+    SearchRevealed { revealed: Binding<super::SearchRevealed> } => [],
     CollectedMembers { receipts: ObjectReceiptList, projection: MemberProjection, deduplicate: GenerationDeduplication } => ["read.receipt.collected-members"],
     MoveAfterAll { receipts: MovementReceiptList, permission: FollowPermission, deduplicate: GenerationDeduplication } => ["receipt.move-after-all", "reference.follow-generation"],
     Created { receipt: ReceiptReference<TokenOutcome> } => ["receipt.created"],

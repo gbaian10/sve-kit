@@ -1,8 +1,11 @@
 use super::{BindingKind, Checked, Checker, WellFormedReason};
+use crate::ir::ReceiptLocation;
 use crate::ir::{
-    Binding, Bool, Cardinality, Expr, FollowPermission, MoveDestination, MoveReason, MoveSpec,
-    MovementReceipt, MovementReceiptList, ObjectRef, OwnerZone, PlayerRef, Position,
-    SearchContinuation, SearchDestination, SelectionConstraint, ZoneKind,
+    Binding, Bool, Cardinality, ChoiceDomain, Decision, DecisionKind, Declinable, Disjointness,
+    Expr, FollowPermission, MoveDestination, MoveReason, MoveSpec, MovementReceipt,
+    MovementReceiptList, Nat, ObjectRef, OwnerZone, Placement, PlayerRef, PlayerRelation, Position,
+    SearchContinuation, SearchDestination, SelectionConstraint, SelectionView, Selector,
+    Visibility, ZoneKind,
 };
 
 // Keep receipt outcome types intact while sharing the exhaustive movement family.
@@ -56,7 +59,13 @@ impl Checker {
         Ok(())
     }
 
-    pub(super) fn movement(&mut self, movement: &MoveSpec, reason: Option<MoveReason>) -> Checked {
+    pub(super) fn movement(
+        &mut self,
+        movement: &MoveSpec,
+        reason: Option<MoveReason>,
+        objects: &Selector,
+        actor: &PlayerRef,
+    ) -> Checked {
         self.at("to", |checker| {
             checker.positioned_destination(&movement.to, movement.position)
         })?;
@@ -71,10 +80,89 @@ impl Checker {
             return Err(self.error(WellFormedReason::InvalidMovement));
         }
         // Entry installation needs a new-generation subject; a source-holder substitution is unsafe.
-        if !movement.entry_effects.is_empty() || movement.order.is_some() {
+        if !movement.entry_effects.is_empty() {
             return self.reject();
         }
+        if let Some(order) = &movement.order {
+            if movement.to
+                != (MoveDestination::Owners {
+                    zone: OwnerZone::Deck,
+                })
+                || movement.position.is_none()
+            {
+                return Err(self.error(WellFormedReason::InvalidMovement));
+            }
+            self.at("order", |checker| checker.move_order(order, objects, actor))?;
+        }
         Ok(())
+    }
+
+    fn move_order(
+        &mut self,
+        decision: &Decision,
+        objects: &Selector,
+        actor: &PlayerRef,
+    ) -> Checked {
+        let ChoiceDomain::Order {
+            objects: domain,
+            binding,
+        } = &decision.domain
+        else {
+            return self.reject();
+        };
+        if domain != objects || &decision.actor != actor || !decision.captures.is_empty() {
+            return self.reject();
+        }
+        if decision.kind
+            != (DecisionKind::ResolutionChoice {
+                may: Declinable::Required,
+                cardinality: Cardinality {
+                    minimum: Nat(1),
+                    maximum: Some(Nat(1)),
+                },
+                precondition: None,
+            })
+        {
+            return Err(self.error(WellFormedReason::DecisionTiming));
+        }
+        self.isolated(|checker| {
+            checker.decision_header(decision)?;
+            checker.env.chooser = Some(actor.clone());
+            checker.env.private_choice = super::visibility::private_to(&decision.visibility, actor);
+            checker.selector(domain)?;
+            checker.define(*binding, BindingKind::Value)
+        })
+    }
+
+    pub(super) fn order(
+        &mut self,
+        cards: &Selector,
+        destinations: &[Placement],
+        chooser: &PlayerRef,
+        visibility: &Visibility,
+    ) -> Checked {
+        if !self.env.choices {
+            return self.reject();
+        }
+        // The common remainder-to-bottom form is one permutation, not a new subset choice.
+        let [placement] = destinations else {
+            return self.reject();
+        };
+        if placement.cards != *cards
+            || placement.zone
+                != (MoveDestination::Owners {
+                    zone: OwnerZone::Deck,
+                })
+        {
+            return Err(self.error(WellFormedReason::InvalidMovement));
+        }
+        self.player(chooser)?;
+        self.visibility(visibility)?;
+        self.isolated(|checker| {
+            checker.env.chooser = Some(chooser.clone());
+            checker.env.private_choice = super::visibility::private_to(visibility, chooser);
+            checker.at("cards", |checker| checker.selector(cards))
+        })
     }
 
     #[expect(
@@ -92,7 +180,7 @@ impl Checker {
         destination: Option<&SearchDestination>,
         continuation: SearchContinuation,
     ) -> Checked {
-        if !self.env.choices || groups.is_some() {
+        if !self.env.choices {
             return self.reject();
         }
         self.player(player)?;
@@ -103,6 +191,11 @@ impl Checker {
             checker.env.private_choice = true;
             checker.at("filter", |checker| checker.candidate(candidate, filter))
         })?;
+        if let Some(groups) = groups {
+            self.at("groups", |checker| {
+                checker.search_groups(groups, player, deck, cardinality)
+            })?;
+        }
         self.isolated(|checker| {
             checker.env.chooser = Some(player.clone());
             checker.env.private_choice = true;
@@ -113,15 +206,28 @@ impl Checker {
             checker.env.scope = scope;
             checker.define(continuation.found, BindingKind::Value)?;
             checker.define(continuation.revealed, BindingKind::Value)?;
+            checker.env.access.insert(
+                continuation.found.key(),
+                super::visibility::only(player.clone()),
+            );
+            checker
+                .env
+                .access
+                .insert(continuation.revealed.key(), Visibility::Public {});
+            let objects = Selector::SearchFound {
+                found: continuation.found,
+            };
             checker.at("destination", |checker| match destination {
                 None => checker.reject(),
-                Some(SearchDestination::Single { movement }) => checker.movement(movement, None),
+                Some(SearchDestination::Single { movement }) => {
+                    checker.search_movement(movement, &objects, player)
+                }
                 Some(SearchDestination::OptionalSelfReplacement {
                     predicate,
                     movement,
                 }) => {
                     checker.boolean(predicate)?;
-                    checker.movement(movement, None)
+                    checker.search_movement(movement, &objects, player)
                 }
                 Some(SearchDestination::Partition { destinations }) => {
                     if destinations.is_empty() {
@@ -152,6 +258,62 @@ impl Checker {
         })
     }
 
+    fn search_movement(
+        &mut self,
+        movement: &MoveSpec,
+        objects: &Selector,
+        player: &PlayerRef,
+    ) -> Checked {
+        // Search ends with a shuffle; placement order needs a separate sequencing contract.
+        if movement.order.is_some() || movement.position.is_some() {
+            return self.reject();
+        }
+        self.movement(movement, None, objects, player)
+    }
+
+    fn search_groups(
+        &mut self,
+        groups: &SelectionConstraint,
+        player: &PlayerRef,
+        deck: &PlayerRef,
+        cardinality: Cardinality,
+    ) -> Checked {
+        if groups.cardinality != cardinality
+            || groups.disjoint != Disjointness::Disjoint
+            || groups.groups.is_empty()
+        {
+            return self.reject();
+        }
+        self.isolated(|checker| {
+            checker.env.chooser = Some(player.clone());
+            checker.env.private_choice = true;
+            for (index, group) in groups.groups.iter().enumerate() {
+                checker.at(&index.to_string(), |checker| {
+                    checker.cardinality(group.cardinality)?;
+                    let Selector::Zone {
+                        players,
+                        zone: ZoneKind::Deck,
+                        view: SelectionView::Current {},
+                        binding,
+                        predicate,
+                    } = &group.selector
+                    else {
+                        return checker.reject();
+                    };
+                    if players.relative_to != *deck
+                        || players.relation != PlayerRelation::SelfPlayer
+                    {
+                        return checker.reject();
+                    }
+                    checker.players(players)?;
+                    // Only the root candidate domain is authorized; nested hidden reads are not.
+                    checker.candidate(*binding, predicate)
+                })?;
+            }
+            checker.aggregate_bounds(&groups.aggregate_bounds)
+        })
+    }
+
     pub(super) fn follow_permission(&self, permission: FollowPermission) -> Checked {
         match permission {
             FollowPermission::SameEffectExplicitReference {} => Ok(()),
@@ -170,6 +332,15 @@ impl Checker {
 
     pub(super) fn movement_visible(&self, receipt: &MovementReceipt) -> Checked {
         movement_dispatch!(receipt, MovementReceipt, receipt => self.visible_receipt(receipt); trigger => self.reject())
+    }
+
+    pub(super) fn movement_before_visible(&self, receipt: &MovementReceipt) -> Checked {
+        movement_dispatch!(receipt, MovementReceipt, receipt => {
+            match receipt.location() {
+                ReceiptLocation::Local { id } => self.visible_object(self.env.movement_before_access.get(id)),
+                ReceiptLocation::Iteration { .. } => self.reject(),
+            }
+        }; trigger => self.reject())
     }
 
     pub(super) fn movements_visible(&self, receipts: MovementReceiptList) -> Checked {

@@ -142,6 +142,55 @@ impl Checker {
         }
     }
 
+    fn reveal_access(&mut self, objects: &Selector) {
+        match objects {
+            Selector::Bound { reference } => {
+                self.env
+                    .access
+                    .insert(reference.key(), Visibility::Public {});
+            }
+            Selector::Captured { reference } => {
+                self.env
+                    .access
+                    .insert(reference.binding.key(), Visibility::Public {});
+            }
+            Selector::ReceiptMembers {
+                receipt: ObjectReceipt::Look { receipt },
+                ..
+            } => {
+                if let ReceiptLocation::Local { id } = receipt.location() {
+                    self.env.receipt_access.insert(*id, Visibility::Public {});
+                }
+            }
+            Selector::CollectedMembers { .. }
+            | Selector::MoveAfterAll { .. }
+            | Selector::Created { .. }
+            | Selector::ReceiptMembers { .. }
+            | Selector::MoveAfter { .. }
+            | Selector::Zone { .. }
+            | Selector::Filter { .. }
+            | Selector::Union { .. }
+            | Selector::Intersection { .. }
+            | Selector::Difference { .. }
+            | Selector::Ordered { .. }
+            | Selector::Objects { .. }
+            | Selector::SearchFound { .. }
+            | Selector::SearchRevealed { .. }
+            | Selector::Relation { .. } => {}
+        }
+    }
+
+    pub(super) fn movement_input_access(&self, action: &Action) -> Option<Visibility> {
+        if let Action::Move { objects, .. }
+        | Action::Destroy { objects }
+        | Action::Banish { objects } = action
+        {
+            self.infer_access(|checker| checker.selector(objects))
+        } else {
+            None
+        }
+    }
+
     pub(super) fn observation(&mut self, instruction: &Instruction) {
         match &instruction.action {
             Action::Look { viewer, .. } => {
@@ -149,39 +198,9 @@ impl Checker {
                     .receipt_access
                     .insert(instruction.receipt, only(viewer.clone()));
             }
-            Action::Reveal { objects } if instruction.precondition.is_none() => match objects {
-                Selector::Bound { reference } => {
-                    self.env
-                        .access
-                        .insert(reference.key(), Visibility::Public {});
-                }
-                Selector::Captured { reference } => {
-                    self.env
-                        .access
-                        .insert(reference.binding.key(), Visibility::Public {});
-                }
-                Selector::ReceiptMembers {
-                    receipt: ObjectReceipt::Look { receipt },
-                    ..
-                } => {
-                    if let ReceiptLocation::Local { id } = receipt.location() {
-                        self.env.receipt_access.insert(*id, Visibility::Public {});
-                    }
-                }
-                Selector::CollectedMembers { .. }
-                | Selector::MoveAfterAll { .. }
-                | Selector::Created { .. }
-                | Selector::ReceiptMembers { .. }
-                | Selector::MoveAfter { .. }
-                | Selector::Zone { .. }
-                | Selector::Filter { .. }
-                | Selector::Union { .. }
-                | Selector::Intersection { .. }
-                | Selector::Difference { .. }
-                | Selector::Ordered { .. }
-                | Selector::Objects { .. }
-                | Selector::Relation { .. } => {}
-            },
+            Action::Reveal { objects } if instruction.precondition.is_none() => {
+                self.reveal_access(objects);
+            }
             Action::Token { output, .. } => {
                 self.env.access.insert(output.key(), Visibility::Public {});
                 self.env
@@ -202,10 +221,10 @@ impl Checker {
             },
             Action::FlipDown { .. } => self.revoked = true,
             Action::Reveal { .. }
-            | Action::InstallEffect { .. }
             | Action::Move { .. }
             | Action::Destroy { .. }
             | Action::Banish { .. }
+            | Action::InstallEffect { .. }
             | Action::Discard { .. }
             | Action::Transfer { .. }
             | Action::Damage { .. }
@@ -284,7 +303,7 @@ const fn flips(instruction: &Instruction) -> bool {
     matches!(instruction.action, Action::FlipDown { .. })
 }
 
-const fn only(player: PlayerRef) -> Visibility {
+pub(super) const fn only(player: PlayerRef) -> Visibility {
     Visibility::Only {
         players: PlayerSet {
             relation: PlayerRelation::SelfPlayer,
@@ -296,4 +315,9 @@ const fn only(player: PlayerRef) -> Visibility {
             text_quantifier: TextQuantifier::Implicit,
         },
     }
+}
+
+pub(super) fn private_to(visibility: &Visibility, actor: &PlayerRef) -> bool {
+    matches!(visibility, Visibility::Only { players }
+        if players.relation == PlayerRelation::SelfPlayer && &players.relative_to == actor)
 }
