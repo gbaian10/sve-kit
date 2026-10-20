@@ -1,6 +1,6 @@
 # 效果作者 1.0：承載、版本與執行邊界
 
-本文是作者 1.0 的文件契約，與[撰寫語法](author-syntax-1.0.md)、[IR 詞彙](ir-vocabulary-1.0.md)共同閱讀；不是已實作的 loader 或已發布的格式。語法的唯一機器權威仍在 `dsl/`，下列新資源須由實作補齊並與本文一致，不能把既有 astra/1 Schema 當作作者 1.0 驗證器。決定方向見 [#799 的維護者決定](https://github.com/gbaian10/sve-kit/issues/799#issuecomment-6282231068)。
+本文是作者 1.0 的文件契約，與[撰寫語法](author-syntax-1.0.md)、[IR 詞彙](ir-vocabulary-1.0.md)共同閱讀；實作範圍見 §1，不表示格式已發布或來源已准入。語法的唯一機器權威仍在 `dsl/`，不能把既有 astra/1 Schema 當作作者 1.0 驗證器。決定方向見 [#799 的維護者決定](https://github.com/gbaian10/sve-kit/issues/799#issuecomment-6282231068)。
 
 ## 1. 版本承諾與入口
 
@@ -12,7 +12,7 @@
 | `1 / effect_body_shard` | `1.0` | `urn:sve-kit:effect-bodies:1.0` | `dsl/effect-bodies.schema.json` |
 | `1 / effects_index` | 定位資訊，不選語義 | `urn:sve-kit:effects-index:1` | `dsl/effects-index.schema.json` |
 
-目前 `effects-index.schema.json` 已提供索引語法；`author-nodes.schema.json` 提供葉參數、[引用／玩家／期限原子](author-reference-shapes-1.0.md)及[數值與非歷史條件片段](author-expression-shapes-1.0.md)。引用原子不是包含 Sel 的完整動作位置型別；數值核心各 variant 的 operand 也不是完整 Expr／Cond。逐卡／companion 入口及遞迴 authored／expanded profile 尚未實作，不能以片段驗證通過當成完整作者輸入通過。確切可用入口見 [dsl/README](../../dsl/README.md)。
+目前三個入口都有封閉 Schema 與 Python 結構 reader；共用 `author-nodes.schema.json` 提供完整能力圖、`A.file`、`A.card` 與 `$defs/authored`。讀取包含來源／審核證據的形狀及檔內 invariant，不表示來源、資格或跨檔閉包已通過。generated_by／參數展開、body hash 核對、`expanded` profile 與 D0 消費介面尚未實作。完整容器形狀與檢查邊界見[入口形狀矩陣](author-entry-shapes-1.0.md)，可用 API 見 [dsl/README](../../dsl/README.md)。
 
 兩個作者資源共用 `urn:sve-kit:author-nodes:1.0`（`dsl/author-nodes.schema.json`）的 A.* 定義。Schema 採 JSON Schema 2020-12。所有固定物件封閉；動態 map 只接受各自卡號／識別字規則，不以任意額外欄位吸收未知構造。Python 型別與 `$defs` 必須逐一對應並驗漂移；Rust 依同一資源的展開 profile 解碼並做漂移測試，不能另立語法。
 
@@ -54,6 +54,8 @@ A.ability 沿用 `line`（1 起算）、選用 `section`（0 起算），正式�
 能力內容二選一：既有單一能力頭（inline），或 `generated_by`。後者恰為 `{macro:{frame_id,ability_scope,applicability_scope},version,params}`；version 是 body_version，params 是 §3 的具型別實值 map。`applicability_scope` 指向該 record 的 registration.id。generated_by 記在產生的能力位置，不用一筆卡片 meta 假裝整張卡只依賴一個巨集；卡片 meta 保留逐卡彙總證據。同一能力同時有能力頭和 generated_by、未指定版本、找不到本體／域、scope 不符，一律拒絕。
 
 inline 能力另有必填 `ports`，形狀與 companion 相同，無接線時兩個 map 為空；generated_by 能力從本體取得 ports，不另覆寫。每個能力另有選用 `imports`：`Map<Code,{binding_id,ability_scope,port}>`；鍵為其 Projection import 名，值精確選定本用途已驗且可見的上游 export。inline 同樣須驗 ports／scope；沒有 import 時省略。同一 projection ability scope 的多片段只組成一次能力；同位置多能力分別保留，不能按 source 數量複製執行。token 能力必掛 token 的 A.card／face，不能借母卡 owner。sources 的 owner、face、field、section、行與能力容器必須一致；classification 零起算 line 到 A.ability.line 只轉換一次。
+
+`A.card.faces` 為 `Map<FaceId,{abilities}>`，FaceId 是永久 `f:` 加 32 lowercase hex；面容器不再嵌 meta。卡級 abilities／faces 與面級 abilities 可空，不將空與省略改寫成同一份作者 bytes。選填的能力 imports 若出現必非空。inline 沒有參數宣告：共用節點 Schema／TypeAdapter 仍接受合法葉位的 ParamRef，完整結構 reader 另沿已解碼型別圖拒絕 inline 內的 ParamRef（`inline_param_reference`），不以 raw dict 同名鍵判斷。
 
 用途總是明示 body 版本及適用域，沒有依檔序、最高版本或「先找到」選版。跨域皆符合也不自動挑一個；inline 不隱式套用候選 body。本版一個能力的 sources 僅准相同 `(frame_id,ability_scope)` 且同來源能力實例；同 binding 的多段 segments 已在 OccurrenceKey 中保留，不拆成重複執行。不同 frame 合成一個能力尚無封閉角色接線，保持 pending，不以同名 scope 猜關係。由 imports 連來的其他 frame 則是先前能力輸出，不當作本能力片段；依賴追蹤仍涵蓋這些上游接口。`evolve_feed_entries.v1` 的 ability_0／ability_1 各產一筆有明確 scope 的 A.ability；缺 scope、重複同能力或漏掉需輸出的 sibling scope 均拒絕。
 
@@ -135,7 +137,9 @@ token_links 是按 canonical bytes 排序且唯一的 `{source_owner,section,tok
 | `rulings` | 排序唯一 `{id,revision}`，採用已驗且適用的當前裁定；沒有則空 |
 | `expansion_recipe,adapter_recipe` | 精確且不可變的 C0 配方識別及資源 Digest |
 | `params` | 此用途完整 typed 實值；inline 為空 |
-| `imports` | 按 port 名排序的明示上游用途引用及其完整依賴鍵；無則空 map，上游依賴圖須無環 |
+| `imports` | 按 port 名排序的 `{binding_id,ability_scope,port,dependency_key:Digest}` map；dependency_key 是上游完整 effect-use-v1 依賴鍵，不嵌遞迴快照。無則空 map，上游依賴圖須無環 |
+
+interfaces、rulings 及 BodyDependencies.sources 以完整 canonical-json-v1 bytes 排序且唯一；Domain.regions 以字串排序且唯一。UseDependencies.sources、written_by、reviewed_by、registrations、registration.reviews、meta.rulings 與能力陣列保留原序，不由 reader 重排。
 
 每個配方 pin 恰為 `{id:Code,hash:Digest}`。依賴鍵是 canonical-json-v1 `{recipe:"effect-use-v1",dependencies:<上表物件>}` 的 Digest。不同用途不得借同卡號的證據；C0 內部來源位置 sidecar 以作者 JSON 路徑對應此依賴，不塞私有欄位進 A.* 樹。
 
@@ -184,6 +188,8 @@ meta.reviewed_by 的 use review 可保存同一用途的多個不同獨立審核
 寫入工具依真實證據產生 meta.status／reviewed_by，建置逐項重算是否仍有效，過期／不一致即報診斷。普通建置只拒絕該卡當前 scope 的自動執行及程式出貨，保留文字與拒絕理由，不使其他卡建置失敗，也不回寫 authored；格式／引用閉包損壞仍依既有入口拒絕。資料變更 CI 必須因 meta 不一致失敗，上游來源、裁定或配方 PR 須同步更新相依作者狀態，不能把缺證據留 main 卻宣稱 reviewed。
 
 卡片 status 為全卡彙總：有未解爭議為 disputed；其餘任一用途 draft 則 draft，全部至少 reviewed 才 reviewed，全部有有效引擎實跑才 verified。非 body 宣告仍須來源／型別及獨立審核，不以無步驟自動 verified。主版遷移沿既有降級規則；draft 不提升，disputed 不消失。過去 review 與實跑的原始內容保留 Git／已指定 DB 證據，但不混進有效名單。
+
+目前結構 reader 對非空 `meta.verified_by_exam` 報 `unsupported_exam_evidence`，其封閉逐用途實跑格式須另行實作；空陣列不授予 verified 資格。reader 在同一 review 容器檢查 reviewer 身分與完整依賴（含 rekey.after）重複，及同用途獨立／機械 review 並存；跨檔、歷史爭議與資格仍由依賴驗證處理。body_boundary 是測試輸入與建置 DB 的實跑證據，不是這兩種 authored 容器的欄位。
 
 ## 6. C0 與 D0 的交接
 

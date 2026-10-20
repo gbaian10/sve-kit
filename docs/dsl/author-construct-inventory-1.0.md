@@ -8,10 +8,12 @@
 
 ## 容器與共用葉
 
+下列父容器已具封閉 Schema、Python 型別與結構 reader；[入口矩陣](author-entry-shapes-1.0.md)列出逐 variant、局部 invariant 與未涵蓋的來源／展開責任。
+
 | 上下文 | 欄位／形狀 | 分開驗證的責任 |
 | --- | --- | --- |
 | A.file | format=1、kind=author_effect_set、scope、cards | cards 為原樣 CardNumber → A.card；逐卡 meta.dsl 不能另選 schema |
-| A.card | meta、note?、abilities?、faces?、deck_rule? | faces 以穩定 FaceId 定位；不附另一份卡表 |
+| A.card | meta、note?、abilities?、faces?、deck_rule? | faces 為 Map<FaceId,{abilities}>，以穩定 FaceId 定位；不附另一份卡表 |
 | A.ability | line、section?、sources、imports?、一個能力頭或 generated_by | inline 另必填 ports；generated_by 不覆寫 ports |
 | sources[] | binding_id、occurrence、ability_scope | 恰一筆；occurrence 沿四層型別，segments 可多段 |
 | ports | imports、exports | Code → {path,bind}；path 元素為字串鍵／Nat 索引；imports path 必空 |

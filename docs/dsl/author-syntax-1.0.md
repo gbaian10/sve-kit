@@ -17,9 +17,11 @@
 
 ## 1. 檔案、卡片與 meta
 
+完整容器的 Schema 與 Python 結構 reader 已提供；逐欄矩陣及來源／展開邊界見[入口形狀](author-entry-shapes-1.0.md)。結構通過不表示來源已准入或引擎可執行。
+
 `A.file = {format: 1, kind: author_effect_set, scope: shared|en_override, cards: Map<CardNumber,A.card>}`。封套、Schema 資源、companion 與精確用途依[作者承載契約](author-contract-1.0.md)。卡號照官網保存。卡表快照提供印刷名稱、種類、數值、種族、圖示，這裡不維護另一套卡表。
 
-`A.card = {meta, note?, abilities?, faces?, deck_rule?}`；faces 用穩定 FaceId，不依名稱猜日英對應。`A.ability = {line, section?, sources, ports?, imports?, <一個能力頭或 generated_by>}`；sources／ability_scope、inline 必填 ports、imports 與引用版見承載契約 §2.3。line 從 1、section 從 0 起算，與分類 index 的零起算 line 轉換時加 1。同一行多能力分成多條，保留相同行號。token 說明段落必須掛 token 定義，不能掛母卡。
+`A.card = {meta, note?, abilities?, faces?, deck_rule?}`；faces 為 `Map<FaceId,{abilities}>`，用穩定 FaceId，不依名稱猜日英對應。`A.ability = {line, section?, sources, ports?, imports?, <一個能力頭或 generated_by>}`；sources／ability_scope、inline 必填 ports、imports 與引用版見承載契約 §2.3。line 從 1、section 從 0 起算，與分類 index 的零起算 line 轉換時加 1。同一行多能力分成多條，保留相同行號。token 說明段落必須掛 token 定義，不能掛母卡。
 
 ```yaml
 format: 1
