@@ -38,6 +38,8 @@ impl Game {
                 continue;
             }
             let replacements = self.damage_replacements(hit, &consumed)?;
+            // Replacement amounts use saturating legacy arithmetic.
+            self.numeric_prototype_operand(id, replacements.is_empty())?;
             let mut ordered = replacements.clone();
             if replacements.len() > 1
                 && node["orders"][&order_key].is_null()
@@ -125,9 +127,13 @@ impl Game {
                 life_changes.push((seat.to_owned(), before, life));
                 self.bump(&format!("{seat}.leader_damaged"), 1);
             } else {
+                self.numeric_damage(id, amount)?;
                 let object = self.object_mut(id)?;
-                object.state["hp"] = json!(int(&object.state["hp"]).saturating_sub(amount));
-                object.state["damage"] = json!(int(&object.state["damage"]).saturating_add(amount));
+                object.state["damage"] = json!(
+                    int(&object.state["damage"])
+                        .checked_add(amount)
+                        .ok_or_else(|| invalid("damage overflow"))?
+                );
             }
             damaged.push(self.event_subject(id)?);
             self.emit(

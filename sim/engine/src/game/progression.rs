@@ -312,23 +312,25 @@ impl Game {
         sep: i64,
         frame: &mut Frame,
     ) -> Result<()> {
+        self.numeric_evolution_allowed(source)?;
         let previous = self.object(source)?.clone();
         let old = self.face(source)?.clone();
         let new = self.catalog.face(&self.object(evolve)?.card, face)?.clone();
         self.move_objects(&[evolve.into()], "evolution", None, None, frame)?;
         self.object_mut(evolve)?.state["face"] = json!(face);
-        let attrs = &mut self.object_mut(source)?.state;
-        attrs["evolved"] = json!(true);
-        attrs["evolved_with"] = json!(evolve);
-        attrs["face"] = json!(face);
+        self.object_mut(source)?.state["evolved"] = json!(true);
+        self.object_mut(source)?.state["evolved_with"] = json!(evolve);
+        self.object_mut(source)?.state["face"] = json!(face);
         for field in ["power", "hp"] {
             let delta = scalar(&new[field])
-                .saturating_sub(scalar(&old[field]))
-                .saturating_add(sep);
-            attrs[field] = json!(int(&attrs[field]).saturating_add(delta));
-            if field == "hp" {
-                attrs["max_hp"] = json!(int(&attrs["max_hp"]).saturating_add(delta));
-            }
+                .checked_sub(scalar(&old[field]))
+                .and_then(|delta| delta.checked_add(sep))
+                .ok_or_else(|| invalid("evolution delta overflow"))?;
+            self.numeric_add_base(
+                source,
+                if field == "power" { delta } else { 0 },
+                if field == "hp" { delta } else { 0 },
+            )?;
         }
         self.bump(
             &format!("{}.evolutions", self.object(source)?.controller),

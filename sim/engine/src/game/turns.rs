@@ -17,9 +17,34 @@ pub(super) struct TurnSchedule {
     extra: Vec<TurnDirective>,
     skipped: Vec<TurnDirective>,
     normal: Option<String>,
+    /// Only turns which actually begin receive an identity, including extra turns.
+    current: u64,
+    closed: bool,
 }
 
 impl TurnSchedule {
+    pub(super) fn current(&self) -> Result<u64> {
+        if self.closed {
+            return Err(invalid("current turn cleanup has already occurred"));
+        }
+        Ok(self.current)
+    }
+
+    pub(super) fn close(&mut self) -> Result<u64> {
+        let current = self.current()?;
+        self.closed = true;
+        Ok(current)
+    }
+
+    pub(super) fn begin(&mut self) -> Result<()> {
+        self.current = self
+            .current
+            .checked_add(1)
+            .ok_or_else(|| invalid("turn identities exhausted"))?;
+        self.closed = false;
+        Ok(())
+    }
+
     pub(super) fn load(value: &Value) -> Result<Self> {
         let schedule: Self = if value.is_null() {
             Self::default()

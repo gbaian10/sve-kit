@@ -37,10 +37,10 @@ checkpoint 期間玩家 projection 的 awaiting 為 null。resume 才交既有�
 
 入口以 `Requirements::derive_program` 走訪完整程式體，包含未執行分支；每一個 exact
 capability code／version 及節點形狀都必須在封閉支援集合內。附加的 context 檢查不允許
-既有 frame、prompt、待機、continuous、delayed、原型能力或 keyword 進入本片執行環境。
+既有 frame、prompt、待機、continuous、delayed、未准入的原型能力或 keyword 進入本片執行環境。
 這些限制避免尚未遷移的取代、觸發或禁制被略過。卡片印刷資料仍由同一份 Catalog 取得。
 
-支援 Sequence、If、root AtResolution 的 Int／Nat／Bool／Selector capture，以及 bounded
+支援 Sequence、If、root AtResolution 的 Int／Nat／Bool／Selector／Player capture，以及 bounded
 integer ResolutionChoice。數值支援常值、已驗 binding／capture、公開玩家資源、公開區域
 計數、checked Nat 轉換、Add／Subtract／Multiply／Minimum／Maximum、條件值與 Draw 的 Cards、Damage 的
 同型 Requested／Actual quantity receipt 投影；布林支援比較、And／Or／Not／Exists。selector 只接受公開 Field／Ex／Cemetery／Banish
@@ -232,7 +232,7 @@ Public Order 依該文件 §7 維持拒絕，Repeat 的跨輪 epoch 依 §8 等�
 ## 固定數值修正
 
 Modify 准入有號 Numeric Add、非負常值 Set 與非空遞迴 Numeric Combined；期限只接受 Installation anchor
-的 NoTemporalExpiry 或 EndResolution，沒有 usage 或 interval。對象限目前場上從者，
+的 NoTemporalExpiry、EndResolution、CurrentTurnEnd 或 NextTurnEnd，沒有 usage 或 interval。對象限目前場上從者，
 已換世代的 capture 不適用；其他目前區域或卡片種類使整次解算回復。
 同指示先固定去重對象，求完所有有號操作數，再規劃與提交。同一 Combined 中重複同 stat 的 Add 合計，相同 Set 合併；同 stat 的 Set／Add 或不同 Set 整棵拒絕，
 不先截零；整數溢位拒絕並回復整份 Game。
@@ -258,7 +258,31 @@ NoTemporalExpiry 沒有額外時間截止。合成 closed Program 的全部本�
 數值修正的 EndResolution 時序已定於[數值期限契約](numeric-timing.md#33-endresolution)，
 目前只驗合成 closed Program 的生命週期；沒有真實 Numeric EndResolution 卡例，不由 lowering 自動補入期限。
 待答不是解算完成，resume 失敗連同到期清理一起回復；真實卡的解決區清理、nested play 與完整 CardProgram 仍未接入。
-持久數值層有效期間拒絕原型 decide，避免未遷移的 set／進化等寫入繞過求值器。
+CurrentTurnEnd 保存安裝當回合的身分，在 7.4.8 整批移除；end 觸發、Quick 與棄牌檢查期間仍有效。
+NextTurnEnd 在安裝時捕捉玩家，等唯一回合排程實際開始該玩家下一回合時綁定其身分，
+再於該回合 7.4.8 到期。skip 不配置身分，extra 每個實際開始的回合各有身分；
+不以 elapsed_turns、預定回合或固定加一／加二換算。到期清理已經過去的回合不接受追認安裝。
+到期造成 hp≤0 時，先執行下一實際回合的重置、PP、站立與抽牌，在 7.2.5 處理規則破壞，
+再進入主要階段並收集 main_start 觸發。到期、重算不發 stat_changed。
+
+原型 decide 可在數值層存在時繼續執行；傷害透過同一有效值重算並保留目前 D，
+原型純 Add 以 checked 基礎差額重算。進化只在該主體的層全是無期限 Add 時以基礎差額接受：
+此時保留層或改成差額的結果相同。有期限的層在進化後如何到期還原，屬[數值期限契約 §1.1](numeric-timing.md#11-進化時的差額)
+的疑義，因此有期限層或 Set 層的主體進化整次拒絕。
+prototype Set／種類或 pilot 基礎替換與有效數值層混用仍拒絕；Set 有效時任何基礎差額也拒絕，
+不為原型的非交換指示捏造 ProperPlay 時間。pilot 還原未遷移，因此有 pilot 的目標不接受 typed 數值安裝。
+原型運算式仍是飽和算術，因此對有效數值層的目標，原型 Add 與傷害量只接受整數常值，
+傷害替換（其增減與指定量同樣走飽和算術）一律拒絕；沒有數值層的目標維持原型既有算術。
+換區重建基礎時清除舊世代數值層，不把修正帶入新世代。
+
+合成入口允許不消費 typed 事實的 prototype spell／activated／evolve 及 end／main_start 觸發並存；
+其他 prototype 觸發、static 與關鍵字仍整體拒絕，尚未接 typed 事實的觸發消費。
+數值層存在期間（輸入開始或結束時有層），每個原型輸入結束時以同一白名單重驗全部物件的能力與關鍵字、
+待機中的能力及延遲觸發；授予、產生物件或登記非 end 延遲監看而越界時整次回復。
+這避免 7.2.5 規則破壞引出的待機能力和 main_start 觸發混在同一次待機。
+期限玩家可使用已捕捉的 Player 值；Capture::Player 允許 Current 來源的 controller／owner，
+世代失效時拒絕，不追蹤新世代或當作缺資訊回零。live role 不直接充當 actor／audience。
+NextTurnEdge、phase edge、非空 intervals、Continuous 與 SetKind 仍拒絕。
 尚有預備 play 時也拒絕原型 decide；同一期間的 observation 在 `semantic_state` 只多一個 `typed_numeric_layers: true`
 布林摘要，不含 effect、execution 或加數明細；belief 入口見到它即拒絕，
 不把有效值當成原型基礎值重建另一份可 decide 的局面。
@@ -274,9 +298,9 @@ EffectId 仍在成功安裝才分配；反序安裝、唯讀查詢及存檔恢�
 不同 stat、純 Add 與相同 Attack Set 可交換。多次 Life Set 可能捕捉不同 D_set，亦整棵拒絕。
 沒有以安裝次序、EffectId 或陣列次序補出非交換 tie；ContinuousTieOrder 的規則輸入仍待後片。
 
-Continuous 安裝及其動態依存、CurrentTurnEnd／NextTurnEnd、interval、SetKind、
+Continuous 安裝及其動態依存、interval、SetKind、
 Grant／RemoveAbility、Modify usage、負 Set 與非常值 Set，包括未執行分支，仍整棵拒絕。
-Set 層有效時的進化／基礎替換由既有原型 decide guard 保持拒絕，未宣稱差額換算完成。
+Set 層有效時的進化／基礎替換由數值寫入邊界拒絕，未宣稱差額換算完成。
 CP02-007 與 BP01-011 只驗已選場上從者的 +1/+1 片段；不包含成本、選牌、EX、
 觸發或整卡准入。BP16-049 只驗受傷對象的 Set 1／1，未承載 SpellChain capture、
-RemoveAbility 或整能力；實際回合期限與非連續區間仍待後片驗收。
+RemoveAbility 或整能力；非連續區間與上述未承載的整卡部分仍待後片驗收。

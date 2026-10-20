@@ -247,6 +247,7 @@ impl Game {
 
     fn change_type(&mut self, node: &Value, frame: &Frame) -> Result<()> {
         for id in self.select(&node["subjects"], frame)? {
+            self.numeric_base_replace_allowed(&id)?;
             let prior = self.object(&id)?.state.clone();
             let typ = if node["op"] == "pilot" || node["type"] == "follower" {
                 "フォロワー"

@@ -5,7 +5,7 @@
     reason = "Closed requirement admission rejects all other runtime shapes before mutation."
 )]
 
-use super::{Frame, Game, View, int};
+use super::{Frame, Game, View, int, string};
 use crate::ir::{
     Action, Arithmetic, Binding, Bool, Capture, CaptureRef, CardQuantityOutcome, Cardinality,
     ChoiceDomain, Comparison, Control, DamageEvent, DamageFlags, DamageQuantityOutcome,
@@ -203,6 +203,7 @@ enum Slot {
     Integer(Int),
     Natural(Nat),
     Boolean(Bool),
+    Player(PlayerId),
     Objects {
         members: Vec<ObjectRef>,
         on_field_at_capture: bool,
@@ -604,13 +605,40 @@ impl Game {
         {
             return Err(unsupported("busy or unsupported execution context"));
         }
-        // Prototype abilities cannot silently become typed trigger/replacement producers.
+        self.internal_prototype_abilities()
+    }
+
+    /// Only future prototype actions and phase triggers can coexist without consuming typed facts.
+    /// Waiting and delayed codes count too: a grant can outlive its holder's generation there.
+    pub(in crate::game) fn internal_prototype_abilities(&self) -> Result<()> {
+        let admitted = |ability: &Value| match string(&ability["kind"]) {
+            "spell" | "activated" | "evolve" => true,
+            "trigger" => matches!(string(&ability["event"]), "end" | "main_start"),
+            _ => false,
+        };
         for object in self.state.objects.values() {
-            if !self.abilities(&object.id)?.is_empty() || !self.keywords(&object.id)?.is_empty() {
+            if !self.abilities(&object.id)?.iter().all(admitted)
+                || !self.keywords(&object.id)?.is_empty()
+            {
                 return Err(unsupported(
                     "context requires prototype abilities or keywords",
                 ));
             }
+        }
+        if !self
+            .state
+            .pending
+            .iter()
+            .all(|pending| admitted(&pending.code))
+            || self
+                .state
+                .delayed
+                .iter()
+                .any(|entry| entry["event"] != "end")
+        {
+            return Err(unsupported(
+                "context requires prototype waits outside phase triggers",
+            ));
         }
         Ok(())
     }

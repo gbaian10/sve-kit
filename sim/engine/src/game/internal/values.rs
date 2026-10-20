@@ -6,7 +6,7 @@ use super::{
     ResolvedRecipients, Result, RuntimeDamageRecipient, Selector, Slot, ZoneKind, contains, int,
     invalid, player_id, seat_name, unsupported,
 };
-use crate::ir::{CharacteristicView, NumberRead, ObjectView, ReceiptId};
+use crate::ir::{CharacteristicView, NumberRead, ObjectView, PlayerRead, ReceiptId, Role};
 use alloc::collections::BTreeSet;
 use core::convert::identity;
 
@@ -17,6 +17,8 @@ use core::convert::identity;
 impl Execution {
     pub(super) fn player(&self, game: &Game, player: &PlayerRef) -> Result<PlayerId> {
         match player {
+            PlayerRef::FromExpression { value } => self.player_value(game, value),
+            PlayerRef::Bound { .. } => Err(unsupported("bound player value")),
             PlayerRef::Controller {} => Ok(self.context.controller),
             PlayerRef::Owner {} => player_id(&game.object(&self.context.source)?.owner),
             PlayerRef::Active {} => player_id(game.active()),
@@ -31,7 +33,39 @@ impl Execution {
                     Err(invalid("player set is not a singleton"))
                 }
             }
-            _ => Err(unsupported("player expression")),
+        }
+    }
+
+    fn player_slot(&self, binding: Binding<PlayerRef>) -> Result<PlayerId> {
+        match self.slots.get(&binding.key()) {
+            Some(Slot::Player(player)) => Ok(*player),
+            _ => Err(invalid("missing player capture")),
+        }
+    }
+
+    fn player_value(&self, game: &Game, value: &Expr<PlayerRef>) -> Result<PlayerId> {
+        match value {
+            Expr::Literal(player) => self.player(game, player),
+            Expr::Captured(reference) => self.player_slot(reference.binding),
+            Expr::Live(read) => match read.as_ref() {
+                PlayerRead::Role {
+                    object: ObjectView::Current { object: operand },
+                    role,
+                } => {
+                    let reference = self.object(game, operand)?;
+                    let id = self.object_id(reference)?;
+                    let object = game.object(id)?;
+                    if object.generation != reference.generation.0 {
+                        return Err(unsupported("stale player role read requires LKI"));
+                    }
+                    player_id(match role {
+                        Role::Controller => &object.controller,
+                        Role::Owner => &object.owner,
+                    })
+                }
+                _ => Err(unsupported("player role view")),
+            },
+            _ => Err(unsupported("player value")),
         }
     }
 
@@ -197,6 +231,10 @@ impl Execution {
             Capture::Boolean { value, into, .. } => (
                 into.binding.key(),
                 Slot::Boolean(self.boolean(game, value)?),
+            ),
+            Capture::Player { value, into, .. } => (
+                into.binding.key(),
+                Slot::Player(self.player_value(game, value)?),
             ),
             Capture::Objects { value, into, .. } => {
                 let members = self.objects(game, value)?;

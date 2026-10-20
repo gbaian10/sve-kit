@@ -826,13 +826,19 @@ impl Checker {
                 self.save_access(into.binding.key(), access);
                 Ok(())
             }
+            Capture::Player { at, value, into } => {
+                let access = self.capture_access(*at, |checker| checker.player_value(value));
+                self.frozen(*at, |checker| checker.player_value(value))?;
+                self.define(into.binding, BindingKind::Capture)?;
+                self.save_access(into.binding.key(), access);
+                Ok(())
+            }
             Capture::Names { .. }
             | Capture::Kind { .. }
             | Capture::Traits { .. }
             | Capture::Class { .. }
             | Capture::Title { .. }
             | Capture::NumberInfo { .. }
-            | Capture::Player { .. }
             | Capture::Posture { .. }
             | Capture::Evolution { .. }
             | Capture::Abilities { .. }
