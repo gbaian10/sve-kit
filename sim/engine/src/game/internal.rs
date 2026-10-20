@@ -9,14 +9,14 @@ use super::{Frame, Game, View, int};
 use crate::ir::{
     Action, Arithmetic, Binding, Bool, Capture, CaptureRef, CardQuantityOutcome, Cardinality,
     ChoiceDomain, Comparison, Control, DamageAmount, DamageEvent, DamageFlags,
-    DamageQuantityOutcome, DamageRecipient, DecisionId, DecisionKind, Declinable, DrawEvent,
-    ExecutionId, Expr, Generation, Instruction, InstructionContext, Int, IntFrozen, IntOperation,
-    IntRead, Located, MeasuredReceipt, Nat, NatFrozen, NatOperation, NatRead, Node, ObjectFrozen,
-    ObjectId, ObjectOperand, ObjectRef, ObjectView, PlayerId, PlayerRef, PlayerRelation,
-    PlayerResource, PlayerSet, PositiveInt, Predicate, Program, ReceiptId, ReceiptLocation,
-    RecipientSet, Requirements, ResolvedRecipients, RuntimeDamageRecipient, RuntimeObjectView,
-    ScopeId, Selector, SnapshotId, SourceSpan, StepwiseAnswer, StepwiseMode, Visibility,
-    WellFormedProgram, ZoneKind,
+    DamageQuantityOutcome, DamageRecipient, DecisionId, DecisionKind, Declinable, DestroyOutcome,
+    DrawEvent, ExecutionId, Expr, Generation, InstallationSubjects, Instruction,
+    InstructionContext, Int, IntFrozen, IntOperation, IntRead, Located, MeasuredReceipt,
+    MoveOutcome, Nat, NatFrozen, NatOperation, NatRead, Node, ObjectFrozen, ObjectId,
+    ObjectOperand, ObjectRef, ObjectView, PlayerId, PlayerRef, PlayerRelation, PlayerResource,
+    PlayerSet, PositiveInt, Predicate, Program, ReceiptId, ReceiptLocation, RecipientSet,
+    Requirements, ResolvedRecipients, RuntimeDamageRecipient, RuntimeObjectView, ScopeId, Selector,
+    SnapshotId, SourceSpan, StepwiseAnswer, StepwiseMode, Visibility, WellFormedProgram, ZoneKind,
 };
 use crate::{EngineFailure, Result, invalid};
 use alloc::collections::{BTreeMap, VecDeque};
@@ -26,7 +26,10 @@ use serde::{Serialize as _, Serializer};
 use serde_json::{Value, json};
 
 mod admission;
+mod movement;
 mod values;
+
+pub use movement::MovementFact;
 
 /// Internal context pinned to the game's immutable catalogue and one source generation.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -84,12 +87,18 @@ pub enum Answer {
 }
 
 /// Typed instruction outcomes retained only by the authority.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum InstructionOutcome {
     /// One outcome for the whole draw instruction.
     Cards(CardQuantityOutcome),
     /// Sum of positive damage actually applied to still-valid recipients.
     Damage(DamageQuantityOutcome),
+    /// Ordinary movement results, without destruction semantics.
+    Move(MoveOutcome),
+    /// Destruction successes and every attempted movement.
+    Destroy(DestroyOutcome),
+    /// Fixed generations protected until this resolution ends.
+    Installed(Vec<ObjectRef>),
 }
 
 /// Authority result. This type intentionally has no player/wire serialization.
@@ -104,12 +113,14 @@ pub struct Progress {
 }
 
 /// First-slice physical facts, sharing the prototype mutation and causal pipeline.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Fact {
     /// A successful individual draw.
     Draw(DrawEvent),
     /// A positive damage application.
     Damage(DamageEvent),
+    /// One physical movement, including its action method and causal execution.
+    Movement(Box<MovementFact>),
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -145,6 +156,7 @@ pub(super) struct Execution {
     receipts: BTreeMap<ReceiptId, InstructionOutcome>,
     facts: Vec<Fact>,
     waiting: Option<(DecisionView, Wait)>,
+    destroy_guards: Vec<ObjectRef>,
 }
 
 #[expect(
@@ -204,6 +216,7 @@ impl Game {
                 receipts: BTreeMap::new(),
                 facts: Vec::new(),
                 waiting: None,
+                destroy_guards: Vec::new(),
             };
             self.internal_run(&mut execution)?;
             let progress = execution.progress();
@@ -624,6 +637,26 @@ impl Game {
                         actual: Nat(actual),
                     }),
                 );
+            }
+            Action::Move {
+                objects,
+                movement,
+                reason,
+            } => {
+                self.internal_move(execution, &instruction, objects, Some((movement, *reason)))?;
+            }
+            Action::Destroy { objects } => {
+                self.internal_move(execution, &instruction, objects, None)?;
+            }
+            Action::InstallEffect { subjects, .. } => {
+                let InstallationSubjects::Objects { objects, .. } = subjects else {
+                    return Err(unsupported("installation subjects"));
+                };
+                let objects = execution.objects(self, objects)?;
+                execution.destroy_guards.extend(objects.iter().copied());
+                execution
+                    .receipts
+                    .insert(instruction.receipt, InstructionOutcome::Installed(objects));
             }
             _ => return Err(unsupported("instruction")),
         }
