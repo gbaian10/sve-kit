@@ -216,6 +216,10 @@ struct State {
     ir_objects: BTreeMap<String, u64>,
     #[serde(default)]
     next_ir_object: u64,
+    #[serde(default)]
+    ir_numeric: BTreeMap<String, internal::NumericState>,
+    #[serde(default)]
+    next_ir_effect: u64,
 }
 
 /// A cloneable game. Only this type resolves effects, creates prompts and hides private state.
@@ -419,6 +423,8 @@ impl Game {
             ir_epoch: 0,
             ir_objects: BTreeMap::new(),
             next_ir_object: 0,
+            ir_numeric: BTreeMap::new(),
+            next_ir_effect: 0,
         };
         for seat in ["P1", "P2"] {
             state.knowledge.insert(seat.into(), Knowledge::default());

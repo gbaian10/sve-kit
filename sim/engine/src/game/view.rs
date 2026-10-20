@@ -191,6 +191,10 @@ impl Game {
                 })
                 .collect::<Vec<_>>()
         );
+        // Only the public fact that layers exist; effect and execution identities stay authority-only.
+        if self.internal_numeric_active() {
+            semantic["typed_numeric_layers"] = json!(true);
+        }
         semantic
     }
 

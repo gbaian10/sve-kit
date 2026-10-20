@@ -33,6 +33,11 @@ impl Game {
         if self.typed.is_some() {
             return Err(invalid("typed execution owns the input point"));
         }
+        if self.internal_numeric_active() {
+            return Err(EngineFailure::Unsupported(
+                "prototype decisions cannot mix with typed numeric layers".into(),
+            ));
+        }
         if !decision.is_object() {
             return Err(invalid("decision must be an object"));
         }

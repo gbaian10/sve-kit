@@ -8,7 +8,7 @@ use super::*;
 fn destroy(id: u64, objects: Selector) -> Located<Node> {
     instruction(id, Action::Destroy { objects })
 }
-fn put(id: u64, objects: Selector, zone: OwnerZone) -> Located<Node> {
+pub(super) fn put(id: u64, objects: Selector, zone: OwnerZone) -> Located<Node> {
     instruction(
         id,
         Action::Move {
@@ -24,7 +24,7 @@ fn put(id: u64, objects: Selector, zone: OwnerZone) -> Located<Node> {
         },
     )
 }
-fn protection(id: u64, objects: Selector, cause: CausePattern) -> Located<Node> {
+pub(super) fn protection(id: u64, objects: Selector, cause: CausePattern) -> Located<Node> {
     let affected = Binding::new(1, ScopeId(100_u64.checked_add(id).unwrap()));
     let targets = Selector::Bound {
         reference: affected,
@@ -57,7 +57,7 @@ fn protection(id: u64, objects: Selector, cause: CausePattern) -> Located<Node> 
         },
     )
 }
-const fn effect_cause() -> CausePattern {
+pub(super) const fn effect_cause() -> CausePattern {
     CausePattern::Effect {
         source: EffectSource::Any {},
     }

@@ -10,7 +10,7 @@ use crate::ir::{
     Action, Arithmetic, Binding, Bool, Capture, CaptureRef, CardQuantityOutcome, Cardinality,
     ChoiceDomain, Comparison, Control, DamageAmount, DamageEvent, DamageFlags,
     DamageQuantityOutcome, DamageRecipient, DecisionId, DecisionKind, Declinable, DestroyOutcome,
-    DrawEvent, ExecutionId, Expr, Generation, InstallationSubjects, Instruction,
+    DrawEvent, EffectId, ExecutionId, Expr, Generation, InstallationSubjects, Instruction,
     InstructionContext, Int, IntFrozen, IntOperation, IntRead, Located, LookOutcome,
     MeasuredReceipt, MoveOutcome, Nat, NatFrozen, NatOperation, NatRead, Node, ObjectFrozen,
     ObjectId, ObjectOperand, ObjectRef, ObjectView, OrderOutcome, PlayerId, PlayerRef,
@@ -28,10 +28,13 @@ use serde_json::{Value, json};
 
 mod admission;
 mod movement;
+mod numeric;
 mod ordering;
 mod values;
 
 pub use movement::MovementFact;
+pub(super) use numeric::NumericState;
+pub use numeric::StatChangeFact;
 pub use ordering::OrderCard;
 
 /// Internal context pinned to the game's immutable catalogue and one source generation.
@@ -106,6 +109,13 @@ pub enum InstructionOutcome {
     Look(LookOutcome),
     /// Successful same-deck ordering; never a cross-zone movement.
     Order(OrderOutcome),
+    /// Frozen generations receiving one additive numeric effect instance.
+    Modified {
+        /// Allocated only when at least one current subject receives the effect.
+        effect: Option<EffectId>,
+        /// Successful subjects, deduplicated at instruction start.
+        subjects: Vec<ObjectRef>,
+    },
 }
 
 /// Authority result. This type intentionally has no player/wire serialization.
@@ -128,6 +138,8 @@ pub enum Fact {
     Damage(DamageEvent),
     /// One physical movement, including its action method and causal execution.
     Movement(Box<MovementFact>),
+    /// One explicit numeric instruction's nonzero facets for one subject.
+    StatChange(StatChangeFact),
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -414,6 +426,7 @@ impl Game {
     fn internal_run(&mut self, execution: &mut Execution) -> Result<()> {
         while execution.waiting.is_none() {
             let Some(node) = execution.todo.pop_front() else {
+                self.internal_numeric_cleanup();
                 self.checks()?;
                 return Ok(());
             };
@@ -543,6 +556,7 @@ impl Game {
             .checked_add(1)
             .ok_or_else(|| invalid("IR epoch exhausted"))?;
         match &instruction.action {
+            Action::Modify { .. } => self.internal_modify(execution, &instruction)?,
             Action::Look { .. } => self.internal_look(execution, &instruction)?,
             Action::Order { .. } => self.internal_order(execution, instruction)?,
             Action::Draw {
