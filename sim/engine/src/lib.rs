@@ -16,6 +16,7 @@ pub mod ai;
 pub mod assist;
 pub mod catalog;
 pub mod game;
+pub mod ir;
 mod random;
 pub mod replay;
 
