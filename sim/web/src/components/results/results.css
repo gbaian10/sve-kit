@@ -265,6 +265,10 @@ html:has([data-card-list]) {
   justify-content: center;
 }
 
+:where([data-card-list] [data-list-type] > img) {
+  margin-inline: auto;
+}
+
 :where([data-list-heading="rarity"]) {
   min-width: var(--rarity-column-min-width);
   font-size: var(--rarity-badge-height);
