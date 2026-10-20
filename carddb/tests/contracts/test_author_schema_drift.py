@@ -14,6 +14,7 @@ from sve_carddb.core.json import canonical, object_value, parse
 from sve_carddb.core.models import Text, UInt
 
 from .author_numeric_cases import NUMERIC, NUMERIC_DEPENDENCIES, NUMERIC_NAMES
+from .author_parent_cases import PARENT_NAMES, PARENTS
 from .author_receipt_cases import RECEIPTS
 from .author_recipient_cases import RECIPIENT_NAMES, RECIPIENTS
 from .author_selection_cases import SELECTIONS
@@ -165,6 +166,7 @@ def test_every_implemented_definition_has_a_python_type() -> None:
             | COUNTS
             | SELECTORS
             | RECIPIENTS
+            | PARENTS
         ).keys()
     )
     assert object_value(INDEX_SCHEMA["$defs"]).keys() == INDEX.keys()
@@ -196,8 +198,14 @@ def test_count_query_type_drift(name: str) -> None:
 
 
 def _assert_selector_definition(schema: dict[str, JsonValue], name: str) -> None:
-    python = (SELECTORS | RECIPIENTS)[name].json_schema()
-    names = SELECTOR_NAMES | RECIPIENT_NAMES | NUMERIC_NAMES | NUMERIC_DEPENDENCIES
+    python = (SELECTORS | RECIPIENTS | PARENTS)[name].json_schema()
+    names = (
+        SELECTOR_NAMES
+        | RECIPIENT_NAMES
+        | NUMERIC_NAMES
+        | NUMERIC_DEPENDENCIES
+        | PARENT_NAMES
+    )
     python_names = {value: key for key, value in names.items()}
     # Expand the root once; only internal recursive references preserve names.
     reference = python.get("$ref")
@@ -211,9 +219,113 @@ def _assert_selector_definition(schema: dict[str, JsonValue], name: str) -> None
     ) == _shape(body, python, python_names)
 
 
-@pytest.mark.parametrize("name", SELECTORS | RECIPIENTS)
+@pytest.mark.parametrize("name", SELECTORS | RECIPIENTS | PARENTS)
 def test_selector_type_drift(name: str) -> None:
     _assert_selector_definition(NODES, name)
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        "A.deck-slice",
+        "A.target.exact",
+        "A.target.up-to",
+        "A.target.any",
+        "A.act.choose.exact",
+        "A.act.choose.up-to",
+        "A.act.choose.any",
+        "A.act.search.exact",
+        "A.act.search.up-to",
+        "A.cost.counter.self.exact",
+        "A.cost.counter.self.up-to",
+        "A.cost.counter.self.any",
+        "A.cost.counter.selected.exact",
+        "A.cost.counter.selected.up-to",
+        "A.cost.counter.selected.any",
+    ],
+)
+@pytest.mark.parametrize("mutation", ["required", "extra", "tag"])
+def test_parent_drift_detects_variant_changes(name: str, mutation: str) -> None:
+    changed = deepcopy(NODES)
+    node = object_value(object_value(changed["$defs"])[name])
+    if mutation == "required":
+        node["required"] = []
+    elif mutation == "extra":
+        node["additionalProperties"] = True
+    else:
+        props = object_value(node["properties"])
+        key = next(key for key in ("n", "upto", "any") if key in props)
+        props["wrong_key"] = props.pop(key)
+    with pytest.raises(AssertionError):
+        _assert_selector_definition(changed, name)
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        "A.quantity",
+        "A.selection-quantity",
+        "A.target",
+        "A.act.choose",
+        "A.act.search",
+        "A.cost.counter",
+        "A.cost.counter.self",
+        "A.cost.counter.selected",
+    ],
+)
+@pytest.mark.parametrize("mutation", ["missing", "duplicate", "domain"])
+def test_parent_drift_detects_union_changes(name: str, mutation: str) -> None:
+    changed = deepcopy(NODES)
+    branches = object_value(object_value(changed["$defs"])[name])["anyOf"]
+    assert isinstance(branches, list)
+    if mutation == "missing":
+        branches.pop()
+    elif mutation == "duplicate":
+        branches.append(deepcopy(branches[0]))
+    else:
+        branches[0] = {"$ref": "#/$defs/Int"}
+    with pytest.raises(AssertionError):
+        _assert_selector_definition(changed, name)
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    ["holder_param", "self_holders", "distinct", "any", "source", "deck_players"],
+)
+def test_parent_drift_detects_position_boundaries(mutation: str) -> None:
+    changed = deepcopy(NODES)
+    definitions = object_value(changed["$defs"])
+    name = "A.target.exact"
+    if mutation == "distinct":
+        object_value(definitions[name]).pop("not")
+    else:
+        changes: dict[str, tuple[str, str, JsonValue]] = {
+            "holder_param": (
+                "A.cost.counter.selected.exact",
+                "holders",
+                {"$ref": "#/$defs/A.selection-quantity"},
+            ),
+            "self_holders": (
+                "A.cost.counter.self.exact",
+                "holders",
+                {"$ref": "#/$defs/A.quantity"},
+            ),
+            "any": ("A.target.any", "any", {"type": "boolean"}),
+            "source": (
+                "A.act.choose.exact",
+                "from",
+                {"$ref": "#/$defs/A.sel.recipient"},
+            ),
+            "deck_players": (
+                "A.deck-slice",
+                "who",
+                {"$ref": "#/$defs/A.player-ref"},
+            ),
+        }
+        name, key, value = changes[mutation]
+        object_value(object_value(definitions[name])["properties"])[key] = value
+    with pytest.raises(AssertionError):
+        _assert_selector_definition(changed, name)
 
 
 @pytest.mark.parametrize(
@@ -575,6 +687,25 @@ def test_numeric_name_check_detects_incomplete_correspondence(mutation: str) -> 
 @pytest.mark.parametrize("name", NUMERIC)
 def test_numeric_type_drift(name: str) -> None:
     _assert_numeric_definition(NODES, name)
+
+
+@pytest.mark.parametrize("mutation", ["missing", "duplicate", "integer"])
+def test_numeric_operation_drift_detects_shared_branch_changes(
+    mutation: str,
+) -> None:
+    changed = deepcopy(NODES)
+    branches = object_value(object_value(changed["$defs"])["A.expr.numeric-operation"])[
+        "anyOf"
+    ]
+    assert isinstance(branches, list)
+    if mutation == "missing":
+        branches.pop()
+    elif mutation == "duplicate":
+        branches.append(deepcopy(branches[0]))
+    else:
+        branches.append({"$ref": "#/$defs/Int"})
+    with pytest.raises(AssertionError):
+        _assert_numeric_definition(changed, "A.expr.numeric-operation")
 
 
 @pytest.mark.parametrize(
