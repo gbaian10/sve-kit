@@ -343,7 +343,7 @@ fn unsupported_numeric_shapes_are_rejected_in_dead_branches_before_draw() {
                 CharacteristicPatch::Numeric {
                     stat: Stat::Attack,
                     change: NumericChange::Set {
-                        amount: Expr::Literal(Int(1)),
+                        amount: Expr::Literal(Int(-1)),
                     },
                 },
                 DurationEnd::NoTemporalExpiry {},
@@ -896,3 +896,6 @@ fn numeric_end_resolution_is_rejected_whole_tree_while_permission_end_resolution
         }
     }
 }
+
+#[path = "numeric_set.rs"]
+mod set;
