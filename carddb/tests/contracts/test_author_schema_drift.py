@@ -16,6 +16,7 @@ from sve_carddb.core.models import Text, UInt
 from .author_ability_types import ABILITIES, ABILITY_NAMES
 from .author_cost_cases import COST_NAMES, COSTS
 from .author_effect_cases import EFFECT_NAMES, EFFECTS
+from .author_entry_types import ENTRIES, ENTRY_NAMES
 from .author_history_cases import HISTORY, HISTORY_NAMES
 from .author_numeric_cases import NUMERIC, NUMERIC_DEPENDENCIES, NUMERIC_NAMES
 from .author_parent_cases import PARENT_NAMES, PARENTS
@@ -188,6 +189,7 @@ def test_every_implemented_definition_has_a_python_type() -> None:
             | EFFECTS
             | STEPS
             | ABILITIES
+            | ENTRIES
         ).keys()
     )
     assert object_value(INDEX_SCHEMA["$defs"]).keys() == INDEX.keys()
@@ -231,6 +233,7 @@ def assert_selector_definition(schema: dict[str, JsonValue], name: str) -> None:
         | EFFECTS
         | STEPS
         | ABILITIES
+        | ENTRIES
     )[name].json_schema()
     names = (
         SELECTOR_NAMES
@@ -244,6 +247,7 @@ def assert_selector_definition(schema: dict[str, JsonValue], name: str) -> None:
         | EFFECT_NAMES
         | STEP_NAMES
         | ABILITY_NAMES
+        | ENTRY_NAMES
     )
     python_names = {value: key for key, value in names.items()}
     # Expand the root once; only internal recursive references preserve names.
@@ -254,7 +258,9 @@ def assert_selector_definition(schema: dict[str, JsonValue], name: str) -> None:
         else python
     )
     assert _shape(
-        object_value(schema["$defs"])[name], schema, {key: key for key in names}
+        object_value(schema["$defs"])[name],
+        schema,
+        {key: key for key in names if name != "authored" or key != "A.file"},
     ) == _shape(body, python, python_names)
 
 
@@ -1161,3 +1167,65 @@ def test_step_type_drift(name: str) -> None:
 @pytest.mark.parametrize("name", ABILITIES)
 def test_ability_type_drift(name: str) -> None:
     assert_selector_definition(NODES, name)
+
+
+@pytest.mark.parametrize("name", ENTRIES)
+def test_entry_type_drift(name: str) -> None:
+    assert_selector_definition(NODES, name)
+
+
+def _assert_entry_heads_match(schema: dict[str, JsonValue]) -> None:
+    definitions = object_value(schema["$defs"])
+    heads = object_value(object_value(definitions["A.ability-head"])["properties"])
+    wrappers = {
+        name
+        for name in ENTRIES
+        if name.startswith("A.ability.") and name != "A.ability.generated"
+    }
+    assert wrappers == {"A.ability." + key.replace("_", "-") for key in heads}
+    for key, payload in heads.items():
+        wrapper = object_value(definitions["A.ability." + key.replace("_", "-")])
+        properties = object_value(wrapper["properties"])
+        assert properties.keys() - {
+            "line",
+            "section",
+            "sources",
+            "imports",
+            "ports",
+        } == {key}
+        assert properties[key] == payload
+        required = wrapper["required"]
+        assert isinstance(required, list)
+        assert set(required) == {"line", "sources", "ports", key}
+
+
+def test_entry_heads_use_exact_shared_payloads() -> None:
+    _assert_entry_heads_match(NODES)
+
+
+@pytest.mark.parametrize(
+    "name", [name for name in ENTRIES if name.startswith("A.ability.")]
+)
+@pytest.mark.parametrize("mutation", ["required", "extra", "type", "reference"])
+def test_entry_drift_detects_wrapper_mutations(name: str, mutation: str) -> None:
+    changed = deepcopy(NODES)
+    node = object_value(object_value(changed["$defs"])[name])
+    if mutation == "required":
+        node["required"] = []
+    elif mutation == "extra":
+        node["additionalProperties"] = True
+    elif mutation == "type":
+        object_value(node["properties"])["line"] = {"type": "string"}
+    else:
+        object_value(node["properties"])["sources"] = {"$ref": "#/$defs/Int"}
+    with pytest.raises(AssertionError):
+        assert_selector_definition(changed, name)
+
+
+@pytest.mark.parametrize("key", ["fanfare", "quick", "keywords"])
+def test_entry_head_matching_detects_payload_mutation(key: str) -> None:
+    changed = deepcopy(NODES)
+    node = object_value(object_value(changed["$defs"])["A.ability." + key])
+    object_value(node["properties"])[key] = {"$ref": "#/$defs/Int"}
+    with pytest.raises(AssertionError):
+        _assert_entry_heads_match(changed)

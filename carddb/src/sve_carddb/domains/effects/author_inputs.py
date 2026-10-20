@@ -1,7 +1,7 @@
-"""Validate author leaves and the effects index, without loading executable bodies."""
+"""Validate author structure and local invariants, without admitting execution."""
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING, Literal, get_args
 
 import yamlrocks
@@ -9,8 +9,16 @@ from jsonschema import Draft202012Validator
 from jsonschema.exceptions import best_match
 from pydantic import ConfigDict, JsonValue, TypeAdapter, ValidationError
 from referencing import Registry, Resource
+from referencing.exceptions import Unresolvable
 
+from sve_carddb.contracts.author_entries import (
+    Ability,
+    AuthorEffectSet,
+    EffectBodyShard,
+)
+from sve_carddb.contracts.author_evidence import SourceUse
 from sve_carddb.contracts.author_leaves import (
+    AuthorIndexRecord,
     EffectsIndex,
     ParamDecl,
     ParamDeclarations,
@@ -20,8 +28,13 @@ from sve_carddb.contracts.author_leaves import (
 )
 from sve_carddb.core.json import canonical, object_value, parse
 from sve_carddb.core.yaml import JSON_VALUE, MAX_BYTES, YamlSyntaxError, parse_yaml
+from sve_carddb.domains.effects.author_validation import (
+    evidence_violations,
+    inline_parameters,
+)
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
     from pathlib import Path
 
     from jsonschema.exceptions import ValidationError as SchemaError
@@ -31,9 +44,13 @@ PathParts = tuple[str | int, ...]
 Leaf = Literal["A.param", "ParamDecl", "ParamValue", "ParamDeclarations", "ParamValues"]
 _NODES = "urn:sve-kit:author-nodes:1.0"
 _INDEX = "urn:sve-kit:effects-index:1"
+_AUTHOR = "urn:sve-kit:author:1.0"
+_BODIES = "urn:sve-kit:effect-bodies:1.0"
 _RESOURCES = {
     "author-nodes.schema.json": _NODES,
     "effects-index.schema.json": _INDEX,
+    "author.schema.json": _AUTHOR,
+    "effect-bodies.schema.json": _BODIES,
 }
 _PARAM_REF = TypeAdapter(ParamRef)
 _PARAM_DECL = TypeAdapter(ParamDecl)
@@ -45,17 +62,27 @@ _PARAM_VALUES: TypeAdapter[ParamValues] = TypeAdapter(
     ParamValues, config=ConfigDict(regex_engine="python-re")
 )
 _INDEX_VALUE = TypeAdapter(EffectsIndex)
+_AUTHOR_VALUE = TypeAdapter(AuthorEffectSet)
+_BODIES_VALUE = TypeAdapter(EffectBodyShard)
+type AuthorDocument = AuthorEffectSet | EffectBodyShard | EffectsIndex
+type Stage = Literal[
+    "yaml", "json", "schema", "index", "envelope", "container", "source"
+]
 
 
 @dataclass(frozen=True)
 class Diagnostic:
-    stage: Literal["yaml", "json", "schema", "index"]
+    stage: Stage
     reason: str
     path: PathParts = ()
     line: int | None = None
     column: int | None = None
     expected: str | None = None
     actual: str | None = None
+    card_id: str | None = None
+    card_no: str | None = None
+    scope: str | None = None
+    source: SourceUse | None = None
 
 
 class AuthorInputError(ValueError):
@@ -74,7 +101,7 @@ class _Locations:
 
     def diagnostic(
         self,
-        stage: Literal["json", "schema", "index"],
+        stage: Stage,
         reason: str,
         path: PathParts,
         expected: str | None = None,
@@ -93,6 +120,247 @@ class _Locations:
 @dataclass(frozen=True)
 class _Document(_Locations):
     value: JsonValue
+    context: AuthorIndexRecord | None = None
+
+
+def _contextual(
+    diagnostic: Diagnostic, context: AuthorIndexRecord | None
+) -> Diagnostic:
+    if context is None or diagnostic.card_no not in {None, context.record_key}:
+        return diagnostic
+    return replace(
+        diagnostic,
+        card_id=context.card_id,
+        card_no=diagnostic.card_no or context.record_key,
+        scope=diagnostic.scope or context.scope,
+    )
+
+
+def _source_at(value: JsonValue, path: PathParts) -> SourceUse | None:
+    prefixes = (
+        ("cards", str, "abilities", int),
+        ("cards", str, "faces", str, "abilities", int),
+    )
+    length = next(
+        (
+            len(prefix)
+            for prefix in prefixes
+            if len(path) >= len(prefix)
+            and all(
+                isinstance(part, expected)
+                if isinstance(expected, type)
+                else part == expected
+                for part, expected in zip(path, prefix, strict=False)
+            )
+        ),
+        None,
+    )
+    if length is None:
+        return None
+    node = value
+    for part in path[:length]:
+        if isinstance(node, dict) and isinstance(part, str):
+            node = node.get(part)
+        elif isinstance(node, list) and isinstance(part, int) and 0 <= part < len(node):
+            node = node[part]
+        else:
+            return None
+    if isinstance(node, dict):
+        sources = node.get("sources")
+        if not isinstance(sources, list) or len(sources) != 1:
+            return None
+        try:
+            return SourceUse.model_validate_json(canonical(sources[0]), strict=True)
+        except ValidationError:
+            return None
+    return None
+
+
+def _located(document: _Document, diagnostic: Diagnostic) -> Diagnostic:
+    value = document.value
+    if isinstance(value, dict):
+        scope = value.get("scope")
+        card_no = None
+        if len(diagnostic.path) > 1 and diagnostic.path[0] == "cards":
+            key = diagnostic.path[1]
+            if isinstance(key, str):
+                card_no = key
+        diagnostic = replace(
+            diagnostic,
+            card_no=card_no,
+            scope=scope if isinstance(scope, str) else None,
+            source=_source_at(value, diagnostic.path),
+        )
+    return _contextual(diagnostic, document.context)
+
+
+def _references(value: JsonValue) -> list[str]:
+    result: list[str] = []
+    pending = [value]
+    while pending:
+        node = pending.pop()
+        if isinstance(node, dict):
+            reference = node.get("$ref")
+            if isinstance(reference, str):
+                result.append(reference)
+            pending.extend(node.values())
+        elif isinstance(node, list):
+            pending.extend(node)
+    return result
+
+
+def _entry_decode[T](document: _Document, adapter: TypeAdapter[T]) -> T:
+    try:
+        return adapter.validate_json(canonical(document.value), strict=True)
+    except ValidationError as error:
+        detail = error.errors(include_input=False, include_context=False)[0]
+        node = document.value
+        path: PathParts = ()
+        # Pydantic union labels are not wire keys and must not leak into cursors.
+        for part in detail["loc"]:
+            if isinstance(node, dict) and isinstance(part, str) and part in node:
+                node = node[part]
+                path = (*path, part)
+                continue
+            if (
+                isinstance(node, list)
+                and isinstance(part, int)
+                and 0 <= part < len(node)
+            ):
+                node = node[part]
+                path = (*path, part)
+        raise AuthorInputError(
+            _located(
+                document, document.diagnostic("schema", "decoder_constraint", path)
+            )
+        ) from None
+
+
+def _entry_preflight(document: _Document, expected: str) -> None:
+    value = document.value
+    if not isinstance(value, dict):
+        raise AuthorInputError(
+            _located(document, document.diagnostic("envelope", "expected_mapping", ()))
+        )
+    if type(value.get("format")) is not int or value["format"] != 1:
+        raise AuthorInputError(
+            _located(
+                document,
+                document.diagnostic("envelope", "unsupported_format", ("format",)),
+            )
+        )
+    if value.get("kind") != expected:
+        raise AuthorInputError(
+            _located(
+                document, document.diagnostic("envelope", "unsupported_kind", ("kind",))
+            )
+        )
+    if expected == "author_effect_set" and value.get("scope") == "en_override":
+        raise AuthorInputError(
+            _located(
+                document,
+                document.diagnostic(
+                    "source", "en_source_contract_unavailable", ("scope",)
+                ),
+            )
+        )
+    candidates: list[tuple[PathParts, JsonValue]] = []
+    cards = value.get("cards")
+    if expected == "author_effect_set" and isinstance(cards, dict):
+        candidates = [
+            (("cards", key, "meta"), card.get("meta"))
+            for key, card in cards.items()
+            if isinstance(card, dict)
+        ]
+    records = value.get("records")
+    if expected == "effect_body_shard" and isinstance(records, list):
+        candidates = [
+            (("records", index), record) for index, record in enumerate(records)
+        ]
+    _candidate_checks(document, candidates)
+
+
+def _candidate_checks(
+    document: _Document, candidates: list[tuple[PathParts, JsonValue]]
+) -> None:
+    for path, candidate in candidates:
+        if not isinstance(candidate, dict):
+            continue
+        if "dsl" in candidate and candidate["dsl"] != "1.0":
+            raise AuthorInputError(
+                _located(
+                    document,
+                    document.diagnostic("envelope", "unsupported_dsl", (*path, "dsl")),
+                )
+            )
+        exams = candidate.get("verified_by_exam")
+        if isinstance(exams, list) and exams:
+            raise AuthorInputError(
+                _located(
+                    document,
+                    document.diagnostic(
+                        "container",
+                        "unsupported_exam_evidence",
+                        (*path, "verified_by_exam"),
+                    ),
+                )
+            )
+
+
+def _abilities(decoded: AuthorEffectSet) -> Iterator[tuple[PathParts, Ability]]:
+    for key, card in decoded.cards.items():
+        for index, ability in enumerate(card.get("abilities", ())):
+            yield ("cards", key, "abilities", index), ability
+        for face_id, face in card.get("faces", {}).items():
+            for index, ability in enumerate(face.abilities):
+                yield ("cards", key, "faces", face_id, "abilities", index), ability
+
+
+def _body_duplicates(document: _Document, decoded: EffectBodyShard) -> None:
+    keys: set[tuple[str, str, str]] = set()
+    for offset, record in enumerate(decoded.records):
+        key = (record["frame_id"], record["ability_scope"], record["body_version"])
+        if key in keys:
+            raise AuthorInputError(
+                document.diagnostic("container", "duplicate_body", ("records", offset))
+            )
+        keys.add(key)
+        identifiers: set[str] = set()
+        for index, registration in enumerate(record["registrations"]):
+            if registration.id in identifiers:
+                raise AuthorInputError(
+                    document.diagnostic(
+                        "container",
+                        "duplicate_registration",
+                        ("records", offset, "registrations", index, "id"),
+                    )
+                )
+            identifiers.add(registration.id)
+
+
+def _local_invariants(
+    document: _Document, decoded: AuthorEffectSet | EffectBodyShard
+) -> None:
+    for violation in evidence_violations(decoded):
+        raise AuthorInputError(
+            _located(
+                document,
+                document.diagnostic("container", violation.reason, violation.path),
+            )
+        )
+    if isinstance(decoded, EffectBodyShard):
+        _body_duplicates(document, decoded)
+        return
+    for path, ability in _abilities(decoded):
+        node = ability.root
+        if "generated_by" in node:
+            continue
+        for violation in inline_parameters(node, path):
+            diagnostic = _located(
+                document,
+                document.diagnostic("container", violation.reason, violation.path),
+            )
+            raise AuthorInputError(replace(diagnostic, source=node["sources"][0]))
 
 
 def _json_value(
@@ -129,7 +397,7 @@ def _json_value(
     return scalar
 
 
-def _document(raw: bytes) -> _Document:
+def _parse_document(raw: bytes) -> _Document:
     if len(raw) >= MAX_BYTES:
         raise AuthorInputError(Diagnostic("yaml", "size_limit"))
     try:
@@ -147,6 +415,13 @@ def _document(raw: bytes) -> _Document:
     return _Document(locations, _json_value(parsed, _Locations(locations)))
 
 
+def _document(raw: bytes, context: AuthorIndexRecord | None = None) -> _Document:
+    try:
+        return replace(_parse_document(raw), context=context)
+    except AuthorInputError as error:
+        raise AuthorInputError(_contextual(error.diagnostic, context)) from None
+
+
 def _schema_diagnostic(document: _Document, error: SchemaError) -> Diagnostic:
     if error.validator in {"oneOf", "anyOf"}:
         mismatched = {
@@ -157,6 +432,16 @@ def _schema_diagnostic(document: _Document, error: SchemaError) -> Diagnostic:
         candidates = [
             child for child in error.context if child.schema_path[0] not in mismatched
         ]
+        # A branch missing its own required key here is another variant, so prefer
+        # the single branch whose keys are present and report its deeper error.
+        absent = {
+            child.schema_path[0]
+            for child in candidates
+            if child.validator == "required" and not child.relative_path
+        }
+        present = [child for child in candidates if child.schema_path[0] not in absent]
+        if len({child.schema_path[0] for child in present}) == 1:
+            candidates = present
         if len({child.schema_path[0] for child in candidates}) == 1:
             selected = best_match(candidates)
             if selected is not None:
@@ -203,19 +488,68 @@ class AuthorSchemas:
 
     def __init__(self, schema_directory: Path) -> None:
         registry: Registry[Schema] = Registry()
+        schemas: dict[str, dict[str, JsonValue]] = {}
         for filename, identity in _RESOURCES.items():
             schema = object_value(parse((schema_directory / filename).read_bytes()))
             if schema.get("$id") != identity:
                 raise ValueError("Unexpected author schema identity")
             Draft202012Validator.check_schema(schema)
             registry = registry.with_resource(identity, Resource.from_contents(schema))
+            schemas[identity] = schema
+        for identity, schema in schemas.items():
+            for reference in _references(schema):
+                try:
+                    registry.resolver(identity).lookup(reference)
+                except Unresolvable:
+                    raise ValueError("Unresolved author schema reference") from None
         self._registry = registry
 
     def _validate(self, document: _Document, reference: str) -> None:
         validator = Draft202012Validator({"$ref": reference}, registry=self._registry)
         error = best_match(validator.iter_errors(document.value))
         if error is not None:
-            raise AuthorInputError(_schema_diagnostic(document, error))
+            raise AuthorInputError(
+                _located(document, _schema_diagnostic(document, error))
+            )
+
+    def author_effect_set(
+        self, raw: bytes, *, context: AuthorIndexRecord | None = None
+    ) -> AuthorEffectSet:
+        """Read complete authored structure, without expansion or source admission."""
+        document = _document(raw, context)
+        _entry_preflight(document, "author_effect_set")
+        self._validate(document, _AUTHOR)
+        decoded = _entry_decode(document, _AUTHOR_VALUE)
+        _local_invariants(document, decoded)
+        return decoded
+
+    def effect_body_shard(self, raw: bytes) -> EffectBodyShard:
+        """Read companion shapes; this does not verify body versions or domains."""
+        document = _document(raw)
+        _entry_preflight(document, "effect_body_shard")
+        self._validate(document, _BODIES)
+        decoded = _entry_decode(document, _BODIES_VALUE)
+        _local_invariants(document, decoded)
+        return decoded
+
+    def document(
+        self, raw: bytes, *, context: AuthorIndexRecord | None = None
+    ) -> AuthorDocument:
+        """Select exactly one registered envelope; never fall back to a prototype."""
+        document = _document(raw, context)
+        value = document.value
+        kind = value.get("kind") if isinstance(value, dict) else None
+        if kind == "author_effect_set":
+            return self.author_effect_set(raw, context=context)
+        if kind == "effect_body_shard":
+            return self.effect_body_shard(raw)
+        if kind == "effects_index":
+            return self.effects_index(raw)
+        raise AuthorInputError(
+            _located(
+                document, document.diagnostic("envelope", "unsupported_kind", ("kind",))
+            )
+        )
 
     def leaf(self, raw: bytes, definition: Leaf) -> JsonValue:
         """Validate a fragment; this grants no placement or source-role permission."""

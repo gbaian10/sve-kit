@@ -32,7 +32,7 @@
 | 定案（新格式） | 模板參數辨識規則 | `translations/parameter-rules/current.yaml`，format 2；規則與必要反例隨程式 PR 修改，不需 approval |
 | 技術契約 | 卡面標籤外觀 | `catalog/rarity-badges.yaml` 單檔，見下方「卡面標籤外觀」 |
 | 定案（技術契約） | 來源綁定的插畫裁切覆寫 | `images/crops.yaml` 單檔，`format: 1, kind: image_crop_overrides, records`、全檔查重，依[覆寫契約](../images/image-crop-overrides.md) |
-| 索引語法與讀取 library 已實作；作者／companion 入口與檔案載入未實作 | 作者 1.0 與本體伴隨檔 | `rules/author-effects/<owner>/<sequence>.yaml`、`rules/effect-bodies/<owner>/<sequence>.yaml`、`rules/effects-index.yaml`；見[作者承載契約](../../dsl/author-contract-1.0.md) |
+| 索引、作者／companion 結構 reader 已實作；檔案集合載入、來源准入與展開未實作 | 作者 1.0 與本體伴隨檔 | `rules/author-effects/<owner>/<sequence>.yaml`、`rules/effect-bodies/<owner>/<sequence>.yaml`、`rules/effects-index.yaml`；見[作者承載契約](../../dsl/author-contract-1.0.md) |
 | 原型／提案設定 | DSL、設定 | `rules/effects/`、`rules/keywords.yaml`、`rules/engine/index.yaml`；其他 macros／config 仍為提案，見後續各節；跨區語義差異採納改走 translations/region-reviews |
 | 定案（技術契約） | 查卡 keyword 登錄與 manual H1 | `rules/keyword-registry.yaml`，明示既有 glossary mapping 與 confirmed 採納；沿既有投影，只產 has／partial，見[關鍵字機制契約](keyword-mechanics.md)。與 astra/1 原型入口不同 |
 | 定案（內部候選格式） | 效果分類與來源範圍 | `rules/classifications/<owner>/<sequence>.yaml`，`format: 2, kind: effect_classification_shard`；只保存候選，見[效果分類候選](effect-classifications.md)，不作 DSL 或公開搜尋選項 |

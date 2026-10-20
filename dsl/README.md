@@ -5,8 +5,8 @@
 use `format: 1, kind: keyword_registry`. These envelopes select the existing
 prototype grammar and keep Schema `$id: urn:sve-kit:effects:astra:1`.
 The [author 1.0 contract](../docs/dsl/author-contract-1.0.md) specifies separate
-`author_effect_set` and `effect_body_shard` entries. Their schemas and loaders
-are not implemented yet. The prototype's 73 node variants contain 47 action atoms, 10 combinators,
+`author_effect_set` and `effect_body_shard` entries. Their closed schemas and
+Python structural readers are available; source admission and expansion remain separate. The prototype's 73 node variants contain 47 action atoms, 10 combinators,
 14 declarations and two loading/unsupported markers.
 
 The Rust prototype validates `authored/rules/keywords.yaml` and every pack file, expands
@@ -95,7 +95,7 @@ ability/effect/step graph. Grant payloads can combine keywords and abilities and
 accept leader recipients; equipment and nested static grants use the same graph.
 Effect parent defaults, source scopes and execution capabilities require C1/D0;
 fragment acceptance is not enclosing-context validation. Full authored file/card
-containers, expansion and the complete reader remain separate contracts.
+containers use the structural reader described below; expansion remains separate.
 Snapshot count/exists do not establish hash equivalence with count_of/did. This recursive graph is not an expanded profile;
 Rust decoding and execution have not been validated by this fragment.
 [effects-index.schema.json](effects-index.schema.json) defines the complete
@@ -137,6 +137,23 @@ For non-string keys and merged keys without direct cursors, coordinates identify
 the containing mapping; ordinary property paths locate their value node.
 Reference syntax does not validate binding scope, event-field availability,
 singleton cardinality or permission to follow a movement receipt.
-The reader does not admit `author_effect_set` or `effect_body_shard`, expand parameters,
-or provide the recursive `authored`/`expanded` profiles. This library is not
-evidence of full author-language or runtime support.
+The complete-container APIs below add `author_effect_set`, `effect_body_shard` and
+the recursive `authored` profile. Parameter expansion and the `expanded` profile
+remain unavailable; structural acceptance is not runtime support.
+
+## Complete author containers
+
+[author.schema.json](author.schema.json) and [effect-bodies.schema.json](effect-bodies.schema.json)
+select the shared `authored` and `A.body-shard` definitions. `AuthorSchemas.document`
+dispatches by registered kind; `author_effect_set` and `effect_body_shard` decode
+closed typed containers. `author_effect_set` and `document` accept an optional
+validated `AuthorIndexRecord` context for diagnostics, including parser failures.
+The [entry shape matrix](../docs/dsl/author-entry-shapes-1.0.md) describes all fields.
+
+The reader checks strict YAML/JSON, local duplicate and evidence invariants, and
+rejects typed `ParamRef` leaves anywhere in inline abilities. The shared schema
+and decoder graph alone still accept these leaves; companion bodies need them.
+This is structural validation: source registries, index/file closure, source and
+body hashes, generated body expansion, qualification and executable support are
+not established. Nonempty `verified_by_exam` is explicitly unsupported. There is
+no `expanded` profile or Rust consumer contract yet. No prototype data is migrated.
