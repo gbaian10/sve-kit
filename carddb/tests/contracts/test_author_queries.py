@@ -82,7 +82,7 @@ def test_new_filters_preserve_query_contexts(name: str, field: str) -> None:
     _check(
         "A.material-filter",
         {field: ATTRIBUTES[field]},
-        accepted=field == "orig_cost_eq",
+        accepted=field in {"orig_cost_eq", "orig_cost_ge", "not_class"},
     )
 
 
@@ -264,7 +264,7 @@ def test_aggregate_attribute_function_matrix(attr: str, fn: str) -> None:
 @pytest.mark.parametrize(
     "value",
     [
-        {"agg": {"of": {"in": "shown"}, "attr": "hp", "fn": "sum"}},
+        {"agg": {"of": {"in": "shown"}, "attr": "unknown", "fn": "sum"}},
         {"agg": {"of": {"in": "shown"}, "attr": "cost", "fn": "mean"}},
         {"entered_from": {"of": "this", "from": "hand"}},
         {"played_from": {"ref": "this", "zone": "ex"}},
@@ -299,7 +299,7 @@ def test_new_payloads_reject_wrong_types_and_unregistered_spellings(
         "dice",
     ],
 )
-def test_unimplemented_history_and_capture_nodes_stay_rejected(key: str) -> None:
+def test_empty_history_and_capture_payloads_stay_rejected(key: str) -> None:
     for name in (E, C):
         _check(name, {key: "this"}, accepted=False)
 
@@ -315,7 +315,7 @@ def test_traits_any_has_nonempty_literal_members(value: JsonValue) -> None:
     _check(COUNTED, {"in": "shown", "traits_any": value}, accepted=False)
 
 
-def test_snapshot_queries_do_not_widen_material_filter() -> None:
+def test_snapshot_queries_and_material_filters_keep_explicit_views() -> None:
     source: dict[str, JsonValue] = {
         "in": {"objects_of": "moved", "view": "before"},
         "not_class": "ロイヤル",
@@ -324,8 +324,14 @@ def test_snapshot_queries_do_not_widen_material_filter() -> None:
     _check(C, {"exists": source}, accepted=True)
     _check(
         C,
-        {"did": {"result": "moved", "where": {"not_class": "ロイヤル"}}},
-        accepted=False,
+        {
+            "did": {
+                "result": "moved",
+                "where": {"not_class": "ロイヤル"},
+                "view": "after",
+            }
+        },
+        accepted=True,
     )
     _check(
         E,
@@ -336,7 +342,7 @@ def test_snapshot_queries_do_not_widen_material_filter() -> None:
                 "view": "before",
             }
         },
-        accepted=False,
+        accepted=True,
     )
 
 

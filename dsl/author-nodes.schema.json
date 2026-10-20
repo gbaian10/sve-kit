@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:sve-kit:author-nodes:1.0",
   "title": "SVE author 1.0 shared leaf and reference definitions",
-  "$comment": "Author fragments only; root rejects standalone input. Numeric expressions, nonhistory conditions and object queries share one recursive graph. Not complete E/C/Sel or execution admission: history, history_count, history_sum, event, lki_of, at, chosen, paid, x_paid, dice, nonnumeric cmp, material extensions and agg.hp remain unsupported.",
+  "$comment": "Closed author node fragments for numeric expressions, conditions, object and recipient queries, event/history narrowing, capture, LKI operands and payment/dice reads. These registered variants share one recursive graph; they are not complete author entry, E/C/Sel or execution admission contracts. Scope, units, source authority and capabilities require C1/D0 validation.",
   "not": {},
   "$defs": {
     "Int": {
@@ -862,40 +862,61 @@
       "additionalProperties": false
     },
     "A.expr.power-of": {
-      "type": "object",
+      "additionalProperties": false,
       "properties": {
         "power_of": {
-          "$ref": "#/$defs/A.ref"
+          "anyOf": [
+            {
+              "$ref": "#/$defs/A.ref"
+            },
+            {
+              "$ref": "#/$defs/A.snapshot-read"
+            }
+          ]
         }
       },
       "required": [
         "power_of"
       ],
-      "additionalProperties": false
+      "type": "object"
     },
     "A.expr.hp-of": {
-      "type": "object",
+      "additionalProperties": false,
       "properties": {
         "hp_of": {
-          "$ref": "#/$defs/A.ref"
+          "anyOf": [
+            {
+              "$ref": "#/$defs/A.ref"
+            },
+            {
+              "$ref": "#/$defs/A.snapshot-read"
+            }
+          ]
         }
       },
       "required": [
         "hp_of"
       ],
-      "additionalProperties": false
+      "type": "object"
     },
     "A.expr.cost-of": {
-      "type": "object",
+      "additionalProperties": false,
       "properties": {
         "cost_of": {
-          "$ref": "#/$defs/A.ref"
+          "anyOf": [
+            {
+              "$ref": "#/$defs/A.ref"
+            },
+            {
+              "$ref": "#/$defs/A.snapshot-read"
+            }
+          ]
         }
       },
       "required": [
         "cost_of"
       ],
-      "additionalProperties": false
+      "type": "object"
     },
     "A.expr.resource-payload": {
       "type": "object",
@@ -1026,16 +1047,23 @@
       "additionalProperties": false
     },
     "A.cond.cmp": {
-      "type": "object",
+      "additionalProperties": false,
       "properties": {
         "cmp": {
-          "$ref": "#/$defs/A.cond.cmp-payload"
+          "anyOf": [
+            {
+              "$ref": "#/$defs/A.cond.cmp-payload"
+            },
+            {
+              "$ref": "#/$defs/A.cond.player-cmp-payload"
+            }
+          ]
         }
       },
       "required": [
         "cmp"
       ],
-      "additionalProperties": false
+      "type": "object"
     },
     "A.cond.all": {
       "type": "object",
@@ -1160,6 +1188,15 @@
         },
         {
           "$ref": "#/$defs/A.cond.zone-free"
+        },
+        {
+          "$ref": "#/$defs/A.cond.history"
+        },
+        {
+          "$ref": "#/$defs/A.cond.paid"
+        },
+        {
+          "$ref": "#/$defs/A.cond.chosen"
         }
       ]
     },
@@ -1245,7 +1282,8 @@
       "additionalProperties": false
     },
     "A.material-filter": {
-      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
       "properties": {
         "name": {
           "$ref": "#/$defs/CardName"
@@ -1253,12 +1291,23 @@
         "zone": {
           "$ref": "#/$defs/Zone"
         },
+        "kind": {
+          "$ref": "#/$defs/Code"
+        },
+        "trait": {
+          "$ref": "#/$defs/Concept"
+        },
+        "not_class": {
+          "$ref": "#/$defs/Concept"
+        },
         "orig_cost_eq": {
-          "$ref": "#/$defs/Nat"
+          "$ref": "#/$defs/A.quantity"
+        },
+        "orig_cost_ge": {
+          "$ref": "#/$defs/A.quantity"
         }
       },
-      "minProperties": 1,
-      "additionalProperties": false
+      "type": "object"
     },
     "A.expr.count-of-filtered": {
       "type": "object",
@@ -1304,20 +1353,27 @@
       "additionalProperties": false
     },
     "A.cond.did-filtered": {
-      "type": "object",
+      "additionalProperties": false,
       "properties": {
         "result": {
           "$ref": "#/$defs/A.receipt-ref"
         },
         "where": {
           "$ref": "#/$defs/A.material-filter"
+        },
+        "view": {
+          "enum": [
+            "before",
+            "after"
+          ],
+          "type": "string"
         }
       },
       "required": [
         "result",
         "where"
       ],
-      "additionalProperties": false
+      "type": "object"
     },
     "A.cond.did": {
       "type": "object",
@@ -2247,6 +2303,27 @@
         },
         {
           "$ref": "#/$defs/A.expr.agg"
+        },
+        {
+          "$ref": "#/$defs/A.expr.orig-cost-of"
+        },
+        {
+          "$ref": "#/$defs/A.expr.event-number"
+        },
+        {
+          "$ref": "#/$defs/A.expr.dice"
+        },
+        {
+          "$ref": "#/$defs/A.expr.x-paid"
+        },
+        {
+          "$ref": "#/$defs/A.expr.history-count"
+        },
+        {
+          "$ref": "#/$defs/A.expr.history-sum"
+        },
+        {
+          "$ref": "#/$defs/A.expr.capture"
         }
       ]
     },
@@ -2938,7 +3015,14 @@
       "additionalProperties": false,
       "properties": {
         "on": {
-          "$ref": "#/$defs/A.ref"
+          "anyOf": [
+            {
+              "$ref": "#/$defs/A.ref"
+            },
+            {
+              "$ref": "#/$defs/A.lki-of"
+            }
+          ]
         },
         "name": {
           "$ref": "#/$defs/CounterName"
@@ -2960,7 +3044,8 @@
           "enum": [
             "cost",
             "orig_cost",
-            "power"
+            "power",
+            "hp"
           ],
           "type": "string"
         },
@@ -3865,6 +3950,6581 @@
         },
         {
           "$ref": "#/$defs/A.collection.union"
+        }
+      ]
+    },
+    "A.expr.orig-cost-of": {
+      "additionalProperties": false,
+      "properties": {
+        "orig_cost_of": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/A.ref"
+            },
+            {
+              "$ref": "#/$defs/A.snapshot-read"
+            }
+          ]
+        }
+      },
+      "required": [
+        "orig_cost_of"
+      ],
+      "type": "object"
+    },
+    "A.expr.event-number": {
+      "additionalProperties": false,
+      "properties": {
+        "event": {
+          "enum": [
+            "amount",
+            "value"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.expr.dice": {
+      "additionalProperties": false,
+      "properties": {
+        "dice": {
+          "$ref": "#/$defs/BindingName"
+        }
+      },
+      "required": [
+        "dice"
+      ],
+      "type": "object"
+    },
+    "A.expr.x-paid": {
+      "additionalProperties": false,
+      "properties": {
+        "x_paid": {
+          "$ref": "#/$defs/BindingName"
+        }
+      },
+      "required": [
+        "x_paid"
+      ],
+      "type": "object"
+    },
+    "A.lki-of": {
+      "additionalProperties": false,
+      "properties": {
+        "lki_of": {
+          "$ref": "#/$defs/A.ref"
+        }
+      },
+      "required": [
+        "lki_of"
+      ],
+      "type": "object"
+    },
+    "A.paid-receipt": {
+      "additionalProperties": false,
+      "properties": {
+        "receipt": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BindingName"
+            },
+            {
+              "$ref": "#/$defs/A.entry-payment-ref"
+            }
+          ]
+        }
+      },
+      "required": [
+        "receipt"
+      ],
+      "type": "object"
+    },
+    "A.cond.paid": {
+      "additionalProperties": false,
+      "properties": {
+        "paid": {
+          "anyOf": [
+            {
+              "enum": [
+                "additional",
+                "optional"
+              ],
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/A.paid-receipt"
+            }
+          ]
+        }
+      },
+      "required": [
+        "paid"
+      ],
+      "type": "object"
+    },
+    "A.expr.player": {
+      "additionalProperties": false,
+      "properties": {
+        "player": {
+          "$ref": "#/$defs/A.player-ref"
+        }
+      },
+      "required": [
+        "player"
+      ],
+      "type": "object"
+    },
+    "A.cond.player-cmp-payload": {
+      "additionalProperties": false,
+      "properties": {
+        "left": {
+          "$ref": "#/$defs/A.expr.player"
+        },
+        "op": {
+          "enum": [
+            "eq",
+            "ne"
+          ],
+          "type": "string"
+        },
+        "right": {
+          "$ref": "#/$defs/A.expr.player"
+        }
+      },
+      "required": [
+        "left",
+        "op",
+        "right"
+      ],
+      "type": "object"
+    },
+    "A.event-subject-filter": {
+      "additionalProperties": false,
+      "dependentRequired": {
+        "as": [
+          "where"
+        ]
+      },
+      "minProperties": 1,
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "token",
+              "not_token"
+            ]
+          },
+          {
+            "required": [
+              "name",
+              "names"
+            ]
+          },
+          {
+            "required": [
+              "name",
+              "name_contains"
+            ]
+          },
+          {
+            "required": [
+              "names",
+              "name_contains"
+            ]
+          }
+        ]
+      },
+      "properties": {
+        "class": {
+          "$ref": "#/$defs/Concept"
+        },
+        "where": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "as": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "not_class": {
+          "$ref": "#/$defs/Concept"
+        },
+        "not_trait": {
+          "$ref": "#/$defs/Concept"
+        },
+        "traits_any": {
+          "items": {
+            "$ref": "#/$defs/Concept"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "not_same_name_as_this": {
+          "const": true,
+          "type": "boolean"
+        },
+        "cost_eq": {
+          "$ref": "#/$defs/Nat"
+        },
+        "cost_le": {
+          "$ref": "#/$defs/Nat"
+        },
+        "cost_ge": {
+          "$ref": "#/$defs/Nat"
+        },
+        "keyword": {
+          "$ref": "#/$defs/Concept"
+        },
+        "has_trigger": {
+          "const": true,
+          "type": "boolean"
+        },
+        "has_evolve": {
+          "const": true,
+          "type": "boolean"
+        },
+        "face_up": {
+          "type": "boolean"
+        },
+        "boxed": {
+          "type": "boolean"
+        },
+        "evolved": {
+          "type": "boolean"
+        },
+        "entered_this_turn": {
+          "const": true,
+          "type": "boolean"
+        },
+        "advance_follower": {
+          "const": true,
+          "type": "boolean"
+        },
+        "names": {
+          "items": {
+            "$ref": "#/$defs/CardName"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "name_contains": {
+          "type": "string",
+          "minLength": 1
+        },
+        "other": {
+          "const": true,
+          "type": "boolean"
+        },
+        "orig_cost_eq": {
+          "$ref": "#/$defs/Nat"
+        },
+        "orig_cost_le": {
+          "$ref": "#/$defs/Nat"
+        },
+        "orig_cost_ge": {
+          "$ref": "#/$defs/Nat"
+        },
+        "hp_le": {
+          "$ref": "#/$defs/Nat"
+        },
+        "acted": {
+          "type": "boolean"
+        },
+        "racing": {
+          "type": "boolean"
+        },
+        "token": {
+          "const": true,
+          "type": "boolean"
+        },
+        "not_token": {
+          "const": true,
+          "type": "boolean"
+        },
+        "kind": {
+          "$ref": "#/$defs/Code"
+        },
+        "trait": {
+          "$ref": "#/$defs/Concept"
+        },
+        "traits_all": {
+          "items": {
+            "$ref": "#/$defs/Concept"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "name": {
+          "$ref": "#/$defs/CardName"
+        }
+      },
+      "type": "object"
+    },
+    "A.event-object-sel": {
+      "additionalProperties": false,
+      "dependentRequired": {
+        "as": [
+          "where"
+        ]
+      },
+      "minProperties": 1,
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "token",
+              "not_token"
+            ]
+          },
+          {
+            "required": [
+              "name",
+              "names"
+            ]
+          },
+          {
+            "required": [
+              "name",
+              "name_contains"
+            ]
+          },
+          {
+            "required": [
+              "names",
+              "name_contains"
+            ]
+          }
+        ]
+      },
+      "properties": {
+        "class": {
+          "$ref": "#/$defs/Concept"
+        },
+        "where": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "as": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "not_class": {
+          "$ref": "#/$defs/Concept"
+        },
+        "not_trait": {
+          "$ref": "#/$defs/Concept"
+        },
+        "traits_any": {
+          "items": {
+            "$ref": "#/$defs/Concept"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "not_same_name_as_this": {
+          "const": true,
+          "type": "boolean"
+        },
+        "cost_eq": {
+          "$ref": "#/$defs/Nat"
+        },
+        "cost_le": {
+          "$ref": "#/$defs/Nat"
+        },
+        "cost_ge": {
+          "$ref": "#/$defs/Nat"
+        },
+        "keyword": {
+          "$ref": "#/$defs/Concept"
+        },
+        "has_trigger": {
+          "const": true,
+          "type": "boolean"
+        },
+        "has_evolve": {
+          "const": true,
+          "type": "boolean"
+        },
+        "face_up": {
+          "type": "boolean"
+        },
+        "boxed": {
+          "type": "boolean"
+        },
+        "evolved": {
+          "type": "boolean"
+        },
+        "entered_this_turn": {
+          "const": true,
+          "type": "boolean"
+        },
+        "advance_follower": {
+          "const": true,
+          "type": "boolean"
+        },
+        "names": {
+          "items": {
+            "$ref": "#/$defs/CardName"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "name_contains": {
+          "type": "string",
+          "minLength": 1
+        },
+        "other": {
+          "const": true,
+          "type": "boolean"
+        },
+        "orig_cost_eq": {
+          "$ref": "#/$defs/Nat"
+        },
+        "orig_cost_le": {
+          "$ref": "#/$defs/Nat"
+        },
+        "orig_cost_ge": {
+          "$ref": "#/$defs/Nat"
+        },
+        "hp_le": {
+          "$ref": "#/$defs/Nat"
+        },
+        "acted": {
+          "type": "boolean"
+        },
+        "racing": {
+          "type": "boolean"
+        },
+        "token": {
+          "const": true,
+          "type": "boolean"
+        },
+        "not_token": {
+          "const": true,
+          "type": "boolean"
+        },
+        "kind": {
+          "$ref": "#/$defs/Code"
+        },
+        "trait": {
+          "$ref": "#/$defs/Concept"
+        },
+        "traits_all": {
+          "items": {
+            "$ref": "#/$defs/Concept"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "name": {
+          "$ref": "#/$defs/CardName"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "zone": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Zone"
+            },
+            {
+              "items": {
+                "$ref": "#/$defs/Zone"
+              },
+              "minItems": 1,
+              "type": "array"
+            }
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "A.event-recipient-atom": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.event-object-sel"
+        },
+        {
+          "$ref": "#/$defs/A.leader-recipient"
+        },
+        {
+          "$ref": "#/$defs/A.sel.leader-or"
+        }
+      ]
+    },
+    "A.event-recipient-union": {
+      "additionalProperties": false,
+      "properties": {
+        "any_of": {
+          "contains": {
+            "anyOf": [
+              {
+                "required": [
+                  "leader"
+                ]
+              },
+              {
+                "required": [
+                  "leaders"
+                ]
+              },
+              {
+                "required": [
+                  "leader_of"
+                ]
+              },
+              {
+                "required": [
+                  "leader_or"
+                ]
+              }
+            ]
+          },
+          "items": {
+            "$ref": "#/$defs/A.event-recipient-atom"
+          },
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "required": [
+        "any_of"
+      ],
+      "type": "object"
+    },
+    "A.event-recipient": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.ref"
+        },
+        {
+          "$ref": "#/$defs/A.event-recipient-atom"
+        },
+        {
+          "$ref": "#/$defs/A.event-recipient-union"
+        }
+      ]
+    },
+    "A.chosen-payload": {
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "where": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        }
+      },
+      "required": [
+        "ref"
+      ],
+      "type": "object"
+    },
+    "A.cond.chosen": {
+      "additionalProperties": false,
+      "properties": {
+        "chosen": {
+          "$ref": "#/$defs/A.chosen-payload"
+        }
+      },
+      "required": [
+        "chosen"
+      ],
+      "type": "object"
+    },
+    "A.during": {
+      "additionalProperties": false,
+      "properties": {
+        "turn": {
+          "$ref": "#/$defs/A.player-ref"
+        }
+      },
+      "required": [
+        "turn"
+      ],
+      "type": "object"
+    },
+    "A.event-by": {
+      "additionalProperties": false,
+      "properties": {
+        "ability_of": {
+          "$ref": "#/$defs/A.event-object-sel"
+        }
+      },
+      "required": [
+        "ability_of"
+      ],
+      "type": "object"
+    },
+    "A.move-origin": {
+      "additionalProperties": false,
+      "properties": {
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "zone": {
+          "$ref": "#/$defs/Zone"
+        }
+      },
+      "required": [
+        "who",
+        "zone"
+      ],
+      "type": "object"
+    },
+    "A.nat-eq": {
+      "additionalProperties": false,
+      "properties": {
+        "eq": {
+          "$ref": "#/$defs/Nat"
+        }
+      },
+      "required": [
+        "eq"
+      ],
+      "type": "object"
+    },
+    "A.nat-le": {
+      "additionalProperties": false,
+      "properties": {
+        "le": {
+          "$ref": "#/$defs/Nat"
+        }
+      },
+      "required": [
+        "le"
+      ],
+      "type": "object"
+    },
+    "A.nat-ge": {
+      "additionalProperties": false,
+      "properties": {
+        "ge": {
+          "$ref": "#/$defs/Nat"
+        }
+      },
+      "required": [
+        "ge"
+      ],
+      "type": "object"
+    },
+    "A.nat-threshold": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.nat-eq"
+        },
+        {
+          "$ref": "#/$defs/A.nat-le"
+        },
+        {
+          "$ref": "#/$defs/A.nat-ge"
+        }
+      ]
+    },
+    "A.die-eq": {
+      "additionalProperties": false,
+      "properties": {
+        "eq": {
+          "maximum": 6,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "eq"
+      ],
+      "type": "object"
+    },
+    "A.die-le": {
+      "additionalProperties": false,
+      "properties": {
+        "le": {
+          "maximum": 6,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "le"
+      ],
+      "type": "object"
+    },
+    "A.die-ge": {
+      "additionalProperties": false,
+      "properties": {
+        "ge": {
+          "maximum": 6,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "ge"
+      ],
+      "type": "object"
+    },
+    "A.die-threshold": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.die-eq"
+        },
+        {
+          "$ref": "#/$defs/A.die-le"
+        },
+        {
+          "$ref": "#/$defs/A.die-ge"
+        }
+      ]
+    },
+    "A.since-window": {
+      "additionalProperties": false,
+      "properties": {
+        "since": {
+          "$ref": "#/$defs/BindingName"
+        }
+      },
+      "required": [
+        "since"
+      ],
+      "type": "object"
+    },
+    "A.history-window": {
+      "anyOf": [
+        {
+          "enum": [
+            "this_turn",
+            "game"
+          ],
+          "type": "string"
+        },
+        {
+          "$ref": "#/$defs/A.since-window"
+        }
+      ]
+    },
+    "A.event.enter-field-payload": {
+      "additionalProperties": false,
+      "not": {
+        "required": [
+          "ref",
+          "sel"
+        ]
+      },
+      "properties": {
+        "from": {
+          "$ref": "#/$defs/Zone"
+        },
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "during": {
+          "$ref": "#/$defs/A.during"
+        },
+        "entered_by": {
+          "enum": [
+            "ability",
+            "play"
+          ],
+          "type": "string"
+        },
+        "by": {
+          "$ref": "#/$defs/A.event-by"
+        }
+      },
+      "type": "object"
+    },
+    "A.event.enter-field": {
+      "additionalProperties": false,
+      "properties": {
+        "enter_field": {
+          "$ref": "#/$defs/A.event.enter-field-payload"
+        }
+      },
+      "required": [
+        "enter_field"
+      ],
+      "type": "object"
+    },
+    "A.history.enter-field-where": {
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        },
+        "during": {
+          "$ref": "#/$defs/A.during"
+        },
+        "entered_by": {
+          "enum": [
+            "ability",
+            "play"
+          ],
+          "type": "string"
+        },
+        "by": {
+          "$ref": "#/$defs/A.event-by"
+        }
+      },
+      "type": "object"
+    },
+    "A.history.enter-field": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "from": {
+          "$ref": "#/$defs/Zone"
+        },
+        "event": {
+          "const": "enter_field",
+          "type": "string"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.enter-field-where"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.history.enter-field-condition": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "from": {
+          "$ref": "#/$defs/Zone"
+        },
+        "event": {
+          "const": "enter_field",
+          "type": "string"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.enter-field-where"
+        },
+        "at_least": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "at": {
+          "const": "event",
+          "type": "string"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.event.left-field-payload": {
+      "additionalProperties": false,
+      "not": {
+        "required": [
+          "ref",
+          "sel"
+        ]
+      },
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "during": {
+          "$ref": "#/$defs/A.during"
+        },
+        "by": {
+          "$ref": "#/$defs/A.event-by"
+        }
+      },
+      "type": "object"
+    },
+    "A.event.left-field": {
+      "additionalProperties": false,
+      "properties": {
+        "left_field": {
+          "$ref": "#/$defs/A.event.left-field-payload"
+        }
+      },
+      "required": [
+        "left_field"
+      ],
+      "type": "object"
+    },
+    "A.history.left-field-where": {
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        },
+        "during": {
+          "$ref": "#/$defs/A.during"
+        },
+        "by": {
+          "$ref": "#/$defs/A.event-by"
+        }
+      },
+      "type": "object"
+    },
+    "A.history.left-field": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "left_field",
+          "type": "string"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.left-field-where"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.history.left-field-condition": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "left_field",
+          "type": "string"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.left-field-where"
+        },
+        "at_least": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "at": {
+          "const": "event",
+          "type": "string"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.event.placed-ex-payload": {
+      "additionalProperties": false,
+      "not": {
+        "required": [
+          "ref",
+          "sel"
+        ]
+      },
+      "properties": {
+        "from": {
+          "$ref": "#/$defs/Zone"
+        },
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "during": {
+          "$ref": "#/$defs/A.during"
+        },
+        "by": {
+          "$ref": "#/$defs/A.event-by"
+        }
+      },
+      "type": "object"
+    },
+    "A.event.placed-ex": {
+      "additionalProperties": false,
+      "properties": {
+        "placed_ex": {
+          "$ref": "#/$defs/A.event.placed-ex-payload"
+        }
+      },
+      "required": [
+        "placed_ex"
+      ],
+      "type": "object"
+    },
+    "A.history.placed-ex-where": {
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        },
+        "during": {
+          "$ref": "#/$defs/A.during"
+        },
+        "by": {
+          "$ref": "#/$defs/A.event-by"
+        }
+      },
+      "type": "object"
+    },
+    "A.history.placed-ex": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "from": {
+          "$ref": "#/$defs/Zone"
+        },
+        "event": {
+          "const": "placed_ex",
+          "type": "string"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.placed-ex-where"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.history.placed-ex-condition": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "from": {
+          "$ref": "#/$defs/Zone"
+        },
+        "event": {
+          "const": "placed_ex",
+          "type": "string"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.placed-ex-where"
+        },
+        "at_least": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "at": {
+          "const": "event",
+          "type": "string"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.event.discarded-payload": {
+      "additionalProperties": false,
+      "not": {
+        "required": [
+          "ref",
+          "sel"
+        ]
+      },
+      "properties": {
+        "from": {
+          "const": "hand",
+          "type": "string"
+        },
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "by": {
+          "$ref": "#/$defs/A.event-by"
+        },
+        "during": {
+          "$ref": "#/$defs/A.during"
+        }
+      },
+      "type": "object"
+    },
+    "A.event.discarded": {
+      "additionalProperties": false,
+      "properties": {
+        "discarded": {
+          "$ref": "#/$defs/A.event.discarded-payload"
+        }
+      },
+      "required": [
+        "discarded"
+      ],
+      "type": "object"
+    },
+    "A.history.discarded-where": {
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        },
+        "by": {
+          "$ref": "#/$defs/A.event-by"
+        },
+        "during": {
+          "$ref": "#/$defs/A.during"
+        }
+      },
+      "type": "object"
+    },
+    "A.history.discarded": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "from": {
+          "const": "hand",
+          "type": "string"
+        },
+        "event": {
+          "const": "discarded",
+          "type": "string"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.discarded-where"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.history.discarded-condition": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "from": {
+          "const": "hand",
+          "type": "string"
+        },
+        "event": {
+          "const": "discarded",
+          "type": "string"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.discarded-where"
+        },
+        "at_least": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "at": {
+          "const": "event",
+          "type": "string"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.event.banished-payload": {
+      "additionalProperties": false,
+      "not": {
+        "required": [
+          "ref",
+          "sel"
+        ]
+      },
+      "properties": {
+        "from": {
+          "$ref": "#/$defs/Zone"
+        },
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "during": {
+          "$ref": "#/$defs/A.during"
+        },
+        "by": {
+          "$ref": "#/$defs/A.event-by"
+        }
+      },
+      "type": "object"
+    },
+    "A.event.banished": {
+      "additionalProperties": false,
+      "properties": {
+        "banished": {
+          "$ref": "#/$defs/A.event.banished-payload"
+        }
+      },
+      "required": [
+        "banished"
+      ],
+      "type": "object"
+    },
+    "A.history.banished-where": {
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        },
+        "during": {
+          "$ref": "#/$defs/A.during"
+        },
+        "by": {
+          "$ref": "#/$defs/A.event-by"
+        }
+      },
+      "type": "object"
+    },
+    "A.history.banished": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "from": {
+          "$ref": "#/$defs/Zone"
+        },
+        "event": {
+          "const": "banished",
+          "type": "string"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.banished-where"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.history.banished-condition": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "from": {
+          "$ref": "#/$defs/Zone"
+        },
+        "event": {
+          "const": "banished",
+          "type": "string"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.banished-where"
+        },
+        "at_least": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "at": {
+          "const": "event",
+          "type": "string"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.event.destroyed-payload": {
+      "additionalProperties": false,
+      "not": {
+        "required": [
+          "ref",
+          "sel"
+        ]
+      },
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "during": {
+          "$ref": "#/$defs/A.during"
+        },
+        "by": {
+          "$ref": "#/$defs/A.event-by"
+        }
+      },
+      "type": "object"
+    },
+    "A.event.destroyed": {
+      "additionalProperties": false,
+      "properties": {
+        "destroyed": {
+          "$ref": "#/$defs/A.event.destroyed-payload"
+        }
+      },
+      "required": [
+        "destroyed"
+      ],
+      "type": "object"
+    },
+    "A.history.destroyed-where": {
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        },
+        "during": {
+          "$ref": "#/$defs/A.during"
+        },
+        "by": {
+          "$ref": "#/$defs/A.event-by"
+        }
+      },
+      "type": "object"
+    },
+    "A.history.destroyed": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "destroyed",
+          "type": "string"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.destroyed-where"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.history.destroyed-condition": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "destroyed",
+          "type": "string"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.destroyed-where"
+        },
+        "at_least": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "at": {
+          "const": "event",
+          "type": "string"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.event.damaged-payload": {
+      "additionalProperties": false,
+      "properties": {
+        "recipient": {
+          "$ref": "#/$defs/A.event-recipient"
+        },
+        "kind": {
+          "enum": [
+            "attack",
+            "combat",
+            "ability"
+          ],
+          "type": "string"
+        },
+        "during": {
+          "$ref": "#/$defs/A.during"
+        },
+        "by": {
+          "$ref": "#/$defs/A.event-by"
+        }
+      },
+      "type": "object"
+    },
+    "A.event.damaged": {
+      "additionalProperties": false,
+      "properties": {
+        "damaged": {
+          "$ref": "#/$defs/A.event.damaged-payload"
+        }
+      },
+      "required": [
+        "damaged"
+      ],
+      "type": "object"
+    },
+    "A.history.damaged-where": {
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "recipient": {
+          "$ref": "#/$defs/A.event-recipient"
+        },
+        "kind": {
+          "enum": [
+            "attack",
+            "combat",
+            "ability"
+          ],
+          "type": "string"
+        },
+        "during": {
+          "$ref": "#/$defs/A.during"
+        },
+        "by": {
+          "$ref": "#/$defs/A.event-by"
+        }
+      },
+      "type": "object"
+    },
+    "A.history.damaged": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "damaged",
+          "type": "string"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.damaged-where"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.history.damaged-condition": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "damaged",
+          "type": "string"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.damaged-where"
+        },
+        "at_least": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "at": {
+          "const": "event",
+          "type": "string"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.history.damaged-sum": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "const": "facts",
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "damaged",
+          "type": "string"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.damaged-where"
+        },
+        "field": {
+          "const": "amount",
+          "type": "string"
+        }
+      },
+      "required": [
+        "window",
+        "event",
+        "field"
+      ],
+      "type": "object"
+    },
+    "A.event.dealt-damage-payload": {
+      "additionalProperties": false,
+      "not": {
+        "required": [
+          "ref",
+          "sel"
+        ]
+      },
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "zone": {
+          "$ref": "#/$defs/Zone"
+        },
+        "recipient": {
+          "$ref": "#/$defs/A.event-recipient"
+        },
+        "kind": {
+          "enum": [
+            "attack",
+            "combat",
+            "ability"
+          ],
+          "type": "string"
+        },
+        "during": {
+          "$ref": "#/$defs/A.during"
+        },
+        "by": {
+          "$ref": "#/$defs/A.event-by"
+        }
+      },
+      "type": "object"
+    },
+    "A.event.dealt-damage": {
+      "additionalProperties": false,
+      "properties": {
+        "dealt_damage": {
+          "$ref": "#/$defs/A.event.dealt-damage-payload"
+        }
+      },
+      "required": [
+        "dealt_damage"
+      ],
+      "type": "object"
+    },
+    "A.history.dealt-damage-where": {
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        },
+        "recipient": {
+          "$ref": "#/$defs/A.event-recipient"
+        },
+        "kind": {
+          "enum": [
+            "attack",
+            "combat",
+            "ability"
+          ],
+          "type": "string"
+        },
+        "during": {
+          "$ref": "#/$defs/A.during"
+        },
+        "by": {
+          "$ref": "#/$defs/A.event-by"
+        }
+      },
+      "type": "object"
+    },
+    "A.history.dealt-damage": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "dealt_damage",
+          "type": "string"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "zone": {
+          "$ref": "#/$defs/Zone"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.dealt-damage-where"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.history.dealt-damage-condition": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "dealt_damage",
+          "type": "string"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "zone": {
+          "$ref": "#/$defs/Zone"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.dealt-damage-where"
+        },
+        "at_least": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "at": {
+          "const": "event",
+          "type": "string"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.history.dealt-damage-sum": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "const": "facts",
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "dealt_damage",
+          "type": "string"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "zone": {
+          "$ref": "#/$defs/Zone"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.dealt-damage-where"
+        },
+        "field": {
+          "const": "amount",
+          "type": "string"
+        }
+      },
+      "required": [
+        "window",
+        "event",
+        "field"
+      ],
+      "type": "object"
+    },
+    "A.event.attacked-payload": {
+      "additionalProperties": false,
+      "not": {
+        "required": [
+          "ref",
+          "sel"
+        ]
+      },
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "during": {
+          "$ref": "#/$defs/A.during"
+        }
+      },
+      "type": "object"
+    },
+    "A.event.attacked": {
+      "additionalProperties": false,
+      "properties": {
+        "attacked": {
+          "$ref": "#/$defs/A.event.attacked-payload"
+        }
+      },
+      "required": [
+        "attacked"
+      ],
+      "type": "object"
+    },
+    "A.history.attacked-where": {
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        },
+        "during": {
+          "$ref": "#/$defs/A.during"
+        }
+      },
+      "type": "object"
+    },
+    "A.history.attacked": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "attacked",
+          "type": "string"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.attacked-where"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.history.attacked-condition": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "attacked",
+          "type": "string"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.attacked-where"
+        },
+        "at_least": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "at": {
+          "const": "event",
+          "type": "string"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.event.attack-target-payload": {
+      "additionalProperties": false,
+      "not": {
+        "required": [
+          "ref",
+          "sel"
+        ]
+      },
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        }
+      },
+      "type": "object"
+    },
+    "A.event.attack-target": {
+      "additionalProperties": false,
+      "properties": {
+        "attack_target": {
+          "$ref": "#/$defs/A.event.attack-target-payload"
+        }
+      },
+      "required": [
+        "attack_target"
+      ],
+      "type": "object"
+    },
+    "A.history.attack-target-where": {
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        }
+      },
+      "type": "object"
+    },
+    "A.history.attack-target": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "attack_target",
+          "type": "string"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.attack-target-where"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.history.attack-target-condition": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "attack_target",
+          "type": "string"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.attack-target-where"
+        },
+        "at_least": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "at": {
+          "const": "event",
+          "type": "string"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.event.evolved-payload": {
+      "additionalProperties": false,
+      "not": {
+        "required": [
+          "ref",
+          "sel"
+        ]
+      },
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "by": {
+          "$ref": "#/$defs/A.event-by"
+        }
+      },
+      "type": "object"
+    },
+    "A.event.evolved": {
+      "additionalProperties": false,
+      "properties": {
+        "evolved": {
+          "$ref": "#/$defs/A.event.evolved-payload"
+        }
+      },
+      "required": [
+        "evolved"
+      ],
+      "type": "object"
+    },
+    "A.history.evolved-where": {
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        },
+        "by": {
+          "$ref": "#/$defs/A.event-by"
+        }
+      },
+      "type": "object"
+    },
+    "A.history.evolved": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "evolved",
+          "type": "string"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.evolved-where"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.history.evolved-condition": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "evolved",
+          "type": "string"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.evolved-where"
+        },
+        "at_least": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "at": {
+          "const": "event",
+          "type": "string"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.event.super-evolved-payload": {
+      "additionalProperties": false,
+      "not": {
+        "required": [
+          "ref",
+          "sel"
+        ]
+      },
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "by": {
+          "$ref": "#/$defs/A.event-by"
+        }
+      },
+      "type": "object"
+    },
+    "A.event.super-evolved": {
+      "additionalProperties": false,
+      "properties": {
+        "super_evolved": {
+          "$ref": "#/$defs/A.event.super-evolved-payload"
+        }
+      },
+      "required": [
+        "super_evolved"
+      ],
+      "type": "object"
+    },
+    "A.history.super-evolved-where": {
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        },
+        "by": {
+          "$ref": "#/$defs/A.event-by"
+        }
+      },
+      "type": "object"
+    },
+    "A.history.super-evolved": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "super_evolved",
+          "type": "string"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.super-evolved-where"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.history.super-evolved-condition": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "super_evolved",
+          "type": "string"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.super-evolved-where"
+        },
+        "at_least": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "at": {
+          "const": "event",
+          "type": "string"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.event.phase-payload": {
+      "additionalProperties": false,
+      "properties": {
+        "which": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Phase"
+            },
+            {
+              "$ref": "#/$defs/A.param"
+            }
+          ]
+        },
+        "whose": {
+          "$ref": "#/$defs/A.player-ref"
+        }
+      },
+      "required": [
+        "which",
+        "whose"
+      ],
+      "type": "object"
+    },
+    "A.event.phase": {
+      "additionalProperties": false,
+      "properties": {
+        "phase": {
+          "$ref": "#/$defs/A.event.phase-payload"
+        }
+      },
+      "required": [
+        "phase"
+      ],
+      "type": "object"
+    },
+    "A.history.phase-where": {
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "which": {
+          "$ref": "#/$defs/Phase"
+        },
+        "whose": {
+          "$ref": "#/$defs/A.player-ref"
+        }
+      },
+      "required": [
+        "which",
+        "whose"
+      ],
+      "type": "object"
+    },
+    "A.history.phase": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "phase",
+          "type": "string"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.phase-where"
+        }
+      },
+      "required": [
+        "window",
+        "event",
+        "where"
+      ],
+      "type": "object"
+    },
+    "A.history.phase-condition": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "phase",
+          "type": "string"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.phase-where"
+        },
+        "at_least": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "at": {
+          "const": "event",
+          "type": "string"
+        }
+      },
+      "required": [
+        "window",
+        "event",
+        "where"
+      ],
+      "type": "object"
+    },
+    "A.event.played-payload": {
+      "additionalProperties": false,
+      "properties": {
+        "from": {
+          "$ref": "#/$defs/Zone"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "during": {
+          "$ref": "#/$defs/A.during"
+        }
+      },
+      "type": "object"
+    },
+    "A.event.played": {
+      "additionalProperties": false,
+      "properties": {
+        "played": {
+          "$ref": "#/$defs/A.event.played-payload"
+        }
+      },
+      "required": [
+        "played"
+      ],
+      "type": "object"
+    },
+    "A.history.played-where": {
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "during": {
+          "$ref": "#/$defs/A.during"
+        }
+      },
+      "type": "object"
+    },
+    "A.history.played": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "from": {
+          "$ref": "#/$defs/Zone"
+        },
+        "event": {
+          "const": "played",
+          "type": "string"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.played-where"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.history.played-condition": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "from": {
+          "$ref": "#/$defs/Zone"
+        },
+        "event": {
+          "const": "played",
+          "type": "string"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.played-where"
+        },
+        "at_least": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "at": {
+          "const": "event",
+          "type": "string"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.event.ability-played-payload": {
+      "additionalProperties": false,
+      "properties": {
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "holder": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/A.ref"
+            },
+            {
+              "$ref": "#/$defs/A.event-object-sel"
+            }
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "A.event.ability-played": {
+      "additionalProperties": false,
+      "properties": {
+        "ability_played": {
+          "$ref": "#/$defs/A.event.ability-played-payload"
+        }
+      },
+      "required": [
+        "ability_played"
+      ],
+      "type": "object"
+    },
+    "A.history.ability-played-where": {
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "holder": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/A.ref"
+            },
+            {
+              "$ref": "#/$defs/A.event-object-sel"
+            }
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "A.history.ability-played": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "ability_played",
+          "type": "string"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.ability-played-where"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.history.ability-played-condition": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "ability_played",
+          "type": "string"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.ability-played-where"
+        },
+        "at_least": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "at": {
+          "const": "event",
+          "type": "string"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.event.life-changed-payload": {
+      "additionalProperties": false,
+      "properties": {
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "direction": {
+          "enum": [
+            "up",
+            "down"
+          ],
+          "type": "string"
+        },
+        "during": {
+          "$ref": "#/$defs/A.during"
+        },
+        "by": {
+          "$ref": "#/$defs/A.event-by"
+        }
+      },
+      "type": "object"
+    },
+    "A.event.life-changed": {
+      "additionalProperties": false,
+      "properties": {
+        "life_changed": {
+          "$ref": "#/$defs/A.event.life-changed-payload"
+        }
+      },
+      "required": [
+        "life_changed"
+      ],
+      "type": "object"
+    },
+    "A.history.life-changed-where": {
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "direction": {
+          "enum": [
+            "up",
+            "down"
+          ],
+          "type": "string"
+        },
+        "during": {
+          "$ref": "#/$defs/A.during"
+        },
+        "by": {
+          "$ref": "#/$defs/A.event-by"
+        }
+      },
+      "type": "object"
+    },
+    "A.history.life-changed": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "life_changed",
+          "type": "string"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.life-changed-where"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.history.life-changed-condition": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "life_changed",
+          "type": "string"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.life-changed-where"
+        },
+        "at_least": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "at": {
+          "const": "event",
+          "type": "string"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.history.life-sum-where": {
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "direction": {
+          "enum": [
+            "up",
+            "down"
+          ],
+          "type": "string"
+        },
+        "during": {
+          "$ref": "#/$defs/A.during"
+        },
+        "by": {
+          "$ref": "#/$defs/A.event-by"
+        }
+      },
+      "required": [
+        "direction"
+      ],
+      "type": "object"
+    },
+    "A.history.life-changed-sum": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "const": "facts",
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "life_changed",
+          "type": "string"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.life-sum-where"
+        },
+        "field": {
+          "const": "delta",
+          "type": "string"
+        }
+      },
+      "required": [
+        "window",
+        "event",
+        "where",
+        "field"
+      ],
+      "type": "object"
+    },
+    "A.event.stat-changed-payload": {
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        },
+        "stat": {
+          "anyOf": [
+            {
+              "enum": [
+                "power",
+                "hp"
+              ],
+              "type": "string"
+            },
+            {
+              "items": {
+                "enum": [
+                  "power",
+                  "hp"
+                ],
+                "type": "string"
+              },
+              "minItems": 1,
+              "type": "array"
+            }
+          ]
+        },
+        "direction": {
+          "enum": [
+            "up",
+            "down"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "A.event.stat-changed": {
+      "additionalProperties": false,
+      "properties": {
+        "stat_changed": {
+          "$ref": "#/$defs/A.event.stat-changed-payload"
+        }
+      },
+      "required": [
+        "stat_changed"
+      ],
+      "type": "object"
+    },
+    "A.history.stat-changed-where": {
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        },
+        "stat": {
+          "anyOf": [
+            {
+              "enum": [
+                "power",
+                "hp"
+              ],
+              "type": "string"
+            },
+            {
+              "items": {
+                "enum": [
+                  "power",
+                  "hp"
+                ],
+                "type": "string"
+              },
+              "minItems": 1,
+              "type": "array"
+            }
+          ]
+        },
+        "direction": {
+          "enum": [
+            "up",
+            "down"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "A.history.stat-changed": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "stat_changed",
+          "type": "string"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.stat-changed-where"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.history.stat-changed-condition": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "stat_changed",
+          "type": "string"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.stat-changed-where"
+        },
+        "at_least": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "at": {
+          "const": "event",
+          "type": "string"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.event.counter-changed-payload": {
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        },
+        "name": {
+          "$ref": "#/$defs/CounterName"
+        },
+        "after": {
+          "$ref": "#/$defs/A.nat-threshold"
+        },
+        "direction": {
+          "enum": [
+            "up",
+            "down"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "A.event.counter-changed": {
+      "additionalProperties": false,
+      "properties": {
+        "counter_changed": {
+          "$ref": "#/$defs/A.event.counter-changed-payload"
+        }
+      },
+      "required": [
+        "counter_changed"
+      ],
+      "type": "object"
+    },
+    "A.history.counter-changed-where": {
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        },
+        "name": {
+          "$ref": "#/$defs/CounterName"
+        },
+        "after": {
+          "$ref": "#/$defs/A.nat-threshold"
+        },
+        "direction": {
+          "enum": [
+            "up",
+            "down"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "A.history.counter-changed": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "counter_changed",
+          "type": "string"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.counter-changed-where"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.history.counter-changed-condition": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "counter_changed",
+          "type": "string"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.counter-changed-where"
+        },
+        "at_least": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "at": {
+          "const": "event",
+          "type": "string"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.event.acted-payload": {
+      "additionalProperties": false,
+      "not": {
+        "required": [
+          "ref",
+          "sel"
+        ]
+      },
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        }
+      },
+      "type": "object"
+    },
+    "A.event.acted": {
+      "additionalProperties": false,
+      "properties": {
+        "acted": {
+          "$ref": "#/$defs/A.event.acted-payload"
+        }
+      },
+      "required": [
+        "acted"
+      ],
+      "type": "object"
+    },
+    "A.history.acted-where": {
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        }
+      },
+      "type": "object"
+    },
+    "A.history.acted": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "acted",
+          "type": "string"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.acted-where"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.history.acted-condition": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "acted",
+          "type": "string"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.acted-where"
+        },
+        "at_least": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "at": {
+          "const": "event",
+          "type": "string"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.event.stood-payload": {
+      "additionalProperties": false,
+      "not": {
+        "required": [
+          "ref",
+          "sel"
+        ]
+      },
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        }
+      },
+      "type": "object"
+    },
+    "A.event.stood": {
+      "additionalProperties": false,
+      "properties": {
+        "stood": {
+          "$ref": "#/$defs/A.event.stood-payload"
+        }
+      },
+      "required": [
+        "stood"
+      ],
+      "type": "object"
+    },
+    "A.history.stood-where": {
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        }
+      },
+      "type": "object"
+    },
+    "A.history.stood": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "stood",
+          "type": "string"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.stood-where"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.history.stood-condition": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "stood",
+          "type": "string"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.stood-where"
+        },
+        "at_least": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "at": {
+          "const": "event",
+          "type": "string"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.event.raced-payload": {
+      "additionalProperties": false,
+      "not": {
+        "required": [
+          "ref",
+          "sel"
+        ]
+      },
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        }
+      },
+      "type": "object"
+    },
+    "A.event.raced": {
+      "additionalProperties": false,
+      "properties": {
+        "raced": {
+          "$ref": "#/$defs/A.event.raced-payload"
+        }
+      },
+      "required": [
+        "raced"
+      ],
+      "type": "object"
+    },
+    "A.history.raced-where": {
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        }
+      },
+      "type": "object"
+    },
+    "A.history.raced": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "raced",
+          "type": "string"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.raced-where"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.history.raced-condition": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "raced",
+          "type": "string"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.raced-where"
+        },
+        "at_least": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "at": {
+          "const": "event",
+          "type": "string"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.event.drive-gained-payload": {
+      "additionalProperties": false,
+      "not": {
+        "required": [
+          "ref",
+          "sel"
+        ]
+      },
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        }
+      },
+      "type": "object"
+    },
+    "A.event.drive-gained": {
+      "additionalProperties": false,
+      "properties": {
+        "drive_gained": {
+          "$ref": "#/$defs/A.event.drive-gained-payload"
+        }
+      },
+      "required": [
+        "drive_gained"
+      ],
+      "type": "object"
+    },
+    "A.history.drive-gained-where": {
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        }
+      },
+      "type": "object"
+    },
+    "A.history.drive-gained": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "drive_gained",
+          "type": "string"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.drive-gained-where"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.history.drive-gained-condition": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "drive_gained",
+          "type": "string"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.drive-gained-where"
+        },
+        "at_least": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "at": {
+          "const": "event",
+          "type": "string"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.event.ub-activated-payload": {
+      "additionalProperties": false,
+      "properties": {
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "holder": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/A.ref"
+            },
+            {
+              "$ref": "#/$defs/A.event-object-sel"
+            }
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "A.event.ub-activated": {
+      "additionalProperties": false,
+      "properties": {
+        "ub_activated": {
+          "$ref": "#/$defs/A.event.ub-activated-payload"
+        }
+      },
+      "required": [
+        "ub_activated"
+      ],
+      "type": "object"
+    },
+    "A.history.ub-activated-where": {
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "holder": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/A.ref"
+            },
+            {
+              "$ref": "#/$defs/A.event-object-sel"
+            }
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "A.history.ub-activated": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "ub_activated",
+          "type": "string"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.ub-activated-where"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.history.ub-activated-condition": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "ub_activated",
+          "type": "string"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.ub-activated-where"
+        },
+        "at_least": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "at": {
+          "const": "event",
+          "type": "string"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.event.fused-payload": {
+      "additionalProperties": false,
+      "properties": {
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "material": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        }
+      },
+      "type": "object"
+    },
+    "A.event.fused": {
+      "additionalProperties": false,
+      "properties": {
+        "fused": {
+          "$ref": "#/$defs/A.event.fused-payload"
+        }
+      },
+      "required": [
+        "fused"
+      ],
+      "type": "object"
+    },
+    "A.history.fused-where": {
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "material": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        }
+      },
+      "type": "object"
+    },
+    "A.history.fused": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "fused",
+          "type": "string"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.fused-where"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.history.fused-condition": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "fused",
+          "type": "string"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.fused-where"
+        },
+        "at_least": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "at": {
+          "const": "event",
+          "type": "string"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.event.targeted-payload": {
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        },
+        "by": {
+          "$ref": "#/$defs/A.event-by"
+        }
+      },
+      "type": "object"
+    },
+    "A.event.targeted": {
+      "additionalProperties": false,
+      "properties": {
+        "targeted": {
+          "$ref": "#/$defs/A.event.targeted-payload"
+        }
+      },
+      "required": [
+        "targeted"
+      ],
+      "type": "object"
+    },
+    "A.history.targeted-where": {
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        },
+        "by": {
+          "$ref": "#/$defs/A.event-by"
+        }
+      },
+      "type": "object"
+    },
+    "A.history.targeted": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "targeted",
+          "type": "string"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.targeted-where"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.history.targeted-condition": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "targeted",
+          "type": "string"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.targeted-where"
+        },
+        "at_least": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "at": {
+          "const": "event",
+          "type": "string"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.event.dice-rolled-payload": {
+      "additionalProperties": false,
+      "properties": {
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        }
+      },
+      "type": "object"
+    },
+    "A.event.dice-rolled": {
+      "additionalProperties": false,
+      "properties": {
+        "dice_rolled": {
+          "$ref": "#/$defs/A.event.dice-rolled-payload"
+        }
+      },
+      "required": [
+        "dice_rolled"
+      ],
+      "type": "object"
+    },
+    "A.history.dice-rolled-where": {
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "value": {
+          "$ref": "#/$defs/A.die-threshold"
+        }
+      },
+      "type": "object"
+    },
+    "A.history.dice-rolled": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "dice_rolled",
+          "type": "string"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.dice-rolled-where"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.history.dice-rolled-condition": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "dice_rolled",
+          "type": "string"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.dice-rolled-where"
+        },
+        "at_least": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "at": {
+          "const": "event",
+          "type": "string"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.event.drive-checked-payload": {
+      "additionalProperties": false,
+      "properties": {
+        "holder": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/A.ref"
+            },
+            {
+              "$ref": "#/$defs/A.event-object-sel"
+            }
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "A.event.drive-checked": {
+      "additionalProperties": false,
+      "properties": {
+        "drive_checked": {
+          "$ref": "#/$defs/A.event.drive-checked-payload"
+        }
+      },
+      "required": [
+        "drive_checked"
+      ],
+      "type": "object"
+    },
+    "A.history.drive-checked-where": {
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "holder": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/A.ref"
+            },
+            {
+              "$ref": "#/$defs/A.event-object-sel"
+            }
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "A.history.drive-checked": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "drive_checked",
+          "type": "string"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.drive-checked-where"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.history.drive-checked-condition": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "drive_checked",
+          "type": "string"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.drive-checked-where"
+        },
+        "at_least": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "at": {
+          "const": "event",
+          "type": "string"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.event.drive-trigger-payload": {
+      "additionalProperties": false,
+      "properties": {
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        }
+      },
+      "type": "object"
+    },
+    "A.event.drive-trigger": {
+      "additionalProperties": false,
+      "properties": {
+        "drive_trigger": {
+          "$ref": "#/$defs/A.event.drive-trigger-payload"
+        }
+      },
+      "required": [
+        "drive_trigger"
+      ],
+      "type": "object"
+    },
+    "A.history.drive-trigger": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "drive_trigger",
+          "type": "string"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.history.drive-trigger-condition": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "drive_trigger",
+          "type": "string"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "at_least": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "at": {
+          "const": "event",
+          "type": "string"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.event.moved-payload": {
+      "additionalProperties": false,
+      "not": {
+        "required": [
+          "ref",
+          "sel"
+        ]
+      },
+      "properties": {
+        "from": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Zone"
+            },
+            {
+              "$ref": "#/$defs/A.move-origin"
+            }
+          ]
+        },
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "to": {
+          "$ref": "#/$defs/Zone"
+        },
+        "during": {
+          "$ref": "#/$defs/A.during"
+        },
+        "by": {
+          "$ref": "#/$defs/A.event-by"
+        }
+      },
+      "type": "object"
+    },
+    "A.event.moved": {
+      "additionalProperties": false,
+      "properties": {
+        "moved": {
+          "$ref": "#/$defs/A.event.moved-payload"
+        }
+      },
+      "required": [
+        "moved"
+      ],
+      "type": "object"
+    },
+    "A.history.moved-where": {
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        },
+        "during": {
+          "$ref": "#/$defs/A.during"
+        },
+        "by": {
+          "$ref": "#/$defs/A.event-by"
+        }
+      },
+      "type": "object"
+    },
+    "A.history.moved": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "from": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Zone"
+            },
+            {
+              "$ref": "#/$defs/A.move-origin"
+            }
+          ]
+        },
+        "event": {
+          "const": "moved",
+          "type": "string"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "to": {
+          "$ref": "#/$defs/Zone"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.moved-where"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.history.moved-condition": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "from": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Zone"
+            },
+            {
+              "$ref": "#/$defs/A.move-origin"
+            }
+          ]
+        },
+        "event": {
+          "const": "moved",
+          "type": "string"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.event-subject-filter"
+        },
+        "to": {
+          "$ref": "#/$defs/Zone"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.moved-where"
+        },
+        "at_least": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "at": {
+          "const": "event",
+          "type": "string"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.event.drew-payload": {
+      "additionalProperties": false,
+      "properties": {
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "not_phase": {
+          "$ref": "#/$defs/Phase"
+        },
+        "by": {
+          "$ref": "#/$defs/A.event-by"
+        }
+      },
+      "type": "object"
+    },
+    "A.event.drew": {
+      "additionalProperties": false,
+      "properties": {
+        "drew": {
+          "$ref": "#/$defs/A.event.drew-payload"
+        }
+      },
+      "required": [
+        "drew"
+      ],
+      "type": "object"
+    },
+    "A.history.drew-where": {
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "not_phase": {
+          "$ref": "#/$defs/Phase"
+        },
+        "by": {
+          "$ref": "#/$defs/A.event-by"
+        }
+      },
+      "type": "object"
+    },
+    "A.history.drew": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "drew",
+          "type": "string"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.drew-where"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.history.drew-condition": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "drew",
+          "type": "string"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.drew-where"
+        },
+        "at_least": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "at": {
+          "const": "event",
+          "type": "string"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.event.equipped-payload": {
+      "additionalProperties": false,
+      "properties": {
+        "equipment": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/A.ref"
+            },
+            {
+              "$ref": "#/$defs/A.event-object-sel"
+            }
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "A.event.equipped": {
+      "additionalProperties": false,
+      "properties": {
+        "equipped": {
+          "$ref": "#/$defs/A.event.equipped-payload"
+        }
+      },
+      "required": [
+        "equipped"
+      ],
+      "type": "object"
+    },
+    "A.history.equipped-where": {
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "equipment": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/A.ref"
+            },
+            {
+              "$ref": "#/$defs/A.event-object-sel"
+            }
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "A.history.equipped": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "equipped",
+          "type": "string"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.equipped-where"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.history.equipped-condition": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "equipped",
+          "type": "string"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.equipped-where"
+        },
+        "at_least": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "at": {
+          "const": "event",
+          "type": "string"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.event.fused-as-material-payload": {
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        },
+        "by": {
+          "$ref": "#/$defs/A.event-by"
+        }
+      },
+      "type": "object"
+    },
+    "A.event.fused-as-material": {
+      "additionalProperties": false,
+      "properties": {
+        "fused_as_material": {
+          "$ref": "#/$defs/A.event.fused-as-material-payload"
+        }
+      },
+      "required": [
+        "fused_as_material"
+      ],
+      "type": "object"
+    },
+    "A.history.fused-as-material-where": {
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        },
+        "by": {
+          "$ref": "#/$defs/A.event-by"
+        }
+      },
+      "type": "object"
+    },
+    "A.history.fused-as-material": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "fused_as_material",
+          "type": "string"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.fused-as-material-where"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.history.fused-as-material-condition": {
+      "additionalProperties": false,
+      "not": {
+        "properties": {
+          "where": {
+            "required": [
+              "ref"
+            ]
+          }
+        },
+        "required": [
+          "sel",
+          "where"
+        ]
+      },
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "fused_as_material",
+          "type": "string"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.fused-as-material-where"
+        },
+        "at_least": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "at": {
+          "const": "event",
+          "type": "string"
+        }
+      },
+      "required": [
+        "window",
+        "event"
+      ],
+      "type": "object"
+    },
+    "A.history.payment-where": {
+      "additionalProperties": false,
+      "properties": {
+        "cost_kind": {
+          "const": "earth_rite",
+          "type": "string"
+        }
+      },
+      "required": [
+        "cost_kind"
+      ],
+      "type": "object"
+    },
+    "A.history.payment": {
+      "additionalProperties": false,
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "payment",
+          "type": "string"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.payment-where"
+        }
+      },
+      "required": [
+        "window",
+        "event",
+        "where"
+      ],
+      "type": "object"
+    },
+    "A.history.payment-condition": {
+      "additionalProperties": false,
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "enum": [
+            "facts",
+            "subjects"
+          ],
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "payment",
+          "type": "string"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.payment-where"
+        },
+        "at_least": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "at": {
+          "const": "event",
+          "type": "string"
+        }
+      },
+      "required": [
+        "window",
+        "event",
+        "where"
+      ],
+      "type": "object"
+    },
+    "A.history.payment-sum": {
+      "additionalProperties": false,
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/A.history-window"
+        },
+        "distinct": {
+          "const": "facts",
+          "type": "string"
+        },
+        "exclude": {
+          "const": "this_execution",
+          "type": "string"
+        },
+        "event": {
+          "const": "payment",
+          "type": "string"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "where": {
+          "$ref": "#/$defs/A.history.payment-where"
+        },
+        "field": {
+          "const": "removed_stack",
+          "type": "string"
+        }
+      },
+      "required": [
+        "window",
+        "event",
+        "where",
+        "field"
+      ],
+      "type": "object"
+    },
+    "A.event.counter-reached-payload": {
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        },
+        "name": {
+          "$ref": "#/$defs/CounterName"
+        },
+        "value": {
+          "$ref": "#/$defs/Nat"
+        }
+      },
+      "required": [
+        "ref",
+        "name",
+        "value"
+      ],
+      "type": "object"
+    },
+    "A.event.counter-reached": {
+      "additionalProperties": false,
+      "properties": {
+        "counter_reached": {
+          "$ref": "#/$defs/A.event.counter-reached-payload"
+        }
+      },
+      "required": [
+        "counter_reached"
+      ],
+      "type": "object"
+    },
+    "A.event.state": {
+      "additionalProperties": false,
+      "properties": {
+        "state": {
+          "$ref": "#/$defs/A.cond"
+        }
+      },
+      "required": [
+        "state"
+      ],
+      "type": "object"
+    },
+    "A.event-atom": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.event.enter-field"
+        },
+        {
+          "$ref": "#/$defs/A.event.left-field"
+        },
+        {
+          "$ref": "#/$defs/A.event.placed-ex"
+        },
+        {
+          "$ref": "#/$defs/A.event.discarded"
+        },
+        {
+          "$ref": "#/$defs/A.event.banished"
+        },
+        {
+          "$ref": "#/$defs/A.event.destroyed"
+        },
+        {
+          "$ref": "#/$defs/A.event.damaged"
+        },
+        {
+          "$ref": "#/$defs/A.event.dealt-damage"
+        },
+        {
+          "$ref": "#/$defs/A.event.attacked"
+        },
+        {
+          "$ref": "#/$defs/A.event.attack-target"
+        },
+        {
+          "$ref": "#/$defs/A.event.evolved"
+        },
+        {
+          "$ref": "#/$defs/A.event.super-evolved"
+        },
+        {
+          "$ref": "#/$defs/A.event.phase"
+        },
+        {
+          "$ref": "#/$defs/A.event.played"
+        },
+        {
+          "$ref": "#/$defs/A.event.ability-played"
+        },
+        {
+          "$ref": "#/$defs/A.event.life-changed"
+        },
+        {
+          "$ref": "#/$defs/A.event.stat-changed"
+        },
+        {
+          "$ref": "#/$defs/A.event.counter-changed"
+        },
+        {
+          "$ref": "#/$defs/A.event.acted"
+        },
+        {
+          "$ref": "#/$defs/A.event.stood"
+        },
+        {
+          "$ref": "#/$defs/A.event.raced"
+        },
+        {
+          "$ref": "#/$defs/A.event.drive-gained"
+        },
+        {
+          "$ref": "#/$defs/A.event.ub-activated"
+        },
+        {
+          "$ref": "#/$defs/A.event.fused"
+        },
+        {
+          "$ref": "#/$defs/A.event.targeted"
+        },
+        {
+          "$ref": "#/$defs/A.event.dice-rolled"
+        },
+        {
+          "$ref": "#/$defs/A.event.drive-checked"
+        },
+        {
+          "$ref": "#/$defs/A.event.drive-trigger"
+        },
+        {
+          "$ref": "#/$defs/A.event.moved"
+        },
+        {
+          "$ref": "#/$defs/A.event.drew"
+        },
+        {
+          "$ref": "#/$defs/A.event.equipped"
+        },
+        {
+          "$ref": "#/$defs/A.event.fused-as-material"
+        },
+        {
+          "$ref": "#/$defs/A.event.counter-reached"
+        }
+      ]
+    },
+    "A.event.any-of": {
+      "additionalProperties": false,
+      "properties": {
+        "any_of": {
+          "items": {
+            "$ref": "#/$defs/A.event-atom"
+          },
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "required": [
+        "any_of"
+      ],
+      "type": "object"
+    },
+    "A.event": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.event-atom"
+        },
+        {
+          "$ref": "#/$defs/A.event.any-of"
+        },
+        {
+          "$ref": "#/$defs/A.event.state"
+        }
+      ]
+    },
+    "A.history-query": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.history.enter-field"
+        },
+        {
+          "$ref": "#/$defs/A.history.left-field"
+        },
+        {
+          "$ref": "#/$defs/A.history.placed-ex"
+        },
+        {
+          "$ref": "#/$defs/A.history.discarded"
+        },
+        {
+          "$ref": "#/$defs/A.history.banished"
+        },
+        {
+          "$ref": "#/$defs/A.history.destroyed"
+        },
+        {
+          "$ref": "#/$defs/A.history.damaged"
+        },
+        {
+          "$ref": "#/$defs/A.history.dealt-damage"
+        },
+        {
+          "$ref": "#/$defs/A.history.attacked"
+        },
+        {
+          "$ref": "#/$defs/A.history.attack-target"
+        },
+        {
+          "$ref": "#/$defs/A.history.evolved"
+        },
+        {
+          "$ref": "#/$defs/A.history.super-evolved"
+        },
+        {
+          "$ref": "#/$defs/A.history.phase"
+        },
+        {
+          "$ref": "#/$defs/A.history.played"
+        },
+        {
+          "$ref": "#/$defs/A.history.ability-played"
+        },
+        {
+          "$ref": "#/$defs/A.history.life-changed"
+        },
+        {
+          "$ref": "#/$defs/A.history.stat-changed"
+        },
+        {
+          "$ref": "#/$defs/A.history.counter-changed"
+        },
+        {
+          "$ref": "#/$defs/A.history.acted"
+        },
+        {
+          "$ref": "#/$defs/A.history.stood"
+        },
+        {
+          "$ref": "#/$defs/A.history.raced"
+        },
+        {
+          "$ref": "#/$defs/A.history.drive-gained"
+        },
+        {
+          "$ref": "#/$defs/A.history.ub-activated"
+        },
+        {
+          "$ref": "#/$defs/A.history.fused"
+        },
+        {
+          "$ref": "#/$defs/A.history.targeted"
+        },
+        {
+          "$ref": "#/$defs/A.history.dice-rolled"
+        },
+        {
+          "$ref": "#/$defs/A.history.drive-checked"
+        },
+        {
+          "$ref": "#/$defs/A.history.drive-trigger"
+        },
+        {
+          "$ref": "#/$defs/A.history.moved"
+        },
+        {
+          "$ref": "#/$defs/A.history.drew"
+        },
+        {
+          "$ref": "#/$defs/A.history.equipped"
+        },
+        {
+          "$ref": "#/$defs/A.history.fused-as-material"
+        },
+        {
+          "$ref": "#/$defs/A.history.payment"
+        }
+      ]
+    },
+    "A.history-condition-query": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.history.enter-field-condition"
+        },
+        {
+          "$ref": "#/$defs/A.history.left-field-condition"
+        },
+        {
+          "$ref": "#/$defs/A.history.placed-ex-condition"
+        },
+        {
+          "$ref": "#/$defs/A.history.discarded-condition"
+        },
+        {
+          "$ref": "#/$defs/A.history.banished-condition"
+        },
+        {
+          "$ref": "#/$defs/A.history.destroyed-condition"
+        },
+        {
+          "$ref": "#/$defs/A.history.damaged-condition"
+        },
+        {
+          "$ref": "#/$defs/A.history.dealt-damage-condition"
+        },
+        {
+          "$ref": "#/$defs/A.history.attacked-condition"
+        },
+        {
+          "$ref": "#/$defs/A.history.attack-target-condition"
+        },
+        {
+          "$ref": "#/$defs/A.history.evolved-condition"
+        },
+        {
+          "$ref": "#/$defs/A.history.super-evolved-condition"
+        },
+        {
+          "$ref": "#/$defs/A.history.phase-condition"
+        },
+        {
+          "$ref": "#/$defs/A.history.played-condition"
+        },
+        {
+          "$ref": "#/$defs/A.history.ability-played-condition"
+        },
+        {
+          "$ref": "#/$defs/A.history.life-changed-condition"
+        },
+        {
+          "$ref": "#/$defs/A.history.stat-changed-condition"
+        },
+        {
+          "$ref": "#/$defs/A.history.counter-changed-condition"
+        },
+        {
+          "$ref": "#/$defs/A.history.acted-condition"
+        },
+        {
+          "$ref": "#/$defs/A.history.stood-condition"
+        },
+        {
+          "$ref": "#/$defs/A.history.raced-condition"
+        },
+        {
+          "$ref": "#/$defs/A.history.drive-gained-condition"
+        },
+        {
+          "$ref": "#/$defs/A.history.ub-activated-condition"
+        },
+        {
+          "$ref": "#/$defs/A.history.fused-condition"
+        },
+        {
+          "$ref": "#/$defs/A.history.targeted-condition"
+        },
+        {
+          "$ref": "#/$defs/A.history.dice-rolled-condition"
+        },
+        {
+          "$ref": "#/$defs/A.history.drive-checked-condition"
+        },
+        {
+          "$ref": "#/$defs/A.history.drive-trigger-condition"
+        },
+        {
+          "$ref": "#/$defs/A.history.moved-condition"
+        },
+        {
+          "$ref": "#/$defs/A.history.drew-condition"
+        },
+        {
+          "$ref": "#/$defs/A.history.equipped-condition"
+        },
+        {
+          "$ref": "#/$defs/A.history.fused-as-material-condition"
+        },
+        {
+          "$ref": "#/$defs/A.history.payment-condition"
+        }
+      ]
+    },
+    "A.history-sum-query": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.history.damaged-sum"
+        },
+        {
+          "$ref": "#/$defs/A.history.dealt-damage-sum"
+        },
+        {
+          "$ref": "#/$defs/A.history.life-changed-sum"
+        },
+        {
+          "$ref": "#/$defs/A.history.payment-sum"
+        }
+      ]
+    },
+    "A.cond.history": {
+      "additionalProperties": false,
+      "properties": {
+        "history": {
+          "$ref": "#/$defs/A.history-condition-query"
+        }
+      },
+      "required": [
+        "history"
+      ],
+      "type": "object"
+    },
+    "A.expr.history-count": {
+      "additionalProperties": false,
+      "properties": {
+        "history_count": {
+          "$ref": "#/$defs/A.history-query"
+        }
+      },
+      "required": [
+        "history_count"
+      ],
+      "type": "object"
+    },
+    "A.expr.history-sum": {
+      "additionalProperties": false,
+      "properties": {
+        "history_sum": {
+          "$ref": "#/$defs/A.history-sum-query"
+        }
+      },
+      "required": [
+        "history_sum"
+      ],
+      "type": "object"
+    },
+    "A.capture.power-of": {
+      "additionalProperties": false,
+      "properties": {
+        "power_of": {
+          "$ref": "#/$defs/A.ref"
+        }
+      },
+      "required": [
+        "power_of"
+      ],
+      "type": "object"
+    },
+    "A.capture.hp-of": {
+      "additionalProperties": false,
+      "properties": {
+        "hp_of": {
+          "$ref": "#/$defs/A.ref"
+        }
+      },
+      "required": [
+        "hp_of"
+      ],
+      "type": "object"
+    },
+    "A.capture.cost-of": {
+      "additionalProperties": false,
+      "properties": {
+        "cost_of": {
+          "$ref": "#/$defs/A.ref"
+        }
+      },
+      "required": [
+        "cost_of"
+      ],
+      "type": "object"
+    },
+    "A.capture.orig-cost-of": {
+      "additionalProperties": false,
+      "properties": {
+        "orig_cost_of": {
+          "$ref": "#/$defs/A.ref"
+        }
+      },
+      "required": [
+        "orig_cost_of"
+      ],
+      "type": "object"
+    },
+    "A.state-numeric-read": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.expr.count"
+        },
+        {
+          "$ref": "#/$defs/A.expr.hand"
+        },
+        {
+          "$ref": "#/$defs/A.expr.leader-life"
+        },
+        {
+          "$ref": "#/$defs/A.expr.resource"
+        },
+        {
+          "$ref": "#/$defs/A.expr.turn-number"
+        },
+        {
+          "$ref": "#/$defs/A.expr.zone-free"
+        },
+        {
+          "$ref": "#/$defs/A.expr.distinct-names"
+        },
+        {
+          "$ref": "#/$defs/A.expr.distinct-orig-costs"
+        },
+        {
+          "$ref": "#/$defs/A.expr.agg"
+        },
+        {
+          "$ref": "#/$defs/A.capture.power-of"
+        },
+        {
+          "$ref": "#/$defs/A.capture.hp-of"
+        },
+        {
+          "$ref": "#/$defs/A.capture.cost-of"
+        },
+        {
+          "$ref": "#/$defs/A.capture.orig-cost-of"
+        },
+        {
+          "$ref": "#/$defs/A.expr.history-count"
+        },
+        {
+          "$ref": "#/$defs/A.expr.history-sum"
+        }
+      ]
+    },
+    "A.capture.timed": {
+      "additionalProperties": false,
+      "properties": {
+        "at": {
+          "enum": [
+            "live",
+            "play",
+            "resolution",
+            "event"
+          ],
+          "type": "string"
+        },
+        "value": {
+          "$ref": "#/$defs/A.state-numeric-read"
+        }
+      },
+      "required": [
+        "at",
+        "value"
+      ],
+      "type": "object"
+    },
+    "A.capture.selection": {
+      "additionalProperties": false,
+      "properties": {
+        "at": {
+          "const": "selection",
+          "type": "string"
+        },
+        "selection": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "value": {
+          "$ref": "#/$defs/A.state-numeric-read"
+        }
+      },
+      "required": [
+        "at",
+        "selection",
+        "value"
+      ],
+      "type": "object"
+    },
+    "A.expr.capture": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.capture.timed"
+        },
+        {
+          "$ref": "#/$defs/A.capture.selection"
         }
       ]
     }

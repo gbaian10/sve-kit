@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 from pydantic import TypeAdapter
 
-from sve_carddb.contracts import author_recipients as author
+from sve_carddb.contracts import author_queries as author
 
 from .author_selector_cases import CONFIG
 

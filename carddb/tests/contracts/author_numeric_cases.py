@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 from pydantic import ConfigDict, TypeAdapter
 
 from sve_carddb.contracts import author_queries as author
-from sve_carddb.contracts import author_receipts as receipts
 from sve_carddb.contracts.author_queries import ExprCount
 
 if TYPE_CHECKING:
@@ -32,7 +31,7 @@ NUMERIC: dict[str, TypeAdapter[object]] = {
     "A.expr.turn-number": TypeAdapter(author.ExprTurnNumber),
     "A.expr.zone-free-payload": TypeAdapter(author.ExprZoneFreePayload),
     "A.expr.zone-free": TypeAdapter(author.ExprZoneFree),
-    "A.expr.count-of": TypeAdapter(receipts.ExprCountOf),
+    "A.expr.count-of": TypeAdapter(author.ExprCountOf),
     "A.expr.numeric": TypeAdapter(author.NumericExpr, config=CONFIG),
     "A.expr.numeric-operation": TypeAdapter(author.NumericOperation, config=CONFIG),
     "A.cond.cmp-payload": TypeAdapter(author.CondCmpPayload),
@@ -40,7 +39,7 @@ NUMERIC: dict[str, TypeAdapter[object]] = {
     "A.cond.all": TypeAdapter(author.CondAll),
     "A.cond.any": TypeAdapter(author.CondAny),
     "A.cond.not": TypeAdapter(author.CondNot),
-    "A.cond.did": TypeAdapter(receipts.CondDid),
+    "A.cond.did": TypeAdapter(author.CondDid),
     "A.cond": TypeAdapter(author.Condition, config=CONFIG),
 }
 NUMERIC_NAMES = {

@@ -149,7 +149,7 @@ groups 與完整動作欄位仍未全部接入，不表示完整作者樹已實�
 它逐 variant 區分必填、互斥與葉參數位置；每個 variant 的 operand 也仍是片段值域，
 不能當作本節完整 Expr／Cond／Sel 或 expanded profile。
 
-沿用 `count: Sel / count_of / objects_of / bound / power_of / hp_of / cost_of / hand / leader_life / counter / distinct_names / distinct_orig_costs / dice / paid / x_paid / history_count / lki_of`；算術為 `plus / minus / times / half_up / per: {of, unit}`，二元運算用二元素陣列。增加 `resource / agg / min / max / event / turn_number` 與 `define`，見 §13。`cmp: {left, op: eq|ne|lt|le|gt|ge, right}` 比較同型值；`all / any / not` 組合條件。保留 `exists / on_field / in_zone / leader_life / hand / zone_free / my_turn / opp_turn / construction / standing / acted / evolved / chosen / did / entered_from / played_from` 與 combo、spellchain、necro、awakened、crimson。
+沿用 `count: Sel / count_of / objects_of / bound / power_of / hp_of / cost_of / hand / leader_life / counter / distinct_names / distinct_orig_costs / dice / paid / x_paid / history_count / lki_of`；算術為 `plus / minus / times / half_up / per: {of, unit}`，二元運算用二元素陣列。增加 `resource / agg / min / max / event / turn_number` 與 `define`，見 §13。`cmp: {left, op: eq|ne|lt|le|gt|ge, right}` 比較數值；Player 同型比較的兩邊須 `{player:PlayerRef}` 且只收 eq/ne。paid、chosen 是 Cond；lki_of 與 objects_of 只在列明 operand，不是自由數值；`all / any / not` 組合條件。保留 `exists / on_field / in_zone / leader_life / hand / zone_free / my_turn / opp_turn / construction / standing / acted / evolved / chosen / did / entered_from / played_from` 與 combo、spellchain、necro、awakened、crimson。
 
 `define: {X: Expr, …}` 是同一能力內的**純表達式別名**，在每個使用點展開、依該 read 的時點讀；不是 entry 時偷偷 freeze。一般卡文定義 X 為 Live（已同意第 18 族），事件／receipt 值本身固定。自定義 X 與頭的自由 x 不可同名；無限循環定義、型別不明定義載入拒絕。同一步使用 X 多次從同一指示開始視圖讀，跨步驟則重新求值。
 
@@ -161,7 +161,7 @@ groups 與完整動作欄位仍未全部接入，不表示完整作者樹已實�
 | AtSelection  | 「選んでいたなら」讀指定目標選定時特徵                                                                          |
 | AtEvent      | event.field、事件材料／來源快照；R-0009 的本文判斷仍能讀這些值                                                  |
 
-`at: live|play|resolution|selection|event` 只能用登錄允許且有語義依據的組合，不是自由改規則。條件求值階段與值的捕捉時間分開；一個複合式可有多種 read，但分類資料不必因已廢止的「長寫條件查兩次」增設 capture 清單（第 20 族結案；遷移見配對文件）。
+捕捉以 `{at:live|play|resolution|event,value:StateNumericRead}` 或 `{at:selection,selection:BindingName,value:StateNumericRead}` 表示；history 條件另允許 payload 內的 at:event。只能用登錄允許且有語義依據的組合，不是自由改規則。條件求值階段與值的捕捉時間分開；一個複合式可有多種 read，但分類資料不必因已廢止的「長寫條件查兩次」增設 capture 清單（第 20 族結案；遷移見配對文件）。
 
 `item` 是保留的局部名稱：`Sel.where` 求值時綁定目前候選元素，型別為該 Sel 的元素型別，只在該 predicate 有效；`by_kind` 分支則綁定窄化後的接受者。禁止巢狀 where／by_kind 隱式遮蔽 item；需要巢狀時以 `Sel.as: name` 或 `by_kind.as: name` 明確命名，該層不再引入 item。別名與一般 bind 同樣不得重名，離開 predicate／分支即失效，外層 item 仍可明確讀取。
 
@@ -235,9 +235,9 @@ DeckSlice 的型別已定，四個完整父動作仍待接入；費用 banish.to
 
 `A.event` 保留 enter_field、left_field、placed_ex、discarded、banished、destroyed、damaged、dealt_damage、attacked、attack_target、evolved、super_evolved、phase、played、ability_played、life_changed、stat_changed、counter_changed、acted、stood、raced、drive_gained、ub_activated、fused、targeted、state。新增 dice_rolled、drive_checked、drive_trigger、moved、drew、equipped、fused_as_material；any_of 合併多種事件但仍是一條能力／限次。payload 必須按事件型別窄化，不可讀不存在欄位。
 
-共同事件 filter `by: {ability_of: Sel}` 判直接來源；入場加 entered_by，UB 加 holder，傷害加 recipient，融合加 material，drew 加 not_phase，counter_reached 為 counter_changed 的 after 比較。`stat_changed: {ref,stat: power|hp或清單,direction:up|down}` 對應 Attack/Life，同一指示對同一主體的攻體增減保存為一個事實的多個 facet，不重複計（`strength: inferred`；Q2075 只證明超進化會誘發，未證明次數）。stat_changed 的 history.where 同樣只用 ref／stat／direction：ref 降為 IR subject，stat 的 power／hp 降為 StatDelta.property 的 Attack／Life；撰寫層不接受 subject／property 別名。從者事件只由明示數值指示或超進化 CR 12.2.4.1 的 +1 步驟產生；進化基礎替換不產生（Q2758），超進化產生（Q2759）。持續效果條件變化、期限到期、種類還原與快取重算不產生，標 `strength: inferred`；領袖的傷害／回復／生命支付仍保留獨立來源。
+共同事件 filter `by: {ability_of: EventObjectSel}` 判直接來源；入場加 entered_by，UB 加 holder，傷害加 recipient，融合加 material，drew 加 not_phase，counter_reached 為 counter_changed 的 after 比較。`stat_changed: {ref,stat: power|hp或清單,direction:up|down}` 對應 Attack/Life，同一指示對同一主體的攻體增減保存為一個事實的多個 facet，不重複計（`strength: inferred`；Q2075 只證明超進化會誘發，未證明次數）。stat_changed 的 history.where 同樣只用 ref／stat／direction：ref 降為 IR subject，stat 的 power／hp 降為 StatDelta.property 的 Attack／Life；撰寫層不接受 subject／property 別名。從者事件只由明示數值指示或超進化 CR 12.2.4.1 的 +1 步驟產生；進化基礎替換不產生（Q2758），超進化產生（Q2759）。持續效果條件變化、期限到期、種類還原與快取重算不產生，標 `strength: inferred`；領袖的傷害／回復／生命支付仍保留獨立來源。
 
-`history: {event,who?,zone?,from?,to?,sel?,where?,window:this_turn|game|since:<錨>,at_least?,distinct?:facts|subjects,exclude?}` 是條件；`history_count` 回數量；`history_sum: {… ,field}` 回 typed payload 總量。事件鍵共用上表（骰子統一 dice_rolled）；where 只接該事件登錄欄位。exclude=this_execution 排除本次 AbilityExecutionId，不排除同卡過去執行或外層執行。UB 在適正打出完成的 E.play 記一次發動，內層查詢已可見外層；另見 IR §13 GAP-S-015。所有歷史保存事件當時特徵，不查目前卡片；內部歷史身份不洩漏隱藏牌固定 ID。
+`history: {event,who?,zone?,from?,to?,sel?,where?,window:this_turn|game|{since:BindingName},at_least?,distinct?:facts|subjects,exclude?}` 是條件；`history_count` 回數量；`history_sum: {… ,field}` 回 typed payload 總量。事件鍵取上表的非 state 事件加 history-only payment（骰子統一 dice_rolled）；where 只接該事件登錄欄位，phase.which 在歷史不收 param。完整封閉形狀見[事件與歷史形狀](author-history-shapes-1.0.md)。exclude=this_execution 排除本次 AbilityExecutionId，不排除同卡過去執行或外層執行。UB 在適正打出完成的 E.play 記一次發動，內層查詢已可見外層；另見 IR §13 GAP-S-015。所有歷史保存事件當時特徵，不查目前卡片；內部歷史身份不洩漏隱藏牌固定 ID。
 
 ## 9. 效果、取代與期限
 
@@ -291,7 +291,7 @@ Until 保留 turn、next_opp_turn、this_and_next_opp_turn、game；明確長形
 
 輸入為單一 UTF-8 YAML 文件；省略版本指示或明示 `%YAML 1.2` 可讀，其他版本指示拒絕。`carddb` 採已鎖定 yamlrocks 的純量語意，例 `on`／`off`／`yes`／`no`／`n` 是字串、`true`／`false` 是布林、日期不是隱式 timestamp；不宣稱完全沿用舊 1.2 core resolver。所有 mapping 鍵必須是字串，布林、數值、null、集合鍵均拒絕；不可先轉字串再驗，亦不可容許 true／false 字串鍵冒充構造。重複鍵須在資料被覆蓋前拒絕。
 
-每個鍵必須在**目前構造上下文**的登錄表：例如 cannot 沒有 n，buff 有 on；不能以另一構造曾使用 n 就放行。cards、define、roles 的動態名稱須符合其專屬卡號／識別字規則，不是任意額外欄位。未知鍵附卡號、行與完整路徑報錯。event 與 history.where 共用該事件的欄位表。
+每個鍵必須在**目前構造上下文**的登錄表：例如 cannot 沒有 n，buff 有 on；不能以另一構造曾使用 n 就放行。cards、define、roles 的動態名稱須符合其專屬卡號／識別字規則，不是任意額外欄位。未知鍵附卡號、行與完整路徑報錯。event 與 history 的欄位依[事件與歷史形狀](author-history-shapes-1.0.md)分工；登錄的 who/zone/from/to/sel 提升到 history 頂層，不留在 where。
 
 `carddb` 的 authored 讀取採 `yamlrocks==0.7.0`，以套件選項拒絕重複鍵與複合鍵，再由 strict JSON 與 canonical 拒絕其他非字串鍵、自訂 tag 物件與非有限數；anchor／alias／merge 與顯式 tag 讀取允許、寫入不產生，字元與數字拼法完整邊界見 [authored 格式 §1](../schema/domains/authored-layout.md#1-路徑與共同格式)。寫出維持 ruamel，不自製 parser／resolver 或 PyYAML fallback；其他既有 Python DSL 工具維持 `ruamel.yaml` 的 `YAML(typ="safe", pure=True)`、版本 `(1, 2)`、`allow_duplicate_keys=False`，本次未替換。正式 1.0 由 Python C0 嚴格讀 YAML 並交付已驗且完全展開的作者 JSON 樹，Rust D0 只接該樹降低 IR；不要求第二套 Rust 作者 YAML parser。既有 astra/1 Rust 入口不在此變更。YAML 原始文字作來源證據保存，不以 load→dump 作反向翻譯來源。
 
@@ -841,7 +841,7 @@ evolve_time:
 
 ### GAP-A-029
 
-history.where 是 typed payload 條件；stat_changed 的 ref 相等比較包含世代（IR subject），不接受撰寫欄位 subject。history_sum.field 明列 amount/delta/removed 等可加總欄位，不能 count 代 sum。
+history.where 是 typed payload 條件；stat_changed 的 ref 相等比較包含世代（IR subject），不接受撰寫欄位 subject。history_sum.field 明列 amount/delta/removed_stack 等可加總欄位，不能 count 代 sum。
 
 真實卡例：**BP20-P37 吹雪のドラゴニュート**；來源 `BP20-P37#0/text/0`，句型 `T4fa538d54e`。
 
@@ -1178,7 +1178,7 @@ auto:
   on:
     any_of:
       - fused: { who: self, material: { trait: 財宝 } }
-      - played: { who: self, trait: 財宝 }
+      - played: { who: self, sel: { trait: 財宝 } }
   do: [{ grant: { on: this, keywords: [storm] } }]
 ```
 
@@ -1621,7 +1621,7 @@ lastword:
 
 ### GAP-A-061
 
-event.field 或 `event:<field>` 都須先由 on 型別推導欄位。固定傷害事件值在本文判斷；兩次 3、2 不合成 5（R-0009、Q940）。
+`event:<field>` 須先由 on 型別推導欄位；不收長形 event.field。固定傷害事件值在本文判斷；兩次 3、2 不合成 5（R-0009、Q940）。
 
 真實卡例：**CP02-SL10 辻野あかり**；來源 `CP02-SL10#0/text/1`，句型 `T247492c8a1`。
 
@@ -1631,7 +1631,7 @@ event.field 或 `event:<field>` 都須先由 on 型別推導欄位。固定傷�
 
 ```yaml
 auto:
-  on: { damaged: { ref: this } }
+  on: { damaged: { recipient: this } }
   do:
     - if:
         cond: { cmp: { left: { event: amount }, op: ge, right: 5 } }
