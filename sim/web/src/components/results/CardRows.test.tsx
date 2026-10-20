@@ -41,6 +41,8 @@ const typeNames: Readonly<Record<string, string>> = {
   amulet: "護符",
   crest: "紋章",
   equipment: "裝備",
+  ep: "Evolution Point",
+  sep: "Super-Evolution Point",
 }
 const typeLabel = (code: string) => typeNames[code] ?? code
 
@@ -723,6 +725,29 @@ it.each(["list", "table"] as const)(
     expect(screen.getAllByRole("img", { name: "Token" })).toHaveLength(2)
   },
 )
+
+it("keeps EP and SEP text available with full-label tooltips in the list", async () => {
+  await renderInRouter(
+    <CardList
+      typeLabel={typeLabel}
+      classLabel={classLabel}
+      cells={["ep", "sep"].map((typeCode) => ({
+        ...cell,
+        key: typeCode,
+        summary: { ...cell.summary, typeCode, deckLocations: [] },
+      }))}
+      onOpen={vi.fn()}
+    />,
+    { language: "en" },
+  )
+  for (const name of ["Evolution Point", "Super-Evolution Point"]) {
+    expect(screen.getByText(name)).toBeVisible()
+    expect(screen.getByText(name)).toHaveAttribute("title", name)
+  }
+  for (const location of document.querySelectorAll("[data-list-location]")) {
+    expect(location).toBeEmptyDOMElement()
+  }
+})
 
 it.each(["list", "table"] as const)(
   "uses the supplied vocabulary label for the type icon in %s regardless of UI language",

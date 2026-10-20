@@ -234,7 +234,7 @@ html:has([data-card-list]) {
   white-space: nowrap;
 }
 
-:where([data-card-list] td:not([data-list-rarity], [data-list-location], [data-list-type])) {
+:where([data-card-list] td:not([data-list-rarity], [data-list-location])) {
   /* Keep long card content from enlarging the intrinsic columns. */
   max-width: 0;
 }
@@ -267,6 +267,12 @@ html:has([data-card-list]) {
 
 :where([data-card-list] [data-list-type] > img) {
   margin-inline: auto;
+}
+
+:where([data-card-list] [data-list-type] > span) {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 :where([data-list-heading="rarity"]) {

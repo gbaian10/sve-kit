@@ -16,7 +16,7 @@ export function CardTypeBadge({
   readonly fallback?: boolean
 }) {
   if (code !== "follower" && code !== "spell" && code !== "amulet")
-    return fallback && code ? <span>{label}</span> : null
+    return fallback && code ? <span title={label}>{label}</span> : null
   return (
     <img
       src={ASSETS[code]}
