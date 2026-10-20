@@ -44,8 +44,8 @@ CardNumber 沿現有身分登錄的非空字串，保留小寫與 `Ⓢ` 等原�
 | spell | targets?、optional_cost?、x?、define?、do | 空 do 合法；仍須打出程序 |
 | static | while?、zone?、effects | 動態 selector、來源有效區；需範圍的 on 不省略 |
 | play | cost_delta?、cost_set?、additional_cost?、optional_cost?、optional_cost_delta?、optional_cost_set?、alt_cost?、cannot_if?、playable_from?、define? | set／delta／替代費用不等價；alt_cost={if,may?,cost} |
-| A.cost 短形 | pp、ep、act_self、self_to_cemetery、banish_self、discard、banish、to_cemetery、return_to_hand、reveal、counter、flip_down、flip_up、leader_life、lesson、earth_rite、stack_counter_from、act、to_ex、to_deck_bottom、to_deck、pp_max、skip_turn、one_of | §3 要求保留付款鍵序；與承載 §4.1／§6 的排序及鍵序不改版存在差異，本表不裁決；to_deck 可含 shuffle:true（§13 GAP-A-012） |
-| A.cost 長形 | steps:[{單一費用鍵:payload}…] | 同鍵重複用 steps；§3 未明定長短形混填規則 |
+| A.cost 短形 | pp、ep、act_self、self_to_cemetery、banish_self、discard、banish、to_cemetery、return_to_hand、reveal、counter、flip_down、flip_up、leader_life、lesson、earth_rite、stack_counter_from、act、to_ex、to_deck_bottom、to_deck、pp_max、skip_turn、one_of 中恰一個操作鍵 | 拒絕多操作鍵；所在 wrapper 已登錄的 result 不算操作鍵，不授予其他位置 metadata；to_deck 可含 shuffle:true（§13 GAP-A-012） |
+| A.cost 長形 | steps:[{單一費用鍵:payload}…]，至少兩項 | 按卡文陣列順序付款，保留重複步驟；拒絕 steps 混操作鍵、多鍵 step、step 層級 metadata；payload 已登錄 result 不受影響；短／長形互斥，詳 §3 |
 | 費用材料 | sel、n\|upto\|any、groups?、distinct_by?、result?；banish 另 top:{who,n}（§13 GAP-A-010） | groups 共用 disjoint／整體限制；discard 的 ref/include_self/random 見 §7、§13 GAP-A-042 |
 | 費用 counter | on、name、n\|upto\|any、holders?、result? | on:this 固定唯一 holder；selector 須明示 holders |
 | optional_cost／additional_cost | 費用＋result? | result 是付款 receipt；付款前不可讀 paid |
@@ -88,8 +88,10 @@ CardNumber 沿現有身分登錄的非空字串，保留小寫與 `Ⓢ` 等原�
 | did 長形 | result、where | 兩鍵必填；預設成功判準且存在匹配的成功材料；已登錄 before 視角限付款／捨牌，型別另驗 |
 | 捕捉 | at=live/play/resolution/selection/event | 只在已登錄位置；apply.capture=play 另為集合捕捉 |
 
-物件來源、差集、where／as 與區域計數的已定片段見[物件查詢矩陣](author-object-query-shapes-1.0.md)。
-計數 any_of 保留 counted 角色並先去重；選取 any_of 另分純物件 ObjectUnion
+物件來源、差集、where／as 與計數集合的已定片段見[物件查詢矩陣](author-object-query-shapes-1.0.md)。
+計數 any_of 的區域 limb 保留 counted 角色並先去重；
+集合讀值與非歷史條件的封閉 payload 見[讀值形狀矩陣](author-expression-shapes-1.0.md)，
+agg／distinct／count.except 的來源不繼承 counted 參數權限。選取 any_of 另分純物件 ObjectUnion
 與至少含一個領袖 limb 的 RecipientUnion，見[接受者矩陣](author-selection-shapes-1.0.md#領袖與聯集)。
 具名 RecipientSel 不擴大物件消費位置；等義拼法不推定相同 body hash。
 單組 Target／choose／search 的數量父變體、counter 與 DeckSlice 已定形，

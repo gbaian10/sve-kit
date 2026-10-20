@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:sve-kit:author-nodes:1.0",
   "title": "SVE author 1.0 shared leaf and reference definitions",
-  "$comment": "Leaf, reference-atom, target-role, numeric, receipt, object-query and recipient fragment library. Object selectors include object unions and exclude leaders; RecipientSel adds leaders and unions containing a leader limb. Count queries retain distinct counted roles. Operands and filters have partial domains, not full Expr/Cond/Sel. Snapshot reads grant no operation authority. The root rejects standalone documents; select a $defs entry. Full authored/expanded profiles are not implemented. Quantity positions share numeric-operation with signed expressions. Single-group Target, choose, search and counter costs are closed fragments; DeckSlice has only documented action-level top consumers. Full action parents, source-role and scope admission remain separate.",
+  "$comment": "Author fragments only; root rejects standalone input. Numeric expressions, nonhistory conditions and object queries share one recursive graph. Not complete E/C/Sel or execution admission: history, history_count, history_sum, event, lki_of, at, chosen, paid, x_paid, dice, nonnumeric cmp, material extensions and agg.hp remain unsupported.",
   "not": {},
   "$defs": {
     "Int": {
@@ -681,10 +681,10 @@
               "type": "array",
               "prefixItems": [
                 {
-                  "$ref": "#/$defs/A.expr.numeric-core"
+                  "$ref": "#/$defs/A.expr.numeric"
                 },
                 {
-                  "$ref": "#/$defs/A.expr.numeric-core"
+                  "$ref": "#/$defs/A.expr.numeric"
                 }
               ],
               "minItems": 2,
@@ -697,7 +697,7 @@
                   "$ref": "#/$defs/A.param"
                 },
                 {
-                  "$ref": "#/$defs/A.expr.numeric-core"
+                  "$ref": "#/$defs/A.expr.numeric"
                 }
               ],
               "minItems": 2,
@@ -707,7 +707,7 @@
               "type": "array",
               "prefixItems": [
                 {
-                  "$ref": "#/$defs/A.expr.numeric-core"
+                  "$ref": "#/$defs/A.expr.numeric"
                 },
                 {
                   "$ref": "#/$defs/A.param"
@@ -731,12 +731,12 @@
           "type": "array",
           "prefixItems": [
             {
-              "$ref": "#/$defs/A.expr.numeric-core"
+              "$ref": "#/$defs/A.expr.numeric"
             },
             {
               "anyOf": [
                 {
-                  "$ref": "#/$defs/A.expr.numeric-core"
+                  "$ref": "#/$defs/A.expr.numeric"
                 },
                 {
                   "$ref": "#/$defs/A.param"
@@ -760,10 +760,10 @@
           "type": "array",
           "prefixItems": [
             {
-              "$ref": "#/$defs/A.expr.numeric-core"
+              "$ref": "#/$defs/A.expr.numeric"
             },
             {
-              "$ref": "#/$defs/A.expr.numeric-core"
+              "$ref": "#/$defs/A.expr.numeric"
             }
           ],
           "minItems": 2,
@@ -779,7 +779,7 @@
       "type": "object",
       "properties": {
         "half_up": {
-          "$ref": "#/$defs/A.expr.numeric-core"
+          "$ref": "#/$defs/A.expr.numeric"
         }
       },
       "required": [
@@ -791,7 +791,7 @@
       "type": "object",
       "properties": {
         "of": {
-          "$ref": "#/$defs/A.expr.numeric-core"
+          "$ref": "#/$defs/A.expr.numeric"
         },
         "unit": {
           "type": "integer",
@@ -823,7 +823,7 @@
         "min": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/A.expr.numeric-core"
+            "$ref": "#/$defs/A.expr.numeric"
           },
           "minItems": 1
         }
@@ -839,7 +839,7 @@
         "max": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/A.expr.numeric-core"
+            "$ref": "#/$defs/A.expr.numeric"
           },
           "minItems": 1
         }
@@ -987,7 +987,7 @@
       ],
       "additionalProperties": false
     },
-    "A.expr.numeric-core": {
+    "A.expr.numeric": {
       "anyOf": [
         {
           "$ref": "#/$defs/Int"
@@ -1001,7 +1001,7 @@
       "type": "object",
       "properties": {
         "left": {
-          "$ref": "#/$defs/A.expr.numeric-core"
+          "$ref": "#/$defs/A.expr.numeric"
         },
         "op": {
           "type": "string",
@@ -1015,7 +1015,7 @@
           ]
         },
         "right": {
-          "$ref": "#/$defs/A.expr.numeric-core"
+          "$ref": "#/$defs/A.expr.numeric"
         }
       },
       "required": [
@@ -1043,7 +1043,7 @@
         "all": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/A.cond.numeric-core"
+            "$ref": "#/$defs/A.cond"
           },
           "minItems": 1
         }
@@ -1059,7 +1059,7 @@
         "any": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/A.cond.numeric-core"
+            "$ref": "#/$defs/A.cond"
           },
           "minItems": 1
         }
@@ -1073,7 +1073,7 @@
       "type": "object",
       "properties": {
         "not": {
-          "$ref": "#/$defs/A.cond.numeric-core"
+          "$ref": "#/$defs/A.cond"
         }
       },
       "required": [
@@ -1081,7 +1081,7 @@
       ],
       "additionalProperties": false
     },
-    "A.cond.numeric-core": {
+    "A.cond": {
       "anyOf": [
         {
           "$ref": "#/$defs/A.cond.cmp"
@@ -1097,6 +1097,69 @@
         },
         {
           "$ref": "#/$defs/A.cond.did"
+        },
+        {
+          "$ref": "#/$defs/A.cond.on-field"
+        },
+        {
+          "$ref": "#/$defs/A.cond.standing"
+        },
+        {
+          "$ref": "#/$defs/A.cond.acted"
+        },
+        {
+          "$ref": "#/$defs/A.cond.evolved"
+        },
+        {
+          "$ref": "#/$defs/A.cond.my-turn"
+        },
+        {
+          "$ref": "#/$defs/A.cond.opp-turn"
+        },
+        {
+          "$ref": "#/$defs/A.cond.construction"
+        },
+        {
+          "$ref": "#/$defs/A.cond.combo"
+        },
+        {
+          "$ref": "#/$defs/A.cond.spellchain"
+        },
+        {
+          "$ref": "#/$defs/A.cond.necro"
+        },
+        {
+          "$ref": "#/$defs/A.cond.awakened"
+        },
+        {
+          "$ref": "#/$defs/A.cond.crimson"
+        },
+        {
+          "$ref": "#/$defs/A.cond.exists"
+        },
+        {
+          "$ref": "#/$defs/A.cond.in-zone"
+        },
+        {
+          "$ref": "#/$defs/A.cond.entered-from"
+        },
+        {
+          "$ref": "#/$defs/A.cond.played-from"
+        },
+        {
+          "$ref": "#/$defs/A.cond.entered-by"
+        },
+        {
+          "$ref": "#/$defs/A.cond.is"
+        },
+        {
+          "$ref": "#/$defs/A.cond.hand"
+        },
+        {
+          "$ref": "#/$defs/A.cond.leader-life"
+        },
+        {
+          "$ref": "#/$defs/A.cond.zone-free"
         }
       ]
     },
@@ -1319,23 +1382,24 @@
           "minItems": 1
         },
         "name_contains": {
-          "$ref": "#/$defs/CardName"
+          "minLength": 1,
+          "type": "string"
         },
         "other": {
           "type": "boolean",
           "const": true
         },
         "orig_cost_eq": {
-          "$ref": "#/$defs/Nat"
+          "$ref": "#/$defs/A.quantity"
         },
         "orig_cost_le": {
-          "$ref": "#/$defs/Nat"
+          "$ref": "#/$defs/A.quantity"
         },
         "orig_cost_ge": {
-          "$ref": "#/$defs/Nat"
+          "$ref": "#/$defs/A.quantity"
         },
         "hp_le": {
-          "$ref": "#/$defs/Nat"
+          "$ref": "#/$defs/A.quantity"
         },
         "acted": {
           "type": "boolean"
@@ -1380,6 +1444,69 @@
               "$ref": "#/$defs/A.param"
             }
           ]
+        },
+        "not_class": {
+          "$ref": "#/$defs/Concept"
+        },
+        "not_trait": {
+          "$ref": "#/$defs/Concept"
+        },
+        "traits_any": {
+          "items": {
+            "$ref": "#/$defs/Concept"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "not_same_name_as_this": {
+          "const": true,
+          "type": "boolean"
+        },
+        "cost_eq": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "cost_le": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "cost_ge": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "keyword": {
+          "$ref": "#/$defs/Concept"
+        },
+        "has_trigger": {
+          "const": true,
+          "type": "boolean"
+        },
+        "has_evolve": {
+          "const": true,
+          "type": "boolean"
+        },
+        "face_up": {
+          "type": "boolean"
+        },
+        "boxed": {
+          "type": "boolean"
+        },
+        "evolved": {
+          "type": "boolean"
+        },
+        "entered_this_turn": {
+          "const": true,
+          "type": "boolean"
+        },
+        "advance_follower": {
+          "const": true,
+          "type": "boolean"
+        },
+        "except": {
+          "$ref": "#/$defs/A.collection"
+        },
+        "where": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "as": {
+          "$ref": "#/$defs/BindingName"
         }
       },
       "required": [
@@ -1414,6 +1541,11 @@
             ]
           }
         ]
+      },
+      "dependentRequired": {
+        "as": [
+          "where"
+        ]
       }
     },
     "A.expr.count-union": {
@@ -1422,7 +1554,7 @@
         "any_of": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/A.expr.count-objects"
+            "$ref": "#/$defs/A.expr.count-atom"
           },
           "minItems": 1
         }
@@ -1435,7 +1567,7 @@
     "A.expr.count-source": {
       "anyOf": [
         {
-          "$ref": "#/$defs/A.expr.count-objects"
+          "$ref": "#/$defs/A.expr.count-atom"
         },
         {
           "$ref": "#/$defs/A.expr.count-union"
@@ -1525,23 +1657,24 @@
           "minItems": 1
         },
         "name_contains": {
-          "$ref": "#/$defs/CardName"
+          "minLength": 1,
+          "type": "string"
         },
         "other": {
           "type": "boolean",
           "const": true
         },
         "orig_cost_eq": {
-          "$ref": "#/$defs/Nat"
+          "$ref": "#/$defs/A.quantity"
         },
         "orig_cost_le": {
-          "$ref": "#/$defs/Nat"
+          "$ref": "#/$defs/A.quantity"
         },
         "orig_cost_ge": {
-          "$ref": "#/$defs/Nat"
+          "$ref": "#/$defs/A.quantity"
         },
         "hp_le": {
-          "$ref": "#/$defs/Nat"
+          "$ref": "#/$defs/A.quantity"
         },
         "acted": {
           "type": "boolean"
@@ -1561,7 +1694,7 @@
           "$ref": "#/$defs/A.sel.object-core"
         },
         "where": {
-          "$ref": "#/$defs/A.cond.numeric-core"
+          "$ref": "#/$defs/A.cond"
         },
         "as": {
           "$ref": "#/$defs/BindingName"
@@ -1595,6 +1728,64 @@
               "$ref": "#/$defs/A.param"
             }
           ]
+        },
+        "not_class": {
+          "$ref": "#/$defs/Concept"
+        },
+        "not_trait": {
+          "$ref": "#/$defs/Concept"
+        },
+        "traits_any": {
+          "items": {
+            "$ref": "#/$defs/Concept"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "not_same_name_as_this": {
+          "const": true,
+          "type": "boolean"
+        },
+        "cost_eq": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "cost_le": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "cost_ge": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "keyword": {
+          "$ref": "#/$defs/Concept"
+        },
+        "has_trigger": {
+          "const": true,
+          "type": "boolean"
+        },
+        "has_evolve": {
+          "const": true,
+          "type": "boolean"
+        },
+        "face_up": {
+          "type": "boolean"
+        },
+        "boxed": {
+          "type": "boolean"
+        },
+        "evolved": {
+          "type": "boolean"
+        },
+        "entered_this_turn": {
+          "const": true,
+          "type": "boolean"
+        },
+        "advance_follower": {
+          "const": true,
+          "type": "boolean"
+        },
+        "power_max": {
+          "const": true,
+          "type": "boolean"
         }
       },
       "required": [
@@ -1706,23 +1897,24 @@
           "minItems": 1
         },
         "name_contains": {
-          "$ref": "#/$defs/CardName"
+          "minLength": 1,
+          "type": "string"
         },
         "other": {
           "type": "boolean",
           "const": true
         },
         "orig_cost_eq": {
-          "$ref": "#/$defs/Nat"
+          "$ref": "#/$defs/A.quantity"
         },
         "orig_cost_le": {
-          "$ref": "#/$defs/Nat"
+          "$ref": "#/$defs/A.quantity"
         },
         "orig_cost_ge": {
-          "$ref": "#/$defs/Nat"
+          "$ref": "#/$defs/A.quantity"
         },
         "hp_le": {
-          "$ref": "#/$defs/Nat"
+          "$ref": "#/$defs/A.quantity"
         },
         "acted": {
           "type": "boolean"
@@ -1742,7 +1934,7 @@
           "$ref": "#/$defs/A.sel.object-core"
         },
         "where": {
-          "$ref": "#/$defs/A.cond.numeric-core"
+          "$ref": "#/$defs/A.cond"
         },
         "as": {
           "$ref": "#/$defs/BindingName"
@@ -1756,6 +1948,64 @@
               "$ref": "#/$defs/A.snapshot-read"
             }
           ]
+        },
+        "not_class": {
+          "$ref": "#/$defs/Concept"
+        },
+        "not_trait": {
+          "$ref": "#/$defs/Concept"
+        },
+        "traits_any": {
+          "items": {
+            "$ref": "#/$defs/Concept"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "not_same_name_as_this": {
+          "const": true,
+          "type": "boolean"
+        },
+        "cost_eq": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "cost_le": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "cost_ge": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "keyword": {
+          "$ref": "#/$defs/Concept"
+        },
+        "has_trigger": {
+          "const": true,
+          "type": "boolean"
+        },
+        "has_evolve": {
+          "const": true,
+          "type": "boolean"
+        },
+        "face_up": {
+          "type": "boolean"
+        },
+        "boxed": {
+          "type": "boolean"
+        },
+        "evolved": {
+          "type": "boolean"
+        },
+        "entered_this_turn": {
+          "const": true,
+          "type": "boolean"
+        },
+        "advance_follower": {
+          "const": true,
+          "type": "boolean"
+        },
+        "power_max": {
+          "const": true,
+          "type": "boolean"
         }
       },
       "required": [
@@ -1979,6 +2229,24 @@
         },
         {
           "$ref": "#/$defs/A.expr.count"
+        },
+        {
+          "$ref": "#/$defs/A.expr.hand"
+        },
+        {
+          "$ref": "#/$defs/A.expr.leader-life"
+        },
+        {
+          "$ref": "#/$defs/A.expr.counter"
+        },
+        {
+          "$ref": "#/$defs/A.expr.distinct-names"
+        },
+        {
+          "$ref": "#/$defs/A.expr.distinct-orig-costs"
+        },
+        {
+          "$ref": "#/$defs/A.expr.agg"
         }
       ]
     },
@@ -2587,6 +2855,1016 @@
         },
         {
           "$ref": "#/$defs/A.cost.counter.selected"
+        }
+      ]
+    },
+    "Title": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "A.expr.hand": {
+      "additionalProperties": false,
+      "properties": {
+        "hand": {
+          "$ref": "#/$defs/A.player-ref"
+        }
+      },
+      "required": [
+        "hand"
+      ],
+      "type": "object"
+    },
+    "A.expr.leader-life": {
+      "additionalProperties": false,
+      "properties": {
+        "leader_life": {
+          "$ref": "#/$defs/A.player-ref"
+        }
+      },
+      "required": [
+        "leader_life"
+      ],
+      "type": "object"
+    },
+    "A.expr.counter": {
+      "additionalProperties": false,
+      "properties": {
+        "counter": {
+          "$ref": "#/$defs/A.expr.counter-payload"
+        }
+      },
+      "required": [
+        "counter"
+      ],
+      "type": "object"
+    },
+    "A.expr.distinct-names": {
+      "additionalProperties": false,
+      "properties": {
+        "distinct_names": {
+          "$ref": "#/$defs/A.collection"
+        }
+      },
+      "required": [
+        "distinct_names"
+      ],
+      "type": "object"
+    },
+    "A.expr.distinct-orig-costs": {
+      "additionalProperties": false,
+      "properties": {
+        "distinct_orig_costs": {
+          "$ref": "#/$defs/A.collection"
+        }
+      },
+      "required": [
+        "distinct_orig_costs"
+      ],
+      "type": "object"
+    },
+    "A.expr.agg": {
+      "additionalProperties": false,
+      "properties": {
+        "agg": {
+          "$ref": "#/$defs/A.expr.agg-payload"
+        }
+      },
+      "required": [
+        "agg"
+      ],
+      "type": "object"
+    },
+    "A.expr.counter-payload": {
+      "additionalProperties": false,
+      "properties": {
+        "on": {
+          "$ref": "#/$defs/A.ref"
+        },
+        "name": {
+          "$ref": "#/$defs/CounterName"
+        }
+      },
+      "required": [
+        "on",
+        "name"
+      ],
+      "type": "object"
+    },
+    "A.expr.agg-payload": {
+      "additionalProperties": false,
+      "properties": {
+        "of": {
+          "$ref": "#/$defs/A.collection"
+        },
+        "attr": {
+          "enum": [
+            "cost",
+            "orig_cost",
+            "power"
+          ],
+          "type": "string"
+        },
+        "fn": {
+          "enum": [
+            "sum",
+            "min",
+            "max"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "of",
+        "attr",
+        "fn"
+      ],
+      "type": "object"
+    },
+    "A.cond.exists": {
+      "additionalProperties": false,
+      "properties": {
+        "exists": {
+          "$ref": "#/$defs/A.sel.object-core"
+        }
+      },
+      "required": [
+        "exists"
+      ],
+      "type": "object"
+    },
+    "A.cond.in-zone": {
+      "additionalProperties": false,
+      "properties": {
+        "in_zone": {
+          "$ref": "#/$defs/A.cond.in-zone-payload"
+        }
+      },
+      "required": [
+        "in_zone"
+      ],
+      "type": "object"
+    },
+    "A.cond.entered-from": {
+      "additionalProperties": false,
+      "properties": {
+        "entered_from": {
+          "$ref": "#/$defs/A.cond.from-payload"
+        }
+      },
+      "required": [
+        "entered_from"
+      ],
+      "type": "object"
+    },
+    "A.cond.played-from": {
+      "additionalProperties": false,
+      "properties": {
+        "played_from": {
+          "$ref": "#/$defs/A.cond.from-payload"
+        }
+      },
+      "required": [
+        "played_from"
+      ],
+      "type": "object"
+    },
+    "A.cond.entered-by": {
+      "additionalProperties": false,
+      "properties": {
+        "entered_by": {
+          "$ref": "#/$defs/A.cond.entered-by-payload"
+        }
+      },
+      "required": [
+        "entered_by"
+      ],
+      "type": "object"
+    },
+    "A.cond.is": {
+      "additionalProperties": false,
+      "properties": {
+        "is": {
+          "$ref": "#/$defs/A.cond.is-payload"
+        }
+      },
+      "required": [
+        "is"
+      ],
+      "type": "object"
+    },
+    "A.cond.in-zone-payload": {
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        },
+        "zone": {
+          "$ref": "#/$defs/Zone"
+        }
+      },
+      "required": [
+        "ref",
+        "zone"
+      ],
+      "type": "object"
+    },
+    "A.cond.from-payload": {
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        },
+        "from": {
+          "$ref": "#/$defs/Zone"
+        }
+      },
+      "required": [
+        "ref",
+        "from"
+      ],
+      "type": "object"
+    },
+    "A.cond.entered-by-payload": {
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        },
+        "by": {
+          "enum": [
+            "ability",
+            "play"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "ref",
+        "by"
+      ],
+      "type": "object"
+    },
+    "A.cond.is-payload": {
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        },
+        "kind": {
+          "$ref": "#/$defs/CardKind"
+        }
+      },
+      "required": [
+        "ref",
+        "kind"
+      ],
+      "type": "object"
+    },
+    "A.cond.on-field": {
+      "additionalProperties": false,
+      "properties": {
+        "on_field": {
+          "$ref": "#/$defs/A.ref"
+        }
+      },
+      "required": [
+        "on_field"
+      ],
+      "type": "object"
+    },
+    "A.cond.standing": {
+      "additionalProperties": false,
+      "properties": {
+        "standing": {
+          "$ref": "#/$defs/A.ref"
+        }
+      },
+      "required": [
+        "standing"
+      ],
+      "type": "object"
+    },
+    "A.cond.acted": {
+      "additionalProperties": false,
+      "properties": {
+        "acted": {
+          "$ref": "#/$defs/A.ref"
+        }
+      },
+      "required": [
+        "acted"
+      ],
+      "type": "object"
+    },
+    "A.cond.evolved": {
+      "additionalProperties": false,
+      "properties": {
+        "evolved": {
+          "$ref": "#/$defs/A.ref"
+        }
+      },
+      "required": [
+        "evolved"
+      ],
+      "type": "object"
+    },
+    "A.cond.my-turn": {
+      "additionalProperties": false,
+      "properties": {
+        "my_turn": {
+          "const": true,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "my_turn"
+      ],
+      "type": "object"
+    },
+    "A.cond.opp-turn": {
+      "additionalProperties": false,
+      "properties": {
+        "opp_turn": {
+          "const": true,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "opp_turn"
+      ],
+      "type": "object"
+    },
+    "A.cond.construction": {
+      "additionalProperties": false,
+      "properties": {
+        "construction": {
+          "$ref": "#/$defs/Title"
+        }
+      },
+      "required": [
+        "construction"
+      ],
+      "type": "object"
+    },
+    "A.cond.combo": {
+      "additionalProperties": false,
+      "properties": {
+        "combo": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "combo"
+      ],
+      "type": "object"
+    },
+    "A.cond.spellchain": {
+      "additionalProperties": false,
+      "properties": {
+        "spellchain": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "spellchain"
+      ],
+      "type": "object"
+    },
+    "A.cond.necro": {
+      "additionalProperties": false,
+      "properties": {
+        "necro": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "necro"
+      ],
+      "type": "object"
+    },
+    "A.cond.awakened": {
+      "additionalProperties": false,
+      "properties": {
+        "awakened": {
+          "const": true,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "awakened"
+      ],
+      "type": "object"
+    },
+    "A.cond.crimson": {
+      "additionalProperties": false,
+      "properties": {
+        "crimson": {
+          "const": true,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "crimson"
+      ],
+      "type": "object"
+    },
+    "A.cond.hand": {
+      "additionalProperties": false,
+      "properties": {
+        "hand": {
+          "$ref": "#/$defs/A.cond.player-threshold"
+        }
+      },
+      "required": [
+        "hand"
+      ],
+      "type": "object"
+    },
+    "A.cond.leader-life": {
+      "additionalProperties": false,
+      "properties": {
+        "leader_life": {
+          "$ref": "#/$defs/A.cond.player-threshold"
+        }
+      },
+      "required": [
+        "leader_life"
+      ],
+      "type": "object"
+    },
+    "A.cond.zone-free": {
+      "additionalProperties": false,
+      "properties": {
+        "zone_free": {
+          "$ref": "#/$defs/A.cond.zone-free-threshold"
+        }
+      },
+      "required": [
+        "zone_free"
+      ],
+      "type": "object"
+    },
+    "A.cond.player-eq-threshold": {
+      "additionalProperties": false,
+      "properties": {
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "eq": {
+          "$ref": "#/$defs/A.quantity"
+        }
+      },
+      "required": [
+        "who",
+        "eq"
+      ],
+      "type": "object"
+    },
+    "A.cond.player-le-threshold": {
+      "additionalProperties": false,
+      "properties": {
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "le": {
+          "$ref": "#/$defs/A.quantity"
+        }
+      },
+      "required": [
+        "who",
+        "le"
+      ],
+      "type": "object"
+    },
+    "A.cond.player-ge-threshold": {
+      "additionalProperties": false,
+      "properties": {
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "ge": {
+          "$ref": "#/$defs/A.quantity"
+        }
+      },
+      "required": [
+        "who",
+        "ge"
+      ],
+      "type": "object"
+    },
+    "A.cond.zone-free-eq-threshold": {
+      "additionalProperties": false,
+      "properties": {
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "zone": {
+          "enum": [
+            "field",
+            "ex"
+          ],
+          "type": "string"
+        },
+        "eq": {
+          "$ref": "#/$defs/A.quantity"
+        }
+      },
+      "required": [
+        "who",
+        "zone",
+        "eq"
+      ],
+      "type": "object"
+    },
+    "A.cond.zone-free-ge-threshold": {
+      "additionalProperties": false,
+      "properties": {
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "zone": {
+          "enum": [
+            "field",
+            "ex"
+          ],
+          "type": "string"
+        },
+        "ge": {
+          "$ref": "#/$defs/A.quantity"
+        }
+      },
+      "required": [
+        "who",
+        "zone",
+        "ge"
+      ],
+      "type": "object"
+    },
+    "A.cond.player-threshold": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.cond.player-eq-threshold"
+        },
+        {
+          "$ref": "#/$defs/A.cond.player-le-threshold"
+        },
+        {
+          "$ref": "#/$defs/A.cond.player-ge-threshold"
+        }
+      ]
+    },
+    "A.cond.zone-free-threshold": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.cond.zone-free-eq-threshold"
+        },
+        {
+          "$ref": "#/$defs/A.cond.zone-free-ge-threshold"
+        }
+      ]
+    },
+    "A.expr.count-atom": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.expr.count-objects"
+        },
+        {
+          "$ref": "#/$defs/A.collection.in"
+        }
+      ]
+    },
+    "A.collection.in": {
+      "additionalProperties": false,
+      "dependentRequired": {
+        "as": [
+          "where"
+        ]
+      },
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "token",
+              "not_token"
+            ]
+          },
+          {
+            "required": [
+              "name",
+              "names"
+            ]
+          },
+          {
+            "required": [
+              "name",
+              "name_contains"
+            ]
+          },
+          {
+            "required": [
+              "names",
+              "name_contains"
+            ]
+          }
+        ]
+      },
+      "properties": {
+        "not_class": {
+          "$ref": "#/$defs/Concept"
+        },
+        "not_trait": {
+          "$ref": "#/$defs/Concept"
+        },
+        "traits_any": {
+          "items": {
+            "$ref": "#/$defs/Concept"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "not_same_name_as_this": {
+          "const": true,
+          "type": "boolean"
+        },
+        "cost_eq": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "cost_le": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "cost_ge": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "keyword": {
+          "$ref": "#/$defs/Concept"
+        },
+        "has_trigger": {
+          "const": true,
+          "type": "boolean"
+        },
+        "has_evolve": {
+          "const": true,
+          "type": "boolean"
+        },
+        "face_up": {
+          "type": "boolean"
+        },
+        "boxed": {
+          "type": "boolean"
+        },
+        "evolved": {
+          "type": "boolean"
+        },
+        "entered_this_turn": {
+          "const": true,
+          "type": "boolean"
+        },
+        "advance_follower": {
+          "const": true,
+          "type": "boolean"
+        },
+        "names": {
+          "items": {
+            "$ref": "#/$defs/CardName"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "name_contains": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "other": {
+          "const": true,
+          "type": "boolean"
+        },
+        "orig_cost_eq": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "orig_cost_le": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "orig_cost_ge": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "hp_le": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "acted": {
+          "type": "boolean"
+        },
+        "racing": {
+          "type": "boolean"
+        },
+        "token": {
+          "const": true,
+          "type": "boolean"
+        },
+        "not_token": {
+          "const": true,
+          "type": "boolean"
+        },
+        "class": {
+          "$ref": "#/$defs/Concept"
+        },
+        "kind": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CardKind"
+            },
+            {
+              "$ref": "#/$defs/A.same-as"
+            }
+          ]
+        },
+        "trait": {
+          "$ref": "#/$defs/Concept"
+        },
+        "traits_all": {
+          "items": {
+            "$ref": "#/$defs/Concept"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CardName"
+            },
+            {
+              "$ref": "#/$defs/A.same-as"
+            }
+          ]
+        },
+        "except": {
+          "$ref": "#/$defs/A.collection"
+        },
+        "where": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "as": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "in": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/A.ref"
+            },
+            {
+              "$ref": "#/$defs/A.snapshot-read"
+            }
+          ]
+        }
+      },
+      "required": [
+        "in"
+      ],
+      "type": "object"
+    },
+    "A.collection.objects": {
+      "additionalProperties": false,
+      "dependentRequired": {
+        "as": [
+          "where"
+        ]
+      },
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "token",
+              "not_token"
+            ]
+          },
+          {
+            "required": [
+              "name",
+              "names"
+            ]
+          },
+          {
+            "required": [
+              "name",
+              "name_contains"
+            ]
+          },
+          {
+            "required": [
+              "names",
+              "name_contains"
+            ]
+          }
+        ]
+      },
+      "properties": {
+        "not_class": {
+          "$ref": "#/$defs/Concept"
+        },
+        "not_trait": {
+          "$ref": "#/$defs/Concept"
+        },
+        "traits_any": {
+          "items": {
+            "$ref": "#/$defs/Concept"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "not_same_name_as_this": {
+          "const": true,
+          "type": "boolean"
+        },
+        "cost_eq": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "cost_le": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "cost_ge": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "keyword": {
+          "$ref": "#/$defs/Concept"
+        },
+        "has_trigger": {
+          "const": true,
+          "type": "boolean"
+        },
+        "has_evolve": {
+          "const": true,
+          "type": "boolean"
+        },
+        "face_up": {
+          "type": "boolean"
+        },
+        "boxed": {
+          "type": "boolean"
+        },
+        "evolved": {
+          "type": "boolean"
+        },
+        "entered_this_turn": {
+          "const": true,
+          "type": "boolean"
+        },
+        "advance_follower": {
+          "const": true,
+          "type": "boolean"
+        },
+        "names": {
+          "items": {
+            "$ref": "#/$defs/CardName"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "name_contains": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "other": {
+          "const": true,
+          "type": "boolean"
+        },
+        "orig_cost_eq": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "orig_cost_le": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "orig_cost_ge": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "hp_le": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "acted": {
+          "type": "boolean"
+        },
+        "racing": {
+          "type": "boolean"
+        },
+        "token": {
+          "const": true,
+          "type": "boolean"
+        },
+        "not_token": {
+          "const": true,
+          "type": "boolean"
+        },
+        "class": {
+          "$ref": "#/$defs/Concept"
+        },
+        "kind": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CardKind"
+            },
+            {
+              "$ref": "#/$defs/A.same-as"
+            }
+          ]
+        },
+        "trait": {
+          "$ref": "#/$defs/Concept"
+        },
+        "traits_all": {
+          "items": {
+            "$ref": "#/$defs/Concept"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CardName"
+            },
+            {
+              "$ref": "#/$defs/A.same-as"
+            }
+          ]
+        },
+        "except": {
+          "$ref": "#/$defs/A.collection"
+        },
+        "where": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "as": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "who": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/A.player-ref"
+            },
+            {
+              "$ref": "#/$defs/A.player-set"
+            }
+          ]
+        },
+        "zone": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Zone"
+            },
+            {
+              "items": {
+                "$ref": "#/$defs/Zone"
+              },
+              "minItems": 1,
+              "type": "array"
+            }
+          ]
+        }
+      },
+      "required": [
+        "who",
+        "zone"
+      ],
+      "type": "object"
+    },
+    "A.collection.atom": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.collection.objects"
+        },
+        {
+          "$ref": "#/$defs/A.collection.in"
+        }
+      ]
+    },
+    "A.collection.union": {
+      "additionalProperties": false,
+      "properties": {
+        "any_of": {
+          "items": {
+            "$ref": "#/$defs/A.collection.atom"
+          },
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "required": [
+        "any_of"
+      ],
+      "type": "object"
+    },
+    "A.collection": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.collection.atom"
+        },
+        {
+          "$ref": "#/$defs/A.collection.union"
         }
       ]
     }

@@ -251,7 +251,7 @@ def test_object_and_count_queries_keep_distinct_roles() -> None:
     for name in (OBJECTS, COUNTED):
         _check(name, shared, accepted=True)
     _check(OBJECTS, {"any_of": [{"in": "shown"}]}, accepted=True)
-    _check(COUNTED, {"any_of": [{"in": "shown"}]}, accepted=False)
+    _check(COUNTED, {"any_of": [{"in": "shown"}]}, accepted=True)
     shared["any_of"] = [{"who": "self", "zone": "field", "kind": {"param": "kind"}}]
     _check(OBJECTS, shared, accepted=True)
     _check(COUNTED, shared, accepted=False)

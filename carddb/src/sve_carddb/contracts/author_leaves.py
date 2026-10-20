@@ -118,3 +118,15 @@ class EffectsIndex(RecordData):
     format: Annotated[Literal[1], BeforeValidator(integer)]
     kind: Literal["effects_index"]
     records: tuple[IndexRecord, ...]
+
+
+def _true(value: object) -> Literal[True]:
+    # Literal[True] alone also accepts the integer 1.
+    if value is not True:
+        raise ValueError("Expected true")
+    return True
+
+
+TrueFlag = Annotated[Literal[True], BeforeValidator(_true)]
+type CounterName = Text
+type Title = Text

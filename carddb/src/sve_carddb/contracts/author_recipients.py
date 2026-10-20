@@ -4,9 +4,9 @@ from typing import Annotated, Literal, NotRequired, TypedDict
 
 from pydantic import AfterValidator, ConfigDict, Field, with_config
 
-from sve_carddb.contracts.author_object_filters import TrueFlag  # ruff: ignore[typing-only-first-party-import] -- Pydantic resolves TypedDict fields at runtime.
+from sve_carddb.contracts.author_leaves import TrueFlag  # ruff: ignore[typing-only-first-party-import] -- Pydantic resolves TypedDict fields at runtime.
+from sve_carddb.contracts.author_queries import ObjectAtom, ObjectSel
 from sve_carddb.contracts.author_references import LeaderRecipient, PlayerRef
-from sve_carddb.contracts.author_selectors import ObjectAtom, ObjectSel
 
 CONFIG = ConfigDict(extra="forbid", strict=True, regex_engine="python-re")
 
