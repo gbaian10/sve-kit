@@ -258,7 +258,10 @@ const TableRow = memo(function TableRow({
               {cell.summary.cardNo}
               <RarityBadges {...cell.summary} />
               <DeckLocationBadges locations={cell.summary.deckLocations} />
-              <CardTypeBadge code={cell.summary.typeCode} />
+              <CardTypeBadge
+                code={cell.summary.typeCode}
+                fallback={cell.summary.typeCode !== "leader"}
+              />
             </span>
           </span>
           <StatLine
@@ -426,7 +429,10 @@ const ListRow = memo(function ListRow({
           case "type":
             return (
               <td key={column} data-list-type="">
-                <CardTypeBadge code={cell.summary.typeCode} />
+                <CardTypeBadge
+                  code={cell.summary.typeCode}
+                  fallback={cell.summary.typeCode !== "leader"}
+                />
               </td>
             )
           case "name":
@@ -553,6 +559,8 @@ export function CardList({
   const style = {
     "--class-column-min-width": `${String(LIST_MIN_WIDTHS.class)}px`,
     "--rarity-column-min-width": `${String(RARITY_COLUMN_MIN_WIDTH)}px`,
+    "--location-column-min-width": `${String(LIST_MIN_WIDTHS.location)}px`,
+    "--type-column-min-width": `${String(LIST_MIN_WIDTHS.type)}px`,
     "--rarity-badge-height": `${String(RARITY_BADGE_HEIGHT)}px`,
     ...Object.fromEntries(
       Object.entries(listWidths).map(([column, width]) => [

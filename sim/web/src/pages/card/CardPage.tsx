@@ -813,9 +813,9 @@ export function CardView({
                       )}
                       <DeckLocationBadges locations={locations} />
                       <RarityBadges {...faceSummary} />
-                      {traits.map((code) => (
-                        <span key={code}>{label("trait", code)}</span>
-                      ))}
+                      {traits.length > 0 && (
+                        <span>{traits.map((code) => label("trait", code)).join(joiner)}</span>
+                      )}
                     </p>
                     <StatCells className="mt-1" cost={cost} attack={attack} defense={defense} />
                     {!frame && ordinal === 0 && navigation && (

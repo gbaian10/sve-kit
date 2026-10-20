@@ -4,13 +4,13 @@ import { type Accent, isAccent, isThemePref, type ThemePref } from "../domain/th
 import { isUiLanguage, type UiLanguage } from "../i18n/languages"
 import {
   DEFAULT_LIST_VISIBILITY,
-  isListVisibility,
   isListWidths,
   LIST_COLUMNS,
   type ListColumn,
   type ListVisibility,
   type ListWidths,
   sanitizeListOrder,
+  sanitizeListVisibility,
 } from "./list-columns"
 
 export const PREFS_KEY = "sve-kit:prefs"
@@ -150,7 +150,7 @@ const sanitizers: Sanitizers = {
   drawerWidth: withDefault(isDrawerWidth, DEFAULT_PREFS.drawerWidth),
   listWidths: withDefault(isListWidths, DEFAULT_PREFS.listWidths),
   listMobileWidths: withDefault(isListWidths, DEFAULT_PREFS.listMobileWidths),
-  listVisibility: withDefault(isListVisibility, DEFAULT_PREFS.listVisibility),
+  listVisibility: sanitizeListVisibility,
   listOrder: sanitizeListOrder,
 }
 

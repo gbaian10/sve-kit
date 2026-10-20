@@ -606,11 +606,43 @@ it.each(["list", "table"] as const)("shows EVOLVE only for evolve cards in %s", 
     expect(within(cells[1] as HTMLElement).getByRole("img", { name: "進化" })).toBeVisible()
     expect(screen.getAllByRole("columnheader")[3]).toHaveAttribute("aria-label", "位置")
   } else {
+    const row = screen.getAllByRole("listitem")[1] as HTMLElement
     expect(
-      screen.getByRole("img", { name: "進化" }).parentElement?.previousElementSibling,
-    ).toHaveAttribute("data-rarity-badges")
+      within(row)
+        .getAllByRole("img")
+        .map((image) => image.getAttribute("alt")),
+    ).toEqual([expect.stringContaining("LG"), "進化"])
   }
 })
+
+it.each(["list", "table"] as const)(
+  "shows text for crest and equipment types in %s",
+  async (view) => {
+    const props = {
+      cells: ["crest", "equipment", "leader"].map((typeCode) => ({
+        ...cell,
+        key: typeCode,
+        summary: {
+          ...cell.summary,
+          typeCode,
+          deckLocations: typeCode === "leader" ? (["leader"] as const) : (["token"] as const),
+        },
+      })),
+      onOpen: vi.fn(),
+    }
+    await renderInRouter(
+      view === "list" ? (
+        <CardList classLabel={classLabel} {...props} />
+      ) : (
+        <CardTable {...props} images={undefined} artOf={() => undefined} />
+      ),
+    )
+    expect(screen.getByText("crest")).toBeVisible()
+    expect(screen.getByText("equipment")).toBeVisible()
+    expect(screen.queryByText("leader")).not.toBeInTheDocument()
+    expect(screen.getAllByRole("img", { name: "Token" })).toHaveLength(2)
+  },
+)
 
 it("toggles type and location columns independently of rarity", async () => {
   await renderInRouter(

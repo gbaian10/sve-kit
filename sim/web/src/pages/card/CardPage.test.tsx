@@ -56,6 +56,7 @@ const paragraphs = (root: Element, lang: string) =>
 
 const state = vi.hoisted(() => ({
   evolve: false,
+  traits: ["synthetic"],
   available: false,
   current: false,
   crossRegion: false,
@@ -353,7 +354,7 @@ vi.mock("../../app/snapshot", () => {
             translations: [],
             class_code: "royal",
             type_code: "follower",
-            traits: ["synthetic"],
+            traits: state.traits,
             special_kinds: state.evolve ? ["evolve"] : [],
             cost: 3,
             attack: 4,
@@ -392,6 +393,7 @@ vi.mock("../../app/snapshot", () => {
 
 beforeEach(() => {
   state.evolve = false
+  state.traits = ["synthetic"]
   state.originalName = false
   state.available = false
   state.multiplePrintings = false
@@ -1158,5 +1160,20 @@ it("shows EVOLVE after the type tag using agreed face values", async () => {
   })
   const badges = screen.getAllByRole("img", { name: "進化" })
   expect(badges).toHaveLength(2)
-  expect(badges[0]?.parentElement?.previousElementSibling).toHaveAttribute("alt", "follower")
+  for (const classification of document.querySelectorAll("[data-card-classification]")) {
+    expect(
+      within(classification as HTMLElement)
+        .getAllByRole("img")
+        .map((image) => image.getAttribute("alt")),
+    ).toEqual(["follower", "進化", expect.stringContaining("官方稀有度")])
+  }
+})
+
+it("separates multiple traits with the printed classification joiner", async () => {
+  state.summary = true
+  state.traits = ["synthetic", "second"]
+  await renderRoutes([{ path: "/cards/:cardNo/:slug?", ...card }], {
+    initialEntries: ["/cards/BP-SYNTHETIC"],
+  })
+  expect(screen.getByText("synthetic・second")).toBeVisible()
 })

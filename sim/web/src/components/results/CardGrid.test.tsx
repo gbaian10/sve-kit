@@ -83,7 +83,7 @@ it("offers each grid card only its largest available image candidate", async () 
   expect(smallImage?.getAttribute("srcset")).toBe("/cdn/images/card_m/synthetic.webp?v=1 320w")
 })
 
-describe("visible current translation quality", () => {
+describe("card results omit translation quality notices", () => {
   it.each([
     ["zh-TW", "待校對", "依日文原文翻譯"],
     ["ja", "翻訳要校正", "日本語原文からの訳"],
