@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:sve-kit:author-nodes:1.0",
   "title": "SVE author 1.0 shared leaf and reference definitions",
-  "$comment": "Closed author node fragments for numeric expressions, conditions, object and recipient queries, event/history narrowing, capture, LKI operands and payment/dice reads. These registered variants share one recursive graph; they are not complete author entry, E/C/Sel or execution admission contracts. Scope, units, source authority and capabilities require C1/D0 validation.",
+  "$comment": "Closed author node fragments for numeric expressions, conditions, object and recipient queries, event/history narrowing, capture, LKI operands and payment/dice reads. These registered variants share one recursive graph; they are not complete author entry, E/C/Sel or execution admission contracts. Scope, units, source authority and capabilities require C1/D0 validation. Includes closed effect installation and cost/target fragments; enclosing ability headers remain outside this subset.",
   "not": {},
   "$defs": {
     "Int": {
@@ -12734,6 +12734,1163 @@
         "$ref": "#/$defs/A.target"
       },
       "minItems": 1
+    },
+    "A.effect-object": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.ref"
+        },
+        {
+          "$ref": "#/$defs/A.sel.object-core"
+        }
+      ]
+    },
+    "A.effect-recipient": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.ref"
+        },
+        {
+          "$ref": "#/$defs/A.sel.recipient"
+        }
+      ]
+    },
+    "A.effect-players": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        {
+          "$ref": "#/$defs/A.player-set"
+        }
+      ]
+    },
+    "A.effect.stat": {
+      "additionalProperties": false,
+      "anyOf": [
+        {
+          "required": [
+            "power"
+          ]
+        },
+        {
+          "required": [
+            "hp"
+          ]
+        }
+      ],
+      "properties": {
+        "on": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "power": {
+          "$ref": "#/$defs/A.expr.numeric"
+        },
+        "hp": {
+          "$ref": "#/$defs/A.expr.numeric"
+        }
+      },
+      "type": "object"
+    },
+    "A.effect.set-stat": {
+      "additionalProperties": false,
+      "anyOf": [
+        {
+          "required": [
+            "power"
+          ]
+        },
+        {
+          "required": [
+            "hp"
+          ]
+        }
+      ],
+      "properties": {
+        "on": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "power": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "hp": {
+          "$ref": "#/$defs/A.quantity"
+        }
+      },
+      "type": "object"
+    },
+    "A.effect.keywords": {
+      "additionalProperties": false,
+      "properties": {
+        "on": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "list": {
+          "items": {
+            "$ref": "#/$defs/Concept"
+          },
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "required": [
+        "list"
+      ],
+      "type": "object"
+    },
+    "A.effect.lose-abilities": {
+      "additionalProperties": false,
+      "properties": {
+        "on": {
+          "$ref": "#/$defs/A.effect-object"
+        }
+      },
+      "type": "object"
+    },
+    "A.effect.also-named": {
+      "additionalProperties": false,
+      "properties": {
+        "on": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "name": {
+          "$ref": "#/$defs/CardName"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object"
+    },
+    "A.effect.trait": {
+      "additionalProperties": false,
+      "properties": {
+        "on": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "trait": {
+          "$ref": "#/$defs/Concept"
+        }
+      },
+      "required": [
+        "trait"
+      ],
+      "type": "object"
+    },
+    "A.effect.make-type": {
+      "additionalProperties": false,
+      "properties": {
+        "on": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "type": {
+          "$ref": "#/$defs/CardKind"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "type": "object"
+    },
+    "A.effect.cost-mod": {
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "required": [
+            "delta"
+          ]
+        },
+        {
+          "required": [
+            "set"
+          ]
+        }
+      ],
+      "properties": {
+        "when_playing": {
+          "$ref": "#/$defs/A.sel.object-core"
+        },
+        "delta": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/A.expr.numeric"
+            },
+            {
+              "$ref": "#/$defs/A.param"
+            }
+          ]
+        },
+        "set": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/A.quantity"
+            },
+            {
+              "$ref": "#/$defs/A.param"
+            }
+          ]
+        },
+        "next_only": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "when_playing"
+      ],
+      "type": "object"
+    },
+    "A.effect.damage-mod": {
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "required": [
+            "delta"
+          ]
+        },
+        {
+          "required": [
+            "multiply"
+          ]
+        }
+      ],
+      "properties": {
+        "on": {
+          "$ref": "#/$defs/A.effect-recipient"
+        },
+        "source": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "kind": {
+          "enum": [
+            "any",
+            "attack",
+            "combat",
+            "ability"
+          ],
+          "type": "string"
+        },
+        "delta": {
+          "$ref": "#/$defs/A.expr.numeric"
+        },
+        "multiply": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "next_only": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "A.effect.prevent": {
+      "additionalProperties": false,
+      "properties": {
+        "on": {
+          "$ref": "#/$defs/A.effect-recipient"
+        },
+        "kind": {
+          "enum": [
+            "any",
+            "combat",
+            "ability"
+          ],
+          "type": "string"
+        },
+        "source": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "next_only": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "type": "object"
+    },
+    "A.effect.damage-cap": {
+      "additionalProperties": false,
+      "properties": {
+        "on": {
+          "$ref": "#/$defs/A.effect-recipient"
+        },
+        "threshold": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "set": {
+          "$ref": "#/$defs/A.quantity"
+        }
+      },
+      "required": [
+        "threshold",
+        "set"
+      ],
+      "type": "object"
+    },
+    "A.effect.evolve-cost-mod": {
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "required": [
+            "delta"
+          ]
+        },
+        {
+          "required": [
+            "set"
+          ]
+        }
+      ],
+      "properties": {
+        "on": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "delta": {
+          "$ref": "#/$defs/A.expr.numeric"
+        },
+        "set": {
+          "$ref": "#/$defs/A.quantity"
+        }
+      },
+      "required": [
+        "on"
+      ],
+      "type": "object"
+    },
+    "A.effect.banish-instead": {
+      "additionalProperties": false,
+      "properties": {
+        "from": {
+          "const": "field",
+          "type": "string"
+        },
+        "on": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "to": {
+          "const": "cemetery",
+          "type": "string"
+        }
+      },
+      "required": [
+        "from",
+        "to"
+      ],
+      "type": "object"
+    },
+    "A.effect.object": {
+      "additionalProperties": false,
+      "properties": {
+        "on": {
+          "$ref": "#/$defs/A.effect-object"
+        }
+      },
+      "required": [
+        "on"
+      ],
+      "type": "object"
+    },
+    "A.effect.play-permission": {
+      "additionalProperties": false,
+      "properties": {
+        "from": {
+          "items": {
+            "$ref": "#/$defs/Zone"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "on": {
+          "$ref": "#/$defs/A.effect-object"
+        }
+      },
+      "required": [
+        "from",
+        "on"
+      ],
+      "type": "object"
+    },
+    "A.effect.no-trigger": {
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "required": [
+            "on"
+          ]
+        },
+        {
+          "required": [
+            "who"
+          ]
+        }
+      ],
+      "properties": {
+        "on": {
+          "$ref": "#/$defs/A.ref"
+        },
+        "who": {
+          "$ref": "#/$defs/A.effect-players"
+        },
+        "kinds": {
+          "items": {
+            "enum": [
+              "fanfare",
+              "lastword",
+              "evolve_time",
+              "super_evolve_time",
+              "attack_time",
+              "race_time",
+              "drive_time"
+            ],
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "required": [
+        "kinds"
+      ],
+      "type": "object"
+    },
+    "A.effect.player": {
+      "additionalProperties": false,
+      "properties": {
+        "who": {
+          "$ref": "#/$defs/A.effect-players"
+        }
+      },
+      "required": [
+        "who"
+      ],
+      "type": "object"
+    },
+    "A.effect.reroll": {
+      "additionalProperties": false,
+      "properties": {
+        "who": {
+          "$ref": "#/$defs/A.effect-players"
+        },
+        "times": {
+          "$ref": "#/$defs/A.quantity"
+        }
+      },
+      "required": [
+        "who",
+        "times"
+      ],
+      "type": "object"
+    },
+    "A.effect.extra-trigger": {
+      "additionalProperties": false,
+      "properties": {
+        "phase": {
+          "$ref": "#/$defs/Phase"
+        },
+        "who": {
+          "$ref": "#/$defs/A.effect-players"
+        },
+        "n": {
+          "$ref": "#/$defs/A.quantity"
+        }
+      },
+      "required": [
+        "phase",
+        "who",
+        "n"
+      ],
+      "type": "object"
+    },
+    "A.effect.must-target": {
+      "additionalProperties": false,
+      "properties": {
+        "on": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "by": {
+          "$ref": "#/$defs/A.effect-players"
+        }
+      },
+      "required": [
+        "on",
+        "by"
+      ],
+      "type": "object"
+    },
+    "A.effect.rule.spellchain-population": {
+      "additionalProperties": false,
+      "properties": {
+        "rule": {
+          "const": "spellchain_population",
+          "type": "string"
+        },
+        "who": {
+          "$ref": "#/$defs/A.effect-players"
+        },
+        "of": {
+          "$ref": "#/$defs/A.collection"
+        }
+      },
+      "required": [
+        "rule",
+        "who",
+        "of"
+      ],
+      "type": "object"
+    },
+    "A.effect.rule.counter-cap": {
+      "additionalProperties": false,
+      "properties": {
+        "rule": {
+          "const": "counter_cap",
+          "type": "string"
+        },
+        "on": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "name": {
+          "$ref": "#/$defs/CounterName"
+        },
+        "max": {
+          "$ref": "#/$defs/A.quantity"
+        }
+      },
+      "required": [
+        "rule",
+        "on",
+        "name",
+        "max"
+      ],
+      "type": "object"
+    },
+    "A.effect.rule.battle-damage-basis": {
+      "additionalProperties": false,
+      "properties": {
+        "rule": {
+          "const": "battle_damage_basis",
+          "type": "string"
+        },
+        "on": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "basis": {
+          "const": "hp",
+          "type": "string"
+        }
+      },
+      "required": [
+        "rule",
+        "on",
+        "basis"
+      ],
+      "type": "object"
+    },
+    "A.effect.rule-override": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.effect.rule.spellchain-population"
+        },
+        {
+          "$ref": "#/$defs/A.effect.rule.counter-cap"
+        },
+        {
+          "$ref": "#/$defs/A.effect.rule.battle-damage-basis"
+        }
+      ]
+    },
+    "A.effect.card-predicate": {
+      "additionalProperties": false,
+      "minProperties": 1,
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "token",
+              "not_token"
+            ]
+          },
+          {
+            "required": [
+              "name",
+              "names"
+            ]
+          },
+          {
+            "required": [
+              "name",
+              "name_contains"
+            ]
+          },
+          {
+            "required": [
+              "names",
+              "name_contains"
+            ]
+          }
+        ]
+      },
+      "properties": {
+        "not_class": {
+          "$ref": "#/$defs/Concept"
+        },
+        "not_trait": {
+          "$ref": "#/$defs/Concept"
+        },
+        "traits_any": {
+          "items": {
+            "$ref": "#/$defs/Concept"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "not_same_name_as_this": {
+          "const": true,
+          "type": "boolean"
+        },
+        "cost_eq": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "cost_le": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "cost_ge": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "keyword": {
+          "$ref": "#/$defs/Concept"
+        },
+        "has_trigger": {
+          "const": true,
+          "type": "boolean"
+        },
+        "has_evolve": {
+          "const": true,
+          "type": "boolean"
+        },
+        "face_up": {
+          "type": "boolean"
+        },
+        "boxed": {
+          "type": "boolean"
+        },
+        "evolved": {
+          "type": "boolean"
+        },
+        "entered_this_turn": {
+          "const": true,
+          "type": "boolean"
+        },
+        "advance_follower": {
+          "const": true,
+          "type": "boolean"
+        },
+        "names": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CardName"
+          },
+          "minItems": 1
+        },
+        "name_contains": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "other": {
+          "const": true,
+          "type": "boolean"
+        },
+        "orig_cost_eq": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "orig_cost_le": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "orig_cost_ge": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "hp_le": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "acted": {
+          "type": "boolean"
+        },
+        "racing": {
+          "type": "boolean"
+        },
+        "token": {
+          "const": true,
+          "type": "boolean"
+        },
+        "not_token": {
+          "const": true,
+          "type": "boolean"
+        },
+        "class": {
+          "$ref": "#/$defs/Concept"
+        },
+        "kind": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CardKind"
+            },
+            {
+              "$ref": "#/$defs/A.same-as"
+            }
+          ]
+        },
+        "trait": {
+          "$ref": "#/$defs/Concept"
+        },
+        "traits_all": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Concept"
+          },
+          "minItems": 1
+        },
+        "name": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CardName"
+            },
+            {
+              "$ref": "#/$defs/A.same-as"
+            }
+          ]
+        },
+        "zone": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Zone"
+            },
+            {
+              "items": {
+                "$ref": "#/$defs/Zone"
+              },
+              "minItems": 1,
+              "type": "array"
+            }
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "A.effect.ability.keyword": {
+      "additionalProperties": false,
+      "properties": {
+        "keyword": {
+          "enum": [
+            "fanfare",
+            "lastword",
+            "evolve_time",
+            "super_evolve_time",
+            "attack_time",
+            "race_time",
+            "drive_time"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "keyword"
+      ],
+      "type": "object"
+    },
+    "A.effect.ability.activated": {
+      "additionalProperties": false,
+      "properties": {
+        "except": {
+          "items": {
+            "const": "evolution",
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "kind": {
+          "const": "activated",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "type": "object"
+    },
+    "A.effect.ability-predicate": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.effect.ability.keyword"
+        },
+        {
+          "$ref": "#/$defs/A.effect.ability.activated"
+        }
+      ]
+    },
+    "A.effect.cannot.draw-not-phase": {
+      "additionalProperties": false,
+      "properties": {
+        "not_phase": {
+          "$ref": "#/$defs/Phase"
+        }
+      },
+      "required": [
+        "not_phase"
+      ],
+      "type": "object"
+    },
+    "A.effect.cannot.draw-rule-phase": {
+      "additionalProperties": false,
+      "properties": {
+        "phase": {
+          "$ref": "#/$defs/Phase"
+        },
+        "cause": {
+          "const": "rule",
+          "type": "string"
+        }
+      },
+      "required": [
+        "phase",
+        "cause"
+      ],
+      "type": "object"
+    },
+    "A.effect.cannot.stand-rule-phase": {
+      "additionalProperties": false,
+      "properties": {
+        "phase": {
+          "const": "start",
+          "type": "string"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "cause": {
+          "const": "rule",
+          "type": "string"
+        }
+      },
+      "required": [
+        "phase",
+        "who",
+        "cause"
+      ],
+      "type": "object"
+    },
+    "A.effect.cannot.play-card": {
+      "additionalProperties": false,
+      "not": {
+        "required": [
+          "on",
+          "who"
+        ]
+      },
+      "properties": {
+        "what": {
+          "const": "play_card",
+          "type": "string"
+        },
+        "on": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "who": {
+          "$ref": "#/$defs/A.effect-players"
+        },
+        "card": {
+          "$ref": "#/$defs/A.effect.card-predicate"
+        }
+      },
+      "required": [
+        "what"
+      ],
+      "type": "object"
+    },
+    "A.effect.cannot.play-ability": {
+      "additionalProperties": false,
+      "not": {
+        "required": [
+          "on",
+          "who"
+        ]
+      },
+      "properties": {
+        "what": {
+          "const": "play_ability",
+          "type": "string"
+        },
+        "on": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "who": {
+          "$ref": "#/$defs/A.effect-players"
+        },
+        "ability": {
+          "$ref": "#/$defs/A.effect.ability-predicate"
+        }
+      },
+      "required": [
+        "what"
+      ],
+      "type": "object"
+    },
+    "A.effect.cannot.attack": {
+      "additionalProperties": false,
+      "properties": {
+        "what": {
+          "const": "attack",
+          "type": "string"
+        },
+        "on": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "target": {
+          "$ref": "#/$defs/A.sel.recipient"
+        }
+      },
+      "required": [
+        "what"
+      ],
+      "type": "object"
+    },
+    "A.effect.cannot.choose-target": {
+      "additionalProperties": false,
+      "properties": {
+        "what": {
+          "const": "choose_target",
+          "type": "string"
+        },
+        "on": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "by": {
+          "$ref": "#/$defs/A.effect-players"
+        }
+      },
+      "required": [
+        "what"
+      ],
+      "type": "object"
+    },
+    "A.effect.cannot.draw": {
+      "additionalProperties": false,
+      "properties": {
+        "what": {
+          "const": "draw",
+          "type": "string"
+        },
+        "who": {
+          "$ref": "#/$defs/A.effect-players"
+        },
+        "during": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/A.effect.cannot.draw-not-phase"
+            },
+            {
+              "$ref": "#/$defs/A.effect.cannot.draw-rule-phase"
+            }
+          ]
+        }
+      },
+      "required": [
+        "what"
+      ],
+      "type": "object"
+    },
+    "A.effect.cannot.remove": {
+      "additionalProperties": false,
+      "properties": {
+        "what": {
+          "enum": [
+            "destroy",
+            "banish"
+          ],
+          "type": "string"
+        },
+        "on": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "by": {
+          "const": "ability",
+          "type": "string"
+        }
+      },
+      "required": [
+        "what"
+      ],
+      "type": "object"
+    },
+    "A.effect.cannot.stand": {
+      "additionalProperties": false,
+      "properties": {
+        "what": {
+          "const": "stand",
+          "type": "string"
+        },
+        "on": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "during": {
+          "$ref": "#/$defs/A.effect.cannot.stand-rule-phase"
+        }
+      },
+      "required": [
+        "what"
+      ],
+      "type": "object"
+    },
+    "A.effect.cannot.player": {
+      "additionalProperties": false,
+      "properties": {
+        "what": {
+          "enum": [
+            "win",
+            "lose",
+            "pp_max_increase"
+          ],
+          "type": "string"
+        },
+        "who": {
+          "$ref": "#/$defs/A.effect-players"
+        }
+      },
+      "required": [
+        "what"
+      ],
+      "type": "object"
+    },
+    "A.effect.cannot.deal-damage": {
+      "additionalProperties": false,
+      "properties": {
+        "what": {
+          "const": "deal_damage",
+          "type": "string"
+        },
+        "on": {
+          "$ref": "#/$defs/A.effect-object"
+        }
+      },
+      "required": [
+        "what"
+      ],
+      "type": "object"
+    },
+    "A.effect.cannot": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.effect.cannot.play-card"
+        },
+        {
+          "$ref": "#/$defs/A.effect.cannot.play-ability"
+        },
+        {
+          "$ref": "#/$defs/A.effect.cannot.attack"
+        },
+        {
+          "$ref": "#/$defs/A.effect.cannot.choose-target"
+        },
+        {
+          "$ref": "#/$defs/A.effect.cannot.draw"
+        },
+        {
+          "$ref": "#/$defs/A.effect.cannot.remove"
+        },
+        {
+          "$ref": "#/$defs/A.effect.cannot.stand"
+        },
+        {
+          "$ref": "#/$defs/A.effect.cannot.player"
+        },
+        {
+          "$ref": "#/$defs/A.effect.cannot.deal-damage"
+        }
+      ]
+    },
+    "A.effect": {
+      "additionalProperties": false,
+      "maxProperties": 1,
+      "minProperties": 1,
+      "properties": {
+        "stat": {
+          "$ref": "#/$defs/A.effect.stat"
+        },
+        "set_stat": {
+          "$ref": "#/$defs/A.effect.set-stat"
+        },
+        "keywords": {
+          "$ref": "#/$defs/A.effect.keywords"
+        },
+        "lose_abilities": {
+          "$ref": "#/$defs/A.effect.lose-abilities"
+        },
+        "also_named": {
+          "$ref": "#/$defs/A.effect.also-named"
+        },
+        "add_trait": {
+          "$ref": "#/$defs/A.effect.trait"
+        },
+        "remove_trait": {
+          "$ref": "#/$defs/A.effect.trait"
+        },
+        "make_type": {
+          "$ref": "#/$defs/A.effect.make-type"
+        },
+        "cost_mod": {
+          "$ref": "#/$defs/A.effect.cost-mod"
+        },
+        "damage_mod": {
+          "$ref": "#/$defs/A.effect.damage-mod"
+        },
+        "prevent": {
+          "$ref": "#/$defs/A.effect.prevent"
+        },
+        "damage_cap": {
+          "$ref": "#/$defs/A.effect.damage-cap"
+        },
+        "evolve_cost_mod": {
+          "$ref": "#/$defs/A.effect.evolve-cost-mod"
+        },
+        "banish_instead": {
+          "$ref": "#/$defs/A.effect.banish-instead"
+        },
+        "cannot": {
+          "$ref": "#/$defs/A.effect.cannot"
+        },
+        "must_attack": {
+          "$ref": "#/$defs/A.effect.object"
+        },
+        "play_permission": {
+          "$ref": "#/$defs/A.effect.play-permission"
+        },
+        "no_trigger": {
+          "$ref": "#/$defs/A.effect.no-trigger"
+        },
+        "unlimited_evolve": {
+          "$ref": "#/$defs/A.effect.player"
+        },
+        "enters_acted": {
+          "$ref": "#/$defs/A.effect.object"
+        },
+        "reroll": {
+          "$ref": "#/$defs/A.effect.reroll"
+        },
+        "ignore_ward": {
+          "$ref": "#/$defs/A.effect.object"
+        },
+        "choice_any": {
+          "$ref": "#/$defs/A.effect.player"
+        },
+        "extra_trigger": {
+          "$ref": "#/$defs/A.effect.extra-trigger"
+        },
+        "must_target": {
+          "$ref": "#/$defs/A.effect.must-target"
+        },
+        "rule_override": {
+          "$ref": "#/$defs/A.effect.rule-override"
+        }
+      },
+      "type": "object"
     }
   }
 }

@@ -84,7 +84,14 @@ do not imply identical body hashes. Consumer role and batch semantics still requ
 lowering. The [event and history matrix](../docs/dsl/author-history-shapes-1.0.md)
 registers event/history narrowing, history_count/history_sum, event numeric reads,
 LKI operands, capture wrappers, chosen, paid, x_paid, dice, PlayerExpr equality,
-material filter extensions and agg.hp. Cost/Target nodes do not constitute complete
+material filter extensions and agg.hp. The [per-event matrix](../docs/dsl/author-event-matrix-1.0.md)
+separates required and optional payload fields from history.where for all 33 base
+event keys, plus the counter_reached macro. The
+[effect matrix](../docs/dsl/author-effect-shapes-1.0.md) adds 26 closed EffectSpec keys,
+cannot variants and rule overrides. `contracts/author_effects.py` shares the same
+selector and numeric graph; grant remains rejected until complete recursive ability
+headers and Steps exist. Effect parent defaults and source scope require C1/D0;
+fragment acceptance is not enclosing-context validation. Cost/Target nodes do not constitute complete
 ability headers or author entry contracts; full Sel and enclosing-context and
 capability checks still require further contracts and C1/D0.
 Snapshot count/exists do not establish hash equivalence with count_of/did. This recursive graph is not an expanded profile;
