@@ -190,8 +190,8 @@ move／banish／look／reveal 的同層 top 共用 DeckSlice，不接受 ref:{to
 | 效果鍵／上下文 | 封閉形狀與區別 |
 | --- | --- |
 | stat／set_stat | 數值增減／設定分開 |
-| keywords | {on,list}；不同於 A.ability.keywords 的列表 |
-| grant／lose_abilities | 能力增減；不附任意回呼 |
+| keywords | {on?,list}；不同於 A.ability.keywords 的列表 |
+| grant／lose_abilities | grant 等完整能力頭接線，目前拒絕；lose_abilities={on?}，AllAtTime |
 | also_named／add_trait／remove_trait／make_type | 名稱／種族／種類變更，各自有型別 |
 | cost_mod | when_playing、delta\|set、next_only?；delta Int、set Nat 葉參數 |
 | damage_mod | on?、source?、kind?、delta\|multiply、next_only? |
@@ -199,10 +199,10 @@ move／banish／look／reveal 的同層 top 共用 DeckSlice，不接受 ref:{to
 | cannot | on\|who、what、by?、target?、card?、ability?、during?；安裝上下文可提供範圍 |
 | must_attack | 攻擊義務 |
 | play_permission | 打出許可 |
-| no_trigger | on、kinds；Ref/Binding；入場特例為 entering |
+| no_trigger | on:Ref/Binding 或 who:PlayerRef/PlayerSet 恰一、kinds；入場特例為 entering |
 | unlimited_evolve | 進化額度效果 |
 | rule_override | 配對 IR 的已登錄規則變體，不是自由規則名稱 |
-| prevent | on?、kind=any/combat/ability、source? |
+| prevent | on?、kind=any/combat/ability、source?、next_only? |
 | damage_cap | on?、threshold、set；不是 min |
 | evolve_cost_mod | on、delta\|set |
 | enters_acted | on；ProspectiveEntry，非額外 act |
@@ -215,7 +215,10 @@ move／banish／look／reveal 的同層 top 共用 DeckSlice，不接受 ref:{to
 | until | turn/next_opp_turn/this_and_next_opp_turn/game；{next_phase:{who,phase,edge}}／{next_turn:{who,edge}}／{during_next_phase:{who,phase}} |
 | entry_effects[] | EffectSpec；move/search/create/transform 共用；entering 為本次新世代 |
 
-cannot.what 的 12 種變體為 play_card/play_ability/attack/choose_target/draw/destroy/banish/stand/win/lose/deal_damage/pp_max_increase。card 只用於 play_card，ability 只用於能力篩選；target 與各 what 的精確組合未在 §9 逐項列定，不能從範例另造禁止規則。during 區分 phase/not_phase、who、cause，不能混成任意額外欄位。靜態範圍與 apply 的 affected 預設分開。cannot.ability.except 在 §13 GAP-A-045 的文字為列表、示意為純量，本表保留差異。
+cannot.what 的 12 種變體為 play_card/play_ability/attack/choose_target/draw/destroy/banish/stand/win/lose/deal_damage/pp_max_increase。
+逐欄型別、互斥、scope 與證據以[效果形狀矩陣](author-effect-shapes-1.0.md)為準；未列欄位拒絕。
+card 只用於 play_card，ability 只用於 play_ability；cannot.ability.except 統一為非空列表 [evolution]，不收純量。
+draw.during 與 stand.during 分開；damage_mod.kind 可 attack，prevent.kind 不可。
 
 instead 僅掛 damage/move/buff/life/grant/choice/create/draw/search/banish/destroy；同種差異保留未改欄位，異種 replace_with 是完整另一動作。choice 數量取代在打出時計算。expiry 與 next_only 的使用額度分開；EntryOccurrence 也不是通用時間期限。
 

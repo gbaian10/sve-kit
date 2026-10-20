@@ -10,6 +10,8 @@ Schema 根拒絕 standalone 文件。節點檢查不提供完整 authored／expa
 不驗 binding 宣告、來源證據、enclosing on、事件世代、規則准入或 capability。
 以下接線責任由 C1／D0 驗證，不能把合法形狀當成已可執行卡片。
 
+逐事件必填、選填、enum、history 頂層與 where 的對照見[事件欄位矩陣](author-event-matrix-1.0.md)。
+
 ## 事件角色與欄位
 
 `A.event-subject-filter` 是非空屬性 filter：
