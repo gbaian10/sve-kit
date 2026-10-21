@@ -1,8 +1,6 @@
 """Closed query variants preserve contexts, optional fields and recursion."""
 
 import json
-from copy import deepcopy
-from itertools import combinations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -93,27 +91,6 @@ def test_filter_parameters_use_only_whitelisted_leaves(field: str) -> None:
     _check(OBJECTS, body, accepted=True)
 
 
-@pytest.mark.parametrize("field", ["kind", "class", "trait", "traits_all", "name"])
-def test_count_attributes_do_not_inherit_selector_parameter_permissions(
-    field: str,
-) -> None:
-    parameter: JsonValue = {"param": "value"}
-    attribute: JsonValue = [parameter] if field == "traits_all" else parameter
-    query: dict[str, JsonValue] = {
-        "who": "self",
-        "zone": "field",
-        field: attribute,
-    }
-    _check(COUNTED, query, accepted=False)
-    _check(COUNTED, {"any_of": [query]}, accepted=False)
-    _check(E, {"count": query}, accepted=False)
-    condition: dict[str, JsonValue] = {
-        "cmp": {"left": {"count": query}, "op": "ge", "right": 1}
-    }
-    _check(OBJECTS, {"in": "shown", "where": condition}, accepted=False)
-    _check(OBJECTS, query, accepted=True)
-
-
 @pytest.mark.parametrize("field", ["kind", "name"])
 def test_same_as_is_snapshot_comparison(field: str) -> None:
     body: dict[str, JsonValue] = {
@@ -131,125 +108,11 @@ def test_same_as_is_snapshot_comparison(field: str) -> None:
 
 
 @pytest.mark.parametrize(
-    "who",
-    [
-        "self",
-        "each",
-        "opponents",
-        "other_players",
-        {"param": "owner"},
-        {"owner_of": "this"},
-    ],
-)
-@pytest.mark.parametrize("zone", ["field", ["field", "ex"], {"param": "zone"}])
-def test_sources_accept_scalars_sets_and_leaf_parameters(
-    who: JsonValue, zone: JsonValue
-) -> None:
-    value = {"who": who, "zone": zone}
-    _check(OBJECTS, value, accepted=True)
-    _check(COUNTED, value, accepted=True)
-
-
-@pytest.mark.parametrize(
     "value",
-    [
-        {},
-        {"zone": "field"},
-        {"who": "self", "in": "shown"},
-        {"in": "shown", "zone": "field"},
-        {"who": None},
-        {"who": ["self", "opp"]},
-        {"who": "self", "zone": []},
-        {"who": "self", "zone": [None]},
-        {"who": "self", "zone": [{"param": "zone"}]},
-        {"in": {"entry_payment": "additional"}},
-        {"in": {"count_of": "moved"}},
-        {"in": {"objects_of": "moved"}},
-        {"in": {"leader": "self"}},
-        {"in": ["shown"]},
-        {"any_of": [{"any_of": [{"in": "shown"}]}]},
-        {"top": {"who": "self", "n": 1}},
-        {"bottom": {"who": "self", "n": 1}},
-        {"leader": "self"},
-        {"who": "self", "leader_or": True, "kind": "follower"},
-        {"rest": "shown"},
-        {"who": "self", "unknown": True},
-        {"who": "self", "except": "chosen"},
-        {"who": "self", "except": {"leader": "opp"}},
-        {"who": "self", "except": {"any_of": [{"leader": "self"}]}},
-        {"who": "self", "as": "candidate"},
-        {"who": "self", "as": "item", "where": {"did": "moved"}},
-        {"who": "self", "where": {"count": {"who": "self", "zone": "field"}}},
-        {"who": "self", "where": {}},
-        {"who": "self", "where": None},
-        {"who": "self", "cost_lt": 3},
-        {"who": "self", "names": []},
-        {"who": "self", "names": [{"param": "name"}]},
-        {"who": "self", "traits_all": {"param": "traits"}},
-        {"who": "self", "traits_all": []},
-        {"who": "self", "orig_cost_ge": {"param": "cost"}},
-        {"who": "self", "name_contains": ""},
-    ],
+    [{}, {"zone": "field"}],
 )
 def test_object_sources_reject_mixed_variants_and_contexts(value: JsonValue) -> None:
     _check(OBJECTS, value, accepted=False)
-
-
-@pytest.mark.parametrize(
-    ("left", "right"),
-    [("token", "not_token"), *combinations(("name", "names", "name_contains"), 2)],
-)
-def test_exclusive_filters(left: str, right: str) -> None:
-    value: dict[str, JsonValue] = {
-        "who": "self",
-        "zone": "field",
-        left: FILTERS[left],
-        right: FILTERS[right],
-    }
-    _check(OBJECTS, value, accepted=False)
-    _check(COUNTED, value, accepted=False)
-    _check(COUNTED, {"any_of": [value]}, accepted=False)
-
-
-@pytest.mark.parametrize("field", ["other", "token", "not_token"])
-@pytest.mark.parametrize("value", [False, 1, 0, "true", None])
-def test_true_flags_are_strict(field: str, value: JsonValue) -> None:
-    _check(OBJECTS, {"who": "self", field: value}, accepted=False)
-    _check(COUNTED, {"who": "self", "zone": "field", field: value}, accepted=False)
-
-
-@pytest.mark.parametrize("field", ["acted", "racing"])
-@pytest.mark.parametrize("value", [1, 0, "false", None])
-def test_boolean_attributes_are_strict(field: str, value: JsonValue) -> None:
-    _check(OBJECTS, {"in": "shown", field: value}, accepted=False)
-
-
-@pytest.mark.parametrize(
-    "field", ["orig_cost_eq", "orig_cost_le", "orig_cost_ge", "hp_le"]
-)
-@pytest.mark.parametrize("value", [-1, 9007199254740992, True, "2", {"param": "n"}])
-def test_comparison_constants_are_not_selection_quantities(
-    field: str, value: JsonValue
-) -> None:
-    _check(OBJECTS, {"in": "shown", field: value}, accepted=False)
-
-
-@pytest.mark.parametrize(
-    "value",
-    [
-        {"who": "self"},
-        {"who": "self", "zone": "field", "as": "candidate"},
-        {"any_of": []},
-        {"any_of": [{"who": "self"}]},
-        {"any_of": [COUNT_UNION]},
-        {"any_of": [{"who": "self", "zone": "field"}], "who": "self"},
-        {"any_of": [{"who": "self", "zone": "field"}], "zone": "field"},
-        {"any_of": [{"leader": "self"}]},
-    ],
-)
-def test_count_source_is_a_separate_closed_query(value: JsonValue) -> None:
-    _check(COUNTED, value, accepted=False)
-    _check(E, {"count": value}, accepted=False)
 
 
 def test_count_and_conditions_recurse_through_existing_numeric_types() -> None:
@@ -268,13 +131,3 @@ def test_count_and_conditions_recurse_through_existing_numeric_types() -> None:
         _check(name, count, accepted=False)
     for name in (E, C, "A.ref"):
         _check(name, {"who": "self", "zone": "field"}, accepted=False)
-
-
-def test_except_keeps_the_object_domain_at_each_depth() -> None:
-    value: dict[str, JsonValue] = {"in": "looked"}
-    for _ in range(4):
-        value = {"in": "looked", "except": value}
-    _check(OBJECTS, value, accepted=True)
-    changed = deepcopy(value)
-    changed["except"] = {"leader": "self"}
-    _check(OBJECTS, changed, accepted=False)

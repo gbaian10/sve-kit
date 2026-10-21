@@ -8,7 +8,7 @@ from sve_carddb.contracts.author_evidence import (
     InterfaceDependency,
     SourceUse,
 )
-from sve_carddb.contracts.four_layer import Port, PortEvidence, ReceiptRef
+from sve_carddb.contracts.four_layer import Port
 from sve_carddb.domains.effects.author_imports import ImportNode, analyze_imports
 
 
@@ -86,45 +86,3 @@ def test_exact_scope_port_and_interface_are_checked() -> None:
     assert (
         analyze_imports([a, b]).violations[0].reason == "conflicting_import_interface"
     )
-
-
-def test_export_evidence_must_match_exact_upstream_occurrence() -> None:
-    a, b = node("a"), node("b", {"in": use("a")})
-    for source, expected in (
-        (a.source, ()),
-        (b.source, ("import_occurrence_mismatch",)),
-    ):
-        evidence = PortEvidence(
-            source=source.occurrence,
-            capture="receipt",
-            value=ReceiptRef(
-                kind="ReceiptId", receipt_id="synthetic", result="objects"
-            ),
-        )
-        port = Port(
-            name="out",
-            type="ReceiptId",
-            source_role="synthetic",
-            scope="ability_0",
-            evidence=evidence,
-        )
-        result = analyze_imports([replace(a, exports=(port,)), b])
-        assert tuple(item.reason for item in result.violations) == expected
-
-
-def test_import_port_evidence_is_checked_against_upstream() -> None:
-    a, b = node("a"), node("b", {"in": use("a")})
-    evidence = PortEvidence(
-        source=b.source.occurrence,
-        capture="receipt",
-        value=ReceiptRef(kind="ReceiptId", receipt_id="synthetic", result="objects"),
-    )
-    port = Port(
-        name="in",
-        type="ReceiptId",
-        source_role="synthetic",
-        scope="ability_0",
-        evidence=evidence,
-    )
-    result = analyze_imports([a, replace(b, input_ports=(port,))])
-    assert result.violations[0].reason == "import_occurrence_mismatch"

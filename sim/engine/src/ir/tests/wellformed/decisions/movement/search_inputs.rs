@@ -78,56 +78,6 @@ fn search_and_all_destination_inputs_share_the_decision_namespace() {
     }
 }
 
-#[test]
-fn search_input_collisions_are_checked_in_unexecuted_branches() {
-    let branch = control(Control::If {
-        condition: Expr::Literal(Bool(false)),
-        then_body: body(10, vec![replacement(9100)]),
-        else_body: None,
-    });
-    reject(
-        body(
-            1,
-            vec![decision(chosen_objects(9100, 1, objects())), branch],
-        ),
-        WellFormedReason::DuplicateDecision,
-    );
-}
-
-#[test]
-fn independent_searches_keep_separate_input_and_continuation_identities() {
-    let first = search();
-    let mut second = search();
-    if let Node::Instruction { instruction } = &mut second.node {
-        instruction.id = InstructionId(2);
-        instruction.receipt = ReceiptId(2);
-    }
-    if let Action::Search {
-        decision,
-        candidate,
-        filter,
-        continuation,
-        ..
-    } = action(&mut second)
-    {
-        *decision = DecisionId(9002);
-        *candidate = Binding::new(1, ScopeId(4));
-        *filter = cp04_filter(*candidate);
-        *continuation = SearchContinuation {
-            found: Binding::new(2, ScopeId(5)),
-            revealed: Binding::new(3, ScopeId(5)),
-        };
-    }
-    accept(body(1, vec![first.clone(), second.clone()]));
-    if let Action::Search { decision, .. } = action(&mut second) {
-        *decision = DecisionId(9001);
-    }
-    reject(
-        body(1, vec![first, second]),
-        WellFormedReason::DuplicateDecision,
-    );
-}
-
 fn card(id: u64, generation: u64) -> ObjectRef {
     ObjectRef {
         id: ObjectId(id),

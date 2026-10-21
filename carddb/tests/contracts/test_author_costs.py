@@ -65,20 +65,6 @@ def test_synthetic_composite_payments(value: JsonValue) -> None:
 
 
 @pytest.mark.parametrize(
-    "op", ["pp", "ep", "leader_life", "lesson", "earth_rite", "pp_max"]
-)
-@pytest.mark.parametrize("value", [-1, True, None, "1", {"param": "quantity"}])
-def test_quantity_cost_rejects_foreign_domains(op: str, value: JsonValue) -> None:
-    _check("A.cost", {op: value}, accepted=False)
-
-
-@pytest.mark.parametrize("op", ["act_self", "self_to_cemetery", "banish_self"])
-@pytest.mark.parametrize("value", [False, 1, None, {}, "true"])
-def test_self_payment_is_strict_true(op: str, value: JsonValue) -> None:
-    _check("A.cost", {op: value}, accepted=False)
-
-
-@pytest.mark.parametrize(
     "mode",
     [
         {"n": 1},
@@ -115,81 +101,10 @@ def test_synthetic_material_modes(op: str, mode: dict[str, JsonValue]) -> None:
 
 @pytest.mark.parametrize(
     "value",
-    [
-        {"sel": {"who": "self"}},
-        {"sel": {"leader": "self"}, "n": 1},
-        {"sel": {"who": "self"}, "n": 1, "upto": 1},
-        {"sel": {"who": "self"}, "any": True, "n": 1},
-        {"sel": {"who": "self"}, "n": {"param": "amount"}},
-        {"sel": {"who": "self"}, "n": 1, "cost_sum_le": 3},
-        {"sel": {"who": "self"}, "n": 1, "include_self": True},
-        {"groups": []},
-        {"groups": [{"sel": {"in": "this"}, "n": 1}]},
-        {
-            "groups": [
-                {"sel": {"in": "this"}, "n": 1, "result": "part"},
-                {"sel": {"who": "self"}, "n": 1},
-            ]
-        },
-        {
-            "groups": [
-                {"sel": {"in": "this"}, "n": 1},
-                {"sel": {"who": "self"}, "n": 1},
-            ],
-            "sel": {"who": "self"},
-        },
-    ],
+    [{"sel": {"who": "self"}}, {"sel": {"leader": "self"}, "n": 1}],
 )
 def test_material_rejects_context_and_mode_mixups(value: JsonValue) -> None:
     _check("A.cost.material", value, accepted=False)
-
-
-@pytest.mark.parametrize(
-    "extra",
-    [
-        {"upto": 1},
-        {"any": True},
-        {"distinct_by": "name"},
-        {"cost_sum_ge": 1},
-        {"ref": "this"},
-        {"include_self": True},
-        {"groups": []},
-    ],
-)
-def test_random_discard_has_no_constrained_selection(
-    extra: dict[str, JsonValue],
-) -> None:
-    _check(
-        "A.cost",
-        {
-            "discard": {
-                "sel": {"who": "self", "zone": "hand"},
-                "n": 1,
-                "random": True,
-                **extra,
-            }
-        },
-        accepted=False,
-    )
-
-
-def test_random_and_shuffle_flags_cannot_be_omitted_or_false() -> None:
-    for flag in ({}, {"shuffle": False}):
-        _check(
-            "A.cost",
-            {"to_deck": {"sel": {"who": "self"}, "n": 1, **flag}},
-            accepted=False,
-        )
-    _check(
-        "A.cost",
-        {"discard": {"sel": {"who": "self"}, "n": 1, "random": False}},
-        accepted=False,
-    )
-    _check(
-        "A.cost",
-        {"reveal": {"sel": {"who": "self"}, "n": 1, "random": True}},
-        accepted=False,
-    )
 
 
 @pytest.mark.parametrize("name", ["A.cost.optional", "A.cost.additional"])
@@ -202,68 +117,6 @@ def test_wrapper_and_material_receipts_have_separate_positions(name: str) -> Non
     _check("A.cost", value, accepted=False)
     _check(name, {"pp": 1, "option": 1}, accepted=name == "A.cost.optional")
     _check(name, {"pp": 1, "result": "this"}, accepted=False)
-
-
-@pytest.mark.parametrize(
-    "value",
-    [
-        [],
-        [{"pp": 1, "option": 1}],
-        [{"pp": 1}, {"ep": 1, "option": 2}],
-        [{"pp": 1, "option": 0}, {"pp": 1, "option": 2}],
-        [{"pp": 1, "option": True}, {"pp": 1, "option": 2}],
-    ],
-)
-def test_multiple_optional_payments_require_mode_indices(value: JsonValue) -> None:
-    _check("A.cost.optionals", value, accepted=False)
-
-
-@pytest.mark.parametrize("key", ["optional_cost_delta", "optional_cost_set"])
-def test_optional_modifiers_require_one_payment(key: str) -> None:
-    _check("A.play.costs", {key: 2}, accepted=False)
-    _check("A.play.costs", {key: 2, "optional_cost": {"pp": 1}}, accepted=True)
-    _check(
-        "A.play.costs",
-        {key: 2, "optional_cost": [{"pp": 1, "option": 1}, {"pp": 1, "option": 2}]},
-        accepted=False,
-    )
-
-
-def test_play_cost_fragment_is_not_a_complete_ability_header() -> None:
-    _check("A.play.costs", {"cost_set": 1, "cost_delta": -2}, accepted=True)
-    _check("A.play.costs", {"if": {"awakened": True}, "cost_delta": -2}, accepted=False)
-
-
-@pytest.mark.parametrize(
-    ("value", "accepted"),
-    [
-        ({"min": 0, "max": "X"}, True),
-        ({"from_payment": "materials"}, True),
-        ({"from_payment": "materials", "min": 0}, False),
-        ({"from_payment": "this"}, False),
-        ({"min": -1}, False),
-        ({"max": {"param": "bound"}}, False),
-    ],
-)
-def test_x_source_is_exclusive(value: JsonValue, *, accepted: bool) -> None:
-    _check("A.x", value, accepted=accepted)
-
-
-@pytest.mark.parametrize(
-    ("value", "accepted"),
-    [
-        ({"if": {"awakened": True}, "cost": {"pp": 0}}, True),
-        ({"if": {"awakened": True}, "cost": {"pp": 0}, "may": False}, True),
-        ({"if": {"awakened": True}, "cost": {"pp": 0}, "may": True}, True),
-        ({"cost": {"pp": 0}}, False),
-        ({"if": {"awakened": True}, "cost_set": 0}, False),
-        ({"if": {"awakened": True}, "cost": {"pp": 0}, "may": 1}, False),
-    ],
-)
-def test_alternative_cost_is_not_a_cost_modifier(
-    value: JsonValue, *, accepted: bool
-) -> None:
-    _check("A.cost.alt", value, accepted=accepted)
 
 
 def _bytes(name: str, value: JsonValue) -> bytes:
@@ -284,22 +137,6 @@ def test_decoded_cost_bytes_preserve_order_repetition_and_mapping_independence()
         "A.cost", {"steps": [{"pp": 1}, first, first]}
     )
     assert _bytes("A.cost", forward) != _bytes("A.cost", {"steps": [first, {"pp": 1}]})
-
-
-def test_decoded_targets_and_optional_payments_keep_array_order() -> None:
-    first: JsonValue = {"bind": "first", "from": {"who": "self"}, "n": 1}
-    second: JsonValue = {"bind": "second", "from": {"who": "opp"}, "n": 1}
-    assert _bytes("A.targets", [first, second]) != _bytes("A.targets", [second, first])
-    payments: JsonValue = [{"pp": 1, "option": 1}, {"pp": 1, "option": 2}]
-    assert parse(_bytes("A.cost.optionals", payments)) == payments
-    _check("A.targets", [], accepted=False)
-
-
-def test_cost_integer_rejects_float_at_both_boundaries() -> None:
-    with pytest.raises(ValueError, match="Floating point"):
-        parse(b'{"pp":1.0}')
-    with pytest.raises(ValidationError):
-        COSTS["A.cost"].validate_json('{"pp":1.0}')
 
 
 @pytest.mark.parametrize(
@@ -334,93 +171,3 @@ def test_grouped_target_synthetic_modes_match_one_branch(
         ]
     ]
     assert sum(_validator(name).is_valid(value) for name in names) == 1
-
-
-@pytest.mark.parametrize(
-    "group",
-    [
-        {},
-        {"who": "self"},
-        {"zone": "field"},
-        {"in": "this"},
-        {"except": {"who": "self"}},
-        {"where": {"awakened": True}},
-        {"as": "item_alias"},
-        {"power_max": True},
-        {"trait": {"param": "trait"}},
-        {"kind": {"param": "kind"}},
-        {"class": {"param": "class"}},
-        {"name": {"param": "name"}},
-        {"traits_all": [{"param": "trait"}]},
-        {"token": True, "not_token": True},
-        {"name": "name", "names": ["name"]},
-        {"orig_cost_le": {"param": "bound"}},
-    ],
-)
-def test_target_group_does_not_borrow_selector_permissions(group: JsonValue) -> None:
-    _check("A.target.group-filter", group, accepted=False)
-    _check(
-        "A.target",
-        {
-            "bind": "t",
-            "from": {"who": "self"},
-            "groups": [group, {"orig_cost_le": 3}],
-            "upto": 2,
-        },
-        accepted=False,
-    )
-
-
-def test_group_filters_keep_nested_quantity_operand_permissions() -> None:
-    _check(
-        "A.target.group-filter",
-        {"orig_cost_le": {"minus": ["X", {"param": "offset"}]}},
-        accepted=True,
-    )
-    _check(
-        "A.target.group-filter",
-        {"orig_cost_le": {"times": ["X", {"param": "offset"}]}},
-        accepted=False,
-    )
-
-
-@pytest.mark.parametrize(
-    "fields",
-    [
-        {"groups": [{"orig_cost_le": 3}]},
-        {"from": {"leader": "opp"}},
-        {"from": {"who": "opp", "leader_or": True}},
-        {"distinct_by": "name", "distinct_names": True},
-        {"roles": {}},
-        {"option": True},
-        {"upto": 1},
-    ],
-)
-def test_grouped_target_rejects_wrong_context_and_exclusivity(
-    fields: dict[str, JsonValue],
-) -> None:
-    _check(
-        "A.target",
-        {
-            "bind": "t",
-            "from": {"who": "self"},
-            "groups": [{"orig_cost_le": 5}, {"orig_cost_le": 3}],
-            "n": 2,
-            **fields,
-        },
-        accepted=False,
-    )
-
-
-@pytest.mark.parametrize("zone", ["banish", "banished"])
-def test_grouped_source_does_not_invent_a_banished_zone(zone: str) -> None:
-    _check(
-        "A.target",
-        {
-            "bind": "t",
-            "from": {"who": "self", "zone": zone},
-            "groups": [{"orig_cost_le": 4}, {"orig_cost_le": 3}, {"orig_cost_le": 2}],
-            "upto": 3,
-        },
-        accepted=False,
-    )

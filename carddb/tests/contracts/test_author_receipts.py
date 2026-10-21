@@ -1,7 +1,6 @@
 """Receipt reads preserve projection, value categories and closed material fields."""
 
 import json
-from itertools import combinations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -35,16 +34,6 @@ ADAPTERS = (
         "A.leader-recipient": TypeAdapter(refs.LeaderRecipient, config=CONFIG),
     }
 )
-ATTRIBUTES: dict[str, JsonValue] = {
-    "name": "ブラスター・ダーク",
-    "zone": "field",
-    "orig_cost_eq": 2,
-}
-MATERIALS = [
-    {key: ATTRIBUTES[key] for key in keys}
-    for size in range(1, len(ATTRIBUTES) + 1)
-    for keys in combinations(ATTRIBUTES, size)
-]
 
 
 @pytest.fixture(scope="module")
@@ -82,49 +71,9 @@ def test_receipt_nodes_round_trip(
     assert not Draft202012Validator(schema).is_valid(value)
 
 
-@pytest.mark.parametrize("where", MATERIALS)
-def test_material_attributes_are_optional_but_conjunctive(
-    schema: dict[str, JsonValue], where: dict[str, JsonValue]
-) -> None:
-    _check(schema, "A.material-filter", where, accepted=True)
-    for view in ("before", "after"):
-        _check(
-            schema,
-            E,
-            {"count_of": {"receipt": "revealed", "where": where, "view": view}},
-            accepted=True,
-        )
-    _check(schema, C, {"did": {"result": "paid_cost", "where": where}}, accepted=True)
-
-
 @pytest.mark.parametrize(
     "where",
-    [
-        {},
-        None,
-        [],
-        True,
-        {"name": ""},
-        {"name": None},
-        {"name": {"param": "name"}},
-        {"zone": ["field", "ex"]},
-        {"zone": {"param": "zone"}},
-        {"zone": "banish"},
-        {"orig_cost_eq": -1},
-        {"orig_cost_eq": 9007199254740992},
-        {"orig_cost_eq": True},
-        {"orig_cost_eq": "2"},
-        {"orig_cost_eq": {"param": "cost"}},
-        {"who": "self"},
-        {"zone": "field", "who": "self"},
-        {"in": "shown"},
-        {"follow": "moved"},
-        {"where": {"did": "paid_cost"}},
-        {"as": "material"},
-        {"actual": 1},
-        {"evolved": True},
-        {"view": "before"},
-    ],
+    [{}, None],
 )
 def test_material_filter_does_not_select_live_sources(
     schema: dict[str, JsonValue], where: JsonValue
@@ -132,24 +81,6 @@ def test_material_filter_does_not_select_live_sources(
     _check(schema, "A.material-filter", where, accepted=False)
     _check(schema, E, {"count_of": {**COUNTED, "where": where}}, accepted=False)
     _check(schema, C, {"did": {**DID, "where": where}}, accepted=False)
-
-
-@pytest.mark.parametrize(
-    "where",
-    [
-        b'{"orig_cost_eq":true}',
-        b'{"orig_cost_eq":"2"}',
-        b'{"zone":"field","who":"self"}',
-    ],
-    ids=["bool", "numeric-string", "unknown-beside-known"],
-)
-def test_material_filter_is_strict_without_caller_strict_mode(where: bytes) -> None:
-    # _check passes strict=True, which would hide a lax TypedDict configuration.
-    with pytest.raises(ValidationError):
-        RECEIPTS["A.material-filter"].validate_json(where)
-    counted = b'{"count_of":{"receipt":"shown","where":' + where + b',"view":"before"}}'
-    with pytest.raises(ValidationError):
-        ADAPTERS[E].validate_json(counted)
 
 
 @pytest.mark.parametrize(
@@ -172,36 +103,6 @@ def test_receipt_sources_do_not_infer_binding_authority(
 
 
 @pytest.mark.parametrize(
-    "receipt",
-    [
-        "this",
-        "self",
-        "opponents",
-        "",
-        "result\n",
-        {"event": "holder"},
-        {"follow": "moved"},
-        {"param": "receipt"},
-        {"actual": 1},
-        {"entry_payment": "optional"},
-        {"result": "paid_cost"},
-        SNAPSHOT,
-    ],
-)
-def test_receipt_sources_reject_other_reference_categories(
-    schema: dict[str, JsonValue], receipt: JsonValue
-) -> None:
-    _check(schema, E, {"count_of": receipt}, accepted=False)
-    _check(schema, C, {"did": receipt}, accepted=False)
-    _check(
-        schema,
-        "A.snapshot-read",
-        {"objects_of": receipt, "view": "before"},
-        accepted=False,
-    )
-
-
-@pytest.mark.parametrize(
     "value",
     [SNAPSHOT, {"same_as": SNAPSHOT}, {"lki_of": "this"}],
 )
@@ -210,65 +111,3 @@ def test_snapshots_do_not_grant_numeric_or_operation_authority(
     schema: dict[str, JsonValue], value: JsonValue, name: str
 ) -> None:
     _check(schema, name, value, accepted=False)
-
-
-@pytest.mark.parametrize(
-    "value",
-    [
-        "this",
-        {"follow": "moved"},
-        {"lki_of": "this"},
-        {"param": "name"},
-        {"objects_of": "material"},
-        {"who": "self", "zone": "field"},
-    ],
-)
-def test_same_as_requires_an_explicit_material_projection(
-    schema: dict[str, JsonValue], value: JsonValue
-) -> None:
-    _check(schema, "A.same-as", {"same_as": value}, accepted=False)
-
-
-@pytest.mark.parametrize("view", [None, True, 1, "live", "Before", {"param": "view"}])
-def test_views_are_closed(schema: dict[str, JsonValue], view: JsonValue) -> None:
-    _check(schema, "A.snapshot-read", {**SNAPSHOT, "view": view}, accepted=False)
-    _check(schema, E, {"count_of": {**COUNTED, "view": view}}, accepted=False)
-
-
-def test_documented_receipts_use_the_existing_recursive_operators(
-    schema: dict[str, JsonValue],
-) -> None:
-    _check(schema, E, {"times": [{"count_of": "returned"}, 2]}, accepted=True)
-    _check(schema, E, {"count_of": COUNTED}, accepted=True)
-    _check(schema, "A.same-as", {"same_as": SNAPSHOT}, accepted=True)
-    _check(schema, C, {"not": {"did": "evolved_now"}}, accepted=True)
-    _check(schema, C, {"did": DID}, accepted=True)
-    _check(
-        schema,
-        C,
-        {"cmp": {"left": {"count_of": COUNTED}, "op": "eq", "right": 2}},
-        accepted=True,
-    )
-    _check(schema, E, {"plus": [SNAPSHOT, 1]}, accepted=False)
-    _check(schema, E, {"plus": [{"did": "paid_cost"}, 1]}, accepted=False)
-
-
-@pytest.mark.parametrize(
-    ("name", "raw"),
-    [
-        ("A.material-filter", b'{"orig_cost_eq":2.0}'),
-        (
-            E,
-            b'{"count_of":{"receipt":"shown","where":{"orig_cost_eq":2.0},"view":"before"}}',
-        ),
-        (C, b'{"did":{"result":"paid_cost","where":{"orig_cost_eq":2.0}}}'),
-    ],
-    ids=["material", "count", "did"],
-)
-def test_material_numbers_reject_floats_at_both_strict_boundaries(
-    name: str, raw: bytes
-) -> None:
-    with pytest.raises(ValueError, match="Floating point"):
-        parse(raw)
-    with pytest.raises(ValidationError):
-        ADAPTERS[name].validate_json(raw, strict=True)

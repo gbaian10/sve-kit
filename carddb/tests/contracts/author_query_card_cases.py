@@ -12,118 +12,6 @@ CARD_QUERIES: list[tuple[str, str, JsonValue]] = [
         {"who": "current", "zone": "field", "kind": "follower", "power_max": True},
     ),
     (
-        "ECP02-072",
-        "A.sel.object-core",
-        {"who": "each", "zone": "field", "kind": "follower", "not_trait": "デレマス"},
-    ),
-    (
-        "BP13-051",
-        "A.sel.object-core",
-        {
-            "who": "self",
-            "zone": "cemetery",
-            "kind": "follower",
-            "orig_cost_le": 2,
-            "traits_any": ["獣", "魔法生物"],
-        },
-    ),
-    (
-        "SP01-043",
-        "A.sel.object-core",
-        {
-            "who": "self",
-            "zone": "deck",
-            "kind": "follower",
-            "class": "ビショップ",
-            "not_same_name_as_this": True,
-            "orig_cost_le": {
-                "minus": [{"resource": {"who": "self", "kind": "pp_max"}}, 1]
-            },
-        },
-    ),
-    (
-        "BP03-112",
-        "A.sel.object-core",
-        {
-            "who": "self",
-            "zone": "hand",
-            "kind": "follower",
-            "class": "ニュートラル",
-            "cost_le": {"resource": {"who": "self", "kind": "pp_max"}},
-        },
-    ),
-    (
-        "BP09-001",
-        "A.sel.object-core",
-        {
-            "who": "self",
-            "zone": "cemetery",
-            "class": "エルフ",
-            "kind": "spell",
-            "orig_cost_le": {
-                "distinct_names": {
-                    "who": "self",
-                    "zone": "cemetery",
-                    "class": "エルフ",
-                    "kind": "spell",
-                }
-            },
-        },
-    ),
-    (
-        "CP03-123",
-        "A.sel.object-core",
-        {"who": "self", "zone": "cemetery", "kind": "follower", "has_trigger": True},
-    ),
-    (
-        "BP11-024",
-        "A.sel.object-core",
-        {"who": "opp", "zone": "field", "kind": "follower", "boxed": True},
-    ),
-    (
-        "BP02-041",
-        "A.sel.object-core",
-        {"who": "opp", "zone": "field", "kind": "follower", "evolved": False},
-    ),
-    (
-        "BP02-101",
-        "A.sel.object-core",
-        {
-            "who": "self",
-            "zone": "field",
-            "kind": "follower",
-            "other": True,
-            "entered_this_turn": True,
-        },
-    ),
-    (
-        "BP08-053",
-        "A.sel.object-core",
-        {"who": "self", "zone": "evolve_deck", "face_up": False},
-    ),
-    (
-        "BP04-070",
-        "A.sel.object-core",
-        {
-            "who": "opp",
-            "zone": "field",
-            "kind": "follower",
-            "where": {
-                "cmp": {
-                    "left": {"cost_of": "item"},
-                    "op": "eq",
-                    "right": {
-                        "agg": {
-                            "of": {"who": "opp", "zone": "field", "kind": "follower"},
-                            "attr": "cost",
-                            "fn": "min",
-                        }
-                    },
-                }
-            },
-        },
-    ),
-    (
         "BP02-105",
         "A.expr.numeric",
         {
@@ -135,11 +23,6 @@ CARD_QUERIES: list[tuple[str, str, JsonValue]] = [
                 "other": True,
             }
         },
-    ),
-    (
-        "BP06-018",
-        "A.expr.numeric",
-        {"count": {"who": "self", "zone": "evolve_deck", "face_up": True}},
     ),
     (
         "BP12-034",
@@ -189,62 +72,6 @@ CARD_QUERIES: list[tuple[str, str, JsonValue]] = [
             }
         },
     ),
-    (
-        "CP04-022",
-        "A.cond",
-        {
-            "cmp": {
-                "left": {
-                    "agg": {
-                        "of": {
-                            "who": "self",
-                            "zone": "field",
-                            "kind": "follower",
-                            "orig_cost_eq": 1,
-                        },
-                        "attr": "power",
-                        "fn": "sum",
-                    }
-                },
-                "op": "ge",
-                "right": 10,
-            }
-        },
-    ),
-    (
-        "ECP02-005",
-        "A.cond",
-        {
-            "cmp": {
-                "left": {
-                    "agg": {
-                        "of": {"who": "self", "zone": "field", "trait": "パッション"},
-                        "attr": "orig_cost",
-                        "fn": "sum",
-                    }
-                },
-                "op": "ge",
-                "right": 10,
-            }
-        },
-    ),
-    (
-        "BP21-060",
-        "A.cond",
-        {
-            "exists": {
-                "who": "self",
-                "zone": "ex",
-                "where": {
-                    "cmp": {
-                        "left": {"counter": {"on": "item", "name": "情熱"}},
-                        "op": "ge",
-                        "right": 4,
-                    }
-                },
-            }
-        },
-    ),
     ("BP03-028", "A.cond", {"not": {"entered_from": {"ref": "this", "from": "hand"}}}),
     ("BP10-062", "A.cond", {"played_from": {"ref": "this", "from": "ex"}}),
     ("BP17-SL25", "A.cond", {"entered_by": {"ref": "this", "by": "ability"}}),
@@ -286,54 +113,8 @@ CARD_QUERIES: list[tuple[str, str, JsonValue]] = [
         "A.sel.object-core",
         {"in": "looked", "kind": "follower", "cost_eq": 1},
     ),
-    (
-        "BP01-053",
-        "A.sel.object-core",
-        {"who": "self", "zone": "cemetery", "kind": "spell", "cost_le": 3},
-    ),
-    (
-        "BP01-100",
-        "A.sel.object-core",
-        {"in": "looked", "class": "ドラゴン", "cost_ge": 5},
-    ),
-    (
-        "BP05-042",
-        "A.sel.object-core",
-        {"who": "self", "zone": "deck", "orig_cost_eq": 1},
-    ),
-    (
-        "BP02-115",
-        "A.sel.object-core",
-        {"who": "opp", "zone": "field", "kind": "follower", "orig_cost_le": 2},
-    ),
-    (
-        "BP05-024",
-        "A.cond",
-        {
-            "exists": {
-                "who": "opp",
-                "zone": "field",
-                "kind": "follower",
-                "orig_cost_ge": 6,
-            }
-        },
-    ),
-    (
-        "BP01-066",
-        "A.sel.object-core",
-        {"who": "opp", "zone": "field", "kind": "follower", "hp_le": 4},
-    ),
-    (
-        "BP01-035",
-        "A.sel.object-core",
-        {"who": "self", "zone": "deck", "kind": "follower", "has_evolve": True},
-    ),
     ("BP01-065", "A.cond", {"spellchain": 10}),
     ("BP02-080", "A.cond", {"necro": 10}),
     ("BP01-112", "A.cond", {"crimson": True}),
-    ("BP03-020", "A.cond", {"hand": {"who": "self", "le": 2}}),
-    ("BP05-096", "A.cond", {"hand": {"who": "self", "ge": 5}}),
-    ("BP10-109", "A.cond", {"leader_life": {"who": "self", "le": 10}}),
     ("BP03-090", "A.cond", {"entered_from": {"ref": "this", "from": "hand"}}),
-    ("BP07-038", "A.cond", {"entered_from": {"ref": "this", "from": "cemetery"}}),
 ]

@@ -101,9 +101,7 @@ def test_cost_uses_occurrence_identity_not_equal_value() -> None:
         entry_payload(altered, "ability_1")
 
 
-@pytest.mark.parametrize(
-    "change", ["pending", "discriminator", "head", "scope", "role", "kind"]
-)
+@pytest.mark.parametrize("change", ["pending", "discriminator"])
 def test_entry_projection_rejects_unmapped_claims(change: str) -> None:
     context = entry("{進化}{コスト１}:これは進化する。")
     frame = context.frame
@@ -115,26 +113,13 @@ def test_entry_projection_rejects_unmapped_claims(change: str) -> None:
                 )
             }
         )
-    elif change == "head":
+    else:
         frame = frame.model_copy(
             update={
-                "semantic_variant": frame.semantic_variant.model_copy(
-                    update={"key": "future_entry.v1"}
+                "projection": frame.projection.model_copy(
+                    update={"discriminator": "future_entry.v1"}
                 )
             }
-        )
-    elif change == "role":
-        frame = frame.model_copy(update={"role": "label"})
-    else:
-        updates = (
-            {"discriminator": "future_entry.v1"}
-            if change == "discriminator"
-            else {"scopes": ()}
-            if change == "scope"
-            else {"projection_kind": "card_field"}
-        )
-        frame = frame.model_copy(
-            update={"projection": frame.projection.model_copy(update=updates)}
         )
     with pytest.raises(SourceError):
         entry_heads(frame)

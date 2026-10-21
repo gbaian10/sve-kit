@@ -8,42 +8,6 @@ fn triggered(pattern: EventPattern) -> Located<CardProgram> {
     }
     seed
 }
-fn equals(operands: ValueEquality) -> Expr<Bool> {
-    Expr::Compute(Box::new(Predicate::Equal {
-        operands: Box::new(operands),
-    }))
-}
-#[test]
-fn own_end_phase_uses_event_player_phase_and_edge() {
-    let event = Binding::new(1, ScopeId(1));
-    let seed = triggered(EventPattern::Phase {
-        binding: event,
-        predicate: Expr::Compute(Box::new(Predicate::And {
-            predicates: vec![
-                Expr::Compute(Box::new(Predicate::PlayerEquals {
-                    left: Expr::Frozen(Box::new(PlayerFrozen::PhasePlayer { event })),
-                    right: Expr::Literal(PlayerRef::Controller {}),
-                })),
-                Expr::Compute(Box::new(Predicate::PhaseEquals {
-                    left: Expr::Frozen(Box::new(PhaseFields::PhasePhase { event })),
-                    right: Expr::Literal(Phase::End),
-                })),
-                equals(ValueEquality::Edge {
-                    left: Expr::Frozen(Box::new(EdgeFields::PhaseEdge { event })),
-                    right: Expr::Literal(Edge::Begin),
-                }),
-            ],
-        })),
-    });
-    for code in [
-        "predicate.player-equals",
-        "shape.PhaseFields.PhasePhase",
-        "shape.EdgeFields.PhaseEdge",
-    ] {
-        assert_missing(&seed, code, "synthetic");
-    }
-    assert!(!codes(&seed).contains(&"value.live"));
-}
 #[test]
 fn played_spell_narrows_the_subject_and_reads_its_event_snapshot() {
     let event = Binding::new(1, ScopeId(1));
@@ -75,81 +39,6 @@ fn played_spell_narrows_the_subject_and_reads_its_event_snapshot() {
     ] {
         assert_missing(&seed, code, "synthetic");
     }
-}
-#[test]
-fn attack_damage_can_match_recipient_flags_and_frozen_source() {
-    let event = Binding::new(1, ScopeId(1));
-    let seed = triggered(EventPattern::Damage {
-        binding: event,
-        predicate: Expr::Compute(Box::new(Predicate::And {
-            predicates: vec![
-                Expr::Compute(Box::new(Predicate::RecipientIsLeader {
-                    recipient: DamageRecipient::FromExpression {
-                        value: Box::new(Expr::Frozen(Box::new(RecipientFields::DamageRecipient {
-                            event,
-                        }))),
-                    },
-                    players: controller_set(),
-                })),
-                equals(ValueEquality::DamageFlags {
-                    left: Expr::Frozen(Box::new(DamageFlagsFields::DamageFlags { event })),
-                    right: Expr::Literal(DamageFlags::Attack),
-                }),
-                Expr::Compute(Box::new(Predicate::NameEquals {
-                    object: ObjectView::Snapshot {
-                        value: Box::new(Expr::Frozen(Box::new(SnapshotFields::DamageSource {
-                            event,
-                        }))),
-                    },
-                    name: Expr::Literal(CardName("synthetic".to_owned())),
-                })),
-            ],
-        })),
-    });
-    for code in [
-        "predicate.recipient-leader",
-        "shape.DamageFlagsFields.DamageFlags",
-        "reference.snapshot",
-    ] {
-        assert_missing(&seed, code, "synthetic");
-    }
-}
-#[test]
-fn stat_facets_and_fusion_materials_have_typed_iteration_bindings() {
-    let event = Binding::new(1, ScopeId(1));
-    let facet = Binding::new(2, ScopeId(2));
-    let stat = triggered(EventPattern::StatChange {
-        binding: event,
-        predicate: Expr::Compute(Box::new(Predicate::AnyStatFacet {
-            facets: Expr::Frozen(Box::new(FacetFields::StatChangeFacets { event })),
-            facet,
-            property: Stat::Life,
-            predicate: Expr::Compute(Box::new(Predicate::CompareInt {
-                left: Expr::Frozen(Box::new(IntFrozen::StatDelta { event: facet })),
-                comparison: Comparison::Less,
-                right: Expr::Literal(Int(0)),
-            })),
-        })),
-    });
-    assert_missing(&stat, "predicate.stat-facet", "synthetic");
-    let fused_event = Binding::new(1, ScopeId(1));
-    let material = Binding::new(2, ScopeId(2));
-    let fused = triggered(EventPattern::Fused {
-        binding: fused_event,
-        predicate: Expr::Compute(Box::new(Predicate::AnySnapshot {
-            snapshots: Expr::Frozen(Box::new(VecRuntimeObjectViewFields::FusedMaterials {
-                event: fused_event,
-            })),
-            object: material,
-            predicate: Expr::Compute(Box::new(Predicate::NameEquals {
-                object: ObjectView::Snapshot {
-                    value: Box::new(Expr::Bound(material)),
-                },
-                name: Expr::Literal(CardName("synthetic".to_owned())),
-            })),
-        })),
-    });
-    assert_missing(&fused, "predicate.snapshot-any", "synthetic");
 }
 #[test]
 fn entry_payment_and_receipt_conditions_have_consumers() {

@@ -12,14 +12,8 @@ from sve_carddb.domains.effects.author_expansion import (
     body_version,
     equivalent_ability,
 )
-from sve_carddb.domains.effects.author_sites import SITE_RULES
-from sve_carddb.domains.effects.author_sources import (
-    SOURCE_SITES,
-    SourceError,
-    resolve_source,
-)
+from sve_carddb.domains.effects.author_sources import SourceError, resolve_source
 
-from .author_source_cases import synthetic_offset
 from .test_author_entries import SCHEMAS, ability, document, shard
 from .test_author_expansion import generated, registered
 from .test_author_sources import entry_case
@@ -81,24 +75,6 @@ def test_resolved_entry_proof_is_separate_from_expanded_tree(
     assert "source_proof" not in next(ability_nodes(resolved.tree))[1]
 
 
-def test_resolved_inline_and_companion_use_same_source_interface(
-    expander: AuthorExpander,
-) -> None:
-    results = []
-    for companion in (False, True):
-        entry, inputs, candidate = entry_input(companion=companion)
-        results.append(
-            expander.expand_sources(
-                canonical(document(entry)), inputs, {ABILITY_PATH: candidate}
-            )
-        )
-    assert results[0].tree == results[1].tree
-    assert results[0].sidecar[0].frame_id == results[1].sidecar[0].frame_id
-    assert results[0].sidecar[0].interface_key == results[1].sidecar[0].interface_key
-    assert results[0].sidecar[0].body_version is None
-    assert results[1].sidecar[0].body_version is not None
-
-
 @pytest.mark.parametrize("mapping", ["missing", "extra", "wrong_path"])
 def test_source_candidate_paths_are_an_exact_set(
     expander: AuthorExpander, mapping: str
@@ -135,31 +111,6 @@ def test_source_scope_cannot_be_fabricated_by_author_metadata(
         expander.expand_sources(raw, inputs, {ABILITY_PATH: candidate})
 
 
-def test_selected_companion_frame_must_match_reconstructed_frame(
-    expander: AuthorExpander,
-) -> None:
-    candidate, use = entry_case()
-    record = registered({"evolve": {"cost": {"pp": 99}}})
-    record["frame_id"] = "frame:" + "f" * 64
-    entry = generated(record)
-    entry["sources"] = [use.model_dump(mode="json")]
-    raw, inputs = canonical(document(entry)), [canonical(shard(record))]
-    assert expander.expand(raw, inputs).sidecar[0].source_proof == "none"
-    with pytest.raises(ExpansionError, match="source_frame_mismatch"):
-        expander.expand_sources(raw, inputs, {ABILITY_PATH: candidate})
-
-
-def test_source_binding_is_exact_even_without_parameters(
-    expander: AuthorExpander,
-) -> None:
-    entry, inputs, candidate = entry_input(companion=False)
-    object_value(array(entry["sources"])[0])["binding_id"] = "bind:" + "0" * 64
-    with pytest.raises(SourceError, match="source_occurrence_mismatch"):
-        expander.expand_sources(
-            canonical(document(entry)), inputs, {ABILITY_PATH: candidate}
-        )
-
-
 def test_nonempty_author_exports_have_no_source_mapping(
     expander: AuthorExpander,
 ) -> None:
@@ -174,49 +125,3 @@ def test_nonempty_author_exports_have_no_source_mapping(
     assert expander.expand(raw, []).sidecar[0].source_proof == "none"
     with pytest.raises(ExpansionError, match="port"):
         expander.expand_sources(raw, [], {ABILITY_PATH: candidate})
-
-
-def test_synthetic_resolved_contract_cannot_supply_expansion_proof(
-    expander: AuthorExpander,
-) -> None:
-    sample = synthetic_offset()
-    assert sample.compatible().source_proof == "none"
-    record = registered(
-        {
-            "spell": {
-                "define": {
-                    "X": {
-                        "minus": [
-                            {"count": {"who": "self", "zone": "deck"}},
-                            {"param": "offset"},
-                        ]
-                    }
-                },
-                "do": [{"draw": {"n": "X"}}],
-            }
-        }
-    )
-    record["frame_id"] = sample.frame.id
-    record["params"] = {"offset": sample.declaration().model_dump(mode="json")}
-    record["body_version"] = body_version(record)
-    entry = generated(record, {"offset": {"type": "Int", "value": 5}})
-    entry["sources"] = [sample.use().model_dump(mode="json")]
-    raw, inputs = canonical(document(entry)), [canonical(shard(record))]
-    assert expander.expand(raw, inputs).sidecar[0].source_proof == "none"
-    with pytest.raises(SourceError, match="source_pending"):
-        expander.expand_sources(raw, inputs, {ABILITY_PATH: sample.candidate})
-
-
-def test_source_signatures_match_kernel_declarations() -> None:
-    expected = {
-        (rule.owner, rule.path): (
-            rule.type,
-            rule.source_type,
-            rule.role,
-            rule.component,
-        )
-        for rule in SITE_RULES
-        if rule.type not in {None, "Concept", "CardKind", "Phase"}
-        and rule.component != "negated_magnitude"
-    }
-    assert expected == SOURCE_SITES

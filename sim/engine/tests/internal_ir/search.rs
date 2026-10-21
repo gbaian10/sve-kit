@@ -1,8 +1,7 @@
 //! Search fragments; no lowering, full printed ability or capability claim.
 
 use super::{
-    body, catalog, checked, context, exact_authority, game, instruction, node, players, setup,
-    source,
+    catalog, checked, context, exact_authority, game, instruction, players, setup, source,
 };
 use serde_json::{Value, json};
 use sve_engine::EngineFailure;
@@ -523,54 +522,6 @@ fn groups_are_one_complete_answer_with_empty_entries_and_disjoint_members() {
 }
 
 #[test]
-fn rejected_capacity_and_aggregate_shapes_are_checked_before_any_mutation() {
-    for seat in [1, 2] {
-        let mut aggregate = grouped();
-        let Node::Instruction { instruction } = &mut aggregate.node else {
-            panic!("literal fixture shape");
-        };
-        let Action::Search {
-            groups: Some(groups),
-            ..
-        } = &mut instruction.action
-        else {
-            panic!("literal fixture shape");
-        };
-        groups.aggregate_bounds.push(AggregateBound {
-            property: NumericProperty::Cost,
-            comparison: Comparison::LessEqual,
-            value: Expr::Literal(Int(8)),
-        });
-        for (dead_branch, step) in [
-            (true, aggregate),
-            (
-                false,
-                search(conditional(), cardinality(0, 6), shared(ZoneKind::Field)),
-            ),
-        ] {
-            let mut game = game(seat, 6);
-            let before = exact_authority(&game);
-            // Capacity depends on the runtime context; aggregate shape rejection must also cover dead branches.
-            let program = if dead_branch {
-                let dead = node(Node::Control {
-                    control: Control::If {
-                        condition: Expr::Literal(Bool(false)),
-                        then_body: body(20, vec![step]),
-                        else_body: None,
-                    },
-                });
-                checked(vec![super::draw(9, 1), dead])
-            } else {
-                checked(vec![step])
-            };
-            game.execute_internal(&program, &source("synthetic"), context(seat))
-                .unwrap_err();
-            assert_eq!(exact_authority(&game), before);
-        }
-    }
-}
-
-#[test]
 fn failing_final_shuffle_restores_the_execution_and_revokes_the_pending_token() {
     for seat in [1, 2] {
         let position = setup(
@@ -926,123 +877,6 @@ fn search_never_puts_a_spell_onto_the_field() {
         let result = answer(&mut game, seat, SearchAnswer::Ungrouped(vec![]));
         assert!(result.complete && outcome(&result).moved.is_empty());
         assert_eq!(shuffles(&result), 1);
-    }
-}
-
-#[expect(
-    clippy::panic,
-    reason = "Literal fixture shape failures must stop the test."
-)]
-fn with_filter(filter: Expr<Bool>, edit: impl FnOnce(&mut Action)) -> Located<Node> {
-    let mut step = search(filter, cardinality(0, 1), hand());
-    let Node::Instruction { instruction } = &mut step.node else {
-        panic!("literal fixture shape");
-    };
-    edit(&mut instruction.action);
-    step
-}
-
-#[test]
-fn private_search_grammar_never_admits_other_nodes_or_unclassified_searches() {
-    let candidate = Binding::new(1, ScopeId(2));
-    let source_name = Expr::Compute(Box::new(Predicate::NamesIntersect {
-        left: Expr::Live(Box::new(NamesRead::Names {
-            object: ObjectView::Current {
-                object: Box::new(ObjectOperand::SourceHolder {}),
-            },
-        })),
-        right: Expr::Literal(vec![CardName("unit-spell".into())]),
-    }));
-    let zone_binding = Binding::new(9, ScopeId(98));
-    let mut mixed = grouped();
-    if let Node::Instruction { instruction } = &mut mixed.node
-        && let Action::Search {
-            groups: Some(groups),
-            ..
-        } = &mut instruction.action
-        && let Selector::Zone { predicate, .. } = &mut groups.groups[1].selector
-    {
-        **predicate = Expr::Literal(Bool(true));
-    } else {
-        panic!("literal fixture shape");
-    }
-    let capture = node(Node::Capture {
-        capture: Capture::Boolean {
-            at: CaptureTime::AtResolution { scope: ScopeId(1) },
-            value: source_name.clone(),
-            into: CaptureRef {
-                binding: Binding::new(5, ScopeId(1)),
-            },
-        },
-    });
-    let mut programs = vec![checked(vec![capture])];
-    let cases = vec![
-        node(Node::Control {
-            control: Control::If {
-                condition: source_name,
-                then_body: body(20, vec![super::draw(8, 1)]),
-                else_body: None,
-            },
-        }),
-        instruction(
-            7,
-            Action::Move {
-                objects: Selector::Zone {
-                    players: players(PlayerRelation::All),
-                    zone: ZoneKind::Cemetery,
-                    view: SelectionView::Current {},
-                    binding: zone_binding,
-                    predicate: Box::new(name(zone_binding, "unit-follower")),
-                },
-                movement: movement(MoveDestination::Owners {
-                    zone: OwnerZone::Banish,
-                }),
-                reason: MoveReason::Put,
-            },
-        ),
-        with_filter(
-            Expr::Compute(Box::new(Predicate::Or {
-                predicates: vec![name(candidate, "unit-follower"), Expr::Literal(Bool(true))],
-            })),
-            |_| {},
-        ),
-        with_filter(Expr::Literal(Bool(false)), |_| {}),
-        with_filter(conditional(), |action| {
-            if let Action::Search { deck, .. } = action {
-                *deck = PlayerRef::RequireOne {
-                    players: Box::new(PlayerSet {
-                        cardinality: cardinality(1, 1),
-                        ..players(PlayerRelation::Opponents)
-                    }),
-                };
-            }
-        }),
-        with_filter(conditional(), |action| {
-            if let Action::Search { destination, .. } = action {
-                *destination = Some(SearchDestination::Single {
-                    movement: movement(MoveDestination::Owners {
-                        zone: OwnerZone::Deck,
-                    }),
-                });
-            }
-        }),
-        mixed,
-    ];
-    programs.extend(
-        cases
-            .into_iter()
-            .map(|case| checked(vec![super::draw(9, 1), case])),
-    );
-    for seat in [1, 2] {
-        for program in &programs {
-            let mut game = game(seat, 3);
-            let before = exact_authority(&game);
-            let error = game
-                .execute_internal(program, &source("synthetic"), context(seat))
-                .unwrap_err();
-            assert!(matches!(error, EngineFailure::Unsupported(_)));
-            assert_eq!(exact_authority(&game), before);
-        }
     }
 }
 

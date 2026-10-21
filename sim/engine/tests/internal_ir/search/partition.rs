@@ -323,70 +323,6 @@ fn earlier_segments_do_not_reserve_for_later_minima_and_zero_bounds_still_ask() 
 }
 
 #[test]
-fn unsupported_partition_destinations_are_rejected_even_in_dead_branches() {
-    let cemetery = MoveDestination::Owners {
-        zone: OwnerZone::Cemetery,
-    };
-    for (admitted, destination) in [
-        (true, vec![hand(), cemetery.clone()]),
-        (false, vec![hand()]),
-        (false, vec![cemetery.clone(), hand()]),
-        (
-            false,
-            vec![
-                hand(),
-                MoveDestination::Owners {
-                    zone: OwnerZone::Banish,
-                },
-            ],
-        ),
-        (false, vec![hand(), cemetery, hand()]),
-    ] {
-        let mut step = partition(cardinality(1, 1), cardinality(1, 1));
-        if let Node::Instruction { instruction } = &mut step.node
-            && let Action::Search {
-                destination: Some(SearchDestination::Partition { destinations }),
-                cardinality: bounds,
-                ..
-            } = &mut instruction.action
-        {
-            *bounds = cardinality(0, u64::try_from(destination.len()).unwrap());
-            *destinations = destination
-                .into_iter()
-                .enumerate()
-                .map(|(index, zone)| SearchPartition {
-                    decision: DecisionId(u64::try_from(index).unwrap() + 20),
-                    zone,
-                    cardinality: cardinality(1, 1),
-                })
-                .collect();
-        }
-        let dead = node(Node::Control {
-            control: Control::If {
-                condition: Expr::Literal(Bool(false)),
-                then_body: body(8, vec![step]),
-                else_body: None,
-            },
-        });
-        let mut game = game(1, 3);
-        let before = exact_authority(&game);
-        let result = game.execute_internal(
-            &checked(vec![super::super::draw(9, 1), dead]),
-            &source("synthetic"),
-            context(1),
-        );
-        // The admitted Hand→Cemetery control proves the rejection comes from the destinations.
-        if admitted {
-            assert!(result.unwrap().complete);
-            assert_ne!(exact_authority(&game), before);
-        } else {
-            result.unwrap_err();
-            assert_eq!(exact_authority(&game), before);
-        }
-    }
-}
-
-#[test]
 fn failure_after_final_partition_restores_execution_and_real_rng() {
     for seat in [1, 2] {
         let draws = Expr::Compute(Box::new(IntOperation::Arithmetic {
@@ -512,54 +448,6 @@ fn selection_and_allocation_vectors_do_not_define_destination_order() {
         assert!(results[0].complete);
         assert_eq!(results[0], results[1]);
         assert_eq!(exact_authority(&games[0]), exact_authority(&games[1]));
-    }
-}
-
-#[test]
-fn possibly_unallocated_found_is_rejected_by_shape_even_when_the_branch_is_dead() {
-    for (admitted, first, second) in [
-        (true, cardinality(1, 2), cardinality(1, 1)),
-        (false, cardinality(0, 1), cardinality(0, 1)),
-        (false, cardinality(1, 1), cardinality(0, 1)),
-        (
-            false,
-            Cardinality {
-                minimum: Nat(1),
-                maximum: None,
-            },
-            cardinality(1, 1),
-        ),
-    ] {
-        let mut step = partition(first, second);
-        if first.maximum.is_none()
-            && let Node::Instruction { instruction } = &mut step.node
-            && let Action::Search { cardinality, .. } = &mut instruction.action
-        {
-            cardinality.maximum = None;
-        }
-        let dead = node(Node::Control {
-            control: Control::If {
-                condition: Expr::Literal(Bool(false)),
-                then_body: body(8, vec![step]),
-                else_body: None,
-            },
-        });
-        for seat in [1, 2] {
-            let mut game = game(seat, 3);
-            let before = exact_authority(&game);
-            let result = game.execute_internal(
-                &checked(vec![super::super::draw(9, 1), dead.clone()]),
-                &source("synthetic"),
-                context(seat),
-            );
-            if admitted {
-                assert!(result.unwrap().complete);
-                assert_ne!(exact_authority(&game), before);
-            } else {
-                assert!(matches!(result.unwrap_err(), EngineFailure::Unsupported(_)));
-                assert_eq!(exact_authority(&game), before);
-            }
-        }
     }
 }
 

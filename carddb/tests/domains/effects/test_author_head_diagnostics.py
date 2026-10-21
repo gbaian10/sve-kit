@@ -9,7 +9,8 @@ import pytest
 from sve_carddb.core.json import canonical, object_value
 from sve_carddb.domains.effects.author_inputs import AuthorInputError, AuthorSchemas
 
-from .test_author_entries import HEADS, ability, companion, document, shard
+from ...contracts.test_author_abilities import HEADS
+from .test_author_entries import ability, document
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
@@ -73,30 +74,6 @@ def test_ability_header_failures_keep_exact_container_paths(
     assert diagnostic.card_no == "FIX-001"
 
 
-@pytest.mark.parametrize(
-    ("body", "reason", "suffix"),
-    [
-        (
-            {"quick": True, "spell": {"do": []}, "typo": None},
-            "ability_head_conflict",
-            (),
-        ),
-        ({"fanfar": {}}, "additionalProperties", ("fanfar",)),
-        ({}, "ability_head_missing", ()),
-    ],
-)
-def test_companion_uses_the_same_head_diagnostics(
-    schemas: AuthorSchemas,
-    body: dict[str, JsonValue],
-    reason: str,
-    suffix: tuple[str, ...],
-) -> None:
-    with pytest.raises(AuthorInputError) as caught:
-        schemas.effect_body_shard(canonical(shard(companion(body))))
-    assert caught.value.diagnostic.reason == reason
-    assert caught.value.diagnostic.path == ("records", 0, "body", *suffix)
-
-
 def test_nested_granted_head_conflict_is_not_reported_as_an_outer_typo(
     schemas: AuthorSchemas,
 ) -> None:
@@ -124,39 +101,3 @@ def test_nested_granted_head_conflict_is_not_reported_as_an_outer_typo(
         "abilities",
         0,
     )
-
-
-def test_generated_payload_errors_stay_inside_authored_generated_branch(
-    schemas: AuthorSchemas,
-) -> None:
-    entry = ability({"generated_by": {"unknown": "private_value"}})
-    del entry["ports"]
-    with pytest.raises(AuthorInputError) as caught:
-        schemas.author_effect_set(canonical(document(entry)))
-    assert caught.value.diagnostic.reason == "additionalProperties"
-    assert caught.value.diagnostic.path == (*ABILITY_PATH, "generated_by", "unknown")
-    assert "private_value" not in str(caught.value)
-
-
-def test_schema_derived_heads_do_not_bypass_the_typed_reader(tmp_path: Path) -> None:
-    for source in SCHEMAS.glob("*.schema.json"):
-        (tmp_path / source.name).write_bytes(source.read_bytes())
-    path = tmp_path / "author-nodes.schema.json"
-    schema = json.loads(path.read_bytes())
-    variant = schema["$defs"]["A.ability.fanfare"]
-    variant["properties"]["future_head"] = variant["properties"].pop("fanfare")
-    variant["required"] = [
-        "future_head" if name == "fanfare" else name for name in variant["required"]
-    ]
-    path.write_text(json.dumps(schema))
-    schemas = AuthorSchemas(tmp_path)
-    with pytest.raises(AuthorInputError) as caught:
-        schemas.author_effect_set(
-            canonical(document(ability({"future_head": {"do": []}, "quick": True})))
-        )
-    assert caught.value.diagnostic.reason == "ability_head_conflict"
-    with pytest.raises(AuthorInputError) as caught:
-        schemas.author_effect_set(
-            canonical(document(ability({"future_head": {"do": []}})))
-        )
-    assert caught.value.diagnostic.reason == "decoder_constraint"

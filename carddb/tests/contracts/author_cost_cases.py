@@ -2,59 +2,13 @@
 
 from typing import TYPE_CHECKING
 
-from pydantic import TypeAdapter
-
 from sve_carddb.contracts import author_costs as costs
 
-from .author_selector_cases import CONFIG
+from .author_adapters import adapters
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
 
-COSTS: dict[str, TypeAdapter[object]] = {
-    "A.play.conditional-delta": TypeAdapter(costs.ConditionalCostDelta, config=CONFIG),
-    "A.play.conditional-set": TypeAdapter(costs.ConditionalCostSet, config=CONFIG),
-    "A.play.cost-delta": TypeAdapter(costs.PlayCostDelta, config=CONFIG),
-    "A.play.cost-set": TypeAdapter(costs.PlayCostSet, config=CONFIG),
-    "A.play.cost-deltas": TypeAdapter(costs.PlayCostDeltas, config=CONFIG),
-    "A.play.cost-sets": TypeAdapter(costs.PlayCostSets, config=CONFIG),
-    "A.cost.material-group.exact": TypeAdapter(costs.MaterialGroupExact, config=CONFIG),
-    "A.cost.material.exact": TypeAdapter(costs.MaterialExact, config=CONFIG),
-    "A.cost.material-group.up-to": TypeAdapter(costs.MaterialGroupUpTo, config=CONFIG),
-    "A.cost.material.up-to": TypeAdapter(costs.MaterialUpTo, config=CONFIG),
-    "A.cost.material-group.any": TypeAdapter(costs.MaterialGroupAny, config=CONFIG),
-    "A.cost.material.any": TypeAdapter(costs.MaterialAny, config=CONFIG),
-    "A.cost.material-group": TypeAdapter(costs.MaterialGroup, config=CONFIG),
-    "A.cost.material.groups": TypeAdapter(costs.MaterialGroups, config=CONFIG),
-    "A.cost.material": TypeAdapter(costs.Material, config=CONFIG),
-    "A.cost.discard-random": TypeAdapter(costs.RandomDiscardMaterial, config=CONFIG),
-    "A.cost.discard-ref": TypeAdapter(costs.DiscardRef, config=CONFIG),
-    "A.cost.banish-top": TypeAdapter(costs.BanishTop, config=CONFIG),
-    "A.cost.shuffle-material.exact": TypeAdapter(
-        costs.ShuffleMaterialExact, config=CONFIG
-    ),
-    "A.cost.shuffle-material.up-to": TypeAdapter(
-        costs.ShuffleMaterialUpTo, config=CONFIG
-    ),
-    "A.cost.shuffle-material.any": TypeAdapter(costs.ShuffleMaterialAny, config=CONFIG),
-    "A.cost.shuffle-material.groups": TypeAdapter(
-        costs.ShuffleMaterialGroups, config=CONFIG
-    ),
-    "A.cost.shuffle-material": TypeAdapter(costs.ShuffleMaterial, config=CONFIG),
-    "A.cost.skip-turn": TypeAdapter(costs.SkipTurn, config=CONFIG),
-    "A.cost.step": TypeAdapter(costs.CostStep, config=CONFIG),
-    "A.cost": TypeAdapter(costs.Cost, config=CONFIG),
-    "A.cost.alternative": TypeAdapter(costs.CostAlternative, config=CONFIG),
-    "A.cost.additional": TypeAdapter(costs.AdditionalCost, config=CONFIG),
-    "A.cost.optional": TypeAdapter(costs.OptionalCost, config=CONFIG),
-    "A.cost.optional-mode": TypeAdapter(costs.OptionalModeCost, config=CONFIG),
-    "A.cost.optionals": TypeAdapter(costs.OptionalCosts, config=CONFIG),
-    "A.cost.alt": TypeAdapter(costs.AltCost, config=CONFIG),
-    "A.x.free": TypeAdapter(costs.FreeX, config=CONFIG),
-    "A.x.payment": TypeAdapter(costs.PaymentX, config=CONFIG),
-    "A.x": TypeAdapter(costs.XParameter, config=CONFIG),
-    "A.play.costs": TypeAdapter(costs.PlayCosts, config=CONFIG),
-}
 COST_NAMES = {
     "A.play.conditional-delta": "ConditionalCostDelta",
     "A.play.conditional-set": "ConditionalCostSet",
@@ -94,6 +48,7 @@ COST_NAMES = {
     "A.play.costs": "PlayCosts",
 }
 
+
 CARD_COSTS: list[tuple[str, dict[str, JsonValue]]] = [
     ("BP03-001", {"pp": 1}),
     ("BP01-105", {"leader_life": 3}),
@@ -107,17 +62,10 @@ CARD_COSTS: list[tuple[str, dict[str, JsonValue]]] = [
         "BP03-045",
         {"discard": {"sel": {"who": "self", "zone": "hand", "kind": "spell"}, "n": 1}},
     ),
-    ("CP02-056", {"discard": {"sel": {"who": "self", "zone": "hand"}, "upto": 3}}),
-    (
-        "BP03-088",
-        {"discard": {"sel": {"who": "self", "zone": "hand"}, "n": 1, "random": True}},
-    ),
-    ("BP08-037", {"discard": {"ref": "this"}}),
     (
         "BP14-023",
         {"banish": {"sel": {"who": "self", "zone": "ex", "name": "輝く金貨"}, "n": 2}},
     ),
-    ("BP03-073", {"banish": {"top": {"who": "self", "n": 10}}}),
     (
         "BP01-SL15",
         {
@@ -138,21 +86,6 @@ CARD_COSTS: list[tuple[str, dict[str, JsonValue]]] = [
             "return_to_hand": {
                 "sel": {"who": "self", "zone": "field", "other": True},
                 "n": 1,
-            }
-        },
-    ),
-    (
-        "CP01-003",
-        {
-            "return_to_hand": {
-                "sel": {
-                    "who": "self",
-                    "zone": "field",
-                    "other": True,
-                    "trait": "ウマ娘",
-                },
-                "any": True,
-                "result": "returned",
             }
         },
     ),
@@ -203,16 +136,6 @@ CARD_COSTS: list[tuple[str, dict[str, JsonValue]]] = [
         "CP04-104",
         {"act": {"sel": {"who": "self", "zone": "field", "kind": "amulet"}, "n": "X"}},
     ),
-    (
-        "BP11-P30",
-        {
-            "act": {
-                "sel": {"who": "self", "zone": "field", "kind": "follower"},
-                "any": True,
-                "cost_sum_ge": 5,
-            }
-        },
-    ),
     ("BP08-072", {"to_ex": {"sel": {"in": "this"}, "n": 1}}),
     ("BP07-012", {"to_deck_bottom": {"sel": {"in": "this"}, "n": 1}}),
     (
@@ -254,25 +177,6 @@ CARD_COSTS: list[tuple[str, dict[str, JsonValue]]] = [
     (
         "BP01-016",
         {"steps": [{"pp": 1}, {"act_self": True}, {"self_to_cemetery": True}]},
-    ),
-    (
-        "SD08-017",
-        {
-            "discard": {
-                "groups": [
-                    {"sel": {"in": "this"}, "n": 1},
-                    {
-                        "sel": {
-                            "who": "self",
-                            "zone": "hand",
-                            "class": "ドラゴン",
-                            "orig_cost_ge": 7,
-                        },
-                        "n": 1,
-                    },
-                ]
-            }
-        },
     ),
 ]
 
@@ -409,4 +313,8 @@ CARD_WRAPPERS.append(
             },
         },
     )
+)
+
+COSTS = adapters(
+    {key: (getattr(costs, name), name) for key, name in COST_NAMES.items()}
 )

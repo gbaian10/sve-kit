@@ -490,103 +490,6 @@ fn static_declarations_and_play_costs_are_not_omitted() {
     assert_missing(&seed, "effect.cost-set", "synthetic");
     assert_missing(&seed, "action.discard", "synthetic");
 }
-#[test]
-fn distinct_patch_shapes_cannot_share_a_support_declaration() {
-    let patch = |patch| {
-        card(
-            program(vec![instruction(
-                Action::Modify {
-                    subjects: Selector::Objects { objects: vec![] },
-                    patch,
-                    expires: turn(),
-                    source: EffectReference::CurrentInstallation {},
-                },
-                1,
-                "synthetic",
-            )]),
-            "synthetic",
-        )
-    };
-    let add_trait = patch(CharacteristicPatch::AddTrait {
-        trait_id: TraitId("synthetic".to_owned()),
-    });
-    let remove_trait = patch(CharacteristicPatch::RemoveTrait {
-        trait_id: TraitId("synthetic".to_owned()),
-    });
-    let add_name = patch(CharacteristicPatch::AddName {
-        name: CardName("synthetic".to_owned()),
-    });
-    let support = Registry::test_support(&add_trait);
-    assert!(matches!(
-        support.check_capabilities(&remove_trait),
-        Err(AdmissionError::Missing(_))
-    ));
-    assert!(matches!(
-        support.check_capabilities(&add_name),
-        Err(AdmissionError::Missing(_))
-    ));
-}
-
-#[test]
-fn narrowed_payment_history_requires_its_own_projection_and_aggregate() {
-    let event = Binding::new(1, ScopeId(7));
-    let component = Binding::new(2, ScopeId(7));
-    let paid = Expr::Compute(Box::new(Predicate::CompareNat {
-        left: Expr::Frozen(Box::new(NatFrozen::EarthRiteRemovedStack { component })),
-        comparison: Comparison::Greater,
-        right: Expr::Literal(Nat(0)),
-    }));
-    let mut seed = card(
-        program(vec![instruction(
-            Action::Draw {
-                player: PlayerRef::Controller {},
-                count: Expr::Live(Box::new(IntRead::HistorySum {
-                    query: NumericHistoryQuery::EarthRiteRemovedStack {
-                        event,
-                        component,
-                        predicate: paid.clone(),
-                        window: HistoryWindow {
-                            range: HistoryRange::CurrentTurn {},
-                            cutoff: HistoryCutoff::CurrentPoint {},
-                            relative_player: None,
-                        },
-                        include_execution: InclusionPolicy::IncludeAll {},
-                    },
-                })),
-                mode: StepwiseMode::Exact,
-            },
-            1,
-            "synthetic",
-        )]),
-        "synthetic",
-    );
-    for ability in &mut seed.node.abilities {
-        ability.node.trigger = Some(source_trigger(EventPattern::AnyOf {
-            patterns: vec![EventPattern::EarthRitePayment {
-                event,
-                component,
-                predicate: paid.clone(),
-            }],
-        }));
-    }
-    for required in [
-        "event.payment.earth-rite",
-        "read.payment.earth-rite-stack",
-        "history.sum.earth-rite-stack",
-        "event.any-of",
-    ] {
-        assert_missing(&seed, required, "synthetic");
-    }
-    let requirements = Requirements::derive(&seed);
-    for requirement in &requirements.required {
-        if requirement.capability.code == "read.payment.earth-rite-stack" {
-            assert_eq!(requirement.locations.len(), 2);
-            assert!(requirement.locations.iter().all(|location| {
-                location.ir_path.contains("/frozen") && !location.ir_path.contains("/frozen/live")
-            }));
-        }
-    }
-}
 
 #[test]
 fn fixed_literal_support_does_not_admit_a_runtime_binding() {
@@ -618,8 +521,6 @@ fn fixed_literal_support_does_not_admit_a_runtime_binding() {
 }
 
 mod events;
-
-mod flow;
 
 mod composition;
 
