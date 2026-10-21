@@ -50,7 +50,7 @@ HEADS: dict[str, JsonValue] = {
 def check(
     value: JsonValue, *, name: str = "A.ability-head", valid: bool = True
 ) -> None:
-    schema = {"$defs": NODES["$defs"], "$ref": "#/$defs/" + name}
+    schema = {"$id": NODES["$id"], "$defs": NODES["$defs"], "$ref": "#/$defs/" + name}
     assert Draft202012Validator(schema).is_valid(value) == valid
     adapter = (ABILITIES | COSTS | STEPS | EFFECTS | REFERENCES)[name]
     if valid:

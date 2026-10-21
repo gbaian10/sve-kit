@@ -84,7 +84,11 @@ OBJECTS: list[tuple[str, dict[str, JsonValue]]] = [
 
 def _validator(schema: dict[str, JsonValue], definition: str) -> Draft202012Validator:
     return Draft202012Validator(
-        {"$defs": schema["$defs"], "$ref": "#/$defs/" + definition}
+        {
+            "$id": schema["$id"],
+            "$defs": schema["$defs"],
+            "$ref": "#/$defs/" + definition,
+        }
     )
 
 
@@ -397,7 +401,9 @@ def _assert_leader_union_disjoint(schema: dict[str, JsonValue]) -> None:
     for value in samples:
         assert (
             sum(
-                Draft202012Validator({"$defs": schema["$defs"], **leaf}).is_valid(value)
+                Draft202012Validator(
+                    {"$id": schema["$id"], "$defs": schema["$defs"], **leaf}
+                ).is_valid(value)
                 for leaf in leaves
             )
             == 1

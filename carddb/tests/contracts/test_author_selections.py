@@ -32,7 +32,11 @@ def _check(
     accepted: bool,
 ) -> None:
     validator = Draft202012Validator(
-        {"$defs": schema["$defs"], "$ref": "#/$defs/" + definition}
+        {
+            "$id": schema["$id"],
+            "$defs": schema["$defs"],
+            "$ref": "#/$defs/" + definition,
+        }
     )
     assert validator.is_valid(value) == accepted
     adapter = SELECTIONS[definition]

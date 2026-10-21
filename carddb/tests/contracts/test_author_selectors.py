@@ -57,7 +57,7 @@ FILTERS: dict[str, JsonValue] = {
 
 def _check(name: str, value: JsonValue, *, accepted: bool) -> None:
     validator = Draft202012Validator(
-        {"$defs": NODES["$defs"], "$ref": "#/$defs/" + name}
+        {"$id": NODES["$id"], "$defs": NODES["$defs"], "$ref": "#/$defs/" + name}
     )
     assert validator.is_valid(value) == accepted
     # TypedDict configurations must enforce strictness without caller overrides.
@@ -324,7 +324,9 @@ def test_query_unions_have_unique_leaves_and_one_match(
     for value in values:
         assert (
             sum(
-                Draft202012Validator({"$defs": NODES["$defs"], **leaf}).is_valid(value)
+                Draft202012Validator(
+                    {"$id": NODES["$id"], "$defs": NODES["$defs"], **leaf}
+                ).is_valid(value)
                 for leaf in leaves
             )
             == 1

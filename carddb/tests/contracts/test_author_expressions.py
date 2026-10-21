@@ -31,7 +31,9 @@ def schema() -> dict[str, JsonValue]:
 
 
 def _validator(schema: dict[str, JsonValue], name: str) -> Draft202012Validator:
-    return Draft202012Validator({"$defs": schema["$defs"], "$ref": "#/$defs/" + name})
+    return Draft202012Validator(
+        {"$id": schema["$id"], "$defs": schema["$defs"], "$ref": "#/$defs/" + name}
+    )
 
 
 def _accept(schema: dict[str, JsonValue], name: str, value: JsonValue) -> None:

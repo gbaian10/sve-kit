@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 
 def _check(value: JsonValue, *, accepted: bool = True, name: str = "A.steps") -> None:
     validator = Draft202012Validator(
-        {"$defs": NODES["$defs"], "$ref": "#/$defs/" + name}
+        {"$id": NODES["$id"], "$defs": NODES["$defs"], "$ref": "#/$defs/" + name}
     )
     assert validator.is_valid(value) == accepted
     adapter = (STEPS | NUMERIC)[name]
