@@ -583,6 +583,10 @@ CR 10.9.1.1–.4：基礎資訊→能力有效性→非數值→數值；Add／S
 
 ## 內部執行契約的補充
 
+常見觸發的限定事件、pending 選序、限次及來源資訊 producer 依
+[觸發與 LKI 契約](trigger-lki-semantics.md)；未實作的 SourceInformation 是內部擴充義務，
+不把任意 Current 改成隱式 LKI，也不解鎖其他已登錄的事件族。
+
 Distribution 的每項最低量以 `minimum: Nat` 明示；CardProgram 准入、打出 snapshot、
 Damage requested／actual 聚合、移動成功 Before、Order 的 DecisionId／答案／epoch
 與 Search 收尾時序依[執行語義契約](runtime-semantics.md)。這些是內部執行義務，

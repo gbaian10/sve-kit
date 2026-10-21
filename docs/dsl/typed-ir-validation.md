@@ -68,6 +68,8 @@ HalfUp 要求一個，Minimum／Maximum 與作者 `min`／`max` 相同，至少�
 FloorDivide 只接受可靜態確認的正整數常值除數，其他動態除數明確拒絕。
 InformationOrZero 接受 Cost／Stats 的 Original／Effective 特徵讀值；LastKnown 與
 ProspectiveEntry 尚未接受，不能用一般讀值替代 LKI 或入場取代情境。
+後續來源資訊 producer 與常見觸發的限定擴充見[觸發與 LKI 契約](trigger-lki-semantics.md)；
+其中 SourceInformation 是待新增的內部變體，本 checker 尚未實作。
 
 其餘形狀一律拒絕，包含下述來源持有者靜態離區改道以外的 replacement、
 未驗的事件投影、下述範圍以外的 effect 安裝及能力宣告。未承載的 decision／付款時點回報 `DecisionTiming`，
