@@ -63,7 +63,7 @@ def _check(
     accepted: bool,
 ) -> None:
     validator = Draft202012Validator(
-        {"$defs": schema["$defs"], "$ref": "#/$defs/" + name}
+        {"$id": schema["$id"], "$defs": schema["$defs"], "$ref": "#/$defs/" + name}
     )
     assert validator.is_valid(value) == accepted
     adapter = ADAPTERS[name]
@@ -355,7 +355,9 @@ def test_receipt_unions_have_unique_leaves_and_exactly_one_match(
     for value in values:
         assert (
             sum(
-                Draft202012Validator({"$defs": schema["$defs"], **leaf}).is_valid(value)
+                Draft202012Validator(
+                    {"$id": schema["$id"], "$defs": schema["$defs"], **leaf}
+                ).is_valid(value)
                 for leaf in leaves
             )
             == 1

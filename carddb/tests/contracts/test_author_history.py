@@ -80,7 +80,7 @@ def _values(*values: JsonValue) -> tuple[JsonValue, ...]:
 
 def _check(name: str, value: JsonValue, *, accepted: bool = True) -> None:
     validator = Draft202012Validator(
-        {"$defs": NODES["$defs"], "$ref": "#/$defs/" + name}
+        {"$id": NODES["$id"], "$defs": NODES["$defs"], "$ref": "#/$defs/" + name}
     )
     assert validator.is_valid(value) == accepted
     adapter = ADAPTERS[name]
@@ -567,7 +567,9 @@ def test_new_unions_match_exactly_one_leaf(name: str, value: JsonValue) -> None:
     leaves = _union_leaves({"$ref": "#/$defs/" + name})
     assert (
         sum(
-            Draft202012Validator({"$defs": NODES["$defs"], **leaf}).is_valid(value)
+            Draft202012Validator(
+                {"$id": NODES["$id"], "$defs": NODES["$defs"], **leaf}
+            ).is_valid(value)
             for leaf in leaves
         )
         == 1
@@ -637,7 +639,9 @@ def test_new_operand_unions_have_one_matching_branch(
     leaves = _union_leaves(object_value(node["properties"])[field])
     assert (
         sum(
-            Draft202012Validator({"$defs": NODES["$defs"], **leaf}).is_valid(value)
+            Draft202012Validator(
+                {"$id": NODES["$id"], "$defs": NODES["$defs"], **leaf}
+            ).is_valid(value)
             for leaf in leaves
         )
         == 1

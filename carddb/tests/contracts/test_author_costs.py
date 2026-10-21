@@ -21,7 +21,9 @@ ADAPTERS = COSTS | PARENTS
 
 
 def _validator(name: str) -> Draft202012Validator:
-    return Draft202012Validator({"$defs": NODES["$defs"], "$ref": "#/$defs/" + name})
+    return Draft202012Validator(
+        {"$id": NODES["$id"], "$defs": NODES["$defs"], "$ref": "#/$defs/" + name}
+    )
 
 
 def _check(name: str, value: JsonValue, *, accepted: bool) -> None:

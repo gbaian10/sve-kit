@@ -30,6 +30,7 @@ from sve_carddb.core.json import canonical, object_value, parse
 from sve_carddb.core.yaml import JSON_VALUE, MAX_BYTES, YamlSyntaxError, parse_yaml
 from sve_carddb.domains.effects.author_validation import (
     evidence_violations,
+    expanded_residuals,
     inline_parameters,
 )
 
@@ -200,9 +201,10 @@ def _references(value: JsonValue) -> list[str]:
     while pending:
         node = pending.pop()
         if isinstance(node, dict):
-            reference = node.get("$ref")
-            if isinstance(reference, str):
-                result.append(reference)
+            for keyword in ("$ref", "$dynamicRef"):
+                reference = node.get(keyword)
+                if isinstance(reference, str):
+                    result.append(reference)
             pending.extend(node.values())
         elif isinstance(node, list):
             pending.extend(node)
@@ -517,20 +519,59 @@ class AuthorSchemas:
     ) -> AuthorEffectSet:
         """Read complete authored structure, without expansion or source admission."""
         document = _document(raw, context)
+        return self._author(document)
+
+    def _author(
+        self, document: _Document, *, expanded: bool = False
+    ) -> AuthorEffectSet:
         _entry_preflight(document, "author_effect_set")
-        self._validate(document, _AUTHOR)
+        reference = _NODES + "#/$defs/expanded" if expanded else _AUTHOR
+        self._validate(document, reference)
         decoded = _entry_decode(document, _AUTHOR_VALUE)
+        if expanded:
+            for violation in expanded_residuals(decoded):
+                raise AuthorInputError(
+                    _located(
+                        document,
+                        document.diagnostic(
+                            "container", violation.reason, violation.path
+                        ),
+                    )
+                )
         _local_invariants(document, decoded)
         return decoded
+
+    def author_tree(
+        self, raw: bytes, *, context: AuthorIndexRecord | None = None
+    ) -> JsonValue:
+        """Validate and retain the original JSON tree, without decoder defaults."""
+        document = _document(raw, context)
+        self._author(document)
+        return document.value
+
+    def expanded(
+        self, raw: bytes, *, context: AuthorIndexRecord | None = None
+    ) -> AuthorEffectSet:
+        """Read a fully expanded tree; this does not establish source admission."""
+        return self._author(_document(raw, context), expanded=True)
 
     def effect_body_shard(self, raw: bytes) -> EffectBodyShard:
         """Read companion shapes; this does not verify body versions or domains."""
         document = _document(raw)
+        return self._bodies(document)
+
+    def _bodies(self, document: _Document) -> EffectBodyShard:
         _entry_preflight(document, "effect_body_shard")
         self._validate(document, _BODIES)
         decoded = _entry_decode(document, _BODIES_VALUE)
         _local_invariants(document, decoded)
         return decoded
+
+    def body_tree(self, raw: bytes) -> JsonValue:
+        """Validate companion inputs while retaining exact hash payload subtrees."""
+        document = _document(raw)
+        self._bodies(document)
+        return document.value
 
     def document(
         self, raw: bytes, *, context: AuthorIndexRecord | None = None
@@ -540,11 +581,11 @@ class AuthorSchemas:
         value = document.value
         kind = value.get("kind") if isinstance(value, dict) else None
         if kind == "author_effect_set":
-            return self.author_effect_set(raw, context=context)
+            return self._author(document)
         if kind == "effect_body_shard":
-            return self.effect_body_shard(raw)
+            return self._bodies(document)
         if kind == "effects_index":
-            return self.effects_index(raw)
+            return self._index(document)
         raise AuthorInputError(
             _located(
                 document, document.diagnostic("envelope", "unsupported_kind", ("kind",))
@@ -582,6 +623,9 @@ class AuthorSchemas:
     def effects_index(self, raw: bytes) -> EffectsIndex:
         """Validate index syntax and uniqueness without opening candidate files."""
         document = _document(raw)
+        return self._index(document)
+
+    def _index(self, document: _Document) -> EffectsIndex:
         self._validate(document, _INDEX)
         index = _decode(_INDEX_VALUE, document.value)
         seen: set[tuple[str, str]] = set()

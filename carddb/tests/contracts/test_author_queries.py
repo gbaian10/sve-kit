@@ -60,7 +60,7 @@ ATTRIBUTES: dict[str, JsonValue] = {
 
 def _check(name: str, value: JsonValue, *, accepted: bool) -> None:
     validator = Draft202012Validator(
-        {"$defs": NODES["$defs"], "$ref": "#/$defs/" + name}
+        {"$id": NODES["$id"], "$defs": NODES["$defs"], "$ref": "#/$defs/" + name}
     )
     assert validator.is_valid(value) == accepted
     adapter = ADAPTERS[name]

@@ -47,7 +47,9 @@ BASES: dict[str, dict[str, JsonValue]] = {
 
 
 def _validator(name: str) -> Draft202012Validator:
-    return Draft202012Validator({"$defs": NODES["$defs"], "$ref": "#/$defs/" + name})
+    return Draft202012Validator(
+        {"$id": NODES["$id"], "$defs": NODES["$defs"], "$ref": "#/$defs/" + name}
+    )
 
 
 def _check(name: str, value: JsonValue, *, accepted: bool) -> None:
@@ -68,7 +70,14 @@ def _branches(name: str) -> list[str]:
         return [name]
     result = []
     for branch in variants:
-        reference = object_value(branch)["$ref"]
+        fields = object_value(branch)
+        if (
+            fields.get("$dynamicRef")
+            == "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
+        ):
+            result.append("A.param")
+            continue
+        reference = fields["$ref"]
         assert isinstance(reference, str)
         result.extend(_branches(reference.removeprefix("#/$defs/")))
     return result
@@ -403,6 +412,17 @@ def test_quantity_variants_have_no_overlap(name: str, value: JsonValue) -> None:
     branches = _branches(name)
     assert len(branches) == len(set(branches))
     assert sum(_validator(branch).is_valid(value) for branch in branches) == 1
+
+
+@pytest.mark.parametrize("name", ["A.quantity", "A.selection-quantity"])
+@pytest.mark.parametrize(
+    ("value", "matches"), [({"param": "amount"}, 1), ({"param": ""}, 0)]
+)
+def test_quantity_parameter_branch(name: str, value: JsonValue, matches: int) -> None:
+    expected = matches if name == "A.selection-quantity" else 0
+    branches = _branches(name)
+    assert sum(_validator(branch).is_valid(value) for branch in branches) == expected
+    assert _validator(name).is_valid(value) == bool(expected)
 
 
 @pytest.mark.parametrize("value", [-1, 0, 1, True, None])

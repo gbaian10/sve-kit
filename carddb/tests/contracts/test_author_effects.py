@@ -24,7 +24,7 @@ def _values(*values: JsonValue) -> tuple[JsonValue, ...]:
 
 def _check(value: JsonValue, *, accepted: bool = True, name: str = "A.effect") -> None:
     validator = Draft202012Validator(
-        {"$defs": NODES["$defs"], "$ref": "#/$defs/" + name}
+        {"$id": NODES["$id"], "$defs": NODES["$defs"], "$ref": "#/$defs/" + name}
     )
     assert validator.is_valid(value) == accepted
     adapter = EFFECTS[name]
@@ -65,7 +65,7 @@ def test_effects_are_closed_and_do_not_enter_other_expression_contexts(
         "A.expr.numeric": NUMERIC["A.expr.numeric"],
     }.items():
         assert not Draft202012Validator(
-            {"$defs": NODES["$defs"], "$ref": "#/$defs/" + name}
+            {"$id": NODES["$id"], "$defs": NODES["$defs"], "$ref": "#/$defs/" + name}
         ).is_valid(effect)
         with pytest.raises(ValidationError):
             adapter.validate_json(canonical(effect), strict=True)
