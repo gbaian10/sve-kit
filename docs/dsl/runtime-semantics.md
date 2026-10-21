@@ -36,12 +36,15 @@
 
 ### 1.2 輸入、固定與回答
 
+完整打出步驟、有效區與回復點依[正式 play 契約](play-semantics.md)；以下聚焦分配。
+`AtPlay` 在卡片自身移動前保存，與下述移入解決區後的選擇 snapshot 不同。
+
 輸入為已准入能力、authority 的 play／結算 context、分配 DecisionId 與完整回答。
 同次 play 先依 CR 10.6.2.1 公開並移入解決區，處理先決選項，再建立選擇 snapshot。
 所有該次目標與其分配使用同一狀態版本：目標依序公開 binding 可以改變環境，但不能
 推進遊戲狀態或穿插其他玩家行動。取代分配總量／去向在該 snapshot 上套用。
 `AtSelection` 可在同一 snapshot 讀新回答；不能另拿付款後的 live 狀態。
-付款與 play 事件依序在這之後（CR 10.6.2.5–.7）。
+付款、Follower／Amulet 場容量檢查及 play 事件依序在這之後（CR 10.6.2.5–.7）。
 
 結算分配則在該 decision 開始固定自己的 snapshot，不能誤用 play snapshot。
 求值後生成 `ResolvedRecipients`，以玩家或物件 ID＋世代去重，並凍結 total、minimum。
@@ -141,6 +144,8 @@ Handoff、Grant／Delay、重複觸發、RuleCarry 等須在各自依賴驗收�
 | RuntimeAbilitySource | 從實例取得 holder、origin 與能力控制者；結算環境保存其來源視圖 | 把 target、文字提供者或目的區 owner 當成來源／控制者 |
 | EffectId | authority 在成功安裝指示建立修正實例，綁該 execution 與被安裝對象 | 把未執行的指示、失敗安裝或其他執行的 id 當成 producer |
 
+普通 Printed Spell 的 `active_zones=[Resolution]`，Hand／EX 起點由卡片打出權限另驗；
+Follower／Amulet 的卡片 play 與場上能力分開，詳見[有效區對映](play-semantics.md#1-有效區打出起點與來源)。
 卡片 play 從手／EX 移到解決區後，從該新世代建立本次 Printed Spell 的來源實例；
 對舊區域的 captures 只能用明示時點。起動能力的來源留在原世代，即使成本令它離場，
 不把新世代重綁成 holder。誘發能力沿用觸發當時的能力實例及其控制者；來源離場

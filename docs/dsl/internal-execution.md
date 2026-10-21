@@ -4,6 +4,9 @@
 它只供合成與卡片段測試使用，不接作者 YAML、不執行整張 `CardProgram`，也不發布公開 capability。
 `Registry::current().supported()` 仍為空；良構通過不能取代本入口的執行准入。
 
+正式 Printed Spell、完整 play snapshot 與付款順序的擴充義務見
+[正式 play 契約](play-semantics.md)。下文保留目前已實作範圍；規格定案不解除拒絕。
+
 ## 整卡起動的內部邊界
 
 `load_internal_card(card_no, WellFormedCardProgram)` 在同一個 Game 載入完整整卡，
@@ -50,8 +53,10 @@ Fanfare 必須保留 `Keyword(Fanfare, Printed)`，觸發形狀限定為 AfterEn
 同 face 多個 Fanfare 在載入時拒絕，未接選序前不以定義順序代替規則輸入。
 
 `play_internal_card(holder, actor)` 限主動玩家 main、自己的 Hand／EX、base 從者及足夠場位，
-以 checked reader 讀取非負印刷 PP 費用，付款後經解決區入場。所有局內卡片必須完整載入，
+以 checked reader 讀取非負有效 PP 費用，付款後經解決區入場。所有局內卡片必須完整載入，
 任何 prototype／continuous／delayed／其他待機介入仍拒絕；整次失敗回復付款與世代。
+此無參數子集的先付款順序不可外推；完整 play 須改依[程序表](play-semantics.md#2-程序已打出與回復點)
+先入 Resolution，且承接 EX 的受驗效果後才決定成本。
 場上新世代實體化能力、保存 controller／instance 並形成私有 pending；卡片收尾後先做規則檢查，
 再停於 `ResumeStage::PendingFanfare`。來源需要 LKI 的形狀仍拒絕，不取消已待機的本文。
 
