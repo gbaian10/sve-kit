@@ -693,7 +693,7 @@ impl Game {
     fn internal_run(&mut self, execution: &mut Execution) -> Result<()> {
         while execution.waiting.is_none() {
             let Some(node) = execution.todo.pop_front() else {
-                self.internal_numeric_cleanup();
+                self.internal_numeric_cleanup()?;
                 self.internal_numeric_end_resolution(execution.id)?;
                 if let Some(source) = execution.ability {
                     execution.facts.push(Fact::AbilityResolved {
@@ -961,6 +961,11 @@ impl Game {
             Action::Search { .. } => return self.internal_search(execution, instruction),
             Action::Destroy { objects } => {
                 self.internal_move(execution, &instruction, objects, None)?;
+            }
+            Action::InstallEffect { effect, .. }
+                if matches!(effect.as_ref(), Effect::Continuous { .. }) =>
+            {
+                self.internal_install_continuous(execution, &instruction)?;
             }
             Action::InstallEffect { effect, .. }
                 if matches!(effect.as_ref(), Effect::CostModifier { .. }) =>

@@ -335,7 +335,8 @@ Public Order 依該文件 §7 維持拒絕，Repeat 的跨輪 epoch 依 §8 等�
 ## 固定數值修正
 
 Modify 准入有號 Numeric Add、非負常值 Set 與非空遞迴 Numeric Combined；期限只接受 Installation anchor
-的 NoTemporalExpiry、EndResolution、CurrentTurnEnd 或 NextTurnEnd，沒有 usage 或 interval。對象限目前場上從者，
+的 NoTemporalExpiry、EndResolution、CurrentTurnEnd、NextTurnEnd，或明示 SourceHolder／Field 的 SourceZoneExit；沒有 usage。
+CurrentTurnEnd 另可帶 DuringNextTurn 附加區間，詳下節。對象限目前場上從者，
 已換世代的 capture 不適用；其他目前區域或卡片種類使整次解算回復。
 同指示先固定去重對象，求完所有有號操作數，再規劃與提交。同一 Combined 中重複同 stat 的 Add 合計，相同 Set 合併；同 stat 的 Set／Add 或不同 Set 整棵拒絕，
 不先截零；整數溢位拒絕並回復整份 Game。
@@ -352,7 +353,7 @@ Catalog 印刷值不變。Effective Current 的 Stats read 經同一求值器，
 instruction、execution、effect 與 commit 身分。兩個指示保持兩個事實；零差值不造 facet。
 此為 authority 結果，尚未接完整 EventHeader、觸發及歷史查詢管線，不能當玩家 wire payload。
 
-來源離場不移除非 static 修正；目標換區後原世代修正失效，不追蹤新世代。
+除明示 SourceZoneExit 外，來源離場不移除非 static 修正；目標換區後原世代修正失效，不追蹤新世代。
 NoTemporalExpiry 沒有額外時間截止。合成 closed Program 的全部本文完成後，先清除目標已換世代的數值層，
 再移除綁定此次 execution 的整批 EndResolution 修正，從原始基礎與其餘 Add／Set 完整重算、保留目前受傷量 D，
 最後執行既有規則檢查；指示之間不清場，體力降到 0 的從者在同一解算內仍是後續指示的對象。
@@ -361,7 +362,7 @@ NoTemporalExpiry 沒有額外時間截止。合成 closed Program 的全部本�
 數值修正的 EndResolution 時序已定於[數值期限契約](numeric-timing.md#33-endresolution)，
 目前只驗合成 closed Program 的生命週期；沒有真實 Numeric EndResolution 卡例，不由 lowering 自動補入期限。
 待答不是解算完成，resume 的提交失敗連同到期清理一起回復整次 execution；真實卡的解決區清理、nested play 與完整 CardProgram 仍未接入。
-CurrentTurnEnd 保存安裝當回合的身分，在 7.4.8 整批移除；end 觸發、Quick 與棄牌檢查期間仍有效。
+CurrentTurnEnd 保存安裝當回合的身分，在 7.4.8 整批結束主區間；沒有未來附加區間的效果才移除，end 觸發、Quick 與棄牌檢查期間仍有效。
 NextTurnEnd 在安裝時捕捉玩家，等唯一回合排程實際開始該玩家下一回合時綁定其身分，
 再於該回合 7.4.8 到期。skip 不配置身分，extra 每個實際開始的回合各有身分；
 不以 elapsed_turns、預定回合或固定加一／加二換算。到期清理已經過去的回合不接受追認安裝。
@@ -385,7 +386,7 @@ prototype Set／種類或 pilot 基礎替換與有效數值層混用仍拒絕；
 這避免 7.2.5 規則破壞引出的待機能力和 main_start 觸發混在同一次待機。
 期限玩家可使用已捕捉的 Player 值；Capture::Player 允許 Current 來源的 controller／owner，
 世代失效時拒絕，不追蹤新世代或當作缺資訊回零。live role 不直接充當 actor／audience。
-NextTurnEdge、phase edge、非空 intervals、Continuous 與 SetKind 仍拒絕。
+NextTurnEdge、phase edge、DuringNextPhase、SetKind 與下節以外的 Continuous 仍拒絕。
 尚有預備 play 時也拒絕原型 decide；同一期間的 observation 在 `semantic_state` 只多一個 `typed_numeric_layers: true`
 布林摘要，不含 effect、execution 或加數明細；belief 入口見到它即拒絕，
 不把有效值當成原型基礎值重建另一份可 decide 的局面。
@@ -401,9 +402,28 @@ EffectId 仍在成功安裝才分配；反序安裝、唯讀查詢及存檔恢�
 不同 stat、純 Add 與相同 Attack Set 可交換。多次 Life Set 可能捕捉不同 D_set，亦整棵拒絕。
 沒有以安裝次序、EffectId 或陣列次序補出非交換 tie；ContinuousTieOrder 的規則輸入仍待後片。
 
-Continuous 安裝及其動態依存、interval、SetKind、
+Continuous 的 Live 條件與操作數、一般動態依存、下節以外的 interval、SetKind、
 Grant／RemoveAbility、Modify usage、負 Set 與非常值 Set，包括未執行分支，仍整棵拒絕。
 Set 層有效時的進化／基礎替換由數值寫入邊界拒絕，未宣稱差額換算完成。
 CP02-007 與 BP01-011 只驗已選場上從者的 +1/+1 片段；不包含成本、選牌、EX、
 觸發或整卡准入。BP16-049 只驗受傷對象的 Set 1／1，未承載 SpellChain capture、
-RemoveAbility 或整能力；非連續區間與上述未承載的整卡部分仍待後片驗收。
+RemoveAbility 或整能力；上述未承載的整卡部分仍待後片驗收。
+
+### 常值 Continuous 與非連續回合區間
+
+本文 Continuous 限 InstructionStart 的固定 affected、Numeric 層、常值 Add／純 Add Combined、
+ProperPlay(Current)、空 active_zones；條件只接受省略或常值 Bool。false 仍保存同一效果實例，
+不因當前不適用而丟棄。操作數與主體固定，這些效果不會改變彼此的適用對象或操作，
+因此沒有動態依存；不把此子集外推為 Live 條件的通用求值器。
+安裝、到期、區間切換與重算不發 stat_changed，也不設定明示加攻體指示的增值旗標。
+
+SourceZoneExit 在安裝時固定來源的 Field 世代；離開後經共同移區清理重算有效值，
+保留目標目前受傷量，不因相同實體的新世代重入而復活。這只承載明示來源在場期限，
+不提供來源離場後的 Current／LKI 讀值。
+
+CurrentTurnEnd 的主區間與 DuringNextTurn 附加區間採聯集。主區間在 7.4.8 結束後保留
+尚未發生的指定玩家下一實際回合；中間其他玩家的額外回合不適用。下一實際 begin 才固定
+該 occurrence 並重新適用，到其 7.4.8 結束；不使用 turn.phase、elapsed_turns 或預定序號冒充。
+目標換世代仍清除整個舊實例，後面的附加區間不能讓舊目標復活。
+本子集不接受 interval-only、EndResolution＋非空 interval 或 phase 區間；缺少 phase occurrence
+時保持拒絕。Set 及帶期限 Add 的進化限制仍維持，不替未定的差額還原補規則。

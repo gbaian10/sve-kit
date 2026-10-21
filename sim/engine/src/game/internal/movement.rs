@@ -61,6 +61,9 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
         Action::InstallEffect {
             effect, duration, ..
         } => {
+            if matches!(effect.as_ref(), Effect::Continuous { .. }) {
+                return Ok(());
+            }
             if matches!(effect.as_ref(), Effect::CostModifier { .. }) {
                 return super::cost::check_action(action);
             }

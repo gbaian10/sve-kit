@@ -5,12 +5,14 @@
     reason = "Numeric cache writes target constructed object maps."
 )]
 
-use super::duration::EffectEnd;
+use super::duration::{EffectEnd, TurnInterval};
 use super::{Execution, Fact, Game, InstructionOutcome, Result, invalid, unsupported};
 use crate::ir::{
-    Action, CharacteristicPatch, CommitId, Control, DurationEnd, EffectId, EffectReference,
-    ExecutionId, Expr, Instruction, Int, Node, NonEmpty, NumericChange, Program, RuntimeHolder,
-    Stat, StatChangeEvent, StatChangeReason, StatDelta, StatOperation, TimeAnchor,
+    Action, Bool, CharacteristicPatch, CommitId, ContinuousLayer, Control, Duration, DurationEnd,
+    Effect, EffectId, EffectReference, EffectTarget, ExecutionId, ExecutionRef, Expr,
+    InstallationSubjects, Instruction, Int, Interval, Node, NonEmpty, NumericChange, ObjectOperand,
+    Program, RuntimeHolder, Selector, Stat, StatChangeEvent, StatChangeReason, StatDelta,
+    StatOperation, TimeAnchor, TimestampBasis, ZoneKind,
 };
 use core::iter::once;
 use serde::{Deserialize, Serialize};
@@ -57,19 +59,30 @@ impl Change {
     }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 struct Modifier {
     effect: u64,
     timestamp: u64,
     execution: u64,
     end: EffectEnd,
+    main_live: bool,
+    intervals: Vec<TurnInterval>,
+    enabled: bool,
     attack: Option<Change>,
     life: Option<Change>,
 }
 
 impl NumericState {
     fn effective(&self, damage: i64) -> Result<(i64, i64, i64)> {
-        let mut effects = self.effects.iter().collect::<Vec<_>>();
+        let mut effects = self
+            .effects
+            .iter()
+            .filter(|effect| {
+                effect.enabled
+                    && (effect.main_live
+                        || effect.intervals.iter().copied().any(TurnInterval::active))
+            })
+            .collect::<Vec<_>>();
         // Frozen subjects and operands cannot change another layer's applicability or operation.
         effects.sort_by_key(|effect| effect.timestamp);
         let (attack, life) =
@@ -122,11 +135,15 @@ fn collect_patches<'program>(
 ) {
     for step in &program.steps {
         match &step.node {
-            Node::Instruction { instruction } => {
-                if let Action::Modify { patch, .. } = &instruction.action {
-                    patches.push(patch);
+            Node::Instruction { instruction } => match &instruction.action {
+                Action::Modify { patch, .. } => patches.push(patch),
+                Action::InstallEffect { effect, .. } => {
+                    if let Effect::Continuous { patch, .. } = effect.as_ref() {
+                        patches.push(patch);
+                    }
                 }
-            }
+                _ => {}
+            },
             Node::Control {
                 control: Control::Sequence { body },
             } => collect_patches(body, patches),
@@ -191,27 +208,101 @@ fn merge(left: Option<Change>, right: Option<Change>) -> Result<Option<Change>> 
 }
 
 pub(super) fn check_action(action: &Action) -> Result<()> {
-    if let Action::Modify {
-        patch,
-        expires,
-        source,
-        ..
-    } = action
-    {
-        if !matches!(
-            expires.end,
-            DurationEnd::NoTemporalExpiry {}
-                | DurationEnd::EndResolution {}
-                | DurationEnd::CurrentTurnEnd {}
-                | DurationEnd::NextTurnEnd { .. }
-        ) || !matches!(expires.anchor, TimeAnchor::Installation {})
-            || expires.usage.is_some()
-            || !expires.intervals.is_empty()
-            || !matches!(source, EffectReference::CurrentInstallation {})
-        {
-            return Err(unsupported("numeric duration or effect reference"));
+    match action {
+        Action::Modify {
+            patch,
+            expires,
+            source,
+            ..
+        } => {
+            check_duration(expires)?;
+            if !matches!(source, EffectReference::CurrentInstallation {}) {
+                return Err(unsupported("numeric effect reference"));
+            }
+            check_patch(patch)
         }
-        check_patch(patch)?;
+        Action::InstallEffect {
+            subjects,
+            effect,
+            duration,
+            ..
+        } => {
+            let Effect::Continuous {
+                target,
+                condition,
+                patch,
+                layer,
+                timestamp,
+                active_zones,
+                duration: inner,
+                ..
+            } = effect.as_ref()
+            else {
+                return Ok(());
+            };
+            let InstallationSubjects::Objects { affected, .. } = subjects else {
+                return Err(unsupported("continuous installation subjects"));
+            };
+            if target
+                != &(EffectTarget::Dynamic {
+                    selector: Selector::Bound {
+                        reference: *affected,
+                    },
+                })
+                || *layer != ContinuousLayer::Numeric
+                || *timestamp
+                    != (TimestampBasis::ProperPlay {
+                        execution: ExecutionRef::Current {},
+                    })
+                || !active_zones.is_empty()
+                || inner != duration
+                || !matches!(condition, None | Some(Expr::Literal(_)))
+                || !literal_adds(patch)
+            {
+                return Err(unsupported("continuous frozen constant Add shape"));
+            }
+            check_duration(duration)
+        }
+        _ => Ok(()),
+    }
+}
+
+fn literal_adds(patch: &CharacteristicPatch) -> bool {
+    match patch {
+        CharacteristicPatch::Numeric {
+            change: NumericChange::Add {
+                amount: Expr::Literal(_),
+            },
+            ..
+        } => true,
+        CharacteristicPatch::Combined { patches } => {
+            !patches.is_empty() && patches.iter().all(literal_adds)
+        }
+        _ => false,
+    }
+}
+
+fn check_duration(duration: &Duration) -> Result<()> {
+    if !matches!(
+        duration.end,
+        DurationEnd::NoTemporalExpiry {}
+            | DurationEnd::EndResolution {}
+            | DurationEnd::CurrentTurnEnd {}
+            | DurationEnd::NextTurnEnd { .. }
+            | DurationEnd::SourceZoneExit {
+                source: ObjectOperand::SourceHolder {},
+                zone: ZoneKind::Field
+            }
+    ) || duration.anchor != (TimeAnchor::Installation {})
+        || duration.usage.is_some()
+        || (!duration.intervals.is_empty()
+            && (duration.end != (DurationEnd::CurrentTurnEnd {})
+                || duration
+                    .intervals
+                    .iter()
+                    .any(|interval| !matches!(interval, Interval::DuringNextTurn { .. }))))
+    {
+        return Err(unsupported("numeric duration"));
     }
     Ok(())
 }
@@ -361,14 +452,64 @@ impl Game {
         })
     }
 
-    #[expect(
-        clippy::too_many_lines,
-        reason = "Freezing, planning and committing form one atomic numeric instruction."
-    )]
     pub(super) fn internal_modify(
         &mut self,
         execution: &mut Execution,
         instruction: &Instruction,
+    ) -> Result<()> {
+        self.internal_modify_options(execution, instruction, true, true)
+    }
+
+    pub(super) fn internal_install_continuous(
+        &mut self,
+        execution: &mut Execution,
+        instruction: &Instruction,
+    ) -> Result<()> {
+        let Action::InstallEffect {
+            subjects: InstallationSubjects::Objects { objects, .. },
+            effect,
+            duration,
+            ..
+        } = &instruction.action
+        else {
+            return Err(unsupported("continuous installation"));
+        };
+        let Effect::Continuous {
+            patch, condition, ..
+        } = effect.as_ref()
+        else {
+            return Err(unsupported("continuous effect"));
+        };
+        let mut lowered = instruction.clone();
+        lowered.action = Action::Modify {
+            subjects: objects.clone(),
+            patch: patch.clone(),
+            expires: duration.clone(),
+            source: EffectReference::CurrentInstallation {},
+        };
+        let enabled = !matches!(condition, Some(Expr::Literal(Bool(false))));
+        self.internal_modify_options(execution, &lowered, false, enabled)?;
+        let Some(InstructionOutcome::Modified { subjects, .. }) =
+            execution.receipts.remove(&instruction.receipt)
+        else {
+            return Err(invalid("missing continuous installation outcome"));
+        };
+        execution
+            .receipts
+            .insert(instruction.receipt, InstructionOutcome::Installed(subjects));
+        Ok(())
+    }
+
+    #[expect(
+        clippy::too_many_lines,
+        reason = "Freezing, planning and committing form one atomic numeric instruction."
+    )]
+    fn internal_modify_options(
+        &mut self,
+        execution: &mut Execution,
+        instruction: &Instruction,
+        emit: bool,
+        enabled: bool,
     ) -> Result<()> {
         let Action::Modify {
             subjects,
@@ -427,6 +568,13 @@ impl Game {
                 timestamp: execution.timestamp,
                 execution: execution.id.0,
                 end,
+                main_live: true,
+                intervals: expires
+                    .intervals
+                    .iter()
+                    .map(|interval| TurnInterval::at(self, execution, interval))
+                    .collect::<Result<Vec<_>>>()?,
+                enabled,
                 attack,
                 life: adjusted_life,
             });
@@ -475,7 +623,7 @@ impl Game {
         for (id, subject, state, after, facets) in plans {
             self.state.ir_numeric.insert(id.clone(), state);
             self.internal_numeric_cache(&id, after)?;
-            if let Some(facets) = facets {
+            if emit && let Some(facets) = facets {
                 if once(&facets.first)
                     .chain(&facets.rest)
                     .any(|facet| facet.delta.0 > 0)
@@ -506,7 +654,7 @@ impl Game {
     }
 
     /// Layers belong to one generation; a moved target never carries them into a new one.
-    pub(in crate::game) fn internal_numeric_cleanup(&mut self) {
+    pub(in crate::game) fn internal_numeric_cleanup(&mut self) -> Result<()> {
         self.internal_cost_cleanup();
         let objects = &self.state.objects;
         self.state.ir_numeric.retain(|id, state| {
@@ -514,18 +662,28 @@ impl Game {
                 .get(id)
                 .is_some_and(|object| object.generation == state.generation)
         });
+        let expired = self
+            .state
+            .ir_numeric
+            .values()
+            .flat_map(|state| &state.effects)
+            .filter(|effect| effect.end.source_expired(self))
+            .map(|effect| effect.effect)
+            .collect::<Vec<_>>();
+        self.internal_numeric_expire(|effect| expired.contains(&effect.effect), None)
     }
 
     pub(super) fn internal_numeric_end_resolution(&mut self, execution: ExecutionId) -> Result<()> {
-        self.internal_numeric_expire(|effect| {
-            effect.end == EffectEnd::EndResolution && effect.execution == execution.0
-        })
+        self.internal_numeric_expire(
+            |effect| effect.end == EffectEnd::EndResolution && effect.execution == execution.0,
+            None,
+        )
     }
 
     pub(in crate::game) fn internal_numeric_end_turn(&mut self, turn: u64) -> Result<()> {
         self.internal_cost_end_turn(turn);
-        self.internal_numeric_cleanup();
-        self.internal_numeric_expire(|effect| effect.end == EffectEnd::Turn(turn))
+        self.internal_numeric_cleanup()?;
+        self.internal_numeric_expire(|effect| effect.end == EffectEnd::Turn(turn), Some(turn))
     }
 
     pub(in crate::game) fn internal_numeric_begin_turn(&mut self) -> Result<()> {
@@ -534,17 +692,47 @@ impl Game {
         for state in self.state.ir_numeric.values_mut() {
             for effect in &mut state.effects {
                 effect.end.begin(turn, player);
+                for interval in &mut effect.intervals {
+                    interval.begin(turn, player);
+                }
             }
+        }
+        let mut plans = Vec::new();
+        for (id, state) in &self.state.ir_numeric {
+            let object = self.object(id)?;
+            let damage = number(&object.state, "max_hp")?
+                .checked_sub(number(&object.state, "hp")?)
+                .ok_or_else(|| invalid("numeric damage overflow"))?;
+            plans.push((id.clone(), state.effective(damage)?));
+        }
+        for (id, after) in plans {
+            self.internal_numeric_cache(&id, after)?;
         }
         Ok(())
     }
 
-    fn internal_numeric_expire(&mut self, expired: impl Fn(&Modifier) -> bool) -> Result<()> {
+    fn internal_numeric_expire(
+        &mut self,
+        expired: impl Fn(&Modifier) -> bool,
+        turn: Option<u64>,
+    ) -> Result<()> {
         let mut plans = Vec::new();
         for (id, state) in &self.state.ir_numeric {
             let mut remaining = state.clone();
-            remaining.effects.retain(|effect| !expired(effect));
-            if remaining.effects.len() == state.effects.len() {
+            for effect in &mut remaining.effects {
+                if expired(effect) {
+                    effect.main_live = false;
+                }
+                if let Some(turn) = turn {
+                    for interval in &mut effect.intervals {
+                        interval.finish(turn);
+                    }
+                }
+            }
+            remaining.effects.retain(|effect| {
+                effect.main_live || effect.intervals.iter().copied().any(TurnInterval::pending)
+            });
+            if remaining.effects == state.effects {
                 continue;
             }
             let object = self.object(id)?;
