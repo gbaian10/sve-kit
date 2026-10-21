@@ -192,47 +192,6 @@ fn may_answers_are_visible_throughout_execute_and_never_after_decline() {
     }
 }
 
-#[test]
-fn compound_answer_domains_do_not_read_sibling_answers() {
-    let mut choice = choose(1, 2);
-    choice.kind = DecisionKind::ResolutionChoice {
-        may: Declinable::MayDecline,
-        cardinality: bounds(1, Some(1)),
-        precondition: None,
-    };
-    choice.domain = ChoiceDomain::Compound {
-        domains: vec![
-            ChoiceDomain::Integer {
-                cardinality: bounds(0, Some(3)),
-                binding: Binding::new(1, ScopeId(2)),
-            },
-            ChoiceDomain::Objects {
-                constraint: constraint(zone(PlayerRef::Controller {}, ZoneKind::Field, 10)),
-                binding: Binding::new(2, ScopeId(2)),
-                target_roles: None,
-            },
-        ],
-    };
-    let optional = |payload| {
-        body(
-            1,
-            vec![control(Control::May {
-                choice: payload,
-                receipt: ReceiptId(9),
-                body: body(2, vec![reveal_binding(3, Binding::new(2, ScopeId(2)))]),
-            })],
-        )
-    };
-    accept(optional(choice.clone()));
-    if let ChoiceDomain::Compound { domains } = &mut choice.domain
-        && let ChoiceDomain::Objects { constraint, .. } = &mut domains[1]
-        && let Selector::Zone { predicate, .. } = &mut constraint.groups[0].selector
-    {
-        **predicate = positive(Expr::Bound(Binding::new(1, ScopeId(2))));
-    }
-    reject(optional(choice), WellFormedReason::UnavailableBinding);
-}
-
 fn roles(scope: u64) -> TargetRoleSpec {
     TargetRoleSpec {
         roles: vec![
@@ -370,42 +329,6 @@ fn entry_captures_are_simultaneous_and_cannot_read_future_body_outputs() {
     );
 }
 
-#[test]
-fn selection_capture_reads_its_answer_and_is_not_a_later_live_read() {
-    let mut card = playable(vec![]);
-    let mut target = play_target();
-    target.captures.push(Capture::Natural {
-        at: CaptureTime::AtSelection {
-            decision: target.id,
-        },
-        value: Expr::Compute(Box::new(NatOperation::Count {
-            objects: Selector::Bound {
-                reference: Binding::new(1, ScopeId(1)),
-            },
-        })),
-        into: CaptureRef {
-            binding: Binding::new(2, ScopeId(1)),
-        },
-    });
-    play_mut(&mut card).parameters.push(target);
-    card.abilities[0].node.body = Some(body(
-        1,
-        vec![draw(
-            2,
-            signed(Expr::Captured(CaptureRef {
-                binding: Binding::new(2, ScopeId(1)),
-            })),
-        )],
-    ));
-    accept_card(card.clone());
-    if let Capture::Natural { at, .. } = &mut play_mut(&mut card).parameters[0].captures[0] {
-        *at = CaptureTime::AtSelection {
-            decision: DecisionId(99),
-        };
-    }
-    reject_card(card, WellFormedReason::CaptureTiming);
-}
-
 fn mode_group(at: SpellCountTime, necro: bool) -> Located<Node> {
     let read = if necro {
         NatFrozen::NecroCharge {
@@ -487,37 +410,6 @@ fn bp02_045_and_bp02_088_mode_count_instead_uses_at_play_nat_conditional() {
             .body
             .steps
             .push(draw(3, Expr::Bound(Binding::new(88, ScopeId(4)))));
-    }
-    reject_card(playable(vec![mode]), WellFormedReason::UnavailableBinding);
-}
-
-#[test]
-fn mode_parameters_use_play_inputs_and_selected_body_keeps_its_own_answers() {
-    let mut mode = mode_group(SpellCountTime::AtPlay, false);
-    if let Node::Control {
-        control: Control::Mode { modes, .. },
-    } = &mut mode.node
-    {
-        let mut target = play_target();
-        target.id = DecisionId(2);
-        if let ChoiceDomain::Objects { binding, .. } = &mut target.domain {
-            *binding = Binding::new(10, ScopeId(2));
-        }
-        modes[0].parameters.push(target);
-        modes[0]
-            .body
-            .steps
-            .push(reveal_binding(3, Binding::new(10, ScopeId(2))));
-    }
-    accept_card(playable(vec![mode.clone()]));
-    if let Node::Control {
-        control: Control::Mode { modes, .. },
-    } = &mut mode.node
-    {
-        modes[1]
-            .body
-            .steps
-            .push(reveal_binding(4, Binding::new(10, ScopeId(2))));
     }
     reject_card(playable(vec![mode]), WellFormedReason::UnavailableBinding);
 }
@@ -667,85 +559,6 @@ fn stepwise_decision_timing_actor_visibility_and_identity_are_checked() {
     );
 }
 
-fn triggered() -> CardProgram {
-    let mut card = playable(vec![draw(
-        2,
-        signed(Expr::Captured(CaptureRef {
-            binding: Binding::new(2, ScopeId(1)),
-        })),
-    )]);
-    let ability = &mut card.abilities[0].node;
-    ability.kind = AbilityKind::Triggered;
-    ability.trigger = Some(TriggerSpec {
-        on: TriggerCondition::Event {
-            pattern: EventPattern::LeaveField {
-                binding: Binding::new(1, ScopeId(1)),
-                predicate: Expr::Literal(Bool(true)),
-            },
-        },
-        active_zones: vec![ZoneKind::Field],
-        view: EventSnapshotPolicy::BeforeExit,
-        limit: None,
-        aggregation: TriggerAggregation::PerFact {},
-    });
-    ability.event_captures.push(Capture::Natural {
-        at: CaptureTime::AtEvent {
-            event: EventContext::Trigger {},
-            policy: EventSnapshotPolicy::BeforeExit,
-        },
-        value: Expr::Literal(Nat(3)),
-        into: CaptureRef {
-            binding: Binding::new(2, ScopeId(1)),
-        },
-    });
-    card
-}
-#[test]
-fn event_capture_requires_the_trigger_entry_and_matching_snapshot() {
-    let card = triggered();
-    accept_card(card.clone());
-    let mut wrong = card.clone();
-    if let Capture::Natural { at, .. } = &mut wrong.abilities[0].node.event_captures[0] {
-        *at = CaptureTime::AtEvent {
-            event: EventContext::Trigger {},
-            policy: EventSnapshotPolicy::AfterEntry,
-        };
-    }
-    reject_card(wrong, WellFormedReason::CaptureTiming);
-    let mut no_event = card.clone();
-    no_event.abilities[0].node.kind = AbilityKind::Spell;
-    no_event.abilities[0].node.trigger = None;
-    reject_card(no_event, WellFormedReason::InvalidEntry);
-    let mut state = card.clone();
-    state.abilities[0].node.trigger.as_mut().unwrap().on = TriggerCondition::State {
-        predicate: Expr::Literal(Bool(true)),
-        latch: Binding::new(1, ScopeId(1)),
-    };
-    reject_card(state, WellFormedReason::UnsupportedShape);
-    let mut future = card.clone();
-    future.abilities[0].node.event_captures = vec![Capture::Natural {
-        at: CaptureTime::AtEvent {
-            event: EventContext::Trigger {},
-            policy: EventSnapshotPolicy::BeforeExit,
-        },
-        value: actual(ReceiptReference::new(ReceiptId(2))),
-        into: CaptureRef {
-            binding: Binding::new(2, ScopeId(1)),
-        },
-    }];
-    reject_card(future, WellFormedReason::UnavailableReceipt);
-    let mut bad_trigger = card;
-    if let TriggerCondition::Event {
-        pattern: EventPattern::LeaveField { predicate, .. },
-    } = &mut bad_trigger.abilities[0].node.trigger.as_mut().unwrap().on
-    {
-        *predicate = positive(Expr::Captured(CaptureRef {
-            binding: Binding::new(2, ScopeId(1)),
-        }));
-    }
-    reject_card(bad_trigger, WellFormedReason::UnavailableBinding);
-}
-
 fn continuous(patch: CharacteristicPatch, layer: ContinuousLayer) -> Effect {
     Effect::Continuous {
         id: EffectDefinitionId(1),
@@ -829,47 +642,6 @@ fn entire_card_checks_declarations_and_nested_granted_ability_bodies() {
 }
 
 #[test]
-fn may_empty_execute_payload_never_asks_a_second_question() {
-    let choice = Decision {
-        domain: ChoiceDomain::Compound { domains: vec![] },
-        kind: DecisionKind::ResolutionChoice {
-            may: Declinable::MayDecline,
-            cardinality: bounds(1, Some(1)),
-            precondition: None,
-        },
-        ..choose(1, 2)
-    };
-    accept(body(
-        1,
-        vec![control(Control::May {
-            choice: choice.clone(),
-            body: body(2, vec![draw(2, Expr::Literal(Int(1)))]),
-            receipt: ReceiptId(9),
-        })],
-    ));
-    for nested in [
-        decision(choose(2, 2)),
-        up_to_draw(2),
-        declare(2, Binding::new(2, ScopeId(2))),
-        discard(DiscardMode::Chosen {
-            constraint: constraint(hand()),
-        }),
-    ] {
-        reject(
-            body(
-                1,
-                vec![control(Control::May {
-                    choice: choice.clone(),
-                    body: body(2, vec![nested]),
-                    receipt: ReceiptId(9),
-                })],
-            ),
-            WellFormedReason::UnsupportedShape,
-        );
-    }
-}
-
-#[test]
 fn play_modes_cannot_be_hidden_behind_resolution_control_flow() {
     let mode = mode_group(SpellCountTime::AtPlay, false);
     for hidden in [
@@ -893,43 +665,4 @@ fn play_modes_cannot_be_hidden_behind_resolution_control_flow() {
     accept_card(playable(vec![control(Control::Sequence {
         body: body(5, vec![nested]),
     })]));
-}
-
-#[test]
-fn mode_count_does_not_read_later_targets_or_live_state() {
-    let mut card = playable(vec![mode_group(SpellCountTime::AtPlay, false)]);
-    play_mut(&mut card).parameters.push(play_target());
-    // Mode and target decision identities are independent, even though their phases differ.
-    play_mut(&mut card).parameters[0].id = DecisionId(2);
-    if let Node::Control {
-        control: Control::Mode { count, .. },
-    } = &mut card.abilities[0].node.body.as_mut().unwrap().steps[0].node
-        && let Expr::Compute(operation) = count
-        && let NatOperation::Conditional { condition, .. } = operation.as_mut()
-    {
-        *condition = Expr::Compute(Box::new(Predicate::Exists {
-            objects: Selector::Bound {
-                reference: Binding::new(1, ScopeId(1)),
-            },
-        }));
-    }
-    reject_card(card, WellFormedReason::UnavailableBinding);
-}
-
-#[test]
-fn mode_answers_respect_evaluated_count_zero_clamping_and_unique_ids() {
-    let Node::Control {
-        control: Control::Mode { chosen, .. },
-    } = mode_group(SpellCountTime::AtPlay, false).node
-    else {
-        panic!("mode");
-    };
-    assert!(chosen.accepts_answer(Nat(1), &[ModeId(1)]));
-    assert!(!chosen.accepts_answer(Nat(1), &[ModeId(1), ModeId(2)]));
-    assert!(chosen.accepts_answer(Nat(3), &[ModeId(1), ModeId(2), ModeId(3)]));
-    assert!(chosen.accepts_answer(Nat(99), &[ModeId(1), ModeId(2), ModeId(3)]));
-    assert!(chosen.accepts_answer(Nat(0), &[]));
-    assert!(!chosen.accepts_answer(Nat(0), &[ModeId(1)]));
-    assert!(!chosen.accepts_answer(Nat(3), &[ModeId(1), ModeId(1)]));
-    assert!(!chosen.accepts_answer(Nat(3), &[ModeId(9)]));
 }

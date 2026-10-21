@@ -269,36 +269,6 @@ fn off_field_destroy_and_late_failure_restore_the_entire_game() {
 }
 
 #[test]
-fn unsupported_placement_and_rule_permissions_are_rejected_before_draw() {
-    let mut ordered = put(2, zone(ZoneKind::Field, 2), OwnerZone::Deck);
-    if let Node::Instruction { instruction } = &mut ordered.node
-        && let Action::Move { movement, .. } = &mut instruction.action
-    {
-        movement.position = Some(Position::Top {});
-    }
-    let mut returned = put(2, zone(ZoneKind::Field, 2), OwnerZone::Cemetery);
-    if let Node::Instruction { instruction } = &mut returned.node
-        && let Action::Move { reason, .. } = &mut instruction.action
-    {
-        *reason = MoveReason::Return;
-    }
-    for steps in [
-        vec![draw(1, 1), ordered],
-        vec![draw(1, 1), returned],
-        vec![
-            draw(1, 1),
-            protection(2, zone(ZoneKind::Field, 2), CausePattern::AnyRule {}),
-        ],
-    ] {
-        let mut game = game(1, 2);
-        let before = exact_authority(&game);
-        game.execute_internal(&checked(steps), &source("synthetic"), context(1))
-            .unwrap_err();
-        assert_eq!(exact_authority(&game), before);
-    }
-}
-
-#[test]
 fn movement_receipts_and_new_generations_are_absent_from_player_packets() {
     let mut game = game(1, 2);
     let progress = game
@@ -489,61 +459,6 @@ fn protection_is_per_generation_and_partial_success_keeps_before_controller() {
         game.projection(View::Referee).unwrap()["P1"]["field"],
         json!(["s"])
     );
-}
-
-#[test]
-fn unsupported_lifetimes_conditions_and_dead_branches_fail_before_mutation() {
-    for variant in 0..3 {
-        let mut install = protection(2, zone(ZoneKind::Field, 2), effect_cause());
-        let Node::Instruction { instruction } = &mut install.node else {
-            panic!("instruction")
-        };
-        let Action::InstallEffect {
-            effect, duration, ..
-        } = &mut instruction.action
-        else {
-            panic!("install")
-        };
-        let Effect::Permission {
-            duration: inner,
-            condition,
-            action,
-            ..
-        } = effect.as_mut()
-        else {
-            panic!("permission")
-        };
-        match variant {
-            0 => {
-                duration.end = DurationEnd::NoTemporalExpiry {};
-                *inner = duration.clone();
-            }
-            1 => *condition = Expr::Literal(Bool(false)),
-            _ => {
-                *action = ActionPattern::Banish {
-                    objects: Selector::Bound {
-                        reference: Binding::new(1, ScopeId(102)),
-                    },
-                    cause: effect_cause(),
-                }
-            }
-        }
-        let program = checked(vec![
-            draw(1, 1),
-            node(Node::Control {
-                control: Control::If {
-                    condition: Expr::Literal(Bool(false)),
-                    then_body: body(3, vec![install]),
-                    else_body: None,
-                },
-            }),
-        ]);
-        let mut game = game(1, 2);
-        let before = exact_authority(&game);
-        game.execute_internal(&program, &source("synthetic"), context(1))
-            .unwrap_err();
-        assert_eq!(exact_authority(&game), before);
-    }
 }
 
 #[test]

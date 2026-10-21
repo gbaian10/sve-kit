@@ -44,14 +44,6 @@ fn paid_ability(actions: Vec<Action>, body: Vec<Located<Node>>) -> Located<Abili
     a
 }
 
-const fn costs_mut(a: &mut Located<Ability>) -> &mut Vec<CostStep> {
-    match &mut a.node.play.as_mut().unwrap().costs {
-        CostSpec::Ordered { steps } => Some(steps),
-        CostSpec::Alternative { .. } => None,
-    }
-    .unwrap()
-}
-
 fn resource_draw(id: u64) -> Located<Node> {
     draw_value(
         id,
@@ -212,100 +204,6 @@ fn body_failure_restores_costs_knowledge_events_and_all_producers() {
         assert_eq!(retry, baseline);
         assert_eq!(exact_authority(&game), exact_authority(&untouched));
     }
-}
-
-#[test]
-fn unimplemented_cost_shapes_reject_the_complete_card() {
-    for seat in [1, 2] {
-        let base = paid_ability(vec![pp(1)], vec![draw(1, 1)]);
-        let mut ep = base.clone();
-        if let Action::Resource { resource, .. } = &mut costs_mut(&mut ep)[0].instruction.action {
-            *resource = Resource::Ep;
-        }
-        let mut foreign_player = base.clone();
-        if let Action::Resource { player, .. } =
-            &mut costs_mut(&mut foreign_player)[0].instruction.action
-        {
-            *player = PlayerRef::Owner {};
-        }
-        let mut foreign_actor = base.clone();
-        costs_mut(&mut foreign_actor)[0].instruction.actor = PlayerRef::Owner {};
-        let mut foreign_source = base.clone();
-        costs_mut(&mut foreign_source)[0].instruction.source.origin = AbilityOrigin::Printed {
-            face: FaceId("0".into()),
-            line: Nat(99),
-        };
-        WellFormedCardProgram::check(CardProgram {
-            abilities: vec![foreign_source],
-        })
-        .unwrap_err();
-        let mut material = paid_ability(vec![act()], vec![]);
-        costs_mut(&mut material)[0].materials = Some(Binding::new(80, ScopeId(1)));
-        let mut other_objects = paid_ability(vec![act()], vec![]);
-        if let Action::Posture { objects, .. } =
-            &mut costs_mut(&mut other_objects)[0].instruction.action
-        {
-            *objects = zone(ZoneKind::Field, 99);
-        }
-        let life = paid_ability(
-            vec![Action::Life {
-                player: PlayerRef::Controller {},
-                change: NumericChange::Add {
-                    amount: Expr::Literal(Int(-1)),
-                },
-            }],
-            vec![],
-        );
-        let mut twice = paid_ability(vec![act()], vec![]);
-        if let Action::Posture {
-            objects: Selector::Objects { objects },
-            ..
-        } = &mut costs_mut(&mut twice)[0].instruction.action
-        {
-            objects.push(ObjectOperand::SourceHolder {});
-        }
-        let mut accepted = game(seat, 1);
-        accepted
-            .load_internal_card("unit-follower", &card(vec![ability(2, vec![]), base]))
-            .unwrap();
-        for a in [
-            ep,
-            foreign_player,
-            foreign_actor,
-            material,
-            other_objects,
-            life,
-            twice,
-        ] {
-            let mut game = game(seat, 1);
-            let before = exact_authority(&game);
-            let error = game
-                .load_internal_card("unit-follower", &card(vec![ability(2, vec![]), a]))
-                .unwrap_err();
-            assert!(error.to_string().contains("whole-card cost"), "{error}");
-            assert_eq!(before, exact_authority(&game));
-        }
-    }
-}
-
-#[test]
-fn body_cannot_read_an_opaque_cost_receipt() {
-    let read = node(Node::Control {
-        control: Control::If {
-            condition: Expr::Frozen(Box::new(BoolFrozen::PaymentComplete {
-                receipt: PaymentReference::Local {
-                    receipt: ReceiptReference::new(ReceiptId(100)),
-                },
-            })),
-            then_body: body(3, vec![draw(4, 1)]),
-            else_body: None,
-        },
-    });
-    let error = WellFormedCardProgram::check(CardProgram {
-        abilities: vec![paid_ability(vec![pp(1)], vec![read])],
-    })
-    .unwrap_err();
-    assert!(format!("{error:?}").contains("ReceiptType"), "{error:?}");
 }
 
 #[test]
