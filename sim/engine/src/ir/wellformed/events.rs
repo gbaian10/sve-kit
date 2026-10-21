@@ -1,4 +1,4 @@
-use crate::ir::{ZoneFrozen, ZoneKind, ZoneOperation};
+use crate::ir::{ZoneFrozen, ZoneKind, ZoneOperation, ZoneRef};
 macro_rules! projected_equality {
     ($checker:expr, $equality:expr; $($variant:ident),+ $(,)?) => {
         match $equality {
@@ -410,6 +410,12 @@ impl Checker {
             EventPattern::CounterChange { binding, predicate } => {
                 event!(binding, predicate, EventSnapshotPolicy::AfterEntry)
             }
+            EventPattern::Attack { binding, predicate } => {
+                event!(binding, predicate, EventSnapshotPolicy::AfterEntry)
+            }
+            EventPattern::Phase { binding, predicate } => {
+                event!(binding, predicate, EventSnapshotPolicy::AfterEntry)
+            }
             EventPattern::Fused { binding, predicate } => {
                 event!(binding, predicate, EventSnapshotPolicy::BeforeExit)
             }
@@ -420,8 +426,6 @@ impl Checker {
             | EventPattern::Banish { .. }
             | EventPattern::Posture { .. }
             | EventPattern::Evolve { .. }
-            | EventPattern::Attack { .. }
-            | EventPattern::Phase { .. }
             | EventPattern::Race { .. }
             | EventPattern::DriveGained { .. }
             | EventPattern::DriveTrigger { .. }
@@ -545,6 +549,27 @@ impl Checker {
         }
     }
 
+    fn leave_destination(&mut self, left: &Expr<ZoneRef>, right: &Expr<ZoneRef>) -> Checked {
+        let Expr::Frozen(field) = left else {
+            return self.reject();
+        };
+        let ZoneFrozen::LeaveFieldTo { event } = field.as_ref() else {
+            return self.reject();
+        };
+        self.reference(*event, BindingKind::Value)?;
+        let Expr::Compute(operation) = right else {
+            return self.reject();
+        };
+        let ZoneOperation::OfPlayer {
+            player,
+            kind: ZoneKind::Cemetery,
+        } = operation.as_ref()
+        else {
+            return self.reject();
+        };
+        self.player(player)
+    }
+
     pub(super) fn event_predicate(&mut self, predicate: &Predicate) -> Checked {
         match predicate {
             Predicate::EventCause { event, pattern } => {
@@ -558,25 +583,10 @@ impl Checker {
                 self.object_value(left)?;
                 self.object_value(right)
             }
-            Predicate::ZoneEquals { left, right } => {
-                let Expr::Frozen(field) = left else {
-                    return self.reject();
-                };
-                let ZoneFrozen::LeaveFieldTo { event } = field.as_ref() else {
-                    return self.reject();
-                };
-                self.reference(*event, BindingKind::Value)?;
-                let Expr::Compute(operation) = right else {
-                    return self.reject();
-                };
-                let ZoneOperation::OfPlayer {
-                    player,
-                    kind: ZoneKind::Cemetery,
-                } = operation.as_ref()
-                else {
-                    return self.reject();
-                };
-                self.player(player)
+            Predicate::ZoneEquals { left, right } => self.leave_destination(left, right),
+            Predicate::PhaseEquals { left, right } => {
+                self.projection(left)?;
+                self.projection(right)
             }
             Predicate::PlayerEquals { left, right } => {
                 self.player_value(left)?;
@@ -624,7 +634,6 @@ impl Checker {
             | Predicate::RecipientIsFollower { .. }
             | Predicate::PostureEquals { .. }
             | Predicate::EvolutionEquals { .. }
-            | Predicate::PhaseEquals { .. }
             | Predicate::TitleEquals { .. }
             | Predicate::HasAbility { .. }
             | Predicate::HasTrait { .. }

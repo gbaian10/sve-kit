@@ -7,6 +7,7 @@ use serde_json::{Value, json};
 
 use super::costs::CostKind;
 use super::{EventSubject, Frame, Game, Object, Pending, Step, int, list, other, string};
+use crate::ir::SnapshotId;
 use crate::{EngineFailure, Result, invalid};
 
 #[expect(
@@ -41,6 +42,14 @@ impl Game {
                 "prototype decisions cannot mix with prepared typed plays".into(),
             ));
         }
+        self.apply_rule_decision(decision, node)
+    }
+
+    pub(in crate::game) fn apply_rule_decision(
+        &mut self,
+        decision: &Value,
+        node: &str,
+    ) -> Result<Step> {
         if !decision.is_object() {
             return Err(invalid("decision must be an object"));
         }
@@ -70,7 +79,9 @@ impl Game {
                 events: take(&mut self.emitted),
             }),
             Err(error) => {
+                let high = self.state.ir_epoch;
                 *self = before;
+                self.state.ir_epoch = self.state.ir_epoch.max(high);
                 Err(error)
             }
         }
@@ -656,6 +667,7 @@ impl Game {
         if !self.can_attack(id, target)? {
             return Ok(false);
         }
+        let before = SnapshotId(self.state.ir_epoch);
         let cause = json!({"decision":self.node});
         self.change_posture(&[id.into()], true, &cause)?;
         self.bump(&format!("{}.attacks", self.active()), 1);
@@ -681,6 +693,7 @@ impl Game {
             &json!({"event":event}),
         )?;
         self.enqueue(pending);
+        self.internal_attack_event(id, target, before)?;
         Ok(true)
     }
 
@@ -720,17 +733,19 @@ impl Game {
     }
 
     fn start_end(&mut self) -> Result<()> {
+        let before = SnapshotId(self.state.ir_epoch);
         self.state.turn["phase"] = json!("end");
         self.state.flow = json!({"kind":"end","stage":"triggers"});
         let pending = self.collect_triggers("end", &[], &json!({"decision":self.node}))?;
         self.enqueue(pending);
         self.enqueue_delayed_end()?;
+        self.internal_end_event(before)?;
         Ok(())
     }
     fn guard_act(&mut self, decision: &Value) -> Result<bool> {
         if self.state.flow["stage"] != "guard"
             || !self
-                .legal()?
+                .end_choices(self.active())?
                 .iter()
                 .any(|choice| super::legal::unordered_selection_matches(choice, decision))
         {
@@ -754,7 +769,7 @@ impl Game {
     fn end_discard(&mut self, decision: &Value) -> Result<bool> {
         if self.state.flow["stage"] != "discard"
             || !self
-                .legal()?
+                .end_choices(self.active())?
                 .iter()
                 .any(|choice| super::legal::unordered_selection_matches(choice, decision))
         {

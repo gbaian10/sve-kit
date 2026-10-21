@@ -291,7 +291,8 @@ impl Checker {
                 self.visible_object(self.env.access.get(&found.key()))?;
                 self.candidate(*object, predicate)
             }
-            Predicate::ZoneEquals { .. }
+            Predicate::PhaseEquals { .. }
+            | Predicate::ZoneEquals { .. }
             | Predicate::EventCause { .. }
             | Predicate::Equal { .. }
             | Predicate::PlayerEquals { .. }

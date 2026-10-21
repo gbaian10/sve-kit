@@ -16,6 +16,9 @@ mod source_information;
 #[path = "card/triggers.rs"]
 mod triggers;
 
+#[path = "card/timing.rs"]
+mod timing;
+
 fn locate_steps(steps: &mut [Located<Node>], span: &SourceSpan, origin: &AbilitySource) {
     for step in steps {
         step.source = span.clone();

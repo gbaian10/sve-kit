@@ -488,7 +488,7 @@ fn printed_origin(origin: &AbilityOrigin) -> Result<(&FaceId, &Nat)> {
     match origin {
         AbilityOrigin::Printed { face, line } => Ok((face, line)),
         AbilityOrigin::Keyword {
-            keyword: KeywordId::Fanfare | KeywordId::Lastword,
+            keyword: KeywordId::Fanfare | KeywordId::Lastword | KeywordId::OnAttack,
             origin,
         } => {
             if let AbilityOrigin::Printed { face, line } = origin.as_ref() {

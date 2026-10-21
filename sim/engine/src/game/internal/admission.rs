@@ -61,7 +61,7 @@ fn source_paths(
                 if matches!(
                     origin.origin,
                     AbilityOrigin::Keyword {
-                        keyword: KeywordId::Fanfare | KeywordId::Lastword,
+                        keyword: KeywordId::Fanfare | KeywordId::Lastword | KeywordId::OnAttack,
                         ..
                     }
                 ) {
@@ -130,6 +130,7 @@ fn check_requirements(
                         "shape.AbilityOrigin.Keyword"
                             | "internal.KeywordId.Fanfare"
                             | "internal.KeywordId.Lastword"
+                            | "internal.KeywordId.OnAttack"
                     ) && requirement
                         .locations
                         .iter()

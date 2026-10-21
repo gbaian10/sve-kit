@@ -8,12 +8,14 @@ use super::{
 };
 use crate::game::{Frame, Object};
 use crate::ir::{
-    BatchId, Cause, DecisionId, EventHeader, EventId, EventPattern, EventSnapshotPolicy,
-    ExecutionId, GameTime, KeywordId, LeaveFieldEvent, OriginFactId, Phase, RuleId,
-    RuntimeVisibility, RuntimeZoneRef, SnapshotId, Timestamp, TriggerAggregation, TriggerCondition,
-    TriggerSpec, TurnId,
+    BatchId, Cause, DecisionId, EventHeader, EventId, EventPattern, EventPayload,
+    EventSnapshotPolicy, ExecutionId, GameTime, KeywordId, LeaveFieldEvent, OriginFactId, Phase,
+    RuleId, RuntimeVisibility, RuntimeZoneRef, SnapshotId, Timestamp, TriggerAggregation,
+    TriggerCondition, TriggerSpec, TurnId,
 };
 use alloc::collections::BTreeMap;
+
+mod timing;
 
 /// Only question-scoped handles and already public information reach a player.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -39,6 +41,7 @@ pub(super) struct PendingOccurrence {
     leave: Option<LeaveFieldEvent>,
     card: String,
     entry_from: Option<ZoneKind>,
+    timing: Option<EventPayload>,
     field_position: u64,
 }
 
@@ -56,6 +59,9 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
         }
     ) {
         return super::fanfare::check_header(ability);
+    }
+    if timing::check_header(ability)? {
+        return Ok(());
     }
     let Some(trigger) = &ability.trigger else {
         return Err(unsupported("missing trigger"));
@@ -184,6 +190,7 @@ impl Game {
             leave,
             card: self.object(holder)?.card.clone(),
             entry_from: None,
+            timing: None,
             field_position: u64::try_from(
                 self.zone_ids(super::seat_name(source.controller)?, "field")
                     .iter()
@@ -209,20 +216,26 @@ impl Game {
                 .and_then(serde_json::Value::as_str)
                 .or_else(|| frame.cause["rule"].as_str())
                 .ok_or_else(|| unsupported("departure without authority cause"))?;
-            let next = RuleId(
-                u64::try_from(self.card_runtime.rule_ids.len())
-                    .map_err(invalid)?
-                    .checked_add(1)
-                    .ok_or_else(|| invalid("rule identities exhausted"))?,
-            );
-            let rule = *self
-                .card_runtime
-                .rule_ids
-                .entry(rule.into())
-                .or_insert(next);
-            Cause::Rule { rule }
+            Cause::Rule {
+                rule: self.rule_id(rule)?,
+            }
         };
         Ok(cause)
+    }
+
+    /// Rule identities are allocated only by this authority map, never from caller numbers.
+    fn rule_id(&mut self, rule: &str) -> Result<RuleId> {
+        let next = RuleId(
+            u64::try_from(self.card_runtime.rule_ids.len())
+                .map_err(invalid)?
+                .checked_add(1)
+                .ok_or_else(|| invalid("rule identities exhausted"))?,
+        );
+        Ok(*self
+            .card_runtime
+            .rule_ids
+            .entry(rule.into())
+            .or_insert(next))
     }
 
     /// Lastword abilities effective just before this field object leaves.
@@ -418,7 +431,6 @@ impl Game {
     }
 
     fn prepare_pending_order(&mut self) -> Result<Option<DecisionView>> {
-        self.checks()?;
         if self.state.game["ended"] == true {
             self.card_runtime.pending.clear();
             return Ok(None);
@@ -457,7 +469,9 @@ impl Game {
                         .ok_or_else(|| invalid("pending handles exhausted"))?,
                     card: pending.card.clone(),
                     line: printed_origin(&pending.ability.node.source.origin)?.1.0,
-                    event: if pending.leave.is_some() {
+                    event: if let Some(event) = &pending.timing {
+                        timing::public_event(event, pending.field_position)?
+                    } else if pending.leave.is_some() {
                         format!("LeaveField from field slot {}", pending.field_position)
                     } else {
                         let from = match pending.entry_from {

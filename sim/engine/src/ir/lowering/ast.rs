@@ -38,6 +38,8 @@ pub(super) struct Ability {
     pub imports: Option<IgnoredAny>,
     pub fanfare: Option<Body>,
     pub lastword: Option<Body>,
+    pub attack_time: Option<Body>,
+    pub auto: Option<Auto>,
 }
 
 #[derive(Deserialize)]
@@ -127,3 +129,37 @@ pub(super) enum DeckZone {
     reason = "An empty JSON object is required here; a unit struct accepts null."
 )]
 pub(super) struct Empty {}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Auto {
+    pub on: PhaseSubscription,
+    #[serde(flatten)]
+    pub body: Body,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct PhaseSubscription {
+    pub phase: PhaseSubscriptionPayload,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct PhaseSubscriptionPayload {
+    #[serde(rename = "which")]
+    pub _which: EndPhase,
+    pub whose: PhasePlayer,
+}
+#[derive(Deserialize)]
+pub(super) enum EndPhase {
+    #[serde(rename = "end")]
+    End,
+}
+#[derive(Deserialize)]
+pub(super) enum PhasePlayer {
+    #[serde(rename = "self")]
+    Controller,
+    #[serde(rename = "opp")]
+    Opponent,
+    #[serde(rename = "each")]
+    Each,
+}

@@ -62,7 +62,7 @@ impl ExpandedLowerer {
 
     /// Lower every card atomically. Success proves only internal IR well-formedness.
     ///
-    /// Only fanfare, lastword, draw, uniform damage to all leaders, and their numeric subset
+    /// Only fanfare, lastword, attack-time, End Begin, draw, uniform damage to all leaders, and their numeric subset
     /// are supported. Card keys remain candidate coordinates, not snapshot IDs.
     ///
     /// # Errors
@@ -136,19 +136,30 @@ impl Allocator {
             return Err(unsupported(path));
         }
 
-        let (body, head, keyword) = match (&entry.fanfare, &entry.lastword) {
-            (Some(body), None) => (body, "fanfare", KeywordId::Fanfare),
-            (None, Some(body)) => (body, "lastword", KeywordId::Lastword),
+        let (body, head, keyword) = match (
+            &entry.fanfare,
+            &entry.lastword,
+            &entry.attack_time,
+            &entry.auto,
+        ) {
+            (Some(body), None, None, None) => (body, "fanfare", Some(KeywordId::Fanfare)),
+            (None, Some(body), None, None) => (body, "lastword", Some(KeywordId::Lastword)),
+            (None, None, Some(body), None) => (body, "attack_time", Some(KeywordId::OnAttack)),
+            (None, None, None, Some(auto)) => (&auto.body, "auto", None),
             _ => return Err(unsupported(path)),
         };
         let source = source_span(key, path, entry)?;
-        let origin = AbilityOrigin::Keyword {
-            keyword,
-            origin: Box::new(AbilityOrigin::Printed {
-                face: FaceId(source.face.clone()),
-                line: Nat(u64::from(entry.line)),
-            }),
+        let printed = AbilityOrigin::Printed {
+            face: FaceId(source.face.clone()),
+            line: Nat(u64::from(entry.line)),
         };
+        let origin = keyword.map_or_else(
+            || printed.clone(),
+            |keyword| AbilityOrigin::Keyword {
+                keyword,
+                origin: Box::new(printed.clone()),
+            },
+        );
         let ability_source = AbilitySource {
             holder: ObjectOperand::SourceHolder {},
             origin,
@@ -186,26 +197,7 @@ impl Allocator {
             });
         }
         let event_id = context.allocator.id(path)?;
-        let trigger = if keyword == KeywordId::Lastword {
-            TriggerSpec::lastword(Binding::new(event_id, scope))
-        } else {
-            let event = Binding::new(event_id, scope);
-            TriggerSpec {
-                on: TriggerCondition::Event {
-                    pattern: EventPattern::EnterField {
-                        binding: event,
-                        predicate: Expr::Compute(Box::new(Predicate::ObjectEquals {
-                            left: Expr::Frozen(Box::new(ObjectFrozen::EnterFieldObject { event })),
-                            right: Expr::Frozen(Box::new(ObjectFrozen::SourceHolder {})),
-                        })),
-                    },
-                },
-                active_zones: vec![ZoneKind::Field],
-                view: EventSnapshotPolicy::AfterEntry,
-                limit: None,
-                aggregation: TriggerAggregation::PerFact {},
-            }
-        };
+        let trigger = lowered_trigger(entry, keyword, event_id, scope);
         Ok(Located {
             source,
             node: Ability {
@@ -222,6 +214,52 @@ impl Allocator {
                 declarations: vec![],
             },
         })
+    }
+}
+
+fn lowered_trigger(
+    entry: &ast::Ability,
+    keyword: Option<KeywordId>,
+    event_id: u64,
+    scope: ScopeId,
+) -> TriggerSpec {
+    if keyword == Some(KeywordId::Lastword) {
+        TriggerSpec::lastword(Binding::new(event_id, scope))
+    } else {
+        let pattern = if keyword == Some(KeywordId::OnAttack) {
+            let event = Binding::new(event_id, scope);
+            EventPattern::Attack {
+                binding: event,
+                predicate: super::events::timing::attack_predicate(event),
+            }
+        } else if let Some(auto) = &entry.auto {
+            let player = match auto.on.phase.whose {
+                ast::PhasePlayer::Controller => Some(PlayerRef::Controller {}),
+                ast::PhasePlayer::Opponent => Some(super::events::timing::opponent()),
+                ast::PhasePlayer::Each => None,
+            };
+            let event = Binding::new(event_id, scope);
+            EventPattern::Phase {
+                binding: event,
+                predicate: super::events::timing::end_predicate(event, player),
+            }
+        } else {
+            let event = Binding::new(event_id, scope);
+            EventPattern::EnterField {
+                binding: event,
+                predicate: Expr::Compute(Box::new(Predicate::ObjectEquals {
+                    left: Expr::Frozen(Box::new(ObjectFrozen::EnterFieldObject { event })),
+                    right: Expr::Frozen(Box::new(ObjectFrozen::SourceHolder {})),
+                })),
+            }
+        };
+        TriggerSpec {
+            on: TriggerCondition::Event { pattern },
+            active_zones: vec![ZoneKind::Field],
+            view: EventSnapshotPolicy::AfterEntry,
+            limit: None,
+            aggregation: TriggerAggregation::PerFact {},
+        }
     }
 }
 

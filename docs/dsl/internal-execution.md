@@ -15,7 +15,7 @@ owner、field、fragment；這不授予永久來源身分或公開 capability。
 本文，不把依賴 play binding 的本文重新當成封閉 `WellFormedProgram`。
 
 准入接受普通 Printed Spell 的 `[Resolution]`、Printed Activated 的 `[Field]`，以及下節的
-Printed Fanfare／Lastword。Spell 的唯一固有 Ordered PP Pay 必須等於同 Catalog face 的印刷費用；
+Printed Fanfare／Lastword／OnAttack 及 End Begin。Spell 的唯一固有 Ordered PP Pay 必須等於同 Catalog face 的印刷費用；
 只在這個已驗位置按 Resolution 的有效成本實付一次。Activated 沿用 controller 的非負常值 PP
 與恰好 SourceHolder 的 Acted Posture／Put 送往 owner 墓地，不能套用卡片減費；成本沒有 materials、precondition 或替代。
 Amulet executor、Quick、前置 X、追加／替代成本、一般 trigger、Static 與任意對象 LKI 仍整棵拒絕。
@@ -95,7 +95,7 @@ Fanfare 入場後保存原來源、controller、instance 與公開的入場來�
 before／after、直接 cause；規則移區的 source=None，不冒充造成先前傷害的能力。
 目前正式本文只承載公開區 owner 墓地／消滅移動；一般回手、入場及跨世代跟隨仍拒絕。
 
-Fanfare 與 Lastword 共用一個私有待機集合。`internal_pending_choice()` 在穩定檢查時點建立題目，
+Fanfare、Lastword、OnAttack 及 End Begin 共用一個私有待機集合。`internal_pending_choice()` 在穩定檢查時點建立題目，
 回合玩家有待機就由該玩家選一個，否則由對手選。`answer_internal_card` 接 `Answer::Pending(handle)`；
 候選只投影當次 handle、已公開卡號、印刷行與事件的過去公開場位／入場來源，不交出 source／instance／snapshot。
 錯 actor、token、handle 或 payload 保留原題；選中後是獨立 execution，完成再交 CheckTiming。
@@ -108,6 +108,19 @@ Fanfare 與 Lastword 共用一個私有待機集合。`internal_pending_choice()
 
 BP01-118 與 BP01-P25 的測試由 C0 展開、lowering、整卡載入及 authority 程序驗證相應傷害片段；
 P25 的送墓成本來自明示的合成測試輔助能力。來源座標為候選 fixture，不宣稱永久來源驗證或公開 capability。
+
+`internal_rule_action` 僅接受 attack、end-phase、pass 與 end-discard 的既有規則動作，
+沿原有時機、目標與支付／姿勢驗證；忙碌、待機及未完成 CheckTiming 時拒絕，不接原型 play／activate。
+守護屬原型 keyword，載入整卡的局面整體拒絕，所以不開 guard-act。時機不符的動作回 `cannot-play` 等拒絕結果，不視為成功。
+OnAttack 限 Printed 關鍵字、自身 Attack、AfterEntry、PerFact、無 limit／PlaySpec；事件在合法目標與 act
+完成後、Quick 與傷害前保存精確 attacker、target、controller 與當回合 ordinal。
+End Begin 限 Printed、Phase(End, Begin)、自己的／對手的／每個 end phase，依事件回合玩家匹配；
+只在 start_end 發一次，先待機再進守護 act、Quick、棄牌及到期，不因重入檢查重發。
+此處 AfterEntry 指事件完成後，沒有把攻擊或 phase 當成入場。進化來源的上述事件 context 尚未接線時整次拒絕。
+選題入口不再自行執行會產生事件的規則處理；各 producer 或 resume 先完成規則穩定處理，避免遺失 Step 事件。
+
+BP10-122 的 attack-time 抽一片段與 BP09-P17 的 end 抽三片段經 C0／lowering 驗證；後者只取抽牌指示，
+不宣稱其完整能力已支援。攻擊測試加上合成待機能力，驗結算前來源加攻送墓後讀 LKI 4。
 
 ### 正式能力來源資訊的受限 LKI
 
