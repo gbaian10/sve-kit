@@ -26,6 +26,8 @@ mod damage;
 mod numeric;
 #[path = "internal_ir/ordering.rs"]
 mod ordering;
+#[path = "internal_ir/projections.rs"]
+mod projections;
 
 #[path = "internal_ir/search.rs"]
 mod search;

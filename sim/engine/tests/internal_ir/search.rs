@@ -105,6 +105,121 @@ fn shuffles(progress: &Progress) -> usize {
 }
 
 #[test]
+fn search_successful_projections_do_not_substitute_found_or_revealed() {
+    for seat in [1, 2] {
+        for full in [false, true] {
+            let mut position = setup(
+                seat,
+                json!([
+                    {"id":"d0","card":"unit-follower"}, {"id":"d1","card":"unit-spell"},
+                    {"id":"d2","card":"unit-spell"}, {"id":"d3","card":"unit-spell"}
+                ]),
+            );
+            if full {
+                position["players"][seat_name(seat)]["zones"]["ex"] = json!([
+                    {"id":"e0","card":"unit-follower"}, {"id":"e1","card":"unit-follower"},
+                    {"id":"e2","card":"unit-follower"}, {"id":"e3","card":"unit-follower"},
+                    {"id":"e4","card":"unit-follower"}
+                ]);
+            }
+            let mut game = Game::new(
+                catalog(),
+                &position,
+                &Value::Null,
+                &Value::Null,
+                "search-projections",
+            )
+            .unwrap();
+            let receipt = MovementReceipt::Search {
+                receipt: ReceiptReference::new(ReceiptId(1)),
+            };
+            let before = Selector::ReceiptMembers {
+                receipt: ObjectReceipt::Movement {
+                    receipt: receipt.clone(),
+                },
+                projection: MemberProjection::Before,
+            };
+            let after = Selector::MoveAfter {
+                receipt,
+                permission: FollowPermission::SameEffectExplicitReference {},
+            };
+            let count = |objects| {
+                Expr::Compute(Box::new(IntOperation::FromNat {
+                    value: Expr::Compute(Box::new(NatOperation::Count { objects })),
+                }))
+            };
+            game.execute_internal(
+                &checked(vec![
+                    search(conditional(), cardinality(1, 1), shared(ZoneKind::Ex)),
+                    super::draw_value(2, count(before)),
+                    super::draw_value(3, count(after)),
+                ]),
+                &source("synthetic"),
+                context(seat),
+            )
+            .unwrap();
+            let result = answer(&mut game, seat, SearchAnswer::Ungrouped(vec![0]));
+            assert_eq!(outcome(&result).found.len(), 1);
+            assert_eq!(outcome(&result).revealed.len(), 1);
+            assert_eq!(shuffles(&result), 1);
+            for id in [2, 3] {
+                let Some(InstructionOutcome::Cards(outcome)) = result.receipts.get(&ReceiptId(id))
+                else {
+                    panic!("draw");
+                };
+                assert_eq!(outcome.actual.0, u64::from(!full));
+            }
+        }
+    }
+}
+
+#[test]
+fn failure_driven_by_successful_after_restores_the_pending_answer_and_real_rng() {
+    for seat in [1, 2] {
+        let after = Selector::MoveAfter {
+            receipt: MovementReceipt::Search {
+                receipt: ReceiptReference::new(ReceiptId(1)),
+            },
+            permission: FollowPermission::SameEffectExplicitReference {},
+        };
+        let count = Expr::Compute(Box::new(IntOperation::Arithmetic {
+            operation: Arithmetic::Multiply,
+            arguments: vec![
+                Expr::Compute(Box::new(IntOperation::FromNat {
+                    value: Expr::Compute(Box::new(NatOperation::Count { objects: after })),
+                })),
+                Expr::Literal(Int(10_001)),
+            ],
+        }));
+        let program = checked(vec![
+            search(conditional(), cardinality(0, 1), shared(ZoneKind::Ex)),
+            super::draw_value(9, count),
+        ]);
+        let mut games = [game(seat, 10), game(seat, 10)];
+        for game in &mut games {
+            game.execute_internal(&program, &source("synthetic"), context(seat))
+                .unwrap();
+        }
+        let token = games[0].internal_decision(view(seat)).unwrap().token;
+        let pending = exact_authority(&games[0]);
+        games[0]
+            .answer_internal(
+                PlayerId { seat },
+                token,
+                Answer::Search(SearchAnswer::Ungrouped(vec![0])),
+            )
+            .unwrap_err();
+        assert_eq!(exact_authority(&games[0]), pending);
+        // Observe the next real shuffle; ChaCha's Debug output does not expose RNG state.
+        let results = games
+            .each_mut()
+            .map(|game| answer(game, seat, SearchAnswer::Ungrouped(vec![])));
+        assert_eq!(results[0], results[1]);
+        assert_eq!(exact_authority(&games[0]), exact_authority(&games[1]));
+    }
+}
+
+#[test]
 fn candidate_existence_does_not_change_opponents_start_observation() {
     for seat in [1, 2] {
         let mut opponents = Vec::new();

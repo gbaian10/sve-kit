@@ -130,8 +130,9 @@ BP16-077 的正式打出流程或整卡可執行。每項不同下限與 LKI 仍
 
 ## 公開區域移動與破壞
 
-Move 只准入 Put、Owners(Cemetery / Banish)，來源限公開 Field／Ex／Cemetery／Banish。
-不接受 Shared(Field / Ex)、私人目的區、position、order、initial_posture 或 entry_effects。
+一般 Move 只准入 Put、Owners(Cemetery / Banish)，來源限公開 Field／Ex／Cemetery／Banish。
+不接受 Shared(Field / Ex)、私人目的區、position、order、initial_posture 或 entry_effects；
+唯一例外是〈私有看牌與同區排列〉所述，從自己牌庫放入自己 EX 的受限 Look→Move 流程。
 Destroy 是獨立 action，僅接受仍在 Field 的目前世代；過期 capture 不移動新世代。
 目前世代位於其他區域時整次執行失敗並回復，不外推場外 Destroy 語義。
 
@@ -149,8 +150,13 @@ Put(Cemetery) 不產生破壞結果。成功成員的 snapshot 區分提交前�
 與離區前控制者。這個型別沒有玩家／wire 序列化，也不是完整 EventHeader／DestroyEvent
 管線。此子集 cause 僅為當次 Effect；不從目的墓地反推 AnyRule 或破壞。
 取代安裝及改道尚未准入，replacements 保持空；沒有取代鏈的執行保證。
-MoveAfter、成功 Before 的程式投影、MovedRef、RuleCarry、FollowEventMove 與事件 payload
-read 均在完整 requirement 預檢時拒絕，包含未執行分支。receipt 與 after 世代不進玩家 packet。
+Movement receipt 的成功 Before 與 SameEffectExplicitReference MoveAfter 已准入
+Move／Search／Destroy 的 local receipt。只取具有 after、actual_to 與實際世代轉換的成員；
+不以 found、revealed、選中集合或 requested_to 代替成功移動。Before 保留舊世代，After
+只指向該次移動的新世代，再次移區後不自動追蹤。一般 Difference 依物件 ID 及世代扣除，
+不依卡號或卡名。這些集合不代表 Destroy 事件或完整付款。
+MovedRef、RuleCarry、FollowEventMove、其他 receipt 家族與事件 payload read
+仍在完整 requirement 預檢時拒絕，包含未執行分支。receipt 與 after 世代不進玩家 packet。
 
 InstallEffect 的有限子集為 InstructionStart 固定物件集合、Permission Forbid Destroy、
 Effect(Any) cause、常值 true condition，以及 Installation anchor 的 EndResolution。
@@ -173,8 +179,17 @@ Order 使用自己的 DecisionId，先固定 cards、chooser、單一 Owners(Dec
 及其他 audience 的題目與結果投影尚未定義，包含未執行分支都拒絕。只准入 Top／Bottom、位於 chooser 自己牌庫的目前世代；
 跨 owner、跨區與 Index 拒絕。cards 可由本次執行的私有 Look receipt、Union／Difference 及原有
 公開 selector 求得；Look receipt 必須屬於 chooser，且仍有有效觀察證據。
-這些新增的私有 selector 只在 Order cards 的 Union／Difference 主幹准入，不放寬一般
-If／capture／Move 或主幹下其他 selector（例如 Zone predicate）的讀值範圍；未執行分支同樣檢查。
+Look 的私有 selector 只在 Order cards 或下述受限 Move 的 Union／Difference 主幹准入，
+不放寬一般 If／capture 或主幹下其他 selector（例如 Zone predicate）的讀值範圍；
+未執行分支同樣檢查。
+
+獨立 Look→Move→Order 流程另准入明示自己 EX、Put、無 position／order／initial_posture／
+entry_effects 的 Move。物件主幹僅由 Look receipt、Union／Difference 構成，逐張重驗
+自己牌庫的目前世代及有效位置證據；不接受任意 Deck selector 或另一玩家的目的區。
+EX 足夠時全批移動；已滿時每個嘗試保留無 after 的 MoveResult；僅剩部分容量而必須
+另問選牌時仍拒絕並回復整次執行。真正 remainder 由 looked 減該 Move 的成功 Before
+取得，再接既有私有單 Placement Order；EX 滿沒移動者仍在 remainder，同名副本互不替代。
+此流程不執行 Search，不增加洗牌，也不把 Order 插進 Search 的末尾洗牌之前。
 
 DecisionView 的 Order domain 只向 chooser／Referee 給出本次 token 範圍內的整數 handle
 及印刷卡號／卡名，沒有物件 ID 或世代。Answer::Order 回答完整 handle 排列，authority
@@ -188,8 +203,8 @@ DecisionView 的 Order domain 只向 chooser／Referee 給出本次 token 範圍
 順序也一樣；需要再次排列時先取得新的 Look 證據。
 
 BP07-SL09、BP06-024 僅驗「看五張、已決定零張入場、餘牌放底」片段；沒有實作中間的
-選牌、總費用、入場、觸發及整卡其他能力。成功移動 remainder、減費安裝與 Token
-共享容量仍未准入；不能以此片段宣稱整能力已執行。
+選牌、總費用、入場、觸發及整卡其他能力。成功移動 remainder 已有上述受限 EX 流程，
+減費安裝與 Token 共享容量仍未准入；不能以此片段宣稱整能力已執行。
 
 ## 搜尋本體與單次分組回答
 

@@ -6,7 +6,10 @@ use super::{
     ResolvedRecipients, Result, RuntimeDamageRecipient, Selector, Slot, ZoneKind, contains, int,
     invalid, player_id, seat_name, unsupported,
 };
-use crate::ir::{CharacteristicView, NumberRead, ObjectView, PlayerRead, ReceiptId, Role};
+use crate::ir::{
+    CharacteristicView, FollowPermission, MemberProjection, NumberRead, ObjectReceipt, ObjectView,
+    PlayerRead, ReceiptId, Role,
+};
 use alloc::collections::BTreeSet;
 use core::convert::identity;
 
@@ -138,6 +141,28 @@ impl Execution {
                 .flatten()
                 .collect(),
             Selector::Captured { reference } => self.object_slot(reference.binding)?,
+            Selector::ReceiptMembers {
+                receipt: ObjectReceipt::Movement { receipt },
+                projection: MemberProjection::Before,
+            } => self
+                .successful_moves(receipt)?
+                .map(|movement| movement.before)
+                .collect(),
+            Selector::MoveAfter {
+                receipt,
+                permission: FollowPermission::SameEffectExplicitReference {},
+            } => self
+                .successful_moves(receipt)?
+                .filter_map(|movement| movement.after)
+                .collect(),
+            Selector::Difference { input, except } => {
+                let input = self.objects(game, input)?;
+                let except = self.objects(game, except)?;
+                input
+                    .into_iter()
+                    .filter(|object| !except.contains(object))
+                    .collect()
+            }
             _ => return Err(unsupported("selector")),
         };
         let mut seen = BTreeSet::new();

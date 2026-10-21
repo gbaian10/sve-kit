@@ -1,11 +1,12 @@
-//! Public-zone movement subset; replacements and cross-generation reads remain closed.
+//! Physical movement and successful receipt projections; full replacement chains remain closed.
 
 use super::{Execution, Fact, Game, InstructionOutcome, Result, invalid, player_id, unsupported};
 use crate::ir::{
     Action, ActionPattern, Bool, Cause, CausePattern, DestroyOutcome, DurationEnd, Effect,
     EffectSource, Expr, Generation, Instruction, MoveDestination, MoveMethod, MoveOutcome,
-    MoveReason, MoveResult, MoveSpec, ObjectRef, OwnerZone, PlayerId, Polarity, ResultMember,
-    ResultMemberId, RuntimeObjectView, RuntimeZoneRef, Selector, SnapshotId, TimeAnchor, ZoneKind,
+    MoveReason, MoveResult, MoveSpec, MovementReceipt, ObjectReceipt, ObjectRef, OwnerZone,
+    PlayerId, PlayerRef, Polarity, ReceiptId, ReceiptLocation, ResultMember, ResultMemberId,
+    RuntimeObjectView, RuntimeZoneRef, Selector, SnapshotId, TimeAnchor, ZoneKind,
 };
 use serde_json::json;
 
@@ -26,6 +27,22 @@ pub struct MovementFact {
 
 pub(super) fn check_action(action: &Action) -> Result<()> {
     match action {
+        Action::Move {
+            objects,
+            movement,
+            reason,
+        } if observed_move(action) => {
+            if !observation_spine(objects)
+                || *reason != MoveReason::Put
+                || movement.position.is_some()
+                || movement.order.is_some()
+                || movement.initial_posture.is_some()
+                || !movement.entry_effects.is_empty()
+            {
+                return Err(unsupported("observed move shape"));
+            }
+            Ok(())
+        }
         Action::Move { movement, .. }
             if !matches!(
                 movement.to,
@@ -71,6 +88,67 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
     }
 }
 
+pub(super) fn observed_move(action: &Action) -> bool {
+    matches!(action, Action::Move { movement, .. }
+        if matches!(&movement.to, MoveDestination::Shared { zone }
+            if zone.player == (PlayerRef::Controller {}) && zone.kind == ZoneKind::Ex))
+}
+
+fn observation_spine(selector: &Selector) -> bool {
+    match selector {
+        Selector::ReceiptMembers {
+            receipt: ObjectReceipt::Look { .. },
+            ..
+        } => true,
+        Selector::Difference { input, except } => {
+            observation_spine(input) && observation_spine(except)
+        }
+        Selector::Union { sets } => sets.iter().all(observation_spine),
+        _ => false,
+    }
+}
+
+impl Execution {
+    pub(super) fn successful_moves(
+        &self,
+        receipt: &MovementReceipt,
+    ) -> Result<impl Iterator<Item = &MoveResult>> {
+        let moves = match receipt {
+            MovementReceipt::Move { receipt } => {
+                match self.receipts.get(local_id(receipt.location())?) {
+                    Some(InstructionOutcome::Move(outcome)) => &outcome.moved,
+                    _ => return Err(invalid("missing move receipt")),
+                }
+            }
+            MovementReceipt::Search { receipt } => {
+                match self.receipts.get(local_id(receipt.location())?) {
+                    Some(InstructionOutcome::Search(outcome)) => &outcome.moved,
+                    _ => return Err(invalid("missing search receipt")),
+                }
+            }
+            MovementReceipt::Destroy { receipt } => {
+                match self.receipts.get(local_id(receipt.location())?) {
+                    Some(InstructionOutcome::Destroy(outcome)) => &outcome.moves,
+                    _ => return Err(invalid("missing destroy receipt")),
+                }
+            }
+            _ => return Err(unsupported("movement receipt projection")),
+        };
+        Ok(moves.iter().filter(|movement| {
+            movement.after.is_some_and(|after| {
+                after.id == movement.before.id && after.generation != movement.before.generation
+            }) && movement.actual_to.is_some()
+        }))
+    }
+}
+
+fn local_id<T>(location: &ReceiptLocation<T>) -> Result<&ReceiptId> {
+    match location {
+        ReceiptLocation::Local { id } => Ok(id),
+        ReceiptLocation::Iteration { .. } => Err(unsupported("iteration movement receipt")),
+    }
+}
+
 #[expect(
     clippy::multiple_inherent_impl,
     reason = "Movement shares the authoritative Game and its mutation primitive."
@@ -83,6 +161,9 @@ impl Game {
         objects: &Selector,
         movement: Option<(&MoveSpec, MoveReason)>,
     ) -> Result<()> {
+        if observed_move(&instruction.action) {
+            return self.internal_observed_move(execution, instruction, objects);
+        }
         let (zone, kind, method) = match movement {
             None => ("cemetery", ZoneKind::Cemetery, MoveMethod::Destroy),
             Some((spec, reason)) => {
@@ -115,6 +196,49 @@ impl Game {
             InstructionOutcome::Move(MoveOutcome { moved: moves })
         };
         execution.receipts.insert(instruction.receipt, outcome);
+        Ok(())
+    }
+
+    fn internal_observed_move(
+        &mut self,
+        execution: &mut Execution,
+        instruction: &Instruction,
+        objects: &Selector,
+    ) -> Result<()> {
+        let player = execution.context.controller;
+        let members = execution.observed_objects(self, objects, player)?;
+        let seat = super::seat_name(player)?;
+        for &member in &members {
+            let id = execution.object_id(member)?;
+            let current = self.object(id)?;
+            if current.generation != member.generation.0
+                || current.zone != "deck"
+                || current.owner != seat
+                || current.controller != seat
+                || !self
+                    .state
+                    .knowledge
+                    .get(seat)
+                    .is_some_and(|knowledge| knowledge.located.contains(id))
+            {
+                return Err(unsupported(
+                    "observed move requires current own-deck evidence",
+                ));
+            }
+        }
+        let available = usize::try_from(5_i64.saturating_sub(self.zone_count(seat, "ex")).max(0))
+            .map_err(invalid)?;
+        if available > 0 && members.len() > available {
+            return Err(unsupported("observed move needs a capacity selection"));
+        }
+        let Action::Move { movement: spec, .. } = &instruction.action else {
+            return Err(unsupported("observed move action"));
+        };
+        let moved = self.internal_search_move(execution, &members, &spec.to, player)?;
+        execution.receipts.insert(
+            instruction.receipt,
+            InstructionOutcome::Move(MoveOutcome { moved }),
+        );
         Ok(())
     }
 

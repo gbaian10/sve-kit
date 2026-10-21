@@ -13,7 +13,7 @@ use sve_engine::game::internal::{
 use sve_engine::game::{Game, View};
 use sve_engine::ir::*;
 
-fn look(id: u64, count: u64) -> Located<Node> {
+pub(super) fn look(id: u64, count: u64) -> Located<Node> {
     instruction(
         id,
         Action::Look {
@@ -27,7 +27,7 @@ fn look(id: u64, count: u64) -> Located<Node> {
         },
     )
 }
-const fn looked(id: u64) -> Selector {
+pub(super) const fn looked(id: u64) -> Selector {
     Selector::ReceiptMembers {
         receipt: ObjectReceipt::Look {
             receipt: ReceiptReference::new(ReceiptId(id)),
@@ -35,7 +35,7 @@ const fn looked(id: u64) -> Selector {
         projection: MemberProjection::Before,
     }
 }
-fn order(id: u64, cards: Selector, position: Position) -> Located<Node> {
+pub(super) fn order(id: u64, cards: Selector, position: Position) -> Located<Node> {
     instruction(
         id,
         Action::Order {

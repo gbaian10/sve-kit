@@ -36,7 +36,8 @@ pub(super) struct OrderWait {
     reason = "The contextual private-read guard checks the complete local node."
 )]
 pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
-    let is_order = matches!(node, Node::Instruction { instruction } if matches!(instruction.action, Action::Order { .. }));
+    let private_spine = matches!(node, Node::Instruction { instruction }
+        if matches!(instruction.action, Action::Order { .. }) || super::movement::observed_move(&instruction.action));
     // Control bodies are checked individually; their guards still need the same restriction.
     if let Node::Control { control } = node {
         if let Control::If { condition, .. } = control {
@@ -55,12 +56,17 @@ pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
         }
         return Ok(());
     }
-    if let Node::Instruction { instruction } = node
-        && let Action::Order { cards, .. } = &instruction.action
-    {
-        // Private selectors are admitted only on the spine that `order_objects` evaluates.
+    if let Node::Instruction { instruction } = node {
+        let cards = match &instruction.action {
+            Action::Order { cards, .. } => Some(cards),
+            Action::Move { objects, .. } if private_spine => Some(objects),
+            _ => None,
+        };
+        // Private selectors are admitted only on the spine evaluated with observation authority.
         let mut leaves = Vec::new();
-        order_leaves(cards, &mut leaves);
+        if let Some(cards) = cards {
+            order_leaves(cards, &mut leaves);
+        }
         for leaf in leaves {
             check_node(
                 &Node::Capture {
@@ -77,6 +83,17 @@ pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
         }
     }
     let mut inspected = node.clone();
+    if let Node::Instruction { instruction } = &mut inspected
+        && super::movement::observed_move(&instruction.action)
+    {
+        super::movement::check_action(&instruction.action)?;
+        if let Action::Move { movement, .. } = &mut instruction.action {
+            // This closed destination does not authorize Shared destinations in any other context.
+            movement.to = MoveDestination::Owners {
+                zone: OwnerZone::Cemetery,
+            };
+        }
+    }
     if let Node::Instruction { instruction } = &mut inspected
         && let Action::Search { player, .. } = &instruction.action
     {
@@ -106,15 +123,13 @@ pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
     });
     for requirement in &requirements.required {
         let code = requirement.capability.code;
-        if (!is_order
-            && matches!(
-                code,
-                "shape.Selector.ReceiptMembers" | "shape.Selector.Difference"
-            ))
+        if (!private_spine && code == "shape.ObjectReceipt.Look")
             || code == "internal.ZoneKind.Deck"
             || super::search::private_requirement(code)
         {
-            return Err(unsupported("private observation outside ordering"));
+            return Err(unsupported(
+                "private observation outside an authorized selector spine",
+            ));
         }
     }
     if let Node::Instruction { instruction } = node {
@@ -240,7 +255,7 @@ impl Game {
         if execution.players(self, players)? != vec![player] {
             return Err(unsupported("order audience"));
         }
-        let cards = execution.order_objects(self, cards, player)?;
+        let cards = execution.observed_objects(self, cards, player)?;
         let mut unique = BTreeSet::new();
         let seat = seat_name(player)?;
         let deck = self.internal_known_deck(seat)?;
@@ -400,8 +415,12 @@ impl Game {
     }
 }
 
+#[expect(
+    clippy::multiple_inherent_impl,
+    reason = "Observed selectors share execution receipts with ordinary value evaluation."
+)]
 impl Execution {
-    fn order_objects(
+    pub(super) fn observed_objects(
         &self,
         game: &Game,
         selector: &Selector,
@@ -424,8 +443,8 @@ impl Execution {
                 Ok(outcome.looked.iter().map(|member| member.object).collect())
             }
             Selector::Difference { input, except } => {
-                let input = self.order_objects(game, input, actor)?;
-                let except = self.order_objects(game, except, actor)?;
+                let input = self.observed_objects(game, input, actor)?;
+                let except = self.observed_objects(game, except, actor)?;
                 Ok(input
                     .into_iter()
                     .filter(|object| !except.contains(object))
@@ -435,7 +454,7 @@ impl Execution {
                 let mut seen = BTreeSet::new();
                 let mut result = Vec::new();
                 for set in sets {
-                    for object in self.order_objects(game, set, actor)? {
+                    for object in self.observed_objects(game, set, actor)? {
                         if seen.insert((object.id, object.generation)) {
                             result.push(object);
                         }
