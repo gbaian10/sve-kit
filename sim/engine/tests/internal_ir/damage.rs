@@ -489,3 +489,59 @@ fn union_cannot_hide_an_off_field_capture_and_rolls_back_every_prior_effect() {
         );
     }
 }
+
+#[test]
+fn unsupported_damage_recipients_restore_prior_draws_and_all_observations() {
+    for (domain, zone_name, card, expected) in [
+        (
+            ZoneKind::Field,
+            "field",
+            "unit-amulet",
+            "non-follower damage recipient",
+        ),
+        (
+            ZoneKind::Cemetery,
+            "cemetery",
+            "unit-follower",
+            "non-field damage recipient",
+        ),
+    ] {
+        let mut position = setup(1, json!([{ "id":"d","card":"unit-follower" }]));
+        position["players"]["P1"]["zones"][zone_name] = json!([{ "id":"a","card":card }]);
+        let mut game = Game::new(
+            catalog(),
+            &position,
+            &Value::Null,
+            &Value::Null,
+            "unsupported-damage-recipient",
+        )
+        .unwrap();
+        let before = exact_authority(&game);
+        let views = [View::P1, View::P2, View::Referee];
+        let observations = views.map(|view| game.projection(view).unwrap());
+        let objects = Selector::Zone {
+            players: players(PlayerRelation::SelfPlayer),
+            zone: domain,
+            view: SelectionView::Current {},
+            binding: Binding::new(9, ScopeId(99)),
+            predicate: Box::new(Expr::Literal(Bool(true))),
+        };
+        let error = game
+            .execute_internal(
+                &checked(vec![
+                    draw(1, 1),
+                    damage(2, RecipientSet::Objects { objects }, 1),
+                ]),
+                &source("synthetic"),
+                context(1),
+            )
+            .unwrap_err();
+        assert!(matches!(&error, sve_engine::EngineFailure::Unsupported(_)));
+        assert!(error.to_string().contains(expected));
+        assert_eq!(exact_authority(&game), before);
+        assert_eq!(
+            views.map(|view| game.projection(view).unwrap()),
+            observations
+        );
+    }
+}
