@@ -214,7 +214,7 @@ def test_nonempty_projection_ports_fail_closed() -> None:
     sample = replace(
         sample, frame=sample.frame.model_copy(update={"projection": projection})
     )
-    with pytest.raises(SourceError, match="unsupported_port_source_mapping"):
+    with pytest.raises(SourceError, match="unsupported_port_evidence"):
         sample.compatible()
 
 

@@ -174,10 +174,28 @@ arithmetic. Canonical ability comparison removes only top-level use locations
 | --- | --- |
 | `AuthorExpander.expand` | `ExpansionCandidate.tree` plus a separate `sidecar`; each ability has `source_proof=none` |
 | `AuthorExpander.expand_sources` | Reconstructs supplied source candidates and validates supported role/operand mappings; successful evidence has `source_proof=derived_self_consistent` |
+| `load_author_set` | Reads every file in the fixed author/body/prototype areas and validates two-way index closure; companion versions and keys are checked across shards |
+| `CurrentAuthorSources.validate(authored_root, expander)` | Loads the complete inventory from disk and returns one accepted candidate or rejection per indexed card/scope; accepted evidence has `source_proof=current_source_checked` |
 | `AuthorSchemas.expanded` | Validates the complete tree against `$defs/expanded` and independently rejects decoded `ParamRef` and `GeneratedBy` nodes |
 
-Neither evidence state means admitted or executable. Current source registries,
-index/file closure, historical qualification and engine exams remain separate.
+No evidence state means qualified or executable. The current boundary loads the
+complete inventory from the authored root itself; a caller-supplied or reduced
+`AuthorInputSet` cannot grant current proof. It then verifies JP
+current revisions, exact registry Frame/Binding matches, the complete
+`effect-source-v1` fingerprint and supported entry payloads. All companion records
+are checked against the registry, including unused bodies. Historical
+qualification, complete use dependencies and engine exams remain separate.
+File/schema/index failures reject the inventory; ordinary unsupported sources reject
+only that card/scope. An EN inventory reader closes file/index references but always
+rejects EN source admission. Unindexed prototypes are validated and checked for
+shared-card overlap, without requiring their migration into the new index.
+
+The supported current ability mappings are evolve, feed, ride, evolve/feed and
+evolve/ride entry variants, with exact root scopes and literal PP costs. Full payload
+comparison rejects extra costs or conditions; identical numbers do not authorize
+borrowing another operand. These variants require empty ports and no imports.
+Real whole-card cases cover BP01-009, BP01-034 and BP01-092; the remaining variants
+have synthetic mechanism tests, not real whole-card admission claims.
 Source adapters accept only supported named constructs: offsets use registered
 expression operands, never numeric or textual guesswork. Nonempty source or author
 ports/imports are rejected by the source route until source-role/scope mappings are
@@ -189,8 +207,11 @@ source mappings.
 The expanded profile shares the author graph through dynamic anchors and excludes
 parameter and generated branches recursively. D0 consumes the expanded JSON tree;
 the C0 sidecar is separate and is not a new public wire format. Candidate goldens
-can exercise lowering, but production admission still requires the remaining source
-and qualification checks. Rust must verify the same profile's dynamic-scope positive
+can exercise lowering, but production admission still requires complete use
+dependencies and qualification checks. The owning face comes from SourceUse.owner;
+card/face containers record placement, and a card-level ability on a multi-face card
+does not imply an ability that remains active on every face.
+Rust must verify the same profile's dynamic-scope positive
 and negative cases with locked `jsonschema` 0.58.1; that Rust check is not yet complete.
 BP08-038 and CP04-060 are pure expansion/canonical goldens only. Their existing
 source fixtures remain negative cases (pending semantics and signed-number review,

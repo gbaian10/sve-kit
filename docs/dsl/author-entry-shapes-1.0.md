@@ -46,6 +46,30 @@ UseDependencies.imports 值恰為 binding_id／ability_scope／port／dependency
 
 診斷帶 stage／reason／作者結構 path／可得 YAML line、column。source line 與 YAML line 不混用；來源定位僅取已驗型別。錯型別只帶 expected/actual 類別，不附 input_value 或卡文；parser 失敗只帶安全類別。未知 key、版本、非字串鍵、重複鍵、非 JSON 純量、unsafe int 與浮點皆拒絕。合法 alias／merge 展開，無直接 cursor 時取最近父容器。
 
+能力頭診斷使用 authored profile 的 Schema 定義；同一 mapping 先報多頭的 `ability_head_conflict`，再報未知鍵並定位到鍵，最後報無頭的 `ability_head_missing`。只有 Schema 已拒絕的輸入才走此診斷，不改接受集合。
+
+## 檔案集合與 current 來源
+
+`load_author_set(authored_root, schemas)` 先讀 `rules/effects-index.yaml`，再嚴格遍歷作者、本體與原型區；拒絕符號連結、非一般檔案、非法路徑與達 1 MiB 的檔案。作者與本體路徑為 `<owner>/<3位以上序號>.yaml`，原型為 `<owner>.yaml`。所有作者檔及被索引的原型檔，其 cards 與 index 必須雙向閉合；未索引原型仍全部驗 astra/1，不要求既有原型先遷移。全部 companion 核對版本與跨分片唯一鍵，無須已被引用。
+
+只有作者與本體目錄都不存在時，缺 index 才表示空作者集合。`author_inventory_tree` 對 shared 做完整結構驗證；對 en_override 只讀封閉 envelope 與 cards 鍵供索引閉包，內容不取得 typed 作者樹，之後逐卡回 `en_source_contract_unavailable`。`prototype_tree` 是獨立入口；`document` 不會自動改用原型 reader。
+
+`CurrentAuthorSources.validate(authored_root, expander)` 自行載入根目錄內的完整檔案集合，對每個 index `(card_id,scope)` 回一個 `CardAccepted` 或 `CardRejected`。外部自行組裝或刪減的 `AuthorInputSet` 不能用來取得 current 證明；`validate_author_set` 只重驗提供的 bytes。檔案／Schema／索引閉包、本體 registry 與原型重疊是全域錯誤；普通來源、未支援構造及 EN 錯誤逐卡拒絕，不影響同檔其他卡。原型的全部卡鍵必須能經 JP printing 唯一解成永久 card_id，不能略過未解身分；shared 原型與 shared 作者卡不得重疊。作者記錄核對全部同號 JP printing，暫定號拒絕。
+
+current 邊界重建真實 registry 的 Frame／Binding，核對全部 JP current 面、exact owner／field／section／line／root scope 及完整來源根集合，並驗所有 companion 的 resolved ability_body／root scope／ports，包括未引用本體。能力屬於哪一面，由 SourceUse.owner 的 revision 對應 face 決定；作者卡級／面級容器只表示位置，多面卡的卡級容器不表示全卡常駐。面容器另驗精確 FaceId，跨容器重複同來源 scope 拒絕。
+
+`effect-source-v1` 依 P1 完整 payload 計算；純 hash 函式不授予來源准入。DB 的非 null 數值／代碼與建置保證完整的種族、稱號、特殊類型集合可判 known；null 屬性及無確定 absent 證據的空 effect 保留 unknown，拒絕准入。token 依賴未閉合時不產完整來源 hash，也不把缺少 token 選用結果當空集合。
+
+| resolved 來源族 | scope → 作者頭 | 接受的完整 payload |
+| --- | --- | --- |
+| evolve_entry.v1 | ability_0 → evolve | `evolve: {cost: {pp: N}}` |
+| feed_entry.v1 | ability_0 → feed | `feed: {cost: {pp: N}}` |
+| ride_entry.v1 | ability_0 → ride | `ride: {cost: {pp: N}}` |
+| evolve_feed_entries.v1 | ability_0 → evolve；ability_1 → feed | 各 scope 的獨立來源 cost |
+| evolve_ride_entries.v1 | ability_0 → evolve；ability_1 → ride | 各 scope 的獨立來源 cost |
+
+五族皆只配空 imports／exports ports，能力 imports 必須省略。去掉 line／section／sources 後完整 canonical 能力必須相等；多加 into、usable_if、times、其他費用或 expression 都不符來源。N 可為 0，須取該構造的 operand，不能借相同數值。非空 ports 與其他執行 scope 保持明示 unsupported；不把跨 owner 或作者陣列較晚定為永久非法。真卡整卡正例為 BP01-009／034／092 的純進化入口；feed／ride 與雙入口的有限機制測試不宣稱已有真卡整卡准入。
+
 固定內容種子：BP08-038 的 Live count−5 與 draw；CP04-060 的 search→follow→本回合 cost delta −2；ECP01-058 的 evolve deck_rule 10；BP09-SL05 兩面定位及第二面 create 名稱列表。它們的內容來源是真卡，測試 SourceUse／FrameId／meta 為明示合成，不能冒充已採納來源或實跑資格。
 
 ## 展開與 D0 消費邊界
@@ -56,12 +80,13 @@ UseDependencies.imports 值恰為 binding_id／ability_scope／port／dependency
 | --- | --- | --- |
 | `expand` → `ExpansionCandidate` | 完整 expanded JSON `tree` 與分離的 `sidecar`；source_proof 為 none | 來源角色真實、現行來源採納或可執行 |
 | `expand_sources` | 自 raw／descriptor／classifier／context 重建來源，核對用途及支援的參數角色／operand；成功後 source_proof 為 derived_self_consistent | current registry／索引閉包或 qualification 已通過 |
+| `CurrentAuthorSources.validate` | 有限支援族通過 current／registry／index／完整來源 hash 與能力映射；成功 sidecar 為 current_source_checked | review／exam 資格有效或可執行 |
 | `AuthorSchemas.expanded` | 共用 `$defs/expanded` 全樹驗證，加 decoded 型別圖獨立排除 ParamRef／GeneratedBy | IR lowering 或引擎語義正確 |
 
 `expanded` 以獨立內嵌資源的 dynamic anchors 覆寫參數與 generated 分支，與 authored 共用能力圖；grant→static→EffectSpec.grant、delayed、Steps、instead.replace_with／after 的任何深度都適用。測試同時涵蓋 17 能力頭、遞迴殘留，以及故意破壞 anchor 覆寫後仍由 typed residual 檢查拒絕的反例。
 
 來源 adapter 只支援已登錄的具名構造。offset 沿 expression 的正式 operand 定位並核對 count sibling，不按同數值反查；negated_magnitude、Concept／CardKind／Phase 來源轉碼尚未支援。來源路徑遇到非空 Projection ports、作者 ports 或 imports 即拒絕；純作者 binding／imports 圖分析不證明來源 source_role 或 scope 映射。直接 instead 參數、grouped target 數量及 grouped search 目的地的白名單範圍尚待定義，展開時拒絕，不放寬 P1。
 
-D0 只消費通過 expanded profile 的 JSON 樹；C0 sidecar 留在樹外，不是新增公開 wire。候選 golden 可用於 lowering 與漂移測試，正式生產接線仍須來源集合、current／index 閉包及資格驗證。Rust 應以鎖定的 `jsonschema` 0.58.1 驗同一 profile 的 dynamic scope 正反例，目前尚未完成該 Rust 驗證。
+D0 只消費通過 expanded profile 的 JSON 樹；C0 sidecar 留在樹外，不是新增公開 wire。候選 golden 可用於 lowering 與漂移測試，正式生產接線仍須完整用途依賴及資格驗證；current_source_checked 本身不足以執行。D0 必須沿 SourceUse.owner 決定能力持有面，不能將卡級容器解讀為全卡常駐。Rust 應以鎖定的 `jsonschema` 0.58.1 驗同一 profile 的 dynamic scope 正反例，目前尚未完成該 Rust 驗證。
 
 BP08-038／CP04-060 的固定 canonical golden 只驗純展開，source_proof 為 none。在既有來源 fixture 下，BP08 仍為 unresolved_whole_line_semantics，CP04 仍有 signed_numeric_requires_review；兩者均是來源重建路徑的負例。合成 resolved 相容性案例與這些真卡內容分開，不宣稱來源已採納。
