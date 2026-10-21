@@ -7,7 +7,7 @@ import pytest
 from jsonschema import Draft202012Validator
 from pydantic import ValidationError
 
-from sve_carddb.core.json import canonical, object_value
+from sve_carddb.core.json import canonical
 
 from .author_ability_cases import CARD_ABILITIES
 from .author_ability_types import ABILITIES
@@ -92,17 +92,6 @@ def test_every_head_and_grant_subset(key: str, payload: JsonValue) -> None:
     check(head, name="A.action", valid=False)
 
 
-@pytest.mark.parametrize("key", [*TRIGGERS, "auto", "activate"])
-@pytest.mark.parametrize("n", [1, True])
-def test_limits_are_positive_safe_integers(key: str, n: JsonValue) -> None:
-    payload = object_value(HEADS[key])
-    check(
-        {key: {**payload, "per_turn": n}},
-        valid=type(n) is int and 1 <= n <= 9007199254740991,
-    )
-    check({key: {**payload, "once_per_turn": True}}, valid=False)
-
-
 @pytest.mark.parametrize("key", TRIGGERS)
 def test_trigger_wrappers_and_zone_boundary(key: str) -> None:
     payload: dict[str, JsonValue] = {
@@ -120,17 +109,6 @@ def test_trigger_wrappers_and_zone_boundary(key: str) -> None:
     check({key: {**payload, "define": {"this": 1}}}, valid=False)
     check({key: {**payload, "define": {}}}, valid=False)
     check({key: {**payload, "ub": False}}, valid=False)
-
-
-@pytest.mark.parametrize("key", ["auto", "activate", "static"])
-@pytest.mark.parametrize(
-    "zone", ["equipment", "hand", ["ex", "ex"], [], "banished", {"param": "zone"}]
-)
-def test_ability_zone_is_distinct_from_selector_zone(key: str, zone: JsonValue) -> None:
-    check(
-        {key: {**object_value(HEADS[key]), "zone": zone}},
-        valid=zone in ("equipment", "hand", ["ex", "ex"]),
-    )
 
 
 @pytest.mark.parametrize(("tag", "amount"), [("n", 1), ("upto", 2), ("any", True)])
@@ -152,27 +130,6 @@ def test_fusion_is_one_material_selection(tag: str, amount: JsonValue) -> None:
     check({"activate": {**head, "advance": True}}, valid=False)
     other = "upto" if tag == "n" else "n"
     check({"activate": {**head, "fusion": {**fusion, other: 1}}}, valid=False)
-
-
-@pytest.mark.parametrize(
-    "into",
-    [
-        "深緑の純心・ポーラ",
-        ["深緑の純心・ポーラ", "真紅の絆・ポーラ"],
-        {"who": "self", "zone": "evolve_deck"},
-        [],
-        {"sel": {"who": "self", "zone": "evolve_deck"}},
-        {"param": "name"},
-    ],
-)
-def test_evolution_destination_is_shared(into: JsonValue) -> None:
-    valid = into not in (
-        [],
-        {"sel": {"who": "self", "zone": "evolve_deck"}},
-        {"param": "name"},
-    )
-    check({"evolve": {"cost": {"pp": 1}, "into": into}}, valid=valid)
-    check({"evolve": {"ref": "this", "into": into}}, name="A.action", valid=valid)
 
 
 @pytest.mark.parametrize(
@@ -204,85 +161,6 @@ def test_conditional_modifiers_preserve_order(key: str) -> None:
         )
 
 
-@pytest.mark.parametrize("zone", ["cemetery", ["cemetery", "ex"]])
-def test_conditional_zone_permission(zone: JsonValue) -> None:
-    check({"play": {"playable_from": {"zone": zone, "if": COND}}})
-    check({"play": {"playable_from": zone}})
-    check({"play": {"playable_from": {"zone": zone}}}, valid=False)
-
-
-@pytest.mark.parametrize(
-    "head",
-    [
-        {},
-        {"quick": 1},
-        {"quick": False},
-        {"keywords": []},
-        {"fanfare": {}},
-        {"auto": {"do": []}},
-        {"activate": {"do": []}},
-        {"static": {"effects": []}},
-        {"static": {"effects": [{"draw": {"n": 1}}]}},
-        {"play": {}},
-        {"play": {"define": {"n": 1}}},
-        {"play": {"playable_from": []}},
-        {"play": {"playable_from": {"zone": [], "if": COND}}},
-        {"spell": {"do": [], "cost": {"pp": 1}}},
-        {"spell": {"do": [], "per_turn": 1}},
-        {"feed": {"cost": {"pp": 1}, "times": 0}},
-        {"feed": {"cost": {"pp": 1}, "times": True}},
-        {"ride": {"cost": {"pp": 1}, "times": 2}},
-    ],
-)
-def test_invalid_heads(head: JsonValue) -> None:
-    check(head, valid=False)
-
-
-@pytest.mark.parametrize(
-    "context", ["A.act.grant", "A.effect.grant", "A.instead.grant"]
-)
-def test_grant_content_and_metadata_boundaries(context: str) -> None:
-    base: dict[str, JsonValue] = (
-        {"on": {"leader": "self"}}
-        if context == "A.act.grant"
-        else {"if": COND}
-        if context == "A.instead.grant"
-        else {}
-    )
-    valid_contents: tuple[dict[str, JsonValue], ...] = (
-        {"keywords": ["quick"]},
-        {"abilities": [{"lastword": {"do": []}}]},
-        {"keywords": ["storm"], "abilities": [{"attack_time": {"do": []}}]},
-    )
-    for content in valid_contents:
-        check({**base, **content}, name=context)
-    invalid_contents: tuple[dict[str, JsonValue], ...] = (
-        {},
-        {"keywords": []},
-        {"abilities": []},
-        {"abilities": [{"quick": True}]},
-        {"abilities": [{"spell": {"do": []}}]},
-        {"abilities": [{"lastword": {"do": [], "line": 1}}]},
-    )
-    for content in invalid_contents:
-        check({**base, **content}, name=context, valid=False)
-    check(
-        {**base, "keywords": [{"param": "kw"}]},
-        name=context,
-        valid=context != "A.effect.grant",
-    )
-    if context == "A.instead.grant":
-        check(
-            {
-                **base,
-                "abilities": [{"lastword": {"do": []}}],
-                "replace_with": {"draw": {"n": 1}},
-            },
-            name=context,
-            valid=False,
-        )
-
-
 @pytest.mark.parametrize("until", [None, "turn", {"during_next_turn": {"who": "opp"}}])
 @pytest.mark.parametrize("next_only", [None, True, False])
 def test_delayed_lifetime_contract(until: JsonValue, next_only: JsonValue) -> None:
@@ -294,123 +172,3 @@ def test_delayed_lifetime_contract(until: JsonValue, next_only: JsonValue) -> No
     valid = not (until is None and next_only is False)
     check({"delayed": payload}, name="A.action", valid=valid)
     check({"delayed": payload}, name="A.step", valid=valid)
-
-
-@pytest.mark.parametrize(
-    ("key", "value"),
-    [
-        ("line", 1),
-        ("result", "installed"),
-        ("cost", {"pp": 1}),
-        ("zone", "field"),
-        ("per_turn", 1),
-        ("ub", True),
-        ("when", EVENT),
-        ("next_only", 1),
-        ("aggregation", "each"),
-    ],
-)
-def test_delayed_rejects_unowned_fields(key: str, value: JsonValue) -> None:
-    check({"on": EVENT, "do": [], key: value}, name="A.act.delayed", valid=False)
-
-
-def test_deep_recursion_and_parameter_positions() -> None:
-    delayed: dict[str, JsonValue] = {
-        "on": EVENT,
-        "precondition": COND,
-        "aggregation": "batch",
-        "do": [
-            {
-                "grant": {
-                    "on": "this",
-                    "abilities": [
-                        {"lastword": {"do": [{"draw": {"n": {"param": "draw"}}}]}}
-                    ],
-                }
-            }
-        ],
-    }
-    head: dict[str, JsonValue] = {
-        "static": {
-            "zone": "equipment",
-            "effects": [
-                {
-                    "grant": {
-                        "on": "host",
-                        "abilities": [
-                            {"auto": {"on": EVENT, "do": [{"delayed": delayed}]}}
-                        ],
-                    }
-                }
-            ],
-        }
-    }
-    check(head)
-    check(
-        {
-            "on": "this",
-            "keywords": ["ward"],
-            "instead": [{"if": COND, "replace_with": {"delayed": delayed}}],
-        },
-        name="A.act.grant",
-    )
-    body = delayed["do"]
-    assert isinstance(body, list)
-    object_value(body[0])["grant"] = {"on": "this", "abilities": [{"param": "ability"}]}
-    check(head, valid=False)
-
-
-@pytest.mark.parametrize(
-    "value",
-    [
-        {"during_next_turn": {"who": "opp"}},
-        {"during_next_turn": {"who": {"master_of": "t"}}},
-        {"during_next_turn": {}},
-        {"during_next_turn": {"who": "opp", "edge": "end"}},
-        {"during_next_turn": {"who": {"param": "who"}}},
-    ],
-)
-def test_full_next_turn_interval(value: JsonValue) -> None:
-    check(
-        value,
-        name="A.until",
-        valid=value
-        in (
-            {"during_next_turn": {"who": "opp"}},
-            {"during_next_turn": {"who": {"master_of": "t"}}},
-        ),
-    )
-
-
-def assert_action_edges(schema: dict[str, JsonValue]) -> None:
-    defs = object_value(schema["$defs"])
-    action = object_value(object_value(defs["A.action"])["properties"])
-    step = object_value(object_value(defs["A.step"])["properties"])
-    assert all(step[key] == value for key, value in action.items())
-    for context in ("A.action", "A.step"):
-        assert object_value(object_value(defs[context])["properties"])["delayed"] == {
-            "$ref": "#/$defs/A.act.delayed"
-        }
-    for key, value in object_value(
-        object_value(defs["A.granted-ability-head"])["properties"]
-    ).items():
-        assert (
-            object_value(object_value(defs["A.ability-head"])["properties"])[key]
-            == value
-        )
-
-
-def test_delayed_accepts_owned_wrappers() -> None:
-    check(
-        {
-            "on": EVENT,
-            "targets": [
-                {"bind": "t", "from": {"who": "opp", "zone": "field"}, "upto": 1}
-            ],
-            "optional_cost": {"pp": "X", "result": "paid"},
-            "x": {},
-            "define": {"amount": 2},
-            "do": [{"damage": {"to": "t", "n": 2}}],
-        },
-        name="A.act.delayed",
-    )

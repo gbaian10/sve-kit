@@ -2,27 +2,20 @@
 
 from typing import TYPE_CHECKING
 
-from pydantic import TypeAdapter
-
 from sve_carddb.contracts import author_queries as author
 
-from .author_selector_cases import CONFIG
+from .author_adapters import adapters
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
 
-RECIPIENTS: dict[str, TypeAdapter[object]] = {
-    "A.sel.leader-or": TypeAdapter(author.LeaderOr, config=CONFIG),
-    "A.sel.recipient-atom": TypeAdapter(author.RecipientAtom, config=CONFIG),
-    "A.sel.recipient-union": TypeAdapter(author.RecipientUnion, config=CONFIG),
-    "A.sel.recipient": TypeAdapter(author.RecipientSel, config=CONFIG),
-}
 RECIPIENT_NAMES = {
     "A.sel.leader-or": "LeaderOr",
     "A.sel.recipient-atom": "RecipientAtom",
     "A.sel.recipient-union": "RecipientUnion",
     "A.sel.recipient": "RecipientSel",
 }
+
 RECIPIENT = "A.sel.recipient"
 OBJECT_UNION = "A.sel.object-union"
 RECIPIENT_UNION = "A.sel.recipient-union"
@@ -100,3 +93,7 @@ CARD_QUERIES: list[tuple[str, dict[str, JsonValue]]] = [
         },
     ),
 ]
+
+RECIPIENTS = adapters(
+    {key: (getattr(author, name), name) for key, name in RECIPIENT_NAMES.items()}
+)

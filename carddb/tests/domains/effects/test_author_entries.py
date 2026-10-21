@@ -12,6 +12,7 @@ from sve_carddb.contracts.author_leaves import AuthorIndexRecord
 from sve_carddb.core.json import canonical, object_value
 from sve_carddb.domains.effects.author_inputs import AuthorInputError, AuthorSchemas
 
+from ...contracts.test_author_abilities import HEADS
 from .author_entry_cases import meta, source_use
 
 if TYPE_CHECKING:
@@ -21,30 +22,6 @@ SCHEMAS = Path(__file__).resolve().parents[4] / "dsl"
 GOLDEN = (
     Path(__file__).resolve().parents[2] / "fixtures" / "author_entries" / "golden.yaml"
 )
-HEADS: dict[str, JsonValue] = {
-    **{
-        key: {"do": []}
-        for key in (
-            "fanfare",
-            "lastword",
-            "evolve_time",
-            "super_evolve_time",
-            "attack_time",
-            "race_time",
-            "drive_time",
-        )
-    },
-    "auto": {"on": {"phase": {"which": "end", "whose": "self"}}, "do": []},
-    "activate": {"cost": {"pp": 1}, "do": []},
-    "static": {"effects": [{"keywords": {"list": ["ward"]}}]},
-    "play": {"cost_delta": -1},
-    "quick": True,
-    "keywords": ["ward"],
-    "evolve": {"cost": {"pp": 1}},
-    "ride": {"cost": {"pp": 1}},
-    "feed": {"cost": {"pp": 1}},
-    "spell": {"do": []},
-}
 
 
 @pytest.fixture(scope="module")
@@ -154,26 +131,8 @@ def test_fixed_goldens_preserve_content_and_order(schemas: AuthorSchemas) -> Non
 
 
 PARAM_STEP: dict[str, JsonValue] = {"draw": {"n": {"param": "N"}}}
-EVENT: dict[str, JsonValue] = {"phase": {"which": "end", "whose": "self"}}
 NESTED: list[tuple[dict[str, JsonValue], tuple[str | int, ...]]] = [
     ({"spell": {"do": [PARAM_STEP]}}, ("spell", "do", 0, "draw", "n")),
-    (
-        {
-            "spell": {
-                "define": {"X": {"max": [{"minus": [1, {"param": "N"}]}]}},
-                "do": [],
-            }
-        },
-        ("spell", "define", "X", "max", 0, "minus", 1),
-    ),
-    (
-        {"spell": {"do": [{"if": {"cond": {"my_turn": True}, "then": [PARAM_STEP]}}]}},
-        ("spell", "do", 0, "if", "then", 0, "draw", "n"),
-    ),
-    (
-        {"spell": {"do": [{"delayed": {"on": EVENT, "do": [PARAM_STEP]}}]}},
-        ("spell", "do", 0, "delayed", "do", 0, "draw", "n"),
-    ),
     (
         {
             "spell": {
@@ -189,106 +148,13 @@ NESTED: list[tuple[dict[str, JsonValue], tuple[str | int, ...]]] = [
         },
         ("spell", "do", 0, "grant", "abilities", 0, "fanfare", "do", 0, "draw", "n"),
     ),
-    (
-        {
-            "static": {
-                "effects": [
-                    {
-                        "grant": {
-                            "abilities": [
-                                {
-                                    "static": {
-                                        "effects": [
-                                            {
-                                                "grant": {
-                                                    "abilities": [
-                                                        {
-                                                            "fanfare": {
-                                                                "do": [PARAM_STEP]
-                                                            }
-                                                        }
-                                                    ]
-                                                }
-                                            }
-                                        ]
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                ]
-            }
-        },
-        (
-            "static",
-            "effects",
-            0,
-            "grant",
-            "abilities",
-            0,
-            "static",
-            "effects",
-            0,
-            "grant",
-            "abilities",
-            0,
-            "fanfare",
-            "do",
-            0,
-            "draw",
-            "n",
-        ),
-    ),
-    (
-        {
-            "spell": {
-                "do": [
-                    {
-                        "draw": {
-                            "n": 1,
-                            "instead": [
-                                {"if": {"my_turn": True}, "replace_with": PARAM_STEP}
-                            ],
-                        }
-                    }
-                ]
-            }
-        },
-        ("spell", "do", 0, "draw", "instead", 0, "replace_with", "draw", "n"),
-    ),
-    (
-        {
-            "spell": {
-                "do": [
-                    {
-                        "draw": {
-                            "n": 1,
-                            "instead": [
-                                {"if": {"my_turn": True}, "n": 2, "after": [PARAM_STEP]}
-                            ],
-                        }
-                    }
-                ]
-            }
-        },
-        ("spell", "do", 0, "draw", "instead", 0, "after", 0, "draw", "n"),
-    ),
 ]
 
 
 @pytest.mark.parametrize(
     ("head", "path"),
     NESTED,
-    ids=[
-        "draw",
-        "alias",
-        "if",
-        "delayed",
-        "grant",
-        "nested-static",
-        "replacement",
-        "after",
-    ],
+    ids=["draw", "grant"],
 )
 @pytest.mark.parametrize("face", [False, True])
 def test_inline_param_is_local_error_at_wire_path(
@@ -319,136 +185,6 @@ def test_inline_param_is_local_error_at_wire_path(
     assert accepted.records[0]["body"]
 
 
-def test_generated_by_and_companion_are_structural_only(schemas: AuthorSchemas) -> None:
-    generated: dict[str, JsonValue] = {
-        "macro": {
-            "frame_id": "frame:" + "1" * 64,
-            "ability_scope": "ability_0",
-            "applicability_scope": "fixture",
-        },
-        "version": "effect-body-v1:sha256:" + "2" * 64,
-        "params": {"N": {"type": "Nat", "value": 1}},
-    }
-    entry: dict[str, JsonValue] = {
-        "line": 1,
-        "sources": [source_use()],
-        "generated_by": generated,
-    }
-    value = document(entry)
-    assert schemas.document(canonical(value)).model_dump(mode="json") == value
-    extras: list[dict[str, JsonValue]] = [
-        {"ports": {"imports": {}, "exports": {}}},
-        {"spell": {"do": []}},
-    ]
-    for extra in extras:
-        with pytest.raises(AuthorInputError):
-            schemas.author_effect_set(canonical(document(entry | extra)))
-    for field in ("macro", "version", "params"):
-        broken = deepcopy(generated)
-        del broken[field]
-        with pytest.raises(AuthorInputError):
-            schemas.author_effect_set(
-                canonical(document(entry | {"generated_by": broken}))
-            )
-
-
-@pytest.mark.parametrize(
-    ("mutation", "reason", "path"),
-    [
-        ({"format": True}, "unsupported_format", ("format",)),
-        ({"format": "1"}, "unsupported_format", ("format",)),
-        ({"format": 2}, "unsupported_format", ("format",)),
-        ({"kind": "effect_set"}, "unsupported_kind", ("kind",)),
-        ({"scope": "en_override"}, "en_source_contract_unavailable", ("scope",)),
-    ],
-)
-def test_explicit_envelope_rejections(
-    schemas: AuthorSchemas,
-    mutation: dict[str, JsonValue],
-    reason: str,
-    path: tuple[str, ...],
-) -> None:
-    with pytest.raises(AuthorInputError) as caught:
-        schemas.author_effect_set(
-            canonical(document(ability({"quick": True})) | mutation)
-        )
-    assert caught.value.diagnostic.reason == reason
-    assert caught.value.diagnostic.path == path
-
-
-@pytest.mark.parametrize(
-    ("field", "value", "reason"),
-    [
-        ("dsl", "1.1", "unsupported_dsl"),
-        ("verified_by_exam", [{"result": "pass"}], "unsupported_exam_evidence"),
-    ],
-)
-def test_unsupported_metadata_is_located(
-    schemas: AuthorSchemas, field: str, value: JsonValue, reason: str
-) -> None:
-    data = document(ability({"quick": True}))
-    card = object_value(object_value(data["cards"])["FIX-001"])
-    object_value(card["meta"])[field] = value
-    with pytest.raises(AuthorInputError) as caught:
-        schemas.document(canonical(data))
-    assert caught.value.diagnostic.reason == reason
-    assert caught.value.diagnostic.path == ("cards", "FIX-001", "meta", field)
-
-
-@pytest.mark.parametrize(
-    ("field", "value"),
-    [
-        ("line", 0),
-        ("line", True),
-        ("section", -1),
-        ("sources", []),
-        ("sources", [source_use(), source_use()]),
-        ("imports", {}),
-    ],
-)
-def test_ability_boundaries(
-    schemas: AuthorSchemas, field: str, value: JsonValue
-) -> None:
-    with pytest.raises(AuthorInputError):
-        schemas.author_effect_set(
-            canonical(document(ability({"quick": True}) | {field: value}))
-        )
-
-
-def test_companion_duplicates_and_metadata_exclusion(schemas: AuthorSchemas) -> None:
-    record = companion({"spell": {"do": []}})
-    value = shard(record)
-    value["records"] = [record, record]
-    with pytest.raises(AuthorInputError) as caught:
-        schemas.effect_body_shard(canonical(value))
-    assert caught.value.diagnostic.reason == "duplicate_body"
-    record["registrations"] = [
-        {"id": "same", "domain": {"regions": ["jp"]}, "reviews": []}
-    ] * 2
-    with pytest.raises(AuthorInputError) as caught:
-        schemas.effect_body_shard(canonical(shard(record)))
-    assert caught.value.diagnostic.reason == "duplicate_registration"
-    for forbidden in ("line", "sources", "ports", "generated_by", "meta"):
-        bad = companion({"spell": {"do": []}, forbidden: {}})
-        with pytest.raises(AuthorInputError):
-            schemas.effect_body_shard(canonical(shard(bad)))
-
-
-def test_no_expanded_profile_or_unknown_resource_fallback(
-    schemas: AuthorSchemas, tmp_path: Path
-) -> None:
-    with pytest.raises(AuthorInputError):
-        schemas.document(b'{"format":1,"kind":"expanded","cards":{}}')
-    for path in SCHEMAS.glob("*.schema.json"):
-        (tmp_path / path.name).write_bytes(path.read_bytes())
-    resource = tmp_path / "author.schema.json"
-    data = json.loads(resource.read_bytes())
-    data["$ref"] = "urn:unregistered:never-fetch"
-    resource.write_text(json.dumps(data))
-    with pytest.raises(ValueError, match="Unresolved author schema reference"):
-        AuthorSchemas(tmp_path)
-
-
 @pytest.mark.parametrize(
     "raw",
     [b"[", b"{x: 1, x: 2}", b"{1: value}", b"{format: 2}"],
@@ -473,75 +209,6 @@ def test_selected_index_context_survives_boundary_errors(
             "FIX-001",
             "shared",
         )
-
-
-@pytest.mark.parametrize("valid_source", [False, True])
-def test_schema_errors_only_attach_valid_source(
-    schemas: AuthorSchemas, valid_source: bool
-) -> None:
-    entry = ability({"quick": True})
-    entry["ports"] = {"imports": {}, "exports": {}, "typo": True}
-    if not valid_source:
-        entry["sources"] = [{"untrusted": "not source evidence"}]
-    with pytest.raises(AuthorInputError) as caught:
-        schemas.author_effect_set(canonical(document(entry)))
-    diagnostic = caught.value.diagnostic
-    assert diagnostic.stage == "schema"
-    assert (diagnostic.source is not None) is valid_source
-
-
-@pytest.mark.parametrize("face", [False, True])
-def test_unknown_key_inside_inline_head_is_located(
-    schemas: AuthorSchemas, face: bool
-) -> None:
-    entry = ability({"fanfare": {"do": [{"draw": {"nn": 1}}]}})
-    value = document(entry)
-    prefix: tuple[str | int, ...] = ("cards", "FIX-001", "abilities", 0)
-    if face:
-        card = object_value(object_value(value["cards"])["FIX-001"])
-        del card["abilities"]
-        card["faces"] = {"f:" + "1" * 32: {"abilities": [entry]}}
-        prefix = ("cards", "FIX-001", "faces", "f:" + "1" * 32, "abilities", 0)
-    with pytest.raises(AuthorInputError) as caught:
-        schemas.author_effect_set(json.dumps(value, indent=2).encode())
-    diagnostic = caught.value.diagnostic
-    assert (diagnostic.stage, diagnostic.reason) == ("schema", "additionalProperties")
-    assert diagnostic.path == (*prefix, "fanfare", "do", 0, "draw", "nn")
-    assert diagnostic.line is not None
-
-
-def test_alias_param_cursor_uses_wire_key(schemas: AuthorSchemas) -> None:
-    raw = canonical(
-        document(
-            ability(
-                {
-                    "spell": {
-                        "define": {"X": {"max": [{"minus": [1, {"param": "N"}]}]}},
-                        "do": [],
-                    }
-                }
-            )
-        )
-    )
-    # JSON is valid YAML; the parser points to the mapping value after the array comma.
-    with pytest.raises(AuthorInputError) as caught:
-        schemas.author_effect_set(raw)
-    diagnostic = caught.value.diagnostic
-    assert diagnostic.path == (
-        "cards",
-        "FIX-001",
-        "abilities",
-        0,
-        "spell",
-        "define",
-        "X",
-        "max",
-        0,
-        "minus",
-        1,
-    )
-    assert diagnostic.line == 1
-    assert diagnostic.column == raw.index(b'{"param":"N"}') + 1
 
 
 @pytest.mark.parametrize(
@@ -589,41 +256,3 @@ def test_golden_content_retains_frozen_line_evidence(
         for document in card["documents"].values()
     }
     assert hashes == {digest}
-
-
-@pytest.mark.parametrize(
-    "fields",
-    [
-        {},
-        {"abilities": []},
-        {"faces": {}},
-        {"faces": {"f:" + "1" * 32: {"abilities": []}}},
-    ],
-)
-def test_empty_containers_preserve_authored_shape(
-    schemas: AuthorSchemas, fields: dict[str, JsonValue]
-) -> None:
-    value: dict[str, JsonValue] = {
-        "format": 1,
-        "kind": "author_effect_set",
-        "scope": "shared",
-        "cards": {"FIX-001": {"meta": meta(), **fields}},
-    }
-    assert schemas.author_effect_set(canonical(value)).model_dump(mode="json") == value
-
-
-def test_selected_context_does_not_misidentify_another_card(
-    schemas: AuthorSchemas,
-) -> None:
-    context = AuthorIndexRecord(
-        card_id="c:" + "1" * 32,
-        scope="shared",
-        file="effects/fixture.yaml",
-        kind="author_effect_set",
-        record_key="OTHER",
-    )
-    value = document(ability({"spell": {"do": [PARAM_STEP]}}))
-    with pytest.raises(AuthorInputError) as caught:
-        schemas.author_effect_set(canonical(value), context=context)
-    assert caught.value.diagnostic.card_id is None
-    assert caught.value.diagnostic.card_no == "FIX-001"

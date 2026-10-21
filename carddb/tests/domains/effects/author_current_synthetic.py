@@ -112,35 +112,3 @@ def back_face(
 
     monkeypatch.setattr(current.sources, "document", document)
     return face_id, revision_id
-
-
-def section(current: CurrentAuthorSources, monkeypatch: pytest.MonkeyPatch) -> None:
-    db = current.db
-    revision = FACTS["BP01-009"]["revision"]
-    row = db.select(
-        "face_revision", db.columns("face_revision"), where={"id": revision}
-    )[0]
-    effect_unit = row.values["effect_unit_id"]
-    unit = db.select("text_unit", ("text",), where={"id": effect_unit})[0]
-    text = unit.values["text"]
-    assert isinstance(text, str)
-    with db.transaction():
-        db.insert(
-            "face_text_section",
-            {
-                "revision_id": revision,
-                "ordinal": 0,
-                "text_unit_id": effect_unit,
-                "kind": "rule",
-            },
-        )
-    original = current.sources.document
-
-    def document(ref: SourceRef) -> tuple[str, JsonValue, Source]:
-        lang, value, source = original(ref)
-        if source.id == row.values["source_id"]:
-            value = deepcopy(value)
-            object_value(array(object_value(value)["faces"])[0])["sections"] = [text]
-        return lang, value, source
-
-    monkeypatch.setattr(current.sources, "document", document)

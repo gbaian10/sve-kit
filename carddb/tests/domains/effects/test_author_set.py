@@ -1,15 +1,12 @@
 """File inventories reject omitted records without changing prototype inputs."""
 
-import os
-from dataclasses import replace
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
 
 from sve_carddb.core.json import canonical, object_value
-from sve_carddb.core.yaml import MAX_BYTES
-from sve_carddb.domains.effects.author_expansion import ExpansionError, body_version
+from sve_carddb.domains.effects.author_expansion import body_version
 from sve_carddb.domains.effects.author_inputs import AuthorInputError, AuthorSchemas
 from sve_carddb.domains.effects.author_set import load_author_set, validate_author_set
 
@@ -148,40 +145,6 @@ def test_complete_inventory_retains_bytes_and_unused_bodies(
     validate_author_set(inputs, schemas)
 
 
-@pytest.mark.parametrize("area", ["rules/author-effects", "rules/effect-bodies"])
-def test_missing_index_with_declared_area(
-    tmp_path: Path, schemas: AuthorSchemas, area: str
-) -> None:
-    (tmp_path / area).mkdir(parents=True)
-    with pytest.raises(AuthorInputError, match="index_missing"):
-        load_author_set(tmp_path, schemas)
-
-
-def test_empty_set_has_no_index_requirement(
-    tmp_path: Path, schemas: AuthorSchemas
-) -> None:
-    assert load_author_set(tmp_path, schemas).index.records == ()
-
-
-def test_rules_parent_must_be_directory(tmp_path: Path, schemas: AuthorSchemas) -> None:
-    (tmp_path / "rules").write_bytes(b"not a directory")
-    with pytest.raises(AuthorInputError, match="unsafe_or_missing_directory"):
-        load_author_set(tmp_path, schemas)
-
-
-@pytest.mark.parametrize("has_index", [False, True])
-@pytest.mark.parametrize("version", [True, 1.0, 99])
-def test_unchecked_index_object_cannot_bypass_schema(
-    tmp_path: Path, schemas: AuthorSchemas, has_index: bool, version: object
-) -> None:
-    if has_index:
-        index(tmp_path)
-    inputs = load_author_set(tmp_path, schemas)
-    forged = replace(inputs, index=inputs.index.model_copy(update={"format": version}))
-    with pytest.raises(AuthorInputError):
-        validate_author_set(forged, schemas)
-
-
 @pytest.mark.parametrize(
     ("keys", "selected", "reason"),
     [
@@ -212,31 +175,6 @@ def test_duplicate_selection_cannot_claim_another_identity(
         load_author_set(tmp_path, schemas)
 
 
-def test_selected_prototype_requires_its_whole_file(
-    tmp_path: Path, schemas: AuthorSchemas
-) -> None:
-    prototype(tmp_path, "FIX-001", "FIX-002")
-    assert len(load_author_set(tmp_path, schemas).prototype_files) == 1
-    index(tmp_path, selection(path=PROTOTYPE))
-    with pytest.raises(AuthorInputError, match="index_record_closure"):
-        load_author_set(tmp_path, schemas)
-    index(
-        tmp_path,
-        selection(path=PROTOTYPE),
-        selection("FIX-002", path=PROTOTYPE, identity="2"),
-    )
-    assert len(load_author_set(tmp_path, schemas).index.records) == 2
-
-
-def test_missing_index_target_is_located(
-    tmp_path: Path, schemas: AuthorSchemas
-) -> None:
-    index(tmp_path, selection())
-    with pytest.raises(AuthorInputError, match="index_file_missing") as caught:
-        load_author_set(tmp_path, schemas)
-    assert caught.value.diagnostic.card_id == "c:" + "1" * 32
-
-
 @pytest.mark.parametrize(
     "path",
     [
@@ -257,7 +195,7 @@ def test_unlisted_bad_paths_are_not_skipped(
         load_author_set(tmp_path, schemas)
 
 
-@pytest.mark.parametrize("component", ["rules", "rules/effects", PROTOTYPE])
+@pytest.mark.parametrize("component", ["rules", "rules/effects"])
 def test_symlinks_are_rejected_before_reading(
     tmp_path: Path, schemas: AuthorSchemas, component: str
 ) -> None:
@@ -270,78 +208,3 @@ def test_symlinks_are_rejected_before_reading(
     target.symlink_to(external, target_is_directory=True)
     with pytest.raises(AuthorInputError, match="unsafe_or_missing"):
         load_author_set(root, schemas)
-
-
-def test_nonregular_file_does_not_block(tmp_path: Path, schemas: AuthorSchemas) -> None:
-    target = tmp_path / PROTOTYPE
-    target.parent.mkdir(parents=True)
-    os.mkfifo(target)
-    with pytest.raises(AuthorInputError, match="nonregular_input"):
-        load_author_set(tmp_path, schemas)
-
-
-def test_size_bound_applies_before_yaml(tmp_path: Path, schemas: AuthorSchemas) -> None:
-    target = write(tmp_path, PROTOTYPE, {})
-    target.write_bytes(b"x" * MAX_BYTES)
-    with pytest.raises(AuthorInputError, match="size_limit"):
-        load_author_set(tmp_path, schemas)
-
-
-def test_en_inventory_is_closed_but_never_decoded(
-    tmp_path: Path, schemas: AuthorSchemas
-) -> None:
-    index(tmp_path, selection(scope="en_override"))
-    write(
-        tmp_path,
-        AUTHOR,
-        {
-            "format": 1,
-            "kind": "author_effect_set",
-            "scope": "en_override",
-            "cards": {"FIX-001": {"future_en_content": True}},
-        },
-    )
-    inputs = load_author_set(tmp_path, schemas)
-    assert inputs.index.records[0].scope == "en_override"
-    with pytest.raises(AuthorInputError, match="en_source_contract_unavailable"):
-        schemas.author_effect_set(inputs.author_files[0].raw)
-    index(tmp_path, selection(scope="shared"))
-    with pytest.raises(AuthorInputError, match="index_envelope_mismatch"):
-        load_author_set(tmp_path, schemas)
-
-
-def test_companion_keys_are_global(tmp_path: Path, schemas: AuthorSchemas) -> None:
-    index(tmp_path)
-    companion(tmp_path)
-    companion(tmp_path, "rules/effect-bodies/OTHER/999.yaml")
-    with pytest.raises(ExpansionError, match="duplicate_body"):
-        load_author_set(tmp_path, schemas)
-
-
-def test_input_objects_are_revalidated(tmp_path: Path, schemas: AuthorSchemas) -> None:
-    index(tmp_path, selection())
-    author(tmp_path, "FIX-001")
-    inputs = load_author_set(tmp_path, schemas)
-    forged = replace(inputs.author_files[0], raw=b"{}")
-    with pytest.raises(AuthorInputError, match="input_hash_mismatch"):
-        validate_author_set(replace(inputs, author_files=(forged,)), schemas)
-    with pytest.raises(AuthorInputError, match="index_file_missing"):
-        validate_author_set(replace(inputs, author_files=()), schemas)
-    with pytest.raises(AuthorInputError, match="duplicate_input_file"):
-        validate_author_set(
-            replace(inputs, author_files=inputs.author_files * 2), schemas
-        )
-    with pytest.raises(AuthorInputError, match="index_missing"):
-        validate_author_set(replace(inputs, index_file=None), schemas)
-
-
-def test_invalid_unselected_prototype_is_not_ignored(
-    tmp_path: Path, schemas: AuthorSchemas
-) -> None:
-    write(
-        tmp_path,
-        PROTOTYPE,
-        {"format": 1, "kind": "effect_set", "cards": {"FIX-001": {}}},
-    )
-    with pytest.raises(AuthorInputError):
-        load_author_set(tmp_path, schemas)

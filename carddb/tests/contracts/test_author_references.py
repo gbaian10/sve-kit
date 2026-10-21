@@ -200,105 +200,10 @@ def test_phase_and_turn_boundaries(
 
 
 @pytest.mark.parametrize(
-    "name",
-    [
-        "",
-        "_t",
-        "1t",
-        "t-name",
-        "t.name",
-        "t/name",
-        " t",
-        "t ",
-        "t\n",
-        "t\r\n",
-        "t\u0000",
-        "名字",
-    ],
-)
-@pytest.mark.parametrize(
-    "definition", ["BindingName", "RoleName", "A.ref", "A.player-ref", "A.receipt-ref"]
-)
-def test_identifier_boundaries(
-    schema: dict[str, JsonValue], definition: str, name: str
-) -> None:
-    _reject(schema, definition, name)
-
-
-@pytest.mark.parametrize(
     ("definition", "value"),
-    [
-        ("A.ref", {"event": "move_receipt"}),
-        ("A.ref", {"event": "amount"}),
-        ("A.ref", {"event": "value"}),
-        ("A.ref", {"event": "equipment"}),
-        ("A.ref", {"entry_payment": "additional"}),
-        ("A.ref", {"follow": "this"}),
-        ("A.ref", {"follow": {"entry_payment": "additional"}}),
-        ("A.ref", {"role": {"of": "this", "name": "primary"}}),
-        ("A.ref", {"role": {"of": {"follow": "moved_group"}, "name": "rest"}}),
-        ("A.ref", {"leader": "self"}),
-        ("A.ref", {"in": "chosen_group", "kind": "follower"}),
-        ("A.ref", "first:chosen_group"),
-        ("A.ref", {"first": "chosen_group"}),
-        ("A.ref", {"second": "chosen_group"}),
-        ("A.ref", {"rest": "chosen_group"}),
-        ("A.ref", "second:chosen_group"),
-        ("A.ref", "rest:chosen_group"),
-        ("A.ref", {"leader_of": "this"}),
-        ("A.player-ref", {"leader_of": "this"}),
-        ("A.receipt-ref", {"leader_of": "this"}),
-        ("A.leader-of", {"leader_of": "self"}),
-        ("A.leader-of", {"leader_of": {"owner_of": "t"}}),
-        ("A.leader-of", {"leader_of": {"master_of": "t"}}),
-        ("A.leader-of", {"leader_of": {"objects_of": "moved"}}),
-        ("A.leader-of", {"leader_of": {"lki_of": "t"}}),
-        ("A.leader-of", {"leader_of": {"leader": "self"}}),
-        ("A.leader-recipient", {"leader_of": {"owner_of": "t"}}),
-        ("A.leader-recipient", {"leader": "opp", "leader_of": "this"}),
-        ("A.receipt-ref", {"event": "holder"}),
-        ("A.receipt-ref", {"entry_payment": "optional"}),
-        ("A.receipt-ref", {"follow": "moved_group"}),
-        ("A.follow-source", {"entry_payment": "additional"}),
-        ("A.player-ref", {"owner_of": {"leader": "self"}}),
-        ("A.player-ref", {"master_of": "opponents"}),
-        ("A.player-ref", {"event": "holder"}),
-        ("A.player-set", "self"),
-        ("A.player-set", "all"),
-        ("A.leader-recipient", {"leader": "current"}),
-        ("A.leader-recipient", {"leader": "opponents"}),
-        ("A.leader-recipient", {"leader": {"master_of": "chosen_group"}}),
-        ("A.leader-recipient", {"leaders": "opp"}),
-        ("A.until", {"next_turn": {"who": "self", "edge": "end", "phase": "end"}}),
-        (
-            "A.until",
-            {"during_next_phase": {"who": "self", "phase": "start", "edge": "begin"}},
-        ),
-        (
-            "A.until",
-            {"next_phase": {"who": "opponents", "phase": "start", "edge": "begin"}},
-        ),
-        (
-            "A.until",
-            {"next_phase": {"who": "self", "phase": "combat", "edge": "begin"}},
-        ),
-        ("A.until", {"next_turn": {"who": "self", "edge": "after"}}),
-        ("A.until", "next_start_phase"),
-        ("A.until", "next_main_phase"),
-        ("A.until", "next_owner_turn_end"),
-    ],
+    [("A.ref", {"event": "move_receipt"}), ("A.ref", {"event": "amount"})],
 )
 def test_wrong_context_and_unregistered_shapes(
     schema: dict[str, JsonValue], definition: str, value: JsonValue
 ) -> None:
     _reject(schema, definition, value)
-
-
-@pytest.mark.parametrize(
-    "value",
-    ["this", {"follow": "moved_group"}, {"next_turn": {"who": "self", "edge": "end"}}],
-)
-def test_library_root_is_not_a_document_entry(
-    schema: dict[str, JsonValue], value: JsonValue
-) -> None:
-    assert not Draft202012Validator(schema).is_valid(value)

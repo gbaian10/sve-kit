@@ -6,6 +6,8 @@ from pydantic import ConfigDict, TypeAdapter
 
 from sve_carddb.contracts import author_queries as author
 
+from .author_adapters import adapters
+
 if TYPE_CHECKING:
     from pydantic import JsonValue
 
@@ -15,13 +17,6 @@ COUNTS: dict[str, TypeAdapter[object]] = {
     "A.expr.count-union": TypeAdapter(author.CountUnion),
     "A.expr.count-source": TypeAdapter(author.CountSource, config=CONFIG),
 }
-SELECTORS: dict[str, TypeAdapter[object]] = {
-    "A.sel.zone-objects": TypeAdapter(author.ZoneObjects, config=CONFIG),
-    "A.sel.in-objects": TypeAdapter(author.InObjects, config=CONFIG),
-    "A.sel.object-atom": TypeAdapter(author.ObjectAtom, config=CONFIG),
-    "A.sel.object-union": TypeAdapter(author.ObjectUnion, config=CONFIG),
-    "A.sel.object-core": TypeAdapter(author.ObjectSel, config=CONFIG),
-}
 SELECTOR_NAMES = {
     "A.sel.zone-objects": "ZoneObjects",
     "A.sel.in-objects": "InObjects",
@@ -29,6 +24,7 @@ SELECTOR_NAMES = {
     "A.sel.object-union": "ObjectUnion",
     "A.sel.object-core": "ObjectSel",
 }
+
 OBJECTS = "A.sel.object-core"
 COUNTED = "A.expr.count-source"
 COUNT_UNION: dict[str, JsonValue] = {
@@ -74,19 +70,7 @@ COUNTS.update(
         "A.collection": TypeAdapter(author.CollectionSource, config=CONFIG),
     }
 )
-SELECTOR_NAMES.update(
-    {
-        "A.expr.count-objects": "CountObjects",
-        "A.expr.count-union": "CountUnion",
-        "A.expr.count-source": "CountSource",
-        "A.expr.count-atom": "CountAtom",
-        "A.collection.in": "CollectionIn",
-        "A.collection.objects": "CollectionObjects",
-        "A.collection.atom": "CollectionAtom",
-        "A.collection.union": "CollectionUnion",
-        "A.collection": "CollectionSource",
-    }
-)
+
 QUERY_CASES.extend(
     [
         ("A.expr.count-atom", {"in": "shown"}),
@@ -102,4 +86,22 @@ QUERY_CASES.extend(
             {"in": "shown", "except": {"in": "chosen"}, "where": {"standing": "item"}},
         ),
     ]
+)
+
+SELECTORS = adapters(
+    {key: (getattr(author, name), name) for key, name in SELECTOR_NAMES.items()}
+)
+
+SELECTOR_NAMES.update(
+    {
+        "A.expr.count-objects": "CountObjects",
+        "A.expr.count-union": "CountUnion",
+        "A.expr.count-source": "CountSource",
+        "A.expr.count-atom": "CountAtom",
+        "A.collection.in": "CollectionIn",
+        "A.collection.objects": "CollectionObjects",
+        "A.collection.atom": "CollectionAtom",
+        "A.collection.union": "CollectionUnion",
+        "A.collection": "CollectionSource",
+    }
 )

@@ -2,7 +2,7 @@
 
 from typing import TYPE_CHECKING
 
-from pydantic import TypeAdapter
+from typing_extensions import TypeForm
 
 from sve_carddb.contracts import author_costs as costs
 from sve_carddb.contracts import author_leaves as leaves
@@ -11,81 +11,53 @@ from sve_carddb.contracts import author_quantities as quantities
 from sve_carddb.contracts import author_queries as queries
 from sve_carddb.contracts import author_selection_parents as parents
 
-from .author_selector_cases import CONFIG
+from .author_adapters import adapters, type_names
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
 
-PARENTS: dict[str, TypeAdapter[object]] = {
-    "A.target.group-filter": TypeAdapter(parents.TargetGroupFilter, config=CONFIG),
-    "A.target.grouped.exact": TypeAdapter(parents.TargetGroupedExact, config=CONFIG),
-    "A.target.grouped.up-to": TypeAdapter(parents.TargetGroupedUpTo, config=CONFIG),
-    "A.target.grouped.any": TypeAdapter(parents.TargetGroupedAny, config=CONFIG),
-    "A.targets": TypeAdapter(parents.Targets, config=CONFIG),
-    "A.quantity": TypeAdapter(queries.Quantity, config=CONFIG),
-    "A.selection-quantity": TypeAdapter(quantities.SelectionQuantity, config=CONFIG),
-    "A.deck-slice": TypeAdapter(quantities.DeckSlice),
-    "CounterName": TypeAdapter(leaves.CounterName, config=CONFIG),
-    "DistinctBy": TypeAdapter(parents.DistinctBy, config=CONFIG),
-    "A.target.exact": TypeAdapter(parents.TargetExact, config=CONFIG),
-    "A.target.up-to": TypeAdapter(parents.TargetUpTo, config=CONFIG),
-    "A.target.any": TypeAdapter(parents.TargetAny, config=CONFIG),
-    "A.target": TypeAdapter(parents.Target, config=CONFIG),
-    "A.act.choose.exact": TypeAdapter(steps.ChooseExact, config=CONFIG),
-    "A.act.choose.up-to": TypeAdapter(steps.ChooseUpTo, config=CONFIG),
-    "A.act.choose.any": TypeAdapter(steps.ChooseAny, config=CONFIG),
-    "A.act.choose": TypeAdapter(steps.Choose, config=CONFIG),
-    "A.act.search.exact": TypeAdapter(steps.SearchExact, config=CONFIG),
-    "A.act.search.up-to": TypeAdapter(steps.SearchUpTo, config=CONFIG),
-    "A.act.search": TypeAdapter(steps.Search, config=CONFIG),
-    "A.cost.counter.self.exact": TypeAdapter(costs.CounterCostSelfExact, config=CONFIG),
-    "A.cost.counter.self.up-to": TypeAdapter(costs.CounterCostSelfUpTo, config=CONFIG),
-    "A.cost.counter.self.any": TypeAdapter(costs.CounterCostSelfAny, config=CONFIG),
-    "A.cost.counter.self": TypeAdapter(costs.CounterCostSelf, config=CONFIG),
-    "A.cost.counter.selected.exact": TypeAdapter(
-        costs.CounterCostSelectedExact, config=CONFIG
+PARENTS_TYPES: dict[str, tuple[TypeForm[object], str]] = {
+    "A.target.group-filter": (parents.TargetGroupFilter, "TargetGroupFilter"),
+    "A.target.grouped.exact": (parents.TargetGroupedExact, "TargetGroupedExact"),
+    "A.target.grouped.up-to": (parents.TargetGroupedUpTo, "TargetGroupedUpTo"),
+    "A.target.grouped.any": (parents.TargetGroupedAny, "TargetGroupedAny"),
+    "A.targets": (parents.Targets, "Targets"),
+    "A.quantity": (queries.Quantity, "Quantity"),
+    "A.selection-quantity": (quantities.SelectionQuantity, "SelectionQuantity"),
+    "A.deck-slice": (quantities.DeckSlice, "DeckSlice"),
+    "CounterName": (leaves.CounterName, "CounterName"),
+    "DistinctBy": (parents.DistinctBy, "DistinctBy"),
+    "A.target.exact": (parents.TargetExact, "TargetExact"),
+    "A.target.up-to": (parents.TargetUpTo, "TargetUpTo"),
+    "A.target.any": (parents.TargetAny, "TargetAny"),
+    "A.target": (parents.Target, "Target"),
+    "A.act.choose.exact": (steps.ChooseExact, "ChooseExact"),
+    "A.act.choose.up-to": (steps.ChooseUpTo, "ChooseUpTo"),
+    "A.act.choose.any": (steps.ChooseAny, "ChooseAny"),
+    "A.act.choose": (steps.Choose, "Choose"),
+    "A.act.search.exact": (steps.SearchExact, "SearchExact"),
+    "A.act.search.up-to": (steps.SearchUpTo, "SearchUpTo"),
+    "A.act.search": (steps.Search, "Search"),
+    "A.cost.counter.self.exact": (costs.CounterCostSelfExact, "CounterCostSelfExact"),
+    "A.cost.counter.self.up-to": (costs.CounterCostSelfUpTo, "CounterCostSelfUpTo"),
+    "A.cost.counter.self.any": (costs.CounterCostSelfAny, "CounterCostSelfAny"),
+    "A.cost.counter.self": (costs.CounterCostSelf, "CounterCostSelf"),
+    "A.cost.counter.selected.exact": (
+        costs.CounterCostSelectedExact,
+        "CounterCostSelectedExact",
     ),
-    "A.cost.counter.selected.up-to": TypeAdapter(
-        costs.CounterCostSelectedUpTo, config=CONFIG
+    "A.cost.counter.selected.up-to": (
+        costs.CounterCostSelectedUpTo,
+        "CounterCostSelectedUpTo",
     ),
-    "A.cost.counter.selected.any": TypeAdapter(
-        costs.CounterCostSelectedAny, config=CONFIG
+    "A.cost.counter.selected.any": (
+        costs.CounterCostSelectedAny,
+        "CounterCostSelectedAny",
     ),
-    "A.cost.counter.selected": TypeAdapter(costs.CounterCostSelected, config=CONFIG),
-    "A.cost.counter": TypeAdapter(costs.CounterCost, config=CONFIG),
+    "A.cost.counter.selected": (costs.CounterCostSelected, "CounterCostSelected"),
+    "A.cost.counter": (costs.CounterCost, "CounterCost"),
 }
-PARENT_NAMES = {
-    "A.target.group-filter": "TargetGroupFilter",
-    "A.target.grouped.exact": "TargetGroupedExact",
-    "A.target.grouped.up-to": "TargetGroupedUpTo",
-    "A.target.grouped.any": "TargetGroupedAny",
-    "A.targets": "Targets",
-    "A.quantity": "Quantity",
-    "A.selection-quantity": "SelectionQuantity",
-    "A.deck-slice": "DeckSlice",
-    "CounterName": "CounterName",
-    "DistinctBy": "DistinctBy",
-    "A.target.exact": "TargetExact",
-    "A.target.up-to": "TargetUpTo",
-    "A.target.any": "TargetAny",
-    "A.target": "Target",
-    "A.act.choose.exact": "ChooseExact",
-    "A.act.choose.up-to": "ChooseUpTo",
-    "A.act.choose.any": "ChooseAny",
-    "A.act.choose": "Choose",
-    "A.act.search.exact": "SearchExact",
-    "A.act.search.up-to": "SearchUpTo",
-    "A.act.search": "Search",
-    "A.cost.counter.self.exact": "CounterCostSelfExact",
-    "A.cost.counter.self.up-to": "CounterCostSelfUpTo",
-    "A.cost.counter.self.any": "CounterCostSelfAny",
-    "A.cost.counter.self": "CounterCostSelf",
-    "A.cost.counter.selected.exact": "CounterCostSelectedExact",
-    "A.cost.counter.selected.up-to": "CounterCostSelectedUpTo",
-    "A.cost.counter.selected.any": "CounterCostSelectedAny",
-    "A.cost.counter.selected": "CounterCostSelected",
-    "A.cost.counter": "CounterCost",
-}
+
 CARD_PARENTS: list[tuple[str, str, dict[str, JsonValue]]] = [
     (
         "BP01-125",
@@ -206,3 +178,6 @@ DECK_CASES: list[tuple[str, dict[str, JsonValue]]] = [
         {"who": "self", "n": {"half_up": {"count": {"who": "self", "zone": "deck"}}}},
     ),
 ]
+
+PARENTS = adapters(PARENTS_TYPES)
+PARENT_NAMES = type_names(PARENTS_TYPES)

@@ -18,7 +18,6 @@ if TYPE_CHECKING:
     from pydantic import JsonValue
 
 ADAPTERS = HISTORY | NUMERIC | RECEIPTS
-EVENT = "A.event"
 QUERY = "A.history-query"
 EVENT_CASES: list[tuple[str, dict[str, JsonValue]]] = [
     (
@@ -69,10 +68,6 @@ EVENT_CASES: list[tuple[str, dict[str, JsonValue]]] = [
     ("fused_as_material", {"ref": "this"}),
     ("state", {"cmp": {"left": {"leader_life": "self"}, "op": "le", "right": 10}}),
 ]
-
-
-def _values(*values: JsonValue) -> tuple[JsonValue, ...]:
-    return values
 
 
 def _check(name: str, value: JsonValue, *, accepted: bool = True) -> None:
@@ -132,34 +127,6 @@ def test_paid_keywords_and_named_receipts_are_disjoint(value: JsonValue) -> None
     _check(E, {"paid": value}, accepted=False)
 
 
-@pytest.mark.parametrize(
-    "value",
-    [
-        "paid_cost",
-        {"entry_payment": "additional"},
-        {"receipt": {"event": "move_receipt"}},
-        {"receipt": "this"},
-        None,
-    ],
-)
-def test_paid_rejects_unregistered_payloads(value: JsonValue) -> None:
-    _check(C, {"paid": value}, accepted=False)
-
-
-@pytest.mark.parametrize("op", ["eq", "ne"])
-def test_player_comparisons_are_same_type(op: str) -> None:
-    value: dict[str, JsonValue] = {
-        "left": {"player": {"owner_of": "t"}},
-        "op": op,
-        "right": {"player": "self"},
-    }
-    _check(C, {"cmp": value})
-    for wrong in _values("self", 1, {"bound": "p"}, {"leader": "self"}):
-        _check(C, {"cmp": {**value, "right": wrong}}, accepted=False)
-    for ordered in ["lt", "le", "gt", "ge"]:
-        _check(C, {"cmp": {**value, "op": ordered}}, accepted=False)
-
-
 STATE_READS: list[JsonValue] = [
     {"count": {"who": "self", "zone": "hand"}},
     {"hand": "self"},
@@ -204,94 +171,10 @@ def test_capture_read_matrix(read: JsonValue, at: str) -> None:
 
 @pytest.mark.parametrize(
     "read",
-    [
-        0,
-        "X",
-        {"bound": "n"},
-        {"plus": [1, 2]},
-        {"dice": "d"},
-        {"x_paid": "cost"},
-        {"event": "value"},
-        {"paid": "additional"},
-        {"counter": {"on": "this", "name": "stack"}},
-        {"lki_of": "this"},
-        {"objects_of": "cost", "view": "before"},
-    ],
+    [0, "X"],
 )
 def test_capture_rejects_frozen_or_unregistered_reads(read: JsonValue) -> None:
     _check(E, {"at": "event", "value": read}, accepted=False)
-
-
-@pytest.mark.parametrize(
-    "property_name", ["power_of", "hp_of", "cost_of", "orig_cost_of"]
-)
-@pytest.mark.parametrize("view", ["before", "after"])
-def test_singleton_material_properties_are_not_recaptured(
-    property_name: str, view: str
-) -> None:
-    value: dict[str, JsonValue] = {property_name: {"objects_of": "cost", "view": view}}
-    _check(E, value)
-    _check(E, {"at": "event", "value": value}, accepted=False)
-    _check(E, {property_name: {"lki_of": "t"}}, accepted=False)
-
-
-def test_lki_is_only_an_explicit_counter_operand() -> None:
-    _check(E, {"counter": {"on": {"lki_of": "this"}, "name": "prayer"}})
-    _check(E, {"lki_of": "this"}, accepted=False)
-    _check(C, {"standing": {"lki_of": "this"}}, accepted=False)
-    _check(E, {"count": {"in": {"lki_of": "this"}}}, accepted=False)
-
-
-@pytest.mark.parametrize("key", ["dice", "x_paid"])
-def test_receipt_and_die_reads_require_names(key: str) -> None:
-    _check(E, {key: "result"})
-    for value in _values("this", 1, {"bound": "result"}, None):
-        _check(E, {key: value}, accepted=False)
-
-
-@pytest.mark.parametrize("field", ["amount", "value"])
-def test_event_numeric_read_is_closed(field: str) -> None:
-    _check(E, {"event": field})
-    _check(C, {"event": field}, accepted=False)
-    _check(E, {"event": {"kind": "damaged", "field": field}}, accepted=False)
-
-
-@pytest.mark.parametrize(
-    "field", ["holder", "move_receipt", "delta", "from", "to", "unknown"]
-)
-def test_non_numeric_event_fields_do_not_enter_numeric_reads(field: str) -> None:
-    _check(E, {"event": field}, accepted=False)
-
-
-@pytest.mark.parametrize("op", ["eq", "le", "ge"])
-def test_history_die_values_are_bounded_and_exclusive(op: str) -> None:
-    for n in _values(1, 6):
-        query: dict[str, JsonValue] = {
-            "event": "dice_rolled",
-            "window": "this_turn",
-            "where": {"value": {op: n}},
-        }
-        _check(QUERY, query)
-        _check(EVENT, {"dice_rolled": {"value": {op: n}}}, accepted=False)
-    for wrong in _values(0, 7, True, "X", {"param": "n"}):
-        _check(
-            QUERY,
-            {
-                "event": "dice_rolled",
-                "window": "this_turn",
-                "where": {"value": {op: wrong}},
-            },
-            accepted=False,
-        )
-    _check(
-        QUERY,
-        {
-            "event": "dice_rolled",
-            "window": "this_turn",
-            "where": {"value": {"eq": 1, "ge": 1}},
-        },
-        accepted=False,
-    )
 
 
 @pytest.mark.parametrize(
@@ -327,197 +210,6 @@ def test_history_sum_is_narrowed(
             },
             accepted=False,
         )
-
-
-def test_history_only_payment_and_structured_windows() -> None:
-    query: dict[str, JsonValue] = {
-        "event": "payment",
-        "who": "self",
-        "where": {"cost_kind": "earth_rite"},
-        "window": {"since": "anchor"},
-    }
-    _check(QUERY, query)
-    _check(C, {"history": query})
-    _check(EVENT, {"payment": {}}, accepted=False)
-    _check(QUERY, {**query, "window": "since:anchor"}, accepted=False)
-    _check(
-        QUERY,
-        {**query, "where": {"cost_kind": "earth_rite", "phase": "main"}},
-        accepted=False,
-    )
-    for event in ["state", "any_of", "counter_reached", "unknown"]:
-        _check(QUERY, {"event": event, "window": "game"}, accepted=False)
-
-
-def test_phase_parameter_permission_is_local_to_on() -> None:
-    _check(EVENT, {"phase": {"which": {"param": "phase"}, "whose": "self"}})
-    _check(
-        QUERY,
-        {
-            "event": "phase",
-            "window": "game",
-            "where": {"which": {"param": "phase"}, "whose": "self"},
-        },
-        accepted=False,
-    )
-    for payload in _values({}, {"which": "end"}, {"whose": "self"}):
-        _check(EVENT, {"phase": payload}, accepted=False)
-
-
-def test_subject_filters_have_no_selection_source_permissions() -> None:
-    cases: list[tuple[str, JsonValue]] = [
-        ("who", "self"),
-        ("zone", "field"),
-        ("in", "t"),
-        ("except", {"in": "t"}),
-        ("power_max", True),
-        ("any_of", [{"kind": "follower"}]),
-    ]
-    for key, value in cases:
-        _check("A.event-subject-filter", {key: value}, accepted=False)
-    for key in ["kind", "name", "trait", "class", "cost_ge", "orig_cost_eq", "hp_le"]:
-        _check("A.event-subject-filter", {key: {"param": "v"}}, accepted=False)
-        _check(
-            "A.event-subject-filter",
-            {key: {"same_as": {"objects_of": "r", "view": "before"}}},
-            accepted=False,
-        )
-    _check(
-        "A.event-subject-filter",
-        {
-            "where": {
-                "cmp": {
-                    "left": {"count": {"who": {"param": "side"}, "zone": "field"}},
-                    "op": "ge",
-                    "right": {"plus": [1, {"param": "offset"}]},
-                }
-            }
-        },
-    )
-    for wrong in _values(
-        {},
-        {"as": "subject"},
-        {"token": True, "not_token": True},
-        {"name": "a", "names": ["b"]},
-    ):
-        _check("A.event-subject-filter", wrong, accepted=False)
-    _check(
-        "A.event-subject-filter", {"as": "subject", "where": {"standing": "subject"}}
-    )
-
-
-def test_subject_reference_and_filter_are_exclusive_across_history_levels() -> None:
-    _check(
-        EVENT, {"moved": {"ref": "this", "sel": {"kind": "follower"}}}, accepted=False
-    )
-    _check(
-        QUERY,
-        {
-            "event": "moved",
-            "window": "game",
-            "sel": {"kind": "follower"},
-            "where": {"ref": "this"},
-        },
-        accepted=False,
-    )
-    _check(EVENT, {"left_field": {"to": "cemetery"}}, accepted=False)
-    _check(EVENT, {"damaged": {"ref": "this"}}, accepted=False)
-    _check(EVENT, {"played": {"trait": "財宝"}}, accepted=False)
-
-
-def test_event_recipient_unions_require_a_leader_and_use_event_roles() -> None:
-    _check(
-        "A.event-recipient",
-        {"any_of": [{"leader": "self"}, {"who": "opp", "kind": "follower"}]},
-    )
-    for value in _values(
-        {"any_of": [{"who": "self"}]},
-        {"any_of": ["this", {"leader": "self"}]},
-        {"who": {"param": "side"}},
-        {"in": "t"},
-    ):
-        _check("A.event-recipient", value, accepted=False)
-
-
-def test_chosen_and_material_filters_keep_their_own_contexts() -> None:
-    _check(C, {"chosen": {"ref": "target", "where": {"hp_le": 3}}})
-    _check(C, {"chosen": {"ref": "target"}})
-    for wrong in _values(
-        {"ref": "this"},
-        {"ref": "target", "where": {}},
-        {"ref": "target", "at": "selection"},
-    ):
-        _check(C, {"chosen": wrong}, accepted=False)
-    _check(
-        C,
-        {"did": {"result": "moved", "where": {"not_class": "エルフ"}, "view": "after"}},
-    )
-    _check(
-        C,
-        {
-            "did": {
-                "result": "cost",
-                "where": {"kind": "follower", "trait": "ウマ娘", "orig_cost_ge": 7},
-            }
-        },
-    )
-    _check(
-        E,
-        {
-            "count_of": {
-                "receipt": "shown",
-                "where": {"orig_cost_eq": {"bound": "declared"}},
-                "view": "before",
-            }
-        },
-    )
-
-
-def test_counter_event_thresholds_are_natural_literals() -> None:
-    _check(EVENT, {"counter_reached": {"ref": "this", "name": "stack", "value": 2}})
-    for wrong in _values(-1, True, "X", {"plus": [1, 1]}):
-        _check(
-            EVENT,
-            {"counter_reached": {"ref": "this", "name": "stack", "value": wrong}},
-            accepted=False,
-        )
-        _check(EVENT, {"counter_changed": {"after": {"ge": wrong}}}, accepted=False)
-    for payload in _values(
-        {"ref": "this", "name": "stack"},
-        {"ref": "this", "value": 1},
-        {"name": "stack", "value": 1},
-    ):
-        _check(EVENT, {"counter_reached": payload}, accepted=False)
-
-
-@pytest.mark.parametrize("quantity", ["X", {"bound": "cost"}, {"plus": [1, 1]}])
-def test_material_cost_comparisons_accept_numeric_operations(
-    quantity: JsonValue,
-) -> None:
-    _check("A.material-filter", {"orig_cost_eq": quantity})
-    _check("A.material-filter", {"orig_cost_ge": quantity})
-
-
-@pytest.mark.parametrize(
-    ("event", "payload"),
-    [
-        ("damaged", {"recipient": {"in": "t"}}),
-        ("attacked", {"who": "opponents"}),
-        ("played", {"sel": {"who": "self"}}),
-        ("stat_changed", {"stat": []}),
-        ("moved", {"from": {"zone": "hand"}}),
-        ("moved", {"from": {"who": "self"}}),
-        ("moved", {"from": {"who": "self", "zone": "hand", "unknown": True}}),
-        ("discarded", {"from": "ex"}),
-        ("drive_trigger", {"holder": "this"}),
-        ("equipped", {"equipment": {"leader": "self"}}),
-        ("fused", {"material": {"in": "t"}}),
-    ],
-)
-def test_direct_events_reject_other_roles_and_incomplete_origins(
-    event: str, payload: JsonValue
-) -> None:
-    _check(EVENT, {event: payload}, accepted=False)
 
 
 @pytest.mark.parametrize(

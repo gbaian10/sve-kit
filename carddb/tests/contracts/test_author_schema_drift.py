@@ -1,6 +1,7 @@
 """Keep every implemented author definition aligned with its Python decoder."""
 
 from copy import deepcopy
+from functools import cache
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -209,8 +210,10 @@ def _assert_complete_definitions() -> None:
     assert object_value(INDEX_SCHEMA["$defs"]).keys() == INDEX.keys()
 
 
-def assert_selector_definition(schema: dict[str, JsonValue], name: str) -> None:
-    python = (
+@cache
+def _python_schemas() -> dict[str, dict[str, JsonValue]]:
+    # Generate the shared recursive graph once rather than once per root.
+    adapters = (
         SELECTORS
         | RECIPIENTS
         | PARENTS
@@ -223,7 +226,17 @@ def assert_selector_definition(schema: dict[str, JsonValue], name: str) -> None:
         | STEPS
         | ABILITIES
         | ENTRIES
-    )[name].json_schema()
+    )
+    roots, graph = TypeAdapter.json_schemas(
+        [(name, "validation", adapter) for name, adapter in adapters.items()]
+    )
+    return {
+        name: {**root, "$defs": graph["$defs"]} for (name, _), root in roots.items()
+    }
+
+
+def assert_selector_definition(schema: dict[str, JsonValue], name: str) -> None:
+    python = _python_schemas()[name]
     names = (
         SELECTOR_NAMES
         | RECIPIENT_NAMES

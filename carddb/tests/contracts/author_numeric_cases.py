@@ -2,47 +2,16 @@
 
 from typing import TYPE_CHECKING
 
-from pydantic import ConfigDict, TypeAdapter
+from pydantic import ConfigDict
 
 from sve_carddb.contracts import author_queries as author
-from sve_carddb.contracts.author_queries import ExprCount
+
+from .author_adapters import adapters
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
 
 CONFIG = ConfigDict(regex_engine="python-re")
-NUMERIC: dict[str, TypeAdapter[object]] = {
-    "A.expr.count": TypeAdapter(ExprCount),
-    "A.expr.plus": TypeAdapter(author.ExprPlus),
-    "A.expr.minus": TypeAdapter(author.ExprMinus),
-    "A.expr.times": TypeAdapter(author.ExprTimes),
-    "A.expr.half-up": TypeAdapter(author.ExprHalfUp),
-    "A.expr.per-payload": TypeAdapter(author.ExprPerPayload),
-    "A.expr.per": TypeAdapter(author.ExprPer),
-    "A.expr.min": TypeAdapter(author.ExprMin),
-    "A.expr.max": TypeAdapter(author.ExprMax),
-    "A.expr.bound": TypeAdapter(author.ExprBound),
-    "A.expr.power-of": TypeAdapter(author.ExprPowerOf),
-    "A.expr.hp-of": TypeAdapter(author.ExprHpOf),
-    "A.expr.cost-of": TypeAdapter(author.ExprCostOf),
-    "A.expr.resource-payload": TypeAdapter(author.ExprResourcePayload),
-    "A.expr.resource": TypeAdapter(author.ExprResource),
-    "A.expr.turn-number-payload": TypeAdapter(author.ExprTurnNumberPayload),
-    "A.expr.turn-number": TypeAdapter(author.ExprTurnNumber),
-    "A.expr.zone-free-payload": TypeAdapter(author.ExprZoneFreePayload),
-    "A.expr.zone-free": TypeAdapter(author.ExprZoneFree),
-    "A.expr.count-of": TypeAdapter(author.ExprCountOf),
-    "A.expr.numeric": TypeAdapter(author.NumericExpr, config=CONFIG),
-    "A.expr.numeric-operation": TypeAdapter(author.NumericOperation, config=CONFIG),
-    "A.cond.cmp-payload": TypeAdapter(author.CondCmpPayload),
-    "A.cond.cmp": TypeAdapter(author.CondCmp),
-    "A.cond.all": TypeAdapter(author.CondAll),
-    "A.cond.any": TypeAdapter(author.CondAny),
-    "A.cond.not": TypeAdapter(author.CondNot),
-    "A.cond.did": TypeAdapter(author.CondDid),
-    "A.cond.payment-decided": TypeAdapter(author.CondPaymentDecided),
-    "A.cond": TypeAdapter(author.Condition, config=CONFIG),
-}
 NUMERIC_NAMES = {
     "A.expr.count": "ExprCount",
     "A.expr.plus": "ExprPlus",
@@ -75,6 +44,7 @@ NUMERIC_NAMES = {
     "A.cond.payment-decided": "CondPaymentDecided",
     "A.cond": "Condition",
 }
+
 NUMERIC_DEPENDENCIES = {
     "A.param": "ParamRef",
     "A.ref": "Ref",
@@ -128,52 +98,6 @@ PAYLOADS: list[tuple[str, dict[str, JsonValue]]] = [
     ("A.cond.cmp-payload", {"left": 0, "op": "eq", "right": 0}),
 ]
 
-NUMERIC.update(
-    {
-        "A.expr.hand": TypeAdapter(author.ExprHand),
-        "A.expr.leader-life": TypeAdapter(author.ExprLeaderLife),
-        "A.expr.counter": TypeAdapter(author.ExprCounter),
-        "A.expr.distinct-names": TypeAdapter(author.ExprDistinctNames),
-        "A.expr.distinct-orig-costs": TypeAdapter(author.ExprDistinctOrigCosts),
-        "A.expr.agg": TypeAdapter(author.ExprAgg),
-        "A.expr.counter-payload": TypeAdapter(author.ExprCounterPayload),
-        "A.expr.agg-payload": TypeAdapter(author.ExprAggPayload),
-        "A.cond.exists": TypeAdapter(author.CondExists),
-        "A.cond.in-zone": TypeAdapter(author.CondInZone),
-        "A.cond.entered-from": TypeAdapter(author.CondEnteredFrom),
-        "A.cond.played-from": TypeAdapter(author.CondPlayedFrom),
-        "A.cond.entered-by": TypeAdapter(author.CondEnteredBy),
-        "A.cond.is": TypeAdapter(author.CondIs),
-        "A.cond.in-zone-payload": TypeAdapter(author.CondInZonePayload),
-        "A.cond.from-payload": TypeAdapter(author.CondFromPayload),
-        "A.cond.entered-by-payload": TypeAdapter(author.CondEnteredByPayload),
-        "A.cond.is-payload": TypeAdapter(author.CondIsPayload),
-        "A.cond.on-field": TypeAdapter(author.CondOnField),
-        "A.cond.standing": TypeAdapter(author.CondStanding),
-        "A.cond.acted": TypeAdapter(author.CondActed),
-        "A.cond.evolved": TypeAdapter(author.CondEvolved),
-        "A.cond.my-turn": TypeAdapter(author.CondMyTurn),
-        "A.cond.opp-turn": TypeAdapter(author.CondOppTurn),
-        "A.cond.construction": TypeAdapter(author.CondConstruction),
-        "A.cond.combo": TypeAdapter(author.CondCombo),
-        "A.cond.spellchain": TypeAdapter(author.CondSpellchain),
-        "A.cond.necro": TypeAdapter(author.CondNecro),
-        "A.cond.awakened": TypeAdapter(author.CondAwakened),
-        "A.cond.crimson": TypeAdapter(author.CondCrimson),
-        "A.cond.hand": TypeAdapter(author.CondHand),
-        "A.cond.leader-life": TypeAdapter(author.CondLeaderLife),
-        "A.cond.zone-free": TypeAdapter(author.CondZoneFree),
-        "A.cond.player-eq-threshold": TypeAdapter(author.PlayerEqThreshold),
-        "A.cond.player-le-threshold": TypeAdapter(author.PlayerLeThreshold),
-        "A.cond.player-ge-threshold": TypeAdapter(author.PlayerGeThreshold),
-        "A.cond.zone-free-eq-threshold": TypeAdapter(author.ZoneFreeEqThreshold),
-        "A.cond.zone-free-ge-threshold": TypeAdapter(author.ZoneFreeGeThreshold),
-        "A.cond.player-threshold": TypeAdapter(author.PlayerThreshold, config=CONFIG),
-        "A.cond.zone-free-threshold": TypeAdapter(
-            author.ZoneFreeThreshold, config=CONFIG
-        ),
-    }
-)
 NUMERIC_NAMES.update(
     {
         "A.expr.hand": "ExprHand",
@@ -218,6 +142,7 @@ NUMERIC_NAMES.update(
         "A.cond.zone-free-threshold": "ZoneFreeThreshold",
     }
 )
+
 EXPRESSIONS.extend(
     [
         ("A.expr.hand", {"hand": "self"}),
@@ -284,4 +209,8 @@ PAYLOADS.extend(
         ("A.cond.player-threshold", {"who": "self", "le": 1}),
         ("A.cond.zone-free-threshold", {"who": "self", "zone": "ex", "eq": 0}),
     ]
+)
+
+NUMERIC = adapters(
+    {key: (getattr(author, name), name) for key, name in NUMERIC_NAMES.items()}
 )
