@@ -2,8 +2,7 @@
 use super::{
     Ability, AbilityKind, AbilityOrigin, Cause, EventHeader, EventPattern, EventSnapshotPolicy,
     Game, KeywordId, Located, Phase, Result, SnapshotId, SourceInformation, TriggerAggregation,
-    TriggerCondition, TurnId, ZoneKind, face_ordinal, invalid, player_id, printed_origin,
-    unsupported,
+    TriggerCondition, TurnId, ZoneKind, invalid, player_id, unsupported,
 };
 use crate::game::{Step, int, string};
 use crate::ir::{
@@ -12,7 +11,7 @@ use crate::ir::{
 };
 use serde_json::Value;
 
-use crate::ir::events::timing::{attack_predicate, end_predicate, opponent};
+use crate::ir::events::timing::{attack_predicate, end_predicate, evolve_predicate, opponent};
 
 pub(super) fn check_header(ability: &Ability) -> Result<bool> {
     let Some(trigger) = &ability.trigger else {
@@ -30,6 +29,18 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
         ) => {
             matches!(origin.as_ref(), AbilityOrigin::Printed { .. })
                 && *predicate == attack_predicate(*binding)
+        }
+        (
+            AbilityOrigin::Keyword {
+                keyword: KeywordId::OnEvolve,
+                origin,
+            },
+            TriggerCondition::Event {
+                pattern: EventPattern::Evolve { binding, predicate },
+            },
+        ) => {
+            matches!(origin.as_ref(), AbilityOrigin::Printed { .. })
+                && *predicate == evolve_predicate(*binding)
         }
         (
             AbilityOrigin::Printed { .. },
@@ -64,6 +75,10 @@ pub(super) fn public_event(event: &Event, position: u64) -> Result<String> {
             "End Begin turn {} player {}",
             event.turn.0, event.player.seat
         )),
+        Event::Evolve { event } => Ok(format!(
+            "Evolve {:?} from field slot {position}",
+            event.kind
+        )),
         _ => Err(invalid("unadmitted pending rule event")),
     }
 }
@@ -81,7 +96,7 @@ impl Game {
         if !matches!(
             string(&decision["do"]),
             // Guard followers carry a prototype keyword, which loaded internal cards reject.
-            "attack" | "end-phase" | "pass" | "end-discard"
+            "evolve" | "attack" | "end-phase" | "pass" | "end-discard"
         ) || self.typed.is_some()
             || self.card_runtime.checkpoint.is_some()
             || self.card_runtime.has_pending()
@@ -99,57 +114,14 @@ impl Game {
     }
 
     fn timing_abilities(&self, holder: &str) -> Result<Vec<Located<Ability>>> {
-        let object = self.object(holder)?;
-        if object.state["silenced"] == true {
-            return Ok(Vec::new());
-        }
-        let Some(card) = self.card_runtime.cards.get(&object.card) else {
-            return Ok(Vec::new());
-        };
-        let form_timing = object.state["evolved_with"]
-            .as_str()
-            .and_then(|id| self.state.objects.get(id))
-            .and_then(|form| self.card_runtime.cards.get(&form.card))
-            .is_some_and(|form| {
-                form.card().abilities.iter().any(|a| {
-                    matches!(
-                        a.node.trigger.as_ref().map(|t| &t.on),
-                        Some(TriggerCondition::Event {
-                            pattern: EventPattern::Attack { .. } | EventPattern::Phase { .. }
-                        })
-                    )
-                })
-            });
-        let abilities = card
-            .card()
-            .abilities
-            .iter()
-            .filter(|ability| {
-                matches!(
-                    ability.node.trigger.as_ref().map(|t| &t.on),
-                    Some(TriggerCondition::Event {
-                        pattern: EventPattern::Attack { .. } | EventPattern::Phase { .. }
-                    })
-                )
-            })
-            .cloned()
-            .collect::<Vec<_>>();
-        if (!abilities.is_empty() || form_timing) && object.state["evolved_with"].is_string() {
-            return Err(unsupported("evolved rule trigger context"));
-        }
-        Ok(abilities
+        Ok(self
+            .internal_printed_abilities(holder)?
             .into_iter()
-            .filter(|ability| {
-                printed_origin(&ability.node.source.origin).is_ok_and(|(face, _)| {
-                    face_ordinal(face).is_ok_and(|ordinal| {
-                        i64::try_from(ordinal).is_ok_and(|ordinal| object.state["face"] == ordinal)
-                    })
-                })
-            })
+            .filter(|a| is_timing(&a.node))
             .collect())
     }
 
-    fn timing_pending(
+    pub(super) fn timing_pending(
         &mut self,
         holder: &str,
         ability: Located<Ability>,
@@ -285,4 +257,15 @@ impl Game {
         }
         Ok(())
     }
+}
+
+pub(super) fn is_timing(ability: &Ability) -> bool {
+    matches!(
+        ability.trigger.as_ref().map(|t| &t.on),
+        Some(TriggerCondition::Event {
+            pattern: EventPattern::Attack { .. }
+                | EventPattern::Phase { .. }
+                | EventPattern::Evolve { .. }
+        })
+    )
 }

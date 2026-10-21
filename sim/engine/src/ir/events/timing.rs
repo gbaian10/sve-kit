@@ -1,7 +1,7 @@
 use crate::ir::{
-    AttackEvent, Binding, Bool, Cardinality, Edge, EdgeFields, Expr, Nat, ObjectFrozen, Phase,
-    PhaseEvent, PhaseFields, PlayerFrozen, PlayerRef, PlayerRelation, PlayerSet, Predicate,
-    TextQuantifier, ValueEquality,
+    AttackEvent, Binding, Bool, Cardinality, Edge, EdgeFields, EvolveEvent, Expr, Nat,
+    ObjectFrozen, Phase, PhaseEvent, PhaseFields, PlayerFrozen, PlayerRef, PlayerRelation,
+    PlayerSet, Predicate, TextQuantifier, ValueEquality,
 };
 
 pub(crate) fn opponent() -> PlayerRef {
@@ -45,4 +45,11 @@ pub(crate) fn end_predicate(event: Binding<PhaseEvent>, player: Option<PlayerRef
         })));
     }
     Expr::Compute(Box::new(Predicate::And { predicates }))
+}
+
+pub(crate) fn evolve_predicate(event: Binding<EvolveEvent>) -> Expr<Bool> {
+    Expr::Compute(Box::new(Predicate::ObjectEquals {
+        left: Expr::Frozen(Box::new(ObjectFrozen::EvolveSubject { event })),
+        right: Expr::Frozen(Box::new(ObjectFrozen::SourceHolder {})),
+    }))
 }

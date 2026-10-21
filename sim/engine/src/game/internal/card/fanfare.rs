@@ -161,7 +161,8 @@ impl Game {
             .find(|(_, physical)| physical == holder)
             .map(|(id, _)| id)
             .ok_or_else(|| invalid("missing holder identity"))?;
-        let key = (holder.into(), generation, definition);
+        let (printed, face) = self.internal_effective_print(holder)?;
+        let key = (holder.into(), generation, printed, face, definition);
         let instance = if let Some(&instance) = self.card_runtime.instances.get(&key) {
             instance
         } else {

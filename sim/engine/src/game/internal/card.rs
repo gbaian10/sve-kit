@@ -5,11 +5,11 @@ use super::{
 };
 use crate::ir::{
     Ability, AbilityId, AbilityInstanceId, AbilityKind, AbilityOrigin, AbilitySource, Action,
-    Control, CostSpec, DamageAmount, ExecutionId, Expr, FaceId, Generation, InstructionContext,
-    Int, KeywordId, Located, MoveDestination, MoveReason, Nat, Node, ObjectOperand, ObjectRef,
-    OwnerZone, PlayerId, PlayerRef, Posture, PostureEvent, Quantity, QuantityUnit, Resource,
-    ResourceOperation, RuleId, RuntimeAbilitySource, Selector, SourceSpan, StepwiseMode,
-    WellFormedCardProgram, ZoneKind,
+    AssociationId, Control, CostSpec, DamageAmount, ExecutionId, Expr, FaceId, Generation,
+    InstructionContext, Int, KeywordId, Located, MoveDestination, MoveReason, Nat, Node,
+    ObjectOperand, ObjectRef, OwnerZone, PlayerId, PlayerRef, Posture, PostureEvent, Quantity,
+    QuantityUnit, Resource, ResourceOperation, RuleId, RuntimeAbilitySource, Selector, SourceSpan,
+    StepwiseMode, WellFormedCardProgram, ZoneKind,
 };
 use crate::{Result, invalid};
 use alloc::collections::{BTreeMap, BTreeSet};
@@ -18,7 +18,9 @@ use serde::Serializer;
 use serde::ser::Error as _;
 use serde_json::json;
 
+mod evolution;
 mod fanfare;
+mod printed;
 mod triggers;
 pub use triggers::PendingOption;
 pub(super) mod play;
@@ -52,7 +54,8 @@ pub struct Activation {
 #[derive(Clone, Debug, Default)]
 pub(in crate::game) struct CardRuntime {
     cards: BTreeMap<String, WellFormedCardProgram>,
-    instances: BTreeMap<(String, u64, AbilityId), AbilityInstanceId>,
+    instances: BTreeMap<(String, u64, String, usize, AbilityId), AbilityInstanceId>,
+    links: BTreeMap<(u64, u64, u64, u64), AssociationId>,
     next_instance: u64,
     pub(in crate::game) checkpoint: Option<ExecutionId>,
     pending: Vec<triggers::PendingOccurrence>,
@@ -77,15 +80,20 @@ impl CardRuntime {
     pub(in crate::game) fn requires_typed_play(&self) -> bool {
         self.cards.values().any(|card| {
             card.card().abilities.iter().any(|ability| {
-                matches!(
-                    ability.node.kind,
-                    AbilityKind::Spell | AbilityKind::Triggered
-                )
+                evolution::intrinsic(&ability.node)
+                    || matches!(
+                        ability.node.kind,
+                        AbilityKind::Spell | AbilityKind::Triggered
+                    )
             })
         })
     }
     pub(in crate::game) fn is_empty(&self) -> bool {
         self.cards.is_empty()
+    }
+
+    pub(in crate::game) fn is_loaded(&self, card: &str) -> bool {
+        self.cards.contains_key(card)
     }
 }
 
@@ -146,6 +154,10 @@ impl Game {
                 play::check_spell(ability, printed)?;
             }
             check_source(&located.source, card_no, &face.0, line.0)?;
+            if evolution::intrinsic(ability) {
+                evolution::check(located)?;
+                continue;
+            }
             if matches!(ability.kind, AbilityKind::Activated | AbilityKind::Spell) {
                 check_costs(ability)?;
             }
@@ -405,6 +417,9 @@ fn check_header(ability: &Ability) -> Result<()> {
     {
         return Err(unsupported("whole-card ability header"));
     }
+    if evolution::intrinsic(ability) {
+        return Ok(());
+    }
     if ability.kind == AbilityKind::Triggered {
         return triggers::check_header(ability);
     }
@@ -495,7 +510,12 @@ fn printed_origin(origin: &AbilityOrigin) -> Result<(&FaceId, &Nat)> {
     match origin {
         AbilityOrigin::Printed { face, line } => Ok((face, line)),
         AbilityOrigin::Keyword {
-            keyword: KeywordId::Fanfare | KeywordId::Lastword | KeywordId::OnAttack,
+            keyword:
+                KeywordId::Fanfare
+                | KeywordId::Lastword
+                | KeywordId::OnAttack
+                | KeywordId::OnEvolve
+                | KeywordId::Evolution,
             origin,
         } => {
             if let AbilityOrigin::Printed { face, line } = origin.as_ref() {

@@ -24,7 +24,7 @@ Amulet executor、Quick、前置 X、追加／替代成本、一般 trigger、St
 與死分支的 requirement 集合。Fanfare Keyword 例外只接受已驗 instruction source 的精確位置，
 不對同名 capability 全域放行。本文仍限 Draw Exact、Look Exact、Uniform／Allocation Damage、
 已支援的 Modify／InstallEffect、Move／Destroy、capture、Sequence／If，另支援下述 ChoiceKeyword。
-Move／Destroy 沿用已驗公開區來源與 owner 墓地／消滅目的地；連結、進化關聯、特殊卡片、
+Move／Destroy 沿用已驗公開區來源與 owner 墓地／消滅目的地；未受驗連結、特殊卡片、
 入場效果與其他互動本文保持拒絕。
 
 `play_internal_card(holder, actor)` 接主動玩家 main、自己的 Hand／EX、base 普通 Spell 或已准入的
@@ -90,12 +90,12 @@ Fanfare 入場後保存原來源、controller、instance 與公開的入場來�
 共同移區原語在同批成功移區前，保存既有 pending 來源資訊與移動前有效的 Lastword 能力；
 真正 Field→Cemetery 才建立 Lastword occurrence。成本 Put 與規則破壞皆走此處，不靠 Destroy facet。
 回手／消滅不符合；完全被取代而未離場的動作不製造 occurrence。
-已有進化關聯的持有者，其有效印刷能力來自進化卡；此離場情境尚未接上，base 或進化卡帶 Lastword 時整次拒絕，
-不沿 base 定義觸發，也不漏掉進化卡的能力。每個成功成員保留獨立原事實與
+已有進化關聯的持有者，其有效印刷能力來自受驗進化卡；離場前保存該印刷定義與來源資訊，
+不沿 base 定義觸發。每個成功成員保留獨立原事實與
 before／after、直接 cause；規則移區的 source=None，不冒充造成先前傷害的能力。
 目前正式本文只承載公開區 owner 墓地／消滅移動；一般回手、入場及跨世代跟隨仍拒絕。
 
-Fanfare、Lastword、OnAttack 及 End Begin 共用一個私有待機集合。`internal_pending_choice()` 在穩定檢查時點建立題目，
+Fanfare、Lastword、OnEvolve、OnAttack 及 End Begin 共用一個私有待機集合。`internal_pending_choice()` 在穩定檢查時點建立題目，
 回合玩家有待機就由該玩家選一個，否則由對手選。`answer_internal_card` 接 `Answer::Pending(handle)`；
 候選只投影當次 handle、已公開卡號、印刷行與事件的過去公開場位／入場來源，不交出 source／instance／snapshot。
 錯 actor、token、handle 或 payload 保留原題；選中後是獨立 execution，完成再交 CheckTiming。
@@ -109,18 +109,31 @@ Fanfare、Lastword、OnAttack 及 End Begin 共用一個私有待機集合。`in
 BP01-118 與 BP01-P25 的測試由 C0 展開、lowering、整卡載入及 authority 程序驗證相應傷害片段；
 P25 的送墓成本來自明示的合成測試輔助能力。來源座標為候選 fixture，不宣稱永久來源驗證或公開 capability。
 
-`internal_rule_action` 僅接受 attack、end-phase、pass 與 end-discard 的既有規則動作，
+`internal_rule_action` 僅接受 evolve、attack、end-phase、pass 與 end-discard 的既有規則動作，
 沿原有時機、目標與支付／姿勢驗證；忙碌、待機及未完成 CheckTiming 時拒絕，不接原型 play／activate。
 守護屬原型 keyword，載入整卡的局面整體拒絕，所以不開 guard-act。時機不符的動作回 `cannot-play` 等拒絕結果，不視為成功。
 OnAttack 限 Printed 關鍵字、自身 Attack、AfterEntry、PerFact、無 limit／PlaySpec；事件在合法目標與 act
 完成後、Quick 與傷害前保存精確 attacker、target、controller 與當回合 ordinal。
 End Begin 限 Printed、Phase(End, Begin)、自己的／對手的／每個 end phase，依事件回合玩家匹配；
 只在 start_end 發一次，先待機再進守護 act、Quick、棄牌及到期，不因重入檢查重發。
-此處 AfterEntry 指事件完成後，沒有把攻擊或 phase 當成入場。進化來源的上述事件 context 尚未接線時整次拒絕。
+此處 AfterEntry 指事件完成後，沒有把攻擊或 phase 當成入場。進化持有者從有效進化卡取得上述印刷能力。
 選題入口不再自行執行會產生事件的規則處理；各 producer 或 resume 先完成規則穩定處理，避免遺失 Step 事件。
 
 BP10-122 的 attack-time 抽一片段與 BP09-P17 的 end 抽三片段經 C0／lowering 驗證；後者只取抽牌指示，
 不宣稱其完整能力已支援。攻擊測試加上合成待機能力，驗結算前來源加攻送墓後讀 LKI 4。
+
+進化規則入口只承接受驗的固有進化正規形：同名、自方未公開 EvolveDeck 資源、Reveal 後支付固定 PP，
+以及單一普通 Evolve 指示；不開一般本文的 Evolve 或 EachObject。只有已載入整卡的持有者走此入口，
+未載入的原型持有者照舊使用原型進化。來源及資源只收 face 0，
+沿既有時機、每回合次數、PP／EP／SEP 規則驗證；一般與合法超進化的 evolve facet 由實際付款決定，
+不信任輸入的 kind。全部程序完成後才從進化卡有效印刷面取得 Printed OnEvolve，自身、AfterEntry、PerFact、
+無 limit／PlaySpec。獨立 OnSuperEvolve 與進化相當能力仍拒絕。
+
+進化保持場上持有者世代；進化卡另有物件世代與受驗關聯。事件保存完整 before／after characteristics，
+新印刷定義依卡號、face、局部 AbilityId 配發新 instance，不與進化前同號能力相撞。
+成本依規則 5.16.1.2 保留 base face 0 的印刷值與既有成本修正；Original 攻／體改讀進化卡。
+Set／帶期限 Add 跨進化仍受 numeric-timing 限制。BP20-R14 只取進化時抽一片段，
+固有進化 PP 入口為明示合成案例；同一代表局面驗一般／超進化 facet、新 instance 及進化後 Lastword。
 
 `concede_internal(actor)` 依投了規則立即結束，即使正在等待正式 play、合成 prepared 本文或待機選序也可用。
 回傳 `Terminal` 與已執行前綴的 `Progress`（complete=false）／Step；保留現有狀態、付款與已發生的事實，
@@ -145,8 +158,8 @@ Spell 的 Resolution 收尾也保存來源資訊，且只收尾本次原世代�
 不存在的欄位（例如 Spell 的攻擊力）才按規則為零。Current 數值讀取維持只讀 Effective。
 Spell 的來源資訊綁定進 Resolution 後的新世代；本文 Move／Destroy 不接受 Resolution 中的物件。
 
-此子集也保存上述待機來源的後續離場資訊、受限成本送墓與共同規則移區。其餘常見觸發、
-回場新世代的完整入場 producer 及 prepared play 終局尚未接上，不宣稱完整來源生命週期已完成。
+此子集也保存上述待機來源的後續離場資訊、受限成本送墓與共同規則移區。長寫入場、
+回場新世代的完整入場 producer 尚未接上，不宣稱完整來源生命週期已完成。
 
 ### 成功 After 的當回合減費片段
 
@@ -158,7 +171,7 @@ intervals、Set 或其他期限。每個成功的新世代必須仍在 EX；EX �
 
 搜尋的 found-local 費用條件、IR Effective Cost 讀值、已完成的卡片 play 與原型正式付款，
 共用 checked 有效費用讀取。各 Delta 先 checked 加總，最後最低為 0；格式錯誤與溢位拒絕，
-不以 scalar 的零預設或飽和運算代替。進化來源的 cost 例外尚未遷移，這類讀值仍拒絕。
+不以 scalar 的零預設或飽和運算代替。進化來源依受驗關聯讀 base face 0 的成本，未知或無效關聯拒絕。
 typed 減費與 prototype continuous 費用層不得混用；存在 typed 費用層時，付款另驗可合併的
 prototype 能力與非溢位 additional PP。
 

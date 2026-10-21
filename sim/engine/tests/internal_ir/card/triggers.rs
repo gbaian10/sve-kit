@@ -2,7 +2,7 @@ use super::*;
 use sve_engine::game::internal::{Answer, DecisionView, InputDomain};
 use sve_engine::ir::lowering::ExpandedLowerer;
 
-fn lastword(mut ability: Located<Ability>) -> Located<Ability> {
+pub(super) fn lastword(mut ability: Located<Ability>) -> Located<Ability> {
     ability.node.kind = AbilityKind::Triggered;
     ability.node.play = None;
     ability.node.source.origin = AbilityOrigin::Keyword {
@@ -209,7 +209,7 @@ fn pending_order_keeps_departed_source_lki_and_checks_defeat_before_the_other_pl
         let mut game = activated(&evolved, &program, seat);
         let before = exact_authority(&game);
         let error = game.resume_internal_card().unwrap_err();
-        assert!(format!("{error:?}").contains("evolved Lastword departure"));
+        assert!(format!("{error:?}").contains("evolution information association"));
         assert_eq!(before, exact_authority(&game));
         let mut game = activated(&initial, &program, seat);
         game.resume_internal_card().unwrap();

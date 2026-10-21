@@ -40,6 +40,8 @@ pub(super) struct Ability {
     pub lastword: Option<Body>,
     pub attack_time: Option<Body>,
     pub auto: Option<Auto>,
+    pub evolve_time: Option<Body>,
+    pub evolve: Option<Evolution>,
 }
 
 #[derive(Deserialize)]
@@ -162,4 +164,15 @@ pub(super) enum PhasePlayer {
     Opponent,
     #[serde(rename = "each")]
     Each,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Evolution {
+    pub cost: EvolutionCost,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct EvolutionCost {
+    pub pp: u64,
 }

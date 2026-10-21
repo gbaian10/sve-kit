@@ -1,6 +1,7 @@
 //! Candidate-only lowering of C0's expanded tree, without source or runtime admission.
 
 mod ast;
+mod evolution;
 
 use super::{
     Ability, AbilityId, AbilityKind, AbilityOrigin, AbilityQualification, AbilitySource, Action,
@@ -62,7 +63,8 @@ impl ExpandedLowerer {
 
     /// Lower every card atomically. Success proves only internal IR well-formedness.
     ///
-    /// Only fanfare, lastword, attack-time, End Begin, draw, uniform damage to all leaders, and their numeric subset
+    /// Only intrinsic evolution, evolve-time, fanfare, lastword, attack-time, End Begin,
+    /// draw, uniform damage to all leaders, and their numeric subset
     /// are supported. Card keys remain candidate coordinates, not snapshot IDs.
     ///
     /// # Errors
@@ -89,6 +91,7 @@ impl ExpandedLowerer {
                 let ability = decode(value, &path)?;
                 let scope = u64::try_from(index)
                     .ok()
+                    .and_then(|index| index.checked_mul(3))
                     .and_then(|index| index.checked_add(1))
                     .ok_or_else(|| unsupported(&path))?;
                 abilities.push(allocator.ability(&key, &path, &ability, ScopeId(scope))?);
@@ -136,16 +139,25 @@ impl Allocator {
             return Err(unsupported(path));
         }
 
+        if entry.evolve.is_some() {
+            return evolution::lower(self, key, path, entry, scope);
+        }
         let (body, head, keyword) = match (
             &entry.fanfare,
             &entry.lastword,
             &entry.attack_time,
             &entry.auto,
+            &entry.evolve_time,
         ) {
-            (Some(body), None, None, None) => (body, "fanfare", Some(KeywordId::Fanfare)),
-            (None, Some(body), None, None) => (body, "lastword", Some(KeywordId::Lastword)),
-            (None, None, Some(body), None) => (body, "attack_time", Some(KeywordId::OnAttack)),
-            (None, None, None, Some(auto)) => (&auto.body, "auto", None),
+            (Some(body), None, None, None, None) => (body, "fanfare", Some(KeywordId::Fanfare)),
+            (None, Some(body), None, None, None) => (body, "lastword", Some(KeywordId::Lastword)),
+            (None, None, Some(body), None, None) => {
+                (body, "attack_time", Some(KeywordId::OnAttack))
+            }
+            (None, None, None, Some(auto), None) => (&auto.body, "auto", None),
+            (None, None, None, None, Some(body)) => {
+                (body, "evolve_time", Some(KeywordId::OnEvolve))
+            }
             _ => return Err(unsupported(path)),
         };
         let source = source_span(key, path, entry)?;
@@ -231,6 +243,12 @@ fn lowered_trigger(
             EventPattern::Attack {
                 binding: event,
                 predicate: super::events::timing::attack_predicate(event),
+            }
+        } else if keyword == Some(KeywordId::OnEvolve) {
+            let event = Binding::new(event_id, scope);
+            EventPattern::Evolve {
+                binding: event,
+                predicate: super::events::timing::evolve_predicate(event),
             }
         } else if let Some(auto) = &entry.auto {
             let player = match auto.on.phase.whose {

@@ -238,7 +238,7 @@ impl Game {
             return Err(invalid("stale Current information read"));
         }
         let printed = self.face(id)?;
-        let cost = super::cost::printed_cost(&printed["cost"])?;
+        let cost = super::cost::printed_cost(&self.internal_cost_print(id)?["cost"])?;
         // A non-follower has no attack/life; only a valid view can yield rules-absent zero.
         let (original_attack, original_life, attack, life) =
             if self.object_type(id)?.contains("フォロワー") {

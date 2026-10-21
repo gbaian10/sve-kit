@@ -658,7 +658,13 @@ impl Game {
     }
 
     fn evolve_decision(&mut self, decision: &Value) -> Result<bool> {
-        self.evolve_action(decision)
+        // A loaded card evolves only through its checked intrinsic proof; prototype holders keep theirs.
+        let source = self.object(string(&decision["source"]))?;
+        if self.card_runtime.is_loaded(&source.card) {
+            self.internal_evolve_action(decision)
+        } else {
+            self.evolve_action(decision)
+        }
     }
 
     fn attack(&mut self, decision: &Value) -> Result<bool> {

@@ -15,6 +15,7 @@ use crate::ir::{
 };
 use alloc::collections::BTreeMap;
 
+mod evolution;
 mod timing;
 
 /// Only question-scoped handles and already public information reach a player.
@@ -180,6 +181,7 @@ impl Game {
             .next_pending
             .checked_add(1)
             .ok_or_else(|| invalid("pending identities exhausted"))?;
+        let card = ability.source.card_no.clone();
         Ok(PendingOccurrence {
             id: self.card_runtime.next_pending,
             holder: holder.into(),
@@ -188,7 +190,7 @@ impl Game {
             information,
             header,
             leave,
-            card: self.object(holder)?.card.clone(),
+            card,
             entry_from: None,
             timing: None,
             field_position: u64::try_from(
@@ -240,49 +242,19 @@ impl Game {
 
     /// Lastword abilities effective just before this field object leaves.
     fn printed_lastwords(&self, object: &Object) -> Result<Vec<Located<Ability>>> {
-        let has_lastword = |card: &str| {
-            self.card_runtime.cards.get(card).is_some_and(|program| {
-                program
-                    .card()
-                    .abilities
-                    .iter()
-                    .any(|ability| is_lastword(&ability.node))
-            })
-        };
-        if object.state["silenced"] == true {
+        if !self.card_runtime.cards.values().any(|program| {
+            program
+                .card()
+                .abilities
+                .iter()
+                .any(|a| is_lastword(&a.node))
+        }) {
             return Ok(Vec::new());
         }
-        // Effective printed abilities of an evolved follower come from its evolution card;
-        // that departure context is not wired, so neither base nor form Lastword may be guessed.
-        if let Some(evolved) = object.state["evolved_with"].as_str() {
-            if has_lastword(&object.card)
-                || self
-                    .state
-                    .objects
-                    .get(evolved)
-                    .is_some_and(|form| has_lastword(&form.card))
-            {
-                return Err(unsupported("evolved Lastword departure context"));
-            }
-            return Ok(Vec::new());
-        }
-        let Some(card) = self.card_runtime.cards.get(&object.card) else {
-            return Ok(Vec::new());
-        };
-        Ok(card
-            .card()
-            .abilities
-            .iter()
-            .filter(|ability| {
-                is_lastword(&ability.node)
-                    && printed_origin(&ability.node.source.origin).is_ok_and(|(face, _)| {
-                        face_ordinal(face).is_ok_and(|ordinal| {
-                            i64::try_from(ordinal)
-                                .is_ok_and(|ordinal| object.state["face"] == ordinal)
-                        })
-                    })
-            })
-            .cloned()
+        Ok(self
+            .internal_printed_abilities(&object.id)?
+            .into_iter()
+            .filter(|a| is_lastword(&a.node))
             .collect())
     }
 
