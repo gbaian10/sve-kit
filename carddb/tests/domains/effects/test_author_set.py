@@ -5,15 +5,23 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.core.json import canonical, object_value
-from sve_carddb.domains.effects.author_expansion import body_version
+from sve_carddb.core.json import canonical
+from sve_carddb.core.provenance import BuildContext
+from sve_carddb.domains.effects.author_current import CardRejected, CurrentAuthorSources
+from sve_carddb.domains.effects.author_expansion import AuthorExpander, body_version
 from sve_carddb.domains.effects.author_inputs import AuthorInputError, AuthorSchemas
 from sve_carddb.domains.effects.author_set import load_author_set, validate_author_set
+from sve_carddb.domains.text_observations import Vocabulary
+from sve_carddb.domains.translations.inputs import Snapshot
+from sve_carddb.domains.translations.recognition.rules import load
+from sve_carddb.domains.translations.sources import Sources
 
 from .author_entry_cases import meta, source_use
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
+
+    from ...support.database_fixtures import DatabaseTemplate
 
 REPO = Path(__file__).resolve().parents[4]
 AUTHOR = "rules/author-effects/FIX/001.yaml"
@@ -115,19 +123,50 @@ def companion(root: Path, path: str = BODY) -> None:
     )
 
 
-def test_existing_authored_tree_without_index(schemas: AuthorSchemas) -> None:
-    inputs = load_author_set(REPO / "authored", schemas)
-    assert inputs.index_file is None
-    assert inputs.index.records == ()
-    assert inputs.author_files == inputs.body_files == ()
-    assert len(inputs.prototype_files) == 47
-    assert (
-        sum(
-            len(object_value(object_value(schemas.prototype_tree(item.raw))["cards"]))
-            for item in inputs.prototype_files
+def test_prototype_inventory_uses_database_identity(
+    tmp_path: Path, t0_database_template: DatabaseTemplate
+) -> None:
+    expander = AuthorExpander(REPO / "dsl")
+    with t0_database_template.copy() as db:
+        with db.transaction():
+            db.insert("card", dict(db.rows("card")[0].values) | {"id": "c:" + "1" * 32})
+            db.insert(
+                "printing",
+                dict(db.rows("printing")[0].values)
+                | {"id": "prototype", "card_no": "FIX-001", "card_id": "c:" + "1" * 32},
+            )
+        current = CurrentAuthorSources(
+            db,
+            Sources({}, REPO, BuildContext.from_inputs("0" * 40, {})),
+            Snapshot((), ()),
+            Vocabulary(bindings=()),
+            load(REPO),
+            "sha256:" + "0" * 64,
         )
-        == 422
-    )
+        prototype(tmp_path, "FIX-001")
+        index(tmp_path, selection(path=PROTOTYPE))
+        result = current.validate(tmp_path, expander)
+        assert len(result) == 1
+        assert isinstance(result[0], CardRejected)
+        assert result[0].diagnostic.reason == "unsupported_prototype"
+        index(tmp_path, selection(path=PROTOTYPE, identity="2"))
+        with pytest.raises(AuthorInputError, match="prototype_index_identity_mismatch"):
+            current.validate(tmp_path, expander)
+        index(tmp_path)
+        prototype(tmp_path, "MISSING")
+        with pytest.raises(AuthorInputError, match="prototype_identity_unresolved"):
+            current.validate(tmp_path, expander)
+        prototype(tmp_path, "FIX-001")
+        for scope in ("shared", "en_override"):
+            author(tmp_path, "FIX-001", scope=scope)
+            index(tmp_path, selection(scope=scope))
+            if scope == "shared":
+                with pytest.raises(AuthorInputError, match="prototype_author_overlap"):
+                    current.validate(tmp_path, expander)
+            else:
+                result = current.validate(tmp_path, expander)
+                assert isinstance(result[0], CardRejected)
+                assert result[0].diagnostic.reason == "en_source_contract_unavailable"
 
 
 def test_complete_inventory_retains_bytes_and_unused_bodies(

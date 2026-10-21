@@ -5,6 +5,7 @@ from pathlib import Path
 
 from sve_carddb.build import create_database
 from sve_carddb.build.t1 import MINIMUM_CAPABILITIES, compile_build
+from sve_carddb.core.authored import read as read_authored
 from sve_carddb.core.json import canonical, object_value, parse, string
 from sve_carddb.core.provenance import BuildContext
 from sve_carddb.domains.catalog.adoption_loader import load_adoptions
@@ -20,13 +21,9 @@ from sve_carddb.domains.text_observations import (
     Vocabulary,
 )
 from sve_carddb.domains.text_observations.closure import close_preview
-from sve_carddb.domains.translations.four_layer_authored import FrameRecord
+from sve_carddb.domains.translations.four_layer_authored import FrameRecord, Shard
 from sve_carddb.domains.translations.glossary.records import TermRecord
-from sve_carddb.domains.translations.inputs import (
-    Snapshot,
-    load_glossary,
-    validate_snapshot,
-)
+from sve_carddb.domains.translations.inputs import Snapshot, validate_snapshot
 from sve_carddb.domains.translations.recognition.rules import Rules, load
 from sve_carddb.domains.translations.sources import Sources
 
@@ -38,13 +35,8 @@ PARSER = "author-current-fixture-v1"
 CARD_NUMBERS = frozenset(
     {
         "BP01-009",
-        "BP01-020",
         "BP01-034",
-        "BP01-076",
         "BP01-092",
-        "BP01-110",
-        "BP08-038",
-        "CP04-060",
     }
 )
 EVOLVE_FRAME = "frame:8ebd201e08a1e14f57b700f2fb76dc11afbf7f16261350a117e2ca75f1aac18c"
@@ -61,21 +53,31 @@ class CurrentSourceFixture:
 
 
 def entry_snapshot() -> Snapshot:
-    """Select a public dependency subset from the validated real authored registry.
+    """Read only the real frame and term shards needed by the adopted entries.
 
     The adopted entry frame and Storm term retain their existing definitions.
     This does not verify the full registry's private digital concept sources.
     """
-    full = load_glossary(REPOSITORY / "authored")
+    authored = REPOSITORY / "authored"
+    records = tuple(
+        record
+        for name in (
+            "translations/glossary/concepts/004.yaml",
+            "translations/templates/definitions/094.yaml",
+        )
+        for record in Shard.model_validate_json(
+            read_authored(authored / name, root=authored)[1]
+        ).records
+    )
     selected = tuple(
         record
-        for record in full.four_layer.records
+        for record in records
         if isinstance(record, FrameRecord) and record.data.id == EVOLVE_FRAME
     )
     assert len(selected) == 1
     storm = tuple(
         record
-        for record in full.four_layer.records
+        for record in records
         if isinstance(record, TermRecord) and record.data.id == "term:keyword.storm"
     )
     assert len(storm) == 1
