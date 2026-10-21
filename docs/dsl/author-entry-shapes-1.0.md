@@ -2,7 +2,7 @@
 
 作者檔與伴隨本體共用 `author-nodes.schema.json` 的能力內容圖。`author.schema.json`／`effect-bodies.schema.json` 各由固定 format/kind 選取，逐卡 dsl 只驗支援集；不得依 dsl 猜「最新」資源。原型 effect_set 不在本 reader 的作者入口。
 
-此 reader 只驗結構與檔內事實。來源 registry／現行版次／FrameId／Port 閉包、索引候選雙向閉包、資格與引擎准入仍是其他驗證階段。generated_by 展開與 body hash 由下述明示展開 API 核對，不由結構 reader 隱式執行。`status:verified` 是作者聲稱，不構成可執行資格；非空 `verified_by_exam` 尚無封閉格式，現階段報 unsupported_exam_evidence。
+此 reader 只驗結構、inline 參數殘留及本體鍵／registration id 唯一性。第一版不執行 review 資格、用途依賴排序／追蹤、rekey 或實跑 DB 驗證；證據欄位保留封閉形狀與作者原序。來源 registry／現行版次／FrameId／Port 閉包、索引候選雙向閉包、資格與引擎准入仍是其他驗證階段。generated_by 展開與 body hash 由下述明示展開 API 核對，不由結構 reader 隱式執行。`status:verified` 是作者聲稱，不構成可執行資格；非空 `verified_by_exam` 尚無封閉格式，現階段報 unsupported_exam_evidence。
 
 ## 容器矩陣
 
@@ -30,15 +30,9 @@ UseDependencies.imports 值恰為 binding_id／ability_scope／port／dependency
 
 | invariant | 精確範圍 |
 | --- | --- |
-| 字串排序唯一 | Domain.regions |
-| 完整 canonical bytes 排序唯一 | UseDependencies／BodyDependencies 的 interfaces、rulings；BodyDependencies.sources |
 | 原序保留 | UseDependencies.sources、written_by、reviewed_by、registration.reviews、registrations、meta.rulings 及所有能力陣列 |
 | registration id 唯一 | 每筆 companion |
 | companion key 唯一 | 同檔 frame_id／ability_scope／body_version；跨分片另驗 |
-| reviewer＋依賴唯一 | 同陣列 review；模型按精確 model、真人按 Actor；原 dependencies 及 rekey.after 都查 |
-| review 類型互斥 | 同明示用途不能同時有 UseReview／MacroMechanical；不以不同 body version 規避 |
-| disputed reason | 必須非空 |
-| MacroMechanical 本體一致性 | body 與 use_dependencies 的 frame_id／ability_scope／body_version／applicability_scope 逐欄相同 |
 
 ## 診斷與驗證範圍
 
@@ -87,6 +81,6 @@ current 邊界重建真實 registry 的 Frame／Binding，核對全部 JP curren
 
 來源 adapter 只支援已登錄的具名構造。offset 沿 expression 的正式 operand 定位並核對 count sibling，不按同數值反查；negated_magnitude、Concept／CardKind／Phase 來源轉碼尚未支援。來源路徑遇到非空 Projection ports、作者 ports 或 imports 即拒絕；純作者 binding／imports 圖分析不證明來源 source_role 或 scope 映射。直接 instead 參數、grouped target 數量及 grouped search 目的地的白名單範圍尚待定義，展開時拒絕，不放寬 P1。
 
-D0 只消費通過 expanded profile 的 JSON 樹；C0 sidecar 留在樹外，不是新增公開 wire。候選 golden 可用於 lowering 與漂移測試，正式生產接線仍須完整用途依賴及資格驗證；current_source_checked 本身不足以執行。D0 必須沿 SourceUse.owner 決定能力持有面，不能將卡級容器解讀為全卡常駐。Rust 應以鎖定的 `jsonschema` 0.58.1 驗同一 profile 的 dynamic scope 正反例，目前尚未完成該 Rust 驗證。
+D0 只消費通過 expanded profile 的 JSON 樹；C0 sidecar 留在樹外，不是新增公開 wire。候選 golden 可用於 lowering 與漂移測試，第一版以來源綁定、良構檢查及引擎實作的支援範圍作為接線邊界，不執行用途依賴與資格機制；current_source_checked 本身不足以執行。D0 必須沿 SourceUse.owner 決定能力持有面，不能將卡級容器解讀為全卡常駐。Rust 應以鎖定的 `jsonschema` 0.58.1 驗同一 profile 的 dynamic scope 正反例，目前尚未完成該 Rust 驗證。
 
 BP08-038／CP04-060 的固定 canonical golden 只驗純展開，source_proof 為 none。在既有來源 fixture 下，BP08 仍為 unresolved_whole_line_semantics，CP04 仍有 signed_numeric_requires_review；兩者均是來源重建路徑的負例。合成 resolved 相容性案例與這些真卡內容分開，不宣稱來源已採納。

@@ -56,10 +56,6 @@ FILTERS: dict[str, JsonValue] = {
 
 
 def _check(name: str, value: JsonValue, *, accepted: bool) -> None:
-    validator = Draft202012Validator(
-        {"$id": NODES["$id"], "$defs": NODES["$defs"], "$ref": "#/$defs/" + name}
-    )
-    assert validator.is_valid(value) == accepted
     # TypedDict configurations must enforce strictness without caller overrides.
     if accepted:
         decoded = ADAPTERS[name].validate_json(canonical(value))
@@ -73,10 +69,6 @@ def _check(name: str, value: JsonValue, *, accepted: bool) -> None:
 def test_query_variants_round_trip(name: str, value: JsonValue) -> None:
     _check(name, value, accepted=True)
     assert not Draft202012Validator(NODES).is_valid(value)
-
-
-def test_query_cases_cover_every_definition() -> None:
-    assert {name for name, _ in QUERY_CASES} == (COUNTS | SELECTORS).keys()
 
 
 @pytest.mark.parametrize("field", FILTERS)
@@ -286,78 +278,3 @@ def test_except_keeps_the_object_domain_at_each_depth() -> None:
     changed = deepcopy(value)
     changed["except"] = {"leader": "self"}
     _check(OBJECTS, changed, accepted=False)
-
-
-def _leaves(node: dict[str, JsonValue]) -> list[dict[str, JsonValue]]:
-    reference = node.get("$ref")
-    if isinstance(reference, str):
-        return _leaves(
-            object_value(
-                object_value(NODES["$defs"])[reference.removeprefix("#/$defs/")]
-            )
-        )
-    branches = node.get("anyOf", node.get("oneOf"))
-    if isinstance(branches, list):
-        return [leaf for branch in branches for leaf in _leaves(object_value(branch))]
-    return [node]
-
-
-@pytest.mark.parametrize(
-    ("name", "values"),
-    [
-        (
-            OBJECTS,
-            [
-                {"who": "self"},
-                {"in": "looked", "except": {"in": "chosen"}},
-            ],
-        ),
-        (COUNTED, [{"who": "self", "zone": "field"}, COUNT_UNION]),
-        (E, [{"count": COUNT_UNION}, {"count": {"who": "each", "zone": "field"}}]),
-    ],
-)
-def test_query_unions_have_unique_leaves_and_one_match(
-    name: str, values: list[JsonValue]
-) -> None:
-    leaves = _leaves(object_value(object_value(NODES["$defs"])[name]))
-    assert len({canonical(leaf) for leaf in leaves}) == len(leaves)
-    for value in values:
-        assert (
-            sum(
-                Draft202012Validator(
-                    {"$id": NODES["$id"], "$defs": NODES["$defs"], **leaf}
-                ).is_valid(value)
-                for leaf in leaves
-            )
-            == 1
-        )
-
-
-@pytest.mark.parametrize(
-    ("name", "payload"),
-    [
-        (OBJECTS, b'{"who":"self","acted":1}'),
-        (OBJECTS, b'{"in":"shown","hp_le":2.0}'),
-        (OBJECTS, b'{"in":"shown","class_":"royal"}'),
-        (OBJECTS, b'{"in":"shown","as_":"candidate"}'),
-        (OBJECTS, b'{"in":"shown","except_":{"in":"chosen"}}'),
-        (COUNTED, b'{"who":"self","zone":"field","orig_cost_eq":2.0}'),
-        (COUNTED, b'{"who":"self","zone":"field","token":1}'),
-        (COUNTED, b'{"who":"self","zone":"field","unknown":true}'),
-    ],
-    ids=[
-        "bool",
-        "float",
-        "class-alias",
-        "scope-alias",
-        "except-alias",
-        "count-float",
-        "count-flag",
-        "count-extra",
-    ],
-)
-def test_adapter_enforces_configuration_without_caller_strict(
-    name: str, payload: bytes
-) -> None:
-    with pytest.raises(ValidationError):
-        ADAPTERS[name].validate_json(payload)

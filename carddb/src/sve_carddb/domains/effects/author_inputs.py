@@ -29,7 +29,6 @@ from sve_carddb.contracts.author_leaves import (
 from sve_carddb.core.json import canonical, object_value, parse
 from sve_carddb.core.yaml import JSON_VALUE, MAX_BYTES, YamlSyntaxError, parse_yaml
 from sve_carddb.domains.effects.author_validation import (
-    evidence_violations,
     expanded_residuals,
     inline_parameters,
 )
@@ -350,13 +349,6 @@ def _body_duplicates(document: _Document, decoded: EffectBodyShard) -> None:
 def _local_invariants(
     document: _Document, decoded: AuthorEffectSet | EffectBodyShard
 ) -> None:
-    for violation in evidence_violations(decoded):
-        raise AuthorInputError(
-            _located(
-                document,
-                document.diagnostic("container", violation.reason, violation.path),
-            )
-        )
     if isinstance(decoded, EffectBodyShard):
         _body_duplicates(document, decoded)
         return

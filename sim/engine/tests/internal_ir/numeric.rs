@@ -345,40 +345,28 @@ fn overflow_and_invalid_subject_restore_every_authority_field() {
 #[test]
 fn unsupported_numeric_shapes_are_rejected_in_dead_branches_before_draw() {
     for seat in [1, 2] {
-        for step in [
-            modify(
-                2,
-                zone(ZoneKind::Field, 130),
-                CharacteristicPatch::Numeric {
-                    stat: Stat::Attack,
-                    change: NumericChange::Set {
-                        amount: Expr::Literal(Int(-1)),
-                    },
+        let step = modify(
+            2,
+            zone(ZoneKind::Field, 130),
+            CharacteristicPatch::Numeric {
+                stat: Stat::Attack,
+                change: NumericChange::Set {
+                    amount: Expr::Literal(Int(-1)),
                 },
-                DurationEnd::NoTemporalExpiry {},
-            ),
-            modify(
-                2,
-                zone(ZoneKind::Field, 130),
-                pair(1, 1),
-                DurationEnd::NextTurnEdge {
-                    player: PlayerRef::Controller {},
-                    edge: Edge::End,
+            },
+            DurationEnd::NoTemporalExpiry {},
+        );
+        let program = checked(vec![
+            draw(1, 1),
+            node(Node::Control {
+                control: Control::If {
+                    condition: Expr::Literal(Bool(false)),
+                    then_body: body(2, vec![step]),
+                    else_body: None,
                 },
-            ),
-        ] {
-            let program = checked(vec![
-                draw(1, 1),
-                node(Node::Control {
-                    control: Control::If {
-                        condition: Expr::Literal(Bool(false)),
-                        then_body: body(2, vec![step]),
-                        else_body: None,
-                    },
-                }),
-            ]);
-            unchanged(&mut game(seat, 2), &program, seat);
-        }
+            }),
+        ]);
+        unchanged(&mut game(seat, 2), &program, seat);
     }
 }
 

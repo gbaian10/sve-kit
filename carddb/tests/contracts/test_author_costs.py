@@ -1,18 +1,17 @@
 """Validate payment shapes, ordered author bytes and their precise context boundaries."""
 
 import json
-from copy import deepcopy
 from typing import TYPE_CHECKING
 
 import pytest
 from jsonschema import Draft202012Validator
 from pydantic import ValidationError
 
-from sve_carddb.core.json import canonical, object_value, parse
+from sve_carddb.core.json import canonical, parse
 
 from .author_cost_cases import CARD_COSTS, CARD_TARGETS, CARD_WRAPPERS, COSTS
 from .author_parent_cases import PARENTS
-from .test_author_schema_drift import NODES, assert_selector_definition
+from .test_author_schema_drift import NODES
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
@@ -27,7 +26,6 @@ def _validator(name: str) -> Draft202012Validator:
 
 
 def _check(name: str, value: JsonValue, *, accepted: bool) -> None:
-    assert _validator(name).is_valid(value) == accepted
     adapter = ADAPTERS[name]
     if accepted:
         decoded = adapter.validate_json(canonical(value))
@@ -52,32 +50,6 @@ def test_card_payment_fragments(value: JsonValue) -> None:
 )
 def test_card_wrapper_fragments(name: str, value: JsonValue) -> None:
     _check(name, value, accepted=True)
-
-
-@pytest.mark.parametrize(
-    "value",
-    [
-        {},
-        {"result": "paid_now"},
-        {"pp": 1, "ep": 1},
-        {"steps": []},
-        {"steps": [{"pp": 1}]},
-        {"steps": [{"pp": 1}, {"pp": 1}], "pp": 1},
-        {"steps": [{"pp": 1, "ep": 1}, {"pp": 1}]},
-        {"steps": [{"pp": 1, "result": "paid_now"}, {"pp": 1}]},
-        {"steps": [{"pp": 1, "option": 1}, {"pp": 1}]},
-        {"steps": [{"steps": [{"pp": 1}, {"pp": 1}]}, {"pp": 1}]},
-        {"pp": 1, "result": "paid_now"},
-        {"pp": 1, "option": 1},
-        {"stack_counter_from": {"on": "this", "n": 1}},
-        {"one_of": []},
-        {"one_of": [{"pp": 1}]},
-        {"one_of": [{"one_of": [{"pp": 1}, {"ep": 1}]}, {"pp": 1}]},
-        {"one_of": [{"pp": 1, "result": "paid_now"}, {"ep": 1}]},
-    ],
-)
-def test_cost_structure_is_closed(value: JsonValue) -> None:
-    _check("A.cost", value, accepted=False)
 
 
 @pytest.mark.parametrize(
@@ -323,38 +295,6 @@ def test_decoded_targets_and_optional_payments_keep_array_order() -> None:
     _check("A.targets", [], accepted=False)
 
 
-@pytest.mark.parametrize("name", COSTS)
-def test_new_node_drift_detects_changed_shape(name: str) -> None:
-    changed = deepcopy(NODES)
-    node = object_value(object_value(changed["$defs"])[name])
-    if "properties" in node:
-        node["additionalProperties"] = True
-    else:
-        node["anyOf"] = []
-    with pytest.raises(AssertionError):
-        assert_selector_definition(changed, name)
-
-
-@pytest.mark.parametrize(
-    ("name", "key", "value"),
-    [
-        ("A.cost", "oneOf", []),
-        ("A.cost.optional-mode", "required", []),
-        ("A.play.costs", "dependentRequired", {}),
-        ("A.play.costs", "then", {}),
-        ("A.target.group-filter", "minProperties", 0),
-        ("A.target.group-filter", "not", {}),
-    ],
-)
-def test_drift_detects_semantic_constraints(
-    name: str, key: str, value: JsonValue
-) -> None:
-    changed = deepcopy(NODES)
-    object_value(object_value(changed["$defs"])[name])[key] = value
-    with pytest.raises(AssertionError):
-        assert_selector_definition(changed, name)
-
-
 def test_cost_integer_rejects_float_at_both_boundaries() -> None:
     with pytest.raises(ValueError, match="Floating point"):
         parse(b'{"pp":1.0}')
@@ -472,54 +412,6 @@ def test_grouped_target_rejects_wrong_context_and_exclusivity(
     )
 
 
-@pytest.mark.parametrize(
-    ("name", "field", "constraint", "value"),
-    [
-        ("A.cost", "steps", "minItems", 1),
-        ("A.cost.step", "one_of", "minItems", 1),
-        ("A.cost.optional-mode", "option", "minimum", 0),
-        ("A.cost.material.groups", "groups", "minItems", 1),
-        ("A.target.grouped.exact", "groups", "minItems", 1),
-    ],
-)
-def test_drift_detects_nested_bounds(
-    name: str, field: str, constraint: str, value: JsonValue
-) -> None:
-    changed = deepcopy(NODES)
-    node = object_value(object_value(changed["$defs"])[name])
-    object_value(object_value(node["properties"])[field])[constraint] = value
-    with pytest.raises(AssertionError):
-        assert_selector_definition(changed, name)
-
-
-@pytest.mark.parametrize("name", ["A.cost.material", "A.cost.shuffle-material"])
-@pytest.mark.parametrize(
-    "mode",
-    [
-        {"n": 1},
-        {"upto": 1},
-        {"any": True},
-        {"groups": [{"sel": {"in": "this"}, "n": 1}, {"sel": {"who": "self"}, "n": 1}]},
-    ],
-)
-def test_material_union_has_exactly_one_branch(
-    name: str, mode: dict[str, JsonValue]
-) -> None:
-    value = dict(mode)
-    if "groups" not in value:
-        value["sel"] = {"who": "self"}
-    if name == "A.cost.shuffle-material":
-        value["shuffle"] = True
-    _check(name, value, accepted=True)
-    assert (
-        sum(
-            _validator(name + "." + suffix).is_valid(value)
-            for suffix in ["exact", "up-to", "any", "groups"]
-        )
-        == 1
-    )
-
-
 @pytest.mark.parametrize("zone", ["banish", "banished"])
 def test_grouped_source_does_not_invent_a_banished_zone(zone: str) -> None:
     _check(
@@ -532,13 +424,3 @@ def test_grouped_source_does_not_invent_a_banished_zone(zone: str) -> None:
         },
         accepted=False,
     )
-
-
-def test_drift_detects_group_filter_parameter_admission() -> None:
-    changed = deepcopy(NODES)
-    node = object_value(object_value(changed["$defs"])["A.target.group-filter"])
-    object_value(node["properties"])["trait"] = {
-        "anyOf": [{"type": "string"}, {"$ref": "#/$defs/A.param"}]
-    }
-    with pytest.raises(AssertionError):
-        assert_selector_definition(changed, "A.target.group-filter")

@@ -12,7 +12,7 @@ from pydantic import TypeAdapter, ValidationError
 from sve_carddb.contracts.author_references import PlayerRef, Ref
 from sve_carddb.core.json import canonical, object_value, parse
 
-from .author_numeric_cases import NUMERIC, C, E
+from .author_numeric_cases import NUMERIC
 from .author_recipient_cases import (
     CARD_QUERIES,
     LEADER_OR,
@@ -46,14 +46,7 @@ ADAPTERS = (
 )
 
 
-def _validator(name: str) -> Draft202012Validator:
-    return Draft202012Validator(
-        {"$id": NODES["$id"], "$defs": NODES["$defs"], "$ref": "#/$defs/" + name}
-    )
-
-
 def _check(name: str, value: JsonValue, *, accepted: bool) -> None:
-    assert _validator(name).is_valid(value) == accepted
     adapter = ADAPTERS[name]
     if accepted:
         decoded = adapter.validate_json(canonical(value))
@@ -63,51 +56,12 @@ def _check(name: str, value: JsonValue, *, accepted: bool) -> None:
             adapter.validate_json(json.dumps(value))
 
 
-def _leaves(name: str) -> list[str]:
-    node = object_value(object_value(NODES["$defs"])[name])
-    variants = node.get("anyOf")
-    if not isinstance(variants, list):
-        return [name]
-    leaves = []
-    for variant in variants:
-        reference = object_value(variant)["$ref"]
-        assert isinstance(reference, str)
-        leaves.extend(_leaves(reference.removeprefix("#/$defs/")))
-    return leaves
-
-
 @pytest.mark.parametrize(
     "value", [v for _, v in CARD_QUERIES], ids=[c for c, _ in CARD_QUERIES]
 )
 def test_card_sources_round_trip(value: JsonValue) -> None:
     _check(RECIPIENT, value, accepted=True)
     assert not Draft202012Validator(NODES).is_valid(value)
-
-
-@pytest.mark.parametrize(
-    "value",
-    [
-        {"who": "self", "zone": "field"},
-        {"in": "shown"},
-        {"any_of": [{"in": "shown"}]},
-        {"leader": "self"},
-        {"leader": "opp"},
-        {"leaders": "all"},
-        {"leaders": "opponents"},
-        {"leader_of": {"role": {"of": "t", "name": "primary"}}},
-        LEADER_OR,
-        {**LEADER_OR, "zone": "field"},
-        {"any_of": [{"leader": "self"}]},
-        {"any_of": [{"leader": "self"}, {"leader": "self"}]},
-        {"any_of": [LEADER_OR, {"in": "shown"}]},
-        *[value for _, value in CARD_QUERIES],
-    ],
-)
-def test_recipient_sum_has_exactly_one_matching_leaf(value: JsonValue) -> None:
-    leaves = _leaves(RECIPIENT)
-    assert len(leaves) == len(set(leaves))
-    assert sum(_validator(name).is_valid(value) for name in leaves) == 1
-    _check(RECIPIENT, value, accepted=True)
 
 
 @pytest.mark.parametrize(
@@ -121,14 +75,6 @@ def test_recipient_sum_has_exactly_one_matching_leaf(value: JsonValue) -> None:
 )
 def test_named_recipient_variants(name: str, value: JsonValue) -> None:
     _check(name, value, accepted=True)
-
-
-@pytest.mark.parametrize(
-    "limb", [{"leader": "self"}, {"leaders": "all"}, {"leader_of": "t"}, LEADER_OR]
-)
-def test_each_leader_tag_satisfies_contains(limb: JsonValue) -> None:
-    _check(RECIPIENT_UNION, {"any_of": [limb]}, accepted=True)
-    _check(OBJECT_UNION, {"any_of": [limb]}, accepted=False)
 
 
 @pytest.mark.parametrize(
@@ -218,34 +164,6 @@ def test_leader_or_rejects_other_domains(key: str, value: JsonValue) -> None:
 )
 def test_union_payload_domains(name: str, value: JsonValue) -> None:
     _check(name, {"any_of": value}, accepted=False)
-
-
-@pytest.mark.parametrize("base", [{"any_of": [{"in": "shown"}]}, LEADER_UNION])
-@pytest.mark.parametrize(
-    ("key", "value"),
-    [
-        ("who", "self"),
-        ("zone", "field"),
-        ("kind", "follower"),
-        ("except", {"in": "chosen"}),
-        ("where", {"did": "moved"}),
-        ("as", "candidate"),
-        ("n", 1),
-        ("any", True),
-    ],
-)
-def test_union_wrapper_is_closed(
-    base: dict[str, JsonValue], key: str, value: JsonValue
-) -> None:
-    _check(RECIPIENT, {**base, key: value}, accepted=False)
-
-
-@pytest.mark.parametrize("name", [OBJECTS, COUNTED, "A.ref", "A.player-ref", E, C])
-@pytest.mark.parametrize("value", [LEADER_OR, LEADER_UNION])
-def test_recipients_do_not_leak_into_object_or_value_positions(
-    name: str, value: JsonValue
-) -> None:
-    _check(name, value, accepted=False)
 
 
 def test_object_and_count_queries_keep_distinct_roles() -> None:

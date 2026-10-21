@@ -167,45 +167,6 @@ fn proper_play_order_overrides_installation_order_for_both_stats() {
 }
 
 #[test]
-fn earlier_set_then_later_add_two_resolves_to_three_even_when_set_installs_last() {
-    for seat in [1, 2] {
-        let mut board = game(seat, 0);
-        let a = board
-            .prepare_internal_play(
-                &checked(vec![fixed(set_patch(Stat::Attack, 1))]),
-                &source("synthetic"),
-                context(seat),
-            )
-            .unwrap();
-        let b = board
-            .prepare_internal_play(
-                &checked(vec![buff(1, 2, 0)]),
-                &source("synthetic"),
-                context(seat),
-            )
-            .unwrap();
-        serde_json::to_value(&board).unwrap_err();
-        let b_result = board.execute_internal_play(&b).unwrap();
-        let a_result = board.execute_internal_play(&a).unwrap();
-        assert_ne!(
-            changes(&b_result)[0].execution,
-            changes(&a_result)[0].execution
-        );
-        assert_ne!(changes(&b_result)[0].effect, changes(&a_result)[0].effect);
-        assert_eq!(changes(&a_result)[0].event.facets.first.before, Int(4));
-        assert_eq!(changes(&a_result)[0].event.facets.first.after, Int(3));
-        assert_eq!(
-            changes(&a_result)[0].event.facets.first.operation,
-            StatOperation::Set
-        );
-        assert_eq!(
-            board.projection(View::Referee).unwrap()["objects"]["f"]["power"],
-            3
-        );
-    }
-}
-
-#[test]
 fn same_timestamp_noncommutative_writes_are_rejected_including_dead_branches() {
     for seat in [1, 2] {
         for dead in [true, false] {

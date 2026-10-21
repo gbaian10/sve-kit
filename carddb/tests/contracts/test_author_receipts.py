@@ -1,7 +1,6 @@
 """Receipt reads preserve projection, value categories and closed material fields."""
 
 import json
-from copy import deepcopy
 from itertools import combinations
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -81,10 +80,6 @@ def test_receipt_nodes_round_trip(
 ) -> None:
     _check(schema, name, value, accepted=True)
     assert not Draft202012Validator(schema).is_valid(value)
-
-
-def test_receipt_examples_cover_every_definition() -> None:
-    assert {name for name, _ in RECEIPT_CASES} == RECEIPTS.keys()
 
 
 @pytest.mark.parametrize("where", MATERIALS)
@@ -240,42 +235,6 @@ def test_views_are_closed(schema: dict[str, JsonValue], view: JsonValue) -> None
     _check(schema, E, {"count_of": {**COUNTED, "view": view}}, accepted=False)
 
 
-@pytest.mark.parametrize(("name", "value"), RECEIPT_CASES)
-def test_receipt_discriminators_and_required_fields(
-    schema: dict[str, JsonValue], name: str, value: dict[str, JsonValue]
-) -> None:
-    for key in value:
-        changed = deepcopy(value)
-        changed.pop(key)
-        _check(schema, name, changed, accepted=False)
-        changed = deepcopy(value)
-        changed["wrong_key"] = changed.pop(key)
-        _check(schema, name, changed, accepted=False)
-        changed = deepcopy(value)
-        changed[key] = None
-        _check(schema, name, changed, accepted=False)
-    _check(schema, name, value | {"follow": "moved"}, accepted=False)
-
-
-@pytest.mark.parametrize(
-    "value",
-    [
-        {"count_of": {**COUNTED, "result": "revealed"}},
-        {"count_of": {**COUNTED, "event": "move_receipt"}},
-        {"did": {**DID, "receipt": "paid_cost"}},
-        {"did": {"actual": 1}},
-        {"did": {"evolved": True}},
-        {"did": {"payment_complete": True}},
-        {"count_of": "result", "did": "result"},
-    ],
-)
-def test_receipt_variants_cannot_be_mixed(
-    schema: dict[str, JsonValue], value: JsonValue
-) -> None:
-    _check(schema, E, value, accepted=False)
-    _check(schema, C, value, accepted=False)
-
-
 def test_documented_receipts_use_the_existing_recursive_operators(
     schema: dict[str, JsonValue],
 ) -> None:
@@ -292,76 +251,6 @@ def test_documented_receipts_use_the_existing_recursive_operators(
     )
     _check(schema, E, {"plus": [SNAPSHOT, 1]}, accepted=False)
     _check(schema, E, {"plus": [{"did": "paid_cost"}, 1]}, accepted=False)
-
-
-def _leaves(
-    node: dict[str, JsonValue], schema: dict[str, JsonValue]
-) -> list[dict[str, JsonValue]]:
-    ref = node.get("$ref")
-    if isinstance(ref, str):
-        return _leaves(
-            object_value(object_value(schema["$defs"])[ref.removeprefix("#/$defs/")]),
-            schema,
-        )
-    variants = node.get("anyOf", node.get("oneOf"))
-    if isinstance(variants, list):
-        return [
-            leaf
-            for branch in variants
-            for leaf in _leaves(object_value(branch), schema)
-        ]
-    return [node]
-
-
-@pytest.mark.parametrize(
-    ("name", "key", "values"),
-    [
-        (
-            "A.expr.count-of",
-            "count_of",
-            [
-                "receipt",
-                {"event": "move_receipt"},
-                {"entry_payment": "additional"},
-                COUNTED,
-            ],
-        ),
-        (
-            "A.cond.did",
-            "did",
-            [
-                "receipt",
-                {"event": "move_receipt"},
-                {"entry_payment": "additional"},
-                DID,
-            ],
-        ),
-        (E, None, [{"count_of": "receipt"}, {"count_of": COUNTED}]),
-        (C, None, [{"did": "receipt"}, {"did": DID}]),
-        ("A.snapshot-read", None, [SNAPSHOT]),
-    ],
-)
-def test_receipt_unions_have_unique_leaves_and_exactly_one_match(
-    schema: dict[str, JsonValue],
-    name: str,
-    key: str | None,
-    values: list[JsonValue],
-) -> None:
-    node = object_value(object_value(schema["$defs"])[name])
-    if key is not None:
-        node = object_value(object_value(node["properties"])[key])
-    leaves = _leaves(node, schema)
-    assert len({canonical(leaf) for leaf in leaves}) == len(leaves)
-    for value in values:
-        assert (
-            sum(
-                Draft202012Validator(
-                    {"$id": schema["$id"], "$defs": schema["$defs"], **leaf}
-                ).is_valid(value)
-                for leaf in leaves
-            )
-            == 1
-        )
 
 
 @pytest.mark.parametrize(

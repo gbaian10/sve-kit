@@ -11,7 +11,7 @@ from referencing import Registry, Resource
 from sve_carddb.core.json import canonical, object_value, parse
 from sve_carddb.domains.effects.author_inputs import AuthorInputError, AuthorSchemas
 
-from .author_entry_cases import dependencies, source_use
+from .author_entry_cases import source_use
 from .test_author_entries import HEADS, NESTED, ability, companion, document, shard
 
 if TYPE_CHECKING:
@@ -143,36 +143,3 @@ def test_original_trees_preserve_optional_fields(
     assert canonical(reader(canonical(original))) != canonical(
         reader(canonical(changed))
     )
-
-
-@pytest.mark.parametrize(
-    ("field", "replacement"),
-    [
-        ("frame_id", "frame:" + "9" * 64),
-        ("ability_scope", "ability_other"),
-        ("body_version", "effect-body-v1:sha256:" + "9" * 64),
-        ("applicability_scope", "other"),
-    ],
-)
-def test_macro_mechanical_dependency_identity(
-    schemas: AuthorSchemas, field: str, replacement: str
-) -> None:
-    use = dependencies() | {
-        "applicability_scope": "fixture",
-        "domain_hash": "sha256:" + "9" * 64,
-    }
-    body = {
-        key: use[key]
-        for key in ("frame_id", "ability_scope", "body_version", "applicability_scope")
-    }
-    value = document(generated())
-    card = object_value(object_value(value["cards"])["FIX-001"])
-    object_value(card["meta"])["reviewed_by"] = [
-        {"kind": "macro_mechanical", "body": body, "use_dependencies": use}
-    ]
-    schemas.author_tree(canonical(value))
-    use[field] = replacement
-    with pytest.raises(AuthorInputError) as error:
-        schemas.author_tree(canonical(value))
-    assert error.value.diagnostic.reason == "macro_body_dependency_mismatch"
-    assert error.value.diagnostic.path[-2:] == ("use_dependencies", field)

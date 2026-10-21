@@ -70,6 +70,10 @@ impl Checker {
         })
     }
 
+    #[expect(
+        clippy::wildcard_enum_match_arm,
+        reason = "Only explicitly supported shapes pass this gate."
+    )]
     fn installed_effect(
         &mut self,
         effect: &Effect,
@@ -153,12 +157,7 @@ impl Checker {
                 })?;
                 self.at("condition", |checker| checker.boolean(condition))
             }
-            Effect::Continuous { .. }
-            | Effect::Permission { .. }
-            | Effect::Replacement { .. }
-            | Effect::RuleModifier { .. }
-            | Effect::DeckRule { .. }
-            | Effect::CostModifier { .. } => self.reject(),
+            _ => self.reject(),
         }
     }
 

@@ -185,32 +185,6 @@ fn modify_duration_is_checked_and_usage_is_not_silently_ignored() {
 }
 
 #[test]
-fn modify_requires_continuous_capability_but_does_not_admit_execution() {
-    let program = selected(modify(numeric(false, &Expr::Literal(Int(1))), "CP02-007"));
-    accept(program.clone());
-    let requirements = Requirements::derive(&card(program, "CP02-007"));
-    for name in [
-        "action.modify",
-        "effect.continuous",
-        "numeric.add",
-        "duration.no-expiry",
-    ] {
-        let requirement = requirements
-            .required
-            .iter()
-            .find(|item| item.capability.code == name)
-            .expect("requirement");
-        assert!(
-            requirement
-                .locations
-                .iter()
-                .any(|location| location.source.card_no == "CP02-007")
-        );
-    }
-    assert!(Registry::current().supported().is_empty());
-}
-
-#[test]
 fn numeric_modify_accepts_standalone_and_nested_numeric_patches() {
     let single = CharacteristicPatch::Numeric {
         stat: Stat::Attack,

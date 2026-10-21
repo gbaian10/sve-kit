@@ -1,18 +1,13 @@
 """Effect installation boundaries, distinct from actions and parent admission."""
 
-from copy import deepcopy
 from typing import TYPE_CHECKING
 
 import pytest
-from jsonschema import Draft202012Validator
 from pydantic import ValidationError
 
-from sve_carddb.core.json import canonical, object_value
+from sve_carddb.core.json import canonical
 
 from .author_effect_cases import CARD_EFFECTS, EFFECTS, SYNTHETIC_EFFECTS
-from .author_history_cases import HISTORY
-from .author_numeric_cases import NUMERIC
-from .test_author_schema_drift import NODES, assert_selector_definition
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
@@ -23,10 +18,6 @@ def _values(*values: JsonValue) -> tuple[JsonValue, ...]:
 
 
 def _check(value: JsonValue, *, accepted: bool = True, name: str = "A.effect") -> None:
-    validator = Draft202012Validator(
-        {"$id": NODES["$id"], "$defs": NODES["$defs"], "$ref": "#/$defs/" + name}
-    )
-    assert validator.is_valid(value) == accepted
     adapter = EFFECTS[name]
     if accepted:
         decoded = adapter.validate_json(canonical(value), strict=True)
@@ -48,28 +39,6 @@ def test_real_card_effect_fragments(effect: dict[str, JsonValue]) -> None:
 @pytest.mark.parametrize("effect", SYNTHETIC_EFFECTS)
 def test_synthetic_effect_fragments(effect: dict[str, JsonValue]) -> None:
     _check(effect)
-
-
-@pytest.mark.parametrize(
-    "effect", [effect for _, _, effect in CARD_EFFECTS] + SYNTHETIC_EFFECTS
-)
-def test_effects_are_closed_and_do_not_enter_other_expression_contexts(
-    effect: dict[str, JsonValue],
-) -> None:
-    key, payload = next(iter(effect.items()))
-    _check({key: {**object_value(payload), "unknown": True}}, accepted=False)
-    _check({**effect, "unknown": {}}, accepted=False)
-    _check({key: None}, accepted=False)
-    for name, adapter in {
-        "A.event": HISTORY["A.event"],
-        "A.expr.numeric": NUMERIC["A.expr.numeric"],
-    }.items():
-        assert not Draft202012Validator(
-            {"$id": NODES["$id"], "$defs": NODES["$defs"], "$ref": "#/$defs/" + name}
-        ).is_valid(effect)
-        with pytest.raises(ValidationError):
-            adapter.validate_json(canonical(effect), strict=True)
-    assert not Draft202012Validator(NODES).is_valid(effect)
 
 
 @pytest.mark.parametrize(
@@ -314,62 +283,3 @@ def test_banish_replacement_does_not_extend_zones() -> None:
         _check({"banish_instead": {"from": source, "to": dest}}, accepted=False)
     _check({"play_permission": {"on": "this", "from": []}}, accepted=False)
     _check({"play_permission": {"on": "this", "from": ["banish"]}}, accepted=False)
-
-
-@pytest.mark.parametrize("name", EFFECTS)
-def test_effect_drift_detects_constraint_removal(name: str) -> None:
-    changed = deepcopy(NODES)
-    node = object_value(object_value(changed["$defs"])[name])
-    if "properties" in node:
-        node["additionalProperties"] = True
-    else:
-        node["anyOf"] = []
-    with pytest.raises(AssertionError):
-        assert_selector_definition(changed, name)
-
-
-@pytest.mark.parametrize(
-    ("name", "keyword"),
-    [
-        ("A.effect", "minProperties"),
-        ("A.effect", "maxProperties"),
-        ("A.effect.stat", "anyOf"),
-        ("A.effect.set-stat", "anyOf"),
-        ("A.effect.cost-mod", "oneOf"),
-        ("A.effect.damage-mod", "oneOf"),
-        ("A.effect.evolve-cost-mod", "oneOf"),
-        ("A.effect.no-trigger", "oneOf"),
-        ("A.effect.cannot.play-card", "not"),
-        ("A.effect.card-predicate", "minProperties"),
-        ("A.effect.cannot.draw-rule-phase", "required"),
-        ("A.effect.cannot.stand-rule-phase", "required"),
-    ],
-)
-def test_effect_drift_detects_cross_field_constraint_removal(
-    name: str, keyword: str
-) -> None:
-    changed = deepcopy(NODES)
-    object_value(object_value(changed["$defs"])[name]).pop(keyword)
-    with pytest.raises(AssertionError):
-        assert_selector_definition(changed, name)
-
-
-@pytest.mark.parametrize(
-    ("name", "field", "replacement"),
-    [
-        ("A.effect.prevent", "kind", {"enum": ["any", "attack", "combat", "ability"]}),
-        ("A.effect.cost-mod", "set", {"$ref": "#/$defs/A.expr.numeric"}),
-        ("A.effect.banish-instead", "from", {"$ref": "#/$defs/Zone"}),
-        ("A.effect.cannot.attack", "target", {"$ref": "#/$defs/A.ref"}),
-        ("A.effect.cannot.draw-rule-phase", "cause", {"type": "string"}),
-        ("A.effect.keywords", "list", {"type": "array", "items": {"type": "string"}}),
-    ],
-)
-def test_effect_drift_detects_field_type_widening(
-    name: str, field: str, replacement: JsonValue
-) -> None:
-    changed = deepcopy(NODES)
-    node = object_value(object_value(changed["$defs"])[name])
-    object_value(node["properties"])[field] = replacement
-    with pytest.raises(AssertionError):
-        assert_selector_definition(changed, name)

@@ -197,11 +197,12 @@ def test_negative_magnitude_never_borrows_a_minus_sign() -> None:
         )
 
 
-def test_nonempty_projection_ports_fail_closed() -> None:
+@pytest.mark.parametrize("direction", ["imports", "exports"])
+def test_nonempty_projection_ports_fail_closed(direction: str) -> None:
     sample = synthetic_offset()
     projection = sample.frame.projection.model_copy(
         update={
-            "exports": (
+            direction: (
                 Port(
                     name="objects",
                     type="ObjectSet",
@@ -214,7 +215,7 @@ def test_nonempty_projection_ports_fail_closed() -> None:
     sample = replace(
         sample, frame=sample.frame.model_copy(update={"projection": projection})
     )
-    with pytest.raises(SourceError, match="unsupported_port_evidence"):
+    with pytest.raises(SourceError, match="unsupported_source_ports"):
         sample.compatible()
 
 

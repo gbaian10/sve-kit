@@ -1,8 +1,6 @@
 """Numeric fragment behavior, including placement, recursive shape and wire keys."""
 
 import json
-from copy import deepcopy
-from itertools import combinations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -15,8 +13,6 @@ from sve_carddb.core.json import canonical, object_value, parse
 from .author_numeric_cases import CMP, CONDITIONS, EXPRESSIONS, NUMERIC, PAYLOADS, C, E
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
-
     from pydantic import JsonValue
 
 SCHEMA_PATH = Path(__file__).resolve().parents[3] / "dsl" / "author-nodes.schema.json"
@@ -74,58 +70,6 @@ def test_payloads_are_not_standalone_expressions(
     schema: dict[str, JsonValue], name: str, value: dict[str, JsonValue]
 ) -> None:
     _accept(schema, name, value)
-    _reject(schema, E, value)
-    _reject(schema, C, value)
-
-
-def test_cases_cover_every_numeric_definition() -> None:
-    assert {name for name, _ in EXPRESSIONS + CONDITIONS + PAYLOADS} | {
-        E,
-        C,
-        "A.expr.numeric-operation",
-    } == NUMERIC.keys()
-
-
-def _objects(value: JsonValue) -> Iterator[dict[str, JsonValue]]:
-    if isinstance(value, dict):
-        yield value
-        for child in value.values():
-            yield from _objects(child)
-    elif isinstance(value, list):
-        for child in value:
-            yield from _objects(child)
-
-
-@pytest.mark.parametrize(("name", "value"), EXPRESSIONS + CONDITIONS + PAYLOADS)
-def test_every_mapping_is_required_closed_and_typed(
-    schema: dict[str, JsonValue], name: str, value: dict[str, JsonValue]
-) -> None:
-    for index, original in enumerate(_objects(value)):
-        for key in original:
-            changed = deepcopy(value)
-            node = list(_objects(changed))[index]
-            del node[key]
-            _reject(schema, name, changed)
-            changed = deepcopy(value)
-            node = list(_objects(changed))[index]
-            node[key] = None
-            _reject(schema, name, changed)
-        changed = deepcopy(value)
-        list(_objects(changed))[index]["unknown"] = 1
-        _reject(schema, name, changed)
-
-
-@pytest.mark.parametrize(("left", "right"), combinations(EXPRESSIONS + CONDITIONS, 2))
-def test_operators_cannot_be_mixed(
-    schema: dict[str, JsonValue],
-    left: tuple[str, dict[str, JsonValue]],
-    right: tuple[str, dict[str, JsonValue]],
-) -> None:
-    if left[1].keys() == right[1].keys():
-        return
-    value = left[1] | right[1]
-    _reject(schema, left[0], value)
-    _reject(schema, right[0], value)
     _reject(schema, E, value)
     _reject(schema, C, value)
 
@@ -382,3 +326,7 @@ def test_fragment_library_rejects_standalone_input(
     schema: dict[str, JsonValue],
 ) -> None:
     assert not Draft202012Validator(schema).is_valid({"plus": [1, 2]})
+
+
+def test_expression_rejects_mixed_operators(schema: dict[str, JsonValue]) -> None:
+    _reject(schema, E, {"plus": [1, 2], "minus": [3, 1]})

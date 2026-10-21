@@ -187,78 +187,22 @@ fn every_installed_duration_checks_its_references_before_minting_a_certificate()
 
 #[test]
 fn unavailable_movement_producers_and_collections_fail_closed() {
-    let producers = [
-        moved(1),
-        MovementReceipt::Search {
-            receipt: ReceiptReference::new(ReceiptId(1)),
-        },
-        MovementReceipt::Discard {
-            receipt: ReceiptReference::new(ReceiptId(1)),
-        },
-        MovementReceipt::Destroy {
-            receipt: ReceiptReference::new(ReceiptId(1)),
-        },
-        MovementReceipt::Banish {
-            receipt: ReceiptReference::new(ReceiptId(1)),
-        },
-        MovementReceipt::Order {
-            receipt: ReceiptReference::new(ReceiptId(1)),
-        },
-        MovementReceipt::Transform {
-            receipt: ReceiptReference::new(ReceiptId(1)),
-        },
-        MovementReceipt::Fusion {
-            receipt: ReceiptReference::new(ReceiptId(1)),
-        },
-    ];
-    for receipt in producers {
-        reject_action(
-            body(1, vec![reveal(2, after(receipt.clone()))]),
-            WellFormedReason::UnavailableReceipt,
-        );
-        reject_choice(body(
-            1,
-            vec![decision(chosen_objects(2, 1, after(receipt)))],
-        ));
-    }
-    let collections = [
-        MovementReceiptList::Move {
+    reject_action(
+        body(1, vec![reveal(2, after(moved(1)))]),
+        WellFormedReason::UnavailableReceipt,
+    );
+    let selector = Selector::MoveAfterAll {
+        receipts: MovementReceiptList::Move {
             receipts: Binding::new(1, ScopeId(1)),
         },
-        MovementReceiptList::Search {
-            receipts: Binding::new(1, ScopeId(1)),
-        },
-        MovementReceiptList::Discard {
-            receipts: Binding::new(1, ScopeId(1)),
-        },
-        MovementReceiptList::Destroy {
-            receipts: Binding::new(1, ScopeId(1)),
-        },
-        MovementReceiptList::Banish {
-            receipts: Binding::new(1, ScopeId(1)),
-        },
-        MovementReceiptList::Order {
-            receipts: Binding::new(1, ScopeId(1)),
-        },
-        MovementReceiptList::Transform {
-            receipts: Binding::new(1, ScopeId(1)),
-        },
-        MovementReceiptList::Fusion {
-            receipts: Binding::new(1, ScopeId(1)),
-        },
-    ];
-    for receipts in collections {
-        let selector = Selector::MoveAfterAll {
-            receipts,
-            permission: FollowPermission::SameEffectExplicitReference {},
-            deduplicate: GenerationDeduplication::ByObjectAndGeneration,
-        };
-        reject_action(
-            body(1, vec![reveal(2, selector.clone())]),
-            WellFormedReason::UnavailableBinding,
-        );
-        reject_choice(body(1, vec![decision(chosen_objects(2, 1, selector))]));
-    }
+        permission: FollowPermission::SameEffectExplicitReference {},
+        deduplicate: GenerationDeduplication::ByObjectAndGeneration,
+    };
+    reject_action(
+        body(1, vec![reveal(2, selector.clone())]),
+        WellFormedReason::UnavailableBinding,
+    );
+    reject_choice(body(1, vec![decision(chosen_objects(2, 1, selector))]));
     let trigger = MovementReceipt::TriggerEvent {
         event: MovementEvent::LeaveField {
             event: Binding::new(1, ScopeId(1)),

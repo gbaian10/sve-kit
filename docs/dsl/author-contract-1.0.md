@@ -1,5 +1,7 @@
 # 效果作者 1.0：承載、版本與執行邊界
 
+第一版保留嚴格 reader、精確展開、來源綁定及 expanded JSON 與 typed IR 的交接。§4–5 的資格、用途依賴追蹤、rekey、邊界案例及實跑 DB 屬延伸契約，第一版不執行；review 證據只驗封閉形狀，不授予准入。
+
 本文是作者 1.0 的文件契約，與[撰寫語法](author-syntax-1.0.md)、[IR 詞彙](ir-vocabulary-1.0.md)共同閱讀；實作範圍見 §1，不表示格式已發布或來源已准入。語法的唯一機器權威仍在 `dsl/`，不能把既有 astra/1 Schema 當作作者 1.0 驗證器。決定方向見 [#799 的維護者決定](https://github.com/gbaian10/sve-kit/issues/799#issuecomment-6282231068)。
 
 ## 1. 版本承諾與入口
@@ -189,7 +191,7 @@ meta.reviewed_by 的 use review 可保存同一用途的多個不同獨立審核
 
 卡片 status 為全卡彙總：有未解爭議為 disputed；其餘任一用途 draft 則 draft，全部至少 reviewed 才 reviewed，全部有有效引擎實跑才 verified。非 body 宣告仍須來源／型別及獨立審核，不以無步驟自動 verified。主版遷移沿既有降級規則；draft 不提升，disputed 不消失。過去 review 與實跑的原始內容保留 Git／已指定 DB 證據，但不混進有效名單。
 
-目前結構 reader 對非空 `meta.verified_by_exam` 報 `unsupported_exam_evidence`，其封閉逐用途實跑格式須另行實作；空陣列不授予 verified 資格。reader 在同一 review 容器檢查 reviewer 身分與完整依賴（含 rekey.after）重複，及同用途獨立／機械 review 並存；跨檔、歷史爭議與資格仍由依賴驗證處理。body_boundary 是測試輸入與建置 DB 的實跑證據，不是這兩種 authored 容器的欄位。
+目前結構 reader 對非空 `meta.verified_by_exam` 報 `unsupported_exam_evidence`，其封閉逐用途實跑格式須另行實作；空陣列不授予 verified 資格。reader 保留 review／rekey 的封閉形狀與原序；review 重複、相依關係、爭議及資格檢查不屬第一版 reader。body_boundary 是測試輸入與建置 DB 的實跑證據，不是這兩種 authored 容器的欄位。
 
 ## 6. C0 與 D0 的交接
 

@@ -102,17 +102,19 @@ def test_all_inline_variants(
     value = document(ability({key: payload}))
     decoded = schemas.author_effect_set(canonical(value))
     assert decoded.model_dump(mode="json") == value
-    for field in ("line", "sources", "ports", key):
-        bad = ability({key: payload})
+
+
+def test_inline_rejects_missing_source_and_unknown_fields(
+    schemas: AuthorSchemas,
+) -> None:
+    for field in ("line", "sources", "ports", "spell"):
+        bad = ability({"spell": {"do": []}})
         del bad[field]
         with pytest.raises(AuthorInputError):
             schemas.author_effect_set(canonical(document(bad)))
-    for extra in ("typo", "generated_by"):
-        bad = ability({key: payload}) | {extra: {}}
-        with pytest.raises(AuthorInputError):
-            schemas.author_effect_set(canonical(document(bad)))
+    bad = ability({"spell": {"do": []}}) | {"typo": True}
     with pytest.raises(AuthorInputError):
-        schemas.author_effect_set(canonical(document(ability({key: None}))))
+        schemas.author_effect_set(canonical(document(bad)))
 
 
 def test_fixed_goldens_preserve_content_and_order(schemas: AuthorSchemas) -> None:
