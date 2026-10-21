@@ -39,7 +39,9 @@ impl Adapter {
 pub(crate) fn error(error: crate::EngineFailure) -> EngineError {
     match error {
         crate::EngineFailure::Unsupported(reason) => EngineError::Unsupported(reason),
-        crate::EngineFailure::Invalid(reason) => EngineError::Adapter(reason),
+        crate::EngineFailure::Invalid(reason) | crate::EngineFailure::IllegalPlay(reason) => {
+            EngineError::Adapter(reason)
+        }
     }
 }
 pub(crate) const fn core_view(view: View) -> game::View {

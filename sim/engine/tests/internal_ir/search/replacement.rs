@@ -472,7 +472,9 @@ fn optional_replacement_can_follow_and_precede_distribution() {
                     InputDomain::BeforeDraw
                     | InputDomain::Integer(_)
                     | InputDomain::Order(_)
-                    | InputDomain::SearchPartition(_) => panic!("unexpected question"),
+                    | InputDomain::SearchPartition(_)
+                    | InputDomain::Targets(_)
+                    | InputDomain::Modes { .. } => panic!("unexpected question"),
                 };
                 let progress = game
                     .answer_internal(question.actor, question.token, answer)

@@ -10,6 +10,7 @@ use crate::ir::{
     CharacteristicView, FollowPermission, MemberProjection, NumberRead, ObjectReceipt, ObjectView,
     PlayerRead, ReceiptId, Role,
 };
+use crate::ir::{ExecutionRef, SpellCountTime};
 use alloc::collections::BTreeSet;
 use core::convert::identity;
 
@@ -141,6 +142,9 @@ impl Execution {
                 .flatten()
                 .collect(),
             Selector::Captured { reference } => self.object_slot(reference.binding)?,
+            Selector::Bound { reference } if self.targets.contains(&reference.key()) => {
+                self.object_slot(*reference)?
+            }
             Selector::ReceiptMembers {
                 receipt: ObjectReceipt::Movement { receipt },
                 projection: MemberProjection::Before,
@@ -239,6 +243,24 @@ impl Execution {
                 }
             }
             _ => {}
+        }
+        Ok(())
+    }
+
+    pub(super) fn captures(&mut self, game: &Game, captures: &[Capture]) -> Result<()> {
+        let entry = self.clone();
+        let mut values = BTreeSet::new();
+        for capture in captures {
+            let mut isolated = entry.clone();
+            isolated.capture(game, capture)?;
+            for (key, value) in isolated.slots {
+                if !entry.slots.contains_key(&key) {
+                    if !values.insert(key) {
+                        return Err(invalid("duplicate capture slot"));
+                    }
+                    self.slots.insert(key, value);
+                }
+            }
         }
         Ok(())
     }
@@ -387,6 +409,28 @@ impl Execution {
                 }
             }
             Expr::Frozen(frozen) => match frozen.as_ref() {
+                NatFrozen::SpellChain {
+                    player,
+                    execution: ExecutionRef::Current {},
+                    at: SpellCountTime::AtPlay,
+                } => {
+                    let seat = self.player(game, player)?.seat;
+                    self.play_counts
+                        .get(&seat)
+                        .map(|counts| counts.0)
+                        .ok_or_else(|| invalid("missing AtPlay spell counts"))
+                }
+                NatFrozen::NecroCharge {
+                    player,
+                    execution: ExecutionRef::Current {},
+                    at: SpellCountTime::AtPlay,
+                } => {
+                    let seat = self.player(game, player)?.seat;
+                    self.play_counts
+                        .get(&seat)
+                        .map(|counts| counts.1)
+                        .ok_or_else(|| invalid("missing AtPlay cemetery count"))
+                }
                 NatFrozen::ReceiptActual { receipt } => {
                     self.quantity(receipt).map(|(_, actual)| actual)
                 }

@@ -2,19 +2,107 @@ use super::{
     Cardinality, ChoiceDomain, Control, DecisionKind, Declinable, InstructionContext, Located,
     Node, Program, Requirements, Result, SourceSpan, Visibility, WellFormedProgram, unsupported,
 };
+use crate::ir::{AbilityOrigin, AbilitySource, KeywordId};
+use alloc::collections::BTreeSet;
 use core::num::NonZeroU32;
 
 pub(super) fn check(program: &WellFormedProgram, source: &SourceSpan) -> Result<()> {
-    check_with_origin(program, source, false)
+    check_body(program.program(), source, None)
 }
 
-pub(super) fn check_card(program: &WellFormedProgram, source: &SourceSpan) -> Result<()> {
-    check_with_origin(program, source, true)
+pub(super) fn check_card(
+    program: &Program,
+    source: &SourceSpan,
+    origin: &AbilitySource,
+) -> Result<()> {
+    check_body(program, source, Some(origin))
 }
 
-fn check_with_origin(program: &WellFormedProgram, source: &SourceSpan, card: bool) -> Result<()> {
+pub(super) fn check_play(program: &Program, source: &SourceSpan) -> Result<()> {
+    check_requirements(program, source, true, &BTreeSet::new())
+}
+
+fn check_body(
+    program: &Program,
+    source: &SourceSpan,
+    origin: Option<&AbilitySource>,
+) -> Result<()> {
+    let mut paths = BTreeSet::new();
+    if let Some(origin) = origin {
+        source_paths(program, "", origin, &mut paths);
+    }
+    check_requirements(program, source, origin.is_some(), &paths)?;
+    super::numeric::check_program(program)?;
+    check_program(program, source, origin.is_some())
+}
+
+fn source_paths(
+    program: &Program,
+    path: &str,
+    origin: &AbilitySource,
+    paths: &mut BTreeSet<String>,
+) {
+    for (index, step) in program.steps.iter().enumerate() {
+        let path = format!("{path}/steps/{index}");
+        match &step.node {
+            Node::Instruction { instruction } if instruction.source == *origin => {
+                if matches!(
+                    origin.origin,
+                    AbilityOrigin::Keyword {
+                        keyword: KeywordId::Fanfare,
+                        ..
+                    }
+                ) {
+                    paths.insert(format!("{path}/instruction/source/origin"));
+                    paths.insert(format!("{path}/instruction/source/origin/keyword"));
+                }
+            }
+            Node::Control {
+                control: Control::Sequence { body },
+            } => source_paths(body, &format!("{path}/control/body"), origin, paths),
+            Node::Control {
+                control:
+                    Control::If {
+                        then_body,
+                        else_body,
+                        ..
+                    },
+            } => {
+                source_paths(
+                    then_body,
+                    &format!("{path}/control/then_body"),
+                    origin,
+                    paths,
+                );
+                if let Some(body) = else_body {
+                    source_paths(body, &format!("{path}/control/else_body"), origin, paths);
+                }
+            }
+            Node::Control {
+                control: Control::Mode { modes, .. },
+            } => {
+                for (mode_index, mode) in modes.iter().enumerate() {
+                    source_paths(
+                        &mode.body,
+                        &format!("{path}/control/modes/{mode_index}/body"),
+                        origin,
+                        paths,
+                    );
+                }
+            }
+            _ => {}
+        }
+    }
+}
+
+fn check_requirements(
+    program: &Program,
+    source: &SourceSpan,
+    card: bool,
+    origins: &BTreeSet<String>,
+) -> Result<()> {
     let located = Located {
-        node: program.program().clone(),
+        node: program.clone(),
         source: source.clone(),
     };
     let requirements = Requirements::derive_program(&located);
@@ -24,28 +112,57 @@ fn check_with_origin(program: &WellFormedProgram, source: &SourceSpan, card: boo
         .filter(|requirement| {
             requirement.capability.version != NonZeroU32::MIN
                 || !(supported(requirement.capability.code)
-                    || (card
-                        && matches!(
-                            requirement.capability.code,
-                            "shape.AbilityOrigin.Keyword" | "internal.KeywordId.Fanfare"
-                        ))
+                    || (card && play_requirement(requirement.capability.code))
+                    || (matches!(
+                        requirement.capability.code,
+                        "shape.AbilityOrigin.Keyword" | "internal.KeywordId.Fanfare"
+                    ) && requirement
+                        .locations
+                        .iter()
+                        .all(|location| origins.contains(&location.ir_path)))
                     || super::search::private_requirement(requirement.capability.code))
         })
         .collect::<Vec<_>>();
     if !missing.is_empty() {
         return Err(unsupported(&format!("requirements {missing:?}")));
     }
-    super::numeric::check_program(program.program())?;
-    check_program(program.program(), source)
+    Ok(())
 }
 
-fn check_program(program: &Program, source: &SourceSpan) -> Result<()> {
+fn play_requirement(code: &str) -> bool {
+    matches!(
+        code,
+        "shape.NatFrozen.SpellChain"
+            | "read.spell-chain"
+            | "shape.NatFrozen.NecroCharge"
+            | "read.necro-charge"
+            | "internal.SpellCountTime.AtPlay"
+            | "shape.CaptureTime.AtPlay"
+            | "shape.CaptureTime.AtSelection"
+            | "shape.ExecutionRef.Current"
+            | "shape.ChoiceDomain.Objects"
+            | "internal.Disjointness.Disjoint"
+            | "shape.DecisionKind.PlayParameter"
+            | "decision.play-parameter"
+            | "internal.PlaySlot.Targets"
+            | "internal.PlaySlot.Distribution"
+            | "internal.SelectionSnapshot.AtDecision"
+            | "internal.InputMode.Inline"
+            | "shape.Control.Mode"
+            | "control.mode"
+            | "shape.ChoiceDomain.Modes"
+            | "shape.ModeDecisionKind.PlayParameter"
+            | "internal.ModeChoiceKind.ChoiceKeyword"
+    )
+}
+
+fn check_program(program: &Program, source: &SourceSpan, card: bool) -> Result<()> {
     for step in &program.steps {
         super::ordering::check_node(&step.node, source)?;
         match &step.node {
             Node::Control {
                 control: Control::Sequence { body },
-            } => check_program(body, source)?,
+            } => check_program(body, source, card)?,
             Node::Control {
                 control:
                     Control::If {
@@ -54,9 +171,9 @@ fn check_program(program: &Program, source: &SourceSpan) -> Result<()> {
                         ..
                     },
             } => {
-                check_program(then_body, source)?;
+                check_program(then_body, source, card)?;
                 if let Some(body) = else_body {
-                    check_program(body, source)?;
+                    check_program(body, source, card)?;
                 }
             }
             Node::Instruction { instruction } => {
@@ -98,6 +215,13 @@ fn check_program(program: &Program, source: &SourceSpan) -> Result<()> {
                     )
                 {
                     return Err(unsupported("decision metadata"));
+                }
+            }
+            Node::Control {
+                control: Control::Mode { modes, .. },
+            } if card => {
+                for mode in modes {
+                    check_program(&mode.body, source, card)?;
                 }
             }
             Node::Capture { .. } => {}

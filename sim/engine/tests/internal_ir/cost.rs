@@ -53,7 +53,7 @@ const fn seat_name(seat: u32) -> &'static str {
     if seat == 1 { "P1" } else { "P2" }
 }
 
-fn reduce(id: u64, moved: MovementReceipt) -> Located<Node> {
+pub(super) fn reduce(id: u64, moved: MovementReceipt) -> Located<Node> {
     let affected = Binding::new(90, ScopeId(90));
     let duration = Duration {
         end: DurationEnd::CurrentTurnEnd {},

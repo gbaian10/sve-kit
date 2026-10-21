@@ -50,8 +50,16 @@ fn bp01_118_author_yaml_reaches_authority_fanfare_once_after_entry() {
             .unwrap_err();
         game.submit(&json!({"do":"play","card":"s"})).unwrap_err();
         assert_eq!(before, exact_authority(&game));
-        let step = game.play_internal_card("s", PlayerId { seat }).unwrap();
-        assert!(step.events.iter().any(|event| event["kind"] == "場に出す"));
+        let CardPlay::Entered(step) = game.play_internal_card("s", PlayerId { seat }).unwrap()
+        else {
+            panic!("follower entry");
+        };
+        assert!(
+            step.step
+                .events
+                .iter()
+                .any(|event| event["kind"] == "場に出す")
+        );
         assert_eq!(
             game.internal_card_stage(),
             Some(ResumeStage::PendingFanfare)
@@ -62,7 +70,7 @@ fn bp01_118_author_yaml_reaches_authority_fanfare_once_after_entry() {
         assert_eq!(game.legal().unwrap(), Vec::<Value>::new());
         game.activate_internal_card("s", program.card().abilities[0].node.id, PlayerId { seat })
             .unwrap_err();
-        let result = game.resolve_internal_fanfare().unwrap();
+        let result = resolved(game.resolve_internal_fanfare().unwrap());
         assert_eq!(result.source.holder.generation, Generation(2));
         assert_eq!(result.source.controller, PlayerId { seat });
         assert_eq!(result.progress.facts.len(), 4);

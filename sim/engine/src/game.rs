@@ -69,7 +69,7 @@ impl View {
 }
 
 /// Outcome and causal events emitted by an authoritative transition.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Step {
     /// Resolution, rejection, pause, cancellation or game end.
     pub outcome: String,

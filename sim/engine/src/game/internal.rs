@@ -8,19 +8,20 @@
 use super::{Frame, Game, View, int, string};
 use crate::ir::{
     Action, Arithmetic, Binding, Bool, Capture, CaptureRef, CardQuantityOutcome, Cardinality,
-    ChoiceDomain, Comparison, Control, CostSpec, DamageEvent, DamageFlags, DamageQuantityOutcome,
+    ChoiceDomain, Comparison, Control, DamageEvent, DamageFlags, DamageQuantityOutcome,
     DamageRecipient, DecisionId, DecisionKind, Declinable, DestroyOutcome, DrawEvent, Effect,
     EffectId, ExecutionId, Expr, Generation, InstallationSubjects, Instruction, InstructionContext,
-    Int, IntFrozen, IntOperation, IntRead, Located, LookOutcome, MeasuredReceipt, MoveOutcome, Nat,
-    NatFrozen, NatOperation, NatRead, Node, ObjectFrozen, ObjectId, ObjectOperand, ObjectRef,
-    ObjectView, OrderOutcome, PlayerId, PlayerRef, PlayerRelation, PlayerResource, PlayerSet,
-    PositiveInt, PostureEvent, Predicate, Program, Quantity, ReceiptId, ReceiptLocation,
-    RecipientSet, Requirements, ResolvedRecipients, RuntimeAbilitySource, RuntimeDamageRecipient,
-    RuntimeObjectView, ScopeId, SearchOutcome, SearchReplacementAnswer, Selector, SnapshotId,
-    SourceSpan, StepwiseAnswer, StepwiseMode, Visibility, WellFormedProgram, ZoneKind,
+    Int, IntFrozen, IntOperation, IntRead, Located, LookOutcome, MeasuredReceipt, ModeId,
+    MoveOutcome, Nat, NatFrozen, NatOperation, NatRead, Node, ObjectFrozen, ObjectId,
+    ObjectOperand, ObjectRef, ObjectView, OrderOutcome, PlayerId, PlayerRef, PlayerRelation,
+    PlayerResource, PlayerSet, PositiveInt, PostureEvent, Predicate, Program, Quantity, ReceiptId,
+    ReceiptLocation, RecipientSet, Requirements, ResolvedRecipients, RuntimeAbilitySource,
+    RuntimeDamageRecipient, RuntimeObjectView, ScopeId, SearchOutcome, SearchReplacementAnswer,
+    Selector, SnapshotId, SourceSpan, StepwiseAnswer, StepwiseMode, Visibility, WellFormedProgram,
+    ZoneKind,
 };
 use crate::{EngineFailure, Result, invalid};
-use alloc::collections::{BTreeMap, VecDeque};
+use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
 use alloc::sync::Arc;
 use core::{num::NonZeroU64, result};
 use serde::ser::Error as _;
@@ -39,7 +40,7 @@ mod search;
 mod values;
 
 pub use allocation::{DamageShare, DistributionDomain, DistributionMember};
-pub use card::{Activation, ResumeStage};
+pub use card::{Activation, CardEntry, CardPlay, ResumeStage, TargetDomain};
 pub(super) use card::{CardRuntime, serialize_cards};
 pub(super) use cost::CostState;
 pub use movement::MovementFact;
@@ -113,6 +114,17 @@ pub enum InputDomain {
     Distribution(DistributionDomain),
     /// Keep the original hand movement or apply the checked optional replacement.
     SearchReplacement,
+    /// Public field candidates and strict play-time cardinality.
+    Targets(TargetDomain),
+    /// Printed mode identifiers and the evaluated count limit.
+    Modes {
+        /// Printed identifiers in resolution order.
+        modes: Vec<ModeId>,
+        /// Printed lower bound and optional fixed upper bound.
+        cardinality: Cardinality,
+        /// Evaluated maximum; answers are additionally capped by the available modes.
+        count: Nat,
+    },
 }
 
 /// Internal answer, checked against actor and the entire decision token.
@@ -132,6 +144,10 @@ pub enum Answer {
     Distribution(Vec<DamageShare>),
     /// Destination choice for the already frozen found set; never another selection.
     SearchReplacement(SearchReplacementAnswer),
+    /// Token-scoped target handles.
+    Targets(Vec<u64>),
+    /// Unique printed mode identifiers; resolution always follows printed order.
+    Modes(Vec<ModeId>),
 }
 
 /// Typed instruction outcomes retained only by the authority.
@@ -183,6 +199,24 @@ pub struct Progress {
 /// First-slice physical facts, sharing the prototype mutation and causal pipeline.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Fact {
+    /// A card has completed all intrinsic costs and, for followers, the capacity check.
+    CardPlayed {
+        /// Authority producer for this card play.
+        execution: ExecutionId,
+        /// Card generation in Resolution.
+        object: ObjectRef,
+        /// Player who played this card.
+        controller: PlayerId,
+    },
+    /// Body, card movement and end-of-resolution cleanup are complete.
+    CardResolved {
+        /// The same producer as `CardPlayed`.
+        execution: ExecutionId,
+        /// The original Resolution generation, never the later cemetery or field generation.
+        object: ObjectRef,
+        /// The same player as `CardPlayed`.
+        controller: PlayerId,
+    },
     /// A fully paid activation, before its body.
     AbilityPlayed {
         /// Authority execution producer.
@@ -228,6 +262,8 @@ enum Slot {
 
 #[derive(Clone, Debug)]
 enum Wait {
+    Targets(card::selection::TargetWait),
+    Modes(card::play::ModeWait),
     Distribution(allocation::DistributionWait),
     Order(ordering::OrderWait),
     Search(search::SearchWait),
@@ -262,6 +298,10 @@ pub(super) struct Execution {
     allocations: BTreeMap<(ScopeId, u64), allocation::Allocation>,
     origin: Option<Box<Game>>,
     ability: Option<RuntimeAbilitySource>,
+    targets: BTreeSet<(ScopeId, u64)>,
+    play: Option<card::play::PlayState>,
+    spell: bool,
+    play_counts: BTreeMap<u32, (Nat, Nat)>,
 }
 
 #[expect(
@@ -385,15 +425,6 @@ impl Game {
     /// # Errors
     /// Rejects missing or consumed play handles and restores all authority on failure.
     pub fn execute_internal_play(&mut self, play: &ProperPlay) -> Result<Progress> {
-        self.resolve_internal_play(play, None, None)
-    }
-
-    fn resolve_internal_play(
-        &mut self,
-        play: &ProperPlay,
-        ability: Option<RuntimeAbilitySource>,
-        costs: Option<&CostSpec>,
-    ) -> Result<Progress> {
         let prepared = self
             .prepared
             .get(&play.execution)
@@ -427,17 +458,12 @@ impl Game {
                 look_viewers: BTreeMap::new(),
                 allocations: BTreeMap::new(),
                 origin: Some(Box::new(before.clone())),
-                ability,
+                ability: None,
+                targets: BTreeSet::new(),
+                play: None,
+                spell: false,
+                play_counts: BTreeMap::new(),
             };
-            if let Some(costs) = costs {
-                self.internal_card_payment(&mut execution, costs)?;
-            }
-            if let Some(source) = ability {
-                execution.facts.push(Fact::AbilityPlayed {
-                    execution: execution.id,
-                    source,
-                });
-            }
             self.internal_run(&mut execution)?;
             let progress = execution.progress();
             if !progress.complete {
@@ -455,11 +481,27 @@ impl Game {
     ///
     /// # Errors
     /// Invalid answers preserve the question; failed commits restore the execution origin.
+    pub fn answer_internal(
+        &mut self,
+        actor: PlayerId,
+        token: DecisionToken,
+        answer: Answer,
+    ) -> Result<Progress> {
+        if self
+            .typed
+            .as_ref()
+            .is_some_and(|execution| execution.ability.is_some())
+        {
+            return Err(invalid("formal play requires answer_internal_card"));
+        }
+        self.answer_internal_step(actor, token, answer)
+    }
+
     #[expect(
         clippy::too_many_lines,
         reason = "All answer variants share one transaction and its two authoritative rollback scopes."
     )]
-    pub fn answer_internal(
+    fn answer_internal_step(
         &mut self,
         actor: PlayerId,
         token: DecisionToken,
@@ -480,9 +522,30 @@ impl Game {
                 return Err(invalid("wrong actor or stale internal answer"));
             }
             match (wait, answer) {
+                (Wait::Targets(wait), Answer::Targets(handles)) => {
+                    let objects = wait.validate(&handles)?;
+                    rollback = execution.origin.take();
+                    Self::internal_target_answer(&mut execution, &wait, objects)?;
+                }
+                (Wait::Modes(wait), Answer::Modes(modes)) => {
+                    if !wait.chosen.accepts_answer(wait.count, &modes) {
+                        return Err(invalid("invalid mode selection"));
+                    }
+                    rollback = execution.origin.take();
+                    execution
+                        .play
+                        .as_mut()
+                        .ok_or_else(|| invalid("missing play context"))?
+                        .chosen
+                        .insert(wait.chosen.id, modes);
+                }
                 (Wait::Distribution(wait), Answer::Distribution(shares)) => {
                     execution.distribution_answer(&wait, &shares)?;
                     rollback = execution.origin.take();
+                    Self::internal_play_distribution_captures(
+                        &mut execution,
+                        wait.producer_decision(),
+                    )?;
                 }
                 (Wait::Order(wait), Answer::Order(handles)) => {
                     let ordered = wait.validate(&handles)?;
@@ -591,6 +654,8 @@ impl Game {
     pub(super) fn internal_decision_packet(&self, view: View) -> Value {
         self.internal_decision(view).map_or(Value::Null, |question| {
             let domain = match question.domain {
+                InputDomain::Targets(domain) => card::selection::packet(&domain),
+                InputDomain::Modes { modes, cardinality, count } => json!({"kind":"modes","modes":modes.iter().map(|id| id.0).collect::<Vec<_>>(),"minimum":cardinality.minimum.0,"maximum":cardinality.maximum.map(|n| n.0),"count":count.0}),
                 InputDomain::BeforeDraw => json!({"kind":"before-draw"}),
                 InputDomain::Integer(bounds) => json!({"kind":"integer","minimum":bounds.minimum.0,"maximum":bounds.maximum.map(|value| value.0)}),
                 InputDomain::Order(cards) => json!({"kind":"order","cards":cards.iter().map(|card| json!({"handle":card.handle,"card":card.card,"name":card.name})).collect::<Vec<_>>()}),
@@ -691,14 +756,35 @@ impl Game {
     }
 
     fn internal_run(&mut self, execution: &mut Execution) -> Result<()> {
+        if execution.play.is_some() {
+            self.internal_play_parameters(execution)?;
+        }
         while execution.waiting.is_none() {
             let Some(node) = execution.todo.pop_front() else {
+                self.internal_spell_cleanup(execution)?;
                 self.internal_numeric_cleanup()?;
                 self.internal_numeric_end_resolution(execution.id)?;
+                if execution.spell {
+                    let group = self.group();
+                    self.emit(
+                        json!({"kind":"解決","object":execution.context.source}),
+                        &execution.frame().cause,
+                        group,
+                    );
+                }
                 if let Some(source) = execution.ability {
-                    execution.facts.push(Fact::AbilityResolved {
-                        execution: execution.id,
-                        source,
+                    self.card_runtime.checkpoint = Some(execution.id);
+                    execution.facts.push(if execution.spell {
+                        Fact::CardResolved {
+                            execution: execution.id,
+                            object: source.holder,
+                            controller: source.controller,
+                        }
+                    } else {
+                        Fact::AbilityResolved {
+                            execution: execution.id,
+                            source,
+                        }
                     });
                 } else {
                     self.checks()?;

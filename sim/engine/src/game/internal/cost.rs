@@ -1,5 +1,6 @@
 use super::duration::EffectEnd;
 use super::{Execution, Game, InstructionOutcome, Result, invalid, unsupported};
+use crate::game::Frame;
 use crate::ir::{
     Action, CostChange, DurationEnd, Effect, EffectId, Expr, InstallationSubjects,
     InstallationTime, Instruction, Int, Selector, TimeAnchor,
@@ -62,7 +63,7 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
     Ok(())
 }
 
-fn printed_cost(value: &Value) -> Result<i64> {
+pub(super) fn printed_cost(value: &Value) -> Result<i64> {
     match value {
         Value::Null => Ok(0),
         Value::String(text) if text == "-" => Ok(0),
@@ -206,6 +207,45 @@ impl Game {
                     .collect(),
             ),
         );
+        Ok(())
+    }
+
+    pub(super) fn internal_play_move(
+        &mut self,
+        holder: &str,
+        destination: &str,
+        frame: &Frame,
+    ) -> Result<()> {
+        let object = self.object(holder)?;
+        if !matches!(
+            (object.zone.as_str(), destination),
+            ("hand" | "ex", "resolution") | ("resolution", "field")
+        ) {
+            return Err(unsupported("card play rule movement"));
+        }
+        object
+            .generation
+            .checked_add(1)
+            .ok_or_else(|| invalid("play generation exhausted"))?;
+        if !object.state["counters"]
+            .as_object()
+            .is_none_or(serde_json::Map::is_empty)
+            || self.state.ir_numeric.contains_key(holder)
+        {
+            return Err(unsupported("unimplemented play carry"));
+        }
+        // Hold the full effect instances across exactly these two rule movements.
+        let generation = object.generation;
+        let carried = self
+            .state
+            .ir_cost
+            .remove(holder)
+            .filter(|state| state.generation == generation);
+        self.move_objects(&[holder.into()], destination, None, None, frame)?;
+        if let Some(mut carried) = carried {
+            carried.generation = self.object(holder)?.generation;
+            self.state.ir_cost.insert(holder.into(), carried);
+        }
         Ok(())
     }
 
