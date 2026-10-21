@@ -266,8 +266,6 @@ pub(super) fn private_requirement(code: &str) -> bool {
             | "shape.SearchDestination.Partition"
             | "shape.SearchDestination.OptionalSelfReplacement"
             | "shape.Predicate.SearchFoundAny"
-            | "shape.NumberRead.Cost"
-            | "read.cost"
             | "shape.Predicate.NamesIntersect"
             | "predicate.names-intersect"
             | "shape.NamesRead.Names"

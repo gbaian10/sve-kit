@@ -6,7 +6,6 @@ use super::{
     SearchOutcome, SnapshotId, Wait, candidate_view, invalid, seat_name, unsupported,
 };
 use crate::ir::{Comparison, Int, IntOperation, NumberRead, SearchFound, SearchReplacementAnswer};
-use serde_json::Value;
 
 #[derive(Clone, Debug)]
 pub(in crate::game::internal) struct ReplacementWait {
@@ -53,18 +52,6 @@ fn cost_limit(value: &Expr<Bool>, binding: Binding<ObjectRef>) -> Result<i64> {
         Err(unsupported(
             "search replacement found-local cost upper bound",
         ))
-    }
-}
-
-// Only a printed "-" or an absent value means no cost; malformed or out-of-range text must not read as zero.
-fn printed_cost(value: &Value) -> Result<i64> {
-    match value {
-        Value::Null => Ok(0),
-        Value::String(text) if text == "-" => Ok(0),
-        Value::String(text) => text.parse().map_err(invalid),
-        _ => value
-            .as_i64()
-            .ok_or_else(|| invalid("invalid printed cost")),
     }
 }
 
@@ -182,13 +169,7 @@ impl Game {
                 let limit = cost_limit(predicate, *object)?;
                 for &reference in found {
                     let id = execution.object_id(reference)?;
-                    // Typed numeric patches affect Attack/Life only; prototype cost producers are excluded by context.
-                    let cost = match self.object(id)?.state.get("cost") {
-                        Some(cost) => cost
-                            .as_i64()
-                            .ok_or_else(|| invalid("invalid effective cost"))?,
-                        None => printed_cost(&self.face(id)?["cost"])?,
-                    };
+                    let cost = self.internal_effective_cost(id)?;
                     if cost <= limit {
                         return Ok(true);
                     }

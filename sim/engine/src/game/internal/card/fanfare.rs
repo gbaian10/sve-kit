@@ -107,7 +107,7 @@ impl Game {
             return Err(unsupported("fanfare belongs to another face"));
         }
         let ability = ability.clone();
-        let cost = self.internal_printed_play_cost(holder)?;
+        let cost = self.internal_effective_cost(holder)?;
         let pp = self.player(seat)?.pp["current"]
             .as_i64()
             .ok_or_else(|| invalid("invalid current PP"))?;
@@ -161,18 +161,6 @@ impl Game {
             outcome: "resolved".into(),
             events: take(&mut self.emitted),
         })
-    }
-
-    fn internal_printed_play_cost(&self, holder: &str) -> Result<i64> {
-        let value = &self.face(holder)?["cost"];
-        value.as_str().map_or_else(
-            || {
-                value
-                    .as_i64()
-                    .ok_or_else(|| invalid("invalid printed play cost"))
-            },
-            |text| text.parse().map_err(invalid),
-        )
     }
 
     /// Resolve only the fanfare occurrence produced by the preceding card play.

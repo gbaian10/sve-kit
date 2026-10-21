@@ -749,7 +749,7 @@ fn effective_source_reads_follow_earlier_instructions_and_reject_stale_or_other_
                 object: ObjectView::Current {
                     object: Box::new(ObjectOperand::SourceHolder {}),
                 },
-                view: CharacteristicView::Effective,
+                view: CharacteristicView::Original,
             },
         }));
         for read in [source_attack(CharacteristicView::Original), cost] {

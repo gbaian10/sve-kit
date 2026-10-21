@@ -5,6 +5,7 @@
     reason = "Numeric cache writes target constructed object maps."
 )]
 
+use super::duration::EffectEnd;
 use super::{Execution, Fact, Game, InstructionOutcome, Result, invalid, unsupported};
 use crate::ir::{
     Action, CharacteristicPatch, CommitId, Control, DurationEnd, EffectId, EffectReference,
@@ -61,17 +62,9 @@ struct Modifier {
     effect: u64,
     timestamp: u64,
     execution: u64,
-    end: NumericEnd,
+    end: EffectEnd,
     attack: Option<Change>,
     life: Option<Change>,
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
-enum NumericEnd {
-    NoTemporalExpiry,
-    EndResolution,
-    Turn(u64),
-    NextTurn { player: u32, after: u64 },
 }
 
 impl NumericState {
@@ -264,7 +257,7 @@ impl Game {
     pub(in crate::game) fn numeric_evolution_allowed(&self, id: &str) -> Result<()> {
         if self.numeric_state(id).is_some_and(|state| {
             state.effects.iter().any(|effect| {
-                effect.end != NumericEnd::NoTemporalExpiry
+                effect.end != EffectEnd::NoTemporalExpiry
                     || matches!(effect.attack, Some(Change::Set(_)))
                     || matches!(effect.life, Some(Change::Set(_)))
             })
@@ -331,7 +324,8 @@ impl Game {
     }
 
     pub(in crate::game) fn internal_numeric_active(&self) -> bool {
-        !self.prepared.is_empty()
+        self.internal_cost_active()
+            || !self.prepared.is_empty()
             || self.state.ir_numeric.iter().any(|(id, state)| {
                 self.state
                     .objects
@@ -387,23 +381,7 @@ impl Game {
         };
         let subjects = execution.objects(self, subjects)?;
         let (attack, life) = changes(execution, self, patch)?;
-        if matches!(
-            expires.end,
-            DurationEnd::CurrentTurnEnd {} | DurationEnd::NextTurnEnd { .. }
-        ) && (self.state.flow["kind"] == "pregame" || self.state.game["ended"] == true)
-        {
-            return Err(unsupported("turn duration requires an actual running turn"));
-        }
-        let end = match &expires.end {
-            DurationEnd::NoTemporalExpiry {} => NumericEnd::NoTemporalExpiry,
-            DurationEnd::EndResolution {} => NumericEnd::EndResolution,
-            DurationEnd::CurrentTurnEnd {} => NumericEnd::Turn(self.state.schedule.current()?),
-            DurationEnd::NextTurnEnd { player } => NumericEnd::NextTurn {
-                player: execution.player(self, player)?.seat,
-                after: self.state.schedule.current()?,
-            },
-            _ => return Err(unsupported("numeric duration")),
-        };
+        let end = EffectEnd::at(self, execution, &expires.end)?;
         let effect = EffectId(self.state.next_ir_effect);
         let mut plans = Vec::new();
         for subject in subjects {
@@ -529,6 +507,7 @@ impl Game {
 
     /// Layers belong to one generation; a moved target never carries them into a new one.
     pub(in crate::game) fn internal_numeric_cleanup(&mut self) {
+        self.internal_cost_cleanup();
         let objects = &self.state.objects;
         self.state.ir_numeric.retain(|id, state| {
             objects
@@ -539,13 +518,14 @@ impl Game {
 
     pub(super) fn internal_numeric_end_resolution(&mut self, execution: ExecutionId) -> Result<()> {
         self.internal_numeric_expire(|effect| {
-            effect.end == NumericEnd::EndResolution && effect.execution == execution.0
+            effect.end == EffectEnd::EndResolution && effect.execution == execution.0
         })
     }
 
     pub(in crate::game) fn internal_numeric_end_turn(&mut self, turn: u64) -> Result<()> {
+        self.internal_cost_end_turn(turn);
         self.internal_numeric_cleanup();
-        self.internal_numeric_expire(|effect| effect.end == NumericEnd::Turn(turn))
+        self.internal_numeric_expire(|effect| effect.end == EffectEnd::Turn(turn))
     }
 
     pub(in crate::game) fn internal_numeric_begin_turn(&mut self) -> Result<()> {
@@ -553,10 +533,7 @@ impl Game {
         let player = super::player_id(self.active())?.seat;
         for state in self.state.ir_numeric.values_mut() {
             for effect in &mut state.effects {
-                if matches!(effect.end, NumericEnd::NextTurn { player: waiting, after } if waiting == player && turn > after)
-                {
-                    effect.end = NumericEnd::Turn(turn);
-                }
+                effect.end.begin(turn, player);
             }
         }
         Ok(())

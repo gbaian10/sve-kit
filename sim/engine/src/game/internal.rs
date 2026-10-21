@@ -9,9 +9,9 @@ use super::{Frame, Game, View, int, string};
 use crate::ir::{
     Action, Arithmetic, Binding, Bool, Capture, CaptureRef, CardQuantityOutcome, Cardinality,
     ChoiceDomain, Comparison, Control, CostSpec, DamageEvent, DamageFlags, DamageQuantityOutcome,
-    DamageRecipient, DecisionId, DecisionKind, Declinable, DestroyOutcome, DrawEvent, EffectId,
-    ExecutionId, Expr, Generation, InstallationSubjects, Instruction, InstructionContext, Int,
-    IntFrozen, IntOperation, IntRead, Located, LookOutcome, MeasuredReceipt, MoveOutcome, Nat,
+    DamageRecipient, DecisionId, DecisionKind, Declinable, DestroyOutcome, DrawEvent, Effect,
+    EffectId, ExecutionId, Expr, Generation, InstallationSubjects, Instruction, InstructionContext,
+    Int, IntFrozen, IntOperation, IntRead, Located, LookOutcome, MeasuredReceipt, MoveOutcome, Nat,
     NatFrozen, NatOperation, NatRead, Node, ObjectFrozen, ObjectId, ObjectOperand, ObjectRef,
     ObjectView, OrderOutcome, PlayerId, PlayerRef, PlayerRelation, PlayerResource, PlayerSet,
     PositiveInt, PostureEvent, Predicate, Program, Quantity, ReceiptId, ReceiptLocation,
@@ -30,6 +30,8 @@ use serde_json::{Value, json};
 mod admission;
 mod allocation;
 mod card;
+mod cost;
+mod duration;
 mod movement;
 mod numeric;
 mod ordering;
@@ -39,6 +41,7 @@ mod values;
 pub use allocation::{DamageShare, DistributionDomain, DistributionMember};
 pub use card::{Activation, ResumeStage};
 pub(super) use card::{CardRuntime, serialize_cards};
+pub(super) use cost::CostState;
 pub use movement::MovementFact;
 pub(super) use numeric::NumericState;
 pub use numeric::StatChangeFact;
@@ -958,6 +961,11 @@ impl Game {
             Action::Search { .. } => return self.internal_search(execution, instruction),
             Action::Destroy { objects } => {
                 self.internal_move(execution, &instruction, objects, None)?;
+            }
+            Action::InstallEffect { effect, .. }
+                if matches!(effect.as_ref(), Effect::CostModifier { .. }) =>
+            {
+                self.internal_install_cost(execution, &instruction)?;
             }
             Action::InstallEffect { subjects, .. } => {
                 let InstallationSubjects::Objects { objects, .. } = subjects else {

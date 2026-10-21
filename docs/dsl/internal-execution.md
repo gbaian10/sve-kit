@@ -62,6 +62,25 @@ Fanfare 必須保留 `Keyword(Fanfare, Printed)`，觸發形狀限定為 AfterEn
 BP01-118 的測試由作者 YAML 經真正 C0 展開、lowering、整卡載入、正式入場及待機解算，
 驗兩位領袖各受 1 點傷害；測試用候選來源沒有宣稱永久來源驗證或公開 capability。
 
+### 成功 After 的當回合減費片段
+
+`InstallEffect CostModifier` 只接受 InstructionStart、成功 `MoveAfter`、精確 affected binding、
+常值非正 Delta 與 CurrentTurnEnd／Installation；內外 Duration 必須相同，不接受 usage、
+intervals、Set 或其他期限。每個成功的新世代必須仍在 EX；EX 滿、沒有找到或沒有實際移動時，
+安裝 receipt 為空，不配發 EffectId，也不把 found／revealed／chosen 當安裝對象。
+修正保存該 execution、ProperPlay timestamp 與目標世代；下一次移區後不沿同實體追蹤。
+
+搜尋的 found-local 費用條件、IR Effective Cost 讀值、已完成的卡片 play 與原型正式付款，
+共用 checked 有效費用讀取。各 Delta 先 checked 加總，最後最低為 0；格式錯誤與溢位拒絕，
+不以 scalar 的零預設或飽和運算代替。進化來源的 cost 例外尚未遷移，這類讀值仍拒絕。
+typed 減費與 prototype continuous 費用層不得混用；存在 typed 費用層時，付款另驗可合併的
+prototype 能力與非溢位 additional PP。
+
+Numeric 與 CostModifier 共用實際回合的 EffectEnd，減費在 7.4.8 清理，不提早於 end／Quick。
+安裝與到期不產 stat_changed。測試採 CP04-060 的 Search→EX→當回合 -2，以及
+BP18-059／SL14 的 Look→實際 Move→減費形狀；只驗片段與付款、到期、容量，不宣稱
+這些卡的完整能力、lowering 或 shared usage 已可執行。
+
 ## 准入與原子性
 
 入口以 `Requirements::derive_program` 走訪完整程式體，包含未執行分支；每一個 exact

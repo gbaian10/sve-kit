@@ -106,6 +106,24 @@ impl Game {
     }
 
     pub(super) fn play_cost_context(&self, id: &str, context: &Frame) -> Result<i64> {
+        if self.internal_cost_active() {
+            self.internal_prototype_abilities()?;
+            if !self.state.continuous.is_empty() {
+                return Err(EngineFailure::Unsupported(
+                    "typed and prototype cost layers".into(),
+                ));
+            }
+            let additional = context.values.get("additional_pp").map_or(Ok(0), |value| {
+                value
+                    .as_i64()
+                    .ok_or_else(|| invalid("invalid additional PP"))
+            })?;
+            return self
+                .internal_effective_cost(id)?
+                .checked_add(additional)
+                .map(|cost| cost.max(0))
+                .ok_or_else(|| invalid("play cost overflow"));
+        }
         let base = scalar(&self.face(id)?["cost"]);
         let adjusted = self.adjusted_pp_cost(id, base, context, CostKind::Play)?;
         Ok(adjusted

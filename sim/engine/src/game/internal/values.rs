@@ -318,6 +318,20 @@ impl Execution {
             Expr::Compute(operation) => match operation.as_ref() {
                 IntOperation::InformationOrZero {
                     information:
+                        NumberRead::Cost {
+                            object: ObjectView::Current { object },
+                            view: CharacteristicView::Effective,
+                        },
+                } => {
+                    let reference = self.object(game, object)?;
+                    let id = self.object_id(reference)?;
+                    if game.object(id)?.generation != reference.generation.0 {
+                        return Err(invalid("stale cost read"));
+                    }
+                    game.internal_effective_cost(id).map(Int)
+                }
+                IntOperation::InformationOrZero {
+                    information:
                         NumberRead::Stats {
                             object: ObjectView::Current { object },
                             property,
