@@ -9,9 +9,9 @@ use super::{Frame, Game, View, int, string};
 use crate::ir::{
     Action, Arithmetic, Binding, Bool, Capture, CaptureRef, CardQuantityOutcome, Cardinality,
     ChoiceDomain, Comparison, Control, CostSpec, DamageEvent, DamageFlags, DamageQuantityOutcome,
-    DamageRecipient, DecisionId, DecisionKind, Declinable, DestroyOutcome, DrawEvent, EffectId,
-    ExecutionId, Expr, Generation, InstallationSubjects, Instruction, InstructionContext, Int,
-    IntFrozen, IntOperation, IntRead, Located, LookOutcome, MeasuredReceipt, MoveOutcome, Nat,
+    DamageRecipient, DecisionId, DecisionKind, Declinable, DestroyOutcome, DrawEvent, Effect,
+    EffectId, ExecutionId, Expr, Generation, InstallationSubjects, Instruction, InstructionContext,
+    Int, IntFrozen, IntOperation, IntRead, Located, LookOutcome, MeasuredReceipt, MoveOutcome, Nat,
     NatFrozen, NatOperation, NatRead, Node, ObjectFrozen, ObjectId, ObjectOperand, ObjectRef,
     ObjectView, OrderOutcome, PlayerId, PlayerRef, PlayerRelation, PlayerResource, PlayerSet,
     PositiveInt, PostureEvent, Predicate, Program, Quantity, ReceiptId, ReceiptLocation,
@@ -30,6 +30,8 @@ use serde_json::{Value, json};
 mod admission;
 mod allocation;
 mod card;
+mod cost;
+mod duration;
 mod movement;
 mod numeric;
 mod ordering;
@@ -39,6 +41,7 @@ mod values;
 pub use allocation::{DamageShare, DistributionDomain, DistributionMember};
 pub use card::{Activation, ResumeStage};
 pub(super) use card::{CardRuntime, serialize_cards};
+pub(super) use cost::CostState;
 pub use movement::MovementFact;
 pub(super) use numeric::NumericState;
 pub use numeric::StatChangeFact;
@@ -336,7 +339,18 @@ impl Game {
         source: &SourceSpan,
         context: Context,
     ) -> Result<ProperPlay> {
+        if self.card_runtime.requires_typed_play() {
+            return Err(unsupported("synthetic play cannot bypass loaded triggers"));
+        }
         admission::check(program, source)?;
+        self.prepare_admitted_internal_play(program, context)
+    }
+
+    fn prepare_admitted_internal_play(
+        &mut self,
+        program: &WellFormedProgram,
+        context: Context,
+    ) -> Result<ProperPlay> {
         self.internal_context(&context)?;
         let execution = self
             .state
@@ -627,6 +641,7 @@ impl Game {
         }
         if self.typed.is_some()
             || self.card_runtime.checkpoint.is_some()
+            || self.card_runtime.has_pending()
             || self.state.frame.is_some()
             || self.state.prompt.is_some()
             || !self.state.pending.is_empty()
@@ -678,7 +693,7 @@ impl Game {
     fn internal_run(&mut self, execution: &mut Execution) -> Result<()> {
         while execution.waiting.is_none() {
             let Some(node) = execution.todo.pop_front() else {
-                self.internal_numeric_cleanup();
+                self.internal_numeric_cleanup()?;
                 self.internal_numeric_end_resolution(execution.id)?;
                 if let Some(source) = execution.ability {
                     execution.facts.push(Fact::AbilityResolved {
@@ -946,6 +961,16 @@ impl Game {
             Action::Search { .. } => return self.internal_search(execution, instruction),
             Action::Destroy { objects } => {
                 self.internal_move(execution, &instruction, objects, None)?;
+            }
+            Action::InstallEffect { effect, .. }
+                if matches!(effect.as_ref(), Effect::Continuous { .. }) =>
+            {
+                self.internal_install_continuous(execution, &instruction)?;
+            }
+            Action::InstallEffect { effect, .. }
+                if matches!(effect.as_ref(), Effect::CostModifier { .. }) =>
+            {
+                self.internal_install_cost(execution, &instruction)?;
             }
             Action::InstallEffect { subjects, .. } => {
                 let InstallationSubjects::Objects { objects, .. } = subjects else {

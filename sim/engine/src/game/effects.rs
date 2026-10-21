@@ -692,7 +692,7 @@ impl Game {
                 advances.push(id.clone());
             }
         }
-        self.internal_numeric_cleanup();
+        self.internal_numeric_cleanup()?;
         self.conceal_placement_order(&plans, frame);
         let erase_group = self.group();
         for id in erased {

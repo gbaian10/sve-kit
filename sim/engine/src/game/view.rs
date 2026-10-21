@@ -103,7 +103,7 @@ impl Game {
         });
         packet["awaiting"] = if self.typed.is_some() {
             self.internal_decision_packet(view)
-        } else if self.card_runtime.checkpoint.is_some() {
+        } else if self.card_runtime.checkpoint.is_some() || self.card_runtime.has_pending() {
             Value::Null
         } else {
             self.awaited(view)?

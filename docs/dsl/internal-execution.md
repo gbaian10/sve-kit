@@ -6,12 +6,15 @@
 
 ## 整卡起動的內部邊界
 
-`load_internal_card(card_no, WellFormedCardProgram)` 在同一個 Game 載入完整的手寫整卡，
-不接作者 YAML。此入口目前只承載以卡號識別卡片、以十進位 ordinal 識別 face 的內部輸入。
-所有能力都必須是 Field 的 Printed Activated，PlaySpec 的 captures、parameters 必須為空。
+`load_internal_card(card_no, WellFormedCardProgram)` 在同一個 Game 載入完整整卡，
+不直接解析作者 YAML。此入口以卡號識別卡片、以十進位 ordinal 識別 face；lowering candidate
+的 `base` 明示對應同一卡表的 face 0，保留 occurrence owner、field 與 binding fragment。
+這是內部候選座標的接點，不授予永久來源身分或公開卡片資格。
+起動能力必須是 Field 的 Printed Activated，PlaySpec 的 captures、parameters 必須為空。
 Ordered costs 僅准入 controller 的非負常值 PpCurrent Pay，以及恰好 SourceHolder 的 Acted
 Posture；成本 actor 必須為 controller，instruction source 須與能力相符。不接受 materials binding。
-Spell、Triggered、Static、其他成本、成本替代、模式、其他 play metadata 與介入能力整棵拒絕。
+另接受下節的 Printed Fanfare。Spell、其他 Triggered、Static、其他成本、成本替代、模式、
+其他 play metadata 與介入能力整棵拒絕。
 載入逐能力驗證 card／face／line 座標一致、印刷座標唯一、instruction source 相符，以及完整本文的
 封閉 requirement 集合（含未執行分支）。另以正向集合限定同步 Draw Exact、Look Exact、Uniform Damage、
 已支援的 Modify／InstallEffect、capture、Sequence／If；互動與可能移動來源的 Move／Destroy 亦整棵拒絕，
@@ -38,7 +41,45 @@ instance／execution 配發、RNG、事件、觀察與額度；本子集不會�
 checkpoint 期間玩家 projection 的 awaiting 為 null。resume 才交既有規則檢查管線，
 回傳該階段產生的規則事件，不重送本文事件；不自動推到 end／discard，本文中不插入致死或抽空檢查。
 載入整卡的 Game 尚無儲存與 digest 格式，序列化與 digest 都明確失敗，不靜默遺失整卡或 instance。
-本子集尚未承載正式卡片打出、PlayParameter Distribution、目標選取、其他成本、互動續體或真實卡准入。
+本子集尚未承載 Spell 打出、PlayParameter Distribution、目標選取、其他成本、互動續體或公開真實卡准入。
+
+### 單一 Fanfare 的 authority 待機
+
+Fanfare 必須保留 `Keyword(Fanfare, Printed)`，觸發形狀限定為 AfterEntry、Field、PerFact，
+且 EnterFieldObject 恰等於 SourceHolder；不接受額外條件、limit、event captures 或 PlaySpec。
+同 face 多個 Fanfare 在載入時拒絕，未接選序前不以定義順序代替規則輸入。
+
+`play_internal_card(holder, actor)` 限主動玩家 main、自己的 Hand／EX、base 從者及足夠場位，
+以 checked reader 讀取非負印刷 PP 費用，付款後經解決區入場。所有局內卡片必須完整載入，
+任何 prototype／continuous／delayed／其他待機介入仍拒絕；整次失敗回復付款與世代。
+場上新世代實體化能力、保存 controller／instance 並形成私有 pending；卡片收尾後先做規則檢查，
+再停於 `ResumeStage::PendingFanfare`。來源需要 LKI 的形狀仍拒絕，不取消已待機的本文。
+
+`resolve_internal_fanfare()` 不收 caller 指定的 holder、AbilityId 或來源，只消費該 pending。
+同步本文完成後形成同 producer 的 play／resolve facts，再交 `CheckTiming`；失敗回復到
+已付卡片費用的 pending 狀態，保留重試，不撤回前次卡片 play。成功 occurrence 不可重播。
+載入 Fanfare 的 Game 封住原型 decide 與合成 closed Program 入口，避免略過待機 producer。
+BP01-118 的測試由作者 YAML 經真正 C0 展開、lowering、整卡載入、正式入場及待機解算，
+驗兩位領袖各受 1 點傷害；測試用候選來源沒有宣稱永久來源驗證或公開 capability。
+
+### 成功 After 的當回合減費片段
+
+`InstallEffect CostModifier` 只接受 InstructionStart、成功 `MoveAfter`、精確 affected binding、
+常值非正 Delta 與 CurrentTurnEnd／Installation；內外 Duration 必須相同，不接受 usage、
+intervals、Set 或其他期限。每個成功的新世代必須仍在 EX；EX 滿、沒有找到或沒有實際移動時，
+安裝 receipt 為空，不配發 EffectId，也不把 found／revealed／chosen 當安裝對象。
+修正保存該 execution、ProperPlay timestamp 與目標世代；下一次移區後不沿同實體追蹤。
+
+搜尋的 found-local 費用條件、IR Effective Cost 讀值、已完成的卡片 play 與原型正式付款，
+共用 checked 有效費用讀取。各 Delta 先 checked 加總，最後最低為 0；格式錯誤與溢位拒絕，
+不以 scalar 的零預設或飽和運算代替。進化來源的 cost 例外尚未遷移，這類讀值仍拒絕。
+typed 減費與 prototype continuous 費用層不得混用；存在 typed 費用層時，付款另驗可合併的
+prototype 能力與非溢位 additional PP。
+
+Numeric 與 CostModifier 共用實際回合的 EffectEnd，減費在 7.4.8 清理，不提早於 end／Quick。
+安裝與到期不產 stat_changed。測試採 CP04-060 的 Search→EX→當回合 -2，以及
+BP18-059／SL14 的 Look→實際 Move→減費形狀；只驗片段與付款、到期、容量，不宣稱
+這些卡的完整能力、lowering 或 shared usage 已可執行。
 
 ## 准入與原子性
 
@@ -294,7 +335,8 @@ Public Order 依該文件 §7 維持拒絕，Repeat 的跨輪 epoch 依 §8 等�
 ## 固定數值修正
 
 Modify 准入有號 Numeric Add、非負常值 Set 與非空遞迴 Numeric Combined；期限只接受 Installation anchor
-的 NoTemporalExpiry、EndResolution、CurrentTurnEnd 或 NextTurnEnd，沒有 usage 或 interval。對象限目前場上從者，
+的 NoTemporalExpiry、EndResolution、CurrentTurnEnd、NextTurnEnd，或明示 SourceHolder／Field 的 SourceZoneExit；沒有 usage。
+CurrentTurnEnd 另可帶 DuringNextTurn 附加區間，詳下節。對象限目前場上從者，
 已換世代的 capture 不適用；其他目前區域或卡片種類使整次解算回復。
 同指示先固定去重對象，求完所有有號操作數，再規劃與提交。同一 Combined 中重複同 stat 的 Add 合計，相同 Set 合併；同 stat 的 Set／Add 或不同 Set 整棵拒絕，
 不先截零；整數溢位拒絕並回復整份 Game。
@@ -311,7 +353,7 @@ Catalog 印刷值不變。Effective Current 的 Stats read 經同一求值器，
 instruction、execution、effect 與 commit 身分。兩個指示保持兩個事實；零差值不造 facet。
 此為 authority 結果，尚未接完整 EventHeader、觸發及歷史查詢管線，不能當玩家 wire payload。
 
-來源離場不移除非 static 修正；目標換區後原世代修正失效，不追蹤新世代。
+除明示 SourceZoneExit 外，來源離場不移除非 static 修正；目標換區後原世代修正失效，不追蹤新世代。
 NoTemporalExpiry 沒有額外時間截止。合成 closed Program 的全部本文完成後，先清除目標已換世代的數值層，
 再移除綁定此次 execution 的整批 EndResolution 修正，從原始基礎與其餘 Add／Set 完整重算、保留目前受傷量 D，
 最後執行既有規則檢查；指示之間不清場，體力降到 0 的從者在同一解算內仍是後續指示的對象。
@@ -320,7 +362,7 @@ NoTemporalExpiry 沒有額外時間截止。合成 closed Program 的全部本�
 數值修正的 EndResolution 時序已定於[數值期限契約](numeric-timing.md#33-endresolution)，
 目前只驗合成 closed Program 的生命週期；沒有真實 Numeric EndResolution 卡例，不由 lowering 自動補入期限。
 待答不是解算完成，resume 的提交失敗連同到期清理一起回復整次 execution；真實卡的解決區清理、nested play 與完整 CardProgram 仍未接入。
-CurrentTurnEnd 保存安裝當回合的身分，在 7.4.8 整批移除；end 觸發、Quick 與棄牌檢查期間仍有效。
+CurrentTurnEnd 保存安裝當回合的身分，在 7.4.8 整批結束主區間；沒有未來附加區間的效果才移除，end 觸發、Quick 與棄牌檢查期間仍有效。
 NextTurnEnd 在安裝時捕捉玩家，等唯一回合排程實際開始該玩家下一回合時綁定其身分，
 再於該回合 7.4.8 到期。skip 不配置身分，extra 每個實際開始的回合各有身分；
 不以 elapsed_turns、預定回合或固定加一／加二換算。到期清理已經過去的回合不接受追認安裝。
@@ -344,7 +386,7 @@ prototype Set／種類或 pilot 基礎替換與有效數值層混用仍拒絕；
 這避免 7.2.5 規則破壞引出的待機能力和 main_start 觸發混在同一次待機。
 期限玩家可使用已捕捉的 Player 值；Capture::Player 允許 Current 來源的 controller／owner，
 世代失效時拒絕，不追蹤新世代或當作缺資訊回零。live role 不直接充當 actor／audience。
-NextTurnEdge、phase edge、非空 intervals、Continuous 與 SetKind 仍拒絕。
+NextTurnEdge、phase edge、DuringNextPhase、SetKind 與下節以外的 Continuous 仍拒絕。
 尚有預備 play 時也拒絕原型 decide；同一期間的 observation 在 `semantic_state` 只多一個 `typed_numeric_layers: true`
 布林摘要，不含 effect、execution 或加數明細；belief 入口見到它即拒絕，
 不把有效值當成原型基礎值重建另一份可 decide 的局面。
@@ -360,9 +402,28 @@ EffectId 仍在成功安裝才分配；反序安裝、唯讀查詢及存檔恢�
 不同 stat、純 Add 與相同 Attack Set 可交換。多次 Life Set 可能捕捉不同 D_set，亦整棵拒絕。
 沒有以安裝次序、EffectId 或陣列次序補出非交換 tie；ContinuousTieOrder 的規則輸入仍待後片。
 
-Continuous 安裝及其動態依存、interval、SetKind、
+Continuous 的 Live 條件與操作數、一般動態依存、下節以外的 interval、SetKind、
 Grant／RemoveAbility、Modify usage、負 Set 與非常值 Set，包括未執行分支，仍整棵拒絕。
 Set 層有效時的進化／基礎替換由數值寫入邊界拒絕，未宣稱差額換算完成。
 CP02-007 與 BP01-011 只驗已選場上從者的 +1/+1 片段；不包含成本、選牌、EX、
 觸發或整卡准入。BP16-049 只驗受傷對象的 Set 1／1，未承載 SpellChain capture、
-RemoveAbility 或整能力；非連續區間與上述未承載的整卡部分仍待後片驗收。
+RemoveAbility 或整能力；上述未承載的整卡部分仍待後片驗收。
+
+### 常值 Continuous 與非連續回合區間
+
+本文 Continuous 限 InstructionStart 的固定 affected、Numeric 層、常值 Add／純 Add Combined、
+ProperPlay(Current)、空 active_zones；條件只接受省略或常值 Bool。false 仍保存同一效果實例，
+不因當前不適用而丟棄。操作數與主體固定，這些效果不會改變彼此的適用對象或操作，
+因此沒有動態依存；不把此子集外推為 Live 條件的通用求值器。
+安裝、到期、區間切換與重算不發 stat_changed，也不設定明示加攻體指示的增值旗標。
+
+SourceZoneExit 在安裝時固定來源的 Field 世代；離開後經共同移區清理重算有效值，
+保留目標目前受傷量，不因相同實體的新世代重入而復活。這只承載明示來源在場期限，
+不提供來源離場後的 Current／LKI 讀值。
+
+CurrentTurnEnd 的主區間與 DuringNextTurn 附加區間採聯集。主區間在 7.4.8 結束後保留
+尚未發生的指定玩家下一實際回合；中間其他玩家的額外回合不適用。下一實際 begin 才固定
+該 occurrence 並重新適用，到其 7.4.8 結束；不使用 turn.phase、elapsed_turns 或預定序號冒充。
+目標換世代仍清除整個舊實例，後面的附加區間不能讓舊目標復活。
+本子集不接受 interval-only、EndResolution＋非空 interval 或 phase 區間；缺少 phase occurrence
+時保持拒絕。Set 及帶期限 Add 的進化限制仍維持，不替未定的差額還原補規則。

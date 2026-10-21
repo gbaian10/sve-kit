@@ -116,6 +116,178 @@ fn end(board: &mut Game) -> Vec<Value> {
     events
 }
 
+fn continuous(id: u64, enabled: bool, end: DurationEnd) -> Located<Node> {
+    let affected = Binding::new(id.saturating_add(700), ScopeId(id.saturating_add(700)));
+    let duration = Duration {
+        end,
+        anchor: TimeAnchor::Installation {},
+        usage: None,
+        intervals: vec![],
+    };
+    let origin = AbilitySource {
+        holder: ObjectOperand::SourceHolder {},
+        origin: AbilityOrigin::Printed {
+            face: FaceId("0".into()),
+            line: Nat(1),
+        },
+        controller: PlayerRef::Controller {},
+    };
+    instruction(
+        id,
+        Action::InstallEffect {
+            subjects: InstallationSubjects::Objects {
+                objects: opponents_field(id.saturating_add(800)),
+                affected,
+            },
+            capture: InstallationTime::InstructionStart,
+            effect: Box::new(Effect::Continuous {
+                id: EffectDefinitionId(id),
+                source: origin,
+                target: EffectTarget::Dynamic {
+                    selector: Selector::Bound {
+                        reference: affected,
+                    },
+                },
+                condition: Some(Expr::Literal(Bool(enabled))),
+                patch: pair(1, 2),
+                layer: ContinuousLayer::Numeric,
+                timestamp: TimestampBasis::ProperPlay {
+                    execution: ExecutionRef::Current {},
+                },
+                active_zones: vec![],
+                duration: duration.clone(),
+            }),
+            duration,
+        },
+    )
+}
+
+#[test]
+fn continuous_source_exit_preserves_damage_and_false_instances_without_stat_facts() {
+    for seat in [1, 2] {
+        let mut initial = position(seat);
+        initial["players"][seat_name(seat)]["zones"]["hand"] = json!([]);
+        initial["players"][seat_name(seat)]["zones"]["field"] =
+            json!([{"id":"s","card":"unit-follower"}]);
+        let mut board = Game::new(
+            catalog(),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "continuous",
+        )
+        .unwrap();
+        let mut inactive = board.clone();
+        let result = run(
+            &mut inactive,
+            vec![continuous(1, false, DurationEnd::NoTemporalExpiry {})],
+            seat,
+        );
+        assert_eq!(changes(&result).len(), 0);
+        stats(&inactive, 2, 3, 3);
+        assert_eq!(
+            inactive.projection(View::Referee).unwrap()["semantic_state"]["typed_numeric_layers"],
+            true
+        );
+        let result = run(
+            &mut board,
+            vec![
+                continuous(
+                    1,
+                    true,
+                    DurationEnd::SourceZoneExit {
+                        source: ObjectOperand::SourceHolder {},
+                        zone: ZoneKind::Field,
+                    },
+                ),
+                hit(2, 1),
+            ],
+            seat,
+        );
+        assert_eq!(changes(&result).len(), 0);
+        stats(&board, 3, 4, 5);
+        let result = run(
+            &mut board,
+            vec![movement::put(
+                1,
+                Selector::Objects {
+                    objects: vec![ObjectOperand::SourceHolder {}],
+                },
+                OwnerZone::Cemetery,
+            )],
+            seat,
+        );
+        assert_eq!(changes(&result).len(), 0);
+        stats(&board, 2, 2, 3);
+    }
+}
+
+#[test]
+fn added_turn_interval_is_inactive_in_the_gap_and_resumes_for_the_actual_opponent_turn() {
+    for seat in [1, 2] {
+        let mut board = Game::new(
+            loaded(
+                json!({"op":"extra_turn","side":"self","count":1}),
+                json!([]),
+            ),
+            &position(seat),
+            &Value::Null,
+            &Value::Null,
+            "interval",
+        )
+        .unwrap();
+        let mut step = current(pair(1, 2));
+        if let Node::Instruction { instruction } = &mut step.node
+            && let Action::Modify { expires, .. } = &mut instruction.action
+        {
+            expires.intervals.push(Interval::DuringNextTurn {
+                player: PlayerRef::RequireOne {
+                    players: Box::new(players(PlayerRelation::Opponents)),
+                },
+            });
+        }
+        run(&mut board, vec![step], seat);
+        board.submit(&json!({"do":"play","card":"s"})).unwrap();
+        stats(&board, 3, 5, 5);
+        end(&mut board);
+        assert_eq!(
+            board.projection(View::Referee).unwrap()["turn"]["active"],
+            seat_name(seat)
+        );
+        stats(&board, 2, 3, 3);
+        let mut departed = board.clone();
+        departed
+            .execute_internal(
+                &checked(vec![instruction(
+                    1,
+                    Action::Destroy {
+                        objects: opponents_field(980),
+                    },
+                )]),
+                &source("synthetic"),
+                Context {
+                    generation: Generation(2),
+                    ..context(seat)
+                },
+            )
+            .unwrap();
+        end(&mut departed);
+        assert_eq!(
+            departed.projection(View::Referee).unwrap()["objects"]["f"]["generation"],
+            1
+        );
+        stats(&departed, 2, 3, 3);
+        end(&mut board);
+        assert_eq!(
+            board.projection(View::Referee).unwrap()["turn"]["active"],
+            seat_name(3 - seat)
+        );
+        stats(&board, 3, 5, 5);
+        end(&mut board);
+        stats(&board, 2, 3, 3);
+    }
+}
+
 #[test]
 fn current_turn_end_remains_through_end_triggers_quick_and_discard_checks() {
     for seat in [1, 2] {
@@ -897,7 +1069,7 @@ fn grants_return_once_expiry_clears_the_last_layer() {
 }
 
 #[test]
-fn closed_turn_and_nonempty_intervals_are_rejected_without_consuming_authority() {
+fn closed_turn_and_unadmitted_intervals_are_rejected_without_consuming_authority() {
     for seat in [1, 2] {
         let mut position = position(seat);
         position["semantic_state"]["turn_schedule"] = json!({"closed":true});
@@ -912,13 +1084,22 @@ fn closed_turn_and_nonempty_intervals_are_rejected_without_consuming_authority()
             DurationEnd::CurrentTurnEnd {},
             DurationEnd::EndResolution {},
         ] {
-            let mut step = modify(1, zone(ZoneKind::Field, 540), pair(1, 2), end);
+            let mut step = modify(1, zone(ZoneKind::Field, 540), pair(1, 2), end.clone());
             if let Node::Instruction { instruction } = &mut step.node
                 && let Action::Modify { expires, .. } = &mut instruction.action
             {
-                expires.intervals.push(Interval::DuringNextTurn {
-                    player: PlayerRef::Controller {},
-                });
+                expires
+                    .intervals
+                    .push(if end == (DurationEnd::CurrentTurnEnd {}) {
+                        Interval::DuringNextPhase {
+                            player: PlayerRef::Controller {},
+                            phase: Phase::Main,
+                        }
+                    } else {
+                        Interval::DuringNextTurn {
+                            player: PlayerRef::Controller {},
+                        }
+                    });
             }
             unchanged(&mut turn_game(seat), &checked(vec![draw(2, 1), step]), seat);
         }

@@ -219,6 +219,8 @@ struct State {
     #[serde(default)]
     ir_numeric: BTreeMap<String, internal::NumericState>,
     #[serde(default)]
+    ir_cost: BTreeMap<String, internal::CostState>,
+    #[serde(default)]
     next_ir_effect: u64,
     #[serde(default)]
     ir_play_clock: u64,
@@ -440,6 +442,7 @@ impl Game {
             ir_objects: BTreeMap::new(),
             next_ir_object: 0,
             ir_numeric: BTreeMap::new(),
+            ir_cost: BTreeMap::new(),
             next_ir_effect: 0,
             ir_play_clock: 0,
         };

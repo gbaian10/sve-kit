@@ -4,6 +4,9 @@ use sve_engine::game::internal::{Activation, ResumeStage};
 #[path = "card/payment.rs"]
 mod payment;
 
+#[path = "card/fanfare.rs"]
+mod fanfare;
+
 fn locate_steps(steps: &mut [Located<Node>], span: &SourceSpan, origin: &AbilitySource) {
     for step in steps {
         step.source = span.clone();

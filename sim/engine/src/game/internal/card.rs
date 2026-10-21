@@ -5,10 +5,10 @@ use super::{
 };
 use crate::ir::{
     Ability, AbilityId, AbilityInstanceId, AbilityKind, AbilityOrigin, AbilitySource, Action,
-    Control, CostSpec, DamageAmount, ExecutionId, Expr, Generation, InstructionContext, Int,
-    Located, Node, ObjectOperand, ObjectRef, PlayerId, PlayerRef, Posture, PostureEvent, Quantity,
-    QuantityUnit, Resource, ResourceOperation, RuntimeAbilitySource, Selector, SourceSpan,
-    StepwiseMode, WellFormedCardProgram, WellFormedProgram, ZoneKind,
+    Control, CostSpec, DamageAmount, ExecutionId, Expr, FaceId, Generation, InstructionContext,
+    Int, KeywordId, Located, Nat, Node, ObjectOperand, ObjectRef, PlayerId, PlayerRef, Posture,
+    PostureEvent, Quantity, QuantityUnit, Resource, ResourceOperation, RuntimeAbilitySource,
+    Selector, SourceSpan, StepwiseMode, WellFormedCardProgram, WellFormedProgram, ZoneKind,
 };
 use crate::{Result, invalid};
 use alloc::collections::{BTreeMap, BTreeSet};
@@ -17,9 +17,13 @@ use serde::Serializer;
 use serde::ser::Error as _;
 use serde_json::json;
 
+mod fanfare;
+
 /// Explicit authority boundary after a complete ability resolution.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ResumeStage {
+    /// Resolve the single authority-produced fanfare before another player action.
+    PendingFanfare,
     /// Run state-based checks before accepting another player action.
     CheckTiming,
 }
@@ -43,9 +47,22 @@ pub(in crate::game) struct CardRuntime {
     instances: BTreeMap<(String, u64, AbilityId), AbilityInstanceId>,
     next_instance: u64,
     pub(in crate::game) checkpoint: Option<ExecutionId>,
+    pending: Option<fanfare::PendingFanfare>,
 }
 
 impl CardRuntime {
+    pub(in crate::game) const fn has_pending(&self) -> bool {
+        self.pending.is_some()
+    }
+
+    pub(in crate::game) fn requires_typed_play(&self) -> bool {
+        self.cards.values().any(|card| {
+            card.card()
+                .abilities
+                .iter()
+                .any(|ability| ability.node.kind == AbilityKind::Triggered)
+        })
+    }
     pub(in crate::game) fn is_empty(&self) -> bool {
         self.cards.is_empty()
     }
@@ -65,8 +82,8 @@ where
     reason = "Whole-card admission and activation share the authoritative game."
 )]
 impl Game {
-    /// Load one complete hand-written card against this game's exact catalogue.
-    /// This internal boundary uses card numbers and numeric face ordinals only.
+    /// Load one complete internal card against this game's exact catalogue.
+    /// Candidate base faces map to ordinal zero without granting public qualification.
     ///
     /// # Errors
     /// Rejects unsupported abilities, play parameters or captures, foreign provenance,
@@ -81,6 +98,7 @@ impl Game {
             || self.typed.is_some()
             || !self.prepared.is_empty()
             || self.card_runtime.checkpoint.is_some()
+            || self.card_runtime.has_pending()
         {
             return Err(invalid("duplicate card or busy internal card loader"));
         }
@@ -88,26 +106,30 @@ impl Game {
             return Err(unsupported("typed card mixed with prototype abilities"));
         }
         let mut origins = BTreeSet::new();
+        let mut fanfare_faces = BTreeSet::new();
         for located in &card.card().abilities {
             let ability = &located.node;
             check_header(ability)?;
-            let AbilityOrigin::Printed { face, line } = &ability.source.origin else {
-                return Err(unsupported("non-printed card ability"));
-            };
-            let ordinal = face.0.parse::<usize>().map_err(invalid)?;
-            if face.0 != ordinal.to_string() || line.0 == 0 || !origins.insert((ordinal, line.0)) {
+            let (face, line) = printed_origin(&ability.source.origin)?;
+            let ordinal = face_ordinal(face)?;
+            if ability.kind == AbilityKind::Triggered && !fanfare_faces.insert(ordinal) {
+                return Err(unsupported("multiple fanfares need pending order"));
+            }
+            if line.0 == 0 || !origins.insert((ordinal, line.0)) {
                 return Err(invalid("invalid or duplicate printed ability coordinate"));
             }
             self.catalog.face(card_no, ordinal)?;
             check_source(&located.source, card_no, &face.0, line.0)?;
-            check_costs(ability)?;
+            if ability.kind == AbilityKind::Activated {
+                check_costs(ability)?;
+            }
             let body = ability
                 .body
                 .as_ref()
                 .ok_or_else(|| invalid("missing body"))?;
             check_nodes(&body.steps, &located.source, &ability.source)?;
             let program = WellFormedProgram::check(body.clone()).map_err(invalid)?;
-            admission::check(&program, &located.source)?;
+            admission::check_card(&program, &located.source)?;
         }
         self.card_runtime.cards.insert(card_no.into(), card.clone());
         Ok(())
@@ -136,9 +158,13 @@ impl Game {
     /// Inspect the authority's explicit next stage without advancing the turn.
     #[must_use]
     pub fn internal_card_stage(&self) -> Option<ResumeStage> {
-        self.card_runtime
-            .checkpoint
-            .map(|_| ResumeStage::CheckTiming)
+        if self.card_runtime.has_pending() {
+            Some(ResumeStage::PendingFanfare)
+        } else {
+            self.card_runtime
+                .checkpoint
+                .map(|_| ResumeStage::CheckTiming)
+        }
     }
 
     /// Finish the pending check timing, preserving the active player's main stage.
@@ -184,7 +210,8 @@ impl Game {
             .ok_or_else(|| invalid("ability is not loaded for this holder"))?;
         let seat = seat_name(actor)?;
         let point = self.input_point();
-        if object.zone != "field"
+        if ability.node.kind != AbilityKind::Activated
+            || object.zone != "field"
             || object.controller != seat
             || point["at"] != "main"
             || point["by"] != seat
@@ -210,40 +237,8 @@ impl Game {
         };
         self.internal_context(&context)?;
         // Even unselected cards must have an admitted whole tree before they can intervene.
-        for current in self.state.objects.values() {
-            if !self.card_runtime.cards.contains_key(&current.card) {
-                return Err(unsupported("context contains an unloaded whole card"));
-            }
-        }
-        let ids = self.internal_identities()?;
-        let id = ids
-            .iter()
-            .find(|(_, physical)| physical.as_str() == holder)
-            .map(|(id, _)| *id)
-            .ok_or_else(|| invalid("missing holder identity"))?;
-        let key = (holder.into(), object.generation, definition);
-        let instance = if let Some(&instance) = self.card_runtime.instances.get(&key) {
-            instance
-        } else {
-            let next = self
-                .card_runtime
-                .next_instance
-                .checked_add(1)
-                .ok_or_else(|| invalid("ability instances exhausted"))?;
-            let instance = AbilityInstanceId(next);
-            self.card_runtime.next_instance = next;
-            self.card_runtime.instances.insert(key, instance);
-            instance
-        };
-        let source = RuntimeAbilitySource {
-            holder: ObjectRef {
-                id,
-                generation: context.generation,
-            },
-            instance,
-            controller: actor,
-            definition,
-        };
+        self.check_internal_cards()?;
+        let source = self.internal_card_source(holder, definition, actor)?;
         let costs = &ability
             .node
             .play
@@ -255,7 +250,7 @@ impl Game {
             .body
             .ok_or_else(|| invalid("missing loaded body"))?;
         let program = WellFormedProgram::check(body).map_err(invalid)?;
-        let play = self.prepare_internal_play(&program, &ability.source, context)?;
+        let play = self.prepare_admitted_internal_play(&program, context)?;
         let execution = ExecutionId(play.execution);
         let progress = self.resolve_internal_play(&play, Some(source), Some(costs))?;
         self.card_runtime.checkpoint = Some(execution);
@@ -265,6 +260,15 @@ impl Game {
             progress,
             resume: ResumeStage::CheckTiming,
         })
+    }
+
+    fn check_internal_cards(&self) -> Result<()> {
+        for current in self.state.objects.values() {
+            if !self.card_runtime.cards.contains_key(&current.card) {
+                return Err(unsupported("context contains an unloaded whole card"));
+            }
+        }
+        Ok(())
     }
 
     pub(super) fn internal_card_payment(
@@ -340,16 +344,22 @@ impl Game {
 }
 
 fn check_header(ability: &Ability) -> Result<()> {
-    if ability.kind != AbilityKind::Activated
-        || ability.active_zones != [ZoneKind::Field]
+    if ability.active_zones != [ZoneKind::Field]
         || ability.source.holder != (ObjectOperand::SourceHolder {})
         || ability.source.controller != (PlayerRef::Controller {})
-        || !matches!(ability.source.origin, AbilityOrigin::Printed { .. })
         || !ability.event_captures.is_empty()
         || !ability.declarations.is_empty()
-        || ability.trigger.is_some()
     {
         return Err(unsupported("whole-card ability header"));
+    }
+    if ability.kind == AbilityKind::Triggered {
+        return fanfare::check_header(ability);
+    }
+    if ability.kind != AbilityKind::Activated
+        || ability.trigger.is_some()
+        || !matches!(ability.source.origin, AbilityOrigin::Printed { .. })
+    {
+        return Err(unsupported("whole-card ability kind or origin"));
     }
     let Some(play) = &ability.play else {
         return Err(unsupported("missing whole-card PlaySpec"));
@@ -403,12 +413,45 @@ fn check_source(source: &SourceSpan, card: &str, face: &str, line: u64) -> Resul
         || source.card_id != card
         || source.face != face
         || u64::from(source.line) != line
-        || source.owner != "card"
-        || source.field != "text"
+        || !((source.owner == "card" && source.field == "text")
+            || (face == "base"
+                && source.field == "effect"
+                && source.fragment.is_some()
+                && serde_json::from_str::<serde_json::Value>(&source.owner).is_ok_and(|owner| {
+                    owner["kind"] == "face_revision" && owner["revision_id"].is_string()
+                })))
     {
         return Err(invalid("card source mapping mismatch"));
     }
     Ok(())
+}
+
+fn printed_origin(origin: &AbilityOrigin) -> Result<(&FaceId, &Nat)> {
+    match origin {
+        AbilityOrigin::Printed { face, line } => Ok((face, line)),
+        AbilityOrigin::Keyword {
+            keyword: KeywordId::Fanfare,
+            origin,
+        } => {
+            if let AbilityOrigin::Printed { face, line } = origin.as_ref() {
+                Ok((face, line))
+            } else {
+                Err(unsupported("nested fanfare origin"))
+            }
+        }
+        _ => Err(unsupported("non-printed card ability")),
+    }
+}
+
+fn face_ordinal(face: &FaceId) -> Result<usize> {
+    if face.0 == "base" {
+        return Ok(0);
+    }
+    let ordinal = face.0.parse::<usize>().map_err(invalid)?;
+    if face.0 != ordinal.to_string() {
+        return Err(invalid("invalid printed face ordinal"));
+    }
+    Ok(ordinal)
 }
 
 fn check_nodes(
@@ -417,6 +460,12 @@ fn check_nodes(
     ability_source: &AbilitySource,
 ) -> Result<()> {
     for located in nodes {
+        if located.source.owner != source.owner
+            || located.source.field != source.field
+            || located.source.fragment != source.fragment
+        {
+            return Err(invalid("instruction source evidence mapping mismatch"));
+        }
         check_source(
             &located.source,
             &source.card_no,
