@@ -1,8 +1,11 @@
 use super::*;
-use sve_engine::game::internal::{Activation, ResumeStage};
+use sve_engine::game::internal::{Activation, CardPlay, ResumeStage};
 
 #[path = "card/payment.rs"]
 mod payment;
+
+#[path = "card/play.rs"]
+mod play;
 
 #[path = "card/fanfare.rs"]
 mod fanfare;
@@ -26,6 +29,13 @@ fn locate_steps(steps: &mut [Located<Node>], span: &SourceSpan, origin: &Ability
                 locate_steps(&mut then_body.steps, span, origin);
                 if let Some(body) = else_body {
                     locate_steps(&mut body.steps, span, origin);
+                }
+            }
+            Node::Control {
+                control: Control::Mode { modes, .. },
+            } => {
+                for mode in modes {
+                    locate_steps(&mut mode.body.steps, span, origin);
                 }
             }
             Node::Control { .. } | Node::Capture { .. } | Node::Decision { .. } => {}
@@ -95,8 +105,21 @@ fn position_with_state(seat: u32, program: &WellFormedCardProgram, state: &Value
 }
 
 fn activate(game: &mut Game, seat: u32) -> Activation {
-    game.activate_internal_card("s", AbilityId(1), PlayerId { seat })
-        .unwrap()
+    resolved(
+        game.activate_internal_card("s", AbilityId(1), PlayerId { seat })
+            .unwrap(),
+    )
+}
+
+#[expect(
+    clippy::panic,
+    reason = "A synchronous fixture must complete its ability."
+)]
+fn resolved(play: CardPlay) -> Activation {
+    let CardPlay::Resolved(activation) = play else {
+        panic!("expected complete ability");
+    };
+    activation
 }
 
 #[test]
@@ -350,7 +373,9 @@ fn multiple_supported_abilities_keep_distinct_instances_and_effect_producers() {
                         assert_eq!(fact.execution, activation.execution);
                         Some(fact.effect)
                     }
-                    Fact::AbilityPlayed { .. }
+                    Fact::CardPlayed { .. }
+                    | Fact::CardResolved { .. }
+                    | Fact::AbilityPlayed { .. }
                     | Fact::AbilityResolved { .. }
                     | Fact::Shuffled { .. }
                     | Fact::Draw(_)
@@ -364,9 +389,10 @@ fn multiple_supported_abilities_keep_distinct_instances_and_effect_producers() {
         assert_eq!(first_effects.len(), 2);
         assert_eq!(first_effects[0], first_effects[1]);
         game.resume_internal_card().unwrap();
-        let second = game
-            .activate_internal_card("s", AbilityId(2), PlayerId { seat })
-            .unwrap();
+        let second = resolved(
+            game.activate_internal_card("s", AbilityId(2), PlayerId { seat })
+                .unwrap(),
+        );
         assert_eq!(first.source.holder, second.source.holder);
         assert_ne!(first.source.instance, second.source.instance);
         assert_ne!(first.execution, second.execution);

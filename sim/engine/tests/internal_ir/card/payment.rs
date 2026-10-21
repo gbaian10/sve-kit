@@ -1,6 +1,6 @@
 use super::*;
 
-const fn pp(amount: i64) -> Action {
+pub(super) const fn pp(amount: i64) -> Action {
     Action::Resource {
         player: PlayerRef::Controller {},
         resource: Resource::PpCurrent,
@@ -9,7 +9,7 @@ const fn pp(amount: i64) -> Action {
     }
 }
 
-fn act() -> Action {
+pub(super) fn act() -> Action {
     Action::Posture {
         objects: Selector::Objects {
             objects: vec![ObjectOperand::SourceHolder {}],
@@ -18,7 +18,7 @@ fn act() -> Action {
     }
 }
 
-fn paid_ability(actions: Vec<Action>, body: Vec<Located<Node>>) -> Located<Ability> {
+pub(super) fn paid_ability(actions: Vec<Action>, body: Vec<Located<Node>>) -> Located<Ability> {
     let mut a = ability(1, body);
     a.node.play.as_mut().unwrap().costs = CostSpec::Ordered {
         steps: actions

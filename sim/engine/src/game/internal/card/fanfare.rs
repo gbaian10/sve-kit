@@ -1,13 +1,13 @@
 use super::{
-    Ability, AbilityId, AbilityInstanceId, AbilityKind, AbilityOrigin, Activation, Context,
-    ExecutionId, Expr, Game, Generation, Located, ObjectRef, PlayerId, Result, ResumeStage,
-    RuntimeAbilitySource, Step, WellFormedProgram, ZoneKind, admission, face_ordinal, int, invalid,
-    json, printed_origin, seat_name, take, unsupported,
+    Ability, AbilityId, AbilityInstanceId, AbilityKind, AbilityOrigin, CardPlay, Context, Expr,
+    Game, Generation, Located, ObjectRef, PlayerId, Result, RuntimeAbilitySource, Step, ZoneKind,
+    face_ordinal, invalid, json, printed_origin, seat_name, take, unsupported,
 };
 use crate::ir::{
     EventPattern, EventSnapshotPolicy, KeywordId, ObjectFrozen, Predicate, TriggerAggregation,
     TriggerCondition,
 };
+use crate::ir::{Int, ReceiptId};
 
 #[derive(Clone, Debug)]
 pub(super) struct PendingFanfare {
@@ -48,21 +48,11 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
     reason = "Fanfare has its own authority producer and continuation."
 )]
 impl Game {
-    /// Play a loaded follower from hand or EX, stopping before its single fanfare.
-    /// Candidate `base` maps to catalogue face zero; this grants no public source qualification.
-    ///
-    /// # Errors
-    /// Rejects unsupported cards, timing, costs and interventions atomically.
-    pub fn play_internal_card(&mut self, holder: &str, actor: PlayerId) -> Result<Step> {
-        let before = self.clone();
-        let result = self.play_internal_follower(holder, actor);
-        if result.is_err() {
-            *self = before;
-        }
-        result
-    }
-
-    fn play_internal_follower(&mut self, holder: &str, actor: PlayerId) -> Result<Step> {
+    pub(super) fn play_internal_follower(
+        &mut self,
+        holder: &str,
+        actor: PlayerId,
+    ) -> Result<super::CardEntry> {
         let object = self.object(holder)?.clone();
         let seat = seat_name(actor)?;
         let context = Context {
@@ -70,23 +60,10 @@ impl Game {
             generation: Generation(object.generation),
             controller: actor,
         };
-        self.internal_context(&context)?;
-        let point = self.input_point();
-        if object.controller != seat
-            || object.owner != seat
-            || !matches!(object.zone.as_str(), "hand" | "ex")
-            || point["at"] != "main"
-            || point["by"] != seat
-            || self.state.flow["kind"] != "main"
-            || self.state.turn["phase"] != "main"
-            || self.object_type(holder)? != "フォロワー"
-            || int(&object.state["face"]) != 0
-            || self.zone_count(seat, "field") >= 5
-            || !self.prepared.is_empty()
-        {
-            return Err(unsupported("fanfare card play holder or timing"));
+        self.check_card_play_holder(holder, actor)?;
+        if self.object_type(holder)? != "フォロワー" {
+            return Err(unsupported("fanfare card play holder"));
         }
-        self.check_internal_cards()?;
         let card = self
             .card_runtime
             .cards
@@ -107,27 +84,31 @@ impl Game {
             return Err(unsupported("fanfare belongs to another face"));
         }
         let ability = ability.clone();
-        let cost = self.internal_effective_cost(holder)?;
-        let pp = self.player(seat)?.pp["current"]
-            .as_i64()
-            .ok_or_else(|| invalid("invalid current PP"))?;
-        if cost < 0 || pp < cost {
-            return Err(invalid("unpayable printed play cost"));
-        }
-        // The prototype movement primitive saturates; prove both new generations first.
-        object
-            .generation
-            .checked_add(2)
-            .ok_or_else(|| invalid("play generation exhausted"))?;
-        self.emitted.clear();
-        self.player_mut(seat)?.pp["current"] = json!(
-            pp.checked_sub(cost)
-                .ok_or_else(|| invalid("PP payment overflow"))?
-        );
+        let mut execution = self.new_card_execution(context)?;
         let decision = json!({"do":"play","card":holder,"by":seat,"at":"main"});
         let mut frame = self.start_frame(holder, serde_json::Value::Null, &decision)?;
-        self.move_objects(&[holder.into()], "resolution", None, None, &frame)?;
+        self.internal_play_move(holder, "resolution", &frame)?;
         self.object_mut(holder)?.state["entered_from"] = json!(object.zone);
+        let cost = self.internal_effective_cost(holder)?;
+        let quantity = self.internal_pay_pp(actor, Int(cost))?;
+        if self.zone_count(seat, "field") >= 5 {
+            return Err(crate::EngineFailure::IllegalPlay(
+                "full field after payment".into(),
+            ));
+        }
+        let played = execution.reference(self, holder)?;
+        execution.receipts.insert(
+            ReceiptId(0),
+            super::InstructionOutcome::Payment {
+                quantity,
+                subjects: Vec::new(),
+            },
+        );
+        execution.facts.push(super::Fact::CardPlayed {
+            execution: execution.id,
+            object: played,
+            controller: actor,
+        });
         self.bump(&format!("{seat}.cards_played"), 1);
         let group = self.group();
         let event = self.emit(
@@ -136,19 +117,25 @@ impl Game {
             group,
         );
         frame.cause = json!({"event":event});
-        self.move_objects(&[holder.into()], "field", None, None, &frame)?;
+        self.internal_play_move(holder, "field", &frame)?;
         let source = self.internal_card_source(holder, ability.node.id, actor)?;
         self.card_runtime.pending = Some(PendingFanfare {
             holder: holder.into(),
             source,
             ability,
         });
+        self.internal_numeric_end_resolution(execution.id)?;
         let resolve_group = self.group();
         self.emit(
             json!({"kind":"解決","object":holder}),
             &frame.cause,
             resolve_group,
         );
+        execution.facts.push(super::Fact::CardResolved {
+            execution: execution.id,
+            object: played,
+            controller: actor,
+        });
         self.checks()?;
         if self.object(holder)?.generation != source.holder.generation.0
             || self.object(holder)?.zone != "field"
@@ -157,9 +144,14 @@ impl Game {
                 "fanfare source requires last-known information",
             ));
         }
-        Ok(Step {
-            outcome: "resolved".into(),
-            events: take(&mut self.emitted),
+        Ok(super::CardEntry {
+            execution: execution.id,
+            progress: execution.progress(),
+            step: Step {
+                outcome: "resolved".into(),
+                events: take(&mut self.emitted),
+            },
+            resume: super::ResumeStage::PendingFanfare,
         })
     }
 
@@ -167,7 +159,7 @@ impl Game {
     ///
     /// # Errors
     /// Rejects missing occurrences and restores the pending producer after any failure.
-    pub fn resolve_internal_fanfare(&mut self) -> Result<Activation> {
+    pub fn resolve_internal_fanfare(&mut self) -> Result<CardPlay> {
         let before = self.clone();
         let result = (|| {
             let pending = self
@@ -175,33 +167,15 @@ impl Game {
                 .pending
                 .take()
                 .ok_or_else(|| invalid("no pending internal fanfare"))?;
-            let body = pending
-                .ability
-                .node
-                .body
-                .ok_or_else(|| invalid("missing fanfare body"))?;
-            let program = WellFormedProgram::check(body).map_err(invalid)?;
-            admission::check_card(&program, &pending.ability.source)?;
             let context = Context {
                 source: pending.holder,
                 generation: pending.source.holder.generation,
                 controller: pending.source.controller,
             };
-            let play = self.prepare_admitted_internal_play(&program, context)?;
-            let execution = ExecutionId(play.execution);
-            let progress = self.resolve_internal_play(&play, Some(pending.source), None)?;
-            self.card_runtime.checkpoint = Some(execution);
-            Ok(Activation {
-                execution,
-                source: pending.source,
-                progress,
-                resume: ResumeStage::CheckTiming,
-            })
+            self.internal_context(&context)?;
+            self.start_internal_ability(pending.ability.node, context, pending.source, false)
         })();
-        if result.is_err() {
-            *self = before;
-        }
-        result
+        self.finish_card_attempt(before, result)
     }
 
     pub(super) fn internal_card_source(

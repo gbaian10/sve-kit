@@ -8,7 +8,7 @@ use crate::ir::{
     Control, CostSpec, DamageAmount, ExecutionId, Expr, FaceId, Generation, InstructionContext,
     Int, KeywordId, Located, Nat, Node, ObjectOperand, ObjectRef, PlayerId, PlayerRef, Posture,
     PostureEvent, Quantity, QuantityUnit, Resource, ResourceOperation, RuntimeAbilitySource,
-    Selector, SourceSpan, StepwiseMode, WellFormedCardProgram, WellFormedProgram, ZoneKind,
+    Selector, SourceSpan, StepwiseMode, WellFormedCardProgram, ZoneKind,
 };
 use crate::{Result, invalid};
 use alloc::collections::{BTreeMap, BTreeSet};
@@ -18,6 +18,11 @@ use serde::ser::Error as _;
 use serde_json::json;
 
 mod fanfare;
+pub(super) mod play;
+pub(super) mod selection;
+
+pub use play::{CardEntry, CardPlay};
+pub use selection::TargetDomain;
 
 /// Explicit authority boundary after a complete ability resolution.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -57,10 +62,12 @@ impl CardRuntime {
 
     pub(in crate::game) fn requires_typed_play(&self) -> bool {
         self.cards.values().any(|card| {
-            card.card()
-                .abilities
-                .iter()
-                .any(|ability| ability.node.kind == AbilityKind::Triggered)
+            card.card().abilities.iter().any(|ability| {
+                matches!(
+                    ability.node.kind,
+                    AbilityKind::Spell | AbilityKind::Triggered
+                )
+            })
         })
     }
     pub(in crate::game) fn is_empty(&self) -> bool {
@@ -107,20 +114,29 @@ impl Game {
         }
         let mut origins = BTreeSet::new();
         let mut fanfare_faces = BTreeSet::new();
+        let mut spell_face = None;
         for located in &card.card().abilities {
             let ability = &located.node;
             check_header(ability)?;
             let (face, line) = printed_origin(&ability.source.origin)?;
             let ordinal = face_ordinal(face)?;
+            if ability.kind == AbilityKind::Spell
+                && (ordinal != 0 || spell_face.replace(ordinal).is_some())
+            {
+                return Err(unsupported("one base Printed Spell per card"));
+            }
             if ability.kind == AbilityKind::Triggered && !fanfare_faces.insert(ordinal) {
                 return Err(unsupported("multiple fanfares need pending order"));
             }
             if line.0 == 0 || !origins.insert((ordinal, line.0)) {
                 return Err(invalid("invalid or duplicate printed ability coordinate"));
             }
-            self.catalog.face(card_no, ordinal)?;
+            let printed = self.catalog.face(card_no, ordinal)?;
+            if ability.kind == AbilityKind::Spell {
+                play::check_spell(ability, printed)?;
+            }
             check_source(&located.source, card_no, &face.0, line.0)?;
-            if ability.kind == AbilityKind::Activated {
+            if matches!(ability.kind, AbilityKind::Activated | AbilityKind::Spell) {
                 check_costs(ability)?;
             }
             let body = ability
@@ -128,8 +144,8 @@ impl Game {
                 .as_ref()
                 .ok_or_else(|| invalid("missing body"))?;
             check_nodes(&body.steps, &located.source, &ability.source)?;
-            let program = WellFormedProgram::check(body.clone()).map_err(invalid)?;
-            admission::check_card(&program, &located.source)?;
+            admission::check_card(body, &located.source, &ability.source)?;
+            play::check(ability, &located.source)?;
         }
         self.card_runtime.cards.insert(card_no.into(), card.clone());
         Ok(())
@@ -146,13 +162,10 @@ impl Game {
         holder: &str,
         definition: AbilityId,
         actor: PlayerId,
-    ) -> Result<Activation> {
+    ) -> Result<CardPlay> {
         let before = self.clone();
         let result = self.activate_loaded_card(holder, definition, actor);
-        if result.is_err() {
-            *self = before;
-        }
-        result
+        self.finish_card_attempt(before, result)
     }
 
     /// Inspect the authority's explicit next stage without advancing the turn.
@@ -172,7 +185,7 @@ impl Game {
     /// # Errors
     /// Rejects missing stages and restores the complete authority on a failed check.
     pub fn resume_internal_card(&mut self) -> Result<Step> {
-        if self.card_runtime.checkpoint.is_none() {
+        if self.card_runtime.checkpoint.is_none() || self.typed.is_some() {
             return Err(invalid("no internal card check timing"));
         }
         let before = self.clone();
@@ -194,7 +207,7 @@ impl Game {
         holder: &str,
         definition: AbilityId,
         actor: PlayerId,
-    ) -> Result<Activation> {
+    ) -> Result<CardPlay> {
         let object = self.object(holder)?.clone();
         let ability = self
             .card_runtime
@@ -227,7 +240,7 @@ impl Game {
         let AbilityOrigin::Printed { face, .. } = &ability.node.source.origin else {
             return Err(unsupported("activation origin"));
         };
-        if face.0 != int(&object.state["face"]).to_string() {
+        if face_ordinal(face)? != usize::try_from(int(&object.state["face"])).map_err(invalid)? {
             return Err(invalid("printed ability belongs to another face"));
         }
         let context = Context {
@@ -239,27 +252,7 @@ impl Game {
         // Even unselected cards must have an admitted whole tree before they can intervene.
         self.check_internal_cards()?;
         let source = self.internal_card_source(holder, definition, actor)?;
-        let costs = &ability
-            .node
-            .play
-            .as_ref()
-            .ok_or_else(|| invalid("missing play"))?
-            .costs;
-        let body = ability
-            .node
-            .body
-            .ok_or_else(|| invalid("missing loaded body"))?;
-        let program = WellFormedProgram::check(body).map_err(invalid)?;
-        let play = self.prepare_admitted_internal_play(&program, context)?;
-        let execution = ExecutionId(play.execution);
-        let progress = self.resolve_internal_play(&play, Some(source), Some(costs))?;
-        self.card_runtime.checkpoint = Some(execution);
-        Ok(Activation {
-            execution,
-            source,
-            progress,
-            resume: ResumeStage::CheckTiming,
-        })
+        self.start_internal_ability(ability.node, context, source, false)
     }
 
     fn check_internal_cards(&self) -> Result<()> {
@@ -271,10 +264,29 @@ impl Game {
         Ok(())
     }
 
+    pub(super) fn internal_pay_pp(&mut self, actor: PlayerId, amount: Int) -> Result<Quantity> {
+        let player = self.player_mut(seat_name(actor)?)?;
+        let current = int(&player.pp["current"]);
+        if current < amount.0 {
+            return Err(crate::EngineFailure::IllegalPlay(
+                "insufficient PP for whole-card payment".into(),
+            ));
+        }
+        let remaining = current
+            .checked_sub(amount.0)
+            .ok_or_else(|| invalid("PP payment overflow"))?;
+        player.pp["current"] = json!(remaining);
+        Ok(Quantity {
+            amount,
+            unit: QuantityUnit::Pp,
+        })
+    }
+
     pub(super) fn internal_card_payment(
         &mut self,
         execution: &mut Execution,
         costs: &CostSpec,
+        card_cost: bool,
     ) -> Result<()> {
         let CostSpec::Ordered { steps } = costs else {
             return Err(unsupported("whole-card cost alternatives"));
@@ -285,29 +297,21 @@ impl Game {
                     amount: Expr::Literal(amount),
                     ..
                 } => {
-                    let seat = seat_name(execution.context.controller)?;
-                    let player = self.player_mut(seat)?;
-                    let current = int(&player.pp["current"]);
-                    if current < amount.0 {
-                        return Err(invalid("insufficient PP for whole-card payment"));
-                    }
-                    let remaining = current
-                        .checked_sub(amount.0)
-                        .ok_or_else(|| invalid("PP payment overflow"))?;
-                    player.pp["current"] = json!(remaining);
+                    let amount = if card_cost {
+                        Int(self.internal_effective_cost(&execution.context.source)?)
+                    } else {
+                        *amount
+                    };
                     (
-                        Quantity {
-                            amount: *amount,
-                            unit: QuantityUnit::Pp,
-                        },
+                        self.internal_pay_pp(execution.context.controller, amount)?,
                         Vec::new(),
                     )
                 }
                 Action::Posture { .. } => {
                     let holder = execution.context.source.clone();
                     if self.object(&holder)?.state["acted"] != false {
-                        return Err(invalid(
-                            "whole-card posture cost requires a standing source",
+                        return Err(crate::EngineFailure::IllegalPlay(
+                            "whole-card posture cost requires a standing source".into(),
                         ));
                     }
                     let object = execution.object(self, &ObjectOperand::SourceHolder {})?;
@@ -317,7 +321,9 @@ impl Game {
                         &execution.frame().cause,
                     )?;
                     if changed != [holder] {
-                        return Err(invalid("incomplete posture payment"));
+                        return Err(crate::EngineFailure::IllegalPlay(
+                            "incomplete posture payment".into(),
+                        ));
                     }
                     execution.facts.push(Fact::Posture(PostureEvent {
                         object,
@@ -344,7 +350,12 @@ impl Game {
 }
 
 fn check_header(ability: &Ability) -> Result<()> {
-    if ability.active_zones != [ZoneKind::Field]
+    let zones = if ability.kind == AbilityKind::Spell {
+        ZoneKind::Resolution
+    } else {
+        ZoneKind::Field
+    };
+    if ability.active_zones != [zones]
         || ability.source.holder != (ObjectOperand::SourceHolder {})
         || ability.source.controller != (PlayerRef::Controller {})
         || !ability.event_captures.is_empty()
@@ -355,17 +366,14 @@ fn check_header(ability: &Ability) -> Result<()> {
     if ability.kind == AbilityKind::Triggered {
         return fanfare::check_header(ability);
     }
-    if ability.kind != AbilityKind::Activated
+    if !matches!(ability.kind, AbilityKind::Activated | AbilityKind::Spell)
         || ability.trigger.is_some()
         || !matches!(ability.source.origin, AbilityOrigin::Printed { .. })
     {
         return Err(unsupported("whole-card ability kind or origin"));
     }
-    let Some(play) = &ability.play else {
+    if ability.play.is_none() {
         return Err(unsupported("missing whole-card PlaySpec"));
-    };
-    if !play.captures.is_empty() || !play.parameters.is_empty() {
-        return Err(unsupported("whole-card captures or parameters"));
     }
     Ok(())
 }
@@ -486,7 +494,7 @@ fn check_nodes(
                         mode: StepwiseMode::Exact,
                         ..
                     } | Action::Damage {
-                        amount: DamageAmount::Uniform { .. },
+                        amount: DamageAmount::Uniform { .. } | DamageAmount::Allocation { .. },
                         ..
                     } | Action::Modify { .. }
                         | Action::InstallEffect { .. }
@@ -510,6 +518,13 @@ fn check_nodes(
                 check_nodes(&then_body.steps, source, ability_source)?;
                 if let Some(body) = else_body {
                     check_nodes(&body.steps, source, ability_source)?;
+                }
+            }
+            Node::Control {
+                control: Control::Mode { modes, .. },
+            } => {
+                for mode in modes {
+                    check_nodes(&mode.body.steps, source, ability_source)?;
                 }
             }
             Node::Capture { .. } => {}

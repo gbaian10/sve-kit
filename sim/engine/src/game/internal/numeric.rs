@@ -160,6 +160,13 @@ fn collect_patches<'program>(
                     collect_patches(body, patches);
                 }
             }
+            Node::Control {
+                control: Control::Mode { modes, .. },
+            } => {
+                for mode in modes {
+                    collect_patches(&mode.body, patches);
+                }
+            }
             _ => {}
         }
     }

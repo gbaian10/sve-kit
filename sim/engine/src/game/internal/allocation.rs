@@ -59,6 +59,12 @@ pub(super) struct DistributionWait {
     expression: RecipientSet,
 }
 
+impl DistributionWait {
+    pub(super) const fn producer_decision(&self) -> DecisionId {
+        self.producer.decision
+    }
+}
+
 #[derive(Clone, Debug)]
 pub(super) struct Allocation {
     occurrence: DistributionWait,
@@ -85,6 +91,22 @@ impl Game {
         execution: &mut Execution,
         decision: &Decision,
     ) -> Result<()> {
+        let snapshot = self.clone();
+        self.internal_distribution_in(
+            execution,
+            decision,
+            &snapshot,
+            SnapshotId(self.state.ir_epoch),
+        )
+    }
+
+    pub(super) fn internal_distribution_in(
+        &mut self,
+        execution: &mut Execution,
+        decision: &Decision,
+        snapshot: &Self,
+        snapshot_id: SnapshotId,
+    ) -> Result<()> {
         let ChoiceDomain::Distribution {
             recipients,
             total,
@@ -94,18 +116,18 @@ impl Game {
         else {
             return Err(unsupported("distribution domain"));
         };
-        let actor = execution.player(self, &decision.actor)?;
+        let actor = execution.player(snapshot, &decision.actor)?;
         let expression = recipients.clone();
-        let recipients = execution.recipients(self, recipients)?;
-        let total = execution.natural(self, total)?;
+        let recipients = execution.recipients(snapshot, recipients)?;
+        let total = execution.natural(snapshot, total)?;
         let mut members = Vec::new();
         for (index, recipient) in recipients.members().iter().enumerate() {
             let (player, card, name) = match *recipient {
                 RuntimeDamageRecipient::Leader { player } => (player, None, None),
                 RuntimeDamageRecipient::Object { object } => {
                     let id = execution.object_id(object)?;
-                    let current = self.object(id)?;
-                    if !self.object_type(id)?.contains("フォロワー") {
+                    let current = snapshot.object(id)?;
+                    if !snapshot.object_type(id)?.contains("フォロワー") {
                         return Err(unsupported("non-follower distribution recipient"));
                     }
                     // No LKI identity is exposed through a stale or originally off-field domain.
@@ -115,7 +137,7 @@ impl Game {
                     (
                         super::player_id(&current.controller)?,
                         Some(current.card.clone()),
-                        Some(self.card_name(id)?),
+                        Some(snapshot.card_name(id)?),
                     )
                 }
             };
@@ -145,7 +167,7 @@ impl Game {
                 decision: decision.id,
                 slot: binding.key().1,
             },
-            snapshot: SnapshotId(self.state.ir_epoch),
+            snapshot: snapshot_id,
             recipients,
             total,
             minimum: *minimum,

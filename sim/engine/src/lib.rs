@@ -20,9 +20,12 @@ pub mod ir;
 mod random;
 pub mod replay;
 
-/// Failures outside ordinary illegal player actions.
+/// Engine, protocol and formal-play failures.
 #[derive(Debug, Clone, thiserror::Error)]
 pub enum EngineFailure {
+    /// A formal play cannot complete its mandatory targets or full payment.
+    #[error("illegal play: {0}")]
+    IllegalPlay(String),
     /// A deliberately unimplemented language or rule feature.
     #[error("unsupported: {0}")]
     Unsupported(String),

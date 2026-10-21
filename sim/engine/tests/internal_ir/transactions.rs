@@ -79,7 +79,10 @@ fn response(question: &DecisionView) -> Answer {
         InputDomain::SearchPartition(domain) => {
             Answer::SearchPartition(vec![domain.cards[0].handle])
         }
-        InputDomain::Integer(_) | InputDomain::SearchReplacement => {
+        InputDomain::Integer(_)
+        | InputDomain::SearchReplacement
+        | InputDomain::Targets(_)
+        | InputDomain::Modes { .. } => {
             panic!("unexpected transaction fixture question")
         }
     }
