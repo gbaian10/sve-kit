@@ -6,12 +6,15 @@
 
 ## 整卡起動的內部邊界
 
-`load_internal_card(card_no, WellFormedCardProgram)` 在同一個 Game 載入完整的手寫整卡，
-不接作者 YAML。此入口目前只承載以卡號識別卡片、以十進位 ordinal 識別 face 的內部輸入。
-所有能力都必須是 Field 的 Printed Activated，PlaySpec 的 captures、parameters 必須為空。
+`load_internal_card(card_no, WellFormedCardProgram)` 在同一個 Game 載入完整整卡，
+不直接解析作者 YAML。此入口以卡號識別卡片、以十進位 ordinal 識別 face；lowering candidate
+的 `base` 明示對應同一卡表的 face 0，保留 occurrence owner、field 與 binding fragment。
+這是內部候選座標的接點，不授予永久來源身分或公開卡片資格。
+起動能力必須是 Field 的 Printed Activated，PlaySpec 的 captures、parameters 必須為空。
 Ordered costs 僅准入 controller 的非負常值 PpCurrent Pay，以及恰好 SourceHolder 的 Acted
 Posture；成本 actor 必須為 controller，instruction source 須與能力相符。不接受 materials binding。
-Spell、Triggered、Static、其他成本、成本替代、模式、其他 play metadata 與介入能力整棵拒絕。
+另接受下節的 Printed Fanfare。Spell、其他 Triggered、Static、其他成本、成本替代、模式、
+其他 play metadata 與介入能力整棵拒絕。
 載入逐能力驗證 card／face／line 座標一致、印刷座標唯一、instruction source 相符，以及完整本文的
 封閉 requirement 集合（含未執行分支）。另以正向集合限定同步 Draw Exact、Look Exact、Uniform Damage、
 已支援的 Modify／InstallEffect、capture、Sequence／If；互動與可能移動來源的 Move／Destroy 亦整棵拒絕，
@@ -38,7 +41,26 @@ instance／execution 配發、RNG、事件、觀察與額度；本子集不會�
 checkpoint 期間玩家 projection 的 awaiting 為 null。resume 才交既有規則檢查管線，
 回傳該階段產生的規則事件，不重送本文事件；不自動推到 end／discard，本文中不插入致死或抽空檢查。
 載入整卡的 Game 尚無儲存與 digest 格式，序列化與 digest 都明確失敗，不靜默遺失整卡或 instance。
-本子集尚未承載正式卡片打出、PlayParameter Distribution、目標選取、其他成本、互動續體或真實卡准入。
+本子集尚未承載 Spell 打出、PlayParameter Distribution、目標選取、其他成本、互動續體或公開真實卡准入。
+
+### 單一 Fanfare 的 authority 待機
+
+Fanfare 必須保留 `Keyword(Fanfare, Printed)`，觸發形狀限定為 AfterEntry、Field、PerFact，
+且 EnterFieldObject 恰等於 SourceHolder；不接受額外條件、limit、event captures 或 PlaySpec。
+同 face 多個 Fanfare 在載入時拒絕，未接選序前不以定義順序代替規則輸入。
+
+`play_internal_card(holder, actor)` 限主動玩家 main、自己的 Hand／EX、base 從者及足夠場位，
+以 checked reader 讀取非負印刷 PP 費用，付款後經解決區入場。所有局內卡片必須完整載入，
+任何 prototype／continuous／delayed／其他待機介入仍拒絕；整次失敗回復付款與世代。
+場上新世代實體化能力、保存 controller／instance 並形成私有 pending；卡片收尾後先做規則檢查，
+再停於 `ResumeStage::PendingFanfare`。來源需要 LKI 的形狀仍拒絕，不取消已待機的本文。
+
+`resolve_internal_fanfare()` 不收 caller 指定的 holder、AbilityId 或來源，只消費該 pending。
+同步本文完成後形成同 producer 的 play／resolve facts，再交 `CheckTiming`；失敗回復到
+已付卡片費用的 pending 狀態，保留重試，不撤回前次卡片 play。成功 occurrence 不可重播。
+載入 Fanfare 的 Game 封住原型 decide 與合成 closed Program 入口，避免略過待機 producer。
+BP01-118 的測試由作者 YAML 經真正 C0 展開、lowering、整卡載入、正式入場及待機解算，
+驗兩位領袖各受 1 點傷害；測試用候選來源沒有宣稱永久來源驗證或公開 capability。
 
 ## 准入與原子性
 

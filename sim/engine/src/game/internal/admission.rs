@@ -5,6 +5,14 @@ use super::{
 use core::num::NonZeroU32;
 
 pub(super) fn check(program: &WellFormedProgram, source: &SourceSpan) -> Result<()> {
+    check_with_origin(program, source, false)
+}
+
+pub(super) fn check_card(program: &WellFormedProgram, source: &SourceSpan) -> Result<()> {
+    check_with_origin(program, source, true)
+}
+
+fn check_with_origin(program: &WellFormedProgram, source: &SourceSpan, card: bool) -> Result<()> {
     let located = Located {
         node: program.program().clone(),
         source: source.clone(),
@@ -16,6 +24,11 @@ pub(super) fn check(program: &WellFormedProgram, source: &SourceSpan) -> Result<
         .filter(|requirement| {
             requirement.capability.version != NonZeroU32::MIN
                 || !(supported(requirement.capability.code)
+                    || (card
+                        && matches!(
+                            requirement.capability.code,
+                            "shape.AbilityOrigin.Keyword" | "internal.KeywordId.Fanfare"
+                        ))
                     || super::search::private_requirement(requirement.capability.code))
         })
         .collect::<Vec<_>>();

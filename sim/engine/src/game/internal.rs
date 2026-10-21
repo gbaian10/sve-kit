@@ -336,7 +336,18 @@ impl Game {
         source: &SourceSpan,
         context: Context,
     ) -> Result<ProperPlay> {
+        if self.card_runtime.requires_typed_play() {
+            return Err(unsupported("synthetic play cannot bypass loaded triggers"));
+        }
         admission::check(program, source)?;
+        self.prepare_admitted_internal_play(program, context)
+    }
+
+    fn prepare_admitted_internal_play(
+        &mut self,
+        program: &WellFormedProgram,
+        context: Context,
+    ) -> Result<ProperPlay> {
         self.internal_context(&context)?;
         let execution = self
             .state
@@ -627,6 +638,7 @@ impl Game {
         }
         if self.typed.is_some()
             || self.card_runtime.checkpoint.is_some()
+            || self.card_runtime.has_pending()
             || self.state.frame.is_some()
             || self.state.prompt.is_some()
             || !self.state.pending.is_empty()
