@@ -402,13 +402,16 @@ trigger、declarations 以及已接受的授予能力。只提供不可變 `card
 Ability 明示 scope。Spell／Activated 需要 play 與 body，Triggered 需要 trigger 與 body，
 Static 不得有 play 或 body；非 Static 不接受 declarations。UnionBurst 尚未驗證。
 本文 scope 必須等於能力 scope；指示與 declaration 的 AbilitySource 須與所屬能力相同。
+通用 checker 只驗有效區非空且不重複；正式 Printed Spell 的 `[Resolution]`、Hand／EX
+起點與卡表類型對映須由[正式 play 准入](play-semantics.md#1-有效區打出起點與來源)另驗，
+現有通用測試中的 Spell／Field 包裝不構成正式 header 範例。
 入口的可見性順序為：
 
 | 入口 | 可讀內容與限制 |
 | --- | --- |
 | trigger pattern | 定義在能力 scope 的事件 binding；不能讀之後的 capture、打出回答或本文結果 |
 | event_captures | AtEvent，event=Trigger 且 policy 與 trigger.view 相同；同批 capture 互不可讀 |
-| play.captures | AtPlay，execution=Current；尚無 targets／X 回答，同批 capture 互不可讀 |
+| play.captures | AtPlay，execution=Current；自身移區／付款前，尚無 targets／X 回答，同批 capture 互不可讀 |
 | ChoiceKeyword 的模式數與選擇 | 讀 play.captures 後、PlaySpec.parameters 前的環境；不得讀稍後的目標或本文結果 |
 | PlaySpec.parameters | 按序公開回答；每次 Decision.captures 只接受指向該 decision 的 AtSelection，可讀該次回答 |
 | 模式 parameters | 只對自己被選模式的 body 可見，不能互讀 sibling 模式 |
@@ -425,6 +428,8 @@ PlayParameter 目前接受 Public 的 Targets→Objects、X→Integer。Targets 
 （CR10.6.2.3）；Public 是本片的保守承載限制。ExecutionRef 僅 Current，
 SelectionSnapshot 為 AtDecision；Inline 的 actor 必須等於 play controller，Handoff 只
 接受相對該 controller、基數恰好 1..1 的 RequireOne(Opponents)，不以不相等的符號猜測異玩家。
+同次 play 的 targets／Distribution 之 AtDecision 共用選擇狀態版本；AtSelection 只增加
+已回答的不可變 binding，不改讀付款後 live 狀態，詳見[快照契約](play-semantics.md#3-同次-play-的快照與-binding)。
 X 影響模式數或任意追加費用的形狀尚未接受（CR10.6.2.2.1），不能外推模式一律先於 X。
 Modes 由 ModeDecision 承載；Distribution 與費用承載見上節。獨立 CostMaterials、
 OptionalCost 仍未接受；Face 僅接受下述限定進化入口，不能據此宣稱作者語法禁止其他形狀。

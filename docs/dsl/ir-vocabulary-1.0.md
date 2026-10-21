@@ -47,6 +47,10 @@ T 型別、R 引用、D 決定、C 捕捉、B 能力、I 指示、K 組合、X �
 | `B.source`        | `AbilitySource {holder:ObjectRef,origin:Printed(face,line) / Granted(effect,grant,provider) / Keyword(keyword,origin),instance:AbilityInstanceId,controller:PlayerRef}`。印刷定義與執行實例分開；來源可保留必要 LKI。                                                                                                                                                           | 關鍵字授予／裝備授予：BP01-078、CP04-001；同行關鍵字：CP03-008。                                            | CR5.16.2.2、10.12、12、14.5.2；C§3.1、C34。能力持有者是一般效果來源；授予者只記 provenance，除非規則另定。      |
 | `B.ability`       | `Ability {id,source,kind:Spell / Activated / Triggered / Static,active_zones:Set<ZoneKind>,play:PlaySpec?,trigger:TriggerSpec?,body:Program?,declarations:List<EffectSpec>,source_span}`；kind 不混同 phase。                                                                                                                                                                   | `fanfare`／墓地起動／法術本文：BP19-P21、BP11-075；`static`：BP18-001。                                     | CR10.1、10.3、10.6；C36。`text`／`sections` 不決定能力種類；能力離開有效區後的已待機能力仍可能須結算。          |
 
+普通 Printed Spell 的有效區為 Resolution；Hand／EX 是卡片 play 的起點權限，
+Follower／Amulet 的卡片 play 不另造 Spell 能力。對映及驗證分工依
+[正式 play 契約](play-semantics.md#1-有效區打出起點與來源)，不從通用測試 header 推定正式准入。
+
 玩家 lowering 規約（對照撰寫 `A.who`）：`opp`／`opponents` 在 selector 位置都是 Opponents 集合域；「すべて」以 `text_quantifier=All` 保留。單寫「相手」使用 `Implicit`，不能由字形推定未定義的多人行為。單人 actor／recipient／`I.draw.player` 位置，在二席限制下以 `RequireOne(Opponents)` 取得 PlayerRef，不另問一次；超過一人時拒絕該二席 lowering，或依另有證據的選擇指示取得 bound PlayerRef。卡文明寫「リーダー1人を選ぶ」仍有 D.play-param，唯一候選也不能略過它；全部對手則保留集合，操作需要逐玩家時用 K.each-player。這是型別轉換規約，不是新增撰寫語法，也不決定多人規則。
 
 **缺資訊不是錯字。** CR1.3.6 的三種用法須保留：數量／種類數排除無該資訊者；比較條件為假；直接取資訊時數值視 0、非數值視空字串。這些是 `AbsentByRules` 的具名規則轉換。讀了一個根本未登錄的欄位，必須報錯，不能用本條合理化靜默預設。
@@ -99,6 +103,9 @@ BP13-043 的 P.start scope 具體化如下：它保護「渡す」的 I.transfer
 | `C.at-resolution` | `AtResolution`：進入含該條件的效果解算範圍時凍結，整段後續步驟不重取。                                                                     | BP01-065「【スペルチェイン\_10】」；BP11-071「【ネクロチャージ\_10】」。                                                                                  | CR13.3.1.4、13.5.1.3.2；C—。一般 `if` 不自動凍結；不能把每個原子開始都當新的 resolution。                                                                                           |
 | `C.at-selection`  | `AtSelection`：指定 DecisionPoint 的某次選擇確定時保存資訊，可用於後續「選んでいたなら」。                                                 | BP17-030「…を選んでいたなら」；BP20-073「体力3以下…を選んでいたなら」。                                                                                   | CR10.6.2.3、10.11；C§9.9。已選物件的當時資訊與其現在是否合法是兩件事。                                                                                                              |
 | `C.at-event`      | `AtEvent`：事件上下文一次凍結；移動事件依 `EventSnapshotPolicy` 決定讀離場前／公開時／入場後資訊。條件何時求值與它讀的值何時捕捉是兩個軸。 | BP19-080 的本文 K.if 讀「それが墓場から場に出ていたなら」的 entered_from；BP04-077 的受傷事件資料。BP20-P59 的場上存在條件是本文 Live，不能列為 AtEvent。 | CR10.7.4.1–.2；C§9.9、[`card-BP19-080`](../../tests/rules-scenarios/questions/card-BP19-080.yaml) B；Q2702 作反例。不是統一取移動後快照，也不代表所有「とき…なら」都是 trigger_if。 |
+
+AtPlay 與移入 Resolution 後的共同選擇 snapshot 是不同時點；兩者的讀值與 binding 規則見
+[正式 play 契約](play-semantics.md#3-同次-play-的快照與-binding)。
 
 撰寫橋接：`read`／數值短寫必須在降低後帶上述 CaptureTime；撰寫若可省略，編譯器只能用已登錄的明確預設展開，且可檢視結果。不能從表達式出現在某一層就任意猜時點。
 
