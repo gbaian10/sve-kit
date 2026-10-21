@@ -88,6 +88,7 @@ def test_decoder_detects_broken_dynamic_override(tmp_path: Path, residual: str) 
         "effects-index.schema.json",
         "author.schema.json",
         "effect-bodies.schema.json",
+        "effects.schema.json",
     ):
         (tmp_path / filename).write_bytes((SCHEMAS / filename).read_bytes())
     nodes_path = tmp_path / "author-nodes.schema.json"

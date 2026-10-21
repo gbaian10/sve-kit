@@ -47,11 +47,13 @@ _NODES = "urn:sve-kit:author-nodes:1.0"
 _INDEX = "urn:sve-kit:effects-index:1"
 _AUTHOR = "urn:sve-kit:author:1.0"
 _BODIES = "urn:sve-kit:effect-bodies:1.0"
+_PROTOTYPE = "urn:sve-kit:effects:astra:1"
 _RESOURCES = {
     "author-nodes.schema.json": _NODES,
     "effects-index.schema.json": _INDEX,
     "author.schema.json": _AUTHOR,
     "effect-bodies.schema.json": _BODIES,
+    "effects.schema.json": _PROTOTYPE,
 }
 _PARAM_REF = TypeAdapter(ParamRef)
 _PARAM_DECL = TypeAdapter(ParamDecl)
@@ -238,7 +240,7 @@ def _entry_decode[T](document: _Document, adapter: TypeAdapter[T]) -> T:
         ) from None
 
 
-def _entry_preflight(document: _Document, expected: str) -> None:
+def _envelope(document: _Document, expected: str) -> dict[str, JsonValue]:
     value = document.value
     if not isinstance(value, dict):
         raise AuthorInputError(
@@ -257,6 +259,11 @@ def _entry_preflight(document: _Document, expected: str) -> None:
                 document, document.diagnostic("envelope", "unsupported_kind", ("kind",))
             )
         )
+    return value
+
+
+def _entry_preflight(document: _Document, expected: str) -> None:
+    value = _envelope(document, expected)
     if expected == "author_effect_set" and value.get("scope") == "en_override":
         raise AuthorInputError(
             _located(
@@ -485,6 +492,110 @@ def _decode[T](adapter: TypeAdapter[T], value: JsonValue) -> T:
         raise AuthorInputError(Diagnostic("schema", "decoder_mismatch")) from None
 
 
+@dataclass(frozen=True)
+class _HeadShape:
+    schema: dict[str, JsonValue]
+    heads: frozenset[str]
+    keys: frozenset[str]
+    branches: dict[str, int] | None = None
+
+    def diagnostic(self, document: _Document, error: SchemaError) -> Diagnostic | None:
+        value = error.instance
+        if error.schema != self.schema or not isinstance(value, dict):
+            return None
+        present = self.heads.intersection(value)
+        path = tuple(error.absolute_path)
+        if len(present) > 1:
+            return document.diagnostic("container", "ability_head_conflict", path)
+        unknown = next((key for key in value if key not in self.keys), None)
+        if unknown is not None:
+            return document.diagnostic(
+                "schema", "additionalProperties", (*path, unknown)
+            )
+        if not present:
+            return document.diagnostic("container", "ability_head_missing", path)
+        return None
+
+    def selected_error(self, error: SchemaError) -> SchemaError | None:
+        if (
+            error.schema != self.schema
+            or not isinstance(error.instance, dict)
+            or self.branches is None
+        ):
+            return None
+        present = self.heads.intersection(error.instance)
+        if len(present) != 1:
+            return None
+        branch = self.branches[next(iter(present))]
+        selected: SchemaError | None = best_match(
+            child for child in error.context if child.schema_path[0] == branch
+        )
+        return selected
+
+
+def _head_shapes(registry: Registry[Schema]) -> tuple[_HeadShape, ...]:
+    resolver = registry.resolver(_NODES)
+
+    def schema(reference: str) -> dict[str, JsonValue]:
+        return object_value(
+            JSON_VALUE.validate_python(resolver.lookup(reference).contents)
+        )
+
+    def required(value: dict[str, JsonValue]) -> frozenset[str]:
+        names = value["required"]
+        assert isinstance(names, list)
+        assert all(isinstance(name, str) for name in names)
+        return frozenset(name for name in names if isinstance(name, str))
+
+    inline = schema("#/$defs/A.inline-ability")
+    choices = inline["anyOf"]
+    assert isinstance(choices, list)
+    variants = []
+    for choice in choices:
+        reference = object_value(choice)["$ref"]
+        assert isinstance(reference, str)
+        variants.append(schema(reference))
+    requirements = [required(item) for item in variants]
+    common = frozenset.intersection(*requirements)
+    heads = frozenset.union(*requirements) - common
+    keys = frozenset(
+        key for item in variants for key in object_value(item["properties"])
+    )
+    ability = schema("#/$defs/A.ability")
+    choices = ability["anyOf"]
+    assert isinstance(choices, list)
+    # Resolve the authored anchor, never the expanded profile's false override.
+    generated_index, generated = next(
+        (index, schema(reference))
+        for index, choice in enumerate(choices)
+        if isinstance(reference := object_value(choice).get("$dynamicRef"), str)
+    )
+    inline_index = next(
+        index
+        for index, choice in enumerate(choices)
+        if isinstance(reference := object_value(choice).get("$ref"), str)
+        and schema(reference) == inline
+    )
+    generated_heads = required(generated) - common
+    shapes = [
+        _HeadShape(inline, heads, keys),
+        _HeadShape(
+            ability,
+            heads | generated_heads,
+            keys | object_value(generated["properties"]).keys(),
+            {
+                **dict.fromkeys(heads, inline_index),
+                **dict.fromkeys(generated_heads, generated_index),
+            },
+        ),
+    ]
+    for reference in ("#/$defs/A.ability-head", "#/$defs/A.granted-ability-head"):
+        head = schema(reference)
+        keys = frozenset(object_value(head["properties"]))
+        shapes.append(_HeadShape(head, keys, keys))
+    return tuple(shapes)
+
+
 class AuthorSchemas:
     """Load the fixed local schema resources; never resolve remote references."""
 
@@ -505,11 +616,46 @@ class AuthorSchemas:
                 except Unresolvable:
                     raise ValueError("Unresolved author schema reference") from None
         self._registry = registry
+        self._heads = _head_shapes(registry)
+        envelope = object_value(
+            JSON_VALUE.validate_python(
+                registry.resolver(_NODES).lookup("#/$defs/A.file").contents
+            )
+        )
+        properties = object_value(envelope["properties"])
+        self._inventory = {
+            **envelope,
+            "properties": {
+                **properties,
+                "cards": {
+                    **object_value(properties["cards"]),
+                    "additionalProperties": True,
+                },
+            },
+        }
 
     def _validate(self, document: _Document, reference: str) -> None:
-        validator = Draft202012Validator({"$ref": reference}, registry=self._registry)
+        self._validate_schema(document, {"$ref": reference})
+
+    def _validate_schema(self, document: _Document, schema: Schema) -> None:
+        validator = Draft202012Validator(schema, registry=self._registry)
         error = best_match(validator.iter_errors(document.value))
         if error is not None:
+            ancestors = []
+            current = error
+            while current is not None:
+                ancestors.append(current)
+                current = current.parent
+            for ancestor in reversed(ancestors):
+                for shape in self._heads:
+                    if diagnostic := shape.diagnostic(document, ancestor):
+                        raise AuthorInputError(_located(document, diagnostic))
+            for ancestor in reversed(ancestors):
+                for shape in self._heads:
+                    if selected := shape.selected_error(ancestor):
+                        raise AuthorInputError(
+                            _located(document, _schema_diagnostic(document, selected))
+                        )
             raise AuthorInputError(
                 _located(document, _schema_diagnostic(document, error))
             )
@@ -547,6 +693,29 @@ class AuthorSchemas:
         """Validate and retain the original JSON tree, without decoder defaults."""
         document = _document(raw, context)
         self._author(document)
+        return document.value
+
+    def author_inventory_tree(
+        self, raw: bytes, *, context: AuthorIndexRecord | None = None
+    ) -> JsonValue:
+        """Validate shared inputs; EN values remain opaque for index closure only."""
+        document = _document(raw, context)
+        value = document.value
+        if isinstance(value, dict) and value.get("scope") == "en_override":
+            # Reuse strict format/kind checks without claiming EN body support.
+            _envelope(document, "author_effect_set")
+            self._validate_schema(document, self._inventory)
+        else:
+            self._author(document)
+        return document.value
+
+    def prototype_tree(
+        self, raw: bytes, *, context: AuthorIndexRecord | None = None
+    ) -> JsonValue:
+        """Validate the separate prototype resource without selecting a runtime."""
+        document = _document(raw, context)
+        _entry_preflight(document, "effect_set")
+        self._validate(document, _PROTOTYPE)
         return document.value
 
     def expanded(

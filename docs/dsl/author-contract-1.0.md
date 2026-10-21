@@ -12,7 +12,7 @@
 | `1 / effect_body_shard` | `1.0` | `urn:sve-kit:effect-bodies:1.0` | `dsl/effect-bodies.schema.json` |
 | `1 / effects_index` | 定位資訊，不選語義 | `urn:sve-kit:effects-index:1` | `dsl/effects-index.schema.json` |
 
-目前三個入口都有封閉 Schema 與 Python 結構 reader；共用 `author-nodes.schema.json` 提供完整能力圖、`A.file`、`A.card` 與 `$defs/authored`。讀取包含來源／審核證據的形狀及檔內 invariant，不表示來源、資格或跨檔閉包已通過。明示展開 API 已提供 generated_by／具型別葉參數展開、原 JSON body hash 核對及 `expanded` profile；輸出為 JSON 樹與分離 sidecar。純展開及來源自洽重建都不代表已採納或可執行；current／索引閉包、資格與 Rust 消費端驗證仍待完成。完整容器形狀與檢查邊界見[入口形狀矩陣](author-entry-shapes-1.0.md)，可用 API 見 [dsl/README](../../dsl/README.md)。
+目前三個入口都有封閉 Schema 與 Python 結構 reader；共用 `author-nodes.schema.json` 提供完整能力圖、`A.file`、`A.card` 與 `$defs/authored`。結構 reader 不授予來源或資格證明。明示 API 已提供檔案／索引雙向閉包、generated_by／具型別葉展開、原 JSON body hash 及 `expanded` profile；current 入口核對 JP current、registry Frame／Binding 與 effect-source-v1，能力映射限五類 entry 的完整 payload 與空 ports。輸出為 JSON 樹及分離 sidecar；current_source_checked 仍不代表用途依賴、review／exam 資格或可執行。完整用途閉包、rekey、資格與 Rust 消費端驗證仍待完成。能力持有面由 SourceUse.owner 的 face 決定，卡級／面級容器只表示位置，多面卡的卡級能力不表示全卡常駐。完整容器形狀與檢查邊界見[入口形狀矩陣](author-entry-shapes-1.0.md)，可用 API 見 [dsl/README](../../dsl/README.md)。
 
 兩個作者資源共用 `urn:sve-kit:author-nodes:1.0`（`dsl/author-nodes.schema.json`）的 A.* 定義。Schema 採 JSON Schema 2020-12。所有固定物件封閉；動態 map 只接受各自卡號／識別字規則，不以任意額外欄位吸收未知構造。Python 型別與 `$defs` 必須逐一對應並驗漂移；Rust 依同一資源的展開 profile 解碼並做漂移測試，不能另立語法。
 

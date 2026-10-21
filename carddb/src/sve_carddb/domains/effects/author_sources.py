@@ -15,6 +15,10 @@ from sve_carddb.contracts.four_layer import (
 from sve_carddb.contracts.n0 import SAFE_INTEGER
 from sve_carddb.contracts.source_binding import SourceBinding
 from sve_carddb.core.json import canonical, digest
+from sve_carddb.domains.effects.author_port_rejections import (
+    PORT_REJECTION_RECIPE,
+    unsupported_port_reason,
+)
 from sve_carddb.domains.translations.four_layer_derivation import derive_source
 from sve_carddb.domains.translations.four_layer_expressions import definition
 
@@ -102,6 +106,19 @@ SOURCE_SITES: dict[tuple[str, tuple[str | int, ...]], tuple[str, str, str, str]]
     ("A.act.create", ("token", "*")): ("CardName", "CardName", "created_name", "value"),
 }
 BINARY_ARITY = 2
+ENTRY_HEADS = {
+    "evolve_entry.v1": ("evolve",),
+    "feed_entry.v1": ("feed",),
+    "ride_entry.v1": ("ride",),
+    "evolve_feed_entries.v1": ("evolve", "feed"),
+    "evolve_ride_entries.v1": ("evolve", "ride"),
+}
+NO_TOKEN_METADATA = (
+    "metadata.name.v1",
+    "metadata.label.v1",
+    "metadata.layout.v1",
+    "pure_reminder.v1",
+)
 
 ADAPTER_RECIPE = digest(
     canonical(
@@ -116,7 +133,17 @@ ADAPTER_RECIPE = digest(
                 {"owner": owner, "path": list(path), "signature": list(signature)}
                 for (owner, path), signature in sorted(SOURCE_SITES.items())
             ],
-            "ports": "unsupported",
+            "ports": "empty-only;all-nonempty-direction-type-role-capture-value-unsupported",
+            "port_rejections": PORT_REJECTION_RECIPE,
+            "entry_heads": {key: list(value) for key, value in ENTRY_HEADS.items()},
+            "entry_payload": "exact-head.cost.pp;empty-ports;no-imports",
+            "entry_operands": "Nat-cost_value-canonical-occurrence-order-v1",
+            "token_closure": "entry-heads-only-no-token-v1",
+            "token_free_metadata": list(NO_TOKEN_METADATA),
+            "current_owner": "current-jp-face-revision;card-membership;exact-face-container",
+            "prototype": "all-jp-printing-identities;shared-overlap;no-execution",
+            "inventory": "authored-root-complete-files-v1",
+            "resolved_nonentry": "unsupported_source_projection",
         }
     )
 )
@@ -150,6 +177,59 @@ class SourceContext:
     )
 
 
+def entry_heads(frame: Frame) -> tuple[str, ...]:
+    """Only complete registered entry projections have a proven author head."""
+    variant = frame.semantic_variant
+    if variant.state != "resolved" or variant.key is None:
+        raise SourceError("source_pending")
+    projection = frame.projection
+    heads = ENTRY_HEADS.get(variant.key)
+    if heads is None or projection.discriminator != variant.key:
+        raise SourceError("unsupported_source_ability_mapping")
+    if frame.role != "body" or projection.projection_kind != "ability_body":
+        raise SourceError("source_not_ability_body")
+    _ports(frame)
+    expected = tuple(
+        (f"ability_{index}", "ability", None) for index in range(len(heads))
+    )
+    if (
+        tuple((scope.id, scope.kind, scope.parent) for scope in projection.scopes)
+        != expected
+    ):
+        raise SourceError("source_ability_scope_mismatch")
+    return heads
+
+
+def entry_payload(source: SourceContext, scope: str) -> dict[str, JsonValue]:
+    """Use source occurrence order, including repeated values, instead of value lookup."""
+    heads = entry_heads(source.frame)
+    scopes = tuple(f"ability_{index}" for index in range(len(heads)))
+    if scope not in scopes:
+        raise SourceError("source_ability_scope_mismatch")
+    slots = {slot.name: slot for slot in source.frame.leaf_schema.slots}
+    operands = []
+    for occurrence in source.binding.occurrences:
+        slot = slots[occurrence.slot]
+        if slot.role != "cost_value":
+            continue
+        if slot.type != "Nat" or len(occurrence.canonical_spans) != 1:
+            raise SourceError("unsupported_source_cost_operand")
+        value = source.binding.values[slot.name]
+        if type(value) is not int or not 0 <= value <= SAFE_INTEGER:
+            raise SourceError("unsupported_source_cost_operand")
+        operands.append((occurrence.canonical_spans[0].start, value))
+    operands.sort()
+    if len(operands) != len(heads) or len(
+        {position for position, _ in operands}
+    ) != len(heads):
+        raise SourceError("source_cost_operand_mismatch")
+    index = scopes.index(scope)
+    return {
+        heads[index]: {"cost": {"pp": operands[index][1]}},
+        "ports": {"imports": {}, "exports": {}},
+    }
+
+
 def _structure(frame: Frame, binding: SourceBinding) -> None:
     if frame.semantic_variant.state != "resolved":
         raise SourceError("source_pending")
@@ -162,8 +242,18 @@ def _structure(frame: Frame, binding: SourceBinding) -> None:
         raise SourceError("source_ability_scope_missing")
     if binding.frame_id != frame.id:
         raise SourceError("source_frame_mismatch")
-    if frame.projection.imports or frame.projection.exports:
-        raise SourceError("unsupported_port_source_mapping")
+    _ports(frame)
+
+
+def _ports(frame: Frame) -> None:
+    if frame.projection.imports:
+        raise SourceError(
+            unsupported_port_reason(frame.projection.imports[0], direction="imports")
+        )
+    if frame.projection.exports:
+        raise SourceError(
+            unsupported_port_reason(frame.projection.exports[0], direction="exports")
+        )
 
 
 def check_source_compatibility(

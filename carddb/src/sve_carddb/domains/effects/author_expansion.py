@@ -1,7 +1,7 @@
 """Exact companion selection and leaf substitution; no execution admission."""
 
 from copy import deepcopy
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 from typing import TYPE_CHECKING, Literal
 
 from pydantic import ConfigDict, JsonValue, TypeAdapter
@@ -43,9 +43,12 @@ _BODY_FIELDS = ("dsl", "ability_scope", "params", "ports", "body")
 
 
 class ExpansionError(ValueError):
-    def __init__(self, reason: str, path: PathParts = ()) -> None:
+    def __init__(
+        self, reason: str, path: PathParts = (), source: SourceUse | None = None
+    ) -> None:
         self.reason = reason
         self.path = path
+        self.source = source
         super().__init__(reason)
 
 
@@ -70,7 +73,9 @@ class ExpansionEvidence:
     interface_key: str | None
     expansion_recipe: str
     adapter_recipe: str
-    source_proof: Literal["none", "derived_self_consistent"] = "none"
+    source_proof: Literal[
+        "none", "derived_self_consistent", "current_source_checked"
+    ] = field(default="none", init=False)
     source_input_hash: str | None = None
 
 
@@ -380,19 +385,46 @@ class AuthorExpander:
         candidates: Mapping[PathParts, SourceCandidate],
     ) -> ExpansionCandidate:
         """Reconstruct supplied sources; this still does not prove current admission."""
+        originals = dict(ability_nodes(self.schemas.author_tree(raw)))
+        if candidates.keys() != originals.keys():
+            raise ExpansionError("source_candidates_mismatch")
+        contexts = {
+            path: resolve_source(
+                candidates[path],
+                SourceUse.model_validate_json(
+                    canonical(array(ability["sources"])[0]), strict=True
+                ),
+            )
+            for path, ability in originals.items()
+        }
+        result = self.expand_contexts(raw, shards, contexts)
+        sidecar = []
+        for evidence in result.sidecar:
+            checked = replace(
+                evidence,
+                source_input_hash=digest(candidates[evidence.path].raw.encode("utf-8")),
+            )
+            object.__setattr__(checked, "source_proof", "derived_self_consistent")  # ruff: ignore[unnecessary-dunder-call] -- replacing evidence resets proof; only this reconstruction path grants it
+            sidecar.append(checked)
+        return ExpansionCandidate(result.tree, tuple(sidecar))
+
+    def expand_contexts(
+        self,
+        raw: bytes,
+        shards: Iterable[bytes],
+        contexts: Mapping[PathParts, SourceContext],
+    ) -> ExpansionCandidate:
+        """Expand supplied contexts without granting any source proof."""
         shard_inputs = tuple(shards)
         result = self.expand(raw, shard_inputs)
         originals = dict(ability_nodes(self.schemas.author_tree(raw)))
-        if candidates.keys() != originals.keys():
+        if contexts.keys() != originals.keys():
             raise ExpansionError("source_candidates_mismatch")
         library = BodyLibrary(self.schemas, shard_inputs)
         sidecar: list[ExpansionEvidence] = []
         for evidence in result.sidecar:
             ability = originals[evidence.path]
-            use = SourceUse.model_validate_json(
-                canonical(array(ability["sources"])[0]), strict=True
-            )
-            source = resolve_source(candidates[evidence.path], use)
+            source = contexts[evidence.path]
             generated_value = ability.get("generated_by")
             if generated_value is not None:
                 generated = object_value(generated_value)
@@ -421,10 +453,6 @@ class AuthorExpander:
             sidecar.append(
                 replace(
                     evidence,
-                    source_proof="derived_self_consistent",
-                    source_input_hash=digest(
-                        candidates[evidence.path].raw.encode("utf-8")
-                    ),
                     frame_id=source.frame.id,
                     interface_key=source.frame.projection.interface_key(
                         source.frame.id
