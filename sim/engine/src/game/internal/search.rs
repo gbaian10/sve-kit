@@ -797,7 +797,7 @@ impl Game {
         }
     }
 
-    fn internal_search_move(
+    pub(super) fn internal_search_move(
         &mut self,
         execution: &mut Execution,
         found: &[ObjectRef],

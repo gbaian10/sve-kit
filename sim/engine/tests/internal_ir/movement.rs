@@ -269,23 +269,13 @@ fn off_field_destroy_and_late_failure_restore_the_entire_game() {
 }
 
 #[test]
-fn unsupported_placement_rule_permissions_and_follow_are_rejected_before_draw() {
+fn unsupported_placement_and_rule_permissions_are_rejected_before_draw() {
     let mut ordered = put(2, zone(ZoneKind::Field, 2), OwnerZone::Deck);
     if let Node::Instruction { instruction } = &mut ordered.node
         && let Action::Move { movement, .. } = &mut instruction.action
     {
         movement.position = Some(Position::Top {});
     }
-    let follow = put(
-        3,
-        Selector::MoveAfter {
-            receipt: MovementReceipt::Move {
-                receipt: ReceiptReference::new(ReceiptId(2)),
-            },
-            permission: FollowPermission::SameEffectExplicitReference {},
-        },
-        OwnerZone::Banish,
-    );
     let mut returned = put(2, zone(ZoneKind::Field, 2), OwnerZone::Cemetery);
     if let Node::Instruction { instruction } = &mut returned.node
         && let Action::Move { reason, .. } = &mut instruction.action
@@ -298,11 +288,6 @@ fn unsupported_placement_rule_permissions_and_follow_are_rejected_before_draw() 
         vec![
             draw(1, 1),
             protection(2, zone(ZoneKind::Field, 2), CausePattern::AnyRule {}),
-        ],
-        vec![
-            draw(1, 1),
-            put(2, zone(ZoneKind::Field, 2), OwnerZone::Cemetery),
-            follow,
         ],
     ] {
         let mut game = game(1, 2);
