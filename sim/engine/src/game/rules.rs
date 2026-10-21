@@ -894,6 +894,7 @@ impl Game {
             return self.checks();
         }
         if self.state.pending.is_empty()
+            && !self.card_runtime.has_pending()
             && self.state.flow["kind"] == "end"
             && self.state.flow["stage"] == "triggers"
         {
@@ -904,6 +905,7 @@ impl Game {
             self.state.flow["stage"] = json!(if guards { "guard" } else { "quick" });
         }
         if self.state.pending.is_empty()
+            && !self.card_runtime.has_pending()
             && self.state.flow["kind"] == "end"
             && self.state.flow["stage"] == "discard"
             && self.zone_count(self.active(), "hand") <= 7

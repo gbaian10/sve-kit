@@ -26,6 +26,8 @@ pub enum CardPlay {
     Resolved(Activation),
     /// Complete follower card play, followed by its separately produced fanfare.
     Entered(CardEntry),
+    /// One pending occurrence cannot legally be played and has been cancelled by rules.
+    Cancelled,
 }
 
 /// Complete follower rule play; its fanfare remains a separate execution.
@@ -269,7 +271,7 @@ fn collect_modes(program: &Program) -> Result<Vec<PlayMode>> {
     reason = "Formal plays share the authority's execution and rollback boundary."
 )]
 impl Game {
-    /// Play an admitted ordinary Spell or the supported single-fanfare follower.
+    /// Play an admitted ordinary Spell or an admitted ordinary follower.
     ///
     /// # Errors
     /// Rejects unsupported cards, timing, carry, payment and body failures atomically.
@@ -427,7 +429,11 @@ impl Game {
         })
     }
 
-    fn run_card_play(&mut self, mut execution: Execution, ability: Ability) -> Result<CardPlay> {
+    pub(super) fn run_card_play(
+        &mut self,
+        mut execution: Execution,
+        ability: Ability,
+    ) -> Result<CardPlay> {
         let body = ability.body.ok_or_else(|| invalid("missing body"))?;
         let groups = collect_modes(&body)?;
         let play = ability.play.unwrap_or(PlaySpec {
@@ -486,6 +492,9 @@ impl Game {
         token: DecisionToken,
         answer: Answer,
     ) -> Result<CardPlay> {
+        if self.typed.is_none() && self.card_runtime.question.is_some() {
+            return self.answer_internal_pending(actor, token, &answer);
+        }
         if self
             .typed
             .as_ref()
@@ -568,7 +577,11 @@ impl Game {
                 return Ok(());
             }
         }
-        self.internal_card_payment(execution, &play.costs, execution.spell)?;
+        let previous = self.card_runtime.active_source;
+        self.card_runtime.active_source = execution.ability;
+        let payment = self.internal_card_payment(execution, &play.costs, execution.spell);
+        self.card_runtime.active_source = previous;
+        payment?;
         let source = execution
             .ability
             .ok_or_else(|| invalid("missing formal source"))?;

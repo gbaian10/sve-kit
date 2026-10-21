@@ -36,7 +36,8 @@ pub(super) struct Ability {
     #[serde(rename = "ports")]
     pub _ports: Ports,
     pub imports: Option<IgnoredAny>,
-    pub fanfare: Body,
+    pub fanfare: Option<Body>,
+    pub lastword: Option<Body>,
 }
 
 #[derive(Deserialize)]

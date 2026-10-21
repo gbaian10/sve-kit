@@ -161,3 +161,38 @@ variants!(NumericHistoryQuery {
     CounterDelta { event: Binding<CounterChangeEvent>, predicate: Expr<Bool>, window: HistoryWindow, include_execution: InclusionPolicy } => ["history.sum.counter-delta"],
     StatDelta { event: Binding<StatChangeEvent>, property: Stat, predicate: Expr<Bool>, window: HistoryWindow, include_execution: InclusionPolicy } => ["history.sum.stat-delta"]
 });
+
+impl TriggerSpec {
+    pub(crate) fn lastword(event: Binding<LeaveFieldEvent>) -> Self {
+        Self {
+            on: TriggerCondition::Event {
+                pattern: EventPattern::LeaveField {
+                    binding: event,
+                    predicate: Expr::Compute(Box::new(super::Predicate::And {
+                        predicates: vec![
+                            Expr::Compute(Box::new(super::Predicate::ObjectEquals {
+                                left: Expr::Frozen(Box::new(
+                                    super::ObjectFrozen::LeaveFieldObjectBefore { event },
+                                )),
+                                right: Expr::Frozen(Box::new(super::ObjectFrozen::SourceHolder {})),
+                            })),
+                            Expr::Compute(Box::new(super::Predicate::ZoneEquals {
+                                left: Expr::Frozen(Box::new(super::ZoneFrozen::LeaveFieldTo {
+                                    event,
+                                })),
+                                right: Expr::Compute(Box::new(super::ZoneOperation::OfPlayer {
+                                    player: PlayerRef::Owner {},
+                                    kind: ZoneKind::Cemetery,
+                                })),
+                            })),
+                        ],
+                    })),
+                },
+            },
+            active_zones: vec![ZoneKind::Field],
+            view: EventSnapshotPolicy::BeforeExit,
+            limit: None,
+            aggregation: TriggerAggregation::PerFact {},
+        }
+    }
+}

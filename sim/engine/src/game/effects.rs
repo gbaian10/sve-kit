@@ -611,6 +611,7 @@ impl Game {
         let mut entered = Vec::new();
         let mut erased = Vec::new();
         let mut advances = Vec::new();
+        let typed_departures = self.internal_before_departures(&movable, &destinations, frame)?;
         let plans = self.place_zone_batch(&movable, &destinations, side, position, frame)?;
         for plan in &plans {
             if !plan.changed {
@@ -692,6 +693,7 @@ impl Game {
                 advances.push(id.clone());
             }
         }
+        self.internal_commit_departures(typed_departures)?;
         self.internal_numeric_cleanup()?;
         self.conceal_placement_order(&plans, frame);
         let erase_group = self.group();

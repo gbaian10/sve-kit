@@ -3,10 +3,10 @@ use crate::ir::AggregateBound;
 use crate::ir::{
     Action, CaptureTime, Cardinality, ChoiceDomain, CostSpec, CounterOperation, Decision,
     DecisionKind, Declinable, DiscardMode, Disjointness, ExecutionRef, InputMode,
-    InstructionContext, MemberProjection, Nat, Node, PaymentOptionality, PaymentResult,
-    PaymentTime, PlaySlot, PlayerRef, PlayerRelation, Posture, Program, ReceiptId, RoleCardinality,
-    RuleProcedure, SelectionConstraint, SelectionView, Selector, TargetRoleSpec, Visibility,
-    ZoneKind,
+    InstructionContext, MemberProjection, MoveDestination, MoveReason, Nat, Node, ObjectOperand,
+    OwnerZone, PaymentOptionality, PaymentResult, PaymentTime, PlaySlot, PlayerRef, PlayerRelation,
+    Posture, Program, ReceiptId, RoleCardinality, RuleProcedure, SelectionConstraint,
+    SelectionView, Selector, TargetRoleSpec, Visibility, ZoneKind,
 };
 use crate::ir::{Expr, Int, NumericChange, ObjectReceipt, ObjectReceiptList, ResourceOperation};
 use alloc::collections::BTreeSet;
@@ -570,7 +570,13 @@ impl Checker {
                             | Action::Posture { posture: Posture::Acted, .. })
                             || matches!(&step.instruction.action, Action::Resource { operation: ResourceOperation::Pay, amount: Expr::Literal(Int(value)), .. } if *value >= 0)
                             || matches!(&step.instruction.action, Action::Life { change: NumericChange::Add { amount: Expr::Literal(Int(value)) }, .. } if *value <= 0);
-                        if !valid {
+                        let source_move = matches!(&step.instruction.action,
+                            Action::Move { objects: Selector::Objects { objects }, movement, reason: MoveReason::Put }
+                            if objects == &[ObjectOperand::SourceHolder {}]
+                                && movement.to == (MoveDestination::Owners { zone: OwnerZone::Cemetery })
+                                && movement.position.is_none() && movement.order.is_none()
+                                && movement.initial_posture.is_none() && movement.entry_effects.is_empty());
+                        if !valid && !source_move {
                             return checker.reject();
                         }
                         checker.instruction_in(

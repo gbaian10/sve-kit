@@ -1,20 +1,13 @@
 use super::{
-    Ability, AbilityId, AbilityInstanceId, AbilityKind, AbilityOrigin, CardPlay, Context, Expr,
-    Game, Generation, Located, ObjectRef, PlayerId, Result, RuntimeAbilitySource, Step, ZoneKind,
-    face_ordinal, invalid, json, printed_origin, seat_name, take, unsupported,
+    Ability, AbilityId, AbilityInstanceId, AbilityOrigin, Context, Expr, Game, Generation,
+    ObjectRef, PlayerId, Result, RuntimeAbilitySource, Step, ZoneKind, face_ordinal, invalid, json,
+    printed_origin, seat_name, take, unsupported,
 };
 use crate::ir::{
     EventPattern, EventSnapshotPolicy, KeywordId, ObjectFrozen, Predicate, TriggerAggregation,
     TriggerCondition,
 };
-use crate::ir::{Int, ReceiptId};
-
-#[derive(Clone, Debug)]
-pub(super) struct PendingFanfare {
-    holder: String,
-    source: RuntimeAbilitySource,
-    ability: Located<Ability>,
-}
+use crate::ir::{Int, ReceiptId, SnapshotId};
 
 pub(super) fn check_header(ability: &Ability) -> Result<()> {
     let Some(trigger) = &ability.trigger else {
@@ -73,17 +66,21 @@ impl Game {
             .card()
             .abilities
             .iter()
-            .filter(|ability| ability.node.kind == AbilityKind::Triggered)
+            .filter(|ability| {
+                matches!(
+                    ability.node.source.origin,
+                    AbilityOrigin::Keyword {
+                        keyword: KeywordId::Fanfare,
+                        ..
+                    }
+                )
+            })
+            .filter(|ability| {
+                printed_origin(&ability.node.source.origin)
+                    .is_ok_and(|(face, _)| face_ordinal(face).is_ok_and(|ordinal| ordinal == 0))
+            })
             .cloned()
             .collect::<Vec<_>>();
-        let [ability] = fanfares.as_slice() else {
-            return Err(unsupported("card play requires one fanfare"));
-        };
-        let (face, _) = printed_origin(&ability.node.source.origin)?;
-        if face_ordinal(face)? != 0 {
-            return Err(unsupported("fanfare belongs to another face"));
-        }
-        let ability = ability.clone();
         let mut execution = self.new_card_execution(context)?;
         let decision = json!({"do":"play","card":holder,"by":seat,"at":"main"});
         let mut frame = self.start_frame(holder, serde_json::Value::Null, &decision)?;
@@ -117,13 +114,11 @@ impl Game {
             group,
         );
         frame.cause = json!({"event":event});
+        let before_entry = SnapshotId(self.state.ir_epoch);
         self.internal_play_move(holder, "field", &frame)?;
-        let source = self.internal_card_source(holder, ability.node.id, actor)?;
-        self.card_runtime.pending = Some(PendingFanfare {
-            holder: holder.into(),
-            source,
-            ability,
-        });
+        for ability in fanfares {
+            self.internal_pending_fanfare(holder, actor, ability, &object.zone, before_entry)?;
+        }
         self.internal_numeric_end_resolution(execution.id)?;
         let resolve_group = self.group();
         self.emit(
@@ -137,13 +132,6 @@ impl Game {
             controller: actor,
         });
         self.checks()?;
-        if self.object(holder)?.generation != source.holder.generation.0
-            || self.object(holder)?.zone != "field"
-        {
-            return Err(unsupported(
-                "fanfare source requires last-known information",
-            ));
-        }
         Ok(super::CardEntry {
             execution: execution.id,
             progress: execution.progress(),
@@ -151,31 +139,13 @@ impl Game {
                 outcome: "resolved".into(),
                 events: take(&mut self.emitted),
             },
-            resume: super::ResumeStage::PendingFanfare,
+            resume: if self.card_runtime.has_pending() {
+                super::ResumeStage::Pending
+            } else {
+                self.card_runtime.checkpoint = Some(execution.id);
+                super::ResumeStage::CheckTiming
+            },
         })
-    }
-
-    /// Resolve only the fanfare occurrence produced by the preceding card play.
-    ///
-    /// # Errors
-    /// Rejects missing occurrences and restores the pending producer after any failure.
-    pub fn resolve_internal_fanfare(&mut self) -> Result<CardPlay> {
-        let before = self.clone();
-        let result = (|| {
-            let pending = self
-                .card_runtime
-                .pending
-                .take()
-                .ok_or_else(|| invalid("no pending internal fanfare"))?;
-            let context = Context {
-                source: pending.holder,
-                generation: pending.source.holder.generation,
-                controller: pending.source.controller,
-            };
-            self.internal_context(&context)?;
-            self.start_internal_ability(pending.ability.node, context, pending.source, false)
-        })();
-        self.finish_card_attempt(before, result)
     }
 
     pub(super) fn internal_card_source(

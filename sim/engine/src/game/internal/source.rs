@@ -48,72 +48,19 @@ impl Execution {
     /// Binds the authority-derived ability source and its reference zone at body start.
     pub(super) fn bind_source(&mut self, game: &Game, source: RuntimeAbilitySource) -> Result<()> {
         self.ability = Some(source);
-        self.source_information = Some(SourceInformation {
-            holder: source.holder,
-            zone: game.object(self.object_id(source.holder)?)?.zone.clone(),
-            departed: None,
-        });
+        self.source_information = Some(SourceInformation::current(game, source)?);
         Ok(())
     }
 
     fn source_snapshot(&self, game: &Game) -> Result<SourceSnapshot> {
-        let information = self
-            .source_information
+        self.source_information
             .as_ref()
-            .ok_or_else(|| invalid("missing ability source information producer"))?;
-        if self
-            .ability
-            .is_none_or(|source| source.holder != information.holder)
-        {
-            return Err(invalid("source information belongs to another ability"));
-        }
-        if let Some(departed) = &information.departed {
-            return Ok(departed.clone());
-        }
-        let id = self.object_id(information.holder)?;
-        let current = game.object(id)?;
-        if current.generation != information.holder.generation.0 || current.zone != information.zone
-        {
-            return Err(invalid(
-                "source left its reference zone without authority LKI",
-            ));
-        }
-        self.information_snapshot(game, information.holder)
-    }
-
-    fn information_snapshot(&self, game: &Game, reference: ObjectRef) -> Result<SourceSnapshot> {
-        let id = self.object_id(reference)?;
-        let current = game.object(id)?;
-        if current.generation != reference.generation.0 {
-            return Err(invalid("stale Current information read"));
-        }
-        let printed = game.face(id)?;
-        let cost = super::cost::printed_cost(&printed["cost"])?;
-        // A non-follower has no attack/life; only a valid view can yield rules-absent zero.
-        let (original_attack, original_life, attack, life) =
-            if game.object_type(id)?.contains("フォロワー") {
-                if current.zone != "field" {
-                    return Err(unsupported("off-field follower source information"));
-                }
-                (
-                    super::cost::printed_cost(&printed["power"])?,
-                    super::cost::printed_cost(&printed["hp"])?,
-                    game.internal_numeric_stat(id, Stat::Attack)?,
-                    game.internal_numeric_stat(id, Stat::Life)?,
-                )
-            } else {
-                (0, 0, 0, 0)
-            };
-        let original = [cost, original_attack, original_life];
-        let effective = [game.internal_effective_cost(id)?, attack, life];
-        Ok(SourceSnapshot {
-            view: RuntimeObjectView {
-                object: reference,
-                snapshot: SnapshotId(game.state.ir_epoch),
-            },
-            original,
-            effective,
-        })
+            .ok_or_else(|| invalid("missing ability source information producer"))?
+            .snapshot(
+                game,
+                self.ability
+                    .ok_or_else(|| invalid("missing ability source"))?,
+            )
     }
 
     pub(super) fn source_before_move(
@@ -131,10 +78,8 @@ impl Execution {
     }
 
     pub(super) const fn seal_source_departure(&mut self, snapshot: Option<SourceSnapshot>) {
-        if let Some(information) = &mut self.source_information
-            && let Some(snapshot) = snapshot
-        {
-            information.departed = Some(snapshot);
+        if let Some(information) = &mut self.source_information {
+            information.seal(snapshot);
         }
     }
 
@@ -205,5 +150,119 @@ impl Execution {
             }
             _ => Err(unsupported("damage source view")),
         }
+    }
+}
+
+impl SourceInformation {
+    pub(super) fn current(game: &Game, source: RuntimeAbilitySource) -> Result<Self> {
+        let snapshot = game.information_snapshot(source.holder)?;
+        let id = game
+            .state
+            .ir_objects
+            .iter()
+            .find(|(_, number)| **number == source.holder.id.0)
+            .map(|(id, _)| id.as_str())
+            .ok_or_else(|| invalid("missing source identity"))?;
+        if snapshot.view.object != source.holder {
+            return Err(invalid("foreign source snapshot"));
+        }
+        Ok(Self {
+            holder: source.holder,
+            zone: game.object(id)?.zone.clone(),
+            departed: None,
+        })
+    }
+
+    pub(super) fn snapshot(
+        &self,
+        game: &Game,
+        source: RuntimeAbilitySource,
+    ) -> Result<SourceSnapshot> {
+        if source.holder != self.holder {
+            return Err(invalid("source information belongs to another ability"));
+        }
+        if let Some(departed) = &self.departed {
+            return Ok(departed.clone());
+        }
+        let snapshot = game.information_snapshot(self.holder)?;
+        let id = game
+            .state
+            .ir_objects
+            .iter()
+            .find(|(_, number)| **number == self.holder.id.0)
+            .map(|(id, _)| id.as_str())
+            .ok_or_else(|| invalid("missing source identity"))?;
+        if game.object(id)?.zone != self.zone {
+            return Err(invalid(
+                "source left its reference zone without authority LKI",
+            ));
+        }
+        Ok(snapshot)
+    }
+
+    pub(super) const fn seal(&mut self, snapshot: Option<SourceSnapshot>) {
+        if self.departed.is_none()
+            && let Some(snapshot) = snapshot
+        {
+            self.departed = Some(snapshot);
+        }
+    }
+}
+
+impl SourceSnapshot {
+    pub(super) const fn at(mut self, snapshot: SnapshotId) -> Self {
+        self.view.snapshot = snapshot;
+        self
+    }
+
+    pub(super) const fn view(&self) -> RuntimeObjectView {
+        self.view
+    }
+}
+
+#[expect(
+    clippy::multiple_inherent_impl,
+    reason = "Pending and executing abilities share the same numeric information boundary."
+)]
+impl Game {
+    pub(super) fn information_snapshot(&self, reference: ObjectRef) -> Result<SourceSnapshot> {
+        let id = self
+            .state
+            .ir_objects
+            .iter()
+            .find(|(_, number)| **number == reference.id.0)
+            .map(|(id, _)| id.as_str())
+            .ok_or_else(|| invalid("unregistered source identity"))?;
+        let current = self.object(id)?;
+        if current.generation != reference.generation.0 {
+            return Err(invalid("stale Current information read"));
+        }
+        let printed = self.face(id)?;
+        let cost = super::cost::printed_cost(&printed["cost"])?;
+        // A non-follower has no attack/life; only a valid view can yield rules-absent zero.
+        let (original_attack, original_life, attack, life) =
+            if self.object_type(id)?.contains("フォロワー") {
+                if current.zone != "field" {
+                    return Err(unsupported("off-field follower source information"));
+                }
+                (
+                    super::cost::printed_cost(&printed["power"])?,
+                    super::cost::printed_cost(&printed["hp"])?,
+                    self.internal_numeric_stat(id, Stat::Attack)?,
+                    self.internal_numeric_stat(id, Stat::Life)?,
+                )
+            } else {
+                (0, 0, 0, 0)
+            };
+        let original = [cost, original_attack, original_life];
+        let effective = [self.internal_effective_cost(id)?, attack, life];
+        Ok(SourceSnapshot {
+            view: RuntimeObjectView {
+                object: reference,
+                snapshot: SnapshotId(self.state.ir_epoch),
+            },
+            original,
+            effective,
+        })
     }
 }

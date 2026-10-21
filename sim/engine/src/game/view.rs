@@ -101,7 +101,7 @@ impl Game {
                     .collect::<Vec<_>>()
             )
         });
-        packet["awaiting"] = if self.typed.is_some() {
+        packet["awaiting"] = if self.typed.is_some() || self.internal_decision(view).is_some() {
             self.internal_decision_packet(view)
         } else if self.card_runtime.checkpoint.is_some() || self.card_runtime.has_pending() {
             Value::Null

@@ -1,3 +1,4 @@
+use crate::ir::{ZoneFrozen, ZoneKind, ZoneOperation};
 macro_rules! projected_equality {
     ($checker:expr, $equality:expr; $($variant:ident),+ $(,)?) => {
         match $equality {
@@ -557,6 +558,26 @@ impl Checker {
                 self.object_value(left)?;
                 self.object_value(right)
             }
+            Predicate::ZoneEquals { left, right } => {
+                let Expr::Frozen(field) = left else {
+                    return self.reject();
+                };
+                let ZoneFrozen::LeaveFieldTo { event } = field.as_ref() else {
+                    return self.reject();
+                };
+                self.reference(*event, BindingKind::Value)?;
+                let Expr::Compute(operation) = right else {
+                    return self.reject();
+                };
+                let ZoneOperation::OfPlayer {
+                    player,
+                    kind: ZoneKind::Cemetery,
+                } = operation.as_ref()
+                else {
+                    return self.reject();
+                };
+                self.player(player)
+            }
             Predicate::PlayerEquals { left, right } => {
                 self.player_value(left)?;
                 self.player_value(right)
@@ -601,7 +622,6 @@ impl Checker {
             | Predicate::ReceiptAny { .. }
             | Predicate::RecipientIsLeader { .. }
             | Predicate::RecipientIsFollower { .. }
-            | Predicate::ZoneEquals { .. }
             | Predicate::PostureEquals { .. }
             | Predicate::EvolutionEquals { .. }
             | Predicate::PhaseEquals { .. }

@@ -62,7 +62,7 @@ impl ExpandedLowerer {
 
     /// Lower every card atomically. Success proves only internal IR well-formedness.
     ///
-    /// Only fanfare, draw, uniform damage to all leaders, and their numeric subset
+    /// Only fanfare, lastword, draw, uniform damage to all leaders, and their numeric subset
     /// are supported. Card keys remain candidate coordinates, not snapshot IDs.
     ///
     /// # Errors
@@ -136,9 +136,14 @@ impl Allocator {
             return Err(unsupported(path));
         }
 
+        let (body, head, keyword) = match (&entry.fanfare, &entry.lastword) {
+            (Some(body), None) => (body, "fanfare", KeywordId::Fanfare),
+            (None, Some(body)) => (body, "lastword", KeywordId::Lastword),
+            _ => return Err(unsupported(path)),
+        };
         let source = source_span(key, path, entry)?;
         let origin = AbilityOrigin::Keyword {
-            keyword: KeywordId::Fanfare,
+            keyword,
             origin: Box::new(AbilityOrigin::Printed {
                 face: FaceId(source.face.clone()),
                 line: Nat(u64::from(entry.line)),
@@ -152,15 +157,15 @@ impl Allocator {
         let mut context = BodyContext {
             scope,
             allocator: Self::default(),
-            definitions: &entry.fanfare.define,
+            definitions: &body.define,
         };
-        for value in entry.fanfare.define.values() {
+        for value in body.define.values() {
             context.number(value, path, &mut BTreeSet::new())?;
         }
         context.allocator = Self::default();
         let mut steps = Vec::new();
-        for (index, step) in entry.fanfare.steps.iter().enumerate() {
-            let step_path = format!("{path}/fanfare/do/{index}");
+        for (index, step) in body.steps.iter().enumerate() {
+            let step_path = format!("{path}/{head}/do/{index}");
             let action = context.action(step, &step_path)?;
             let instruction_id = self.id(&step_path)?;
             let mut step_source = source.clone();
@@ -180,21 +185,26 @@ impl Allocator {
                 },
             });
         }
-        let event = Binding::new(context.allocator.id(path)?, scope);
-        let trigger = TriggerSpec {
-            on: TriggerCondition::Event {
-                pattern: EventPattern::EnterField {
-                    binding: event,
-                    predicate: Expr::Compute(Box::new(Predicate::ObjectEquals {
-                        left: Expr::Frozen(Box::new(ObjectFrozen::EnterFieldObject { event })),
-                        right: Expr::Frozen(Box::new(ObjectFrozen::SourceHolder {})),
-                    })),
+        let event_id = context.allocator.id(path)?;
+        let trigger = if keyword == KeywordId::Lastword {
+            TriggerSpec::lastword(Binding::new(event_id, scope))
+        } else {
+            let event = Binding::new(event_id, scope);
+            TriggerSpec {
+                on: TriggerCondition::Event {
+                    pattern: EventPattern::EnterField {
+                        binding: event,
+                        predicate: Expr::Compute(Box::new(Predicate::ObjectEquals {
+                            left: Expr::Frozen(Box::new(ObjectFrozen::EnterFieldObject { event })),
+                            right: Expr::Frozen(Box::new(ObjectFrozen::SourceHolder {})),
+                        })),
+                    },
                 },
-            },
-            active_zones: vec![ZoneKind::Field],
-            view: EventSnapshotPolicy::AfterEntry,
-            limit: None,
-            aggregation: TriggerAggregation::PerFact {},
+                active_zones: vec![ZoneKind::Field],
+                view: EventSnapshotPolicy::AfterEntry,
+                limit: None,
+                aggregation: TriggerAggregation::PerFact {},
+            }
         };
         Ok(Located {
             source,

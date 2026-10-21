@@ -40,7 +40,7 @@ mod source;
 mod values;
 
 pub use allocation::{DamageShare, DistributionDomain, DistributionMember};
-pub use card::{Activation, CardEntry, CardPlay, ResumeStage, TargetDomain};
+pub use card::{Activation, CardEntry, CardPlay, PendingOption, ResumeStage, TargetDomain};
 pub(super) use card::{CardRuntime, serialize_cards};
 pub(super) use cost::CostState;
 pub use movement::MovementFact;
@@ -102,6 +102,8 @@ pub struct DecisionView {
 pub enum InputDomain {
     /// Continue or stop before exactly one draw attempt.
     BeforeDraw,
+    /// Public occurrence handles for exactly one player at the current check timing.
+    Pending(Vec<PendingOption>),
     /// One natural number in the checked inclusive range.
     Integer(Cardinality),
     /// Token-scoped handles and printed information, visible only to the chooser.
@@ -132,6 +134,8 @@ pub enum InputDomain {
 pub enum Answer {
     /// Answer the current before-draw occurrence.
     Stepwise(StepwiseAnswer),
+    /// Exactly one occurrence handle from the current pending-order question.
+    Pending(u64),
     /// Answer a bounded integer decision.
     Integer(Nat),
     /// Complete permutation of this question's handles, in top-to-bottom order.
@@ -647,7 +651,16 @@ impl Game {
     /// Inspect only the current actor's question; authority may inspect it as referee.
     #[must_use]
     pub fn internal_decision(&self, view: View) -> Option<DecisionView> {
-        let (question, _) = self.typed.as_ref()?.waiting.as_ref()?;
+        let question = self
+            .typed
+            .as_ref()
+            .and_then(|execution| execution.waiting.as_ref().map(|(question, _)| question))
+            .or_else(|| {
+                self.card_runtime
+                    .question
+                    .as_ref()
+                    .map(|(question, _)| question)
+            })?;
         view.player()
             .is_none_or(|seat| seat == seat_name(question.actor).unwrap_or_default())
             .then(|| question.clone())
@@ -658,6 +671,7 @@ impl Game {
             let domain = match question.domain {
                 InputDomain::Targets(domain) => card::selection::packet(&domain),
                 InputDomain::Modes { modes, cardinality, count } => json!({"kind":"modes","modes":modes.iter().map(|id| id.0).collect::<Vec<_>>(),"minimum":cardinality.minimum.0,"maximum":cardinality.maximum.map(|n| n.0),"count":count.0}),
+                InputDomain::Pending(options) => json!({"kind":"pending","options":options.iter().map(|option| json!({"handle":option.handle,"card":option.card,"line":option.line,"event":option.event})).collect::<Vec<_>>()}),
                 InputDomain::BeforeDraw => json!({"kind":"before-draw"}),
                 InputDomain::Integer(bounds) => json!({"kind":"integer","minimum":bounds.minimum.0,"maximum":bounds.maximum.map(|value| value.0)}),
                 InputDomain::Order(cards) => json!({"kind":"order","cards":cards.iter().map(|card| json!({"handle":card.handle,"card":card.card,"name":card.name})).collect::<Vec<_>>()}),
@@ -840,7 +854,11 @@ impl Game {
                     )?;
                 }
                 Node::Instruction { instruction } => {
-                    self.internal_instruction(execution, instruction)?;
+                    let previous = self.card_runtime.active_source;
+                    self.card_runtime.active_source = execution.ability;
+                    let result = self.internal_instruction(execution, instruction);
+                    self.card_runtime.active_source = previous;
+                    result?;
                 }
                 Node::Control { .. } => return Err(unsupported("control")),
             }

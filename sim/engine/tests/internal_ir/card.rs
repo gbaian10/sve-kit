@@ -13,6 +13,9 @@ mod fanfare;
 #[path = "card/source.rs"]
 mod source_information;
 
+#[path = "card/triggers.rs"]
+mod triggers;
+
 fn locate_steps(steps: &mut [Located<Node>], span: &SourceSpan, origin: &AbilitySource) {
     for step in steps {
         step.source = span.clone();

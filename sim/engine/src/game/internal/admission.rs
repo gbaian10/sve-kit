@@ -61,7 +61,7 @@ fn source_paths(
                 if matches!(
                     origin.origin,
                     AbilityOrigin::Keyword {
-                        keyword: KeywordId::Fanfare,
+                        keyword: KeywordId::Fanfare | KeywordId::Lastword,
                         ..
                     }
                 ) {
@@ -127,7 +127,9 @@ fn check_requirements(
                     || (card && play_requirement(requirement.capability.code))
                     || (matches!(
                         requirement.capability.code,
-                        "shape.AbilityOrigin.Keyword" | "internal.KeywordId.Fanfare"
+                        "shape.AbilityOrigin.Keyword"
+                            | "internal.KeywordId.Fanfare"
+                            | "internal.KeywordId.Lastword"
                     ) && requirement
                         .locations
                         .iter()

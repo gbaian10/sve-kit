@@ -1,6 +1,10 @@
 use super::*;
 
-fn source_read(object: &ObjectView, view: CharacteristicView, property: Option<Stat>) -> Expr<Int> {
+pub(super) fn source_read(
+    object: &ObjectView,
+    view: CharacteristicView,
+    property: Option<Stat>,
+) -> Expr<Int> {
     Expr::Compute(Box::new(IntOperation::InformationOrZero {
         information: property.map_or_else(
             || NumberRead::Cost {
@@ -16,7 +20,7 @@ fn source_read(object: &ObjectView, view: CharacteristicView, property: Option<S
     }))
 }
 
-fn source_hit(id: u64, amount: Expr<Int>) -> Located<Node> {
+pub(super) fn source_hit(id: u64, amount: Expr<Int>) -> Located<Node> {
     instruction(
         id,
         Action::Damage {

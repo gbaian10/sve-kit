@@ -15,9 +15,9 @@ owner、field、fragment；這不授予永久來源身分或公開 capability。
 本文，不把依賴 play binding 的本文重新當成封閉 `WellFormedProgram`。
 
 准入接受普通 Printed Spell 的 `[Resolution]`、Printed Activated 的 `[Field]`，以及下節的
-單一 Printed Fanfare。Spell 的唯一固有 Ordered PP Pay 必須等於同 Catalog face 的印刷費用；
+Printed Fanfare／Lastword。Spell 的唯一固有 Ordered PP Pay 必須等於同 Catalog face 的印刷費用；
 只在這個已驗位置按 Resolution 的有效成本實付一次。Activated 沿用 controller 的非負常值 PP
-與恰好 SourceHolder 的 Acted Posture，不能套用卡片減費；成本沒有 materials、precondition 或替代。
+與恰好 SourceHolder 的 Acted Posture／Put 送往 owner 墓地，不能套用卡片減費；成本沒有 materials、precondition 或替代。
 Amulet executor、Quick、前置 X、追加／替代成本、一般 trigger、Static 與任意對象 LKI 仍整棵拒絕。
 
 載入逐能力驗證 card／face／line、印刷座標唯一、所有 instruction 的來源閉包，以及包含未選模式
@@ -27,8 +27,8 @@ Amulet executor、Quick、前置 X、追加／替代成本、一般 trigger、St
 Move／Destroy 沿用已驗公開區來源與 owner 墓地／消滅目的地；連結、進化關聯、特殊卡片、
 入場效果與其他互動本文保持拒絕。
 
-`play_internal_card(holder, actor)` 接主動玩家 main、自己的 Hand／EX、base 普通 Spell 或單一
-Fanfare 從者；`activate_internal_card(holder, AbilityId, actor)` 接已載入的當前場上從者能力。
+`play_internal_card(holder, actor)` 接主動玩家 main、自己的 Hand／EX、base 普通 Spell 或已准入的
+普通從者；`activate_internal_card(holder, AbilityId, actor)` 接已載入的當前場上從者能力。
 來源、世代、instance 與 execution 都由 authority 建立；`base` 在起動時同樣比對 face 0。
 所有局內卡片都須完整載入，空能力卡也須明示；未准入的原型能力、keyword、continuous、delayed
 與忙碌 context 拒絕。已載入 Spell／Fanfare 時封住合成 prepare 與原型打出，不略過正式 producer。
@@ -68,34 +68,46 @@ Spell 本文完成後，僅把仍在 Resolution 的同世代卡移去 owner 墓�
 
 錯 actor／token／payload 保持原題與 RNG；合法回答之後的付款、本文或收尾失敗回復整次 origin，
 包含來源／instance／execution 配發、RNG、事件、待機、額度與觀察，僅保留已外發 epoch 高水位。
-能力 origin 在付款與 prepare 前；Fanfare origin 則是卡片已付款入場後的 pending。
+能力 origin 在付款與 prepare 前；選取待機能力的 origin 則是保存原 pending 與問題的狀態，不撤銷之前的卡片 play。
 `IllegalPlay`、協定 `Invalid` 與執行器 `Unsupported` 分開回報。沒有任意取消或隨機成本重抽入口。
 
 成功 Activation 明示 `ResumeStage::CheckTiming`，Game 同時保存 checkpoint；`resume_internal_card()`
 才做既有規則檢查。在 checkpoint 前不能插入原型 decide／submit 或另一個 typed 入口。
 整卡與待答續體尚無儲存／digest 格式，相關操作明確失敗，不靜默遺失程式或 producer。
 
-### 單一 Fanfare 的 authority 待機
+### Fanfare／Lastword 的 authority 待機
 
-Fanfare 必須保留 `Keyword(Fanfare, Printed)`，觸發形狀限定為 AfterEntry、Field、PerFact，
-且 EnterFieldObject 恰等於 SourceHolder；不接受額外條件、limit、event captures 或 PlaySpec。
-同 face 多個 Fanfare 在載入時拒絕，未接選序前不以定義順序代替規則輸入。
-本文的 InstallEffect 不接受以該 Fanfare 為來源的 Continuous；此組合在載入時整棵拒絕，
-尚未驗收其來源世代、期限與 SourceZoneExit 的互動。
+Fanfare 保留 `Keyword(Fanfare, Printed)`，限定 AfterEntry、Field、PerFact，EnterFieldObject 恰等於
+SourceHolder。Lastword 保留 `Keyword(Lastword, Printed)`，限定 BeforeExit、Field、PerFact，
+LeaveFieldObjectBefore 恰等於 SourceHolder 且實際目的區為 owner 墓地。兩者都不接受 limit、
+event captures 或 PlaySpec；其他 trigger 與整棵本文仍各自准入。Fanfare 的 Continuous 來源形狀仍拒絕。
 
-從者卡片打出同樣先入 Resolution，承接受驗 EX 費用效果後才決定並支付固有 PP；付款後再驗場位。
-EX→Resolution 與 Resolution→Field 僅承接既有 CostModifier 的完整實例與目標新世代，保留原
-EffectId、來源、值、timestamp 與期限；其他效果／counter 承接未實作時在移動前拒絕。
-普通 Move 與 Resolution→Cemetery 沿原世代失效規則，不取得泛用跟隨權。
-場上新世代實體化能力、保存 controller／instance 並形成私有 pending；卡片收尾後先做規則檢查，
-再停於 `ResumeStage::PendingFanfare`。既有單一待機不提供其他能力插入與通用離場觸發。
+普通從者先入 Resolution，承接受驗 EX 費用後才決定並支付固有 PP，付款後驗場位。
+EX→Resolution 與 Resolution→Field 只承接既有 CostModifier 的完整實例與目標新世代；其他效果／counter
+承接未實作時拒絕。從者可以沒有 Fanfare，或在同一 face 有多個已准入的能力；不能用定義序決定結算序。
+Fanfare 入場後保存原來源、controller、instance 與公開的入場來源區域。
 
-`resolve_internal_fanfare()` 不收 caller 指定的 holder、AbilityId 或來源，只消費該 pending。
-本文沿相同正式 play 程序完成後形成同 producer 的 play／resolve facts，再交 `CheckTiming`；失敗回復到
-已付卡片費用的 pending 狀態，保留重試，不撤回前次卡片 play。成功 occurrence 不可重播。
-載入 Fanfare 的 Game 封住原型 decide 與合成 closed Program 入口，避免略過待機 producer。
-BP01-118 的測試由作者 YAML 經真正 C0 展開、lowering、整卡載入、正式入場及待機解算，
-驗兩位領袖各受 1 點傷害；測試用候選來源沒有宣稱永久來源驗證或公開 capability。
+共同移區原語在同批成功移區前，保存既有 pending 來源資訊與移動前有效的 Lastword 能力；
+真正 Field→Cemetery 才建立 Lastword occurrence。成本 Put 與規則破壞皆走此處，不靠 Destroy facet。
+回手／消滅不符合；完全被取代而未離場的動作不製造 occurrence。
+已有進化關聯的持有者，其有效印刷能力來自進化卡；此離場情境尚未接上，base 或進化卡帶 Lastword 時整次拒絕，
+不沿 base 定義觸發，也不漏掉進化卡的能力。每個成功成員保留獨立原事實與
+before／after、直接 cause；規則移區的 source=None，不冒充造成先前傷害的能力。
+目前正式本文只承載公開區 owner 墓地／消滅移動；一般回手、入場及跨世代跟隨仍拒絕。
+
+Fanfare 與 Lastword 共用一個私有待機集合。`internal_pending_choice()` 在穩定檢查時點建立題目，
+回合玩家有待機就由該玩家選一個，否則由對手選。`answer_internal_card` 接 `Answer::Pending(handle)`；
+候選只投影當次 handle、已公開卡號、印刷行與事件的過去公開場位／入場來源，不交出 source／instance／snapshot。
+錯 actor、token、handle 或 payload 保留原題；選中後是獨立 execution，完成再交 CheckTiming。
+`resume_internal_card()` 先跑規則處理到穩定，再讓下一題依當下待機重新決定玩家；不一次預排雙方。
+
+已待機能力不因來源離場或換世代而消失；來源資訊讀取已封存 LKI，controller 仍固定為觸發當下。
+內部錯誤回該次能力嘗試前，保留原 pending、題目及已成功的前次 card play，epoch 高水位不退。
+正常敗北在 CheckTiming 成立時停止其餘待機並使舊題目失效；已完成本文的 resolved 事實仍保留。
+其他 prepared play 終局、投了、一般 trigger play 目標／成本、每回合一次及 PerBatch 尚未准入。
+
+BP01-118 與 BP01-P25 的測試由 C0 展開、lowering、整卡載入及 authority 程序驗證相應傷害片段；
+P25 的送墓成本來自明示的合成測試輔助能力。來源座標為候選 fixture，不宣稱永久來源驗證或公開 capability。
 
 ### 正式能力來源資訊的受限 LKI
 
@@ -113,8 +125,8 @@ Spell 的 Resolution 收尾也保存來源資訊，且只收尾本次原世代�
 不存在的欄位（例如 Spell 的攻擊力）才按規則為零。Current 數值讀取維持只讀 Effective。
 Spell 的來源資訊綁定進 Resolution 後的新世代；本文 Move／Destroy 不接受 Resolution 中的物件。
 
-這個子集只保存正式已開始能力的來源；尚未接上 Last Words／一般 pending、成本送墓、
-外部規則動作離場及 prepared play 終局，不宣稱常見觸發或完整來源生命週期已完成。
+此子集也保存上述待機來源的後續離場資訊、受限成本送墓與共同規則移區。其餘常見觸發、
+回場新世代的完整入場 producer 及 prepared play 終局尚未接上，不宣稱完整來源生命週期已完成。
 
 ### 成功 After 的當回合減費片段
 
