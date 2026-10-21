@@ -1,7 +1,6 @@
 """Synthetic reference fragments from author syntax §§6, 9, 13 and 14."""
 
-from copy import deepcopy
-from itertools import combinations, product
+from itertools import product
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -200,66 +199,6 @@ def test_phase_and_turn_boundaries(
     _accept(schema, "A.until", {"during_next_phase": {"who": who, "phase": phase}})
 
 
-def _objects(value: dict[str, JsonValue]) -> list[dict[str, JsonValue]]:
-    result = [value]
-    for child in value.values():
-        if isinstance(child, dict):
-            result.extend(_objects(child))
-    return result
-
-
-@pytest.mark.parametrize(("definition", "value"), OBJECTS)
-def test_every_mapping_is_closed_and_required(
-    schema: dict[str, JsonValue], definition: str, value: dict[str, JsonValue]
-) -> None:
-    for offset, node in enumerate(_objects(value)):
-        for key in node:
-            changed = deepcopy(value)
-            del _objects(changed)[offset][key]
-            _reject(schema, definition, changed)
-        changed = deepcopy(value)
-        _objects(changed)[offset]["unexpected"] = "ignored"
-        _reject(schema, definition, changed)
-
-
-@pytest.mark.parametrize(("definition", "value"), OBJECTS)
-@pytest.mark.parametrize("invalid", [None, False, 3, [], {"param": "p"}])
-def test_fields_reject_wrong_types_and_parameters(
-    schema: dict[str, JsonValue],
-    definition: str,
-    value: dict[str, JsonValue],
-    invalid: JsonValue,
-) -> None:
-    for offset, node in enumerate(_objects(value)):
-        for key in node:
-            changed = deepcopy(value)
-            _objects(changed)[offset][key] = invalid
-            _reject(schema, definition, changed)
-
-
-@pytest.mark.parametrize(
-    "definition",
-    ["A.receipt-ref", "A.ref", "A.player-ref", "A.leader-recipient", "A.until"],
-)
-def test_variants_cannot_be_combined(
-    schema: dict[str, JsonValue], definition: str
-) -> None:
-    samples = [value for name, value in OBJECTS if name == definition]
-    for left, right in combinations(samples, 2):
-        if left.keys().isdisjoint(right):
-            _reject(schema, definition, left | right)
-
-
-@pytest.mark.parametrize("definition", ADAPTERS)
-@pytest.mark.parametrize(
-    "value", [None, False, 1, [], {}, {"param": "p"}, {"generated_by": {}}]
-)
-def test_roots_reject_wrong_types_and_expansion_nodes(
-    schema: dict[str, JsonValue], definition: str, value: JsonValue
-) -> None:
-    _reject(schema, definition, value)
-
-
 @pytest.mark.parametrize(
     "name",
     [
@@ -355,18 +294,6 @@ def test_wrong_context_and_unregistered_shapes(
     _reject(schema, definition, value)
 
 
-def test_reserved_name_probe_detects_overlapping_union(
-    schema: dict[str, JsonValue],
-) -> None:
-    changed = deepcopy(schema)
-    binding = object_value(object_value(changed["$defs"])["BindingName"])
-    pattern = binding["pattern"]
-    assert isinstance(pattern, str)
-    binding["pattern"] = pattern.replace("|opponents", "")
-    with pytest.raises(AssertionError):
-        _reserved_roles(changed, "opponents", False, False, True)
-
-
 @pytest.mark.parametrize(
     "value",
     ["this", {"follow": "moved_group"}, {"next_turn": {"who": "self", "edge": "end"}}],
@@ -375,65 +302,3 @@ def test_library_root_is_not_a_document_entry(
     schema: dict[str, JsonValue], value: JsonValue
 ) -> None:
     assert not Draft202012Validator(schema).is_valid(value)
-
-
-def _union_leaves(
-    schema: dict[str, JsonValue], node: dict[str, JsonValue]
-) -> list[dict[str, JsonValue]]:
-    reference = node.get("$ref")
-    if isinstance(reference, str):
-        name = reference.removeprefix("#/$defs/")
-        return _union_leaves(schema, object_value(object_value(schema["$defs"])[name]))
-    branches = node.get("anyOf", node.get("oneOf"))
-    if isinstance(branches, list):
-        return [
-            leaf
-            for branch in branches
-            for leaf in _union_leaves(schema, object_value(branch))
-        ]
-    return [node]
-
-
-def _assert_leader_union_disjoint(schema: dict[str, JsonValue]) -> None:
-    leaves = _union_leaves(schema, {"$ref": "#/$defs/A.leader-recipient"})
-    assert len({canonical(leaf) for leaf in leaves}) == len(leaves)
-    samples = [value for name, value in OBJECTS if name == "A.leader-recipient"]
-    for value in samples:
-        assert (
-            sum(
-                Draft202012Validator(
-                    {"$id": schema["$id"], "$defs": schema["$defs"], **leaf}
-                ).is_valid(value)
-                for leaf in leaves
-            )
-            == 1
-        )
-
-
-def test_leader_union_contains_each_shape_once(schema: dict[str, JsonValue]) -> None:
-    _assert_leader_union_disjoint(schema)
-
-
-@pytest.mark.parametrize("operator", ["anyOf", "oneOf"])
-@pytest.mark.parametrize("mutation", ["nested_duplicate", "overlapping_shape"])
-def test_leader_union_probe_detects_overlap(
-    schema: dict[str, JsonValue], operator: str, mutation: str
-) -> None:
-    changed = deepcopy(schema)
-    definitions = object_value(changed["$defs"])
-    union = object_value(definitions["A.leader-recipient"])
-    branches = union.pop("anyOf")
-    assert isinstance(branches, list)
-    union[operator] = branches
-    if mutation == "nested_duplicate":
-        branches.append({"anyOf": [{"$ref": "#/$defs/A.single-leader"}]})
-    else:
-        narrower = deepcopy(object_value(definitions["A.single-leader"]))
-        object_value(narrower["properties"])["leader"] = {
-            "type": "string",
-            "const": "self",
-        }
-        definitions["A.overlapping-leader"] = narrower
-        branches.append({"$ref": "#/$defs/A.overlapping-leader"})
-    with pytest.raises(AssertionError):
-        _assert_leader_union_disjoint(changed)

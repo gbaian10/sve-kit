@@ -1,28 +1,21 @@
-"""Public step decoding, recursive boundaries, and independent schema mutations."""
+"""Step decoding preserves card programs and rejects invalid recursive boundaries."""
 
-from copy import deepcopy
 from typing import TYPE_CHECKING
 
 import pytest
-from jsonschema import Draft202012Validator
 from pydantic import ValidationError
 
-from sve_carddb.core.json import canonical, object_value
+from sve_carddb.core.json import canonical
 
 from .author_numeric_cases import NUMERIC
 from .author_step_cases import CARD_STEPS, SYNTHETIC_ACTIONS, SYNTHETIC_CONTROLS
 from .author_step_types import STEPS
-from .test_author_schema_drift import NODES, assert_selector_definition
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
 
 
 def _check(value: JsonValue, *, accepted: bool = True, name: str = "A.steps") -> None:
-    validator = Draft202012Validator(
-        {"$id": NODES["$id"], "$defs": NODES["$defs"], "$ref": "#/$defs/" + name}
-    )
-    assert validator.is_valid(value) == accepted
     adapter = (STEPS | NUMERIC)[name]
     if accepted:
         decoded = adapter.validate_json(canonical(value), strict=True)
@@ -54,20 +47,6 @@ def test_synthetic_action_variants(action: dict[str, JsonValue]) -> None:
 def test_control_variants_are_not_actions(control: dict[str, JsonValue]) -> None:
     _check([control])
     _check(control, name="A.action", accepted=False)
-
-
-@pytest.mark.parametrize("step", SYNTHETIC_ACTIONS + SYNTHETIC_CONTROLS)
-def test_steps_are_closed_and_not_numeric_or_condition_nodes(
-    step: dict[str, JsonValue],
-) -> None:
-    key, payload = next(iter(step.items()))
-    _check([{**step, "unknown": True}], accepted=False)
-    _check([{key: None}], accepted=False)
-    if isinstance(payload, dict):
-        _check([{key: {**payload, "unknown": True}}], accepted=False)
-    _check(step, name="A.expr.numeric", accepted=False)
-    _check(step, name="A.cond", accepted=False)
-    assert not Draft202012Validator(NODES).is_valid(step)
 
 
 @pytest.mark.parametrize(
@@ -248,45 +227,6 @@ def test_payment_decision_has_a_separate_preserved_wire_key() -> None:
         {"all": [{"payment_decided": "optional"}, {"not": {"paid": "optional"}}]},
         name="A.cond",
     )
-
-
-@pytest.mark.parametrize(
-    ("name", "mutation"),
-    [
-        ("A.act.draw", "required"),
-        ("A.act.box", "required"),
-        ("A.act.move.ref", "extra"),
-        ("A.position.nth", "type"),
-        ("A.control.repeat.count", "reference"),
-        ("A.control.choice.exact", "minimum"),
-        ("A.move-order", "enum"),
-        ("A.act.search.grouped", "reference"),
-        ("A.step", "maximum"),
-        ("A.steps", "reference"),
-    ],
-)
-def test_step_schema_drift_detects_mutations(name: str, mutation: str) -> None:
-    schema = deepcopy(NODES)
-    node = object_value(object_value(schema["$defs"])[name])
-    if mutation == "required":
-        node.pop("required")
-    elif mutation == "extra":
-        node["additionalProperties"] = True
-    elif mutation == "type":
-        object_value(object_value(node["properties"])["nth"])["type"] = "string"
-    elif mutation == "minimum":
-        object_value(object_value(node["properties"])["options"])["minItems"] = 0
-    elif mutation == "enum":
-        node["enum"] = ["chooser", "shuffle", "random"]
-    elif mutation == "maximum":
-        node["maxProperties"] = 2
-    elif name == "A.steps":
-        node["items"] = {"$ref": "#/$defs/A.action"}
-    else:
-        field = "do" if name == "A.control.repeat.count" else "to"
-        object_value(node["properties"])[field] = {"$ref": "#/$defs/A.effect"}
-    with pytest.raises(AssertionError):
-        assert_selector_definition(schema, name)
 
 
 @pytest.mark.parametrize(

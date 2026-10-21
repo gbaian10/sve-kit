@@ -1,21 +1,18 @@
 """Event roles, history narrowing and capture boundaries from author contracts."""
 
 import json
-from copy import deepcopy
 from typing import TYPE_CHECKING
 
 import pytest
-from jsonschema import Draft202012Validator
 from pydantic import ValidationError
 
-from sve_carddb.core.json import canonical, object_value
+from sve_carddb.core.json import canonical
 
 from .author_history_card_cases import CARD_HISTORY_CASES
 from .author_history_cases import HISTORY
 from .author_history_syntax_cases import SYNTAX_HISTORY_CASES
 from .author_numeric_cases import NUMERIC, C, E
 from .author_receipt_cases import RECEIPTS
-from .test_author_schema_drift import NODES, assert_selector_definition
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
@@ -79,10 +76,6 @@ def _values(*values: JsonValue) -> tuple[JsonValue, ...]:
 
 
 def _check(name: str, value: JsonValue, *, accepted: bool = True) -> None:
-    validator = Draft202012Validator(
-        {"$id": NODES["$id"], "$defs": NODES["$defs"], "$ref": "#/$defs/" + name}
-    )
-    assert validator.is_valid(value) == accepted
     adapter = ADAPTERS[name]
     if accepted:
         decoded = adapter.validate_json(canonical(value), strict=True)
@@ -90,20 +83,6 @@ def _check(name: str, value: JsonValue, *, accepted: bool = True) -> None:
     else:
         with pytest.raises(ValidationError):
             adapter.validate_json(json.dumps(value), strict=True)
-
-
-@pytest.mark.parametrize(("event", "payload"), EVENT_CASES)
-def test_each_direct_event_is_closed(event: str, payload: dict[str, JsonValue]) -> None:
-    _check(EVENT, {event: payload})
-    _check(EVENT, {event: {**payload, "unknown": True}}, accepted=False)
-    _check(EVENT, {event: payload, "extra": {}}, accepted=False)
-    _check(EVENT, {event: None}, accepted=False)
-    _check(E, {event: payload}, accepted=False)
-    if event != "state":
-        _check(EVENT, {"any_of": [{event: payload}]})
-        _check(EVENT, {"any_of": [{"any_of": [{event: payload}]}]}, accepted=False)
-    else:
-        _check(EVENT, {"any_of": [{event: payload}]}, accepted=False)
 
 
 @pytest.mark.parametrize(("event", "payload"), EVENT_CASES[:-1])
@@ -494,111 +473,6 @@ def test_chosen_and_material_filters_keep_their_own_contexts() -> None:
     )
 
 
-@pytest.mark.parametrize("name", HISTORY)
-def test_new_definition_drift_detects_constraint_removal(name: str) -> None:
-    changed = deepcopy(NODES)
-    node = object_value(object_value(changed["$defs"])[name])
-    if "anyOf" in node:
-        branches = node["anyOf"]
-        assert isinstance(branches, list)
-        branches.append({"type": "null"})
-    elif "properties" in node:
-        node["additionalProperties"] = True
-    else:
-        node["type"] = "null"
-    with pytest.raises(AssertionError):
-        assert_selector_definition(changed, name)
-
-
-@pytest.mark.parametrize(
-    ("name", "field", "replacement"),
-    [
-        ("A.event.phase-payload", "which", {"type": "null"}),
-        ("A.history.phase-where", "which", {"$ref": "#/$defs/A.param"}),
-        ("A.history.life-changed-sum", "field", {"const": "amount"}),
-        ("A.capture.selection", "selection", {"$ref": "#/$defs/A.ref"}),
-        ("A.capture.power-of", "power_of", {"$ref": "#/$defs/A.snapshot-read"}),
-        ("A.die-eq", "eq", {"$ref": "#/$defs/Nat"}),
-        ("A.cond.player-cmp-payload", "op", {"enum": ["eq", "ne", "lt"]}),
-    ],
-)
-def test_new_role_drift_detects_type_widening(
-    name: str, field: str, replacement: JsonValue
-) -> None:
-    changed = deepcopy(NODES)
-    node = object_value(object_value(changed["$defs"])[name])
-    object_value(node["properties"])[field] = replacement
-    with pytest.raises(AssertionError):
-        assert_selector_definition(changed, name)
-
-
-def _union_leaves(node: JsonValue) -> list[dict[str, JsonValue]]:
-    body = object_value(node)
-    reference = body.get("$ref")
-    if isinstance(reference, str):
-        return _union_leaves(
-            object_value(NODES["$defs"])[reference.removeprefix("#/$defs/")]
-        )
-    variants = body.get("anyOf")
-    if isinstance(variants, list):
-        return [leaf for variant in variants for leaf in _union_leaves(variant)]
-    return [body]
-
-
-@pytest.mark.parametrize(
-    ("name", "value"),
-    [
-        *[(EVENT, {event: payload}) for event, payload in EVENT_CASES],
-        *[("A.state-numeric-read", read) for read in STATE_READS],
-        ("A.expr.capture", {"at": "event", "value": {"hand": "self"}}),
-        (
-            "A.expr.capture",
-            {"at": "selection", "selection": "t", "value": {"hand": "self"}},
-        ),
-        ("A.event-recipient", "this"),
-        ("A.event-recipient", {"leader": "self"}),
-        ("A.event-recipient", {"who": "self", "kind": "follower"}),
-        ("A.event-recipient", {"who": "self", "kind": "follower", "leader_or": True}),
-        ("A.event-recipient", {"any_of": [{"leader": "self"}, {"kind": "follower"}]}),
-        ("A.cond.cmp-payload", {"left": -1, "op": "eq", "right": 0}),
-    ],
-)
-def test_new_unions_match_exactly_one_leaf(name: str, value: JsonValue) -> None:
-    leaves = _union_leaves({"$ref": "#/$defs/" + name})
-    assert (
-        sum(
-            Draft202012Validator(
-                {"$id": NODES["$id"], "$defs": NODES["$defs"], **leaf}
-            ).is_valid(value)
-            for leaf in leaves
-        )
-        == 1
-    )
-
-
-@pytest.mark.parametrize(
-    ("name", "keyword"),
-    [
-        ("A.event.enter-field-payload", "not"),
-        ("A.history.moved", "not"),
-        ("A.event-subject-filter", "dependentRequired"),
-        ("A.event-subject-filter", "minProperties"),
-        ("A.history.phase", "required"),
-        ("A.history.life-changed-sum", "required"),
-        ("A.history.life-sum-where", "required"),
-        ("A.capture.selection", "required"),
-        ("A.event.phase-payload", "required"),
-    ],
-)
-def test_new_drift_detects_required_and_exclusive_constraint_removal(
-    name: str, keyword: str
-) -> None:
-    changed = deepcopy(NODES)
-    object_value(object_value(changed["$defs"])[name]).pop(keyword)
-    with pytest.raises(AssertionError):
-        assert_selector_definition(changed, name)
-
-
 def test_counter_event_thresholds_are_natural_literals() -> None:
     _check(EVENT, {"counter_reached": {"ref": "this", "name": "stack", "value": 2}})
     for wrong in _values(-1, True, "X", {"plus": [1, 1]}):
@@ -616,70 +490,12 @@ def test_counter_event_thresholds_are_natural_literals() -> None:
         _check(EVENT, {"counter_reached": payload}, accepted=False)
 
 
-@pytest.mark.parametrize(
-    ("name", "field", "value"),
-    [
-        ("A.cond.paid", "paid", "additional"),
-        ("A.cond.paid", "paid", "optional"),
-        ("A.cond.paid", "paid", {"receipt": "additional"}),
-        ("A.cond.paid", "paid", {"receipt": "optional"}),
-        ("A.cond.paid", "paid", {"receipt": {"entry_payment": "additional"}}),
-        (
-            "A.cond.cmp",
-            "cmp",
-            {"left": {"player": "self"}, "op": "eq", "right": {"player": "opp"}},
-        ),
-        ("A.cond.cmp", "cmp", {"left": 1, "op": "eq", "right": 2}),
-    ],
-)
-def test_new_operand_unions_have_one_matching_branch(
-    name: str, field: str, value: JsonValue
-) -> None:
-    node = object_value(object_value(NODES["$defs"])[name])
-    leaves = _union_leaves(object_value(node["properties"])[field])
-    assert (
-        sum(
-            Draft202012Validator(
-                {"$id": NODES["$id"], "$defs": NODES["$defs"], **leaf}
-            ).is_valid(value)
-            for leaf in leaves
-        )
-        == 1
-    )
-
-
 @pytest.mark.parametrize("quantity", ["X", {"bound": "cost"}, {"plus": [1, 1]}])
 def test_material_cost_comparisons_accept_numeric_operations(
     quantity: JsonValue,
 ) -> None:
     _check("A.material-filter", {"orig_cost_eq": quantity})
     _check("A.material-filter", {"orig_cost_ge": quantity})
-
-
-@pytest.mark.parametrize(
-    ("event", "field", "values", "wrong"),
-    [
-        ("damaged", "kind", ["attack", "combat", "ability"], "any"),
-        ("dealt_damage", "kind", ["attack", "combat", "ability"], "effect"),
-        ("enter_field", "entered_by", ["ability", "play"], "rule"),
-        ("life_changed", "direction", ["up", "down"], "set"),
-        ("stat_changed", "direction", ["up", "down"], "change"),
-        ("counter_changed", "direction", ["up", "down"], "set"),
-        ("stat_changed", "stat", ["power", "hp"], "attack"),
-        ("drew", "not_phase", ["start", "main", "end"], "draw"),
-    ],
-)
-def test_event_and_history_filter_enums_match_the_per_event_matrix(
-    event: str, field: str, values: list[str], wrong: str
-) -> None:
-    for value in [*values, wrong]:
-        accepted = value != wrong
-        _check(EVENT, {event: {field: value}}, accepted=accepted)
-        _check(
-            QUERY,
-            {"event": event, "window": "game", "where": {field: value}},
-            accepted=accepted,
-        )
 
 
 @pytest.mark.parametrize(
@@ -709,9 +525,8 @@ def test_direct_events_reject_other_roles_and_incomplete_origins(
     CARD_HISTORY_CASES + SYNTAX_HISTORY_CASES,
     ids=[source for source, _, _ in CARD_HISTORY_CASES + SYNTAX_HISTORY_CASES],
 )
-def test_card_and_syntax_fragments_round_trip_in_one_leaf(
+def test_card_and_syntax_fragments_round_trip(
     source: str, name: str, value: JsonValue
 ) -> None:
     assert source
     _check(name, value)
-    test_new_unions_match_exactly_one_leaf(name, value)

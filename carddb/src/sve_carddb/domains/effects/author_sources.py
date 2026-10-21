@@ -15,10 +15,6 @@ from sve_carddb.contracts.four_layer import (
 from sve_carddb.contracts.n0 import SAFE_INTEGER
 from sve_carddb.contracts.source_binding import SourceBinding
 from sve_carddb.core.json import canonical, digest
-from sve_carddb.domains.effects.author_port_rejections import (
-    PORT_REJECTION_RECIPE,
-    unsupported_port_reason,
-)
 from sve_carddb.domains.translations.four_layer_derivation import derive_source
 from sve_carddb.domains.translations.four_layer_expressions import definition
 
@@ -133,8 +129,7 @@ ADAPTER_RECIPE = digest(
                 {"owner": owner, "path": list(path), "signature": list(signature)}
                 for (owner, path), signature in sorted(SOURCE_SITES.items())
             ],
-            "ports": "empty-only;all-nonempty-direction-type-role-capture-value-unsupported",
-            "port_rejections": PORT_REJECTION_RECIPE,
+            "ports": "empty-only;unsupported-source-ports",
             "entry_heads": {key: list(value) for key, value in ENTRY_HEADS.items()},
             "entry_payload": "exact-head.cost.pp;empty-ports;no-imports",
             "entry_operands": "Nat-cost_value-canonical-occurrence-order-v1",
@@ -246,14 +241,8 @@ def _structure(frame: Frame, binding: SourceBinding) -> None:
 
 
 def _ports(frame: Frame) -> None:
-    if frame.projection.imports:
-        raise SourceError(
-            unsupported_port_reason(frame.projection.imports[0], direction="imports")
-        )
-    if frame.projection.exports:
-        raise SourceError(
-            unsupported_port_reason(frame.projection.exports[0], direction="exports")
-        )
+    if frame.projection.imports or frame.projection.exports:
+        raise SourceError("unsupported_source_ports")
 
 
 def check_source_compatibility(

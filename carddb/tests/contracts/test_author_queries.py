@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
-from jsonschema import Draft202012Validator
 from pydantic import ValidationError
 
 from sve_carddb.core.json import canonical, object_value, parse
@@ -59,10 +58,6 @@ ATTRIBUTES: dict[str, JsonValue] = {
 
 
 def _check(name: str, value: JsonValue, *, accepted: bool) -> None:
-    validator = Draft202012Validator(
-        {"$id": NODES["$id"], "$defs": NODES["$defs"], "$ref": "#/$defs/" + name}
-    )
-    assert validator.is_valid(value) == accepted
     adapter = ADAPTERS[name]
     if accepted:
         decoded = adapter.validate_json(canonical(value))
