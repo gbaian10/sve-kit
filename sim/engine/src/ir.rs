@@ -123,6 +123,7 @@ mod capabilities;
 mod effects;
 mod events;
 mod flow;
+pub mod lowering;
 mod projections;
 mod runtime;
 mod values;

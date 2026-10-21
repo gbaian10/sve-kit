@@ -124,7 +124,14 @@ fn bp08() -> Located<CardProgram> {
             keyword: KeywordId::Fanfare,
             origin: Box::new(ability.node.source.origin.clone()),
         };
-        let event = Binding::new(1, ScopeId(1));
+        if let Some(body) = &mut ability.node.body {
+            for step in &mut body.steps {
+                if let Node::Instruction { instruction } = &mut step.node {
+                    instruction.source = ability.node.source.clone();
+                }
+            }
+        }
+        let event = Binding::new(2, ScopeId(1));
         ability.node.trigger = Some(source_trigger(EventPattern::EnterField {
             binding: event,
             predicate: Expr::Compute(Box::new(Predicate::ObjectEquals {
@@ -525,3 +532,5 @@ mod events;
 mod composition;
 
 mod wellformed;
+
+mod lowering;
