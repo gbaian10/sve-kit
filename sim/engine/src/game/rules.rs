@@ -871,7 +871,11 @@ impl Game {
     }
 
     pub(super) fn checks(&mut self) -> Result<()> {
-        if self.state.frame.is_some() || self.state.game["ended"] == true {
+        if self.state.game["ended"] == true {
+            self.internal_terminal_cleanup();
+            return Ok(());
+        }
+        if self.state.frame.is_some() {
             return Ok(());
         }
         let mut losers = Vec::new();
@@ -903,6 +907,7 @@ impl Game {
                     group,
                 );
             }
+            self.internal_terminal_cleanup();
             return Ok(());
         }
         if self.clean_field_rules()? {

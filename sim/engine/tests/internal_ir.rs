@@ -33,6 +33,9 @@ mod projections;
 #[path = "internal_ir/transactions.rs"]
 mod transactions;
 
+#[path = "internal_ir/terminal.rs"]
+mod terminal;
+
 #[path = "internal_ir/search.rs"]
 mod search;
 

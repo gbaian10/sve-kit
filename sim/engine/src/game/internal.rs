@@ -36,6 +36,9 @@ mod movement;
 mod numeric;
 mod ordering;
 mod search;
+mod terminal;
+pub use terminal::Terminal;
+
 mod source;
 mod values;
 

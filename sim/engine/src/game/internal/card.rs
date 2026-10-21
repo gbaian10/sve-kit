@@ -63,6 +63,13 @@ pub(in crate::game) struct CardRuntime {
 }
 
 impl CardRuntime {
+    pub(in crate::game::internal) fn terminate(&mut self) {
+        self.pending.clear();
+        self.question = None;
+        self.checkpoint = None;
+        self.active_source = None;
+    }
+
     pub(in crate::game) const fn has_pending(&self) -> bool {
         !self.pending.is_empty()
     }

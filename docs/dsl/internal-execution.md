@@ -104,7 +104,7 @@ Fanfare、Lastword、OnAttack 及 End Begin 共用一個私有待機集合。`in
 已待機能力不因來源離場或換世代而消失；來源資訊讀取已封存 LKI，controller 仍固定為觸發當下。
 內部錯誤回該次能力嘗試前，保留原 pending、題目及已成功的前次 card play，epoch 高水位不退。
 正常敗北在 CheckTiming 成立時停止其餘待機並使舊題目失效；已完成本文的 resolved 事實仍保留。
-其他 prepared play 終局、投了、一般 trigger play 目標／成本、每回合一次及 PerBatch 尚未准入。
+一般 trigger play 目標／成本、每回合一次及 PerBatch 尚未准入。
 
 BP01-118 與 BP01-P25 的測試由 C0 展開、lowering、整卡載入及 authority 程序驗證相應傷害片段；
 P25 的送墓成本來自明示的合成測試輔助能力。來源座標為候選 fixture，不宣稱永久來源驗證或公開 capability。
@@ -121,6 +121,13 @@ End Begin 限 Printed、Phase(End, Begin)、自己的／對手的／每個 end p
 
 BP10-122 的 attack-time 抽一片段與 BP09-P17 的 end 抽三片段經 C0／lowering 驗證；後者只取抽牌指示，
 不宣稱其完整能力已支援。攻擊測試加上合成待機能力，驗結算前來源加攻送墓後讀 LKI 4。
+
+`concede_internal(actor)` 依投了規則立即結束，即使正在等待正式 play、合成 prepared 本文或待機選序也可用。
+回傳 `Terminal` 與已執行前綴的 `Progress`（complete=false）／Step；保留現有狀態、付款與已發生的事實，
+釋放待答續體、外層 origin、prepared handles、所有 pending 與問題，舊 token 不再可答。不回復 origin，
+不執行剩餘本文或結束清理，不生成尚未完成的 CardResolved／AbilityResolved。若先前已完成並回傳 resolved，
+其事實不因稍後投了而撤銷。無效玩家與已結束對局拒絕且不變狀態。
+正常生命歸零／抽空仍在完整本文之後的 CheckTiming 處理；來源消失不當作終局，卡文直接勝敗仍拒絕。
 
 ### 正式能力來源資訊的受限 LKI
 
