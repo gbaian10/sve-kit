@@ -6,7 +6,7 @@ use super::*;
     clippy::panic,
     reason = "Literal fixture shape failures must stop the test."
 )]
-fn partition(first: Cardinality, second: Cardinality) -> Located<Node> {
+pub(crate) fn partition(first: Cardinality, second: Cardinality) -> Located<Node> {
     let mut step = search(conditional(), cardinality(0, 2), hand());
     if let Node::Instruction { instruction } = &mut step.node
         && let Action::Search { destination, .. } = &mut instruction.action
@@ -387,7 +387,7 @@ fn unsupported_partition_destinations_are_rejected_even_in_dead_branches() {
 }
 
 #[test]
-fn failure_after_final_partition_restores_pending_allocation_and_real_rng() {
+fn failure_after_final_partition_restores_execution_and_real_rng() {
     for seat in [1, 2] {
         let draws = Expr::Compute(Box::new(IntOperation::Arithmetic {
             operation: Arithmetic::Multiply,
@@ -410,20 +410,27 @@ fn failure_after_final_partition_restores_pending_allocation_and_real_rng() {
             partition(cardinality(1, 2), cardinality(1, 1)),
             super::super::draw_value(9, draws),
         ]);
-        let mut games = [game(seat, 10), game(seat, 10)];
+        let mut games = [game(seat, 10), game(seat, 10)].map(|game| {
+            serde_json::from_value::<Game>(serde_json::to_value(game).unwrap()).unwrap()
+        });
+        let origin = games[0].clone();
         for game in &mut games {
             game.execute_internal(&program, &source("synthetic"), context(seat))
                 .unwrap();
             answer(game, seat, SearchAnswer::Ungrouped(vec![0, 1]));
         }
         let (token, handles, _) = question(&games[0], seat);
-        let before = exact_authority(&games[0]);
         // Both cards to Hand leaves an empty final segment, then a real shuffle before the failing draw.
         games[0]
             .answer_internal(PlayerId { seat }, token, Answer::SearchPartition(handles))
             .unwrap_err();
-        assert_eq!(exact_authority(&games[0]), before);
-        // Retry with one in each zone and compare the successful shuffle with the same-seed control.
+        super::super::transactions::assert_restored(&games[0], &origin);
+        games[1] = super::super::transactions::aligned_control(&games[0], &origin);
+        for game in &mut games {
+            game.execute_internal(&program, &source("synthetic"), context(seat))
+                .unwrap();
+            answer(game, seat, SearchAnswer::Ungrouped(vec![0, 1]));
+        }
         let results = games.each_mut().map(|game| {
             let (_, handles, _) = question(game, seat);
             allocate(game, seat, vec![handles[0]]);
@@ -432,7 +439,7 @@ fn failure_after_final_partition_restores_pending_allocation_and_real_rng() {
         });
         assert!(results[0].complete);
         assert_eq!(results[0], results[1]);
-        assert_eq!(exact_authority(&games[0]), exact_authority(&games[1]));
+        super::super::transactions::assert_restored(&games[0], &games[1]);
     }
 }
 
@@ -658,13 +665,14 @@ fn numeric_set_survives_both_partition_waits_before_an_effective_addition() {
 }
 
 #[test]
-fn failed_final_nonempty_segment_preserves_the_prior_hand_movement() {
+fn failed_final_nonempty_segment_restores_even_the_prior_hand_movement() {
     for seat in [1, 2] {
         let program = checked(vec![
             partition(cardinality(1, 1), cardinality(1, 1)),
             super::super::draw(9, 10_001),
         ]);
         let mut game = game(seat, 10);
+        let origin = game.clone();
         game.execute_internal(&program, &source("synthetic"), context(seat))
             .unwrap();
         answer(&mut game, seat, SearchAnswer::Ungrouped(vec![0, 1]));
@@ -674,19 +682,15 @@ fn failed_final_nonempty_segment_preserves_the_prior_hand_movement() {
         assert_eq!(shuffles(&progress), 0);
         let (token, remaining, _) = question(&game, seat);
         assert_eq!(token.decision, DecisionId(12));
-        rejected(&mut game, seat, token, Answer::SearchPartition(remaining));
-        let referee = game.projection(View::Referee).unwrap();
+        let error = game
+            .answer_internal(PlayerId { seat }, token, Answer::SearchPartition(remaining))
+            .unwrap_err();
         assert!(
-            referee[seat_name(seat)]["hand"]
-                .as_array()
-                .unwrap()
-                .contains(&json!("d0"))
+            error
+                .to_string()
+                .contains("draw request exceeds internal execution limit"),
+            "{error}"
         );
-        assert!(
-            !referee[seat_name(seat)]["cemetery"]
-                .as_array()
-                .unwrap()
-                .contains(&json!("d1"))
-        );
+        super::super::transactions::assert_restored(&game, &origin);
     }
 }

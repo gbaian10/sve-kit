@@ -587,27 +587,25 @@ fn failure_after_resume_restores_pending_numeric_layers_and_completion_keeps_the
     for seat in [1, 2] {
         let (_, _, view) = seats(seat);
         let mut game = game(seat, 1);
-        let pending = run(
-            &mut game,
-            vec![
-                modify(
-                    1,
-                    zone(ZoneKind::Field, 150),
-                    pair(1, 1),
-                    DurationEnd::NoTemporalExpiry {},
-                ),
-                buff(2, 1, 1),
-                integer_choice(3, 1),
-                draw(4, 1),
-                modify(
-                    5,
-                    zone(ZoneKind::Field, 151),
-                    patch(Stat::Attack, scaled.clone()),
-                    DurationEnd::NoTemporalExpiry {},
-                ),
-            ],
-            seat,
-        );
+        let origin = game.clone();
+        let steps = vec![
+            modify(
+                1,
+                zone(ZoneKind::Field, 150),
+                pair(1, 1),
+                DurationEnd::NoTemporalExpiry {},
+            ),
+            buff(2, 1, 1),
+            integer_choice(3, 1),
+            draw(4, 1),
+            modify(
+                5,
+                zone(ZoneKind::Field, 151),
+                patch(Stat::Attack, scaled.clone()),
+                DurationEnd::NoTemporalExpiry {},
+            ),
+        ];
+        let pending = run(&mut game, steps.clone(), seat);
         assert!(!pending.complete);
         assert_eq!(
             game.projection(View::Referee).unwrap()["objects"]["f"]["power"],
@@ -615,11 +613,12 @@ fn failure_after_resume_restores_pending_numeric_layers_and_completion_keeps_the
         );
         serde_json::to_value(&game).unwrap_err();
         let question = game.internal_decision(view).unwrap();
-        let before = exact_authority(&game);
         // A nonzero answer overflows only after the resumed draw has committed.
         game.answer_internal(PlayerId { seat }, question.token, Answer::Integer(Nat(1)))
             .unwrap_err();
-        assert_eq!(exact_authority(&game), before);
+        transactions::assert_restored(&game, &origin);
+        run(&mut game, steps, seat);
+        let question = game.internal_decision(view).unwrap();
         let progress = game
             .answer_internal(PlayerId { seat }, question.token, Answer::Integer(Nat(0)))
             .unwrap();

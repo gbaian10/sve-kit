@@ -304,6 +304,7 @@ fn subsequent_orders_revoke_old_evidence_and_use_new_epochs() {
         );
 
         let mut stale = super::game(seat, 4);
+        let origin = stale.clone();
         execute(
             &mut stale,
             seat,
@@ -314,7 +315,6 @@ fn subsequent_orders_revoke_old_evidence_and_use_new_epochs() {
             ],
         );
         let question = stale.internal_decision(view(seat)).unwrap();
-        let before = exact_authority(&stale);
         stale
             .answer_internal(
                 PlayerId { seat },
@@ -322,7 +322,7 @@ fn subsequent_orders_revoke_old_evidence_and_use_new_epochs() {
                 Answer::Order(vec![0, 1, 2]),
             )
             .unwrap_err();
-        assert_eq!(exact_authority(&stale), before);
+        super::transactions::assert_restored(&stale, &origin);
     }
 }
 

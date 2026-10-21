@@ -58,8 +58,7 @@ Game／State、區域順序、RNG、Knowledge、事件與待機仍使用原有�
 typed ObjectId 由 State 內的持久映射配發給原型物件 ID，同一局內不重新編號、不重用，存檔後沿用。
 內部續體只存 typed node、帶 ScopeId 的 slot、typed quantity receipt 及 input occurrence。
 入口失敗與錯誤回答還原整份 Game，包含私有續體、事件 buffer、RNG、使用紀錄與輸入 epoch；
-尚未開始分配的 execution 在有效回答後執行失敗，同樣還原到回答前並保留原詢問。
-已開始分配的 execution 若在有效回答後執行失敗，回復 execution 前的 Game 並取消續體；
+有效回答後的執行失敗依〈互動回答的交易分界〉回復 execution 前的 Game 並取消續體；
 僅保留已外發 epoch 的高水位，避免舊 token 因回復而復活。
 便利入口回復到準備前；明示預備入口保留已提交的 play 與時間，可用同一 handle 重試，但舊答案 token 仍失效。
 執行入口不允許原型 decide／submit 插入待答中的 typed 解算。尚無 typed save 格式；
@@ -86,8 +85,8 @@ authority 的 `DamageQuantityOutcome` 依[執行語義 §1.3](runtime-semantics.
 已無該物件則不計。聚合、轉型、體力扣除與累積傷害加法皆 checked；溢位回復整份 authority。
 同型 Damage Requested／Actual 投影在指示完整提交後可供後續指示讀取，不能當成 Cards。
 
-Allocation／Distribution 仍在入口拒絕。IR 已以 `Distribution.minimum: Nat` 承載明示最低量；
-本入口尚未執行它。來源、凍結、無解拒絕及 selected play targets 的最低 1 點限制依
+合成 ResolutionChoice 的 Allocation／Distribution 子集見下節。來源、凍結、無解拒絕及
+selected play targets 的最低 1 點限制依
 [執行語義 §1](runtime-semantics.md#1-分配最低量與打出-snapshot)，不能外推為所有結算分配的預設。
 
 ## 觀察與測試種子
@@ -103,13 +102,31 @@ BP01-006 四點傷害與 BP02-052 固定手札數為 3 的 Uniform 傷害片段�
 SpellChain／PP 回復，也不包含 BP01-006 的打出時目標選取與整卡准入；不宣稱整卡已遷移完成。
 BP06-110 未准入。
 
+## 互動回答的交易分界
+
+actor、完整 token、回答變體、handle、permutation、groups、基數及不同名限制先以唯讀方式驗答。
+Search 的不同名限制依題目凍結的印刷名稱，不能改用付款或移動後的 live 名稱。
+錯答保持同一題與完整 authority；Search 選取 Spell 入場、可選目的地未具備兩個可執行去向、
+以及未能解讀的 found-local 費用，維持既有的驗答拒絕，不先公開、移動或消耗 token。
+
+驗答成功後，snapshot／世代重驗、第一個 mutation、接續指示、下一題的建立、洗牌與
+EndResolution 清理都屬提交。任一步失敗回復本次 execution 的 origin，撤銷前面已回答的
+移動、RNG 消耗、事件、待機、額度及觀察；不退回最後一題。此規則也適用 Integer 與
+SearchReplacement。驗答錯誤比對待答狀態，提交錯誤比對 execution 起點；兩者均須核對完整 authority 與觀察。
+未完成的 Progress 是 authority 的暫存進度，不是已提交的對外事實。
+抽牌遇到世代耗盡拒絕，不沿用原型的飽和世代。
+
+整次回復保留已外發 epoch 高水位；重試須取得新 token，舊 token 不會復活。
+明示 prepare 的 proper-play association 可按既有契約保留，但重試題目的 epoch 仍前進。
+整卡入口只准同步本文，付款後不會在同一次起動中暫停詢問；本節的整次回復不涵蓋同次起動付款後的互動。
+
 ## 合成結算分配
 
 Distribution 僅准入必選、Public 的合成 ResolutionChoice；來源座標的 card_no 必須是
 `synthetic`，不將此入口視為已審真實卡文證據。PlayParameter、付款、AtSelection、
 模式及整張 CardProgram 仍整棵拒絕。真實結算卡沒有時點與 minimum 來源也拒絕。
-分配與 Search／Order／UpToStepwise 混用時也在完整 requirement 預檢拒絕（含死分支）；
-這些 answer handler 尚未區分錯誤回答與驗答成功後的提交失敗，不能承諾分配的整次回復。
+分配可在封閉合成 Program 中與 Search（含 Partition／可選目的地）、Order、UpToStepwise
+交錯；所有互動延續共用上節的驗答與提交分界。整卡入口只准同步本文。
 
 每題求出並去重 ResolvedRecipients，凍結 total、IR minimum、snapshot 與
 `(ExecutionId, ScopeId, DecisionId, binding slot)` producer。只接受目前場上從者與主戰者，
@@ -265,8 +282,8 @@ moved 才保存成功 after；選項與續體只向搜尋者／Referee 提供。
 
 BP03-002 コスモスファング只驗搜尋獣、公開、找到物件的有效費用條件、可選回手／入場及
 最後洗牌片段；印刷資料由公開輸入產生器提供，沒有承載進化、攻擊時能力、完整取代鏈、
-場滿時可選替代的裁定或整卡准入。錯答及選擇後失敗均完整回復待答，RNG 回復以錯答後
-重答成功洗牌與同種子控制局比對，不能只比較 Debug 字串。
+場滿時可選替代的裁定或整卡准入。錯答完整保留待答；選擇後的提交失敗回復整次 execution。
+RNG 回復以重新起動後成功洗牌與同種子控制局比對，不能只比較 Debug 字串。
 
 CP04-060 僅驗排除同名的ドラゴンズネスト搜尋、公開、進 EX 與洗牌，未接 UB、進化程序、
 成功 after 減費及其他能力；BP13-035 僅驗已支付追加費用後的三組各一張搜尋、進場與
@@ -302,7 +319,7 @@ NoTemporalExpiry 沒有額外時間截止。合成 closed Program 的全部本�
 閒置 Game 的基礎、固定操作與 ProperPlay 時間可存檔；待答與尚未解算的預備 play 不可存檔。
 數值修正的 EndResolution 時序已定於[數值期限契約](numeric-timing.md#33-endresolution)，
 目前只驗合成 closed Program 的生命週期；沒有真實 Numeric EndResolution 卡例，不由 lowering 自動補入期限。
-待答不是解算完成，resume 失敗連同到期清理一起回復；真實卡的解決區清理、nested play 與完整 CardProgram 仍未接入。
+待答不是解算完成，resume 的提交失敗連同到期清理一起回復整次 execution；真實卡的解決區清理、nested play 與完整 CardProgram 仍未接入。
 CurrentTurnEnd 保存安裝當回合的身分，在 7.4.8 整批移除；end 觸發、Quick 與棄牌檢查期間仍有效。
 NextTurnEnd 在安裝時捕捉玩家，等唯一回合排程實際開始該玩家下一回合時綁定其身分，
 再於該回合 7.4.8 到期。skip 不配置身分，extra 每個實際開始的回合各有身分；

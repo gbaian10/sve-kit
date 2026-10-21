@@ -360,8 +360,9 @@ fn end_resolution_guard_does_not_prevent_lethal_damage_rule_cleanup() {
 }
 
 #[test]
-fn late_resume_failure_restores_guard_continuation_and_previous_facts() {
+fn late_resume_failure_restores_the_entire_execution_and_guards() {
     let mut game = game(1, 2);
+    let origin = game.clone();
     game.execute_internal(
         &checked(vec![
             protection(1, zone(ZoneKind::Field, 2), effect_cause()),
@@ -378,16 +379,13 @@ fn late_resume_failure_restores_guard_continuation_and_previous_facts() {
     )
     .unwrap();
     let decision = game.internal_decision(View::P1).unwrap();
-    let before = exact_authority(&game);
-    for _ in 0..2 {
-        game.answer_internal(
-            PlayerId { seat: 1 },
-            decision.token,
-            Answer::Stepwise(StepwiseAnswer::Continue),
-        )
-        .unwrap_err();
-        assert_eq!(exact_authority(&game), before);
-    }
+    game.answer_internal(
+        PlayerId { seat: 1 },
+        decision.token,
+        Answer::Stepwise(StepwiseAnswer::Continue),
+    )
+    .unwrap_err();
+    transactions::assert_restored(&game, &origin);
 }
 
 #[cfg(feature = "runner")]

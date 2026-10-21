@@ -289,7 +289,7 @@ fn replacement_rejects_wrong_actor_tokens_variants_and_replay_atomically() {
 }
 
 #[test]
-fn failure_after_choice_and_shuffle_restores_the_pending_choice_and_real_rng() {
+fn failure_after_choice_and_shuffle_restores_execution_and_real_rng() {
     for seat in [1, 2] {
         let count = Expr::Compute(Box::new(IntOperation::Conditional {
             condition: Expr::Compute(Box::new(Predicate::CompareNat {
@@ -306,14 +306,16 @@ fn failure_after_choice_and_shuffle_restores_the_pending_choice_and_real_rng() {
             replacement(cost_condition()),
             super::super::draw_value(9, count),
         ]);
-        let mut games = [game(seat, 10), game(seat, 10)];
+        let mut games = [game(seat, 10), game(seat, 10)].map(|game| {
+            serde_json::from_value::<Game>(serde_json::to_value(game).unwrap()).unwrap()
+        });
+        let origin = games[0].clone();
         for game in &mut games {
             game.execute_internal(&program, &source("synthetic"), context(seat))
                 .unwrap();
             answer(game, seat, SearchAnswer::Ungrouped(vec![0]));
         }
         let token = games[0].internal_decision(view(seat)).unwrap().token;
-        let before = exact_authority(&games[0]);
         games[0]
             .answer_internal(
                 PlayerId { seat },
@@ -321,13 +323,19 @@ fn failure_after_choice_and_shuffle_restores_the_pending_choice_and_real_rng() {
                 Answer::SearchReplacement(SearchReplacementAnswer::Replacement),
             )
             .unwrap_err();
-        assert_eq!(exact_authority(&games[0]), before);
+        super::super::transactions::assert_restored(&games[0], &origin);
+        games[1] = super::super::transactions::aligned_control(&games[0], &origin);
+        for game in &mut games {
+            game.execute_internal(&program, &source("synthetic"), context(seat))
+                .unwrap();
+            answer(game, seat, SearchAnswer::Ungrouped(vec![0]));
+        }
         let results = games
             .each_mut()
             .map(|game| choose(game, seat, SearchReplacementAnswer::Original));
         assert!(results[0].complete);
         assert_eq!(results[0], results[1]);
-        assert_eq!(exact_authority(&games[0]), exact_authority(&games[1]));
+        super::super::transactions::assert_restored(&games[0], &games[1]);
     }
 }
 
@@ -601,55 +609,47 @@ fn malformed_printed_costs_are_rejected_instead_of_reading_as_no_cost() {
 }
 
 #[test]
-fn optional_replacement_preserves_the_distribution_mixing_guard_after_integration() {
-    let distribution = node(Node::Decision {
-        decision: Decision {
-            id: DecisionId(20),
-            actor: PlayerRef::Controller {},
-            visibility: Visibility::Public {},
-            captures: vec![],
-            domain: ChoiceDomain::Distribution {
-                recipients: RecipientSet::Leaders {
-                    players: players(PlayerRelation::All),
-                },
-                total: Expr::Literal(Nat(0)),
-                minimum: Nat(0),
-                binding: Binding::new(20, ScopeId(1)),
-            },
-            kind: DecisionKind::ResolutionChoice {
-                may: Declinable::Required,
-                cardinality: cardinality(1, 1),
-                precondition: None,
-            },
-        },
-    });
+fn optional_replacement_can_follow_and_precede_distribution() {
     for seat in [1, 2] {
-        for dead in [false, true] {
-            let mut step = replacement(cost_condition());
-            if dead {
-                step = node(Node::Control {
-                    control: Control::If {
-                        condition: Expr::Literal(Bool(false)),
-                        then_body: body(8, vec![step]),
-                        else_body: None,
-                    },
-                });
+        for first in [false, true] {
+            let distribution = super::super::allocation::distribution(
+                20,
+                super::super::allocation::leaders(),
+                Expr::Literal(Nat(4)),
+                1,
+            );
+            let mut steps = vec![replacement(cost_condition())];
+            if first {
+                steps.insert(0, distribution);
+            } else {
+                steps.push(distribution);
             }
             let mut game = game(seat, 3);
-            let before = exact_authority(&game);
-            let program = checked(vec![super::super::draw(9, 1), distribution.clone(), step]);
-            let error = game
-                .execute_internal(&program, &source("synthetic"), context(seat))
-                .unwrap_err();
-            assert!(matches!(&error, EngineFailure::Unsupported(_)));
-            assert!(
-                error
-                    .to_string()
-                    .contains("distribution mixed with another interactive continuation"),
-                "{error}"
-            );
-            assert_eq!(exact_authority(&game), before);
-            assert!(game.internal_decision(view(seat)).is_none());
+            game.execute_internal(&checked(steps), &source("synthetic"), context(seat))
+                .unwrap();
+            loop {
+                let question = game.internal_decision(View::Referee).unwrap();
+                let answer = match question.domain {
+                    InputDomain::Distribution(_) => {
+                        super::super::allocation::answer(&[(0, 3), (1, 1)])
+                    }
+                    InputDomain::Search(_) => Answer::Search(SearchAnswer::Ungrouped(vec![0])),
+                    InputDomain::SearchReplacement => {
+                        Answer::SearchReplacement(SearchReplacementAnswer::Original)
+                    }
+                    InputDomain::BeforeDraw
+                    | InputDomain::Integer(_)
+                    | InputDomain::Order(_)
+                    | InputDomain::SearchPartition(_) => panic!("unexpected question"),
+                };
+                let progress = game
+                    .answer_internal(question.actor, question.token, answer)
+                    .unwrap();
+                if progress.complete {
+                    assert_eq!(shuffles(&progress), 1);
+                    break;
+                }
+            }
         }
     }
 }
