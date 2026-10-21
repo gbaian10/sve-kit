@@ -209,7 +209,11 @@ impl Allocator {
             });
         }
         let event_id = context.allocator.id(path)?;
-        let trigger = lowered_trigger(entry, keyword, event_id, scope);
+        let mut trigger = lowered_trigger(entry, keyword, event_id, scope, path)?;
+        if body.per_turn.is_some_and(|maximum| maximum != 1) {
+            return Err(unsupported(path));
+        }
+        trigger.limit = body.per_turn.map(|_| super::LimitSpec::once_per_turn());
         Ok(Located {
             source,
             node: Ability {
@@ -234,8 +238,9 @@ fn lowered_trigger(
     keyword: Option<KeywordId>,
     event_id: u64,
     scope: ScopeId,
-) -> TriggerSpec {
-    if keyword == Some(KeywordId::Lastword) {
+    path: &str,
+) -> Result<TriggerSpec, LoweringError> {
+    Ok(if keyword == Some(KeywordId::Lastword) {
         TriggerSpec::lastword(Binding::new(event_id, scope))
     } else {
         let pattern = if keyword == Some(KeywordId::OnAttack) {
@@ -251,16 +256,7 @@ fn lowered_trigger(
                 predicate: super::events::timing::evolve_predicate(event),
             }
         } else if let Some(auto) = &entry.auto {
-            let player = match auto.on.phase.whose {
-                ast::PhasePlayer::Controller => Some(PlayerRef::Controller {}),
-                ast::PhasePlayer::Opponent => Some(super::events::timing::opponent()),
-                ast::PhasePlayer::Each => None,
-            };
-            let event = Binding::new(event_id, scope);
-            EventPattern::Phase {
-                binding: event,
-                predicate: super::events::timing::end_predicate(event, player),
-            }
+            lowered_subscription(&auto.on, event_id, scope, path)?
         } else {
             let event = Binding::new(event_id, scope);
             EventPattern::EnterField {
@@ -277,6 +273,54 @@ fn lowered_trigger(
             view: EventSnapshotPolicy::AfterEntry,
             limit: None,
             aggregation: TriggerAggregation::PerFact {},
+        }
+    })
+}
+
+fn lowered_subscription(
+    on: &ast::PhaseSubscription,
+    event_id: u64,
+    scope: ScopeId,
+    path: &str,
+) -> Result<EventPattern, LoweringError> {
+    match on {
+        ast::PhaseSubscription::Phase(phase) => {
+            let player = match phase.whose {
+                ast::PhasePlayer::Controller => Some(PlayerRef::Controller {}),
+                ast::PhasePlayer::Opponent => Some(super::events::timing::opponent()),
+                ast::PhasePlayer::Each => None,
+            };
+            let event = Binding::new(event_id, scope);
+            Ok(EventPattern::Phase {
+                binding: event,
+                predicate: super::events::timing::end_predicate(event, player),
+            })
+        }
+        ast::PhaseSubscription::EnterField(entry) => {
+            let itself = entry.reference.as_ref().map(|_| true);
+            let own = entry
+                .who
+                .as_ref()
+                .map(|side| matches!(side, ast::EntryPlayer::Controller));
+            if itself.is_none() && (own.is_none() || entry.sel.is_none()) {
+                return Err(unsupported(path));
+            }
+            let filter = super::events::entry::EntryFilter {
+                own,
+                itself,
+                follower: entry.sel.is_some(),
+                trait_id: entry
+                    .sel
+                    .as_ref()
+                    .and_then(|sel| sel.trait_id.as_ref())
+                    .map(|id| super::TraitId(id.clone())),
+                own_turn: entry.during.is_some(),
+            };
+            let event = Binding::new(event_id, scope);
+            Ok(EventPattern::EnterField {
+                binding: event,
+                predicate: filter.predicate(event),
+            })
         }
     }
 }

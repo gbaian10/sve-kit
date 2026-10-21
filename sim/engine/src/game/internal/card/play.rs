@@ -422,6 +422,7 @@ impl Game {
             origin: None,
             ability: None,
             source_information: None,
+            entry_object: None,
             targets: BTreeSet::new(),
             play: None,
             spell: false,

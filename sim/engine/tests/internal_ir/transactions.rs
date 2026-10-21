@@ -83,6 +83,7 @@ fn response(question: &DecisionView) -> Answer {
         | InputDomain::SearchReplacement
         | InputDomain::Targets(_)
         | InputDomain::Pending(_)
+        | InputDomain::TriggerQuota(_)
         | InputDomain::Modes { .. } => {
             panic!("unexpected transaction fixture question")
         }

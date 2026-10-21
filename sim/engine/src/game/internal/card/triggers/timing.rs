@@ -5,6 +5,8 @@ use super::{
     TriggerCondition, TurnId, ZoneKind, invalid, player_id, unsupported,
 };
 use crate::game::{Step, int, string};
+use crate::ir::EntryOrigin;
+use crate::ir::LimitSpec;
 use crate::ir::{
     AttackEvent, Edge, EventPayload as Event, Generation, Nat, ObjectRef, PhaseEvent, PlayerRef,
     RuntimeDamageRecipient,
@@ -57,7 +59,9 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
         || ability.play.is_some()
         || trigger.active_zones != [ZoneKind::Field]
         || trigger.view != EventSnapshotPolicy::AfterEntry
-        || trigger.limit.is_some()
+        || trigger
+            .limit
+            .is_some_and(|limit| limit != LimitSpec::once_per_turn())
         || trigger.aggregation != (TriggerAggregation::PerFact {})
     {
         return Err(unsupported("printed self Attack or End Begin header"));
@@ -67,6 +71,15 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
 
 pub(super) fn public_event(event: &Event, position: u64) -> Result<String> {
     match event {
+        Event::EnterField { event } => {
+            let EntryOrigin::Zone { zone } = event.from else {
+                return Err(invalid("missing public entry origin"));
+            };
+            Ok(format!(
+                "EnterField {:?} from {zone:?} at field slot {position}",
+                event.characters.names
+            ))
+        }
         Event::Attack { event } => Ok(format!(
             "Attack {} from field slot {position}",
             event.ordinal.0
@@ -134,8 +147,7 @@ impl Game {
         let mut pending =
             self.new_pending(holder, source, ability, information, header.clone(), None)?;
         pending.timing = Some(event);
-        self.card_runtime.pending.push(pending);
-        Ok(())
+        self.internal_admit_pending(vec![pending])
     }
 
     pub(in crate::game) fn internal_attack_event(

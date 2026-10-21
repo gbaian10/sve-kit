@@ -11,6 +11,7 @@ use crate::ir::{
     QuantityUnit, Resource, ResourceOperation, RuleId, RuntimeAbilitySource, Selector, SourceSpan,
     StepwiseMode, WellFormedCardProgram, ZoneKind,
 };
+use crate::ir::{EventPattern, TriggerCondition, TurnId};
 use crate::{Result, invalid};
 use alloc::collections::{BTreeMap, BTreeSet};
 use core::{mem::take, result, slice};
@@ -21,8 +22,8 @@ use serde_json::json;
 mod evolution;
 mod fanfare;
 mod printed;
-mod triggers;
-pub use triggers::PendingOption;
+pub(in crate::game::internal) mod triggers;
+pub use triggers::{PendingOption, QuotaDomain, QuotaSelection};
 pub(super) mod play;
 pub(super) mod selection;
 
@@ -56,6 +57,8 @@ pub(in crate::game) struct CardRuntime {
     cards: BTreeMap<String, WellFormedCardProgram>,
     instances: BTreeMap<(String, u64, String, usize, AbilityId), AbilityInstanceId>,
     links: BTreeMap<(u64, u64, u64, u64), AssociationId>,
+    quotas: BTreeMap<AbilityInstanceId, TurnId>,
+    admission: Option<triggers::Admission>,
     next_instance: u64,
     pub(in crate::game) checkpoint: Option<ExecutionId>,
     pending: Vec<triggers::PendingOccurrence>,
@@ -68,6 +71,7 @@ pub(in crate::game) struct CardRuntime {
 impl CardRuntime {
     pub(in crate::game::internal) fn terminate(&mut self) {
         self.pending.clear();
+        self.admission = None;
         self.question = None;
         self.checkpoint = None;
         self.active_source = None;
@@ -166,7 +170,16 @@ impl Game {
                 .as_ref()
                 .ok_or_else(|| invalid("missing body"))?;
             check_nodes(&body.steps, &located.source, &ability.source)?;
-            admission::check_card(body, &located.source, &ability.source)?;
+            let entry = ability
+                .trigger
+                .as_ref()
+                .and_then(|trigger| match &trigger.on {
+                    TriggerCondition::Event {
+                        pattern: EventPattern::EnterField { binding, .. },
+                    } => Some(*binding),
+                    _ => None,
+                });
+            admission::check_card(body, &located.source, &ability.source, entry)?;
             play::check(ability, &located.source)?;
         }
         self.card_runtime.cards.insert(card_no.into(), card.clone());

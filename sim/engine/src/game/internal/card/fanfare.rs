@@ -1,13 +1,14 @@
 use super::{
     Ability, AbilityId, AbilityInstanceId, AbilityOrigin, Context, Expr, Game, Generation,
-    ObjectRef, PlayerId, Result, RuntimeAbilitySource, Step, ZoneKind, face_ordinal, invalid, json,
-    printed_origin, seat_name, take, unsupported,
+    ObjectRef, PlayerId, Result, RuntimeAbilitySource, Step, ZoneKind, invalid, json, seat_name,
+    take, unsupported,
 };
+use crate::ir::LimitSpec;
 use crate::ir::{
     EventPattern, EventSnapshotPolicy, KeywordId, ObjectFrozen, Predicate, TriggerAggregation,
     TriggerCondition,
 };
-use crate::ir::{Int, ReceiptId, SnapshotId};
+use crate::ir::{Int, ReceiptId};
 
 pub(super) fn check_header(ability: &Ability) -> Result<()> {
     let Some(trigger) = &ability.trigger else {
@@ -27,7 +28,9 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
         || ability.play.is_some()
         || trigger.active_zones != [ZoneKind::Field]
         || trigger.view != EventSnapshotPolicy::AfterEntry
-        || trigger.limit.is_some()
+        || trigger
+            .limit
+            .is_some_and(|limit| limit != LimitSpec::once_per_turn())
         || trigger.aggregation != (TriggerAggregation::PerFact {})
         || *predicate != expected
     {
@@ -57,30 +60,6 @@ impl Game {
         if self.object_type(holder)? != "フォロワー" {
             return Err(unsupported("fanfare card play holder"));
         }
-        let card = self
-            .card_runtime
-            .cards
-            .get(&object.card)
-            .ok_or_else(|| invalid("card is not loaded"))?;
-        let fanfares = card
-            .card()
-            .abilities
-            .iter()
-            .filter(|ability| {
-                matches!(
-                    ability.node.source.origin,
-                    AbilityOrigin::Keyword {
-                        keyword: KeywordId::Fanfare,
-                        ..
-                    }
-                )
-            })
-            .filter(|ability| {
-                printed_origin(&ability.node.source.origin)
-                    .is_ok_and(|(face, _)| face_ordinal(face).is_ok_and(|ordinal| ordinal == 0))
-            })
-            .cloned()
-            .collect::<Vec<_>>();
         let mut execution = self.new_card_execution(context)?;
         let decision = json!({"do":"play","card":holder,"by":seat,"at":"main"});
         let mut frame = self.start_frame(holder, serde_json::Value::Null, &decision)?;
@@ -114,11 +93,7 @@ impl Game {
             group,
         );
         frame.cause = json!({"event":event});
-        let before_entry = SnapshotId(self.state.ir_epoch);
         self.internal_play_move(holder, "field", &frame)?;
-        for ability in fanfares {
-            self.internal_pending_fanfare(holder, actor, ability, &object.zone, before_entry)?;
-        }
         self.internal_numeric_end_resolution(execution.id)?;
         let resolve_group = self.group();
         self.emit(

@@ -43,7 +43,10 @@ mod source;
 mod values;
 
 pub use allocation::{DamageShare, DistributionDomain, DistributionMember};
-pub use card::{Activation, CardEntry, CardPlay, PendingOption, ResumeStage, TargetDomain};
+pub use card::{
+    Activation, CardEntry, CardPlay, PendingOption, QuotaDomain, QuotaSelection, ResumeStage,
+    TargetDomain,
+};
 pub(super) use card::{CardRuntime, serialize_cards};
 pub(super) use cost::CostState;
 pub use movement::MovementFact;
@@ -107,6 +110,8 @@ pub enum InputDomain {
     BeforeDraw,
     /// Public occurrence handles for exactly one player at the current check timing.
     Pending(Vec<PendingOption>),
+    /// Select one simultaneous fact before its once-per-turn admission commits.
+    TriggerQuota(QuotaDomain),
     /// One natural number in the checked inclusive range.
     Integer(Cardinality),
     /// Token-scoped handles and printed information, visible only to the chooser.
@@ -139,6 +144,8 @@ pub enum Answer {
     Stepwise(StepwiseAnswer),
     /// Exactly one occurrence handle from the current pending-order question.
     Pending(u64),
+    /// One candidate from the current simultaneous quota question.
+    TriggerQuota(u64),
     /// Answer a bounded integer decision.
     Integer(Nat),
     /// Complete permutation of this question's handles, in top-to-bottom order.
@@ -269,6 +276,9 @@ enum Slot {
 
 #[derive(Clone, Debug)]
 enum Wait {
+    TriggerQuota {
+        count: usize,
+    },
     Targets(card::selection::TargetWait),
     Modes(card::play::ModeWait),
     Distribution(allocation::DistributionWait),
@@ -306,6 +316,7 @@ pub(super) struct Execution {
     origin: Option<Box<Game>>,
     ability: Option<RuntimeAbilitySource>,
     source_information: Option<source::SourceInformation>,
+    entry_object: Option<((ScopeId, u64), ObjectRef)>,
     targets: BTreeSet<(ScopeId, u64)>,
     play: Option<card::play::PlayState>,
     spell: bool,
@@ -468,6 +479,7 @@ impl Game {
                 origin: Some(Box::new(before.clone())),
                 ability: None,
                 source_information: None,
+                entry_object: None,
                 targets: BTreeSet::new(),
                 play: None,
                 spell: false,
@@ -531,6 +543,13 @@ impl Game {
                 return Err(invalid("wrong actor or stale internal answer"));
             }
             match (wait, answer) {
+                (Wait::TriggerQuota { count }, Answer::TriggerQuota(handle))
+                    if usize::try_from(handle)
+                        .is_ok_and(|handle| handle > 0 && handle <= count) =>
+                {
+                    rollback = execution.origin.take();
+                    self.internal_quota_answer(handle)?;
+                }
                 (Wait::Targets(wait), Answer::Targets(handles)) => {
                     let objects = wait.validate(&handles)?;
                     rollback = execution.origin.take();
@@ -672,6 +691,7 @@ impl Game {
     pub(super) fn internal_decision_packet(&self, view: View) -> Value {
         self.internal_decision(view).map_or(Value::Null, |question| {
             let domain = match question.domain {
+                InputDomain::TriggerQuota(domain) => json!({"kind":"trigger-quota","candidates":domain.candidates.iter().map(|option| json!({"handle":option.handle,"card":option.card,"line":option.line,"event":option.event})).collect::<Vec<_>>(),"earlier":domain.earlier.iter().map(|selection| json!({"actor":selection.actor.seat,"card":selection.occurrence.card,"line":selection.occurrence.line,"event":selection.occurrence.event})).collect::<Vec<_>>()}),
                 InputDomain::Targets(domain) => card::selection::packet(&domain),
                 InputDomain::Modes { modes, cardinality, count } => json!({"kind":"modes","modes":modes.iter().map(|id| id.0).collect::<Vec<_>>(),"minimum":cardinality.minimum.0,"maximum":cardinality.maximum.map(|n| n.0),"count":count.0}),
                 InputDomain::Pending(options) => json!({"kind":"pending","options":options.iter().map(|option| json!({"handle":option.handle,"card":option.card,"line":option.line,"event":option.event})).collect::<Vec<_>>()}),
@@ -779,6 +799,9 @@ impl Game {
             self.internal_play_parameters(execution)?;
         }
         while execution.waiting.is_none() {
+            if self.internal_quota_wait(execution)? {
+                break;
+            }
             let Some(node) = execution.todo.pop_front() else {
                 self.internal_spell_cleanup(execution)?;
                 self.internal_numeric_cleanup()?;

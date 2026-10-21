@@ -2,20 +2,21 @@ use super::{
     Cardinality, ChoiceDomain, Control, DecisionKind, Declinable, InstructionContext, Located,
     Node, Program, Requirements, Result, SourceSpan, Visibility, WellFormedProgram, unsupported,
 };
-use crate::ir::{AbilityOrigin, AbilitySource, KeywordId};
+use crate::ir::{AbilityOrigin, AbilitySource, Binding, EnterFieldEvent, KeywordId};
 use alloc::collections::BTreeSet;
 use core::num::NonZeroU32;
 
 pub(super) fn check(program: &WellFormedProgram, source: &SourceSpan) -> Result<()> {
-    check_body(program.program(), source, None)
+    check_body(program.program(), source, None, None)
 }
 
 pub(super) fn check_card(
     program: &Program,
     source: &SourceSpan,
     origin: &AbilitySource,
+    entry: Option<Binding<EnterFieldEvent>>,
 ) -> Result<()> {
-    check_body(program, source, Some(origin))
+    check_body(program, source, Some(origin), entry)
 }
 
 pub(super) fn check_play(program: &Program, source: &SourceSpan) -> Result<()> {
@@ -38,10 +39,14 @@ fn check_body(
     program: &Program,
     source: &SourceSpan,
     origin: Option<&AbilitySource>,
+    entry: Option<Binding<EnterFieldEvent>>,
 ) -> Result<()> {
     let mut paths = BTreeSet::new();
     if let Some(origin) = origin {
         source_paths(program, "", origin, &mut paths);
+    }
+    if let Some(event) = entry {
+        super::card::triggers::entry_operand::paths(program, "", event, &mut paths);
     }
     check_requirements(program, source, origin.is_some(), &paths)?;
     super::numeric::check_program(program)?;
@@ -131,6 +136,10 @@ fn check_requirements(
                     || (matches!(
                         requirement.capability.code,
                         "shape.AbilityOrigin.Keyword"
+                            | "shape.ObjectFrozen.EnterFieldObject"
+                            | "reference.expression"
+                            | "shape.ObjectOperand.FromExpression"
+                            | "read.event-field"
                             | "internal.KeywordId.Fanfare"
                             | "internal.KeywordId.Lastword"
                             | "internal.KeywordId.OnAttack"

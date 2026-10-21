@@ -56,6 +56,7 @@ pub(super) struct Ports {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct Body {
+    pub per_turn: Option<u64>,
     #[serde(default)]
     pub define: BTreeMap<String, Number>,
     #[serde(rename = "do")]
@@ -141,8 +142,11 @@ pub(super) struct Auto {
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
-pub(super) struct PhaseSubscription {
-    pub phase: PhaseSubscriptionPayload,
+pub(super) enum PhaseSubscription {
+    #[serde(rename = "phase")]
+    Phase(PhaseSubscriptionPayload),
+    #[serde(rename = "enter_field")]
+    EnterField(EntrySubscription),
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -175,4 +179,45 @@ pub(super) struct Evolution {
 #[serde(deny_unknown_fields)]
 pub(super) struct EvolutionCost {
     pub pp: u64,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct EntrySubscription {
+    #[serde(rename = "ref")]
+    pub reference: Option<This>,
+    pub who: Option<EntryPlayer>,
+    pub sel: Option<EntrySubject>,
+    pub during: Option<During>,
+}
+#[derive(Deserialize)]
+pub(super) enum This {
+    #[serde(rename = "this")]
+    This,
+}
+#[derive(Deserialize)]
+pub(super) enum EntryPlayer {
+    #[serde(rename = "self")]
+    Controller,
+    #[serde(rename = "opp")]
+    Opponent,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct During {
+    #[serde(rename = "turn")]
+    pub _turn: SelfPlayer,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct EntrySubject {
+    #[serde(rename = "kind")]
+    pub _kind: Follower,
+    #[serde(rename = "trait")]
+    pub trait_id: Option<String>,
+}
+#[derive(Deserialize)]
+pub(super) enum Follower {
+    #[serde(rename = "follower")]
+    Follower,
 }

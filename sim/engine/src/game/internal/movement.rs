@@ -43,6 +43,18 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
             }
             Ok(())
         }
+        Action::Move {
+            movement,
+            reason: MoveReason::Put,
+            ..
+        } if field_move(movement)
+            && movement.position.is_none()
+            && movement.order.is_none()
+            && movement.initial_posture.is_none()
+            && movement.entry_effects.is_empty() =>
+        {
+            Ok(())
+        }
         Action::Move { movement, .. }
             if !matches!(
                 movement.to,
@@ -92,6 +104,10 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
         }
         _ => Ok(()),
     }
+}
+
+pub(super) fn field_move(movement: &MoveSpec) -> bool {
+    matches!(&movement.to, MoveDestination::Shared { zone } if zone.player == (PlayerRef::Controller {}) && zone.kind == ZoneKind::Field)
 }
 
 pub(super) fn observed_move(action: &Action) -> bool {
@@ -173,6 +189,9 @@ impl Game {
         let (zone, kind, method) = match movement {
             None => ("cemetery", ZoneKind::Cemetery, MoveMethod::Destroy),
             Some((spec, reason)) => {
+                if field_move(spec) && reason == MoveReason::Put {
+                    return self.internal_field_entry(execution, instruction, objects);
+                }
                 let MoveDestination::Owners { zone } = spec.to else {
                     return Err(unsupported("shared movement destination"));
                 };
@@ -202,6 +221,53 @@ impl Game {
             InstructionOutcome::Move(MoveOutcome { moved: moves })
         };
         execution.receipts.insert(instruction.receipt, outcome);
+        Ok(())
+    }
+
+    fn internal_field_entry(
+        &mut self,
+        execution: &mut Execution,
+        instruction: &Instruction,
+        objects: &Selector,
+    ) -> Result<()> {
+        let members = execution.objects(self, objects)?;
+        let seat = super::seat_name(execution.context.controller)?;
+        let mut incoming = 0_i64;
+        for &member in &members {
+            let object = self.object(execution.object_id(member)?)?;
+            if object.generation != member.generation.0 {
+                continue;
+            }
+            if !matches!(object.zone.as_str(), "cemetery" | "ex")
+                || object.owner != seat
+                || object.controller != seat
+                || self.object_type(&object.id)? != "フォロワー"
+                || object.state["face"] != 0_i64
+            {
+                return Err(unsupported("ordinary public controller field entry"));
+            }
+            incoming = incoming
+                .checked_add(1)
+                .ok_or_else(|| invalid("entry count overflow"))?;
+        }
+        if self
+            .zone_count(seat, "field")
+            .checked_add(incoming)
+            .is_none_or(|count| count > 5)
+        {
+            return Err(unsupported("field entry needs capacity selection"));
+        }
+        let (moved, _) = self.internal_move_members(
+            execution,
+            &members,
+            "field",
+            ZoneKind::Field,
+            MoveMethod::Put,
+        )?;
+        execution.receipts.insert(
+            instruction.receipt,
+            InstructionOutcome::Move(MoveOutcome { moved }),
+        );
         Ok(())
     }
 
@@ -268,7 +334,11 @@ impl Game {
             let id = execution.object_id(before)?.to_owned();
             let previous = self.object(&id)?.clone();
             let requested_to = RuntimeZoneRef {
-                player: player_id(&previous.owner)?,
+                player: if zone == "field" {
+                    execution.context.controller
+                } else {
+                    player_id(&previous.owner)?
+                },
                 kind,
             };
             let result = MoveResult {
@@ -331,7 +401,17 @@ impl Game {
             .collect::<Vec<_>>();
         let departing_source = execution.source_before_move(self, &ids)?;
         let frame = execution.frame();
-        self.move_objects(&ids, zone, None, None, &frame)?;
+        self.move_objects(
+            &ids,
+            zone,
+            if zone == "field" {
+                Some(super::seat_name(execution.context.controller)?)
+            } else {
+                None
+            },
+            None,
+            &frame,
+        )?;
         self.state.ir_epoch = self
             .state
             .ir_epoch
@@ -343,7 +423,12 @@ impl Game {
             let after = execution.reference(self, &id)?;
             if after.generation != Generation(previous.generation.saturating_add(1))
                 || self.object(&id)?.zone != zone
-                || self.object(&id)?.controller != previous.owner
+                || player_id(&self.object(&id)?.controller)?
+                    != moves
+                        .get(index)
+                        .ok_or_else(|| invalid("missing movement proposal"))?
+                        .requested_to
+                        .player
             {
                 return Err(invalid(
                     "movement commit diverged from the admitted proposal",

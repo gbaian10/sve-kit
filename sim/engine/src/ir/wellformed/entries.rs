@@ -1,4 +1,5 @@
 use super::{BindingKind, CaptureTime, Checked, Checker, WellFormedError, WellFormedReason};
+use crate::ir::LimitSpec;
 use crate::ir::OncePerEvent;
 use crate::ir::{
     Ability, AbilityKind, AbilityQualification, Capture, CardProgram, Cardinality,
@@ -324,7 +325,11 @@ impl Checker {
             return Err(self.error(WellFormedReason::InvalidEntry));
         }
         // Union narrowing and batch event envelopes require their own proof.
-        if trigger.aggregation != (TriggerAggregation::PerFact {}) || trigger.limit.is_some() {
+        if trigger.aggregation != (TriggerAggregation::PerFact {})
+            || trigger
+                .limit
+                .is_some_and(|limit| limit != LimitSpec::once_per_turn())
+        {
             return self.reject();
         }
         match &trigger.on {

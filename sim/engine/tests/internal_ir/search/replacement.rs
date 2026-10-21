@@ -475,6 +475,7 @@ fn optional_replacement_can_follow_and_precede_distribution() {
                     | InputDomain::SearchPartition(_)
                     | InputDomain::Targets(_)
                     | InputDomain::Pending(_)
+                    | InputDomain::TriggerQuota(_)
                     | InputDomain::Modes { .. } => panic!("unexpected question"),
                 };
                 let progress = game

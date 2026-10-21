@@ -2,7 +2,7 @@ use super::*;
 use sve_engine::game::internal::{Answer, InputDomain};
 use sve_engine::ir::lowering::ExpandedLowerer;
 
-fn on_attack(mut ability: Located<Ability>) -> Located<Ability> {
+pub(super) fn on_attack(mut ability: Located<Ability>) -> Located<Ability> {
     ability.node.kind = AbilityKind::Triggered;
     ability.node.play = None;
     ability.node.source.origin = AbilityOrigin::Keyword {

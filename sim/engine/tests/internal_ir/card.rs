@@ -22,6 +22,9 @@ mod timing;
 #[path = "card/evolution.rs"]
 mod evolution;
 
+#[path = "card/entry.rs"]
+mod entry;
+
 fn locate_steps(steps: &mut [Located<Node>], span: &SourceSpan, origin: &AbilitySource) {
     for step in steps {
         step.source = span.clone();

@@ -1,3 +1,4 @@
+pub(crate) mod entry;
 pub(crate) mod timing;
 use super::{
     AttackEvent, BanishEvent, BatchPolicy, Binding, Bool, CounterChangeEvent, DamageEvent,
@@ -194,6 +195,17 @@ impl TriggerSpec {
             view: EventSnapshotPolicy::BeforeExit,
             limit: None,
             aggregation: TriggerAggregation::PerFact {},
+        }
+    }
+}
+
+impl LimitSpec {
+    pub(crate) const fn once_per_turn() -> Self {
+        Self {
+            maximum: Nat(1),
+            window: LimitWindow::Turn,
+            scope: LimitScope::AbilityInstance,
+            consume_at: ConsumptionPoint::PendingAdmission,
         }
     }
 }

@@ -104,6 +104,15 @@ impl Execution {
                 {
                     self.object(game, &ObjectOperand::SourceHolder {})
                 }
+                Expr::Frozen(frozen) => {
+                    let ObjectFrozen::EnterFieldObject { event } = frozen.as_ref() else {
+                        return Err(unsupported("object expression"));
+                    };
+                    self.entry_object
+                        .filter(|(binding, _)| *binding == event.key())
+                        .map(|(_, saved)| saved)
+                        .ok_or_else(|| invalid("missing entry object authority"))
+                }
                 _ => Err(unsupported("object expression")),
             },
             _ => Err(unsupported("object operand")),

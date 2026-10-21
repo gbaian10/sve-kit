@@ -84,7 +84,8 @@ pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
     }
     let mut inspected = node.clone();
     if let Node::Instruction { instruction } = &mut inspected
-        && super::movement::observed_move(&instruction.action)
+        && (super::movement::observed_move(&instruction.action)
+            || matches!(&instruction.action, Action::Move { movement, .. } if super::movement::field_move(movement)))
     {
         super::movement::check_action(&instruction.action)?;
         if let Action::Move { movement, .. } = &mut instruction.action {

@@ -1,4 +1,5 @@
 //! Authority occurrences share one queue and return to state-based checks after each play.
+use crate::ir::LimitSpec;
 
 use super::super::source::{SourceInformation, SourceSnapshot};
 use super::super::{Answer, DecisionToken, DecisionView, InputDomain, player_id};
@@ -15,8 +16,13 @@ use crate::ir::{
 };
 use alloc::collections::BTreeMap;
 
+mod entry;
+pub(in crate::game::internal) mod entry_operand;
 mod evolution;
+mod quota;
 mod timing;
+pub(in crate::game::internal) use quota::Admission;
+pub use quota::{QuotaDomain, QuotaSelection};
 
 /// Only question-scoped handles and already public information reach a player.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -41,7 +47,6 @@ pub(super) struct PendingOccurrence {
     header: EventHeader,
     leave: Option<LeaveFieldEvent>,
     card: String,
-    entry_from: Option<ZoneKind>,
     timing: Option<EventPayload>,
     field_position: u64,
 }
@@ -61,7 +66,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
     ) {
         return super::fanfare::check_header(ability);
     }
-    if timing::check_header(ability)? {
+    if entry::check_header(ability)? || timing::check_header(ability)? {
         return Ok(());
     }
     let Some(trigger) = &ability.trigger else {
@@ -79,7 +84,9 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
         || ability.play.is_some()
         || trigger.active_zones != [ZoneKind::Field]
         || trigger.view != EventSnapshotPolicy::BeforeExit
-        || trigger.limit.is_some()
+        || trigger
+            .limit
+            .is_some_and(|limit| limit != LimitSpec::once_per_turn())
         || trigger.aggregation != (TriggerAggregation::PerFact {})
         || trigger.on != TriggerSpec::lastword(*binding).on
     {
@@ -144,29 +151,6 @@ impl Game {
         })
     }
 
-    pub(super) fn internal_pending_fanfare(
-        &mut self,
-        holder: &str,
-        actor: PlayerId,
-        ability: Located<Ability>,
-        from: &str,
-        before: SnapshotId,
-    ) -> Result<()> {
-        let source = self.internal_card_source(holder, ability.node.id, actor)?;
-        let information = SourceInformation::current(self, source)?;
-        let header =
-            self.pending_header(actor, Cause::PlayerAction { player: actor }, None, before)?;
-        let mut occurrence =
-            self.new_pending(holder, source, ability, information, header, None)?;
-        occurrence.entry_from = Some(match from {
-            "hand" => ZoneKind::Hand,
-            "ex" => ZoneKind::Ex,
-            _ => return Err(unsupported("unadmitted fanfare entry origin")),
-        });
-        self.card_runtime.pending.push(occurrence);
-        Ok(())
-    }
-
     fn new_pending(
         &mut self,
         holder: &str,
@@ -191,7 +175,6 @@ impl Game {
             header,
             leave,
             card,
-            entry_from: None,
             timing: None,
             field_position: u64::try_from(
                 self.zone_ids(super::seat_name(source.controller)?, "field")
@@ -365,14 +348,15 @@ impl Game {
                 pending.information.seal(Some(snapshot));
             }
         }
+        let mut admitted = Vec::new();
         for (mut pending, previous) in plan.lastwords {
             if self.object(&previous.id)?.generation == previous.generation {
                 return Err(invalid("departure did not commit"));
             }
             pending.header.after = after;
-            self.card_runtime.pending.push(pending);
+            admitted.push(pending);
         }
-        Ok(())
+        self.internal_admit_pending(admitted)
     }
 
     /// Prepare one authority-owned pending-order question after all rule processing is stable.
@@ -434,29 +418,12 @@ impl Game {
             .filter(|pending| pending.source.controller == actor)
             .enumerate()
             .map(|(index, pending)| {
-                Ok(PendingOption {
-                    handle: u64::try_from(index)
+                pending.public_option(
+                    u64::try_from(index)
                         .map_err(invalid)?
                         .checked_add(1)
                         .ok_or_else(|| invalid("pending handles exhausted"))?,
-                    card: pending.card.clone(),
-                    line: printed_origin(&pending.ability.node.source.origin)?.1.0,
-                    event: if let Some(event) = &pending.timing {
-                        timing::public_event(event, pending.field_position)?
-                    } else if pending.leave.is_some() {
-                        format!("LeaveField from field slot {}", pending.field_position)
-                    } else {
-                        let from = match pending.entry_from {
-                            Some(ZoneKind::Hand) => "Hand",
-                            Some(ZoneKind::Ex) => "EX",
-                            _ => return Err(invalid("missing entry origin")),
-                        };
-                        format!(
-                            "EnterField from {from} at field slot {}",
-                            pending.field_position
-                        )
-                    },
-                })
+                )
             })
             .collect::<Result<Vec<_>>>()?;
         self.state.ir_epoch = self
@@ -538,6 +505,14 @@ impl Game {
                 controller: pending.source.controller,
             };
             let mut execution = self.new_card_execution(context)?;
+            if let (Some(EventPayload::EnterField { event }), Some(trigger)) =
+                (&pending.timing, &pending.ability.node.trigger)
+                && let TriggerCondition::Event {
+                    pattern: EventPattern::EnterField { binding, .. },
+                } = &trigger.on
+            {
+                execution.entry_object = Some((binding.key(), event.object));
+            }
             execution.ability = Some(pending.source);
             execution.source_information = Some(pending.information);
             self.run_card_play(execution, pending.ability.node)
@@ -554,5 +529,23 @@ impl Game {
             return Ok(CardPlay::Cancelled);
         }
         self.finish_card_attempt(before, result)
+    }
+}
+
+impl PendingOccurrence {
+    fn public_option(&self, handle: u64) -> Result<PendingOption> {
+        Ok(PendingOption {
+            handle,
+            card: self.card.clone(),
+            line: printed_origin(&self.ability.node.source.origin)?.1.0,
+            event: if let Some(event) = &self.timing {
+                timing::public_event(event, self.field_position)?
+            } else if self.leave.is_some() {
+                format!("LeaveField from field slot {}", self.field_position)
+            } else {
+                // Every producer, including Fanfare, now stores its public event payload.
+                return Err(invalid("pending occurrence without a public event"));
+            },
+        })
     }
 }

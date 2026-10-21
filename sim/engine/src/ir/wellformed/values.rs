@@ -7,7 +7,10 @@ use super::{
 use crate::ir::{
     BoolFrozen, CaptureTime, CharacteristicView, ExecutionRef, NumberRead, PaymentReference,
 };
-use crate::ir::{CardKind, CardName, KindRead, MemberProjection, NamesRead, TraitsRead};
+use crate::ir::{
+    CardKind, CardName, EventSnapshotPolicy, KindRead, MemberProjection, NamesRead, ObjectFrozen,
+    TraitsRead,
+};
 
 #[expect(
     clippy::multiple_inherent_impl,
@@ -396,6 +399,12 @@ impl Checker {
                 Ok(())
             }
             ObjectOperand::FollowEventMove { event } => self.follow_event(*event),
+            ObjectOperand::FromExpression { value }
+                if self.env.trigger == Some(EventSnapshotPolicy::AfterEntry)
+                    && matches!(value.as_ref(), Expr::Frozen(field) if matches!(field.as_ref(), ObjectFrozen::EnterFieldObject { .. })) =>
+            {
+                self.projection(value)
+            }
             ObjectOperand::FromExpression { .. }
             | ObjectOperand::Target { .. }
             | ObjectOperand::Moved { .. } => self.reject(),

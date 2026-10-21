@@ -2,6 +2,7 @@
     clippy::indexing_slicing,
     reason = "Validated JSON uses total read indexing; writes target constructed objects."
 )]
+use crate::ir::SnapshotId;
 use core::slice::from_ref;
 use serde_json::{Value, json};
 
@@ -586,6 +587,7 @@ impl Game {
                 movable.push(id.clone());
             }
         }
+        let typed_entry_before = SnapshotId(self.state.ir_epoch);
         let destinations = self.movement_destinations(&movable, zone, frame)?;
         self.emit_banish_instruction(&movable, &destinations, frame)?;
         let leaving = movable
@@ -725,6 +727,14 @@ impl Game {
         for (object, _) in &entered {
             self.initialize_entry_counters(&object.id, frame)?;
         }
+        let entry_previous = plans
+            .iter()
+            .filter(|plan| {
+                plan.changed && plan.destination == "field" && plan.previous.zone != "field"
+            })
+            .map(|plan| plan.previous.clone())
+            .collect::<Vec<_>>();
+        self.internal_field_events(&entry_previous, typed_entry_before, frame)?;
         for (object, cause) in entered {
             self.enter_triggers(&self.object(&object.id)?.clone(), &cause, frame)?;
         }
