@@ -422,7 +422,7 @@ fn non_field_domains_reject_without_confusing_stale_field_captures() {
 }
 
 #[test]
-fn overflowing_answer_restores_the_same_question_and_accepts_a_valid_retry() {
+fn overflowing_answer_restores_execution_and_accepts_a_fresh_attempt() {
     for seat in [1, 2] {
         let mut game = game(seat, 6);
         let program = checked(vec![
@@ -451,29 +451,22 @@ fn overflowing_answer_restores_the_same_question_and_accepts_a_valid_retry() {
             ),
             draw_value(3, actual(2)),
         ]);
+        let origin = game.clone();
         let initial = game
             .execute_internal(&program, &source("synthetic"), context(seat))
             .unwrap();
         assert!(!initial.complete);
         let question = game.internal_decision(View::Referee).unwrap();
-        let before = exact_authority(&game);
-        let views = [View::P1, View::P2, View::Referee];
-        let observations = views.map(|view| game.projection(view).unwrap());
         game.answer_internal(
             PlayerId { seat },
             question.token,
             Answer::Integer(Nat(u64::try_from(i64::MAX).unwrap())),
         )
         .unwrap_err();
-        assert_eq!(exact_authority(&game), before);
-        assert_eq!(
-            views.map(|view| game.projection(view).unwrap()),
-            observations
-        );
-        assert_eq!(
-            game.internal_decision(View::Referee),
-            Some(question.clone())
-        );
+        transactions::assert_restored(&game, &origin);
+        game.execute_internal(&program, &source("synthetic"), context(seat))
+            .unwrap();
+        let question = game.internal_decision(View::Referee).unwrap();
         let result = game
             .answer_internal(PlayerId { seat }, question.token, Answer::Integer(Nat(2)))
             .unwrap();

@@ -1,7 +1,7 @@
 use super::*;
 use sve_engine::game::internal::{DamageShare, DecisionToken, InputDomain};
 
-fn distribution(
+pub(super) fn distribution(
     id: u64,
     recipients: RecipientSet,
     total: Expr<Nat>,
@@ -31,7 +31,7 @@ fn distribution(
     })
 }
 
-fn allocated(id: u64, producer: u64, recipients: RecipientSet) -> Located<Node> {
+pub(super) fn allocated(id: u64, producer: u64, recipients: RecipientSet) -> Located<Node> {
     instruction(
         id,
         Action::Damage {
@@ -54,13 +54,13 @@ fn both_fields() -> RecipientSet {
     }
 }
 
-const fn leaders() -> RecipientSet {
+pub(super) const fn leaders() -> RecipientSet {
     RecipientSet::Leaders {
         players: players(PlayerRelation::All),
     }
 }
 
-fn answer(values: &[(u64, u64)]) -> Answer {
+pub(super) fn answer(values: &[(u64, u64)]) -> Answer {
     Answer::Distribution(
         values
             .iter()
@@ -769,105 +769,5 @@ fn successive_executions_never_reuse_allocation_answers_or_tokens() {
             .answer_internal(second.actor, second.token, answer(&[(0, 1), (1, 3)]))
             .unwrap();
         result(&progress, 2, 4, 4);
-    }
-}
-
-#[test]
-fn mixed_interactive_continuations_reject_whole_trees_including_dead_branches() {
-    let empty = Selector::Objects { objects: vec![] };
-    let interactive = [
-        up_to(3, 1),
-        instruction(
-            3,
-            Action::Order {
-                decision: DecisionId(3),
-                cards: empty.clone(),
-                destinations: vec![Placement {
-                    cards: empty,
-                    zone: MoveDestination::Owners {
-                        zone: OwnerZone::Deck,
-                    },
-                    position: Position::Top {},
-                }],
-                chooser: PlayerRef::Controller {},
-                visibility: Visibility::Only {
-                    players: players(PlayerRelation::SelfPlayer),
-                },
-            },
-        ),
-        instruction(
-            3,
-            Action::Search {
-                decision: DecisionId(10),
-                player: PlayerRef::Controller {},
-                deck: PlayerRef::Controller {},
-                candidate: Binding::new(1, ScopeId(2)),
-                filter: Expr::Literal(Bool(true)),
-                cardinality: Cardinality {
-                    minimum: Nat(0),
-                    maximum: Some(Nat(1)),
-                },
-                groups: None,
-                destination: Some(SearchDestination::Single {
-                    movement: MoveSpec {
-                        to: MoveDestination::Owners {
-                            zone: OwnerZone::Hand,
-                        },
-                        initial_posture: None,
-                        entry_effects: vec![],
-                        position: None,
-                        order: None,
-                    },
-                }),
-                continuation: SearchContinuation {
-                    found: Binding::new(2, ScopeId(3)),
-                    revealed: Binding::new(3, ScopeId(3)),
-                },
-            },
-        ),
-    ];
-    for seat in [1, 2] {
-        for step in &interactive {
-            for dead in [false, true] {
-                let step = if dead {
-                    node(Node::Control {
-                        control: Control::If {
-                            condition: Expr::Literal(Bool(false)),
-                            then_body: body(4, vec![step.clone()]),
-                            else_body: None,
-                        },
-                    })
-                } else {
-                    step.clone()
-                };
-                let mut game = game(seat, 2);
-                let before = exact_authority(&game);
-                let observations =
-                    [View::P1, View::P2, View::Referee].map(|view| game.projection(view).unwrap());
-                let error = game
-                    .execute_internal(
-                        &checked(vec![
-                            draw(1, 1),
-                            distribution(2, leaders(), Expr::Literal(Nat(4)), 1),
-                            step,
-                        ]),
-                        &source("synthetic"),
-                        context(seat),
-                    )
-                    .unwrap_err();
-                assert!(matches!(&error, sve_engine::EngineFailure::Unsupported(_)));
-                assert!(
-                    error
-                        .to_string()
-                        .contains("distribution mixed with another interactive continuation"),
-                    "{error}"
-                );
-                assert_eq!(exact_authority(&game), before);
-                assert_eq!(
-                    [View::P1, View::P2, View::Referee].map(|view| game.projection(view).unwrap()),
-                    observations
-                );
-            }
-        }
     }
 }

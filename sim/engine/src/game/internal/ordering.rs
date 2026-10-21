@@ -300,7 +300,7 @@ impl Game {
             deck,
         };
         if domain.is_empty() {
-            return self.internal_order_answer(execution, &wait, &[]);
+            return self.internal_order_answer(execution, &wait, Vec::new());
         }
         self.internal_wait(
             execution,
@@ -315,24 +315,8 @@ impl Game {
         &mut self,
         execution: &mut Execution,
         wait: &OrderWait,
-        handles: &[u64],
+        ordered: Vec<ObjectRef>,
     ) -> Result<()> {
-        let ordered = handles
-            .iter()
-            .map(|&handle| {
-                wait.cards
-                    .get(usize::try_from(handle).map_err(invalid)?)
-                    .copied()
-                    .ok_or_else(|| invalid("foreign order handle"))
-            })
-            .collect::<Result<Vec<_>>>()?;
-        if !(OrderAnswer {
-            cards: ordered.clone(),
-        })
-        .matches_domain(&wait.cards)
-        {
-            return Err(invalid("order answer is not a full permutation"));
-        }
         let seat = seat_name(wait.player)?;
         if self.internal_known_deck(seat)? != wait.deck {
             return Err(invalid("order snapshot changed"));
@@ -464,5 +448,27 @@ impl Execution {
             }
             _ => self.objects(game, selector),
         }
+    }
+}
+
+impl OrderWait {
+    pub(super) fn validate(&self, handles: &[u64]) -> Result<Vec<ObjectRef>> {
+        let ordered = handles
+            .iter()
+            .map(|&handle| {
+                self.cards
+                    .get(usize::try_from(handle).map_err(invalid)?)
+                    .copied()
+                    .ok_or_else(|| invalid("foreign order handle"))
+            })
+            .collect::<Result<Vec<_>>>()?;
+        if !(OrderAnswer {
+            cards: ordered.clone(),
+        })
+        .matches_domain(&self.cards)
+        {
+            return Err(invalid("order answer is not a full permutation"));
+        }
+        Ok(ordered)
     }
 }

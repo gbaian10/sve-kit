@@ -28,6 +28,8 @@ mod numeric;
 mod ordering;
 #[path = "internal_ir/projections.rs"]
 mod projections;
+#[path = "internal_ir/transactions.rs"]
+mod transactions;
 
 #[path = "internal_ir/search.rs"]
 mod search;
@@ -682,11 +684,11 @@ fn runtime_expression_failure_rolls_back_draw_events_random_and_all_authority_fi
             steps.push(integer_choice(1, 1));
         }
         steps.push(draw_value(2, overflow.clone()));
+        let origin = game.clone();
         let before = exact_authority(&game);
         let result = game.execute_internal(&checked(steps), &source("synthetic"), context(1));
         if with_pause {
             result.unwrap();
-            let before = exact_authority(&game);
             let question = game.internal_decision(View::P1).unwrap();
             game.answer_internal(
                 PlayerId { seat: 1 },
@@ -694,7 +696,7 @@ fn runtime_expression_failure_rolls_back_draw_events_random_and_all_authority_fi
                 Answer::Integer(Nat(1)),
             )
             .unwrap_err();
-            assert_eq!(exact_authority(&game), before);
+            transactions::assert_restored(&game, &origin);
         } else {
             result.unwrap_err();
             assert_eq!(exact_authority(&game), before);

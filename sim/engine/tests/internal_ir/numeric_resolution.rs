@@ -229,6 +229,7 @@ fn expiring_set_reveals_remaining_add_and_multiple_expiries_are_one_batch() {
 fn resume_failure_after_damage_restores_pending_expiry_and_authority() {
     for seat in [1, 2] {
         let mut board = game(seat, 1);
+        let origin = board.clone();
         run(
             &mut board,
             vec![
@@ -241,12 +242,11 @@ fn resume_failure_after_damage_restores_pending_expiry_and_authority() {
             seat,
         );
         let question = board.internal_decision(View::Referee).unwrap();
-        let before = exact_authority(&board);
         board
             .answer_internal(PlayerId { seat }, question.token, Answer::Integer(Nat(0)))
             .unwrap_err();
-        assert_eq!(exact_authority(&board), before);
-        stats(&board, 3, 4, 4, 0);
+        transactions::assert_restored(&board, &origin);
+        stats(&board, 2, 3, 3, 0);
     }
 }
 
@@ -268,14 +268,14 @@ fn overflow_revealed_by_expiry_rolls_back_the_entire_closed_execution() {
         unchanged(&mut board, &checked(steps.clone()), seat);
         let mut pending = steps;
         pending.push(integer_choice(4, 1));
+        let origin = board.clone();
         run(&mut board, pending, seat);
         stats(&board, i64::MAX, 3, 3, 0);
-        let before = exact_authority(&board);
         let question = board.internal_decision(View::Referee).unwrap();
         board
             .answer_internal(PlayerId { seat }, question.token, Answer::Integer(Nat(0)))
             .unwrap_err();
-        assert_eq!(exact_authority(&board), before);
+        transactions::assert_restored(&board, &origin);
     }
 }
 

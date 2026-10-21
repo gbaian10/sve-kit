@@ -18,7 +18,7 @@ const fn view(seat: u32) -> View {
 const fn seat_name(seat: u32) -> &'static str {
     if seat == 1 { "P1" } else { "P2" }
 }
-const fn cardinality(minimum: u64, maximum: u64) -> Cardinality {
+pub(super) const fn cardinality(minimum: u64, maximum: u64) -> Cardinality {
     Cardinality {
         minimum: Nat(minimum),
         maximum: Some(Nat(maximum)),
@@ -43,7 +43,7 @@ const fn movement(to: MoveDestination) -> MoveSpec {
         order: None,
     }
 }
-fn search(filter: Expr<Bool>, count: Cardinality, to: MoveDestination) -> Located<Node> {
+pub(super) fn search(filter: Expr<Bool>, count: Cardinality, to: MoveDestination) -> Located<Node> {
     instruction(
         1,
         Action::Search {
@@ -64,7 +64,7 @@ fn search(filter: Expr<Bool>, count: Cardinality, to: MoveDestination) -> Locate
         },
     )
 }
-const fn hand() -> MoveDestination {
+pub(super) const fn hand() -> MoveDestination {
     MoveDestination::Owners {
         zone: OwnerZone::Hand,
     }
@@ -77,7 +77,7 @@ const fn shared(kind: ZoneKind) -> MoveDestination {
         },
     }
 }
-fn conditional() -> Expr<Bool> {
+pub(super) fn conditional() -> Expr<Bool> {
     name(Binding::new(1, ScopeId(2)), "unit-follower")
 }
 fn execute(game: &mut Game, seat: u32, step: Located<Node>) -> Progress {
@@ -174,7 +174,7 @@ fn search_successful_projections_do_not_substitute_found_or_revealed() {
 }
 
 #[test]
-fn failure_driven_by_successful_after_restores_the_pending_answer_and_real_rng() {
+fn failure_driven_by_successful_after_restores_the_execution_and_real_rng() {
     for seat in [1, 2] {
         let after = Selector::MoveAfter {
             receipt: MovementReceipt::Search {
@@ -195,13 +195,15 @@ fn failure_driven_by_successful_after_restores_the_pending_answer_and_real_rng()
             search(conditional(), cardinality(0, 1), shared(ZoneKind::Ex)),
             super::draw_value(9, count),
         ]);
-        let mut games = [game(seat, 10), game(seat, 10)];
+        let mut games = [game(seat, 10), game(seat, 10)].map(|game| {
+            serde_json::from_value::<Game>(serde_json::to_value(game).unwrap()).unwrap()
+        });
+        let origin = games[0].clone();
         for game in &mut games {
             game.execute_internal(&program, &source("synthetic"), context(seat))
                 .unwrap();
         }
         let token = games[0].internal_decision(view(seat)).unwrap().token;
-        let pending = exact_authority(&games[0]);
         games[0]
             .answer_internal(
                 PlayerId { seat },
@@ -209,13 +211,18 @@ fn failure_driven_by_successful_after_restores_the_pending_answer_and_real_rng()
                 Answer::Search(SearchAnswer::Ungrouped(vec![0])),
             )
             .unwrap_err();
-        assert_eq!(exact_authority(&games[0]), pending);
+        super::transactions::assert_restored(&games[0], &origin);
+        games[1] = super::transactions::aligned_control(&games[0], &origin);
+        for game in &mut games {
+            game.execute_internal(&program, &source("synthetic"), context(seat))
+                .unwrap();
+        }
         // Observe the next real shuffle; ChaCha's Debug output does not expose RNG state.
         let results = games
             .each_mut()
             .map(|game| answer(game, seat, SearchAnswer::Ungrouped(vec![])));
         assert_eq!(results[0], results[1]);
-        assert_eq!(exact_authority(&games[0]), exact_authority(&games[1]));
+        super::transactions::assert_restored(&games[0], &games[1]);
     }
 }
 
@@ -564,7 +571,7 @@ fn rejected_capacity_and_aggregate_shapes_are_checked_before_any_mutation() {
 }
 
 #[test]
-fn failing_final_shuffle_restores_found_movement_history_and_the_pending_token() {
+fn failing_final_shuffle_restores_the_execution_and_revokes_the_pending_token() {
     for seat in [1, 2] {
         let position = setup(
             seat,
@@ -579,21 +586,21 @@ fn failing_final_shuffle_restores_found_movement_history_and_the_pending_token()
             "shuffle-rollback",
         )
         .unwrap();
+        let origin = game.clone();
         execute(
             &mut game,
             seat,
             search(conditional(), cardinality(1, 1), hand()),
         );
         let token = game.internal_decision(view(seat)).unwrap().token;
-        let before = exact_authority(&game);
         game.answer_internal(
             PlayerId { seat },
             token,
             Answer::Search(SearchAnswer::Ungrouped(vec![0])),
         )
         .unwrap_err();
-        assert_eq!(exact_authority(&game), before);
-        assert_eq!(game.internal_decision(view(seat)).unwrap().token, token);
+        super::transactions::assert_restored(&game, &origin);
+        assert!(game.internal_decision(view(seat)).is_none());
     }
 }
 
@@ -841,13 +848,15 @@ fn a_later_failure_rolls_back_the_real_rng_shuffle_with_the_answer() {
             ),
             super::draw_value(9, draws),
         ]);
-        let mut games = [game(seat, 10), game(seat, 10)];
+        let mut games = [game(seat, 10), game(seat, 10)].map(|game| {
+            serde_json::from_value::<Game>(serde_json::to_value(game).unwrap()).unwrap()
+        });
+        let origin = games[0].clone();
         for game in &mut games {
             game.execute_internal(&program, &source("synthetic"), context(seat))
                 .unwrap();
         }
         let token = games[0].internal_decision(view(seat)).unwrap().token;
-        let before = exact_authority(&games[0]);
         games[0]
             .answer_internal(
                 PlayerId { seat },
@@ -855,13 +864,18 @@ fn a_later_failure_rolls_back_the_real_rng_shuffle_with_the_answer() {
                 Answer::Search(SearchAnswer::Ungrouped(vec![0])),
             )
             .unwrap_err();
-        assert_eq!(exact_authority(&games[0]), before);
+        super::transactions::assert_restored(&games[0], &origin);
+        games[1] = super::transactions::aligned_control(&games[0], &origin);
+        for game in &mut games {
+            game.execute_internal(&program, &source("synthetic"), context(seat))
+                .unwrap();
+        }
         let results = games
             .each_mut()
             .map(|game| answer(game, seat, SearchAnswer::Ungrouped(vec![])));
         assert!(results[0].complete);
         assert_eq!(results[0], results[1]);
-        assert_eq!(exact_authority(&games[0]), exact_authority(&games[1]));
+        super::transactions::assert_restored(&games[0], &games[1]);
     }
 }
 
@@ -1122,7 +1136,7 @@ fn effective_numeric_reads_survive_a_private_search_input_between_additions() {
 }
 
 #[path = "search/partition.rs"]
-mod partition;
+pub(super) mod partition;
 
 #[path = "search/replacement.rs"]
 mod replacement;

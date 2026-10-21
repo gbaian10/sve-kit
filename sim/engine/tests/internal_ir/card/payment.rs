@@ -307,3 +307,35 @@ fn body_cannot_read_an_opaque_cost_receipt() {
     .unwrap_err();
     assert!(format!("{error:?}").contains("ReceiptType"), "{error:?}");
 }
+
+#[test]
+fn failed_interactive_execution_preserves_preexisting_paid_ability_authority() {
+    for seat in [1, 2] {
+        let a = paid_ability(vec![pp(1), act()], vec![draw(1, 1)]);
+        let mut game = position_with_card(seat, &card(vec![a]));
+        let paid = activate(&mut game, seat);
+        assert!(paid.progress.complete);
+        game.resume_internal_card().unwrap();
+        let origin = game.clone();
+        let program = checked(vec![up_to(70, 1), draw(71, 10_001)]);
+        game.execute_internal(&program, &source("synthetic"), context(seat))
+            .unwrap();
+        let question = game.internal_decision(View::Referee).unwrap();
+        game.answer_internal(
+            question.actor,
+            question.token,
+            Answer::Stepwise(StepwiseAnswer::Continue),
+        )
+        .unwrap_err();
+        transactions::assert_restored(&game, &origin);
+        let actor = if seat == 1 { "P1" } else { "P2" };
+        assert_eq!(
+            game.projection(View::Referee).unwrap()[actor]["pp"]["current"],
+            1
+        );
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["objects"]["s"]["acted"],
+            true
+        );
+    }
+}

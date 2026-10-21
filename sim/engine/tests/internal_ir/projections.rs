@@ -409,6 +409,7 @@ fn successful_after_is_usable_but_reordering_revokes_old_look_authority() {
         );
 
         let mut revoked = make_game(seat, false);
+        let origin = revoked.clone();
         execute(
             &mut revoked,
             seat,
@@ -419,11 +420,11 @@ fn successful_after_is_usable_but_reordering_revokes_old_look_authority() {
             ],
         );
         let question = revoked.internal_decision(view(seat)).unwrap();
-        let pending = exact_authority(&revoked);
         revoked
             .answer_internal(PlayerId { seat }, question.token, Answer::Order(vec![0]))
             .unwrap_err();
-        assert_eq!(exact_authority(&revoked), pending);
+        transactions::assert_restored(&revoked, &origin);
+        assert!(revoked.internal_decision(view(seat)).is_none());
     }
 }
 

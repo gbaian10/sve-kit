@@ -10,22 +10,6 @@ pub(super) fn check(program: &WellFormedProgram, source: &SourceSpan) -> Result<
         source: source.clone(),
     };
     let requirements = Requirements::derive_program(&located);
-    let has = |code| {
-        requirements
-            .required
-            .iter()
-            .any(|requirement| requirement.capability.code == code)
-    };
-    // These answer handlers do not yet distinguish invalid input from a failed commit.
-    if has("shape.ChoiceDomain.Distribution")
-        && (has("action.search")
-            || has("action.order")
-            || has("internal.StepwiseMode.UpToStepwise"))
-    {
-        return Err(unsupported(
-            "distribution mixed with another interactive continuation",
-        ));
-    }
     let missing = requirements
         .required
         .iter()

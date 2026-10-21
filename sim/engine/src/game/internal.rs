@@ -258,7 +258,6 @@ pub(super) struct Execution {
     look_viewers: BTreeMap<ReceiptId, PlayerId>,
     allocations: BTreeMap<(ScopeId, u64), allocation::Allocation>,
     origin: Option<Box<Game>>,
-    distribution_started: bool,
     ability: Option<RuntimeAbilitySource>,
 }
 
@@ -414,7 +413,6 @@ impl Game {
                 look_viewers: BTreeMap::new(),
                 allocations: BTreeMap::new(),
                 origin: Some(Box::new(before.clone())),
-                distribution_started: false,
                 ability,
             };
             if let Some(costs) = costs {
@@ -442,7 +440,7 @@ impl Game {
     /// Resume only the exact outstanding occurrence and its authorized actor.
     ///
     /// # Errors
-    /// Invalid answers and subsequent execution failures restore the complete authority.
+    /// Invalid answers preserve the question; failed commits restore the execution origin.
     #[expect(
         clippy::too_many_lines,
         reason = "All answer variants share one transaction and its two authoritative rollback scopes."
@@ -470,22 +468,32 @@ impl Game {
             match (wait, answer) {
                 (Wait::Distribution(wait), Answer::Distribution(shares)) => {
                     execution.distribution_answer(&wait, &shares)?;
+                    rollback = execution.origin.take();
                 }
                 (Wait::Order(wait), Answer::Order(handles)) => {
-                    self.internal_order_answer(&mut execution, &wait, &handles)?;
+                    let ordered = wait.validate(&handles)?;
+                    rollback = execution.origin.take();
+                    self.internal_order_answer(&mut execution, &wait, ordered)?;
                 }
                 (Wait::Search(wait), Answer::Search(answer)) => {
-                    self.internal_search_answer(&mut execution, &wait, answer)?;
+                    let found = self.internal_search_validate(&execution, &wait, answer)?;
+                    rollback = execution.origin.take();
+                    self.internal_search_answer(&mut execution, &wait, found)?;
                 }
                 (Wait::SearchPartition(wait), Answer::SearchPartition(handles)) => {
-                    self.internal_search_partition_answer(&mut execution, &wait, &handles)?;
+                    let cards =
+                        self.internal_search_partition_validate(&execution, &wait, &handles)?;
+                    rollback = execution.origin.take();
+                    self.internal_search_partition_answer(&mut execution, &wait, &cards)?;
                 }
                 (Wait::SearchReplacement(wait), Answer::SearchReplacement(answer)) => {
+                    rollback = execution.origin.take();
                     self.internal_search_replacement_answer(&mut execution, &wait, answer)?;
                 }
                 (Wait::Integer { binding, bounds }, Answer::Integer(number))
                     if contains(bounds, number) =>
                 {
+                    rollback = execution.origin.take();
                     execution.slots.insert(binding.key(), Slot::Natural(number));
                 }
                 (
@@ -498,6 +506,7 @@ impl Game {
                     },
                     Answer::Stepwise(answer),
                 ) => {
+                    rollback = execution.origin.take();
                     if answer == StepwiseAnswer::Continue {
                         actual.0 = actual
                             .0
@@ -535,11 +544,8 @@ impl Game {
                 }
                 _ => return Err(invalid("answer is outside the internal domain")),
             }
-            self.internal_run(&mut execution).inspect_err(|_| {
-                if execution.distribution_started {
-                    rollback = execution.origin.take();
-                }
-            })?;
+            self.internal_run(&mut execution)?;
+            execution.origin = rollback.take();
             let progress = execution.progress();
             if !progress.complete {
                 self.typed = Some(execution);
@@ -981,6 +987,11 @@ impl Game {
         ordinal: Nat,
     ) -> Result<bool> {
         let seat = seat_name(player)?;
+        if let Some(id) = self.zone_ids(seat, "deck").first()
+            && self.object(id)?.generation == u64::MAX
+        {
+            return Err(invalid("draw generation exhausted"));
+        }
         let before = self.zone_ids(seat, "hand");
         self.draw(seat, &execution.frame())?;
         let after = self.zone_ids(seat, "hand");

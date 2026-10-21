@@ -510,16 +510,12 @@ impl Game {
         )
     }
 
-    #[expect(
-        clippy::too_many_lines,
-        reason = "Validation, proof, movement and final shuffle form one atomic answer transition."
-    )]
-    pub(super) fn internal_search_answer(
-        &mut self,
-        execution: &mut Execution,
+    pub(super) fn internal_search_validate(
+        &self,
+        execution: &Execution,
         wait: &SearchWait,
         answer: SearchAnswer,
-    ) -> Result<()> {
+    ) -> Result<Vec<ObjectRef>> {
         let translate = |handles: Vec<u64>| {
             handles
                 .into_iter()
@@ -571,13 +567,59 @@ impl Game {
             return Err(invalid("search total cardinality"));
         }
         let mut names = BTreeSet::new();
-        for &object in &found {
-            let id = execution.object_id(object)?;
-            if self.object(id)?.generation != object.generation.0 {
-                return Err(invalid("stale search generation"));
-            }
-            if wait.distinct_names && !names.insert(self.card_name(id)?) {
+        for object in &found {
+            let index = wait
+                .members
+                .iter()
+                .position(|member| member == object)
+                .ok_or_else(|| invalid("foreign search member"))?;
+            let card = wait
+                .domain
+                .cards
+                .get(index)
+                .ok_or_else(|| invalid("missing frozen search card"))?;
+            if wait.distinct_names && !names.insert(&card.name) {
                 return Err(invalid("search names must differ"));
+            }
+        }
+        if let Action::Search {
+            destination: Some(SearchDestination::Single { movement }),
+            ..
+        } = &wait.instruction.action
+        {
+            self.internal_search_check_move(execution, &found, &movement.to, wait.player)?;
+        }
+        if let Action::Search {
+            destination:
+                Some(SearchDestination::OptionalSelfReplacement {
+                    predicate,
+                    movement,
+                    ..
+                }),
+            ..
+        } = &wait.instruction.action
+        {
+            self.internal_search_replacement_validate(
+                execution,
+                &found,
+                predicate,
+                &movement.to,
+                wait.player,
+            )?;
+        }
+        found.sort_by_key(|object| object.id);
+        Ok(found)
+    }
+
+    pub(super) fn internal_search_answer(
+        &mut self,
+        execution: &mut Execution,
+        wait: &SearchWait,
+        found: Vec<ObjectRef>,
+    ) -> Result<()> {
+        for &object in &found {
+            if self.object(execution.object_id(object)?)?.generation != object.generation.0 {
+                return Err(invalid("stale search generation"));
             }
         }
         let seat = seat_name(wait.player)?;
@@ -591,7 +633,6 @@ impl Game {
         {
             return Err(invalid("search snapshot changed"));
         }
-        found.sort_by_key(|object| object.id);
         let views = found
             .iter()
             .map(|&object| RuntimeObjectView {
@@ -719,12 +760,12 @@ impl Game {
         )
     }
 
-    pub(super) fn internal_search_partition_answer(
-        &mut self,
-        execution: &mut Execution,
+    pub(super) fn internal_search_partition_validate(
+        &self,
+        execution: &Execution,
         wait: &PartitionWait,
         handles: &[u64],
-    ) -> Result<()> {
+    ) -> Result<Vec<ObjectRef>> {
         let mut cards = handles
             .iter()
             .map(|handle| {
@@ -744,6 +785,22 @@ impl Game {
         {
             return Err(invalid("partition answer does not match its remainder"));
         }
+        self.internal_search_check_move(
+            execution,
+            &cards,
+            &wait.partition.zone,
+            wait.continuation.player,
+        )?;
+        cards.sort_by_key(|object| object.id);
+        Ok(cards)
+    }
+
+    pub(super) fn internal_search_partition_answer(
+        &mut self,
+        execution: &mut Execution,
+        wait: &PartitionWait,
+        cards: &[ObjectRef],
+    ) -> Result<()> {
         if self.internal_known_deck(seat_name(wait.continuation.player)?)? != wait.deck
             || self.state.ir_epoch
                 != wait
@@ -759,7 +816,6 @@ impl Game {
                 return Err(invalid("stale partition generation"));
             }
         }
-        cards.sort_by_key(|object| object.id);
         let mut continuation = wait.continuation.clone();
         // Allocation consumes members even if a future admitted movement can fail.
         continuation
@@ -767,7 +823,7 @@ impl Game {
             .retain(|object| !cards.contains(object));
         continuation.outcome.moved.extend(self.internal_search_move(
             execution,
-            &cards,
+            cards,
             &wait.partition.zone,
             continuation.player,
         )?);
@@ -795,6 +851,27 @@ impl Game {
             }
             _ => Err(unsupported("search destination owner")),
         }
+    }
+
+    fn internal_search_check_move(
+        &self,
+        execution: &Execution,
+        found: &[ObjectRef],
+        to: &MoveDestination,
+        player: PlayerId,
+    ) -> Result<()> {
+        let (zone, kind) = self.internal_search_destination(execution, to, player)?;
+        if kind == ZoneKind::Field && self.zone_count(seat_name(player)?, zone) < 5 {
+            for &object in found {
+                if self
+                    .object_type(execution.object_id(object)?)?
+                    .contains("スペル")
+                {
+                    return Err(unsupported("putting a found spell onto the field"));
+                }
+            }
+        }
+        Ok(())
     }
 
     pub(super) fn internal_search_move(

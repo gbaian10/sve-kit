@@ -85,7 +85,6 @@ impl Game {
         execution: &mut Execution,
         decision: &Decision,
     ) -> Result<()> {
-        execution.distribution_started = true;
         let ChoiceDomain::Distribution {
             recipients,
             total,
