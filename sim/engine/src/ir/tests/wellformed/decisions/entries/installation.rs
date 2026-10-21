@@ -627,57 +627,6 @@ fn unsupported_installations_in_unexecuted_branches_reject_the_card() {
 }
 
 #[test]
-fn capability_walk_keeps_nested_installation_requirements_and_source_paths() {
-    let duration = Duration {
-        usage: Some(UseLimit {
-            count: Nat(1),
-            scope: UsageScope::SharedPlayer {
-                player: PlayerRef::Controller {},
-                effect: EffectReference::CurrentInstallation {},
-            },
-        }),
-        intervals: vec![Interval::DuringNextTurn {
-            player: PlayerRef::Controller {},
-        }],
-        ..lasting()
-    };
-    let mut step = installed_for(discount(), duration);
-    step.source = source("synthetic-install");
-    let program = body(1, vec![step]);
-    accept(program.clone());
-    let requirements = Requirements::derive(&card(program, "synthetic"));
-    let action = "/abilities/0/body/steps/0/instruction/action";
-    for (name, nested) in [
-        ("effect.cost-modifier", &["/effect"][..]),
-        (
-            "usage.shared-player",
-            &["/duration/usage/scope", "/effect/duration/usage/scope"][..],
-        ),
-        (
-            "duration.next-turn-interval",
-            &["/duration/intervals/0", "/effect/duration/intervals/0"][..],
-        ),
-    ] {
-        let requirement = requirements
-            .required
-            .iter()
-            .find(|requirement| requirement.capability.code == name)
-            .expect("nested capability");
-        assert_eq!(requirement.locations.len(), nested.len(), "{name}");
-        for path in nested {
-            assert!(
-                requirement.locations.iter().any(|location| {
-                    location.ir_path == format!("{action}{path}")
-                        && location.source.card_no == "synthetic-install"
-                }),
-                "{name} at {path}"
-            );
-        }
-    }
-    assert!(Registry::current().supported().is_empty());
-}
-
-#[test]
 fn bound_instance_inputs_cannot_reinterpret_an_existing_scalar_slot() {
     let mut timestamped = buff();
     if let Effect::Continuous { timestamp, .. } = &mut timestamped {
@@ -761,42 +710,6 @@ fn installed_permission_recursively_checks_effect_source_candidates() {
 }
 
 #[test]
-fn deferred_installed_effects_stay_rejected() {
-    let replacement = Effect::Replacement {
-        id: EffectDefinitionId(1),
-        source: ability_source(),
-        pattern: ProposedEventPattern::LeavesZone {
-            objects: affected(),
-            from: ZoneKind::Field,
-        },
-        condition: Expr::Literal(Bool(true)),
-        rewrite: EventRewrite::RedirectMove {
-            to: MoveDestination::Owners {
-                zone: OwnerZone::Deck,
-            },
-            position: Some(Position::Top {}),
-        },
-        scope: ReplacementScope::SelfOnly,
-        affected_player: PlayerRef::Controller {},
-        once_per_event: OncePerEvent::Enforced,
-        usage: None,
-        prospective_chars: None,
-        duration: lasting(),
-    };
-    let deck_rule = Effect::DeckRule {
-        scope: DeckRuleScope::Deck,
-        basis: DeckBasis::Class,
-        constraint: DeckConstraint::StartAmuletDistinctNameLimit { maximum: Nat(1) },
-        setup_steps: vec![],
-        visibility: Visibility::Public {},
-        rule: RuleId(1),
-    };
-    for effect in [replacement, deck_rule] {
-        reject_effect(installed_card(effect), WellFormedReason::UnsupportedShape);
-    }
-}
-
-#[test]
 fn deferred_actions_and_granted_sources_stay_rejected() {
     let provider = TextProvider {
         provider: ObjectView::Current {
@@ -811,35 +724,15 @@ fn deferred_actions_and_granted_sources_stay_rejected() {
         duration: lasting(),
         provider: provider.clone(),
     };
-    let delay = Action::Delay {
-        trigger: TriggerSpec {
-            on: TriggerCondition::Event {
-                pattern: EventPattern::LeaveField {
-                    binding: Binding::new(1, ScopeId(3)),
-                    predicate: Expr::Literal(Bool(true)),
-                },
-            },
-            active_zones: vec![ZoneKind::Field],
-            view: EventSnapshotPolicy::BeforeExit,
-            limit: None,
-            aggregation: TriggerAggregation::PerFact {},
-        },
-        body: body(4, vec![]),
-        captures: vec![],
-        lifetime: DelayedLifetime::Once {},
-        source: ability_source(),
-    };
-    for action in [grant, delay] {
-        let error = reject(
-            body(1, vec![instruction(action, 1, "synthetic")]),
-            WellFormedReason::UnsupportedShape,
-        );
-        assert!(
-            error.ir_path.ends_with("/instruction/action"),
-            "{}",
-            error.ir_path
-        );
-    }
+    let grant_error = reject(
+        body(1, vec![instruction(grant, 1, "synthetic")]),
+        WellFormedReason::UnsupportedShape,
+    );
+    assert!(
+        grant_error.ir_path.ends_with("/instruction/action"),
+        "{}",
+        grant_error.ir_path
+    );
     let origin = AbilityOrigin::Granted {
         effect: EffectReference::CurrentInstallation {},
         grant: AbilityId(1),

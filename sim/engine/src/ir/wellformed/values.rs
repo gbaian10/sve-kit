@@ -218,6 +218,10 @@ impl Checker {
         }
     }
 
+    #[expect(
+        clippy::wildcard_enum_match_arm,
+        reason = "Only explicitly supported shapes pass this gate."
+    )]
     fn predicate(&mut self, expression: &Predicate) -> Checked {
         match expression {
             Predicate::And { predicates } | Predicate::Or { predicates } => {
@@ -296,24 +300,7 @@ impl Checker {
             | Predicate::AnyMove { .. }
             | Predicate::MoveSucceeded { .. }
             | Predicate::ObjectEquals { .. } => self.event_predicate(expression),
-            Predicate::ReceiptStatusEquals { .. }
-            | Predicate::PlayedCard { .. }
-            | Predicate::PlayedAbility { .. }
-            | Predicate::HolderIsPlayer { .. }
-            | Predicate::HolderIsObject { .. }
-            | Predicate::ReceiptAny { .. }
-            | Predicate::RecipientIsLeader { .. }
-            | Predicate::RecipientIsFollower { .. }
-            | Predicate::ZoneEquals { .. }
-            | Predicate::PostureEquals { .. }
-            | Predicate::EvolutionEquals { .. }
-            | Predicate::PhaseEquals { .. }
-            | Predicate::TitleEquals { .. }
-            | Predicate::HasAbility { .. }
-            | Predicate::ClassEquals { .. }
-            | Predicate::HasInfo { .. }
-            | Predicate::NameEquals { .. }
-            | Predicate::NameContains { .. } => self.reject(),
+            _ => self.reject(),
         }
     }
 

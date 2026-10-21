@@ -559,7 +559,11 @@ impl Checker {
 
     #[expect(
         clippy::too_many_lines,
-        reason = "Exhaustive action dispatch keeps unvalidated variants explicitly rejected."
+        reason = "Action dispatch validates each supported shape before accepting it."
+    )]
+    #[expect(
+        clippy::wildcard_enum_match_arm,
+        reason = "Only explicitly supported shapes pass this gate."
     )]
     fn action(&mut self, action: &Action, instruction_actor: &PlayerRef) -> Checked {
         match action {
@@ -727,26 +731,7 @@ impl Checker {
                 }
                 self.order(cards, destinations, chooser, visibility)
             }
-            Action::RevealUntil { .. }
-            | Action::Shuffle { .. }
-            | Action::Evolve { .. }
-            | Action::Transform { .. }
-            | Action::FlipUp { .. }
-            | Action::Grant { .. }
-            | Action::RemoveAbility { .. }
-            | Action::Delay { .. }
-            | Action::PlayCard { .. }
-            | Action::PlayAbility { .. }
-            | Action::MealRace { .. }
-            | Action::RideDrive { .. }
-            | Action::DriveCheck { .. }
-            | Action::Equip { .. }
-            | Action::Fusion { .. }
-            | Action::Random { .. }
-            | Action::Dice { .. }
-            | Action::ScheduleTurn { .. }
-            | Action::GameResult { .. }
-            | Action::BoxPilot { .. } => self.reject(),
+            _ => self.reject(),
         }
     }
 
@@ -796,6 +781,10 @@ impl Checker {
         self.player(&decision.actor)
     }
 
+    #[expect(
+        clippy::wildcard_enum_match_arm,
+        reason = "Only explicitly supported shapes pass this gate."
+    )]
     fn capture(&mut self, capture: &Capture) -> Checked {
         match capture {
             Capture::Integer { at, value, into } => {
@@ -833,23 +822,7 @@ impl Checker {
                 self.save_access(into.binding.key(), access);
                 Ok(())
             }
-            Capture::Names { .. }
-            | Capture::Kind { .. }
-            | Capture::Traits { .. }
-            | Capture::Class { .. }
-            | Capture::Title { .. }
-            | Capture::NumberInfo { .. }
-            | Capture::Posture { .. }
-            | Capture::Evolution { .. }
-            | Capture::Abilities { .. }
-            | Capture::Turn { .. }
-            | Capture::Phase { .. }
-            | Capture::Object { .. }
-            | Capture::EntryPayment { .. }
-            | Capture::ReceiptStatus { .. }
-            | Capture::ReceiptMoves { .. }
-            | Capture::Name { .. }
-            | Capture::Zone { .. } => self.reject(),
+            _ => self.reject(),
         }
     }
 

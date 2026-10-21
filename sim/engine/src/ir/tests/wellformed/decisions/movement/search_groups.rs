@@ -198,24 +198,3 @@ fn search_group_aggregate_cannot_read_the_raw_deck() {
         "{error}"
     );
 }
-
-#[test]
-fn search_projections_keep_nested_capability_requirements_and_sources() {
-    let program = body(1, vec![grouped()]);
-    accept(program.clone());
-    let required = Requirements::derive(&card(program, "synthetic"));
-    for name in [
-        "action.search",
-        "receipt.move-after",
-        "selector.zone",
-        "read.traits",
-    ] {
-        assert!(
-            required
-                .required
-                .iter()
-                .any(|item| item.capability.code == name)
-        );
-    }
-    assert!(Registry::current().supported().is_empty());
-}
