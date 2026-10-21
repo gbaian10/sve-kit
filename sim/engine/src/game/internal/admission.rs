@@ -2,23 +2,36 @@ use super::{
     Cardinality, ChoiceDomain, Control, DecisionKind, Declinable, InstructionContext, Located,
     Node, Program, Requirements, Result, SourceSpan, Visibility, WellFormedProgram, unsupported,
 };
-use crate::ir::{AbilityOrigin, AbilitySource, KeywordId};
+use crate::ir::{AbilityOrigin, AbilitySource, Binding, EnterFieldEvent, KeywordId};
 use alloc::collections::BTreeSet;
 use core::num::NonZeroU32;
 
 pub(super) fn check(program: &WellFormedProgram, source: &SourceSpan) -> Result<()> {
-    check_body(program.program(), source, None)
+    check_body(program.program(), source, None, None)
 }
 
 pub(super) fn check_card(
     program: &Program,
     source: &SourceSpan,
     origin: &AbilitySource,
+    entry: Option<Binding<EnterFieldEvent>>,
 ) -> Result<()> {
-    check_body(program, source, Some(origin))
+    check_body(program, source, Some(origin), entry)
 }
 
 pub(super) fn check_play(program: &Program, source: &SourceSpan) -> Result<()> {
+    let located = Located {
+        node: program.clone(),
+        source: source.clone(),
+    };
+    // Play-time reads precede the body's source producer; a Spell is still in Hand or EX here.
+    if Requirements::derive_program(&located)
+        .required
+        .iter()
+        .any(|requirement| requirement.capability.code == "reference.source-information")
+    {
+        return Err(unsupported("play-time source information"));
+    }
     check_requirements(program, source, true, &BTreeSet::new())
 }
 
@@ -26,10 +39,14 @@ fn check_body(
     program: &Program,
     source: &SourceSpan,
     origin: Option<&AbilitySource>,
+    entry: Option<Binding<EnterFieldEvent>>,
 ) -> Result<()> {
     let mut paths = BTreeSet::new();
     if let Some(origin) = origin {
         source_paths(program, "", origin, &mut paths);
+    }
+    if let Some(event) = entry {
+        super::card::triggers::entry_operand::paths(program, "", event, &mut paths);
     }
     check_requirements(program, source, origin.is_some(), &paths)?;
     super::numeric::check_program(program)?;
@@ -49,7 +66,10 @@ fn source_paths(
                 if matches!(
                     origin.origin,
                     AbilityOrigin::Keyword {
-                        keyword: KeywordId::Fanfare,
+                        keyword: KeywordId::Fanfare
+                            | KeywordId::Lastword
+                            | KeywordId::OnAttack
+                            | KeywordId::OnEvolve,
                         ..
                     }
                 ) {
@@ -115,7 +135,15 @@ fn check_requirements(
                     || (card && play_requirement(requirement.capability.code))
                     || (matches!(
                         requirement.capability.code,
-                        "shape.AbilityOrigin.Keyword" | "internal.KeywordId.Fanfare"
+                        "shape.AbilityOrigin.Keyword"
+                            | "shape.ObjectFrozen.EnterFieldObject"
+                            | "reference.expression"
+                            | "shape.ObjectOperand.FromExpression"
+                            | "read.event-field"
+                            | "internal.KeywordId.Fanfare"
+                            | "internal.KeywordId.Lastword"
+                            | "internal.KeywordId.OnAttack"
+                            | "internal.KeywordId.OnEvolve"
                     ) && requirement
                         .locations
                         .iter()
@@ -132,7 +160,9 @@ fn check_requirements(
 fn play_requirement(code: &str) -> bool {
     matches!(
         code,
-        "shape.NatFrozen.SpellChain"
+        "shape.ObjectView.SourceInformation"
+            | "reference.source-information"
+            | "shape.NatFrozen.SpellChain"
             | "read.spell-chain"
             | "shape.NatFrozen.NecroCharge"
             | "read.necro-charge"

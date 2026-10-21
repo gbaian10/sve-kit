@@ -240,8 +240,6 @@ impl Game {
 
     pub(super) fn evolve_action(&mut self, decision: &Value) -> Result<bool> {
         let source = string(&decision["source"]);
-        let evolve = string(&decision["evolve_card"]);
-        let face = usize::try_from(int(&decision["face"])).map_err(invalid)?;
         let code = if decision.get("ability").is_some() {
             self.ability(source, &decision["ability"])?
         } else {
@@ -254,14 +252,26 @@ impl Game {
             };
             code
         };
+        self.evolve_with_code(decision, &code, false)
+    }
+
+    pub(in crate::game) fn evolve_with_code(
+        &mut self,
+        decision: &Value,
+        code: &Value,
+        reveal_resource: bool,
+    ) -> Result<bool> {
+        let source = string(&decision["source"]);
+        let evolve = string(&decision["evolve_card"]);
+        let face = usize::try_from(int(&decision["face"])).map_err(invalid)?;
         if self.object(source)?.controller != string(&decision["by"])
-            || !self.evolution_pair(source, evolve, face, &code)?
+            || !self.evolution_pair(source, evolve, face, code)?
         {
             return Ok(false);
         }
-        let mut frame = self.start_frame(source, self.reference(source, &code), decision)?;
-        self.freeze(&code, "play-start", &mut frame)?;
-        let cost = self.evolution_pp(&code, &frame)?;
+        let mut frame = self.start_frame(source, self.reference(source, code), decision)?;
+        self.freeze(code, "play-start", &mut frame)?;
+        let cost = self.evolution_pp(code, &frame)?;
         let pp = int(&decision["pay"]["pp"]);
         let ep = int(&decision["pay"]["ep"]);
         let sep = int(&decision["pay"]["sep"]);
@@ -274,7 +284,7 @@ impl Game {
             || player.ep < ep
             || player.sep < sep
             || (sep > 0 && !self.can_super_evolve(&frame.controller))
-            || !self.valid_parameters(&code, &frame)?
+            || !self.valid_parameters(code, &frame)?
         {
             return Ok(false);
         }
@@ -287,6 +297,9 @@ impl Game {
         );
         if !self.can_pay(&list(&non_pp["costs"]), &frame)? {
             return Ok(false);
+        }
+        if reveal_resource {
+            self.reveal(&[evolve.into()], "all", &frame, false);
         }
         self.consume_cost_adjustments(source, CostKind::Evolve)?;
         self.pay_costs(&non_pp, &mut frame)?;
@@ -313,6 +326,7 @@ impl Game {
         frame: &mut Frame,
     ) -> Result<()> {
         self.numeric_evolution_allowed(source)?;
+        let typed_evolution = self.internal_before_evolution(source, evolve, face)?;
         let previous = self.object(source)?.clone();
         let old = self.face(source)?.clone();
         let new = self.catalog.face(&self.object(evolve)?.card, face)?.clone();
@@ -357,6 +371,10 @@ impl Game {
             let super_pending = self.collect_triggers("super_evolve", &affected, &frame.cause)?;
             self.enqueue(super_pending);
         }
+        if !self.card_runtime.is_empty() {
+            self.object_mut(source)?.state["super_evolved"] = json!(sep > 0);
+        }
+        self.internal_evolve_event(source, evolve, sep > 0, typed_evolution, frame)?;
         Ok(())
     }
 }

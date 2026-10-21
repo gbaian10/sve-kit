@@ -106,9 +106,7 @@ fn bp01_118_is_one_uniform_instruction_for_all_leaders() {
                 amount: Expr::Literal(Int(1))
             },
             flags: DamageFlags::Ability,
-            source: ObjectView::Current {
-                object: Box::new(ObjectOperand::SourceHolder {})
-            },
+            source: ObjectView::SourceInformation {},
             batch: BatchPolicy::Instruction {},
         }
     );

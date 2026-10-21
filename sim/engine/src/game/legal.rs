@@ -178,6 +178,29 @@ impl Game {
         normalized
     }
 
+    pub(super) fn end_choices(&self, seat: &str) -> Result<Vec<Value>> {
+        if self.state.flow["stage"] == "discard" {
+            let excess = usize::try_from(self.zone_count(seat, "hand").saturating_sub(7).max(0))
+                .map_err(invalid)?;
+            return Ok(subsets(&self.zone_ids(seat, "hand"), excess, excess)
+                .into_iter()
+                .map(|select| json!({"do":"end-discard","select":select}))
+                .collect());
+        }
+        let ids = self
+            .zone_ids(seat, "field")
+            .into_iter()
+            .filter(|id| {
+                self.object(id).is_ok_and(|o| o.state["acted"] != true)
+                    && self.keywords(id).is_ok_and(|k| k.contains("guard"))
+            })
+            .collect::<Vec<_>>();
+        Ok(subsets(&ids, 0, ids.len())
+            .into_iter()
+            .map(|select| json!({"do":"guard-act","select":select}))
+            .collect())
+    }
+
     /// Complete decision set, before search pruning. Parameterized actions are expanded.
     ///
     /// # Errors
@@ -209,27 +232,7 @@ impl Game {
         let seat = string(&point["by"]);
         let quick = point["at"] == "quick";
         if point["at"] == "end" {
-            if self.state.flow["stage"] == "discard" {
-                let excess =
-                    usize::try_from(self.zone_count(seat, "hand").saturating_sub(7).max(0))
-                        .map_err(invalid)?;
-                return Ok(subsets(&self.zone_ids(seat, "hand"), excess, excess)
-                    .into_iter()
-                    .map(|select| json!({"do":"end-discard","select":select}))
-                    .collect());
-            }
-            let ids = self
-                .zone_ids(seat, "field")
-                .into_iter()
-                .filter(|id| {
-                    self.object(id).is_ok_and(|o| o.state["acted"] != true)
-                        && self.keywords(id).is_ok_and(|k| k.contains("guard"))
-                })
-                .collect::<Vec<_>>();
-            return Ok(subsets(&ids, 0, ids.len())
-                .into_iter()
-                .map(|select| json!({"do":"guard-act","select":select}))
-                .collect());
+            return self.end_choices(seat);
         }
         let mut out = if quick {
             vec![json!({"do":"pass"})]

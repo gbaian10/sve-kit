@@ -335,6 +335,7 @@ variants!(PlayerRef {
 variants!(ObjectView {
     Snapshot { value: Box<Expr<RuntimeObjectView>> } => ["reference.snapshot"],
     Current { object: Box<ObjectOperand> } => ["reference.object-generation"],
+    SourceInformation {} => ["reference.source-information"],
     LastKnown { object: Box<ObjectOperand>, reason: LkiReason } => ["reference.lki"],
     EventSnapshot { object: Box<ObjectOperand>, event: EventContext, policy: EventSnapshotPolicy } => ["value.event-snapshot"]
 });

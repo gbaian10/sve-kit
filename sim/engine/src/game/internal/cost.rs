@@ -101,16 +101,26 @@ impl Game {
         self.internal_cost_with_delta(id, 0)
     }
 
+    pub(super) fn internal_cost_print(&self, id: &str) -> Result<&Value> {
+        let object = self.object(id)?;
+        if object.state["evolved_with"].is_string() {
+            self.internal_effective_print(id)?;
+            self.catalog.face(&object.card, 0)
+        } else {
+            self.face(id)
+        }
+    }
+
     fn internal_cost_with_delta(&self, id: &str, delta: i64) -> Result<i64> {
         let object = self.object(id)?;
-        if object.state["evolved_with"].is_string() || super::int(&object.state["face"]) != 0 {
+        if !object.state["evolved_with"].is_string() && super::int(&object.state["face"]) != 0 {
             return Err(unsupported("evolved cost information"));
         }
         let base = match object.state.get("cost") {
             Some(cost) => cost
                 .as_i64()
                 .ok_or_else(|| invalid("invalid effective cost"))?,
-            None => printed_cost(&self.face(id)?["cost"])?,
+            None => printed_cost(&self.internal_cost_print(id)?["cost"])?,
         };
         let cost = self
             .state

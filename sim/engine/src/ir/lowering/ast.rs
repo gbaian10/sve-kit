@@ -36,7 +36,12 @@ pub(super) struct Ability {
     #[serde(rename = "ports")]
     pub _ports: Ports,
     pub imports: Option<IgnoredAny>,
-    pub fanfare: Body,
+    pub fanfare: Option<Body>,
+    pub lastword: Option<Body>,
+    pub attack_time: Option<Body>,
+    pub auto: Option<Auto>,
+    pub evolve_time: Option<Body>,
+    pub evolve: Option<Evolution>,
 }
 
 #[derive(Deserialize)]
@@ -51,6 +56,7 @@ pub(super) struct Ports {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct Body {
+    pub per_turn: Option<u64>,
     #[serde(default)]
     pub define: BTreeMap<String, Number>,
     #[serde(rename = "do")]
@@ -126,3 +132,92 @@ pub(super) enum DeckZone {
     reason = "An empty JSON object is required here; a unit struct accepts null."
 )]
 pub(super) struct Empty {}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Auto {
+    pub on: PhaseSubscription,
+    #[serde(flatten)]
+    pub body: Body,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) enum PhaseSubscription {
+    #[serde(rename = "phase")]
+    Phase(PhaseSubscriptionPayload),
+    #[serde(rename = "enter_field")]
+    EnterField(EntrySubscription),
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct PhaseSubscriptionPayload {
+    #[serde(rename = "which")]
+    pub _which: EndPhase,
+    pub whose: PhasePlayer,
+}
+#[derive(Deserialize)]
+pub(super) enum EndPhase {
+    #[serde(rename = "end")]
+    End,
+}
+#[derive(Deserialize)]
+pub(super) enum PhasePlayer {
+    #[serde(rename = "self")]
+    Controller,
+    #[serde(rename = "opp")]
+    Opponent,
+    #[serde(rename = "each")]
+    Each,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Evolution {
+    pub cost: EvolutionCost,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct EvolutionCost {
+    pub pp: u64,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct EntrySubscription {
+    #[serde(rename = "ref")]
+    pub reference: Option<This>,
+    pub who: Option<EntryPlayer>,
+    pub sel: Option<EntrySubject>,
+    pub during: Option<During>,
+}
+#[derive(Deserialize)]
+pub(super) enum This {
+    #[serde(rename = "this")]
+    This,
+}
+#[derive(Deserialize)]
+pub(super) enum EntryPlayer {
+    #[serde(rename = "self")]
+    Controller,
+    #[serde(rename = "opp")]
+    Opponent,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct During {
+    #[serde(rename = "turn")]
+    pub _turn: SelfPlayer,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct EntrySubject {
+    #[serde(rename = "kind")]
+    pub _kind: Follower,
+    #[serde(rename = "trait")]
+    pub trait_id: Option<String>,
+}
+#[derive(Deserialize)]
+pub(super) enum Follower {
+    #[serde(rename = "follower")]
+    Follower,
+}

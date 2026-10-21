@@ -32,7 +32,7 @@ fn count(objects: Selector) -> Expr<Int> {
         value: Expr::Compute(Box::new(NatOperation::Count { objects })),
     }))
 }
-fn put_ex(id: u64, objects: Selector) -> Located<Node> {
+pub(super) fn put_ex(id: u64, objects: Selector) -> Located<Node> {
     instruction(
         id,
         Action::Move {

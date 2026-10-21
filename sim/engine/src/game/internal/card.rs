@@ -5,11 +5,13 @@ use super::{
 };
 use crate::ir::{
     Ability, AbilityId, AbilityInstanceId, AbilityKind, AbilityOrigin, AbilitySource, Action,
-    Control, CostSpec, DamageAmount, ExecutionId, Expr, FaceId, Generation, InstructionContext,
-    Int, KeywordId, Located, Nat, Node, ObjectOperand, ObjectRef, PlayerId, PlayerRef, Posture,
-    PostureEvent, Quantity, QuantityUnit, Resource, ResourceOperation, RuntimeAbilitySource,
-    Selector, SourceSpan, StepwiseMode, WellFormedCardProgram, ZoneKind,
+    AssociationId, Control, CostSpec, DamageAmount, ExecutionId, Expr, FaceId, Generation,
+    InstructionContext, Int, KeywordId, Located, MoveDestination, MoveReason, Nat, Node,
+    ObjectOperand, ObjectRef, OwnerZone, PlayerId, PlayerRef, Posture, PostureEvent, Quantity,
+    QuantityUnit, Resource, ResourceOperation, RuleId, RuntimeAbilitySource, Selector, SourceSpan,
+    StepwiseMode, WellFormedCardProgram, ZoneKind,
 };
+use crate::ir::{EventPattern, TriggerCondition, TurnId};
 use crate::{Result, invalid};
 use alloc::collections::{BTreeMap, BTreeSet};
 use core::{mem::take, result, slice};
@@ -17,7 +19,11 @@ use serde::Serializer;
 use serde::ser::Error as _;
 use serde_json::json;
 
+mod evolution;
 mod fanfare;
+mod printed;
+pub(in crate::game::internal) mod triggers;
+pub use triggers::{PendingOption, QuotaDomain, QuotaSelection};
 pub(super) mod play;
 pub(super) mod selection;
 
@@ -27,8 +33,8 @@ pub use selection::TargetDomain;
 /// Explicit authority boundary after a complete ability resolution.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ResumeStage {
-    /// Resolve the single authority-produced fanfare before another player action.
-    PendingFanfare,
+    /// Choose and resolve authority-produced pending occurrences before another player action.
+    Pending,
     /// Run state-based checks before accepting another player action.
     CheckTiming,
 }
@@ -49,29 +55,49 @@ pub struct Activation {
 #[derive(Clone, Debug, Default)]
 pub(in crate::game) struct CardRuntime {
     cards: BTreeMap<String, WellFormedCardProgram>,
-    instances: BTreeMap<(String, u64, AbilityId), AbilityInstanceId>,
+    instances: BTreeMap<(String, u64, String, usize, AbilityId), AbilityInstanceId>,
+    links: BTreeMap<(u64, u64, u64, u64), AssociationId>,
+    quotas: BTreeMap<AbilityInstanceId, TurnId>,
+    admission: Option<triggers::Admission>,
     next_instance: u64,
     pub(in crate::game) checkpoint: Option<ExecutionId>,
-    pending: Option<fanfare::PendingFanfare>,
+    pending: Vec<triggers::PendingOccurrence>,
+    pub(in crate::game::internal) question: Option<(super::DecisionView, Vec<u64>)>,
+    next_pending: u64,
+    rule_ids: BTreeMap<String, RuleId>,
+    pub(in crate::game::internal) active_source: Option<RuntimeAbilitySource>,
 }
 
 impl CardRuntime {
+    pub(in crate::game::internal) fn terminate(&mut self) {
+        self.pending.clear();
+        self.admission = None;
+        self.question = None;
+        self.checkpoint = None;
+        self.active_source = None;
+    }
+
     pub(in crate::game) const fn has_pending(&self) -> bool {
-        self.pending.is_some()
+        !self.pending.is_empty()
     }
 
     pub(in crate::game) fn requires_typed_play(&self) -> bool {
         self.cards.values().any(|card| {
             card.card().abilities.iter().any(|ability| {
-                matches!(
-                    ability.node.kind,
-                    AbilityKind::Spell | AbilityKind::Triggered
-                )
+                evolution::intrinsic(&ability.node)
+                    || matches!(
+                        ability.node.kind,
+                        AbilityKind::Spell | AbilityKind::Triggered
+                    )
             })
         })
     }
     pub(in crate::game) fn is_empty(&self) -> bool {
         self.cards.is_empty()
+    }
+
+    pub(in crate::game) fn is_loaded(&self, card: &str) -> bool {
+        self.cards.contains_key(card)
     }
 }
 
@@ -113,7 +139,6 @@ impl Game {
             return Err(unsupported("typed card mixed with prototype abilities"));
         }
         let mut origins = BTreeSet::new();
-        let mut fanfare_faces = BTreeSet::new();
         let mut spell_face = None;
         for located in &card.card().abilities {
             let ability = &located.node;
@@ -125,9 +150,6 @@ impl Game {
             {
                 return Err(unsupported("one base Printed Spell per card"));
             }
-            if ability.kind == AbilityKind::Triggered && !fanfare_faces.insert(ordinal) {
-                return Err(unsupported("multiple fanfares need pending order"));
-            }
             if line.0 == 0 || !origins.insert((ordinal, line.0)) {
                 return Err(invalid("invalid or duplicate printed ability coordinate"));
             }
@@ -136,6 +158,10 @@ impl Game {
                 play::check_spell(ability, printed)?;
             }
             check_source(&located.source, card_no, &face.0, line.0)?;
+            if evolution::intrinsic(ability) {
+                evolution::check(located)?;
+                continue;
+            }
             if matches!(ability.kind, AbilityKind::Activated | AbilityKind::Spell) {
                 check_costs(ability)?;
             }
@@ -144,7 +170,16 @@ impl Game {
                 .as_ref()
                 .ok_or_else(|| invalid("missing body"))?;
             check_nodes(&body.steps, &located.source, &ability.source)?;
-            admission::check_card(body, &located.source, &ability.source)?;
+            let entry = ability
+                .trigger
+                .as_ref()
+                .and_then(|trigger| match &trigger.on {
+                    TriggerCondition::Event {
+                        pattern: EventPattern::EnterField { binding, .. },
+                    } => Some(*binding),
+                    _ => None,
+                });
+            admission::check_card(body, &located.source, &ability.source, entry)?;
             play::check(ability, &located.source)?;
         }
         self.card_runtime.cards.insert(card_no.into(), card.clone());
@@ -170,13 +205,13 @@ impl Game {
 
     /// Inspect the authority's explicit next stage without advancing the turn.
     #[must_use]
-    pub fn internal_card_stage(&self) -> Option<ResumeStage> {
-        if self.card_runtime.has_pending() {
-            Some(ResumeStage::PendingFanfare)
+    pub const fn internal_card_stage(&self) -> Option<ResumeStage> {
+        if self.card_runtime.checkpoint.is_some() {
+            Some(ResumeStage::CheckTiming)
+        } else if self.card_runtime.has_pending() {
+            Some(ResumeStage::Pending)
         } else {
-            self.card_runtime
-                .checkpoint
-                .map(|_| ResumeStage::CheckTiming)
+            None
         }
     }
 
@@ -196,6 +231,10 @@ impl Game {
         }
         result?;
         self.card_runtime.checkpoint = None;
+        if self.state.game["ended"] == true {
+            self.card_runtime.pending.clear();
+            self.card_runtime.question = None;
+        }
         Ok(Step {
             outcome: "resolved".into(),
             events: take(&mut self.emitted),
@@ -307,6 +346,34 @@ impl Game {
                         Vec::new(),
                     )
                 }
+                Action::Move {
+                    objects,
+                    movement,
+                    reason,
+                } => {
+                    let original = execution.object(self, &ObjectOperand::SourceHolder {})?;
+                    self.internal_move(
+                        execution,
+                        &step.instruction,
+                        objects,
+                        Some((movement, *reason)),
+                    )?;
+                    if !matches!(execution.receipts.get(&step.instruction.receipt),
+                        Some(InstructionOutcome::Move(outcome)) if matches!(outcome.moved.as_slice(), [member]
+                            if member.before == original && member.after.is_some()))
+                    {
+                        return Err(crate::EngineFailure::IllegalPlay(
+                            "incomplete movement cost".into(),
+                        ));
+                    }
+                    (
+                        Quantity {
+                            amount: Int(1),
+                            unit: QuantityUnit::Cards,
+                        },
+                        vec![original],
+                    )
+                }
                 Action::Posture { .. } => {
                     let holder = execution.context.source.clone();
                     if self.object(&holder)?.state["acted"] != false {
@@ -363,8 +430,11 @@ fn check_header(ability: &Ability) -> Result<()> {
     {
         return Err(unsupported("whole-card ability header"));
     }
+    if evolution::intrinsic(ability) {
+        return Ok(());
+    }
     if ability.kind == AbilityKind::Triggered {
-        return fanfare::check_header(ability);
+        return triggers::check_header(ability);
     }
     if !matches!(ability.kind, AbilityKind::Activated | AbilityKind::Spell)
         || ability.trigger.is_some()
@@ -407,6 +477,21 @@ fn check_costs(ability: &Ability) -> Result<()> {
                 objects: Selector::Objects { objects },
                 posture: Posture::Acted,
             } => objects == &[ObjectOperand::SourceHolder {}],
+            Action::Move {
+                objects: Selector::Objects { objects },
+                movement,
+                reason: MoveReason::Put,
+            } => {
+                objects == &[ObjectOperand::SourceHolder {}]
+                    && movement.to
+                        == (MoveDestination::Owners {
+                            zone: OwnerZone::Cemetery,
+                        })
+                    && movement.position.is_none()
+                    && movement.order.is_none()
+                    && movement.initial_posture.is_none()
+                    && movement.entry_effects.is_empty()
+            }
             _ => false,
         };
         if !supported {
@@ -438,7 +523,12 @@ fn printed_origin(origin: &AbilityOrigin) -> Result<(&FaceId, &Nat)> {
     match origin {
         AbilityOrigin::Printed { face, line } => Ok((face, line)),
         AbilityOrigin::Keyword {
-            keyword: KeywordId::Fanfare,
+            keyword:
+                KeywordId::Fanfare
+                | KeywordId::Lastword
+                | KeywordId::OnAttack
+                | KeywordId::OnEvolve
+                | KeywordId::Evolution,
             origin,
         } => {
             if let AbilityOrigin::Printed { face, line } = origin.as_ref() {
@@ -485,20 +575,25 @@ fn check_nodes(
                 if instruction.source != *ability_source {
                     return Err(invalid("instruction has a foreign ability source"));
                 }
-                if !matches!(
-                    instruction.action,
-                    Action::Draw {
-                        mode: StepwiseMode::Exact,
-                        ..
-                    } | Action::Look {
-                        mode: StepwiseMode::Exact,
-                        ..
-                    } | Action::Damage {
-                        amount: DamageAmount::Uniform { .. } | DamageAmount::Allocation { .. },
-                        ..
-                    } | Action::Modify { .. }
-                        | Action::InstallEffect { .. }
-                ) {
+                // Observed Look→EX moves are a private-spine shape, not the public Move subset.
+                if super::movement::observed_move(&instruction.action)
+                    || !matches!(
+                        instruction.action,
+                        Action::Draw {
+                            mode: StepwiseMode::Exact,
+                            ..
+                        } | Action::Look {
+                            mode: StepwiseMode::Exact,
+                            ..
+                        } | Action::Damage {
+                            amount: DamageAmount::Uniform { .. } | DamageAmount::Allocation { .. },
+                            ..
+                        } | Action::Move { .. }
+                            | Action::Destroy { .. }
+                            | Action::Modify { .. }
+                            | Action::InstallEffect { .. }
+                    )
+                {
                     return Err(unsupported("whole-card synchronous action"));
                 }
             }

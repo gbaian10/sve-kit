@@ -121,7 +121,7 @@ mod actions;
 mod answers;
 mod capabilities;
 mod effects;
-mod events;
+pub(crate) mod events;
 mod flow;
 pub mod lowering;
 mod projections;

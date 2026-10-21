@@ -1,6 +1,7 @@
 //! Candidate-only lowering of C0's expanded tree, without source or runtime admission.
 
 mod ast;
+mod evolution;
 
 use super::{
     Ability, AbilityId, AbilityKind, AbilityOrigin, AbilityQualification, AbilitySource, Action,
@@ -62,7 +63,8 @@ impl ExpandedLowerer {
 
     /// Lower every card atomically. Success proves only internal IR well-formedness.
     ///
-    /// Only fanfare, draw, uniform damage to all leaders, and their numeric subset
+    /// Only intrinsic evolution, evolve-time, fanfare, lastword, attack-time, End Begin,
+    /// draw, uniform damage to all leaders, and their numeric subset
     /// are supported. Card keys remain candidate coordinates, not snapshot IDs.
     ///
     /// # Errors
@@ -89,6 +91,7 @@ impl ExpandedLowerer {
                 let ability = decode(value, &path)?;
                 let scope = u64::try_from(index)
                     .ok()
+                    .and_then(|index| index.checked_mul(3))
                     .and_then(|index| index.checked_add(1))
                     .ok_or_else(|| unsupported(&path))?;
                 abilities.push(allocator.ability(&key, &path, &ability, ScopeId(scope))?);
@@ -136,14 +139,39 @@ impl Allocator {
             return Err(unsupported(path));
         }
 
-        let source = source_span(key, path, entry)?;
-        let origin = AbilityOrigin::Keyword {
-            keyword: KeywordId::Fanfare,
-            origin: Box::new(AbilityOrigin::Printed {
-                face: FaceId(source.face.clone()),
-                line: Nat(u64::from(entry.line)),
-            }),
+        if entry.evolve.is_some() {
+            return evolution::lower(self, key, path, entry, scope);
+        }
+        let (body, head, keyword) = match (
+            &entry.fanfare,
+            &entry.lastword,
+            &entry.attack_time,
+            &entry.auto,
+            &entry.evolve_time,
+        ) {
+            (Some(body), None, None, None, None) => (body, "fanfare", Some(KeywordId::Fanfare)),
+            (None, Some(body), None, None, None) => (body, "lastword", Some(KeywordId::Lastword)),
+            (None, None, Some(body), None, None) => {
+                (body, "attack_time", Some(KeywordId::OnAttack))
+            }
+            (None, None, None, Some(auto), None) => (&auto.body, "auto", None),
+            (None, None, None, None, Some(body)) => {
+                (body, "evolve_time", Some(KeywordId::OnEvolve))
+            }
+            _ => return Err(unsupported(path)),
         };
+        let source = source_span(key, path, entry)?;
+        let printed = AbilityOrigin::Printed {
+            face: FaceId(source.face.clone()),
+            line: Nat(u64::from(entry.line)),
+        };
+        let origin = keyword.map_or_else(
+            || printed.clone(),
+            |keyword| AbilityOrigin::Keyword {
+                keyword,
+                origin: Box::new(printed.clone()),
+            },
+        );
         let ability_source = AbilitySource {
             holder: ObjectOperand::SourceHolder {},
             origin,
@@ -152,15 +180,15 @@ impl Allocator {
         let mut context = BodyContext {
             scope,
             allocator: Self::default(),
-            definitions: &entry.fanfare.define,
+            definitions: &body.define,
         };
-        for value in entry.fanfare.define.values() {
+        for value in body.define.values() {
             context.number(value, path, &mut BTreeSet::new())?;
         }
         context.allocator = Self::default();
         let mut steps = Vec::new();
-        for (index, step) in entry.fanfare.steps.iter().enumerate() {
-            let step_path = format!("{path}/fanfare/do/{index}");
+        for (index, step) in body.steps.iter().enumerate() {
+            let step_path = format!("{path}/{head}/do/{index}");
             let action = context.action(step, &step_path)?;
             let instruction_id = self.id(&step_path)?;
             let mut step_source = source.clone();
@@ -180,22 +208,12 @@ impl Allocator {
                 },
             });
         }
-        let event = Binding::new(context.allocator.id(path)?, scope);
-        let trigger = TriggerSpec {
-            on: TriggerCondition::Event {
-                pattern: EventPattern::EnterField {
-                    binding: event,
-                    predicate: Expr::Compute(Box::new(Predicate::ObjectEquals {
-                        left: Expr::Frozen(Box::new(ObjectFrozen::EnterFieldObject { event })),
-                        right: Expr::Frozen(Box::new(ObjectFrozen::SourceHolder {})),
-                    })),
-                },
-            },
-            active_zones: vec![ZoneKind::Field],
-            view: EventSnapshotPolicy::AfterEntry,
-            limit: None,
-            aggregation: TriggerAggregation::PerFact {},
-        };
+        let event_id = context.allocator.id(path)?;
+        let mut trigger = lowered_trigger(entry, keyword, event_id, scope, path)?;
+        if body.per_turn.is_some_and(|maximum| maximum != 1) {
+            return Err(unsupported(path));
+        }
+        trigger.limit = body.per_turn.map(|_| super::LimitSpec::once_per_turn());
         Ok(Located {
             source,
             node: Ability {
@@ -212,6 +230,98 @@ impl Allocator {
                 declarations: vec![],
             },
         })
+    }
+}
+
+fn lowered_trigger(
+    entry: &ast::Ability,
+    keyword: Option<KeywordId>,
+    event_id: u64,
+    scope: ScopeId,
+    path: &str,
+) -> Result<TriggerSpec, LoweringError> {
+    Ok(if keyword == Some(KeywordId::Lastword) {
+        TriggerSpec::lastword(Binding::new(event_id, scope))
+    } else {
+        let pattern = if keyword == Some(KeywordId::OnAttack) {
+            let event = Binding::new(event_id, scope);
+            EventPattern::Attack {
+                binding: event,
+                predicate: super::events::timing::attack_predicate(event),
+            }
+        } else if keyword == Some(KeywordId::OnEvolve) {
+            let event = Binding::new(event_id, scope);
+            EventPattern::Evolve {
+                binding: event,
+                predicate: super::events::timing::evolve_predicate(event),
+            }
+        } else if let Some(auto) = &entry.auto {
+            lowered_subscription(&auto.on, event_id, scope, path)?
+        } else {
+            let event = Binding::new(event_id, scope);
+            EventPattern::EnterField {
+                binding: event,
+                predicate: Expr::Compute(Box::new(Predicate::ObjectEquals {
+                    left: Expr::Frozen(Box::new(ObjectFrozen::EnterFieldObject { event })),
+                    right: Expr::Frozen(Box::new(ObjectFrozen::SourceHolder {})),
+                })),
+            }
+        };
+        TriggerSpec {
+            on: TriggerCondition::Event { pattern },
+            active_zones: vec![ZoneKind::Field],
+            view: EventSnapshotPolicy::AfterEntry,
+            limit: None,
+            aggregation: TriggerAggregation::PerFact {},
+        }
+    })
+}
+
+fn lowered_subscription(
+    on: &ast::PhaseSubscription,
+    event_id: u64,
+    scope: ScopeId,
+    path: &str,
+) -> Result<EventPattern, LoweringError> {
+    match on {
+        ast::PhaseSubscription::Phase(phase) => {
+            let player = match phase.whose {
+                ast::PhasePlayer::Controller => Some(PlayerRef::Controller {}),
+                ast::PhasePlayer::Opponent => Some(super::events::timing::opponent()),
+                ast::PhasePlayer::Each => None,
+            };
+            let event = Binding::new(event_id, scope);
+            Ok(EventPattern::Phase {
+                binding: event,
+                predicate: super::events::timing::end_predicate(event, player),
+            })
+        }
+        ast::PhaseSubscription::EnterField(entry) => {
+            let itself = entry.reference.as_ref().map(|_| true);
+            let own = entry
+                .who
+                .as_ref()
+                .map(|side| matches!(side, ast::EntryPlayer::Controller));
+            if itself.is_none() && (own.is_none() || entry.sel.is_none()) {
+                return Err(unsupported(path));
+            }
+            let filter = super::events::entry::EntryFilter {
+                own,
+                itself,
+                follower: entry.sel.is_some(),
+                trait_id: entry
+                    .sel
+                    .as_ref()
+                    .and_then(|sel| sel.trait_id.as_ref())
+                    .map(|id| super::TraitId(id.clone())),
+                own_turn: entry.during.is_some(),
+            };
+            let event = Binding::new(event_id, scope);
+            Ok(EventPattern::EnterField {
+                binding: event,
+                predicate: filter.predicate(event),
+            })
+        }
     }
 }
 
@@ -246,9 +356,7 @@ impl BodyContext<'_> {
                         amount: self.number(&damage.n, path, &mut BTreeSet::new())?,
                     },
                     flags: DamageFlags::Ability,
-                    source: ObjectView::Current {
-                        object: Box::new(ObjectOperand::SourceHolder {}),
-                    },
+                    source: ObjectView::SourceInformation {},
                     batch: BatchPolicy::Instruction {},
                 })
             }

@@ -1,7 +1,7 @@
 use super::*;
 use sve_engine::game::internal::{DamageShare, DecisionView, InputDomain};
 
-fn spell(steps: Vec<Located<Node>>) -> Located<Ability> {
+pub(super) fn spell(steps: Vec<Located<Node>>) -> Located<Ability> {
     let mut ability = payment::paid_ability(vec![payment::pp(1)], steps);
     ability.source = source("unit-spell");
     ability.source.fragment = None;
@@ -15,7 +15,7 @@ fn spell(steps: Vec<Located<Node>>) -> Located<Ability> {
     ability
 }
 
-fn position(program: &WellFormedCardProgram, zone: &str, followers: usize) -> Game {
+pub(super) fn position(program: &WellFormedCardProgram, zone: &str, followers: usize) -> Game {
     let mut initial = setup(1, json!([{"id":"d","card":"unit-follower"}]));
     initial["players"]["P1"]["pp"] = json!({"current":4,"max":4});
     initial["players"]["P1"]["zones"]["hand"] = json!([]);
@@ -572,4 +572,31 @@ fn ex_spell_preserves_the_installed_reduction_until_its_single_intrinsic_payment
         2
     );
     cards(&result.progress, 4, 1, 1);
+}
+
+#[test]
+fn surrender_during_formal_target_selection_preserves_resolution_prefix() {
+    let mut ability = spell(vec![damage(1, selected(10, 1), 2)]);
+    ability.node.play.as_mut().unwrap().parameters = vec![target(10, 1, 1, 1)];
+    let mut game = position(&card(vec![ability]), "hand", 1);
+    let question = awaiting(game.play_internal_card("s", PlayerId { seat: 1 }).unwrap());
+    let before = game.projection(View::Referee).unwrap();
+    let terminal = game.concede_internal(PlayerId { seat: 2 }).unwrap();
+    let progress = terminal.progress.unwrap();
+    assert!(!progress.complete);
+    assert!(!progress.facts.iter().any(|fact| matches!(
+        fact,
+        Fact::CardPlayed { .. } | Fact::CardResolved { .. } | Fact::Damage(_)
+    )));
+    let view = game.projection(View::Referee).unwrap();
+    for seat in ["P1", "P2"] {
+        assert_eq!(before[seat], view[seat]);
+    }
+    assert_eq!(terminal.step.outcome, "game-end");
+    assert!(game.internal_decision(View::Referee).is_none());
+    assert_eq!(game.internal_card_stage(), None);
+    let ended = exact_authority(&game);
+    game.answer_internal_card(question.actor, question.token, Answer::Targets(vec![0]))
+        .unwrap_err();
+    assert_eq!(ended, exact_authority(&game));
 }

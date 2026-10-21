@@ -46,7 +46,7 @@ impl Checker {
         if flags != DamageFlags::Ability || batch != (BatchPolicy::Instruction {}) {
             return self.reject();
         }
-        self.view(source)?;
+        self.information_view(source)?;
         match amount {
             DamageAmount::Uniform { amount } => {
                 self.recipients(recipients)?;
