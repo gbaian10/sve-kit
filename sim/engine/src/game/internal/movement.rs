@@ -329,6 +329,7 @@ impl Game {
             .iter()
             .map(|(_, id, _, _)| id.clone())
             .collect::<Vec<_>>();
+        let departing_source = execution.source_before_move(self, &ids)?;
         let frame = execution.frame();
         self.move_objects(&ids, zone, None, None, &frame)?;
         self.state.ir_epoch = self
@@ -385,6 +386,7 @@ impl Game {
                 );
             }
         }
+        execution.seal_source_departure(departing_source);
         Ok((moves, successful))
     }
 }

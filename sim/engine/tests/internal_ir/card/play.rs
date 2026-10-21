@@ -1,7 +1,7 @@
 use super::*;
 use sve_engine::game::internal::{DamageShare, DecisionView, InputDomain};
 
-fn spell(steps: Vec<Located<Node>>) -> Located<Ability> {
+pub(super) fn spell(steps: Vec<Located<Node>>) -> Located<Ability> {
     let mut ability = payment::paid_ability(vec![payment::pp(1)], steps);
     ability.source = source("unit-spell");
     ability.source.fragment = None;
@@ -15,7 +15,7 @@ fn spell(steps: Vec<Located<Node>>) -> Located<Ability> {
     ability
 }
 
-fn position(program: &WellFormedCardProgram, zone: &str, followers: usize) -> Game {
+pub(super) fn position(program: &WellFormedCardProgram, zone: &str, followers: usize) -> Game {
     let mut initial = setup(1, json!([{"id":"d","card":"unit-follower"}]));
     initial["players"]["P1"]["pp"] = json!({"current":4,"max":4});
     initial["players"]["P1"]["zones"]["hand"] = json!([]);

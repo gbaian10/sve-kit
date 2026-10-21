@@ -18,13 +18,14 @@ owner、field、fragment；這不授予永久來源身分或公開 capability。
 單一 Printed Fanfare。Spell 的唯一固有 Ordered PP Pay 必須等於同 Catalog face 的印刷費用；
 只在這個已驗位置按 Resolution 的有效成本實付一次。Activated 沿用 controller 的非負常值 PP
 與恰好 SourceHolder 的 Acted Posture，不能套用卡片減費；成本沒有 materials、precondition 或替代。
-Amulet executor、Quick、前置 X、追加／替代成本、一般 trigger、Static 與 LKI 仍整棵拒絕。
+Amulet executor、Quick、前置 X、追加／替代成本、一般 trigger、Static 與任意對象 LKI 仍整棵拒絕。
 
 載入逐能力驗證 card／face／line、印刷座標唯一、所有 instruction 的來源閉包，以及包含未選模式
 與死分支的 requirement 集合。Fanfare Keyword 例外只接受已驗 instruction source 的精確位置，
 不對同名 capability 全域放行。本文仍限 Draw Exact、Look Exact、Uniform／Allocation Damage、
-已支援的 Modify／InstallEffect、capture、Sequence／If，另支援下述 ChoiceKeyword；可能使來源
-離場的 Move／Destroy 與其他互動本文保持拒絕。
+已支援的 Modify／InstallEffect、Move／Destroy、capture、Sequence／If，另支援下述 ChoiceKeyword。
+Move／Destroy 沿用已驗公開區來源與 owner 墓地／消滅目的地；連結、進化關聯、特殊卡片、
+入場效果與其他互動本文保持拒絕。
 
 `play_internal_card(holder, actor)` 接主動玩家 main、自己的 Hand／EX、base 普通 Spell 或單一
 Fanfare 從者；`activate_internal_card(holder, AbilityId, actor)` 接已載入的當前場上從者能力。
@@ -87,7 +88,7 @@ EX→Resolution 與 Resolution→Field 僅承接既有 CostModifier 的完整實
 EffectId、來源、值、timestamp 與期限；其他效果／counter 承接未實作時在移動前拒絕。
 普通 Move 與 Resolution→Cemetery 沿原世代失效規則，不取得泛用跟隨權。
 場上新世代實體化能力、保存 controller／instance 並形成私有 pending；卡片收尾後先做規則檢查，
-再停於 `ResumeStage::PendingFanfare`。來源需要 LKI 的形狀仍拒絕，不取消已待機的本文。
+再停於 `ResumeStage::PendingFanfare`。既有單一待機不提供其他能力插入與通用離場觸發。
 
 `resolve_internal_fanfare()` 不收 caller 指定的 holder、AbilityId 或來源，只消費該 pending。
 本文沿相同正式 play 程序完成後形成同 producer 的 play／resolve facts，再交 `CheckTiming`；失敗回復到
@@ -95,6 +96,25 @@ EffectId、來源、值、timestamp 與期限；其他效果／counter 承接未
 載入 Fanfare 的 Game 封住原型 decide 與合成 closed Program 入口，避免略過待機 producer。
 BP01-118 的測試由作者 YAML 經真正 C0 展開、lowering、整卡載入、正式入場及待機解算，
 驗兩位領袖各受 1 點傷害；測試用候選來源沒有宣稱永久來源驗證或公開 capability。
+
+### 正式能力來源資訊的受限 LKI
+
+`ObjectView::SourceInformation {}` 只在受驗整卡能力本文讀 Cost／Attack／Life（Original／Effective）
+及作為能力傷害 source。封閉 `WellFormedProgram` 即使帶相同 instruction source 也拿不到資格；
+play 時點的 captures／參數、role／selector 等其他資訊用途、任意 `LastKnown` 與 caller snapshot 仍拒絕。
+Original 只在讀 SourceInformation 的數值位置放行，其他位置仍屬私有讀值。
+正式 lowering 的傷害來源使用此正規形，合成 Current 的意義不變。
+
+能力 execution 固定來源的精確世代與參照區域。來源仍在該區域時即時讀有效資訊；本文 Move／Destroy
+真正移區前，在同一批 before 狀態保存已算出的有效數值與卡表 Original 數值，成功提交才封存。
+後續讀值與傷害沿原 execution 使用該 LKI，不重新付款、不查新世代；同批清理的修正不會提前消失。
+Spell 的 Resolution 收尾也保存來源資訊，且只收尾本次原世代。來源資訊隨 execution 與 origin 保存，
+執行錯誤連同付款及已執行本文一起回復。stale Current 或缺 producer 是錯誤，只有合法資訊中
+不存在的欄位（例如 Spell 的攻擊力）才按規則為零。Current 數值讀取維持只讀 Effective。
+Spell 的來源資訊綁定進 Resolution 後的新世代；本文 Move／Destroy 不接受 Resolution 中的物件。
+
+這個子集只保存正式已開始能力的來源；尚未接上 Last Words／一般 pending、成本送墓、
+外部規則動作離場及 prepared play 終局，不宣稱常見觸發或完整來源生命週期已完成。
 
 ### 成功 After 的當回合減費片段
 
@@ -146,7 +166,8 @@ Draw Exact 保留有號 requested，非正值不抽牌；正值依序呼叫共�
 UpToStepwise 每張前只詢問該抽牌者 Continue／Stop；每次問答都有新的 epoch。
 單次執行限制為 10,000 次抽牌嘗試，超過時完整拒絕並還原。
 
-Damage 只接受 Ability flags、Instruction batch、Current source 及 Uniform signed amount。
+Damage 只接受 Ability flags、Instruction batch、Current source（正式整卡亦接受上述 SourceInformation）
+及 Uniform signed amount。
 同指示開始時求值 recipients／amount；Union 依物件 ID＋世代或玩家去重。
 物件成員無法確認為從者時整次拒絕，不推定非從者是否計入 requested；這是內部准入限制。
 目前世代不在場上的成員、或捕捉時不全在場上的集合，也整次拒絕；capture slot 保存當時的場上來源證據，

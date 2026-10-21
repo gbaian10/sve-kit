@@ -246,9 +246,7 @@ impl BodyContext<'_> {
                         amount: self.number(&damage.n, path, &mut BTreeSet::new())?,
                     },
                     flags: DamageFlags::Ability,
-                    source: ObjectView::Current {
-                        object: Box::new(ObjectOperand::SourceHolder {}),
-                    },
+                    source: ObjectView::SourceInformation {},
                     batch: BatchPolicy::Instruction {},
                 })
             }

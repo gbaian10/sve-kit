@@ -10,6 +10,9 @@ mod play;
 #[path = "card/fanfare.rs"]
 mod fanfare;
 
+#[path = "card/source.rs"]
+mod source_information;
+
 fn locate_steps(steps: &mut [Located<Node>], span: &SourceSpan, origin: &AbilitySource) {
     for step in steps {
         step.source = span.clone();
@@ -300,22 +303,28 @@ fn provenance_face_line_card_and_instruction_origin_are_bound() {
 }
 
 #[test]
-fn interactive_bodies_and_source_departure_are_not_admitted() {
+fn unsupported_interactive_bodies_are_not_admitted() {
     for seat in [1, 2] {
-        for step in [
-            up_to(1, 1),
-            instruction(
-                1,
-                Action::Destroy {
-                    objects: zone(ZoneKind::Field, 90),
-                },
+        for (steps, observed) in [
+            (vec![up_to(1, 1)], false),
+            // Observed Look-to-EX movement stays outside the public whole-card Move subset.
+            (
+                vec![
+                    ordering::look(1, 2),
+                    projections::put_ex(2, ordering::looked(1)),
+                ],
+                true,
             ),
         ] {
             let mut game = game(seat, 2);
             let before = exact_authority(&game);
+            let error = game
+                .load_internal_card("unit-follower", &card(vec![ability(1, steps)]))
+                .unwrap_err();
             assert!(
-                game.load_internal_card("unit-follower", &card(vec![ability(1, vec![step])]))
-                    .is_err()
+                !observed
+                    || matches!(&error, sve_engine::EngineFailure::Unsupported(message)
+                if message.contains("whole-card synchronous action"))
             );
             assert_eq!(before, exact_authority(&game));
         }

@@ -19,6 +19,18 @@ pub(super) fn check_card(
 }
 
 pub(super) fn check_play(program: &Program, source: &SourceSpan) -> Result<()> {
+    let located = Located {
+        node: program.clone(),
+        source: source.clone(),
+    };
+    // Play-time reads precede the body's source producer; a Spell is still in Hand or EX here.
+    if Requirements::derive_program(&located)
+        .required
+        .iter()
+        .any(|requirement| requirement.capability.code == "reference.source-information")
+    {
+        return Err(unsupported("play-time source information"));
+    }
     check_requirements(program, source, true, &BTreeSet::new())
 }
 
@@ -132,7 +144,9 @@ fn check_requirements(
 fn play_requirement(code: &str) -> bool {
     matches!(
         code,
-        "shape.NatFrozen.SpellChain"
+        "shape.ObjectView.SourceInformation"
+            | "reference.source-information"
+            | "shape.NatFrozen.SpellChain"
             | "read.spell-chain"
             | "shape.NatFrozen.NecroCharge"
             | "read.necro-charge"

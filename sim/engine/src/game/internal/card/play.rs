@@ -321,7 +321,8 @@ impl Game {
         self.object_mut(holder)?.state["entered_from"] = json!(object.zone);
         execution.context.generation = Generation(self.object(holder)?.generation);
         let source = self.internal_card_source(holder, ability.id, actor)?;
-        execution.ability = Some(source);
+        // The Spell's source is its Resolution generation, never the Hand/EX play-time object.
+        execution.bind_source(self, source)?;
         execution.spell = true;
         self.run_card_play(execution, ability)
     }
@@ -360,10 +361,10 @@ impl Game {
         spell: bool,
     ) -> Result<CardPlay> {
         let mut execution = self.new_card_execution(context)?;
+        execution.bind_source(self, source)?;
         if let Some(play) = &ability.play {
             execution.captures(self, &play.captures)?;
         }
-        execution.ability = Some(source);
         execution.spell = spell;
         self.run_card_play(execution, ability)
     }
@@ -418,6 +419,7 @@ impl Game {
             allocations: BTreeMap::new(),
             origin: None,
             ability: None,
+            source_information: None,
             targets: BTreeSet::new(),
             play: None,
             spell: false,
@@ -688,7 +690,7 @@ impl Game {
 
     pub(in crate::game::internal) fn internal_spell_cleanup(
         &mut self,
-        execution: &Execution,
+        execution: &mut Execution,
     ) -> Result<()> {
         if execution.spell {
             let holder = &execution.context.source;
@@ -699,7 +701,9 @@ impl Game {
                     .generation
                     .checked_add(1)
                     .ok_or_else(|| invalid("Spell cleanup generation exhausted"))?;
+                let departing_source = execution.source_before_move(self, from_ref(holder))?;
                 self.move_objects(from_ref(holder), "cemetery", None, None, &execution.frame())?;
+                execution.seal_source_departure(departing_source);
             }
         }
         Ok(())

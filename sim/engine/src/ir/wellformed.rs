@@ -249,6 +249,7 @@ struct Checker {
     receipts: BTreeSet<ReceiptId>,
     source: Option<Box<SourceSpan>>,
     ability_source: Option<AbilitySource>,
+    source_information_entry: bool,
     path: String,
 }
 #[expect(
@@ -294,6 +295,7 @@ impl Checker {
             receipts: BTreeSet::new(),
             source: None,
             ability_source: None,
+            source_information_entry: false,
             path: String::new(),
         }
     }

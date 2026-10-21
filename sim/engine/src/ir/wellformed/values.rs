@@ -91,7 +91,7 @@ impl Checker {
                         ) {
                             return self.reject();
                         }
-                        self.view(object)
+                        self.information_view(object)
                     }
                 },
             },
@@ -400,6 +400,18 @@ impl Checker {
         }
     }
 
+    pub(super) fn information_view(&self, view: &ObjectView) -> Checked {
+        if matches!(view, ObjectView::SourceInformation {}) {
+            if self.source_information_entry && !self.event_capture() {
+                Ok(())
+            } else {
+                self.reject()
+            }
+        } else {
+            self.view(view)
+        }
+    }
+
     pub(super) fn view(&self, view: &ObjectView) -> Checked {
         match view {
             ObjectView::Snapshot { value } => self.projection(value),
@@ -416,7 +428,8 @@ impl Checker {
             {
                 self.object(object)
             }
-            ObjectView::Current { .. }
+            ObjectView::SourceInformation {}
+            | ObjectView::Current { .. }
             | ObjectView::LastKnown { .. }
             | ObjectView::EventSnapshot { .. } => self.reject(),
         }

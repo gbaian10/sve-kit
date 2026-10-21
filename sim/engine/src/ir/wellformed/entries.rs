@@ -163,6 +163,8 @@ impl Checker {
         let previous_play = self.play_entry.clone();
         let previous_controller = self.play_controller.clone();
         let previous_source = self.ability_source.replace(ability.source.clone());
+        let previous_information = self.source_information_entry;
+        self.source_information_entry = true;
         let previous_revoked = self.revoked;
         self.env = Self::new(ability.scope).env;
         self.root = ability.scope;
@@ -182,6 +184,7 @@ impl Checker {
         self.play_entry = previous_play;
         self.play_controller = previous_controller;
         self.ability_source = previous_source;
+        self.source_information_entry = previous_information;
         self.revoked = previous_revoked;
         result
     }

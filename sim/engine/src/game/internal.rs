@@ -13,12 +13,11 @@ use crate::ir::{
     EffectId, ExecutionId, Expr, Generation, InstallationSubjects, Instruction, InstructionContext,
     Int, IntFrozen, IntOperation, IntRead, Located, LookOutcome, MeasuredReceipt, ModeId,
     MoveOutcome, Nat, NatFrozen, NatOperation, NatRead, Node, ObjectFrozen, ObjectId,
-    ObjectOperand, ObjectRef, ObjectView, OrderOutcome, PlayerId, PlayerRef, PlayerRelation,
-    PlayerResource, PlayerSet, PositiveInt, PostureEvent, Predicate, Program, Quantity, ReceiptId,
-    ReceiptLocation, RecipientSet, Requirements, ResolvedRecipients, RuntimeAbilitySource,
-    RuntimeDamageRecipient, RuntimeObjectView, ScopeId, SearchOutcome, SearchReplacementAnswer,
-    Selector, SnapshotId, SourceSpan, StepwiseAnswer, StepwiseMode, Visibility, WellFormedProgram,
-    ZoneKind,
+    ObjectOperand, ObjectRef, OrderOutcome, PlayerId, PlayerRef, PlayerRelation, PlayerResource,
+    PlayerSet, PositiveInt, PostureEvent, Predicate, Program, Quantity, ReceiptId, ReceiptLocation,
+    RecipientSet, Requirements, ResolvedRecipients, RuntimeAbilitySource, RuntimeDamageRecipient,
+    ScopeId, SearchOutcome, SearchReplacementAnswer, Selector, SourceSpan, StepwiseAnswer,
+    StepwiseMode, Visibility, WellFormedProgram, ZoneKind,
 };
 use crate::{EngineFailure, Result, invalid};
 use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
@@ -37,6 +36,7 @@ mod movement;
 mod numeric;
 mod ordering;
 mod search;
+mod source;
 mod values;
 
 pub use allocation::{DamageShare, DistributionDomain, DistributionMember};
@@ -298,6 +298,7 @@ pub(super) struct Execution {
     allocations: BTreeMap<(ScopeId, u64), allocation::Allocation>,
     origin: Option<Box<Game>>,
     ability: Option<RuntimeAbilitySource>,
+    source_information: Option<source::SourceInformation>,
     targets: BTreeSet<(ScopeId, u64)>,
     play: Option<card::play::PlayState>,
     spell: bool,
@@ -459,6 +460,7 @@ impl Game {
                 allocations: BTreeMap::new(),
                 origin: Some(Box::new(before.clone())),
                 ability: None,
+                source_information: None,
                 targets: BTreeSet::new(),
                 play: None,
                 spell: false,
@@ -967,21 +969,14 @@ impl Game {
             Action::Damage {
                 recipients,
                 amount: damage_amount,
-                source:
-                    ObjectView::Current {
-                        object: source_object,
-                    },
+                source: source_view,
                 ..
             } => {
                 let (shares, requested) =
                     execution.damage_shares(self, recipients, damage_amount)?;
-                let source = execution.object(self, source_object)?;
-                let source_id = execution.object_id(source)?.to_owned();
-                if self.object(&source_id)?.generation != source.generation.0 {
-                    return Err(invalid("damage source generation is no longer current"));
-                }
+                let source = execution.damage_source(self, source_view)?;
+                let source_id = execution.object_id(source.object)?.to_owned();
                 let actor = execution.player(self, &instruction.source.controller)?;
-                let snapshot = SnapshotId(self.state.ir_epoch);
                 let mut hits = Vec::new();
                 let mut facts = Vec::new();
                 let mut actual = 0_u64;
@@ -1015,10 +1010,7 @@ impl Game {
                             .ok_or_else(|| invalid("damage outcome overflow"))?;
                         hits.push(json!({"source":source_id,"target":target,"amount":amount,"battle":false,"attack":false}));
                         facts.push(Fact::Damage(DamageEvent {
-                            source: RuntimeObjectView {
-                                object: source,
-                                snapshot,
-                            },
+                            source,
                             recipient,
                             amount: PositiveInt(positive),
                             flags: DamageFlags::Ability,

@@ -485,20 +485,25 @@ fn check_nodes(
                 if instruction.source != *ability_source {
                     return Err(invalid("instruction has a foreign ability source"));
                 }
-                if !matches!(
-                    instruction.action,
-                    Action::Draw {
-                        mode: StepwiseMode::Exact,
-                        ..
-                    } | Action::Look {
-                        mode: StepwiseMode::Exact,
-                        ..
-                    } | Action::Damage {
-                        amount: DamageAmount::Uniform { .. } | DamageAmount::Allocation { .. },
-                        ..
-                    } | Action::Modify { .. }
-                        | Action::InstallEffect { .. }
-                ) {
+                // Observed Look→EX moves are a private-spine shape, not the public Move subset.
+                if super::movement::observed_move(&instruction.action)
+                    || !matches!(
+                        instruction.action,
+                        Action::Draw {
+                            mode: StepwiseMode::Exact,
+                            ..
+                        } | Action::Look {
+                            mode: StepwiseMode::Exact,
+                            ..
+                        } | Action::Damage {
+                            amount: DamageAmount::Uniform { .. } | DamageAmount::Allocation { .. },
+                            ..
+                        } | Action::Move { .. }
+                            | Action::Destroy { .. }
+                            | Action::Modify { .. }
+                            | Action::InstallEffect { .. }
+                    )
+                {
                     return Err(unsupported("whole-card synchronous action"));
                 }
             }

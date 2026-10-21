@@ -6,11 +6,10 @@ use super::{
     ResolvedRecipients, Result, RuntimeDamageRecipient, Selector, Slot, ZoneKind, contains, int,
     invalid, player_id, seat_name, unsupported,
 };
-use crate::ir::{
-    CharacteristicView, FollowPermission, MemberProjection, NumberRead, ObjectReceipt, ObjectView,
-    PlayerRead, ReceiptId, Role,
-};
 use crate::ir::{ExecutionRef, SpellCountTime};
+use crate::ir::{
+    FollowPermission, MemberProjection, ObjectReceipt, ObjectView, PlayerRead, ReceiptId, Role,
+};
 use alloc::collections::BTreeSet;
 use core::convert::identity;
 
@@ -338,34 +337,8 @@ impl Execution {
                 _ => Err(unsupported("signed projection")),
             },
             Expr::Compute(operation) => match operation.as_ref() {
-                IntOperation::InformationOrZero {
-                    information:
-                        NumberRead::Cost {
-                            object: ObjectView::Current { object },
-                            view: CharacteristicView::Effective,
-                        },
-                } => {
-                    let reference = self.object(game, object)?;
-                    let id = self.object_id(reference)?;
-                    if game.object(id)?.generation != reference.generation.0 {
-                        return Err(invalid("stale cost read"));
-                    }
-                    game.internal_effective_cost(id).map(Int)
-                }
-                IntOperation::InformationOrZero {
-                    information:
-                        NumberRead::Stats {
-                            object: ObjectView::Current { object },
-                            property,
-                            view: CharacteristicView::Effective,
-                        },
-                } => {
-                    let reference = self.object(game, object)?;
-                    let id = self.object_id(reference)?;
-                    if game.object(id)?.generation != reference.generation.0 {
-                        return Err(invalid("stale numeric read"));
-                    }
-                    game.internal_numeric_stat(id, *property).map(Int)
+                IntOperation::InformationOrZero { information } => {
+                    self.number_information(game, information).map(Int)
                 }
                 IntOperation::FromNat { value } => Ok(Int(i64::try_from(
                     self.natural(game, value)?.0,
@@ -393,7 +366,7 @@ impl Execution {
                         .collect::<Result<Vec<_>>>()?;
                     arithmetic(*operation, &values).map(Int)
                 }
-                _ => Err(unsupported("signed operation")),
+                IntOperation::Sum { .. } => Err(unsupported("signed operation")),
             },
         }
     }
