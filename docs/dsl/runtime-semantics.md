@@ -151,10 +151,13 @@ Follower／Amulet 的卡片 play 與場上能力分開，詳見[有效區對映]
 不把新世代重綁成 holder。誘發能力沿用觸發當時的能力實例及其控制者；來源離場
 不取消已待機／已打出的能力（CR 3.1.2、10.6.2.8.2.1、10.7.7）。來源所需的舊資訊
 以事件／LKI 視圖保存；Current 讀取仍須驗世代，不能偷偷改成 LKI。
+常見觸發的 pending 選序、來源資訊 producer 與終局接點依
+[觸發與 LKI 契約](trigger-lki-semantics.md)；該契約不代表 executor 已准入。
 
 CR 10.12.1.1／10.12.2.2 決定能力效果及傷害的來源通常為持有能力的卡。由規則造成
-的處理用 `Cause::Rule`，不捏造能力來源。來源視圖與 controller 在本次 execution
-固定；目標的 owner／controller 在各自規則要求的時點讀取。未支援 LKI 傷害時，會
+的處理用 `Cause::Rule`，不捏造能力來源。來源身分與 controller 在本次 execution
+固定；來源資訊依明示的 Current／事件／LKI 視圖讀取，並非一律凍結數值。
+目標的 owner／controller 在各自規則要求的時點讀取。未支援 LKI 傷害時，會
 需要該路徑的完整能力先拒絕；不可把「來源不在場則取消整個能力」當遊戲規則。
 
 成本成功後才發 play 事實；本文完整解算並處理解決區收尾後，才交回 CR 10.5 的
