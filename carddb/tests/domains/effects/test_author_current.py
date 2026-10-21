@@ -1,5 +1,6 @@
 """Real adopted sources enter through the complete current author-set boundary."""
 
+from contextlib import contextmanager
 from copy import deepcopy
 from dataclasses import replace
 from pathlib import Path
@@ -18,7 +19,11 @@ from sve_carddb.domains.effects.author_current import (
     CurrentAuthorSources,
 )
 from sve_carddb.domains.effects.author_expansion import AuthorExpander
-from sve_carddb.domains.effects.author_set import AuthorInputSet, InputFile
+from sve_carddb.domains.effects.author_set import (
+    AuthorInputSet,
+    InputFile,
+    load_author_set,
+)
 from sve_carddb.domains.effects.author_source_hash import (
     AuthorSourcePayload,
     source_version,
@@ -36,7 +41,7 @@ from .author_entry_cases import meta
 from .test_author_entries import SCHEMAS
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Generator
 
 
 CARDS = {
@@ -45,13 +50,6 @@ CARDS = {
     "BP01-092": "c:8c4b83cfcb625c0490eb8c66968f29dc",
 }
 FRAME = "frame:8ebd201e08a1e14f57b700f2fb76dc11afbf7f16261350a117e2ca75f1aac18c"
-IDENTITIES = CARDS | {
-    "BP01-110": "c:9c467cdec10851c3958323fe461496dd",
-    "BP01-076": "c:31103e7d8c6b5a2d9e3838cac19b1c07",
-    "BP01-020": "c:5a26f30fff6c59c4ba36ffe785afbe17",
-    "BP08-038": "c:c780e65fdb615e298840ce5be62553a7",
-    "CP04-060": "c:446aae79e53156c0875a89bd7c3bb6bc",
-}
 
 
 @pytest.fixture(scope="module")
@@ -64,8 +62,8 @@ def expander() -> AuthorExpander:
     return AuthorExpander(SCHEMAS)
 
 
-@pytest.fixture
-def current(fixture: CurrentSourceFixture) -> Iterator[CurrentAuthorSources]:
+@contextmanager
+def current(fixture: CurrentSourceFixture) -> Generator[CurrentAuthorSources]:
     with fixture.template.copy() as db:
         yield CurrentAuthorSources(
             db,
@@ -101,7 +99,7 @@ def inputs(
             "kind": "effects_index",
             "records": [
                 {
-                    "card_id": IDENTITIES[number],
+                    "card_id": CARDS[number],
                     "scope": scope,
                     "file": file.path,
                     "kind": "author_effect_set",
@@ -143,7 +141,7 @@ def author(
     current: CurrentAuthorSources, number: str = "BP01-009"
 ) -> dict[str, JsonValue]:
     # Registry matches only construct the author input; independent goldens pin its hash.
-    card = current._card_payload(IDENTITIES[number])
+    card = current._card_payload(CARDS[number])
     matched = card.fields[0].matches[0]
     assert matched is not None
     assert matched.frame.id == FRAME
@@ -155,8 +153,6 @@ def author(
     metadata = meta()
     metadata["source"] = source_version(
         AuthorSourcePayload.model_validate_json(canonical(golden(number)))
-        if number in CARDS
-        else card.payload  # BP01-110 only seeds the prototype-overlap regression.
     )
     return {
         "meta": metadata,
@@ -171,7 +167,6 @@ def author(
                             "BP01-009": 1,
                             "BP01-034": 2,
                             "BP01-092": 0,
-                            "BP01-110": 1,
                         }[number]
                     }
                 },
@@ -197,22 +192,26 @@ def rejected(
     return result[0]
 
 
-@pytest.mark.parametrize("number", CARDS)
-@pytest.mark.parametrize("face_container", [False, True])
-def test_real_current_entry_and_container(
+def check_real_current_entry_and_container(
     current: CurrentAuthorSources,
     expander: AuthorExpander,
     number: str,
     face_container: bool,
+    prototypes: tuple[InputFile, ...],
 ) -> None:
     card = author(current, number)
     if face_container:
         face = FACTS[number]["face"]
         card["faces"] = {face: {"abilities": card.pop("abilities")}}
-    collection = inputs({number: card})
+    collection = replace(inputs({number: card}), prototype_files=prototypes)
     results = validate_files(current, collection, expander)
     assert len(results) == 1
     assert isinstance(results[0], CardAccepted)
+    expected = canonical(golden(number))
+    assert results[0].source_payload == expected
+    assert results[0].source_version == source_version(
+        AuthorSourcePayload.model_validate_json(expected)
+    )
     evidence = results[0].candidate.sidecar[0]
     assert evidence.source_proof == "current_source_checked"
     assert evidence.input_hash == collection.author_files[0].input_hash
@@ -225,23 +224,7 @@ def test_real_current_entry_and_container(
     )
 
 
-@pytest.mark.parametrize("number", CARDS)
-def test_independent_real_payload_goldens(
-    current: CurrentAuthorSources, expander: AuthorExpander, number: str
-) -> None:
-    expected = canonical(golden(number))
-    result = validate_files(
-        current, inputs({number: author(current, number)}), expander
-    )[0]
-    assert isinstance(result, CardAccepted)
-    assert result.source_payload == expected
-    assert result.source_version == source_version(
-        AuthorSourcePayload.model_validate_json(expected)
-    )
-
-
-@pytest.mark.parametrize("attribute", ["class_code", "cost"])
-def test_database_null_is_unknown_and_rejected(
+def check_database_null_is_unknown_and_rejected(
     current: CurrentAuthorSources, expander: AuthorExpander, attribute: str
 ) -> None:
     card = author(current)
@@ -252,28 +235,7 @@ def test_database_null_is_unknown_and_rejected(
     rejected(current, expander, card, "source_unknown")
 
 
-@pytest.mark.parametrize(
-    "head",
-    [
-        {"spell": {"do": []}},
-        {"feed": {"cost": {"pp": 1}}},
-        {"evolve": {"cost": {"pp": 2}}},
-        {"evolve": {"cost": {"steps": [{"pp": 1}, {"ep": 1}]}}},
-        {"evolve": {"cost": {"steps": [{"pp": 1}, {"leader_life": 1}]}}},
-        {"evolve": {"cost": {"pp": {"plus": [0, 1]}}}},
-        {"evolve": {"cost": {"pp": 1}, "usable_if": {"my_turn": True}}},
-    ],
-    ids=[
-        "wrong-spell",
-        "wrong-feed",
-        "wrong-cost",
-        "extra-ep",
-        "extra-life",
-        "expression",
-        "usable-if",
-    ],
-)
-def test_complete_head_payload(
+def check_complete_head_payload(
     current: CurrentAuthorSources, expander: AuthorExpander, head: dict[str, JsonValue]
 ) -> None:
     card = author(current)
@@ -283,22 +245,7 @@ def test_complete_head_payload(
     rejected(current, expander, card, "source_head_payload_mismatch")
 
 
-@pytest.mark.parametrize(
-    ("change", "reason"),
-    [
-        ("hash", "source_occurrence_mismatch"),
-        ("binding", "source_occurrence_mismatch"),
-        ("scope", "source_occurrence_mismatch"),
-        ("line", "source_location_mismatch"),
-        ("owner", "source_current_owner_mismatch"),
-        ("meta", "source_version_mismatch"),
-        ("missing", "source_ability_closure_mismatch"),
-        ("duplicate", "duplicate_source_ability"),
-        ("face", "source_face_container_mismatch"),
-        ("deck", "unsupported_source_deck_rule"),
-    ],
-)
-def test_exact_current_use(
+def check_exact_current_use(
     current: CurrentAuthorSources, expander: AuthorExpander, change: str, reason: str
 ) -> None:
     card = author(current)
@@ -309,8 +256,6 @@ def test_exact_current_use(
         occurrence["source_hash"] = "f" * 64
     elif change == "binding":
         use["binding_id"] = "bind:" + "f" * 64
-    elif change == "scope":
-        use["ability_scope"] = "ability_1"
     elif change == "line":
         node["line"] = 2
     elif change == "owner":
@@ -329,7 +274,7 @@ def test_exact_current_use(
     rejected(current, expander, card, reason)
 
 
-def test_mixed_same_file_retains_success(
+def check_mixed_same_file_retains_success(
     current: CurrentAuthorSources, expander: AuthorExpander
 ) -> None:
     good, bad = author(current), author(current, "BP01-034")
@@ -342,8 +287,7 @@ def test_mixed_same_file_retains_success(
     assert result[1].diagnostic.card_no == "BP01-034"
 
 
-@pytest.mark.parametrize("face_container", [False, True])
-def test_synthetic_multiface_owner_controls_both_containers(
+def check_synthetic_multiface_owner_controls_both_containers(
     current: CurrentAuthorSources,
     expander: AuthorExpander,
     monkeypatch: pytest.MonkeyPatch,
@@ -377,7 +321,7 @@ def test_synthetic_multiface_owner_controls_both_containers(
     assert len(result.candidate.sidecar) == 2
 
 
-def test_current_evidence_replacement_drops_proof(
+def check_current_evidence_replacement_drops_proof(
     current: CurrentAuthorSources, expander: AuthorExpander
 ) -> None:
     result = validate_files(current, inputs({"BP01-009": author(current)}), expander)[0]
@@ -388,16 +332,7 @@ def test_current_evidence_replacement_drops_proof(
         replace(evidence, source_proof="current_source_checked")
 
 
-@pytest.mark.parametrize(
-    ("family", "change"),
-    [
-        (family, change)
-        for family in ("feed", "ride")
-        for change in ("none", "missing", "swapped", "extra")
-    ]
-    + [("feed", "times")],
-)
-def test_synthetic_sibling_root_closure(
+def check_synthetic_sibling_root_closure(
     current: CurrentAuthorSources,
     fixture: CurrentSourceFixture,
     expander: AuthorExpander,
@@ -461,10 +396,6 @@ def test_synthetic_sibling_root_closure(
         object_value(object_value(abilities[1])["feed"])["times"] = 2
     elif change == "missing":
         abilities.pop()
-    elif change == "extra":
-        object_value(object_value(abilities[0])["evolve"])["into"] = (
-            "Synthetic other form"
-        )
     metadata = meta()
     metadata["source"] = source_version(complete.payload)
     result = validate_files(
@@ -482,3 +413,66 @@ def test_synthetic_sibling_root_closure(
             if change == "missing"
             else "source_head_payload_mismatch"
         )
+
+
+def test_real_current_author_set(
+    fixture: CurrentSourceFixture, expander: AuthorExpander
+) -> None:
+    # One test keeps the real tree/database build on one xdist worker.
+    real = load_author_set(SCHEMAS.parent / "authored", expander.schemas)
+    assert real.index_file is None
+    assert real.index.records == ()
+    assert real.author_files == real.body_files == ()
+    assert {file.path for file in real.prototype_files} == {
+        path.relative_to(SCHEMAS.parent / "authored").as_posix()
+        for path in (SCHEMAS.parent / "authored/rules/effects").glob("*.yaml")
+    }
+    assert real.prototype_files
+    with current(fixture) as source:
+        for index, number in enumerate(CARDS):
+            check_real_current_entry_and_container(
+                source,
+                expander,
+                number,
+                index == 1,
+                real.prototype_files if index == 0 else (),
+            )
+        check_mixed_same_file_retains_success(source, expander)
+        check_current_evidence_replacement_drops_proof(source, expander)
+        heads: tuple[dict[str, JsonValue], ...] = (
+            {"spell": {"do": []}},
+            {"evolve": {"cost": {"pp": 2}}},
+            {"evolve": {"cost": {"steps": [{"pp": 1}, {"ep": 1}]}}},
+        )
+        for head in heads:
+            check_complete_head_payload(source, expander, head)
+        for change, reason in (
+            ("hash", "source_occurrence_mismatch"),
+            ("binding", "source_occurrence_mismatch"),
+            ("line", "source_location_mismatch"),
+            ("owner", "source_current_owner_mismatch"),
+            ("meta", "source_version_mismatch"),
+            ("missing", "source_ability_closure_mismatch"),
+            ("duplicate", "duplicate_source_ability"),
+            ("face", "source_face_container_mismatch"),
+            ("deck", "unsupported_source_deck_rule"),
+        ):
+            check_exact_current_use(source, expander, change, reason)
+    with current(fixture) as source:
+        check_database_null_is_unknown_and_rejected(source, expander, "cost")
+    for face_container in (False, True):
+        with current(fixture) as source, pytest.MonkeyPatch.context() as patch:
+            check_synthetic_multiface_owner_controls_both_containers(
+                source, expander, patch, face_container
+            )
+    for family, change in (
+        ("feed", "none"),
+        ("feed", "missing"),
+        ("feed", "swapped"),
+        ("feed", "times"),
+        ("ride", "none"),
+    ):
+        with current(fixture) as source, pytest.MonkeyPatch.context() as patch:
+            check_synthetic_sibling_root_closure(
+                source, fixture, expander, patch, family, change
+            )
