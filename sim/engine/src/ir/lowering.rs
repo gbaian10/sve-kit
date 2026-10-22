@@ -72,8 +72,8 @@ impl ExpandedLowerer {
     /// field activation with ordered constant PP/Act/self-to-cemetery costs,
     /// draw, uniform damage to all leaders, destroy, numeric modifications,
     /// constant continuous installations, Search, successful EX discounts and
-    /// observed deck ordering have closed supported subsets. Search and Order
-    /// still require D1's fragment harness; this is not whole-card admission.
+    /// observed deck ordering have closed supported subsets. D1 separately checks
+    /// whole-card runtime support; this is not source or qualification admission.
     /// Unfiltered field targets, same-play Distribution and a sole top-level
     /// `ChoiceKeyword` have closed supported subsets. Spell headers require
     /// [`Self::lower_with_printed_costs`]; this method rejects missing printed costs.
