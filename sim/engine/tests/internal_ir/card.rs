@@ -1,4 +1,7 @@
 use super::*;
+
+#[path = "card/admission.rs"]
+mod admission;
 use sve_engine::game::internal::{Activation, CardPlay, ResumeStage};
 
 #[path = "card/payment.rs"]
@@ -317,15 +320,17 @@ fn provenance_face_line_card_and_instruction_origin_are_bound() {
 #[test]
 fn unsupported_interactive_bodies_are_not_admitted() {
     for seat in [1, 2] {
-        for (steps, observed) in [
-            (vec![up_to(1, 1)], false),
-            // Observed Look-to-EX movement stays outside the public whole-card Move subset.
+        for (steps, expected) in [
+            (vec![up_to(1, 1)], "whole-card synchronous action"),
+            // An EX move outside the observed Look spine keeps the private shape gate.
             (
-                vec![
-                    ordering::look(1, 2),
-                    projections::put_ex(2, ordering::looked(1)),
-                ],
-                true,
+                vec![projections::put_ex(
+                    1,
+                    Selector::Objects {
+                        objects: vec![ObjectOperand::SourceHolder {}],
+                    },
+                )],
+                "observed move shape",
             ),
         ] {
             let mut game = game(seat, 2);
@@ -334,12 +339,24 @@ fn unsupported_interactive_bodies_are_not_admitted() {
                 .load_internal_card("unit-follower", &card(vec![ability(1, steps)]))
                 .unwrap_err();
             assert!(
-                !observed
-                    || matches!(&error, sve_engine::EngineFailure::Unsupported(message)
-                if message.contains("whole-card synchronous action"))
+                matches!(&error, sve_engine::EngineFailure::Unsupported(message) if message.contains(expected)),
+                "{error:?}"
             );
             assert_eq!(before, exact_authority(&game));
         }
+        // The observed Look-to-EX spine is now part of the whole-card subset.
+        game(seat, 2)
+            .load_internal_card(
+                "unit-follower",
+                &card(vec![ability(
+                    1,
+                    vec![
+                        ordering::look(1, 2),
+                        projections::put_ex(2, ordering::looked(1)),
+                    ],
+                )]),
+            )
+            .unwrap();
     }
 }
 

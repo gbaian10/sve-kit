@@ -13,6 +13,9 @@
 YAML。印刷 face 的十進位 ordinal 與 lowering candidate 的 `base`（對應 face 0）都保留原本
 owner、field、fragment；這不授予永久來源身分或公開 capability。整卡的良構入口環境直接帶入
 本文，不把依賴 play binding 的本文重新當成封閉 `WellFormedProgram`。
+base 與能力引用的印刷面費用為 null 或缺欄時拒絕，不能以零補值；明示的零費用仍有效。
+印刷為「-」的面（エボルヴ等不從手牌打出的種類）照舊視為無費用資訊，不在此拒絕。
+Printed Activated 的印刷面必須是普通從者，護符起動片段在載入時即拒絕。
 
 准入接受普通 Printed Spell 的 `[Resolution]`、Printed Activated 的 `[Field]`，以及下節的
 Printed Fanfare／Lastword／OnAttack 及 End Begin。Spell 的唯一固有 Ordered PP Pay 必須等於同 Catalog face 的印刷費用；
@@ -23,9 +26,10 @@ Amulet executor、Quick、前置 X、追加／替代成本、一般 trigger、St
 載入逐能力驗證 card／face／line、印刷座標唯一、所有 instruction 的來源閉包，以及包含未選模式
 與死分支的 requirement 集合。Fanfare Keyword 例外只接受已驗 instruction source 的精確位置，
 不對同名 capability 全域放行。本文仍限 Draw Exact、Look Exact、Uniform／Allocation Damage、
-已支援的 Modify／InstallEffect、Move／Destroy、capture、Sequence／If，另支援下述 ChoiceKeyword。
-Move／Destroy 沿用已驗公開區來源與 owner 墓地／消滅目的地；未受驗連結、特殊卡片、
-入場效果與其他互動本文保持拒絕。
+已支援的 Modify／InstallEffect、Move／Destroy、Search、Order、capture、Sequence／If，另支援下述 ChoiceKeyword。
+Move／Destroy 沿用已驗公開區來源與 owner 墓地／消滅目的地；Search、Order 與 Look→自己 EX 的
+觀察 Move 只收〈私有看牌與同區排列〉及 Search 各節的同一受限形狀，整卡不另放寬。
+這只是執行支援，不代表正式來源或 qualified 已驗；未受驗連結、特殊卡片、入場效果與其他互動本文保持拒絕。
 
 `play_internal_card(holder, actor)` 接主動玩家 main、自己的 Hand／EX、base 普通 Spell 或已准入的
 普通從者；`activate_internal_card(holder, AbilityId, actor)` 接已載入的當前場上從者能力。
@@ -137,6 +141,8 @@ Set／帶期限 Add 跨進化仍受 numeric-timing 限制。BP20-R14 只取進�
 長寫 EnterField 限 Printed、自身或自方／對手的從者入場，可排除自身、匹配受驗特徵及自回合條件。
 只收凍結事件資訊的正規形；同批所有成員完成移區、數值清理與入場 counter 後才匹配，
 新入場監看者也觀察同批其他成員。Fanfare 共用此 producer，不額外要求 play。
+沒有監看者匹配的入場不產生事件；有匹配時才讀入場來源區，Deck 等未准入來源（含被放入者自身的
+Fanfare）拒絕整個動作，不靜默略過。
 事件保存新世代、真正來源區、controller、有效 characteristics 與 Play／AbilityPut；經 Resolution 仍保留原 Hand／EX。
 場間控制移轉不產生入場；未受驗入場效果、Creation、隱藏來源與一般事件條件拒絕。
 
@@ -411,8 +417,7 @@ found 不變，after／actual_to 為空。手牌新 slot 不提供對手持續�
 輸入，因此可找到的最大張數可能超過正數空位時，在讀取隱藏候選前拒絕情境；零空位
 可記零成功移動。スペル置於場的結果尚未准入：張數限定搜尋進場在開始前整棵拒絕，
 條件搜尋的回答若選到スペル即拒絕並維持待答。position／order、entry_effects、
-成功投影與減費安裝仍拒絕。完整 CardProgram、lowering 與公開
-capability 沒有擴充。
+成功投影與減費安裝仍拒絕。整卡本文可承載本節 Search；公開 capability 沒有擴充。
 
 Partition 僅准入 Owners(Hand)→Owners(Cemetery) 兩段，且搜尋有明示 maximum，兩段
 minimum 足以涵蓋該上限，以保證所有回答都會分配完 found；可能留下未分配成員的形狀
@@ -445,7 +450,9 @@ moved 才保存成功 after；選項與續體只向搜尋者／Referee 提供。
 
 BP03-002 コスモスファング只驗搜尋獣、公開、找到物件的有效費用條件、可選回手／入場及
 最後洗牌片段；印刷資料由公開輸入產生器提供，沒有承載進化、攻擊時能力、完整取代鏈、
-場滿時可選替代的裁定或整卡准入。錯答完整保留待答；選擇後的提交失敗回復整次 execution。
+場滿時可選替代的裁定或逐卡准入。其 C0／lowering 的 Fanfare 片段另經整卡載入、打出、
+Fanfare 待機、Search、可選入場到 CheckTiming 驗證；來源座標為合成且 source_proof=none，
+不是正式來源或 qualified 證據。錯答完整保留待答；選擇後的提交失敗回復整次 execution。
 RNG 回復以重新起動後成功洗牌與同種子控制局比對，不能只比較 Debug 字串。
 
 CP04-060 僅驗排除同名的ドラゴンズネスト搜尋、公開、進 EX 與洗牌，未接 UB、進化程序、

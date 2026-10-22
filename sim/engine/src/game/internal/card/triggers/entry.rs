@@ -6,7 +6,7 @@ use super::{
 };
 use crate::game::{Frame, Object};
 use crate::ir::events::entry::EntryFilter;
-use crate::ir::{CardKind, LimitSpec};
+use crate::ir::{CardKind, Characteristics, LimitSpec};
 use crate::ir::{EnterFieldEvent, EntryMethod, EntryOrigin, ExecutionId};
 
 pub(super) fn check_header(ability: &Ability) -> Result<bool> {
@@ -66,20 +66,21 @@ fn entry_origin(previous: &Object) -> Result<ZoneKind> {
 
 fn matches(
     plan: &EntryFilter,
-    event: &EnterFieldEvent,
+    entered: (PlayerId, &Characteristics),
     same: bool,
     controller: PlayerId,
     active: PlayerId,
 ) -> bool {
+    let (entry_controller, characters) = entered;
     plan.itself.is_none_or(|itself| itself == same)
         && plan
             .own
-            .is_none_or(|own| own == (event.controller == controller))
-        && (!plan.follower || event.characters.kind == CardKind::Follower)
+            .is_none_or(|own| own == (entry_controller == controller))
+        && (!plan.follower || characters.kind == CardKind::Follower)
         && plan
             .trait_id
             .as_ref()
-            .is_none_or(|trait_id| event.characters.traits.contains(trait_id))
+            .is_none_or(|trait_id| characters.traits.contains(trait_id))
         && (!plan.own_turn || active == controller)
 }
 
@@ -155,49 +156,64 @@ impl Game {
             {
                 return Err(invalid("entry did not commit"));
             }
-            let event = EnterFieldEvent {
-                object,
-                from: EntryOrigin::Zone {
-                    zone: entry_origin(old)?,
-                },
-                controller: player_id(&self.object(&old.id)?.controller)?,
-                characters: self.internal_characteristics(&old.id)?,
-                method,
-                play_receipt: None,
-            };
+            let entry_controller = player_id(&self.object(&old.id)?.controller)?;
+            let characters = self.internal_characteristics(&old.id)?;
             let header = self.pending_header(actor, cause, effect_source, before)?;
+            let mut matched = Vec::new();
             for (holder, abilities) in &observers {
                 let controller = player_id(&self.object(holder)?.controller)?;
                 for ability in abilities {
                     let plan =
                         filter(&ability.node).ok_or_else(|| invalid("missing entry filter"))?;
-                    if !matches(&plan, &event, *holder == old.id, controller, active) {
-                        continue;
+                    if matches(
+                        &plan,
+                        (entry_controller, &characters),
+                        *holder == old.id,
+                        controller,
+                        active,
+                    ) {
+                        matched.push((holder, ability, controller));
                     }
-                    let source = self.internal_card_source(holder, ability.node.id, controller)?;
-                    let information = SourceInformation::current(self, source)?;
-                    let mut pending = self.new_pending(
-                        holder,
-                        source,
-                        ability.clone(),
-                        information,
-                        header.clone(),
-                        None,
-                    )?;
-                    pending.field_position = u64::try_from(
-                        self.zone_ids(super::super::seat_name(event.controller)?, "field")
-                            .iter()
-                            .position(|id| *id == old.id)
-                            .ok_or_else(|| invalid("entry has no field position"))?,
-                    )
-                    .map_err(invalid)?
-                    .checked_add(1)
-                    .ok_or_else(|| invalid("entry position overflow"))?;
-                    pending.timing = Some(EventPayload::EnterField {
-                        event: event.clone(),
-                    });
-                    candidates.push(pending);
                 }
+            }
+            if matched.is_empty() {
+                continue;
+            }
+            // Only a matching occurrence publishes the origin; unadmitted zones still reject it.
+            let event = EnterFieldEvent {
+                object,
+                from: EntryOrigin::Zone {
+                    zone: entry_origin(old)?,
+                },
+                controller: entry_controller,
+                characters,
+                method,
+                play_receipt: None,
+            };
+            for (holder, ability, controller) in matched {
+                let source = self.internal_card_source(holder, ability.node.id, controller)?;
+                let information = SourceInformation::current(self, source)?;
+                let mut pending = self.new_pending(
+                    holder,
+                    source,
+                    ability.clone(),
+                    information,
+                    header.clone(),
+                    None,
+                )?;
+                pending.field_position = u64::try_from(
+                    self.zone_ids(super::super::seat_name(event.controller)?, "field")
+                        .iter()
+                        .position(|id| *id == old.id)
+                        .ok_or_else(|| invalid("entry has no field position"))?,
+                )
+                .map_err(invalid)?
+                .checked_add(1)
+                .ok_or_else(|| invalid("entry position overflow"))?;
+                pending.timing = Some(EventPayload::EnterField {
+                    event: event.clone(),
+                });
+                candidates.push(pending);
             }
         }
         self.internal_admit_pending(candidates)

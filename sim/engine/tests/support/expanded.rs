@@ -6,13 +6,21 @@ use std::process::Command;
 use std::sync::OnceLock;
 
 pub(crate) fn tree() -> &'static Value {
-    static TREE: OnceLock<Value> = OnceLock::new();
-    TREE.get_or_init(|| expand(false))
+    &candidate(false)["tree"]
 }
 
 pub(crate) fn spell_tree() -> &'static Value {
+    &candidate(true)["tree"]
+}
+
+pub(crate) fn candidate(spell: bool) -> &'static Value {
     static TREE: OnceLock<Value> = OnceLock::new();
-    TREE.get_or_init(|| expand(true))
+    static SPELL: OnceLock<Value> = OnceLock::new();
+    if spell {
+        SPELL.get_or_init(|| expand(true))
+    } else {
+        TREE.get_or_init(|| expand(false))
+    }
 }
 
 #[allow(
@@ -37,11 +45,18 @@ import sys
 from pathlib import Path
 from sve_carddb.domains.effects.author_expansion import AuthorExpander
 expander = AuthorExpander(Path(sys.argv[1]))
-first = expander.expand(Path(sys.argv[2]).read_bytes(), []).tree
+initial = expander.expand(Path(sys.argv[2]).read_bytes(), [])
+first = initial.tree
+evidence = list(initial.sidecar)
 first['cards'] = {'BP08-038': first['cards']['BP08-038']}
 for path in sys.argv[3:]:
-    first['cards'].update(expander.expand(Path(path).read_bytes(), []).tree['cards'])
-print(json.dumps(first))
+    candidate = expander.expand(Path(path).read_bytes(), [])
+    first['cards'].update(candidate.tree['cards'])
+    evidence.extend(candidate.sidecar)
+print(json.dumps({'tree': first, 'evidence': [
+    {'path': list(entry.path), 'source_proof': entry.source_proof}
+    for entry in evidence if entry.path[1] in first['cards']
+]}))
 ",
         ])
         .arg(root.join("dsl"))

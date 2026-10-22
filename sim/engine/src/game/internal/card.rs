@@ -126,7 +126,10 @@ impl Game {
         card_no: &str,
         card: &WellFormedCardProgram,
     ) -> Result<()> {
-        self.catalog.face(card_no, 0)?;
+        let base_print = self.catalog.face(card_no, 0)?;
+        if base_print["cost"].is_null() {
+            return Err(unsupported("missing printed card cost"));
+        }
         if self.card_runtime.cards.contains_key(card_no)
             || self.typed.is_some()
             || !self.prepared.is_empty()
@@ -154,6 +157,12 @@ impl Game {
                 return Err(invalid("invalid or duplicate printed ability coordinate"));
             }
             let printed = self.catalog.face(card_no, ordinal)?;
+            if printed["cost"].is_null() {
+                return Err(unsupported("missing printed face cost"));
+            }
+            if ability.kind == AbilityKind::Activated && printed["card_type"] != "フォロワー" {
+                return Err(unsupported("activated printed face is not a follower"));
+            }
             if ability.kind == AbilityKind::Spell {
                 play::check_spell(ability, printed)?;
             }
@@ -575,25 +584,24 @@ fn check_nodes(
                 if instruction.source != *ability_source {
                     return Err(invalid("instruction has a foreign ability source"));
                 }
-                // Observed Look→EX moves are a private-spine shape, not the public Move subset.
-                if super::movement::observed_move(&instruction.action)
-                    || !matches!(
-                        instruction.action,
-                        Action::Draw {
-                            mode: StepwiseMode::Exact,
-                            ..
-                        } | Action::Look {
-                            mode: StepwiseMode::Exact,
-                            ..
-                        } | Action::Damage {
-                            amount: DamageAmount::Uniform { .. } | DamageAmount::Allocation { .. },
-                            ..
-                        } | Action::Move { .. }
-                            | Action::Destroy { .. }
-                            | Action::Modify { .. }
-                            | Action::InstallEffect { .. }
-                    )
-                {
+                if !matches!(
+                    instruction.action,
+                    Action::Draw {
+                        mode: StepwiseMode::Exact,
+                        ..
+                    } | Action::Look {
+                        mode: StepwiseMode::Exact,
+                        ..
+                    } | Action::Damage {
+                        amount: DamageAmount::Uniform { .. } | DamageAmount::Allocation { .. },
+                        ..
+                    } | Action::Move { .. }
+                        | Action::Destroy { .. }
+                        | Action::Modify { .. }
+                        | Action::InstallEffect { .. }
+                        | Action::Search { .. }
+                        | Action::Order { .. }
+                ) {
                     return Err(unsupported("whole-card synchronous action"));
                 }
             }

@@ -30,7 +30,7 @@ pub(super) fn position_for_card(
     game
 }
 
-fn fragment_position(seat: u32, card_no: &str, pp: i64, deck: Value) -> Game {
+pub(super) fn fragment_position(seat: u32, card_no: &str, pp: i64, deck: Value) -> Game {
     let snapshot = read_to_string(var_os("SVE_TEST_SNAPSHOT").unwrap()).unwrap();
     let registry = json!({"format":1,"kind":"keyword_registry","keywords":{}}).to_string();
     let mut effects = json!({"format":1,"kind":"effect_set","cards":{
@@ -62,22 +62,24 @@ fn fragment_position(seat: u32, card_no: &str, pp: i64, deck: Value) -> Game {
 }
 
 #[test]
-fn bp03_002_lowered_search_runs_in_synthetic_harness() {
+fn bp03_002_lowered_search_runs_through_whole_card_pending() {
     let cards = ExpandedLowerer::new()
         .unwrap()
         .lower(expanded::tree())
         .unwrap();
     let mut game = fragment_position(1, "BP03-002", 5, json!([{"id":"d0","card":"BP03-009"}]));
-    assert!(
-        matches!(game.load_internal_card("BP03-002", &cards["BP03-002"]), Err(sve_engine::EngineFailure::Unsupported(message)) if message.contains("whole-card synchronous action"))
-    );
-    let ability = &cards["BP03-002"].card().abilities[0];
-    let program = synthetic_body(&ability.node);
-    game.execute_internal(&program, &ability.source, context(1))
+    game.load_internal_card("BP03-002", &cards["BP03-002"])
         .unwrap();
+    game.load_internal_card("BP03-009", &card(vec![])).unwrap();
+    game.play_internal_card("s", PlayerId { seat: 1 }).unwrap();
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["pp"]["current"],
+        0
+    );
+    assert!(matches!(pending(&mut game).unwrap(), CardPlay::Awaiting(_)));
     let question = game.internal_decision(View::P1).unwrap();
     assert!(matches!(question.domain, InputDomain::Search(_)));
-    game.answer_internal(
+    game.answer_internal_card(
         question.actor,
         question.token,
         Answer::Search(SearchAnswer::Ungrouped(vec![0])),
@@ -86,56 +88,103 @@ fn bp03_002_lowered_search_runs_in_synthetic_harness() {
     let question = game.internal_decision(View::P1).unwrap();
     assert_eq!(question.domain, InputDomain::SearchReplacement);
     let result = game
-        .answer_internal(
+        .answer_internal_card(
             question.actor,
             question.token,
             Answer::SearchReplacement(SearchReplacementAnswer::Replacement),
         )
         .unwrap();
-    assert!(result.complete);
+    let result = resolved(result);
+    assert!(result.progress.complete);
+    assert_eq!(result.source.holder.generation, Generation(2));
+    assert_eq!(
+        result.source.definition,
+        cards["BP03-002"].card().abilities[0].node.id
+    );
     assert_eq!(
         game.projection(View::Referee).unwrap()["P1"]["field"],
-        json!(["d0"])
+        json!(["s", "d0"])
     );
     assert_eq!(
         result
+            .progress
             .facts
             .iter()
             .filter(|fact| matches!(fact, Fact::Shuffled { .. }))
             .count(),
         1
     );
+    assert_eq!(game.internal_card_stage(), Some(ResumeStage::CheckTiming));
+    game.resume_internal_card().unwrap();
 }
 
-#[expect(
-    clippy::panic,
-    reason = "A fixture outside the synthetic harness's instruction subset must fail."
-)]
-fn synthetic_body(ability: &Ability) -> WellFormedProgram {
-    let original = ability.body.as_ref().unwrap();
-    let mut body = original.clone();
-    // D1's fragment harness has no keyword producer; production admission remains closed.
-    for step in &mut body.steps {
-        let Node::Instruction { instruction } = &mut step.node else {
-            panic!("instruction body");
-        };
-        let AbilityOrigin::Keyword { origin, .. } = &instruction.source.origin else {
-            panic!("keyword source");
-        };
-        instruction.source.origin = *origin.clone();
-    }
-    let mut restored = body.clone();
-    for step in &mut restored.steps {
-        let Node::Instruction { instruction } = &mut step.node else {
-            panic!("instruction body");
-        };
-        instruction.source.origin = ability.source.origin.clone();
-    }
-    assert_eq!(
-        &restored, original,
-        "the harness must change only the keyword origin"
+#[test]
+fn whole_card_observed_order_preserves_keyword_and_pending_authority() {
+    let mut tree = expanded::tree().clone();
+    // Synthetic body: source qualification is deliberately outside this runtime regression.
+    tree["cards"]["BP03-002"]["abilities"][0]["fanfare"]["do"] = json!([
+        {"look":{"top":{"who":"self","n":3},"bind":"seen"}},
+        {"look":{"top":{"who":"self","n":1},"bind":"take"}},
+        {"move":{"ref":{"in":"take"},"to":"ex","result":"moved"}},
+        {"move":{"ref":{"in":"seen","except":{"in":{"objects_of":"moved","view":"before"}}},"to":"deck","position":"bottom","order":"chooser"}}
+    ]);
+    let cards = ExpandedLowerer::new().unwrap().lower(&tree).unwrap();
+    let program = &cards["BP03-002"];
+    let mut game = fragment_position(
+        1,
+        "BP03-002",
+        5,
+        json!([
+            {"id":"d0","card":"BP03-009"},
+            {"id":"d1","card":"BP03-009"},
+            {"id":"d2","card":"BP03-009"},
+            {"id":"d3","card":"BP03-009"}
+        ]),
     );
-    WellFormedProgram::check(body).unwrap()
+    game.load_internal_card("BP03-002", program).unwrap();
+    game.load_internal_card("BP03-009", &card(vec![])).unwrap();
+    game.play_internal_card("s", PlayerId { seat: 1 }).unwrap();
+    let CardPlay::Awaiting(question) = pending(&mut game).unwrap() else {
+        panic!("order question");
+    };
+    assert!(matches!(question.domain, InputDomain::Order(_)));
+    assert!(game.internal_decision(View::P2).is_none());
+    let before = exact_authority(&game);
+    game.answer_internal_card(question.actor, question.token, Answer::Order(vec![0, 0]))
+        .unwrap_err();
+    assert_eq!(exact_authority(&game), before);
+    let result = resolved(
+        game.answer_internal_card(question.actor, question.token, Answer::Order(vec![1, 0]))
+            .unwrap(),
+    );
+    assert!(result.progress.complete);
+    assert_eq!(
+        result.source.definition,
+        program.card().abilities[0].node.id
+    );
+    let view = game.projection(View::Referee).unwrap();
+    assert_eq!(view["P1"]["pp"]["current"], 0);
+    assert_eq!(view["P1"]["ex"], json!(["d0"]));
+    assert_eq!(view["P1"]["deck"], json!(["d3", "d2", "d1"]));
+    assert!(
+        !result
+            .progress
+            .facts
+            .iter()
+            .any(|fact| matches!(fact, Fact::Shuffled { .. }))
+    );
+    assert_eq!(game.internal_card_stage(), Some(ResumeStage::CheckTiming));
+    game.resume_internal_card().unwrap();
+
+    let mut foreign = program.card().clone();
+    foreign.abilities[0].source.fragment = Some("foreign".into());
+    let foreign = WellFormedCardProgram::check(foreign).unwrap();
+    let mut fresh = fragment_position(1, "BP03-002", 5, json!([]));
+    let before = exact_authority(&fresh);
+    assert!(
+        matches!(fresh.load_internal_card("BP03-002", &foreign), Err(sve_engine::EngineFailure::Invalid(message)) if message.contains("instruction source evidence mapping mismatch"))
+    );
+    assert_eq!(exact_authority(&fresh), before);
 }
 
 #[test]
