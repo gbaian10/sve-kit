@@ -146,6 +146,7 @@ pub(super) fn lower(
         || entry.auto.is_some()
         || entry.evolve_time.is_some()
         || entry.activate.is_some()
+        || entry.spell.is_some()
     {
         return Err(unsupported(path));
     }

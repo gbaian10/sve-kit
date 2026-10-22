@@ -41,16 +41,15 @@ impl BodyContext<'_> {
                 )
             }),
             ast::Step::Search(value) => {
-                if value
-                    .result
-                    .as_ref()
-                    .is_some_and(|name| self.observations.contains_key(name))
-                {
+                if value.result.as_ref().is_some_and(|name| {
+                    self.observations.contains_key(name) || self.targets.contains_key(name)
+                }) {
                     return Err(unsupported(path));
                 }
                 return self.search_result(step, receipt, path);
             }
-            ast::Step::Draw(_)
+            ast::Step::Choice(_)
+            | ast::Step::Draw(_)
             | ast::Step::Damage(_)
             | ast::Step::Destroy(_)
             | ast::Step::Buff(_)
@@ -58,7 +57,8 @@ impl BodyContext<'_> {
             | ast::Step::Apply(_) => None,
         };
         if let Some((name, saved_receipt)) = saved
-            && (self.searches.contains_key(name)
+            && (self.targets.contains_key(name)
+                || self.searches.contains_key(name)
                 || self
                     .observations
                     .insert(name.clone(), saved_receipt)

@@ -37,3 +37,26 @@ The evolution ability is outside this fragment; source coordinates are synthetic
 and [BP11-099 official page](https://shadowverse-evolve.com/cardlist/?cardno=BP11-099).
 These are ability fragments with synthetic coordinates. BP01-041 proves lowering
 and well-formedness only: D1 activation currently admits follower holders only.
+
+`spell.yaml` transcribes the second line of **SD03-005 知恵の光** from
+`card-data/jp/SD03/000-099.json`
+([official page](https://shadowverse-evolve.com/cardlist/?cardno=SD03-005)).
+Its printed cost is 1. Only the draw body is represented; this does not admit its
+Quick keyword or an entire authored card. As above, source coordinates are synthetic.
+The test supplies the printed cost explicitly to the candidate compiler; D1 checks
+it against the generated snapshot before accepting the Spell header. The E2E
+retains Printed origin and runs the ordinary payment/resolution route unchanged.
+
+The play golden's target/distribution and ChoiceKeyword bodies are synthetic
+replacements of that fragment, not transcriptions of 知恵の光. Target selectors
+currently preserve only unfiltered public field sets; D1 additionally rejects a
+position containing any non-follower target candidate. Kind filters are rejected,
+not erased. Distribution uses one preceding target group, a constant total and a
+minimum of one per recipient. ChoiceKeyword accepts a sole top-level choice with
+constant exact count and independent modes, including 1-based `option` targets
+visible only inside their mode. Nested choices, mode-local Distribution, mixing
+mode and unconditional targets, and exclusion histories remain unsupported.
+The extra mode E2E uses a synthetic body with one target-requiring mode and one
+draw mode; selecting the latter does not ask for the former's unavailable target.
+The activation golden additionally appends a synthetic `self_to_cemetery` cost
+to assert its ordered owner-cemetery Put shape; it is not part of BP01-041's wording.

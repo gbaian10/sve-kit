@@ -1,5 +1,6 @@
 use super::*;
 use crate::ir::lowering::{ExpandedLowerer, validator};
+use alloc::collections::BTreeMap;
 use serde_json::json;
 
 #[path = "../../../tests/support/expanded.rs"]
@@ -249,6 +250,10 @@ fn search_groups_partition_and_successful_ex_discount_are_scoped() {
 fn activated_payment_order_and_trigger_limit_remain_separate() {
     let mut tree = expanded::tree().clone();
     tree["cards"]["BP08-067"]["abilities"][0]["auto"]["per_turn"] = json!(1_u64);
+    tree["cards"]["BP01-041"]["abilities"][0]["activate"]["cost"]["steps"]
+        .as_array_mut()
+        .unwrap()
+        .push(json!({"self_to_cemetery":true}));
     let lowerer = ExpandedLowerer::new().unwrap();
     let cards = lowerer.lower(&tree).unwrap();
     let ability = &cards["BP01-041"].card().abilities[0].node;
@@ -277,6 +282,11 @@ fn activated_payment_order_and_trigger_limit_remain_separate() {
             ..
         }
     ));
+    assert!(matches!(&steps[2].instruction.action, Action::Move {
+        objects: Selector::Objects { objects },
+        movement: MoveSpec { to: MoveDestination::Owners { zone: OwnerZone::Cemetery }, position: None, order: None, initial_posture: None, entry_effects },
+        reason: MoveReason::Put,
+    } if objects == &[ObjectOperand::SourceHolder {}] && entry_effects.is_empty()));
     assert_eq!(
         cards["BP08-067"].card().abilities[0]
             .node
@@ -290,5 +300,137 @@ fn activated_payment_order_and_trigger_limit_remain_separate() {
     assert_eq!(
         lowerer.lower(&tree).unwrap_err().code,
         "unsupported_construct"
+    );
+}
+
+#[test]
+fn printed_spell_cost_targets_distribution_and_choice_preserve_play_scopes() {
+    let lowerer = ExpandedLowerer::new().unwrap();
+    let mut tree = expanded::spell_tree().clone();
+    let costs = BTreeMap::from([("SD03-005".to_owned(), Nat(1))]);
+    assert_eq!(
+        lowerer.lower(&tree).unwrap_err().code,
+        "unsupported_construct"
+    );
+    let initial_cards = lowerer.lower_with_printed_costs(&tree, &costs).unwrap();
+    let initial_ability = &initial_cards["SD03-005"].card().abilities[0].node;
+    assert_eq!(initial_ability.kind, AbilityKind::Spell);
+    assert_eq!(initial_ability.active_zones, vec![ZoneKind::Resolution]);
+    assert!(matches!(
+        initial_ability.source.origin,
+        AbilityOrigin::Printed { .. }
+    ));
+    let body = "/cards/SD03-005/abilities/0/spell";
+    *tree.pointer_mut(body).unwrap() = json!({
+        "targets":[{"bind":"t","from":{"who":"opp","zone":"field"},"upto":2_u64}],
+        "do":[{"damage":{"to":"t","n":3_u64,"distribute":true}}]
+    });
+    let cards = lowerer.lower_with_printed_costs(&tree, &costs).unwrap();
+    let ability = &cards["SD03-005"].card().abilities[0].node;
+    assert_play_distribution(ability);
+    tree.pointer_mut(body).unwrap()["targets"][0]["from"]["kind"] = json!("follower");
+    assert_eq!(
+        lowerer
+            .lower_with_printed_costs(&tree, &costs)
+            .unwrap_err()
+            .code,
+        "unsupported_construct"
+    );
+    *tree.pointer_mut(body).unwrap() = json!({"targets":[{"bind":"mode_t","from":{"who":"opp","zone":"field"},"n":1_u64,"option":1_u64}], "do":[{"choice":{"n":1_u64,"options":[[{"damage":{"to":"mode_t","n":2_u64}}],[{"draw":{"n":1_u64}}]]}}]});
+    let choices = lowerer.lower_with_printed_costs(&tree, &costs).unwrap();
+    let program = choices["SD03-005"].card().abilities[0]
+        .node
+        .body
+        .as_ref()
+        .unwrap();
+    let Node::Control {
+        control:
+            Control::Mode {
+                modes,
+                chosen,
+                choice_kind,
+                ..
+            },
+    } = &program.steps[0].node
+    else {
+        panic!("choice keyword");
+    };
+    assert_eq!(*choice_kind, ModeChoiceKind::ChoiceKeyword);
+    assert!(matches!(
+        chosen.kind,
+        ModeDecisionKind::PlayParameter { .. }
+    ));
+    let ChoiceDomain::Objects { binding, .. } = modes[0].parameters[0].domain else {
+        panic!("mode target");
+    };
+    assert_eq!(binding.key().0, modes[0].body.scope);
+    assert_eq!(modes[1].parameters, []);
+    assert_ne!(modes[0].body.scope, modes[1].body.scope);
+    assert_ne!(modes[0].body.scope, program.scope);
+    assert!(
+        modes[0].body.steps[0]
+            .source
+            .author_path
+            .ends_with("/spell/do/0/choice/options/0/0")
+    );
+    tree.pointer_mut(body).unwrap()["targets"][0]["option"] = json!(3_u64);
+    assert_eq!(
+        lowerer
+            .lower_with_printed_costs(&tree, &costs)
+            .unwrap_err()
+            .code,
+        "unsupported_construct"
+    );
+    tree.pointer_mut(body).unwrap()["targets"][0]["option"] = json!(1_u64);
+    tree.pointer_mut(body).unwrap()["do"][0]["choice"]["exclude_chosen"] = json!("this_turn");
+    assert_eq!(
+        lowerer
+            .lower_with_printed_costs(&tree, &costs)
+            .unwrap_err()
+            .code,
+        "unsupported_construct"
+    );
+}
+
+fn assert_play_distribution(ability: &Ability) {
+    let parameters = &ability.play.as_ref().unwrap().parameters;
+    assert_eq!(parameters.len(), 2);
+    let ChoiceDomain::Objects {
+        binding: target,
+        constraint,
+        ..
+    } = &parameters[0].domain
+    else {
+        panic!("targets");
+    };
+    assert_eq!(
+        constraint.cardinality,
+        Cardinality {
+            minimum: Nat(0),
+            maximum: Some(Nat(2))
+        }
+    );
+    let ChoiceDomain::Distribution {
+        recipients,
+        total,
+        minimum,
+        binding,
+    } = &parameters[1].domain
+    else {
+        panic!("distribution");
+    };
+    assert_eq!(
+        recipients,
+        &RecipientSet::Objects {
+            objects: Selector::Bound { reference: *target }
+        }
+    );
+    assert_eq!(total, &Expr::Literal(Nat(3)));
+    assert_eq!(minimum, &Nat(1));
+    let Node::Instruction { instruction } = &ability.body.as_ref().unwrap().steps[0].node else {
+        panic!("damage");
+    };
+    assert!(
+        matches!(instruction.action, Action::Damage { amount: DamageAmount::Allocation { binding: actual }, .. } if actual == *binding)
     );
 }

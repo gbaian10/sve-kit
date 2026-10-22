@@ -43,6 +43,7 @@ pub(super) struct Ability {
     pub evolve_time: Option<Body>,
     pub evolve: Option<Evolution>,
     pub activate: Option<Activate>,
+    pub spell: Option<Body>,
 }
 
 #[derive(Deserialize)]
@@ -69,6 +70,7 @@ pub(super) enum Cost {
 pub(super) enum CostOperation {
     Pp(u64),
     ActSelf(bool),
+    SelfToCemetery(bool),
 }
 
 #[derive(Deserialize)]
@@ -85,6 +87,8 @@ pub(super) struct Ports {
 pub(super) struct Body {
     pub per_turn: Option<u64>,
     #[serde(default)]
+    pub targets: Vec<Target>,
+    #[serde(default)]
     pub define: BTreeMap<String, Number>,
     #[serde(rename = "do")]
     pub steps: Vec<Step>,
@@ -93,6 +97,7 @@ pub(super) struct Body {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum Step {
+    Choice(Choice),
     Draw(Draw),
     Damage(Damage),
     Destroy(Destroy),
@@ -205,14 +210,14 @@ pub(super) enum Objects {
     Follow { follow: String },
 }
 
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct ObjectQuery {
     pub who: Side,
     pub zone: Zone,
 }
 
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 pub(super) enum Side {
     #[serde(rename = "self")]
     Controller,
@@ -222,7 +227,7 @@ pub(super) enum Side {
     All,
 }
 
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum Zone {
     Field,
@@ -409,12 +414,40 @@ pub(super) enum SelfPlayer {
 pub(super) struct Damage {
     pub to: Recipients,
     pub n: Number,
+    pub distribute: Option<bool>,
+    pub distribute_at: Option<AtPlay>,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum Recipients {
+    Leaders { leaders: AllPlayers },
+    Target(String),
+}
+
+#[derive(Deserialize)]
+pub(super) enum AtPlay {
+    #[serde(rename = "play")]
+    Play,
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Target {
+    pub option: Option<u64>,
+    pub bind: String,
+    pub from: ObjectQuery,
+    pub n: Option<u64>,
+    pub upto: Option<u64>,
 }
 
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
-pub(super) struct Recipients {
-    pub leaders: AllPlayers,
+pub(super) struct Choice {
+    pub n: u64,
+    pub options: Vec<Vec<Step>>,
+    #[serde(rename = "who")]
+    pub _who: Option<SelfPlayer>,
 }
 
 #[derive(Deserialize)]

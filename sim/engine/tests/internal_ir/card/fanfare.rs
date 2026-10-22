@@ -1,4 +1,5 @@
 use super::*;
+use alloc::collections::BTreeMap;
 use std::env::var_os;
 use std::fs::read_to_string;
 use sve_engine::game::internal::{InputDomain, SearchAnswer};
@@ -288,5 +289,61 @@ fn bp08_067_author_fragment_destroys_itself_at_own_end_phase() {
             .facts
             .iter()
             .any(|fact| matches!(fact, Fact::Movement(m) if m.method == MoveMethod::Destroy))
+    );
+}
+
+#[test]
+fn sd03_005_author_spell_pays_printed_cost_then_draws_and_resolves() {
+    let costs = BTreeMap::from([("SD03-005".to_owned(), Nat(1))]);
+    let cards = ExpandedLowerer::new()
+        .unwrap()
+        .lower_with_printed_costs(expanded::spell_tree(), &costs)
+        .unwrap();
+    let mut game = fragment_position(1, "SD03-005", 1, json!([{"id":"d0","card":"BP03-009"}]));
+    game.load_internal_card("SD03-005", &cards["SD03-005"])
+        .unwrap();
+    game.load_internal_card("BP03-009", &card(vec![])).unwrap();
+    let result = resolved(game.play_internal_card("s", PlayerId { seat: 1 }).unwrap());
+    assert!(result.progress.complete);
+    assert_eq!(result.source.holder.generation, Generation(1));
+    let view = game.projection(View::Referee).unwrap();
+    assert_eq!(view["P1"]["pp"]["current"], 0);
+    assert_eq!(view["P1"]["hand"], json!(["d0"]));
+    assert_eq!(view["P1"]["cemetery"], json!(["s"]));
+}
+
+#[test]
+fn lowered_choice_only_requires_the_selected_modes_targets() {
+    let mut tree = expanded::spell_tree().clone();
+    tree["cards"]["SD03-005"]["abilities"][0]["spell"] = json!({
+        "targets":[{"bind":"t","from":{"who":"opp","zone":"field"},"n":1,"option":1}],
+        "do":[{"choice":{"n":1,"options":[[{"damage":{"to":"t","n":2}}],[{"draw":{"n":1}}]]}}]
+    });
+    let costs = BTreeMap::from([("SD03-005".to_owned(), Nat(1))]);
+    let cards = ExpandedLowerer::new()
+        .unwrap()
+        .lower_with_printed_costs(&tree, &costs)
+        .unwrap();
+    let mut game = fragment_position(1, "SD03-005", 1, json!([{"id":"d0","card":"BP03-009"}]));
+    game.load_internal_card("SD03-005", &cards["SD03-005"])
+        .unwrap();
+    game.load_internal_card("BP03-009", &card(vec![])).unwrap();
+    let CardPlay::Awaiting(question) = game.play_internal_card("s", PlayerId { seat: 1 }).unwrap()
+    else {
+        panic!("mode question");
+    };
+    assert!(matches!(question.domain, InputDomain::Modes { .. }));
+    let result = resolved(
+        game.answer_internal_card(
+            question.actor,
+            question.token,
+            Answer::Modes(vec![ModeId(2)]),
+        )
+        .unwrap(),
+    );
+    assert!(result.progress.complete);
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["hand"],
+        json!(["d0"])
     );
 }

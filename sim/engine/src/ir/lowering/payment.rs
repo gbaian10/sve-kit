@@ -1,4 +1,7 @@
-use super::super::{CostSpec, CostStep, PlaySpec, Posture, Resource, ResourceOperation};
+use super::super::{
+    CostSpec, CostStep, MoveDestination, MoveReason, MoveSpec, OwnerZone, PlaySpec, Posture,
+    Resource, ResourceOperation,
+};
 use super::{
     AbilitySource, Action, Allocator, Expr, Instruction, InstructionContext, InstructionId, Int,
     LoweringError, PlayerRef, ReceiptId, ast, numeric, unsupported,
@@ -30,7 +33,22 @@ pub(super) fn lower(
                 objects: numeric::holder(),
                 posture: Posture::Acted,
             },
-            ast::CostOperation::ActSelf(false) => return Err(unsupported(path)),
+            ast::CostOperation::SelfToCemetery(true) => Action::Move {
+                objects: numeric::holder(),
+                movement: MoveSpec {
+                    to: MoveDestination::Owners {
+                        zone: OwnerZone::Cemetery,
+                    },
+                    position: None,
+                    order: None,
+                    initial_posture: None,
+                    entry_effects: vec![],
+                },
+                reason: MoveReason::Put,
+            },
+            ast::CostOperation::ActSelf(false) | ast::CostOperation::SelfToCemetery(false) => {
+                return Err(unsupported(path));
+            }
         };
         let id = allocator.id(path)?;
         steps.push(CostStep {
