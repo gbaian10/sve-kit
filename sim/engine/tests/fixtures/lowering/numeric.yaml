@@ -1,0 +1,60 @@
+format: 1
+kind: author_effect_set
+scope: shared
+cards:
+  BP08-067:
+    meta:
+      dsl: '1.0'
+      source: effect-source-v1:sha256:3333333333333333333333333333333333333333333333333333333333333333
+      written_by:
+        - actor: {who: synthetic fixture, model: null}
+          date: '2026-10-22'
+      reviewed_by: []
+      status: draft
+      verified_by_exam: []
+      rulings: []
+    abilities:
+      - line: 2
+        sources:
+          - binding_id: binding:fixture-bp08-067
+            ability_scope: ability_0
+            occurrence:
+              owner: {kind: face_revision, revision_id: revision:fixture-bp08-067}
+              field: effect
+              ordinal:
+              source_hash: '0000000000000000000000000000000000000000000000000000000000000000'
+              line_ordinal: 1
+              role: body
+              segments: [{start: 0, end: 1}]
+        ports: {imports: {}, exports: {}}
+        auto:
+          on: {phase: {which: end, whose: self}}
+          do: [destroy: this]
+  BP18-018:
+    meta:
+      dsl: '1.0'
+      source: effect-source-v1:sha256:3333333333333333333333333333333333333333333333333333333333333333
+      written_by:
+        - actor: {who: synthetic fixture, model: null}
+          date: '2026-10-22'
+      reviewed_by: []
+      status: draft
+      verified_by_exam: []
+      rulings: []
+    abilities:
+      - line: 1
+        sources:
+          - binding_id: binding:fixture-bp18-018
+            ability_scope: ability_0
+            occurrence:
+              owner: {kind: face_revision, revision_id: revision:fixture-bp18-018}
+              field: effect
+              ordinal:
+              source_hash: '0000000000000000000000000000000000000000000000000000000000000000'
+              line_ordinal: 0
+              role: body
+              segments: [{start: 0, end: 1}]
+        ports: {imports: {}, exports: {}}
+        attack_time:
+          do:
+            - buff: {on: this, power: 3, hp: 3}

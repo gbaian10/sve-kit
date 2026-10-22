@@ -42,6 +42,35 @@ pub(super) struct Ability {
     pub auto: Option<Auto>,
     pub evolve_time: Option<Body>,
     pub evolve: Option<Evolution>,
+    pub activate: Option<Activate>,
+    pub spell: Option<Body>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Activate {
+    pub cost: Cost,
+    #[serde(flatten)]
+    pub body: Body,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum Cost {
+    Short(CostOperation),
+    Ordered { steps: Vec<CostOperation> },
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+#[expect(
+    variant_size_differences,
+    reason = "Author cost operations have distinct scalar payloads."
+)]
+pub(super) enum CostOperation {
+    Pp(u64),
+    ActSelf(bool),
+    SelfToCemetery(bool),
 }
 
 #[derive(Deserialize)]
@@ -58,6 +87,8 @@ pub(super) struct Ports {
 pub(super) struct Body {
     pub per_turn: Option<u64>,
     #[serde(default)]
+    pub targets: Vec<Target>,
+    #[serde(default)]
     pub define: BTreeMap<String, Number>,
     #[serde(rename = "do")]
     pub steps: Vec<Step>,
@@ -66,8 +97,302 @@ pub(super) struct Body {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum Step {
+    Choice(Choice),
     Draw(Draw),
     Damage(Damage),
+    Destroy(Destroy),
+    Buff(Modify),
+    SetStat(Modify),
+    Apply(Apply),
+    Search(Search),
+    Look(Look),
+    Move(Move),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Look {
+    pub top: DeckTop,
+    pub bind: String,
+    #[serde(rename = "by")]
+    pub _by: Option<SelfPlayer>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct DeckTop {
+    pub who: SelfPlayer,
+    pub n: u64,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Move {
+    pub r#ref: Observed,
+    pub to: ObservedDestination,
+    pub position: Option<Placement>,
+    pub order: Option<Chooser>,
+    pub result: Option<String>,
+    #[serde(rename = "by")]
+    pub _by: Option<SelfPlayer>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Observed {
+    pub r#in: Observation,
+    pub except: Option<Box<Self>>,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum Observation {
+    Binding(String),
+    Before { objects_of: String, view: Before },
+}
+
+#[derive(Deserialize)]
+pub(super) enum Before {
+    #[serde(rename = "before")]
+    Before,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum ObservedDestination {
+    Deck,
+    Ex,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum Placement {
+    Top,
+    Bottom,
+}
+
+#[derive(Deserialize)]
+pub(super) enum Chooser {
+    #[serde(rename = "chooser")]
+    Chooser,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum Destroy {
+    Short(This),
+    Long { r#ref: Objects },
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Modify {
+    pub on: Objects,
+    pub power: Option<Number>,
+    pub hp: Option<Number>,
+    pub until: Option<Until>,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum Until {
+    Turn,
+    NextOppTurn,
+    ThisAndNextOppTurn,
+    Game,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum Objects {
+    This(This),
+    Zone(ObjectQuery),
+    Follow { follow: String },
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct ObjectQuery {
+    pub who: Side,
+    pub zone: Zone,
+}
+
+#[derive(Clone, Deserialize)]
+pub(super) enum Side {
+    #[serde(rename = "self")]
+    Controller,
+    #[serde(rename = "opp")]
+    Opponent,
+    #[serde(rename = "all")]
+    All,
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum Zone {
+    Field,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Apply {
+    pub on: Objects,
+    pub effect: InstalledEffect,
+    pub until: Option<Until>,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum InstalledEffect {
+    Stat(ConstantStats),
+    CostMod(CostModifier),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct CostModifier {
+    pub when_playing: AffectedCondition,
+    pub delta: i64,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct AffectedCondition {
+    #[serde(rename = "in")]
+    pub subjects: Affected,
+}
+
+#[derive(Deserialize)]
+pub(super) enum Affected {
+    #[serde(rename = "affected")]
+    Affected,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Search {
+    pub sel: Option<SearchQuery>,
+    pub n: Option<u64>,
+    pub upto: Option<u64>,
+    pub groups: Option<Vec<SearchGroup>>,
+    pub to: SearchDestination,
+    pub result: Option<String>,
+    pub distinct_by: Option<Names>,
+}
+
+#[derive(Deserialize)]
+pub(super) enum Names {
+    #[serde(rename = "name")]
+    Name,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct SearchGroup {
+    pub sel: SearchQuery,
+    pub n: Option<u64>,
+    pub upto: Option<u64>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct SearchQuery {
+    pub who: SelfPlayer,
+    pub zone: DeckZone,
+    pub kind: Option<SearchKind>,
+    pub r#trait: Option<String>,
+    pub name: Option<String>,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum SearchKind {
+    Follower,
+    Spell,
+    Amulet,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum SearchDestination {
+    Single(SearchZone),
+    Partition {
+        order: Printed,
+        partition: Vec<SearchPart>,
+    },
+    Replacement {
+        zone: SearchZone,
+        instead: SearchReplacement,
+    },
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum SearchZone {
+    Hand,
+    Cemetery,
+    Ex,
+    Field,
+}
+
+#[derive(Deserialize)]
+pub(super) enum Printed {
+    #[serde(rename = "printed")]
+    Printed,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct SearchPart {
+    pub zone: SearchZone,
+    pub n: u64,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct SearchReplacement {
+    pub r#if: FoundCondition,
+    pub zone: SearchZone,
+    pub may: Option<bool>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct FoundCondition {
+    pub cmp: FoundComparison,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct FoundComparison {
+    pub left: FoundCost,
+    pub op: LessEqual,
+    pub right: i64,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct FoundCost {
+    pub cost_of: Found,
+}
+
+#[derive(Deserialize)]
+pub(super) enum Found {
+    #[serde(rename = "found")]
+    Found,
+}
+
+#[derive(Deserialize)]
+pub(super) enum LessEqual {
+    #[serde(rename = "le")]
+    LessEqual,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct ConstantStats {
+    pub power: Option<i64>,
+    pub hp: Option<i64>,
 }
 
 #[derive(Deserialize)]
@@ -89,12 +414,40 @@ pub(super) enum SelfPlayer {
 pub(super) struct Damage {
     pub to: Recipients,
     pub n: Number,
+    pub distribute: Option<bool>,
+    pub distribute_at: Option<AtPlay>,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum Recipients {
+    Leaders { leaders: AllPlayers },
+    Target(String),
+}
+
+#[derive(Deserialize)]
+pub(super) enum AtPlay {
+    #[serde(rename = "play")]
+    Play,
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Target {
+    pub option: Option<u64>,
+    pub bind: String,
+    pub from: ObjectQuery,
+    pub n: Option<u64>,
+    pub upto: Option<u64>,
 }
 
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
-pub(super) struct Recipients {
-    pub leaders: AllPlayers,
+pub(super) struct Choice {
+    pub n: u64,
+    pub options: Vec<Vec<Step>>,
+    #[serde(rename = "who")]
+    pub _who: Option<SelfPlayer>,
 }
 
 #[derive(Deserialize)]

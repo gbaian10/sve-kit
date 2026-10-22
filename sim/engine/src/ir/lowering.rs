@@ -2,6 +2,11 @@
 
 mod ast;
 mod evolution;
+mod numeric;
+mod ordering;
+mod payment;
+mod play;
+mod search;
 
 use super::{
     Ability, AbilityId, AbilityKind, AbilityOrigin, AbilityQualification, AbilitySource, Action,
@@ -63,15 +68,38 @@ impl ExpandedLowerer {
 
     /// Lower every card atomically. Success proves only internal IR well-formedness.
     ///
-    /// Only intrinsic evolution, evolve-time, fanfare, lastword, attack-time, End Begin,
-    /// draw, uniform damage to all leaders, and their numeric subset
-    /// are supported. Card keys remain candidate coordinates, not snapshot IDs.
+    /// Intrinsic evolution, evolve-time, fanfare, lastword, attack-time, End Begin,
+    /// field activation with ordered constant PP/Act/self-to-cemetery costs,
+    /// draw, uniform damage to all leaders, destroy, numeric modifications,
+    /// constant continuous installations, Search, successful EX discounts and
+    /// observed deck ordering have closed supported subsets. Search and Order
+    /// still require D1's fragment harness; this is not whole-card admission.
+    /// Unfiltered field targets, same-play Distribution and a sole top-level
+    /// `ChoiceKeyword` have closed supported subsets. Spell headers require
+    /// [`Self::lower_with_printed_costs`]; this method rejects missing printed costs.
+    /// Card keys remain candidate coordinates, not snapshot IDs.
     ///
     /// # Errors
     /// Rejects schema violations and any unsupported construct anywhere in the tree.
     pub fn lower(
         &self,
         tree: &Value,
+    ) -> Result<BTreeMap<String, WellFormedCardProgram>, LoweringError> {
+        self.lower_with_printed_costs(tree, &BTreeMap::new())
+    }
+
+    /// Lower candidates with base-face printed PP costs supplied by the snapshot caller.
+    ///
+    /// Keys are the same candidate coordinates as `tree`. These values do not prove
+    /// identity or source admission; D1 must still match them against its catalog.
+    /// Missing Spell costs are rejected, never inferred from author text.
+    ///
+    /// # Errors
+    /// Rejects unsupported trees, absent Spell costs and invalid expanded input.
+    pub fn lower_with_printed_costs(
+        &self,
+        tree: &Value,
+        printed_costs: &BTreeMap<String, Nat>,
     ) -> Result<BTreeMap<String, WellFormedCardProgram>, LoweringError> {
         self.validator
             .validate(tree)
@@ -84,7 +112,13 @@ impl ExpandedLowerer {
         for (key, card) in document.cards {
             let path = format!("/cards/{}", pointer_key(&key));
             let card: ast::Card = decode(card, &path)?;
-            let mut allocator = Allocator::default();
+            let mut allocator = Allocator {
+                next: 0,
+                next_scope: u64::try_from(card.abilities.len())
+                    .ok()
+                    .and_then(|count| count.checked_mul(3))
+                    .ok_or_else(|| unsupported(&path))?,
+            };
             let mut abilities = Vec::new();
             for (index, value) in card.abilities.into_iter().enumerate() {
                 let path = format!("{path}/abilities/{index}");
@@ -94,7 +128,13 @@ impl ExpandedLowerer {
                     .and_then(|index| index.checked_mul(3))
                     .and_then(|index| index.checked_add(1))
                     .ok_or_else(|| unsupported(&path))?;
-                abilities.push(allocator.ability(&key, &path, &ability, ScopeId(scope))?);
+                abilities.push(allocator.ability(
+                    &key,
+                    &path,
+                    &ability,
+                    ScopeId(scope),
+                    printed_costs.get(&key).copied(),
+                )?);
             }
             let checked = WellFormedCardProgram::check(CardProgram { abilities })
                 .map_err(|_private| error("ill_formed", &path))?;
@@ -121,11 +161,20 @@ pub(super) fn validator(profile: &str) -> Result<jsonschema::Validator, Lowering
 #[derive(Default)]
 struct Allocator {
     next: u64,
+    next_scope: u64,
 }
 impl Allocator {
     fn id(&mut self, path: &str) -> Result<u64, LoweringError> {
         self.next = self.next.checked_add(1).ok_or_else(|| unsupported(path))?;
         Ok(self.next)
+    }
+
+    fn scope(&mut self, path: &str) -> Result<ScopeId, LoweringError> {
+        self.next_scope = self
+            .next_scope
+            .checked_add(1)
+            .ok_or_else(|| unsupported(path))?;
+        Ok(ScopeId(self.next_scope))
     }
 
     fn ability(
@@ -134,6 +183,7 @@ impl Allocator {
         path: &str,
         entry: &ast::Ability,
         scope: ScopeId,
+        printed_cost: Option<Nat>,
     ) -> Result<Located<Ability>, LoweringError> {
         if entry.imports.is_some() {
             return Err(unsupported(path));
@@ -142,95 +192,145 @@ impl Allocator {
         if entry.evolve.is_some() {
             return evolution::lower(self, key, path, entry, scope);
         }
-        let (body, head, keyword) = match (
-            &entry.fanfare,
-            &entry.lastword,
-            &entry.attack_time,
-            &entry.auto,
-            &entry.evolve_time,
-        ) {
-            (Some(body), None, None, None, None) => (body, "fanfare", Some(KeywordId::Fanfare)),
-            (None, Some(body), None, None, None) => (body, "lastword", Some(KeywordId::Lastword)),
-            (None, None, Some(body), None, None) => {
-                (body, "attack_time", Some(KeywordId::OnAttack))
-            }
-            (None, None, None, Some(auto), None) => (&auto.body, "auto", None),
-            (None, None, None, None, Some(body)) => {
-                (body, "evolve_time", Some(KeywordId::OnEvolve))
-            }
-            _ => return Err(unsupported(path)),
-        };
+        let (body, head, keyword) = ability_body(entry, path)?;
         let source = source_span(key, path, entry)?;
-        let printed = AbilityOrigin::Printed {
-            face: FaceId(source.face.clone()),
-            line: Nat(u64::from(entry.line)),
-        };
-        let origin = keyword.map_or_else(
-            || printed.clone(),
-            |keyword| AbilityOrigin::Keyword {
-                keyword,
-                origin: Box::new(printed.clone()),
-            },
-        );
-        let ability_source = AbilitySource {
-            holder: ObjectOperand::SourceHolder {},
-            origin,
-            controller: PlayerRef::Controller {},
-        };
+        let ability_source = ability_source(&source, keyword);
         let mut context = BodyContext {
             scope,
             allocator: Self::default(),
+            card_allocator: self,
             definitions: &body.define,
+            searches: BTreeMap::new(),
+            observations: BTreeMap::new(),
+            targets: BTreeMap::new(),
+            parameters: vec![],
+            mode_targets: BTreeMap::new(),
+            formal_play: entry.activate.is_some() || entry.spell.is_some(),
         };
         for value in body.define.values() {
             context.number(value, path, &mut BTreeSet::new())?;
         }
         context.allocator = Self::default();
-        let mut steps = Vec::new();
-        for (index, step) in body.steps.iter().enumerate() {
-            let step_path = format!("{path}/{head}/do/{index}");
-            let action = context.action(step, &step_path)?;
-            let instruction_id = self.id(&step_path)?;
-            let mut step_source = source.clone();
-            step_source.author_path = step_path;
-            steps.push(Located {
-                source: step_source,
-                node: Node::Instruction {
-                    instruction: Box::new(Instruction {
-                        id: InstructionId(instruction_id),
-                        receipt: ReceiptId(instruction_id),
-                        actor: PlayerRef::Controller {},
-                        source: ability_source.clone(),
-                        precondition: None,
-                        context: InstructionContext::Effect,
-                        action,
-                    }),
-                },
-            });
+        let choice = matches!(body.steps.as_slice(), [ast::Step::Choice(_)]);
+        context.targets(&body.targets, choice, path)?;
+        let program = context.body(body, &format!("{path}/{head}"), &source, &ability_source)?;
+        let (kind, mut play, trigger) = if entry.spell.is_some() {
+            if body.per_turn.is_some() {
+                return Err(unsupported(path));
+            }
+            let cost = printed_cost.ok_or_else(|| unsupported(path))?;
+            (
+                AbilityKind::Spell,
+                Some(payment::lower(
+                    context.card_allocator,
+                    &ast::Cost::Short(ast::CostOperation::Pp(cost.0)),
+                    &ability_source,
+                    path,
+                )?),
+                None,
+            )
+        } else if let Some(activated) = &entry.activate {
+            if body.per_turn.is_some() {
+                return Err(unsupported(path));
+            }
+            (
+                AbilityKind::Activated,
+                Some(payment::lower(
+                    context.card_allocator,
+                    &activated.cost,
+                    &ability_source,
+                    path,
+                )?),
+                None,
+            )
+        } else {
+            let event_id = context.allocator.id(path)?;
+            let mut trigger = lowered_trigger(entry, keyword, event_id, scope, path)?;
+            if body.per_turn.is_some_and(|maximum| maximum != 1) {
+                return Err(unsupported(path));
+            }
+            trigger.limit = body.per_turn.map(|_| super::LimitSpec::once_per_turn());
+            (AbilityKind::Triggered, None, Some(trigger))
+        };
+        if let Some(play) = &mut play {
+            play.parameters = context.parameters;
         }
-        let event_id = context.allocator.id(path)?;
-        let mut trigger = lowered_trigger(entry, keyword, event_id, scope, path)?;
-        if body.per_turn.is_some_and(|maximum| maximum != 1) {
-            return Err(unsupported(path));
-        }
-        trigger.limit = body.per_turn.map(|_| super::LimitSpec::once_per_turn());
         Ok(Located {
             source,
             node: Ability {
                 id: AbilityId(scope.0),
                 scope,
                 source: ability_source,
-                kind: AbilityKind::Triggered,
+                kind,
                 qualification: AbilityQualification::Ordinary,
-                active_zones: vec![ZoneKind::Field],
+                active_zones: vec![if entry.spell.is_some() {
+                    ZoneKind::Resolution
+                } else {
+                    ZoneKind::Field
+                }],
                 event_captures: vec![],
-                play: None,
-                trigger: Some(trigger),
-                body: Some(Program { scope, steps }),
+                play,
+                trigger,
+                body: Some(program),
                 declarations: vec![],
             },
         })
     }
+}
+
+fn ability_source(source: &SourceSpan, keyword: Option<KeywordId>) -> AbilitySource {
+    let printed = AbilityOrigin::Printed {
+        face: FaceId(source.face.clone()),
+        line: Nat(u64::from(source.line)),
+    };
+    let origin = keyword.map_or_else(
+        || printed.clone(),
+        |keyword| AbilityOrigin::Keyword {
+            keyword,
+            origin: Box::new(printed.clone()),
+        },
+    );
+    AbilitySource {
+        holder: ObjectOperand::SourceHolder {},
+        origin,
+        controller: PlayerRef::Controller {},
+    }
+}
+
+fn ability_body<'entry>(
+    entry: &'entry ast::Ability,
+    path: &str,
+) -> Result<(&'entry ast::Body, &'static str, Option<KeywordId>), LoweringError> {
+    Ok(
+        match (
+            &entry.fanfare,
+            &entry.lastword,
+            &entry.attack_time,
+            &entry.auto,
+            &entry.evolve_time,
+            &entry.activate,
+            &entry.spell,
+        ) {
+            (Some(body), None, None, None, None, None, None) => {
+                (body, "fanfare", Some(KeywordId::Fanfare))
+            }
+            (None, Some(body), None, None, None, None, None) => {
+                (body, "lastword", Some(KeywordId::Lastword))
+            }
+            (None, None, Some(body), None, None, None, None) => {
+                (body, "attack_time", Some(KeywordId::OnAttack))
+            }
+            (None, None, None, Some(auto), None, None, None) => (&auto.body, "auto", None),
+            (None, None, None, None, Some(body), None, None) => {
+                (body, "evolve_time", Some(KeywordId::OnEvolve))
+            }
+            (None, None, None, None, None, Some(activated), None) => {
+                (&activated.body, "activate", None)
+            }
+            (None, None, None, None, None, None, Some(body)) => (body, "spell", None),
+            _ => return Err(unsupported(path)),
+        },
+    )
 }
 
 fn lowered_trigger(
@@ -328,38 +428,110 @@ fn lowered_subscription(
 struct BodyContext<'definitions> {
     scope: ScopeId,
     allocator: Allocator,
+    card_allocator: &'definitions mut Allocator,
     definitions: &'definitions BTreeMap<String, ast::Number>,
+    searches: BTreeMap<String, (ReceiptId, bool)>,
+    observations: BTreeMap<String, super::ObjectReceipt>,
+    targets: BTreeMap<String, Binding<Selector>>,
+    parameters: Vec<super::Decision>,
+    formal_play: bool,
+    mode_targets: BTreeMap<u64, Vec<ast::Target>>,
 }
+#[expect(
+    clippy::multiple_inherent_impl,
+    reason = "Action families share the ability binding allocator."
+)]
 impl BodyContext<'_> {
-    fn action(&mut self, step: &ast::Step, path: &str) -> Result<Action, LoweringError> {
+    fn body(
+        &mut self,
+        body: &ast::Body,
+        path: &str,
+        source: &SourceSpan,
+        ability_source: &AbilitySource,
+    ) -> Result<Program, LoweringError> {
+        self.steps(&body.steps, &format!("{path}/do"), source, ability_source)
+    }
+
+    fn steps(
+        &mut self,
+        author_steps: &[ast::Step],
+        path: &str,
+        source: &SourceSpan,
+        ability_source: &AbilitySource,
+    ) -> Result<Program, LoweringError> {
+        let mut steps = Vec::new();
+        for (index, step) in author_steps.iter().enumerate() {
+            let step_path = format!("{path}/{index}");
+            if let ast::Step::Choice(choice) = step {
+                if author_steps.len() != 1 {
+                    return Err(unsupported(&step_path));
+                }
+                steps.push(self.choice(choice, &step_path, source, ability_source)?);
+                continue;
+            }
+            let instruction_id = self.card_allocator.id(&step_path)?;
+            let action = self.action(step, &step_path, ability_source)?;
+            self.remember(step, ReceiptId(instruction_id), &step_path)?;
+            let mut step_source = source.clone();
+            step_source.author_path = step_path;
+            steps.push(Located {
+                source: step_source,
+                node: Node::Instruction {
+                    instruction: Box::new(Instruction {
+                        id: InstructionId(instruction_id),
+                        receipt: ReceiptId(instruction_id),
+                        actor: PlayerRef::Controller {},
+                        source: ability_source.clone(),
+                        precondition: None,
+                        context: InstructionContext::Effect,
+                        action,
+                    }),
+                },
+            });
+        }
+        Ok(Program {
+            scope: self.scope,
+            steps,
+        })
+    }
+
+    fn action(
+        &mut self,
+        step: &ast::Step,
+        path: &str,
+        source: &AbilitySource,
+    ) -> Result<Action, LoweringError> {
         match step {
+            ast::Step::Choice(_) => Err(unsupported(path)),
+            ast::Step::Destroy(value) => Ok(Action::Destroy {
+                objects: match value {
+                    ast::Destroy::Short(ast::This::This) => numeric::holder(),
+                    ast::Destroy::Long { r#ref } => self.objects(r#ref, path)?,
+                },
+            }),
+            ast::Step::Buff(value) => self.modify(value, false, path),
+            ast::Step::SetStat(value) => self.modify(value, true, path),
+            ast::Step::Apply(value) => self.continuous(value, source, path),
+            ast::Step::Search(value) => self.search(value, path),
+            ast::Step::Look(value) => {
+                let ast::SelfPlayer::Controller = value.top.who;
+                Ok(Action::Look {
+                    viewer: PlayerRef::Controller {},
+                    zone: super::ZoneRef {
+                        player: PlayerRef::Controller {},
+                        kind: ZoneKind::Deck,
+                    },
+                    count: Expr::Literal(Nat(value.top.n)),
+                    mode: StepwiseMode::Exact,
+                })
+            }
+            ast::Step::Move(value) => self.observed_move(value, path),
             ast::Step::Draw(draw) => Ok(Action::Draw {
                 player: PlayerRef::Controller {},
                 count: self.number(&draw.n, path, &mut BTreeSet::new())?,
                 mode: StepwiseMode::Exact,
             }),
-            ast::Step::Damage(damage) => {
-                let ast::AllPlayers::All = damage.to.leaders;
-                Ok(Action::Damage {
-                    recipients: RecipientSet::Leaders {
-                        players: PlayerSet {
-                            relation: PlayerRelation::All,
-                            relative_to: PlayerRef::Controller {},
-                            cardinality: Cardinality {
-                                minimum: Nat(0),
-                                maximum: None,
-                            },
-                            text_quantifier: TextQuantifier::All,
-                        },
-                    },
-                    amount: DamageAmount::Uniform {
-                        amount: self.number(&damage.n, path, &mut BTreeSet::new())?,
-                    },
-                    flags: DamageFlags::Ability,
-                    source: ObjectView::SourceInformation {},
-                    batch: BatchPolicy::Instruction {},
-                })
-            }
+            ast::Step::Damage(damage) => self.damage(damage, path),
         }
     }
 
