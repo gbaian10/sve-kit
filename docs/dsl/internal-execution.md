@@ -13,6 +13,9 @@
 YAML。印刷 face 的十進位 ordinal 與 lowering candidate 的 `base`（對應 face 0）都保留原本
 owner、field、fragment；這不授予永久來源身分或公開 capability。整卡的良構入口環境直接帶入
 本文，不把依賴 play binding 的本文重新當成封閉 `WellFormedProgram`。
+base 與能力引用的印刷面費用為 null 或缺欄時拒絕，不能以零補值；明示的零費用仍有效。
+印刷為「-」的面（エボルヴ等不從手牌打出的種類）照舊視為無費用資訊，不在此拒絕。
+Printed Activated 的印刷面必須是普通從者，護符起動片段在載入時即拒絕。
 
 准入接受普通 Printed Spell 的 `[Resolution]`、Printed Activated 的 `[Field]`，以及下節的
 Printed Fanfare／Lastword／OnAttack 及 End Begin。Spell 的唯一固有 Ordered PP Pay 必須等於同 Catalog face 的印刷費用；

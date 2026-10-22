@@ -30,7 +30,7 @@ pub(super) fn position_for_card(
     game
 }
 
-fn fragment_position(seat: u32, card_no: &str, pp: i64, deck: Value) -> Game {
+pub(super) fn fragment_position(seat: u32, card_no: &str, pp: i64, deck: Value) -> Game {
     let snapshot = read_to_string(var_os("SVE_TEST_SNAPSHOT").unwrap()).unwrap();
     let registry = json!({"format":1,"kind":"keyword_registry","keywords":{}}).to_string();
     let mut effects = json!({"format":1,"kind":"effect_set","cards":{

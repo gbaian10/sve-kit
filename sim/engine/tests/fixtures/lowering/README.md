@@ -10,8 +10,30 @@ Official content remains outside the project licenses; see `LICENSING.md`.
 
 BP08-038 uses the existing `carddb/tests/fixtures/author_entries/golden.yaml`
 fixture and its documented source. A shared test helper calls Python's actual
-`AuthorExpander`, passes only the selected expanded trees to Rust, and never
+`AuthorExpander`, passes the selected expanded trees and separate source-proof diagnostics to Rust, and never
 stores generated JSON or sidecars. These tests do not admit cards for production.
+
+## Per-card diagnostic entry
+
+After changing these YAML fixtures, lowering or D1 admission, run:
+
+```bash
+python3 .github/ci/rust_tests.py test --locked -p sve-engine --test internal_ir author_fixture_admission_report -- --nocapture
+```
+
+The complete Rust CI scope also runs this test. It expands this batch with C0,
+lowers each card separately and checks the original candidate through D1's
+whole-card loader. Printed Spell costs come from the generated snapshot.
+The JSON report separates runtime support from admission: every fixture is
+`rejected`, with current-source, snapshot-identity, complete-ability and use-qualification
+blockers. In particular, BP01-041's Amulet activation is also rejected by D1;
+SD03-005's supported draw body does not supply its missing Quick ability.
+
+This is a test diagnostic entry, without a production acceptance branch.
+C0's source-checked expansion alone does not supply C1 use qualification or
+prove the complete printed ability set. Ordinary builds do not run this entry
+or create validation results; they must consume verified inputs as specified in
+`docs/dsl/author-contract-1.0.md` §8.
 
 `numeric.yaml` contains two complete ability fragments: BP08-067
 マリオネットドラゴン's own end-phase destruction (face 0, text line 1), and

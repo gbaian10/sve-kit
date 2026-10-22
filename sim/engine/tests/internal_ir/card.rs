@@ -1,4 +1,7 @@
 use super::*;
+
+#[path = "card/admission.rs"]
+mod admission;
 use sve_engine::game::internal::{Activation, CardPlay, ResumeStage};
 
 #[path = "card/payment.rs"]
