@@ -2,6 +2,7 @@
 
 mod ast;
 mod evolution;
+mod numeric;
 
 use super::{
     Ability, AbilityId, AbilityKind, AbilityOrigin, AbilityQualification, AbilitySource, Action,
@@ -64,7 +65,8 @@ impl ExpandedLowerer {
     /// Lower every card atomically. Success proves only internal IR well-formedness.
     ///
     /// Only intrinsic evolution, evolve-time, fanfare, lastword, attack-time, End Begin,
-    /// draw, uniform damage to all leaders, and their numeric subset
+    /// draw, uniform damage to all leaders, destroy, numeric modifications,
+    /// and constant continuous installations with the supported turn durations
     /// are supported. Card keys remain candidate coordinates, not snapshot IDs.
     ///
     /// # Errors
@@ -84,7 +86,13 @@ impl ExpandedLowerer {
         for (key, card) in document.cards {
             let path = format!("/cards/{}", pointer_key(&key));
             let card: ast::Card = decode(card, &path)?;
-            let mut allocator = Allocator::default();
+            let mut allocator = Allocator {
+                next: 0,
+                next_scope: u64::try_from(card.abilities.len())
+                    .ok()
+                    .and_then(|count| count.checked_mul(3))
+                    .ok_or_else(|| unsupported(&path))?,
+            };
             let mut abilities = Vec::new();
             for (index, value) in card.abilities.into_iter().enumerate() {
                 let path = format!("{path}/abilities/{index}");
@@ -121,11 +129,20 @@ pub(super) fn validator(profile: &str) -> Result<jsonschema::Validator, Lowering
 #[derive(Default)]
 struct Allocator {
     next: u64,
+    next_scope: u64,
 }
 impl Allocator {
     fn id(&mut self, path: &str) -> Result<u64, LoweringError> {
         self.next = self.next.checked_add(1).ok_or_else(|| unsupported(path))?;
         Ok(self.next)
+    }
+
+    fn scope(&mut self, path: &str) -> Result<ScopeId, LoweringError> {
+        self.next_scope = self
+            .next_scope
+            .checked_add(1)
+            .ok_or_else(|| unsupported(path))?;
+        Ok(ScopeId(self.next_scope))
     }
 
     fn ability(
@@ -180,6 +197,7 @@ impl Allocator {
         let mut context = BodyContext {
             scope,
             allocator: Self::default(),
+            card_allocator: self,
             definitions: &body.define,
         };
         for value in body.define.values() {
@@ -189,8 +207,8 @@ impl Allocator {
         let mut steps = Vec::new();
         for (index, step) in body.steps.iter().enumerate() {
             let step_path = format!("{path}/{head}/do/{index}");
-            let action = context.action(step, &step_path)?;
-            let instruction_id = self.id(&step_path)?;
+            let action = context.action(step, &step_path, &ability_source)?;
+            let instruction_id = context.card_allocator.id(&step_path)?;
             let mut step_source = source.clone();
             step_source.author_path = step_path;
             steps.push(Located {
@@ -328,11 +346,30 @@ fn lowered_subscription(
 struct BodyContext<'definitions> {
     scope: ScopeId,
     allocator: Allocator,
+    card_allocator: &'definitions mut Allocator,
     definitions: &'definitions BTreeMap<String, ast::Number>,
 }
+#[expect(
+    clippy::multiple_inherent_impl,
+    reason = "Numeric lowering shares the ability binding allocator."
+)]
 impl BodyContext<'_> {
-    fn action(&mut self, step: &ast::Step, path: &str) -> Result<Action, LoweringError> {
+    fn action(
+        &mut self,
+        step: &ast::Step,
+        path: &str,
+        source: &AbilitySource,
+    ) -> Result<Action, LoweringError> {
         match step {
+            ast::Step::Destroy(value) => Ok(Action::Destroy {
+                objects: match value {
+                    ast::Destroy::Short(ast::This::This) => numeric::holder(),
+                    ast::Destroy::Long { r#ref } => self.objects(r#ref, path)?,
+                },
+            }),
+            ast::Step::Buff(value) => self.modify(value, false, path),
+            ast::Step::SetStat(value) => self.modify(value, true, path),
+            ast::Step::Apply(value) => self.continuous(value, source, path),
             ast::Step::Draw(draw) => Ok(Action::Draw {
                 player: PlayerRef::Controller {},
                 count: self.number(&draw.n, path, &mut BTreeSet::new())?,

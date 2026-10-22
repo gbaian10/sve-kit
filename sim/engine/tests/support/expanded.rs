@@ -30,13 +30,15 @@ from sve_carddb.domains.effects.author_expansion import AuthorExpander
 expander = AuthorExpander(Path(sys.argv[1]))
 first = expander.expand(Path(sys.argv[2]).read_bytes(), []).tree
 second = expander.expand(Path(sys.argv[3]).read_bytes(), []).tree
-first['cards'] = {'BP08-038': first['cards']['BP08-038'], **second['cards']}
+third = expander.expand(Path(sys.argv[4]).read_bytes(), []).tree
+first['cards'] = {'BP08-038': first['cards']['BP08-038'], **second['cards'], **third['cards']}
 print(json.dumps(first))
 ",
             ])
             .arg(root.join("dsl"))
             .arg(root.join("carddb/tests/fixtures/author_entries/golden.yaml"))
             .arg(root.join("sim/engine/tests/fixtures/lowering/bp01-118.yaml"))
+            .arg(root.join("sim/engine/tests/fixtures/lowering/numeric.yaml"))
             .output()
             .expect("run C0 fixture expansion");
         assert!(

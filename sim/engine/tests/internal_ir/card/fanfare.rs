@@ -145,3 +145,28 @@ fn failed_fanfare_keeps_paid_card_and_pending_producer_without_partial_damage() 
     );
     assert_eq!(game.internal_card_stage(), Some(ResumeStage::Pending));
 }
+
+#[test]
+fn bp08_067_author_fragment_destroys_itself_at_own_end_phase() {
+    let cards = ExpandedLowerer::new()
+        .unwrap()
+        .lower(expanded::tree())
+        .unwrap();
+    let mut game = position_for_card(1, &cards["BP08-067"], "BP08-067", 10);
+    game.play_internal_card("s", PlayerId { seat: 1 }).unwrap();
+    game.resume_internal_card().unwrap();
+    game.internal_rule_action(&json!({"do":"end-phase"}))
+        .unwrap();
+    let result = resolved(pending(&mut game).unwrap());
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["cemetery"],
+        json!(["s"])
+    );
+    assert!(
+        result
+            .progress
+            .facts
+            .iter()
+            .any(|fact| matches!(fact, Fact::Movement(m) if m.method == MoveMethod::Destroy))
+    );
+}

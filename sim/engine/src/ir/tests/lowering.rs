@@ -65,7 +65,7 @@ fn unsupported_step_rejects_the_entire_candidate() {
     tree["cards"]["BP08-038"]["abilities"][0]["fanfare"]["do"]
         .as_array_mut()
         .unwrap()
-        .push(json!({"destroy":"this"}));
+        .push(json!({"banish":"this"}));
     let failure = ExpandedLowerer::new().unwrap().lower(&tree).unwrap_err();
     assert_eq!(failure.code, "unsupported_construct");
     assert_eq!(failure.path, "/cards/BP08-038/abilities/0");
@@ -109,5 +109,67 @@ fn bp01_118_is_one_uniform_instruction_for_all_leaders() {
             source: ObjectView::SourceInformation {},
             batch: BatchPolicy::Instruction {},
         }
+    );
+}
+
+#[test]
+fn numeric_duration_and_continuous_preserve_distinct_semantics() {
+    let mut tree = expanded::tree().clone();
+    let steps = &mut tree["cards"]["BP08-038"]["abilities"][0]["fanfare"]["do"];
+    *steps = json!([
+        {"set_stat":{"on":"this","hp":1_i64,"until":"next_opp_turn"}},
+        {"buff":{"on":"this","power":-1_i64,"until":"this_and_next_opp_turn"}},
+        {"apply":{"on":"this","effect":{"stat":{"hp":2_i64}},"until":"turn"}},
+        {"apply":{"on":"this","effect":{"stat":{"power":1_i64}}}}
+    ]);
+    let second = tree["cards"]["BP08-038"]["abilities"][0].clone();
+    tree["cards"]["BP08-038"]["abilities"]
+        .as_array_mut()
+        .unwrap()
+        .push(second);
+    let cards = ExpandedLowerer::new().unwrap().lower(&tree).unwrap();
+    let body = cards["BP08-038"].card().abilities[0]
+        .node
+        .body
+        .as_ref()
+        .unwrap();
+    let actions = body
+        .steps
+        .iter()
+        .map(|step| match &step.node {
+            Node::Instruction { instruction } => &instruction.action,
+            Node::Control { .. } | Node::Capture { .. } | Node::Decision { .. } => {
+                panic!("instruction")
+            }
+        })
+        .collect::<Vec<_>>();
+    assert!(matches!(
+        actions[0],
+        Action::Modify {
+            patch: CharacteristicPatch::Numeric {
+                change: NumericChange::Set { .. },
+                ..
+            },
+            expires: Duration {
+                end: DurationEnd::NextTurnEnd { .. },
+                ..
+            },
+            ..
+        }
+    ));
+    assert!(
+        matches!(actions[1], Action::Modify { expires: Duration { end: DurationEnd::CurrentTurnEnd {}, intervals, .. }, .. } if matches!(intervals.as_slice(), [Interval::DuringNextTurn { .. }]))
+    );
+    assert!(
+        matches!(actions[2], Action::InstallEffect { effect, .. } if matches!(effect.as_ref(), Effect::Continuous { layer: ContinuousLayer::Numeric, .. }))
+    );
+    tree["cards"]["BP08-038"]["abilities"][0]["fanfare"]["do"][0]["set_stat"]["hp"] = json!("X");
+    assert_eq!(
+        ExpandedLowerer::new()
+            .unwrap()
+            .lower(&tree)
+            .unwrap_err()
+            .code,
+        "unsupported_construct"
     );
 }

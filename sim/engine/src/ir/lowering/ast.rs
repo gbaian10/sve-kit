@@ -68,6 +68,86 @@ pub(super) struct Body {
 pub(super) enum Step {
     Draw(Draw),
     Damage(Damage),
+    Destroy(Destroy),
+    Buff(Modify),
+    SetStat(Modify),
+    Apply(Apply),
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum Destroy {
+    Short(This),
+    Long { r#ref: Objects },
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Modify {
+    pub on: Objects,
+    pub power: Option<Number>,
+    pub hp: Option<Number>,
+    pub until: Option<Until>,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum Until {
+    Turn,
+    NextOppTurn,
+    ThisAndNextOppTurn,
+    Game,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum Objects {
+    This(This),
+    Zone(ObjectQuery),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct ObjectQuery {
+    pub who: Side,
+    pub zone: Zone,
+}
+
+#[derive(Deserialize)]
+pub(super) enum Side {
+    #[serde(rename = "self")]
+    Controller,
+    #[serde(rename = "opp")]
+    Opponent,
+    #[serde(rename = "all")]
+    All,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum Zone {
+    Field,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Apply {
+    pub on: Objects,
+    pub effect: StatEffect,
+    pub until: Option<Until>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct StatEffect {
+    pub stat: ConstantStats,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct ConstantStats {
+    pub power: Option<i64>,
+    pub hp: Option<i64>,
 }
 
 #[derive(Deserialize)]
