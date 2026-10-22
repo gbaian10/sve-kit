@@ -28,3 +28,12 @@ fragment (face 0, text line 1), from `card-data/jp/BP03/000-099.json` and the
 [official card page](https://shadowverse-evolve.com/cardlist/?cardno=BP03-002).
 Its optional field destination follows Q445 recorded alongside that source.
 The evolution ability is outside this fragment; source coordinates are synthetic.
+
+`activated.yaml` contains the third-line activated ability of BP01-041
+騎士王の威光 (3 PP, Act, draw one) and BP11-099 リボルバーイーグル
+(6 PP, +4/+4). Sources: `card-data/jp/BP01/000-099.json` and
+`card-data/jp/BP11/000-099.json`, from the
+[BP01-041 official page](https://shadowverse-evolve.com/cardlist/?cardno=BP01-041)
+and [BP11-099 official page](https://shadowverse-evolve.com/cardlist/?cardno=BP11-099).
+These are ability fragments with synthetic coordinates. BP01-041 proves lowering
+and well-formedness only: D1 activation currently admits follower holders only.

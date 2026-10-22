@@ -4,6 +4,7 @@ mod ast;
 mod evolution;
 mod numeric;
 mod ordering;
+mod payment;
 mod search;
 
 use super::{
@@ -66,7 +67,8 @@ impl ExpandedLowerer {
 
     /// Lower every card atomically. Success proves only internal IR well-formedness.
     ///
-    /// Only intrinsic evolution, evolve-time, fanfare, lastword, attack-time, End Begin,
+    /// Intrinsic evolution, evolve-time, fanfare, lastword, attack-time, End Begin,
+    /// field activation with ordered constant PP/Act costs,
     /// draw, uniform damage to all leaders, destroy, numeric modifications,
     /// constant continuous installations, Search, successful EX discounts and
     /// observed deck ordering have closed supported subsets. Search and Order
@@ -163,24 +165,7 @@ impl Allocator {
         if entry.evolve.is_some() {
             return evolution::lower(self, key, path, entry, scope);
         }
-        let (body, head, keyword) = match (
-            &entry.fanfare,
-            &entry.lastword,
-            &entry.attack_time,
-            &entry.auto,
-            &entry.evolve_time,
-        ) {
-            (Some(body), None, None, None, None) => (body, "fanfare", Some(KeywordId::Fanfare)),
-            (None, Some(body), None, None, None) => (body, "lastword", Some(KeywordId::Lastword)),
-            (None, None, Some(body), None, None) => {
-                (body, "attack_time", Some(KeywordId::OnAttack))
-            }
-            (None, None, None, Some(auto), None) => (&auto.body, "auto", None),
-            (None, None, None, None, Some(body)) => {
-                (body, "evolve_time", Some(KeywordId::OnEvolve))
-            }
-            _ => return Err(unsupported(path)),
-        };
+        let (body, head, keyword) = ability_body(entry, path)?;
         let source = source_span(key, path, entry)?;
         let printed = AbilityOrigin::Printed {
             face: FaceId(source.face.clone()),
@@ -210,52 +195,79 @@ impl Allocator {
             context.number(value, path, &mut BTreeSet::new())?;
         }
         context.allocator = Self::default();
-        let mut steps = Vec::new();
-        for (index, step) in body.steps.iter().enumerate() {
-            let step_path = format!("{path}/{head}/do/{index}");
-            let instruction_id = context.card_allocator.id(&step_path)?;
-            let action = context.action(step, &step_path, &ability_source)?;
-            context.remember(step, ReceiptId(instruction_id), &step_path)?;
-            let mut step_source = source.clone();
-            step_source.author_path = step_path;
-            steps.push(Located {
-                source: step_source,
-                node: Node::Instruction {
-                    instruction: Box::new(Instruction {
-                        id: InstructionId(instruction_id),
-                        receipt: ReceiptId(instruction_id),
-                        actor: PlayerRef::Controller {},
-                        source: ability_source.clone(),
-                        precondition: None,
-                        context: InstructionContext::Effect,
-                        action,
-                    }),
-                },
-            });
-        }
-        let event_id = context.allocator.id(path)?;
-        let mut trigger = lowered_trigger(entry, keyword, event_id, scope, path)?;
-        if body.per_turn.is_some_and(|maximum| maximum != 1) {
-            return Err(unsupported(path));
-        }
-        trigger.limit = body.per_turn.map(|_| super::LimitSpec::once_per_turn());
+        let program = context.body(body, &format!("{path}/{head}"), &source, &ability_source)?;
+        let (kind, play, trigger) = if let Some(activated) = &entry.activate {
+            if body.per_turn.is_some() {
+                return Err(unsupported(path));
+            }
+            (
+                AbilityKind::Activated,
+                Some(payment::lower(
+                    context.card_allocator,
+                    &activated.cost,
+                    &ability_source,
+                    path,
+                )?),
+                None,
+            )
+        } else {
+            let event_id = context.allocator.id(path)?;
+            let mut trigger = lowered_trigger(entry, keyword, event_id, scope, path)?;
+            if body.per_turn.is_some_and(|maximum| maximum != 1) {
+                return Err(unsupported(path));
+            }
+            trigger.limit = body.per_turn.map(|_| super::LimitSpec::once_per_turn());
+            (AbilityKind::Triggered, None, Some(trigger))
+        };
         Ok(Located {
             source,
             node: Ability {
                 id: AbilityId(scope.0),
                 scope,
                 source: ability_source,
-                kind: AbilityKind::Triggered,
+                kind,
                 qualification: AbilityQualification::Ordinary,
                 active_zones: vec![ZoneKind::Field],
                 event_captures: vec![],
-                play: None,
-                trigger: Some(trigger),
-                body: Some(Program { scope, steps }),
+                play,
+                trigger,
+                body: Some(program),
                 declarations: vec![],
             },
         })
     }
+}
+
+fn ability_body<'entry>(
+    entry: &'entry ast::Ability,
+    path: &str,
+) -> Result<(&'entry ast::Body, &'static str, Option<KeywordId>), LoweringError> {
+    Ok(
+        match (
+            &entry.fanfare,
+            &entry.lastword,
+            &entry.attack_time,
+            &entry.auto,
+            &entry.evolve_time,
+            &entry.activate,
+        ) {
+            (Some(body), None, None, None, None, None) => {
+                (body, "fanfare", Some(KeywordId::Fanfare))
+            }
+            (None, Some(body), None, None, None, None) => {
+                (body, "lastword", Some(KeywordId::Lastword))
+            }
+            (None, None, Some(body), None, None, None) => {
+                (body, "attack_time", Some(KeywordId::OnAttack))
+            }
+            (None, None, None, Some(auto), None, None) => (&auto.body, "auto", None),
+            (None, None, None, None, Some(body), None) => {
+                (body, "evolve_time", Some(KeywordId::OnEvolve))
+            }
+            (None, None, None, None, None, Some(activated)) => (&activated.body, "activate", None),
+            _ => return Err(unsupported(path)),
+        },
+    )
 }
 
 fn lowered_trigger(
@@ -363,6 +375,42 @@ struct BodyContext<'definitions> {
     reason = "Action families share the ability binding allocator."
 )]
 impl BodyContext<'_> {
+    fn body(
+        &mut self,
+        body: &ast::Body,
+        path: &str,
+        source: &SourceSpan,
+        ability_source: &AbilitySource,
+    ) -> Result<Program, LoweringError> {
+        let mut steps = Vec::new();
+        for (index, step) in body.steps.iter().enumerate() {
+            let step_path = format!("{path}/do/{index}");
+            let instruction_id = self.card_allocator.id(&step_path)?;
+            let action = self.action(step, &step_path, ability_source)?;
+            self.remember(step, ReceiptId(instruction_id), &step_path)?;
+            let mut step_source = source.clone();
+            step_source.author_path = step_path;
+            steps.push(Located {
+                source: step_source,
+                node: Node::Instruction {
+                    instruction: Box::new(Instruction {
+                        id: InstructionId(instruction_id),
+                        receipt: ReceiptId(instruction_id),
+                        actor: PlayerRef::Controller {},
+                        source: ability_source.clone(),
+                        precondition: None,
+                        context: InstructionContext::Effect,
+                        action,
+                    }),
+                },
+            });
+        }
+        Ok(Program {
+            scope: self.scope,
+            steps,
+        })
+    }
+
     fn action(
         &mut self,
         step: &ast::Step,

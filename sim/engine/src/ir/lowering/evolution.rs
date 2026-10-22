@@ -145,6 +145,7 @@ pub(super) fn lower(
         || entry.attack_time.is_some()
         || entry.auto.is_some()
         || entry.evolve_time.is_some()
+        || entry.activate.is_some()
     {
         return Err(unsupported(path));
     }

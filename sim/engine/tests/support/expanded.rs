@@ -40,6 +40,7 @@ print(json.dumps(first))
             .arg(root.join("sim/engine/tests/fixtures/lowering/bp01-118.yaml"))
             .arg(root.join("sim/engine/tests/fixtures/lowering/numeric.yaml"))
             .arg(root.join("sim/engine/tests/fixtures/lowering/search.yaml"))
+            .arg(root.join("sim/engine/tests/fixtures/lowering/activated.yaml"))
             .output()
             .expect("run C0 fixture expansion");
         assert!(

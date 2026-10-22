@@ -138,6 +138,40 @@ fn synthetic_body(ability: &Ability) -> WellFormedProgram {
 }
 
 #[test]
+fn bp11_099_author_activation_pays_before_modifying_the_holder() {
+    let cards = ExpandedLowerer::new()
+        .unwrap()
+        .lower(expanded::tree())
+        .unwrap();
+    let program = &cards["BP11-099"];
+    let mut game = position_for_card(1, program, "BP11-099", 8);
+    game.play_internal_card("s", PlayerId { seat: 1 }).unwrap();
+    game.resume_internal_card().unwrap();
+    let result = resolved(
+        game.activate_internal_card(
+            "s",
+            program.card().abilities[0].node.id,
+            PlayerId { seat: 1 },
+        )
+        .unwrap(),
+    );
+    assert!(result.progress.complete);
+    let view = game.projection(View::Referee).unwrap();
+    assert_eq!(view["P1"]["pp"]["current"], 0);
+    assert_eq!(view["objects"]["s"]["power"], 6);
+    assert_eq!(view["objects"]["s"]["hp"], 5);
+    game.resume_internal_card().unwrap();
+    let before = exact_authority(&game);
+    game.activate_internal_card(
+        "s",
+        program.card().abilities[0].node.id,
+        PlayerId { seat: 1 },
+    )
+    .unwrap_err();
+    assert_eq!(exact_authority(&game), before);
+}
+
+#[test]
 fn bp01_118_author_yaml_reaches_authority_fanfare_once_after_entry() {
     let cards = ExpandedLowerer::new()
         .unwrap()

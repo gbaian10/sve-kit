@@ -244,3 +244,51 @@ fn search_groups_partition_and_successful_ex_discount_are_scoped() {
         "unsupported_construct"
     );
 }
+
+#[test]
+fn activated_payment_order_and_trigger_limit_remain_separate() {
+    let mut tree = expanded::tree().clone();
+    tree["cards"]["BP08-067"]["abilities"][0]["auto"]["per_turn"] = json!(1_u64);
+    let lowerer = ExpandedLowerer::new().unwrap();
+    let cards = lowerer.lower(&tree).unwrap();
+    let ability = &cards["BP01-041"].card().abilities[0].node;
+    assert_eq!(ability.kind, AbilityKind::Activated);
+    assert!(matches!(
+        ability.source.origin,
+        AbilityOrigin::Printed { .. }
+    ));
+    assert!(ability.trigger.is_none());
+    let CostSpec::Ordered { steps } = &ability.play.as_ref().unwrap().costs else {
+        panic!("ordered payment");
+    };
+    assert!(matches!(
+        steps[0].instruction.action,
+        Action::Resource {
+            resource: Resource::PpCurrent,
+            operation: ResourceOperation::Pay,
+            amount: Expr::Literal(Int(3)),
+            ..
+        }
+    ));
+    assert!(matches!(
+        steps[1].instruction.action,
+        Action::Posture {
+            posture: Posture::Acted,
+            ..
+        }
+    ));
+    assert_eq!(
+        cards["BP08-067"].card().abilities[0]
+            .node
+            .trigger
+            .as_ref()
+            .unwrap()
+            .limit,
+        Some(LimitSpec::once_per_turn())
+    );
+    tree["cards"]["BP01-041"]["abilities"][0]["activate"]["per_turn"] = json!(1_u64);
+    assert_eq!(
+        lowerer.lower(&tree).unwrap_err().code,
+        "unsupported_construct"
+    );
+}

@@ -42,6 +42,33 @@ pub(super) struct Ability {
     pub auto: Option<Auto>,
     pub evolve_time: Option<Body>,
     pub evolve: Option<Evolution>,
+    pub activate: Option<Activate>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Activate {
+    pub cost: Cost,
+    #[serde(flatten)]
+    pub body: Body,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum Cost {
+    Short(CostOperation),
+    Ordered { steps: Vec<CostOperation> },
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+#[expect(
+    variant_size_differences,
+    reason = "Author cost operations have distinct scalar payloads."
+)]
+pub(super) enum CostOperation {
+    Pp(u64),
+    ActSelf(bool),
 }
 
 #[derive(Deserialize)]
