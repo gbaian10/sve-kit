@@ -120,7 +120,7 @@ fn numeric_duration_and_continuous_preserve_distinct_semantics() {
         {"set_stat":{"on":"this","hp":1_i64,"until":"next_opp_turn"}},
         {"buff":{"on":"this","power":-1_i64,"until":"this_and_next_opp_turn"}},
         {"apply":{"on":"this","effect":{"stat":{"hp":2_i64}},"until":"turn"}},
-        {"apply":{"on":"this","effect":{"stat":{"power":1_i64}}}}
+        {"apply":{"on":{"who":"self","zone":"field"},"effect":{"stat":{"power":1_i64}}}}
     ]);
     let second = tree["cards"]["BP08-038"]["abilities"][0].clone();
     tree["cards"]["BP08-038"]["abilities"]
@@ -170,6 +170,77 @@ fn numeric_duration_and_continuous_preserve_distinct_semantics() {
             .lower(&tree)
             .unwrap_err()
             .code,
+        "unsupported_construct"
+    );
+}
+
+#[test]
+fn search_groups_partition_and_successful_ex_discount_are_scoped() {
+    let mut tree = expanded::tree().clone();
+    tree["cards"]["BP03-002"]["abilities"][0]["fanfare"]["do"] = json!([
+        {"search":{"groups":[
+            {"sel":{"who":"self","zone":"deck","kind":"follower"},"n":1_u64},
+            {"sel":{"who":"self","zone":"deck","kind":"spell"},"upto":1_u64}
+        ],"distinct_by":"name","to":{"order":"printed","partition":[{"zone":"hand","n":1_u64},{"zone":"cemetery","n":1_u64}]}}},
+        {"search":{"sel":{"who":"self","zone":"deck","name":"コスモスファング"},"n":1_u64,"to":"ex","result":"searched"}},
+        {"apply":{"on":{"follow":"searched"},"effect":{"cost_mod":{"when_playing":{"in":"affected"},"delta":-2_i64}},"until":"turn"}},
+        {"look":{"top":{"who":"self","n":3_u64},"bind":"seen"}},
+        {"move":{"ref":{"in":"seen"},"to":"ex","result":"moved"}},
+        {"move":{"ref":{"in":"seen","except":{"in":{"objects_of":"moved","view":"before"}}},"to":"deck","position":"bottom","order":"chooser"}}
+    ]);
+    let lowerer = ExpandedLowerer::new().unwrap();
+    let cards = lowerer.lower(&tree).unwrap();
+    let body = cards["BP03-002"].card().abilities[0]
+        .node
+        .body
+        .as_ref()
+        .unwrap();
+    let Node::Instruction { instruction: first } = &body.steps[0].node else {
+        panic!("search");
+    };
+    let Action::Search {
+        groups: Some(groups),
+        destination: Some(SearchDestination::Partition { destinations }),
+        ..
+    } = &first.action
+    else {
+        panic!("partition");
+    };
+    assert_eq!(
+        groups.cardinality,
+        Cardinality {
+            minimum: Nat(1),
+            maximum: Some(Nat(2))
+        }
+    );
+    assert_eq!(destinations.len(), 2);
+    let Node::Instruction {
+        instruction: searched,
+    } = &body.steps[1].node
+    else {
+        panic!("search");
+    };
+    let Node::Instruction {
+        instruction: installed,
+    } = &body.steps[2].node
+    else {
+        panic!("installation");
+    };
+    assert!(
+        matches!(&installed.action, Action::InstallEffect { subjects: InstallationSubjects::Objects { objects: Selector::MoveAfter { receipt: MovementReceipt::Search { receipt }, .. }, .. }, .. } if *receipt == ReceiptReference::new(searched.receipt))
+    );
+    let Node::Instruction {
+        instruction: ordered,
+    } = &body.steps[5].node
+    else {
+        panic!("order");
+    };
+    assert!(
+        matches!(&ordered.action, Action::Order { cards: Selector::Difference { except, .. }, .. } if matches!(except.as_ref(), Selector::ReceiptMembers { receipt: ObjectReceipt::Movement { receipt: MovementReceipt::Move { .. } }, projection: MemberProjection::Before }))
+    );
+    tree["cards"]["BP03-002"]["abilities"][0]["fanfare"]["do"][1]["search"]["to"] = json!("hand");
+    assert_eq!(
+        lowerer.lower(&tree).unwrap_err().code,
         "unsupported_construct"
     );
 }

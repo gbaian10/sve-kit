@@ -72,6 +72,77 @@ pub(super) enum Step {
     Buff(Modify),
     SetStat(Modify),
     Apply(Apply),
+    Search(Search),
+    Look(Look),
+    Move(Move),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Look {
+    pub top: DeckTop,
+    pub bind: String,
+    #[serde(rename = "by")]
+    pub _by: Option<SelfPlayer>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct DeckTop {
+    pub who: SelfPlayer,
+    pub n: u64,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Move {
+    pub r#ref: Observed,
+    pub to: ObservedDestination,
+    pub position: Option<Placement>,
+    pub order: Option<Chooser>,
+    pub result: Option<String>,
+    #[serde(rename = "by")]
+    pub _by: Option<SelfPlayer>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Observed {
+    pub r#in: Observation,
+    pub except: Option<Box<Self>>,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum Observation {
+    Binding(String),
+    Before { objects_of: String, view: Before },
+}
+
+#[derive(Deserialize)]
+pub(super) enum Before {
+    #[serde(rename = "before")]
+    Before,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum ObservedDestination {
+    Deck,
+    Ex,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum Placement {
+    Top,
+    Bottom,
+}
+
+#[derive(Deserialize)]
+pub(super) enum Chooser {
+    #[serde(rename = "chooser")]
+    Chooser,
 }
 
 #[derive(Deserialize)]
@@ -104,6 +175,7 @@ pub(super) enum Until {
 pub(super) enum Objects {
     This(This),
     Zone(ObjectQuery),
+    Follow { follow: String },
 }
 
 #[derive(Deserialize)]
@@ -133,14 +205,155 @@ pub(super) enum Zone {
 #[serde(deny_unknown_fields)]
 pub(super) struct Apply {
     pub on: Objects,
-    pub effect: StatEffect,
+    pub effect: InstalledEffect,
     pub until: Option<Until>,
 }
 
 #[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum InstalledEffect {
+    Stat(ConstantStats),
+    CostMod(CostModifier),
+}
+
+#[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
-pub(super) struct StatEffect {
-    pub stat: ConstantStats,
+pub(super) struct CostModifier {
+    pub when_playing: AffectedCondition,
+    pub delta: i64,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct AffectedCondition {
+    #[serde(rename = "in")]
+    pub subjects: Affected,
+}
+
+#[derive(Deserialize)]
+pub(super) enum Affected {
+    #[serde(rename = "affected")]
+    Affected,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Search {
+    pub sel: Option<SearchQuery>,
+    pub n: Option<u64>,
+    pub upto: Option<u64>,
+    pub groups: Option<Vec<SearchGroup>>,
+    pub to: SearchDestination,
+    pub result: Option<String>,
+    pub distinct_by: Option<Names>,
+}
+
+#[derive(Deserialize)]
+pub(super) enum Names {
+    #[serde(rename = "name")]
+    Name,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct SearchGroup {
+    pub sel: SearchQuery,
+    pub n: Option<u64>,
+    pub upto: Option<u64>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct SearchQuery {
+    pub who: SelfPlayer,
+    pub zone: DeckZone,
+    pub kind: Option<SearchKind>,
+    pub r#trait: Option<String>,
+    pub name: Option<String>,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum SearchKind {
+    Follower,
+    Spell,
+    Amulet,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum SearchDestination {
+    Single(SearchZone),
+    Partition {
+        order: Printed,
+        partition: Vec<SearchPart>,
+    },
+    Replacement {
+        zone: SearchZone,
+        instead: SearchReplacement,
+    },
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum SearchZone {
+    Hand,
+    Cemetery,
+    Ex,
+    Field,
+}
+
+#[derive(Deserialize)]
+pub(super) enum Printed {
+    #[serde(rename = "printed")]
+    Printed,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct SearchPart {
+    pub zone: SearchZone,
+    pub n: u64,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct SearchReplacement {
+    pub r#if: FoundCondition,
+    pub zone: SearchZone,
+    pub may: Option<bool>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct FoundCondition {
+    pub cmp: FoundComparison,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct FoundComparison {
+    pub left: FoundCost,
+    pub op: LessEqual,
+    pub right: i64,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct FoundCost {
+    pub cost_of: Found,
+}
+
+#[derive(Deserialize)]
+pub(super) enum Found {
+    #[serde(rename = "found")]
+    Found,
+}
+
+#[derive(Deserialize)]
+pub(super) enum LessEqual {
+    #[serde(rename = "le")]
+    LessEqual,
 }
 
 #[derive(Deserialize)]

@@ -3,6 +3,8 @@
 mod ast;
 mod evolution;
 mod numeric;
+mod ordering;
+mod search;
 
 use super::{
     Ability, AbilityId, AbilityKind, AbilityOrigin, AbilityQualification, AbilitySource, Action,
@@ -66,8 +68,10 @@ impl ExpandedLowerer {
     ///
     /// Only intrinsic evolution, evolve-time, fanfare, lastword, attack-time, End Begin,
     /// draw, uniform damage to all leaders, destroy, numeric modifications,
-    /// and constant continuous installations with the supported turn durations
-    /// are supported. Card keys remain candidate coordinates, not snapshot IDs.
+    /// constant continuous installations, Search, successful EX discounts and
+    /// observed deck ordering have closed supported subsets. Search and Order
+    /// still require D1's fragment harness; this is not whole-card admission.
+    /// Card keys remain candidate coordinates, not snapshot IDs.
     ///
     /// # Errors
     /// Rejects schema violations and any unsupported construct anywhere in the tree.
@@ -199,6 +203,8 @@ impl Allocator {
             allocator: Self::default(),
             card_allocator: self,
             definitions: &body.define,
+            searches: BTreeMap::new(),
+            observations: BTreeMap::new(),
         };
         for value in body.define.values() {
             context.number(value, path, &mut BTreeSet::new())?;
@@ -207,8 +213,9 @@ impl Allocator {
         let mut steps = Vec::new();
         for (index, step) in body.steps.iter().enumerate() {
             let step_path = format!("{path}/{head}/do/{index}");
-            let action = context.action(step, &step_path, &ability_source)?;
             let instruction_id = context.card_allocator.id(&step_path)?;
+            let action = context.action(step, &step_path, &ability_source)?;
+            context.remember(step, ReceiptId(instruction_id), &step_path)?;
             let mut step_source = source.clone();
             step_source.author_path = step_path;
             steps.push(Located {
@@ -348,10 +355,12 @@ struct BodyContext<'definitions> {
     allocator: Allocator,
     card_allocator: &'definitions mut Allocator,
     definitions: &'definitions BTreeMap<String, ast::Number>,
+    searches: BTreeMap<String, (ReceiptId, bool)>,
+    observations: BTreeMap<String, super::ObjectReceipt>,
 }
 #[expect(
     clippy::multiple_inherent_impl,
-    reason = "Numeric lowering shares the ability binding allocator."
+    reason = "Action families share the ability binding allocator."
 )]
 impl BodyContext<'_> {
     fn action(
@@ -370,6 +379,20 @@ impl BodyContext<'_> {
             ast::Step::Buff(value) => self.modify(value, false, path),
             ast::Step::SetStat(value) => self.modify(value, true, path),
             ast::Step::Apply(value) => self.continuous(value, source, path),
+            ast::Step::Search(value) => self.search(value, path),
+            ast::Step::Look(value) => {
+                let ast::SelfPlayer::Controller = value.top.who;
+                Ok(Action::Look {
+                    viewer: PlayerRef::Controller {},
+                    zone: super::ZoneRef {
+                        player: PlayerRef::Controller {},
+                        kind: ZoneKind::Deck,
+                    },
+                    count: Expr::Literal(Nat(value.top.n)),
+                    mode: StepwiseMode::Exact,
+                })
+            }
+            ast::Step::Move(value) => self.observed_move(value, path),
             ast::Step::Draw(draw) => Ok(Action::Draw {
                 player: PlayerRef::Controller {},
                 count: self.number(&draw.n, path, &mut BTreeSet::new())?,

@@ -56,7 +56,11 @@ impl BodyContext<'_> {
         path: &str,
     ) -> Result<Selector, LoweringError> {
         let ast::Objects::Zone(query) = value else {
-            return Ok(holder());
+            return if matches!(value, ast::Objects::This(_)) {
+                Ok(holder())
+            } else {
+                Err(unsupported(path))
+            };
         };
         let binding: Binding<ObjectRef> = Binding::new(self.allocator.id(path)?, self.scope);
         Ok(Selector::Zone {
@@ -126,10 +130,13 @@ impl BodyContext<'_> {
         source: &AbilitySource,
         path: &str,
     ) -> Result<Action, LoweringError> {
+        let ast::InstalledEffect::Stat(statistics) = &installation.effect else {
+            return self.discount(installation, path);
+        };
         let mut patches = Vec::new();
         for (stat, value) in [
-            (Stat::Attack, installation.effect.stat.power),
-            (Stat::Life, installation.effect.stat.hp),
+            (Stat::Attack, statistics.power),
+            (Stat::Life, statistics.hp),
         ] {
             if let Some(value) = value {
                 patches.push(CharacteristicPatch::Numeric {

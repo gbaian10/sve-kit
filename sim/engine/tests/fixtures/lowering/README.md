@@ -22,3 +22,9 @@ Their sources are `card-data/jp/BP08/000-099.json` and
 and [BP18-018 official page](https://shadowverse-evolve.com/cardlist/?cardno=BP18-018).
 Other printed abilities are outside these fragments. The synthetic source
 coordinates have the same candidate-only limitations as the fixtures above.
+
+`search.yaml` contains BP03-002 コスモスファング's complete fanfare
+fragment (face 0, text line 1), from `card-data/jp/BP03/000-099.json` and the
+[official card page](https://shadowverse-evolve.com/cardlist/?cardno=BP03-002).
+Its optional field destination follows Q445 recorded alongside that source.
+The evolution ability is outside this fragment; source coordinates are synthetic.

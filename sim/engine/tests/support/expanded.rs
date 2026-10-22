@@ -29,9 +29,9 @@ from pathlib import Path
 from sve_carddb.domains.effects.author_expansion import AuthorExpander
 expander = AuthorExpander(Path(sys.argv[1]))
 first = expander.expand(Path(sys.argv[2]).read_bytes(), []).tree
-second = expander.expand(Path(sys.argv[3]).read_bytes(), []).tree
-third = expander.expand(Path(sys.argv[4]).read_bytes(), []).tree
-first['cards'] = {'BP08-038': first['cards']['BP08-038'], **second['cards'], **third['cards']}
+first['cards'] = {'BP08-038': first['cards']['BP08-038']}
+for path in sys.argv[3:]:
+    first['cards'].update(expander.expand(Path(path).read_bytes(), []).tree['cards'])
 print(json.dumps(first))
 ",
             ])
@@ -39,6 +39,7 @@ print(json.dumps(first))
             .arg(root.join("carddb/tests/fixtures/author_entries/golden.yaml"))
             .arg(root.join("sim/engine/tests/fixtures/lowering/bp01-118.yaml"))
             .arg(root.join("sim/engine/tests/fixtures/lowering/numeric.yaml"))
+            .arg(root.join("sim/engine/tests/fixtures/lowering/search.yaml"))
             .output()
             .expect("run C0 fixture expansion");
         assert!(
