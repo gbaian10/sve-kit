@@ -5,6 +5,7 @@ use super::{
     SourceSpan, Step, admission, face_ordinal, int, invalid, printed_origin, seat_name,
     unsupported,
 };
+use crate::game::legal::subsets;
 use crate::ir::{
     Action, ObjectRef, PlaySpec, PlayerRef, RecipientSet, SelectionSnapshot, Selector,
 };
@@ -28,6 +29,8 @@ pub enum CardPlay {
     Entered(CardEntry),
     /// One pending occurrence cannot legally be played and has been cancelled by rules.
     Cancelled,
+    /// A valid Quick Pass resumed the stored attack or end-phase procedure.
+    Continued(Step),
 }
 
 /// Complete follower or amulet rule play; fanfare remains a separate execution.
@@ -271,11 +274,126 @@ fn collect_modes(program: &Program) -> Result<Vec<PlayMode>> {
     reason = "Formal plays share the authority's execution and rollback boundary."
 )]
 impl Game {
+    pub(in crate::game::internal) fn internal_quick_preflight(
+        &self,
+        holder: &str,
+        ability: &Ability,
+        actor: PlayerId,
+        spell: bool,
+    ) -> Result<bool> {
+        // Allocate evaluation slots on a disposable authority, without moving cards or running effects.
+        let mut probe = self.clone();
+        let mut execution = probe.new_card_execution(Context {
+            source: holder.into(),
+            generation: Generation(self.object(holder)?.generation),
+            controller: actor,
+        })?;
+        let play = ability
+            .play
+            .as_ref()
+            .ok_or_else(|| invalid("missing Quick PlaySpec"))?;
+        execution.captures(&probe, &play.captures)?;
+        let CostSpec::Ordered { steps } = &play.costs else {
+            return Err(unsupported("Quick costs"));
+        };
+        let mut pp = int(&self.player(seat_name(actor)?)?.pp["current"]);
+        let mut standing = self.object(holder)?.state["acted"] == false;
+        for step in steps {
+            match &step.instruction.action {
+                Action::Resource {
+                    amount: Expr::Literal(Int(amount)),
+                    ..
+                } => {
+                    let amount = if spell {
+                        self.internal_quote_card_cost(&execution)?
+                    } else {
+                        *amount
+                    };
+                    if pp < amount {
+                        return Ok(false);
+                    }
+                    pp = pp
+                        .checked_sub(amount)
+                        .ok_or_else(|| invalid("PP quote overflow"))?;
+                }
+                Action::Posture { .. } => {
+                    if !standing {
+                        return Ok(false);
+                    }
+                    standing = false;
+                }
+                Action::Move { .. } => {}
+                _ => return Err(unsupported("Quick cost proof")),
+            }
+        }
+        let groups = collect_modes(
+            ability
+                .body
+                .as_ref()
+                .ok_or_else(|| invalid("missing Quick body"))?,
+        )?;
+        self.quick_mode_plan(&execution, &groups, play.parameters.clone().into())
+    }
+
+    fn quick_mode_plan(
+        &self,
+        execution: &Execution,
+        groups: &[PlayMode],
+        parameters: VecDeque<Decision>,
+    ) -> Result<bool> {
+        let Some((group, rest)) = groups.split_first() else {
+            return self.internal_feasible_targets(execution, &execution.slots, &parameters);
+        };
+        let count = execution.natural(self, &group.count)?;
+        let ChoiceDomain::Modes { cardinality, .. } = &group.chosen.domain else {
+            return Err(unsupported("Quick mode domain"));
+        };
+        if count == Nat(0) {
+            return self.quick_mode_plan(execution, rest, parameters);
+        }
+        let names = group
+            .modes
+            .iter()
+            .enumerate()
+            .map(|(i, _)| i.to_string())
+            .collect::<Vec<_>>();
+        let maximum = cardinality.maximum.map_or(count.0, |n| n.0.min(count.0));
+        for selection in subsets(
+            &names,
+            usize::try_from(cardinality.minimum.0).map_err(invalid)?,
+            usize::try_from(maximum).map_err(invalid)?,
+        ) {
+            let selected = group
+                .modes
+                .iter()
+                .enumerate()
+                .filter(|(index, _)| selection.contains(&index.to_string()))
+                .map(|(_, mode)| mode.id)
+                .collect::<Vec<_>>();
+            if !group.chosen.accepts_answer(count, &selected) {
+                continue;
+            }
+            let mut parameters = parameters.clone();
+            for (index, mode) in group.modes.iter().enumerate() {
+                if selection.contains(&index.to_string()) {
+                    parameters.extend(mode.parameters.clone());
+                }
+            }
+            if self.quick_mode_plan(execution, rest, parameters)? {
+                return Ok(true);
+            }
+        }
+        Ok(false)
+    }
+
     /// Play an admitted ordinary Spell, follower or amulet.
     ///
     /// # Errors
     /// Rejects unsupported cards, timing, carry, payment and body failures atomically.
     pub fn play_internal_card(&mut self, holder: &str, actor: PlayerId) -> Result<CardPlay> {
+        if self.card_runtime.quick.is_some() {
+            return Err(invalid("Quick requires its authority question"));
+        }
         let before = self.clone();
         let result = if self.object_type(holder)? == "スペル" {
             self.play_internal_spell(holder, actor)
@@ -286,7 +404,11 @@ impl Game {
         self.finish_card_attempt(before, result)
     }
 
-    fn play_internal_spell(&mut self, holder: &str, actor: PlayerId) -> Result<CardPlay> {
+    pub(super) fn play_internal_spell(
+        &mut self,
+        holder: &str,
+        actor: PlayerId,
+    ) -> Result<CardPlay> {
         self.check_card_play_holder(holder, actor)?;
         let object = self.object(holder)?.clone();
         let card = self
@@ -337,14 +459,10 @@ impl Game {
             generation: Generation(object.generation),
             controller: actor,
         })?;
-        let point = self.input_point();
         if object.owner != seat
             || object.controller != seat
             || !matches!(object.zone.as_str(), "hand" | "ex")
-            || point["at"] != "main"
-            || point["by"] != seat
-            || self.state.flow["kind"] != "main"
-            || self.state.turn["phase"] != "main"
+            || !self.internal_play_timing(actor, self.internal_quick_spell(holder)?)
             || int(&object.state["face"]) != 0
             || !self.prepared.is_empty()
             || object.state["evolved_with"].is_string()
@@ -464,7 +582,12 @@ impl Game {
         result: Result<CardPlay>,
     ) -> Result<CardPlay> {
         if result.is_err() {
+            let high = self.state.ir_epoch;
             *self = before;
+            if self.card_runtime.quick.is_some() {
+                self.state.ir_epoch = self.state.ir_epoch.max(high);
+                self.refresh_internal_quick()?;
+            }
             return result;
         }
         if let Some(execution) = self.typed.as_mut() {
@@ -493,6 +616,9 @@ impl Game {
         token: DecisionToken,
         answer: Answer,
     ) -> Result<CardPlay> {
+        if self.card_runtime.quick.is_some() {
+            return self.answer_internal_quick(actor, token, &answer);
+        }
         if self.typed.is_none() && self.card_runtime.question.is_some() {
             return self.answer_internal_pending(actor, token, &answer);
         }

@@ -25,6 +25,9 @@ mod triggers;
 #[path = "card/timing.rs"]
 mod timing;
 
+#[path = "card/quick.rs"]
+mod quick;
+
 #[path = "card/evolution.rs"]
 mod evolution;
 

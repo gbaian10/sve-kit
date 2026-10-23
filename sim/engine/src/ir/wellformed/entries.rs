@@ -315,6 +315,10 @@ impl Checker {
             self.at("body/steps", |checker| checker.program_steps(body))?;
         }
         for (index, effect) in ability.declarations.iter().enumerate() {
+            // Only this complete header grants PlayCard; generic permission remains closed.
+            if super::super::quick::card_permission(ability) {
+                continue;
+            }
             self.at(&format!("declarations/{index}"), |checker| {
                 checker.effect(effect, &ability.active_zones)
             })?;

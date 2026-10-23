@@ -3,6 +3,7 @@ use super::{
     Context, Execution, Fact, Game, InstructionOutcome, Progress, admission, int, player_id,
     seat_name, unsupported,
 };
+use crate::ir::quick::{card_permission, is_printed_quick};
 use crate::ir::{
     Ability, AbilityId, AbilityInstanceId, AbilityKind, AbilityOrigin, AbilitySource, Action,
     AssociationId, Control, CostSpec, DamageAmount, ExecutionId, Expr, FaceId, Generation,
@@ -23,6 +24,7 @@ mod costs;
 mod evolution;
 mod fanfare;
 mod printed;
+pub(super) mod quick;
 pub(in crate::game::internal) mod triggers;
 pub use triggers::{PendingOption, QuotaDomain, QuotaSelection};
 pub(super) mod play;
@@ -67,6 +69,8 @@ pub(in crate::game) struct CardRuntime {
     next_pending: u64,
     rule_ids: BTreeMap<String, RuleId>,
     pub(in crate::game::internal) active_source: Option<RuntimeAbilitySource>,
+    pub(in crate::game::internal) quick: Option<quick::Question>,
+    pub(in crate::game::internal) quick_start: bool,
 }
 
 impl CardRuntime {
@@ -76,6 +80,8 @@ impl CardRuntime {
         self.question = None;
         self.checkpoint = None;
         self.active_source = None;
+        self.quick = None;
+        self.quick_start = false;
     }
 
     pub(in crate::game) const fn has_pending(&self) -> bool {
@@ -85,6 +91,11 @@ impl CardRuntime {
     pub(in crate::game) fn requires_typed_play(&self) -> bool {
         self.cards.values().any(|card| {
             !card.card().card_play_costs.is_empty()
+                || card
+                    .card()
+                    .abilities
+                    .iter()
+                    .any(|a| is_printed_quick(&a.node))
                 || card.card().abilities.iter().any(|ability| {
                     evolution::intrinsic(&ability.node)
                         || matches!(
@@ -142,6 +153,7 @@ impl Game {
             || !self.prepared.is_empty()
             || self.card_runtime.checkpoint.is_some()
             || self.card_runtime.has_pending()
+            || self.card_runtime.quick.is_some()
         {
             return Err(invalid("duplicate card or busy internal card loader"));
         }
@@ -165,6 +177,14 @@ impl Game {
             }
             let printed = self.catalog.face(card_no, ordinal)?;
             check_printed_face(printed)?;
+            if is_printed_quick(ability)
+                && ability.kind == AbilityKind::Activated
+                && printed["card_type"] != "フォロワー"
+            {
+                return Err(unsupported(
+                    "Quick activation requires an ordinary follower",
+                ));
+            }
             if ability.kind == AbilityKind::Activated
                 && !matches!(
                     printed["card_type"].as_str(),
@@ -179,6 +199,13 @@ impl Game {
                 play::check_spell(ability, printed)?;
             }
             check_source(&located.source, card_no, &face.0, line.0)?;
+            if card_permission(ability) {
+                quick::check_spell_face(card.card(), ordinal, base_print)?;
+                continue;
+            }
+            if is_printed_quick(ability) && ordinal != 0 {
+                return Err(unsupported("Quick special face"));
+            }
             if evolution::intrinsic(ability) {
                 evolution::check(located)?;
                 continue;
@@ -219,6 +246,9 @@ impl Game {
         definition: AbilityId,
         actor: PlayerId,
     ) -> Result<CardPlay> {
+        if self.card_runtime.quick.is_some() {
+            return Err(invalid("Quick requires its authority question"));
+        }
         let before = self.clone();
         let result = self.activate_loaded_card(holder, definition, actor);
         self.finish_card_attempt(before, result)
@@ -282,24 +312,19 @@ impl Game {
             .cloned()
             .ok_or_else(|| invalid("ability is not loaded for this holder"))?;
         let seat = seat_name(actor)?;
-        let point = self.input_point();
         if ability.node.kind != AbilityKind::Activated
             || object.zone != "field"
             || object.controller != seat
-            || point["at"] != "main"
-            || point["by"] != seat
-            || self.state.flow["kind"] != "main"
-            || self.state.turn["phase"] != "main"
+            || !self.internal_play_timing(actor, is_printed_quick(&ability.node))
             || object.state["silenced"] == true
             || object.state["evolved_with"].is_string()
             || !matches!(self.object_type(holder)?, "フォロワー" | "アミュレット")
+            || (is_printed_quick(&ability.node) && self.object_type(holder)? != "フォロワー")
             || !self.prepared.is_empty()
         {
             return Err(unsupported("activation holder, controller or timing"));
         }
-        let AbilityOrigin::Printed { face, .. } = &ability.node.source.origin else {
-            return Err(unsupported("activation origin"));
-        };
+        let (face, _) = printed_origin(&ability.node.source.origin)?;
         if face_ordinal(face)? != usize::try_from(int(&object.state["face"])).map_err(invalid)? {
             return Err(invalid("printed ability belongs to another face"));
         }
@@ -315,7 +340,7 @@ impl Game {
         self.start_internal_ability(ability.node, context, source, false)
     }
 
-    fn check_internal_cards(&self) -> Result<()> {
+    pub(in crate::game) fn check_internal_cards(&self) -> Result<()> {
         for current in self.state.objects.values() {
             if !self.card_runtime.cards.contains_key(&current.card) {
                 return Err(unsupported("context contains an unloaded whole card"));
@@ -449,6 +474,9 @@ fn check_printed_face(printed: &serde_json::Value) -> Result<()> {
 }
 
 fn check_header(ability: &Ability) -> Result<()> {
+    if card_permission(ability) {
+        return Ok(());
+    }
     let zones = if ability.kind == AbilityKind::Spell {
         ZoneKind::Resolution
     } else {
@@ -470,7 +498,8 @@ fn check_header(ability: &Ability) -> Result<()> {
     }
     if !matches!(ability.kind, AbilityKind::Activated | AbilityKind::Spell)
         || ability.trigger.is_some()
-        || !matches!(ability.source.origin, AbilityOrigin::Printed { .. })
+        || !(matches!(ability.source.origin, AbilityOrigin::Printed { .. })
+            || (ability.kind == AbilityKind::Activated && is_printed_quick(ability)))
     {
         return Err(unsupported("whole-card ability kind or origin"));
     }
@@ -488,6 +517,15 @@ fn check_costs(ability: &Ability) -> Result<()> {
     let CostSpec::Ordered { steps } = &play.costs else {
         return Err(unsupported("whole-card cost alternatives"));
     };
+    if is_printed_quick(ability)
+        && steps
+            .iter()
+            .rev()
+            .skip(1)
+            .any(|step| matches!(step.instruction.action, Action::Move { .. }))
+    {
+        return Err(unsupported("Quick source movement must finish payment"));
+    }
     for step in steps {
         let instruction = &step.instruction;
         if step.materials.is_some()
@@ -560,7 +598,8 @@ fn printed_origin(origin: &AbilityOrigin) -> Result<(&FaceId, &Nat)> {
                 | KeywordId::Lastword
                 | KeywordId::OnAttack
                 | KeywordId::OnEvolve
-                | KeywordId::Evolution,
+                | KeywordId::Evolution
+                | KeywordId::Quick,
             origin,
         } => {
             if let AbilityOrigin::Printed { face, line } = origin.as_ref() {

@@ -210,9 +210,14 @@ impl Game {
         reason = "The legal decision union enumerates each distinct input kind once."
     )]
     pub fn legal(&self) -> Result<Vec<Value>> {
+        if !self.card_runtime.is_empty() {
+            self.check_internal_cards()?;
+        }
         if self.typed.is_some()
             || self.card_runtime.checkpoint.is_some()
             || self.card_runtime.requires_typed_play()
+            || self.card_runtime.has_pending()
+            || (!self.card_runtime.is_empty() && self.input_point()["at"] == "quick")
         {
             return Ok(Vec::new());
         }

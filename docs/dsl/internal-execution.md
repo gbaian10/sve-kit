@@ -23,8 +23,10 @@ Printed Activated 的印刷面限普通從者或護符；卡種由同一 Catalog
 Printed Fanfare／Lastword／OnAttack 及 End Begin。Spell 的唯一固有 Ordered PP Pay 必須等於同 Catalog face 的印刷費用；
 只在這個已驗位置按 Resolution 的有效成本實付一次。Activated 沿用 controller 的非負常值 PP
 與恰好 SourceHolder 的 Acted Posture／Put 送往 owner 墓地，不能套用卡片減費；成本沒有 materials、precondition 或替代。
-Quick、前置 X、追加／替代成本、一般 trigger、Static 與任意對象 LKI 仍整棵拒絕。
-Quick 的後續准入義務見 [Quick 契約](quick-semantics.md)，本節的已驗範圍不因規格定義而擴張。
+前置 X、追加／替代成本、一般 trigger、通用 Static 與任意對象 LKI 仍整棵拒絕。
+Quick 僅接受 [Quick 契約 §1、§5](quick-semantics.md) 的普通 Spell 獨立 Static 許可與
+普通場上從者的指定 Activated；共用精確形狀檢查，不開放一般 PlayCard Permission。
+目前只由內部 typed 輸入承載；作者入口與正式來源 lowering 尚未完成。
 
 載入逐能力驗證 card／face／line、印刷座標唯一、所有 instruction 的來源閉包，以及包含未選模式
 與死分支的 requirement 集合。Fanfare Keyword 例外只接受已驗 instruction source 的精確位置，
@@ -145,7 +147,7 @@ Fanfare、長寫 EnterField、Lastword、OnEvolve、OnAttack 及 End Begin 共�
 BP01-118 與 BP01-P25 的測試由 C0 展開、lowering、整卡載入及 authority 程序驗證相應傷害片段；
 P25 的送墓成本來自明示的合成測試輔助能力。來源座標為候選 fixture，不宣稱永久來源驗證或公開 capability。
 
-`internal_rule_action` 僅接受 evolve、attack、end-phase、pass 與 end-discard 的既有規則動作，
+`internal_rule_action` 僅接受 evolve、attack、end-phase 與 end-discard 的既有規則動作，
 沿原有時機、目標與支付／姿勢驗證；忙碌、待機及未完成 CheckTiming 時拒絕，不接原型 play／activate。
 守護屬原型 keyword，載入整卡的局面整體拒絕，所以不開 guard-act。時機不符的動作回 `cannot-play` 等拒絕結果，不視為成功。
 OnAttack 限 Printed 關鍵字、自身 Attack、AfterEntry、PerFact、無 PlaySpec；事件在合法目標與 act
@@ -157,6 +159,21 @@ End Begin 限 Printed、Phase(End, Begin)、自己的／對手的／每個 end p
 
 BP10-122 的 attack-time 抽一片段與 BP09-P17 的 end 抽三片段經 C0／lowering 驗證；後者只取抽牌指示，
 不宣稱其完整能力已支援。攻擊測試加上合成待機能力，驗結算前來源加攻送墓後讀 LKI 4。
+
+### Quick 窗口
+
+`internal_quick_choice()` 在攻擊或 end 的共同檢查與兩方待機全部完成後，建立
+`Procedure::Quick` 的私有 `InputDomain::Quick` 題目；actor 固定為非回合玩家。
+候選只列當前可付款且有合法模式／目標方案的受驗 Quick，以純讀取預檢證明，不試跑本文。
+沒有合法候選仍等待 `Answer::Quick(None)` 明示 Pass；選行動用當次 handle，
+模式、目標及付款仍依原 play 詢問。自己 main 繼續用普通打出與起動入口。
+
+`answer_internal_card` 的 Quick 回答驗證 actor、完整 token、程序續體與固定 domain；
+外部不能自製 source 或 window，原型 pass 與直接 Quick play 都不能繞過題目。
+成功 play 仍交 `CheckTiming`，排空待機後同一窗口再配新 token；攻擊者離場也不提早關閉。
+Pass 回傳 `CardPlay::Continued(Step)`，才續接原攻擊或 end 棄牌程序；戰鬥比對宣告時的
+攻擊者及目標世代。合法選擇後失敗則回本次 play origin，以新 epoch 恢復原窗口，
+先前成功行動保留。終局清除窗口，私有候選不投影給對手。
 
 進化規則入口只承接受驗的固有進化正規形：同名、自方未公開 EvolveDeck 資源、Reveal 後支付固定 PP，
 以及單一普通 Evolve 指示；不開一般本文的 Evolve 或 EachObject。只有已載入整卡的持有者走此入口，

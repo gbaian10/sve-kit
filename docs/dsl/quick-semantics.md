@@ -1,6 +1,6 @@
 # Quick 許可與規則窗口
 
-本文件定義內部 typed IR 的執行義務，不代表 executor 已完成；已驗範圍仍以
+本文件定義內部 typed IR 的執行義務；已驗範圍仍以
 [內部執行入口](internal-execution.md)為準。不變更作者語法、公開 program、capability
 或最低版本。卡片 Quick 與起動能力 Quick 是不同許可，不由作者容器的位置推斷。
 
@@ -119,7 +119,7 @@ view 的 audience 與 observation epoch；待答保存只有在完整保留續�
 
 ## 5. 內部 IR 正規形與 lowering 邊界
 
-以下是待實作的狹窄語義准入，不是新的作者寫法，也不是現有 checker 已完成的宣稱。
+以下是內部狹窄語義准入，不定義新的作者寫法。
 沿既有 `Ability`、`AbilityOrigin::Keyword` 與 `Effect::Permission`，不新增 IR 型別：
 
 | 類別 | 首批內部承載 |
@@ -134,9 +134,8 @@ Installation anchor、無 usage／intervals。selector 恰為 `Objects([SourceHo
 泛用 Allow 跳過任何其他 play 檢查，也不安裝跨區永續實例。正式載入要求此 Static 的 face
 對應同一普通 Spell 本文；Spell 本文仍是 Printed、[Resolution]，不把 Quick 改成本文的來源。
 
-現況：通用良構的 Permission 動作只收 Destroy／Banish，`PlayCard` 會被拒絕；整卡准入也拒絕
-Static、declarations 與 Quick origin。checker 與整卡准入須只為上述精確 header 及 declaration
-新增例外，不能只放行 `KeywordId::Quick`、`PlayCard` 或整個 `effect.permission` requirement；
+通用良構的 Permission 動作只收 Destroy／Banish；checker 與整卡准入僅為上述精確 header
+及 declaration 接受例外，不能只放行 `KeywordId::Quick`、`PlayCard` 或整個 `effect.permission` requirement；
 良構通過也不等於 Quick 執行准入。`RuleId` 目前是不透明編號、沒有固定的 CR 對照，准入不憑
 它辨識 Quick，而以 origin 與精確形狀判定。origin 只能包一層 Quick＋Printed，不接受任意
 巢狀 Keyword、Granted 或 Triggered Quick。authority 再比對整卡、face、來源座標閉包與實際時點。
