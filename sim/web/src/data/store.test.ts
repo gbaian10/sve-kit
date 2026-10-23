@@ -7,7 +7,7 @@ import { type Fetcher } from "./cdn"
 import { createSnapshotClient } from "./client"
 import { type JsonObject, type JsonValue, stringValue } from "./format-v3/json"
 import { loadImagePage } from "./images"
-import { createLocator, homeSetOwner } from "./locator"
+import { createLocator, GLOBAL_OWNER, homeSetOwner } from "./locator"
 import { createCardIndex } from "./store"
 
 const stubImage = ({ width, height, seed }: { width: number; height: number; seed: number }) =>
@@ -36,6 +36,44 @@ if (!snapshot) throw new Error("fixture did not load")
 const index = createCardIndex(snapshot)
 
 describe("locator", () => {
+  it("uses sixteen bands only for global detail with null region, including inferred scope", () => {
+    const files = new Map<string, JsonObject>()
+    for (const [purpose, region, table, bands] of [
+      ["detail", null, "qa_version", 16],
+      ["detail", "jp", "qa", 8],
+      ["detail", "en", "qa", 8],
+      ["engine", null, "voice", 8],
+    ] as const)
+      for (let band = 0; band < bands; band += 1) {
+        const key = `${purpose}/${region ?? "shared"}/shared/${String(band)}`
+        const segment = `shared:band-${String(band)}`
+        files.set(key, {
+          key,
+          purpose,
+          region,
+          segment,
+          row_counts: [[table, "global", null, "detail", segment, 1]],
+        })
+      }
+    const locate = createLocator(files)
+    // SHA-256(canonical(["qa_v"])) mod 64 = 33; ["qa:c"] gives 58.
+    for (const [id, shared, regional] of [
+      ["qa_v", 8, 4],
+      ["qa:c", 14, 7],
+    ] as const) {
+      const ref = { owner: GLOBAL_OWNER, entityKey: [id], partition: "detail" as const }
+      expect(locate({ ...ref, table: "qa_version" })).toBe(`detail/shared/shared/${String(shared)}`)
+      expect(locate({ ...ref, table: "qa_version", region: "jp" })).toBe(
+        `detail/shared/shared/${String(shared)}`,
+      )
+      for (const region of ["jp", "en"])
+        expect(locate({ ...ref, table: "qa", region })).toBe(
+          `detail/${region}/shared/${String(regional)}`,
+        )
+      expect(locate({ ...ref, table: "voice" })).toBe(`engine/shared/shared/${String(regional)}`)
+    }
+  })
+
   it("maps every fragment identity to exactly one file", () => {
     const locate = createLocator(snapshot.files)
     for (const [key, file] of snapshot.files) {

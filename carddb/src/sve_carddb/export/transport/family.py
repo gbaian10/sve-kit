@@ -151,7 +151,7 @@ class FamilyLayout:
     ) -> Scope:
         """Derive physical membership only from the fixed exception list."""
         group = self.layout.group(table, row, part)
-        width = self.layout.profile.width(purpose, group.identifier)
+        width = self.layout.profile.width(purpose, group.identifier, region or None)
         return Scope(
             purpose,
             region,

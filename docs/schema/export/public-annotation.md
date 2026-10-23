@@ -9,7 +9,7 @@ producer、Python reader、TS 解碼器與 read_api 已切換為 4.0.0，Web 依
 
 ## 1. 版本與驗證邊界
 
-`format_version=4.0.0`；現行快照的 `min_reader_version=4.0.1`，由[卡名反查的准入規則](snapshot-transport.md#卡名反查的-engine-配置與准入)提高，annotation 元件本身的欄序與能力不變。新增必要 annotation，改變 Translation／FieldTranslation／cr_clause
+`format_version=4.0.0`；現行快照的 `min_reader_version=4.0.2`，依[固定 band 與舊 preview 准入規則](snapshot-transport.md#11-版本與相容判斷)，annotation 元件本身的欄序與能力不變。新增必要 annotation，改變 Translation／FieldTranslation／cr_clause
 欄序並移除 basis 值，依[傳輸契約 §1.1](snapshot-transport.md#11-版本與相容判斷)升 major。
 所有 manifest、config、container、programs、changes 與 index entry 宣告同步；
 `index_format=2` 不變。空 annotation 或無繁中列的快照仍須宣告全部能力。

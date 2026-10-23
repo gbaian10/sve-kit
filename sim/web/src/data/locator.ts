@@ -68,17 +68,7 @@ export function createLocator(files: Files, onlyTables?: ReadonlySet<string>): L
             : ref.table === "face_revision"
               ? "detail"
               : undefined)
-    const width =
-      purpose === "images"
-        ? family === null
-          ? 1
-          : 32
-        : family === null
-          ? 8
-          : ["BP01", "CP04"].includes(stringValue(family))
-            ? 32
-            : 64
-    const band = Math.floor(bucket([...ref.entityKey], 64) / width)
+    const entityBucket = bucket([...ref.entityKey], 64)
     const matching = entries.filter(
       ({ file, count }) =>
         count[0] === ref.table &&
@@ -93,11 +83,25 @@ export function createLocator(files: Files, onlyTables?: ReadonlySet<string>): L
     if (scopes.size === 1) return scopes.values().next().value
     const keys = new Set(
       matching
-        .filter(
-          ({ file }) =>
+        .filter(({ file }) => {
+          const width =
+            file["purpose"] === "images"
+              ? family === null
+                ? 1
+                : 32
+              : family === null
+                ? file["purpose"] === "detail" && file["region"] === null
+                  ? 4
+                  : 8
+                : ["BP01", "CP04"].includes(stringValue(family))
+                  ? 32
+                  : 64
+          const band = Math.floor(entityBucket / width)
+          return (
             file["purpose"] === "catalog" ||
-            stringValue(file["segment"]).endsWith(`:band-${String(band)}`),
-        )
+            stringValue(file["segment"]).endsWith(`:band-${String(band)}`)
+          )
+        })
         .map(({ file }) => stringValue(file["key"])),
     )
     if (keys.size > 1) fail("shape", "ambiguous row file scope")

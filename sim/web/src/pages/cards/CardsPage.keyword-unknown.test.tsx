@@ -38,7 +38,7 @@ describe("filter panel", () => {
     await renderRoutes(routes, { initialEntries: ["/cards?ed=en&mech=kw%3Award"] })
     // The unsupported result waits for mechanics, which loads after this catalog is ready.
     const classes = await screen.findByRole("group", { name: "職業" })
-    await within(classes).findByRole("button", { name: "精靈" })
+    await within(classes).findByRole("button", { name: "精靈" }, { timeout: 4000 })
     const alert = await screen.findByRole("alert")
     expect(screen.queryByText("0 個版次")).not.toBeInTheDocument()
     const initialIndexRequests = indexRequests

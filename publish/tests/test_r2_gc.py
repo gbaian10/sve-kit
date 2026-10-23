@@ -280,7 +280,7 @@ def test_cli_dry_run_lists_and_execute_deletes(
 
 
 @pytest.mark.parametrize("slot", ["current", "previous"])
-def test_diff_and_gc_accept_retained_reader_4_0_0_manifests(
+def test_json_retention_accepts_old_preview_but_image_gc_requires_readable_current(
     images: PublicImages,
     roots: Roots,
     remote: tuple[R2Store, ServerState, Loopback],
@@ -307,5 +307,11 @@ def test_diff_and_gc_accept_retained_reader_4_0_0_manifests(
     candidates = result["candidates"]
     assert isinstance(candidates, list)
     assert not set(candidates).intersection(closure(path, manifest))
-    assert gc.collect_images(store, IMAGE_PREFIXES, execute=False)["candidates"] == []
+    if slot == "current":
+        with pytest.raises(ExportError, match=r"^GC retained snapshot is invalid$"):
+            gc.collect_images(store, IMAGE_PREFIXES, execute=False)
+    else:
+        assert (
+            gc.collect_images(store, IMAGE_PREFIXES, execute=False)["candidates"] == []
+        )
     assert not any(operation == "DELETE" for operation, _key, _ in state.operations)

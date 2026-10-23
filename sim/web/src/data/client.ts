@@ -275,6 +275,9 @@ function snapshotClient(
     try {
       const record = objectValue(JSON.parse(new TextDecoder().decode(bytes)) as JsonValue)
       const manifest = objectValue(record["manifest"])
+      // A record verified by an older reader may use band widths this reader would misplace.
+      if (!isCompatible(manifest))
+        throw new SnapshotError("unsupported-version", "stored snapshot needs another reader")
       return {
         dataVersion: stringValue(manifest["data_version"]),
         region: selectedRegion,

@@ -25,10 +25,12 @@
 - 正式 `data_version` 為 `YYYYMMDDTHHMMSSZ-NNNN`，NNNN 是同 UTC 秒內從 0001 起的四位流水號。預覽為 `preview-YYYYMMDDTHHMMSSZ-NNNN`；只在隔離根中分配，只能進開發桶的版本索引，不能進正式版本索引。`published_at` 是該批次 UTC Instant；預覽填產出時間，不代表公開發布。
 - `required_capabilities` 是排序、唯一的非空 Code 陣列，4.0 的固定集合依 §5.4。reader 需同時滿足 format 範圍、最低契約版本、所有 capabilities，才能啟用；不因 major 相同就接受未知 minor。
 - 改 tuple 欄序／型別／nullable、移除欄、改 enum 語義、變動 canonical 規則或 join 語義，升 format major。已發布格式新增可協商功能／新分片配置以 minor 升版並更新 Schema、共用 golden、reader 能力與最低版本；尚未發布的 4.0.0 可同步原地替換，不留雙格式 parser，也不另增 capability。patch 只修正不改 wire bytes 解釋的規格問題。資料修字、來源新增與新卡只升 data_version。
-- 未凍結期間，舊 reader 會讀錯的原地變更須提高 reader 契約的 patch，並同步 producer 的最低 reader 版本。同一 format 的 reader 與發布器仍接受較舊且受支援的 min_reader_version 留存 manifest，不把新產出的固定最低版本當成留存資料的驗證常數。目前接受 4.0.0／4.0.1，新產出固定寫 4.0.1。
+- 未凍結期間，舊 reader 會讀錯的原地變更須提高 reader 契約的 patch，並同步 producer 的最低 reader 版本。新產出固定寫 min_reader_version=4.0.2；Python 與 Web reader 只准入此最低版本，版本索引略過 4.0.0／4.0.1 的舊 preview，沒有相容入口就回報不支援。舊 preview 須以新 data_version 重建，不以新配置解讀舊 band，也不加舊配置 fallback。Schema 保留舊 minimum 以辨識索引與留存封套；發布器仍可核對舊 manifest 封套與 JSON 保留閉包，但不能把它當成可讀快照或用來重算圖片閉包。
 - 分片 bucket 的算法與數目由每個 format 版本的配置釘死；已發布配置調整至少升 minor；尚未發布的 4.0.0 依前項同步替換，不能只更換 data_version。`search.grammar_version/normalizer_version` 是搜尋契約的獨立 Code，不宣稱特定搜尋實作已完成；reader 必須明示支援這一對值，未知值停用搜尋並告知，不能用舊 normalizer 建錯索引。
 
 例如 reader 可以讀兩個 data_version 不同的 `4.0.0` 快照，但仍須驗證固定能力集合。
+版本索引、preview 指標與本機已驗證紀錄的每個採用入口，都須重新檢查現行 reader 准入；
+舊 reader 寫入的快取紀錄不能代替這項檢查。
 未知格式拒收；更新失敗可保留相容 current／previous 或本機已驗 active。
 `preview-20260929T010203Z-0001` 即使格式相容，也不能交給正式發布器。
 
@@ -349,7 +351,7 @@ card、face、face_revision、support、卡片關係跟 card.home_set_id；print
 
 ### 5.1 固定配置
 
-4.0 固定內部 N=64、min_reader_version=4.0.1，能力依 §5.4。bucket 僅用 sha256-mod-v1 作穩定背景 band 分配，不是 fragment 身分或 row_index 座標。一般家族一帶，BP01／CP04 固定兩帶，global 八帶。images 保留原 physical 成員：global width=1、home_set width=32，同檔只合併 fragment、base=null。
+4.0 固定內部 N=64、min_reader_version=4.0.2，能力依 §5.4。bucket 僅用 sha256-mod-v1 作穩定背景 band 分配，不是 fragment 身分或 row_index 座標。一般家族一帶（width=64），BP01／CP04 固定兩帶（width=32）。global 預設八帶（width=8）；僅 purpose=detail、region=null、global family 固定十六帶（width=4），JP／EN 的 global detail 仍為八帶。region 是固定配置判定的一部分；局部字典跟隨其 File，不另依字典的 global owner 重分。images 保留原 physical 成員：global width=1、home_set width=32，同檔只合併 fragment、base=null。
 
 catalog 不分帶，segment=`family-<永久家族>` 或 `shared`；背景再加 `:band-<n>`。File key 為 `<purpose>/<region-or-shared>/<family-or-shared>/<band>`，家族 ID 按 UTF-8 percent encode（只保留 unreserved），catalog band 固定 0。config、programs 各一檔，key 同用途，region=null、segment=shared。
 
@@ -371,7 +373,7 @@ catalog 不分帶，segment=`family-<永久家族>` 或 `shared`；背景再加 
 
 ### 5.4 卡包 media 與 ID 圖片
 
-format_version 為 `4.0.0`，min_reader_version 為 `4.0.1`，完整八個 required_capabilities 依
+format_version 為 `4.0.0`，min_reader_version 為 `4.0.2`，完整八個 required_capabilities 依
 [公開 annotation §1](public-annotation.md#1-版本與驗證邊界)，空圖片、same_name 或 annotation 也不能省略。
 translation 在 bootstrap／detail 均為完整八欄；FieldTranslation 的七格欄序與 basis 依 §8。
 canonical、owner、分片鍵及裝檔規則沿前述配置，producer、Python reader、共用 golden 與 Web 解碼欄序須同步。
@@ -451,7 +453,7 @@ support_changes 比較套用 override/block 後的有效狀態；同狀態但 re
 ## 8. annotation 與來源閉包
 
 [公開 annotation 契約](public-annotation.md)及其[元件 Schema](public-annotation.schema.json)定義現行欄位：
-format_version=4.0.0、min_reader_version=4.0.1，必要能力包含 jp-source-translation-v1 與 public-annotation-v1，
+format_version=4.0.0、min_reader_version=4.0.2，必要能力包含 jp-source-translation-v1 與 public-annotation-v1，
 完整集合依該契約 §1，所有封套及 index entry 一致；index_format=2 不變。
 canonical、N=64、band widths、media、base／row_index 與同名規則依前述配置；整體容量仍須重新量測。
 
@@ -494,4 +496,4 @@ File.region 固定為 null，與 `card_related`、`card_engine_support` 共用�
 
 4.0.0 尚未凍結，本次同步替換固定 Schema、producer、reader 與合成樣本，不新增 capability 或雙格式 parser。
 最低 reader 契約版本提升為 4.0.1；4.0.0 reader 在版本索引階段即略過新快照，可選相容的 previous，
-沒有相容版時回報不支援，不進入新表的解碼。Web 與 Python reader 均明示支援至 4.0.1。
+沒有相容版時回報不支援，不進入新表的解碼。此為 4.0.1 的歷史准入邊界；現行 4.0.2 的舊 preview 處理依 §1.1。

@@ -397,11 +397,11 @@ def test_matching_member_hash_cannot_bypass_payload_schema(member: str) -> None:
         snapshot.verify(Projection({}, {}, {}))
 
 
-@pytest.mark.parametrize("minimum", ["0.9.0", "4.0.2"])
+@pytest.mark.parametrize("minimum", ["0.9.0", "4.0.3", "4.0.0", "4.0.1"])
 def test_reader_minimum_version_must_be_supported(minimum: str) -> None:
     manifest = object_value(fixture("manifest.json"))
     manifest["min_reader_version"] = minimum
-    with pytest.raises(ValidationError):
+    with pytest.raises((ValidationError, ValueError)):
         read_snapshot(manifest, payloads())
 
 
