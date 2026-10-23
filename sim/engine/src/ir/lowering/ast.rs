@@ -23,8 +23,14 @@ pub(super) struct Card {
     pub _note: Option<IgnoredAny>,
     #[serde(default)]
     pub abilities: Vec<Value>,
-    #[serde(default, rename = "faces")]
-    pub _faces: Empty,
+    #[serde(default)]
+    pub faces: BTreeMap<String, Face>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Face {
+    pub abilities: Vec<Value>,
 }
 
 #[derive(Deserialize)]

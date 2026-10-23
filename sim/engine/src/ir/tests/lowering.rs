@@ -6,6 +6,116 @@ use serde_json::{Value, json};
 #[path = "../../../tests/support/expanded.rs"]
 mod expanded;
 
+use std::{path::PathBuf, process::Command, sync::OnceLock};
+
+fn current_inputs() -> &'static Value {
+    static CURRENT: OnceLock<Value> = OnceLock::new();
+    CURRENT.get_or_init(|| {
+        let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
+        let output = Command::new("uv")
+            .args(["run", "--directory"])
+            .arg(root.join("carddb"))
+            .args([
+                "--locked",
+                "--no-default-groups",
+                "python",
+                "-c",
+                "
+import json
+from tempfile import TemporaryDirectory
+from pathlib import Path
+from tests.support.current_lowering_fixtures import current_lowering_inputs
+with TemporaryDirectory() as temporary:
+    print(json.dumps(current_lowering_inputs(Path(temporary))))
+",
+            ])
+            .output()
+            .unwrap();
+        assert!(
+            output.status.success(),
+            "current C0 fixture failed: {}",
+            output.status
+        );
+        serde_json::from_slice(&output.stdout).unwrap()
+    })
+}
+
+#[test]
+fn current_reader_hands_permanent_owner_and_token_selection_to_lowering() {
+    let input = &current_inputs()["accepted"];
+    let lowerer = ExpandedLowerer::new().unwrap();
+    let admitted = lowerer.lower_current(input).unwrap();
+    let face = "f:8708790ca2995a0f9f9e5ffd1af52668";
+    let revision = "rev:v1:c9b82c4e4e8df5c8ab2b4975c3058c7e0ffdd179e76429d4e47f4c557cac7304";
+    assert_eq!(admitted.card_id, "c:9c5459446e0254818099800b4208cd96");
+    assert_eq!(admitted.card_no, "BP01-009");
+    assert_eq!(admitted.source_version, input["source_version"]);
+    assert_eq!(admitted.source_payload["token_links"], json!([]));
+    let ability = &admitted.program.card().abilities[0];
+    assert_eq!(ability.source.card_id, admitted.card_id);
+    assert_eq!(ability.source.card_no, admitted.card_no);
+    assert_eq!(ability.source.face, face);
+    assert_eq!(
+        serde_json::from_str::<Value>(&ability.source.owner).unwrap(),
+        json!({"kind":"face_revision", "revision_id":revision})
+    );
+    assert_eq!(ability.source.field, "effect");
+    let body = ability.node.body.as_ref().unwrap();
+    assert_eq!(body.steps[0].source.card_id, admitted.card_id);
+    assert_eq!(body.steps[0].source.face, face);
+    let AbilityOrigin::Keyword { origin, .. } = &ability.node.source.origin else {
+        panic!("evolution");
+    };
+    assert!(
+        matches!(origin.as_ref(), AbilityOrigin::Printed { face: owner, .. } if owner.0 == face)
+    );
+
+    let mut container = input.clone();
+    let abilities = container["tree"]["cards"]["BP01-009"]
+        .as_object_mut()
+        .unwrap()
+        .remove("abilities")
+        .unwrap();
+    container["tree"]["cards"]["BP01-009"]["faces"] = json!({face:{"abilities":abilities}});
+    let nested = lowerer.lower_current(&container).unwrap();
+    assert_eq!(nested.program.card().abilities[0].source.face, face);
+    assert!(
+        nested.program.card().abilities[0]
+            .source
+            .author_path
+            .contains("/faces/")
+    );
+}
+
+#[test]
+fn provisional_current_printing_and_unresolved_handoffs_cannot_lower() {
+    let inputs = current_inputs();
+    assert_eq!(inputs["rejected"]["reason"], "provisional_record_key");
+    let lowerer = ExpandedLowerer::new().unwrap();
+    assert_eq!(
+        lowerer.lower_current(&inputs["rejected"]).unwrap_err().code,
+        "invalid_current_identity"
+    );
+    for pointer in [
+        "/card_id",
+        "/source_payload/faces/0/face_id",
+        "/source_payload/faces/0/revision_id",
+    ] {
+        let mut input = inputs["accepted"].clone();
+        *input.pointer_mut(pointer).unwrap() = json!("unresolved");
+        assert_eq!(
+            lowerer.lower_current(&input).unwrap_err().code,
+            "invalid_current_identity"
+        );
+    }
+    let mut input = inputs["accepted"].clone();
+    input["source_payload"]["token_links"] = json!([{"token_face_id":"unknown"}]);
+    assert_eq!(
+        lowerer.lower_current(&input).unwrap_err().code,
+        "unsupported_token_selection"
+    );
+}
+
 #[test]
 fn expanded_dynamic_scope_rejects_a_parameter_that_authored_accepts() {
     let expanded = validator("expanded").unwrap();

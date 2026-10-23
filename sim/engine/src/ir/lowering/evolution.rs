@@ -135,7 +135,7 @@ fn costs(
 
 pub(super) fn lower(
     allocator: &mut Allocator,
-    key: &str,
+    key: &super::CardCoordinates<'_>,
     path: &str,
     entry: &ast::Ability,
     scope: ScopeId,
