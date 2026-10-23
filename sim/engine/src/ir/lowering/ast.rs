@@ -305,7 +305,7 @@ pub(super) struct SearchQuery {
     pub name: Option<String>,
 }
 
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum SearchKind {
     Follower,
@@ -437,9 +437,18 @@ pub(super) enum AtPlay {
 pub(super) struct Target {
     pub option: Option<u64>,
     pub bind: String,
-    pub from: ObjectQuery,
+    pub from: TargetQuery,
     pub n: Option<u64>,
     pub upto: Option<u64>,
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct TargetQuery {
+    pub who: Side,
+    pub zone: Zone,
+    pub kind: Option<SearchKind>,
+    pub r#trait: Option<String>,
 }
 
 #[derive(Deserialize)]

@@ -150,8 +150,13 @@ impl Execution {
                 .flatten()
                 .collect(),
             Selector::Captured { reference } => self.object_slot(reference.binding)?,
-            Selector::Bound { reference } if self.targets.contains(&reference.key()) => {
-                self.object_slot(*reference)?
+            Selector::Bound { reference } if self.targets.contains_key(&reference.key()) => {
+                let members = self.object_slot(*reference)?;
+                self.targets
+                    .get(&reference.key())
+                    .ok_or_else(|| invalid("missing target producer"))?
+                    .check_current(game, self, &members)?;
+                members
             }
             Selector::ReceiptMembers {
                 receipt: ObjectReceipt::Movement { receipt },

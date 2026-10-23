@@ -211,6 +211,7 @@ impl Game {
                 "effect evolution no longer matches its saved subjects",
             ));
         }
+        self.numeric_evolution_allowed(source, false)?;
         self.reveal(&[resource.into()], "all", frame, false);
         self.apply_evolution(source, resource, face, 0, frame)?;
         frame.performed = 1;
@@ -298,6 +299,7 @@ impl Game {
         if !self.can_pay(&list(&non_pp["costs"]), &frame)? {
             return Ok(false);
         }
+        self.numeric_evolution_allowed(source, true)?;
         if reveal_resource {
             self.reveal(&[evolve.into()], "all", &frame, false);
         }
@@ -325,9 +327,8 @@ impl Game {
         sep: i64,
         frame: &mut Frame,
     ) -> Result<()> {
-        self.numeric_evolution_allowed(source)?;
+        self.numeric_evolution_allowed(source, true)?;
         let typed_evolution = self.internal_before_evolution(source, evolve, face)?;
-        let previous = self.object(source)?.clone();
         let old = self.face(source)?.clone();
         let new = self.catalog.face(&self.object(evolve)?.card, face)?.clone();
         self.move_objects(&[evolve.into()], "evolution", None, None, frame)?;
@@ -338,13 +339,17 @@ impl Game {
         for field in ["power", "hp"] {
             let delta = scalar(&new[field])
                 .checked_sub(scalar(&old[field]))
-                .and_then(|delta| delta.checked_add(sep))
                 .ok_or_else(|| invalid("evolution delta overflow"))?;
             self.numeric_add_base(
                 source,
                 if field == "power" { delta } else { 0 },
                 if field == "hp" { delta } else { 0 },
             )?;
+        }
+        // Base replacement is not a stat-change event; only super evolution's explicit +1/+1 counts.
+        let previous = self.object(source)?.clone();
+        if sep > 0 {
+            self.numeric_add_base(source, sep, sep)?;
         }
         self.bump(
             &format!("{}.evolutions", self.object(source)?.controller),

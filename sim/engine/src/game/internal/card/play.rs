@@ -13,7 +13,7 @@ use crate::ir::{
     Mode, ModeChoiceKind, ModeDecision, ModeDecisionKind, ModeId, PlaySlot, Program, ScopeId,
     SnapshotId, Visibility,
 };
-use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
+use alloc::collections::{BTreeMap, VecDeque};
 use core::slice::from_ref;
 use serde_json::{Value, json};
 
@@ -423,7 +423,7 @@ impl Game {
             ability: None,
             source_information: None,
             entry_object: None,
-            targets: BTreeSet::new(),
+            targets: BTreeMap::new(),
             play: None,
             spell: false,
             play_counts: self.internal_play_counts()?,

@@ -4,7 +4,7 @@ use super::super::{
     SelectionConstraint, SelectionGroup, SelectionSnapshot, Visibility,
 };
 use super::{
-    AbilitySource, Action, Allocator, BTreeMap, BTreeSet, BatchPolicy, Binding, BodyContext, Bool,
+    AbilitySource, Action, Allocator, BTreeMap, BTreeSet, BatchPolicy, Binding, BodyContext,
     Cardinality, DamageAmount, DamageFlags, Expr, Int, Located, LoweringError, Nat, Node,
     ObjectView, PlayerRef, PlayerRelation, PlayerSet, RecipientSet, SelectionView, Selector,
     SourceSpan, TextQuantifier, ZoneKind, ast, unsupported,
@@ -100,7 +100,12 @@ impl BodyContext<'_> {
             },
             view: SelectionView::Current {},
             binding: candidate,
-            predicate: Box::new(Expr::Literal(Bool(true))),
+            predicate: Box::new(super::search::object_filter(
+                target.from.kind.as_ref(),
+                target.from.r#trait.as_deref(),
+                None,
+                candidate,
+            )),
         };
         self.parameters.push(parameter(
             self.card_allocator.id(path)?,

@@ -1,8 +1,9 @@
 use super::super::{DecisionToken, DecisionView, InputDomain, Slot, Wait, contains};
 use super::{Execution, Game, Nat, ObjectRef, Result, invalid, player_id, unsupported};
 use crate::ir::{
-    Binding, Cardinality, ChoiceDomain, Decision, Disjointness, ScopeId, SelectionConstraint,
-    Selector,
+    Binding, CardKind, Cardinality, CharacteristicView, ChoiceDomain, Decision, Disjointness,
+    KindRead, ObjectOperand, ObjectView, PlayerRef, Predicate, ScopeId, SelectionConstraint,
+    Selector, TraitsRead,
 };
 use crate::ir::{Bool, Expr, SelectionView, ZoneKind};
 use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
@@ -23,9 +24,61 @@ pub(in crate::game::internal) struct TargetWait {
     binding: Binding<Selector>,
     members: Vec<ObjectRef>,
     bounds: Cardinality,
+    characteristics: Vec<(ObjectRef, TargetCharacteristics)>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct TargetCharacteristics {
+    controller: String,
+    kind: String,
+    traits: Vec<String>,
+}
+
+fn characteristics(game: &Game, id: &str) -> Result<TargetCharacteristics> {
+    // The admitted closure has no trait patches, static effects or base replacement during play.
+    let traits = game.face(id)?["traits"]
+        .as_array()
+        .ok_or_else(|| invalid("missing effective traits"))?
+        .iter()
+        .map(|value| {
+            value
+                .as_str()
+                .map(str::to_owned)
+                .ok_or_else(|| invalid("invalid effective trait"))
+        })
+        .collect::<Result<Vec<_>>>()?;
+    Ok(TargetCharacteristics {
+        controller: game.object(id)?.controller.clone(),
+        kind: game.object_type(id)?.into(),
+        traits,
+    })
 }
 
 impl TargetWait {
+    pub(in crate::game::internal) fn check_current(
+        &self,
+        game: &Game,
+        execution: &Execution,
+        members: &[ObjectRef],
+    ) -> Result<()> {
+        for member in members {
+            let id = execution.object_id(*member)?;
+            let current = game.object(id)?;
+            if current.generation != member.generation.0 {
+                continue;
+            }
+            let saved = self
+                .characteristics
+                .iter()
+                .find(|(reference, _)| reference == member)
+                .ok_or_else(|| invalid("missing target selection producer"))?;
+            if current.zone != "field" || characteristics(game, id)? != saved.1 {
+                return Err(unsupported("selected target characteristics changed"));
+            }
+        }
+        Ok(())
+    }
+
     pub(in crate::game::internal) fn validate(&self, handles: &[u64]) -> Result<Vec<ObjectRef>> {
         if !contains(
             self.bounds,
@@ -64,13 +117,15 @@ pub(super) fn check(constraint: &SelectionConstraint) -> Result<()> {
 
 fn field_selector(selector: &Selector) -> Result<()> {
     match selector {
-        // Resolution re-validates only the target generation; rechecking a live predicate is unspecified.
         Selector::Zone {
             zone: ZoneKind::Field,
             view: SelectionView::Current {},
             predicate,
-            ..
-        } if **predicate == Expr::Literal(Bool(true)) => Ok(()),
+            binding,
+            players,
+        } if players.relative_to == (PlayerRef::Controller {}) => {
+            check_predicate(predicate, *binding)
+        }
         Selector::Captured { .. } | Selector::Bound { .. } | Selector::Objects { .. } => Ok(()),
         Selector::Union { sets } => {
             for set in sets {
@@ -79,6 +134,78 @@ fn field_selector(selector: &Selector) -> Result<()> {
             Ok(())
         }
         _ => Err(unsupported("public field target selector")),
+    }
+}
+
+fn candidate_view(view: &ObjectView, candidate: Binding<ObjectRef>) -> bool {
+    matches!(view, ObjectView::Current { object } if matches!(object.as_ref(), ObjectOperand::Bound { binding } if *binding == candidate))
+}
+
+fn check_predicate(value: &Expr<Bool>, candidate: Binding<ObjectRef>) -> Result<()> {
+    match value {
+        Expr::Literal(Bool(true)) => Ok(()),
+        Expr::Compute(operation) => match operation.as_ref() {
+            Predicate::KindEquals {
+                left: Expr::Live(read),
+                right: Expr::Literal(_),
+            } if matches!(read.as_ref(), KindRead::Kind { object, view: CharacteristicView::Effective } if candidate_view(object, candidate)) => {
+                Ok(())
+            }
+            Predicate::HasTrait {
+                traits: Expr::Live(read),
+                trait_id,
+            } if !trait_id.0.is_empty()
+                && matches!(read.as_ref(), TraitsRead::Traits { object, view: CharacteristicView::Effective } if candidate_view(object, candidate)) =>
+            {
+                Ok(())
+            }
+            Predicate::And { predicates } | Predicate::Or { predicates }
+                if !predicates.is_empty() =>
+            {
+                for predicate in predicates {
+                    check_predicate(predicate, candidate)?;
+                }
+                Ok(())
+            }
+            Predicate::Not { predicate } => check_predicate(predicate, candidate),
+            _ => Err(unsupported(
+                "unstable or unsupported field target predicate",
+            )),
+        },
+        _ => Err(unsupported("field target predicate")),
+    }
+}
+
+fn matches_candidate(game: &Game, id: &str, value: &Expr<Bool>) -> Result<bool> {
+    match value {
+        Expr::Literal(Bool(true)) => Ok(true),
+        Expr::Compute(operation) => match operation.as_ref() {
+            Predicate::KindEquals {
+                right: Expr::Literal(kind),
+                ..
+            } => Ok(game.object_type(id)?.contains(match kind {
+                CardKind::Follower => "フォロワー",
+                CardKind::Spell => "スペル",
+                CardKind::Amulet => "アミュレット",
+            })),
+            Predicate::HasTrait { trait_id, .. } => {
+                Ok(characteristics(game, id)?.traits.contains(&trait_id.0))
+            }
+            Predicate::And { predicates } | Predicate::Or { predicates } => {
+                let values = predicates
+                    .iter()
+                    .map(|predicate| matches_candidate(game, id, predicate))
+                    .collect::<Result<Vec<_>>>()?;
+                Ok(if matches!(operation.as_ref(), Predicate::And { .. }) {
+                    values.iter().all(|matched| *matched)
+                } else {
+                    values.iter().any(|matched| *matched)
+                })
+            }
+            Predicate::Not { predicate } => Ok(!matches_candidate(game, id, predicate)?),
+            _ => Err(unsupported("field target predicate evaluation")),
+        },
+        _ => Err(unsupported("field target predicate evaluation")),
     }
 }
 
@@ -133,7 +260,7 @@ impl Game {
         let [group] = constraint.groups.as_slice() else {
             return Err(unsupported("target groups"));
         };
-        let members = execution.objects(self, &group.selector)?;
+        let members = execution.target_objects(self, &group.selector)?;
         let bounds = Cardinality {
             minimum: Nat(constraint
                 .cardinality
@@ -170,12 +297,22 @@ impl Game {
                 })
             })
             .collect::<Result<Vec<_>>>()?;
+        let characteristics = members
+            .iter()
+            .map(|reference| {
+                Ok((
+                    *reference,
+                    characteristics(self, execution.object_id(*reference)?)?,
+                ))
+            })
+            .collect::<Result<Vec<_>>>()?;
         Ok((
             TargetWait {
                 decision: decision.clone(),
                 binding: *binding,
                 members,
                 bounds,
+                characteristics,
             },
             TargetDomain {
                 members: public,
@@ -249,12 +386,47 @@ impl Game {
     reason = "Selected targets retain a checked producer separate from installation locals."
 )]
 impl Execution {
+    fn target_objects(&self, game: &Game, selector: &Selector) -> Result<Vec<ObjectRef>> {
+        let members = match selector {
+            Selector::Zone {
+                players,
+                binding,
+                predicate,
+                ..
+            } => {
+                check_predicate(predicate, *binding)?;
+                let mut members = Vec::new();
+                for player in self.players(game, players)? {
+                    for id in game.zone_ids(super::super::seat_name(player)?, "field") {
+                        if matches_candidate(game, &id, predicate)? {
+                            members.push(self.reference(game, &id)?);
+                        }
+                    }
+                }
+                members
+            }
+            Selector::Union { sets } => sets
+                .iter()
+                .map(|set| self.target_objects(game, set))
+                .collect::<Result<Vec<_>>>()?
+                .into_iter()
+                .flatten()
+                .collect(),
+            _ => self.objects(game, selector)?,
+        };
+        let mut seen = BTreeSet::new();
+        Ok(members
+            .into_iter()
+            .filter(|member| seen.insert((member.id, member.generation)))
+            .collect())
+    }
+
     pub(in crate::game::internal) fn bind_targets(
         &mut self,
         wait: &TargetWait,
         members: Vec<ObjectRef>,
     ) {
-        self.targets.insert(wait.binding.key());
+        self.targets.insert(wait.binding.key(), wait.clone());
         self.slots.insert(
             wait.binding.key(),
             Slot::Objects {

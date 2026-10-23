@@ -5,8 +5,8 @@
 `Registry::current().supported()` 仍為空；良構通過不能取代本入口的執行准入。
 
 正式卡片與能力打出的程序以[正式 play 契約](play-semantics.md)為準；以下列出執行器已驗子集。
-目標 predicate 與限期 Add 跨進化的後續義務見[目標與進化契約](target-evolution-semantics.md)；
-本次僅定規格，下列恆真目標及數值進化的已驗限制仍保留。
+已選目標與純固定 Add 跨進化依[目標與進化契約](target-evolution-semantics.md)執行；
+以下記錄已驗的穩定種類／タイプ條件與限期 Add 子集。
 常見觸發與來源離場的後續義務見[觸發與 LKI 契約](trigger-lki-semantics.md)，不改變下列准入限制。
 
 ## 整卡與正式 play 的內部邊界
@@ -80,9 +80,16 @@ count 支援常值與良構的條件樹；模式數專用的 SC／NC 在 AtPlay 
 
 所有 targets／play Distribution 共用移入 Resolution 及先決選項後的一份選擇 snapshot。
 AtSelection 在驗答後讀這份 snapshot 與已公開 binding；不讀付款後的 PP。每個 target decision
-限一個 selector group、公開場上從者、無 roles／distinct／aggregate；場上區域選取只接受 Current
-視圖與恆真 predicate，因結算只重驗目標世代，可被付款或本文改變的條件仍拒絕。沒有分配時可有多個
-target decision。Bound 只讀受驗的 target producer，與 InstallEffect affected 局部 binding 分開。
+限一個 selector group、公開場上未進化從者（候選含已進化從者時整次拒絕）、無 roles／distinct／aggregate；場上區域選取只接受 Current
+視圖，玩家基準固定為 Controller；predicate 接受恆真、candidate 的 Effective KindEquals／HasTrait
+及非空 And／Or、Not。有效種類與タイプ由目前特徵讀取；已准入的完整成本、本文與 context
+閉包不含控制轉移、種類／タイプ修改、static 或未受驗 continuous，故仍在場的原世代條件不變。
+不能以這次候選剛好匹配取代預檢；可能翻轉的管線及數值、姿態、進化狀態、名稱等 predicate
+仍在付款前拒絕。lowering 保留作者 target 的 kind／trait 為 typed predicate 與原來源座標，其他欄位仍拒絕。
+沒有分配時可有多個 target decision。Bound 只讀受驗的 target producer，與 InstallEffect affected 局部 binding 分開。
+每個 Damage／Modify／Move 使用點固定完整輸入，核對原世代及存活目標的選擇特徵；
+若特徵意外翻轉，整次回復 origin。離場換世代只使該指示無實際作用，不刪原 binding、不重綁或補選，
+Damage requested 保留原量，Movement 成功投影不含失效者；獨立後句繼續，本文 If 與 AtSelection 不改位置。
 存在 Distribution 時整棵僅接受唯一一組 targets，recipients 恰讀它的 binding、minimum=1，
 且所有 targets 在分配前完成；不能為符合順序而重排相依參數。
 
@@ -161,7 +168,7 @@ BP10-122 的 attack-time 抽一片段與 BP09-P17 的 end 抽三片段經 C0／l
 進化保持場上持有者世代；進化卡另有物件世代與受驗關聯。事件保存完整 before／after characteristics，
 新印刷定義依卡號、face、局部 AbilityId 配發新 instance，不與進化前同號能力相撞。
 成本依規則 5.16.1.2 保留 base face 0 的印刷值與既有成本修正；Original 攻／體改讀進化卡。
-Set／帶期限 Add 跨進化仍受 numeric-timing 限制。BP20-R14 只取進化時抽一片段，
+跨進化僅接受下文的純固定 Add 子集，Set 與其他期限／區間仍拒絕。BP20-R14 只取進化時抽一片段，
 固有進化 PP 入口為明示合成案例；同一代表局面驗一般／超進化 facet、新 instance 及進化後 Lastword。
 
 長寫 EnterField 限 Printed、自身或自方／對手的從者入場，可排除自身、匹配受驗特徵及自回合條件。
@@ -543,9 +550,11 @@ NextTurnEnd 在安裝時捕捉玩家，等唯一回合排程實際開始該玩�
 再進入主要階段並收集 main_start 觸發。到期、重算不發 stat_changed。
 
 原型 decide 可在數值層存在時繼續執行；傷害透過同一有效值重算並保留目前 D，
-原型純 Add 以 checked 基礎差額重算。進化只在該主體的層全是無期限 Add 時以基礎差額接受：
-此時保留層或改成差額的結果相同。有期限的層在進化後如何到期還原，屬[數值期限契約 §1.1](numeric-timing.md#11-進化時的差額)
-的疑義，因此有期限層或 Set 層的主體進化整次拒絕。
+原型純 Add 以 checked 基礎差額重算。普通／超進化接受固定對象、已捕捉操作數的純 Add，
+期限限 NoTemporalExpiry、CurrentTurnEnd、NextTurnEnd，無附加 intervals。只替換基礎，
+保留 EffectId、ProperPlay timestamp、原期限錨與目前傷害，不重複加上修正差額；超進化 +1/+1 獨立保留。
+到期從進化後基礎與其餘修正重算，不另發 stat_changed；限期到期還原是目標與進化契約 §3 的
+`inferred` 專案解讀，沒有宣稱官方裁定。尚可能適用的 Set、其他期限／區間與基礎替換仍在進化付款前拒絕；效果本文進化仍只接受無期限 Add。
 prototype Set／種類或 pilot 基礎替換與有效數值層混用仍拒絕；Set 有效時任何基礎差額也拒絕，
 不為原型的非交換指示捏造 ProperPlay 時間。pilot 還原未遷移，因此有 pilot 的目標不接受 typed 數值安裝。
 原型運算式仍是飽和算術，因此對有效數值層的目標，原型 Add 與傷害量只接受整數常值，
@@ -599,4 +608,4 @@ CurrentTurnEnd 的主區間與 DuringNextTurn 附加區間採聯集。主區間�
 該 occurrence 並重新適用，到其 7.4.8 結束；不使用 turn.phase、elapsed_turns 或預定序號冒充。
 目標換世代仍清除整個舊實例，後面的附加區間不能讓舊目標復活。
 本子集不接受 interval-only、EndResolution＋非空 interval 或 phase 區間；缺少 phase occurrence
-時保持拒絕。Set 及帶期限 Add 的進化限制仍維持，不替未定的差額還原補規則。
+時保持拒絕。Set 及帶附加區間 Add 的進化限制仍維持；純固定限期 Add 僅開放上節所列子集。

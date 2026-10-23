@@ -351,16 +351,24 @@ impl Game {
         Ok(())
     }
 
-    /// numeric-timing §1.1 leaves how a timed or Set layer behaves after evolution undecided.
-    pub(in crate::game) fn numeric_evolution_allowed(&self, id: &str) -> Result<()> {
+    // Timed Add expiry follows the project inference in target-evolution-semantics §3,
+    // which covers rule evolution only; effect-text evolution keeps the untimed-Add limit.
+    pub(in crate::game) fn numeric_evolution_allowed(
+        &self,
+        id: &str,
+        rule_evolution: bool,
+    ) -> Result<()> {
         if self.numeric_state(id).is_some_and(|state| {
             state.effects.iter().any(|effect| {
-                effect.end != EffectEnd::NoTemporalExpiry
+                !(effect.end == EffectEnd::NoTemporalExpiry
+                    || (rule_evolution
+                        && matches!(effect.end, EffectEnd::Turn(_) | EffectEnd::NextTurn { .. })))
+                    || !effect.intervals.is_empty()
                     || matches!(effect.attack, Some(Change::Set(_)))
                     || matches!(effect.life, Some(Change::Set(_)))
             })
         }) {
-            return Err(unsupported("evolution with timed or Set numeric layers"));
+            return Err(unsupported("evolution outside fixed Add numeric layers"));
         }
         Ok(())
     }

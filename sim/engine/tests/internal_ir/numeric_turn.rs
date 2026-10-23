@@ -15,9 +15,17 @@ fn position(seat: u32) -> Value {
 }
 
 fn loaded(spell: Value, abilities: Value) -> Arc<Catalog> {
+    loaded_with_evolved_stats(spell, abilities, ("4", "5"))
+}
+
+fn loaded_with_evolved_stats(
+    spell: Value,
+    abilities: Value,
+    evolved: (&str, &str),
+) -> Arc<Catalog> {
     let snapshot = ["unit-spell", "unit-follower", "evolved"].iter().map(|card| {
         let (kind, power, hp) = if *card == "unit-spell" { ("スペル", "2", "3") }
-            else if *card == "evolved" { ("フォロワー・エボルヴ", "4", "5") }
+            else if *card == "evolved" { ("フォロワー・エボルヴ", evolved.0, evolved.1) }
             else { ("フォロワー", "2", "3") };
         json!({"number":card,"faces":[{"name":"unit-follower","card_class":"ニュートラル","card_type":kind,"cost":"1","power":power,"hp":hp,"traits":[],"text":null,"sections":[]}]}).to_string()
     }).collect::<Vec<_>>().join("\n");
@@ -707,53 +715,78 @@ fn installation_captures_controller_instead_of_owner_or_a_future_controller() {
 }
 
 #[test]
-fn untimed_add_evolution_updates_the_base_and_timed_or_set_evolution_rolls_back() {
-    for seat in [1, 2] {
-        let mut position = position(seat);
-        position["players"][seat_name(3 - seat)]["zones"]["field"] = json!([]);
-        position["players"][seat_name(seat)]["zones"]["field"] =
-            json!([{"id":"f","card":"unit-follower"}]);
-        position["players"][seat_name(seat)]["zones"]["evolve_deck"] =
-            json!([{"id":"e","card":"evolved"}]);
-        let abilities = json!([{"kind":"evolve","line":1,"costs":[{"op":"pp","amount":1}],"body":{"op":"evolve","subjects":"self"}}]);
-        let loaded = loaded(json!({"op":"draw","side":"self","count":1}), abilities);
-        // Only an untimed Add looks the same whether evolution keeps it as a layer or a difference.
-        for (layer, accepted) in [
-            (buff(1, 1, 2), true),
-            (current(pair(1, 2)), false),
-            (set::fixed(set::set_pair(4)), false),
-        ] {
-            let mut board = Game::new(
-                Arc::clone(&loaded),
-                &position,
-                &Value::Null,
-                &Value::Null,
-                "evolution",
-            )
-            .unwrap();
-            run(&mut board, vec![layer, hit(2, 1)], seat);
-            let evolve = board
-                .legal()
-                .unwrap()
-                .into_iter()
-                .find(|choice| choice["do"] == "evolve")
-                .unwrap();
-            let before = exact_authority(&board);
-            if accepted {
-                board.decide(&evolve, "add-evolution").unwrap();
-                stats(&board, 5, 6, 7);
-                end(&mut board);
-                stats(&board, 5, 6, 7);
-            } else {
-                board.decide(&evolve, "undecided-evolution").unwrap_err();
-                assert_eq!(
-                    exact_authority(&board),
-                    before,
-                    "the legal evolution rejects with payment and movement restored"
-                );
-            }
-        }
-    }
+fn timed_add_evolution_expires_from_evolved_base_under_project_inference_and_set_rejects() {
+    let mut position = position(1);
+    position["players"]["P2"]["zones"]["field"] = json!([]);
+    position["players"]["P1"]["zones"]["field"] = json!([{"id":"f","card":"unit-follower"}]);
+    position["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"e","card":"evolved"}]);
+    let abilities = json!([
+        {"kind":"evolve","line":1,"costs":[{"op":"pp","amount":1}],"body":{"op":"evolve","subjects":"self"}},
+        {"kind":"activated","line":2,"body":{"op":"evolve","subjects":"self"}}
+    ]);
+    let loaded = loaded_with_evolved_stats(
+        json!({"op":"draw","side":"self","count":1}),
+        abilities,
+        ("3", "4"),
+    );
+    let mut board = Game::new(
+        Arc::clone(&loaded),
+        &position,
+        &Value::Null,
+        &Value::Null,
+        "evolution",
+    )
+    .unwrap();
+    let progress = run(&mut board, vec![current(pair(2, 2)), hit(2, 1)], 1);
+    assert_eq!(changes(&progress).len(), 1);
+    stats(&board, 4, 4, 5);
+    let installed = serde_json::to_value(&board).unwrap()["state"]["ir_numeric"].clone();
+    let evolve = board
+        .legal()
+        .unwrap()
+        .into_iter()
+        .find(|choice| choice["do"] == "evolve")
+        .unwrap();
+    let mut set_board = Game::new(
+        loaded,
+        &position,
+        &Value::Null,
+        &Value::Null,
+        "set-evolution",
+    )
+    .unwrap();
+    run(
+        &mut set_board,
+        vec![set::fixed(set::set_pair(4)), hit(2, 1)],
+        1,
+    );
+    let before = exact_authority(&set_board);
+    set_board.decide(&evolve, "set-evolution").unwrap_err();
+    assert_eq!(exact_authority(&set_board), before);
+    // Effect-text evolution is outside the timed-Add subset and keeps rejecting.
+    let mut effect_board = board.clone();
+    effect_board
+        .decide(
+            &json!({"do":"activate","ability":{"source":"f","line":2}}),
+            "effect-evolution",
+        )
+        .unwrap();
+    let before = exact_authority(&effect_board);
+    effect_board
+        .decide(
+            &json!({"do":"resolve-choice","select":["e"]}),
+            "effect-evolution",
+        )
+        .unwrap_err();
+    assert_eq!(exact_authority(&effect_board), before);
+    board.decide(&evolve, "add-evolution").unwrap();
+    stats(&board, 5, 5, 6);
+    let after = serde_json::to_value(&board).unwrap()["state"]["ir_numeric"].clone();
+    assert_eq!(installed["f"]["effects"], after["f"]["effects"]);
+    run(&mut board, vec![hit(3, 1)], 1);
+    stats(&board, 5, 4, 6);
+    end(&mut board);
+    stats(&board, 3, 2, 4);
 }
 
 #[test]
