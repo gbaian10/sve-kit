@@ -34,8 +34,22 @@ fn view(binding: Binding<ObjectRef>) -> ObjectView {
 fn filter(query: &ast::SearchQuery, candidate: Binding<ObjectRef>) -> Expr<Bool> {
     let ast::SelfPlayer::Controller = query.who;
     let ast::DeckZone::Deck = query.zone;
+    object_filter(
+        query.kind.as_ref(),
+        query.r#trait.as_deref(),
+        query.name.as_deref(),
+        candidate,
+    )
+}
+
+pub(super) fn object_filter(
+    kind: Option<&ast::SearchKind>,
+    trait_id: Option<&str>,
+    name: Option<&str>,
+    candidate: Binding<ObjectRef>,
+) -> Expr<Bool> {
     let mut predicates = Vec::new();
-    if let Some(kind) = &query.kind {
+    if let Some(kind) = kind {
         predicates.push(Expr::Compute(Box::new(Predicate::KindEquals {
             left: Expr::Live(Box::new(KindRead::Kind {
                 object: view(candidate),
@@ -48,21 +62,21 @@ fn filter(query: &ast::SearchQuery, candidate: Binding<ObjectRef>) -> Expr<Bool>
             }),
         })));
     }
-    if let Some(trait_id) = &query.r#trait {
+    if let Some(trait_id) = trait_id {
         predicates.push(Expr::Compute(Box::new(Predicate::HasTrait {
             traits: Expr::Live(Box::new(TraitsRead::Traits {
                 object: view(candidate),
                 view: CharacteristicView::Effective,
             })),
-            trait_id: TraitId(trait_id.clone()),
+            trait_id: TraitId(trait_id.to_owned()),
         })));
     }
-    if let Some(name) = &query.name {
+    if let Some(name) = name {
         predicates.push(Expr::Compute(Box::new(Predicate::NamesIntersect {
             left: Expr::Live(Box::new(NamesRead::Names {
                 object: view(candidate),
             })),
-            right: Expr::Literal(vec![CardName(name.clone())]),
+            right: Expr::Literal(vec![CardName(name.to_owned())]),
         })));
     }
     if predicates.is_empty() {

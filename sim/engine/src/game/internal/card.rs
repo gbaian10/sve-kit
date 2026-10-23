@@ -19,6 +19,7 @@ use serde::Serializer;
 use serde::ser::Error as _;
 use serde_json::json;
 
+mod costs;
 mod evolution;
 mod fanfare;
 mod printed;
@@ -83,13 +84,14 @@ impl CardRuntime {
 
     pub(in crate::game) fn requires_typed_play(&self) -> bool {
         self.cards.values().any(|card| {
-            card.card().abilities.iter().any(|ability| {
-                evolution::intrinsic(&ability.node)
-                    || matches!(
-                        ability.node.kind,
-                        AbilityKind::Spell | AbilityKind::Triggered
-                    )
-            })
+            !card.card().card_play_costs.is_empty()
+                || card.card().abilities.iter().any(|ability| {
+                    evolution::intrinsic(&ability.node)
+                        || matches!(
+                            ability.node.kind,
+                            AbilityKind::Spell | AbilityKind::Triggered
+                        )
+                })
         })
     }
     pub(in crate::game) fn is_empty(&self) -> bool {
@@ -130,6 +132,13 @@ impl Game {
         if base_print["cost"].is_null() {
             return Err(unsupported("missing printed card cost"));
         }
+        if matches!(
+            base_print["card_type"].as_str(),
+            Some("フォロワー" | "スペル" | "アミュレット")
+        ) {
+            super::cost::printed_play_cost(&base_print["cost"])?;
+        }
+        costs::check(self, card_no, card)?;
         if self.card_runtime.cards.contains_key(card_no)
             || self.typed.is_some()
             || !self.prepared.is_empty()
@@ -346,7 +355,7 @@ impl Game {
                     ..
                 } => {
                     let amount = if card_cost {
-                        Int(self.internal_effective_cost(&execution.context.source)?)
+                        Int(self.internal_card_play_cost(execution)?)
                     } else {
                         *amount
                     };

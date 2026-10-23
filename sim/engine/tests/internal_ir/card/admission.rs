@@ -111,6 +111,18 @@ fn unknown_printed_cost_rejects_even_an_empty_card_but_zero_is_known() {
         matches!(game.load_internal_card("unit-follower", &card(vec![])), Err(EngineFailure::Unsupported(reason)) if reason.contains("missing printed card cost"))
     );
     assert_eq!(exact_authority(&game), before);
+    let mut dash = Game::new(
+        catalog_with_cost(&json!("-")),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "dash-cost",
+    )
+    .unwrap();
+    assert!(matches!(
+        dash.load_internal_card("unit-follower", &card(vec![])),
+        Err(EngineFailure::Unsupported(_))
+    ));
     let mut zero = Game::new(
         catalog_with_cost(&json!("0")),
         &initial,

@@ -199,6 +199,7 @@ fn evolution() -> Located<Ability> {
 
 fn mitra() -> CardProgram {
     CardProgram {
+        card_play_costs: vec![],
         abilities: vec![evolution(), fanfare()],
     }
 }
@@ -232,6 +233,7 @@ fn bp06_110_whole_card_checks_fanfare_and_printed_evolution() {
         &card
     );
     invalid(CardProgram {
+        card_play_costs: vec![],
         abilities: vec![{
             let mut ordinary = evolution();
             ordinary.node.source.origin = ability_source().origin;
@@ -356,6 +358,7 @@ fn self_entry_comparison_retains_its_bound_event_in_body_and_capture() {
     printed.node.body = Some(body(1, vec![draw(5, Expr::Literal(Int(1)))]));
     let reason = |ability: Located<Ability>| {
         WellFormedCardProgram::check(CardProgram {
+            card_play_costs: vec![],
             abilities: vec![ability],
         })
         .map(|_| ())
@@ -413,6 +416,7 @@ fn evolve_is_rejected_outside_the_printed_evolution_entry() {
         }
     }
     let error = WellFormedCardProgram::check(CardProgram {
+        card_play_costs: vec![],
         abilities: vec![outside],
     })
     .unwrap_err();

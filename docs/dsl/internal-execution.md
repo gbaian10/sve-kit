@@ -15,8 +15,8 @@
 YAML。印刷 face 的十進位 ordinal 與 lowering candidate 的 `base`（對應 face 0）都保留原本
 owner、field、fragment；這不授予永久來源身分或公開 capability。整卡的良構入口環境直接帶入
 本文，不把依賴 play binding 的本文重新當成封閉 `WellFormedProgram`。
-base 與能力引用的印刷面費用為 null 或缺欄時拒絕，不能以零補值；明示的零費用仍有效。
-印刷為「-」的面（エボルヴ等不從手牌打出的種類）照舊視為無費用資訊，不在此拒絕。
+base face 的普通打出費用必須是非負數字；缺欄、null、「-」、其他非數字及負值拒絕，明示的零費用仍有效。
+非打出用的進化 face 不套用此數字限制；能力引用 face 的原有缺欄檢查仍適用。
 Printed Activated 的印刷面必須是普通從者，護符起動片段在載入時即拒絕。
 
 准入接受普通 Printed Spell 的 `[Resolution]`、Printed Activated 的 `[Field]`，以及下節的
@@ -200,16 +200,29 @@ intervals、Set 或其他期限。每個成功的新世代必須仍在 EX；EX �
 安裝 receipt 為空，不配發 EffectId，也不把 found／revealed／chosen 當安裝對象。
 修正保存該 execution、ProperPlay timestamp 與目標世代；下一次移區後不沿同實體追蹤。
 
-搜尋的 found-local 費用條件、IR Effective Cost 讀值、已完成的卡片 play 與原型正式付款，
-共用 checked 有效費用讀取。各 Delta 先 checked 加總，最後最低為 0；格式錯誤與溢位拒絕，
-不以 scalar 的零預設或飽和運算代替。進化來源依受驗關聯讀 base face 0 的成本，未知或無效關聯拒絕。
-typed 減費與 prototype continuous 費用層不得混用；存在 typed 費用層時，付款另驗可合併的
-prototype 能力與非溢位 additional PP。
+搜尋的 found-local 費用條件、IR Effective Cost 與 SourceInformation 只讀卡片 Cost 資訊，
+不套用 `when_playing` 修正；原有無費用資訊的搜尋 fallback 見搜尋替代目的地一節。
+進化來源依受驗關聯讀 base face 0 的成本，未知或無效關聯拒絕。
+原型付款仍承接已安裝的減費，typed 與 prototype continuous 費用層不得混用。
 
-以上共用讀值描述現有實作，並非正式費用語義的保證；CR 10.4.4.1 要求
-`when_playing` 修正只影響實付 PP。[打出費用契約](play-cost-semantics.md#21-時點與資料)
-要求後續實作分離 Search／一般 Cost 資訊與付款讀值；未完成前不能據此宣稱這類搜尋
-與減費組合符合規則。自身修正的新內部承載也尚未實作，本節不擴大已驗子集。
+### 自身打出費用修正
+
+`CardProgram.card_play_costs` 以每 face 唯一的非空 `FacePlayCost` 承載自身修正，
+`PlayCostModifier` 保留各自來源。lowering 只收自身 `play.cost_delta`／`cost_set` 的常值，
+不生成 InstallEffect 或 EffectId；新入口獨立推導 `card.play-cost` 內部需求碼，公開 registry 仍不開放。
+准入限 base face、非正 delta 與至多一個非負 set 宣告，包含條件不成立的分支。
+
+付款前在 Resolution 的同一狀態求值一次，單一 set 先於全部自身及承接 delta；checked 算術後
+最後截零。Spell 只在經印刷成本核對的唯一固有 PP 位置支付，從者由卡片規則程序支付；
+Activated、Fanfare 與進化不讀這個入口。完整付款、場容量與回復沿正式 play 程序。
+
+純條件限 Bool 常值、And／Or／Not、公開 Field／Cemetery 的 Exists 或計數對常值比較；
+查詢可按同一卡表的 kind、trait、name 過濾。這個入口使用隔離的封閉求值器，
+不擴大一般 selector 的 predicate 子集。分段區間由作者明示，原樣保留；兩條獨立減費各計一次。
+SC 可明示為墓地 Spell 計數；未展開的關鍵字及缺少封閉原區域讀值的 EX 限定自身條件仍拒絕。
+付款交換、additional／optional／alt、X、動態值、正 delta、複數 set、aura、next-play 共享額度，
+以及無明示期限的特定卡修正維持拒絕。完整合成、時點與來源義務見
+[打出費用契約 §2–4](play-cost-semantics.md#2-決定實付-pp)。
 
 Numeric 與 CostModifier 共用實際回合的 EffectEnd，減費在 7.4.8 清理，不提早於 end／Quick。
 安裝與到期不產 stat_changed。測試採 CP04-060 的 Search→EX→當回合 -2，以及

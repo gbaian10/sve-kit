@@ -65,7 +65,8 @@ impl Game {
         let mut frame = self.start_frame(holder, serde_json::Value::Null, &decision)?;
         self.internal_play_move(holder, "resolution", &frame)?;
         self.object_mut(holder)?.state["entered_from"] = json!(object.zone);
-        let cost = self.internal_effective_cost(holder)?;
+        execution.context.generation = Generation(self.object(holder)?.generation);
+        let cost = self.internal_card_play_cost(&execution)?;
         let quantity = self.internal_pay_pp(actor, Int(cost))?;
         if self.zone_count(seat, "field") >= 5 {
             return Err(crate::EngineFailure::IllegalPlay(

@@ -95,7 +95,7 @@ pub(super) fn packet(domain: &SearchDomain) -> Value {
 }
 
 // This closed grammar classifies conditions without consulting the hidden candidate population.
-fn check_predicate(value: &Expr<Bool>, candidate: Binding<ObjectRef>) -> Result<bool> {
+pub(super) fn check_predicate(value: &Expr<Bool>, candidate: Binding<ObjectRef>) -> Result<bool> {
     match value {
         Expr::Literal(Bool(true)) => Ok(false),
         Expr::Compute(operation) => match operation.as_ref() {
@@ -304,7 +304,7 @@ fn bounds(printed: Cardinality, available: usize, conditional: bool) -> Result<C
     })
 }
 
-fn matches_candidate(game: &Game, id: &str, expression: &Expr<Bool>) -> Result<bool> {
+pub(super) fn matches_candidate(game: &Game, id: &str, expression: &Expr<Bool>) -> Result<bool> {
     match expression {
         Expr::Literal(Bool(true)) => Ok(true),
         Expr::Compute(operation) => match operation.as_ref() {

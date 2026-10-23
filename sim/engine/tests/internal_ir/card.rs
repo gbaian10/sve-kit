@@ -4,6 +4,9 @@ use super::*;
 mod admission;
 use sve_engine::game::internal::{Activation, CardPlay, ResumeStage};
 
+#[path = "card/costs.rs"]
+mod play_costs;
+
 #[path = "card/payment.rs"]
 mod payment;
 
@@ -97,7 +100,11 @@ fn ability(id: u64, mut steps: Vec<Located<Node>>) -> Located<Ability> {
 }
 
 fn card(abilities: Vec<Located<Ability>>) -> WellFormedCardProgram {
-    WellFormedCardProgram::check(CardProgram { abilities }).unwrap()
+    WellFormedCardProgram::check(CardProgram {
+        abilities,
+        card_play_costs: vec![],
+    })
+    .unwrap()
 }
 
 fn position(seat: u32, steps: Vec<Located<Node>>) -> Game {

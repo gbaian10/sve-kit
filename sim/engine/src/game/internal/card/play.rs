@@ -131,7 +131,7 @@ pub(super) fn check_spell(ability: &Ability, printed: &Value) -> Result<()> {
         return Err(unsupported("Spell intrinsic cost"));
     };
     if printed["card_type"] != "スペル"
-        || *amount != super::super::cost::printed_cost(&printed["cost"])?
+        || *amount != super::super::cost::printed_play_cost(&printed["cost"])?
     {
         return Err(unsupported(
             "Spell catalogue kind or intrinsic cost mismatch",

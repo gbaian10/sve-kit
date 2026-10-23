@@ -541,7 +541,7 @@ fn arithmetic(operation: Arithmetic, values: &[i64]) -> Result<i64> {
         .ok_or_else(|| invalid("signed arithmetic overflow"))
     })
 }
-fn compare<T>(left: T, comparison: Comparison, right: T) -> bool
+pub(super) fn compare<T>(left: T, comparison: Comparison, right: T) -> bool
 where
     T: Ord + Copy,
 {

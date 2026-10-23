@@ -637,7 +637,6 @@ impl Game {
             return Ok(json!(scalar(&self.face(id)?["cost"])));
         }
         if field == "current_cost" {
-            // Typed reductions live outside prototype state, so use the shared checked reader.
             if self.internal_cost_layered(id) {
                 return self.internal_effective_cost(id).map(|cost| json!(cost));
             }

@@ -1,4 +1,5 @@
 use super::*;
+use core::slice::from_mut;
 use sve_engine::game::internal::{DamageShare, DecisionView, InputDomain};
 
 pub(super) fn spell(steps: Vec<Located<Node>>) -> Located<Ability> {
@@ -509,13 +510,87 @@ fn base_activated_play_restores_payment_and_body_observations_after_a_valid_answ
     assert!(next.token.epoch > question.token.epoch);
 }
 
+fn discounted_spell() -> WellFormedCardProgram {
+    let mut spell = spell(vec![draw(4, 1)]);
+    spell.node.play.as_mut().unwrap().costs = payment::paid_ability(vec![payment::pp(5)], vec![])
+        .node
+        .play
+        .unwrap()
+        .costs;
+    let mut damage = damage(
+        5,
+        RecipientSet::Leaders {
+            players: players(PlayerRelation::Opponents),
+        },
+        0,
+    );
+    if let Node::Instruction { instruction } = &mut damage.node
+        && let Action::Damage { amount, .. } = &mut instruction.action
+    {
+        *amount = DamageAmount::Uniform {
+            amount: Expr::Compute(Box::new(IntOperation::InformationOrZero {
+                information: NumberRead::Cost {
+                    object: ObjectView::SourceInformation {},
+                    view: CharacteristicView::Effective,
+                },
+            })),
+        };
+    }
+    locate_steps(from_mut(&mut damage), &spell.source, &spell.node.source);
+    spell.node.body.as_mut().unwrap().steps.push(damage);
+    let condition = Expr::Compute(Box::new(Predicate::Exists {
+        objects: zone(ZoneKind::Field, 80),
+    }));
+    let modifier = Located {
+        source: spell.source.clone(),
+        node: PlayCostModifier {
+            condition: Some(condition),
+            change: CostChange::Delta {
+                amount: Expr::Literal(Int(-2)),
+            },
+        },
+    };
+    WellFormedCardProgram::check(CardProgram {
+        abilities: vec![spell],
+        card_play_costs: vec![Located {
+            source: modifier.source.clone(),
+            node: FacePlayCost {
+                face: FaceId("0".into()),
+                modifiers: vec![modifier],
+            },
+        }],
+    })
+    .unwrap()
+}
+
 #[test]
 fn ex_spell_preserves_the_installed_reduction_until_its_single_intrinsic_payment() {
     let initial = setup(
         1,
         json!([{"id":"d","card":"unit-spell"}, {"id":"next","card":"unit-follower"}]),
     );
-    let mut game = Game::new(catalog(), &initial, &Value::Null, &Value::Null, "ex-spell").unwrap();
+    let mut game = Game::new(
+        catalog_with_cost(&json!("5")),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "ex-spell",
+    )
+    .unwrap();
+    let mut reduction = cost::reduce(
+        3,
+        MovementReceipt::Move {
+            receipt: ReceiptReference::new(ReceiptId(2)),
+        },
+    );
+    if let Node::Instruction { instruction } = &mut reduction.node
+        && let Action::InstallEffect { effect, .. } = &mut instruction.action
+        && let Effect::CostModifier { change, .. } = effect.as_mut()
+    {
+        *change = CostChange::Delta {
+            amount: Expr::Literal(Int(-1)),
+        };
+    }
     let result = game
         .execute_internal(
             &checked(vec![
@@ -539,19 +614,14 @@ fn ex_spell_preserves_the_installed_reduction_until_its_single_intrinsic_payment
                         reason: MoveReason::Put,
                     },
                 ),
-                cost::reduce(
-                    3,
-                    MovementReceipt::Move {
-                        receipt: ReceiptReference::new(ReceiptId(2)),
-                    },
-                ),
+                reduction,
             ]),
             &source("BP18-059"),
             context(1),
         )
         .unwrap();
     assert!(result.complete);
-    game.load_internal_card("unit-spell", &card(vec![spell(vec![draw(4, 1)])]))
+    game.load_internal_card("unit-spell", &discounted_spell())
         .unwrap();
     game.load_internal_card("unit-follower", &card(vec![]))
         .unwrap();
@@ -561,7 +631,7 @@ fn ex_spell_preserves_the_installed_reduction_until_its_single_intrinsic_payment
         result.progress.receipts[&ReceiptId(100)],
         InstructionOutcome::Payment {
             quantity: Quantity {
-                amount: Int(0),
+                amount: Int(2),
                 unit: QuantityUnit::Pp
             },
             subjects: vec![]
@@ -569,9 +639,13 @@ fn ex_spell_preserves_the_installed_reduction_until_its_single_intrinsic_payment
     );
     assert_eq!(
         game.projection(View::Referee).unwrap()["P1"]["pp"]["current"],
-        2
+        0
     );
     cards(&result.progress, 4, 1, 1);
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P2"]["leader"]["life"],
+        15
+    );
 }
 
 #[test]
