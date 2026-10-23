@@ -93,9 +93,7 @@
       {
         "id": "keep-guard",
         "match": {
-          "cards": [
-            "BP01-046"
-          ],
+          "cards": ["BP01-046"],
           "tags": []
         },
         "when": {
@@ -107,9 +105,7 @@
       {
         "id": "keep-snipe-with-curve",
         "match": {
-          "cards": [
-            "BP01-179"
-          ],
+          "cards": ["BP01-179"],
           "tags": []
         },
         "when": {
@@ -123,10 +119,7 @@
     ],
     "bundles": [
       {
-        "cards": [
-          "BP01-046",
-          "BP01-179"
-        ],
+        "cards": ["BP01-046", "BP01-179"],
         "when": {
           "fact": "seat.first",
           "op": "eq",
@@ -156,19 +149,12 @@
   "matchups": [
     {
       "id": "small-storm-attacker",
-      "opponent_archetypes": [
-        "royal-aggro",
-        "unknown"
-      ],
+      "opponent_archetypes": ["royal-aggro", "unknown"],
       "minimum_belief": 0.15,
       "threat": {
         "match": {
-          "cards": [
-            "BP01-P10"
-          ],
-          "tags": [
-            "storm"
-          ]
+          "cards": ["BP01-P10"],
+          "tags": ["storm"]
         },
         "when": {
           "fact": "threat.damage_bound",
@@ -181,12 +167,8 @@
       "counters": [
         {
           "match": {
-            "cards": [
-              "BP01-179"
-            ],
-            "tags": [
-              "quick_removal"
-            ]
+            "cards": ["BP01-179"],
+            "tags": ["quick_removal"]
           },
           "intent": "remove",
           "priority": 100,
@@ -195,12 +177,8 @@
         },
         {
           "match": {
-            "cards": [
-              "BP01-046"
-            ],
-            "tags": [
-              "guard"
-            ]
+            "cards": ["BP01-046"],
+            "tags": ["guard"]
           },
           "intent": "guard",
           "priority": 60,
@@ -216,10 +194,7 @@
     "maximum_pp": 3,
     "minimum_threat_probability": 0.3,
     "unused_pp_penalty": 0.7,
-    "windows": [
-      "attack_quick",
-      "end_quick"
-    ],
+    "windows": ["attack_quick", "end_quick"],
     "release_if_no_feasible_response": true
   },
   "opponent_model": {
@@ -321,9 +296,7 @@
   "provenance": {
     "source": "human",
     "author": "Codex gpt-6-astra",
-    "evidence_ids": [
-      "design-only-untrained-example"
-    ],
+    "evidence_ids": ["design-only-untrained-example"],
     "validation_run_id": null
   }
 }

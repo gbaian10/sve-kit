@@ -9,16 +9,17 @@ config = false
 # No ignorePath: the defaults (.gitignore, .prettierignore, .git/info/exclude) also work in linked
 # worktrees, where .git is a file and an explicit .git/info/exclude fails with ENOTDIR.
 ignorePatterns = [
-    "*.md",               # markdownlint
-    "*.toml",             # taplo
-    "authored/registry/", # written by carddb's own encoder
+    "*.md",                # markdownlint
+    "*.toml",              # taplo
+    "authored/registry/",  # written by carddb's own encoder
     "authored/ids/",
-    "card-data/",         # generated; card-data/index.json pins the sha256 of every file
-    "carddb/",            # verbatim page fixtures and generated package schemas
-    "dsl/",               # schema bytes are part of the DSL body-version hash
-    "sim/web/fixtures/",  # canonical JSON whose sha256 is pinned
-    "tests/fixtures/",    # canonical JSON named by its hash
-    "tools/schema-er/",   # generated ER model and page
+    "card-data/",          # generated; card-data/index.json pins the sha256 of every file
+    "carddb/",             # verbatim page fixtures and generated package schemas
+    "docs/schema/ingest/", # generated from carddb models; a test compares the bytes
+    "dsl/",                # schema bytes are part of the DSL body-version hash
+    "sim/web/fixtures/",   # canonical JSON whose sha256 is pinned
+    "tests/fixtures/",     # canonical JSON named by its hash
+    "tools/schema-er/",    # generated ER model and page
 ]
 
 [fmt.sortTailwindcss]
