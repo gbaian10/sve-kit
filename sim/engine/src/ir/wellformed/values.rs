@@ -215,6 +215,16 @@ impl Checker {
                 }
                 BoolFrozen::DriveGainedFirstGain { event } => self.event_field(*event),
                 BoolFrozen::DriveCheckedTriggerAccepted { event } => self.event_field(*event),
+                BoolFrozen::PaymentComplete {
+                    receipt: PaymentReference::CardPlay { face, receipt },
+                } if self.capture_time.is_none()
+                    && self.count_time.is_none()
+                    && self.env.chooser.is_none()
+                    && self.card_payment_body.as_ref() == Some(face)
+                    && self.card_payments.get(&face.0) == Some(receipt) =>
+                {
+                    Ok(())
+                }
                 BoolFrozen::PaymentComplete { .. } => self.reject(),
             },
             Expr::Compute(predicate) => self.predicate(predicate),

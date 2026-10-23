@@ -4,6 +4,9 @@ use super::*;
 mod admission;
 use sve_engine::game::internal::{Activation, CardPlay, ResumeStage};
 
+#[path = "card/exchange.rs"]
+mod exchange;
+
 #[path = "card/costs.rs"]
 mod play_costs;
 

@@ -789,6 +789,7 @@ tags!(GenerationDeduplication {
 });
 
 variants!(PaymentReference {
+    CardPlay { face: FaceId, receipt: ReceiptId } => ["read.card-play.payment-complete"],
     Local { receipt: ReceiptReference<PaymentResult> } => [],
     Entry { receipt: Expr<Info<PaymentReceipt>>, absent: AbsentPayment } => []
 });

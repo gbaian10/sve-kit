@@ -7,6 +7,7 @@ fn own_costs(changes: Vec<CostChange>) -> WellFormedCardProgram {
         card_play_costs: vec![Located {
             source: source.clone(),
             node: FacePlayCost {
+                exchange: None,
                 face: FaceId("0".into()),
                 modifiers: changes
                     .into_iter()

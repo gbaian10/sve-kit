@@ -21,6 +21,7 @@ mod decisions;
 mod entries;
 mod events;
 mod evolution;
+mod exchange;
 mod installation;
 mod modes;
 mod movement;
@@ -250,6 +251,8 @@ struct Checker {
     source: Option<Box<SourceSpan>>,
     ability_source: Option<AbilitySource>,
     source_information_entry: bool,
+    card_payments: BTreeMap<String, ReceiptId>,
+    card_payment_body: Option<super::FaceId>,
     path: String,
 }
 #[expect(
@@ -296,6 +299,8 @@ impl Checker {
             source: None,
             ability_source: None,
             source_information_entry: false,
+            card_payments: BTreeMap::new(),
+            card_payment_body: None,
             path: String::new(),
         }
     }

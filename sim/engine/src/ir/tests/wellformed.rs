@@ -976,6 +976,7 @@ fn card_play_costs_check_their_own_entry_and_keep_rejection_sources() {
         card_play_costs: vec![Located {
             source: source("synthetic"),
             node: FacePlayCost {
+                exchange: None,
                 face: FaceId("base".into()),
                 modifiers: vec![change(7)],
             },

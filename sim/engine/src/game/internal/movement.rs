@@ -400,7 +400,13 @@ impl Game {
             .map(|(_, id, _, _)| id.clone())
             .collect::<Vec<_>>();
         let departing_source = execution.source_before_move(self, &ids)?;
-        let frame = execution.frame();
+        let mut frame = execution.frame();
+        if method == MoveMethod::Banish {
+            // The ordinary banish event is emitted only for a banish instruction frame.
+            frame
+                .values
+                .insert("banish_instruction".into(), json!(true));
+        }
         self.move_objects(
             &ids,
             zone,
@@ -452,7 +458,7 @@ impl Game {
                 },
                 controller_before,
             })));
-            if method == MoveMethod::Destroy {
+            if matches!(method, MoveMethod::Destroy | MoveMethod::Banish) {
                 successful.push(ResultMember {
                     id: ResultMemberId(u64::try_from(index).map_err(invalid)?),
                     before: Some(RuntimeObjectView {
@@ -464,6 +470,8 @@ impl Game {
                         snapshot: after_snapshot,
                     }),
                 });
+            }
+            if method == MoveMethod::Destroy {
                 self.emit(
                     json!({"kind":"破壊","object":id,"source":frame.source}),
                     &frame.cause,

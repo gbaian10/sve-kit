@@ -97,7 +97,8 @@ pub(in crate::game::internal) struct PlayState {
     groups: Vec<PlayMode>,
     pub(in crate::game::internal) chosen: BTreeMap<DecisionId, Vec<ModeId>>,
     parameters: VecDeque<Decision>,
-    costs: CostSpec,
+    pub(super) exchange: Option<super::exchange::ExchangeState>,
+    pub(super) costs: CostSpec,
     limit: Option<LimitSpec>,
     body: Program,
     restart: Option<SelectionOrigin>,
@@ -443,7 +444,6 @@ impl Game {
             self.play_internal_spell(holder, actor)
         } else {
             self.play_internal_field_card(holder, actor)
-                .map(CardPlay::Entered)
         };
         self.finish_card_attempt(before, result)
     }
@@ -588,6 +588,8 @@ impl Game {
             targets: BTreeMap::new(),
             play: None,
             spell: false,
+            field_entry: false,
+            card_payment: None,
             play_counts: self.internal_play_counts()?,
         })
     }
@@ -612,6 +614,11 @@ impl Game {
             groups,
             chosen: BTreeMap::new(),
             parameters: play.parameters.into(),
+            exchange: if execution.spell {
+                self.internal_exchange(&execution)?
+            } else {
+                None
+            },
             costs: play.costs,
             limit: play.limit,
             body,
@@ -642,11 +649,13 @@ impl Game {
         result
     }
 
-    fn card_play_result(&mut self, execution: Execution) -> Result<CardPlay> {
+    pub(super) fn card_play_result(&mut self, execution: Execution) -> Result<CardPlay> {
         if let Some((view, _)) = &execution.waiting {
             let view = view.clone();
             self.typed = Some(execution);
             Ok(CardPlay::Awaiting(view))
+        } else if let Some(entry) = self.card_runtime.entry_result.take() {
+            Ok(CardPlay::Entered(entry))
         } else {
             activation(execution.progress(), execution.ability).map(CardPlay::Resolved)
         }
@@ -671,7 +680,7 @@ impl Game {
         if self
             .typed
             .as_ref()
-            .is_none_or(|execution| execution.ability.is_none())
+            .is_none_or(|execution| execution.ability.is_none() && !execution.field_entry)
         {
             return Err(invalid("no pending formal play"));
         }
@@ -683,6 +692,8 @@ impl Game {
             .and_then(|execution| execution.waiting.as_ref())
         {
             Ok(CardPlay::Awaiting(view.clone()))
+        } else if let Some(entry) = self.card_runtime.entry_result.take() {
+            Ok(CardPlay::Entered(entry))
         } else {
             activation(progress, source).map(CardPlay::Resolved)
         }
@@ -695,7 +706,9 @@ impl Game {
         let Some(mut play) = execution.play.take() else {
             return Ok(());
         };
-        if self.internal_play_modes(execution, &mut play)? {
+        if self.internal_exchange_decision(execution, &play)?
+            || self.internal_play_modes(execution, &mut play)?
+        {
             execution.play = Some(play);
             return Ok(());
         }
@@ -750,11 +763,26 @@ impl Game {
                 return Ok(());
             }
         }
+        if self.internal_exchange_materials(execution, &mut play)? {
+            execution.play = Some(play);
+            return Ok(());
+        }
+        self.finish_play_payment(execution, play)
+    }
+
+    fn finish_play_payment(&mut self, execution: &mut Execution, play: PlayState) -> Result<()> {
         let previous = self.card_runtime.active_source;
         self.card_runtime.active_source = execution.ability;
-        let payment = self.internal_card_payment(execution, &play.costs, execution.spell);
+        let payment = if play.exchange.is_some() || execution.field_entry {
+            self.internal_exchange_payment(execution, &play)
+        } else {
+            self.internal_card_payment(execution, &play.costs, execution.spell)
+        };
         self.card_runtime.active_source = previous;
         payment?;
+        if execution.field_entry {
+            return Ok(());
+        }
         self.commit_internal_play(execution, play)
     }
 
@@ -861,17 +889,7 @@ impl Game {
                     legal.push(mode.id);
                 }
             }
-            let mut payment_game = self.clone();
-            payment_game.card_runtime.active_source = execution.ability;
-            let affordable = match payment_game.internal_card_payment(
-                &mut execution.clone(),
-                &play.costs,
-                execution.spell,
-            ) {
-                Ok(()) => true,
-                Err(crate::EngineFailure::IllegalPlay(_)) => false,
-                Err(error) => return Err(error),
-            };
+            let affordable = self.internal_play_affordable(execution, play)?;
             if u64::try_from(legal.len()).map_err(invalid)? < minimum || !affordable {
                 return Err(crate::EngineFailure::IllegalPlay(
                     "no legal mode and cost plan".into(),
@@ -905,6 +923,23 @@ impl Game {
             return Ok(true);
         }
         Ok(false)
+    }
+
+    fn internal_play_affordable(&self, execution: &Execution, play: &PlayState) -> Result<bool> {
+        if play.exchange.is_some() {
+            return self.internal_exchange_affordable(execution, play);
+        }
+        let mut payment_game = self.clone();
+        payment_game.card_runtime.active_source = execution.ability;
+        match payment_game.internal_card_payment(
+            &mut execution.clone(),
+            &play.costs,
+            execution.spell,
+        ) {
+            Ok(()) => Ok(true),
+            Err(crate::EngineFailure::IllegalPlay(_)) => Ok(false),
+            Err(error) => Err(error),
+        }
     }
 
     pub(in crate::game::internal) fn internal_play_distribution_captures(
@@ -1047,5 +1082,34 @@ fn independent_selector(selector: &Selector) -> bool {
         Selector::Zone { .. } | Selector::Objects { .. } => true,
         Selector::Union { sets } => sets.iter().all(independent_selector),
         _ => false,
+    }
+}
+
+#[expect(
+    clippy::multiple_inherent_impl,
+    reason = "Field plays share the card payment continuation."
+)]
+impl Game {
+    pub(super) fn run_field_play(&mut self, mut execution: Execution) -> Result<CardPlay> {
+        execution.field_entry = true;
+        execution.play = Some(PlayState {
+            snapshot: None,
+            snapshot_id: SnapshotId(self.state.ir_epoch),
+            modes: VecDeque::new(),
+            groups: vec![],
+            chosen: BTreeMap::new(),
+            parameters: VecDeque::new(),
+            exchange: self.internal_exchange(&execution)?,
+            costs: CostSpec::Ordered { steps: vec![] },
+            limit: None,
+            body: Program {
+                scope: ScopeId(0),
+                steps: vec![],
+            },
+            restart: None,
+            distribution_captures: None,
+        });
+        self.internal_run(&mut execution)?;
+        self.card_play_result(execution)
     }
 }

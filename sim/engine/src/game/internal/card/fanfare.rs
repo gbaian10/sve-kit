@@ -8,7 +8,6 @@ use crate::ir::{
     EventPattern, EventSnapshotPolicy, KeywordId, ObjectFrozen, Predicate, TriggerAggregation,
     TriggerCondition,
 };
-use crate::ir::{Int, ReceiptId};
 
 pub(super) fn check_header(ability: &Ability) -> Result<()> {
     let Some(trigger) = &ability.trigger else {
@@ -48,7 +47,7 @@ impl Game {
         &mut self,
         holder: &str,
         actor: PlayerId,
-    ) -> Result<super::CardEntry> {
+    ) -> Result<super::CardPlay> {
         let object = self.object(holder)?.clone();
         let seat = seat_name(actor)?;
         let context = Context {
@@ -62,25 +61,28 @@ impl Game {
         }
         let mut execution = self.new_card_execution(context)?;
         let decision = json!({"do":"play","card":holder,"by":seat,"at":"main"});
-        let mut frame = self.start_frame(holder, serde_json::Value::Null, &decision)?;
+        let frame = self.start_frame(holder, serde_json::Value::Null, &decision)?;
         self.internal_play_move(holder, "resolution", &frame)?;
         self.object_mut(holder)?.state["entered_from"] = json!(object.zone);
         execution.context.generation = Generation(self.object(holder)?.generation);
-        let cost = self.internal_card_play_cost(&execution)?;
-        let quantity = self.internal_pay_pp(actor, Int(cost))?;
+        self.run_field_play(execution)
+    }
+
+    pub(in crate::game::internal) fn internal_field_card_finish(
+        &mut self,
+        execution: &mut super::Execution,
+    ) -> Result<()> {
+        let holder = execution.context.source.clone();
+        let actor = execution.context.controller;
+        let seat = seat_name(actor)?;
+        let decision = json!({"do":"play","card":holder,"by":seat,"at":"main"});
+        let mut frame = self.start_frame(&holder, serde_json::Value::Null, &decision)?;
         if self.zone_count(seat, "field") >= 5 {
             return Err(crate::EngineFailure::IllegalPlay(
                 "full field after payment".into(),
             ));
         }
-        let played = execution.reference(self, holder)?;
-        execution.receipts.insert(
-            ReceiptId(0),
-            super::InstructionOutcome::Payment {
-                quantity,
-                subjects: Vec::new(),
-            },
-        );
+        let played = execution.reference(self, &holder)?;
         execution.facts.push(super::Fact::CardPlayed {
             execution: execution.id,
             object: played,
@@ -94,7 +96,7 @@ impl Game {
             group,
         );
         frame.cause = json!({"event":event});
-        self.internal_play_move(holder, "field", &frame)?;
+        self.internal_play_move(&holder, "field", &frame)?;
         self.internal_numeric_end_resolution(execution.id)?;
         let resolve_group = self.group();
         self.emit(
@@ -108,7 +110,7 @@ impl Game {
             controller: actor,
         });
         self.checks()?;
-        Ok(super::CardEntry {
+        self.card_runtime.entry_result = Some(super::CardEntry {
             execution: execution.id,
             progress: execution.progress(),
             step: Step {
@@ -121,7 +123,8 @@ impl Game {
                 self.card_runtime.checkpoint = Some(execution.id);
                 super::ResumeStage::CheckTiming
             },
-        })
+        });
+        Ok(())
     }
 
     pub(super) fn internal_card_source(

@@ -40,12 +40,12 @@ impl WellFormedCardProgram {
     /// Returns the first invalid or unsupported shape.
     pub fn check(card: CardProgram) -> Result<Self, WellFormedError> {
         let mut faces = BTreeSet::new();
+        let mut checker = Checker::new(ScopeId(0));
         for (index, face) in card.card_play_costs.iter().enumerate() {
-            let mut checker = Checker::new(ScopeId(0));
             checker.at(&format!("card_play_costs/{index}"), |checker| {
                 checker.located(face, |checker, face| {
                     if face.face.0.is_empty()
-                        || face.modifiers.is_empty()
+                        || (face.modifiers.is_empty() && face.exchange.is_none())
                         || !faces.insert(face.face.0.clone())
                     {
                         return Err(checker.error(WellFormedReason::InvalidEntry));
@@ -76,11 +76,21 @@ impl WellFormedCardProgram {
                             })
                         })?;
                     }
+                    if let Some(exchange) = &face.exchange {
+                        checker.at("exchange", |checker| {
+                            checker.located(exchange, |checker, exchange| {
+                                checker.exchange(exchange, &mut has_set)?;
+                                checker
+                                    .card_payments
+                                    .insert(face.face.0.clone(), exchange.receipt);
+                                Ok(())
+                            })
+                        })?;
+                    }
                     Ok(())
                 })
             })?;
         }
-        let mut checker = Checker::new(ScopeId(0));
         for (index, ability) in card.abilities.iter().enumerate() {
             checker.at(&format!("abilities/{index}"), |checker| {
                 checker.located(ability, Checker::ability)
@@ -198,6 +208,7 @@ const fn self_player(player: PlayerRef) -> PlayerSet {
 )]
 impl Checker {
     fn ability(&mut self, ability: &Ability) -> Checked {
+        let previous_payment = self.card_payment_body.take();
         let previous_env = self.env.clone();
         let previous_root = self.root;
         let previous_entry = self.entry;
@@ -219,6 +230,7 @@ impl Checker {
             .as_ref()
             .map(|_| ability.source.controller.clone());
         let result = self.ability_contents(ability);
+        self.card_payment_body = previous_payment;
         self.env = previous_env;
         self.root = previous_root;
         self.entry = previous_entry;
@@ -312,9 +324,17 @@ impl Checker {
         }
         self.env.play_payments = ability.play.as_ref().map(|_| ability.scope);
         self.resolution_entry = self.env.clone();
+        let previous_payment = self.card_payment_body.take();
+        if ability.kind == AbilityKind::Spell
+            && ability.qualification == AbilityQualification::Ordinary
+            && let AbilityOrigin::Printed { face, .. } = &ability.source.origin
+        {
+            self.card_payment_body = Some(face.clone());
+        }
         if let Some(body) = &ability.body {
             self.at("body/steps", |checker| checker.program_steps(body))?;
         }
+        self.card_payment_body = previous_payment;
         for (index, effect) in ability.declarations.iter().enumerate() {
             // Only this complete header grants PlayCard; generic permission remains closed.
             if super::super::quick::card_permission(ability) {

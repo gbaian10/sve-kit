@@ -3,6 +3,7 @@
 mod ast;
 mod costs;
 mod evolution;
+mod exchange;
 mod numeric;
 mod ordering;
 mod payment;
@@ -122,11 +123,37 @@ impl ExpandedLowerer {
             };
             let mut abilities = Vec::new();
             let mut modifiers = Vec::new();
-            for (index, value) in card.abilities.into_iter().enumerate() {
+            let entries = card
+                .abilities
+                .into_iter()
+                .enumerate()
+                .map(|(index, value)| {
+                    decode::<ast::Ability>(value, &format!("{path}/abilities/{index}"))
+                })
+                .collect::<Result<Vec<_>, _>>()?;
+            let mut exchange = None;
+            let mut payment_result = None;
+            for (index, ability) in entries.iter().enumerate() {
                 let path = format!("{path}/abilities/{index}");
-                let ability: ast::Ability = decode(value, &path)?;
                 if let Some(play) = &ability.play {
-                    costs::lower(&key, &path, &ability, play, &mut allocator, &mut modifiers)?;
+                    costs::lower(&key, &path, ability, play, &mut allocator, &mut modifiers)?;
+                    let source = source_span(&key, &path, ability)?;
+                    if let Some(lowered) = exchange::lower(play, &source, &mut allocator)? {
+                        if exchange.is_some() {
+                            return Err(unsupported(&path));
+                        }
+                        payment_result = play
+                            .optional_cost
+                            .as_ref()
+                            .and_then(|cost| cost.result.clone())
+                            .map(|name| (name, lowered.node.receipt));
+                        exchange = Some(lowered);
+                    }
+                }
+            }
+            for (index, ability) in entries.into_iter().enumerate() {
+                let path = format!("{path}/abilities/{index}");
+                if ability.play.is_some() {
                     continue;
                 }
                 let scope = u64::try_from(index)
@@ -140,6 +167,7 @@ impl ExpandedLowerer {
                     &ability,
                     ScopeId(scope),
                     printed_costs.get(&key).copied(),
+                    payment_result.clone(),
                 )?);
             }
             let checked = WellFormedCardProgram::check(CardProgram {
@@ -147,12 +175,14 @@ impl ExpandedLowerer {
                 card_play_costs: modifiers
                     .first()
                     .map(|first| first.source.clone())
+                    .or_else(|| exchange.as_ref().map(|item| item.source.clone()))
                     .map_or_else(Vec::new, |source| {
                         vec![Located {
                             source,
                             node: super::FacePlayCost {
                                 face: FaceId("base".into()),
                                 modifiers,
+                                exchange,
                             },
                         }]
                     }),
@@ -212,6 +242,7 @@ impl Allocator {
         entry: &ast::Ability,
         scope: ScopeId,
         printed_cost: Option<Nat>,
+        payment_result: Option<(String, ReceiptId)>,
     ) -> Result<Located<Ability>, LoweringError> {
         if entry.imports.is_some() {
             return Err(unsupported(path));
@@ -225,6 +256,11 @@ impl Allocator {
         let ability_source = ability_source(&source, keyword);
         let mut context = BodyContext {
             scope,
+            payment_result: if entry.spell.is_some() {
+                payment_result
+            } else {
+                None
+            },
             allocator: Self::default(),
             card_allocator: self,
             definitions: &body.define,
@@ -235,12 +271,7 @@ impl Allocator {
             mode_targets: BTreeMap::new(),
             formal_play: entry.activate.is_some() || entry.spell.is_some(),
         };
-        for value in body.define.values() {
-            context.number(value, path, &mut BTreeSet::new())?;
-        }
-        context.allocator = Self::default();
-        let choice = play::choice_body(body, path)?;
-        context.targets(&body.targets, choice, path)?;
+        context.prepare_parameters(body, path)?;
         let program = context.body(body, &format!("{path}/{head}"), &source, &ability_source)?;
         let (kind, mut play, trigger) = if entry.spell.is_some() {
             if body.per_turn.is_some() {
@@ -463,6 +494,7 @@ fn lowered_subscription(
 
 struct BodyContext<'definitions> {
     scope: ScopeId,
+    payment_result: Option<(String, ReceiptId)>,
     allocator: Allocator,
     card_allocator: &'definitions mut Allocator,
     definitions: &'definitions BTreeMap<String, ast::Number>,
@@ -478,6 +510,15 @@ struct BodyContext<'definitions> {
     reason = "Action families share the ability binding allocator."
 )]
 impl BodyContext<'_> {
+    fn prepare_parameters(&mut self, body: &ast::Body, path: &str) -> Result<(), LoweringError> {
+        for value in body.define.values() {
+            self.number(value, path, &mut BTreeSet::new())?;
+        }
+        self.allocator = Allocator::default();
+        let choice = play::choice_body(body, path)?;
+        self.targets(&body.targets, choice, path)
+    }
+
     fn body(
         &mut self,
         body: &ast::Body,
@@ -498,6 +539,54 @@ impl BodyContext<'_> {
         let mut steps = Vec::new();
         for (index, step) in author_steps.iter().enumerate() {
             let step_path = format!("{path}/{index}");
+            if let ast::Step::If(conditional) = step {
+                let (name, receipt) = self
+                    .payment_result
+                    .as_ref()
+                    .ok_or_else(|| unsupported(&step_path))?;
+                if name != &conditional.cond.paid.receipt {
+                    return Err(unsupported(&step_path));
+                }
+                let condition = Expr::Frozen(Box::new(super::BoolFrozen::PaymentComplete {
+                    receipt: super::PaymentReference::CardPlay {
+                        face: FaceId("base".into()),
+                        receipt: *receipt,
+                    },
+                }));
+                let parent = self.scope;
+                self.scope = self.card_allocator.scope(&step_path)?;
+                let then_body = self.steps(
+                    &conditional.then,
+                    &format!("{step_path}/if/then"),
+                    source,
+                    ability_source,
+                )?;
+                let else_body = if let Some(otherwise) = &conditional.r#else {
+                    self.scope = self.card_allocator.scope(&step_path)?;
+                    Some(self.steps(
+                        otherwise,
+                        &format!("{step_path}/if/else"),
+                        source,
+                        ability_source,
+                    )?)
+                } else {
+                    None
+                };
+                self.scope = parent;
+                let mut located = source.clone();
+                located.author_path = step_path;
+                steps.push(Located {
+                    source: located,
+                    node: Node::Control {
+                        control: super::Control::If {
+                            condition,
+                            then_body,
+                            else_body,
+                        },
+                    },
+                });
+                continue;
+            }
             // The ability entry admits one top-level group; mode bodies reject nested choices.
             if let ast::Step::Choice(choice) = step {
                 steps.push(self.choice(choice, &step_path, source, ability_source)?);
@@ -536,7 +625,7 @@ impl BodyContext<'_> {
         source: &AbilitySource,
     ) -> Result<Action, LoweringError> {
         match step {
-            ast::Step::Choice(_) => Err(unsupported(path)),
+            ast::Step::Choice(_) | ast::Step::If(_) => Err(unsupported(path)),
             ast::Step::Destroy(value) => Ok(Action::Destroy {
                 objects: match value {
                     ast::Destroy::Short(ast::This::This) => numeric::holder(),

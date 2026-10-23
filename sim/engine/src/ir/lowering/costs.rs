@@ -113,7 +113,7 @@ fn condition(
     })))
 }
 
-fn query(
+pub(super) fn query(
     value: &ast::PublicQuery,
     allocator: &mut Allocator,
     path: &str,

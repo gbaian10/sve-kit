@@ -3,6 +3,7 @@ use super::{
     unsupported,
 };
 use crate::game::internal::{search, values::compare};
+use crate::ir::{AbilityOrigin, AbilityQualification, AbilitySource, CostSpec, ObjectOperand};
 use crate::ir::{
     Bool, CostChange, Expr, Int, IntOperation, Nat, NatRead, PlayerRef, Predicate, SelectionView,
     Selector, SourceSpan, ZoneKind,
@@ -38,6 +39,50 @@ pub(super) fn check(game: &Game, card_no: &str, card: &WellFormedCardProgram) ->
             Ok(())
         };
         check().map_err(|error| at_source(error, &face.source))?;
+        if let Some(exchange) = &face.node.exchange {
+            if exchange.source.line == 0
+                || exchange.source.scope.is_empty()
+                || exchange.source.author_path.is_empty()
+            {
+                return Err(at_source(
+                    invalid("incomplete exchange source"),
+                    &exchange.source,
+                ));
+            }
+            if card
+                .card()
+                .abilities
+                .iter()
+                .any(|ability| ability.node.qualification != AbilityQualification::Ordinary)
+            {
+                return Err(unsupported("exchange requires ordinary card play"));
+            }
+            check_source(
+                &exchange.source,
+                card_no,
+                &face.node.face.0,
+                u64::from(exchange.source.line),
+            )
+            .map_err(|error| at_source(error, &exchange.source))?;
+            let CostSpec::Ordered { steps } = &exchange.node.cost else {
+                return Err(unsupported("exchange cost"));
+            };
+            let [step] = steps.as_slice() else {
+                return Err(unsupported("exchange steps"));
+            };
+            if step.instruction.source
+                != (AbilitySource {
+                    holder: ObjectOperand::SourceHolder {},
+                    origin: AbilityOrigin::Printed {
+                        face: face.node.face.clone(),
+                        line: Nat(u64::from(exchange.source.line)),
+                    },
+                    controller: PlayerRef::Controller {},
+                })
+            {
+                return Err(unsupported("exchange instruction source"));
+            }
+        }
         for modifier in &face.node.modifiers {
             let check_modifier = || {
                 if modifier.source.line == 0
@@ -140,18 +185,30 @@ impl Game {
         &self,
         execution: &Execution,
     ) -> Result<i64> {
+        self.internal_card_play_cost_with(execution, None)
+    }
+
+    pub(super) fn internal_card_play_cost_with(
+        &self,
+        execution: &Execution,
+        exchange: Option<&CostChange>,
+    ) -> Result<i64> {
         let holder = &execution.context.source;
         let object = self.object(holder)?;
         if object.zone != "resolution" {
             return Err(unsupported("typed payment zone"));
         }
-        self.internal_quote_card_cost(execution)
+        self.quote_card_cost(execution, exchange)
     }
 
     pub(in crate::game::internal) fn internal_quote_card_cost(
         &self,
         execution: &Execution,
     ) -> Result<i64> {
+        self.quote_card_cost(execution, None)
+    }
+
+    fn quote_card_cost(&self, execution: &Execution, exchange: Option<&CostChange>) -> Result<i64> {
         let holder = &execution.context.source;
         let object = self.object(holder)?;
         if object.state.get("cost").is_some() || !self.state.continuous.is_empty() {
@@ -189,6 +246,21 @@ impl Game {
                     } => base = *amount,
                     _ => return Err(unsupported("play cost change")),
                 }
+            }
+        }
+        if let Some(change) = exchange {
+            match change {
+                CostChange::Set {
+                    amount: Expr::Literal(Int(amount)),
+                } => base = *amount,
+                CostChange::Delta {
+                    amount: Expr::Literal(Int(amount)),
+                } => {
+                    delta = delta
+                        .checked_add(*amount)
+                        .ok_or_else(|| invalid("play cost overflow"))?;
+                }
+                _ => return Err(unsupported("exchange change")),
             }
         }
         let raw = base

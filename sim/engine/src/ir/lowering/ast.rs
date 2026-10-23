@@ -98,6 +98,7 @@ pub(super) struct Body {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum Step {
+    If(Conditional),
     Choice(Choice),
     Draw(Draw),
     Damage(Damage),
@@ -593,6 +594,9 @@ pub(super) enum Follower {
 pub(super) struct PlayCosts {
     pub cost_delta: Option<Value>,
     pub cost_set: Option<Value>,
+    pub optional_cost: Option<OptionalCost>,
+    pub optional_cost_delta: Option<i64>,
+    pub optional_cost_set: Option<i64>,
 }
 
 #[derive(Deserialize)]
@@ -675,4 +679,36 @@ pub(super) struct ChoiceInstead {
 pub(super) enum ModeCondition {
     Spellchain(u64),
     Necro(u64),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct OptionalCost {
+    pub to_cemetery: Option<Material>,
+    pub banish: Option<Material>,
+    pub act: Option<Material>,
+    pub result: Option<String>,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Material {
+    pub sel: PublicQuery,
+    pub n: u64,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Conditional {
+    pub cond: PaidCondition,
+    pub then: Vec<Step>,
+    pub r#else: Option<Vec<Step>>,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct PaidCondition {
+    pub paid: PaidReceipt,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct PaidReceipt {
+    pub receipt: String,
 }
