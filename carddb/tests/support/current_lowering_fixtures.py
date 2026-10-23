@@ -5,13 +5,14 @@ from typing import TYPE_CHECKING
 from pydantic import JsonValue
 
 from sve_carddb.contracts.author_evidence import SourceUse
-from sve_carddb.core.json import canonical
+from sve_carddb.core.json import canonical, object_value
 from sve_carddb.domains.effects.author_current import (
     CardAccepted,
     CardRejected,
     CurrentAuthorSources,
 )
 from sve_carddb.domains.effects.author_expansion import AuthorExpander
+from sve_carddb.domains.effects.author_inputs import AuthorInputError
 from sve_carddb.domains.effects.author_source_hash import source_version
 
 from .author_current_fixtures import REPOSITORY, current_source_fixture
@@ -27,7 +28,6 @@ def current_lowering_inputs(root: Path) -> JsonValue:
     card_id = "c:9c5459446e0254818099800b4208cd96"
     authored = root / "authored"
     file = authored / "rules/author-effects/BP01/000.yaml"
-    file.parent.mkdir(parents=True)
     with fixture.template.copy() as db:
         current = CurrentAuthorSources(
             db,
@@ -45,6 +45,34 @@ def current_lowering_inputs(root: Path) -> JsonValue:
             occurrence=matched.binding.occurrence_key(),
             ability_scope="ability_0",
         )
+        expander = AuthorExpander(REPOSITORY / "dsl")
+        prototype = authored / "rules/effects/BP01.yaml"
+        prototype.parent.mkdir(parents=True)
+        prototype.write_bytes(
+            canonical(
+                {
+                    "format": 1,
+                    "kind": "effect_set",
+                    "cards": {
+                        number: {
+                            "status": "complete",
+                            "abilities": [
+                                {
+                                    "line": 1,
+                                    "kind": "evolve",
+                                    "costs": [{"op": "pp", "amount": 1}],
+                                    "body": {"op": "evolve", "subjects": "self"},
+                                }
+                            ],
+                        }
+                    },
+                }
+            )
+        )
+        switch: dict[str, JsonValue] = {
+            "before": current.selection_input(authored, expander)
+        }
+        file.parent.mkdir(parents=True)
         file.write_bytes(
             canonical(
                 {
@@ -97,9 +125,17 @@ def current_lowering_inputs(root: Path) -> JsonValue:
                 }
             )
         )
-        expander = AuthorExpander(REPOSITORY / "dsl")
+        try:
+            current.selection_input(authored, expander)
+        except AuthorInputError as error:
+            switch["overlap"] = error.diagnostic.reason
+        else:
+            raise AssertionError("synthetic prototype overlap was accepted")
+        prototype.unlink()
         accepted = current.validate(authored, expander)[0]
         assert isinstance(accepted, CardAccepted)
+        switch["after"] = current.selection_input(authored, expander)
+        switch["missing"] = missing_selection(file, authored, current, expander)
         with db.transaction():
             for printing in db.select(
                 "printing", ("id",), where={"region": "jp", "card_no": number}
@@ -114,4 +150,18 @@ def current_lowering_inputs(root: Path) -> JsonValue:
         return {
             "accepted": accepted.lowering_input(),
             "rejected": {"reason": rejected.diagnostic.reason},
+            "switch": switch,
         }
+
+
+def missing_selection(
+    file: Path, authored: Path, current: CurrentAuthorSources, expander: AuthorExpander
+) -> JsonValue:
+    original = file.read_bytes()
+    tree = object_value(expander.schemas.author_tree(original))
+    object_value(object_value(tree["cards"])["BP01-009"])["abilities"] = []
+    file.write_bytes(canonical(tree))
+    try:
+        return current.selection_input(authored, expander)
+    finally:
+        file.write_bytes(original)

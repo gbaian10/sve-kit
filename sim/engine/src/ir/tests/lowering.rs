@@ -6,7 +6,14 @@ use serde_json::{Value, json};
 #[path = "../../../tests/support/expanded.rs"]
 mod expanded;
 
-use std::{path::PathBuf, process::Command, sync::OnceLock};
+use crate::catalog::{Catalog, SelectedEffects};
+use std::{
+    env::temp_dir,
+    fs::{create_dir_all, remove_dir_all, write},
+    path::PathBuf,
+    process::{Command, id},
+    sync::OnceLock,
+};
 
 fn current_inputs() -> &'static Value {
     static CURRENT: OnceLock<Value> = OnceLock::new();
@@ -39,6 +46,57 @@ with TemporaryDirectory() as temporary:
         );
         serde_json::from_slice(&output.stdout).unwrap()
     })
+}
+
+fn selected_catalog(input: &Value) -> crate::Result<SelectedEffects> {
+    Catalog::from_current_selection(
+        r#"{"number":"BP01-009","faces":[{"card_type":"フォロワー","name":"synthetic switch"}]}"#,
+        "format: 1\nkind: keyword_registry\nkeywords: {}\n",
+        input,
+    )
+}
+
+#[test]
+fn batch_switch_selects_current_card_and_removes_its_prototype() {
+    let switch = &current_inputs()["switch"];
+    let before = selected_catalog(&switch["before"]).unwrap();
+    assert_eq!(before.prototypes.authored_count(), 1);
+    assert!(before.current.is_empty());
+    let after = selected_catalog(&switch["after"]).unwrap();
+    assert_eq!(after.prototypes.authored_count(), 0);
+    after.prototypes.program("BP01-009").unwrap_err();
+    let current = &after.current["BP01-009"];
+    assert_eq!(current.program.card().abilities.len(), 1);
+    assert_eq!(current.card_id, "c:9c5459446e0254818099800b4208cd96");
+}
+
+#[test]
+fn batch_switch_rejects_missing_abilities_and_overlapping_versions() {
+    let switch = &current_inputs()["switch"];
+    assert_eq!(switch["overlap"], "prototype_author_overlap");
+    let missing = selected_catalog(&switch["missing"]).unwrap_err();
+    assert!(
+        missing
+            .to_string()
+            .contains("source_ability_closure_mismatch")
+    );
+    let mut overlap = switch["after"].clone();
+    overlap["documents"] = switch["before"]["documents"].clone();
+    selected_catalog(&overlap).unwrap_err();
+    let mut missing_body = switch["after"].clone();
+    missing_body["authors"][0]["input"]["tree"]["cards"]["BP01-009"]["abilities"] = json!([]);
+    missing_body["authors"][0]["input"]["sidecar"] = json!([]);
+    selected_catalog(&missing_body).unwrap_err();
+    assert_legacy_loader_refuses_current_inventory();
+}
+
+fn assert_legacy_loader_refuses_current_inventory() {
+    let root = temp_dir().join(format!("sve-current-selection-{}", id()));
+    create_dir_all(root.join("rules")).unwrap();
+    write(root.join("rules/effects-index.yaml"), "{}").unwrap();
+    let rejected = Catalog::load(&root.join("absent.jsonl"), &root).unwrap_err();
+    assert!(rejected.to_string().contains("from_current_selection"));
+    remove_dir_all(root).unwrap();
 }
 
 fn assert_current_sources(admitted: &CurrentCardProgram, input: &Value, face: &str) {

@@ -17,9 +17,11 @@ use serde_json::{Value, json};
 use crate::{EngineFailure, Result, invalid};
 
 mod rule_bindings;
+mod selection;
 mod semantics;
 
 pub use rule_bindings::{EngineIdentityInput, FaceIdentity};
+pub use selection::SelectedEffects;
 
 /// Card facts from the sole versioned card database snapshot.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -61,6 +63,17 @@ impl Catalog {
         authored: &Path,
         identity: &EngineIdentityInput,
     ) -> Result<Self> {
+        for area in [
+            "rules/effects-index.yaml",
+            "rules/author-effects",
+            "rules/effect-bodies",
+        ] {
+            if authored.join(area).try_exists().map_err(invalid)? {
+                return Err(EngineFailure::Unsupported(
+                    "current author inventory requires Catalog::from_current_selection".into(),
+                ));
+            }
+        }
         let mut paths: Vec<_> = read_dir(authored.join("rules/effects"))
             .map_err(invalid)?
             .map(|entry| entry.map(|entry| entry.path()).map_err(invalid))
@@ -83,6 +96,19 @@ impl Catalog {
             &read_to_string(authored.join("rules/engine/index.yaml")).map_err(invalid)?,
             identity,
         )
+    }
+
+    /// Consume `CurrentAuthorSources.selection_input()` from the trusted Python reader.
+    ///
+    /// # Errors
+    /// Rejects the entire selection on any rejected card, overlap or D0 failure;
+    /// callers never receive a partial selection or an implicit prototype fallback.
+    pub fn from_current_selection(
+        snapshot: &str,
+        keywords: &str,
+        input: &Value,
+    ) -> Result<SelectedEffects> {
+        selection::select(snapshot, keywords, input)
     }
 
     /// Resolves settings against caller-supplied bytes without filesystem access.

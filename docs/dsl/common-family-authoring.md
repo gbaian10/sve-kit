@@ -171,3 +171,22 @@ compiled 須含完整 expanded 樹與 typed IR 的良構證據，executed 須指
 
 每張原型最後必須遷移或保留明確拒絕清單；空能力卡核對一般規則責任，不假算 executed。
 移除 astra/1 前，索引、loader、測試與所有引用都須確認不再需要它；Git 中的來源與舊判讀不刪歷史。
+
+### 逐批選用入口
+
+每張完整卡的作者檔、`effects-index` 記錄與原型條目在同一個 PR 切換；
+不能先刪原型、再等另一個 PR 補作者卡或索引。切換回退用正常 revert，保留來源歷史。
+
+`CurrentAuthorSources.selection_input()` 從同一次 `load_author_set()` 的完整輸入清單，
+沿用索引閉包、永久身分重疊與 current 完整能力驗證，交接原型文件及每張作者卡的
+accepted／rejected 結果。它不略過拒絕卡，也不把拒絕卡換回原型。
+Rust `Catalog::from_current_selection()` 消費這份內部交接：原型沿用既有 Catalog，
+作者卡逐張經 `ExpandedLowerer::lower_current()` 的完整能力對帳與整樹 lowering。
+任一卡拒絕、重疊或 lowering 失敗都拒絕整次選用，不回傳半份結果。
+
+成功結果 `SelectedEffects` 分別保留原型 Catalog 與完整 current D0 候選；
+這不是 D1 runtime 准入，也不讓永久 owner 自動進入舊原型執行器。
+尚未提供 current 來源上下文的 `Catalog::load()`／`load_with_identity()`，
+遇到作者索引、作者卡或 companion 目錄即明確拒絕，不再只掃原型目錄而漏載已切換卡。
+`from_documents()` 仍是 caller 明示提供原型 bytes 的入口，不能用它代替完整作者目錄選用。
+這些介面不新增公開 wire、快照欄位、capability 或用途資格。
