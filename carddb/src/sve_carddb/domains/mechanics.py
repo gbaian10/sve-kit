@@ -23,6 +23,8 @@ from sve_carddb.domains.mechanic_coverage import (
     project_current,
     store_evidence,
 )
+from sve_carddb.domains.mechanic_fields import ADAPTER as FIELDS_ADAPTER
+from sve_carddb.domains.mechanic_fields import apply as apply_fields
 from sve_carddb.domains.mechanic_grants import ADAPTER as GRANTS_ADAPTER
 from sve_carddb.domains.mechanic_grants import apply as apply_grants
 from sve_carddb.domains.mechanic_references import ADAPTER as REFERENCES_ADAPTER
@@ -120,6 +122,7 @@ class Inputs:
             "registry_sha256": digest(self.exact),
             "grants_adapter": GRANTS_ADAPTER,
             "references_adapter": REFERENCES_ADAPTER,
+            "fields_adapter": FIELDS_ADAPTER,
             "grants_batch_sha256": digest(
                 canonical(list[JsonValue](sorted(FIRST_BATCH_CARDS)))
             ),
@@ -448,6 +451,7 @@ def apply(  # ruff: ignore[complex-structure,too-many-locals] -- one owner-check
     )
     grants = apply_grants(db, inputs, settings, hashes)
     references = apply_references(db, inputs, settings, hashes)
+    fields = apply_fields(db, inputs, settings, hashes, version)
     insert_raw_sources(db, (use.source for use in settings.sources.uses))
     tags = {str(row.values["id"]): row.values for row in db.rows("card_mechanic")}
     _suppress(db, inputs.registry.suppressions, tags, registry_source_id, reasons)
@@ -459,6 +463,7 @@ def apply(  # ruff: ignore[complex-structure,too-many-locals] -- one owner-check
                 version,
                 str(grants["producer_version"]),
                 str(references["producer_version"]),
+                str(fields["producer_version"]),
             }
         ),
     )
@@ -468,11 +473,15 @@ def apply(  # ruff: ignore[complex-structure,too-many-locals] -- one owner-check
         "producer_version": version,
         "grants": grants,
         "references": references,
+        "fields": fields,
         "keywords": len(keywords),
         "positive_tags": len(tags),
         "projection_rows": len(db.rows("mechanic_projection")),
         "coverage_rows": len(db.rows("card_mechanic_coverage")),
-        "complete_cards": 0,
+        "complete_cards": sum(
+            row.values["complete_all"] is True
+            for row in db.rows("card_mechanic_coverage")
+        ),
         "reasons": dict[str, JsonValue](sorted(reasons.items())),
     }
 

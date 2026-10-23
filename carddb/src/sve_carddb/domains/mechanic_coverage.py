@@ -14,7 +14,8 @@ if TYPE_CHECKING:
 
     from sve_carddb.build import Database, Value
 
-RELATIONS = ("has", "grants", "refers", "counts")
+type Relation = Literal["has", "grants", "refers", "counts"]
+RELATIONS: tuple[Relation, ...] = ("has", "grants", "refers", "counts")
 type FieldKey = tuple[str, str | None, str, int | None, str]
 
 
@@ -23,7 +24,7 @@ class FieldCheck(RecordData, frozen=True):
     revision_id: Text
     field: Literal["effect", "section"]
     ordinal: int | None
-    relation: Literal["has", "grants", "refers", "counts"]
+    relation: Relation
     whole_field: bool
 
     @model_validator(mode="after")

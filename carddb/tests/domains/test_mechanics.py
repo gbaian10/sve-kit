@@ -197,6 +197,63 @@ def case(
         yield db, inputs, settings, fixture.card.id
 
 
+def test_first_batch_declarations_and_empty_back_prove_all_keywords(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    with case(
+        tmp_path, monkeypatch, "【合成甲】【合成乙】", back="", first_batch=True
+    ) as (db, inputs, settings, cid):
+        support = db.rows("card_engine_support")
+        with db.transaction():
+            report = mechanics.apply(db, inputs, settings)
+        coverage = db.rows("card_mechanic_coverage")
+        assert len(coverage) == 1
+        assert coverage[0].values == {
+            "card_id": cid,
+            "scope": "shared",
+            "complete_all": True,
+            "complete_mode": "include",
+            "complete_keyword_ids": Json([]),
+            "partial_mode": "include",
+            "partial_keyword_ids": Json([]),
+        }
+        assert {row.values["keyword_id"] for row in db.rows("mechanic_projection")} == {
+            "kw:ward",
+            "kw:storm",
+        }
+        assert all(
+            row.values["relations"] == Json(["has"])
+            for row in db.rows("mechanic_projection")
+        )
+        assert report["complete_cards"] == 1
+        assert db.rows("card_engine_support") == support
+
+
+def test_first_batch_missing_current_back_prevents_complete(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    with case(
+        tmp_path, monkeypatch, "【合成甲】", back="【合成乙】", first_batch=True
+    ) as (db, inputs, settings, _):
+        with db.transaction():
+            back = db.select(
+                "face_current",
+                db.columns("face_current"),
+                where={"revision_id": "back-revision"},
+            )[0].values
+            db.delete("face_current", {"face_id": back["face_id"], "region": "jp"})
+            report = mechanics.apply(db, inputs, settings)
+        coverage = db.rows("card_mechanic_coverage")[0].values
+        assert coverage["complete_all"] is False
+        assert coverage["complete_keyword_ids"] == Json([])
+        assert coverage["partial_mode"] == "exclude"
+        assert coverage["partial_keyword_ids"] == Json([])
+        assert report["complete_cards"] == 0
+        projection = db.rows("mechanic_projection")
+        assert len(projection) == 1
+        assert projection[0].values["keyword_id"] == "kw:ward"
+
+
 def test_other_card_grant_merges_with_self_declaration_but_stays_partial(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -447,7 +504,12 @@ def test_duplicate_positive_evidence_deduplicates_and_stays_partial(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    with case(tmp_path, monkeypatch, "【合成甲】") as (db, inputs, settings, cid):
+    with case(tmp_path, monkeypatch, "【合成甲】", first_batch=True) as (
+        db,
+        inputs,
+        settings,
+        cid,
+    ):
         before = mechanics.source_bundles(db)[cid]
         with db.transaction():
             db.insert(
@@ -464,6 +526,7 @@ def test_duplicate_positive_evidence_deduplicates_and_stays_partial(
         assert mechanics.source_bundles(db)[cid] != before
         with db.transaction():
             mechanics.apply(db, inputs, settings)
+            assert db.rows("card_mechanic_coverage")[0].values["complete_all"] is False
             clear_projection(db)
             tag = db.rows("card_mechanic")[0].values
             db.insert(
