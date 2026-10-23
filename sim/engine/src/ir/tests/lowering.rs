@@ -1,5 +1,5 @@
 use super::*;
-use crate::ir::lowering::{ExpandedLowerer, validator};
+use crate::ir::lowering::{CurrentCardProgram, ExpandedLowerer, validator};
 use alloc::collections::BTreeMap;
 use serde_json::{Value, json};
 
@@ -41,6 +41,41 @@ with TemporaryDirectory() as temporary:
     })
 }
 
+fn assert_current_sources(admitted: &CurrentCardProgram, input: &Value, face: &str) {
+    let evidence = admitted
+        .source_at("/cards/BP01-009/abilities/0/evolve/cost/pp")
+        .unwrap();
+    assert_eq!(evidence.source.card_id, admitted.card_id);
+    assert_eq!(evidence.source.face, face);
+    assert_eq!(evidence.source.field, "effect");
+    assert_eq!(evidence.source.section, None);
+    assert_eq!(evidence.source.line, 1);
+    assert_eq!(
+        evidence.source.fragment.as_deref(),
+        evidence.source_use["binding_id"].as_str()
+    );
+    assert_eq!(
+        evidence.source.owner,
+        evidence.source_use["occurrence"]["owner"].to_string()
+    );
+    assert_eq!(evidence.input_hash, input["sidecar"][0]["input_hash"]);
+    assert_eq!(
+        evidence.source_input_hash,
+        input["sidecar"][0]["source_input_hash"]
+    );
+    assert!(admitted.source_at("/cards/BP01-009/abilities/01").is_none());
+    let requirements = Requirements::derive(&Located {
+        source: admitted.program.card().abilities[0].source.clone(),
+        node: admitted.program.card().clone(),
+    });
+    for requirement in requirements.required {
+        for location in requirement.locations {
+            let checked = admitted.source_at(&location.source.author_path).unwrap();
+            assert_eq!(checked.source, location.source);
+        }
+    }
+}
+
 #[test]
 fn current_reader_hands_permanent_owner_and_token_selection_to_lowering() {
     let input = &current_inputs()["accepted"];
@@ -52,6 +87,8 @@ fn current_reader_hands_permanent_owner_and_token_selection_to_lowering() {
     assert_eq!(admitted.card_no, "BP01-009");
     assert_eq!(admitted.source_version, input["source_version"]);
     assert_eq!(admitted.source_payload["token_links"], json!([]));
+    assert_eq!(admitted.expanded, input["tree"]);
+    assert_current_sources(&admitted, input, face);
     let ability = &admitted.program.card().abilities[0];
     assert_eq!(ability.source.card_id, admitted.card_id);
     assert_eq!(ability.source.card_no, admitted.card_no);
@@ -70,7 +107,6 @@ fn current_reader_hands_permanent_owner_and_token_selection_to_lowering() {
     assert!(
         matches!(origin.as_ref(), AbilityOrigin::Printed { face: owner, .. } if owner.0 == face)
     );
-
     let mut container = input.clone();
     let abilities = container["tree"]["cards"]["BP01-009"]
         .as_object_mut()
@@ -78,6 +114,8 @@ fn current_reader_hands_permanent_owner_and_token_selection_to_lowering() {
         .remove("abilities")
         .unwrap();
     container["tree"]["cards"]["BP01-009"]["faces"] = json!({face:{"abilities":abilities}});
+    container["sidecar"][0]["path"] =
+        json!(["cards", "BP01-009", "faces", face, "abilities", 0_u64]);
     let nested = lowerer.lower_current(&container).unwrap();
     assert_eq!(nested.program.card().abilities[0].source.face, face);
     assert!(
@@ -114,6 +152,60 @@ fn provisional_current_printing_and_unresolved_handoffs_cannot_lower() {
     assert_eq!(
         lowerer.lower_current(&input).unwrap_err().code,
         "unsupported_token_selection"
+    );
+    for pointer in [
+        "/sidecar/0/source_proof",
+        "/sidecar/0/source_input_hash",
+        "/sidecar/0/input_hash",
+        "/sidecar/0/source_use/occurrence/owner/revision_id",
+        "/sidecar/0/path/1",
+        "/tree/cards/BP01-009/abilities/0/sources/0/occurrence/owner/revision_id",
+        "/tree/cards/BP01-009/abilities/0/sources/0/occurrence/line_ordinal",
+    ] {
+        let mut mismatched = inputs["accepted"].clone();
+        *mismatched.pointer_mut(pointer).unwrap() = json!("mismatch");
+        assert_eq!(
+            lowerer.lower_current(&mismatched).unwrap_err().code,
+            "invalid_current_source"
+        );
+    }
+    let mut other_hash = inputs["accepted"].clone();
+    other_hash["sidecar"][0]["source_input_hash"] = json!(format!("sha256:{}", "0".repeat(64)));
+    assert_eq!(
+        lowerer.lower_current(&other_hash).unwrap_err().code,
+        "invalid_current_source"
+    );
+    let mut zero_line = inputs["accepted"].clone();
+    zero_line["tree"]["cards"]["BP01-009"]["abilities"][0]["line"] = json!(0_u32);
+    for use_path in [
+        "/tree/cards/BP01-009/abilities/0/sources/0/occurrence",
+        "/sidecar/0/source_use/occurrence",
+    ] {
+        zero_line
+            .pointer_mut(use_path)
+            .unwrap()
+            .as_object_mut()
+            .unwrap()
+            .remove("line_ordinal");
+    }
+    assert_eq!(
+        lowerer.lower_current(&zero_line).unwrap_err().code,
+        "invalid_current_source"
+    );
+    let mut missing = inputs["accepted"].clone();
+    missing["sidecar"] = json!([]);
+    assert_eq!(
+        lowerer.lower_current(&missing).unwrap_err().code,
+        "invalid_current_source"
+    );
+    let mut duplicate = inputs["accepted"].clone();
+    duplicate["sidecar"]
+        .as_array_mut()
+        .unwrap()
+        .push(inputs["accepted"]["sidecar"][0].clone());
+    assert_eq!(
+        lowerer.lower_current(&duplicate).unwrap_err().code,
+        "invalid_current_source"
     );
 }
 

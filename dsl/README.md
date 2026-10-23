@@ -176,7 +176,7 @@ arithmetic. Canonical ability comparison removes only top-level use locations
 | `AuthorExpander.expand_sources` | Reconstructs supplied source candidates and validates supported role/operand mappings; successful evidence has `source_proof=derived_self_consistent` |
 | `load_author_set` | Reads every file in the fixed author/body/prototype areas and validates two-way index closure; companion versions and keys are checked across shards |
 | `CurrentAuthorSources.validate(authored_root, expander)` | Loads the complete inventory from disk and returns one accepted candidate or rejection per indexed card/scope; accepted evidence has `source_proof=current_source_checked` |
-| `CardAccepted.lowering_input()` → Rust `ExpandedLowerer.lower_current` | Internal handoff of the accepted tree, permanent CardId, current face/revision mapping and explicit token links; returns well-formed candidate IR with permanent source owners and preserves the source payload separately |
+| `CardAccepted.lowering_input()` → Rust `ExpandedLowerer.lower_current` | Internal handoff of the accepted tree, current-checked source sidecar, permanent CardId, current face/revision mapping and explicit token links; returns candidate IR, the expanded tree and a separate checked source sidecar. `CurrentCardProgram.source_at(author_path)` resolves expanded descendants and IR instruction paths to permanent owners, original coordinates and checked SourceUse evidence |
 | `AuthorSchemas.expanded` | Validates the complete tree against `$defs/expanded` and independently rejects decoded `ParamRef` and `GeneratedBy` nodes |
 
 No evidence state means qualified or executable. The current boundary loads the

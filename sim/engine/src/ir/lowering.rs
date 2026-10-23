@@ -21,7 +21,7 @@ use super::{
     RecipientSet, ScopeId, SelectionView, Selector, SourceSpan, StepwiseMode, TextQuantifier,
     TriggerAggregation, TriggerCondition, TriggerSpec, WellFormedCardProgram, ZoneKind,
 };
-pub use current::CurrentCardProgram;
+pub use current::{CurrentCardProgram, CurrentSourceEvidence};
 
 use alloc::collections::{BTreeMap, BTreeSet};
 use serde::de::DeserializeOwned;
