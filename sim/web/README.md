@@ -44,7 +44,7 @@ root and the badge switches roots by hand. Only two derived flags reach browser 
 | `bun run check:all`    | Everything below, in order; run it before pushing         |
 | `bun run format:check` | `bun fmt --check` (`bun run format` rewrites)             |
 | `bun run lint:all`     | ESLint (`lint:js`) and Stylelint (`lint:css`)             |
-| `bun run typecheck`    | `bun check`, Bun's built-in TypeScript checker            |
+| `bun run typecheck`    | `bun check --threads=4`, Bun's built-in type checker      |
 | `bun run test:all`     | Vitest, including the ESLint and Stylelint rule fixtures  |
 | `bun run build:all`    | Production build into `dist/`                             |
 | `bun run shots`        | Manual: real-browser screenshots and geometry (see below) |
@@ -61,8 +61,7 @@ The pre-commit hooks run bun fmt and Stylelint on changed files. bun fmt reads t
 `bunfig.toml`; `.prettierrc.mjs` only serves the editor's Prettier extension, so change both
 together. The pre-push hook runs ESLint over all of sim/web, as CI does: type-aware rules load the
 whole TypeScript project however few files they check. It also runs the `typecheck` script that CI
-shares, which caps `UV_THREADPOOL_SIZE`, libuv's pool size, that `bun check` uses as its thread
-count. Vitest is a
+shares, which uses `--threads=4` to limit the thread count for `bun check`. Vitest is a
 manual hook (`pre-commit run --hook-stage manual web-test`); CI runs the steps of `check:all` on
 every web change.
 

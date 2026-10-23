@@ -9,7 +9,7 @@
     "dev:lan": "SVE_DEV_HTTPS=1 vite --host 0.0.0.0",
     "build:all": "vite build",
     "preview": "vite preview",
-    "typecheck": "UV_THREADPOOL_SIZE=4 bun check",
+    "typecheck": "bun check --threads=4",
     "lint:all": "bun run lint:js && bun run lint:css",
     "lint:js": "eslint --max-warnings=0 --no-warn-ignored --cache --cache-strategy content --cache-location node_modules/.cache/eslint/cache.json",
     "lint:css": "stylelint \"src/**/*.css\"",
