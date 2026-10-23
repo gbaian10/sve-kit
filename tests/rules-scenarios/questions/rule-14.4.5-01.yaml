@@ -91,7 +91,7 @@ verified_by:
     method: qa
     note: 契約 10 節第 14 條；兩局面只刪 after-decision-3／view P2 的 awaiting.choices，其餘欄位與 omniscient 條目未動（git diff 三個 hunk＝這兩處＋我改的 [fable] A）；規則結論沿用 xverify-1（Q1481、14.4.5.1.5、4.15.2）；見 recheck-3/result.md 第 3 節
 scenarios:
-  - name: '[astra] 第一次執行抽牌，第二次翻到治療'
+  - name: "[astra] 第一次執行抽牌，第二次翻到治療"
     setup:
       turn:
         active: P1
@@ -284,7 +284,7 @@ scenarios:
         trigger_icon: heal
         source: 官方卡圖右上角圖示（Opus 確認，card-facts-verified.md）
         verified: true
-  - name: '[astra] 第一次不執行，第二次仍翻到抽牌'
+  - name: "[astra] 第一次不執行，第二次仍翻到抽牌"
     setup:
       turn:
         active: P1
@@ -475,7 +475,7 @@ scenarios:
         trigger_icon: heal
         source: 官方卡圖右上角圖示（Opus 確認，card-facts-verified.md）
         verified: true
-  - name: '[fable] A 第1次揭露ドロートリガー、執行 → 抽到 a4 → 第2次看到 a5'
+  - name: "[fable] A 第1次揭露ドロートリガー、執行 → 抽到 a4 → 第2次看到 a5"
     card_facts:
       CP03-016:
         trigger_icon: draw
@@ -668,8 +668,8 @@ scenarios:
             source: a1
             target: P2.leader
             amount: 3
-  - name: '[fable] B 第1次揭露ドロートリガー、不執行 → a3 放底 → 第2次看到 a4 → 也放底'
-    inherit: '[fable] A 第1次揭露ドロートリガー、執行 → 抽到 a4 → 第2次看到 a5'
+  - name: "[fable] B 第1次揭露ドロートリガー、不執行 → a3 放底 → 第2次看到 a4 → 也放底"
+    inherit: "[fable] A 第1次揭露ドロートリガー、執行 → 抽到 a4 → 第2次看到 a5"
     decisions:
       - n: 1
         by: P1
@@ -753,8 +753,8 @@ scenarios:
         outcome: resolved
         assert:
           P2.leader.life: 17
-  - name: '[fable] C 對照：職業基準牌組 → 不看圖示、沒有決定、兩張直接放底（14.4.5.1.2）'
-    inherit: '[fable] A 第1次揭露ドロートリガー、執行 → 抽到 a4 → 第2次看到 a5'
+  - name: "[fable] C 對照：職業基準牌組 → 不看圖示、沒有決定、兩張直接放底（14.4.5.1.2）"
+    inherit: "[fable] A 第1次揭露ドロートリガー、執行 → 抽到 a4 → 第2次看到 a5"
     setup:
       players:
         P1:

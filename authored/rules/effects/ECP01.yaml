@@ -233,7 +233,7 @@ cards:
         event: race
         subject: self
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -316,7 +316,7 @@ cards:
         event: enter
         subject: self
         targets:
-          - key: '1'
+          - key: "1"
             select:
               zone: evolve_deck
               side: self
@@ -361,7 +361,7 @@ cards:
               zone: field
               name: ヴィブロス
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -384,7 +384,7 @@ cards:
         event: enter
         subject: self
         cost_selections:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: hand
@@ -433,7 +433,7 @@ cards:
         event: enter
         subject: self
         targets:
-          - key: '1'
+          - key: "1"
             select:
               zone: field
               side: opponent
@@ -470,7 +470,7 @@ cards:
         event: enter
         subject: self
         cost_selections:
-          - key: '1'
+          - key: "1"
             select:
               zone: hand
               side: self
@@ -512,7 +512,7 @@ cards:
                 subjects: target.1.leader
                 amount: 2
         targets:
-          - key: '1'
+          - key: "1"
             select:
               zone: field
               side: opponent

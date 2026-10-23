@@ -93,7 +93,7 @@ cards:
                 op: draw
                 count: 1
         targets:
-          - key: '1'
+          - key: "1"
             select:
               zone: field
               side: opponent
@@ -121,7 +121,7 @@ cards:
               count: 1
               to: ex
         targets:
-          - key: '1'
+          - key: "1"
             select:
               zone: field
               side: opponent
@@ -186,7 +186,7 @@ cards:
         event: enter
         subject: self
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -269,7 +269,7 @@ cards:
             - op: draw
               count: 1
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: field
@@ -301,7 +301,7 @@ cards:
             - read: self.is_active
             - read: event.effect_damage
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -324,7 +324,7 @@ cards:
         event: enter
         subject: self
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: field
@@ -352,7 +352,7 @@ cards:
           other: true
         retain_event: true
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -419,7 +419,7 @@ cards:
               count: 1
         section: 0
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -427,7 +427,7 @@ cards:
             min: 1
             max: 1
         cost_selections:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: field
@@ -529,7 +529,7 @@ cards:
                   - op: recover_pp
                     amount: 1
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -560,7 +560,7 @@ cards:
                 subjects: target.1.leader
                 amount: 2
         targets:
-          - key: '1'
+          - key: "1"
             select:
               zone: field
               side: opponent
@@ -669,7 +669,7 @@ cards:
                       to: deck
                       position: bottom
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -800,7 +800,7 @@ cards:
           subjects: target.1
           to: field
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: cemetery
@@ -865,7 +865,7 @@ cards:
           other: true
         retain_event: true
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -959,7 +959,7 @@ cards:
           subjects: target.1
           to: field
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: cemetery

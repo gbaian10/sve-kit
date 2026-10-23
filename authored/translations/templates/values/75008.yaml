@@ -10,11 +10,11 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: '{'
+            text: "{"
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}從下列抉擇'
+            text: "}從下列抉擇"
           - kind: Form
             form_id: quantity.choice_mode_count.placeholder
             args:
@@ -61,7 +61,7 @@ records:
           - kind: LeafRef
             slot: leaf_15
           - kind: Literal
-            text: '}+'
+            text: "}+"
           - kind: LeafRef
             slot: leaf_16
           - kind: Literal

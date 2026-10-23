@@ -5,7 +5,16 @@ sources:
 id: rule-3.2.5-01
 kind: rule
 must_pass: true
-mechanisms: [規則卡（EP／SEP）, 3.2.5, 6.2.1.10, EP 是整場共用的資源、不每回合補回, 進化與食事共用同一組 EP, 12.2.3, 14.2.2.4, 7.2 開始階段不補 EP, 回合交替]
+mechanisms:
+  - 規則卡（EP／SEP）
+  - 3.2.5
+  - 6.2.1.10
+  - EP 是整場共用的資源、不每回合補回
+  - 進化與食事共用同一組 EP
+  - 12.2.3
+  - 14.2.2.4
+  - 7.2 開始階段不補 EP
+  - 回合交替
 cards: [ECP01-001, ECP01-002, CP01-085, CSD01-T01, BP01-173, BP01-176]
 why: >-
   規則卡『レジェンドレース VSスペシャルウィーク』（CSD01-T01，種類 EP）寫的是規則：「バトル開始時、後攻プレイヤーはEPを3つ持つ」「自分が{進化}か{食事}のコストを払うとき、表向きのEPを1つ裏向きにすることで、1PPを払える」。
@@ -44,49 +53,66 @@ verified_by:
 scenarios:
   - name: A 後攻 P2 用 1 EP 食事 → 跨回合 EP 不補回 → 下回合再用 1 EP 進化另一隻
     setup:
-      turn: {active: P2, first_player: P1, elapsed_turns: {P1: 2, P2: 2}, phase: main}
+      turn: { active: P2, first_player: P1, elapsed_turns: { P1: 2, P2: 2 }, phase: main }
       history: none
       players:
         P1:
           construction: class
-          leader: {class: ロイヤル, life: 20}
-          pp: {current: 0, max: 2}
+          leader: { class: ロイヤル, life: 20 }
+          pp: { current: 0, max: 2 }
           zones:
             field:
-              - {id: b1, card: BP01-173}
+              - { id: b1, card: BP01-173 }
             hand:
-              - {filler: 3}
+              - { filler: 3 }
             deck:
-              - {id: x1, card: BP01-176}
-              - {filler: 19}
+              - { id: x1, card: BP01-176 }
+              - { filler: 19 }
         P2:
           construction: title
           title: ウマ娘 プリティーダービー
-          leader: {class: エルフ, life: 20}
-          pp: {current: 0, max: 2}
+          leader: { class: エルフ, life: 20 }
+          pp: { current: 0, max: 2 }
           ep: 3
           sep: 1
           zones:
             field:
-              - {id: a1, card: ECP01-001}         # ホッコータルマエ（進化 コスト1、食事 コスト1）
-              - {id: a2, card: ECP01-001}
+              - { id: a1, card: ECP01-001 } # ホッコータルマエ（進化 コスト1、食事 コスト1）
+              - { id: a2, card: ECP01-001 }
             evolve_deck:
-              - {id: e1, card: ECP01-002}
-              - {id: n1, card: CP01-085}
+              - { id: e1, card: ECP01-002 }
+              - { id: n1, card: CP01-085 }
             hand:
-              - {filler: 3}
+              - { filler: 3 }
             deck:
-              - {id: d1, card: BP01-173}
-              - {id: d2, card: BP01-176}
-              - {filler: 18}
+              - { id: d1, card: BP01-173 }
+              - { id: d2, card: BP01-176 }
+              - { filler: 18 }
     decisions:
-      - {n: 1, by: P2, at: main, do: activate, ability: {source: a1, line: 3}, costs: {1: [n1]}, pay: {pp: 0, ep: 1}}
-      - {n: 2, by: P2, at: main, do: end-phase}
-      - {n: 3, by: P1, at: quick, do: pass}
-      - {n: 4, by: P1, at: main, do: end-phase}
-      - {n: 5, by: P2, at: quick, do: pass}
-      - {n: 6, by: P2, at: main, do: evolve, source: a2, ability: {source: a2, line: 2}, evolve_card: e1, pay: {pp: 0, ep: 1, sep: 0}}
-      - {n: 7, by: P2, at: check-timing, do: choose-pending, pending: {ability: {source: a2, card: ECP01-002, line: 1}}}
+      - n: 1
+        by: P2
+        at: main
+        do: activate
+        ability: { source: a1, line: 3 }
+        costs: { 1: [n1] }
+        pay: { pp: 0, ep: 1 }
+      - { n: 2, by: P2, at: main, do: end-phase }
+      - { n: 3, by: P1, at: quick, do: pass }
+      - { n: 4, by: P1, at: main, do: end-phase }
+      - { n: 5, by: P2, at: quick, do: pass }
+      - n: 6
+        by: P2
+        at: main
+        do: evolve
+        source: a2
+        ability: { source: a2, line: 2 }
+        evolve_card: e1
+        pay: { pp: 0, ep: 1, sep: 0 }
+      - n: 7
+        by: P2
+        at: check-timing
+        do: choose-pending
+        pending: { ability: { source: a2, card: ECP01-002, line: 1 } }
     random: {}
     expected:
       - at: after-decision-1
@@ -96,67 +122,78 @@ scenarios:
           P2.pp.current: 0
           P2.ep: 2
           P2.race: [n1]
-          P2.field.a1: {links: {出走: [n1]}}
-          semantic_state.counters_this_turn: {P2.evolve_played: 1}
+          P2.field.a1: { links: { 出走: [n1] } }
+          semantic_state.counters_this_turn: { P2.evolve_played: 1 }
       - at: after-decision-5
         view: omniscient
         outcome: resolved
         assert:
-          turn: {active: P2, phase: main}
-          turn.elapsed_turns: {P1: 3, P2: 3}
-          P2.pp: {current: 3, max: 3}
+          turn: { active: P2, phase: main }
+          turn.elapsed_turns: { P1: 3, P2: 3 }
+          P2.pp: { current: 3, max: 3 }
           P2.ep: 2
           P2.sep: 1
           P2.hand: [d1, filler: 3]
           P1.ep: 0
-          semantic_state.counters_this_turn: {P2.evolve_played: 0}
+          semantic_state.counters_this_turn: { P2.evolve_played: 0 }
         events:
-          - {kind: 引く, player: P1, object: x1}
-          - {kind: 引く, player: P2, object: d1}
+          - { kind: 引く, player: P1, object: x1 }
+          - { kind: 引く, player: P2, object: d1 }
       - at: after-decision-7
         view: omniscient
         outcome: resolved
         assert:
           P2.pp.current: 3
           P2.ep: 1
-          P2.field.a2: {evolved: true, evolved_with: e1}
+          P2.field.a2: { evolved: true, evolved_with: e1 }
           P2.hand: [d1, d2, filler: 3]
 
   - name: B PP 0、EP 1 → 進化的 1 PP 費用全部由 EP 代付
     setup:
-      turn: {active: P2, first_player: P1, elapsed_turns: {P1: 3, P2: 3}, phase: main}
+      turn: { active: P2, first_player: P1, elapsed_turns: { P1: 3, P2: 3 }, phase: main }
       history: none
       players:
         P1:
           construction: class
-          leader: {class: ロイヤル, life: 20}
-          pp: {current: 0, max: 3}
+          leader: { class: ロイヤル, life: 20 }
+          pp: { current: 0, max: 3 }
           zones:
             field:
-              - {id: b1, card: BP01-173}
+              - { id: b1, card: BP01-173 }
             hand:
-              - {filler: 3}
+              - { filler: 3 }
             deck:
-              - {filler: 20}
+              - { filler: 20 }
         P2:
           construction: title
           title: ウマ娘 プリティーダービー
-          leader: {class: エルフ, life: 20}
-          pp: {current: 0, max: 3}
+          leader: { class: エルフ, life: 20 }
+          pp: { current: 0, max: 3 }
           ep: 1
           zones:
             field:
-              - {id: a2, card: ECP01-001}
+              - { id: a2, card: ECP01-001 }
             evolve_deck:
-              - {id: e1, card: ECP01-002}
+              - { id: e1, card: ECP01-002 }
             hand:
-              - {filler: 3}
+              - { filler: 3 }
             deck:
-              - {id: d2, card: BP01-176}
-              - {filler: 19}
+              - { id: d2, card: BP01-176 }
+              - { filler: 19 }
     decisions:
-      - {n: 1, by: P2, at: main, do: evolve, source: a2, ability: {source: a2, line: 2}, evolve_card: e1, pay: {pp: 0, ep: 1, sep: 0}}
-      - {n: 2, by: P2, at: check-timing, do: choose-pending, pending: {ability: {source: a2, card: ECP01-002, line: 1}}}
+      - n: 1
+        by: P2
+        at: main
+        do: evolve
+        source: a2
+        ability: { source: a2, line: 2 }
+        evolve_card: e1
+        pay: { pp: 0, ep: 1, sep: 0 }
+      - n: 2
+        by: P2
+        at: check-timing
+        do: choose-pending
+        pending: { ability: { source: a2, card: ECP01-002, line: 1 } }
     random: {}
     expected:
       - at: after-decision-2
@@ -165,7 +202,7 @@ scenarios:
         assert:
           P2.pp.current: 0
           P2.ep: 0
-          P2.field.a2: {evolved: true, evolved_with: e1}
+          P2.field.a2: { evolved: true, evolved_with: e1 }
           P2.hand: [d2, filler: 3]
 
   - name: C PP 0、EP 0 → 進化付不出 → cannot-evolve
@@ -175,7 +212,14 @@ scenarios:
         P2:
           ep: 0
     decisions:
-      - {n: 1, by: P2, at: main, do: evolve, source: a2, ability: {source: a2, line: 2}, evolve_card: e1, pay: {pp: 0, ep: 0, sep: 0}}
+      - n: 1
+        by: P2
+        at: main
+        do: evolve
+        source: a2
+        ability: { source: a2, line: 2 }
+        evolve_card: e1
+        pay: { pp: 0, ep: 0, sep: 0 }
     random: {}
     expected:
       - at: after-decision-1
@@ -183,5 +227,5 @@ scenarios:
         outcome: cannot-evolve
         assert:
           P2.ep: 0
-          P2.field.a2: {evolved: false}
+          P2.field.a2: { evolved: false }
           P2.evolve_deck: [e1]

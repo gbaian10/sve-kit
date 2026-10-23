@@ -4,8 +4,16 @@ sources:
   cards_jsonl_sha256: 4c7b98b77342d2a9
 id: card-CP03-001
 kind: card
-must_pass: true             # 觸發圖示已用官方卡圖確認（card-facts-verified.md，2026-09-25）
-mechanisms: [Vanguard：憑依、驅動, 本回合歷史, 5.16.1.1.1, 進化卡自身的能力, 進化成不同名的卡, 14.4.6.3, 10.7.2, 8.3.2]
+must_pass: true # 觸發圖示已用官方卡圖確認（card-facts-verified.md，2026-09-25）
+mechanisms:
+  - Vanguard：憑依、驅動
+  - 本回合歷史
+  - 5.16.1.1.1
+  - 進化卡自身的能力
+  - 進化成不同名的卡
+  - 14.4.6.3
+  - 10.7.2
+  - 8.3.2
 cards: [CP03-001, CP03-002, CP03-010, CP03-021, BP01-173]
 why: >-
   蒼嵐竜 メイルストローム「【攻撃時】このターン、4回目の自分の場のアクアフォース・フォロワーの攻撃なら、これは『蒼嵐覇竜 グローリー・メイルストローム』に進化する」：
@@ -17,7 +25,18 @@ discriminates: >-
   沒計算本回合アクアフォース攻擊次數（或只算「其他」從者）的引擎不會進化 → 傷害 3 而非 4；不允許進化成不同名卡的引擎會 pending-cancelled；
   把這次進化算進 8.3.2.1 的引擎，在 B 之後試用進化能力會 cannot-evolve（本題不測，見 Q1376）。
 refs:
-  rules: [5.16.1, 5.16.1.1, 5.16.1.1.1, 5.16.1.2, 12.7.2, 14.4.6.3, 14.4.5.1.1, 14.4.5.1.5, 10.7.2, 10.7.3.1, 8.4.9]
+  rules:
+    - 5.16.1
+    - 5.16.1.1
+    - 5.16.1.1.1
+    - 5.16.1.2
+    - 12.7.2
+    - 14.4.6.3
+    - 14.4.5.1.1
+    - 14.4.5.1.5
+    - 10.7.2
+    - 10.7.3.1
+    - 8.4.9
   qa: [Q1374, Q1375, Q1376, Q1377]
 evidence:
   - ref: Q1374
@@ -36,54 +55,74 @@ verified_by:
 scenarios:
   - name: A 三隻アクアフォース先攻擊過 → メイルストローム第 4 次攻擊 → 進化成グローリー → 驅動檢查 → 傷害 4
     card_facts:
-      CP03-010: {trigger_icon: none, source: 官方卡圖右上角圖示（Opus 確認，card-facts-verified.md）, verified: true}
+      CP03-010:
+        trigger_icon: none
+        source: 官方卡圖右上角圖示（Opus 確認，card-facts-verified.md）
+        verified: true
     setup:
-      turn: {active: P1, first_player: P1, elapsed_turns: {P1: 6, P2: 5}, phase: main}
+      turn: { active: P1, first_player: P1, elapsed_turns: { P1: 6, P2: 5 }, phase: main }
       history: none
       players:
         P1:
           construction: title
           title: カードファイト!! ヴァンガード
-          leader: {class: エルフ, life: 20}
-          pp: {current: 6, max: 6}
+          leader: { class: エルフ, life: 20 }
+          pp: { current: 6, max: 6 }
           zones:
             field:
-              - {id: a0, card: CP03-021}          # スタートアミュレット
-              - {id: a1, card: CP03-001}          # 蒼嵐竜 メイルストローム 3/3
-              - {id: a2, card: CP03-010}          # ティアーナイト ラザロス 3/2（アクアフォース）
-              - {id: a3, card: CP03-010}
-              - {id: a4, card: CP03-010}
+              - { id: a0, card: CP03-021 } # スタートアミュレット
+              - { id: a1, card: CP03-001 } # 蒼嵐竜 メイルストローム 3/3
+              - { id: a2, card: CP03-010 } # ティアーナイト ラザロス 3/2（アクアフォース）
+              - { id: a3, card: CP03-010 }
+              - { id: a4, card: CP03-010 }
             evolve_deck:
-              - {id: e1, card: CP03-002}          # 蒼嵐覇竜 グローリー・メイルストローム 4/4
+              - { id: e1, card: CP03-002 } # 蒼嵐覇竜 グローリー・メイルストローム 4/4
             hand:
-              - {filler: 1}
+              - { filler: 1 }
             deck:
-              - {id: t1, card: CP03-010}
-              - {id: t2, card: CP03-010}
-              - {filler: 20}
+              - { id: t1, card: CP03-010 }
+              - { id: t2, card: CP03-010 }
+              - { filler: 20 }
         P2:
           construction: class
-          leader: {class: ロイヤル, life: 20}
-          pp: {current: 0, max: 6}
+          leader: { class: ロイヤル, life: 20 }
+          pp: { current: 0, max: 6 }
           zones:
             hand:
-              - {filler: 3}
+              - { filler: 3 }
             deck:
-              - {filler: 25}
+              - { filler: 25 }
     decisions:
-      - {n: 1, by: P1, at: main, do: attack, attacker: a2, target: P2.leader}
-      - {n: 2, by: P2, at: quick, do: pass}
-      - {n: 3, by: P1, at: main, do: attack, attacker: a3, target: P2.leader}
-      - {n: 4, by: P2, at: quick, do: pass}
-      - {n: 5, by: P1, at: main, do: attack, attacker: a4, target: P2.leader}
-      - {n: 6, by: P2, at: quick, do: pass}
-      - {n: 7, by: P1, at: main, do: attack, attacker: a1, target: P2.leader}
-      - {n: 8, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 3}}}
+      - { n: 1, by: P1, at: main, do: attack, attacker: a2, target: P2.leader }
+      - { n: 2, by: P2, at: quick, do: pass }
+      - { n: 3, by: P1, at: main, do: attack, attacker: a3, target: P2.leader }
+      - { n: 4, by: P2, at: quick, do: pass }
+      - { n: 5, by: P1, at: main, do: attack, attacker: a4, target: P2.leader }
+      - { n: 6, by: P2, at: quick, do: pass }
+      - { n: 7, by: P1, at: main, do: attack, attacker: a1, target: P2.leader }
+      - n: 8
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: { ability: { source: a1, line: 3 } }
       # 5.16.1.1：從エボルヴデッキ裏向き卡中指定『蒼嵐覇竜 グローリー・メイルストローム』
-      - {n: 9, by: P1, at: resolve, of: {decision: 8, occurrence: 1}, do: resolve-choice, select: [e1]}
-      - {n: 10, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2, keyword: ツインドライブ, rule: 14.4.6.3}}}
-      - {n: 11, by: P2, at: quick, do: pass}
-      - {n: 12, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, card: CP03-002, line: 2}}}
+      - n: 9
+        by: P1
+        at: resolve
+        of: { decision: 8, occurrence: 1 }
+        do: resolve-choice
+        select: [e1]
+      - n: 10
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: { ability: { source: a1, line: 2, keyword: ツインドライブ, rule: 14.4.6.3 } }
+      - { n: 11, by: P2, at: quick, do: pass }
+      - n: 12
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: { ability: { source: a1, card: CP03-002, line: 2 } }
     random: {}
     expected:
       - at: after-decision-6
@@ -91,33 +130,34 @@ scenarios:
         outcome: resolved
         assert:
           P2.leader.life: 11
-          semantic_state.counters_this_turn: {P1.attacks: 3}
+          semantic_state.counters_this_turn: { P1.attacks: 3 }
       - at: after-decision-7
         view: omniscient
         outcome: resolved
         awaiting:
           by: P1
           choices:
-            - {do: choose-pending, pending: {ability: {source: a1, line: 3}}}
-            - {do: choose-pending, pending: {ability: {source: a1, line: 2, keyword: ツインドライブ, rule: 14.4.6.3}}}
+            - { do: choose-pending, pending: { ability: { source: a1, line: 3 } } }
+            - do: choose-pending
+              pending: { ability: { source: a1, line: 2, keyword: ツインドライブ, rule: 14.4.6.3 } }
       - at: after-decision-8
         view: omniscient
         outcome: paused
         awaiting:
           by: P1
           choices:
-            - {do: resolve-choice, select: [e1]}
+            - { do: resolve-choice, select: [e1] }
         assert:
-          P1.field.a1: {evolved: false}
+          P1.field.a1: { evolved: false }
       - at: after-decision-9
         view: omniscient
         outcome: resolved
         assert:
-          P1.field.a1: {evolved: true, evolved_with: e1, power: 4, hp: 4, acted: true}
+          P1.field.a1: { evolved: true, evolved_with: e1, power: 4, hp: 4, acted: true }
           P1.evolve_deck: []
-          semantic_state.counters_this_turn: {P1.evolve_played: 0, P1.evolutions: 1}
+          semantic_state.counters_this_turn: { P1.evolve_played: 0, P1.evolutions: 1 }
         events:
-          - {kind: 進化, object: a1, with: e1}
+          - { kind: 進化, object: a1, with: e1 }
       - at: after-decision-10
         view: omniscient
         outcome: resolved
@@ -130,12 +170,12 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - {do: choose-pending, pending: {ability: {source: a1, card: CP03-002, line: 2}}}
+            - { do: choose-pending, pending: { ability: { source: a1, card: CP03-002, line: 2 } } }
         assert:
           P2.leader.life: 7
         events:
-          - {kind: ダメージ, source: a1, target: P2.leader, amount: 4}
-          - {kind: 待機, ability: {source: a1, card: CP03-002, line: 2}}
+          - { kind: ダメージ, source: a1, target: P2.leader, amount: 4 }
+          - { kind: 待機, ability: { source: a1, card: CP03-002, line: 2 } }
       - at: after-decision-12
         view: omniscient
         outcome: pending-cancelled
@@ -143,35 +183,43 @@ scenarios:
           P1.hand: [filler: 1]
           semantic_state.pending_triggers: []
         events:
-          - {kind: 待機取消, ability: {source: a1, card: CP03-002, line: 2}}
+          - { kind: 待機取消, ability: { source: a1, card: CP03-002, line: 2 } }
         forbidden_events:
-          - {kind: 引く}
+          - { kind: 引く }
 
   - name: B 只有兩隻先攻擊 → 第 3 次 → 不進化 → 傷害 3
     inherit: A 三隻アクアフォース先攻擊過 → メイルストローム第 4 次攻擊 → 進化成グローリー → 驅動檢查 → 傷害 4
     decisions:
-      - {n: 1, by: P1, at: main, do: attack, attacker: a2, target: P2.leader}
-      - {n: 2, by: P2, at: quick, do: pass}
-      - {n: 3, by: P1, at: main, do: attack, attacker: a3, target: P2.leader}
-      - {n: 4, by: P2, at: quick, do: pass}
-      - {n: 5, by: P1, at: main, do: attack, attacker: a1, target: P2.leader}
-      - {n: 6, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 3}}}
-      - {n: 7, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2, keyword: ツインドライブ, rule: 14.4.6.3}}}
-      - {n: 8, by: P2, at: quick, do: pass}
+      - { n: 1, by: P1, at: main, do: attack, attacker: a2, target: P2.leader }
+      - { n: 2, by: P2, at: quick, do: pass }
+      - { n: 3, by: P1, at: main, do: attack, attacker: a3, target: P2.leader }
+      - { n: 4, by: P2, at: quick, do: pass }
+      - { n: 5, by: P1, at: main, do: attack, attacker: a1, target: P2.leader }
+      - n: 6
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: { ability: { source: a1, line: 3 } }
+      - n: 7
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: { ability: { source: a1, line: 2, keyword: ツインドライブ, rule: 14.4.6.3 } }
+      - { n: 8, by: P2, at: quick, do: pass }
     random: {}
     expected:
       - at: after-decision-6
         view: omniscient
         outcome: resolved
         assert:
-          P1.field.a1: {evolved: false, power: 3, hp: 3}
+          P1.field.a1: { evolved: false, power: 3, hp: 3 }
           P1.evolve_deck: [e1]
         forbidden_events:
-          - {kind: 進化}
+          - { kind: 進化 }
       - at: after-decision-8
         view: omniscient
         outcome: resolved
         assert:
           P2.leader.life: 11
         events:
-          - {kind: ダメージ, source: a1, target: P2.leader, amount: 3}
+          - { kind: ダメージ, source: a1, target: P2.leader, amount: 3 }

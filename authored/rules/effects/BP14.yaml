@@ -101,7 +101,7 @@ cards:
         event: evolve
         subject: self
         cost_selections:
-          - key: '1'
+          - key: "1"
             select:
               zone: ex
               side: self
@@ -211,7 +211,7 @@ cards:
           zone: ex
           name: 輝く金貨
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -302,7 +302,7 @@ cards:
                 subjects: target.2
                 amount: 4
         targets:
-          - key: '1'
+          - key: "1"
             select:
               zone: field
               side: opponent
@@ -311,7 +311,7 @@ cards:
             max: 1
             modes:
               - 1
-          - key: '2'
+          - key: "2"
             select:
               zone: field
               side: opponent
@@ -344,7 +344,7 @@ cards:
                 subjects: target.1.leader
                 amount: 2
         targets:
-          - key: '1'
+          - key: "1"
             select:
               zone: field
               side: opponent
@@ -464,7 +464,7 @@ cards:
               set_power: 1
               set_hp: 1
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: cemetery
@@ -494,7 +494,7 @@ cards:
         active_zones:
           - hand
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: field
@@ -518,7 +518,7 @@ cards:
         active_zones:
           - hand
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: field
@@ -555,7 +555,7 @@ cards:
                   - storm
         section: 0
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: cemetery
@@ -615,7 +615,7 @@ cards:
           op: banish
           subjects: target.1
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -674,7 +674,7 @@ cards:
         active_zones:
           - ex
         cost_selections:
-          - key: '1'
+          - key: "1"
             select:
               zone: ex
               side: self

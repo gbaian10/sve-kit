@@ -61,7 +61,7 @@ verified_by:
     method: qa
     note: Q1968、9.1.4.3／9.1.4.4；xverify-1/result.md〈22 個重疊題〉。之後未再改
 scenarios:
-  - name: '[astra] 從 ex 打出'
+  - name: "[astra] 從 ex 打出"
     setup:
       turn:
         active: P1
@@ -121,7 +121,7 @@ scenarios:
           - kind: 消去
             object: a
             by: rule-9.1.4.4
-  - name: '[fable] A 用 EX 的 3 張輝く金貨起動：消滅 3 張（消去）、+1、抽 1'
+  - name: "[fable] A 用 EX 的 3 張輝く金貨起動：消滅 3 張（消去）、+1、抽 1"
     setup:
       turn:
         active: P1
@@ -187,7 +187,7 @@ scenarios:
         assert:
           P1.pp.current: 0
           P1.ex: []
-          P1.banish: []   # 3 張金貨都已消去（9.1.4.4）；消去的相對順序不比對
+          P1.banish: [] # 3 張金貨都已消去（9.1.4.4）；消去的相對順序不比對
           P1.leader.life: 21
           P1.hand:
             - filler: 2
@@ -209,8 +209,8 @@ scenarios:
           - kind: 引く
             player: P1
             object: d1
-  - name: '[fable] B 當 0 費法術打出：沒有效果，進墓場後消去'
-    inherit: '[fable] A 用 EX 的 3 張輝く金貨起動：消滅 3 張（消去）、+1、抽 1'
+  - name: "[fable] B 當 0 費法術打出：沒有效果，進墓場後消去"
+    inherit: "[fable] A 用 EX 的 3 張輝く金貨起動：消滅 3 張（消去）、+1、抽 1"
     decisions:
       - n: 1
         by: P1
@@ -237,8 +237,8 @@ scenarios:
         forbidden_events:
           - kind: 引く
           - kind: 体力増加
-  - name: '[fable] C 只有 2 張 → 費用付不出 → 不能起動'
-    inherit: '[fable] A 用 EX 的 3 張輝く金貨起動：消滅 3 張（消去）、+1、抽 1'
+  - name: "[fable] C 只有 2 張 → 費用付不出 → 不能起動"
+    inherit: "[fable] A 用 EX 的 3 張輝く金貨起動：消滅 3 張（消去）、+1、抽 1"
     setup:
       players:
         P1:

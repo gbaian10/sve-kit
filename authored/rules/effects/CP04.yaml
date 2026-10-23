@@ -77,7 +77,7 @@ cards:
         subject: self
         section: 0
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -98,7 +98,7 @@ cards:
           - op: act
             subjects: self
         targets:
-          - key: '1'
+          - key: "1"
             select:
               zone: field
               side: opponent
@@ -198,7 +198,7 @@ cards:
         event: enter
         subject: self
         targets:
-          - key: '1'
+          - key: "1"
             select:
               zone: field
               side: opponent
@@ -237,7 +237,7 @@ cards:
         subject: self
         ub: true
         targets:
-          - key: '1'
+          - key: "1"
             select:
               zone: field
               side: opponent
@@ -305,7 +305,7 @@ cards:
           max: 2
           to: field
           groups:
-            - key: '1'
+            - key: "1"
               select:
                 zone: deck
                 side: self
@@ -318,7 +318,7 @@ cards:
                     - 3
               min: 0
               max: 1
-            - key: '1'
+            - key: "1"
               select:
                 zone: deck
                 side: self
@@ -372,7 +372,7 @@ cards:
         subject: self
         ub: true
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -381,7 +381,7 @@ cards:
             max:
               read: x
         cost_selections:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: field
@@ -417,7 +417,7 @@ cards:
           - op: act
             subjects: self
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -537,7 +537,7 @@ cards:
         subject: self
         ub: true
         cost_selections:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: hand
@@ -548,7 +548,7 @@ cards:
           - op: discard
             subjects: cost.1
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -589,7 +589,7 @@ cards:
         event: evolve
         subject: self
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -612,7 +612,7 @@ cards:
         event: super_evolve
         subject: self
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: cemetery

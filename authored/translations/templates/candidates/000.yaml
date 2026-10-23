@@ -11,7 +11,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{Q}{起動}將戰場上的N個『X』放置到墓場：本回合，自己下一次使用卡片之際，消費-N。'
+      text: "{Q}{起動}將戰場上的N個『X』放置到墓場：本回合，自己下一次使用卡片之際，消費-N。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -35,7 +35,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}如果自己的戰場上有「卡片名稱含有『X』的從者」，則將N張『X』放置到EX區。'
+      text: "{入場曲}如果自己的戰場上有「卡片名稱含有『X』的從者」，則將N張『X』放置到EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -96,7 +96,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}捨棄手牌中的N張雷維翁・卡片：從自己的牌堆中搜尋N張「卡片名稱含有『X』的{皇家護衛}從者」，增加到手牌中。'
+      text: "{入場曲}捨棄手牌中的N張雷維翁・卡片：從自己的牌堆中搜尋N張「卡片名稱含有『X』的{皇家護衛}從者」，增加到手牌中。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -157,7 +157,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}可以將N張『X』放置到戰場或EX區。'
+      text: "{入場曲}可以將N張『X』放置到戰場或EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -169,7 +169,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}{消費N}將這張卡片{橫置}並放置到墓場：從自己的牌堆中搜尋至多N張卡片名稱各不相同的「卡片名稱含有『X』、『X』、『X』、『X』、『X』、『X』、『X』、『X』、『X』或『X』的絕傑・從者」。從其中將任意張數召喚到戰場上。將任意張數放置到EX區。'
+      text: "{起動}{消費N}將這張卡片{橫置}並放置到墓場：從自己的牌堆中搜尋至多N張卡片名稱各不相同的「卡片名稱含有『X』、『X』、『X』、『X』、『X』、『X』、『X』、『X』、『X』或『X』的絕傑・從者」。從其中將任意張數召喚到戰場上。將任意張數放置到EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -181,7 +181,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}{消費N}將戰場上的N個『X』放置到墓場：抽取N張卡片。可以將自己手牌中的N張原始消費N以下的武裝・從者召喚到戰場上。此能力N回合中可使用N次。'
+      text: "{起動}{消費N}將戰場上的N個『X』放置到墓場：抽取N張卡片。可以將自己手牌中的N張原始消費N以下的武裝・從者召喚到戰場上。此能力N回合中可使用N次。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -230,7 +230,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{謝幕曲}召喚N個『X』到戰場上。使其獲得【守護】。可以將其中任意數量橫置。'
+      text: "{謝幕曲}召喚N個『X』到戰場上。使其獲得【守護】。可以將其中任意數量橫置。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -242,7 +242,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}{消費N}：召喚N個『X』與N個『X』到戰場上。'
+      text: "{入場曲}{消費N}：召喚N個『X』與N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -266,7 +266,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}如果自己墓場的武裝・卡片為N張以上，則召喚N個『X』到戰場上。給予敵方的全部主戰者N點傷害。'
+      text: "{入場曲}如果自己墓場的武裝・卡片為N張以上，則召喚N個『X』到戰場上。給予敵方的全部主戰者N點傷害。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -289,7 +289,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}從自己的牌堆中搜尋N張『X』，召喚到戰場上。'
+      text: "{入場曲}從自己的牌堆中搜尋N張『X』，召喚到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -313,7 +313,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{謝幕曲}召喚N個『X』到戰場上。給予敵方的全部主戰者N點傷害。'
+      text: "{謝幕曲}召喚N個『X』到戰場上。給予敵方的全部主戰者N點傷害。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -326,7 +326,7 @@ records:
         - numeric_role_requires_review
       role: body
       source_kind: effect
-      text: '{入場曲}如果自己的戰場上有『X』，則在這張卡片上放置N個箭矢指示物。'
+      text: "{入場曲}如果自己的戰場上有『X』，則在這張卡片上放置N個箭矢指示物。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -362,7 +362,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}將這張卡片{橫置}：將N張『X』放置到EX區。'
+      text: "{起動}將這張卡片{橫置}：將N張『X』放置到EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -375,7 +375,7 @@ records:
         - signed_numeric_requires_review
       role: body
       source_kind: effect
-      text: '{謝幕曲}召喚N個『X』到戰場上。自己戰場上的【蓄積】+N。'
+      text: "{謝幕曲}召喚N個『X』到戰場上。自己戰場上的【蓄積】+N。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -387,7 +387,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{謝幕曲}{消費N}使戰場或EX區的N張『X』消失：從自己的牌堆中搜尋N張『X』，召喚到戰場上。自己的主戰者{生命值}+N。'
+      text: "{謝幕曲}{消費N}使戰場或EX區的N張『X』消失：從自己的牌堆中搜尋N張『X』，召喚到戰場上。自己的主戰者{生命值}+N。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -399,7 +399,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}召喚N個『X』到戰場上。'
+      text: "{入場曲}召喚N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -423,7 +423,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}召喚N個『X』到戰場上。如果自己的戰場上有原始消費N以上的鍊金術士・從者，則將N張『X』放置到EX區。'
+      text: "{入場曲}召喚N個『X』到戰場上。如果自己的戰場上有原始消費N以上的鍊金術士・從者，則將N張『X』放置到EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -447,7 +447,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}捨棄手牌中的N張人偶・卡片：抽取N張卡片。將N張『X』放置到EX區。'
+      text: "{入場曲}捨棄手牌中的N張人偶・卡片：抽取N張卡片。將N張『X』放置到EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -459,7 +459,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}從下列之中選擇N項。【N】從自己的牌堆中搜尋N張『X』，增加到手牌中。【N】可以將自己手牌中的N張『X』召喚到戰場上。'
+      text: "{入場曲}從下列之中選擇N項。【N】從自己的牌堆中搜尋N張『X』，增加到手牌中。【N】可以將自己手牌中的N張『X』召喚到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -471,7 +471,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}{消費N}將這張卡片{橫置}、將這張卡片與戰場上的N個其他護符放置到墓場：召喚N個『X』與N個『X』到戰場上。'
+      text: "{起動}{消費N}將這張卡片{橫置}、將這張卡片與戰場上的N個其他護符放置到墓場：召喚N個『X』與N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -568,7 +568,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}召喚N個『X』與N個『X』到戰場上。如果自己戰場上的{皇家護衛}卡片為N張，則這張卡片進化。'
+      text: "{入場曲}召喚N個『X』與N個『X』到戰場上。如果自己戰場上的{皇家護衛}卡片為N張，則這張卡片進化。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -617,7 +617,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{進化}{消費N}：這張卡片進化為「卡片名稱含有『X』的進化從者」。'
+      text: "{進化}{消費N}：這張卡片進化為「卡片名稱含有『X』的進化從者」。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -665,7 +665,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}召喚N個『X』到戰場上。從自己的牌堆中搜尋N張『X』，放置到EX區。【魔力連鎖_N】本回合，使用該卡之際，消費-N。'
+      text: "{入場曲}召喚N個『X』到戰場上。從自己的牌堆中搜尋N張『X』，放置到EX區。【魔力連鎖_N】本回合，使用該卡之際，消費-N。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -676,7 +676,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}從自己的牌堆中搜尋N張『X』，增加到手牌中。'
+      text: "{入場曲}從自己的牌堆中搜尋N張『X』，增加到手牌中。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -724,7 +724,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}將這張卡片{橫置}：指定自己EX區的N張『X』。本回合，使用該卡之際，消費-X。X為「本回合中自己使用的卡片張數」。'
+      text: "{起動}將這張卡片{橫置}：指定自己EX區的N張『X』。本回合，使用該卡之際，消費-X。X為「本回合中自己使用的卡片張數」。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -761,7 +761,7 @@ records:
         - numeric_role_requires_review
       role: body
       source_kind: effect
-      text: '{起動}將這張卡片{橫置}：指定敵方戰場上的N個從者。如果自己EX區的N張卡片的熱情指示物為N個以上，則給予其N點傷害。如果為N個以上，則這張卡片{生命值}+N。'
+      text: "{起動}將這張卡片{橫置}：指定敵方戰場上的N個從者。如果自己EX區的N張卡片的熱情指示物為N個以上，則給予其N點傷害。如果為N個以上，則這張卡片{生命值}+N。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -773,7 +773,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}指定自己墓場的N張原始消費N以下的荒野・從者。將其召喚到戰場上。召喚N個『X』到戰場上。'
+      text: "{入場曲}指定自己墓場的N張原始消費N以下的荒野・從者。將其召喚到戰場上。召喚N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -798,7 +798,7 @@ records:
         - signed_numeric_requires_review
       role: body
       source_kind: effect
-      text: '{入場曲}從下列之中選擇N項。【N】自己的PP最大值+N。回復自己的PP N點。【N】如果為【覺醒】狀態，則召喚N個『X』到戰場上。自己的主戰者{生命值}+N。'
+      text: "{入場曲}從下列之中選擇N項。【N】自己的PP最大值+N。回復自己的PP N點。【N】如果為【覺醒】狀態，則召喚N個『X』到戰場上。自己的主戰者{生命值}+N。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -822,7 +822,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}給予自己的主戰者N點傷害。如果自己的戰場上有「卡片名稱含有『X』的從者」，則這張卡片進化。'
+      text: "{入場曲}給予自己的主戰者N點傷害。如果自己的戰場上有「卡片名稱含有『X』的從者」，則這張卡片進化。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -847,7 +847,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{謝幕曲}從自己的牌堆中搜尋N張『X』，召喚到戰場上。'
+      text: "{謝幕曲}從自己的牌堆中搜尋N張『X』，召喚到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -859,7 +859,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}本回合，自己下一次使用原始消費N以下的宴樂・卡片或原始消費N以下的魔法使・卡片之際，消費-N。如果自己的戰場上有『X』，則自己的主戰者{生命值}+N。'
+      text: "{入場曲}本回合，自己下一次使用原始消費N以下的宴樂・卡片或原始消費N以下的魔法使・卡片之際，消費-N。如果自己的戰場上有『X』，則自己的主戰者{生命值}+N。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -871,7 +871,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}從下列之中選擇N項。【N】本回合，自己下一次使用『X』之際，消費-N。【N】本回合，自己下一次使用盜賊・卡片之際，消費-N。'
+      text: "{入場曲}從下列之中選擇N項。【N】本回合，自己下一次使用『X』之際，消費-N。【N】本回合，自己下一次使用盜賊・卡片之際，消費-N。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -884,7 +884,7 @@ records:
         - numeric_role_requires_review
       role: body
       source_kind: effect
-      text: '{起動}移除戰場上N個『X』的N個神湯指示物：這張卡片{攻擊力}+N，並獲得【疾馳】。此能力N回合中可使用N次。'
+      text: "{起動}移除戰場上N個『X』的N個神湯指示物：這張卡片{攻擊力}+N，並獲得【疾馳】。此能力N回合中可使用N次。"
     origin: machine
     low_confidence: true
     note: 2026-10-18 對照後保留低信心；未啟用的歷史候選稿，不是目前 template_translation 的選中值；缺少可執行的逐槽來源對齊與採用關係，不以現有成品替候選稿背書。保留原 reasons
@@ -910,7 +910,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}【連擊_N】指定敵方的N個從者。將其破壞。召喚N個『X』到敵方的戰場上。'
+      text: "{入場曲}【連擊_N】指定敵方的N個從者。將其破壞。召喚N個『X』到敵方的戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -959,7 +959,7 @@ records:
         - numeric_role_requires_review
       role: body
       source_kind: effect
-      text: '{入場曲}從下列之中選擇至多X項。X為「自己戰場上目白家・卡片的張數」。【N】指定敵方戰場上的N個從者。使其消失。【N】這張卡片獲得【疾馳】。【N】自己的主戰者{生命值}+N。抽取N張卡片。'
+      text: "{入場曲}從下列之中選擇至多X項。X為「自己戰場上目白家・卡片的張數」。【N】指定敵方戰場上的N個從者。使其消失。【N】這張卡片獲得【疾馳】。【N】自己的主戰者{生命值}+N。抽取N張卡片。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -971,7 +971,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}將N張『X』或N張『X』放置到EX區。'
+      text: "{入場曲}將N張『X』或N張『X』放置到EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -1033,7 +1033,7 @@ records:
         - numeric_role_requires_review
       role: body
       source_kind: effect
-      text: '{謝幕曲}如果自己的戰場上有『X』，則在自己戰場上的全部『X』上放置N個雷指示物。如果自己的戰場上沒有『X』，則召喚N個『X』到戰場上。'
+      text: "{謝幕曲}如果自己的戰場上有『X』，則在自己戰場上的全部『X』上放置N個雷指示物。如果自己的戰場上沒有『X』，則召喚N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -1105,7 +1105,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}將這張卡片{橫置}：指定自己戰場上至多N個『X』。使其{攻擊力}+N/{生命值}+N。此能力在自己墓場的人偶・卡片為N張以上時可使用。'
+      text: "{起動}將這張卡片{橫置}：指定自己戰場上至多N個『X』。使其{攻擊力}+N/{生命值}+N。此能力在自己墓場的人偶・卡片為N張以上時可使用。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -1117,7 +1117,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}使戰場上的N個『X』消失：指定自己戰場上的N個自然・從者。使其{攻擊力}+N。'
+      text: "{起動}使戰場上的N個『X』消失：指定自己戰場上的N個自然・從者。使其{攻擊力}+N。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -1153,7 +1153,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}{消費N}：召喚N個『X』到戰場上。此能力N回合中可使用N次。'
+      text: "{起動}{消費N}：召喚N個『X』到戰場上。此能力N回合中可使用N次。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -1189,7 +1189,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}捨棄N張手牌：召喚N個『X』到戰場上。如果捨棄了死者・卡片，則抽取N張卡片。'
+      text: "{入場曲}捨棄N張手牌：召喚N個『X』到戰場上。如果捨棄了死者・卡片，則抽取N張卡片。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -1201,7 +1201,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}將這張卡片{橫置}：指定敵方的N個從者。給予其N點傷害。如果自己的戰場上有『X』，則轉變為N點傷害。'
+      text: "{起動}將這張卡片{橫置}：指定敵方的N個從者。給予其N點傷害。如果自己的戰場上有『X』，則轉變為N點傷害。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -1213,7 +1213,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}將這張卡片{橫置}：指定自己戰場上的N個『X』。使其獲得【必殺】。'
+      text: "{起動}將這張卡片{橫置}：指定自己戰場上的N個『X』。使其獲得【必殺】。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -1225,7 +1225,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}{消費N}使EX區的這張卡片與N張『X』消失：自己的主戰者{生命值}+N。抽取N張卡片。'
+      text: "{起動}{消費N}使EX區的這張卡片與N張『X』消失：自己的主戰者{生命值}+N。抽取N張卡片。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -1262,7 +1262,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}從下列之中選擇N項。【N】召喚N個『X』到戰場上。【N】指定自己墓場中的N張護符。將其增加到手牌中。'
+      text: "{入場曲}從下列之中選擇N項。【N】召喚N個『X』到戰場上。【N】指定自己墓場中的N張護符。將其增加到手牌中。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -1287,7 +1287,7 @@ records:
         - numeric_role_requires_review
       role: body
       source_kind: effect
-      text: '{入場曲}使戰場上的X張『X』消失：從下列之中選擇至多X項。【N】指定敵方戰場上的N個從者。將其破壞。【N】從自己的牌堆中搜尋至多N張卡片名稱各不相同的自然・法術，放置到EX區。【N】自己的主戰者{生命值}+N。'
+      text: "{入場曲}使戰場上的X張『X』消失：從下列之中選擇至多X項。【N】指定敵方戰場上的N個從者。將其破壞。【N】從自己的牌堆中搜尋至多N張卡片名稱各不相同的自然・法術，放置到EX區。【N】自己的主戰者{生命值}+N。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -1314,7 +1314,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}召喚N張『X』到戰場上，直到戰場達到上限為止。將其餘的放置到EX區。'
+      text: "{入場曲}召喚N張『X』到戰場上，直到戰場達到上限為止。將其餘的放置到EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -1326,7 +1326,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}將這張卡片{橫置}：指定N個從者。將其破壞。其玩家召喚N個『X』到戰場上。'
+      text: "{起動}將這張卡片{橫置}：指定N個從者。將其破壞。其玩家召喚N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -1338,7 +1338,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}{消費N}將這張卡片{橫置}並放置到墓場：可以將自己手牌中的N張「卡片名稱含有『X』的從者」召喚到戰場上。'
+      text: "{起動}{消費N}將這張卡片{橫置}並放置到墓場：可以將自己手牌中的N張「卡片名稱含有『X』的從者」召喚到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -1362,7 +1362,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}【連擊_N】召喚N個『X』到戰場上。'
+      text: "{入場曲}【連擊_N】召喚N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -1422,7 +1422,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{進化}{消費N}：這張卡片進化為『X』。此能力在自己墓場的吸血鬼・卡片為N張以上時可使用。'
+      text: "{進化}{消費N}：這張卡片進化為『X』。此能力在自己墓場的吸血鬼・卡片為N張以上時可使用。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -1434,7 +1434,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}指定自己進化牌堆中正面朝上放置的N張『X』。將其轉為背面朝上。這張卡片{攻擊力}+N/{生命值}+N。'
+      text: "{入場曲}指定自己進化牌堆中正面朝上放置的N張『X』。將其轉為背面朝上。這張卡片{攻擊力}+N/{生命值}+N。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -1446,7 +1446,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}抽取N張卡片。如果自己的戰場或自己的墓場有「卡片名稱含有『X』的從者」，則回復自己的PP N點。'
+      text: "{入場曲}抽取N張卡片。如果自己的戰場或自己的墓場有「卡片名稱含有『X』的從者」，則回復自己的PP N點。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -1458,7 +1458,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}指定自己墓場至多N張『X』。將其召喚到戰場上。'
+      text: "{入場曲}指定自己墓場至多N張『X』。將其召喚到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -1471,7 +1471,7 @@ records:
         - numeric_role_requires_review
       role: body
       source_kind: effect
-      text: '{入場曲}如果自己的戰場上有『X』，則在這張卡片上放置至多N個災厄指示物。'
+      text: "{入場曲}如果自己的戰場上有『X』，則在這張卡片上放置至多N個災厄指示物。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -1543,7 +1543,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}召喚N個『X』到戰場上。將自己牌堆頂的N張卡片放置到EX區。'
+      text: "{入場曲}召喚N個『X』到戰場上。將自己牌堆頂的N張卡片放置到EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -1579,7 +1579,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}將N張『X』放置到EX區。如果自己的戰場上有『X』，則自己的主戰者{生命值}+N。'
+      text: "{入場曲}將N張『X』放置到EX區。如果自己的戰場上有『X』，則自己的主戰者{生命值}+N。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -1615,7 +1615,7 @@ records:
         - numeric_identifier_requires_review
       role: body
       source_kind: effect
-      text: '{起動}將這張卡片{橫置}【土之秘術_N】：給予敵方戰場上的全部從者N點傷害。'
+      text: "{起動}將這張卡片{橫置}【土之秘術_N】：給予敵方戰場上的全部從者N點傷害。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -1652,7 +1652,7 @@ records:
         - numeric_role_requires_review
       role: body
       source_kind: effect
-      text: '{入場曲}如果N名敵方玩家戰場上的從者為N個以上，則將N張『X』放置到EX區。'
+      text: "{入場曲}如果N名敵方玩家戰場上的從者為N個以上，則將N張『X』放置到EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -1677,7 +1677,7 @@ records:
         - signed_numeric_requires_review
       role: body
       source_kind: effect
-      text: '{入場曲}使戰場上的N個『X』消失：自己的PP最大值+N。'
+      text: "{入場曲}使戰場上的N個『X』消失：自己的PP最大值+N。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -1700,7 +1700,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}{消費N}將這張卡片{橫置}並放置到墓場：召喚N個『X』到戰場上。'
+      text: "{起動}{消費N}將這張卡片{橫置}並放置到墓場：召喚N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -1724,7 +1724,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}{消費N}將這張卡片{橫置}並放置到墓場：從自己的牌堆中搜尋N張『X』，召喚到戰場上。'
+      text: "{起動}{消費N}將這張卡片{橫置}並放置到墓場：從自己的牌堆中搜尋N張『X』，召喚到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -1748,7 +1748,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}將N張『X』放置到EX區。自己EX區的全部妖精・從者{攻擊力}+N/{生命值}+N。'
+      text: "{入場曲}將N張『X』放置到EX區。自己EX區的全部妖精・從者{攻擊力}+N/{生命值}+N。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -1760,7 +1760,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}使戰場上的N個『X』消失：給予敵方戰場上的全部從者N點傷害。'
+      text: "{起動}使戰場上的N個『X』消失：給予敵方戰場上的全部從者N點傷害。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -1772,7 +1772,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}從N張『X』與N張『X』之中，召喚N張到戰場上。將N張放置到EX區。'
+      text: "{入場曲}從N張『X』與N張『X』之中，召喚N張到戰場上。將N張放置到EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -1808,7 +1808,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}使墓場的這張卡片消失：指定自己戰場上的N個『X』與N個『X』。將其破壞。可以將自己進化牌堆的N張「卡片名稱含有『X』的進階從者」召喚到戰場上。'
+      text: "{起動}使墓場的這張卡片消失：指定自己戰場上的N個『X』與N個『X』。將其破壞。可以將自己進化牌堆的N張「卡片名稱含有『X』的進階從者」召喚到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -1832,7 +1832,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}各玩家召喚N個『X』到戰場上。'
+      text: "{入場曲}各玩家召喚N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -1856,7 +1856,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}召喚N個『X』到戰場上。查看自己牌堆頂的N張卡片。可以從其中公開N張妖精・卡片並增加到手牌中。將其餘卡片以任意順序放置到牌堆底。'
+      text: "{入場曲}召喚N個『X』到戰場上。查看自己牌堆頂的N張卡片。可以從其中公開N張妖精・卡片並增加到手牌中。將其餘卡片以任意順序放置到牌堆底。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -1905,7 +1905,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}如果為【覺醒】狀態，則從自己的牌堆中搜尋N張『X』，放置到EX區。'
+      text: "{入場曲}如果為【覺醒】狀態，則從自己的牌堆中搜尋N張『X』，放置到EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -1941,7 +1941,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}{消費N}捨棄手牌中的這張卡片：召喚N個『X』到戰場上。'
+      text: "{起動}{消費N}捨棄手牌中的這張卡片：召喚N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -2014,7 +2014,7 @@ records:
         - signed_numeric_requires_review
       role: body
       source_kind: effect
-      text: '{謝幕曲}召喚N個『X』到戰場上。自己戰場的【蓄積】+N。'
+      text: "{謝幕曲}召喚N個『X』到戰場上。自己戰場的【蓄積】+N。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -2026,7 +2026,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}{謝幕曲}將N張『X』放置到EX區。'
+      text: "{入場曲}{謝幕曲}將N張『X』放置到EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -2039,7 +2039,7 @@ records:
         - numeric_role_requires_review
       role: body
       source_kind: effect
-      text: '{謝幕曲}將這張卡片與N張『X』放置到EX區。在EX區的這張卡片上放置N個休眠指示物。'
+      text: "{謝幕曲}將這張卡片與N張『X』放置到EX區。在EX區的這張卡片上放置N個休眠指示物。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -2087,7 +2087,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{進化}{消費N}：這張卡片進化為『X』或『X』。'
+      text: "{進化}{消費N}：這張卡片進化為『X』或『X』。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -2099,7 +2099,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}捨棄N張手牌：將N張『X』放置到EX區。'
+      text: "{入場曲}捨棄N張手牌：將N張『X』放置到EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -2111,7 +2111,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}{消費N}使墓場的這張卡片消失：如果自己的EX區有『X』，則可以將自己進化牌堆的N張『X』召喚到戰場上。'
+      text: "{起動}{消費N}使墓場的這張卡片消失：如果自己的EX區有『X』，則可以將自己進化牌堆的N張『X』召喚到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -2148,7 +2148,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}將N張『X』與N張『X』放置到EX區。敵方的全部玩家將自身牌堆頂的N張卡片放置到墓場。'
+      text: "{入場曲}將N張『X』與N張『X』放置到EX區。敵方的全部玩家將自身牌堆頂的N張卡片放置到墓場。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -2172,7 +2172,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}{消費N}：召喚N個『X』到戰場上。'
+      text: "{入場曲}{消費N}：召喚N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -2184,7 +2184,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}{消費N}捨棄手牌中的這張卡片：召喚N個『X』或N個『X』或N個『X』到戰場上。'
+      text: "{起動}{消費N}捨棄手牌中的這張卡片：召喚N個『X』或N個『X』或N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -2256,7 +2256,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}從下列之中選擇N項。【N】從自己的牌堆中搜尋N張『X』，召喚到戰場上。【N】回復自己的PP N點。'
+      text: "{入場曲}從下列之中選擇N項。【N】從自己的牌堆中搜尋N張『X』，召喚到戰場上。【N】回復自己的PP N點。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -2280,7 +2280,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}將這張卡片{橫置}並放置到墓場：召喚N個『X』到戰場上。'
+      text: "{起動}將這張卡片{橫置}並放置到墓場：召喚N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -2292,7 +2292,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}查看自己牌堆頂的N張卡片。可以從其中公開N張機械・卡片並增加到手牌中。將其餘卡片以任意順序放置到牌堆底。將N張『X』放置到EX區。回復自己的PP N點。'
+      text: "{入場曲}查看自己牌堆頂的N張卡片。可以從其中公開N張機械・卡片並增加到手牌中。將其餘卡片以任意順序放置到牌堆底。將N張『X』放置到EX區。回復自己的PP N點。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -2304,7 +2304,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}將N張『X』放置到EX區。回復自己的PP N點。'
+      text: "{入場曲}將N張『X』放置到EX區。回復自己的PP N點。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -2316,7 +2316,7 @@ records:
         - numeric_role_requires_review
       role: body
       source_kind: effect
-      text: '{入場曲}各玩家擲骰子。如果為N至N，則該玩家抽取N張卡片。如果為N至N，則該玩家隨機捨棄自身的N張手牌。'
+      text: "{入場曲}各玩家擲骰子。如果為N至N，則該玩家抽取N張卡片。如果為N至N，則該玩家隨機捨棄自身的N張手牌。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -2328,7 +2328,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}{消費N}：從自己的牌堆中搜尋N張『X』，放置到EX區。本回合，使用該卡之際，消費-N。'
+      text: "{入場曲}{消費N}：從自己的牌堆中搜尋N張『X』，放置到EX區。本回合，使用該卡之際，消費-N。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -2340,7 +2340,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{謝幕曲}召喚N個『X』到戰場上。'
+      text: "{謝幕曲}召喚N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -2364,7 +2364,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{謝幕曲}指定自己墓場的N張『X』。將其以橫置狀態召喚到戰場上。'
+      text: "{謝幕曲}指定自己墓場的N張『X』。將其以橫置狀態召喚到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -2388,7 +2388,7 @@ records:
         - signed_numeric_requires_review
       role: body
       source_kind: effect
-      text: '{入場曲}抽取X張卡片。X為「自己牌堆的張數-N」。'
+      text: "{入場曲}抽取X張卡片。X為「自己牌堆的張數-N」。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -2400,7 +2400,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}從下列之中選擇N項。【N】【土之秘術】這張卡片{攻擊力}+N/{生命值}+N。【N】召喚N個『X』到戰場上。'
+      text: "{入場曲}從下列之中選擇N項。【N】【土之秘術】這張卡片{攻擊力}+N/{生命值}+N。【N】召喚N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -2436,7 +2436,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}將這張卡片{橫置}：可以使用自己進化牌堆中的N張『X』。此能力在自己墓場的學院・卡片為N張以上時可使用。'
+      text: "{起動}將這張卡片{橫置}：可以使用自己進化牌堆中的N張『X』。此能力在自己墓場的學院・卡片為N張以上時可使用。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -2459,7 +2459,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}召喚N個『X』到戰場上。'
+      text: "{入場曲}召喚N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -2483,7 +2483,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}抽取N張卡片。如果自己墓場的「卡片名稱含有『X』的從者」為N張以上，則這張卡片{攻擊力}+N/{生命值}+N，並獲得【疾馳】。'
+      text: "{入場曲}抽取N張卡片。如果自己墓場的「卡片名稱含有『X』的從者」為N張以上，則這張卡片{攻擊力}+N/{生命值}+N，並獲得【疾馳】。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -2495,7 +2495,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}將N張『X』放置到EX區。【死靈充能_N】轉變為N張。'
+      text: "{入場曲}將N張『X』放置到EX區。【死靈充能_N】轉變為N張。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -2507,7 +2507,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{謝幕曲}{消費N}：召喚N個『X』到戰場上。'
+      text: "{謝幕曲}{消費N}：召喚N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -2554,7 +2554,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}如果自己戰場上屬於學院・從者或野獸・從者的從者合計為N個以上，則將N張『X』放置到EX區。'
+      text: "{入場曲}如果自己戰場上屬於學院・從者或野獸・從者的從者合計為N個以上，則將N張『X』放置到EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -2566,7 +2566,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}如果自己的EX區有『X』，則這張卡片{生命值}+N，並獲得【守護】。'
+      text: "{入場曲}如果自己的EX區有『X』，則這張卡片{生命值}+N，並獲得【守護】。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -2578,7 +2578,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{進化}{消費N}：這張卡片進化為『X』。此能力在自己墓場的人偶・卡片為N張以上時可使用。'
+      text: "{進化}{消費N}：這張卡片進化為『X』。此能力在自己墓場的人偶・卡片為N張以上時可使用。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -2590,7 +2590,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}將這張卡片{橫置}並放置到墓場：召喚N個『X』到戰場上。此能力在本回合自己戰場上的從者曾進化的情況下可使用。'
+      text: "{起動}將這張卡片{橫置}並放置到墓場：召喚N個『X』到戰場上。此能力在本回合自己戰場上的從者曾進化的情況下可使用。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -2602,7 +2602,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{謝幕曲}召喚N個『X』到戰場上。將自己牌堆頂的N張卡片放置到墓場。'
+      text: "{謝幕曲}召喚N個『X』到戰場上。將自己牌堆頂的N張卡片放置到墓場。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -2626,7 +2626,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}使自己牌堆頂的N張卡片消失。如果自己的消失區為N張以上，則召喚N個『X』到戰場上。'
+      text: "{入場曲}使自己牌堆頂的N張卡片消失。如果自己的消失區為N張以上，則召喚N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -2674,7 +2674,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}將這張卡片{橫置}、將戰場上任意張數的『X』{橫置}：指定敵方戰場上的N個從者。給予其與「橫置的『X』的張數」相同的傷害。'
+      text: "{起動}將這張卡片{橫置}、將戰場上任意張數的『X』{橫置}：指定敵方戰場上的N個從者。給予其與「橫置的『X』的張數」相同的傷害。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -2698,7 +2698,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}使戰場上的N個『X』消失：抽取N張卡片。'
+      text: "{入場曲}使戰場上的N個『X』消失：抽取N張卡片。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -2711,7 +2711,7 @@ records:
         - numeric_identifier_requires_review
       role: body
       source_kind: effect
-      text: '{入場曲}指定敵方戰場上至多N個從者。【魔力連鎖_N】給予其N點傷害。【魔力連鎖_N】給予敵方的全部主戰者N點傷害。自己的主戰者{生命值}+N。【魔力連鎖_N】將自己墓場的全部『X』放置到EX區。【魔力連鎖_N】自己戰場與自己EX區的全部『X』{攻擊力}+N/{生命值}+N。'
+      text: "{入場曲}指定敵方戰場上至多N個從者。【魔力連鎖_N】給予其N點傷害。【魔力連鎖_N】給予敵方的全部主戰者N點傷害。自己的主戰者{生命值}+N。【魔力連鎖_N】將自己墓場的全部『X』放置到EX區。【魔力連鎖_N】自己戰場與自己EX區的全部『X』{攻擊力}+N/{生命值}+N。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -2723,7 +2723,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}將這張卡片{橫置}、使EX區中原始消費全部不同的N張卡片消失：可以將自己進化牌堆的N張『X』召喚到戰場上。'
+      text: "{起動}將這張卡片{橫置}、使EX區中原始消費全部不同的N張卡片消失：可以將自己進化牌堆的N張『X』召喚到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -2795,7 +2795,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}將N張『X』與N張『X』放置到EX區。'
+      text: "{入場曲}將N張『X』與N張『X』放置到EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -2819,7 +2819,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}如果自己墓場的學院・卡片為N張以上，則將N張『X』放置到EX區。'
+      text: "{入場曲}如果自己墓場的學院・卡片為N張以上，則將N張『X』放置到EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -2831,7 +2831,7 @@ records:
         - numeric_role_requires_review
       role: body
       source_kind: effect
-      text: '{入場曲}指定敵方戰場上的N個從者。如果自己的SEP為N，則給予其N點傷害。自己的主戰者{生命值}+N。'
+      text: "{入場曲}指定敵方戰場上的N個從者。如果自己的SEP為N，則給予其N點傷害。自己的主戰者{生命值}+N。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -2855,7 +2855,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}將這張卡片{橫置}、使墓場的N張卡片消失：召喚N個『X』與N個『X』到戰場上。'
+      text: "{起動}將這張卡片{橫置}、使墓場的N張卡片消失：召喚N個『X』與N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -2891,7 +2891,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}召喚N個『X』到戰場上。如果為【覺醒】狀態，則轉變為N個。'
+      text: "{入場曲}召喚N個『X』到戰場上。如果為【覺醒】狀態，則轉變為N個。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -2902,7 +2902,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}召喚N個『X』到戰場上。'
+      text: "{入場曲}召喚N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -2914,7 +2914,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}使墓場的N張機械・卡片消失：召喚N個『X』到戰場上。此能力N回合中可使用N次。'
+      text: "{起動}使墓場的N張機械・卡片消失：召喚N個『X』到戰場上。此能力N回合中可使用N次。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -2962,7 +2962,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}將這張卡片{橫置}【土之秘術】：召喚N個『X』到戰場上。'
+      text: "{起動}將這張卡片{橫置}【土之秘術】：召喚N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -2998,7 +2998,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}如果這張卡片上放置有融合指示物，則抽取N張卡片。如果這張卡片上未放置融合指示物，則將N張『X』放置到EX區。'
+      text: "{入場曲}如果這張卡片上放置有融合指示物，則抽取N張卡片。如果這張卡片上未放置融合指示物，則將N張『X』放置到EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -3070,7 +3070,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}{消費N}：指定敵方EX區的N張卡片。如果自己EX區的卡片為N張以上，則其變身為『X』。'
+      text: "{入場曲}{消費N}：指定敵方EX區的N張卡片。如果自己EX區的卡片為N張以上，則其變身為『X』。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -3082,7 +3082,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}從N張『X』之中，召喚任意張數到戰場上。將任意張數放置到EX區。'
+      text: "{入場曲}從N張『X』之中，召喚任意張數到戰場上。將任意張數放置到EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -3106,7 +3106,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}從下列之中選擇N項。【N】指定自己戰場上的N張其他偶像歌手・卡片。將其破壞。將N張『X』放置到EX區。【N】召喚N個『X』到戰場上。'
+      text: "{入場曲}從下列之中選擇N項。【N】指定自己戰場上的N張其他偶像歌手・卡片。將其破壞。將N張『X』放置到EX區。【N】召喚N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -3141,7 +3141,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{進化}{消費N}：這張卡片進化為『X』或『X』。此能力在自己墓場的學院・卡片為N張以上時可使用。'
+      text: "{進化}{消費N}：這張卡片進化為『X』或『X』。此能力在自己墓場的學院・卡片為N張以上時可使用。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -3153,7 +3153,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}召喚N個『X』、N個『X』或N個『X』到戰場上。'
+      text: "{入場曲}召喚N個『X』、N個『X』或N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -3177,7 +3177,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}將這張卡片{橫置}、將戰場上的N個『X』{橫置}：指定敵方戰場上的N個從者。給予其N點傷害。'
+      text: "{起動}將這張卡片{橫置}、將戰場上的N個『X』{橫置}：指定敵方戰場上的N個從者。給予其N點傷害。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -3213,7 +3213,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}捨棄手牌中的N張『X』：指定敵方戰場上的N個從者。給予其N點傷害。將N張『X』放置到EX區。'
+      text: "{起動}捨棄手牌中的N張『X』：指定敵方戰場上的N個從者。給予其N點傷害。將N張『X』放置到EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -3225,7 +3225,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}將N張『X』放置到EX區。【連擊_N】在這張卡片上放置N個童話指示物。'
+      text: "{入場曲}將N張『X』放置到EX區。【連擊_N】在這張卡片上放置N個童話指示物。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -3249,7 +3249,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}如果自己戰場上的偶像歌手・卡片為N張以上，則將N張『X』放置到EX區。'
+      text: "{入場曲}如果自己戰場上的偶像歌手・卡片為N張以上，則將N張『X』放置到EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -3261,7 +3261,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}{消費N}將戰場上的N個『X』放置到墓場：給予敵方戰場上的全部從者N點傷害。這張卡片{攻擊力}+N/{生命值}+N。'
+      text: "{起動}{消費N}將戰場上的N個『X』放置到墓場：給予敵方戰場上的全部從者N點傷害。這張卡片{攻擊力}+N/{生命值}+N。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -3297,7 +3297,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}使墓場的這張卡片消失：指定自己戰場上的N個『X』。使其獲得【疾馳】。'
+      text: "{起動}使墓場的這張卡片消失：指定自己戰場上的N個『X』。使其獲得【疾馳】。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -3309,7 +3309,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}給予自己的主戰者N點傷害。如果自己的戰場上有『X』，則這張卡片進化。'
+      text: "{入場曲}給予自己的主戰者N點傷害。如果自己的戰場上有『X』，則這張卡片進化。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -3321,7 +3321,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}召喚N個『X』到戰場上。使其{攻擊力}+N/{生命值}+N，並獲得【守護】。'
+      text: "{入場曲}召喚N個『X』到戰場上。使其{攻擊力}+N/{生命值}+N，並獲得【守護】。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -3333,7 +3333,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{謝幕曲}召喚N個『X』到戰場上。'
+      text: "{謝幕曲}召喚N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -3357,7 +3357,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}將這張卡片{橫置}：從自己的牌堆中搜尋N張『X』，召喚到戰場上。此能力在「本回合中自己使用的卡片張數」為N張以上時可使用。'
+      text: "{起動}將這張卡片{橫置}：從自己的牌堆中搜尋N張『X』，召喚到戰場上。此能力在「本回合中自己使用的卡片張數」為N張以上時可使用。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -3369,7 +3369,7 @@ records:
         - numeric_role_requires_review
       role: body
       source_kind: effect
-      text: '{入場曲}這張卡片{攻擊力}+X/{生命值}+X。X為「自己進化牌堆中正面朝上的進化從者的張數」。如果X為N以上，則這張卡片獲得【指定攻擊】。如果X為N以上，則這張卡片獲得「【攻擊時】將這張卡片重置。此能力N回合中至多發動N次」。'
+      text: "{入場曲}這張卡片{攻擊力}+X/{生命值}+X。X為「自己進化牌堆中正面朝上的進化從者的張數」。如果X為N以上，則這張卡片獲得【指定攻擊】。如果X為N以上，則這張卡片獲得「【攻擊時】將這張卡片重置。此能力N回合中至多發動N次」。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -3381,7 +3381,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}指定自己EX區中任意張數的妖精・從者。其變身為『X』。'
+      text: "{入場曲}指定自己EX區中任意張數的妖精・從者。其變身為『X』。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -3393,7 +3393,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}如果自己的手牌為N張以下，則從自己的牌堆中搜尋N張『X』，放置到EX區。如果自己的手牌為N張，則本回合，使用該卡之際，消費-N。'
+      text: "{入場曲}如果自己的手牌為N張以下，則從自己的牌堆中搜尋N張『X』，放置到EX區。如果自己的手牌為N張，則本回合，使用該卡之際，消費-N。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -3417,7 +3417,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}從下列之中選擇N項。【N】將N張『X』放置到EX區。【N】如果自己的EX區有「卡片名稱含有『X』的從者」，則查看自己牌堆頂的N張卡片。可以從其中公開N張{夜魔}卡片並增加到手牌中。將其餘卡片以任意順序放置到牌堆底。'
+      text: "{入場曲}從下列之中選擇N項。【N】將N張『X』放置到EX區。【N】如果自己的EX區有「卡片名稱含有『X』的從者」，則查看自己牌堆頂的N張卡片。可以從其中公開N張{夜魔}卡片並增加到手牌中。將其餘卡片以任意順序放置到牌堆底。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -3429,7 +3429,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}指定敵方戰場上的N個從者。將N張『X』放置到EX區。給予所指定的從者與「自己EX區的妖精・衍生物張數」相同的傷害。'
+      text: "{入場曲}指定敵方戰場上的N個從者。將N張『X』放置到EX區。給予所指定的從者與「自己EX區的妖精・衍生物張數」相同的傷害。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -3441,7 +3441,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}{消費N}使墓場的這張卡片消失：指定自己墓場或自己消失區中至多N張『X』。將其返回牌堆，並洗牌。將自己進化牌堆中任意張數正面朝上的『X』轉為背面朝上。'
+      text: "{起動}{消費N}使墓場的這張卡片消失：指定自己墓場或自己消失區中至多N張『X』。將其返回牌堆，並洗牌。將自己進化牌堆中任意張數正面朝上的『X』轉為背面朝上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -3453,7 +3453,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}捨棄手牌中的N張學院・卡片：抽取N張卡片。如果自己墓場的學院・卡片為N張以上，則將N張『X』放置到EX區。'
+      text: "{入場曲}捨棄手牌中的N張學院・卡片：抽取N張卡片。如果自己墓場的學院・卡片為N張以上，則將N張『X』放置到EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -3477,7 +3477,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{謝幕曲}指定自己EX區的N張『X』。將其以橫置狀態召喚到戰場上。'
+      text: "{謝幕曲}指定自己EX區的N張『X』。將其以橫置狀態召喚到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -3513,7 +3513,7 @@ records:
         - numeric_role_requires_review
       role: body
       source_kind: effect
-      text: '{起動}移除戰場上N個『X』的N個神湯指示物：抽取N張卡片。此能力N回合中可使用N次。'
+      text: "{起動}移除戰場上N個『X』的N個神湯指示物：抽取N張卡片。此能力N回合中可使用N次。"
     origin: machine
     low_confidence: true
     note: 2026-10-18 對照後保留低信心；未啟用的歷史候選稿，不是目前 template_translation 的選中值；缺少可執行的逐槽來源對齊與採用關係，不以現有成品替候選稿背書。保留原 reasons
@@ -3539,7 +3539,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}將戰場上的N個『X』{橫置}：這張卡片{攻擊力}+N。自己的主戰者{生命值}+N。'
+      text: "{起動}將戰場上的N個『X』{橫置}：這張卡片{攻擊力}+N。自己的主戰者{生命值}+N。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -3563,7 +3563,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}召喚N個『X』到戰場上。如果為【覺醒】狀態，則轉變為至多N個。這張卡片獲得【突進】。'
+      text: "{入場曲}召喚N個『X』到戰場上。如果為【覺醒】狀態，則轉變為至多N個。這張卡片獲得【突進】。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -3587,7 +3587,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}將這張卡片{橫置}、將戰場上的N個『X』或『X』放置到墓場：指定敵方戰場上的N個從者。給予其與「放置到墓場的從者的攻擊力」相同的傷害。'
+      text: "{起動}將這張卡片{橫置}、將戰場上的N個『X』或『X』放置到墓場：指定敵方戰場上的N個從者。給予其與「放置到墓場的從者的攻擊力」相同的傷害。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -3623,7 +3623,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}將N張『X』放置到EX區。如果自己的戰場上有『X』，則這張卡片進化。'
+      text: "{入場曲}將N張『X』放置到EX區。如果自己的戰場上有『X』，則這張卡片進化。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -3635,7 +3635,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}{消費N}：如果為【覺醒】狀態，則從自己的牌堆中搜尋N張『X』，召喚到戰場上。'
+      text: "{入場曲}{消費N}：如果為【覺醒】狀態，則從自己的牌堆中搜尋N張『X』，召喚到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -3671,7 +3671,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}從下列之中選擇N項。【N】將N張『X』放置到EX區。【N】如果自己EX區的機械・卡片為N張以上，則這張卡片{攻擊力}+N/{生命值}+N，並獲得【突進】。'
+      text: "{入場曲}從下列之中選擇N項。【N】將N張『X』放置到EX區。【N】如果自己EX區的機械・卡片為N張以上，則這張卡片{攻擊力}+N/{生命值}+N，並獲得【突進】。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -3695,7 +3695,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}將這張卡片{橫置}、使EX區的N張『X』消失：抽取N張卡片。'
+      text: "{起動}將這張卡片{橫置}、使EX區的N張『X』消失：抽取N張卡片。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -3743,7 +3743,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}從自己的牌堆中搜尋N張原始消費N以下的絕傑・獵人・法術，增加到手牌中。如果自己墓場的獵人・卡片為N張以上，則將N張『X』放置到EX區。'
+      text: "{入場曲}從自己的牌堆中搜尋N張原始消費N以下的絕傑・獵人・法術，增加到手牌中。如果自己墓場的獵人・卡片為N張以上，則將N張『X』放置到EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -3755,7 +3755,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}將戰場上的N個其他護符放置到墓場：從自己的牌堆中搜尋N張『X』，召喚到戰場上。'
+      text: "{入場曲}將戰場上的N個其他護符放置到墓場：從自己的牌堆中搜尋N張『X』，召喚到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -3780,7 +3780,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}指定敵方戰場上的N個從者。給予其N點傷害。如果自己的戰場上有『X』，則轉變為N點傷害。'
+      text: "{入場曲}指定敵方戰場上的N個從者。給予其N點傷害。如果自己的戰場上有『X』，則轉變為N點傷害。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -3804,7 +3804,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}如果自己的EX區有「卡片名稱含有『X』的從者」，則抽取N張卡片。'
+      text: "{入場曲}如果自己的EX區有「卡片名稱含有『X』的從者」，則抽取N張卡片。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -3852,7 +3852,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}{消費N}使戰場上的N個『X』消失：指定敵方戰場上的N個從者。給予其N點傷害。此能力N回合中可使用N次。'
+      text: "{起動}{消費N}使戰場上的N個『X』消失：指定敵方戰場上的N個從者。給予其N點傷害。此能力N回合中可使用N次。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -3864,7 +3864,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}指定EX區的N張卡片。其變身為『X』。'
+      text: "{入場曲}指定EX區的N張卡片。其變身為『X』。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -3913,7 +3913,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}從自己的牌堆中搜尋N張『X』或『X』，召喚到戰場上。'
+      text: "{入場曲}從自己的牌堆中搜尋N張『X』或『X』，召喚到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -3937,7 +3937,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{謝幕曲}指定自己墓場中任意張數的『X』。將其返回牌堆，並洗牌。'
+      text: "{謝幕曲}指定自己墓場中任意張數的『X』。將其返回牌堆，並洗牌。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -3961,7 +3961,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{謝幕曲}使戰場或EX區的N張『X』消失：將這張卡片以橫置狀態召喚到戰場上。這張卡片進化。如果未進化，則這張卡片消失。'
+      text: "{謝幕曲}使戰場或EX區的N張『X』消失：將這張卡片以橫置狀態召喚到戰場上。這張卡片進化。如果未進化，則這張卡片消失。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -4021,7 +4021,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}將N個護符{橫置}：召喚N個『X』到戰場上。'
+      text: "{入場曲}將N個護符{橫置}：召喚N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -4046,7 +4046,7 @@ records:
         - numeric_role_requires_review
       role: body
       source_kind: effect
-      text: '{入場曲}使墓場的N張『X』消失：指定敵方戰場上的N個從者。使其生命值變為N。'
+      text: "{入場曲}使墓場的N張『X』消失：指定敵方戰場上的N個從者。使其生命值變為N。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -4058,7 +4058,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}{消費N}捨棄手牌中的這張卡片：從自己的牌堆中搜尋N張『X』，召喚到戰場上。'
+      text: "{起動}{消費N}捨棄手牌中的這張卡片：從自己的牌堆中搜尋N張『X』，召喚到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -4082,7 +4082,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}將這張卡片{橫置}、捨棄N張手牌：將N張『X』放置到EX區。此能力在【覺醒】狀態時可使用。'
+      text: "{起動}將這張卡片{橫置}、捨棄N張手牌：將N張『X』放置到EX區。此能力在【覺醒】狀態時可使用。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -4094,7 +4094,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}{消費N}將這張卡片{橫置}並放置到墓場：指定敵方戰場上的N個從者。將其破壞。其玩家召喚N個『X』到戰場上。此能力在自己EX區的妖精・卡片為N張時可使用。'
+      text: "{起動}{消費N}將這張卡片{橫置}並放置到墓場：指定敵方戰場上的N個從者。將其破壞。其玩家召喚N個『X』到戰場上。此能力在自己EX區的妖精・卡片為N張時可使用。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -4214,7 +4214,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}使戰場上的N個『X』消失：自己的主戰者{生命值}+N。此能力N回合中可使用N次。'
+      text: "{起動}使戰場上的N個『X』消失：自己的主戰者{生命值}+N。此能力N回合中可使用N次。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -4226,7 +4226,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}如果為【覺醒】狀態，則將N張『X』放置到EX區。'
+      text: "{入場曲}如果為【覺醒】狀態，則將N張『X』放置到EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -4250,7 +4250,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}{消費N}【土之秘術】：召喚『X』與『X』合計N個到戰場上。'
+      text: "{起動}{消費N}【土之秘術】：召喚『X』與『X』合計N個到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -4286,7 +4286,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}敵方的全部玩家將自身牌堆頂的N張卡片放置到墓場。如果放置到墓場的卡片中有從者，則自己將N張『X』放置到EX區。如果放置到墓場的卡片中有法術或護符，則自己將N張『X』放置到EX區。'
+      text: "{入場曲}敵方的全部玩家將自身牌堆頂的N張卡片放置到墓場。如果放置到墓場的卡片中有從者，則自己將N張『X』放置到EX區。如果放置到墓場的卡片中有法術或護符，則自己將N張『X』放置到EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -4322,7 +4322,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{謝幕曲}召喚N個『X』到戰場上。給予敵方的全部主戰者N點傷害。{起動}將戰場上的N張偶像歌手・卡片{橫置}：將這張卡片放置到墓場。'
+      text: "{謝幕曲}召喚N個『X』到戰場上。給予敵方的全部主戰者N點傷害。{起動}將戰場上的N張偶像歌手・卡片{橫置}：將這張卡片放置到墓場。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -4334,7 +4334,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}將這張卡片{橫置}：指定自己戰場上的N個『X』。使其{攻擊力}+N/{生命值}+N，並獲得【疾馳】【必殺】。此能力在自己墓場的人偶・卡片為N張以上時可使用。'
+      text: "{起動}將這張卡片{橫置}：指定自己戰場上的N個『X』。使其{攻擊力}+N/{生命值}+N，並獲得【疾馳】【必殺】。此能力在自己墓場的人偶・卡片為N張以上時可使用。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -4358,7 +4358,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}{消費N}：從自己的牌堆中搜尋N張『X』與N張『X』，放置到EX區。'
+      text: "{入場曲}{消費N}：從自己的牌堆中搜尋N張『X』與N張『X』，放置到EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -4406,7 +4406,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{謝幕曲}召喚N個『X』到戰場上。'
+      text: "{謝幕曲}召喚N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -4430,7 +4430,7 @@ records:
         - numeric_role_requires_review
       role: body
       source_kind: effect
-      text: '{入場曲}自己墓場的『X』與『X』各N張每有N組，指定敵方戰場上至多N個從者。將其破壞。'
+      text: "{入場曲}自己墓場的『X』與『X』各N張每有N組，指定敵方戰場上至多N個從者。將其破壞。"
     origin: machine
     low_confidence: true
     note: 2026-10-18 對照後保留低信心；未啟用的歷史候選稿，不是目前 template_translation 的選中值；缺少可執行的逐槽來源對齊與採用關係，不以現有成品替候選稿背書。保留原 reasons
@@ -4484,7 +4484,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}將N張『X』放置到EX區。如果為【覺醒】狀態，則自己的主戰者{生命值}+N。'
+      text: "{入場曲}將N張『X』放置到EX區。如果為【覺醒】狀態，則自己的主戰者{生命值}+N。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -4521,7 +4521,7 @@ records:
         - numeric_identifier_requires_review
       role: body
       source_kind: effect
-      text: '{入場曲}從下列之中選擇N項。【N】指定自己墓場的N張『X』。將其放置到EX區。【死靈充能_N】本回合，使用該卡之際，消費-N。【N】將自己牌堆頂的N張卡片放置到墓場。'
+      text: "{入場曲}從下列之中選擇N項。【N】指定自己墓場的N張『X』。將其放置到EX區。【死靈充能_N】本回合，使用該卡之際，消費-N。【N】將自己牌堆頂的N張卡片放置到墓場。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -4570,7 +4570,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}查看自己牌堆頂的N張卡片。可以從其中公開N張吸血鬼・卡片並增加到手牌中。將其餘卡片以任意順序放置到牌堆底。如果公開了「卡片名稱含有『X』的從者」，則召喚N個『X』到戰場上。'
+      text: "{入場曲}查看自己牌堆頂的N張卡片。可以從其中公開N張吸血鬼・卡片並增加到手牌中。將其餘卡片以任意順序放置到牌堆底。如果公開了「卡片名稱含有『X』的從者」，則召喚N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -4582,7 +4582,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}【土之秘術】將N張『X』放置到EX區。'
+      text: "{入場曲}【土之秘術】將N張『X』放置到EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -4618,7 +4618,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}{消費N}：從自己的牌堆中搜尋N張『X』，放置到EX區。'
+      text: "{入場曲}{消費N}：從自己的牌堆中搜尋N張『X』，放置到EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -4630,7 +4630,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}從下列之中選擇N項。【N】從自己的牌堆中搜尋N張『X』，增加到手牌中。【N】指定自己墓場的N張『X』。將其增加到手牌中。'
+      text: "{入場曲}從下列之中選擇N項。【N】從自己的牌堆中搜尋N張『X』，增加到手牌中。【N】指定自己墓場的N張『X』。將其增加到手牌中。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -4654,7 +4654,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}{謝幕曲}召喚N個『X』到戰場上。'
+      text: "{入場曲}{謝幕曲}召喚N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -4666,7 +4666,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}將這張卡片{橫置}：指定自己戰場上的N個『X』或『X』。使其獲得【吸血】。'
+      text: "{起動}將這張卡片{橫置}：指定自己戰場上的N個『X』或『X』。使其獲得【吸血】。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -4678,7 +4678,7 @@ records:
         - numeric_role_requires_review
       role: body
       source_kind: effect
-      text: '{入場曲}如果自己的SEP為N，則這張卡片{攻擊力}+N/{生命值}+N，並獲得【疾馳】。'
+      text: "{入場曲}如果自己的SEP為N，則這張卡片{攻擊力}+N/{生命值}+N，並獲得【疾馳】。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -4690,7 +4690,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}捨棄手牌中的N張機械・卡片：抽取N張卡片。將N張『X』與N張『X』放置到EX區。如果自己EX區的機械・卡片為N張，則回復自己的PP N點。'
+      text: "{入場曲}捨棄手牌中的N張機械・卡片：抽取N張卡片。將N張『X』與N張『X』放置到EX區。如果自己EX區的機械・卡片為N張，則回復自己的PP N點。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -4702,7 +4702,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}將這張卡片{橫置}【土之秘術】：召喚N個『X』或N個『X』到戰場上。'
+      text: "{起動}將這張卡片{橫置}【土之秘術】：召喚N個『X』或N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -4726,7 +4726,7 @@ records:
         - numeric_role_requires_review
       role: body
       source_kind: effect
-      text: '{入場曲}抽取N張卡片。如果自己的SEP為N，則這張卡片{攻擊力}+N/{生命值}+N。自己的主戰者{生命值}+N。'
+      text: "{入場曲}抽取N張卡片。如果自己的SEP為N，則這張卡片{攻擊力}+N/{生命值}+N。自己的主戰者{生命值}+N。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -4750,7 +4750,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}抽取N張卡片。如果自己的戰場上有『X』，則自己的主戰者{生命值}+N。'
+      text: "{入場曲}抽取N張卡片。如果自己的戰場上有『X』，則自己的主戰者{生命值}+N。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -4762,7 +4762,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}將N張『X』放置到EX區。如果自己EX區的卡片為N張以上，則自己的主戰者{生命值}+N。'
+      text: "{入場曲}將N張『X』放置到EX區。如果自己EX區的卡片為N張以上，則自己的主戰者{生命值}+N。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -4798,7 +4798,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}這張卡片{攻擊力}+X/{生命值}+X。X為「自己戰場上『X』的數量」。'
+      text: "{入場曲}這張卡片{攻擊力}+X/{生命值}+X。X為「自己戰場上『X』的數量」。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -4810,7 +4810,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{謝幕曲}將N張『X』放置到EX區。將自己牌堆頂的N張卡片放置到墓場。'
+      text: "{謝幕曲}將N張『X』放置到EX區。將自己牌堆頂的N張卡片放置到墓場。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -4834,7 +4834,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}將這張卡片{橫置}並放置到墓場：將N張『X』放置到EX區。此能力在自己戰場上的機械・從者為N個以上時可使用。'
+      text: "{起動}將這張卡片{橫置}並放置到墓場：將N張『X』放置到EX區。此能力在自己戰場上的機械・從者為N個以上時可使用。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -4846,7 +4846,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}使戰場上的N個『X』消失：這張卡片{攻擊力}+N/{生命值}+N。'
+      text: "{入場曲}使戰場上的N個『X』消失：這張卡片{攻擊力}+N/{生命值}+N。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -4882,7 +4882,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}{謝幕曲}召喚N個『X』到戰場上。'
+      text: "{入場曲}{謝幕曲}召喚N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -4930,7 +4930,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}{消費N}使EX區的N張機械・衍生物消失：召喚N個『X』到戰場上。'
+      text: "{起動}{消費N}使EX區的N張機械・衍生物消失：召喚N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -4942,7 +4942,7 @@ records:
         - numeric_role_requires_review
       role: body
       source_kind: effect
-      text: '{起動}【融合】X張原始消費N以上的財寶・卡片：在這張卡片上放置X個融合指示物。X為N以下。'
+      text: "{起動}【融合】X張原始消費N以上的財寶・卡片：在這張卡片上放置X個融合指示物。X為N以下。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -4954,7 +4954,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}將N張『X』放置到EX區。如果自己EX區的自然・卡片為N張以上，則自己的主戰者{生命值}+N。'
+      text: "{入場曲}將N張『X』放置到EX區。如果自己EX區的自然・卡片為N張以上，則自己的主戰者{生命值}+N。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -4966,7 +4966,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}如果自己的戰場上有「卡片名稱含有『X』的從者」，則這張卡片{攻擊力}+N，並獲得【疾馳】。'
+      text: "{入場曲}如果自己的戰場上有「卡片名稱含有『X』的從者」，則這張卡片{攻擊力}+N，並獲得【疾馳】。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -4978,7 +4978,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}這張卡片{攻擊力}+N。將自己牌堆頂的N張卡片放置到墓場。如果藉此將『X』放置到了墓場，則重複這張卡片的{入場曲}能力。'
+      text: "{入場曲}這張卡片{攻擊力}+N。將自己牌堆頂的N張卡片放置到墓場。如果藉此將『X』放置到了墓場，則重複這張卡片的{入場曲}能力。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -4990,7 +4990,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}將『X』『X』各N張放置到EX區。給予敵方的全部主戰者與敵方戰場上的全部從者與「自己EX區的載具・卡片張數」相同的傷害。'
+      text: "{入場曲}將『X』『X』各N張放置到EX區。給予敵方的全部主戰者與敵方戰場上的全部從者與「自己EX區的載具・卡片張數」相同的傷害。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -5014,7 +5014,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}使EX區的N張『X』消失：將N張『X』放置到EX區。'
+      text: "{入場曲}使EX區的N張『X』消失：將N張『X』放置到EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -5038,7 +5038,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}{消費N}使墓場的這張卡片消失：自己戰場上的全部『X』{攻擊力}+N，並獲得【疾馳】。'
+      text: "{起動}{消費N}使墓場的這張卡片消失：自己戰場上的全部『X』{攻擊力}+N，並獲得【疾馳】。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -5062,7 +5062,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}{消費N}：這張卡片{攻擊力}+N/{生命值}+N。召喚N個『X』到戰場上。'
+      text: "{起動}{消費N}：這張卡片{攻擊力}+N/{生命值}+N。召喚N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -5098,7 +5098,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}召喚N個『X』與N個『X』到戰場上。將N張『X』放置到EX區。'
+      text: "{入場曲}召喚N個『X』與N個『X』到戰場上。將N張『X』放置到EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -5110,7 +5110,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}可以將N張『X』放置到戰場或EX區。之後，如果自己戰場與自己EX區的自然・卡片合計為N張以上，則查看自己牌堆頂的N張卡片。可以從其中公開N張自然・卡片並增加到手牌中。將其餘卡片以任意順序放置到牌堆底。'
+      text: "{入場曲}可以將N張『X』放置到戰場或EX區。之後，如果自己戰場與自己EX區的自然・卡片合計為N張以上，則查看自己牌堆頂的N張卡片。可以從其中公開N張自然・卡片並增加到手牌中。將其餘卡片以任意順序放置到牌堆底。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -5122,7 +5122,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}{消費N}：召喚N個『X』到戰場上。抽取N張卡片。'
+      text: "{入場曲}{消費N}：召喚N個『X』到戰場上。抽取N張卡片。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -5146,7 +5146,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}抽取N張卡片。捨棄自己的N張手牌。將N張『X』放置到EX區。'
+      text: "{入場曲}抽取N張卡片。捨棄自己的N張手牌。將N張『X』放置到EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -5158,7 +5158,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}指定自己EX區的N張『X』。其變身為『X』。'
+      text: "{入場曲}指定自己EX區的N張『X』。其變身為『X』。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -5182,7 +5182,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{謝幕曲}將N張『X』放置到EX區。'
+      text: "{謝幕曲}將N張『X』放置到EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -5206,7 +5206,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}召喚N個『X』與N個『X』到戰場上。【死靈充能_N】使其獲得【疾馳】。'
+      text: "{入場曲}召喚N個『X』與N個『X』到戰場上。【死靈充能_N】使其獲得【疾馳】。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -5218,7 +5218,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}{消費N}捨棄手牌中的這張卡片：指定自己戰場上的N張卡片。將其返回手牌。將N張『X』放置到EX區。'
+      text: "{起動}{消費N}捨棄手牌中的這張卡片：指定自己戰場上的N張卡片。將其返回手牌。將N張『X』放置到EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -5230,7 +5230,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}如果自己的戰場上有『X』，則抽取N張卡片。'
+      text: "{入場曲}如果自己的戰場上有『X』，則抽取N張卡片。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -5242,7 +5242,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}從下列之中選擇N項。【N】召喚N個『X』到戰場上。【N】【土之秘術】指定敵方戰場上的N個從者。給予其N點傷害。'
+      text: "{入場曲}從下列之中選擇N項。【N】召喚N個『X』到戰場上。【N】【土之秘術】指定敵方戰場上的N個從者。給予其N點傷害。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -5254,7 +5254,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}各玩家將N張『X』放置到EX區。'
+      text: "{入場曲}各玩家將N張『X』放置到EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -5266,7 +5266,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}將這張卡片{橫置}：指定敵方戰場上的N個從者。給予其與「自己戰場上的『X』的數量」相同的傷害。'
+      text: "{起動}將這張卡片{橫置}：指定敵方戰場上的N個從者。給予其與「自己戰場上的『X』的數量」相同的傷害。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -5291,7 +5291,7 @@ records:
         - numeric_role_requires_review
       role: body
       source_kind: effect
-      text: '{入場曲}從自己的牌堆中搜尋原始消費合計為N以下的至多N張「與這張卡片同名者除外的荒野・卡片」，放置到EX區。本回合，使用該卡之際，消費變為N。召喚N個『X』到戰場上。'
+      text: "{入場曲}從自己的牌堆中搜尋原始消費合計為N以下的至多N張「與這張卡片同名者除外的荒野・卡片」，放置到EX區。本回合，使用該卡之際，消費變為N。召喚N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -5303,7 +5303,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{謝幕曲}可以將『X』『X』『X』各N張放置到戰場或EX區。'
+      text: "{謝幕曲}可以將『X』『X』『X』各N張放置到戰場或EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -5315,7 +5315,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}將戰場上的N個其他從者放置到墓場：從下列之中選擇N項。此能力N回合中可使用N次。【N】抽取N張卡片。【N】召喚N個『X』到戰場上。【N】將自己牌堆頂的N張卡片放置到墓場。'
+      text: "{起動}將戰場上的N個其他從者放置到墓場：從下列之中選擇N項。此能力N回合中可使用N次。【N】抽取N張卡片。【N】召喚N個『X』到戰場上。【N】將自己牌堆頂的N張卡片放置到墓場。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -5327,7 +5327,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}從下列之中選擇N項。【N】從自己的牌堆中搜尋N張『X』，召喚到戰場上。【N】可以將自己手牌中的N張『X』召喚到戰場上。'
+      text: "{入場曲}從下列之中選擇N項。【N】從自己的牌堆中搜尋N張『X』，召喚到戰場上。【N】可以將自己手牌中的N張『X』召喚到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -5363,7 +5363,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}召喚N個『X』到戰場上。如果自己的戰場上有『X』，則轉變為N個。'
+      text: "{入場曲}召喚N個『X』到戰場上。如果自己的戰場上有『X』，則轉變為N個。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -5387,7 +5387,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}{消費N}將這張卡片與N個『X』放置到墓場：從自己的牌堆中搜尋N張『X』，召喚到戰場上。'
+      text: "{起動}{消費N}將這張卡片與N個『X』放置到墓場：從自己的牌堆中搜尋N張『X』，召喚到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -5399,7 +5399,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}召喚N個『X』或N個『X』到戰場上。將N張『X』或N張『X』放置到EX區。'
+      text: "{入場曲}召喚N個『X』或N個『X』到戰場上。將N張『X』或N張『X』放置到EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -5435,7 +5435,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}使墓場的N張『X』消失：給予敵方的全部主戰者N點傷害。抽取N張卡片。此能力N回合中可使用N次。'
+      text: "{起動}使墓場的N張『X』消失：給予敵方的全部主戰者N點傷害。抽取N張卡片。此能力N回合中可使用N次。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -5447,7 +5447,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}使墓場的這張卡片與N張『X』消失：指定敵方戰場上的N個從者。將其橫置。'
+      text: "{起動}使墓場的這張卡片與N張『X』消失：指定敵方戰場上的N個從者。將其橫置。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -5471,7 +5471,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}使戰場上的N個『X』消失：指定敵方戰場上的N個從者。將其破壞。'
+      text: "{入場曲}使戰場上的N個『X』消失：指定敵方戰場上的N個從者。將其破壞。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -5507,7 +5507,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}將N張『X』放置到EX區。敵方的全部玩家將自身牌堆頂的N張卡片放置到墓場。'
+      text: "{入場曲}將N張『X』放置到EX區。敵方的全部玩家將自身牌堆頂的N張卡片放置到墓場。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -5519,7 +5519,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}{消費N}：這張卡片獲得【疾馳】。將N張『X』放置到EX區。此能力在自己墓場的Cute・卡片為N張以上時，N回合中可使用N次。'
+      text: "{起動}{消費N}：這張卡片獲得【疾馳】。將N張『X』放置到EX區。此能力在自己墓場的Cute・卡片為N張以上時，N回合中可使用N次。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -5531,7 +5531,7 @@ records:
         - signed_numeric_requires_review
       role: body
       source_kind: effect
-      text: '{入場曲}指定敵方戰場上的N個從者。如果本回合已使自己主戰者的{生命值}+N以上，則將其破壞。抽取N張卡片。'
+      text: "{入場曲}指定敵方戰場上的N個從者。如果本回合已使自己主戰者的{生命值}+N以上，則將其破壞。抽取N張卡片。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -5555,7 +5555,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}使墓場的這張卡片消失：自己戰場上的全部『X』獲得【疾馳】。'
+      text: "{起動}使墓場的這張卡片消失：自己戰場上的全部『X』獲得【疾馳】。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -5567,7 +5567,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}{消費N}：從自己的牌堆中搜尋N張『X』，召喚到戰場上。自己戰場上的全部『X』{攻擊力}+N/{生命值}+N。'
+      text: "{入場曲}{消費N}：從自己的牌堆中搜尋N張『X』，召喚到戰場上。自己戰場上的全部『X』{攻擊力}+N/{生命值}+N。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -5579,7 +5579,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}{消費N}：將自己墓場的這張卡片召喚到戰場上。這張卡片{攻擊力}+N，並獲得「{謝幕曲}這張卡片消失」。此能力在自己的戰場上有『X』時可使用。'
+      text: "{起動}{消費N}：將自己墓場的這張卡片召喚到戰場上。這張卡片{攻擊力}+N，並獲得「{謝幕曲}這張卡片消失」。此能力在自己的戰場上有『X』時可使用。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -5591,7 +5591,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}如果自己的戰場上有「卡片名稱含有『X』的從者」，則這張卡片{攻擊力}+N/{生命值}+N。'
+      text: "{入場曲}如果自己的戰場上有「卡片名稱含有『X』的從者」，則這張卡片{攻擊力}+N/{生命值}+N。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -5651,7 +5651,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}將戰場上的N個『X』{橫置}：操縱這張卡片。'
+      text: "{起動}將戰場上的N個『X』{橫置}：操縱這張卡片。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -5699,7 +5699,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}從下列之中選擇N項。【N】指定自己戰場與自己EX區中至多N張妖精・衍生物・從者。使其{攻擊力}+N/{生命值}+N。【N】召喚N個『X』到戰場上。'
+      text: "{入場曲}從下列之中選擇N項。【N】指定自己戰場與自己EX區中至多N張妖精・衍生物・從者。使其{攻擊力}+N/{生命值}+N。【N】召喚N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -5711,7 +5711,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}召喚N個『X』到戰場上。【連擊_N】使其獲得【突進】。'
+      text: "{入場曲}召喚N個『X』到戰場上。【連擊_N】使其獲得【突進】。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -5735,7 +5735,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{Q}{起動}將這張卡片{橫置}、將N個『X』放置到墓場：指定敵方的N個從者。將其破壞。'
+      text: "{Q}{起動}將這張卡片{橫置}、將N個『X』放置到墓場：指定敵方的N個從者。將其破壞。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -5771,7 +5771,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}召喚N個『X』到戰場上。'
+      text: "{入場曲}召喚N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -5795,7 +5795,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{謝幕曲}召喚N個『X』到戰場上。自己的主戰者{生命值}+N。{起動}將戰場上的N張偶像歌手・卡片{橫置}：將這張卡片放置到墓場。'
+      text: "{謝幕曲}召喚N個『X』到戰場上。自己的主戰者{生命值}+N。{起動}將戰場上的N張偶像歌手・卡片{橫置}：將這張卡片放置到墓場。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -5843,7 +5843,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}{消費N}：將自己墓場中的這張卡片召喚到戰場上。這張卡片獲得「{謝幕曲}這張卡片消失」。此能力在自己的墓場為N張以上，且自己的戰場上沒有『X』時可使用。'
+      text: "{起動}{消費N}：將自己墓場中的這張卡片召喚到戰場上。這張卡片獲得「{謝幕曲}這張卡片消失」。此能力在自己的墓場為N張以上，且自己的戰場上沒有『X』時可使用。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -5891,7 +5891,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}從下列之中選擇N項。【N】召喚N個『X』到戰場上。【N】這張卡片{攻擊力}+N，並獲得【突進】【守護】。【N】給予敵方的全部主戰者N點傷害。【N】{消費N}將這張卡片放置到墓場：可以將自己進化牌堆的N張『X』召喚到戰場上。'
+      text: "{入場曲}從下列之中選擇N項。【N】召喚N個『X』到戰場上。【N】這張卡片{攻擊力}+N，並獲得【突進】【守護】。【N】給予敵方的全部主戰者N點傷害。【N】{消費N}將這張卡片放置到墓場：可以將自己進化牌堆的N張『X』召喚到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -5915,7 +5915,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}使墓場的這張卡片消失：指定敵方戰場上的N個從者。給予其N點傷害。抽取N張卡片。此能力在自己的戰場上有『X』時可使用。'
+      text: "{起動}使墓場的這張卡片消失：指定敵方戰場上的N個從者。給予其N點傷害。抽取N張卡片。此能力在自己的戰場上有『X』時可使用。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -5939,7 +5939,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}將N張『X』放置到EX區。如果為【覺醒】狀態，則召喚N個『X』到戰場上。'
+      text: "{入場曲}將N張『X』放置到EX區。如果為【覺醒】狀態，則召喚N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -5951,7 +5951,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}從下列之中選擇至多N項。如果自己的戰場上有『X』，則轉變為至多N項。'
+      text: "{入場曲}從下列之中選擇至多N項。如果自己的戰場上有『X』，則轉變為至多N項。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -5999,7 +5999,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}公開手牌中的N張「卡片名稱含有『X』的從者」：抽取N張卡片。'
+      text: "{入場曲}公開手牌中的N張「卡片名稱含有『X』的從者」：抽取N張卡片。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -6024,7 +6024,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}{消費N}將N個『X』放置到墓場：指定敵方的N個從者。給予其N點傷害。給予其主戰者N點傷害。'
+      text: "{起動}{消費N}將N個『X』放置到墓場：指定敵方的N個從者。給予其N點傷害。給予其主戰者N點傷害。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -6048,7 +6048,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}將N張『X』放置到EX區。如果自己EX區的機械・卡片為N張以上，則抽取N張卡片。'
+      text: "{入場曲}將N張『X』放置到EX區。如果自己EX區的機械・卡片為N張以上，則抽取N張卡片。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -6060,7 +6060,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}使EX區的N張『X』消失：這張卡片獲得【疾馳】。'
+      text: "{起動}使EX區的N張『X』消失：這張卡片獲得【疾馳】。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -6072,7 +6072,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}查看自己牌堆頂的N張卡片。可以從其中公開N張武裝・卡片並增加到手牌中。將其餘卡片以任意順序放置到牌堆底。如果自己墓場的武裝・卡片為N張以上，則召喚N個『X』到戰場上。回復自己的PP N點。'
+      text: "{入場曲}查看自己牌堆頂的N張卡片。可以從其中公開N張武裝・卡片並增加到手牌中。將其餘卡片以任意順序放置到牌堆底。如果自己墓場的武裝・卡片為N張以上，則召喚N個『X』到戰場上。回復自己的PP N點。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -6121,7 +6121,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{進化}{消費N}：這張卡片進化為『X』。'
+      text: "{進化}{消費N}：這張卡片進化為『X』。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -6146,7 +6146,7 @@ records:
         - numeric_role_requires_review
       role: body
       source_kind: effect
-      text: '{入場曲}指定戰場上的N個其他從者。使其{攻擊力}+N/{生命值}-N。如果自己的SEP為N，則將N張『X』放置到EX區。'
+      text: "{入場曲}指定戰場上的N個其他從者。使其{攻擊力}+N/{生命值}-N。如果自己的SEP為N，則將N張『X』放置到EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -6158,7 +6158,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}將這張卡片{橫置}並放置到墓場：指定自己戰場上的N個『X』。本回合，其不會受到下一次傷害。'
+      text: "{起動}將這張卡片{橫置}並放置到墓場：指定自己戰場上的N個『X』。本回合，其不會受到下一次傷害。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -6182,7 +6182,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}{消費N}：從自己的牌堆中搜尋N張『X』，召喚到戰場上。'
+      text: "{入場曲}{消費N}：從自己的牌堆中搜尋N張『X』，召喚到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -6206,7 +6206,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}{消費N}使墓場的N張『X』消失：自己戰場上的全部機械・從者{攻擊力}+N/{生命值}+N，並獲得【突進】。此能力N回合中可使用N次。'
+      text: "{起動}{消費N}使墓場的N張『X』消失：自己戰場上的全部機械・從者{攻擊力}+N/{生命值}+N，並獲得【突進】。此能力N回合中可使用N次。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -6230,7 +6230,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}從下列之中選擇N項。【N】將N張『X』放置到EX區。【N】從自己的牌堆中搜尋N張『X』，增加到手牌中。'
+      text: "{入場曲}從下列之中選擇N項。【N】將N張『X』放置到EX區。【N】從自己的牌堆中搜尋N張『X』，增加到手牌中。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -6242,7 +6242,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}捨棄手牌中的N張吸血鬼・卡片：將N張『X』放置到EX區。抽取N張卡片。'
+      text: "{入場曲}捨棄手牌中的N張吸血鬼・卡片：將N張『X』放置到EX區。抽取N張卡片。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -6289,7 +6289,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}{消費N}：召喚N個『X』到戰場上。'
+      text: "{入場曲}{消費N}：召喚N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -6301,7 +6301,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}捨棄手牌中的這張卡片與N張絕傑・魔法使・法術：將N張『X』放置到EX區。'
+      text: "{起動}捨棄手牌中的這張卡片與N張絕傑・魔法使・法術：將N張『X』放置到EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -6324,7 +6324,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}給予自己的主戰者N點傷害。將『X』『X』『X』『X』各N張放置到EX區。'
+      text: "{入場曲}給予自己的主戰者N點傷害。將『X』『X』『X』『X』各N張放置到EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -6336,7 +6336,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}將這張卡片{橫置}：回復自己的PP，回復量與「自己EX區中『X』的張數」相同。'
+      text: "{起動}將這張卡片{橫置}：回復自己的PP，回復量與「自己EX區中『X』的張數」相同。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -6348,7 +6348,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}{消費N}使墓場的這張卡片消失：指定自己墓場的N張『X』與N張『X』。將其召喚到戰場上。'
+      text: "{起動}{消費N}使墓場的這張卡片消失：指定自己墓場的N張『X』與N張『X』。將其召喚到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -6408,7 +6408,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}將自己戰場上的全部原始消費N以上的機械・從者放置到墓場。如果將原始消費N的機械・從者放置到了墓場，則召喚N個『X』到戰場上。如果將原始消費N的機械・從者放置到了墓場，則給予敵方戰場上的全部從者N點傷害。自己戰場上的全部其他機械・從者{攻擊力}+N/{生命值}+N。'
+      text: "{入場曲}將自己戰場上的全部原始消費N以上的機械・從者放置到墓場。如果將原始消費N的機械・從者放置到了墓場，則召喚N個『X』到戰場上。如果將原始消費N的機械・從者放置到了墓場，則給予敵方戰場上的全部從者N點傷害。自己戰場上的全部其他機械・從者{攻擊力}+N/{生命值}+N。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -6420,7 +6420,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}這張卡片{攻擊力}+X/{生命值}+X。X為「自己墓場的『X』的張數」。'
+      text: "{入場曲}這張卡片{攻擊力}+X/{生命值}+X。X為「自己墓場的『X』的張數」。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -6432,7 +6432,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}將這張卡片{橫置}、使戰場上的N個『X』消失：抽取N張卡片。'
+      text: "{起動}將這張卡片{橫置}、使戰場上的N個『X』消失：抽取N張卡片。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -6444,7 +6444,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}從下列之中選擇N項。【N】將N張『X』放置到EX區。【N】指定自己墓場的N張學院・法術。如果自己墓場的學院・卡片為N張以上，則將其增加到手牌中。'
+      text: "{入場曲}從下列之中選擇N項。【N】將N張『X』放置到EX區。【N】指定自己墓場的N張學院・法術。如果自己墓場的學院・卡片為N張以上，則將其增加到手牌中。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -6468,7 +6468,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{進階起動}{消費N}將這張卡片放置到墓場：可以將自己進化牌堆中的N張『X』召喚到戰場上。此能力在自己戰場上的護符為N個以上時可使用。'
+      text: "{進階起動}{消費N}將這張卡片放置到墓場：可以將自己進化牌堆中的N張『X』召喚到戰場上。此能力在自己戰場上的護符為N個以上時可使用。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -6492,7 +6492,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}{消費N}：召喚N個『X』到戰場上。此能力N回合中可使用N次。'
+      text: "{起動}{消費N}：召喚N個『X』到戰場上。此能力N回合中可使用N次。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -6552,7 +6552,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}查看自己牌堆頂的N張卡片。可以將其放置到牌堆底。將N張『X』放置到EX區。'
+      text: "{入場曲}查看自己牌堆頂的N張卡片。可以將其放置到牌堆底。將N張『X』放置到EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -6576,7 +6576,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{謝幕曲}將N張『X』與N張『X』放置到EX區。'
+      text: "{謝幕曲}將N張『X』與N張『X』放置到EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -6648,7 +6648,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}將這張卡片{橫置}並放置到墓場：召喚N個『X』到戰場上。如果自己的戰場上有「卡片名稱含有『X』的從者」，則轉變為N個。'
+      text: "{起動}將這張卡片{橫置}並放置到墓場：召喚N個『X』到戰場上。如果自己的戰場上有「卡片名稱含有『X』的從者」，則轉變為N個。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -6659,7 +6659,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{謝幕曲}從自己的牌堆中搜尋N張『X』，增加到手牌中。'
+      text: "{謝幕曲}從自己的牌堆中搜尋N張『X』，增加到手牌中。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -6719,7 +6719,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{謝幕曲}召喚N個『X』到戰場上。自己的主戰者{生命值}+N。'
+      text: "{謝幕曲}召喚N個『X』到戰場上。自己的主戰者{生命值}+N。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -6743,7 +6743,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}將N張『X』放置到EX區。如果為【覺醒】狀態，則本回合，使用該卡之際，消費-N。'
+      text: "{入場曲}將N張『X』放置到EX區。如果為【覺醒】狀態，則本回合，使用該卡之際，消費-N。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -6755,7 +6755,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}召喚N個『X』到戰場上。如果為【覺醒】狀態，則使其獲得【疾馳】。'
+      text: "{入場曲}召喚N個『X』到戰場上。如果為【覺醒】狀態，則使其獲得【疾馳】。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -6767,7 +6767,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}將N張『X』放置到EX區。自己戰場上的全部妖精・衍生物{攻擊力}+N。'
+      text: "{入場曲}將N張『X』放置到EX區。自己戰場上的全部妖精・衍生物{攻擊力}+N。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -6791,7 +6791,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}將這張卡片{橫置}、將戰場上的N個『X』放置到墓場：從下列之中選擇N項。【N】指定敵方戰場上的N個從者。給予其N點傷害。抽取N張卡片。【N】給予敵方的全部主戰者N點傷害。自己的主戰者{生命值}+N。抽取N張卡片。'
+      text: "{起動}將這張卡片{橫置}、將戰場上的N個『X』放置到墓場：從下列之中選擇N項。【N】指定敵方戰場上的N個從者。給予其N點傷害。抽取N張卡片。【N】給予敵方的全部主戰者N點傷害。自己的主戰者{生命值}+N。抽取N張卡片。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -6803,7 +6803,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}如果自己的戰場上沒有『X』，則召喚N個『X』到戰場上。'
+      text: "{入場曲}如果自己的戰場上沒有『X』，則召喚N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -6816,7 +6816,7 @@ records:
         - signed_numeric_requires_review
       role: body
       source_kind: effect
-      text: '{入場曲}召喚N個『X』到戰場上。自己戰場上的【蓄積】+N。抽取N張卡片。'
+      text: "{入場曲}召喚N個『X』到戰場上。自己戰場上的【蓄積】+N。抽取N張卡片。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -6852,7 +6852,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}將這張卡片{橫置}，主戰者的{生命值}-N：召喚N個『X』到戰場上。'
+      text: "{起動}將這張卡片{橫置}，主戰者的{生命值}-N：召喚N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -6888,7 +6888,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}從自己的牌堆中搜尋N張『X』，放置到EX區。'
+      text: "{入場曲}從自己的牌堆中搜尋N張『X』，放置到EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -6911,7 +6911,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}將N張『X』放置到EX區。'
+      text: "{入場曲}將N張『X』放置到EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -6947,7 +6947,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}將這張卡片{橫置}：指定敵方戰場上的N個從者。給予其N點傷害。本回合，其從戰場被放置到墓場時，將N張『X』放置到EX區。'
+      text: "{起動}將這張卡片{橫置}：指定敵方戰場上的N個從者。給予其N點傷害。本回合，其從戰場被放置到墓場時，將N張『X』放置到EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -6959,7 +6959,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}{消費N}將這張卡片{橫置}：召喚N個『X』或N個『X』到戰場上。'
+      text: "{起動}{消費N}將這張卡片{橫置}：召喚N個『X』或N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -6971,7 +6971,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}{消費N}將這張卡片{橫置}：指定自己EX區的N張『X』。將其召喚到戰場上。使其獲得【突進】。如果為【覺醒】狀態，則回復自己的PP N點。'
+      text: "{起動}{消費N}將這張卡片{橫置}：指定自己EX區的N張『X』。將其召喚到戰場上。使其獲得【突進】。如果為【覺醒】狀態，則回復自己的PP N點。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -6983,7 +6983,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}將這張卡片{橫置}並放置到墓場：將N張『X』放置到EX區。此能力在自己墓場的機械・卡片為N張以上時可使用。'
+      text: "{起動}將這張卡片{橫置}並放置到墓場：將N張『X』放置到EX區。此能力在自己墓場的機械・卡片為N張以上時可使用。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -6995,7 +6995,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{謝幕曲}{消費N}：從自己的牌堆中搜尋N張『X』，以橫置狀態召喚到戰場上。'
+      text: "{謝幕曲}{消費N}：從自己的牌堆中搜尋N張『X』，以橫置狀態召喚到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -7019,7 +7019,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}將這張卡片{橫置}：召喚N個『X』到戰場上。'
+      text: "{起動}將這張卡片{橫置}：召喚N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -7066,7 +7066,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}召喚N個『X』到戰場上。將N張『X』放置到EX區。'
+      text: "{入場曲}召喚N個『X』到戰場上。將N張『X』放置到EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -7091,7 +7091,7 @@ records:
         - numeric_role_requires_review
       role: body
       source_kind: effect
-      text: '{入場曲}指定自己墓場的N張『X』。將其消費變為N並使用。'
+      text: "{入場曲}指定自己墓場的N張『X』。將其消費變為N並使用。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -7103,7 +7103,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}【課程_N】：從自己的牌堆中搜尋N張「卡片名稱含有『X』或『X』或『X』或『X』的從者」，增加到手牌中。'
+      text: "{入場曲}【課程_N】：從自己的牌堆中搜尋N張「卡片名稱含有『X』或『X』或『X』或『X』的從者」，增加到手牌中。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -7115,7 +7115,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}捨棄N張手牌：將N張『X』放置到EX區。自己戰場與自己EX區的全部巨像・從者{攻擊力}+N。'
+      text: "{入場曲}捨棄N張手牌：將N張『X』放置到EX區。自己戰場與自己EX區的全部巨像・從者{攻擊力}+N。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -7151,7 +7151,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}召喚N個『X』或N個『X』到戰場上。'
+      text: "{入場曲}召喚N個『X』或N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -7163,7 +7163,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}如果為【覺醒】狀態，則召喚N個『X』到戰場上。'
+      text: "{入場曲}如果為【覺醒】狀態，則召喚N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -7175,7 +7175,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}{消費N}將這張卡片{橫置}：召喚N個『X』到戰場上。使其獲得【疾馳】。'
+      text: "{起動}{消費N}將這張卡片{橫置}：召喚N個『X』到戰場上。使其獲得【疾馳】。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -7211,7 +7211,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}將N張『X』放置到EX區。如果這張卡片是因能力而進入戰場的，則自己戰場上的全部機械・從者{攻擊力}+N/{生命值}+N。'
+      text: "{入場曲}將N張『X』放置到EX區。如果這張卡片是因能力而進入戰場的，則自己戰場上的全部機械・從者{攻擊力}+N/{生命值}+N。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -7235,7 +7235,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}【連擊_N】從自己的牌堆中搜尋N張『X』，增加到手牌中。'
+      text: "{入場曲}【連擊_N】從自己的牌堆中搜尋N張『X』，增加到手牌中。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -7247,7 +7247,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}將戰場上的N個「與這張卡片同名者除外的野獸・從者」返回手牌：從自己的牌堆中搜尋N張『X』，增加到手牌中。'
+      text: "{入場曲}將戰場上的N個「與這張卡片同名者除外的野獸・從者」返回手牌：從自己的牌堆中搜尋N張『X』，增加到手牌中。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -7283,7 +7283,7 @@ records:
         - numeric_role_requires_review
       role: body
       source_kind: effect
-      text: '{起動}將這張卡片{橫置}：如果自己EX區的N張卡片的熱情指示物為N個以上，則自己的主戰者{生命值}+N。如果為N個以上，則這張卡片{生命值}+N。'
+      text: "{起動}將這張卡片{橫置}：如果自己EX區的N張卡片的熱情指示物為N個以上，則自己的主戰者{生命值}+N。如果為N個以上，則這張卡片{生命值}+N。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -7295,7 +7295,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}使EX區的N張『X』消失：本回合，這張卡片的{進化}消費-N。'
+      text: "{起動}使EX區的N張『X』消失：本回合，這張卡片的{進化}消費-N。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -7307,7 +7307,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}召喚N個『X』到戰場上。抽取X張卡片。X為「自己戰場上龍裔・衍生物的數量」。'
+      text: "{入場曲}召喚N個『X』到戰場上。抽取X張卡片。X為「自己戰場上龍裔・衍生物的數量」。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -7319,7 +7319,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}將這張卡片{橫置}並放置到墓場：召喚N個『X』到戰場上。'
+      text: "{起動}將這張卡片{橫置}並放置到墓場：召喚N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -7331,7 +7331,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}從自己的牌堆中搜尋N張『X』、N張『X』與N張『X』，增加到手牌中。'
+      text: "{入場曲}從自己的牌堆中搜尋N張『X』、N張『X』與N張『X』，增加到手牌中。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -7417,7 +7417,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}查看自己牌堆頂的N張卡片。可以從其中將至多N張『X』召喚到戰場上。將其餘卡片以任意順序放置到牌堆底。'
+      text: "{入場曲}查看自己牌堆頂的N張卡片。可以從其中將至多N張『X』召喚到戰場上。將其餘卡片以任意順序放置到牌堆底。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -7441,7 +7441,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}{消費N}：召喚N個『X』到戰場上。自己戰場上的全部其他妖怪・從者{攻擊力}+N。'
+      text: "{入場曲}{消費N}：召喚N個『X』到戰場上。自己戰場上的全部其他妖怪・從者{攻擊力}+N。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -7453,7 +7453,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}{消費N}：自己戰場上的全部『X』{攻擊力}+N/{生命值}+N。此能力在自己墓場的吸血鬼・卡片為N張以上時，N回合中可使用N次。'
+      text: "{起動}{消費N}：自己戰場上的全部『X』{攻擊力}+N/{生命值}+N。此能力在自己墓場的吸血鬼・卡片為N張以上時，N回合中可使用N次。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -7513,7 +7513,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{謝幕曲}指定自己戰場上的N個未進化的『X』。其進化。'
+      text: "{謝幕曲}指定自己戰場上的N個未進化的『X』。其進化。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -7525,7 +7525,7 @@ records:
         - numeric_role_requires_review
       role: body
       source_kind: effect
-      text: '{入場曲}擲骰子。如果本回合自己擲出的骰子點數中有N，則這張卡片進化。'
+      text: "{入場曲}擲骰子。如果本回合自己擲出的骰子點數中有N，則這張卡片進化。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -7537,7 +7537,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}將這張卡片{橫置}、將戰場上的N個護符放置到墓場：召喚N個『X』到戰場上。'
+      text: "{起動}將這張卡片{橫置}、將戰場上的N個護符放置到墓場：召喚N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -7549,7 +7549,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}從自己的牌堆中搜尋至多N張「卡片名稱含有『X』的從者」。從其中將N張增加到手牌中。將N張放置到墓場。'
+      text: "{入場曲}從自己的牌堆中搜尋至多N張「卡片名稱含有『X』的從者」。從其中將N張增加到手牌中。將N張放置到墓場。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -7573,7 +7573,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}{消費N}使EX區的N張機械・衍生物消失，並將手牌中的這張卡片放置到EX區：召喚N個『X』或N個『X』到戰場上。'
+      text: "{起動}{消費N}使EX區的N張機械・衍生物消失，並將手牌中的這張卡片放置到EX區：召喚N個『X』或N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -7585,7 +7585,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}將N張『X』放置到EX區。如果自己EX區的『X』為N張以上，則抽取N張卡片。'
+      text: "{入場曲}將N張『X』放置到EX區。如果自己EX區的『X』為N張以上，則抽取N張卡片。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -7597,7 +7597,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{謝幕曲}召喚N個『X』到戰場上。'
+      text: "{謝幕曲}召喚N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -7609,7 +7609,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}將N張『X』放置到EX區。如果這張卡片是因能力而進入戰場的，則這張卡片進化。'
+      text: "{入場曲}將N張『X』放置到EX區。如果這張卡片是因能力而進入戰場的，則這張卡片進化。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -7633,7 +7633,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}可以將N張『X』放置到戰場或EX區。自己的主戰者{生命值}+N。'
+      text: "{入場曲}可以將N張『X』放置到戰場或EX區。自己的主戰者{生命值}+N。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -7669,7 +7669,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}召喚N個『X』到戰場上。將N張『X』放置到EX區。'
+      text: "{入場曲}召喚N個『X』到戰場上。將N張『X』放置到EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -7681,7 +7681,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}{消費N}將這張卡片{橫置}：從自己的牌堆中搜尋至多N張『X』，召喚到戰場上。'
+      text: "{起動}{消費N}將這張卡片{橫置}：從自己的牌堆中搜尋至多N張『X』，召喚到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -7693,7 +7693,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}{消費N}將這張卡片{橫置}：可以將自己手牌中的N張『X』召喚到戰場上。使其獲得【守護】。'
+      text: "{起動}{消費N}將這張卡片{橫置}：可以將自己手牌中的N張『X』召喚到戰場上。使其獲得【守護】。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -7705,7 +7705,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}將戰場上的N個『X』{橫置}：這張卡片獲得【疾馳】。'
+      text: "{入場曲}將戰場上的N個『X』{橫置}：這張卡片獲得【疾馳】。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -7729,7 +7729,7 @@ records:
         - numeric_role_requires_review
       role: body
       source_kind: effect
-      text: '{進化}{消費N}：這張卡片進化。此能力在本回合中曾因自己的【土之秘術】而移除自己戰場上N個以上的【蓄積】時可使用。'
+      text: "{進化}{消費N}：這張卡片進化。此能力在本回合中曾因自己的【土之秘術】而移除自己戰場上N個以上的【蓄積】時可使用。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -7753,7 +7753,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}{消費X}：召喚X個『X』到戰場上。'
+      text: "{入場曲}{消費X}：召喚X個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -7789,7 +7789,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}召喚N個『X』到戰場上。如果為【覺醒】狀態，則轉變為N個。'
+      text: "{入場曲}召喚N個『X』到戰場上。如果為【覺醒】狀態，則轉變為N個。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -7801,7 +7801,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}使墓場的N張『X』消失：將N張『X』或N張『X』或N張『X』放置到EX區。'
+      text: "{起動}使墓場的N張『X』消失：將N張『X』或N張『X』或N張『X』放置到EX區。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -7825,7 +7825,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{起動}{消費N}將這張卡片{橫置}：召喚N個『X』到戰場上。'
+      text: "{起動}{消費N}將這張卡片{橫置}：召喚N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -7849,7 +7849,7 @@ records:
         - missing_card_name_concept
       role: body
       source_kind: effect
-      text: '{入場曲}召喚N個『X』或N個『X』到戰場上。'
+      text: "{入場曲}召喚N個『X』或N個『X』到戰場上。"
     origin: machine
   - kind: template_translation_candidate
     data:

@@ -32,7 +32,7 @@ cards:
           amount:
             count: cost.1
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -40,7 +40,7 @@ cards:
             min: 1
             max: 1
         cost_selections:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: field
@@ -156,7 +156,7 @@ cards:
           subjects: target.1
           amount: 4
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -237,7 +237,7 @@ cards:
                 to: ex
         section: 0
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -265,7 +265,7 @@ cards:
                   zone: cemetery
                   type: follower
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -331,7 +331,7 @@ cards:
           subjects: target.1
           power: 2
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: field
@@ -340,7 +340,7 @@ cards:
             min: 1
             max: 1
         cost_selections:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: field

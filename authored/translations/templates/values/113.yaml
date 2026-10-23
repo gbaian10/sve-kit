@@ -10,11 +10,11 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: '{'
+            text: "{"
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}捨棄自己的全部手牌。'
+            text: "}捨棄自己的全部手牌。"
       expression_targets: {}
   - origin: machine
     kind: template_translation
@@ -77,7 +77,7 @@ records:
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
-            text: ' '
+            text: " "
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
@@ -89,7 +89,7 @@ records:
           - kind: LeafRef
             slot: leaf_4
           - kind: Literal
-            text: ' '
+            text: " "
           - kind: LeafRef
             slot: leaf_5
           - kind: Literal
@@ -108,11 +108,11 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: '{進化}{消費'
+            text: "{進化}{消費"
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}：這張卡片進化。處於【覺醒】狀態時，才可以使用這個能力。'
+            text: "}：這張卡片進化。處於【覺醒】狀態時，才可以使用這個能力。"
       expression_targets: {}
   - origin: machine
     kind: template_translation
@@ -160,11 +160,11 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: '{'
+            text: "{"
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}若自己戰場上與自己EX區中合計有'
+            text: "}若自己戰場上與自己EX區中合計有"
           - kind: Form
             form_id: quantity.existence_count.value
             args:
@@ -186,11 +186,11 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: '{'
+            text: "{"
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}使戰場上的'
+            text: "}使戰場上的"
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
@@ -241,7 +241,7 @@ records:
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}的消費時，可以藉由將'
+            text: "}的消費時，可以藉由將"
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
@@ -260,11 +260,11 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: '{'
+            text: "{"
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}召喚'
+            text: "}召喚"
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
@@ -321,15 +321,15 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: '{'
+            text: "{"
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}將這張卡片{'
+            text: "}將這張卡片{"
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
-            text: '}、將'
+            text: "}、將"
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
@@ -374,11 +374,11 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: '{'
+            text: "{"
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}查看'
+            text: "}查看"
           - kind: LeafRef
             slot: leaf_1
           - kind: LeafRef
@@ -429,7 +429,7 @@ records:
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
-            text: '}法術的'
+            text: "}法術的"
           - kind: LeafRef
             slot: name_5
           - kind: Literal
@@ -441,7 +441,7 @@ records:
           - kind: LeafRef
             slot: leaf_3
           - kind: Literal
-            text: '}+'
+            text: "}+"
           - kind: LeafRef
             slot: leaf_4
           - kind: Literal
@@ -465,7 +465,7 @@ records:
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}+'
+            text: "}+"
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
@@ -473,7 +473,7 @@ records:
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
-            text: '}+'
+            text: "}+"
           - kind: LeafRef
             slot: leaf_3
           - kind: Literal
@@ -481,7 +481,7 @@ records:
           - kind: LeafRef
             slot: leaf_4
           - kind: Literal
-            text: '}+'
+            text: "}+"
           - kind: LeafRef
             slot: leaf_5
           - kind: Literal
@@ -496,11 +496,11 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: '{'
+            text: "{"
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}給予自己的主戰者'
+            text: "}給予自己的主戰者"
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
@@ -542,7 +542,7 @@ records:
           - kind: LeafRef
             slot: leaf_5
           - kind: Literal
-            text: ' '
+            text: " "
           - kind: LeafRef
             slot: leaf_6
           - kind: Literal
@@ -572,11 +572,11 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: '{'
+            text: "{"
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}召喚'
+            text: "}召喚"
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
@@ -599,11 +599,11 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: '{'
+            text: "{"
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}若'
+            text: "}若"
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
@@ -696,11 +696,11 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: '{'
+            text: "{"
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}敵方的全部玩家隨機捨棄自身的'
+            text: "}敵方的全部玩家隨機捨棄自身的"
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
@@ -715,11 +715,11 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: '{'
+            text: "{"
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}將'
+            text: "}將"
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
@@ -804,11 +804,11 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: '{'
+            text: "{"
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}捨棄'
+            text: "}捨棄"
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
@@ -884,11 +884,11 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: '{'
+            text: "{"
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}選擇'
+            text: "}選擇"
           - kind: LeafRef
             slot: leaf_1
           - kind: LeafRef
@@ -936,11 +936,11 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: '{'
+            text: "{"
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}將'
+            text: "}將"
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
@@ -1013,7 +1013,7 @@ records:
           - kind: LeafRef
             slot: leaf_3
           - kind: Literal
-            text: '}'
+            text: "}"
           - kind: LeafRef
             slot: leaf_4
           - kind: Literal
@@ -1047,11 +1047,11 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: '{'
+            text: "{"
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}若'
+            text: "}若"
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal

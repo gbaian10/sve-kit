@@ -30,39 +30,43 @@ verified_by:
 scenarios:
   - name: A 自己的主要階段來臨 → 茨の森自毀 → 之後攻擊沒有附加傷害
     setup:
-      turn: {active: P2, first_player: P1, elapsed_turns: {P1: 4, P2: 4}, phase: main}
+      turn: { active: P2, first_player: P1, elapsed_turns: { P1: 4, P2: 4 }, phase: main }
       history: none
       players:
         P1:
           construction: class
-          leader: {class: エルフ, life: 20}
-          pp: {current: 0, max: 4}
+          leader: { class: エルフ, life: 20 }
+          pp: { current: 0, max: 4 }
           zones:
             field:
-              - {id: a1, card: BP03-011}          # 茨の森
-              - {id: a2, card: SD02-002}          # ヴァンガード・レイサム 3/3
+              - { id: a1, card: BP03-011 } # 茨の森
+              - { id: a2, card: SD02-002 } # ヴァンガード・レイサム 3/3
             hand:
-              - {filler: 2}
+              - { filler: 2 }
             deck:
-              - {id: d1, card: BP01-173}
-              - {filler: 20}
+              - { id: d1, card: BP01-173 }
+              - { filler: 20 }
         P2:
           construction: class
-          leader: {class: ロイヤル, life: 20}
-          pp: {current: 0, max: 4}
+          leader: { class: ロイヤル, life: 20 }
+          pp: { current: 0, max: 4 }
           zones:
             field:
-              - {id: b1, card: BP01-173, state: {acted: true}}   # ファイター 2/3
+              - { id: b1, card: BP01-173, state: { acted: true } } # ファイター 2/3
             hand:
-              - {filler: 3}
+              - { filler: 3 }
             deck:
-              - {filler: 20}
+              - { filler: 20 }
     decisions:
-      - {n: 1, by: P2, at: main, do: end-phase}
-      - {n: 2, by: P1, at: quick, do: pass}
-      - {n: 3, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 1}}}
-      - {n: 4, by: P1, at: main, do: attack, attacker: a2, target: b1}
-      - {n: 5, by: P2, at: quick, do: pass}
+      - { n: 1, by: P2, at: main, do: end-phase }
+      - { n: 2, by: P1, at: quick, do: pass }
+      - n: 3
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: { ability: { source: a1, line: 1 } }
+      - { n: 4, by: P1, at: main, do: attack, attacker: a2, target: b1 }
+      - { n: 5, by: P2, at: quick, do: pass }
     random: {}
     expected:
       - at: after-decision-2
@@ -71,9 +75,9 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - {do: choose-pending, pending: {ability: {source: a1, line: 1}}}
+            - { do: choose-pending, pending: { ability: { source: a1, line: 1 } } }
         assert:
-          turn: {active: P1, phase: main}
+          turn: { active: P1, phase: main }
           P1.hand: [filler: 2, d1]
       - at: after-decision-3
         view: omniscient
@@ -82,55 +86,63 @@ scenarios:
           P1.field: [a2]
           P1.cemetery: [a1]
         events:
-          - {kind: 破壊, object: a1}
+          - { kind: 破壊, object: a1 }
       - at: after-decision-5
         view: omniscient
         outcome: resolved
         assert:
           P2.field: []
-          P1.field.a2: {hp: 1, acted: true}
+          P1.field.a2: { hp: 1, acted: true }
         events:
-          - {kind: ダメージ, source: a2, target: b1, amount: 3, group: 1}
-          - {kind: ダメージ, source: b1, target: a2, amount: 2, group: 1}
+          - { kind: ダメージ, source: a2, target: b1, amount: 3, group: 1 }
+          - { kind: ダメージ, source: b1, target: a2, amount: 2, group: 1 }
         forbidden_events:
-          - {kind: 待機}
+          - { kind: 待機 }
 
   - name: B 打出當回合：攻撃時 2 傷害打死體力 2 的目標 → 不交戰、攻擊者體力不減
     setup:
-      turn: {active: P1, first_player: P1, elapsed_turns: {P1: 4, P2: 3}, phase: main}
+      turn: { active: P1, first_player: P1, elapsed_turns: { P1: 4, P2: 3 }, phase: main }
       history: none
       players:
         P1:
           construction: class
-          leader: {class: エルフ, life: 20}
-          pp: {current: 1, max: 4}
+          leader: { class: エルフ, life: 20 }
+          pp: { current: 1, max: 4 }
           zones:
             field:
-              - {id: a2, card: SD02-002}          # ヴァンガード・レイサム 3/3，非本回合進場
+              - { id: a2, card: SD02-002 } # ヴァンガード・レイサム 3/3，非本回合進場
             hand:
-              - {id: a1, card: BP03-011}          # 茨の森（コスト1）
+              - { id: a1, card: BP03-011 } # 茨の森（コスト1）
             deck:
-              - {filler: 20}
+              - { filler: 20 }
         P2:
           construction: class
-          leader: {class: ロイヤル, life: 20}
-          pp: {current: 0, max: 4}
+          leader: { class: ロイヤル, life: 20 }
+          pp: { current: 0, max: 4 }
           zones:
             field:
-              - {id: b1, card: BP01-173, state: {acted: true, hp: 2}}
+              - { id: b1, card: BP01-173, state: { acted: true, hp: 2 } }
             hand:
               # after-decision-4 要完整列出 P2 的合法選項（只有 pass）→ 手牌用真實的非クイック卡，不能用 filler（契約 2.3；互驗第二輪修正，astra）
-              - {id: b2, card: BP01-173}
-              - {id: b3, card: BP01-173}
-              - {id: b4, card: BP01-173}
+              - { id: b2, card: BP01-173 }
+              - { id: b3, card: BP01-173 }
+              - { id: b4, card: BP01-173 }
             deck:
-              - {filler: 20}
+              - { filler: 20 }
     decisions:
-      - {n: 1, by: P1, at: main, do: play, card: a1}
-      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 3}}}
-      - {n: 3, by: P1, at: main, do: attack, attacker: a2, target: b1}
-      - {n: 4, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a2, card: BP03-011, line: 2, keyword: 攻撃時}}}
-      - {n: 5, by: P2, at: quick, do: pass}
+      - { n: 1, by: P1, at: main, do: play, card: a1 }
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: { ability: { source: a1, line: 3 } }
+      - { n: 3, by: P1, at: main, do: attack, attacker: a2, target: b1 }
+      - n: 4
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: { ability: { source: a2, card: BP03-011, line: 2, keyword: 攻撃時 } }
+      - { n: 5, by: P2, at: quick, do: pass }
     random: {}
     expected:
       - at: after-decision-2
@@ -138,26 +150,26 @@ scenarios:
         outcome: resolved
         assert:
           P1.field: [a2, a1, new-1]
-          P1.field.new-1: {name: フェアリー, entered_from: other, entered_by: effect}
+          P1.field.new-1: { name: フェアリー, entered_from: other, entered_by: effect }
         events:
-          - {kind: 場に出す, object: new-1, to: P1.field}
+          - { kind: 場に出す, object: new-1, to: P1.field }
       - at: after-decision-4
         view: omniscient
         outcome: resolved
         awaiting:
           by: P2
           choices:
-            - {do: pass}
+            - { do: pass }
         assert:
           P2.field: []
           P2.cemetery: [b1]
         events:
-          - {kind: ダメージ, source: a2, target: b1, amount: 2}
-          - {kind: 破壊, object: b1, by: rule-11.3.1}
+          - { kind: ダメージ, source: a2, target: b1, amount: 2 }
+          - { kind: 破壊, object: b1, by: rule-11.3.1 }
       - at: after-decision-5
         view: omniscient
         outcome: resolved
         assert:
-          P1.field.a2: {hp: 3, acted: true}
+          P1.field.a2: { hp: 3, acted: true }
         forbidden_events:
-          - {kind: ダメージ, target: a2}
+          - { kind: ダメージ, target: a2 }

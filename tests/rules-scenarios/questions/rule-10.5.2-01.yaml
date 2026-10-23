@@ -94,7 +94,7 @@ verified_by:
     method: independent-derivation
     note: 10.5.2.1、10.5.2.2；xverify-1/result.md〈22 個重疊題〉。之後未再改
 scenarios:
-  - name: '[astra] 非回合玩家尚有待機時，優先回到回合玩家的新待機'
+  - name: "[astra] 非回合玩家尚有待機時，優先回到回合玩家的新待機"
     setup:
       turn:
         active: P1
@@ -254,10 +254,18 @@ scenarios:
         awaiting:
           by: P2
           choices:
-            - {do: choose-pending, pending: {ability: {source: b1, line: 3}}, targets: {1: [a3]}}
-            - {do: choose-pending, pending: {ability: {source: b1, line: 3}}, targets: {1: [a4]}}
-            - {do: choose-pending, pending: {ability: {source: b2, line: 3}}, targets: {1: [a3]}}
-            - {do: choose-pending, pending: {ability: {source: b2, line: 3}}, targets: {1: [a4]}}
+            - do: choose-pending
+              pending: { ability: { source: b1, line: 3 } }
+              targets: { 1: [a3] }
+            - do: choose-pending
+              pending: { ability: { source: b1, line: 3 } }
+              targets: { 1: [a4] }
+            - do: choose-pending
+              pending: { ability: { source: b2, line: 3 } }
+              targets: { 1: [a3] }
+            - do: choose-pending
+              pending: { ability: { source: b2, line: 3 } }
+              targets: { 1: [a4] }
         events:
           - kind: プレイ
             ability:
@@ -328,7 +336,9 @@ scenarios:
         awaiting:
           by: P2
           choices:
-            - {do: choose-pending, pending: {ability: {source: b2, line: 3}}, targets: {1: [a4]}}
+            - do: choose-pending
+              pending: { ability: { source: b2, line: 3 } }
+              targets: { 1: [a4] }
         events:
           - kind: プレイ
             ability:
@@ -362,7 +372,7 @@ scenarios:
               line: 3
         events_exact:
           - プレイ
-  - name: '[fable] A P2 先結算サロメ → 打死アウトローガンナー → 回合玩家 P1 的新待機先處理 → P2 敗北，デモンビーター來不及'
+  - name: "[fable] A P2 先結算サロメ → 打死アウトローガンナー → 回合玩家 P1 的新待機先處理 → P2 敗北，デモンビーター來不及"
     setup:
       turn:
         active: P1
@@ -450,9 +460,13 @@ scenarios:
         awaiting:
           by: P2
           choices:
-            - {do: choose-pending, pending: {ability: {source: b1, keyword: ラストワード, line: 1}}, targets: {1: [a1]}}
-            - {do: choose-pending, pending: {ability: {source: b1, keyword: ラストワード, line: 1}}, targets: {1: [a2]}}
-            - {do: choose-pending, pending: {ability: {source: b2, line: 3}}}
+            - do: choose-pending
+              pending: { ability: { source: b1, keyword: ラストワード, line: 1 } }
+              targets: { 1: [a1] }
+            - do: choose-pending
+              pending: { ability: { source: b1, keyword: ラストワード, line: 1 } }
+              targets: { 1: [a2] }
+            - { do: choose-pending, pending: { ability: { source: b2, line: 3 } } }
         assert:
           P1.pp.current: 5
           P1.cemetery:
@@ -562,8 +576,8 @@ scenarios:
               source: b2
               line: 3
           - kind: 体力増加
-  - name: '[fable] B P2 先結算デモンビーター → 再サロメ → P1 的新待機 → P2 以體力 1 存活'
-    inherit: '[fable] A P2 先結算サロメ → 打死アウトローガンナー → 回合玩家 P1 的新待機先處理 → P2 敗北，デモンビーター來不及'
+  - name: "[fable] B P2 先結算デモンビーター → 再サロメ → P1 的新待機 → P2 以體力 1 存活"
+    inherit: "[fable] A P2 先結算サロメ → 打死アウトローガンナー → 回合玩家 P1 的新待機先處理 → P2 敗北，デモンビーター來不及"
     decisions:
       - n: 1
         by: P1
@@ -606,8 +620,12 @@ scenarios:
         awaiting:
           by: P2
           choices:
-            - {do: choose-pending, pending: {ability: {source: b1, keyword: ラストワード, line: 1}}, targets: {1: [a1]}}
-            - {do: choose-pending, pending: {ability: {source: b1, keyword: ラストワード, line: 1}}, targets: {1: [a2]}}
+            - do: choose-pending
+              pending: { ability: { source: b1, keyword: ラストワード, line: 1 } }
+              targets: { 1: [a1] }
+            - do: choose-pending
+              pending: { ability: { source: b1, keyword: ラストワード, line: 1 } }
+              targets: { 1: [a2] }
         assert:
           P2.leader.life: 2
           P1.field:

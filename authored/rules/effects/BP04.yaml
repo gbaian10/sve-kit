@@ -18,11 +18,11 @@ cards:
               - count:
                   side: self
                   zone: ex
-          split: '1'
+          split: "1"
         event: enter
         subject: self
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -94,7 +94,7 @@ cards:
               power: -2
               hp: -2
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: field
@@ -104,7 +104,7 @@ cards:
             max: 1
             modes:
               - 1
-          - key: '2'
+          - key: "2"
             select:
               side: opponent
               zone: field
@@ -189,7 +189,7 @@ cards:
             op: banish
             subjects: target.1
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -248,7 +248,7 @@ cards:
         event: enter
         subject: self
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -351,7 +351,7 @@ cards:
         event: enter
         subject: self
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field

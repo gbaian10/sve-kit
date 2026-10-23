@@ -33,7 +33,7 @@ refs:
     - 10.9.1.2
     - 5.31.2
     - 12.5.1
-    - '12.8'
+    - "12.8"
   qa:
     - Q2107
     - Q2104
@@ -68,7 +68,7 @@ verified_by:
     method: qa
     note: Q2107、13.3.1.2、13.3.1.3；xverify-1/result.md〈22 個重疊題〉。之後未再改
 scenarios:
-  - name: '[astra] SC 初始 9'
+  - name: "[astra] SC 初始 9"
     setup:
       turn:
         active: P1
@@ -172,7 +172,7 @@ scenarios:
               event:
                 left_field: b
           P2.leader.life: 17
-  - name: '[astra] SC 初始 10'
+  - name: "[astra] SC 初始 10"
     setup:
       turn:
         active: P1
@@ -272,7 +272,7 @@ scenarios:
             - b
           semantic_state.pending_triggers: []
           P2.leader.life: 17
-  - name: '[astra] SC 初始 11'
+  - name: "[astra] SC 初始 11"
     setup:
       turn:
         active: P1
@@ -374,7 +374,7 @@ scenarios:
             - b
           semantic_state.pending_triggers: []
           P2.leader.life: 17
-  - name: '[fable] A 墓場 10 張法術（只有 4 種名）→ SC 成立 → 失去能力 → 被破壞時沒有ラストワード'
+  - name: "[fable] A 墓場 10 張法術（只有 4 種名）→ SC 成立 → 失去能力 → 被破壞時沒有ラストワード"
     setup:
       turn:
         active: P1
@@ -476,8 +476,8 @@ scenarios:
         forbidden_events:
           - kind: 待機
           - kind: 体力増加
-  - name: '[fable] B 墓場 9 張法術（自身不算）→ SC 不成立 → 保留能力 → ラストワード誘發'
-    inherit: '[fable] A 墓場 10 張法術（只有 4 種名）→ SC 成立 → 失去能力 → 被破壞時沒有ラストワード'
+  - name: "[fable] B 墓場 9 張法術（自身不算）→ SC 不成立 → 保留能力 → ラストワード誘發"
+    inherit: "[fable] A 墓場 10 張法術（只有 4 種名）→ SC 成立 → 失去能力 → 被破壞時沒有ラストワード"
     setup:
       players:
         P1:

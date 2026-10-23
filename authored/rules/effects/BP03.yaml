@@ -69,7 +69,7 @@ cards:
               subjects: self.leader
               hp: 1
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: field
@@ -138,7 +138,7 @@ cards:
             - op: stand
               subjects: target.1
         targets:
-          - key: '1'
+          - key: "1"
             select:
               zone: field
               side: opponent
@@ -146,7 +146,7 @@ cards:
             min: 1
             max: 1
         cost_selections:
-          - key: '1'
+          - key: "1"
             select:
               zone: cemetery
               side: self
@@ -211,7 +211,7 @@ cards:
         event: enter
         subject: self
         targets:
-          - key: '1'
+          - key: "1"
             select:
               zone: field
               side: opponent

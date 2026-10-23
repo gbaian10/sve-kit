@@ -34,29 +34,29 @@ verified_by:
 scenarios:
   - name: A 雙方リーダー在同一次結算歸 0 → 和局
     setup:
-      turn: {active: P1, first_player: P1, elapsed_turns: {P1: 9, P2: 8}, phase: main}
+      turn: { active: P1, first_player: P1, elapsed_turns: { P1: 9, P2: 8 }, phase: main }
       history: none
       players:
         P1:
           construction: class
-          leader: {class: ナイトメア, life: 1}
-          pp: {current: 1, max: 9}
+          leader: { class: ナイトメア, life: 1 }
+          pp: { current: 1, max: 9 }
           zones:
             hand:
-              - {id: w1, card: BP12-079}          # 紅のワルツ（コスト1）
+              - { id: w1, card: BP12-079 } # 紅のワルツ（コスト1）
             deck:
-              - {filler: 20}
+              - { filler: 20 }
         P2:
           construction: class
-          leader: {class: ロイヤル, life: 2}
-          pp: {current: 0, max: 9}
+          leader: { class: ロイヤル, life: 2 }
+          pp: { current: 0, max: 9 }
           zones:
             hand:
-              - {filler: 3}
+              - { filler: 3 }
             deck:
-              - {filler: 20}
+              - { filler: 20 }
     decisions:
-      - {n: 1, by: P1, at: main, do: play, card: w1, options: [1]}
+      - { n: 1, by: P1, at: main, do: play, card: w1, options: [1] }
     random: {}
     expected:
       - at: after-decision-1
@@ -65,21 +65,21 @@ scenarios:
         assert:
           P1.leader.life: 0
           P2.leader.life: 0
-          game: {ended: true, winner: null, by: 1.2.2}
+          game: { ended: true, winner: null, by: 1.2.2 }
         events:
-          - {kind: ダメージ, source: w1, target: P2.leader, amount: 2}
-          - {kind: ダメージ, source: w1, target: P1.leader, amount: 1}
-          - {kind: 敗北, player: P1, by: rule-11.2.1, group: 1}
-          - {kind: 敗北, player: P2, by: rule-11.2.1, group: 1}
+          - { kind: ダメージ, source: w1, target: P2.leader, amount: 2 }
+          - { kind: ダメージ, source: w1, target: P1.leader, amount: 1 }
+          - { kind: 敗北, player: P1, by: rule-11.2.1, group: 1 }
+          - { kind: 敗北, player: P2, by: rule-11.2.1, group: 1 }
 
   - name: B 對照：只有 P2 歸 0 → P1 勝
     inherit: A 雙方リーダー在同一次結算歸 0 → 和局
     setup:
       players:
         P1:
-          leader: {class: ナイトメア, life: 2}
+          leader: { class: ナイトメア, life: 2 }
     decisions:
-      - {n: 1, by: P1, at: main, do: play, card: w1, options: [1]}
+      - { n: 1, by: P1, at: main, do: play, card: w1, options: [1] }
     random: {}
     expected:
       - at: after-decision-1
@@ -88,51 +88,51 @@ scenarios:
         assert:
           P1.leader.life: 1
           P2.leader.life: 0
-          game: {ended: true, winner: P1, by: 11.2.1}
+          game: { ended: true, winner: P1, by: 11.2.1 }
         events:
-          - {kind: 敗北, player: P2, by: rule-11.2.1}
+          - { kind: 敗北, player: P2, by: rule-11.2.1 }
         forbidden_events:
-          - {kind: 敗北, player: P1}
+          - { kind: 敗北, player: P1 }
 
   - name: C P2 體力歸 0（11.2.1）與 P1 空牌庫抽牌（11.2.2）在同一次規則處理 → 和局
     setup:
-      turn: {active: P1, first_player: P1, elapsed_turns: {P1: 9, P2: 8}, phase: main}
+      turn: { active: P1, first_player: P1, elapsed_turns: { P1: 9, P2: 8 }, phase: main }
       history: none
       players:
         P1:
           construction: class
-          leader: {class: ドラゴン, life: 20}
-          pp: {current: 1, max: 9}
+          leader: { class: ドラゴン, life: 20 }
+          pp: { current: 1, max: 9 }
           zones:
             field:
-              - {id: a2, card: BP01-173}          # 灯火の烈絶 的己方目標
+              - { id: a2, card: BP01-173 } # 灯火の烈絶 的己方目標
             hand:
-              - {id: s1, card: BP15-064}          # 灯火の烈絶（コスト1）
+              - { id: s1, card: BP15-064 } # 灯火の烈絶（コスト1）
             deck: []
         P2:
           construction: class
-          leader: {class: ロイヤル, life: 1}
-          pp: {current: 0, max: 9}
+          leader: { class: ロイヤル, life: 1 }
+          pp: { current: 0, max: 9 }
           zones:
             hand:
-              - {filler: 3}
+              - { filler: 3 }
             deck:
-              - {filler: 20}
+              - { filler: 20 }
     decisions:
-      - {n: 1, by: P1, at: main, do: play, card: s1, targets: {1: [a2]}}
+      - { n: 1, by: P1, at: main, do: play, card: s1, targets: { 1: [a2] } }
     random: {}
     expected:
       - at: after-decision-1
         view: omniscient
         outcome: game-end
         assert:
-          P1.field.a2: {hp: 2}
+          P1.field.a2: { hp: 2 }
           P2.leader.life: 0
           P1.hand: []
           P1.deck: []
-          game: {ended: true, winner: null, by: 1.2.2}
+          game: { ended: true, winner: null, by: 1.2.2 }
         events:
-          - {kind: ダメージ, source: s1, target: a2, amount: 1}
-          - {kind: ダメージ, source: s1, target: P2.leader, amount: 1}
-          - {kind: 敗北, player: P2, by: rule-11.2.1, group: 1}
-          - {kind: 敗北, player: P1, by: rule-11.2.2, group: 1}
+          - { kind: ダメージ, source: s1, target: a2, amount: 1 }
+          - { kind: ダメージ, source: s1, target: P2.leader, amount: 1 }
+          - { kind: 敗北, player: P2, by: rule-11.2.1, group: 1 }
+          - { kind: 敗北, player: P1, by: rule-11.2.2, group: 1 }

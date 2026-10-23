@@ -87,7 +87,7 @@ verified_by:
     method: independent-derivation
     note: 7.4.5；xverify-1/result.md〈22 個重疊題〉。遷移時 Quick=True 多了空 guard-act（xverify-2/result.md 無法判斷），fix-2 移除後 xverify-2/recheck.md 同意；目前版本與第一輪驗過的版本相同
 scenarios:
-  - name: '[astra] 結束時 Quick=False'
+  - name: "[astra] 結束時 Quick=False"
     setup:
       turn:
         active: P1
@@ -144,7 +144,7 @@ scenarios:
           P1.field:
             - a
           P2.pp.current: 10
-  - name: '[astra] 結束時 Quick=True'
+  - name: "[astra] 結束時 Quick=True"
     setup:
       turn:
         active: P1
@@ -208,7 +208,7 @@ scenarios:
         assert:
           P1.field: []
           P2.pp.current: 6
-  - name: '[fable] A 結束時誘發（リーダー傷害被リリエル擋下、從者傷害照常）→ 守護アクト → P2 用クイック起動 → 再問一次 → 下回合站起'
+  - name: "[fable] A 結束時誘發（リーダー傷害被リリエル擋下、從者傷害照常）→ 守護アクト → P2 用クイック起動 → 再問一次 → 下回合站起"
     setup:
       turn:
         active: P1

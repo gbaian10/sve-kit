@@ -37,58 +37,62 @@ verified_by:
 scenarios:
   - name: A 三輪：第 1、2 輪各放到 1 張サイ → 第 3 輪沒有 → 停；攻撃力 +9、墓場 12 張
     setup:
-      turn: {active: P1, first_player: P1, elapsed_turns: {P1: 5, P2: 4}, phase: main}
+      turn: { active: P1, first_player: P1, elapsed_turns: { P1: 5, P2: 4 }, phase: main }
       history: none
       players:
         P1:
           construction: class
-          leader: {class: ドラゴン, life: 20}
-          pp: {current: 5, max: 5}
+          leader: { class: ドラゴン, life: 20 }
+          pp: { current: 5, max: 5 }
           zones:
             hand:
-              - {id: a1, card: BP05-SL12}         # 魔導電磁サイ 0/7
+              - { id: a1, card: BP05-SL12 } # 魔導電磁サイ 0/7
             deck:
-              - {id: d1, card: BP01-173}
-              - {id: d2, card: BP05-SL12}         # 第 1 輪含サイ
-              - {id: d3, card: BP01-176}
-              - {id: d4, card: BP01-180}
-              - {id: d5, card: BP05-SL12}         # 第 2 輪含サイ
-              - {id: d6, card: BP01-173}
-              - {id: d7, card: BP01-176}
-              - {id: d8, card: BP01-180}
-              - {id: d9, card: BP01-173}          # 第 3 輪：沒有サイ
-              - {id: d10, card: BP01-176}
-              - {id: d11, card: BP01-180}
-              - {id: d12, card: BP01-173}
-              - {filler: 8}
+              - { id: d1, card: BP01-173 }
+              - { id: d2, card: BP05-SL12 } # 第 1 輪含サイ
+              - { id: d3, card: BP01-176 }
+              - { id: d4, card: BP01-180 }
+              - { id: d5, card: BP05-SL12 } # 第 2 輪含サイ
+              - { id: d6, card: BP01-173 }
+              - { id: d7, card: BP01-176 }
+              - { id: d8, card: BP01-180 }
+              - { id: d9, card: BP01-173 } # 第 3 輪：沒有サイ
+              - { id: d10, card: BP01-176 }
+              - { id: d11, card: BP01-180 }
+              - { id: d12, card: BP01-173 }
+              - { filler: 8 }
         P2:
           construction: class
-          leader: {class: ロイヤル, life: 20}
-          pp: {current: 0, max: 5}
+          leader: { class: ロイヤル, life: 20 }
+          pp: { current: 0, max: 5 }
           zones:
             hand:
-              - {filler: 3}
+              - { filler: 3 }
             deck:
-              - {filler: 20}
+              - { filler: 20 }
     decisions:
-      - {n: 1, by: P1, at: main, do: play, card: a1}
-      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2}}}
+      - { n: 1, by: P1, at: main, do: play, card: a1 }
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: { ability: { source: a1, line: 2 } }
     random: {}
     expected:
       - at: after-decision-2
         view: omniscient
         outcome: resolved
         assert:
-          P1.field.a1: {power: 9, hp: 7}
+          P1.field.a1: { power: 9, hp: 7 }
           P1.deck: [filler: 8]
           P1.cemetery: [d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12]
           semantic_state.pending_triggers: []
-          game: {ended: false}
+          game: { ended: false }
         events:
-          - {kind: プレイ, object: a1}
-          - {kind: プレイ, ability: {source: a1, line: 2}}
-          - {kind: 移動, object: d1, from: P1.deck, to: P1.cemetery}
-          - {kind: 移動, object: d12, from: P1.deck, to: P1.cemetery}
+          - { kind: プレイ, object: a1 }
+          - { kind: プレイ, ability: { source: a1, line: 2 } }
+          - { kind: 移動, object: d1, from: P1.deck, to: P1.cemetery }
+          - { kind: 移動, object: d12, from: P1.deck, to: P1.cemetery }
         events_exact: [プレイ]
 
   - name: B 牌庫 0 張：+3 照做，放牌庫不做，不敗北
@@ -99,18 +103,22 @@ scenarios:
           zones:
             deck: []
     decisions:
-      - {n: 1, by: P1, at: main, do: play, card: a1}
-      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2}}}
+      - { n: 1, by: P1, at: main, do: play, card: a1 }
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: { ability: { source: a1, line: 2 } }
     random: {}
     expected:
       - at: after-decision-2
         view: omniscient
         outcome: resolved
         assert:
-          P1.field.a1: {power: 3, hp: 7}
+          P1.field.a1: { power: 3, hp: 7 }
           P1.deck: []
           P1.cemetery: []
-          game: {ended: false}
+          game: { ended: false }
         forbidden_events:
-          - {kind: 敗北}
-          - {kind: 移動, to: P1.cemetery}
+          - { kind: 敗北 }
+          - { kind: 移動, to: P1.cemetery }

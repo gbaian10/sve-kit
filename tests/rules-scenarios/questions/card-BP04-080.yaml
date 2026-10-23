@@ -31,35 +31,48 @@ verified_by:
 scenarios:
   - name: A 自傷 1 → 真紅 → 8 傷害
     setup:
-      turn: {active: P1, first_player: P1, elapsed_turns: {P1: 6, P2: 5}, phase: main}
+      turn: { active: P1, first_player: P1, elapsed_turns: { P1: 6, P2: 5 }, phase: main }
       history: none
       players:
         P1:
           construction: class
-          leader: {class: ナイトメア, life: 20}
-          pp: {current: 6, max: 6}
+          leader: { class: ナイトメア, life: 20 }
+          pp: { current: 6, max: 6 }
           zones:
             hand:
-              - {id: a1, card: BP04-080}          # ハウリングデーモン（コスト5）
-              - {id: a2, card: BP19-090}          # バイオレントスクリーム（コスト0；【2】{コスト1}）
+              - { id: a1, card: BP04-080 } # ハウリングデーモン（コスト5）
+              - # バイオレントスクリーム（コスト0；【2】{コスト1}）
+                id: a2
+                card: BP19-090
             deck:
-              - {id: d1, card: BP01-173}
-              - {filler: 20}
+              - { id: d1, card: BP01-173 }
+              - { filler: 20 }
         P2:
           construction: class
-          leader: {class: ロイヤル, life: 20}
-          pp: {current: 0, max: 6}
+          leader: { class: ロイヤル, life: 20 }
+          pp: { current: 0, max: 6 }
           zones:
             field:
-              - {id: b1, card: BP01-176}          # 天剣の乙女 4/6
+              - { id: b1, card: BP01-176 } # 天剣の乙女 4/6
             hand:
-              - {filler: 3}
+              - { filler: 3 }
             deck:
-              - {filler: 20}
+              - { filler: 20 }
     decisions:
-      - {n: 1, by: P1, at: main, do: play, card: a2, options: [2], optional_costs: {mode_2: {pp: 1}}}
-      - {n: 2, by: P1, at: main, do: play, card: a1}
-      - {n: 3, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2}}, targets: {1: [b1]}}
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a2
+        options: [2]
+        optional_costs: { mode_2: { pp: 1 } }
+      - { n: 2, by: P1, at: main, do: play, card: a1 }
+      - n: 3
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: { ability: { source: a1, line: 2 } }
+        targets: { 1: [b1] }
     random: {}
     expected:
       - at: after-decision-1
@@ -76,9 +89,9 @@ scenarios:
           P2.field: []
           P1.pp.current: 0
         events:
-          - {kind: ダメージ, source: a1, target: b1, amount: 8}
+          - { kind: ダメージ, source: a1, target: b1, amount: 8 }
         forbidden_events:
-          - {kind: ダメージ, amount: 4}
+          - { kind: ダメージ, amount: 4 }
 
   - name: B 有リリエル：自傷變 0 → 體力沒減少 → 不是真紅 → 4 傷害
     inherit: A 自傷 1 → 真紅 → 8 傷害
@@ -87,11 +100,22 @@ scenarios:
         P1:
           zones:
             field:
-              - {id: a3, card: BP05-108}          # 神弓の座天使・リリエル
+              - { id: a3, card: BP05-108 } # 神弓の座天使・リリエル
     decisions:
-      - {n: 1, by: P1, at: main, do: play, card: a2, options: [2], optional_costs: {mode_2: {pp: 1}}}
-      - {n: 2, by: P1, at: main, do: play, card: a1}
-      - {n: 3, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2}}, targets: {1: [b1]}}
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a2
+        options: [2]
+        optional_costs: { mode_2: { pp: 1 } }
+      - { n: 2, by: P1, at: main, do: play, card: a1 }
+      - n: 3
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: { ability: { source: a1, line: 2 } }
+        targets: { 1: [b1] }
     random: {}
     expected:
       - at: after-decision-1
@@ -101,11 +125,11 @@ scenarios:
           P1.leader.life: 20
           P1.hand: [a1, d1]
         forbidden_events:
-          - {kind: ダメージ, target: P1.leader}
+          - { kind: ダメージ, target: P1.leader }
       - at: after-decision-3
         view: omniscient
         outcome: resolved
         assert:
-          P2.field.b1: {hp: 2}
+          P2.field.b1: { hp: 2 }
         events:
-          - {kind: ダメージ, source: a1, target: b1, amount: 4}
+          - { kind: ダメージ, source: a1, target: b1, amount: 4 }

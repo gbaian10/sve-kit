@@ -72,7 +72,7 @@ cards:
         event: attack
         subject: self
         targets:
-          - key: '1'
+          - key: "1"
             select:
               zone: field
               side: opponent
@@ -116,7 +116,7 @@ cards:
           power: 1
           hp: 1
         targets:
-          - key: '1'
+          - key: "1"
             select:
               zone: field
               side: self
@@ -165,7 +165,7 @@ cards:
           subjects: target.1
           amount: 3
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -212,7 +212,7 @@ cards:
         event: enter
         subject: self
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field

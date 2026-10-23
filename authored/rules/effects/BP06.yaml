@@ -80,7 +80,7 @@ cards:
           keywords:
             - storm
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: field
@@ -145,7 +145,7 @@ cards:
           subjects: target.1
           power: 2
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: field
@@ -274,7 +274,7 @@ cards:
         active_zones:
           - hand
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -313,7 +313,7 @@ cards:
         event: enter
         subject: self
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -322,7 +322,7 @@ cards:
             max: 1
             modes:
               - 1
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: cemetery
@@ -347,7 +347,7 @@ cards:
             - op: draw
               count: 1
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: evolve_deck

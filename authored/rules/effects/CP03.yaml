@@ -73,7 +73,7 @@ cards:
         trigger_if:
           read: event.to_opposing_leader
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -221,7 +221,7 @@ cards:
               event: attack
               subject: self
               targets:
-                - key: '1'
+                - key: "1"
                   select:
                     side: opponent
                     zone: field
@@ -311,7 +311,7 @@ cards:
         event: enter
         subject: self
         targets:
-          - key: '1'
+          - key: "1"
             select:
               zone: field
               side: opponent
@@ -356,7 +356,7 @@ cards:
           keywords:
             - storm
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: field
@@ -429,7 +429,7 @@ cards:
               hp: 2
         event: drive_trigger
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -586,7 +586,7 @@ cards:
         event: enter
         subject: self
         targets:
-          - key: '1'
+          - key: "1"
             select:
               zone: cemetery
               side: self

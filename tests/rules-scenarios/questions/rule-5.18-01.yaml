@@ -8,7 +8,7 @@ must_pass: false
 mechanisms:
   - 抉擇＋條件改變選擇數
   - 10.6.2
-  - '5.18'
+  - "5.18"
   - 5.18.2.1
   - 5.18.3
   - 10.6.2.8.2.2
@@ -72,7 +72,7 @@ verified_by:
     method: qa
     note: 5.18.2.1、Q2251／Q293、Q2275、10.6.2.8.2.2、5.15.1；xverify-1/result.md〈22 個重疊題〉三局面；「重複模式 [1, 1]」xverify-2/result.md 1/1（Q2251）（非必過）
 scenarios:
-  - name: '[astra] [1]'
+  - name: "[astra] [1]"
     setup:
       turn:
         active: P1
@@ -142,7 +142,7 @@ scenarios:
         assert:
           P1.pp.current: 5
           P2.field: []
-  - name: '[astra] [3, 1]'
+  - name: "[astra] [3, 1]"
     setup:
       turn:
         active: P1
@@ -242,7 +242,7 @@ scenarios:
         assert:
           P1.pp.current: 7
           P2.field: []
-  - name: '[astra] []'
+  - name: "[astra] []"
     setup:
       turn:
         active: P1
@@ -309,7 +309,7 @@ scenarios:
           P1.pp.current: 10
           P2.field:
             - b
-  - name: '[astra] 重複模式 [1, 1]'
+  - name: "[astra] 重複模式 [1, 1]"
     setup:
       turn:
         active: P1
@@ -386,7 +386,7 @@ scenarios:
         forbidden_events:
           - kind: 破壊
           - kind: プレイ
-  - name: '[fable] A 選【2】【3】：awaiting 列出全部 10 種合法組合；結算依卡面順序（先 +3 再抽）'
+  - name: "[fable] A 選【2】【3】：awaiting 列出全部 10 種合法組合；結算依卡面順序（先 +3 再抽）"
     setup:
       turn:
         active: P1
@@ -555,8 +555,8 @@ scenarios:
             object: a2
         forbidden_events:
           - kind: 捨てる
-  - name: '[fable] B 選【1】【4】：EP +1（EP 無上限）、對手在結算中途選一張捨'
-    inherit: '[fable] A 選【2】【3】：awaiting 列出全部 10 種合法組合；結算依卡面順序（先 +3 再抽）'
+  - name: "[fable] B 選【1】【4】：EP +1（EP 無上限）、對手在結算中途選一張捨"
+    inherit: "[fable] A 選【2】【3】：awaiting 列出全部 10 種合法組合；結算依卡面順序（先 +3 再抽）"
     decisions:
       - n: 1
         by: P1

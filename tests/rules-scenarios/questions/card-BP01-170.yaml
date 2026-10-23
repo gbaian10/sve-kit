@@ -10,7 +10,7 @@ mechanisms:
   - 額外回合、跳過、勝利
   - 10.3.4
   - 7.4.7
-  - '12.4'
+  - "12.4"
   - 回合特定時點
 cards:
   - BP01-170
@@ -62,7 +62,7 @@ verified_by:
     method: qa
     note: Q242、5.10.1.1、11.2.2、1.2.1.2；xverify-1/result.md〈22 個重疊題〉。三個 [astra] 局面之後未再改
 scenarios:
-  - name: '[astra] 牌庫 0 張'
+  - name: "[astra] 牌庫 0 張"
     setup:
       turn:
         active: P1
@@ -120,7 +120,7 @@ scenarios:
             ended: true
             winner: P2
             by: 11.2.2
-  - name: '[astra] 牌庫 1 張'
+  - name: "[astra] 牌庫 1 張"
     setup:
       turn:
         active: P1
@@ -178,7 +178,7 @@ scenarios:
           P1.cemetery:
             - a
           semantic_state.pending_triggers: []
-  - name: '[astra] 牌庫 2 張'
+  - name: "[astra] 牌庫 2 張"
     setup:
       turn:
         active: P1
@@ -238,7 +238,7 @@ scenarios:
           P1.cemetery:
             - a
           semantic_state.pending_triggers: []
-  - name: '[fable] A 結束階段捨光の道筋 → 抽 1 → 再捨 1'
+  - name: "[fable] A 結束階段捨光の道筋 → 抽 1 → 再捨 1"
     setup:
       turn:
         active: P1
@@ -393,7 +393,7 @@ scenarios:
             object: a8
         forbidden_events:
           - kind: 待機
-  - name: '[fable] B 打出光の道筋 → 只抽本體的 1 張；進墓場不算捨棄'
+  - name: "[fable] B 打出光の道筋 → 只抽本體的 1 張；進墓場不算捨棄"
     setup:
       turn:
         active: P1

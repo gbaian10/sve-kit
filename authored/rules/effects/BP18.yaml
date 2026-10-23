@@ -34,7 +34,7 @@ cards:
         event: enter
         subject: self
         targets:
-          - key: '1'
+          - key: "1"
             select:
               zone: cemetery
               side: self
@@ -67,7 +67,7 @@ cards:
         trigger_if:
           read: self.is_active
         targets:
-          - key: '1'
+          - key: "1"
             select:
               zone: field
               side: opponent
@@ -96,7 +96,7 @@ cards:
         event: enter
         subject: self
         targets:
-          - key: '1'
+          - key: "1"
             select:
               zone: field
               side: opponent
@@ -142,7 +142,7 @@ cards:
         event: enter
         subject: self
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -291,7 +291,7 @@ cards:
           subjects: target.1
           amount: 4
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -299,7 +299,7 @@ cards:
             min: 1
             max: 1
         cost_selections:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: hand
@@ -336,7 +336,7 @@ cards:
         event: enter
         subject: self
         cost_selections:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: hand
@@ -366,14 +366,14 @@ cards:
               keywords:
                 - storm
         targets:
-          - key: '1'
+          - key: "1"
             select:
               zone: field
               side: opponent
               type: follower
             min: 1
             max: 1
-          - key: '2'
+          - key: "2"
             select:
               zone: field
               side: self
@@ -391,7 +391,7 @@ cards:
           subjects: target.1
           to: hand
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: cemetery
@@ -552,7 +552,7 @@ cards:
               until: next-controller-end
         limit: 1
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field

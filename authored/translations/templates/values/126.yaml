@@ -10,11 +10,11 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: '{'
+            text: "{"
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}選擇'
+            text: "}選擇"
           - kind: LeafRef
             slot: leaf_1
           - kind: LeafRef
@@ -39,11 +39,11 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: '{'
+            text: "{"
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}將'
+            text: "}將"
           - kind: LeafRef
             slot: leaf_1
           - kind: LeafRef
@@ -69,11 +69,11 @@ records:
           - kind: LeafRef
             slot: leaf_7
           - kind: Literal
-            text: '}的卡片」，則自己的主戰者{'
+            text: "}的卡片」，則自己的主戰者{"
           - kind: LeafRef
             slot: leaf_8
           - kind: Literal
-            text: '}+'
+            text: "}+"
           - kind: LeafRef
             slot: leaf_9
           - kind: Literal
@@ -92,11 +92,11 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: '{'
+            text: "{"
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}選擇'
+            text: "}選擇"
           - kind: LeafRef
             slot: leaf_1
           - kind: LeafRef
@@ -133,7 +133,7 @@ records:
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
-            text: '}'
+            text: "}"
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
@@ -145,11 +145,11 @@ records:
           - kind: LeafRef
             slot: leaf_4
           - kind: Literal
-            text: '{消費'
+            text: "{消費"
           - kind: LeafRef
             slot: leaf_5
           - kind: Literal
-            text: '}'
+            text: "}"
       expression_targets: {}
   - origin: machine
     kind: template_translation
@@ -160,11 +160,11 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: '{'
+            text: "{"
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}若'
+            text: "}若"
           - kind: LeafRef
             slot: leaf_1
           - kind: LeafRef
@@ -247,7 +247,7 @@ records:
           - kind: LeafRef
             slot: leaf_5
           - kind: Literal
-            text: '}+'
+            text: "}+"
           - kind: LeafRef
             slot: leaf_6
           - kind: Literal
@@ -255,7 +255,7 @@ records:
           - kind: LeafRef
             slot: leaf_7
           - kind: Literal
-            text: '}+'
+            text: "}+"
           - kind: LeafRef
             slot: leaf_8
           - kind: Literal
@@ -270,11 +270,11 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: '{'
+            text: "{"
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}選擇'
+            text: "}選擇"
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
@@ -310,11 +310,11 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: '{'
+            text: "{"
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}選擇自己的墓場中的原始消費'
+            text: "}選擇自己的墓場中的原始消費"
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
@@ -337,7 +337,7 @@ records:
           - kind: LeafRef
             slot: leaf_5
           - kind: Literal
-            text: '}+'
+            text: "}+"
           - kind: LeafRef
             slot: leaf_6
           - kind: Literal
@@ -345,7 +345,7 @@ records:
           - kind: LeafRef
             slot: leaf_7
           - kind: Literal
-            text: '}+'
+            text: "}+"
           - kind: LeafRef
             slot: leaf_8
           - kind: Literal
@@ -360,11 +360,11 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: '{'
+            text: "{"
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}若處於【覺醒】狀態，則這張卡片裝備'
+            text: "}若處於【覺醒】狀態，則這張卡片裝備"
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal

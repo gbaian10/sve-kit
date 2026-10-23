@@ -32,22 +32,11 @@ repos:
     hooks:
       - id: check-json5
 
-  - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-    rev: v2.16.0
-    hooks:
-      # Registry and id shards are written by carddb's own encoder; see check-yaml above.
-      - id: pretty-format-yaml
-        args:
-          - --autofix
-          - --indent=2
-          - --offset=2
-        exclude: ^authored/(registry|ids)/.*\.yaml$
-
   - repo: https://github.com/ComPWA/taplo-pre-commit
     rev: v0.9.3
     hooks:
       - id: taplo-format
-        args: [-o, array_auto_collapse=false, -o, 'indent_string=    '] # 4 spaces
+        args: [-o, array_auto_collapse=false, -o, "indent_string=    "] # 4 spaces
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.17.0
@@ -198,7 +187,16 @@ repos:
         name: bun fmt
         language: system
         entry: mise exec -- bun fmt
-        types_or: [javascript, jsx, ts, tsx, css, json, html]
+        types_or: [javascript, jsx, ts, tsx, css, json, html, yaml]
+        stages: [pre-commit, manual]
+      # bun fmt keeps the style it is given and wraps an over-long {…} or […] across lines; write those in
+      # block style (one key or item per line) instead.
+      - id: yaml-block-style
+        name: long YAML collections use block style
+        language: python
+        additional_dependencies: [pyyaml==6.0.3]
+        entry: python .github/ci/yaml_block_style.py
+        types: [yaml]
         stages: [pre-commit, manual]
       # sim/web: `mise exec` pins Bun without relying on the caller's PATH; paths are relative to sim/web.
       # Flags live in sim/web's lint:js; require_serial keeps one process, since each type-aware ESLint

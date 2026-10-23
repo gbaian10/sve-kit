@@ -18,7 +18,7 @@ cards:
         event: enter
         subject: self
         cost_selections:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: field
@@ -78,7 +78,7 @@ cards:
         limit: 1
         limit_at: trigger
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -145,7 +145,7 @@ cards:
               subjects: self.leader
               hp: 1
         cost_selections:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: field
@@ -204,7 +204,7 @@ cards:
         active_zones:
           - ex
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: field
@@ -253,7 +253,7 @@ cards:
               subjects: target.1
               until: next-controller-end
         targets:
-          - key: '1'
+          - key: "1"
             select:
               zone: field
               side: opponent
@@ -295,7 +295,7 @@ cards:
           amount: 1
         event: end
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -376,7 +376,7 @@ cards:
         event: enter
         subject: self
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -386,7 +386,7 @@ cards:
             modes:
               - 1
         cost_selections:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: hand

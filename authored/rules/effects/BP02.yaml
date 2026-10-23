@@ -33,7 +33,7 @@ cards:
             subjects: target.1
             to: hand
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -63,7 +63,7 @@ cards:
             amount: 2
         event: end
         targets:
-          - key: '1'
+          - key: "1"
             select:
               union:
                 - side: opponent
@@ -81,7 +81,7 @@ cards:
         event: enter
         subject: self
         cost_selections:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: hand
@@ -121,7 +121,7 @@ cards:
           op: evolve
           subjects: self
         cost_selections:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: hand
@@ -180,7 +180,7 @@ cards:
               subjects: target.1.leader
               amount: 2
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -204,7 +204,7 @@ cards:
           op: evolve
           subjects: self
         cost_selections:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: hand

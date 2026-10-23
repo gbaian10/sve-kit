@@ -54,32 +54,38 @@ verified_by:
 scenarios:
   - name: A 選【2】、不付費 → 0 PP 打出、什麼都不發生，但算打出了 1 張
     setup:
-      turn: {active: P1, first_player: P1, elapsed_turns: {P1: 4, P2: 3}, phase: main}
+      turn: { active: P1, first_player: P1, elapsed_turns: { P1: 4, P2: 3 }, phase: main }
       history: none
       players:
         P1:
           construction: class
-          leader: {class: ナイトメア, life: 20}
-          pp: {current: 3, max: 3}
+          leader: { class: ナイトメア, life: 20 }
+          pp: { current: 3, max: 3 }
           zones:
             hand:
-              - {id: a1, card: BP19-090}          # バイオレントスクリーム
+              - { id: a1, card: BP19-090 } # バイオレントスクリーム
             deck:
-              - {id: d1, card: BP01-173}
-              - {filler: 20}
+              - { id: d1, card: BP01-173 }
+              - { filler: 20 }
         P2:
           construction: class
-          leader: {class: ロイヤル, life: 20}
-          pp: {current: 0, max: 3}
+          leader: { class: ロイヤル, life: 20 }
+          pp: { current: 0, max: 3 }
           zones:
             field:
-              - {id: b1, card: BP01-173}          # ファイター 2/3
+              - { id: b1, card: BP01-173 } # ファイター 2/3
             hand:
-              - {filler: 3}
+              - { filler: 3 }
             deck:
-              - {filler: 20}
+              - { filler: 20 }
     decisions:
-      - {n: 1, by: P1, at: main, do: play, card: a1, options: [2], optional_costs: {mode_2: decline}}
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a1
+        options: [2]
+        optional_costs: { mode_2: decline }
     random: {}
     expected:
       - at: after-decision-1
@@ -91,20 +97,20 @@ scenarios:
           P1.cemetery: [a1]
           P1.leader.life: 20
           P1.deck: [d1, filler: 20]
-          semantic_state.counters_this_turn: {P1.cards_played: 1}
+          semantic_state.counters_this_turn: { P1.cards_played: 1 }
         events:
           - kind: プレイ
             object: a1
           - kind: 解決
             object: a1
         forbidden_events:
-          - {kind: ダメージ}
-          - {kind: 引く}
+          - { kind: ダメージ }
+          - { kind: 引く }
 
   - name: B 一個都不選 → 不能打出
     inherit: A 選【2】、不付費 → 0 PP 打出、什麼都不發生，但算打出了 1 張
     decisions:
-      - {n: 1, by: P1, at: main, do: play, card: a1, options: []}
+      - { n: 1, by: P1, at: main, do: play, card: a1, options: [] }
     random: {}
     expected:
       - at: after-decision-1
@@ -114,7 +120,7 @@ scenarios:
           P1.hand: [a1]
           P1.cemetery: []
         forbidden_events:
-          - {kind: プレイ}
+          - { kind: プレイ }
 
   - name: C 對手沒有從者 → 不能選【1】；只能選【2】
     inherit: A 選【2】、不付費 → 0 PP 打出、什麼都不發生，但算打出了 1 張
@@ -124,9 +130,15 @@ scenarios:
           zones:
             field: []
     decisions:
-      - {n: 1, by: P1, at: main, do: play, card: a1, options: [1], targets: {1: []}}
-      - {n: 2, by: P1, at: main, do: play, card: a1, options: [1, 2], targets: {1: []}}
-      - {n: 3, by: P1, at: main, do: play, card: a1, options: [2], optional_costs: {mode_2: {pp: 1}}}
+      - { n: 1, by: P1, at: main, do: play, card: a1, options: [1], targets: { 1: [] } }
+      - { n: 2, by: P1, at: main, do: play, card: a1, options: [1, 2], targets: { 1: [] } }
+      - n: 3
+        by: P1
+        at: main
+        do: play
+        card: a1
+        options: [2]
+        optional_costs: { mode_2: { pp: 1 } }
     random: {}
     expected:
       - at: after-decision-1
@@ -149,13 +161,13 @@ scenarios:
           P1.hand: [d1]
           P1.cemetery: [a1]
         events:
-          - {kind: ダメージ, source: a1, target: P1.leader, amount: 1}
-          - {kind: 引く, player: P1, object: d1}
+          - { kind: ダメージ, source: a1, target: P1.leader, amount: 1 }
+          - { kind: 引く, player: P1, object: d1 }
 
   - name: D 同一選項選兩次 → 不能打出
     inherit: A 選【2】、不付費 → 0 PP 打出、什麼都不發生，但算打出了 1 張
     decisions:
-      - {n: 1, by: P1, at: main, do: play, card: a1, options: [2, 2]}
+      - { n: 1, by: P1, at: main, do: play, card: a1, options: [2, 2] }
     random: {}
     expected:
       - at: after-decision-1
@@ -166,7 +178,14 @@ scenarios:
   - name: E 選【1】【2】：付【1】、不付【2】 → 2 傷害、自傷 1、不抽牌
     inherit: A 選【2】、不付費 → 0 PP 打出、什麼都不發生，但算打出了 1 張
     decisions:
-      - {n: 1, by: P1, at: main, do: play, card: a1, options: [1, 2], targets: {1: [b1]}, optional_costs: {mode_1: {pp: 1}, mode_2: decline}}
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a1
+        options: [1, 2]
+        targets: { 1: [b1] }
+        optional_costs: { mode_1: { pp: 1 }, mode_2: decline }
     random: {}
     expected:
       - at: after-decision-1
@@ -180,7 +199,7 @@ scenarios:
           P2.field.b1:
             hp: 1
         forbidden_events:
-          - {kind: 引く}
+          - { kind: 引く }
         events:
           - kind: ダメージ
             source: a1

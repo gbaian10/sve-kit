@@ -5,22 +5,65 @@ revision: 2
 question: 長寫「〜とき、…なら」的條件何時判斷？
 decision: 誘發事件發生即誘發（事件本身的限定、有效區域、每回合次數照常），本文條件在結算處理到該處時判斷；不成立則條件管到的效果不做，處理完不因條件之後成立而補做；「那次傷害」等事件資訊仍取事件當時的值。
 evidence:
-  - {ref: Q940, kind: direct, quote: "いいえ。自分のPP最大値を+1することができません。\n『簒奪の蛇剣』によって3ダメージと2ダメージを受けており『辻野あかり』の能力は2回誘発しますが、どちらも5以上のダメージを受けていないので、「そのダメージが5以上なら、」以降の効果を適用することができません。", question: "自分の墓場が10枚以上で、相手がプレイする『簒奪の蛇剣』が3ダメージ与えた後に追加で2ダメージ与える状況です。\nこの状況で、自分の場の『辻野あかり』に対して『簒奪の蛇剣』を相手がプレイした場合、『辻野あかり』の能力によって自分のPP最大値を+1することができますか？", date: '2023-08-18'}
-  - {ref: Q852, kind: direct, quote: はい。その順で能力を解決し、それらの効果を適用することができます。, question: "自分の場に『デウスエクスマキナ』と『アーツマスター・カルラ』がいて、自分のPP最大値が6、自分の残りPPが0の状況です。\nこの状況でエンドフェイズが来たとき、誘発したそれぞれの能力を、『デウスエクスマキナ』の能力から解決して、自分のPPを4回復し、その後『アーツマスター・カルラ』の能力を解決して、相手のリーダーに2ダメージ与え、1枚引くことができますか？", date: '2023-06-09'}
-  - {ref: Q2418, kind: direct, quote: はい。この場合、相手の場のフォロワーすべてに2ダメージを与えることができます。, question: 自分の場の元のコスト1のフォロワーの攻撃力の合計が9の状況で、自分のエンドフェイズを迎えました。何らかのエンドフェイズが来たときに誘発する能力によって自分の場の『ラビリスタ』の《攻撃力》が+1された場合、『ラビリスタ』の「自分のエンドフェイズが来たとき、～」という能力をプレイし、相手の場のフォロワーすべてに2ダメージを与えることができますか？, date: '2026-01-26'}
-  - {ref: Q1867, kind: direct, quote: はい。この場合、『ネオユニヴァース』の【進化時】能力で自分のPP最大値を+1した後、『カツラギエース』の「自分のウマ娘・カードの能力によってこれを自分の手札から捨てたとき、～」という能力を解決する際に、コストを支払うことで『カツラギエース』を場に出すことができます。, question: 自分のPP最大値が6の状況で、『ネオユニヴァース』の【進化時】能力で【1】をチョイスし手札の『カツラギエース』を捨てた場合、『カツラギエース』の「自分のウマ娘・カードの能力によってこれを自分の手札から捨てたとき、～」という能力で『カツラギエース』を場に出すことができますか？, date: '2025-01-17'}
-  - {ref: Q964, kind: supporting, quote: "最終的に、自分のリーダーは体力+5し、1枚引きます。\n処理順は以下になります。\n\n①エンドフェイズが来たとき、それぞれの『高垣楓』の能力が誘発し、待機状態になります。\n②待機状態になったそれぞれの能力を順に解決します。\n③1つ目の『高垣楓』の能力を解決します。自分のリーダーの体力が5なので、自分のリーダーは体力+5し、1枚引きます。\n④2つ目の『高垣楓』の能力を解決します。自分のリーダーの体力が10なので、何も行いません。", question: 自分のリーダーの体力が5、自分の場に『高垣楓』が2体いる状況でエンドフェイズを迎えました。誘発したそれぞれの能力を解決する場合、どのようになりますか？, date: '2023-08-18'}
-  - {ref: Q2702, kind: supporting, quote: "いいえ。『至高の凌駕』をEXエリアに置くことはできません。詳細な挙動は以下の通りです。\n『ハンプティダンプティ』の【進化時】能力を解決します。『絶大の顕現・マゼルベイン』に5ダメージ与えられ体力が0以下になります。自分の手札をすべて捨て、『至高の凌駕』の能力が誘発し待機状態になります。その後チェックタイミングにおいて体力が0以下になった『絶大の顕現・マゼルベイン』が墓場に置かれます。次に待機状態となっている『至高の凌駕』の能力を解決します。この時点で自分の場に『絶大の顕現・マゼルベイン』がいないので『至高の凌駕』をEXエリアに置くことができません。", question: 自分の場に『絶大の顕現・マゼルベイン』と『ハンプティダンプティ』がいる状況で『ハンプティダンプティ』が進化し、『絶大の顕現・マゼルベイン』に5ダメージ与え体力が0以下になり、手札の『至高の凌駕』を捨てました。この場合『至高の凌駕』の能力によって、捨てた墓場にある『至高の凌駕』をEXエリアに置くことができますか？, date: '2026-05-29'}
-  - {ref: Q2354, kind: supporting, quote: "いいえ。自分のデッキから『ドラゴスネーク』1枚を探し、場に出すことができません。\nこの場合、『ドラゴスネーク』の能力は誘発しますが、『ドラゴスネーク』の能力の解決時にこの『ドラゴスネーク』は自分の場にいないので、「これが自分の場にいるなら、」以降の効果を適用することができません。", question: 自分の場の体力が3の『ドラゴスネーク』が3ダメージを受けた場合、『ドラゴスネーク』の能力によって自分のデッキから『ドラゴスネーク』1枚を探し、場に出すことができますか？, date: '2025-11-17'}
-  - {ref: CR 10.1.1.2.1, kind: supporting, quote: "10.1.1.2.1. 自動能力は、カード上では原則として\n「（条件）とき、（効果）」と表記されていま\nす。", version: 1.27.0}
-  - {ref: CR 10.7.1, kind: supporting, quote: "10.7.1. 自動能力とは、特定の誘発条件が発生したとき\nに、その後に発生したチェックタイミングでプレイされ\nる能力を指します。", version: 1.27.0}
-  - {ref: CR 10.7.2, kind: supporting, quote: "10.7.2. なんらかの自動能力の誘発条件が満たされた場\n合、その自動能力は待機状態になります。", version: 1.27.0}
-  - {ref: CR 10.6.2.8.2, kind: supporting, quote: "10.6.2.8.2. プレイしたのがスペルや起動能力や\n自動能力である場合、そのテキストや能力\nに示された効果を、表記の順に従って実行\nします。", version: 1.27.0}
-  - {ref: CR 10.7.6, kind: supporting, quote: "10.7.6. 自動能力が、特定の事項が発生したことではな\nく、特定の条件が満たされていることを誘発条件とし\nている場合があります（「あなたの手札にカードがな\nいとき、～」等）。これを状態誘発と呼びます。", version: 1.27.0}
+  - ref: Q940
+    kind: direct
+    quote: "いいえ。自分のPP最大値を+1することができません。\n『簒奪の蛇剣』によって3ダメージと2ダメージを受けており『辻野あかり』の能力は2回誘発しますが、どちらも5以上のダメージを受けていないので、「そのダメージが5以上なら、」以降の効果を適用することができません。"
+    question: "自分の墓場が10枚以上で、相手がプレイする『簒奪の蛇剣』が3ダメージ与えた後に追加で2ダメージ与える状況です。\nこの状況で、自分の場の『辻野あかり』に対して『簒奪の蛇剣』を相手がプレイした場合、『辻野あかり』の能力によって自分のPP最大値を+1することができますか？"
+    date: "2023-08-18"
+  - ref: Q852
+    kind: direct
+    quote: はい。その順で能力を解決し、それらの効果を適用することができます。
+    question: "自分の場に『デウスエクスマキナ』と『アーツマスター・カルラ』がいて、自分のPP最大値が6、自分の残りPPが0の状況です。\nこの状況でエンドフェイズが来たとき、誘発したそれぞれの能力を、『デウスエクスマキナ』の能力から解決して、自分のPPを4回復し、その後『アーツマスター・カルラ』の能力を解決して、相手のリーダーに2ダメージ与え、1枚引くことができますか？"
+    date: "2023-06-09"
+  - ref: Q2418
+    kind: direct
+    quote: はい。この場合、相手の場のフォロワーすべてに2ダメージを与えることができます。
+    question: 自分の場の元のコスト1のフォロワーの攻撃力の合計が9の状況で、自分のエンドフェイズを迎えました。何らかのエンドフェイズが来たときに誘発する能力によって自分の場の『ラビリスタ』の《攻撃力》が+1された場合、『ラビリスタ』の「自分のエンドフェイズが来たとき、～」という能力をプレイし、相手の場のフォロワーすべてに2ダメージを与えることができますか？
+    date: "2026-01-26"
+  - ref: Q1867
+    kind: direct
+    quote: はい。この場合、『ネオユニヴァース』の【進化時】能力で自分のPP最大値を+1した後、『カツラギエース』の「自分のウマ娘・カードの能力によってこれを自分の手札から捨てたとき、～」という能力を解決する際に、コストを支払うことで『カツラギエース』を場に出すことができます。
+    question: 自分のPP最大値が6の状況で、『ネオユニヴァース』の【進化時】能力で【1】をチョイスし手札の『カツラギエース』を捨てた場合、『カツラギエース』の「自分のウマ娘・カードの能力によってこれを自分の手札から捨てたとき、～」という能力で『カツラギエース』を場に出すことができますか？
+    date: "2025-01-17"
+  - ref: Q964
+    kind: supporting
+    quote: "最終的に、自分のリーダーは体力+5し、1枚引きます。\n処理順は以下になります。\n\n①エンドフェイズが来たとき、それぞれの『高垣楓』の能力が誘発し、待機状態になります。\n②待機状態になったそれぞれの能力を順に解決します。\n③1つ目の『高垣楓』の能力を解決します。自分のリーダーの体力が5なので、自分のリーダーは体力+5し、1枚引きます。\n④2つ目の『高垣楓』の能力を解決します。自分のリーダーの体力が10なので、何も行いません。"
+    question: 自分のリーダーの体力が5、自分の場に『高垣楓』が2体いる状況でエンドフェイズを迎えました。誘発したそれぞれの能力を解決する場合、どのようになりますか？
+    date: "2023-08-18"
+  - ref: Q2702
+    kind: supporting
+    quote: "いいえ。『至高の凌駕』をEXエリアに置くことはできません。詳細な挙動は以下の通りです。\n『ハンプティダンプティ』の【進化時】能力を解決します。『絶大の顕現・マゼルベイン』に5ダメージ与えられ体力が0以下になります。自分の手札をすべて捨て、『至高の凌駕』の能力が誘発し待機状態になります。その後チェックタイミングにおいて体力が0以下になった『絶大の顕現・マゼルベイン』が墓場に置かれます。次に待機状態となっている『至高の凌駕』の能力を解決します。この時点で自分の場に『絶大の顕現・マゼルベイン』がいないので『至高の凌駕』をEXエリアに置くことができません。"
+    question: 自分の場に『絶大の顕現・マゼルベイン』と『ハンプティダンプティ』がいる状況で『ハンプティダンプティ』が進化し、『絶大の顕現・マゼルベイン』に5ダメージ与え体力が0以下になり、手札の『至高の凌駕』を捨てました。この場合『至高の凌駕』の能力によって、捨てた墓場にある『至高の凌駕』をEXエリアに置くことができますか？
+    date: "2026-05-29"
+  - ref: Q2354
+    kind: supporting
+    quote: "いいえ。自分のデッキから『ドラゴスネーク』1枚を探し、場に出すことができません。\nこの場合、『ドラゴスネーク』の能力は誘発しますが、『ドラゴスネーク』の能力の解決時にこの『ドラゴスネーク』は自分の場にいないので、「これが自分の場にいるなら、」以降の効果を適用することができません。"
+    question: 自分の場の体力が3の『ドラゴスネーク』が3ダメージを受けた場合、『ドラゴスネーク』の能力によって自分のデッキから『ドラゴスネーク』1枚を探し、場に出すことができますか？
+    date: "2025-11-17"
+  - ref: CR 10.1.1.2.1
+    kind: supporting
+    quote: "10.1.1.2.1. 自動能力は、カード上では原則として\n「（条件）とき、（効果）」と表記されていま\nす。"
+    version: 1.27.0
+  - ref: CR 10.7.1
+    kind: supporting
+    quote: "10.7.1. 自動能力とは、特定の誘発条件が発生したとき\nに、その後に発生したチェックタイミングでプレイされ\nる能力を指します。"
+    version: 1.27.0
+  - ref: CR 10.7.2
+    kind: supporting
+    quote: "10.7.2. なんらかの自動能力の誘発条件が満たされた場\n合、その自動能力は待機状態になります。"
+    version: 1.27.0
+  - ref: CR 10.6.2.8.2
+    kind: supporting
+    quote: "10.6.2.8.2. プレイしたのがスペルや起動能力や\n自動能力である場合、そのテキストや能力\nに示された効果を、表記の順に従って実行\nします。"
+    version: 1.27.0
+  - ref: CR 10.7.6
+    kind: supporting
+    quote: "10.7.6. 自動能力が、特定の事項が発生したことではな\nく、特定の条件が満たされていることを誘発条件とし\nている場合があります（「あなたの手札にカードがな\nいとき、～」等）。これを状態誘発と呼びます。"
+    version: 1.27.0
   - ref: Q311 (EN, BP02-062EN)
     kind: counter
     quote: No. The discarding of cards over your hand's limit happens after "the start of your end phase," so the ability does not trigger.
-    date: '2023-09-29'
+    date: "2023-09-29"
     url: https://en.shadowverse-evolve.com/cards/?cardno=BP02-062EN
     note: 日文 Q302 為「プレイしません」；英文版寫 does not trigger，字面支持舊讀法。兩讀法結果相同（不造成傷害），且 Q940「2回誘発します」、Q852、Q2418 為一律誘發的直接證據，故維持 R-0009；題目 card-BP02-062 B、C 已改為只驗結果（2026-09-27，使用者同意）
 strength: official
@@ -31,786 +74,924 @@ applies_to:
     uses:
       - cards: [CP03-005, CP03-P01]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:a63cfe3a6a0fc3cefb76d00021bd06362d5cbeb9bae5921a2ae7c1a7922ac255}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:a63cfe3a6a0fc3cefb76d00021bd06362d5cbeb9bae5921a2ae7c1a7922ac255
           field: effect
           ordinal:
           source_hash: 64ea82642b5d68c466144fc16d4104d91644050fbbae6d1807423982ae6b50e7
           line_ordinal: 1
           role: body
-          segments: [{start: 36, end: 118}]
+          segments: [{ start: 36, end: 118 }]
       - cards: [CP03-006, CP03-P02]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:acbbfe64c6ea5eebb6fa50fb226b9a9ebb61738f6b3038a1592c4b4cc4ccdb37}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:acbbfe64c6ea5eebb6fa50fb226b9a9ebb61738f6b3038a1592c4b4cc4ccdb37
           field: effect
           ordinal:
           source_hash: 23cbda078f2815c81f767fd2153a0facd6c8a14e747897349c03653c26086e58
           line_ordinal: 1
           role: body
-          segments: [{start: 10, end: 92}]
+          segments: [{ start: 10, end: 92 }]
   - legacy: T0f32c3c735
     namespace: classification-v0
     uses:
       - cards: [BP13-024, PR-366]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:9a93241d8c14b3e28aea66dac30e4c8ff155c0ad2ca92ede08cdfc4e6b455cb0}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:9a93241d8c14b3e28aea66dac30e4c8ff155c0ad2ca92ede08cdfc4e6b455cb0
           field: effect
           ordinal:
           source_hash: 288a0247d58053df8f062be29cb3844f31ab364574d56e6682352197c90d6c36
           line_ordinal: 2
           role: body
-          segments: [{start: 26, end: 90}]
+          segments: [{ start: 26, end: 90 }]
   - legacy: T984838f53c
     namespace: classification-v0
     uses:
       - cards: [BP16-095, BP16-SL25, EBD04-003]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:4f988c3ecbc3044ea3a677b21cdee37f8911f081ceade6a44e640df4d13f6d73}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:4f988c3ecbc3044ea3a677b21cdee37f8911f081ceade6a44e640df4d13f6d73
           field: effect
           ordinal:
           source_hash: c59b5ad1efb0af3f9dd5f08143f4da137d2bfd5e5443d86c046f13bc8651fa6c
           line_ordinal: 0
           role: body
-          segments: [{start: 0, end: 52}]
+          segments: [{ start: 0, end: 52 }]
       - cards: [BP16-094, BP16-SL24, EBD04-002]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:cda0b9085ce26006fe3942f63044421d4ffa31b15e0f2e5de59977f1ed0a27d6}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:cda0b9085ce26006fe3942f63044421d4ffa31b15e0f2e5de59977f1ed0a27d6
           field: effect
           ordinal:
           source_hash: 89ddad7a9508828b5f6be9a11fadea6539e798208b7d81eae6886a16542a45b7
           line_ordinal: 1
           role: body
-          segments: [{start: 20, end: 72}]
+          segments: [{ start: 20, end: 72 }]
   - legacy: Ta33b0c016f
     namespace: classification-v0
     uses:
       - cards: [BP21-083, BP21-P44]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:26260e98eb6753129fb8b36ec077dd18f03cb7c8ba3271369559ed94d7ca094d}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:26260e98eb6753129fb8b36ec077dd18f03cb7c8ba3271369559ed94d7ca094d
           field: effect
           ordinal:
           source_hash: 66c682501f6c1737ad0cc7f91c66a7db25616290528160546eab00487d4518ce
           line_ordinal: 0
           role: body
-          segments: [{start: 0, end: 39}]
+          segments: [{ start: 0, end: 39 }]
       - cards: [BP21-075, BP21-SL19, BP21-U05]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:991c58c4f787d44cbfe3e996f39f08066313b11307ca80687454c11b99bf687f}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:991c58c4f787d44cbfe3e996f39f08066313b11307ca80687454c11b99bf687f
           field: effect
           ordinal:
           source_hash: d3dd1c6831881b265ef5a0f4f3b312278a8a9bc2f8bb3ea13ba7d8bceb9d1706
           line_ordinal: 1
           role: body
-          segments: [{start: 47, end: 86}]
+          segments: [{ start: 47, end: 86 }]
   - legacy: T86c2094121
     namespace: classification-v0
     uses:
       - cards: [BP21-056, BP21-SL14]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:30fe8485e2714a43fd69c6e8df541918a514551761e89a48cf63009b0af4fb44}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:30fe8485e2714a43fd69c6e8df541918a514551761e89a48cf63009b0af4fb44
           field: effect
           ordinal:
           source_hash: d399d2a5712e799f0721b93d389fbc476628cbd0e30d15464aa79623b0dba98c
           line_ordinal: 0
           role: body
-          segments: [{start: 0, end: 54}]
+          segments: [{ start: 0, end: 54 }]
   - legacy: Tbdc1e2e59f
     namespace: classification-v0
     uses:
       - cards: [BP21-058, BP21-SL16, BP21-SP01, BP21-U04]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:01461bb15739343cb2651da7750eadd9aebd937bfd7f4bfb35e43fd6539785c1}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:01461bb15739343cb2651da7750eadd9aebd937bfd7f4bfb35e43fd6539785c1
           field: effect
           ordinal:
           source_hash: 538a18e0b96882080b116c13d0364e6b949e560b0c4b8add8bf73bcf90ae1e9a
           line_ordinal: 0
           role: body
-          segments: [{start: 0, end: 73}]
+          segments: [{ start: 0, end: 73 }]
   - legacy: T20b8d91398
     namespace: classification-v0
     uses:
       - cards: [BP21-062, PR-578]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:7bbd9ec160801934d84f3f493948c487997dd5df0390f50c07900f8e451c9bb0}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:7bbd9ec160801934d84f3f493948c487997dd5df0390f50c07900f8e451c9bb0
           field: effect
           ordinal:
           source_hash: 446bf69023211abc60bb416d4b81b2a2ec9b97265709dab3fa6544e8e69db255
           line_ordinal: 1
           role: body
-          segments: [{start: 5, end: 63}]
+          segments: [{ start: 5, end: 63 }]
       - cards: [BP04-030, BP04-P09]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:a209aa6151dd3de9018917ecc99314cf4b76fdc537bb1a587b64b0dcc154ebaa}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:a209aa6151dd3de9018917ecc99314cf4b76fdc537bb1a587b64b0dcc154ebaa
           field: effect
           ordinal:
           source_hash: 1d4e2852fee2aca4747185725b5872f52cf7441037fb712feddf030352f24458
           line_ordinal: 2
           role: body
-          segments: [{start: 50, end: 108}]
+          segments: [{ start: 50, end: 108 }]
   - legacy: Ta19600decc
     namespace: classification-v0
     uses:
       - cards: [BP16-037, BP16-SL09, BP16-U03, SCS01-004]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:aeb8214b5e0fc1364fe8f187dfae1dc2a94364124c4047d910acb963ee48f357}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:aeb8214b5e0fc1364fe8f187dfae1dc2a94364124c4047d910acb963ee48f357
           field: effect
           ordinal:
           source_hash: e6be63a0c8ab6db788eaa71e417f77218e4ec16c73fcb73a9023823d090dd564
           line_ordinal: 1
           role: body
-          segments: [{start: 35, end: 87}]
+          segments: [{ start: 35, end: 87 }]
   - legacy: Tc020f30dec
     namespace: classification-v0
     uses:
       - cards: [BP10-074, BP10-SL18, BP10-U05, SCS01-006]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:7adf209aa7b79d9acb358a9ff621884608daeaefaab01d3c640d98a1cb1e65cb}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:7adf209aa7b79d9acb358a9ff621884608daeaefaab01d3c640d98a1cb1e65cb
           field: effect
           ordinal:
           source_hash: 874ef92cc834041c06db63a7a3c5b691cb2b5e074422243cbbbacb3ed0020b8e
           line_ordinal: 0
           role: body
-          segments: [{start: 0, end: 36}]
+          segments: [{ start: 0, end: 36 }]
   - legacy: Tfef715e05e
     namespace: classification-v0
     uses:
       - cards: [BP19-075, BP19-SL19, SCS01-007]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:beb3b28e6d8dedf183e43f82081b91d6cf9c27a8c0491356c89c72d7ac980e49}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:beb3b28e6d8dedf183e43f82081b91d6cf9c27a8c0491356c89c72d7ac980e49
           field: effect
           ordinal:
           source_hash: f0a1cdbebaa9d6bea6483e11f30e4c826a821570a7f6c10e375dd8dba4cd1253
           line_ordinal: 1
           role: body
-          segments: [{start: 20, end: 88}]
+          segments: [{ start: 20, end: 88 }]
   - legacy: Tb034f10a01
     namespace: classification-v0
     uses:
       - cards: [BP20-P69, BP20-T10]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:38a3256e655ebde984427338425888a40f6b7667d00795683484a82a02a1e67e}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:38a3256e655ebde984427338425888a40f6b7667d00795683484a82a02a1e67e
           field: effect
           ordinal:
           source_hash: c36fcaf5a6f4b65ad2c78e67ff1adc667e68d3656368dd4c35a8603241e4e84e
           line_ordinal: 0
           role: body
-          segments: [{start: 0, end: 54}]
+          segments: [{ start: 0, end: 54 }]
       - cards: [BP20-102, BP20-P51]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:0231d7c2d1afe639faf478ceb20bc8481ec7636b9b826a7172d11bf381bae273}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:0231d7c2d1afe639faf478ceb20bc8481ec7636b9b826a7172d11bf381bae273
           field: section
           ordinal: 0
           source_hash: 3f23f878b03538e4efff7a47ba96d6c72e0c8c787a338b3f033536ae7a1b3cf5
           line_ordinal: 0
           role: body
-          segments: [{start: 30, end: 84}]
+          segments: [{ start: 30, end: 84 }]
   - legacy: T1cbd499314
     namespace: classification-v0
     uses:
       - cards: [BP20-120, BP20-P59]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:51789f36f5c89aeab5ea30441e93e57b816bc01c507097f929b540306e5e1059}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:51789f36f5c89aeab5ea30441e93e57b816bc01c507097f929b540306e5e1059
           field: effect
           ordinal:
           source_hash: be0cf345591a44ddeea117a40d0ffad69fcdf6fc99319a55b7d28a44f715d718
           line_ordinal: 0
           role: body
-          segments: [{start: 0, end: 65}]
+          segments: [{ start: 0, end: 65 }]
   - legacy: Tc27001befb
     namespace: classification-v0
     uses:
       - cards: [BP20-P70, BP20-T11]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:d5ede3ec4a9c3f320b689a03f8077aadd8832c6e15c61861668186e3fa8eb95f}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:d5ede3ec4a9c3f320b689a03f8077aadd8832c6e15c61861668186e3fa8eb95f
           field: effect
           ordinal:
           source_hash: ddf034fc0e4712135ac5308b295b7ccfdc2f7ffbfb3307c34fcfb54af4805e83
           line_ordinal: 0
           role: body
-          segments: [{start: 0, end: 34}]
+          segments: [{ start: 0, end: 34 }]
   - legacy: T11c373258c
     namespace: classification-v0
     uses:
       - cards: [BP05-103, BP05-SL19, BP20-R15]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:d5471d1173eceff61fa834165e5100fa92e3c4909fd244c614bcbfe0431b9218}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:d5471d1173eceff61fa834165e5100fa92e3c4909fd244c614bcbfe0431b9218
           field: effect
           ordinal:
           source_hash: 8f28e1b6e6f66a95c9d8e2f9b438c5bbc4647cd4c6f4f37ffe4c17695df36591
           line_ordinal: 2
           role: body
-          segments: [{start: 25, end: 102}]
+          segments: [{ start: 25, end: 102 }]
   - legacy: T346c9feff2
     namespace: classification-v0
     uses:
       - cards: [BP19-006, BP19-P02]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:7b50a7e957e557d1c418b18c02a7be2fee116aaeb11cb9d815403b740a054a50}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:7b50a7e957e557d1c418b18c02a7be2fee116aaeb11cb9d815403b740a054a50
           field: effect
           ordinal:
           source_hash: a69b43fd4a421625fe37e76695b1f6b37fe9d74622758e477d77950b9f23432b
           line_ordinal: 0
           role: body
-          segments: [{start: 0, end: 33}]
+          segments: [{ start: 0, end: 33 }]
       - cards: [BP19-005, BP19-P01]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:87707c263b5f853e22c3d1ef46c25812b67f26db9631dff04e87200afe265b48}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:87707c263b5f853e22c3d1ef46c25812b67f26db9631dff04e87200afe265b48
           field: effect
           ordinal:
           source_hash: 9184fe5f20cf088fc940d7747014d3710ad56a470c9f96b9fd67a6ab67b3a99a
           line_ordinal: 1
           role: body
-          segments: [{start: 20, end: 53}]
+          segments: [{ start: 20, end: 53 }]
   - legacy: Tbfd33d4dcc
     namespace: classification-v0
     uses:
       - cards: [CP04-022, CP04-SL08]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:ea621a287b4bd3306a03d9858dc8a4e13b86de06eadcc701c128288053456b99}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:ea621a287b4bd3306a03d9858dc8a4e13b86de06eadcc701c128288053456b99
           field: section
           ordinal: 0
           source_hash: da77a28bebb64cc34bde548584c8298513e798aa3e047391e2f4a82891bb0e37
           line_ordinal: 0
           role: body
-          segments: [{start: 0, end: 68}]
+          segments: [{ start: 0, end: 68 }]
   - legacy: T2c3b8840bf
     namespace: classification-v0
     uses:
       - cards: [BP18-100, BP18-SL25]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:5992ea62ce69554dfb74c49fe64e67ec4b21e1f0eace054668c027e13fc54d98}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:5992ea62ce69554dfb74c49fe64e67ec4b21e1f0eace054668c027e13fc54d98
           field: effect
           ordinal:
           source_hash: 085bda80d761ab25573733c57e5ecae26402957f43e6b6632645b0634dd95fbd
           line_ordinal: 1
           role: body
-          segments: [{start: 5, end: 57}]
+          segments: [{ start: 5, end: 57 }]
   - legacy: Tc668a31a25
     namespace: classification-v0
     uses:
       - cards: [BP18-073]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:89c3af0190db48df684fdffab7d01ac4e734b9d42b5e650a89472ac8bee24bd7}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:89c3af0190db48df684fdffab7d01ac4e734b9d42b5e650a89472ac8bee24bd7
           field: effect
           ordinal:
           source_hash: 1f4153a8b3cf413ee100c511c36b6f81e4805df67c35f7c876c589db65a2b1e5
           line_ordinal: 1
           role: body
-          segments: [{start: 5, end: 60}]
+          segments: [{ start: 5, end: 60 }]
   - legacy: T50eecf6f23
     namespace: classification-v0
     uses:
       - cards: [BP17-P33, BP17-T06]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:0fbd45438cf1638a3245fae16c814912a146f131b22f20825ab5183b99bc084b}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:0fbd45438cf1638a3245fae16c814912a146f131b22f20825ab5183b99bc084b
           field: effect
           ordinal:
           source_hash: 4d5e654311eb3a9bfebab05f6392524d610863c7affb3aa401d0daca1ad82ce9
           line_ordinal: 0
           role: body
-          segments: [{start: 0, end: 54}]
+          segments: [{ start: 0, end: 54 }]
   - legacy: Te0a680da45
     namespace: classification-v0
     uses:
       - cards: [BP16-058, BP16-SL16]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:c04d6ada9249ad9e12574c5d5793caf37a4923ad66ab6a84db4f568c256db123}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:c04d6ada9249ad9e12574c5d5793caf37a4923ad66ab6a84db4f568c256db123
           field: effect
           ordinal:
           source_hash: ad270f4b52602eadedf94d420b4d95f264b7c4c3c48799b43b85c6d0fada55b1
           line_ordinal: 0
           role: body
-          segments: [{start: 0, end: 65}]
+          segments: [{ start: 0, end: 65 }]
   - legacy: T513521b9e4
     namespace: classification-v0
     uses:
       - cards: [BP08-018, BP08-SL04, SD07-005]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:1f65179620e2c510aa2878610c0e0aad9e7241f2f466faab69a62d97d1ef3c4d}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:1f65179620e2c510aa2878610c0e0aad9e7241f2f466faab69a62d97d1ef3c4d
           field: effect
           ordinal:
           source_hash: 664f2af91c7bb56c2d1a0495905add0132f5e3d08dad789797a6e457aa0b6680
           line_ordinal: 0
           role: body
-          segments: [{start: 0, end: 72}]
+          segments: [{ start: 0, end: 72 }]
   - legacy: T0757d64bf5
     namespace: classification-v0
     uses:
       - cards: [BP13-032]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:7fedb231be881f0c9bf5032fc1c19015bdc0830e883f66e9f05e682a4964f2fa}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:7fedb231be881f0c9bf5032fc1c19015bdc0830e883f66e9f05e682a4964f2fa
           field: effect
           ordinal:
           source_hash: 134f157c876a3d4857a95589e9e2aae742430713fe46371763bf4044905c778b
           line_ordinal: 1
           role: body
-          segments: [{start: 5, end: 61}]
+          segments: [{ start: 5, end: 61 }]
       - cards: [SD07-019]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:ca3613b6cc9b0b8c9c59d46b470c73913e80e36c4986023810f901b42a4afbfc}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:ca3613b6cc9b0b8c9c59d46b470c73913e80e36c4986023810f901b42a4afbfc
           field: effect
           ordinal:
           source_hash: 370cc9cd9f1372d4475fa6d528fbd0e1d4e142a72d0d0e9375e02b3a7c0b3d10
           line_ordinal: 1
           role: body
-          segments: [{start: 70, end: 126}]
+          segments: [{ start: 70, end: 126 }]
   - legacy: Tc20ea969bc
     namespace: classification-v0
     uses:
       - cards: [ECP01-SP16, ECP01-SSP16]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:26c556591ba97f387cb20965447cd59765036569f512c038353ad7c975f8a948}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:26c556591ba97f387cb20965447cd59765036569f512c038353ad7c975f8a948
           field: effect
           ordinal:
           source_hash: bf4033df8d107b7609e4ca3c8d3e5732d4968523e90e7cac95b4dba14519f6bb
           line_ordinal: 0
           role: body
-          segments: [{start: 0, end: 57}]
+          segments: [{ start: 0, end: 57 }]
       - cards: [ECP01-031, ECP01-SL16]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:c1b46b03ffe1703385654f46f511f70c1b0e1295b13a2ac2172bce51f3513c81}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:c1b46b03ffe1703385654f46f511f70c1b0e1295b13a2ac2172bce51f3513c81
           field: effect
           ordinal:
           source_hash: 89a5242f19ab05409bc7a0ab869c7714575ff3f53b37c536464fad9d255ac88d
           line_ordinal: 0
           role: body
-          segments: [{start: 0, end: 57}]
+          segments: [{ start: 0, end: 57 }]
   - legacy: T0b6064c3a4
     namespace: classification-v0
     uses:
       - cards: [ECP01-038, ECP01-SL18, ECP01-SP18, ECP01-SSP18]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:0c8ff49700691fe7eb2a7517d97d5bcac60e6873c3eaaa0ca39ed43eab1c3ab5}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:0c8ff49700691fe7eb2a7517d97d5bcac60e6873c3eaaa0ca39ed43eab1c3ab5
           field: effect
           ordinal:
           source_hash: 31fc2b21b0cb53c14b0e91bcaf21f1dd5348697c1698fc08ef0de46c09ab2c34
           line_ordinal: 0
           role: body
-          segments: [{start: 0, end: 71}]
+          segments: [{ start: 0, end: 71 }]
   - legacy: Tb5d63647eb
     namespace: classification-v0
     uses:
       - cards: [BP13-037, BP13-SL09]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:386b4325eb34a3d3b10facc8e277d4ed46b1152a79465805d8cd9e64046f3d50}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:386b4325eb34a3d3b10facc8e277d4ed46b1152a79465805d8cd9e64046f3d50
           field: effect
           ordinal:
           source_hash: cac384b26406df2188e38f82089e54666b4aae9bfb605873e754eb23f1361e11
           line_ordinal: 1
           role: body
-          segments: [{start: 20, end: 100}]
+          segments: [{ start: 20, end: 100 }]
   - legacy: T224a565171
     namespace: classification-v0
     uses:
       - cards: [BP13-071, BP13-SL15]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:2f794cac8d00895d12ec034ebdabb74a7c19fbb13b4f611ce6f0fa1412410a38}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:2f794cac8d00895d12ec034ebdabb74a7c19fbb13b4f611ce6f0fa1412410a38
           field: effect
           ordinal:
           source_hash: b73442bc6ed2ce16a9e6acd88455ccd18e5c98b1958f1875f1abe90ad4d16676
           line_ordinal: 2
           role: body
-          segments: [{start: 59, end: 126}]
+          segments: [{ start: 59, end: 126 }]
   - legacy: T548f622d15
     namespace: classification-v0
     uses:
       - cards: [BP12-010, PR-329]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:8cf38119225e078e90b69cb4461e9c6ecb1eeba25c499000cc04dbb93554a568}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:8cf38119225e078e90b69cb4461e9c6ecb1eeba25c499000cc04dbb93554a568
           field: effect
           ordinal:
           source_hash: 6ed181dbf4522288953f0001f67d2784dedadb4be8cd5a12bf2379457a09a681
           line_ordinal: 0
           role: body
-          segments: [{start: 0, end: 79}]
+          segments: [{ start: 0, end: 79 }]
   - legacy: Tb555e33119
     namespace: classification-v0
     uses:
       - cards: [SP01-032, SP01-SL32, SP01-SP20, SP01-U18]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:d027c893a765db04a7d7033a1b1a472e378c4b59892d1652cdad7d7dfd16b926}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:d027c893a765db04a7d7033a1b1a472e378c4b59892d1652cdad7d7dfd16b926
           field: effect
           ordinal:
           source_hash: 30a70d7285d84f058a08627ffa1e2db52a4e906a7dbbe67bcdc573435b6443e2
           line_ordinal: 0
           role: body
-          segments: [{start: 0, end: 72}]
+          segments: [{ start: 0, end: 72 }]
   - legacy: T62a7b69b95
     namespace: classification-v0
     uses:
       - cards: [CP03-018, CP03-P12]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:3f05f6c18240ef4e2aec3244bd517604f921f4622ec2ff50abab362e5eff8b90}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:3f05f6c18240ef4e2aec3244bd517604f921f4622ec2ff50abab362e5eff8b90
           field: effect
           ordinal:
           source_hash: 9078a4292275e2ba7a96c5d19b8b6024bb57184d5d6a74c2bfc85fd284378ee1
           line_ordinal: 1
           role: body
-          segments: [{start: 5, end: 76}]
+          segments: [{ start: 5, end: 76 }]
   - legacy: Tabd98faf17
     namespace: classification-v0
     uses:
       - cards: [BP10-035, BP10-P08]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:a88effac84f5cbd6aad165ffb281fcc34e857094629bdd220f5e5b1eeb09788d}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:a88effac84f5cbd6aad165ffb281fcc34e857094629bdd220f5e5b1eeb09788d
           field: effect
           ordinal:
           source_hash: 4d403eebc2c7c02f5a8f12d896052b187ba9e3e125e3b0de047eb7c24ab119e8
           line_ordinal: 0
           role: body
-          segments: [{start: 0, end: 62}]
+          segments: [{ start: 0, end: 62 }]
   - legacy: Te72c46795e
     namespace: classification-v0
     uses:
       - cards: [BP10-072]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:0b02959e9ccf54e216845b9a251270b5fc4c9d575f706e2c3bbd00211c8af597}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:0b02959e9ccf54e216845b9a251270b5fc4c9d575f706e2c3bbd00211c8af597
           field: effect
           ordinal:
           source_hash: 10c793aac7d96d94205766b87fe47beff58c894dc31b93fe3bdc298b3f88ed66
           line_ordinal: 1
           role: body
-          segments: [{start: 5, end: 74}]
+          segments: [{ start: 5, end: 74 }]
   - legacy: T4d9c7adf4c
     namespace: classification-v0
     uses:
       - cards: [BP10-097]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:08b93ab8e7196e164fe5ade6004aff815bfc4a75eb32ab845190e864cba1e599}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:08b93ab8e7196e164fe5ade6004aff815bfc4a75eb32ab845190e864cba1e599
           field: effect
           ordinal:
           source_hash: 25114d9b4648d53c094fe31c1317e10e9625806f1c6727178c5d9cf7b7397818
           line_ordinal: 1
           role: body
-          segments: [{start: 5, end: 44}]
+          segments: [{ start: 5, end: 44 }]
   - legacy: Tab973a8da1
     namespace: classification-v0
     uses:
       - cards: [BP09-095, BP09-P30]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:449f0a2d7206749bc21320d7ad4d86a0d27f018196cf0a59b85fb06423bbc8bd}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:449f0a2d7206749bc21320d7ad4d86a0d27f018196cf0a59b85fb06423bbc8bd
           field: effect
           ordinal:
           source_hash: c6d5985f43a0db5aa3045a247989db697b866a3a7c43d4611262db88f62807e0
           line_ordinal: 1
           role: body
-          segments: [{start: 50, end: 129}]
+          segments: [{ start: 50, end: 129 }]
   - legacy: T1b3704b138
     namespace: classification-v0
     uses:
       - cards: [BP09-071, BP09-SL15, BP09-U05]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:72e2320decf9e13f4c68457bd736eff5e6f4f30706444c994e41e75e2e1c023e}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:72e2320decf9e13f4c68457bd736eff5e6f4f30706444c994e41e75e2e1c023e
           field: effect
           ordinal:
           source_hash: e8d5f0d57b95e855f63168a7392e8d8613a09401fdef72784637d09003764417
           line_ordinal: 1
           role: body
-          segments: [{start: 14, end: 54}]
+          segments: [{ start: 14, end: 54 }]
   - legacy: Te58f2f455f
     namespace: classification-v0
     uses:
       - cards: [BP08-077]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:2c16d5b6382a119755c7abfc98eb73c6afda048b839e5a5b8091b29fd752116e}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:2c16d5b6382a119755c7abfc98eb73c6afda048b839e5a5b8091b29fd752116e
           field: effect
           ordinal:
           source_hash: 59b919aa9f6ca275bd5f48579c9c2ebd602584362558a56a0feffc25d36ea491
           line_ordinal: 0
           role: body
-          segments: [{start: 0, end: 81}]
+          segments: [{ start: 0, end: 81 }]
       - cards: [BP08-076]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:c0e073f390e1fa4faa023c5a9402be9d8303c429daf869bc9019584a5dcaab11}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:c0e073f390e1fa4faa023c5a9402be9d8303c429daf869bc9019584a5dcaab11
           field: effect
           ordinal:
           source_hash: cd1191a87312d02b11017b4412037ca1687a6975652302d171410be70fb01142
           line_ordinal: 1
           role: body
-          segments: [{start: 20, end: 101}]
+          segments: [{ start: 20, end: 101 }]
   - legacy: T9fed6a378a
     namespace: classification-v0
     uses:
       - cards: [CSD02b-003, CSD02b-SL03]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:a7db784ba9b204993d8c7fcd96b47943d82dba04f724966717a159bc2e3991da}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:a7db784ba9b204993d8c7fcd96b47943d82dba04f724966717a159bc2e3991da
           field: effect
           ordinal:
           source_hash: 1b41f27aac97918064c42d6eccd865a8e1c7951a618899dba35a91fc02a4d645
           line_ordinal: 0
           role: body
-          segments: [{start: 0, end: 48}]
+          segments: [{ start: 0, end: 48 }]
   - legacy: Tb60ffda4dd
     namespace: classification-v0
     uses:
       - cards: [PR-435]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:6a6e48fba5b82a8528195849197bfc147586eab0b72ae44032fb1199d13a496b}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:6a6e48fba5b82a8528195849197bfc147586eab0b72ae44032fb1199d13a496b
           field: effect
           ordinal:
           source_hash: 7376635278e0cc0f30c6246466b4295f1c2f72e6603f555924bb06728a91cc6e
           line_ordinal: 0
           role: body
-          segments: [{start: 0, end: 100}]
+          segments: [{ start: 0, end: 100 }]
       - cards: [CP02-006, CP02-P03, CP02-SP02, CP02-U02]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:e63a9162114f7179b6d9b7875305854864f31a5b188ce6ef1ee4c76a50ffaaec}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:e63a9162114f7179b6d9b7875305854864f31a5b188ce6ef1ee4c76a50ffaaec
           field: effect
           ordinal:
           source_hash: 7376635278e0cc0f30c6246466b4295f1c2f72e6603f555924bb06728a91cc6e
           line_ordinal: 0
           role: body
-          segments: [{start: 0, end: 100}]
+          segments: [{ start: 0, end: 100 }]
   - legacy: Tea50a52035
     namespace: classification-v0
     uses:
       - cards: [CP02-007, CP02-P04]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:55d003cb5190f35828b8e7f73acfe4a707606d8f193c67da33e5e74308479d89}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:55d003cb5190f35828b8e7f73acfe4a707606d8f193c67da33e5e74308479d89
           field: effect
           ordinal:
           source_hash: 26fb25daddc40a45cc19f8abf652a82227bbb98a0a739e5d385cfdabf92d42e3
           line_ordinal: 0
           role: body
-          segments: [{start: 0, end: 50}]
+          segments: [{ start: 0, end: 50 }]
   - legacy: T247492c8a1
     namespace: classification-v0
     uses:
       - cards: [CP02-052, CP02-SL10]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:f6d5ebf65774e271aa05ad70ba226b32e5c9e466c1684f8fd025d93a1aba2457}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:f6d5ebf65774e271aa05ad70ba226b32e5c9e466c1684f8fd025d93a1aba2457
           field: effect
           ordinal:
           source_hash: b02a6374fc9849534cbb3ca380b29b77d1daa44569a656dd3bdaa22e8b4caf8f
           line_ordinal: 1
           role: body
-          segments: [{start: 5, end: 46}]
+          segments: [{ start: 5, end: 46 }]
   - legacy: T5141b4aea9
     namespace: classification-v0
     uses:
       - cards: [CP02-086, CP02-SL16, CP02-SP11, CP02-U11]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:ab360eb0e8a33fb9c5f5f43087a6e2f01094bafde74907387dea33ac18b01c57}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:ab360eb0e8a33fb9c5f5f43087a6e2f01094bafde74907387dea33ac18b01c57
           field: effect
           ordinal:
           source_hash: 2ea955265f5441206efe21a8e3f716ac5ed56cbed591c9af7ae1b36fa2820060
           line_ordinal: 1
           role: body
-          segments: [{start: 5, end: 61}]
+          segments: [{ start: 5, end: 61 }]
   - legacy: T836644f5c2
     namespace: classification-v0
     uses:
       - cards: [BP06-075, BP06-SL15]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:db83b9cc14f6ff34d36ff67819d6ff093a39d6b2c3da673197876927324e78c2}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:db83b9cc14f6ff34d36ff67819d6ff093a39d6b2c3da673197876927324e78c2
           field: effect
           ordinal:
           source_hash: 4d8327cb019969bde77a6f5e5d55da06add6dea4d04e62486d28e91925410bf0
           line_ordinal: 0
           role: body
-          segments: [{start: 0, end: 60}]
+          segments: [{ start: 0, end: 60 }]
   - legacy: Tc14c80b801
     namespace: classification-v0
     uses:
       - cards: [BP06-091, BP06-SL17]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:57820a8a174cac37189d3ff6889165141074c811d9c871249c59dc907cf4b5c7}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:57820a8a174cac37189d3ff6889165141074c811d9c871249c59dc907cf4b5c7
           field: effect
           ordinal:
           source_hash: c2b3022cdb3d23facefab9f5fb4066d0b86ae34f0e9705726b931b56e8ea9325
           line_ordinal: 1
           role: body
-          segments: [{start: 20, end: 125}]
+          segments: [{ start: 20, end: 125 }]
   - legacy: T9912546180
     namespace: classification-v0
     uses:
       - cards: [BP06-095]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:3b345e3da44555e6bd8f271bb2bfa3a40deb3d25b00695876ff7f65bbf879367}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:3b345e3da44555e6bd8f271bb2bfa3a40deb3d25b00695876ff7f65bbf879367
           field: effect
           ordinal:
           source_hash: a31eef60c2b0f62e9230118872b0a16142490857b2ccd63206efd07b352b2bb6
           line_ordinal: 0
           role: body
-          segments: [{start: 0, end: 55}]
+          segments: [{ start: 0, end: 55 }]
       - cards: [BP06-094]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:744b520ac43388eeabbefd8e65501b0b5f3ea48500b878da9cb2a4783fd68a21}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:744b520ac43388eeabbefd8e65501b0b5f3ea48500b878da9cb2a4783fd68a21
           field: effect
           ordinal:
           source_hash: ae071a52bf58a63dde22c76eaaf3d8bbf2868debfabd206a3690351ed68c67fa
           line_ordinal: 1
           role: body
-          segments: [{start: 20, end: 75}]
+          segments: [{ start: 20, end: 75 }]
   - legacy: T1258b0632e
     namespace: classification-v0
     uses:
       - cards: [BP06-102, PR-136]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:9e1ca4c984f17a1ef9e20fd0df2e0e8c1e20d444f536204264c1fefb55a50ead}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:9e1ca4c984f17a1ef9e20fd0df2e0e8c1e20d444f536204264c1fefb55a50ead
           field: effect
           ordinal:
           source_hash: 08a94f07295399a730b85c8ff4cb538a93cc6b75cbf1363b1b1595907d5ed340
           line_ordinal: 0
           role: body
-          segments: [{start: 0, end: 52}]
+          segments: [{ start: 0, end: 52 }]
   - legacy: T7ad9182907
     namespace: classification-v0
     uses:
       - cards: [BP06-104]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:ae29e1a042bda82d764252b11c4a32ab8c400af887c8a7081ce8fd8e9c4ac294}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:ae29e1a042bda82d764252b11c4a32ab8c400af887c8a7081ce8fd8e9c4ac294
           field: effect
           ordinal:
           source_hash: d0c368ad10a4db6474cd5fcf2b2d12e027950f75203ec0d2b656ece45372da76
           line_ordinal: 0
           role: body
-          segments: [{start: 0, end: 52}]
+          segments: [{ start: 0, end: 52 }]
       - cards: [BP06-103]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:ce0f17e4a1580a6fb93cc4d4b7004f1aab73b25f0be4f130735ca079da695033}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:ce0f17e4a1580a6fb93cc4d4b7004f1aab73b25f0be4f130735ca079da695033
           field: effect
           ordinal:
           source_hash: 5cd4e7b9238b18a208eb09c5773e023835c4da6f7e9fadd6aeb52043665c6031
           line_ordinal: 1
           role: body
-          segments: [{start: 22, end: 74}]
+          segments: [{ start: 22, end: 74 }]
   - legacy: T8c92904194
     namespace: classification-v0
     uses:
       - cards: [BP04-032, BP04-P10]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:feac6179964d790a301900958e622f2da73a8afa38725bf2cab28a9e066c5906}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:feac6179964d790a301900958e622f2da73a8afa38725bf2cab28a9e066c5906
           field: effect
           ordinal:
           source_hash: 05a11b67bf78a36fbc02a0213d785a27e56910b7b7c99b4be1b4fb38355cbe8f
           line_ordinal: 2
           role: body
-          segments: [{start: 50, end: 114}]
+          segments: [{ start: 50, end: 114 }]
   - legacy: Ta6a8800bd2
     namespace: classification-v0
     uses:
       - cards: [BP03-082, BP03-P24]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:8cf6653f4730f73024acf22c0733885b7605f9e54ea83522a53ec173912f4d5a}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:8cf6653f4730f73024acf22c0733885b7605f9e54ea83522a53ec173912f4d5a
           field: effect
           ordinal:
           source_hash: a00383cd5a23d75bf59afa9b350fb0c633e8d233529bad8299243355e01dd4c9
           line_ordinal: 0
           role: body
-          segments: [{start: 0, end: 58}]
+          segments: [{ start: 0, end: 58 }]
       - cards: [BP03-081, BP03-P23]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:3b69a689ce93375bf4926900ef6473afa8613a339801b27ba6058f048bad1072}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:3b69a689ce93375bf4926900ef6473afa8613a339801b27ba6058f048bad1072
           field: effect
           ordinal:
           source_hash: 757dc3c5c585eb2d5735827211c5cd446bee8dce719b61dafac4b786891e814a
           line_ordinal: 1
           role: body
-          segments: [{start: 20, end: 78}]
+          segments: [{ start: 20, end: 78 }]
   - legacy: Tbf6a186338
     namespace: classification-v0
     uses:
       - cards: [BP03-052, PR-078]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:1add598dc39d51250822cb131eab3812558b1653757775f2de9753d98582e982}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:1add598dc39d51250822cb131eab3812558b1653757775f2de9753d98582e982
           field: effect
           ordinal:
           source_hash: ed75e63a199f6d7867bf7075d942dec71bc05da5da6fb8ba85d5965530790f56
           line_ordinal: 0
           role: body
-          segments: [{start: 0, end: 72}]
+          segments: [{ start: 0, end: 72 }]
   - legacy: Tfc219284d1
     namespace: classification-v0
     uses:
       - cards: [CP01-076, CP01-P58]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:812e1bbec3f50b32ef9e5786e63d5ddde5eacc3f98aed474f033ffd97b61f429}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:812e1bbec3f50b32ef9e5786e63d5ddde5eacc3f98aed474f033ffd97b61f429
           field: effect
           ordinal:
           source_hash: 51197c002be7b984378a0d17c77655788d4b33cb1f7d9b654bce639e7f4bb6d8
           line_ordinal: 2
           role: body
-          segments: [{start: 25, end: 82}]
+          segments: [{ start: 25, end: 82 }]
       - cards: [CSD01-028]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:d7e9d6711a4fcab8c9694fc56972af73232d08e5b1e8dea0a2ac1a437b8c09a1}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:d7e9d6711a4fcab8c9694fc56972af73232d08e5b1e8dea0a2ac1a437b8c09a1
           field: effect
           ordinal:
           source_hash: cef076630df66f4071c3b3e1ec357a10850fe05b22aacd99c983c56f89239e2c
           line_ordinal: 2
           role: body
-          segments: [{start: 90, end: 147}]
+          segments: [{ start: 90, end: 147 }]
   - legacy: T7e4c84804e
     namespace: classification-v0
     uses:
       - cards: [CP01-029, CP01-SL09, CP01-SP09]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:a2f7c378115a6c4890c267a97971b8f8c5815826e8392c2a59160732211e6cef}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:a2f7c378115a6c4890c267a97971b8f8c5815826e8392c2a59160732211e6cef
           field: effect
           ordinal:
           source_hash: 53b30f71c08bd057e6a74cb69c8b91a2caa6e69970eacd71d557ab9b0585aea7
           line_ordinal: 2
           role: body
-          segments: [{start: 77, end: 141}]
+          segments: [{ start: 77, end: 141 }]
   - legacy: T11a208d0c0
     namespace: classification-v0
     uses:
       - cards: [BP02-062, BP02-P19]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:9ff7a8c5aaa73f1cf35483d903dbaf0aa73fa3c1dadf061766d558339d117a98}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:9ff7a8c5aaa73f1cf35483d903dbaf0aa73fa3c1dadf061766d558339d117a98
           field: effect
           ordinal:
           source_hash: 1d361ab0b6f09234b8decb18c4eb3d00af1d60c4faa144b0d43bd94037f56c31
           line_ordinal: 0
           role: body
-          segments: [{start: 0, end: 70}]
+          segments: [{ start: 0, end: 70 }]
   - legacy: T0b9040b3aa
     namespace: classification-v0
     uses:
       - cards: [BP02-098, BP02-P29]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:a8e04a7df6bfd65007bf77e25367729f5da1d012dffbaf9d5c4dd3164446e05c}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:a8e04a7df6bfd65007bf77e25367729f5da1d012dffbaf9d5c4dd3164446e05c
           field: effect
           ordinal:
           source_hash: aa4a2ac367dbdc80fe0fb9c7298f5d7c50e646a9c7c73656b3796ed60b045d15
           line_ordinal: 0
           role: body
-          segments: [{start: 0, end: 48}]
+          segments: [{ start: 0, end: 48 }]
   - legacy: Ta8dd7eb692
     namespace: classification-v0
     uses:
       - cards: [BP02-086]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:27e3f3c9bce2230b1684fe3d6b9b70711520445f1e872440d06b3df15494d4b8}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:27e3f3c9bce2230b1684fe3d6b9b70711520445f1e872440d06b3df15494d4b8
           field: effect
           ordinal:
           source_hash: f08f7239810b4d91bc553acf4a72639fd80ee87df2846ab3b60ceba7463883c4
           line_ordinal: 1
           role: body
-          segments: [{start: 20, end: 62}]
+          segments: [{ start: 20, end: 62 }]
       - cards: [BP02-085]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:4f6357e535ea8a54414f8fbbdf047473e620d774d2a5a1379b41df1a3e035b3e}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:4f6357e535ea8a54414f8fbbdf047473e620d774d2a5a1379b41df1a3e035b3e
           field: effect
           ordinal:
           source_hash: f5b718d259e7b1de980c687ede27a388e190409b163c3111e182434d7f1eb0db
           line_ordinal: 1
           role: body
-          segments: [{start: 20, end: 62}]
+          segments: [{ start: 20, end: 62 }]
   - legacy: Tbb105a5e57
     namespace: classification-v0
     uses:
       - cards: [BP01-162, PR-027]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:f6c78adb2d4f9063e3e402d362978a5efb5a891a91162ee0c44fe7ea65e615cc}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:f6c78adb2d4f9063e3e402d362978a5efb5a891a91162ee0c44fe7ea65e615cc
           field: effect
           ordinal:
           source_hash: d90a683a424dce791541842d65e9551ff9c934cd3dea08f5b6f1eaa502bdae7d
           line_ordinal: 0
           role: body
-          segments: [{start: 0, end: 66}]
+          segments: [{ start: 0, end: 66 }]
 hint:
   zh-TW: 依 Q940、Q852，「〜とき、…なら」只要事件發生就誘發；條件在結算時才判，不成立就不做，之後才成立也不補做。「那次傷害」等事件資訊取事件當時的值。
   ja: Q940・Q852より、「～とき、…なら」は条件となる事象が起きれば誘発し、条件は解決時に確認します。満たしていなければ効果は適用されず、後から満たしても適用されません。「そのダメージ」などの事象の情報は、その事象が起きた時点の値を参照します。
-supersedes: '舊裁定 #1（「〜とき、…なら」在誘發時檢查條件，不成立就不誘發，依 Q302）；以及 R-0002 中「誘發時查」的部分'
+supersedes: "舊裁定 #1（「〜とき、…なら」在誘發時檢查條件，不成立就不誘發，依 Q302）；以及 R-0002 中「誘發時查」的部分"
 note: Q302（BP02-P19）在兩種讀法下結果相同：手牌上限的捨牌發生在結束階段能力處理之後，無論「誘發時查」或「結算時查」，該能力都不會因這次捨牌而生效，所以不構成反證。10.7.6 的狀態誘發（「あなたの手札にカードがないとき、～」等）是另一類，不在本裁定範圍。 revision 2 只把 applies_to 改成明示舊適用域，裁定內容不變；沒有提升證據強度或授予可執行資格。

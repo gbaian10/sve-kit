@@ -35,43 +35,43 @@ verified_by:
 scenarios:
   - name: A 只能選【2】：宿命の狐火・セッカ +2/+2 後，天剣の乙女受 3
     setup:
-      turn: {active: P1, first_player: P1, elapsed_turns: {P1: 3, P2: 2}, phase: main}
+      turn: { active: P1, first_player: P1, elapsed_turns: { P1: 3, P2: 2 }, phase: main }
       history: none
       players:
         P1:
           construction: class
-          leader: {class: エルフ, life: 20}
-          pp: {current: 1, max: 3}
+          leader: { class: エルフ, life: 20 }
+          pp: { current: 1, max: 3 }
           zones:
             field:
-              - {id: a1, card: BP13-001}          # 宿命の狐火・セッカ 1/1
+              - { id: a1, card: BP13-001 } # 宿命の狐火・セッカ 1/1
             hand:
-              - {id: a2, card: BP13-008}          # 九尾の決意
+              - { id: a2, card: BP13-008 } # 九尾の決意
             deck:
-              - {filler: 20}
+              - { filler: 20 }
         P2:
           construction: class
-          leader: {class: ロイヤル, life: 20}
-          pp: {current: 0, max: 3}
+          leader: { class: ロイヤル, life: 20 }
+          pp: { current: 0, max: 3 }
           zones:
             field:
-              - {id: b1, card: BP01-176}          # 天剣の乙女 4/6
+              - { id: b1, card: BP01-176 } # 天剣の乙女 4/6
             hand:
-              - {filler: 3}
+              - { filler: 3 }
             deck:
-              - {filler: 20}
+              - { filler: 20 }
     decisions:
-      - {n: 1, by: P1, at: main, do: play, card: a2, options: [2], targets: {2: [a1], 3: [b1]}}
+      - { n: 1, by: P1, at: main, do: play, card: a2, options: [2], targets: { 2: [a1], 3: [b1] } }
     random: {}
     expected:
       - at: after-decision-1
         view: omniscient
         outcome: resolved
         assert:
-          P1.field.a1: {power: 3, hp: 3}
-          P2.field.b1: {hp: 3}
+          P1.field.a1: { power: 3, hp: 3 }
+          P2.field.b1: { hp: 3 }
           P1.pp.current: 0
         events:
-          - {kind: ダメージ, source: a2, target: b1, amount: 3}
+          - { kind: ダメージ, source: a2, target: b1, amount: 3 }
         forbidden_events:
-          - {kind: ダメージ, amount: 1}
+          - { kind: ダメージ, amount: 1 }

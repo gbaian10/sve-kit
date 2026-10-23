@@ -10,7 +10,7 @@ mechanisms:
   - 10.7 其他
   - token
   - 放牌庫頂或底
-  - '5.9'
+  - "5.9"
   - 10.6.2.8.2
   - 結算時的選擇（可選剛抽的卡）
 cards:
@@ -59,7 +59,7 @@ verified_by:
     method: qa
     note: 10.7.2.1、Q1886、4.8.3.1／4.8.3.2；xverify-1/result.md；遷移後 xverify-2/result.md 3/3；「原 EX 0」「原 EX 3」fix-2 加 移動 與 group 後 xverify-2/recheck.md 同意；「原 EX 5」followup 補零張 select 後 xverify-2/final.md 同意
 scenarios:
-  - name: '[astra] 原 EX 0'
+  - name: "[astra] 原 EX 0"
     setup:
       turn:
         active: P1
@@ -210,7 +210,7 @@ scenarios:
             - b
           P2.leader.life: 18
           semantic_state.pending_triggers: []
-  - name: '[astra] 原 EX 3'
+  - name: "[astra] 原 EX 3"
     setup:
       turn:
         active: P1
@@ -370,7 +370,7 @@ scenarios:
             - b
           P2.leader.life: 18
           semantic_state.pending_triggers: []
-  - name: '[astra] 原 EX 5'
+  - name: "[astra] 原 EX 5"
     setup:
       turn:
         active: P1
@@ -493,7 +493,7 @@ scenarios:
             - x4
         forbidden_events:
           - kind: 待機
-  - name: '[fable] A 抽到 d1 後把 d1 放回牌庫頂'
+  - name: "[fable] A 抽到 d1 後把 d1 放回牌庫頂"
     setup:
       turn:
         active: P1
@@ -620,8 +620,8 @@ scenarios:
             from: P1.hand
             to: P1.deck
             position: top
-  - name: '[fable] B 把原本的手牌 h1 放到牌庫底'
-    inherit: '[fable] A 抽到 d1 後把 d1 放回牌庫頂'
+  - name: "[fable] B 把原本的手牌 h1 放到牌庫底"
+    inherit: "[fable] A 抽到 d1 後把 d1 放回牌庫頂"
     decisions:
       - n: 1
         by: P1

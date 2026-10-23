@@ -34,47 +34,63 @@ verified_by:
 scenarios:
   - name: A 場上 4 張、付 +2、不找到：遮断出場（5 張）→ 蹂躙不出
     setup:
-      turn: {active: P1, first_player: P1, elapsed_turns: {P1: 5, P2: 4}, phase: main}
+      turn: { active: P1, first_player: P1, elapsed_turns: { P1: 5, P2: 4 }, phase: main }
       history: none
       players:
         P1:
           construction: class
-          leader: {class: ウィッチ, life: 20}
-          pp: {current: 5, max: 5}
+          leader: { class: ウィッチ, life: 20 }
+          pp: { current: 5, max: 5 }
           zones:
             field:
-              - {id: a1, card: BP01-173}
-              - {id: a2, card: BP01-173}
-              - {id: a3, card: SD02-002}
-              - {id: a4, card: SD02-002}
+              - { id: a1, card: BP01-173 }
+              - { id: a2, card: BP01-173 }
+              - { id: a3, card: SD02-002 }
+              - { id: a4, card: SD02-002 }
             ex:
-              - {id: m1, card: BP17-T14}          # 遮断の触手（機械）
-              - {id: m2, card: BP17-T14}
-              - {id: m3, card: BP17-T15}          # 蹂躙の触手（機械）→ EX 機械 3 張
+              - { id: m1, card: BP17-T14 } # 遮断の触手（機械）
+              - { id: m2, card: BP17-T14 }
+              - { id: m3, card: BP17-T15 } # 蹂躙の触手（機械）→ EX 機械 3 張
             hand:
-              - {id: s1, card: BP17-044}          # 戦慄の侵略（コスト3、+2 してよい）
+              - { id: s1, card: BP17-044 } # 戦慄の侵略（コスト3、+2 してよい）
             deck:
-              - {id: d1, card: BP17-040}          # 極致の創造主・ベルフォメット
-              - {id: d2, card: BP01-173}
-              - {id: d3, card: BP01-173}
+              - { id: d1, card: BP17-040 } # 極致の創造主・ベルフォメット
+              - { id: d2, card: BP01-173 }
+              - { id: d3, card: BP01-173 }
         P2:
           construction: class
-          leader: {class: ロイヤル, life: 20}
-          pp: {current: 0, max: 5}
+          leader: { class: ロイヤル, life: 20 }
+          pp: { current: 0, max: 5 }
           zones:
             hand:
-              - {filler: 3}
+              - { filler: 3 }
             deck:
-              - {filler: 20}
+              - { filler: 20 }
     decisions:
-      - {n: 1, by: P1, at: main, do: play, card: s1, optional_costs: {additional: {pp: 2}}}
-      - {n: 2, by: P1, at: resolve, of: {decision: 1, occurrence: 1}, do: resolve-choice, select: []}
-      - {n: 3, by: P1, at: resolve, of: {decision: 1, occurrence: 2}, do: place-acted, object: new-1, acted: false}
+      - { n: 1, by: P1, at: main, do: play, card: s1, optional_costs: { additional: { pp: 2 } } }
+      - n: 2
+        by: P1
+        at: resolve
+        of: { decision: 1, occurrence: 1 }
+        do: resolve-choice
+        select: []
+      - n: 3
+        by: P1
+        at: resolve
+        of: { decision: 1, occurrence: 2 }
+        do: place-acted
+        object: new-1
+        acted: false
       # 4.4.4.2：場已 5 張 → 從要建立的『蹂躙の触手』中選 0 張；契約 10.4 用卡號選、9.8 只剩 select: [] 也是輸入點
-      - {n: 4, by: P1, at: resolve, of: {decision: 1, occurrence: 3}, do: resolve-choice, select: []}
+      - n: 4
+        by: P1
+        at: resolve
+        of: { decision: 1, occurrence: 3 }
+        do: resolve-choice
+        select: []
     random:
       shuffles:
-        - {player: P1, zone: deck, result: [d3, d1, d2]}
+        - { player: P1, zone: deck, result: [d3, d1, d2] }
     expected:
       - at: after-decision-2
         view: omniscient
@@ -82,25 +98,25 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - {do: place-acted, object: new-1, acted: false}
-            - {do: place-acted, object: new-1, acted: true}
+            - { do: place-acted, object: new-1, acted: false }
+            - { do: place-acted, object: new-1, acted: true }
         assert:
           P1.deck: [d3, d1, d2]
         forbidden_events:
           # 只禁止搜尋結果向對手出示（to: P2）；決定 1 從手牌打出 s1 時依 10.6.2.1 的公開（to: all）在同一區間、必然發生（astra 複查 R1）
-          - {kind: 公開, to: P2}
+          - { kind: 公開, to: P2 }
       - at: after-decision-3
         view: omniscient
         outcome: paused
         awaiting:
           by: P1
           choices:
-            - {do: resolve-choice, select: []}
+            - { do: resolve-choice, select: [] }
         assert:
           P1.field: [a1, a2, a3, a4, new-1]
-          P1.field.new-1: {name: 遮断の触手, acted: false}
+          P1.field.new-1: { name: 遮断の触手, acted: false }
         events:
-          - {kind: 場に出す, object: new-1, to: P1.field}
+          - { kind: 場に出す, object: new-1, to: P1.field }
       - at: after-decision-4
         view: omniscient
         outcome: resolved
@@ -112,10 +128,10 @@ scenarios:
           P1.field: [a1, a2, a3, a4, new-1]
           P1.field_count: 5
         events:
-          - {kind: 解決, object: s1}
+          - { kind: 解決, object: s1 }
         forbidden_events:
           # 這段區間（決定 4）什麼都不放上場：蹂躙 依 4.4.4.2 選了 0 張
-          - {kind: 場に出す}
+          - { kind: 場に出す }
 
   - name: B 場上 3 張：遮断與蹂躙都出場
     inherit: A 場上 4 張、付 +2、不找到：遮断出場（5 張）→ 蹂躙不出
@@ -124,16 +140,27 @@ scenarios:
         P1:
           zones:
             field:
-              - {id: a1, card: BP01-173}
-              - {id: a2, card: BP01-173}
-              - {id: a3, card: SD02-002}
+              - { id: a1, card: BP01-173 }
+              - { id: a2, card: BP01-173 }
+              - { id: a3, card: SD02-002 }
     decisions:
-      - {n: 1, by: P1, at: main, do: play, card: s1, optional_costs: {additional: {pp: 2}}}
-      - {n: 2, by: P1, at: resolve, of: {decision: 1, occurrence: 1}, do: resolve-choice, select: [d1]}
-      - {n: 3, by: P1, at: resolve, of: {decision: 1, occurrence: 2}, do: place-acted, object: new-1, acted: false}
+      - { n: 1, by: P1, at: main, do: play, card: s1, optional_costs: { additional: { pp: 2 } } }
+      - n: 2
+        by: P1
+        at: resolve
+        of: { decision: 1, occurrence: 1 }
+        do: resolve-choice
+        select: [d1]
+      - n: 3
+        by: P1
+        at: resolve
+        of: { decision: 1, occurrence: 2 }
+        do: place-acted
+        object: new-1
+        acted: false
     random:
       shuffles:
-        - {player: P1, zone: deck, result: [d3, d2]}
+        - { player: P1, zone: deck, result: [d3, d2] }
     expected:
       - at: after-decision-2
         view: omniscient
@@ -141,14 +168,14 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - {do: place-acted, object: new-1, acted: false}
-            - {do: place-acted, object: new-1, acted: true}
+            - { do: place-acted, object: new-1, acted: false }
+            - { do: place-acted, object: new-1, acted: true }
         assert:
           P1.hand: [d1]
           P1.deck: [d3, d2]
         events:
-          - {kind: 公開, object: d1, to: P2, source: s1}     # 5.8.1.2 向對手出示（契約 10.5）
-          - {kind: 移動, object: d1, from: P1.deck, to: P1.hand}
+          - { kind: 公開, object: d1, to: P2, source: s1 } # 5.8.1.2 向對手出示（契約 10.5）
+          - { kind: 移動, object: d1, from: P1.deck, to: P1.hand }
       - at: after-decision-3
         view: omniscient
         outcome: resolved
@@ -157,12 +184,12 @@ scenarios:
           P1.deck: [d3, d2]
           P1.field: [a1, a2, a3, new-1, new-2]
           P1.field_count: 5
-          P1.field.new-1: {name: 遮断の触手, acted: false}
-          P1.field.new-2: {name: 蹂躙の触手}
+          P1.field.new-1: { name: 遮断の触手, acted: false }
+          P1.field.new-2: { name: 蹂躙の触手 }
         events:
           # 「『遮断の触手』1体を場に出す。コストを+2したなら、『蹂躙の触手』1体を場に出す。」是兩句 → 先後而非同時
-          - {kind: 場に出す, object: new-1, to: P1.field}
-          - {kind: 場に出す, object: new-2, to: P1.field}
+          - { kind: 場に出す, object: new-1, to: P1.field }
+          - { kind: 場に出す, object: new-2, to: P1.field }
         events_exact: [場に出す]
 
   - name: C EX 機械卡只有 2 張 → 不能打出
@@ -172,10 +199,10 @@ scenarios:
         P1:
           zones:
             ex:
-              - {id: m1, card: BP17-T14}
-              - {id: m2, card: BP17-T14}
+              - { id: m1, card: BP17-T14 }
+              - { id: m2, card: BP17-T14 }
     decisions:
-      - {n: 1, by: P1, at: main, do: play, card: s1, optional_costs: {additional: decline}}
+      - { n: 1, by: P1, at: main, do: play, card: s1, optional_costs: { additional: decline } }
     random: {}
     expected:
       - at: after-decision-1

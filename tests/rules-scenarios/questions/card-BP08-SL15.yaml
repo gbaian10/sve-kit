@@ -10,7 +10,7 @@ mechanisms:
   - 10.7.4
   - 10.5.2
   - 5.11.1
-  - '10.5'
+  - "10.5"
   - 10.7.7
   - 10.7.3.1
   - 效果中途不插入誘發
@@ -72,7 +72,7 @@ verified_by:
     method: qa
     note: Q1100、Q1101、10.6.2.8.2、10.7.3.2；xverify-1/result.md〈22 個重疊題〉。之後未再改（非必過）
 scenarios:
-  - name: '[astra] 出場 0 張'
+  - name: "[astra] 出場 0 張"
     setup:
       turn:
         active: P1
@@ -181,7 +181,7 @@ scenarios:
             - x3
           P2.leader.life: 20
           semantic_state.pending_triggers: []
-  - name: '[astra] 出場 1 張'
+  - name: "[astra] 出場 1 張"
     setup:
       turn:
         active: P1
@@ -296,7 +296,7 @@ scenarios:
                 line: 1
               event:
                 left_field: r
-  - name: '[astra] 出場 3 張'
+  - name: "[astra] 出場 3 張"
     setup:
       turn:
         active: P1
@@ -423,7 +423,7 @@ scenarios:
                 line: 3
               event:
                 entered_field: l
-  - name: '[fable] A 看 7 張出 2 隻（デモンビーター、サロメ）→ 其餘放底 → 破壞 → 4 個待機自選順序'
+  - name: "[fable] A 看 7 張出 2 隻（デモンビーター、サロメ）→ 其餘放底 → 破壞 → 4 個待機自選順序"
     setup:
       turn:
         active: P1
@@ -587,10 +587,14 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - {do: choose-pending, pending: {ability: {source: d1, line: 2}}, costs: decline}
-            - {do: choose-pending, pending: {ability: {source: d1, line: 3}}}
-            - {do: choose-pending, pending: {ability: {source: d2, keyword: ファンファーレ, line: 1}}, targets: {1: [b1]}}
-            - {do: choose-pending, pending: {ability: {source: d2, keyword: ラストワード, line: 1}}, targets: {1: [b1]}}
+            - { do: choose-pending, pending: { ability: { source: d1, line: 2 } }, costs: decline }
+            - { do: choose-pending, pending: { ability: { source: d1, line: 3 } } }
+            - do: choose-pending
+              pending: { ability: { source: d2, keyword: ファンファーレ, line: 1 } }
+              targets: { 1: [b1] }
+            - do: choose-pending
+              pending: { ability: { source: d2, keyword: ラストワード, line: 1 } }
+              targets: { 1: [b1] }
         assert:
           P1.field:
             - a1

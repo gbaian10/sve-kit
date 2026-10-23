@@ -5,7 +5,14 @@ sources:
 id: card-BP05-SL13
 kind: card
 must_pass: true
-mechanisms: [動態數值, 本回合歷史, 連擊、覺醒、真紅, 13.5.2, 10.4.7.4, 抉擇＋條件改變選擇數, 效果中的「費用：效果」]
+mechanisms:
+  - 動態數值
+  - 本回合歷史
+  - 連擊、覺醒、真紅
+  - 13.5.2
+  - 10.4.7.4
+  - 抉擇＋條件改變選擇數
+  - 效果中的「費用：效果」
 cards: [BP05-SL13, BP19-090, BP01-173]
 why: >-
   欲望の絶傑・ヴァーナレク「【真紅】状態である限り、これは【疾走】を持つ」「【攻撃時】相手のリーダーすべてに「このターン中に自分のリーダーの体力が減少した回数」と同じダメージ。
@@ -38,38 +45,54 @@ verified_by:
 scenarios:
   - name: A 自傷兩次 → 真紅 → 疾走攻擊：攻撃時 2 傷害；體力剛好 7 → +2/+2 → 攻擊傷害 4
     setup:
-      turn: {active: P1, first_player: P1, elapsed_turns: {P1: 4, P2: 3}, phase: main}
+      turn: { active: P1, first_player: P1, elapsed_turns: { P1: 4, P2: 3 }, phase: main }
       history: none
       players:
         P1:
           construction: class
-          leader: {class: ナイトメア, life: 9}
-          pp: {current: 4, max: 4}
+          leader: { class: ナイトメア, life: 9 }
+          pp: { current: 4, max: 4 }
           zones:
             hand:
-              - {id: a1, card: BP05-SL13}         # 欲望の絶傑・ヴァーナレク 2/2
-              - {id: a2, card: BP19-090}          # バイオレントスクリーム（コスト0）
-              - {id: a3, card: BP19-090}
+              - { id: a1, card: BP05-SL13 } # 欲望の絶傑・ヴァーナレク 2/2
+              - { id: a2, card: BP19-090 } # バイオレントスクリーム（コスト0）
+              - { id: a3, card: BP19-090 }
             deck:
-              - {id: d1, card: BP01-173}
-              - {id: d2, card: BP01-173}
-              - {filler: 20}
+              - { id: d1, card: BP01-173 }
+              - { id: d2, card: BP01-173 }
+              - { filler: 20 }
         P2:
           construction: class
-          leader: {class: ロイヤル, life: 20}
-          pp: {current: 0, max: 4}
+          leader: { class: ロイヤル, life: 20 }
+          pp: { current: 0, max: 4 }
           zones:
             hand:
-              - {filler: 3}
+              - { filler: 3 }
             deck:
-              - {filler: 20}
+              - { filler: 20 }
     decisions:
-      - {n: 1, by: P1, at: main, do: play, card: a1}
-      - {n: 2, by: P1, at: main, do: play, card: a2, options: [2], optional_costs: {mode_2: {pp: 1}}}
-      - {n: 3, by: P1, at: main, do: play, card: a3, options: [2], optional_costs: {mode_2: {pp: 1}}}
-      - {n: 4, by: P1, at: main, do: attack, attacker: a1, target: P2.leader}
-      - {n: 5, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2}}}
-      - {n: 6, by: P2, at: quick, do: pass}
+      - { n: 1, by: P1, at: main, do: play, card: a1 }
+      - n: 2
+        by: P1
+        at: main
+        do: play
+        card: a2
+        options: [2]
+        optional_costs: { mode_2: { pp: 1 } }
+      - n: 3
+        by: P1
+        at: main
+        do: play
+        card: a3
+        options: [2]
+        optional_costs: { mode_2: { pp: 1 } }
+      - { n: 4, by: P1, at: main, do: attack, attacker: a1, target: P2.leader }
+      - n: 5
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: { ability: { source: a1, line: 2 } }
+      - { n: 6, by: P2, at: quick, do: pass }
     random: {}
     expected:
       - at: after-decision-3
@@ -80,45 +103,45 @@ scenarios:
           P1.pp.current: 0
           P1.hand: [d1, d2]
         events:
-          - {kind: ダメージ, source: a2, target: P1.leader, amount: 1}
-          - {kind: 引く, player: P1, object: d1}
-          - {kind: ダメージ, source: a3, target: P1.leader, amount: 1}
-          - {kind: 引く, player: P1, object: d2}
+          - { kind: ダメージ, source: a2, target: P1.leader, amount: 1 }
+          - { kind: 引く, player: P1, object: d1 }
+          - { kind: ダメージ, source: a3, target: P1.leader, amount: 1 }
+          - { kind: 引く, player: P1, object: d2 }
       - at: after-decision-4
         view: omniscient
         outcome: resolved
         awaiting:
           by: P1
           choices:
-            - {do: choose-pending, pending: {ability: {source: a1, line: 2}}}
+            - { do: choose-pending, pending: { ability: { source: a1, line: 2 } } }
         assert:
-          P1.field.a1: {acted: true}
+          P1.field.a1: { acted: true }
       - at: after-decision-5
         view: omniscient
         outcome: resolved
         assert:
           P2.leader.life: 18
-          P1.field.a1: {power: 4, hp: 4}
+          P1.field.a1: { power: 4, hp: 4 }
         events:
-          - {kind: ダメージ, source: a1, target: P2.leader, amount: 2}
+          - { kind: ダメージ, source: a1, target: P2.leader, amount: 2 }
       - at: after-decision-6
         view: omniscient
         outcome: resolved
         assert:
           P2.leader.life: 14
         events:
-          - {kind: ダメージ, source: a1, target: P2.leader, amount: 4}
+          - { kind: ダメージ, source: a1, target: P2.leader, amount: 4 }
 
   - name: B 本回合沒自傷 → 不是真紅 → 沒有疾走 → 本回合進場不能攻擊
     inherit: A 自傷兩次 → 真紅 → 疾走攻擊：攻撃時 2 傷害；體力剛好 7 → +2/+2 → 攻擊傷害 4
     decisions:
-      - {n: 1, by: P1, at: main, do: play, card: a1}
-      - {n: 2, by: P1, at: main, do: attack, attacker: a1, target: P2.leader}
+      - { n: 1, by: P1, at: main, do: play, card: a1 }
+      - { n: 2, by: P1, at: main, do: attack, attacker: a1, target: P2.leader }
     random: {}
     expected:
       - at: after-decision-2
         view: omniscient
         outcome: cannot-attack
         assert:
-          P1.field.a1: {acted: false}
+          P1.field.a1: { acted: false }
           P2.leader.life: 20

@@ -29,9 +29,6 @@ job = "repo"
 [hooks.check-json5]
 job = "repo"
 
-[hooks.pretty-format-yaml]
-job = "repo"
-
 [hooks.taplo-format]
 job = "repo"
 
@@ -108,6 +105,9 @@ reason = "Manual-stage mutation test; far too slow for CI."
 
 # Repo-wide; the web job also runs format:check on sim/web after `bun install`, which Tailwind class order needs.
 [hooks.bun-fmt]
+job = "repo"
+
+[hooks.yaml-block-style]
 job = "repo"
 
 # The web job calls the same package.json scripts in separate steps.

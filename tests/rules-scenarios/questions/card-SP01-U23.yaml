@@ -5,7 +5,7 @@ sources:
 id: card-SP01-U23
 kind: card
 must_pass: true
-mechanisms: [本回合歷史, 10.4.7.1, '5.27', 搜尋有條件, 5.8.1.2]
+mechanisms: [本回合歷史, 10.4.7.1, "5.27", 搜尋有條件, 5.8.1.2]
 cards: [SP01-U23, BP19-095, BP01-173, BP01-176]
 why: >-
   砂浜の調べ・リテュエル「このターン、自分のリーダーの{体力}を+4以上していたなら、それを破壊する。1枚引く」：條件是**本回合的歷史**（累計 +4 以上，Q1614），
@@ -38,42 +38,64 @@ verified_by:
 scenarios:
   - name: A 先 +4 再打出 → 破壞目標並抽 1 張
     setup:
-      turn: {active: P1, first_player: P1, elapsed_turns: {P1: 5, P2: 4}, phase: main}
+      turn: { active: P1, first_player: P1, elapsed_turns: { P1: 5, P2: 4 }, phase: main }
       history: none
       players:
         P1:
           construction: class
-          leader: {class: ビショップ, life: 15}
-          pp: {current: 5, max: 5}
+          leader: { class: ビショップ, life: 15 }
+          pp: { current: 5, max: 5 }
           zones:
             hand:
-              - {id: a1, card: BP19-095}          # 希望の女王・リテュエル（コスト4：探す＋体力+4）
-              - {id: a2, card: SP01-U23}          # 砂浜の調べ・リテュエル（コスト1）
+              - # 希望の女王・リテュエル（コスト4：探す＋体力+4）
+                id: a1
+                card: BP19-095
+              - { id: a2, card: SP01-U23 } # 砂浜の調べ・リテュエル（コスト1）
             deck:
-              - {id: d1, card: BP01-173}
-              - {id: d2, card: BP01-176}
+              - { id: d1, card: BP01-173 }
+              - { id: d2, card: BP01-176 }
         P2:
           construction: class
-          leader: {class: ロイヤル, life: 20}
-          pp: {current: 0, max: 5}
+          leader: { class: ロイヤル, life: 20 }
+          pp: { current: 0, max: 5 }
           zones:
             field:
-              - {id: b1, card: BP01-173}
+              - { id: b1, card: BP01-173 }
             hand:
-              - {filler: 3}
+              - { filler: 3 }
             deck:
-              - {filler: 20}
+              - { filler: 20 }
     decisions:
-      - {n: 1, by: P1, at: main, do: play, card: a1}
+      - { n: 1, by: P1, at: main, do: play, card: a1 }
       # 12.8.2：リテュエル 有【守護】→ 放上場時選直立／アクト（9.2 place-acted，屬決定 1 的結算）
-      - {n: 2, by: P1, at: resolve, of: {decision: 1, occurrence: 1}, do: place-acted, object: a1, acted: false}
-      - {n: 3, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2}}}
-      - {n: 4, by: P1, at: resolve, of: {decision: 3, occurrence: 1}, do: resolve-choice, select: []}
-      - {n: 5, by: P1, at: main, do: play, card: a2}
-      - {n: 6, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a2, line: 1}}, targets: {1: [b1]}}
+      - n: 2
+        by: P1
+        at: resolve
+        of: { decision: 1, occurrence: 1 }
+        do: place-acted
+        object: a1
+        acted: false
+      - n: 3
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: { ability: { source: a1, line: 2 } }
+      - n: 4
+        by: P1
+        at: resolve
+        of: { decision: 3, occurrence: 1 }
+        do: resolve-choice
+        select: []
+      - { n: 5, by: P1, at: main, do: play, card: a2 }
+      - n: 6
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: { ability: { source: a2, line: 1 } }
+        targets: { 1: [b1] }
     random:
       shuffles:
-        - {player: P1, zone: deck, result: [d2, d1]}
+        - { player: P1, zone: deck, result: [d2, d1] }
     expected:
       - at: after-decision-1
         view: omniscient
@@ -81,8 +103,8 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - {do: place-acted, object: a1, acted: false}
-            - {do: place-acted, object: a1, acted: true}
+            - { do: place-acted, object: a1, acted: false }
+            - { do: place-acted, object: a1, acted: true }
       - at: after-decision-4
         view: omniscient
         outcome: resolved
@@ -92,9 +114,9 @@ scenarios:
           P1.deck: [d2, d1]
           P1.field: [a1]
         events:
-          - {kind: 体力増加, target: P1.leader, amount: 4}
+          - { kind: 体力増加, target: P1.leader, amount: 4 }
         forbidden_events:
-          - {kind: 公開, to: P2}    # 只禁止搜尋結果的出示；與 card-BP17-044 A 寫法一致
+          - { kind: 公開, to: P2 } # 只禁止搜尋結果的出示；與 card-BP17-044 A 寫法一致
       - at: after-decision-6
         view: omniscient
         outcome: resolved
@@ -104,14 +126,19 @@ scenarios:
           P1.hand: [d2]
           P1.pp.current: 0
         events:
-          - {kind: 破壊, object: b1}
-          - {kind: 引く, player: P1, object: d2}
+          - { kind: 破壊, object: b1 }
+          - { kind: 引く, player: P1, object: d2 }
 
   - name: B 本回合沒有 +4 → 不破壞、也不抽（以降の効果は働かず）
     inherit: A 先 +4 再打出 → 破壞目標並抽 1 張
     decisions:
-      - {n: 1, by: P1, at: main, do: play, card: a2}
-      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a2, line: 1}}, targets: {1: [b1]}}
+      - { n: 1, by: P1, at: main, do: play, card: a2 }
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: { ability: { source: a2, line: 1 } }
+        targets: { 1: [b1] }
     random: {}
     expected:
       - at: after-decision-2
@@ -123,7 +150,7 @@ scenarios:
           P1.deck: [d1, d2]
           P1.pp.current: 4
         events:
-          - {kind: プレイ, ability: {source: a2, line: 1}}
+          - { kind: プレイ, ability: { source: a2, line: 1 } }
         forbidden_events:
-          - {kind: 破壊}
-          - {kind: 引く}
+          - { kind: 破壊 }
+          - { kind: 引く }

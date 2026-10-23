@@ -32,35 +32,40 @@ verified_by:
 scenarios:
   - name: A 場上 3 張、要出 3 個 token → 只能選 2 個
     setup:
-      turn: {active: P1, first_player: P1, elapsed_turns: {P1: 4, P2: 3}, phase: main}
+      turn: { active: P1, first_player: P1, elapsed_turns: { P1: 4, P2: 3 }, phase: main }
       history: none
       players:
         P1:
           construction: class
-          leader: {class: ロイヤル, life: 20}
-          pp: {current: 3, max: 4}
+          leader: { class: ロイヤル, life: 20 }
+          pp: { current: 3, max: 4 }
           zones:
             field:
-              - {id: a1, card: BP01-173}
-              - {id: a2, card: BP01-173}
-              - {id: a3, card: SD02-002}
+              - { id: a1, card: BP01-173 }
+              - { id: a2, card: BP01-173 }
+              - { id: a3, card: SD02-002 }
             hand:
-              - {id: w1, card: BP16-036}          # 王断の威光
+              - { id: w1, card: BP16-036 } # 王断の威光
             deck:
-              - {filler: 20}
+              - { filler: 20 }
         P2:
           construction: class
-          leader: {class: ドラゴン, life: 20}
-          pp: {current: 0, max: 4}
+          leader: { class: ドラゴン, life: 20 }
+          pp: { current: 0, max: 4 }
           zones:
             hand:
-              - {filler: 3}
+              - { filler: 3 }
             deck:
-              - {filler: 20}
+              - { filler: 20 }
     decisions:
-      - {n: 1, by: P1, at: main, do: play, card: w1, options: [1]}
+      - { n: 1, by: P1, at: main, do: play, card: w1, options: [1] }
       # 4.4.4.2 的選擇：要建立的物件還不存在，依契約第 10 節第 35 條以 token 名稱指定（9.1.2.3），依卡面文字順序
-      - {n: 2, by: P1, at: resolve, of: {decision: 1, occurrence: 1}, do: resolve-choice, select: [スティールナイト, ナイト]}
+      - n: 2
+        by: P1
+        at: resolve
+        of: { decision: 1, occurrence: 1 }
+        do: resolve-choice
+        select: [スティールナイト, ナイト]
     random: {}
     expected:
       - at: after-decision-1
@@ -69,9 +74,9 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - {do: resolve-choice, select: [スティールナイト, シールドガーディアン]}
-            - {do: resolve-choice, select: [スティールナイト, ナイト]}
-            - {do: resolve-choice, select: [シールドガーディアン, ナイト]}
+            - { do: resolve-choice, select: [スティールナイト, シールドガーディアン] }
+            - { do: resolve-choice, select: [スティールナイト, ナイト] }
+            - { do: resolve-choice, select: [シールドガーディアン, ナイト] }
       - at: after-decision-2
         view: omniscient
         outcome: resolved
@@ -80,18 +85,18 @@ scenarios:
           P1.cemetery: [w1]
           P1.field: [a1, a2, a3, new-1, new-2]
           P1.field_count: 5
-          P1.field.new-1: {name: スティールナイト}
-          P1.field.new-2: {name: ナイト}
+          P1.field.new-1: { name: スティールナイト }
+          P1.field.new-2: { name: ナイト }
         events:
           # new-n 依效果文字順序：スティールナイト先於ナイト；同一個指示建立 → 同時（group）；token 不附卡號（契約第 10 節第 19 條）
-          - {kind: 場に出す, object: new-1, to: P1.field, group: 1}
-          - {kind: 場に出す, object: new-2, to: P1.field, group: 1}
-          - {kind: 移動, object: w1, from: P1.resolution, to: P1.cemetery, by: rule-10.6.2.8.3}
+          - { kind: 場に出す, object: new-1, to: P1.field, group: 1 }
+          - { kind: 場に出す, object: new-2, to: P1.field, group: 1 }
+          - { kind: 移動, object: w1, from: P1.resolution, to: P1.cemetery, by: rule-10.6.2.8.3 }
         # 恰好兩個 場に出す：シールドガーディアン 沒有被建立
         events_exact: [場に出す]
         forbidden_events:
-          - {kind: 移動, to: P1.cemetery, object: new-1}
-          - {kind: 移動, to: P1.cemetery, object: new-2}
+          - { kind: 移動, to: P1.cemetery, object: new-1 }
+          - { kind: 移動, to: P1.cemetery, object: new-2 }
 
   - name: B 場上 5 張 → 打出從者不合法、回溯
     inherit: A 場上 3 張、要出 3 個 token → 只能選 2 個
@@ -100,16 +105,16 @@ scenarios:
         P1:
           zones:
             field:
-              - {id: a1, card: BP01-173}
-              - {id: a2, card: BP01-173}
-              - {id: a3, card: SD02-002}
-              - {id: a4, card: SD02-002}
-              - {id: a5, card: BP01-173}
+              - { id: a1, card: BP01-173 }
+              - { id: a2, card: BP01-173 }
+              - { id: a3, card: SD02-002 }
+              - { id: a4, card: SD02-002 }
+              - { id: a5, card: BP01-173 }
             hand:
-              - {id: w1, card: BP16-036}
-              - {id: f1, card: BP01-173}
+              - { id: w1, card: BP16-036 }
+              - { id: f1, card: BP01-173 }
     decisions:
-      - {n: 1, by: P1, at: main, do: play, card: f1}
+      - { n: 1, by: P1, at: main, do: play, card: f1 }
     random: {}
     expected:
       - at: after-decision-1
@@ -123,9 +128,14 @@ scenarios:
   - name: C 場上 5 張 → 法術可以打出，但 0 個 token 建立
     inherit: B 場上 5 張 → 打出從者不合法、回溯
     decisions:
-      - {n: 1, by: P1, at: main, do: play, card: w1, options: [1]}
+      - { n: 1, by: P1, at: main, do: play, card: w1, options: [1] }
       # 4.4.4.2：選「5−5＝0」張；契約 9.8 只剩 select: [] 也是輸入點
-      - {n: 2, by: P1, at: resolve, of: {decision: 1, occurrence: 1}, do: resolve-choice, select: []}
+      - n: 2
+        by: P1
+        at: resolve
+        of: { decision: 1, occurrence: 1 }
+        do: resolve-choice
+        select: []
     random: {}
     expected:
       - at: after-decision-1
@@ -134,12 +144,12 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - {do: resolve-choice, select: []}
+            - { do: resolve-choice, select: [] }
         assert:
           P1.pp.current: 0
           P1.field_count: 5
         forbidden_events:
-          - {kind: 場に出す}
+          - { kind: 場に出す }
       - at: after-decision-2
         view: omniscient
         outcome: resolved
@@ -149,4 +159,4 @@ scenarios:
           P1.field: [a1, a2, a3, a4, a5]
           P1.field_count: 5
         forbidden_events:
-          - {kind: 場に出す}
+          - { kind: 場に出す }

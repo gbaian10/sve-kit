@@ -107,7 +107,7 @@ cards:
         active_zones:
           - cemetery
         cost_selections:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: cemetery
@@ -158,7 +158,7 @@ cards:
                   amount:
                     read: target.2.power
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: field
@@ -167,7 +167,7 @@ cards:
             max: 1
             modes:
               - 1
-          - key: '2'
+          - key: "2"
             select:
               side: self
               zone: field
@@ -177,7 +177,7 @@ cards:
             max: 1
             modes:
               - 2
-          - key: '3'
+          - key: "3"
             select:
               side: opponent
               zone: field
@@ -315,7 +315,7 @@ cards:
                     keywords:
                       - assail
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field

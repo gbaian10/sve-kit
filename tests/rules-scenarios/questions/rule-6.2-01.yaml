@@ -134,7 +134,7 @@ verified_by:
     method: independent-derivation
     note: 6.2.1.7～12、7.2.1～7.2.4.1、3.3.2、14.3.1.2、14.4.3.1／.2；xverify-2/result.md 3/3；fix-2 補發牌／換牌 移動 事件後 xverify-2/recheck.md 同意
 scenarios:
-  - name: '[astra] 一般開局與先攻換牌底牌方向'
+  - name: "[astra] 一般開局與先攻換牌底牌方向"
     setup:
       pregame: true
       players:
@@ -328,7 +328,7 @@ scenarios:
             group: mulligan-hand
         forbidden_events:
           - kind: 引く
-  - name: '[astra] 偶像作品開局先放五道具；選後攻'
+  - name: "[astra] 偶像作品開局先放五道具；選後攻"
     setup:
       pregame: true
       players:
@@ -554,7 +554,7 @@ scenarios:
             group: mulligan-hand
         forbidden_events:
           - kind: 引く
-  - name: '[astra] 雙方秘密選起始護符再洗牌'
+  - name: "[astra] 雙方秘密選起始護符再洗牌"
     setup:
       pregame: true
       players:
@@ -796,7 +796,7 @@ scenarios:
             knows:
               - a-start
               - b-start
-  - name: '[fable] A Vanguard 起始護符；P2 被隨機選中並選先攻；P2 不換牌、P1 換牌 → 先攻第 1 回合不抽牌'
+  - name: "[fable] A Vanguard 起始護符；P2 被隨機選中並選先攻；P2 不換牌、P1 換牌 → 先攻第 1 回合不抽牌"
     setup:
       pregame: true
       players:
@@ -981,8 +981,8 @@ scenarios:
             to: P1.hand
         forbidden_events:
           - kind: 引く
-  - name: '[fable] B P2 選後攻 → P1 先攻：P1 不換牌、P2 換牌；P1 EP 0、P2 EP 3'
-    inherit: '[fable] A Vanguard 起始護符；P2 被隨機選中並選先攻；P2 不換牌、P1 換牌 → 先攻第 1 回合不抽牌'
+  - name: "[fable] B P2 選後攻 → P1 先攻：P1 不換牌、P2 換牌；P1 EP 0、P2 EP 3"
+    inherit: "[fable] A Vanguard 起始護符；P2 被隨機選中並選先攻；P2 不換牌、P1 換牌 → 先攻第 1 回合不抽牌"
     decisions:
       - n: 1
         by: P1
@@ -1087,7 +1087,7 @@ scenarios:
             - b3
         forbidden_events:
           - kind: 引く
-  - name: '[fable] C 偶像大師作品構築：決定先後之前 EX 放 5 個『魔法のアイテム』'
+  - name: "[fable] C 偶像大師作品構築：決定先後之前 EX 放 5 個『魔法のアイテム』"
     setup:
       pregame: true
       players:
