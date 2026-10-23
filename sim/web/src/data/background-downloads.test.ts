@@ -1,12 +1,23 @@
+import { brotliCompressSync } from "node:zlib"
+
 import { act, waitFor } from "@testing-library/react"
 import { afterEach, expect, it, vi } from "vitest"
 
+import { buildSnapshot } from "../../scripts/fixture/build"
 import { memoryCache } from "../test-utils/cache"
 import { BackgroundDownloads } from "./background-downloads"
+import { bodyHeaders } from "./cache-budget"
 import type { Fetcher } from "./cdn"
 import type { FetchSelection } from "./fetch-plan"
-import type { JsonObject } from "./format-v3/json"
+import {
+  arrayValue,
+  canonicalText,
+  type JsonObject,
+  objectValue,
+  stringValue,
+} from "./format-v3/json"
 import { transferDigest } from "./integrity"
+import { rawBlobDescriptor, RawBlobStore } from "./raw-blobs"
 
 const base = "https://lifecycle.test/cdn"
 
@@ -197,5 +208,150 @@ it("cancels replaced identities and ignores late writes from each previous root,
       gate.resolve(undefined)
       downloads.dispose()
     }
+  }
+})
+
+it("admits the whole compressed batch including saved startup bytes and the manifest, and preserves old data on capacity failure", async () => {
+  vi.spyOn(document, "hidden", "get").mockReturnValue(false)
+  vi.spyOn(navigator, "onLine", "get").mockReturnValue(true)
+  for (const mode of ["limit", "unknown", "capacity", "deduplicated"] as const) {
+    const data = await fixture()
+    const saved = data.selection.files.get("saved")
+    if (!saved) throw new Error("fixture missing")
+    const network = vi.fn<Fetcher>((url) =>
+      Promise.resolve(new Response(data.bodies.get(url)?.slice().buffer)),
+    )
+    const storage = memoryCache()
+    const raw = new RawBlobStore(base, network, storage)
+    await raw.read(rawBlobDescriptor(saved))
+    network.mockClear()
+    const cache = await storage.open(`sve-search-index:1:${encodeURIComponent(base)}`)
+    if (mode === "capacity")
+      await cache.put(
+        `${base}/old-active`,
+        new Response("old", { headers: bodyHeaders(96 * 1024 * 1024) }),
+      )
+    const downloads = new BackgroundDownloads({
+      enabled: true,
+      storage,
+      foreground: network,
+      background: network,
+    })
+    try {
+      downloads.select(
+        mode === "deduplicated"
+          ? { ...data.selection, files: new Map([["saved", saved]]) }
+          : {
+              ...data.selection,
+              files: new Map([
+                [
+                  "saved",
+                  {
+                    ...saved,
+                    compressed_bytes: {
+                      br: mode === "unknown" ? null : mode === "limit" ? 12 * 1024 * 1024 : 1,
+                    },
+                  },
+                ],
+              ]),
+              manifest: {
+                ...rawBlobDescriptor(saved),
+                key: "manifest",
+                sha256: "sha256:manifest",
+                bytes: 1,
+                brotli: 1,
+              },
+            },
+      )
+      await waitFor(() => {
+        expect(downloads.getStatus().state).toBe("settled")
+      })
+      expect(downloads.getStatus().progress).toMatchObject(
+        mode === "deduplicated"
+          ? { phase: "complete", missing: 0 }
+          : {
+              phase: "partial",
+              reason: mode === "capacity" ? "capacity" : "batch-limit",
+              missing: 1,
+            },
+      )
+      expect(network).not.toHaveBeenCalled()
+      if (mode === "capacity") expect(await cache.match(`${base}/old-active`)).toBeDefined()
+    } finally {
+      downloads.dispose()
+    }
+  }
+})
+
+it("uses only the adopted exact manifest after restore, includes it in the byte plan, and cancels metadata on selection changes", async () => {
+  vi.spyOn(document, "hidden", "get").mockReturnValue(false)
+  vi.spyOn(navigator, "onLine", "get").mockReturnValue(true)
+  const built = await buildSnapshot({ encodeImage: () => Promise.resolve(new Uint8Array([1])) })
+  for (const value of arrayValue(built.manifest["files"])) {
+    const file = objectValue(value)
+    const body = built.files.get(stringValue(file["path"]))
+    if (!body) throw new Error("file missing")
+    file["compressed_bytes"] = { br: brotliCompressSync(body).byteLength }
+  }
+  const bytes = new TextEncoder().encode(canonicalText(built.manifest))
+  built.files.set(built.manifestPath, bytes)
+  const network = vi.fn<Fetcher>((url) => {
+    const body = built.files.get(url.slice(base.length + 1))
+    return Promise.resolve(
+      body
+        ? new Response(body.slice().buffer, {
+            headers: { "content-encoding": "br", "content-length": "100" },
+          })
+        : new Response(null, { status: 404 }),
+    )
+  })
+  const storage = memoryCache()
+  const downloads = new BackgroundDownloads({
+    storage,
+    foreground: network,
+    background: network,
+  })
+  const adopted = {
+    base,
+    manifestPath: built.manifestPath,
+    manifestHash: await transferDigest(bytes),
+    dataVersion: stringValue(built.manifest["data_version"]),
+    edition: "en" as const,
+  }
+  try {
+    downloads.adopt(adopted)
+    await waitFor(() => {
+      expect(downloads.getStatus().state).toBe("disabled")
+    })
+    downloads.setEnabled(true)
+    await waitFor(() => {
+      expect(downloads.getStatus().progress?.phase).toBe("complete")
+    })
+    expect(
+      network.mock.calls.every(
+        ([url]) => !url.endsWith("current.json") && !url.endsWith("index.json"),
+      ),
+    ).toBe(true)
+    expect(network.mock.calls.some(([url]) => url === `${base}/${built.manifestPath}`)).toBe(true)
+    downloads.preferEdition(base, "jp")
+    expect(downloads.getStatus().selection?.edition).toBe("jp")
+    await waitFor(() => {
+      expect(downloads.getStatus().progress?.phase).toBe("complete")
+    })
+    await storage.delete(`sve-raw:${encodeURIComponent(base)}`)
+    await downloads.recheck()
+    expect(downloads.getStatus().progress).toMatchObject({ phase: "partial", reason: "cleared" })
+    const held = Promise.withResolvers<Response>()
+    network.mockImplementation(() => held.promise)
+    downloads.adopt({ ...adopted, base: `${base}/next` })
+    const signal = network.mock.calls.at(-1)?.[1]?.signal
+    downloads.adopt(null)
+    expect(signal?.aborted).toBe(true)
+    const status = downloads.getStatus()
+    held.resolve(new Response(bytes.slice().buffer))
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    expect(downloads.getStatus()).toBe(status)
+  } finally {
+    downloads.dispose()
   }
 })

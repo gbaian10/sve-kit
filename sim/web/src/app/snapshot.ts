@@ -4,6 +4,7 @@ import { useLocation } from "react-router"
 import {
   activeSnapshotRoot,
   type AnnotatedTextResolver,
+  appBackgroundDownloads,
   arrayValue,
   canonicalText,
   type Catalog,
@@ -40,7 +41,7 @@ import {
 } from "../data"
 import { DEFAULT_QUERY } from "../domain/query/model"
 import type { Region } from "../domain/search"
-import { usePrefs } from "../settings"
+import { prefsStore, showsOtherEdition, usePrefs } from "../settings"
 
 performance.mark("sve-app-start")
 
@@ -60,8 +61,37 @@ function workerOf(root: SnapshotRoot): ActiveWorker {
   let edition: Region | undefined
   let status: SnapshotStatus = { state: "idle" }
   const listeners = new Set<() => void>()
+  const syncDownloads = () => {
+    const next = session.getStatus()
+    if (
+      activeSnapshotRoot() === root &&
+      next.edition &&
+      next.edition === edition &&
+      next.manifestPath &&
+      next.manifestHash &&
+      next.dataVersion
+    ) {
+      appBackgroundDownloads.adopt({
+        base: detail.base,
+        manifestPath: next.manifestPath,
+        manifestHash: next.manifestHash,
+        dataVersion: next.dataVersion,
+        edition: next.edition,
+      })
+      appBackgroundDownloads.preferEdition(
+        detail.base,
+        showsOtherEdition(prefsStore.get(), next.edition)
+          ? next.edition === "jp"
+            ? "en"
+            : "jp"
+          : next.edition,
+      )
+    }
+  }
+  prefsStore.subscribe(syncDownloads)
   session.subscribe(() => {
     const next = session.getStatus()
+    syncDownloads()
     status =
       next.phase === "ready"
         ? {
@@ -88,7 +118,12 @@ function workerOf(root: SnapshotRoot): ActiveWorker {
     for (const listener of listeners) listener()
   })
   const start = (next: Region, force = false) => {
-    if (!force && edition === next && status.state !== "error") return
+    if (!force && edition === next && status.state !== "error") {
+      syncDownloads()
+      return
+    }
+    if (edition !== next || appBackgroundDownloads.getStatus().selection?.base !== detail.base)
+      appBackgroundDownloads.adopt(null)
     edition = next
     detail.setRegion?.(next)
     session.load(detail.base, next, root === "preview" ? "preview" : "index")

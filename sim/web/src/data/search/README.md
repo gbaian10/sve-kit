@@ -80,7 +80,7 @@ Cache identity includes root, manifest hash, reader build and local format. View
 include the normalizer version, selected-region policy and complete query. Multilingual
 names avoid a separate language-specific record. Index format is 4; view format is 2;
 the public snapshot wire format is unchanged. Automatic raw/index/view/metadata caches
-share 64 MiB per root and 128 MiB per origin. Views have a 2 MiB raw-body subquota; an
+share 96 MiB per root and 128 MiB per origin. Views have a 2 MiB raw-body subquota; an
 oversized view stays usable in memory. Successful raw plans and verified records retain
 at most two generations. Quota failure gets one cleanup/retry, then memory fallback.
 CacheStorage has no multi-record transaction or cross-tab lock: eviction may cause a miss,
@@ -112,3 +112,12 @@ returns one selected effect string (translation or original). It retains at most
 strings; decoded file promises are shared only while running. Each file is capped at 12 MiB.
 These are basic previews, not annotation closures. Pending previews cannot delay independent
 list/suggestion channels, and closed or replaced channels never publish their late results.
+
+Background byte downloads use the exact adopted manifest reference, including after a stored
+search-index restore. Admission counts the whole deduplicated plan (including the manifest
+and startup files) against 12 MiB Brotli; unknown compressed lengths stop the batch. The
+manifest length comes from the Brotli response headers. Disk admission conservatively retains
+existing data (including derived caches and old active data) and adds only missing raw hashes,
+under the 96 MiB root and 128 MiB origin budgets. These are payload budgets, not a promise
+that browser quota will permit every write. Automatic full-version downloads remain disabled
+until their settings control is available. Bitmap caching is independent.

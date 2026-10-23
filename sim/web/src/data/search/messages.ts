@@ -126,6 +126,7 @@ type WorkerEvent =
       readonly root: string
       readonly dataVersion: string
       readonly manifestHash: string
+      readonly manifestPath?: string
       readonly metrics: SearchMetrics
       readonly searchReady?: boolean
       readonly unconfirmed?: boolean

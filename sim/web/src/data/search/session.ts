@@ -66,6 +66,7 @@ export interface SearchStatus {
   }
   readonly dataVersion?: string
   readonly manifestHash?: string
+  readonly manifestPath?: string
 }
 export interface SearchTransport {
   readonly send: (request: SearchRequest) => void
@@ -475,6 +476,7 @@ export class SearchSession {
         ...(this.staging !== null ? { progress, loading } : {}),
         dataVersion: event.dataVersion,
         manifestHash: event.manifestHash,
+        ...(event.manifestPath ? { manifestPath: event.manifestPath } : {}),
         searchReady: event.searchReady ?? true,
         unconfirmed: event.unconfirmed ?? false,
       })

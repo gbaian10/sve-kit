@@ -8,6 +8,7 @@ export {
   type SelectedText,
   sharedAnnotatedTextResolver,
 } from "./annotated-text"
+export { appBackgroundDownloads } from "./background-downloads"
 export { type CardRouteInput, locateCard, type LocatedCard } from "./card-route"
 export { type CardSummary, type Catalog, catalogOf, nameOf } from "./catalog"
 export {

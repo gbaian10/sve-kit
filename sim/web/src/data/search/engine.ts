@@ -80,6 +80,7 @@ export class SearchEngine {
         index?: SearchIndex
         request: LoadRequest
         hash: string
+        manifestPath: string
         dataVersion: string
         manifestFields: JsonObject
         files: Map<string, JsonObject>
@@ -477,6 +478,7 @@ export class SearchEngine {
       root: request.base,
       dataVersion: active.dataVersion,
       manifestHash: active.hash,
+      manifestPath: active.manifestPath,
       searchReady,
       unconfirmed,
       metrics,
@@ -541,6 +543,7 @@ export class SearchEngine {
           generation: request.generation,
           request,
           hash,
+          manifestPath: stringValue(entry["manifest_path"]),
           dataVersion: "",
           manifestFields: {} as JsonObject,
           files: new Map<string, JsonObject>(),
@@ -779,6 +782,7 @@ export class SearchEngine {
         index,
         request,
         hash: manifestHash,
+        manifestPath: stringValue(entry["manifest_path"]),
         dataVersion,
         manifestFields,
         files,
@@ -798,6 +802,7 @@ export class SearchEngine {
         root: request.base,
         dataVersion,
         manifestHash,
+        manifestPath: active.manifestPath,
         metrics: {
           restored: false,
           files: keys.length,
