@@ -203,6 +203,11 @@ intervals、Set 或其他期限。每個成功的新世代必須仍在 EX；EX �
 typed 減費與 prototype continuous 費用層不得混用；存在 typed 費用層時，付款另驗可合併的
 prototype 能力與非溢位 additional PP。
 
+以上共用讀值描述現有實作，並非正式費用語義的保證；CR 10.4.4.1 要求
+`when_playing` 修正只影響實付 PP。[打出費用契約](play-cost-semantics.md#21-時點與資料)
+要求後續實作分離 Search／一般 Cost 資訊與付款讀值；未完成前不能據此宣稱這類搜尋
+與減費組合符合規則。自身修正的新內部承載也尚未實作，本節不擴大已驗子集。
+
 Numeric 與 CostModifier 共用實際回合的 EffectEnd，減費在 7.4.8 清理，不提早於 end／Quick。
 安裝與到期不產 stat_changed。測試採 CP04-060 的 Search→EX→當回合 -2，以及
 BP18-059／SL14 的 Look→實際 Move→減費形狀；只驗片段與付款、到期、容量，不宣稱
