@@ -197,6 +197,8 @@ meta.reviewed_by 的 use review 可保存同一用途的多個不同獨立審核
 
 C0 讀嚴格 YAML、驗作者型別、展開共用本體與葉參數，交出通過共用作者 Schema 的 `expanded` profile 的 JSON 樹；D0 讀這棵完全展開的作者樹並降低 typed IR。sources／meta 為作者資源本有欄位；共用資源提供兩個封閉入口 `$defs/authored` 與 `$defs/expanded`：後者遞迴排除 A.param／generated_by，展開產物一律用後者驗，Rust 型別亦對它測漂移。C0 額外的逐節點位置與依賴 sidecar 是內部介面，和樹分開，不是新公開 wire 格式。C0 的等值驗收比較去除 line／section／sources 與審核 metadata 後的 canonical 能力樹（ports 保留）；inline 與 companion 的同義能力必須逐 byte 相同，IR 等值與執行則是 D0 的責任。
 
+目前 `CardAccepted.lowering_input()` 另交接逐能力的 `current_source_checked`、已檢查的完整 SourceUse、作者輸入與來源文字 hash。D0 對帳 sidecar 與 expanded 能力路徑的精確集合、SourceUse 與行／section；缺漏、重複、非 current proof 或來源不符均整卡拒絕。`CurrentCardProgram` 分別保留 expanded 樹、來源 sidecar 與 IR；`source_at(author_path)` 沿能力祖先路徑回查永久 CardId／FaceId／revision、原 field／section／line／fragment 及 occurrence segments，IR instruction 沿既有 SourceSpan.author_path 使用同一對應。來源證明不等於用途資格或執行准入；原型 base／ordinal 入口不變。
+
 | 接縫 | 必須保留／拒絕的責任 |
 | --- | --- |
 | Int／Nat | 值域與靜態型別分開，bool 不作 Int；BP08-038 的 Live 有號減法不先轉 Nat，負數動作依規則處理 |
