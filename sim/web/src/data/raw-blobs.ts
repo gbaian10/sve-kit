@@ -43,7 +43,7 @@ export function rawRetentionPlan(
 
 interface ReadOptions {
   readonly signal?: AbortSignal
-  readonly priority?: "foreground" | "background" | "low"
+  readonly priority?: "foreground" | "background" | "low" | "speculative"
 }
 interface Pending {
   readonly signal: AbortSignal | undefined
@@ -154,6 +154,8 @@ export class RawBlobStore {
         `${this.base}/${file.path}`,
         {
           ...(signal ? { signal } : {}),
+          raw: { root: this.base, sha256: file.sha256, bytes: file.bytes },
+          ...(priority === "speculative" ? { speculative: true } : {}),
           ...(priority === "low" ? { priority: "low" } : {}),
         },
       )

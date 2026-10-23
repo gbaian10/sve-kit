@@ -1,20 +1,24 @@
-import type { Fetcher } from "./cdn"
+import type { Fetcher, FetchOptions } from "./cdn"
 
 const SLOTS = 32
 const BACKGROUND_SLOTS = 24
+const SPECULATIVE_SLOTS = 2
 interface Waiter {
   readonly resolve: (response: Response) => void
   readonly reject: (error: unknown) => void
   readonly cleanup: () => void
+  readonly priority: number
 }
 interface Job {
   readonly key: string
   readonly url: string
-  readonly init: RequestInit | undefined
+  readonly init: FetchOptions | undefined
   readonly abort: AbortController
   readonly waiters: Set<Waiter>
-  priority: boolean
   started: boolean
+}
+function priority(job: Job): number {
+  return Math.min(...[...job.waiters].map((waiter) => waiter.priority))
 }
 /** One app budget holds permits through body reads and shares requests across all consumers. */
 export function requestQueue(fetcher: Fetcher): {
@@ -25,27 +29,41 @@ export function requestQueue(fetcher: Fetcher): {
   const queue: Job[] = []
   let running = 0
   let background = 0
+  let speculative = 0
   const pump = () => {
     while (running < SLOTS) {
-      let index = queue.findIndex((job) => job.priority)
-      if (index < 0) {
-        if (background >= BACKGROUND_SLOTS) return
-        index = 0
+      const foregroundActive = [...jobs.values()].some((job) => priority(job) === 0)
+      let index = -1
+      let nextPriority = Infinity
+      for (const [candidate, job] of queue.entries()) {
+        const level = priority(job)
+        if (level > 0 && background >= BACKGROUND_SLOTS) continue
+        if (level === 3 && (speculative >= SPECULATIVE_SLOTS || foregroundActive)) continue
+        if (level < nextPriority) {
+          index = candidate
+          nextPriority = level
+        }
       }
+      if (index < 0) return
       const job = queue.splice(index, 1)[0]
       if (!job) return
-      if (!job.waiters.size) continue
       job.started = true
-      const isBackground = !job.priority
+      const isBackground = nextPriority > 0
+      const isSpeculative = nextPriority === 3
       running += 1
       if (isBackground) background += 1
+      if (isSpeculative) speculative += 1
+      const { raw: _raw, speculative: _speculative, ...init } = job.init ?? {}
       void fetcher(job.url, {
-        ...job.init,
-        ...(job.priority && job.init?.priority === "low" ? { priority: "auto" } : {}),
+        ...init,
+        ...(nextPriority === 0 && init.priority === "low" ? { priority: "auto" } : {}),
+        ...(isSpeculative ? { priority: "low" } : {}),
         signal: job.abort.signal,
       })
         .then(async (response) => {
           const bytes = await response.arrayBuffer()
+          // Remove the completed identity before consumers can retry a corrupt response.
+          if (jobs.get(job.key) === job) jobs.delete(job.key)
           for (const waiter of job.waiters)
             waiter.resolve(
               new Response(bytes, { status: response.status, headers: response.headers }),
@@ -59,34 +77,29 @@ export function requestQueue(fetcher: Fetcher): {
           if (jobs.get(job.key) === job) jobs.delete(job.key)
           running -= 1
           if (isBackground) background -= 1
+          if (isSpeculative) speculative -= 1
           pump()
         })
     }
   }
   const enqueue =
-    (priority: boolean): Fetcher =>
+    (foreground: boolean): Fetcher =>
     (url, init) =>
       new Promise((resolve, reject) => {
         if (init?.signal?.aborted) {
           reject(new Error("request cancelled"))
           return
         }
-        const key = JSON.stringify([url, init?.cache ?? "default"])
+        const key = JSON.stringify([
+          init?.raw ? [init.raw.root, init.raw.sha256, init.raw.bytes] : url,
+          init?.cache ?? "default",
+        ])
         let job = jobs.get(key)
         if (!job || job.abort.signal.aborted) {
-          job = {
-            key,
-            url,
-            init,
-            abort: new AbortController(),
-            waiters: new Set(),
-            priority,
-            started: false,
-          }
+          job = { key, url, init, abort: new AbortController(), waiters: new Set(), started: false }
           jobs.set(key, job)
           queue.push(job)
         }
-        if (priority) job.priority = true
         const selected = job
         const abort = () => {
           selected.waiters.delete(waiter)
@@ -95,12 +108,17 @@ export function requestQueue(fetcher: Fetcher): {
           if (!selected.waiters.size) {
             selected.abort.abort()
             if (jobs.get(key) === selected) jobs.delete(key)
+            if (!selected.started) {
+              const index = queue.indexOf(selected)
+              if (index >= 0) queue.splice(index, 1)
+            }
           }
           pump()
         }
         const waiter: Waiter = {
           resolve,
           reject,
+          priority: init?.speculative ? 3 : foreground ? 0 : init?.priority === "low" ? 2 : 1,
           cleanup: () => init?.signal?.removeEventListener("abort", abort),
         }
         selected.waiters.add(waiter)

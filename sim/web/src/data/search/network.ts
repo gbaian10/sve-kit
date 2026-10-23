@@ -1,4 +1,4 @@
-import type { Fetcher } from "../cdn"
+import type { Fetcher, FetchOptions } from "../cdn"
 import { appRequests } from "../request-queue"
 
 interface NetworkRequest {
@@ -7,6 +7,9 @@ interface NetworkRequest {
   readonly url: string
   readonly foreground: boolean
   readonly cache?: RequestCache
+  readonly raw?: FetchOptions["raw"]
+  readonly priority?: RequestPriority
+  readonly speculative?: boolean
 }
 interface NetworkReply {
   readonly kind: "fetch-reply"
@@ -56,6 +59,9 @@ export function workerFetch(
           url,
           foreground,
           ...(init?.cache ? { cache: init.cache } : {}),
+          ...(init?.raw ? { raw: init.raw } : {}),
+          ...(init?.priority ? { priority: init.priority } : {}),
+          ...(init?.speculative ? { speculative: true } : {}),
         })
       }),
     receive: (message) => {
@@ -91,6 +97,9 @@ export function mainNetwork(worker: Worker): {
       void (message.foreground ? appRequests.foreground : appRequests.background)(message.url, {
         signal: abort.signal,
         ...(message.cache ? { cache: message.cache } : {}),
+        ...(message.raw ? { raw: message.raw } : {}),
+        ...(message.priority ? { priority: message.priority } : {}),
+        ...(message.speculative ? { speculative: true } : {}),
       })
         .then(async (response) => {
           const bytes = await response.arrayBuffer()
