@@ -68,6 +68,21 @@ grants 只接受主文整行的有限句型：明示選擇自方從者、從墓�
 token 原生 keyword 不會掛到母卡。主文明示額外授予生成 token 的 keyword 則屬母卡 grants。
 來源 descriptor、current revision、exact field bytes 與凍結來源重驗後才交出正標籤，與翻譯無關。
 
+有限 refers／counts adapter `manual-keywords-references-bp01-v1` 沿用相同 209 張永久 ID、
+十個 keyword 及來源重驗。語意依用途分配：費用中依 keyword 選定捨棄的牌，以及依 keyword
+選擇目標，屬 refers；明示符合 keyword 的從者數量門檻，屬 counts，不因同時提到 keyword 再加 refers。
+固定捨棄一張牌是費用選擇，並非對 keyword 數量的統計。
+
+目前只接受三種主文完整行（K 必須唯一對應已登錄日文名稱，N 為數字）：
+
+- `{起動}{コストN}これを{アクト}墓場に置く：【K】を持つ自分のフォロワー1体を選ぶ。それは{攻撃力}+N/{体力}+Nする。` → refers。
+- `{起動}{コストN}手札の【K】を持つフォロワー1枚を捨てる：1枚引く。` → refers。
+- `{ファンファーレ}自分の場の【K】を持つフォロワーがN体以上なら、1枚引く。` → counts（門檻 N 至少 1）。
+
+各 N 獨立，費用及攻防增量可為 0。不接受未知前後句、關鍵字字串命中或引號內能力；
+含「」的主文整欄略過，sections 全不檢查，因此 token 的原生能力仍屬 token。
+只在匹配行提交相應 relation 的局部檢查，`whole_field=false`；四關係都有 producer 仍不構成 complete。
+
 ## 新鮮度與補正
 
 `mechanic-source-bundle-v1` 對 card／shared 全部面（含缺 current 的面）、
@@ -77,7 +92,8 @@ token 原生 keyword 不會掛到母卡。主文明示額外授予生成 token �
 producer_version 包含 `manual-keywords-h1-v1`、來源 normalizer／葉規則、keyword mapping
 與 keyword 概念集合，不含中文呈現、無關 commit 或 suppression。
 grants producer_version 另含自身 adapter、固定 card 集合及十個已登錄概念的 mapping／日文名稱；
-F1 configuration 也釘 grants adapter 與固定 card 集合 hash。
+refers／counts 的 producer_version 同樣釘自身 adapter、固定 card 集合及 keyword mapping；
+F1 configuration 也釘兩個有限 adapter 與固定 card 集合 hash。
 抽取或 bundle 演算法變更必須更新 adapter／recipe 版本；keyword/action universe 與 coverage 每次重建。
 
 card_mechanic 使用 `source_kind=manual, dsl_id=null`，source_id 指實際原文，
@@ -95,7 +111,7 @@ decision 同上例且必須 confirmed。只有候選 ID、source hash 及 produc
 
 H1 提交已驗正標籤及自身宣告所在面／主文的局部 has 檢查，由共用 coverage reducer 合併；
 不把局部宣告當整欄位已查。內部範圍與 producer 鍵見[建置資料庫 §10](../build/build-db.md#10-dsl驗證與未實作卡片頁)。
-H1 與 grants 均儲存後，才在共同編排點套用 suppression，並傳入全部有效 producer_version 投影一次。
+H1、grants 與 refers／counts 均儲存後，才在共同編排點套用 suppression，並傳入全部有效 producer_version 投影一次。
 grants 只提交所在面／主文的局部 grants 檢查；has＋grants 也不能補滿 refers／counts 或 sections。
 目前已檢查 keyword 一律為 partial；公開每 card／shared 一列，complete_all=false、
 complete 集合空。partial 選較短 include／exclude，同長選 include；只投影 fresh coverage。

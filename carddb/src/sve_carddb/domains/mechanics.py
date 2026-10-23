@@ -25,6 +25,8 @@ from sve_carddb.domains.mechanic_coverage import (
 )
 from sve_carddb.domains.mechanic_grants import ADAPTER as GRANTS_ADAPTER
 from sve_carddb.domains.mechanic_grants import apply as apply_grants
+from sve_carddb.domains.mechanic_references import ADAPTER as REFERENCES_ADAPTER
+from sve_carddb.domains.mechanic_references import apply as apply_references
 from sve_carddb.domains.products.models import LocalizedText
 from sve_carddb.domains.text_observations.intern import TextInterner
 from sve_carddb.domains.translations.direct import write
@@ -117,6 +119,7 @@ class Inputs:
             "adapter": ADAPTER,
             "registry_sha256": digest(self.exact),
             "grants_adapter": GRANTS_ADAPTER,
+            "references_adapter": REFERENCES_ADAPTER,
             "grants_batch_sha256": digest(
                 canonical(list[JsonValue](sorted(FIRST_BATCH_CARDS)))
             ),
@@ -444,15 +447,27 @@ def apply(  # ruff: ignore[complex-structure,too-many-locals] -- one owner-check
         ),
     )
     grants = apply_grants(db, inputs, settings, hashes)
+    references = apply_references(db, inputs, settings, hashes)
     insert_raw_sources(db, (use.source for use in settings.sources.uses))
     tags = {str(row.values["id"]): row.values for row in db.rows("card_mechanic")}
     _suppress(db, inputs.registry.suppressions, tags, registry_source_id, reasons)
-    project_current(db, hashes, frozenset({version, str(grants["producer_version"])}))
+    project_current(
+        db,
+        hashes,
+        frozenset(
+            {
+                version,
+                str(grants["producer_version"]),
+                str(references["producer_version"]),
+            }
+        ),
+    )
     return {
         "adapter": ADAPTER,
         "description": "Self keyword declarations: body parts containing only keywords.",
         "producer_version": version,
         "grants": grants,
+        "references": references,
         "keywords": len(keywords),
         "positive_tags": len(tags),
         "projection_rows": len(db.rows("mechanic_projection")),
