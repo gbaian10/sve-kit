@@ -31,9 +31,14 @@ impl Game {
     /// # Errors
     /// Returns unsupported semantics or malformed transport data; legal rejections are outcomes.
     pub fn decide(&mut self, decision: &Value, node: &str) -> Result<Step> {
+        if !self.card_runtime.is_empty() {
+            self.check_internal_cards()?;
+        }
         if self.typed.is_some()
             || self.card_runtime.checkpoint.is_some()
             || self.card_runtime.requires_typed_play()
+            || self.card_runtime.has_pending()
+            || (!self.card_runtime.is_empty() && self.input_point()["at"] == "quick")
         {
             return Err(invalid("typed execution owns the input point"));
         }
@@ -692,7 +697,7 @@ impl Game {
             &cause,
             group,
         );
-        self.state.flow = json!({"kind":"battle","attacker":id,"target":target,"decision":decision,"cause":{"event":event}});
+        self.state.flow = json!({"kind":"battle","attacker":id,"attacker_generation":self.object(id)?.generation,"target":target,"target_generation":if target.ends_with(".leader") { None } else { Some(self.object(target)?.generation) },"decision":decision,"cause":{"event":event}});
         let pending = self.collect_triggers(
             "attack",
             &[self.object(id)?.clone()],
@@ -711,7 +716,20 @@ impl Game {
                 let target = string(&flow["target"]);
                 self.state.flow = json!({"kind":"main"});
                 if self.object(source)?.zone != "field"
-                    || (!target.ends_with(".leader") && self.object(target)?.zone != "field")
+                    || flow["attacker_generation"]
+                        .as_u64()
+                        .is_some_and(|generation| {
+                            self.object(source)
+                                .is_ok_and(|o| o.generation != generation)
+                        })
+                    || (!target.ends_with(".leader")
+                        && (self.object(target)?.zone != "field"
+                            || flow["target_generation"]
+                                .as_u64()
+                                .is_some_and(|generation| {
+                                    self.object(target)
+                                        .is_ok_and(|o| o.generation != generation)
+                                })))
                 {
                     return Ok(());
                 }

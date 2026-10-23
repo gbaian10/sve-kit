@@ -67,7 +67,7 @@ const fn parameter(id: u64, slot: PlaySlot, domain: ChoiceDomain) -> Decision {
     }
 }
 
-fn target(id: u64, scope: u64, minimum: u64, maximum: u64) -> Decision {
+pub(super) fn target(id: u64, scope: u64, minimum: u64, maximum: u64) -> Decision {
     let cardinality = Cardinality {
         minimum: Nat(minimum),
         maximum: Some(Nat(maximum)),

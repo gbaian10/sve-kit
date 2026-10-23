@@ -2,7 +2,7 @@ use super::*;
 use sve_engine::game::internal::{Answer, InputDomain};
 use sve_engine::ir::lowering::ExpandedLowerer;
 
-fn own_zone(kind: ZoneKind, scope: u64) -> Selector {
+pub(super) fn own_zone(kind: ZoneKind, scope: u64) -> Selector {
     let mut selector = zone(kind, scope);
     if let Selector::Zone {
         players: selected, ..
@@ -12,7 +12,7 @@ fn own_zone(kind: ZoneKind, scope: u64) -> Selector {
     }
     selector
 }
-fn enter(id: u64, objects: Selector) -> Located<Node> {
+pub(super) fn enter(id: u64, objects: Selector) -> Located<Node> {
     instruction(
         id,
         Action::Move {
@@ -329,12 +329,7 @@ fn bp20_028_entry_seed_admits_once_after_controller_batch_choices_and_real_turn_
             "resolved"
         );
         // The Quick pass must really finish this turn; the next active player's draw succeeds.
-        assert_eq!(
-            game.internal_rule_action(&json!({"do":"pass"}))
-                .unwrap()
-                .outcome,
-            "resolved"
-        );
+        assert_eq!(quick::pass(&mut game).outcome, "resolved");
     }
     resolved(
         game.activate_internal_card("s", AbilityId(22), PlayerId { seat: 1 })

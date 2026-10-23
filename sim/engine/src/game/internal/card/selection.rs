@@ -327,12 +327,32 @@ impl Game {
         slots: &BTreeMap<(ScopeId, u64), Slot>,
         parameters: &VecDeque<Decision>,
     ) -> Result<bool> {
+        if parameters.is_empty() {
+            return Ok(true);
+        }
         let mut candidate = execution.clone();
         candidate.slots.clone_from(slots);
-        candidate.targets.clear();
         let first = parameters
             .front()
             .ok_or_else(|| invalid("missing target restart"))?;
+        if let ChoiceDomain::Distribution {
+            recipients, total, ..
+        } = &first.domain
+        {
+            let recipients = candidate.recipients(self, recipients)?;
+            let total = candidate.natural(self, total)?;
+            if !recipients.members().is_empty()
+                && u64::try_from(recipients.members().len()).map_err(invalid)? > total.0
+            {
+                return Ok(false);
+            }
+            candidate.captures(self, &first.captures)?;
+            return self.internal_feasible_targets(
+                &candidate,
+                &candidate.slots,
+                &parameters.iter().skip(1).cloned().collect(),
+            );
+        }
         let (wait, _) = self.target_domain(&candidate, first)?;
         // Both public fields have a rules-defined capacity of five, so this proof is finite.
         if wait.members.len() > 10 {
@@ -355,25 +375,11 @@ impl Game {
             let mut candidate = candidate.clone();
             candidate.bind_targets(&wait, wait.validate(&handles)?);
             candidate.captures(self, &first.captures)?;
-            let mut feasible = true;
-            for decision in parameters.iter().skip(1) {
-                let ChoiceDomain::Distribution {
-                    recipients, total, ..
-                } = &decision.domain
-                else {
-                    return Err(unsupported("feasibility parameter order"));
-                };
-                let recipients = candidate.recipients(self, recipients)?;
-                let total = candidate.natural(self, total)?;
-                if !recipients.members().is_empty()
-                    && u64::try_from(recipients.members().len()).map_err(invalid)? > total.0
-                {
-                    feasible = false;
-                    break;
-                }
-                candidate.captures(self, &decision.captures)?;
-            }
-            if feasible {
+            if self.internal_feasible_targets(
+                &candidate,
+                &candidate.slots,
+                &parameters.iter().skip(1).cloned().collect(),
+            )? {
                 return Ok(true);
             }
         }

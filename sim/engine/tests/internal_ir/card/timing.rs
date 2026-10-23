@@ -123,7 +123,7 @@ fn bp10_122_attack_pending_precedes_quick_and_keeps_later_departure_information(
             game.projection(View::Referee).unwrap()[opponent]["leader"]["life"],
             16
         );
-        let quick = game.internal_rule_action(&json!({"do":"pass"})).unwrap();
+        let quick = quick::pass(&mut game);
         assert_eq!(quick.outcome, "resolved");
         assert_eq!(
             game.projection(View::Referee).unwrap()[opponent]["leader"]["life"],
@@ -204,8 +204,13 @@ fn bp09_p17_end_begin_occurs_once_before_guard_quick_and_expiry() {
         game.internal_rule_action(&json!({"do":"guard-act","select":[]}))
             .unwrap_err();
         assert_eq!(before, exact_authority(&game));
-        let quick = game.internal_rule_action(&json!({"do":"pass"})).unwrap();
+        let question = game.internal_quick_choice().unwrap().unwrap();
+        assert!(
+            matches!(&question.domain, InputDomain::Quick { options, .. } if options.is_empty())
+        );
+        let quick = quick::pass(&mut game);
         assert_eq!(quick.outcome, "resolved");
+        assert!(game.internal_quick_choice().unwrap().is_none());
         let active =
             |game: &Game| game.projection(View::Referee).unwrap()["turn"]["active"].clone();
         assert_eq!(active(&game), actor);

@@ -142,10 +142,19 @@ impl Game {
     ) -> Result<i64> {
         let holder = &execution.context.source;
         let object = self.object(holder)?;
-        if object.zone != "resolution"
-            || object.state.get("cost").is_some()
-            || !self.state.continuous.is_empty()
-        {
+        if object.zone != "resolution" {
+            return Err(unsupported("typed payment zone"));
+        }
+        self.internal_quote_card_cost(execution)
+    }
+
+    pub(in crate::game::internal) fn internal_quote_card_cost(
+        &self,
+        execution: &Execution,
+    ) -> Result<i64> {
+        let holder = &execution.context.source;
+        let object = self.object(holder)?;
+        if object.state.get("cost").is_some() || !self.state.continuous.is_empty() {
             return Err(unsupported("typed payment state or prototype cost layers"));
         }
         let mut base = super::super::cost::printed_play_cost(&self.face(holder)?["cost"])?;

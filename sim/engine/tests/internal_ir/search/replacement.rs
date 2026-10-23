@@ -476,7 +476,8 @@ fn optional_replacement_can_follow_and_precede_distribution() {
                     | InputDomain::Targets(_)
                     | InputDomain::Pending(_)
                     | InputDomain::TriggerQuota(_)
-                    | InputDomain::Modes { .. } => panic!("unexpected question"),
+                    | InputDomain::Modes { .. }
+                    | InputDomain::Quick { .. } => panic!("unexpected question"),
                 };
                 let progress = game
                     .answer_internal(question.actor, question.token, answer)

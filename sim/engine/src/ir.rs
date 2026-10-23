@@ -125,6 +125,7 @@ pub(crate) mod events;
 mod flow;
 pub mod lowering;
 mod projections;
+pub(crate) mod quick;
 mod runtime;
 mod values;
 mod wellformed;

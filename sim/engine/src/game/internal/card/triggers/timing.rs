@@ -109,11 +109,12 @@ impl Game {
         if !matches!(
             string(&decision["do"]),
             // Guard followers carry a prototype keyword, which loaded internal cards reject.
-            "evolve" | "attack" | "end-phase" | "pass" | "end-discard"
+            "evolve" | "attack" | "end-phase" | "end-discard"
         ) || self.typed.is_some()
             || self.card_runtime.checkpoint.is_some()
             || self.card_runtime.has_pending()
             || self.card_runtime.question.is_some()
+            || self.card_runtime.quick.is_some()
             || !self.prepared.is_empty()
         {
             return Err(unsupported("internal rule action or timing"));

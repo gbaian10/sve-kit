@@ -6,6 +6,7 @@
 )]
 
 use super::{Frame, Game, View, int, string};
+use crate::ir::QuickWindow;
 use crate::ir::{
     Action, Arithmetic, Binding, Bool, Capture, CaptureRef, CardQuantityOutcome, Cardinality,
     ChoiceDomain, Comparison, Control, DamageEvent, DamageFlags, DamageQuantityOutcome,
@@ -43,6 +44,7 @@ mod source;
 mod values;
 
 pub use allocation::{DamageShare, DistributionDomain, DistributionMember};
+pub use card::quick::QuickOption;
 pub use card::{
     Activation, CardEntry, CardPlay, PendingOption, QuotaDomain, QuotaSelection, ResumeStage,
     TargetDomain,
@@ -106,6 +108,13 @@ pub struct DecisionView {
 /// First-slice input shapes.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum InputDomain {
+    /// Legal private plays plus an explicit Pass, bound to the current rule procedure.
+    Quick {
+        /// Authority-selected rule window.
+        window: QuickWindow,
+        /// Token-local action handles; Pass is always available separately.
+        options: Vec<QuickOption>,
+    },
     /// Continue or stop before exactly one draw attempt.
     BeforeDraw,
     /// Public occurrence handles for exactly one player at the current check timing.
@@ -140,6 +149,8 @@ pub enum InputDomain {
 /// Internal answer, checked against actor and the entire decision token.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Answer {
+    /// One Quick action handle, or an explicit Pass (`None`).
+    Quick(Option<u64>),
     /// Answer the current before-draw occurrence.
     Stepwise(StepwiseAnswer),
     /// Exactly one occurrence handle from the current pending-order question.
@@ -663,6 +674,7 @@ impl Game {
                 *self = *origin;
                 // An externally observed token must never become live again after rollback.
                 self.state.ir_epoch = epoch;
+                self.refresh_internal_quick()?;
             } else {
                 *self = before;
             }
@@ -682,6 +694,12 @@ impl Game {
                     .question
                     .as_ref()
                     .map(|(question, _)| question)
+            })
+            .or_else(|| {
+                self.card_runtime
+                    .quick
+                    .as_ref()
+                    .map(|question| &question.view)
             })?;
         view.player()
             .is_none_or(|seat| seat == seat_name(question.actor).unwrap_or_default())
@@ -691,6 +709,7 @@ impl Game {
     pub(super) fn internal_decision_packet(&self, view: View) -> Value {
         self.internal_decision(view).map_or(Value::Null, |question| {
             let domain = match question.domain {
+                InputDomain::Quick { window, options } => card::quick::packet(window, &options),
                 InputDomain::TriggerQuota(domain) => json!({"kind":"trigger-quota","candidates":domain.candidates.iter().map(|option| json!({"handle":option.handle,"card":option.card,"line":option.line,"event":option.event})).collect::<Vec<_>>(),"earlier":domain.earlier.iter().map(|selection| json!({"actor":selection.actor.seat,"card":selection.occurrence.card,"line":selection.occurrence.line,"event":selection.occurrence.event})).collect::<Vec<_>>()}),
                 InputDomain::Targets(domain) => card::selection::packet(&domain),
                 InputDomain::Modes { modes, cardinality, count } => json!({"kind":"modes","modes":modes.iter().map(|id| id.0).collect::<Vec<_>>(),"minimum":cardinality.minimum.0,"maximum":cardinality.maximum.map(|n| n.0),"count":count.0}),
@@ -746,6 +765,7 @@ impl Game {
         if self.typed.is_some()
             || self.card_runtime.checkpoint.is_some()
             || self.card_runtime.has_pending()
+            || self.card_runtime.quick.is_some()
             || self.state.frame.is_some()
             || self.state.prompt.is_some()
             || !self.state.pending.is_empty()

@@ -69,7 +69,8 @@ fn source_paths(
                         keyword: KeywordId::Fanfare
                             | KeywordId::Lastword
                             | KeywordId::OnAttack
-                            | KeywordId::OnEvolve,
+                            | KeywordId::OnEvolve
+                            | KeywordId::Quick,
                         ..
                     }
                 ) {
@@ -144,6 +145,7 @@ fn check_requirements(
                             | "internal.KeywordId.Lastword"
                             | "internal.KeywordId.OnAttack"
                             | "internal.KeywordId.OnEvolve"
+                            | "internal.KeywordId.Quick"
                     ) && requirement
                         .locations
                         .iter()
