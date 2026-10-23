@@ -197,6 +197,7 @@ pub(super) fn lower(
             declarations: vec![],
             trigger: None,
             play: Some(PlaySpec {
+                limit: None,
                 captures: vec![],
                 parameters: vec![parameter],
                 costs,

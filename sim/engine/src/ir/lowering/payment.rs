@@ -65,6 +65,7 @@ pub(super) fn lower(
         });
     }
     Ok(PlaySpec {
+        limit: None,
         captures: vec![],
         parameters: vec![],
         costs: CostSpec::Ordered { steps },

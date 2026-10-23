@@ -6,8 +6,10 @@ use super::{
     unsupported,
 };
 use crate::game::legal::subsets;
+use crate::ir::quick::is_printed_quick;
 use crate::ir::{
-    Action, ObjectRef, PlaySpec, PlayerRef, RecipientSet, SelectionSnapshot, Selector,
+    Action, Cardinality, LimitSpec, ModeUse, ObjectRef, PlaySpec, PlayerRef, RecipientSet,
+    SelectionSnapshot, Selector, TurnId,
 };
 use crate::ir::{
     ChoiceDomain, Control, CostSpec, Decision, DecisionId, DecisionKind, ExecutionRef, InputMode,
@@ -59,6 +61,34 @@ struct PlayMode {
     chosen: ModeDecision,
 }
 
+impl PlayMode {
+    fn parameters(&self) -> Result<Vec<Decision>> {
+        let mut parameters = Vec::new();
+        if matches!(
+            &self.chosen.domain,
+            ChoiceDomain::Modes {
+                cardinality: Cardinality {
+                    minimum: Nat(0),
+                    ..
+                },
+                ..
+            }
+        ) && self.count != Expr::Literal(Nat(0))
+        {
+            return Err(unsupported("any-number mode choice"));
+        }
+        for mode in &self.modes {
+            if mode.parameters.iter().any(|decision| !decision.captures.is_empty()
+                || !matches!(&decision.domain, ChoiceDomain::Objects { constraint, .. }
+                    if constraint.groups.iter().all(|target| independent_selector(&target.selector)))) {
+                return Err(unsupported("mode targets require independent public selectors"));
+            }
+            parameters.extend(mode.parameters.clone());
+        }
+        Ok(parameters)
+    }
+}
+
 #[derive(Clone, Debug)]
 pub(in crate::game::internal) struct PlayState {
     snapshot: Option<Box<Game>>,
@@ -68,6 +98,7 @@ pub(in crate::game::internal) struct PlayState {
     pub(in crate::game::internal) chosen: BTreeMap<DecisionId, Vec<ModeId>>,
     parameters: VecDeque<Decision>,
     costs: CostSpec,
+    limit: Option<LimitSpec>,
     body: Program,
     restart: Option<SelectionOrigin>,
     distribution_captures: Option<Decision>,
@@ -152,11 +183,24 @@ pub(super) fn check(ability: &Ability, source: &SourceSpan) -> Result<()> {
         .as_ref()
         .ok_or_else(|| invalid("missing body"))?;
     let groups = collect_modes(body)?;
+    if is_printed_quick(ability)
+        && groups.iter().any(|group| {
+            matches!(
+                &group.chosen.domain,
+                ChoiceDomain::Modes {
+                    exclude_used: Some(_),
+                    ..
+                }
+            )
+        })
+    {
+        return Err(unsupported(
+            "Quick mode exclusion needs a history-aware preflight",
+        ));
+    }
     let mut parameters = play.parameters.clone();
     for group in &groups {
-        for mode in &group.modes {
-            parameters.extend(mode.parameters.clone());
-        }
+        parameters.extend(group.parameters()?);
     }
     let mut distribution = false;
     let mut target = None;
@@ -556,6 +600,7 @@ impl Game {
         let body = ability.body.ok_or_else(|| invalid("missing body"))?;
         let groups = collect_modes(&body)?;
         let play = ability.play.unwrap_or(PlaySpec {
+            limit: None,
             captures: Vec::new(),
             parameters: Vec::new(),
             costs: CostSpec::Ordered { steps: Vec::new() },
@@ -568,6 +613,7 @@ impl Game {
             chosen: BTreeMap::new(),
             parameters: play.parameters.into(),
             costs: play.costs,
+            limit: play.limit,
             body,
             restart: None,
             distribution_captures: None,
@@ -709,6 +755,10 @@ impl Game {
         let payment = self.internal_card_payment(execution, &play.costs, execution.spell);
         self.card_runtime.active_source = previous;
         payment?;
+        self.commit_internal_play(execution, play)
+    }
+
+    fn commit_internal_play(&mut self, execution: &mut Execution, play: PlayState) -> Result<()> {
         let source = execution
             .ability
             .ok_or_else(|| invalid("missing formal source"))?;
@@ -723,6 +773,34 @@ impl Game {
                 &execution.frame().cause,
                 group,
             );
+        }
+        let turn = TurnId(self.state.schedule.current()?);
+        if let Some(limit) = play.limit {
+            self.card_runtime
+                .consume_quota(source.instance, turn, limit)?;
+        }
+        for group in &play.groups {
+            if let ChoiceDomain::Modes {
+                exclude_used: Some(_),
+                ..
+            } = group.chosen.domain
+            {
+                for mode in play
+                    .chosen
+                    .get(&group.chosen.id)
+                    .ok_or_else(|| invalid("missing modes"))?
+                {
+                    let fact = ModeUse {
+                        execution: execution.id,
+                        ability_instance: source.instance,
+                        mode: *mode,
+                        turn,
+                    };
+                    if !self.card_runtime.mode_uses.contains(&fact) {
+                        self.card_runtime.mode_uses.push(fact);
+                    }
+                }
+            }
         }
         execution.facts.push(if execution.spell {
             Fact::CardPlayed {
@@ -748,28 +826,81 @@ impl Game {
         while let Some(group) = play.modes.pop_front() {
             let count = execution.natural(self, &group.count)?;
             let ChoiceDomain::Modes {
-                modes, cardinality, ..
+                modes,
+                cardinality,
+                exclude_used,
+                ..
             } = &group.chosen.domain
             else {
                 return Err(unsupported("mode domain"));
             };
+            let count = Nat(count.0.min(u64::try_from(modes.len()).map_err(invalid)?));
             if count == Nat(0) {
                 play.chosen.insert(group.chosen.id, Vec::new());
                 continue;
             }
+            let minimum = if cardinality.maximum.is_none() {
+                1
+            } else {
+                cardinality.minimum.0
+            };
+            let source = execution
+                .ability
+                .ok_or_else(|| invalid("missing mode source"))?;
+            let turn = TurnId(self.state.schedule.current()?);
+            let mut legal = Vec::new();
+            for mode in &group.modes {
+                if self.internal_mode_targets_feasible(execution, &mode.parameters)?
+                    && (exclude_used.is_none()
+                        || !self.card_runtime.mode_uses.iter().any(|used| {
+                            used.ability_instance == source.instance
+                                && used.turn == turn
+                                && used.mode == mode.id
+                        }))
+                {
+                    legal.push(mode.id);
+                }
+            }
+            let mut payment_game = self.clone();
+            payment_game.card_runtime.active_source = execution.ability;
+            let affordable = match payment_game.internal_card_payment(
+                &mut execution.clone(),
+                &play.costs,
+                execution.spell,
+            ) {
+                Ok(()) => true,
+                Err(crate::EngineFailure::IllegalPlay(_)) => false,
+                Err(error) => return Err(error),
+            };
+            if u64::try_from(legal.len()).map_err(invalid)? < minimum || !affordable {
+                return Err(crate::EngineFailure::IllegalPlay(
+                    "no legal mode and cost plan".into(),
+                ));
+            }
+            let mut chosen = group.chosen;
+            let ChoiceDomain::Modes {
+                modes: legal_modes,
+                cardinality: legal_bounds,
+                ..
+            } = &mut chosen.domain
+            else {
+                return Err(unsupported("mode domain"));
+            };
+            *legal_modes = legal;
+            *legal_bounds = Cardinality {
+                minimum: Nat(minimum),
+                maximum: Some(count),
+            };
             self.internal_wait(
                 execution,
-                group.chosen.id,
+                chosen.id,
                 execution.context.controller,
                 InputDomain::Modes {
-                    modes: modes.clone(),
-                    cardinality: *cardinality,
+                    modes: legal_modes.clone(),
+                    cardinality: *legal_bounds,
                     count,
                 },
-                Wait::Modes(ModeWait {
-                    chosen: group.chosen,
-                    count,
-                }),
+                Wait::Modes(ModeWait { chosen, count }),
             )?;
             return Ok(true);
         }
@@ -909,4 +1040,12 @@ fn selected_body(
     }
     program.steps = steps;
     Ok(program)
+}
+
+fn independent_selector(selector: &Selector) -> bool {
+    match selector {
+        Selector::Zone { .. } | Selector::Objects { .. } => true,
+        Selector::Union { sets } => sets.iter().all(independent_selector),
+        _ => false,
+    }
 }

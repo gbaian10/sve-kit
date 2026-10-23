@@ -167,6 +167,7 @@ fn evolution() -> Located<Ability> {
     ability.node.id = AbilityId(2);
     ability.node.kind = AbilityKind::Activated;
     ability.node.play = Some(PlaySpec {
+        limit: None,
         captures: vec![],
         parameters: vec![face()],
         costs: CostSpec::Ordered {
@@ -394,6 +395,7 @@ fn evolve_is_rejected_outside_the_printed_evolution_entry() {
     let mut outside = evolution();
     outside.node.source = ability_source();
     outside.node.play = Some(PlaySpec {
+        limit: None,
         captures: vec![],
         parameters: vec![],
         costs: CostSpec::Ordered { steps: vec![] },

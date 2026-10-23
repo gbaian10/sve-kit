@@ -321,6 +321,20 @@ impl Game {
         ))
     }
 
+    pub(super) fn internal_mode_targets_feasible(
+        &self,
+        execution: &Execution,
+        parameters: &[Decision],
+    ) -> Result<bool> {
+        for decision in parameters {
+            let (wait, _) = self.target_domain(execution, decision)?;
+            if wait.bounds.minimum.0 > u64::try_from(wait.members.len()).map_err(invalid)? {
+                return Ok(false);
+            }
+        }
+        Ok(true)
+    }
+
     pub(super) fn internal_feasible_targets(
         &self,
         execution: &Execution,

@@ -94,6 +94,7 @@ fn ability(id: u64, mut steps: Vec<Located<Node>>) -> Located<Ability> {
             active_zones: vec![ZoneKind::Field],
             event_captures: vec![],
             play: Some(PlaySpec {
+                limit: None,
                 captures: vec![],
                 parameters: vec![],
                 costs: CostSpec::Ordered { steps: vec![] },

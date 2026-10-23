@@ -709,6 +709,7 @@ fn a_play_capture_of_a_hand_stays_with_its_holder() {
         choice.visibility = visibility;
         let mut program = card(body(1, vec![decision(choice)]), "synthetic").node;
         program.abilities[0].node.play = Some(PlaySpec {
+            limit: None,
             captures: vec![Capture::Objects {
                 at: CaptureTime::AtPlay {
                     execution: ExecutionRef::Current {},
@@ -792,6 +793,7 @@ fn a_play_capture_cannot_regain_evidence_revoked_before_a_mode_body() {
         steps.push(mode);
         let mut program = card(body(1, steps), "synthetic").node;
         program.abilities[0].node.play = Some(PlaySpec {
+            limit: None,
             captures: vec![Capture::Objects {
                 at: CaptureTime::AtPlay {
                     execution: ExecutionRef::Current {},

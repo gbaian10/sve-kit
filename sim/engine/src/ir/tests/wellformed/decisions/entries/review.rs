@@ -211,3 +211,67 @@ fn resolution_alternative_is_exactly_one_and_has_no_play_parameters() {
     }
     reject(body(1, vec![node]), WellFormedReason::DecisionTiming);
 }
+
+#[test]
+fn activated_limit_requires_play_committed() {
+    let mut card = playable(vec![]);
+    card.abilities[0].node.kind = AbilityKind::Activated;
+    let limit = LimitSpec::activated_per_turn(Nat(1));
+    play_mut(&mut card).limit = Some(limit);
+    accept_card(card.clone());
+    play_mut(&mut card).limit = Some(LimitSpec {
+        consume_at: ConsumptionPoint::PendingAdmission,
+        ..limit
+    });
+    reject_card(card, WellFormedReason::UnsupportedShape);
+}
+
+#[test]
+fn mode_exclusion_requires_one_exact_play_choice() {
+    let mut node = literal_modes(1, bounds(1, Some(1)), 2);
+    let Node::Control {
+        control: Control::Mode { chosen, .. },
+    } = &mut node.node
+    else {
+        panic!("mode");
+    };
+    let ChoiceDomain::Modes { exclude_used, .. } = &mut chosen.domain else {
+        panic!("modes");
+    };
+    *exclude_used = Some(ModeExclusion::CurrentTurnAbilityInstance);
+    accept_card(playable(vec![node.clone()]));
+    let mut alternative = node.clone();
+    let Node::Control {
+        control:
+            Control::Mode {
+                chosen: alternative_choice,
+                choice_kind,
+                ..
+            },
+    } = &mut alternative.node
+    else {
+        panic!("mode");
+    };
+    *choice_kind = ModeChoiceKind::ResolutionAlternative;
+    alternative_choice.kind = ModeDecisionKind::ResolutionChoice {
+        cardinality: bounds(1, Some(1)),
+    };
+    reject(body(1, vec![alternative]), WellFormedReason::InvalidModes);
+    let Node::Control {
+        control:
+            Control::Mode {
+                count,
+                chosen: upto_choice,
+                ..
+            },
+    } = &mut node.node
+    else {
+        panic!("mode");
+    };
+    *count = Expr::Literal(Nat(2));
+    let ChoiceDomain::Modes { cardinality, .. } = &mut upto_choice.domain else {
+        panic!("modes");
+    };
+    *cardinality = bounds(1, Some(2));
+    reject_card(playable(vec![node]), WellFormedReason::InvalidModes);
+}

@@ -4,7 +4,7 @@ use super::{
     CounterQuantityOutcome, DamageAllocation, DamageQuantityOutcome, DamageRecipient, DecisionId,
     DestroyOutcome, DiscardOutcome, Effect, EffectReference, EventContext, EventSnapshotPolicy,
     EvolutionState, ExecutionRef, Expr, FaceId, FlipOutcome, FusionOutcome, Info, InstructionId,
-    Int, KeywordId, LookOutcome, ModeId, MoveOutcome, MoveResult, MovementEvent, Nat,
+    Int, KeywordId, LimitSpec, LookOutcome, ModeId, MoveOutcome, MoveResult, MovementEvent, Nat,
     ObjectOperand, ObjectRef, ObjectView, OrderOutcome, PaymentReceipt, PaymentResult, Phase,
     PlayerRef, PlayerSet, Posture, ReceiptId, ReceiptList, RecipientSet, RuleId, ScopeId,
     SearchOutcome, SelectionConstraint, SelectionSnapshot, Selector, TitleId, TokenOutcome,
@@ -87,7 +87,7 @@ tags!(AbilityKind {
     Triggered,
     Static
 });
-record!(PlaySpec { captures: Vec<Capture>, parameters: Vec<Decision>, costs: CostSpec });
+record!(PlaySpec { limit: Option<LimitSpec>, captures: Vec<Capture>, parameters: Vec<Decision>, costs: CostSpec });
 record!(Precondition { kind: PreconditionKind, predicate: Expr<Bool>, protects: InstructionId, reason: PreconditionReason });
 tags!(PreconditionKind {
     CardTextPrerequisite,

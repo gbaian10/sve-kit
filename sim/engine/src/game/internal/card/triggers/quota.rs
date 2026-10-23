@@ -1,7 +1,7 @@
 //! A simultaneous admission commits quota and occurrences only after every controller chooses.
 use super::{Game, PendingOccurrence, PendingOption, PlayerId, Result, invalid, player_id};
 use crate::game::internal::{Execution, InputDomain, Wait};
-use crate::ir::{AbilityInstanceId, DecisionId};
+use crate::ir::{AbilityInstanceId, DecisionId, LimitSpec};
 use alloc::collections::{BTreeMap, VecDeque};
 
 /// One earlier controller's public choice in the same simultaneous admission.
@@ -51,8 +51,11 @@ impl Game {
                 .as_ref()
                 .is_some_and(|trigger| trigger.limit.is_some());
             if limited_entry
-                && self.card_runtime.quotas.get(&candidate.source.instance)
-                    == Some(&candidate.header.time.turn)
+                && !self.card_runtime.quota_available(
+                    candidate.source.instance,
+                    candidate.header.time.turn,
+                    LimitSpec::once_per_turn(),
+                )
             {
                 continue;
             }
@@ -76,14 +79,13 @@ impl Game {
         plan.groups
             .make_contiguous()
             .sort_by_key(|group| group.first().is_some_and(|p| p.source.controller != active));
-        self.internal_commit_admission(plan);
-        Ok(())
+        self.internal_commit_admission(plan)
     }
 
-    fn internal_commit_admission(&mut self, plan: Admission) {
+    fn internal_commit_admission(&mut self, plan: Admission) -> Result<()> {
         if !plan.groups.is_empty() {
             self.card_runtime.admission = Some(plan);
-            return;
+            return Ok(());
         }
         for pending in plan.ready {
             if pending
@@ -93,12 +95,15 @@ impl Game {
                 .as_ref()
                 .is_some_and(|trigger| trigger.limit.is_some())
             {
-                self.card_runtime
-                    .quotas
-                    .insert(pending.source.instance, pending.header.time.turn);
+                self.card_runtime.consume_quota(
+                    pending.source.instance,
+                    pending.header.time.turn,
+                    LimitSpec::once_per_turn(),
+                )?;
             }
             self.card_runtime.pending.push(pending);
         }
+        Ok(())
     }
 
     pub(in crate::game::internal) fn internal_quota_wait(
@@ -169,7 +174,6 @@ impl Game {
             occurrence: chosen.public_option(handle)?,
         });
         plan.ready.push(chosen);
-        self.internal_commit_admission(plan);
-        Ok(())
+        self.internal_commit_admission(plan)
     }
 }

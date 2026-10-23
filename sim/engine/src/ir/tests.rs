@@ -474,6 +474,7 @@ fn static_declarations_and_play_costs_are_not_omitted() {
             usage: None,
         });
         ability.node.play = Some(PlaySpec {
+            limit: None,
             captures: vec![],
             parameters: vec![],
             costs: CostSpec::Ordered {

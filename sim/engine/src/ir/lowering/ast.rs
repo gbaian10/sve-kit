@@ -454,7 +454,10 @@ pub(super) struct TargetQuery {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct Choice {
-    pub n: u64,
+    pub n: Option<u64>,
+    pub upto: Option<u64>,
+    pub instead: Option<Vec<ChoiceInstead>>,
+    pub exclude_chosen: Option<ThisTurn>,
     pub options: Vec<Vec<Step>>,
     #[serde(rename = "who")]
     pub _who: Option<SelfPlayer>,
@@ -651,4 +654,25 @@ pub(super) struct ConditionalChange {
     pub r#if: CostCondition,
     pub delta: Option<i64>,
     pub set: Option<i64>,
+}
+
+#[derive(Deserialize)]
+pub(super) enum ThisTurn {
+    #[serde(rename = "this_turn")]
+    ThisTurn,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct ChoiceInstead {
+    pub r#if: ModeCondition,
+    pub n: Option<u64>,
+    pub upto: Option<u64>,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum ModeCondition {
+    Spellchain(u64),
+    Necro(u64),
 }

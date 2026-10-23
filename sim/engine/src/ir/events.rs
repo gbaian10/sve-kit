@@ -200,6 +200,19 @@ impl TriggerSpec {
 }
 
 impl LimitSpec {
+    pub(crate) const fn activated_per_turn(maximum: Nat) -> Self {
+        Self {
+            maximum,
+            window: LimitWindow::Turn,
+            scope: LimitScope::AbilityInstance,
+            consume_at: ConsumptionPoint::PlayCommitted,
+        }
+    }
+
+    pub(crate) fn is_activated(self) -> bool {
+        matches!(self.maximum, Nat(1 | 2)) && self == Self::activated_per_turn(self.maximum)
+    }
+
     pub(crate) const fn once_per_turn() -> Self {
         Self {
             maximum: Nat(1),

@@ -1,7 +1,8 @@
 use super::{BindingKind, Checked, Checker, WellFormedReason};
 use crate::ir::{
-    Bool, Cardinality, ChoiceDomain, Expr, Mode, ModeChoiceKind, ModeDecision, ModeDecisionKind,
-    Nat, NatFrozen, NatOperation, Predicate, SpellCountTime, Visibility,
+    Bool, Cardinality, ChoiceDomain, Control, Expr, Mode, ModeChoiceKind, ModeDecision,
+    ModeDecisionKind, Nat, NatFrozen, NatOperation, Node, PlayerRef, Predicate, Program,
+    SpellCountTime, Visibility,
 };
 use alloc::collections::BTreeSet;
 
@@ -17,7 +18,9 @@ impl Checker {
         chosen: &ModeDecision,
         kind: ModeChoiceKind,
     ) -> Checked {
-        if kind == ModeChoiceKind::ChoiceKeyword && !self.env.play_modes {
+        if kind == ModeChoiceKind::ChoiceKeyword
+            && (!self.env.play_modes || chosen.actor != (PlayerRef::Controller {}))
+        {
             return Err(self.error(WellFormedReason::DecisionTiming));
         }
         if !self.env.choices {
@@ -36,7 +39,7 @@ impl Checker {
         if ids.is_empty()
             || ids != *available
             || ids.iter().collect::<BTreeSet<_>>().len() != ids.len()
-            || exclude_used.is_some()
+            || (exclude_used.is_some() && !exact_play_mode(kind, count, *cardinality))
         {
             return Err(self.error(WellFormedReason::InvalidModes));
         }
@@ -226,4 +229,37 @@ impl Checker {
             Expr::Frozen(_) | Expr::Live(_) | Expr::Captured(_) | Expr::Bound(_) => self.reject(),
         }
     }
+}
+
+pub(super) fn play_mode_groups(program: &Program) -> usize {
+    program
+        .steps
+        .iter()
+        .map(|step| match &step.node {
+            Node::Control {
+                control: Control::Sequence { body },
+            } => play_mode_groups(body),
+            Node::Control {
+                control:
+                    Control::Mode {
+                        choice_kind: ModeChoiceKind::ChoiceKeyword,
+                        ..
+                    },
+            } => 1,
+            Node::Instruction { .. }
+            | Node::Control { .. }
+            | Node::Capture { .. }
+            | Node::Decision { .. } => 0,
+        })
+        .sum()
+}
+
+fn exact_play_mode(kind: ModeChoiceKind, count: &Expr<Nat>, cardinality: Cardinality) -> bool {
+    kind == ModeChoiceKind::ChoiceKeyword
+        && *count == Expr::Literal(Nat(1))
+        && cardinality
+            == (Cardinality {
+                minimum: Nat(1),
+                maximum: Some(Nat(1)),
+            })
 }
