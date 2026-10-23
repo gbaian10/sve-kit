@@ -20,6 +20,8 @@ export interface OverlayEntryState {
   readonly route?: CardEntryState["route"]
   /** Opening pushed a history entry, so closing from the UI pops it instead of replacing. */
   readonly pushed?: boolean
+  /** The list entry the card was pushed over; pages loaded beside the card are kept for it. */
+  readonly listKey?: string
   /** The result cell that opened the card: focus returns to it when the card closes. */
   readonly opener?: string
   /** That cell's card, kept apart from the shown card so unit changes still find the cell. */
@@ -55,6 +57,26 @@ export function routeState(summary: CardSummary): Pick<CardEntryState, "route"> 
         },
       }
     : {}
+}
+
+/**
+ * Pages loaded while a card was pushed over a list entry, by that entry's history key. Only the
+ * current entry can be written through the router, so the list takes them up when it is current
+ * again. Kept in memory: after a reload the list entry keeps the pages it had (architecture §2.2).
+ */
+const pagesByListEntry = new Map<string, number>()
+
+export function keepPagesBeside(listKey: string, pages: number): void {
+  pagesByListEntry.set(listKey, Math.max(pages, pagesByListEntry.get(listKey) ?? 0))
+}
+
+export function pagesBeside(listKey: string): number | undefined {
+  return pagesByListEntry.get(listKey)
+}
+
+/** The list entry has taken the pages up into its own state. */
+export function forgetPagesBeside(listKey: string): void {
+  pagesByListEntry.delete(listKey)
 }
 
 function isListEntryState(value: unknown): value is ListEntryState {

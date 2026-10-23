@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event"
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { buildSnapshot } from "../../../scripts/fixture/build"
+import { keepPagesBeside, type ListEntryState } from "../../app/listEntryState"
 import { routes } from "../../app/routes"
 import {
   type CardOpenMode,
@@ -416,19 +417,33 @@ describe("opening a card beside the results", () => {
     expect(cellLink("p:bp01-002")).toHaveAttribute("aria-current", "true")
   })
 
-  it("keeps pages loaded beside the card when back closes it", async () => {
+  it.each([
+    { leave: "back closes it", toPage: false },
+    { leave: "it turns into its page first", toPage: true },
+  ])("keeps pages loaded beside the card when $leave", async ({ toPage }) => {
     const { router } = await open("/cards?q=bp01", "panel")
     const user = userEvent.setup()
     const [first] = await cells()
     if (!first) throw new Error("missing cell")
     await user.click(first)
     await within(panel()).findByRole("heading", { name: "試作見習兵" }, { timeout: 5000 })
-    // Loading more beside the card writes the card's own entry, not the list's below it.
+    // What loading a second page beside the card does: the card's own entry and the list's note.
     const { pathname, search } = router.state.location
-    const state = router.state.location.state as object
+    const state = router.state.location.state as ListEntryState
+    const listKey = state.overlay?.listKey
+    if (listKey === undefined) throw new Error("missing list key")
+    keepPagesBeside(listKey, 2)
     await act(() =>
       router.navigate(pathname + search, { replace: true, state: { ...state, pages: 2 } }),
     )
+    if (toPage) {
+      act(() => {
+        prefsStore.set({ cardOpenMode: "page" })
+      })
+      await waitFor(() => {
+        expect(router.state.location.pathname).toContain("/cards/BP01-001")
+      })
+    }
     await act(() => router.navigate(-1))
     await waitFor(() => {
       expect(router.state.location).toMatchObject({ search: "?q=bp01", state: { pages: 2 } })

@@ -205,6 +205,11 @@ export function useCardOverlay({
         resultKey: key,
         ...routeState(summary),
         pushed: alreadyOpen ? (previous?.pushed ?? false) : true,
+        ...(alreadyOpen
+          ? previous?.listKey === undefined
+            ? {}
+            : { listKey: previous.listKey }
+          : { listKey: location.key }),
         opener: key,
         ...(summary.route ? { openerRoute: routeState(summary).route } : {}),
         ...(top === undefined ? {} : { openerTop: Math.round(top) }),
@@ -372,6 +377,7 @@ export function useCardOverlay({
         ...(resultKey === undefined ? {} : { resultKey }),
         ...(to.route ? { route: to.route } : {}),
         ...(previous?.pushed ? { pushed: true } : {}),
+        ...(previous?.listKey === undefined ? {} : { listKey: previous.listKey }),
         ...(previous?.opener === undefined ? {} : { opener: previous.opener }),
         ...(previous?.openerRoute === undefined ? {} : { openerRoute: previous.openerRoute }),
         ...(previous?.openerTop === undefined ? {} : { openerTop: previous.openerTop }),
