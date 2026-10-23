@@ -378,7 +378,11 @@ describe("createSnapshotClient", () => {
 
   it("loads detail files on demand, joins them onto the bootstrap and keeps an LRU", async () => {
     const served = serve("/cdn")
-    const client = createSnapshotClient("/cdn", { fetch: served.fetcher, detailCacheSize: 1 })
+    const client = createSnapshotClient("/cdn", {
+      fetch: served.fetcher,
+      detailCacheSize: 1,
+      cacheStorage: memoryCache(),
+    })
     await client.load()
     const bp01 = await client.fragments(printingKey)
     const printing = bp01.find((fragment) => fragment.table === "printing")
@@ -395,8 +399,10 @@ describe("createSnapshotClient", () => {
     await client.fragments(printingKey)
     expect(served.requests.length).toBe(before)
     await client.fragments(textKey)
+    const afterText = served.requests.length
     await client.fragments(printingKey)
-    expect(served.requests.length).toBe(before + 3)
+    expect(afterText).toBe(before)
+    expect(served.requests.length).toBe(afterText)
     await expect(client.fragments("programs")).rejects.toThrow("not a detail file")
     await expect(client.fragments("nope")).rejects.toThrow("unknown file")
   })

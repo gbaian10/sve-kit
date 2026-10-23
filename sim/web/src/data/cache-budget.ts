@@ -4,7 +4,7 @@ const ROOT_BUDGET = 64 * MIB
 const ORIGIN_BUDGET = 128 * MIB
 
 export function isDataCache(name: string): boolean {
-  return /^sve-(search-|snapshot:|images-)/u.test(name)
+  return /^sve-(search-|snapshot:|images-|raw:)/u.test(name)
 }
 
 /** Counts declared payload bytes without trimming or materializing decoded data. */

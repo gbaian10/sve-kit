@@ -23,6 +23,7 @@ import {
 import { checkEntry, indexEntries } from "./index-entry"
 import { transferDigest } from "./integrity"
 import { MetadataBytes, type MetadataProgress } from "./metadata"
+import { rawBlobDescriptor, RawBlobStore } from "./raw-blobs"
 import { appRequests, requestQueue } from "./request-queue"
 import { VerifiedCache } from "./verified-cache"
 
@@ -139,6 +140,12 @@ function snapshotClient(
   const fetcher = requests.foreground
   const entry = options.entry ?? "index"
   const decode = createDecoder()
+  const raw = new RawBlobStore(
+    base,
+    fetcher,
+    options.cacheStorage ?? globalThis.caches,
+    requests.background,
+  )
   const stored = new VerifiedCache(
     base,
     "snapshot",
@@ -710,13 +717,10 @@ function snapshotClient(
       metadata &&
       arrayValue(file["row_counts"]).some((c) => arrayValue(c)[0] === "printing_image")
         ? await metadata.read(key, backgroundSignal === undefined, backgroundSignal)
-        : await fetchVerified(
-            stringValue(file["path"]),
-            stringValue(file["sha256"]),
-            integerValue(file["bytes"]),
+        : await raw.read(rawBlobDescriptor(file), {
             signal,
-            backgroundSignal ? "low" : "foreground",
-          )
+            priority: backgroundSignal ? "low" : "foreground",
+          })
     if (!active()) throw new Error("snapshot replaced")
     const version = stringValue(snapshot.manifest["format_version"])
     const result = await decode({ kind: "file", file, bytes: data, version })
