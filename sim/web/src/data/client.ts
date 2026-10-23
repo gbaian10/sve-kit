@@ -542,6 +542,7 @@ function snapshotClient(
       selection.index !== lastIndex
     )
       return
+    await raw.retain(snapshot.files, snapshot.manifestHash)
     await stored.write(
       `adopted-${entry}-${snapshot.region ?? region}`,
       "active",

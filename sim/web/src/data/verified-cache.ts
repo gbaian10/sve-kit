@@ -84,17 +84,20 @@ export class VerifiedCache {
     try {
       const key = this.key(slot, manifestHash)
       const prefix = this.slotPrefix(slot)
-      const ownKeys = async () =>
-        (await cache.keys()).map((request) => request.url).filter((url) => url.startsWith(prefix))
+      const ownKeys = async () => {
+        const keys = (await cache.keys()).filter((request) => request.url.startsWith(prefix))
+        const dated = await Promise.all(
+          keys.map(async (request) => ({
+            url: request.url,
+            touched: Number((await cache.match(request))?.headers.get("x-sve-touched") ?? 0),
+          })),
+        )
+        return dated.sort((a, b) => a.touched - b.touched).map(({ url }) => url)
+      }
       const prune = async (urls: string[], keep: number) => {
         for (const url of urls.slice(0, Math.max(0, urls.length - keep))) await cache.delete(url)
       }
-      const before = await ownKeys()
-      // Cache keys are in insertion order. Rewrites retain the previous distinct record.
-      await prune(before, before.includes(key) ? 2 : 1)
       const digest = await transferDigest(payload)
-      // Reinsert a reused record so it remains the current one in insertion order.
-      await cache.delete(key)
       const response = () =>
         new Response(payload, { headers: { [DIGEST]: digest, ...bodyHeaders(payload.length) } })
       let retried = false
@@ -103,7 +106,7 @@ export class VerifiedCache {
       } catch {
         if (!this.storage) return
         const budget = await readDataCacheBudget(this.storage, this.root)
-        await budget.trim(payload.length, true)
+        if (!(await budget.trim(payload.length, true))) return
         const replacement = response()
         await cache.put(key, replacement)
         budget.record(
@@ -113,12 +116,14 @@ export class VerifiedCache {
           payload.length,
           Number(replacement.headers.get("x-sve-touched")),
         )
-        await budget.trim()
+        if (!(await budget.trim())) await cache.delete(key)
         retried = true
       }
-      if (this.storage && !retried) await trimDataCaches(this.storage, this.root)
+      if (this.storage && !retried && !(await trimDataCaches(this.storage, this.root)))
+        await cache.delete(key)
       // Sweep after insertion too: concurrent writers cannot leave orphaned records or grow a slot.
-      await prune(await ownKeys(), 2)
+      const keys = await ownKeys()
+      await prune([...keys.filter((url) => url !== key), ...keys.filter((url) => url === key)], 2)
     } catch {
       // Quota or storage failures only cost a rebuild on the next load.
     }

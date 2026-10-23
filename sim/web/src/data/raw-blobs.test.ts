@@ -2,7 +2,7 @@
 import { expect, it, vi } from "vitest"
 
 import { memoryCache } from "../test-utils/cache"
-import { dataCacheBytes } from "./cache-budget"
+import { dataCacheBytes, readDataCacheBudget } from "./cache-budget"
 import type { Fetcher } from "./cdn"
 import { transferDigest } from "./integrity"
 import { MetadataBytes } from "./metadata"
@@ -213,4 +213,105 @@ it("recovers persistence only on a successful write without a newer concurrent s
   await cache.delete(slot)
   await store.read(rawBlobDescriptor(file))
   expect(store.persistent).toBe(true)
+})
+
+it("collects only unreferenced hashes from whole retained manifests and recovers a two-tab GC miss", async () => {
+  const storage = memoryCache()
+  const bodies = [payload, new Uint8Array([4]), new Uint8Array([5])]
+  const descriptors = await Promise.all(
+    bodies.map(async (bytes, index) => ({
+      ...file,
+      key: String(index),
+      path: `${String(index)}.json`,
+      bytes: bytes.length,
+      sha256: await transferDigest(bytes),
+    })),
+  )
+  const fetcher = vi.fn<Fetcher>((url) =>
+    Promise.resolve(
+      new Response(bodies[Number(url.split("/").at(-1)?.split(".")[0])]?.slice().buffer),
+    ),
+  )
+  const tab = new RawBlobStore(base, fetcher, storage)
+  for (const descriptor of descriptors) await tab.read(descriptor)
+  const [old, detail, current] = descriptors
+  if (!old || !detail || !current) throw new Error("missing descriptors")
+  await tab.retain(
+    new Map([
+      [old.key, old],
+      [detail.key, detail],
+    ]),
+    `sha256:${"1".repeat(64)}`,
+  )
+  await tab.retain(
+    new Map([
+      [current.key, current],
+      [detail.key, detail],
+    ]),
+    `sha256:${"2".repeat(64)}`,
+  )
+  expect(await tab.has(old)).toBe(true)
+  expect(await tab.has(detail)).toBe(true)
+  // A second tab's later adoption drops the oldest generation; an already-probed read must miss safely.
+  const second = new RawBlobStore(base, fetcher, storage)
+  await second.retain(new Map([[detail.key, detail]]), `sha256:${"3".repeat(64)}`)
+  expect(await tab.has(old)).toBe(false)
+  expect(await tab.read(old)).toEqual(payload)
+  expect(await second.has(detail)).toBe(true)
+  expect(fetcher.mock.calls.filter(([url]) => url.endsWith(old.path))).toHaveLength(2)
+  // A damaged plan fails closed, and re-retaining the same hash repairs it.
+  const plans = await storage.open(`sve-retained:${encodeURIComponent(base)}`)
+  const damaged = (await plans.keys()).find((key) =>
+    key.url.includes(encodeURIComponent(`sha256:${"2".repeat(64)}`)),
+  )
+  if (!damaged) throw new Error("missing plan")
+  await plans.put(
+    damaged.url,
+    new Response("x", {
+      headers: { "x-sve-sha256": "bad", "x-sve-bytes": "1", "x-sve-touched": "1" },
+    }),
+  )
+  await expect(readDataCacheBudget(storage, base)).rejects.toThrow("damaged")
+  // Re-adopting a retained hash makes it the newest plan, so the next adoption drops the other one.
+  await tab.read(current)
+  await tab.retain(
+    new Map([
+      [current.key, current],
+      [detail.key, detail],
+    ]),
+    `sha256:${"2".repeat(64)}`,
+  )
+  await expect(readDataCacheBudget(storage, base)).resolves.toBeDefined()
+  await tab.retain(new Map([[old.key, old]]), `sha256:${"4".repeat(64)}`)
+  expect(await tab.has(current)).toBe(true)
+  expect(await tab.has(detail)).toBe(true)
+})
+
+it("preserves necessary old bytes when activation or a quota retry fails", async () => {
+  const storage = memoryCache()
+  const fetcher = vi.fn<Fetcher>(() => Promise.resolve(new Response(payload)))
+  const tab = new RawBlobStore(base, fetcher, storage)
+  await tab.read(file)
+  await tab.retain(new Map([[file.key, file]]), `sha256:${"1".repeat(64)}`)
+  const open = storage.open.bind(storage)
+  const raw = await storage.open(`sve-raw:${encodeURIComponent(base)}`)
+  const plans = await storage.open(`sve-retained:${encodeURIComponent(base)}`)
+  storage.open = (name) =>
+    name.startsWith("sve-retained:")
+      ? Promise.resolve(plans)
+      : name.startsWith("sve-raw:")
+        ? Promise.resolve(raw)
+        : open(name)
+  vi.spyOn(plans, "put").mockRejectedValue(new Error("quota"))
+  await tab.retain(new Map(), `sha256:${"2".repeat(64)}`)
+  expect(await tab.has(file)).toBe(true)
+  const put = vi.spyOn(raw, "put").mockRejectedValue(new Error("quota"))
+  const nextPayload = new Uint8Array([8])
+  const next = { ...file, sha256: await transferDigest(nextPayload), bytes: 1 }
+  const nextTab = new RawBlobStore(base, () => Promise.resolve(new Response(nextPayload)), storage)
+  await nextTab.read(next)
+  expect(put.mock.calls.length).toBeLessThanOrEqual(2)
+  expect(nextTab.persistent).toBe(false)
+  expect(await tab.read(file)).toEqual(payload)
+  expect(fetcher).toHaveBeenCalledTimes(1)
 })

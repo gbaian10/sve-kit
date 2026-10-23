@@ -1007,6 +1007,13 @@ describe("createSnapshotClient: verified snapshot records", () => {
     })
     expect(client.snapshot()).toBe(local)
     expect(await records(storage)).toHaveLength(1)
+    const oldRaw = await storage.open(`sve-raw:${encodeURIComponent(base)}`)
+    expect((await oldRaw.keys()).length).toBeGreaterThan(0)
+    const offline = serve(base)
+    offline.fail(() => true)
+    const restored = createSnapshotClient(base, { fetch: offline.fetcher, cacheStorage: storage })
+    await restored.load()
+    expect(restored.snapshot()?.manifestHash).toBe(local?.manifestHash)
   })
 
   it("keeps the local snapshot until a newer background download is fully verified", async () => {

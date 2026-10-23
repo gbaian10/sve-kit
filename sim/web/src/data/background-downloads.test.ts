@@ -226,11 +226,12 @@ it("admits the whole compressed batch including saved startup bytes and the mani
     await raw.read(rawBlobDescriptor(saved))
     network.mockClear()
     const cache = await storage.open(`sve-search-index:1:${encodeURIComponent(base)}`)
-    if (mode === "capacity")
-      await cache.put(
-        `${base}/old-active`,
-        new Response("old", { headers: bodyHeaders(96 * 1024 * 1024) }),
-      )
+    const oldHash = `sha256:${"1".repeat(64)}`
+    const oldSlot = `${base}/old-active/${encodeURIComponent(oldHash)}`
+    if (mode === "capacity") {
+      await raw.retain(data.selection.files, oldHash)
+      await cache.put(oldSlot, new Response("old", { headers: bodyHeaders(96 * 1024 * 1024) }))
+    }
     const downloads = new BackgroundDownloads({
       enabled: true,
       storage,
@@ -276,7 +277,7 @@ it("admits the whole compressed batch including saved startup bytes and the mani
             },
       )
       expect(network).not.toHaveBeenCalled()
-      if (mode === "capacity") expect(await cache.match(`${base}/old-active`)).toBeDefined()
+      if (mode === "capacity") expect(await cache.match(oldSlot)).toBeDefined()
     } finally {
       downloads.dispose()
     }
