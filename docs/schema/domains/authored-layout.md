@@ -63,7 +63,7 @@ Anchor／alias／merge 與顯式 tag **讀取允許，寫入不產生**；普通
 | registry_index、catalog_adoption_shard、display_override_shard | 2 |
 | digital_name_policy、digital_link_index、digital_link_shard、template_parameter_rules、effect_classification_shard | 2 |
 | author_effect_set、effect_body_shard、effects_index | 1 |
-| effect_set、keyword_registry、engine_rules、flavor_translation_shard、image_crop_overrides、classification_source_shard | 1 |
+| effect_set、keyword_registry、engine_rules、flavor_translation_shard、qa_translation_shard、image_crop_overrides、classification_source_shard | 1 |
 
 `effect_set`／`keyword_registry` format 1 精確選定 astra/1 原型文法，保留 Schema `$id: urn:sve-kit:effects:astra:1`；不是 DSL 1.0，正式 DSL 1.0 使用 author_effect_set／effect_body_shard，資源映射及已實作驗證邊界依[作者承載契約 §1](../../dsl/author-contract-1.0.md#1-版本承諾與入口)。ruling 的 format 2 production reader 已實作，revision 必填並保留原頂層本文。
 
@@ -592,3 +592,8 @@ A／B 兩種名稱語意見 [引擎規則能力與資料身分](../../dsl/engine
 `wording/<filing_key>/<sequence>.yaml` 是可選的 AI／人工卡文等價判定入口，
 format 1、kind wording_decisions；完整欄位、內容雜湊與人工覆寫規則依
 [卡文依據契約](wording-basis.md)。不存官方卡文，單檔沿用小於 1 MiB 限制。
+
+### 官方 Q&A 直接譯文
+
+`translations/qa/<卡包>.yaml` 使用 format 1、kind qa_translation_shard，依 `(qa_id, field, source_hash, lang)` 排序且唯一。
+問與答各自整段翻譯，綁該版本日文原文；缺譯或原文改版不套用。完整欄位、過期統計與檢查命令見[官方 Q&A 的直接譯文](qa-translation.md)。

@@ -26,7 +26,10 @@ from sve_carddb.domains.catalog.models import Catalog
 from sve_carddb.domains.catalog.projection import CatalogProjection
 from sve_carddb.domains.products import Language, OfficialProducts, ProductIdentities
 from sve_carddb.domains.registry.records import PrintingData
+from sve_carddb.domains.translations.qa import load as load_qa_translations
+from sve_carddb.domains.translations.qa_checks import issues as qa_translation_issues
 from sve_carddb.export.media import prepare_media
+from sve_carddb.export.media_config import offline_configuration
 from sve_carddb.export.preview import Roots, write_preview
 from sve_carddb.export.project import project
 from sve_carddb.export.publication import require_preview
@@ -53,6 +56,8 @@ from ..support.text_observation_fixtures import LANGUAGES
 
 if TYPE_CHECKING:
     from pathlib import Path
+
+    from pydantic import JsonValue
 
     from sve_carddb.build import Database
     from sve_carddb.export.project import Decisions, Projection, Settings
@@ -925,3 +930,191 @@ def test_explicit_ruling_requires_a_translation_build(
     )
     with pytest.raises(ValueError, match="verified build sources"):
         build(recipe, bundle_dir=tmp_path / "bundle")
+
+
+def test_qa_translation_shards_reach_only_the_exact_japanese_owner(
+    prepared: tuple[Case, Inputs, tuple[CardPage, ...]], monkeypatch: pytest.MonkeyPatch
+) -> None:
+
+    _, recipe, pages = prepared
+
+    class Pages:
+        def __init__(self, *_args: object, region: str, **_kwargs: object) -> None:
+            self.region = region
+
+        def pages(self) -> tuple[CardPage, ...]:
+            return tuple(
+                page.model_copy(
+                    update={
+                        "qa": (
+                            *page.qa,
+                            page.qa[0].model_copy(
+                                update={
+                                    "official_number": "Q900001",
+                                    "stable_source_key": "Q900001",
+                                    "locator": "qa-block:1",
+                                    "question": "Synthetic alternative question?",
+                                }
+                            ),
+                        )
+                    }
+                )
+                if page.region == "jp"
+                else page
+                for page in pages
+                if page.region == self.region
+            )
+
+    monkeypatch.setattr(offline, "FrozenCardExtras", Pages)
+    plain = build(recipe)
+    owner = next(
+        row
+        for row in plain.projection.tables["qa"]
+        if row["region"] == "jp" and row["official_number"] == "Q900000"
+    )
+    entries: list[JsonValue] = [
+        {
+            "qa_id": owner["id"],
+            "field": field,
+            "source_hash": digest(
+                b"Synthetic regional question?"
+                if field == "question"
+                else b"Synthetic answer."
+            ),
+            "lang": "zh-Hant",
+            "text": target,
+            "origin": "machine",
+            "low_confidence": True,
+        }
+        for field, target in (("answer", "合成回答。"), ("question", "合成問題？"))
+    ]
+    other = next(
+        row
+        for row in plain.projection.tables["qa"]
+        if row["region"] == "jp" and row["official_number"] == "Q900001"
+    )
+    entries.append(
+        {
+            "qa_id": other["id"],
+            "field": "answer",
+            "source_hash": digest(b"Synthetic answer."),
+            "lang": "zh-Hant",
+            "text": "另一個回答。",
+            "origin": "machine",
+            "low_confidence": True,
+        }
+    )
+    entries.sort(
+        key=lambda e: (
+            string(object_value(e)["qa_id"]),
+            string(object_value(e)["field"]),
+        )
+    )
+    directory = recipe.repo / "authored/translations/qa"
+    directory.mkdir(parents=True)
+    (directory / "SYN.yaml").write_bytes(
+        canonical({"format": 1, "kind": "qa_translation_shard", "entries": entries})
+    )
+    assert len(load_qa_translations(recipe.repo / "authored")) == 3
+    built = build(recipe, bundle_dir=recipe.repo.parent / "qa-bundle")
+    assert built.report["qa_translations"] == {"entries": 3, "applied": 3, "stale": 0}
+    checked = CliRunner().invoke(
+        app,
+        [
+            "qa-translations",
+            "check",
+            "--authored",
+            str(recipe.repo / "authored"),
+            "--database",
+            str(recipe.repo.parent / "qa-bundle/build.sqlite"),
+        ],
+    )
+    assert checked.exit_code == 0, checked.output
+    projected = built.projection.tables["qa_version"]
+    translated = next(row for row in projected if row["qa_id"] == owner["id"])
+    bindings = [object_value(v) for v in array(translated["translations"])]
+    assert {r["field"] for r in bindings} == {"question", "answer"}
+    assert all(r["basis"] == "own_source" for r in bindings)
+    assert all(
+        not row["translations"]
+        for row in projected
+        if row["qa_id"] not in {owner["id"], other["id"]}
+    )
+    other_version = next(row for row in projected if row["qa_id"] == other["id"])
+    assert [
+        object_value(raw)["field"] for raw in array(other_version["translations"])
+    ] == ["answer"]
+    translations = built.projection.tables["translation"]
+    assert len(translations) == 3
+    assert all(
+        row["origin"] == "machine" and row["low_confidence"] is True
+        for row in translations
+    )
+    export_snapshot(
+        replace(
+            built.projection, config=offline_configuration(built.projection.config)
+        ),
+        built.ownership,
+        recipe.batch(),
+    )
+    assert (
+        qa_translation_issues(
+            "Q123『合成名』の場に1枚",
+            "Q123戰場上的1張『採用名』",
+            {"合成名": {"採用名"}},
+            {"場": {"戰場"}},
+        )
+        == ()
+    )
+    assert set(
+        qa_translation_issues(
+            "Q123『合成名』の場に1枚",
+            "Q124『錯名』2張",
+            {"合成名": {"採用名"}},
+            {"場": {"戰場"}},
+        )
+    ) == {"card_name", "numbers_or_q_number", "glossary"}
+    assert qa_translation_issues("いいえ。", "不會。", {}, {}) == ()
+    assert qa_translation_issues("いいえ。", "不需要。", {}, {}) == ()
+    assert (
+        qa_translation_issues(
+            "フォロワーを場に出す",
+            "召喚從者到戰場上",
+            {},
+            {"場に出す": {"召喚到戰場上"}, "場": {"戰場"}},
+        )
+        == ()
+    )
+
+
+def test_qa_changed_source_is_stale_and_does_not_inherit_a_translation(
+    prepared: tuple[Case, Inputs, tuple[CardPage, ...]],
+) -> None:
+
+    _, recipe, _ = prepared
+    plain = build(recipe)
+    owner = next(row for row in plain.projection.tables["qa"] if row["region"] == "jp")
+    entry = {
+        "qa_id": owner["id"],
+        "field": "question",
+        "source_hash": digest(b"Older question"),
+        "lang": "zh-Hant",
+        "text": "舊版問題？",
+        "origin": "machine",
+        "low_confidence": True,
+    }
+    directory = recipe.repo / "authored/translations/qa"
+    directory.mkdir(parents=True)
+    path = directory / "SYN.yaml"
+    path.write_bytes(
+        canonical({"format": 1, "kind": "qa_translation_shard", "entries": [entry]})
+    )
+    built = build(recipe)
+    assert built.report["qa_translations"] == {"entries": 1, "applied": 0, "stale": 1}
+    assert all(not row["translations"] for row in built.projection.tables["qa_version"])
+    assert not built.projection.tables["translation"]
+    path.write_bytes(
+        canonical({"format": True, "kind": "qa_translation_shard", "entries": [entry]})
+    )
+    with pytest.raises(ValueError, match="Invalid Q&A translation shard"):
+        load_qa_translations(recipe.repo / "authored")
