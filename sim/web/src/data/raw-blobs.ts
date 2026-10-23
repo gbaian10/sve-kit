@@ -4,7 +4,7 @@ import { SnapshotError } from "./format-v3/errors"
 import { integerValue, type JsonObject, stringValue } from "./format-v3/json"
 import { transferDigest } from "./integrity"
 
-interface RawBlobDescriptor {
+export interface RawBlobDescriptor {
   readonly key: string
   readonly path: string
   readonly sha256: string
@@ -101,6 +101,26 @@ export class RawBlobStore {
     return job.promise
   }
 
+  /** Probe verified storage without starting a download or retaining the bytes. */
+  async has(file: RawBlobDescriptor): Promise<boolean> {
+    const cache = await this.open()
+    if (!cache) return false
+    try {
+      const response = await cache.match(this.slot(file))
+      if (!response) return false
+      const bytes = new Uint8Array(await response.arrayBuffer())
+      return bytes.length === file.bytes && (await transferDigest(bytes)) === file.sha256
+    } catch {
+      this.failures += 1
+      this.persistent = false
+      return false
+    }
+  }
+
+  private slot(file: RawBlobDescriptor): string {
+    return `${this.base}/__sve-raw/${encodeURIComponent(file.sha256)}/bytes`
+  }
+
   private async open(): Promise<Cache | undefined> {
     try {
       // Reopen after browser/user clearing instead of writing into a detached cache handle.
@@ -120,7 +140,7 @@ export class RawBlobStore {
     signal?.throwIfAborted()
     const cache = await this.open()
     // The suffix keeps raw hashes distinct from the budget's derived-generation keys.
-    const slot = `${this.base}/__sve-raw/${encodeURIComponent(file.sha256)}/bytes`
+    const slot = this.slot(file)
     const valid = async (bytes: Uint8Array) =>
       bytes.length === file.bytes && (await transferDigest(bytes)) === file.sha256
     let cached: Uint8Array | undefined
