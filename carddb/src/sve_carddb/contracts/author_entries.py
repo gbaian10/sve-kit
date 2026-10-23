@@ -22,7 +22,6 @@ from sve_carddb.contracts.author_leaves import (
     ParamRef,
     ParamValues,
     Scope,
-    TrueFlag,
 )
 from sve_carddb.contracts.four_layer import Code, FrameId
 from sve_carddb.core.json import integer
@@ -144,14 +143,6 @@ type PlayAbility = PlayAbilityFields
 
 
 @with_config(CONFIG)
-class QuickAbilityFields(InlineFields):
-    quick: TrueFlag
-
-
-type QuickAbility = QuickAbilityFields
-
-
-@with_config(CONFIG)
 class KeywordsAbilityFields(InlineFields):
     keywords: Annotated[tuple[Concept | ParamRef, ...], Field(min_length=1)]
 
@@ -211,7 +202,6 @@ type InlineAbility = (
     | ActivateAbility
     | StaticAbility
     | PlayAbility
-    | QuickAbility
     | KeywordsAbility
     | EvolveAbility
     | RideAbility

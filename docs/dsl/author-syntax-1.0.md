@@ -63,8 +63,7 @@ DSL 用主版.次版：次版只容許舊資料不必修改且降低語義不變
 
 | 構造 | 內容與降低 |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `keywords: [Keyword…]` | `B.keyword`，保留規則展開來源；ward、storm、rush、assail、bane、drain、intimidate、aura、stack、single_drive、twin_drive、drive、start_amulet。參數型關鍵字依 CR 12–14 登錄 |
-| `quick: true` | 卡的 Quick 許可；不控制引擎是否開窗口 |
+| `keywords: [Keyword…]` | `B.keyword`，保留規則展開來源；quick、ward、storm、rush、assail、bane、drain、intimidate、aura、stack、single_drive、twin_drive、drive、start_amulet。`quick` 表示卡的 Quick 許可，不控制引擎是否開窗口；參數型關鍵字依 CR 12–14 登錄 |
 | `fanfare / lastword / evolve_time / super_evolve_time / attack_time / race_time / drive_time` | `B.trigger` 巨集；分別匹配入場／場到墓地／進化／超進化／攻擊／出走／首次獲 Drive，均以 this 為主體 |
 | `auto: {on, do, …}` | 一般事件能力；`on: {state: Cond}` 是 CR 10.7.6 狀態誘發，保留待機 latch |
 | `activate: {cost, do, …}` 或 `{fusion, do, …}` | 一般起動可有 usable_if／quick／advance；fusion 與 cost 互斥且不收 quick／advance；數量與欄位見[能力矩陣](author-ability-shapes-1.0.md) |

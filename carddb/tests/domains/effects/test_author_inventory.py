@@ -73,4 +73,4 @@ def test_prototype_requires_its_own_explicit_entry(schemas: AuthorSchemas) -> No
         with pytest.raises(AuthorInputError):
             read(raw)
     with pytest.raises(AuthorInputError):
-        schemas.prototype_tree(canonical(document(ability({"quick": True}))))
+        schemas.prototype_tree(canonical(document(ability({"keywords": ["quick"]}))))

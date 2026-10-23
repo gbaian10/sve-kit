@@ -28,7 +28,7 @@ def schemas() -> AuthorSchemas:
 def test_registered_heads_conflict_before_unknown_keys(
     schemas: AuthorSchemas, head: str, payload: JsonValue
 ) -> None:
-    other = "spell" if head == "quick" else "quick"
+    other = "spell" if head == "keywords" else "keywords"
     entry = ability({head: payload, other: HEADS[other], "unknown": "private_value"})
     with pytest.raises(AuthorInputError) as caught:
         schemas.author_effect_set(canonical(document(entry)))
@@ -44,8 +44,12 @@ def test_registered_heads_conflict_before_unknown_keys(
     [
         ({"fanfar": {"do": []}}, "additionalProperties", ("fanfar",)),
         ({}, "ability_head_missing", ()),
-        ({"quick": True, "unknown": None}, "additionalProperties", ("unknown",)),
-        ({"quick": True, "generated_by": {}}, "ability_head_conflict", ()),
+        (
+            {"keywords": ["quick"], "unknown": None},
+            "additionalProperties",
+            ("unknown",),
+        ),
+        ({"keywords": ["quick"], "generated_by": {}}, "ability_head_conflict", ()),
     ],
 )
 @pytest.mark.parametrize("face", [False, True])

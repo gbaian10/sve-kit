@@ -553,7 +553,7 @@ scope 指同 frame 宣告的 ability／branch／sequence 作用域。A 驗簽章
 | 類別 | 必要語義及結果 | 案例 |
 | --- | --- | --- |
 | ability_body | 可對接能力本體；targets/choose、cost/effect、may、分支／結果不可丟 | FL-002／FL-019／FL-022 |
-| ability_flag | 例如已辨識 Quick 對應 A.ability.quick；有明確所屬能力，不當空白本體 | FL-006 |
+| ability_flag | 例如已辨識 Quick 對應 A.ability.keywords（`keywords: [quick]`）；有明確所屬能力，不當空白本體 | FL-006 |
 | card_field | 例如構築限制對應 A.card.deck_rule；不是執行指令，也不是 none | FL-006 |
 | none | 已辨識且無獨立執行內容的 layout／純提示；imports/exports 必空 | FL-006／FL-008 |
 | pending | 未知／未解分類，保留原來源與原因清單，不能計為 no-op 或已完成本體 | FL-006 |

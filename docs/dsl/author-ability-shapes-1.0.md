@@ -14,8 +14,7 @@ T=既有非空、保序 Targets；O=OptionalCosts；X=XParameter；D=非空 Map<
 
 | 頭 | 必填 | 選填 | 真例／合成欄 |
 | --- | --- | --- | --- |
-| keywords | 非空 Concept/ParamRef 列表 | 無 | BP01-159 守護；ParamRef 合成，沿既有白名單 |
-| quick | true | 無 | BP01-007；false/1/null 拒絕 |
+| keywords | 非空 Concept/ParamRef 列表 | 無 | BP01-159 守護、BP01-007 Quick；ParamRef 與 `[quick, ward]` 並列合成，沿既有白名單 |
 | fanfare | do | T,cost,O,X,D,per_turn,ub | BP19-038 cost、BP01-004 D、BP01-011 本文；per_turn 合成 |
 | evolve_time | do | 同 fanfare | BP02-047；T/cost/UB 沿既有 §3、§13 真例；per_turn 合成 |
 | super_evolve_time | do | 同 fanfare | BP18-081；未有直接例的 O/X/D/per_turn/ub 標合成 |
@@ -51,7 +50,7 @@ play 的 optional_cost 沿既有 OptionalCosts 形狀（保留 C0/C1 已定邊�
 
 ## grant 的子集合與期限
 
-GrantedAbilityHead 共用普通頭 payload，接受 7 個觸發巨集頭、auto、activate、static、play；排除 quick、keywords、spell、evolve、ride、feed。grant.keywords 已承載關鍵字；其餘未證實能授予的規則入口不新增接受形狀。每項恰一個頭，沒有 line/sources/ports/generated_by。類別與接受者准入仍由 C1 驗。
+GrantedAbilityHead 共用普通頭 payload，接受 7 個觸發巨集頭、auto、activate、static、play；排除 keywords、spell、evolve、ride、feed。grant.keywords 已承載關鍵字；其餘未證實能授予的規則入口不新增接受形狀。每項恰一個頭，沒有 line/sources/ports/generated_by。類別與接受者准入仍由 C1 驗。
 
 - A.act.grant：on:EffectRecipient 必填（擴成可含領袖），keywords?/abilities? 至少一項且各非空，可並用；沿原 result/precondition/until/instead。keywords 元素 Concept|ParamRef；abilities 為 GrantedAbilityHead 列表。
 - EffectSpec.grant：on:EffectRecipient 選填，keywords?/abilities? 至少一項；keywords 只有 Concept，不繼承動作直接 param。static 明寫 on 是 C1 的要求；C0 仍接受省略 on 的效果形狀。apply/player_effect/entry_effects 按既有 optional R scope 表，不推測物件↔玩家轉換。
@@ -59,7 +58,7 @@ GrantedAbilityHead 共用普通頭 payload，接受 7 個觸發巨集頭、auto�
 - 一個 grant 的 until 適用全部內容。BP20-036 的 keywords 無期限、abilities until:turn，寫兩個有序 grant 步驟；這沿既有 I.grant 指示，不捏造兩者相同期限。此期限解讀不構成 reviewed/verified 規則證據，C1 仍須核對來源與適用範圍。
 - 純關鍵字優先現有 keywords 形，混合例 BP12-029/BP13-033/CP03-023/ECP01-043；多能力 ECP02-061；授予 play BP17-079、lastword BP07-038；grant 頭子集合的其他無實例格標合成。
 
-Quick：普通 quick:true 頭表示 Quick 宣告。授予子集合排除 quick 與 keywords 頭，關鍵字由 grant.keywords 承載；既有 grant.keywords 與 EffectSpec.keywords 繼續接受 quick 字串，不新增同義拼法禁令。BP12-058 的作者標準形是 static.while＋EffectSpec.keywords(list:[quick])；不做語義正規化，不推定不同形狀有相同 body hash。
+Quick：卡片本身持有時寫 `keywords: [quick]`，起動能力仍寫 `activate.quick: true`。授予子集合排除 keywords 頭，關鍵字由 grant.keywords 承載；既有 grant.keywords 與 EffectSpec.keywords 繼續接受 quick 字串，不新增同義拼法禁令。BP12-058 的作者標準形是 static.while＋EffectSpec.keywords(list:[quick])；不做語義正規化，不推定不同形狀有相同 body hash。
 
 巢狀 this 指接受者、self 指能力控制者，文字提供者來源保留。host 已登錄：CP04-PR21 是外層 static(zone:equipment)→grant(on:host)→static；內層 this 是裝備者。host 在裝備不存在／不在有效位置時不可假造物件，接附改變須重算。CP04-PR18 是 UB 起動、PR20 是 per_turn=2、PR25 是 batch、CP04-058 sections/0 是混合授予。
 

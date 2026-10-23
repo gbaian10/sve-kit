@@ -124,7 +124,7 @@ view 的 audience 與 observation epoch；待答保存只有在完整保留續�
 
 | 類別 | 首批內部承載 |
 | --- | --- |
-| 卡片自身的獨立 Quick | 獨立 `Static` 能力，`Keyword(Quick, Printed(face,line))`，holder=SourceHolder、controller=Controller、active_zones 恰為 Hand／Ex，無 play／trigger／body／event captures；唯一 declaration 是下述自身打出許可 |
+| 卡片自身的獨立 Quick（`keywords: [quick]`） | 獨立 `Static` 能力，`Keyword(Quick, Printed(face,line))`，holder=SourceHolder、controller=Controller、active_zones 恰為 Hand／Ex，無 play／trigger／body／event captures；唯一 declaration 是下述自身打出許可 |
 | 起動前的 Quick | 原 `Activated` 能力的 origin 為 `Keyword(Quick, Printed(face,line))`，active_zones=[Field]，其餘 PlaySpec／body 原樣；不另造 Static 許可、不改成 Spell、不標記其他起動能力 |
 
 卡片許可恰為 `Permission`：subject 與 `PlayCard.objects` 都只選 SourceHolder 當前世代，

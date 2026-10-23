@@ -6,41 +6,21 @@
 use super::*;
 use sve_engine::game::Step;
 use sve_engine::game::internal::{Answer, DecisionView, InputDomain};
+use sve_engine::ir::lowering::ExpandedLowerer;
 
 fn permit() -> Located<Ability> {
-    let mut a = ability(2, vec![]);
-    a.source = source("unit-spell");
-    a.source.fragment = None;
-    a.source.line = 2;
-    a.node.source.origin = AbilityOrigin::Keyword {
-        keyword: KeywordId::Quick,
-        origin: Box::new(AbilityOrigin::Printed {
-            face: FaceId("0".into()),
-            line: Nat(2),
-        }),
-    };
-    a.node.kind = AbilityKind::Static;
-    a.node.active_zones = vec![ZoneKind::Hand, ZoneKind::Ex];
-    a.node.play = None;
-    a.node.body = None;
-    let objects = Selector::Objects {
-        objects: vec![ObjectOperand::SourceHolder {}],
-    };
-    a.node.declarations = vec![Effect::Permission {
-        subject: PermissionSubject::Objects {
-            objects: objects.clone(),
-        },
-        action: ActionPattern::PlayCard { objects },
-        polarity: Polarity::Allow,
-        condition: Expr::Literal(Bool(true)),
-        duration: Duration {
-            end: DurationEnd::NoTemporalExpiry {},
-            anchor: TimeAnchor::Installation {},
-            usage: None,
-            intervals: vec![],
-        },
-        rule: RuleId(1232),
-    }];
+    let mut tree = fanfare::expanded::tree().clone();
+    let mut seed = tree["cards"]["BP01-041"].clone();
+    let mut header = seed["abilities"][0].clone();
+    header.as_object_mut().unwrap().remove("activate");
+    header["line"] = json!(2);
+    header["keywords"] = json!(["quick"]);
+    seed["abilities"] = json!([header]);
+    tree["cards"] = json!({"unit-spell": seed});
+    let lowered = ExpandedLowerer::new().unwrap().lower(&tree).unwrap();
+    let mut a = lowered["unit-spell"].card().abilities[0].clone();
+    a.node.id = AbilityId(2);
+    a.node.scope = ScopeId(2);
     a
 }
 

@@ -32,8 +32,7 @@ TRIGGERS = (
 )
 HEADS: dict[str, JsonValue] = {
     **{key: {"do": []} for key in TRIGGERS},
-    "keywords": ["ward"],
-    "quick": True,
+    "keywords": ["quick", "ward"],
     "auto": {"on": EVENT, "do": []},
     "activate": {"cost": {"pp": 1}, "do": []},
     "spell": {"do": []},
@@ -66,6 +65,13 @@ def test_frozen_card_fragments(head: dict[str, JsonValue]) -> None:
     check(head)
 
 
+def test_standalone_quick_head_is_rejected() -> None:
+    head: dict[str, JsonValue] = {"quick": True}
+    check(head, valid=False)
+    schema = {**NODES, "$ref": "#/$defs/A.ability-head"}
+    assert not Draft202012Validator(schema).is_valid(head)
+
+
 @pytest.mark.parametrize(("key", "payload"), HEADS.items())
 def test_every_head_and_grant_subset(key: str, payload: JsonValue) -> None:
     head = {key: payload}
@@ -75,7 +81,6 @@ def test_every_head_and_grant_subset(key: str, payload: JsonValue) -> None:
         name="A.granted-ability-head",
         valid=key
         not in {
-            "quick",
             "keywords",
             "spell",
             "evolve",

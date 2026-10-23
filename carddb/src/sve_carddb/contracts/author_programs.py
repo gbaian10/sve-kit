@@ -3277,8 +3277,6 @@ class AbilityHeadFields(TypedDict):
 
     play: NotRequired[PlayHead]
 
-    quick: NotRequired[TrueFlag]
-
     keywords: NotRequired[
         Annotated[tuple[Concept | ParamRef, ...], Field(min_length=1)]
     ]
