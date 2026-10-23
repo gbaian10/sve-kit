@@ -68,6 +68,8 @@ async function expectCount(total: number) {
 }
 
 describe("CardsPage", () => {
+  // The first test pays the page's cold start (about 2.7 s alone), which can exceed the 5 s default
+  // when the whole suite runs on four workers.
   it("commits a multi-match query with Enter without picking a suggestion", async () => {
     const { router } = await open("/cards?sort=cost")
     const user = userEvent.setup()
@@ -78,7 +80,7 @@ describe("CardsPage", () => {
     expect(router.state.location.pathname).toBe("/cards")
     expect(router.state.location.search).toBe("?q=bp01&sort=cost")
     expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
-  })
+  }, 15_000)
 
   it("opens the explicitly selected suggestion when several cards match", async () => {
     const { router } = await open()
