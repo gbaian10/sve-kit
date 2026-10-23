@@ -31,6 +31,7 @@
 | legacy，僅供轉換 | 模板採納政策／核可收據 | `translation-policies/index.yaml`、`translation-policies/<policy_id>.policy.yaml`／`.approval.yaml`／`.review-queue.yaml`；無文字摘要進索引，首輪實際抽查、不可變索引與五欄 pin 依 [模板採納政策契約](translation-policy.md)，未支援完整 loader 前不得套用 |
 | 定案（新格式） | 模板參數辨識規則 | `translations/parameter-rules/current.yaml`，format 2；規則與必要反例隨程式 PR 修改，不需 approval |
 | 技術契約 | 卡面標籤外觀 | `catalog/rarity-badges.yaml` 單檔，見下方「卡面標籤外觀」 |
+| 技術契約 | 再錄版次 | `catalog/reprints.yaml` 單檔，見下方「再錄版次」 |
 | 定案（技術契約） | 來源綁定的插畫裁切覆寫 | `images/crops.yaml` 單檔，`format: 1, kind: image_crop_overrides, records`、全檔查重，依[覆寫契約](../images/image-crop-overrides.md) |
 | 結構、檔案／索引閉包、展開與有限 current 來源驗證已實作；資格未實作 | 作者 1.0 與本體伴隨檔 | `rules/author-effects/<owner>/<sequence>.yaml`、`rules/effect-bodies/<owner>/<sequence>.yaml`、`rules/effects-index.yaml`；來源能力限五類 entry／空 ports，見[入口形狀](../../dsl/author-entry-shapes-1.0.md)與[作者承載契約](../../dsl/author-contract-1.0.md) |
 | 原型／提案設定 | DSL、設定 | `rules/effects/`、`rules/keywords.yaml`、`rules/engine/index.yaml`；其他 macros／config 仍為提案，見後續各節；跨區語義差異採納改走 translations/region-reviews |
@@ -76,6 +77,23 @@ Anchor／alias／merge 與顯式 tag **讀取允許，寫入不產生**；普通
 另填 `region`、`card_no` 供人讀與核對，`leader_name_frame` 僅接受 `gold`／`white`。
 loader 拒絕重複、未知 printing、地區／卡號不符及非主戰者版次；未登錄者與非主戰者保持 null。
 資料是經確認的版次外觀，不從稀有度或卡號推算，也不重新分類卡片類型。
+
+### 再錄版次
+
+`catalog/reprints.yaml` 是單一可修改檔，封套為 `format: 1`、`kind: printing_reprints`、`records`。
+每筆以 `printing_id` 唯一定位，另填 `region`、`card_no` 供人讀與核對，以及 `basis`（目前只有 `series_numbering`：
+官方在補充包內另編 R 系列號、與先前版次共用同一張卡）。loader 拒絕重複、未知 printing、未知 basis 與地區／卡號不符。
+未登錄的版次一律不是再錄；新卡包加入時照此補登，不由卡號前綴推斷。官方卡頁沒有再錄標記，這份登錄是維護者確認的人寫資料。
+
+```yaml
+format: 1
+kind: printing_reprints
+records:
+  - printing_id: p:synthetic
+    region: jp
+    card_no: SYN-R01
+    basis: series_numbering
+```
 
 ### 卡面標籤外觀
 

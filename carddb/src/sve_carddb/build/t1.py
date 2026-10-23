@@ -20,7 +20,7 @@ from sve_carddb.build.model import Capability
 from sve_carddb.build.registry import Registry
 from sve_carddb.build.t0_json import schemas
 
-SCHEMA_VERSION = 15
+SCHEMA_VERSION = 16
 MINIMUM_CAPABILITIES = ("t0", "cr", "errata", "correction", "qa", "related")
 TABLES = (
     *t1_cr.TABLES,

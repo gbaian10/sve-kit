@@ -84,6 +84,9 @@ def prepared(
     (repo / "authored/catalog/leader-name-frames.yaml").write_text(
         "format: 1\nkind: printing_leader_name_frames\nrecords: []\n"
     )
+    (repo / "authored/catalog/reprints.yaml").write_text(
+        "format: 1\nkind: printing_reprints\nrecords: []\n"
+    )
     (repo / "authored/catalog/rarity-badges.yaml").write_text(
         "format: 1\nkind: printing_rarity_badges\nrecords: []\n"
     )

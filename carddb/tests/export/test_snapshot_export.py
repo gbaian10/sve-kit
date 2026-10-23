@@ -618,3 +618,19 @@ def test_leader_frame_survives_projection_export_and_reader(frame: str | None) -
             prepared, Ownership.from_database(db, projection), BATCH
         )
         exported.verify(prepared)
+
+
+@pytest.mark.parametrize("reprint", [True, None])
+def test_reprint_survives_projection_export_and_reader(reprint: bool | None) -> None:
+    with create_database(schema()) as db:
+        with db.transaction():
+            populate(db)
+            db.update("printing", {"id": "printing"}, {"reprint": reprint})
+        projection = projected(db)
+        assert projection.tables["printing"][0]["reprint"] is reprint
+        projection = replace(projection, tables=projection.tables | media_rows())
+        prepared = prepare_media(projection, None, revision=1).projection
+        exported = export_snapshot(
+            prepared, Ownership.from_database(db, projection), BATCH
+        )
+        exported.verify(prepared)

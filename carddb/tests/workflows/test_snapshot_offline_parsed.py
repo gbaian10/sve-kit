@@ -56,6 +56,11 @@ def test_default_parsed_build_without_sve_archive(tmp_path: Path) -> None:  # ru
             "kind": "printing_leader_name_frames",
             "records": [],
         },
+        "catalog/reprints.yaml": {
+            "format": 1,
+            "kind": "printing_reprints",
+            "records": [],
+        },
         "catalog/rarity-badges.yaml": {
             "format": 1,
             "kind": "printing_rarity_badges",

@@ -3397,11 +3397,21 @@
             "white",
             null
           ]
+        },
+        {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Bool"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       ],
       "items": false,
-      "minItems": 22,
-      "maxItems": 22,
+      "minItems": 23,
+      "maxItems": 23,
       "x-columns": [
         "id",
         "card_id",
@@ -3424,7 +3434,8 @@
         "decklog_source_url",
         "decklog_checked_on",
         "faces",
-        "leader_name_frame"
+        "leader_name_frame",
+        "reprint"
       ],
       "x-types": [
         {
@@ -3533,6 +3544,11 @@
               "white"
             ]
           }
+        },
+        {
+          "nullable": {
+            "scalar": "Bool"
+          }
         }
       ],
       "x-primary-key": [
@@ -3562,6 +3578,7 @@
               {
                 "const": "verified"
               },
+              {},
               {},
               {},
               {},
@@ -3595,6 +3612,7 @@
                 "$ref": "#/$defs/Date"
               },
               {},
+              {},
               {}
             ]
           },
@@ -3623,6 +3641,7 @@
                 "type": "null"
               },
               {},
+              {},
               {}
             ]
           }
@@ -3638,6 +3657,7 @@
               {
                 "const": "official"
               },
+              {},
               {},
               {},
               {},
@@ -3681,6 +3701,7 @@
               {},
               {},
               {},
+              {},
               {}
             ]
           },
@@ -3697,6 +3718,7 @@
               {
                 "minItems": 1
               },
+              {},
               {},
               {},
               {},
@@ -8571,11 +8593,21 @@
             "white",
             null
           ]
+        },
+        {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Bool"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       ],
       "items": false,
-      "minItems": 22,
-      "maxItems": 22,
+      "minItems": 23,
+      "maxItems": 23,
       "x-columns": [
         "id",
         "card_id",
@@ -8598,7 +8630,8 @@
         "decklog_source_url",
         "decklog_checked_on",
         "faces",
-        "leader_name_frame"
+        "leader_name_frame",
+        "reprint"
       ],
       "x-types": [
         {
@@ -8707,6 +8740,11 @@
               "white"
             ]
           }
+        },
+        {
+          "nullable": {
+            "scalar": "Bool"
+          }
         }
       ],
       "allOf": [
@@ -8733,6 +8771,7 @@
               {
                 "const": "verified"
               },
+              {},
               {},
               {},
               {},
@@ -8766,6 +8805,7 @@
                 "$ref": "#/$defs/Date"
               },
               {},
+              {},
               {}
             ]
           },
@@ -8794,6 +8834,7 @@
                 "type": "null"
               },
               {},
+              {},
               {}
             ]
           }
@@ -8809,6 +8850,7 @@
               {
                 "const": "official"
               },
+              {},
               {},
               {},
               {},
@@ -8852,6 +8894,7 @@
               {},
               {},
               {},
+              {},
               {}
             ]
           },
@@ -8868,6 +8911,7 @@
               {
                 "minItems": 1
               },
+              {},
               {},
               {},
               {},
@@ -17774,7 +17818,8 @@
                         "decklog_source_url",
                         "decklog_checked_on",
                         "faces",
-                        "leader_name_frame"
+                        "leader_name_frame",
+                        "reprint"
                       ]
                     },
                     "maxItems": 0
@@ -20001,7 +20046,8 @@
                         "decklog_source_url",
                         "decklog_checked_on",
                         "faces",
-                        "leader_name_frame"
+                        "leader_name_frame",
+                        "reprint"
                       ]
                     },
                     "minItems": 1,
@@ -22271,7 +22317,8 @@
                         "decklog_source_url",
                         "decklog_checked_on",
                         "faces",
-                        "leader_name_frame"
+                        "leader_name_frame",
+                        "reprint"
                       ]
                     },
                     "maxItems": 0
