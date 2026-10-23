@@ -9,6 +9,8 @@ import {
   languageSnapshot,
 } from "../test-utils/language-matrix"
 import { createAnnotatedTextResolver } from "./annotated-text"
+import { catalogOf } from "./catalog"
+import { stringValue } from "./format-v3/json"
 
 describe("the eighteen language choices through the native reader", () => {
   it.each(languageCases)("$id", async (row) => {
@@ -19,6 +21,18 @@ describe("the eighteen language choices through the native reader", () => {
       row.receiver,
       row.text_language,
     )
+    const snapshot = client.snapshot()
+    if (!snapshot) throw new Error("synthetic snapshot missing")
+    const index = catalogOf(snapshot).index
+    const revision = index.revision(row.receiver.owner.id)
+    const cardId = index.face(stringValue(revision?.["face_id"]))?.["card_id"]
+    expect(typeof cardId).toBe("string")
+    expect(
+      await createAnnotatedTextResolver(client, stringValue(cardId)).resolve(
+        row.receiver,
+        row.text_language,
+      ),
+    ).toEqual(result)
     expect(result).not.toBeNull()
     expect(result?.original.unit["text"]).toBe(row.expected.original)
     expect(result?.translated?.unit["text"] ?? null).toBe(row.expected.translated)

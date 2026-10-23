@@ -39,8 +39,8 @@ export async function prepareCardContent(
   if (preloadSignal) await yieldCardPreload(preloadSignal)
   const catalog = catalogOf(snapshot)
   if (preloadSignal) await yieldCardPreload(preloadSignal)
-  // Candidate metadata extends the catalog; the resolver loads its own full text closure.
-  const resolver = sharedAnnotatedTextResolver(pinned)
+  // Candidate metadata extends the catalog; the resolver loads this card's text closure itself.
+  const resolver = sharedAnnotatedTextResolver(pinned, printing.cardId)
   if (preloadSignal) await yieldCardPreload(preloadSignal)
   const pointers = new Map<string, JsonObject>()
   const add = (owner: JsonObject, field: string) => {
