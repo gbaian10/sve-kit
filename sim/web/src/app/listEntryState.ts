@@ -59,11 +59,8 @@ export function routeState(summary: CardSummary): Pick<CardEntryState, "route"> 
     : {}
 }
 
-/**
- * Pages loaded while a card was pushed over a list entry, by that entry's history key. Only the
- * current entry can be written through the router, so the list takes them up when it is current
- * again. Kept in memory: after a reload the list entry keeps the pages it had (architecture §2.2).
- */
+// The router can only write the current entry, so the list takes these pages up on return.
+// Reloading drops this note; the list keeps the pages already in its history entry.
 const pagesByListEntry = new Map<string, number>()
 
 export function keepPagesBeside(listKey: string, pages: number): void {
@@ -74,7 +71,6 @@ export function pagesBeside(listKey: string): number | undefined {
   return pagesByListEntry.get(listKey)
 }
 
-/** The list entry has taken the pages up into its own state. */
 export function forgetPagesBeside(listKey: string): void {
   pagesByListEntry.delete(listKey)
 }
