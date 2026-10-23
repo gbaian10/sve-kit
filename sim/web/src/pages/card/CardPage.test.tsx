@@ -63,6 +63,7 @@ const state = vi.hoisted(() => ({
   comparisonReady: false,
   doubleFace: false,
   order: null as { key: string; printingId: string }[] | null,
+  suggestions: [] as { cardId: string; printingId: string; cardNo: string }[],
   multiplePrintings: false,
   printingRows: null as
     | {
@@ -234,8 +235,16 @@ vi.mock("../../app/snapshot", () => {
       updating: false,
       retry: () => undefined,
     }),
-    useNeighbours: (_query: unknown, _target: string, maxItems?: number) => {
-      const order =
+    useWorkerSuggestions: (text: string, edition: string) => ({
+      lastInput: { state: { text }, edition },
+      result: {
+        phase: "complete",
+        suggestions: text === "" ? [] : state.suggestions.map((summary) => ({ summary })),
+      },
+      images: undefined,
+    }),
+    useNeighbours: (_query: unknown, target: string | null, maxItems?: number) => {
+      const all =
         state.order ??
         (state.doubleFace
           ? [
@@ -243,11 +252,16 @@ vi.mock("../../app/snapshot", () => {
               { key: "c:other", printingId: "p:synthetic" },
             ]
           : [])
+      // Like the index: the loaded order when the target names one of its cells, else nothing.
+      const loaded = all.slice(0, maxItems)
+      const order = loaded.some((item) => item.key === target || item.printingId === target)
+        ? loaded
+        : []
       return {
         result: {
           phase: "complete",
           page: {
-            items: order.slice(0, maxItems).map((item) => ({
+            items: order.map((item) => ({
               ...item,
               summary: { cardNo: "BP-SYNTHETIC", printingId: item.printingId },
             })),
@@ -411,6 +425,7 @@ beforeEach(() => {
   state.comparisonReady = false
   state.doubleFace = false
   state.order = null
+  state.suggestions = []
   state.undated = [{ id: "p:undated", cardNo: "PR-SYNTHETIC" }]
   state.classification = "same_effect"
   state.untranslated = []
@@ -909,6 +924,40 @@ describe("double-face headers", () => {
     )
     await waitFor(() => expect(screen.getByRole("button", { name: "下一張" })).toBeDisabled())
     expect(screen.getByRole("button", { name: "上一張" })).toBeEnabled()
+  })
+  it.each([
+    {
+      name: "walks the suggestion order, not the result order, from a suggestion",
+      entry: { background: "?q=syn", source: "suggest", resultKey: "p:synthetic" },
+      // The results put this card first; the suggestions put it last.
+      previous: true,
+      next: false,
+    },
+    {
+      name: "finds the card's own cell when the list key names another printing",
+      entry: { background: "?unit=card", source: "results", resultKey: "p:synthetic" },
+      previous: true,
+      next: true,
+    },
+  ])("$name", async ({ entry, previous, next }) => {
+    state.summary = true
+    state.order = [
+      { key: "c:synthetic", printingId: "p:representative" },
+      { key: "c:second", printingId: "p:second" },
+    ]
+    state.suggestions = [
+      { cardId: "c:first", printingId: "p:first", cardNo: "BP-FIRST" },
+      { cardId: "c:synthetic", printingId: "p:synthetic", cardNo: "BP-SYNTHETIC" },
+    ]
+    if (entry.source === "results")
+      state.order = [{ key: "c:first", printingId: "p:first" }, ...state.order]
+    prefsStore.set({ uiLanguage: "zh-TW" })
+    await renderRoutes([{ path: "/cards/:cardNo/:slug?", ...card }], {
+      initialEntries: [{ pathname: "/cards/BP-SYNTHETIC", state: { ...entry, pages: 1 } }],
+    })
+    const button = (name: string) => screen.findByRole("button", { name })
+    expect(await button("上一張")).toHaveProperty("disabled", !previous)
+    expect(await button("下一張")).toHaveProperty("disabled", !next)
   })
   it("closes the enlarged image on browser back before leaving the card", async () => {
     state.doubleFace = true

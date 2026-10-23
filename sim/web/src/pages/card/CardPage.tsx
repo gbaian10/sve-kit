@@ -5,12 +5,11 @@ import { Link as RouterLink, type To, useLocation, useNavigate, useParams } from
 
 import type { PrefetchTarget } from "../../app/card-prefetch"
 import { useDialogHistory } from "../../app/dialog-history"
-import { type CardEntryState, LIST_PAGE_SIZE, routeState } from "../../app/listEntryState"
+import { type CardEntryState, routeState } from "../../app/listEntryState"
 import { useOtherEdition } from "../../app/other-edition"
 import {
   type SearchReadiness,
   useImageIndex,
-  useNeighbours,
   useRouteEdition,
   useSearchReadiness,
 } from "../../app/snapshot"
@@ -48,11 +47,11 @@ import { CardRouteError, printingPath } from "../../domain/cardRoute"
 import { classStyle } from "../../domain/classes"
 import { deckLocationBadges } from "../../domain/deckLocation"
 import { displayName, UI_TEXT_LANG } from "../../domain/nameDisplay"
-import { parseQuery } from "../../domain/query/codec"
 import type { Region } from "../../domain/search"
 import { currentUiLanguage } from "../../i18n"
 import { showsOtherEdition, usePrefs } from "../../settings"
 import { PageTitle } from "../PageTitle"
+import { frontArtOf, useCardSequence } from "./card-sequence"
 import { CardTextPanel } from "./CardTextPanel"
 import { CardWording } from "./CardWording"
 import { printingGroups } from "./printing-order"
@@ -173,6 +172,7 @@ export function CardView({
   const textLang = UI_TEXT_LANG[uiLanguage]
   const printing = resolved ? catalog?.index.printing(resolved.id) : undefined
   const printingId = printing ? stringValue(printing["id"]) : null
+  const artId = frontArtOf(printing)
   const region = (printing?.["region"] as Region | undefined) ?? cardEdition
   const faces = printing ? (catalog?.index.facesOf(printing["card_id"] as string) ?? []) : []
   const summary: CardSummary | undefined = printingId ? catalog?.summary(printingId) : undefined
@@ -237,33 +237,11 @@ export function CardView({
     (typeof location.state === "object" && location.state !== null
       ? (location.state as Record<string, unknown>)
       : null)
-  const background = typeof entry?.["background"] === "string" ? entry["background"] : null
-  const fromList = background !== null
-  const pages = typeof entry?.["pages"] === "number" ? Math.max(1, entry["pages"]) : 1
-  const neighbourQuery = useMemo(
-    () => ({ state: parseQuery(new URLSearchParams(background ?? "")), edition: cardEdition }),
-    [background, cardEdition],
-  )
-  const hint = entry?.["route"] as { printingId?: string } | undefined
-  const neighbourTarget =
-    typeof entry?.["resultKey"] === "string"
-      ? entry["resultKey"]
-      : (hint?.printingId ?? (pending ? null : printingId))
-  const neighbours = useNeighbours(
-    fromList ? neighbourQuery : null,
-    fromList ? neighbourTarget : null,
-    fromList ? pages * LIST_PAGE_SIZE : undefined,
-  )
-  const order = neighbours.result.phase === "complete" ? neighbours.result.page.items : []
-  const position = order.findIndex(
-    (item) => item.key === neighbourTarget || item.printingId === neighbourTarget,
-  )
-  const neighbour = (step: -1 | 1) => {
-    const item = position < 0 ? undefined : order[position + step]
-    return item?.summary ? { key: item.key, summary: item.summary } : undefined
-  }
-  const previous = fromList ? neighbour(-1) : undefined
-  const next = fromList ? neighbour(1) : undefined
+  const fromList = typeof entry?.["background"] === "string"
+  // While switching, the shown printing is still the old one: it must not place the new card.
+  const sequence = useCardSequence(entry, cardEdition, pending ? null : printingId, cardId, artId)
+  const previous = sequence.phase === "found" ? sequence.previous : undefined
+  const next = sequence.phase === "found" ? sequence.next : undefined
   const [readyImage, setReadyImage] = useState<string | null>(null)
   const imageKey = JSON.stringify([client.base, client.snapshot()?.manifestHash, printingId])
   const prefetchAbort = useRef<AbortController | null>(null)
@@ -569,7 +547,7 @@ export function CardView({
   })
   const zoomedView = views.find((view) => view.faceId === zoomed)
   const Heading = frame ? "h2" : "h1"
-  const navigation = fromList && (neighbours.result.phase !== "complete" || position >= 0) && (
+  const navigation = (sequence.phase === "pending" || sequence.phase === "found") && (
     <>
       <Button
         data-card-navigation

@@ -28,6 +28,11 @@ vi.mock("../../app/snapshot", async (original) => ({
   useCardSnapshot: () => ({ client: state.client, status: { state: "ready" } }),
   useRouteEdition: () => "jp",
   useSearchReadiness: () => ({ phase: "ready", retry: () => undefined }),
+  useWorkerSuggestions: () => ({
+    lastInput: null,
+    result: { phase: "pending" },
+    images: undefined,
+  }),
   useNeighbours: () => ({
     result: {
       phase: "complete",
