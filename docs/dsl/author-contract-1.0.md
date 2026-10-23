@@ -14,7 +14,7 @@
 | `1 / effect_body_shard` | `1.0` | `urn:sve-kit:effect-bodies:1.0` | `dsl/effect-bodies.schema.json` |
 | `1 / effects_index` | 定位資訊，不選語義 | `urn:sve-kit:effects-index:1` | `dsl/effects-index.schema.json` |
 
-目前三個入口都有封閉 Schema 與 Python 結構 reader；共用 `author-nodes.schema.json` 提供完整能力圖、`A.file`、`A.card` 與 `$defs/authored`。結構 reader 不授予來源或資格證明。明示 API 已提供檔案／索引雙向閉包、generated_by／具型別葉展開、原 JSON body hash 及 `expanded` profile；current 入口核對 JP current、registry Frame／Binding 與 effect-source-v1，能力映射限五類 entry 的完整 payload 與空 ports。輸出為 JSON 樹及分離 sidecar；current_source_checked 仍不代表用途依賴、review／exam 資格或可執行。完整用途閉包、rekey、資格與 Rust 消費端驗證仍待完成。能力持有面由 SourceUse.owner 的 face 決定，卡級／面級容器只表示位置，多面卡的卡級能力不表示全卡常駐。完整容器形狀與檢查邊界見[入口形狀矩陣](author-entry-shapes-1.0.md)，可用 API 見 [dsl/README](../../dsl/README.md)。
+目前三個入口都有封閉 Schema 與 Python 結構 reader；共用 `author-nodes.schema.json` 提供完整能力圖、`A.file`、`A.card` 與 `$defs/authored`。結構 reader 不授予來源或資格證明。明示 API 已提供檔案／索引雙向閉包、generated_by／具型別葉展開、原 JSON body hash 及 `expanded` profile；current 入口核對 JP current、registry Frame／Binding 與 effect-source-v1，能力映射限五類 entry 的完整 payload 與空 ports。輸出為 JSON 樹及分離 sidecar；current_source_checked 仍不代表用途依賴、review／exam 資格或可執行。完整用途依賴、rekey、資格與正式執行准入仍待完成。能力持有面由 SourceUse.owner 的 face 決定，卡級／面級容器只表示位置，多面卡的卡級能力不表示全卡常駐。完整容器形狀與檢查邊界見[入口形狀矩陣](author-entry-shapes-1.0.md)，可用 API 見 [dsl/README](../../dsl/README.md)。
 
 兩個作者資源共用 `urn:sve-kit:author-nodes:1.0`（`dsl/author-nodes.schema.json`）的 A.* 定義。Schema 採 JSON Schema 2020-12。所有固定物件封閉；動態 map 只接受各自卡號／識別字規則，不以任意額外欄位吸收未知構造。Python 型別與 `$defs` 必須逐一對應並驗漂移；Rust 依同一資源的展開 profile 解碼並做漂移測試，不能另立語法。
 
@@ -198,6 +198,15 @@ meta.reviewed_by 的 use review 可保存同一用途的多個不同獨立審核
 C0 讀嚴格 YAML、驗作者型別、展開共用本體與葉參數，交出通過共用作者 Schema 的 `expanded` profile 的 JSON 樹；D0 讀這棵完全展開的作者樹並降低 typed IR。sources／meta 為作者資源本有欄位；共用資源提供兩個封閉入口 `$defs/authored` 與 `$defs/expanded`：後者遞迴排除 A.param／generated_by，展開產物一律用後者驗，Rust 型別亦對它測漂移。C0 額外的逐節點位置與依賴 sidecar 是內部介面，和樹分開，不是新公開 wire 格式。C0 的等值驗收比較去除 line／section／sources 與審核 metadata 後的 canonical 能力樹（ports 保留）；inline 與 companion 的同義能力必須逐 byte 相同，IR 等值與執行則是 D0 的責任。
 
 目前 `CardAccepted.lowering_input()` 另交接逐能力的 `current_source_checked`、已檢查的完整 SourceUse、作者輸入與來源文字 hash。D0 對帳 sidecar 與 expanded 能力路徑的精確集合、SourceUse 與行／section；缺漏、重複、非 current proof 或來源不符均整卡拒絕。`CurrentCardProgram` 分別保留 expanded 樹、來源 sidecar 與 IR；`source_at(author_path)` 沿能力祖先路徑回查永久 CardId／FaceId／revision、原 field／section／line／fragment 及 occurrence segments，IR instruction 沿既有 SourceSpan.author_path 使用同一對應。來源證明不等於用途資格或執行准入；原型 base／ordinal 入口不變。
+
+current 入口另從全部 current 面與 sections 的 registry 來源建立獨立 `source_inventory`，
+不從作者樹或 sidecar 回推必需能力。每個 `(binding_id, ability_scope)` 保存完整 SourceUse
+與去掉 line／section／sources 的能力本文（含 ports、費用、全部分支）。D0 逐一消耗這個集合；
+即使 expanded 與 sidecar 同時漏掉 sibling 或 section 能力，仍整卡拒絕；多出、重複或改變
+未選模式本文也拒絕。清單沿用既有來源 hash，不新增 hash 配方或公開格式。
+非 body 的來源宣告另存在 `non_body_sources`；卡面屬性與普通費用仍在 source_payload，
+不當成缺能力，也不因沒有本文而聲稱已執行。token 來源與非空 token 選用目前仍整卡拒絕，
+不把 token 能力複製到母卡。來源 adapter 未支援的能力圖也維持拒絕，清單對帳不擴張來源支援範圍。
 
 | 接縫 | 必須保留／拒絕的責任 |
 | --- | --- |

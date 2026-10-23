@@ -160,7 +160,7 @@ CARD_PARENTS: list[tuple[str, str, dict[str, JsonValue]]] = [
         "BP14-063",
         "A.cost.counter.selected.exact",
         {
-            "on": {"who": "each", "zone": "field", "name": "竜山温泉"},
+            "on": {"who": "self", "zone": "field", "name": "竜山温泉"},
             "name": "神湯",
             "holders": 1,
             "n": 2,

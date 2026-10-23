@@ -197,6 +197,16 @@ or names. Token sources currently fail current admission; Rust also rejects none
 token links until their source contract is supported. The handoff grants no use
 qualification and does not enable the prototype runtime loader for permanent owners.
 
+Its internal `source_inventory` is derived independently from all current face and
+section sources, not from the supplied tree or sidecar. D0 requires an exact match
+of every `(binding_id, ability_scope)`, complete SourceUse and complete ability body
+(including costs, ports and all mode branches). Removing both an ability and its
+sidecar cannot hide a missing obligation; extra or duplicate abilities also reject
+the whole card. Non-body declarations are retained separately in
+`CurrentCardProgram.non_body_sources`; face facts and ordinary costs remain in
+`source_payload`. Neither category counts as executed abilities. This reuses the
+existing source hashes and does not extend the supported source adapters.
+
 The supported current ability mappings are evolve, feed, ride, evolve/feed and
 evolve/ride entry variants, with exact root scopes and literal PP costs. Full payload
 comparison rejects extra costs or conditions; identical numbers do not authorize

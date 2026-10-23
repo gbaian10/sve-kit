@@ -38,6 +38,7 @@ BASES: dict[str, dict[str, JsonValue]] = {
     "A.act.choose": {"bind": "picked", "from": {"in": "looked"}},
     "A.act.search": {"sel": {"who": "self", "zone": "deck"}, "to": "hand"},
     "A.cost.counter.self": {"on": "this", "name": "童話"},
+    # Synthetic cross-player holder domain, not BP14-063 payment permission.
     "A.cost.counter.selected": {
         "on": {"who": "each", "zone": "field", "name": "竜山温泉"},
         "name": "神湯",

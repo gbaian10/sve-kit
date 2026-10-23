@@ -23,6 +23,8 @@ pub struct CurrentCardProgram {
     pub expanded: Value,
     /// One current-checked source per ability, keyed by its author JSON pointer.
     pub source_sidecar: BTreeMap<String, CurrentSourceEvidence>,
+    /// Source declarations outside ability bodies; retained without claiming execution.
+    pub non_body_sources: Vec<Value>,
     /// Well-formed IR; this alone grants neither whole-card admission nor execution.
     pub program: WellFormedCardProgram,
 }
@@ -61,7 +63,22 @@ struct CurrentInput {
     card_no: String,
     source_version: String,
     source_payload: Value,
+    source_inventory: SourceInventory,
     sidecar: Vec<SourceEvidenceInput>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct SourceInventory {
+    abilities: Vec<RequiredAbility>,
+    non_body: Vec<Value>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct RequiredAbility {
+    source_use: Value,
+    body: Value,
 }
 
 #[derive(Deserialize)]
@@ -115,6 +132,16 @@ fn checked_sources(
     if supplied.len() != entries.len() {
         return Err(invalid_source(&card_path));
     }
+    let mut required = BTreeMap::new();
+    for ability in &input.source_inventory.abilities {
+        let key = source_key(&ability.source_use, &card_path)?;
+        if required.insert(key, ability).is_some() {
+            return Err(closure_error(&card_path));
+        }
+    }
+    if required.len() != entries.len() {
+        return Err(closure_error(&card_path));
+    }
     let coordinates = CardCoordinates {
         key: &input.card_no,
         identity: Some(identity),
@@ -144,6 +171,21 @@ fn checked_sources(
         {
             return Err(invalid_source(&path));
         }
+        let obligation = required
+            .remove(&source_key(source_use, &path)?)
+            .ok_or_else(|| closure_error(&path))?;
+        let mut body = input
+            .tree
+            .pointer(&path)
+            .and_then(Value::as_object)
+            .cloned()
+            .ok_or_else(|| invalid_source(&path))?;
+        for key in ["line", "section", "sources"] {
+            body.remove(key);
+        }
+        if obligation.source_use != *source_use || obligation.body != Value::Object(body) {
+            return Err(closure_error(&path));
+        }
         result.insert(
             path.clone(),
             CurrentSourceEvidence {
@@ -155,6 +197,19 @@ fn checked_sources(
         );
     }
     Ok(result)
+}
+
+fn source_key(source: &Value, path: &str) -> Result<(String, String), LoweringError> {
+    let binding = source.get("binding_id").and_then(Value::as_str);
+    let scope = source.get("ability_scope").and_then(Value::as_str);
+    binding
+        .zip(scope)
+        .map(|(binding, scope)| (binding.to_owned(), scope.to_owned()))
+        .ok_or_else(|| closure_error(path))
+}
+
+fn closure_error(path: &str) -> LoweringError {
+    error("current_ability_closure_mismatch", path)
 }
 
 pub(super) struct CurrentIdentity {
@@ -300,6 +355,7 @@ pub(super) fn lower(
         source_payload: input.source_payload,
         expanded: input.tree,
         source_sidecar,
+        non_body_sources: input.source_inventory.non_body,
         program,
     })
 }

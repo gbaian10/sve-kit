@@ -111,7 +111,7 @@ CARD_COSTS: list[tuple[str, dict[str, JsonValue]]] = [
                     "who": "self",
                     "zone": "evolve_deck",
                     "face_up": True,
-                    "kind": "follower",
+                    "kind": "evolve_follower",
                     "name_contains": "ブラスター",
                 },
                 "n": 1,
@@ -126,7 +126,7 @@ CARD_COSTS: list[tuple[str, dict[str, JsonValue]]] = [
                     "who": "self",
                     "zone": "evolve_deck",
                     "face_up": False,
-                    "kind": "follower",
+                    "kind": "evolve_follower",
                 },
                 "n": 3,
             }
@@ -204,7 +204,7 @@ CARD_WRAPPERS: list[tuple[str, str, JsonValue]] = [
                     "who": "self",
                     "zone": "evolve_deck",
                     "face_up": False,
-                    "kind": "follower",
+                    "kind": "evolve_follower",
                 },
                 "n": 1,
             }

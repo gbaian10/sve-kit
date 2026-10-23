@@ -62,6 +62,7 @@ class CardAccepted:
     candidate: ExpansionCandidate
     source_payload: bytes
     source_version: str
+    source_inventory: bytes
 
     def lowering_input(self) -> JsonValue:
         """Hand current identities to D0 separately from the expanded author tree."""
@@ -71,6 +72,7 @@ class CardAccepted:
             "card_no": self.record.record_key,
             "source_version": self.source_version,
             "source_payload": parse(self.source_payload),
+            "source_inventory": parse(self.source_inventory),
             "sidecar": [
                 {
                     "path": list(item.path),
@@ -526,7 +528,9 @@ class CurrentAuthorSources:
         )
         if object_value(authored["meta"])["source"] != version:
             raise SourceError("source_version_mismatch")
-        contexts = self._uses(card, tree)
+        expected = self._contexts(card)
+        inventory = self._source_inventory(card, expected)
+        contexts = self._uses(card, tree, expected)
         result = expander.expand_contexts(
             canonical(tree), (file.raw for file in inputs.body_files), contexts
         )
@@ -552,13 +556,48 @@ class CurrentAuthorSources:
             object.__setattr__(checked, "source_proof", "current_source_checked")  # ruff: ignore[unnecessary-dunder-call] -- only the complete current boundary grants this proof
             evidence.append(checked)
         return CardAccepted(
-            record, ExpansionCandidate(result.tree, tuple(evidence)), payload, version
+            record,
+            ExpansionCandidate(result.tree, tuple(evidence)),
+            payload,
+            version,
+            inventory,
         )
 
+    @staticmethod
+    def _source_inventory(
+        card: _CurrentCard, expected: Mapping[tuple[str, str], SourceContext]
+    ) -> bytes:
+        # Derive obligations from current sources, never from the supplied author tree.
+        abilities: list[JsonValue] = [
+            {
+                "source_use": SourceUse(
+                    binding_id=binding,
+                    occurrence=source.binding.occurrence_key(),
+                    ability_scope=scope,
+                ).model_dump(mode="json"),
+                "body": entry_payload(source, scope),
+            }
+            for (binding, scope), source in expected.items()
+        ]
+        non_body: list[JsonValue] = [
+            {
+                "binding_id": matched.binding.id,
+                "occurrence": matched.binding.occurrence_key().model_dump(mode="json"),
+                "semantic_key": matched.frame.semantic_variant.key,
+            }
+            for field in card.fields
+            for matched in field.matches
+            if matched is not None
+            and matched.frame.projection.projection_kind == "none"
+        ]
+        return canonical({"abilities": abilities, "non_body": non_body})
+
     def _uses(
-        self, card: _CurrentCard, tree: JsonValue
+        self,
+        card: _CurrentCard,
+        tree: JsonValue,
+        expected: Mapping[tuple[str, str], SourceContext],
     ) -> dict[PathParts, SourceContext]:
-        expected = self._contexts(card)
         for value in object_value(object_value(tree)["cards"]).values():
             authored = object_value(value)
             if "deck_rule" in authored:
