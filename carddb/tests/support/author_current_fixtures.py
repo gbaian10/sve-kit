@@ -27,7 +27,7 @@ from sve_carddb.domains.translations.inputs import Snapshot, validate_snapshot
 from sve_carddb.domains.translations.recognition.rules import Rules, load
 from sve_carddb.domains.translations.sources import Sources
 
-from .database_fixtures import DatabaseTemplate
+from .database_template import DatabaseTemplate
 
 REPOSITORY = Path(__file__).resolve().parents[3]
 REVISION = "8ca79f0935dd97340991c057cb1b226fe745da50"

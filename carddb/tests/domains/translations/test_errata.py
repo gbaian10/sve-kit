@@ -12,7 +12,7 @@ from sve_carddb.domains.card_extras.reviewed_errata import admit
 from sve_carddb.domains.translations.errata import apply, load
 
 if TYPE_CHECKING:
-    from tests.support.database_fixtures import DatabaseTemplate
+    from tests.support.database_template import DatabaseTemplate
 
 
 @pytest.mark.parametrize("matches", [True, False])

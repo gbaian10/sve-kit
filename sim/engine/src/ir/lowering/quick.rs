@@ -8,7 +8,7 @@ use super::{
 };
 
 pub(super) fn lower(
-    key: &str,
+    key: &super::CardCoordinates<'_>,
     path: &str,
     entry: &ast::Ability,
     scope: ScopeId,

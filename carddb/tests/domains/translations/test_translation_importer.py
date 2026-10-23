@@ -44,7 +44,7 @@ if TYPE_CHECKING:
     from sve_carddb.core.provenance import Source
     from sve_carddb.ingest.archive.source_archive import Descriptor
 
-    from ...support.database_fixtures import DatabaseTemplate
+    from ...support.database_template import DatabaseTemplate
 
 
 @dataclass(frozen=True)

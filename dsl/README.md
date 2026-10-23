@@ -176,6 +176,7 @@ arithmetic. Canonical ability comparison removes only top-level use locations
 | `AuthorExpander.expand_sources` | Reconstructs supplied source candidates and validates supported role/operand mappings; successful evidence has `source_proof=derived_self_consistent` |
 | `load_author_set` | Reads every file in the fixed author/body/prototype areas and validates two-way index closure; companion versions and keys are checked across shards |
 | `CurrentAuthorSources.validate(authored_root, expander)` | Loads the complete inventory from disk and returns one accepted candidate or rejection per indexed card/scope; accepted evidence has `source_proof=current_source_checked` |
+| `CardAccepted.lowering_input()` → Rust `ExpandedLowerer.lower_current` | Internal handoff of the accepted tree, permanent CardId, current face/revision mapping and explicit token links; returns well-formed candidate IR with permanent source owners and preserves the source payload separately |
 | `AuthorSchemas.expanded` | Validates the complete tree against `$defs/expanded` and independently rejects decoded `ParamRef` and `GeneratedBy` nodes |
 
 No evidence state means qualified or executable. The current boundary loads the
@@ -189,6 +190,12 @@ File/schema/index failures reject the inventory; ordinary unsupported sources re
 only that card/scope. An EN inventory reader closes file/index references but always
 rejects EN source admission. Unindexed prototypes are validated and checked for
 shared-card overlap, without requiring their migration into the new index.
+
+The current handoff resolves ability owners from their exact current revision,
+including abilities in face containers. It does not infer identity from card numbers
+or names. Token sources currently fail current admission; Rust also rejects nonempty
+token links until their source contract is supported. The handoff grants no use
+qualification and does not enable the prototype runtime loader for permanent owners.
 
 The supported current ability mappings are evolve, feed, ride, evolve/feed and
 evolve/ride entry variants, with exact root scopes and literal PP costs. Full payload

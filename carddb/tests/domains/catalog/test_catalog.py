@@ -18,7 +18,7 @@ from sve_carddb.domains.catalog.languages import register_languages
 from sve_carddb.domains.catalog.models import Alias, Catalog, NameBinding, Term
 from sve_carddb.domains.products.models import Language, LocalizedText
 
-from ...support.database_fixtures import DatabaseTemplate
+from ...support.database_template import DatabaseTemplate
 from .test_catalog_symbols import symbol
 
 if TYPE_CHECKING:

@@ -18,7 +18,7 @@ from sve_carddb.domains.translations.sources import Sources
 
 from .adoption_fixtures import commit
 from .build_db_fixtures import rows
-from .database_fixtures import DatabaseTemplate
+from .database_template import DatabaseTemplate
 from .digital_name_policy_fixtures import PolicyFixture, make_policy_fixture
 from .translation_fixtures import template, write
 

@@ -9,7 +9,7 @@ from pydantic import JsonValue
 from sve_carddb.contracts.author_evidence import SourceUse
 from sve_carddb.contracts.author_leaves import AuthorIndexRecord
 from sve_carddb.contracts.four_layer import FaceRevisionOwner, OwnerField
-from sve_carddb.core.json import array, canonical, digest, object_value, string
+from sve_carddb.core.json import array, canonical, digest, object_value, parse, string
 from sve_carddb.domains.catalog.adoption_models import SourceRef
 from sve_carddb.domains.effects.author_expansion import (
     ExpansionCandidate,
@@ -62,6 +62,16 @@ class CardAccepted:
     candidate: ExpansionCandidate
     source_payload: bytes
     source_version: str
+
+    def lowering_input(self) -> JsonValue:
+        """Hand current identities to D0 separately from the expanded author tree."""
+        return {
+            "tree": self.candidate.tree,
+            "card_id": self.record.card_id,
+            "card_no": self.record.record_key,
+            "source_version": self.source_version,
+            "source_payload": parse(self.source_payload),
+        }
 
 
 @dataclass(frozen=True)

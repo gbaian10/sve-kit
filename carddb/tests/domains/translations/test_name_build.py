@@ -12,7 +12,7 @@ from sve_carddb.domains.translations.names.sources import NameOwner, name_source
 from ...support.name_build_fixtures import template
 
 if TYPE_CHECKING:
-    from ...support.database_fixtures import DatabaseTemplate
+    from ...support.database_template import DatabaseTemplate
 
 REVISION = NameOwner("face_revision", "revision")
 PRINTING = NameOwner("printing_face", "printing", "face")

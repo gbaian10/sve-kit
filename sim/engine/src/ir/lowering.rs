@@ -2,6 +2,7 @@
 
 mod ast;
 mod costs;
+mod current;
 mod evolution;
 mod exchange;
 mod numeric;
@@ -20,6 +21,8 @@ use super::{
     RecipientSet, ScopeId, SelectionView, Selector, SourceSpan, StepwiseMode, TextQuantifier,
     TriggerAggregation, TriggerCondition, TriggerSpec, WellFormedCardProgram, ZoneKind,
 };
+pub use current::CurrentCardProgram;
+
 use alloc::collections::{BTreeMap, BTreeSet};
 use serde::de::DeserializeOwned;
 use serde_json::{Value, json};
@@ -104,6 +107,29 @@ impl ExpandedLowerer {
         tree: &Value,
         printed_costs: &BTreeMap<String, Nat>,
     ) -> Result<BTreeMap<String, WellFormedCardProgram>, LoweringError> {
+        self.lower_coordinates(tree, printed_costs, None)
+    }
+
+    /// Consume only `CardAccepted.lowering_input()` from the current Python reader.
+    ///
+    /// This is an internal trusted boundary, not a public program encoding or a
+    /// replacement for source reconstruction, use qualification or runtime admission.
+    /// The reader currently rejects token sources; a nonempty token selection is
+    /// rejected here too, rather than selecting a template by display name.
+    ///
+    /// # Errors
+    /// Rejects absent/ambiguous identities, unknown current owners, token selections
+    /// without a supported source contract and every unsupported expanded construct.
+    pub fn lower_current(&self, input: &Value) -> Result<CurrentCardProgram, LoweringError> {
+        current::lower(self, input)
+    }
+
+    fn lower_coordinates(
+        &self,
+        tree: &Value,
+        printed_costs: &BTreeMap<String, Nat>,
+        identity: Option<&current::CurrentIdentity>,
+    ) -> Result<BTreeMap<String, WellFormedCardProgram>, LoweringError> {
         self.validator
             .validate(tree)
             .map_err(|failure| error("invalid_expanded", &failure.instance_path().to_string()))?;
@@ -115,33 +141,39 @@ impl ExpandedLowerer {
         for (key, card) in document.cards {
             let path = format!("/cards/{}", pointer_key(&key));
             let card: ast::Card = decode(card, &path)?;
+            if identity.is_none() && !card.faces.is_empty() {
+                return Err(unsupported(&path));
+            }
+            let coordinates = CardCoordinates {
+                key: &key,
+                identity,
+            };
+            let entries = ability_entries(card, &path)?;
             let mut allocator = Allocator {
                 next: 0,
-                next_scope: u64::try_from(card.abilities.len())
+                next_scope: u64::try_from(entries.len())
                     .ok()
                     .and_then(|count| count.checked_mul(3))
                     .ok_or_else(|| unsupported(&path))?,
             };
             let mut abilities = Vec::new();
             let mut modifiers = Vec::new();
-            let entries = card
-                .abilities
-                .into_iter()
-                .enumerate()
-                .map(|(index, value)| {
-                    decode::<ast::Ability>(value, &format!("{path}/abilities/{index}"))
-                })
-                .collect::<Result<Vec<_>, _>>()?;
             let mut exchange = None;
             let mut payment_result = None;
-            for (index, ability) in entries.iter().enumerate() {
-                let path = format!("{path}/abilities/{index}");
+            for (entry_path, ability) in &entries {
                 if let Some(play) = &ability.play {
-                    costs::lower(&key, &path, ability, play, &mut allocator, &mut modifiers)?;
-                    let source = source_span(&key, &path, ability)?;
+                    costs::lower(
+                        &coordinates,
+                        entry_path,
+                        ability,
+                        play,
+                        &mut allocator,
+                        &mut modifiers,
+                    )?;
+                    let source = source_span(&coordinates, entry_path, ability)?;
                     if let Some(lowered) = exchange::lower(play, &source, &mut allocator)? {
                         if exchange.is_some() {
-                            return Err(unsupported(&path));
+                            return Err(unsupported(entry_path));
                         }
                         payment_result = play
                             .optional_cost
@@ -152,8 +184,9 @@ impl ExpandedLowerer {
                     }
                 }
             }
-            for (index, ability) in entries.into_iter().enumerate() {
-                let path = format!("{path}/abilities/{index}");
+            let play_faces =
+                play_faces(&modifiers, exchange.as_ref()).ok_or_else(|| unsupported(&path))?;
+            for (index, (entry_path, ability)) in entries.into_iter().enumerate() {
                 if ability.play.is_some() {
                     continue;
                 }
@@ -161,46 +194,104 @@ impl ExpandedLowerer {
                     .ok()
                     .and_then(|index| index.checked_mul(3))
                     .and_then(|index| index.checked_add(1))
-                    .ok_or_else(|| unsupported(&path))?;
+                    .ok_or_else(|| unsupported(&entry_path))?;
                 abilities.push(allocator.ability(
-                    &key,
-                    &path,
+                    &coordinates,
+                    &entry_path,
                     &ability,
                     ScopeId(scope),
-                    printed_costs.get(&key).copied(),
-                    payment_result.clone(),
+                    match identity {
+                        Some(identity) => {
+                            identity.printed_cost(&ability.sources[0], &entry_path)?
+                        }
+                        None => printed_costs.get(&key).copied(),
+                    },
+                    payment_result.clone().filter(|_| {
+                        source_span(&coordinates, &entry_path, &ability)
+                            .is_ok_and(|source| play_faces.contains(&source.face))
+                    }),
                 )?);
             }
-            let checked = WellFormedCardProgram::check(CardProgram {
-                abilities,
-                card_play_costs: modifiers
-                    .first()
-                    .map(|first| first.source.clone())
-                    .or_else(|| exchange.as_ref().map(|item| item.source.clone()))
-                    .map_or_else(Vec::new, |source| {
-                        vec![Located {
-                            source,
-                            node: super::FacePlayCost {
-                                face: FaceId("base".into()),
-                                modifiers,
-                                exchange,
-                            },
-                        }]
-                    }),
-            })
-            .map_err(|failure| {
-                error(
-                    "ill_formed",
-                    failure
-                        .source
-                        .as_ref()
-                        .map_or(path.as_str(), |source| source.author_path.as_str()),
-                )
-            })?;
+            let checked = check_card(
+                CardProgram {
+                    abilities,
+                    card_play_costs: face_play_costs(modifiers, exchange),
+                },
+                &path,
+            )?;
             cards.insert(key, checked);
         }
         Ok(cards)
     }
+}
+
+/// Face play costs and their payment receipt belong to one printed face.
+fn play_faces(
+    modifiers: &[Located<super::PlayCostModifier>],
+    exchange: Option<&Located<super::PlayCostExchange>>,
+) -> Option<BTreeSet<String>> {
+    let faces = modifiers
+        .iter()
+        .map(|item| item.source.face.clone())
+        .chain(exchange.map(|item| item.source.face.clone()))
+        .collect::<BTreeSet<_>>();
+    (faces.len() <= 1).then_some(faces)
+}
+
+fn face_play_costs(
+    modifiers: Vec<Located<super::PlayCostModifier>>,
+    exchange: Option<Located<super::PlayCostExchange>>,
+) -> Vec<Located<super::FacePlayCost>> {
+    modifiers
+        .first()
+        .map(|first| first.source.clone())
+        .or_else(|| exchange.as_ref().map(|item| item.source.clone()))
+        .map_or_else(Vec::new, |source| {
+            vec![Located {
+                node: super::FacePlayCost {
+                    face: FaceId(source.face.clone()),
+                    modifiers,
+                    exchange,
+                },
+                source,
+            }]
+        })
+}
+
+fn check_card(card: CardProgram, path: &str) -> Result<WellFormedCardProgram, LoweringError> {
+    WellFormedCardProgram::check(card).map_err(|failure| {
+        error(
+            "ill_formed",
+            failure
+                .source
+                .as_ref()
+                .map_or(path, |source| source.author_path.as_str()),
+        )
+    })
+}
+
+fn ability_entries(
+    card: ast::Card,
+    path: &str,
+) -> Result<Vec<(String, ast::Ability)>, LoweringError> {
+    card.abilities
+        .into_iter()
+        .enumerate()
+        .map(|(index, value)| (format!("{path}/abilities/{index}"), value))
+        .chain(card.faces.into_iter().flat_map(|(face, container)| {
+            container
+                .abilities
+                .into_iter()
+                .enumerate()
+                .map(move |(index, value)| {
+                    (
+                        format!("{path}/faces/{}/abilities/{index}", pointer_key(&face)),
+                        value,
+                    )
+                })
+        }))
+        .map(|(entry_path, value)| decode(value, &entry_path).map(|ability| (entry_path, ability)))
+        .collect()
 }
 
 pub(super) fn validator(profile: &str) -> Result<jsonschema::Validator, LoweringError> {
@@ -238,7 +329,7 @@ impl Allocator {
 
     fn ability(
         &mut self,
-        key: &str,
+        key: &CardCoordinates<'_>,
         path: &str,
         entry: &ast::Ability,
         scope: ScopeId,
@@ -595,7 +686,7 @@ impl BodyContext<'_> {
                 }
                 let condition = Expr::Frozen(Box::new(super::BoolFrozen::PaymentComplete {
                     receipt: super::PaymentReference::CardPlay {
-                        face: FaceId("base".into()),
+                        face: FaceId(source.face.clone()),
                         receipt: *receipt,
                     },
                 }));
@@ -761,7 +852,16 @@ impl BodyContext<'_> {
     }
 }
 
-fn source_span(key: &str, path: &str, entry: &ast::Ability) -> Result<SourceSpan, LoweringError> {
+struct CardCoordinates<'input> {
+    key: &'input str,
+    identity: Option<&'input current::CurrentIdentity>,
+}
+
+fn source_span(
+    key: &CardCoordinates<'_>,
+    path: &str,
+    entry: &ast::Ability,
+) -> Result<SourceSpan, LoweringError> {
     let [source] = &entry.sources;
     let text = |pointer| {
         source
@@ -770,15 +870,29 @@ fn source_span(key: &str, path: &str, entry: &ast::Ability) -> Result<SourceSpan
             .map(str::to_owned)
             .ok_or_else(|| unsupported(path))
     };
+    let (card_id, face) = key.identity.map_or_else(
+        || Ok((key.key.to_owned(), "base".to_owned())),
+        |identity| identity.owner(source, path),
+    )?;
+    if key.identity.is_some()
+        && path.contains("/faces/")
+        && !path.starts_with(&format!(
+            "/cards/{}/faces/{}/abilities/",
+            pointer_key(key.key),
+            pointer_key(&face)
+        ))
+    {
+        return Err(error("invalid_current_identity", path));
+    }
     Ok(SourceSpan {
-        card_id: key.to_owned(),
-        card_no: key.to_owned(),
+        card_id,
+        card_no: key.key.to_owned(),
         scope: text("/ability_scope")?,
         owner: source
             .pointer("/occurrence/owner")
             .ok_or_else(|| unsupported(path))?
             .to_string(),
-        face: "base".to_owned(),
+        face,
         field: text("/occurrence/field")?,
         section: entry.section.map(|section| section.to_string()),
         line: entry.line,

@@ -8,7 +8,7 @@ from sve_carddb.build import Json, create_database
 from sve_carddb.build.t1 import compile_build
 from sve_carddb.core.json import canonical, digest, object_value
 
-from .database_fixtures import DatabaseTemplate
+from .database_template import DatabaseTemplate
 
 if TYPE_CHECKING:
     from pathlib import Path

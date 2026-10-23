@@ -34,7 +34,7 @@ from sve_carddb.domains.translations.names.resolve import prepare as prepare_nam
 from sve_carddb.domains.translations.names.sources import NameOwner, name_source
 
 from ...support.adoption_fixtures import commit
-from ...support.database_fixtures import DatabaseTemplate
+from ...support.database_template import DatabaseTemplate
 from ...support.digital_name_policy_fixtures import NAMES
 from ...support.name_application_fixtures import (
     ApplicationCase,

@@ -6,7 +6,7 @@ use super::{
 use crate::ir::{Comparison, CostChange, PlayCostModifier};
 
 pub(super) fn lower(
-    key: &str,
+    key: &super::CardCoordinates<'_>,
     path: &str,
     entry: &ast::Ability,
     play: &ast::PlayCosts,

@@ -7,7 +7,7 @@ from sve_carddb.build.t1 import compile_build
 from sve_carddb.core.json import digest
 
 from .build_db_fixtures import rows
-from .database_fixtures import DatabaseTemplate
+from .database_template import DatabaseTemplate
 
 if TYPE_CHECKING:
     from sve_carddb.build import Database, Value

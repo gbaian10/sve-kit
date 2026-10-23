@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 
     from pydantic import JsonValue
 
-    from ...support.database_fixtures import DatabaseTemplate
+    from ...support.database_template import DatabaseTemplate
 
 
 @pytest.fixture(scope="module")

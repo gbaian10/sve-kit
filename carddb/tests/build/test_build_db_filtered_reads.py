@@ -9,7 +9,7 @@ from sve_carddb.build.rows import insert_exact
 if TYPE_CHECKING:
     from sve_carddb.build import Database, Value
 
-    from ..support.database_fixtures import DatabaseTemplate
+    from ..support.database_template import DatabaseTemplate
 
 
 def test_filtered_read_matches_nullable_values_and_does_not_change_unfiltered_reads(

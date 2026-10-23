@@ -14,7 +14,7 @@ from sve_carddb.workflows import offline
 from sve_carddb.workflows.offline import build
 
 from ...support.build_db_fixtures import HASH, seed
-from ...support.database_fixtures import DatabaseTemplate
+from ...support.database_template import DatabaseTemplate
 from ...workflows.test_snapshot_offline import prepared as _prepared
 
 prepared = _prepared

@@ -21,7 +21,7 @@ from .author_entry_cases import meta, source_use
 if TYPE_CHECKING:
     from pydantic import JsonValue
 
-    from ...support.database_fixtures import DatabaseTemplate
+    from ...support.database_template import DatabaseTemplate
 
 REPO = Path(__file__).resolve().parents[4]
 AUTHOR = "rules/author-effects/FIX/001.yaml"

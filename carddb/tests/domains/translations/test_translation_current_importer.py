@@ -18,7 +18,7 @@ from sve_carddb.domains.translations.inputs import Inputs, load_glossary
 
 from ...support.adoption_fixtures import commit
 from ...support.build_db_fixtures import seed
-from ...support.database_fixtures import DatabaseTemplate
+from ...support.database_template import DatabaseTemplate
 from .test_translation_importer import frozen as _frozen_fixture
 
 synthetic_frozen = _frozen_fixture

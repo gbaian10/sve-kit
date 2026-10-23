@@ -1,43 +1,15 @@
 """Private connections restored from an immutable, genuinely populated database."""
 
-import sqlite3
-from contextlib import contextmanager
-from dataclasses import dataclass
-from typing import TYPE_CHECKING
-
 import pytest
 
-from sve_carddb.build import Database, create_database
-from sve_carddb.build.database import install_functions
+from sve_carddb.build import create_database
 from sve_carddb.build.t0 import compile_t0
 from sve_carddb.build.t1 import compile_build, compile_minimum
 
 from .build_db_fixtures import seed
 from .build_db_t1_fixtures import populate as populate_t1
 from .build_db_t1b_fixtures import populate as populate_t1b
-
-if TYPE_CHECKING:
-    from collections.abc import Generator
-
-    from sve_carddb.build import CompiledSchema
-
-
-@dataclass(frozen=True)
-class DatabaseTemplate:
-    schema: CompiledSchema
-    content: bytes
-
-    @contextmanager
-    def copy(self) -> Generator[Database]:
-        # The verified graph is shared as bytes; connection state and Rules never are.
-        connection = sqlite3.connect(":memory:", isolation_level=None)
-        try:
-            connection.deserialize(self.content)
-            rules = install_functions(connection, self.schema)
-            connection.execute("PRAGMA foreign_keys = ON")
-            yield Database(connection, self.schema, rules)
-        finally:
-            connection.close()
+from .database_template import DatabaseTemplate
 
 
 @pytest.fixture(scope="session")
