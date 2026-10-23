@@ -13,6 +13,7 @@ import type { Region } from "../../domain/search"
 import { cn } from "../ui/cn"
 import { Switch } from "../ui/Switch"
 import { Section, Toggle } from "./FilterControls"
+import { StatValue } from "./StatValue"
 
 export interface FilterPanelProps {
   /** The element id the search bar's filter button controls. */
@@ -66,11 +67,13 @@ export function FilterPanel({
         <Toggle
           key={value}
           pressed={values.includes(value)}
+          label={value === cap ? `${String(value)}+` : String(value)}
+          className="px-1.5"
           onClick={() => {
             onChange({ ...query, [field]: toggleValue(values, value) })
           }}
         >
-          {value === cap ? `${String(value)}+` : String(value)}
+          <StatValue field={field} value={value} orMore={value === cap} />
         </Toggle>
       ))}
     </Section>
