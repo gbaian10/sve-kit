@@ -202,6 +202,14 @@ Plan bytes count toward the shared data budget and are removed by clearing autom
 Cross-tab collection has no lock: readers verify cache hits and recover removed records as
 ordinary misses. Retention cannot promise atomic offline availability across tabs or browser eviction.
 
+Each background transfer window shares one inventory across its two producers, updating payload
+totals on successful writes. With room left, trimming does not re-sort or enumerate caches per file.
+A quota failure gets at most one write retry using the same inventory; persistent failure stops
+the speculative producers. The window closes with a fresh budget scan and verified presence check,
+so removal during the batch yields partial completion without a refill loop. The next window
+reads storage again; its inventory is not an atomic cross-tab view. Ordinary on-demand and derived
+writes still perform their own budget checks.
+
 Image metadata uses the manifest's exact fragment locator: permanent printing owner and
 printing bucket select a home-set media file. The viewport hook prefetches half a viewport
 height above and one and a half below, using pixel margins rebuilt on resize. Faces nearest

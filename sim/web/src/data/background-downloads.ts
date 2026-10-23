@@ -281,10 +281,14 @@ export class BackgroundDownloads {
         reject("capacity")
         return
       }
-      await plan.run(run.signal, (progress) => {
-        if (this.run !== run || run.signal.aborted || this.plan !== plan) return
-        this.publish({ selection: plan.selection, state: "running", progress })
-      })
+      await plan.run(
+        run.signal,
+        (progress) => {
+          if (this.run !== run || run.signal.aborted || this.plan !== plan) return
+          this.publish({ selection: plan.selection, state: "running", progress })
+        },
+        budget,
+      )
     })().then(
       () => {
         if (this.run !== run || run.signal.aborted) return
