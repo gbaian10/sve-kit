@@ -6,9 +6,10 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.contracts.four_layer import PrintingFaceOwner
+from sve_carddb.contracts.four_layer import PrintingFaceOwner, Projection
 from sve_carddb.domains.translations.four_layer_derivation import derive_source
-from sve_carddb.domains.translations.four_layer_semantics import CardContext
+from sve_carddb.domains.translations.four_layer_draw import prepare_draw
+from sve_carddb.domains.translations.four_layer_semantics import CardContext, Classified
 
 from .test_four_layer_classification import classifier, source
 
@@ -253,3 +254,48 @@ def test_closed_sibling_brackets_keep_the_independent_trigger(sibling: str) -> N
     assert derived.bind(len(derived.recognized) - 1)[0].semantic_variant.key == (
         "draw_exact_evolve_time.v1"
     )
+
+
+@pytest.mark.parametrize(
+    ("raw", "kind", "phase"),
+    [
+        ("9007199254740992枚引く。", "spell", "normal"),
+        ("【攻撃時】9007199254740992枚引く。", "follower", "normal"),
+        ("【進化時】9007199254740992枚引く。", "follower", "evolved"),
+    ],
+    ids=_ascii_id,
+)
+def test_count_above_safe_integer_keeps_the_numeric_rejection(
+    raw: str, kind: str, phase: str
+) -> None:
+    facts = CardContext(source(raw), "c:synthetic", "f:synthetic", phase, kind, True, 0)
+    derived = derive_source(raw, facts.source, classifier(), context=facts)
+    assert any(
+        "invalid_safe_unsigned_decimal" in found.issues for found in derived.recognized
+    )
+    assert all(found.semantics is None for found in derived.recognized)
+
+
+def test_existing_semantics_on_the_exact_line_is_a_conflict() -> None:
+    raw = "【進化時】1枚引く。"
+    facts = CardContext(
+        source(raw), "c:synthetic", "f:synthetic", "evolved", "follower", True, 0
+    )
+    unresolved = derive_source(raw, facts.source, classifier())
+    other = Classified(
+        "synthetic_other.v1",
+        Projection(
+            projection_kind="ability_body",
+            discriminator="synthetic_other.v1",
+            scopes=(),
+            imports=(),
+            exports=(),
+        ),
+    )
+    first, *rest = unresolved.derived.recognized
+    claimed = replace(first, semantics=other)
+    seeded = replace(
+        unresolved, derived=replace(unresolved.derived, recognized=(claimed, *rest))
+    )
+    with pytest.raises(ValueError, match="ambiguous_semantic_variant"):
+        prepare_draw(raw, seeded, facts)
