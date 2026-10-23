@@ -6,7 +6,7 @@ import {
   type RoutePrinting,
 } from "../domain/cardRoute"
 import type { Region } from "../domain/search"
-import { type Catalog, catalogOf } from "./catalog"
+import { type Catalog, catalogOf, preparePrintingOverlay } from "./catalog"
 import type { LoadedSnapshot, SnapshotClient } from "./client"
 import { arrayValue, type JsonObject, stringValue } from "./format-v3/json"
 import { mergedRows } from "./format-v3/reader"
@@ -26,6 +26,33 @@ export interface LocatedCard {
 const routingTables = new Set(["card_route_alias", "route_override"])
 const includesTable = (file: JsonObject, tables: ReadonlySet<string>) =>
   arrayValue(file["row_counts"]).some((count) => tables.has(stringValue(arrayValue(count)[0])))
+
+function routePrinting(card: JsonObject, row: JsonObject): RoutePrinting {
+  return {
+    id: stringValue(row["id"]),
+    cardId: stringValue(card["id"]),
+    cardOwner: stringValue(card["home_set_id"]),
+    printingOwner: stringValue(row["home_set_id"]),
+    region: stringValue(row["region"]) as Region,
+    cardNo: stringValue(row["card_no"]),
+    cardNoState: typeof row["card_no_state"] === "string" ? row["card_no_state"] : "official",
+    ...(typeof row["int_id"] === "number" ? { intId: row["int_id"] } : {}),
+  }
+}
+
+function record(snapshot: LoadedSnapshot, id: string): RoutePrinting | undefined {
+  const index = catalogOf(snapshot).index
+  const row = index.printing(id)
+  const card = row ? index.card(stringValue(row["card_id"])) : undefined
+  return row && card ? routePrinting(card, row) : undefined
+}
+
+function records(snapshot: LoadedSnapshot): RoutePrinting[] {
+  const { index } = catalogOf(snapshot)
+  return index.cards.flatMap((card) =>
+    index.printingsOf(stringValue(card["id"])).map((row) => routePrinting(card, row)),
+  )
+}
 
 /** Uses the existing catalog locators; a non-default printing is loaded from its own owner. */
 export async function locateCard(
@@ -58,30 +85,18 @@ export async function locateCard(
       stringValue(row["printing_id"]),
     ]),
   )
-  const records = (snapshot: LoadedSnapshot): RoutePrinting[] => {
-    const catalog = catalogOf(snapshot)
-    return catalog.index.cards.flatMap((card) =>
-      catalog.index.printingsOf(stringValue(card["id"])).map((row) => ({
-        id: stringValue(row["id"]),
-        cardId: stringValue(card["id"]),
-        cardOwner: stringValue(card["home_set_id"]),
-        printingOwner: stringValue(row["home_set_id"]),
-        region: stringValue(row["region"]) as Region,
-        cardNo: stringValue(row["card_no"]),
-        cardNoState: typeof row["card_no_state"] === "string" ? row["card_no_state"] : "official",
-        ...(typeof row["int_id"] === "number" ? { intId: row["int_id"] } : {}),
-      })),
-    )
-  }
   const supplement = async (keys: readonly string[]): Promise<void> => {
     const parts = (await Promise.all(keys.map((key) => client.fragments(key)))).flat()
     if (client.snapshot()?.manifestHash !== snapshot.manifestHash)
       throw new CardRouteError("reference", "snapshot changed while opening card")
     const present = new Set(snapshot.bootstrap.map((f) => f.identity))
+    const additions = parts.filter((f) => !present.has(f.identity))
+    const previous = snapshot
     snapshot = {
       ...snapshot,
-      bootstrap: [...snapshot.bootstrap, ...parts.filter((f) => !present.has(f.identity))],
+      bootstrap: [...snapshot.bootstrap, ...additions],
     }
+    preparePrintingOverlay(snapshot, previous, additions)
   }
   // Only the requested key and its own alias chain can name the card; other aliases stay unloaded.
   const keys = [input.key]
@@ -97,16 +112,15 @@ export async function locateCard(
     if (input.namespace === "provisional") {
       await supplement(
         [...snapshot.files]
-          .filter(
-            ([, file]) => file["purpose"] === "print" && (file["region"] ?? region) === region,
-          )
+          .filter(([, file]) => file["purpose"] === "print" && file["region"] === region)
           .map(([key]) => key),
       )
       return
     }
     const locate = createLocator(snapshot.files)
     const files = new Set<string>()
-    for (const candidate of records(snapshot)) {
+    const hinted = input.hint ? record(snapshot, input.hint.id) : undefined
+    for (const candidate of hinted ? [hinted] : records(snapshot)) {
       if (
         candidate.intId !== undefined ||
         !keys.some((key) => routeFold(key) === routeFold(candidate.cardNo))
@@ -129,7 +143,7 @@ export async function locateCard(
   let printing: RoutePrinting
   try {
     if (input.hint) {
-      const hinted = records(snapshot).find((row) => row.id === input.hint?.id)
+      const hinted = record(snapshot, input.hint.id)
       if (
         !hinted ||
         (input.namespace === "official"
@@ -188,10 +202,10 @@ export async function locateCard(
     await supplement([key])
   }
   const catalog = catalogOf(snapshot)
-  const full = records(snapshot).find((p) => p.id === printing.id)
+  const full = record(snapshot, printing.id)
   if (!full || full.intId === undefined || !catalog.summary(full.id))
     throw new CardRouteError("reference", "card printing reference is missing")
-  if (!input.hint && input.namespace === "official" && full.cardNoState !== "official")
+  if (input.namespace === "official" && full.cardNoState !== "official")
     throw new CardRouteError("not-found", "provisional labels do not identify official routes")
   return { printing: full, catalog, snapshot }
 }

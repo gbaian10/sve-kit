@@ -12,6 +12,7 @@ export interface CardIndex {
   readonly face: (id: string) => Row | undefined
   readonly facesOf: (cardId: string) => readonly Row[]
   readonly printing: (id: string) => Row | undefined
+  /** Callers sort for presentation; loaded fragment order is not stable. */
   readonly printingsOf: (cardId: string) => readonly Row[]
   readonly printingByCardNo: (region: string, cardNo: string) => Row | undefined
   /** The bootstrap columns of the current revision for one face in one region. */

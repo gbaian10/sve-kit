@@ -4,8 +4,10 @@ import { describe, expect, it } from "vitest"
 import { buildSnapshot } from "../../scripts/fixture/build"
 import { memoryCache } from "../test-utils/cache"
 import { locateCard } from "./card-route"
+import { catalogOf, createCatalog } from "./catalog"
 import { createSnapshotClient } from "./client"
 import { arrayValue, canonical, objectValue, parseJson, stringValue } from "./format-v3/json"
+import { columns, rowType } from "./format-v3/schema"
 import { digest } from "./format-v3/sha256"
 
 const built = await buildSnapshot({ encodeImage: () => Promise.resolve(new Uint8Array([1])) })
@@ -64,6 +66,49 @@ function expectCatalogsOnce(h: ReturnType<typeof routingClient>) {
     expect(paths.length).toBeGreaterThan(0)
     expect(h.requests.filter((path) => paths.includes(path)).sort()).toEqual(paths.sort())
   }
+}
+
+function provisionalClient() {
+  const h = client("jp", "preview")
+  const manifest = structuredClone(built.manifest)
+  const files = arrayValue(manifest["files"]).map((file) => objectValue(file))
+  const changed = new Map<string, string>()
+  for (const file of files) {
+    if (file["purpose"] !== "print") continue
+    const path = stringValue(file["path"])
+    const bytes = h.files.get(path)
+    if (!bytes) throw new Error("missing printing fixture")
+    const payload = objectValue(parseJson(bytes))
+    const fields = columns(rowType("printing", "bootstrap"))
+    let edited = false
+    for (const raw of arrayValue(objectValue(payload["tables"])["printing"] ?? []))
+      for (const row of arrayValue(arrayValue(raw)[4]).map((row) => arrayValue(row))) {
+        if (row[fields.indexOf("id")] !== "p:bp01-002-alt") continue
+        row[fields.indexOf("card_no_state")] = "provisional"
+        edited = true
+      }
+    if (!edited) continue
+    const next = canonical(payload)
+    file["bytes"] = next.length
+    file["sha256"] = digest(next)
+    changed.set(stringValue(file["key"]), stringValue(file["sha256"]))
+    h.files.set(path, next)
+  }
+  if (changed.size === 0) throw new Error("missing alternate printing")
+  for (const file of files)
+    for (const field of ["dependencies", "source_refs"])
+      for (const raw of arrayValue(file[field])) {
+        const ref = objectValue(raw)
+        const hash = changed.get(stringValue(ref["key"]))
+        if (hash) ref["sha256"] = hash
+      }
+  const bytes = canonical(manifest)
+  h.files.set(built.manifestPath, bytes)
+  h.files.set(
+    "snapshots/preview/current.json",
+    canonical({ manifest_path: built.manifestPath, manifest_sha256: digest(bytes) }),
+  )
+  return h
 }
 
 describe("catalog-based cold card routes", () => {
@@ -141,6 +186,69 @@ describe("catalog-based cold card routes", () => {
     expect(result.printing.cardNo).toBe("BP01-002a")
     expect(result.printing.intId).toBeGreaterThan(0)
     expect(result.catalog.summary(result.printing.id)?.cardNo).toBe("BP01-002a")
+  })
+  it("completes summaries without changing the base snapshot or another located card", async () => {
+    const h = client()
+    await h.client.load()
+    const initial = h.client.snapshot()
+    if (!initial) throw new Error("missing snapshot")
+    const before = JSON.stringify(initial.bootstrap)
+    const base = catalogOf(initial)
+    expect(base.summary("p:bp01-002-alt")?.intId).toBeUndefined()
+    const first = await locateCard(h.client, { namespace: "official", key: "BP01-002a" })
+    const second = await locateCard(h.client, { namespace: "official", key: "BP01-001" })
+    expect(JSON.stringify(initial.bootstrap)).toBe(before)
+    expect(h.client.snapshot()).toBe(initial)
+    expect(base.summary("p:bp01-002-alt")?.intId).toBeUndefined()
+    expect(first.snapshot).not.toBe(initial)
+    expect(first.catalog).not.toBe(base)
+    expect(catalogOf(first.snapshot)).toBe(first.catalog)
+    expect(second.catalog.summary("p:bp01-002-alt")?.intId).toBeUndefined()
+    expect(first.catalog.summary(first.printing.id)?.intId).toBe(1102)
+    const rebuilt = createCatalog(first.snapshot)
+    for (const card of rebuilt.index.cards)
+      for (const row of rebuilt.index.printingsOf(stringValue(card["id"]))) {
+        const id = stringValue(row["id"])
+        expect(first.catalog.index.printing(id)).toEqual(row)
+        expect(first.catalog.summary(id)).toEqual(rebuilt.summary(id))
+      }
+  })
+  it("discards a stale ID hint when its URL names another printing", async () => {
+    const h = client()
+    const previous = await locateCard(h.client, { namespace: "official", key: "BP01-001" })
+    const result = await locateCard(h.client, {
+      namespace: "official",
+      key: "BP01-002a",
+      hint: previous.printing,
+    })
+    expect(result.printing.id).toBe("p:bp01-002-alt")
+    expect(result.catalog.summary(result.printing.id)?.intId).toBe(1102)
+  })
+  it("uses a provisional integer and rejects its label on official routes with or without a hint", async () => {
+    const h = provisionalClient()
+    const result = await locateCard(h.client, { namespace: "provisional", key: "1102" })
+    expect(result.printing).toMatchObject({
+      id: "p:bp01-002-alt",
+      cardNoState: "provisional",
+      intId: 1102,
+    })
+    expect(result.catalog.summary(result.printing.id)?.cardNoState).toBe("provisional")
+    const hinted = await locateCard(h.client, {
+      namespace: "provisional",
+      key: "1102",
+      hint: result.printing,
+    })
+    expect(hinted.printing).toEqual(result.printing)
+    await expect(
+      locateCard(h.client, { namespace: "official", key: "BP01-002a" }),
+    ).rejects.toMatchObject({ kind: "not-found" })
+    await expect(
+      locateCard(h.client, {
+        namespace: "official",
+        key: "BP01-002a",
+        hint: result.printing,
+      }),
+    ).rejects.toMatchObject({ kind: "not-found" })
   })
   it("opens exact EN identity without loading the other catalog", async () => {
     const h = client("en")
