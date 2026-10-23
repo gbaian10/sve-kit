@@ -119,10 +119,11 @@ TABLES = (
             SCOPE,
             Column("state", Kind.TEXT, choices=("unreviewed", "partial", "complete")),
             *FRESHNESS,
+            _json("checked_ranges", "MechanicChecks"),
             Column("decision_id", Kind.ID, nullable=True),
             Column("dsl_id", Kind.ID, nullable=True),
         ),
-        ("card_id", "keyword_id", "scope"),
+        ("card_id", "keyword_id", "scope", "producer_version"),
         foreign_keys=(
             _fk("card_id", "card"),
             _fk("keyword_id", "keyword"),
@@ -206,6 +207,26 @@ def schemas() -> dict[str, dict[str, JsonValue]]:
         },
         "MechanicCodes": {"type": "string", "pattern": "^" + CODE + "$"},
         "MechanicIDs": {"type": "string", "minLength": 1},
+        "MechanicChecks": {
+            "type": "object",
+            "additionalProperties": False,
+            "required": [
+                "face_id",
+                "revision_id",
+                "field",
+                "ordinal",
+                "relation",
+                "whole_field",
+            ],
+            "properties": {
+                "face_id": {"type": "string", "minLength": 1},
+                "revision_id": {"type": "string", "minLength": 1},
+                "field": {"enum": ["effect", "section"]},
+                "ordinal": {"type": ["integer", "null"], "minimum": 0},
+                "relation": {"enum": ["has", "grants", "refers", "counts"]},
+                "whole_field": {"type": "boolean"},
+            },
+        },
     }
     return {
         name: {"type": "array", "items": item, "uniqueItems": True}

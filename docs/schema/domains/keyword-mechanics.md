@@ -75,10 +75,12 @@ decision 同上例且必須 confirmed。只有候選 ID、source hash 及 produc
 
 ## Coverage 與承載
 
-H1 一律寫已檢查 keyword 的 partial；公開每 card／shared 一列，complete_all=false、
+H1 提交已驗正標籤及自身宣告所在面／主文的局部 has 檢查，由共用 coverage reducer 合併；
+不把局部宣告當整欄位已查。內部範圍與 producer 鍵見[建置資料庫 §10](../build/build-db.md#10-dsl驗證與未實作卡片頁)。
+目前僅 H1，已檢查 keyword 一律為 partial；公開每 card／shared 一列，complete_all=false、
 complete 集合空。partial 選較短 include／exclude，同長選 include；只投影 fresh coverage。
 has present 不證 grants absent；缺標籤且 partial／缺 coverage 仍 unknown。
-此 producer 拒絕 complete／unreviewed 來源列冒充其檢查結果。
+reducer 重驗內部 state 與 checked_ranges 一致，不能用手填 complete 冒充完整檢查結果。
 
 目前不產 en_override，不授予 shared 跨區資格；reader 沿既有 aligned／region block 條件，
 不能因 JP 繁中可顯示就套用 EN 機制。分母依 manifest 全地區 non-retired，含 provisional。
