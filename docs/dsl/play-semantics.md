@@ -4,6 +4,7 @@
 它不代表 executor 已完成；已驗子集以[內部執行入口](internal-execution.md)為準。
 不新增作者語法、公開 program、capability 或最低版本。一般觸發與來源離場後的 LKI、
 prepared play 終局接點另依[觸發與 LKI 契約](trigger-lki-semantics.md)。
+模式數、本回合模式排除與起動限次的擴充子集依[選擇與限次契約](choice-limit-semantics.md)。
 
 依據為[日文 CR 1.28.0（2026-09-28）](https://shadowverse-evolve.com/wordpress/wp-content/uploads/2026/09/28121513/ShadowverseEVOLVE_cr_1.28.0_260928.pdf)，
 核對日 2026-10-21。以下條號均指該版。`active_zones`、snapshot 與交易界線是專案對規則的
