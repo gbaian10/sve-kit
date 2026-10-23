@@ -78,30 +78,140 @@ class PageClosure {
   readonly client: SnapshotClient
   readonly locate: ReturnType<typeof createLocator>
   readonly fragments: Fragment[] = []
+  private readonly cardId: string | undefined
   private owners: TextOwners | undefined
   private locations: ReturnType<typeof annotationLocations> | undefined
 
-  constructor(client: SnapshotClient, snapshot: LoadedSnapshot) {
+  constructor(client: SnapshotClient, snapshot: LoadedSnapshot, cardId?: string) {
+    this.cardId = cardId
     this.client = client
     this.snapshot = snapshot
     this.locate = createLocator(snapshot.files)
-    this.add(snapshot.bootstrap)
+    if (cardId === undefined) this.add(snapshot.bootstrap)
+    else {
+      const index = catalogOf(snapshot).index
+      const revisions = new Set<JsonValue>()
+      for (const face of index.facesOf(cardId)) {
+        for (const raw of arrayValue(face["current"]))
+          revisions.add(objectValue(raw)["revision_id"] ?? null)
+        for (const raw of arrayValue(face["wording"])) {
+          const wording = objectValue(raw)
+          revisions.add(objectValue(wording["display"])["revision_id"] ?? null)
+          for (const candidate of arrayValue(wording["candidates"]))
+            revisions.add(objectValue(candidate)["revision_id"] ?? null)
+        }
+      }
+      const homes = new Set([
+        index.card(cardId)?.["home_set_id"],
+        ...index.printingsOf(cardId).map((row) => row["home_set_id"]),
+      ])
+      const roots = snapshot.bootstrap.filter(
+        (fragment) =>
+          fragment.table === "vocabulary" ||
+          (["card", "face", "printing", "face_revision"].includes(fragment.table) &&
+            homes.has(objectValue(fragment.value["owner"])["id"])),
+      )
+      // Keep the physical fragments intact: exact bases refer to their original row positions.
+      this.fragments.push(...snapshot.bootstrap)
+      this.add(
+        roots,
+        (table, row) =>
+          table === "card"
+            ? row["id"] === cardId
+            : table === "face" || table === "printing"
+              ? row["card_id"] === cardId
+              : table === "face_revision"
+                ? revisions.has(row["id"] ?? null)
+                : table === "vocabulary",
+        false,
+      )
+      for (const row of this.rows.get("vocabulary")?.values() ?? [])
+        this.includeBootstrap("text_unit", [row["label_unit_id"] ?? null])
+    }
     for (const fragment of snapshot.bootstrap) this.loaded.add(fragment.file)
   }
 
-  add(fragments: readonly Fragment[]): void {
+  private includeBootstrap(table: string, primaryKey: readonly JsonValue[]): void {
+    if (this.cardId === undefined) return
+    if (table === "text_unit" || table === "translation") {
+      const id = primaryKey[0]
+      // A null reference keeps the public-annotation failure that row() reports.
+      if (typeof id !== "string") return
+      const index = catalogOf(this.snapshot).index
+      const row = table === "text_unit" ? index.textUnit(id) : index.translation(id)
+      if (row) {
+        const rows = this.rows.get(table) ?? new Map<string, JsonObject>()
+        const identity = canonicalText([...primaryKey])
+        const previous = rows.get(identity)
+        if (previous && canonicalText(previous) !== canonicalText(row))
+          annotationFailure("reference")
+        rows.set(identity, row)
+        this.rows.set(table, rows)
+      }
+      return
+    }
+    const fields = arrayValue(definition(table)["x-primary-key"]).map((field) => stringValue(field))
+    const values = primaryKey.map((value) => canonicalText(value))
+    for (const fragment of this.snapshot.bootstrap) {
+      if (fragment.table !== table) continue
+      const selected = fragment.rows.filter((row) =>
+        fields.every((field, i) => {
+          const value = row[field] ?? null
+          return typeof value === "object" && value !== null
+            ? canonicalText(value) === values[i]
+            : value === primaryKey[i]
+        }),
+      )
+      if (selected.length) this.add([fragment], (_table, row) => selected.includes(row), false)
+    }
+  }
+
+  add(
+    fragments: readonly Fragment[],
+    select?: (table: string, row: JsonObject) => boolean,
+    retain = true,
+  ): void {
     for (const fragment of fragments) {
       if (fragment.table === "card_locator" || fragment.table === "__name_sources") {
-        this.fragments.push(fragment)
+        if (retain) this.fragments.push(fragment)
         continue
       }
-      this.fragments.push(fragment)
+      if (retain) this.fragments.push(fragment)
       const rows = this.rows.get(fragment.table) ?? new Map<string, JsonObject>()
       let replaced = false
-      for (let row of fragment.rows) {
+      const accepted = fragment.rows.filter((row) => {
+        if (select) return select(fragment.table, row)
+        if (this.cardId === undefined) return true
+        if (fragment.table === "card") return row["id"] === this.cardId
+        if (fragment.table === "face" || fragment.table === "printing")
+          return row["card_id"] === this.cardId
+        if (fragment.table === "face_revision")
+          return this.rows.get("face")?.has(canonicalText([row["face_id"] ?? null])) === true
+        return true
+      })
+      if (!accepted.length) continue
+      for (let row of accepted) {
         this.indexSelections(row, fragment.file)
         const identity = key(fragment.table, row)
-        const previous = rows.get(identity)
+        if (
+          this.cardId !== undefined &&
+          ["annotation_set", "annotation_concept"].includes(fragment.table)
+        )
+          for (const base of this.snapshot.bootstrap) {
+            if (base.table !== fragment.table) continue
+            for (const original of base.rows)
+              if (original["id"] === row["id"] && canonicalText(original) !== canonicalText(row))
+                annotationFailure("reference")
+          }
+        const previous =
+          rows.get(identity) ??
+          (this.cardId === undefined
+            ? undefined
+            : fragment.table === "text_unit"
+              ? catalogOf(this.snapshot).index.textUnit(stringValue(row["id"]))
+              : fragment.table === "translation"
+                ? catalogOf(this.snapshot).index.translation(stringValue(row["id"]))
+                : undefined)
         if (
           previous &&
           ["card", "face"].includes(fragment.table) &&
@@ -133,7 +243,7 @@ class PageClosure {
         if (replaced) this.owners = undefined
         else
           try {
-            this.owners?.include({ [fragment.table]: fragment.rows })
+            this.owners?.include({ [fragment.table]: accepted })
           } catch {
             this.owners = undefined
           }
@@ -242,6 +352,7 @@ class PageClosure {
 
   async row(table: string, id: JsonValue): Promise<JsonObject> {
     const identity = canonicalText([id])
+    if (!this.rows.get(table)?.has(identity)) this.includeBootstrap(table, [id])
     if (
       !this.rows.get(table)?.has(identity) &&
       !["text_unit", "translation", "annotation_set", "annotation_concept"].includes(table)
@@ -335,6 +446,7 @@ class PageClosure {
         kind === "vocabulary"
           ? [value["vocabulary_kind"] ?? null, value["code"] ?? null]
           : [value["id"] ?? null]
+      this.includeBootstrap(kind, pk)
       await this.load(kind, pk, "detail")
     }
     if (
@@ -386,6 +498,7 @@ class PageClosure {
     const unitId = this.textOwners().optionalPointer(pointer)
     if (unitId === null) return null
     await this.row("text_unit", unitId)
+    this.includeBootstrap("field_annotation", pk)
     const annotationRow = this.rows.get("field_annotation")?.get(canonicalText(pk))
     let annotationId = annotationRow?.["annotation_set_id"] ?? null
     const concept = this.owner(value).row["name_concept_id"]
@@ -412,21 +525,28 @@ export function peekAnnotatedTextResolver(
 }
 
 // Share bootstrap indexing across previews and reopened card pages for the same snapshot.
-export function sharedAnnotatedTextResolver(client: SnapshotClient): AnnotatedTextResolver {
+// The first caller's cardId scopes it, so pass one only for a snapshot pinned to that card.
+export function sharedAnnotatedTextResolver(
+  client: SnapshotClient,
+  cardId?: string,
+): AnnotatedTextResolver {
   const snapshot = client.snapshot()
   if (!snapshot) throw new Error("snapshot not loaded")
   let resolver = shared.get(snapshot)
   if (!resolver) {
-    resolver = createAnnotatedTextResolver(client)
+    resolver = createAnnotatedTextResolver(client, cardId)
     shared.set(snapshot, resolver)
   }
   return resolver
 }
 
-export function createAnnotatedTextResolver(client: SnapshotClient): AnnotatedTextResolver {
+export function createAnnotatedTextResolver(
+  client: SnapshotClient,
+  cardId?: string,
+): AnnotatedTextResolver {
   const snapshot = client.snapshot()
   if (!snapshot) throw new Error("snapshot not loaded")
-  const page = new PageClosure(client, snapshot)
+  const page = new PageClosure(client, snapshot, cardId)
   const resolveText = async (
     pointer: JsonObject,
     targetLang: string,
@@ -628,8 +748,8 @@ export function createAnnotatedTextResolver(client: SnapshotClient): AnnotatedTe
           : []
       }),
       explanations,
-      cards: [...(page.rows.get("card")?.values() ?? [])]
-        .filter((card) =>
+      cards: catalogOf(snapshot)
+        .index.cards.filter((card) =>
           concepts.some((concept) => arrayValue(concept["card_ids"]).includes(card["id"] ?? null)),
         )
         .flatMap((card) =>
