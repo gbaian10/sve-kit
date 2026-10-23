@@ -2426,14 +2426,18 @@ it("filters official PR by each printing's appearance, independently of printed 
   }
 })
 
-// Merged cells pick their representative from every printing's rarity and number, so the answer
-// waits for the background printing download instead of first showing the locator-stage choice.
+// Locator rows lack reprint flags and representative metadata, so these queries wait for printings.
 it.each([
   ["lowest rarity", {}, ["p:sd01-002-bp"]],
   ["highest rarity", { representative: "high" as const }, ["p:sd01-002-bp"]],
   // The fixture gives every printing its own art, so the art unit lists both, by number.
   ["same art", { unit: "art" as const }, ["p:sd01-002-bp", "p:sd01-002"]],
-])("merged cells wait for printing completion (%s)", async (_label, changes, expected) => {
+  [
+    "hidden reprints",
+    { unit: "printing" as const, reprints: "hide" as const },
+    ["p:sd01-002-bp", "p:sd01-002"],
+  ],
+])("queries wait for printing completion (%s)", async (_label, changes, expected) => {
   const served = origin()
   const h = harness(served)
   const print = (built.manifest["files"] as JsonObject[]).find(
@@ -2685,6 +2689,62 @@ it("filters leader frames per printing, intersects rarity and restores the index
       expected.filter((item) => item.frame === "gold").length,
     )
     expect(index.options.locationCounts["main"]).toBeUndefined()
+  }
+})
+
+it("hides registered reprints per printing, not when merged per card, and restores the index", async () => {
+  const client = createSnapshotClient(base, { fetch: origin().fetcher })
+  await client.load()
+  const initial = client.snapshot()
+  if (!initial) throw new Error("missing initial snapshot")
+  const locators = new BootstrapColumns()
+  locators.ingest(initial.bootstrap)
+  locators.seal()
+  await client.prefetchPrintings?.()
+  const snapshot = client.snapshot()
+  if (!snapshot) throw new Error("missing snapshot")
+  const reprints: string[] = []
+  const columns = new BootstrapColumns()
+  columns.ingest(
+    snapshot.bootstrap.map((fragment) => ({
+      ...fragment,
+      rows: fragment.rows.map((row) => {
+        if (fragment.table !== "printing" || row["region"] !== "jp") return row
+        const reprint = reprints.length % 3 === 0
+        reprints.push(reprint ? stringValue(row["id"]) : "")
+        return { ...row, reprint: reprint ? true : null }
+      }),
+    })),
+  )
+  columns.seal()
+  const created = new SearchIndex(columns, "jp")
+  const completed = new SearchIndex(locators, "jp")
+  completed.completePrintings(columns)
+  const registered = reprints.filter(Boolean)
+  expect(registered.length).toBeGreaterThan(0)
+  for (const index of [
+    created,
+    new SearchIndex(created.encode(), "jp"),
+    completed,
+    new SearchIndex(completed.encode(), "jp"),
+  ]) {
+    const ids = (state: Partial<typeof DEFAULT_QUERY>) =>
+      index
+        .search({ ...query, limit: 1000, state: { ...DEFAULT_QUERY, ...state } })
+        .items.map((item) => item.printingId)
+    const all = ids({})
+    for (const id of registered) expect(all).toContain(id)
+    const hidden = ids({ reprints: "hide" })
+    expect(hidden.length).toBe(all.length - registered.length)
+    for (const id of registered) expect(hidden).not.toContain(id)
+    const hiddenArt = ids({ reprints: "hide", unit: "art" })
+    expect(hiddenArt.length).toBeGreaterThan(0)
+    for (const id of registered) expect(hiddenArt).not.toContain(id)
+    // "Only" keeps exactly the registered ones.
+    expect(ids({ reprints: "only" }).sort()).toEqual([...registered].sort())
+    // Merging per card shows every card once: the switch has no effect there.
+    expect(ids({ reprints: "hide", unit: "card" })).toEqual(ids({ unit: "card" }))
+    expect(ids({ reprints: "only", unit: "card" })).toEqual(ids({ unit: "card" }))
   }
 })
 

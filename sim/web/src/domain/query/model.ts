@@ -8,6 +8,10 @@ import type { RepresentativeRarity } from "../representative"
 export const QUERY_UNITS = ["printing", "art", "card"] as const
 type QueryUnit = (typeof QUERY_UNITS)[number]
 
+/** Registered reprint printings: shown with the rest, hidden, or the only ones shown. */
+export const REPRINT_MODES = ["all", "hide", "only"] as const
+type ReprintMode = (typeof REPRINT_MODES)[number]
+
 export const QUERY_SORTS = ["no", "cost", "name", "date", "atk", "def"] as const
 type QuerySort = (typeof QUERY_SORTS)[number]
 
@@ -43,6 +47,8 @@ export interface QueryState {
   readonly rarities: readonly string[]
   readonly altArtOnly: boolean
   readonly errataOnly: boolean
+  /** Filters on registered reprint printings; a merged-by-card list ignores it. */
+  readonly reprints: ReprintMode
   readonly unit: QueryUnit
   /** Which printing a merged cell shows (#781); ignored while the unit is `printing`. */
   readonly representative: RepresentativeRarity
@@ -67,6 +73,7 @@ export const DEFAULT_QUERY: QueryState = {
   rarities: [],
   altArtOnly: false,
   errataOnly: false,
+  reprints: "all",
   unit: "printing",
   representative: "low",
   prFirst: false,
@@ -88,6 +95,7 @@ export function activeFilterCount(state: QueryState): number {
     (state.rarities.length > 0 ? 1 : 0) +
     (state.altArtOnly ? 1 : 0) +
     (state.errataOnly ? 1 : 0) +
+    (state.reprints !== DEFAULT_QUERY.reprints ? 1 : 0) +
     (state.unit !== DEFAULT_QUERY.unit ? 1 : 0)
   )
 }

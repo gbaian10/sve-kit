@@ -7,6 +7,7 @@ import {
   COST_CAP,
   QUERY_UNITS,
   type QueryState,
+  REPRINT_MODES,
   STAT_CAP,
   toggleValue,
 } from "../../domain/query/model"
@@ -14,6 +15,7 @@ import { REPRESENTATIVE_RARITIES } from "../../domain/representative"
 import type { Region } from "../../domain/search"
 import { Button } from "../ui/Button"
 import { cn } from "../ui/cn"
+import { Segmented } from "../ui/Segmented"
 import { Switch } from "../ui/Switch"
 import { Section, Toggle } from "./FilterControls"
 import { StatValue } from "./StatValue"
@@ -113,6 +115,7 @@ export function FilterPanel({
   const { t } = useTranslation()
   const collapsible = useMediaQuery("(width < 600px)")
   const merged = query.unit !== "printing"
+  const cardMerged = query.unit === "card"
   const stat = (
     title: string,
     field: "cost" | "attack" | "defense",
@@ -284,6 +287,28 @@ export function FilterPanel({
             />
             {t("filters.prFirst")}
           </label>
+          <div className="flex w-full flex-wrap items-center gap-2">
+            <span className="text-13 text-text-2">{t("filters.reprints")}</span>
+            <Segmented
+              label={t("filters.reprints")}
+              size="sm"
+              value={query.reprints}
+              disabled={cardMerged}
+              describedBy={cardMerged ? `${id}-reprints-hint` : undefined}
+              options={REPRINT_MODES.map((mode) => ({
+                value: mode,
+                label: t(`filters.reprintModes.${mode}`),
+              }))}
+              onChange={(reprints) => {
+                onChange({ ...query, reprints })
+              }}
+            />
+          </div>
+          {cardMerged && (
+            <p id={`${id}-reprints-hint`} className="w-full text-12 text-text-3">
+              {t("filters.reprintsMerged")}
+            </p>
+          )}
         </div>
       </FilterGroup>
       <div className="sticky bottom-21 z-50 -mx-3 -mb-3 rounded-b-block border-t border-border bg-surface-1 p-3 md:hidden phone-landscape:bottom-0">

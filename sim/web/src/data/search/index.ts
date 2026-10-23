@@ -163,6 +163,7 @@ const PRINTING_COLUMNS = [
   "rarity",
   "badge",
   "leaderFrame",
+  "reprint",
   "art",
   "alt",
   "releaseDate",
@@ -175,7 +176,7 @@ const seal = <T extends string>(columns: Record<T, number[]>): Record<T, Uint32A
   ) as Record<T, Uint32Array>
 
 /** Bump when the stored layout or derived data changes, so older images are rebuilt. */
-export const INDEX_IMAGE_FORMAT = 21
+export const INDEX_IMAGE_FORMAT = 22
 
 // Card-level special kinds, packed into the `kinds` column; Token stays per printing.
 const KIND_EVOLVE = 1
@@ -556,6 +557,7 @@ function build(
           ? fullPrinting["leader_name_frame"]
           : "unknown"
       printings.leaderFrame.push(intern(leaderFrame))
+      printings.reprint.push(Number(fullPrinting?.["reprint"] === true))
       // A locator row has no classification yet; a full row without a code has none at all.
       printings.rarity.push(
         intern(
@@ -883,6 +885,7 @@ export class SearchIndex {
         printings.owner[ordinal] = intern(code)
         printings.releaseDate[ordinal] = intern(dates.get(id))
         printings.leaderFrame[ordinal] = intern(frame)
+        printings.reprint[ordinal] = Number(row["reprint"] === true)
         printings.rarity[ordinal] = intern(official)
         printings.badge[ordinal] = intern(badgeOf(row)?.style ?? "unknown")
         printings.art[ordinal] = intern(art || id)
@@ -1090,7 +1093,11 @@ export class SearchIndex {
                 rarity === `pr:${this.pool.get(this.printings.badge[printing] ?? 0)}`
               : rarity === official
         })) &&
-      (!state.altArtOnly || this.printings.alt[printing] === 1)
+      (!state.altArtOnly || this.printings.alt[printing] === 1) &&
+      // A merged-by-card cell stands for every printing, so hiding reprints cannot apply there.
+      (state.reprints === "all" ||
+        state.unit === "card" ||
+        (this.printings.reprint[printing] === 1) === (state.reprints === "only"))
     // Stats come from the opened printing's summary; a selection within one stat is a union and
     // the three stats intersect.
     const statsAllowed = (printing: number) =>
