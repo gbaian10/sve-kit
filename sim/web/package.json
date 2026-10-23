@@ -11,7 +11,7 @@
     "preview": "vite preview",
     "typecheck": "UV_THREADPOOL_SIZE=4 bun check",
     "lint:all": "bun run lint:js && bun run lint:css",
-    "lint:js": "eslint --max-warnings=0 --no-warn-ignored",
+    "lint:js": "eslint --max-warnings=0 --no-warn-ignored --cache --cache-strategy content --cache-location node_modules/.cache/eslint/cache.json",
     "lint:css": "stylelint \"src/**/*.css\"",
     "format": "bun fmt",
     "format:check": "bun fmt --check",

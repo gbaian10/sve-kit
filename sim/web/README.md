@@ -53,10 +53,16 @@ Scripts never take the name of a Bun built-in command (`test`, `build`, `check`,
 `bun test` runs Bun's own test runner, which ignores the Vitest config, and a `check` script would
 replace the type checker behind `bun check`. A script that runs a whole group is `<name>:all`.
 
-The pre-commit hooks run bun fmt, ESLint and Stylelint on changed files. bun fmt reads the root
+ESLint keeps a content-based cache in `node_modules/.cache/eslint/`, so a repeated run only lints
+changed files. Type-aware results of an unchanged file can go stale when another file's types change;
+delete the cache if an error looks unrelated to your change. CI starts without it.
+
+The pre-commit hooks run bun fmt and Stylelint on changed files. bun fmt reads the root
 `bunfig.toml`; `.prettierrc.mjs` only serves the editor's Prettier extension, so change both
-together. The pre-push hook and CI run the same `typecheck` script, which caps
-`UV_THREADPOOL_SIZE`, libuv's pool size, that `bun check` uses as its thread count. Vitest is a
+together. The pre-push hook runs ESLint over all of sim/web, as CI does: type-aware rules load the
+whole TypeScript project however few files they check. It also runs the `typecheck` script that CI
+shares, which caps `UV_THREADPOOL_SIZE`, libuv's pool size, that `bun check` uses as its thread
+count. Vitest is a
 manual hook (`pre-commit run --hook-stage manual web-test`); CI runs the steps of `check:all` on
 every web change.
 
