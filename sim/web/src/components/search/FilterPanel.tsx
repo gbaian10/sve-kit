@@ -113,6 +113,7 @@ export function FilterPanel({
   const { t } = useTranslation()
   const collapsible = useMediaQuery("(width < 600px)")
   const merged = query.unit !== "printing"
+  const cardMerged = query.unit === "card"
   const stat = (
     title: string,
     field: "cost" | "attack" | "defense",
@@ -284,6 +285,29 @@ export function FilterPanel({
             />
             {t("filters.prFirst")}
           </label>
+          <label
+            className={cn(
+              "flex min-h-9 items-center gap-2 px-1 text-13",
+              cardMerged ? "cursor-not-allowed text-text-3" : "cursor-pointer text-text-1",
+            )}
+          >
+            <input
+              type="checkbox"
+              checked={query.hideReprints}
+              disabled={cardMerged}
+              aria-describedby={cardMerged ? `${id}-reprints-hint` : undefined}
+              onChange={(event) => {
+                onChange({ ...query, hideReprints: event.target.checked })
+              }}
+              className="size-4 shrink-0 accent-accent"
+            />
+            {t("filters.hideReprints")}
+          </label>
+          {cardMerged && (
+            <p id={`${id}-reprints-hint`} className="w-full text-12 text-text-3">
+              {t("filters.hideReprintsMerged")}
+            </p>
+          )}
         </div>
       </FilterGroup>
       <div className="sticky bottom-21 z-50 -mx-3 -mb-3 rounded-b-block border-t border-border bg-surface-1 p-3 md:hidden phone-landscape:bottom-0">

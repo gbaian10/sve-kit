@@ -192,6 +192,7 @@ export class SearchEngine {
               request.query.state.sort === "date" ||
               request.query.state.locations.some((token) => token.startsWith("leader:")) ||
               request.query.state.altArtOnly ||
+              request.query.state.hideReprints ||
               // A merged cell's representative needs every printing's rarity and art (#781).
               request.query.state.unit !== "printing")
           )

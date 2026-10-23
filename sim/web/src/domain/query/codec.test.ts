@@ -7,7 +7,7 @@ describe("query codec", () => {
   it("reads every parameter and ignores unknown values", () => {
     const state = parseQuery(
       new URLSearchParams(
-        "q=%20試作%20&class=witch,elf,elf,Bad!&cost=3,1,3&atk=10,0&def=4&type=spell&loc=token:spell,main&trait=pixie,Bad!&mech=-kw:a,kw:b&set=set:bp01&rarity=gold&alt=1&unit=art&rep=high&prfirst=1&sort=cost&view=table",
+        "q=%20試作%20&class=witch,elf,elf,Bad!&cost=3,1,3&atk=10,0&def=4&type=spell&loc=token:spell,main&trait=pixie,Bad!&mech=-kw:a,kw:b&set=set:bp01&rarity=gold&alt=1&noreprint=1&unit=art&rep=high&prfirst=1&sort=cost&view=table",
       ),
     )
     expect(state).toEqual({
@@ -24,6 +24,7 @@ describe("query codec", () => {
       rarities: ["gold"],
       altArtOnly: true,
       errataOnly: false,
+      hideReprints: true,
       unit: "art",
       representative: "high",
       prFirst: true,
@@ -52,6 +53,10 @@ describe("query codec", () => {
     expect(querySearch({ ...DEFAULT_QUERY, representative: "high", prFirst: true })).toBe(
       "?rep=high&prfirst=1",
     )
+    // Hiding reprints is written only when on and survives the round trip.
+    expect(querySearch(DEFAULT_QUERY)).toBe("")
+    expect(querySearch({ ...DEFAULT_QUERY, hideReprints: true })).toBe("?noreprint=1")
+    expect(parseQuery(new URLSearchParams("noreprint=0"))).toEqual(DEFAULT_QUERY)
   })
 
   it("reads deck locations out of older type URLs and writes them back as loc", () => {
@@ -132,9 +137,10 @@ describe("query codec", () => {
         cost: [1],
         attack: [2],
         altArtOnly: true,
+        hideReprints: true,
         unit: "art",
       }),
-    ).toBe(5)
+    ).toBe(6)
     expect(
       activeFilterCount({
         ...DEFAULT_QUERY,

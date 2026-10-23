@@ -174,6 +174,8 @@ const zhTW = {
     representative: "代表版次",
     representativeRarity: { low: "顯示最低稀有度", high: "顯示最高稀有度" },
     prFirst: "優先顯示 PR",
+    hideReprints: "不顯示再錄卡",
+    hideReprintsMerged: "同卡合併成一張時不適用",
     details: "{{label}}的細項",
     chipTitle: "{{label}}（{{count}}）",
     clear: "清除",

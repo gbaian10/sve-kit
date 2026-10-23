@@ -182,6 +182,8 @@ export default {
     representative: "Representative printing",
     representativeRarity: { low: "Show lowest rarity", high: "Show highest rarity" },
     prFirst: "Prefer PR",
+    hideReprints: "Hide reprints",
+    hideReprintsMerged: "Not applied when merged per card",
     details: "{{label}} details",
     chipTitle: "{{label}} ({{count}})",
     clear: "Clear",

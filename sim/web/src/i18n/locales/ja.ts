@@ -186,6 +186,8 @@ export default {
     representative: "代表する版",
     representativeRarity: { low: "最低レアリティを表示", high: "最高レアリティを表示" },
     prFirst: "PRを優先表示",
+    hideReprints: "再録カードを隠す",
+    hideReprintsMerged: "同じカードを1枚にまとめる表示では無効",
     details: "{{label}}の内訳",
     chipTitle: "{{label}}（{{count}}）",
     clear: "解除",

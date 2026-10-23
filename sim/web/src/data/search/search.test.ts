@@ -2688,6 +2688,44 @@ it("filters leader frames per printing, intersects rarity and restores the index
   }
 })
 
+it("hides registered reprints per printing, not when merged per card, and restores the index", async () => {
+  const client = createSnapshotClient(base, { fetch: origin().fetcher })
+  await client.load()
+  await client.prefetchPrintings?.()
+  const snapshot = client.snapshot()
+  if (!snapshot) throw new Error("missing snapshot")
+  const reprints: string[] = []
+  const columns = new BootstrapColumns()
+  columns.ingest(
+    snapshot.bootstrap.map((fragment) => ({
+      ...fragment,
+      rows: fragment.rows.map((row) => {
+        if (fragment.table !== "printing" || row["region"] !== "jp") return row
+        const reprint = reprints.length % 3 === 0
+        reprints.push(reprint ? stringValue(row["id"]) : "")
+        return { ...row, reprint: reprint ? true : null }
+      }),
+    })),
+  )
+  columns.seal()
+  const created = new SearchIndex(columns, "jp")
+  const registered = reprints.filter(Boolean)
+  expect(registered.length).toBeGreaterThan(0)
+  for (const index of [created, new SearchIndex(created.encode(), "jp")]) {
+    const ids = (state: Partial<typeof DEFAULT_QUERY>) =>
+      index
+        .search({ ...query, limit: 1000, state: { ...DEFAULT_QUERY, ...state } })
+        .items.map((item) => item.printingId)
+    const all = ids({})
+    for (const id of registered) expect(all).toContain(id)
+    const hidden = ids({ hideReprints: true })
+    expect(hidden.length).toBe(all.length - registered.length)
+    for (const id of registered) expect(hidden).not.toContain(id)
+    // Merging per card shows every card once: the switch has no effect there.
+    expect(ids({ hideReprints: true, unit: "card" })).toEqual(ids({ unit: "card" }))
+  }
+})
+
 it("selects Token by special kind and unions it with followers after index restore", async () => {
   const client = createSnapshotClient(base, { fetch: origin().fetcher })
   await client.load()
