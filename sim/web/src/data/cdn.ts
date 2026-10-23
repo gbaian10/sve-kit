@@ -1,4 +1,8 @@
-export type Fetcher = (url: string, init?: RequestInit) => Promise<Response>
+export interface FetchOptions extends RequestInit {
+  readonly raw?: { readonly root: string; readonly sha256: string; readonly bytes: number }
+  readonly speculative?: boolean
+}
+export type Fetcher = (url: string, init?: FetchOptions) => Promise<Response>
 
 /** A transport failure: the bytes never arrived intact, so the same request may succeed later. */
 export class NetworkError extends Error {
@@ -14,7 +18,7 @@ export class NetworkError extends Error {
 export async function fetchBytes(
   fetcher: Fetcher,
   url: string,
-  init?: RequestInit,
+  init?: FetchOptions,
 ): Promise<Uint8Array> {
   let response: Response
   try {

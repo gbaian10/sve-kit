@@ -106,6 +106,8 @@ export class MetadataBytes {
     }
     const existing = this.pending.get(key)
     if (existing) {
+      if (priority && !existing.priority && existing.started)
+        return this.read(key, true, this.abort.signal)
       if (priority && !existing.priority && !existing.started) {
         existing.priority = true
         if (existing.submitted) this.queue.setPriority(key, 1)

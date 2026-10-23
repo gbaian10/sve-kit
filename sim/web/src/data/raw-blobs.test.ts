@@ -5,7 +5,10 @@ import { memoryCache } from "../test-utils/cache"
 import { dataCacheBytes } from "./cache-budget"
 import type { Fetcher } from "./cdn"
 import { transferDigest } from "./integrity"
+import { MetadataBytes } from "./metadata"
 import { rawBlobDescriptor, RawBlobStore, rawRetentionPlan } from "./raw-blobs"
+import { appRequests } from "./request-queue"
+import { mainNetwork, type NetworkMessage, workerFetch } from "./search/network"
 
 const base = "https://raw.test/cdn"
 const payload = new Uint8Array([1, 2, 3])
@@ -107,7 +110,63 @@ it("repairs corrupt bytes and falls back to verified on-demand reads when storag
   await expect(scheduled.read(descriptor, { signal: aborted.signal })).rejects.toThrow("cancelled")
   expect(foreground).not.toHaveBeenCalled()
   expect(await scheduled.read(descriptor, { priority: "low" })).toEqual(payload)
-  expect(background).toHaveBeenCalledWith(`${base}/${file.path}`, { priority: "low" })
+  expect(background).toHaveBeenCalledWith(
+    `${base}/${file.path}`,
+    expect.objectContaining({ priority: "low" }),
+  )
+})
+
+it("shares raw identity across worker, metadata and detail subscribers with independent cancellation", async () => {
+  const gate = Promise.withResolvers<undefined>()
+  const entered = Promise.withResolvers<undefined>()
+  const fetcher = vi.fn(async (_url: string, init?: RequestInit) => {
+    entered.resolve(undefined)
+    await gate.promise
+    init?.signal?.throwIfAborted()
+    return new Response(payload)
+  })
+  vi.stubGlobal("fetch", fetcher)
+  const storage = memoryCache()
+  const worker = workerFetch((message) => {
+    bridge.receive(message)
+  }, false)
+  const bridge = mainNetwork({
+    postMessage: (message: NetworkMessage) => {
+      if (message.kind === "fetch-reply") worker.receive(message)
+    },
+  } as Worker)
+  const cancel = new AbortController()
+  const background = new RawBlobStore(base, worker.fetch, storage)
+  const pending = background.read(rawBlobDescriptor(file), { signal: cancel.signal })
+  const rejected = expect(pending).rejects.toThrow("cancelled")
+  await entered.promise
+  const renamed = { ...file, path: "another-path.json" }
+  const metadata = new MetadataBytes(
+    base,
+    new Map([[file.key, renamed]]),
+    appRequests.foreground,
+    () => undefined,
+    storage,
+    appRequests.background,
+  )
+  const visible = metadata.read(file.key)
+  const retained = new RawBlobStore(base, appRequests.foreground, storage).read(
+    rawBlobDescriptor(renamed),
+  )
+  // Let cache probes attach the two foreground subscribers before cancelling the worker owner.
+  await new Promise((resolve) => setTimeout(resolve, 0))
+  cancel.abort()
+  await rejected
+  gate.resolve(undefined)
+  try {
+    expect(await visible).toEqual(payload)
+    expect(await retained).toEqual(payload)
+    expect(fetcher).toHaveBeenCalledTimes(1)
+  } finally {
+    metadata.dispose()
+    bridge.dispose()
+    vi.unstubAllGlobals()
+  }
 })
 
 it("recovers persistence only on a successful write without a newer concurrent storage failure", async () => {

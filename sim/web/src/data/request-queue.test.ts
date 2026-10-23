@@ -89,3 +89,51 @@ it("copies the shared source into independently readable responses before publis
   expect(second.headers.get("x-shared")).toBe("yes")
   expect(fetcher).toHaveBeenCalledTimes(1)
 })
+
+it("limits speculative bodies app-wide, promotes queued subscribers, and pauses dispatch for P0", async () => {
+  const gates = new Map<string, () => void>()
+  const started: string[] = []
+  const queue = requestQueue((url) => {
+    started.push(url)
+    const gate = Promise.withResolvers<undefined>()
+    gates.set(url, () => {
+      gate.resolve(undefined)
+    })
+    return Promise.resolve(
+      new Response(
+        new ReadableStream({
+          async start(controller) {
+            await gate.promise
+            controller.enqueue(new Uint8Array([1]))
+            controller.close()
+          },
+        }),
+      ),
+    )
+  })
+  const speculative = Array.from({ length: 5 }, (_, n) =>
+    (n === 0 ? queue.foreground : queue.background)(`https://test/spec-${String(n)}`, {
+      speculative: true,
+    }),
+  )
+  expect(started).toHaveLength(2)
+  const promoted = queue.foreground("https://test/spec-4")
+  expect(started).toEqual(["https://test/spec-0", "https://test/spec-1", "https://test/spec-4"])
+  const background = Array.from({ length: 25 }, (_, n) =>
+    queue.background(`https://test/print-${String(n)}`),
+  )
+  expect(started).toHaveLength(25)
+  const visible = queue.foreground("https://test/visible")
+  expect(started.at(-1)).toBe("https://test/visible")
+  gates.get("https://test/spec-0")?.()
+  gates.get("https://test/spec-1")?.()
+  await Promise.all(speculative.slice(0, 2))
+  await new Promise((resolve) => setTimeout(resolve, 0))
+  expect(started).not.toContain("https://test/spec-2")
+  for (let round = 0; round < 6; round += 1) {
+    for (const release of gates.values()) release()
+    await new Promise((resolve) => setTimeout(resolve, 0))
+  }
+  await Promise.all([...speculative, ...background, promoted, visible])
+  expect(started.filter((url) => url === "https://test/spec-4")).toHaveLength(1)
+})
