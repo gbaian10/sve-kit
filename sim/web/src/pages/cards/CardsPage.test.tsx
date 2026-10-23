@@ -435,13 +435,18 @@ describe("CardsPage", () => {
       pages: 1,
       resultKey: "p:bp01-051",
     })
-    // Back lands on the list with the typed text in the URL and the input.
-    await router.navigate(-1)
+    // Back keeps the typed query and returns focus to the suggested card's result cell.
+    await act(() => router.navigate(-1))
     await waitFor(() => {
       expect(screen.getByRole("combobox", { name: "搜尋卡片" })).toHaveValue("bp01-51")
     })
+    await waitFor(() => {
+      const cell = document.querySelector('a[data-result-key="p:bp01-051"]')
+      expect(cell).toHaveFocus()
+      expect(cell).toHaveClass("ring-text-1")
+    })
     expect(router.state.location.search).toBe("?q=bp01-51")
-  })
+  }, 15_000)
 
   it("marks alias hits, shows all with the see-all link and keeps the text on back", async () => {
     prefsStore.set({ cardOpenMode: "page" })

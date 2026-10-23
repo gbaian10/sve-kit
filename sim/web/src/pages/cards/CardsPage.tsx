@@ -88,7 +88,6 @@ import { useCardOverlay } from "./CardOverlay"
 const DEBOUNCE_MS = 150
 /** How long a cell returned to from a card stays outlined (#522: about a second). */
 const RETURN_FLASH_MS = 1000
-/** Frames to wait for the returned-to cell to render before giving up on focusing it. */
 const RETURN_FRAMES = 30
 
 function resultCell(root: HTMLElement | null, key: string): HTMLElement | undefined {
@@ -341,8 +340,6 @@ export function CardsPage() {
     entry.scrollY,
     imageRoot,
   ])
-  // The cell a card returned to is flashed for a moment, whether the card was a page or beside
-  // the results.
   const [flash, setFlash] = useState<string | undefined>(undefined)
   const flashTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const flashCell = useCallback((key: string) => {
@@ -360,23 +357,34 @@ export function CardsPage() {
   )
   // Back from a card page mounts the list again: once its pages and scroll are back, focus returns
   // to the cell that opened the card. Rows render around the scroll position, so wait for the cell.
-  const returnTo = useRef(navigationType === NavigationType.Pop ? entry.anchor : undefined)
+  const returnTo = useRef({
+    key: location.key,
+    anchor: navigationType === NavigationType.Pop ? entry.anchor : undefined,
+  })
   useLayoutEffect(() => {
-    if (!page || pageLoading || restoreScroll.current === undefined) return
-    window.scrollTo(0, restoreScroll.current)
-    restoreScroll.current = undefined
-    const anchor = returnTo.current
-    returnTo.current = undefined
+    if (returnTo.current.key !== location.key) returnTo.current.anchor = undefined
+    if (!page || pageLoading) return
+    if (restoreScroll.current !== undefined) {
+      window.scrollTo(0, restoreScroll.current)
+      restoreScroll.current = undefined
+    }
+    const anchor = returnTo.current.anchor
     if (anchor === undefined) return
     let tries = 0
+    let frame: number
     const settle = () => {
       const cell = resultCell(imageRoot.current, anchor)
       if (cell) {
+        returnTo.current.anchor = undefined
         cell.focus({ preventScroll: true })
         flashCell(anchor)
-      } else if (++tries < RETURN_FRAMES) requestAnimationFrame(settle)
+      } else if (++tries < RETURN_FRAMES) frame = requestAnimationFrame(settle)
+      else returnTo.current.anchor = undefined
     }
-    requestAnimationFrame(settle)
+    frame = requestAnimationFrame(settle)
+    return () => {
+      cancelAnimationFrame(frame)
+    }
   }, [page, pageLoading, positionQuery, location.key, imageRoot, flashCell])
   const cellOf = useMemo(() => createCellReader(nameOf), [nameOf])
   const cells: GridCell[] = useMemo(
@@ -414,8 +422,14 @@ export function CardsPage() {
     const background = fromSuggest
       ? `?${urlParams({ ...DEFAULT_QUERY, text: typed }).toString()}`
       : location.search
-    if (fromSuggest && background !== location.search) {
-      void navigate(location.pathname + background, { replace: true, state: { pages: 1 } })
+    if (fromSuggest) {
+      const position = { anchor: row.summary.printingId, scrollY: window.scrollY }
+      if (background !== location.search) {
+        void navigate(location.pathname + background, {
+          replace: true,
+          state: { pages: 1, ...position },
+        })
+      } else updateEntry({ ...position, listScroll: listScroll.current })
     }
     const state: CardEntryState = {
       background,
