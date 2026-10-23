@@ -532,9 +532,13 @@ def test_exact_fixed_band_width_matrix() -> None:
                 ("print", "BP02"),
                 ("history", ""),
                 ("history", "BP02"),
+                ("detail", "", None),
+                ("detail", "", "jp"),
+                ("detail", "", "en"),
+                ("detail", "BP01", None),
             ],
         )
-    ) == [1, 32, 32, 8, 8, 32, 32, 64, 8, 64]
+    ) == [1, 32, 32, 8, 8, 32, 32, 64, 8, 64, 4, 8, 8, 32]
 
 
 def test_shared_full_sha_bucket_goldens() -> None:

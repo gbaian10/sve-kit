@@ -5,7 +5,7 @@ text or image binaries. Expected objects are independent of the exporter and
 reader. `index.json` lists the shared Python and TypeScript inputs. Core schema,
 reader, canonical and bucket vectors use the current 4.0 shape.
 
-The profile is format `4.0.0`, minimum reader `4.0.1`, 64 buckets, with all eight required capabilities.
+The profile is format `4.0.0`, minimum reader `4.0.2`, 64 buckets, with all eight required capabilities.
 JSON files are indented for review; manifest hashes and sizes describe
 canonical-json-v1 bytes. Load each payload through its manifest key and path.
 The golden must rejoin from individual files to `expected-logical.json`.
@@ -129,3 +129,8 @@ read its `card_mentioned_by` row from the shared file already used by
 `card_related`, without another request or annotation details. Independent
 Python projection assertions cover self references, duplicates, withheld targets,
 sections, historical versions and selected Japanese source annotations for English.
+
+Global detail with null region uses width 4 (16 bands); regional global detail
+stays at width 8. Old previews with reader minimum 4.0.0/4.0.1 are skipped by
+index negotiation and must be rebuilt. The mixed window supplies only the
+readable current manifest; its older previous entry is never fetched.

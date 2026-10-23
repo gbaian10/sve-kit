@@ -873,7 +873,11 @@ def _expected_placement(
         else bucket(
             _entity_key(fragment.table, row, entities[0], entities[1]), selected.buckets
         )
-        // selected.width(source_purpose, family)
+        // selected.width(
+            source_purpose,
+            family,
+            string(file["region"]) if file["region"] is not None else None,
+        )
     )
     segment = _physical_segment(purpose, family, band)
     expected_fragment = (

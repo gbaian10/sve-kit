@@ -576,11 +576,9 @@ def validate_manifest(manifest_value: JsonValue) -> None:
     manifest = object_value(manifest_value)
     validate("Manifest", manifest, string(manifest["format_version"]))
     selected = profile(string(manifest["format_version"]))
-    if tuple(map(int, string(manifest["min_reader_version"]).split("."))) > tuple(
-        map(int, READER_VERSION.split("."))
-    ) or set(map(string, array(manifest["required_capabilities"]))) != set(
-        selected.capabilities
-    ):
+    if manifest["min_reader_version"] != READER_VERSION or set(
+        map(string, array(manifest["required_capabilities"]))
+    ) != set(selected.capabilities):
         raise ValueError("Unsupported reader version or capability")
     files = _files(manifest)
     _metadata(manifest, files)
@@ -633,8 +631,7 @@ def compatible(entry: Row) -> bool:
         selected = profile(string(entry["format_version"]))
     except ValueError:
         return False
-    minimum = tuple(map(int, string(entry["min_reader_version"]).split(".")))
-    return minimum <= tuple(map(int, READER_VERSION.split("."))) and set(
+    return entry["min_reader_version"] == READER_VERSION and set(
         map(string, array(entry["required_capabilities"]))
     ) <= set(selected.capabilities)
 

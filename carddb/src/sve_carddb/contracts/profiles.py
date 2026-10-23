@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 
 MEDIA = "4.0.0"
-READER_VERSION = "4.0.1"
+READER_VERSION = "4.0.2"
 
 
 @dataclass(frozen=True)
@@ -29,9 +29,12 @@ class Profile:
     min_reader_version: str
     text_bands: Bands
     image_bands: Bands
+    global_detail_width: int
 
-    def width(self, purpose: str, family: str) -> int:
+    def width(self, purpose: str, family: str, region: str | None = None) -> int:
         """Keep physical membership stable across data versions, including exceptions."""
+        if purpose == "detail" and region is None and not family:
+            return self.global_detail_width
         return (self.image_bands if purpose == "images" else self.text_bands).width(
             family
         )
@@ -55,6 +58,7 @@ PROFILES = (
         min_reader_version=READER_VERSION,
         text_bands=Bands(family=64, shared=8, overrides=(("BP01", 32), ("CP04", 32))),
         image_bands=Bands(family=32, shared=1),
+        global_detail_width=4,
     ),
 )
 
