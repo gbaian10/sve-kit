@@ -1,4 +1,4 @@
-# 關鍵字登錄與自身宣告投影
+# 關鍵字登錄與機制投影
 
 自身宣告（內部代號 H1）指「整行只有關鍵字」，表示卡片本身具有該能力。
 
@@ -52,6 +52,22 @@ H1 只接受 `card_keywords.v2` 的完整 body part：整個片段由唯一解�
 token 定義的 keyword 不表示原卡自身具有。H1 不產 grants／refers／counts，
 沒有標籤亦不代表沒有能力。
 
+有限 grants adapter `manual-keywords-grants-bp01-v1` 只檢查首批固定永久 card ID 集合，
+由 `mechanic_batch.FIRST_BATCH_CARDS` 承載。209 張來自固定解析輸入及 identity recipe 中
+JP printing 原樣卡號以 `BP01-` 開頭、card 為 confirmed（排除 retired）的去重集合；
+後續批次或新增 printing 不會自動擴張這份集合。執行時仍重驗 confirmed 與 JP current owner。
+只使用既有 ward、storm、rush、bane、assail、intimidate、aura、drain、ambush、barrier 十個已登錄 ID，
+依相同 glossary 的唯一日文拼寫匹配，不新增概念。
+
+grants 只接受主文整行的有限句型：明示選擇自方從者、從墓場選擇並出場或產生具名 token 後，
+「それは【keyword】を持つ。」（可有指定格式的攻防增加）；以及
+「これがある限り、自分の『具名 token』すべては【keyword】を持つ。」。
+前綴僅接受已列出的ファンファーレ、ラストワード或指定 PP／act 費用格式的起動；
+尾句僅接受指定的任意數量 act 句。其他費用、條件、片段、引號能力及未知句型均不算已檢查。
+含「」的主文整欄保守略過，避免跨行引述；sections（含 token_definition）不交給這個 producer，
+token 原生 keyword 不會掛到母卡。主文明示額外授予生成 token 的 keyword 則屬母卡 grants。
+來源 descriptor、current revision、exact field bytes 與凍結來源重驗後才交出正標籤，與翻譯無關。
+
 ## 新鮮度與補正
 
 `mechanic-source-bundle-v1` 對 card／shared 全部面（含缺 current 的面）、
@@ -60,6 +76,8 @@ token 定義的 keyword 不表示原卡自身具有。H1 不產 grants／refers�
 
 producer_version 包含 `manual-keywords-h1-v1`、來源 normalizer／葉規則、keyword mapping
 與 keyword 概念集合，不含中文呈現、無關 commit 或 suppression。
+grants producer_version 另含自身 adapter、固定 card 集合及十個已登錄概念的 mapping／日文名稱；
+F1 configuration 也釘 grants adapter 與固定 card 集合 hash。
 抽取或 bundle 演算法變更必須更新 adapter／recipe 版本；keyword/action universe 與 coverage 每次重建。
 
 card_mechanic 使用 `source_kind=manual, dsl_id=null`，source_id 指實際原文，
@@ -77,7 +95,9 @@ decision 同上例且必須 confirmed。只有候選 ID、source hash 及 produc
 
 H1 提交已驗正標籤及自身宣告所在面／主文的局部 has 檢查，由共用 coverage reducer 合併；
 不把局部宣告當整欄位已查。內部範圍與 producer 鍵見[建置資料庫 §10](../build/build-db.md#10-dsl驗證與未實作卡片頁)。
-目前僅 H1，已檢查 keyword 一律為 partial；公開每 card／shared 一列，complete_all=false、
+H1 與 grants 均儲存後，才在共同編排點套用 suppression，並傳入全部有效 producer_version 投影一次。
+grants 只提交所在面／主文的局部 grants 檢查；has＋grants 也不能補滿 refers／counts 或 sections。
+目前已檢查 keyword 一律為 partial；公開每 card／shared 一列，complete_all=false、
 complete 集合空。partial 選較短 include／exclude，同長選 include；只投影 fresh coverage。
 has present 不證 grants absent；缺標籤且 partial／缺 coverage 仍 unknown。
 reducer 重驗內部 state 與 checked_ranges 一致，不能用手填 complete 冒充完整檢查結果。

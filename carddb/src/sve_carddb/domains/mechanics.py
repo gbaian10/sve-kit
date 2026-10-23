@@ -1,4 +1,4 @@
-"""Derive self keyword declarations from exact current owners, independently of rendering."""
+"""Compose keyword producers from exact current owners, independently of rendering."""
 
 from collections import Counter
 from dataclasses import dataclass
@@ -16,12 +16,15 @@ from sve_carddb.contracts.four_layer import (
 from sve_carddb.core.authored import read
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.core.models import Hash, RecordData, Text
+from sve_carddb.domains.mechanic_batch import FIRST_BATCH_CARDS
 from sve_carddb.domains.mechanic_coverage import (
     FieldCheck,
     Inspection,
     project_current,
     store_evidence,
 )
+from sve_carddb.domains.mechanic_grants import ADAPTER as GRANTS_ADAPTER
+from sve_carddb.domains.mechanic_grants import apply as apply_grants
 from sve_carddb.domains.products.models import LocalizedText
 from sve_carddb.domains.text_observations.intern import TextInterner
 from sve_carddb.domains.translations.direct import write
@@ -110,7 +113,14 @@ class Inputs:
 
     def configuration(self) -> dict[str, JsonValue]:
         """Pin accepted authored bytes without recording a machine-local location."""
-        return {"adapter": ADAPTER, "registry_sha256": digest(self.exact)}
+        return {
+            "adapter": ADAPTER,
+            "registry_sha256": digest(self.exact),
+            "grants_adapter": GRANTS_ADAPTER,
+            "grants_batch_sha256": digest(
+                canonical(list[JsonValue](sorted(FIRST_BATCH_CARDS)))
+            ),
+        }
 
 
 def load(authored: Path) -> Inputs:
@@ -133,6 +143,7 @@ class Settings:
     classifier: Classifier
     batch_id: str
     authored_revision: str
+    first_batch_cards: frozenset[str] = FIRST_BATCH_CARDS
 
 
 def _adoption(
@@ -313,7 +324,7 @@ def source_bundles(db: Database) -> dict[str, str]:
 def apply(  # ruff: ignore[complex-structure,too-many-locals] -- one owner-checked declaration pass retains all rejection reasons without render dependencies
     db: Database, inputs: Inputs, settings: Settings
 ) -> dict[str, JsonValue]:
-    """Self keyword declarations prove has; every other relation stays incomplete."""
+    """Store every producer before suppression and one shared coverage projection."""
     registry_source_id = _register(db, inputs, settings.authored_revision)
     hashes = source_bundles(db)
     version = producer_version(inputs, settings.classifier)
@@ -414,7 +425,6 @@ def apply(  # ruff: ignore[complex-structure,too-many-locals] -- one owner-check
                         whole_field=False,
                     )
                 )
-    insert_raw_sources(db, (use.source for use in settings.sources.uses))
     store_evidence(
         db,
         tuple(positives.values()),
@@ -433,13 +443,16 @@ def apply(  # ruff: ignore[complex-structure,too-many-locals] -- one owner-check
             for (cid, keyword), checks in sorted(checked.items())
         ),
     )
+    grants = apply_grants(db, inputs, settings, hashes)
+    insert_raw_sources(db, (use.source for use in settings.sources.uses))
     tags = {str(row.values["id"]): row.values for row in db.rows("card_mechanic")}
     _suppress(db, inputs.registry.suppressions, tags, registry_source_id, reasons)
-    project_current(db, hashes, frozenset({version}))
+    project_current(db, hashes, frozenset({version, str(grants["producer_version"])}))
     return {
         "adapter": ADAPTER,
         "description": "Self keyword declarations: body parts containing only keywords.",
         "producer_version": version,
+        "grants": grants,
         "keywords": len(keywords),
         "positive_tags": len(tags),
         "projection_rows": len(db.rows("mechanic_projection")),
