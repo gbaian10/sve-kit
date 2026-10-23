@@ -1,5 +1,6 @@
 """Prove bounded whole fields without treating positive fragments as completeness."""
 
+import re
 from collections import Counter
 from typing import TYPE_CHECKING
 
@@ -36,16 +37,17 @@ if TYPE_CHECKING:
     from sve_carddb.domains.mechanic_coverage import FieldKey
     from sve_carddb.domains.mechanics import Inputs, Settings
 
-ADAPTER = "manual-keywords-fields-bp01-v1"
+ADAPTER = "manual-keywords-fields-bp01-v2"
+_EVOLUTION = re.compile(r"\{進化\}\{コスト[0-9]+\}：これは進化する。")
 
 
-def _declarations(
+def _main_field(
     raw: str,
     source: SourceDescriptor,
     settings: Settings,
     keywords: Mapping[str, str],
 ) -> bool:
-    """Every non-layout part must prove the same self declaration accepted by H1."""
+    """Prove exact PP-only evolution clauses independently of H1 self declarations."""
     if "「" in raw or "」" in raw:
         return False
     derived = analyze_source(raw, source, settings.classifier)
@@ -53,9 +55,14 @@ def _declarations(
     for part, found in zip(derived.field.parts, derived.recognized, strict=True):
         if part.source_span.role == "layout":
             continue
+        if part.source_span.role != "body":
+            return False
+        spans = part.source_span.segments
+        if len(spans) == 1 and _EVOLUTION.fullmatch(raw[spans[0].start : spans[0].end]):
+            bodies += 1
+            continue
         if (
-            part.source_span.role != "body"
-            or found.issues
+            found.issues
             or found.semantics is None
             or found.semantics.key != "card_keywords.v2"
         ):
@@ -121,7 +128,7 @@ def _proved(
     if source.field == "section":
         reasons["nonempty_section"] += 1
         return False
-    if not _declarations(raw, source, settings, keywords):
+    if not _main_field(raw, source, settings, keywords):
         reasons["unproved_main_field"] += 1
         return False
     return True
@@ -182,7 +189,7 @@ def apply(
     hashes: Mapping[str, str],
     h1_version: str,
 ) -> dict[str, JsonValue]:
-    """Empty fields and pure main declarations prove all four relations for this batch."""
+    """Only closed fields prove all four relations for this batch."""
     keywords = {
         record.term_id: record.id
         for record in inputs.registry.records

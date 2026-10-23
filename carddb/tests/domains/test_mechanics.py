@@ -229,11 +229,53 @@ def test_first_batch_declarations_and_empty_back_prove_all_keywords(
         assert db.rows("card_engine_support") == support
 
 
+def test_first_batch_pp_evolution_and_declarations_prove_without_new_labels(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    with case(
+        tmp_path,
+        monkeypatch,
+        "{進化}{コスト2}：これは進化する。\n【合成甲】",
+        back="{進化}{コスト0}：これは進化する。",
+        first_batch=True,
+    ) as (db, inputs, settings, _):
+        with db.transaction():
+            report = mechanics.apply(db, inputs, settings)
+        assert db.rows("card_mechanic_coverage")[0].values["complete_all"] is True
+        projection = db.rows("mechanic_projection")
+        assert len(projection) == 1
+        assert projection[0].values["keyword_id"] == "kw:ward"
+        assert projection[0].values["relations"] == Json(["has"])
+        assert report["complete_cards"] == 1
+
+
+def test_first_batch_pp_evolution_with_unproved_reminder_stays_partial(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    with case(
+        tmp_path,
+        monkeypatch,
+        "{進化}{コスト1}：これは進化する。（合成の未証明注記）\n【合成甲】",
+        first_batch=True,
+    ) as (db, inputs, settings, _):
+        with db.transaction():
+            report = mechanics.apply(db, inputs, settings)
+        coverage = db.rows("card_mechanic_coverage")[0].values
+        assert coverage["complete_all"] is False
+        assert coverage["complete_keyword_ids"] == Json([])
+        assert coverage["partial_keyword_ids"] == Json(["kw:ward"])
+        assert report["complete_cards"] == 0
+
+
 def test_first_batch_missing_current_back_prevents_complete(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     with case(
-        tmp_path, monkeypatch, "【合成甲】", back="【合成乙】", first_batch=True
+        tmp_path,
+        monkeypatch,
+        "{進化}{コスト2}：これは進化する。\n【合成甲】",
+        back="【合成乙】",
+        first_batch=True,
     ) as (db, inputs, settings, _):
         with db.transaction():
             back = db.select(
@@ -257,7 +299,10 @@ def test_first_batch_missing_current_back_prevents_complete(
 def test_other_card_grant_merges_with_self_declaration_but_stays_partial(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    raw = "【合成甲】\n{ファンファーレ}自分の他のフォロワー1体を選ぶ。それは【合成甲】を持つ。"
+    raw = (
+        "{進化}{コスト2}：これは進化する。\n"
+        "【合成甲】\n{ファンファーレ}自分の他のフォロワー1体を選ぶ。それは【合成甲】を持つ。"
+    )
     with case(tmp_path, monkeypatch, raw, first_batch=True) as (
         db,
         inputs,
