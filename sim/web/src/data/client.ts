@@ -195,24 +195,10 @@ function snapshotClient(
   const url = (path: string) => `${base}/${path}`
 
   /** Exact bytes or nothing: one retry covers a torn download, a second mismatch is corruption. */
-  const fetchVerified = async (
-    path: string,
-    sha256: string,
-    bytes?: number,
-    signal?: AbortSignal,
-    priority: "foreground" | "background" | "low" = "foreground",
-  ): Promise<Uint8Array> => {
+  const fetchVerified = async (path: string, sha256: string): Promise<Uint8Array> => {
     for (let attempt = 0; ; attempt += 1) {
-      const data = await fetchBytes(
-        priority === "foreground" ? fetcher : requests.background,
-        url(path),
-        {
-          ...(signal ? { signal } : {}),
-          ...(priority === "low" ? { priority: "low" } : {}),
-        },
-      )
-      if ((await transferDigest(data)) === sha256 && (bytes === undefined || data.length === bytes))
-        return data
+      const data = await fetchBytes(fetcher, url(path))
+      if ((await transferDigest(data)) === sha256) return data
       if (attempt === 1)
         throw new SnapshotError("blob-integrity", `hash mismatch for ${path} after retry`)
     }
@@ -432,12 +418,7 @@ function snapshotClient(
     const batch = new AbortController()
     const results = await Promise.all(
       startup.map(async ([key, file]) => {
-        const data = await fetchVerified(
-          stringValue(file["path"]),
-          stringValue(file["sha256"]),
-          integerValue(file["bytes"]),
-          batch.signal,
-        )
+        const data = await raw.read(rawBlobDescriptor(file), { signal: batch.signal })
         const result = await decode({ kind: "file", file, bytes: data, version })
         if (file["role"] === "bootstrap") done += 1
         if (!previous && !batch.signal.aborted && file["role"] === "bootstrap")
@@ -913,13 +894,7 @@ function snapshotClient(
           check()
           const file = snapshot.files.get(key)
           if (!file) throw new SnapshotError("payload-set", "missing catalog file")
-          const bytes = await fetchVerified(
-            stringValue(file["path"]),
-            stringValue(file["sha256"]),
-            integerValue(file["bytes"]),
-            signal,
-            "background",
-          )
+          const bytes = await raw.read(rawBlobDescriptor(file), { signal, priority: "background" })
           check()
           const result = await decode({ kind: "file", file, bytes, version })
           if (result.kind !== "fragments")

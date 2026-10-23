@@ -811,36 +811,57 @@ it("root changes keep the active result's provenance until the new generation is
   })
 })
 
-it("persistent cache evicts all but two successful plans per edition without evicting another root", async () => {
+it("whole-manifest plans preserve details and share hashes across generations and roots", async () => {
   const storage = memoryCache()
   const files = new Map<string, Uint8Array>()
-  const fetcher: Fetcher = (url) => Promise.resolve(new Response(files.get(url)?.slice().buffer))
-  const file = (root: string, value: string): JsonObject => {
+  const fetcher = vi.fn<Fetcher>((url) =>
+    Promise.resolve(new Response(files.get(url)?.slice().buffer)),
+  )
+  const descriptor = (root: string, key: string, value: string, path = key): JsonObject => {
     const bytes = new TextEncoder().encode(value)
-    const path = `snapshots/blobs/${digest(bytes).slice(7)}.json`
-    files.set(`${root}/${path}`, bytes)
-    return { path, bytes: bytes.length, sha256: digest(bytes) }
+    files.set(root + "/" + path, bytes)
+    return { key, path, bytes: bytes.length, sha256: digest(bytes) }
   }
-  const plan = async (root: string, edition: "jp" | "en", values: string[]) => {
-    const blobs = new SearchBlobs(root, fetcher, storage)
-    const selected = values.map((value) => file(root, value))
-    for (const descriptor of selected) await blobs.read(descriptor, new AbortController().signal)
-    await blobs.retainPlan(edition, selected)
-    return selected.map((descriptor) => `${root}/${stringValue(descriptor["path"])}`)
-  }
-  const otherRoot = `${base}/other`
-  const isolated = await plan(otherRoot, "jp", ["isolated"])
-  const old = await plan(base, "jp", ["old", "shared"])
-  const en = await plan(base, "en", ["en", "shared"])
-  const previous = await plan(base, "jp", ["previous", "shared"])
-  const current = await plan(base, "jp", ["current", "shared"])
-  // Repeating the same plan must not replace the previous distinct one.
-  await plan(base, "jp", ["current", "shared"])
-  const cache = await storage.open(`sve-search-blobs:${encodeURIComponent(base)}`)
-  expect(await cache.match(old[0] ?? "")).toBeUndefined()
-  for (const path of [...previous, ...current, ...en]) expect(await cache.match(path)).toBeDefined()
-  const other = await storage.open(`sve-search-blobs:${encodeURIComponent(otherRoot)}`)
-  expect(await other.match(isolated[0] ?? "")).toBeDefined()
+  const legacy = "sve-search-blobs:" + encodeURIComponent(base)
+  await (await storage.open(legacy)).put(base + "/obsolete", new Response("old"))
+  const otherRoot = base + "/other"
+  const otherLegacy = "sve-search-blobs:" + encodeURIComponent(otherRoot)
+  await storage.open(otherLegacy)
+  const old = descriptor(base, "catalog", "original")
+  const detail = descriptor(base, "detail", "detail bytes")
+  const renamed = descriptor(base, "renamed", "original", "new-path")
+  const first = new SearchBlobs(base, fetcher, storage)
+  await first.read(old, new AbortController().signal)
+  await first.read(detail, new AbortController().signal)
+  const second = new SearchBlobs(base, fetcher, storage)
+  const changed = descriptor(base, "catalog", "replacement")
+  const fullManifest = new Map([
+    ["renamed", renamed],
+    ["catalog", changed],
+    ["detail", detail],
+  ])
+  const plan = await second.retainPlan(fullManifest, "new-manifest")
+  expect(plan.get(stringValue(detail["sha256"]))?.manifests).toEqual(new Set(["new-manifest"]))
+  await second.read(renamed, new AbortController().signal)
+  expect(fetcher).toHaveBeenCalledTimes(2)
+  expect(await second.read(changed, new AbortController().signal)).toEqual(
+    new TextEncoder().encode("replacement"),
+  )
+  const third = new SearchBlobs(base, fetcher, storage)
+  await third.retainPlan(fullManifest, "third-manifest")
+  expect(await third.read(detail, new AbortController().signal)).toEqual(
+    new TextEncoder().encode("detail bytes"),
+  )
+  expect(fetcher).toHaveBeenCalledTimes(3)
+  const cache = await storage.open("sve-raw:" + encodeURIComponent(base))
+  expect(await cache.keys()).toHaveLength(3)
+  expect(await storage.keys()).not.toContain(legacy)
+  expect(await storage.keys()).toContain(otherLegacy)
+  const other = new SearchBlobs(otherRoot, fetcher, storage)
+  const isolated = descriptor(otherRoot, "detail", "detail bytes")
+  await other.read(isolated, new AbortController().signal)
+  expect(fetcher).toHaveBeenCalledTimes(4)
+  expect(await cache.keys()).toHaveLength(3)
 })
 
 it("staging refuses lookups outside its search projection", async () => {
@@ -1191,45 +1212,20 @@ it("attack and defense values union within a stat, intersect across stats, and 1
   expect(bigIndex.search({ ...query, state: { ...CARD_QUERY, attack: [9] } }).total).toBe(0)
 })
 
-it("cache cleanup still reclaims stale plans when a blob write hits quota", async () => {
-  const storage = memoryCache()
-  let rejectBlobs = false
-  const limited = {
-    open: async (name: string) => {
-      const cache = await storage.open(name)
-      const put = cache.put.bind(cache)
-      cache.put = (key, response) =>
-        rejectBlobs && new Request(key).url.includes("/snapshots/blobs/")
-          ? Promise.reject(new Error("quota"))
-          : put(key, response)
-      return cache
-    },
-  } as CacheStorage
-  const descriptors = ["old", "previous", "current"].map((text) => {
-    const bytes = new TextEncoder().encode(text)
-    return {
-      bytes,
-      file: {
-        path: `snapshots/blobs/${digest(bytes).slice(7)}.json`,
-        bytes: bytes.length,
-        sha256: digest(bytes),
-      },
-    }
-  })
-  const fetcher: Fetcher = (url) =>
-    Promise.resolve(
-      new Response(descriptors.find((item) => url.endsWith(item.file.path))?.bytes.slice().buffer),
-    )
-  for (const [ordinal, { file }] of descriptors.entries()) {
-    if (ordinal === 2) rejectBlobs = true
-    const blobs = new SearchBlobs(base, fetcher, limited)
-    await blobs.read(file, new AbortController().signal)
-    await blobs.retainPlan("jp", [file])
-    if (ordinal === 2) expect(blobs.persistent).toBe(false)
+it("quota failures keep search usable without retaining fallback bytes in RAM", async () => {
+  const storage = memoryCache(true)
+  const bytes = new TextEncoder().encode("current")
+  const file = { key: "catalog", path: "catalog.json", bytes: bytes.length, sha256: digest(bytes) }
+  const fetcher = vi.fn<Fetcher>(() => Promise.resolve(new Response(bytes)))
+  const blobs = new SearchBlobs(base, fetcher, storage)
+  for (let attempt = 0; attempt < 2; attempt++) {
+    expect(await blobs.read(file, new AbortController().signal)).toEqual(bytes)
+    expect(blobs.persistent).toBe(false)
+    await blobs.retainPlan(new Map([["catalog", file]]), "manifest")
   }
-  const cache = await storage.open(`sve-search-blobs:${encodeURIComponent(base)}`)
-  expect(await cache.match(`${base}/${descriptors[0]?.file.path ?? ""}`)).toBeUndefined()
-  expect(await cache.match(`${base}/${descriptors[1]?.file.path ?? ""}`)).toBeDefined()
+  expect(fetcher).toHaveBeenCalledTimes(2)
+  const cache = await storage.open("sve-raw:" + encodeURIComponent(base))
+  expect(await cache.keys()).toHaveLength(0)
 })
 
 it("a stored index image answers every query like the index it was encoded from", async () => {
@@ -1475,9 +1471,9 @@ it("a complete cached view and index are usable while the entry is blocked, with
   const metadata = (built.manifest["files"] as JsonObject[]).filter((file) =>
     (file["row_counts"] as JsonValue[][]).some((row) => row[0] === "printing_image"),
   )
-  const blobs = await storage.open(`sve-search-blobs:${encodeURIComponent(base)}`)
+  const blobs = await storage.open(`sve-raw:${encodeURIComponent(base)}`)
   for (const file of metadata) {
-    await blobs.delete(`${base}/${stringValue(file["path"])}`)
+    await blobs.delete(`${base}/__sve-raw/${encodeURIComponent(stringValue(file["sha256"]))}/bytes`)
     served.files.delete(stringValue(file["path"]))
   }
   served.requests.length = 0
@@ -1535,11 +1531,13 @@ it("missing views recover and image errors stay separate from usable search resu
   restored.session.load(base, "jp", "preview")
   await restored.settled()
   await expect.poll(() => restored.status().result.phase, POLL).toBe("complete")
-  const blobs = await storage.open(`sve-search-blobs:${encodeURIComponent(base)}`)
+  const blobs = await storage.open(`sve-raw:${encodeURIComponent(base)}`)
   await storage.delete(`sve-search-view:${encodeURIComponent(base)}`)
   for (const file of built.manifest["files"] as JsonObject[])
     if ((file["row_counts"] as JsonValue[][]).some((row) => row[0] === "printing_image")) {
-      await blobs.delete(`${base}/${stringValue(file["path"])}`)
+      await blobs.delete(
+        `${base}/__sve-raw/${encodeURIComponent(stringValue(file["sha256"]))}/bytes`,
+      )
       served.files.set(stringValue(file["path"]), new Uint8Array([0]))
     }
   const broken = harness(served, storage)
@@ -1675,13 +1673,17 @@ it("visible-image channels share metadata while search channels do not request i
   first.session.load(base, "jp", "preview")
   await first.settled()
   await storage.delete(`sve-search-view:${encodeURIComponent(base)}`)
-  const blobs = await storage.open(`sve-search-blobs:${encodeURIComponent(base)}`)
+  const blobs = await storage.open(`sve-raw:${encodeURIComponent(base)}`)
   const metadata = (built.manifest["files"] as JsonObject[])
     .filter((file) =>
       (file["row_counts"] as JsonValue[][]).some((row) => row[0] === "printing_image"),
     )
     .map((file) => stringValue(file["path"]))
-  for (const path of metadata) await blobs.delete(`${base}/${path}`)
+  for (const file of built.manifest["files"] as JsonObject[])
+    if (metadata.includes(stringValue(file["path"])))
+      await blobs.delete(
+        `${base}/__sve-raw/${encodeURIComponent(stringValue(file["sha256"]))}/bytes`,
+      )
   served.requests.length = 0
   const warm = harness(served, storage)
   const options = warm.session.createChannel()
@@ -3134,3 +3136,34 @@ it.each(["jp", "en"] as const)(
     }
   },
 )
+
+it("search lists and the full client reuse startup, comparison and detail raw bytes", async () => {
+  const storage = memoryCache()
+  const served = origin()
+  const jp = harness(served, storage)
+  jp.session.load(base, "jp", "preview")
+  await jp.settled()
+  const en = harness(served, storage)
+  en.session.load(base, "en", "preview")
+  await en.settled()
+  const searched = new Set(served.requests)
+  const client = createSnapshotClient(base, { fetch: served.fetcher, cacheStorage: storage })
+  served.requests.length = 0
+  await client.load()
+  expect(client.status().state).toBe("ready")
+  const comparison = await client.catalog?.("en", new AbortController().signal)
+  expect(comparison?.region).toBe("en")
+  const detail = (built.manifest["files"] as JsonObject[]).find(
+    (file) =>
+      file["role"] === "text" &&
+      searched.has(stringValue(file["path"])) &&
+      (file["region"] === "jp" || file["region"] === null),
+  )
+  if (!detail) throw new Error("search did not load a text file")
+  expect(await client.fragments(stringValue(detail["key"]))).not.toHaveLength(0)
+  const blobs = new Set(
+    (built.manifest["files"] as JsonObject[]).map((file) => stringValue(file["path"])),
+  )
+  expect(served.requests.filter((path) => blobs.has(path) && searched.has(path))).toEqual([])
+  expect(await storage.keys()).not.toContain("sve-search-blobs:" + encodeURIComponent(base))
+})

@@ -1147,7 +1147,11 @@ describe("createSnapshotClient: verified snapshot records", () => {
       const opened = await open(name)
       const put = opened.put.bind(opened)
       opened.put = async (key, response) => {
-        if (!(key instanceof Request ? key.url : String(key)).includes("/adopted-")) await held
+        if (
+          name.startsWith("sve-snapshot:") &&
+          !(key instanceof Request ? key.url : String(key)).includes("/adopted-")
+        )
+          await held
         return put(key, response)
       }
       return opened
@@ -1171,7 +1175,7 @@ describe("createSnapshotClient: verified snapshot records", () => {
     expect(await revision()).toBe(3)
   })
 
-  it("a damaged record falls back to the full verified download", async () => {
+  it("a damaged decoded record rebuilds from verified raw bytes", async () => {
     const storage = memoryCache()
     const original = createSnapshotClient(base, {
       fetch: serve(base).fetcher,
@@ -1190,7 +1194,11 @@ describe("createSnapshotClient: verified snapshot records", () => {
     const served = serve(base)
     const client = createSnapshotClient(base, { fetch: served.fetcher, cacheStorage: storage })
     await client.load()
-    expect(served.requests.length).toBeGreaterThan(2)
+    const index = objectValue(parseJson(served.files.get(INDEX) ?? ""))
+    expect(served.requests).toEqual([
+      INDEX,
+      stringValue(objectValue(index["current"])["manifest_path"]),
+    ])
     expect(client.snapshot()).toStrictEqual(original.snapshot())
   })
 
