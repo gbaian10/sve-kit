@@ -1383,7 +1383,9 @@ function familyFragments(input: Iterable<Fragment>): {
             ? ["BP01", "CP04"].includes(fragment.owner.id)
               ? 32
               : 64
-            : 8
+            : purpose === "detail" && region === null
+              ? 4
+              : 8
       const band = purpose === "catalog" ? 0 : Math.floor(bucket(key, 64) / width)
       const segment = purpose === "catalog" ? family : `${family}:band-${String(band)}`
       const part = dictionaries.has(table)
@@ -2068,7 +2070,7 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
     data_as_of: AS_OF,
     regions,
     languages,
-    min_reader_version: "4.0.0",
+    min_reader_version: "4.0.2",
     required_capabilities: [
       "column-partition-v1",
       "digital-same-name-links-v1",
@@ -2138,7 +2140,7 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
     data_version: dataVersion,
     published_at: publishedAt,
     format_version: FORMAT,
-    min_reader_version: "4.0.0",
+    min_reader_version: "4.0.2",
     required_capabilities: [
       "column-partition-v1",
       "digital-same-name-links-v1",

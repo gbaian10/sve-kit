@@ -15,7 +15,7 @@ import { primaryKey, rowType } from "./schema"
 
 const FORMAT = "4.0.0"
 /** This reader's own contract version (transport §1.1), independent of the web app version. */
-const READER_CONTRACT_VERSION = "4.0.1"
+const READER_CONTRACT_VERSION = "4.0.2"
 const CAPABILITIES: readonly string[] = [
   "column-partition-v1",
   "fragment-container-v1",
@@ -41,20 +41,6 @@ export interface Fragment {
 
 export type Files = Map<string, JsonObject>
 
-function versionTuple(version: string): number[] {
-  return version.split(".").map((part) => Number(part))
-}
-
-function newerThan(version: string, reference: readonly number[]): boolean {
-  const parts = versionTuple(version)
-  for (let i = 0; i < reference.length; i += 1) {
-    const a = parts[i] ?? 0
-    const b = reference[i] ?? 0
-    if (a !== b) return a > b
-  }
-  return false
-}
-
 /** Whether a manifest or version-index entry can be read by this reader (transport §1.1). */
 export function isCompatible(entry: JsonObject): boolean {
   const capabilities = arrayValue(entry["required_capabilities"] ?? null).map((item) =>
@@ -62,7 +48,7 @@ export function isCompatible(entry: JsonObject): boolean {
   )
   return (
     stringValue(entry["format_version"]) === FORMAT &&
-    !newerThan(stringValue(entry["min_reader_version"]), versionTuple(READER_CONTRACT_VERSION)) &&
+    entry["min_reader_version"] === READER_CONTRACT_VERSION &&
     capabilities.length === CAPABILITIES.length &&
     CAPABILITIES.every((capability) => capabilities.includes(capability)) &&
     capabilities.every((capability) => CAPABILITIES.includes(capability))

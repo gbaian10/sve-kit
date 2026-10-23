@@ -70,9 +70,9 @@ describe("current card-name back references", () => {
     )?.rows
     expect(rows).toEqual([{ card_id: "old_card", region: "jp", from_card_id: "card" }])
     expect(requests.slice(before)).toEqual([])
-    expect(manifest["min_reader_version"]).toBe("4.0.1")
+    expect(manifest["min_reader_version"]).toBe("4.0.2")
     expect(isCompatible(manifest)).toBe(true)
-    expect(isCompatible({ ...manifest, min_reader_version: "4.0.2" })).toBe(false)
+    expect(isCompatible({ ...manifest, min_reader_version: "4.0.3" })).toBe(false)
   })
   it("keeps JP and EN rows in one shared engine file and rejects a regional container", () => {
     const native = objectValue(v3Fixture("mentioned-by-native.json"))
@@ -99,22 +99,24 @@ describe("current card-name back references", () => {
       "back references require shared engine",
     )
   })
-  it("accepts both manifests in the shared mixed reader-minimum window", () => {
+  it("rejects the old preview in the shared mixed reader-minimum window", () => {
     const mixed = arrayValue(v3Fixture("index-cases.json"))
       .map((raw) => objectValue(raw))
       .find((item) => item["name"] === "mixed-reader-minimum-window")
     if (!mixed) throw new Error("missing mixed-window fixture")
     const index = objectValue(mixed["index"])
     const entries = [objectValue(index["current"]), objectValue(index["previous"])]
-    expect(entries.map((entry) => entry["min_reader_version"])).toEqual(["4.0.1", "4.0.0"])
-    for (const entry of entries) {
-      expect(isCompatible(entry)).toBe(true)
-      const manifest = objectValue(
-        objectValue(mixed["manifests"])[stringValue(entry["manifest_sha256"])],
-      )
-      expect(readManifest(manifest).manifest["min_reader_version"]).toBe(
-        entry["min_reader_version"],
-      )
+    expect(entries.map((entry) => entry["min_reader_version"])).toEqual(["4.0.2", "4.0.1"])
+    for (const [i, entry] of entries.entries()) {
+      expect(isCompatible(entry)).toBe(i === 0)
+      if (i === 0) {
+        const manifest = objectValue(
+          objectValue(mixed["manifests"])[stringValue(entry["manifest_sha256"])],
+        )
+        expect(readManifest(manifest).manifest["min_reader_version"]).toBe(
+          entry["min_reader_version"],
+        )
+      } else expect(() => readManifest(entry)).toThrow("unsupported format")
     }
   })
 })

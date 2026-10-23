@@ -576,40 +576,48 @@ describe("catalog preparation at client publication boundaries", () => {
     },
   )
 
-  it.each(["restore", "restoreAdopted"])(
-    "rebuilds an unusable %s record when catalog construction fails",
-    async (path) => {
-      const { storage, original } = await seeded(),
-        snapshot = ready(original)
-      const stored = new VerifiedCache(base, "snapshot", 2, storage)
-      const bootstrap = structuredClone(snapshot.bootstrap)
+  it.each([
+    ["restore", "catalog construction"],
+    ["restoreAdopted", "catalog construction"],
+    ["restore", "reader admission"],
+    ["restoreAdopted", "reader admission"],
+  ])("rebuilds an unusable %s record when %s fails", async (path, failure) => {
+    const { storage, original } = await seeded(),
+      snapshot = ready(original)
+    const stored = new VerifiedCache(base, "snapshot", 2, storage)
+    const bootstrap = structuredClone(snapshot.bootstrap)
+    if (failure === "catalog construction") {
       const card = bootstrap.find((fragment) => fragment.table === "card")?.rows[0]
       if (!card) throw new Error("Missing fixture card")
       delete card["id"]
-      const record = {
-        manifest: snapshot.manifest,
-        config: snapshot.config,
-        bootstrap,
-      }
-      await stored.write(
-        "snapshot-jp",
-        snapshot.manifestHash,
-        new TextEncoder().encode(JSON.stringify(record)),
-      )
-      if (path === "restore") {
-        const cache = await persisted(storage)
-        for (const key of await cache.keys())
-          if (key.url.includes("/adopted-")) await cache.delete(key)
-      }
-      const served = origin(),
-        client = createSnapshotClient(base, { fetch: served.fetch, cacheStorage: storage }),
-        published = observed(client)
-      await client.load()
-      await client.reload()
-      expect(published).toEqual([ready(client)])
-      expect(served.paths.some((path) => path.startsWith("snapshots/manifests/"))).toBe(true)
-    },
-  )
+    }
+    // An old preview verified under minimum 4.0.1 has the eight-band global detail layout.
+    const record = {
+      manifest:
+        failure === "reader admission"
+          ? { ...snapshot.manifest, min_reader_version: "4.0.1" }
+          : snapshot.manifest,
+      config: snapshot.config,
+      bootstrap,
+    }
+    await stored.write(
+      "snapshot-jp",
+      snapshot.manifestHash,
+      new TextEncoder().encode(JSON.stringify(record)),
+    )
+    if (path === "restore") {
+      const cache = await persisted(storage)
+      for (const key of await cache.keys())
+        if (key.url.includes("/adopted-")) await cache.delete(key)
+    }
+    const served = origin(),
+      client = createSnapshotClient(base, { fetch: served.fetch, cacheStorage: storage }),
+      published = observed(client)
+    await client.load()
+    await client.reload()
+    expect(published).toEqual([ready(client)])
+    expect(served.paths.some((path) => path.startsWith("snapshots/manifests/"))).toBe(true)
+  })
 
   it("excludes task-yield waits from active work observations", async () => {
     const clock = slices(),
