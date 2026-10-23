@@ -5,6 +5,8 @@
 `Registry::current().supported()` 仍為空；良構通過不能取代本入口的執行准入。
 
 正式卡片與能力打出的程序以[正式 play 契約](play-semantics.md)為準；以下列出執行器已驗子集。
+目標 predicate 與限期 Add 跨進化的後續義務見[目標與進化契約](target-evolution-semantics.md)；
+本次僅定規格，下列恆真目標及數值進化的已驗限制仍保留。
 常見觸發與來源離場的後續義務見[觸發與 LKI 契約](trigger-lki-semantics.md)，不改變下列准入限制。
 
 ## 整卡與正式 play 的內部邊界
