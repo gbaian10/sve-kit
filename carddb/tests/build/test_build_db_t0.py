@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 
     from sve_carddb.build import CompiledSchema
 
-    from ..support.database_fixtures import DatabaseTemplate
+    from ..support.database_template import DatabaseTemplate
 
 # ruff: file-ignore[hardcoded-sql-expression] -- transactions and fixture-authored SQL test native constraint enforcement
 

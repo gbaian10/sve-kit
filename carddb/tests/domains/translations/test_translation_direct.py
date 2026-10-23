@@ -10,7 +10,7 @@ from sve_carddb.build.t1 import compile_build
 from sve_carddb.domains.translations.direct import write
 
 from ...support.build_db_fixtures import seed
-from ...support.database_fixtures import DatabaseTemplate
+from ...support.database_template import DatabaseTemplate
 
 if TYPE_CHECKING:
     from sve_carddb.build import Database

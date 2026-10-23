@@ -25,7 +25,7 @@ from ..support.build_db_fixtures import seed
 from ..support.build_db_t1_fixtures import populate, rows
 
 if TYPE_CHECKING:
-    from ..support.database_fixtures import DatabaseTemplate
+    from ..support.database_template import DatabaseTemplate
 
 
 TABLES = CR_TABLES

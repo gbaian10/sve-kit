@@ -12,7 +12,7 @@ from sve_carddb.domains.catalog.rules_names import populate_rules_names, registe
 from sve_carddb.domains.products.models import LocalizedText
 from sve_carddb.domains.text_observations.intern import TextInterner
 
-from ...support.database_fixtures import DatabaseTemplate
+from ...support.database_template import DatabaseTemplate
 
 if TYPE_CHECKING:
     from collections.abc import Iterator

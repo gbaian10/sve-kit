@@ -38,7 +38,7 @@ if TYPE_CHECKING:
 
     from sve_carddb.domains.catalog.adoption_models import ReviewContext
 
-    from ...support.database_fixtures import DatabaseTemplate
+    from ...support.database_template import DatabaseTemplate
 
 
 @pytest.fixture(scope="module")

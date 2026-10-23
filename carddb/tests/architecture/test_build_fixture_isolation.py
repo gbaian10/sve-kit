@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from sve_carddb.core.provenance import SourceUse
     from sve_carddb.ingest.archive.frozen_sources import FrozenSources
 
-    from ..support.database_fixtures import DatabaseTemplate
+    from ..support.database_template import DatabaseTemplate
 
 
 @pytest.mark.parametrize("kind", ["t0", "t1b"])

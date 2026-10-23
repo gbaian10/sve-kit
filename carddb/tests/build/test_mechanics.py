@@ -9,7 +9,7 @@ from sve_carddb.build import Json, create_database
 from sve_carddb.build.t1 import compile_build
 
 from ..support.build_db_fixtures import HASH, seed
-from ..support.database_fixtures import DatabaseTemplate
+from ..support.database_template import DatabaseTemplate
 
 if TYPE_CHECKING:
     from sve_carddb.build import Value
