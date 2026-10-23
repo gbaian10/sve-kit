@@ -234,11 +234,47 @@ def test_other_card_grant_merges_with_self_declaration_but_stays_partial(
             mechanic_grants.apply(db, inputs, settings, mechanics.source_bundles(db))
 
 
+def test_keyword_selection_and_threshold_merge_without_completing_coverage(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    raw = (
+        "【合成甲】\n"
+        "{ファンファーレ}自分の他のフォロワー1体を選ぶ。それは【合成甲】を持つ。\n"
+        "{起動}{コスト2}これを{アクト}墓場に置く："
+        "【合成甲】を持つ自分のフォロワー1体を選ぶ。それは{攻撃力}+2/{体力}+2する。\n"
+        "{起動}{コスト1}手札の【合成甲】を持つフォロワー1枚を捨てる：1枚引く。\n"
+        "{ファンファーレ}自分の場の【合成甲】を持つフォロワーが2体以上なら、1枚引く。"
+    )
+    with case(tmp_path, monkeypatch, raw, first_batch=True) as (
+        db,
+        inputs,
+        settings,
+        cid,
+    ):
+        with db.transaction():
+            mechanics.apply(db, inputs, settings)
+        row = db.rows("mechanic_projection")[0].values
+        assert row["card_id"] == cid
+        assert row["relations"] == Json(["counts", "grants", "has", "refers"])
+        assert row["actions"] == Json([])
+        coverage = db.rows("card_mechanic_coverage")[0].values
+        assert coverage["complete_all"] is False
+        assert coverage["complete_keyword_ids"] == Json([])
+        assert coverage["partial_keyword_ids"] == Json(["kw:ward"])
+
+
 def test_quoted_grants_and_token_sections_do_not_grant_the_parent_card(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     grant = "自分の他のフォロワー1体を選ぶ。それは【合成甲】を持つ。"
-    raw = "これは「\n" + grant + "\n」を持つ。"
+    reference = (
+        "{起動}{コスト2}これを{アクト}墓場に置く："
+        "【合成甲】を持つ自分のフォロワー1体を選ぶ。それは{攻撃力}+2/{体力}+2する。"
+    )
+    count = (
+        "{ファンファーレ}自分の場の【合成甲】を持つフォロワーが2体以上なら、1枚引く。"
+    )
+    raw = "これは「\n" + grant + "\n" + reference + "\n" + count + "\n」を持つ。"
     with case(tmp_path, monkeypatch, raw, first_batch=True) as (
         db,
         inputs,
@@ -253,7 +289,15 @@ def test_quoted_grants_and_token_sections_do_not_grant_the_parent_card(
                     "ordinal": 0,
                     "kind": "token_definition",
                     "text_unit_id": TextInterner(db).intern(
-                        LocalizedText(lang="ja", text="『合成トークン』" + grant)
+                        LocalizedText(
+                            lang="ja",
+                            text="『合成トークン』"
+                            + grant
+                            + "\n"
+                            + reference
+                            + "\n"
+                            + count,
+                        )
                     ),
                 },
             )
