@@ -20,15 +20,17 @@ import { catalogWork } from "./catalog-timing"
 import type { LoadedSnapshot } from "./client"
 import { drain } from "./format-v3/cursor"
 import type { Row } from "./format-v3/decode"
+import { fail } from "./format-v3/errors"
 import {
   arrayValue,
+  canonicalText,
   integerValue,
   type JsonObject,
   type JsonValue,
   objectValue,
   stringValue,
 } from "./format-v3/json"
-import { mergedRowsCursor, validateCatalogCursor } from "./format-v3/reader"
+import { type Fragment, mergedRowsCursor, validateCatalogCursor } from "./format-v3/reader"
 import { type CardIndex, cardIndexCursor } from "./store"
 
 /** What a list cell or suggestion row shows for one card without loading any detail file. */
@@ -397,6 +399,133 @@ export function catalogOf(snapshot: LoadedSnapshot): Catalog {
     catalogs.set(snapshot, catalog)
   }
   return catalog
+}
+
+/** Only printing completion can reuse search membership; revisions need a full catalog. */
+export function preparePrintingOverlay(
+  snapshot: LoadedSnapshot,
+  previous: LoadedSnapshot,
+  additions: readonly Fragment[],
+): void {
+  if (snapshot.manifestHash !== previous.manifestHash || snapshot.region !== previous.region)
+    fail("shape", "printing overlay changed snapshot scope")
+  if (
+    snapshot.bootstrap.length !== previous.bootstrap.length + additions.length ||
+    previous.bootstrap.some((part, i) => snapshot.bootstrap[i] !== part) ||
+    additions.some((part, i) => snapshot.bootstrap[previous.bootstrap.length + i] !== part)
+  )
+    fail("shape", "printing overlay must only append its additions")
+  const base = catalogOf(previous)
+  const fragments = new Map<string, Fragment[]>()
+  const identities = new Set(previous.bootstrap.map((part) => part.identity))
+  for (const part of additions) {
+    const file = snapshot.files.get(part.file)
+    const owner = objectValue(part.value["owner"])
+    if (
+      !file ||
+      file["purpose"] !== "print" ||
+      (file["region"] !== "jp" && file["region"] !== "en") ||
+      part.value["file_sha256"] !== file["sha256"] ||
+      part.value["purpose"] !== "print" ||
+      part.value["region"] !== file["region"] ||
+      part.value["partition"] !== "bootstrap" ||
+      part.value["base"] !== null ||
+      owner["kind"] !== "home_set" ||
+      !["printing", "printing_product"].includes(part.table) ||
+      identities.has(part.identity) ||
+      part.identity !==
+        canonicalText([
+          part.file,
+          part.table,
+          owner,
+          file["region"] ?? null,
+          file["purpose"] ?? null,
+          part.value["segment"] ?? null,
+          part.value["partition"] ?? null,
+        ]) ||
+      !arrayValue(file["row_counts"]).some(
+        (count) =>
+          canonicalText(count) ===
+          canonicalText([
+            part.table,
+            owner["kind"] ?? null,
+            owner["id"] ?? null,
+            part.value["partition"] ?? null,
+            part.value["segment"] ?? null,
+            part.rows.length,
+          ]),
+      )
+    )
+      fail("shape", "printing overlay requires regional print bootstrap fragments")
+    identities.add(part.identity)
+    if (part.table !== "printing") continue
+    const key = stringValue(owner["id"])
+    const parts = fragments.get(key)
+    if (parts) parts.push(part)
+    else fragments.set(key, [part])
+  }
+  // An owner is indexed once, so a cold provisional route stays linear in the print rows.
+  const owners = new Map<string, ReadonlyMap<string, Row>>()
+  const completed = new Map<string, Row | undefined>()
+  const printing = (id: string): Row | undefined => {
+    if (completed.has(id)) return completed.get(id)
+    const known = base.index.printing(id)
+    if (!known) {
+      completed.set(id, undefined)
+      return undefined
+    }
+    const owner = stringValue(known["home_set_id"])
+    let rows = owners.get(owner)
+    if (!rows) {
+      const indexed = new Map<string, Row>()
+      for (const fragment of fragments.get(owner) ?? [])
+        for (const row of fragment.rows) {
+          const key = stringValue(row["id"])
+          const identity = base.index.printing(key)
+          if (
+            !identity ||
+            identity["home_set_id"] !== owner ||
+            ["card_id", "region", "card_no"].some((field) => row[field] !== identity[field]) ||
+            indexed.has(key)
+          )
+            fail("shape", "printing overlay differs from its catalog identity")
+          indexed.set(key, { ...identity, ...row, home_set_id: owner })
+        }
+      rows = indexed
+      owners.set(owner, rows)
+    }
+    const full = rows.get(id) ?? known
+    completed.set(id, full)
+    return full
+  }
+  const index: CardIndex = {
+    ...base.index,
+    printing,
+    printingsOf: (cardId) =>
+      base.index.printingsOf(cardId).map((row) => printing(stringValue(row["id"])) ?? row),
+    printingByCardNo: (region, cardNo) => {
+      const row = base.index.printingByCardNo(region, cardNo)
+      return row ? printing(stringValue(row["id"])) : undefined
+    },
+  }
+  const summaries = new Map<string, CardSummary>()
+  catalogs.set(snapshot, {
+    ...base,
+    index,
+    summary: (id) => {
+      const cached = summaries.get(id)
+      if (cached) return cached
+      const row = printing(id)
+      if (!row || row === base.index.printing(id)) return base.summary(id)
+      const card = index.card(stringValue(row["card_id"]))
+      if (!card) return undefined
+      return catalogWork("printingSummary", () => {
+        for (const result of catalogCards(index, [card], [], base.sets))
+          for (const summary of result.summaries) summaries.set(summary.printingId, summary)
+        return summaries.get(id)
+      })
+    },
+  })
 }
 
 /** Digest-checked local records reuse their prior validation; construction still stays private. */
