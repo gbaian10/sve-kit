@@ -1,5 +1,6 @@
 use super::{BindingKind, CaptureTime, Checked, Checker, WellFormedError, WellFormedReason};
 use crate::ir::OncePerEvent;
+use crate::ir::events::timing::second_header;
 use crate::ir::{
     Ability, AbilityKind, AbilityQualification, Capture, CardProgram, Cardinality,
     CharacteristicPatch, ChoiceDomain, ContinuousLayer, DecisionKind, Duration, DurationEnd,
@@ -291,18 +292,8 @@ impl Checker {
         ) {
             self.fanfare_header(ability)?;
         }
-        if let Some(trigger) = &ability.trigger {
-            self.at("trigger", |checker| checker.trigger(trigger))?;
-            self.at("event_captures", |checker| {
-                checker.captures(
-                    &ability.event_captures,
-                    CaptureTime::AtEvent {
-                        event: EventContext::Trigger {},
-                        policy: trigger.view,
-                    },
-                )
-            })?;
-        }
+        self.super_evolve_header(ability)?;
+        self.trigger_entry(ability)?;
         if let Some(play) = &ability.play {
             self.play_entry = Some(self.env.clone());
             self.at("play", |checker| {
@@ -347,6 +338,22 @@ impl Checker {
         Ok(())
     }
 
+    fn trigger_entry(&mut self, ability: &Ability) -> Checked {
+        let Some(trigger) = &ability.trigger else {
+            return Ok(());
+        };
+        self.at("trigger", |checker| checker.trigger(trigger))?;
+        self.at("event_captures", |checker| {
+            checker.captures(
+                &ability.event_captures,
+                CaptureTime::AtEvent {
+                    event: EventContext::Trigger {},
+                    policy: trigger.view,
+                },
+            )
+        })
+    }
+
     fn play_header(&self, ability: &Ability) -> Checked {
         if ability
             .play
@@ -372,6 +379,28 @@ impl Checker {
             {
                 return self.reject();
             }
+        }
+        Ok(())
+    }
+
+    fn super_evolve_header(&self, ability: &Ability) -> Checked {
+        if matches!(
+            ability.source.origin,
+            AbilityOrigin::Keyword {
+                keyword: KeywordId::OnSuperEvolve,
+                ..
+            }
+        ) && (second_header(ability) != Some(true)
+            || ability.kind != AbilityKind::Triggered
+            || ability.play.is_some()
+            || ability.active_zones != [ZoneKind::Field]
+            || ability.source.holder != (ObjectOperand::SourceHolder {})
+            || ability
+                .trigger
+                .as_ref()
+                .is_none_or(|trigger| trigger.active_zones != [ZoneKind::Field]))
+        {
+            return self.reject();
         }
         Ok(())
     }

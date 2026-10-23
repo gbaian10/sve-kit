@@ -8,7 +8,8 @@ use super::{
 };
 use crate::ir::{BoolFrozen, ExecutionRef, PaymentReference, SpellCountTime};
 use crate::ir::{
-    FollowPermission, MemberProjection, ObjectReceipt, ObjectView, PlayerRead, ReceiptId, Role,
+    FollowPermission, MemberProjection, MovementReceipt, ObjectReceipt, ObjectView, PlayerRead,
+    ReceiptId, Role,
 };
 use alloc::collections::BTreeSet;
 use core::convert::identity;
@@ -168,10 +169,23 @@ impl Execution {
             Selector::MoveAfter {
                 receipt,
                 permission: FollowPermission::SameEffectExplicitReference {},
-            } => self
-                .successful_moves(receipt)?
-                .filter_map(|movement| movement.after)
-                .collect(),
+            } => {
+                let moves = self.successful_moves(receipt)?.collect::<Vec<_>>();
+                // A bounced card's new hand generation must not become trackable (second batch §5).
+                if matches!(receipt, MovementReceipt::Move { .. })
+                    && moves.iter().any(|movement| {
+                        movement
+                            .actual_to
+                            .is_some_and(|to| to.kind == ZoneKind::Hand)
+                    })
+                {
+                    return Err(unsupported("hidden hand after follow"));
+                }
+                moves
+                    .into_iter()
+                    .filter_map(|movement| movement.after)
+                    .collect()
+            }
             Selector::Difference { input, except } => {
                 let input = self.objects(game, input)?;
                 let except = self.objects(game, except)?;
@@ -345,6 +359,13 @@ impl Execution {
                 IntRead::HistorySum { .. } => Err(unsupported("signed read")),
             },
             Expr::Frozen(frozen) => match frozen.as_ref() {
+                IntFrozen::DamageAmount { event } => {
+                    let (_, hit) = self
+                        .damage_event
+                        .filter(|(binding, _)| *binding == event.key())
+                        .ok_or_else(|| invalid("missing damage event authority"))?;
+                    Ok(Int(i64::try_from(hit.amount.0.get()).map_err(invalid)?))
+                }
                 IntFrozen::ReceiptRequested { receipt } => {
                     self.quantity(receipt).map(|(requested, _)| requested)
                 }

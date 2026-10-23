@@ -1,6 +1,7 @@
 //! Evolution facts are captured around the actual rule procedure, after its effective print changes.
 use super::{Cause, Game, Result, SnapshotId, player_id, unsupported};
 use crate::game::Frame;
+use crate::ir::{AbilityOrigin, KeywordId};
 use crate::ir::{
     Characteristics, EventPattern, EventPayload, EvolutionState, EvolveEvent, ExecutionId,
     TriggerCondition,
@@ -75,16 +76,28 @@ impl Game {
             None
         };
         let header = self.pending_header(actor, cause, source, plan.at)?;
+        let mut pending = Vec::new();
         for ability in abilities {
-            self.timing_pending(
+            if !super_evolved
+                && matches!(
+                    ability.node.source.origin,
+                    AbilityOrigin::Keyword {
+                        keyword: KeywordId::OnSuperEvolve,
+                        ..
+                    }
+                )
+            {
+                continue;
+            }
+            pending.push(self.timing_occurrence(
                 holder,
                 ability,
                 &header,
                 EventPayload::Evolve {
                     event: Box::new(event.clone()),
                 },
-            )?;
+            )?);
         }
-        Ok(())
+        self.internal_admit_pending(pending)
     }
 }

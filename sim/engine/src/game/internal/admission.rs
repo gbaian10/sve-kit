@@ -3,20 +3,32 @@ use super::{
     Node, Program, Requirements, Result, SourceSpan, Visibility, WellFormedProgram, unsupported,
 };
 use crate::ir::{AbilityOrigin, AbilitySource, Binding, EnterFieldEvent, KeywordId};
+use crate::ir::{Action, DamageAmount, IntFrozen, IntOperation, Predicate};
+use crate::ir::{Bool, DamageEvent, Expr, Int};
+use crate::ir::{EventPattern, TriggerCondition, TriggerSpec};
 use alloc::collections::BTreeSet;
 use core::num::NonZeroU32;
 
 pub(super) fn check(program: &WellFormedProgram, source: &SourceSpan) -> Result<()> {
-    check_body(program.program(), source, None, None)
+    check_body(program.program(), source, None, None, None)
 }
 
 pub(super) fn check_card(
     program: &Program,
     source: &SourceSpan,
     origin: &AbilitySource,
-    entry: Option<Binding<EnterFieldEvent>>,
+    trigger: Option<&TriggerSpec>,
 ) -> Result<()> {
-    check_body(program, source, Some(origin), entry)
+    let (entry, damage) = match trigger.map(|trigger| &trigger.on) {
+        Some(TriggerCondition::Event {
+            pattern: EventPattern::EnterField { binding, .. },
+        }) => (Some(*binding), None),
+        Some(TriggerCondition::Event {
+            pattern: EventPattern::Damage { binding, .. },
+        }) => (None, Some(*binding)),
+        _ => (None, None),
+    };
+    check_body(program, source, Some(origin), entry, damage)
 }
 
 pub(super) fn check_play(program: &Program, source: &SourceSpan) -> Result<()> {
@@ -40,6 +52,7 @@ fn check_body(
     source: &SourceSpan,
     origin: Option<&AbilitySource>,
     entry: Option<Binding<EnterFieldEvent>>,
+    damage: Option<Binding<DamageEvent>>,
 ) -> Result<()> {
     let mut paths = BTreeSet::new();
     if let Some(origin) = origin {
@@ -47,6 +60,9 @@ fn check_body(
     }
     if let Some(event) = entry {
         super::card::triggers::entry_operand::paths(program, "", event, &mut paths);
+    }
+    if let Some(event) = damage {
+        damage_paths(program, "", event, &mut paths);
     }
     check_requirements(program, source, origin.is_some(), &paths)?;
     super::numeric::check_program(program)?;
@@ -70,6 +86,7 @@ fn source_paths(
                             | KeywordId::Lastword
                             | KeywordId::OnAttack
                             | KeywordId::OnEvolve
+                            | KeywordId::OnSuperEvolve
                             | KeywordId::Quick,
                         ..
                     }
@@ -138,6 +155,7 @@ fn check_requirements(
                         requirement.capability.code,
                         "shape.AbilityOrigin.Keyword"
                             | "shape.ObjectFrozen.EnterFieldObject"
+                            | "shape.IntFrozen.DamageAmount"
                             | "reference.expression"
                             | "shape.ObjectOperand.FromExpression"
                             | "read.event-field"
@@ -145,6 +163,7 @@ fn check_requirements(
                             | "internal.KeywordId.Lastword"
                             | "internal.KeywordId.OnAttack"
                             | "internal.KeywordId.OnEvolve"
+                            | "internal.KeywordId.OnSuperEvolve"
                             | "internal.KeywordId.Quick"
                     ) && requirement
                         .locations
@@ -348,6 +367,7 @@ fn supported(code: &str) -> bool {
             | "shape.MoveDestination.Owners"
             | "internal.OwnerZone.Cemetery"
             | "internal.OwnerZone.Banish"
+            | "internal.OwnerZone.Hand"
             | "internal.MoveReason.Put"
             | "shape.Action.InstallEffect"
             | "action.install-effect"
@@ -499,4 +519,147 @@ fn supported(code: &str) -> bool {
             | "shape.Visibility.Public"
             | "shape.Visibility.Only"
     )
+}
+
+fn damage_paths(
+    program: &Program,
+    path: &str,
+    event: Binding<DamageEvent>,
+    paths: &mut BTreeSet<String>,
+) {
+    for (index, step) in program.steps.iter().enumerate() {
+        let path = format!("{path}/steps/{index}");
+        match &step.node {
+            Node::Instruction { instruction } => match &instruction.action {
+                Action::Draw { count, .. } => damage_integer(
+                    count,
+                    &format!("{path}/instruction/action/count"),
+                    event,
+                    paths,
+                ),
+                Action::Damage {
+                    amount: DamageAmount::Uniform { amount },
+                    ..
+                } => damage_integer(
+                    amount,
+                    &format!("{path}/instruction/action/amount/amount"),
+                    event,
+                    paths,
+                ),
+                _ => {}
+            },
+            Node::Control {
+                control: Control::Sequence { body },
+            } => damage_paths(body, &format!("{path}/control/body"), event, paths),
+            Node::Control {
+                control:
+                    Control::If {
+                        condition,
+                        then_body,
+                        else_body,
+                    },
+            } => {
+                damage_boolean(
+                    condition,
+                    &format!("{path}/control/condition"),
+                    event,
+                    paths,
+                );
+                damage_paths(
+                    then_body,
+                    &format!("{path}/control/then_body"),
+                    event,
+                    paths,
+                );
+                if let Some(body) = else_body {
+                    damage_paths(body, &format!("{path}/control/else_body"), event, paths);
+                }
+            }
+            _ => {}
+        }
+    }
+}
+fn damage_integer(
+    value: &Expr<Int>,
+    path: &str,
+    event: Binding<DamageEvent>,
+    paths: &mut BTreeSet<String>,
+) {
+    match value {
+        Expr::Frozen(field) if matches!(field.as_ref(), IntFrozen::DamageAmount { event: bound } if *bound == event) =>
+        {
+            paths.insert(format!("{path}/frozen"));
+        }
+        Expr::Compute(operation) => match operation.as_ref() {
+            IntOperation::Arithmetic { arguments, .. } => {
+                for (index, argument) in arguments.iter().enumerate() {
+                    damage_integer(
+                        argument,
+                        &format!("{path}/compute/arguments/{index}"),
+                        event,
+                        paths,
+                    );
+                }
+            }
+            IntOperation::Conditional {
+                condition,
+                then_value,
+                else_value,
+            } => {
+                damage_boolean(
+                    condition,
+                    &format!("{path}/compute/condition"),
+                    event,
+                    paths,
+                );
+                damage_integer(
+                    then_value,
+                    &format!("{path}/compute/then_value"),
+                    event,
+                    paths,
+                );
+                damage_integer(
+                    else_value,
+                    &format!("{path}/compute/else_value"),
+                    event,
+                    paths,
+                );
+            }
+            _ => {}
+        },
+        _ => {}
+    }
+}
+fn damage_boolean(
+    value: &Expr<Bool>,
+    path: &str,
+    event: Binding<DamageEvent>,
+    paths: &mut BTreeSet<String>,
+) {
+    let Expr::Compute(predicate) = value else {
+        return;
+    };
+    match predicate.as_ref() {
+        Predicate::CompareInt { left, right, .. } => {
+            damage_integer(left, &format!("{path}/compute/left"), event, paths);
+            damage_integer(right, &format!("{path}/compute/right"), event, paths);
+        }
+        Predicate::And { predicates } | Predicate::Or { predicates } => {
+            for (index, part) in predicates.iter().enumerate() {
+                damage_boolean(
+                    part,
+                    &format!("{path}/compute/predicates/{index}"),
+                    event,
+                    paths,
+                );
+            }
+        }
+        Predicate::Not { predicate } => damage_boolean(
+            predicate,
+            &format!("{path}/compute/predicate"),
+            event,
+            paths,
+        ),
+        _ => {}
+    }
 }

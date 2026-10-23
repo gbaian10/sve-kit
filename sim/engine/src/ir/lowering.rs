@@ -368,6 +368,9 @@ fn ability_body<'entry>(
     entry: &'entry ast::Ability,
     path: &str,
 ) -> Result<(&'entry ast::Body, &'static str, Option<KeywordId>), LoweringError> {
+    if let Some(body) = &entry.super_evolve_time {
+        return Ok((body, "super_evolve_time", Some(KeywordId::OnSuperEvolve)));
+    }
     Ok(
         match (
             &entry.fanfare,
@@ -416,11 +419,18 @@ fn lowered_trigger(
                 binding: event,
                 predicate: super::events::timing::attack_predicate(event),
             }
-        } else if keyword == Some(KeywordId::OnEvolve) {
+        } else if matches!(
+            keyword,
+            Some(KeywordId::OnEvolve | KeywordId::OnSuperEvolve)
+        ) {
             let event = Binding::new(event_id, scope);
             EventPattern::Evolve {
                 binding: event,
-                predicate: super::events::timing::evolve_predicate(event),
+                predicate: if keyword == Some(KeywordId::OnSuperEvolve) {
+                    super::events::timing::super_evolve_predicate(event)
+                } else {
+                    super::events::timing::evolve_predicate(event)
+                },
             }
         } else if let Some(auto) = &entry.auto {
             lowered_subscription(&auto.on, event_id, scope, path)?
@@ -435,9 +445,13 @@ fn lowered_trigger(
             }
         };
         TriggerSpec {
-            on: TriggerCondition::Event { pattern },
             active_zones: vec![ZoneKind::Field],
-            view: EventSnapshotPolicy::AfterEntry,
+            view: if matches!(pattern, EventPattern::LeaveField { .. }) {
+                EventSnapshotPolicy::BeforeExit
+            } else {
+                EventSnapshotPolicy::AfterEntry
+            },
+            on: TriggerCondition::Event { pattern },
             limit: None,
             aggregation: TriggerAggregation::PerFact {},
         }
@@ -460,7 +474,35 @@ fn lowered_subscription(
             let event = Binding::new(event_id, scope);
             Ok(EventPattern::Phase {
                 binding: event,
-                predicate: super::events::timing::end_predicate(event, player),
+                predicate: super::events::timing::phase_predicate(
+                    event,
+                    match phase.which {
+                        ast::SubscribedPhase::Main => super::Phase::Main,
+                        ast::SubscribedPhase::End => super::Phase::End,
+                    },
+                    player,
+                ),
+            })
+        }
+        ast::PhaseSubscription::LeaveField(entry) => {
+            let event = Binding::new(event_id, scope);
+            Ok(EventPattern::LeaveField {
+                binding: event,
+                predicate: super::events::timing::leave_predicate(event, entry.during.is_some()),
+            })
+        }
+        ast::PhaseSubscription::Damage(entry) => {
+            let event = Binding::new(event_id, scope);
+            let filter = super::events::timing::DamageFilter {
+                ability: entry.kind.is_some(),
+                own_turn: entry
+                    .during
+                    .as_ref()
+                    .map(|during| matches!(during.turn, ast::EntryPlayer::Controller)),
+            };
+            Ok(EventPattern::Damage {
+                binding: event,
+                predicate: filter.predicate(event),
             })
         }
         ast::PhaseSubscription::EnterField(entry) => {

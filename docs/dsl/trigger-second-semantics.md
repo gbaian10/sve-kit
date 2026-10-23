@@ -2,8 +2,10 @@
 
 本文件補充[第一批觸發契約](trigger-lki-semantics.md)，只定義內部 typed IR 的執行義務。
 以下四個有限入口取代第一批 §1 對應的暫時拒絕；未列出的形狀維持拒絕。
-這是待接線契約，不表示 lowering／checker／executor 已支援，也不改作者 schema、
-公開 program、capability 或最低版本。本文、選項、成本及所有介入效果仍須整棵准入。
+lowering／checker／executor 已接上以下有限入口；作者 `whose=each` 仍受現有 A.player-ref
+schema 限制而拒絕。這不改作者 schema、公開 program、capability 或最低版本；
+本文、選項、成本及所有介入效果仍須整棵准入。執行與資訊邊界見
+[內部執行契約](internal-execution.md#第二批自動能力入口)。
 
 規則依據為[日文 CR 1.28.0（2026-09-28）](https://shadowverse-evolve.com/wordpress/wp-content/uploads/2026/09/28121513/ShadowverseEVOLVE_cr_1.28.0_260928.pdf)，
 PDF SHA-256 `c44b8f2ff7e1019bc2b4ec59df894d6a067179ff05eac2542b7723648a22cd47`。

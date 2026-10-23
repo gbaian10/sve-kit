@@ -34,6 +34,9 @@ mod quick;
 #[path = "card/evolution.rs"]
 mod evolution;
 
+#[path = "card/second.rs"]
+mod second;
+
 #[path = "card/entry.rs"]
 mod entry;
 

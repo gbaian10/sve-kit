@@ -1,3 +1,4 @@
+use crate::ir::DamageRecipient;
 use crate::ir::{ZoneFrozen, ZoneKind, ZoneOperation, ZoneRef};
 macro_rules! projected_equality {
     ($checker:expr, $equality:expr; $($variant:ident),+ $(,)?) => {
@@ -624,6 +625,17 @@ impl Checker {
                 self.local_value(*movement, predicate)
             }
             Predicate::MoveSucceeded { movement } => self.reference(*movement, BindingKind::Value),
+            Predicate::RecipientIsFollower {
+                recipient: DamageRecipient::FromExpression { value },
+                objects,
+            } => {
+                self.projection(value)?;
+                self.selector(objects)
+            }
+            Predicate::EvolutionEquals { left, right } => {
+                self.projection(left)?;
+                self.projection(right)
+            }
             Predicate::Equal { operands } => self.equality(operands),
             Predicate::SearchFoundAny { .. }
             | Predicate::ReceiptStatusEquals { .. }
@@ -635,7 +647,6 @@ impl Checker {
             | Predicate::RecipientIsLeader { .. }
             | Predicate::RecipientIsFollower { .. }
             | Predicate::PostureEquals { .. }
-            | Predicate::EvolutionEquals { .. }
             | Predicate::TitleEquals { .. }
             | Predicate::HasAbility { .. }
             | Predicate::HasTrait { .. }
