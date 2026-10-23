@@ -1,0 +1,31 @@
+format: 1
+kind: qa_translation_shard
+entries:
+  - qa_id: qa:v1:147a0c138561e5cb29f9d83fbddcbc477cd648cf51146d6bdbd497e7943b6f2e
+    field: answer
+    source_hash: sha256:3aa00310e829d7d9737df3dbfe626917500c8c4cf853db60c0aab8fc99f729d3
+    lang: zh-Hant
+    text: "是的。可以選擇。\n此時，不公開卡片，使其返回牌堆頂。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:147a0c138561e5cb29f9d83fbddcbc477cd648cf51146d6bdbd497e7943b6f2e
+    field: question
+    source_hash: sha256:69f2e6cb48b46d44595d2fb25ed7ffd583870f1a661761f90e1fe0d871e6be04
+    lang: zh-Hant
+    text: 以這個從者的「從自己的手牌捨棄這張卡片時，～」能力從自己的牌堆查看的卡片中有雷維翁・卡片時，是否可以選擇不將其加入手牌？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:83792a17b02c6cf6709fbf4cc9898a1f9a9b5ae77a9b56e101ab87640bc0c44d
+    field: answer
+    source_hash: sha256:a064b2b92d6ab4ca800f9935cd99a510a36f3bc27c420e9c866d06fe01c2f8c5
+    lang: zh-Hant
+    text: "是的。是永續能力。只要墓場中有5張以上的雷維翁・卡片，『雷維翁戰斧‧傑諾』就具有【疾馳】。\n將『雷維翁戰斧‧傑諾』召喚到戰場上後，若自己的墓場中的雷維翁・卡片從4張以下變為5張以上，其就具有【疾馳】。\n將『雷維翁戰斧‧傑諾』召喚到戰場上後，若自己的墓場中的雷維翁・卡片從5張以上變為4張以下，其就失去【疾馳】。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:83792a17b02c6cf6709fbf4cc9898a1f9a9b5ae77a9b56e101ab87640bc0c44d
+    field: question
+    source_hash: sha256:7fa15cb08cc8a55596e8cf2ed824a225f229d1bc913897ad7e89f9a0fb83eb64
+    lang: zh-Hant
+    text: 『雷維翁戰斧‧傑諾』的「只要自己的墓場中有5張以上的雷維翁・卡片，這張卡片就具有【疾馳】。」能力是永續能力嗎？
+    origin: machine
+    low_confidence: true

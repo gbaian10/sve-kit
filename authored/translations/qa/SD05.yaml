@@ -1,0 +1,87 @@
+format: 1
+kind: qa_translation_shard
+entries:
+  - qa_id: qa:v1:1443c1d4d9394f3f3b7391777a52a290796dd6fff26d96976f4d7dde55918f2e
+    field: answer
+    source_hash: sha256:54d1827ccbba335e7094be26752219d0263b221a7b71fbc4984da3bbcc5bf684
+    lang: zh-Hant
+    text: 是的。可以使用。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:1443c1d4d9394f3f3b7391777a52a290796dd6fff26d96976f4d7dde55918f2e
+    field: question
+    source_hash: sha256:e31cb85b16670676d3d573fca79251d5aa3dc9c41a62e78d3020bd43a369a8f3
+    lang: zh-Hant
+    text: 自己的戰場已達上限，且敵方戰場上有可以選擇的從者時，可以使用這張法術嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:3b779287eda04ff9495f35f56b9c9ba953c1e5936739672318cbce469a743145
+    field: answer
+    source_hash: sha256:47ae824854513e7304a574d0bbbe9bcdcecfc7f89d58339e8fec7f3a72732978
+    lang: zh-Hant
+    text: 不行。無法召喚到戰場上。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:3b779287eda04ff9495f35f56b9c9ba953c1e5936739672318cbce469a743145
+    field: question
+    source_hash: sha256:4f1bf155836c2ffa53914bd6caa75ff7fdd465d783ce25591f2e4782a7d4a8b0
+    lang: zh-Hant
+    text: 自己的戰場已達上限時，可以藉由這個從者的能力，召喚1個『怨靈』到戰場上嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:424a1ea36697eb353dea8ae28b60362b2fba9fce8d90047eea489d28934d0404
+    field: answer
+    source_hash: sha256:16c4f561a99e0b124df4da066d34cd9cbf7b64800c0ce5711496adcb8d31316c
+    lang: zh-Hant
+    text: 不行。法術的文字中有「選擇」的指示時，若沒有可以選作目標的卡片，就無法使用該卡片，也無法支付消費。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:424a1ea36697eb353dea8ae28b60362b2fba9fce8d90047eea489d28934d0404
+    field: question
+    source_hash: sha256:3e2adcb5ddc3bc1ffb8761d352c67cc6b6638c3b0cab47e5afe765827cb4bfe1
+    lang: zh-Hant
+    text: 『暗夜中的獸群』或『火炎粉碎術』等法術，在敵方戰場上沒有從者，或只有具有【光紋】的從者時，可以不選擇目標而使用嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:94358272ca4a6e78197b1ff3c4062997384efca009698ba3aa93e6f0564f36e8
+    field: answer
+    source_hash: sha256:beb02123abd1a9cfcb9a3b0bf2ce50a87386f7bbc271566d6ab7479277fe153d
+    lang: zh-Hant
+    text: 不行。由於這個能力的消費要求將這個從者橫置，因此在橫置狀態下無法支付消費。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:94358272ca4a6e78197b1ff3c4062997384efca009698ba3aa93e6f0564f36e8
+    field: question
+    source_hash: sha256:c6979519dbe80966b76934bd47e347216f08571ea8e7f8fb13d0e8a8eb49321f
+    lang: zh-Hant
+    text: 這個從者橫置時，可以支付這個從者的{起動}能力的消費嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:ac92aa30c016717384f984312d23cf2db5547f59e9a8cca7d5ac923402cca6b5
+    field: answer
+    source_hash: sha256:da5890f10b2dee7e9a83375393270902802c9357bf2e3c57f498d066e555e1e8
+    lang: zh-Hant
+    text: 不會。只會使用【吸血】1次。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:ac92aa30c016717384f984312d23cf2db5547f59e9a8cca7d5ac923402cca6b5
+    field: question
+    source_hash: sha256:54d9ceb7fd90d25eecd35aeb4994d4e082814728546748f56c6d56683a7efcba
+    lang: zh-Hant
+    text: 自己的戰場上有2個這個從者，『叢林蝙蝠』攻擊時，會使用【吸血】2次嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:bb0c0e4dfd8aa05507e8d0cec6202625a450d70c0254c6bfe2ab6690ae0e7f56
+    field: answer
+    source_hash: sha256:8c9e384a9052ef8cde7d501d20041ea5eeb91ce91dc318205fc2443188a27c80
+    lang: zh-Hant
+    text: 是的。會{攻擊力}+2並具有【守護】。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:bb0c0e4dfd8aa05507e8d0cec6202625a450d70c0254c6bfe2ab6690ae0e7f56
+    field: question
+    source_hash: sha256:0a37abdca759594254c9b273f30be704ec2a520ece823ec581bfa89c1575b133
+    lang: zh-Hant
+    text: 自己的戰場上有2個這個從者，『叢林蝙蝠』進入戰場時，該『叢林蝙蝠』會{攻擊力}+2並具有【守護】嗎？
+    origin: machine
+    low_confidence: true

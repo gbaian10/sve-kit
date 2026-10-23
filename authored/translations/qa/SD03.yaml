@@ -1,0 +1,171 @@
+format: 1
+kind: qa_translation_shard
+entries:
+  - qa_id: qa:v1:2edac7aac2a7ef86cba4041901bc52f7a47f715e9d9b7f25e9100945dbcee040
+    field: answer
+    source_hash: sha256:93fdac7e93306eee1f13a12bbcd1b964936369a9700fbbf35fc9c076b215d47e
+    lang: zh-Hant
+    text: 是的。可以給予傷害。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:2edac7aac2a7ef86cba4041901bc52f7a47f715e9d9b7f25e9100945dbcee040
+    field: question
+    source_hash: sha256:c29d16119acb2203a962b43ce630e28b2da6504f4cfe7186eeae2d1a5d0cd1d2
+    lang: zh-Hant
+    text: 敵方戰場上有具有【光紋】的從者時，是否可以用這個從者的能力，給予敵方具有【光紋】的從者傷害？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:3d830a78717392b73cdbe53995856faf0939d7a2f7edc8a56fbe141244b199cb
+    field: answer
+    source_hash: sha256:ca5f0aeee6cb4ed568af30c29ecbf4f2d3257f2351a2e6fa9eb8e4086109a089
+    lang: zh-Hant
+    text: 是的。未將以這個能力查看的卡片放置到墓場時，該卡片會保持非公開狀態，放置到牌堆頂。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:3d830a78717392b73cdbe53995856faf0939d7a2f7edc8a56fbe141244b199cb
+    field: question
+    source_hash: sha256:0915458ce24f48204eb609af9b3ca78956b025f5c42daecf801d616e015e9197
+    lang: zh-Hant
+    text: 以這個從者的{入場曲}能力查看牌堆頂的1張卡片，未將其放置到墓場時，會將以這個能力查看的卡片放置到牌堆頂嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:53fc0854e53b818cb40104ec3569bc63a431149817c1b1c2e09b611bfbb1d7f3
+    field: answer
+    source_hash: sha256:93fdac7e93306eee1f13a12bbcd1b964936369a9700fbbf35fc9c076b215d47e
+    lang: zh-Hant
+    text: 是的。可以給予傷害。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:53fc0854e53b818cb40104ec3569bc63a431149817c1b1c2e09b611bfbb1d7f3
+    field: question
+    source_hash: sha256:c29d16119acb2203a962b43ce630e28b2da6504f4cfe7186eeae2d1a5d0cd1d2
+    lang: zh-Hant
+    text: 敵方戰場上有具有【光紋】的從者時，是否可以用這個從者的能力，給予敵方具有【光紋】的從者傷害？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:77fe2814e8d9520d9ac4d38c866b155e12ddd125659541f028565029cc3e48de
+    field: answer
+    source_hash: sha256:3c96cc42b8961535b9f243a55ee42236821be3544920c6c03570c8135715f210
+    lang: zh-Hant
+    text: 不會。不給敵方看，只有自己可以查看。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:77fe2814e8d9520d9ac4d38c866b155e12ddd125659541f028565029cc3e48de
+    field: question
+    source_hash: sha256:6e074a0a1c6c731b9372a516a1b052efb78191039384d5db561e561467e85428
+    lang: zh-Hant
+    text: 以這個從者的{入場曲}能力查看牌堆頂的1張卡片時，會將該卡片給敵方看嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:996335c1d938abe00c73584b83af960842756b5220dc5d790e37c7fcb90d5689
+    field: answer
+    source_hash: sha256:4b5ad85aa954a93ce2807fe2d3993430a987879970939b4eb54d38407fb59c2d
+    lang: zh-Hant
+    text: 不行。由於沒有這張法術可選擇的從者，無法使用，也無法抽卡片。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:996335c1d938abe00c73584b83af960842756b5220dc5d790e37c7fcb90d5689
+    field: question
+    source_hash: sha256:73dc785c205b4d99ace591cf4db09b8076af85c2ce91593ce5902cae0b2498fc
+    lang: zh-Hant
+    text: 敵方戰場上沒有從者時，是否可以使用這張法術，抽1張卡片？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:9c81a02e7dd5ab2d899e63989d651c9b9396427da82b6985b1571b0c9830565b
+    field: answer
+    source_hash: sha256:1720932b982c60d7858397ec5beeda60b4b6c3afb281ec7cded9126490a2735a
+    lang: zh-Hant
+    text: 是的。可以使用。此時，自己會在遊戲中敗北。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:9c81a02e7dd5ab2d899e63989d651c9b9396427da82b6985b1571b0c9830565b
+    field: question
+    source_hash: sha256:9b0ecfeb3223272f8f0e2052e5d7f44e7994d4bbf451d90f78bb7b4bc49d9c6c
+    lang: zh-Hant
+    text: 自己的牌堆為0張時，是否可以使用這張法術？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a26bd3bd7d96c074ef755bb8c61136b8addbe705a23799b0941bb637cfd5d41d
+    field: answer
+    source_hash: sha256:93fdac7e93306eee1f13a12bbcd1b964936369a9700fbbf35fc9c076b215d47e
+    lang: zh-Hant
+    text: 是的。可以給予傷害。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a26bd3bd7d96c074ef755bb8c61136b8addbe705a23799b0941bb637cfd5d41d
+    field: question
+    source_hash: sha256:92958d731244a3df66053466cb6d43ecf0c503da954ddc13a3d49c9708569833
+    lang: zh-Hant
+    text: 敵方戰場上沒有從者時，是否可以用這個從者的能力，給予敵方的主戰者傷害？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a839d05997e2e33e516b0b4521a218de3cec55997147cc5b4d4c8b8852a31e95
+    field: answer
+    source_hash: sha256:2c344751082115128fb00c364d2542a85e5d7cf414500ee4116e0821f02f2e45
+    lang: zh-Hant
+    text: 不行。無法放置。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a839d05997e2e33e516b0b4521a218de3cec55997147cc5b4d4c8b8852a31e95
+    field: question
+    source_hash: sha256:5e5bebe7779095e221b752bf034675b1ac66cd1ec8d3d3115258a370a3b387d5
+    lang: zh-Hant
+    text: 自己的EX區已達上限時，是否可以用這張法術將『防禦型巨像』或『攻擊型巨像』放置到EX區？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:bcb2f5b53aad882df60989d997dda91b9a0cee460dd6f6c1de5506d3c251fbc0
+    field: answer
+    source_hash: sha256:0db9adfb82d236c54ceaabe0c6bdd1e90f89591e8e6bc28d4b32e4fa2cab4d5d
+    lang: zh-Hant
+    text: 是的。可以使用。此時，主牌堆為0張的玩家會在遊戲中敗北。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:bcb2f5b53aad882df60989d997dda91b9a0cee460dd6f6c1de5506d3c251fbc0
+    field: question
+    source_hash: sha256:1814d03112344b84b56cae9c194f389585cab116333ff0ea10903d4851fb438a
+    lang: zh-Hant
+    text: 任一玩家的牌堆為0張時，是否可以使用這個從者的能力？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:cddd840a5c36e438a7af2ea385d044cf2b3cf895b350221c291b63cf7a7c57a4
+    field: answer
+    source_hash: sha256:8dde2812811e6129bc11dfc1988aef70a882a1f69f2d5e2cb53b7f5316f0e59f
+    lang: zh-Hant
+    text: 是的。會{攻擊力}+4/{生命值}+4，並具有【疾馳】。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:cddd840a5c36e438a7af2ea385d044cf2b3cf895b350221c291b63cf7a7c57a4
+    field: question
+    source_hash: sha256:bdcc90dc4698ffd4f5a79b88a6e3ccf43dafc312f0ab1312e70afdbcfb66e871
+    lang: zh-Hant
+    text: 滿足【魔力連鎖 10】條件時，這個從者會{攻擊力}+4/{生命值}+4，並具有【疾馳】嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:d8458f3249b22c84ea63cd027d51a29af8daf5936e390d646d87eda998071d09
+    field: answer
+    source_hash: sha256:725423d45360e1d1f6e33f0bed9767f995bf599de1f1172674479a6ba8fdd890
+    lang: zh-Hant
+    text: 不行。只能查看主牌堆。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:d8458f3249b22c84ea63cd027d51a29af8daf5936e390d646d87eda998071d09
+    field: question
+    source_hash: sha256:f77b4c6c508b26ac8dc6a61ca1c7b2885991e77300eeb124aa160d91af4eddcf
+    lang: zh-Hant
+    text: 是否可以用這個從者的{入場曲}能力，查看自己的進化牌堆？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:ecdaadae305ddb90173296b3c2ea0342acb5e8b2e45752c23d547f405ed731f7
+    field: answer
+    source_hash: sha256:cfa443322e6af64601d70f16824192351205396f18246330b58de973f501a3e9
+    lang: zh-Hant
+    text: 不會。滿足【魔力連鎖 15】條件時，這個從者會給予敵方的全部從者與敵方的全部主戰者各5點傷害。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:ecdaadae305ddb90173296b3c2ea0342acb5e8b2e45752c23d547f405ed731f7
+    field: question
+    source_hash: sha256:159226f8a35e6981115ec2e970d40ef3b2b7c43380f4494e1444dfade4a8082d
+    lang: zh-Hant
+    text: 滿足【魔力連鎖 15】條件時，這個從者會給予敵方的全部從者8點傷害，並給予敵方的全部主戰者5點傷害嗎？
+    origin: machine
+    low_confidence: true

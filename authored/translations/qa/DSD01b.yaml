@@ -1,0 +1,129 @@
+format: 1
+kind: qa_translation_shard
+entries:
+  - qa_id: qa:v1:0797a1b2aa0ea2fb389194f904c04ee95b5d1bad8c8e78e60aae404d9993fe5e
+    field: answer
+    source_hash: sha256:2428fd344b055931973d79f7e465f690732b4699b7eb0688502c57433b3469d7
+    lang: zh-Hant
+    text: "是的。是永續能力。只要自己戰場上有其他武鬥龍人・卡片，『殘影龍人』就具有【突進】【指定攻擊】。\n召喚『殘影龍人』到戰場上後，若召喚其他武鬥龍人・卡片到自己戰場上，則具有【突進】【指定攻擊】。\n召喚『殘影龍人』到戰場上後，若自己戰場上的其他武鬥龍人・卡片變為0張，則失去【突進】【指定攻擊】。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:0797a1b2aa0ea2fb389194f904c04ee95b5d1bad8c8e78e60aae404d9993fe5e
+    field: question
+    source_hash: sha256:404105648b687249b3d42f53fd9a77a49e3859f6c8395194ee703c97214efc04
+    lang: zh-Hant
+    text: 『殘影龍人』的「只要自己戰場上有其他武鬥龍人・卡片，這張卡片就具有【突進】【指定攻擊】。」能力，是永續能力嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:098a945b71a4acf123304b6f5cd7137ca8f2224279c6b9e8aa441c9fc083b9fc
+    field: answer
+    source_hash: sha256:f9791052d2cd1a3a5f7185b28dc619b53fc191a0a528c0451b2cd56142fc68a9
+    lang: zh-Hant
+    text: 是的。即使是敵方的回合中，也會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:098a945b71a4acf123304b6f5cd7137ca8f2224279c6b9e8aa441c9fc083b9fc
+    field: question
+    source_hash: sha256:93df49555ce953e46097f277147adba7d3431550f868ef3eee137648780e6a93
+    lang: zh-Hant
+    text: 若因某些能力，而在敵方的回合中有武鬥龍人・從者進入自己戰場，『遺留的電擊』的「武鬥龍人・從者進入自己戰場時，在這張卡片上放置1個雷指示物。」能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:1a1c63c31a35e4955b08152c88e12e01dab68f2353afe7435aad31a017956dcd
+    field: answer
+    source_hash: sha256:4b2635107fee02c3327f9204aa495d4b843109b45b4ff5b9e7d424f54a68aad8
+    lang: zh-Hant
+    text: "不行。無法召喚2個『遺留的電擊』到戰場上。\n2個『崇高的靂雷‧羅瑪洛尼雅』因『忒彌斯的審判』被破壞並放置到墓場時，各自的{謝幕曲}能力會同時觸發並進入待機狀態。結算處於待機狀態的第1個『崇高的靂雷‧羅瑪洛尼雅』的{謝幕曲}能力時，由於自己戰場上沒有『遺留的電擊』，因此召喚1個『遺留的電擊』到戰場上。接著，結算第2個『崇高的靂雷‧羅瑪洛尼雅』的{謝幕曲}能力時，由於自己戰場上已有『遺留的電擊』，因此不會召喚『遺留的電擊』，而是在自己戰場上的全部『遺留的電擊』上放置1個雷指示物。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:1a1c63c31a35e4955b08152c88e12e01dab68f2353afe7435aad31a017956dcd
+    field: question
+    source_hash: sha256:c799ba0c2f7736757b0040e36a7767e43cf89c0b31b2d93fe20df20e55b6f212
+    lang: zh-Hant
+    text: 自己戰場上的卡片只有2個『崇高的靂雷‧羅瑪洛尼雅』的情況下，敵方使用『忒彌斯的審判』，將2個『崇高的靂雷‧羅瑪洛尼雅』破壞。此時，可以召喚2個『遺留的電擊』到戰場上嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:1a486f5b194fc6822bdd1f07dca9af116b4af7dc78406b649e9009323926eec1
+    field: answer
+    source_hash: sha256:c160a87b6e8aa156bfe705b1bb2d95efb0f3546a954b075fdfc028b2369fb857
+    lang: zh-Hant
+    text: 是的。即使在攻擊過程中失去【突進】或【指定攻擊】，也不會改變攻擊目標，仍會進行該次攻擊。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:1a486f5b194fc6822bdd1f07dca9af116b4af7dc78406b649e9009323926eec1
+    field: question
+    source_hash: sha256:173ab3ddd1204582b8ed564413e12c2b6bfb34e4c6b1bc118f14450cee921651
+    lang: zh-Hant
+    text: 自己戰場上的卡片為1個『遺留的電擊』與1個『殘影龍人』的情況下，自己戰場上具有【突進】【指定攻擊】的『殘影龍人』攻擊，選擇敵方戰場上重置狀態的從者為攻擊目標。在之後的Quick時點，自己戰場上的『遺留的電擊』被『處決』等破壞，使正在攻擊的『殘影龍人』失去【突進】【指定攻擊】時，該次攻擊仍會進行嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:27aa27d282535d0588bda22159d0703d3b2faf95000c7d6833979e8bd9fbc079
+    field: answer
+    source_hash: sha256:27a521068399ab068bc8dbafb7becc147bd5edb81d9121e9fab4a576b00f92c5
+    lang: zh-Hant
+    text: 是的。會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:27aa27d282535d0588bda22159d0703d3b2faf95000c7d6833979e8bd9fbc079
+    field: question
+    source_hash: sha256:98565686562ae205d47daf683bc1769ad25b00fd905ae590de2e9434e7a0d23c
+    lang: zh-Hant
+    text: 2個武鬥龍人・從者同時進入戰場時，『遺留的電擊』的「武鬥龍人・從者進入自己戰場時，在這張卡片上放置1個雷指示物。」能力會觸發2次嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:512370ef290e7450ef5d1032731da822d1f95f7a1eafb482dc40433791ce82b9
+    field: answer
+    source_hash: sha256:ab860ad3dec78e3e122ea47bc8af5890db2ef2ebdd0368638a8d23691cbb1ee5
+    lang: zh-Hant
+    text: 是的。可以使用。此時，PP最大值維持為10。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:512370ef290e7450ef5d1032731da822d1f95f7a1eafb482dc40433791ce82b9
+    field: question
+    source_hash: sha256:5a59580c37bd4f215fddeed85e491311751048cc7b24bdfa128efd1f3abdfdd8
+    lang: zh-Hant
+    text: 自己的PP最大值為10時，可以抉擇這張法術的【1】並使用嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:53a6b28bf3a7cf848fbd69ed1bc08e65ab5bb6d055660a109f17b67a49473e45
+    field: answer
+    source_hash: sha256:22fbc87af20c80cecfc3df56257366981e3495b01edc77d325004fb51842bc73
+    lang: zh-Hant
+    text: 不行。由於PP最大值不會大於10，因此無法使自己的PP最大值變為11以上。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:53a6b28bf3a7cf848fbd69ed1bc08e65ab5bb6d055660a109f17b67a49473e45
+    field: question
+    source_hash: sha256:f2190510bdb72f8ff6202085f72f3c4dad5b97b96db7207add00b7194670b5ef
+    lang: zh-Hant
+    text: 可以抉擇這張法術的【1】並使用，使自己的PP最大值變為11以上嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:5576f0f3a8f981848f3c9a3ae7692c5009c67156ffb9449af347792fd144efbd
+    field: answer
+    source_hash: sha256:61774cadbc6b94f5f07c1bfff2a71f1db24aff030b03941282d9cfef639cff9a
+    lang: zh-Hant
+    text: "是的。是永續能力。只要自己戰場上有其他武鬥龍人・卡片，『巨鐮龍騎士』就具有【疾馳】。\n召喚『巨鐮龍騎士』到戰場上後，若召喚其他武鬥龍人・卡片到自己戰場上，則具有【疾馳】。\n召喚『巨鐮龍騎士』到戰場上後，若自己戰場上的其他武鬥龍人・卡片變為0張，則失去【疾馳】。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:5576f0f3a8f981848f3c9a3ae7692c5009c67156ffb9449af347792fd144efbd
+    field: question
+    source_hash: sha256:2f299c1509160c1228ebfd6c5480087e94f1bf7212e8da0d69ab0af05cf51ffd
+    lang: zh-Hant
+    text: 『巨鐮龍騎士』的「只要自己戰場上有其他武鬥龍人・卡片，這張卡片就具有【疾馳】。」能力，是永續能力嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:b0c9d04c6e82f264d8dac0c59a4ce791864b2d29ba4e2e676e25f406cd309938
+    field: answer
+    source_hash: sha256:ef17a06efa42786f619e291dca546028864ce9cde483c454e7d0102ef43bda92
+    lang: zh-Hant
+    text: 不行。無法放置雷指示物，只會召喚1個『遺留的電擊』到戰場上。除了作為使用前提的選項外，能力的處理依照卡文記載的順序進行。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:b0c9d04c6e82f264d8dac0c59a4ce791864b2d29ba4e2e676e25f406cd309938
+    field: question
+    source_hash: sha256:873dc028cf7a883ea8320f6646f8b52072650b67ef103ddea7457ec342fe15ee
+    lang: zh-Hant
+    text: 結算『崇高的靂雷‧羅瑪洛尼雅』的{謝幕曲}能力時，若自己戰場上沒有『遺留的電擊』，可以在召喚1個『遺留的電擊』到戰場上後，因自己戰場上已有『遺留的電擊』，而在自己戰場上的全部『遺留的電擊』上放置1個雷指示物嗎？
+    origin: machine
+    low_confidence: true

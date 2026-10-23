@@ -1,0 +1,59 @@
+format: 1
+kind: qa_translation_shard
+entries:
+  - qa_id: qa:v1:4730f6110ab6cc1bf5b14eeceb7532f87fc2ea674e2c6de30c82a0b7c3fb96dd
+    field: answer
+    source_hash: sha256:b1d40fb33ee0d321f62ffa5d1a0c1cb9508c0a20e7e5aa9444e0068889d71a6f
+    lang: zh-Hant
+    text: 是的。可以選擇0個。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:4730f6110ab6cc1bf5b14eeceb7532f87fc2ea674e2c6de30c82a0b7c3fb96dd
+    field: question
+    source_hash: sha256:5e4d0c8f77030e35e701dddb8689bfd08c2933230010f98f29016fee504d1428
+    lang: zh-Hant
+    text: 使用這張法術時，可以選擇敵方的0個從者嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:b07fa88665c0594f8174ff242a9967d3889e6981662fa5d9ced6994af5cdd01a
+    field: answer
+    source_hash: sha256:134d87899691bb80fd3292af1134a47b5eb5efd8b282411d0c733b48457b4275
+    lang: zh-Hant
+    text: "是的。會觸發。\n另外，在Quick時點結算自己使用的法術後，會結算觸發的『天真的水花‧普麗絲』的能力。這會在敵方的從者給予攻擊目標傷害前進行。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:b07fa88665c0594f8174ff242a9967d3889e6981662fa5d9ced6994af5cdd01a
+    field: question
+    source_hash: sha256:be2875931603b0be495ce84d532d87871f85f498851ffa5ef2adb9a7df517a36
+    lang: zh-Hant
+    text: 敵方的回合中，敵方的從者宣告攻擊後進入的Quick時點，自己使用魔法使・法術時，自己戰場上的『天真的水花‧普麗絲』的能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:db8bb9322ab513c4c8b5d2ea6b4151818107f252aa4e0c7598396f521dce41f9
+    field: answer
+    source_hash: sha256:67bfae4877939c1845af8247ab0a274fbe474a3a7baafea30e73f43167eee8d7
+    lang: zh-Hant
+    text: 不會。不會觸發。使用『天真的水花‧普麗絲』時，該『天真的水花‧普麗絲』不在戰場上，其能力無效。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:db8bb9322ab513c4c8b5d2ea6b4151818107f252aa4e0c7598396f521dce41f9
+    field: question
+    source_hash: sha256:ea1ec5300c9ccacec6acc56ec27d6ff27a71f272a9c4d5158075054e509057e7
+    lang: zh-Hant
+    text: 『天真的水花‧普麗絲』的「自己使用魔法使・卡片時，～」能力，在使用具有這個能力的『天真的水花‧普麗絲』本身時，也會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:dd527846831446358290cb3e0fec6b03ef6d22bfad0368ab2095cf4c916341b3
+    field: answer
+    source_hash: sha256:28c507cbc7d1f25544c003e471b050d6a070417b04dfef15645ed612a8b4e421
+    lang: zh-Hant
+    text: 不行。「分配」時，必須對所選的從者分配至少1點以上的傷害，因此無法給予0點傷害。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:dd527846831446358290cb3e0fec6b03ef6d22bfad0368ab2095cf4c916341b3
+    field: question
+    source_hash: sha256:7bd59e17d24ca862200d07a1acd03235b09aa35535f82ea78aea2041f2fb6d54
+    lang: zh-Hant
+    text: 以這張法術選擇敵方的2個從者並使用時，可以給予所選的其中一個從者0點傷害，給予另一個從者3點傷害嗎？
+    origin: machine
+    low_confidence: true

@@ -1,0 +1,829 @@
+format: 1
+kind: qa_translation_shard
+entries:
+  - qa_id: qa:v1:01e3b98bfc50c43ba5e5adbcd59249366de30823c4788d103ca977c200b603d7
+    field: answer
+    source_hash: sha256:b0b431acc4189a928c3b43ea4b8a9af38d5ccefad2a5bccc91a5da573ca1ecd4
+    lang: zh-Hant
+    text: 是的。攻擊力與生命值會+1/+1。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:01e3b98bfc50c43ba5e5adbcd59249366de30823c4788d103ca977c200b603d7
+    field: question
+    source_hash: sha256:6cd23a33f218a02fabae57f7ce0881d37146b8d210e8f4d22e3496517c30f8a6
+    lang: zh-Hant
+    text: 敵方戰場上有『貴婦人』，自己的從者超進化時，該從者的攻擊力與生命值會+1/+1嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:09bf8ef04570815d8daf832e8ae8da07082f7a7c63d9d3a7ada9d8e20c25f926
+    field: answer
+    source_hash: sha256:48b982bafaac3bfc19d02364bb4cb9559a98d4d463277939000ca7eb5f8fac42
+    lang: zh-Hant
+    text: 是的。會分別觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:09bf8ef04570815d8daf832e8ae8da07082f7a7c63d9d3a7ada9d8e20c25f926
+    field: question
+    source_hash: sha256:7222bee6401cc1c233c09266fd5b0e452b7240b2910f087ba96080b4f838866a
+    lang: zh-Hant
+    text: 自己戰場上有2個這個護符，『目白麥昆』進入自己的戰場時，「『目白麥昆』進入自己的戰場時，～」能力會分別觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:1138338fa6b919ce18191729316914880483bde122e3b919d8b53353449ed4b0
+    field: answer
+    source_hash: sha256:e7e4b7d5780da144f0fab864f20af9e67df3aea9b063e9831e2127b741460051
+    lang: zh-Hant
+    text: 是的。可以。從牌堆中搜尋卡片時，可以選擇不找到『伏特加』或原始消費為1的賽馬娘・法術。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:1138338fa6b919ce18191729316914880483bde122e3b919d8b53353449ed4b0
+    field: question
+    source_hash: sha256:c35a08b957e1593678f22be1557d4a041e0cc6ce1ad321af3a3c8b0cc1dca6da
+    lang: zh-Hant
+    text: 使用這個從者的{入場曲}能力時，可以選擇不找到『伏特加』或原始消費為1的賽馬娘・法術其中1張嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:12936613f136d0b5a7fbd757559fa375c7fac27b2d51122f7ae8f0ee98d9a6fe
+    field: answer
+    source_hash: sha256:9be55f815e1636fb81b70e62cce0ba5f3063d5c3dc7ba226d7fc75e0a5b3cf1e
+    lang: zh-Hant
+    text: 是的。此時，先藉由『新宇宙』的【進化時】能力使自己的PP最大值+1，之後結算『葛城榮主』的「因自己的賽馬娘・卡片的能力而從自己的手牌捨棄這張卡片時，～」能力時，可以藉由支付消費召喚『葛城榮主』到戰場上。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:12936613f136d0b5a7fbd757559fa375c7fac27b2d51122f7ae8f0ee98d9a6fe
+    field: question
+    source_hash: sha256:02488471ecf2cce0ea7a8b83043165f4f3761124b8d4d2fad0ac132bf8767466
+    lang: zh-Hant
+    text: 自己的PP最大值為6，藉由『新宇宙』的【進化時】能力抉擇【1】，捨棄手牌中的『葛城榮主』時，可以藉由『葛城榮主』的「因自己的賽馬娘・卡片的能力而從自己的手牌捨棄這張卡片時，～」能力，召喚『葛城榮主』到戰場上嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:1464439ac2d7719665c4b66baa3f860d87e50ac0f736f660d60b14f06402db8c
+    field: answer
+    source_hash: sha256:d169b5438b2fb2cbb611c7a9fb22097a51f227914fb0ac678cf6c9fb3c1e5ce0
+    lang: zh-Hant
+    text: 是的。會觸發2次。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:1464439ac2d7719665c4b66baa3f860d87e50ac0f736f660d60b14f06402db8c
+    field: question
+    source_hash: sha256:187b5702b44f14c9c133aaf415198b8392cbe51238b9b75474935b81db807a58
+    lang: zh-Hant
+    text: 若因某個能力，1個『高尚駿逸』與1個『比布魯斯』同時進入自己的戰場，「『高尚駿逸』或『比布魯斯』進入自己的戰場時，～」能力會觸發2次嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:15bea3d804405c2cbf4b42449531a21ec501e80473ef92b6bbea0c8bb2558318
+    field: answer
+    source_hash: sha256:e700782cfbb5ced0cb87245a6891116dd57621df10dff201a755eef5824011c1
+    lang: zh-Hant
+    text: "是的。是永續能力。只要自己的墓場中有20張以上的賽馬娘・卡片，『空中神宮』就具有【疾馳】與「【攻擊時】這張卡片{攻擊力}+3/{生命值}+3」。\n召喚『空中神宮』到戰場上後，若自己墓場中的賽馬娘・卡片從19張以下變為20張以上，就會具有【疾馳】與「【攻擊時】這張卡片{攻擊力}+3/{生命值}+3」。\n召喚『空中神宮』到戰場上後，若自己墓場中的賽馬娘・卡片從20張以上變為19張以下，就會失去【疾馳】與「【攻擊時】這張卡片{攻擊力}+3/{生命值}+3」。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:15bea3d804405c2cbf4b42449531a21ec501e80473ef92b6bbea0c8bb2558318
+    field: question
+    source_hash: sha256:6d2756d081097f7fdf81700ebf5debf134b79b423daca0a33b947a10c676d9eb
+    lang: zh-Hant
+    text: 『空中神宮』的「只要自己的墓場中有20張以上的賽馬娘・卡片，這張卡片就具有【疾馳】與「【攻擊時】這張卡片{攻擊力}+3/{生命值}+3」。」能力是永續能力嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:18ed79449822480e3f13ae55afd0a4579addd5b2f0f82c9da40d13b2853c3117
+    field: answer
+    source_hash: sha256:cef93eff35bbc8901675921d5736fa646661014b40bb44b668166b675d351c06
+    lang: zh-Hant
+    text: 是的。【超進化時】能力會觸發。另外，【進化時】能力不會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:18ed79449822480e3f13ae55afd0a4579addd5b2f0f82c9da40d13b2853c3117
+    field: question
+    source_hash: sha256:9c733fd809d98b327f2f8e4c56c3c312e75c7cc46a6dac2f503beef5cbe1de08
+    lang: zh-Hant
+    text: 敵方戰場上有『貴婦人』，自己超進化為具有【進化時】與【超進化時】能力的從者時，【超進化時】能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:1deb112f30cbbc9fcd8dd020e73dd0714e88dcd4e096a7b895e2420df9278a6b
+    field: answer
+    source_hash: sha256:76555563e174e43083b33a36a6ee1e18ac8be455da3030b42c701d613e7143e8
+    lang: zh-Hant
+    text: "不行。{入場曲}能力即使滿足觸發條件也不會觸發，因此無法使用。\n【光紋】是僅禁止敵方藉由能力選擇的能力。『貴婦人』的能力不會選擇敵方戰場上的從者，因此即使具有【光紋】，{入場曲}能力或【進化時】能力也不會觸發。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:1deb112f30cbbc9fcd8dd020e73dd0714e88dcd4e096a7b895e2420df9278a6b
+    field: question
+    source_hash: sha256:6e319d6d4c805c0e97beae8284f7fc8b474025e0f23964880172abc13aadb154
+    lang: zh-Hant
+    text: 敵方戰場上有『貴婦人』，自己使用具有【光紋】的從者並將其召喚到戰場上時，可以使用該從者的{入場曲}能力嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:1f829048036cec6ccccc6d2d53ece0709044a3469a534bc3017842cff31eeb56
+    field: answer
+    source_hash: sha256:1d3c8fd2703c51f5ba62539910eeb991e948882bad2a341049c61d84f4b79d17
+    lang: zh-Hant
+    text: 是的。先攻與後攻的玩家都可以使EP+1。另外，即使EP已為3，也可以使EP+1。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:1f829048036cec6ccccc6d2d53ece0709044a3469a534bc3017842cff31eeb56
+    field: question
+    source_hash: sha256:a48b60bdbb3c04fcce6644b840603571f8c868d049f313ea60623d8409c20fb8
+    lang: zh-Hant
+    text: 先攻的玩家可以藉由這個從者的能力使EP+1嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:1f9adf12fe06ef461084cf4260f93c84fa0ce53dcbad099ab21b64ad0c9954b5
+    field: answer
+    source_hash: sha256:97281bd018276e7dba754ebde2b8dd931debf5b3ee1dec10d8fd4755bef6ed1b
+    lang: zh-Hant
+    text: 不行。無法抉擇同1項選項2次以上。另外，即使「自己戰場上的目白家・卡片張數」為4張以上，抉擇的數量仍為至多3項。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:1f9adf12fe06ef461084cf4260f93c84fa0ce53dcbad099ab21b64ad0c9954b5
+    field: question
+    source_hash: sha256:6a4bbad83b89a9bf41d159b9e632add163503e541aa731ea36c546d81065633b
+    lang: zh-Hant
+    text: 「自己戰場上的目白家・卡片張數」為4張，使用這個從者的{入場曲}能力時，可以抉擇同1項選項2次以上嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:22ff31707ea4cd7c59fc1c76bb445e92bd853eb389a5318160693679259593ad
+    field: answer
+    source_hash: sha256:27a521068399ab068bc8dbafb7becc147bd5edb81d9121e9fab4a576b00f92c5
+    lang: zh-Hant
+    text: 是的。會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:22ff31707ea4cd7c59fc1c76bb445e92bd853eb389a5318160693679259593ad
+    field: question
+    source_hash: sha256:14bf2c326a10c950e5e62687d4a222a69230c0696d60697419f392c3b2558488
+    lang: zh-Hant
+    text: 若因某個能力，1個『極峰』與1個『高尚駿逸』同時進入自己的戰場，「『高尚駿逸』或『比布魯斯』進入自己的戰場時，～」能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:2391981c7133ec972d972beee905b5b7003a3d40944eb09e158c6eea266ece34
+    field: answer
+    source_hash: sha256:fd2222e7091eb1d32e2c6597dfb7e78993d22315eb052375e2a5e778d5467f8b
+    lang: zh-Hant
+    text: 不行。曾參賽的從者無法再次使用{用餐}能力。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:2391981c7133ec972d972beee905b5b7003a3d40944eb09e158c6eea266ece34
+    field: question
+    source_hash: sha256:a39e57bb86d1e23640738b20996d641b20f3d38fe34fc2c67e32803707df36e9
+    lang: zh-Hant
+    text: 這個從者已參賽時，可以使用「{用餐}{用餐}{消費2}：這張卡片參賽2次。」嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:269b1783bdee7d83afd9e08bf270ce58a54a01a66e93f4582da7edd2ee8e133c
+    field: answer
+    source_hash: sha256:8bc82dc784da7975125118bb7f2123ec90b271a862cd4923a8dbd88fd5b6e249
+    lang: zh-Hant
+    text: 各個『第一紅寶』的能力會分別觸發1次，合計觸發2次。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:269b1783bdee7d83afd9e08bf270ce58a54a01a66e93f4582da7edd2ee8e133c
+    field: question
+    source_hash: sha256:4dc0e3401055a81e3c9724b3c37a3d097d7a9cb20c8f9b8094c6f6068bb6aa04
+    lang: zh-Hant
+    text: 自己戰場上有2個『第一紅寶』，若『忒彌斯的審判』被使用，『第一紅寶』的能力會觸發幾次？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:293c5c38bb80ca5d43e287312e62929723db3e13b8e4239edc0aeab0307c970b
+    field: answer
+    source_hash: sha256:12111c8f276438490c668ff380f7df83c0294bccc1846011fef75fd3c3680444
+    lang: zh-Hant
+    text: 是的。可以選擇不支付消費，不使用能力。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:293c5c38bb80ca5d43e287312e62929723db3e13b8e4239edc0aeab0307c970b
+    field: question
+    source_hash: sha256:3a2bee17a8d0079fd9b331f51d77875d1989eb4a5ced12205a2096ad299a4e64
+    lang: zh-Hant
+    text: 對於『葛城榮主』的「因自己的賽馬娘・卡片的能力而從自己的手牌捨棄這張卡片時」能力，可以選擇不支付消費，不使用能力嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:2c74ec33706a21c798e3d6c09ec7894fd6411ffd96dfcb9d9900979b36ba7b6f
+    field: answer
+    source_hash: sha256:fe95f3621e68ca6eae33124602e4c1de31b57806872ba4d11d2fed2d3ab6b8c4
+    lang: zh-Hant
+    text: 是的。此時，『轟出去吧──！！？』的「『目白麥昆』進入自己的戰場時，選擇敵方戰場上的1個從者。給予其3點傷害。」能力會滿足觸發條件並變為待機狀態，因此可以依任意順序結算這些能力。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:2c74ec33706a21c798e3d6c09ec7894fd6411ffd96dfcb9d9900979b36ba7b6f
+    field: question
+    source_hash: sha256:58509f74fb84ffe4132b4fd6f78f5f328c345df53658b3b712294e8fd697c267
+    lang: zh-Hant
+    text: 自己戰場上有『轟出去吧──！！？』，使用『目白麥昆』後，藉由『目白麥昆』的{入場曲}能力將自己戰場上的『轟出去吧──！！？』放置到墓場，再藉由『轟出去吧──！！？』的{謝幕曲}能力，使自己戰場上的『目白麥昆』進化，並藉由『目白麥昆』的【進化時】能力將墓場中的『轟出去吧──！！？』加入手牌時，可以使用『轟出去吧──！！？』的「『目白麥昆』進入自己的戰場時，選擇敵方戰場上的1個從者。給予其3點傷害。」能力嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:2d1287af34887693d9016c4d0d0a436609a625e24f2c7660544b9b6db91d2771
+    field: answer
+    source_hash: sha256:8a7e027b4f536e8bb912e04f4280f5c6c3733564c605b4a4d119be8d4f2b4a39
+    lang: zh-Hant
+    text: 是的。若進化牌堆中沒有3張『紅蘿蔔』，就無法支付「{用餐}{用餐}{用餐}{消費3}：這張卡片參賽3次。」的消費，無法使用能力。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:2d1287af34887693d9016c4d0d0a436609a625e24f2c7660544b9b6db91d2771
+    field: question
+    source_hash: sha256:2f6603a26e6cde5542ccdf26429f99c93e678fc5ee9d314d145dc6036a6f3966
+    lang: zh-Hant
+    text: 這個從者參賽3次時，進化牌堆中需要3張『紅蘿蔔』嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:30425bdee7fb4e2751c16ab41da4fd6b6a6d613bf69be42145f68b14792d2fd0
+    field: answer
+    source_hash: sha256:5b5d465da5db059bda048af8ddb565a2c40689318a2f16fc1836927727ab98e4
+    lang: zh-Hant
+    text: 不行。在戰場以外的區域，「只要自己的墓場中有20張以上的賽馬娘・卡片，這張卡片就具有【疾馳】與「【攻擊時】這張卡片{攻擊力}+3/{生命值}+3」。」效果並無效力，『空中神宮』不具有【疾馳】，因此無法使其消失來作為『〔桃色的背影照〕成田路』的【攻擊時】能力的消費。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:30425bdee7fb4e2751c16ab41da4fd6b6a6d613bf69be42145f68b14792d2fd0
+    field: question
+    source_hash: sha256:98f5572e66680b01daee080b25b803de15613ff8c29b476111bb8ac9bbd272f5
+    lang: zh-Hant
+    text: 使用『〔桃色的背影照〕成田路』的【攻擊時】能力時，可以使墓場中的『空中神宮』消失作為消費嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:33ec90c3fe17c78690076bedfca1e8e188dcc12fcf1dc01bbd22f77e5c59646b
+    field: answer
+    source_hash: sha256:88ac0e34708eb53a144adbe0d96a3416a99202aedb512ab29074b49bcda50177
+    lang: zh-Hant
+    text: 不行。若無法選擇敵方戰場上的從者，就無法使用這個從者的{起動}能力，因此也無法支付消費，無法抽1張卡片。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:33ec90c3fe17c78690076bedfca1e8e188dcc12fcf1dc01bbd22f77e5c59646b
+    field: question
+    source_hash: sha256:3280ae26f3d7c6b9a76a5cb87ebc96be6e0c7d1591a5d40be7da396dbd5c9148
+    lang: zh-Hant
+    text: 若無法選擇敵方戰場上的從者，可以使用這個從者的{起動}能力抽1張卡片嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:39e2376e3581855e672fd00f7ce5b6d60a9084770a57f0d6da3f3103ebba1224
+    field: answer
+    source_hash: sha256:48b982bafaac3bfc19d02364bb4cb9559a98d4d463277939000ca7eb5f8fac42
+    lang: zh-Hant
+    text: 是的。會分別觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:39e2376e3581855e672fd00f7ce5b6d60a9084770a57f0d6da3f3103ebba1224
+    field: question
+    source_hash: sha256:cff36b16c864b8dc79f2157829ba7c7b70b5e3d7e746aff819e8ca9668aeb6f6
+    lang: zh-Hant
+    text: 自己戰場上有2個這個從者，『運勢的走向』進入自己的戰場時，「『運勢的走向』進入自己的戰場時，～」能力會分別觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:3c5d53c6617402ba77f378aad66fc96a65ae565fed9ab7ed2896b7d03c0b0594
+    field: answer
+    source_hash: sha256:808c30b1d671ab76edf661822ba52c455913ec90700926ddeaa0da965478d469
+    lang: zh-Hant
+    text: 不行。自己戰場上有5張卡片時，無法使用這個從者，因此也無法使用{入場曲}能力。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:3c5d53c6617402ba77f378aad66fc96a65ae565fed9ab7ed2896b7d03c0b0594
+    field: question
+    source_hash: sha256:edc3e0d4dd608e884421e3970d28b3e250b626bbd9412d8cf39ae9ec1ce45f63
+    lang: zh-Hant
+    text: 自己戰場上有5張賽馬娘・卡片時，可以藉由這個從者的{入場曲}能力，使自己戰場上『萬籟爭鳴』以外的賽馬娘・卡片返回手牌，藉此使用這個從者嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:3d12c153e0db98f2a00d14f7e6f62fc35a14b9bb9b7f49b0ffc4615ca5a6e4eb
+    field: answer
+    source_hash: sha256:8d2e75a46ffaf81ab6cf9935e5a27f1badfcc6023dde30c932f17443b91a0d63
+    lang: zh-Hant
+    text: 不需要。可以不支付消費1，選擇不重置。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:3d12c153e0db98f2a00d14f7e6f62fc35a14b9bb9b7f49b0ffc4615ca5a6e4eb
+    field: question
+    source_hash: sha256:2c04f5ca080ef8f0ee2603b4d1f1c3e929b74b721b78208dc38d84f97879951d
+    lang: zh-Hant
+    text: 關於「自己的主要階段到來時，{消費1}：將這張卡片重置。」能力的消費，自己的主要階段到來時，必須支付消費1嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:3d3e33afeb5fc331e46108b62e0f9b00baa78943c62dd08a9607072aa755c149
+    field: answer
+    source_hash: sha256:62e657a108da962a9aa42e0e77817d22d6648ab660684463a17ba7a5a6283f6b
+    lang: zh-Hant
+    text: 是的。【參賽時】能力會觸發2次。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:3d3e33afeb5fc331e46108b62e0f9b00baa78943c62dd08a9607072aa755c149
+    field: question
+    source_hash: sha256:ef0125bce629a30f35ce3acabe2131db6746919b377107759fef51ad7d446cd3
+    lang: zh-Hant
+    text: 這個從者參賽2次時，這個從者的【參賽時】能力會觸發2次嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:4258713094d1fc8526e0d739281b9fcf6170e63ba88725b3b483481882b30b62
+    field: answer
+    source_hash: sha256:75b0454d13f36d3b4c4ab41061fb86bdf469669e8f1f657a087f7d56a9ede09d
+    lang: zh-Hant
+    text: 是的。結算完【攻擊時】能力等全部在從者攻擊時觸發的能力後，才會迎來非回合玩家的Quick時點，因此即使在Quick時點自己戰場上的從者變為2個以下，也可以藉由【攻擊時】能力抽1張卡片並捨棄自己的1張手牌。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:4258713094d1fc8526e0d739281b9fcf6170e63ba88725b3b483481882b30b62
+    field: question
+    source_hash: sha256:972bca955db8c72a08f35262cf969db87ac655238e519a64b60f479b5f3e100d
+    lang: zh-Hant
+    text: 自己戰場上有3個從者，以自己戰場上的『櫻花驀進王』攻擊敵方的主戰者時，若在敵方的Quick時點，自己戰場上的從者變為2個以下，可以藉由【攻擊時】能力抽1張卡片並捨棄自己的1張手牌嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:45c592428ebae7766f8d76b61b5e986f858286154fa7a379aa73004ead4ea45d
+    field: answer
+    source_hash: sha256:d169b5438b2fb2cbb611c7a9fb22097a51f227914fb0ac678cf6c9fb3c1e5ce0
+    lang: zh-Hant
+    text: 是的。會觸發2次。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:45c592428ebae7766f8d76b61b5e986f858286154fa7a379aa73004ead4ea45d
+    field: question
+    source_hash: sha256:b5168667a1148d4c9f996c5c34f32040999a28f92cee5572662480b948814aca
+    lang: zh-Hant
+    text: 若藉由這個從者的{入場曲}能力，2張『運勢的走向』同時進入自己的戰場，「『運勢的走向』進入自己的戰場時，～」能力會觸發2次嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:520a9eb95a3fbe250fd1a7d0b02d47aa8173cf623c62d560f6718bec382326e5
+    field: answer
+    source_hash: sha256:44e93717098a15cb60d5f2ee011c0dd14cfa898f5a6cf808207e570249c7c3ef
+    lang: zh-Hant
+    text: 不需要。由於是藉由這個護符的能力效果進化，並非『目白麥昆』的{進化}能力，因此不支付所選『目白麥昆』的{進化}能力的消費便進化。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:520a9eb95a3fbe250fd1a7d0b02d47aa8173cf623c62d560f6718bec382326e5
+    field: question
+    source_hash: sha256:bda241500069526783f2581ed9a1b8542011e4082bd8ffec3d09cf6b1b5e1ecf
+    lang: zh-Hant
+    text: 藉由這個護符的{謝幕曲}能力，使自己戰場上的『目白麥昆』進化時，必須支付『目白麥昆』具有的{進化}能力的消費嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:57a9c78c2928727b6deb8a21e0aff860c4feca76096abd1d432933d97b1e9617
+    field: answer
+    source_hash: sha256:f8fc7b94df261a593a9129b5f57e018a117b060f644d0d2170be90deaba5a351
+    lang: zh-Hant
+    text: 不行。若無法選擇敵方戰場上的從者，就無法使用這個從者的{入場曲}能力，因此也無法支付消費，無法使自己戰場上的「與這張卡片同名者除外的賽馬娘・卡片」返回手牌。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:57a9c78c2928727b6deb8a21e0aff860c4feca76096abd1d432933d97b1e9617
+    field: question
+    source_hash: sha256:7e81c7c6c0b947edf829ea8311ebcf5fc5bb9a0f2cef86c8b5d2453ebbf92fd9
+    lang: zh-Hant
+    text: 若無法選擇敵方戰場上的從者，可以使用這個從者的{入場曲}能力，使自己戰場上的「與這張卡片同名者除外的賽馬娘・卡片」返回手牌嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:5ca6aee47551228ce988eeffd53e569fb8df8e42b85a7bd529fac90a2875728a
+    field: answer
+    source_hash: sha256:60a3df6ccc46bca23cc08609e9bef381c15c8a0a8dcc893b0ea108b3bb5df4b5
+    lang: zh-Hant
+    text: "可以依任意順序結算。\n首先結算『〔Enchaînement〕魯道夫象徵』第1次的【參賽時】能力。之後，可以從進入戰場的從者的{入場曲}能力，以及第2次起的『〔Enchaînement〕魯道夫象徵』的【參賽時】能力等滿足觸發條件並變為待機狀態的能力中，選擇先結算哪一個。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:5ca6aee47551228ce988eeffd53e569fb8df8e42b85a7bd529fac90a2875728a
+    field: question
+    source_hash: sha256:ca7b071bc678c4d0341faacf9a8402b72af5e1a00b0aec08ccfb9a44ae5b9906
+    lang: zh-Hant
+    text: 『〔Enchaînement〕魯道夫象徵』參賽3次，若藉由第1次的【參賽時】能力召喚具有{入場曲}能力的從者到戰場上，要依什麼順序結算觸發的能力？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:649e8b7f466a42f60150d25d31c2fec85c00e015985d54d72f5b893d4f654c38
+    field: answer
+    source_hash: sha256:d169b5438b2fb2cbb611c7a9fb22097a51f227914fb0ac678cf6c9fb3c1e5ce0
+    lang: zh-Hant
+    text: 是的。會觸發2次。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:649e8b7f466a42f60150d25d31c2fec85c00e015985d54d72f5b893d4f654c38
+    field: question
+    source_hash: sha256:6dfb3af0d36b59592cc79d03391bf17ebf0d2e2a111b888665cc10fd1966e21c
+    lang: zh-Hant
+    text: 若因某個能力，2個『目白麥昆』同時進入自己的戰場，「『目白麥昆』進入自己的戰場時，～」能力會觸發2次嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6bf0de8ca8a3b6787ad94c6b8837da9e1dba2aa520f13d64f6f5d90e388797bf
+    field: answer
+    source_hash: sha256:fbaacc5d2e8cca863b07bb3548b276542a862c42c6969946c009f45d0d795751
+    lang: zh-Hant
+    text: "自己戰場上的『目白麥昆』會進化，但進化後『目白麥昆』的【進化時】能力不會觸發。\n參照適用了某個持續效果的卡片資訊時，一律以卡片本身記載的資訊作為基準值，再適用賦予能力／使其失去能力／使能力有效／使能力無效的效果。此次會以進化後『目白麥昆』卡片上記載的卡片資訊作為基準值，再適用『目白麥昆』被賦予的【裝箱】狀態。也就是說，『目白麥昆』的【進化時】能力已失去，因此不會觸發。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6bf0de8ca8a3b6787ad94c6b8837da9e1dba2aa520f13d64f6f5d90e388797bf
+    field: question
+    source_hash: sha256:36e16eacf2d27f56d7d45669a9d805ee77f65e0a293b32ace7cab2660f4b710d
+    lang: zh-Hant
+    text: 自己戰場上有『轟出去吧──！！？』與『目白麥昆』。此時，自己戰場上的『目白麥昆』因敵方『咒箱女王‧娜哈特‧娜哈特』的能力變為【裝箱】狀態。之後，在適用【裝箱】狀態的回合中，若使用自己戰場上的『轟出去吧──！！？』的{謝幕曲}能力，自己戰場上的『目白麥昆』會進化嗎？另外，進化後『目白麥昆』的【進化時】能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6cc3d803541fd98b88d55720066b79c78dc748a2da67ea02904c388c7801600e
+    field: answer
+    source_hash: sha256:293e0a7b4e415e0bee9579ed0c2298c450dec55b1f8bfc1d6303fb80047d1bcb
+    lang: zh-Hant
+    text: 不行。若無法選擇適當的目標，就無法抉擇【1】，必須抉擇【2】或【3】。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6cc3d803541fd98b88d55720066b79c78dc748a2da67ea02904c388c7801600e
+    field: question
+    source_hash: sha256:4caa1749e55935a21871092a2af2c3e94e0d719f827ced79504ff1fb5e22d2f1
+    lang: zh-Hant
+    text: 若無法選擇敵方戰場上的從者，可以藉由這個從者的{入場曲}能力抉擇【1】，選擇不發生任何事嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6f81c676b02fa73512d8690924ebf1dd0add35acb8f0d7c9de059e5ceaea781e
+    field: answer
+    source_hash: sha256:d508cd8897c0953725c4b99343d511a177fa38476d72c90dfb0f30463346297e
+    lang: zh-Hant
+    text: 不行。【進化時】能力即使滿足觸發條件也不會觸發，因此無法使用。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6f81c676b02fa73512d8690924ebf1dd0add35acb8f0d7c9de059e5ceaea781e
+    field: question
+    source_hash: sha256:1a2141d8efca2d655a12bc87cfcd1bbcc354bd9c6711dbe01ceaa40e1f91285f
+    lang: zh-Hant
+    text: 敵方戰場上有『貴婦人』，自己的『被詛咒的石像』進化時，可以使用『被詛咒的石像』的【進化時】能力嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:77c7c24e520dfad26194f4780b5dc7acb3818b61de3fdf2fac761f6f41cbd175
+    field: answer
+    source_hash: sha256:2d465dede2ef5ff53d3d69144f498773a27808a8e69b9f4aaeffeab91196e278
+    lang: zh-Hant
+    text: 不行。若無法選擇敵方戰場上的從者，就無法使用這個從者的{入場曲}能力，無法使自己的主戰者{生命值}+2，並將自己牌堆頂的2張卡片放置到墓場。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:77c7c24e520dfad26194f4780b5dc7acb3818b61de3fdf2fac761f6f41cbd175
+    field: question
+    source_hash: sha256:c0773a4c6a60168a176d23947e0220c295ec25c602472d7a688c7f55ec873055
+    lang: zh-Hant
+    text: 若無法選擇敵方戰場上的從者，可以使用這個從者的{入場曲}能力，使自己的主戰者{生命值}+2嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:78cace27ac61e25b40bb431bcd5008b8f904b0a90e5ec59ae12a062cff9024b1
+    field: answer
+    source_hash: sha256:c91c757cac9966a5956c5170aefed33f8ff8c84e6384d462b4230c4d570fe632
+    lang: zh-Hant
+    text: "是的。兩者都會觸發，可以依任意順序結算。\n另外，即使先結算「自己的結束階段到來時，使這張卡片返回手牌。」，也可以藉由「自己的結束階段到來時，若自己進化牌堆中有9張以上正面朝上的『紅蘿蔔』，則將敵方全部玩家牌堆頂的20張卡片放置到墓場。」，將敵方全部玩家牌堆頂的20張卡片放置到墓場。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:78cace27ac61e25b40bb431bcd5008b8f904b0a90e5ec59ae12a062cff9024b1
+    field: question
+    source_hash: sha256:f088a2d5355a3d30da73e309cd86b60267d2245a791eff705b349df6a13e9c31
+    lang: zh-Hant
+    text: 藉由這個從者的{入場曲}能力，將手牌中的『菱奇蹟』召喚到戰場上並進化，迎來自己的結束階段時，「自己的結束階段到來時，使這張卡片返回手牌。」與『菱奇蹟』的「自己的結束階段到來時，若自己進化牌堆中有9張以上正面朝上的『紅蘿蔔』，則將敵方全部玩家牌堆頂的20張卡片放置到墓場。」能力都會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:7f583243058b4495fc12072e56a9ef50de15682b6acda87db990c9f82f7ab5c0
+    field: answer
+    source_hash: sha256:73f1dd5111918c3bb4e5ddf6684a6a081bed08e134097474eb3eeaebb5c9cf6c
+    lang: zh-Hant
+    text: 不行。與戰場上的從者建立關聯的『紅蘿蔔』並未以正面朝上放置在進化牌堆中，因此無法計入。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:7f583243058b4495fc12072e56a9ef50de15682b6acda87db990c9f82f7ab5c0
+    field: question
+    source_hash: sha256:94b892fff09800f6a08025e74d5ca1c87c225c3366f135da87346b9e1004d01f
+    lang: zh-Hant
+    text: 自己戰場上有曾參賽的從者時，與該從者建立關聯的『紅蘿蔔』，可以計入「自己進化牌堆中正面朝上的『紅蘿蔔』張數」嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:873ed1e0eb999f5ad650ecfab45f9b088f403b7dc82be9a4b7850610cc5857aa
+    field: answer
+    source_hash: sha256:f9791052d2cd1a3a5f7185b28dc619b53fc191a0a528c0451b2cd56142fc68a9
+    lang: zh-Hant
+    text: 是的。即使在敵方的回合中也會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:873ed1e0eb999f5ad650ecfab45f9b088f403b7dc82be9a4b7850610cc5857aa
+    field: question
+    source_hash: sha256:faffb50e98d343c9ca58905fb3d1f5bdb38718d412e93fd54d9d1dcdca785991
+    lang: zh-Hant
+    text: 若因某個能力，在敵方的回合中有『目白麥昆』進入自己的戰場，「『目白麥昆』進入自己的戰場時，～」能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:88199ba6d33d9407e7ffa54bd6d271f0b7febe073b810991e2d94793154713d9
+    field: answer
+    source_hash: sha256:0f964524f67541e162b9cc369259b83c0af0996b5b7e2c17c4a1e6bc9904d004
+    lang: zh-Hant
+    text: 不行。無法抉擇同1項選項2次以上。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:88199ba6d33d9407e7ffa54bd6d271f0b7febe073b810991e2d94793154713d9
+    field: question
+    source_hash: sha256:3f49351884a5aa4ef511053c5494b628fa3bb5fb52610536991877a8ba74ed45
+    lang: zh-Hant
+    text: 抉擇2項以上的選項時，可以抉擇同1項選項2次以上嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:92ca1cb65b399c3e9aadc925f780c635db4d2d491b45a8ae68f1b88b362653a4
+    field: answer
+    source_hash: sha256:27a521068399ab068bc8dbafb7becc147bd5edb81d9121e9fab4a576b00f92c5
+    lang: zh-Hant
+    text: 是的。會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:92ca1cb65b399c3e9aadc925f780c635db4d2d491b45a8ae68f1b88b362653a4
+    field: question
+    source_hash: sha256:ee0bc6fae74e0cfdc46b6f0e19aa0681220c10ab6bfa4f8fcfbada3dc2b8c3d4
+    lang: zh-Hant
+    text: 使用『高尚駿逸』的【進化時】能力，給予敵方戰場上的1個從者2點傷害後，使用『串擊』將該從者放置到墓場時，『高尚駿逸』的「自己的每個回合2次，「本回合中曾受到自己的賽馬娘・卡片傷害的敵方從者」從戰場被放置到墓場時，～」能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:96bd24b0bc2d68f6dc3debbeeeb34d79fbba5a7b4539b345caaacd1a65abab09
+    field: answer
+    source_hash: sha256:22403290e53a0f47eb8fd762dbd163c42d1201ccf6b5d624ebac8f0160e57340
+    lang: zh-Hant
+    text: "是的。會在自己的開始階段之後到來。\n完成開始階段中的PP最大值增加與PP回復、將從者重置（『〔月下的小惡魔♪〕目白善信』因能力而在開始階段不會重置）、抽1張卡片等全部事項後，才會迎來自己的主要階段。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:96bd24b0bc2d68f6dc3debbeeeb34d79fbba5a7b4539b345caaacd1a65abab09
+    field: question
+    source_hash: sha256:a2aab07d818bdbb77003420561f866e4c732ec6bbba9df6f4bbb078c6c21adaa
+    lang: zh-Hant
+    text: 自己的主要階段會在自己的開始階段之後到來嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:97e9282204602cc4368ce81734bf28dc91b554424cb8312662339e0e592a6360
+    field: answer
+    source_hash: sha256:8f2b8db2690855b84801b73e3a5ee8ce85e1d491bb3f1d9c07bf26fc60e9ff5b
+    lang: zh-Hant
+    text: 是的。可以選擇不進化。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:97e9282204602cc4368ce81734bf28dc91b554424cb8312662339e0e592a6360
+    field: question
+    source_hash: sha256:865c8c58de9ae5554618123066248c61a16120d9fb05ad8b4ad9a6ca57e49032
+    lang: zh-Hant
+    text: 藉由這個護符的{謝幕曲}能力選擇自己戰場上未進化的『目白麥昆』時，即使進化牌堆中有『目白麥昆』，也可以選擇不進化嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a1488d8436bef93ccdc99914eb6e02b335b38f4feaa07e88a496867a506a8a44
+    field: answer
+    source_hash: sha256:416ccf5141f9f37bf81a84aa079373a885b9f6000857993ec5e3107031072a97
+    lang: zh-Hant
+    text: 不行。只能使自己戰場上的「與這張卡片同名者除外的賽馬娘・卡片」返回手牌。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a1488d8436bef93ccdc99914eb6e02b335b38f4feaa07e88a496867a506a8a44
+    field: question
+    source_hash: sha256:844b2d91175a875ac5ffaa5692b83bc6d493e3949b20b807467ccf5301f4034d
+    lang: zh-Hant
+    text: 可以使敵方戰場上的1個「與這張卡片同名者除外的賽馬娘・卡片」返回手牌，作為「{入場曲}使戰場上的1個「與這張卡片同名者除外的賽馬娘・卡片」返回手牌：」的消費嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a2b34fd817ba29210df489768f6e51b66f2b6874a0dd842fb326b91ccb5c8f72
+    field: answer
+    source_hash: sha256:3b92cb7b9c8645ad3687cd91bacfbc5dac23e2df27b7ff5b1e480b30082e002b
+    lang: zh-Hant
+    text: 是的。會滿足。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a2b34fd817ba29210df489768f6e51b66f2b6874a0dd842fb326b91ccb5c8f72
+    field: question
+    source_hash: sha256:1c81f05ad0c7d3be40f1951db4473fe5e490750edfeaa1ea97122d9fabc46ded
+    lang: zh-Hant
+    text: 藉由『帝皇──皇──皇──！！！』召喚『山人西風』到戰場上時，會滿足「若這張卡片是藉由賽馬娘・卡片的能力進入戰場的，則」嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a6174d8cc3eaa34eb610e9f43c3e7a8e2aa641cc37d437478a23c46b668a63cb
+    field: answer
+    source_hash: sha256:c2e45535de1e319168f95f3e4a41a8cf703aeba21f9067d7b47a80b9617ee3d1
+    lang: zh-Hant
+    text: 是的。即使在攻擊途中失去【疾馳】，攻擊目標也不會變更，該次攻擊仍會進行。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a6174d8cc3eaa34eb610e9f43c3e7a8e2aa641cc37d437478a23c46b668a63cb
+    field: question
+    source_hash: sha256:36269da212e7f368f1b2473c27203a007d8787bf1a47cd7bca7158365668d837
+    lang: zh-Hant
+    text: 自己的墓場中有20張以上的賽馬娘・卡片，以具有【疾馳】的『空中神宮』攻擊，並選擇敵方的主戰者作為攻擊目標。若在之後的Quick時點，因某個能力而使自己墓場中的賽馬娘・卡片變為19張以下，使『空中神宮』失去【疾馳】，該次攻擊仍會進行嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a7c55a1b46f53be931e1c15d74c28edc15eadceecf541a28cf050f6589e5744c
+    field: answer
+    source_hash: sha256:293e0a7b4e415e0bee9579ed0c2298c450dec55b1f8bfc1d6303fb80047d1bcb
+    lang: zh-Hant
+    text: 不行。若無法選擇適當的目標，就無法抉擇【1】，必須抉擇【2】或【3】。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a7c55a1b46f53be931e1c15d74c28edc15eadceecf541a28cf050f6589e5744c
+    field: question
+    source_hash: sha256:6e22eb62d01c402ab7f7fd6436be3c5fb1decf7834b00c0555ccb5d11f6deac9
+    lang: zh-Hant
+    text: 若無法選擇自己墓場中原始消費5以下的賽馬娘・從者，可以藉由這個從者的{起動}能力抉擇【1】，選擇不發生任何事嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a933c4a024d6236de209509180e619123750bc954a081961be923939434e079e
+    field: answer
+    source_hash: sha256:ac6f486c80e7c384fa668cac20d74108e9b2b2a6c83a4e2f52abd06db1501738
+    lang: zh-Hant
+    text: 不行。必須在使自己的主戰者{生命值}+2並抽1張卡片之前，選擇敵方戰場上的從者。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a933c4a024d6236de209509180e619123750bc954a081961be923939434e079e
+    field: question
+    source_hash: sha256:b7247e9c0f9e6c0393eea5b2b678b0173a6ffd2bced703b9cb09a2d6815e708e
+    lang: zh-Hant
+    text: 藉由這個從者的{入場曲}能力抉擇【1】與【3】時，可以先使自己的主戰者{生命值}+2並抽1張卡片，再選擇敵方戰場上的從者嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:b28ac1fa7f97406f5532cffcc54fc854504b986e544a75d56ccb85c892224906
+    field: answer
+    source_hash: sha256:e0ffd9c6857ba8207ea635ee16d9653345de7e40443870e158a593a8b8ebcf18
+    lang: zh-Hant
+    text: 不行。若無法選擇敵方戰場上的從者，就無法使用這個從者的{入場曲}能力，即使處於【覺醒】狀態，也無法抽1張卡片。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:b28ac1fa7f97406f5532cffcc54fc854504b986e544a75d56ccb85c892224906
+    field: question
+    source_hash: sha256:1529eecd228a269807c35201ec2d6441a6b0afecf06719b3a8763036a88b5870
+    lang: zh-Hant
+    text: 若無法選擇敵方戰場上的從者，可以使用這個從者的{入場曲}能力抽1張卡片嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:b7ce80f678f3acb201eafb96bd01b7b8318c588596728029b60293d96a4feb85
+    field: answer
+    source_hash: sha256:f9791052d2cd1a3a5f7185b28dc619b53fc191a0a528c0451b2cd56142fc68a9
+    lang: zh-Hant
+    text: 是的。即使在敵方的回合中也會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:b7ce80f678f3acb201eafb96bd01b7b8318c588596728029b60293d96a4feb85
+    field: question
+    source_hash: sha256:d7a00f1a05a0fb2a6c14dab8fec5bf4c8e2f87a2e846500b59b13f56aa4c6a71
+    lang: zh-Hant
+    text: 若因某個能力，在敵方的回合中有『比布魯斯』進入自己的戰場，「『高尚駿逸』或『比布魯斯』進入自己的戰場時，～」能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:bd25f2d9ba94a94deb90ead954d11c20702ef8349359a5aa887a051a49ced2ea
+    field: answer
+    source_hash: sha256:af4542a715ebbde6f3d7a09bf3b49a472755a5ac34f71d148070b60bfb402313
+    lang: zh-Hant
+    text: 不行。若無法選擇敵方戰場上的從者，就無法使用這張法術，因此也無法支付消費，無法抽1張卡片。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:bd25f2d9ba94a94deb90ead954d11c20702ef8349359a5aa887a051a49ced2ea
+    field: question
+    source_hash: sha256:474707e0b10e13634e2f48bd8f641054791e2fa6333b427b2951b32512f859f0
+    lang: zh-Hant
+    text: 若無法選擇敵方戰場上的從者，可以使用這張法術抽1張卡片嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:c060d0581126fc1f3ee852d12ae6c9545a1e81b11977b710f9442832afeca0b9
+    field: answer
+    source_hash: sha256:126550b30eb4dcb29a2ee66c51acb852351c6d389f34c7d7b1929af388941f51
+    lang: zh-Hant
+    text: "是的。會返回手牌。\n藉由『都留岐涼花』的能力進入戰場的『美麗週日』具有「自己的結束階段到來時，使這張卡片返回手牌」，即使『都留岐涼花』離開戰場，這個能力仍有效。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:c060d0581126fc1f3ee852d12ae6c9545a1e81b11977b710f9442832afeca0b9
+    field: question
+    source_hash: sha256:92885e2990747226fcbde477139ef463141382c597feae8b9c16c4c32b9da2e4
+    lang: zh-Hant
+    text: 藉由『都留岐涼花』的{入場曲}能力，將手牌中的『美麗週日』召喚到戰場上，再藉由『美麗週日』的{入場曲}能力，使這個『都留岐涼花』返回手牌。這個『美麗週日』會在自己的結束階段到來時返回手牌嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:c258d2fd30ecfe4a7f5517fce57f9590f130ceb24ad8022e345dd9ad27757edd
+    field: answer
+    source_hash: sha256:9231f4658bb629cffe17320d97d15c191e37d7656ca0d816e2020ac9f43fa644
+    lang: zh-Hant
+    text: 不行。『貴婦人』在戰場上時，敵方的{入場曲}能力或【進化時】能力即使滿足觸發條件也不會觸發，因此無法使用。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:c258d2fd30ecfe4a7f5517fce57f9590f130ceb24ad8022e345dd9ad27757edd
+    field: question
+    source_hash: sha256:8d5bac458395baa9377b5ae2e58d43dbb214acf8ac19bbf089f828de411f80de
+    lang: zh-Hant
+    text: 『貴婦人』在戰場上，敵方召喚具有{入場曲}能力的從者到戰場上，或進化為具有【進化時】能力的從者時，可以使用該{入場曲}能力或【進化時】能力嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:c83419e2f330521795c73760e33552ede3f61f6a513d454a18d21d996addca1d
+    field: answer
+    source_hash: sha256:3bcbf7e918b73e6430ec62fbd2fe6d40cf74f232e36e38fcc8e595dcbe1423fb
+    lang: zh-Hant
+    text: "是的。會觸發。\n戰場上的從者因能力而被破壞，或戰場上生命值變為0以下的從者被破壞時，會將該從者從戰場放置到墓場。也就是會滿足『第一紅寶』能力的觸發條件。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:c83419e2f330521795c73760e33552ede3f61f6a513d454a18d21d996addca1d
+    field: question
+    source_hash: sha256:195ec0f680e34230d12bb6b6c1d2e13926109ddd6250ea388addfa770019e60a
+    lang: zh-Hant
+    text: 自己戰場上的其他賽馬娘・從者被「破壞」時，『第一紅寶』的能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:dc83b2481a1bf07f98e16183902cd6c11db941364e21dcd5d2cfb0fb5f98c392
+    field: answer
+    source_hash: sha256:3aa00310e829d7d9737df3dbfe626917500c8c4cf853db60c0aab8fc99f729d3
+    lang: zh-Hant
+    text: "是的。可以選擇。\n此時，不公開卡片，使其返回牌堆頂。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:dc83b2481a1bf07f98e16183902cd6c11db941364e21dcd5d2cfb0fb5f98c392
+    field: question
+    source_hash: sha256:832bdbe30f32b18f6bc28d05833f67801006719230bbebc5e2d48186c3a50dd1
+    lang: zh-Hant
+    text: 使用這張法術並查看自己牌堆中的卡片，其中有賽馬娘・卡片時，可以選擇不將其加入手牌嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:dee1896f10a84f8373910eee2ccc2a13ce28728a4c10404045360c2bdc63d8be
+    field: answer
+    source_hash: sha256:f9791052d2cd1a3a5f7185b28dc619b53fc191a0a528c0451b2cd56142fc68a9
+    lang: zh-Hant
+    text: 是的。即使在敵方的回合中也會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:dee1896f10a84f8373910eee2ccc2a13ce28728a4c10404045360c2bdc63d8be
+    field: question
+    source_hash: sha256:3136422e67a0d6ff0a182b14f492eb2a24f3ad4c0433e87f205157485a1700ed
+    lang: zh-Hant
+    text: 若因某個能力，在敵方的回合中有『運勢的走向』進入自己的戰場，「『運勢的走向』進入自己的戰場時，～」能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e05fb5eb89b1d0b63ee4662c1df1bb0f85089d38ed7efdf8a58be326c228fe6e
+    field: answer
+    source_hash: sha256:3aa00310e829d7d9737df3dbfe626917500c8c4cf853db60c0aab8fc99f729d3
+    lang: zh-Hant
+    text: "是的。可以選擇。\n此時，不公開卡片，使其返回牌堆頂。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e05fb5eb89b1d0b63ee4662c1df1bb0f85089d38ed7efdf8a58be326c228fe6e
+    field: question
+    source_hash: sha256:e200ddde45742ce20143656fffcae8698d2a25239008fc28c445fdff4a5a17a3
+    lang: zh-Hant
+    text: 藉由這個護符的{入場曲}能力查看的自己牌堆卡片中有賽馬娘・卡片時，可以選擇不將其加入手牌嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e1a69c582f9e05797670a20a24f32f921ae4d551976c37f73bde5d58d2296be5
+    field: answer
+    source_hash: sha256:63ddb9527eef5777c81beb29c55a48db0dd7548854a73cb704d4a25ad2c4dee8
+    lang: zh-Hant
+    text: 是的。若同時滿足「使用這張卡片時，捨棄手牌中的1張賽馬娘・卡片：消費-2。」與「只要這張卡片存在，自己使用賽馬娘・法術時，若為本回合中的第1張賽馬娘・法術，則消費-1。」，消費會-3。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e1a69c582f9e05797670a20a24f32f921ae4d551976c37f73bde5d58d2296be5
+    field: question
+    source_hash: sha256:378e447437a35055ac1a2f51c630bfbf04066dcbdde2e5c3a20a0558a749ee58
+    lang: zh-Hant
+    text: 自己戰場上有『大和赤驥』時，這張法術可以使消費-3來使用嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e9901c65ad10ae3d347a22fa4d3dde893d13a83ceff0b300f2ba0cbeaf0749fc
+    field: answer
+    source_hash: sha256:48b982bafaac3bfc19d02364bb4cb9559a98d4d463277939000ca7eb5f8fac42
+    lang: zh-Hant
+    text: 是的。會分別觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e9901c65ad10ae3d347a22fa4d3dde893d13a83ceff0b300f2ba0cbeaf0749fc
+    field: question
+    source_hash: sha256:c4c39bb3ed06677cb2cdd74fcec07047145283f155eebf2a22aa88427199416f
+    lang: zh-Hant
+    text: 自己戰場上有2個這個從者，『比布魯斯』進入自己的戰場時，「『高尚駿逸』或『比布魯斯』進入自己的戰場時，～」能力會分別觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:edef71d0e3cfddc43acdb9aac000aad66a25abf7fde959bdb25398acac3812c9
+    field: answer
+    source_hash: sha256:634a5d3bd561d6f2fb7c768c39d2c563955b5aef46c2624a9b64522bac1ce6c0
+    lang: zh-Hant
+    text: 不行。若無法選擇適當的目標，就無法抉擇【1】，必須抉擇【2】。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:edef71d0e3cfddc43acdb9aac000aad66a25abf7fde959bdb25398acac3812c9
+    field: question
+    source_hash: sha256:4caa1749e55935a21871092a2af2c3e94e0d719f827ced79504ff1fb5e22d2f1
+    lang: zh-Hant
+    text: 若無法選擇敵方戰場上的從者，可以藉由這個從者的{入場曲}能力抉擇【1】，選擇不發生任何事嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:f0e0c86673aa2e211551b04dbe85b4a5fcdbbd9903ac9dbcc946860c3d2d8fa5
+    field: answer
+    source_hash: sha256:af3fc5827220d1813414f810775ef92293c38df22c41a97643fd505fd6128d34
+    lang: zh-Hant
+    text: 不會。該{UB}{入場曲}能力或{UB}【進化時】能力不會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:f0e0c86673aa2e211551b04dbe85b4a5fcdbbd9903ac9dbcc946860c3d2d8fa5
+    field: question
+    source_hash: sha256:ebce0df593afaab7f7f951e94af2d00251d704714c5945bd1a6cff6b7f892662
+    lang: zh-Hant
+    text: 『貴婦人』在戰場上，敵方召喚具有{UB}{入場曲}能力的從者到戰場上，或進化為具有{UB}【進化時】能力的從者時，該{UB}{入場曲}能力或{UB}【進化時】能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:f9e4aed3d6493de24332f0189929899cbf9afa2bc0ef175b47b1b3d5319405de
+    field: answer
+    source_hash: sha256:27a521068399ab068bc8dbafb7becc147bd5edb81d9121e9fab4a576b00f92c5
+    lang: zh-Hant
+    text: 是的。會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:f9e4aed3d6493de24332f0189929899cbf9afa2bc0ef175b47b1b3d5319405de
+    field: question
+    source_hash: sha256:2b0e9da34855d6169986ff57afa455f89672c65e397031ace2bd69505f59eb4c
+    lang: zh-Hant
+    text: 自己戰場上有『第一紅寶』與『大德太陽』，若『忒彌斯的審判』被使用，『第一紅寶』的能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:fae5b85a2b3363cbccc0ab094f7d6cf8a1c2bbefb8d74860210c886f491dfbd0
+    field: answer
+    source_hash: sha256:4ae1239ec34282fea68e233b94aa42b0189b41ed8dc1f021e98fcbcedd827bd6
+    lang: zh-Hant
+    text: "不會。不會計入1回合中1次的次數。\n像進化前的『哥布林』所具有的{進化}能力（可以進化的起動能力，「圓圈E」圖示），在1回合中只能使用1次。藉由其他能力進化等情況沒有這項限制。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:fae5b85a2b3363cbccc0ab094f7d6cf8a1c2bbefb8d74860210c886f491dfbd0
+    field: question
+    source_hash: sha256:e326724016340d4111649873699f000fcb5c8a22a7f1384477ef2de2f7f9eb63
+    lang: zh-Hant
+    text: 藉由這個護符的{謝幕曲}能力使自己戰場上的『目白麥昆』進化時，這次進化會計入像進化前的『哥布林』所具有的{進化}能力（可以進化的起動能力，「圓圈E」圖示）在1回合中可以使用1次的次數嗎？
+    origin: machine
+    low_confidence: true

@@ -1,0 +1,143 @@
+format: 1
+kind: qa_translation_shard
+entries:
+  - qa_id: qa:v1:080f5544d53e3d88b0d3e7911cf34cd3dbcad0c129ef62a5514a4d2887ff678c
+    field: answer
+    source_hash: sha256:bb4239ddfe69434ab40dbc6f03775964e95c70ed852dca89f6f09292d8387d9d
+    lang: zh-Hant
+    text: 是的。由於是因能力進入戰場，因此會進化。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:080f5544d53e3d88b0d3e7911cf34cd3dbcad0c129ef62a5514a4d2887ff678c
+    field: question
+    source_hash: sha256:750338e50426c5be628aaaf127e195a3e820939d533301eb3d1b0d23da415b4c
+    lang: zh-Hant
+    text: 以『騎士王 阿爾弗雷德』的【進化時】能力或『溫加爾』的{起動}能力將『爆破劍士』召喚到戰場上時，『爆破劍士』會因{入場曲}能力而進化嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:1d9bddef2985f4aa5a5158c0a46fa030deeb518bb510590fb37dca16bd7b0edc
+    field: answer
+    source_hash: sha256:2a8c627720699363e4497ef050f7f489cdfaedbe8d74f172cd17b71344cee164
+    lang: zh-Hant
+    text: 是的。即使是敵方的回合中，由於是因能力進入戰場，因此會進化。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:1d9bddef2985f4aa5a5158c0a46fa030deeb518bb510590fb37dca16bd7b0edc
+    field: question
+    source_hash: sha256:454f6d28a3fbfbf8214b31b3e0e9a057c3b68c886c343eb441a7a7bd150c7f00
+    lang: zh-Hant
+    text: 『爆破劍士』在敵方的回合中因某種能力進入戰場時，也會因{入場曲}能力而進化嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:39fc59d6b72ae5c1c38b12d8db437c4f41a1bcfa3a5a02178044c04c057b1626
+    field: answer
+    source_hash: sha256:4ae1239ec34282fea68e233b94aa42b0189b41ed8dc1f021e98fcbcedd827bd6
+    lang: zh-Hant
+    text: "不會。不會計入1回合中1次的次數。\n如進化前的『哥布林』所具有的{進化}能力（可以進化的起動能力、「圓圈E」圖示），1回合中只能使用1次。因其他能力而進化等情況沒有這項限制。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:39fc59d6b72ae5c1c38b12d8db437c4f41a1bcfa3a5a02178044c04c057b1626
+    field: question
+    source_hash: sha256:1dd40dbab7fb6e26530c8a4a27d79b291541f98d0bcf9faa0fdcc397d2c91039
+    lang: zh-Hant
+    text: 這個從者因{入場曲}能力而進化時，該次進化會計入如進化前的『哥布林』所具有的{進化}能力（可以進化的起動能力、「圓圈E」圖示）可使用次數的1回合中1次嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:43f71b47a4b238ae4f9cc3cafeaa04266702ee9bed24247fc1627a1462fd2d55
+    field: answer
+    source_hash: sha256:fa34c6e63daa2f6005dae9951bad3ff6b4a074c375d41c7d44245521d10a3854
+    lang: zh-Hant
+    text: 【單重驅動】觸發並結算的時點在先。結算全部如【攻擊時】能力等從者攻擊時觸發的能力後，才會進入非回合玩家的Quick時點。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:43f71b47a4b238ae4f9cc3cafeaa04266702ee9bed24247fc1627a1462fd2d55
+    field: question
+    source_hash: sha256:c06bfeb3c37e08411923bea6089fb6a259accaa858fd835bacbd4308271a9164
+    lang: zh-Hant
+    text: 【單重驅動】觸發並結算的時點與Quick時點，哪一個在先？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:4cdee20eac28682ae0b58b86dbd8fd57e801ca0a425cdcca1805724951def9aa
+    field: answer
+    source_hash: sha256:ee4ae93b7224749b639fd856cfc882cca4daa340498370652745ad0d07b6273e
+    lang: zh-Hant
+    text: 不行。抉擇【2】而無法選擇敵方戰場上的從者時，無法使用這張法術，也無法支付消費，因此無法使自己主戰者的生命值+2。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:4cdee20eac28682ae0b58b86dbd8fd57e801ca0a425cdcca1805724951def9aa
+    field: question
+    source_hash: sha256:64a9e1148d5b3cc80e23e8f5442b002dbae6463247524bc72709ef1a3ed2550b
+    lang: zh-Hant
+    text: 無法選擇敵方戰場上的從者時，可以抉擇這張法術的【2】並支付消費，使自己主戰者的生命值+2嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:82442854c359840f21ca8e3ccfecc17d7910737b3392de00ce903689c124cf09
+    field: answer
+    source_hash: sha256:965fd2e5b05316f9b92d2aaa555ced683cab3485d588e86995f882c3ddc41fb3
+    lang: zh-Hant
+    text: 【雙重驅動】觸發並結算的時點在先。結算全部如【攻擊時】能力等從者攻擊時觸發的能力後，才會進入非回合玩家的Quick時點。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:82442854c359840f21ca8e3ccfecc17d7910737b3392de00ce903689c124cf09
+    field: question
+    source_hash: sha256:67286f26bf387bbf13712b1793515c95363c449e78d07566fbe354ae8517f9f0
+    lang: zh-Hant
+    text: 【雙重驅動】觸發並結算的時點與Quick時點，哪一個在先？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:bd1779df43a519f07e722aba9022a5eacd04673cd27cdb6f756bea58567cc532
+    field: answer
+    source_hash: sha256:84696572ecbfee576a77b5d617e446e20c5b0b07b109d82281049db5bf13c83e
+    lang: zh-Hant
+    text: 是的。可以以任意順序結算。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:bd1779df43a519f07e722aba9022a5eacd04673cd27cdb6f756bea58567cc532
+    field: question
+    source_hash: sha256:d5c96819ecc54c8d56fd5e10431570d94a03ff6e349c6625f1c3f132840f221d
+    lang: zh-Hant
+    text: 【單重驅動】與【攻擊時】能力，可以以任意順序結算嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:bf31dd4a55d00f60c7f4ce2d9930bf36cf3821f07f888991e31d437816838a33
+    field: answer
+    source_hash: sha256:984bcb3c0f1704213e1316ae4aea989c8b51d0d0c1bdabe7bc1f53fffa21a61d
+    lang: zh-Hant
+    text: 不行。由於必須在支付消費前選擇目標，因此無法選擇。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:bf31dd4a55d00f60c7f4ce2d9930bf36cf3821f07f888991e31d437816838a33
+    field: question
+    source_hash: sha256:68aa0e2a6ad3f3e46fcedade74c8015f71fe5dc32557d6a384143f311724cdd3
+    lang: zh-Hant
+    text: 以這個從者的{入場曲}能力選擇墓場中的1張皇家聖騎士・從者時，可以選擇作為{入場曲}能力的消費而捨棄的卡片嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:ce12c50e6059b8a80032f2df81c2f061f63feb78dcfafc2d10f3085be589bb73
+    field: answer
+    source_hash: sha256:dca9604f439bbd0dfe2a7c467612ccda5009eff10d4a668143d90f979b0d74bd
+    lang: zh-Hant
+    text: 【單重驅動】或【攻擊時】能力觸發並結算的時點在先。結算全部如【攻擊時】能力等從者攻擊時觸發的能力後，才會進入非回合玩家的Quick時點。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:ce12c50e6059b8a80032f2df81c2f061f63feb78dcfafc2d10f3085be589bb73
+    field: question
+    source_hash: sha256:dddaa918d82e1fe8ad7875bd4604110d0c70c12cf5a76888935b11b68559bb78
+    lang: zh-Hant
+    text: 【單重驅動】或【攻擊時】能力觸發並結算的時點與Quick時點，哪一個在先？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:dc1c70050931751658208c6566051b1d173a586a0216f6d6e52e102f80e6f4c3
+    field: answer
+    source_hash: sha256:c1b9636233d9348d250e3f459b96c7579a5580ccb0fd82090d01dfedb81e8bb0
+    lang: zh-Hant
+    text: 是的。可以使攻擊力與生命值+1。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:dc1c70050931751658208c6566051b1d173a586a0216f6d6e52e102f80e6f4c3
+    field: question
+    source_hash: sha256:b99810f1dbd9c6414aadc112fef2cbbac61d0a21274f8a3b2c717a7b8b38664f
+    lang: zh-Hant
+    text: 使用這個從者的【進化時】能力，選擇未找到自己牌堆中原始消費3以下的皇家聖騎士・從者時，若自己的墓場中有15張以上的皇家聖騎士・從者，可以使這個從者的攻擊力與生命值+1嗎？
+    origin: machine
+    low_confidence: true

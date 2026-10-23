@@ -1,0 +1,31 @@
+format: 1
+kind: qa_translation_shard
+entries:
+  - qa_id: qa:v1:371ade0b4d063673e065b5bf1c82440acdb89434682f1618ea80212e3c2e0617
+    field: answer
+    source_hash: sha256:634a5d3bd561d6f2fb7c768c39d2c563955b5aef46c2624a9b64522bac1ce6c0
+    lang: zh-Hant
+    text: 不行。無法選擇適當目標時，無法抉擇【1】，必須抉擇【2】。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:371ade0b4d063673e065b5bf1c82440acdb89434682f1618ea80212e3c2e0617
+    field: question
+    source_hash: sha256:4caa1749e55935a21871092a2af2c3e94e0d719f827ced79504ff1fb5e22d2f1
+    lang: zh-Hant
+    text: 無法選擇敵方戰場上的從者時，可以藉由這個從者的{入場曲}能力抉擇【1】，選擇什麼都不發生嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6c5316f4ebab1e68fe9e42abd89da9beb10ff3ece703f3466f9496e7670caa60
+    field: answer
+    source_hash: sha256:47ae824854513e7304a574d0bbbe9bcdcecfc7f89d58339e8fec7f3a72732978
+    lang: zh-Hant
+    text: 不行。無法召喚到戰場上。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6c5316f4ebab1e68fe9e42abd89da9beb10ff3ece703f3466f9496e7670caa60
+    field: question
+    source_hash: sha256:1e341448528715eff3e49469848865ea24c12d018d80e13a3cd94ad646c7b23f
+    lang: zh-Hant
+    text: 自己的戰場已達上限時，可以藉由這個從者的能力，召喚1個『騎士』到戰場上嗎？
+    origin: machine
+    low_confidence: true

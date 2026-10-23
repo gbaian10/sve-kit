@@ -1,0 +1,59 @@
+format: 1
+kind: qa_translation_shard
+entries:
+  - qa_id: qa:v1:158a9703a57bd4ae85f628418150f5f6190ac04159b1bb27c3fa838bcc1414b3
+    field: answer
+    source_hash: sha256:f350730ab9309df6d3466e8463f984f5d31ed49b9c56d2c7eb4b2521399163af
+    lang: zh-Hant
+    text: 是的。會背面朝上返回原本的位置。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:158a9703a57bd4ae85f628418150f5f6190ac04159b1bb27c3fa838bcc1414b3
+    field: question
+    source_hash: sha256:011c7fd2ee5898bfcaf3e1eacb19e93e1bd9947255a57587d0300dcec304dbce
+    lang: zh-Hant
+    text: 以『上田鈴帆』的{入場曲}能力查看自己牌堆頂的1張卡片後，會將該卡片背面朝上返回原本的位置嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:838cefa7d5798e248f3811fa0d4ffc926d8a22eb9ee1feb012b934f292f35222
+    field: answer
+    source_hash: sha256:df6b9142001775c0aed019b7024bba0dcb1c50eef54e571975a31b4d31be0441
+    lang: zh-Hant
+    text: 是的。正是如此。將自己牌堆頂的1張卡片放置到墓場，若放置到墓場的卡片的原始消費為奇數，就抽1張卡片；若放置到墓場的卡片的原始消費為偶數，就使自己主戰者的生命值+2。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:838cefa7d5798e248f3811fa0d4ffc926d8a22eb9ee1feb012b934f292f35222
+    field: question
+    source_hash: sha256:5fbef86cfdd122fbfc350be7ced426c50edf693c1fda95043bc2b00ff8556931
+    lang: zh-Hant
+    text: 這個從者的{入場曲}能力中的「若將原始消費為奇數的卡片放置到墓場，則抽1張卡片。若將原始消費為偶數的卡片放置到墓場，則自己的主戰者{生命值}+2。」，是指以這個從者的{入場曲}能力從牌堆放置到墓場的卡片，其原始消費為奇數或偶數的情況嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:953c53317a417fe670cc28c768b683d0e8e0282d2d4af55225d8fb7d86119ee9
+    field: answer
+    source_hash: sha256:8329de5ec995444d6fe785930ed6ab0ad4cb9b6463e1a4b18b1fab886c427e67
+    lang: zh-Hant
+    text: 是的。可以將『〔親手做的幸福〕高森藍子』自身也包含在內支付消費。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:953c53317a417fe670cc28c768b683d0e8e0282d2d4af55225d8fb7d86119ee9
+    field: question
+    source_hash: sha256:194fb59e3e798912ed58da84b8f60da27e16789f52cb3e8e3314b47f9282330c
+    lang: zh-Hant
+    text: 支付{起動}能力的消費「將戰場上的3個Passion・從者{橫置}」時，可以將具有這個{起動}能力的自己戰場上的『〔親手做的幸福〕高森藍子』自身也包含在內，將戰場上的3個Passion・從者{橫置}來支付消費嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a09d6b7ebfcd77b87d4b3aa89248620d1628246e7b31380c687bfca8686c56b8
+    field: answer
+    source_hash: sha256:9e580b4312335867d1368913832d193958132d93e25b1feaa76fdbc3732ff1fe
+    lang: zh-Hant
+    text: "不行。無法如此處理。使用【進化時】能力時，就要選擇敵方的從者。之後依文字記載的順序處理效果，公開自己牌堆頂的1張卡片。\n（可以以進化前的『上田鈴帆』的{入場曲}能力，查看自己牌堆頂的1張卡片。）"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a09d6b7ebfcd77b87d4b3aa89248620d1628246e7b31380c687bfca8686c56b8
+    field: question
+    source_hash: sha256:96b7fc034b4e773e7e3742bb959db45ae0dd543d66025e01a4d2fcaa1c0c1625
+    lang: zh-Hant
+    text: 使用『上田鈴帆（EVOLVE）』的【進化時】能力時，可以先公開自己牌堆頂的1張卡片，確認該卡片的原始消費後，再選擇敵方的從者，決定給予傷害的對象嗎？
+    origin: machine
+    low_confidence: true

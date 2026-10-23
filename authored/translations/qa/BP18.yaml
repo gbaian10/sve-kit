@@ -1,0 +1,1291 @@
+format: 1
+kind: qa_translation_shard
+entries:
+  - qa_id: qa:v1:00d68455ac61c90bba5b800cf6ec5679b87d3ba9a9f12fa2c7f9de6d9472d3ef
+    field: answer
+    source_hash: sha256:cee8ae823011de482af701aff8db6956cbb5ebcce8d952b32156dd95962cb72c
+    lang: zh-Hant
+    text: 是的。不會移動到EX區，而會被放置到墓場。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:00d68455ac61c90bba5b800cf6ec5679b87d3ba9a9f12fa2c7f9de6d9472d3ef
+    field: question
+    source_hash: sha256:cb599d0b2f1bf07384392afa3ce39c332618b769315416876af61b355bffe3e5
+    lang: zh-Hant
+    text: 自己的EX區有5張卡片時，從手牌使用這張法術，這張法術會被放置到墓場嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:09791a37dd49f5cf90db164678eb0a2784d28bc717591b5507c6c9b63c8a5e39
+    field: answer
+    source_hash: sha256:4ae1239ec34282fea68e233b94aa42b0189b41ed8dc1f021e98fcbcedd827bd6
+    lang: zh-Hant
+    text: "不會。不會計入1回合中1次的次數。\n如進化前的『哥布林』所具有的{進化}能力（可以進化的起動能力、「圓圈E」圖示），1回合中只能使用1次。因其他能力而進化等情況沒有這項限制。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:09791a37dd49f5cf90db164678eb0a2784d28bc717591b5507c6c9b63c8a5e39
+    field: question
+    source_hash: sha256:1dd40dbab7fb6e26530c8a4a27d79b291541f98d0bcf9faa0fdcc397d2c91039
+    lang: zh-Hant
+    text: 這個從者因{入場曲}能力而進化時，該次進化會計入如進化前的『哥布林』所具有的{進化}能力（可以進化的起動能力、「圓圈E」圖示）可使用次數的1回合中1次嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:0d02a57c51b50581996986613f457f2c05d584ffc1ad63bd079b19c8a8f95690
+    field: answer
+    source_hash: sha256:d5f2f7d7a7bf270170f64e4b368da01ea786afa2d9bbb960eec76ef6f86719bf
+    lang: zh-Hant
+    text: 是的。自己可以使用{進化}能力。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:0d02a57c51b50581996986613f457f2c05d584ffc1ad63bd079b19c8a8f95690
+    field: question
+    source_hash: sha256:329625b44d9c93e75a4a6d1c91a3909acb0db72b9cab3ea6789ca53e5352ad0f
+    lang: zh-Hant
+    text: 這個從者在自己戰場上，本回合自己已使用過{進化}能力時，自己可以使用{進化}能力嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:0e45a4c67e6b2af3ba5fb489ebc85298fed00d1fc023bcfe6ef0c2c44f912011
+    field: answer
+    source_hash: sha256:78d7242df60bde214b24a0d0768706cf78f0fe0deac006bff5807f61f88255fc
+    lang: zh-Hant
+    text: "不行。無法從自己的牌堆搜尋1張『龍首巨蛇』，召喚到戰場上。\n因『篡奪的蛇劍』受到3點傷害與2點傷害，『龍首巨蛇』的能力會觸發2次，但結算『龍首巨蛇』的能力時，這個『龍首巨蛇』不在自己戰場上，因此無法適用「若這張卡片在自己戰場上，」之後的效果。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:0e45a4c67e6b2af3ba5fb489ebc85298fed00d1fc023bcfe6ef0c2c44f912011
+    field: question
+    source_hash: sha256:0049e02108ca385fc42418aa6b73d3672f1504ba127325cc681e44093cad9090
+    lang: zh-Hant
+    text: "自己的墓場有10張以上的卡片，敵方使用的『篡奪的蛇劍』在給予3點傷害後，會再給予2點傷害。\n此狀態下，敵方對自己戰場上生命值為5的『龍首巨蛇』使用『篡奪的蛇劍』時，可以因『龍首巨蛇』的能力，從自己的牌堆搜尋1張『龍首巨蛇』，召喚到戰場上嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:1542ab783dfeea725669795ffc90627e8cb46b3d824fb2db1c3c3b102193d145
+    field: answer
+    source_hash: sha256:0a8286ea155c03b08de1f2d5dffe141f8a34dd49e5b8ac5f03a9fd11ef8521ba
+    lang: zh-Hant
+    text: 不行。『驅動點數』與進階卡不屬於進化從者，無法使其變為背面朝上。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:1542ab783dfeea725669795ffc90627e8cb46b3d824fb2db1c3c3b102193d145
+    field: question
+    source_hash: sha256:970e72e9b9b747660a7a605371794dbdc17e0bb01449fbafb2b2a527e14b4533
+    lang: zh-Hant
+    text: 可以使用這張法術，使進化牌堆中正面朝上的『驅動點數』或進階卡變為背面朝上嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:170c9c2da87a6551e8d6e07ffc06faea595725e68623c703f3bbe0c0321f2dd1
+    field: answer
+    source_hash: sha256:be9b35a920e1dd37f2cf252002101b995c6113187d6f470c73714d67f2282d89
+    lang: zh-Hant
+    text: 不會。不滿足。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:170c9c2da87a6551e8d6e07ffc06faea595725e68623c703f3bbe0c0321f2dd1
+    field: question
+    source_hash: sha256:f2886d064291ff230b973030919b9bfd141b9af632d470e950ea8a676389532a
+    lang: zh-Hant
+    text: 自己已使用過{用餐}能力時，會滿足「若自己戰場上的從者已進化」嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:172ccacff7ca3c15b12f264f2d7ef215c7bc3e9e05b33e8f6c50958841189085
+    field: answer
+    source_hash: sha256:a729256ec8a448aa5b5a4149ceab6bf625c4014733258d93155702d0088321dd
+    lang: zh-Hant
+    text: 是的。可以。從牌堆搜尋卡片時，選擇未找到『統率的魯米那斯騎士』、『卓越的魯米那斯法師』或『勇猛的魯米那斯槍士』，就可以不將其加入手牌。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:172ccacff7ca3c15b12f264f2d7ef215c7bc3e9e05b33e8f6c50958841189085
+    field: question
+    source_hash: sha256:5500ef77084e0a099ced562a96a88548aef8969f3eb5029e58ba31cc94d0dd0e
+    lang: zh-Hant
+    text: 使用『魯米那斯騎士團旗紋』時，可以選擇不將『統率的魯米那斯騎士』、『卓越的魯米那斯法師』或『勇猛的魯米那斯槍士』中的任意1張加入手牌嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:19435bdc94d8471230a25ce701e29b353d483ce32988e20e5a5f6b4497b1e85c
+    field: answer
+    source_hash: sha256:f9791052d2cd1a3a5f7185b28dc619b53fc191a0a528c0451b2cd56142fc68a9
+    lang: zh-Hant
+    text: 是的。即使是敵方的回合中也會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:19435bdc94d8471230a25ce701e29b353d483ce32988e20e5a5f6b4497b1e85c
+    field: question
+    source_hash: sha256:472e90ad3521a670d1ed7df17fefee496934134e04038be04ff3b365fff7a352
+    lang: zh-Hant
+    text: 因某種能力使從者在敵方的回合中從戰場被放置到墓場時，「從者從戰場被放置到墓場時，～」能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:194b74d6bcd664adb6ccf13e6e4d438240d2e06a99e559ed02712ba8107b6d9c
+    field: answer
+    source_hash: sha256:d5f2f7d7a7bf270170f64e4b368da01ea786afa2d9bbb960eec76ef6f86719bf
+    lang: zh-Hant
+    text: 是的。自己可以使用{進化}能力。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:194b74d6bcd664adb6ccf13e6e4d438240d2e06a99e559ed02712ba8107b6d9c
+    field: question
+    source_hash: sha256:d2b6e37bd0549be7e33c6e613122de9f485a7de0d5886d8edddc4e41db973e64
+    lang: zh-Hant
+    text: 這個從者在自己戰場上，本回合自己已使用過{憑依}能力時，自己可以使用{進化}能力嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:2095eb746b965d46392476fcb5b93b3c0f3e754ea6222a854fd3bb445bbb369c
+    field: answer
+    source_hash: sha256:d5f2f7d7a7bf270170f64e4b368da01ea786afa2d9bbb960eec76ef6f86719bf
+    lang: zh-Hant
+    text: 是的。自己可以使用{進化}能力。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:2095eb746b965d46392476fcb5b93b3c0f3e754ea6222a854fd3bb445bbb369c
+    field: question
+    source_hash: sha256:009a64a4fb3d8aa44e4f6c44a27f0f8cb8a5cfdd7f494e8bbac399177ed875f1
+    lang: zh-Hant
+    text: 這個從者在自己戰場上，本回合自己已使用過{進階起動}能力時，自己可以使用{進化}能力嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:20f788368cdca85428ef0be5c48327e3c9af6669c95b7fbf9bf4b89ac6fa5f43
+    field: answer
+    source_hash: sha256:ba83bfc26e75e5106f6caeca6fef83ad20cfc53299508f0d980d39cdf2599680
+    lang: zh-Hant
+    text: 是的。『死之索償』的能力並非給予傷害的能力，因此攻擊力與生命值會-2。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:20f788368cdca85428ef0be5c48327e3c9af6669c95b7fbf9bf4b89ac6fa5f43
+    field: question
+    source_hash: sha256:14373a8ca88705412122ef8126ebf9e0b20e4ab2dbc9e190e56a169802b0fd32
+    lang: zh-Hant
+    text: 以適用『精靈鍛造師‧蕾妮』的{入場曲}能力的從者為目標，使用『死之索償』時，該從者的攻擊力與生命值會-2嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:22b2097e6b187563179fea7cf25c3aa334734e4a8922173eab0dd5f22de2e0aa
+    field: answer
+    source_hash: sha256:398d01a3beb6aff437d7af28be160614811a1eaae523c30bbec76a63e554e871
+    lang: zh-Hant
+    text: 不行。無法選擇敵方戰場上的從者時，無法使用這個從者的【進化時】能力，因此無法將2個『叢林蝙蝠』召喚到戰場上。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:22b2097e6b187563179fea7cf25c3aa334734e4a8922173eab0dd5f22de2e0aa
+    field: question
+    source_hash: sha256:daa0ec0251c13ed127df607d84dbb67731f63e885b9f61e0ff15a683b65510a7
+    lang: zh-Hant
+    text: 無法選擇敵方戰場上的從者時，可以使用這個從者的【進化時】能力，將2個『叢林蝙蝠』召喚到戰場上嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:235c6284d5225eed1a22e58d42b1433f5b0e073ec992281d5c7decdcd2b4028e
+    field: answer
+    source_hash: sha256:ca43350d3c7193439e2472761324f246c707a4cd3ff627da91e8b1371f0ff4c5
+    lang: zh-Hant
+    text: 不行。無法選擇敵方戰場上的從者時，無法使用這個從者的{入場曲}能力，無法使自己的主戰者{生命值}+3。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:235c6284d5225eed1a22e58d42b1433f5b0e073ec992281d5c7decdcd2b4028e
+    field: question
+    source_hash: sha256:73f036ec839f44083a64274840dff53dc140a7be1381ed4815042a04049aa243
+    lang: zh-Hant
+    text: 無法選擇敵方戰場上的從者時，可以使用這個從者的{入場曲}能力，使自己的主戰者{生命值}+3嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:25302bfdfaa7e054d97b183fb0fa963cbb201e6149431dee410125058d630e20
+    field: answer
+    source_hash: sha256:bfc7db6af05b5dbfb313d1c8d6c952bdeaa0f1f421d7cf750dd75e5644a68868
+    lang: zh-Hant
+    text: 不行。無法選擇敵方戰場上的從者時，無法使用這張法術，無法抽1張卡片。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:25302bfdfaa7e054d97b183fb0fa963cbb201e6149431dee410125058d630e20
+    field: question
+    source_hash: sha256:3c8fcc7c40efe5a38679b05a94a2b3f65b54aab1aff99d94244cbf029dee4ff6
+    lang: zh-Hant
+    text: 無法選擇敵方戰場上的從者時，可以使用這張法術，抽1張卡片嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:270f13a0c9b2a1fa98b02e4d726a3ea79caf3eae1c60141998aab66b4cf49476
+    field: answer
+    source_hash: sha256:2f31cb48a936160534584d54ba357a777b65898b658a87bc393cc26c9b28b985
+    lang: zh-Hant
+    text: 是的。正是如此。支付的消費合計-4。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:270f13a0c9b2a1fa98b02e4d726a3ea79caf3eae1c60141998aab66b4cf49476
+    field: question
+    source_hash: sha256:7e93bc5e571c8170573f9dea20924a9ec7f66d3db5efab190d9c433d25968365
+    lang: zh-Hant
+    text: 自己進化牌堆中的正面朝上的透京・進化從者為5張，敵方戰場上有『沉默絕傑‧魯魯納伊』時，使用『因芽應報』，自己實際支付的消費是0PP嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:2832d94822d2b57c1d06f3c8644fc00eb2cd563a9770ce3df1fc7948c4719715
+    field: answer
+    source_hash: sha256:bb409846b23627e3d5d75d65978783a7087602fb966c36d5516aa8a54e0ed6d4
+    lang: zh-Hant
+    text: "不行。此時無法抽1張卡片，『樹正的木鐸‧京』會具有【疾馳】。\n『樹正的木鐸‧京』的能力參照該回合中進化的次數，而非從『樹正的木鐸‧京』進入戰場後才開始計算。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:2832d94822d2b57c1d06f3c8644fc00eb2cd563a9770ce3df1fc7948c4719715
+    field: question
+    source_hash: sha256:5adfdfa690ddfa049afcb0b80fe9b0c4eebd024b0eebe5a164df715675ede661
+    lang: zh-Hant
+    text: 自己的回合中，自己戰場上的1個從者進化後，使用『樹正的木鐸‧京』，自己戰場上的其他1個從者進化時，可以因『樹正的木鐸‧京』的「自己戰場上的從者進化時，～」能力而抽1張卡片嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:2bc484056937c1f708d930f82a4254761facd3551cd451a1f903409b15850cd8
+    field: answer
+    source_hash: sha256:80b4b4663599dae1e10ece9477fe09cf9f95e4b96e5dc687dee9f2345aa22b38
+    lang: zh-Hant
+    text: 不行。無法選擇敵方戰場上的從者時，無法使用『活潑的精靈‧小梅』的{入場曲}能力，因此無法將『活潑的精靈‧小梅』放置到牌堆底。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:2bc484056937c1f708d930f82a4254761facd3551cd451a1f903409b15850cd8
+    field: question
+    source_hash: sha256:171470fcdeb4c97b358610aaaae90807b8fce211aa1ef243306c7c55bbb66158
+    lang: zh-Hant
+    text: 無法選擇敵方戰場上的從者時，使用『活潑的精靈‧小梅』的{入場曲}能力，可以將『活潑的精靈‧小梅』放置到牌堆底嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:2fa97a983b675ea08099f4d93fabded6f955486e434ead15c726fb53a6a45110
+    field: answer
+    source_hash: sha256:ea3ebda1f05cba0c1f1dc8a8a49d62fd69d286ef355c13384a5311c7d866d324
+    lang: zh-Hant
+    text: "自己戰場上有4張卡片時，使用這個從者的【進化時】能力，進行以下處理。\n\n①選擇從自己的牌堆找到2張透京・從者時\n從找到的2張中，將任意1張召喚到戰場上。另1張不會從牌堆移動，將牌堆洗牌。\n\n②選擇從自己的牌堆找到1張透京・從者時\n將找到的1張召喚到戰場上，將牌堆洗牌。\n\n此外，也可以選擇1張都未找到，不將透京・從者召喚到戰場上。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:2fa97a983b675ea08099f4d93fabded6f955486e434ead15c726fb53a6a45110
+    field: question
+    source_hash: sha256:73caa7e84e7e2463960e76f6cb3969426eedf95a4ab8fafc29b8b31c695876ab
+    lang: zh-Hant
+    text: 請說明自己戰場上有4張卡片時，使用這個從者的【進化時】能力的處理。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:30815fdf6c99d4d832475cb6794d64612f5e17714ea60fdef6bd895362ccf753
+    field: answer
+    source_hash: sha256:61875849e6074699989939de116997acf3e9c9eb1c9bf07126a5324fad52636a
+    lang: zh-Hant
+    text: 不會。由於與攻擊力為0的從者交戰不會給予傷害，因此不會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:30815fdf6c99d4d832475cb6794d64612f5e17714ea60fdef6bd895362ccf753
+    field: question
+    source_hash: sha256:5a17796a00e3ae52a93695cd79c0233b2d8f0414400605ba1798a766861ae8b0
+    lang: zh-Hant
+    text: 這個從者與攻擊力為0的從者交戰時，「這張卡片受到傷害時，～」能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:343dfd3f3512c5373f71f5c5e46e2ece46a000321638806a0e3db1af195a336a
+    field: answer
+    source_hash: sha256:aaef2923b062656274cd1fbbeaf56eb9418cef9a324e8e0b61808304f722901c
+    lang: zh-Hant
+    text: 不行。由於沒有可選擇的從者，因此無法使用『炎術檢定A級』本身，無法給予敵方的主戰者1點傷害。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:343dfd3f3512c5373f71f5c5e46e2ece46a000321638806a0e3db1af195a336a
+    field: question
+    source_hash: sha256:04ebf6dcbbabc1800ef0411b5d5b0608705979526fdb4fc448307d4c59901d27
+    lang: zh-Hant
+    text: 自己戰場上有『魔汙區公所職員‧災藤』，敵方戰場上沒有可選擇的從者時，可以使用『炎術檢定A級』，給予敵方的主戰者1點傷害嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:37c15db756163901f7e33f256e3f4f887fc3e5a8a088617b8b333103e2384564
+    field: answer
+    source_hash: sha256:f9dabef907c0cc9d36ecbc35da4d5c363e7345d7917ad44e183408d86a707eca
+    lang: zh-Hant
+    text: 是的。除了【超進化時】能力，【進化時】能力也會觸發。此外，所觸發的2個能力可以以任意順序結算。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:37c15db756163901f7e33f256e3f4f887fc3e5a8a088617b8b333103e2384564
+    field: question
+    source_hash: sha256:899e2c7fc15a54c95c7a417bd8f763db7a34bab8d6fee0a0032065cf2ff1e837
+    lang: zh-Hant
+    text: 具有【進化時】能力的從者超進化時，該從者的【進化時】能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:37cd79a1276898f5dd0b81e58a5f14227fd5c7f644f52f12ec71507ad78ab3ee
+    field: answer
+    source_hash: sha256:6f16da85ecfcb4d1a67c6e3f5d502ebd1fa83fb8bc9b3fc4bc9d9d58eeb6c7da
+    lang: zh-Hant
+    text: "是的。可以使用。\n此時，作為消費的處理，會改為使這個『機械鋸死亡使者』消失，而非放置到墓場。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:37cd79a1276898f5dd0b81e58a5f14227fd5c7f644f52f12ec71507ad78ab3ee
+    field: question
+    source_hash: sha256:d78075e3b2c0d88cc85654b98de7677bd80693aa60137a8f5f4e524918d58e9b
+    lang: zh-Hant
+    text: 敵方戰場上有『邪智之龍‧法夫納』時，可以使用『機械鋸死亡使者』的{起動}能力嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:37dbb9f47063959fb0e61f2e6e2f2a6740ef7215633baff50557d51f632f185e
+    field: answer
+    source_hash: sha256:5058e7c6ecb2f88a97e8e2c4e177701c95e55ca73587592a8072b8ecc968e019
+    lang: zh-Hant
+    text: 不會。不會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:37dbb9f47063959fb0e61f2e6e2f2a6740ef7215633baff50557d51f632f185e
+    field: question
+    source_hash: sha256:d8a1f4ea3fbd247f051366164c18558e2b20d04fe7a1449b876afed03f5fd4c6
+    lang: zh-Hant
+    text: 自己戰場上有『邪智之龍‧法夫納』時，破壞敵方戰場上的從者，該從者的{謝幕曲}能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:39f29005715ff819bf470c996bf6eb2bd2d59bdd64ef1c978b0684151f1581a4
+    field: answer
+    source_hash: sha256:9a3207a10327db63766e09c19ac24b89bfc51cd5c9a7aef53636c5c89e56b59c
+    lang: zh-Hant
+    text: "是的。會受到傷害。\n『帥忍部長‧煤木萬裁』的{起動}能力，是在使用這個能力時，適用於自己戰場上的全部『帥忍部長‧煤木萬裁』與全部『分身之術‧煤木萬裁』的能力。使用這個{起動}能力後，才將『帥忍部長‧煤木萬裁』或『分身之術‧煤木萬裁』召喚到戰場上時，該『帥忍部長‧煤木萬裁』或『分身之術‧煤木萬裁』不會適用這個{起動}能力的效果。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:39f29005715ff819bf470c996bf6eb2bd2d59bdd64ef1c978b0684151f1581a4
+    field: question
+    source_hash: sha256:7cad4952bf330d89dacbb5d4eedf9f8731b2c1b75016d915f1e20875dfdeb358
+    lang: zh-Hant
+    text: 在使用『帥忍部長‧煤木萬裁』的{起動}能力的回合中，結束階段到來時，以『帥忍部長‧煤木萬裁』的「自己的結束階段到來時，～」能力將『分身之術‧煤木萬裁』召喚到戰場上。之後的Quick時點，敵方以這個『分身之術‧煤木萬裁』為目標，使用『扭曲的進步』時，這個『分身之術‧煤木萬裁』會受到傷害嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:3a2d89c869d4d718d70384613389a5ed75ade1a765f0b773ed321038539e43e5
+    field: answer
+    source_hash: sha256:f9791052d2cd1a3a5f7185b28dc619b53fc191a0a528c0451b2cd56142fc68a9
+    lang: zh-Hant
+    text: 是的。即使是敵方的回合中也會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:3a2d89c869d4d718d70384613389a5ed75ade1a765f0b773ed321038539e43e5
+    field: question
+    source_hash: sha256:adee48e85638f3fc82351b1f11fac3ac76d741babcaa3a1c52ff20da59f53295
+    lang: zh-Hant
+    text: 因某種能力使自己戰場上的從者在敵方的回合中進化時，「透京・從者進入自己戰場時，或自己戰場上的從者進化時，～」能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:3ab35148443fe4b2c9885081fb719142d4b9b3a506495f9e12f75be4f047cdd2
+    field: answer
+    source_hash: sha256:be9b35a920e1dd37f2cf252002101b995c6113187d6f470c73714d67f2282d89
+    lang: zh-Hant
+    text: 不會。不滿足。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:3ab35148443fe4b2c9885081fb719142d4b9b3a506495f9e12f75be4f047cdd2
+    field: question
+    source_hash: sha256:7a38d7f7b0654e0e800a3c5a6d2aa8ed9173c8100a10211e8ae3e44af1caa3fd
+    lang: zh-Hant
+    text: 自己已使用過{憑依}能力時，會滿足「若自己戰場上的從者已進化」嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:3b1a6872a4ed5e62919bbd98c063c09d74f7b180d9bf1613b813ae7603a463d5
+    field: answer
+    source_hash: sha256:d3884953d8aad08fbbebef2b97cf1da1f0e01c27cb76244d91921eee653a630f
+    lang: zh-Hant
+    text: 是的。可以使自己的主戰者{生命值}+2。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:3b1a6872a4ed5e62919bbd98c063c09d74f7b180d9bf1613b813ae7603a463d5
+    field: question
+    source_hash: sha256:6c9f8a8ec3425e272250af9f14a5f3f73df2586da75a0f720095c2a32f769ae0
+    lang: zh-Hant
+    text: 使用這張法術，選擇未找到自己牌堆中原始消費3以下的透京・從者時，可以使自己的主戰者{生命值}+2嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:3d0148b4dedf278a2d3ee41be058fa84eb8e374643850b980172ef10ce7ff937
+    field: answer
+    source_hash: sha256:5291d584bf2733131a172167507862ba86db2253f893ce6c1ab5b3f07f9d7cc5
+    lang: zh-Hant
+    text: 不行。無法選擇自己戰場上的透京・從者時，無法使用{起動}能力，無法使自己的主戰者{生命值}+1。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:3d0148b4dedf278a2d3ee41be058fa84eb8e374643850b980172ef10ce7ff937
+    field: question
+    source_hash: sha256:277ee6b0940a2ed6b051c302050bcd11cc79c9a8e498d41601efc21d0489e48b
+    lang: zh-Hant
+    text: 無法選擇自己戰場上的透京・從者時，可以使用{起動}能力，使自己的主戰者{生命值}+1嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:43855f3348808a270c23b6be2cdfe8cc5d936b18cd9f08ed7d9b2477e4cdb77b
+    field: answer
+    source_hash: sha256:ba83bfc26e75e5106f6caeca6fef83ad20cfc53299508f0d980d39cdf2599680
+    lang: zh-Hant
+    text: 是的。『死之索償』的能力並非給予傷害的能力，因此攻擊力與生命值會-2。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:43855f3348808a270c23b6be2cdfe8cc5d936b18cd9f08ed7d9b2477e4cdb77b
+    field: question
+    source_hash: sha256:5d1f86b6b7c6a00af7e8f23f00ab32cee6d12dcb7fca5c8b145405460d599542
+    lang: zh-Hant
+    text: 『帥忍部長‧煤木萬裁』的{起動}能力的效果有效時，以『帥忍部長‧煤木萬裁』為目標使用『死之索償』，『帥忍部長‧煤木萬裁』的攻擊力與生命值會-2嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:4937ddff15dfb89813772e6fdfb1208b461b0710eef003908a4d23170f8922b6
+    field: answer
+    source_hash: sha256:ffb15834035e021c679c507f6964ea19f11b772f28fa33ee9f24159c1e052350
+    lang: zh-Hant
+    text: 不行。自己戰場上的『巨型劍刃』未放置GIGA指示物時，無法支付{起動}能力的消費，因此無法使用{起動}能力。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:4937ddff15dfb89813772e6fdfb1208b461b0710eef003908a4d23170f8922b6
+    field: question
+    source_hash: sha256:8658799b072627f633b7c63d52edac985be4cc5a4d334762961fa6e70137461b
+    lang: zh-Hant
+    text: 自己戰場上的『巨型劍刃』未放置GIGA指示物時，可以使用這個從者的{起動}能力嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:4aefabb885d0c58f26d23987e06e97efdebe8b7d117996a3965cd6f0158d1dc0
+    field: answer
+    source_hash: sha256:409ba9719cba76997dd509ea76f788ee3e5d770c5776ea277ce006c67e81453c
+    lang: zh-Hant
+    text: "不行。此時無法使用{用餐}能力。\n{用餐}能力或{進化}能力（可以進化的起動能力、「圓圈E」圖示），1回合中只能使用1次。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:4aefabb885d0c58f26d23987e06e97efdebe8b7d117996a3965cd6f0158d1dc0
+    field: question
+    source_hash: sha256:6200081a9ed8ca356e6a6ce74604563bde9f2e9b550e301fcd4a5f5e6e1adc75
+    lang: zh-Hant
+    text: 這個從者在自己戰場上，本回合自己已使用過{進化}能力時，自己可以使用{用餐}能力嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:4cefcc8449bf694e8729ada0cb28e079f6ed19464a755c6f3bcea2d0543a4530
+    field: answer
+    source_hash: sha256:ffcf79e9df80087930e0cb282dfa4bc2764aa4d8e9f4c3fcf2d4b49afecf299b
+    lang: zh-Hant
+    text: "不行。無法給予敵方戰場上的1個從者與其主戰者2點傷害。\n使用『明亮式切割』時，其位於結算區而非消失區，因此消失區變為9張卡片，不滿足『明亮式切割』的「若自己的消失區有10張以上的卡片，」條件。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:4cefcc8449bf694e8729ada0cb28e079f6ed19464a755c6f3bcea2d0543a4530
+    field: question
+    source_hash: sha256:c4b0b0f102ccf80f1dd716a67622a5008580b00aba77fe7b362f0bf09fe5c0b0
+    lang: zh-Hant
+    text: 自己的消失區有10張卡片時，使用消失區的『明亮式切割』，抉擇【1】，可以給予敵方戰場上的1個從者與其主戰者2點傷害嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:53e2228b54944e3a067160ed40046df2282de57ec070f6a2f14dee63f9e87f38
+    field: answer
+    source_hash: sha256:f9791052d2cd1a3a5f7185b28dc619b53fc191a0a528c0451b2cd56142fc68a9
+    lang: zh-Hant
+    text: 是的。即使是敵方的回合中也會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:53e2228b54944e3a067160ed40046df2282de57ec070f6a2f14dee63f9e87f38
+    field: question
+    source_hash: sha256:5c92baac0a13b59077e10961a8559c1b901b1191c37457baeeea6b8288e22178
+    lang: zh-Hant
+    text: 因某種能力使透京・從者在敵方的回合中進入自己戰場時，「透京・從者進入自己戰場時，或自己戰場上的從者進化時，～」能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:571c0158898f6f7abb857939bd771d9c91d5593dbbc212d90fe6aa0db15bd908
+    field: answer
+    source_hash: sha256:a891d996e9a49e083adf5ac8354f22e15e6dbb26020ddcb98e8c96b294f2ab3b
+    lang: zh-Hant
+    text: 是的。是進化前卡片的原始消費數值。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:571c0158898f6f7abb857939bd771d9c91d5593dbbc212d90fe6aa0db15bd908
+    field: question
+    source_hash: sha256:ceaf48c9f75fa154be3921504795ace1666b8f6bd35d33e8cc2a23c44eca4322
+    lang: zh-Hant
+    text: 進化從者的原始消費數值，是進化前卡片的原始消費數值嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:581dd56337988645cd3839e03a7e83ecc4cd3e51204d8d53e71f001da26918aa
+    field: answer
+    source_hash: sha256:79f2eb4498c8a2ea1b2bb642e803da5ff4020a29ee31555f763c0778bc20f896
+    lang: zh-Hant
+    text: 前者是「所選的自己戰場上的{精靈}卡片」，後者是「所選的敵方戰場上的從者」。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:581dd56337988645cd3839e03a7e83ecc4cd3e51204d8d53e71f001da26918aa
+    field: question
+    source_hash: sha256:e02559401ac43819f3af0f4de23dec60c8ddb45720e8291b4caf857b1ca1781a
+    lang: zh-Hant
+    text: 請說明前者與後者。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:5deeac39f229ec11daf0730179e06e432e02386fa499db774382bb4855ee861a
+    field: answer
+    source_hash: sha256:be249648742726a8595665f7f5fa828bc6b1c3931d06161fa82e221a35c02e51
+    lang: zh-Hant
+    text: "不行。無法從自己的牌堆搜尋1張『龍首巨蛇』，召喚到戰場上。\n此時，『龍首巨蛇』的能力會觸發，但結算『龍首巨蛇』的能力時，這個『龍首巨蛇』不在自己戰場上，因此無法適用「若這張卡片在自己戰場上，」之後的效果。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:5deeac39f229ec11daf0730179e06e432e02386fa499db774382bb4855ee861a
+    field: question
+    source_hash: sha256:0b35527ca9350d445dafa031dbc7c731afd05570d4f2cd2a9e6c864c96e8f41a
+    lang: zh-Hant
+    text: 自己戰場上生命值為3的『龍首巨蛇』受到3點傷害時，可以因『龍首巨蛇』的能力，從自己的牌堆搜尋1張『龍首巨蛇』，召喚到戰場上嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:5f6cf1d8f3d53fd9400ddafb3f92bffc856cc333aea83bbc6c7f433eee0a6317
+    field: answer
+    source_hash: sha256:f9791052d2cd1a3a5f7185b28dc619b53fc191a0a528c0451b2cd56142fc68a9
+    lang: zh-Hant
+    text: 是的。即使是敵方的回合中也會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:5f6cf1d8f3d53fd9400ddafb3f92bffc856cc333aea83bbc6c7f433eee0a6317
+    field: question
+    source_hash: sha256:fd7d4cb144a6fa00e7e1c1ef0949fb2aed643766597ead8a5079ec6b83962597
+    lang: zh-Hant
+    text: 敵方的回合中自己使用法術時，這個從者的「每回合1次，自己使用法術時，～」能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:618cbd6843c5de784aad9d6054c5e966e48e6e8ba9b89bf6731bc922bf66a12c
+    field: answer
+    source_hash: sha256:73fb8791bd24560e39e4d990f8ee4a25d3698deb515e526a0c7b105df9586fdf
+    lang: zh-Hant
+    text: 不會。自己的結束階段到來時，這個『分身之術‧煤木萬裁』不在自己戰場上，因此這個『分身之術‧煤木萬裁』的「自己的結束階段到來時，～」能力不會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:618cbd6843c5de784aad9d6054c5e966e48e6e8ba9b89bf6731bc922bf66a12c
+    field: question
+    source_hash: sha256:b5042d988c567a454b07162157c6d7abf301819218a274acbb166c4bea9bdc05
+    lang: zh-Hant
+    text: 自己的結束階段到來時，以『帥忍部長‧煤木萬裁』的「自己的結束階段到來時，～」能力將『分身之術‧煤木萬裁』召喚到戰場上，這個『分身之術‧煤木萬裁』的「自己的結束階段到來時，～」能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:61fcc9ba108d8abff545e10717a3813b178521af0bbd8cf9d36d1925d2d20c24
+    field: answer
+    source_hash: sha256:9ca9099020196c41e81d76c5e1ffaa970ca585fc3bef450467bb408057489e48
+    lang: zh-Hant
+    text: "是的。是永續能力。只要自己戰場上有其他武鬥龍人・從者，『電爪回家社社員』就具有【突進】【指定攻擊】。\n『電爪回家社社員』進入戰場後，若將其他武鬥龍人・從者召喚到自己戰場上，就會具有【突進】【指定攻擊】。\n『電爪回家社社員』進入戰場後，若自己戰場上的其他武鬥龍人・從者變為0個，就會失去【突進】【指定攻擊】。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:61fcc9ba108d8abff545e10717a3813b178521af0bbd8cf9d36d1925d2d20c24
+    field: question
+    source_hash: sha256:6940bdd08af359ac8699ef9ffb1d2a6e4c1a759a99aa2397ea55db1ff43db2b0
+    lang: zh-Hant
+    text: 『電爪回家社社員』的「只要自己戰場上有其他武鬥龍人・從者，這張卡片就具有【突進】【指定攻擊】。」是永續能力嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6331743b85442e2d9e0180c1ad667091f6c59a842c3eec26b988e6bd74f311e9
+    field: answer
+    source_hash: sha256:fc1109cd11c06da3d2fd2e2a85e94e9e6e3f6690f85b5d08fc42d3cb5f993732
+    lang: zh-Hant
+    text: 各個『妒火紅龍‧艾特爾』的能力會各觸發1次，合計觸發2次。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6331743b85442e2d9e0180c1ad667091f6c59a842c3eec26b988e6bd74f311e9
+    field: question
+    source_hash: sha256:49a65675f71b402650908a0a898d208bec611ee4fbdb2ca53e909128ea2965a6
+    lang: zh-Hant
+    text: 自己戰場上有2個『妒火紅龍‧艾特爾』與1個『弒龍者‧尹安』時，使用『忒彌斯的審判』，『妒火紅龍‧艾特爾』的能力會觸發幾次？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:66e4037560c5c3b29163c5c36dd26d56822c822e29be579f409a17a55285a462
+    field: answer
+    source_hash: sha256:5beffbc2f96422f17d3cbb829184f55eecf8568257623c9aa37df8f1dbfb385c
+    lang: zh-Hant
+    text: 是的。是『預知未來』在EX區時有效的能力。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:66e4037560c5c3b29163c5c36dd26d56822c822e29be579f409a17a55285a462
+    field: question
+    source_hash: sha256:2c143b5fcd7ada085495568c252dd0a7ecb400e25ee43f9e1ba791d44791f82d
+    lang: zh-Hant
+    text: 「{起動}{消費1}將EX區的這張卡片放置到墓場：給予敵方戰場上的全部從者1點傷害。」這個能力，是『預知未來』在EX區時有效的能力嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:681aa0de8f9281094b9c9870e14f446a619b80cfe49879021d662f55d5b73139
+    field: answer
+    source_hash: sha256:e65a1ef313edc1837d4218d987a450aa60f9d6d4187c3d15d5d8e699f57262f0
+    lang: zh-Hant
+    text: 是的。可以用消費2使用。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:681aa0de8f9281094b9c9870e14f446a619b80cfe49879021d662f55d5b73139
+    field: question
+    source_hash: sha256:75d69ff3a66dee128a8d6bf1c7799bc51d828af31202ee4550a321c1d6fa3cce
+    lang: zh-Hant
+    text: 使用因『壞龍的六銘傳‧耶薾』的【進化時】能力而放置到EX區的『爆炎的咆哮』時，若使消費+3，可以用消費2使用嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6855928c59778d7b010f286472864db8855ed6da83c3a58105b23bcd8a70a38c
+    field: answer
+    source_hash: sha256:a34b7525c5eefa3a12c041636d771260bc320bc0136f020e75122af28f758153
+    lang: zh-Hant
+    text: 不行。無法選擇敵方戰場上的從者時，無法使用這個從者的「自己的結束階段到來時，～」能力，因此無法使自己的主戰者{生命值}+1。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6855928c59778d7b010f286472864db8855ed6da83c3a58105b23bcd8a70a38c
+    field: question
+    source_hash: sha256:86ecf13124a7afc55a31b13ed7653729649e0d51c265edc5f46608d2d6042b5b
+    lang: zh-Hant
+    text: 無法選擇敵方戰場上的從者時，可以使用這個從者的「自己的結束階段到來時，～」能力，使自己的主戰者{生命值}+1嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:69582557e14e3a751b54e8454ef9d171bc9220e2cccb48198dcb9e1e38b41039
+    field: answer
+    source_hash: sha256:12b596094e4599a1bea5ecffe1f08c62a8afe8f1381f81505695b00cb53e88b6
+    lang: zh-Hant
+    text: 是的。可以從自己的牌堆搜尋1張『龍首巨蛇』，召喚到戰場上。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:69582557e14e3a751b54e8454ef9d171bc9220e2cccb48198dcb9e1e38b41039
+    field: question
+    source_hash: sha256:3cb4d560e03ca639690bd15b5f0e7d79636c85c7039d6168677e7d93474b4aa6
+    lang: zh-Hant
+    text: 自己戰場上生命值為3的『龍首巨蛇』受到2點傷害時，可以因『龍首巨蛇』的能力，從自己的牌堆搜尋1張『龍首巨蛇』，召喚到戰場上嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6b3a96f3722936754b491d3705e90e46803d8bd8d6fdbb0e6ce1419601082b97
+    field: answer
+    source_hash: sha256:bc39912755cb510998701d36f2629281758eeb4f68737e26f19c5302cf85f62f
+    lang: zh-Hant
+    text: 是的。失去全部能力後被賦予的效果有效。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6b3a96f3722936754b491d3705e90e46803d8bd8d6fdbb0e6ce1419601082b97
+    field: question
+    source_hash: sha256:d817d5d37be5aa4825ee93c5a4f7de05abf4b20e27473f0d222d2f5f043ea28a
+    lang: zh-Hant
+    text: 可以以『庇護的天光』的{入場曲}能力，賦予因這張法術而失去能力的從者【守護】嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6d0d2a2123938608e0969fe686060afd9c1cc0d85b9df7968e09938b342b36e1
+    field: answer
+    source_hash: sha256:255f82bb2210de6caa9222879319c6b14524c35f5f97346ceaca29fede788845
+    lang: zh-Hant
+    text: 是的。從EX區、牌堆或墓場等進入戰場時，就滿足條件。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6d0d2a2123938608e0969fe686060afd9c1cc0d85b9df7968e09938b342b36e1
+    field: question
+    source_hash: sha256:b2f9d12408bf61a386c7117f58f66938e34906e76c01915aac21c3be071eab1c
+    lang: zh-Hant
+    text: 以「若本回合中自己使用的卡片張數為3張以上，則這張卡片可以從墓場使用。」能力，使用自己墓場中的『活潑的精靈‧小梅』時，會滿足{入場曲}能力中的「若這張卡片從手牌以外進入戰場，」條件嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6f4e2a8f255e413111305506854f6c5ae955f8c8c1439ae95e3fab56438ccd29
+    field: answer
+    source_hash: sha256:1d3c8fd2703c51f5ba62539910eeb991e948882bad2a341049c61d84f4b79d17
+    lang: zh-Hant
+    text: 是的。無論先攻或後攻玩家，都可以使EP+1。此外，即使已有3個EP，也可以使EP+1。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6f4e2a8f255e413111305506854f6c5ae955f8c8c1439ae95e3fab56438ccd29
+    field: question
+    source_hash: sha256:c1c6c135e618954c2f0981df9d61f01a14b809f7f92245fc137bd5df2d912ddd
+    lang: zh-Hant
+    text: 先攻玩家可以以這張法術的能力使EP+1嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:7069f7e8d162eeb4e1a9962448f7112cabdc23f1d546cc3cc88fa64f3fafc589
+    field: answer
+    source_hash: sha256:f36ac94c21c6f2b7302dee7bf6dc6054d44b7541667c94c59a82f2cd2ff0d4bc
+    lang: zh-Hant
+    text: 不會。由於已失去能力，因此{謝幕曲}能力不會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:7069f7e8d162eeb4e1a9962448f7112cabdc23f1d546cc3cc88fa64f3fafc589
+    field: question
+    source_hash: sha256:88d0367062a1fd7bcec2c57776f8b3256bfa42b91eeef8b29c40f4b2149a633e
+    lang: zh-Hant
+    text: 因這張法術而失去能力的從者，在該回合中被放置到墓場時，該從者的{謝幕曲}能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:72149a062fb41d4d409bac7163c1c8b00dca7b6672318d18046360d5fd76021e
+    field: answer
+    source_hash: sha256:9c666c606ad17ddc26eb6b3d9e169d99ec07cc4f152ce2c3f70b14fd4e88f3a0
+    lang: zh-Hant
+    text: "是的。會被放置到墓場。\n「放置到墓場」的處理並非能力造成的破壞，因此『巨型劍刃』的「這張卡片無法被能力破壞，且不會消失。」能力不會生效。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:72149a062fb41d4d409bac7163c1c8b00dca7b6672318d18046360d5fd76021e
+    field: question
+    source_hash: sha256:a0b7477f66db468839517f923fb702a68311913390379ed0de22830bee1d29f3
+    lang: zh-Hant
+    text: 具有「這張卡片無法被能力破壞，且不會消失。」能力的『巨型劍刃』，適用「放置到墓場」時，會被放置到墓場嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:776312aaa3731a0e7abea395a56ea3d131b02572562f463f0c3fbd4a30978573
+    field: answer
+    source_hash: sha256:15f895ba2c86afea5354ae70512224f515cd1bf3149497771dbd3d61d0038433
+    lang: zh-Hant
+    text: 是的。同一回合中多次使用{進化}能力時，每使用1次{進化}能力，都可以各自使用1個EP。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:776312aaa3731a0e7abea395a56ea3d131b02572562f463f0c3fbd4a30978573
+    field: question
+    source_hash: sha256:3a775ae9e37eb5b7cac77efeb6aba1f4b1ad704f989035a704df39322b3c9ace
+    lang: zh-Hant
+    text: 自己具有2個以上的EP，且這個從者在自己戰場上時，自己已使用EP使用過1次{進化}能力。本回合使用第2次{進化}能力時，自己可以再次使用EP嗎？（在同一回合中多次使用{進化}能力時，可以各自使用1個EP嗎？）
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:78a4643976bbe05082aa6fdc4108002b5ac89645406369c4cd6c012c9a1339cf
+    field: answer
+    source_hash: sha256:51d7c2cf2b00b2d398b8be807912557e54a5a043850b379754aa922017e5d7f7
+    lang: zh-Hant
+    text: 可以以任意順序結算。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:78a4643976bbe05082aa6fdc4108002b5ac89645406369c4cd6c012c9a1339cf
+    field: question
+    source_hash: sha256:0998a2d51ddb12e99cc626e3aed9611fe508f0fc48be32ee27d3aac3a69437f7
+    lang: zh-Hant
+    text: 具有【進化時】能力與【超進化時】能力的從者超進化時，所觸發的2個能力從哪一個開始結算？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:7b21c1803e2df7806f55c3f6131e2161de71f58826610d21229b6460cd25aa1a
+    field: answer
+    source_hash: sha256:5991429c1d1a137368dcf9ed557dbda5c7dc6de0985eb1eebf123874cea77261
+    lang: zh-Hant
+    text: "是的。會觸發。\n戰場上的從者被能力破壞，或戰場上生命值為0以下的從者被破壞時，將該從者從戰場放置到墓場。也就是說，會滿足「從者從戰場被放置到墓場時，～」能力的觸發條件。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:7b21c1803e2df7806f55c3f6131e2161de71f58826610d21229b6460cd25aa1a
+    field: question
+    source_hash: sha256:763c275ee78553f990233b6d7f506ff4c128460eb2b295fcee522c56c7625b65
+    lang: zh-Hant
+    text: 戰場上的從者被「破壞」時，「從者從戰場被放置到墓場時，～」能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:7f66ce5dea9cffed706d80c2b3ac491c24f04454b55d226a14f6d0bd502f51c7
+    field: answer
+    source_hash: sha256:3aa00310e829d7d9737df3dbfe626917500c8c4cf853db60c0aab8fc99f729d3
+    lang: zh-Hant
+    text: "是的。可以選擇。\n此時不公開卡片，使其返回牌堆頂。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:7f66ce5dea9cffed706d80c2b3ac491c24f04454b55d226a14f6d0bd502f51c7
+    field: question
+    source_hash: sha256:1f0a4b73701f1165b69ec5132971822072ec6ad454125ee71a2944d483811416
+    lang: zh-Hant
+    text: 以這張法術查看的自己牌堆中的卡片裡有吸血鬼・卡片時，可以選擇不將其加入手牌嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:8360d368c24c7c8ad30edc3ffbec1c48689c4699b89d128aa252055e3c16445b
+    field: answer
+    source_hash: sha256:5db73e9b42a9fa2e6ffc7d999cd99b0c0c24a2f283782de309198aed8b07f281
+    lang: zh-Hant
+    text: 不會。由於已失去能力，因此不會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:8360d368c24c7c8ad30edc3ffbec1c48689c4699b89d128aa252055e3c16445b
+    field: question
+    source_hash: sha256:0b6ed311fb5771c7ac9626e037bd58b6cb238bd5377c8d1e45f44bc4b18e6076
+    lang: zh-Hant
+    text: 因這張法術而失去能力的從者，在該回合中從戰場返回手牌時，該從者的「這張卡片從戰場返回手牌時，」能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:83d779e6295e187c984164623bd8c9cd29dadff47f9cd0762583caa092f52173
+    field: answer
+    source_hash: sha256:c8fbffec909fa3e6687be8a462a700052294da4f0ce937c51da6d6fd8ace9bda
+    lang: zh-Hant
+    text: 是的。正是如此。查看自己牌堆頂的3張卡片，公開並加入手牌的吸血鬼・卡片是「日文卡名含有『ヴァンピィ』（斑比）的從者」時，將1個『叢林蝙蝠』召喚到戰場上。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:83d779e6295e187c984164623bd8c9cd29dadff47f9cd0762583caa092f52173
+    field: question
+    source_hash: sha256:cbcdc4cf862788ee027c39b8f9e00dbbb67aade6d32dc912e3304ba3f1f04103
+    lang: zh-Hant
+    text: "{入場曲}能力中的「若公開了「日文卡名含有『ヴァンピィ』（斑比）的從者」，則召喚1個『叢林蝙蝠』到戰場上。」，是指以這個{入場曲}能力公開並加入手牌的吸血鬼・卡片是「日文卡名含有『ヴァンピィ』（斑比）的從者」的情況嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:84b92ac07b498567e46d5996817ff83ebf25a8a82c6ddba1d8d1301f3a341b38
+    field: answer
+    source_hash: sha256:63256fc373c5c0c067ed693df8741f6ed1da72fdf26945d187355d595202f160
+    lang: zh-Hant
+    text: 不行。無法選擇敵方戰場上的從者時，無法使用『越光的六銘傳‧瑪娜（EVOLVE）』的【進化時】能力，因此無法抽1張卡片。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:84b92ac07b498567e46d5996817ff83ebf25a8a82c6ddba1d8d1301f3a341b38
+    field: question
+    source_hash: sha256:bd6fd8329992d4e3f459fecf8358f0ec50a973a74c912ec8503eeb372b16595d
+    lang: zh-Hant
+    text: 無法選擇敵方戰場上的從者時，可以使用『越光的六銘傳‧瑪娜（EVOLVE）』的【進化時】能力，抽1張卡片嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:8756f9e50944df36e7c67452b837419ac79005cf9e30824550f1f518062ba857
+    field: answer
+    source_hash: sha256:91d791d0c601cd18f905d065d3a9e48095ff34065df6cab25054107e8404511f
+    lang: zh-Hant
+    text: "是的。消費會-2。\n自己的墓場中有5張以上、9張以下的法術時，消費-1。10張以上、14張以下時，消費-2。15張以上、19張以下時，消費-3。（之後以此類推。）"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:8756f9e50944df36e7c67452b837419ac79005cf9e30824550f1f518062ba857
+    field: question
+    source_hash: sha256:04c94696f77391989a9a0cdbe9635a20095e0be24e7f99478b4a13a9df4afbf3
+    lang: zh-Hant
+    text: 自己的墓場中有10張法術時，使用這張卡片的消費會-2嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:87926b05aeacb3d329e4f241485845dd273d4eb506aeca8f8625bd96df34acce
+    field: answer
+    source_hash: sha256:c7443946de6700ef2f389d7e1d802a51f5ada11e1438b2b8c115008399bcb804
+    lang: zh-Hant
+    text: 不會。不會失去。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:87926b05aeacb3d329e4f241485845dd273d4eb506aeca8f8625bd96df34acce
+    field: question
+    source_hash: sha256:f8172061bf5aa1ec0d11119e2635a93c7998b05e58726085522fd44a9e8e6c66
+    lang: zh-Hant
+    text: 選擇因『龍武裝甲』的效果而具有武裝類型的從者為目標，使用這張法術時，該從者會失去武裝類型嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:9a0d3d2d646edd1e062494b8b42c52f0546ebbffecad464b0a8c6fc3d125d8a0
+    field: answer
+    source_hash: sha256:f8ab37f762d716265d03487d6fd4837c0932455685d92f16cd52ca63e433f2e8
+    lang: zh-Hant
+    text: 是的。即使是自己戰場上的『冰晶皇族‧蒂亞』被放置到EX區也會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:9a0d3d2d646edd1e062494b8b42c52f0546ebbffecad464b0a8c6fc3d125d8a0
+    field: question
+    source_hash: sha256:4e42cacc49b24c60ed02693eab6d6a3464d95e182a404580e1f19a8c0ad0782e
+    lang: zh-Hant
+    text: 因某種能力使自己的『冰晶皇族‧蒂亞』從戰場被放置到EX區時，這個『冰晶皇族‧蒂亞』的「自己的每回合1次，冰晶・卡片被放置到自己的EX區時，～」能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a03cf07a53ebb9e8fbb06dc6840d49544452dd4f8134c65c3c8af6e3ff015b75
+    field: answer
+    source_hash: sha256:402b7489ba8182933a273b9a5a6f941129682714a5dbbe0d4a3870c8067a955d
+    lang: zh-Hant
+    text: 不行。因『山岳少女‧米蘿洛』的能力使消費變為0後，會因『沉默絕傑‧魯魯納伊』的能力而使消費+1，因此消費為1。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a03cf07a53ebb9e8fbb06dc6840d49544452dd4f8134c65c3c8af6e3ff015b75
+    field: question
+    source_hash: sha256:aa891cd5e1d235059068dcc7575ebe2d099a7f2314f7b18d237b414dc8489683
+    lang: zh-Hant
+    text: 敵方戰場上有『沉默絕傑‧魯魯納伊』時，使用自己的『山岳少女‧米蘿洛』的{入場曲}能力，使用『對空射擊』時，可以用消費0使用嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a422e1de007ee1e9f3bb658ed07cfc763b631fa4ccc93ca0ee75db9334ade2d9
+    field: answer
+    source_hash: sha256:d466f2b91074ab4755e6b5a3f3e19b93845f46cd95afbea8a10404e6151c4408
+    lang: zh-Hant
+    text: "是的。會觸發。\n戰場上的『弒龍者‧尹安』被能力破壞，或戰場上生命值為0以下的『弒龍者‧尹安』被破壞時，將該『弒龍者‧尹安』從戰場放置到墓場。也就是說，會滿足『妒火紅龍‧艾特爾』的能力的觸發條件。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a422e1de007ee1e9f3bb658ed07cfc763b631fa4ccc93ca0ee75db9334ade2d9
+    field: question
+    source_hash: sha256:02ab4834270b2b4c33e145c11a7c7f71054b387c6f933b981fdcfd999382d08d
+    lang: zh-Hant
+    text: 自己戰場上的『弒龍者‧尹安』被「破壞」時，『妒火紅龍‧艾特爾』的能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:aa416e4470e88ae5716090d6eb84aceeace619757546cba06e0a548ccff996cc
+    field: answer
+    source_hash: sha256:6fc69b42a34c7fc018c17e17066bcf873dd379fc866ea09f52359497affa958e
+    lang: zh-Hant
+    text: 是的。即使是因這個從者的{入場曲}能力，使自己牌堆頂的1張卡片消失，讓自己的消失區變為10張卡片，自己的主戰者也可以{生命值}+2。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:aa416e4470e88ae5716090d6eb84aceeace619757546cba06e0a548ccff996cc
+    field: question
+    source_hash: sha256:b526e23ac6dbe120f54e645d2ff097774f814c5645531b37a124e1eb5bdc931c
+    lang: zh-Hant
+    text: 自己的消失區有9張卡片時，使用這個從者的{入場曲}能力，自己的主戰者可以{生命值}+2嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:ab8fce8ca23f8c9919d48f13e553cfa37efba362227a59be71614789bcac8fd5
+    field: answer
+    source_hash: sha256:95eb8b8ebf439a1e5e33adc29b90728f19e9861a11e13262aa37eee3a739b010
+    lang: zh-Hant
+    text: 是的。可以加入手牌。此外，查看的牌堆中的卡片有『戒信的六銘傳‧聖士郎』，沒有其他透京・卡片時，也同樣可以只從其中公開1張『戒信的六銘傳‧聖士郎』並加入手牌。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:ab8fce8ca23f8c9919d48f13e553cfa37efba362227a59be71614789bcac8fd5
+    field: question
+    source_hash: sha256:671c816199250b7a861a91bce3b009ed4ffe34bfbbae07d8bd77bb4800f50e37
+    lang: zh-Hant
+    text: 以『不可動搖的祈禱』的{入場曲}能力查看的牌堆中的卡片全部是透京・卡片，沒有『戒信的六銘傳‧聖士郎』時，可以只從其中公開1張透京・卡片並加入手牌嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:af2887f4c4e15a337af725f9958d2a34e9cf2cb1d72f1ba94026320d7b222bd2
+    field: answer
+    source_hash: sha256:7e2f5d100e5e915818213be989c64588e5998f61238da51ebfeabeb1a81dc73f
+    lang: zh-Hant
+    text: 除了與從者交戰造成的傷害，以及攻擊主戰者造成的傷害以外，其他一切傷害都是能力傷害。法術能力造成的傷害與從者能力造成的傷害都屬於能力傷害。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:af2887f4c4e15a337af725f9958d2a34e9cf2cb1d72f1ba94026320d7b222bd2
+    field: question
+    source_hash: sha256:2d2f0a97245e174cd9f7b6e656ed79fe35c6a68d1511a9490ff46e55f648069e
+    lang: zh-Hant
+    text: 能力傷害是什麼？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:b163d8685a2ff264b8ac93dc4a14ca4d3ee75ab4ddc9f9113506fbca03867d9f
+    field: answer
+    source_hash: sha256:429eeb3d137d543df444ed00a19c585e0a43ae14c1cfc49ca3b21d25f798ee25
+    lang: zh-Hant
+    text: 是的。正是如此。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:b163d8685a2ff264b8ac93dc4a14ca4d3ee75ab4ddc9f9113506fbca03867d9f
+    field: question
+    source_hash: sha256:6c6873fc2ef98f30fc435ae3253fe06daf223bd6ef11d51f30117910b25d7704
+    lang: zh-Hant
+    text: 這張法術只有在雙方戰場上都有可以選擇為目標的從者時，才可以使用嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:b3a35d3e0a78a3068baac99d5532f1a0ec270fd5f9a2915bf3cea997594c648e
+    field: answer
+    source_hash: sha256:429eeb3d137d543df444ed00a19c585e0a43ae14c1cfc49ca3b21d25f798ee25
+    lang: zh-Hant
+    text: 是的。正是如此。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:b3a35d3e0a78a3068baac99d5532f1a0ec270fd5f9a2915bf3cea997594c648e
+    field: question
+    source_hash: sha256:334c986a286535562c0e08ee5d3e4e267134bed997dc2e6205f21b619a4d72a1
+    lang: zh-Hant
+    text: 這個從者具有「【攻擊時】選擇敵方戰場上的1個從者。給予其等同於「自己戰場上的從者數量」的傷害。」與「【進化時】選擇敵方戰場上的1個從者。給予其等同於「自己戰場上的從者數量」的傷害。」這2個能力嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:b5d1fd8ce8612fd4932fc398757f321d4f306f45d6ff8f395921d38d23104453
+    field: answer
+    source_hash: sha256:ab11cfecac78ff0daef3df7c355c28788c7130ac218e503321f38201099a290f
+    lang: zh-Hant
+    text: 不會。『預知未來』的「{起動}{消費1}將EX區的這張卡片放置到墓場：給予敵方戰場上的全部從者1點傷害。」是『預知未來』在自己EX區時可以使用的起動能力，使用起動能力與使用法術不同，因此『愛麗速子』的能力不會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:b5d1fd8ce8612fd4932fc398757f321d4f306f45d6ff8f395921d38d23104453
+    field: question
+    source_hash: sha256:c802d6028c1ebed7003e551a1c0666174b9a8d121f37005cf4e075875e1a1725
+    lang: zh-Hant
+    text: 『預知未來』在EX區時，使用『預知未來』的「{起動}{消費1}將EX區的這張卡片放置到墓場：給予敵方戰場上的全部從者1點傷害。」能力，若自己戰場上有『愛麗速子』，『愛麗速子』的「自己使用法術時，～」能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:b7784c8d6cde7abd752829f74c75f92d6123ee3b399b0e874c8aafe87ad17827
+    field: answer
+    source_hash: sha256:634a5d3bd561d6f2fb7c768c39d2c563955b5aef46c2624a9b64522bac1ce6c0
+    lang: zh-Hant
+    text: 不行。無法選擇適當目標時，無法抉擇【1】，必須抉擇【2】。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:b7784c8d6cde7abd752829f74c75f92d6123ee3b399b0e874c8aafe87ad17827
+    field: question
+    source_hash: sha256:a1e5d2e8d74d6223837f7fdfd4f64b74460bbf9058b8e915d56ce6a22b994d34
+    lang: zh-Hant
+    text: 無法選擇敵方戰場上的從者時，可以抉擇【1】，選擇讓什麼都不發生嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:bae06339e9b181b651438393b966a70c5777bef9eae704bcaf9c36a78d429dc6
+    field: answer
+    source_hash: sha256:33ef3b17dd37ce351e58050994082140ad0df8f88b540b2f03e7058eeea4165c
+    lang: zh-Hant
+    text: "是的。兩者都會觸發，可以以任意順序結算。\n此外，即使先結算「自己的結束階段到來時，使這張卡片返回手牌。」，也可以因「自己的結束階段到來時，召喚1個『分身之術‧煤木萬裁』到戰場上。」而將1個『分身之術‧煤木萬裁』召喚到戰場上。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:bae06339e9b181b651438393b966a70c5777bef9eae704bcaf9c36a78d429dc6
+    field: question
+    source_hash: sha256:eaf9c2d6bd0f9574c459e495eaef31b5dcfbf30143d5398b1d85d9bfc1ad2c37
+    lang: zh-Hant
+    text: 以『幻影術師』的{入場曲}能力，將手牌中的『帥忍部長‧煤木萬裁』召喚到戰場上，迎來自己的結束階段時，「自己的結束階段到來時，使這張卡片返回手牌。」與『帥忍部長‧煤木萬裁』的「自己的結束階段到來時，召喚1個『分身之術‧煤木萬裁』到戰場上。」能力都會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:bc2172ebf5fcc325986bdaf2944007a47824fe1fd3c3498b77092cea2f53f325
+    field: answer
+    source_hash: sha256:c9d030e671977ff3fb8ebbce82547ecb8c13c65ee15d5721476b503e468d889a
+    lang: zh-Hant
+    text: 這個從者的能力觸發並結算的時點在先。結算全部如【攻擊時】能力等從者攻擊時觸發的能力後，才會進入非回合玩家的Quick時點。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:bc2172ebf5fcc325986bdaf2944007a47824fe1fd3c3498b77092cea2f53f325
+    field: question
+    source_hash: sha256:acf6a4a3c490e8033196aa9a13146298767c489eb06739cba8e13511ac561f96
+    lang: zh-Hant
+    text: 自己戰場上攻擊力4以上的武鬥龍人・從者攻擊時，這個從者的能力觸發並結算的時點與Quick時點，哪一個在先？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:be8a5d075bd811af61971325fad2326acd29efe2467f7d8381ebb4b281edc5b9
+    field: answer
+    source_hash: sha256:ef0c25cbf3ef3636abdbdbd862f8dc0138a8d4fc53af299e420fbe14bb51b0fe
+    lang: zh-Hant
+    text: "不行。無法使用【進化時】能力。\n具有「這張卡片不會因能力而消失。」能力的從者，不會因能力而消失，因此無法支付『越光的六銘傳‧瑪娜（EVOLVE）』的【進化時】能力的消費「使戰場上的1個其他從者消失」。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:be8a5d075bd811af61971325fad2326acd29efe2467f7d8381ebb4b281edc5b9
+    field: question
+    source_hash: sha256:183467e5029969b8a2bfbb3ed4a199b6e3da58ce8ee9ca3139e04ede7defbc74
+    lang: zh-Hant
+    text: 自己戰場上有1個『越光的六銘傳‧瑪娜（EVOLVE）』與1個具有「這張卡片不會因能力而消失。」能力的從者時，可以支付『越光的六銘傳‧瑪娜（EVOLVE）』的【進化時】能力的消費「使戰場上的1個其他從者消失」，使用這個【進化時】能力嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:c48c543a599a6a4c144d76473f02ca556a72794dde758ea4a3d0d8c6529f67e3
+    field: answer
+    source_hash: sha256:293e0a7b4e415e0bee9579ed0c2298c450dec55b1f8bfc1d6303fb80047d1bcb
+    lang: zh-Hant
+    text: 不行。無法選擇適當目標時，無法抉擇【1】，必須抉擇【2】或【3】。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:c48c543a599a6a4c144d76473f02ca556a72794dde758ea4a3d0d8c6529f67e3
+    field: question
+    source_hash: sha256:d00e1d4a49ab7da727153f6419986a68089561f9570693f02ff987411b9a4243
+    lang: zh-Hant
+    text: 無法選擇自己墓場中的『炎術檢定A級』時，可以以這個從者的【進化時】能力抉擇【1】，選擇讓什麼都不發生嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:c5416a80e9d9e2f9478bc1e501377010117173bd749b2e66f0542a47b3442be9
+    field: answer
+    source_hash: sha256:9dcee2dae5ee8f8344bf36701984aaec572a52e85fd13ec09233271724de7bed
+    lang: zh-Hant
+    text: 是的。是『活潑的精靈‧小梅』在墓場中時有效的能力。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:c5416a80e9d9e2f9478bc1e501377010117173bd749b2e66f0542a47b3442be9
+    field: question
+    source_hash: sha256:92a15077de8c0fa333fdcc9dcdcf91897593def142606c9ca9f52d47af7ee1b9
+    lang: zh-Hant
+    text: 「若本回合中自己使用的卡片張數為3張以上，則這張卡片可以從墓場使用。」這個能力，是『活潑的精靈‧小梅』在墓場中時有效的能力嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:c8a49671c8bbf1c7c7f1a737f0d92abe4499d51fa453655a9456fee04828f25f
+    field: answer
+    source_hash: sha256:c6d9d6013e72ad366409620e451e6b0476f67ff343b06a38cdc02974dfde8242
+    lang: zh-Hant
+    text: "是的。會返回手牌。\n因『幻影術師』的{入場曲}能力而進入戰場的『帥忍部長‧煤木萬裁』，具有「自己的結束階段到來時，使這張卡片返回手牌」，即使『幻影術師』離開戰場，這個能力仍然有效。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:c8a49671c8bbf1c7c7f1a737f0d92abe4499d51fa453655a9456fee04828f25f
+    field: question
+    source_hash: sha256:88a89ff6b88f7beec68ed64ee2f63908a197139ab2fc709998fe77a5394509aa
+    lang: zh-Hant
+    text: 以『幻影術師』的{入場曲}能力，將手牌中的『帥忍部長‧煤木萬裁』召喚到戰場上，之後因某種能力使這個從者離開戰場。這個『帥忍部長‧煤木萬裁』會在自己的結束階段到來時返回手牌嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:c92c5df8fec01cb18ec9a721a3fd7d91bdc93ae2a2a5136a78d9946081f018a3
+    field: answer
+    source_hash: sha256:27a521068399ab068bc8dbafb7becc147bd5edb81d9121e9fab4a576b00f92c5
+    lang: zh-Hant
+    text: 是的。會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:c92c5df8fec01cb18ec9a721a3fd7d91bdc93ae2a2a5136a78d9946081f018a3
+    field: question
+    source_hash: sha256:aae820e608c248c226e257cfc6e02de8b87e40837ba899e04286ac41ff750c62
+    lang: zh-Hant
+    text: 以自己戰場上的『山岳少女‧米蘿洛』為目標使用『對空射擊』時，『山岳少女‧米蘿洛』的「每回合1次，自己使用法術時，～」能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:ccba8231b1f538d98e44a5dc3bcd138d5eb2dfc6b95711f904f6e8a7217ed545
+    field: answer
+    source_hash: sha256:cb16807b2f0b8112daaa55f4446cf452fca5ab1fd88a77924f6ab46d8f8c5a85
+    lang: zh-Hant
+    text: 使用消失區的卡片時，先指定要使用的卡片，將該卡片從消失區移動到結算區。使用法術時，執行該卡片文字所示的效果後，將該卡片從結算區移動到墓場。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:ccba8231b1f538d98e44a5dc3bcd138d5eb2dfc6b95711f904f6e8a7217ed545
+    field: question
+    source_hash: sha256:7e23e104c535ffa6da80c87ef89d5431db5d3522883812ee84a1e83b6381a95f
+    lang: zh-Hant
+    text: 使用消失區的法術時，執行文字的效果後，該法術會被放置到哪裡？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:d1a534e6bae30e294a8b4fcdf19dc69b8db83bca7e9c8fb4ee6592453c76f225
+    field: answer
+    source_hash: sha256:27a521068399ab068bc8dbafb7becc147bd5edb81d9121e9fab4a576b00f92c5
+    lang: zh-Hant
+    text: 是的。會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:d1a534e6bae30e294a8b4fcdf19dc69b8db83bca7e9c8fb4ee6592453c76f225
+    field: question
+    source_hash: sha256:64ef808865f4c8714df595fd278229dc094b932dbff1b868b1d03d99aecc176f
+    lang: zh-Hant
+    text: 自己戰場上的從者超進化時，「自己戰場上的從者進化時，～」能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:d5be8d11d3bb43ba1f2c833251ed738f3b373f0781270aeb53528625d26b9bc5
+    field: answer
+    source_hash: sha256:a31edd207298bb7a86be7f191309019d51e8a07f6a612bb05daae56d13069679
+    lang: zh-Hant
+    text: 不行。必須支付使用『活潑的精靈‧小梅』所需的消費。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:d5be8d11d3bb43ba1f2c833251ed738f3b373f0781270aeb53528625d26b9bc5
+    field: question
+    source_hash: sha256:e2d87033b6fbb548937d8d0c5088fe138baf10dc9cd6781734b604464bc4e1bd
+    lang: zh-Hant
+    text: 自己的剩餘PP為0，本回合中自己使用的卡片張數為3張以上時，可以使用自己墓場中的『活潑的精靈‧小梅』嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:d6f3c0a6b584fc436b3c805f5b0120b19a8f5fa24515a9608ba8709c5d2f7153
+    field: answer
+    source_hash: sha256:be9b35a920e1dd37f2cf252002101b995c6113187d6f470c73714d67f2282d89
+    lang: zh-Hant
+    text: 不會。不滿足。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:d6f3c0a6b584fc436b3c805f5b0120b19a8f5fa24515a9608ba8709c5d2f7153
+    field: question
+    source_hash: sha256:e2a51311d5e6ea1d614cb64829e636a2fea2da85076ce479bd511ebbaa0367c2
+    lang: zh-Hant
+    text: 自己已使用過{進階起動}能力時，會滿足「若自己戰場上的從者已進化」嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:da0e3ed97e5dc4039156219a2a57f627f851aa07d487078f3cba3a2dff8b4d22
+    field: answer
+    source_hash: sha256:b60d3ec59246f9d57e2e15abbfb084b15f1a4112f215270208613166a78ef57e
+    lang: zh-Hant
+    text: "不會。不會消失。\n卡片的效果指示玩家進行某種動作，同時又有禁止該動作的效果時，禁止效果一律優先。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:da0e3ed97e5dc4039156219a2a57f627f851aa07d487078f3cba3a2dff8b4d22
+    field: question
+    source_hash: sha256:c3ee6eae0420fe23f2493e23cc660cad1b1526b2714a6d014a5cd2f05f703571
+    lang: zh-Hant
+    text: 自己戰場上有『邪智之龍‧法夫納』時，因某種能力使敵方戰場上的『遠古英雄』從戰場被放置到墓場之際，該『遠古英雄』會消失嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:db6d1de2457a417d68ef5003ff84b0d86a576a31e098cc87d13a5b2a56b0938b
+    field: answer
+    source_hash: sha256:f9791052d2cd1a3a5f7185b28dc619b53fc191a0a528c0451b2cd56142fc68a9
+    lang: zh-Hant
+    text: 是的。即使是敵方的回合中也會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:db6d1de2457a417d68ef5003ff84b0d86a576a31e098cc87d13a5b2a56b0938b
+    field: question
+    source_hash: sha256:29485071a15c7fea264c7419e06042d01837521c4fcbaff5ce4300a9199f5715
+    lang: zh-Hant
+    text: 因某種能力使自己戰場上的從者在敵方的回合中進化時，「自己戰場上的從者進化時，～」能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:dcb27555417ecae228ed65fb85ac13f4a401380eb6f9485f9327a5f695d7ac40
+    field: answer
+    source_hash: sha256:8290614dd17fc75bbb2ff28e06964f482ab8ca6c1508576afccd3b7beceda96b
+    lang: zh-Hant
+    text: 是的。是『神諭翼龍』在手牌中時有效的能力。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:dcb27555417ecae228ed65fb85ac13f4a401380eb6f9485f9327a5f695d7ac40
+    field: question
+    source_hash: sha256:d92a4f95e97571f85e4bcff4c1af5324f1ad819862e1e3f19ee1cba7711f31bf
+    lang: zh-Hant
+    text: 「{起動}{消費2}捨棄手牌中的這張卡片：抽1張卡片。」這個能力，是『神諭翼龍』在手牌中時有效的能力嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e251fe28c1b5a66f1e31f498b568363e79dddf99e27cb7da66590eb70013bbe7
+    field: answer
+    source_hash: sha256:d5f2f7d7a7bf270170f64e4b368da01ea786afa2d9bbb960eec76ef6f86719bf
+    lang: zh-Hant
+    text: 是的。自己可以使用{進化}能力。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e251fe28c1b5a66f1e31f498b568363e79dddf99e27cb7da66590eb70013bbe7
+    field: question
+    source_hash: sha256:6e6fe981ab9a52877ee4520d962c8cd7455c679894a914659870079a7fc550d0
+    lang: zh-Hant
+    text: 這個從者在自己戰場上，本回合自己已使用過{用餐}能力時，自己可以使用{進化}能力嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e502c5505c57839f7380d83b8036ecebde01f7d01cdd123743d3e895a795e5bc
+    field: answer
+    source_hash: sha256:c8eec44c8ff28eb01da3f5c8878ca2d69f4d0f859feec065be7c56be56f1963d
+    lang: zh-Hant
+    text: 是的。正是如此。支付的消費合計-5。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e502c5505c57839f7380d83b8036ecebde01f7d01cdd123743d3e895a795e5bc
+    field: question
+    source_hash: sha256:43311a039bfc7524436c7b8df69450559cc2a399d65861530e22cf4686f21b95
+    lang: zh-Hant
+    text: 自己進化牌堆中的正面朝上的透京・進化從者為6張，敵方戰場上有『沉默絕傑‧魯魯納伊』時，使用『淨土蒔植』，自己實際支付的消費是0PP嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e575703958465ceb486564ea1bdfbecbdeeea4bce9c67dbb8420e0c79ac96e5c
+    field: answer
+    source_hash: sha256:16ee3fdb13a1d939ed0bfb25c981d8fb996609ab53faf21f7625310177cf4aa3
+    lang: zh-Hant
+    text: 是的。可以在自己戰場上的全部『巨型劍刃』上放置2個GIGA指示物。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e575703958465ceb486564ea1bdfbecbdeeea4bce9c67dbb8420e0c79ac96e5c
+    field: question
+    source_hash: sha256:18c46f04cab64bd190159956044bf244dffa535045c1a68b66e048fe76ce4856
+    lang: zh-Hant
+    text: 使用這張法術，選擇未找到自己牌堆中的『全識的六銘傳‧森羅』時，可以在自己戰場上的全部『巨型劍刃』上放置2個GIGA指示物嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e781399d8976fa84829c11f14d151d2dce35526f3a7279ca95970d026f7e5e39
+    field: answer
+    source_hash: sha256:5e486373c3a72e0335896ac9dd00b9bd4664cc991861ddc1ff81faf35e730c19
+    lang: zh-Hant
+    text: 是的。只有此時才可以使用。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e781399d8976fa84829c11f14d151d2dce35526f3a7279ca95970d026f7e5e39
+    field: question
+    source_hash: sha256:1df60125a9104a10a4623f79cce547696aff3eeeece723cdfbdd50687a462225
+    lang: zh-Hant
+    text: 這張法術只有在可以選擇自己戰場上的1張{精靈}卡片與敵方戰場上的1個從者時，才可以使用嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e7ac15f47cea4013f5a03824e82183418fe55722c088f16e7a277853950cc7af
+    field: answer
+    source_hash: sha256:27a521068399ab068bc8dbafb7becc147bd5edb81d9121e9fab4a576b00f92c5
+    lang: zh-Hant
+    text: 是的。會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e7ac15f47cea4013f5a03824e82183418fe55722c088f16e7a277853950cc7af
+    field: question
+    source_hash: sha256:8e031fba0958d4903c1091513307cd2fcc837c734dd44ce926f3ef7986f98c2e
+    lang: zh-Hant
+    text: 敵方的回合中，增加自己主戰者的{生命值}時，這個從者的「自己主戰者的{生命值}增加時，～」能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e978018bd5ff0dd0e6e255544724c0cb1a583563be9eec2ac04440c122ca9e7c
+    field: answer
+    source_hash: sha256:634a5d3bd561d6f2fb7c768c39d2c563955b5aef46c2624a9b64522bac1ce6c0
+    lang: zh-Hant
+    text: 不行。無法選擇適當目標時，無法抉擇【1】，必須抉擇【2】。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e978018bd5ff0dd0e6e255544724c0cb1a583563be9eec2ac04440c122ca9e7c
+    field: question
+    source_hash: sha256:118e1564c9e760875dff28271eae343358f6c36465f22e850e74cd4e5ebb02e0
+    lang: zh-Hant
+    text: 無法選擇敵方戰場上的從者時，可以抉擇【1】，選擇使自己牌堆頂的2張卡片消失嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:ec437bda6a10d58c6e2cb59963ad82ad6b1b99c0c8ab19d636625df2c8a4b41a
+    field: answer
+    source_hash: sha256:f9791052d2cd1a3a5f7185b28dc619b53fc191a0a528c0451b2cd56142fc68a9
+    lang: zh-Hant
+    text: 是的。即使是敵方的回合中也會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:ec437bda6a10d58c6e2cb59963ad82ad6b1b99c0c8ab19d636625df2c8a4b41a
+    field: question
+    source_hash: sha256:e101d151e2ea2b5803ee19aee406868a2613b9687338f07b0ff9a72fe9192a10
+    lang: zh-Hant
+    text: 除了自己的回合以外，敵方的回合中這個從者受到傷害時，這個從者的「這張卡片受到傷害時，若這張卡片在自己戰場上，則從自己的牌堆搜尋1張『龍首巨蛇』，召喚到戰場上。」也會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:f3e6205da83a7c4aaf2cfd35b19afee6ace5e0376131b348181069f00c3c4b61
+    field: answer
+    source_hash: sha256:77a9f2216d28236467f00f1c2c72621d44e33702067a9ab7873b9c2bf28394f1
+    lang: zh-Hant
+    text: 是的。即使是因這個從者的{入場曲}能力，使自己牌堆頂的2張卡片消失，讓自己的消失區變為5張卡片，這張卡片也會具有【指定攻擊】。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:f3e6205da83a7c4aaf2cfd35b19afee6ace5e0376131b348181069f00c3c4b61
+    field: question
+    source_hash: sha256:e1e4c2e41be0866c31d9db7ae7c04de2a7945d18b59a25df9032d09d49a896a8
+    lang: zh-Hant
+    text: 自己的消失區有3張卡片時，使用這個從者的{入場曲}能力，這張卡片會具有【指定攻擊】嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:f9d20262889e257563f3e0f9be38cfaedaf11a9cc95826bf3dabc96760ee369d
+    field: answer
+    source_hash: sha256:26d87ceccafe864da6348f780386421082f9e9f7a4b3c08a05b707857a88d0b9
+    lang: zh-Hant
+    text: 前者是「所選的敵方戰場上的從者」，後者是「所選的自己戰場上的透京・從者」。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:f9d20262889e257563f3e0f9be38cfaedaf11a9cc95826bf3dabc96760ee369d
+    field: question
+    source_hash: sha256:e02559401ac43819f3af0f4de23dec60c8ddb45720e8291b4caf857b1ca1781a
+    lang: zh-Hant
+    text: 請說明前者與後者。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:fb7d21038dcb3a34c78122bcb826c129233ce1e000321bad94cc76f19a6ddb27
+    field: answer
+    source_hash: sha256:c160a87b6e8aa156bfe705b1bb2d95efb0f3546a954b075fdfc028b2369fb857
+    lang: zh-Hant
+    text: 是的。即使在攻擊途中失去【突進】或【指定攻擊】，也不會變更攻擊目標，該攻擊仍會進行。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:fb7d21038dcb3a34c78122bcb826c129233ce1e000321bad94cc76f19a6ddb27
+    field: question
+    source_hash: sha256:9419713031d1adb4c0e0cf64a236818b6314275ecf968769278f567e1e37fa45
+    lang: zh-Hant
+    text: 自己戰場上有這個從者與1個『壞龍的六銘傳‧耶薾』時，具有【突進】【指定攻擊】的這個從者進行攻擊，選擇敵方戰場上重置狀態的從者為攻擊目標。之後的Quick時點，自己戰場上的『壞龍的六銘傳‧耶薾』被破壞，這個從者失去【突進】【指定攻擊】時，該攻擊仍會進行嗎？
+    origin: machine
+    low_confidence: true

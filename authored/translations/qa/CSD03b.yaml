@@ -1,0 +1,73 @@
+format: 1
+kind: qa_translation_shard
+entries:
+  - qa_id: qa:v1:24dd2e7dc4e57cc10039726169399dc381b45c3f5ffd68ccaf9aa28ac1d5a4f1
+    field: answer
+    source_hash: sha256:4ae1239ec34282fea68e233b94aa42b0189b41ed8dc1f021e98fcbcedd827bd6
+    lang: zh-Hant
+    text: "不會。不會計入1回合中1次的次數。\n進化前的『哥布林』所具有的{進化}能力（可以進化的起動能力、「圓圈E」圖示），在1回合中只能使用1次。藉由其他能力進化等情況，沒有此限制。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:24dd2e7dc4e57cc10039726169399dc381b45c3f5ffd68ccaf9aa28ac1d5a4f1
+    field: question
+    source_hash: sha256:1dd40dbab7fb6e26530c8a4a27d79b291541f98d0bcf9faa0fdcc397d2c91039
+    lang: zh-Hant
+    text: 這個從者藉由{入場曲}能力進化時，該次進化會計入進化前的『哥布林』所具有的{進化}能力（可以進化的起動能力、「圓圈E」圖示）的使用次數上限，即1回合中1次嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:32c3263cc6263c9d07a99013572965f9252636fc033a45e4492144728508f683
+    field: answer
+    source_hash: sha256:5cae8bdd3c74729929096af42756a7059c9655af2fa47cd0f4d0c7488b5d92c5
+    lang: zh-Hant
+    text: "是的。是永續能力。只要處於【覺醒】狀態，且自己戰場上有其他陽炎・從者，『龍之霸主』就具有【疾馳】。\n召喚『龍之霸主』到戰場上後，若滿足2個條件，則具有【疾馳】。\n召喚『龍之霸主』到戰場上後，若不再滿足其中任一條件，則失去【疾馳】。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:32c3263cc6263c9d07a99013572965f9252636fc033a45e4492144728508f683
+    field: question
+    source_hash: sha256:e8f9f43345b604f1162330cb060c856f104a2fd69c87c4a1d5f2fee2e1b5eb1c
+    lang: zh-Hant
+    text: 『龍之霸主』的「只要處於【覺醒】狀態，且自己戰場上有其他陽炎・從者，這張卡片就具有【疾馳】。」能力，是永續能力嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:63a30cc07a27ef6175c721416169a5342778f84df33cc52358e2a0c74937c571
+    field: answer
+    source_hash: sha256:ba71586b28241db26e08fd9e5e17653d8c89ed506bd9d97930361d5384ca78be
+    lang: zh-Hant
+    text: 是的。即使在攻擊過程中失去【疾馳】，仍會進行該次攻擊。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:63a30cc07a27ef6175c721416169a5342778f84df33cc52358e2a0c74937c571
+    field: question
+    source_hash: sha256:0a90f6aed0ac82351f2d6db8c7de02e9ac24c5dc98068b17cb5f59729c12dbcc
+    lang: zh-Hant
+    text: 處於【覺醒】狀態，且自己戰場上有1個其他陽炎・從者的情況下，具有【疾馳】的『龍之霸主』在進入戰場的回合攻擊，選擇敵方的主戰者為攻擊目標。在之後的Quick時點，自己戰場上的其他陽炎・從者被『處決』等破壞，使正在攻擊的『龍之霸主』失去【疾馳】時，該次攻擊仍會進行嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:786cacf9f842518d0492287b8cfb36a7e057419d2ab3df2d567ed378cbdda3e9
+    field: answer
+    source_hash: sha256:51a167b43582df9fa52d8a74c674c96678c793b01b3118f37a6c6f87b1d7be1c
+    lang: zh-Hant
+    text: 是的。這個從者的攻擊力為5的情況下，使用{起動}能力時，雖然會將這個從者放置到墓場作為消費，但仍可以給予選擇為目標的從者5點傷害。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:786cacf9f842518d0492287b8cfb36a7e057419d2ab3df2d567ed378cbdda3e9
+    field: question
+    source_hash: sha256:94e1ddc58a4019efe887acffead795a87b4e3338b739494a7e88ca91f4958090
+    lang: zh-Hant
+    text: 這個從者的{起動}能力給予敵方戰場上的從者的傷害，與這張卡片在戰場上時的攻擊力數值相同嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:c9259eb520898224401b80157bb93b5db5c49f65460ab79135f1029cb5ac3961
+    field: answer
+    source_hash: sha256:b1343e961b90eeae5eb5c3d6f97115021bfc2851cb452d665e7e4b81bb359b09
+    lang: zh-Hant
+    text: 不行。若無法選擇敵方戰場上的從者，則無法使用這個從者的【進化時】能力，即使處於【覺醒】狀態，也無法具有「這張卡片給予交戰傷害時，將這張卡片重置。這個能力在1回合中至多生效1次」。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:c9259eb520898224401b80157bb93b5db5c49f65460ab79135f1029cb5ac3961
+    field: question
+    source_hash: sha256:e20957bca9c555f5859a6941fcf12bdf66ca135543642b6e4b005ce41e51a4ea
+    lang: zh-Hant
+    text: 無法選擇敵方戰場上的從者時，若處於【覺醒】狀態，可以使用這個從者的【進化時】能力，使其在該回合具有「這張卡片給予交戰傷害時，將這張卡片重置。這個能力在1回合中至多生效1次」嗎？
+    origin: machine
+    low_confidence: true

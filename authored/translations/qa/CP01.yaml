@@ -1,0 +1,829 @@
+format: 1
+kind: qa_translation_shard
+entries:
+  - qa_id: qa:v1:00f8fa0fe9aae644d1c2dc12c6518cb26a812bc90f937dfb3da707a03080670c
+    field: answer
+    source_hash: sha256:e873f341044dc41175cb00338a69ca21e16dbedfebe2e2f8ebeceb72d2ba74cd
+    lang: zh-Hant
+    text: 是的。在「選擇自己的1個賽馬娘・從者。」中，藉由選擇『大和赤驥』本身，能力可以正常結算，使其具有【疾馳】。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:00f8fa0fe9aae644d1c2dc12c6518cb26a812bc90f937dfb3da707a03080670c
+    field: question
+    source_hash: sha256:de877c9f5bf7100b7bbcabebac2f4df3e05fce722c152325a7a4e611001b000e
+    lang: zh-Hant
+    text: 自己的戰場上只有1個『大和赤驥』的狀態下，使用這個從者具有的能力「～，選擇自己的1個賽馬娘・從者。其與這張卡片具有【疾馳】。」此時，自己戰場上的『大和赤驥』可以具有【疾馳】嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:07e462a2f338ca38fc0096ef397e9a7e22f237973da26a87f21fd98398769962
+    field: answer
+    source_hash: sha256:81c3dfe0d6a07ab7c309f6005d6434f926c7372736b6150b4f688daa3b7eb6e3
+    lang: zh-Hant
+    text: 由於消費0是偶數，因此會給予自己的主戰者2點傷害。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:07e462a2f338ca38fc0096ef397e9a7e22f237973da26a87f21fd98398769962
+    field: question
+    source_hash: sha256:fef8b5670a902289fe0ff3dac8fab84c528e75e2ebf3c140ce7c04fd2a408a91
+    lang: zh-Hant
+    text: 藉由這個從者公開的卡片的消費為0時，會給予哪一方的主戰者傷害？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:08a65522c853230955e4873d9e7e052f40184a07534e2f6daea4e1a023141014
+    field: answer
+    source_hash: sha256:3175e482da4adfd61782e4207dc6292bd9572ebfdab0306d84ea65e1a340fe82
+    lang: zh-Hant
+    text: 是的。可以選擇。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:08a65522c853230955e4873d9e7e052f40184a07534e2f6daea4e1a023141014
+    field: question
+    source_hash: sha256:9f1dec4cb5d29a17dc06571c3f9eb3b9977975c5566f8a9ae680fd66ea8ca7c0
+    lang: zh-Hant
+    text: 抉擇【2】的選項時，可以選擇如『黃金城市』這類因能力而具有【疾馳】的從者，而非原本就具有【疾馳】的從者嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:08c8f42f4f9e90fdc04c9db91dc82520741adf460f3c2dbf45e4518d4beb043f
+    field: answer
+    source_hash: sha256:c96cbbf42365e90953d0f84e48e7242262a6b5c9d7e028baf987901f8c113739
+    lang: zh-Hant
+    text: 不會。藉由這個從者的能力，使進化從者或正在參賽的從者返回手牌時，「返回的張數」會計為1張。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:08c8f42f4f9e90fdc04c9db91dc82520741adf460f3c2dbf45e4518d4beb043f
+    field: question
+    source_hash: sha256:f7a002aef2255aa995720ab6cbd4b710c45b1a04cee6815634bb7255cca2f3c2
+    lang: zh-Hant
+    text: 藉由這個從者的能力，使自己的進化從者或正在參賽的從者返回手牌時，「返回的張數」會計為2張嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:0d24d1c84a5f9aeec921ea16f13526a8b690a4b4468f4aa3c10a6d177e9bbe98
+    field: answer
+    source_hash: sha256:1477ffe5a79fb36347c60b9ad4cf273a7ea18ec55962ee4163e204d5c6e36a96
+    lang: zh-Hant
+    text: 是的。計算本回合中使用的法術張數時，也會計算這個從者進入戰場前使用的法術張數。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:0d24d1c84a5f9aeec921ea16f13526a8b690a4b4468f4aa3c10a6d177e9bbe98
+    field: question
+    source_hash: sha256:c2cb19c4c8bcce75c66651478728770c496ccef930537eb52f3319fe7274674c
+    lang: zh-Hant
+    text: 這個從者的「若為本回合中的第3張法術，」也會計算這個從者在戰場上之前使用的法術嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:107ff7169e9f35a84ce9e7ea47d99302977591cdc2b30cc955c5025f5571065b
+    field: answer
+    source_hash: sha256:ceff936184503d0fdbcd8d6ba5476b95bd2572e9825e68bfd895e2d55b71118b
+    lang: zh-Hant
+    text: 是的。會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:107ff7169e9f35a84ce9e7ea47d99302977591cdc2b30cc955c5025f5571065b
+    field: question
+    source_hash: sha256:eb2f91bf146a0e8f872cdd08d45d228d6bfffe56277593cfc83bb2f1d6ee0228
+    lang: zh-Hant
+    text: 自己的戰場上有2個這個從者，自己使用法術時，這些從者的「自己使用法術時，選擇敵方的1個從者。使其{攻擊力}-1/{生命值}-1。」會分別觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:11721f0c495d5088c0a905ef3d72ea64a4cebe36fd20d36ae04d65023428a852
+    field: answer
+    source_hash: sha256:65222b20cb2b122fd3a87ccd005b81d62f6eb8c32a8147c63c82e2b22623cf4f
+    lang: zh-Hant
+    text: 不行。由於無法選擇，因此無法使用這個能力，也無法給予敵方的主戰者3點傷害。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:11721f0c495d5088c0a905ef3d72ea64a4cebe36fd20d36ae04d65023428a852
+    field: question
+    source_hash: sha256:f75d85be3435fb32eea690c24836bc7eea7467d659fec7758bf0cce24ac3190b
+    lang: zh-Hant
+    text: 這個從者的【攻擊時】能力若無法選擇敵方的從者，可以給予敵方的主戰者3點傷害嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:169813bb08074ba49e67d8c241a0058ff0ab566a2f3f34d34dfd904322dbef2c
+    field: answer
+    source_hash: sha256:62e657a108da962a9aa42e0e77817d22d6648ab660684463a17ba7a5a6283f6b
+    lang: zh-Hant
+    text: 是的。【參賽時】能力會觸發2次。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:169813bb08074ba49e67d8c241a0058ff0ab566a2f3f34d34dfd904322dbef2c
+    field: question
+    source_hash: sha256:ef0125bce629a30f35ce3acabe2131db6746919b377107759fef51ad7d446cd3
+    lang: zh-Hant
+    text: 這個從者參賽2次時，這個從者的【參賽時】能力會觸發2次嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:170e9897c17a4338551abc3749ab85d87defb0d14a16d7b810b15c2bd35fd207
+    field: answer
+    source_hash: sha256:ceff936184503d0fdbcd8d6ba5476b95bd2572e9825e68bfd895e2d55b71118b
+    lang: zh-Hant
+    text: 是的。會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:170e9897c17a4338551abc3749ab85d87defb0d14a16d7b810b15c2bd35fd207
+    field: question
+    source_hash: sha256:a582b8a700cf608f40d12f9fc5707c527d36a6a4f71eba4dd74220dbdfaa79d9
+    lang: zh-Hant
+    text: 敵方的回合中，自己以Quick使用法術時，這個從者的能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:193491fa6048257cf98342a74e6511969eb008a7f8ade0b9ac40184ef3496cd7
+    field: answer
+    source_hash: sha256:ec124b1a9df16449f7fa6cfc51d5732f0307b889bd7bebe2c4d6b5b900216dc5
+    lang: zh-Hant
+    text: "這張卡片是賽馬娘・從者的{用餐}能力所需的卡片，可以放入進化牌堆。\n一般情況下，進化牌堆中可以放入至多3張同名卡片，但這張卡片可以放入至多10張。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:193491fa6048257cf98342a74e6511969eb008a7f8ade0b9ac40184ef3496cd7
+    field: question
+    source_hash: sha256:3173f9b888e16795b81c557a5cf90557efe02576c270a40b5e14fa8df0839b17
+    lang: zh-Hant
+    text: 請說明這張卡片。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:1ac5fa3f9f96f9bfa58d37647d8a333d35acf7b3fed54ee3e3ae75de37a46d15
+    field: answer
+    source_hash: sha256:15cd9c1ffb757f98744112c4fff7a2cb37ea19d0969e6f8bb44086a05da20a39
+    lang: zh-Hant
+    text: 是的。消費會-2。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:1ac5fa3f9f96f9bfa58d37647d8a333d35acf7b3fed54ee3e3ae75de37a46d15
+    field: question
+    source_hash: sha256:c31b9d7c473fcdedd05752d32843b84ce249f6a5a98f34251ca81968379dd228
+    lang: zh-Hant
+    text: 自己的戰場上有2個這個從者，自己使用本回合中的第1張賽馬娘・法術時，消費會-2嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:1cf60e53b21ab8543a33f2551e45c83933de5da14011f2df34b935c78cccbeac
+    field: answer
+    source_hash: sha256:63eb6fe44aa7dd8b2088df29eec32051e8806a9c4b96744681ca547a7888f19f
+    lang: zh-Hant
+    text: 是的。由於會依參賽次數使{攻擊力}+1/{生命值}+1，因此參賽3次的從者會{攻擊力}+3/{生命值}+3。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:1cf60e53b21ab8543a33f2551e45c83933de5da14011f2df34b935c78cccbeac
+    field: question
+    source_hash: sha256:5ce11f3e4bee91d29ec1db1e808f4965be1857813a5236b6b96c9072a68f5dad
+    lang: zh-Hant
+    text: 1個從者參賽3次時，該從者會{攻擊力}+3/{生命值}+3嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:1d1a94cf016a99639de2146c8f23cf6f01f02e8bd1cec1cc491c9419ca6ca1dc
+    field: answer
+    source_hash: sha256:ed5444ec22a704dbe43139887e75d2faa11ab773ea6f59980112b8d82956bca5
+    lang: zh-Hant
+    text: 是的。會觸發。除了自己的回合，敵方的回合也可以在各自的每個回合分別觸發能力1次。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:1d1a94cf016a99639de2146c8f23cf6f01f02e8bd1cec1cc491c9419ca6ca1dc
+    field: question
+    source_hash: sha256:0edcdbc0b359be67d5a7957b64ea39caff4a162de37e5016a1d0bfb5a2e25c9a
+    lang: zh-Hant
+    text: 除了自己的回合，敵方的回合中自己以Quick使用法術時，這個從者的能力也會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:2ae91f93905ea7cd323a1ff5f404e3bbeae173791fb73fff56df6dfbe0eaefdc
+    field: answer
+    source_hash: sha256:7ba65a007b7d0c984d6fe0627356adb6f9842e7cac82b4f1c4d2e395f5fad721
+    lang: zh-Hant
+    text: 不行。若未將所選卡片放置到EX區，就無法以消費0使用。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:2ae91f93905ea7cd323a1ff5f404e3bbeae173791fb73fff56df6dfbe0eaefdc
+    field: question
+    source_hash: sha256:11652854e2e48d5b7dc97e4280d5f83ea572dda7e3ba9adb7176ddc3b0be6428
+    lang: zh-Hant
+    text: 自己的EX區中有5張卡片，藉由這個從者的能力選擇手牌中的法術時，可以以消費0從手牌使用所選法術嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:32620242e02334ab4af6217079c682e9cad4bd0a3e4f1438a37cd043a13668d8
+    field: answer
+    source_hash: sha256:fd2222e7091eb1d32e2c6597dfb7e78993d22315eb052375e2a5e778d5467f8b
+    lang: zh-Hant
+    text: 不行。曾參賽的從者無法再次使用{用餐}能力。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:32620242e02334ab4af6217079c682e9cad4bd0a3e4f1438a37cd043a13668d8
+    field: question
+    source_hash: sha256:a39e57bb86d1e23640738b20996d641b20f3d38fe34fc2c67e32803707df36e9
+    lang: zh-Hant
+    text: 這個從者已參賽時，可以使用「{用餐}{用餐}{消費2}：這張卡片參賽2次。」嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:3c1b9283a930a120378842c02f59f40135adcf156fb5c87db667209175641e85
+    field: answer
+    source_hash: sha256:3aa00310e829d7d9737df3dbfe626917500c8c4cf853db60c0aab8fc99f729d3
+    lang: zh-Hant
+    text: "是的。可以選擇。\n此時，不公開卡片，使其返回牌堆頂。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:3c1b9283a930a120378842c02f59f40135adcf156fb5c87db667209175641e85
+    field: question
+    source_hash: sha256:a9c97cd5e7454d744298d0901ca1b1dea3181c9443fe026c971738984d646a61
+    lang: zh-Hant
+    text: 藉由這個從者的{入場曲}能力從自己的牌堆查看的卡片中有賽馬娘・卡片時，可以選擇不將其加入手牌嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:3df6fe11b7cca88d1d0ed5bab25ceb9b10f1b0b818caaff358a71d3c51ec8f31
+    field: answer
+    source_hash: sha256:e4f2cdf2676736477aaf8d8d066abdd32535db2480999836b0be71063406d70b
+    lang: zh-Hant
+    text: 不行。只能將自己戰場上的卡片返回手牌。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:3df6fe11b7cca88d1d0ed5bab25ceb9b10f1b0b818caaff358a71d3c51ec8f31
+    field: question
+    source_hash: sha256:a6b381bd16133800b305fa6d4c5d3d858a3d12087b3e08c80841577223baa135
+    lang: zh-Hant
+    text: 可以將敵方戰場上的卡片返回手牌，作為這個從者的{入場曲}的消費嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:3f1642fd2dc2387cdec3dee4787b1931ace237a8d41aeeade283257294d3021f
+    field: answer
+    source_hash: sha256:3aa00310e829d7d9737df3dbfe626917500c8c4cf853db60c0aab8fc99f729d3
+    lang: zh-Hant
+    text: "是的。可以選擇。\n此時，不公開卡片，使其返回牌堆頂。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:3f1642fd2dc2387cdec3dee4787b1931ace237a8d41aeeade283257294d3021f
+    field: question
+    source_hash: sha256:a5834fd4ac7f22af433e4e0d0b83d38af3a29a872225010e496ef81226bea66c
+    lang: zh-Hant
+    text: 藉由這個護符的{起動}能力從自己的牌堆查看的卡片中有消費為7的卡片時，可以選擇不將其加入手牌嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:40b53088f0ff6df129e62baad0821926e74105632f2f2dbe7f2d16395a6706e7
+    field: answer
+    source_hash: sha256:553c8831a2986ff1f3443079457b73dc70517761054149a4e0137526b0dcfcf7
+    lang: zh-Hant
+    text: 是的。會觸發。這個從者的能力會參照具有目白家類型的從者，或護符。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:40b53088f0ff6df129e62baad0821926e74105632f2f2dbe7f2d16395a6706e7
+    field: question
+    source_hash: sha256:62a8d078b296ad61842fd96a693102d5740ded5aa84ac05f11f1895bafab5d1f
+    lang: zh-Hant
+    text: 非目白家類型的護符離開戰場時，這個從者以「目白家・從者或護符離開戰場時～」開頭的能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:43b18608973a699c58cfb6e69e6a12164506faa54bfc30e2b55a28e93dadf873
+    field: answer
+    source_hash: sha256:c97c2b936f5a70312f8f59b35fd1482e0b1bb8135d00587323bb673849655c20
+    lang: zh-Hant
+    text: 只有骰子點數為6時才會破壞。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:43b18608973a699c58cfb6e69e6a12164506faa54bfc30e2b55a28e93dadf873
+    field: question
+    source_hash: sha256:2b6001014198955a50b229fc352658503238a6f0ce890c7960adc682a5b4d942
+    lang: zh-Hant
+    text: 藉由這張卡片的能力破壞這張卡片，是在骰子點數為多少時？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:451f0eb27020cb5f4cd7cc97aa86584997b731316a689882598136b7b1da2315
+    field: answer
+    source_hash: sha256:ceff936184503d0fdbcd8d6ba5476b95bd2572e9825e68bfd895e2d55b71118b
+    lang: zh-Hant
+    text: 是的。會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:451f0eb27020cb5f4cd7cc97aa86584997b731316a689882598136b7b1da2315
+    field: question
+    source_hash: sha256:a582b8a700cf608f40d12f9fc5707c527d36a6a4f71eba4dd74220dbdfaa79d9
+    lang: zh-Hant
+    text: 敵方的回合中，自己以Quick使用法術時，這個從者的能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:489031a85891c94812cde86de0699f5087c19548738aa182d000a945d083ce70
+    field: answer
+    source_hash: sha256:f86e52119bb8594d3226251ea5421b8257151dc9bbff71ff2c14d52ffab1868b
+    lang: zh-Hant
+    text: 是的。選擇『青雲天空』時，會結算「使其{攻擊力}+1」，抽1張卡片，之後也會結算『{攻擊力}+1/{生命值}+1」。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:489031a85891c94812cde86de0699f5087c19548738aa182d000a945d083ce70
+    field: question
+    source_hash: sha256:97934924ffbcf36cf1ef31b5daa2e0a06063273d1438d275f4ae4f2e6dc12540
+    lang: zh-Hant
+    text: 藉由這張法術選擇『青雲天空』作為目標時，『青雲天空』也會結算「使其{攻擊力}+1」嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:4be03a7085d74716958d8bbff41ce705d005c922a7d68c5467bffa8fd525b15f
+    field: answer
+    source_hash: sha256:ff7a787c79f2772ad07dbac894f323e7e67fa77ef207004b8f92ba113664530d
+    lang: zh-Hant
+    text: 是的。由於能力消費中的「將這張卡片{橫置}」不是攻擊，因此可以使用。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:4be03a7085d74716958d8bbff41ce705d005c922a7d68c5467bffa8fd525b15f
+    field: question
+    source_hash: sha256:65a3c87b862b597a596a45e4a9c870566402ba5725deb9045cf94962bac58259
+    lang: zh-Hant
+    text: 因這個從者的能力而重置的從者，可以使用消費中具有「將這張卡片{橫置}」的能力嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:4f0294e4d27a05bd6c6e41b10fd62decab1361c8c8d386339a15914d96a3e0b0
+    field: answer
+    source_hash: sha256:28c73a251dec71ae71619a11f88b318f03ca345a1645fc45724af61239d0b57a
+    lang: zh-Hant
+    text: 不是。是指藉由這張法術所選從者為『青雲天空』的情況。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:4f0294e4d27a05bd6c6e41b10fd62decab1361c8c8d386339a15914d96a3e0b0
+    field: question
+    source_hash: sha256:8e32ef06e67b5ccac60f5f94204c6e79727156c9dbd397a3ae93b13c84bc081a
+    lang: zh-Hant
+    text: 這張法術的能力「若其為『青雲天空』，」是指藉由這張法術的能力「抽1張卡片。」加入手牌的1張卡片為『青雲天空』的情況嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:4fb5e1072d029f05034d698722115a48f978d9ed9c703ef1f4bb891911eb20d7
+    field: answer
+    source_hash: sha256:8f6924df8e7fb0cc7cfad0fe9e8b291644f9e6382b28ce2dba7ebc8c3f938c8e
+    lang: zh-Hant
+    text: 不行。由於在該回合中已使用第1張賽馬娘・法術，接下來使用的賽馬娘・法術會是該回合中的第2張賽馬娘・法術，因此無法藉由『大和赤驥』的能力使消費-1。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:4fb5e1072d029f05034d698722115a48f978d9ed9c703ef1f4bb891911eb20d7
+    field: question
+    source_hash: sha256:7ecec2f04949caa48e809892d4e2bb4ec654576e9b72f53c06d8543fe95cf9fb
+    lang: zh-Hant
+    text: 自己的回合中，使用第1張賽馬娘・法術後，將『大和赤驥』召喚到戰場上時，可以使接下來使用的賽馬娘・法術的消費-1嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:4fec55d7425e5550b4b672d1e1ed0603a124fe379c78af9bd2c6195e9327c4b2
+    field: answer
+    source_hash: sha256:cffc002b87ba05ae505cbe2619a5fa3879ae8e911f07d6616d318241a067c9b1
+    lang: zh-Hant
+    text: 是的。各自的能力會在1回合中分別觸發1次。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:4fec55d7425e5550b4b672d1e1ed0603a124fe379c78af9bd2c6195e9327c4b2
+    field: question
+    source_hash: sha256:1b3d0865e8e27c20bc874930c84f943b9f47ee912827ccea68638f602c35b5bf
+    lang: zh-Hant
+    text: 自己的戰場上有2個這個從者，自己使用法術時，這些從者的能力會分別觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:5464e740d29c7ec0abe60d52d0dfa5f004ab75210901fe15bc8caedb8663029e
+    field: answer
+    source_hash: sha256:58aea3dbaceb65e25f4097825fbf7eef518f4c4b257071083abce81a76d2b288
+    lang: zh-Hant
+    text: 不行。由於無法選擇，因此無法使用這個能力，也無法抽1張卡片。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:5464e740d29c7ec0abe60d52d0dfa5f004ab75210901fe15bc8caedb8663029e
+    field: question
+    source_hash: sha256:973fc356017d9342913ed65ef56312972b794af626a8af2cacd6a64383fec79e
+    lang: zh-Hant
+    text: 這個從者的{入場曲}若無法選擇正面朝上放置的1張『紅蘿蔔』，可以抽1張卡片嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:613c4883fce06bdbeadaf603ac89698deadcc7257c1e7f4ce01d51abb8f49559
+    field: answer
+    source_hash: sha256:bd7b4a1e1bbcdb1d9f4b5c067fb78e4c585bd65174866542763e17ec48a73842
+    lang: zh-Hant
+    text: 不行。由於無法選擇，因此無法使用這個能力，也無法將自己牌堆頂的1張卡片放置到墓場。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:613c4883fce06bdbeadaf603ac89698deadcc7257c1e7f4ce01d51abb8f49559
+    field: question
+    source_hash: sha256:31774e8c21da5b9f3c00ed370e4c6595ef379a81c043d3b81667ec04e053f9fd
+    lang: zh-Hant
+    text: 這個從者的起動能力若無法選擇敵方的從者，可以將自己牌堆頂的1張卡片放置到墓場嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:65a409eee9bbbceaa85bf782c03d1710359dd40687c3f1b161147e89d8b8a827
+    field: answer
+    source_hash: sha256:31f993c6f6f2f75ec59c433bcd0c0cae539adcf8535b366ea4361c709df7ce3d
+    lang: zh-Hant
+    text: 是的。藉由這個從者的{入場曲}能力，可以從具有賽馬娘類型的卡片或護符中，公開1張並加入手牌。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:65a409eee9bbbceaa85bf782c03d1710359dd40687c3f1b161147e89d8b8a827
+    field: question
+    source_hash: sha256:9c5f81e3aa4ba3e1cfac7c958244c05b2a4df4284c45b106893dfc7fdc6798ab
+    lang: zh-Hant
+    text: 可以藉由這個從者的{入場曲}能力，將不具有賽馬娘類型的護符加入手牌嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6be80a0f1e51d78cb0ef903c17dfb810fe7e9b88b2939c3618eece9ac4d529be
+    field: answer
+    source_hash: sha256:8a7e027b4f536e8bb912e04f4280f5c6c3733564c605b4a4d119be8d4f2b4a39
+    lang: zh-Hant
+    text: 是的。進化牌堆中沒有3張『紅蘿蔔』時，無法支付「{用餐}{用餐}{用餐}{消費3}：這張卡片參賽3次。」的消費，也無法使用能力。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6be80a0f1e51d78cb0ef903c17dfb810fe7e9b88b2939c3618eece9ac4d529be
+    field: question
+    source_hash: sha256:2f6603a26e6cde5542ccdf26429f99c93e678fc5ee9d314d145dc6036a6f3966
+    lang: zh-Hant
+    text: 這個從者要參賽3次時，進化牌堆中必須有3張『紅蘿蔔』嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:76aaf8da658aeeafe7d57e34267df6a1f083d01d9d6d1119eaa5a58f4fd12c7a
+    field: answer
+    source_hash: sha256:3fb513fd025315c82aa72b36ac177e0622113837ecdb4e495770cfa658438055
+    lang: zh-Hant
+    text: 不會。將『紅蘿蔔』疊放在要參賽的從者上，不視為使用法術。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:76aaf8da658aeeafe7d57e34267df6a1f083d01d9d6d1119eaa5a58f4fd12c7a
+    field: question
+    source_hash: sha256:df3a504aa2f06288779b8c717aae8f65a8b33cecdd48b30e0445bec76943f3b7
+    lang: zh-Hant
+    text: 藉由{用餐}能力，將『紅蘿蔔』疊放在要參賽的從者上，會視為使用法術嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:783a0715601fea9792ebc86a983579024a89be2357390310f612f79017a3cd7a
+    field: answer
+    source_hash: sha256:6241b260e2fcf740af3a8ceac92c84916fedc251e686cde8e9cecb1d1d195263
+    lang: zh-Hant
+    text: 是的。由於這個從者的能力中的「自己戰場上的從者數量」也包含使用的『東海帝皇』本身，因此會給予敵方的從者2點傷害。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:783a0715601fea9792ebc86a983579024a89be2357390310f612f79017a3cd7a
+    field: question
+    source_hash: sha256:738dc910f466c0e1a6a3b08e7046982b48ea9099edbd05548e35317a21b7f50d
+    lang: zh-Hant
+    text: 自己的戰場上沒有從者的狀態下，使用『東海帝皇』。可以藉由這個從者的{入場曲}給予敵方的從者2點傷害嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:78e0b3a625ef9931034bbcf86fda305ca011f58966ab1404db66637d7cef37be
+    field: answer
+    source_hash: sha256:203bac652423777ca8e324df090fd4e9bd1444ada34c10972249a5aa36c3ea95
+    lang: zh-Hant
+    text: 不行。在戰場以外的區域，「只要雙方戰場上的卡片數量合計為8張以上，這張卡片就具有【疾馳】。」的效果無效，『黃金城市』不具有【疾馳】，因此無法從牌堆搜尋並加入手牌。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:78e0b3a625ef9931034bbcf86fda305ca011f58966ab1404db66637d7cef37be
+    field: question
+    source_hash: sha256:c721d038e1c23995b38d5b71044da995cbc9df89ecaa33cbb9781198b27d02b4
+    lang: zh-Hant
+    text: 可以抉擇【1】的選項，從自己的牌堆搜尋『黃金城市』並加入手牌嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:7b333a6dfc0c625a5572848ab18aaa2b4d933120ba18505cb4cc1ac5d461a3b2
+    field: answer
+    source_hash: sha256:ceff936184503d0fdbcd8d6ba5476b95bd2572e9825e68bfd895e2d55b71118b
+    lang: zh-Hant
+    text: 是的。會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:7b333a6dfc0c625a5572848ab18aaa2b4d933120ba18505cb4cc1ac5d461a3b2
+    field: question
+    source_hash: sha256:eb2f91bf146a0e8f872cdd08d45d228d6bfffe56277593cfc83bb2f1d6ee0228
+    lang: zh-Hant
+    text: 自己的戰場上有2個這個從者，自己使用法術時，這些從者的「自己使用法術時，選擇敵方的1個從者。使其{攻擊力}-1/{生命值}-1。」會分別觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:7c85769aa16eb561f80046f3bee3e55a498d1b77cd3fcb6f7179c10d6863e590
+    field: answer
+    source_hash: sha256:e4f2cdf2676736477aaf8d8d066abdd32535db2480999836b0be71063406d70b
+    lang: zh-Hant
+    text: 不行。只能將自己戰場上的卡片返回手牌。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:7c85769aa16eb561f80046f3bee3e55a498d1b77cd3fcb6f7179c10d6863e590
+    field: question
+    source_hash: sha256:a6b381bd16133800b305fa6d4c5d3d858a3d12087b3e08c80841577223baa135
+    lang: zh-Hant
+    text: 可以將敵方戰場上的卡片返回手牌，作為這個從者的{入場曲}的消費嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:7cb19dd6a3ae0901e1bf09660f6a93bb624bf696909ef418d2464cbbe9691a0f
+    field: answer
+    source_hash: sha256:d7eaf6ef395451860876b3d349c67938cba4ecf060f0332fa63976b82fd84456
+    lang: zh-Hant
+    text: 不行。藉由這個從者的能力，可以使自己戰場上的其他卡片返回手牌。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:7cb19dd6a3ae0901e1bf09660f6a93bb624bf696909ef418d2464cbbe9691a0f
+    field: question
+    source_hash: sha256:ab1ffd1db00138160812a52e022351442ecdab4238c600c65010cc92b04b59d9
+    lang: zh-Hant
+    text: 可以藉由這個從者的能力，使墓場或EX區中的卡片返回手牌嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:875bdc10e31ca7609e32c901d7622532cfe0d7cb3f28e1cf2d9990e61e20432f
+    field: answer
+    source_hash: sha256:c017a069ddadd1a78aa69f118d5e6427e3a3bcba7c8e91f960b776b7b9fe394f
+    lang: zh-Hant
+    text: 是的。即使自己的手牌為0張，也可以使用{入場曲}能力，給予敵方的主戰者與敵方的從者5點傷害。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:875bdc10e31ca7609e32c901d7622532cfe0d7cb3f28e1cf2d9990e61e20432f
+    field: question
+    source_hash: sha256:d9652b4266f9845630b6f6e4559932b22f3ba63b30cffe25eb75097d411bc0df
+    lang: zh-Hant
+    text: 自己的手牌為0張時，可以使用這個從者的{入場曲}能力嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:888f2ce1f3e64c4ad3abbf464facd573e38bae01370ad74f7bd6857f0473ee91
+    field: answer
+    source_hash: sha256:8bf072ec21a1ae22d554704b2d1658e895c494612e198e022d114974dc649061
+    lang: zh-Hant
+    text: 不會。消費會-2。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:888f2ce1f3e64c4ad3abbf464facd573e38bae01370ad74f7bd6857f0473ee91
+    field: question
+    source_hash: sha256:557b5750fe73f749ec7a92d652ad5ab09071cb57bf9081398a029f2d535daf3c
+    lang: zh-Hant
+    text: 自己的戰場上有2個『大和赤驥』時，使用這個從者的消費會-4嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:9d781e33078fc85be4a9bf7f50d3cc09e002f506d4da49610d9509551f2acdfd
+    field: answer
+    source_hash: sha256:53c97be95d72bf943780954719189ca109465a12785bc5bc8e246b159284c90e
+    lang: zh-Hant
+    text: 是的。會失去。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:9d781e33078fc85be4a9bf7f50d3cc09e002f506d4da49610d9509551f2acdfd
+    field: question
+    source_hash: sha256:2e894b8c548dda85c8ecf50fb20e311f0499e1fda38fa336afe3f8b337041fd7
+    lang: zh-Hant
+    text: 這個從者的能力，在雙方戰場上的卡片從8張以上變為7張以下時，會失去【疾馳】嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:9fba081c94fbe5e45809472e67e63b7c1f7522f743a6dcd642bde0a2f0b806c5
+    field: answer
+    source_hash: sha256:57576d16caf5127ea3e2fb8ed5028da3fc480377eaafd325c3aa3b6c74b9ee41
+    lang: zh-Hant
+    text: 不會。由於這個從者的能力在戰場以外不會觸發，因此不會具有【疾馳】。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:9fba081c94fbe5e45809472e67e63b7c1f7522f743a6dcd642bde0a2f0b806c5
+    field: question
+    source_hash: sha256:25c97ca7286b56ae86d8fe0a74f3b16459108487e1917260e6dd786755d14018
+    lang: zh-Hant
+    text: 目白家・從者離開戰場後，將這個從者召喚到戰場上時，這個從者會具有【疾馳】嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a2b551ed6a978b20f35b13f8d53ad7f18ca4167855039c9cbb649937deaf3108
+    field: answer
+    source_hash: sha256:e81484b6380c0a7dbd104c6e738f5d331f3b81e319188df51b63a3348ce503af
+    lang: zh-Hant
+    text: "可以以任意順序使用。\n首先結算『一起繼續創造的回憶』。之後，可以從{入場曲}等滿足觸發條件而進入待機狀態的能力中，選擇要先使用哪一個。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a2b551ed6a978b20f35b13f8d53ad7f18ca4167855039c9cbb649937deaf3108
+    field: question
+    source_hash: sha256:ca05395b43ec21257269254c5f8a8eedd4526371bcbe5b4b8fa4a56a2b5ea9c7
+    lang: zh-Hant
+    text: 藉由這張法術的能力，同時有多張卡片進入戰場。假設這些卡片分別具有{入場曲}等能力，此時，這些能力會以什麼順序使用？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a3f5bfccadc2b9be64e149d4bed77d8986b9ec8f2a846fb4974f598d44907915
+    field: answer
+    source_hash: sha256:e593113d6772a0d8854e341902adaae8b3654025543e1d6b71d8322a06cd91fd
+    lang: zh-Hant
+    text: 是的。會{攻擊力}+1/{生命值}+1。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a3f5bfccadc2b9be64e149d4bed77d8986b9ec8f2a846fb4974f598d44907915
+    field: question
+    source_hash: sha256:f1f5ed98e801f75581fd2f0ff0b582ff56f9718d1e61a59a41f19eaba59ef2aa
+    lang: zh-Hant
+    text: 藉由這個從者的【參賽時】能力，未從牌堆搜尋1張消費為1的護符並召喚到戰場上時，會{攻擊力}+1/{生命值}+1嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a5fa296f872c4e0fbf252b7ad216a6ecca3f2a3494ed21630c77c2f8367dd855
+    field: answer
+    source_hash: sha256:d24f4cedb8e56c9b233f4b702570794f9a2eb2f9e2c609c12320e9be8491874b
+    lang: zh-Hant
+    text: 不行。無法攻擊敵方的主戰者或敵方的從者。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a5fa296f872c4e0fbf252b7ad216a6ecca3f2a3494ed21630c77c2f8367dd855
+    field: question
+    source_hash: sha256:01d611ba23701264a3a708206122963b868aefd3ab817f05af217263f2ab5eb6
+    lang: zh-Hant
+    text: 藉由這個從者的【參賽時】能力選作目標的從者，可以攻擊敵方戰場上橫置的從者嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a692c1d6c2cd03780b5c2663c78483c7c0a486201c419b31d64b0310088f4d1c
+    field: answer
+    source_hash: sha256:30875783dd4ca8f898f488c0261930df4818d8ab6f8fddf01801937b2f61dd4a
+    lang: zh-Hant
+    text: 是的。會觸發3次。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a692c1d6c2cd03780b5c2663c78483c7c0a486201c419b31d64b0310088f4d1c
+    field: question
+    source_hash: sha256:351643a46b2c898e2244dec4aa1dab6c9922e00abf536b552e0ac794e2205737
+    lang: zh-Hant
+    text: 1個從者參賽3次時，這個從者的「自己的其他從者參賽時～」的能力會觸發3次嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:ad6b1d116950cbbf2001454b8bae8f031b502d2e28f00b1d9b9c2bf81cea211c
+    field: answer
+    source_hash: sha256:550323c0f337ea005a34f3addc1a9e0febe03d1d62dfc60129d044bfcda8628a
+    lang: zh-Hant
+    text: 會重複「將自己牌堆頂的1張卡片放置到EX區。」3次。由於不包含「從下列抉擇1項。」，因此不會重複該項處理。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:ad6b1d116950cbbf2001454b8bae8f031b502d2e28f00b1d9b9c2bf81cea211c
+    field: question
+    source_hash: sha256:65c9432a88d1b041bde3a4467fcbf452f7cfb2a520f6c4e129478d53ad82de6d
+    lang: zh-Hant
+    text: 這個從者的能力「重複此動作3次。」會重複哪項處理3次？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:adc341acee240b3c8a6d27ef23af2a44c94414e07f813d23749631261e023fcf
+    field: answer
+    source_hash: sha256:1ef518dfb8fe7c015d95d5477e374b3e97ee4234088a8f733c530813018c08d6
+    lang: zh-Hant
+    text: 是的。可以抉擇。此時，重複「將自己牌堆頂的1張卡片放置到EX區」2次。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:adc341acee240b3c8a6d27ef23af2a44c94414e07f813d23749631261e023fcf
+    field: question
+    source_hash: sha256:28e27f9b1951e242d11d459a149c861bbcdcd2e4542d00e22c465eb4bb1b8e1c
+    lang: zh-Hant
+    text: 自己的EX區中有3張卡片時，可以藉由這個從者的能力抉擇【1】的選項嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:b19efe1eeadae8293ecff8136a29454074c655fadfee821d98e38b8af63d7056
+    field: answer
+    source_hash: sha256:acb99599e6632ee44e56d214648d5743a9dcc1793bf6d7237e66643a2d6a9a07
+    lang: zh-Hant
+    text: 是的。由於『見習魔女與漫漫長夜』的消費會變為0，因此即使剩餘PP為0，也可以使用。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:b19efe1eeadae8293ecff8136a29454074c655fadfee821d98e38b8af63d7056
+    field: question
+    source_hash: sha256:efdd10b669f45d4325de8c1db01712e0355e99a0a4c9411743683c370478f2b6
+    lang: zh-Hant
+    text: 自己的剩餘PP為0，且『大和赤驥』在自己的戰場上時，可以將原始消費為1的『見習魔女與漫漫長夜』作為本回合中的第1張賽馬娘・法術，以消費0使用嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:b68f4d9f5f776cb68078cd7799f01aac5cb2d96d236b3e72ae39ba3fe64f935e
+    field: answer
+    source_hash: sha256:0c036c9f626bc0c2d19371c88271a218ca9e6255520731025da8aae2253e56d0
+    lang: zh-Hant
+    text: 是的。『米浴』的{謝幕曲}結算時，同時被破壞的『特別週』已在墓場中，因此可以選擇其作為目標。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:b68f4d9f5f776cb68078cd7799f01aac5cb2d96d236b3e72ae39ba3fe64f935e
+    field: question
+    source_hash: sha256:ed821f4f63e180a36dd2180aabd7f8304e5fb0d42020ea690a0460c208c50a48
+    lang: zh-Hant
+    text: 自己戰場上的『米浴』與『特別週』同時被破壞時，可以藉由『米浴』的{謝幕曲}，選擇同時被破壞的『特別週』作為目標嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:b8622b7fe7b681f4b13fbd561355fb7fe20cd7ce42242d226317d103bc9b0d94
+    field: answer
+    source_hash: sha256:1826f91b5104dd7d91dba1f5827cded429187e4e45f62567dad076fe1d56e2d3
+    lang: zh-Hant
+    text: 是的。可以使用。此時，雖然『封印的熾天使』具有「這張卡片無法被能力破壞。」這個能力，但仍會被放置到墓場，並使用『目白麥昆』的{入場曲}能力。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:b8622b7fe7b681f4b13fbd561355fb7fe20cd7ce42242d226317d103bc9b0d94
+    field: question
+    source_hash: sha256:216cc73ddd03df286a8877f8524de4608e567c76895b236632208a1f110ede6e
+    lang: zh-Hant
+    text: 可以將『封印的熾天使』放置到墓場，作為『目白麥昆』的{入場曲}的消費並使用能力嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:b8b67cfb8cc33d08a4621602947d19e55e8d8d743eaea4236ec92e8a9be01ac7
+    field: answer
+    source_hash: sha256:3fb513fd025315c82aa72b36ac177e0622113837ecdb4e495770cfa658438055
+    lang: zh-Hant
+    text: 不會。將『紅蘿蔔』疊放在要參賽的從者上，不視為使用法術。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:b8b67cfb8cc33d08a4621602947d19e55e8d8d743eaea4236ec92e8a9be01ac7
+    field: question
+    source_hash: sha256:df3a504aa2f06288779b8c717aae8f65a8b33cecdd48b30e0445bec76943f3b7
+    lang: zh-Hant
+    text: 藉由{用餐}能力，將『紅蘿蔔』疊放在要參賽的從者上，會視為使用法術嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:cf77261f861fadec3dfae1b9ad45917efc0a293d1e58077fbcb9fb198b5682c1
+    field: answer
+    source_hash: sha256:5fc04069a14c9b0b0a3877fc10df2ff966f74f85b2c381680c3402b85a147057
+    lang: zh-Hant
+    text: 不行。由於無法選擇，因此無法使用這個能力，也無法將自己牌堆頂的2張卡片放置到墓場。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:cf77261f861fadec3dfae1b9ad45917efc0a293d1e58077fbcb9fb198b5682c1
+    field: question
+    source_hash: sha256:bf0717a434bf818e972ac7e2aee55d70a385d277258b1df6cd5e7113659b799b
+    lang: zh-Hant
+    text: 這個從者的{入場曲}若無法選擇敵方的從者，可以將自己牌堆頂的2張卡片放置到墓場嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:d5477091d9e99575e4a1439ba7b094e773f768e511dd29087bc32d572eb7a301
+    field: answer
+    source_hash: sha256:ba71586b28241db26e08fd9e5e17653d8c89ed506bd9d97930361d5384ca78be
+    lang: zh-Hant
+    text: 是的。即使在攻擊途中失去【疾馳】，該次攻擊仍會執行。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:d5477091d9e99575e4a1439ba7b094e773f768e511dd29087bc32d572eb7a301
+    field: question
+    source_hash: sha256:7c07917255b74e54138bb2d8bd398187dab7912468c03dff3e60a3464d5e8244
+    lang: zh-Hant
+    text: 這個從者因自身的能力而具有【疾馳】，在進入戰場的回合宣告攻擊。此時，因某種原因使戰場上的卡片變為7張以下而失去【疾馳】時，該次攻擊仍會執行嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:db50ad17aba0be249e4f3abba0e5f8b09dd7aa9238a695fa42ebf5e88e4b2e8f
+    field: answer
+    source_hash: sha256:bbe87e7599e03dcbed41f721552d7e3a800a03e5650c2c6e7d323bd5abf62bfa
+    lang: zh-Hant
+    text: 是指擲1個一般的6面骰子，讓1至6的數字隨機決定。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:db50ad17aba0be249e4f3abba0e5f8b09dd7aa9238a695fa42ebf5e88e4b2e8f
+    field: question
+    source_hash: sha256:d134711333787d77f16f956fc683f9db58f53099b2812049c92bf840608442f4
+    lang: zh-Hant
+    text: 「擲骰子」是什麼意思？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e355c0b498eb23bc93e6b7428a1895a47881b812bc56791d9a31a1791f1a4356
+    field: answer
+    source_hash: sha256:e4f2cdf2676736477aaf8d8d066abdd32535db2480999836b0be71063406d70b
+    lang: zh-Hant
+    text: 不行。只能將自己戰場上的卡片返回手牌。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e355c0b498eb23bc93e6b7428a1895a47881b812bc56791d9a31a1791f1a4356
+    field: question
+    source_hash: sha256:a6b381bd16133800b305fa6d4c5d3d858a3d12087b3e08c80841577223baa135
+    lang: zh-Hant
+    text: 可以將敵方戰場上的卡片返回手牌，作為這個從者的{入場曲}的消費嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e62035f6d243b78cf3c4cbf01424e19a097069fb44d87c04c86dc005537e880a
+    field: answer
+    source_hash: sha256:37b219ff7ad55ef054abbc632fa8a09c6c3960001a425b2138da0b5169bf885c
+    lang: zh-Hant
+    text: 使其以背面朝上返回原本的位置。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e62035f6d243b78cf3c4cbf01424e19a097069fb44d87c04c86dc005537e880a
+    field: question
+    source_hash: sha256:8ec719403f2871c2aca4ce68200a3df421c0c3c0db0bb37017bddc3709d01c50
+    lang: zh-Hant
+    text: 藉由這個從者的能力公開的卡片，在能力結算後，會被放置到哪裡？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:eac9150bb8be89cbefb9d0949e47cddd9f6293fbd74b15eb318858a3ae2cd04b
+    field: answer
+    source_hash: sha256:d1abbf062d2f2659f93ae5b4417d23d87b6c88f64d4a3be559de79214f2ee173
+    lang: zh-Hant
+    text: 不會。不會向敵方公開。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:eac9150bb8be89cbefb9d0949e47cddd9f6293fbd74b15eb318858a3ae2cd04b
+    field: question
+    source_hash: sha256:5df5fe9eb25046019eabd7ad0411c5c6804a0f75ea497572e64853ab1850c341
+    lang: zh-Hant
+    text: 藉由這個護符的{入場曲}能力，放置到自己牌堆頂或牌堆底的卡片，會向敵方公開嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:eb9f770b7999665cbabc150193a70a020a151e6b4329d68323af941b994198f3
+    field: answer
+    source_hash: sha256:12c34672bda8ff69f295e452376fb5fdbf807c748c4a12cd3f606459aacfc6c1
+    lang: zh-Hant
+    text: 是的。消費會-1。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:eb9f770b7999665cbabc150193a70a020a151e6b4329d68323af941b994198f3
+    field: question
+    source_hash: sha256:049ea74c37de657b76cf6872aad14cfea4a22c0d7770ab7ac39aa773669383e9
+    lang: zh-Hant
+    text: 敵方的回合中，自己以Quick使用賽馬娘・法術時，若其為第1張賽馬娘・法術，會因這個從者的能力使消費-1嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:f519ddbd1b9decc9f014f3820919d79c29992bc2bee28d11e883b9696e1847f7
+    field: answer
+    source_hash: sha256:8702a72430c6a1c13341640eed58ed10e8140af428e99c7bbae890f4a06383f3
+    lang: zh-Hant
+    text: 是的。可以從公開的6張卡片中，將任意數量的賽馬娘・從者與任意數量的賽馬娘・護符分別召喚到戰場上。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:f519ddbd1b9decc9f014f3820919d79c29992bc2bee28d11e883b9696e1847f7
+    field: question
+    source_hash: sha256:1a9a6b726f910461fbb917cbda328afcd1db38cc4399eb8285401e8369a2ca1b
+    lang: zh-Hant
+    text: 可以藉由這張法術，同時將賽馬娘・從者與賽馬娘・護符召喚到戰場上嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:fb3d470edb5421a9525cd30bd2e8b20db58f97d0a1a7052d4837cb66c3e40f50
+    field: answer
+    source_hash: sha256:37b219ff7ad55ef054abbc632fa8a09c6c3960001a425b2138da0b5169bf885c
+    lang: zh-Hant
+    text: 使其以背面朝上返回原本的位置。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:fb3d470edb5421a9525cd30bd2e8b20db58f97d0a1a7052d4837cb66c3e40f50
+    field: question
+    source_hash: sha256:8ec719403f2871c2aca4ce68200a3df421c0c3c0db0bb37017bddc3709d01c50
+    lang: zh-Hant
+    text: 藉由這個從者的能力公開的卡片，在能力結算後，會被放置到哪裡？
+    origin: machine
+    low_confidence: true
