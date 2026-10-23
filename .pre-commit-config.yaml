@@ -215,11 +215,11 @@ repos:
         entry: bash -c 'cd sim/web && exec mise exec -- bun x stylelint -- "${@#sim/web/}"' --
         files: ^sim/web/.*\.css$
         stages: [pre-commit, manual]
-      # Bun's TypeScript-Go checker keeps pre-push fast; CI still runs `bun run typecheck` (tsc -b) as the gate.
+      # The same script is CI's type gate.
       - id: web-typecheck
-        name: bun --check (sim/web)
+        name: bun check (sim/web)
         language: system
-        entry: mise exec -- bun run --cwd sim/web typecheck:local
+        entry: mise exec -- bun run --cwd sim/web typecheck
         pass_filenames: false
         files: ^(sim/web/|mise\.toml$|\.pre-commit-config\.yaml$)
         stages: [pre-push]
@@ -234,7 +234,7 @@ repos:
       - id: web-test
         name: vitest (sim/web)
         language: system
-        entry: mise exec -- bun run --cwd sim/web test
+        entry: mise exec -- bun run --cwd sim/web test:all
         pass_filenames: false
         always_run: true
         stages: [manual]

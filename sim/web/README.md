@@ -39,25 +39,26 @@ root and the badge switches roots by hand. Only two derived flags reach browser 
 
 ## Scripts
 
-| Script                    | What it does                                                 |
-| ------------------------- | ------------------------------------------------------------ |
-| `bun run check`           | Everything below, in order; run it before pushing            |
-| `bun run format:check`    | Prettier (`bun run format` rewrites)                         |
-| `bun run lint`            | ESLint (`lint:js`) and Stylelint (`lint:css`)                |
-| `bun run typecheck`       | `tsc -b` with TypeScript 6                                   |
-| `bun run typecheck:local` | Pre-push only, not in `check`: `bun --check` (TypeScript-Go) |
-| `bun run test`            | Vitest, including the ESLint and Stylelint rule fixtures     |
-| `bun run build`           | Production build into `dist/`                                |
-| `bun run shots`           | Manual: real-browser screenshots and geometry (see below)    |
+| Script                 | What it does                                              |
+| ---------------------- | --------------------------------------------------------- |
+| `bun run check:all`    | Everything below, in order; run it before pushing         |
+| `bun run format:check` | `bun fmt --check` (`bun run format` rewrites)             |
+| `bun run lint:all`     | ESLint (`lint:js`) and Stylelint (`lint:css`)             |
+| `bun run typecheck`    | `bun check`, Bun's built-in TypeScript checker            |
+| `bun run test:all`     | Vitest, including the ESLint and Stylelint rule fixtures  |
+| `bun run build:all`    | Production build into `dist/`                             |
+| `bun run shots`        | Manual: real-browser screenshots and geometry (see below) |
 
-`bun test` is Bun's own test runner and ignores the Vitest config. Always use `bun run test`.
+Scripts never take the name of a Bun built-in command (`test`, `build`, `check`, `lint`, `fmt`):
+`bun test` runs Bun's own test runner, which ignores the Vitest config, and a `check` script would
+replace the type checker behind `bun check`. A script that runs a whole group is `<name>:all`.
 
-The pre-commit hooks run Prettier, ESLint and Stylelint on changed files; the pre-push hook checks
-types with `typecheck:local` (under a second), while CI keeps `tsc -b` as the gate. That script caps
-`UV_THREADPOOL_SIZE`, libuv's pool size, which `bun --check` uses as its thread count. Write
-`bun --check`, not `bun check`: the latter runs this package's `check` script. Vitest is a manual
-hook (`pre-commit run --hook-stage manual web-test`); CI runs the whole `bun run check` on every web
-change.
+The pre-commit hooks run bun fmt, ESLint and Stylelint on changed files. bun fmt reads the root
+`bunfig.toml`; `.prettierrc.mjs` only serves the editor's Prettier extension, so change both
+together. The pre-push hook and CI run the same `typecheck` script, which caps
+`UV_THREADPOOL_SIZE`, libuv's pool size, that `bun check` uses as its thread count. Vitest is a
+manual hook (`pre-commit run --hook-stage manual web-test`); CI runs the steps of `check:all` on
+every web change.
 
 ## Theme tokens
 
@@ -273,7 +274,7 @@ the generator that breaks the contract fails the tests, not the pages.
 Unset or empty `SVE_EXPORT_DIR` uses the fixture; unset or empty `SVE_PREVIEW_DIR`
 leaves `/cdn-preview` unconfigured. Non-empty roots must be absolute paths. Local
 paths stay in the Vite server configuration; only the derived preview flag reaches browser code.
-The files are canonical JSON and are excluded from Prettier.
+The files are canonical JSON and are excluded from formatting.
 
 ## Search and the card list
 
@@ -357,10 +358,10 @@ neutral colour and an initial.
 
 ## Dead code
 
-`bun run knip` (part of `bun run check`) reports files, exports, types and dependencies that
+`bun run knip` (part of `bun run check:all`) reports files, exports, types and dependencies that
 nothing uses. Delete what it reports together with the UI that stopped needing it; do not keep
 components or helpers "for later" — they come back from git history when their consumer lands.
-The only configured exceptions are in `knip.json`: the lint rule fixtures (input data, never
+The only configured exceptions are in `knip.jsonc`: the lint rule fixtures (input data, never
 imported) and the font package, which only CSS `@font-face` rules reference. The dependency-only
 PR that added Playwright listed it there too; the screenshot script now imports it, so that entry
 is gone.
@@ -371,7 +372,7 @@ either as a string literal or under a template-literal prefix such as ``t(`nav.$
 
 - **Vitest on the Bun runtime** (Bun 1.4.2, Vitest 5.0.2, jsdom 30.1.1): `bun --bun vitest run`
   cannot start jsdom test files; jsdom throws "addEventListener called on an object that is not a
-  valid instance of EventTarget". Node-environment test files pass. `bun run test` uses Node and
+  valid instance of EventTarget". Node-environment test files pass. `bun run test:all` uses Node and
   passes, so do not add `--bun`.
 - `bun install`, `vite build` (with and without `--bun`), DOM and async Vitest tests on Node: no
   problems found.
@@ -382,7 +383,7 @@ either as a string literal or under a template-literal prefix such as ``t(`nav.$
 ## Screenshots and first-screen geometry
 
 `bun run shots` (`scripts/screenshots/main.ts`) drives a running dev server in headless Chromium
-through Playwright. It is a manual dev tool: not part of `bun run check`, never run in CI, never
+through Playwright. It is a manual dev tool: not part of `bun run check:all`, never run in CI, never
 given synthetic data. It captures the card list and the given card pages for every theme ×
 UI language × width (dark/light × zh-TW/ja/en × 390/820/1180/1440 by default, filterable) and
 writes `report.json` next to the PNGs with the data version, manifest hash, browser, and per shot
@@ -402,7 +403,7 @@ stand in for the maintainer's phone: CJK font size and wrapping are judged on th
 ### Card drawer geometry
 
 `bun run check:drawer -- --base https://127.0.0.1:5793 [--out /tmp/drawer]` is a manual tool like
-`shots`: run by hand against a running dev server with real data, not part of `bun run check` and
+`shots`: run by hand against a running dev server with real data, not part of `bun run check:all` and
 never run in CI, so a local pass is not a CI guarantee. It needs real data with several printings
 of the first card (the printing case) and at least two pages of results (the second-page case). It
 checks what jsdom cannot: the card drawer pushes the frame (main content and the avatar end where

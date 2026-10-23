@@ -89,7 +89,7 @@ class DirectTestTests(unittest.TestCase):
                 "rust",
                 "python3 .github/ci/rust_tests.py llvm-cov --locked --workspace --summary-only",
             ),
-            ("web", "bun run test --maxWorkers=4 --reporter=junit"),
+            ("web", "bun run test:all --maxWorkers=4 --reporter=junit"),
         ):
             steps = cast("list[dict[str, object]]", jobs[job]["steps"])
             test = next(step for step in steps if step.get("id") == "tests")

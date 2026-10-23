@@ -457,7 +457,7 @@ jobs:
           key: bun-${{ runner.os }}-${{ hashFiles('sim/web/bun.lock') }}
       - run: bun install --frozen-lockfile
       - name: Web formatting, lint, types and unused dependencies
-        run: bun run format:check && bun run lint && bun run typecheck && bun run knip
+        run: bun run format:check && bun run lint:all && bun run typecheck && bun run knip
       - name: Vitest
         id: tests
         env:
@@ -468,7 +468,7 @@ jobs:
           mkdir -p "$REPORT_DIR"
           status=0
           start=$SECONDS
-          bun run test --maxWorkers=4 --reporter=junit --outputFile="$REPORT_DIR/junit.xml" \
+          bun run test:all --maxWorkers=4 --reporter=junit --outputFile="$REPORT_DIR/junit.xml" \
             > "$REPORT_DIR/test.log" 2>&1 || status=$?
           echo "$((SECONDS - start))" > "$REPORT_DIR/elapsed.txt"
           echo "vitest exit status: $status (statistics in the next step; raw output stays private)"
@@ -484,7 +484,7 @@ jobs:
           REPORT_DIR: ${{ runner.temp }}/sve-web-reports
         run: rm -rf "$REPORT_DIR"
       - name: Web build
-        run: bun run build
+        run: bun run build:all
       - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.hook-cache.outputs.cache-hit != 'true'
         with:

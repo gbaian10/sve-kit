@@ -297,9 +297,9 @@ interface QueryState {
 | 型別      | TS strict＋額外選項；快照型別與常數表                                                                                                                                                                                                                                                 |
 | Vitest    | `domain/`、`data/`、`settings/` 的單元測試；元件測試只測行為（篩選面板開合與條件按鈕；第一版即時生效，草稿制是 V3 待決方向、尚未實作。鍵盤、卡文渲染、卡圖佔位、路由呈現規則、對話框焦點）；靜態檢查（i18n、token、theme-boot）；假資料可被 reader 載入；契約反例（每個拒絕條件一例） |
 | 腳本      | `knip`（手動）、首屏體積基準（只記錄不設門檻）                                                                                                                                                                                                                                        |
-| 真瀏覽器  | 不在 `bun run check` 內；版面以真瀏覽器在固定裝置尺寸與深淺色下的 DOM 幾何量測驗收（無水平捲動、主要觸控目標尺寸）                                                                                                                                                                    |
+| 真瀏覽器  | 不在 `bun run check:all` 內；版面以真瀏覽器在固定裝置尺寸與深淺色下的 DOM 幾何量測驗收（無水平捲動、主要觸控目標尺寸）                                                                                                                                                                |
 
-`bun run check`（Prettier、ESLint、Stylelint、`tsc -b`、Vitest、build）是合併的最低門檻。
+`bun run check:all`（bun fmt、ESLint、Stylelint、`bun check`、Vitest、knip、build）是合併的最低門檻。
 
 ## 10. 依賴
 

@@ -3,5 +3,6 @@
   "ignore": ["tests/lint-fixtures/**"],
   "ignoreDependencies": ["@fontsource/ibm-plex-sans"],
   "entry": ["bench/driver.ts"],
-  "ignoreBinaries": ["systemd-run"]
+  // knip 6.38 does not know Bun's newer `bun check` and `bun fmt` commands and reads them as binaries.
+  "ignoreBinaries": ["systemd-run", "check", "fmt"],
 }
