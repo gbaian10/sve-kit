@@ -53,6 +53,7 @@ interface Pending {
 
 /** Persistent immutable bytes, with no decoded objects or settled buffers retained in RAM. */
 export class RawBlobStore {
+  persistent = false
   private readonly name: string
   private readonly inflight = new Map<string, Set<Pending>>()
   private readonly base: string
@@ -71,6 +72,7 @@ export class RawBlobStore {
     this.storage = storage
     this.background = background
     this.name = `sve-raw:${encodeURIComponent(base)}`
+    void this.open()
   }
 
   async read(file: RawBlobDescriptor, options: ReadOptions = {}): Promise<Uint8Array> {
@@ -97,8 +99,11 @@ export class RawBlobStore {
   private async open(): Promise<Cache | undefined> {
     try {
       // Reopen after browser/user clearing instead of writing into a detached cache handle.
-      return await this.storage?.open(this.name)
+      const cache = await this.storage?.open(this.name)
+      this.persistent = cache !== undefined
+      return cache
     } catch {
+      this.persistent = false
       return undefined
     }
   }
@@ -121,6 +126,7 @@ export class RawBlobStore {
           else await cache.delete(slot)
         }
       } catch {
+        this.persistent = false
         // Unreadable storage is a miss, not a reason to retain a second copy in RAM.
         try {
           await cache.delete(slot)
@@ -165,6 +171,7 @@ export class RawBlobStore {
       }
       if (this.storage) await trimDataCaches(this.storage, this.base)
     } catch {
+      this.persistent = false
       // Quota or denied storage costs another on-demand read, never an unbounded RAM fallback.
     }
   }

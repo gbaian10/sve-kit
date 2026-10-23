@@ -875,20 +875,7 @@ export class SearchEngine {
       }
       // Restored indexes have no pending phases, so persist only after both closures succeed.
       if (!completed) return
-      await blobs.retainPlan(
-        request.edition,
-        [
-          ...new Set([
-            ...keys.flatMap((key) => {
-              const file = files.get(key)
-              return file ? [file] : []
-            }),
-            ...mediaFiles.values(),
-            ...backgroundFiles,
-          ]),
-        ],
-        manifestHash,
-      )
+      await blobs.retainPlan(files, manifestHash)
       // Written only now: every file passed its checks and this generation is already published.
       await stored.write(
         request.edition,
