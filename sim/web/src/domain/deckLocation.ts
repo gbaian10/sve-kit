@@ -39,7 +39,7 @@ export function orderLocationTokens(tokens: readonly string[]): string[] {
   })
 }
 
-export type BadgeLocation = "evolve" | "advance" | "leader" | "token"
+export type BadgeLocation = "evolve" | "advance" | "leader" | "token" | "ep" | "sep"
 
 /** Badges retain every matching kind, in the filter row's display order. */
 export function deckLocationBadges(

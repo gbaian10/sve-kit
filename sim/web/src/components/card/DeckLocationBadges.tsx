@@ -1,12 +1,14 @@
 import { useTranslation } from "react-i18next"
 
 import advance from "../../assets/card-labels/advance.svg"
+import ep from "../../assets/card-labels/ep.svg"
 import evolve from "../../assets/card-labels/evolve.svg"
 import leader from "../../assets/card-labels/leader.svg"
+import sep from "../../assets/card-labels/sep.svg"
 import token from "../../assets/card-labels/token.svg"
 import type { BadgeLocation } from "../../domain/deckLocation"
 
-const ASSETS = { evolve, advance, leader, token }
+const ASSETS = { evolve, advance, leader, token, ep, sep }
 
 export function DeckLocationBadges({
   locations = [],
