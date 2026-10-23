@@ -24,6 +24,7 @@ Printed Fanfare／Lastword／OnAttack 及 End Begin。Spell 的唯一固有 Orde
 只在這個已驗位置按 Resolution 的有效成本實付一次。Activated 沿用 controller 的非負常值 PP
 與恰好 SourceHolder 的 Acted Posture／Put 送往 owner 墓地，不能套用卡片減費；成本沒有 materials、precondition 或替代。
 Amulet executor、Quick、前置 X、追加／替代成本、一般 trigger、Static 與任意對象 LKI 仍整棵拒絕。
+Quick 的後續准入義務見 [Quick 契約](quick-semantics.md)，本節的已驗範圍不因規格定義而擴張。
 
 載入逐能力驗證 card／face／line、印刷座標唯一、所有 instruction 的來源閉包，以及包含未選模式
 與死分支的 requirement 集合。Fanfare Keyword 例外只接受已驗 instruction source 的精確位置，
