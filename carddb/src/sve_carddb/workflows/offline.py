@@ -57,6 +57,7 @@ from sve_carddb.domains.registry.preview.review_inputs import (
 )
 from sve_carddb.domains.registry.rarity import populate as populate_rarities
 from sve_carddb.domains.registry.records import PrintingData
+from sve_carddb.domains.registry.reprints import load_reprints, populate_reprints
 from sve_carddb.domains.rulings.historical import rebuild as rebuild_rulings
 from sve_carddb.domains.rulings.reader import load as load_rulings
 from sve_carddb.domains.rulings.storage import PROFILE as RULING_PROFILE
@@ -517,6 +518,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
     context = BuildContext.from_inputs(inputs.revision, configuration)
     badges = load_badges(authored_root(inputs.repo))
     leader_frames = load_leader_frames(authored_root(inputs.repo))
+    reprints = load_reprints(authored_root(inputs.repo))
     flavor = load_flavor(authored_root(inputs.repo))
     qa_translations = load_qa(authored_root(inputs.repo))
     configuration["qa_translations"] = digest(
@@ -583,6 +585,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             )
             missing_badges = populate_badges(db, badges)
             populate_leader_frames(db, leader_frames)
+            populate_reprints(db, reprints)
             if names is not None:
                 replay = _current_names(adoptions, context, stores, db, name_sources)
                 assert replay is not None

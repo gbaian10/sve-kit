@@ -15,6 +15,7 @@ from sve_carddb.domains.products.identity_models import IdentityShard
 from sve_carddb.domains.products.models import Shard as ProductShard
 from sve_carddb.domains.registry.badges import BadgeOverrides
 from sve_carddb.domains.registry.leader_frames import LeaderFrames
+from sve_carddb.domains.registry.reprints import Reprints
 from sve_carddb.domains.registry.storage import read_base_files, read_yaml
 from sve_carddb.domains.translations.flavor import Shard as FlavorShard
 from sve_carddb.domains.translations.four_layer_authored import Shard
@@ -46,6 +47,7 @@ CASES = (
     (CropOverrides, "images/crops.yaml", None),
     (BadgeOverrides, "catalog/rarity-badges.yaml", None),
     (LeaderFrames, "catalog/leader-name-frames.yaml", None),
+    (Reprints, "catalog/reprints.yaml", None),
     (KeywordRegistry, "rules/keyword-registry.yaml", None),
 )
 

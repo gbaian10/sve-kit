@@ -39,6 +39,8 @@ export interface Printing {
   readonly variant: "standard" | "alt" | "signed"
   readonly rarity: string | null
   readonly premium?: boolean
+  /** A registered reprint printing; unregistered printings carry null on the wire. */
+  readonly reprint?: boolean
   readonly product: string
   readonly stamp?: string
   /** Image state for the front face; back faces reuse it. */

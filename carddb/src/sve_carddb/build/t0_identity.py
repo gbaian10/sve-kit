@@ -329,6 +329,7 @@ TABLES = (
             Column(
                 "leader_name_frame", Kind.TEXT, nullable=True, choices=("gold", "white")
             ),
+            Column("reprint", Kind.BOOL, nullable=True),
             Column("rarity_raw", Kind.TEXT),
             Column("premium", Kind.BOOL, nullable=True),
             Column("serial_total", Kind.UINT, nullable=True),

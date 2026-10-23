@@ -39,7 +39,7 @@ reader 編譯具型別 accessor，詳情分片保留 tuples＋ID→row 索引；
 | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `card` | `id, layout, identity_state, home_set_id, faces:[face_id], regions:[RegionView]` | 每卡一格、各區預設入口、發行/對照狀態 |
 | `face` | `id, card_id, ordinal, side, current:[{region,revision_id,basis}], wording:[WordingView]` | 雙面切換，兩面算同一實物 |
-| `printing` | `id, card_id, region, card_no, card_no_state, catalog_state, listing_confidence?, review_level, reference_urls:[url], variant_key, rarity_code?, rarity_badge?, rarity_raw, premium?, serial_total?, int_id, decklog_available, decklog_verification:unverified/verified, decklog_source_url?, decklog_checked_on?, faces:[PrintingFace], leader_name_frame:gold/white?` | 每版次一格、版本區、分享碼解碼、圖像定位 |
+| `printing` | `id, card_id, region, card_no, card_no_state, catalog_state, listing_confidence?, review_level, reference_urls:[url], variant_key, rarity_code?, rarity_badge?, rarity_raw, premium?, serial_total?, int_id, decklog_available, decklog_verification:unverified/verified, decklog_source_url?, decklog_checked_on?, faces:[PrintingFace], leader_name_frame:gold/white?, reprint?` | 每版次一格、版本區、分享碼解碼、圖像定位 |
 | `product_family` | `id, code, public_code, kind, name_unit_id, translations:[FieldTranslation]` | /sets 與 set 搜尋 |
 | `product` | `id, family_ids:[ID], region, product_code?, name_unit_id, product_type?, released_on?, date_precision, date_raw?, translations:[FieldTranslation]` | 單卡頁補充的商品名稱與日期 |
 | `printing_product` | `printing_id, product_id, available_on?, date_precision?, date_raw?, inclusion_kind, note_unit_id?, first_inclusion_state` | 複合 `PK(printing_id,product_id)`；單卡頁列出 PR／再錄收錄；初收錄（首次／再錄）篩選 |
@@ -180,6 +180,14 @@ Token 為父項，子項依序為有資料的從者／法術／護符／紋章�
 父項全選全部 Token，子項部分選取時父項半選；`type=token:spell` 等子項同時要求 Token 標記及指定類型。
 `type=token` 表示同一面的 `special_kinds` 含 `token`，標籤取 `vocabulary(kind=special_kind,code=token)`；
 不新增 type_code。與其他類型取聯集，例如從者加 Token 包含全部從者及全部 Token，重疊版次只計一次。
+候選 4.0.0 依 §4 與 snapshot-contract 同步修訂 Schema、golden 與 reader，不另升版。
+
+### 再錄版次
+
+`printing.reprint` 是 required nullable 布林欄，位於 printing/bootstrap tuple 尾端（`leader_name_frame` 之後）：
+`true` 表示該版次已登錄為再錄版次，`null` 表示未登錄；沒有 `false`，未登錄不代表已確認不是再錄。
+此欄只描述版次本身，與 `printing_product.first_inclusion_state`（商品收錄的首次／再錄）分開，不由卡號前綴推導。
+查卡的「不顯示再錄卡」開關在版次層過濾 `reprint=true` 的版次；卡頁仍列出全部版次，「同一張卡只顯示一次」時不作用。
 候選 4.0.0 依 §4 與 snapshot-contract 同步修訂 Schema、golden 與 reader，不另升版。
 
 ### 2.1 獨立影像清單與 DSL 附件

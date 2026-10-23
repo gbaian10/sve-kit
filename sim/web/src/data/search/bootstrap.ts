@@ -41,6 +41,7 @@ const FIELDS: Readonly<Record<string, readonly string[]>> = {
     "premium",
     "rarity_badge",
     "leader_name_frame",
+    "reprint",
     "faces",
     "variant_key",
   ],

@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 SCALARS = {
     "card": "id,layout,identity_state,home_set_id",
     "face": "id,card_id,ordinal,side",
-    "printing": "id,card_id,region,card_no,card_no_state,catalog_state,listing_confidence,variant_key,rarity_code,leader_name_frame,rarity_raw,premium,serial_total,decklog_available,decklog_verification,decklog_checked_on",
+    "printing": "id,card_id,region,card_no,card_no_state,catalog_state,listing_confidence,variant_key,rarity_code,leader_name_frame,reprint,rarity_raw,premium,serial_total,decklog_available,decklog_verification,decklog_checked_on",
     "product_family": "id,code,public_code,kind,name_unit_id",
     "product": "id,family_id,region,product_code,name_unit_id,product_type,released_on,date_precision,date_raw",
     "printing_product": "printing_id,product_id,inclusion_kind,note_unit_id",

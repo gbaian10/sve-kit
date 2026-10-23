@@ -233,7 +233,7 @@ printing/detail 與現行／暫顯 face_revision/detail 的 `base={file:FileRef,
 
 | fragment／巢狀型別 | columns（依序） |
 | --- | --- |
-| printing/bootstrap | id, card_id, region, card_no, card_no_state, catalog_state, listing_confidence, review_level, reference_urls, variant_key, rarity_code, rarity_badge, rarity_raw, premium, serial_total, int_id, decklog_available, decklog_verification, decklog_source_url, decklog_checked_on, faces, leader_name_frame |
+| printing/bootstrap | id, card_id, region, card_no, card_no_state, catalog_state, listing_confidence, review_level, reference_urls, variant_key, rarity_code, rarity_badge, rarity_raw, premium, serial_total, int_id, decklog_available, decklog_verification, decklog_source_url, decklog_checked_on, faces, leader_name_frame, reprint |
 | PrintingFaceBootstrap | face_id, art_id, frame_code, signed, embellishment_state, stamps |
 | printing/detail | row_index, faces |
 | PrintingFaceDetail | face_ordinal, printed_name_unit_id, printed_effect_unit_id, flavor_unit_id, printed_text_state, observations, sections, translations, corrections, name_concept_id |

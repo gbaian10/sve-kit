@@ -92,6 +92,11 @@ def baseline(tmp_path_factory: pytest.TempPathFactory) -> VocabularyCase:
     )
     install(
         case.case.root,
+        "catalog/reprints.yaml",
+        {"format": 1, "kind": "printing_reprints", "records": []},
+    )
+    install(
+        case.case.root,
         "catalog/rarity-badges.yaml",
         {"format": 1, "kind": "printing_rarity_badges", "records": []},
     )
