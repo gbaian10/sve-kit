@@ -190,7 +190,7 @@ export function CardsPage() {
     }
     if (openCardParam === null) {
       updateEntry({ pages, listScroll: listScroll.current, scrollY: window.scrollY })
-      setParams(next, { state, preventScrollReset })
+      setParams(next, { state: { ...state, listId: newListId() }, preventScrollReset })
       return
     }
     const listed: ListEntryState = { ...state, listId: newListId() }
@@ -351,14 +351,21 @@ export function CardsPage() {
     },
     [],
   )
-  // Back from a card page mounts the list again: once its pages and scroll are back, focus returns
-  // to the cell that opened the card. Rows render around the scroll position, so wait for the cell.
+  // A pages write replaces the router key, so a return follows the list's stable id.
+  // Rows render around the restored scroll position; wait until the target cell exists.
+  const returnEntryId = entry.listId ?? location.key
   const returnTo = useRef({
-    key: location.key,
+    id: returnEntryId,
+    query: positionQuery,
     anchor: navigationType === NavigationType.Pop ? entry.anchor : undefined,
   })
   useLayoutEffect(() => {
-    if (returnTo.current.key !== location.key) returnTo.current.anchor = undefined
+    if (
+      returnTo.current.id !== returnEntryId ||
+      returnTo.current.query !== positionQuery ||
+      openCard !== null
+    )
+      returnTo.current.anchor = undefined
     if (!page || pageLoading) return
     if (restoreScroll.current !== undefined) {
       window.scrollTo(0, restoreScroll.current)
@@ -381,7 +388,16 @@ export function CardsPage() {
     return () => {
       cancelAnimationFrame(frame)
     }
-  }, [page, pageLoading, positionQuery, location.key, imageRoot, flashCell])
+  }, [
+    page,
+    pageLoading,
+    positionQuery,
+    location.key,
+    returnEntryId,
+    openCard,
+    imageRoot,
+    flashCell,
+  ])
   const cellOf = useMemo(() => createCellReader(nameOf), [nameOf])
   const cells: GridCell[] = useMemo(
     () =>
