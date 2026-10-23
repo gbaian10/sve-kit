@@ -295,6 +295,7 @@ describe("CardsPage", () => {
     const scrollTo = vi.spyOn(window, "scrollTo").mockImplementation(() => undefined)
     const { router } = await open()
     await expectCount(27)
+    const count = screen.getByText("個版次")
     // The first render's scroll reset is the router's; only what a condition change does counts.
     scrollTo.mockClear()
     const results = document.querySelector<HTMLElement>("[data-results]")
@@ -306,12 +307,17 @@ describe("CardsPage", () => {
     // The skeleton replaces the grid, but not its height, and the toggle keeps focus.
     expect(results.style.minHeight).toBe("1234px")
     expect(type).toHaveFocus()
+    expect(count).toBeInTheDocument()
+    expect(count).toHaveTextContent("27 個版次")
+    expect(count.parentElement).toHaveAttribute("aria-busy", "true")
     await waitFor(() => {
       expect(screen.getByText("個版次")).not.toHaveTextContent("27 個版次")
     })
     await waitFor(() => {
       expect(results.style.minHeight).toBe("")
     })
+    expect(screen.getByText("個版次")).toBe(count)
+    expect(count.parentElement).toHaveAttribute("aria-busy", "false")
     expect(scrollTo).not.toHaveBeenCalled()
     // Returning restores the saved window position as before.
     await act(() => router.navigate(-1))
@@ -354,14 +360,27 @@ describe("CardsPage", () => {
   it("lists the snapshot and keeps the class filter in the URL", async () => {
     const { router } = await open()
     const user = userEvent.setup()
+    const filter = screen.getByRole("button", { name: "篩選" })
+    await user.click(filter)
+    expect(filter).not.toHaveClass("bg-accent")
     expect(
       screen.getAllByRole("link").filter((a) => a.hasAttribute("data-result-key")).length,
     ).toBeGreaterThan(20)
     await user.click(screen.getByRole("button", { name: "主教" }))
     expect(router.state.location.search).toBe("?class=bishop")
     expect(screen.getByRole("button", { name: "主教" })).toHaveAttribute("aria-pressed", "true")
+    expect(filter).toHaveClass("bg-accent")
+    expect(
+      document.getElementById(filter.getAttribute("aria-describedby") ?? ""),
+    ).toHaveTextContent("已啟用 1 個篩選條件")
     await user.click(screen.getByRole("button", { name: "中立" }))
     expect(router.state.location.search).toBe("?class=bishop%2Cneutral")
+    expect(
+      document.getElementById(filter.getAttribute("aria-describedby") ?? ""),
+    ).toHaveTextContent("已啟用 1 個篩選條件")
+    await user.click(screen.getByRole("button", { name: "清除" }))
+    expect(filter).not.toHaveClass("bg-accent")
+    expect(filter).not.toHaveAttribute("aria-describedby")
   })
 
   it("suggests while typing, names the matched field and opens with the keyboard", async () => {
@@ -534,7 +553,7 @@ describe("CardsPage", () => {
       const panel = document.getElementById(button.getAttribute("aria-controls") ?? "")
       expect(panel).not.toBeNull()
       expect(panel).not.toBeVisible()
-      // The class row stays outside the panel, visible while collapsed, and the badge leaves it out.
+      // The class row stays outside the panel and its active condition counts while collapsed.
       const classRow = screen.getByRole("group", { name: "職業" })
       expect(classRow).toBeVisible()
       expect(panel).not.toContainElement(classRow)
@@ -543,6 +562,10 @@ describe("CardsPage", () => {
         "true",
       )
       expect(button).toHaveTextContent("篩選")
+      expect(button).toHaveClass("bg-accent")
+      expect(
+        document.getElementById(button.getAttribute("aria-describedby") ?? ""),
+      ).toHaveTextContent("已啟用 1 個篩選條件")
       await userEvent.click(button)
       expect(button).toHaveAttribute("aria-expanded", "true")
       expect(panel).toBeVisible()

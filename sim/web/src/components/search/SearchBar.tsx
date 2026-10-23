@@ -42,6 +42,7 @@ export function SearchBar({
   summary,
 }: SearchBarProps) {
   const { t } = useTranslation()
+  const filtersActive = filtersOpen || (filterCount ?? 0) > 0
   return (
     <div className="flex flex-wrap items-center gap-2">
       <div className="relative flex h-11 min-w-0 flex-1 items-center">
@@ -124,7 +125,7 @@ export function SearchBar({
           onClick={onToggleFilters}
           className={cn(
             "flex h-11 shrink-0 items-center justify-center gap-2 rounded-button border px-3 text-13 font-semibold whitespace-nowrap",
-            filtersOpen
+            filtersActive
               ? "border-accent bg-accent text-accent-ink hover:brightness-105"
               : "border-border bg-surface-1 text-text-1 hover:bg-surface-2",
           )}
@@ -148,7 +149,7 @@ export function SearchBar({
               aria-hidden="true"
               className={cn(
                 "flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-11 font-bold tabular-nums",
-                filtersOpen ? "bg-accent-ink text-accent" : "bg-accent text-accent-ink",
+                filtersActive ? "bg-accent-ink text-accent" : "bg-accent text-accent-ink",
               )}
             >
               {filterCount}

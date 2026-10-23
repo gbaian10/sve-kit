@@ -74,9 +74,9 @@ export const DEFAULT_QUERY: QueryState = {
 }
 
 /** Number of filter facets set beyond the text, for the filter button's badge. */
-// The class row is always on screen, so the filter button's badge leaves classes out.
 export function activeFilterCount(state: QueryState): number {
   return (
+    (state.classes.length > 0 ? 1 : 0) +
     (state.cost.length > 0 ? 1 : 0) +
     (state.attack.length > 0 ? 1 : 0) +
     (state.defense.length > 0 ? 1 : 0) +

@@ -487,15 +487,26 @@ export function CardsPage() {
     ? { ...query, sets: query.sets.filter((item) => item !== set.code) }
     : query
   const filterCount = activeFilterCount(countedConditions)
-  const hasConditions =
-    countedConditions.text !== "" || countedConditions.classes.length > 0 || filterCount > 0
+  const hasConditions = countedConditions.text !== "" || filterCount > 0
   const panelOpen = prefs.filterPanelOpen
+  const countScope = JSON.stringify([readiness.root, readiness.manifestHash, edition, query.unit])
+  const [lastCount, setLastCount] = useState({ scope: countScope, total: page?.total ?? null })
+  // Keep the count through a new query, but never carry it into another dataset or result unit.
+  if (lastCount.scope !== countScope || (page !== null && lastCount.total !== page.total)) {
+    setLastCount({ scope: countScope, total: page?.total ?? null })
+  }
+  const total =
+    page?.total ?? (lastCount.scope === countScope && !queryError ? lastCount.total : null)
   const resultCount =
-    page !== null ? (
-      <div className="min-w-0 text-right text-13 text-text-2" aria-live="polite">
+    total !== null ? (
+      <div
+        className="shrink-0 text-right text-13 whitespace-nowrap text-text-2"
+        aria-live="polite"
+        aria-busy={page === null}
+      >
         <p>
-          <b className="font-semibold text-text-1 tabular-nums">
-            {new Intl.NumberFormat(uiLanguage).format(page.total)}
+          <b className="inline-block min-w-14 font-semibold text-text-1 tabular-nums">
+            {new Intl.NumberFormat(uiLanguage).format(total)}
           </b>{" "}
           {query.unit === "printing"
             ? t("results.countPrintingUnit")

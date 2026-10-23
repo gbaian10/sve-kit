@@ -128,13 +128,13 @@ describe("query codec", () => {
       activeFilterCount({
         ...DEFAULT_QUERY,
         text: "x",
-        classes: ["elf"],
+        classes: ["elf", "bishop"],
         cost: [1],
         attack: [2],
         altArtOnly: true,
         unit: "art",
       }),
-    ).toBe(4)
+    ).toBe(5)
     expect(
       activeFilterCount({
         ...DEFAULT_QUERY,

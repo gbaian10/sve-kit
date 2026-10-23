@@ -30,14 +30,14 @@ function Harness() {
   )
 }
 
-it("shows the filter label and reflects its open state with the accent style", async () => {
+it("keeps active conditions accented when the panel is collapsed", async () => {
   await renderInRouter(<Harness />)
   const button = screen.getByRole("button", { name: "篩選" })
 
   expect(button).toHaveTextContent("篩選")
   expect(button).toHaveAttribute("aria-expanded", "false")
   expect(button).toHaveAttribute("aria-controls", "filter-panel")
-  expect(button).toHaveClass("bg-surface-1", "border-border")
+  expect(button).toHaveClass("bg-accent", "text-accent-ink", "border-accent")
   expect(document.getElementById(button.getAttribute("aria-describedby") ?? "")).toHaveTextContent(
     "已啟用 3 個篩選條件",
   )
@@ -45,7 +45,7 @@ it("shows the filter label and reflects its open state with the accent style", a
   const badge = within(button).getByText("3")
   expect(badge).toHaveAttribute("aria-hidden", "true")
   expect(badge).not.toHaveClass("absolute")
-  expect(badge).toHaveClass("rounded-full", "bg-accent", "text-accent-ink")
+  expect(badge).toHaveClass("rounded-full", "bg-accent-ink", "text-accent")
 
   await userEvent.click(button)
   expect(button).toHaveAttribute("aria-expanded", "true")
@@ -55,8 +55,8 @@ it("shows the filter label and reflects its open state with the accent style", a
 
   await userEvent.click(button)
   expect(button).toHaveAttribute("aria-expanded", "false")
-  expect(button).toHaveClass("bg-surface-1", "border-border")
-  expect(badge).toHaveClass("bg-accent", "text-accent-ink")
+  expect(button).toHaveClass("bg-accent", "text-accent-ink", "border-accent")
+  expect(badge).toHaveClass("bg-accent-ink", "text-accent")
 })
 
 it.each([
