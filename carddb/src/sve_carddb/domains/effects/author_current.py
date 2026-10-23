@@ -71,6 +71,18 @@ class CardAccepted:
             "card_no": self.record.record_key,
             "source_version": self.source_version,
             "source_payload": parse(self.source_payload),
+            "sidecar": [
+                {
+                    "path": list(item.path),
+                    "source_proof": item.source_proof,
+                    "input_hash": item.input_hash,
+                    "source_input_hash": item.source_input_hash,
+                    "source_use": item.current_source.model_dump(mode="json")
+                    if item.current_source is not None
+                    else None,
+                }
+                for item in self.candidate.sidecar
+            ],
         }
 
 
@@ -518,6 +530,7 @@ class CurrentAuthorSources:
         result = expander.expand_contexts(
             canonical(tree), (file.raw for file in inputs.body_files), contexts
         )
+        checked_uses = {}
         for path, ability in ability_nodes(result.tree):
             use = SourceUse.model_validate_json(
                 canonical(array(ability["sources"])[0]), strict=True
@@ -526,6 +539,7 @@ class CurrentAuthorSources:
                 entry_payload(contexts[path], use.ability_scope)
             ):
                 raise ExpansionError("source_head_payload_mismatch", path, use)
+            checked_uses[path] = use
         evidence = []
         for item in result.sidecar:
             checked = replace(
@@ -533,6 +547,7 @@ class CurrentAuthorSources:
                 input_hash=input_hash,
                 source_input_hash="sha256:"
                 + contexts[item.path].binding.source.source_hash,
+                current_source=checked_uses[item.path],
             )
             object.__setattr__(checked, "source_proof", "current_source_checked")  # ruff: ignore[unnecessary-dunder-call] -- only the complete current boundary grants this proof
             evidence.append(checked)

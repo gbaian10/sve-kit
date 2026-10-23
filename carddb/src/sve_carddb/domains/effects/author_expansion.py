@@ -77,6 +77,7 @@ class ExpansionEvidence:
         "none", "derived_self_consistent", "current_source_checked"
     ] = field(default="none", init=False)
     source_input_hash: str | None = None
+    current_source: SourceUse | None = None
 
 
 @dataclass(frozen=True)
