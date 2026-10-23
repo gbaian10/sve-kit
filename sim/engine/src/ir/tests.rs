@@ -50,6 +50,7 @@ fn card(body: Program, number: &str) -> Located<CardProgram> {
     Located {
         source: source(number),
         node: CardProgram {
+            card_play_costs: vec![],
             abilities: vec![Located {
                 source: source(number),
                 node: Ability {

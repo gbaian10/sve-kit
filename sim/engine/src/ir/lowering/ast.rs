@@ -44,6 +44,7 @@ pub(super) struct Ability {
     pub evolve: Option<Evolution>,
     pub activate: Option<Activate>,
     pub spell: Option<Body>,
+    pub play: Option<PlayCosts>,
 }
 
 #[derive(Deserialize)]
@@ -573,4 +574,72 @@ pub(super) struct EntrySubject {
 pub(super) enum Follower {
     #[serde(rename = "follower")]
     Follower,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct PlayCosts {
+    pub cost_delta: Option<Value>,
+    pub cost_set: Option<Value>,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum CostCondition {
+    All(Vec<Self>),
+    Any(Vec<Self>),
+    Not(Box<Self>),
+    Cmp(CostComparison),
+    Exists(PublicQuery),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct CostComparison {
+    pub left: PublicNumber,
+    pub op: Comparison,
+    pub right: i64,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum Comparison {
+    Eq,
+    Ne,
+    Lt,
+    Le,
+    Gt,
+    Ge,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum PublicNumber {
+    Literal(i64),
+    Count { count: PublicQuery },
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct PublicQuery {
+    pub who: Side,
+    pub zone: PublicZone,
+    pub kind: Option<SearchKind>,
+    pub r#trait: Option<String>,
+    pub name: Option<String>,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum PublicZone {
+    Field,
+    Cemetery,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct ConditionalChange {
+    pub r#if: CostCondition,
+    pub delta: Option<i64>,
+    pub set: Option<i64>,
 }

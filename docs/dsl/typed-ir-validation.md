@@ -401,6 +401,12 @@ trigger、declarations 以及已接受的授予能力。只提供不可變 `card
 的子 body 包裝成封閉 `WellFormedProgram`。能力、effect 定義 ID 與 scope 全樹唯一；
 各能力的環境互相隔離，不能從其他能力讀 binding／receipt。
 
+`card_play_costs` 也完整遍歷來源座標；每 face 至多一筆非空 `FacePlayCost`，
+每筆至多一個 set 宣告，連恆假分支也計入。delta 必須是非正常值，set 必須是非負常值。
+條件在獨立入口檢查，不繼承任何能力的 binding、target、capture 或 receipt；
+卡表 face、來源閉包與純公開條件的執行白名單由整卡 loader 另驗。
+承載及拒絕規則見[打出費用契約 §4](play-cost-semantics.md#4-最小內部承載與-lowering)。
+
 Ability 明示 scope。Spell／Activated 需要 play 與 body，Triggered 需要 trigger 與 body，
 Static 不得有 play 或 body；非 Static 不接受 declarations。UnionBurst 尚未驗證。
 本文 scope 必須等於能力 scope；指示與 declaration 的 AbilitySource 須與所屬能力相同。

@@ -119,7 +119,7 @@ impl Game {
                     .ok_or_else(|| invalid("invalid additional PP"))
             })?;
             return self
-                .internal_effective_cost(id)?
+                .internal_installed_play_cost(id, scalar(&self.face(id)?["cost"]))?
                 .checked_add(additional)
                 .map(|cost| cost.max(0))
                 .ok_or_else(|| invalid("play cost overflow"));

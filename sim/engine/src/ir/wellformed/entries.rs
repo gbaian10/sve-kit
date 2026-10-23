@@ -1,5 +1,4 @@
 use super::{BindingKind, CaptureTime, Checked, Checker, WellFormedError, WellFormedReason};
-use crate::ir::LimitSpec;
 use crate::ir::OncePerEvent;
 use crate::ir::{
     Ability, AbilityKind, AbilityQualification, Capture, CardProgram, Cardinality,
@@ -17,13 +16,14 @@ use crate::ir::{
     ActionPattern, EventRewrite, PermissionSubject, ProposedEventPattern, ReplacementScope,
     Selector,
 };
+use crate::ir::{CostChange, Int, LimitSpec};
 use alloc::collections::BTreeSet;
 
 /// An immutable card whose entire accepted ability tree passed structural checking.
 /// This does not grant capability support or permission to execute.
 /// ```compile_fail
 /// use sve_engine::ir::{CardProgram, WellFormedCardProgram};
-/// let unchecked = WellFormedCardProgram { card: CardProgram { abilities: vec![] } };
+/// let unchecked = WellFormedCardProgram { card: CardProgram { abilities: vec![], card_play_costs: vec![] } };
 /// ```
 /// ```compile_fail
 /// use sve_engine::ir::WellFormedCardProgram;
@@ -39,6 +39,47 @@ impl WellFormedCardProgram {
     /// # Errors
     /// Returns the first invalid or unsupported shape.
     pub fn check(card: CardProgram) -> Result<Self, WellFormedError> {
+        let mut faces = BTreeSet::new();
+        for (index, face) in card.card_play_costs.iter().enumerate() {
+            let mut checker = Checker::new(ScopeId(0));
+            checker.at(&format!("card_play_costs/{index}"), |checker| {
+                checker.located(face, |checker, face| {
+                    if face.face.0.is_empty()
+                        || face.modifiers.is_empty()
+                        || !faces.insert(face.face.0.clone())
+                    {
+                        return Err(checker.error(WellFormedReason::InvalidEntry));
+                    }
+                    let mut has_set = false;
+                    for (modifier_index, modifier) in face.modifiers.iter().enumerate() {
+                        checker.at(&format!("modifiers/{modifier_index}"), |checker| {
+                            checker.located(modifier, |checker, modifier| {
+                                match &modifier.change {
+                                    CostChange::Delta {
+                                        amount: Expr::Literal(Int(amount)),
+                                    } if *amount <= 0 => {}
+                                    CostChange::Set {
+                                        amount: Expr::Literal(Int(amount)),
+                                    } if *amount >= 0 && !has_set => {
+                                        has_set = true;
+                                    }
+                                    CostChange::Delta { .. } | CostChange::Set { .. } => {
+                                        return checker.reject();
+                                    }
+                                }
+                                if let Some(condition) = &modifier.condition {
+                                    checker.at("condition", |checker| {
+                                        checker.isolated(|checker| checker.boolean(condition))
+                                    })?;
+                                }
+                                Ok(())
+                            })
+                        })?;
+                    }
+                    Ok(())
+                })
+            })?;
+        }
         let mut checker = Checker::new(ScopeId(0));
         for (index, ability) in card.abilities.iter().enumerate() {
             checker.at(&format!("abilities/{index}"), |checker| {

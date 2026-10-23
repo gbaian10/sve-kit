@@ -434,3 +434,49 @@ fn assert_play_distribution(ability: &Ability) {
         matches!(instruction.action, Action::Damage { amount: DamageAmount::Allocation { binding: actual }, .. } if actual == *binding)
     );
 }
+
+#[test]
+#[expect(
+    clippy::default_numeric_fallback,
+    reason = "Synthetic author JSON contains literal cost amounts."
+)]
+fn own_play_costs_preserve_explicit_intervals_and_reject_payment_shapes() {
+    let mut tree = expanded::tree().clone();
+    let mut entry = tree["cards"]["BP08-038"]["abilities"][0].clone();
+    entry.as_object_mut().unwrap().remove("fanfare");
+    let count = json!({"count":{"who":"self","zone":"cemetery","kind":"spell"}});
+    let threshold = |op, right| json!({"cmp":{"left":count,"op":op,"right":right}});
+    entry["play"] = json!({"cost_delta":[
+        {"if":threshold("ge",15),"delta":-9},
+        {"if":{"all":[threshold("ge",10),threshold("lt",15)]},"delta":-6},
+        {"if":{"all":[threshold("ge",5),threshold("lt",10)]},"delta":-3},-1,-1],"cost_set":7});
+    let meta = tree["cards"]["BP08-038"]["meta"].clone();
+    tree["cards"] = json!({"synthetic":{"meta":meta,"abilities":[entry]}});
+    let lowerer = ExpandedLowerer::new().unwrap();
+    let cards = lowerer.lower(&tree).unwrap();
+    let card = cards["synthetic"].card();
+    assert_eq!(card.abilities, []);
+    assert_eq!(card.card_play_costs[0].node.modifiers.len(), 6);
+    assert!(
+        card.card_play_costs[0].node.modifiers[1]
+            .source
+            .author_path
+            .ends_with("/play/cost_delta/1")
+    );
+    let located = Located {
+        source: source("synthetic"),
+        node: card.clone(),
+    };
+    let requirements = Requirements::derive(&located);
+    assert!(requirements.required.iter().any(|r| {
+        r.capability.code == "card.play-cost"
+            && r.locations
+                .iter()
+                .all(|location| location.ir_path.contains("card_play_costs"))
+    }));
+    tree["cards"]["synthetic"]["abilities"][0]["play"]["optional_cost"] = json!({"pp":1});
+    assert_eq!(
+        lowerer.lower(&tree).unwrap_err().path,
+        "/cards/synthetic/abilities/0"
+    );
+}

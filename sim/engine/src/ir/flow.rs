@@ -254,7 +254,24 @@ tags!(ReceiptReason {
     Exhausted
 });
 
-record!(CardProgram { abilities: Vec<Located<Ability>> });
+record!(CardProgram { abilities: Vec<Located<Ability>>, card_play_costs: Vec<Located<FacePlayCost>> });
+/// Own-card payment replacements, separate from printed abilities.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct FacePlayCost {
+    /// Printed face to which these replacements belong.
+    pub face: FaceId,
+    /// Independent replacements, retaining each author coordinate.
+    pub modifiers: Vec<Located<PlayCostModifier>>,
+}
+record!(PlayCostModifier { condition: Option<Expr<Bool>>, change: super::CostChange });
+
+impl Walk for FacePlayCost {
+    fn walk(&self, visitor: &mut Visitor, path: &str) {
+        visitor.require("card.play-cost", path);
+        self.face.walk(visitor, &format!("{path}/face"));
+        self.modifiers.walk(visitor, &format!("{path}/modifiers"));
+    }
+}
 variants!(CostSpec { Ordered { steps: Vec<CostStep> } => [], Alternative { alternatives: Vec<CostSpec> } => [] });
 
 /// Typed reference to one instruction result; lowering proves its defining instruction.

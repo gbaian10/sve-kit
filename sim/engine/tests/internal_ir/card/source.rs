@@ -179,6 +179,7 @@ fn source_information_requires_whole_ability_proof_and_rejects_forged_lki() {
         };
     }
     WellFormedCardProgram::check(CardProgram {
+        card_play_costs: vec![],
         abilities: vec![forged],
     })
     .unwrap_err();
@@ -197,6 +198,7 @@ fn source_information_requires_whole_ability_proof_and_rejects_forged_lki() {
             },
         })];
         WellFormedCardProgram::check(CardProgram {
+            card_play_costs: vec![],
             abilities: vec![role],
         })
     };

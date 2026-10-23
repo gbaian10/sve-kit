@@ -1,6 +1,7 @@
 //! Candidate-only lowering of C0's expanded tree, without source or runtime admission.
 
 mod ast;
+mod costs;
 mod evolution;
 mod numeric;
 mod ordering;
@@ -120,9 +121,14 @@ impl ExpandedLowerer {
                     .ok_or_else(|| unsupported(&path))?,
             };
             let mut abilities = Vec::new();
+            let mut modifiers = Vec::new();
             for (index, value) in card.abilities.into_iter().enumerate() {
                 let path = format!("{path}/abilities/{index}");
-                let ability = decode(value, &path)?;
+                let ability: ast::Ability = decode(value, &path)?;
+                if let Some(play) = &ability.play {
+                    costs::lower(&key, &path, &ability, play, &mut allocator, &mut modifiers)?;
+                    continue;
+                }
                 let scope = u64::try_from(index)
                     .ok()
                     .and_then(|index| index.checked_mul(3))
@@ -136,8 +142,30 @@ impl ExpandedLowerer {
                     printed_costs.get(&key).copied(),
                 )?);
             }
-            let checked = WellFormedCardProgram::check(CardProgram { abilities })
-                .map_err(|_private| error("ill_formed", &path))?;
+            let checked = WellFormedCardProgram::check(CardProgram {
+                abilities,
+                card_play_costs: modifiers
+                    .first()
+                    .map(|first| first.source.clone())
+                    .map_or_else(Vec::new, |source| {
+                        vec![Located {
+                            source,
+                            node: super::FacePlayCost {
+                                face: FaceId("base".into()),
+                                modifiers,
+                            },
+                        }]
+                    }),
+            })
+            .map_err(|failure| {
+                error(
+                    "ill_formed",
+                    failure
+                        .source
+                        .as_ref()
+                        .map_or(path.as_str(), |source| source.author_path.as_str()),
+                )
+            })?;
             cards.insert(key, checked);
         }
         Ok(cards)

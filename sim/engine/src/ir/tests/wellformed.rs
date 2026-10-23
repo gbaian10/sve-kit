@@ -959,3 +959,47 @@ fn operands_require_a_dominating_definition() {
 }
 
 mod decisions;
+
+#[test]
+fn card_play_costs_check_their_own_entry_and_keep_rejection_sources() {
+    let change = |amount| Located {
+        source: source("synthetic"),
+        node: PlayCostModifier {
+            condition: None,
+            change: CostChange::Set {
+                amount: Expr::Literal(Int(amount)),
+            },
+        },
+    };
+    let mut seed = CardProgram {
+        abilities: vec![],
+        card_play_costs: vec![Located {
+            source: source("synthetic"),
+            node: FacePlayCost {
+                face: FaceId("base".into()),
+                modifiers: vec![change(7)],
+            },
+        }],
+    };
+    WellFormedCardProgram::check(seed.clone()).unwrap();
+    let mut second = change(3);
+    second.source.author_path = "/play/cost_set/1".into();
+    second.node.condition = Some(Expr::Literal(Bool(false)));
+    seed.card_play_costs[0].node.modifiers.push(second.clone());
+    let failure = WellFormedCardProgram::check(seed.clone()).unwrap_err();
+    assert_eq!(failure.source.as_deref(), Some(&second.source));
+    seed.card_play_costs[0].node.modifiers.pop();
+    seed.card_play_costs[0].node.modifiers[0].node.condition =
+        Some(Expr::Frozen(Box::new(BoolFrozen::PaymentComplete {
+            receipt: PaymentReference::Local {
+                receipt: ReceiptReference::new(ReceiptId(1)),
+            },
+        })));
+    let receipt_failure = WellFormedCardProgram::check(seed).unwrap_err();
+    assert_eq!(receipt_failure.reason, WellFormedReason::UnavailableReceipt);
+    assert!(
+        receipt_failure
+            .ir_path
+            .contains("card_play_costs/0/modifiers/0/condition")
+    );
+}
