@@ -44,7 +44,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
     reason = "Fanfare has its own authority producer and continuation."
 )]
 impl Game {
-    pub(super) fn play_internal_follower(
+    pub(super) fn play_internal_field_card(
         &mut self,
         holder: &str,
         actor: PlayerId,
@@ -57,8 +57,8 @@ impl Game {
             controller: actor,
         };
         self.check_card_play_holder(holder, actor)?;
-        if self.object_type(holder)? != "フォロワー" {
-            return Err(unsupported("fanfare card play holder"));
+        if !matches!(self.object_type(holder)?, "フォロワー" | "アミュレット") {
+            return Err(unsupported("ordinary field card play holder"));
         }
         let mut execution = self.new_card_execution(context)?;
         let decision = json!({"do":"play","card":holder,"by":seat,"at":"main"});

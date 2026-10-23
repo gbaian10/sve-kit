@@ -31,6 +31,9 @@ mod evolution;
 #[path = "card/entry.rs"]
 mod entry;
 
+#[path = "card/amulet.rs"]
+mod amulet;
+
 fn locate_steps(steps: &mut [Located<Node>], span: &SourceSpan, origin: &AbilitySource) {
     for step in steps {
         step.source = span.clone();
@@ -477,12 +480,9 @@ fn empty_loaded_card_cannot_be_silently_omitted_from_digest() {
 }
 
 #[test]
-fn silenced_or_nonfollower_holder_is_not_activated() {
+fn silenced_or_nonfield_card_holder_is_not_activated() {
     for seat in [1, 2] {
-        for state in [
-            json!({"silenced":true}),
-            json!({"card_type":"アミュレット"}),
-        ] {
+        for state in [json!({"silenced":true}), json!({"card_type":"スペル"})] {
             let program = card(vec![ability(1, vec![draw(1, 0)])]);
             let mut game = position_with_state(seat, &program, &state);
             let before = exact_authority(&game);

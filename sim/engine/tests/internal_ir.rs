@@ -198,7 +198,7 @@ fn catalog() -> Arc<Catalog> {
 }
 fn catalog_with_cost(cost: &Value) -> Arc<Catalog> {
     let snapshot = [("unit-spell", "スペル"), ("unit-follower", "フォロワー"), ("unit-amulet", "アミュレット")].iter().map(|(number, kind)| {
-        json!({"number":number,"faces":[{"name":number,"card_class":"ニュートラル","card_type":kind,"cost":cost,"power":"2","hp":"3","traits":[],"text":null,"sections":[]}]}).to_string()
+        json!({"number":number,"faces":[{"name":number,"card_class":"ニュートラル","card_type":kind,"cost":cost,"power":if *kind=="アミュレット" {"-"}else{"2"},"hp":if *kind=="アミュレット" {"-"}else{"3"},"traits":[],"text":null,"sections":[]}]}).to_string()
     }).collect::<Vec<_>>().join("\n");
     let registry = json!({"format":1,"kind":"keyword_registry","keywords":{}}).to_string();
     let document = json!({"format":1,"kind":"effect_set","cards":{

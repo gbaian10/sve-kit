@@ -68,13 +68,17 @@ fn report_candidates(candidate: &Value, snapshot: &str) -> BTreeMap<String, Valu
 #[test]
 fn author_fixture_admission_report() {
     let snapshot = read_to_string(var_os("SVE_TEST_SNAPSHOT").unwrap()).unwrap();
-    let reports = report_candidates(fanfare::expanded::candidate(true), &snapshot);
+    let mut candidate = fanfare::expanded::candidate(true).clone();
+    // A synthetic candidate also exercises an unsupported printed amulet shape.
+    candidate["tree"]["cards"]["BP16-U06"] = candidate["tree"]["cards"]["BP01-041"].clone();
+    let reports = report_candidates(&candidate, &snapshot);
     assert_eq!(reports["BP03-002"]["runtime"]["status"], "supported");
     assert_eq!(reports["SD03-005"]["runtime"]["status"], "supported");
-    assert_eq!(reports["BP01-041"]["runtime"]["status"], "rejected");
+    assert_eq!(reports["BP01-041"]["runtime"]["status"], "supported");
+    assert_eq!(reports["BP16-U06"]["runtime"]["status"], "rejected");
     assert_eq!(
-        reports["BP01-041"]["runtime"]["reason"],
-        "unsupported: internal D1 does not support activated printed face is not a follower"
+        reports["BP16-U06"]["runtime"]["reason"],
+        "unsupported: internal D1 does not support amulet with printed combat statistics"
     );
     for report in reports.values() {
         assert_eq!(report["status"], "rejected");

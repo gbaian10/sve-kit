@@ -213,7 +213,7 @@ pub struct Progress {
 /// First-slice physical facts, sharing the prototype mutation and causal pipeline.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Fact {
-    /// A card has completed all intrinsic costs and, for followers, the capacity check.
+    /// A card has completed intrinsic costs and, for field cards, the capacity check.
     CardPlayed {
         /// Authority producer for this card play.
         execution: ExecutionId,
