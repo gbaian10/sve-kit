@@ -456,57 +456,78 @@ describe("opening a card beside the results", () => {
     { leave: "back closes it, and again after forward", how: "back" },
     { leave: "it turns into its page first", how: "page" },
     { leave: "the view changes beside it first", how: "view" },
-  ])("keeps pages loaded beside the card when $leave", async ({ how }) => {
-    const { router } = await open("/cards?q=bp01", "panel")
-    const user = userEvent.setup()
-    const [first] = await cells()
-    if (!first) throw new Error("missing cell")
-    await user.click(first)
-    await within(panel()).findByRole("heading", { name: "試作見習兵" }, { timeout: 5000 })
-    if (how === "view") await user.click(screen.getByRole("radio", { name: "表格" }))
-    // What loading another page beside the card does: the card's own entry and the list's note.
-    const loadBeside = async (pages: number) => {
-      const { pathname, search } = router.state.location
-      const state = router.state.location.state as ListEntryState
-      const listId = state.overlay?.listId
-      if (listId === undefined) throw new Error("missing list id")
-      keepPagesBeside(listId, pages)
-      await act(() =>
-        router.navigate(pathname + search, { replace: true, state: { ...state, pages } }),
-      )
-    }
-    const list = how === "view" ? "?q=bp01&view=table" : "?q=bp01"
-    await loadBeside(2)
-    if (how === "page") {
-      act(() => {
-        prefsStore.set({ cardOpenMode: "page" })
-      })
+  ])(
+    "keeps pages loaded beside the card when $leave",
+    async ({ how }) => {
+      const { router } = await open("/cards?q=bp01", "panel")
+      const user = userEvent.setup()
+      const [first] = await cells()
+      if (!first) throw new Error("missing cell")
+      await user.click(first)
+      await within(panel()).findByRole("heading", { name: "試作見習兵" }, { timeout: 5000 })
+      if (how === "view") await user.click(screen.getByRole("radio", { name: "表格" }))
+      // What loading another page beside the card does: the card's own entry and the list's note.
+      const loadBeside = async (pages: number) => {
+        const { pathname, search } = router.state.location
+        const state = router.state.location.state as ListEntryState
+        const listId = state.overlay?.listId
+        if (listId === undefined) throw new Error("missing list id")
+        keepPagesBeside(listId, pages)
+        await act(() =>
+          router.navigate(pathname + search, { replace: true, state: { ...state, pages } }),
+        )
+      }
+      const list = how === "view" ? "?q=bp01&view=table" : "?q=bp01"
+      await loadBeside(2)
+      if (how === "page") {
+        act(() => {
+          prefsStore.set({ cardOpenMode: "page" })
+        })
+        await waitFor(() => {
+          expect(router.state.location.pathname).toContain("/cards/BP01-001")
+        })
+      }
+      await act(() => router.navigate(-1))
       await waitFor(() => {
-        expect(router.state.location.pathname).toContain("/cards/BP01-001")
+        expect(router.state.location).toMatchObject({ search: list, state: { pages: 2 } })
       })
-    }
-    await act(() => router.navigate(-1))
-    await waitFor(() => {
-      expect(router.state.location).toMatchObject({ search: list, state: { pages: 2 } })
-    })
-    if (how === "page") {
+      if (how === "page") {
+        await waitFor(() => {
+          expect(cellLink("p:bp01-001")).toHaveFocus()
+          expect(cellLink("p:bp01-001")).toHaveClass("ring-text-1")
+        })
+      }
+      if (how === "view") {
+        await act(() => router.navigate(1))
+        await within(panel()).findByRole("heading", { name: "試作見習兵" }, { timeout: 5000 })
+        act(() => {
+          prefsStore.set({ cardOpenMode: "page" })
+        })
+        await waitFor(() => {
+          expect(router.state.location.pathname).toContain("/cards/BP01-001/")
+        })
+        await act(() => router.navigate(-1))
+        await waitFor(
+          () => {
+            expect(cellLink("p:bp01-001")).toHaveFocus()
+          },
+          { timeout: 5000 },
+        )
+      }
+      if (how !== "back") return
+      // Writing the pages back replaces the list's entry; forward to the card still finds it.
+      await act(() => router.navigate(1))
       await waitFor(() => {
-        expect(cellLink("p:bp01-001")).toHaveFocus()
-        expect(cellLink("p:bp01-001")).toHaveClass("ring-text-1")
+        expect(new URLSearchParams(router.state.location.search).get("card")).toBe("BP01-001")
       })
-    }
-    if (how !== "back") return
-    // Writing the pages back replaces the list's entry; forward to the card still finds it.
-    await act(() => router.navigate(1))
-    await waitFor(() => {
-      expect(new URLSearchParams(router.state.location.search).get("card")).toBe("BP01-001")
-    })
-    await loadBeside(3)
-    await act(() => router.navigate(-1))
-    await waitFor(() => {
-      expect(router.state.location).toMatchObject({ search: list, state: { pages: 3 } })
-    })
-  })
+      await loadBeside(3)
+      await act(() => router.navigate(-1))
+      await waitFor(() => {
+        expect(router.state.location).toMatchObject({ search: list, state: { pages: 3 } })
+      })
+    },
+    15_000,
+  )
 })
 
 describe("opening a card over the results", () => {

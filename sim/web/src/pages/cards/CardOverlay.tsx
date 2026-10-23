@@ -217,6 +217,7 @@ export function useCardOverlay({
       )
     const state: ListEntryState = {
       ...list,
+      anchor: key,
       pages,
       listScroll: listScroll.current,
       scrollY: window.scrollY,
