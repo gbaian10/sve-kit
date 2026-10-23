@@ -4,6 +4,10 @@
 不宣稱 executor 或正式來源准入已完成。作者語法仍以 `dsl/` 為權威；不變更公開 program、
 capability、最低版本或 body hash recipe。
 
+本文件的無付款第一版界線不變；後續單一材料換常值修正依
+[付款交換契約](play-payment-exchange.md)，其首批範圍取代下列對該子集的概括拒絕。
+executor 是否支援仍須另驗，不因規格已補足就跳過准入。
+
 依據為[日文 CR 1.28.0（2026-09-28）](https://shadowverse-evolve.com/wordpress/wp-content/uploads/2026/09/28121513/ShadowverseEVOLVE_cr_1.28.0_260928.pdf)，
 核對日 2026-10-23。以下條號均指該版。第一版的限制是支援界線，不是遊戲規則禁止。
 
