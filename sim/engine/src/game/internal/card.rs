@@ -12,7 +12,7 @@ use crate::ir::{
     QuantityUnit, Resource, ResourceOperation, RuleId, RuntimeAbilitySource, Selector, SourceSpan,
     StepwiseMode, WellFormedCardProgram, ZoneKind,
 };
-use crate::ir::{EventPattern, TriggerCondition, TurnId};
+use crate::ir::{ConsumptionPoint, EventPattern, LimitSpec, ModeUse, TriggerCondition, TurnId};
 use crate::{Result, invalid};
 use alloc::collections::{BTreeMap, BTreeSet};
 use core::{mem::take, result, slice};
@@ -60,7 +60,8 @@ pub(in crate::game) struct CardRuntime {
     cards: BTreeMap<String, WellFormedCardProgram>,
     instances: BTreeMap<(String, u64, String, usize, AbilityId), AbilityInstanceId>,
     links: BTreeMap<(u64, u64, u64, u64), AssociationId>,
-    quotas: BTreeMap<AbilityInstanceId, TurnId>,
+    quotas: BTreeMap<(AbilityInstanceId, ConsumptionPoint), (TurnId, u64)>,
+    mode_uses: Vec<ModeUse>,
     admission: Option<triggers::Admission>,
     next_instance: u64,
     pub(in crate::game) checkpoint: Option<ExecutionId>,
@@ -74,6 +75,37 @@ pub(in crate::game) struct CardRuntime {
 }
 
 impl CardRuntime {
+    fn quota_available(&self, instance: AbilityInstanceId, turn: TurnId, limit: LimitSpec) -> bool {
+        self.quotas
+            .get(&(instance, limit.consume_at))
+            .is_none_or(|(used_turn, used)| *used_turn != turn || *used < limit.maximum.0)
+    }
+
+    fn consume_quota(
+        &mut self,
+        instance: AbilityInstanceId,
+        turn: TurnId,
+        limit: LimitSpec,
+    ) -> Result<()> {
+        if !self.quota_available(instance, turn, limit) {
+            return Err(crate::EngineFailure::IllegalPlay(
+                "ability quota exhausted".into(),
+            ));
+        }
+        let entry = self
+            .quotas
+            .entry((instance, limit.consume_at))
+            .or_insert((turn, 0));
+        if entry.0 != turn {
+            *entry = (turn, 0);
+        }
+        entry.1 = entry
+            .1
+            .checked_add(1)
+            .ok_or_else(|| invalid("ability quota overflow"))?;
+        Ok(())
+    }
+
     pub(in crate::game::internal) fn terminate(&mut self) {
         self.pending.clear();
         self.admission = None;
@@ -186,10 +218,7 @@ impl Game {
                 ));
             }
             if ability.kind == AbilityKind::Activated
-                && !matches!(
-                    printed["card_type"].as_str(),
-                    Some("フォロワー" | "アミュレット")
-                )
+                && !printed["card_type"].as_str().is_some_and(activation_type)
             {
                 return Err(unsupported(
                     "activated printed face is not an ordinary field card",
@@ -300,32 +329,24 @@ impl Game {
     ) -> Result<CardPlay> {
         let object = self.object(holder)?.clone();
         let ability = self
-            .card_runtime
-            .cards
-            .get(&object.card)
-            .and_then(|card| {
-                card.card()
-                    .abilities
-                    .iter()
-                    .find(|a| a.node.id == definition)
-            })
-            .cloned()
-            .ok_or_else(|| invalid("ability is not loaded for this holder"))?;
+            .internal_printed_abilities(holder)?
+            .into_iter()
+            .find(|ability| ability.node.id == definition)
+            .ok_or_else(|| invalid("ability is not effective for this holder"))?;
         let seat = seat_name(actor)?;
         if ability.node.kind != AbilityKind::Activated
             || object.zone != "field"
             || object.controller != seat
             || !self.internal_play_timing(actor, is_printed_quick(&ability.node))
             || object.state["silenced"] == true
-            || object.state["evolved_with"].is_string()
-            || !matches!(self.object_type(holder)?, "フォロワー" | "アミュレット")
+            || !activation_type(self.object_type(holder)?)
             || (is_printed_quick(&ability.node) && self.object_type(holder)? != "フォロワー")
             || !self.prepared.is_empty()
         {
             return Err(unsupported("activation holder, controller or timing"));
         }
         let (face, _) = printed_origin(&ability.node.source.origin)?;
-        if face_ordinal(face)? != usize::try_from(int(&object.state["face"])).map_err(invalid)? {
+        if face_ordinal(face)? != self.internal_effective_print(holder)?.1 {
             return Err(invalid("printed ability belongs to another face"));
         }
         let context = Context {
@@ -337,6 +358,17 @@ impl Game {
         // Even unselected cards must have an admitted whole tree before they can intervene.
         self.check_internal_cards()?;
         let source = self.internal_card_source(holder, definition, actor)?;
+        if let Some(limit) = ability.node.play.as_ref().and_then(|play| play.limit)
+            && !self.card_runtime.quota_available(
+                source.instance,
+                TurnId(self.state.schedule.current()?),
+                limit,
+            )
+        {
+            return Err(crate::EngineFailure::IllegalPlay(
+                "activated ability quota exhausted".into(),
+            ));
+        }
         self.start_internal_ability(ability.node, context, source, false)
     }
 
@@ -471,6 +503,11 @@ fn check_printed_face(printed: &serde_json::Value) -> Result<()> {
         return Err(unsupported("amulet with printed combat statistics"));
     }
     Ok(())
+}
+
+// Evolved forms carry their own printed definitions; token and advance rules are not represented.
+fn activation_type(kind: &str) -> bool {
+    matches!(kind, "フォロワー" | "フォロワー・エボルヴ" | "アミュレット")
 }
 
 fn check_header(ability: &Ability) -> Result<()> {

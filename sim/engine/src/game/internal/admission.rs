@@ -185,6 +185,7 @@ fn play_requirement(code: &str) -> bool {
             | "shape.ChoiceDomain.Modes"
             | "shape.ModeDecisionKind.PlayParameter"
             | "internal.ModeChoiceKind.ChoiceKeyword"
+            | "internal.ModeExclusion.CurrentTurnAbilityInstance"
     )
 }
 

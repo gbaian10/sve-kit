@@ -256,6 +256,7 @@ impl Checker {
         {
             return Err(self.error(WellFormedReason::InvalidEntry));
         }
+        self.play_header(ability)?;
         if ability.qualification != AbilityQualification::Ordinary {
             return self.reject();
         }
@@ -322,6 +323,35 @@ impl Checker {
             self.at(&format!("declarations/{index}"), |checker| {
                 checker.effect(effect, &ability.active_zones)
             })?;
+        }
+        Ok(())
+    }
+
+    fn play_header(&self, ability: &Ability) -> Checked {
+        if ability
+            .play
+            .as_ref()
+            .and_then(|play| play.limit)
+            .is_some_and(|limit| {
+                ability.kind != AbilityKind::Activated
+                    || !matches!(ability.source.origin, AbilityOrigin::Printed { .. })
+                    || ability.active_zones != [ZoneKind::Field]
+                    || !limit.is_activated()
+            })
+        {
+            return self.reject();
+        }
+        if let Some(body) = &ability.body {
+            let count = super::modes::play_mode_groups(body);
+            if count > 1
+                || (count > 0
+                    && ability
+                        .play
+                        .as_ref()
+                        .is_some_and(|play| !play.parameters.is_empty()))
+            {
+                return self.reject();
+            }
         }
         Ok(())
     }

@@ -130,6 +130,12 @@ materials／receipt 不隱含 join。Optional 的「付不付」、alternative �
 其他成本保守拒絕。Cost 不得帶可略過指示的 precondition。Ordered 的材料／receipt
 只對後續成本及 on_paid 可見，付款 receipt 在所有成本檢查完才公開。
 
+`PlaySpec.limit` 只有 Printed Activated、`active_zones=[Field]` 可帶 Some，
+且只收 maximum=1／2、Turn、AbilityInstance、PlayCommitted 的精確組合；
+Spell、Triggered 及內嵌 Action::PlayCard 的 PlaySpec 不得帶起動額度。
+None 明示無起動限次；觸發額度仍只在 TriggerSpec.limit，不改 Duration.usage。
+細節見[選擇擴充與起動限次 §4.2](choice-limit-semantics.md#42-良構與准入)。
+
 PlaySpec.costs 接受同一 CostSpec 檢查。`K.pay PlayParameter` 僅可放在有 play 入口的
 root body 前綴，on_paid 必須為空；打出付款在結算開始前完成，付款結果可供其後的
 AtResolution capture 與結算本文判斷，capture 之後不能再出現打出付款。這個位置是
@@ -524,7 +530,10 @@ Fixed、多個 IfNonempty、空 roles、重複 remainder 明確拒絕。BP21-PR1
 
 ChoiceKeyword 只可放在有 play 入口的能力 body 頂層或 Sequence；If、Repeat、EachPlayer、
 EachObject、May、pay on_paid 與其他模式分支內不接受。ResolutionAlternative 是結算時
-exact 1。所有模式 ID 依印刷順序與 domain 完全一致，不能重複；exclude_used 尚未接受。
+exact 1。所有模式 ID 依印刷順序與 domain 完全一致，不能重複。
+每個能力至多一組 ChoiceKeyword，且不與根 PlaySpec.parameters 並存；
+exclude_used 只接受 play 入口的頂層 ChoiceKeyword、controller、Public、count 常值 1 與
+基數 1..1 的 CurrentTurnAbilityInstance。ResolutionAlternative、巢狀模式或其他 count 拒絕。
 
 Mode.count 是上限的權威。常值 count 先依 CR5.18.2.3 clamp 到模式數，domain 基數須一致；
 可為 exact、1..上限；只有上限涵蓋全部模式時才接受 0..上限，承載「好きな数」，
@@ -535,6 +544,8 @@ lowering 必須拒絕此類原文，不能誤降成「まで」而期待 checker
 只能用於模式數，不能出現在一般本文或 capture。BP02-045／BP02-088 是種子；通用 instead
 仍無 typed 節點。`ModeDecision::accepts_answer` 驗已求值的 count、模式 ID 與基數，count=0
 不執行，不能從此推定所選模式的付款或目標在 runtime 合法。
+上述「好きな数」是既有 IR 良構形狀；D1 首批 executor 仍依
+[模式數契約 §2.1](choice-limit-semantics.md#21-模式數與不足)拒絕該形狀，不因良構通過取得准入。
 
 Draw／Look 的 UpToStepwise 明示 decision ID、actor、visibility 與 timing。ID 全樹唯一，
 actor 為抽牌者／觀看者，visibility 為 Only 該玩家，choice-free context 拒絕。

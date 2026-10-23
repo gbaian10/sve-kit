@@ -239,7 +239,7 @@ impl Allocator {
             context.number(value, path, &mut BTreeSet::new())?;
         }
         context.allocator = Self::default();
-        let choice = matches!(body.steps.as_slice(), [ast::Step::Choice(_)]);
+        let choice = play::choice_body(body, path)?;
         context.targets(&body.targets, choice, path)?;
         let program = context.body(body, &format!("{path}/{head}"), &source, &ability_source)?;
         let (kind, mut play, trigger) = if entry.spell.is_some() {
@@ -258,7 +258,10 @@ impl Allocator {
                 None,
             )
         } else if let Some(activated) = &entry.activate {
-            if body.per_turn.is_some() {
+            if body
+                .per_turn
+                .is_some_and(|maximum| !matches!(maximum, 1 | 2))
+            {
                 return Err(unsupported(path));
             }
             (
@@ -282,6 +285,11 @@ impl Allocator {
         };
         if let Some(play) = &mut play {
             play.parameters = context.parameters;
+            if entry.activate.is_some() {
+                play.limit = body
+                    .per_turn
+                    .map(|maximum| super::LimitSpec::activated_per_turn(Nat(maximum)));
+            }
         }
         Ok(Located {
             source,
@@ -490,10 +498,8 @@ impl BodyContext<'_> {
         let mut steps = Vec::new();
         for (index, step) in author_steps.iter().enumerate() {
             let step_path = format!("{path}/{index}");
+            // The ability entry admits one top-level group; mode bodies reject nested choices.
             if let ast::Step::Choice(choice) = step {
-                if author_steps.len() != 1 {
-                    return Err(unsupported(&step_path));
-                }
                 steps.push(self.choice(choice, &step_path, source, ability_source)?);
                 continue;
             }

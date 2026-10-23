@@ -432,7 +432,6 @@ fn choice_keyword_precedes_targets_and_only_selected_modes_need_current_targets(
     );
     let program = card(vec![a]);
     let mut game = position(&program, "hand", 0);
-    let origin = game.clone();
     let modes = awaiting(game.play_internal_card("s", PlayerId { seat: 1 }).unwrap());
     assert!(matches!(
         modes.domain,
@@ -441,9 +440,9 @@ fn choice_keyword_precedes_targets_and_only_selected_modes_need_current_targets(
     let mut absent = game.clone();
     assert!(matches!(
         absent.answer_internal_card(modes.actor, modes.token, Answer::Modes(vec![ModeId(1)])),
-        Err(sve_engine::EngineFailure::IllegalPlay(_))
+        Err(sve_engine::EngineFailure::Invalid(_))
     ));
-    transactions::assert_restored(&absent, &origin);
+    transactions::assert_restored(&absent, &game);
     let result = resolved(
         game.answer_internal_card(modes.actor, modes.token, Answer::Modes(vec![ModeId(2)]))
             .unwrap(),
@@ -858,4 +857,306 @@ fn stable_trait_target_retains_selection_after_paid_departure_and_runs_independe
     assert_eq!(view["P1"]["hand"], json!(["d"]));
     assert_eq!(view["P1"]["cemetery"], json!(["s"]));
     assert_eq!(view["objects"]["nonmatch"]["hp"], 3);
+}
+
+fn literal_choice(exact: bool, excluded: bool, targets: bool) -> Located<Node> {
+    node(Node::Control {
+        control: Control::Mode {
+            modes: vec![
+                Mode {
+                    id: ModeId(1),
+                    parameters: if targets {
+                        vec![target(10, 2, 1, 1)]
+                    } else {
+                        vec![]
+                    },
+                    body: body(2, vec![draw(1, 0)]),
+                },
+                Mode {
+                    id: ModeId(2),
+                    parameters: vec![],
+                    body: body(3, vec![draw(2, 0)]),
+                },
+            ],
+            count: Expr::Literal(Nat(if excluded { 1 } else { 2 })),
+            chosen: ModeDecision {
+                id: DecisionId(20),
+                actor: PlayerRef::Controller {},
+                domain: ChoiceDomain::Modes {
+                    modes: vec![ModeId(1), ModeId(2)],
+                    cardinality: Cardinality {
+                        minimum: Nat(if exact && !excluded { 2 } else { 1 }),
+                        maximum: Some(Nat(if excluded { 1 } else { 2 })),
+                    },
+                    binding: Binding::new(20, ScopeId(1)),
+                    exclude_used: excluded.then_some(ModeExclusion::CurrentTurnAbilityInstance),
+                },
+                kind: ModeDecisionKind::PlayParameter {
+                    play_scope: ExecutionRef::Current {},
+                    input: InputMode::Inline,
+                },
+                visibility: Visibility::Public {},
+            },
+            choice_kind: ModeChoiceKind::ChoiceKeyword,
+        },
+    })
+}
+
+#[test]
+fn upto_modes_filter_targets_validate_answers_and_resolve_in_printed_order() {
+    let mut mode = literal_choice(false, false, false);
+    if let Node::Control {
+        control: Control::Mode { modes, .. },
+    } = &mut mode.node
+    {
+        modes[0].body.steps = vec![draw(1, 1)];
+        modes[1].body.steps = vec![draw(2, 1)];
+    }
+    let program = card(vec![spell(vec![mode])]);
+    let mut game = position(&program, "hand", 0);
+    let question = awaiting(game.play_internal_card("s", PlayerId { seat: 1 }).unwrap());
+    let before = game.clone();
+    assert!(matches!(
+        game.answer_internal_card(question.actor, question.token, Answer::Modes(vec![])),
+        Err(sve_engine::EngineFailure::Invalid(_))
+    ));
+    assert!(matches!(
+        game.answer_internal_card(
+            question.actor,
+            question.token,
+            Answer::Modes(vec![ModeId(1), ModeId(1)])
+        ),
+        Err(sve_engine::EngineFailure::Invalid(_))
+    ));
+    transactions::assert_restored(&game, &before);
+    let mut one = game.clone();
+    let result = resolved(
+        one.answer_internal_card(
+            question.actor,
+            question.token,
+            Answer::Modes(vec![ModeId(2)]),
+        )
+        .unwrap(),
+    );
+    assert!(result.progress.receipts.contains_key(&ReceiptId(2)));
+    assert!(!result.progress.receipts.contains_key(&ReceiptId(1)));
+    let result = resolved(
+        game.answer_internal_card(
+            question.actor,
+            question.token,
+            Answer::Modes(vec![ModeId(2), ModeId(1)]),
+        )
+        .unwrap(),
+    );
+    cards(&result.progress, 1, 1, 1);
+    cards(&result.progress, 2, 1, 0);
+    let mut limited = position(
+        &card(vec![spell(vec![literal_choice(false, false, true)])]),
+        "hand",
+        0,
+    );
+    let question = awaiting(
+        limited
+            .play_internal_card("s", PlayerId { seat: 1 })
+            .unwrap(),
+    );
+    assert!(
+        matches!(&question.domain, InputDomain::Modes { modes, .. } if *modes == vec![ModeId(2)])
+    );
+    resolved(
+        limited
+            .answer_internal_card(
+                question.actor,
+                question.token,
+                Answer::Modes(vec![ModeId(2)]),
+            )
+            .unwrap(),
+    );
+    let mut exact = position(
+        &card(vec![spell(vec![literal_choice(true, false, true)])]),
+        "hand",
+        0,
+    );
+    let before = exact.clone();
+    assert!(matches!(
+        exact.play_internal_card("s", PlayerId { seat: 1 }),
+        Err(sve_engine::EngineFailure::IllegalPlay(_))
+    ));
+    transactions::assert_restored(&exact, &before);
+    assert_unadmitted_modes();
+}
+
+fn assert_unadmitted_modes() {
+    let mut arbitrary = literal_choice(false, false, false);
+    if let Node::Control {
+        control: Control::Mode { chosen, .. },
+    } = &mut arbitrary.node
+        && let ChoiceDomain::Modes { cardinality, .. } = &mut chosen.domain
+    {
+        cardinality.minimum = Nat(0);
+    }
+    let arbitrary = card(vec![spell(vec![arbitrary])]);
+    let mut rejected = game(1, 1);
+    assert!(
+        matches!(
+            rejected.load_internal_card("unit-spell", &arbitrary),
+            Err(sve_engine::EngineFailure::Unsupported(_))
+        ),
+        "Any-number modes have no D1 admission"
+    );
+    let mut quick = ability(1, vec![literal_choice(true, true, false)]);
+    quick.node.source.origin = AbilityOrigin::Keyword {
+        keyword: KeywordId::Quick,
+        origin: Box::new(quick.node.source.origin.clone()),
+    };
+    locate_steps(
+        &mut quick.node.body.as_mut().unwrap().steps,
+        &quick.source,
+        &quick.node.source,
+    );
+    let mut allowed = quick.clone();
+    if let Node::Control {
+        control: Control::Mode { chosen, .. },
+    } = &mut allowed.node.body.as_mut().unwrap().steps[0].node
+        && let ChoiceDomain::Modes { exclude_used, .. } = &mut chosen.domain
+    {
+        *exclude_used = None;
+    }
+    rejected
+        .clone()
+        .load_internal_card("unit-follower", &card(vec![allowed]))
+        .unwrap();
+    assert!(
+        matches!(
+            rejected.load_internal_card("unit-follower", &card(vec![quick])),
+            Err(sve_engine::EngineFailure::Unsupported(_))
+        ),
+        "Quick history exclusion needs a separate preflight proof"
+    );
+}
+
+pub(super) fn next_turn(game: &mut Game) {
+    game.internal_rule_action(&json!({"do":"end-phase"}))
+        .unwrap();
+    quick::pass(game);
+    game.internal_rule_action(&json!({"do":"end-discard","select":[]}))
+        .unwrap();
+}
+
+#[expect(clippy::panic, reason = "The fixture must retain its mode group.")]
+fn excluded_position() -> Game {
+    let mut initial = setup(
+        1,
+        json!([{"id":"d1","card":"unit-spell"},{"id":"d2","card":"unit-spell"}]),
+    );
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P1"]["zones"]["field"] =
+        json!([{"id":"s","card":"unit-follower"},{"id":"u","card":"unit-follower"}]);
+    initial["players"]["P2"]["zones"]["deck"] =
+        json!([{"id":"o1","card":"unit-spell"},{"id":"o2","card":"unit-spell"}]);
+    let mode = literal_choice(true, true, false);
+    let mut a = payment::paid_ability(vec![payment::pp(1)], vec![mode]);
+    let Node::Control {
+        control: Control::Mode { modes, .. },
+    } = &mut a.node.body.as_mut().unwrap().steps[0].node
+    else {
+        panic!("mode");
+    };
+    modes[0].body.steps = vec![node(Node::Control {
+        control: Control::If {
+            condition: Expr::Literal(Bool(false)),
+            then_body: body(4, vec![draw(3, 1)]),
+            else_body: None,
+        },
+    })];
+    locate_steps(
+        &mut a.node.body.as_mut().unwrap().steps,
+        &a.source,
+        &a.node.source,
+    );
+    let program = card(vec![a]);
+    initial["players"]["P1"]["pp"] = json!({"current":0,"max":4});
+    let mut failed = Game::new(
+        catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "mode-history",
+    )
+    .unwrap();
+    failed
+        .load_internal_card("unit-follower", &program)
+        .unwrap();
+    failed
+        .load_internal_card("unit-spell", &card(vec![]))
+        .unwrap();
+    failed
+}
+
+#[test]
+fn excluded_modes_commit_only_on_play_and_are_scoped_to_instance_and_turn() {
+    let mut failed = excluded_position();
+    let before = failed.clone();
+    assert!(matches!(
+        failed.activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 }),
+        Err(sve_engine::EngineFailure::IllegalPlay(_))
+    ));
+    transactions::assert_restored(&failed, &before);
+    next_turn(&mut failed);
+    next_turn(&mut failed);
+    let q = awaiting(
+        failed
+            .activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
+            .unwrap(),
+    );
+    let first = resolved(
+        failed
+            .answer_internal_card(q.actor, q.token, Answer::Modes(vec![ModeId(1)]))
+            .unwrap(),
+    );
+    failed.resume_internal_card().unwrap();
+    let q = awaiting(
+        failed
+            .activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
+            .unwrap(),
+    );
+    assert!(matches!(&q.domain, InputDomain::Modes { modes, .. } if *modes == vec![ModeId(2)]));
+    assert!(matches!(
+        failed.answer_internal_card(q.actor, q.token, Answer::Modes(vec![ModeId(1)])),
+        Err(sve_engine::EngineFailure::Invalid(_))
+    ));
+    resolved(
+        failed
+            .answer_internal_card(q.actor, q.token, Answer::Modes(vec![ModeId(2)]))
+            .unwrap(),
+    );
+    failed.resume_internal_card().unwrap();
+    assert!(matches!(
+        failed.activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 }),
+        Err(sve_engine::EngineFailure::IllegalPlay(_))
+    ));
+    let q = awaiting(
+        failed
+            .activate_internal_card("u", AbilityId(1), PlayerId { seat: 1 })
+            .unwrap(),
+    );
+    let other = resolved(
+        failed
+            .answer_internal_card(q.actor, q.token, Answer::Modes(vec![ModeId(1)]))
+            .unwrap(),
+    );
+    assert_ne!(first.source.instance, other.source.instance);
+    failed.resume_internal_card().unwrap();
+    next_turn(&mut failed);
+    next_turn(&mut failed);
+    let q = awaiting(
+        failed
+            .activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
+            .unwrap(),
+    );
+    resolved(
+        failed
+            .answer_internal_card(q.actor, q.token, Answer::Modes(vec![ModeId(1)]))
+            .unwrap(),
+    );
 }

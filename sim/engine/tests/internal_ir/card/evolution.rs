@@ -1,4 +1,5 @@
 use super::*;
+use std::sync::OnceLock;
 use sve_engine::game::internal::InputDomain;
 use sve_engine::ir::lowering::ExpandedLowerer;
 
@@ -58,7 +59,16 @@ fn relabel(mut ability: Located<Ability>, card: &str, line: u64) -> Located<Abil
 }
 
 fn position(seat: u32, base: &WellFormedCardProgram, form: &WellFormedCardProgram) -> Game {
-    let snapshot = [("unit-follower","フォロワー","1","2","3"),("unit-form","エボルヴフォロワー","-","4","5"),("unit-spell","スペル","1","-","-")]
+    position_with_decks(seat, base, form, false)
+}
+
+fn position_with_decks(
+    seat: u32,
+    base: &WellFormedCardProgram,
+    form: &WellFormedCardProgram,
+    turn_decks: bool,
+) -> Game {
+    let snapshot = [("unit-follower","フォロワー","1","2","3"),("unit-form","フォロワー・エボルヴ","-","4","5"),("unit-spell","スペル","1","-","-")]
         .iter().map(|(number,kind,cost,power,hp)| json!({"number":number,"faces":[{"name":if *number=="unit-form" {"unit-follower"} else {number},"card_class":"ニュートラル","card_type":kind,"cost":cost,"power":power,"hp":hp,"traits":[],"text":null,"sections":[]}]}).to_string()).collect::<Vec<_>>().join("\n");
     let registry = json!({"format":1,"kind":"keyword_registry","keywords":{}}).to_string();
     let document=json!({"format":1,"kind":"effect_set","cards":{
@@ -77,6 +87,15 @@ fn position(seat: u32, base: &WellFormedCardProgram, form: &WellFormedCardProgra
     initial["players"][actor]["zones"]["field"] =
         json!([{"id":"s","card":"unit-follower"},{"id":"u","card":"unit-follower"}]);
     initial["players"][actor]["zones"]["evolve_deck"] = json!([{"id":"e","card":"unit-form"}]);
+    if turn_decks {
+        for player in ["P1", "P2"] {
+            initial["players"][player]["zones"]["deck"] = json!(
+                (0..3)
+                    .map(|i| json!({"id":format!("{player}-d{i}"),"card":"unit-spell"}))
+                    .collect::<Vec<_>>()
+            );
+        }
+    }
     let mut game = Game::new(
         catalog,
         &initial,
@@ -92,7 +111,13 @@ fn position(seat: u32, base: &WellFormedCardProgram, form: &WellFormedCardProgra
     game
 }
 
-fn programs() -> (WellFormedCardProgram, WellFormedCardProgram) {
+// Schema compilation dominates these tests, so they share one immutable lowered fixture.
+fn programs() -> &'static (WellFormedCardProgram, WellFormedCardProgram) {
+    static PROGRAMS: OnceLock<(WellFormedCardProgram, WellFormedCardProgram)> = OnceLock::new();
+    PROGRAMS.get_or_init(lowered_programs)
+}
+
+fn lowered_programs() -> (WellFormedCardProgram, WellFormedCardProgram) {
     let lowered = ExpandedLowerer::new()
         .unwrap()
         .lower(fanfare::expanded::tree())
@@ -158,7 +183,7 @@ fn programs() -> (WellFormedCardProgram, WellFormedCardProgram) {
 fn bp20_r14_evolve_draw_fragment_uses_new_print_instance_and_real_super_facet() {
     let (base, form) = programs();
     for seat in [1, 2] {
-        let mut game = position(seat, &base, &form);
+        let mut game = position(seat, base, form);
         let prior = resolved(
             game.activate_internal_card("s", AbilityId(7), PlayerId { seat })
                 .unwrap(),
@@ -218,4 +243,153 @@ fn bp20_r14_evolve_draw_fragment_uses_new_print_instance_and_real_super_facet() 
         game.resume_internal_card().unwrap();
         assert!(game.internal_pending_choice().unwrap().is_none());
     }
+}
+
+fn limited_activation(id: u64, maximum: u64, cost: i64) -> Located<Ability> {
+    let mut a = ability(id, vec![draw(id, 0)]);
+    let mut paid = payment::paid_ability(vec![payment::pp(cost)], vec![]);
+    let play = paid.node.play.as_mut().unwrap();
+    if let CostSpec::Ordered { steps } = &mut play.costs {
+        for step in steps {
+            step.instruction.source = a.node.source.clone();
+            let slot = 1_000_u64.checked_add(id).unwrap();
+            step.instruction.id = InstructionId(slot);
+            step.instruction.receipt = ReceiptId(slot);
+        }
+    }
+    play.limit = Some(LimitSpec {
+        maximum: Nat(maximum),
+        window: LimitWindow::Turn,
+        scope: LimitScope::AbilityInstance,
+        consume_at: ConsumptionPoint::PlayCommitted,
+    });
+    a.node.play = paid.node.play;
+    a
+}
+
+fn quota_programs() -> (WellFormedCardProgram, WellFormedCardProgram) {
+    let (original, _) = programs();
+    let base = card(vec![
+        original.card().abilities[0].clone(),
+        limited_activation(7, 1, 1),
+        limited_activation(8, 1, 2),
+        ability(
+            9,
+            vec![movement::put(
+                9,
+                Selector::Objects {
+                    objects: vec![ObjectOperand::SourceHolder {}],
+                },
+                OwnerZone::Cemetery,
+            )],
+        ),
+        ability(
+            10,
+            vec![instruction(
+                10,
+                Action::Move {
+                    objects: zone(ZoneKind::Cemetery, 70),
+                    movement: MoveSpec {
+                        to: MoveDestination::Shared {
+                            zone: ZoneRef {
+                                player: PlayerRef::Controller {},
+                                kind: ZoneKind::Field,
+                            },
+                        },
+                        initial_posture: None,
+                        entry_effects: vec![],
+                        position: None,
+                        order: None,
+                    },
+                    reason: MoveReason::Put,
+                },
+            )],
+        ),
+        limited_activation(11, 2, 0),
+    ]);
+    let form = card(vec![relabel(limited_activation(7, 1, 0), "unit-form", 7)]);
+    (base, form)
+}
+
+#[test]
+fn printed_activation_quota_tracks_turn_reentry_and_evolved_definition() {
+    let (base, form) = quota_programs();
+    let mut game = position_with_decks(1, &base, &form, true);
+    let actor = PlayerId { seat: 1 };
+    resolved(
+        game.activate_internal_card("u", AbilityId(8), actor)
+            .unwrap(),
+    );
+    game.resume_internal_card().unwrap();
+    let before = game.clone();
+    assert!(matches!(
+        game.activate_internal_card("s", AbilityId(7), actor),
+        Err(sve_engine::EngineFailure::IllegalPlay(_))
+    ));
+    transactions::assert_restored(&game, &before);
+    play::next_turn(&mut game);
+    play::next_turn(&mut game);
+    let first = resolved(
+        game.activate_internal_card("s", AbilityId(7), actor)
+            .unwrap(),
+    );
+    game.resume_internal_card().unwrap();
+    assert!(matches!(
+        game.activate_internal_card("s", AbilityId(7), actor),
+        Err(sve_engine::EngineFailure::IllegalPlay(_))
+    ));
+    resolved(
+        game.activate_internal_card("s", AbilityId(9), actor)
+            .unwrap(),
+    );
+    game.resume_internal_card().unwrap();
+    resolved(
+        game.activate_internal_card("u", AbilityId(10), actor)
+            .unwrap(),
+    );
+    game.resume_internal_card().unwrap();
+    let returned = resolved(
+        game.activate_internal_card("s", AbilityId(7), actor)
+            .unwrap(),
+    );
+    assert_ne!(first.source.instance, returned.source.instance);
+    assert_eq!(returned.source.holder.generation, Generation(2));
+    game.resume_internal_card().unwrap();
+    game.internal_rule_action(
+        &json!({"do":"evolve","source":"s","evolve_card":"e","pay":{"pp":1,"ep":0,"sep":0}}),
+    )
+    .unwrap();
+    let evolved = resolved(
+        game.activate_internal_card("s", AbilityId(7), actor)
+            .unwrap(),
+    );
+    assert_eq!(evolved.source.holder, returned.source.holder);
+    assert_ne!(evolved.source.instance, returned.source.instance);
+    game.resume_internal_card().unwrap();
+    assert!(matches!(
+        game.activate_internal_card("s", AbilityId(7), actor),
+        Err(sve_engine::EngineFailure::IllegalPlay(_))
+    ));
+    play::next_turn(&mut game);
+    play::next_turn(&mut game);
+    let next = resolved(
+        game.activate_internal_card("s", AbilityId(7), actor)
+            .unwrap(),
+    );
+    assert_eq!(next.source.instance, evolved.source.instance);
+    game.resume_internal_card().unwrap();
+    resolved(
+        game.activate_internal_card("u", AbilityId(11), actor)
+            .unwrap(),
+    );
+    game.resume_internal_card().unwrap();
+    resolved(
+        game.activate_internal_card("u", AbilityId(11), actor)
+            .unwrap(),
+    );
+    game.resume_internal_card().unwrap();
+    assert!(matches!(
+        game.activate_internal_card("u", AbilityId(11), actor),
+        Err(sve_engine::EngineFailure::IllegalPlay(_))
+    ));
 }

@@ -1,7 +1,7 @@
 # チョイス擴充與起動能力限次
 
 本文件補充[正式 play](play-semantics.md)、[執行語義](runtime-semantics.md)與
-[觸發額度](trigger-lki-semantics.md#3-限次與同時批次)，是待實作的內部契約。
+[觸發額度](trigger-lki-semantics.md#3-限次與同時批次)，是內部契約。
 現行支援以[內部執行入口](internal-execution.md)為準；不新增作者語法、公開 program、
 capability、最低版本或整卡資格，也不擴張 Quick、費用及結算重驗的支援範圍。
 
@@ -145,7 +145,7 @@ Q471（2022-12-09）確認自己與對手的回合各可使用一次，不因此
 
 ## 4. lowering、良構與執行接線
 
-以下是 D1 實作義務，本文沒有修改 Rust 型別或 checker。
+以下為 D1 的輸入與良構義務；已驗子集見[內部執行入口](internal-execution.md#共同選擇-snapshot-與回復)。
 
 ### 4.1 輸入與 lowering
 
@@ -159,7 +159,7 @@ Q471（2022-12-09）確認自己與對手的回合各可使用一次，不因此
 - `exclude_chosen: this_turn` 降為既有 Modes.exclude_used 的
   `CurrentTurnAbilityInstance`。只收 exact 1、controller、唯一頂層群組；來源沒有
   排除文字時不得自動加上，也不得把跨回合或全同名卡的排除降成它。
-- 起動 `per_turn` 降為 §3 的 LimitSpec。新增一個**待實作**內部欄位
+- 起動 `per_turn` 降為 §3 的 LimitSpec。內部欄位
   `PlaySpec.limit: Option<LimitSpec>`，僅 Activated 能力允許 Some；Spell／Triggered 能力
   及 `Action::PlayCard.parameters` 的 PlaySpec 必須 None，Triggered 額度仍在
   `TriggerSpec.limit`，不重複承載。無限次明示 None，不能以 maximum=0 表示；

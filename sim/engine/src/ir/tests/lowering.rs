@@ -1,7 +1,7 @@
 use super::*;
 use crate::ir::lowering::{ExpandedLowerer, validator};
 use alloc::collections::BTreeMap;
-use serde_json::json;
+use serde_json::{Value, json};
 
 #[path = "../../../tests/support/expanded.rs"]
 mod expanded;
@@ -296,10 +296,15 @@ fn activated_payment_order_and_trigger_limit_remain_separate() {
             .limit,
         Some(LimitSpec::once_per_turn())
     );
-    tree["cards"]["BP01-041"]["abilities"][0]["activate"]["per_turn"] = json!(1_u64);
+    tree["cards"]["BP01-041"]["abilities"][0]["activate"]["per_turn"] = json!(2_u64);
     assert_eq!(
-        lowerer.lower(&tree).unwrap_err().code,
-        "unsupported_construct"
+        lowerer.lower(&tree).unwrap()["BP01-041"].card().abilities[0]
+            .node
+            .play
+            .as_ref()
+            .unwrap()
+            .limit,
+        Some(LimitSpec::activated_per_turn(Nat(2)))
     );
 }
 
@@ -379,11 +384,102 @@ fn printed_spell_cost_targets_distribution_and_choice_preserve_play_scopes() {
             .code,
         "unsupported_construct"
     );
+    assert_choice_extensions(&lowerer, tree, &costs, body);
+}
+
+fn assert_choice_extensions(
+    lowerer: &ExpandedLowerer,
+    mut tree: Value,
+    costs: &BTreeMap<String, Nat>,
+    body: &str,
+) {
     tree.pointer_mut(body).unwrap()["targets"][0]["option"] = json!(1_u64);
     tree.pointer_mut(body).unwrap()["do"][0]["choice"]["exclude_chosen"] = json!("this_turn");
+    let excluded = lowerer.lower_with_printed_costs(&tree, costs).unwrap();
+    assert!(matches!(
+        &excluded["SD03-005"].card().abilities[0]
+            .node
+            .body
+            .as_ref()
+            .unwrap()
+            .steps[0]
+            .node,
+        Node::Control {
+            control: Control::Mode {
+                chosen: ModeDecision {
+                    domain: ChoiceDomain::Modes {
+                        exclude_used: Some(ModeExclusion::CurrentTurnAbilityInstance),
+                        ..
+                    },
+                    ..
+                },
+                ..
+            }
+        }
+    ));
+    tree.pointer_mut(body).unwrap()["do"][0]["choice"] = json!({"upto":2_u64,"instead":[{"if":{"spellchain":3_u64},"upto":1_u64}],"options":[[{"damage":{"to":"mode_t","n":2_u64}}],[{"draw":{"n":1_u64}}]]});
+    let conditional = lowerer.lower_with_printed_costs(&tree, costs).unwrap();
+    assert!(matches!(
+        &conditional["SD03-005"].card().abilities[0]
+            .node
+            .body
+            .as_ref()
+            .unwrap()
+            .steps[0]
+            .node,
+        Node::Control {
+            control: Control::Mode {
+                count: Expr::Compute(_),
+                ..
+            }
+        }
+    ));
+    tree.pointer_mut(body).unwrap()["do"][0]["choice"]["instead"][0] =
+        json!({"if":{"necro":3_u64},"n":2_u64});
     assert_eq!(
         lowerer
-            .lower_with_printed_costs(&tree, &costs)
+            .lower_with_printed_costs(&tree, costs)
+            .unwrap_err()
+            .code,
+        "unsupported_construct"
+    );
+    let steps = &mut tree.pointer_mut(body).unwrap()["do"];
+    steps[0]["choice"] = json!({"n":1_u64,"options":[[{"damage":{"to":"mode_t","n":2_u64}}],[{"draw":{"n":1_u64}}]]});
+    steps
+        .as_array_mut()
+        .unwrap()
+        .insert(0, json!({"draw":{"n":1_u64}}));
+    let surrounded = lowerer.lower_with_printed_costs(&tree, costs).unwrap();
+    assert!(matches!(
+        surrounded["SD03-005"].card().abilities[0]
+            .node
+            .body
+            .as_ref()
+            .unwrap()
+            .steps
+            .as_slice(),
+        [
+            Located {
+                node: Node::Instruction { .. },
+                ..
+            },
+            Located {
+                node: Node::Control {
+                    control: Control::Mode { .. }
+                },
+                ..
+            }
+        ]
+    ));
+    let second = tree.pointer(&format!("{body}/do/1")).unwrap().clone();
+    tree.pointer_mut(&format!("{body}/do"))
+        .unwrap()
+        .as_array_mut()
+        .unwrap()
+        .push(second);
+    assert_eq!(
+        lowerer
+            .lower_with_printed_costs(&tree, costs)
             .unwrap_err()
             .code,
         "unsupported_construct"

@@ -126,6 +126,7 @@ fn play_payment_completes_before_resolution_entry_captures_freeze() {
     let make = |steps| {
         let mut program = card(body(1, steps), "BP20-P12").node;
         program.abilities[0].node.play = Some(PlaySpec {
+            limit: None,
             captures: vec![],
             parameters: vec![],
             costs: CostSpec::Ordered { steps: vec![] },
@@ -189,6 +190,7 @@ fn play_costs_and_optional_play_payment_have_an_explicit_entry() {
     let make = |steps| {
         let mut program = card(body(1, steps), "BP20-P12").node;
         program.abilities[0].node.play = Some(PlaySpec {
+            limit: None,
             captures: vec![],
             parameters: vec![],
             costs: CostSpec::Ordered {

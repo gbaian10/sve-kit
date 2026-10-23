@@ -6,6 +6,7 @@ mod review;
 fn playable(steps: Vec<Located<Node>>) -> CardProgram {
     let mut card = card(body(1, steps), "BP01-007").node;
     card.abilities[0].node.play = Some(PlaySpec {
+        limit: None,
         captures: vec![],
         parameters: vec![],
         costs: CostSpec::Ordered { steps: vec![] },
@@ -63,6 +64,7 @@ fn card_entry_owns_parameters_and_program_is_not_a_card_certificate() {
             id: AbilityId(2),
             scope: ScopeId(2),
             play: Some(PlaySpec {
+                limit: None,
                 captures: vec![],
                 parameters: vec![],
                 costs: CostSpec::Ordered { steps: vec![] },

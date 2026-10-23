@@ -17,7 +17,7 @@ owner、field、fragment；這不授予永久來源身分或公開 capability。
 本文，不把依賴 play binding 的本文重新當成封閉 `WellFormedProgram`。
 base face 的普通打出費用必須是非負數字；缺欄、null、「-」、其他非數字及負值拒絕，明示的零費用仍有效。
 非打出用的進化 face 不套用此數字限制；能力引用 face 的原有缺欄檢查仍適用。
-Printed Activated 的印刷面限普通從者或護符；卡種由同一 Catalog face 驗證。
+Printed Activated 的印刷面限普通從者、官方進化從者（フォロワー・エボルヴ）或護符；卡種由同一 Catalog face 驗證。
 
 准入接受普通 Printed Spell 的 `[Resolution]`、Printed Activated 的 `[Field]`，以及下節的
 Printed Fanfare／Lastword／OnAttack 及 End Begin。Spell 的唯一固有 Ordered PP Pay 必須等於同 Catalog face 的印刷費用；
@@ -38,7 +38,9 @@ Move／Destroy 沿用已驗公開區來源與 owner 墓地／消滅目的地；S
 
 `play_internal_card(holder, actor)` 接主動玩家 main、自己的 Hand／EX、base 普通 Spell 或已准入的
 普通從者／護符；`activate_internal_card(holder, AbilityId, actor)` 接已載入的當前場上從者／護符能力。
-來源、世代、instance 與 execution 都由 authority 建立；`base` 在起動時同樣比對 face 0。
+來源、世代、instance 與 execution 都由 authority 建立；起動讀目前有效的印刷定義，`base` 比對 face 0。
+Printed、Field 起動可帶 `PlaySpec.limit` 的每回合 1／2 次額度；以 AbilityInstanceId 與實際 TurnId
+計數，全部付款完成的 AbilityPlayed 才耗次。耗盡回 IllegalPlay，不出題、不付款；失敗回復沿下節。
 所有局內卡片都須完整載入，空能力卡也須明示；未准入的原型能力、keyword、continuous、delayed
 與忙碌 context 拒絕。已載入 Spell／Fanfare 時封住合成 prepare 與原型打出，不略過正式 producer。
 
@@ -76,9 +78,18 @@ BP01-041 的候選起動片段由 C0 展開、lowering、良構與整卡執行�
 `play.captures` 的 AtPlay 在自身移區前求值；同批 captures 先各自從入口求值再一起公開，
 值域沿用良構 checker 與 executor 的交集。卡片先移入 Resolution；Spell 從這個新世代建立
 RuntimeAbilitySource。ChoiceKeyword 在普通參數前選定，本文只按印刷順序執行保存的模式。
-count 支援常值與良構的條件樹；模式數專用的 SC／NC 在 AtPlay 固定計數，SC 數墓地 Spell、NC 數墓地全部牌。
-改計數母體的 rule modifier、Handoff 與未支援的參數依賴仍拒絕。
-只對所選模式檢查目前目標，未選模式依然必須通過整樹支援檢查。
+count 支援常值 exact／upto 與良構的 SC／NC 條件樹；在 AtPlay 固定計數，SC 數墓地 Spell、NC 數墓地全部牌。
+常值按印刷模式數截斷，upto 正數至少選一個，零則保存空模式結果並繼續成本與其他本文。
+先證明模式的必要公開目標與共同成本可行，再出題；不可選模式不縮減 exact 必選數。
+只接受唯一頂層、controller、Public 的 ChoiceKeyword；模式 targets 限彼此獨立的公開 selector，
+沒有 mode 內 Distribution、capture 或與根 parameters 混用，未選模式仍通過整樹支援閉包。
+exact 1 可帶 `CurrentTurnAbilityInstance` 排除；Authority 以既有 ModeUse 保存
+(execution, ability_instance, mode, turn)，AbilityPlayed 才原子提交，本文 false 仍保留紀錄。
+作者 lowering 接常值 n／upto、單一 SC／NC instead 及 this_turn 排除；混合 exact>1、
+多個 instead 的優先序、改計數母體的 rule modifier、Handoff、未支援的參數依賴、其他 actor 與任意私有 choose 保持拒絕。
+Quick 起動的模式歷史排除在整卡准入保持拒絕；既有 Quick preflight 尚未承載歷史。
+Quick 起動的 PlaySpec.limit 已由 Printed 限制拒絕，不因本片擴張 Quick。
+完整額度與模式語義見[チョイス擴充與起動能力限次 §1–4](choice-limit-semantics.md)。
 
 所有 targets／play Distribution 共用移入 Resolution 及先決選項後的一份選擇 snapshot。
 AtSelection 在驗答後讀這份 snapshot 與已公開 binding；不讀付款後的 PP。每個 target decision
