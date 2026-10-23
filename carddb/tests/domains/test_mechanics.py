@@ -3,7 +3,7 @@
 import sqlite3
 from contextlib import contextmanager
 from dataclasses import replace
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 import pytest
 from pydantic import ValidationError
@@ -11,7 +11,7 @@ from pydantic import ValidationError
 from sve_carddb.build import Json, create_database
 from sve_carddb.build.t1 import compile_build
 from sve_carddb.core.json import array, canonical, object_value
-from sve_carddb.domains import mechanics
+from sve_carddb.domains import mechanic_coverage, mechanics
 from sve_carddb.domains.products.models import LocalizedText
 from sve_carddb.domains.registry.records import FaceData
 from sve_carddb.domains.registry.snapshot import load_registry
@@ -24,7 +24,7 @@ from ..support.translation_fixtures import template
 from .translations.test_four_layer_classification import classifier
 
 if TYPE_CHECKING:
-    from collections.abc import Generator
+    from collections.abc import Generator, Mapping
     from pathlib import Path
 
     from sve_carddb.build import Database, Value
@@ -268,10 +268,17 @@ def test_stale_or_wrong_scope_evidence_does_not_become_public(
                 db.update("card_mechanic", {"id": tag["id"]}, {"scope": "en_override"})
                 db.update(
                     "mechanic_coverage",
-                    {"card_id": cid, "keyword_id": "kw:test-a", "scope": "shared"},
+                    {
+                        "card_id": cid,
+                        "keyword_id": "kw:test-a",
+                        "scope": "shared",
+                        "producer_version": mechanics.producer_version(
+                            inputs, settings.classifier
+                        ),
+                    },
                     {"scope": "en_override"},
                 )
-            mechanics.project_current(db, hashes, version)
+            mechanic_coverage.project_current(db, hashes, frozenset({version}))
         assert not db.rows("mechanic_projection")
         assert not db.rows("card_mechanic_coverage")
 
@@ -302,10 +309,10 @@ def test_suppression_is_exact_and_does_not_clear_partial_coverage(
                     "decision_id": "mapping:synthetic",
                 },
             )
-            mechanics.project_current(
+            mechanic_coverage.project_current(
                 db,
                 mechanics.source_bundles(db),
-                mechanics.producer_version(inputs, settings.classifier),
+                frozenset({mechanics.producer_version(inputs, settings.classifier)}),
             )
         assert bool(db.rows("mechanic_projection")) is not fresh
         assert len(db.rows("card_mechanic_coverage")) == 1
@@ -338,10 +345,10 @@ def test_duplicate_positive_evidence_deduplicates_and_stays_partial(
             db.insert(
                 "card_mechanic", dict(tag) | {"id": "mechanic:second-synthetic-source"}
             )
-            mechanics.project_current(
+            mechanic_coverage.project_current(
                 db,
                 mechanics.source_bundles(db),
-                mechanics.producer_version(inputs, settings.classifier),
+                frozenset({mechanics.producer_version(inputs, settings.classifier)}),
             )
         assert len(db.rows("mechanic_projection")) == 1
         assert db.rows("card_mechanic_coverage")[0].values["complete_all"] is False
@@ -676,18 +683,177 @@ def test_h1_rejects_complete_coverage_and_uses_shortest_partial_encoding(
         with db.transaction():
             db.update(
                 "mechanic_coverage",
-                {"card_id": cid, "keyword_id": "kw:test-a", "scope": "shared"},
+                {
+                    "card_id": cid,
+                    "keyword_id": "kw:test-a",
+                    "scope": "shared",
+                    "producer_version": mechanics.producer_version(
+                        inputs, settings.classifier
+                    ),
+                },
                 {"state": "complete"},
             )
 
         def reproject() -> None:
             with db.transaction():
                 clear_projection(db)
-                mechanics.project_current(
+                mechanic_coverage.project_current(
                     db,
                     mechanics.source_bundles(db),
-                    mechanics.producer_version(inputs, settings.classifier),
+                    frozenset(
+                        {mechanics.producer_version(inputs, settings.classifier)}
+                    ),
                 )
 
-        with pytest.raises(ValueError, match="only accepts partial"):
+        with pytest.raises(ValueError, match="state differs from checked ranges"):
             reproject()
+
+
+def inspection(
+    tag: Mapping[str, Value],
+    version: str,
+    checks: tuple[mechanic_coverage.FieldCheck, ...],
+) -> mechanic_coverage.Inspection:
+    return mechanic_coverage.Inspection(
+        card_id=str(tag["card_id"]),
+        keyword_id=str(tag["keyword_id"]),
+        scope="shared",
+        source_kind="manual",
+        source_text_hash=str(tag["source_text_hash"]),
+        producer_version=version,
+        decision_id=str(tag["decision_id"]),
+        dsl_id=None,
+        checks=checks,
+    )
+
+
+def test_reducer_unions_two_producers_without_overwriting_checks(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    with case(tmp_path, monkeypatch, "【合成甲】") as (db, inputs, settings, _):
+        with db.transaction():
+            mechanics.apply(db, inputs, settings)
+            tag = db.rows("card_mechanic")[0].values
+            coverage = db.rows("mechanic_coverage")[0].values
+            raw = coverage["checked_ranges"]
+            assert isinstance(raw, Json)
+            first = mechanic_coverage.FieldCheck.model_validate_json(
+                canonical(array(raw.value)[0])
+            )
+            second = first.model_copy(update={"relation": "grants"})
+            mechanic_coverage.store_evidence(
+                db,
+                (
+                    dict(tag)
+                    | {
+                        "id": "mechanic:grants",
+                        "relation": "grants",
+                        "producer_version": "grants-v1",
+                    },
+                ),
+                (inspection(tag, "grants-v1", (second,)),),
+            )
+            clear_projection(db)
+            mechanic_coverage.project_current(
+                db,
+                mechanics.source_bundles(db),
+                frozenset({str(tag["producer_version"]), "grants-v1"}),
+            )
+        assert len(db.rows("mechanic_coverage")) == 2
+        assert db.rows("mechanic_projection")[0].values["relations"] == Json(
+            ["grants", "has"]
+        )
+        assert db.rows("card_mechanic_coverage")[0].values["complete_all"] is False
+
+
+def test_reducer_requires_every_relation_on_every_face_and_section(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    with case(tmp_path, monkeypatch, "【合成甲】", back="Synthetic back effect.") as (
+        db,
+        inputs,
+        settings,
+        _,
+    ):
+        with db.transaction():
+            db.insert(
+                "face_text_section",
+                {
+                    "revision_id": "link-revision",
+                    "ordinal": 0,
+                    "text_unit_id": db.rows("face_revision")[0].values[
+                        "effect_unit_id"
+                    ],
+                    "kind": "token_definition",
+                },
+            )
+            mechanics.apply(db, inputs, settings)
+            tag = db.rows("card_mechanic")[0].values
+            fields: list[tuple[str, str, Literal["effect", "section"], int | None]] = [
+                (
+                    str(row.values["face_id"]),
+                    str(row.values["revision_id"]),
+                    "effect",
+                    None,
+                )
+                for row in db.rows("face_current")
+                if row.values["region"] == "jp"
+            ]
+            front = next(
+                face for face, revision, _, _ in fields if revision == "link-revision"
+            )
+            fields.append((front, "link-revision", "section", 0))
+            checks = tuple(
+                mechanic_coverage.FieldCheck(
+                    face_id=face,
+                    revision_id=revision,
+                    field=field,
+                    ordinal=ordinal,
+                    relation=relation,
+                    whole_field=True,
+                )
+                for face, revision, field, ordinal in fields
+                for relation in ("has", "grants", "refers")
+            )
+            mechanic_coverage.store_evidence(
+                db, (), (inspection(tag, "three-relations", checks),)
+            )
+            clear_projection(db)
+            mechanic_coverage.project_current(
+                db, mechanics.source_bundles(db), frozenset({"three-relations"})
+            )
+        coverage = db.rows("card_mechanic_coverage")[0].values
+        assert coverage["complete_keyword_ids"] == Json([])
+        assert coverage["partial_keyword_ids"] == Json(["kw:test-a"])
+        counts = tuple(
+            check.model_copy(update={"relation": "counts"})
+            for check in checks
+            if check.relation == "has"
+        )
+        with db.transaction():
+            mechanic_coverage.store_evidence(
+                db, (), (inspection(tag, "counts-main", counts[:-1]),)
+            )
+            clear_projection(db)
+            mechanic_coverage.project_current(
+                db,
+                mechanics.source_bundles(db),
+                frozenset({"three-relations", "counts-main"}),
+            )
+        assert db.rows("card_mechanic_coverage")[0].values[
+            "complete_keyword_ids"
+        ] == Json([])
+        with db.transaction():
+            mechanic_coverage.store_evidence(
+                db, (), (inspection(tag, "counts-section", counts[-1:]),)
+            )
+            clear_projection(db)
+            mechanic_coverage.project_current(
+                db,
+                mechanics.source_bundles(db),
+                frozenset({"three-relations", "counts-main", "counts-section"}),
+            )
+        coverage = db.rows("card_mechanic_coverage")[0].values
+        assert coverage["complete_keyword_ids"] == Json(["kw:test-a"])
+        assert coverage["complete_all"] is False
+        assert coverage["partial_keyword_ids"] == Json([])

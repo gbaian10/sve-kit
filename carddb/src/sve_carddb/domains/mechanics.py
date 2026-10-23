@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING, Annotated, Literal, cast
 
 from pydantic import Field, JsonValue, ValidationError, field_validator, model_validator
 
-from sve_carddb.build import Json
 from sve_carddb.build.rows import insert_exact
 from sve_carddb.build.source_rows import insert_raw_sources
 from sve_carddb.contracts.four_layer import (
@@ -17,6 +16,12 @@ from sve_carddb.contracts.four_layer import (
 from sve_carddb.core.authored import read
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.core.models import Hash, RecordData, Text
+from sve_carddb.domains.mechanic_coverage import (
+    FieldCheck,
+    Inspection,
+    project_current,
+    store_evidence,
+)
 from sve_carddb.domains.products.models import LocalizedText
 from sve_carddb.domains.text_observations.intern import TextInterner
 from sve_carddb.domains.translations.direct import write
@@ -305,91 +310,7 @@ def source_bundles(db: Database) -> dict[str, str]:
     }
 
 
-def _shortest(selected: set[str], universe: set[str]) -> tuple[str, list[JsonValue]]:
-    complement = universe - selected
-    return (
-        ("include", list[JsonValue](sorted(selected)))
-        if len(selected) <= len(complement)
-        else ("exclude", list[JsonValue](sorted(complement)))
-    )
-
-
-def project_current(  # ruff: ignore[complex-structure] -- exact freshness and confirmed suppressions precede each sparse projection
-    db: Database, hashes: Mapping[str, str], version: str
-) -> None:
-    """Only exact fresh evidence can enter the public sparse sets."""
-    decisions = {
-        str(row.values["id"]): row.values["state"] for row in db.rows("decision")
-    }
-    overrides: dict[str, list[Mapping[str, Value]]] = {}
-    for row in db.rows("mechanic_override"):
-        overrides.setdefault(str(row.values["target_tag_id"]), []).append(row.values)
-    positive: dict[tuple[str, str, str], tuple[set[str], set[str]]] = {}
-    for row in db.rows("card_mechanic"):
-        tag = row.values
-        if (
-            tag["scope"] != "shared"
-            or tag["source_text_hash"] != hashes.get(str(tag["card_id"]))
-            or tag["producer_version"] != version
-        ):
-            continue
-        if any(
-            override["source_text_hash"] == tag["source_text_hash"]
-            and override["producer_version"] == tag["producer_version"]
-            and decisions[str(override["decision_id"])] == "confirmed"
-            for override in overrides.get(str(tag["id"]), [])
-        ):
-            continue
-        key = (str(tag["card_id"]), str(tag["keyword_id"]), str(tag["scope"]))
-        relations, actions = positive.setdefault(key, (set(), set()))
-        relations.add(str(tag["relation"]))
-        if tag["action"] is not None:
-            actions.add(str(tag["action"]))
-    for (cid, keyword, scope), (relations, actions) in sorted(positive.items()):
-        db.insert(
-            "mechanic_projection",
-            {
-                "card_id": cid,
-                "keyword_id": keyword,
-                "scope": scope,
-                "relations": Json(list[JsonValue](sorted(relations))),
-                "actions": Json(list[JsonValue](sorted(actions))),
-            },
-        )
-    universe = {str(row.values["id"]) for row in db.rows("keyword")}
-    partial: dict[tuple[str, str], set[str]] = {}
-    for row in db.rows("mechanic_coverage"):
-        value = row.values
-        if (
-            value["scope"] != "shared"
-            or value["source_text_hash"] != hashes.get(str(value["card_id"]))
-            or value["producer_version"] != version
-        ):
-            continue
-        if value["state"] != "partial":
-            raise ValueError(
-                "The self keyword declaration producer only accepts partial mechanism coverage"
-            )
-        partial.setdefault((str(value["card_id"]), str(value["scope"])), set()).add(
-            str(value["keyword_id"])
-        )
-    for (cid, scope), keywords in sorted(partial.items()):
-        mode, ids = _shortest(keywords, universe)
-        db.insert(
-            "card_mechanic_coverage",
-            {
-                "card_id": cid,
-                "scope": scope,
-                "complete_all": False,
-                "complete_mode": "include",
-                "complete_keyword_ids": Json([]),
-                "partial_mode": mode,
-                "partial_keyword_ids": Json(ids),
-            },
-        )
-
-
-def apply(  # ruff: ignore[complex-structure,too-many-locals,too-many-branches] -- one owner-checked declaration pass retains all rejection reasons without render dependencies
+def apply(  # ruff: ignore[complex-structure,too-many-locals] -- one owner-checked declaration pass retains all rejection reasons without render dependencies
     db: Database, inputs: Inputs, settings: Settings
 ) -> dict[str, JsonValue]:
     """Self keyword declarations prove has; every other relation stays incomplete."""
@@ -404,7 +325,8 @@ def apply(  # ruff: ignore[complex-structure,too-many-locals,too-many-branches] 
         str(row.values["id"]): row.values["identity_state"] for row in db.rows("card")
     }
     reasons: Counter[str] = Counter()
-    checked: set[tuple[str, str]] = set()
+    positives: dict[str, dict[str, Value]] = {}
+    checked: dict[tuple[str, str], set[FieldCheck]] = {}
     for row in db.rows("face_current"):
         current = row.values
         if current["region"] != "jp":
@@ -468,44 +390,73 @@ def apply(  # ruff: ignore[complex-structure,too-many-locals,too-many-branches] 
                         )
                     )[7:]
                 )
-                insert_exact(
-                    db,
-                    "card_mechanic",
-                    {
-                        "id": identifier,
-                        "card_id": cid,
-                        "keyword_id": keyword,
-                        "relation": "has",
-                        "action": None,
-                        "scope": "shared",
-                        "source_kind": "manual",
-                        "source_text_hash": hashes[cid],
-                        "producer_version": version,
-                        "dsl_id": None,
-                        "source_id": original.source_id,
-                        "decision_id": inputs.registry.decision.id,
-                    },
-                    ("id",),
+                positives[identifier] = {
+                    "id": identifier,
+                    "card_id": cid,
+                    "keyword_id": keyword,
+                    "relation": "has",
+                    "action": None,
+                    "scope": "shared",
+                    "source_kind": "manual",
+                    "source_text_hash": hashes[cid],
+                    "producer_version": version,
+                    "dsl_id": None,
+                    "source_id": original.source_id,
+                    "decision_id": inputs.registry.decision.id,
+                }
+                checked.setdefault((cid, keyword), set()).add(
+                    FieldCheck(
+                        face_id=str(current["face_id"]),
+                        revision_id=str(current["revision_id"]),
+                        field="effect",
+                        ordinal=None,
+                        relation="has",
+                        whole_field=False,
+                    )
                 )
-                checked.add((cid, keyword))
     insert_raw_sources(db, (use.source for use in settings.sources.uses))
-    for cid, keyword in sorted(checked):
-        db.insert(
-            "mechanic_coverage",
-            {
-                "card_id": cid,
-                "keyword_id": keyword,
-                "scope": "shared",
-                "state": "partial",
-                "source_kind": "manual",
-                "source_text_hash": hashes[cid],
-                "producer_version": version,
-                "decision_id": inputs.registry.decision.id,
-                "dsl_id": None,
-            },
-        )
+    store_evidence(
+        db,
+        tuple(positives.values()),
+        tuple(
+            Inspection(
+                card_id=cid,
+                keyword_id=keyword,
+                scope="shared",
+                source_kind="manual",
+                source_text_hash=hashes[cid],
+                producer_version=version,
+                decision_id=inputs.registry.decision.id,
+                dsl_id=None,
+                checks=tuple(sorted(checks, key=lambda check: check.model_dump_json())),
+            )
+            for (cid, keyword), checks in sorted(checked.items())
+        ),
+    )
     tags = {str(row.values["id"]): row.values for row in db.rows("card_mechanic")}
-    for suppression in inputs.registry.suppressions:
+    _suppress(db, inputs.registry.suppressions, tags, registry_source_id, reasons)
+    project_current(db, hashes, frozenset({version}))
+    return {
+        "adapter": ADAPTER,
+        "description": "Self keyword declarations: body parts containing only keywords.",
+        "producer_version": version,
+        "keywords": len(keywords),
+        "positive_tags": len(tags),
+        "projection_rows": len(db.rows("mechanic_projection")),
+        "coverage_rows": len(db.rows("card_mechanic_coverage")),
+        "complete_cards": 0,
+        "reasons": dict[str, JsonValue](sorted(reasons.items())),
+    }
+
+
+def _suppress(
+    db: Database,
+    suppressions: tuple[Suppression, ...],
+    tags: dict[str, Mapping[str, Value]],
+    registry_source_id: str,
+    reasons: Counter[str],
+) -> None:
+    for suppression in suppressions:
         tag = tags.get(suppression.target_tag_id)
         if (
             tag is None
@@ -532,15 +483,3 @@ def apply(  # ruff: ignore[complex-structure,too-many-locals,too-many-branches] 
                 "decision_id": suppression.decision.id,
             },
         )
-    project_current(db, hashes, version)
-    return {
-        "adapter": ADAPTER,
-        "description": "Self keyword declarations: body parts containing only keywords.",
-        "producer_version": version,
-        "keywords": len(keywords),
-        "positive_tags": len(tags),
-        "projection_rows": len(db.rows("mechanic_projection")),
-        "coverage_rows": len(db.rows("card_mechanic_coverage")),
-        "complete_cards": 0,
-        "reasons": dict[str, JsonValue](sorted(reasons.items())),
-    }
