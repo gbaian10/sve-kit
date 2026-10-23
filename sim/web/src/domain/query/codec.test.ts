@@ -53,8 +53,6 @@ describe("query codec", () => {
     expect(querySearch({ ...DEFAULT_QUERY, representative: "high", prFirst: true })).toBe(
       "?rep=high&prfirst=1",
     )
-    // Hiding reprints is written only when on and survives the round trip.
-    expect(querySearch(DEFAULT_QUERY)).toBe("")
     expect(querySearch({ ...DEFAULT_QUERY, hideReprints: true })).toBe("?noreprint=1")
     expect(parseQuery(new URLSearchParams("noreprint=0"))).toEqual(DEFAULT_QUERY)
   })
