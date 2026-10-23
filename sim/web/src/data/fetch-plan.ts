@@ -17,6 +17,7 @@ export interface FetchSelection {
   readonly edition: Region
   /** Files from the adopted, verified manifest, including all regions. */
   readonly files: ReadonlyMap<string, JsonObject>
+  readonly manifest?: RawBlobDescriptor & { readonly brotli: number | null }
 }
 
 interface PlannedBlob extends RawBlobDescriptor {
@@ -25,6 +26,7 @@ interface PlannedBlob extends RawBlobDescriptor {
 
 export interface FetchProgress {
   readonly phase: "checking" | "downloading" | "complete" | "partial"
+  readonly reason?: "batch-limit" | "capacity" | "storage" | "write" | "cleared" | "network"
   readonly total: number
   readonly rawBytes: number
   readonly brotliBytes: number | null
@@ -40,7 +42,7 @@ export class FetchPlan {
   private readonly raw: RawBlobStore
 
   constructor(selection: FetchSelection, raw?: RawBlobStore) {
-    const { files, ...identity } = selection
+    const { files, manifest, ...identity } = selection
     this.selection = Object.freeze(identity)
     this.raw =
       raw ??
@@ -91,6 +93,7 @@ export class FetchPlan {
     for (const [key, file] of files)
       if (["images", "programs"].includes(stringValue(file["role"]))) add(key)
     const blobs = new Map<string, PlannedBlob>()
+    if (manifest) blobs.set(manifest.sha256, Object.freeze({ ...manifest }))
     for (const key of selected) {
       const file = files.get(key)
       if (!file) throw new SnapshotError("shape", "fetch plan file missing")
@@ -113,28 +116,41 @@ export class FetchPlan {
     return this.raw.persistent
   }
 
+  private summarize(missing: readonly PlannedBlob[], phase: FetchProgress["phase"]): FetchProgress {
+    const sum = (blobs: readonly PlannedBlob[], field: "bytes" | "brotli") =>
+      blobs.some((blob) => blob[field] === null)
+        ? null
+        : blobs.reduce((total, blob) => total + (blob[field] ?? 0), 0)
+    return {
+      phase,
+      total: this.blobs.length,
+      rawBytes: sum(this.blobs, "bytes") ?? 0,
+      brotliBytes: sum(this.blobs, "brotli"),
+      missing: missing.length,
+      missingRawBytes: sum(missing, "bytes") ?? 0,
+      missingBrotliBytes: sum(missing, "brotli"),
+    }
+  }
+
+  async inspect(signal: AbortSignal): Promise<FetchProgress> {
+    await this.raw.ready
+    const missing: PlannedBlob[] = []
+    for (const blob of this.blobs) {
+      signal.throwIfAborted()
+      if (!(await this.raw.has(blob))) missing.push(blob)
+    }
+    signal.throwIfAborted()
+    return this.summarize(missing, "checking")
+  }
+
   async run(signal: AbortSignal, progress: (value: FetchProgress) => void): Promise<void> {
-    const summarize = (
+    const publish = (
       missing: readonly PlannedBlob[],
       phase: FetchProgress["phase"],
-    ): FetchProgress => {
-      const sum = (blobs: readonly PlannedBlob[], field: "bytes" | "brotli") =>
-        blobs.some((blob) => blob[field] === null)
-          ? null
-          : blobs.reduce((total, blob) => total + (blob[field] ?? 0), 0)
-      return {
-        phase,
-        total: this.blobs.length,
-        rawBytes: sum(this.blobs, "bytes") ?? 0,
-        brotliBytes: sum(this.blobs, "brotli"),
-        missing: missing.length,
-        missingRawBytes: sum(missing, "bytes") ?? 0,
-        missingBrotliBytes: sum(missing, "brotli"),
-      }
-    }
-    const publish = (missing: readonly PlannedBlob[], phase: FetchProgress["phase"]) => {
+      reason?: FetchProgress["reason"],
+    ) => {
       signal.throwIfAborted()
-      progress(summarize(missing, phase))
+      progress({ ...this.summarize(missing, phase), ...(reason ? { reason } : {}) })
     }
     const missing = async () => {
       const out: PlannedBlob[] = []
@@ -149,13 +165,14 @@ export class FetchPlan {
     await this.raw.ready
     let remaining = await missing()
     if (!this.stored()) {
-      publish(remaining, "partial")
+      publish(remaining, "partial", "storage")
       return
     }
     publish(remaining, "downloading")
     // A small producer window avoids queuing a whole manifest of cache probes and buffers.
     const pending = [...remaining]
     let failed = false
+    const didFail = () => failed
     await Promise.all(
       Array.from({ length: 2 }, async () => {
         while (!failed && this.stored()) {
@@ -181,6 +198,11 @@ export class FetchPlan {
     )
     // Eviction or clear during the batch invalidates earlier writes; never refill in a loop.
     remaining = await missing()
-    publish(remaining, this.stored() && remaining.length === 0 ? "complete" : "partial")
+    const complete = this.stored() && remaining.length === 0
+    publish(
+      remaining,
+      complete ? "complete" : "partial",
+      complete ? undefined : !this.stored() ? "write" : didFail() ? "network" : "cleared",
+    )
   }
 }

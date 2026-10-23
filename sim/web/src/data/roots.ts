@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from "react"
 
+import { appBackgroundDownloads } from "./background-downloads"
 import { createSnapshotClient, type SnapshotClient, type SnapshotStatus } from "./client"
 
 export type SnapshotRoot = "cdn" | "preview"
@@ -25,6 +26,7 @@ export function activeSnapshotRoot(): SnapshotRoot {
 }
 
 export function setActiveSnapshotRoot(root: SnapshotRoot): void {
+  if (active !== root) appBackgroundDownloads.adopt(null)
   active = root
   for (const listener of listeners) listener()
 }

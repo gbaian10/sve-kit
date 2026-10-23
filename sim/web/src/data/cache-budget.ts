@@ -1,6 +1,6 @@
 const MIB = 1024 * 1024
 export const VIEW_BUDGET = 2 * MIB
-const ROOT_BUDGET = 64 * MIB
+const ROOT_BUDGET = 96 * MIB
 const ORIGIN_BUDGET = 128 * MIB
 
 export function isDataCache(name: string): boolean {
@@ -123,6 +123,22 @@ export async function readDataCacheBudget(storage: CacheStorage, root: string) {
     }
   }
   return {
+    fits: (blobs: readonly { readonly sha256: string; readonly bytes: number }[]) => {
+      const raw = new Map(blobs.map((blob) => [blob.sha256, blob.bytes]))
+      let own = 0
+      let total = 0
+      for (const entry of entries) {
+        // Keep derived data and the previous active bytes; overlapping raw hashes count once.
+        const hash = entry.root
+          ? entry.url.match(/\/__sve-raw\/(sha256%3A[a-f0-9]{64})\/bytes$/u)?.[1]
+          : undefined
+        if (hash && raw.has(decodeURIComponent(hash))) continue
+        total += entry.bytes
+        if (entry.root) own += entry.bytes
+      }
+      const reserve = [...raw.values()].reduce((sum, bytes) => sum + bytes, 0)
+      return own + reserve <= ROOT_BUDGET && total + reserve <= ORIGIN_BUDGET
+    },
     trim,
     record: (name: string, cache: Cache, url: string, bytes: number, touched: number) => {
       const hash = url.match(/\/sha256%3A([a-f0-9]{64})$/u)?.[1]

@@ -49,7 +49,17 @@ it("combines raw metadata and decoded records under the same root budget", async
     )
   await trimDataCaches(storage, root)
   expect((await cache.keys()).length).toBe(1)
-  expect(await raw.keys()).toHaveLength(0)
+  expect(await raw.keys()).toHaveLength(1)
+  await raw.put(
+    `${root}/extra`,
+    new Response("x", {
+      headers: { "x-sve-bytes": String(30 * 1024 * 1024), "x-sve-touched": "3" },
+    }),
+  )
+  await trimDataCaches(storage, root)
+  expect(await cache.keys()).toHaveLength(1)
+  expect(await raw.match(`${root}/__sve-raw/${hash}/bytes`)).toBeUndefined()
+  expect(await raw.match(`${root}/extra`)).toBeDefined()
 })
 
 it("evicts a legacy headerless record once without reading its body on later scans", async () => {

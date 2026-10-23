@@ -42,6 +42,7 @@ export async function estimateStorage(): Promise<StorageEstimate> {
 export async function clearManagedCaches(): Promise<void> {
   const names = (await caches.keys()).filter((name) => name === IMAGE_CACHE || isDataCache(name))
   const results = await Promise.allSettled(names.map((name) => caches.delete(name)))
+  if (typeof window !== "undefined") window.dispatchEvent(new Event("sve-cache-cleared"))
   if (results.some((result) => result.status === "rejected"))
     throw new Error("Cache clearing incomplete")
   if ((await caches.keys()).some((name) => name === IMAGE_CACHE || isDataCache(name)))
