@@ -418,25 +418,31 @@ describe("opening a card beside the results", () => {
   })
 
   it.each([
-    { leave: "back closes it", toPage: false },
-    { leave: "it turns into its page first", toPage: true },
-  ])("keeps pages loaded beside the card when $leave", async ({ toPage }) => {
+    { leave: "back closes it, and again after forward", how: "back" },
+    { leave: "it turns into its page first", how: "page" },
+    { leave: "the view changes beside it first", how: "view" },
+  ])("keeps pages loaded beside the card when $leave", async ({ how }) => {
     const { router } = await open("/cards?q=bp01", "panel")
     const user = userEvent.setup()
     const [first] = await cells()
     if (!first) throw new Error("missing cell")
     await user.click(first)
     await within(panel()).findByRole("heading", { name: "試作見習兵" }, { timeout: 5000 })
-    // What loading a second page beside the card does: the card's own entry and the list's note.
-    const { pathname, search } = router.state.location
-    const state = router.state.location.state as ListEntryState
-    const listKey = state.overlay?.listKey
-    if (listKey === undefined) throw new Error("missing list key")
-    keepPagesBeside(listKey, 2)
-    await act(() =>
-      router.navigate(pathname + search, { replace: true, state: { ...state, pages: 2 } }),
-    )
-    if (toPage) {
+    if (how === "view") await user.click(screen.getByRole("radio", { name: "表格" }))
+    // What loading another page beside the card does: the card's own entry and the list's note.
+    const loadBeside = async (pages: number) => {
+      const { pathname, search } = router.state.location
+      const state = router.state.location.state as ListEntryState
+      const listId = state.overlay?.listId
+      if (listId === undefined) throw new Error("missing list id")
+      keepPagesBeside(listId, pages)
+      await act(() =>
+        router.navigate(pathname + search, { replace: true, state: { ...state, pages } }),
+      )
+    }
+    const list = how === "view" ? "?q=bp01&view=table" : "?q=bp01"
+    await loadBeside(2)
+    if (how === "page") {
       act(() => {
         prefsStore.set({ cardOpenMode: "page" })
       })
@@ -446,7 +452,18 @@ describe("opening a card beside the results", () => {
     }
     await act(() => router.navigate(-1))
     await waitFor(() => {
-      expect(router.state.location).toMatchObject({ search: "?q=bp01", state: { pages: 2 } })
+      expect(router.state.location).toMatchObject({ search: list, state: { pages: 2 } })
+    })
+    if (how !== "back") return
+    // Writing the pages back replaces the list's entry; forward to the card still finds it.
+    await act(() => router.navigate(1))
+    await waitFor(() => {
+      expect(new URLSearchParams(router.state.location.search).get("card")).toBe("BP01-001")
+    })
+    await loadBeside(3)
+    await act(() => router.navigate(-1))
+    await waitFor(() => {
+      expect(router.state.location).toMatchObject({ search: list, state: { pages: 3 } })
     })
   })
 })

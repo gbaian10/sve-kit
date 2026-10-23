@@ -24,6 +24,7 @@ import {
 import {
   type CardEntryState,
   type ListEntryState,
+  newListId,
   type OverlayEntryState,
   routeState,
 } from "../../app/listEntryState"
@@ -196,6 +197,13 @@ export function useCardOverlay({
     next.set(CARD_PARAM, cardParamOf(summary))
     const { overlay: previous, ...list } = entry
     const top = cellOf(root.current, key)?.getBoundingClientRect().top
+    // The list entry gets its id before the card is pushed over it (replace, then push).
+    const listId = alreadyOpen ? previous?.listId : (list.listId ?? newListId())
+    if (!alreadyOpen && list.listId === undefined)
+      void navigate(
+        { pathname: location.pathname, search: location.search },
+        { replace: true, preventScrollReset: true, state: { ...entry, listId } },
+      )
     const state: ListEntryState = {
       ...list,
       pages,
@@ -205,11 +213,7 @@ export function useCardOverlay({
         resultKey: key,
         ...routeState(summary),
         pushed: alreadyOpen ? (previous?.pushed ?? false) : true,
-        ...(alreadyOpen
-          ? previous?.listKey === undefined
-            ? {}
-            : { listKey: previous.listKey }
-          : { listKey: location.key }),
+        ...(listId === undefined ? {} : { listId }),
         opener: key,
         ...(summary.route ? { openerRoute: routeState(summary).route } : {}),
         ...(top === undefined ? {} : { openerTop: Math.round(top) }),
@@ -377,7 +381,7 @@ export function useCardOverlay({
         ...(resultKey === undefined ? {} : { resultKey }),
         ...(to.route ? { route: to.route } : {}),
         ...(previous?.pushed ? { pushed: true } : {}),
-        ...(previous?.listKey === undefined ? {} : { listKey: previous.listKey }),
+        ...(previous?.listId === undefined ? {} : { listId: previous.listId }),
         ...(previous?.opener === undefined ? {} : { opener: previous.opener }),
         ...(previous?.openerRoute === undefined ? {} : { openerRoute: previous.openerRoute }),
         ...(previous?.openerTop === undefined ? {} : { openerTop: previous.openerTop }),

@@ -26,7 +26,7 @@ import {
   forgetPagesBeside,
   keepPagesBeside,
   type ListEntryState,
-  type OverlayEntryState,
+  newListId,
   pagesBeside,
   routeState,
   useListEntryState,
@@ -93,11 +93,6 @@ const DEBOUNCE_MS = 150
 /** How long a cell returned to from a card stays outlined (#522: about a second). */
 const RETURN_FLASH_MS = 1000
 const RETURN_FRAMES = 30
-
-function withoutListKey(overlay: OverlayEntryState | undefined): OverlayEntryState {
-  const { listKey: _listKey, ...rest } = overlay ?? {}
-  return rest
-}
 
 function resultCell(root: HTMLElement | null, key: string): HTMLElement | undefined {
   return [...(root?.querySelectorAll<HTMLElement>("a[data-result-key]") ?? [])].find(
@@ -198,17 +193,17 @@ export function CardsPage() {
       setParams(next, { state, preventScrollReset })
       return
     }
+    const listed: ListEntryState = { ...state, listId: newListId() }
     void navigate(
       { pathname: location.pathname, search: searchOf(next) },
-      { replace: true, state, preventScrollReset },
+      { replace: true, state: listed, preventScrollReset },
     )
     const withCard = new URLSearchParams(next)
     withCard.set(CARD_PARAM, openCardParam)
     void navigate(
       { pathname: location.pathname, search: searchOf(withCard) },
-      // The new list's history key is unknown here: pages loaded beside this card are not carried.
       {
-        state: { ...state, overlay: { ...withoutListKey(overlay), pushed: true } },
+        state: { ...listed, overlay: { ...overlay, listId: listed.listId, pushed: true } },
         preventScrollReset: true,
       },
     )
@@ -285,11 +280,14 @@ export function CardsPage() {
   // Pages loaded while a card was open beside the results were written to the card's entry; the
   // list's own entry takes them up once it is current again, however the card was left.
   const entryPages = Math.max(1, entry.pages ?? 1)
-  const pages = Math.max(entryPages, pagesBeside(location.key) ?? 0)
+  const carried = openCard === null ? pagesBeside(entry.listId) : undefined
+  const pages = Math.max(entryPages, carried ?? 0)
+  const entryListId = entry.listId
   useEffect(() => {
-    if (pages > entryPages) updateEntry({ pages })
-    forgetPagesBeside(location.key)
-  }, [pages, entryPages, updateEntry, location.key])
+    if (carried === undefined || entryListId === undefined) return
+    if (carried > entryPages) updateEntry({ pages: carried })
+    forgetPagesBeside(entryListId)
+  }, [carried, entryPages, entryListId, updateEntry])
   const searchState = useMemo(() => parseQuery(new URLSearchParams(conditionsKey)), [conditionsKey])
   const searchQuery = useMemo<SearchQuery>(
     () => ({ state: searchState, edition }),
@@ -531,11 +529,11 @@ export function CardsPage() {
     return { kind: "navigate", state }
   }, [])
 
-  const overlayListKey = overlay?.pushed ? overlay.listKey : undefined
+  const overlayListId = overlay?.pushed ? overlay.listId : undefined
   const loadNextPage = useCallback(() => {
-    if (overlayListKey !== undefined) keepPagesBeside(overlayListKey, pages + 1)
+    if (overlayListId !== undefined) keepPagesBeside(overlayListId, pages + 1)
     updateEntry({ pages: pages + 1, listScroll: listScroll.current, scrollY: window.scrollY })
-  }, [updateEntry, pages, overlayListKey])
+  }, [updateEntry, pages, overlayListId])
 
   const quickBar: QuickBarClass[] = useMemo(
     () =>
