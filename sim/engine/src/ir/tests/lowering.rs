@@ -16,6 +16,7 @@ fn current_inputs() -> &'static Value {
             .args(["run", "--directory"])
             .arg(root.join("carddb"))
             .args([
+                "--isolated",
                 "--locked",
                 "--no-default-groups",
                 "python",
