@@ -170,7 +170,8 @@ describe.each([undefined, "card"])("the native C → P → R annotation slice (%
     await client.load()
     expect(client.status().state).toBe("ready")
     const before = requests.length
-    const value = await createResolver(client).resolve(
+    const resolver = createResolver(client)
+    const value = await resolver.resolve(
       { owner: { kind: "face_revision", id: "revision" }, field: "name", ordinal: null },
       "zh-Hant",
     )
@@ -180,8 +181,71 @@ describe.each([undefined, "card"])("the native C → P → R annotation slice (%
     expect(value?.selection?.["basis"]).toBe("own_source")
     expect(value?.translation?.["low_confidence"]).toBe(false)
     expect(value?.explanations[0]?.reference).toEqual({ kind: "keyword", id: "keyword" })
+    const full = createAnnotatedTextResolver(client)
+    for (const field of ["label", "effect"])
+      for (const language of ["ja", "en", "zh-Hant"]) {
+        const pointer = { owner: { kind: "keyword", id: "keyword" }, field, ordinal: null }
+        expect(await resolver.resolve(pointer, language)).toEqual(
+          await full.resolve(pointer, language),
+        )
+      }
     expect(requests).toHaveLength(before)
   })
+  it.each(["matching", "wrong-text", "wrong-concept", "conflicting-copy"])(
+    "validates %s name witnesses against the materialized owner",
+    async (mutation) => {
+      const { client } = await annotatedOrigin()
+      await client.load()
+      const snapshot = client.snapshot()
+      const fragment = snapshot?.bootstrap.find((f) => f.table === "face_revision")
+      const revision = fragment?.rows[0]
+      if (!snapshot || !fragment || !revision) throw new Error("synthetic revision missing")
+      const pointer = {
+        owner: { kind: "face_revision", id: "revision" },
+        field: "name",
+        ordinal: null,
+      }
+      const source = {
+        pointer,
+        text_unit_id: revision["name_unit_id"] ?? null,
+        name_concept_id: revision["name_concept_id"] ?? null,
+      }
+      const altered = {
+        ...source,
+        ...(mutation === "wrong-text" ? { text_unit_id: "wrong-text" } : {}),
+        ...(mutation === "wrong-concept" || mutation === "conflicting-copy"
+          ? { name_concept_id: "wrong-concept" }
+          : {}),
+      }
+      // A bad single witness fails on its own; a conflicting copy in another file fails even
+      // though the copy read last matches the owner.
+      const files =
+        mutation === "matching"
+          ? [[source]]
+          : mutation === "conflicting-copy"
+            ? [[altered], [source]]
+            : [[altered]]
+      const loaded = {
+        ...snapshot,
+        bootstrap: [
+          ...snapshot.bootstrap,
+          ...files.map((nameSources) => ({
+            ...fragment,
+            table: "__name_sources",
+            rows: [],
+            nameSources,
+          })),
+        ],
+      }
+      const patched = { ...client, snapshot: () => loaded }
+      const resolve = () => createResolver(patched).resolve(pointer, "zh-Hant")
+      if (mutation === "matching") {
+        const expected = await createResolver(client).resolve(pointer, "zh-Hant")
+        expect(await resolve()).toEqual(expected)
+        expect(await resolve()).toEqual(expected)
+      } else await expect(resolve()).rejects.toThrow("public-annotation/owner")
+    },
+  )
   it("reports an explanation without its text as a missing reference", async () => {
     const { client } = await annotatedOrigin()
     await client.load()

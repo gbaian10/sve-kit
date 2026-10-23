@@ -1,6 +1,6 @@
 import { fail } from "./errors"
 import { arrayValue, type JsonObject, type JsonValue, objectValue, stringValue } from "./json"
-import type { Fragment, View } from "./reader"
+import type { View } from "./reader"
 
 function displayRevisions(view: View): Set<JsonValue> {
   return new Set<JsonValue>(
@@ -20,20 +20,14 @@ function displayRevisions(view: View): Set<JsonValue> {
   )
 }
 
-export function annotationLocations(view: View, fragments: readonly Fragment[]) {
+/** `printingHomes`: printing id to the physical owner of the fragment with its full row. */
+export function annotationLocations(view: View, printingHomes: ReadonlyMap<string, JsonValue>) {
   const display = displayRevisions(view)
   const revisions = new Map(
     (view["face_revision"] ?? []).map((row) => [stringValue(row["id"]), row]),
   )
   const faces = new Map((view["face"] ?? []).map((row) => [stringValue(row["id"]), row]))
   const cards = new Map((view["card"] ?? []).map((row) => [stringValue(row["id"]), row]))
-  const printingHomes = new Map(
-    fragments
-      .filter((f) => f.table === "printing" && f.value["base"] === null)
-      .flatMap((f) =>
-        f.rows.map((row) => [stringValue(row["id"]), objectValue(f.value["owner"])["id"]] as const),
-      ),
-  )
   return (owner: JsonObject, field: string, ordinal: JsonValue = null) => {
     const kind = stringValue(owner["kind"])
     let home: JsonValue = null
