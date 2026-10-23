@@ -3,6 +3,7 @@ import { fetchBytes, type Fetcher } from "./cdn"
 import { SnapshotError } from "./format-v3/errors"
 import { integerValue, type JsonObject, stringValue } from "./format-v3/json"
 import { transferDigest } from "./integrity"
+import { retainManifest } from "./retained-manifests"
 
 export interface RawBlobDescriptor {
   readonly key: string
@@ -117,6 +118,17 @@ export class RawBlobStore {
     }
   }
 
+  async retain(files: ReadonlyMap<string, JsonObject>, hash: string): Promise<void> {
+    if (!this.storage) return
+    try {
+      await retainManifest(this.storage, this.base, hash, files)
+      await trimDataCaches(this.storage, this.base, 0, false, true)
+    } catch {
+      this.failures += 1
+      this.persistent = false
+    }
+  }
+
   private slot(file: RawBlobDescriptor): string {
     return `${this.base}/__sve-raw/${encodeURIComponent(file.sha256)}/bytes`
   }
@@ -200,10 +212,14 @@ export class RawBlobStore {
         await cache.put(slot, response())
       } catch {
         if (!this.storage) return
-        await trimDataCaches(this.storage, this.base, bytes.length, true)
+        if (!(await trimDataCaches(this.storage, this.base, bytes.length, true)))
+          throw new Error("Cache capacity")
         await cache.put(slot, response())
       }
-      if (this.storage) await trimDataCaches(this.storage, this.base)
+      if (this.storage && !(await trimDataCaches(this.storage, this.base))) {
+        await cache.delete(slot)
+        throw new Error("Cache capacity")
+      }
       if (this.failures === failures) this.persistent = true
     } catch {
       this.failures += 1

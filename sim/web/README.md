@@ -193,6 +193,15 @@ Downloaded bytes are hashed before transfer to the decode Worker; an idle worker
 its parsing heap after one second. Tests use the same decoder without a Worker. Raw tuples
 are released after decoding, rather than kept alongside row objects.
 
+Adopted snapshots retain two complete manifest hash-reference plans in CacheStorage.
+The plans include every file in each manifest, regardless of the search or download subset,
+and the manifest hash itself. GC removes unreferenced raw bytes first. Necessary raw and
+derived records for those two manifests survive capacity and quota trimming; a batch that
+cannot fit reports partial completion. A failed adoption does not replace the retained plans.
+Plan bytes count toward the shared data budget and are removed by clearing automatic caches.
+Cross-tab collection has no lock: readers verify cache hits and recover removed records as
+ordinary misses. Retention cannot promise atomic offline availability across tabs or browser eviction.
+
 Image metadata uses the manifest's exact fragment locator: permanent printing owner and
 printing bucket select a home-set media file. The viewport hook prefetches half a viewport
 height above and one and a half below, using pixel margins rebuilt on resize. Faces nearest

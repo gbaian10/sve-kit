@@ -6,6 +6,7 @@ import { stringValue } from "./format-v3/json"
 import { transferDigest } from "./integrity"
 import { RawBlobStore } from "./raw-blobs"
 import { appRequests } from "./request-queue"
+import { retainManifest } from "./retained-manifests"
 
 interface AdoptedManifest {
   readonly base: string
@@ -270,7 +271,11 @@ export class BackgroundDownloads {
         reject("storage")
         return
       }
+      const files = this.selected?.files
+      if (!files || this.plan !== plan) return
+      await retainManifest(storage, plan.selection.base, plan.selection.manifestHash, files)
       const budget = await readDataCacheBudget(storage, plan.selection.base)
+      await budget.trim(0, false, true)
       run.signal.throwIfAborted()
       if (!budget.fits(plan.blobs)) {
         reject("capacity")

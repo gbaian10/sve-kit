@@ -1,10 +1,15 @@
+import { retainedReferences } from "./retained-manifests"
+
 const MIB = 1024 * 1024
 export const VIEW_BUDGET = 2 * MIB
 const ROOT_BUDGET = 96 * MIB
 const ORIGIN_BUDGET = 128 * MIB
 
+// The adopted-selection pointer names a retained manifest; losing it would drop the active choice.
+const activeSelection = (url: string) => /\/active$/u.test(url)
+
 export function isDataCache(name: string): boolean {
-  return /^sve-(search-|snapshot:|images-|raw:)/u.test(name)
+  return /^sve-(search-|snapshot:|images-|raw:|retained:)/u.test(name)
 }
 
 /** Counts declared payload bytes without trimming or materializing decoded data. */
@@ -29,15 +34,17 @@ export async function trimDataCaches(
   root: string,
   reserve = 0,
   quota = false,
-): Promise<void> {
+  collect = false,
+): Promise<boolean> {
   const budget = await readDataCacheBudget(storage, root)
-  await budget.trim(reserve, quota)
+  return budget.trim(reserve, quota, collect)
 }
 
 /** A quota retry reuses the same inventory before and after inserting its replacement. */
 export async function readDataCacheBudget(storage: CacheStorage, root: string) {
   const encoded = encodeURIComponent(root)
   const names = (await storage.keys()).filter(isDataCache)
+  const retained = await retainedReferences(storage, names)
   const entries: {
     cache: Cache
     url: string
@@ -46,6 +53,8 @@ export async function readDataCacheBudget(storage: CacheStorage, root: string) {
     view: boolean
     touched: number
     hash?: string
+    rawHash?: string
+    protected: boolean
   }[] = []
   for (const name of names) {
     const cache = await storage.open(name)
@@ -59,6 +68,8 @@ export async function readDataCacheBudget(storage: CacheStorage, root: string) {
         continue
       }
       const hash = key.url.match(/\/sha256%3A([a-f0-9]{64})$/u)?.[1]
+      const rawHash = key.url.match(/\/__sve-raw\/(sha256%3A[a-f0-9]{64})\/bytes$/u)?.[1]
+      const refs = retained.get(name.slice(name.lastIndexOf(":") + 1))
       entries.push({
         cache,
         url: key.url,
@@ -67,10 +78,22 @@ export async function readDataCacheBudget(storage: CacheStorage, root: string) {
         view: name.startsWith("sve-search-view:"),
         touched: Number(response.headers.get("x-sve-touched") ?? 0),
         ...(hash ? { hash } : {}),
+        ...(rawHash ? { rawHash: decodeURIComponent(rawHash) } : {}),
+        protected:
+          name.startsWith("sve-retained:") ||
+          !!(
+            refs &&
+            (rawHash
+              ? refs.raw.has(decodeURIComponent(rawHash))
+              : hash
+                ? !name.startsWith("sve-search-view:") && refs.manifests.has(`sha256:${hash}`)
+                : activeSelection(key.url))
+          ),
       })
     }
   }
-  const trim = async (reserve = 0, quota = false) => {
+  const trim = async (reserve = 0, quota = false, collect = false) => {
+    let reclaimed = 0
     entries.sort((a, b) => a.touched - b.touched)
     const hashes = [
       ...new Set(
@@ -82,22 +105,33 @@ export async function readDataCacheBudget(storage: CacheStorage, root: string) {
     ].slice(0, 2)
     for (let i = entries.length - 1; i >= 0; i -= 1) {
       const e = entries[i]
-      if (e?.root && e.hash && !hashes.includes(e.hash)) {
+      const refs = retained.get(encoded)
+      if (
+        e?.root &&
+        !e.protected &&
+        ((e.hash &&
+          (!refs || collect) &&
+          !(refs ? refs.manifests.has(`sha256:${e.hash}`) : hashes.includes(e.hash))) ||
+          (collect && refs && e.rawHash && !refs.raw.has(e.rawHash)))
+      ) {
         await e.cache.delete(e.url)
+        reclaimed += e.bytes
         entries.splice(i, 1)
       }
     }
     const latestView = [...entries].reverse().find((e) => e.root && e.view)
     const pinned = (entry: (typeof entries)[number]) =>
-      entry === latestView || (entry.root && entry.hash === hashes[0] && !entry.view)
+      entry.protected ||
+      entry === latestView ||
+      (entry.root && entry.hash === hashes[0] && !entry.view)
     let total = entries.reduce((n, e) => n + e.bytes, reserve)
     let own = entries.filter((e) => e.root).reduce((n, e) => n + e.bytes, reserve)
     let views = entries.filter((e) => e.root && e.view).reduce((n, e) => n + e.bytes, 0)
-    let reclaimed = 0
     const eviction = [...entries].sort(
       (a, b) => Number(pinned(a)) - Number(pinned(b)) || a.touched - b.touched,
     )
     for (const e of eviction) {
+      if (e.protected) continue
       // An active generation that cannot fit must fall back to misses rather than exceed the budget.
       if (pinned(e) && total <= ORIGIN_BUDGET && own <= ROOT_BUDGET && views <= VIEW_BUDGET)
         continue
@@ -121,6 +155,12 @@ export async function readDataCacheBudget(storage: CacheStorage, root: string) {
       if (e.root) own -= e.bytes
       if (e.root && e.view) views -= e.bytes
     }
+    return (
+      total <= ORIGIN_BUDGET &&
+      own <= ROOT_BUDGET &&
+      views <= VIEW_BUDGET &&
+      (!quota || reclaimed >= reserve)
+    )
   }
   return {
     fits: (blobs: readonly { readonly sha256: string; readonly bytes: number }[]) => {
@@ -150,10 +190,17 @@ export async function readDataCacheBudget(storage: CacheStorage, root: string) {
         root: name.endsWith(`:${encoded}`) || name.startsWith(`sve-images-${encoded}:-`),
         view: name.startsWith("sve-search-view:"),
         ...(hash ? { hash } : {}),
+        protected: !!(
+          hash &&
+          !name.startsWith("sve-search-view:") &&
+          retained.get(name.slice(name.lastIndexOf(":") + 1))?.manifests.has(`sha256:${hash}`)
+        ),
       })
     },
   }
 }
+let lastTouched = 0
 export function bodyHeaders(bytes: number): Record<string, string> {
-  return { "x-sve-bytes": String(bytes), "x-sve-touched": String(Date.now()) }
+  lastTouched = Math.max(Date.now(), lastTouched + 1)
+  return { "x-sve-bytes": String(bytes), "x-sve-touched": String(lastTouched) }
 }

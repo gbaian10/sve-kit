@@ -24,7 +24,7 @@ export class SearchBlobs {
 
   async retainPlan(files: ReadonlyMap<string, JsonObject>, manifestHash: string) {
     await this.migration
-    // GC is deferred; only a complete manifest may define raw references.
+    await this.raw.retain(files, manifestHash)
     return rawRetentionPlan([{ hash: manifestHash, files }])
   }
 
