@@ -493,6 +493,9 @@ Capacity 的候選是本次移動／建立集合，與入場時守護選擇及�
 actor 固定為相對 Active 的 RequireOne(Opponents)，基數 1..1（CR7.4.5、8.4.7）；
 domain 必須為該 actor 的 QuickActionOrPass，
 可見性只給該玩家；不依手牌內容刪除窗口。這些入口不是規則執行器，也不能嵌入卡片本文。
+Quick 的許可正規形、合法動作及續體依 [Quick 契約 §4–5](quick-semantics.md#4-合法動作可見性與答題)；
+目前 Permission 的動作只收 Destroy／Banish，卡片 Quick 所需的 `PlayCard` 許可仍拒絕；
+該精確 header／declaration 例外待實作，良構通過也不等於已驗執行。
 
 ## May 與目標角色
 
