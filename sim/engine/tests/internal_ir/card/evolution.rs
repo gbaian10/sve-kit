@@ -1,7 +1,6 @@
 use super::*;
 use std::sync::OnceLock;
 use sve_engine::game::internal::InputDomain;
-use sve_engine::ir::lowering::ExpandedLowerer;
 
 #[expect(
     clippy::panic,
@@ -79,7 +78,10 @@ fn position_with_decks(
             .unwrap(),
     );
     let actor = if seat == 1 { "P1" } else { "P2" };
-    let mut initial = setup(seat, json!([{"id":"d","card":"unit-spell"}]));
+    let mut initial = setup(
+        seat,
+        json!([{"id":"d","card":"unit-spell"},{"id":"d2","card":"unit-spell"},{"id":"d3","card":"unit-spell"}]),
+    );
     initial["turn"]["active"] = json!(actor);
     initial["turn"]["elapsed_turns"][actor] = json!(7);
     initial["players"][actor]["sep"] = json!(1);
@@ -118,10 +120,7 @@ fn programs() -> &'static (WellFormedCardProgram, WellFormedCardProgram) {
 }
 
 fn lowered_programs() -> (WellFormedCardProgram, WellFormedCardProgram) {
-    let lowered = ExpandedLowerer::new()
-        .unwrap()
-        .lower(fanfare::expanded::tree())
-        .unwrap();
+    let lowered = second::lowerer().lower(fanfare::expanded::tree()).unwrap();
     let intrinsic = relabel(
         lowered["synthetic-evolution"].card().abilities[0].clone(),
         "unit-follower",
@@ -392,4 +391,61 @@ fn printed_activation_quota_tracks_turn_reentry_and_evolved_definition() {
         game.activate_internal_card("u", AbilityId(11), actor),
         Err(sve_engine::EngineFailure::IllegalPlay(_))
     ));
+}
+
+#[test]
+fn super_evolve_pending_is_kind_checked_and_controller_orders_both_facets() {
+    let (base, _) = programs();
+    let mut triggers = second::evolve_triggers().into_iter();
+    let mut evolve = relabel(triggers.next().unwrap(), "unit-form", 1);
+    evolve.node.id = AbilityId(1);
+    let mut super_evolve = relabel(triggers.next().unwrap(), "unit-form", 2);
+    super_evolve.node.id = AbilityId(2);
+    let mut invalid = super_evolve.clone();
+    let TriggerCondition::Event {
+        pattern: EventPattern::Evolve { predicate, .. },
+    } = &mut invalid.node.trigger.as_mut().unwrap().on
+    else {
+        panic!("evolve");
+    };
+    let Expr::Compute(and) = predicate else {
+        panic!("and");
+    };
+    let Predicate::And { predicates } = and.as_mut() else {
+        panic!("and");
+    };
+    *predicate = predicates[0].clone();
+    WellFormedCardProgram::check(CardProgram {
+        abilities: vec![invalid],
+        card_play_costs: vec![],
+    })
+    .unwrap_err();
+    let form = card(vec![evolve, super_evolve]);
+    for super_payment in [0, 1] {
+        let mut game = position(1, base, &form);
+        game.internal_rule_action(&json!({"do":"evolve","source":"s","evolve_card":"e","pay":{"pp":1,"ep":0,"sep":super_payment}})).unwrap();
+        let q = game.internal_pending_choice().unwrap().unwrap();
+        assert!(
+            matches!(&q.domain, InputDomain::Pending(options) if options.len() == if super_payment==1 {2} else {1})
+        );
+        let handle = if super_payment == 1 { 2 } else { 1 };
+        let first = resolved(
+            game.answer_internal_card(q.actor, q.token, Answer::Pending(handle))
+                .unwrap(),
+        );
+        assert_eq!(first.source.definition, AbilityId(handle));
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["P1"]["sep"],
+            1 - super_payment
+        );
+        game.resume_internal_card().unwrap();
+        if super_payment == 1 {
+            let q = game.internal_pending_choice().unwrap().unwrap();
+            assert!(matches!(&q.domain, InputDomain::Pending(options) if options.len()==1));
+            game.answer_internal_card(q.actor, q.token, Answer::Pending(1))
+                .unwrap();
+            game.resume_internal_card().unwrap();
+        }
+        assert!(game.internal_pending_choice().unwrap().is_none());
+    }
 }

@@ -1,5 +1,6 @@
 //! Authority occurrences share one queue and return to state-based checks after each play.
 use crate::ir::LimitSpec;
+use crate::ir::events::timing::leave_filter;
 
 use super::super::source::{SourceInformation, SourceSnapshot};
 use super::super::{Answer, DecisionToken, DecisionView, InputDomain, player_id};
@@ -53,7 +54,7 @@ pub(super) struct PendingOccurrence {
 
 pub(in crate::game) struct DeparturePlan {
     updates: Vec<(u64, SourceSnapshot)>,
-    lastwords: Vec<(PendingOccurrence, Object)>,
+    departures: Vec<(PendingOccurrence, Object)>,
 }
 
 pub(super) fn check_header(ability: &Ability) -> Result<()> {
@@ -137,10 +138,10 @@ impl Game {
             source,
             time: GameTime {
                 turn: TurnId(self.state.schedule.current()?),
-                phase: if self.state.turn["phase"] == "end" {
-                    Phase::End
-                } else {
-                    Phase::Main
+                phase: match self.state.turn["phase"].as_str() {
+                    Some("end") => Phase::End,
+                    Some("start") => Phase::Start,
+                    _ => Phase::Main,
                 },
                 point: Timestamp(id),
             },
@@ -223,21 +224,39 @@ impl Game {
             .or_insert(next))
     }
 
-    /// Lastword abilities effective just before this field object leaves.
-    fn printed_lastwords(&self, object: &Object) -> Result<Vec<Located<Ability>>> {
+    fn printed_departures(&self, object: &Object, to: &str) -> Result<Vec<Located<Ability>>> {
         if !self.card_runtime.cards.values().any(|program| {
-            program
-                .card()
-                .abilities
-                .iter()
-                .any(|a| is_lastword(&a.node))
+            program.card().abilities.iter().any(|a| {
+                matches!(
+                    a.node.trigger.as_ref().map(|t| &t.on),
+                    Some(TriggerCondition::Event {
+                        pattern: EventPattern::LeaveField { .. }
+                    })
+                )
+            })
         }) {
             return Ok(Vec::new());
         }
+        let own_turn = object.controller == self.active();
         Ok(self
             .internal_printed_abilities(&object.id)?
             .into_iter()
-            .filter(|a| is_lastword(&a.node))
+            .filter(|a| {
+                if is_lastword(&a.node) {
+                    return to == "cemetery";
+                }
+                let Some(TriggerSpec {
+                    on:
+                        TriggerCondition::Event {
+                            pattern: EventPattern::LeaveField { binding, predicate },
+                        },
+                    ..
+                }) = &a.node.trigger
+                else {
+                    return false;
+                };
+                leave_filter(*binding, predicate).is_some_and(|own| !own || own_turn)
+            })
             .collect())
     }
 
@@ -249,7 +268,7 @@ impl Game {
     ) -> Result<DeparturePlan> {
         let mut plan = DeparturePlan {
             updates: Vec::new(),
-            lastwords: Vec::new(),
+            departures: Vec::new(),
         };
         let before = SnapshotId(self.state.ir_epoch);
         for pending in &self.card_runtime.pending {
@@ -269,12 +288,24 @@ impl Game {
         }
         for id in ids {
             let object = self.object(id)?.clone();
-            if object.zone != "field" || destinations.get(id).is_none_or(|to| to != "cemetery") {
+            let Some(destination) = destinations.get(id).map(String::as_str) else {
+                continue;
+            };
+            if object.zone != "field" || destination == "field" {
                 continue;
             }
-            let abilities = self.printed_lastwords(&object)?;
+            let abilities = self.printed_departures(&object, destination)?;
             let Some(definition) = abilities.first().map(|ability| ability.node.id) else {
                 continue;
+            };
+            // Only a subscribed departure needs a typed destination; other moves stay as before.
+            let to = match destination {
+                "cemetery" => ZoneKind::Cemetery,
+                "hand" => ZoneKind::Hand,
+                "deck" => ZoneKind::Deck,
+                "banish" => ZoneKind::Banish,
+                "ex" => ZoneKind::Ex,
+                _ => return Err(unsupported("departure destination")),
             };
             let actor = player_id(&object.controller)?;
             let effect_source = self.card_runtime.active_source;
@@ -301,7 +332,7 @@ impl Game {
                     lki: snapshot.view(),
                     to: RuntimeZoneRef {
                         player: player_id(&object.owner)?,
-                        kind: ZoneKind::Cemetery,
+                        kind: to,
                     },
                 };
                 let occurrence = self.new_pending(
@@ -312,7 +343,7 @@ impl Game {
                     header.clone(),
                     Some(leave),
                 )?;
-                plan.lastwords.push((occurrence, object.clone()));
+                plan.departures.push((occurrence, object.clone()));
             }
         }
         Ok(plan)
@@ -322,7 +353,7 @@ impl Game {
         &mut self,
         plan: DeparturePlan,
     ) -> Result<()> {
-        if plan.updates.is_empty() && plan.lastwords.is_empty() {
+        if plan.updates.is_empty() && plan.departures.is_empty() {
             return Ok(());
         }
         self.state.ir_epoch = self
@@ -349,7 +380,7 @@ impl Game {
             }
         }
         let mut admitted = Vec::new();
-        for (mut pending, previous) in plan.lastwords {
+        for (mut pending, previous) in plan.departures {
             if self.object(&previous.id)?.generation == previous.generation {
                 return Err(invalid("departure did not commit"));
             }
@@ -512,6 +543,14 @@ impl Game {
                 } = &trigger.on
             {
                 execution.entry_object = Some((binding.key(), event.object));
+            }
+            if let (Some(EventPayload::Damage { event }), Some(trigger)) =
+                (&pending.timing, &pending.ability.node.trigger)
+                && let TriggerCondition::Event {
+                    pattern: EventPattern::Damage { binding, .. },
+                } = &trigger.on
+            {
+                execution.damage_event = Some((binding.key(), *event));
             }
             execution.ability = Some(pending.source);
             execution.source_information = Some(pending.information);

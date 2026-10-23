@@ -304,7 +304,9 @@ impl Checker {
                 self.visible_object(self.env.access.get(&found.key()))?;
                 self.candidate(*object, predicate)
             }
-            Predicate::PhaseEquals { .. }
+            Predicate::EvolutionEquals { .. }
+            | Predicate::RecipientIsFollower { .. }
+            | Predicate::PhaseEquals { .. }
             | Predicate::ZoneEquals { .. }
             | Predicate::EventCause { .. }
             | Predicate::Equal { .. }

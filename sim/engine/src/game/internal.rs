@@ -342,6 +342,7 @@ pub(super) struct Execution {
     ability: Option<RuntimeAbilitySource>,
     source_information: Option<source::SourceInformation>,
     entry_object: Option<((ScopeId, u64), ObjectRef)>,
+    damage_event: Option<((ScopeId, u64), DamageEvent)>,
     targets: BTreeMap<(ScopeId, u64), card::selection::TargetWait>,
     play: Option<card::play::PlayState>,
     spell: bool,
@@ -507,6 +508,7 @@ impl Game {
                 ability: None,
                 source_information: None,
                 entry_object: None,
+                damage_event: None,
                 targets: BTreeMap::new(),
                 play: None,
                 spell: false,
@@ -1105,18 +1107,18 @@ impl Game {
                             .checked_add(positive.get())
                             .ok_or_else(|| invalid("damage outcome overflow"))?;
                         hits.push(json!({"source":source_id,"target":target,"amount":amount,"battle":false,"attack":false}));
-                        facts.push(Fact::Damage(DamageEvent {
+                        facts.push(DamageEvent {
                             source,
                             recipient,
                             amount: PositiveInt(positive),
                             flags: DamageFlags::Ability,
                             controller: actor,
-                        }));
+                        });
                     }
                 }
                 let frame = execution.frame();
-                self.apply_damage(&hits, &frame)?;
-                execution.facts.extend(facts);
+                self.apply_damage(&hits, &frame, Some(&facts))?;
+                execution.facts.extend(facts.into_iter().map(Fact::Damage));
                 execution.receipts.insert(
                     instruction.receipt,
                     InstructionOutcome::Damage(DamageQuantityOutcome {

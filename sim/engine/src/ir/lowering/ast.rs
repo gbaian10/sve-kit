@@ -41,6 +41,7 @@ pub(super) struct Ability {
     pub attack_time: Option<Body>,
     pub auto: Option<Auto>,
     pub evolve_time: Option<Body>,
+    pub super_evolve_time: Option<Body>,
     pub evolve: Option<Evolution>,
     pub activate: Option<Activate>,
     pub spell: Option<Body>,
@@ -514,16 +515,21 @@ pub(super) enum PhaseSubscription {
     Phase(PhaseSubscriptionPayload),
     #[serde(rename = "enter_field")]
     EnterField(EntrySubscription),
+    #[serde(rename = "left_field")]
+    LeaveField(LeaveSubscription),
+    #[serde(rename = "damaged")]
+    Damage(DamageSubscription),
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct PhaseSubscriptionPayload {
-    #[serde(rename = "which")]
-    pub _which: EndPhase,
+    pub which: SubscribedPhase,
     pub whose: PhasePlayer,
 }
 #[derive(Deserialize)]
-pub(super) enum EndPhase {
+pub(super) enum SubscribedPhase {
+    #[serde(rename = "main")]
+    Main,
     #[serde(rename = "end")]
     End,
 }
@@ -711,4 +717,29 @@ pub(super) struct PaidCondition {
 #[serde(deny_unknown_fields)]
 pub(super) struct PaidReceipt {
     pub receipt: String,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct LeaveSubscription {
+    #[serde(rename = "ref")]
+    pub _reference: This,
+    pub during: Option<During>,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct DamageSubscription {
+    #[serde(rename = "recipient")]
+    pub _recipient: This,
+    pub kind: Option<AbilityDamage>,
+    pub during: Option<DamageDuring>,
+}
+#[derive(Deserialize)]
+pub(super) enum AbilityDamage {
+    #[serde(rename = "ability")]
+    Ability,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct DamageDuring {
+    pub turn: EntryPlayer,
 }

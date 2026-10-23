@@ -255,11 +255,7 @@ impl Game {
             }
         }
         self.state.turn["elapsed_turns"][&first] = json!(1_i64);
-        self.state.turn["phase"] = json!("main");
-        self.state.flow = json!({"kind":"main"});
-        let pending = self.collect_triggers("main_start", &[], &json!({"rule":"7.3"}))?;
-        self.enqueue(pending);
-        Ok(())
+        self.start_main()
     }
 
     fn shuffle_opening_decks(&mut self) -> Result<()> {

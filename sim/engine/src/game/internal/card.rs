@@ -3,6 +3,7 @@ use super::{
     Context, Execution, Fact, Game, InstructionOutcome, Progress, admission, int, player_id,
     seat_name, unsupported,
 };
+use crate::ir::TurnId;
 use crate::ir::quick::{card_permission, is_printed_quick};
 use crate::ir::{
     Ability, AbilityId, AbilityInstanceId, AbilityKind, AbilityOrigin, AbilitySource, Action,
@@ -12,7 +13,7 @@ use crate::ir::{
     QuantityUnit, Resource, ResourceOperation, RuleId, RuntimeAbilitySource, Selector, SourceSpan,
     StepwiseMode, WellFormedCardProgram, ZoneKind,
 };
-use crate::ir::{ConsumptionPoint, EventPattern, LimitSpec, ModeUse, TriggerCondition, TurnId};
+use crate::ir::{ConsumptionPoint, LimitSpec, ModeUse};
 use crate::{Result, invalid};
 use alloc::collections::{BTreeMap, BTreeSet};
 use core::{mem::take, result, slice};
@@ -249,16 +250,12 @@ impl Game {
                 .as_ref()
                 .ok_or_else(|| invalid("missing body"))?;
             check_nodes(&body.steps, &located.source, &ability.source)?;
-            let entry = ability
-                .trigger
-                .as_ref()
-                .and_then(|trigger| match &trigger.on {
-                    TriggerCondition::Event {
-                        pattern: EventPattern::EnterField { binding, .. },
-                    } => Some(*binding),
-                    _ => None,
-                });
-            admission::check_card(body, &located.source, &ability.source, entry)?;
+            admission::check_card(
+                body,
+                &located.source,
+                &ability.source,
+                ability.trigger.as_ref(),
+            )?;
             play::check(ability, &located.source)?;
         }
         self.card_runtime.cards.insert(card_no.into(), card.clone());
@@ -637,6 +634,7 @@ fn printed_origin(origin: &AbilityOrigin) -> Result<(&FaceId, &Nat)> {
                 | KeywordId::Lastword
                 | KeywordId::OnAttack
                 | KeywordId::OnEvolve
+                | KeywordId::OnSuperEvolve
                 | KeywordId::Evolution
                 | KeywordId::Quick,
             origin,

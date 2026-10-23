@@ -585,6 +585,7 @@ impl Game {
             ability: None,
             source_information: None,
             entry_object: None,
+            damage_event: None,
             targets: BTreeMap::new(),
             play: None,
             spell: false,

@@ -2,6 +2,7 @@
     clippy::indexing_slicing,
     reason = "Validated JSON uses total read indexing; writes target constructed objects."
 )]
+use crate::ir::Phase;
 use core::mem::take;
 use serde_json::{Value, json};
 
@@ -756,6 +757,16 @@ impl Game {
         Ok(())
     }
 
+    /// Opening and turn start share this entry so Main Begin fires exactly once per turn.
+    pub(super) fn start_main(&mut self) -> Result<()> {
+        self.state.turn["phase"] = json!("main");
+        self.state.flow = json!({"kind":"main"});
+        self.internal_phase_event(Phase::Main, SnapshotId(self.state.ir_epoch))?;
+        let pending = self.collect_triggers("main_start", &[], &json!({"rule":"7.3"}))?;
+        self.enqueue(pending);
+        Ok(())
+    }
+
     fn start_end(&mut self) -> Result<()> {
         let before = SnapshotId(self.state.ir_epoch);
         self.state.turn["phase"] = json!("end");
@@ -763,7 +774,7 @@ impl Game {
         let pending = self.collect_triggers("end", &[], &json!({"decision":self.node}))?;
         self.enqueue(pending);
         self.enqueue_delayed_end()?;
-        self.internal_end_event(before)?;
+        self.internal_phase_event(Phase::End, before)?;
         Ok(())
     }
     fn guard_act(&mut self, decision: &Value) -> Result<bool> {
@@ -862,15 +873,9 @@ impl Game {
                 && entry["window_player"] == seat
                 && int(&entry["window_turn"]) <= elapsed)
         });
-        // Expiry at 7.4.8 cannot destroy a follower before the next start procedures.
-        self.checks()?;
-        if self.state.game["ended"] == true {
-            return Ok(());
-        }
-        self.state.turn["phase"] = json!("main");
-        let pending = self.collect_triggers("main_start", &[], &json!({"rule":"7.3"}))?;
-        self.enqueue(pending);
-        Ok(())
+        // Start checks can leave typed occurrences that must finish before Main begins.
+        self.state.flow = json!({"kind":"main","stage":"start-check"});
+        self.checks()
     }
 
     pub(super) fn win_by_effect(&mut self, node: &Value, frame: &Frame) -> Result<()> {
@@ -936,6 +941,12 @@ impl Game {
         }
         if self.clean_field_rules()? {
             return self.checks();
+        }
+        if self.state.pending.is_empty()
+            && !self.card_runtime.has_pending()
+            && self.state.flow["stage"] == "start-check"
+        {
+            self.start_main()?;
         }
         if self.state.pending.is_empty()
             && !self.card_runtime.has_pending()

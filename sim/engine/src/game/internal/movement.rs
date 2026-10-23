@@ -59,7 +59,7 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
             if !matches!(
                 movement.to,
                 MoveDestination::Owners {
-                    zone: OwnerZone::Cemetery | OwnerZone::Banish
+                    zone: OwnerZone::Cemetery | OwnerZone::Banish | OwnerZone::Hand
                 }
             ) || movement.position.is_some()
                 || movement.order.is_some()
@@ -198,7 +198,8 @@ impl Game {
                 let (zone, kind) = match zone {
                     OwnerZone::Cemetery => ("cemetery", ZoneKind::Cemetery),
                     OwnerZone::Banish => ("banish", ZoneKind::Banish),
-                    _ => return Err(unsupported("private movement destination")),
+                    OwnerZone::Hand => ("hand", ZoneKind::Hand),
+                    OwnerZone::Deck => return Err(unsupported("private movement destination")),
                 };
                 if reason != MoveReason::Put {
                     return Err(unsupported("movement reason"));
@@ -210,6 +211,9 @@ impl Game {
         for &member in &members {
             let object = self.object(execution.object_id(member)?)?;
             if object.generation == member.generation.0 {
+                if kind == ZoneKind::Hand && object.zone != "field" {
+                    return Err(unsupported("only public field departures to hand"));
+                }
                 public_zone(&object.zone)?;
             }
         }
@@ -418,6 +422,16 @@ impl Game {
             None,
             &frame,
         )?;
+        if kind == ZoneKind::Hand {
+            // As with draws, the public card stays known but its new hand slot is not located.
+            for (_, id, previous, _) in &plans {
+                for (viewer, knowledge) in &mut self.state.knowledge {
+                    if *viewer != previous.owner {
+                        knowledge.located.remove(id);
+                    }
+                }
+            }
+        }
         self.state.ir_epoch = self
             .state
             .ir_epoch

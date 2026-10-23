@@ -142,9 +142,14 @@ Fanfare 由共同入場 producer 保存原來源、controller、instance 與公�
 已有進化關聯的持有者，其有效印刷能力來自受驗進化卡；離場前保存該印刷定義與來源資訊，
 不沿 base 定義觸發。每個成功成員保留獨立原事實與
 before／after、直接 cause；規則移區的 source=None，不冒充造成先前傷害的能力。
-正式本文承載公開區 owner 墓地／消滅移動，以及下述公開自方從者入場；一般回手及跨世代跟隨仍拒絕。
+正式本文承載公開區 owner 墓地／消滅移動，以及下述公開自方從者入場。另依
+[第二批觸發契約](trigger-second-semantics.md#5-自身離場)承載公開 Field→Owner Hand 的 Put；
+回手後只保留公開 before 與 LKI，不讓對手定位手牌新世代。一般 Move receipt 的 MoveAfter
+若指向實際回手成員，求值時拒絕並回復整次嘗試；這是執行期拒絕，不是載入期靜態拒絕。
+其他一般回手及未准入的跨世代跟隨仍拒絕。
 
-Fanfare、長寫 EnterField、Lastword、OnEvolve、OnAttack 及 End Begin 共用一個私有待機集合。`internal_pending_choice()` 在穩定檢查時點建立題目，
+Fanfare、長寫 EnterField、Lastword、OnEvolve、OnSuperEvolve、OnAttack、Main／End Begin、
+自身 LeaveField 與 Damage 共用一個私有待機集合。`internal_pending_choice()` 在穩定檢查時點建立題目，
 回合玩家有待機就由該玩家選一個，否則由對手選。`answer_internal_card` 接 `Answer::Pending(handle)`；
 候選只投影當次 handle、已公開卡號、印刷行與事件的過去公開場位／入場來源，不交出 source／instance／snapshot。
 錯 actor、token、handle 或 payload 保留原題；選中後是獨立 execution，完成再交 CheckTiming。
@@ -158,7 +163,7 @@ Fanfare、長寫 EnterField、Lastword、OnEvolve、OnAttack 及 End Begin 共�
 BP01-118 與 BP01-P25 的測試由 C0 展開、lowering、整卡載入及 authority 程序驗證相應傷害片段；
 P25 的送墓成本來自明示的合成測試輔助能力。來源座標為候選 fixture，不宣稱永久來源驗證或公開 capability。
 
-`internal_rule_action` 僅接受 evolve、attack、end-phase 與 end-discard 的既有規則動作，
+`internal_rule_action` 僅接受 evolve、attack、end-phase、end-discard 與開局 mulligan 的既有規則動作，
 沿原有時機、目標與支付／姿勢驗證；忙碌、待機及未完成 CheckTiming 時拒絕，不接原型 play／activate。
 守護屬原型 keyword，載入整卡的局面整體拒絕，所以不開 guard-act。時機不符的動作回 `cannot-play` 等拒絕結果，不視為成功。
 OnAttack 限 Printed 關鍵字、自身 Attack、AfterEntry、PerFact、無 PlaySpec；事件在合法目標與 act
@@ -170,6 +175,23 @@ End Begin 限 Printed、Phase(End, Begin)、自己的／對手的／每個 end p
 
 BP10-122 的 attack-time 抽一片段與 BP09-P17 的 end 抽三片段經 C0／lowering 驗證；後者只取抽牌指示，
 不宣稱其完整能力已支援。攻擊測試加上合成待機能力，驗結算前來源加攻送墓後讀 LKI 4。
+
+### 第二批自動能力入口
+
+有限形狀與排除以[第二批觸發契約](trigger-second-semantics.md) §2–7 為準；
+lowering、良構檢查與執行器沿用既有事件型別，不擴張公開 capability 或整卡准入。
+OnSuperEvolve 在受驗超進化付款及加值後，與 OnEvolve 共用同一 Evolve 事實，由 controller 選序；
+普通進化不觸發 OnSuperEvolve。首回合與正常回合完成 start 檢查後共用 Main Begin 入口，
+待機完成前不開自由行動，返回 Main 不重發。
+
+自身 LeaveField 與 Lastword 共用移區前的同批快照與 departure plan；僅實際離場才待機，
+完全防止或取代後留場不發生。自身 Damage 在共同實際扣血提交點收能力與戰鬥正傷害，
+0 或全防止不發生；致命傷先跑規則破壞，再選取仍保留原來源資訊的待機。
+DamageAmount 只准入自身已綁定 Damage 事件的有限讀值路徑，不授權 closed Program 偽造事件。
+
+作者 `whose=each` 尚不符合現有 A.player-ref schema，作者 lowering 維持拒絕；
+內部 typed Phase 可表示不限制回合玩家。其他物件監看、LifeChange、一般 Move 訂閱、
+Grant／Delay、非 Field 入口、離場取代與 BP01-083 均維持拒絕。
 
 ### Quick 窗口
 
@@ -191,7 +213,7 @@ Pass 回傳 `CardPlay::Continued(Step)`，才續接原攻擊或 end 棄牌程序
 未載入的原型持有者照舊使用原型進化。來源及資源只收 face 0，
 沿既有時機、每回合次數、PP／EP／SEP 規則驗證；一般與合法超進化的 evolve facet 由實際付款決定，
 不信任輸入的 kind。全部程序完成後才從進化卡有效印刷面取得 Printed OnEvolve，自身、AfterEntry、PerFact、
-無 PlaySpec。獨立 OnSuperEvolve 與進化相當能力仍拒絕。
+無 PlaySpec。進化相當能力仍拒絕；OnSuperEvolve 見〈第二批自動能力入口〉。
 
 進化保持場上持有者世代；進化卡另有物件世代與受驗關聯。事件保存完整 before／after characteristics，
 新印刷定義依卡號、face、局部 AbilityId 配發新 instance，不與進化前同號能力相撞。
@@ -395,7 +417,8 @@ BP16-077 的正式打出流程或整卡可執行。每項不同下限與 LKI 仍
 
 ## 公開區域移動與破壞
 
-一般 Move 只准入 Put、Owners(Cemetery / Banish)，來源限公開 Field／Ex／Cemetery／Banish。
+一般 Move 只准入 Put、Owners(Cemetery / Banish)，來源限公開 Field／Ex／Cemetery／Banish；
+Owners(Hand) 僅限公開 Field 來源，見[第二批觸發契約](trigger-second-semantics.md#5-自身離場)。
 不接受 Shared(Field / Ex)、私人目的區、position、order、initial_posture 或 entry_effects；
 唯一例外是〈私有看牌與同區排列〉所述，從自己牌庫放入自己 EX 的受限 Look→Move 流程。
 Destroy 是獨立 action，僅接受仍在 Field 的目前世代；過期 capture 不移動新世代。

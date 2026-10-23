@@ -4,6 +4,7 @@
 )]
 use super::legal::permutations;
 use super::{BTreeMap, Frame, Game, int, list, string};
+use crate::ir::{DamageEvent, SnapshotId};
 use crate::{EngineFailure, Result, invalid};
 use serde_json::{Value, json};
 
@@ -108,10 +109,16 @@ impl Game {
             *uses = json!(int(uses).saturating_sub(count));
         }
         Self::damage_receipt(&actual, node["bind"].as_str(), frame);
-        self.apply_damage(&actual, frame)
+        self.apply_damage(&actual, frame, None)
     }
 
-    pub(super) fn apply_damage(&mut self, actual: &[Value], frame: &Frame) -> Result<()> {
+    pub(super) fn apply_damage(
+        &mut self,
+        actual: &[Value],
+        frame: &Frame,
+        facts: Option<&[DamageEvent]>,
+    ) -> Result<()> {
+        let at = SnapshotId(self.state.ir_epoch);
         let mut pending = self.drain_triggers(actual, &frame.cause)?;
         let group = self.group();
         let mut damaged = Vec::new();
@@ -158,6 +165,7 @@ impl Game {
             });
             pending.extend(self.collect_subject_event("deal_damage", &[subject], &frame.cause, &json!({"target":target,"amount":hit["amount"],"battle":hit["battle"],"to_opposing_leader":to_opposing_leader}))?);
         }
+        self.internal_damage_events(actual, facts, frame, at)?;
         self.enqueue(pending);
         self.life_change_triggers(&life_changes, &frame.cause)?;
         Ok(())
