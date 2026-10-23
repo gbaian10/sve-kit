@@ -200,6 +200,7 @@ def check_real_current_entry_and_container(
     prototypes: tuple[InputFile, ...],
 ) -> None:
     card = author(current, number)
+    evolve = ability(card)["evolve"]
     if face_container:
         face = FACTS[number]["face"]
         card["faces"] = {face: {"abilities": card.pop("abilities")}}
@@ -216,6 +217,13 @@ def check_real_current_entry_and_container(
     assert evidence.source_proof == "current_source_checked"
     assert evidence.input_hash == collection.author_files[0].input_hash
     assert evidence.frame_id == FRAME
+    inventory = object_value(
+        object_value(results[0].lowering_input())["source_inventory"]
+    )
+    required = object_value(array(inventory["abilities"])[0])
+    assert evidence.current_source is not None
+    assert required["source_use"] == evidence.current_source.model_dump(mode="json")
+    assert object_value(required["body"])["evolve"] == evolve
     assert (
         object_value(
             object_value(object_value(results[0].candidate.tree)["cards"])[number]
@@ -319,6 +327,16 @@ def check_synthetic_multiface_owner_controls_both_containers(
     result = validate_files(current, inputs({"BP01-009": card}), expander)[0]
     assert isinstance(result, CardAccepted)
     assert len(result.candidate.sidecar) == 2
+    assert (
+        len(
+            array(
+                object_value(object_value(result.lowering_input())["source_inventory"])[
+                    "abilities"
+                ]
+            )
+        )
+        == 2
+    )
 
 
 def check_current_evidence_replacement_drops_proof(
@@ -406,6 +424,14 @@ def check_synthetic_sibling_root_closure(
     if change == "none":
         assert isinstance(result, CardAccepted)
         assert len(result.candidate.sidecar) == 2
+        assert [
+            object_value(object_value(item)["source_use"])["ability_scope"]
+            for item in array(
+                object_value(object_value(result.lowering_input())["source_inventory"])[
+                    "abilities"
+                ]
+            )
+        ] == ["ability_0", "ability_1"]
     else:
         assert isinstance(result, CardRejected)
         assert result.diagnostic.reason == (
