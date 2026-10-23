@@ -31,7 +31,9 @@ PDF SHA-256 `c44b8f2ff7e1019bc2b4ec59df894d6a067179ff05eac2542b7723648a22cd47`�
 一次同時入場時，新入場的監看者也按 10.7.4.2 觀察同批其他入場，
 先原子安裝入場效果、算有效資訊，再匹配。場間控制權轉移不產生 EnterField。
 
-main phase、抽牌／傷害／生命變更等其他訂閱、一般離場、獨立超進化時、State、
+main phase、傷害、自身離場與獨立超進化時的有限擴充另見
+[第二批觸發契約](trigger-second-semantics.md)；未列入口仍拒絕。
+本文件的首批範圍中，main phase、抽牌／傷害／生命變更等其他訂閱、一般離場、獨立超進化時、State、
 Delay／Grant／非 Field 有效區、一般 AnyOf、PerBatch 皆先拒絕。
 這是首批支援限制，不否定 IR 詞彙登錄的完整語義。一般回合開始／結束文字不自動
 別名到 main／end phase；「次の…」產生的延遲能力也不冒充 Printed phase 訂閱。
