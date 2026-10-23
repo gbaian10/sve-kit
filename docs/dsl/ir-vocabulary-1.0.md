@@ -517,7 +517,7 @@ SetKind 單獨登記 NonNumeric 層，不產生數值事件，也不隱含失去
 
 ### GAP-S-014
 
-`TypedEventRewrite::ReplaceInstruction {match:InstructionPattern,body:TypedInstructionOrBatch,target_map,receipt_projection}`。來源動作與目的動作型別不同仍須保留同一提案 lineage／已用 replacement IDs；不是任意 Program callback。target_map 明寫單體／集合，輸入物件合法性與輸出対象各檢查；被完全取代的動作無原事件，receipt 同時存 proposed 與 performed，不以被替代動作成功冒充原量。damage→destroy／banish、return-to-hand→destroy、single-banish→all-banish 均有封閉變體。BP04-P18、BP05-P33／P54、BP03-003、BP07-026；CR 10.10。
+`TypedEventRewrite::ReplaceInstruction {match:InstructionPattern,body:TypedInstructionOrBatch,target_map,receipt_projection}`。來源動作與目的動作型別不同仍須保留同一提案 lineage／已用 replacement IDs；不是任意 Program callback。target_map 明寫單體／集合，輸入物件合法性與輸出対象各檢查；被完全取代的動作無原事件，receipt 同時存 proposed 與 performed，不以被替代動作成功冒充原量。但若被取代的是費用處理，原處理仍視為已執行，須獨立判 PaymentComplete（CR 10.6.2.5.2、Q2387），不能由原事件未發生推成未付款。damage→destroy／banish、return-to-hand→destroy、single-banish→all-banish 均有封閉變體。BP04-P18、BP05-P33／P54、BP03-003、BP07-026；CR 10.10。
 
 ### GAP-S-015
 

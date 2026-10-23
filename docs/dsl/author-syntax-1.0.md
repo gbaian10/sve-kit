@@ -104,6 +104,11 @@ evolve:
 
 `A.target`：`targets: [{bind, from: Sel, n|upto|any, groups?, cost_sum_le?, distinct_by?, distinct_names?, option?, roles?}]`。選ぶ依語義規則收集為 D.play-param Targets，順序按卡文；本文普通 choose 永遠結算時。公開與否不能獨自決定選擇時點。`option` 僅在被選的チョイス模式有效。**刪除 `targets[].if`**：R-0004 普通條件不阻止選目標，R-0005 未支付土の秘術也不能免除目標要求。必要目標不足不能打出／選該模式；一般條件在本文查，SC／NC 另按捕捉規則。
 
+一般 auto 的「（處理）：…選ぶ」仍先在打出時選目標（CR 10.6.2.3），再於解決時
+決定是否執行冒號前處理（10.4.7.3）。Q303／Q430 直接確認不能選付款才進墓地的卡；
+BP09-092 天狐の社亦先選傷害目標，解決時才決定是否橫置，不把 pay 內文字的「選ぶ」
+改成付款後的 choose。
+
 roles 的逐 variant 形狀與數量位置分型見[角色與選取位置矩陣](author-selection-shapes-1.0.md)。
 單組 Target／choose／search 與 counter 的數量父變體見[要求量矩陣](author-quantity-shapes-1.0.md)；
 Cost、wrapper 與 Target.groups 已定形，見[費用與目標矩陣](author-cost-target-shapes-1.0.md)；
@@ -898,6 +903,8 @@ auto:
 ### GAP-A-031
 
 counter.on 接 Sel，須明確選定一個 holder 再取 counter，不能默認 this；result 保留選到的 holder。
+CR 10.4.3／Q806 限未指定玩家的費用材料為能力 master 所屬；本例「場の」使用 self，
+不能移除對手的 counter。Q1914 另確認自己場上沒有神湯 counter 時不能付費。
 
 真實卡例：**BP14-063 竜山の鳴動**；來源 `BP14-063#0/text/0`，句型 `T9059c4c9cd`。
 
@@ -910,7 +917,7 @@ play:
   optional_cost:
     counter:
       {
-        on: { who: each, zone: field, name: 竜山温泉 },
+        on: { who: self, zone: field, name: 竜山温泉 },
         name: 神湯,
         n: 2,
         holders: 1,

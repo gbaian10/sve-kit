@@ -55,7 +55,7 @@ GrantedAbilityHead 共用普通頭 payload，接受 7 個觸發巨集頭、auto�
 - A.act.grant：on:EffectRecipient 必填（擴成可含領袖），keywords?/abilities? 至少一項且各非空，可並用；沿原 result/precondition/until/instead。keywords 元素 Concept|ParamRef；abilities 為 GrantedAbilityHead 列表。
 - EffectSpec.grant：on:EffectRecipient 選填，keywords?/abilities? 至少一項；keywords 只有 Concept，不繼承動作直接 param。static 明寫 on 是 C1 的要求；C0 仍接受省略 on 的效果形狀。apply/player_effect/entry_effects 按既有 optional R scope 表，不推測物件↔玩家轉換。
 - grant.instead 差異可改 keywords、abilities（可同時）；replace_with 與任何差異互斥；不改 on/until/result，合併後重驗。abilities 差異是合成，BP15-029 只佐證 keywords。
-- 一個 grant 的 until 適用全部內容。BP20-036 的 keywords 無期限、abilities until:turn，寫兩個有序 grant 步驟；這沿既有 I.grant 指示，不捏造兩者相同期限。此期限解讀不構成 reviewed/verified 規則證據，C1 仍須核對來源與適用範圍。
+- 一個 grant 的 until 適用全部內容。BP20-036 的 keywords 無期限、abilities until:turn，寫兩個有序 grant 步驟。官方英文卡文將「本回合」只掛在後面的防傷能力；Q629 亦確認未限期的指定攻擊不在回合末失去，CR 10.2.1.2／7.4.8 分別規定無明示期限及回合末到期。同型卡名還有 BP05-112、BP16-103、BP18-017（突進）、BP18-026（オーラ），各用途仍核對其官方卡文；不以一個 grant 把期限擴到前面的關鍵字。此為文字範圍判讀，官方 Q&A 未直接回答 BP20-036 的掛接範圍，Q2647 只確認防傷能力不擋非傷害的攻擊力與體力減少；C1 仍須驗證用途來源與資格。
 - 純關鍵字優先現有 keywords 形，混合例 BP12-029/BP13-033/CP03-023/ECP01-043；多能力 ECP02-061；授予 play BP17-079、lastword BP07-038；grant 頭子集合的其他無實例格標合成。
 
 Quick：卡片本身持有時寫 `keywords: [quick]`，起動能力仍寫 `activate.quick: true`。授予子集合排除 keywords 頭，關鍵字由 grant.keywords 承載；既有 grant.keywords 與 EffectSpec.keywords 繼續接受 quick 字串，不新增同義拼法禁令。BP12-058 的作者標準形是 static.while＋EffectSpec.keywords(list:[quick])；不做語義正規化，不推定不同形狀有相同 body hash。

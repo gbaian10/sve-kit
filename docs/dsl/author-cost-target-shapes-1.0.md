@@ -92,6 +92,10 @@ one_of 至少兩個 CostAlternative，只選一支；禁止直接 one_of 套 one
 CounterCost 六個數量分支及 holders 的必要性沿[要求量矩陣](author-quantity-shapes-1.0.md#單組父變體矩陣)，
 已併入 author_costs 模組。self 的 on:this 不收 holders；selected 的 on:ObjectSel 必有 holders:Q。
 所有 counter 數量不接受直接 selection_count 參數，不能借用 Target 的 T。
+CR 10.4.3 規定費用未明指玩家的「場の」等所屬域是要求該費用的卡／能力之 master；
+Q806 確認不能以對手使用的卡付費。BP14-063／BP14-055 的「場の『竜山温泉』」
+因而限自己的場，不能移除對手的神湯 counter（Q1910／Q1914 補充自身無 counter 時不能付）。
+此為規則限制；語法能表達 who:each 不表示該卡能用這個域付款。
 
 上述只列費用片段；不能因片段接受就放入任意能力頭。MaterialGroup 的 upto／any、
 各材料操作未點名的約束交叉格均為合成。cost_sum_ge 只有 act.any 的 BP11-P30
@@ -182,8 +186,12 @@ CR 10.6.2 先處理必要自由 X（.2.1）、可選付款決定（.2.2）、模
 不能用 paid 假裝；這個決定讀值的完整能力頭拼法不在本節點契約。
 BP17-056 的 X 與前置模式數也不能直接用 from_payment 解決。
 
-Cost.steps 依來源順序支付、保留重複；targets 依卡文原序。不同費用欄位的合併／付款順序
-必須由 CR 與來源證據決定，禁止依 mapping 鍵序固定排序。沒有跨欄位支配證明時，
+Cost.steps 依卡文順序支付、保留重複（CR 10.4.2.1）；targets 依卡文原序。
+CR 10.6.2.5 要求先決定完整費用，再全部支付；任何一項付不起便不能付整份
+（10.4.2.2），並回復 play 前（10.6.2.5.4）。BP15-046 文字先列公開手牌、後列 X PP，
+依 10.4.2.1 以此順序執行（Q2006 另確認 X 於打出時指定）。印刷費用與文字追加費用的相對
+次序未另有明文，不由 YAML 欄位順序推斷；上述先定全費用及文字順序不是待查證事項。
+沒有跨欄位支配證明時，
 C1／D0 不得讓前一欄任意讀另一欄的 receipt。one_of 分支內 result 為分支 scope，
 只有全部分支同型輸出才能合流；靜態檢查不猜玩家會選哪一支。
 未宣告、拼錯、前向、自參照、跨 execution 的 receipt 都須拒絕。

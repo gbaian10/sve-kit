@@ -22,6 +22,9 @@
 - 打出時先選為分配對象的目標：CR 10.6.2.4.2 要求每項至少 1。首批 runtime 只接受
   `PlayParameter Distribution` 指向同次 play 的已選目標 binding，且 `minimum=1`。
   其他 play 分配形狀保守拒絕；不能把固定集合與已選目標混為一談。
+- 此為一般規則，亦由 Q1070／Q79 確認每個已選目標至少分到 1 點；總量不足時依
+  CR 10.6.2.4.2–.4.2.1 回到選目標前，仍無合法選法則取消 play。現有「割りふる」
+  卡文均在打出時選目標並分配，沒有結算中才分配的實卡。
 - `ResolutionChoice Distribution` 必須由該句卡文證明在結算時選擇及其最低量。
   CR 1.3.5 的選數非負不等於所有分配最低 1。良構可接受明示非負量，runtime 的
   合成入口也可驗它，但未核對時點與最低量的真實卡一律不准入。
@@ -217,11 +220,16 @@ CR 10.10.1.1 決定被取代事件不存在；Q2346 證明墓地改消滅不能�
 這個物理移動成功集合可供 remainder 扣除、move-after 或容量計數；**不能拿它當
 「已破壞」事件或完整付款**。卡文若讀「被破壞的數量」須依對應實際事件語義，
 不明時另立 predicate，不直接 count 成功 before。付款依 CR 10.6.2.5.2–.3 另判
-PaymentComplete，即使物理事件改道或費用為零也可能完整。
+PaymentComplete：合法取代後，原費用處理仍視為已執行（Q2387 的送墓費用改為消滅
+仍可支付）；合法零費用也算執行。不能把「原事件沒發生」誤寫成「費用未付」。
 
 [BP18-059 壊竜の六銘伝・エル](https://shadowverse-evolve.com/cardlist/?cardno=BP18-059)
-的 remainder 是 looked 減成功 before：EX 滿而沒移動的牌仍留在 remainder；已被
-改道搬走的牌不能再次拿去排牌。後句減費只作用於有規則指涉且適合該效果的成功
+的 remainder 採**本專案解讀**（`strength: inferred`，2026-10-23 維護者決定）：
+看牌庫頂 N 張、挑 1 張放 EX、其餘放牌庫底時，挑中但因 EX 已滿而放不進的牌
+也算「其餘」，一起放牌庫底，結果與沒挑相同。CR 4.8.3.2 只規定容量不足者不移動，
+5.11.1 的 Look 不移出牌庫；CR 未定義這裡的「残り」，官方 Q&A 亦未回答。
+因此此型的 remainder 定義為 looked 減成功 before；已被改道搬走的牌不能再次拿去排牌
+是內部移動契約，不宣稱已有同型官方裁定。後句減費只作用於有規則指涉且適合該效果的成功
 新世代，不因 before 成功就自動取得其可見性或跨區追蹤權限。
 
 ### 3.3 混 owner 的目的區
@@ -238,10 +246,11 @@ PaymentComplete，即使物理事件改道或費用為零也可能完整。
 - 未明示玩家的區依 CR 4.1.6 去 owner；lowering 不能因 MoveDestination 尚缺
   `Owners(Ex)` 就把混 owner 卡寫成單一 Self。首批若未能表達來源規則，拒絕該
   lowering，或在可信指示 context 明示 5.22.5 的離場規則；不可推測卡文。
-- 無場上控制轉移背景、卻要求把外來 owner 的卡從其他區放進某人的 EX，尚無本片
-  真實卡例；保守拒絕該情境。普通同 owner 的 Hand／Deck→Self EX 不受此限制。
-  場上外來 owner 卡若不是經 Transfer 取得，且指示明示另一玩家的目的區，亦須有
-  該特殊來源的規則證據才能准入，不能泛用 5.22.5 類推。
+- 不經 Transfer 亦有外來 owner 實卡：BP05-019 把對手墓地卡放入自己的 EX，
+  BP05-018 可從對手墓地打出卡。Q687／Q688 確認其之後往場以外的區域移動時回
+  owner 的區域；EX 卡由能力直接入場則進目前使用者的場，法術解決後進 owner 墓地。
+  未明示玩家的目的區亦依 CR 4.1.6 解析。這些是已定案規則；executor 尚未支援
+  外來 owner 流程時仍拒絕整能力，不把支援限制寫成沒有實卡或規則未解。
 
 真實背景：[BP13-043 混沌の流儀](https://shadowverse-evolve.com/cardlist/?cardno=BP13-043)
 的渡す，以及 [BP03-109 カオティックエンジェル](https://shadowverse-evolve.com/cardlist/?cardno=BP03-109)
@@ -276,7 +285,7 @@ CR 4.1.5.1、5.21.1.1 撤銷證據，舊 epoch 不復活。
 | M-A | BP02-116 的場上破壞去各 owner 墓地，有新世代 | 場外 Destroy 不移動；失效目標不跟新世代；不能把 Q323 的無目標 play 當可打出 |
 | M-B | BP02-089 不能被能力破壞；一般 Put 仍按自己的規則執行 | 禁止破壞時不可先改為 Banish；不發 Destroy |
 | M-C | BP18-SL16 改墓地為消滅，before 成功、actual_to=Banish | 不發原墓地／Destroy／LastWords；不可因未進 requested_to 而把它留在 remainder |
-| M-D | BP18-059 選一張、EX 滿、未移動：全部 looked 排回底 | 無 after 不安裝減費；同名另一張不能代替 |
+| M-D | BP18-059 選一張、EX 滿、未移動：依 §3.2 專案解讀全部 looked 排回底（CR 4.8.3.2 未定義 remainder，官方未答） | 無 after 不安裝減費；同名另一張不能代替 |
 | M-E | 渡す後混 owner 場上兩卡去 EX：各回 owner EX，分別判容量 | 不能全入 actor EX；場→對方場不得產生新世代／EnterField |
 | M-F | 公開離場 trigger 有確切單 member，authority 能指涉 after | 對手不同手牌排列的 payload 不可區分；再洗牌／換區後舊 handle 不再授權 |
 
@@ -357,12 +366,14 @@ entry_effects 與 Move＋Token 共享容量仍依各自契約驗收。
 依[數值修正、排序與期限](numeric-timing.md)。該文件的局面為 executor 驗收義務，
 不表示本節所列片段已全部實作。
 
-CR 1.3.2.4 允許無特定上下限的數值資訊為負；這不表示所有動作都可要求負數。
-首批 Numeric Add 保留有號差值；Attack／Life 的 Set 先只准入可證明非負的結果。
+CR 1.3.2.4 允許無特定上下限的數值資訊為 0 或負數，Attack／Life 的 Set 亦不例外；
+5.14.1.1 明示體力可為負。1.3.2.2.1 將負數當 0 是以該資訊為基準執行其他非加減動作
+的規則，不把設值結果截成 0。首批 Numeric Add 保留有號差值；Attack／Life 的 Set
+先只准入可證明非負的結果，這是 executor 支援限制。
 [BP16-049 スノーアウェイク](https://shadowverse-evolve.com/cardlist/?cardno=BP16-049)
-提供 Set 1／1 的真實種子，沒有本片真實卡證明直接 Set 負常值的語法意義；負 Set
-仍列為未准入，不在 IR 有號欄位先截零。CostModifier Set 同樣先限非負，動態結果
-不能證明則拒絕，不把負費用資訊可存在（CR 1.3.2.2.1）當作任意 Set 的許可。
+提供 Set 1／1 的真實種子；現有卡沒有算出負數的直接設值卡例。負 Set 仍未准入，
+不在 IR 有號欄位先截零，也不標成規則待查證。CostModifier Set 同樣先限非負，
+動態結果不能證明則拒絕；此限制不改 CR 1.3.2.4 的有號數值規則。
 
 數值修正 usage 維持拒絕；只有已受驗的 CostModifier 可使用共享 UsageId，完整成功
 提交才消耗，預演／失敗／rollback 不消耗。多張候選共享一次額度不能每張各建一份。

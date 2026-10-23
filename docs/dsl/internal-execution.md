@@ -477,6 +477,8 @@ entry_effects 的 Move。物件主幹僅由 Look receipt、Union／Difference �
 EX 足夠時全批移動；已滿時每個嘗試保留無 after 的 MoveResult；僅剩部分容量而必須
 另問選牌時仍拒絕並回復整次執行。真正 remainder 由 looked 減該 Move 的成功 Before
 取得，再接既有私有單 Placement Order；EX 滿沒移動者仍在 remainder，同名副本互不替代。
+此 EX 滿的 remainder 行為採 2026-10-23 維護者的 `inferred` 專案解讀，官方未回答；
+CR 4.8.3.2 僅規定放不進者不移動，依據與邊界見 [runtime §3.2](runtime-semantics.md#32-精確成功-before)。
 此流程不執行 Search，不增加洗牌，也不把 Order 插進 Search 的末尾洗牌之前。
 
 DecisionView 的 Order domain 只向 chooser／Referee 給出本次 token 範圍內的整數 handle
