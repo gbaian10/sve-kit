@@ -6,7 +6,7 @@ use super::{
     ResolvedRecipients, Result, RuntimeDamageRecipient, Selector, Slot, ZoneKind, contains, int,
     invalid, player_id, seat_name, unsupported,
 };
-use crate::ir::{ExecutionRef, SpellCountTime};
+use crate::ir::{BoolFrozen, ExecutionRef, PaymentReference, SpellCountTime};
 use crate::ir::{
     FollowPermission, MemberProjection, ObjectReceipt, ObjectView, PlayerRead, ReceiptId, Role,
 };
@@ -466,6 +466,24 @@ impl Execution {
                     Err(invalid("missing boolean binding"))
                 }
             }
+            Expr::Frozen(read) => match read.as_ref() {
+                BoolFrozen::PaymentComplete {
+                    receipt: PaymentReference::CardPlay { face, receipt },
+                } => match &self.card_payment {
+                    Some((paid_face, paid_receipt))
+                        if self.spell && paid_face == face && paid_receipt == receipt =>
+                    {
+                        match self.receipts.get(paid_receipt) {
+                            Some(InstructionOutcome::ExchangePayment(payment)) => {
+                                Ok(payment.complete)
+                            }
+                            _ => Err(invalid("missing card payment result")),
+                        }
+                    }
+                    _ => Err(invalid("unavailable card play payment")),
+                },
+                _ => Err(unsupported("boolean receipt")),
+            },
             Expr::Compute(operation) => Ok(Bool(match operation.as_ref() {
                 Predicate::And { predicates } => predicates
                     .iter()
@@ -501,7 +519,7 @@ impl Execution {
                 Predicate::Exists { objects } => !self.objects(game, objects)?.is_empty(),
                 _ => return Err(unsupported("predicate")),
             })),
-            _ => Err(unsupported("boolean expression")),
+            Expr::Live(_) => Err(unsupported("boolean expression")),
         }
     }
 

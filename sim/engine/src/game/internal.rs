@@ -6,7 +6,6 @@
 )]
 
 use super::{Frame, Game, View, int, string};
-use crate::ir::QuickWindow;
 use crate::ir::{
     Action, Arithmetic, Binding, Bool, Capture, CaptureRef, CardQuantityOutcome, Cardinality,
     ChoiceDomain, Comparison, Control, DamageEvent, DamageFlags, DamageQuantityOutcome,
@@ -20,6 +19,7 @@ use crate::ir::{
     ScopeId, SearchOutcome, SearchReplacementAnswer, Selector, SourceSpan, StepwiseAnswer,
     StepwiseMode, Visibility, WellFormedProgram, ZoneKind,
 };
+use crate::ir::{BanishOutcome, FaceId, PaymentResult, QuickWindow};
 use crate::{EngineFailure, Result, invalid};
 use alloc::collections::{BTreeMap, VecDeque};
 use alloc::sync::Arc;
@@ -115,6 +115,10 @@ pub enum InputDomain {
         /// Token-local action handles; Pass is always available separately.
         options: Vec<QuickOption>,
     },
+    /// Accept or decline this card play's single material exchange.
+    OptionalCost,
+    /// Public materials selected before any payment.
+    CostMaterials(TargetDomain),
     /// Continue or stop before exactly one draw attempt.
     BeforeDraw,
     /// Public occurrence handles for exactly one player at the current check timing.
@@ -151,6 +155,10 @@ pub enum InputDomain {
 pub enum Answer {
     /// One Quick action handle, or an explicit Pass (`None`).
     Quick(Option<u64>),
+    /// The dedicated exchange decision; independent of its payment result.
+    OptionalCost(bool),
+    /// Exact token-scoped material handles.
+    CostMaterials(Vec<u64>),
     /// Answer the current before-draw occurrence.
     Stepwise(StepwiseAnswer),
     /// Exactly one occurrence handle from the current pending-order question.
@@ -178,6 +186,10 @@ pub enum Answer {
 /// Typed instruction outcomes retained only by the authority.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum InstructionOutcome {
+    /// The whole exchange, available only after the complete card payment.
+    ExchangePayment(PaymentResult),
+    /// One complete banishment with its original and resulting generations.
+    Banish(BanishOutcome),
     /// One completely paid cost step; incomplete payment aborts the entire activation.
     Payment {
         /// Equal requested and actual quantity for a successful step.
@@ -287,6 +299,8 @@ enum Slot {
 
 #[derive(Clone, Debug)]
 enum Wait {
+    OptionalCost,
+    CostMaterials(card::exchange::MaterialWait),
     TriggerQuota {
         count: usize,
     },
@@ -331,6 +345,8 @@ pub(super) struct Execution {
     targets: BTreeMap<(ScopeId, u64), card::selection::TargetWait>,
     play: Option<card::play::PlayState>,
     spell: bool,
+    field_entry: bool,
+    card_payment: Option<(FaceId, ReceiptId)>,
     play_counts: BTreeMap<u32, (Nat, Nat)>,
 }
 
@@ -494,6 +510,8 @@ impl Game {
                 targets: BTreeMap::new(),
                 play: None,
                 spell: false,
+                field_entry: false,
+                card_payment: None,
                 play_counts: BTreeMap::new(),
             };
             self.internal_run(&mut execution)?;
@@ -522,7 +540,7 @@ impl Game {
         if self
             .typed
             .as_ref()
-            .is_some_and(|execution| execution.ability.is_some())
+            .is_some_and(|execution| execution.ability.is_some() || execution.field_entry)
         {
             return Err(invalid("formal play requires answer_internal_card"));
         }
@@ -554,6 +572,15 @@ impl Game {
                 return Err(invalid("wrong actor or stale internal answer"));
             }
             match (wait, answer) {
+                (Wait::OptionalCost, Answer::OptionalCost(accepted)) => {
+                    rollback = execution.origin.take();
+                    card::exchange::accept(&mut execution, accepted)?;
+                }
+                (Wait::CostMaterials(wait), Answer::CostMaterials(handles)) => {
+                    let members = wait.validate(&handles)?;
+                    rollback = execution.origin.take();
+                    card::exchange::select(&mut execution, members)?;
+                }
                 (Wait::TriggerQuota { count }, Answer::TriggerQuota(handle))
                     if usize::try_from(handle)
                         .is_ok_and(|handle| handle > 0 && handle <= count) =>
@@ -714,6 +741,8 @@ impl Game {
                 InputDomain::Targets(domain) => card::selection::packet(&domain),
                 InputDomain::Modes { modes, cardinality, count } => json!({"kind":"modes","modes":modes.iter().map(|id| id.0).collect::<Vec<_>>(),"minimum":cardinality.minimum.0,"maximum":cardinality.maximum.map(|n| n.0),"count":count.0}),
                 InputDomain::Pending(options) => json!({"kind":"pending","options":options.iter().map(|option| json!({"handle":option.handle,"card":option.card,"line":option.line,"event":option.event})).collect::<Vec<_>>()}),
+                InputDomain::OptionalCost => json!({"kind":"optional-cost","options":["accept","decline"]}),
+                InputDomain::CostMaterials(domain) => { let mut packet = card::selection::packet(&domain); packet["kind"] = json!("cost-materials"); packet },
                 InputDomain::BeforeDraw => json!({"kind":"before-draw"}),
                 InputDomain::Integer(bounds) => json!({"kind":"integer","minimum":bounds.minimum.0,"maximum":bounds.maximum.map(|value| value.0)}),
                 InputDomain::Order(cards) => json!({"kind":"order","cards":cards.iter().map(|card| json!({"handle":card.handle,"card":card.card,"name":card.name})).collect::<Vec<_>>()}),
@@ -823,6 +852,9 @@ impl Game {
                 break;
             }
             let Some(node) = execution.todo.pop_front() else {
+                if execution.field_entry {
+                    return self.internal_field_card_finish(execution);
+                }
                 self.internal_spell_cleanup(execution)?;
                 self.internal_numeric_cleanup()?;
                 self.internal_numeric_end_resolution(execution.id)?;

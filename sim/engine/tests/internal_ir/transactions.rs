@@ -85,7 +85,9 @@ fn response(question: &DecisionView) -> Answer {
         | InputDomain::Pending(_)
         | InputDomain::TriggerQuota(_)
         | InputDomain::Modes { .. }
-        | InputDomain::Quick { .. } => {
+        | InputDomain::Quick { .. }
+        | InputDomain::OptionalCost
+        | InputDomain::CostMaterials(_) => {
             panic!("unexpected transaction fixture question")
         }
     }

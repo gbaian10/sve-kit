@@ -162,7 +162,11 @@ fn check_requirements(
 fn play_requirement(code: &str) -> bool {
     matches!(
         code,
-        "shape.ObjectView.SourceInformation"
+        "shape.PaymentReference.CardPlay"
+            | "read.card-play.payment-complete"
+            | "shape.BoolFrozen.PaymentComplete"
+            | "read.receipt.payment-complete"
+            | "shape.ObjectView.SourceInformation"
             | "reference.source-information"
             | "shape.NatFrozen.SpellChain"
             | "read.spell-chain"

@@ -22,6 +22,7 @@ use serde_json::json;
 
 mod costs;
 mod evolution;
+pub(super) mod exchange;
 mod fanfare;
 mod printed;
 pub(super) mod quick;
@@ -64,6 +65,7 @@ pub(in crate::game) struct CardRuntime {
     mode_uses: Vec<ModeUse>,
     admission: Option<triggers::Admission>,
     next_instance: u64,
+    entry_result: Option<CardEntry>,
     pub(in crate::game) checkpoint: Option<ExecutionId>,
     pending: Vec<triggers::PendingOccurrence>,
     pub(in crate::game::internal) question: Option<(super::DecisionView, Vec<u64>)>,

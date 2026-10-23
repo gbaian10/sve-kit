@@ -48,7 +48,8 @@ impl BodyContext<'_> {
                 }
                 return self.search_result(step, receipt, path);
             }
-            ast::Step::Choice(_)
+            ast::Step::If(_)
+            | ast::Step::Choice(_)
             | ast::Step::Draw(_)
             | ast::Step::Damage(_)
             | ast::Step::Destroy(_)
