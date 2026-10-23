@@ -489,6 +489,12 @@ describe("opening a card beside the results", () => {
     await waitFor(() => {
       expect(router.state.location).toMatchObject({ search: list, state: { pages: 2 } })
     })
+    if (how === "page") {
+      await waitFor(() => {
+        expect(cellLink("p:bp01-001")).toHaveFocus()
+        expect(cellLink("p:bp01-001")).toHaveClass("ring-text-1")
+      })
+    }
     if (how !== "back") return
     // Writing the pages back replaces the list's entry; forward to the card still finds it.
     await act(() => router.navigate(1))

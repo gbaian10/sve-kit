@@ -197,12 +197,23 @@ export function useCardOverlay({
     next.set(CARD_PARAM, cardParamOf(summary))
     const { overlay: previous, ...list } = entry
     const top = cellOf(root.current, key)?.getBoundingClientRect().top
-    // The list entry gets its id before the card is pushed over it (replace, then push).
+    // A page preference can replace the card's entry, so its opener belongs to the list below it.
     const listId = alreadyOpen ? previous?.listId : (list.listId ?? newListId())
-    if (!alreadyOpen && list.listId === undefined)
+    if (!alreadyOpen)
       void navigate(
         { pathname: location.pathname, search: location.search },
-        { replace: true, preventScrollReset: true, state: { ...entry, listId } },
+        {
+          replace: true,
+          preventScrollReset: true,
+          state: {
+            ...list,
+            listId,
+            anchor: key,
+            pages,
+            listScroll: listScroll.current,
+            scrollY: window.scrollY,
+          },
+        },
       )
     const state: ListEntryState = {
       ...list,
