@@ -137,7 +137,7 @@ function apiBans(...bans: (typeof fetchBan)[]): Linter.RulesRecord {
 }
 
 export default defineConfig(
-  globalIgnores(["dist/", "node_modules/", "tests/lint-fixtures/"]),
+  globalIgnores(["dist/", "node_modules/", "tests/lint-fixtures/", ".playwright-mcp/"]),
 
   js.configs.recommended,
   tseslint.configs.strictTypeChecked,

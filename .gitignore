@@ -210,3 +210,7 @@ mise.local.toml
 ### CI ###
 # Private test data checked out by the rust CI job.
 .testdata/
+
+### Local tools ###
+.claude/settings.local.json
+.playwright-mcp/
