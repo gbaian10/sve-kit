@@ -71,8 +71,11 @@ describe("SetPage header", () => {
       .getAllByRole("button", { name: /^移除條件：/u })
       .map((button) => button.getAttribute("aria-label"))
     expect(chips).toEqual(["移除條件：主教"])
-    // Only the class is set, and the class row is not counted: the filter button shows no badge.
-    expect(screen.getByRole("button", { name: "篩選" })).toHaveTextContent(/^篩選$/u)
+    // The class counts as one condition; the page's own set still contributes nothing.
+    const filter = screen.getByRole("button", { name: "篩選" })
+    expect(
+      document.getElementById(filter.getAttribute("aria-describedby") ?? ""),
+    ).toHaveTextContent("已啟用 1 個篩選條件")
   })
 
   it("keeps the implied set in a multi-select when another chip is removed", async () => {
