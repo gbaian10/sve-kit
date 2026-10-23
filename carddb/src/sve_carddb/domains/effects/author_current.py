@@ -246,6 +246,41 @@ class CurrentAuthorSources:
             raise AuthorInputError(Diagnostic("source", "author_root_required"))
         inputs = load_author_set(authored_root, expander.schemas)
         self._prepare(inputs, expander)
+        return self._validate(inputs, expander)
+
+    def selection_input(
+        self, authored_root: Path, expander: AuthorExpander
+    ) -> JsonValue:
+        """Select prototypes and complete current candidates from one checked inventory.
+
+        Card-local failures remain explicit; consumers must not drop them or fall
+        back to a prototype. This internal handoff grants no runtime qualification.
+        """
+        inputs = load_author_set(authored_root, expander.schemas)
+        self._prepare(inputs, expander)
+        authors: list[JsonValue] = []
+        for result in self._validate(inputs, expander):
+            if not isinstance(result.record, AuthorIndexRecord):
+                continue
+            authors.append(
+                {"status": "accepted", "input": result.lowering_input()}
+                if isinstance(result, CardAccepted)
+                else {
+                    "status": "rejected",
+                    "card_no": result.record.record_key,
+                    "reason": result.diagnostic.reason,
+                }
+            )
+        return {
+            "documents": [
+                [file.path, file.raw.decode("utf-8")] for file in inputs.prototype_files
+            ],
+            "authors": authors,
+        }
+
+    def _validate(
+        self, inputs: AuthorInputSet, expander: AuthorExpander
+    ) -> tuple[CardResult, ...]:
         files = {file.path: file for file in inputs.author_files}
         results: list[CardResult] = []
         for record in inputs.index.records:
