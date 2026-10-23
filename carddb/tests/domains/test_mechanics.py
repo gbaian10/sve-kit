@@ -11,7 +11,7 @@ from pydantic import ValidationError
 from sve_carddb.build import Json, create_database
 from sve_carddb.build.t1 import compile_build
 from sve_carddb.core.json import array, canonical, object_value
-from sve_carddb.domains import mechanic_coverage, mechanics
+from sve_carddb.domains import mechanic_coverage, mechanic_grants, mechanics
 from sve_carddb.domains.products.models import LocalizedText
 from sve_carddb.domains.registry.records import FaceData
 from sve_carddb.domains.registry.snapshot import load_registry
@@ -65,6 +65,7 @@ def case(
     raw: str,
     *,
     back: str | None = None,
+    first_batch: bool = False,
 ) -> Generator[tuple[Database, mechanics.Inputs, mechanics.Settings, str]]:
     html = digital_link_import_fixtures.RAW
     if back is not None:
@@ -93,6 +94,18 @@ def case(
     )
     fixture = replace(fixture, face=faces[0])
     inputs = mechanics.Inputs(registry(), canonical(registry().model_dump(mode="json")))
+    if first_batch:
+        adopted = inputs.registry.model_copy(
+            update={
+                "records": tuple(
+                    record.model_copy(update={"id": "kw:" + code, "code": code})
+                    for record, code in zip(
+                        inputs.registry.records, ("ward", "storm"), strict=True
+                    )
+                )
+            }
+        )
+        inputs = mechanics.Inputs(adopted, canonical(adopted.model_dump(mode="json")))
     engine = classifier(
         (
             Term("term:keyword.test_a", "keyword", "合成甲"),
@@ -179,7 +192,74 @@ def case(
         settings = mechanics.Settings(
             fixture.sources(), engine, fixture.jp.batch_id, fixture.authored
         )
+        if first_batch:
+            settings = replace(settings, first_batch_cards=frozenset({fixture.card.id}))
         yield db, inputs, settings, fixture.card.id
+
+
+def test_other_card_grant_merges_with_self_declaration_but_stays_partial(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    raw = "【合成甲】\n{ファンファーレ}自分の他のフォロワー1体を選ぶ。それは【合成甲】を持つ。"
+    with case(tmp_path, monkeypatch, raw, first_batch=True) as (
+        db,
+        inputs,
+        settings,
+        cid,
+    ):
+        with db.transaction():
+            mechanics.apply(db, inputs, settings)
+        projection = db.rows("mechanic_projection")
+        assert len(projection) == 1
+        assert projection[0].values["card_id"] == cid
+        assert projection[0].values["relations"] == Json(["grants", "has"])
+        evidence = db.rows("card_mechanic")
+        assert len({row.values["producer_version"] for row in evidence}) == 2
+        coverage = db.rows("card_mechanic_coverage")[0].values
+        assert coverage["complete_all"] is False
+        assert coverage["complete_keyword_ids"] == Json([])
+        assert coverage["partial_keyword_ids"] == Json(["kw:ward"])
+        with db.transaction():
+            clear_projection(db)
+            db.update(
+                "face_revision",
+                {"id": "link-revision"},
+                {
+                    "effect_unit_id": TextInterner(db).intern(
+                        LocalizedText(lang="ja", text=raw + "\nBorrowed source.")
+                    )
+                },
+            )
+        with pytest.raises(ValueError, match="frozen field differs"), db.transaction():
+            mechanic_grants.apply(db, inputs, settings, mechanics.source_bundles(db))
+
+
+def test_quoted_grants_and_token_sections_do_not_grant_the_parent_card(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    grant = "自分の他のフォロワー1体を選ぶ。それは【合成甲】を持つ。"
+    raw = "これは「\n" + grant + "\n」を持つ。"
+    with case(tmp_path, monkeypatch, raw, first_batch=True) as (
+        db,
+        inputs,
+        settings,
+        _,
+    ):
+        with db.transaction():
+            db.insert(
+                "face_text_section",
+                {
+                    "revision_id": "link-revision",
+                    "ordinal": 0,
+                    "kind": "token_definition",
+                    "text_unit_id": TextInterner(db).intern(
+                        LocalizedText(lang="ja", text="『合成トークン』" + grant)
+                    ),
+                },
+            )
+            mechanics.apply(db, inputs, settings)
+        assert not db.rows("mechanic_projection")
+        assert not db.rows("card_mechanic_coverage")
 
 
 @pytest.mark.parametrize(
