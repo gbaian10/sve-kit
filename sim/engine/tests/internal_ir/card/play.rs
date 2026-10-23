@@ -674,3 +674,188 @@ fn surrender_during_formal_target_selection_preserves_resolution_prefix() {
         .unwrap_err();
     assert_eq!(ended, exact_authority(&game));
 }
+
+#[expect(
+    clippy::panic,
+    reason = "Unexpected fixture shapes must fail the test."
+)]
+fn trait_target_ability() -> Located<Ability> {
+    let candidate = ObjectView::Current {
+        object: Box::new(ObjectOperand::Bound {
+            binding: Binding::new(9, ScopeId(100)),
+        }),
+    };
+    let predicate = Expr::Compute(Box::new(Predicate::And {
+        predicates: vec![
+            Expr::Compute(Box::new(Predicate::KindEquals {
+                left: Expr::Live(Box::new(KindRead::Kind {
+                    object: candidate.clone(),
+                    view: CharacteristicView::Effective,
+                })),
+                right: Expr::Literal(CardKind::Follower),
+            })),
+            Expr::Compute(Box::new(Predicate::HasTrait {
+                traits: Expr::Live(Box::new(TraitsRead::Traits {
+                    object: candidate,
+                    view: CharacteristicView::Effective,
+                })),
+                trait_id: TraitId("兵士".into()),
+            })),
+        ],
+    }));
+    let mut target = target(10, 1, 1, 1);
+    let ChoiceDomain::Objects { constraint, .. } = &mut target.domain else {
+        panic!("target");
+    };
+    let Selector::Zone {
+        predicate: filter, ..
+    } = &mut constraint.groups[0].selector
+    else {
+        panic!("field");
+    };
+    **filter = predicate;
+    let subjects = Selector::Bound {
+        reference: Binding::new(10, ScopeId(1)),
+    };
+    let Node::Instruction {
+        instruction: payment,
+    } = movement::put(
+        100,
+        Selector::Objects {
+            objects: vec![ObjectOperand::SourceHolder {}],
+        },
+        OwnerZone::Cemetery,
+    )
+    .node
+    else {
+        panic!("payment");
+    };
+    let mut a = payment::paid_ability(
+        vec![payment::pp(1), payment.action],
+        vec![
+            instruction(
+                1,
+                Action::Damage {
+                    recipients: selected(10, 1),
+                    amount: DamageAmount::Uniform {
+                        amount: Expr::Literal(Int(2)),
+                    },
+                    flags: DamageFlags::Ability,
+                    source: ObjectView::SourceInformation {},
+                    batch: BatchPolicy::Instruction {},
+                },
+            ),
+            numeric::modify(
+                2,
+                subjects.clone(),
+                numeric::pair(1, 1),
+                DurationEnd::NoTemporalExpiry {},
+            ),
+            instruction(3, Action::Destroy { objects: subjects }),
+            draw(4, 1),
+        ],
+    );
+    a.node.play.as_mut().unwrap().parameters = vec![target];
+    a
+}
+
+fn trait_target_position() -> Game {
+    let snapshot = ["unit-follower", "other"].iter().map(|number| json!({"number":number,"faces":[{"name":number,"card_class":"ニュートラル","card_type":"フォロワー","cost":"1","power":"2","hp":"3","traits":if *number == "unit-follower" { json!(["兵士"]) } else { json!([]) },"text":null,"sections":[]}]}).to_string()).collect::<Vec<_>>().join("\n");
+    let catalog = Arc::new(
+        Catalog::from_documents(
+            &snapshot,
+            &json!({"format":1,"kind":"keyword_registry","keywords":{}}).to_string(),
+            &[(
+                "trait-target.yaml".into(),
+                json!({"format":1,"kind":"effect_set","cards":{
+                    "unit-follower":{"status":"complete","review":"synthetic","abilities":[]},
+                    "other":{"status":"complete","review":"synthetic","abilities":[]}
+                }})
+                .to_string(),
+            )],
+        )
+        .unwrap(),
+    );
+    let mut initial = setup(1, json!([{"id":"d","card":"other"}]));
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P1"]["zones"]["field"] =
+        json!([{"id":"s","card":"unit-follower"}, {"id":"nonmatch","card":"other"}]);
+    initial["players"]["P2"]["zones"]["field"] = json!([]);
+    Game::new(
+        catalog,
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "trait-target",
+    )
+    .unwrap()
+}
+
+#[test]
+fn stable_trait_target_retains_selection_after_paid_departure_and_runs_independent_draw() {
+    let a = trait_target_ability();
+    let mut game = trait_target_position();
+    let origin = exact_authority(&game);
+    let mut flipping = a.clone();
+    flipping.node.body.as_mut().unwrap().steps.push(instruction(
+        5,
+        Action::Modify {
+            subjects: zone(ZoneKind::Field, 990),
+            patch: CharacteristicPatch::SetKind {
+                kind: CardKind::Amulet,
+            },
+            expires: Duration {
+                end: DurationEnd::NoTemporalExpiry {},
+                anchor: TimeAnchor::Installation {},
+                intervals: vec![],
+                usage: None,
+            },
+            source: EffectReference::CurrentInstallation {},
+        },
+    ));
+    locate_steps(
+        &mut flipping.node.body.as_mut().unwrap().steps,
+        &flipping.source,
+        &flipping.node.source,
+    );
+    game.load_internal_card("unit-follower", &card(vec![flipping]))
+        .unwrap_err();
+    assert_eq!(origin, exact_authority(&game));
+    game.load_internal_card("unit-follower", &card(vec![a]))
+        .unwrap();
+    game.load_internal_card("other", &card(vec![])).unwrap();
+    let question = awaiting(
+        game.activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
+            .unwrap(),
+    );
+    assert!(
+        matches!(&question.domain, InputDomain::Targets(domain) if domain.members.len() == 1 && domain.members[0].card.as_deref() == Some("unit-follower"))
+    );
+    let before = exact_authority(&game);
+    game.answer_internal_card(question.actor, question.token, Answer::Targets(vec![1]))
+        .unwrap_err();
+    assert_eq!(before, exact_authority(&game));
+    let result = resolved(
+        game.answer_internal_card(question.actor, question.token, Answer::Targets(vec![0]))
+            .unwrap(),
+    );
+    assert_eq!(
+        result.progress.receipts[&ReceiptId(1)],
+        InstructionOutcome::Damage(DamageQuantityOutcome {
+            requested: Int(2),
+            actual: Nat(0)
+        })
+    );
+    assert!(
+        matches!(&result.progress.receipts[&ReceiptId(2)], InstructionOutcome::Modified { subjects, effect: None } if subjects.is_empty())
+    );
+    assert!(
+        matches!(&result.progress.receipts[&ReceiptId(3)], InstructionOutcome::Destroy(outcome) if outcome.successful.is_empty())
+    );
+    cards(&result.progress, 4, 1, 1);
+    let view = game.projection(View::Referee).unwrap();
+    assert_eq!(view["P1"]["pp"]["current"], 1);
+    assert_eq!(view["P1"]["hand"], json!(["d"]));
+    assert_eq!(view["P1"]["cemetery"], json!(["s"]));
+    assert_eq!(view["objects"]["nonmatch"]["hp"], 3);
+}

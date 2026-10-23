@@ -20,7 +20,7 @@ use crate::ir::{
     StepwiseMode, Visibility, WellFormedProgram, ZoneKind,
 };
 use crate::{EngineFailure, Result, invalid};
-use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
+use alloc::collections::{BTreeMap, VecDeque};
 use alloc::sync::Arc;
 use core::{num::NonZeroU64, result};
 use serde::ser::Error as _;
@@ -317,7 +317,7 @@ pub(super) struct Execution {
     ability: Option<RuntimeAbilitySource>,
     source_information: Option<source::SourceInformation>,
     entry_object: Option<((ScopeId, u64), ObjectRef)>,
-    targets: BTreeSet<(ScopeId, u64)>,
+    targets: BTreeMap<(ScopeId, u64), card::selection::TargetWait>,
     play: Option<card::play::PlayState>,
     spell: bool,
     play_counts: BTreeMap<u32, (Nat, Nat)>,
@@ -480,7 +480,7 @@ impl Game {
                 ability: None,
                 source_information: None,
                 entry_object: None,
-                targets: BTreeSet::new(),
+                targets: BTreeMap::new(),
                 play: None,
                 spell: false,
                 play_counts: BTreeMap::new(),
@@ -1034,12 +1034,12 @@ impl Game {
                         RuntimeDamageRecipient::Object { object } => {
                             let id = execution.object_id(object)?;
                             let current = self.object(id)?;
+                            if current.generation != object.generation.0 {
+                                continue;
+                            }
                             // Requested units for non-follower members are not admitted yet.
                             if !self.object_type(id)?.contains("フォロワー") {
                                 return Err(unsupported("non-follower damage recipient"));
-                            }
-                            if current.generation != object.generation.0 {
-                                continue;
                             }
                             if current.zone != "field" {
                                 return Err(unsupported("non-field damage recipient"));

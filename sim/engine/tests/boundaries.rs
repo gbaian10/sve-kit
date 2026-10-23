@@ -5482,7 +5482,7 @@ fn repeated_stat_events_keep_distinct_contexts_and_identical_trigger_copies() {
 }
 
 #[test]
-fn evolution_collects_stat_triggers_from_the_new_face() {
+fn evolution_base_replacement_does_not_collect_stat_triggers_from_the_new_face() {
     let mut doc = stat_event_document(&json!({"op":"evolve","subjects":"self"}));
     doc["cards"]["unit-evolved"] = json!({"status":"complete","review":"synthetic","abilities":[{"kind":"trigger","line":1_i64,"event":"hp_increase","subject":"self","body":{"op":"modify","subjects":"self.leader","hp":1_i64}}]});
     let evolved = json!({"number":"unit-evolved","faces":[{"name":"unit-follower","card_class":"ニュートラル","card_type":"フォロワー・エボルヴ","cost":"1","power":"4","hp":"5","traits":[],"text":null,"sections":[]}]});
@@ -5502,16 +5502,22 @@ fn evolution_collects_stat_triggers_from_the_new_face() {
     engine
         .decide(&json!({"do":"resolve-choice","select":["e"]}), "evolve")
         .unwrap();
-    assert_eq!(
-        engine.legal().unwrap(),
-        vec![
-            json!({"do":"choose-pending","pending":{"ability":{"source":"a","card":"unit-evolved","line":1_i64}}})
-        ]
+    assert!(
+        engine
+            .legal()
+            .unwrap()
+            .iter()
+            .all(|choice| choice["do"] != "choose-pending")
     );
-    engine.decide(&json!({"do":"choose-pending","pending":{"ability":{"source":"a","card":"unit-evolved","line":1_i64}}}),"trigger").unwrap();
     assert_eq!(
         engine.query(View::P1, "P1.leader.life").unwrap(),
-        Some(json!(21_i64))
+        Some(json!(20_i64))
+    );
+    assert_eq!(
+        engine
+            .query(View::P1, "P1.field.a.stats_increased_this_turn")
+            .unwrap(),
+        Some(json!(false))
     );
 }
 

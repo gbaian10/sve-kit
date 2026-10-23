@@ -263,7 +263,10 @@ impl Execution {
                     requested,
                 ))
             }
-            DamageAmount::Allocation { binding } => self.allocated_shares(*binding, recipients),
+            DamageAmount::Allocation { binding } => {
+                self.recipients(game, recipients)?;
+                self.allocated_shares(*binding, recipients)
+            }
         }
     }
 

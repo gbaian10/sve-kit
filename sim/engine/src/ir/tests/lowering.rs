@@ -329,13 +329,11 @@ fn printed_spell_cost_targets_distribution_and_choice_preserve_play_scopes() {
     let ability = &cards["SD03-005"].card().abilities[0].node;
     assert_play_distribution(ability);
     tree.pointer_mut(body).unwrap()["targets"][0]["from"]["kind"] = json!("follower");
-    assert_eq!(
-        lowerer
-            .lower_with_printed_costs(&tree, &costs)
-            .unwrap_err()
-            .code,
-        "unsupported_construct"
-    );
+    tree.pointer_mut(body).unwrap()["targets"][0]["from"]["trait"] = json!("兵士");
+    let filtered = lowerer.lower_with_printed_costs(&tree, &costs).unwrap();
+    assert_target_characteristics(&filtered["SD03-005"]);
+    tree.pointer_mut(body).unwrap()["targets"][0]["from"]["power_max"] = json!(3_u64);
+    lowerer.lower_with_printed_costs(&tree, &costs).unwrap_err();
     *tree.pointer_mut(body).unwrap() = json!({"targets":[{"bind":"mode_t","from":{"who":"opp","zone":"field"},"n":1_u64,"option":1_u64}], "do":[{"choice":{"n":1_u64,"options":[[{"damage":{"to":"mode_t","n":2_u64}}],[{"draw":{"n":1_u64}}]]}}]});
     let choices = lowerer.lower_with_printed_costs(&tree, &costs).unwrap();
     let program = choices["SD03-005"].card().abilities[0]
@@ -478,5 +476,28 @@ fn own_play_costs_preserve_explicit_intervals_and_reject_payment_shapes() {
     assert_eq!(
         lowerer.lower(&tree).unwrap_err().path,
         "/cards/synthetic/abilities/0"
+    );
+}
+
+fn assert_target_characteristics(filtered: &WellFormedCardProgram) {
+    let ChoiceDomain::Objects { constraint, .. } = &filtered.card().abilities[0]
+        .node
+        .play
+        .as_ref()
+        .unwrap()
+        .parameters[0]
+        .domain
+    else {
+        panic!("targets");
+    };
+    let Selector::Zone { predicate, .. } = &constraint.groups[0].selector else {
+        panic!("field");
+    };
+    assert!(
+        matches!(predicate.as_ref(), Expr::Compute(operation) if matches!(operation.as_ref(), Predicate::And { predicates } if matches!(predicates.as_slice(), [Expr::Compute(kind), Expr::Compute(traits)] if matches!(kind.as_ref(), Predicate::KindEquals { right: Expr::Literal(CardKind::Follower), .. }) && matches!(traits.as_ref(), Predicate::HasTrait { trait_id, .. } if trait_id.0 == "兵士"))))
+    );
+    assert_eq!(
+        filtered.card().abilities[0].source.author_path,
+        "/cards/SD03-005/abilities/0"
     );
 }

@@ -11,7 +11,7 @@ const fn patch(stat: Stat, amount: Expr<Int>) -> CharacteristicPatch {
     }
 }
 
-fn pair(attack: i64, life: i64) -> CharacteristicPatch {
+pub(super) fn pair(attack: i64, life: i64) -> CharacteristicPatch {
     CharacteristicPatch::Combined {
         patches: vec![
             patch(Stat::Attack, Expr::Literal(Int(attack))),
@@ -20,7 +20,7 @@ fn pair(attack: i64, life: i64) -> CharacteristicPatch {
     }
 }
 
-fn modify(
+pub(super) fn modify(
     id: u64,
     subjects: Selector,
     patch: CharacteristicPatch,
