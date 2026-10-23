@@ -704,8 +704,35 @@ export function CardsPage() {
         onChange={commit}
         edition={edition}
         onEditionChange={commitEdition}
-        facets={
-          <>
+        resultTotal={page?.total}
+        onClose={() => {
+          prefsStore.set({ filterPanelOpen: false })
+          requestAnimationFrame(() => {
+            resultsRef.current?.scrollIntoView({ block: "start" })
+          })
+        }}
+        types={
+          <TypeFilter
+            options={printingOptions?.type}
+            textLang={textLang}
+            selected={query.types}
+            onChange={(types) => {
+              commit({ ...query, types })
+            }}
+          />
+        }
+        locations={
+          <LocationFilter
+            options={printingOptions?.location}
+            textLang={textLang}
+            selected={query.locations}
+            onChange={(locations) => {
+              commit({ ...query, locations })
+            }}
+          />
+        }
+        facets={{
+          rarity: (
             <RarityFilter
               rarities={(rarities ?? []).map((rarity) => ({
                 code: rarity.code,
@@ -718,22 +745,25 @@ export function CardsPage() {
                 commit({ ...query, rarities })
               }}
             />
-            <TypeFilter
-              options={printingOptions?.type}
-              textLang={textLang}
-              selected={query.types}
-              onChange={(types) => {
-                commit({ ...query, types })
-              }}
-            />
-            <LocationFilter
-              options={printingOptions?.location}
-              textLang={textLang}
-              selected={query.locations}
-              onChange={(locations) => {
-                commit({ ...query, locations })
-              }}
-            />
+          ),
+          sets: (
+            <>
+              {/* A set page's set comes from its path, so the dropdown would only show one choice. */}
+              {!code && (
+                <SetFilter
+                  sets={sets}
+                  quickSets={quickSets}
+                  counts={setCounts}
+                  textLang={textLang}
+                  selected={query.sets}
+                  onChange={(sets) => {
+                    commit({ ...query, sets })
+                  }}
+                />
+              )}
+            </>
+          ),
+          traits: (
             <TraitFilter
               options={printingOptions?.trait}
               textLang={textLang}
@@ -742,6 +772,8 @@ export function CardsPage() {
                 commit({ ...query, traits })
               }}
             />
+          ),
+          keywords: (
             <KeywordFilter
               options={printingOptions?.keyword}
               textLang={textLang}
@@ -751,21 +783,8 @@ export function CardsPage() {
                 commit({ ...query, mechanics })
               }}
             />
-            {/* A set page's set comes from its path, so the dropdown would only show one choice. */}
-            {!code && (
-              <SetFilter
-                sets={sets}
-                quickSets={quickSets}
-                counts={setCounts}
-                textLang={textLang}
-                selected={query.sets}
-                onChange={(sets) => {
-                  commit({ ...query, sets })
-                }}
-              />
-            )}
-          </>
-        }
+          ),
+        }}
       />
       {unsupported && (
         <Notice

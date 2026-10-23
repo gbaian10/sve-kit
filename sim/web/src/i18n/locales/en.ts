@@ -149,6 +149,14 @@ export default {
     neutral: "Neutral",
   },
   filters: {
+    groups: {
+      basic: "Basics",
+      stats: "Stats",
+      collection: "Collection",
+      effects: "Effects",
+    },
+    showResults: "Show {{count}} results",
+    updatingResults: "Updating results…",
     errataOnly: "Only show cards with errata",
     errataOnlyHint: "Cards with an official errata announcement",
     keywords: "Keywords",

@@ -4,7 +4,8 @@ import type { SearchOptions } from "../../data"
 import type { MechanicState } from "../../domain/query/model"
 import type { Region, TextLang } from "../../domain/search"
 import { vocabularyOptionLabel } from "./facet-labels"
-import { Section, Toggle } from "./FilterControls"
+import { Toggle } from "./FilterControls"
+import { FilterDropdown } from "./FilterDropdown"
 
 export function KeywordFilter({
   options,
@@ -27,8 +28,24 @@ export function KeywordFilter({
   const { t } = useTranslation()
   const disabled = !options || options.coverage === "pending" || options.coverage === "unknown"
   return (
-    <Section
-      title={t("filters.keywords")}
+    <FilterDropdown
+      label={t("filters.keywords")}
+      selectedCount={Object.keys(selected).length}
+      summary={
+        Object.keys(selected).length > 0
+          ? Object.keys(selected)
+              .map((id) => {
+                const keyword = options?.keywords.find((item) => item.id === id)
+                const label = keyword ? vocabularyOptionLabel(keyword.name, textLang) : id
+                return selected[id] === "not" ? t("filters.keywordNot", { label }) : label
+              })
+              .join("、")
+          : !options || options.coverage === "pending"
+            ? t("filters.keywordLoading")
+            : disabled
+              ? t(edition === "en" ? "filters.keywordEnglishUnknown" : "filters.keywordUnknown")
+              : t("rarityBadge.all")
+      }
       onClear={
         Object.keys(selected).length
           ? () => {
@@ -37,23 +54,25 @@ export function KeywordFilter({
           : undefined
       }
     >
-      {(options?.keywords ?? []).map((keyword) => (
-        <Toggle
-          key={keyword.id}
-          pressed={selected[keyword.id] === "has"}
-          disabled={disabled}
-          onClick={() => {
-            onChange(
-              selected[keyword.id] === "has"
-                ? Object.fromEntries(Object.entries(selected).filter(([id]) => id !== keyword.id))
-                : { ...selected, [keyword.id]: "has" },
-            )
-          }}
-        >
-          {vocabularyOptionLabel(keyword.name, textLang)}
-        </Toggle>
-      ))}
-      <p className="w-full text-12 text-text-3" role="status">
+      <div className="flex flex-wrap gap-2">
+        {(options?.keywords ?? []).map((keyword) => (
+          <Toggle
+            key={keyword.id}
+            pressed={selected[keyword.id] === "has"}
+            disabled={disabled}
+            onClick={() => {
+              onChange(
+                selected[keyword.id] === "has"
+                  ? Object.fromEntries(Object.entries(selected).filter(([id]) => id !== keyword.id))
+                  : { ...selected, [keyword.id]: "has" },
+              )
+            }}
+          >
+            {vocabularyOptionLabel(keyword.name, textLang)}
+          </Toggle>
+        ))}
+      </div>
+      <p className="mt-3 text-12 text-text-3" role="status">
         {!options || options.coverage === "pending"
           ? t("filters.keywordLoading")
           : disabled
@@ -64,6 +83,6 @@ export function KeywordFilter({
               ? t("filters.keywordPartial")
               : t("filters.keywordAny")}
       </p>
-    </Section>
+    </FilterDropdown>
   )
 }

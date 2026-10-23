@@ -47,9 +47,9 @@ const url = () => decodeURIComponent(screen.getByLabelText("url").textContent)
 it("lists traits by their label, narrows them from the search box and keeps selections", async () => {
   await renderInRouter(<Harness textLang="zh-Hant" />)
   const button = screen.getByRole("button", { name: /^類型/u })
-  expect(button).toHaveTextContent("已選 1 項")
+  expect(button).toHaveTextContent("機械")
   await userEvent.click(button)
-  const list = screen.getByRole("group", { name: "類型" })
+  const list = document.getElementById(button.getAttribute("aria-controls") ?? "") as HTMLElement
   // Ordered by the label in the UI's text language; a trait without a translation shows its
   // original label.
   expect(
@@ -81,9 +81,10 @@ it("lists traits by their label, narrows them from the search box and keeps sele
 
 it("matches the search box against width-folded English labels", async () => {
   await renderInRouter(<Harness textLang="en" />)
-  await userEvent.click(screen.getByRole("button", { name: /^類型/u }))
+  const button = screen.getByRole("button", { name: /^類型/u })
+  await userEvent.click(button)
   await userEvent.type(screen.getByRole("searchbox", { name: "搜尋類型" }), "ＮＥＷ")
-  const list = screen.getByRole("group", { name: "類型" })
+  const list = document.getElementById(button.getAttribute("aria-controls") ?? "") as HTMLElement
   expect(
     within(list)
       .getAllByRole("checkbox")

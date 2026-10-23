@@ -65,12 +65,14 @@ function Harness({ textLang = "zh-Hant" }: { readonly textLang?: TextLang }) {
 }
 it("toggles multiple has chips, round trips the URL and removes conditions independently", async () => {
   await renderInRouter(<Harness />)
+  await userEvent.click(screen.getByRole("button", { name: /^關鍵字/u }))
   expect(screen.getByText(/標註尚未完整/u)).toBeVisible()
   await userEvent.click(screen.getByRole("button", { name: "守護" }))
   await userEvent.click(screen.getByRole("button", { name: "疾馳" }))
   expect(decodeURIComponent(screen.getByLabelText("url").textContent)).toBe("mech=kw:storm,kw:ward")
   expect(screen.getByRole("button", { name: "守護" })).toHaveAttribute("aria-pressed", "true")
   await userEvent.click(screen.getByRole("button", { name: "移除條件：關鍵字：守護" }))
+  await userEvent.click(screen.getByRole("button", { name: /^關鍵字:/u }))
   expect(screen.getByRole("button", { name: "守護" })).toHaveAttribute("aria-pressed", "false")
   expect(decodeURIComponent(screen.getByLabelText("url").textContent)).toBe("mech=kw:storm")
   await userEvent.click(screen.getByRole("button", { name: "清除關鍵字" }))
@@ -82,6 +84,7 @@ it.each([
   ["zh-TW", "zh-Hant", "疾馳"],
 ] as const)("uses the vocabulary fallback in %s", async (language, textLang, label) => {
   await renderInRouter(<Harness textLang={textLang} />, { language })
+  await userEvent.click(screen.getByRole("button", { name: /^(?:關鍵字|Keywords|キーワード)/u }))
   expect(screen.getByRole("button", { name: label })).toBeVisible()
 })
 it("disables EN when the edition's coverage is unknown, even with a selected URL condition", async () => {
@@ -95,6 +98,7 @@ it("disables EN when the edition's coverage is unknown, even with a selected URL
     />,
     { language: "en" },
   )
+  await userEvent.click(screen.getByRole("button", { name: /^Keywords/u }))
   const group = screen.getByRole("group", { name: "Keywords" })
   expect(within(group).getByText("English edition is not tagged yet")).toBeVisible()
   expect(within(group).getByRole("button", { name: "守護" })).toBeDisabled()
@@ -121,6 +125,7 @@ it("keeps keyword chips in place and disabled until tagging finishes", async () 
     )
   }
   await renderInRouter(<LoadingHarness />)
+  await userEvent.click(screen.getByRole("button", { name: /^關鍵字/u }))
   const ward = screen.getByRole("button", { name: "守護" })
   const storm = screen.getByRole("button", { name: "疾馳" })
   expect(ward).toBeDisabled()
@@ -129,6 +134,7 @@ it("keeps keyword chips in place and disabled until tagging finishes", async () 
   await userEvent.click(ward)
   expect(onChange).not.toHaveBeenCalled()
   await userEvent.click(screen.getByRole("button", { name: "完成標註" }))
+  await userEvent.click(screen.getByRole("button", { name: /^關鍵字:/u }))
   expect(screen.getByRole("button", { name: "守護" })).toBe(ward)
   expect(screen.getByRole("button", { name: "疾馳" })).toBe(storm)
   expect(ward).toBeEnabled()

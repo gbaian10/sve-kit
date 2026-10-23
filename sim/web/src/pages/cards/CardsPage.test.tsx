@@ -68,6 +68,8 @@ async function expectCount(total: number) {
 }
 
 describe("CardsPage", () => {
+  // The first test pays the page's cold start (about 2.7 s alone), which can exceed the 5 s default
+  // when the whole suite runs on four workers.
   it("commits a multi-match query with Enter without picking a suggestion", async () => {
     const { router } = await open("/cards?sort=cost")
     const user = userEvent.setup()
@@ -78,7 +80,7 @@ describe("CardsPage", () => {
     expect(router.state.location.pathname).toBe("/cards")
     expect(router.state.location.search).toBe("?q=bp01&sort=cost")
     expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
-  })
+  }, 15_000)
 
   it("opens the explicitly selected suggestion when several cards match", async () => {
     const { router } = await open()
@@ -644,8 +646,8 @@ describe("CardsPage", () => {
           "PR",
           "銅",
           "從者",
-          "主戰者・金框",
           "Token",
+          "主戰者・金框",
           "同卡合併成一張",
         ])
       })
@@ -785,6 +787,7 @@ describe("CardsPage", () => {
 
     it("shares keyword conditions between the panel, URL, chips and result units", async () => {
       const { router } = await open()
+      await userEvent.click(screen.getByRole("button", { name: /^關鍵字/u }))
       const group = screen.getByRole("group", { name: "關鍵字" })
       const ward = await within(group).findByRole("button", { name: "守護" })
       await waitFor(() => expect(ward).toBeEnabled())

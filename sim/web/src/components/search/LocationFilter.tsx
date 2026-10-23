@@ -99,6 +99,7 @@ export function LocationFilter({
   return (
     <FacetChips
       title={t("locationFilter.label")}
+      locationGrid
       items={items}
       counts={options?.counts}
       selected={selected}

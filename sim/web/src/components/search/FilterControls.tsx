@@ -54,17 +54,19 @@ export function Toggle({
 export function Section({
   title,
   onClear,
+  contentClassName,
   children,
 }: {
   readonly title: string
   /** Clears this section only; given while it has a selection. */
   readonly onClear?: (() => void) | undefined
   readonly children: ReactNode
+  readonly contentClassName?: string
 }) {
   const { t } = useTranslation()
   const id = useId()
   return (
-    <div role="group" aria-labelledby={id} className="flex flex-col gap-1.5">
+    <div role="group" aria-labelledby={id} className="flex min-w-0 flex-col gap-2">
       <div className="flex h-4 items-center gap-2 leading-4">
         <p id={id} className="text-12 font-semibold text-text-2">
           {title}
@@ -80,7 +82,7 @@ export function Section({
           </button>
         )}
       </div>
-      <div className="flex flex-wrap gap-1.5">{children}</div>
+      <div className={contentClassName ?? "flex flex-wrap gap-1.5"}>{children}</div>
     </div>
   )
 }

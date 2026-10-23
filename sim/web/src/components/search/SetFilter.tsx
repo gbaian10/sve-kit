@@ -65,40 +65,43 @@ export function SetFilter({
   const recent = quickSets?.recent
   const promo = quickSets?.promo
   return (
-    <div className="flex flex-wrap items-center gap-1.5">
-      <FacetFilter
-        label={t("filters.sets")}
-        groups={groups}
-        counts={counts}
-        selected={selected}
-        onChange={onChange}
-      />
-      {recent && (
-        <Toggle
-          pressed={selected.includes(recent.code)}
-          disabled={!counts}
-          label={t("quickSet.latestAccessible", { name: setLabel(recent.name, textLang).text })}
-          title={setLabel(recent.name, textLang).text}
-          onClick={() => {
-            toggleSet(recent.code)
-          }}
-        >
-          {t("quickSet.latest", { code: recent.publicCode ?? recent.code })}
-        </Toggle>
-      )}
-      {promo && (
-        <Toggle
-          pressed={selected.includes(promo.code)}
-          disabled={!counts}
-          label={setCaption(promo, textLang).text}
-          title={setLabel(promo.name, textLang).text}
-          onClick={() => {
-            toggleSet(promo.code)
-          }}
-        >
-          {promo.publicCode ?? promo.code}
-        </Toggle>
-      )}
-    </div>
+    <FacetFilter
+      label={t("filters.sets")}
+      groups={groups}
+      counts={counts}
+      selected={selected}
+      onChange={onChange}
+      searchable
+      quickOptions={
+        <>
+          {recent && (
+            <Toggle
+              pressed={selected.includes(recent.code)}
+              disabled={!counts}
+              label={t("quickSet.latestAccessible", { name: setLabel(recent.name, textLang).text })}
+              title={setLabel(recent.name, textLang).text}
+              onClick={() => {
+                toggleSet(recent.code)
+              }}
+            >
+              {t("quickSet.latest", { code: recent.publicCode ?? recent.code })}
+            </Toggle>
+          )}
+          {promo && (
+            <Toggle
+              pressed={selected.includes(promo.code)}
+              disabled={!counts}
+              label={setCaption(promo, textLang).text}
+              title={setLabel(promo.name, textLang).text}
+              onClick={() => {
+                toggleSet(promo.code)
+              }}
+            >
+              {promo.publicCode ?? promo.code}
+            </Toggle>
+          )}
+        </>
+      }
+    />
   )
 }
