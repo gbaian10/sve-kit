@@ -3,6 +3,7 @@ import { expect, it, vi } from "vitest"
 
 import { memoryCache } from "../test-utils/cache"
 import { dataCacheBytes } from "./cache-budget"
+import type { Fetcher } from "./cdn"
 import { transferDigest } from "./integrity"
 import { rawBlobDescriptor, RawBlobStore, rawRetentionPlan } from "./raw-blobs"
 
@@ -67,7 +68,7 @@ it("shares immutable bytes across retained manifests and releases completed read
 it("repairs corrupt bytes and falls back to verified on-demand reads when storage fails", async () => {
   const descriptor = rawBlobDescriptor(file)
   const storage = memoryCache()
-  const fetcher = vi.fn(() => Promise.resolve(new Response(payload)))
+  const fetcher = vi.fn<Fetcher>(() => Promise.resolve(new Response(payload)))
   const store = new RawBlobStore(base, fetcher, storage)
   await store.read(descriptor)
   const cache = await storage.open((await storage.keys())[0] ?? "missing")
@@ -107,4 +108,50 @@ it("repairs corrupt bytes and falls back to verified on-demand reads when storag
   expect(foreground).not.toHaveBeenCalled()
   expect(await scheduled.read(descriptor, { priority: "low" })).toEqual(payload)
   expect(background).toHaveBeenCalledWith(`${base}/${file.path}`, { priority: "low" })
+})
+
+it("recovers persistence only on a successful write without a newer concurrent storage failure", async () => {
+  const storage = memoryCache()
+  const name = `sve-raw:${encodeURIComponent(base)}`
+  const cache = await storage.open(name)
+  const open = storage.open.bind(storage)
+  storage.open = (key) => (key === name ? Promise.resolve(cache) : open(key))
+  const fetcher = vi.fn<Fetcher>(() => Promise.resolve(new Response(payload)))
+  const store = new RawBlobStore(base, fetcher, storage)
+  await store.read(rawBlobDescriptor(file))
+  expect(store.persistent).toBe(true)
+  const nextBytes = new Uint8Array([4, 5, 6])
+  const next = { ...file, sha256: await transferDigest(nextBytes) }
+  const put = cache.put.bind(cache)
+  const pending = Promise.withResolvers<undefined>()
+  const entered = Promise.withResolvers<undefined>()
+  let block = true
+  cache.put = async (key, response) => {
+    const url = typeof key === "string" ? key : key instanceof URL ? key.href : key.url
+    if (url.includes(encodeURIComponent(file.sha256))) {
+      if (block) {
+        entered.resolve(undefined)
+        await pending.promise
+      }
+      await put(key, response)
+    } else throw new Error("quota")
+  }
+  const slot = `${base}/__sve-raw/${encodeURIComponent(file.sha256)}/bytes`
+  await cache.delete(slot)
+  fetcher.mockImplementation((url) =>
+    Promise.resolve(new Response(url.endsWith("later.json") ? nextBytes : payload)),
+  )
+  const earlier = store.read(rawBlobDescriptor(file))
+  await entered.promise
+  await store.read(rawBlobDescriptor({ ...next, path: "later.json" }))
+  expect(store.persistent).toBe(false)
+  pending.resolve(undefined)
+  await earlier
+  expect(store.persistent).toBe(false)
+  await store.read(rawBlobDescriptor(file))
+  expect(store.persistent).toBe(false)
+  block = false
+  await cache.delete(slot)
+  await store.read(rawBlobDescriptor(file))
+  expect(store.persistent).toBe(true)
 })

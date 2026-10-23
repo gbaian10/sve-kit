@@ -1,11 +1,9 @@
-import { LRUCache } from "lru-cache"
 import PQueue from "p-queue"
 
-import { bodyHeaders, trimDataCaches } from "./cache-budget"
-import { fetchBytes, type Fetcher } from "./cdn"
+import type { Fetcher } from "./cdn"
 import { SnapshotError } from "./format-v3/errors"
-import { integerValue, type JsonObject, stringValue } from "./format-v3/json"
-import { transferDigest } from "./integrity"
+import type { JsonObject } from "./format-v3/json"
+import { rawBlobDescriptor, RawBlobStore } from "./raw-blobs"
 
 export interface MetadataProgress {
   readonly state: "idle" | "running" | "cancelled" | "error" | "complete"
@@ -26,8 +24,6 @@ interface Job {
   readonly resolve: (bytes: Uint8Array) => void
   readonly reject: (error: unknown) => void
 }
-const MAX_BYTES = 12 * 1024 * 1024
-const MAX_FILES = 64
 const cacheInitializers = new WeakMap<CacheStorage, Promise<unknown>>()
 
 /** Bytes only: background work never decodes fragments or builds an image index. */
@@ -35,41 +31,30 @@ export class MetadataBytes {
   private readonly queue = new PQueue({ concurrency: 4 })
   private readonly background = new PQueue({ concurrency: 3 })
   private readonly pending = new Map<string, Job>()
-  private readonly memory = new LRUCache<string, Uint8Array>({
-    max: MAX_FILES,
-    maxSize: MAX_BYTES,
-    sizeCalculation: (bytes) => Math.max(1, bytes.length),
-  })
   private readonly verified = new Set<string>()
   private readonly abort = new AbortController()
   private disposed = false
   private epoch = 0
   private progress: MetadataProgress
-  private cache: Promise<Cache | undefined>
+  private readonly initialized: Promise<void>
+  private readonly raw: RawBlobStore
 
-  private readonly storage: CacheStorage | undefined
-  private readonly base: string
   private readonly files: ReadonlyMap<string, JsonObject>
-  private readonly fetcher: Fetcher
   private readonly changed: () => void
-  private readonly backgroundFetch: Fetcher
 
   constructor(
     base: string,
-    hash: string,
     files: ReadonlyMap<string, JsonObject>,
     fetcher: Fetcher,
     changed: () => void,
     storage?: CacheStorage,
     backgroundFetch: Fetcher = fetcher,
-    previousHash?: string,
   ) {
-    this.storage = storage
-    this.base = base
     this.files = files
-    this.fetcher = fetcher
     this.changed = changed
-    this.backgroundFetch = backgroundFetch
+    this.raw = new RawBlobStore(base, fetcher, storage, backgroundFetch, (file) => {
+      this.rawMissed(file.sha256)
+    })
     this.progress = {
       state: "idle",
       done: 0,
@@ -79,26 +64,20 @@ export class MetadataBytes {
     }
     if (storage) {
       const scope = `${encodeURIComponent(base)}:`
-      const current = `sve-images-${scope}-${hash}`
-      const previous = previousHash ? `sve-images-${scope}-${previousHash}` : undefined
       const initialized = (cacheInitializers.get(storage) ?? Promise.resolve())
         .then(async () => {
-          if (!this.active()) return undefined
+          if (!this.active()) return
           for (const name of await storage.keys())
-            if (name.startsWith(`sve-images-${scope}-`) && name !== current && name !== previous)
-              await storage.delete(name)
-          if (!this.active()) return undefined
-          const cache = await storage.open(current)
-          if (this.active()) this.update({ persistent: true, checking: false })
-          return cache
+            if (name.startsWith(`sve-images-${scope}-`)) await storage.delete(name)
         })
         .catch(() => {
-          if (this.active()) this.update({ persistent: false, checking: false })
-          return undefined
+          // A later session retries legacy cleanup if storage refuses it.
         })
       cacheInitializers.set(storage, initialized)
-      this.cache = initialized
-    } else this.cache = Promise.resolve(undefined)
+      this.initialized = Promise.all([initialized, this.raw.ready]).then(() => {
+        if (this.active()) this.update({ persistent: this.raw.persistent, checking: false })
+      })
+    } else this.initialized = this.raw.ready
   }
 
   private active(): boolean {
@@ -125,8 +104,6 @@ export class MetadataBytes {
         priority: priority ? 1 : 0,
       })
     }
-    const memory = this.memory.get(key)
-    if (memory) return Promise.resolve(memory)
     const existing = this.pending.get(key)
     if (existing) {
       if (priority && !existing.priority && !existing.started) {
@@ -174,10 +151,10 @@ export class MetadataBytes {
         },
         { id: job.key, priority: job.priority ? 1 : 0, signal: job.queueAbort.signal },
       )
-      .then(job.resolve, job.reject)
       .finally(() => {
         if (this.pending.get(job.key) === job) this.pending.delete(job.key)
       })
+      .then(job.resolve, job.reject)
   }
 
   private rejectQueued(job: Job, error: unknown): void {
@@ -194,83 +171,57 @@ export class MetadataBytes {
     const activeSignal = signal ? AbortSignal.any([this.abort.signal, signal]) : this.abort.signal
     if (!this.active()) throw new Error("snapshot replaced")
     activeSignal.throwIfAborted()
-    const path = `${this.base}/${stringValue(file["path"])}`
-    const hash = stringValue(file["sha256"])
-    const valid = async (bytes: Uint8Array) =>
-      bytes.length === integerValue(file["bytes"]) && (await transferDigest(bytes)) === hash
-    const cache = await this.cache
-    if (!priority && !this.progress.persistent)
+    await this.initialized
+    if (!priority && !this.raw.persistent)
       throw new Error("persistent cache required for background fetch")
-    let bytes: Uint8Array | undefined
-    if (cache) {
-      try {
-        const response = await cache.match(path)
-        if (response) {
-          const cached = new Uint8Array(await response.arrayBuffer())
-          if (await valid(cached)) bytes = cached
-        } else if (this.verified.has(key)) this.losePersistence()
-      } catch {
-        this.losePersistence()
-      }
-    }
-    if (!bytes) {
-      if (!priority && !this.progress.persistent)
-        throw new Error("persistent cache required for background fetch")
-      for (let attempt = 0; attempt < 2; attempt += 1) {
-        const candidate = await fetchBytes(priority ? this.fetcher : this.backgroundFetch, path, {
-          signal: activeSignal,
-          ...(signal ? { priority: "low" as const } : {}),
-        })
-        if (await valid(candidate)) {
-          bytes = candidate
-          break
-        }
-      }
-      if (!bytes)
-        throw new SnapshotError("blob-integrity", "image metadata hash/length mismatch after retry")
-      if (this.disposed) throw new Error("snapshot replaced")
-      activeSignal.throwIfAborted()
-      if (cache) {
-        try {
-          try {
-            await cache.put(
-              path,
-              new Response(bytes.slice().buffer, { headers: bodyHeaders(bytes.length) }),
-            )
-          } catch {
-            if (!this.storage) throw new Error("cache unavailable")
-            await trimDataCaches(this.storage, this.base, bytes.length, true)
-            await cache.put(
-              path,
-              new Response(bytes.slice().buffer, { headers: bodyHeaders(bytes.length) }),
-            )
-          }
-          if (this.storage) await trimDataCaches(this.storage, this.base)
-        } catch {
-          this.losePersistence()
-        }
-      }
+    let bytes: Uint8Array
+    try {
+      bytes = await this.raw.read(rawBlobDescriptor(file), {
+        signal: activeSignal,
+        priority: priority ? "foreground" : signal ? "low" : "background",
+      })
+    } catch (error) {
+      if (this.disposed) throw new Error("snapshot replaced", { cause: error })
+      throw error
     }
     if (this.disposed) throw new Error("snapshot replaced")
     activeSignal.throwIfAborted()
-    // CacheStorage owns persistent bytes; keep a bounded RAM fallback only when it fails.
-    if (!this.progress.persistent && priority) this.memory.set(key, bytes)
+    if (!this.raw.persistent) {
+      // Without usable storage there is nothing verified to lose; only a real downgrade signals it.
+      if (this.progress.persistent) this.losePersistence()
+      return bytes
+    }
     this.verified.add(key)
     this.update({
       done: this.verified.size,
+      persistent: true,
       ...(this.verified.size === this.files.size ? { state: "complete" as const } : {}),
     })
     return bytes
   }
 
+  /** A verified file vanished from storage, so the other verified claims can no longer be trusted. */
+  private rawMissed(sha256: string): void {
+    if (this.disposed) return
+    for (const key of this.verified) {
+      if (this.files.get(key)?.["sha256"] !== sha256) continue
+      this.verified.clear()
+      this.update({ done: 0 })
+      // Stop background refill; a foreground read re-adds only the file it actually restores.
+      this.cancel()
+      return
+    }
+  }
+
   private losePersistence(): void {
-    this.update({ persistent: false })
+    this.verified.clear()
+    this.update({ persistent: false, done: 0 })
     this.cancel()
   }
 
   async prefetch(): Promise<void> {
-    await this.cache
-    if (this.disposed || !this.progress.persistent) return
+    await this.initialized
+    if (this.disposed || !this.raw.persistent) return
     this.background.start()
     const epoch = ++this.epoch
     this.update({ state: "running" })
@@ -314,6 +265,5 @@ export class MetadataBytes {
       job.queueAbort.abort(error)
       this.rejectQueued(job, error)
     }
-    this.memory.clear()
   }
 }

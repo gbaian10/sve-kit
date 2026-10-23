@@ -2,67 +2,108 @@
 import { describe, expect, it, vi } from "vitest"
 
 import { memoryCache } from "../test-utils/cache"
+import { dataCacheBytes } from "./cache-budget"
 import type { Fetcher } from "./cdn"
 import type { JsonObject } from "./format-v3/json"
 import { transferDigest } from "./integrity"
 import { MetadataBytes } from "./metadata"
+import { rawBlobDescriptor, RawBlobStore } from "./raw-blobs"
+import { SearchBlobs } from "./search/blobs"
 
 const tick = () => new Promise<void>((resolve) => setTimeout(resolve, 0))
 const MiB = 1024 * 1024
 
+it("shares metadata raw bytes with search and detail readers across manifests and clearing", async () => {
+  const storage = memoryCache()
+  const { files, fetcher, bytes } = await fixture([3], storage)
+  const file = files.get("file0")
+  if (!file) throw new Error("fixture missing")
+  const renamed = { ...file, key: "new-key", path: "new-path" }
+  await bytes.prefetch()
+  expect(bytes.status()).toMatchObject({ state: "complete", done: 1, persistent: true })
+  const search = new SearchBlobs("/cdn", fetcher, storage)
+  await search.read(renamed, new AbortController().signal)
+  const detail = new RawBlobStore("/cdn", fetcher, storage)
+  await detail.read(rawBlobDescriptor(renamed))
+  bytes.dispose()
+  const next = new MetadataBytes(
+    "/cdn",
+    new Map([["new-key", renamed]]),
+    fetcher,
+    () => undefined,
+    storage,
+  )
+  await next.prefetch()
+  expect(next.status()).toMatchObject({ state: "complete", done: 1, persistent: true })
+  expect(fetcher).toHaveBeenCalledTimes(1)
+  expect(await dataCacheBytes(storage)).toBe(3)
+  const raw = await storage.open("sve-raw:%2Fcdn")
+  expect(await raw.keys()).toHaveLength(1)
+  await storage.delete("sve-raw:%2Fcdn")
+  await detail.read(rawBlobDescriptor(file))
+  expect(fetcher).toHaveBeenCalledTimes(2)
+  expect(await dataCacheBytes(storage)).toBe(3)
+  next.dispose()
+})
+
 async function fixture(sizes: readonly number[], storage?: CacheStorage) {
   const bodies = new Map<number, Uint8Array>()
   const hashes = new Map<number, string>()
-  for (const size of new Set(sizes)) {
-    const body = new Uint8Array(size).fill(7)
-    bodies.set(size, body)
-    hashes.set(size, await transferDigest(body))
+  for (const [index, size] of sizes.entries()) {
+    const body = new Uint8Array(size).fill(index + 7)
+    bodies.set(index, body)
+    hashes.set(index, await transferDigest(body))
   }
   const files = new Map<string, JsonObject>(
     sizes.map((size, index) => [
       `file${String(index)}`,
-      { path: `data${String(index)}`, bytes: size, sha256: hashes.get(size) ?? "" },
+      {
+        key: `file${String(index)}`,
+        path: `data${String(index)}`,
+        bytes: size,
+        sha256: hashes.get(index) ?? "",
+      },
     ]),
   )
   const response = (url: string) => {
-    const size = sizes[Number(url.split("data")[1])]
-    const body = size === undefined ? undefined : bodies.get(size)
+    const body = bodies.get(Number(url.split("data")[1]))
     if (!body) throw new Error("unexpected request")
     return new Response(body.slice().buffer)
   }
   const fetcher = vi.fn<Fetcher>((url) => Promise.resolve(response(url)))
-  const bytes = new MetadataBytes("/cdn", "synthetic", files, fetcher, () => undefined, storage)
+  const bytes = new MetadataBytes("/cdn", files, fetcher, () => undefined, storage)
   return { files, response, fetcher, bytes }
 }
 
 describe("metadata library boundaries", () => {
-  it("caps fallback RAM at 64 files and refreshes LRU on reads", async () => {
+  it("does not retain settled raw bytes in RAM when persistent storage is unavailable", async () => {
     const { bytes, fetcher } = await fixture(Array.from({ length: 65 }, () => 1))
     for (let i = 0; i < 64; i += 1) await bytes.read(`file${String(i)}`)
     await bytes.read("file0")
     await bytes.read("file64")
     await bytes.read("file0")
-    expect(fetcher).toHaveBeenCalledTimes(65)
+    expect(bytes.status()).toMatchObject({ state: "idle", done: 0, persistent: false })
+    expect(fetcher).toHaveBeenCalledTimes(67)
     await bytes.read("file1")
-    expect(fetcher).toHaveBeenCalledTimes(66)
+    expect(fetcher).toHaveBeenCalledTimes(68)
     bytes.dispose()
   })
 
-  it("retains exactly 12 MiB and evicts the least recent file when bytes exceed it", async () => {
+  it("releases large foreground bytes rather than creating a RAM fallback", async () => {
     const { bytes, fetcher } = await fixture([6 * MiB, 6 * MiB, 1])
     await bytes.read("file0")
     await bytes.read("file1")
     await bytes.read("file0")
-    expect(fetcher).toHaveBeenCalledTimes(2)
+    expect(fetcher).toHaveBeenCalledTimes(3)
     await bytes.read("file2")
     await bytes.read("file0")
-    expect(fetcher).toHaveBeenCalledTimes(3)
+    expect(fetcher).toHaveBeenCalledTimes(5)
     await bytes.read("file1")
-    expect(fetcher).toHaveBeenCalledTimes(4)
+    expect(fetcher).toHaveBeenCalledTimes(6)
     bytes.dispose()
   })
 
-  it("does not retain oversized values and accepts empty bodies without a size exception", async () => {
+  it("releases oversized and empty bodies after each on-demand read", async () => {
     const { bytes, fetcher } = await fixture([13 * MiB, 0])
     await bytes.read("file0")
     await tick()
@@ -70,7 +111,7 @@ describe("metadata library boundaries", () => {
     expect(fetcher).toHaveBeenCalledTimes(2)
     await bytes.read("file1")
     await bytes.read("file1")
-    expect(fetcher).toHaveBeenCalledTimes(3)
+    expect(fetcher).toHaveBeenCalledTimes(4)
     bytes.dispose()
   })
 
@@ -78,7 +119,7 @@ describe("metadata library boundaries", () => {
     const { files, response } = await fixture([1, 1])
     const gate = Promise.withResolvers<Response>()
     const fetcher = vi.fn<Fetcher>(() => gate.promise)
-    const bytes = new MetadataBytes("/cdn", "dedup", files, fetcher, () => undefined)
+    const bytes = new MetadataBytes("/cdn", files, fetcher, () => undefined)
     const first = bytes.read("file0")
     expect(bytes.read("file0")).toBe(first)
     const rejected = expect(first).rejects.toThrow("failed")
@@ -101,14 +142,7 @@ describe("metadata library boundaries", () => {
       gates.set(url, gate)
       return gate.promise
     }
-    const bytes = new MetadataBytes(
-      "/cdn",
-      "admitted",
-      files,
-      fetcher,
-      () => undefined,
-      memoryCache(),
-    )
+    const bytes = new MetadataBytes("/cdn", files, fetcher, () => undefined, memoryCache())
     const foreground = [0, 1, 2, 3].map((i) => bytes.read(`file${String(i)}`))
     await tick()
     const prefetch = bytes.prefetch()
@@ -138,14 +172,7 @@ describe("metadata library boundaries", () => {
       await gate.promise
       return response(url)
     })
-    const bytes = new MetadataBytes(
-      "/cdn",
-      "replacement",
-      files,
-      fetcher,
-      () => undefined,
-      memoryCache(),
-    )
+    const bytes = new MetadataBytes("/cdn", files, fetcher, () => undefined, memoryCache())
     const prefetch = bytes.prefetch()
     await tick()
     expect(fetcher).toHaveBeenCalledTimes(3)
@@ -171,7 +198,7 @@ describe("metadata library boundaries", () => {
           })
         }),
     )
-    const bytes = new MetadataBytes("/cdn", "dispose", files, fetcher, () => undefined)
+    const bytes = new MetadataBytes("/cdn", files, fetcher, () => undefined)
     const reads = [0, 1, 2, 3, 4].map((i) => bytes.read(`file${String(i)}`))
     const results = Promise.allSettled(reads)
     await tick()
@@ -191,7 +218,6 @@ it("rejects a cancelled scoped image read and ignores bytes arriving after cance
   const background = vi.fn<Fetcher>(() => gate.promise)
   const bytes = new MetadataBytes(
     "/cdn",
-    "scoped",
     files,
     (url) => Promise.resolve(response(url)),
     () => undefined,
@@ -208,7 +234,7 @@ it("rejects a cancelled scoped image read and ignores bytes arriving after cance
   await rejected
   gate.resolve(response("/cdn/data0"))
   await tick()
-  const cache = await storage.open("sve-images-%2Fcdn:-scoped")
+  const cache = await storage.open("sve-raw:%2Fcdn")
   expect(await cache.keys()).toHaveLength(0)
   expect(await bytes.read("file0")).toHaveLength(1)
   bytes.dispose()
