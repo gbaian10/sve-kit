@@ -53,6 +53,10 @@ Scripts never take the name of a Bun built-in command (`test`, `build`, `check`,
 `bun test` runs Bun's own test runner, which ignores the Vitest config, and a `check` script would
 replace the type checker behind `bun check`. A script that runs a whole group is `<name>:all`.
 
+ESLint keeps a content-based cache in `node_modules/.cache/eslint/`, so a repeated run only lints
+changed files. Type-aware results of an unchanged file can go stale when another file's types change;
+delete the cache if an error looks unrelated to your change. CI starts without it.
+
 The pre-commit hooks run bun fmt, ESLint and Stylelint on changed files. bun fmt reads the root
 `bunfig.toml`; `.prettierrc.mjs` only serves the editor's Prettier extension, so change both
 together. The pre-push hook and CI run the same `typecheck` script, which caps
