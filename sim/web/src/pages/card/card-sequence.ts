@@ -7,7 +7,6 @@ import { parseQuery } from "../../domain/query/codec"
 import type { QueryState } from "../../domain/query/model"
 import type { Region } from "../../domain/search"
 
-/** One cell of the sequence previous/next walk: its result key and the printing it opens. */
 interface SequenceItem {
   readonly key: string
   readonly printingId: string
@@ -19,23 +18,18 @@ interface Neighbour {
   readonly summary: CardSummary
 }
 
-/**
- * Where the shown card sits in the list it was opened from (architecture §2.2): `none` when it was
- * not opened from a list, `missing` when it is not in that list's loaded cells (no previous/next).
- */
+// Distinguish a direct link from a card missing from its source list (architecture §2.2).
 type CardSequence =
   | { readonly phase: "none" | "pending" | "missing" }
   | { readonly phase: "found"; readonly previous?: Neighbour; readonly next?: Neighbour }
 
-/** The shown printing and what identifies its cell under each unit. */
 interface SequenceCard {
   readonly cardId: string
   readonly printingId: string
-  /** The front face's art; a printing without one is its own art cell. */
   readonly artId?: string | undefined
 }
 
-/** The front face's `art_id` of a printing row, as the search index groups art cells. */
+// Match the search index's art grouping, which uses only the front face.
 export function frontArtOf(printing: Row | undefined): string | undefined {
   const faces = printing?.["faces"]
   const first = Array.isArray(faces) ? faces[0] : undefined
@@ -46,14 +40,12 @@ export function frontArtOf(printing: Row | undefined): string | undefined {
   return typeof art === "string" && art !== "" ? art : undefined
 }
 
-/** The result key of the cell that holds `card` when cells are `unit`. */
 function unitKeyOf(unit: QueryState["unit"], card: SequenceCard): string {
   if (unit === "card") return card.cardId
   if (unit === "art") return card.artId ?? card.printingId
   return card.printingId
 }
 
-/** The first target that names a cell, by its result key or by the printing it opens. */
 function locate(
   order: readonly SequenceItem[],
   targets: readonly (string | null | undefined)[],
@@ -82,13 +74,7 @@ function found(order: readonly SequenceItem[], position: number): CardSequence {
   }
 }
 
-/**
- * Previous/next for a card opened from a list or a suggestion list. The sequence is recomputed
- * from the entry's background URL in the card's edition: a suggestion list walks the suggestions
- * for its text, a result list walks its own order within the pages it had loaded. The entry's
- * `resultKey` places the card; when it names no cell (another printing was opened since), the
- * cell of the shown printing's card or art under the list's unit is looked up instead.
- */
+// Rebuild the source sequence from its URL rather than retained list state (architecture §2.2).
 export function useCardSequence(
   entry: Readonly<Record<string, unknown>> | null,
   edition: Region,
