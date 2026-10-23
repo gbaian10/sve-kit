@@ -84,7 +84,8 @@ Resolution→Field 同樣承接。這是已知規則，不是來源不明，也�
 因此付款費用須在步驟 5 依 Resolution 上承接後的有效資訊及受驗 play-cost 規則決定；
 不能先移區清掉減費再用印刷成本，也不能僅抄一個舊 EX scalar 冒充完整承接。
 卡片成本資訊與僅修改付款額的效果依 10.4.4.1 區分，本片不重解舊 AST 的所有 cost 欄位。
-未支援的動態成本表達或付款修正仍拒絕。
+自身打出修正、實付 PP 與 Cost 資訊的分離，以及首批拒絕條件，依
+[打出費用修正](play-cost-semantics.md)；未實作或超出該子集的形狀仍拒絕。
 
 Spell 的固有 PP 成本由 lowering 明示在 `PlaySpec.costs`；authority 驗它與同一卡表及
 成本規則相符，執行此單一付款計畫，不能再額外扣一次 Catalog 印刷 PP。若形狀只能承載
