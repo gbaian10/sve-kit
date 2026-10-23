@@ -1,0 +1,283 @@
+format: 1
+kind: qa_translation_shard
+entries:
+  - qa_id: qa:v1:0e14ada0f9cab3bcde0741264dd60309cf7dc8a6468cfb1c8f94867c45f5137b
+    field: answer
+    source_hash: sha256:3e6ae9f5aa1baf1d78dab158600225143ada49d86528273d5da2e6d1b07dacb8
+    lang: zh-Hant
+    text: "不會。不會移出遊戲，而是放置到EX區。\n作為Token的從者與護符，只能存在於戰場、EX區與結算區。移動到其他區域時，會在移動後立刻移出。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:0e14ada0f9cab3bcde0741264dd60309cf7dc8a6468cfb1c8f94867c45f5137b
+    field: question
+    source_hash: sha256:6fb4434048e9552709489edefc8d2287df45a04be9725768b53a1f1f21046921
+    lang: zh-Hant
+    text: 將敵方戰場上的Token・從者放置到EX區時，該Token・從者會移出遊戲嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:230da2fd695889039d131abcd7be2d561dde6ebb58c126eb43f2885f6aa81e07
+    field: answer
+    source_hash: sha256:1890a4129c7902e15370e6ec3ca3392c1ad943893cf47c4cfc340525dfbf9179
+    lang: zh-Hant
+    text: "是的。可以將EX區的『失落武士‧景光』召喚到戰場上。\n此時，會在維持EX區的『失落武士‧景光』上放置的戰意指示物的狀態下進入戰場。\n此外，由於並非以『失落武士‧景光』的「自己戰場上的從者進化時，～」能力進入戰場，因此不會使用這個能力，無法以這個能力使『失落武士‧景光』進化。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:230da2fd695889039d131abcd7be2d561dde6ebb58c126eb43f2885f6aa81e07
+    field: question
+    source_hash: sha256:ed12671bee0505ecee3d9a7325849b52c1555449fb0ee4412742b8f4c3d387da
+    lang: zh-Hant
+    text: 可以以『晴空的銀騎士‧艾蜜莉亞』的起動能力，將EX區的『失落武士‧景光』召喚到戰場上嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:32a7f5583cd1bf2056e71b31648d39c944ae576b724382028359968aecc5510a
+    field: answer
+    source_hash: sha256:a891d996e9a49e083adf5ac8354f22e15e6dbb26020ddcb98e8c96b294f2ab3b
+    lang: zh-Hant
+    text: 是的。是進化前卡片的原始消費數值。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:32a7f5583cd1bf2056e71b31648d39c944ae576b724382028359968aecc5510a
+    field: question
+    source_hash: sha256:ceaf48c9f75fa154be3921504795ace1666b8f6bd35d33e8cc2a23c44eca4322
+    lang: zh-Hant
+    text: 進化從者的原始消費數值，是進化前卡片的原始消費數值嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:3ccf20a52068cb0ba476a5aa67cc145d79e272b4bc8c2e1bc0cc1e47af47a052
+    field: answer
+    source_hash: sha256:1c583adf13714a7fd94ed1bb782b3956f144cfb95647ef9079a14ad14aa1422a
+    lang: zh-Hant
+    text: 不行。未使自己主戰者的生命值增加4以上時，之後的效果不會生效，無法抽1張卡片。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:3ccf20a52068cb0ba476a5aa67cc145d79e272b4bc8c2e1bc0cc1e47af47a052
+    field: question
+    source_hash: sha256:2a64b783b138206a818fb232df7e039685df8207c86288f20d89d85bec3a51d8
+    lang: zh-Hant
+    text: 本回合中未使自己主戰者的生命值增加4以上時，也可以以這個從者的{入場曲}能力選擇敵方戰場上的從者，抽1張卡片嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:4fed1b53b2b8555c5701d3bf04374d77650a3ba291b5ad8bc1c4f978bfaf3cb8
+    field: answer
+    source_hash: sha256:3c77d06de2c60afa92442db62a6d2808925331fc6c8e6a7124ca7412dcdb7aa9
+    lang: zh-Hant
+    text: 不行。無法回復至超過PP最大值。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:4fed1b53b2b8555c5701d3bf04374d77650a3ba291b5ad8bc1c4f978bfaf3cb8
+    field: question
+    source_hash: sha256:4a087bf2a20c8a137de11b0867701ee0d42a355d6b5632d03777a27a20f792bd
+    lang: zh-Hant
+    text: 可以以這個從者的{入場曲}能力，使自己的PP回復至超過PP最大值嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:54be7702f6651ae0cdb3e02d12c07333593b0a8a450fc29773cd57713aacc55b
+    field: answer
+    source_hash: sha256:69a206133e5ebdd14487a7b32ff7165eb4f4465a4b581b7e1545e0ac0c5ef893
+    lang: zh-Hant
+    text: 不行。必須在抽1張卡片前選擇敵方戰場上的從者。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:54be7702f6651ae0cdb3e02d12c07333593b0a8a450fc29773cd57713aacc55b
+    field: question
+    source_hash: sha256:baea1a9db9045a3d0fe8989c8961a39742c5e16df1fa378c496cd7d5ea744382
+    lang: zh-Hant
+    text: 以這個從者的{起動}能力抉擇【1】與【4】時，可以先抽1張卡片，再選擇敵方戰場上的從者嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:5c3404259ab8dfa62a2789df1d8b058675609de3dbf068ea38b09b3fda5cc613
+    field: answer
+    source_hash: sha256:0951711fb88ef4536f0d0e53bd0e48a985deb94d51f7e183cab2cc7d89f57a21
+    lang: zh-Hant
+    text: 不行。所選從者無法攻擊敵方的主戰者與敵方的從者。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:5c3404259ab8dfa62a2789df1d8b058675609de3dbf068ea38b09b3fda5cc613
+    field: question
+    source_hash: sha256:32876d981e509f2f35c11190b0db597334445e6f3fd71d413425163d66eb658f
+    lang: zh-Hant
+    text: 以這個從者的{起動}能力抉擇【1】時，被這個能力選擇的從者，在其玩家的下一個回合中，可以攻擊敵方的從者嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:5efa5cb8019dcde68eed50ebd23d34ffe18c835b87f53d7aab7f6c6127fe3a03
+    field: answer
+    source_hash: sha256:f20109fda3705bd025e4d638c8080657df536d2dfad2878842a92448177a00f7
+    lang: zh-Hant
+    text: 不行。由於EX區已達張數上限，因此卡片不會移動，會留在戰場上。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:5efa5cb8019dcde68eed50ebd23d34ffe18c835b87f53d7aab7f6c6127fe3a03
+    field: question
+    source_hash: sha256:394f6933de94c4ebfd28d4d6be2fdd707ee5061c6f34ccfcfb0ee283adb236b1
+    lang: zh-Hant
+    text: 敵方的EX區有5張卡片時，可以將所選的敵方戰場上的從者放置到EX區嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:645e8617cd2c5d3f48836d6a5e96adb63dce3f1fffc748f174e7c91a27b570dc
+    field: answer
+    source_hash: sha256:3b92cb7b9c8645ad3687cd91bacfbc5dac23e2df27b7ff5b1e480b30082e002b
+    lang: zh-Hant
+    text: 是的。會滿足。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:645e8617cd2c5d3f48836d6a5e96adb63dce3f1fffc748f174e7c91a27b570dc
+    field: question
+    source_hash: sha256:abe0cac759b40db61cc18e97d7557902ceacbc0fbea5450e2235096d734c0a3c
+    lang: zh-Hant
+    text: 因「自己的主戰者{生命值}+1。」與「自己的主戰者{生命值}+3。」能力，使自己主戰者的生命值在1回合中合計增加4以上時，會滿足這個從者的{入場曲}能力中的「若本回合自己主戰者的{生命值}已增加4以上，」條件嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:64e7143be747d72d7a9dd2d4e54c98bbafbca93d63515475de7d43338741f918
+    field: answer
+    source_hash: sha256:3ba6d72caffccde7ad79ec5795bc172360525e045dc28f2dca297e5508d4c2b6
+    lang: zh-Hant
+    text: 不行。無法選擇敵方戰場上的從者時，無法使用這個從者的{入場曲}能力，無法抽1張卡片。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:64e7143be747d72d7a9dd2d4e54c98bbafbca93d63515475de7d43338741f918
+    field: question
+    source_hash: sha256:6c9c9288c720b3191b7be97de09127a7a47c7006221f5e1c0728695ba538d8e8
+    lang: zh-Hant
+    text: 本回合中已使自己主戰者的生命值增加4以上，但無法選擇敵方戰場上的從者時，可以使用這個從者的{入場曲}能力，抽1張卡片嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:7b9ae70e75b5b0c1c23d2d9c741da9840212736760c8b00995cbfd8285fed1ca
+    field: answer
+    source_hash: sha256:a9d9c4810f466202a57e481c9e912aa0698ef65482351bfcb60e98d815e08265
+    lang: zh-Hant
+    text: 是的。會失去。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:7b9ae70e75b5b0c1c23d2d9c741da9840212736760c8b00995cbfd8285fed1ca
+    field: question
+    source_hash: sha256:0206af2dc1af66f0f769c268f615a412911d96c8f8eef4d90146b6377148b0a1
+    lang: zh-Hant
+    text: 將敵方戰場上的從者放置到EX區時，該從者此前受到的傷害與被賦予的能力等，會全部失去嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:8ac26c8f2c78257f19bf0b3b7d813968ee25f36677aca6b4d0db8308ab8600f5
+    field: answer
+    source_hash: sha256:817dc1d71ee8fb5deedd2e28e2195c93cc4d09e7a82e28ace5b21c990b2048aa
+    lang: zh-Hant
+    text: "是的。會滿足。\n自己主戰者的生命值從-3變為1，已增加4以上，因此滿足「若本回合自己主戰者的{生命值}已增加4以上，」的條件。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:8ac26c8f2c78257f19bf0b3b7d813968ee25f36677aca6b4d0db8308ab8600f5
+    field: question
+    source_hash: sha256:08a7ead27142bb3fd1884018dc82831f8400384dbe94b4107abf15e374c5f4e9
+    lang: zh-Hant
+    text: 自己主戰者的生命值為1，自己戰場上有1張『古老的守護者』，敵方戰場上有1個『終戰兵器』，自己的回合中破壞敵方的『終戰兵器』，使自己的主戰者因{謝幕曲}受到4點傷害。此時，自己主戰者的生命值變為-3，之後因『古老的守護者』的能力而變為1，會滿足『沙灘的旋律‧莉迪耶爾』的{入場曲}能力中的「若本回合自己主戰者的{生命值}已增加4以上，」條件嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:9fb6ba4af27105395d5f5a59ea148d681519cbd769010768472ac4b7382c041f
+    field: answer
+    source_hash: sha256:51d7c2cf2b00b2d398b8be807912557e54a5a043850b379754aa922017e5d7f7
+    lang: zh-Hant
+    text: 可以以任意順序結算。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:9fb6ba4af27105395d5f5a59ea148d681519cbd769010768472ac4b7382c041f
+    field: question
+    source_hash: sha256:0ee713190973db4aa91eba65ea36a4e1ad8f1ed0e95ccf900bc3154605e13e66
+    lang: zh-Hant
+    text: 將如『不可思議的青空‧愛麗絲』這類具有2個{入場曲}能力的從者召喚到戰場上時，所觸發的2個{入場曲}能力從哪一個開始結算？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a1a0cf6331c310d06577f97369e61d71ba406d7be5aa7ec649a1253170a5dc67
+    field: answer
+    source_hash: sha256:f9791052d2cd1a3a5f7185b28dc619b53fc191a0a528c0451b2cd56142fc68a9
+    lang: zh-Hant
+    text: 是的。即使是敵方的回合中也會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a1a0cf6331c310d06577f97369e61d71ba406d7be5aa7ec649a1253170a5dc67
+    field: question
+    source_hash: sha256:d7ef5079e4213ead2bddf6f969c50cfbfb97fa83c50dc04c1c3d29e873529a6d
+    lang: zh-Hant
+    text: 因某種能力使士兵・從者在敵方的回合中進入自己戰場時，「士兵・從者進入自己戰場時，～」能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:ac50a90e731d6e5479d940d718297dcd295ecc05d135b6a22a8f00816230cc30
+    field: answer
+    source_hash: sha256:5c293be2c36fc4f5bab3266abbde72a39039c8669b470ef1674bb98e4cc4523a
+    lang: zh-Hant
+    text: "不行。會使『白堊龍騎士』的攻擊力與生命值＋1。\n對於「本回合，下一次有1個以上的從者進入自己戰場時，～」能力，下一次從者進入自己戰場時，若有2個以上的從者同時進入戰場，可以從其中選擇1個；但若是因下一個進入戰場的從者的能力，使另1個從者新進入戰場，則會使最初的1個的攻擊力與生命值＋1。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:ac50a90e731d6e5479d940d718297dcd295ecc05d135b6a22a8f00816230cc30
+    field: question
+    source_hash: sha256:2ad2fb772dc9f559f256bfdc1b9aea2dc97d18adecacd32c3868276052cfe01d
+    lang: zh-Hant
+    text: 使用這個從者的{起動}能力，抉擇【2】。之後使用『白堊龍騎士』，並以『白堊龍騎士』的{入場曲}能力將『加魯古尤』召喚到戰場上時，可以選擇『白堊龍騎士』或『加魯古尤』中的1個，使其攻擊力與生命值+1嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:be542c6798f23c54b9bec49e5bad5da0e2775be424113a61055305b2ae2d54f1
+    field: answer
+    source_hash: sha256:40557876bb07193681ce6d182cc9347f4c95e0ccfce64167fef86224bba5ebce
+    lang: zh-Hant
+    text: 不會。不會正面朝上放置到進化牌堆頂。會持續留在EX區。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:be542c6798f23c54b9bec49e5bad5da0e2775be424113a61055305b2ae2d54f1
+    field: question
+    source_hash: sha256:fb8b83f1690f05d4bcce2ea3b68fd90c7621400bae0cd81f4c31a5380f6fe8f2
+    lang: zh-Hant
+    text: 將敵方戰場上的進階從者放置到EX區時，該進階從者會正面朝上放置到進化牌堆頂嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e519007ae4e72c626f879186d6f401f1d9fc49d2d87e7c3c79a615350c35c112
+    field: answer
+    source_hash: sha256:3b92cb7b9c8645ad3687cd91bacfbc5dac23e2df27b7ff5b1e480b30082e002b
+    lang: zh-Hant
+    text: 是的。會滿足。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e519007ae4e72c626f879186d6f401f1d9fc49d2d87e7c3c79a615350c35c112
+    field: question
+    source_hash: sha256:6d88fbcf60e6fd00e96d03c519b4e7450181143747d4359298b8f7e8baafcf7b
+    lang: zh-Hant
+    text: 因某種能力使自己主戰者的生命值+4後，自己的主戰者受到4點傷害時，會滿足這個從者的{入場曲}能力中的「若本回合自己主戰者的{生命值}已增加4以上，」條件嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e5d21e69d46e6984b4362be804d235e65306b278166fadab5ee8ded69e08e9b4
+    field: answer
+    source_hash: sha256:0f964524f67541e162b9cc369259b83c0af0996b5b7e2c17c4a1e6bc9904d004
+    lang: zh-Hant
+    text: 不行。無法抉擇同1個選項2次以上。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e5d21e69d46e6984b4362be804d235e65306b278166fadab5ee8ded69e08e9b4
+    field: question
+    source_hash: sha256:3f49351884a5aa4ef511053c5494b628fa3bb5fb52610536991877a8ba74ed45
+    lang: zh-Hant
+    text: 抉擇2項以上的選項時，可以抉擇同1個選項2次以上嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:f250760ae77aaf6e40dbdf3a726044462a4bd8532268cba3a9dd52f9cc9f7fae
+    field: answer
+    source_hash: sha256:74c78bb22251eca2d886db177eafbe348fa243b05954fd6d37580ff0781bbb69
+    lang: zh-Hant
+    text: 是的。2個以上的從者同時進入戰場時，可以使其中1個的攻擊力與生命值+1。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:f250760ae77aaf6e40dbdf3a726044462a4bd8532268cba3a9dd52f9cc9f7fae
+    field: question
+    source_hash: sha256:965400733185e6b1ac0621ec96cd8721580f3edf541f24fad279b48f8f0e56f3
+    lang: zh-Hant
+    text: 使用這個從者的{起動}能力，抉擇【2】。之後，在滿足【覺醒】狀態的情況下使用『虎鯨巨渦』時，可以選擇同時進入戰場的2個『虎鯨』中的1個，使其攻擊力與生命值+1嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:f5f203d0094504b8e0aa71df3440e3e5b9d5b577f778786c8d53e80f56481eb1
+    field: answer
+    source_hash: sha256:d169b5438b2fb2cbb611c7a9fb22097a51f227914fb0ac678cf6c9fb3c1e5ce0
+    lang: zh-Hant
+    text: 是的。會觸發2次。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:f5f203d0094504b8e0aa71df3440e3e5b9d5b577f778786c8d53e80f56481eb1
+    field: question
+    source_hash: sha256:3000aebfb96e9772d81c626560192097d4270ebf65a3ac61dd0c748668f9dbfc
+    lang: zh-Hant
+    text: 因某種能力使2個士兵・從者同時進入自己戰場時，「士兵・從者進入自己戰場時，～」能力會觸發2次嗎？
+    origin: machine
+    low_confidence: true

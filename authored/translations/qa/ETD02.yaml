@@ -1,0 +1,45 @@
+format: 1
+kind: qa_translation_shard
+entries:
+  - qa_id: qa:v1:505f990cfde5fe22b91093040bc71fd9c5ed8f0478016bffd3e210cbac901b61
+    field: answer
+    source_hash: sha256:e250d52e782b09dfec94b6f4418fc4800bec4f0720b89975b57f38f6ba5e77f4
+    lang: zh-Hant
+    text: 不行。由於沒有這張法術可選擇的從者，因此無法使用，無法將自己牌堆頂的卡片放置到墓場。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:505f990cfde5fe22b91093040bc71fd9c5ed8f0478016bffd3e210cbac901b61
+    field: question
+    source_hash: sha256:fafcb74054188cf3d93af0c5a824c0c1cf028195f61bfecef46c87b1334bfcde
+    lang: zh-Hant
+    text: 敵方戰場上沒有從者時，可以使用這張法術，將自己牌堆頂的1張卡片放置到墓場嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:cebf5a466b6a7596a7b990c0da71856f292dd5fc376fd089ae69e07e63836197
+    field: answer
+    source_hash: sha256:cd9fb21a9184ecfc871f49162718886dbf9c7c0afa1b4703f0acaa19cf8498f5
+    lang: zh-Hant
+    text: 是的。可以將1個『怨靈』召喚到戰場上。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:cebf5a466b6a7596a7b990c0da71856f292dd5fc376fd089ae69e07e63836197
+    field: question
+    source_hash: sha256:c59c6a4ad7b2c2567c9d2f43c35420ea1d08b63d73d5c26b78844c634632866a
+    lang: zh-Hant
+    text: 自己的戰場距離上限只剩1張時，可以以這個從者的能力將1個『怨靈』召喚到戰場上嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:f3cb646a18c2dbe28e4588f0a531540ef863b0e6f522f9cd3ccc53eb520a0116
+    field: answer
+    source_hash: sha256:54d1827ccbba335e7094be26752219d0263b221a7b71fbc4984da3bbcc5bf684
+    lang: zh-Hant
+    text: 是的。可以使用。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:f3cb646a18c2dbe28e4588f0a531540ef863b0e6f522f9cd3ccc53eb520a0116
+    field: question
+    source_hash: sha256:90390835501a10f2c19580e8f489156d45ff3719b8ced145f3c37c35314c5c5f
+    lang: zh-Hant
+    text: 敵方戰場上有可選擇的從者，且自己的牌堆為0張時，可以使用這張法術嗎？
+    origin: machine
+    low_confidence: true

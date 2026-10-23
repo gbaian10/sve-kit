@@ -1,0 +1,45 @@
+format: 1
+kind: qa_translation_shard
+entries:
+  - qa_id: qa:v1:59f078da331116e9ece69f554f7d6519a07eaf777d5a22524216e31f63bd6959
+    field: answer
+    source_hash: sha256:b49f414984b7e3c4a2ede340d37b61d4e35edced405837f8bb4a82b655155371
+    lang: zh-Hant
+    text: 不行。若無法選擇敵方戰場上的從者，就無法使用這個【進化時】能力，也無法抽1張卡片。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:59f078da331116e9ece69f554f7d6519a07eaf777d5a22524216e31f63bd6959
+    field: question
+    source_hash: sha256:e36c8b94b189ee5bd3a64742ab9c070290f5ad80d9df9c4a8cc6c50608dbe7a7
+    lang: zh-Hant
+    text: 若無法選擇敵方戰場上的從者，是否可以藉由【進化時】能力，捨棄手牌中的1張Cute・卡片作為消費，抽1張卡片？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:c51b9deae72003671b72dffe6e05e33b4e378af1764a56286fd3718af1e7a90e
+    field: answer
+    source_hash: sha256:51d7c2cf2b00b2d398b8be807912557e54a5a043850b379754aa922017e5d7f7
+    lang: zh-Hant
+    text: 可以依任意順序結算。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:c51b9deae72003671b72dffe6e05e33b4e378af1764a56286fd3718af1e7a90e
+    field: question
+    source_hash: sha256:b49c5e3d45f33dd49a79d37534bd1082f9eb88cf80e937083efc8460d5e49b6b
+    lang: zh-Hant
+    text: 藉由『〔P.C.S〕島村卯月』的{入場曲}能力，將『〔P.C.S〕五十嵐響子』與『〔P.C.S〕小日向美穗』從自己的墓場召喚到戰場上時，觸發的『〔P.C.S〕五十嵐響子』與『〔P.C.S〕小日向美穗』的{入場曲}能力會從哪個開始結算？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:f5bbaaf3c7969ab160d13cbe2c49e5ba4fb373e647e0905e3410b40878245916
+    field: answer
+    source_hash: sha256:3aa00310e829d7d9737df3dbfe626917500c8c4cf853db60c0aab8fc99f729d3
+    lang: zh-Hant
+    text: "是的。可以選擇。\n此時，不公開卡片，使其返回牌堆頂。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:f5bbaaf3c7969ab160d13cbe2c49e5ba4fb373e647e0905e3410b40878245916
+    field: question
+    source_hash: sha256:df26509106988d7b1f71dbc48b796f99e987e521cd821c70ec0c1799d54d705c
+    lang: zh-Hant
+    text: 以這個從者的{入場曲}能力從自己的牌堆查看的卡片中有Cute・卡片時，是否可以選擇不將其加入手牌？
+    origin: machine
+    low_confidence: true

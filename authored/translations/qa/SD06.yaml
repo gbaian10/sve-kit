@@ -1,0 +1,157 @@
+format: 1
+kind: qa_translation_shard
+entries:
+  - qa_id: qa:v1:3871a82238fd177d99000eb9e03915ea1b07f84ecd52f632bc2d9d9da2743bb9
+    field: answer
+    source_hash: sha256:6150b08a4d192c016f2a95b6a743d19f0d78dc5748c7051042861a1d9faa462e
+    lang: zh-Hant
+    text: 不會。只要自己戰場上有1個以上護符，無論其張數為何，都只會{生命值}+1。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:3871a82238fd177d99000eb9e03915ea1b07f84ecd52f632bc2d9d9da2743bb9
+    field: question
+    source_hash: sha256:920df53d8b8f5decdd1c86b2a286f9c8ac7a73469a8b7444dd111ff6cba32efc
+    lang: zh-Hant
+    text: 自己戰場上有2個護符時，這個從者會{生命值}+2嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:61febaeff9e87c9e991e4a5e6c821ac193fe9881738f3d68fe97eb8a7fef061d
+    field: answer
+    source_hash: sha256:71f6b75d325f1251e5e6b24b8b3e913fcb4a5fc97644260310dcfb22361bd20c
+    lang: zh-Hant
+    text: 不會。不會有任何時點處於重置狀態，從召喚到戰場上的時點起就是橫置狀態。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:61febaeff9e87c9e991e4a5e6c821ac193fe9881738f3d68fe97eb8a7fef061d
+    field: question
+    source_hash: sha256:c91306bc1c4edda2b8fa81dc917698bf8e107a23ebf4727a08b3520c4d8e9430
+    lang: zh-Hant
+    text: 這個護符進入戰場時，會先以重置狀態進入戰場，再橫置嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:64d679a60d02e2430ba288dc3f8739dfe5d5d864ff1c285d8202a179e8424d65
+    field: answer
+    source_hash: sha256:27a521068399ab068bc8dbafb7becc147bd5edb81d9121e9fab4a576b00f92c5
+    lang: zh-Hant
+    text: 是的。會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:64d679a60d02e2430ba288dc3f8739dfe5d5d864ff1c285d8202a179e8424d65
+    field: question
+    source_hash: sha256:f96f34f51a41cf5b0ddce4d65c995191b3c6f17fdf438825a85f1b55a6a0af4d
+    lang: zh-Hant
+    text: 自己戰場上有這個從者與『夢想的白兔』，使用『夢想的白兔』的「{起動}{消費10}將這張卡片{橫置}並放置到墓場：使全部從者消失。」時，雖然這個從者會消失，但這個從者的「自己的護符離開戰場時，給予敵方的全部主戰者與敵方的全部從者2點傷害。」能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6e8e45181b6fc3640850cccc2a9244eeb41218937aaf95bcaaaa098619039275
+    field: answer
+    source_hash: sha256:f980326a6eb480d2f25c91146d5b33ec5b330630f060ec3ec83d324887942fbb
+    lang: zh-Hant
+    text: 不行。由於能力的消費要求將這個護符橫置，因此橫置狀態下無法支付消費。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6e8e45181b6fc3640850cccc2a9244eeb41218937aaf95bcaaaa098619039275
+    field: question
+    source_hash: sha256:3b0c4502b0f16aff12a581e425ba439029e202865dfcd63f83bf64b01dfd666e
+    lang: zh-Hant
+    text: 這個護符已橫置時，可以支付這個護符的能力的消費嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:76561c4f585399e09768af6a9903f26f8d325de48c80df1b306bec15992877bd
+    field: answer
+    source_hash: sha256:a524618fcf95838fc68e0353439c815f64cc29c99ee36097b003d5fee6f2cedc
+    lang: zh-Hant
+    text: 是的。可以使其{生命值}+2。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:76561c4f585399e09768af6a9903f26f8d325de48c80df1b306bec15992877bd
+    field: question
+    source_hash: sha256:965ed7fd245f60b8db3320f3cbde90f7af09aec72dd3f7cb2bf6b50fc98e477b
+    lang: zh-Hant
+    text: 自己的主戰者的{生命值}為20時，可以用這個從者的【進化時】，使自己的主戰者{生命值}+2嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:7779d156ddf91658aadf30088e1dfecf6835b96e7ae40347ec4024395daeeb56
+    field: answer
+    source_hash: sha256:d15941b9f98c7a18eb06b1382742079d1b05bcf9e48aa39e3276e84fcc1590d5
+    lang: zh-Hant
+    text: 是的。這個護符在支付消費的時點就已離開自己戰場，結算能力時，自己戰場上距離上限還差1張，因此可以召喚1個『神聖之虎』到戰場上。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:7779d156ddf91658aadf30088e1dfecf6835b96e7ae40347ec4024395daeeb56
+    field: question
+    source_hash: sha256:5250f3fd1ab29518972be63d65a3079ed60deeb04edc099c1ce8deed37ce61ca
+    lang: zh-Hant
+    text: 自己戰場上已達上限，使用這個護符的{起動}能力時，可以召喚1個『神聖之虎』到戰場上嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:8952198ff573224a9e924c656795d0f2d7c74816e818b8ddabc04a2ab38ca727
+    field: answer
+    source_hash: sha256:d15941b9f98c7a18eb06b1382742079d1b05bcf9e48aa39e3276e84fcc1590d5
+    lang: zh-Hant
+    text: 是的。這個護符在支付消費的時點就已離開自己戰場，結算能力時，自己戰場上距離上限還差1張，因此可以召喚1個『神聖之虎』到戰場上。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:8952198ff573224a9e924c656795d0f2d7c74816e818b8ddabc04a2ab38ca727
+    field: question
+    source_hash: sha256:5250f3fd1ab29518972be63d65a3079ed60deeb04edc099c1ce8deed37ce61ca
+    lang: zh-Hant
+    text: 自己戰場上已達上限，使用這個護符的{起動}能力時，可以召喚1個『神聖之虎』到戰場上嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:ae8e9b329ab7178f94457ecff1c7df638a529bd244af2a54710a23469fc05800
+    field: answer
+    source_hash: sha256:4b2f0149587f0bbe31df63204067ad0ec5aa0cd9db896d815abe0662d1cc439a
+    lang: zh-Hant
+    text: 不行。由於能力的消費要求將這個護符橫置，因此橫置狀態下無法支付消費。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:ae8e9b329ab7178f94457ecff1c7df638a529bd244af2a54710a23469fc05800
+    field: question
+    source_hash: sha256:f3dc5aa6a8ea9432cc2b04f587108a6cfabdb8d00e4f69c9646cd23668f694c3
+    lang: zh-Hant
+    text: 這個護符已橫置時，可以支付這個護符的{起動}能力的消費嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:ba916e2ea311dfef56d4b5d1899c6a4db27ec459951626a07b6ce6665b7248b8
+    field: answer
+    source_hash: sha256:27a521068399ab068bc8dbafb7becc147bd5edb81d9121e9fab4a576b00f92c5
+    lang: zh-Hant
+    text: 是的。會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:ba916e2ea311dfef56d4b5d1899c6a4db27ec459951626a07b6ce6665b7248b8
+    field: question
+    source_hash: sha256:3cf35a9fa4b445596ea79f257287ace4a0d50b96074256cdf14f14b9de7d07c0
+    lang: zh-Hant
+    text: 自己戰場上的複數個護符同時離開戰場時，這個從者的『自己的護符離開戰場時，給予敵方的全部主戰者與敵方的全部從者2點傷害』能力，會觸發與離開戰場的護符數量相同的次數嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:c3f90300a0c3da3c7f0824553c2f6bc4c8f55a0ccf0e0c06b369c4f3247b6639
+    field: answer
+    source_hash: sha256:4b2f0149587f0bbe31df63204067ad0ec5aa0cd9db896d815abe0662d1cc439a
+    lang: zh-Hant
+    text: 不行。由於能力的消費要求將這個護符橫置，因此橫置狀態下無法支付消費。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:c3f90300a0c3da3c7f0824553c2f6bc4c8f55a0ccf0e0c06b369c4f3247b6639
+    field: question
+    source_hash: sha256:f3dc5aa6a8ea9432cc2b04f587108a6cfabdb8d00e4f69c9646cd23668f694c3
+    lang: zh-Hant
+    text: 這個護符已橫置時，可以支付這個護符的{起動}能力的消費嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:d1878ad571f532505e995a6fa6c1f0e37dfd0d74a72ece9e8ca0fe6f2eb8301a
+    field: answer
+    source_hash: sha256:0d306070f60f7493cba6de5e3dec7fec0acf9235f3ba9eda29f8b2cbd3e5d511
+    lang: zh-Hant
+    text: 是的。這個護符在支付消費的時點就已離開自己戰場，結算能力時，自己戰場上距離上限還差1張，因此可以召喚1個『神聖獵鷹』到戰場上。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:d1878ad571f532505e995a6fa6c1f0e37dfd0d74a72ece9e8ca0fe6f2eb8301a
+    field: question
+    source_hash: sha256:a73cf8f0a901af0a354bf1c7ace74d631d51be121b76da42715679e3a358c3d0
+    lang: zh-Hant
+    text: 自己戰場上已達上限，使用這個護符的{起動}能力時，可以召喚1個『神聖獵鷹』到戰場上嗎？
+    origin: machine
+    low_confidence: true

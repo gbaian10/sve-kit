@@ -1,0 +1,1025 @@
+format: 1
+kind: qa_translation_shard
+entries:
+  - qa_id: qa:v1:02411beb536761680129cfca8c5dcc4593da07f37f561f84d6ca719ea4da37b4
+    field: answer
+    source_hash: sha256:8c94c83abb5a402d25701422aa3cc2a379f6b029127c6dfe39cb7284af59e95e
+    lang: zh-Hant
+    text: "是的。可以使用。\n此時，因「本回合，這張卡片無法攻擊。」，本回合將無法攻擊敵方的主戰者與敵方戰場上的從者。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:02411beb536761680129cfca8c5dcc4593da07f37f561f84d6ca719ea4da37b4
+    field: question
+    source_hash: sha256:8d2a3ead2990307ddda48ed093012b2ed42b0d4bef70eec2003d3f40b60ea0b9
+    lang: zh-Hant
+    text: 這個從者處於重置狀態時，可以使用「{起動}{消費2}：將這張卡片重置。本回合，這張卡片無法攻擊。」這個{起動}能力嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:07df6afd8688ddb05ad0aa549df228d3d7164868a5758b25c3782d61f8f40c33
+    field: answer
+    source_hash: sha256:05a36706de53cad287a60732157c37489fecfbb6efbe34501afe782d33de1aea
+    lang: zh-Hant
+    text: "是的。可以抉擇【2】。\n即使抉擇【2】並選擇自己戰場上的1個蒼月・從者，若自己的消失區中有4張以下卡片，則不會發生任何事。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:07df6afd8688ddb05ad0aa549df228d3d7164868a5758b25c3782d61f8f40c33
+    field: question
+    source_hash: sha256:f588753ffa99a1f6e52ba20f5d87a2f5f29afbfa976504473c68efc06a5df415
+    lang: zh-Hant
+    text: 自己的消失區中有4張以下卡片時，可以用這個從者的{入場曲}能力抉擇【2】嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:09a503212bbfea4c5931dafb2e6651e0565144e056048368159f7a07816fa837
+    field: answer
+    source_hash: sha256:0d0832d853cbcd922ea77e92c72a1c680b24ec4cb539c77b89c84f9a0c85dd18
+    lang: zh-Hant
+    text: 是的。會觸發。Token・從者從戰場被放置到墓場後會立刻消除。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:09a503212bbfea4c5931dafb2e6651e0565144e056048368159f7a07816fa837
+    field: question
+    source_hash: sha256:5c167a65e8946b72b878e83d68959e4565ab7e532b13f6553f2f2c8006c5b0ab
+    lang: zh-Hant
+    text: 自己的回合中，敵方的從者第1次從戰場被放置到墓場時，若該從者是Token・從者，這個從者的「自己的每個回合1次，敵方的從者從戰場被放置到墓場時，～」能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:09dcdaf8058a3f9eb33ffd8bea69a79a3301a541318309a5f31f5f6326301709
+    field: answer
+    source_hash: sha256:84696572ecbfee576a77b5d617e446e20c5b0b07b109d82281049db5bf13c83e
+    lang: zh-Hant
+    text: 是的。可以以任意順序結算。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:09dcdaf8058a3f9eb33ffd8bea69a79a3301a541318309a5f31f5f6326301709
+    field: question
+    source_hash: sha256:7f4cea0c5d750c2859ec6c190e09943fd555dceb56d468d3a44b403c623edb93
+    lang: zh-Hant
+    text: 【單重驅動】與「自己戰場上的水藍軍隊・從者攻擊時，～」能力，可以以任意順序結算嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:0c83f22e564fff4e336332cb8edb5418293801ca2376cbaa0ab121f3c05af912
+    field: answer
+    source_hash: sha256:84696572ecbfee576a77b5d617e446e20c5b0b07b109d82281049db5bf13c83e
+    lang: zh-Hant
+    text: 是的。可以以任意順序結算。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:0c83f22e564fff4e336332cb8edb5418293801ca2376cbaa0ab121f3c05af912
+    field: question
+    source_hash: sha256:f8d1f87b451f8b4218d06407bbf43d5e2b15221eba1a2a37d67a9b3a98c91b3c
+    lang: zh-Hant
+    text: 【雙重驅動】與「自己戰場上的水藍軍隊・從者攻擊時，～」能力，可以以任意順序結算嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:0cab1286b10390eaa31232037cb89077b0c492271da40979d2d76fb12265a14e
+    field: answer
+    source_hash: sha256:634a5d3bd561d6f2fb7c768c39d2c563955b5aef46c2624a9b64522bac1ce6c0
+    lang: zh-Hant
+    text: 不行。若無法選擇適當的目標，則無法抉擇【1】，必須抉擇【2】。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:0cab1286b10390eaa31232037cb89077b0c492271da40979d2d76fb12265a14e
+    field: question
+    source_hash: sha256:3d683d2cbee8eb98cd670c8f06fde206eab28a88efd8af5795d1fc956c6195c5
+    lang: zh-Hant
+    text: 無法選擇敵方戰場上的從者時，可以用這個從者的「因自己的驅動檢查而觸發時，～」能力抉擇【1】，選擇不發生任何事嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:17e57f9b536b486a42f770ae44031734153d934192feb37577a132937c291628
+    field: answer
+    source_hash: sha256:47c1ee202500ed89c3bd1638241423431c59f429d9dbfd568cf649fb0a666d3f
+    lang: zh-Hant
+    text: 是的。同時進入戰場的2個『淚騎士 提奧』都滿足「若自己戰場上有其他水藍軍隊・從者，則」的條件，因此具有【突進】與【指定攻擊】。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:17e57f9b536b486a42f770ae44031734153d934192feb37577a132937c291628
+    field: question
+    source_hash: sha256:f98abab2598b4778cac896eff95aa97c2b3c7e0f2b1f3cc55cf79206b5602e68
+    lang: zh-Hant
+    text: 以『風暴騎手 迪亞曼提斯』的{謝幕曲}能力，使2個『淚騎士 提奧』同時進入自己戰場。若自己戰場上的從者只有這2個『淚騎士 提奧』，是否滿足『淚騎士 提奧』的{入場曲}能力中的「若自己戰場上有其他水藍軍隊・從者，則」條件？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:20af8dc1f31f2105f9ffd7f6d647842d8e0feb72e22870a44b10ddbc1ebbc938
+    field: answer
+    source_hash: sha256:bb9f6efefbed73d65e775db0966f4c2e3719052b69da77b2de723504ca2ec9ce
+    lang: zh-Hant
+    text: 【雙重驅動】或「自己戰場上的水藍軍隊・從者攻擊時，～」能力觸發並結算的時點在先。在【攻擊時】能力等從者攻擊時觸發的全部能力結算後，才會進入非回合玩家的Quick時點。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:20af8dc1f31f2105f9ffd7f6d647842d8e0feb72e22870a44b10ddbc1ebbc938
+    field: question
+    source_hash: sha256:ef269263e6277f99977940c2b428d78ff020cdeaed1fc2b1c97a7744e668e6c4
+    lang: zh-Hant
+    text: 【雙重驅動】或「自己戰場上的水藍軍隊・從者攻擊時，～」能力觸發並結算的時點，與Quick時點，哪個在先？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:216ccf35b1ef75a7762f18b71f5ab0c8ffa5b304948c8062c6f3cf1b42fbf67c
+    field: answer
+    source_hash: sha256:8dccfac233fc61c3ba858344446b460f0684e6eae36d70e98433908981881442
+    lang: zh-Hant
+    text: "不行。若無法選擇敵方戰場上的從者，則無法使用這張法術，也無法將自己的墓場中的闇影聖騎士・從者加入手牌。\n另外，若可以選擇敵方戰場上的從者，而自己的墓場中沒有闇影聖騎士・從者，則可以藉由選擇自己的墓場中的0個闇影聖騎士・從者，使用這張法術。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:216ccf35b1ef75a7762f18b71f5ab0c8ffa5b304948c8062c6f3cf1b42fbf67c
+    field: question
+    source_hash: sha256:d8b9e41e8cfe9555051319d66efe3a162c7ac8a5d30f2dac60bc674ff38a6a4d
+    lang: zh-Hant
+    text: 無法選擇敵方戰場上的從者，但可以選擇自己的墓場中的1張闇影聖騎士・從者時，可以使用這張法術，將所選的闇影聖騎士・從者加入手牌嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:223884c74909fc6be4cc988a5da01cf49ab9b0d6d9ffb910edcbe8e3383210a1
+    field: answer
+    source_hash: sha256:166ebaa442abda21490e8e5e656f98a66ea6d6b99ae56349ee8bc83b6bc8b492
+    lang: zh-Hant
+    text: 是的。由於並非傷害，因此自己的主戰者的生命值會變為10。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:223884c74909fc6be4cc988a5da01cf49ab9b0d6d9ffb910edcbe8e3383210a1
+    field: question
+    source_hash: sha256:d2f82e86d487d5c958daed9c148a220987a9a3340f1d1784f5695dad14dfe506
+    lang: zh-Hant
+    text: 自己的主戰者的生命值為11以上，且這張法術的【2】效果有效時，敵方的『阿撒塞勒（EVOLVE）』的【進化時】能力會使自己的主戰者的生命值變為10嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:23ebed9f8a6fa66d47aa0ce16a815b4ab569b11a824a3ef8b0da905e1c615f9a
+    field: answer
+    source_hash: sha256:1df545b817f5178022fc8af0dbcdba822094cc3abf8e9ba88cd562921710ddf7
+    lang: zh-Hant
+    text: 「能力傷害」是除了從者間交戰時互相給予的交戰傷害及攻擊傷害以外的所有傷害。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:23ebed9f8a6fa66d47aa0ce16a815b4ab569b11a824a3ef8b0da905e1c615f9a
+    field: question
+    source_hash: sha256:6decaea49f0a12ac01bfaea7b47f0855564e17438cc1d481457984a430361df1
+    lang: zh-Hant
+    text: 「能力傷害」是什麼？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:28472bfb78901d016102a2676100b88544c9490610b19ae21909523929b0d97f
+    field: answer
+    source_hash: sha256:965fd2e5b05316f9b92d2aaa555ced683cab3485d588e86995f882c3ddc41fb3
+    lang: zh-Hant
+    text: 【雙重驅動】觸發並結算的時點在先。在【攻擊時】能力等從者攻擊時觸發的全部能力結算後，才會進入非回合玩家的Quick時點。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:28472bfb78901d016102a2676100b88544c9490610b19ae21909523929b0d97f
+    field: question
+    source_hash: sha256:67286f26bf387bbf13712b1793515c95363c449e78d07566fbe354ae8517f9f0
+    lang: zh-Hant
+    text: 【雙重驅動】觸發並結算的時點，與Quick時點，哪個在先？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:2c57fe95ab0df9dd849bee36efb1b10a39896a4ba96f580e842a19f8872b9302
+    field: answer
+    source_hash: sha256:4ae1239ec34282fea68e233b94aa42b0189b41ed8dc1f021e98fcbcedd827bd6
+    lang: zh-Hant
+    text: "不會。不會計入1回合中1次的次數。\n進化前的『哥布林』所具有的{進化}能力（可以進化的起動能力、「圓圈E」圖示），在1回合中只能使用1次。藉由其他能力進化等情況，沒有此限制。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:2c57fe95ab0df9dd849bee36efb1b10a39896a4ba96f580e842a19f8872b9302
+    field: question
+    source_hash: sha256:1dd40dbab7fb6e26530c8a4a27d79b291541f98d0bcf9faa0fdcc397d2c91039
+    lang: zh-Hant
+    text: 這個從者藉由{入場曲}能力進化時，該次進化會計入進化前的『哥布林』所具有的{進化}能力（可以進化的起動能力、「圓圈E」圖示）的使用次數上限，即1回合中1次嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:2f98a101f53c1c87cb21fb821ee8933029b531f94857770ab1ce67c6051613f2
+    field: answer
+    source_hash: sha256:671c32e2b06b8d1eb9e364bff7060dbe28b11f7987918d62cf3ea6f1b7acc9f0
+    lang: zh-Hant
+    text: 是的。可以用{入場曲}能力，將作為消費而返回手牌的原始消費為1的水藍軍隊・從者召喚到戰場上。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:2f98a101f53c1c87cb21fb821ee8933029b531f94857770ab1ce67c6051613f2
+    field: question
+    source_hash: sha256:c5241ec57c272c84b4c51ae2dbb8a7292bde4dbc500d25f695765ccd96b22721
+    lang: zh-Hant
+    text: 可以用{入場曲}能力，將作為{入場曲}能力的消費而返回手牌的原始消費為1的水藍軍隊・從者召喚到戰場上嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:366a43408a11b1a4cfbecc13370ce646a98e19ac9c1d2209c42293f4ce48ccbb
+    field: answer
+    source_hash: sha256:ddc0a130aac933d4be058e99a4a7dae5f82c796beac754f752168ec7d5c8cd94
+    lang: zh-Hant
+    text: 是的。即使自己的消失區中的卡片為4張以下，也可以使這個從者的攻擊力與生命值+1。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:366a43408a11b1a4cfbecc13370ce646a98e19ac9c1d2209c42293f4ce48ccbb
+    field: question
+    source_hash: sha256:18b72a0685427999e16dafcd90d98ef740d5d49f2885723a1411111fb40cfb28
+    lang: zh-Hant
+    text: 即使自己的消失區中的卡片為4張以下，也可以藉由這個從者的【獲得驅動時】能力，使這個從者的攻擊力與生命值+1嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:379c60d8608eb852045a8b59762d90b384bc726ba838023a560883ed36f7980d
+    field: answer
+    source_hash: sha256:60186e3bf8a99e6beaefd288859c37686214f787da0a3b75e8bf315e2fe8fa19
+    lang: zh-Hant
+    text: "是的。可以使用。\nToken・從者從戰場被放置到墓場後會立刻消除。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:379c60d8608eb852045a8b59762d90b384bc726ba838023a560883ed36f7980d
+    field: question
+    source_hash: sha256:86e5199cd5cf1b459ec10b2ebfdc7e90b69a57a1bb0c8f177a2d85cc44715b0e
+    lang: zh-Hant
+    text: 若本回合中，從敵方戰場被放置到墓場的從者只有Token・從者，可以使用『格林機砲爪龍』的{起動}能力嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:39771b14ace1a9bb61370d0e07544fb1a788a6491574ac7116f8c7ae44b2cdcb
+    field: answer
+    source_hash: sha256:c88dcabe3c59f64a03ae09798e823ef31f06e15dafb4fbafe8b63e11ae383e62
+    lang: zh-Hant
+    text: 不會。由於攻擊力為0以下的從者的攻擊不會給予傷害，因此不會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:39771b14ace1a9bb61370d0e07544fb1a788a6491574ac7116f8c7ae44b2cdcb
+    field: question
+    source_hash: sha256:8d31c8c6dad4f66b86800f0b7ace16153d5e7e79d1b98647ec3dcd6597a46fb6
+    lang: zh-Hant
+    text: 這個從者的攻擊力因某些能力而變為0以下的情況下，攻擊敵方的主戰者時，「這張卡片給予敵方的主戰者傷害時，～」能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:3e4a4ee69f342953851df04d9c1f802dea4bd41b9d8ebc78efd8130f3ccf3656
+    field: answer
+    source_hash: sha256:c0d0172a8141b05880126dc896d972adc9736c19518fe5c796433704e5b0d82d
+    lang: zh-Hant
+    text: 不行。若抉擇【2】卻無法選擇敵方戰場上的從者，則無法使用這張法術，也無法支付消費，因此無法查看自己牌堆頂的1張卡片，將原始消費為1的水藍軍隊・從者加入手牌。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:3e4a4ee69f342953851df04d9c1f802dea4bd41b9d8ebc78efd8130f3ccf3656
+    field: question
+    source_hash: sha256:e4ed86b4cf5e564efa74d3c4df360ff095d920f40a33e675b28447e25c73082e
+    lang: zh-Hant
+    text: 無法選擇敵方戰場上的從者時，可以抉擇這張法術的【2】並支付消費，查看自己牌堆頂的1張卡片，將1張原始消費為1的水藍軍隊・從者加入手牌嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:404f53e91a39655cf0f41c246bb3aebf1bd984d82d59b98a73eadf05328169d3
+    field: answer
+    source_hash: sha256:3d9e3d7044e9218088b15e5b58bebce0ca126ce75ba2133770c81e58f8b67396
+    lang: zh-Hant
+    text: "是的。會觸發2次。\n【雙重驅動】生效時，會在第1次與第2次驅動檢查時各自觸發並進入待機狀態。接著，在【雙重驅動】的全部處理結束後的檢查時點，結算處於待機狀態的能力。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:404f53e91a39655cf0f41c246bb3aebf1bd984d82d59b98a73eadf05328169d3
+    field: question
+    source_hash: sha256:a7758a02ccff25e3c2693c0f4fc7c5aa1782962ab63e0435bd1151a3d6fab4ba
+    lang: zh-Hant
+    text: 自己戰場上的從者的【雙重驅動】生效時，這個從者的「自己戰場上的從者進行驅動檢查時，」能力會觸發2次嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:417ac7710ae9611486bcf51ef0f0bb283cee138319f1f3f8ffac5ac17a160054
+    field: answer
+    source_hash: sha256:88fc8228633740e36593acbee6581d8f65e1cc0959d7f047b07cbd38f1e0383c
+    lang: zh-Hant
+    text: 是的。即使在結束階段的Quick時點被破壞，也滿足「若是自己的回合中，則」的條件，因此有效。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:417ac7710ae9611486bcf51ef0f0bb283cee138319f1f3f8ffac5ac17a160054
+    field: question
+    source_hash: sha256:13cf263fd9b27b62a997199b787f7073e2db73162afb4aa37b2f1cf17e3cb629
+    lang: zh-Hant
+    text: 這個從者在自己的結束階段，因敵方的『天使的聖箭』受到2點傷害並被破壞時，這個從者的{謝幕曲}能力有效嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:4e5374b84b9aaf5e9822abc57dc43f8eb99c3248932862a0e5ff41ba009324a2
+    field: answer
+    source_hash: sha256:1d762d4836fcaa1ef8f68f2b94141280b5bd5535ff05f64a8cdfe7c6b47142bf
+    lang: zh-Hant
+    text: 是的。選擇至多1張時，可以選擇0張，因此即使自己的墓場中有卡片，也可以藉由不選擇該卡片，不將其放置到牌堆從上數來第3張的位置。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:4e5374b84b9aaf5e9822abc57dc43f8eb99c3248932862a0e5ff41ba009324a2
+    field: question
+    source_hash: sha256:82a39ab43586f3066fd0d89476be6d4b24c4a816492dfaf41f36efdf9cade5cc
+    lang: zh-Hant
+    text: 自己的墓場中有卡片時，可以用這個從者的{入場曲}能力，選擇自己的墓場中的0張卡片，不將卡片放置到牌堆從上數來第3張的位置嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:50d86932a78774e863bde7035a1e6310f7e98fb93b19e83fb94a801b98d94728
+    field: answer
+    source_hash: sha256:dca9604f439bbd0dfe2a7c467612ccda5009eff10d4a668143d90f979b0d74bd
+    lang: zh-Hant
+    text: 【單重驅動】或【攻擊時】能力觸發並結算的時點在先。在【攻擊時】能力等從者攻擊時觸發的全部能力結算後，才會進入非回合玩家的Quick時點。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:50d86932a78774e863bde7035a1e6310f7e98fb93b19e83fb94a801b98d94728
+    field: question
+    source_hash: sha256:dddaa918d82e1fe8ad7875bd4604110d0c70c12cf5a76888935b11b68559bb78
+    lang: zh-Hant
+    text: 【單重驅動】或【攻擊時】能力觸發並結算的時點，與Quick時點，哪個在先？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:5628e4ff5b2db2fa38377d329f26b1ecbfe7976842e2b6305123d2053e1a25e6
+    field: answer
+    source_hash: sha256:96f4e1833ec214d18cf0ed9facae5d74b50db586ea1de0f2bf543c5cdc3b745a
+    lang: zh-Hant
+    text: 不行。無法使用。使用法術時必須選擇適當的目標。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:5628e4ff5b2db2fa38377d329f26b1ecbfe7976842e2b6305123d2053e1a25e6
+    field: question
+    source_hash: sha256:a6b88b104cf0fe166806b8d687d8144158d73c957f3efb733787053c877f5e74
+    lang: zh-Hant
+    text: 抉擇【2】時，若無法選擇自己的墓場中的5張具有觸發的從者，可以使用這張法術嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:604606ab31b43856ba4124e4e0a4eb2bc81101186c6365c0309a20d09ace5367
+    field: answer
+    source_hash: sha256:54c8c23b348a1d97ae9b9043c2e7957a8e43b8d5b63027de08ed3f051bcc1f59
+    lang: zh-Hant
+    text: "是的。是永續能力。只要自己的墓場中有10張以上闇影聖騎士・卡片，『多蘭汪』就具有【必殺】。\n召喚『多蘭汪』到戰場上後，若自己的墓場中的闇影聖騎士・卡片從9張以下變為10張以上，則具有【必殺】。\n召喚『多蘭汪』到戰場上後，若自己的墓場中的闇影聖騎士・卡片從10張以上變為9張以下，則失去【必殺】。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:604606ab31b43856ba4124e4e0a4eb2bc81101186c6365c0309a20d09ace5367
+    field: question
+    source_hash: sha256:f7db48fcd69b86418ec1a20d29039faff39905ac2b28fb16c16297654d1ec544
+    lang: zh-Hant
+    text: 『多蘭汪』的「只要自己的墓場中的闇影聖騎士・卡片數量為10張以上，這張卡片就具有【必殺】。」能力，是永續能力嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6624b932313b34f86fe925acf0edeccf541bd15b6d120307b6d73bf7c7b75b38
+    field: answer
+    source_hash: sha256:2b391361c5d5aeeadc0a5912baffb04f9abe61e8b6aeb59e410bb4b54e1ef09b
+    lang: zh-Hant
+    text: 是的。即使攻擊從者在Quick時點已被破壞，攻擊的事件仍已發生，因此可以計入「該回合中自己戰場上的水藍軍隊・從者攻擊的次數」。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6624b932313b34f86fe925acf0edeccf541bd15b6d120307b6d73bf7c7b75b38
+    field: question
+    source_hash: sha256:c17ffd59b7e43a0ff96c1d26954dc3fdfc2d16856557bbe4e6671801932f193c
+    lang: zh-Hant
+    text: 自己戰場上的水藍軍隊・從者攻擊時，若在Quick時點該從者已被破壞，該次攻擊可以計入「該回合中自己戰場上的水藍軍隊・從者攻擊的次數」嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6995caa2ab5d9242e13c56fd5f33d0f52732a3d7e114cfc117f85829494e9888
+    field: answer
+    source_hash: sha256:526a286189f9993eba542e001bcb8d9e4113cea6b910c81380783bd55283ee0f
+    lang: zh-Hant
+    text: 是的。可以支付消費。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6995caa2ab5d9242e13c56fd5f33d0f52732a3d7e114cfc117f85829494e9888
+    field: question
+    source_hash: sha256:31011fab2d49b31903ff89836dcc714e85d9ba5f4d2033d2dddff14b995489a5
+    lang: zh-Hant
+    text: 自己的手牌中沒有原始消費3以下的水藍軍隊・從者時，可以支付這個從者的{入場曲}能力的消費嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:69f03b8ead8fde9222763a70b5ccfa0d5c49c98f25579952139439a12dc7bc51
+    field: answer
+    source_hash: sha256:0fcf1260acfe9f23081acccbd6705fda206f512c463202a400be95fa66b5a5f0
+    lang: zh-Hant
+    text: "是的。只有第3次時有效。\n這個從者攻擊時，若包括這個從者的攻擊在內，本回合自己戰場上的水藍軍隊・從者的攻擊是第2次，或第4次以後，則無效。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:69f03b8ead8fde9222763a70b5ccfa0d5c49c98f25579952139439a12dc7bc51
+    field: question
+    source_hash: sha256:2de2ec8db4187e2b5c8b05dc69ef53fe0fcb24ffe8237856fc309c9c1d6b472e
+    lang: zh-Hant
+    text: 這個從者在【獲得驅動時】具有的「【攻擊時】選擇敵方戰場上的1個從者。若這是本回合自己戰場上的水藍軍隊・從者的第3次攻擊，則給予其2點傷害」能力，只有在包括這個從者在內，本回合自己戰場上的水藍軍隊・從者的攻擊是第3次時才有效嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6a0af89a345ce0ceb2dea0c5c1248d4e2238e1ed6ba8d8a7672741767c5ead5e
+    field: answer
+    source_hash: sha256:57f3b7ab6f2c432b04ee55a8733bd7e9ad57b4017e8fbdbb6b05db28540cfc89
+    lang: zh-Hant
+    text: "是的。本回合自己的主戰者下一次受到的傷害會-10。\n另外，下一次受到傷害時，若適用第1次『真理的騎士 戈登』的效果後，變為不會受到傷害的情況，則在這個時點已沒有受到傷害的行動，因此第2次『真理的騎士 戈登』的效果沒有適用對象，效果會繼續保留。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6a0af89a345ce0ceb2dea0c5c1248d4e2238e1ed6ba8d8a7672741767c5ead5e
+    field: question
+    source_hash: sha256:57cb6d2b9f5facc60102b88dbf5d3b7bfd948d0d69ce6babb3dad0eae4638f7a
+    lang: zh-Hant
+    text: 抉擇【2】並使用這張卡片2次時，本回合自己的主戰者下一次受到的傷害會-10嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6b5dda8f3005ce02f9e75e0b2caadaee06db01e0bc1693e7b9165c1ab4c0fa3a
+    field: answer
+    source_hash: sha256:cd7c7d46f22a0dc0709e41ec5495755c09edfb9de36ab72d61b77c43de9e567e
+    lang: zh-Hant
+    text: "不行。無法召喚到戰場上。\n另外，也無法用『月與日』的{起動}能力，將墓場中的這個從者召喚到戰場上。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6b5dda8f3005ce02f9e75e0b2caadaee06db01e0bc1693e7b9165c1ab4c0fa3a
+    field: question
+    source_hash: sha256:79167e059e5f3364dd47543ee81efca778088e91d091074e214427089c5eaede
+    lang: zh-Hant
+    text: 可以藉由『月與日』，從自己的牌堆搜尋這個從者並將其召喚到戰場上嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6b9da680f1117e651aa693aabe25acf36391cfe3115705f7198182335504b62b
+    field: answer
+    source_hash: sha256:97b7143098f400c8297535c4e51f22b430620a7df320638d87c292a56a47c9f4
+    lang: zh-Hant
+    text: 不行。若無法選擇敵方戰場上的從者，則無法使用這個從者的{起動}能力，也無法公開自己牌堆頂的1張卡片。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6b9da680f1117e651aa693aabe25acf36391cfe3115705f7198182335504b62b
+    field: question
+    source_hash: sha256:04982a729e488cc901681858b6429f751f4c59c771e43e8f64fff4e7bb04d423
+    lang: zh-Hant
+    text: 無法選擇敵方戰場上的從者時，可以使用這個從者的{起動}能力，公開自己牌堆頂的1張卡片嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6e00a0847e5347d2ee66eba68a45747e3630690fa5c629e083a501175e77df00
+    field: answer
+    source_hash: sha256:a63f3f165362047f59679549fae88d490509163115ff075ccefc8119b3288e07
+    lang: zh-Hant
+    text: 【單重驅動】或「自己戰場上的水藍軍隊・從者攻擊時，～」能力觸發並結算的時點在先。在【攻擊時】能力等從者攻擊時觸發的全部能力結算後，才會進入非回合玩家的Quick時點。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6e00a0847e5347d2ee66eba68a45747e3630690fa5c629e083a501175e77df00
+    field: question
+    source_hash: sha256:f4fcc77388c78f0cd2d721aed807b75258c4185e03fc4c019c83d63e5517dbf0
+    lang: zh-Hant
+    text: 【單重驅動】或「自己戰場上的水藍軍隊・從者攻擊時，～」能力觸發並結算的時點，與Quick時點，哪個在先？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6e3b510f8add30c49844c0383079c309a03d1284d4bd5e2a41721a967d3a2bf7
+    field: answer
+    source_hash: sha256:a863fb5c373b19dda35f40d30caccabe0554fa8d55a9ea7daec53fee3ca3b4af
+    lang: zh-Hant
+    text: "會先進行觸發的處理。\n第1次驅動檢查將具有觸發的卡片放置到觸發區時，會在包括該觸發的處理在內的全部驅動檢查處理結束後，進行第2次驅動檢查。\n\n例如，藉由【雙重驅動】進行的第1次驅動檢查，將抽卡觸發放置到觸發區並執行該觸發的處理時，會抽1張卡片，將觸發區的卡片放置到墓場後，進行第2次驅動檢查。\n若未執行觸發的處理，或將不具有觸發的卡片放置到觸發區，則會將該卡片放置到牌堆底後，進行第2次驅動檢查。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6e3b510f8add30c49844c0383079c309a03d1284d4bd5e2a41721a967d3a2bf7
+    field: question
+    source_hash: sha256:d6d1273d025998d4a03128284b73c197eacb88c7dbfd5ad499eb9b8d6f2ba9db
+    lang: zh-Hant
+    text: 具有【雙重驅動】的從者攻擊，並在第1次驅動檢查將具有觸發的卡片放置到觸發區時，會先進行該觸發的處理，還是第2次驅動檢查？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6ebeb46d886b1ef27dc60de037006e4d7886e173e8e2e1a188fbbf2678b87ba0
+    field: answer
+    source_hash: sha256:239e055698475b538381045e7cef14bee098107f4460a256fc474a11cf3ecae5
+    lang: zh-Hant
+    text: 不需要。因某些能力進入戰場時，無須支付追加消費。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6ebeb46d886b1ef27dc60de037006e4d7886e173e8e2e1a188fbbf2678b87ba0
+    field: question
+    source_hash: sha256:a66002f9888d2ae69842117a707c019322f7459d84467bbe2bfcf83c78b9d796
+    lang: zh-Hant
+    text: 這個從者因某些能力而從手牌或墓場進入戰場時，需要支付追加消費嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6faf9faa8232fec0df17e238443b453e88aeaf18c16ee8492850c43ebd19222e
+    field: answer
+    source_hash: sha256:36d400a7893b040d4e8eeb7a15ad8c0dd44cbdf2d19fcaba82a13a3188940342
+    lang: zh-Hant
+    text: 【攻擊時】能力觸發並結算的時點在先。在【攻擊時】能力等從者攻擊時觸發的全部能力結算後，才會進入非回合玩家的Quick時點。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6faf9faa8232fec0df17e238443b453e88aeaf18c16ee8492850c43ebd19222e
+    field: question
+    source_hash: sha256:77906467c4ae2ae07b145c83e2827f77aee1930e0f1ecd2a8470366318a67f35
+    lang: zh-Hant
+    text: 【攻擊時】能力觸發並結算的時點，與Quick時點，哪個在先？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:76c296d01575b3f01cad5fd598d0b1c644e1fe246137f931b2ac174252eacd0b
+    field: answer
+    source_hash: sha256:abc640955ba92f203e9bb42fc7f6a47bc43b3191764fb65e3dc05f758ec9189b
+    lang: zh-Hant
+    text: "不行。無法攻擊敵方的主戰者。\n重置觸發的處理並非使對象具有「本回合，無法攻擊敵方的主戰者」能力，因此即使因『臥龍 斯特萊肯』的「因自己的驅動檢查而觸發時，本回合，這張卡片失去全部能力。」能力而失去全部能力，也無法攻擊敵方的主戰者。（可以攻擊敵方戰場上橫置狀態的從者。）"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:76c296d01575b3f01cad5fd598d0b1c644e1fe246137f931b2ac174252eacd0b
+    field: question
+    source_hash: sha256:50334f41d6012ac25932ff8215a9f69ca90306aa5ca2cde80b918ce5e6a84e6e
+    lang: zh-Hant
+    text: 因自己的驅動檢查，以從自己的上一個回合起就位於自己戰場上的『臥龍 斯特萊肯』為目標，執行重置觸發的處理時，該『臥龍 斯特萊肯』可以攻擊敵方的主戰者嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:7fd8784d0f3965b2df00ebb6f860ac739b106d436fa3a6e2b9f024c5df5b1d71
+    field: answer
+    source_hash: sha256:643f734f977d2b622e371cb18fbfd15e34913feb3611e6d19992fd25904a5616
+    lang: zh-Hant
+    text: "是的。是永續能力。只要自己的墓場中有15張以上皇家聖騎士・卡片，『爆炎的劍士 巴羅米迪斯』就具有【疾馳】與【攻擊時】能力。\n召喚『爆炎的劍士 巴羅米迪斯』到戰場上後，若自己的墓場中的皇家聖騎士・卡片從14張以下變為15張以上，則具有【疾馳】與【攻擊時】能力。\n召喚『爆炎的劍士 巴羅米迪斯』到戰場上後，若自己的墓場中的皇家聖騎士・卡片從15張以上變為14張以下，則失去【疾馳】與【攻擊時】能力。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:7fd8784d0f3965b2df00ebb6f860ac739b106d436fa3a6e2b9f024c5df5b1d71
+    field: question
+    source_hash: sha256:09f8e822b2741e55470d85f87e3652ebb4a0a91d955b0e8688a729a09a7289e8
+    lang: zh-Hant
+    text: 『爆炎的劍士 巴羅米迪斯』的「只要自己的墓場中的皇家聖騎士・卡片數量為15張以上，這張卡片就具有【疾馳】與「【攻擊時】這張卡片{攻擊力}+1/{生命值}+1」。」能力，是永續能力嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:8022f63400e6722a6c7add743d328e4320dce7c40151ceecca1cd9255b87df60
+    field: answer
+    source_hash: sha256:96ac7251069b43fdf1f6def35b1290aa7d1e68c3f57b4431bdd8c676a17e597f
+    lang: zh-Hant
+    text: "是的。只有第4次時有效。\n這個從者攻擊時，若包括這個從者的攻擊在內，本回合自己戰場上的水藍軍隊・從者的攻擊是第3次，或第5次以後，則無效。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:8022f63400e6722a6c7add743d328e4320dce7c40151ceecca1cd9255b87df60
+    field: question
+    source_hash: sha256:e596060275ad073f4b29d1269daf28477ccf1e7858d7d1b642ba3cf2dce2b878
+    lang: zh-Hant
+    text: 「【攻擊時】若這是本回合自己戰場上的水藍軍隊・從者的第4次攻擊，則這張卡片進化為『蒼嵐霸龍 榮耀‧大漩渦』。」能力，只有在包括這個從者在內，本回合自己戰場上的水藍軍隊・從者的攻擊是第4次時才有效嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:80516031b259bd07690ab557eda4b7e856694dc4518e27d743a236932dc0d048
+    field: answer
+    source_hash: sha256:5aa88c85114c1c38162c97312668e8f4dfc63c25c3ed94a2e3be5971b13ec89d
+    lang: zh-Hant
+    text: 若自己的墓場中有『爆破劍士』與『爆破者‧黑暗』各1張，則選擇敵方戰場上的至多1個從者，將其破壞。若各有2張，則選擇敵方戰場上的至多2個從者，將其破壞。若各有3張，則選擇敵方戰場上的至多3個從者，將其破壞。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:80516031b259bd07690ab557eda4b7e856694dc4518e27d743a236932dc0d048
+    field: question
+    source_hash: sha256:708c9b9455efbcc4c9142f0e11af0439a97e48373784904e35624b412a25fa5c
+    lang: zh-Hant
+    text: 請說明{入場曲}能力的「以自己的墓場中的『爆破劍士』與自己的墓場中的『爆破者‧黑暗』各1張為1組，每組選擇敵方戰場上的至多1個從者。將其破壞。」。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:84e8059aac6ef86a58c0061e0138ec8df78636d13eee5438c871dd63b49eed25
+    field: answer
+    source_hash: sha256:1ab392d6fb80d970cbb504ad7b105802ced42182bf4cc565331c86f56e1c5cbd
+    lang: zh-Hant
+    text: 不行。若不支付追加消費，則無法使用這個從者。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:84e8059aac6ef86a58c0061e0138ec8df78636d13eee5438c871dd63b49eed25
+    field: question
+    source_hash: sha256:07a49f51fdac442b350b353a3ff12ec700072c4644e0968e129f64137f6760f5
+    lang: zh-Hant
+    text: 可以不將戰場上的1個闇影聖騎士・從者放置到墓場作為追加消費，就使用這個從者嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:87bf91676804ac1532fe3b0adccc29c94600a7954abb80f8d4802f6ab5ad37be
+    field: answer
+    source_hash: sha256:79711361ad407f30c374c9ba52a23a9141ca036046bbb073d5ab675db09665ae
+    lang: zh-Hant
+    text: 不行。若抉擇【2】卻無法選擇敵方戰場上的從者，則無法使用這張法術，也無法支付消費，因此無法將自己牌堆頂的1張卡片放置到墓場。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:87bf91676804ac1532fe3b0adccc29c94600a7954abb80f8d4802f6ab5ad37be
+    field: question
+    source_hash: sha256:031483e85412c6487574e975e3eef18dc87b138a87a2f6dd340404c6e9f355d9
+    lang: zh-Hant
+    text: 無法選擇敵方戰場上的從者時，可以抉擇這張法術的【2】並支付消費，將自己牌堆頂的1張卡片放置到墓場嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:89d8da889e01467554ef3332fb4bbbc5a703e40c6c576f171b67bbd0a8487624
+    field: answer
+    source_hash: sha256:2214a685e7f01f698ac449fb0b57ed3551fa555f4d93631c06e85e8ed2af7f54
+    lang: zh-Hant
+    text: 不行。若選擇只找到1張，則必須將該1張公開並加入手牌。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:89d8da889e01467554ef3332fb4bbbc5a703e40c6c576f171b67bbd0a8487624
+    field: question
+    source_hash: sha256:12501fea1ab7651a552cb2c4297e4dca21fe550a7abe37bfb9379dd90c4e8eb8
+    lang: zh-Hant
+    text: 以{入場曲}能力從自己的牌堆搜尋至多2張「日文卡名含有『ブラスター』（爆破）的從者」時，若選擇只找到1張，可以將該1張放置到墓場嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:8e01ad905daa539dc5efeede5e6063065c028b840d9e0f2709979694194f0072
+    field: answer
+    source_hash: sha256:388da2245a33b7c068657eca2fa13bfbfe62b0079e8acf22b888520f35fbccfe
+    lang: zh-Hant
+    text: "是的。是永續能力。只要自己的消失區中有5張以上卡片，『硝化雜耍師』就具有【必殺】與【守護】。\n召喚『硝化雜耍師』到戰場上後，若自己的消失區從4張以下變為5張以上，則具有【必殺】與【守護】。\n召喚『硝化雜耍師』到戰場上後，若自己的消失區從5張以上變為4張以下，則失去【必殺】與【守護】。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:8e01ad905daa539dc5efeede5e6063065c028b840d9e0f2709979694194f0072
+    field: question
+    source_hash: sha256:23c9d0be3bc4f709a0618a09010bf12da8f3835bbf8b532fb79e87af989a7e0f
+    lang: zh-Hant
+    text: 『硝化雜耍師』的「只要自己的消失區中的卡片數量為5張以上，這張卡片就具有【必殺】【守護】。」能力，是永續能力嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:9484a581e0625d7b8ccef202f7016f2a572eec4cc79ad83dfc8f5ad194417998
+    field: answer
+    source_hash: sha256:429eeb3d137d543df444ed00a19c585e0a43ae14c1cfc49ca3b21d25f798ee25
+    lang: zh-Hant
+    text: 是的。正是如此。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:9484a581e0625d7b8ccef202f7016f2a572eec4cc79ad83dfc8f5ad194417998
+    field: question
+    source_hash: sha256:528aa7b5a08b3ea689c4cf5e72b8bf555520b67fc21f0924e77b8693d574eb7d
+    lang: zh-Hant
+    text: 「使用這張卡片時，若自己的墓場中的闇影聖騎士・卡片數量為15張以上，則可以不支付這張卡片的原始消費，而將戰場上的1個『幻影爆破龍』放置到墓場。」能力，是指若自己的墓場中有15張以上闇影聖騎士・卡片，則可以不支付這個從者的原始消費9PP，而將戰場上的1個『幻影爆破龍』放置到墓場來使用嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:96d09ce2e3d38a3a16992843deb3c0f75e1aa4f350338358646ff0a4b046d34e
+    field: answer
+    source_hash: sha256:239648c5601fceddd0f7803a0408328fb13e09bbbf25f45fadc66ef8f9de19e8
+    lang: zh-Hant
+    text: "是在因自己的驅動檢查而執行觸發的處理時觸發的能力。即使將具有觸發的卡片放置到觸發區，若未執行該觸發的處理，則不會觸發。\n藉由【雙重驅動】進行2次驅動檢查，並執行2次觸發的處理時，「因自己的驅動檢查而觸發時，～」能力會觸發2次並進入待機狀態。接著，在【雙重驅動】的全部處理結束後的檢查時點，結算處於待機狀態的能力。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:96d09ce2e3d38a3a16992843deb3c0f75e1aa4f350338358646ff0a4b046d34e
+    field: question
+    source_hash: sha256:6233ce04c9d926fc47c160359b0d39f0c20c864beb310b1f8881754f23348e8b
+    lang: zh-Hant
+    text: 「因自己的驅動檢查而觸發時，～」能力，是在什麼時點觸發的能力？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:9d1ff94eb824d09ec630caa0e36c3883075f9dd3d6b95f954192637aa974b7df
+    field: answer
+    source_hash: sha256:48b982bafaac3bfc19d02364bb4cb9559a98d4d463277939000ca7eb5f8fac42
+    lang: zh-Hant
+    text: 是的。會各自觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:9d1ff94eb824d09ec630caa0e36c3883075f9dd3d6b95f954192637aa974b7df
+    field: question
+    source_hash: sha256:9b8d35627fafe94fc6ad6f0d030e2b105ae7dca76a4b094ab36fcb2c7f6244fc
+    lang: zh-Hant
+    text: 自己戰場上有2個以上這個從者的情況下，自己戰場上的水藍軍隊・從者攻擊時，「自己戰場上的水藍軍隊・從者攻擊時，若這是本回合自己戰場上的水藍軍隊・從者的第3次攻擊，則自己的主戰者{生命值}+2。抽1張卡片。」能力會各自觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a0bc4c67490dbe755e78f7da18f9ed01980e322f2928b2d8d1e17af97e547e86
+    field: answer
+    source_hash: sha256:84696572ecbfee576a77b5d617e446e20c5b0b07b109d82281049db5bf13c83e
+    lang: zh-Hant
+    text: 是的。可以以任意順序結算。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a0bc4c67490dbe755e78f7da18f9ed01980e322f2928b2d8d1e17af97e547e86
+    field: question
+    source_hash: sha256:d5c96819ecc54c8d56fd5e10431570d94a03ff6e349c6625f1c3f132840f221d
+    lang: zh-Hant
+    text: 【單重驅動】與【攻擊時】能力，可以以任意順序結算嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a93137772ea738afc7fe153bcfe0395953654f246ffd69d8c9c7b1413dc4dc02
+    field: answer
+    source_hash: sha256:1aae968133e4422681f8effc9a4b56721087dac9fbd37be6c5e72bccd5183006
+    lang: zh-Hant
+    text: 不行。只有在墓場中有『龍之霸主』時，才可以使自己的PP回復1點。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a93137772ea738afc7fe153bcfe0395953654f246ffd69d8c9c7b1413dc4dc02
+    field: question
+    source_hash: sha256:18f2fd7afcb8e9b2928c4aa995b7f30a23b9ad232fb5a9d39e6a5634a5a76787
+    lang: zh-Hant
+    text: 自己的墓場中有其他『龍之霸主‧終焉』時，可以用這個從者的{入場曲}能力回復1PP嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:ab9576b0a38ddd7a31601923954d49290c2752175123fc0aa64024b7bd60bb61
+    field: answer
+    source_hash: sha256:f37825bcfb3fb65bf5668e324f2eda4ef7b1334e5f64ea42fb56dce8215bca4b
+    lang: zh-Hant
+    text: 不行。由於與戰場上的從者關聯的『驅動點數』並未正面朝上放置在進化牌堆中，因此無法計入。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:ab9576b0a38ddd7a31601923954d49290c2752175123fc0aa64024b7bd60bb61
+    field: question
+    source_hash: sha256:546899c62028f275185139101ff2b0830f9ee6ea540c07b458a34cc667de54ca
+    lang: zh-Hant
+    text: 自己戰場上有具有驅動的從者時，與該從者關聯的『驅動點數』可以計入「自己的進化牌堆中正面朝上的『驅動點數』」嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:abdeaf7071bd2c0e7e8147c8bf890b2587f4429601a027c02dee9faac68b1cbf
+    field: answer
+    source_hash: sha256:9cadf3f016cf63144b9c3a0f9576557595ea5ee7afc9ec61127c8b9373a17bc7
+    lang: zh-Hant
+    text: "是的。只有第3次時有效。\n若包括攻擊的從者在內，本回合自己戰場上的水藍軍隊・從者的攻擊是第2次，或第4次以後，則無效。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:abdeaf7071bd2c0e7e8147c8bf890b2587f4429601a027c02dee9faac68b1cbf
+    field: question
+    source_hash: sha256:6197b96af2e457d60ea141420c14405546f98a192a109406ee2bc86505b09d0d
+    lang: zh-Hant
+    text: 「自己戰場上的水藍軍隊・從者攻擊時，若這是本回合自己戰場上的水藍軍隊・從者的第3次攻擊，則自己的主戰者{生命值}+2。抽1張卡片。」能力，只有在包括攻擊的從者在內，本回合自己戰場上的水藍軍隊・從者的攻擊是第3次時才有效嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:b06263128847ff6b5fb0e55cd9a7fedf5da62fb183ab4e9b2d0efae64c9d8623
+    field: answer
+    source_hash: sha256:b84d8cc5ed7be14a4f5ca09485d4c96b330e25d50d386a876ea5a1420789d694
+    lang: zh-Hant
+    text: 是的。即使是因這個從者的{入場曲}能力，使自己牌堆頂的1張卡片消失，讓自己的消失區變為5張卡片，也可以給予敵方的全部主戰者2點傷害。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:b06263128847ff6b5fb0e55cd9a7fedf5da62fb183ab4e9b2d0efae64c9d8623
+    field: question
+    source_hash: sha256:ea4c3289db7b2770dc0e2440b90e069d2cbaa32df65bf519cf1dc94fadf96e13
+    lang: zh-Hant
+    text: 自己的消失區中有4張卡片的情況下，使用這個從者的{入場曲}能力時，可以給予敵方的全部主戰者2點傷害嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:b74ab927f7ee473db6af1a10b8e576417de2b455e7a55317b4091a711f50549c
+    field: answer
+    source_hash: sha256:30419b6f6e8ca9fef9b9f21159303d3ec0fb5fcdd5c2aa390095bb6da54d54f8
+    lang: zh-Hant
+    text: 是的。自己的回合中，即使敵方以自己戰場上的『封龍 布羅凱德』為目標使用『天使的聖箭』，將『封龍 布羅凱德』破壞，也可以藉由使用『天使的聖箭』時觸發的『封龍 布羅凱德』的「自己的回合中，敵方使用法術時，～」能力，給予使用『天使的聖箭』的玩家的主戰者2點傷害。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:b74ab927f7ee473db6af1a10b8e576417de2b455e7a55317b4091a711f50549c
+    field: question
+    source_hash: sha256:7d278cc012a9369215fd86fb38c10e65f64f40986ed8c4c03c046588efa4c86a
+    lang: zh-Hant
+    text: 自己的回合中，敵方在Quick時點，以自己戰場上的『封龍 布羅凱德』為目標使用『天使的聖箭』，將『封龍 布羅凱德』破壞時，可以用『封龍 布羅凱德』的「自己的回合中，敵方使用法術時，給予其主戰者2點傷害。」能力，給予使用『天使的聖箭』的玩家的主戰者2點傷害嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:ba725b65274632f335bc5badc15066376c246511563c9fb476f446f0e76b8aaf
+    field: answer
+    source_hash: sha256:beef6ae7bc7dd391fa1ddc463c92ef219875a673415dcca4ad61f36d39f5c9bb
+    lang: zh-Hant
+    text: 是的。會破壞敵方戰場上與自己戰場上的全部其他從者。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:ba725b65274632f335bc5badc15066376c246511563c9fb476f446f0e76b8aaf
+    field: question
+    source_hash: sha256:1c1c207761fb2a978e834ad990f1c730d5918996b89c05e414b57417874b1f44
+    lang: zh-Hant
+    text: 這個從者的{起動}能力，也會破壞自己戰場上的其他從者嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:bc20bf31348a6f89edf6c962802ad445c46505b635eed2de4413578b049af086
+    field: answer
+    source_hash: sha256:5cc7cd6b1bc3a9cd391734c5000c3dde5167b783fdd5e8ec5378309bcdb960a2
+    lang: zh-Hant
+    text: 【雙重驅動】或【攻擊時】能力觸發並結算的時點在先。在【攻擊時】能力等從者攻擊時觸發的全部能力結算後，才會進入非回合玩家的Quick時點。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:bc20bf31348a6f89edf6c962802ad445c46505b635eed2de4413578b049af086
+    field: question
+    source_hash: sha256:3dd49e7289a1b120310cd87655677d2af5d64b548624af3d883ae5f2d3d3471c
+    lang: zh-Hant
+    text: 【雙重驅動】或【攻擊時】能力觸發並結算的時點，與Quick時點，哪個在先？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:bc5b14dbb1ab43f511c61b89523bcf87f7fb34e4623fc25b84ce2bb11add4577
+    field: answer
+    source_hash: sha256:d0e756507ecc13156fbd9c51b9746c134ec7d743b92d93648d330888c2c0c33a
+    lang: zh-Hant
+    text: "是的。給予3點傷害後再給予2點傷害，因此合計給予5點傷害。\n若自己的墓場中的闇影聖騎士・卡片為5張以上、9張以下，則合計4點傷害；若為10張以上、14張以下，則合計5點傷害；若為15張以上、19張以下，則合計給予6點傷害。（之後也依此類推。）"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:bc5b14dbb1ab43f511c61b89523bcf87f7fb34e4623fc25b84ce2bb11add4577
+    field: question
+    source_hash: sha256:2ee9edd9d0b934639f9aa7971d85deddb18a08461e42c3988b8970363da7a968
+    lang: zh-Hant
+    text: 自己的墓場中的闇影聖騎士・卡片為10張時，以這個從者的「【進化時】選擇敵方戰場上的1個從者。給予其3點傷害。自己的墓場中每有5張闇影聖騎士・卡片，再給予1點傷害。」能力，給予敵方戰場上的從者的傷害是5點嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:bc7ba40cc1520586f16cdb71e8a3377f06afd47d6085c48aa4bf87c678c42100
+    field: answer
+    source_hash: sha256:ac9e1703f3d2725cf384b01a22791b14d04f6ef2437d51e1e8f40fb45620f1df
+    lang: zh-Hant
+    text: "是的。是永續能力。只要自己的墓場中有10張以上闇影聖騎士・卡片，『虛空的騎士‧假面舞會』就具有【突進】與【必殺】。\n召喚『虛空的騎士‧假面舞會』到戰場上後，若自己的墓場中的闇影聖騎士・卡片從9張以下變為10張以上，則具有【突進】與【必殺】。\n召喚『虛空的騎士‧假面舞會』到戰場上後，若自己的墓場中的闇影聖騎士・卡片從10張以上變為9張以下，則失去【突進】與【必殺】。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:bc7ba40cc1520586f16cdb71e8a3377f06afd47d6085c48aa4bf87c678c42100
+    field: question
+    source_hash: sha256:8b9b8872d0f925f7a589275fcc4278e522d6ba70c91e62d2b3166f35d39e8f8b
+    lang: zh-Hant
+    text: 『虛空的騎士‧假面舞會』的「只要自己的墓場中的闇影聖騎士・卡片數量為10張以上，這張卡片就具有【突進】【必殺】。」能力，是永續能力嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:bcf43348824a704e0ce3e23a005f7fe2e8a8fd8666c87950a67cdd381bb2546f
+    field: answer
+    source_hash: sha256:b00895414c00fe2b7ae102058bb8e17c4fc8eb4d9919fc35b0bc80fcfbc5e40f
+    lang: zh-Hant
+    text: 不行。若無法選擇敵方戰場上的從者，則無法使用這個從者的{入場曲}能力，也無法抽3張卡片。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:bcf43348824a704e0ce3e23a005f7fe2e8a8fd8666c87950a67cdd381bb2546f
+    field: question
+    source_hash: sha256:90f497d8b29eba66951b37b3744326e386ae4b502033a0b346d015d125941c8d
+    lang: zh-Hant
+    text: 無法選擇敵方戰場上的從者時，可以使用這個從者的{入場曲}能力，抽3張卡片嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:bd919daac5d4c2453b950c757a66c3f2dbc40dccd2e845a84b961921a0ad8685
+    field: answer
+    source_hash: sha256:c50675a5e3187b5d867032e3fe53e59a77092fac024f5bc8377f54f99934aa20
+    lang: zh-Hant
+    text: 不行。會在驅動檢查的全部處理結束後，結算「自己戰場上的從者進行驅動檢查時，～」能力。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:bd919daac5d4c2453b950c757a66c3f2dbc40dccd2e845a84b961921a0ad8685
+    field: question
+    source_hash: sha256:d936f62a5b52393af7ae4ea47e6d2fda8d713f45a871bf1686ecfc31df6a0cbd
+    lang: zh-Hant
+    text: 自己戰場上的從者進行驅動檢查，將具有觸發的卡片放置到觸發區時，可以在執行該觸發的處理前，結算「自己戰場上的從者進行驅動檢查時，～」能力嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:be4484fbeddacbca4891bfbe85e1e066a1b7f94df2e7c8d8cd17bb7b19d4e1f5
+    field: answer
+    source_hash: sha256:54298403967c51268900bcf164a55af9be92a9a0cb1bdca5162177fe6150ca82
+    lang: zh-Hant
+    text: "是的。是永續能力。只要自己的墓場中有10張以上闇影聖騎士・卡片，『死神』就具有【疾馳】。\n召喚『死神』到戰場上後，若自己的墓場中的闇影聖騎士・卡片從9張以下變為10張以上，則具有【疾馳】。\n召喚『死神』到戰場上後，若自己的墓場中的闇影聖騎士・卡片從10張以上變為9張以下，則失去【疾馳】。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:be4484fbeddacbca4891bfbe85e1e066a1b7f94df2e7c8d8cd17bb7b19d4e1f5
+    field: question
+    source_hash: sha256:1a73add3d946c85ba45bc435c737753f3396e355dc54f9f749f17fb964c8afef
+    lang: zh-Hant
+    text: 『死神』的「只要自己的墓場中的闇影聖騎士・卡片數量為10張以上，這張卡片就具有【疾馳】。」能力，是永續能力嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:c1ff5c5f70ede2365313b58580e8bc9b8cf0860ddec6ce5683ee8cda38488308
+    field: answer
+    source_hash: sha256:9cadf3f016cf63144b9c3a0f9576557595ea5ee7afc9ec61127c8b9373a17bc7
+    lang: zh-Hant
+    text: "是的。只有第3次時有效。\n若包括攻擊的從者在內，本回合自己戰場上的水藍軍隊・從者的攻擊是第2次，或第4次以後，則無效。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:c1ff5c5f70ede2365313b58580e8bc9b8cf0860ddec6ce5683ee8cda38488308
+    field: question
+    source_hash: sha256:8ebbbcd958ddf6b9ae7b0ada55a383d8ece58255ecb822e9a27937cde3cc548b
+    lang: zh-Hant
+    text: 「自己戰場上的水藍軍隊・從者攻擊時，選擇敵方戰場上的1個從者。若這是本回合自己戰場上的水藍軍隊・從者的第3次攻擊，則給予其2點傷害。」能力，只有在包括攻擊的從者在內，本回合自己戰場上的水藍軍隊・從者的攻擊是第3次時才有效嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:c9e07b29e33c2e00592dafd8759f1a6076395cbf658bf6600b3bb399d1d967e1
+    field: answer
+    source_hash: sha256:819e13956a5e71afef118dd27ce0fe2c35220b6ed53f6223aeed0b00edf9d06a
+    lang: zh-Hant
+    text: 不行。若抉擇【2】卻無法選擇敵方戰場上的從者，則無法使用這張法術，也無法支付消費，因此無法使自己牌堆頂的3張卡片消失。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:c9e07b29e33c2e00592dafd8759f1a6076395cbf658bf6600b3bb399d1d967e1
+    field: question
+    source_hash: sha256:5b139ea7764484fb58d6056139d09d48b9cf552e3cec15eb18cb61950ce9360c
+    lang: zh-Hant
+    text: 無法選擇敵方戰場上的從者時，可以抉擇這張法術的【2】並支付消費，使自己牌堆頂的3張卡片消失嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:ca467caeb94f3144771ade2e566cbb131cf3b5d3da96c24ca816fb6540457ade
+    field: answer
+    source_hash: sha256:0f964524f67541e162b9cc369259b83c0af0996b5b7e2c17c4a1e6bc9904d004
+    lang: zh-Hant
+    text: 不行。無法抉擇同1項選項2次以上。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:ca467caeb94f3144771ade2e566cbb131cf3b5d3da96c24ca816fb6540457ade
+    field: question
+    source_hash: sha256:3f49351884a5aa4ef511053c5494b628fa3bb5fb52610536991877a8ba74ed45
+    lang: zh-Hant
+    text: 抉擇2項以上選項時，可以抉擇同1項選項2次以上嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:cdcef147e3001a38d1ddd89e6e306f7ee0b76918fabcb719fce69120e7e7df17
+    field: answer
+    source_hash: sha256:06f1587fc02ae5077764d4db72fa5850d813ad3a2ad7bb0a59b8648b26748d2b
+    lang: zh-Hant
+    text: "是的。『颶風女士』會具有【疾馳】。\n以『銀荊棘的馭龍使 露綺耶』的{入場曲}能力，同時召喚『颶風女士』與『硝化雜耍師』到戰場上時，各自的{入場曲}能力會觸發並進入待機狀態。\n由於處於待機狀態的自動能力可以以任意順序結算，因此先從『硝化雜耍師』開始結算，藉由「查看自己牌堆頂的5張卡片。可以使其中至多2張卡片消失。將其餘卡片以任意順序放置到牌堆底。」能力，使2張卡片消失，讓自己的消失區變為5張卡片。之後結算『颶風女士』的{入場曲}能力時，由於自己的消失區中有5張卡片，因此滿足「若自己的消失區中的卡片數量為5張以上，則」的條件，具有【疾馳】。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:cdcef147e3001a38d1ddd89e6e306f7ee0b76918fabcb719fce69120e7e7df17
+    field: question
+    source_hash: sha256:dfb124fff0f1e5566f155378f046e32e8d254454b8d21f01ace3aee8a7d0550d
+    lang: zh-Hant
+    text: 自己的消失區中有5張卡片的情況下，使用『銀荊棘的馭龍使 露綺耶』，並以{入場曲}能力召喚1個『颶風女士』與1個『硝化雜耍師』到戰場上。此時，先結算『硝化雜耍師』的{入場曲}能力，再結算『颶風女士』的{入場曲}能力，這個『颶風女士』會具有【疾馳】嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:ceb6b5f5cefa7908e58e29f961e81ffaa7a02917cf9c2b5c5b97d6d5c957cfb0
+    field: answer
+    source_hash: sha256:8da9f9eab0ae1a5bc601742fdaaa39c35bf7983627473e6aec08ba3c19aa20fe
+    lang: zh-Hant
+    text: 不會。由於攻擊力0以下的從者對主戰者的攻擊不會給予傷害，因此不會適用『真理的騎士 戈登』的【2】能力。另外，由於未受到傷害，因此『真理的騎士 戈登』的【2】能力會繼續保留。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:ceb6b5f5cefa7908e58e29f961e81ffaa7a02917cf9c2b5c5b97d6d5c957cfb0
+    field: question
+    source_hash: sha256:01f9d5b94bafd7f5a6f0f9b14b175b417f6c36c41c5e2b77773178f3bfc9621e
+    lang: zh-Hant
+    text: 『真理的騎士 戈登』的抉擇中的【2】能力，會適用於『叮噹天使』等攻擊力0以下的從者對主戰者的攻擊嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:cefba3871776cc7cd2a34a4bcbd42aeeb7a1c52ed7a65bc01f745ceb87700e85
+    field: answer
+    source_hash: sha256:4a3955a2bcd7adfaf57d7cb63fbc701896da6e777c284af7d370dda3391ca70e
+    lang: zh-Hant
+    text: "是的。可以召喚到戰場上。\n以『銀荊棘的馭龍使 露綺耶』的{入場曲}能力，同時召喚『黃金‧馴獸師』與『硝化雜耍師』到戰場上時，各自的{入場曲}能力會觸發並進入待機狀態。\n由於處於待機狀態的自動能力可以以任意順序結算，因此先從『硝化雜耍師』開始結算，使原始消費2以下的蒼月・從者消失後，在結算『黃金‧馴獸師』的{入場曲}能力的時點，該從者已位於消失區，因此可以用{入場曲}能力將其召喚到戰場上。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:cefba3871776cc7cd2a34a4bcbd42aeeb7a1c52ed7a65bc01f745ceb87700e85
+    field: question
+    source_hash: sha256:d853364d3420ccde6b5d690a399b65ec114a21f2169774d82b80b651d98a8adf
+    lang: zh-Hant
+    text: 以『銀荊棘的馭龍使 露綺耶』的{入場曲}能力，召喚1個『黃金‧馴獸師』與1個『硝化雜耍師』到戰場上。先結算『硝化雜耍師』的{入場曲}能力，使原始消費2以下的蒼月・從者消失時，可以用『黃金‧馴獸師』的{入場曲}能力將該從者召喚到戰場上嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:ddd8ec85eaa5e277035085660c8ff5cb65cfdaf0d587b854104e714bcdb8024f
+    field: answer
+    source_hash: sha256:3dbd23dcef2d8e2b839a4fac4515130f6d91324c33d1a9918b0c785685ce1318
+    lang: zh-Hant
+    text: 不行。若抉擇【2】卻無法選擇敵方戰場上的從者，則無法使用這張法術，也無法支付消費，因此無法查看自己牌堆頂的2張卡片，將那些卡片放置到牌堆頂或牌堆底。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:ddd8ec85eaa5e277035085660c8ff5cb65cfdaf0d587b854104e714bcdb8024f
+    field: question
+    source_hash: sha256:3d7409de7b1ee09b285df9e7d05ed00ecca6cb01a685afbdf47cc806aabc9a75
+    lang: zh-Hant
+    text: 無法選擇敵方戰場上的從者時，可以抉擇這張法術的【2】並支付消費，查看自己牌堆頂的2張卡片，將那些卡片放置到牌堆頂或牌堆底嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e05970826608e63dca693fc424a50af8049620be07d23139c9a5a0fcbb3586eb
+    field: answer
+    source_hash: sha256:c9d030e671977ff3fb8ebbce82547ecb8c13c65ee15d5721476b503e468d889a
+    lang: zh-Hant
+    text: 這個從者的能力觸發並結算的時點在先。在【攻擊時】能力等從者攻擊時觸發的全部能力結算後，才會進入非回合玩家的Quick時點。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e05970826608e63dca693fc424a50af8049620be07d23139c9a5a0fcbb3586eb
+    field: question
+    source_hash: sha256:922e151691722c400512ad617425abf110b2958523a462337ffe7670b32cb547
+    lang: zh-Hant
+    text: 自己戰場上的水藍軍隊・從者攻擊時，這個從者的能力觸發並結算的時點，與Quick時點，哪個在先？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:ea3e30cd0a52d9a1ff76f3de0d51af7eeafe4811f39e725943e1b4e58d0635a7
+    field: answer
+    source_hash: sha256:4ae1239ec34282fea68e233b94aa42b0189b41ed8dc1f021e98fcbcedd827bd6
+    lang: zh-Hant
+    text: "不會。不會計入1回合中1次的次數。\n進化前的『哥布林』所具有的{進化}能力（可以進化的起動能力、「圓圈E」圖示），在1回合中只能使用1次。藉由其他能力進化等情況，沒有此限制。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:ea3e30cd0a52d9a1ff76f3de0d51af7eeafe4811f39e725943e1b4e58d0635a7
+    field: question
+    source_hash: sha256:a2f6d1dee89f2181a1904f5bf07634b0f4f05a06b082527daf4259c79166f8a2
+    lang: zh-Hant
+    text: 這個從者藉由【攻擊時】能力進化時，該次進化會計入進化前的『哥布林』所具有的{進化}能力（可以進化的起動能力、「圓圈E」圖示）的使用次數上限，即1回合中1次嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:eb690b7ab549c96371d7d9c47cda4f388f12f77a79315be9a2626454cdc0f06a
+    field: answer
+    source_hash: sha256:5c200ab808df9d8f51d1d3efc7f53378c7f22c9e0be9e9345297e33cb38f492d
+    lang: zh-Hant
+    text: 不行。若無法選擇敵方戰場上的從者，則無法使用這個從者的「因自己的驅動檢查而觸發時，～」能力，也無法使自己的主戰者的生命值+2。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:eb690b7ab549c96371d7d9c47cda4f388f12f77a79315be9a2626454cdc0f06a
+    field: question
+    source_hash: sha256:5211a7d0690d83e2870eb96e293e2025b1a932d97802ea6257f748f1a1c31154
+    lang: zh-Hant
+    text: 無法選擇敵方戰場上的從者時，可以使用這個從者的「因自己的驅動檢查而觸發時，～」能力，使自己的主戰者的生命值+2嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:f68344132be03d21430fb4e78edc142067b823195fac1a7135622210cc004cc0
+    field: answer
+    source_hash: sha256:06572edf34f635d8f82eb30efd971e8e1b8452a92f6d17568e4015e676868fb0
+    lang: zh-Hant
+    text: 是的。即使是因這個從者的{入場曲}能力，使自己牌堆頂的1張卡片消失，讓自己的消失區變為5張卡片，也可以抽1張卡片。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:f68344132be03d21430fb4e78edc142067b823195fac1a7135622210cc004cc0
+    field: question
+    source_hash: sha256:2fb3c796d8764c1f4ffb7f933db9445563dfb97b2367becc57e6d7e161966fc3
+    lang: zh-Hant
+    text: 自己的消失區中有4張卡片的情況下，使用這個從者的{入場曲}能力時，可以抽1張卡片嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:f7b7e30310c1e1a61d0dcadd6b6ec9e7bdaf341a999cbb10027d3d45a3a36643
+    field: answer
+    source_hash: sha256:fa34c6e63daa2f6005dae9951bad3ff6b4a074c375d41c7d44245521d10a3854
+    lang: zh-Hant
+    text: 【單重驅動】觸發並結算的時點在先。在【攻擊時】能力等從者攻擊時觸發的全部能力結算後，才會進入非回合玩家的Quick時點。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:f7b7e30310c1e1a61d0dcadd6b6ec9e7bdaf341a999cbb10027d3d45a3a36643
+    field: question
+    source_hash: sha256:c06bfeb3c37e08411923bea6089fb6a259accaa858fd835bacbd4308271a9164
+    lang: zh-Hant
+    text: 【單重驅動】觸發並結算的時點，與Quick時點，哪個在先？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:f933a3c78f30d28f158a446dfcbda2fa77a3bc15e83f4a39224de624c3a5f10e
+    field: answer
+    source_hash: sha256:84696572ecbfee576a77b5d617e446e20c5b0b07b109d82281049db5bf13c83e
+    lang: zh-Hant
+    text: 是的。可以以任意順序結算。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:f933a3c78f30d28f158a446dfcbda2fa77a3bc15e83f4a39224de624c3a5f10e
+    field: question
+    source_hash: sha256:5a9cb6fd060873c98d87690ad5cdd524a8a290a7835197c937c09e05885e5c02
+    lang: zh-Hant
+    text: 【雙重驅動】與【攻擊時】能力，可以以任意順序結算嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:fa106d5fad6fecd31c8959598dfe306f8caf7b504b4052ad77971493bae2669e
+    field: answer
+    source_hash: sha256:984bcb3c0f1704213e1316ae4aea989c8b51d0d0c1bdabe7bc1f53fffa21a61d
+    lang: zh-Hant
+    text: 不行。由於必須在支付消費前選擇目標，因此無法選擇。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:fa106d5fad6fecd31c8959598dfe306f8caf7b504b4052ad77971493bae2669e
+    field: question
+    source_hash: sha256:01a0844f896502f01bcfa407939f58fa908a93f10cb7221398fd4c450b0bc3bb
+    lang: zh-Hant
+    text: 以這個從者的{入場曲}能力選擇墓場中的1張闇影聖騎士・從者時，可以選擇作為{入場曲}能力的消費而捨棄的卡片嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:fb070cd29df3f495ae1b212686cbbadf3a608d4d143ea72196c7a99cd234f679
+    field: answer
+    source_hash: sha256:7b0234522e0091afb5143a43af9b1442df1bf53dfaf60dcbfcdf9bd6b8cf5e59
+    lang: zh-Hant
+    text: "是的。是永續能力。只要自己的墓場中有『半月女神‧月讀』與『彎月女神 月讀』各1張以上，『滿月女神‧月讀』就具有【疾馳】。\n召喚『滿月女神‧月讀』到戰場上後，若將『半月女神‧月讀』與『彎月女神 月讀』放置到自己的墓場，則具有【疾馳】。\n召喚『滿月女神‧月讀』到戰場上後，若自己的墓場中的『半月女神‧月讀』或『彎月女神 月讀』其中一種移動到其他區域，則失去【疾馳】。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:fb070cd29df3f495ae1b212686cbbadf3a608d4d143ea72196c7a99cd234f679
+    field: question
+    source_hash: sha256:ae0fc1d3b0c9b6a2309fe080915d8082472f8001aea8825b061da4140db2cd28
+    lang: zh-Hant
+    text: 『滿月女神‧月讀』的「只要自己的墓場中有『半月女神‧月讀』與『彎月女神 月讀』，這張卡片就具有【疾馳】。」能力，是永續能力嗎？
+    origin: machine
+    low_confidence: true

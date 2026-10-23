@@ -1,0 +1,59 @@
+format: 1
+kind: qa_translation_shard
+entries:
+  - qa_id: qa:v1:92dd68b1598e14f5717659316212ef54965aff45a820651f9b80cc96aff04d7d
+    field: answer
+    source_hash: sha256:93fdac7e93306eee1f13a12bbcd1b964936369a9700fbbf35fc9c076b215d47e
+    lang: zh-Hant
+    text: 是的。可以給予傷害。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:92dd68b1598e14f5717659316212ef54965aff45a820651f9b80cc96aff04d7d
+    field: question
+    source_hash: sha256:c29d16119acb2203a962b43ce630e28b2da6504f4cfe7186eeae2d1a5d0cd1d2
+    lang: zh-Hant
+    text: 敵方戰場上有具有【光紋】的從者時，可以用這個從者的能力，給予敵方具有【光紋】的從者傷害嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:982e620411cba386c0facc6fe1dccac67ffc6bc4d4627d3d246a5607acae3126
+    field: answer
+    source_hash: sha256:7ca9de8eeb02458d7622e947ad3962868bbc6bc566df66b9e9725b3e8b5bd3c6
+    lang: zh-Hant
+    text: 是的。會繼續保留。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:982e620411cba386c0facc6fe1dccac67ffc6bc4d4627d3d246a5607acae3126
+    field: question
+    source_hash: sha256:52427082d03085ca11f32b99d5e2a1301e0d8c70b57dd44b5673e8c5cb5f7ecb
+    lang: zh-Hant
+    text: 這個從者的【攻擊時】使其{攻擊力}+1時，這個{攻擊力}+1在攻擊結束後也會繼續保留嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:bf338b1b6c226c44c7a5f9e440e321d9de74f6a3301510a1a2e6e1b098809e84
+    field: answer
+    source_hash: sha256:7ca9de8eeb02458d7622e947ad3962868bbc6bc566df66b9e9725b3e8b5bd3c6
+    lang: zh-Hant
+    text: 是的。會繼續保留。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:bf338b1b6c226c44c7a5f9e440e321d9de74f6a3301510a1a2e6e1b098809e84
+    field: question
+    source_hash: sha256:574428355e50f9882ffcfe7ffb1c09e7f95a343f352e9633c313c2090fe4b5e7
+    lang: zh-Hant
+    text: 這個從者的能力使其{攻擊力}+1/{生命值}+1時，這個{攻擊力}+1/{生命值}+1在攻擊結束後也會繼續保留嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:f226e787fc455904bdfbffe65006f498465fcd469d362f20e498fda635383cbd
+    field: answer
+    source_hash: sha256:2c344751082115128fb00c364d2542a85e5d7cf414500ee4116e0821f02f2e45
+    lang: zh-Hant
+    text: 不行。無法放置。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:f226e787fc455904bdfbffe65006f498465fcd469d362f20e498fda635383cbd
+    field: question
+    source_hash: sha256:47497e50966c81aa66d3369ca494aca9ad95bf3b258345684a383c310454c044
+    lang: zh-Hant
+    text: 自己的EX區已達上限時，可以用這個從者的{入場曲}能力，將『飛龍』放置到EX區嗎？
+    origin: machine
+    low_confidence: true

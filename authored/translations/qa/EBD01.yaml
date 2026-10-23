@@ -1,0 +1,59 @@
+format: 1
+kind: qa_translation_shard
+entries:
+  - qa_id: qa:v1:30a8c09ba45c87802fd083817ebb18293e08db49443f1938265418d90cd00075
+    field: answer
+    source_hash: sha256:4f341ec3e2a6ec25e5d40b7f9e4a293af9dfbad9912f81fb02fd8745f52860ea
+    lang: zh-Hant
+    text: 是的。因各個能力而{攻擊力}+1/{生命值}+1，合計為{攻擊力}+2/{生命值}+2。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:30a8c09ba45c87802fd083817ebb18293e08db49443f1938265418d90cd00075
+    field: question
+    source_hash: sha256:a1fb98c736caefb589c46b42f9c09b4a720f107e5411d0e6aca7faf64f5c0261
+    lang: zh-Hant
+    text: 自己戰場上有2張這張卡片，妖精・Token進入自己戰場時，其會{攻擊力}+2/{生命值}+2嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:9541bb8b8cd94e0194f2b1e3e582450e41f79c2501a8a0ce68f3da0c2e19fa8c
+    field: answer
+    source_hash: sha256:e9c35aa95afb142b0dce29812a0d47166cfce66b7823cf7267d522293dab6f83
+    lang: zh-Hant
+    text: 不會。只會使自己戰場上的妖精・Token{攻擊力}+1/{生命值}+1。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:9541bb8b8cd94e0194f2b1e3e582450e41f79c2501a8a0ce68f3da0c2e19fa8c
+    field: question
+    source_hash: sha256:bd8aba2f904a836d30262b4d31375b57350a1b1301439e47bba645e942c95cd0
+    lang: zh-Hant
+    text: 『提泰妮婭的妖精鄉』的「{入場曲}自己的全部妖精・Token{攻擊力}+1/{生命值}+1。」能力，也會使自己EX區的妖精・Token{攻擊力}+1/{生命值}+1嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:dfaea1488f774c36e7771bdaac579db4287a79b5e22252e5a8c11545b7c47a38
+    field: answer
+    source_hash: sha256:9b1dd16ccb588890bb09adc75b9c9221d720e10b0803b4c1a259d1e80e177c28
+    lang: zh-Hant
+    text: 是的。可以攻擊。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:dfaea1488f774c36e7771bdaac579db4287a79b5e22252e5a8c11545b7c47a38
+    field: question
+    source_hash: sha256:1ede5501497976cfb6f4d929bfb9c328af3541a2a59a35d0af001387752f56e3
+    lang: zh-Hant
+    text: 具有【指定攻擊】的從者，可以攻擊敵方的主戰者或橫置狀態的敵方從者嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e0f57d9436f81591fa1947f819a70366741f1e96608a7700be52979b392a6e14
+    field: answer
+    source_hash: sha256:f9791052d2cd1a3a5f7185b28dc619b53fc191a0a528c0451b2cd56142fc68a9
+    lang: zh-Hant
+    text: 是的。即使是敵方的回合中也會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e0f57d9436f81591fa1947f819a70366741f1e96608a7700be52979b392a6e14
+    field: question
+    source_hash: sha256:29485071a15c7fea264c7419e06042d01837521c4fcbaff5ce4300a9199f5715
+    lang: zh-Hant
+    text: 因某種能力使自己戰場上的從者在敵方的回合中進化時，「自己戰場上的從者進化時，～」能力會觸發嗎？
+    origin: machine
+    low_confidence: true

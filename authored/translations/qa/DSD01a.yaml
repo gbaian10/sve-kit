@@ -1,0 +1,171 @@
+format: 1
+kind: qa_translation_shard
+entries:
+  - qa_id: qa:v1:21bb5dfcf58352d1a9b1ea5f6b606f15ba257438c1b7e6e56b10ee2a6ce0678a
+    field: answer
+    source_hash: sha256:813728f96065aef1277a9b4641f76ec7fc3de27205e05bfe48f452c108d3907e
+    lang: zh-Hant
+    text: 不行。效果結算中，使用的這張『安的宏大魔法』自身尚未被放置到墓場，因此無法計入墓場中的學院・卡片張數。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:21bb5dfcf58352d1a9b1ea5f6b606f15ba257438c1b7e6e56b10ee2a6ce0678a
+    field: question
+    source_hash: sha256:aa268064ec4a3612264f92b4c512977889c603539b862ea886c91380747bb9dc
+    lang: zh-Hant
+    text: 使用『安的宏大魔法』並抉擇【2】時，可以將使用的這張『安的宏大魔法』自身計入自己墓場中的學院・卡片張數嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:2262ba29844e98c535490d4a1d3014f20ff036014e07a03b4a9320b07cb258ba
+    field: answer
+    source_hash: sha256:a143a3fd30f47065b655eb0079481cb1567fa1ed4e6eef446c0bab0e0baec9f8
+    lang: zh-Hant
+    text: 不行。支付使用『馬納歷亞的知識』的消費時，該『馬納歷亞的知識』位於結算區，因此必須公開手牌中的2張其他學院・卡片。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:2262ba29844e98c535490d4a1d3014f20ff036014e07a03b4a9320b07cb258ba
+    field: question
+    source_hash: sha256:6a74c32b08dca61a548797025298b7bd2de2778a0be5e6f0d7763c3560606b85
+    lang: zh-Hant
+    text: 作為追加消費公開的2張學院・卡片中，可以包含要使用的這張『馬納歷亞的知識』自身嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:43b8bb950e791808ca2fb421cf42b2990e99cd9fb186f8bf2d706e1209cdf08d
+    field: answer
+    source_hash: sha256:986bfaca15f580b096aca6e2f32b71aa16e4c657c80bfb00c7ec5d572bcfd309
+    lang: zh-Hant
+    text: 不行。無法選擇適當目標時，無法抉擇【2】，必須抉擇【1】。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:43b8bb950e791808ca2fb421cf42b2990e99cd9fb186f8bf2d706e1209cdf08d
+    field: question
+    source_hash: sha256:3d0179ac1fb332e2e4a1f66a91f159e74a486039b4a0bae101e824c8cbc21228
+    lang: zh-Hant
+    text: 無法選擇自己墓場中的學院・法術時，可以以這個從者的{入場曲}能力抉擇【2】，選擇讓什麼都不發生嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:5107e016b9c29a42b511de0ced182a969d0d7cf957917972479f210f4536f86c
+    field: answer
+    source_hash: sha256:e1e0dc2af549a75a8c4eeec4dfa241a17de94a04dab28ddffc8807d3dc972e22
+    lang: zh-Hant
+    text: 是的。從手牌以外使用時也會使消費-1。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:5107e016b9c29a42b511de0ced182a969d0d7cf957917972479f210f4536f86c
+    field: question
+    source_hash: sha256:b18c6b0d7b1f77350ed4720f2d18a74362b8cc5582e86e11403ab88ba950f01a
+    lang: zh-Hant
+    text: 「本回合，自己下一次使用『古蕾婭的炎熱之術』時，消費-1。」能力，在從手牌以外使用『古蕾婭的炎熱之術』時，也會使消費-1嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:55850604ea67bbf569b571602e13da67d0600b02b9f60432e6e6587b0e9007ea
+    field: answer
+    source_hash: sha256:58b3e2ae7dff725746dd5d272b42f28d4d872ca057fcea9bb96a90a89d4e7867
+    lang: zh-Hant
+    text: 是的。自己的學院・法術給予的傷害會+2。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:55850604ea67bbf569b571602e13da67d0600b02b9f60432e6e6587b0e9007ea
+    field: question
+    source_hash: sha256:7d3740e4af6e196622603c9256ec54bf9290d9695f201ddfbbb781c00c6b5e2f
+    lang: zh-Hant
+    text: 自己戰場上有2個『馬納歷亞龍人公主‧古蕾婭（EVOLVE）』時，自己的學院・法術給予的傷害會+2嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6420046daf2527b1b3ccca4da3dae3950de93aeada37f9b9f3f9fb7c9cbf3011
+    field: answer
+    source_hash: sha256:f427508e5f1cf02fce4a831512c551f9d16d2c3e77f5a616158ba9842ad7734d
+    lang: zh-Hant
+    text: 是的。即使選擇未找到自己牌堆中的『安的宏大魔法』，「本回合，自己下一次使用『安的宏大魔法』時，消費-5。」也有效。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6420046daf2527b1b3ccca4da3dae3950de93aeada37f9b9f3f9fb7c9cbf3011
+    field: question
+    source_hash: sha256:e84596a4bfbe38b8ef05d57e745195ce0eb9c12292dcf443cda0c54339e8c2e1
+    lang: zh-Hant
+    text: 以{入場曲}能力抉擇【1】，選擇未找到自己牌堆中的『安的宏大魔法』時，「本回合，自己下一次使用『安的宏大魔法』時，消費-5。」有效嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:84d9d81ffbaca9555d94f7a2970a607f1026e5a72fedb48fba53bd9a2fcb4c64
+    field: answer
+    source_hash: sha256:6993b6744bc1ddd4d8a357c68f4e1e6ca61e91ba6734f592a0a82b1e7943e39c
+    lang: zh-Hant
+    text: 不行。由於無法公開手牌中的2張學院・卡片作為追加消費，因此無法使用自己墓場中的『馬納歷亞的知識』，什麼都不會發生。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:84d9d81ffbaca9555d94f7a2970a607f1026e5a72fedb48fba53bd9a2fcb4c64
+    field: question
+    source_hash: sha256:6411a8b106c247ba4b55292cf02e05fd303f96b9353bc3f49904721126c91e2d
+    lang: zh-Hant
+    text: 自己手牌中的學院・卡片為1張以下時，以自己墓場中的『馬納歷亞的知識』為目標，使用『梅林（EVOLVE）』的【進化時】能力，可以使用該『馬納歷亞的知識』嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:afd612ae2020e13cd99b78925c7675ffc2b508d2395c7f85bf185aea2ce4825c
+    field: answer
+    source_hash: sha256:b4e9b31427f630c289e2e2dbcca53abf947ff575e6f1ef628a4c571df42f310f
+    lang: zh-Hant
+    text: 是的。從手牌以外使用時也會使消費-5。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:afd612ae2020e13cd99b78925c7675ffc2b508d2395c7f85bf185aea2ce4825c
+    field: question
+    source_hash: sha256:fc0d97cc059a88a8316fdce1e3e8026c3b07dd0079d490786405228019ed2ba3
+    lang: zh-Hant
+    text: 「本回合，自己下一次使用『安的宏大魔法』時，消費-5。」能力，在從手牌以外使用『安的宏大魔法』時，也會使消費-5嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:ba2411d5d0b5ab6070ae8cb8674856e08c4afff8b5eb489ef0c1b6b84e0ae89d
+    field: answer
+    source_hash: sha256:70c2254914416ffec495dff01799a6f9964cb98d7dddfb17d1ca96c65a1a3219
+    lang: zh-Hant
+    text: 是的。會各自+1，給予敵方戰場上的從者4點傷害，給予其主戰者3點傷害。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:ba2411d5d0b5ab6070ae8cb8674856e08c4afff8b5eb489ef0c1b6b84e0ae89d
+    field: question
+    source_hash: sha256:1a78ebdfdb6f66aeccee83874adcf03b6e079f4a6870a546617a59b892a410e4
+    lang: zh-Hant
+    text: 自己的墓場中有10張以上的學院・卡片，且自己戰場上有『馬納歷亞龍人公主‧古蕾婭（EVOLVE）』時，『馬納歷亞魔彈』給予敵方戰場上的從者與其主戰者的傷害會各自+1嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:bac2220d67d2fc328be3f66ed76255bcda8d42495527c41cdf6bc99e8d67ce8c
+    field: answer
+    source_hash: sha256:fcca0cb7ea887fcb5ae5fc8c9e913916aacce6be9885a687d54472581fca014d
+    lang: zh-Hant
+    text: 不行。效果結算中，使用的這張『馬納歷亞魔彈』自身尚未被放置到墓場，因此無法計入墓場中的學院・卡片張數。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:bac2220d67d2fc328be3f66ed76255bcda8d42495527c41cdf6bc99e8d67ce8c
+    field: question
+    source_hash: sha256:c030f9ae4f8f6d14808733840bfece28e32b2a3a0cff6846221eeaa88a0cc5a1
+    lang: zh-Hant
+    text: 使用『馬納歷亞魔彈』時，可以將使用的這張『馬納歷亞魔彈』自身計入自己墓場中的學院・卡片張數嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:c8cf771a9efa007a0dd4c2d287d5c50263777a9b49dc98791b82d505a7791239
+    field: answer
+    source_hash: sha256:b37390e4ad39262a0320e02886c3d0534d1a1707b9888800ea06bf3556b96823
+    lang: zh-Hant
+    text: 是的。即使選擇未找到自己牌堆中的『古蕾婭的炎熱之術』，「本回合，自己下一次使用『古蕾婭的炎熱之術』時，消費-1。」也有效。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:c8cf771a9efa007a0dd4c2d287d5c50263777a9b49dc98791b82d505a7791239
+    field: question
+    source_hash: sha256:322a8303062f15923a45997579fc94d9895e89a7b0bb2863015fdb549dee27e3
+    lang: zh-Hant
+    text: 使用『馬納歷亞龍人公主‧古蕾婭（EVOLVE）』的【進化時】能力，選擇未找到自己牌堆中的『古蕾婭的炎熱之術』時，「本回合，自己下一次使用『古蕾婭的炎熱之術』時，消費-1。」有效嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:fe0572008e4a2ae1c488bec19510ddc64afcd64c5d0a4b2fa3ac562144322698
+    field: answer
+    source_hash: sha256:0f964524f67541e162b9cc369259b83c0af0996b5b7e2c17c4a1e6bc9904d004
+    lang: zh-Hant
+    text: 不行。無法抉擇同1個選項2次以上。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:fe0572008e4a2ae1c488bec19510ddc64afcd64c5d0a4b2fa3ac562144322698
+    field: question
+    source_hash: sha256:3f49351884a5aa4ef511053c5494b628fa3bb5fb52610536991877a8ba74ed45
+    lang: zh-Hant
+    text: 抉擇2項以上的選項時，可以抉擇同1個選項2次以上嗎？
+    origin: machine
+    low_confidence: true

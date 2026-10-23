@@ -1,0 +1,941 @@
+format: 1
+kind: qa_translation_shard
+entries:
+  - qa_id: qa:v1:00d14be32fca0214c86cb61a0d490f8c0fabb83aad370b1b2e4d1c7f86f89b97
+    field: answer
+    source_hash: sha256:2618f2dd3b97cb7497b27ef80b049ecc4da9b7692cc9881a48d34b2ec7a8aca4
+    lang: zh-Hant
+    text: 不需要。由於是因『〔Lollipop Honey〕大槻唯』的【進化時】能力的效果，而非『大槻唯』的{進化}能力使其進化，因此不支付所選『大槻唯』的{進化}能力的消費，就會進化。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:00d14be32fca0214c86cb61a0d490f8c0fabb83aad370b1b2e4d1c7f86f89b97
+    field: question
+    source_hash: sha256:53c3254297e505b1b3964f3d43ad0c5d807164519307b7312a9f16151d8141e6
+    lang: zh-Hant
+    text: 藉由『〔Lollipop Honey〕大槻唯』的【進化時】能力，使自己戰場上的『大槻唯』進化時，必須支付『大槻唯』所具有的{進化}能力的消費嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:0b2e4d8b2c7a07f56503a673adf527b72e264e7c78afb58c4559f90d4a825105
+    field: answer
+    source_hash: sha256:dca82bfd58129309748f410aefcaecc67334fb35710ce56aa1964d0f815529d1
+    lang: zh-Hant
+    text: 是的。可以使其進化。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:0b2e4d8b2c7a07f56503a673adf527b72e264e7c78afb58c4559f90d4a825105
+    field: question
+    source_hash: sha256:f7b9933eded1a00ea3974b6ea192b5fa7f67939f66b657d2452cfde22b9aa433
+    lang: zh-Hant
+    text: 藉由『〔Lollipop Honey〕大槻唯』的【進化時】能力，使另一個『〔Lollipop Honey〕大槻唯』進化時，可以藉由該『〔Lollipop Honey〕大槻唯』的【進化時】能力，將另一個「日文卡名含有『大槻唯』的從者」召喚到戰場上並使其進化嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:0e942fbae53f375166de258766771466cccb3052433ded9d520942b82facc6d9
+    field: answer
+    source_hash: sha256:f9dabef907c0cc9d36ecbc35da4d5c363e7345d7917ad44e183408d86a707eca
+    lang: zh-Hant
+    text: 是的。除了【超進化時】能力，【進化時】能力也會觸發。另外，觸發的2個能力可以以任意順序結算。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:0e942fbae53f375166de258766771466cccb3052433ded9d520942b82facc6d9
+    field: question
+    source_hash: sha256:899e2c7fc15a54c95c7a417bd8f763db7a34bab8d6fee0a0032065cf2ff1e837
+    lang: zh-Hant
+    text: 具有【進化時】能力的從者超進化時，該從者的【進化時】能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:108e61108552a13a28156ba2cdb4bc82f04647d815311483c31673a8aef551c6
+    field: answer
+    source_hash: sha256:b77ddc4c86244d4987b0ec86b4c1ccc4b7ef6e6d5f9d3661161601fe4da590fe
+    lang: zh-Hant
+    text: "不會。『崇高的熾天使‧勒碧絲』不會視為從者，會視為護符。\n這個從者的【超進化時】能力的效果，會在『崇高的熾天使‧勒碧絲』的「只要這張卡片的祈禱指示物數量為4個以上，這張卡片就是從者。」這個能力的持續效果之後適用。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:108e61108552a13a28156ba2cdb4bc82f04647d815311483c31673a8aef551c6
+    field: question
+    source_hash: sha256:d23de5ad54f9a49d4a9830dd6b8e4417236f96fddb10af175645d8a159824cad
+    lang: zh-Hant
+    text: 對敵方戰場上具有4個以上祈禱指示物的『崇高的熾天使‧勒碧絲』使用這個從者的【超進化時】能力時，該『崇高的熾天使‧勒碧絲』會視為從者嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:11c27839a9101c3330809119e10c75eaa1608720ad75f911a51658ebb6b5e45b
+    field: answer
+    source_hash: sha256:0db9adfb82d236c54ceaabe0c6bdd1e90f89591e8e6bc28d4b32e4fa2cab4d5d
+    lang: zh-Hant
+    text: 是的。可以使用。此時，主牌堆為0張的玩家會在遊戲中敗北。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:11c27839a9101c3330809119e10c75eaa1608720ad75f911a51658ebb6b5e45b
+    field: question
+    source_hash: sha256:99d141f5af4690e1044c1681e6a91febf16791174fe8d8a184fa0662c0a35cd7
+    lang: zh-Hant
+    text: 任一玩家的牌堆為0張時，可以使用這個從者的{入場曲}能力嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:1557f5d11dc0aec96aa80a7838a15adec04c0b31e1768bf5b073987ddb42955c
+    field: answer
+    source_hash: sha256:491b468054c1fd1bb88d2994b259efacf5c1d8fa56b86fdcf74e162f4124a905
+    lang: zh-Hant
+    text: "是的。會作為其中任一類型的1張卡片來參照。（即使用如『new generations』或『笑容的謝幕』這類卡片，作為消費而從手牌捨棄的卡片合計張數仍為3張。）\n例如，無法只使用1張如『new generations』或『笑容的謝幕』這類卡片，支付「捨棄手牌中的1張Cute・卡片、1張Cool・卡片與1張Passion・卡片」這項消費。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:1557f5d11dc0aec96aa80a7838a15adec04c0b31e1768bf5b073987ddb42955c
+    field: question
+    source_hash: sha256:c14a2c7319ff9f5c05f5f5df757f6d5c7e6ff68f147783b3f7115daa28f94b84
+    lang: zh-Hant
+    text: 支付使用{起動}能力時的「捨棄手牌中的1張Cute・卡片、1張Cool・卡片與1張Passion・卡片」這項消費時，如『new generations』或『笑容的謝幕』這類同時具有「Cute・Cool・Passion」類型的卡片，會作為其中任一類型的1張卡片來參照嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:166b344cfabdcdf149aad5574bb2db5bd90d0e76819d9a78c1e3e18f7722dc4b
+    field: answer
+    source_hash: sha256:7ba5e5586d9787c0338d2247f6f61f9769bba15c1642346a4cbee658ff7ce6a0
+    lang: zh-Hant
+    text: "不會。不會失去能力。另外，{起動}能力、{進化}能力與{謝幕曲}能力等全部能力，仍然有效。\n例：『水之妖精』因這個從者的能力而變為護符時，該『水之妖精』會視為具有「{進化}{消費2}：這張卡片進化。」「{謝幕曲}將1張『妖精』放置到EX區。」「自己的主要階段到來時，給予自己的主戰者2點傷害」「{起動}{消費1}捨棄2張手牌：將這張卡片放置到墓場」的護符。另外，這個變為護符的『水之妖精』因某種原因從戰場被放置到墓場時，{謝幕曲}能力會觸發。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:166b344cfabdcdf149aad5574bb2db5bd90d0e76819d9a78c1e3e18f7722dc4b
+    field: question
+    source_hash: sha256:8de03d3b559351971b2aff58b99af85bcff240399689f98498c971fa3103d091
+    lang: zh-Hant
+    text: 因這個從者的【超進化時】能力而變為護符的從者，會失去能力嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:178f852111fcb62e5f659b3b95bd42fa23ac99ed4589b7f5634eaa6cac759dd5
+    field: answer
+    source_hash: sha256:04f2240952053ebe589e3674b3c648ccb677bd1d79f933a19891bcb575cb04a0
+    lang: zh-Hant
+    text: 不是。只要『〔強運的才女〕鷹富士茄子』在戰場上，即使在敵方的回合中也有效。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:178f852111fcb62e5f659b3b95bd42fa23ac99ed4589b7f5634eaa6cac759dd5
+    field: question
+    source_hash: sha256:2bb27eca81fe03e05517130fe613a2e2d22978dccfe01aad7c575a1dd5352018
+    lang: zh-Hant
+    text: 『〔強運的才女〕鷹富士茄子』的「只要這張卡片在戰場上，自己就可以重擲骰子1次。」這個能力，只有在自己的回合中有效嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:1c0f5abeda9e6265dda4a7a458e72998a8967960d0b24e5455053f9e3a1d3e60
+    field: answer
+    source_hash: sha256:27a521068399ab068bc8dbafb7becc147bd5edb81d9121e9fab4a576b00f92c5
+    lang: zh-Hant
+    text: 是的。會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:1c0f5abeda9e6265dda4a7a458e72998a8967960d0b24e5455053f9e3a1d3e60
+    field: question
+    source_hash: sha256:b9d98b245596abe7a0f5e79a2427aa9e542c57957194d90449adf37dc6890789
+    lang: zh-Hant
+    text: 敵方的回合中，自己使用Passion・法術時，這個從者的「自己使用Passion・法術時，～」這個能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:1c4a13985cff9d74ad15d4d3cdbe7cc0b1e39dd8796b5ab5a4d8810ac82b4866
+    field: answer
+    source_hash: sha256:27a521068399ab068bc8dbafb7becc147bd5edb81d9121e9fab4a576b00f92c5
+    lang: zh-Hant
+    text: 是的。會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:1c4a13985cff9d74ad15d4d3cdbe7cc0b1e39dd8796b5ab5a4d8810ac82b4866
+    field: question
+    source_hash: sha256:8cd08bad1e8c49898e001584c8f58594516ecd1b04eb3ac32ddc4b581ab8b2c2
+    lang: zh-Hant
+    text: 自己的戰場上有『〔我龍天征〕向井拓海』，使用『奈芙蒂斯』的{入場曲}能力，將『神崎蘭子』召喚到戰場上並破壞。藉由『神崎蘭子』的{入場曲}能力，給予敵方戰場上的1個從者2點傷害時，『〔我龍天征〕向井拓海』的「自己的回合中，自己戰場上的灰姑娘・卡片給予敵方戰場上的1個以上的從者傷害時，～」這個能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:22454b14ad0f06921b44a4db30d6482317525e8910d7d29193840a2511fb901c
+    field: answer
+    source_hash: sha256:5f798565176400783fb4dca15e0f33e7af5a27fe300b23b5c51a9ad29fa5fc92
+    lang: zh-Hant
+    text: 是的。即使在敵方的回合中，由於是從手牌以外的區域進入戰場，因此會進化。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:22454b14ad0f06921b44a4db30d6482317525e8910d7d29193840a2511fb901c
+    field: question
+    source_hash: sha256:deefe3d76ae66584e868b37fb7ef44dcc6877caa23cdf47f5f050a5a5c4c4227
+    lang: zh-Hant
+    text: 敵方的回合中，『〔Happiness Tune〕緒方智繪里』因某種能力而從手牌以外的區域進入戰場時，也會因{入場曲}能力而進化嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:26aa698abb2eab66a256e4545dc8f8704080691be11b80414b8aefe53d4687f4
+    field: answer
+    source_hash: sha256:4767a1c95550fab5b9fb250810fbad3cdb9995a95435b2400fc0dd7168bf449e
+    lang: zh-Hant
+    text: 不會。即使變為護符的從者進化，『迷你靈魔』的「自己的從者進化時」的能力也不會觸發。『迷你靈魔』的觸發條件是「從者」進化。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:26aa698abb2eab66a256e4545dc8f8704080691be11b80414b8aefe53d4687f4
+    field: question
+    source_hash: sha256:68f25dbe6e70ec38c81e7b1fc142192592ddd6630255327460a8df47666aecb7
+    lang: zh-Hant
+    text: 因這個從者的【超進化時】能力而變為護符的從者進化時，『迷你靈魔』的「自己的從者進化時」的能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:29f2d5bcb4c8ffd4f7212e7ddd0d727da3be6b027894d208ffba40f43a6872f4
+    field: answer
+    source_hash: sha256:27a521068399ab068bc8dbafb7becc147bd5edb81d9121e9fab4a576b00f92c5
+    lang: zh-Hant
+    text: 是的。會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:29f2d5bcb4c8ffd4f7212e7ddd0d727da3be6b027894d208ffba40f43a6872f4
+    field: question
+    source_hash: sha256:5b2c4a1c7dd4067015f4d0ed21a06f0fbac0b87e7f15b52bd49588c545d3b193
+    lang: zh-Hant
+    text: 因這個從者的【超進化時】能力而變為護符的從者被放置到墓場時，{謝幕曲}能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:2afa54adbc9da49990ba680c1da97115e31a154cf5d9b1d5ae780f30aa4b24e6
+    field: answer
+    source_hash: sha256:e4f8e1d07314da446a4fd06957e6c12e723125f4774095c319b2b0977d2929f4
+    lang: zh-Hant
+    text: 不行。藉由『〔強運的才女〕鷹富士茄子』的「只要這張卡片在戰場上，自己就可以重擲骰子1次。」這個能力重擲骰子時，無法參照重擲前的點數。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:2afa54adbc9da49990ba680c1da97115e31a154cf5d9b1d5ae780f30aa4b24e6
+    field: question
+    source_hash: sha256:4e52f01a12f83c81be6045ff276c8b560e4793927bbd16085b5c735936d899ba
+    lang: zh-Hant
+    text: 藉由『〔強運的才女〕鷹富士茄子』的「只要這張卡片在戰場上，自己就可以重擲骰子1次。」這個能力重擲骰子時，可以參照重擲前的點數嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:31e4cdef5b759fd884402c8561835580fb72edfb0a414f3ba1ff695958570ef6
+    field: answer
+    source_hash: sha256:7ab129b0ca4a1bb9e1552eda92a843802ff5b5e23e49f4dfce556503a05582fa
+    lang: zh-Hant
+    text: 是的。此時，可以在處理「擲骰子。」後，立即分別重擲骰子1次。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:31e4cdef5b759fd884402c8561835580fb72edfb0a414f3ba1ff695958570ef6
+    field: question
+    source_hash: sha256:d370fcfa1b068d34b114427c66a3178121dd67e9338f82743adb23be1b282115
+    lang: zh-Hant
+    text: 自己的戰場上有1個『〔強運的才女〕鷹富士茄子』與2個『先來扎一針吧？』，自己的主要階段到來時，『先來扎一針吧？』的「自己的主要階段到來時，擲骰子。～」這個能力合計會觸發2次，此時可以藉由『〔強運的才女〕鷹富士茄子』的「只要這張卡片在戰場上，自己就可以重擲骰子1次。」這個能力，分別重擲骰子1次嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:3ae2fd40404ebcd21c610ba5feb5366df563432e9f9a2cf543c4f87802e29683
+    field: answer
+    source_hash: sha256:c88dcabe3c59f64a03ae09798e823ef31f06e15dafb4fbafe8b63e11ae383e62
+    lang: zh-Hant
+    text: 不會。由於攻擊力為0以下的從者攻擊時不會給予傷害，因此不會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:3ae2fd40404ebcd21c610ba5feb5366df563432e9f9a2cf543c4f87802e29683
+    field: question
+    source_hash: sha256:ed0b1b8c86801a3f10896f82ce8213e4d45ed1c8ea16d440b885b49933d92430
+    lang: zh-Hant
+    text: 自己戰場上因某種能力而使攻擊力變為0以下的灰姑娘・從者，攻擊敵方戰場上的從者時，「自己的回合中，自己戰場上的灰姑娘・卡片給予敵方戰場上的1個以上的從者傷害時，～」這個能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:40d6d70dabefae89d7e0c5e5533a9ce6ce770ccf8cfbaebfc6e6245b48d1e722
+    field: answer
+    source_hash: sha256:13237608ab6619007daff75d5c3c2df4ab4db9bdb09d5bbdf704a6f6de1a9f36
+    lang: zh-Hant
+    text: 不需要。該『璀鑽之主』是護符，無法藉由選擇從者的能力選擇，因此無須選擇。但如『處決』這類可以選擇護符的能力，則必須選擇『璀鑽之主』。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:40d6d70dabefae89d7e0c5e5533a9ce6ce770ccf8cfbaebfc6e6245b48d1e722
+    field: question
+    source_hash: sha256:dd9e7553a9445d3f20b75aaf05ed0952e88a29670a6d68ae93e898a46968f743
+    lang: zh-Hant
+    text: 『璀鑽之主』因這個從者的【超進化時】能力而變為護符時，選擇從者的能力是否必須選擇該『璀鑽之主』？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:41f47fbb0b587dc75b6cc4e780d4d889384ad41c1f10997c6a815a985049aac4
+    field: answer
+    source_hash: sha256:51d7c2cf2b00b2d398b8be807912557e54a5a043850b379754aa922017e5d7f7
+    lang: zh-Hant
+    text: 可以以任意順序結算。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:41f47fbb0b587dc75b6cc4e780d4d889384ad41c1f10997c6a815a985049aac4
+    field: question
+    source_hash: sha256:0998a2d51ddb12e99cc626e3aed9611fe508f0fc48be32ee27d3aac3a69437f7
+    lang: zh-Hant
+    text: 具有【進化時】能力與【超進化時】能力的從者超進化時，觸發的2個能力要先結算哪一個？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:42d4883587124e021a5ef427fd90be13e59336e04a02acede5fcd73513a2d520
+    field: answer
+    source_hash: sha256:c0663cae52e38c211f54862013f2b3a580e1440a5b0b7b68fc6f327fd34c505f
+    lang: zh-Hant
+    text: 不行。雖然保留攻擊力與生命值的數值本身，但會視為不具有攻擊力與生命值，不受參照這些數值的效果影響。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:42d4883587124e021a5ef427fd90be13e59336e04a02acede5fcd73513a2d520
+    field: question
+    source_hash: sha256:bf23808e2255c63d68eaec4d9405d99660d9aa99eba70c9cf302a93ddc291725
+    lang: zh-Hant
+    text: 因這個從者的【超進化時】能力而變為護符的從者，可以參照其攻擊力與生命值嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:481e4d0ae111544ccdfc5272287c3adee1a86e695af11ae5e9c37d12c63bfe18
+    field: answer
+    source_hash: sha256:4ae1239ec34282fea68e233b94aa42b0189b41ed8dc1f021e98fcbcedd827bd6
+    lang: zh-Hant
+    text: "不會。不會計入1回合1次的次數。\n進化前的『哥布林』所具有的{進化}能力（可以進化的起動能力・「圓圈E」圖示），在1回合中只能使用1次。因其他能力而進化等情況，則沒有這項限制。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:481e4d0ae111544ccdfc5272287c3adee1a86e695af11ae5e9c37d12c63bfe18
+    field: question
+    source_hash: sha256:1dd40dbab7fb6e26530c8a4a27d79b291541f98d0bcf9faa0fdcc397d2c91039
+    lang: zh-Hant
+    text: 這個從者因{入場曲}能力而進化時，該次進化會計入進化前的『哥布林』所具有的{進化}能力（可以進化的起動能力・「圓圈E」圖示）的使用次數上限，即1回合中1次嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:50280fbcad91ae8e0c44c3e91bd93ca83486bdc990c1c5b1b1990365be7ad616
+    field: answer
+    source_hash: sha256:f484418b2ac0d2762c35ef9e5f8995f935969caba2a621d3940ab96161b7e9b7
+    lang: zh-Hant
+    text: "是的。是永續能力。只要墓場中有5張以上的Passion・卡片，『〔一千零一夜舞姬〕娜塔莉亞』就具有【指定攻擊】與【必殺】。\n將『〔一千零一夜舞姬〕娜塔莉亞』召喚到戰場上後，若自己墓場中的Passion・卡片從4張以下變為5張以上，就會具有【指定攻擊】與【必殺】。\n將『〔一千零一夜舞姬〕娜塔莉亞』召喚到戰場上後，若自己墓場中的Passion・卡片從5張以上變為4張以下，就會失去【指定攻擊】與【必殺】。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:50280fbcad91ae8e0c44c3e91bd93ca83486bdc990c1c5b1b1990365be7ad616
+    field: question
+    source_hash: sha256:ed7c056a15749046864d665e85801b5f7e3c092db92f49d731734a52c5ccabd6
+    lang: zh-Hant
+    text: 『〔一千零一夜舞姬〕娜塔莉亞』的「只要自己的墓場中有5張以上的Passion・卡片，這張卡片就具有【指定攻擊】【必殺】。」這個能力，是永續能力嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:5125bae67937b60513302e7b2e522eba62d053d16adbb45b673754566b979b4c
+    field: answer
+    source_hash: sha256:3aa00310e829d7d9737df3dbfe626917500c8c4cf853db60c0aab8fc99f729d3
+    lang: zh-Hant
+    text: "是的。可以選擇。\n此時，不公開卡片，使其返回牌堆頂。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:5125bae67937b60513302e7b2e522eba62d053d16adbb45b673754566b979b4c
+    field: question
+    source_hash: sha256:e15b67b1f928cab4762bd2db7a84217da3ff6fa98015f6ada0663b93894888fa
+    lang: zh-Hant
+    text: 藉由這個從者的{起動}能力從自己的牌堆查看的卡片中，有灰姑娘・卡片時，可以選擇不將其加入手牌嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:5a98ec86dbf9d67e623d1f6df6edbcc3c1d4319054698bf5426ddab8f780b13d
+    field: answer
+    source_hash: sha256:8a9a500dc020301bbfa483ddf932112da25b2a7a62200f415449ddabc33d9483
+    lang: zh-Hant
+    text: 不行。因『〔Happiness Tune〕緒方智繪里』的能力使消費變為0後，會因『沉默絕傑‧魯魯納伊』的能力使消費+1，因此消費變為1。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:5a98ec86dbf9d67e623d1f6df6edbcc3c1d4319054698bf5426ddab8f780b13d
+    field: question
+    source_hash: sha256:cb195256bef0d3e743c44250472aca7325b5288a363efdf470772e87cb1da1a3
+    lang: zh-Hant
+    text: 敵方戰場上有『沉默絕傑‧魯魯納伊』，使用『〔Happiness Tune〕緒方智繪里』的{起動}能力時，使用『自稱‧街上的紅人』可以以消費0使用嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:60af5bd57edf29e62954fff8b60f032e159c235b097b66ed97f6ee213a80b1dd
+    field: answer
+    source_hash: sha256:c9dd92d3975ca34145ccf40827db4d906e790970fdf18271614c4d001fb75def
+    lang: zh-Hant
+    text: 是的。雖然有『Cute耳環』與『Cool墜飾』等各種卡片，但這些在對戰中全部都是具有『魔法道具』這個相同卡片名稱的卡片，且為Token。（可以搭配使用『Cute耳環』與『Cool墜飾』等Token卡片。）
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:60af5bd57edf29e62954fff8b60f032e159c235b097b66ed97f6ee213a80b1dd
+    field: question
+    source_hash: sha256:9e98038ae1b2d768860a75f7c56cec46c9ee1b1f240b6e0096953ae61eb44cb1
+    lang: zh-Hant
+    text: 這張卡片的卡片名稱是『魔法道具』嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6258c993b60c3348e58e0478a2e33b76ef6bf5f33f512f71c2a9636ad0b025bd
+    field: answer
+    source_hash: sha256:b373415d9dae4962b4c787038dce3b081c82debac953c479efa81ec2d4fb4c7e
+    lang: zh-Hant
+    text: 是的。可以進化。另外，即使進化，該從者也會視為護符。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6258c993b60c3348e58e0478a2e33b76ef6bf5f33f512f71c2a9636ad0b025bd
+    field: question
+    source_hash: sha256:dbebff05db4773352cba31c7d2984548161f5511f04c1314617f764ac77b17e6
+    lang: zh-Hant
+    text: 因這個從者的【超進化時】能力而變為護符的從者，可以進化嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:68cf70d8754ab527e671a9d3c0355c3c6b343201d671e73befc9eeee03e1c32a
+    field: answer
+    source_hash: sha256:a89741d2f93daa6c6384ba319f5fa2fd6fe752c85b9b69bbd722564586cc7972
+    lang: zh-Hant
+    text: 是的。此時，可以將其作為1張Cute・卡片、Cool・卡片或Passion・卡片加入手牌。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:68cf70d8754ab527e671a9d3c0355c3c6b343201d671e73befc9eeee03e1c32a
+    field: question
+    source_hash: sha256:b7ef4e7d94402b3ebb5e661610d3ab699e623f209eed948877f639e89d6727ce
+    lang: zh-Hant
+    text: 藉由這個從者的{入場曲}能力從自己的牌堆查看的卡片中，有如『笑容的謝幕』這類同時具有「Cute・Cool・Passion」類型的卡片時，可以將其作為1張Cute・卡片、Cool・卡片或Passion・卡片加入手牌嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6940b8565dc24e625c33a3878eb654efc8abf43baad3f9560109b0e6fb49bf9a
+    field: answer
+    source_hash: sha256:509f60b8d413bc0820e51262381bb9d5aa55fb382e02dbd13036f7503103a11b
+    lang: zh-Hant
+    text: "是的。會具有2個。\n此時，使用時消費合計會-10。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6940b8565dc24e625c33a3878eb654efc8abf43baad3f9560109b0e6fb49bf9a
+    field: question
+    source_hash: sha256:253bc25150b496ff4e045f38c7b391f2f1b0c6117bc265d0ac36cb9386235aa8
+    lang: zh-Hant
+    text: 使用這個從者的{起動}能力2次，選擇自己EX區中的『笑容的謝幕』時，該『笑容的謝幕』會具有2個「使用這張卡片時，消費-5。」嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6ae169eafb47307955da32a3de5c372ca7d09f2da11b156533065848fc99ee00
+    field: answer
+    source_hash: sha256:82d7b07f99d40e6e00b6cce49fce41ed0b12a4607717b5b30466d751579cba43
+    lang: zh-Hant
+    text: "是的。是永續能力。只要墓場中有10張以上的灰姑娘・卡片，『〔individuals〕早坂美玲』就具有【疾馳】。\n將『〔individuals〕早坂美玲』召喚到戰場上後，若自己墓場中的灰姑娘・卡片從9張以下變為10張以上，就會具有【疾馳】。\n將『〔individuals〕早坂美玲』召喚到戰場上後，若自己墓場中的灰姑娘・卡片從10張以上變為9張以下，就會失去【疾馳】。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6ae169eafb47307955da32a3de5c372ca7d09f2da11b156533065848fc99ee00
+    field: question
+    source_hash: sha256:bb56244899d90fd2f81df81709acf45d2b6df9346336693e5e2a244061637a8a
+    lang: zh-Hant
+    text: 『〔individuals〕早坂美玲』的「只要自己的墓場中有10張以上的灰姑娘・卡片，這張卡片就具有【疾馳】。」這個能力，是永續能力嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6d2a48892a4070a021204a8df6228edd2155ad283dc7c065ad425375f673c97a
+    field: answer
+    source_hash: sha256:437116880fce07f04680d49b8a60c5e79e5652cd78d42c4cb2e667f0d42ccf69
+    lang: zh-Hant
+    text: 即使自己戰場上的灰姑娘・卡片給予敵方戰場上的2個從者傷害，「自己的回合中，自己戰場上的灰姑娘・卡片給予敵方戰場上的1個以上的從者傷害時，～」這個能力也只會觸發1次。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6d2a48892a4070a021204a8df6228edd2155ad283dc7c065ad425375f673c97a
+    field: question
+    source_hash: sha256:01da3fa08e47d0b903905b378cf4b4c7a0708db3bdbd029df0318ab7506ba621
+    lang: zh-Hant
+    text: 自己的回合中，自己戰場上的灰姑娘・卡片給予敵方戰場上的2個從者傷害時，「自己的回合中，自己戰場上的灰姑娘・卡片給予敵方戰場上的1個以上的從者傷害時，～」這個能力會觸發幾次？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6fe8583e3e9293eb039447bdedd22a451d070c394ebc4e673ea5647cd4fae254
+    field: answer
+    source_hash: sha256:02065e91c21015257d51a69fb59b33d227e2c2c254d69de2ebc6de75b05a76fb
+    lang: zh-Hant
+    text: 是的。【進化時】能力或【參賽時】能力會觸發並使用。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6fe8583e3e9293eb039447bdedd22a451d070c394ebc4e673ea5647cd4fae254
+    field: question
+    source_hash: sha256:83405915020b9d28005a953424ec52cbad7417315a0af93e377012fbc24eda32
+    lang: zh-Hant
+    text: 因這個從者的【超進化時】能力而變為護符的從者進化或參賽時，【進化時】能力或【參賽時】能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:70d9e60ecbf9ee752d2ce5405bce2d00b06d824aba986f76a3f2780efc3b9ef0
+    field: answer
+    source_hash: sha256:cf2a5ab5f8a9578da82a64b8e0a9e98ab69c7a13a2489aaf0c6fece3e9cf6de3
+    lang: zh-Hant
+    text: 是的。此時，可以重擲骰子2次。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:70d9e60ecbf9ee752d2ce5405bce2d00b06d824aba986f76a3f2780efc3b9ef0
+    field: question
+    source_hash: sha256:45048749ce1a809162f46a23e0be45ddd531f10fb343c5acdd3083dde4bbf6d5
+    lang: zh-Hant
+    text: 自己的戰場上有2個『〔強運的才女〕鷹富士茄子』，使用『〔強運的才女〕鷹富士茄子』的【進化時】能力時，可以藉由「只要這張卡片在戰場上，自己就可以重擲骰子1次。」這個能力，重擲骰子2次嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:70da4eca639bafedc4be6c1b30a7ea70ff4ba62ed2ef4039b7a547b70f6ae4a2
+    field: answer
+    source_hash: sha256:dd1d5d48a933cd60bc93b76a9b68869bf876cffc7f679c368cec6d7784dcf620
+    lang: zh-Hant
+    text: 不會。會生效1次。將2張以上的Cool・卡片或Passion・卡片放置到墓場時，也同樣如此。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:70da4eca639bafedc4be6c1b30a7ea70ff4ba62ed2ef4039b7a547b70f6ae4a2
+    field: question
+    source_hash: sha256:d2fadd39f2b2128c16c684453c8bfc9a789f0b918223333881eddae99881304b
+    lang: zh-Hant
+    text: 藉由『〔茁壯×2朱里蘋果〕辻野朱里』的{入場曲}能力，將2張Cute・卡片放置到墓場時，「若將Cute・卡片放置到墓場，則自己的主戰者{生命值}+2。」會生效2次嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:7bf6c86639ed20491a6496a4ee35cb3af646af1f2e8d8d411fd5a1d4a9c705d3
+    field: answer
+    source_hash: sha256:94d6108645914e9e161248deca9f0e54863e644fa0cad63007257e342cc3df0d
+    lang: zh-Hant
+    text: "自己的使用牌堆構築為「偶像大師 灰姑娘女孩」作品構築時，會以在EX區放置5張『魔法道具』的狀態開始對戰。\n這項規則並非可選，自己的使用牌堆構築為「偶像大師 灰姑娘女孩」作品構築時，必定適用。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:7bf6c86639ed20491a6496a4ee35cb3af646af1f2e8d8d411fd5a1d4a9c705d3
+    field: question
+    source_hash: sha256:4fee7b9dd429e0c71f8d948a0f4bd3a5912a6422ff2da3954dd0fbc4e6daf407
+    lang: zh-Hant
+    text: 請說明（※對戰開始時，若自己的牌堆構築為「偶像大師 灰姑娘女孩」作品構築，則將5張『魔法道具』放置到EX區）這項規則。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:7f2afdb1065d94ff7446c9fecddb8a73d250b973513e19175844aed27f8b3e53
+    field: answer
+    source_hash: sha256:3aa00310e829d7d9737df3dbfe626917500c8c4cf853db60c0aab8fc99f729d3
+    lang: zh-Hant
+    text: "是的。可以選擇。\n此時，不公開卡片，使其返回牌堆頂。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:7f2afdb1065d94ff7446c9fecddb8a73d250b973513e19175844aed27f8b3e53
+    field: question
+    source_hash: sha256:d232b6d02b27403b941fbf6465508dfa50f0064320a364972bdf8c9923c05668
+    lang: zh-Hant
+    text: 藉由這個從者的{入場曲}能力從自己的牌堆查看的卡片中有Cool・卡片時，可以選擇不將其加入手牌嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:8899541e31c0f6c3704504d65fb532377b127e37946b0433f6fe089fe592188d
+    field: answer
+    source_hash: sha256:77d739c133d2ed8c1ab4ff15b8517e162cd9d5ce769f207c6c8951b2cbada1e3
+    lang: zh-Hant
+    text: 不行。無法選擇敵方戰場上的從者時，無法使用這個從者的{入場曲}能力，因此即使自己的墓場有5張以上的卡片，也無法使自己的主戰者{生命值}+3。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:8899541e31c0f6c3704504d65fb532377b127e37946b0433f6fe089fe592188d
+    field: question
+    source_hash: sha256:ad7a7bb31f95458ddaf3cf83a376cdca7cc9a221a5b61342440ea6def8c8602a
+    lang: zh-Hant
+    text: 無法選擇敵方戰場上的從者時，可以使用這個從者的{入場曲}能力，使自己的主戰者{生命值}+3嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:88cb06df68e73fc7c2322fd30011abe79ee660d4330b6394a247d578a5b3fbc1
+    field: answer
+    source_hash: sha256:f9791052d2cd1a3a5f7185b28dc619b53fc191a0a528c0451b2cd56142fc68a9
+    lang: zh-Hant
+    text: 是的。即使在敵方的回合中，也會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:88cb06df68e73fc7c2322fd30011abe79ee660d4330b6394a247d578a5b3fbc1
+    field: question
+    source_hash: sha256:05549ec7f9e2b40245267001525e9586b00e48c33ca172c0d81f7f25862bd79e
+    lang: zh-Hant
+    text: 敵方的回合中，因某種能力使「日文卡名含有『早坂美鈴』或『星輝子』的從者」進入自己的戰場時，「「日文卡名含有『早坂美鈴』或『星輝子』的從者」進入自己的戰場時，～」這個能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:894c318006bff75764bc1f2ecddd745e184ac9545a2c20f4a6205779e4fb2ca3
+    field: answer
+    source_hash: sha256:e3c295d803b0d7c076820a4d5fca93782444a954c1991cc96010b53f49dac58d
+    lang: zh-Hant
+    text: "是的。是永續能力。只要戰場上有3個以上的Cool・從者，『〔Charming Sweet〕二宮飛鳥』就具有【疾馳】。\n將『〔Charming Sweet〕二宮飛鳥』召喚到戰場上後，若自己戰場上的Cool・從者從2個以下變為3個以上，就會具有【疾馳】。\n將『〔Charming Sweet〕二宮飛鳥』召喚到戰場上後，若自己戰場上的Cool・從者從3個以上變為2個以下，就會失去【疾馳】。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:894c318006bff75764bc1f2ecddd745e184ac9545a2c20f4a6205779e4fb2ca3
+    field: question
+    source_hash: sha256:325d5efc43e69cb2bc84721f24daf3e22da8cb42bba1d84aa0a855d8f613a3ba
+    lang: zh-Hant
+    text: 『〔Charming Sweet〕二宮飛鳥』的「只要自己的戰場上有3個以上的Cool・從者，這張卡片就具有【疾馳】。」這個能力，是永續能力嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:8a870bac8875393bc32d9ce2f71cf1a8808924e82af267cdeb33d64c2a7c5ab9
+    field: answer
+    source_hash: sha256:c084a7ba6830314b584d7a46ba3475d383777037963fd075353e6b4e5412665c
+    lang: zh-Hant
+    text: 不行。無法選擇敵方戰場上的從者時，無法使用這個護符的{入場曲}能力，因此即使自己的戰場上有灰姑娘・從者，也無法使自己的主戰者{生命值}+2。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:8a870bac8875393bc32d9ce2f71cf1a8808924e82af267cdeb33d64c2a7c5ab9
+    field: question
+    source_hash: sha256:4458219ba2bcbbd8b9ad607cfbe2102a41fcd1e16e950894836d70983f90aad9
+    lang: zh-Hant
+    text: 無法選擇敵方戰場上的從者時，可以使用這個護符的{入場曲}能力，使自己的主戰者{生命值}+2嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:90c12e8638350579441622ae931795ebf9de4b3edae9bd485aaa9e07cfe65583
+    field: answer
+    source_hash: sha256:8bdb2b0466f3736d55c25d0b3e6cc675e4b6fe218bfd42d33c53c034e9abe666
+    lang: zh-Hant
+    text: 不需要。由於無法攻擊變為護符的從者，因此無須將其作為攻擊目標。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:90c12e8638350579441622ae931795ebf9de4b3edae9bd485aaa9e07cfe65583
+    field: question
+    source_hash: sha256:1dc6bef20b2e64751c57cd4c1e701e63b96e5c4a820d2c24267771b9bb60fd73
+    lang: zh-Hant
+    text: 因這個從者的【超進化時】能力而變為護符的從者具有【守護】時，敵方是否必須因該【守護】的效果，將該橫置狀態、已變為護符的從者作為攻擊目標？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:9e59140ec97e4f4fa3c2fbd796fe691cdd6c8e57fc1f3072ca5a20f9a1cc6bd2
+    field: answer
+    source_hash: sha256:9483633b0ecbd14f84ba0a501f69ee9a67772f2704a96f06282b06573069d165
+    lang: zh-Hant
+    text: "是的。即使選擇敵方戰場上橫置狀態的從者，其也不會在敵方的下一個開始階段重置。\n選擇敵方戰場上橫置狀態的從者時，「將其橫置。」僅因其已處於橫置狀態而不執行，後續的效果「其在敵方的下一個開始階段不會重置。」仍會適用。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:9e59140ec97e4f4fa3c2fbd796fe691cdd6c8e57fc1f3072ca5a20f9a1cc6bd2
+    field: question
+    source_hash: sha256:b4f4b67cea2e40b6819e43f29e186e6cea2494499f7aaa1863ab38d50a267dbf
+    lang: zh-Hant
+    text: 即使藉由{起動}能力選擇敵方戰場上橫置狀態的從者，其也不會在敵方的下一個開始階段重置嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a5aa1e96bc7afdb3fc3c027ae02556f5f6e53e4758d2fe8ee8bef03858987673
+    field: answer
+    source_hash: sha256:90e5fa7eae3cba0c94d9521674a308bb7d952e82644940f85169d2d75e2f19e0
+    lang: zh-Hant
+    text: 是的。可以使自己的主戰者{生命值}+4，並抽2張卡片。此時，由於自己EX區中的卡片為張數上限的5張，因此不會將任何1張『魔法道具』放置到EX區。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a5aa1e96bc7afdb3fc3c027ae02556f5f6e53e4758d2fe8ee8bef03858987673
+    field: question
+    source_hash: sha256:19f2763ed6e667b9b5810b7e6a5d1961845ee2280735efbeea628ef57144bd85
+    lang: zh-Hant
+    text: 自己的EX區中有5張『魔法道具』時，可以使用這張法術，使自己的主戰者{生命值}+4，並抽2張卡片嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a637c73100aa0ccb218f5d717b6ada8283fe45840b63463f045b285462187727
+    field: answer
+    source_hash: sha256:54d1827ccbba335e7094be26752219d0263b221a7b71fbc4984da3bbcc5bf684
+    lang: zh-Hant
+    text: 是的。可以使用。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a637c73100aa0ccb218f5d717b6ada8283fe45840b63463f045b285462187727
+    field: question
+    source_hash: sha256:4e8bd50d925db9a296a404dd507d22b26127e51e62b08cbd1e4c2a4b9def11d6
+    lang: zh-Hant
+    text: 自己的EX區包含1張『魔法道具』在內已達張數上限時，可以藉由使自己EX區中的1張『魔法道具』消失，使用這個從者的{入場曲}能力嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a83e9b150e1f7116047b06b52acfd4e9fa9dc7295a183f3e363c7b0628410d24
+    field: answer
+    source_hash: sha256:27a521068399ab068bc8dbafb7becc147bd5edb81d9121e9fab4a576b00f92c5
+    lang: zh-Hant
+    text: 是的。會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a83e9b150e1f7116047b06b52acfd4e9fa9dc7295a183f3e363c7b0628410d24
+    field: question
+    source_hash: sha256:fb82c77238696c26dd0015d770dde36fe88e8b2c758ec86940f6a1b53dac3a31
+    lang: zh-Hant
+    text: 自己的回合中，自己戰場上的灰姑娘・從者給予敵方戰場上的從者交戰傷害時，「自己的回合中，自己戰場上的灰姑娘・卡片給予敵方戰場上的1個以上的從者傷害時，～」這個能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:aca929c7d0ced036de78dbbc1c73a020176b02c68615fa5904f5e2c9d5e8031a
+    field: answer
+    source_hash: sha256:6823eddcaeca5d7e8a1c257e9f7b63a90fd0b92a6a964337053aca9547a9394a
+    lang: zh-Hant
+    text: 不行。因『〔演歌轉音‧紅〕村上巴』的能力使消費變為0後，會因『沉默絕傑‧魯魯納伊』的能力使消費+1，因此消費變為1。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:aca929c7d0ced036de78dbbc1c73a020176b02c68615fa5904f5e2c9d5e8031a
+    field: question
+    source_hash: sha256:86d8781175434362e9c5efe1bac0b295923c2528feb310442e2913cf9c12d7cf
+    lang: zh-Hant
+    text: 敵方戰場上有『沉默絕傑‧魯魯納伊』，使用『〔演歌轉音‧紅〕村上巴』的{入場曲}能力時，使用『閃亮裝飾☆遊行』可以以消費0使用嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:aeee83a20f27c25cdf23de0a93065f3593f4a9f65aebd6654a992b9a01511e7f
+    field: answer
+    source_hash: sha256:a519e4ee42e56108e4756c3ca190d29a3fe4d4d5d9b74c03fb6b3b867137ad6f
+    lang: zh-Hant
+    text: "是的。可以作為法術使用。\n可以藉由支付4PP使用，使自己的主戰者的{生命值}+1，並抽1張卡片。法術結算後，會將這張卡片放置到墓場，但由於是Token，因此會在放置到墓場後，立即從墓場移除。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:aeee83a20f27c25cdf23de0a93065f3593f4a9f65aebd6654a992b9a01511e7f
+    field: question
+    source_hash: sha256:8224ad70988d118b3ffd370c728c13e7ce84831e41bd2c74b979b1c6d37ae2a1
+    lang: zh-Hant
+    text: 這張卡片可以從自己的EX區支付4PP，作為法術使用嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:b5a8a76c151d32e131e0ef1a12a296bcf87de60aee1bb7f69648bf6d509c6c8f
+    field: answer
+    source_hash: sha256:916369abd24c4512b1750f6fc400baa7c491bb6ec0a0d7ec381a6b591b1c2104
+    lang: zh-Hant
+    text: 不是。該『不死鬥士‧莫迪凱』不是護符。曾離開戰場的卡片會視為新的卡片，因此先前被賦予到『不死鬥士‧莫迪凱』上的效果，在其被放置到戰場上時會被清除。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:b5a8a76c151d32e131e0ef1a12a296bcf87de60aee1bb7f69648bf6d509c6c8f
+    field: question
+    source_hash: sha256:75fd3f07abf2be8bfdcfbde84a7196dfd146e0c546cfdb06eca3bb0cb6c460c8
+    lang: zh-Hant
+    text: 因這個從者的【超進化時】能力而變為護符的『不死鬥士‧莫迪凱』，被放置到墓場並藉由{謝幕曲}能力進入戰場時，該『不死鬥士‧莫迪凱』仍然是護符嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:b677069a3ecd479dfa244569c8eff7e1ea223ed7a17158b103dab6971ef04777
+    field: answer
+    source_hash: sha256:24ad0b82c7f29e98110c466f9f4665d12e1082a9e69a3a89ffe5f0e475e37174
+    lang: zh-Hant
+    text: 不行。無法選擇敵方戰場上的從者時，無法使用這個從者的【進化時】能力，因此無法將自己牌堆頂的2張卡片放置到墓場。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:b677069a3ecd479dfa244569c8eff7e1ea223ed7a17158b103dab6971ef04777
+    field: question
+    source_hash: sha256:d7244e4f9aebe3c074c58e58c9c5565cfea74f5c1105e8d0546e8990956aa83f
+    lang: zh-Hant
+    text: 無法選擇敵方戰場上的從者時，可以使用這個從者的【進化時】能力，將自己牌堆頂的2張卡片放置到墓場嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:bca8daef11bd7f0edfaa2aff0066e02817eaea7a8cfaa0e8561f04c422a1346e
+    field: answer
+    source_hash: sha256:8f2b8db2690855b84801b73e3a5ee8ce85e1d491bb3f1d9c07bf26fc60e9ff5b
+    lang: zh-Hant
+    text: 是的。可以選擇不進化。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:bca8daef11bd7f0edfaa2aff0066e02817eaea7a8cfaa0e8561f04c422a1346e
+    field: question
+    source_hash: sha256:bda12e98d3c4e786365d319557b0457f72a3446e6fb71179f3f8728273c3ba38
+    lang: zh-Hant
+    text: 藉由『〔Lollipop Honey〕大槻唯』的【進化時】能力將『大槻唯』召喚到戰場上時，即使進化牌堆中有『大槻唯』，也可以選擇不進化嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:bf848bf081556a308e7f372fde0d36d0aca867188169368e9179cc7947a9fa01
+    field: answer
+    source_hash: sha256:5847a5be5c38536f5e053a81b86134466434925f41b42a33bb373c6f61007567
+    lang: zh-Hant
+    text: 不行。由於是護符，因此無法攻擊。另外，也不會被攻擊或受到傷害。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:bf848bf081556a308e7f372fde0d36d0aca867188169368e9179cc7947a9fa01
+    field: question
+    source_hash: sha256:d4eed84e0491eb0486b453d59dcd84dbea9525fe87e5d9b8b01235e43b77aef4
+    lang: zh-Hant
+    text: 因這個從者的【超進化時】能力而變為護符的從者，可以攻擊嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:c318dae91591b0ef1ec64839ec4a0e157fa5eb496208b7814c75f8accafe63d3
+    field: answer
+    source_hash: sha256:250dedac802fc93ba8bd420d3f9272fa249d4c4a37bccb3721827022bd5f5386
+    lang: zh-Hant
+    text: 是的。由於滿足「若將Cute・卡片放置到墓場，」、「若將Cool・卡片放置到墓場，」與「若將Passion・卡片放置到墓場，」這3種條件，因此可以適用全部3種效果。自己的主戰者{生命值}+2，這個『〔茁壯×2朱里蘋果〕辻野朱里』{攻擊力}+2，並具有【指定攻擊】。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:c318dae91591b0ef1ec64839ec4a0e157fa5eb496208b7814c75f8accafe63d3
+    field: question
+    source_hash: sha256:1b913c6d0234734111eb4784ff5021473d317550da0d063f0d80d765d4d8ee28
+    lang: zh-Hant
+    text: 『〔茁壯×2朱里蘋果〕辻野朱里』的{入場曲}能力中，若將如『new generations』或『笑容的謝幕』這類同時具有Cute・Cool・Passion類型的卡片放置到墓場，可以適用全部3種效果嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:c7e3205dc5f10ad0bb672c35166b1e9c002563f6c1a320012a814ae22cc487fd
+    field: answer
+    source_hash: sha256:0f964524f67541e162b9cc369259b83c0af0996b5b7e2c17c4a1e6bc9904d004
+    lang: zh-Hant
+    text: 不行。無法抉擇同1項選項2次以上。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:c7e3205dc5f10ad0bb672c35166b1e9c002563f6c1a320012a814ae22cc487fd
+    field: question
+    source_hash: sha256:3f49351884a5aa4ef511053c5494b628fa3bb5fb52610536991877a8ba74ed45
+    lang: zh-Hant
+    text: 抉擇2項以上的選項時，可以抉擇同1項選項2次以上嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:cb0abaa7a97d78eac23cd31f1a1c148fb0706950c54683b946c941345d55756d
+    field: answer
+    source_hash: sha256:92f9a2f1f2a52a6acfd9bf77020182113bcbe22de67822fbc1bcb4180eecf56c
+    lang: zh-Hant
+    text: "是的。是永續能力。只要戰場上有3個以上的Cool・從者，或有「日文卡名含有『的場梨沙』的從者」，『〔秘密的藍玫瑰〕結城晴』就具有【突進】與【指定攻擊】。\n將『〔秘密的藍玫瑰〕結城晴』召喚到戰場上後，若自己戰場上的Cool・從者從2個以下變為3個以上，或「日文卡名含有『的場梨沙』的從者」進入戰場，就會具有【突進】與【指定攻擊】。\n將『〔秘密的藍玫瑰〕結城晴』召喚到戰場上後，若自己戰場上的Cool・從者從3個以上變為2個以下，或「日文卡名含有『的場梨沙』的從者」離開戰場，就會失去【突進】與【指定攻擊】。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:cb0abaa7a97d78eac23cd31f1a1c148fb0706950c54683b946c941345d55756d
+    field: question
+    source_hash: sha256:680d429c0c48d6db64a11372d2636bdecc6addd80c56ebe323114d507a455fc8
+    lang: zh-Hant
+    text: 『〔秘密的藍玫瑰〕結城晴』的「只要自己的戰場上有3個以上的Cool・從者，或有「日文卡名含有『的場梨沙』的從者」，這張卡片就具有【突進】【指定攻擊】。」這個能力，是永續能力嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:ccde12b8fa7e8bc737290490cb9a8f1e6be5ab44a097a83e58e98ab7731708c7
+    field: answer
+    source_hash: sha256:f49d15683c49e34baebda59f35e4f452481ea8e3c6ecc97b9e28d1cbc359990b
+    lang: zh-Hant
+    text: "是的。是永續能力。只要墓場中有10張以上的Passion・卡片，『〔緋紅的情歌〕木村夏樹』就具有【疾馳】。\n將『〔緋紅的情歌〕木村夏樹』召喚到戰場上後，若自己墓場中的Passion・卡片從9張以下變為10張以上，就會具有【疾馳】。\n將『〔緋紅的情歌〕木村夏樹』召喚到戰場上後，若自己墓場中的Passion・卡片從10張以上變為9張以下，就會失去【疾馳】。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:ccde12b8fa7e8bc737290490cb9a8f1e6be5ab44a097a83e58e98ab7731708c7
+    field: question
+    source_hash: sha256:b149d92d5aef70a4944a230be7ff120b3ec9f4702964477022b4b69415584b55
+    lang: zh-Hant
+    text: 『〔緋紅的情歌〕木村夏樹』的「只要自己的墓場中有10張以上的Passion・卡片，這張卡片就具有【疾馳】。」這個能力，是永續能力嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:ce3832de77139626ef83740c65f53c150bdadacf660725692cbe0db840e7fee6
+    field: answer
+    source_hash: sha256:ba674e9ad062450f46e3b58fbd9bc82a705cdf03b519d82bec5ef18bedd43a32
+    lang: zh-Hant
+    text: 是的。會滿足條件。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:ce3832de77139626ef83740c65f53c150bdadacf660725692cbe0db840e7fee6
+    field: question
+    source_hash: sha256:47390a10b46d178691a964f8606943edded91db8dc668f7142bd660b2d0851dc
+    lang: zh-Hant
+    text: 自己的墓場中有1張如『new generations』或『笑容的謝幕』這類同時具有「Cute・Cool・Passion」類型的卡片時，會滿足【進化時】能力的「若自己的墓場中有Cute・卡片、Cool・卡片與Passion・卡片，」的條件嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:cf87b15382b88aae42899f4f09df32e93d883b1a984d27da1b0cdccaa5eaaf52
+    field: answer
+    source_hash: sha256:47b57a6e003f248c1f62d5bd4c6ee08f25c314f9ee0a0fe64f748d3bf68aaf9c
+    lang: zh-Hant
+    text: 不行。無法選擇敵方戰場上的從者時，無法使用這個從者的【進化時】能力，即使自己墓場中的Passion・卡片有5張以上，也無法將1張『魔法道具』放置到EX區。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:cf87b15382b88aae42899f4f09df32e93d883b1a984d27da1b0cdccaa5eaaf52
+    field: question
+    source_hash: sha256:329f65556bc5fb97eaabcf57a263503e42c24356677124d99687d63368660dcb
+    lang: zh-Hant
+    text: 無法選擇敵方戰場上的從者時，可以使用這個從者的【進化時】能力，將1張『魔法道具』放置到EX區嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:d795b581f9811eefc92e663fb206eca3cb8e0d7c38a5775f7c11d3a43294714e
+    field: answer
+    source_hash: sha256:317837e027d5f21f7764fda1cfc9575f469cefee337254252b045a0a9c3ab09d
+    lang: zh-Hant
+    text: 是的。即使在敵方的回合中，由於自己的戰場上有原始消費5以上的灰姑娘・從者，因此會進化。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:d795b581f9811eefc92e663fb206eca3cb8e0d7c38a5775f7c11d3a43294714e
+    field: question
+    source_hash: sha256:9c9f0e75f06c01acd1615b70099b6676ec420439300bf7a40e5f7f0b8f41b268
+    lang: zh-Hant
+    text: 自己的戰場上有『〔我龍天征〕向井拓海』，敵方的回合中，『〔緋紅的情歌〕木村夏樹』因某種能力而進入戰場時，也會因{入場曲}能力而進化嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:d8c16496a5531c4037d6336b565ac9582fa906b978facad1edb0065b9efea66f
+    field: answer
+    source_hash: sha256:6ad8d212aa461bcde621875b9b34fc514f4bd881127b76541c29729a3b248400
+    lang: zh-Hant
+    text: 不會。變為護符的從者不會受到以從者為對象的效果影響，只會受到以護符為對象的效果影響。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:d8c16496a5531c4037d6336b565ac9582fa906b978facad1edb0065b9efea66f
+    field: question
+    source_hash: sha256:2815a39787033a0341188784af6964ef32a2ce125ac562d2d51177f2e16a8250
+    lang: zh-Hant
+    text: 因這個從者的【超進化時】能力而變為護符的從者，會受到以從者為對象的效果影響嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:dc15774ad7c337a3cdeafda450c22583d57342645d534177028d9809ab448113
+    field: answer
+    source_hash: sha256:ba674e9ad062450f46e3b58fbd9bc82a705cdf03b519d82bec5ef18bedd43a32
+    lang: zh-Hant
+    text: 是的。會滿足條件。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:dc15774ad7c337a3cdeafda450c22583d57342645d534177028d9809ab448113
+    field: question
+    source_hash: sha256:89b7801513f089ac1f5e7d6ff043d4c96f6ea1655b7c02bf234add8430c29a20
+    lang: zh-Hant
+    text: 自己的墓場中有3張如『new generations』或『笑容的謝幕』這類同時具有「Cute・Cool・Passion」類型的卡片時，會滿足{入場曲}能力的「若自己的墓場中的Cute・卡片、Cool・卡片與Passion・卡片各有3張以上，」的條件嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:dc2eefc8eeaa137ce2a3ad113e08fcd18ba7d28cb921f9ff6b97f7f3fddc5537
+    field: answer
+    source_hash: sha256:7d042d38485c8b5cdeca98f000865a4e32057ede810862cdb9407e35e7d7d2cd
+    lang: zh-Hant
+    text: 是的。是『〔夢見璃亞夢的Party Night〕夢見璃亞夢』在手牌中時有效的能力。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:dc2eefc8eeaa137ce2a3ad113e08fcd18ba7d28cb921f9ff6b97f7f3fddc5537
+    field: question
+    source_hash: sha256:05ef0f752f5b17bb763bb3e384eed4697ca9b7879dd53e363e31c5a4a41ab430
+    lang: zh-Hant
+    text: 「{Q}{起動}{消費1}【課程 1】捨棄手牌中的這張卡片：選擇敵方戰場上的1個從者。給予其2點傷害。」這個能力，是『〔夢見璃亞夢的Party Night〕夢見璃亞夢』在手牌中時有效的能力嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:dec752daa5ef23d5231de5ec5a2a18d1191caaba49125983a847cd8b76e61262
+    field: answer
+    source_hash: sha256:3a46457fd504c2d33abbf51d5cac1f7f4d727cbb0c7ba040afaa2dd44c1b3ae4
+    lang: zh-Hant
+    text: 是的。攻擊力有可能因某種效果而變為負數。攻擊力變為負數的從者，其攻擊或交戰傷害本身不會給予傷害。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:dec752daa5ef23d5231de5ec5a2a18d1191caaba49125983a847cd8b76e61262
+    field: question
+    source_hash: sha256:a5b5f1d81dca7f63fa20d8b4fa56a25eb0e962c225c2974a542a727354cc7dc2
+    lang: zh-Hant
+    text: 從者的攻擊力有可能變為負數嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:decbf2906517d57a59873aeef8d86a470964f45c2283c7767dc986710a3b48f6
+    field: answer
+    source_hash: sha256:255f82bb2210de6caa9222879319c6b14524c35f5f97346ceaca29fede788845
+    lang: zh-Hant
+    text: 是的。從EX區、牌堆或墓場等區域進入戰場時，都會滿足條件。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:decbf2906517d57a59873aeef8d86a470964f45c2283c7767dc986710a3b48f6
+    field: question
+    source_hash: sha256:617caf34ec36c8b27c81bc5430746680985b6d60d0d34a4b69fa794d35b51534
+    lang: zh-Hant
+    text: 這個從者從EX區進入戰場時，會滿足{入場曲}能力的「若這張卡片是從手牌以外的區域進入戰場的，」的條件嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e0c8184a3bc92b86a33a4928a9f0872090c25884b88ad087c4b096e3ac35b09e
+    field: answer
+    source_hash: sha256:de055dbbbfed1ce406483887e393befaec0b362ffd5492f569bb3a22e5fee0ab
+    lang: zh-Hant
+    text: 是的。會滿足所參照的條件。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e0c8184a3bc92b86a33a4928a9f0872090c25884b88ad087c4b096e3ac35b09e
+    field: question
+    source_hash: sha256:c49d4f1e128158e0d517125ca7ed0eb4e02fda60b8070cfbe9f1e55af2182857
+    lang: zh-Hant
+    text: 因「捨棄手牌中的2張Cute・卡片」、「可以公開1張Cool・卡片，並加入手牌。」或「若自己的墓場中有5張以上的Passion・卡片，」這類效果，參照具有各類型的卡片時，如『笑容的謝幕』這類同時具有「Cute・Cool・Passion」類型的卡片，會滿足所參照的條件嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e2dadcd9aea85dedbb01a3ef56efa02400be8e4e2fe508524688164a7bc95fe4
+    field: answer
+    source_hash: sha256:293e0a7b4e415e0bee9579ed0c2298c450dec55b1f8bfc1d6303fb80047d1bcb
+    lang: zh-Hant
+    text: 不行。無法選擇適當目標時，無法抉擇【1】，必須抉擇【2】或【3】。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e2dadcd9aea85dedbb01a3ef56efa02400be8e4e2fe508524688164a7bc95fe4
+    field: question
+    source_hash: sha256:a1e5d2e8d74d6223837f7fdfd4f64b74460bbf9058b8e915d56ce6a22b994d34
+    lang: zh-Hant
+    text: 無法選擇敵方戰場上的從者時，可以抉擇【1】，選擇什麼都不發生嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e656770cc49ad162b3ce7367892f04708414e6d83d1082c7462a6a7eedd1e766
+    field: answer
+    source_hash: sha256:c6c1e3462afa240ce01cde34d6de39b3329a928e0a54f29625dc620212de9fb4
+    lang: zh-Hant
+    text: 不行。無法選擇敵方戰場上的從者時，無法使用這張法術，也無法從自己的牌堆搜尋「日文卡名含有『桐生つかさ』（桐生司）的從者」並召喚到戰場上。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e656770cc49ad162b3ce7367892f04708414e6d83d1082c7462a6a7eedd1e766
+    field: question
+    source_hash: sha256:2d8c1d9cc70c676059025aaa201a387941de2c6d87ea739eb34a7f5e168532fd
+    lang: zh-Hant
+    text: 無法選擇敵方戰場上的從者時，可以使消費+3並使用這張法術，從自己的牌堆搜尋「日文卡名含有『桐生つかさ』（桐生司）的從者」，召喚到戰場上嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e874dacf91deb9862951d89cfd2fabadf4ce56db663c58231024175badaa405f
+    field: answer
+    source_hash: sha256:bb7950c7070b46f90497d620f35f1b16fdef47e1a143851435cb2a4139418042
+    lang: zh-Hant
+    text: 不行。無法選擇敵方戰場上的從者時，無法使用這個從者的{入場曲}能力，因此無法使自己的主戰者{生命值}+1。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e874dacf91deb9862951d89cfd2fabadf4ce56db663c58231024175badaa405f
+    field: question
+    source_hash: sha256:a0a717aba983dda0cb3d5a4eea9e87c7fb6d25167139379e93febde1ef6750a4
+    lang: zh-Hant
+    text: 無法選擇敵方戰場上的從者時，可以使用這個從者的{入場曲}能力，使自己的主戰者{生命值}+1嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e97b59f8b52330b9b4736c8a26e513fd0376c921b2175d5e930e6246e5b2c0fd
+    field: answer
+    source_hash: sha256:7d415436bc0e6a4ac997b541416bb27874afe7441529f82176052ace515df5cf
+    lang: zh-Hant
+    text: 是的。可以用餐或參賽。另外，即使用餐或參賽，該從者也會視為護符。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e97b59f8b52330b9b4736c8a26e513fd0376c921b2175d5e930e6246e5b2c0fd
+    field: question
+    source_hash: sha256:20885ebe0ed270de8d8038b430376a44f1c072005def789a6e57eb529f66c96a
+    lang: zh-Hant
+    text: 因這個從者的【超進化時】能力而變為護符的從者，可以用餐或參賽嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:f843be74ead46b1db2d3e6bc397802409d3d154736429797c6b2393de0a00820
+    field: answer
+    source_hash: sha256:7ab129b0ca4a1bb9e1552eda92a843802ff5b5e23e49f4dfce556503a05582fa
+    lang: zh-Hant
+    text: 是的。此時，可以在處理「擲骰子。」後，立即分別重擲骰子1次。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:f843be74ead46b1db2d3e6bc397802409d3d154736429797c6b2393de0a00820
+    field: question
+    source_hash: sha256:2eb6565ff29f8e4879407bb65ed6f69899b3d66f03b1fc1fe2b05a328dd248dc
+    lang: zh-Hant
+    text: 自己的戰場上有1個『〔強運的才女〕鷹富士茄子』與1個『《暴走》戰車‧奧輅昂』，自己的結束階段到來時，『《暴走》戰車‧奧輅昂』的「擲骰子。～」這個能力會重複2次，此時可以藉由『〔強運的才女〕鷹富士茄子』的「只要這張卡片在戰場上，自己就可以重擲骰子1次。」這個能力，分別重擲骰子1次嗎？
+    origin: machine
+    low_confidence: true

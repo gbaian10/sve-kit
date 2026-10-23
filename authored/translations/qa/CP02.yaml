@@ -1,0 +1,1123 @@
+format: 1
+kind: qa_translation_shard
+entries:
+  - qa_id: qa:v1:04b57d0a2383dc7bce0f6807cc908f2ba81e818c33295664fe4feb0d5f0a1993
+    field: answer
+    source_hash: sha256:a519e4ee42e56108e4756c3ca190d29a3fe4d4d5d9b74c03fb6b3b867137ad6f
+    lang: zh-Hant
+    text: "是的。可以作為法術使用。\n可以支付4PP來使用，使自己的主戰者的{生命值}+1，並抽1張卡片。法術結算後，將這張卡片放置到墓場，但由於其是Token，在放置到墓場後會立即從墓場消除。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:04b57d0a2383dc7bce0f6807cc908f2ba81e818c33295664fe4feb0d5f0a1993
+    field: question
+    source_hash: sha256:8224ad70988d118b3ffd370c728c13e7ce84831e41bd2c74b979b1c6d37ae2a1
+    lang: zh-Hant
+    text: 這張卡片可以從自己的EX區支付4PP作為法術使用嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:063a5afdb5aaa907b439a22f371e5e61953ef0c7b02b03f8e21bb2f47fb13771
+    field: answer
+    source_hash: sha256:4eb2e664024e82d87af8a947fc6343f58edbd255a5e1574fe0c4a754aabbe382
+    lang: zh-Hant
+    text: "不會。既不滿足【真紅】狀態，也不滿足「本回合中自己的主戰者生命值曾減少」。\n【真紅】狀態是指目前為自己的回合，且在這個自己的回合中，自己的主戰者生命值曾減少的狀態。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:063a5afdb5aaa907b439a22f371e5e61953ef0c7b02b03f8e21bb2f47fb13771
+    field: question
+    source_hash: sha256:16ec86f762ab2cb36313a2380a8d960ec870a7ec0ccd1a9960266eaecad5f846
+    lang: zh-Hant
+    text: 自己戰場上有這個從者，適用「給予自己的主戰者1點傷害。」這類給予自己的主戰者傷害的效果時，由於這個從者的能力使其不受到能力傷害，自己的主戰者不會受到傷害，此時會滿足【真紅】狀態或「本回合中自己的主戰者生命值曾減少」嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:07e7e1d611e0f10e0c4fe340791fb7e4688aafe4d71742d5963ae1cb75588b7a
+    field: answer
+    source_hash: sha256:f59e229cba8855ee06452347501048376c135cf46a1598c252474369e9d89d6f
+    lang: zh-Hant
+    text: 是的。會給予包含敵方戰場與自己戰場在內的戰場上全部從者7點傷害。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:07e7e1d611e0f10e0c4fe340791fb7e4688aafe4d71742d5963ae1cb75588b7a
+    field: question
+    source_hash: sha256:e3a4c58bc45ba6a48a13f16182529905d9192b172386694d7ad35b45538e3ef1
+    lang: zh-Hant
+    text: 除了敵方戰場上的從者，也會給予自己戰場上的從者7點傷害嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:0aac6fcf1a31ba73d3b7e3a1e9fd1875576194e206428cc258ef0616cb5bb0eb
+    field: answer
+    source_hash: sha256:e582e10406b65115050cb265127389d005db600cad0daf792046ea41a56ad928
+    lang: zh-Hant
+    text: "不行。無法使自己的PP回復2點。\n『安娜斯塔西婭』的能力參照的是該回合中使用的卡片張數，並非從『安娜斯塔西婭』進入戰場之後開始計算。\n自己的回合中，作為該回合的第3張或之後的卡片使用『安娜斯塔西婭』時，由於該回合已使用3張卡片，即使之後包含『安娜斯塔西婭』本身在內使用了3張卡片，也無法藉由『安娜斯塔西婭』的「自己的回合中，自己使用卡片時，若為本回合中的第3張卡片，則～」能力，使自己的PP回復2點。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:0aac6fcf1a31ba73d3b7e3a1e9fd1875576194e206428cc258ef0616cb5bb0eb
+    field: question
+    source_hash: sha256:5caa144a2987de9c13ff3e0dea9755458d08fe83cacc0eeb0f9f594e7f754554
+    lang: zh-Hant
+    text: 自己的回合中，作為該回合的第3張或之後的卡片使用『安娜斯塔西婭』，之後包含『安娜斯塔西婭』本身在內使用3張卡片時，可以藉由『安娜斯塔西婭』的「自己的回合中，自己使用卡片時，若為本回合中的第3張卡片，則～」能力，使自己的PP回復2點嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:1163c72a2462bad36db8149f11db9a248f9b0ddd6fc1023239a5998ea6c8e1ce
+    field: answer
+    source_hash: sha256:1ace84a6f62bb88fbecb85133abbeb6b0a92f9d7467fe9762972c981541a5559
+    lang: zh-Hant
+    text: "是的。先向敵方公開再加入手牌。\n從牌堆中搜尋具有某種條件的特定卡片時，必須向敵方公開該卡片。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:1163c72a2462bad36db8149f11db9a248f9b0ddd6fc1023239a5998ea6c8e1ce
+    field: question
+    source_hash: sha256:82d349cab339bd7fe9d8dc4eec12060eec18069875d2932df5da8f4aea3c6268
+    lang: zh-Hant
+    text: 藉由【進化時】能力，從自己的牌堆中搜尋1張原始消費3以下的法術並加入手牌時，要先向敵方公開該卡片再加入手牌嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:12f06c4d5b259c0294344de79ebd9d3cc4f070594ad4905c691cbc30f0b54e4b
+    field: answer
+    source_hash: sha256:f28ac954d52171a0ed7ba94658cf06aa47915412bd16d7d7b5c026fcb78bc6d1
+    lang: zh-Hant
+    text: 是的。選擇至多1個時，可以選擇0個，因此即使敵方戰場上只有1個橫置狀態的從者，也可以不選擇該從者，使其維持橫置狀態。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:12f06c4d5b259c0294344de79ebd9d3cc4f070594ad4905c691cbc30f0b54e4b
+    field: question
+    source_hash: sha256:3001e750b0f3e554e389dcf9cdb94076f269375b012277c66a426bd27590e642
+    lang: zh-Hant
+    text: 敵方戰場上只有1個橫置狀態的從者時，可以藉由【進化時】能力選擇敵方戰場上的0個從者，使該從者維持橫置狀態嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:14e0faa231c942749251e4b4b866abdd15dc09a77b99468168793779724cb8cf
+    field: answer
+    source_hash: sha256:51d7c2cf2b00b2d398b8be807912557e54a5a043850b379754aa922017e5d7f7
+    lang: zh-Hant
+    text: 可以依任意順序結算。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:14e0faa231c942749251e4b4b866abdd15dc09a77b99468168793779724cb8cf
+    field: question
+    source_hash: sha256:cbfafd5b7ac981192efd2a76d74f0eb5078fc69d310dc5e8c7963ee1c0a417f1
+    lang: zh-Hant
+    text: 若召喚像『砂塚明』這樣具有2個{入場曲}能力的從者到戰場上，觸發的2個{入場曲}能力要從哪一個開始結算？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:15830e934dce9a4c6d2f501992f3f1fdd74c30a6414690420be6f70c4a897167
+    field: answer
+    source_hash: sha256:66b48bd847e7c6fc84d266adf1ccdd5a6e80fc700f1335be2826fe848e35a236
+    lang: zh-Hant
+    text: "不是。是指該回合被給予的每次4點以上的傷害，都會變為3點傷害。\n以下為例子。\n・若受到2次4點以上的傷害，則受到2次3點傷害。\n・若分別受到4點傷害與2點傷害，則受到3點傷害與2點傷害。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:15830e934dce9a4c6d2f501992f3f1fdd74c30a6414690420be6f70c4a897167
+    field: question
+    source_hash: sha256:848a7a0f9f4e410b3645b3b7683c6f74988de06b1331f0702cf2a4376118cd16
+    lang: zh-Hant
+    text: 「這張卡片受到的4點以上的傷害變為3點。」能力，是指該回合不會累計受到4點以上的傷害，而是受到的傷害變為3點嗎？（是指該回合累計不會受到4點以上的傷害嗎？）
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:169ebbc6bc330c1b9d80a6d2cb270cb02cdeb1191f2772b41c2e4f76a89d659e
+    field: answer
+    source_hash: sha256:36d400a7893b040d4e8eeb7a15ad8c0dd44cbdf2d19fcaba82a13a3188940342
+    lang: zh-Hant
+    text: 【攻擊時】能力觸發並結算的時點在先。結算完【攻擊時】能力等全部在從者攻擊時觸發的能力後，才會迎來非回合玩家的Quick時點。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:169ebbc6bc330c1b9d80a6d2cb270cb02cdeb1191f2772b41c2e4f76a89d659e
+    field: question
+    source_hash: sha256:77906467c4ae2ae07b145c83e2827f77aee1930e0f1ecd2a8470366318a67f35
+    lang: zh-Hant
+    text: 【攻擊時】能力觸發並結算的時點，與Quick時點，哪一個在先？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:18854e1bd9884c0c0fc92c01c039b62547fb53996f49dc4a7a9efd06b6699f8e
+    field: answer
+    source_hash: sha256:e2998494960cb1246176d1be8fc22daae0a1be34e6c9a1350144d61db78b302e
+    lang: zh-Hant
+    text: 是的。自己的回合中，作為該回合的第5張卡片，以自己戰場上的『安娜斯塔西婭』為目標使用『大自然的導引』，即使使『安娜斯塔西婭』返回手牌，也可以藉由使用『大自然的導引』時觸發的『安娜斯塔西婭』的「自己的回合中，自己使用卡片時，～」能力，使自己戰場上的『妖精』攻擊力與生命值+1。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:18854e1bd9884c0c0fc92c01c039b62547fb53996f49dc4a7a9efd06b6699f8e
+    field: question
+    source_hash: sha256:fc35574602e6bedd49b2f522ea211386325ed81d08b5ed523184b8ef131604bf
+    lang: zh-Hant
+    text: 自己戰場上有『安娜斯塔西婭』與『妖精』，在自己的回合中，作為該回合的第5張卡片，以『安娜斯塔西婭』為目標使用了『大自然的導引』。此時，可以藉由『安娜斯塔西婭』的「自己的回合中，自己使用卡片時，～」能力，使自己戰場上的『妖精』攻擊力與生命值+1嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:1ac6581f004b1c933b5a20949059f60c77da7a52afc3b46062b2e93bb1fcc2c5
+    field: answer
+    source_hash: sha256:a95563866fb15897ac8b75f7557ed9278c0bf6af3a6f9321fa81aaf8cb011701
+    lang: zh-Hant
+    text: "是的。會支付+X部分的PP消費。\n同時適用將消費置換為特定數值的效果與增減消費的效果時，會先適用將消費置換為特定數值的能力。\n適用「消費變為0」後，才適用「消費+X」。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:1ac6581f004b1c933b5a20949059f60c77da7a52afc3b46062b2e93bb1fcc2c5
+    field: question
+    source_hash: sha256:cfc47df3d526fbfb600c7439f879dfc7fda5f5210e0c8ed4265d2d1ae56a112c
+    lang: zh-Hant
+    text: 若適用『一之瀨志希（EVOLVE）』或『荒木比奈（EVOLVE）』等卡片具有的「使用時，消費變為0。」或「將消費變為0並使用」效果來使用『沸騰吧感情』，實際支付的消費是+X部分的PP消費嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:1ebbac70a3b3c599f019c740fe4312b7ae9a0a9d194250ccb80a68dafdc15f9e
+    field: answer
+    source_hash: sha256:3aa00310e829d7d9737df3dbfe626917500c8c4cf853db60c0aab8fc99f729d3
+    lang: zh-Hant
+    text: "是的。可以選擇。\n此時，不公開卡片，使其返回牌堆頂。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:1ebbac70a3b3c599f019c740fe4312b7ae9a0a9d194250ccb80a68dafdc15f9e
+    field: question
+    source_hash: sha256:fbb0b513e1cb0d0712fe2472d0ac30b40218ffdb23efa6767832ef750b4f5ddc
+    lang: zh-Hant
+    text: 可以選擇不將藉由這個從者的【進化時】能力查看的自己牌堆中的卡片加入手牌嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:243014c6322d008603c80a09f600dd481bdd392cbd39ea5b6abbc38a90490625
+    field: answer
+    source_hash: sha256:75f59ab2f110881eedcfe49edbfa2096153a61243971aad3ec95e12cc05646f0
+    lang: zh-Hant
+    text: 是的。自己的回合中，作為該回合的第4張卡片使用『安娜斯塔西婭』，之後使用1張『妖精』時，該『妖精』是該回合的第5張卡片，因此可以藉由『安娜斯塔西婭』的「自己的回合中，自己使用卡片時，～」能力，使自己戰場上的全部從者攻擊力與生命值+1。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:243014c6322d008603c80a09f600dd481bdd392cbd39ea5b6abbc38a90490625
+    field: question
+    source_hash: sha256:c1f78dd3a383b752c23d367550de764358b70c0e8e3562adbed2cb974f42c4d5
+    lang: zh-Hant
+    text: 自己的回合中，作為該回合的第4張卡片使用『安娜斯塔西婭』，之後使用1張『妖精』時，可以藉由『安娜斯塔西婭』的「自己的回合中，自己使用卡片時，～」能力，使自己戰場上的全部從者攻擊力與生命值+1嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:2b60565719ff13ce2dd0899ca8b799ca97774f7762fd8e41df6cc658325398ee
+    field: answer
+    source_hash: sha256:c9dd92d3975ca34145ccf40827db4d906e790970fdf18271614c4d001fb75def
+    lang: zh-Hant
+    text: 是的。雖然存在『Cute耳環』與『Cool墜飾』等各種卡片，但這些在對戰中全部都是具有『魔法道具』這個相同卡片名稱的卡片，並且是Token。（將『Cute耳環』與『Cool墜飾』等Token卡片搭配使用也沒有問題。）
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:2b60565719ff13ce2dd0899ca8b799ca97774f7762fd8e41df6cc658325398ee
+    field: question
+    source_hash: sha256:9e98038ae1b2d768860a75f7c56cec46c9ee1b1f240b6e0096953ae61eb44cb1
+    lang: zh-Hant
+    text: 這張卡片的卡片名稱是『魔法道具』嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:2c1b43c4e2a181ac3e924c6487be56b6d998dead8d3d4973e1fe3ea9da8b6b8f
+    field: answer
+    source_hash: sha256:be2072b91e1b95fc087399848902548e3d4222ac1a01ac062abaf6fbaa41acf8
+    lang: zh-Hant
+    text: 是的。使用時消費的增減不會改變卡片的原始消費，因此使用原始消費為6的『村上巴』時，『宮本芙蕾德莉卡』的能力會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:2c1b43c4e2a181ac3e924c6487be56b6d998dead8d3d4973e1fe3ea9da8b6b8f
+    field: question
+    source_hash: sha256:75da05044f5e6e13924d512de844002c83eec731adcc7da3764aab65be50b7e0
+    lang: zh-Hant
+    text: 自己戰場上有『宮本芙蕾德莉卡』，藉由「使用這張卡片時，捨棄1張手牌：消費-2。」能力使消費-2來使用『村上巴』時，『宮本芙蕾德莉卡』的能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:30760b20cfacfdadee7107bec0ae9dd73006cb09f28a14df3e567057022ef1b8
+    field: answer
+    source_hash: sha256:5e4149e6deaf727e818b2fa35bde9020ae62eea763ebf454e0d76729c858c97b
+    lang: zh-Hant
+    text: 不行。若無法選擇自己戰場上的從者，就無法使用這張法術，無法使自己的主戰者生命值+3。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:30760b20cfacfdadee7107bec0ae9dd73006cb09f28a14df3e567057022ef1b8
+    field: question
+    source_hash: sha256:b0f5f16e7d8819ef20f55cb24d79ee00d6d33ec9cc960d4818110e04e2edf1f1
+    lang: zh-Hant
+    text: 若無法選擇自己戰場上的從者，可以使用這張法術使自己的主戰者生命值+3嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:399235e89f9642468bc05f843ecfebeaa01e593bce46dfddeb6dfa40509fe699
+    field: answer
+    source_hash: sha256:5f23f889f12ff7af85219562552a65e75de898fbe5b57bdaf8bd99716e74d96b
+    lang: zh-Hant
+    text: 不行。若無法選擇敵方戰場上的從者，就無法使用這個【進化時】能力，無法給予敵方的主戰者3點傷害。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:399235e89f9642468bc05f843ecfebeaa01e593bce46dfddeb6dfa40509fe699
+    field: question
+    source_hash: sha256:2c234e3d85462795a1477ea9abaa26001a00a608dca404e35626693f92592bf7
+    lang: zh-Hant
+    text: 若無法選擇敵方戰場上的從者，且自己的PP最大值為10，可以藉由【進化時】能力給予敵方的主戰者3點傷害嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:3de31e4af4122b358b6d1e124eaf5dceb4a691878b6c5ec2ff3eb17dee271bca
+    field: answer
+    source_hash: sha256:27a521068399ab068bc8dbafb7becc147bd5edb81d9121e9fab4a576b00f92c5
+    lang: zh-Hant
+    text: 是的。會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:3de31e4af4122b358b6d1e124eaf5dceb4a691878b6c5ec2ff3eb17dee271bca
+    field: question
+    source_hash: sha256:ac0b02f9ed7390b6b7500a8291e080f92e6a40ccaf80ae8b35db75f5ce9fafd3
+    lang: zh-Hant
+    text: 若2個灰姑娘・從者同時進入戰場，這個從者的能力會觸發2次嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:3f147a0941158c25e90c5958183dec47faa1499b5c80530f521d645466c8443e
+    field: answer
+    source_hash: sha256:50df7844975c5dcfcaa350666f22b267c92f2def2b5f2dd4c3dbb8caf66eb3f8
+    lang: zh-Hant
+    text: "是的。是永續能力。只要自己的墓場中有5張以上的灰姑娘・卡片，『早坂美玲』就具有【突進】。\n召喚『早坂美玲』到戰場上後，若自己墓場中的灰姑娘・卡片變為5張以上，就會具有【突進】。\n召喚『早坂美玲』到戰場上後，若自己墓場中的灰姑娘・卡片從5張以上變為4張以下，就會失去【突進】。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:3f147a0941158c25e90c5958183dec47faa1499b5c80530f521d645466c8443e
+    field: question
+    source_hash: sha256:23f19688c5ed32143115dd1fd162bd5d1e560f9140e9a01a59bfca6bae02b39a
+    lang: zh-Hant
+    text: 『早坂美玲』具有的「只要自己的墓場中有5張以上的灰姑娘・卡片，這張卡片就具有【突進】。」能力是永續能力嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:40b4d8e9d9017e47eddff9764bf45a8f89081050c4c57dadcc62425d868f3b60
+    field: answer
+    source_hash: sha256:4719812e8df9b2f299c4e73925d94e1ee2251ce81a1446a76bb48b768af1bc3e
+    lang: zh-Hant
+    text: 不行。若無法選擇敵方戰場上的從者，就無法使用這張法術，無法使自己的主戰者生命值+3。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:40b4d8e9d9017e47eddff9764bf45a8f89081050c4c57dadcc62425d868f3b60
+    field: question
+    source_hash: sha256:c5f06ef5bb7dfd160724eb74dc02b95f3b52990ca1286c62ddbdf4f592098b9a
+    lang: zh-Hant
+    text: 自己戰場上有Cute・從者，若無法選擇敵方戰場上的從者，可以使用這張法術使自己的主戰者生命值+3嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:4268b455ba1b47b78285f3d8efc0283925814965785c9358ddbb894ce0965fa8
+    field: answer
+    source_hash: sha256:27a521068399ab068bc8dbafb7becc147bd5edb81d9121e9fab4a576b00f92c5
+    lang: zh-Hant
+    text: 是的。會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:4268b455ba1b47b78285f3d8efc0283925814965785c9358ddbb894ce0965fa8
+    field: question
+    source_hash: sha256:ad54994b09ac8f2c44028bc79e8abb17617b6c64eccb7ad6ca9706a856c864e6
+    lang: zh-Hant
+    text: 若像『唯一的容器』這樣的護符從戰場被放置到墓場，該護符具有的{謝幕曲}能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:47ca022afb32f0809462679324af846f50dcaaa15a0550be1ab531c41cb656d5
+    field: answer
+    source_hash: sha256:cc23dac3f76621cf68bb4aed9ced3489d366c107af6fc090435a5aae621f19a7
+    lang: zh-Hant
+    text: 不會。消費會-3。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:47ca022afb32f0809462679324af846f50dcaaa15a0550be1ab531c41cb656d5
+    field: question
+    source_hash: sha256:48e35b561f6febf2f4e978cf6af006d046aee94ee747a67381eb9160a93ba95f
+    lang: zh-Hant
+    text: 自己戰場上有2個原始消費為1的從者時，使用這個從者時的消費會-6嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:49414dd88f8a34ca3b497071d759aa09489a4f0f12db31c2016584d9eadd15b9
+    field: answer
+    source_hash: sha256:17b8be99675570ef3c8cd9f9f5b19f2620e08e22b5f66024fb244d500a3e5733
+    lang: zh-Hant
+    text: "『村上巴』進入戰場後，可以依任意順序結算。\n在使用『村上巴』、支付消費到進入戰場的過程中，『光明之路』與『村上巴』的能力會分別觸發並變為待機狀態。之後，依任意順序結算變為待機狀態的能力。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:49414dd88f8a34ca3b497071d759aa09489a4f0f12db31c2016584d9eadd15b9
+    field: question
+    source_hash: sha256:f76d26f818eb15236d4b24b8aa3e33c8fd3af075a2afde970656476033912de5
+    lang: zh-Hant
+    text: 捨棄『光明之路』作為使用時的追加消費來使用『村上巴』時，『光明之路』的能力與『村上巴』的{入場曲}能力要如何結算？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:4b0e064143df3c9d4a97eeb19dbb97ae7e3161b4353c9f279479505f7e8b9528
+    field: answer
+    source_hash: sha256:e63581e4a3b141d0ab9aa669ef5bf1c963cee5892f86ea115496f68464918433
+    lang: zh-Hant
+    text: 不會。若無法選擇敵方戰場上的從者，就無法使用這個【進化時】能力，不會受到3點傷害。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:4b0e064143df3c9d4a97eeb19dbb97ae7e3161b4353c9f279479505f7e8b9528
+    field: question
+    source_hash: sha256:98d6b35b5e9b09ca41b137e6ad796dfb5de7a62fbd14197c1cbd981aba79e316
+    lang: zh-Hant
+    text: 若無法選擇敵方戰場上的從者，『北條加蓮（EVOLVE）』會因【進化時】能力受到3點傷害嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:4f778287555796d5bf423ed37c5d52251dbc330956b431550608623693771d47
+    field: answer
+    source_hash: sha256:fd18c1a413f703817e85e40f11f5e0698204a7ad7163468b33ae2bcb5e33b204
+    lang: zh-Hant
+    text: 是的。會參照包含敵方戰場上的從者與自己戰場上的從者數量在內的戰場上從者數量。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:4f778287555796d5bf423ed37c5d52251dbc330956b431550608623693771d47
+    field: question
+    source_hash: sha256:27c5db81db1279edaea644615ce9f22d5ceba8b7b088a22bd3a9f9cc754c7a19
+    lang: zh-Hant
+    text: 使消費+X時的X數值，除了敵方戰場上的從者，也包含自己戰場上的從者數量嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:504a3fad1621806d1a3eaafbc558636e6c6d77cfbd78a625181d4cef71ba79c5
+    field: answer
+    source_hash: sha256:5b1d16177a1b4ec5d32860e63ae0c9ff8b50762c7061a389699d6be0f946b7fc
+    lang: zh-Hant
+    text: 不會。由於「自己的回合中，這張卡片不受到傷害。」能力，不會受到交戰或能力傷害等任何傷害。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:504a3fad1621806d1a3eaafbc558636e6c6d77cfbd78a625181d4cef71ba79c5
+    field: question
+    source_hash: sha256:987b11a7fff7b1850099fcc4afc96e9d613491a676dc0420f8e33c0ee7fb04e7
+    lang: zh-Hant
+    text: 自己的回合中，『五十嵐響子（EVOLVE）』會受到交戰傷害嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:54ebf1b53a3458706f4a69b04ff3dbffad1431c96fea62ebce3cae7ccf551456
+    field: answer
+    source_hash: sha256:d8f589159cea203289aed3e8c0883853ebcc52ccd90c4eac19f88f4e8c4d8309
+    lang: zh-Hant
+    text: 是的。可以再次攻擊。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:54ebf1b53a3458706f4a69b04ff3dbffad1431c96fea62ebce3cae7ccf551456
+    field: question
+    source_hash: sha256:e39483297f2a4f1752ca6b6efa514acd444a6aa532e327c4a2c46f7e9c8ffb63
+    lang: zh-Hant
+    text: 該回合已攻擊而成為橫置狀態的從者，若因『諸星琪拉莉』的能力重置，該從者可以再次攻擊嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:566cac8fd0a1d3268f7c13e7d22ecbec8cf2d45a6d0dfd87d965780adc797eb9
+    field: answer
+    source_hash: sha256:34f43d71663378992cd03896c9b20a1ee8ee9465289d4ef7aa4a677ba2af72ae
+    lang: zh-Hant
+    text: "是的。會觸發。另外，若該傷害為5點以上，則會藉由效果使自己的PP最大值+1。\n（生命值為3的『辻野朱里』受到5點傷害時，PP最大值會+1。）"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:566cac8fd0a1d3268f7c13e7d22ecbec8cf2d45a6d0dfd87d965780adc797eb9
+    field: question
+    source_hash: sha256:b60557be4ba5035dfa4348433b2f2b40da7a776979b0165e6bcb956fc4918a0c
+    lang: zh-Hant
+    text: 若『辻野朱里』受到使其生命值變為0以下的傷害，『辻野朱里』的能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6155c4a84fbc2502a1d354ff9f83108d9f3084f967f5e15bb743c9a2b3b0b3d2
+    field: answer
+    source_hash: sha256:a891d996e9a49e083adf5ac8354f22e15e6dbb26020ddcb98e8c96b294f2ab3b
+    lang: zh-Hant
+    text: 是的。是進化前卡片的原始消費數值。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6155c4a84fbc2502a1d354ff9f83108d9f3084f967f5e15bb743c9a2b3b0b3d2
+    field: question
+    source_hash: sha256:ceaf48c9f75fa154be3921504795ace1666b8f6bd35d33e8cc2a23c44eca4322
+    lang: zh-Hant
+    text: 進化卡從者的原始消費數值，是進化前卡片的原始消費數值嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:65ec5957a6aa7e0e936583e42495b7d741dd1974d7061d225409f081a690f05c
+    field: answer
+    source_hash: sha256:0a1d07ed18e7f86a495db7f90990631dfac0a480ecb909443a2d96f6319a3292
+    lang: zh-Hant
+    text: 不需要。可以不支付消費2，選擇不重置。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:65ec5957a6aa7e0e936583e42495b7d741dd1974d7061d225409f081a690f05c
+    field: question
+    source_hash: sha256:a2eaec09f4137785a60246ac52b8615e1bed90646b42d14ab52c29b18e298505
+    lang: zh-Hant
+    text: 關於「自己的主要階段到來時，{消費2}：將這張卡片重置。」能力的消費，自己的主要階段到來時，必須支付消費2嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:65f86a0b6317a8a9045c94efacd7f824fd1b716d4561b22798723eee8d9008fe
+    field: answer
+    source_hash: sha256:44de45c26ba12df83b0da935c9b78f5f0f60c00b3bb20b02221986e4e6098fe5
+    lang: zh-Hant
+    text: 不行。若無法選擇適當的目標，就無法抉擇【1】，必須抉擇【2】或【3】。（可以抉擇【2】或【3】，不支付消費，選擇不發生任何事。）
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:65f86a0b6317a8a9045c94efacd7f824fd1b716d4561b22798723eee8d9008fe
+    field: question
+    source_hash: sha256:4caa1749e55935a21871092a2af2c3e94e0d719f827ced79504ff1fb5e22d2f1
+    lang: zh-Hant
+    text: 若無法選擇敵方戰場上的從者，可以藉由這個從者的{入場曲}能力抉擇【1】，選擇不發生任何事嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6a6c0eebd40db3c1da2f1b73d86b0ff3e0f3d71b4dc77f89ea727e7449344eb8
+    field: answer
+    source_hash: sha256:5d55d7e8a7ca239739c2e3d3f41e6a599283cacd4f24cac82aec1e0e9dae40e7
+    lang: zh-Hant
+    text: 不會。從者進化不計入卡片的使用，因此不會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6a6c0eebd40db3c1da2f1b73d86b0ff3e0f3d71b4dc77f89ea727e7449344eb8
+    field: question
+    source_hash: sha256:2cce19bd497730742cc5fd0be774b8a28e4655afc789eb5edf80265e9621d9eb
+    lang: zh-Hant
+    text: 自己的回合中，從手牌使用『安娜斯塔西婭』，接著從手牌使用了『喜多見柚』。之後，若使自己戰場上的『喜多見柚』進化，『安娜斯塔西婭』的「自己的回合中，自己使用卡片時，若為本回合中的第3張卡片，則～」能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6c3118dcf187468bd37b24c3144d37829b5d16ca06e3fc1ae5a1255b6e6a834e
+    field: answer
+    source_hash: sha256:b10566b02d320ba50fafdd7e6771b70822b3a2a3209ff2f79f48b630a9f643e1
+    lang: zh-Hant
+    text: 是的。『宮本芙蕾德莉卡』的能力會分別觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6c3118dcf187468bd37b24c3144d37829b5d16ca06e3fc1ae5a1255b6e6a834e
+    field: question
+    source_hash: sha256:5993396513e083e58338c0acbee3c735d0d123b91823aed6ef72c797e9fba7e0
+    lang: zh-Hant
+    text: 自己戰場上有2個『宮本芙蕾德莉卡』，自己使用原始消費5以上的卡片時，『宮本芙蕾德莉卡』的能力會分別觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6cf02f6d7a1902dd8a2436470234a5b9b17de3cbdfb00be0fefc4338c6a0b5b9
+    field: answer
+    source_hash: sha256:bfc7db6af05b5dbfb313d1c8d6c952bdeaa0f1f421d7cf750dd75e5644a68868
+    lang: zh-Hant
+    text: 不行。若無法選擇敵方戰場上的從者，就無法使用這張法術，無法抽1張卡片。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6cf02f6d7a1902dd8a2436470234a5b9b17de3cbdfb00be0fefc4338c6a0b5b9
+    field: question
+    source_hash: sha256:00689266521188a4450c8cb83c2f4690863dfd886bc1836fafc4d0c91bbec4ce
+    lang: zh-Hant
+    text: 自己戰場上有Passion・從者，若無法選擇敵方戰場上的從者，可以使用這張法術抽1張卡片嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6d9df42507783311a42d788ebc62e8a182fdab1513f93b3d905a3234b2b4d31f
+    field: answer
+    source_hash: sha256:54d1827ccbba335e7094be26752219d0263b221a7b71fbc4984da3bbcc5bf684
+    lang: zh-Hant
+    text: 是的。可以使用。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6d9df42507783311a42d788ebc62e8a182fdab1513f93b3d905a3234b2b4d31f
+    field: question
+    source_hash: sha256:2f4eb7978be7dbda69651766efef42f6873fa58e54eab586a1ba5d78c5b48e7d
+    lang: zh-Hant
+    text: 自己戰場上有2個這個從者時，可以分別使用這個從者的起動能力嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:72ba0e5d2154e96cdbe46fd9acd609d1bd244b2ce58bd160f03bae4716a20663
+    field: answer
+    source_hash: sha256:035ad3234e7b14f8c6cd9e52efd5dc089bf5e45ef6be7e4f19ca3cfd0d969810
+    lang: zh-Hant
+    text: "若自己的EX區中已放置3張卡片，則將2張『魔法道具』放置到自己的EX區，使其達到EX區上限的5張。\n另外，無論是否將『魔法道具』放置到EX區，都會處理其後的效果，自己的PP回復4點。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:72ba0e5d2154e96cdbe46fd9acd609d1bd244b2ce58bd160f03bae4716a20663
+    field: question
+    source_hash: sha256:6521feb733dc0d87b2920dcc317d451d97e887ccadeb877a3f1072907f8418e3
+    lang: zh-Hant
+    text: 自己的EX區中已放置3張卡片，結算{入場曲}能力時，要將幾張『魔法道具』放置到自己的EX區？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:73754c38ed436fc3a4c6f6cc5c1ab311192dded19b653106d63594f1530f63ff
+    field: answer
+    source_hash: sha256:51d7c2cf2b00b2d398b8be807912557e54a5a043850b379754aa922017e5d7f7
+    lang: zh-Hant
+    text: 可以依任意順序結算。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:73754c38ed436fc3a4c6f6cc5c1ab311192dded19b653106d63594f1530f63ff
+    field: question
+    source_hash: sha256:81d308053062906a5e37858272c7462ebad71de6040c5b33248022581f81986e
+    lang: zh-Hant
+    text: 若召喚像『澀谷凜』這樣具有2個{入場曲}能力的從者到戰場上，觸發的2個{入場曲}能力要從哪一個開始結算？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:760d2781fe5880cbd7c864844473339b0b4227aa4218164d224f1c69101f8c44
+    field: answer
+    source_hash: sha256:1e3982ed733b46af3cc8c47663e7a15ea0fbcd9b3eecbb56b405de5eba0032e1
+    lang: zh-Hant
+    text: "是的。會觸發。\n另外，在Quick時點自己使用的法術結算後，會結算觸發的『松本沙理奈』的能力。這會在敵方從者給予攻擊目標傷害之前進行。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:760d2781fe5880cbd7c864844473339b0b4227aa4218164d224f1c69101f8c44
+    field: question
+    source_hash: sha256:75de0a2686640006b65a69278a7dfbd2ed27bdaa37972638ac08c936b5808a4b
+    lang: zh-Hant
+    text: 敵方的回合中，在敵方從者宣告攻擊後到來的Quick時點，若自己使用法術，自己戰場上的『松本沙理奈』的能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:77239d6da6d49a8f067fd01306b5119e0086c896920028a1ff0f3e47dbf5c1d6
+    field: answer
+    source_hash: sha256:386628db9577a7ba75a76d8273f8367252ba868d98bd4a95d916b62021e3d11f
+    lang: zh-Hant
+    text: 是的。可以。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:77239d6da6d49a8f067fd01306b5119e0086c896920028a1ff0f3e47dbf5c1d6
+    field: question
+    source_hash: sha256:94997a94049ae7620d9674c9e2085e6fa0989de8a22c49a197cf20f8a28edf40
+    lang: zh-Hant
+    text: 可以藉由{入場曲}能力，選擇將自己牌堆中的1張原始消費為3的從者召喚到戰場上，而不召喚1張原始消費為1的從者到戰場上嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:7b8e1291334a4bc8a82e7711b89e6f4192e1d7617ba71534ff2ece06e991b650
+    field: answer
+    source_hash: sha256:82e6b14badc286d03b1a500a628d9acb078780a85c6e7fd6ef285bde165ab80c
+    lang: zh-Hant
+    text: 是的。自己的回合中，各個『黑埼千歲』都不會受到能力傷害。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:7b8e1291334a4bc8a82e7711b89e6f4192e1d7617ba71534ff2ece06e991b650
+    field: question
+    source_hash: sha256:897f1439b0682e69b233eaf37194993bb158cb65e5428d19d11e5a09acd1c616
+    lang: zh-Hant
+    text: 自己戰場上有2個『黑埼千歲』時，藉由「只要這張卡片存在，自己的回合中，自己的主戰者與自己戰場上的全部其他從者就不受到能力傷害。」能力，自己的回合中，各個『黑埼千歲』都不會受到能力傷害嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:7ceb65fe58031e80cedb1804a2652cac90e2bf2bdb33fe947ed5cb03aacc683d
+    field: answer
+    source_hash: sha256:a68ca717bc1418f7838e14aeb4999b5758d2c61d7940507bd4c1e937c25487e2
+    lang: zh-Hant
+    text: 是的。可以。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:7ceb65fe58031e80cedb1804a2652cac90e2bf2bdb33fe947ed5cb03aacc683d
+    field: question
+    source_hash: sha256:d93f0893a269d0d2d09d7c998cc1af9e14e503f0ee0c0ad98532b39c9e56a925
+    lang: zh-Hant
+    text: 可以藉由【進化時】能力選擇自己EX區中的0張卡片，選擇不給予自己的主戰者傷害嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:7e1c6482806ac0389fb5ad2432146002f5bf650e5d1a1a750a30c3bffb946575
+    field: answer
+    source_hash: sha256:deec498e662ed10d7a6032fc3e70f879a29bad9f7f66416a9058acacb3557fda
+    lang: zh-Hant
+    text: 是的。『松本沙理奈』的能力會分別觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:7e1c6482806ac0389fb5ad2432146002f5bf650e5d1a1a750a30c3bffb946575
+    field: question
+    source_hash: sha256:fe835401df1c3fb468e724a7d7cc6447b1cbe3854deb875bfe7890e7b320afde
+    lang: zh-Hant
+    text: 自己戰場上有2個『松本沙理奈』，自己使用法術時，『松本沙理奈』的能力會分別觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:805eeda8e8968f98f03509566520cb02f75cc1a057d506fcdd115c9e8bb99068
+    field: answer
+    source_hash: sha256:ed5444ec22a704dbe43139887e75d2faa11ab773ea6f59980112b8d82956bca5
+    lang: zh-Hant
+    text: 是的。會觸發。不僅自己的回合，敵方的回合也可以在各回合分別觸發能力1次。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:805eeda8e8968f98f03509566520cb02f75cc1a057d506fcdd115c9e8bb99068
+    field: question
+    source_hash: sha256:170bc4dcd61ea3caa1e5468715d9e88243c3d7b9be509fe39755a120d0bb78f5
+    lang: zh-Hant
+    text: 除了自己的回合之外，若敵方的回合中自己以Quick使用原始消費5以上的卡片，這個從者的能力也會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:813311e41e3b34182ee7eca375bb21a84536818c2709e14316e7c1bb1ad07c9d
+    field: answer
+    source_hash: sha256:3e83b91f3004b3799afc047b7d76733b6d850f1b59ee3db1a26fe9c8dfdee712
+    lang: zh-Hant
+    text: "是的。會生效。\n【真紅】等存在於部分職業卡片上的關鍵字能力或特定表記，並沒有僅限該職業才會生效的限制。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:813311e41e3b34182ee7eca375bb21a84536818c2709e14316e7c1bb1ad07c9d
+    field: question
+    source_hash: sha256:52ae72df9715e085e8bf81c306bf4dcd0e8da6ed086d605926d00456461ee8ca
+    lang: zh-Hant
+    text: 即使使用的牌堆構築是「偶像大師 灰姑娘女孩」作品構築，而非「夜魔」職業構築，「若處於【真紅】狀態，則」效果也會生效嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:821b79149283b2c949195b5e061984c8f3198b9b92207c53041c34bed8a20ee5
+    field: answer
+    source_hash: sha256:49ccbb6fd4140ea3bb4b26ce08c17894e471399ba4397cf520eb77d9a7a030d5
+    lang: zh-Hant
+    text: "是的。會作為其中某種類型的1張卡片來參照。可以作為「3張Cute・卡片」中的1張、「3張Cool・卡片」中的1張，或「3張Passion・卡片」中的1張來參照。（即使用了像『new generations』或『New Wave』這樣的卡片，作為追加消費而從墓場消失的卡片合計張數仍為9張。）\n例如，無法僅使用3張像『new generations』或『New Wave』這樣的卡片，來支付「使墓場中的3張Cute・卡片、3張Cool・卡片與3張Passion・卡片消失」的追加消費。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:821b79149283b2c949195b5e061984c8f3198b9b92207c53041c34bed8a20ee5
+    field: question
+    source_hash: sha256:b84262aeabdd11776c7e9f464be47fa3a19572c105ee002c5e360b8b6a04cd19
+    lang: zh-Hant
+    text: 支付「使墓場中的3張Cute・卡片、3張Cool・卡片與3張Passion・卡片消失」作為使用時的追加消費時，像『new generations』或『New Wave』這樣同時具有「Cute、Cool與Passion」類型的卡片，會作為其中某種類型的1張卡片來參照嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:849ee442e385c65187df9dfd1f0838d97bcb7b06f6c05713fa6d095154c004ec
+    field: answer
+    source_hash: sha256:6d223e86fa61387a97e77d6f585fd6c74a8e681a7cb5ce6063a84407f218de53
+    lang: zh-Hant
+    text: "可以依任意順序結算。\n迎來自己的結束階段時，全部「自己的結束階段到來時，～」能力會觸發並變為待機狀態。之後，依任意順序每次結算1個變為待機狀態的能力。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:849ee442e385c65187df9dfd1f0838d97bcb7b06f6c05713fa6d095154c004ec
+    field: question
+    source_hash: sha256:48443a323f9d8c1c37b961300a2043fa0530470245fbca3aaf1944d58fdb1a59
+    lang: zh-Hant
+    text: 自己戰場上有複數張具有「自己的結束階段到來時，～」能力的卡片，迎來結束階段時，要依什麼順序結算觸發的能力？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:852fd9a0494b926cce55e414d30db02ce4530edbf5a74b57451e848706687591
+    field: answer
+    source_hash: sha256:9b75a031b14b6f1b088fd0bf29859fb2a98538c933081c614a7df993d8689bff
+    lang: zh-Hant
+    text: 不會。使用『安娜斯塔西婭』時，該『安娜斯塔西婭』本身還不在自己的戰場上，該能力並無效力，因此不會觸發。（無法藉由這個能力使自己的PP回復2點。{入場曲}能力會觸發，使自己的PP回復2點。）
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:852fd9a0494b926cce55e414d30db02ce4530edbf5a74b57451e848706687591
+    field: question
+    source_hash: sha256:4a0f5da3e80a2cfa039e1056ef93f8e89d6e3b6363ebdefc43b8bb1f9a3fdc26
+    lang: zh-Hant
+    text: 自己的回合中，作為該回合的第3張卡片使用『安娜斯塔西婭』時，該『安娜斯塔西婭』本身具有的「自己的回合中，自己使用卡片時，若為本回合中的第3張卡片，則～」能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:8b2ba543e3182e73983d84e339b65017362a4fdb87897273a4c90a68302662c8
+    field: answer
+    source_hash: sha256:94d6108645914e9e161248deca9f0e54863e644fa0cad63007257e342cc3df0d
+    lang: zh-Hant
+    text: "這是自己使用的牌堆構築為「偶像大師 灰姑娘女孩」作品構築時，以EX區中放置5張『魔法道具』的狀態開始對戰的規則。\n這項規則並非任意，自己使用的牌堆構築為「偶像大師 灰姑娘女孩」作品構築時，必定適用。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:8b2ba543e3182e73983d84e339b65017362a4fdb87897273a4c90a68302662c8
+    field: question
+    source_hash: sha256:4fee7b9dd429e0c71f8d948a0f4bd3a5912a6422ff2da3954dd0fbc4e6daf407
+    lang: zh-Hant
+    text: 請說明「（※對戰開始時，若自己的牌堆構築為「偶像大師 灰姑娘女孩」作品構築，則將5張『魔法道具』放置到EX區）」這項規則。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:8b648f8b4aff8a2f46cfd9ece9c89e646d87ea4d96931d92af3b637f1147c11a
+    field: answer
+    source_hash: sha256:3785bb38af698d93a55300e3069d061f2f61904108b3af34e123e4472395395b
+    lang: zh-Hant
+    text: 不會。若無法選擇敵方戰場上的從者，就無法使用這個【進化時】能力，自己的主戰者不會受到3點傷害。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:8b648f8b4aff8a2f46cfd9ece9c89e646d87ea4d96931d92af3b637f1147c11a
+    field: question
+    source_hash: sha256:c50bd9375df1713f8e985d9b5ea303b54c7ff0a15146e2af4365355756baeaa1
+    lang: zh-Hant
+    text: 若無法選擇敵方戰場上的從者，自己的主戰者會因【進化時】能力受到3點傷害嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:93a7e280f6996a48ac636146b642f19cbd11822b5ca4cdf58d13aeb7970c0f7a
+    field: answer
+    source_hash: sha256:de055dbbbfed1ce406483887e393befaec0b362ffd5492f569bb3a22e5fee0ab
+    lang: zh-Hant
+    text: 是的。會滿足所參照的條件。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:93a7e280f6996a48ac636146b642f19cbd11822b5ca4cdf58d13aeb7970c0f7a
+    field: question
+    source_hash: sha256:26655f038631ae2ceb8d7649d21156789a62be6df067fbf861bd28394fb5c0fb
+    lang: zh-Hant
+    text: 藉由「可以公開1張Cute・卡片，並加入手牌。」或「選擇自己戰場上的1個其他Cool・從者。」或「若自己的墓場中有5張以上的Passion・卡片，則」這類效果，參照具有各種類型的卡片時，像『new generations』或『New Wave』這樣同時具有「Cute、Cool與Passion」類型的卡片，會滿足所參照的條件嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:9749bc690e13ea13dcc85e127448767012af88fad76c591335365a2ac714bebf
+    field: answer
+    source_hash: sha256:a891d996e9a49e083adf5ac8354f22e15e6dbb26020ddcb98e8c96b294f2ab3b
+    lang: zh-Hant
+    text: 是的。是進化前卡片的原始消費數值。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:9749bc690e13ea13dcc85e127448767012af88fad76c591335365a2ac714bebf
+    field: question
+    source_hash: sha256:ceaf48c9f75fa154be3921504795ace1666b8f6bd35d33e8cc2a23c44eca4322
+    lang: zh-Hant
+    text: 進化卡從者的原始消費數值，是進化前卡片的原始消費數值嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:97d7382b7ec5e7b9238ad53c382d367f6cd6d672394860ba493f138b094a3036
+    field: answer
+    source_hash: sha256:36d400a7893b040d4e8eeb7a15ad8c0dd44cbdf2d19fcaba82a13a3188940342
+    lang: zh-Hant
+    text: 【攻擊時】能力觸發並結算的時點在先。結算完【攻擊時】能力等全部在從者攻擊時觸發的能力後，才會迎來非回合玩家的Quick時點。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:97d7382b7ec5e7b9238ad53c382d367f6cd6d672394860ba493f138b094a3036
+    field: question
+    source_hash: sha256:77906467c4ae2ae07b145c83e2827f77aee1930e0f1ecd2a8470366318a67f35
+    lang: zh-Hant
+    text: 【攻擊時】能力觸發並結算的時點，與Quick時點，哪一個在先？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:991d8cb5dc560232b08c301f4a4780f17e44e49593cb4e3cef247f0d95fd8459
+    field: answer
+    source_hash: sha256:d4a84c998b02f7f47364449a4a493ecad3dbff963e29d3952abf96750f8d5f46
+    lang: zh-Hant
+    text: "最終，自己的主戰者生命值+5，並抽1張卡片。\n處理順序如下。\n\n①結束階段到來時，各個『高垣楓』的能力會觸發並變為待機狀態。\n②依序結算各個變為待機狀態的能力。\n③結算第1個『高垣楓』的能力。由於自己的主戰者生命值為5，自己的主戰者生命值+5，並抽1張卡片。\n④結算第2個『高垣楓』的能力。由於自己的主戰者生命值為10，不執行任何事。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:991d8cb5dc560232b08c301f4a4780f17e44e49593cb4e3cef247f0d95fd8459
+    field: question
+    source_hash: sha256:ec1efc5ffca78810bf10533d3cccb2d2a6961e396d99512c833a49534fe99f3d
+    lang: zh-Hant
+    text: 自己的主戰者生命值為5，自己戰場上有2個『高垣楓』，並迎來結束階段。結算各自觸發的能力時，會如何處理？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a1cde9c730a54e84310bc6f9c1baed2926f743cd9b6872286d005e2a8c023f56
+    field: answer
+    source_hash: sha256:ec8f5ef2a9ad4d82201bbdac4a5355d4ff57a7e7feb010c94e0766a467a70f0f
+    lang: zh-Hant
+    text: 不行。由於無法選擇，因此無法使用這個{起動}能力，無法將『Brand New Beat』放置到墓場。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a1cde9c730a54e84310bc6f9c1baed2926f743cd9b6872286d005e2a8c023f56
+    field: question
+    source_hash: sha256:f07348bd7c11b997f3c258133d48a965346537e78cb81d178d1e20ad22be56c7
+    lang: zh-Hant
+    text: 若無法選擇自己戰場上的從者，可以使用『Brand New Beat』的{起動}能力，並藉由其消費將『Brand New Beat』放置到墓場嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a35ed1c05c315feb58fa1527b096268508fc4ce5e6671be054f01e45fc4ebd3f
+    field: answer
+    source_hash: sha256:2c1fcf1f2938eb6f727eb8bfec7c02c91cafb04d0220626893feaf03f18b04bb
+    lang: zh-Hant
+    text: 是的。自己的主戰者生命值會-2。「{生命值}-2」並非能力傷害，因此不會適用『黑埼千歲』的能力。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a35ed1c05c315feb58fa1527b096268508fc4ce5e6671be054f01e45fc4ebd3f
+    field: question
+    source_hash: sha256:dfe3f8ad8af239f6f1ecce99f6b0821f0f21c6b1edcc3259d07ee6aa032ccc5c
+    lang: zh-Hant
+    text: 自己的回合中，自己戰場上有『黑埼千歲』，適用自己『龐克惡魔‧戴莫尼亞』起動能力消費中的「主戰者的{生命值}-2」時，自己的主戰者生命值會-2嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a53e51fcd528024e61dafdf8597abacdeafce4f722ce8bce156fbf513742ca17
+    field: answer
+    source_hash: sha256:46ef02b9fe22736d045742f37006bdf90118cca93dcd2ac6d6ca2bcc660084a0
+    lang: zh-Hant
+    text: "是的。會在自己的開始階段之後到來。\n完成開始階段中的PP最大值增加與PP回復、將從者重置（『雙葉杏』因能力而在開始階段不會重置）、抽1張卡片等全部事項後，才會迎來自己的主要階段。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a53e51fcd528024e61dafdf8597abacdeafce4f722ce8bce156fbf513742ca17
+    field: question
+    source_hash: sha256:a2aab07d818bdbb77003420561f866e4c732ec6bbba9df6f4bbb078c6c21adaa
+    lang: zh-Hant
+    text: 自己的主要階段會在自己的開始階段之後到來嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a77fed6ddb303f79aa866480b34ed1206ad974cbe7fcc9b796400756af53547c
+    field: answer
+    source_hash: sha256:b92445494e630c28305ff1ae06f7509b95d6c8ec4357064a80a9b7114aec2869
+    lang: zh-Hant
+    text: 是的。攻擊力與生命值會-1。使生命值-1的效果並非傷害。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a77fed6ddb303f79aa866480b34ed1206ad974cbe7fcc9b796400756af53547c
+    field: question
+    source_hash: sha256:2a0428bdb66c6141c637dc95eb837382cb97060173caccd0b0ee8eacac7310f1
+    lang: zh-Hant
+    text: 自己的回合中，因『黑埼千歲』的能力而處於「不受到能力傷害」狀態的自己的其他從者，若適用了『愛麗速子』能力的「{攻擊力}-1/{生命值}-1」，攻擊力與生命值會-1嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:abad9e70dcecbadcf7546f17de7423d053f0982eea607b29e666160061715680
+    field: answer
+    source_hash: sha256:51d7c2cf2b00b2d398b8be807912557e54a5a043850b379754aa922017e5d7f7
+    lang: zh-Hant
+    text: 可以依任意順序結算。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:abad9e70dcecbadcf7546f17de7423d053f0982eea607b29e666160061715680
+    field: question
+    source_hash: sha256:6716a44453926c974d62d4a7114b8286f8d8673d68429e7368f3400459f426b2
+    lang: zh-Hant
+    text: 藉由{入場曲}能力，從自己的牌堆召喚了『財前時子』與『橘愛麗絲』到戰場上。「其他灰姑娘・從者進入自己的戰場時，」能力，以及『財前時子』與『橘愛麗絲』的{入場曲}能力會觸發，要從哪個能力開始結算？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:b2059661c274a81e31b1dcb8d83695897b3697c4f740f597b07087ef3a35f7b1
+    field: answer
+    source_hash: sha256:d716e1c0db41007fdfd19a16a266297a57f4659a60637a8257c114e03db9c294
+    lang: zh-Hant
+    text: 是的。由於滿足「若捨棄了Cute・卡片，則」「若捨棄了Cool・卡片，則」「若捨棄了Passion・卡片，則」全部3種條件，因此可以分別適用3種效果。自己的主戰者{生命值}+2，抽1張卡片，並給予敵方的全部主戰者2點傷害。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:b2059661c274a81e31b1dcb8d83695897b3697c4f740f597b07087ef3a35f7b1
+    field: question
+    source_hash: sha256:1a0239a249d7ce033633c7541182c4c35abfe8a769e021662b6f5a8a6746f98d
+    lang: zh-Hant
+    text: 『砂塚明』的{入場曲}能力中，若從手牌僅捨棄1張像『new generations』或『New Wave』這樣同時具有Cute、Cool與Passion類型的卡片，可以分別適用3種效果嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:b3f10565dba85e5800a5b70f8d4beffbc87f3c545aebedf2c46969058dffabb9
+    field: answer
+    source_hash: sha256:634a5d3bd561d6f2fb7c768c39d2c563955b5aef46c2624a9b64522bac1ce6c0
+    lang: zh-Hant
+    text: 不行。若無法選擇適當的目標，就無法抉擇【1】，必須抉擇【2】。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:b3f10565dba85e5800a5b70f8d4beffbc87f3c545aebedf2c46969058dffabb9
+    field: question
+    source_hash: sha256:a7f18658b55d8a93324837c143a5ea2ad98fccca77deccd5f65a81e7a6057591
+    lang: zh-Hant
+    text: 若無法選擇敵方戰場上的護符，可以藉由這個從者的{入場曲}能力抉擇【1】，選擇不發生任何事嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:b94d80eb6ccf7c422a1b44bec262c2c84197b287bafadabaa4a8473b823fa579
+    field: answer
+    source_hash: sha256:0f964524f67541e162b9cc369259b83c0af0996b5b7e2c17c4a1e6bc9904d004
+    lang: zh-Hant
+    text: 不行。無法抉擇同1項選項2次以上。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:b94d80eb6ccf7c422a1b44bec262c2c84197b287bafadabaa4a8473b823fa579
+    field: question
+    source_hash: sha256:eb02ddf305f0479df751c7e9b04ea01f5e2ff17e526bfbf09a1c53b04945f0ac
+    lang: zh-Hant
+    text: 抉擇2項以上的選項時，可以抉擇同1項選項2次以上嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:cacdbfeb10fd4da3e421292ccacdc54223434e21991df41df0d3b394b15400d3
+    field: answer
+    source_hash: sha256:a43af5f049f58613f24a31a08f1f291e37e417c9a5d2585a97aa090b450c3618
+    lang: zh-Hant
+    text: 不會。使用『梅木音葉』時，該『梅木音葉』本身還不在自己的戰場上，因此該能力並無效力，不會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:cacdbfeb10fd4da3e421292ccacdc54223434e21991df41df0d3b394b15400d3
+    field: question
+    source_hash: sha256:7a1382644d39e18eff5751b51cba40f41c67e3eb4f47200ee5acadb9c71be01f
+    lang: zh-Hant
+    text: 使用『梅木音葉』時，該『梅木音葉』本身具有的「自己使用卡片時，～」能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:cf43dd92e3a3de310474fe709969e9ee50be01bce700ec8c49c6595e88c29de0
+    field: answer
+    source_hash: sha256:6321e6bda2fd5fa98ca91ec17fc41533ba9d1a7a311c1e0758b5776141ef3c2c
+    lang: zh-Hant
+    text: 是的。可以正常選擇。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:cf43dd92e3a3de310474fe709969e9ee50be01bce700ec8c49c6595e88c29de0
+    field: question
+    source_hash: sha256:ff6d2a5a5220ffa1c73a3dd6f96ffb698b763575b1b03ab7e1bd61a71049ab78
+    lang: zh-Hant
+    text: 藉由{入場曲}能力從自己的牌堆中搜尋時，也可以選擇原始消費為1且卡片名稱各不相同的「2張灰姑娘・從者」或「2張灰姑娘・護符」這樣的組合嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:d26dd5a851992fc93b40abdf7ba164d9f2061b696e21dd44843ea03a4814c8ad
+    field: answer
+    source_hash: sha256:77f295074c0b1774be8bf1713a4e31298be580542ae254fe481da29e154ea400
+    lang: zh-Hant
+    text: 是的。會觸發。另外，由於作為第3張卡片使用了『Angelic Maid』，自己的PP會回復2點。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:d26dd5a851992fc93b40abdf7ba164d9f2061b696e21dd44843ea03a4814c8ad
+    field: question
+    source_hash: sha256:8a46c7e6a15d1c5541cfcde8d12adcb6c5ec9f87fa2c7c6e5b2df75639fac951
+    lang: zh-Hant
+    text: 自己的回合中，從手牌使用『安娜斯塔西婭』，接著從手牌使用了『荒木比奈』。之後，使自己戰場上的『荒木比奈』進化，並藉由【進化時】能力使用自己墓場中的『Angelic Maid』。此時，『安娜斯塔西婭』的「自己的回合中，自己使用卡片時，若為本回合中的第3張卡片，則～」能力會觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:d28f2024ad497f23d85dd1ab822592208be0a24fe0816c036e4c72528bec1cda
+    field: answer
+    source_hash: sha256:3326bf67436f8cb99903b81848901cd763bd3c9665da0a6208870ff155e48170
+    lang: zh-Hant
+    text: 是的。作為該回合的第5張卡片使用的從者，其攻擊力與生命值也會+1。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:d28f2024ad497f23d85dd1ab822592208be0a24fe0816c036e4c72528bec1cda
+    field: question
+    source_hash: sha256:07615dd9468e0bfcc5222bc6a67c1209c2b25d30619943a0437c51b2e2981007
+    lang: zh-Hant
+    text: 自己戰場上有『安娜斯塔西婭』，在自己的回合中作為該回合的第5張卡片使用從者時，該從者的攻擊力與生命值也會+1嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:de5d0ac1dbc4211e58412f22f88f1269a23c7aa1b35fac68af52bcad635e0955
+    field: answer
+    source_hash: sha256:22f9108f0a89d93407e2ddb1dfdb87e373f4c5cbb65092496cf21fc4c3acee77
+    lang: zh-Hant
+    text: 是的。可以從『高垣楓』的能力開始結算。可以先藉由『高垣楓』的能力使自己的主戰者生命值+5並抽1張卡片，再藉由『路西法』的能力使自己的主戰者生命值+4。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:de5d0ac1dbc4211e58412f22f88f1269a23c7aa1b35fac68af52bcad635e0955
+    field: question
+    source_hash: sha256:7b519954b5d10e98d4f31597848c7949a31750e53e2fd98e48c50b76dcbd53b7
+    lang: zh-Hant
+    text: 自己的主戰者生命值為5，自己戰場上有『高垣楓』與『路西法』，並迎來結束階段。此時，可以從『高垣楓』的能力開始結算各自觸發的能力嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e1618d8239094837118d7bbe9e6270ff5ee2ae80efc71e0aba6918b45e0881e6
+    field: answer
+    source_hash: sha256:be2e67def1661df760d97610efe68666c58ae0f37327d4b4fdea9884f0267469
+    lang: zh-Hant
+    text: 除了從者因交戰受到的傷害，以及主戰者因攻擊受到的傷害之外，其他一切傷害都是能力傷害。法術能力給予的傷害及從者能力給予的傷害都屬於能力傷害。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e1618d8239094837118d7bbe9e6270ff5ee2ae80efc71e0aba6918b45e0881e6
+    field: question
+    source_hash: sha256:0b4b412a4c251f299bc2926583a982830ee29d91135b40c67daa3e17c8423be5
+    lang: zh-Hant
+    text: 什麼是能力傷害？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e184acc62b2d5761f84114d4181fc3d9f2bd8ea4ea23f396b85579d434c7960a
+    field: answer
+    source_hash: sha256:67cb27b071af0d64b46c860de9c68da9c1584ec9f42d1c272b3d1bf4a5bfa511
+    lang: zh-Hant
+    text: 是的。正是如此。查看自己牌堆頂的1張卡片後，若公開並加入手牌的卡片為Cute・卡片，則自己的主戰者生命值+2。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e184acc62b2d5761f84114d4181fc3d9f2bd8ea4ea23f396b85579d434c7960a
+    field: question
+    source_hash: sha256:12956fe11ed5079d5c5f24156e94c75b81f4d507826aabc45f7abc26ca16c0d9
+    lang: zh-Hant
+    text: 這個從者的【進化時】能力中的「若公開了Cute・卡片，則自己的主戰者{生命值}+2。」是指這個從者的【進化時】能力公開並加入手牌的卡片為Cute・卡片時嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e2e9954d2da06887be6d41b695127dd6bf148c0c63247890c077c080b0cd34e3
+    field: answer
+    source_hash: sha256:6ce8424113fd14e2c90d971cfe30d8f7f792a915a5a3731091a7d1113f6d916c
+    lang: zh-Hant
+    text: 不行。若無法選擇敵方戰場上的從者，就無法使用這個{入場曲}能力，無法抽2張卡片。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e2e9954d2da06887be6d41b695127dd6bf148c0c63247890c077c080b0cd34e3
+    field: question
+    source_hash: sha256:cdc06dfb56fcc133879de01be3801b64ed64eab86e768fdcdddad52489f9ba30
+    lang: zh-Hant
+    text: 若無法選擇敵方戰場上的從者，可以藉由{入場曲}能力抽2張卡片嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:eb6be075de2425553003bddfb7fa956216a2a3eb27be2073fa7cb2689d3dc359
+    field: answer
+    source_hash: sha256:d24f4cedb8e56c9b233f4b702570794f9a2eb2f9e2c609c12320e9be8491874b
+    lang: zh-Hant
+    text: 不行。無法攻擊敵方的主戰者或敵方的從者。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:eb6be075de2425553003bddfb7fa956216a2a3eb27be2073fa7cb2689d3dc359
+    field: question
+    source_hash: sha256:40790660964a6b738a97675069c87493e275f8f0a4b27a4a0d0e44b0aca519ba
+    lang: zh-Hant
+    text: 這個從者可以攻擊敵方戰場上橫置的從者嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:f54f9a955ee67ee3933d7c9d96f1e62cb41320671ee7be74a1f3314b0c90bc40
+    field: answer
+    source_hash: sha256:243ef455a9614e669b58d01c15e51204848b44c8cb2600acc3ca7c7a1df37e78
+    lang: zh-Hant
+    text: 不行。無法抽1張卡片。若自己的主戰者生命值不是5以下，則其後的效果不會生效。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:f54f9a955ee67ee3933d7c9d96f1e62cb41320671ee7be74a1f3314b0c90bc40
+    field: question
+    source_hash: sha256:c886f198afa2188bac71b4369ac33c754d58fe484466383f5f40a609a81a2e00
+    lang: zh-Hant
+    text: 即使自己的主戰者生命值不是5以下，自己的結束階段到來時，也可以抽1張卡片嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:f73277d67040fd457bc8f428c2108df973596d0948d7a3928c1897342ab31c2c
+    field: answer
+    source_hash: sha256:675a4c6763e3522d6ecc376f170341dd482a7f888bac48675021c39d417bb45d
+    lang: zh-Hant
+    text: "「自己使用卡片時，～」是在自己從手牌、EX區或墓場使用從者或法術等卡片時觸發的自動能力。使用{起動}能力或自動能力等，與使用卡片不同，因此不會觸發。\n以『荒木比奈（EVOLVE）』而言，使用【進化時】能力時不會觸發，但藉由【進化時】能力的「選擇自己墓場中的1張原始消費2以下的灰姑娘・法術。將其消費變為0並使用。」，以0消費使用自己墓場中的『早熟的小惡魔』時就會觸發。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:f73277d67040fd457bc8f428c2108df973596d0948d7a3928c1897342ab31c2c
+    field: question
+    source_hash: sha256:048dfcb631ae0ab6b1cccddfc2736eebe40acd0d775c59266a1e7d00ee598174
+    lang: zh-Hant
+    text: "「自己使用卡片時，～」是在什麼情況下觸發的自動能力？\n例如，藉由『荒木比奈（EVOLVE）』的【進化時】能力，以0消費使用自己墓場中的『早熟的小惡魔』時，『梅木音葉』的「自己使用卡片時，～」會觸發嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:f76f2d2a1921e8c6d65f2e2bcd1cdeed966e2a5facff540f15c8876a893b73d8
+    field: answer
+    source_hash: sha256:8f1fe10c2fb85c22b1cd214e466b8b00f5c9780288f60f67777432c848b03555
+    lang: zh-Hant
+    text: 是的。結算後會放置到墓場。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:f76f2d2a1921e8c6d65f2e2bcd1cdeed966e2a5facff540f15c8876a893b73d8
+    field: question
+    source_hash: sha256:ffcb39b1342db992c9b25bc56d48d2dbf4beee45e54afc5846f61d868c297f4f
+    lang: zh-Hant
+    text: 藉由【進化時】能力，從自己的墓場使用灰姑娘・法術時，該法術結算後會放置到墓場嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:fbb718c89ade61d5a474124d187a46968b8f5f8b35367a950676cd8a9d16b094
+    field: answer
+    source_hash: sha256:2c279ef09de968142c3521b671f18ae35a1365c850cbac288e16a6f768079088
+    lang: zh-Hant
+    text: 不會。會生效1次。捨棄2張以上的Cool・卡片或Passion・卡片時也相同。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:fbb718c89ade61d5a474124d187a46968b8f5f8b35367a950676cd8a9d16b094
+    field: question
+    source_hash: sha256:b6132e19e552136e10ad26cf4f01be742f4649a6431938fb1b6be58784facf68
+    lang: zh-Hant
+    text: 藉由『砂塚明』的{入場曲}能力捨棄2張Cute・卡片時，「若捨棄了Cute・卡片，則自己的主戰者{生命值}+2。」會生效2次嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:fc19b402791f94e000f38d698043d698a556e6eb41e82ea16272e33aac553b4a
+    field: answer
+    source_hash: sha256:967e8fa0e83ae9069323ca0b2bbc20c335645f196a03d6e13816735f7a23f770
+    lang: zh-Hant
+    text: 不行。若無法選擇敵方戰場上的從者，就無法使用這張法術，無法使{攻擊力}+1。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:fc19b402791f94e000f38d698043d698a556e6eb41e82ea16272e33aac553b4a
+    field: question
+    source_hash: sha256:029dc6562554fa89f70925e87ebb7e3e60630df50748dbecc619302b15c6e4f4
+    lang: zh-Hant
+    text: 若無法選擇敵方戰場上的從者，可以使用這張法術，使自己戰場上原始消費1以下的全部從者{攻擊力}+1嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:fc8120baffdb6409b618d0ddee0dc3643410dd3850276a67b510dead54ada799
+    field: answer
+    source_hash: sha256:0b404c179858bfa8d212deaf2dcb149be396939b83d27d61aaa84c9bf6e1f4ed
+    lang: zh-Hant
+    text: "不行。無法使自己的PP最大值+1。\n因『篡奪的蛇劍』受到3點傷害與2點傷害，『辻野朱里』的能力會觸發2次，但由於兩次都未受到5點以上的傷害，因此無法適用「若該傷害為5點以上，則」之後的效果。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:fc8120baffdb6409b618d0ddee0dc3643410dd3850276a67b510dead54ada799
+    field: question
+    source_hash: sha256:7385dd7f52bbd28e225648cad4c2edfdccc307d2160934ce982a571815f34d76
+    lang: zh-Hant
+    text: "自己的墓場有10張以上的卡片，敵方使用的『篡奪的蛇劍』會在給予3點傷害後，再給予2點傷害。\n此時，若敵方對自己戰場上的『辻野朱里』使用『篡奪的蛇劍』，可以藉由『辻野朱里』的能力，使自己的PP最大值+1嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:fe92c12a8a56203d263056980e59909a8e95c166acdba1b669493a9689a236f2
+    field: answer
+    source_hash: sha256:1c2eaabf1e67660cbafcd7dfae146ed76adede0f100246f30b579db7df6579d7
+    lang: zh-Hant
+    text: 是的。可以使其消失。『彩☆超能力少女』進入戰場時觸發並變為待機狀態的『輝夜姬』的「護符進入自己的戰場時，」能力，與『彩☆超能力少女』的{入場曲}能力，可以依任意順序結算。先結算『輝夜姬』的能力，給予『魔導電磁巨犀』3點傷害。接著結算『彩☆超能力少女』的{入場曲}能力，便可以使生命值變為4的『魔導電磁巨犀』消失。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:fe92c12a8a56203d263056980e59909a8e95c166acdba1b669493a9689a236f2
+    field: question
+    source_hash: sha256:224b4031a1bd6ce73a6df80e1d338b851e48d5fa48175f4f59573539544fd401
+    lang: zh-Hant
+    text: 自己戰場上有『輝夜姬』，召喚『彩☆超能力少女』到戰場上時，可以使敵方戰場上生命值為7的『魔導電磁巨犀』消失嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:feac906cbe7080645db41b52315403ace6e6c5516618f54ae27862a7a0b58148
+    field: answer
+    source_hash: sha256:ccd89ee7ec43db64d2165127b1a2a6ffd6315cc3f1a7ffc98e36850f4e332ffe
+    lang: zh-Hant
+    text: "是的。是永續能力。只要自己的主戰者生命值為10以下，『輿水幸子』就具有【疾馳】【必殺】。\n召喚『輿水幸子』到戰場上後，若自己的主戰者生命值從11以上變為10以下，就會具有【疾馳】與【必殺】。\n召喚『輿水幸子』到戰場上後，若自己的主戰者生命值從10以下變為11以上，就會失去【疾馳】與【必殺】。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:feac906cbe7080645db41b52315403ace6e6c5516618f54ae27862a7a0b58148
+    field: question
+    source_hash: sha256:7c0418611ce77896b27ff8ef45074892a244ca2de89f9bd62db59678db759fd9
+    lang: zh-Hant
+    text: 『輿水幸子』具有的「只要自己的主戰者的{生命值}為10以下，這張卡片就具有【疾馳】【必殺】。」能力是永續能力嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:ff0c52581fe24b2c894e7df5f580d64fd6e74c41da0fffbb1deabedd2cd5507a
+    field: answer
+    source_hash: sha256:c87e33be9a3769ed7949181d5d8a7bc8ff125c2a616f0fcdcb79f719071abafa
+    lang: zh-Hant
+    text: "不行。由於自己EX區中的『魔法道具』並未消失，無法滿足該條件。\n使用EX區中的Token・法術時，結算後會移動到墓場。此時，由於『魔法道具』是Token，在移動到墓場後會立即被消除。（從墓場移除。不會一直留在墓場中。）"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:ff0c52581fe24b2c894e7df5f580d64fd6e74c41da0fffbb1deabedd2cd5507a
+    field: question
+    source_hash: sha256:5a7c04b12dc5c0479bf7665c2795c8c1272c53f1a7a609cfbbc84ddf21c9fa61
+    lang: zh-Hant
+    text: 若支付消費，將自己EX區中的『魔法道具』作為法術使用，可以滿足「這張卡片離開戰場時，若本回合自己的EX區中的『魔法道具』曾消失，則」條件嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:ff7ae200b3550320cb2ad2b5f49297bec58bfd1c20f7d4079fc11a7969a1ca55
+    field: answer
+    source_hash: sha256:6203fcf7f8c601dff10dc1f090e83b9871d236f40a10c74500e777e88f9c8cdc
+    lang: zh-Hant
+    text: 不行。由於進化前『喜多見柚』的起動能力中的「本回合，無法使用這張卡片的{進化}以外的起動能力。」，本回合處於無法使用這個從者起動能力的狀態，因此無法使用進化後『喜多見柚（EVOLVE）』的起動能力。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:ff7ae200b3550320cb2ad2b5f49297bec58bfd1c20f7d4079fc11a7969a1ca55
+    field: question
+    source_hash: sha256:5b76f2d7c7e8c5fbe77d6eaf6a76104c03a872a1d75e2c2ea90088c5dc7b7fb0
+    lang: zh-Hant
+    text: 在使用『喜多見柚』起動能力的回合進化時，可以使用進化後的『喜多見柚（EVOLVE）』的起動能力嗎？
+    origin: machine
+    low_confidence: true
