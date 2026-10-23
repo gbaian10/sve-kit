@@ -103,6 +103,12 @@ Resolution、Race、Drive、Trigger、Equipment；Hand 只容許持有者私有�
 的裏向物件需另有可見性證據，不能把整區當公開。限定進化入口的私有 Face 選擇
 是下節明列的例外，不放寬一般選擇域。
 
+上述為 checker 的保守准入，遊戲資訊規則已有依據：CR 4.1.2.1 使所有區域的張數
+公開，If／While 讀手牌或牌庫張數不等於讀隱藏內容；手牌內容受 4.7.2 保護。
+CR 4.10.2 規定消滅區原則公開、未另指示時表側放置；Q691 則要求牌庫頂牌消滅的
+處理過程不看內容、不改順序，不能把 Banish 當成預先 Look／Reveal 的授權。
+逐物件的表示面與各時點 audience 仍須驗證，不因區域名稱便向對手發布隱藏身分。
+
 選擇域要求來源證據：物件／整數回答保留該 decision 的 visibility，Look receipt 只給
 viewer；沒有 start guard 的 Reveal 直接公開一個 bound／captured 集合或 Look receipt 後，
 該集合可作 Public 選擇域。帶 guard 的 Reveal，包括 guarded decision 之後的受保護指示與
@@ -145,7 +151,7 @@ AtResolution capture 與結算本文判斷，capture 之後不能再出現打出
 
 repeat 可匯出 PaymentResult；本輪 complete 與 collected payments 的 All／Any complete
 保留型別。**完整付款不是從 actual>0 推論**：零費用依法完成；合法取代後原費用視為
-執行，但不能偽造原動作的物理事件（CR10.6.2.5.2–.3）。本 checker 不執行付款，
+執行，但不能偽造原動作的物理事件（CR10.6.2.5.2–.3；Q2387 直接確認送墓改消滅仍可付費）。本 checker 不執行付款，
 executor 必須先證明整個被選 CostSpec 可付，按規則處理取代，材料只選一次，任何一步
 失敗不得留下部分消耗；非法 play 的 rollback 也包含事件、待機及使用額度。
 PaymentResult 的建構、zero／replaced 投影、動態費用與完整 rollback 尚未接入。
@@ -261,7 +267,9 @@ MoveAfter／MoveAfterAll 需要支配它的同型 producer／repeat collect，�
 SameEffectExplicitReference；TriggerExplicitReference 與 RuleCarry 尚未接受。
 ObjectReceipt::Movement 僅接受 Before 成功成員投影，供原集合扣除實際移動成員；
 After 必須用 MoveAfter，不能省略跨世代引用權限。BP18-059 的 remainder 是觀察集合
-減去成功移動的 before 成員；不能減去所有 chosen，否則 EX 滿而未移動的牌會遺失。
+減去成功移動的 before 成員；EX 滿而未移動者仍算「其餘」。這是 2026-10-23 採用的
+`inferred` 專案解讀；CR 4.8.3.2 只定不移動，官方未回答 remainder，詳見
+[runtime §3.2](runtime-semantics.md#32-精確成功-before)，不宣稱由良構檢查證明遊戲裁定。
 Move 與 Token 可共用 SharedCapacityAtomic 批次，成員間仍不能讀 sibling 結果。
 Move／Destroy／Banish 的成功 Before 成員可保留原輸入已知的 audience，供 remainder
 選擇使用；audience 必須在首次檢查 selector、宣告 candidate 之前推導，
@@ -555,8 +563,13 @@ actor 為抽牌者／觀看者，visibility 為 Only 該玩家，choice-free con
 由 Action::Look 與 AfterLook timing 保留，不代表第一張必看。
 
 此協定不保存牌庫或卡片身分，不負責卡文降低、實際抽空敗北、觀察授權與 receipt；
-draw 不因呼叫端知道牌庫空而跳過選擇（CR5.10.1.1、11.2.2）。look 缺牌仍按有限次
-嘗試處理是專案的保守結構解讀（inferred），不宣稱 CR 禁止略過空位；禁止抽牌與缺牌的
-executor performed 語義須另驗。完整 executor 必須在 Perform 處完成單張操作及資訊
+draw 不因呼叫端知道牌庫空而跳過選擇。CR 5.10.3.2–.3 以執行單張抽牌指示的次數
+計上限，空牌庫嘗試亦計一次；依 5.10.1.1、11.2.2 在解決後下一次規則處理才敗北
+（Q1514 同型佐證），不能用成功抽到的張數取代嘗試數。
+被禁止的抽牌則依 CR 1.3.3、Q1332／Q1333 不執行，不算成功抽到、不發 E.draw，
+不誘發 BP05-094 的抽牌能力（Q756）；此為規則要求，不是 performed 欄位的工程選擇。
+StepwiseSession 的 performed 呼叫只推進內部迭代，不能單憑它判定遊戲事件或抽空敗北。
+look 缺牌仍按有限次嘗試處理是專案的保守結構解讀（inferred），不宣稱 CR 禁止略過空位。
+完整 executor 必須在 Perform 處完成單張操作及資訊
 投影，再開下一個回答。合成測試以 BP01-007／BP01-065、BP07-SL09 的動作為種子；up-to
 本身是 CR5.10.3／5.11.2 的 rule-only 形狀，不冒稱這些卡印有 up-to。

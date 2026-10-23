@@ -146,9 +146,18 @@ class 與 not_class、trait 與 not_trait 等同時出現只表示 AND，不因�
 
 power_max 在同 atom 的其他 F、except 與 where 都套用後，保留有效攻擊力最大值的**全部並列者**；
 空集合仍空，不要求作者選一張。聯集每個 limb 分別取極值，limb 排列不建立順序。
+Q1204 確認 BP09-077 有多個最大攻擊力從者時，由該玩家從並列者中選一體；
+power_max 先保留並列候選，再由外層選取決定，不能以內部順序任取一張。
+費用 filter 的 cost_*與 orig_cost_* 依 Q773／CR 5.24.1 都比較卡面費用，進化從者
+讀進化前費用（Q1707），不比較打出時減費後的 PP。
 這個順序是契約定形，沒有直接卡例同時要求 except／where／power_max；降低驗證不能省略。
 BP10-063 デュアルレイジ 是 kind:advance_follower 的例，不能充作布林欄位的直接卡例；
 兩種拼法不推定同 hash。has_trigger 在來源缺 TriggerIcon 時也不宣稱已可執行。
+CR 14.4.1.2 明定「トリガーを持つ」是具有 TriggerIcon，不是具有任意自動能力。
+「エボルヴフォロワー」則須同時符合從者與特殊種類 Evolve（CR 2.3.3.1、2.3.4）；
+Q2277／Q1572 明確排除 Advance 卡及 Drive Point，不能只用 kind:follower 或所在
+EvolveDeck 判斷。作者 `kind:evolve_follower` 須經 registry／來源接線確認，代碼尚未
+准入時拒絕，不能退回 follower；CP03-029、BP08-053、BP17-116 的翻面材料亦同。
 keyword 的 OR 以 any_of 表達（例如 BP03-092），不新增 keywords_any。
 
 所有 ParamRef 須依[承載契約 §3](author-contract-1.0.md#3-封閉葉參數)核對。

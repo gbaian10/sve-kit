@@ -73,6 +73,10 @@ define 因而有兩種已記載的拼法重疊，本表不選標準形，也不�
 
 `A.expr.per-payload.unit` 的正整數限制、all/any 非空限制、half_up 的單運元標量形，
 以及 plus 偏移 param 可在任一側，是本表明確定形的雙向細化。
+費用資訊讀值的 `cost_of` 與 `orig_cost_of` 依 Q773 同樣讀卡面印刷費用；進化從者讀
+進化前的費用（Q1707、CR 5.24.1）。打出時的費用增減不改此資訊（Q935），不讀
+已支付 PP；BP04-098 的「コスト」與 SP01-043 的「元のコスト」在這個讀值上同義。
+作者仍保留來源用詞與各自語法節點，不因此推定 body hash 相同。
 all、any、min、max 均允許單元素列表；min/max 非空另有 GAP-A-028 的明文依據。
 不從 IR 型別偷偷推出其他撰寫形狀。`A.cond` 收上表四種條件、下表的 did、非歷史條件矩陣及事件與歷史矩陣的 history／paid／chosen，
 不收裸 bool，也不把讀值 `{zone_free:{who,zone}}` 視為條件。
@@ -157,6 +161,12 @@ CollectionSource 的 who／zone 不收直接 param；包括 agg.of、distinct �
 但 where 內巢狀 count 是另一個 A.expr.count 節點，仍有自己的 counted 參數權限；
 Quantity 內的合法算術偏移也不受外層來源角色影響。
 名稱等價、單位、空集合與 AbsentByRules 傳播均是降低責任，schema 不執行聚合。
+
+離場自身的 counter 讀值依 CR 10.11.1 使用最後在原區域時的數量：BP10-102 的災い、
+BP17-008 的矢所定義的 X 均讀離場前數量。Q1990 確認離場會移除 counter，
+不表示上述 X 變成 0；C1／D0 須保留 LKI 讀值，不能以目前墓地物件的數量代替。
+領袖生命依 CR 2.8.3／2.8.3.1 是可比較的資訊，未另指定時起始值為 20；
+上表 ECP01-046 的接線待定是實作邊界，不是領袖沒有體力或規則待維護者決定。
 
 ## 非歷史條件矩陣
 
