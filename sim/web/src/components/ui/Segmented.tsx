@@ -13,6 +13,8 @@ export interface SegmentedProps<T extends string> {
   readonly options: readonly SegmentedOption<T>[]
   readonly value: T
   readonly onChange: (value: T) => void
+  readonly disabled?: boolean
+  readonly describedBy?: string | undefined
   /** `accent` is reserved for the view switcher (design §7); everything else keeps `neutral`. */
   readonly tone?: "neutral" | "accent"
   readonly size?: "sm" | "md"
@@ -25,6 +27,8 @@ export function Segmented<T extends string>({
   options,
   value,
   onChange,
+  disabled = false,
+  describedBy,
   tone = "neutral",
   size = "md",
   className,
@@ -38,6 +42,8 @@ export function Segmented<T extends string>({
     <div
       role="radiogroup"
       aria-label={label}
+      aria-describedby={describedBy}
+      aria-disabled={disabled || undefined}
       className={cn(
         "inline-flex shrink-0 rounded-control border border-border bg-surface-1",
         size === "sm" ? "h-8.5 p-0.5" : "h-9 p-0.75",
@@ -53,6 +59,7 @@ export function Segmented<T extends string>({
             type="button"
             role="radio"
             aria-checked={checked}
+            disabled={disabled}
             tabIndex={checked ? 0 : -1}
             onKeyDown={onKeyDown}
             onClick={() => {
@@ -67,6 +74,7 @@ export function Segmented<T extends string>({
                   ? "bg-accent text-accent-ink"
                   : "bg-surface-3 text-text-1 ring-1 ring-text-1"
                 : "text-text-2 hover:text-text-1",
+              disabled && "cursor-not-allowed text-text-3 hover:text-text-3",
             )}
           >
             {option.label}

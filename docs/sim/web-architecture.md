@@ -95,12 +95,12 @@ interface QueryState {
 }
 ```
 
-`domain/query/codec.ts` 在 `QueryState` 與 URL 參數（`q class cost atk def type loc trait mech set rarity alt noreprint unit rep prfirst sort order view`）之間互轉：
+`domain/query/codec.ts` 在 `QueryState` 與 URL 參數（`q class cost atk def type loc trait mech set rarity alt reprint unit rep prfirst sort order view`）之間互轉：
 牌組位置原本放在 `type`，`type` 裡出現的位置 token（`token`、`token:spell`、`leader:gold`、`ep`、`sep`）仍會讀成 `loc`，寫回時只寫 `loc`；
 `set` 值用歸檔類別的 `product_family.code`（`SetCode`）；vocabulary 篩選值用其英文 code；`cost`、`atk`、`def` 是逗號分隔的數值清單，
 同一統計值內取聯集、不同統計值之間取交集。順序固定，篩選、排序、單位的預設值不寫進 URL，所以同一狀態只有一種網址。
 `view` 是例外：URL 有帶就照 URL；沒帶就用偏好 `viewMode`；使用者切換檢視時同時寫 URL 與偏好。
-`noreprint=1` 是「不顯示再錄卡」：只隱藏 `printing.reprint=true` 的版次，只在 `unit` 為 `printing` 或 `art` 時作用；`unit=card` 時開關停用、說明不適用，網址仍保留。卡頁列出全部版次，不受影響。
+`reprint=hide`（不含再錄）與 `reprint=only`（只看再錄）篩選 `printing.reprint=true` 的版次，沒帶參數是全部；只在 `unit` 為 `printing` 或 `art` 時作用，`unit=card` 時整組切換停用、說明不適用，網址仍保留。卡頁列出全部版次，不受影響。
 
 依使用者 2026-09-30 的規格變更（build-db §15），`/sets/:code` 的路徑代號是 `product_family.public_code`，解析到同一歸檔類別後，以其 `code` 預設 `set=`，標頭顯示歸檔類別名稱。卡包瀏覽與搜尋依已登錄的 `printing.home_set_id` 篩選，且只納入 `printing.region` 符合目前 `cardEdition`（`jp`／`en`，§3）的版次，兩區結果不混；合併卡片顯示也只使用命中的版次。商品名稱、發售日與收錄供單卡頁補充資訊及連結，不驅動 `set=` 篩選；獨立的初收錄 facet 依 build-db §15 的協調者決定，資料缺少或未知時標示 coverage，不因此隱藏卡片。
 

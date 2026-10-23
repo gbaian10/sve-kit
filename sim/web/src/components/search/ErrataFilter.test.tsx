@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react"
+import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { useState } from "react"
 import { expect, it } from "vitest"
@@ -46,22 +46,45 @@ it("toggles errata independently before the display controls and round trips thr
 })
 
 it.each([
-  { language: "zh-TW" as const, label: "不顯示再錄卡", display: "顯示方式", note: "不適用" },
-  { language: "ja" as const, label: "再録カードを隠す", display: "表示方法", note: "無効" },
-  { language: "en" as const, label: "Hide reprints", display: "Display", note: "Not applied" },
-])("toggles hiding reprints in $language and ignores it per card", async (copy) => {
+  {
+    language: "zh-TW" as const,
+    group: "再錄卡",
+    hide: "不含再錄",
+    only: "只看再錄",
+    display: "顯示方式",
+    note: "不適用",
+  },
+  {
+    language: "ja" as const,
+    group: "再録カード",
+    hide: "再録を除く",
+    only: "再録のみ",
+    display: "表示方法",
+    note: "無効",
+  },
+  {
+    language: "en" as const,
+    group: "Reprints",
+    hide: "Hide reprints",
+    only: "Reprints only",
+    display: "Display",
+    note: "Not applied",
+  },
+])("switches the reprint filter in $language and ignores it per card", async (copy) => {
   await renderInRouter(<Harness />, { language: copy.language })
   const user = userEvent.setup()
-  const hide = screen.getByRole("checkbox", { name: copy.label })
-  expect(hide).not.toBeChecked()
+  const group = screen.getByRole("radiogroup", { name: copy.group })
+  expect(within(group).getAllByRole("radio")).toHaveLength(3)
+  expect(within(group).getAllByRole("radio")[0]).toBeChecked()
   expect(screen.getByLabelText("URL")).toHaveTextContent("")
-  await user.click(hide)
-  expect(hide).toBeChecked()
+  await user.click(screen.getByRole("radio", { name: copy.hide }))
+  expect(screen.getByLabelText("URL")).toHaveTextContent("reprint=hide")
+  await user.click(screen.getByRole("radio", { name: copy.only }))
   const url = screen.getByLabelText("URL").textContent
-  expect(url).toBe("noreprint=1")
-  expect(parseQuery(new URLSearchParams(url))).toMatchObject({ hideReprints: true })
+  expect(url).toBe("reprint=only")
+  expect(parseQuery(new URLSearchParams(url))).toMatchObject({ reprints: "only" })
   await user.selectOptions(screen.getByRole("combobox", { name: copy.display }), "card")
-  expect(hide).toBeDisabled()
-  expect(hide).toBeChecked()
-  expect(hide).toHaveAccessibleDescription(new RegExp(copy.note, "u"))
+  expect(screen.getByRole("radio", { name: copy.only })).toBeDisabled()
+  expect(screen.getByRole("radio", { name: copy.only })).toBeChecked()
+  expect(group).toHaveAccessibleDescription(new RegExp(copy.note, "u"))
 })

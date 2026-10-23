@@ -2434,7 +2434,7 @@ it.each([
   ["same art", { unit: "art" as const }, ["p:sd01-002-bp", "p:sd01-002"]],
   [
     "hidden reprints",
-    { unit: "printing" as const, hideReprints: true },
+    { unit: "printing" as const, reprints: "hide" as const },
     ["p:sd01-002-bp", "p:sd01-002"],
   ],
 ])("queries wait for printing completion (%s)", async (_label, changes, expected) => {
@@ -2734,14 +2734,17 @@ it("hides registered reprints per printing, not when merged per card, and restor
         .items.map((item) => item.printingId)
     const all = ids({})
     for (const id of registered) expect(all).toContain(id)
-    const hidden = ids({ hideReprints: true })
+    const hidden = ids({ reprints: "hide" })
     expect(hidden.length).toBe(all.length - registered.length)
     for (const id of registered) expect(hidden).not.toContain(id)
-    const hiddenArt = ids({ hideReprints: true, unit: "art" })
+    const hiddenArt = ids({ reprints: "hide", unit: "art" })
     expect(hiddenArt.length).toBeGreaterThan(0)
     for (const id of registered) expect(hiddenArt).not.toContain(id)
+    // "Only" keeps exactly the registered ones.
+    expect(ids({ reprints: "only" }).sort()).toEqual([...registered].sort())
     // Merging per card shows every card once: the switch has no effect there.
-    expect(ids({ hideReprints: true, unit: "card" })).toEqual(ids({ unit: "card" }))
+    expect(ids({ reprints: "hide", unit: "card" })).toEqual(ids({ unit: "card" }))
+    expect(ids({ reprints: "only", unit: "card" })).toEqual(ids({ unit: "card" }))
   }
 })
 

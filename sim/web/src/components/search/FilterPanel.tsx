@@ -7,6 +7,7 @@ import {
   COST_CAP,
   QUERY_UNITS,
   type QueryState,
+  REPRINT_MODES,
   STAT_CAP,
   toggleValue,
 } from "../../domain/query/model"
@@ -14,6 +15,7 @@ import { REPRESENTATIVE_RARITIES } from "../../domain/representative"
 import type { Region } from "../../domain/search"
 import { Button } from "../ui/Button"
 import { cn } from "../ui/cn"
+import { Segmented } from "../ui/Segmented"
 import { Switch } from "../ui/Switch"
 import { Section, Toggle } from "./FilterControls"
 import { StatValue } from "./StatValue"
@@ -285,27 +287,26 @@ export function FilterPanel({
             />
             {t("filters.prFirst")}
           </label>
-          <label
-            className={cn(
-              "flex min-h-9 items-center gap-2 px-1 text-13",
-              cardMerged ? "cursor-not-allowed text-text-3" : "cursor-pointer text-text-1",
-            )}
-          >
-            <input
-              type="checkbox"
-              checked={query.hideReprints}
+          <div className="flex w-full flex-wrap items-center gap-2">
+            <span className="text-13 text-text-2">{t("filters.reprints")}</span>
+            <Segmented
+              label={t("filters.reprints")}
+              size="sm"
+              value={query.reprints}
               disabled={cardMerged}
-              aria-describedby={cardMerged ? `${id}-reprints-hint` : undefined}
-              onChange={(event) => {
-                onChange({ ...query, hideReprints: event.target.checked })
+              describedBy={cardMerged ? `${id}-reprints-hint` : undefined}
+              options={REPRINT_MODES.map((mode) => ({
+                value: mode,
+                label: t(`filters.reprintModes.${mode}`),
+              }))}
+              onChange={(reprints) => {
+                onChange({ ...query, reprints })
               }}
-              className="size-4 shrink-0 accent-accent"
             />
-            {t("filters.hideReprints")}
-          </label>
+          </div>
           {cardMerged && (
             <p id={`${id}-reprints-hint`} className="w-full text-12 text-text-3">
-              {t("filters.hideReprintsMerged")}
+              {t("filters.reprintsMerged")}
             </p>
           )}
         </div>

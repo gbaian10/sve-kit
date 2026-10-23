@@ -1095,7 +1095,9 @@ export class SearchIndex {
         })) &&
       (!state.altArtOnly || this.printings.alt[printing] === 1) &&
       // A merged-by-card cell stands for every printing, so hiding reprints cannot apply there.
-      (!state.hideReprints || state.unit === "card" || this.printings.reprint[printing] !== 1)
+      (state.reprints === "all" ||
+        state.unit === "card" ||
+        (this.printings.reprint[printing] === 1) === (state.reprints === "only"))
     // Stats come from the opened printing's summary; a selection within one stat is a union and
     // the three stats intersect.
     const statsAllowed = (printing: number) =>

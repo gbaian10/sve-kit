@@ -173,15 +173,15 @@ export function ConditionChips({
           },
         ]
       : []),
-    ...(query.hideReprints
-      ? [
+    ...(query.reprints === "all"
+      ? []
+      : [
           {
             key: "reprints",
-            label: t("filters.hideReprints"),
-            without: { ...query, hideReprints: false },
+            label: t(`filters.reprintModes.${query.reprints}`),
+            without: { ...query, reprints: "all" as const },
           },
-        ]
-      : []),
+        ]),
     // Merging cells is display, but the maintainer wants it removable from here too.
     ...(query.unit === "printing"
       ? []
