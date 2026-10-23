@@ -1,0 +1,143 @@
+format: 1
+kind: qa_translation_shard
+entries:
+  - qa_id: qa:v1:11ab1b33d0fdeaa81a01b6558a69c02b63fe3dba2eafe64145e8aec275c71c85
+    field: answer
+    source_hash: sha256:27a521068399ab068bc8dbafb7becc147bd5edb81d9121e9fab4a576b00f92c5
+    lang: zh-Hant
+    text: 是的。會觸發。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:11ab1b33d0fdeaa81a01b6558a69c02b63fe3dba2eafe64145e8aec275c71c85
+    field: question
+    source_hash: sha256:adb881b1fd8a19115f7af5f67a919c6d122e75a27c9e8736967d123fc546a54a
+    lang: zh-Hant
+    text: 自己的戰場上有2個這個從者，且有其他從者進入戰場時，這些從者的能力會各自觸發嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:19f237f984a44421063e3c6e36d7827e0cdcd00f0f602f3503b7c11fe58061b9
+    field: answer
+    source_hash: sha256:fb2f2d205519da8dc734d914ac36397a950c84407b35e0f4fa70656775cb4b94
+    lang: zh-Hant
+    text: 是的。可以使用。此時，無法將『騎士』放置到EX區。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:19f237f984a44421063e3c6e36d7827e0cdcd00f0f602f3503b7c11fe58061b9
+    field: question
+    source_hash: sha256:7faa5bd12ee16977c337b641351f668fd8f41e92f535946a142463684a1bdbeb
+    lang: zh-Hant
+    text: 自己的EX區已達上限，且敵方戰場上有可以選擇的從者時，可以選擇敵方的1個從者並使用這張法術嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:41cf78ddc9154dcb34f056bf52496cf164dbeac5f2dc388e058656b5d76aadcc
+    field: answer
+    source_hash: sha256:2c344751082115128fb00c364d2542a85e5d7cf414500ee4116e0821f02f2e45
+    lang: zh-Hant
+    text: 不行。無法放置。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:41cf78ddc9154dcb34f056bf52496cf164dbeac5f2dc388e058656b5d76aadcc
+    field: question
+    source_hash: sha256:68743f1eb3a3b484d2c9b3822086162f68a6c1c55415c9bd61e73e37f3dc7074
+    lang: zh-Hant
+    text: 自己的EX區已達上限時，可以藉由這張法術將『妖精』放置到EX區嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:7f20e7ab659946116e9ef4f0939f217ebe19c9adf91ff60d9c6640d8cd2ccb28
+    field: answer
+    source_hash: sha256:3d23bdc66ff6d76c3b03dc72343b1497283e0c1b83fe06429c1464f8bb86d968
+    lang: zh-Hant
+    text: 不會。滿足【魔力連鎖 10】的條件時，這個從者會給予敵方的1個從者4點傷害，並給予敵方的主戰者2點傷害。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:7f20e7ab659946116e9ef4f0939f217ebe19c9adf91ff60d9c6640d8cd2ccb28
+    field: question
+    source_hash: sha256:afbdd1bf93c1229c16618dfc7ca9db9f2afeac636d70dbb0dcab263d4b6fab9c
+    lang: zh-Hant
+    text: 滿足【魔力連鎖 10】的條件時，這個從者會給予敵方的1個從者6點傷害，並給予敵方的主戰者2點傷害嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:97d92d2de14fb26c0e791376f7166dfa490098324c73e1d2498bd55dab4d698f
+    field: answer
+    source_hash: sha256:fbfff0864289fc9bde120324bd58274855d06e61263e6133552db2fcf5f9fc77
+    lang: zh-Hant
+    text: 不會。自己的戰場已達上限時，若使用召喚從者或護符到戰場上的能力，從者或護符不會進入戰場，因此這個從者不會{攻擊力}+1/{生命值}+1。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:97d92d2de14fb26c0e791376f7166dfa490098324c73e1d2498bd55dab4d698f
+    field: question
+    source_hash: sha256:5889f4dea3e24374ccbd8b65c12b1741f564636553f9ec4bd065759eb15a3918
+    lang: zh-Hant
+    text: 自己的戰場已達上限，且使用了召喚從者到戰場上的能力時，這個從者會{攻擊力}+1/{生命值}+1嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a5d92868ecbd65241774479c7180d0dafb30d7ac6255adf1426ae3aaacf0cd47
+    field: answer
+    source_hash: sha256:4b5ad85aa954a93ce2807fe2d3993430a987879970939b4eb54d38407fb59c2d
+    lang: zh-Hant
+    text: 不行。由於沒有可供這張法術選擇的從者，因此無法使用，也無法抽卡片。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a5d92868ecbd65241774479c7180d0dafb30d7ac6255adf1426ae3aaacf0cd47
+    field: question
+    source_hash: sha256:e1ef134e73cf1538ee0463a319ab3ee4e795cb0b0bd7ea5ae6ec2297e0f386b4
+    lang: zh-Hant
+    text: 自己的戰場上沒有從者時，可以使用這張法術來抽1張卡片嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:c31b24dd342705f43d28ae5074e35db5e358824aea7bc6d8b0e240f67f921ac7
+    field: answer
+    source_hash: sha256:7e0b1b3c770ee6216e44d025aabb6f406e7ee5e0a3338e1e43470a6959d7dfe6
+    lang: zh-Hant
+    text: 不行。由於沒有可供這張法術選擇的從者，因此無法使用，也無法將『騎士』放置到EX區。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:c31b24dd342705f43d28ae5074e35db5e358824aea7bc6d8b0e240f67f921ac7
+    field: question
+    source_hash: sha256:ab6f33d5b22ae7e1f878a9a4a88050a6228f6d4c8f96d25e7434c9a82272e500
+    lang: zh-Hant
+    text: 敵方戰場上沒有從者時，可以使用這張法術將『騎士』放置到EX區嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:c5e9f7ce115f1d3335894db6e322f07e86db3af2007e312059e08e7f16a0c6bc
+    field: answer
+    source_hash: sha256:988e72e57e2089e4c1bfc232691050bdfc9f1405fc21f7cbb7d54cad0a6bfa5e
+    lang: zh-Hant
+    text: 是的。由於能力的消費要求將這個護符橫置，因此在橫置狀態下無法支付消費。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:c5e9f7ce115f1d3335894db6e322f07e86db3af2007e312059e08e7f16a0c6bc
+    field: question
+    source_hash: sha256:f8e40b9b079c5785b4413c1fa39a63f054138d8664dbccea27431811454860a5
+    lang: zh-Hant
+    text: 這個護符已橫置時，是否無法支付這個護符的能力的消費？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:dbd4346ec24f04f28e7506986d7aec4744cb54f38a7edf2b8fbd0abadc9f1823
+    field: answer
+    source_hash: sha256:93fdac7e93306eee1f13a12bbcd1b964936369a9700fbbf35fc9c076b215d47e
+    lang: zh-Hant
+    text: 是的。可以給予傷害。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:dbd4346ec24f04f28e7506986d7aec4744cb54f38a7edf2b8fbd0abadc9f1823
+    field: question
+    source_hash: sha256:f2a769e680b0850fba4637542380016e88da566e5d71a7fe7e55335ccd71be64
+    lang: zh-Hant
+    text: 敵方戰場上有具有【光紋】的從者時，可以藉由這張法術給予敵方具有【光紋】的從者傷害嗎？
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e4cb67a79e197014c78c1900e63f7f4d4a929582b910eff300ecf7bc2e93f50f
+    field: answer
+    source_hash: sha256:59f5f7c82cb4814bf3285a6e45513a1531ee98c4060b2a1a756994cce71df177
+    lang: zh-Hant
+    text: 不會。從者進化時，進化從者不視為進入戰場，因此這個從者不會{攻擊力}+1/{生命值}+1。
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e4cb67a79e197014c78c1900e63f7f4d4a929582b910eff300ecf7bc2e93f50f
+    field: question
+    source_hash: sha256:e398019bae51772c2b96bd775df428f3ae0e1a13f9ccf31c65e9549a4134c127
+    lang: zh-Hant
+    text: 自己戰場上的其他從者進化時，這個從者會{攻擊力}+1/{生命值}+1嗎？
+    origin: machine
+    low_confidence: true
