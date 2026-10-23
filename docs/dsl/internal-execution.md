@@ -17,13 +17,13 @@ owner、field、fragment；這不授予永久來源身分或公開 capability。
 本文，不把依賴 play binding 的本文重新當成封閉 `WellFormedProgram`。
 base face 的普通打出費用必須是非負數字；缺欄、null、「-」、其他非數字及負值拒絕，明示的零費用仍有效。
 非打出用的進化 face 不套用此數字限制；能力引用 face 的原有缺欄檢查仍適用。
-Printed Activated 的印刷面必須是普通從者，護符起動片段在載入時即拒絕。
+Printed Activated 的印刷面限普通從者或護符；卡種由同一 Catalog face 驗證。
 
 准入接受普通 Printed Spell 的 `[Resolution]`、Printed Activated 的 `[Field]`，以及下節的
 Printed Fanfare／Lastword／OnAttack 及 End Begin。Spell 的唯一固有 Ordered PP Pay 必須等於同 Catalog face 的印刷費用；
 只在這個已驗位置按 Resolution 的有效成本實付一次。Activated 沿用 controller 的非負常值 PP
 與恰好 SourceHolder 的 Acted Posture／Put 送往 owner 墓地，不能套用卡片減費；成本沒有 materials、precondition 或替代。
-Amulet executor、Quick、前置 X、追加／替代成本、一般 trigger、Static 與任意對象 LKI 仍整棵拒絕。
+Quick、前置 X、追加／替代成本、一般 trigger、Static 與任意對象 LKI 仍整棵拒絕。
 Quick 的後續准入義務見 [Quick 契約](quick-semantics.md)，本節的已驗範圍不因規格定義而擴張。
 
 載入逐能力驗證 card／face／line、印刷座標唯一、所有 instruction 的來源閉包，以及包含未選模式
@@ -35,16 +35,39 @@ Move／Destroy 沿用已驗公開區來源與 owner 墓地／消滅目的地；S
 這只是執行支援，不代表正式來源或 qualified 已驗；未受驗連結、特殊卡片、入場效果與其他互動本文保持拒絕。
 
 `play_internal_card(holder, actor)` 接主動玩家 main、自己的 Hand／EX、base 普通 Spell 或已准入的
-普通從者；`activate_internal_card(holder, AbilityId, actor)` 接已載入的當前場上從者能力。
+普通從者／護符；`activate_internal_card(holder, AbilityId, actor)` 接已載入的當前場上從者／護符能力。
 來源、世代、instance 與 execution 都由 authority 建立；`base` 在起動時同樣比對 face 0。
 所有局內卡片都須完整載入，空能力卡也須明示；未准入的原型能力、keyword、continuous、delayed
 與忙碌 context 拒絕。已載入 Spell／Fanfare 時封住合成 prepare 與原型打出，不略過正式 producer。
 
 上述入口回傳 `CardPlay`：`Awaiting` 只有本次 token、actor 與授權的題目；`Resolved` 含完整
-`Activation`；從者卡片 play 的 `Entered` 含 `CardEntry`（本次 execution、完整付款／card facts、
+`Activation`；從者／護符卡片 play 的 `Entered` 含 `CardEntry`（本次 execution、完整付款／card facts、
 事件與下一階段）。`answer_internal_card(actor, token, payload)` 不收 caller 的 source、snapshot
 或環境；合成 `answer_internal` 不能回答正式 play。待答期間不發布部分完整 Activation。
-從者規則付款以該次 execution 的 `ReceiptId(0)` 保存，Fanfare 另有 execution 與 receipts。
+從者／護符規則付款以該次 execution 的 `ReceiptId(0)` 保存，Fanfare 另有 execution 與 receipts。
+
+### 普通護符的執行子集
+
+此子集限印刷攻／體皆為「-」的普通護符；有印刷數值的護符（如 BP16-U06）在載入時拒絕，
+不以缺值零規則誤讀其資訊，也不開操縱／種類變更。普通護符與從者共用上述 Hand／EX → Resolution → Field 程序、固有 PP 付款、付款後五格
+場容量及失敗回復；護符自身的打出費用修正（`card_play_costs`）仍在載入時拒絕，[自身打出費用修正](#自身打出費用修正)只承載從者與 Spell。
+護符起動沿相同的 `[Field]`／Printed 准入，支援非負常值 PP、SourceHolder
+的 Act 與 Put 至 owner 墓地；目標先選完才付款。自身送墓仍以離場前世代作為傷害來源，
+來源數值沿既有 SourceInformation／LKI 讀取；缺少攻／體的資訊直接讀值為零（CR 1.3.6.3），不將護符當從者。
+[數值期限契約 R-B](numeric-timing.md#5-可執行局面驗收清單) 要求的比較為 false 尚未承載，lowering 也還不產生這類讀值。
+攻擊、被攻擊與從者目標仍由既有卡種檢查拒絕。
+
+護符的 Fanfare、Lastword、已支援的 Printed EnterField 與 End Begin 沿共同 producer、
+pending 與 LKI，不另設護符待機。護符入場仍可被「從者入場」條件排除。
+lowering 與良構檢查原已按能力形狀而非卡種承載上述成本／觸發，這片不新增作者語法或 IR 欄位，
+亦不擴大 `Registry::current().supported()`。
+
+BP01-041 的候選起動片段由 C0 展開、lowering、良構與整卡執行驗 PP／Act；BP20-100
+只以合成來源座標驗抽牌 Fanfare 與 Act／自身送墓／傷害片段。後者的 `usable_if`
+（EX 的クレスト至少三枚）尚未由 lowering 承載，完整能力仍拒絕，不能刪掉條件宣稱整卡可用。
+逐卡候選報告中的 `runtime=supported` 只表示機制子集可執行；C1 來源／資格／完整能力閉包
+尚缺時，外層准入仍為 rejected。起動 `per_turn`、Quick、X、追加／替代成本、Static
+及其他未准入觸發保持拒絕。
 
 ### 共同選擇 snapshot 與回復
 
@@ -68,7 +91,7 @@ target decision。Bound 只讀受驗的 target producer，與 InstallEffect affe
 合法方案；完全無解時不出題，直接回整次 play 前。空目標保存空分配並續後句。完整分配仍綁定 execution／scope／decision／slot
 與共同 snapshot；Damage 保留原量，重驗原世代，不重綁或補分。
 
-完整付款後才形成 CardPlayed／AbilityPlayed；從者於付款後驗場容量，Spell 不要求場位。
+完整付款後才形成 CardPlayed／AbilityPlayed；從者／護符於付款後驗場容量，Spell 不要求場位。
 Spell 本文完成後，僅把仍在 Resolution 的同世代卡移去 owner 墓地，再做 EndResolution 收尾，
 最後形成 CardResolved／AbilityResolved 並交 `CheckTiming`。來源記錄保留打出時的 Resolution
 世代，不把墓地新世代冒充來源。本文中不做致死／抽空檢查，不插入回應窗口，也不自行推到 end／discard。
@@ -88,7 +111,7 @@ Fanfare 保留 `Keyword(Fanfare, Printed)`，限定 AfterEntry、Field、PerFact
 SourceHolder。Lastword 保留 `Keyword(Lastword, Printed)`，限定 BeforeExit、Field、PerFact，
 LeaveFieldObjectBefore 恰等於 SourceHolder 且實際目的區為 owner 墓地。兩者都不接受 event captures 或 PlaySpec；限次只收下述共同正規形。其他 trigger 與整棵本文仍各自准入。Fanfare 的 Continuous 來源形狀仍拒絕。
 
-普通從者先入 Resolution，承接受驗 EX 費用後才決定並支付固有 PP，付款後驗場位。
+普通從者／護符先入 Resolution，承接受驗 EX 費用後才決定並支付固有 PP，付款後驗場位。
 EX→Resolution 與 Resolution→Field 只承接既有 CostModifier 的完整實例與目標新世代；其他效果／counter
 承接未實作時拒絕。從者可以沒有 Fanfare，或在同一 face 有多個已准入的能力；不能用定義序決定結算序。
 Fanfare 由共同入場 producer 保存原來源、controller、instance 與公開的入場來源區域。

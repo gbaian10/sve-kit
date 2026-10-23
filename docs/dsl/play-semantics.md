@@ -23,7 +23,8 @@ prepared play 終局接點另依[觸發與 LKI 契約](trigger-lki-semantics.md)
 
 Spell 的 Resolution 對映依 10.1.1、10.3.4、10.6.2.1、10.6.2.8.2；Follower／Amulet
 能力的 Field 預設依 10.3.5。Fanfare 依 12.4、10.7.1–.3，不要求卡片是經 play 入場；
-第一版只沿用已受驗的單一自身 Fanfare producer，不因此開放其他入場路徑或 Amulet executor。
+已驗的從者／護符 play 子集及共同入場 producer 見[內部執行入口](internal-execution.md#普通護符的執行子集)；
+不因此開放其他未受驗入場路徑。
 
 載入整卡時驗 header、卡表類型／face／來源閉包及整樹支援；實際打出再驗 holder 世代、
 owner／controller、區域、禁止與時點。普通起點限 Hand／EX，不新增 `PlaySpec` 起點欄位。
