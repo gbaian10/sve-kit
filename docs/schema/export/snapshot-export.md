@@ -64,7 +64,8 @@ default printing 的基本列進 catalog，其餘印刷的卡號定位三格按�
 裝進 catalog，與 default 基本列的聯集恰好覆蓋全部印刷；其完整基本列在背景 print 檔。
 商品與引擎資料亦按用途放背景檔，不阻塞基本目錄冷載。
 
-背景一般家族 width=64，BP01／CP04 固定 width=32（兩帶），global width=8（八帶）；
+背景一般家族 width=64，BP01／CP04 固定 width=32（兩帶），global 預設 width=8（八帶），
+僅 purpose=detail、region=null 的 global 為 width=4（十六帶）；
 共用譯文檔依來源 JP owner 的家族沿用同一固定 band。images 保留原 physical 成員：
 global width=1、home_set width=32。Python producer 與 reader 共用 contracts 的寬度表，
 各自計算分組與驗證；不按資料大小動態換 width，也不跨家族填裝。
