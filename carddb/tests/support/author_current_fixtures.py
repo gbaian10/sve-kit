@@ -39,7 +39,7 @@ CARD_NUMBERS = frozenset(
         "BP01-092",
     }
 )
-EVOLVE_FRAME = "frame:8ebd201e08a1e14f57b700f2fb76dc11afbf7f16261350a117e2ca75f1aac18c"
+EVOLVE_FRAME = "frame:4e38fd488749ed51f1cf501759988e443549000c47bca7aba285a2f6009b902d"
 
 
 @dataclass(frozen=True)

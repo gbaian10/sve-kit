@@ -31,6 +31,8 @@ class CardContext:
     face_id: str
     phase: str
     card_kind: str
+    current: bool = False
+    section_count: int | None = None
 
 
 @dataclass(frozen=True)

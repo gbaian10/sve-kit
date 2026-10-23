@@ -43,10 +43,18 @@ recognition rules. N1 source semantics belongs to #380/#499.
 
 `four_layer_derivation.derive_source` is the production source entry point. It
 uses the current source partitions, Unicode units and adopted classifier catalog.
-Its frames use `four-layer-jp-v6`, the single version accepted by the production
+Its frames use `four-layer-jp-v7`, the single version accepted by the production
 authored and DB readers. The normal build derives N1 source fields before matching
 frames. Frozen N0 lexical and numeric rules remain the registered foundation,
 without a second production reader.
+
+After lexical derivation, `four_layer_draw.prepare_draw` recognizes the three
+closed `draw_exact_spell.v1`, `draw_exact_attack_time.v1` and
+`draw_exact_evolve_time.v1` constructions. Each requires a current JP face effect,
+an exact whole source line and one required Nat/count leaf. Card kind, phase,
+section and cross-line quotation guards keep other uses pending. Quick is excluded.
+These source classifications do not extend production author adapters; the full
+conditions are recorded in the four-layer translation contract, §11.15.
 
 Complete `【keyword】` lines obtain required Concept leaves, including every
 repeated source occurrence. The standalone `{クイック}` construction requires the
