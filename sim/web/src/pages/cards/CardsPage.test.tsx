@@ -644,8 +644,8 @@ describe("CardsPage", () => {
           "PR",
           "銅",
           "從者",
-          "主戰者・金框",
           "Token",
+          "主戰者・金框",
           "同卡合併成一張",
         ])
       })
@@ -785,6 +785,7 @@ describe("CardsPage", () => {
 
     it("shares keyword conditions between the panel, URL, chips and result units", async () => {
       const { router } = await open()
+      await userEvent.click(screen.getByRole("button", { name: /^關鍵字/u }))
       const group = screen.getByRole("group", { name: "關鍵字" })
       const ward = await within(group).findByRole("button", { name: "守護" })
       await waitFor(() => expect(ward).toBeEnabled())

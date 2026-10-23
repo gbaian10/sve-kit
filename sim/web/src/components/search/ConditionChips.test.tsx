@@ -70,7 +70,7 @@ describe("condition chips for grouped values", () => {
 
   it("keeps one chip per sub-value while the selection is partial, each removable alone", async () => {
     await renderInRouter(<Harness initial="type=leader:gold,token:spell&rarity=pr:gr" />)
-    expect(chips()).toEqual(["PR（GR）", "主戰者・金框", "Token・法術"])
+    expect(chips()).toEqual(["PR（GR）", "Token・法術", "主戰者・金框"])
     await userEvent.click(screen.getByRole("button", { name: "移除條件：Token・法術" }))
     expect(chips()).toEqual(["PR（GR）", "主戰者・金框"])
     // Location tokens read from an older `type=` URL are written back as `loc=`.

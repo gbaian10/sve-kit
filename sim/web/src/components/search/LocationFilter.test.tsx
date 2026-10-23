@@ -76,10 +76,10 @@ it("orders the row, keeps Token kinds and leader frames behind popovers and read
     "主牌組",
     "進化",
     "進階",
-    "主戰者",
-    "主戰者的細項",
     "Token",
     "Token的細項",
+    "主戰者",
+    "主戰者的細項",
     "EP",
     "SEP",
   ])
@@ -95,7 +95,7 @@ it("orders the row, keeps Token kinds and leader frames behind popovers and read
   expect(token).toHaveAttribute("aria-pressed", "mixed")
   expect(leader).toHaveAttribute("aria-pressed", "mixed")
   await userEvent.click(within(row).getByRole("button", { name: "Token的細項" }))
-  const kinds = screen.getByRole("group", { name: "Token" })
+  const kinds = screen.getByRole("group", { name: "Token的細項" })
   expect(
     within(kinds)
       .getAllByRole("checkbox")
@@ -106,7 +106,7 @@ it("orders the row, keeps Token kinds and leader frames behind popovers and read
   expect(token).toHaveAttribute("aria-pressed", "true")
   expect(url()).toBe("loc=leader:white,token")
   await userEvent.click(within(row).getByRole("button", { name: "主戰者的細項" }))
-  const frames = screen.getByRole("group", { name: "主戰者" })
+  const frames = screen.getByRole("group", { name: "主戰者的細項" })
   expect(within(frames).getByRole("checkbox", { name: "金框" })).toHaveAccessibleDescription("2")
   await userEvent.click(within(frames).getByRole("checkbox", { name: "金框" }))
   expect(leader).toHaveAttribute("aria-pressed", "true")

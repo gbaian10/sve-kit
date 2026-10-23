@@ -1,6 +1,6 @@
 // Token and leader keep the sub-values they had under the former type filter (`token:<type>`,
 // `leader:<frame>`), so the location tokens older `type=` URLs carry still resolve.
-export const LOCATION_ORDER = ["main", "evolve", "advance", "leader", "token", "ep", "sep"] as const
+export const LOCATION_ORDER = ["main", "evolve", "advance", "token", "leader", "ep", "sep"] as const
 const TOKEN_TYPES = ["follower", "spell", "amulet", "crest", "equipment"] as const
 const LEADER_FRAMES = ["gold", "white", "unknown"] as const
 
@@ -41,15 +41,13 @@ export function orderLocationTokens(tokens: readonly string[]): string[] {
 
 export type BadgeLocation = "evolve" | "advance" | "leader" | "token" | "ep" | "sep"
 
-/** Badges retain every matching kind, in the filter row's display order. */
+/** Card-face badges keep their order independently of filter controls. */
 export function deckLocationBadges(
   type: string,
   specialKinds: readonly unknown[],
 ): BadgeLocation[] {
-  return LOCATION_ORDER.filter((location): location is BadgeLocation => {
-    if (location === "leader") return type === "leader"
-    if (location === "evolve" || location === "advance" || location === "token")
-      return specialKinds.includes(location)
-    return false
-  })
+  const badgeOrder = ["evolve", "advance", "leader", "token"] as const
+  return badgeOrder.filter((location) =>
+    location === "leader" ? type === "leader" : specialKinds.includes(location),
+  )
 }

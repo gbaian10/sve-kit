@@ -1,9 +1,8 @@
-import { ChevronDown } from "lucide-react"
 import { type ReactNode, useId, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { normalizeText } from "../../domain/normalize"
-import { Button } from "../ui/Button"
+import { FilterDropdown } from "./FilterDropdown"
 
 interface FacetOption {
   readonly code: string
@@ -52,6 +51,7 @@ export function FacetFilter({
   selected,
   onChange,
   searchable = false,
+  quickOptions,
 }: {
   readonly label: string
   readonly groups: readonly (readonly FacetOption[])[]
@@ -60,11 +60,10 @@ export function FacetFilter({
   readonly onChange: (selected: string[]) => void
   /** Adds a text box that narrows the list by label (for long lists such as traits). */
   readonly searchable?: boolean
+  readonly quickOptions?: ReactNode
 }) {
   const { t } = useTranslation()
-  const [open, setOpen] = useState(false)
   const [filter, setFilter] = useState("")
-  const id = useId()
   const searchId = useId()
   const toggle = (code: string) => {
     onChange(
@@ -84,72 +83,66 @@ export function FacetFilter({
     .filter((items) => items.length > 0)
   const nothingMatches = needle !== "" && !groups.some((items) => items.some(matches))
   return (
-    <div>
-      <Button
-        size="sm"
-        disabled={!counts}
-        aria-expanded={open}
-        aria-controls={id}
-        onClick={() => {
-          setOpen(!open)
-        }}
-      >
-        {label}
-        <span className="font-normal text-text-2">
-          {selected.length
-            ? t("rarityBadge.selected", { count: selected.length })
-            : t("rarityBadge.all")}
-        </span>
-        <ChevronDown aria-hidden="true" className="size-4" />
-      </Button>
-      <div
-        id={id}
-        hidden={!open}
-        className="mt-2 max-h-96 w-full max-w-xl overflow-y-auto rounded-control border border-border bg-surface-1 p-2"
-      >
-        {searchable && (
-          <input
-            id={searchId}
-            type="search"
-            value={filter}
-            disabled={!counts}
-            aria-label={t("filters.searchIn", { label })}
-            placeholder={t("filters.searchIn", { label })}
-            autoComplete="off"
-            onChange={(event) => {
-              setFilter(event.target.value)
-            }}
-            className="mb-2 h-9 w-full rounded-control border border-border bg-surface-1 px-2 text-13 text-text-1 placeholder:text-text-3"
-          />
+    <FilterDropdown
+      label={label}
+      disabled={!counts}
+      selectedCount={selected.length}
+      summary={
+        selected.length > 0
+          ? selected
+              .map((code) => groups.flat().find((item) => item.code === code)?.label ?? code)
+              .join("、")
+          : t("rarityBadge.all")
+      }
+      onClear={() => {
+        onChange([])
+      }}
+    >
+      {quickOptions && (
+        <div className="mb-3 flex flex-wrap gap-2 border-b border-border pb-3">{quickOptions}</div>
+      )}
+      {searchable && (
+        <input
+          id={searchId}
+          type="search"
+          value={filter}
+          disabled={!counts}
+          aria-label={t("filters.searchIn", { label })}
+          placeholder={t("filters.searchIn", { label })}
+          autoComplete="off"
+          onChange={(event) => {
+            setFilter(event.target.value)
+          }}
+          className="mb-2 h-9 w-full rounded-control border border-border bg-surface-1 px-2 text-13 text-text-1 placeholder:text-text-3"
+        />
+      )}
+      <fieldset disabled={!counts}>
+        <legend className="sr-only">{label}</legend>
+        {searchable && nothingMatches && (
+          <p className="px-2 py-2 text-13 text-text-3">{t("filters.noMatch")}</p>
         )}
-        <fieldset disabled={!counts}>
-          <legend className="sr-only">{label}</legend>
-          {searchable && nothingMatches && (
-            <p className="px-2 py-2 text-13 text-text-3">{t("filters.noMatch")}</p>
-          )}
-          {shown.map((items, index) => (
-            <div key={items.at(0)?.code ?? index}>
-              {index > 0 && (
-                <hr className="my-2 border-0 border-t border-dashed border-border-strong" />
-              )}
-              <ul className="grid grid-cols-2 gap-x-4">
-                {items.map((item) => (
-                  <li key={item.code} className={item.fullWidth ? "col-span-2" : undefined}>
-                    <FacetCheckbox
-                      label={item.label}
-                      count={counts?.[item.code] ?? 0}
-                      checked={selected.includes(item.code)}
-                      onChange={() => {
-                        toggle(item.code)
-                      }}
-                    />
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </fieldset>
-      </div>
-    </div>
+        {shown.map((items, index) => (
+          <div key={items.at(0)?.code ?? index}>
+            {index > 0 && (
+              <hr className="my-2 border-0 border-t border-dashed border-border-strong" />
+            )}
+            <ul className="grid grid-cols-2 gap-x-4">
+              {items.map((item) => (
+                <li key={item.code} className={item.fullWidth ? "col-span-2" : undefined}>
+                  <FacetCheckbox
+                    label={item.label}
+                    count={counts?.[item.code] ?? 0}
+                    checked={selected.includes(item.code)}
+                    onChange={() => {
+                      toggle(item.code)
+                    }}
+                  />
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </fieldset>
+    </FilterDropdown>
   )
 }

@@ -141,6 +141,14 @@ const zhTW = {
     neutral: "中立",
   },
   filters: {
+    groups: {
+      basic: "基本",
+      stats: "數值",
+      collection: "收錄",
+      effects: "效果",
+    },
+    showResults: "顯示 {{count}} 張",
+    updatingResults: "更新結果中…",
     errataOnly: "只顯示勘誤卡",
     errataOnlyHint: "官方發過勘誤公告的卡",
     keywords: "關鍵字",

@@ -149,6 +149,14 @@ export default {
     neutral: "ニュートラル",
   },
   filters: {
+    groups: {
+      basic: "基本",
+      stats: "数値",
+      collection: "収録",
+      effects: "効果",
+    },
+    showResults: "{{count}}枚を表示",
+    updatingResults: "結果を更新中…",
     errataOnly: "エラッタのあるカードのみ",
     errataOnlyHint: "公式のエラッタ告知があるカード",
     keywords: "キーワード",

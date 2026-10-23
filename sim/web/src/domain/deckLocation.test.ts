@@ -49,7 +49,7 @@ describe("deck location tokens", () => {
         "leader:gold",
         "evolve",
       ]),
-    ).toEqual(["main", "evolve", "leader:gold", "leader:white", "token", "token:spell", "sep"])
+    ).toEqual(["main", "evolve", "token", "token:spell", "leader:gold", "leader:white", "sep"])
     expect(orderTypeTokens(["amulet", "crest", "follower"])).toEqual([
       "follower",
       "amulet",
@@ -58,12 +58,13 @@ describe("deck location tokens", () => {
   })
 })
 
-it("keeps overlapping positions in filter order and omits main deck, EP and SEP", () => {
+it("keeps overlapping card-face positions in their order and omits main deck, EP and SEP", () => {
   expect(deckLocationBadges("follower", ["token", "advance", "evolve"])).toEqual([
     "evolve",
     "advance",
     "token",
   ])
   expect(deckLocationBadges("leader", [])).toEqual(["leader"])
+  expect(deckLocationBadges("leader", ["token"])).toEqual(["leader", "token"])
   for (const type of ["follower", "ep", "sep"]) expect(deckLocationBadges(type, [])).toEqual([])
 })

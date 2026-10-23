@@ -97,14 +97,14 @@ it("groups by family kind and splits decks by their leading letter prefix", asyn
 
 it("keeps quick buttons and dropdown selections in sync with the URL", async () => {
   await renderInRouter(<Harness />)
+  const dropdownButton = screen.getByRole("button", { name: /^卡包/u })
+  await userEvent.click(dropdownButton)
   const latest = screen.getByRole("button", { name: "最新卡包：譯名補充甲" })
   const promo = screen.getByRole("button", { name: "PX01 譯名宣傳甲" })
   await userEvent.click(latest)
   expect(latest).toHaveAttribute("aria-pressed", "true")
   expect(screen.getByLabelText("url")).toHaveTextContent(/^set=booster-a$/u)
 
-  const dropdownButton = screen.getByRole("button", { name: /^卡包/u })
-  await userEvent.click(dropdownButton)
   const dropdown = document.getElementById(dropdownButton.getAttribute("aria-controls") ?? "")
   const latestCheckbox = within(dropdown as HTMLElement).getByRole("checkbox", {
     name: "BX01 譯名補充甲",

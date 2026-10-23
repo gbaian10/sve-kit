@@ -1,5 +1,6 @@
 /// <reference types="node" />
 import "@testing-library/jest-dom/vitest"
+import "./test-utils/popover"
 
 import { webcrypto } from "node:crypto"
 

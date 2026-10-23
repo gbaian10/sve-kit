@@ -1,20 +1,11 @@
-import { ChevronDown } from "lucide-react"
-import {
-  Fragment,
-  type ReactNode,
-  useEffect,
-  useId,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react"
+import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 
 import { toggleFacet } from "../../domain/rarityFilter"
 import { cn } from "../ui/cn"
 import { FacetCheckbox } from "./FacetFilter"
 import { Section, Toggle } from "./FilterControls"
-import { popoverAlignment } from "./popover-placement"
+import { FilterDropdown } from "./FilterDropdown"
 
 export interface FacetChipOption {
   readonly code: string
@@ -28,108 +19,6 @@ export interface FacetChip extends FacetChipOption {
   readonly children?: readonly FacetChipOption[]
 }
 
-// The sub-values float over the content instead of pushing it (the maintainer's choice), and open
-// on a click so phones can use them. Light dismiss and Escape are done here because the native
-// popover attribute has no test support yet.
-function ChipPopover({
-  label,
-  chip,
-  disabled,
-  children,
-}: {
-  readonly label: string
-  readonly chip: ReactNode
-  readonly disabled: boolean
-  readonly children: ReactNode
-}) {
-  const { t } = useTranslation()
-  const [open, setOpen] = useState(false)
-  const [alignEnd, setAlignEnd] = useState(false)
-  const root = useRef<HTMLDivElement>(null)
-  const button = useRef<HTMLButtonElement>(null)
-  const panel = useRef<HTMLDivElement>(null)
-  const id = useId()
-  useEffect(() => {
-    if (!open) return
-    const onPointerDown = (event: PointerEvent) => {
-      if (event.target instanceof Node && !root.current?.contains(event.target)) setOpen(false)
-    }
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return
-      setOpen(false)
-      button.current?.focus()
-    }
-    document.addEventListener("pointerdown", onPointerDown)
-    document.addEventListener("keydown", onKeyDown)
-    return () => {
-      document.removeEventListener("pointerdown", onPointerDown)
-      document.removeEventListener("keydown", onKeyDown)
-    }
-  }, [open])
-  // A chip near the right edge opens its popover leftwards so it stays inside the viewport. The
-  // side is derived from the anchor (a panel already hung from one side would always "fit"), and
-  // redone whenever the viewport or the chip row's wrapping changes while it is open.
-  useLayoutEffect(() => {
-    if (!open || !root.current || !panel.current) return
-    const anchor = root.current
-    const place = () => {
-      const rect = anchor.getBoundingClientRect()
-      setAlignEnd(
-        popoverAlignment({
-          anchorLeft: rect.left,
-          anchorRight: rect.right,
-          panelWidth: panel.current?.offsetWidth ?? 0,
-          viewportWidth: document.documentElement.clientWidth,
-        }) === "end",
-      )
-    }
-    place()
-    panel.current.querySelector<HTMLElement>("input")?.focus()
-    window.addEventListener("resize", place)
-    const observer = new ResizeObserver(place)
-    if (anchor.parentElement) observer.observe(anchor.parentElement)
-    return () => {
-      window.removeEventListener("resize", place)
-      observer.disconnect()
-    }
-  }, [open])
-  return (
-    <div ref={root} className="relative inline-flex">
-      {chip}
-      <button
-        ref={button}
-        type="button"
-        disabled={disabled}
-        aria-label={t("filters.details", { label })}
-        aria-expanded={open}
-        aria-controls={id}
-        onClick={() => {
-          setOpen(!open)
-        }}
-        className={cn(
-          "flex h-9 w-7 items-center justify-center rounded-r-control border border-l-0 border-border bg-surface-1 text-text-2 hover:bg-surface-2",
-          "disabled:cursor-not-allowed disabled:text-text-3",
-        )}
-      >
-        <ChevronDown aria-hidden="true" className={cn("size-4", open && "rotate-180")} />
-      </button>
-      <div
-        ref={panel}
-        id={id}
-        role="group"
-        aria-label={label}
-        hidden={!open}
-        className={cn(
-          "absolute top-full z-30 mt-1 min-w-52 rounded-control border border-border bg-surface-1 p-1 shadow-lg",
-          alignEnd ? "right-0" : "left-0",
-        )}
-      >
-        {children}
-      </div>
-    </div>
-  )
-}
-
 /** A row of multi-select chips; a chip with sub-values gets an arrow that opens them in a popover. */
 export function FacetChips({
   title,
@@ -137,8 +26,10 @@ export function FacetChips({
   counts,
   selected,
   onChange,
+  locationGrid = false,
 }: {
   readonly title: string
+  readonly locationGrid?: boolean
   readonly items: readonly FacetChip[]
   /** Printings per value; undefined while the index is still loading (chips are disabled). */
   readonly counts: Readonly<Record<string, number>> | undefined
@@ -146,15 +37,12 @@ export function FacetChips({
   readonly onChange: (selected: string[]) => void
 }) {
   const { t } = useTranslation()
-  return (
-    <Section
-      title={title}
-      onClear={
-        selected.length > 0
-          ? () => {
-              onChange([])
-            }
-          : undefined
+  const content = (
+    <div
+      className={
+        locationGrid
+          ? "grid w-full grid-cols-3 gap-1.5 md:flex md:flex-wrap"
+          : "flex flex-wrap gap-1.5"
       }
     >
       {items.map((item) => {
@@ -179,7 +67,10 @@ export function FacetChips({
             disabled={!counts}
             label={item.label}
             title={t("filters.chipTitle", { label: item.label, count: counts?.[item.code] ?? 0 })}
-            className={children.length > 0 ? "rounded-r-none" : undefined}
+            className={cn(
+              children.length > 0 && "rounded-r-none",
+              locationGrid && "max-md:h-11 max-md:min-w-0 max-md:flex-1 max-md:px-1",
+            )}
             onClick={() => {
               toggle(item.code)
             }}
@@ -187,24 +78,50 @@ export function FacetChips({
             {item.content ?? item.label}
           </Toggle>
         )
-        if (children.length === 0) return <Fragment key={item.code}>{chip}</Fragment>
         return (
-          <ChipPopover key={item.code} label={item.label} chip={chip} disabled={!counts}>
-            {children.map((child) => (
-              <FacetCheckbox
-                key={child.code}
-                label={child.label}
-                content={child.content}
-                count={counts?.[child.code] ?? 0}
-                checked={all || selected.includes(child.code)}
-                onChange={() => {
-                  toggle(child.code)
-                }}
-              />
-            ))}
-          </ChipPopover>
+          <span
+            key={item.code}
+            data-filter-chip=""
+            className={cn(
+              "inline-flex min-w-0",
+              locationGrid && item.code === "main" && "col-span-3 justify-self-start",
+            )}
+          >
+            {chip}
+            {children.length > 0 && (
+              <FilterDropdown
+                label={t("filters.details", { label: item.label })}
+                compact
+                disabled={!counts}
+              >
+                {children.map((child) => (
+                  <FacetCheckbox
+                    key={child.code}
+                    label={child.label}
+                    content={child.content}
+                    count={counts?.[child.code] ?? 0}
+                    checked={all || selected.includes(child.code)}
+                    onChange={() => {
+                      toggle(child.code)
+                    }}
+                  />
+                ))}
+              </FilterDropdown>
+            )}
+          </span>
         )
       })}
+    </div>
+  )
+  const clear =
+    selected.length > 0
+      ? () => {
+          onChange([])
+        }
+      : undefined
+  return (
+    <Section title={title} onClear={clear}>
+      {content}
     </Section>
   )
 }

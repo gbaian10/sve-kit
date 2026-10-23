@@ -78,7 +78,7 @@ describe("rarity chips", () => {
     await userEvent.click(arrow)
     expect(arrow).toHaveAttribute("aria-expanded", "true")
     expect(popover).toBeVisible()
-    const group = screen.getByRole("group", { name: "PR" })
+    const group = screen.getByRole("group", { name: "PR的細項" })
     expect(within(group).queryByRole("checkbox", { name: "PR（SR）" })).not.toBeInTheDocument()
     const bronze = within(group).getByRole("checkbox", { name: "PR（BR）" })
     expect(bronze).toBeChecked()
