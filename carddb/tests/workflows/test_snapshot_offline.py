@@ -1088,6 +1088,23 @@ def test_qa_translation_shards_reach_only_the_exact_japanese_owner(
         )
         == ()
     )
+    assert (
+        qa_translation_issues(
+            "①1枚。プレイヤーの置き場。カード名に『合成名』を含まない。『合成名(EVOLVE)』",
+            "①第1張。玩家的放置區。日文卡片名稱不含『合成名』（採用名）。『採用名（EVOLVE）』",
+            {"合成名": {"採用名"}},
+            {"プレイ": {"使用"}, "場": {"戰場"}, "カード名": {"卡片名稱"}},
+        )
+        == ()
+    )
+    assert set(
+        qa_translation_issues(
+            "カード名に『片段』を含む。『片段』。『合成名（EVOLVE）』",
+            "日文卡名含有『片段』。『片段』。『採用名』",
+            {"合成名": {"採用名"}},
+            {},
+        )
+    ) == {"unknown_card_name", "card_name"}
 
 
 def test_qa_changed_source_is_stale_and_does_not_inherit_a_translation(
