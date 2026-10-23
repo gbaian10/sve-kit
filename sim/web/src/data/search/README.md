@@ -119,5 +119,6 @@ and startup files) against 12 MiB Brotli; unknown compressed lengths stop the ba
 manifest length comes from the Brotli response headers. Disk admission conservatively retains
 existing data (including derived caches and old active data) and adds only missing raw hashes,
 under the 96 MiB root and 128 MiB origin budgets. These are payload budgets, not a promise
-that browser quota will permit every write. Automatic full-version downloads remain disabled
-until their settings control is available. Bitmap caching is independent.
+that browser quota will permit every write. Automatic full-version downloads default on and can be disabled independently in settings.
+The settings progress is scoped to the adopted manifest and chosen card edition. Opening
+settings or focusing it rechecks a completed plan; explicit cache clearing invalidates it. Bitmap caching is independent.

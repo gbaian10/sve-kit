@@ -49,6 +49,36 @@ export default {
     cardOpenMode: { auto: "Auto", panel: "Drawer", modal: "Pop-up", page: "Page" },
   },
   settings: {
+    downloads: "Downloads",
+    downloadAll: "Downloads",
+    downloadAllHint:
+      "Download all text and related data for this edition in the background. Card images are separate. Hidden tabs and offline connections pause the download.",
+    downloadProgress: "{{done}} / {{total}} files",
+    downloadVersion: "{{version}} · {{edition}}",
+    downloadScope:
+      "Complete applies only to this data and card edition. Card images load separately.",
+    downloadPausedHint:
+      "Paused while offline or the tab is hidden. It resumes when connected and back in the foreground.",
+    downloadOffHint: "Background downloads are off. Saved data is kept.",
+    downloadStatus: {
+      idle: "Waiting",
+      checking: "Checking",
+      running: "Fetching",
+      paused: "Paused",
+      disabled: "Off",
+      complete: "Complete",
+      partial: "Incomplete",
+    },
+    downloadReason: {
+      capacity: "Not enough space to finish. Clear the cache, then turn downloads off and on.",
+      storage: "The browser cannot save data, so the download is incomplete.",
+      write: "A write failed or storage ran out, so the download is incomplete.",
+      cleared: "Some saved data was removed. Turn downloads off and on to continue.",
+      network: "The download was interrupted. Turn downloads off and on to retry.",
+      manifest: "This data could not be verified. Turn downloads off and on to retry.",
+      "batch-limit":
+        "The full download exceeds the automatic limit, or its size is unknown. It is incomplete.",
+    },
     infiniteScroll: "Infinite scroll",
     infiniteScrollHint: "Load the next page near the end of results. Turn off to use Load more.",
     resetDefaults: "Restore defaults",

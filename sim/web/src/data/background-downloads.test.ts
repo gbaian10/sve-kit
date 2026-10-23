@@ -6,7 +6,7 @@ import { afterEach, expect, it, vi } from "vitest"
 import { buildSnapshot } from "../../scripts/fixture/build"
 import { memoryCache } from "../test-utils/cache"
 import { BackgroundDownloads } from "./background-downloads"
-import { bodyHeaders } from "./cache-budget"
+import { bodyHeaders, dataCacheBytes } from "./cache-budget"
 import type { Fetcher } from "./cdn"
 import type { FetchSelection } from "./fetch-plan"
 import {
@@ -228,9 +228,15 @@ it("admits the whole compressed batch including saved startup bytes and the mani
     const cache = await storage.open(`sve-search-index:1:${encodeURIComponent(base)}`)
     const oldHash = `sha256:${"1".repeat(64)}`
     const oldSlot = `${base}/old-active/${encodeURIComponent(oldHash)}`
-    if (mode === "capacity") {
+    if (mode === "capacity" || mode === "deduplicated") {
       await raw.retain(data.selection.files, oldHash)
-      await cache.put(oldSlot, new Response("old", { headers: bodyHeaders(96 * 1024 * 1024) }))
+      if (mode === "deduplicated")
+        await raw.retain(new Map([["saved", saved]]), data.selection.manifestHash)
+      const occupied = mode === "deduplicated" ? await dataCacheBytes(storage) : 0
+      await cache.put(
+        oldSlot,
+        new Response("old", { headers: bodyHeaders(96 * 1024 * 1024 - occupied) }),
+      )
     }
     const downloads = new BackgroundDownloads({
       enabled: true,
@@ -277,7 +283,8 @@ it("admits the whole compressed batch including saved startup bytes and the mani
             },
       )
       expect(network).not.toHaveBeenCalled()
-      if (mode === "capacity") expect(await cache.match(oldSlot)).toBeDefined()
+      if (mode === "capacity" || mode === "deduplicated")
+        expect(await cache.match(oldSlot)).toBeDefined()
     } finally {
       downloads.dispose()
     }

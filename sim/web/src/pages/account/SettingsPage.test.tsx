@@ -1,7 +1,10 @@
-import { screen, within } from "@testing-library/react"
+import { createHash } from "node:crypto"
+
+import { act, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
+import { appBackgroundDownloads } from "../../data"
 import { DEFAULT_PREFS, prefsStore, readPrefs, recentStore } from "../../settings"
 import { renderInRouter } from "../../test-utils"
 import { memoryCache } from "../../test-utils/cache"
@@ -78,6 +81,14 @@ it("refreshes estimates on demand, leaves caches untouched when clearing is canc
 it("starts preloading disabled and remembers both advanced switches", async () => {
   prefsStore.set(DEFAULT_PREFS)
   const view = await renderInRouter(<SettingsPage />)
+  const background = screen.getByRole("switch", { name: "背景下載" })
+  expect(background).toHaveAttribute("aria-checked", "true")
+  await userEvent.click(background)
+  expect(readPrefs()).toMatchObject({
+    backgroundDownloads: false,
+    uiLanguage: null,
+    cardEdition: "jp",
+  })
   for (const name of ["預先下載所有版次", "預先下載上一張／下一張"]) {
     expect(screen.getByRole("switch", { name })).toHaveAttribute("aria-checked", "false")
     await userEvent.click(screen.getByRole("switch", { name }))
@@ -86,6 +97,7 @@ it("starts preloading disabled and remembers both advanced switches", async () =
   view.unmount()
   prefsStore.reload()
   await renderInRouter(<SettingsPage />)
+  expect(screen.getByRole("switch", { name: "背景下載" })).toHaveAttribute("aria-checked", "false")
   for (const name of ["預先下載所有版次", "預先下載上一張／下一張"])
     expect(screen.getByRole("switch", { name })).toHaveAttribute("aria-checked", "true")
 })
@@ -165,4 +177,92 @@ it("shows flavor text by default and remembers disabling it in advanced settings
     "aria-checked",
     "false",
   )
+})
+
+it("shows live download, pause, failed writes and completion only while the selected bytes remain saved", async () => {
+  let hidden = false
+  vi.spyOn(document, "hidden", "get").mockImplementation(() => hidden)
+  vi.spyOn(navigator, "onLine", "get").mockReturnValue(true)
+  const bytes = new TextEncoder().encode("background bytes")
+  const gate = Promise.withResolvers<undefined>()
+  vi.stubGlobal("fetch", async () => {
+    await gate.promise
+    return new Response(bytes.slice().buffer)
+  })
+  const selection = {
+    base: "https://settings.test",
+    manifestHash: "selected",
+    dataVersion: "20261024T000000Z-0001",
+    edition: "jp" as const,
+    files: new Map([
+      [
+        "data",
+        {
+          key: "data",
+          path: "data.json",
+          sha256: `sha256:${createHash("sha256").update(bytes).digest("hex")}`,
+          bytes: bytes.length,
+          compressed_bytes: { br: 8 },
+          role: "text",
+          region: "jp",
+          dependencies: [],
+          source_refs: [],
+        },
+      ],
+    ]),
+  }
+  const failing = memoryCache()
+  const rawName = `sve-raw:${encodeURIComponent(selection.base)}`
+  const raw = await failing.open(rawName)
+  // Retention metadata must persist so this scenario reaches the raw write.
+  raw.put = () => Promise.reject(new Error("quota"))
+  const open = failing.open.bind(failing)
+  failing.open = (name) => (name === rawName ? Promise.resolve(raw) : open(name))
+  vi.stubGlobal("caches", failing)
+  appBackgroundDownloads.setEnabled(true)
+  appBackgroundDownloads.select(selection)
+  try {
+    await renderInRouter(<SettingsPage />)
+    const downloads = within(screen.getByRole("region", { name: "背景下載" }))
+    expect(await downloads.findByText("下載中")).toBeInTheDocument()
+    act(() => {
+      hidden = true
+      document.dispatchEvent(new Event("visibilitychange"))
+    })
+    expect(downloads.getByText("已暫停")).toBeInTheDocument()
+    gate.resolve(undefined)
+    act(() => {
+      hidden = false
+      document.dispatchEvent(new Event("visibilitychange"))
+    })
+    expect(await downloads.findByText("尚未全部下載")).toBeInTheDocument()
+    expect(downloads.getByText(/寫入失敗或儲存空間不足/u)).toBeInTheDocument()
+    const denied = memoryCache()
+    await denied.open(`sve-raw:${encodeURIComponent(selection.base)}`)
+    denied.open = () => Promise.reject(new Error("storage unavailable"))
+    vi.stubGlobal("caches", denied)
+    act(() => {
+      appBackgroundDownloads.select({ ...selection, manifestHash: "denied" })
+    })
+    expect(await downloads.findByText(/瀏覽器目前無法儲存資料/u)).toBeInTheDocument()
+    const storage = memoryCache()
+    vi.stubGlobal("caches", storage)
+    act(() => {
+      appBackgroundDownloads.select({ ...selection, manifestHash: "next" })
+    })
+    expect(await downloads.findByText("已完成")).toBeInTheDocument()
+    expect(downloads.getByText("2026-10-24 · 日版")).toBeInTheDocument()
+    expect(downloads.getByRole("progressbar")).toHaveAttribute("value", "1")
+    await act(async () => {
+      await storage.delete(`sve-raw:${encodeURIComponent(selection.base)}`)
+      await appBackgroundDownloads.recheck()
+    })
+    await waitFor(() => {
+      expect(downloads.getByText("尚未全部下載")).toBeInTheDocument()
+    })
+    expect(downloads.getByText(/部分資料已被移除/u)).toBeInTheDocument()
+  } finally {
+    gate.resolve(undefined)
+    appBackgroundDownloads.select(null)
+  }
 })

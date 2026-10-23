@@ -62,6 +62,7 @@ function workerOf(root: SnapshotRoot): ActiveWorker {
   let status: SnapshotStatus = { state: "idle" }
   const listeners = new Set<() => void>()
   const syncDownloads = () => {
+    appBackgroundDownloads.setEnabled(prefsStore.get().backgroundDownloads)
     const next = session.getStatus()
     if (
       activeSnapshotRoot() === root &&
