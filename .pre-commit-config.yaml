@@ -199,16 +199,15 @@ repos:
         types: [yaml]
         stages: [pre-commit, manual]
       # sim/web: `mise exec` pins Bun without relying on the caller's PATH; paths are relative to sim/web.
-      # Flags live in sim/web's lint:js; require_serial keeps one process, since each type-aware ESLint
-      # process loads the whole TS project (~2 GB) and per-core batches exhaust memory on large commits.
+      # Type-aware ESLint loads the whole TS project (~2 GB) however few files it checks, so it runs on
+      # push over all of sim/web, as CI does; its cache (flags in lint:js) keeps repeat runs short.
       - id: web-eslint
         name: eslint (sim/web)
         language: system
-        entry: bash -c 'cd sim/web && exec mise exec -- bun run lint:js "${@/#sim\/web\//./}"' --
-        files: ^sim/web/.*\.(ts|tsx|js|mjs|cjs)$
-        exclude: ^sim/web/tests/lint-fixtures/
-        require_serial: true
-        stages: [pre-commit, manual]
+        entry: mise exec -- bun run --cwd sim/web lint:js
+        pass_filenames: false
+        files: ^(sim/web/|mise\.toml$|\.pre-commit-config\.yaml$)
+        stages: [pre-push]
       - id: web-stylelint
         name: stylelint (sim/web)
         language: system
