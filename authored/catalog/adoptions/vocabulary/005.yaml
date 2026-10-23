@@ -354,7 +354,7 @@ records:
           - lang: zh-Hant
             text: 夜魔
             origin: machine
-            low_confidence: true  # note: 2026-10-18 對照後保留低信心；P0 v1.12 §10 與 R16 明訂夜魔選詞仍保留低信心並逐用途傳播；尚缺解除此職業選詞保留狀態的維護者定案
+            low_confidence: true # note: 2026-10-18 對照後保留低信心；P0 v1.12 §10 與 R16 明訂夜魔選詞仍保留低信心並逐用途傳播；尚缺解除此職業選詞保留狀態的維護者定案
           - lang: en
             text: Abysscraft
             origin: official
@@ -1040,7 +1040,7 @@ records:
         raw_mappings:
           - region: en
             lang: en
-            raw: 'Princess Connect! Re: Dive'
+            raw: "Princess Connect! Re: Dive"
             source_ref:
               batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
               source_version_id: src:v1:841efc51b5c6be8315058e061d8375eee2485fe3adb4db878a18c6f9d2d14791
@@ -1061,7 +1061,7 @@ records:
         active: true
         translations:
           - lang: en
-            text: 'Princess Connect! Re: Dive'
+            text: "Princess Connect! Re: Dive"
             origin: official
             source_ref:
               batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446

@@ -61,7 +61,7 @@ verified_by:
     method: independent-derivation
     note: 8.3.2.1；xverify-1/result.md〈22 個重疊題〉。之後未再改
 scenarios:
-  - name: '[astra] 第一次進化'
+  - name: "[astra] 第一次進化"
     setup:
       turn:
         active: P1
@@ -131,7 +131,7 @@ scenarios:
             evolved: false
           P1.evolve_deck:
             - f
-  - name: '[astra] 第二次進化被拒'
+  - name: "[astra] 第二次進化被拒"
     setup:
       turn:
         active: P1
@@ -210,7 +210,7 @@ scenarios:
             evolved: false
           P1.evolve_deck:
             - f
-  - name: '[fable] A アクト狀態的從者可以進化；同回合第二隻不能；已アクト的リリエル不能起動'
+  - name: "[fable] A アクト狀態的從者可以進化；同回合第二隻不能；已アクト的リリエル不能起動"
     setup:
       turn:
         active: P1

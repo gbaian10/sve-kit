@@ -17,9 +17,7 @@
               "type": "ZoneSet",
               "role": "counted_zone",
               "domain": {
-                "values": [
-                  "fixture.zones"
-                ],
+                "values": ["fixture.zones"],
                 "min": null,
                 "max": null
               },
@@ -39,10 +37,7 @@
                 "values": [
                   {
                     "kind": "vocabulary",
-                    "key": [
-                      "type",
-                      "follower"
-                    ]
+                    "key": ["type", "follower"]
                   }
                 ],
                 "min": null,
@@ -61,9 +56,7 @@
               "type": "QuantitySpec",
               "role": "selection_count",
               "domain": {
-                "values": [
-                  "fixture.cardinality"
-                ],
+                "values": ["fixture.cardinality"],
                 "min": null,
                 "max": null
               },
@@ -88,15 +81,10 @@
         }
       },
       "values": {
-        "zone": [
-          "hand"
-        ],
+        "zone": ["hand"],
         "kind": {
           "kind": "vocabulary",
-          "key": [
-            "type",
-            "follower"
-          ]
+          "key": ["type", "follower"]
         },
         "quantity": {
           "mode": "exact",
@@ -190,9 +178,7 @@
       },
       "expected_card": "card:a",
       "expected_face": "face:a",
-      "available_versions": [
-        "version:a"
-      ],
+      "available_versions": ["version:a"],
       "raw_sources": {
         "version:a": {
           "faces": [
@@ -257,23 +243,9 @@
       ]
     },
     "target_base": {
-      "required": [
-        "zone",
-        "kind",
-        "quantity"
-      ],
-      "bound": [
-        "zone",
-        "kind",
-        "quantity"
-      ],
-      "known_references": [
-        "term:zone.hand",
-        [
-          "type",
-          "follower"
-        ]
-      ],
+      "required": ["zone", "kind", "quantity"],
+      "bound": ["zone", "kind", "quantity"],
+      "known_references": ["term:zone.hand", ["type", "follower"]],
       "target": {
         "format": 1,
         "nodes": [
@@ -367,23 +339,13 @@
           "key": "term:zone.cemetery"
         }
       },
-      "known_concepts": [
-        "term:fixture.name",
-        "term:zone.cemetery",
-        "term:fixture.other"
-      ]
+      "known_concepts": ["term:fixture.name", "term:zone.cemetery", "term:fixture.other"]
     },
     "ruling_base": {
       "legacy_namespace": "template-v1.normalizer-v1",
       "legacy_template_id": "T-fixture",
-      "legacy_occurrences": [
-        "occ:a",
-        "occ:b"
-      ],
-      "legacy_scope": [
-        "occ:a",
-        "occ:b"
-      ],
+      "legacy_occurrences": ["occ:a", "occ:b"],
+      "legacy_scope": ["occ:a", "occ:b"],
       "edges": [
         {
           "occurrence": "occ:a",
@@ -402,9 +364,7 @@
       ],
       "reference_occurrence": "occ:a",
       "requested_status": "resolved",
-      "requested_scope": [
-        "occ:a"
-      ]
+      "requested_scope": ["occ:a"]
     },
     "authored_base": {
       "document": {
@@ -459,9 +419,7 @@
           }
         ]
       },
-      "known_frames": [
-        "frame:2e85f9ca2af9ea45ee92ba4b6a8a28aa501b188c7152f6df21f86308b1b01e3b"
-      ]
+      "known_frames": ["frame:2e85f9ca2af9ea45ee92ba4b6a8a28aa501b188c7152f6df21f86308b1b01e3b"]
     },
     "db_target_base": {
       "table": "template_translation",
@@ -511,12 +469,8 @@
         "origin": "project",
         "low_confidence": false
       },
-      "existing_frames": [
-        "frame:2e85f9ca2af9ea45ee92ba4b6a8a28aa501b188c7152f6df21f86308b1b01e3b"
-      ],
-      "existing_authored_sources": [
-        "source:fixture"
-      ]
+      "existing_frames": ["frame:2e85f9ca2af9ea45ee92ba4b6a8a28aa501b188c7152f6df21f86308b1b01e3b"],
+      "existing_authored_sources": ["source:fixture"]
     },
     "ruling_document": {
       "format": 2,
@@ -528,11 +482,7 @@
       "evidence": [],
       "strength": "inferred",
       "decided_on": "2026-10-10",
-      "applies_to": [
-        "T-old",
-        "T-old",
-        "E.synthetic"
-      ],
+      "applies_to": ["T-old", "T-old", "E.synthetic"],
       "hint": {
         "ja": "合成"
       }
@@ -998,10 +948,7 @@
               "type": "Player",
               "role": "source_owner",
               "domain": {
-                "values": [
-                  "opponent",
-                  "self"
-                ],
+                "values": ["opponent", "self"],
                 "min": null,
                 "max": null
               },
@@ -1018,9 +965,7 @@
               "type": "ZoneSet",
               "role": "source_zone",
               "domain": {
-                "values": [
-                  "fixture.pg380.zone"
-                ],
+                "values": ["fixture.pg380.zone"],
                 "min": null,
                 "max": null
               },
@@ -1040,10 +985,7 @@
                 "values": [
                   {
                     "kind": "vocabulary",
-                    "key": [
-                      "type",
-                      "follower"
-                    ]
+                    "key": ["type", "follower"]
                   }
                 ],
                 "min": null,
@@ -1062,9 +1004,7 @@
               "type": "QuantitySpec",
               "role": "selection_count",
               "domain": {
-                "values": [
-                  "fixture.pg380.quantity"
-                ],
+                "values": ["fixture.pg380.quantity"],
                 "min": null,
                 "max": null
               },
@@ -1090,15 +1030,10 @@
       },
       "values": {
         "owner": "self",
-        "zone": [
-          "hand"
-        ],
+        "zone": ["hand"],
         "kind": {
           "kind": "vocabulary",
-          "key": [
-            "type",
-            "follower"
-          ]
+          "key": ["type", "follower"]
         },
         "quantity": {
           "mode": "exact",
@@ -1470,9 +1405,7 @@
       "input": {
         "fixture": "identity_base",
         "changes": {
-          "/semantic/leaf_schema/slots/0/domain/values": [
-            "fixture.zones.narrow"
-          ]
+          "/semantic/leaf_schema/slots/0/domain/values": ["fixture.zones.narrow"]
         }
       },
       "expected": {
@@ -1534,15 +1467,11 @@
       "input": {
         "constructor": "fixture.select_card",
         "counted_object": "follower",
-        "counted_zones": [
-          "ex"
-        ],
+        "counted_zones": ["ex"],
         "token": true,
         "quantity_role": "cardinality",
         "raw_unit": "体",
-        "registered_allowed_units": [
-          "体"
-        ]
+        "registered_allowed_units": ["体"]
       },
       "expected": {
         "result": "accept",
@@ -1557,15 +1486,11 @@
       "input": {
         "constructor": "fixture.select_card",
         "counted_object": "follower",
-        "counted_zones": [
-          "ex"
-        ],
+        "counted_zones": ["ex"],
         "token": true,
         "quantity_role": "cardinality",
         "raw_unit": "枚",
-        "registered_allowed_units": [
-          "体"
-        ]
+        "registered_allowed_units": ["体"]
       },
       "expected": {
         "result": "reject",
@@ -1580,16 +1505,11 @@
       "input": {
         "constructor": "fixture.select_union",
         "counted_object": "follower",
-        "counted_zones": [
-          "battlefield",
-          "ex"
-        ],
+        "counted_zones": ["battlefield", "ex"],
         "token": false,
         "quantity_role": "union_cardinality",
         "raw_unit": "枚",
-        "registered_allowed_units": [
-          "枚"
-        ]
+        "registered_allowed_units": ["枚"]
       },
       "expected": {
         "result": "accept",
@@ -1604,16 +1524,11 @@
       "input": {
         "constructor": "fixture.select_union",
         "counted_object": "follower",
-        "counted_zones": [
-          "battlefield",
-          "ex"
-        ],
+        "counted_zones": ["battlefield", "ex"],
         "token": false,
         "quantity_role": "union_cardinality",
         "raw_unit": "体",
-        "registered_allowed_units": [
-          "枚"
-        ]
+        "registered_allowed_units": ["枚"]
       },
       "expected": {
         "result": "reject",
@@ -1628,16 +1543,11 @@
       "input": {
         "constructor": "fixture.select_card",
         "counted_object": "amulet",
-        "counted_zones": [
-          "battlefield"
-        ],
+        "counted_zones": ["battlefield"],
         "token": false,
         "quantity_role": "cardinality",
         "raw_unit": "つ",
-        "registered_allowed_units": [
-          "つ",
-          "枚"
-        ]
+        "registered_allowed_units": ["つ", "枚"]
       },
       "expected": {
         "result": "accept",
@@ -1652,16 +1562,11 @@
       "input": {
         "constructor": "fixture.select_card",
         "counted_object": "amulet",
-        "counted_zones": [
-          "battlefield"
-        ],
+        "counted_zones": ["battlefield"],
         "token": false,
         "quantity_role": "cardinality",
         "raw_unit": "枚",
-        "registered_allowed_units": [
-          "つ",
-          "枚"
-        ]
+        "registered_allowed_units": ["つ", "枚"]
       },
       "expected": {
         "result": "accept",
@@ -1680,9 +1585,7 @@
         "token": false,
         "quantity_role": "player_count",
         "raw_unit": "人",
-        "registered_allowed_units": [
-          "人"
-        ]
+        "registered_allowed_units": ["人"]
       },
       "expected": {
         "result": "accept",
@@ -1701,9 +1604,7 @@
         "token": false,
         "quantity_role": "player_count",
         "raw_unit": "枚",
-        "registered_allowed_units": [
-          "人"
-        ]
+        "registered_allowed_units": ["人"]
       },
       "expected": {
         "result": "reject",
@@ -1718,15 +1619,11 @@
       "input": {
         "constructor": "fixture.select_card",
         "counted_object": "follower",
-        "counted_zones": [
-          "hand"
-        ],
+        "counted_zones": ["hand"],
         "token": false,
         "quantity_role": "cardinality",
         "raw_unit": "枚",
-        "registered_allowed_units": [
-          "枚"
-        ]
+        "registered_allowed_units": ["枚"]
       },
       "expected": {
         "result": "accept",
@@ -1741,15 +1638,11 @@
       "input": {
         "constructor": "fixture.select_card",
         "counted_object": "follower",
-        "counted_zones": [
-          "hand"
-        ],
+        "counted_zones": ["hand"],
         "token": false,
         "quantity_role": "cardinality",
         "raw_unit": "回",
-        "registered_allowed_units": [
-          "枚"
-        ]
+        "registered_allowed_units": ["枚"]
       },
       "expected": {
         "result": "reject",
@@ -1853,10 +1746,7 @@
       "input": {
         "fixture": "target_base",
         "changes": {
-          "/bound": [
-            "zone",
-            "kind"
-          ]
+          "/bound": ["zone", "kind"]
         }
       },
       "expected": {
@@ -2202,9 +2092,7 @@
       "operation": "record_shape",
       "input": {
         "fixture": "authored_base",
-        "remove": [
-          "/document/records/0/data/target"
-        ]
+        "remove": ["/document/records/0/data/target"]
       },
       "expected": {
         "result": "reject",
@@ -2661,18 +2549,8 @@
       "input": {
         "text": "手牌與手牌",
         "reference": "term:zone.hand",
-        "source_ordinals": [
-          0,
-          1
-        ],
-        "target_paths": [
-          [
-            0
-          ],
-          [
-            2
-          ]
-        ],
+        "source_ordinals": [0, 1],
+        "target_paths": [[0], [2]],
         "ranges": [
           {
             "start": 0,
@@ -3075,9 +2953,7 @@
       "operation": "zone_forms",
       "input": {
         "type": "ZoneSet",
-        "value": [
-          "deck_top"
-        ]
+        "value": ["deck_top"]
       },
       "expected": {
         "result": "reject",
@@ -3118,10 +2994,7 @@
       "id": "sum_type",
       "operation": "partial_np",
       "input": {
-        "branches": [
-          "PlayerRef",
-          "CardObject"
-        ],
+        "branches": ["PlayerRef", "CardObject"],
         "requested_element_type": "CardObject"
       },
       "expected": {
@@ -3695,9 +3568,7 @@
         "result": "accept",
         "status": "resolved",
         "frame_id": "frame:2e85f9ca2af9ea45ee92ba4b6a8a28aa501b188c7152f6df21f86308b1b01e3b",
-        "active_scope": [
-          "occ:a"
-        ]
+        "active_scope": ["occ:a"]
       }
     },
     {
@@ -3708,18 +3579,14 @@
         "fixture": "ruling_base",
         "changes": {
           "/reference_occurrence": "occ:b",
-          "/requested_scope": [
-            "occ:b"
-          ]
+          "/requested_scope": ["occ:b"]
         }
       },
       "expected": {
         "result": "accept",
         "status": "resolved",
         "frame_id": "frame:0c74eb8449d2560139710b27e8d20a6fc86d25fba1aa7e471af2bafecd089c0b",
-        "active_scope": [
-          "occ:b"
-        ]
+        "active_scope": ["occ:b"]
       }
     },
     {
@@ -3727,14 +3594,8 @@
       "id": "two_legacy_one_frame",
       "operation": "ruling_mapping",
       "input": {
-        "legacy_ids": [
-          "T-a",
-          "T-b"
-        ],
-        "occurrences": [
-          "occ:a",
-          "occ:b"
-        ],
+        "legacy_ids": ["T-a", "T-b"],
+        "occurrences": ["occ:a", "occ:b"],
         "targets": [
           "frame:2e85f9ca2af9ea45ee92ba4b6a8a28aa501b188c7152f6df21f86308b1b01e3b",
           "frame:2e85f9ca2af9ea45ee92ba4b6a8a28aa501b188c7152f6df21f86308b1b01e3b"
@@ -3743,10 +3604,7 @@
       "expected": {
         "result": "accept",
         "resolved_count": 2,
-        "active_scope": [
-          "occ:a",
-          "occ:b"
-        ],
+        "active_scope": ["occ:a", "occ:b"],
         "all_frame_uses_allowed": false
       }
     },
@@ -3772,11 +3630,7 @@
       "input": {
         "fixture": "ruling_base",
         "changes": {
-          "/requested_scope": [
-            "occ:a",
-            "occ:b",
-            "occ:c"
-          ]
+          "/requested_scope": ["occ:a", "occ:b", "occ:c"]
         }
       },
       "expected": {
@@ -3874,9 +3728,7 @@
       "input": {
         "status": "pending",
         "target": "frame:2e85f9ca2af9ea45ee92ba4b6a8a28aa501b188c7152f6df21f86308b1b01e3b",
-        "candidates": [
-          "frame:2e85f9ca2af9ea45ee92ba4b6a8a28aa501b188c7152f6df21f86308b1b01e3b"
-        ],
+        "candidates": ["frame:2e85f9ca2af9ea45ee92ba4b6a8a28aa501b188c7152f6df21f86308b1b01e3b"],
         "reason": "ambiguous_variant"
       },
       "expected": {
@@ -4042,10 +3894,7 @@
       "input": {
         "form": "zone.counted_locative",
         "registered": true,
-        "valid_rule_cases": [
-          "hand",
-          "battlefield"
-        ],
+        "valid_rule_cases": ["hand", "battlefield"],
         "form_cases": {
           "hand": [
             {
@@ -4071,9 +3920,7 @@
       "input": {
         "form": "zone.counted_locative",
         "registered": true,
-        "valid_rule_cases": [
-          "hand"
-        ],
+        "valid_rule_cases": ["hand"],
         "form_cases": {
           "unknown": [
             {
@@ -4469,9 +4316,7 @@
       "input": {
         "fixture": "ruling_document",
         "changes": {},
-        "remove": [
-          "/revision"
-        ]
+        "remove": ["/revision"]
       },
       "expected": {
         "result": "reject"
@@ -4484,9 +4329,7 @@
       "input": {
         "fixture": "ruling_reference",
         "changes": {},
-        "remove": [
-          "/legacy/occurrence"
-        ]
+        "remove": ["/legacy/occurrence"]
       },
       "expected": {
         "result": "reject"
@@ -4499,9 +4342,7 @@
       "input": {
         "fixture": "ruling_reference",
         "changes": {},
-        "remove": [
-          "/target"
-        ]
+        "remove": ["/target"]
       },
       "expected": {
         "result": "reject"
@@ -5009,9 +4850,7 @@
           "/semantic/leaf_schema/slots/3/role": "selection_count"
         },
         "omit_np_zone": true,
-        "remove_forms": [
-          "owner.counted_possessive"
-        ]
+        "remove_forms": ["owner.counted_possessive"]
       },
       "expected": {
         "result": "fallback",

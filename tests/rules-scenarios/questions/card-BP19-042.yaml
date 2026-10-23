@@ -9,7 +9,7 @@ mechanisms:
   - 融合
   - 手牌、墓場中有效的能力
   - 10.6.2.5
-  - '12.18'
+  - "12.18"
   - 12.18.3
   - 10.6.2.1.3
   - 10.6.2.8.1.1
@@ -33,7 +33,7 @@ refs:
     - 10.6.2.1.3
     - 10.6.2.8.1.1
     - 10.1.1.2.2
-    - '15.1'
+    - "15.1"
   qa:
     - Q2575
 evidence:
@@ -73,7 +73,7 @@ verified_by:
     method: independent-derivation
     note: 12.18.2、12.18.3、10.4.2.2；xverify-1/result.md〈22 個重疊題〉三局面同意。「ex BP01-173 EX滿=False」第一輪不同意（hand／ex 矛盾），遷移後改正，xverify-2/result.md 1/1 同意
 scenarios:
-  - name: '[astra] hand BP01-173 EX滿=False'
+  - name: "[astra] hand BP01-173 EX滿=False"
     setup:
       turn:
         active: P1
@@ -145,7 +145,7 @@ scenarios:
           - kind: 捨てる
             player: P1
             object: b
-  - name: '[astra] ex BP01-173 EX滿=False'
+  - name: "[astra] ex BP01-173 EX滿=False"
     setup:
       turn:
         active: P1
@@ -215,7 +215,7 @@ scenarios:
               融合カウンター: 1
         forbidden_events:
           - kind: 捨てる
-  - name: '[astra] ex BP21-T11 EX滿=False'
+  - name: "[astra] ex BP21-T11 EX滿=False"
     setup:
       turn:
         active: P1
@@ -282,7 +282,7 @@ scenarios:
             - b
         forbidden_events:
           - kind: 捨てる
-  - name: '[astra] hand BP01-173 EX滿=True'
+  - name: "[astra] hand BP01-173 EX滿=True"
     setup:
       turn:
         active: P1
@@ -364,7 +364,7 @@ scenarios:
             - x4
         forbidden_events:
           - kind: 捨てる
-  - name: '[fable] A 從手牌融合ファイター → 進 EX 帶 1 個融合カウンター → 從 EX 打出 → ファンファーレ付計數器出 token'
+  - name: "[fable] A 從手牌融合ファイター → 進 EX 帶 1 個融合カウンター → 從 EX 打出 → ファンファーレ付計數器出 token"
     setup:
       turn:
         active: P1
@@ -461,8 +461,8 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - {do: choose-pending, pending: {ability: {source: a1, line: 2}}}
-            - {do: choose-pending, pending: {ability: {source: a1, line: 2}}, costs: decline}
+            - { do: choose-pending, pending: { ability: { source: a1, line: 2 } } }
+            - { do: choose-pending, pending: { ability: { source: a1, line: 2 } }, costs: decline }
         assert:
           P1.pp.current: 0
           P1.field:
@@ -496,8 +496,8 @@ scenarios:
           - kind: 場に出す
             object: new-1
             to: P1.field
-  - name: '[fable] B 手牌與 EX 都沒有可融合的卡 → 不能起動'
-    inherit: '[fable] A 從手牌融合ファイター → 進 EX 帶 1 個融合カウンター → 從 EX 打出 → ファンファーレ付計數器出 token'
+  - name: "[fable] B 手牌與 EX 都沒有可融合的卡 → 不能起動"
+    inherit: "[fable] A 從手牌融合ファイター → 進 EX 帶 1 個融合カウンター → 從 EX 打出 → ファンファーレ付計數器出 token"
     setup:
       players:
         P1:

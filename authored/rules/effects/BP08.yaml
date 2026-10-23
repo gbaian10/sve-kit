@@ -13,7 +13,7 @@ cards:
             - ロイド
             - ヴィクトリア
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: ex
@@ -41,7 +41,7 @@ cards:
                     - 10
                 then: 8
                 else: 4
-              split: '1'
+              split: "1"
             - op: if
               condition:
                 fn: ge
@@ -55,7 +55,7 @@ cards:
                 subjects: opponent.leader
                 amount: 8
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -85,7 +85,7 @@ cards:
           keywords:
             - rush
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: field
@@ -109,7 +109,7 @@ cards:
         event: enter
         subject: self
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -131,7 +131,7 @@ cards:
         event: field_to_cemetery
         subject: self
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -156,7 +156,7 @@ cards:
         event: field_to_cemetery
         subject: self
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: cemetery
@@ -216,7 +216,7 @@ cards:
         event: evolve
         subject: self
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -396,7 +396,7 @@ cards:
             - op: draw
               count: 1
         targets:
-          - key: '1'
+          - key: "1"
             select:
               union:
                 - side: opponent

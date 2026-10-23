@@ -47,7 +47,7 @@ cards:
             min: 0
             max: 2
         cost_selections:
-          - key: '1'
+          - key: "1"
             select:
               union:
                 - zone: hand
@@ -111,7 +111,7 @@ cards:
               kind: any
               until: end-of-turn
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: field
@@ -145,7 +145,7 @@ cards:
                 subjects: target.1.leader
                 amount: 3
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -203,7 +203,7 @@ cards:
         event: attack
         subject: self
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -232,7 +232,7 @@ cards:
             subjects: target.1
             amount: 3
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -242,7 +242,7 @@ cards:
         additional_costs:
           - key: beast
             cost_selections:
-              - key: '1'
+              - key: "1"
                 select:
                   side: self
                   zone: hand
@@ -310,7 +310,7 @@ cards:
         event: enter
         subject: self
         cost_selections:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: hand
@@ -386,7 +386,7 @@ cards:
           subjects: target.1
           amount: 1
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: field
@@ -496,7 +496,7 @@ cards:
         active_zones:
           - ex
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -624,7 +624,7 @@ cards:
         active_zones:
           - ex
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: field
@@ -687,7 +687,7 @@ cards:
         active_zones:
           - ex
         targets:
-          - key: '1'
+          - key: "1"
             select:
               union:
                 - side: opponent
@@ -720,7 +720,7 @@ cards:
         active_zones:
           - ex
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: field

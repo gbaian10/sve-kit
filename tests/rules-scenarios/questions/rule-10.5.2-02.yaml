@@ -80,7 +80,7 @@ verified_by:
     method: independent-derivation
     note: 10.5.2.2／.3；xverify-1/result.md〈22 個重疊題〉。之後未再改
 scenarios:
-  - name: '[astra] 回合玩家 P1'
+  - name: "[astra] 回合玩家 P1"
     setup:
       turn:
         active: P1
@@ -171,7 +171,7 @@ scenarios:
                 ability:
                   source: b
                   line: 1
-  - name: '[astra] 回合玩家 P2'
+  - name: "[astra] 回合玩家 P2"
     setup:
       turn:
         active: P2
@@ -262,7 +262,7 @@ scenarios:
                 ability:
                   source: a
                   line: 1
-  - name: '[fable] A 雙方各兩個ラストワード；P1 先清完；P2 的サロメ選不到目標取消，デモンビーター照常'
+  - name: "[fable] A 雙方各兩個ラストワード；P1 先清完；P2 的サロメ選不到目標取消，デモンビーター照常"
     setup:
       turn:
         active: P1
@@ -511,8 +511,8 @@ scenarios:
               line: 3
         events_exact:
           - プレイ
-  - name: '[fable] B P1 留有存活從者 → サロメ有目標，四個都結算；順序仍是 P1 兩個先'
-    inherit: '[fable] A 雙方各兩個ラストワード；P1 先清完；P2 的サロメ選不到目標取消，デモンビーター照常'
+  - name: "[fable] B P1 留有存活從者 → サロメ有目標，四個都結算；順序仍是 P1 兩個先"
+    inherit: "[fable] A 雙方各兩個ラストワード；P1 先清完；P2 的サロメ選不到目標取消，デモンビーター照常"
     setup:
       players:
         P1:

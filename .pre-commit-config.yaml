@@ -32,22 +32,11 @@ repos:
     hooks:
       - id: check-json5
 
-  - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-    rev: v2.16.0
-    hooks:
-      # Registry and id shards are written by carddb's own encoder; see check-yaml above.
-      - id: pretty-format-yaml
-        args:
-          - --autofix
-          - --indent=2
-          - --offset=2
-        exclude: ^authored/(registry|ids)/.*\.yaml$
-
   - repo: https://github.com/ComPWA/taplo-pre-commit
     rev: v0.9.3
     hooks:
       - id: taplo-format
-        args: [-o, array_auto_collapse=false, -o, 'indent_string=    '] # 4 spaces
+        args: [-o, array_auto_collapse=false, -o, "indent_string=    "] # 4 spaces
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.17.0
@@ -192,13 +181,24 @@ repos:
         pass_filenames: false
         files: ^(Cargo\.lock|(.*/)?Cargo\.toml|deny\.toml)$
         stages: [pre-push]
-      # sim/web: `mise exec` pins Bun without relying on the caller's PATH; paths are relative to sim/web.
-      - id: web-prettier
-        name: prettier (sim/web)
+      # Settings and excluded data live in bunfig.toml [fmt]; Markdown and TOML stay with markdownlint and taplo.
+      # Tailwind class order needs sim/web/node_modules, so CI's web job checks sim/web again after `bun install`.
+      - id: bun-fmt
+        name: bun fmt
         language: system
-        entry: bash -c 'cd sim/web && exec mise exec -- bun x prettier --write --ignore-unknown -- "${@#sim/web/}"' --
-        files: ^sim/web/
+        entry: mise exec -- bun fmt
+        types_or: [javascript, jsx, ts, tsx, css, json, html, yaml]
         stages: [pre-commit, manual]
+      # bun fmt keeps the style it is given and wraps an over-long {…} or […] across lines; write those in
+      # block style (one key or item per line) instead.
+      - id: yaml-block-style
+        name: long YAML collections use block style
+        language: python
+        additional_dependencies: [pyyaml==6.0.3]
+        entry: python .github/ci/yaml_block_style.py
+        types: [yaml]
+        stages: [pre-commit, manual]
+      # sim/web: `mise exec` pins Bun without relying on the caller's PATH; paths are relative to sim/web.
       # Flags live in sim/web's lint:js; require_serial keeps one process, since each type-aware ESLint
       # process loads the whole TS project (~2 GB) and per-core batches exhaust memory on large commits.
       - id: web-eslint
@@ -215,11 +215,11 @@ repos:
         entry: bash -c 'cd sim/web && exec mise exec -- bun x stylelint -- "${@#sim/web/}"' --
         files: ^sim/web/.*\.css$
         stages: [pre-commit, manual]
-      # Bun's TypeScript-Go checker keeps pre-push fast; CI still runs `bun run typecheck` (tsc -b) as the gate.
+      # The same script is CI's type gate.
       - id: web-typecheck
-        name: bun --check (sim/web)
+        name: bun check (sim/web)
         language: system
-        entry: mise exec -- bun run --cwd sim/web typecheck:local
+        entry: mise exec -- bun run --cwd sim/web typecheck
         pass_filenames: false
         files: ^(sim/web/|mise\.toml$|\.pre-commit-config\.yaml$)
         stages: [pre-push]
@@ -234,7 +234,7 @@ repos:
       - id: web-test
         name: vitest (sim/web)
         language: system
-        entry: mise exec -- bun run --cwd sim/web test
+        entry: mise exec -- bun run --cwd sim/web test:all
         pass_filenames: false
         always_run: true
         stages: [manual]

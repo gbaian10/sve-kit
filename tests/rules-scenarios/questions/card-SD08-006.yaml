@@ -5,7 +5,16 @@ sources:
 id: card-SD08-006
 kind: card
 must_pass: true
-mechanisms: [條件管到段落結尾, 〜なら、A。B。, 10.4.7.1, 10.6.2.8.2, 體力門檻一次判定, 10.5.2.2, 10.5.2.3, 兩個ファンファーレ 自選順序, 10.7.3.2]
+mechanisms:
+  - 條件管到段落結尾
+  - 〜なら、A。B。
+  - 10.4.7.1
+  - 10.6.2.8.2
+  - 體力門檻一次判定
+  - 10.5.2.2
+  - 10.5.2.3
+  - 兩個ファンファーレ 自選順序
+  - 10.7.3.2
 cards: [SD08-006, BP01-173, BP01-P25]
 why: >-
   《世界》・ゼルガネイア 的第一個ファンファーレ「相手の場のフォロワー1体を選ぶ。自分の場に他のフォロワーがいないなら、それを破壊する。1枚引く。」：
@@ -38,34 +47,43 @@ verified_by:
 scenarios:
   - name: A 沒有其他從者、體力 12：第一段破壞並抽 1；第二段不回復
     setup:
-      turn: {active: P1, first_player: P1, elapsed_turns: {P1: 6, P2: 5}, phase: main}
+      turn: { active: P1, first_player: P1, elapsed_turns: { P1: 6, P2: 5 }, phase: main }
       history: none
       players:
         P1:
           construction: class
-          leader: {class: ビショップ, life: 12}
-          pp: {current: 6, max: 6}
+          leader: { class: ビショップ, life: 12 }
+          pp: { current: 6, max: 6 }
           zones:
             hand:
-              - {id: a1, card: SD08-006}          # 《世界》・ゼルガネイア 5/5
+              - { id: a1, card: SD08-006 } # 《世界》・ゼルガネイア 5/5
             deck:
-              - {id: d1, card: BP01-173}
-              - {filler: 20}
+              - { id: d1, card: BP01-173 }
+              - { filler: 20 }
         P2:
           construction: class
-          leader: {class: ロイヤル, life: 20}
-          pp: {current: 0, max: 5}
+          leader: { class: ロイヤル, life: 20 }
+          pp: { current: 0, max: 5 }
           zones:
             field:
-              - {id: b1, card: BP01-173}          # ファイター 2/3
+              - { id: b1, card: BP01-173 } # ファイター 2/3
             hand:
-              - {filler: 3}
+              - { filler: 3 }
             deck:
-              - {filler: 20}
+              - { filler: 20 }
     decisions:
-      - {n: 1, by: P1, at: main, do: play, card: a1}
-      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 1}}, targets: {1: [b1]}}
-      - {n: 3, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2}}}
+      - { n: 1, by: P1, at: main, do: play, card: a1 }
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: { ability: { source: a1, line: 1 } }
+        targets: { 1: [b1] }
+      - n: 3
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: { ability: { source: a1, line: 2 } }
     random: {}
     expected:
       - at: after-decision-1
@@ -76,8 +94,10 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - {do: choose-pending, pending: {ability: {source: a1, line: 1}}, targets: {1: [b1]}}
-            - {do: choose-pending, pending: {ability: {source: a1, line: 2}}}
+            - do: choose-pending
+              pending: { ability: { source: a1, line: 1 } }
+              targets: { 1: [b1] }
+            - { do: choose-pending, pending: { ability: { source: a1, line: 2 } } }
       - at: after-decision-2
         view: omniscient
         outcome: resolved
@@ -85,29 +105,38 @@ scenarios:
           P2.field: []
           P1.hand: [d1]
         events:
-          - {kind: 破壊, object: b1}
-          - {kind: 引く, player: P1, object: d1}
+          - { kind: 破壊, object: b1 }
+          - { kind: 引く, player: P1, object: d1 }
       - at: after-decision-3
         view: omniscient
         outcome: resolved
         assert:
           P1.leader.life: 12
         forbidden_events:
-          - {kind: 体力増加}
+          - { kind: 体力増加 }
 
   - name: B 有其他從者、體力 10：第一段選了目標但不破壞也不抽；第二段（另一段落）照常 +5
     inherit: A 沒有其他從者、體力 12：第一段破壞並抽 1；第二段不回復
     setup:
       players:
         P1:
-          leader: {class: ビショップ, life: 10}
+          leader: { class: ビショップ, life: 10 }
           zones:
             field:
-              - {id: a2, card: BP01-173}
+              - { id: a2, card: BP01-173 }
     decisions:
-      - {n: 1, by: P1, at: main, do: play, card: a1}
-      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 1}}, targets: {1: [b1]}}
-      - {n: 3, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2}}}
+      - { n: 1, by: P1, at: main, do: play, card: a1 }
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: { ability: { source: a1, line: 1 } }
+        targets: { 1: [b1] }
+      - n: 3
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: { ability: { source: a1, line: 2 } }
     random: {}
     expected:
       - at: after-decision-2
@@ -117,34 +146,49 @@ scenarios:
           P2.field: [b1]
           P1.hand: []
         events:
-          - {kind: プレイ, ability: {source: a1, line: 1}}
-          - {kind: 解決, ability: {source: a1, line: 1}}
+          - { kind: プレイ, ability: { source: a1, line: 1 } }
+          - { kind: 解決, ability: { source: a1, line: 1 } }
         forbidden_events:
-          - {kind: 破壊}
-          - {kind: 引く}
+          - { kind: 破壊 }
+          - { kind: 引く }
       - at: after-decision-3
         view: omniscient
         outcome: resolved
         assert:
           P1.leader.life: 15
         events:
-          - {kind: 体力増加, target: P1.leader, amount: 5}
+          - { kind: 体力増加, target: P1.leader, amount: 5 }
 
   - name: C 體力 11、破壞ラビットネクロマンサー：P1 的第二段先於 P2 的ラストワード 結算 → 不回復 → 之後才變 9
     inherit: A 沒有其他從者、體力 12：第一段破壞並抽 1；第二段不回復
     setup:
       players:
         P1:
-          leader: {class: ビショップ, life: 11}
+          leader: { class: ビショップ, life: 11 }
         P2:
           zones:
             field:
-              - {id: b1, card: BP01-P25}          # ラビットネクロマンサー 3/3（ラストワード リーダーすべてに2ダメージ）
+              - # ラビットネクロマンサー 3/3（ラストワード リーダーすべてに2ダメージ）
+                id: b1
+                card: BP01-P25
     decisions:
-      - {n: 1, by: P1, at: main, do: play, card: a1}
-      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 1}}, targets: {1: [b1]}}
-      - {n: 3, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2}}}
-      - {n: 4, by: P2, at: check-timing, do: choose-pending, pending: {ability: {source: b1, line: 1}}}
+      - { n: 1, by: P1, at: main, do: play, card: a1 }
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: { ability: { source: a1, line: 1 } }
+        targets: { 1: [b1] }
+      - n: 3
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: { ability: { source: a1, line: 2 } }
+      - n: 4
+        by: P2
+        at: check-timing
+        do: choose-pending
+        pending: { ability: { source: b1, line: 1 } }
     random: {}
     expected:
       - at: after-decision-2
@@ -158,18 +202,18 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - {do: choose-pending, pending: {ability: {source: a1, line: 2}}}
+            - { do: choose-pending, pending: { ability: { source: a1, line: 2 } } }
       - at: after-decision-3
         view: omniscient
         outcome: resolved
         assert:
           P1.leader.life: 11
         forbidden_events:
-          - {kind: 体力増加}
+          - { kind: 体力増加 }
         awaiting:
           by: P2
           choices:
-            - {do: choose-pending, pending: {ability: {source: b1, line: 1}}}
+            - { do: choose-pending, pending: { ability: { source: b1, line: 1 } } }
       - at: after-decision-4
         view: omniscient
         outcome: resolved
@@ -177,22 +221,31 @@ scenarios:
           P1.leader.life: 9
           P2.leader.life: 18
         events:
-          - {kind: ダメージ, source: b1, target: P1.leader, amount: 2, group: g1}
-          - {kind: ダメージ, source: b1, target: P2.leader, amount: 2, group: g1}
+          - { kind: ダメージ, source: b1, target: P1.leader, amount: 2, group: g1 }
+          - { kind: ダメージ, source: b1, target: P2.leader, amount: 2, group: g1 }
 
   - name: D 對手沒有從者、體力 10：第一段選不到目標 → 待機取消、不抽；第二段照常 +5
     inherit: A 沒有其他從者、體力 12：第一段破壞並抽 1；第二段不回復
     setup:
       players:
         P1:
-          leader: {class: ビショップ, life: 10}
+          leader: { class: ビショップ, life: 10 }
         P2:
           zones:
             field: []
     decisions:
-      - {n: 1, by: P1, at: main, do: play, card: a1}
-      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 1}}, targets: {1: []}}
-      - {n: 3, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2}}}
+      - { n: 1, by: P1, at: main, do: play, card: a1 }
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: { ability: { source: a1, line: 1 } }
+        targets: { 1: [] }
+      - n: 3
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: { ability: { source: a1, line: 2 } }
     random: {}
     expected:
       - at: after-decision-2
@@ -201,9 +254,9 @@ scenarios:
         assert:
           P1.hand: []
         events:
-          - {kind: 待機取消, ability: {source: a1, line: 1}}
+          - { kind: 待機取消, ability: { source: a1, line: 1 } }
         forbidden_events:
-          - {kind: 引く}
+          - { kind: 引く }
       - at: after-decision-3
         view: omniscient
         outcome: resolved

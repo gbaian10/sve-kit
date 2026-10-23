@@ -3,14 +3,36 @@ kind: ruling
 id: R-0003
 revision: 2
 question: 「【攻撃時】Xなら、Y」的條件是誘發條件（不成立就不誘發），還是本文條件（結算時判）？
-decision: '本文條件（選項 A）：攻擊一定誘發、能力一定打出，條件在結算時判，不成立就不做；與 {ファンファーレ}、【進化時】相同。已裁定 #1 只適用於長寫自動能力，不適用於關鍵字誘發。'
+decision: "本文條件（選項 A）：攻擊一定誘發、能力一定打出，條件在結算時判，不成立就不做；與 {ファンファーレ}、【進化時】相同。已裁定 #1 只適用於長寫自動能力，不適用於關鍵字誘發。"
 evidence:
-  - {ref: Q2531, kind: direct, quote: はい。プレイすることができます。また《UB》能力が発動したことを満たします。, question: このフォロワーが相手のリーダーに攻撃した場合、このフォロワーの《UB》【攻撃時】能力をプレイすることができますか？また《UB》能力が発動したことを満たしますか？, date: '2026-01-26'}
-  - {ref: Q1101, kind: supporting, quote: "はい。満たします。\nまず、『ネフティス』の《ファンファーレ》能力の解決を行い、その後、誘発して待機状態になった能力を解決します。『沈黙の絶傑・ルルナイ』の《ファンファーレ》能力を解決するタイミングで自分の墓場が10枚以上あるため、【ネクロチャージ_10】の条件を満たすことができます。", question: 自分の墓場が6枚の状況で、『ネフティス』の《ファンファーレ》能力によって、『沈黙の絶傑・ルルナイ』を含む4体を場に出して破壊した場合、『沈黙の絶傑・ルルナイ』の《ファンファーレ》能力にある【ネクロチャージ_10】の条件を満たしますか？, date: '2023-12-15'}
-  - {ref: Q1102, kind: supporting, quote: "はい。満たします。\n『ネフティス』の《ファンファーレ》能力によって、誘発して待機状態になった能力は任意の順番で解決することができます。『デュエリスト・モルディカイ』の《ラストワード》能力を先に解決し、自分のリーダーの体力を-3することで、『ハウリングデーモン』の《ファンファーレ》能力を解決するタイミングで【真紅】状態になっているため、「【真紅】状態なら、」の条件を満たすことができます。", question: 『ネフティス』の《ファンファーレ》能力によって、『ハウリングデーモン』と『デュエリスト・モルディカイ』を場に出して破壊しました。『デュエリスト・モルディカイ』の《ラストワード》能力を先に解決し、コストとして自分のリーダーの体力を-3した場合、『ハウリングデーモン』の《ファンファーレ》能力にある「【真紅】状態なら、」の条件を満たしますか？, date: '2023-12-15'}
-  - {ref: Q1353, kind: supporting, quote: "いいえ。できません。\n『《世界》・ゼルガネイア』の《ファンファーレ》能力によって、『ラビットネクロマンサー』を破壊した際、『ラビットネクロマンサー』の《ラストワード》能力が誘発し待機状態になりますが、待機状態の自動能力はターンプレイヤーから解決するため、先に「《ファンファーレ》自分のリーダーの体力が10以下なら、自分のリーダーは《体力》+5する。」を解決します。この時点で自分のリーダーの体力は11なので、体力を+5することはできず、この能力の解決後に『ラビットネクロマンサー』の《ラストワード》能力によって自分のリーダーの体力が9になります。\n\nまた、何らかの能力によって相手のターン中に自分の場に『《世界》・ゼルガネイア』が出て《ファンファーレ》能力によって『ラビットネクロマンサー』を破壊した場合、「《ファンファーレ》自分のリーダーの体力が10以下なら、自分のリーダーは《体力》+5する。」より先に『ラビットネクロマンサー』の《ラストワード》能力を解決するため、自分のリーダーの体力を+5することができます。", question: "自分のリーダの体力が11で、自分の場のフォロワーが0体、相手の場のフォロワーが『ラビットネクロマンサー』1体のみの状況です。\n自分のターン中に、『《世界》・ゼルガネイア』をプレイし、「《ファンファーレ》相手の場のフォロワー1体を選ぶ。自分の場に他のフォロワーがいないなら、それを破壊する。1枚引く。」から解決して『ラビットネクロマンサー』を破壊した場合、『ラビットネクロマンサー』の《ラストワード》能力で、自分のリーダーの体力が9になった後に「《ファンファーレ》自分のリーダーの体力が10以下なら、自分のリーダーは《体力》+5する。」によって、自分のリーダーの体力を+5することができますか？", date: '2024-04-15'}
-  - {ref: CR 12.7.2, kind: supporting, quote: "12.7.2. ‘【攻撃時】（テキスト）’は、‘このフォロワーが攻撃\nしたとき、（テキスト）’を意味します。", version: 1.27.0}
-  - {ref: CR 12.4.3, kind: supporting, quote: "12.4.3. ‘ファンファーレ （テキスト）’は、‘このカードを場\n以外から場に置いたとき、（テキスト）’を意味しま\nす。", version: 1.27.0}
+  - ref: Q2531
+    kind: direct
+    quote: はい。プレイすることができます。また《UB》能力が発動したことを満たします。
+    question: このフォロワーが相手のリーダーに攻撃した場合、このフォロワーの《UB》【攻撃時】能力をプレイすることができますか？また《UB》能力が発動したことを満たしますか？
+    date: "2026-01-26"
+  - ref: Q1101
+    kind: supporting
+    quote: "はい。満たします。\nまず、『ネフティス』の《ファンファーレ》能力の解決を行い、その後、誘発して待機状態になった能力を解決します。『沈黙の絶傑・ルルナイ』の《ファンファーレ》能力を解決するタイミングで自分の墓場が10枚以上あるため、【ネクロチャージ_10】の条件を満たすことができます。"
+    question: 自分の墓場が6枚の状況で、『ネフティス』の《ファンファーレ》能力によって、『沈黙の絶傑・ルルナイ』を含む4体を場に出して破壊した場合、『沈黙の絶傑・ルルナイ』の《ファンファーレ》能力にある【ネクロチャージ_10】の条件を満たしますか？
+    date: "2023-12-15"
+  - ref: Q1102
+    kind: supporting
+    quote: "はい。満たします。\n『ネフティス』の《ファンファーレ》能力によって、誘発して待機状態になった能力は任意の順番で解決することができます。『デュエリスト・モルディカイ』の《ラストワード》能力を先に解決し、自分のリーダーの体力を-3することで、『ハウリングデーモン』の《ファンファーレ》能力を解決するタイミングで【真紅】状態になっているため、「【真紅】状態なら、」の条件を満たすことができます。"
+    question: 『ネフティス』の《ファンファーレ》能力によって、『ハウリングデーモン』と『デュエリスト・モルディカイ』を場に出して破壊しました。『デュエリスト・モルディカイ』の《ラストワード》能力を先に解決し、コストとして自分のリーダーの体力を-3した場合、『ハウリングデーモン』の《ファンファーレ》能力にある「【真紅】状態なら、」の条件を満たしますか？
+    date: "2023-12-15"
+  - ref: Q1353
+    kind: supporting
+    quote: "いいえ。できません。\n『《世界》・ゼルガネイア』の《ファンファーレ》能力によって、『ラビットネクロマンサー』を破壊した際、『ラビットネクロマンサー』の《ラストワード》能力が誘発し待機状態になりますが、待機状態の自動能力はターンプレイヤーから解決するため、先に「《ファンファーレ》自分のリーダーの体力が10以下なら、自分のリーダーは《体力》+5する。」を解決します。この時点で自分のリーダーの体力は11なので、体力を+5することはできず、この能力の解決後に『ラビットネクロマンサー』の《ラストワード》能力によって自分のリーダーの体力が9になります。\n\nまた、何らかの能力によって相手のターン中に自分の場に『《世界》・ゼルガネイア』が出て《ファンファーレ》能力によって『ラビットネクロマンサー』を破壊した場合、「《ファンファーレ》自分のリーダーの体力が10以下なら、自分のリーダーは《体力》+5する。」より先に『ラビットネクロマンサー』の《ラストワード》能力を解決するため、自分のリーダーの体力を+5することができます。"
+    question: "自分のリーダの体力が11で、自分の場のフォロワーが0体、相手の場のフォロワーが『ラビットネクロマンサー』1体のみの状況です。\n自分のターン中に、『《世界》・ゼルガネイア』をプレイし、「《ファンファーレ》相手の場のフォロワー1体を選ぶ。自分の場に他のフォロワーがいないなら、それを破壊する。1枚引く。」から解決して『ラビットネクロマンサー』を破壊した場合、『ラビットネクロマンサー』の《ラストワード》能力で、自分のリーダーの体力が9になった後に「《ファンファーレ》自分のリーダーの体力が10以下なら、自分のリーダーは《体力》+5する。」によって、自分のリーダーの体力を+5することができますか？"
+    date: "2024-04-15"
+  - ref: CR 12.7.2
+    kind: supporting
+    quote: "12.7.2. ‘【攻撃時】（テキスト）’は、‘このフォロワーが攻撃\nしたとき、（テキスト）’を意味します。"
+    version: 1.27.0
+  - ref: CR 12.4.3
+    kind: supporting
+    quote: "12.4.3. ‘ファンファーレ （テキスト）’は、‘このカードを場\n以外から場に置いたとき、（テキスト）’を意味しま\nす。"
+    version: 1.27.0
 strength: official
 decided_on: 2026-09-27
 applies_to:
@@ -19,130 +41,152 @@ applies_to:
     uses:
       - cards: [BP21-024, BP21-P12]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:ffbdd6b779fcb7d78d53850e62cc974dc50a396f0b9adaf06939ec127bc31b2f}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:ffbdd6b779fcb7d78d53850e62cc974dc50a396f0b9adaf06939ec127bc31b2f
           field: effect
           ordinal:
           source_hash: 80bdd7108d8975285fdae7554e4557207587c55229cf056cd49dbf8cdd07836d
           line_ordinal: 0
           role: body
-          segments: [{start: 0, end: 58}]
+          segments: [{ start: 0, end: 58 }]
   - legacy: T8dba09d157
     namespace: classification-v0
     uses:
       - cards: [BP19-021, BP19-SL07]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:5302d25d7250b6531d16e09f82a099db049d026dc79932fa7ff3629873fc4baa}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:5302d25d7250b6531d16e09f82a099db049d026dc79932fa7ff3629873fc4baa
           field: effect
           ordinal:
           source_hash: c27d78a16af881996dd26dc09e4a4738abb8fa96c092b49b47314b66eee997e4
           line_ordinal: 1
           role: body
-          segments: [{start: 9, end: 71}]
+          segments: [{ start: 9, end: 71 }]
   - legacy: T29a2617cd4
     namespace: classification-v0
     uses:
       - cards: [BP17-019, BP17-SL05, BP17-U03]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:b7d2e0e96522a27721073dd0d1fae63e13dd4c6d6a285812c1300d281f45f40d}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:b7d2e0e96522a27721073dd0d1fae63e13dd4c6d6a285812c1300d281f45f40d
           field: effect
           ordinal:
           source_hash: 9708708b2627a8392c8d824ddbc5cd7b5eec839eb2ad30c7956b80c4d93a5c72
           line_ordinal: 1
           role: body
-          segments: [{start: 5, end: 43}]
+          segments: [{ start: 5, end: 43 }]
   - legacy: Taec5f7452e
     namespace: classification-v0
     uses:
       - cards: [BP15-023, BP15-SL09]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:06112aea750f1c5cdb3ddbe9df4ac6dcbff8c1fc98cdd72fe8059b14ae01d68a}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:06112aea750f1c5cdb3ddbe9df4ac6dcbff8c1fc98cdd72fe8059b14ae01d68a
           field: effect
           ordinal:
           source_hash: ecf66abf04795e68beee49af9a2cb310cc5533aeddb728d2130e4bf75ffda5d7
           line_ordinal: 1
           role: body
-          segments: [{start: 5, end: 46}]
+          segments: [{ start: 5, end: 46 }]
   - legacy: Tf05b906ae3
     namespace: classification-v0
     uses:
       - cards: [BP21-061, BP21-P31]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:1eff100048852acfaf5c23647df5a4a5cd0c755a137f1149784fe25d7c2e59d0}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:1eff100048852acfaf5c23647df5a4a5cd0c755a137f1149784fe25d7c2e59d0
           field: effect
           ordinal:
           source_hash: 5ca8c31242e7e5556a1f58bed24d754c3ad9dd71102f41e06479cb013b3fbf60
           line_ordinal: 1
           role: body
-          segments: [{start: 11, end: 80}]
+          segments: [{ start: 11, end: 80 }]
   - legacy: T50d7e70ddd
     namespace: classification-v0
     uses:
       - cards: [BP21-063, BP21-P32]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:218f331babb65789632158a0eb46efc936bb3b4976152deded22ba9cf89f777e}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:218f331babb65789632158a0eb46efc936bb3b4976152deded22ba9cf89f777e
           field: effect
           ordinal:
           source_hash: 3ed5daf57593df6ead42813dc496a204d5f54d46c1282508e622867d9bc83f85
           line_ordinal: 2
           role: body
-          segments: [{start: 25, end: 88}]
+          segments: [{ start: 25, end: 88 }]
   - legacy: T8bf49c125d
     namespace: classification-v0
     uses:
       - cards: [BP11-003, BP11-SL03, BP11-U01, BP21-PR02, BP21-PR14]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:34992496dcc59d0a76a279f7aa37da806bdacfff8ef4c67748a150e1cb07d536}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:34992496dcc59d0a76a279f7aa37da806bdacfff8ef4c67748a150e1cb07d536
           field: effect
           ordinal:
           source_hash: 7a114ead6e92bc4f10914c39e19e4cc1042d2bc3c8854c22e11b06d339223b9a
           line_ordinal: 1
           role: body
-          segments: [{start: 5, end: 37}]
+          segments: [{ start: 5, end: 37 }]
   - legacy: T95c472c471
     namespace: classification-v0
     uses:
       - cards: [BP03-027, BP03-P07]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:a11d79d374f0e70bbd31a1ea20247e705e9183523f3b3cf7ac24e4bd19df0c4e}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:a11d79d374f0e70bbd31a1ea20247e705e9183523f3b3cf7ac24e4bd19df0c4e
           field: effect
           ordinal:
           source_hash: c7b9914db5bc178d2178d48b7cc756d55cc3f71f1b95b1afce5814511da31124
           line_ordinal: 1
           role: body
-          segments: [{start: 7, end: 47}]
+          segments: [{ start: 7, end: 47 }]
   - legacy: T474d229c66
     namespace: classification-v0
     uses:
       - cards: [BP01-126, BP01-SL16]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:6bbec213c65b970d576415acb5e1b1344758f36f13b8783ce0dbd5536fdcf1fe}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:6bbec213c65b970d576415acb5e1b1344758f36f13b8783ce0dbd5536fdcf1fe
           field: effect
           ordinal:
           source_hash: 505e4e3e1f6ece6098dcb4003304fea99f7cc390c7feb54b1ad83fb50f5e96c9
           line_ordinal: 1
           role: body
-          segments: [{start: 5, end: 35}]
+          segments: [{ start: 5, end: 35 }]
   - legacy: T044753d805
     namespace: classification-v0
     uses:
       - cards: [CP04-046, CP04-P34]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:2c5023976ea75bfd8a1ab8aae673a914f2867250793b91b952a8d849d3e5d4b9}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:2c5023976ea75bfd8a1ab8aae673a914f2867250793b91b952a8d849d3e5d4b9
           field: effect
           ordinal:
           source_hash: 0499d36ba3a0fa3fb060cc935e78ad53182367af45671ddc9ba8e2ecc87d27e0
           line_ordinal: 0
           role: body
-          segments: [{start: 0, end: 71}]
+          segments: [{ start: 0, end: 71 }]
       - cards: [PCS01-019]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:8f3bfb2d73f0756b70e6e6a40fcd3f3f9d36ec03e25f9a84e372a289233bd96f}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:8f3bfb2d73f0756b70e6e6a40fcd3f3f9d36ec03e25f9a84e372a289233bd96f
           field: effect
           ordinal:
           source_hash: 0499d36ba3a0fa3fb060cc935e78ad53182367af45671ddc9ba8e2ecc87d27e0
           line_ordinal: 0
           role: body
-          segments: [{start: 0, end: 71}]
+          segments: [{ start: 0, end: 71 }]
 hint:
   zh-TW: 依 Q2531，【攻撃時】後面的條件在結算時判；條件不成立，能力照樣打出（也算《UB》能力發動），只是不做效果。
   ja: Q2531より、【攻撃時】に続く条件は解決時に確認します。満たさなくても能力はプレイされ（《UB》能力の発動も満たします）、効果が適用されないだけです。

@@ -7,8 +7,8 @@ kind: card
 must_pass: true
 mechanisms:
   - 封箱、操縱、變成種類
-  - '5.32'
-  - '12.10'
+  - "5.32"
+  - "12.10"
   - 8.4.2.1
   - 費用中的選擇
   - 攻撃時目標被破壞後不交戰
@@ -66,7 +66,7 @@ verified_by:
     method: qa
     note: Q1581、10.4.2.2、5.32.1、12.10.2；xverify-1/result.md〈22 個重疊題〉。之後未再改
 scenarios:
-  - name: '[astra] 足額=True 已橫置=False'
+  - name: "[astra] 足額=True 已橫置=False"
     setup:
       turn:
         active: P1
@@ -145,7 +145,7 @@ scenarios:
             acted: true
           P1.field.a:
             acted: true
-  - name: '[astra] 足額=False 已橫置=False'
+  - name: "[astra] 足額=False 已橫置=False"
     setup:
       turn:
         active: P1
@@ -218,7 +218,7 @@ scenarios:
             acted: false
           P1.field.a:
             acted: false
-  - name: '[astra] 足額=True 已橫置=True'
+  - name: "[astra] 足額=True 已橫置=True"
     setup:
       turn:
         active: P1
@@ -291,7 +291,7 @@ scenarios:
             acted: true
           P1.field.a:
             acted: false
-  - name: '[fable] A 回合開始就在場的列車：操縦 → 攻擊アクト從者 → 攻撃時破壞它並 +2 → 不交戰'
+  - name: "[fable] A 回合開始就在場的列車：操縦 → 攻擊アクト從者 → 攻撃時破壞它並 +2 → 不交戰"
     setup:
       turn:
         active: P1
@@ -416,8 +416,8 @@ scenarios:
             hp: 5
         forbidden_events:
           - kind: ダメージ
-  - name: '[fable] B 本回合進場的列車：操縦後不能攻擊リーダー，突進可攻擊アクト從者'
-    inherit: '[fable] A 回合開始就在場的列車：操縦 → 攻擊アクト從者 → 攻撃時破壞它並 +2 → 不交戰'
+  - name: "[fable] B 本回合進場的列車：操縦後不能攻擊リーダー，突進可攻擊アクト從者"
+    inherit: "[fable] A 回合開始就在場的列車：操縦 → 攻擊アクト從者 → 攻撃時破壞它並 +2 → 不交戰"
     setup:
       players:
         P1:
@@ -468,7 +468,9 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - {do: choose-pending, pending: {ability: {source: a1, line: 3}}, targets: {1: [b1]}}
+            - do: choose-pending
+              pending: { ability: { source: a1, line: 3 } }
+              targets: { 1: [b1] }
         assert:
           P1.field.a1:
             acted: true

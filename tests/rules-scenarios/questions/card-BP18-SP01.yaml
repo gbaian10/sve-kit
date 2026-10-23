@@ -9,11 +9,11 @@ mechanisms:
   - 封箱、操縱、變成種類
   - 1.3.2
   - 10.7.4
-  - '5.31'
+  - "5.31"
   - 5.31.2
   - 5.31.3
-  - '12.5'
-  - '12.8'
+  - "12.5"
+  - "12.8"
   - 封箱的從者離場時謝幕曲不進入待機
 cards:
   - BP01-P25
@@ -75,7 +75,7 @@ verified_by:
     method: qa
     note: Q1497、Q1501、5.31.2、1.3.2.1；xverify-1/result.md〈22 個重疊題〉。之後未再改
 scenarios:
-  - name: '[astra] 原橫置=False 封箱=True'
+  - name: "[astra] 原橫置=False 封箱=True"
     setup:
       turn:
         active: P1
@@ -151,7 +151,7 @@ scenarios:
           P2.cemetery:
             - b
           semantic_state.pending_triggers: []
-  - name: '[astra] 原橫置=True 封箱=True'
+  - name: "[astra] 原橫置=True 封箱=True"
     setup:
       turn:
         active: P1
@@ -227,7 +227,7 @@ scenarios:
           P2.cemetery:
             - b
           semantic_state.pending_triggers: []
-  - name: '[astra] 原橫置=False 封箱=False'
+  - name: "[astra] 原橫置=False 封箱=False"
     setup:
       turn:
         active: P1
@@ -299,7 +299,7 @@ scenarios:
                 line: 1
               event:
                 left_field: b
-  - name: '[fable] A 箱詰め後被破壞 → ラストワード不誘發'
+  - name: "[fable] A 箱詰め後被破壞 → ラストワード不誘發"
     setup:
       turn:
         active: P1
@@ -387,8 +387,8 @@ scenarios:
         forbidden_events:
           - kind: 待機
           - kind: 体力増加
-  - name: '[fable] B 箱詰め的從者在自己開始階段不站起；對手回合結束後能力回來（守護重新擋攻擊）'
-    inherit: '[fable] A 箱詰め後被破壞 → ラストワード不誘發'
+  - name: "[fable] B 箱詰め的從者在自己開始階段不站起；對手回合結束後能力回來（守護重新擋攻擊）"
+    inherit: "[fable] A 箱詰め後被破壞 → ラストワード不誘發"
     setup:
       players:
         P1:

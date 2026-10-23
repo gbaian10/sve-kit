@@ -1,4 +1,6 @@
+# For the editor's Prettier extension; keep in step with ignorePatterns in the root bunfig.toml.
 dist/
 bun.lock
 # Canonical JSON bytes: hashes cover them, so no reformatting.
 fixtures/
+*.md

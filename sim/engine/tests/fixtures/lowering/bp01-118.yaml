@@ -4,11 +4,11 @@ scope: shared
 cards:
   BP01-118:
     meta:
-      dsl: '1.0'
+      dsl: "1.0"
       source: effect-source-v1:sha256:3333333333333333333333333333333333333333333333333333333333333333
       written_by:
-        - actor: {who: synthetic fixture, model: null}
-          date: '2026-10-21'
+        - actor: { who: synthetic fixture, model: null }
+          date: "2026-10-21"
       reviewed_by: []
       status: draft
       verified_by_exam: []
@@ -19,24 +19,24 @@ cards:
           - binding_id: binding:fixture-bp01-118
             ability_scope: ability_0
             occurrence:
-              owner: {kind: face_revision, revision_id: revision:fixture-bp01-118}
+              owner: { kind: face_revision, revision_id: revision:fixture-bp01-118 }
               field: effect
               ordinal:
-              source_hash: '0000000000000000000000000000000000000000000000000000000000000000'
+              source_hash: "0000000000000000000000000000000000000000000000000000000000000000"
               line_ordinal: 0
               role: body
-              segments: [{start: 0, end: 1}]
-        ports: {imports: {}, exports: {}}
+              segments: [{ start: 0, end: 1 }]
+        ports: { imports: {}, exports: {} }
         fanfare:
           do:
-            - damage: {to: {leaders: all}, n: 1}
+            - damage: { to: { leaders: all }, n: 1 }
   BP01-P25:
     meta:
-      dsl: '1.0'
+      dsl: "1.0"
       source: effect-source-v1:sha256:3333333333333333333333333333333333333333333333333333333333333333
       written_by:
-        - actor: {who: synthetic fixture, model: null}
-          date: '2026-10-22'
+        - actor: { who: synthetic fixture, model: null }
+          date: "2026-10-22"
       reviewed_by: []
       status: draft
       verified_by_exam: []
@@ -47,25 +47,25 @@ cards:
           - binding_id: binding:fixture-bp01-p25
             ability_scope: ability_0
             occurrence:
-              owner: {kind: face_revision, revision_id: revision:fixture-bp01-p25}
+              owner: { kind: face_revision, revision_id: revision:fixture-bp01-p25 }
               field: effect
               ordinal:
-              source_hash: '0000000000000000000000000000000000000000000000000000000000000000'
+              source_hash: "0000000000000000000000000000000000000000000000000000000000000000"
               line_ordinal: 0
               role: body
-              segments: [{start: 0, end: 1}]
-        ports: {imports: {}, exports: {}}
+              segments: [{ start: 0, end: 1 }]
+        ports: { imports: {}, exports: {} }
         lastword:
           do:
-            - damage: {to: {leaders: all}, n: 2}
+            - damage: { to: { leaders: all }, n: 2 }
 
   BP10-122:
     meta:
-      dsl: '1.0'
+      dsl: "1.0"
       source: effect-source-v1:sha256:3333333333333333333333333333333333333333333333333333333333333333
       written_by:
-        - actor: {who: synthetic fixture, model: null}
-          date: '2026-10-22'
+        - actor: { who: synthetic fixture, model: null }
+          date: "2026-10-22"
       reviewed_by: []
       status: draft
       verified_by_exam: []
@@ -76,25 +76,25 @@ cards:
           - binding_id: binding:fixture-bp10-122
             ability_scope: ability_0
             occurrence:
-              owner: {kind: face_revision, revision_id: revision:fixture-bp10-122}
+              owner: { kind: face_revision, revision_id: revision:fixture-bp10-122 }
               field: effect
               ordinal:
-              source_hash: '0000000000000000000000000000000000000000000000000000000000000000'
+              source_hash: "0000000000000000000000000000000000000000000000000000000000000000"
               line_ordinal: 0
               role: body
-              segments: [{start: 0, end: 1}]
-        ports: {imports: {}, exports: {}}
+              segments: [{ start: 0, end: 1 }]
+        ports: { imports: {}, exports: {} }
         attack_time:
           do:
-            - draw: {n: 1}
+            - draw: { n: 1 }
 
   BP09-P17:
     meta:
-      dsl: '1.0'
+      dsl: "1.0"
       source: effect-source-v1:sha256:3333333333333333333333333333333333333333333333333333333333333333
       written_by:
-        - actor: {who: synthetic fixture, model: null}
-          date: '2026-10-22'
+        - actor: { who: synthetic fixture, model: null }
+          date: "2026-10-22"
       reviewed_by: []
       status: draft
       verified_by_exam: []
@@ -105,26 +105,26 @@ cards:
           - binding_id: binding:fixture-bp09-p17
             ability_scope: ability_0
             occurrence:
-              owner: {kind: face_revision, revision_id: revision:fixture-bp09-p17}
+              owner: { kind: face_revision, revision_id: revision:fixture-bp09-p17 }
               field: effect
               ordinal:
-              source_hash: '0000000000000000000000000000000000000000000000000000000000000000'
+              source_hash: "0000000000000000000000000000000000000000000000000000000000000000"
               line_ordinal: 0
               role: body
-              segments: [{start: 0, end: 1}]
-        ports: {imports: {}, exports: {}}
+              segments: [{ start: 0, end: 1 }]
+        ports: { imports: {}, exports: {} }
         auto:
-          on: {phase: {which: end, whose: self}}
+          on: { phase: { which: end, whose: self } }
           do:
-            - draw: {n: 3}
+            - draw: { n: 3 }
 
   synthetic-evolution:
     meta:
-      dsl: '1.0'
+      dsl: "1.0"
       source: effect-source-v1:sha256:3333333333333333333333333333333333333333333333333333333333333333
       written_by:
-        - actor: {who: synthetic fixture, model: null}
-          date: '2026-10-22'
+        - actor: { who: synthetic fixture, model: null }
+          date: "2026-10-22"
       reviewed_by: []
       status: draft
       verified_by_exam: []
@@ -135,24 +135,23 @@ cards:
           - binding_id: binding:fixture-evolution-entry
             ability_scope: ability_0
             occurrence:
-              owner: {kind: face_revision, revision_id: revision:fixture-evolution-entry}
+              owner: { kind: face_revision, revision_id: revision:fixture-evolution-entry }
               field: effect
               ordinal:
-              source_hash: '0000000000000000000000000000000000000000000000000000000000000000'
+              source_hash: "0000000000000000000000000000000000000000000000000000000000000000"
               line_ordinal: 0
               role: body
-              segments: [{start: 0, end: 1}]
-        ports: {imports: {}, exports: {}}
-        evolve: {cost: {pp: 1}}
-
+              segments: [{ start: 0, end: 1 }]
+        ports: { imports: {}, exports: {} }
+        evolve: { cost: { pp: 1 } }
 
   BP20-R14:
     meta:
-      dsl: '1.0'
+      dsl: "1.0"
       source: effect-source-v1:sha256:3333333333333333333333333333333333333333333333333333333333333333
       written_by:
-        - actor: {who: synthetic fixture, model: null}
-          date: '2026-10-22'
+        - actor: { who: synthetic fixture, model: null }
+          date: "2026-10-22"
       reviewed_by: []
       status: draft
       verified_by_exam: []
@@ -163,24 +162,24 @@ cards:
           - binding_id: binding:fixture-bp20-r14
             ability_scope: ability_0
             occurrence:
-              owner: {kind: face_revision, revision_id: revision:fixture-bp20-r14}
+              owner: { kind: face_revision, revision_id: revision:fixture-bp20-r14 }
               field: effect
               ordinal:
-              source_hash: '0000000000000000000000000000000000000000000000000000000000000000'
+              source_hash: "0000000000000000000000000000000000000000000000000000000000000000"
               line_ordinal: 0
               role: body
-              segments: [{start: 0, end: 1}]
-        ports: {imports: {}, exports: {}}
+              segments: [{ start: 0, end: 1 }]
+        ports: { imports: {}, exports: {} }
         evolve_time:
           do:
-            - draw: {n: 1}
+            - draw: { n: 1 }
   BP20-028:
     meta:
-      dsl: '1.0'
+      dsl: "1.0"
       source: effect-source-v1:sha256:3333333333333333333333333333333333333333333333333333333333333333
       written_by:
-        - actor: {who: synthetic fixture, model: null}
-          date: '2026-10-22'
+        - actor: { who: synthetic fixture, model: null }
+          date: "2026-10-22"
       reviewed_by: []
       status: draft
       verified_by_exam: []
@@ -191,17 +190,17 @@ cards:
           - binding_id: binding:fixture-bp20-028
             ability_scope: ability_0
             occurrence:
-              owner: {kind: face_revision, revision_id: revision:fixture-bp20-028}
+              owner: { kind: face_revision, revision_id: revision:fixture-bp20-028 }
               field: effect
               ordinal:
-              source_hash: '0000000000000000000000000000000000000000000000000000000000000000'
+              source_hash: "0000000000000000000000000000000000000000000000000000000000000000"
               line_ordinal: 0
               role: body
-              segments: [{start: 0, end: 1}]
-        ports: {imports: {}, exports: {}}
+              segments: [{ start: 0, end: 1 }]
+        ports: { imports: {}, exports: {} }
         auto:
           on:
-            enter_field: {who: self, sel: {kind: follower, trait: 兵士}}
+            enter_field: { who: self, sel: { kind: follower, trait: 兵士 } }
           per_turn: 1
           do:
-            - draw: {n: 1}
+            - draw: { n: 1 }

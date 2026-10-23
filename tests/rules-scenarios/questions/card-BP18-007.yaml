@@ -5,7 +5,18 @@ sources:
 id: card-BP18-007
 kind: card
 must_pass: true
-mechanisms: [從墓場打出的許可, 墓場中有效的永續能力, 10.3.4, 13.2.1, コンボ 張數條件, 8.2.1 仍要付費, 「手札以外から場に出ていたなら」, 5.5.3, 自己離場的誘發, 10.7.4.2, 10.6.2.3.3]
+mechanisms:
+  - 從墓場打出的許可
+  - 墓場中有效的永續能力
+  - 10.3.4
+  - 13.2.1
+  - コンボ 張數條件
+  - 8.2.1 仍要付費
+  - 「手札以外から場に出ていたなら」
+  - 5.5.3
+  - 自己離場的誘發
+  - 10.7.4.2
+  - 10.6.2.3.3
 cards: [BP18-007, BP01-173, BP01-176]
 why: >-
   アクティブエルフ・メイ「「このターン中に自分がプレイしたカードの枚数」が3枚以上なら、これは墓場からプレイできる」是在墓場有效的永續能力（Q2306、10.3.4）；
@@ -41,38 +52,48 @@ verified_by:
 scenarios:
   - name: A 本回合已打出 3 張 → 從墓場付 1 PP 打出 → ファンファーレ 1 傷害後放牌庫底 → 離場誘發再 1 傷害
     setup:
-      turn: {active: P1, first_player: P1, elapsed_turns: {P1: 5, P2: 4}, phase: main}
+      turn: { active: P1, first_player: P1, elapsed_turns: { P1: 5, P2: 4 }, phase: main }
       history: explicit
       semantic_state:
-        counters_this_turn: {P1.cards_played: 3}
+        counters_this_turn: { P1.cards_played: 3 }
       players:
         P1:
           construction: class
-          leader: {class: エルフ, life: 20}
-          pp: {current: 3, max: 5}
+          leader: { class: エルフ, life: 20 }
+          pp: { current: 3, max: 5 }
           zones:
             cemetery:
-              - {id: g1, card: BP18-007}
+              - { id: g1, card: BP18-007 }
             hand:
-              - {filler: 2}
+              - { filler: 2 }
             deck:
-              - {filler: 20}
+              - { filler: 20 }
         P2:
           construction: class
-          leader: {class: ロイヤル, life: 20}
-          pp: {current: 0, max: 5}
+          leader: { class: ロイヤル, life: 20 }
+          pp: { current: 0, max: 5 }
           zones:
             field:
-              - {id: b1, card: BP01-173}        # ファイター 2/3
-              - {id: b2, card: BP01-176}        # 天剣の乙女 4/6
+              - { id: b1, card: BP01-173 } # ファイター 2/3
+              - { id: b2, card: BP01-176 } # 天剣の乙女 4/6
             hand:
-              - {filler: 3}
+              - { filler: 3 }
             deck:
-              - {filler: 20}
+              - { filler: 20 }
     decisions:
-      - {n: 1, by: P1, at: main, do: play, card: g1}
-      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: g1, line: 3}}, targets: {1: [b1]}}
-      - {n: 3, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: g1, line: 2}}, targets: {1: [b2]}}
+      - { n: 1, by: P1, at: main, do: play, card: g1 }
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: { ability: { source: g1, line: 3 } }
+        targets: { 1: [b1] }
+      - n: 3
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: { ability: { source: g1, line: 2 } }
+        targets: { 1: [b2] }
     random: {}
     expected:
       - at: after-decision-1
@@ -81,49 +102,57 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - {do: choose-pending, pending: {ability: {source: g1, line: 3}}, targets: {1: [b1]}}
-            - {do: choose-pending, pending: {ability: {source: g1, line: 3}}, targets: {1: [b2]}}
+            - do: choose-pending
+              pending: { ability: { source: g1, line: 3 } }
+              targets: { 1: [b1] }
+            - do: choose-pending
+              pending: { ability: { source: g1, line: 3 } }
+              targets: { 1: [b2] }
         assert:
           P1.pp.current: 2
           P1.field: [g1]
-          P1.field.g1: {entered_from: cemetery, entered_by: play}
+          P1.field.g1: { entered_from: cemetery, entered_by: play }
           P1.cemetery: []
-          semantic_state.counters_this_turn: {P1.cards_played: 4}
+          semantic_state.counters_this_turn: { P1.cards_played: 4 }
         events:
-          - {kind: プレイ, object: g1}
+          - { kind: プレイ, object: g1 }
       - at: after-decision-2
         view: omniscient
         outcome: resolved
         awaiting:
           by: P1
           choices:
-            - {do: choose-pending, pending: {ability: {source: g1, line: 2}}, targets: {1: [b1]}}
-            - {do: choose-pending, pending: {ability: {source: g1, line: 2}}, targets: {1: [b2]}}
+            - do: choose-pending
+              pending: { ability: { source: g1, line: 2 } }
+              targets: { 1: [b1] }
+            - do: choose-pending
+              pending: { ability: { source: g1, line: 2 } }
+              targets: { 1: [b2] }
         assert:
-          P2.field.b1: {hp: 2}
+          P2.field.b1: { hp: 2 }
           P1.field: []
           P1.deck: [filler: 20, g1]
         events:
-          - {kind: ダメージ, source: g1, target: b1, amount: 1}
-          - {kind: 移動, object: g1, from: P1.field, to: P1.deck, position: bottom}
-          - {kind: 待機, ability: {source: g1, line: 2}}
+          - { kind: ダメージ, source: g1, target: b1, amount: 1 }
+          - { kind: 移動, object: g1, from: P1.field, to: P1.deck, position: bottom }
+          - { kind: 待機, ability: { source: g1, line: 2 } }
       - at: after-decision-3
         view: omniscient
         outcome: resolved
         assert:
-          P2.field.b2: {hp: 5}
+          P2.field.b2: { hp: 5 }
           P1.deck: [filler: 20, g1]
           semantic_state.pending_triggers: []
         events:
-          - {kind: ダメージ, source: g1, target: b2, amount: 1}
+          - { kind: ダメージ, source: g1, target: b2, amount: 1 }
 
   - name: B 本回合只打出 2 張 → 不能從墓場打出
     inherit: A 本回合已打出 3 張 → 從墓場付 1 PP 打出 → ファンファーレ 1 傷害後放牌庫底 → 離場誘發再 1 傷害
     setup:
       semantic_state:
-        counters_this_turn: {P1.cards_played: 2}
+        counters_this_turn: { P1.cards_played: 2 }
     decisions:
-      - {n: 1, by: P1, at: main, do: play, card: g1}
+      - { n: 1, by: P1, at: main, do: play, card: g1 }
     random: {}
     expected:
       - at: after-decision-1
@@ -139,9 +168,9 @@ scenarios:
     setup:
       players:
         P1:
-          pp: {current: 0, max: 5}
+          pp: { current: 0, max: 5 }
     decisions:
-      - {n: 1, by: P1, at: main, do: play, card: g1}
+      - { n: 1, by: P1, at: main, do: play, card: g1 }
     random: {}
     expected:
       - at: after-decision-1
@@ -159,8 +188,12 @@ scenarios:
           zones:
             field: []
     decisions:
-      - {n: 1, by: P1, at: main, do: play, card: g1}
-      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: g1, line: 3}}}
+      - { n: 1, by: P1, at: main, do: play, card: g1 }
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: { ability: { source: g1, line: 3 } }
     random: {}
     expected:
       - at: after-decision-2
@@ -172,4 +205,4 @@ scenarios:
           P1.pp.current: 2
           semantic_state.pending_triggers: []
         forbidden_events:
-          - {kind: 移動, object: g1, to: P1.deck}
+          - { kind: 移動, object: g1, to: P1.deck }

@@ -13,7 +13,7 @@ cards:
         event: enter
         subject: self
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: ex
@@ -48,7 +48,7 @@ cards:
               count: 1
         limit: 1
         cost_selections:
-          - key: '1'
+          - key: "1"
             select:
               zone: ex
               side: self
@@ -73,7 +73,7 @@ cards:
             - op: draw
               count: 1
         targets:
-          - key: '1'
+          - key: "1"
             select:
               zone: field
               side: self
@@ -202,7 +202,7 @@ cards:
                 subjects: target.1.leader
                 amount: 3
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -281,7 +281,7 @@ cards:
               keywords:
                 - guard
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: cemetery
@@ -313,7 +313,7 @@ cards:
               subjects: target.1
               amount: 3
         targets:
-          - key: '1'
+          - key: "1"
             select:
               union:
                 - side: opponent
@@ -347,7 +347,7 @@ cards:
           op: banish
           subjects: target.1
         targets:
-          - key: '1'
+          - key: "1"
             select:
               zone: field
               side: opponent
@@ -388,7 +388,7 @@ cards:
         event: enter
         subject: self
         targets:
-          - key: '1'
+          - key: "1"
             select:
               zone: field
               side: self
@@ -403,7 +403,7 @@ cards:
           power: 2
           hp: 2
         targets:
-          - key: '1'
+          - key: "1"
             select:
               zone: field
               side: self
@@ -468,7 +468,7 @@ cards:
           subjects: target.1
           amount: 3
         targets:
-          - key: '1'
+          - key: "1"
             select:
               union:
                 - side: opponent
@@ -491,7 +491,7 @@ cards:
           op: destroy
           subjects: target.1
         targets:
-          - key: '1'
+          - key: "1"
             select:
               zone: field
               side: opponent
@@ -588,7 +588,7 @@ cards:
           subjects: target.1
           amount: 2
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field

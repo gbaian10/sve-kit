@@ -17,10 +17,7 @@
     },
     "status": {
       "type": "string",
-      "enum": [
-        "draft",
-        "validated"
-      ]
+      "enum": ["draft", "validated"]
     },
     "validity": {
       "type": "object",
@@ -59,14 +56,7 @@
           "maxLength": 160
         }
       },
-      "required": [
-        "from",
-        "through",
-        "format",
-        "rules_version",
-        "catalog_sha256",
-        "dsl_version"
-      ],
+      "required": ["from", "through", "format", "rules_version", "catalog_sha256", "dsl_version"],
       "additionalProperties": false
     },
     "deck": {
@@ -135,10 +125,7 @@
                 "maximum": 50
               }
             },
-            "required": [
-              "card",
-              "minimum_copies"
-            ],
+            "required": ["card", "minimum_copies"],
             "additionalProperties": false
           },
           "minItems": 1,
@@ -188,11 +175,7 @@
               "$ref": "#/$defs/weight_overrides"
             }
           },
-          "required": [
-            "opening",
-            "midgame",
-            "endgame"
-          ],
+          "required": ["opening", "midgame", "endgame"],
           "additionalProperties": false
         },
         "cvar_alpha": {
@@ -229,14 +212,7 @@
           },
           "role": {
             "type": "string",
-            "enum": [
-              "finisher",
-              "engine",
-              "removal",
-              "defense",
-              "draw",
-              "combo_piece"
-            ]
+            "enum": ["finisher", "engine", "removal", "defense", "draw", "combo_piece"]
           },
           "priority": {
             "type": "number",
@@ -252,13 +228,7 @@
             "$ref": "#/$defs/condition"
           }
         },
-        "required": [
-          "card",
-          "role",
-          "priority",
-          "reserve_copies",
-          "when"
-        ],
+        "required": ["card", "role", "priority", "reserve_copies", "when"],
         "additionalProperties": false
       },
       "minItems": 1,
@@ -309,23 +279,14 @@
                 "maximum": 10
               }
             },
-            "required": [
-              "cards",
-              "when",
-              "score_bonus"
-            ],
+            "required": ["cards", "when", "score_bonus"],
             "additionalProperties": false
           },
           "minItems": 0,
           "maxItems": 16
         }
       },
-      "required": [
-        "default_keep_cost_ceiling",
-        "max_total_kept",
-        "rules",
-        "bundles"
-      ],
+      "required": ["default_keep_cost_ceiling", "max_total_kept", "rules", "bundles"],
       "additionalProperties": false
     },
     "seat_adjustments": {
@@ -338,10 +299,7 @@
           "$ref": "#/$defs/seat"
         }
       },
-      "required": [
-        "first",
-        "second"
-      ],
+      "required": ["first", "second"],
       "additionalProperties": false
     },
     "matchups": {
@@ -379,10 +337,7 @@
           "type": "array",
           "items": {
             "type": "string",
-            "enum": [
-              "attack_quick",
-              "end_quick"
-            ]
+            "enum": ["attack_quick", "end_quick"]
           },
           "minItems": 0,
           "maxItems": 2
@@ -451,22 +406,14 @@
       "properties": {
         "algorithm": {
           "type": "string",
-          "enum": [
-            "information_set_root",
-            "information_set_mcts"
-          ]
+          "enum": ["information_set_root", "information_set_mcts"]
         },
         "candidate_policy": {
           "const": "all_legal_then_rank"
         },
         "default_difficulty": {
           "type": "string",
-          "enum": [
-            "simple",
-            "normal",
-            "hard",
-            "expert"
-          ]
+          "enum": ["simple", "normal", "hard", "expert"]
         },
         "difficulty": {
           "type": "object",
@@ -484,12 +431,7 @@
               "$ref": "#/$defs/budget"
             }
           },
-          "required": [
-            "simple",
-            "normal",
-            "hard",
-            "expert"
-          ],
+          "required": ["simple", "normal", "hard", "expert"],
           "additionalProperties": false
         },
         "reproducible_reduction": {
@@ -566,11 +508,7 @@
               "maximum": 60000
             }
           },
-          "required": [
-            "score_margin_below",
-            "belief_entropy_above",
-            "minimum_remaining_ms"
-          ],
+          "required": ["score_margin_below", "belief_entropy_above", "minimum_remaining_ms"],
           "additionalProperties": false
         },
         "max_weight_multiplier": {
@@ -608,10 +546,7 @@
       "properties": {
         "method": {
           "type": "string",
-          "enum": [
-            "coordinate_search",
-            "random_search"
-          ]
+          "enum": ["coordinate_search", "random_search"]
         },
         "train_split": {
           "type": "string",
@@ -692,11 +627,7 @@
       "properties": {
         "source": {
           "type": "string",
-          "enum": [
-            "human",
-            "llm",
-            "self_play"
-          ]
+          "enum": ["human", "llm", "self_play"]
         },
         "author": {
           "type": "string",
@@ -725,12 +656,7 @@
           ]
         }
       },
-      "required": [
-        "source",
-        "author",
-        "evidence_ids",
-        "validation_run_id"
-      ],
+      "required": ["source", "author", "evidence_ids", "validation_run_id"],
       "additionalProperties": false
     }
   },
@@ -769,9 +695,7 @@
               "maxItems": 12
             }
           },
-          "required": [
-            "all"
-          ],
+          "required": ["all"],
           "additionalProperties": false
         },
         {
@@ -786,9 +710,7 @@
               "maxItems": 12
             }
           },
-          "required": [
-            "any"
-          ],
+          "required": ["any"],
           "additionalProperties": false
         },
         {
@@ -798,9 +720,7 @@
               "$ref": "#/$defs/condition"
             }
           },
-          "required": [
-            "not"
-          ],
+          "required": ["not"],
           "additionalProperties": false
         },
         {
@@ -829,13 +749,7 @@
             },
             "op": {
               "type": "string",
-              "enum": [
-                "eq",
-                "lt",
-                "le",
-                "gt",
-                "ge"
-              ]
+              "enum": ["eq", "lt", "le", "gt", "ge"]
             },
             "value": {
               "type": "number",
@@ -843,11 +757,7 @@
               "maximum": 1000
             }
           },
-          "required": [
-            "fact",
-            "op",
-            "value"
-          ],
+          "required": ["fact", "op", "value"],
           "additionalProperties": false
         }
       ]
@@ -886,10 +796,7 @@
           "maxItems": 10
         }
       },
-      "required": [
-        "cards",
-        "tags"
-      ],
+      "required": ["cards", "tags"],
       "additionalProperties": false,
       "anyOf": [
         {
@@ -1167,11 +1074,7 @@
           "maximum": 5
         }
       },
-      "required": [
-        "weight_overrides",
-        "mulligan_cost_bias",
-        "reserve_pp_delta"
-      ],
+      "required": ["weight_overrides", "mulligan_cost_bias", "reserve_pp_delta"],
       "additionalProperties": false
     },
     "mulligan_rule": {
@@ -1198,13 +1101,7 @@
           "maximum": 10
         }
       },
-      "required": [
-        "id",
-        "match",
-        "when",
-        "priority",
-        "keep_max"
-      ],
+      "required": ["id", "match", "when", "priority", "keep_max"],
       "additionalProperties": false
     },
     "counter": {
@@ -1215,14 +1112,7 @@
         },
         "intent": {
           "type": "string",
-          "enum": [
-            "remove",
-            "guard",
-            "heal",
-            "race",
-            "deny_resource",
-            "disrupt_combo"
-          ]
+          "enum": ["remove", "guard", "heal", "race", "deny_resource", "disrupt_combo"]
         },
         "priority": {
           "type": "integer",
@@ -1236,21 +1126,10 @@
         },
         "latest_window": {
           "type": "string",
-          "enum": [
-            "own_main",
-            "attack_quick",
-            "end_quick",
-            "any_legal"
-          ]
+          "enum": ["own_main", "attack_quick", "end_quick", "any_legal"]
         }
       },
-      "required": [
-        "match",
-        "intent",
-        "priority",
-        "reserve_pp",
-        "latest_window"
-      ],
+      "required": ["match", "intent", "priority", "reserve_pp", "latest_window"],
       "additionalProperties": false
     },
     "matchup": {
@@ -1294,12 +1173,7 @@
               "maximum": 1
             }
           },
-          "required": [
-            "match",
-            "when",
-            "horizon_turns",
-            "severity"
-          ],
+          "required": ["match", "when", "horizon_turns", "severity"],
           "additionalProperties": false
         },
         "counters": {
@@ -1312,12 +1186,7 @@
         },
         "fallback_intent": {
           "type": "string",
-          "enum": [
-            "develop",
-            "race",
-            "stabilize",
-            "preserve_resources"
-          ]
+          "enum": ["develop", "race", "stabilize", "preserve_resources"]
         }
       },
       "required": [

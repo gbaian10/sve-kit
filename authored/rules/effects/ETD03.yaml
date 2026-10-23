@@ -15,7 +15,7 @@ cards:
             - op: draw
               count: 1
         targets:
-          - key: '1'
+          - key: "1"
             select:
               zone: field
               side: self
@@ -36,7 +36,7 @@ cards:
           subjects: target.1
           amount: 2
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field

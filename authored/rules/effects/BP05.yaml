@@ -47,7 +47,7 @@ cards:
             subjects: self.leader
             hp: 2
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: field
@@ -72,7 +72,7 @@ cards:
           amount:
             read: cost.1.power
         targets:
-          - key: '1'
+          - key: "1"
             select:
               union:
                 - side: opponent
@@ -82,7 +82,7 @@ cards:
             min: 1
             max: 1
         cost_selections:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: field
@@ -136,7 +136,7 @@ cards:
         event: enter
         subject: self
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -283,7 +283,7 @@ cards:
         event: field_to_cemetery
         subject: self
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: cemetery
@@ -373,7 +373,7 @@ cards:
         event: enter
         subject: self
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field

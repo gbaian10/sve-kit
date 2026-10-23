@@ -5,9 +5,18 @@ revision: 2
 question: 舊版『大地の魔片』（BP01-T10、BP02-T15）【スタック】括號說明後的三行，是能力還是規則說明？
 decision: 規則說明（選項 B）：標 rule-reminder／NotApplicable；引擎照現行 CR 13.3.2 處理，スタックカウンター歸零時由規則處理移到墓場，不是破壊。
 evidence:
-  - {ref: CR 13.3.2.2, kind: direct, quote: "13.3.2.2. ‘【スタック】’は以下の 3 つの能力を意味し\nます。\n* このカードを場に置く場合、その上にスタッ\nクカウンターが 1 個置かれた状態で場に出\nる。\n* このカードにスタックカウンターが置かれて\nいる状態でこのカードが場を離れる場合、代\nわりにこのカードのスタックカウンターを 1 個\n取り除き、このカードは場に残る。\n*\n：自分の他の【スタック】を持つアミュ\nレット 1 つを選ぶ。それにこれのスタックカウン\nターをすべて移す。", version: 1.27.0}
-  - {ref: CR 13.3.2.3, kind: direct, quote: "13.3.2.3. スタック能力を持つカードにスタックカウン\nターが置かれていない場合、ルール処理によ\nりそのカードをオーナーの墓場に移動します\n（11.7）。", version: 1.27.0}
-  - {ref: EBD02-T01, kind: supporting, quote: '【スタック】（【スタック】を持つアミュレットは、下記の能力を持つ。「これはスタックカウンター1個を置いた状態で場に出る」「これが場を離れる際、代わりにこれのスタックカウンター1個を取る」「これのスタックカウンターが0個なら、これを墓場に置く」「{起動}これを{アクト}：自分の場の他の【スタック】を持つアミュレット1つを選ぶ。それにこれのスタックカウンターすべてを移す」）', date: '2025-11-21'}
+  - ref: CR 13.3.2.2
+    kind: direct
+    quote: "13.3.2.2. ‘【スタック】’は以下の 3 つの能力を意味し\nます。\n* このカードを場に置く場合、その上にスタッ\nクカウンターが 1 個置かれた状態で場に出\nる。\n* このカードにスタックカウンターが置かれて\nいる状態でこのカードが場を離れる場合、代\nわりにこのカードのスタックカウンターを 1 個\n取り除き、このカードは場に残る。\n*\n：自分の他の【スタック】を持つアミュ\nレット 1 つを選ぶ。それにこれのスタックカウン\nターをすべて移す。"
+    version: 1.27.0
+  - ref: CR 13.3.2.3
+    kind: direct
+    quote: "13.3.2.3. スタック能力を持つカードにスタックカウン\nターが置かれていない場合、ルール処理によ\nりそのカードをオーナーの墓場に移動します\n（11.7）。"
+    version: 1.27.0
+  - ref: EBD02-T01
+    kind: supporting
+    quote: "【スタック】（【スタック】を持つアミュレットは、下記の能力を持つ。「これはスタックカウンター1個を置いた状態で場に出る」「これが場を離れる際、代わりにこれのスタックカウンター1個を取る」「これのスタックカウンターが0個なら、これを墓場に置く」「{起動}これを{アクト}：自分の場の他の【スタック】を持つアミュレット1つを選ぶ。それにこれのスタックカウンターすべてを移す」）"
+    date: "2025-11-21"
 strength: official
 decided_on: 2026-09-27
 applies_to:
@@ -16,37 +25,43 @@ applies_to:
     uses:
       - cards: [BP01-T10, BP02-T15]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:bba1b829abc30c9d73b4863cde2a3ce9ed1ded5967255af1d21b76795826250d}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:bba1b829abc30c9d73b4863cde2a3ce9ed1ded5967255af1d21b76795826250d
           field: effect
           ordinal:
           source_hash: 2fb9b130f23727137c930365ccd60104ae3cccecdfde75710d282c1deedbff06
           line_ordinal: 1
           role: body
-          segments: [{start: 57, end: 90}]
+          segments: [{ start: 57, end: 90 }]
   - legacy: T4558662d43
     namespace: classification-v0
     uses:
       - cards: [BP01-T10, BP02-T15]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:bba1b829abc30c9d73b4863cde2a3ce9ed1ded5967255af1d21b76795826250d}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:bba1b829abc30c9d73b4863cde2a3ce9ed1ded5967255af1d21b76795826250d
           field: effect
           ordinal:
           source_hash: 2fb9b130f23727137c930365ccd60104ae3cccecdfde75710d282c1deedbff06
           line_ordinal: 2
           role: body
-          segments: [{start: 91, end: 120}]
+          segments: [{ start: 91, end: 120 }]
   - legacy: Ta56f995cb5
     namespace: classification-v0
     uses:
       - cards: [BP01-T10, BP02-T15]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:bba1b829abc30c9d73b4863cde2a3ce9ed1ded5967255af1d21b76795826250d}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:bba1b829abc30c9d73b4863cde2a3ce9ed1ded5967255af1d21b76795826250d
           field: effect
           ordinal:
           source_hash: 2fb9b130f23727137c930365ccd60104ae3cccecdfde75710d282c1deedbff06
           line_ordinal: 3
           role: body
-          segments: [{start: 121, end: 182}]
+          segments: [{ start: 121, end: 182 }]
 hint:
   zh-TW: 舊版『大地の魔片』括號後的三行是【スタック】的說明；依現行 CR 13.3.2.3，スタックカウンター變 0 時由規則處理移到墓場，不算破壊。
   ja: 旧版『大地の魔片』の3行は【スタック】の説明文です。現行の総合ルール13.3.2.3により、スタックカウンターが0個になった場合はルール処理でオーナーの墓場に移動し、破壊ではありません。

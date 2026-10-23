@@ -36,7 +36,7 @@ cards:
         event: evolve
         subject: self
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -98,7 +98,7 @@ cards:
         active_zones:
           - hand
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: field
@@ -210,7 +210,7 @@ cards:
           type: follower
           trait: 八獄
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -267,7 +267,7 @@ cards:
           - hand
         keyword: fusion
         cost_selections:
-          - key: '1'
+          - key: "1"
             select:
               union:
                 - side: self
@@ -332,7 +332,7 @@ cards:
         event: evolve
         subject: self
         targets:
-          - key: '1'
+          - key: "1"
             select:
               union:
                 - side: opponent
@@ -375,7 +375,7 @@ cards:
         event: field_to_cemetery
         subject: self
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -415,7 +415,7 @@ cards:
         event: enter
         subject: self
         cost_selections:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: hand
@@ -432,7 +432,7 @@ cards:
           subjects: target.1
           to: field
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: cemetery
@@ -591,7 +591,7 @@ cards:
                   - op: draw
                     count: 1
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -689,7 +689,7 @@ cards:
         event: enter
         subject: self
         cost_selections:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: hand
@@ -706,7 +706,7 @@ cards:
           subjects: target.1
           to: field
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: cemetery
@@ -785,7 +785,7 @@ cards:
         event: field_to_cemetery
         subject: self
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -804,7 +804,7 @@ cards:
           subjects: target.1
           amount: 1
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -812,7 +812,7 @@ cards:
             min: 1
             max: 1
         cost_selections:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: field
@@ -954,7 +954,7 @@ cards:
           - hand
         keyword: fusion
         cost_selections:
-          - key: '1'
+          - key: "1"
             select:
               union:
                 - side: self
@@ -1027,7 +1027,7 @@ cards:
         event: evolve
         subject: self
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -1046,7 +1046,7 @@ cards:
         event: super_evolve
         subject: self
         targets:
-          - key: '1'
+          - key: "1"
             select:
               union:
                 - side: self
@@ -1100,7 +1100,7 @@ cards:
               count: 1
         event: end
         targets:
-          - key: '1'
+          - key: "1"
             select:
               zone: field
               side: opponent

@@ -60,7 +60,7 @@ verified_by:
     method: qa
     note: Q2633、Q2634、10.6.2.3.3；xverify-1/result.md〈22 個重疊題〉（兩邊局面相同）。之後未再改
 scenarios:
-  - name: '[astra] 付了追加費用'
+  - name: "[astra] 付了追加費用"
     setup:
       turn:
         active: P1
@@ -148,7 +148,7 @@ scenarios:
           - kind: 引く
             player: P1
             object: a3
-  - name: '[astra] 沒付追加費用'
+  - name: "[astra] 沒付追加費用"
     setup:
       turn:
         active: P1
@@ -230,7 +230,7 @@ scenarios:
             amount: 3
         forbidden_events:
           - kind: 引く
-  - name: '[astra] 沒有目標，宣告付費仍不能打出'
+  - name: "[astra] 沒有目標，宣告付費仍不能打出"
     setup:
       turn:
         active: P1
@@ -308,7 +308,7 @@ scenarios:
           - kind: ダメージ
           - kind: 引く
           - kind: 捨てる
-  - name: '[fable] A 付了追加費用'
+  - name: "[fable] A 付了追加費用"
     setup:
       turn:
         active: P1
@@ -398,8 +398,8 @@ scenarios:
             source: a1
             target: b1
             amount: 3
-  - name: '[fable] B 沒付追加費用'
-    inherit: '[fable] A 付了追加費用'
+  - name: "[fable] B 沒付追加費用"
+    inherit: "[fable] A 付了追加費用"
     decisions:
       - n: 1
         by: P1
@@ -435,8 +435,8 @@ scenarios:
         forbidden_events:
           - kind: 引く
             player: P1
-  - name: '[fable] C 對手場上沒有從者'
-    inherit: '[fable] A 付了追加費用'
+  - name: "[fable] C 對手場上沒有從者"
+    inherit: "[fable] A 付了追加費用"
     setup:
       players:
         P2:

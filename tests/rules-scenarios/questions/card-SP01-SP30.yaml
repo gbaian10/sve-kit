@@ -38,34 +38,46 @@ verified_by:
 scenarios:
   - name: A 從手牌打出 → 條件不成立，只抽 1 張
     setup:
-      turn: {active: P1, first_player: P1, elapsed_turns: {P1: 3, P2: 2}, phase: main}
+      turn: { active: P1, first_player: P1, elapsed_turns: { P1: 3, P2: 2 }, phase: main }
       history: none
       players:
         P1:
           construction: class
-          leader: {class: ビショップ, life: 20}
-          pp: {current: 2, max: 3}
+          leader: { class: ビショップ, life: 20 }
+          pp: { current: 2, max: 3 }
           zones:
             hand:
-              - {id: a1, card: SP01-SP30}         # 不思議な青空・アリス 2/3
+              - { id: a1, card: SP01-SP30 } # 不思議な青空・アリス 2/3
             deck:
-              - {id: d1, card: BP01-173}
-              - {filler: 20}
+              - { id: d1, card: BP01-173 }
+              - { filler: 20 }
         P2:
           construction: class
-          leader: {class: ロイヤル, life: 20}
-          pp: {current: 0, max: 3}
+          leader: { class: ロイヤル, life: 20 }
+          pp: { current: 0, max: 3 }
           zones:
             field:
-              - {id: b1, card: BP01-173, state: {hp: 1}}     # ファイター 2/3（元のコスト2），已受傷
+              - # ファイター 2/3（元のコスト2），已受傷
+                id: b1
+                card: BP01-173
+                state: { hp: 1 }
             hand:
-              - {filler: 3}
+              - { filler: 3 }
             deck:
-              - {filler: 20}
+              - { filler: 20 }
     decisions:
-      - {n: 1, by: P1, at: main, do: play, card: a1}
-      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2}}, targets: {1: [b1]}}
-      - {n: 3, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 1}}}
+      - { n: 1, by: P1, at: main, do: play, card: a1 }
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: { ability: { source: a1, line: 2 } }
+        targets: { 1: [b1] }
+      - n: 3
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: { ability: { source: a1, line: 1 } }
     random: {}
     expected:
       - at: after-decision-1
@@ -74,8 +86,10 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - {do: choose-pending, pending: {ability: {source: a1, line: 1}}}
-            - {do: choose-pending, pending: {ability: {source: a1, line: 2}}, targets: {1: [b1]}}
+            - { do: choose-pending, pending: { ability: { source: a1, line: 1 } } }
+            - do: choose-pending
+              pending: { ability: { source: a1, line: 2 } }
+              targets: { 1: [b1] }
       - at: after-decision-3
         view: omniscient
         outcome: resolved
@@ -83,9 +97,9 @@ scenarios:
           P2.field: [b1]
           P2.ex: []
           P1.hand: [d1]
-          P1.field.a1: {entered_from: hand, entered_by: play}
+          P1.field.a1: { entered_from: hand, entered_by: play }
         forbidden_events:
-          - {kind: 移動, object: b1}
+          - { kind: 移動, object: b1 }
 
   - name: B 從 EX 區打出 → 「手札以外から場に出ていた」成立 → 目標移到對手 EX，傷害清除
     inherit: A 從手牌打出 → 條件不成立，只抽 1 張
@@ -95,11 +109,20 @@ scenarios:
           zones:
             hand: []
             ex:
-              - {id: a1, card: SP01-SP30}
+              - { id: a1, card: SP01-SP30 }
     decisions:
-      - {n: 1, by: P1, at: main, do: play, card: a1}
-      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2}}, targets: {1: [b1]}}
-      - {n: 3, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 1}}}
+      - { n: 1, by: P1, at: main, do: play, card: a1 }
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: { ability: { source: a1, line: 2 } }
+        targets: { 1: [b1] }
+      - n: 3
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: { ability: { source: a1, line: 1 } }
     random: {}
     expected:
       - at: after-decision-2
@@ -109,10 +132,10 @@ scenarios:
           P2.field: []
           P2.ex: [b1]
           P1.field: [a1]
-          P1.field.a1: {entered_from: ex, entered_by: play}
+          P1.field.a1: { entered_from: ex, entered_by: play }
           P1.ex: []
         events:
-          - {kind: 移動, object: b1, from: P2.field, to: P2.ex}
+          - { kind: 移動, object: b1, from: P2.field, to: P2.ex }
 
   - name: C 對手 EX 已滿 5 張 → 不移動、留在場上
     inherit: B 從 EX 區打出 → 「手札以外から場に出ていた」成立 → 目標移到對手 EX，傷害清除
@@ -121,17 +144,31 @@ scenarios:
         P2:
           zones:
             ex:
-              - {id: e1, card: BP01-180}
-              - {id: e2, card: BP01-180}
-              - {id: e3, card: BP01-180}
-              - {id: e4, card: BP01-099}
-              - {id: e5, card: BP01-099}
+              - { id: e1, card: BP01-180 }
+              - { id: e2, card: BP01-180 }
+              - { id: e3, card: BP01-180 }
+              - { id: e4, card: BP01-099 }
+              - { id: e5, card: BP01-099 }
     decisions:
-      - {n: 1, by: P1, at: main, do: play, card: a1}
-      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2}}, targets: {1: [b1]}}
+      - { n: 1, by: P1, at: main, do: play, card: a1 }
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: { ability: { source: a1, line: 2 } }
+        targets: { 1: [b1] }
       # 4.8.3.2：對手 EX 已滿，可移動 0 張；契約第 10 節第 11、33 條：只剩 select: [] 仍是輸入點（同 card-BP17-030、card-BP05-007）
-      - {n: 3, by: P1, at: resolve, of: {decision: 2, occurrence: 1}, do: resolve-choice, select: []}
-      - {n: 4, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 1}}}
+      - n: 3
+        by: P1
+        at: resolve
+        of: { decision: 2, occurrence: 1 }
+        do: resolve-choice
+        select: []
+      - n: 4
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: { ability: { source: a1, line: 1 } }
     random: {}
     expected:
       - at: after-decision-2
@@ -143,13 +180,13 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - {do: resolve-choice, select: []}
+            - { do: resolve-choice, select: [] }
       - at: after-decision-3
         view: omniscient
         outcome: resolved
         assert:
           P2.field: [b1]
-          P2.field.b1: {hp: 1}
+          P2.field.b1: { hp: 1 }
           P2.ex: [e1, e2, e3, e4, e5]
         forbidden_events:
-          - {kind: 移動, object: b1}
+          - { kind: 移動, object: b1 }

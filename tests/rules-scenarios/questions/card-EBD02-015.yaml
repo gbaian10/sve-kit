@@ -68,7 +68,7 @@ verified_by:
     method: qa
     note: Q78、Q79、Q279、10.6.2.3.2、10.6.2.4.2；「選零目標」xverify-1/result.md；「單體分配 3」「3 加 0」xverify-2/result.md 3/3；「兩體分配 2 加 1」fix-2 加 group 後 xverify-2/recheck.md 同意
 scenarios:
-  - name: '[astra] 選零目標'
+  - name: "[astra] 選零目標"
     setup:
       turn:
         active: P1
@@ -132,7 +132,7 @@ scenarios:
             hp: 6
         forbidden_events:
           - kind: ダメージ
-  - name: '[astra] 兩體分配 2 加 1'
+  - name: "[astra] 兩體分配 2 加 1"
     setup:
       turn:
         active: P1
@@ -218,7 +218,7 @@ scenarios:
             target: c
             amount: 1
             group: distributed-damage
-  - name: '[astra] 單體分配 3'
+  - name: "[astra] 單體分配 3"
     setup:
       turn:
         active: P1
@@ -296,7 +296,7 @@ scenarios:
             source: a
             target: b
             amount: 3
-  - name: '[astra] 選兩體但分配 3 加 0'
+  - name: "[astra] 選兩體但分配 3 加 0"
     setup:
       turn:
         active: P1
@@ -374,7 +374,7 @@ scenarios:
         forbidden_events:
           - kind: ダメージ
           - kind: プレイ
-  - name: '[fable] A 選 2 體，分配 2＋1'
+  - name: "[fable] A 選 2 體，分配 2＋1"
     setup:
       turn:
         active: P1
@@ -457,8 +457,8 @@ scenarios:
             target: b2
             amount: 1
             group: 1
-  - name: '[fable] B 選 2 體但分配 3＋0 → 不合法 → 回溯'
-    inherit: '[fable] A 選 2 體，分配 2＋1'
+  - name: "[fable] B 選 2 體但分配 3＋0 → 不合法 → 回溯"
+    inherit: "[fable] A 選 2 體，分配 2＋1"
     decisions:
       - n: 1
         by: P1
@@ -486,8 +486,8 @@ scenarios:
             hp: 3
         forbidden_events:
           - kind: ダメージ
-  - name: '[fable] C 對手沒有從者：選 0 體也能打出，什麼都不發生'
-    inherit: '[fable] A 選 2 體，分配 2＋1'
+  - name: "[fable] C 對手沒有從者：選 0 體也能打出，什麼都不發生"
+    inherit: "[fable] A 選 2 體，分配 2＋1"
     setup:
       players:
         P2:

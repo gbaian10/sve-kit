@@ -43,7 +43,7 @@ verified_by:
     method: qa
     note: Q1278、1.2.2；xverify-1/result.md〈對方沒把握的題目〉。之後未再改（非必過）
 scenarios:
-  - name: '[3, 4]'
+  - name: "[3, 4]"
     setup:
       turn:
         active: P1
@@ -112,7 +112,7 @@ scenarios:
           P2.leader.life: 6
           P2.field:
             - b
-  - name: '[3, 5]'
+  - name: "[3, 5]"
     setup:
       turn:
         active: P1
@@ -185,7 +185,7 @@ scenarios:
             ended: true
             winner:
             by: 1.2.2
-  - name: '[1, 2]'
+  - name: "[1, 2]"
     setup:
       turn:
         active: P1

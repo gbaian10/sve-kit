@@ -5,7 +5,13 @@ sources:
 id: card-BP11-035
 kind: card
 must_pass: true
-mechanisms: [本回合事件歷史, 本回合攻擊力或體力被加過, 進化能力的使用條件, 8.1.2, 5.16.2.1, 進化每回合一次]
+mechanisms:
+  - 本回合事件歷史
+  - 本回合攻擊力或體力被加過
+  - 進化能力的使用條件
+  - 8.1.2
+  - 5.16.2.1
+  - 進化每回合一次
 cards: [BP11-035, BP11-036, BP06-072, BP01-173]
 why: >-
   ピースキーパー・ヴィンセント「{進化}{コスト1}：これは進化する。この能力はこのターン、これの攻撃力や体力を+していたなら使える」：
@@ -33,38 +39,49 @@ verified_by:
 scenarios:
   - name: A 先 +2 攻擊力 → 進化能力可用 → 進化後 7/5
     setup:
-      turn: {active: P1, first_player: P1, elapsed_turns: {P1: 6, P2: 5}, phase: main}
+      turn: { active: P1, first_player: P1, elapsed_turns: { P1: 6, P2: 5 }, phase: main }
       history: none
       players:
         P1:
           construction: class
-          leader: {class: ウィッチ, life: 20}
-          pp: {current: 6, max: 6}
+          leader: { class: ウィッチ, life: 20 }
+          pp: { current: 6, max: 6 }
           ep: 2
           zones:
             field:
-              - {id: a1, card: BP11-035}          # ピースキーパー・ヴィンセント 4/4
+              - { id: a1, card: BP11-035 } # ピースキーパー・ヴィンセント 4/4
             hand:
-              - {id: s1, card: BP06-072}          # 武力炎翔（攻撃力+2）
+              - { id: s1, card: BP06-072 } # 武力炎翔（攻撃力+2）
             evolve_deck:
-              - {id: e1, card: BP11-036}          # ヴィンセント（エボルヴ）5/5
+              - { id: e1, card: BP11-036 } # ヴィンセント（エボルヴ）5/5
             cemetery:
-              - {id: c1, card: BP01-173}
+              - { id: c1, card: BP01-173 }
             deck:
-              - {filler: 20}
+              - { filler: 20 }
         P2:
           construction: class
-          leader: {class: ロイヤル, life: 20}
-          pp: {current: 0, max: 5}
+          leader: { class: ロイヤル, life: 20 }
+          pp: { current: 0, max: 5 }
           zones:
             hand:
-              - {filler: 3}
+              - { filler: 3 }
             deck:
-              - {filler: 20}
+              - { filler: 20 }
     decisions:
-      - {n: 1, by: P1, at: main, do: play, card: s1, targets: {1: [a1]}}
-      - {n: 2, by: P1, at: main, do: evolve, source: a1, ability: {source: a1, line: 1}, evolve_card: e1, pay: {pp: 1, ep: 0}}
-      - {n: 3, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, card: BP11-036, line: 1}}}
+      - { n: 1, by: P1, at: main, do: play, card: s1, targets: { 1: [a1] } }
+      - n: 2
+        by: P1
+        at: main
+        do: evolve
+        source: a1
+        ability: { source: a1, line: 1 }
+        evolve_card: e1
+        pay: { pp: 1, ep: 0 }
+      - n: 3
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: { ability: { source: a1, card: BP11-036, line: 1 } }
     random: {}
     expected:
       - at: after-decision-1
@@ -72,23 +89,30 @@ scenarios:
         outcome: resolved
         assert:
           P1.pp.current: 5
-          P1.field.a1: {power: 6, hp: 4}
+          P1.field.a1: { power: 6, hp: 4 }
       - at: after-decision-3
         view: omniscient
         outcome: resolved
         assert:
           P1.pp.current: 4
-          P1.field.a1: {evolved: true, evolved_with: e1, power: 7, hp: 5}
+          P1.field.a1: { evolved: true, evolved_with: e1, power: 7, hp: 5 }
           P1.leader.life: 20
         events:
-          - {kind: 進化, object: a1, with: e1}
+          - { kind: 進化, object: a1, with: e1 }
         forbidden_events:
-          - {kind: 体力増加}
+          - { kind: 体力増加 }
 
   - name: B 本回合沒加過 → 進化能力不能用
     inherit: A 先 +2 攻擊力 → 進化能力可用 → 進化後 7/5
     decisions:
-      - {n: 1, by: P1, at: main, do: evolve, source: a1, ability: {source: a1, line: 1}, evolve_card: e1, pay: {pp: 1, ep: 0}}
+      - n: 1
+        by: P1
+        at: main
+        do: evolve
+        source: a1
+        ability: { source: a1, line: 1 }
+        evolve_card: e1
+        pay: { pp: 1, ep: 0 }
     random: {}
     expected:
       - at: after-decision-1
@@ -96,6 +120,6 @@ scenarios:
         outcome: cannot-evolve
         assert:
           P1.pp.current: 6
-          P1.field.a1: {evolved: false, power: 4, hp: 4}
+          P1.field.a1: { evolved: false, power: 4, hp: 4 }
         forbidden_events:
-          - {kind: 進化}
+          - { kind: 進化 }

@@ -5,10 +5,22 @@ revision: 2
 question: BP20-P65「代わりに好きな数チョイスする」可以選 0 個選項嗎？
 decision: 可以：選項數的範圍改為 0 到可用選項數；選 0 時該整段指示不執行。不套用「Nつまで」至少選 1 的下限。
 evidence:
-  - {ref: BP20-P65, kind: supporting, quote: 自分は1つ以上の選択肢をチョイスする際、代わりに好きな数チョイスする。, date: '2026-05-22'}
-  - {ref: CR 1.3.5, kind: supporting, quote: "1.3.5. プレイヤーがカードやルールによりなんらかの数を\n選ぶ場合、特に指定がない限り、0 以上の整数を選\nぶ必要があります。1 未満の端数を含む数や負の\n数は選べません。", version: 1.27.0}
-  - {ref: CR 5.18.2.2, kind: supporting, quote: "5.18.2.2. チョイスの個数が 0 である場合、その一連\nの指示はまったく実行しません。", version: 1.27.0}
-  - {ref: project, kind: project, reason: 依 CR 1.3.5 與 5.18.2.2 推論；沒有這張卡的直接 Q&A，也查無反證 Q&A。, date: '2026-09-27'}
+  - ref: BP20-P65
+    kind: supporting
+    quote: 自分は1つ以上の選択肢をチョイスする際、代わりに好きな数チョイスする。
+    date: "2026-05-22"
+  - ref: CR 1.3.5
+    kind: supporting
+    quote: "1.3.5. プレイヤーがカードやルールによりなんらかの数を\n選ぶ場合、特に指定がない限り、0 以上の整数を選\nぶ必要があります。1 未満の端数を含む数や負の\n数は選べません。"
+    version: 1.27.0
+  - ref: CR 5.18.2.2
+    kind: supporting
+    quote: "5.18.2.2. チョイスの個数が 0 である場合、その一連\nの指示はまったく実行しません。"
+    version: 1.27.0
+  - ref: project
+    kind: project
+    reason: 依 CR 1.3.5 與 5.18.2.2 推論；沒有這張卡的直接 Q&A，也查無反證 Q&A。
+    date: "2026-09-27"
 strength: inferred
 decided_on: 2026-09-27
 applies_to:
@@ -17,22 +29,26 @@ applies_to:
     uses:
       - cards: [BP20-P65, BP20-T06]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:3e72fcc6f7bac2c32d810ad3ec4104aef34b201c6230460b305bd62480b6f073}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:3e72fcc6f7bac2c32d810ad3ec4104aef34b201c6230460b305bd62480b6f073
           field: effect
           ordinal:
           source_hash: e331cd7a4272684a89a2b82376a2f4e1f15972c055c5df2c7cae598fbfa51646
           line_ordinal: 0
           role: body
-          segments: [{start: 0, end: 35}]
+          segments: [{ start: 0, end: 35 }]
       - cards: [BP20-077, BP20-SL23]
         occurrence:
-          owner: {kind: face_revision, revision_id: rev:v1:f9005e2943f59af4b9232bd3b08b27f775c379ffc7ec459d4d3b682cff9e7258}
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:f9005e2943f59af4b9232bd3b08b27f775c379ffc7ec459d4d3b682cff9e7258
           field: section
           ordinal: 0
           source_hash: 82bc59b4db2f72ca2194f8ec3947431c9220749aae0a7216a75abf930b5335f1
           line_ordinal: 0
           role: body
-          segments: [{start: 46, end: 81}]
+          segments: [{ start: 46, end: 81 }]
 hint:
   zh-TW: 本專案解讀：這裡的「好きな数」可以選 0 個；選 0 個時，這段チョイス整段不執行。
   ja: 本プロジェクトの解釈：ここでの「好きな数」は0を選ぶことができます。0を選んだ場合、そのチョイスの指示は何も実行しません。

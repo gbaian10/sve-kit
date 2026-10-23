@@ -5,7 +5,17 @@ sources:
 id: card-BP01-P23
 kind: card
 must_pass: true
-mechanisms: [令對手公開手牌再選一張捨棄, 資訊隔離, 5.21.1, 公開後仍可識別, 手札のオーラ可選, 12.15.2.1, 5.12, 對手捨棄由對手執行, 空手牌仍自傷, Q340]
+mechanisms:
+  - 令對手公開手牌再選一張捨棄
+  - 資訊隔離
+  - 5.21.1
+  - 公開後仍可識別
+  - 手札のオーラ可選
+  - 12.15.2.1
+  - 5.12
+  - 對手捨棄由對手執行
+  - 空手牌仍自傷
+  - Q340
 cards: [BP01-110, BP01-P23, BP01-173, BP06-022, BP01-176, BP01-042]
 why: >-
   狂気の処刑人（進化後）【進化時】「自分のリーダーに2ダメージ。相手プレイヤー1人は手札を公開する。自分はその中から1枚を選ぶ。相手はそれを捨てる」。
@@ -41,44 +51,60 @@ verified_by:
 scenarios:
   - name: A 公開 3 張 → 選手牌裡的古の英雄（オーラ）→ 對手捨棄 → 之後對手抽的新卡 P1 不知道
     setup:
-      turn: {active: P1, first_player: P1, elapsed_turns: {P1: 4, P2: 3}, phase: main}
+      turn: { active: P1, first_player: P1, elapsed_turns: { P1: 4, P2: 3 }, phase: main }
       history: none
       players:
         P1:
           construction: class
-          leader: {class: ナイトメア, life: 20}
-          pp: {current: 1, max: 4}
+          leader: { class: ナイトメア, life: 20 }
+          pp: { current: 1, max: 4 }
           ep: 2
           zones:
             field:
-              - {id: a1, card: BP01-110}                    # 狂気の処刑人 3/3
+              - { id: a1, card: BP01-110 } # 狂気の処刑人 3/3
             evolve_deck:
-              - {id: e1, card: BP01-P23}
+              - { id: e1, card: BP01-P23 }
             hand:
-              - {filler: 2}
+              - { filler: 2 }
             deck:
-              - {id: d1, card: BP01-042}
-              - {filler: 19}
+              - { id: d1, card: BP01-042 }
+              - { filler: 19 }
         P2:
           construction: class
-          leader: {class: ロイヤル, life: 20}
-          pp: {current: 0, max: 3}
+          leader: { class: ロイヤル, life: 20 }
+          pp: { current: 0, max: 3 }
           zones:
             field:
-              - {id: b1, card: BP01-173}
+              - { id: b1, card: BP01-173 }
             hand:
-              - {id: c1, card: BP01-173}
-              - {id: c2, card: BP06-022}                    # 古の英雄（オーラ）
-              - {id: c3, card: BP01-176}
+              - { id: c1, card: BP01-173 }
+              - { id: c2, card: BP06-022 } # 古の英雄（オーラ）
+              - { id: c3, card: BP01-176 }
             deck:
-              - {id: c4, card: BP01-176}
-              - {filler: 19}
+              - { id: c4, card: BP01-176 }
+              - { filler: 19 }
     decisions:
-      - {n: 1, by: P1, at: main, do: evolve, source: a1, ability: {source: a1, line: 1}, evolve_card: e1, pay: {pp: 0, ep: 1, sep: 0}}
-      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, card: BP01-P23, line: 1}}}
-      - {n: 3, by: P1, at: resolve, of: {decision: 2, occurrence: 1}, do: resolve-choice, select: [c2]}
-      - {n: 4, by: P1, at: main, do: end-phase}
-      - {n: 5, by: P2, at: quick, do: pass}
+      - n: 1
+        by: P1
+        at: main
+        do: evolve
+        source: a1
+        ability: { source: a1, line: 1 }
+        evolve_card: e1
+        pay: { pp: 0, ep: 1, sep: 0 }
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: { ability: { source: a1, card: BP01-P23, line: 1 } }
+      - n: 3
+        by: P1
+        at: resolve
+        of: { decision: 2, occurrence: 1 }
+        do: resolve-choice
+        select: [c2]
+      - { n: 4, by: P1, at: main, do: end-phase }
+      - { n: 5, by: P2, at: quick, do: pass }
     random: {}
     expected:
       - at: after-decision-2
@@ -87,29 +113,29 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - {do: resolve-choice, select: [c1]}
-            - {do: resolve-choice, select: [c2]}
-            - {do: resolve-choice, select: [c3]}
+            - { do: resolve-choice, select: [c1] }
+            - { do: resolve-choice, select: [c2] }
+            - { do: resolve-choice, select: [c3] }
         assert:
           P1.leader.life: 18
           P2.hand: [c1, c2, c3]
         events:
-          - {kind: ダメージ, source: a1, target: P1.leader, amount: 2}
-          - {kind: 公開, object: c1, to: all, group: 1}
-          - {kind: 公開, object: c2, to: all, group: 1}
-          - {kind: 公開, object: c3, to: all, group: 1}
+          - { kind: ダメージ, source: a1, target: P1.leader, amount: 2 }
+          - { kind: 公開, object: c1, to: all, group: 1 }
+          - { kind: 公開, object: c2, to: all, group: 1 }
+          - { kind: 公開, object: c3, to: all, group: 1 }
       - at: after-decision-2
         view: P1
         outcome: paused
         awaiting:
           by: P1
           choices:
-            - {do: resolve-choice, select: [c1]}
-            - {do: resolve-choice, select: [c2]}
-            - {do: resolve-choice, select: [c3]}
+            - { do: resolve-choice, select: [c1] }
+            - { do: resolve-choice, select: [c2] }
+            - { do: resolve-choice, select: [c3] }
         assert:
           P2.hand_count: 3
-          knowledge: {knows: [c1, c2, c3], does_not_know: [c4]}
+          knowledge: { knows: [c1, c2, c3], does_not_know: [c4] }
       - at: after-decision-3
         view: omniscient
         outcome: resolved
@@ -118,21 +144,21 @@ scenarios:
           P2.cemetery: [c2]
           P1.leader.life: 18
         events:
-          - {kind: 捨てる, player: P2, object: c2}
+          - { kind: 捨てる, player: P2, object: c2 }
       - at: after-decision-5
         view: P1
         outcome: resolved
         assert:
-          turn: {active: P2, phase: main}
+          turn: { active: P2, phase: main }
           P2.hand_count: 3
-          knowledge: {knows: [c1, c3], does_not_know: [c4]}
+          knowledge: { knows: [c1, c3], does_not_know: [c4] }
       - at: after-decision-5
         view: omniscient
         outcome: resolved
         assert:
           P2.hand: [c1, c3, c4]
         events:
-          - {kind: 引く, player: P2, object: c4}
+          - { kind: 引く, player: P2, object: c4 }
 
   - name: B 對手手牌 0 張 → 仍對自己 2 傷害 → 沒有可選的卡
     inherit: A 公開 3 張 → 選手牌裡的古の英雄（オーラ）→ 對手捨棄 → 之後對手抽的新卡 P1 不知道
@@ -142,9 +168,25 @@ scenarios:
           zones:
             hand: []
     decisions:
-      - {n: 1, by: P1, at: main, do: evolve, source: a1, ability: {source: a1, line: 1}, evolve_card: e1, pay: {pp: 0, ep: 1, sep: 0}}
-      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, card: BP01-P23, line: 1}}}
-      - {n: 3, by: P1, at: resolve, of: {decision: 2, occurrence: 1}, do: resolve-choice, select: []}
+      - n: 1
+        by: P1
+        at: main
+        do: evolve
+        source: a1
+        ability: { source: a1, line: 1 }
+        evolve_card: e1
+        pay: { pp: 0, ep: 1, sep: 0 }
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: { ability: { source: a1, card: BP01-P23, line: 1 } }
+      - n: 3
+        by: P1
+        at: resolve
+        of: { decision: 2, occurrence: 1 }
+        do: resolve-choice
+        select: []
     random: {}
     expected:
       - at: after-decision-2
@@ -153,11 +195,11 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - {do: resolve-choice, select: []}
+            - { do: resolve-choice, select: [] }
         assert:
           P1.leader.life: 18
         events:
-          - {kind: ダメージ, source: a1, target: P1.leader, amount: 2}
+          - { kind: ダメージ, source: a1, target: P1.leader, amount: 2 }
       - at: after-decision-3
         view: omniscient
         outcome: resolved
@@ -166,5 +208,5 @@ scenarios:
           P2.hand: []
           P2.cemetery: []
         forbidden_events:
-          - {kind: 捨てる}
-          - {kind: 公開}
+          - { kind: 捨てる }
+          - { kind: 公開 }

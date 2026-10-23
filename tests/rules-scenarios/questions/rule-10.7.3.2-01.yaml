@@ -11,7 +11,7 @@ mechanisms:
   - 10.1.1.2.2
   - 10.7.2.1
   - 12.4.3
-  - '5.8'
+  - "5.8"
   - 待機取消：費用付不出、同一能力多次待機
   - 搜尋有條件
 cards:
@@ -51,7 +51,7 @@ evidence:
     derivation:
       - 選到無目標的待機只取消一次，來源維持墓場；有目標時打出並造成傷害。
   - ref: Q619
-    quote: 'Q: 『デモンビーター』の《ファンファーレ》能力によってデッキから他の『デモンビーター』を場に出したとき、その『デモンビーター』の《ファンファーレ》能力を2PP支払ってプレイすることはできますか？ A: はい。コストを支払ってプレイすることができます。'
+    quote: "Q: 『デモンビーター』の《ファンファーレ》能力によってデッキから他の『デモンビーター』を場に出したとき、その『デモンビーター』の《ファンファーレ》能力を2PP支払ってプレイすることはできますか？ A: はい。コストを支払ってプレイすることができます。"
     derivation:
       - 「{ファンファーレ}{コスト2}：」是打出費用（10.1.1.2.2），且由效果放到場上的那張也誘發
   - ref: cr 10.7.3.2
@@ -80,7 +80,7 @@ verified_by:
     method: independent-derivation
     note: 10.7.3.2、10.6.2.3.3；xverify-1/result.md〈22 個重疊題〉。之後未再改
 scenarios:
-  - name: '[astra] 可選目標 0'
+  - name: "[astra] 可選目標 0"
     setup:
       turn:
         active: P1
@@ -154,7 +154,7 @@ scenarios:
           P2.cemetery: []
         forbidden_events:
           - kind: ダメージ
-  - name: '[astra] 可選目標 1'
+  - name: "[astra] 可選目標 1"
     setup:
       turn:
         active: P1
@@ -230,7 +230,7 @@ scenarios:
           P2.field: []
           P2.cemetery:
             - b0
-  - name: '[astra] 可選目標 2'
+  - name: "[astra] 可選目標 2"
     setup:
       turn:
         active: P1
@@ -309,7 +309,7 @@ scenarios:
             - b1
           P2.cemetery:
             - b0
-  - name: '[fable] A PP 不足付不出ファンファーレ費用 → 待機取消一次'
+  - name: "[fable] A PP 不足付不出ファンファーレ費用 → 待機取消一次"
     setup:
       turn:
         active: P1
@@ -400,7 +400,7 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - {do: choose-pending, pending: {ability: {source: a1, line: 2}}, costs: decline}
+            - { do: choose-pending, pending: { ability: { source: a1, line: 2 } }, costs: decline }
         assert:
           P1.pp.current: 1
           P1.field:
@@ -444,8 +444,8 @@ scenarios:
           - kind: 場に出す
           - kind: 移動
             object: a2
-  - name: '[fable] A2 付得出 → 搜到另一張放到場上 → 它也誘發 → 這次 PP 0 付不出 → 取消'
-    inherit: '[fable] A PP 不足付不出ファンファーレ費用 → 待機取消一次'
+  - name: "[fable] A2 付得出 → 搜到另一張放到場上 → 它也誘發 → 這次 PP 0 付不出 → 取消"
+    inherit: "[fable] A PP 不足付不出ファンファーレ費用 → 待機取消一次"
     setup:
       players:
         P1:
@@ -556,7 +556,7 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - {do: choose-pending, pending: {ability: {source: a2, line: 2}}, costs: decline}
+            - { do: choose-pending, pending: { ability: { source: a2, line: 2 } }, costs: decline }
         assert:
           P1.field:
             - a1
@@ -600,7 +600,7 @@ scenarios:
             ability:
               source: a2
               line: 2
-  - name: '[fable] B 同一能力待機兩次（兩隻一ツ尾狐同時離場）；第一次打死唯一目標，第二次取消'
+  - name: "[fable] B 同一能力待機兩次（兩隻一ツ尾狐同時離場）；第一次打死唯一目標，第二次取消"
     setup:
       turn:
         active: P2
@@ -691,8 +691,12 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - {do: choose-pending, pending: {ability: {source: a1, line: 1}, event: {left_field: a2}}, targets: {1: [b1]}}
-            - {do: choose-pending, pending: {ability: {source: a1, line: 1}, event: {left_field: a3}}, targets: {1: [b1]}}
+            - do: choose-pending
+              pending: { ability: { source: a1, line: 1 }, event: { left_field: a2 } }
+              targets: { 1: [b1] }
+            - do: choose-pending
+              pending: { ability: { source: a1, line: 1 }, event: { left_field: a3 } }
+              targets: { 1: [b1] }
         assert:
           P1.field:
             - a1

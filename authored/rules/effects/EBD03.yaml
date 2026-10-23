@@ -76,7 +76,7 @@ cards:
         event: enter
         subject: self
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: cemetery
@@ -160,7 +160,7 @@ cards:
         event: enter
         subject: self
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: cemetery
@@ -180,7 +180,7 @@ cards:
         active_zones:
           - cemetery
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -188,7 +188,7 @@ cards:
             min: 1
             max: 1
         cost_selections:
-          - key: '1'
+          - key: "1"
             select:
               side: self
               zone: cemetery
@@ -216,7 +216,7 @@ cards:
           hp: -2
         section: 0
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -278,7 +278,7 @@ cards:
         event: evolve
         subject: self
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field
@@ -329,7 +329,7 @@ cards:
                 subjects: target.1.leader
                 amount: 4
         targets:
-          - key: '1'
+          - key: "1"
             select:
               side: opponent
               zone: field

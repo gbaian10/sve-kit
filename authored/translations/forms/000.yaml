@@ -71,63 +71,63 @@ records:
       id: zone.source_union.locative_or
       lang: zh-Hant
       signature:
-        - {name: owner, type: Player, role: source_owner}
-        - {name: zone, type: ZoneSet, role: source_zone}
+        - { name: owner, type: Player, role: source_owner }
+        - { name: zone, type: ZoneSet, role: source_zone }
       rule: zone.source_union.v1
       cases:
         battlefield:
-          - {kind: Label, arg: owner}
-          - {kind: ZoneMember, arg: zone}
-          - {kind: Literal, text: 上}
+          - { kind: Label, arg: owner }
+          - { kind: ZoneMember, arg: zone }
+          - { kind: Literal, text: 上 }
         ex:
-          - {kind: Label, arg: owner}
-          - {kind: ZoneMember, arg: zone}
+          - { kind: Label, arg: owner }
+          - { kind: ZoneMember, arg: zone }
         separator:
-          - {kind: Literal, text: 或}
+          - { kind: Literal, text: 或 }
   - kind: translation_form
     data:
       id: zone.source_union.or
       lang: zh-Hant
       signature:
-        - {name: owner, type: Player, role: source_owner}
-        - {name: zone, type: ZoneSet, role: source_zone}
+        - { name: owner, type: Player, role: source_owner }
+        - { name: zone, type: ZoneSet, role: source_zone }
       rule: zone.source_union.v1
       cases:
         battlefield:
-          - {kind: Label, arg: owner}
-          - {kind: ZoneMember, arg: zone}
+          - { kind: Label, arg: owner }
+          - { kind: ZoneMember, arg: zone }
         ex:
-          - {kind: Label, arg: owner}
-          - {kind: ZoneMember, arg: zone}
+          - { kind: Label, arg: owner }
+          - { kind: ZoneMember, arg: zone }
         separator:
-          - {kind: Literal, text: 或}
+          - { kind: Literal, text: 或 }
   - kind: translation_form
     data:
       id: zone.source_union.and
       lang: zh-Hant
       signature:
-        - {name: owner, type: Player, role: source_owner}
-        - {name: zone, type: ZoneSet, role: source_zone}
+        - { name: owner, type: Player, role: source_owner }
+        - { name: zone, type: ZoneSet, role: source_zone }
       rule: zone.source_union.v1
       cases:
         battlefield:
-          - {kind: Label, arg: owner}
-          - {kind: ZoneMember, arg: zone}
+          - { kind: Label, arg: owner }
+          - { kind: ZoneMember, arg: zone }
         ex:
-          - {kind: Label, arg: owner}
-          - {kind: ZoneMember, arg: zone}
+          - { kind: Label, arg: owner }
+          - { kind: ZoneMember, arg: zone }
         separator:
-          - {kind: Literal, text: 與}
+          - { kind: Literal, text: 與 }
   - kind: translation_form
     origin: machine
     data:
       id: quantity.choice_mode_count.placeholder
       lang: zh-Hant
       signature:
-        - {name: quantity, type: QuantitySpec, role: choice_mode_count}
-        - {name: definition, type: QuantityExpr, role: count_expression}
+        - { name: quantity, type: QuantitySpec, role: choice_mode_count }
+        - { name: definition, type: QuantityExpr, role: count_expression }
       rule: quantity.choice_mode_count.placeholder.v1
       cases:
         up_to:
-          - {kind: Literal, text: 至多}
-          - {kind: QuantityPlaceholder, arg: quantity}
+          - { kind: Literal, text: 至多 }
+          - { kind: QuantityPlaceholder, arg: quantity }

@@ -5,7 +5,16 @@ sources:
 id: card-BP10-053
 kind: card
 must_pass: true
-mechanisms: [堆疊、土之秘術, 13.3.3.2, 土の秘術_2 計數器須來自同一護符, 可選追加費用, 10.6.2.2.2, 10.4.2.2, 10.6.2.3.3, 9.1.4.4, 自己置換「代わりに」]
+mechanisms:
+  - 堆疊、土之秘術
+  - 13.3.3.2
+  - 土の秘術_2 計數器須來自同一護符
+  - 可選追加費用
+  - 10.6.2.2.2
+  - 10.4.2.2
+  - 10.6.2.3.3
+  - 9.1.4.4
+  - 自己置換「代わりに」
 cards: [BP10-053, EBD02-T01, BP01-173, BP01-176]
 why: >-
   エクステンドマジック「相手の場のフォロワー1体を選ぶ。それに2ダメージ。【土の秘術_2】代わりに4ダメージ。1枚引く」。
@@ -17,7 +26,17 @@ discriminates: >-
   B：允許跨護符湊 2 個的引擎會 resolved 並造成 4 傷害。A：取到 0 個後等 11.7 檢查時點才送墓的引擎，事件順序不同（移動在 解決 之後）；不消去 token 的引擎墓場多一張。
   B／C：不付秘術也抽牌的引擎手牌多 1 張。D：認為有追加費用就能打出的引擎會 resolved。
 refs:
-  rules: [13.3.3.2, 13.3.3.2.1, 13.3.2.2, 10.4.7, 10.6.2.2.2, 10.6.2.3.1, 10.6.2.3.3, 10.4.2.2, 9.1.4.4, 10.10.2.5]
+  rules:
+    - 13.3.3.2
+    - 13.3.3.2.1
+    - 13.3.2.2
+    - 10.4.7
+    - 10.6.2.2.2
+    - 10.6.2.3.1
+    - 10.6.2.3.3
+    - 10.4.2.2
+    - 9.1.4.4
+    - 10.10.2.5
   qa: [Q1301, Q1302]
 evidence:
   - ref: cr 13.3.3.2
@@ -44,35 +63,41 @@ verified_by:
 scenarios:
   - name: A 一個魔片有 2 個計數器 → 付土の秘術_2 → 4 傷害，魔片歸 0 放墓場並消去
     setup:
-      turn: {active: P1, first_player: P1, elapsed_turns: {P1: 5, P2: 4}, phase: main}
+      turn: { active: P1, first_player: P1, elapsed_turns: { P1: 5, P2: 4 }, phase: main }
       history: none
       players:
         P1:
           construction: class
-          leader: {class: ウィッチ, life: 20}
-          pp: {current: 3, max: 5}
+          leader: { class: ウィッチ, life: 20 }
+          pp: { current: 3, max: 5 }
           zones:
             field:
-              - {id: s1, card: EBD02-T01, state: {counters: {スタックカウンター: 2}}}
+              - { id: s1, card: EBD02-T01, state: { counters: { スタックカウンター: 2 } } }
             hand:
-              - {id: h1, card: BP10-053}
-              - {filler: 1}
+              - { id: h1, card: BP10-053 }
+              - { filler: 1 }
             deck:
-              - {id: d1, card: BP01-173}
-              - {filler: 19}
+              - { id: d1, card: BP01-173 }
+              - { filler: 19 }
         P2:
           construction: class
-          leader: {class: ロイヤル, life: 20}
-          pp: {current: 0, max: 5}
+          leader: { class: ロイヤル, life: 20 }
+          pp: { current: 0, max: 5 }
           zones:
             field:
-              - {id: b1, card: BP01-176}       # 天剣の乙女 4/6
+              - { id: b1, card: BP01-176 } # 天剣の乙女 4/6
             hand:
-              - {filler: 3}
+              - { filler: 3 }
             deck:
-              - {filler: 20}
+              - { filler: 20 }
     decisions:
-      - {n: 1, by: P1, at: main, do: play, card: h1, targets: {1: [b1]}, optional_costs: {additional: {stack_counter_from: s1}}}
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: h1
+        targets: { 1: [b1] }
+        optional_costs: { additional: { stack_counter_from: s1 } }
     random: {}
     expected:
       - at: after-decision-1
@@ -82,15 +107,15 @@ scenarios:
           P1.pp.current: 2
           P1.field: []
           P1.cemetery: [h1]
-          P2.field.b1: {hp: 2}
+          P2.field.b1: { hp: 2 }
           P1.hand: [d1, filler: 1]
         events:
-          - {kind: カウンター, object: s1, name: スタックカウンター, delta: -2}
-          - {kind: 移動, object: s1, from: P1.field, to: P1.cemetery}
-          - {kind: 消去, object: s1, by: rule-9.1.4.4}
-          - {kind: ダメージ, source: h1, target: b1, amount: 4}
-          - {kind: 引く, player: P1, object: d1}
-          - {kind: 解決, object: h1}
+          - { kind: カウンター, object: s1, name: スタックカウンター, delta: -2 }
+          - { kind: 移動, object: s1, from: P1.field, to: P1.cemetery }
+          - { kind: 消去, object: s1, by: rule-9.1.4.4 }
+          - { kind: ダメージ, source: h1, target: b1, amount: 4 }
+          - { kind: 引く, player: P1, object: d1 }
+          - { kind: 解決, object: h1 }
 
   - name: B 兩個魔片各 1 個 → 跨護符取 2 個是非法決定 → cannot-play；拒付則 2 傷害
     inherit: A 一個魔片有 2 個計數器 → 付土の秘術_2 → 4 傷害，魔片歸 0 放墓場並消去
@@ -99,11 +124,23 @@ scenarios:
         P1:
           zones:
             field:
-              - {id: s1, card: EBD02-T01, state: {counters: {スタックカウンター: 1}}}
-              - {id: s2, card: EBD02-T01, state: {counters: {スタックカウンター: 1}}}
+              - { id: s1, card: EBD02-T01, state: { counters: { スタックカウンター: 1 } } }
+              - { id: s2, card: EBD02-T01, state: { counters: { スタックカウンター: 1 } } }
     decisions:
-      - {n: 1, by: P1, at: main, do: play, card: h1, targets: {1: [b1]}, optional_costs: {additional: {stack_counter_from: [s1, s2]}}}
-      - {n: 2, by: P1, at: main, do: play, card: h1, targets: {1: [b1]}, optional_costs: {additional: decline}}
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: h1
+        targets: { 1: [b1] }
+        optional_costs: { additional: { stack_counter_from: [s1, s2] } }
+      - n: 2
+        by: P1
+        at: main
+        do: play
+        card: h1
+        targets: { 1: [b1] }
+        optional_costs: { additional: decline }
     random: {}
     expected:
       - at: after-decision-1
@@ -112,30 +149,36 @@ scenarios:
         assert:
           P1.pp.current: 3
           P1.hand: [h1, filler: 1]
-          P1.field.s1: {counters: {スタックカウンター: 1}}
-          P1.field.s2: {counters: {スタックカウンター: 1}}
-          P2.field.b1: {hp: 6}
+          P1.field.s1: { counters: { スタックカウンター: 1 } }
+          P1.field.s2: { counters: { スタックカウンター: 1 } }
+          P2.field.b1: { hp: 6 }
       - at: after-decision-2
         view: omniscient
         outcome: resolved
         assert:
           P1.pp.current: 2
           P1.field: [s1, s2]
-          P1.field.s1: {counters: {スタックカウンター: 1}}
-          P1.field.s2: {counters: {スタックカウンター: 1}}
-          P2.field.b1: {hp: 4}
+          P1.field.s1: { counters: { スタックカウンター: 1 } }
+          P1.field.s2: { counters: { スタックカウンター: 1 } }
+          P2.field.b1: { hp: 4 }
           P1.hand: [filler: 1]
           P1.deck: [d1, filler: 19]
         events:
-          - {kind: ダメージ, source: h1, target: b1, amount: 2}
+          - { kind: ダメージ, source: h1, target: b1, amount: 2 }
         forbidden_events:
-          - {kind: カウンター}
-          - {kind: 引く}
+          - { kind: カウンター }
+          - { kind: 引く }
 
   - name: C 有 2 個計數器但選擇不付 → 2 傷害、計數器不動
     inherit: A 一個魔片有 2 個計數器 → 付土の秘術_2 → 4 傷害，魔片歸 0 放墓場並消去
     decisions:
-      - {n: 1, by: P1, at: main, do: play, card: h1, targets: {1: [b1]}, optional_costs: {additional: decline}}
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: h1
+        targets: { 1: [b1] }
+        optional_costs: { additional: decline }
     random: {}
     expected:
       - at: after-decision-1
@@ -143,15 +186,15 @@ scenarios:
         outcome: resolved
         assert:
           P1.pp.current: 2
-          P1.field.s1: {counters: {スタックカウンター: 2}}
-          P2.field.b1: {hp: 4}
+          P1.field.s1: { counters: { スタックカウンター: 2 } }
+          P2.field.b1: { hp: 4 }
           P1.hand: [filler: 1]
           P1.deck: [d1, filler: 19]
         events:
-          - {kind: ダメージ, source: h1, target: b1, amount: 2}
+          - { kind: ダメージ, source: h1, target: b1, amount: 2 }
         forbidden_events:
-          - {kind: カウンター}
-          - {kind: 引く}
+          - { kind: カウンター }
+          - { kind: 引く }
 
   - name: D 對手沒有從者 → 不能打出，也不能只為了抽牌付土の秘術
     inherit: A 一個魔片有 2 個計數器 → 付土の秘術_2 → 4 傷害，魔片歸 0 放墓場並消去
@@ -161,7 +204,13 @@ scenarios:
           zones:
             field: []
     decisions:
-      - {n: 1, by: P1, at: main, do: play, card: h1, targets: {1: []}, optional_costs: {additional: {stack_counter_from: s1}}}
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: h1
+        targets: { 1: [] }
+        optional_costs: { additional: { stack_counter_from: s1 } }
     random: {}
     expected:
       - at: after-decision-1
@@ -170,6 +219,6 @@ scenarios:
         assert:
           P1.pp.current: 3
           P1.hand: [h1, filler: 1]
-          P1.field.s1: {counters: {スタックカウンター: 2}}
+          P1.field.s1: { counters: { スタックカウンター: 2 } }
         forbidden_events:
-          - {kind: 引く}
+          - { kind: 引く }

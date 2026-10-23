@@ -10,8 +10,8 @@ mechanisms:
   - 持續效果與禁止
   - 1.3.3
   - 10.7.2
-  - '12.4'
-  - '12.6'
+  - "12.4"
+  - "12.6"
   - 賽馬娘
   - 誘發本身被禁止
 cards:
@@ -72,7 +72,7 @@ verified_by:
     method: independent-derivation
     note: 14.2.1.1、14.2.2.4、14.2.2.5、14.2.3.1、10.4.2.2；xverify-1/result.md〈22 個重疊題〉三局面，遷移後四局面 xverify-2/result.md 4/4 同意（非必過）
 scenarios:
-  - name: '[astra] 有胡蘿蔔=True PP=1'
+  - name: "[astra] 有胡蘿蔔=True PP=1"
     setup:
       turn:
         active: P1
@@ -160,7 +160,7 @@ scenarios:
           semantic_state.counters_this_turn:
             P1.evolve_played: 1
             P1.evolutions: 0
-  - name: '[astra] 有胡蘿蔔=False PP=1'
+  - name: "[astra] 有胡蘿蔔=False PP=1"
     setup:
       turn:
         active: P1
@@ -235,7 +235,7 @@ scenarios:
           semantic_state.counters_this_turn:
             P1.evolve_played: 0
             P1.evolutions: 0
-  - name: '[astra] 有胡蘿蔔=True PP=0'
+  - name: "[astra] 有胡蘿蔔=True PP=0"
     setup:
       turn:
         active: P1
@@ -313,7 +313,7 @@ scenarios:
           semantic_state.counters_this_turn:
             P1.evolve_played: 0
             P1.evolutions: 0
-  - name: '[astra] PP 0 以 EP 1 代付'
+  - name: "[astra] PP 0 以 EP 1 代付"
     setup:
       turn:
         active: P1
@@ -402,7 +402,7 @@ scenarios:
           semantic_state.counters_this_turn:
             P1.evolve_played: 1
             P1.evolutions: 0
-  - name: '[fable] A 對手打出有ファンファーレ的從者 → 沒有待機'
+  - name: "[fable] A 對手打出有ファンファーレ的從者 → 沒有待機"
     setup:
       turn:
         active: P2
@@ -505,8 +505,8 @@ scenarios:
             ability:
               source: b1
               line: 2
-  - name: '[fable] B 對手進化 → 進化本身照常，進化時不誘發'
-    inherit: '[fable] A 對手打出有ファンファーレ的從者 → 沒有待機'
+  - name: "[fable] B 對手進化 → 進化本身照常，進化時不誘發"
+    inherit: "[fable] A 對手打出有ファンファーレ的從者 → 沒有待機"
     decisions:
       - n: 1
         by: P2

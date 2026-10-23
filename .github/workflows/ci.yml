@@ -18,7 +18,7 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
-  CARGO_BUILD_JOBS: '4'
+  CARGO_BUILD_JOBS: "4"
   PYTEST_WORKERS: ${{ vars.CI_PYTEST_WORKERS || '4' }}
 
 jobs:
@@ -84,6 +84,7 @@ jobs:
               - 'tests/engine/*.yaml'
             web:
               - 'sim/web/**'
+              - 'bunfig.toml' # bun fmt settings; Tailwind class order is only checked here, with node_modules
               - 'docs/schema/export/public-annotation-cases.json'
               - 'carddb/src/sve_carddb/contracts/schema/**' # the web reader validates against the published schema
 
@@ -126,10 +127,15 @@ jobs:
           fetch-depth: 0 # gitleaks-range scans the whole pushed commit range
           persist-credentials: false
           clean: true
+      # The bun-fmt hook runs Bun from mise.toml.
+      - uses: jdx/mise-action@08ae2a091c038e1e05ec6f5115dc5c69d5a2a6b8 # v5.1.2
+        with:
+          cache: true
+          cache_save: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
       # Hooks pin language_version python3.14 (.pre-commit-config.yaml).
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
-          python-version: '3.14'
+          python-version: "3.14"
       - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
         with:
           enable-cache: true
@@ -166,7 +172,7 @@ jobs:
             ':(glob)**/action.yml' ':(glob)**/action.yaml'
             ':(glob)**/.markdownlint*' ':(glob)**/.editorconfig'
             ':(glob)**/.gitattributes' ':(glob)**/.gitleaks*'
-            taplo.toml .taplo.toml uv.toml carddb/uv.toml
+            bunfig.toml taplo.toml .taplo.toml uv.toml carddb/uv.toml
             carddb/pyproject.toml carddb/uv.lock publish/pyproject.toml publish/uv.lock
           )
           scope=(--all-files)
@@ -220,7 +226,7 @@ jobs:
       # Hooks pin language_version python3.14 (.pre-commit-config.yaml).
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
-          python-version: '3.14'
+          python-version: "3.14"
       - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
         with:
           enable-cache: true
@@ -349,7 +355,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
-      MISE_EXEC_AUTO_INSTALL: 'false' # the cargo hooks go through `mise exec`; Rust itself comes from rustup
+      MISE_EXEC_AUTO_INSTALL: "false" # the cargo hooks go through `mise exec`; Rust itself comes from rustup
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -451,7 +457,7 @@ jobs:
           key: bun-${{ runner.os }}-${{ hashFiles('sim/web/bun.lock') }}
       - run: bun install --frozen-lockfile
       - name: Web formatting, lint, types and unused dependencies
-        run: bun run format:check && bun run lint && bun run typecheck && bun run knip
+        run: bun run format:check && bun run lint:all && bun run typecheck && bun run knip
       - name: Vitest
         id: tests
         env:
@@ -462,7 +468,7 @@ jobs:
           mkdir -p "$REPORT_DIR"
           status=0
           start=$SECONDS
-          bun run test --maxWorkers=4 --reporter=junit --outputFile="$REPORT_DIR/junit.xml" \
+          bun run test:all --maxWorkers=4 --reporter=junit --outputFile="$REPORT_DIR/junit.xml" \
             > "$REPORT_DIR/test.log" 2>&1 || status=$?
           echo "$((SECONDS - start))" > "$REPORT_DIR/elapsed.txt"
           echo "vitest exit status: $status (statistics in the next step; raw output stays private)"
@@ -478,7 +484,7 @@ jobs:
           REPORT_DIR: ${{ runner.temp }}/sve-web-reports
         run: rm -rf "$REPORT_DIR"
       - name: Web build
-        run: bun run build
+        run: bun run build:all
       - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.hook-cache.outputs.cache-hit != 'true'
         with:

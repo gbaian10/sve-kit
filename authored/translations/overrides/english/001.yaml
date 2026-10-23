@@ -993,11 +993,11 @@ records:
           key: term:zone.battlefield
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}召喚1個『'
+          text: "}召喚1個『"
         - kind: LeafRef
           slot: name.earth_magic_fragment
         - kind: Literal
@@ -1013,7 +1013,7 @@ records:
         - kind: LeafRef
           slot: ability.activation
         - kind: Literal
-          text: '}【'
+          text: "}【"
         - kind: LeafRef
           slot: ability.earth_rite
         - kind: Literal
@@ -1052,11 +1052,11 @@ records:
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}自己的主戰者{'
+          text: "}自己的主戰者{"
         - kind: LeafRef
           slot: stat.health
         - kind: Literal
-          text: '}+3。'
+          text: "}+3。"
   - origin: machine
     kind: english_exception_target
     data:
@@ -1092,7 +1092,7 @@ records:
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}查看自己'
+          text: "}查看自己"
         - kind: LeafRef
           slot: zone.deck_top
         - kind: Literal
@@ -1138,11 +1138,11 @@ records:
           key: term:zone.hand
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: action.evolve
         - kind: Literal
-          text: '}{'
+          text: "}{"
         - kind: LeafRef
           slot: rule.cost
         - kind: Literal
@@ -1150,7 +1150,7 @@ records:
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}從自己的'
+          text: "}從自己的"
         - kind: LeafRef
           slot: zone.deck
         - kind: Literal
@@ -1209,15 +1209,15 @@ records:
         - kind: LeafRef
           slot: type.follower
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: stat.attack
         - kind: Literal
-          text: '}+2/{'
+          text: "}+2/{"
         - kind: LeafRef
           slot: stat.health
         - kind: Literal
-          text: '}+2。'
+          text: "}+2。"
   - origin: machine
     kind: english_exception_target
     data:
@@ -1252,11 +1252,11 @@ records:
           key: term:zone.hand
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: action.evolve
         - kind: Literal
-          text: '}{'
+          text: "}{"
         - kind: LeafRef
           slot: rule.cost
         - kind: Literal
@@ -1264,7 +1264,7 @@ records:
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}選擇自己的'
+          text: "}選擇自己的"
         - kind: LeafRef
           slot: zone.cemetery
         - kind: Literal
@@ -1272,7 +1272,7 @@ records:
         - kind: LeafRef
           slot: class.royal
         - kind: Literal
-          text: '}'
+          text: "}"
         - kind: LeafRef
           slot: type.follower
         - kind: Literal
@@ -1352,15 +1352,15 @@ records:
           key: term:zone.deck_top
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}若自己的主戰者為{'
+          text: "}若自己的主戰者為{"
         - kind: LeafRef
           slot: class.royal
         - kind: Literal
-          text: '}，則公開自己'
+          text: "}，則公開自己"
         - kind: LeafRef
           slot: zone.deck_top
         - kind: Literal
@@ -1450,7 +1450,7 @@ records:
         - kind: LeafRef
           slot: ability.last_words
         - kind: Literal
-          text: '}選擇自己的'
+          text: "}選擇自己的"
         - kind: LeafRef
           slot: zone.cemetery
         - kind: Literal
@@ -1510,7 +1510,7 @@ records:
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}選擇敵方的每名玩家'
+          text: "}選擇敵方的每名玩家"
         - kind: LeafRef
           slot: zone.battlefield
         - kind: Literal
@@ -1543,7 +1543,7 @@ records:
           key: term:zone.hand
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: ability.quick
         - kind: Literal
@@ -1575,7 +1575,7 @@ records:
         - kind: LeafRef
           slot: class.elf
         - kind: Literal
-          text: '}，則抽1張卡片，之後給予所選的全部對象等同於「自己的'
+          text: "}，則抽1張卡片，之後給予所選的全部對象等同於「自己的"
         - kind: LeafRef
           slot: zone.hand
         - kind: Literal
@@ -1606,11 +1606,11 @@ records:
           key: term:zone.battlefield
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: action.evolve
         - kind: Literal
-          text: '}{'
+          text: "}{"
         - kind: LeafRef
           slot: rule.cost
         - kind: Literal
@@ -1701,11 +1701,11 @@ records:
           key: term:zone.battlefield
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}選擇敵方'
+          text: "}選擇敵方"
         - kind: LeafRef
           slot: zone.battlefield
         - kind: Literal
@@ -1721,11 +1721,11 @@ records:
         - kind: LeafRef
           slot: stat.attack
         - kind: Literal
-          text: '}+2/{'
+          text: "}+2/{"
         - kind: LeafRef
           slot: stat.health
         - kind: Literal
-          text: '}+2。'
+          text: "}+2。"
   - origin: machine
     kind: english_exception_target
     data:
@@ -1752,11 +1752,11 @@ records:
           key: term:zone.hand
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}抽2張卡片。可以將自己的'
+          text: "}抽2張卡片。可以將自己的"
         - kind: LeafRef
           slot: zone.hand
         - kind: Literal
@@ -1805,11 +1805,11 @@ records:
         - kind: LeafRef
           slot: ability.activation
         - kind: Literal
-          text: '}將這張卡片{'
+          text: "}將這張卡片{"
         - kind: LeafRef
           slot: action.engage
         - kind: Literal
-          text: '}並放置到'
+          text: "}並放置到"
         - kind: LeafRef
           slot: zone.cemetery
         - kind: Literal
@@ -1817,7 +1817,7 @@ records:
         - kind: LeafRef
           slot: stat.health
         - kind: Literal
-          text: '}+3。'
+          text: "}+3。"
   - origin: machine
     kind: english_exception_target
     data:
@@ -1873,7 +1873,7 @@ records:
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}給予敵方'
+          text: "}給予敵方"
         - kind: LeafRef
           slot: zone.battlefield
         - kind: Literal
@@ -1881,7 +1881,7 @@ records:
         - kind: LeafRef
           slot: class.neutral
         - kind: Literal
-          text: '}'
+          text: "}"
         - kind: LeafRef
           slot: type.follower
         - kind: Literal
@@ -1926,11 +1926,11 @@ records:
           key: term:zone.hand
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}各玩家同時公開自身的'
+          text: "}各玩家同時公開自身的"
         - kind: LeafRef
           slot: zone.hand
         - kind: Literal
@@ -1958,7 +1958,7 @@ records:
         - kind: LeafRef
           slot: ability.activation
         - kind: Literal
-          text: '}{'
+          text: "}{"
         - kind: LeafRef
           slot: rule.cost
         - kind: Literal
@@ -1966,7 +1966,7 @@ records:
         - kind: LeafRef
           slot: action.engage
         - kind: Literal
-          text: '}並放置到'
+          text: "}並放置到"
         - kind: LeafRef
           slot: zone.cemetery
         - kind: Literal
@@ -2104,11 +2104,11 @@ records:
           key: term:zone.hand
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: action.evolve
         - kind: Literal
-          text: '}{'
+          text: "}{"
         - kind: LeafRef
           slot: rule.cost
         - kind: Literal
@@ -2120,7 +2120,7 @@ records:
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}可以將自己的'
+          text: "}可以將自己的"
         - kind: LeafRef
           slot: zone.hand
         - kind: Literal
@@ -2144,15 +2144,15 @@ records:
         - kind: LeafRef
           slot: type.follower
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: stat.attack
         - kind: Literal
-          text: '}+2/{'
+          text: "}+2/{"
         - kind: LeafRef
           slot: stat.health
         - kind: Literal
-          text: '}+2。'
+          text: "}+2。"
   - origin: machine
     kind: english_exception_target
     data:
@@ -2220,15 +2220,15 @@ records:
         - kind: LeafRef
           slot: type.follower
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: stat.attack
         - kind: Literal
-          text: '}+2/{'
+          text: "}+2/{"
         - kind: LeafRef
           slot: stat.health
         - kind: Literal
-          text: '}+2。'
+          text: "}+2。"
   - origin: machine
     kind: english_exception_target
     data:
@@ -2284,11 +2284,11 @@ records:
           key: term:rule.cost
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: action.evolve
         - kind: Literal
-          text: '}{'
+          text: "}{"
         - kind: LeafRef
           slot: rule.cost
         - kind: Literal
@@ -2370,11 +2370,11 @@ records:
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}在自己的下一個回合中，自己的{'
+          text: "}在自己的下一個回合中，自己的{"
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}能力各觸發2次。'
+          text: "}能力各觸發2次。"
   - origin: machine
     kind: english_exception_target
     data:
@@ -2399,11 +2399,11 @@ records:
           key: term:zone.hand
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: action.evolve
         - kind: Literal
-          text: '}{'
+          text: "}{"
         - kind: LeafRef
           slot: rule.cost
         - kind: Literal
@@ -2411,7 +2411,7 @@ records:
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}將自己的至多2張'
+          text: "}將自己的至多2張"
         - kind: LeafRef
           slot: zone.hand
         - kind: Literal
@@ -2500,7 +2500,7 @@ records:
         - kind: LeafRef
           slot: stat.health
         - kind: Literal
-          text: '}-3、捨棄1張'
+          text: "}-3、捨棄1張"
         - kind: LeafRef
           slot: zone.hand
         - kind: Literal
@@ -2565,7 +2565,7 @@ records:
         - kind: LeafRef
           slot: class.witch
         - kind: Literal
-          text: '}，則再從自己的'
+          text: "}，則再從自己的"
         - kind: LeafRef
           slot: zone.deck
         - kind: Literal
@@ -2630,11 +2630,11 @@ records:
           key: term:zone.hand
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}從自己的'
+          text: "}從自己的"
         - kind: LeafRef
           slot: zone.deck
         - kind: Literal
@@ -2654,11 +2654,11 @@ records:
         - kind: LeafRef
           slot: ability.activation
         - kind: Literal
-          text: '}將這張卡片{'
+          text: "}將這張卡片{"
         - kind: LeafRef
           slot: action.engage
         - kind: Literal
-          text: '}並放置到'
+          text: "}並放置到"
         - kind: LeafRef
           slot: zone.cemetery
         - kind: Literal
@@ -2703,7 +2703,7 @@ records:
           key: term:rule.cost
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: ability.quick
         - kind: Literal
@@ -2711,7 +2711,7 @@ records:
         - kind: LeafRef
           slot: class.dragon
         - kind: Literal
-          text: '}，則'
+          text: "}，則"
         - kind: LeafRef
           slot: rule.cost
         - kind: Literal
@@ -2732,11 +2732,11 @@ records:
         - kind: LeafRef
           slot: stat.health
         - kind: Literal
-          text: '}+1，並抽1張卡片。若擲出4、5或6，則自己的主戰者{'
+          text: "}+1，並抽1張卡片。若擲出4、5或6，則自己的主戰者{"
         - kind: LeafRef
           slot: stat.health
         - kind: Literal
-          text: '}+1，自己抽1張卡片。'
+          text: "}+1，自己抽1張卡片。"
   - origin: machine
     kind: english_exception_target
     data:
@@ -2758,11 +2758,11 @@ records:
           key: term:zone.hand
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: action.evolve
         - kind: Literal
-          text: '}{'
+          text: "}{"
         - kind: LeafRef
           slot: rule.cost
         - kind: Literal
@@ -2774,7 +2774,7 @@ records:
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}敵方的全部玩家中，'
+          text: "}敵方的全部玩家中，"
         - kind: LeafRef
           slot: zone.hand
         - kind: Literal
@@ -2851,11 +2851,11 @@ records:
           key: term:zone.hand
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: action.evolve
         - kind: Literal
-          text: '}{'
+          text: "}{"
         - kind: LeafRef
           slot: rule.cost
         - kind: Literal
@@ -2867,7 +2867,7 @@ records:
         - kind: LeafRef
           slot: ability.activation
         - kind: Literal
-          text: '}{'
+          text: "}{"
         - kind: LeafRef
           slot: rule.cost
         - kind: Literal
@@ -2971,11 +2971,11 @@ records:
           key: term:zone.hand
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: action.evolve
         - kind: Literal
-          text: '}{'
+          text: "}{"
         - kind: LeafRef
           slot: rule.cost
         - kind: Literal
@@ -2983,11 +2983,11 @@ records:
         - kind: LeafRef
           slot: class.nightmare
         - kind: Literal
-          text: '}，則自己的主戰者{'
+          text: "}，則自己的主戰者{"
         - kind: LeafRef
           slot: stat.health
         - kind: Literal
-          text: '}+2，抽1張卡片，之後敵方的全部玩家捨棄自身的1張'
+          text: "}+2，抽1張卡片，之後敵方的全部玩家捨棄自身的1張"
         - kind: LeafRef
           slot: zone.hand
         - kind: Literal
@@ -3039,11 +3039,11 @@ records:
         - kind: LeafRef
           slot: class.nightmare
         - kind: Literal
-          text: '}，則自己的主戰者{'
+          text: "}，則自己的主戰者{"
         - kind: LeafRef
           slot: stat.health
         - kind: Literal
-          text: '}+4，抽2張卡片，之後敵方的全部玩家捨棄自身的2張'
+          text: "}+4，抽2張卡片，之後敵方的全部玩家捨棄自身的2張"
         - kind: LeafRef
           slot: zone.hand
         - kind: Literal
@@ -3104,7 +3104,7 @@ records:
         - kind: LeafRef
           slot: ability.activation
         - kind: Literal
-          text: '}{'
+          text: "}{"
         - kind: LeafRef
           slot: rule.cost
         - kind: Literal
@@ -3112,7 +3112,7 @@ records:
         - kind: LeafRef
           slot: action.engage
         - kind: Literal
-          text: '}並放置到'
+          text: "}並放置到"
         - kind: LeafRef
           slot: zone.cemetery
         - kind: Literal
@@ -3168,11 +3168,11 @@ records:
           key: term:zone.deck_top
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: action.evolve
         - kind: Literal
-          text: '}{'
+          text: "}{"
         - kind: LeafRef
           slot: rule.cost
         - kind: Literal
@@ -3196,7 +3196,7 @@ records:
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}選擇敵方'
+          text: "}選擇敵方"
         - kind: LeafRef
           slot: zone.battlefield
         - kind: Literal
@@ -3308,11 +3308,11 @@ records:
           key: term:zone.cemetery
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}選擇敵方'
+          text: "}選擇敵方"
         - kind: LeafRef
           slot: zone.battlefield
         - kind: Literal
@@ -3324,11 +3324,11 @@ records:
         - kind: LeafRef
           slot: ability.necrocharge
         - kind: Literal
-          text: ' 10】改為給予5點傷害。【'
+          text: " 10】改為給予5點傷害。【"
         - kind: LeafRef
           slot: ability.necrocharge
         - kind: Literal
-          text: ' 20】給予其主戰者3點傷害。（自己的'
+          text: " 20】給予其主戰者3點傷害。（自己的"
         - kind: LeafRef
           slot: zone.cemetery
         - kind: Literal
@@ -3336,11 +3336,11 @@ records:
         - kind: LeafRef
           slot: ability.necrocharge
         - kind: Literal
-          text: ' 10】之後的能力會生效。有20張以上時，【'
+          text: " 10】之後的能力會生效。有20張以上時，【"
         - kind: LeafRef
           slot: ability.necrocharge
         - kind: Literal
-          text: ' 20】之後的能力也會生效）'
+          text: " 20】之後的能力也會生效）"
   - origin: machine
     kind: english_exception_target
     data:
@@ -3398,7 +3398,7 @@ records:
         - kind: LeafRef
           slot: ability.necrocharge
         - kind: Literal
-          text: ' 20】將其召喚到'
+          text: " 20】將其召喚到"
         - kind: LeafRef
           slot: zone.battlefield
         - kind: Literal
@@ -3410,7 +3410,7 @@ records:
         - kind: LeafRef
           slot: ability.necrocharge
         - kind: Literal
-          text: ' 20】之後的能力會生效）'
+          text: " 20】之後的能力會生效）"
   - origin: machine
     kind: english_exception_target
     data:
@@ -3429,7 +3429,7 @@ records:
           key: term:zone.deck_top
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: ability.quick
         - kind: Literal
@@ -3462,7 +3462,7 @@ records:
           key: term:zone.battlefield
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: ability.quick
         - kind: Literal
@@ -3506,7 +3506,7 @@ records:
         - kind: LeafRef
           slot: ability.last_words
         - kind: Literal
-          text: '}選擇敵方的1名主戰者。給予其3點傷害。'
+          text: "}選擇敵方的1名主戰者。給予其3點傷害。"
   - origin: machine
     kind: english_exception_target
     data:
@@ -3542,11 +3542,11 @@ records:
           key: term:zone.cemetery
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: action.evolve
         - kind: Literal
-          text: '}{'
+          text: "}{"
         - kind: LeafRef
           slot: rule.cost
         - kind: Literal
@@ -3558,7 +3558,7 @@ records:
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}選擇敵方的1名玩家。該玩家將自身'
+          text: "}選擇敵方的1名玩家。該玩家將自身"
         - kind: LeafRef
           slot: zone.battlefield
         - kind: Literal
@@ -3574,7 +3574,7 @@ records:
         - kind: LeafRef
           slot: stat.health
         - kind: Literal
-          text: '}增加等同於「藉此放置到'
+          text: "}增加等同於「藉此放置到"
         - kind: LeafRef
           slot: zone.cemetery
         - kind: Literal
@@ -3680,11 +3680,11 @@ records:
           key: term:zone.deck
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: action.evolve
         - kind: Literal
-          text: '}{'
+          text: "}{"
         - kind: LeafRef
           slot: rule.cost
         - kind: Literal
@@ -3692,11 +3692,11 @@ records:
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}若自己的主戰者為{'
+          text: "}若自己的主戰者為{"
         - kind: LeafRef
           slot: class.bishop
         - kind: Literal
-          text: '}，則從自己的'
+          text: "}，則從自己的"
         - kind: LeafRef
           slot: zone.deck
         - kind: Literal
@@ -3799,11 +3799,11 @@ records:
           key: term:zone.hand
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}各玩家可以將自身的'
+          text: "}各玩家可以將自身的"
         - kind: LeafRef
           slot: zone.cemetery
         - kind: Literal
@@ -3819,7 +3819,7 @@ records:
         - kind: LeafRef
           slot: ability.activation
         - kind: Literal
-          text: '}{'
+          text: "}{"
         - kind: LeafRef
           slot: rule.cost
         - kind: Literal
@@ -3827,7 +3827,7 @@ records:
         - kind: LeafRef
           slot: action.engage
         - kind: Literal
-          text: '}：可以將自己的'
+          text: "}：可以將自己的"
         - kind: LeafRef
           slot: zone.hand
         - kind: Literal
@@ -3875,11 +3875,11 @@ records:
           key: term:zone.hand
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: action.evolve
         - kind: Literal
-          text: '}{'
+          text: "}{"
         - kind: LeafRef
           slot: rule.cost
         - kind: Literal
@@ -3887,7 +3887,7 @@ records:
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}從下列抉擇1項。【1】從自己的'
+          text: "}從下列抉擇1項。【1】從自己的"
         - kind: LeafRef
           slot: zone.deck
         - kind: Literal
@@ -3946,7 +3946,7 @@ records:
         - kind: LeafRef
           slot: stat.health
         - kind: Literal
-          text: '}+3，並抽1張卡片。'
+          text: "}+3，並抽1張卡片。"
   - origin: machine
     kind: english_exception_target
     data:
@@ -3968,11 +3968,11 @@ records:
           key: term:stat.health
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: action.evolve
         - kind: Literal
-          text: '}{'
+          text: "}{"
         - kind: LeafRef
           slot: rule.cost
         - kind: Literal
@@ -4099,7 +4099,7 @@ records:
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}選擇1名敵方玩家的'
+          text: "}選擇1名敵方玩家的"
         - kind: LeafRef
           slot: zone.ex
         - kind: Literal
@@ -4169,7 +4169,7 @@ records:
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}自己的PP回復等同於「自己'
+          text: "}自己的PP回復等同於「自己"
         - kind: LeafRef
           slot: zone.battlefield
         - kind: Literal
@@ -4246,11 +4246,11 @@ records:
           key: term:zone.cemetery
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}選擇敵方'
+          text: "}選擇敵方"
         - kind: LeafRef
           slot: zone.battlefield
         - kind: Literal
@@ -4274,7 +4274,7 @@ records:
         - kind: LeafRef
           slot: ability.activation
         - kind: Literal
-          text: '}{'
+          text: "}{"
         - kind: LeafRef
           slot: rule.cost
         - kind: Literal
@@ -4282,7 +4282,7 @@ records:
         - kind: LeafRef
           slot: action.engage
         - kind: Literal
-          text: '}並放置到'
+          text: "}並放置到"
         - kind: LeafRef
           slot: zone.cemetery
         - kind: Literal
@@ -4352,11 +4352,11 @@ records:
           key: term:stat.health
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: action.evolve
         - kind: Literal
-          text: '}{'
+          text: "}{"
         - kind: LeafRef
           slot: rule.cost
         - kind: Literal
@@ -4368,15 +4368,15 @@ records:
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}【'
+          text: "}【"
         - kind: LeafRef
           slot: ability.combo
         - kind: Literal
-          text: ' 3】自己的主戰者{'
+          text: " 3】自己的主戰者{"
         - kind: LeafRef
           slot: stat.health
         - kind: Literal
-          text: '}+4。抽2張卡片。'
+          text: "}+4。抽2張卡片。"
   - origin: machine
     note: 2026-10-18 維護者確認 Q546／Q560 的全部攻擊限制；與日文共用規則一致，譯為「無法攻擊」。
     kind: english_exception_target
@@ -4404,7 +4404,7 @@ records:
         - kind: LeafRef
           slot: ability.last_words
         - kind: Literal
-          text: '}到自己的下一個回合開始時為止，自己的主戰者的'
+          text: "}到自己的下一個回合開始時為止，自己的主戰者的"
         - kind: LeafRef
           slot: stat.health
         - kind: Literal
@@ -4449,11 +4449,11 @@ records:
           key: term:zone.deck
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: action.evolve
         - kind: Literal
-          text: '}{'
+          text: "}{"
         - kind: LeafRef
           slot: rule.cost
         - kind: Literal
@@ -4465,11 +4465,11 @@ records:
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}若自己的主戰者為{'
+          text: "}若自己的主戰者為{"
         - kind: LeafRef
           slot: class.elf
         - kind: Literal
-          text: '}，則從自己的'
+          text: "}，則從自己的"
         - kind: LeafRef
           slot: zone.deck
         - kind: Literal
@@ -4541,7 +4541,7 @@ records:
         - kind: LeafRef
           slot: ability.combo
         - kind: Literal
-          text: ' 3】從自己的'
+          text: " 3】從自己的"
         - kind: LeafRef
           slot: zone.deck
         - kind: Literal
@@ -4611,11 +4611,11 @@ records:
           key: term:zone.hand
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: action.evolve
         - kind: Literal
-          text: '}{'
+          text: "}{"
         - kind: LeafRef
           slot: rule.cost
         - kind: Literal
@@ -4623,7 +4623,7 @@ records:
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}使敵方'
+          text: "}使敵方"
         - kind: LeafRef
           slot: zone.battlefield
         - kind: Literal
@@ -4670,7 +4670,7 @@ records:
         - kind: LeafRef
           slot: stat.health
         - kind: Literal
-          text: '}-1。'
+          text: "}-1。"
   - origin: machine
     kind: english_exception_target
     data:
@@ -4686,7 +4686,7 @@ records:
           key: term:ability.last_words
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
@@ -4694,7 +4694,7 @@ records:
         - kind: LeafRef
           slot: ability.last_words
         - kind: Literal
-          text: '}使這張卡片消失。'
+          text: "}使這張卡片消失。"
   - origin: machine
     kind: english_exception_target
     data:
@@ -4727,11 +4727,11 @@ records:
           key: term:zone.hand
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: action.evolve
         - kind: Literal
-          text: '}{'
+          text: "}{"
         - kind: LeafRef
           slot: rule.cost
         - kind: Literal
@@ -4739,7 +4739,7 @@ records:
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}公開'
+          text: "}公開"
         - kind: LeafRef
           slot: zone.hand
         - kind: Literal
@@ -4796,7 +4796,7 @@ records:
         - kind: LeafRef
           slot: ability.combo
         - kind: Literal
-          text: ' 5】查看自己'
+          text: " 5】查看自己"
         - kind: LeafRef
           slot: zone.deck_top
         - kind: Literal
@@ -4846,15 +4846,15 @@ records:
           key: term:zone.battlefield
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}【'
+          text: "}【"
         - kind: LeafRef
           slot: ability.combo
         - kind: Literal
-          text: ' 5】到自己的下一個回合開始時為止，自己'
+          text: " 5】到自己的下一個回合開始時為止，自己"
         - kind: LeafRef
           slot: zone.battlefield
         - kind: Literal
@@ -4961,11 +4961,11 @@ records:
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}若自己的主戰者為{'
+          text: "}若自己的主戰者為{"
         - kind: LeafRef
           slot: class.witch
         - kind: Literal
-          text: '}，則從自己的'
+          text: "}，則從自己的"
         - kind: LeafRef
           slot: zone.deck
         - kind: Literal
@@ -5017,11 +5017,11 @@ records:
           key: term:zone.battlefield
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: action.evolve
         - kind: Literal
-          text: '}{'
+          text: "}{"
         - kind: LeafRef
           slot: rule.cost
         - kind: Literal
@@ -5029,7 +5029,7 @@ records:
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}選擇自己'
+          text: "}選擇自己"
         - kind: LeafRef
           slot: zone.battlefield
         - kind: Literal
@@ -5041,7 +5041,7 @@ records:
         - kind: LeafRef
           slot: class.bishop
         - kind: Literal
-          text: '}，則這張卡片進化。'
+          text: "}，則這張卡片進化。"
   - origin: machine
     kind: english_exception_target
     data:
@@ -5076,7 +5076,7 @@ records:
         - kind: LeafRef
           slot: stat.health
         - kind: Literal
-          text: '}+1或{'
+          text: "}+1或{"
         - kind: LeafRef
           slot: stat.health
         - kind: Literal
@@ -5100,11 +5100,11 @@ records:
         - kind: LeafRef
           slot: stat.health
         - kind: Literal
-          text: '}-1。【2】自身的主戰者{'
+          text: "}-1。【2】自身的主戰者{"
         - kind: LeafRef
           slot: stat.health
         - kind: Literal
-          text: '}+1。抽1張卡片。'
+          text: "}+1。抽1張卡片。"
   - origin: machine
     kind: english_exception_target
     data:
@@ -5134,11 +5134,11 @@ records:
           key: term:zone.battlefield
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: action.evolve
         - kind: Literal
-          text: '}{'
+          text: "}{"
         - kind: LeafRef
           slot: rule.cost
         - kind: Literal
@@ -5158,7 +5158,7 @@ records:
         - kind: LeafRef
           slot: stat.health
         - kind: Literal
-          text: '}+3，並抽1張卡片。'
+          text: "}+3，並抽1張卡片。"
   - origin: machine
     kind: english_exception_target
     data:
@@ -5235,7 +5235,7 @@ records:
         - kind: LeafRef
           slot: stat.health
         - kind: Literal
-          text: '}+3，並抽1張卡片。'
+          text: "}+3，並抽1張卡片。"
   - origin: machine
     kind: english_exception_target
     data:
@@ -5265,11 +5265,11 @@ records:
           key: term:zone.battlefield
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}在這張卡片上放置3個神話'
+          text: "}在這張卡片上放置3個神話"
         - kind: LeafRef
           slot: object.counter
         - kind: Literal
@@ -5281,11 +5281,11 @@ records:
         - kind: LeafRef
           slot: ability.activation
         - kind: Literal
-          text: '}將這張卡片{'
+          text: "}將這張卡片{"
         - kind: LeafRef
           slot: action.engage
         - kind: Literal
-          text: '}、移除這張卡片的1個神話'
+          text: "}、移除這張卡片的1個神話"
         - kind: LeafRef
           slot: object.counter
         - kind: Literal
@@ -5337,11 +5337,11 @@ records:
           key: term:rule.cost
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: action.evolve
         - kind: Literal
-          text: '}{'
+          text: "}{"
         - kind: LeafRef
           slot: rule.cost
         - kind: Literal
@@ -5392,7 +5392,7 @@ records:
         - kind: LeafRef
           slot: class.dragon
         - kind: Literal
-          text: '}，則改為自己的'
+          text: "}，則改為自己的"
         - kind: LeafRef
           slot: stat.max_pp
         - kind: Literal
@@ -5443,11 +5443,11 @@ records:
           key: term:zone.battlefield
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: action.evolve
         - kind: Literal
-          text: '}{'
+          text: "}{"
         - kind: LeafRef
           slot: rule.cost
         - kind: Literal
@@ -5455,7 +5455,7 @@ records:
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}選擇敵方'
+          text: "}選擇敵方"
         - kind: LeafRef
           slot: zone.battlefield
         - kind: Literal
@@ -5531,11 +5531,11 @@ records:
           key: term:zone.evolve_deck
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: action.evolve
         - kind: Literal
-          text: '}{'
+          text: "}{"
         - kind: LeafRef
           slot: rule.cost
         - kind: Literal
@@ -5543,7 +5543,7 @@ records:
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}若自己的'
+          text: "}若自己的"
         - kind: LeafRef
           slot: zone.evolve_deck
         - kind: Literal
@@ -5596,7 +5596,7 @@ records:
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}將這張卡片交給自己以外的1名玩家。（移動到自己以外的玩家的'
+          text: "}將這張卡片交給自己以外的1名玩家。（移動到自己以外的玩家的"
         - kind: LeafRef
           slot: zone.battlefield
         - kind: Literal
@@ -5692,7 +5692,7 @@ records:
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}選擇自己'
+          text: "}選擇自己"
         - kind: LeafRef
           slot: zone.battlefield
         - kind: Literal
@@ -5704,11 +5704,11 @@ records:
         - kind: LeafRef
           slot: stat.attack
         - kind: Literal
-          text: '}+2/{'
+          text: "}+2/{"
         - kind: LeafRef
           slot: stat.health
         - kind: Literal
-          text: '}+2，並具有【'
+          text: "}+2，並具有【"
         - kind: LeafRef
           slot: keyword.storm
         - kind: Literal
@@ -5716,7 +5716,7 @@ records:
         - kind: LeafRef
           slot: class.royal
         - kind: Literal
-          text: '}，則改為自己'
+          text: "}，則改為自己"
         - kind: LeafRef
           slot: zone.battlefield
         - kind: Literal
@@ -5724,15 +5724,15 @@ records:
         - kind: LeafRef
           slot: type.follower
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: stat.attack
         - kind: Literal
-          text: '}+2/{'
+          text: "}+2/{"
         - kind: LeafRef
           slot: stat.health
         - kind: Literal
-          text: '}+2，並具有【'
+          text: "}+2，並具有【"
         - kind: LeafRef
           slot: keyword.storm
         - kind: Literal
@@ -5761,11 +5761,11 @@ records:
           key: term:stat.max_pp
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: action.evolve
         - kind: Literal
-          text: '}{'
+          text: "}{"
         - kind: LeafRef
           slot: rule.cost
         - kind: Literal
@@ -5777,7 +5777,7 @@ records:
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}若自己的'
+          text: "}若自己的"
         - kind: LeafRef
           slot: stat.max_pp
         - kind: Literal
@@ -5872,7 +5872,7 @@ records:
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}敵方的全部玩家召喚1個『'
+          text: "}敵方的全部玩家召喚1個『"
         - kind: LeafRef
           slot: name.dragon
         - kind: Literal
@@ -5880,7 +5880,7 @@ records:
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}若自己的'
+          text: "}若自己的"
         - kind: LeafRef
           slot: stat.max_pp
         - kind: Literal
@@ -5892,11 +5892,11 @@ records:
         - kind: LeafRef
           slot: ability.last_words
         - kind: Literal
-          text: '}自己的主戰者{'
+          text: "}自己的主戰者{"
         - kind: LeafRef
           slot: stat.health
         - kind: Literal
-          text: '}+5。'
+          text: "}+5。"
   - origin: machine
     kind: english_exception_target
     data:
@@ -5931,11 +5931,11 @@ records:
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}若自己的主戰者為{'
+          text: "}若自己的主戰者為{"
         - kind: LeafRef
           slot: class.nightmare
         - kind: Literal
-          text: '}，則敵方的全部玩家隨機捨棄自身的1張'
+          text: "}，則敵方的全部玩家隨機捨棄自身的1張"
         - kind: LeafRef
           slot: zone.hand
         - kind: Literal
@@ -5971,11 +5971,11 @@ records:
           key: term:zone.evolve_deck
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}給予敵方的全部主戰者與敵方'
+          text: "}給予敵方的全部主戰者與敵方"
         - kind: LeafRef
           slot: zone.battlefield
         - kind: Literal
@@ -6004,11 +6004,11 @@ records:
           key: term:ability.fanfare
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}這張卡片進化。'
+          text: "}這張卡片進化。"
   - origin: machine
     kind: english_exception_target
     data:
@@ -6119,11 +6119,11 @@ records:
           key: term:zone.deck
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: action.evolve
         - kind: Literal
-          text: '}{'
+          text: "}{"
         - kind: LeafRef
           slot: rule.cost
         - kind: Literal
@@ -6207,7 +6207,7 @@ records:
         - kind: LeafRef
           slot: ability.activation
         - kind: Literal
-          text: '}移除這張卡片的3個夢想'
+          text: "}移除這張卡片的3個夢想"
         - kind: LeafRef
           slot: object.counter
         - kind: Literal
@@ -6227,7 +6227,7 @@ records:
         - kind: LeafRef
           slot: class.elf
         - kind: Literal
-          text: '}，則本回合，使用該卡片時，'
+          text: "}，則本回合，使用該卡片時，"
         - kind: LeafRef
           slot: rule.cost
         - kind: Literal
@@ -6267,11 +6267,11 @@ records:
           key: term:zone.battlefield
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: action.evolve
         - kind: Literal
-          text: '}{'
+          text: "}{"
         - kind: LeafRef
           slot: rule.cost
         - kind: Literal
@@ -6279,15 +6279,15 @@ records:
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}這張卡片{'
+          text: "}這張卡片{"
         - kind: LeafRef
           slot: stat.attack
         - kind: Literal
-          text: '}+X/{'
+          text: "}+X/{"
         - kind: LeafRef
           slot: stat.health
         - kind: Literal
-          text: '}+X。X為「自己'
+          text: "}+X。X為「自己"
         - kind: LeafRef
           slot: zone.battlefield
         - kind: Literal
@@ -6365,11 +6365,11 @@ records:
           key: term:rule.cost
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: action.evolve
         - kind: Literal
-          text: '}{'
+          text: "}{"
         - kind: LeafRef
           slot: rule.cost
         - kind: Literal
@@ -6429,11 +6429,11 @@ records:
           key: term:rule.cost
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: action.evolve
         - kind: Literal
-          text: '}{'
+          text: "}{"
         - kind: LeafRef
           slot: rule.cost
         - kind: Literal
@@ -6465,7 +6465,7 @@ records:
         - kind: LeafRef
           slot: stat.health
         - kind: Literal
-          text: '}+3。'
+          text: "}+3。"
   - origin: machine
     kind: english_exception_target
     data:
@@ -6522,7 +6522,7 @@ records:
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}從自己的'
+          text: "}從自己的"
         - kind: LeafRef
           slot: zone.deck
         - kind: Literal
@@ -6530,7 +6530,7 @@ records:
         - kind: LeafRef
           slot: class.royal
         - kind: Literal
-          text: '}'
+          text: "}"
         - kind: LeafRef
           slot: type.spell
         - kind: Literal
@@ -6546,7 +6546,7 @@ records:
         - kind: LeafRef
           slot: class.royal
         - kind: Literal
-          text: '}，則本回合，自己下一次使用『'
+          text: "}，則本回合，自己下一次使用『"
         - kind: LeafRef
           slot: name.musketeers_vow
         - kind: Literal
@@ -6661,11 +6661,11 @@ records:
           key: term:zone.ex
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: action.evolve
         - kind: Literal
-          text: '}{'
+          text: "}{"
         - kind: LeafRef
           slot: rule.cost
         - kind: Literal
@@ -6767,11 +6767,11 @@ records:
         - kind: LeafRef
           slot: stat.attack
         - kind: Literal
-          text: '}+1/{'
+          text: "}+1/{"
         - kind: LeafRef
           slot: stat.health
         - kind: Literal
-          text: '}+1，並將這張卡片交給自己以外的1名玩家。（移動到敵方玩家的'
+          text: "}+1，並將這張卡片交給自己以外的1名玩家。（移動到敵方玩家的"
         - kind: LeafRef
           slot: zone.battlefield
         - kind: Literal
@@ -6823,7 +6823,7 @@ records:
         - kind: LeafRef
           slot: stat.health
         - kind: Literal
-          text: '}+X。X為「公開的卡片的'
+          text: "}+X。X為「公開的卡片的"
         - kind: LeafRef
           slot: rule.cost
         - kind: Literal
@@ -6865,11 +6865,11 @@ records:
           key: term:zone.ex
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}將1張『'
+          text: "}將1張『"
         - kind: LeafRef
           slot: name.unicorn
         - kind: Literal
@@ -6881,7 +6881,7 @@ records:
         - kind: LeafRef
           slot: stat.health
         - kind: Literal
-          text: '}增加時，選擇自己'
+          text: "}增加時，選擇自己"
         - kind: LeafRef
           slot: zone.battlefield
         - kind: Literal
@@ -6893,15 +6893,15 @@ records:
         - kind: LeafRef
           slot: class.bishop
         - kind: Literal
-          text: '}，則使其{'
+          text: "}，則使其{"
         - kind: LeafRef
           slot: stat.attack
         - kind: Literal
-          text: '}+X。X為「本回合自己的主戰者的{'
+          text: "}+X。X為「本回合自己的主戰者的{"
         - kind: LeafRef
           slot: stat.health
         - kind: Literal
-          text: '}增加的次數」。'
+          text: "}增加的次數」。"
   - origin: machine
     kind: english_exception_target
     data:
@@ -6928,11 +6928,11 @@ records:
           key: term:zone.evolve_deck
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: action.evolve
         - kind: Literal
-          text: '}{'
+          text: "}{"
         - kind: LeafRef
           slot: rule.cost
         - kind: Literal
@@ -6940,7 +6940,7 @@ records:
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}若自己的'
+          text: "}若自己的"
         - kind: LeafRef
           slot: zone.evolve_deck
         - kind: Literal
@@ -6980,7 +6980,7 @@ records:
         - kind: LeafRef
           slot: action.evolve
         - kind: Literal
-          text: '}的'
+          text: "}的"
         - kind: LeafRef
           slot: type.follower
         - kind: Literal
@@ -7010,11 +7010,11 @@ records:
           key: term:rule.cost
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: action.evolve
         - kind: Literal
-          text: '}{'
+          text: "}{"
         - kind: LeafRef
           slot: rule.cost
         - kind: Literal
@@ -7026,7 +7026,7 @@ records:
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}抽2張卡片。'
+          text: "}抽2張卡片。"
   - origin: machine
     kind: english_exception_target
     data:
@@ -7066,7 +7066,7 @@ records:
         - kind: LeafRef
           slot: stat.health
         - kind: Literal
-          text: '}+X。X為「自己的'
+          text: "}+X。X為「自己的"
         - kind: LeafRef
           slot: zone.hand
         - kind: Literal
@@ -7078,11 +7078,11 @@ records:
         - kind: LeafRef
           slot: stat.attack
         - kind: Literal
-          text: '}+X/{'
+          text: "}+X/{"
         - kind: LeafRef
           slot: stat.health
         - kind: Literal
-          text: '}+X。X為「自己的'
+          text: "}+X。X為「自己的"
         - kind: LeafRef
           slot: zone.hand
         - kind: Literal
@@ -7120,11 +7120,11 @@ records:
           key: term:zone.hand
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}抽3張卡片。各玩家可以將自身的'
+          text: "}抽3張卡片。各玩家可以將自身的"
         - kind: LeafRef
           slot: zone.hand
         - kind: Literal
@@ -7140,11 +7140,11 @@ records:
         - kind: LeafRef
           slot: ability.activation
         - kind: Literal
-          text: '}將這張卡片{'
+          text: "}將這張卡片{"
         - kind: LeafRef
           slot: action.engage
         - kind: Literal
-          text: '}、捨棄2張'
+          text: "}、捨棄2張"
         - kind: LeafRef
           slot: zone.hand
         - kind: Literal
@@ -7187,11 +7187,11 @@ records:
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}自己的主戰者{'
+          text: "}自己的主戰者{"
         - kind: LeafRef
           slot: stat.health
         - kind: Literal
-          text: '}+3。'
+          text: "}+3。"
   - origin: machine
     kind: english_exception_target
     data:
@@ -7201,7 +7201,7 @@ records:
       references: {}
       nodes:
         - kind: Literal
-          text: '{入場曲}新的一年將充滿幸福。'
+          text: "{入場曲}新的一年將充滿幸福。"
   - origin: machine
     note: 與 en-180 同卡同語義、英文句子切法不同；中文相同
     kind: english_exception_target
@@ -7245,7 +7245,7 @@ records:
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}選擇自己'
+          text: "}選擇自己"
         - kind: LeafRef
           slot: zone.battlefield
         - kind: Literal
@@ -7257,11 +7257,11 @@ records:
         - kind: LeafRef
           slot: stat.attack
         - kind: Literal
-          text: '}+2/{'
+          text: "}+2/{"
         - kind: LeafRef
           slot: stat.health
         - kind: Literal
-          text: '}+2，並具有【'
+          text: "}+2，並具有【"
         - kind: LeafRef
           slot: keyword.storm
         - kind: Literal
@@ -7269,7 +7269,7 @@ records:
         - kind: LeafRef
           slot: class.royal
         - kind: Literal
-          text: '}，則改為自己'
+          text: "}，則改為自己"
         - kind: LeafRef
           slot: zone.battlefield
         - kind: Literal
@@ -7277,15 +7277,15 @@ records:
         - kind: LeafRef
           slot: type.follower
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: stat.attack
         - kind: Literal
-          text: '}+2/{'
+          text: "}+2/{"
         - kind: LeafRef
           slot: stat.health
         - kind: Literal
-          text: '}+2，並具有【'
+          text: "}+2，並具有【"
         - kind: LeafRef
           slot: keyword.storm
         - kind: Literal
@@ -7322,11 +7322,11 @@ records:
           key: term:zone.cemetery
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: action.evolve
         - kind: Literal
-          text: '}{'
+          text: "}{"
         - kind: LeafRef
           slot: rule.cost
         - kind: Literal
@@ -7338,7 +7338,7 @@ records:
         - kind: LeafRef
           slot: ability.last_words
         - kind: Literal
-          text: '}選擇自己的'
+          text: "}選擇自己的"
         - kind: LeafRef
           slot: zone.cemetery
         - kind: Literal
@@ -7455,7 +7455,7 @@ records:
           key: term:zone.battlefield
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: ability.quick
         - kind: Literal
@@ -7475,7 +7475,7 @@ records:
         - kind: LeafRef
           slot: stat.health
         - kind: Literal
-          text: '}+1。'
+          text: "}+1。"
   - origin: machine
     note: 英文明示 owner's 目的地，保留「所有者」（控制權可轉移，不默認為控制者）
     kind: english_exception_target
@@ -7518,7 +7518,7 @@ records:
         - kind: LeafRef
           slot: ability.last_words
         - kind: Literal
-          text: '}將這張卡片放置到其所有者的'
+          text: "}將這張卡片放置到其所有者的"
         - kind: LeafRef
           slot: zone.ex
         - kind: Literal
@@ -7591,11 +7591,11 @@ records:
             - amulet
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: class.witch
         - kind: Literal
-          text: '}{'
+          text: "}{"
         - kind: LeafRef
           slot: rule.cost
         - kind: Literal
@@ -7654,11 +7654,11 @@ records:
             - follower
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: class.royal
         - kind: Literal
-          text: '}{'
+          text: "}{"
         - kind: LeafRef
           slot: rule.cost
         - kind: Literal
@@ -7678,11 +7678,11 @@ records:
         - kind: LeafRef
           slot: stat.attack
         - kind: Literal
-          text: '}1/{'
+          text: "}1/{"
         - kind: LeafRef
           slot: stat.health
         - kind: Literal
-          text: '}1｜【'
+          text: "}1｜【"
         - kind: LeafRef
           slot: keyword.ward
         - kind: Literal
@@ -7728,11 +7728,11 @@ records:
             - follower
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: class.elf
         - kind: Literal
-          text: '}{'
+          text: "}{"
         - kind: LeafRef
           slot: rule.cost
         - kind: Literal
@@ -7752,11 +7752,11 @@ records:
         - kind: LeafRef
           slot: stat.attack
         - kind: Literal
-          text: '}2/{'
+          text: "}2/{"
         - kind: LeafRef
           slot: stat.health
         - kind: Literal
-          text: '}1｜【'
+          text: "}1｜【"
         - kind: LeafRef
           slot: keyword.storm
         - kind: Literal
@@ -7800,11 +7800,11 @@ records:
             - follower
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: class.dragon
         - kind: Literal
-          text: '}{'
+          text: "}{"
         - kind: LeafRef
           slot: rule.cost
         - kind: Literal
@@ -7824,11 +7824,11 @@ records:
         - kind: LeafRef
           slot: stat.attack
         - kind: Literal
-          text: '}5/{'
+          text: "}5/{"
         - kind: LeafRef
           slot: stat.health
         - kind: Literal
-          text: '}5'
+          text: "}5"
   - origin: machine
     note: 衍生物資訊行，格式同 en-219
     kind: english_exception_target
@@ -7873,11 +7873,11 @@ records:
             - follower
       nodes:
         - kind: Literal
-          text: '{'
+          text: "{"
         - kind: LeafRef
           slot: class.bishop
         - kind: Literal
-          text: '}{'
+          text: "}{"
         - kind: LeafRef
           slot: rule.cost
         - kind: Literal
@@ -7901,11 +7901,11 @@ records:
         - kind: LeafRef
           slot: stat.attack
         - kind: Literal
-          text: '}4/{'
+          text: "}4/{"
         - kind: LeafRef
           slot: stat.health
         - kind: Literal
-          text: '}4｜【'
+          text: "}4｜【"
         - kind: LeafRef
           slot: keyword.ward
         - kind: Literal
@@ -7913,11 +7913,11 @@ records:
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
-          text: '}自己的主戰者{'
+          text: "}自己的主戰者{"
         - kind: LeafRef
           slot: stat.health
         - kind: Literal
-          text: '}+3。'
+          text: "}+3。"
   - origin: machine
     kind: english_exception_target
     data:
