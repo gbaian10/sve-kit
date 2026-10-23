@@ -106,10 +106,11 @@ job = "rust"
 job = "none"
 reason = "Manual-stage mutation test; far too slow for CI."
 
-# The web job calls the same package.json scripts in separate steps.
-[hooks.web-prettier]
-job = "web"
+# Repo-wide; the web job also runs format:check on sim/web after `bun install`, which Tailwind class order needs.
+[hooks.bun-fmt]
+job = "repo"
 
+# The web job calls the same package.json scripts in separate steps.
 [hooks.web-eslint]
 job = "web"
 

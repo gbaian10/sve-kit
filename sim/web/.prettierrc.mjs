@@ -1,3 +1,5 @@
+// Keep Prettier for editor integration until Bun provides one.
+// Match root bunfig.toml so saving and committing produce the same formatting.
 /** @type {import('prettier').Config & import('prettier-plugin-tailwindcss').PluginOptions} */
 export default {
   semi: false,

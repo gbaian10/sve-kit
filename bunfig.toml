@@ -1,0 +1,26 @@
+# Bun settings. Only [fmt] for now; type checking (bun check) reads sim/web/tsconfig.json instead.
+# bun fmt uses the first bunfig.toml with [fmt] above the directory it runs in, so keep [fmt] only here.
+
+[fmt]
+printWidth = 100
+semi = false
+# Ignore sim/web/.prettierrc.mjs: it only serves the editor's Prettier extension.
+config = false
+# No ignorePath: the defaults (.gitignore, .prettierignore, .git/info/exclude) also work in linked
+# worktrees, where .git is a file and an explicit .git/info/exclude fails with ENOTDIR.
+ignorePatterns = [
+    "*.md",               # markdownlint
+    "*.toml",             # taplo
+    "authored/registry/", # written by carddb's own encoder
+    "authored/ids/",
+    "card-data/",         # generated; card-data/index.json pins the sha256 of every file
+    "carddb/",            # verbatim page fixtures and generated package schemas
+    "dsl/",               # schema bytes are part of the DSL body-version hash
+    "sim/web/fixtures/",  # canonical JSON whose sha256 is pinned
+    "tests/fixtures/",    # canonical JSON named by its hash
+    "tools/schema-er/",   # generated ER model and page
+]
+
+[fmt.sortTailwindcss]
+stylesheet = "./sim/web/src/styles/index.css"
+functions = ["cn", "clsx"]

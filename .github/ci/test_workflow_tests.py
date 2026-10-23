@@ -38,6 +38,18 @@ class DirectTestTests(unittest.TestCase):
         assert not owned["mypy"].direct
         assert main(["check"]) == 0
 
+    def test_bun_settings_run_the_web_job(self) -> None:
+        """A bunfig.toml-only PR must rerun the web format check, the one with Tailwind class order."""
+        workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
+        filters = yaml.safe_load(
+            next(
+                step["with"]["filters"]
+                for step in workflow["jobs"]["changes"]["steps"]
+                if step.get("id") == "filter"
+            )
+        )
+        assert "bunfig.toml" in filters["web"]
+
     def test_publish_is_in_the_python_job_with_independent_coverage(self) -> None:
         """Reader changes and fork PRs must retain the complete publisher tests."""
         workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())

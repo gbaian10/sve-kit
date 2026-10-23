@@ -192,13 +192,15 @@ repos:
         pass_filenames: false
         files: ^(Cargo\.lock|(.*/)?Cargo\.toml|deny\.toml)$
         stages: [pre-push]
-      # sim/web: `mise exec` pins Bun without relying on the caller's PATH; paths are relative to sim/web.
-      - id: web-prettier
-        name: prettier (sim/web)
+      # Settings and excluded data live in bunfig.toml [fmt]; Markdown and TOML stay with markdownlint and taplo.
+      # Tailwind class order needs sim/web/node_modules, so CI's web job checks sim/web again after `bun install`.
+      - id: bun-fmt
+        name: bun fmt
         language: system
-        entry: bash -c 'cd sim/web && exec mise exec -- bun x prettier --write --ignore-unknown -- "${@#sim/web/}"' --
-        files: ^sim/web/
+        entry: mise exec -- bun fmt
+        types_or: [javascript, jsx, ts, tsx, css, json, html]
         stages: [pre-commit, manual]
+      # sim/web: `mise exec` pins Bun without relying on the caller's PATH; paths are relative to sim/web.
       # Flags live in sim/web's lint:js; require_serial keeps one process, since each type-aware ESLint
       # process loads the whole TS project (~2 GB) and per-core batches exhaust memory on large commits.
       - id: web-eslint

@@ -120,6 +120,7 @@ class RepoScopeTests(unittest.TestCase):
             ".editorconfig",
             ".gitattributes",
             ".gitleaks.toml",
+            "bunfig.toml",
             "taplo.toml",
             ".taplo.toml",
             "carddb/uv.toml",
