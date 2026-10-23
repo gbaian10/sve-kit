@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 CARD_ABILITIES: list[tuple[str, str, dict[str, JsonValue]]] = [
     ("BP01-159", "keywords", {"keywords": ["ward"]}),
     ("BP01-159", "lastword", {"lastword": {"do": [{"draw": {"n": 1}}]}}),
-    ("BP01-007", "quick", {"quick": True}),
+    ("BP01-007", "quick", {"keywords": ["quick"]}),
     (
         "BP01-011",
         "fanfare",

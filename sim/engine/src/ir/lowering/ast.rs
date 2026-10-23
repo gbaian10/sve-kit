@@ -46,6 +46,7 @@ pub(super) struct Ability {
     pub activate: Option<Activate>,
     pub spell: Option<Body>,
     pub play: Option<PlayCosts>,
+    pub keywords: Option<Vec<String>>,
 }
 
 #[derive(Deserialize)]

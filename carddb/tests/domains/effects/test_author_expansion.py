@@ -58,7 +58,7 @@ def generated(
 
 
 @pytest.mark.parametrize(("key", "payload"), HEADS.items())
-def test_seventeen_heads_exact_equivalence(
+def test_all_heads_exact_equivalence(
     expander: AuthorExpander, key: str, payload: JsonValue
 ) -> None:
     record = registered({key: payload})
@@ -217,7 +217,7 @@ def test_hash_collision_compares_complete_payload(
     expander: AuthorExpander, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     first = registered({"spell": {"do": []}})
-    second = registered({"quick": True})
+    second = registered({"keywords": ["quick"]})
     fixed = "a" * 64
     first["body_version"] = second["body_version"] = "effect-body-v1:sha256:" + fixed
     monkeypatch.setattr(

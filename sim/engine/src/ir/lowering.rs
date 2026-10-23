@@ -8,6 +8,7 @@ mod numeric;
 mod ordering;
 mod payment;
 mod play;
+mod quick;
 mod search;
 
 use super::{
@@ -250,6 +251,9 @@ impl Allocator {
 
         if entry.evolve.is_some() {
             return evolution::lower(self, key, path, entry, scope);
+        }
+        if let Some(keywords) = &entry.keywords {
+            return quick::lower(key, path, entry, scope, keywords);
         }
         let (body, head, keyword) = ability_body(entry, path)?;
         let source = source_span(key, path, entry)?;

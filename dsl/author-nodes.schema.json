@@ -18528,10 +18528,6 @@
         "play": {
           "$ref": "#/$defs/A.head.play"
         },
-        "quick": {
-          "type": "boolean",
-          "const": true
-        },
         "keywords": {
           "type": "array",
           "items": {
@@ -19379,9 +19375,6 @@
           "$ref": "#/$defs/A.ability.play"
         },
         {
-          "$ref": "#/$defs/A.ability.quick"
-        },
-        {
           "$ref": "#/$defs/A.ability.keywords"
         },
         {
@@ -20072,51 +20065,6 @@
       "required": [
         "kind",
         "qa_version_id"
-      ],
-      "type": "object"
-    },
-    "A.ability.quick": {
-      "additionalProperties": false,
-      "properties": {
-        "line": {
-          "maximum": 9007199254740991,
-          "minimum": 1,
-          "type": "integer"
-        },
-        "section": {
-          "$ref": "#/$defs/Nat"
-        },
-        "sources": {
-          "items": {
-            "$ref": "#/$defs/SourceUse"
-          },
-          "maxItems": 1,
-          "minItems": 1,
-          "type": "array"
-        },
-        "imports": {
-          "minProperties": 1,
-          "type": "object",
-          "propertyNames": {
-            "$ref": "#/$defs/Code"
-          },
-          "additionalProperties": {
-            "$ref": "#/$defs/ImportUse"
-          }
-        },
-        "ports": {
-          "$ref": "#/$defs/Ports"
-        },
-        "quick": {
-          "type": "boolean",
-          "const": true
-        }
-      },
-      "required": [
-        "line",
-        "sources",
-        "ports",
-        "quick"
       ],
       "type": "object"
     },

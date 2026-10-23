@@ -25,7 +25,6 @@ ENTRY_TYPES: dict[str, tuple[TypeForm[object], str]] = {
     "A.ability.keywords": (entries.KeywordsAbility, "KeywordsAbility"),
     "A.ability.lastword": (entries.LastwordAbility, "LastwordAbility"),
     "A.ability.play": (entries.PlayAbility, "PlayAbility"),
-    "A.ability.quick": (entries.QuickAbility, "QuickAbility"),
     "A.ability.race-time": (entries.RaceTimeAbility, "RaceTimeAbility"),
     "A.ability.ride": (entries.RideAbility, "RideAbility"),
     "A.ability.spell": (entries.SpellAbility, "SpellAbility"),
