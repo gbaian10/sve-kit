@@ -12,7 +12,7 @@ from sve_carddb.build.source_rows import insert_raw_sources
 from sve_carddb.build.t1 import MINIMUM_CAPABILITIES, compile_build
 from sve_carddb.contracts.snapshot import validate
 from sve_carddb.core.authored import authored_root
-from sve_carddb.core.json import array, digest, object_value, parse
+from sve_carddb.core.json import array, canonical, digest, object_value, parse
 from sve_carddb.core.models import Hash, Instant, RecordData, Text
 from sve_carddb.core.provenance import BuildContext, Revision, input_record
 from sve_carddb.core.regions import Region
@@ -85,6 +85,8 @@ from sve_carddb.domains.translations.jp_sources import display_bindings
 from sve_carddb.domains.translations.labels import apply as apply_labels
 from sve_carddb.domains.translations.models import EffectTerm, SourceValue
 from sve_carddb.domains.translations.names.resolve import prepare as prepare_names
+from sve_carddb.domains.translations.qa import apply as apply_qa
+from sve_carddb.domains.translations.qa import load as load_qa
 from sve_carddb.domains.translations.recognition.rules import load as load_rules
 from sve_carddb.domains.translations.sources import Sources as TranslationSources
 from sve_carddb.export.project import Decisions, Projection, Settings, project
@@ -516,6 +518,10 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
     badges = load_badges(authored_root(inputs.repo))
     leader_frames = load_leader_frames(authored_root(inputs.repo))
     flavor = load_flavor(authored_root(inputs.repo))
+    qa_translations = load_qa(authored_root(inputs.repo))
+    configuration["qa_translations"] = digest(
+        canonical([entry.model_dump(mode="json") for entry in qa_translations.values()])
+    )
     templates = _templates(adoptions)
     translation_sources = TranslationSources(
         stores,
@@ -594,6 +600,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                 )
             mark("db: rarities + card extras + names")
             flavor_report = apply_flavor(db, flavor)
+            qa_report = apply_qa(db, qa_translations)
             translation = adoptions.translation_inputs()
             if translation is not None:
                 apply_labels(db, translation.load().four_layer, sources=name_sources)
@@ -802,6 +809,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             ],
         }
         report["flavor_translations"] = dict[str, JsonValue](flavor_report.payload())
+        report["qa_translations"] = dict[str, JsonValue](qa_report.payload())
         report["effect_translations"] = (
             None if template_report is None else template_report.payload()
         )

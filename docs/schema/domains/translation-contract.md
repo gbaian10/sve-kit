@@ -256,7 +256,7 @@ use 仍為 `use:`＋H(`{recipe:"use-v1",owner,field,ordinal,context_id}`)。
 use 恰有一個有效 owner，context 原文等於該 owner 欄位；section/action_label 才有非 null ordinal。
 face_revision 用 name/effect/section；printing_face 另可用 flavor。printing_face 的 name 只用自己已知的 printed 文字；
 effect、section 與 flavor 只要自己欄位有原文單元，依原文 hash 套用，不等 printed_text_state 確認。
-qa_version 用 question/answer，cr_clause 用 effect，vocabulary／商品用 label；keyword 可用 label/effect/action_label。
+qa_version 的 question/answer 已由[Q&A 直接譯文](qa-translation.md)實作；cr_clause 用 effect，vocabulary／商品用 label；keyword 可用 label/effect/action_label。
 
 | owner.kind／鍵 | 合法 field |
 | --- | --- |
