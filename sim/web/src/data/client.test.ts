@@ -541,11 +541,15 @@ describe("createSnapshotClient: reload and transport edge cases", () => {
 
   it("classifies a body that fails to arrive as a network error", async () => {
     const fetcher: Fetcher = () =>
-      Promise.resolve({
-        ok: true,
-        status: 200,
-        arrayBuffer: () => Promise.reject(new TypeError("body stream aborted")),
-      } as unknown as Response)
+      Promise.resolve(
+        new Response(
+          new ReadableStream({
+            start(controller) {
+              controller.error(new TypeError("body stream aborted"))
+            },
+          }),
+        ),
+      )
     const client = createSnapshotClient("/cdn", { fetch: fetcher })
     await client.load()
     expect(client.status()).toMatchObject({

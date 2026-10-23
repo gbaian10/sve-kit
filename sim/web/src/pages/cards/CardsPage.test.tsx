@@ -47,9 +47,16 @@ async function open(path = "/cards", { panel = true } = {}) {
   // jsdom reports en-US; the assertions below read the Traditional Chinese copy.
   prefsStore.set({ uiLanguage: "zh-TW", filterPanelOpen: panel })
   const rendered = await renderRoutes(routes, { initialEntries: [path] })
-  // The class row sits outside the panel and appears once the snapshot has loaded, whatever the
-  // results are.
-  await screen.findByRole("button", { name: "精靈" }, { timeout: 4000 })
+  // Scope polling to the class row; whole-page role diagnostics can delay worker ready events.
+  await waitFor(
+    () => {
+      const classes = screen.queryByLabelText("職業", { selector: '[role="group"]' })
+      expect(
+        classes ? within(classes).queryByRole("button", { name: "精靈" }) : null,
+      ).toBeInTheDocument()
+    },
+    { timeout: 4000 },
+  )
   return rendered
 }
 

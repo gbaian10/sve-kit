@@ -73,15 +73,22 @@ it("one consumer's cancellation leaves the shared download available to another"
 
 it("copies the shared source into independently readable responses before publishing them", async () => {
   const source = new Uint8Array([1, 2, 3])
-  const response = new Response(source, { status: 201, headers: { "x-shared": "yes" } })
-  vi.spyOn(response, "arrayBuffer").mockResolvedValue(source.buffer)
+  const response = new Response(
+    new ReadableStream({
+      start(controller) {
+        controller.enqueue(source)
+        controller.close()
+      },
+    }),
+    { status: 201, headers: { "x-shared": "yes" } },
+  )
   const fetcher = vi.fn(() => Promise.resolve(response))
   const queue = requestQueue(fetcher)
   const [first, second] = await Promise.all([
     queue.foreground("https://test/shared-body"),
     queue.background("https://test/shared-body"),
   ])
-  // Response copies BufferSource at construction, before either consumer reads its body.
+  // The queue copies stream chunks before publishing, so later writes to the source stay invisible.
   source.fill(9)
   expect(new Uint8Array(await first.arrayBuffer())).toEqual(new Uint8Array([1, 2, 3]))
   expect(new Uint8Array(await second.arrayBuffer())).toEqual(new Uint8Array([1, 2, 3]))
@@ -94,6 +101,7 @@ it("limits speculative bodies app-wide, promotes queued subscribers, and pauses 
   const gates = new Map<string, () => void>()
   const started: string[] = []
   const queue = requestQueue((url) => {
+    let cancelled = false
     started.push(url)
     const gate = Promise.withResolvers<undefined>()
     gates.set(url, () => {
@@ -104,8 +112,12 @@ it("limits speculative bodies app-wide, promotes queued subscribers, and pauses 
         new ReadableStream({
           async start(controller) {
             await gate.promise
+            if (cancelled) return
             controller.enqueue(new Uint8Array([1]))
             controller.close()
+          },
+          cancel() {
+            cancelled = true
           },
         }),
       ),
@@ -114,10 +126,13 @@ it("limits speculative bodies app-wide, promotes queued subscribers, and pauses 
   const speculative = Array.from({ length: 5 }, (_, n) =>
     (n === 0 ? queue.foreground : queue.background)(`https://test/spec-${String(n)}`, {
       speculative: true,
+      raw: { root: "test", sha256: String(n), bytes: 512 * 1024 },
     }),
   )
   expect(started).toHaveLength(2)
-  const promoted = queue.foreground("https://test/spec-4")
+  const promoted = queue.foreground("https://test/spec-4", {
+    raw: { root: "test", sha256: "4", bytes: 512 * 1024 },
+  })
   expect(started).toEqual(["https://test/spec-0", "https://test/spec-1", "https://test/spec-4"])
   const background = Array.from({ length: 25 }, (_, n) =>
     queue.background(`https://test/print-${String(n)}`),
@@ -127,7 +142,6 @@ it("limits speculative bodies app-wide, promotes queued subscribers, and pauses 
   expect(started.at(-1)).toBe("https://test/visible")
   gates.get("https://test/spec-0")?.()
   gates.get("https://test/spec-1")?.()
-  await Promise.all(speculative.slice(0, 2))
   await new Promise((resolve) => setTimeout(resolve, 0))
   expect(started).not.toContain("https://test/spec-2")
   for (let round = 0; round < 6; round += 1) {
@@ -136,4 +150,113 @@ it("limits speculative bodies app-wide, promotes queued subscribers, and pauses 
   }
   await Promise.all([...speculative, ...background, promoted, visible])
   expect(started.filter((url) => url === "https://test/spec-4")).toHaveLength(1)
+})
+
+it("interrupts a stalled speculative body for P0 while preserving a shared foreground body and retrying later", async () => {
+  const starts = new Map<string, number>()
+  const finish = new Map<string, () => void>()
+  const cancelled: string[] = []
+  const queue = requestQueue((url) => {
+    const attempt = (starts.get(url) ?? 0) + 1
+    starts.set(url, attempt)
+    if (url === "visible" || attempt > 1) return Promise.resolve(new Response("ready"))
+    return Promise.resolve(
+      new Response(
+        new ReadableStream({
+          start(controller) {
+            controller.enqueue(new TextEncoder().encode("partial"))
+            finish.set(url, () => {
+              controller.close()
+            })
+          },
+          cancel() {
+            cancelled.push(url)
+          },
+        }),
+      ),
+    )
+  })
+  const a = queue.background("slow-a", {
+    speculative: true,
+    raw: { root: "test", sha256: "a", bytes: 512 * 1024 },
+  })
+  const b = queue.background("slow-b", {
+    speculative: true,
+    raw: { root: "test", sha256: "b", bytes: 512 * 1024 },
+  })
+  await new Promise((resolve) => setTimeout(resolve, 0))
+  const shared = queue.foreground("slow-b", {
+    raw: { root: "test", sha256: "b", bytes: 512 * 1024 },
+  })
+  const rejoined = queue.foreground("slow-a", {
+    raw: { root: "test", sha256: "a", bytes: 512 * 1024 },
+  })
+  expect(await (await queue.foreground("visible")).text()).toBe("ready")
+  expect(cancelled).toEqual(["slow-a"])
+  expect(await (await rejoined).text()).toBe("ready")
+  finish.get("slow-b")?.()
+  expect(await (await shared).text()).toBe("partial")
+  expect(await (await b).text()).toBe("partial")
+  expect(await (await a).text()).toBe("ready")
+  expect(starts.get("slow-a")).toBe(2)
+  expect(starts.get("slow-b")).toBe(1)
+})
+
+it("releases aggregate speculative byte credit after completion and cancellation and admits an oversized catalog alone", async () => {
+  const finish = new Map<string, () => void>()
+  const started: string[] = []
+  const cancelled: string[] = []
+  const queue = requestQueue((url) => {
+    started.push(url)
+    return Promise.resolve(
+      new Response(
+        new ReadableStream({
+          start(controller) {
+            controller.enqueue(new Uint8Array([1]))
+            finish.set(url, () => {
+              controller.close()
+            })
+          },
+          cancel() {
+            cancelled.push(url)
+          },
+        }),
+      ),
+    )
+  })
+  const abort = new AbortController()
+  const read = (url: string, bytes: number, signal?: AbortSignal) =>
+    queue.background(url, {
+      speculative: true,
+      raw: { root: "test", sha256: url, bytes },
+      ...(signal ? { signal } : {}),
+    })
+  const large = read("large", 768 * 1024, abort.signal)
+  const rejected = expect(large).rejects.toThrow("cancelled")
+  const medium = read("medium", 512 * 1024)
+  const small = read("small", 256 * 1024)
+  expect(started).toEqual(["large", "small"])
+  finish.get("small")?.()
+  await small
+  await new Promise((resolve) => setTimeout(resolve, 0))
+  expect(started).not.toContain("medium")
+  abort.abort()
+  await rejected
+  await new Promise((resolve) => setTimeout(resolve, 0))
+  expect(cancelled).toContain("large")
+  expect(started).toContain("medium")
+  const catalog = read("catalog", 2 * 1024 * 1024)
+  expect(started).not.toContain("catalog")
+  finish.get("medium")?.()
+  await medium
+  await new Promise((resolve) => setTimeout(resolve, 0))
+  expect(started.at(-1)).toBe("catalog")
+  const next = read("next", 128 * 1024)
+  expect(started).not.toContain("next")
+  finish.get("catalog")?.()
+  await catalog
+  await new Promise((resolve) => setTimeout(resolve, 0))
+  expect(started.at(-1)).toBe("next")
+  finish.get("next")?.()
+  await next
 })
