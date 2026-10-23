@@ -415,6 +415,25 @@ describe("opening a card beside the results", () => {
     expect(new URLSearchParams(router.state.location.search).get("card")).toBe("BP01-002")
     expect(cellLink("p:bp01-002")).toHaveAttribute("aria-current", "true")
   })
+
+  it("keeps pages loaded beside the card when back closes it", async () => {
+    const { router } = await open("/cards?q=bp01", "panel")
+    const user = userEvent.setup()
+    const [first] = await cells()
+    if (!first) throw new Error("missing cell")
+    await user.click(first)
+    await within(panel()).findByRole("heading", { name: "試作見習兵" }, { timeout: 5000 })
+    // Loading more beside the card writes the card's own entry, not the list's below it.
+    const { pathname, search } = router.state.location
+    const state = router.state.location.state as object
+    await act(() =>
+      router.navigate(pathname + search, { replace: true, state: { ...state, pages: 2 } }),
+    )
+    await act(() => router.navigate(-1))
+    await waitFor(() => {
+      expect(router.state.location).toMatchObject({ search: "?q=bp01", state: { pages: 2 } })
+    })
+  })
 })
 
 describe("opening a card over the results", () => {

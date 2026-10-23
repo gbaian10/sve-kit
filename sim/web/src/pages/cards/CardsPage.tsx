@@ -86,6 +86,16 @@ import { SetHeader } from "../sets/SetHeader"
 import { useCardOverlay } from "./CardOverlay"
 
 const DEBOUNCE_MS = 150
+/** How long a cell returned to from a card stays outlined (#522: about a second). */
+const RETURN_FLASH_MS = 1000
+/** Frames to wait for the returned-to cell to render before giving up on focusing it. */
+const RETURN_FRAMES = 30
+
+function resultCell(root: HTMLElement | null, key: string): HTMLElement | undefined {
+  return [...(root?.querySelectorAll<HTMLElement>("a[data-result-key]") ?? [])].find(
+    (link) => link.getAttribute("data-result-key") === key,
+  )
+}
 
 function cardPath(summary: CardSummary): string {
   return printingPath(summary)
@@ -254,11 +264,35 @@ export function CardsPage() {
     readiness.edition === edition &&
     readiness.searchReady !== false
 
-  const pages = Math.max(1, entry.pages ?? 1)
   // The view is presentation only: switching it must not run the search again, so the query
   // handed to the search keeps its identity while everything but the view is unchanged.
   const { view: chosenView, ...conditions } = query
   const conditionsKey = formatQuery(conditions).toString()
+  const positionQuery = JSON.stringify([location.pathname, conditionsKey, edition])
+  const openCard = params.get(CARD_PARAM)
+  // Going back from a card open beside the results lands on the list's own entry, which still has
+  // the pages it had when the card opened; pages loaded beside the card are kept and written back.
+  const entryPages = Math.max(1, entry.pages ?? 1)
+  const [shownPages, setShownPages] = useState({
+    key: location.key,
+    card: openCard,
+    query: positionQuery,
+    pages: entryPages,
+  })
+  let pages = shownPages.pages
+  if (shownPages.key !== location.key) {
+    const keep =
+      navigationType === NavigationType.Pop &&
+      shownPages.card !== null &&
+      openCard === null &&
+      shownPages.query === positionQuery &&
+      shownPages.pages > entryPages
+    pages = keep ? shownPages.pages : entryPages
+    setShownPages({ key: location.key, card: openCard, query: positionQuery, pages })
+  }
+  useEffect(() => {
+    if (pages > entryPages) updateEntry({ pages })
+  }, [pages, entryPages, updateEntry])
   const searchState = useMemo(() => parseQuery(new URLSearchParams(conditionsKey)), [conditionsKey])
   const searchQuery = useMemo<SearchQuery>(
     () => ({ state: searchState, edition }),
@@ -274,8 +308,6 @@ export function CardsPage() {
     retry: retryView,
   } = useListView(searchQuery, pages)
   const page = listView?.page ?? null
-  const positionQuery = JSON.stringify([location.pathname, conditionsKey, edition])
-  const openCard = params.get(CARD_PARAM)
   const positionRef = useRef({ query: positionQuery, key: location.key, card: openCard })
   useLayoutEffect(() => {
     const previous = positionRef.current
@@ -309,11 +341,43 @@ export function CardsPage() {
     entry.scrollY,
     imageRoot,
   ])
+  // The cell a card returned to is flashed for a moment, whether the card was a page or beside
+  // the results.
+  const [flash, setFlash] = useState<string | undefined>(undefined)
+  const flashTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const flashCell = useCallback((key: string) => {
+    clearTimeout(flashTimer.current)
+    setFlash(key)
+    flashTimer.current = setTimeout(() => {
+      setFlash(undefined)
+    }, RETURN_FLASH_MS)
+  }, [])
+  useEffect(
+    () => () => {
+      clearTimeout(flashTimer.current)
+    },
+    [],
+  )
+  // Back from a card page mounts the list again: once its pages and scroll are back, focus returns
+  // to the cell that opened the card. Rows render around the scroll position, so wait for the cell.
+  const returnTo = useRef(navigationType === NavigationType.Pop ? entry.anchor : undefined)
   useLayoutEffect(() => {
     if (!page || pageLoading || restoreScroll.current === undefined) return
     window.scrollTo(0, restoreScroll.current)
     restoreScroll.current = undefined
-  }, [page, pageLoading, positionQuery, location.key])
+    const anchor = returnTo.current
+    returnTo.current = undefined
+    if (anchor === undefined) return
+    let tries = 0
+    const settle = () => {
+      const cell = resultCell(imageRoot.current, anchor)
+      if (cell) {
+        cell.focus({ preventScroll: true })
+        flashCell(anchor)
+      } else if (++tries < RETURN_FRAMES) requestAnimationFrame(settle)
+    }
+    requestAnimationFrame(settle)
+  }, [page, pageLoading, positionQuery, location.key, imageRoot, flashCell])
   const cellOf = useMemo(() => createCellReader(nameOf), [nameOf])
   const cells: GridCell[] = useMemo(
     () =>
@@ -332,10 +396,10 @@ export function CardsPage() {
     cells,
     listScroll,
     root: imageRoot,
+    onReturned: flashCell,
   })
   const openInPlace = cardOverlay.openInPlace
-  // The cell a closed card came back to, or the one a card page returned to.
-  const returnAnchor = cardOverlay.open ? undefined : (cardOverlay.returned ?? entry.anchor)
+  const returnAnchor = cardOverlay.open ? undefined : flash
   const openContextRef = useRef({ pages, updateEntry, background, openInPlace })
   useLayoutEffect(() => {
     openContextRef.current = { pages, updateEntry, background, openInPlace }

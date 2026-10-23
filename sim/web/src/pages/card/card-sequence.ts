@@ -21,7 +21,13 @@ interface Neighbour {
 // Distinguish a direct link from a card missing from its source list (architecture §2.2).
 type CardSequence =
   | { readonly phase: "none" | "pending" | "missing" }
-  | { readonly phase: "found"; readonly previous?: Neighbour; readonly next?: Neighbour }
+  | {
+      readonly phase: "found"
+      /** The shown card's own cell, which the entry's `resultKey` may not name yet. */
+      readonly key: string
+      readonly previous?: Neighbour
+      readonly next?: Neighbour
+    }
 
 interface SequenceCard {
   readonly cardId: string
@@ -64,11 +70,13 @@ function neighbourAt(order: readonly SequenceItem[], position: number): Neighbou
 }
 
 function found(order: readonly SequenceItem[], position: number): CardSequence {
-  if (position < 0) return { phase: "missing" }
+  const item = order[position]
+  if (!item) return { phase: "missing" }
   const previous = neighbourAt(order, position - 1)
   const next = neighbourAt(order, position + 1)
   return {
     phase: "found",
+    key: item.key,
     ...(previous ? { previous } : {}),
     ...(next ? { next } : {}),
   }

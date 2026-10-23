@@ -276,6 +276,23 @@ describe("CardsPage", () => {
       listScroll: { top: 240, left: 120 },
     })
   })
+  it("focuses the cell a card returned to and outlines it only for a moment", async () => {
+    // Back from a card page mounts the list on its own entry, as a reload of that entry does.
+    prefsStore.set({ uiLanguage: "zh-TW" })
+    await renderRoutes(routes, {
+      initialEntries: [
+        {
+          pathname: "/cards",
+          search: "?q=bp01",
+          state: { pages: 1, anchor: "p:bp01-002", scrollY: 0 },
+        },
+      ],
+    })
+    const cell = () => document.querySelector('a[data-result-key="p:bp01-002"]')
+    await waitFor(() => expect(cell()).toHaveFocus(), { timeout: 5000 })
+    expect(cell()).toHaveClass("ring-text-1")
+    await waitFor(() => expect(cell()).not.toHaveClass("ring-text-1"), { timeout: 3000 })
+  }, 15_000)
   it("resets list scroll on a sort change and restores the previous query on back", async () => {
     const { router } = await open("/cards?view=list")
     const root = document.querySelector<HTMLElement>("[data-list-scroll]")

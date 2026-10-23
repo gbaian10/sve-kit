@@ -1,5 +1,5 @@
 import { ArrowLeft, ChevronLeft, ChevronRight, Link2, Maximize2, X } from "lucide-react"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link as RouterLink, type To, useLocation, useNavigate, useParams } from "react-router"
 
@@ -100,6 +100,8 @@ export interface CardFrame {
   readonly key: string
   /** Where a link to another printing goes while the overlay stays open. */
   readonly link: (target: OverlayLinkTarget) => { readonly to: To; readonly state: unknown }
+  /** The card was found in the list under another key (its card or art cell). */
+  readonly onPlaced: (resultKey: string) => void
   readonly onClose: () => void
 }
 
@@ -242,6 +244,16 @@ export function CardView({
   const sequence = useCardSequence(entry, cardEdition, pending ? null : printingId, cardId, artId)
   const previous = sequence.phase === "found" ? sequence.previous : undefined
   const next = sequence.phase === "found" ? sequence.next : undefined
+  // A card placed through its card or art cell tells the list which cell to mark. Only the list's
+  // own state changes: writing history here could land on an entry the user already left.
+  const placedKey = sequence.phase === "found" ? sequence.key : undefined
+  const storedKey = typeof entry?.["resultKey"] === "string" ? entry["resultKey"] : undefined
+  const place = useEffectEvent((key: string) => {
+    frame?.onPlaced(key)
+  })
+  useEffect(() => {
+    if (placedKey !== undefined && placedKey !== storedKey) place(placedKey)
+  }, [placedKey, storedKey])
   const [readyImage, setReadyImage] = useState<string | null>(null)
   const imageKey = JSON.stringify([client.base, client.snapshot()?.manifestHash, printingId])
   const prefetchAbort = useRef<AbortController | null>(null)
