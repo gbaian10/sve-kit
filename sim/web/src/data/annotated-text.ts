@@ -69,6 +69,45 @@ function key(table: string, row: JsonObject): string {
   )
 }
 
+// Fragments are immutable and still carry the exact base rows used by the reader.
+const bootstrapRows = new WeakMap<Fragment, ReadonlyMap<string, readonly JsonObject[]>>()
+const sourceNames = new WeakMap<Fragment, ReadonlyMap<string, JsonObject>>()
+
+function indexedRows(fragment: Fragment): ReadonlyMap<string, readonly JsonObject[]> {
+  let index = bootstrapRows.get(fragment)
+  if (!index) {
+    const rows = new Map<string, JsonObject[]>()
+    const fields = arrayValue(definition(fragment.table)["x-primary-key"]).map((field) =>
+      stringValue(field),
+    )
+    for (const row of fragment.rows) {
+      const identity = canonicalText(fields.map((field) => row[field] ?? null))
+      const copies = rows.get(identity) ?? []
+      copies.push(row)
+      rows.set(identity, copies)
+    }
+    index = rows
+    bootstrapRows.set(fragment, index)
+  }
+  return index
+}
+
+function indexedNames(fragment: Fragment): ReadonlyMap<string, JsonObject> {
+  let index = sourceNames.get(fragment)
+  if (!index) {
+    const names = new Map<string, JsonObject>()
+    for (const source of fragment.nameSources ?? []) {
+      const identity = canonicalText(source["pointer"] ?? null)
+      const previous = names.get(identity)
+      if (previous && canonicalText(previous) !== canonicalText(source)) annotationFailure("owner")
+      names.set(identity, source)
+    }
+    index = names
+    sourceNames.set(fragment, index)
+  }
+  return index
+}
+
 class PageClosure {
   readonly rows = new Map<string, Map<string, JsonObject>>()
   readonly loaded = new Set<string>()
@@ -79,6 +118,8 @@ class PageClosure {
   readonly locate: ReturnType<typeof createLocator>
   readonly fragments: Fragment[] = []
   private readonly cardId: string | undefined
+  private names: ReadonlyMap<string, JsonObject> | undefined
+  private readonly printingHomes = new Map<string, JsonValue>()
   private owners: TextOwners | undefined
   private locations: ReturnType<typeof annotationLocations> | undefined
 
@@ -150,19 +191,12 @@ class PageClosure {
       }
       return
     }
-    const fields = arrayValue(definition(table)["x-primary-key"]).map((field) => stringValue(field))
-    const values = primaryKey.map((value) => canonicalText(value))
+    const identity = canonicalText([...primaryKey])
+    if (this.rows.get(table)?.has(identity)) return
     for (const fragment of this.snapshot.bootstrap) {
       if (fragment.table !== table) continue
-      const selected = fragment.rows.filter((row) =>
-        fields.every((field, i) => {
-          const value = row[field] ?? null
-          return typeof value === "object" && value !== null
-            ? canonicalText(value) === values[i]
-            : value === primaryKey[i]
-        }),
-      )
-      if (selected.length) this.add([fragment], (_table, row) => selected.includes(row), false)
+      const selected = indexedRows(fragment).get(identity)
+      if (selected?.length) this.add([{ ...fragment, rows: [...selected] }], undefined, false)
     }
   }
 
@@ -172,6 +206,10 @@ class PageClosure {
     retain = true,
   ): void {
     for (const fragment of fragments) {
+      if (fragment.nameSources?.length) {
+        this.names = undefined
+        this.owners = undefined
+      }
       if (fragment.table === "card_locator" || fragment.table === "__name_sources") {
         if (retain) this.fragments.push(fragment)
         continue
@@ -179,6 +217,7 @@ class PageClosure {
       if (retain) this.fragments.push(fragment)
       const rows = this.rows.get(fragment.table) ?? new Map<string, JsonObject>()
       let replaced = false
+      let changed = false
       const accepted = fragment.rows.filter((row) => {
         if (select) return select(fragment.table, row)
         if (this.cardId === undefined) return true
@@ -199,9 +238,8 @@ class PageClosure {
         )
           for (const base of this.snapshot.bootstrap) {
             if (base.table !== fragment.table) continue
-            for (const original of base.rows)
-              if (original["id"] === row["id"] && canonicalText(original) !== canonicalText(row))
-                annotationFailure("reference")
+            for (const original of indexedRows(base).get(identity) ?? [])
+              if (canonicalText(original) !== canonicalText(row)) annotationFailure("reference")
           }
         const previous =
           rows.get(identity) ??
@@ -233,17 +271,30 @@ class PageClosure {
           canonicalText(previous) !== canonicalText(row)
         )
           annotationFailure("reference")
+        if (fragment.table === "printing" && fragment.value["base"] === null)
+          this.printingHomes.set(
+            stringValue(row["id"]),
+            objectValue(fragment.value["owner"])["id"] ?? null,
+          )
+        if (rows.has(identity) && previous && canonicalText(previous) === canonicalText(row))
+          continue
+        changed = true
         replaced ||= rows.has(identity)
         rows.set(identity, row)
       }
       this.rows.set(fragment.table, rows)
-      // Extend valid new rows in place; replacements or rejected rows require full validation.
+      if (!changed) continue
       const placed = ["card", "face", "printing", "face_revision"].includes(fragment.table)
       if (placed || OWNER_TABLES.includes(fragment.table)) {
         if (replaced) this.owners = undefined
         else
           try {
-            this.owners?.include({ [fragment.table]: accepted })
+            // Earlier owners were checked against every witness when they were indexed.
+            if (this.owners)
+              this.includeOwnerNames(
+                this.owners,
+                this.owners.include({ [fragment.table]: accepted }),
+              )
           } catch {
             this.owners = undefined
           }
@@ -367,17 +418,56 @@ class PageClosure {
     return this.textOwners().get(value)
   }
 
-  textOwners(): TextOwners {
+  private nameSource(pointer: JsonObject): JsonObject | undefined {
+    if (!this.names) {
+      const names = new Map<string, JsonObject>()
+      for (const fragment of this.fragments) {
+        if (!fragment.nameSources?.length) continue
+        for (const [identity, source] of indexedNames(fragment)) {
+          const previous = names.get(identity)
+          if (previous && canonicalText(previous) !== canonicalText(source))
+            annotationFailure("owner")
+          names.set(identity, source)
+        }
+      }
+      this.names = names
+    }
+    return this.names.get(canonicalText(pointer))
+  }
+
+  private includeOwnerNames(
+    owners: TextOwners,
+    values: Iterable<TextOwner> = owners.byOwner.values(),
+  ): void {
+    if (this.names?.size === 0) return
+    for (const { owner } of values) {
+      if (!["face_revision", "printing_face"].includes(stringValue(owner["kind"]))) continue
+      const source = this.nameSource({ owner, field: "name", ordinal: null })
+      if (source) owners.includeNameSources([source])
+    }
+  }
+
+  textOwners(pointer?: JsonObject): TextOwners {
     if (!this.owners) {
-      this.owners = new TextOwners(this.view())
-      this.owners.includeNameSources(this.fragments.flatMap((f) => f.nameSources ?? []))
+      const view = Object.fromEntries(
+        ["card", "face", "printing", ...OWNER_TABLES].map((table) => [
+          table,
+          [...(this.rows.get(table)?.values() ?? [])],
+        ]),
+      )
+      this.owners = new TextOwners(view)
+      this.includeOwnerNames(this.owners)
+    }
+    if (pointer) {
+      const source = this.nameSource(pointer)
+      if (source) this.owners.includeNameSources([source])
     }
     return this.owners
   }
 
   location(value: JsonObject, field: string, ordinal: JsonValue = null) {
     this.owner(value)
-    this.locations ??= annotationLocations(this.view(), this.fragments)
+    this.locations ??= annotationLocations(this.view(), this.printingHomes)
     return this.locations(value, field, ordinal)
   }
 
@@ -393,10 +483,9 @@ class PageClosure {
     receiver?: TextOwner,
     region: string | undefined = this.snapshot.region,
   ): Promise<{ unitId: string; annotationId: JsonValue } | null> {
-    const witness = this.fragments
-      .flatMap((f) => f.nameSources ?? [])
-      .find((source) => canonicalText(source["pointer"] ?? null) === canonicalText(pointer))
+    const witness = this.nameSource(pointer)
     if (pointer["field"] === "name" && typeof witness?.["name_concept_id"] === "string") {
+      this.textOwners(pointer)
       const unit = await this.row("text_unit", witness["text_unit_id"] ?? null)
       const annotation = wholeName(unit, witness["name_concept_id"])
       this.virtualAnnotation(annotation)
@@ -495,7 +584,7 @@ class PageClosure {
       ["face_revision", "printing_face"].includes(kind) ? location.entity : pk,
       region,
     )
-    const unitId = this.textOwners().optionalPointer(pointer)
+    const unitId = this.textOwners(pointer).optionalPointer(pointer)
     if (unitId === null) return null
     await this.row("text_unit", unitId)
     this.includeBootstrap("field_annotation", pk)
@@ -593,7 +682,7 @@ export function createAnnotatedTextResolver(
     const sourceRegion = selection?.["basis"] === "jp_source" ? "jp" : receiverRegion
     if (selection && pointer["field"] !== "name") {
       await page.sources(selection)
-      page.textOwners().optionalPointer(sourcePointer)
+      page.textOwners(sourcePointer).optionalPointer(sourcePointer)
     }
     const source = await page.original(sourcePointer, receiver, sourceRegion)
     if (source === null) annotationFailure("owner")
@@ -619,7 +708,9 @@ export function createAnnotatedTextResolver(
     }
     if (translation?.["annotation_kind"] === "whole_name" && selection) {
       const unit = await page.row("text_unit", translation["text_unit_id"] ?? null)
-      const annotation = wholeName(unit, translationNameConcept(page.textOwners(), selection))
+      // A concurrent load may rebuild the owners after the await; re-include the source witness.
+      const owners = page.textOwners(sourcePointer)
+      const annotation = wholeName(unit, translationNameConcept(owners, selection))
       page.virtualAnnotation(annotation)
       translation["annotation_set_id"] = annotation["id"] ?? null
     }
@@ -627,7 +718,7 @@ export function createAnnotatedTextResolver(
     let counterpart: { unitId: string; annotationId: JsonValue } | null = null
     if (selection?.["counterpart"] !== null && selection?.["counterpart"] !== undefined) {
       const pointer = objectValue(selection["counterpart"])
-      if (pointer["field"] !== "name") page.textOwners().optionalPointer(pointer)
+      if (pointer["field"] !== "name") page.textOwners(pointer).optionalPointer(pointer)
       counterpart = await page.original(pointer, receiver, receiverRegion === "jp" ? "en" : "jp")
       if (counterpart === null) annotationFailure("owner")
       const donor = page.owner(objectValue(pointer["owner"]))

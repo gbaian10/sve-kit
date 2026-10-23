@@ -187,13 +187,36 @@ describe("whole names on exact source owners", () => {
       snapshot: () => witnessed,
       fragments: () => Promise.reject(new Error("source body should stay unloaded")),
     })
-    const result = await resolver.resolve(
-      { owner: { kind: "face_revision", id: "revision" }, field: "name", ordinal: null },
-      "zh-Hant",
-    )
+    const pointer = {
+      owner: { kind: "face_revision", id: "revision" },
+      field: "name",
+      ordinal: null,
+    }
+    const result = await resolver.resolve(pointer, "zh-Hant")
     expect(result?.source?.annotation?.["occurrences"]).toHaveLength(1)
     expect(result?.translated?.annotation?.["occurrences"]).toHaveLength(1)
     expect(result?.source?.unit["id"]).toBe(donor?.["name_unit_id"])
+    // A concurrent detail load rebuilds the owners at any point while the name resolves.
+    const detailKey = "detail/jp/family-family/0"
+    const detail = await client.fragments(detailKey)
+    for (let delay = 0; delay < 8; delay++)
+      for (const nameFirst of [true, false]) {
+        const racing = createAnnotatedTextResolver({
+          ...client,
+          snapshot: () => witnessed,
+          fragments: async (key) => {
+            for (let tick = 0; tick < delay; tick++) await Promise.resolve()
+            if (key !== detailKey) throw new Error("source body should stay unloaded")
+            return detail
+          },
+        })
+        const name = () => racing.resolve(pointer, "zh-Hant")
+        const effect = () => racing.resolve({ ...pointer, field: "effect" }, "ja")
+        const named = nameFirst
+          ? (await Promise.all([name(), effect()]))[0]
+          : (await Promise.all([effect(), name()]))[1]
+        expect(named).toEqual(result)
+      }
   })
   it("stays pending while the exact source is fetching, then rejects a complete missing source", async () => {
     const { client, revision, historyKey } = await sourceHistory()

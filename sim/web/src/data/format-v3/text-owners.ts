@@ -49,13 +49,18 @@ export class TextOwners {
     this.include(view)
   }
 
-  /** Indexes rows not seen before; a row that replaces an indexed one needs a new instance. */
-  include(view: View): void {
+  /**
+   * Indexes rows not seen before and returns their owners; a row that replaces an indexed one
+   * needs a new instance.
+   */
+  include(view: View): TextOwner[] {
     const { cards, faces } = this
     for (const row of view["card"] ?? []) cards.set(stringValue(row["id"]), row)
     for (const row of view["face"] ?? []) faces.set(stringValue(row["id"]), row)
+    const added: TextOwner[] = []
     const add = (value: TextOwner): void => {
       this.byOwner.set(canonicalText(value.owner), value)
+      added.push(value)
     }
     for (const kind of ["qa_version", "cr_clause", "product_family", "product", "keyword"]) {
       for (const row of view[kind] ?? []) add({ owner: { kind, id: row["id"] ?? null }, row })
@@ -98,6 +103,7 @@ export class TextOwners {
         })
       }
     }
+    return added
   }
 
   includeNameSources(sources: readonly JsonObject[]): void {
