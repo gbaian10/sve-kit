@@ -28,7 +28,7 @@ type QaField = "question" | "answer"
 
 type TextState =
   | { readonly phase: "pending" }
-  | { readonly phase: "error"; readonly validation: boolean }
+  | { readonly phase: "error"; readonly validation: boolean; readonly retry: () => void }
   | { readonly phase: "ready"; readonly value: SelectedText | null }
 
 const pointerOf = (versionId: string, field: QaField) => ({
@@ -45,7 +45,8 @@ function useQaText(
   language: string,
 ): TextState {
   const snapshot = client.snapshot()
-  const key = canonicalText([versionId, field, language, snapshot?.manifestHash ?? null])
+  const [attempt, setAttempt] = useState(0)
+  const key = canonicalText([versionId, field, language, snapshot?.manifestHash ?? null, attempt])
   const [settled, setSettled] = useState<{ key: string; state: TextState }>()
   useEffect(() => {
     if (!snapshot) return
@@ -66,7 +67,13 @@ function useQaText(
           settle({ phase: "ready", value })
         },
         (error: unknown) => {
-          settle({ phase: "error", validation: error instanceof SnapshotError })
+          settle({
+            phase: "error",
+            validation: error instanceof SnapshotError,
+            retry: () => {
+              setAttempt((value) => value + 1)
+            },
+          })
         },
       )
     return () => {
@@ -111,9 +118,16 @@ function QaLine({
     )
   else if (state.phase === "error")
     body = (
-      <p role="alert" className="text-13 text-text-2">
-        {state.validation ? t("card.textFailed") : t("card.textLoadFailed")}
-      </p>
+      <div className="space-y-2">
+        <p role="alert" className="text-13 text-text-2">
+          {state.validation ? t("card.textFailed") : t("card.textLoadFailed")}
+        </p>
+        {!state.validation && (
+          <Button size="sm" onClick={state.retry}>
+            {t("qa.retry")}
+          </Button>
+        )}
+      </div>
     )
   else if (!state.value) body = <p className="text-13 text-text-2">{t("card.textUnavailable")}</p>
   else {
@@ -121,7 +135,7 @@ function QaLine({
     const shown = value.translated ?? value.original
     const foreign = !value.translated && stringValue(value.original.unit["lang"]) !== language
     body = (
-      <div lang={stringValue(shown.unit["lang"])} className="space-y-1">
+      <div className="space-y-1">
         <AnnotatedText
           value={shown}
           context={value}
@@ -137,10 +151,7 @@ function QaLine({
   }
   return (
     <div className="flex gap-2">
-      <span
-        className="mt-0.5 inline-flex size-6 shrink-0 items-center justify-center rounded-sm bg-surface-2 text-12 font-semibold text-text-2"
-        aria-hidden="true"
-      >
+      <span className="mt-0.5 inline-flex size-6 shrink-0 items-center justify-center rounded-sm bg-surface-2 text-12 font-semibold text-text-2">
         {label}
       </span>
       <div className="min-w-0 flex-1">{body}</div>
@@ -204,15 +215,13 @@ function QaItem({
             {values.map(
               (value, index) =>
                 value && (
-                  <p
-                    key={index}
-                    lang={stringValue(value.original.unit["lang"])}
-                    className="text-14 leading-effect whitespace-pre-wrap text-text-2"
-                  >
+                  <p key={index} className="text-14 leading-effect whitespace-pre-wrap text-text-2">
                     <span className="me-2 font-semibold text-text-3">
                       {t(index === 0 ? "qa.question" : "qa.answer")}
                     </span>
-                    {stringValue(value.original.unit["text"])}
+                    <span lang={stringValue(value.original.unit["lang"])}>
+                      {stringValue(value.original.unit["text"])}
+                    </span>
                   </p>
                 ),
             )}

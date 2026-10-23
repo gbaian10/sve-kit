@@ -75,6 +75,7 @@ const complete = (region: string) => ({
   scope_key: "region:*",
   from_date: "2026-01-01",
   until_date: null,
+  as_of: "2026-10-24",
   state: "complete",
 })
 
@@ -87,7 +88,7 @@ it("reports present, absent and unknown apart; an empty list is never absence", 
     "Q9",
     "Q11",
   ])
-  // Named only by an old revision: the complete jp window then proves none exists today.
+  // A card with no current association is absent only inside the complete jp window.
   expect((await loadCardQa(client, snapshot, "c:c", "jp", today)).coverage).toBe("absent")
   // The en edition has Q&A for c:a but no window covers it for other cards: unknown, not absent.
   expect((await loadCardQa(client, snapshot, "c:c", "en", today)).coverage).toBe("unknown")
@@ -100,5 +101,23 @@ it("reports present, absent and unknown apart; an empty list is never absence", 
   const partial = snapshotOf([{ ...complete("jp"), state: "partial" }], [])
   expect((await loadCardQa(partial.client, partial.snapshot, "c:c", "jp", today)).coverage).toBe(
     "unknown",
+  )
+  for (const windows of [
+    [{ ...complete("jp"), as_of: "2026-10-23" }],
+    [{ ...complete("jp"), until_date: today }],
+    [{ ...complete("jp"), from_date: "2026-10-25" }],
+    [{ ...complete("jp"), scope_key: "product:bp01" }],
+    [{ ...complete("jp"), kind: "errata" }],
+    [complete("jp"), { ...complete("jp"), state: "partial" }],
+    [complete("jp"), { ...complete("jp"), scope_key: "product:bp01", state: "partial" }],
+  ]) {
+    const uncertain = snapshotOf(windows, [])
+    expect(
+      (await loadCardQa(uncertain.client, uncertain.snapshot, "c:c", "jp", today)).coverage,
+    ).toBe("unknown")
+  }
+  const finite = snapshotOf([{ ...complete("jp"), until_date: "2026-10-25" }], [])
+  expect((await loadCardQa(finite.client, finite.snapshot, "c:c", "jp", today)).coverage).toBe(
+    "absent",
   )
 })

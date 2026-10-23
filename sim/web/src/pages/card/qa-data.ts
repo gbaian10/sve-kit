@@ -38,18 +38,23 @@ const tableFiles = (snapshot: LoadedSnapshot, table: string, region?: string) =>
 
 /** A complete source window of the whole edition that covers `today` proves the absence. */
 function windowCovers(snapshot: LoadedSnapshot, region: string, today: string): boolean {
-  return arrayValue(snapshot.manifest["source_windows"]).some((raw) => {
-    const window = objectValue(raw)
+  const windows = arrayValue(snapshot.manifest["source_windows"]).map((raw) => objectValue(raw))
+  const applicable = windows.filter((window) => {
     const until = window["until_date"]
     return (
       window["kind"] === "qa" &&
       window["region"] === region &&
-      window["scope_key"] === "region:*" &&
-      window["state"] === "complete" &&
       stringValue(window["from_date"]) <= today &&
-      (typeof until !== "string" || today <= until)
+      (typeof until !== "string" || today < until) &&
+      today <= stringValue(window["as_of"])
     )
   })
+  // A partial window can contradict the edition-wide claim even when its scope is narrower.
+  return (
+    applicable.some(
+      (window) => window["scope_key"] === "region:*" && window["state"] === "complete",
+    ) && applicable.every((window) => window["state"] === "complete")
+  )
 }
 
 /**
