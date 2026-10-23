@@ -209,6 +209,122 @@ fn provisional_current_printing_and_unresolved_handoffs_cannot_lower() {
     );
 }
 
+fn synthetic_current_closure() -> Value {
+    // Synthetic obligations exercise D0 beyond the entry-only current source adapter.
+    let mut input = current_inputs()["accepted"].clone();
+    let face = format!("f:{}", "e".repeat(32));
+    let revision = "revision:synthetic-back";
+    let mut back = input["source_payload"]["faces"][0].clone();
+    back["face_id"] = json!(face);
+    back["revision_id"] = json!(revision);
+    let mut text = back["texts"][1].clone();
+    text["field"] = json!("section");
+    text["ordinal"] = json!(0_u64);
+    back["texts"].as_array_mut().unwrap().push(text);
+    input["source_payload"]["faces"]
+        .as_array_mut()
+        .unwrap()
+        .push(back);
+    let mut uses = input["sidecar"][0]["source_use"].clone();
+    uses["binding_id"] = json!(format!("bind:{}", "e".repeat(64)));
+    uses["occurrence"]["owner"]["revision_id"] = json!(revision);
+    uses["occurrence"]["field"] = json!("section");
+    uses["occurrence"]["ordinal"] = json!(0_u64);
+    let mut abilities = Vec::new();
+    for index in 0_u64..2 {
+        uses["ability_scope"] = json!(format!("ability_{index}"));
+        let body = if index == 0 {
+            json!({"ports":{"imports":{},"exports":{}}, "spell":{"do":[{"choice":{"n":1_u64,"options":[[{"draw":{"n":1_u64}}],[{"draw":{"n":2_u64}}]]}}]}})
+        } else {
+            json!({"ports":{"imports":{},"exports":{}}, "fanfare":{"do":[{"draw":{"n":2_u64}}]}})
+        };
+        let mut ability = body.clone();
+        ability["line"] = json!(1_u64);
+        ability["section"] = json!(0_u64);
+        ability["sources"] = json!([uses]);
+        abilities.push(ability);
+        let mut evidence = input["sidecar"][0].clone();
+        evidence["path"] = json!(["cards", "BP01-009", "faces", face, "abilities", index]);
+        evidence["source_use"] = uses.clone();
+        input["sidecar"].as_array_mut().unwrap().push(evidence);
+        input["source_inventory"]["abilities"]
+            .as_array_mut()
+            .unwrap()
+            .push(json!({"source_use":uses,"body":body}));
+    }
+    input["tree"]["cards"]["BP01-009"]["faces"] = json!({face:{"abilities":abilities}});
+    input
+}
+
+#[test]
+fn complete_current_inventory_covers_faces_sections_siblings_and_all_modes() {
+    let input = synthetic_current_closure();
+    let admitted = ExpandedLowerer::new()
+        .unwrap()
+        .lower_current(&input)
+        .unwrap();
+    assert_eq!(admitted.program.card().abilities.len(), 3);
+    assert_eq!(admitted.source_sidecar.len(), 3);
+    assert_eq!(admitted.non_body_sources, Vec::<Value>::new());
+    let Node::Control {
+        control: Control::Mode { modes, .. },
+    } = &admitted.program.card().abilities[1]
+        .node
+        .body
+        .as_ref()
+        .unwrap()
+        .steps[0]
+        .node
+    else {
+        panic!("all choice modes must lower");
+    };
+    assert_eq!(modes.len(), 2);
+    let mode_path = format!(
+        "/cards/BP01-009/faces/f:{}/abilities/0/spell/do/0/choice/options/1/0",
+        "e".repeat(32)
+    );
+    let evidence = admitted.source_at(&mode_path).unwrap();
+    assert_eq!(evidence.source.field, "section");
+    assert_eq!(evidence.source.section.as_deref(), Some("0"));
+    assert_eq!(evidence.source.face, format!("f:{}", "e".repeat(32)));
+}
+
+#[test]
+fn current_inventory_rejects_joint_omissions_extras_and_changed_mode_bodies() {
+    let input = synthetic_current_closure();
+    let lowerer = ExpandedLowerer::new().unwrap();
+    let face_path = format!("/tree/cards/BP01-009/faces/f:{}/abilities", "e".repeat(32));
+    let mut missing = input.clone();
+    missing
+        .pointer_mut(&face_path)
+        .unwrap()
+        .as_array_mut()
+        .unwrap()
+        .pop();
+    missing["sidecar"].as_array_mut().unwrap().pop();
+    let mut extra = input.clone();
+    extra["source_inventory"]["abilities"]
+        .as_array_mut()
+        .unwrap()
+        .pop();
+    let mut duplicate = input.clone();
+    duplicate["source_inventory"]["abilities"][2] =
+        input["source_inventory"]["abilities"][1].clone();
+    let mut mode = input.clone();
+    mode.pointer_mut(&face_path).unwrap()[0]["spell"]["do"][0]["choice"]["options"][1] = json!([]);
+    let mut occurrence = input.clone();
+    occurrence["source_inventory"]["abilities"][0]["source_use"]["occurrence"]["source_hash"] =
+        json!("0".repeat(64));
+    let mut bad_key = input;
+    bad_key["source_inventory"]["abilities"][0]["source_use"]["ability_scope"] = Value::Null;
+    for rejected in [missing, extra, duplicate, mode, occurrence, bad_key] {
+        assert_eq!(
+            lowerer.lower_current(&rejected).unwrap_err().code,
+            "current_ability_closure_mismatch"
+        );
+    }
+}
+
 #[test]
 fn expanded_dynamic_scope_rejects_a_parameter_that_authored_accepts() {
     let expanded = validator("expanded").unwrap();
