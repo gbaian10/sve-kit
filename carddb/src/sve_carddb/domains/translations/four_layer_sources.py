@@ -211,7 +211,10 @@ def card_source(
     source_lang, document, source = sources.document(ref)
     if source.id != source_id or source_lang != lang:
         raise ValueError("Card source frozen version belongs to another owner source")
-    if pointer(document, locator) != raw:
+    frozen = pointer(document, locator)
+    # Source absence is interned as empty effect text, never as a semantic span.
+    empty_effect = descriptor.field == "effect" and frozen is None and not raw
+    if frozen != raw and not empty_effect:
         raise ValueError(
             "Card source frozen field differs from the exact owner bytes: "
             f"{descriptor.owner.model_dump(mode='json')} {descriptor.field} "

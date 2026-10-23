@@ -41,7 +41,7 @@ F1 configuration 納入 registry hash 與 adapter 版本。
 不表示正面一定具有該能力；公開投影沒有面向維度。
 預設建置由已審查解析輸入取得來源版本及 locator；sealed/raw bytes 在產生解析資料及明示 `archive` 模式驗證，
 不在普通建置重跑，見[解析卡片輸入〈建置入口〉](../ingest/parsed-card-inputs.md#建置入口)。更正沿用既有 corrected-source recipe。
-空主文只記未抽取，不授予完整 coverage；不合併所有 printing、歷史 revision 或他 owner binding。
+H1 略過空主文；完整欄位 adapter 另驗來源的空值，不合併所有 printing、歷史 revision 或他 owner binding。
 
 H1 只接受 `card_keywords.v2` 的完整 body part：整個片段由唯一解析的 keyword
 宣告組成，葉皆為 Concept／keyword／GlossaryReference。SourceBinding 與來源位置重驗後，
@@ -83,6 +83,19 @@ token 原生 keyword 不會掛到母卡。主文明示額外授予生成 token �
 含「」的主文整欄略過，sections 全不檢查，因此 token 的原生能力仍屬 token。
 只在匹配行提交相應 relation 的局部檢查，`whole_field=false`；四關係都有 producer 仍不構成 complete。
 
+完整欄位 adapter `manual-keywords-fields-bp01-v1` 沿用固定首批集合、confirmed JP current
+及十個已登錄 keyword。每個面先驗 exact owner 主文與凍結來源的完整有序 section 清單；
+來源與資料庫的 section 數量、順序或原文字節不符時，該面不提交完整檢查。
+空主文須明驗凍結來源為 null 或空字串、已 intern 的原文確為空字串；空 section 也須驗自己的來源位置。
+非空主文只接受整欄由 H1 的 `card_keywords.v2` 自身宣告及 layout 組成，所有葉均為已登錄的
+Concept／keyword／GlossaryReference，逐 part 重驗 binding 與來源座標；至少須有一個宣告。
+任何其他句型、pending、reminder 或引號能力都留下缺口，不能以另一個正標籤補滿。
+非空 sections 全數保留缺口，包含 token_definition；不把 token 原生 keyword 掛到母卡。
+
+已證明的空欄位與純自身宣告，對十個 keyword 的 has／grants／refers／counts 各提交
+`whole_field=true`，自身 has 正標籤仍只由 H1 產生。缺 current 的面不提交檢查，也不從必要範圍刪除。
+因此同卡另一面或任一 section 未證明時仍為 partial；沒有任何檢查的 keyword 維持 unknown。
+
 ## 新鮮度與補正
 
 `mechanic-source-bundle-v1` 對 card／shared 全部面（含缺 current 的面）、
@@ -94,6 +107,8 @@ producer_version 包含 `manual-keywords-h1-v1`、來源 normalizer／葉規則�
 grants producer_version 另含自身 adapter、固定 card 集合及十個已登錄概念的 mapping／日文名稱；
 refers／counts 的 producer_version 同樣釘自身 adapter、固定 card 集合及 keyword mapping；
 F1 configuration 也釘兩個有限 adapter 與固定 card 集合 hash。
+完整欄位 producer_version 另釘自身 adapter、固定 card 集合及 H1 producer_version（含 normalizer、
+葉規則與完整 keyword mapping）；F1 configuration 同時釘完整欄位 adapter。
 抽取或 bundle 演算法變更必須更新 adapter／recipe 版本；keyword/action universe 與 coverage 每次重建。
 
 card_mechanic 使用 `source_kind=manual, dsl_id=null`，source_id 指實際原文，
@@ -111,10 +126,10 @@ decision 同上例且必須 confirmed。只有候選 ID、source hash 及 produc
 
 H1 提交已驗正標籤及自身宣告所在面／主文的局部 has 檢查，由共用 coverage reducer 合併；
 不把局部宣告當整欄位已查。內部範圍與 producer 鍵見[建置資料庫 §10](../build/build-db.md#10-dsl驗證與未實作卡片頁)。
-H1、grants 與 refers／counts 均儲存後，才在共同編排點套用 suppression，並傳入全部有效 producer_version 投影一次。
+H1、grants、refers／counts 與完整欄位檢查均儲存後，才在共同編排點套用 suppression，並傳入全部有效 producer_version 投影一次。
 grants 只提交所在面／主文的局部 grants 檢查；has＋grants 也不能補滿 refers／counts 或 sections。
-目前已檢查 keyword 一律為 partial；公開每 card／shared 一列，complete_all=false、
-complete 集合空。partial 選較短 include／exclude，同長選 include；只投影 fresh coverage。
+公開每 card／shared 一列，只有所有必要範圍均已完整檢查的 keyword 才進 complete 集合；
+全部 keyword 都完整時使用 complete_all。complete／partial 選較短 include／exclude，同長選 include；只投影 fresh coverage。
 has present 不證 grants absent；缺標籤且 partial／缺 coverage 仍 unknown。
 reducer 重驗內部 state 與 checked_ranges 一致，不能用手填 complete 冒充完整檢查結果。
 

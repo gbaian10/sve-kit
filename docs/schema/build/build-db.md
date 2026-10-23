@@ -429,9 +429,11 @@ EN 接收端引用 JP owner 的合法 use，不將 EN source_unit 改成 JP；�
 producer_version 是內部鍵的一部分，不同 producer 不互覆；每列 state 只描述自身證據，公開 coverage 由全部 fresh 範圍聯集重算。
 reducer 依目前全部面（含缺 current 的面）、主文與所有 sections 建必要範圍，四種 relation 全部滿足才 complete；
 缺範圍為 partial，沒有檢查維持 unknown。新鮮度仍依完整 source bundle、當次 producer 集合及重建的 keyword universe，不能沿用舊 complete。
-目前 producer 為 H1 與固定首批集合的有限 grants、refers／counts，均僅局部檢查，scope 仍僅 shared；
+目前 producer 為 H1 與固定首批集合的有限 grants、refers／counts（僅局部檢查），
+以及同批完整欄位 adapter（驗來源閉包後，僅空欄位及純自身宣告可完整檢查），scope 仍僅 shared；
 全部 producer 儲存、suppression 套用後才以當次完整 producer_version 集合投影一次。
-四關係的局部檢查仍不滿足完整欄位及 sections；公開 coverage 粒度與 EN 資格不變。
+四關係的局部檢查仍不滿足完整欄位及 sections；缺 current 面與非空 sections 保留缺口。
+完整欄位的有限判定與 source section 清單重驗依[關鍵字機制契約](../domains/keyword-mechanics.md)；公開 coverage 粒度與 EN 資格不變。
 
 機制只出稀疏正標籤 projection＋每卡每 scope 一列 coverage。查特定 keyword/relation/action：存在吻合正標籤→present；無吻合但 `complete_all` 或 keyword 在解碼後 complete 集合→absent；其餘 unknown。某 relation 正標籤不證明其他 relation 不存在；partial 集合只表示有檢查但未完整。`complete_mode/include` 表示列出完整集合，exclude 表示在本快照清單 universe U 的補集；`partial_mode` 的基底為 U 減去已解碼 complete 集合。producer 分別選 ID 數較少的正集/補集，同數選 include；每個列表最多基底一半，reader 先解 complete 再解 partial，不能把 omitted 的未查項當完整。`complete_all` 為特例。缺正標籤不必然 unknown，必須合併 coverage；缺 coverage 才全部按 unknown。
 
