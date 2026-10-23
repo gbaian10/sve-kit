@@ -247,9 +247,9 @@ stops queued background work; without persistent storage only visible faces are 
 When background work completes, its session cost includes every file containing `printing_image` rows.
 The progress surface offers pause/retry and distinguishes download completion from persistent
 cache availability; neither means all images or offline text are ready. Snapshot replacement
-aborts old metadata requests and isolates CacheStorage by manifest hash and file content path.
-After successful adoption, old metadata namespaces are pruned, retaining the active and
-immediately previous manifest only; unrelated application caches are preserved.
+aborts old metadata requests. Bytes live in the shared raw cache keyed by root and content hash,
+so manifests reuse one copy. Startup removes only this root's legacy per-manifest metadata
+namespaces; unrelated application caches and other roots are preserved.
 
 Visible work takes priority, with p-queue limiting metadata work to four requests including
 bodies and a second queue admitting no more than three background requests. Queued work
@@ -257,8 +257,7 @@ can be promoted without duplicating its shared promise; cancellation removes que
 work while running requests finish, and snapshot replacement aborts the active transport. Verified persistent bytes are rechecked before decoding; returning
 to an evicted face can reparse without another external request; recently used faces do not
 need re-decoding. CacheStorage failures visibly degrade
-to a 12 MiB / 64-file RAM byte LRU provided by lru-cache. Oversized files are not retained;
-empty values count as one byte for the library's size accounting. The page parsing workset is capped at 12 MiB raw;
+to on-demand verified network reads; no settled bytes are kept in RAM. The page parsing workset is capped at 12 MiB raw;
 this is not a heap measurement or a physical-phone acceptance claim.
 
 ## Development snapshot
@@ -429,7 +428,7 @@ Added once pages exist:
 - Component tests that the jsx-a11y component mapping (`CardImage`, `Link`, `Button`) matches the rendered DOM
 
 Production builds include `third-party-licenses.md` from Vite's dependency license reporting.
-The dependency report includes lru-cache's BlueOak-1.0.0 terms and the MIT notices for p-queue,
+The dependency report includes the MIT notices for p-queue,
 p-timeout and eventemitter3; these third-party terms are not replaced by the project license.
 
 ## Catalog performance benchmark

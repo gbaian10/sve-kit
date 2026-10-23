@@ -31,20 +31,25 @@ it("retains only two generations across distinct query slots", async () => {
   expect(await cache.read("query-3", `sha256:${"3".repeat(64)}`)).toEqual(new Uint8Array([3]))
 })
 
-it("the current generation cannot bypass the root budget when its pinned bodies are too large", async () => {
+it("combines raw metadata and decoded records under the same root budget", async () => {
   const storage = memoryCache()
   const root = "https://cdn.test/root"
   const cache = await storage.open(`sve-search-index:${encodeURIComponent(root)}`)
   const hash = `sha256%3A${"1".repeat(64)}`
-  for (const n of [1, 2])
-    await cache.put(
-      `${root}/index/${String(n)}/${hash}`,
+  const raw = await storage.open(`sve-raw:${encodeURIComponent(root)}`)
+  for (const [n, target, url] of [
+    [1, raw, `${root}/__sve-raw/${hash}/bytes`],
+    [2, cache, `${root}/index/${hash}`],
+  ] as const)
+    await target.put(
+      url,
       new Response("x", {
         headers: { "x-sve-bytes": String(40 * 1024 * 1024), "x-sve-touched": String(n) },
       }),
     )
   await trimDataCaches(storage, root)
   expect((await cache.keys()).length).toBe(1)
+  expect(await raw.keys()).toHaveLength(0)
 })
 
 it("evicts a legacy headerless record once without reading its body on later scans", async () => {

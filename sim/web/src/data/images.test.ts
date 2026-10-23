@@ -147,7 +147,6 @@ describe("page image metadata", () => {
     let requests = 0
     const bytes = new MetadataBytes(
       "/cdn",
-      "no-storage",
       metadataFiles(70),
       () => {
         requests += 1
@@ -161,61 +160,52 @@ describe("page image metadata", () => {
     await bytes.read("file0")
     expect(requests).toBe(1)
   })
-  it("prunes only old metadata namespaces and keeps the active and immediately previous version", async () => {
+  it("removes legacy metadata namespaces for this root while retaining shared raw across versions", async () => {
     const cache = storage()
     await cache.open("unrelated-app")
     await cache.open("sve-images-%2Fcdn-preview:-preview")
+    await cache.open("sve-images-%2Fcdn:-a")
+    await cache.open("sve-images-%2Fcdn:-b")
     const fetcher: Fetcher = () =>
       Promise.resolve(new Response(canonical({ synthetic: 0 }).slice().buffer))
-    const first = new MetadataBytes("/cdn", "a", metadataFiles(1), fetcher, () => undefined, cache)
+    const first = new MetadataBytes("/cdn", metadataFiles(1), fetcher, () => undefined, cache)
     await first.prefetch()
     const second = new MetadataBytes(
       "/cdn",
-      "b",
       metadataFiles(1),
       fetcher,
       () => undefined,
       cache,
       fetcher,
-      "a",
     )
     await second.prefetch()
     expect((await cache.keys()).sort()).toEqual(
-      [
-        "sve-images-%2Fcdn:-a",
-        "sve-images-%2Fcdn:-b",
-        "sve-images-%2Fcdn-preview:-preview",
-        "unrelated-app",
-      ].sort(),
+      ["sve-raw:%2Fcdn", "sve-images-%2Fcdn-preview:-preview", "unrelated-app"].sort(),
     )
     const third = new MetadataBytes(
       "/cdn",
-      "c",
       metadataFiles(1),
       fetcher,
       () => undefined,
       cache,
       fetcher,
-      "b",
     )
     await third.prefetch()
     expect((await cache.keys()).sort()).toEqual(
-      [
-        "sve-images-%2Fcdn:-b",
-        "sve-images-%2Fcdn:-c",
-        "sve-images-%2Fcdn-preview:-preview",
-        "unrelated-app",
-      ].sort(),
+      ["sve-raw:%2Fcdn", "sve-images-%2Fcdn-preview:-preview", "unrelated-app"].sort(),
     )
   })
   it("revalidates equal-length persistent bytes instead of accepting a corrupt cache entry", async () => {
     const cache = storage()
-    const opened = await cache.open("sve-images-%2Fcdn:-corrupt")
-    await opened.put("/cdn/data0", new Response(canonical({ synthetic: 9 }).slice().buffer))
+    const opened = await cache.open("sve-raw:%2Fcdn")
+    const hash = digest(canonical({ synthetic: 0 }))
+    await opened.put(
+      `/cdn/__sve-raw/${encodeURIComponent(hash)}/bytes`,
+      new Response(canonical({ synthetic: 9 }).slice().buffer),
+    )
     let requests = 0
     const bytes = new MetadataBytes(
       "/cdn",
-      "corrupt",
       metadataFiles(1),
       () => {
         requests += 1
@@ -270,7 +260,7 @@ describe("page image metadata", () => {
     await prefetch
     expect(aborted).toBeGreaterThan(0)
   })
-  it("reopens bytes from persistent cache after the 64-file memory LRU has been evicted", async () => {
+  it("reopens persistent bytes across sessions and manifests without retaining a raw memory LRU", async () => {
     const files = metadataFiles(70)
     const requests: string[] = []
     const fetcher: Fetcher = (url) => {
@@ -279,38 +269,23 @@ describe("page image metadata", () => {
       return Promise.resolve(new Response(canonical({ synthetic: i }).slice().buffer))
     }
     const sharedCache = storage()
-    const bytes = new MetadataBytes(
-      "/cdn",
-      "snapshot-a",
-      files,
-      fetcher,
-      () => undefined,
-      sharedCache,
-    )
+    const bytes = new MetadataBytes("/cdn", files, fetcher, () => undefined, sharedCache)
     await bytes.prefetch()
     expect(requests).toHaveLength(70)
     await bytes.read("file0")
     expect(requests).toHaveLength(70)
-    const reopened = new MetadataBytes(
-      "/cdn",
-      "snapshot-a",
-      files,
-      fetcher,
-      () => undefined,
-      sharedCache,
-    )
+    const reopened = new MetadataBytes("/cdn", files, fetcher, () => undefined, sharedCache)
     await reopened.read("file0")
     expect(requests).toHaveLength(70)
-    const separate = new MetadataBytes(
-      "/cdn",
-      "snapshot-b",
-      files,
-      fetcher,
-      () => undefined,
-      sharedCache,
-    )
+    const separate = new MetadataBytes("/cdn", files, fetcher, () => undefined, sharedCache)
     await separate.read("file0")
+    expect(requests).toHaveLength(70)
+    expect(bytes.status()).toMatchObject({ state: "complete", done: 70 })
+    await sharedCache.delete("sve-raw:%2Fcdn")
+    await bytes.read("file0")
     expect(requests).toHaveLength(71)
+    // One restored file cannot vouch for the other 69 that the clear took away.
+    expect(bytes.status()).toMatchObject({ persistent: true, state: "cancelled", done: 1 })
   })
   it("reports quota degradation and retries after eviction rather than claiming persistent offline readiness", async () => {
     const files = metadataFiles(70)
@@ -321,17 +296,20 @@ describe("page image metadata", () => {
         new Response(canonical({ synthetic: Number(url.split("data")[1]) }).slice().buffer),
       )
     }
-    const bytes = new MetadataBytes("/cdn", "quota", files, served, () => undefined, storage(true))
+    const bytes = new MetadataBytes("/cdn", files, served, () => undefined, storage(true))
     await bytes.prefetch()
     expect(bytes.status()).toMatchObject({ persistent: false, state: "cancelled" })
     expect(requests).toBeLessThanOrEqual(3)
     expect(await bytes.read("file0")).toEqual(canonical({ synthetic: 0 }))
+    const after = requests
+    expect(await bytes.read("file0")).toEqual(canonical({ synthetic: 0 }))
+    expect(requests).toBe(after + 1)
+    expect(bytes.status()).toMatchObject({ persistent: false, state: "cancelled", done: 0 })
   })
   it("rejects a replaced snapshot even when its transport ignores abort", async () => {
     let finish: ((response: Response) => void) | undefined
     const bytes = new MetadataBytes(
       "/cdn",
-      "replaced",
       metadataFiles(1),
       () =>
         new Promise<Response>((resolve) => {
@@ -366,7 +344,6 @@ describe("page image metadata", () => {
     let requests = 0
     const bytes = new MetadataBytes(
       "/cdn",
-      "bad",
       metadataFiles(1),
       () => {
         requests += 1
@@ -415,7 +392,6 @@ describe("network scheduling", () => {
     const release: Array<() => void> = []
     const bytes = new MetadataBytes(
       "/cdn",
-      "priority",
       metadataFiles(10),
       async (url) => {
         starts.push(url)
@@ -448,7 +424,6 @@ describe("network scheduling", () => {
     let calls = 0
     const bytes = new MetadataBytes(
       "/cdn",
-      "cancel",
       files,
       async (url) => {
         calls += 1

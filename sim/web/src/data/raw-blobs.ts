@@ -54,25 +54,30 @@ interface Pending {
 /** Persistent immutable bytes, with no decoded objects or settled buffers retained in RAM. */
 export class RawBlobStore {
   persistent = false
+  readonly ready: Promise<void>
+  private failures = 0
   private readonly name: string
   private readonly inflight = new Map<string, Set<Pending>>()
   private readonly base: string
   private readonly foreground: Fetcher
   private readonly storage: CacheStorage | undefined
   private readonly background: Fetcher
+  private readonly onMiss: ((file: RawBlobDescriptor) => void) | undefined
 
   constructor(
     base: string,
     foreground: Fetcher,
     storage?: CacheStorage,
     background: Fetcher = foreground,
+    onMiss?: (file: RawBlobDescriptor) => void,
   ) {
+    this.onMiss = onMiss
     this.base = base
     this.foreground = foreground
     this.storage = storage
     this.background = background
     this.name = `sve-raw:${encodeURIComponent(base)}`
-    void this.open()
+    this.ready = this.open().then(() => undefined)
   }
 
   async read(file: RawBlobDescriptor, options: ReadOptions = {}): Promise<Uint8Array> {
@@ -100,9 +105,11 @@ export class RawBlobStore {
     try {
       // Reopen after browser/user clearing instead of writing into a detached cache handle.
       const cache = await this.storage?.open(this.name)
-      this.persistent = cache !== undefined
+      // Opening or hitting a cache cannot prove a failed write has recovered.
+      if (this.failures === 0) this.persistent = cache !== undefined
       return cache
     } catch {
+      this.failures += 1
       this.persistent = false
       return undefined
     }
@@ -123,9 +130,13 @@ export class RawBlobStore {
         if (response) {
           const bytes = new Uint8Array(await response.arrayBuffer())
           if (await valid(bytes)) cached = bytes
-          else await cache.delete(slot)
-        }
+          else {
+            this.onMiss?.(file)
+            await cache.delete(slot)
+          }
+        } else this.onMiss?.(file)
       } catch {
+        this.failures += 1
         this.persistent = false
         // Unreadable storage is a miss, not a reason to retain a second copy in RAM.
         try {
@@ -157,6 +168,7 @@ export class RawBlobStore {
   }
 
   private async write(cache: Cache, slot: string, bytes: Uint8Array): Promise<void> {
+    const failures = this.failures
     const response = () =>
       new Response(bytes.slice().buffer, {
         headers: { ...bodyHeaders(bytes.length), "content-length": String(bytes.length) },
@@ -170,7 +182,9 @@ export class RawBlobStore {
         await cache.put(slot, response())
       }
       if (this.storage) await trimDataCaches(this.storage, this.base)
+      if (this.failures === failures) this.persistent = true
     } catch {
+      this.failures += 1
       this.persistent = false
       // Quota or denied storage costs another on-demand read, never an unbounded RAM fallback.
     }

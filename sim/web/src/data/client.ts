@@ -496,10 +496,8 @@ function snapshotClient(
   }
 
   const adopt = (candidate: LoadedSnapshot): void => {
-    const previous = loaded
     const nextMetadata = new MetadataBytes(
       base,
-      candidate.manifestHash,
       new Map(
         [...candidate.files].filter(
           ([, file]) =>
@@ -513,7 +511,6 @@ function snapshotClient(
       },
       options.cacheStorage ?? globalThis.caches,
       requests.background,
-      previous?.manifestHash,
     )
     for (const [key, cached] of catalogs)
       if (cached.manifestHash !== candidate.manifestHash) catalogs.delete(key)

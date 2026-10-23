@@ -49,7 +49,9 @@ describe("metadata progress", () => {
       await client.load()
       const start = vi.spyOn(client, "prefetchImages")
       await renderInRouter(<MetadataStatus client={client} />, { language })
-      expect(start).toHaveBeenCalledOnce()
+      await waitFor(() => {
+        expect(start).toHaveBeenCalledOnce()
+      })
       expect(screen.queryByText(degraded)).not.toBeInTheDocument()
       // A finished download is not news: the row disappears instead of reporting completion.
       await waitFor(() => {
