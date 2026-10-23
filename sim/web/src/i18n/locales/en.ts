@@ -16,6 +16,23 @@ export default {
     nonText: "This notice does not list a text change for this face. See the official notice.",
     retry: "Reload errata",
   },
+  qa: {
+    heading: "Q&A",
+    question: "Q",
+    answer: "A",
+    official: "Official page",
+    loading: "Loading Q&A…",
+    none: "The official Q&A for this edition has been fully checked and lists none for this card.",
+    unknown:
+      "Q&A for this edition is not fully collected yet, so we cannot tell whether this card has any.",
+    loadFailed: "Could not load Q&A. Check your connection and retry.",
+    validationFailed: "The Q&A data failed validation and is not shown.",
+    retry: "Reload Q&A",
+    untranslated: "Not translated",
+    showOriginal: "Show original",
+    showAll: "Show all {{count}}",
+    collapse: "Collapse",
+  },
   app: {
     title: "sve-kit",
   },

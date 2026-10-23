@@ -52,6 +52,7 @@ import { currentUiLanguage } from "../../i18n"
 import { showsOtherEdition, usePrefs } from "../../settings"
 import { PageTitle } from "../PageTitle"
 import { frontArtOf, useCardSequence } from "./card-sequence"
+import { CardQa } from "./CardQa"
 import { CardTextPanel } from "./CardTextPanel"
 import { CardWording } from "./CardWording"
 import { printingGroups } from "./printing-order"
@@ -838,6 +839,15 @@ export function CardView({
               </section>
             )
           })}
+          {catalog && cardId !== undefined && (
+            <CardQa
+              key={cardId}
+              client={client}
+              cardId={cardId}
+              edition={region}
+              showOther={showOther}
+            />
+          )}
           {showOther && !other.catalog && !other.error && (
             <p role="status" className="mt-6 text-13 text-text-2">
               {t("cardPage.switchingEdition")}
