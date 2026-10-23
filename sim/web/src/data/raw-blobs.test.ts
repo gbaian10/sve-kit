@@ -273,7 +273,6 @@ it("collects only unreferenced hashes from whole retained manifests and recovers
   )
   await expect(readDataCacheBudget(storage, base)).rejects.toThrow("damaged")
   // Re-adopting a retained hash makes it the newest plan, so the next adoption drops the other one.
-  await tab.read(current)
   await tab.retain(
     new Map([
       [current.key, current],
@@ -282,6 +281,7 @@ it("collects only unreferenced hashes from whole retained manifests and recovers
     `sha256:${"2".repeat(64)}`,
   )
   await expect(readDataCacheBudget(storage, base)).resolves.toBeDefined()
+  await tab.read(current)
   await tab.retain(new Map([[old.key, old]]), `sha256:${"4".repeat(64)}`)
   expect(await tab.has(current)).toBe(true)
   expect(await tab.has(detail)).toBe(true)

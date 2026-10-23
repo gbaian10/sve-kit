@@ -45,7 +45,31 @@ export async function readDataCacheBudget(storage: CacheStorage, root: string) {
   const encoded = encodeURIComponent(root)
   const names = (await storage.keys()).filter(isDataCache)
   const retained = await retainedReferences(storage, names)
+  const describe = (name: string, url: string) => {
+    const hash = url.match(/\/sha256%3A([a-f0-9]{64})$/u)?.[1]
+    const rawHash = url.match(/\/__sve-raw\/(sha256%3A[a-f0-9]{64})\/bytes$/u)?.[1]
+    const refs = retained.get(name.slice(name.lastIndexOf(":") + 1))
+    const view = name.startsWith("sve-search-view:")
+    return {
+      name,
+      root: name.endsWith(`:${encoded}`) || name.startsWith(`sve-images-${encoded}:-`),
+      view,
+      ...(hash ? { hash } : {}),
+      ...(rawHash ? { rawHash: decodeURIComponent(rawHash) } : {}),
+      protected:
+        name.startsWith("sve-retained:") ||
+        !!(
+          refs &&
+          (rawHash
+            ? refs.raw.has(decodeURIComponent(rawHash))
+            : hash
+              ? !view && refs.manifests.has(`sha256:${hash}`)
+              : activeSelection(url))
+        ),
+    }
+  }
   const entries: {
+    name: string
     cache: Cache
     url: string
     bytes: number
@@ -67,32 +91,47 @@ export async function readDataCacheBudget(storage: CacheStorage, root: string) {
         await cache.delete(key)
         continue
       }
-      const hash = key.url.match(/\/sha256%3A([a-f0-9]{64})$/u)?.[1]
-      const rawHash = key.url.match(/\/__sve-raw\/(sha256%3A[a-f0-9]{64})\/bytes$/u)?.[1]
-      const refs = retained.get(name.slice(name.lastIndexOf(":") + 1))
       entries.push({
+        ...describe(name, key.url),
         cache,
         url: key.url,
         bytes: Number(size),
-        root: name.endsWith(`:${encoded}`) || name.startsWith(`sve-images-${encoded}:-`),
-        view: name.startsWith("sve-search-view:"),
         touched: Number(response.headers.get("x-sve-touched") ?? 0),
-        ...(hash ? { hash } : {}),
-        ...(rawHash ? { rawHash: decodeURIComponent(rawHash) } : {}),
-        protected:
-          name.startsWith("sve-retained:") ||
-          !!(
-            refs &&
-            (rawHash
-              ? refs.raw.has(decodeURIComponent(rawHash))
-              : hash
-                ? !name.startsWith("sve-search-view:") && refs.manifests.has(`sha256:${hash}`)
-                : activeSelection(key.url))
-          ),
       })
     }
   }
+  let usage = {
+    total: entries.reduce((n, e) => n + e.bytes, 0),
+    own: entries.filter((e) => e.root).reduce((n, e) => n + e.bytes, 0),
+    views: entries.filter((e) => e.root && e.view).reduce((n, e) => n + e.bytes, 0),
+  }
+  let generationsDirty = true
+  const forget = (name: string, url: string) => {
+    // Cache keys are absolute while a relative data root writes relative slots; resolve against a sibling key.
+    const origin = entries.find((entry) => entry.name === name && URL.canParse(entry.url))?.url
+    const resolve = (value: string) => (origin ? new URL(value, origin).href : value)
+    const target = resolve(url)
+    const index = entries.findIndex(
+      (entry) => entry.name === name && (entry.url === url || resolve(entry.url) === target),
+    )
+    const previous = entries[index]
+    if (!previous) return
+    usage.total -= previous.bytes
+    if (previous.root) usage.own -= previous.bytes
+    if (previous.root && previous.view) usage.views -= previous.bytes
+    entries.splice(index, 1)
+  }
   const trim = async (reserve = 0, quota = false, collect = false) => {
+    // Raw batch writes normally only update totals; sort and sweep when pressure requires it.
+    if (
+      !generationsDirty &&
+      !quota &&
+      !collect &&
+      usage.total + reserve <= ORIGIN_BUDGET &&
+      usage.own + reserve <= ROOT_BUDGET &&
+      usage.views <= VIEW_BUDGET
+    )
+      return true
     let reclaimed = 0
     entries.sort((a, b) => a.touched - b.touched)
     const hashes = [
@@ -123,7 +162,7 @@ export async function readDataCacheBudget(storage: CacheStorage, root: string) {
     const pinned = (entry: (typeof entries)[number]) =>
       entry.protected ||
       entry === latestView ||
-      (entry.root && entry.hash === hashes[0] && !entry.view)
+      (entry.root && entry.hash !== undefined && entry.hash === hashes[0] && !entry.view)
     let total = entries.reduce((n, e) => n + e.bytes, reserve)
     let own = entries.filter((e) => e.root).reduce((n, e) => n + e.bytes, reserve)
     let views = entries.filter((e) => e.root && e.view).reduce((n, e) => n + e.bytes, 0)
@@ -155,6 +194,8 @@ export async function readDataCacheBudget(storage: CacheStorage, root: string) {
       if (e.root) own -= e.bytes
       if (e.root && e.view) views -= e.bytes
     }
+    usage = { total: total - reserve, own: own - reserve, views }
+    generationsDirty = false
     return (
       total <= ORIGIN_BUDGET &&
       own <= ROOT_BUDGET &&
@@ -180,25 +221,19 @@ export async function readDataCacheBudget(storage: CacheStorage, root: string) {
       return own + reserve <= ROOT_BUDGET && total + reserve <= ORIGIN_BUDGET
     },
     trim,
+    forget,
     record: (name: string, cache: Cache, url: string, bytes: number, touched: number) => {
-      const hash = url.match(/\/sha256%3A([a-f0-9]{64})$/u)?.[1]
-      entries.push({
-        cache,
-        url,
-        bytes,
-        touched,
-        root: name.endsWith(`:${encoded}`) || name.startsWith(`sve-images-${encoded}:-`),
-        view: name.startsWith("sve-search-view:"),
-        ...(hash ? { hash } : {}),
-        protected: !!(
-          hash &&
-          !name.startsWith("sve-search-view:") &&
-          retained.get(name.slice(name.lastIndexOf(":") + 1))?.manifests.has(`sha256:${hash}`)
-        ),
-      })
+      forget(name, url)
+      const entry = { ...describe(name, url), cache, url, bytes, touched }
+      entries.push(entry)
+      usage.total += bytes
+      if (entry.root) usage.own += bytes
+      if (entry.root && entry.view) usage.views += bytes
+      generationsDirty ||= entry.hash !== undefined
     },
   }
 }
+export type DataCacheBudget = Awaited<ReturnType<typeof readDataCacheBudget>>
 let lastTouched = 0
 export function bodyHeaders(bytes: number): Record<string, string> {
   lastTouched = Math.max(Date.now(), lastTouched + 1)

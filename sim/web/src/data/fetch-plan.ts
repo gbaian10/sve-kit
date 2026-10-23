@@ -1,4 +1,5 @@
 import type { Region } from "../domain/search"
+import type { DataCacheBudget } from "./cache-budget"
 import { SnapshotError } from "./format-v3/errors"
 import {
   arrayValue,
@@ -143,7 +144,11 @@ export class FetchPlan {
     return this.summarize(missing, "checking")
   }
 
-  async run(signal: AbortSignal, progress: (value: FetchProgress) => void): Promise<void> {
+  async run(
+    signal: AbortSignal,
+    progress: (value: FetchProgress) => void,
+    inventory?: DataCacheBudget,
+  ): Promise<void> {
     const publish = (
       missing: readonly PlannedBlob[],
       phase: FetchProgress["phase"],
@@ -173,28 +178,32 @@ export class FetchPlan {
     const pending = [...remaining]
     let failed = false
     const didFail = () => failed
-    await Promise.all(
-      Array.from({ length: 2 }, async () => {
-        while (!failed && this.stored()) {
-          signal.throwIfAborted()
-          const blob = pending.shift()
-          if (!blob) return
-          try {
-            await this.raw.read(blob, { signal, priority: "speculative" })
-            signal.throwIfAborted()
-            if (!this.stored() || !(await this.raw.has(blob))) {
-              failed = true
-              return
+    await this.raw.batch(
+      (read) =>
+        Promise.all(
+          Array.from({ length: 2 }, async () => {
+            while (!failed && this.stored()) {
+              signal.throwIfAborted()
+              const blob = pending.shift()
+              if (!blob) return
+              try {
+                await read(blob, { signal, priority: "speculative" })
+                signal.throwIfAborted()
+                if (!this.stored() || !(await this.raw.has(blob))) {
+                  failed = true
+                  return
+                }
+                remaining = remaining.filter((file) => file.sha256 !== blob.sha256)
+                publish(remaining, "downloading")
+              } catch {
+                signal.throwIfAborted()
+                failed = true
+                return
+              }
             }
-            remaining = remaining.filter((file) => file.sha256 !== blob.sha256)
-            publish(remaining, "downloading")
-          } catch {
-            signal.throwIfAborted()
-            failed = true
-            return
-          }
-        }
-      }),
+          }),
+        ).then(() => undefined),
+      inventory,
     )
     // Eviction or clear during the batch invalidates earlier writes; never refill in a loop.
     remaining = await missing()

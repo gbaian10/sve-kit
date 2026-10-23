@@ -1,4 +1,9 @@
-import { bodyHeaders, trimDataCaches } from "./cache-budget"
+import {
+  bodyHeaders,
+  type DataCacheBudget,
+  readDataCacheBudget,
+  trimDataCaches,
+} from "./cache-budget"
 import { fetchBytes, type Fetcher } from "./cdn"
 import { SnapshotError } from "./format-v3/errors"
 import { integerValue, type JsonObject, stringValue } from "./format-v3/json"
@@ -45,6 +50,12 @@ export function rawRetentionPlan(
 interface ReadOptions {
   readonly signal?: AbortSignal
   readonly priority?: "foreground" | "background" | "low" | "speculative"
+  readonly batch?: BatchWrites
+}
+interface BatchWrites {
+  readonly inventory: DataCacheBudget | undefined
+  readonly failures: number
+  writing: Promise<void>
 }
 interface Pending {
   readonly signal: AbortSignal | undefined
@@ -129,6 +140,35 @@ export class RawBlobStore {
     }
   }
 
+  /** Inventory lives only for this transfer window; later runs re-read other tabs' changes. */
+  async batch(
+    run: (read: RawBlobStore["read"]) => Promise<void>,
+    inventory?: DataCacheBudget,
+  ): Promise<void> {
+    const batch: BatchWrites = {
+      inventory:
+        inventory ??
+        (this.storage ? await readDataCacheBudget(this.storage, this.base) : undefined),
+      failures: this.failures,
+      writing: Promise.resolve(),
+    }
+    try {
+      await run((file, options) => this.read(file, { ...options, batch }))
+    } finally {
+      await batch.writing
+      let fits = false
+      try {
+        fits = !this.storage || (await trimDataCaches(this.storage, this.base))
+      } catch {
+        // A failed closing scan cannot turn a partial batch into a completion claim.
+      }
+      if (!fits) {
+        this.failures += 1
+        this.persistent = false
+      }
+    }
+  }
+
   private slot(file: RawBlobDescriptor): string {
     return `${this.base}/__sve-raw/${encodeURIComponent(file.sha256)}/bytes`
   }
@@ -194,33 +234,50 @@ export class RawBlobStore {
       signal?.throwIfAborted()
       if (!(await valid(bytes))) continue
       signal?.throwIfAborted()
-      if (cache) await this.write(cache, slot, bytes)
+      if (cache) await this.write(cache, slot, bytes, options.batch)
       signal?.throwIfAborted()
       return bytes
     }
     throw new SnapshotError("blob-integrity", `hash/length mismatch for ${file.key} after retry`)
   }
 
-  private async write(cache: Cache, slot: string, bytes: Uint8Array): Promise<void> {
+  private write(cache: Cache, slot: string, bytes: Uint8Array, batch?: BatchWrites): Promise<void> {
+    if (!batch) return this.persist(cache, slot, bytes)
+    // Serialize accounting for the two producers, without locking any other store or tab.
+    const write = batch.writing.then(() => this.persist(cache, slot, bytes, batch))
+    batch.writing = write.catch(() => undefined)
+    return write
+  }
+
+  private async persist(
+    cache: Cache,
+    slot: string,
+    bytes: Uint8Array,
+    batch?: BatchWrites,
+  ): Promise<void> {
     const failures = this.failures
+    const headers = bodyHeaders(bytes.length)
     const response = () =>
       new Response(bytes.slice().buffer, {
-        headers: { ...bodyHeaders(bytes.length), "content-length": String(bytes.length) },
+        headers: { ...headers, "content-length": String(bytes.length) },
       })
     try {
+      if (!this.storage) return
+      const budget = batch?.inventory ?? (await readDataCacheBudget(this.storage, this.base))
       try {
         await cache.put(slot, response())
       } catch {
-        if (!this.storage) return
-        if (!(await trimDataCaches(this.storage, this.base, bytes.length, true)))
-          throw new Error("Cache capacity")
+        if (!(await budget.trim(bytes.length, true))) throw new Error("Cache capacity")
         await cache.put(slot, response())
       }
-      if (this.storage && !(await trimDataCaches(this.storage, this.base))) {
+      budget.record(this.name, cache, slot, bytes.length, Number(headers["x-sve-touched"]))
+      if (!(await budget.trim())) {
         await cache.delete(slot)
+        budget.forget(this.name, slot)
         throw new Error("Cache capacity")
       }
-      if (this.failures === failures) this.persistent = true
+      if (this.failures === failures && (!batch || failures === batch.failures))
+        this.persistent = true
     } catch {
       this.failures += 1
       this.persistent = false

@@ -108,7 +108,14 @@ it("fixes each edition's one-hop text closure, exact changed base and byte total
 })
 
 it("counts persisted writes only and stops partially on failed storage or a cleared earlier file", async () => {
-  for (const mode of ["blocked", "failed", "cleared", "unavailable"] as const) {
+  for (const mode of [
+    "blocked",
+    "failed",
+    "cleared",
+    "unavailable",
+    "quota-retry",
+    "quota-stop",
+  ] as const) {
     const data = await fixture()
     const files = new Map([
       ["common", data.common],
@@ -122,7 +129,29 @@ it("counts persisted writes only and stops partially on failed storage or a clea
     const entered = Promise.withResolvers<undefined>()
     const gate = Promise.withResolvers<undefined>()
     const put = cache.put.bind(cache)
+    const attempts = new Map<string, number>()
+    if (mode.startsWith("quota")) {
+      const evictable = await storage.open(`sve-snapshot:${encodeURIComponent(base)}`)
+      await evictable.put(
+        `${base}/unused`,
+        new Response("x", {
+          headers: { "x-sve-bytes": "1024", "x-sve-touched": "0" },
+        }),
+      )
+      await evictable.put(
+        `${base}/pointer/active`,
+        new Response("active", {
+          headers: { "x-sve-bytes": "6", "x-sve-touched": "0" },
+        }),
+      )
+      // More work than the producer window makes stopping observable at the network boundary.
+      for (const [key, file] of data.files) files.set(key, file)
+    }
     cache.put = async (key, response) => {
+      const url = typeof key === "string" ? key : key instanceof URL ? key.href : key.url
+      attempts.set(url, (attempts.get(url) ?? 0) + 1)
+      if (mode === "quota-stop" || (mode === "quota-retry" && attempts.get(url) === 1))
+        throw new DOMException("quota", "QuotaExceededError")
       if (mode === "blocked") {
         entered.resolve(undefined)
         await gate.promise
@@ -140,6 +169,7 @@ it("counts persisted writes only and stops partially on failed storage or a clea
       mode === "unavailable" ? undefined : storage,
       data.network,
     )
+    if (mode.startsWith("quota")) await raw.retain(files, "adopted")
     const plan = new FetchPlan(
       { base, manifestHash: "adopted", dataVersion: "v1", edition: "jp", files },
       raw,
@@ -154,6 +184,71 @@ it("counts persisted writes only and stops partially on failed storage or a clea
     await running
     expect(updates.at(-1)?.phase).toBe(mode === "blocked" ? "complete" : "partial")
     if (mode !== "blocked") expect(updates.at(-1)?.missing).toBeGreaterThan(0)
+    if (mode.startsWith("quota")) {
+      expect(Math.max(...attempts.values())).toBeLessThanOrEqual(2)
+      expect([...attempts.values()]).toContain(2)
+      expect(data.network.mock.calls.length).toBeLessThan(files.size)
+      expect(new Set(data.network.mock.calls.map(([url]) => url)).size).toBe(
+        data.network.mock.calls.length,
+      )
+      expect(updates.at(-1)).toMatchObject({ phase: "partial", reason: "write" })
+      expect(
+        await (
+          await storage.open(`sve-snapshot:${encodeURIComponent(base)}`)
+        ).match(`${base}/pointer/active`),
+      ).toBeDefined()
+    }
     if (mode === "unavailable") expect(data.network).not.toHaveBeenCalled()
   }
+})
+
+it("keeps whole-inventory enumeration bounded as a raw batch grows", async () => {
+  const scans: { files: number; inventories: number; rawKeys: number }[] = []
+  for (const count of [4, 40]) {
+    const storage = memoryCache()
+    const cache = await storage.open(`sve-raw:${encodeURIComponent(base)}`)
+    const open = storage.open.bind(storage)
+    storage.open = (name) => (name.startsWith("sve-raw:") ? Promise.resolve(cache) : open(name))
+    const inventories = vi.spyOn(storage, "keys")
+    const keys = vi.spyOn(cache, "keys")
+    const files = new Map<string, JsonObject>()
+    const bodies = new Map<string, Uint8Array>()
+    for (let i = 0; i < count; i += 1) {
+      const key = `file-${String(i)}`
+      const body = new TextEncoder().encode(key)
+      bodies.set(`${base}/${key}.json`, body)
+      files.set(key, {
+        key,
+        path: `${key}.json`,
+        sha256: await transferDigest(body),
+        bytes: body.length,
+        role: "text",
+        region: "jp",
+        compressed_bytes: { br: 1 },
+        dependencies: [],
+        source_refs: [],
+      })
+    }
+    const network = vi.fn<Fetcher>((url) =>
+      Promise.resolve(new Response(bodies.get(url)?.slice().buffer)),
+    )
+    const raw = new RawBlobStore(base, network, storage, network)
+    const plan = new FetchPlan(
+      { base, manifestHash: "batch", dataVersion: "v1", edition: "jp", files },
+      raw,
+    )
+    const updates: FetchProgress[] = []
+    await plan.run(new AbortController().signal, (progress) => updates.push(progress))
+    expect(updates.at(-1)).toMatchObject({ phase: "complete", total: count, missing: 0 })
+    expect(network).toHaveBeenCalledTimes(count)
+    scans.push({
+      files: count,
+      inventories: inventories.mock.calls.length,
+      rawKeys: keys.mock.calls.length,
+    })
+  }
+  expect(scans[1]?.inventories).toBe(scans[0]?.inventories)
+  expect(scans[1]?.rawKeys).toBe(scans[0]?.rawKeys)
+  expect(scans[1]?.inventories).toBeLessThanOrEqual(2)
+  expect(scans[1]?.rawKeys).toBeLessThanOrEqual(2)
 })

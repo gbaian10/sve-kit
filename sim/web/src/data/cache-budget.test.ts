@@ -2,7 +2,7 @@
 import { expect, it, vi } from "vitest"
 
 import { memoryCache } from "../test-utils/cache"
-import { trimDataCaches, VIEW_BUDGET } from "./cache-budget"
+import { readDataCacheBudget, trimDataCaches, VIEW_BUDGET } from "./cache-budget"
 import { VerifiedCache } from "./verified-cache"
 
 it("keeps the latest complete view, bounds all view slots together, and isolates another root", async () => {
@@ -50,6 +50,16 @@ it("combines raw metadata and decoded records under the same root budget", async
   await trimDataCaches(storage, root)
   expect((await cache.keys()).length).toBe(1)
   expect(await raw.keys()).toHaveLength(1)
+  const budget = await readDataCacheBudget(storage, root)
+  for (let i = 0; i < 2; i += 1)
+    budget.record(
+      `sve-raw:${encodeURIComponent(root)}`,
+      raw,
+      `${root}/__sve-raw/${hash}/bytes`,
+      40 * 1024 * 1024,
+      4,
+    )
+  expect(budget.fits([{ sha256: `sha256:${"2".repeat(64)}`, bytes: 15 * 1024 * 1024 }])).toBe(true)
   await raw.put(
     `${root}/extra`,
     new Response("x", {
@@ -60,6 +70,31 @@ it("combines raw metadata and decoded records under the same root budget", async
   expect(await cache.keys()).toHaveLength(1)
   expect(await raw.match(`${root}/__sve-raw/${hash}/bytes`)).toBeUndefined()
   expect(await raw.match(`${root}/extra`)).toBeDefined()
+})
+
+it("replaces and forgets a relative slot against absolute cache keys within its own root", async () => {
+  const storage = memoryCache()
+  const hash = `sha256%3A${"1".repeat(64)}`
+  const size = (mib: number, touched: number) => ({
+    headers: { "x-sve-bytes": String(mib * 1024 * 1024), "x-sve-touched": String(touched) },
+  })
+  const rawName = `sve-raw:${encodeURIComponent("/cdn")}`
+  const raw = await storage.open(rawName)
+  const slot = `/cdn/__sve-raw/${hash}/bytes`
+  await raw.put(slot, new Response("x", size(30, 1)))
+  await (
+    await storage.open(`sve-search-index:${encodeURIComponent("/cdn")}`)
+  ).put("/cdn/index/other", new Response("x", size(30, 2)))
+  await (
+    await storage.open(`sve-raw:${encodeURIComponent("/other")}`)
+  ).put(slot, new Response("x", size(50, 3)))
+  const budget = await readDataCacheBudget(storage, "/cdn")
+  const blob = (mib: number) => [{ sha256: `sha256:${"2".repeat(64)}`, bytes: mib * 1024 * 1024 }]
+  for (let i = 0; i < 2; i += 1) budget.record(rawName, raw, slot, 30 * 1024 * 1024, 4 + i)
+  expect(budget.fits(blob(10))).toBe(true)
+  budget.forget(rawName, slot)
+  expect(budget.fits(blob(40))).toBe(true)
+  expect(budget.fits(blob(60))).toBe(false)
 })
 
 it("evicts a legacy headerless record once without reading its body on later scans", async () => {
