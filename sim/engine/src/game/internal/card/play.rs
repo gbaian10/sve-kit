@@ -24,13 +24,13 @@ pub enum CardPlay {
     Awaiting(DecisionView),
     /// Complete printed Spell or ability, followed by explicit check timing.
     Resolved(Activation),
-    /// Complete follower card play, followed by its separately produced fanfare.
+    /// Complete follower or amulet play, followed by its separately produced fanfare.
     Entered(CardEntry),
     /// One pending occurrence cannot legally be played and has been cancelled by rules.
     Cancelled,
 }
 
-/// Complete follower rule play; its fanfare remains a separate execution.
+/// Complete follower or amulet rule play; fanfare remains a separate execution.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct CardEntry {
     /// Authority producer for the card play.
@@ -271,7 +271,7 @@ fn collect_modes(program: &Program) -> Result<Vec<PlayMode>> {
     reason = "Formal plays share the authority's execution and rollback boundary."
 )]
 impl Game {
-    /// Play an admitted ordinary Spell or an admitted ordinary follower.
+    /// Play an admitted ordinary Spell, follower or amulet.
     ///
     /// # Errors
     /// Rejects unsupported cards, timing, carry, payment and body failures atomically.
@@ -280,7 +280,7 @@ impl Game {
         let result = if self.object_type(holder)? == "スペル" {
             self.play_internal_spell(holder, actor)
         } else {
-            self.play_internal_follower(holder, actor)
+            self.play_internal_field_card(holder, actor)
                 .map(CardPlay::Entered)
         };
         self.finish_card_attempt(before, result)

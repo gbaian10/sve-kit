@@ -18,6 +18,24 @@ pub(super) fn act() -> Action {
     }
 }
 
+pub(super) fn self_to_cemetery() -> Action {
+    Action::Move {
+        objects: Selector::Objects {
+            objects: vec![ObjectOperand::SourceHolder {}],
+        },
+        movement: MoveSpec {
+            to: MoveDestination::Owners {
+                zone: OwnerZone::Cemetery,
+            },
+            position: None,
+            order: None,
+            initial_posture: None,
+            entry_effects: vec![],
+        },
+        reason: MoveReason::Put,
+    }
+}
+
 pub(super) fn paid_ability(actions: Vec<Action>, body: Vec<Located<Node>>) -> Located<Ability> {
     let mut a = ability(1, body);
     a.node.play.as_mut().unwrap().costs = CostSpec::Ordered {

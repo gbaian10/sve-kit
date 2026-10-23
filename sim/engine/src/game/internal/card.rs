@@ -129,9 +129,7 @@ impl Game {
         card: &WellFormedCardProgram,
     ) -> Result<()> {
         let base_print = self.catalog.face(card_no, 0)?;
-        if base_print["cost"].is_null() {
-            return Err(unsupported("missing printed card cost"));
-        }
+        check_printed_face(base_print)?;
         if matches!(
             base_print["card_type"].as_str(),
             Some("フォロワー" | "スペル" | "アミュレット")
@@ -166,11 +164,16 @@ impl Game {
                 return Err(invalid("invalid or duplicate printed ability coordinate"));
             }
             let printed = self.catalog.face(card_no, ordinal)?;
-            if printed["cost"].is_null() {
-                return Err(unsupported("missing printed face cost"));
-            }
-            if ability.kind == AbilityKind::Activated && printed["card_type"] != "フォロワー" {
-                return Err(unsupported("activated printed face is not a follower"));
+            check_printed_face(printed)?;
+            if ability.kind == AbilityKind::Activated
+                && !matches!(
+                    printed["card_type"].as_str(),
+                    Some("フォロワー" | "アミュレット")
+                )
+            {
+                return Err(unsupported(
+                    "activated printed face is not an ordinary field card",
+                ));
             }
             if ability.kind == AbilityKind::Spell {
                 play::check_spell(ability, printed)?;
@@ -289,7 +292,7 @@ impl Game {
             || self.state.turn["phase"] != "main"
             || object.state["silenced"] == true
             || object.state["evolved_with"].is_string()
-            || self.object_type(holder)? != "フォロワー"
+            || !matches!(self.object_type(holder)?, "フォロワー" | "アミュレット")
             || !self.prepared.is_empty()
         {
             return Err(unsupported("activation holder, controller or timing"));
@@ -432,6 +435,17 @@ impl Game {
         }
         Ok(())
     }
+}
+
+fn check_printed_face(printed: &serde_json::Value) -> Result<()> {
+    if printed["cost"].is_null() {
+        return Err(unsupported("missing printed card cost"));
+    }
+    if printed["card_type"] == "アミュレット" && (printed["power"] != "-" || printed["hp"] != "-")
+    {
+        return Err(unsupported("amulet with printed combat statistics"));
+    }
+    Ok(())
 }
 
 fn check_header(ability: &Ability) -> Result<()> {

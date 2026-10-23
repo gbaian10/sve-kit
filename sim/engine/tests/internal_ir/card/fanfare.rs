@@ -31,6 +31,23 @@ pub(super) fn position_for_card(
 }
 
 pub(super) fn fragment_position(seat: u32, card_no: &str, pp: i64, deck: Value) -> Game {
+    let (catalog, initial) = fragment_setup(seat, card_no, pp, deck);
+    Game::new(
+        catalog,
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "fanfare-seed",
+    )
+    .unwrap()
+}
+
+pub(super) fn fragment_setup(
+    seat: u32,
+    card_no: &str,
+    pp: i64,
+    deck: Value,
+) -> (Arc<Catalog>, Value) {
     let snapshot = read_to_string(var_os("SVE_TEST_SNAPSHOT").unwrap()).unwrap();
     let registry = json!({"format":1,"kind":"keyword_registry","keywords":{}}).to_string();
     let mut effects = json!({"format":1,"kind":"effect_set","cards":{
@@ -51,14 +68,7 @@ pub(super) fn fragment_position(seat: u32, card_no: &str, pp: i64, deck: Value) 
     initial["players"][actor]["pp"] = json!({"current":pp,"max":pp});
     initial["players"][actor]["zones"]["hand"] = json!([{"id":"s","card":card_no}]);
     initial["players"][opponent]["zones"]["field"] = json!([]);
-    Game::new(
-        catalog,
-        &initial,
-        &Value::Null,
-        &Value::Null,
-        "fanfare-seed",
-    )
-    .unwrap()
+    (catalog, initial)
 }
 
 #[test]
