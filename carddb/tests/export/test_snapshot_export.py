@@ -18,6 +18,7 @@ from sve_carddb.core.json import array, canonical, digest, object_value, parse, 
 from sve_carddb.export.buckets import bucket
 from sve_carddb.export.media import prepare_media
 from sve_carddb.export.reader import read_snapshot
+from sve_carddb.export.semantics import _qa_card_index
 from sve_carddb.export.transport import (
     Batch,
     Brotli,
@@ -88,6 +89,34 @@ def test_reader_rejects_inexact_current_qa_index(
             exported.manifest | {"qa_card_index": index},
             {key: blob.raw for key, blob in exported.payloads.items()},
         )
+
+
+def test_reader_rejects_qa_index_in_the_wrong_order() -> None:
+    def qa(identifier: str, number: str | None) -> JsonValue:
+        return {
+            "id": identifier,
+            "region": "jp",
+            "official_number": number,
+            "current_version_id": identifier + "-v",
+        }
+
+    view: dict[str, list[JsonValue]] = {
+        "qa": [qa("c", None), qa("b", "Q10"), qa("a", "Q2")],
+        "qa_version": [
+            {"id": key + "-v", "cards": ["card"]} for key in ("a", "b", "c")
+        ],
+    }
+    versions = {
+        string(object_value(row)["id"]): object_value(row) for row in view["qa_version"]
+    }
+    manifest = {
+        "regions": ["jp"],
+        "qa_card_index": {"jp": {"card": ["a-v", "b-v", "c-v"]}},
+    }
+    _qa_card_index(view, manifest, versions)  # type: ignore[arg-type]
+    manifest["qa_card_index"] = {"jp": {"card": ["b-v", "a-v", "c-v"]}}
+    with pytest.raises(ValueError, match="QA card index mismatch"):
+        _qa_card_index(view, manifest, versions)  # type: ignore[arg-type]
 
 
 def test_clean_exports_are_exact_bytes(
