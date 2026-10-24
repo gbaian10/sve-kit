@@ -9,28 +9,26 @@ import {
   toggleCredited,
   UNCREDITED_ARTIST,
 } from "../../domain/artistFilter"
-import type { TextLang } from "../../domain/search"
+import type { Region } from "../../domain/search"
 import { FacetCheckbox, FacetFilter } from "./FacetFilter"
 
-// Artists are credited as the official site prints them, so there is nothing to translate: the
-// list is the printed names, ordered in the UI language's collation, with a search box. Above it
-// two summary rows cover the whole edition: every credited printing (ticking selects all artists)
-// and the printings nobody credits.
+// Ordered by the card edition's collation, so the list does not change with the UI language.
+// Names are shown as the official site prints them, never translated.
 export function ArtistFilter({
   options,
-  textLang,
+  edition,
   selected,
   onChange,
 }: {
   readonly options:
     | { readonly artists: SearchOptions["artists"]; readonly counts: SearchOptions["artistCounts"] }
     | undefined
-  readonly textLang: TextLang
+  readonly edition: Region
   readonly selected: readonly string[]
   readonly onChange: (selected: string[]) => void
 }) {
   const { t } = useTranslation()
-  const collator = new Intl.Collator(textLang === "zh-Hant" ? "zh-Hant" : textLang)
+  const collator = new Intl.Collator(edition === "jp" ? "ja" : "en")
   const items = (options?.artists ?? [])
     .map((artist) => ({ code: artist.id, label: artist.name }))
     .sort((a, b) => collator.compare(a.label, b.label) || a.code.localeCompare(b.code))

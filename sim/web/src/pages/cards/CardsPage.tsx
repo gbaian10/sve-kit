@@ -904,7 +904,7 @@ export function CardsPage() {
           artists: (
             <ArtistFilter
               options={printingOptions?.artist}
-              textLang={textLang}
+              edition={edition}
               selected={query.artists}
               onChange={(artists) => {
                 commit({ ...query, artists })
