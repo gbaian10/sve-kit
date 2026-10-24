@@ -54,6 +54,44 @@ function quality(value: SelectedText | null): string | undefined {
     : undefined
 }
 
+function OriginalText({
+  state,
+  emphasis,
+  client,
+  edition,
+}: {
+  readonly state: AnnotatedTextState
+  readonly emphasis: boolean
+  readonly client: SnapshotClient
+  readonly edition: Region
+}) {
+  const { t } = useTranslation()
+  const { readiness, value } = state
+  if (readiness.basic === "pending")
+    return (
+      <p role="status" className="text-13">
+        {t("card.annotationPending")}
+      </p>
+    )
+  if (readiness.basic === "error")
+    return (
+      <p role="alert" className="text-13">
+        {readiness.error?.kind === "validation" ? t("card.textFailed") : t("card.textLoadFailed")}
+      </p>
+    )
+  if (!value) return <p className="text-13">{t("card.textUnavailable")}</p>
+  return (
+    <AnnotatedText
+      value={value.original}
+      context={value}
+      emphasis={emphasis}
+      annotationReady={readiness.annotations === "ready" || readiness.annotations === "none"}
+      client={client}
+      edition={edition}
+    />
+  )
+}
+
 /** A section printed under the effect, separated from it by a rule like on the card face. */
 function SectionText({
   state,
@@ -87,6 +125,8 @@ function SectionText({
 }) {
   const { t } = useTranslation()
   const { readiness, value } = state
+  const translated = show === "translated" ? value?.translated : undefined
+  const boxed = pair === "self" ? (translated ? state : undefined) : pair
   let body: ReactNode
   if (readiness.basic === "pending")
     body = (
@@ -102,47 +142,34 @@ function SectionText({
     )
   else if (!value) body = <p className="text-13">{t("card.textUnavailable")}</p>
   else {
-    const translated = show === "translated" ? value.translated : undefined
-    const boxed = pair === "self" ? (translated ? state : undefined) : pair
-    const pairedOriginal = boxed?.value && (
-      <OriginalBox>
-        <AnnotatedText
-          value={boxed.value.original}
-          context={boxed.value}
-          emphasis={emphasis}
-          annotationReady={
-            boxed.readiness.annotations === "ready" || boxed.readiness.annotations === "none"
-          }
-          client={client}
-          edition={edition}
-        />
-      </OriginalBox>
-    )
     body = (
-      <>
-        <AnnotatedText
-          value={translated ?? value.original}
-          context={value}
-          emphasis={emphasis}
-          annotationReady={readiness.annotations === "ready" || readiness.annotations === "none"}
-          client={client}
-          edition={edition}
-        />
-        {pairedOriginal}
-        {translated && sourceLine && <TranslationSourceLine value={value} />}
-        {show === "translated" &&
-          noteMissing &&
-          !translated &&
-          stringValue(value.original.unit["lang"]) !== language && (
-            <p className="text-13 text-text-2">{t("card.translationMissing")}</p>
-          )}
-      </>
+      <AnnotatedText
+        value={translated ?? value.original}
+        context={value}
+        emphasis={emphasis}
+        annotationReady={readiness.annotations === "ready" || readiness.annotations === "none"}
+        client={client}
+        edition={edition}
+      />
     )
   }
   return (
     <div className={cn("space-y-1", rule && "border-t border-border pt-2")} data-section>
       {label !== undefined && <p className="text-13 text-text-3">{label}</p>}
       {body}
+      {boxed && (
+        <OriginalBox>
+          <OriginalText state={boxed} emphasis={emphasis} client={client} edition={edition} />
+        </OriginalBox>
+      )}
+      {value && translated && sourceLine && <TranslationSourceLine value={value} />}
+      {value &&
+        show === "translated" &&
+        noteMissing &&
+        !translated &&
+        stringValue(value.original.unit["lang"]) !== language && (
+          <p className="text-13 text-text-2">{t("card.translationMissing")}</p>
+        )}
     </div>
   )
 }
@@ -319,34 +346,12 @@ export function CardText({
   // The original text: this printing's own wording when it differs, else the owner's.
   let printedEffect: ReactNode
   if (!printed) printedEffect = effectOriginal
-  else if (printedText.readiness.basic === "pending")
-    printedEffect = (
-      <p role="status" className="text-13">
-        {t("card.annotationPending")}
-      </p>
-    )
-  else if (printedText.readiness.basic === "error")
-    printedEffect = (
-      <p role="alert" className="text-13">
-        {printedText.readiness.error?.kind === "validation"
-          ? t("card.textFailed")
-          : t("card.textLoadFailed")}
-      </p>
-    )
-  else if (!printedText.value)
-    printedEffect = <p className="text-13">{t("card.textUnavailable")}</p>
   else {
-    const printedValue = printedText.value
     printedEffect =
-      stringValue(printedValue.original.unit["text"]) === "" ? null : (
-        <AnnotatedText
-          value={printedValue.original}
-          context={printedValue}
+      printedText.value && stringValue(printedText.value.original.unit["text"]) === "" ? null : (
+        <OriginalText
+          state={printedText}
           emphasis={prefs.termEmphasis}
-          annotationReady={
-            printedText.readiness.annotations === "ready" ||
-            printedText.readiness.annotations === "none"
-          }
           client={client}
           edition={edition}
         />
