@@ -44,6 +44,10 @@ type ImageEncoder = (request: ImageRequest) => Promise<Uint8Array>
 export interface BuildOptions {
   readonly encodeImage: ImageEncoder
   readonly cards?: readonly Card[]
+  readonly dataAsOf?: string
+  readonly restrictionAsOf?: string
+  readonly dataVersion?: string
+  readonly publishedAt?: string
 }
 
 export interface BuiltSnapshot {
@@ -1746,8 +1750,8 @@ function blob(value: JsonValue): { bytes: Uint8Array; hash: string; path: string
 
 export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapshot> {
   const cards = options.cards ?? CARDS
-  const dataVersion = "20260929T000000Z-0001"
-  const publishedAt = "2026-09-29T00:00:00Z"
+  const dataVersion = options.dataVersion ?? "20260929T000000Z-0001"
+  const publishedAt = options.publishedAt ?? "2026-09-29T00:00:00Z"
   const families = SETS
   const vocabulary = SYNTHETIC_VOCABULARY
   const builder = new Builder()
@@ -2068,7 +2072,7 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
     format_version: FORMAT,
     data_version: dataVersion,
     published_at: publishedAt,
-    data_as_of: AS_OF,
+    data_as_of: options.dataAsOf ?? AS_OF,
     regions,
     languages,
     min_reader_version: "4.0.2",
@@ -2095,8 +2099,12 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
     restriction_coverage: [
       {
         profile_id: PROFILE.id,
-        from_date: PROFILE.effectiveFrom,
-        until_date: null,
+        from_date: options.restrictionAsOf ?? PROFILE.effectiveFrom,
+        until_date: options.restrictionAsOf
+          ? new Date(Date.parse(`${options.restrictionAsOf}T00:00:00Z`) + 86_400_000)
+              .toISOString()
+              .slice(0, 10)
+          : null,
         state: "complete",
         source_url: "https://example.invalid/restrictions",
       },
@@ -2108,7 +2116,7 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
         scope_key: "region:*",
         from_date: "2026-01-01",
         until_date: null,
-        as_of: AS_OF,
+        as_of: options.dataAsOf ?? AS_OF,
         state: "complete",
         source_url: "https://example.invalid/errata",
       },
@@ -2118,7 +2126,7 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
         scope_key: "region:*",
         from_date: "2026-01-01",
         until_date: null,
-        as_of: AS_OF,
+        as_of: options.dataAsOf ?? AS_OF,
         state: "complete",
         source_url: "https://example.invalid/qa",
       },

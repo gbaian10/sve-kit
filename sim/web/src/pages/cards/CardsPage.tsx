@@ -704,7 +704,12 @@ export function CardsPage() {
         <Notice tone="info" role="status">
           {!printingOptions?.restrictions || printingOptions.restrictions.state === "unknown"
             ? t("filters.restrictionsUnknown")
-            : t("filters.restrictionsDate", { date: printingOptions.restrictions.onDate })}
+            : t(
+                printingOptions.restrictions.synthetic
+                  ? "filters.restrictionsSyntheticDate"
+                  : "filters.restrictionsDate",
+                { date: printingOptions.restrictions.onDate },
+              )}
           {printingOptions?.restrictions?.synthetic ? ` ${t("filters.restrictionsSynthetic")}` : ""}
           {printingOptions?.restrictions?.state === "partial"
             ? ` ${t("filters.restrictionsPartial")}`

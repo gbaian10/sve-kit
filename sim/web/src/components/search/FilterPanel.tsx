@@ -236,7 +236,12 @@ export function FilterPanel({
               <div className="text-13 text-text-1">{t("filters.restrictionsOnly")}</div>
               <p id={`${id}-restriction-hint`} className="text-12 text-text-3">
                 {restrictions && restrictions.state !== "unknown"
-                  ? t("filters.restrictionsDate", { date: restrictions.onDate })
+                  ? t(
+                      restrictions.synthetic
+                        ? "filters.restrictionsSyntheticDate"
+                        : "filters.restrictionsDate",
+                      { date: restrictions.onDate },
+                    )
                   : t("filters.restrictionsUnknown")}
                 {restrictions?.synthetic ? ` ${t("filters.restrictionsSynthetic")}` : ""}
                 {restrictions?.state === "partial" ? ` ${t("filters.restrictionsPartial")}` : ""}

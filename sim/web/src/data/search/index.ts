@@ -27,7 +27,7 @@ import {
   objectValue,
   stringValue,
 } from "../format-v3/json"
-import type { RestrictionSelection, RestrictionStatus } from "../restrictions"
+import type { CardRestriction, RestrictionSelection, RestrictionStatus } from "../restrictions"
 import type { CardIndex } from "../store"
 import type { BootstrapColumns } from "./bootstrap"
 import { cardNumberOrder } from "./card-number-order"
@@ -49,6 +49,7 @@ interface SearchOption {
 }
 export interface SearchOptions {
   readonly restrictions?: RestrictionStatus
+  readonly restrictionDetails?: Readonly<Record<string, readonly CardRestriction[]>>
   readonly keywords: readonly SearchOption[]
   readonly keywordCoverage: "pending" | "unknown" | "partial" | "complete"
   readonly types: readonly SearchOption[]
@@ -179,7 +180,7 @@ const seal = <T extends string>(columns: Record<T, number[]>): Record<T, Uint32A
   ) as Record<T, Uint32Array>
 
 /** Bump when the stored layout or derived data changes, so older images are rebuilt. */
-export const INDEX_IMAGE_FORMAT = 23
+export const INDEX_IMAGE_FORMAT = 24
 
 // Card-level special kinds, packed into the `kinds` column; Token stays per printing.
 const KIND_EVOLVE = 1
@@ -657,7 +658,12 @@ function build(
     options: {
       ...options,
       keywordCoverage: "pending",
-      ...(restrictions ? { restrictions: restrictions.status } : {}),
+      ...(restrictions
+        ? {
+            restrictions: restrictions.status,
+            restrictionDetails: Object.fromEntries(restrictions.details),
+          }
+        : {}),
     },
     releases,
     targets,
@@ -983,7 +989,12 @@ export class SearchIndex {
       this.optionsValue = {
         ...options,
         keywordCoverage: this.optionsValue.keywordCoverage,
-        ...(this.optionsValue.restrictions ? { restrictions: this.optionsValue.restrictions } : {}),
+        ...(this.optionsValue.restrictions
+          ? {
+              restrictions: this.optionsValue.restrictions,
+              restrictionDetails: this.optionsValue.restrictionDetails,
+            }
+          : {}),
       }
       this.releasesValue = releases
       this.indexTargets()
@@ -1244,6 +1255,8 @@ export class SearchIndex {
   private item(printing: number, state: SearchQuery["state"]): SearchPage["items"][number] {
     const card = this.printings.card[printing] ?? 0
     const summary = this.printings.summary[printing] ?? 0
+    const restrictions =
+      this.optionsValue.restrictionDetails?.[this.pool.get(this.cards.id[card] ?? 0)]
     return {
       key: this.pool.get(
         state.unit === "printing"
@@ -1253,7 +1266,12 @@ export class SearchIndex {
             : (this.cards.id[card] ?? 0),
       ),
       printingId: this.pool.get(this.printings.id[printing] ?? 0),
-      summary: summary ? (this.summaries.row(summary - 1) as unknown as CardSummary) : undefined,
+      summary: summary
+        ? {
+            ...(this.summaries.row(summary - 1) as unknown as CardSummary),
+            ...(restrictions?.length ? { restrictions } : {}),
+          }
+        : undefined,
     }
   }
 

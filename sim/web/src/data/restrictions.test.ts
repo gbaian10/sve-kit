@@ -159,7 +159,7 @@ it("includes other cards with the same construction name and counts a two-faced 
       ...bootstrap
         .index()
         .facesOf("c:bp01-060")
-        .map((face) => ({ ...binding, face_id: face["id"] })),
+        .map((face) => ({ ...binding, face_id: stringValue(face["id"]) })),
     ],
   })
   expect([...selection.cards].sort()).toEqual(["c:bp01-001", "c:bp01-021", "c:bp01-060"])
@@ -211,3 +211,47 @@ it.each([null, "missing"])(
     expect(selection.cards.size).toBe(0)
   },
 )
+
+it("uses the source cutoff rather than a newer card snapshot date", () => {
+  const manifest = {
+    ...built.manifest,
+    data_as_of: "2026-10-06",
+    restriction_coverage: (built.manifest["restriction_coverage"] as JsonObject[]).map(
+      (window) => ({ ...window, from_date: "2026-09-25", until_date: "2026-09-26" }),
+    ),
+  }
+  const selection = selectRestrictions(
+    manifest,
+    (table) => bootstrap.rows(table),
+    bootstrap.index(),
+    "jp",
+  )
+  expect(selection.status.onDate).toBe("2026-09-25")
+  expect(selection.details.get("c:bp01-021")).toEqual([
+    {
+      id: "restr:bp01-021",
+      formatCode: "standard",
+      maxCopies: 1,
+      effectiveFrom: "2026-04-01",
+      sourceUrl: "https://example.invalid/restrictions",
+      asOf: "2026-09-25",
+    },
+  ])
+  expect(
+    selectRestrictions(
+      manifest,
+      (table) => bootstrap.rows(table),
+      bootstrap.index(),
+      "jp",
+      "2026-10-06",
+    ).status.state,
+  ).toBe("unknown")
+})
+
+it("keeps directly evidenced bans and one-copy limits queryable before general construction rules arrive", () => {
+  const profiles = bootstrap.rows("rules_profile").map((profile) => ({ ...profile, revisions: [] }))
+  const selection = lookup({ rules_profile: profiles })
+  expect(selection.status.state).toBe("complete")
+  expect(selection.cards.has("c:bp01-021")).toBe(true)
+  expect(selection.details.get("c:bp01-021")?.[0]?.maxCopies).toBe(1)
+})

@@ -788,7 +788,6 @@ export class SearchEngine {
               (table) => sealedBootstrap.rows(table),
               sealedBootstrap.index(),
               request.edition,
-              stringValue(manifest["data_as_of"]),
             ),
           ),
       )

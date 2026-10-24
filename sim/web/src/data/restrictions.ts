@@ -1,14 +1,29 @@
 import type { Region } from "../domain/search"
+import type { LoadedSnapshot, SnapshotClient } from "./client"
 import type { Row } from "./format-v3/decode"
 import { arrayValue, type JsonObject, objectValue, stringValue } from "./format-v3/json"
-import type { CardIndex } from "./store"
+import { mergedRows } from "./format-v3/reader"
+import { type CardIndex, createCardIndex } from "./store"
 
 export interface RestrictionStatus {
   readonly state: "unknown" | "partial" | "complete"
   readonly onDate: string
   readonly synthetic?: boolean
 }
+export interface CardRestriction {
+  readonly id: string
+  readonly formatCode: "standard"
+  readonly maxCopies: number | null
+  readonly effectiveFrom: string
+  readonly sourceUrl: string | null
+  readonly asOf: string
+}
+export interface CardRestrictionDetails {
+  readonly status: RestrictionStatus
+  readonly restrictions: readonly CardRestriction[]
+}
 export interface RestrictionSelection {
+  readonly details: ReadonlyMap<string, readonly CardRestriction[]>
   readonly status: RestrictionStatus
   readonly cards: ReadonlySet<string>
 }
@@ -18,33 +33,52 @@ const contains = (row: Row, day: string, from: string, until: string) =>
   row[from] <= day &&
   (row[until] === null || (typeof row[until] === "string" && day < row[until]))
 
-/** Reads explicit snapshot dates; a missing coverage window never proves absence. */
+/** A source cutoff cannot exceed the snapshot date; missing coverage never proves absence. */
 export function selectRestrictions(
   manifest: JsonObject,
   rows: (table: string) => readonly Row[],
   index: CardIndex,
   edition: Region,
-  onDate: string,
+  requestedDate?: string,
 ): RestrictionSelection {
+  let onDate = requestedDate ?? stringValue(manifest["data_as_of"])
   const cards = new Set<string>()
-  const unknown = { status: { state: "unknown", onDate }, cards } as const
-  if (onDate > stringValue(manifest["data_as_of"])) return unknown
+  const details = new Map<string, CardRestriction[]>()
+  const unknown = () => ({ status: { state: "unknown", onDate }, cards, details }) as const
+  if (onDate > stringValue(manifest["data_as_of"])) return unknown()
   const profiles = rows("rules_profile").filter(
     (row) => row["region"] === edition && row["format_code"] === "standard",
   )
-  if (profiles.length !== 1) return unknown
+  if (profiles.length !== 1) return unknown()
   const profile = profiles[0]
+  const sourceWindows = arrayValue(manifest["restriction_coverage"] ?? [])
+    .map((value) => objectValue(value))
+    .filter((row) => row["profile_id"] === profile?.["id"])
+  const snapshotDate = stringValue(manifest["data_as_of"])
+  const coveredDates = sourceWindows.flatMap((window) => {
+    const from = stringValue(window["from_date"])
+    if (from > snapshotDate) return []
+    const until = window["until_date"]
+    // Coverage has an exclusive end; a one-day source window pins its exact list date.
+    const last =
+      typeof until === "string"
+        ? new Date(Date.parse(`${until}T00:00:00Z`) - 86_400_000).toISOString().slice(0, 10)
+        : snapshotDate
+    const day = last < snapshotDate ? last : snapshotDate
+    return day < from ? [] : [day]
+  })
+  if (requestedDate === undefined) onDate = coveredDates.sort().at(-1) ?? snapshotDate
   const revisions = arrayValue(profile?.["revisions"] ?? [])
     .map((value) => objectValue(value))
     .filter((row) => contains(row, onDate, "effective_from", "effective_until"))
-  if (revisions.length !== 1) return unknown
+  if (revisions.length > 1) return unknown()
   const windows = arrayValue(manifest["restriction_coverage"])
     .map((value) => objectValue(value))
     .filter(
       (row) =>
         row["profile_id"] === profile?.["id"] && contains(row, onDate, "from_date", "until_date"),
     )
-  if (windows.length !== 1) return unknown
+  if (windows.length !== 1) return unknown()
   const names = new Map(
     rows("rules_name")
       .filter((row) => row["region"] === edition)
@@ -72,7 +106,7 @@ export function selectRestrictions(
     if (
       restriction["kind"] === "copy_limit" &&
       (typeof limit !== "number" ||
-        (limit !== 0 && (typeof baseline !== "number" || limit >= baseline)))
+        (limit > 1 && (typeof baseline !== "number" || limit >= baseline)))
     ) {
       incomplete = true
       continue
@@ -99,8 +133,22 @@ export function selectRestrictions(
           incomplete = true
           continue
         }
-        if (scope === "all" || region["deck_role"] === scope)
-          cards.add(stringValue(face["card_id"]))
+        if (scope === "all" || region["deck_role"] === scope) {
+          const cardId = stringValue(face["card_id"])
+          cards.add(cardId)
+          const entries = details.get(cardId) ?? []
+          if (!entries.some((entry) => entry.id === restriction["id"]))
+            entries.push({
+              id: stringValue(restriction["id"]),
+              formatCode: "standard",
+              maxCopies: typeof limit === "number" ? limit : null,
+              effectiveFrom: stringValue(restriction["effective_from"]),
+              sourceUrl:
+                typeof windows[0]?.["source_url"] === "string" ? windows[0]["source_url"] : null,
+              asOf: onDate,
+            })
+          details.set(cardId, entries)
+        }
       }
     }
   }
@@ -111,5 +159,41 @@ export function selectRestrictions(
       synthetic: windows[0]?.["source_url"] === "https://example.invalid/restrictions",
     },
     cards,
+    details,
   }
+}
+
+export async function loadCardRestrictionDetails(
+  client: SnapshotClient,
+  snapshot: LoadedSnapshot,
+  cardId: string,
+  edition: Region,
+): Promise<CardRestrictionDetails> {
+  const keys = [...snapshot.files]
+    .filter(([, file]) =>
+      arrayValue(file["row_counts"]).some((count) =>
+        ["rules_profile", "restriction", "rules_name", "face_rules_name"].includes(
+          stringValue(arrayValue(count)[0]),
+        ),
+      ),
+    )
+    .map(([key]) => key)
+  if (!arrayValue(snapshot.manifest["restriction_coverage"] ?? []).length)
+    return {
+      status: { state: "unknown", onDate: stringValue(snapshot.manifest["data_as_of"]) },
+      restrictions: [],
+    }
+  const fragments = [
+    ...snapshot.bootstrap,
+    ...(await Promise.all(keys.map((key) => client.fragments(key)))).flat(),
+  ]
+  if (client.snapshot()?.manifestHash !== snapshot.manifestHash)
+    throw new Error("snapshot replaced")
+  const selection = selectRestrictions(
+    snapshot.manifest,
+    (table) => mergedRows(fragments, table),
+    createCardIndex(snapshot),
+    edition,
+  )
+  return { status: selection.status, restrictions: selection.details.get(cardId) ?? [] }
 }
