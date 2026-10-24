@@ -161,3 +161,42 @@ it.each(["latest", "printed"] as const)(
     expect(within(region).getByText("Printed fifth")).toBeVisible()
   },
 )
+
+it("interleaves translation and original line by line, and keeps one pair when the line counts differ", async () => {
+  const { client, resolver, texts } = await pairingCase()
+  texts.set("latest:effect:null", selected("一行目\n二行目\n三行目", "第一行\n第二行\n第三行"))
+  const view = await renderInRouter(
+    <CardText
+      client={client}
+      edition="jp"
+      owner={latest}
+      field="effect"
+      sharedResolver={resolver}
+    />,
+  )
+  const region = screen.getByRole("region", { name: "效果" })
+  const lines = [...region.querySelectorAll<HTMLElement>("[data-line]")]
+  expect(
+    lines.map((line) => [...line.querySelectorAll("p[lang]")].map((p) => p.textContent)),
+  ).toEqual([
+    ["第一行", "一行目"],
+    ["第二行", "二行目"],
+    ["第三行", "三行目"],
+  ])
+  expect(lines.every((line) => line.querySelectorAll("[data-original]").length === 1)).toBe(true)
+  view.unmount()
+  // Two translated lines against three original lines cannot be matched without guessing.
+  texts.set("latest:effect:null", selected("一行目\n二行目\n三行目", "第一行\n第二行"))
+  await renderInRouter(
+    <CardText
+      client={client}
+      edition="jp"
+      owner={latest}
+      field="effect"
+      sharedResolver={resolver}
+    />,
+  )
+  const whole = screen.getByRole("region", { name: "效果" })
+  expect(whole.querySelector("[data-line]")).toBeNull()
+  expect(whole.querySelectorAll("[data-original]")).toHaveLength(1)
+})

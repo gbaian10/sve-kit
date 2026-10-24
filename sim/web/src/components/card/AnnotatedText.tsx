@@ -34,7 +34,7 @@ import { cn } from "../ui/cn"
 import { Link } from "../ui/Link"
 import { CardImage } from "./CardImage"
 import { SymbolIcon } from "./InlineText"
-import { inlinePieces, type SymbolPiece } from "./textSymbols"
+import { inlinePieces, lineWindow, type SymbolPiece } from "./textSymbols"
 
 interface Segment {
   readonly text: string
@@ -51,6 +51,7 @@ function layOut(
     readonly reference?: JsonObject | null
     readonly bold?: boolean | null
   }[],
+  window: { readonly start: number; readonly end: number } = { start: 0, end: text.length },
 ): readonly Segment[] {
   let offset = 0
   const spans = runs.map((run) => {
@@ -60,6 +61,7 @@ function layOut(
   })
   const segments: Segment[] = []
   for (const piece of inlinePieces(text)) {
+    if (piece.end <= window.start || piece.start >= window.end) continue
     if (piece.kind === "symbol") {
       const span = spans.find(
         (candidate) =>
@@ -76,8 +78,8 @@ function layOut(
       continue
     }
     for (const span of spans) {
-      const start = Math.max(span.start, piece.start)
-      const end = Math.min(span.end, piece.end)
+      const start = Math.max(span.start, piece.start, window.start)
+      const end = Math.min(span.end, piece.end, window.end)
       if (start < end)
         segments.push({ text: text.slice(start, end), reference: span.reference, bold: span.bold })
     }
@@ -317,6 +319,7 @@ export function AnnotatedText({
   client,
   edition,
   className,
+  line,
 }: {
   readonly value: TextValue
   readonly context: SelectedText
@@ -329,6 +332,8 @@ export function AnnotatedText({
   /** The edition shown: lists filter in it, and a linked card of the other edition is tagged. */
   readonly edition: Region
   readonly className?: string
+  /** Show only this newline-separated line of the text (annotations keep their offsets). */
+  readonly line?: number | undefined
 }) {
   const { t } = useTranslation()
   const tooltipId = useId()
@@ -355,8 +360,13 @@ export function AnnotatedText({
   const Text = heading ? "h2" : "p"
   const text = stringValue(value.unit["text"])
   const segments = useMemo(
-    () => layOut(text, annotationReady ? textRuns(value) : [{ text }]),
-    [text, value, annotationReady],
+    () =>
+      layOut(
+        text,
+        annotationReady ? textRuns(value) : [{ text }],
+        line === undefined ? undefined : lineWindow(text, line),
+      ),
+    [text, value, annotationReady, line],
   )
   return (
     <div className="relative" data-annotated>
