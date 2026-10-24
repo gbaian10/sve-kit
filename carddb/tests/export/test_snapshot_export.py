@@ -17,6 +17,7 @@ from sve_carddb.build import create_database
 from sve_carddb.core.json import array, canonical, digest, object_value, parse, string
 from sve_carddb.export.buckets import bucket
 from sve_carddb.export.media import prepare_media
+from sve_carddb.export.reader import read_snapshot
 from sve_carddb.export.transport import (
     Batch,
     Brotli,
@@ -67,6 +68,58 @@ def test_join_equals_public_projection(
         if object_value(file)["key"] == "detail/shared/shared/8"
     )
     assert any(array(row)[0] == "qa_version" for row in array(qa_file["row_counts"]))
+
+
+@pytest.mark.parametrize(
+    "index",
+    [
+        {"jp": {}},
+        {"jp": {"old_card": ["qa_v"]}},
+        {"jp": {"card": ["missing"]}},
+        {"jp": {"card": ["qa_v", "qa_v"]}},
+        {"en": {"card": ["qa_v"]}},
+    ],
+)
+def test_reader_rejects_inexact_current_qa_index(
+    exported: Snapshot, index: JsonValue
+) -> None:
+    with pytest.raises((ValueError, ValidationError)):
+        read_snapshot(
+            exported.manifest | {"qa_card_index": index},
+            {key: blob.raw for key, blob in exported.payloads.items()},
+        )
+
+
+def test_reader_rejects_qa_index_in_the_wrong_order(
+    logical: tuple[Projection, Ownership],
+) -> None:
+    projection, ownership = cloned(logical)
+    for identifier, number in (("q2", "Q2"), ("q10", "Q10"), ("qx", None)):
+        projection.tables["qa"].append(
+            projection.tables["qa"][0]
+            | {
+                "id": identifier,
+                "official_number": number,
+                "current_version_id": identifier + "_v",
+            }
+        )
+        projection.tables["qa_version"].append(
+            projection.tables["qa_version"][0]
+            | {"id": identifier + "_v", "qa_id": identifier}
+        )
+    for table in ("qa", "qa_version"):
+        projection.tables[table].sort(key=lambda row: string(row["id"]))
+    projection = replace(
+        projection,
+        metadata=projection.metadata
+        | {"qa_card_index": {"jp": {"card": ["qa_v", "q2_v", "q10_v", "qx_v"]}}},
+    )
+    result = export_snapshot(projection, ownership, BATCH)
+    payloads = {key: blob.raw for key, blob in result.payloads.items()}
+    read_snapshot(result.manifest, payloads)
+    wrong: JsonValue = {"jp": {"card": ["qa_v", "q10_v", "q2_v", "qx_v"]}}
+    with pytest.raises(ValueError, match="QA card index mismatch"):
+        read_snapshot(result.manifest | {"qa_card_index": wrong}, payloads)
 
 
 def test_clean_exports_are_exact_bytes(

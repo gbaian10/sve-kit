@@ -11,6 +11,7 @@ from sve_carddb.export.read_api import (
     POINTER,
     ExportError,
     canonical,
+    digest,
     load_export,
     object_value,
     parse,
@@ -263,6 +264,28 @@ def test_tampered_export_is_rejected_before_any_request(
     raw = path.read_bytes()
     path.write_bytes(raw[:-1] + b"!")
     with pytest.raises(ExportError):
+        load_export(roots.preview)
+
+
+def test_local_export_checks_qa_index_against_the_published_rows(
+    images: PublicImages, roots: Roots
+) -> None:
+    projection = deepcopy(images.projection)
+    projection.metadata["qa_card_index"] = {"jp": {"card": ["qa_v"]}}
+    export(images, roots, step=0, projection=projection)
+    loaded = load_export(roots.preview)
+    raw = (roots.preview / string(loaded.entry["manifest_path"])).read_bytes()
+    manifest = object_value(parse(raw))
+    assert manifest["qa_card_index"] == {"jp": {"card": ["qa_v"]}}
+    manifest["qa_card_index"] = {"jp": {}}
+    changed = canonical(manifest)
+    hashed = digest(changed)
+    path = "snapshots/manifests/" + hashed[7:] + ".json"
+    (roots.preview / path).write_bytes(changed)
+    (roots.preview / POINTER).write_bytes(
+        canonical({"manifest_path": path, "manifest_sha256": hashed})
+    )
+    with pytest.raises(ExportError, match=r"^Export validation failed$"):
         load_export(roots.preview)
 
 
