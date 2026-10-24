@@ -8,12 +8,13 @@ export default {
     before: "Before (notice excerpt)",
     after: "After (notice excerpt)",
     printedHeading: "Physical card text",
+    reconstructedHeading: "Reconstructed old text",
     correctedHeading: "Full corrected text",
     reconstructedUnknown:
-      "Full old text reconstructed from the official notice. The text printed on this version is unconfirmed.",
+      "Full old text reconstructed from the official notice. The full text printed on this version is unconfirmed.",
     reconstructedConfirmed:
       "Reconstructed from the official notice. This erratum is confirmed to apply to this version.",
-    printings: "Versions listed in the notice:",
+    printings: "Versions of this card listed in the notice:",
     printingListed: "{{cardNo}} (printed text unconfirmed)",
     printingConfirmed: "{{cardNo}} (application confirmed)",
     listSeparator: ", ",

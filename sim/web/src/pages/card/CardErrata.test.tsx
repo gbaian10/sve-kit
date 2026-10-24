@@ -50,9 +50,11 @@ it("shows reconstructed full text, excerpt translations and source while keeping
   expect(
     notice.querySelector('del [lang="zh-Hant"]') ?? notice.querySelector('[lang="zh-Hant"] del'),
   ).toHaveTextContent("2")
-  expect(within(notice).getByRole("heading", { name: "實體卡印刷文字" })).toBeVisible()
+  expect(
+    within(notice).getByRole("heading", { name: "勘誤前完整文字（依公告還原）" }),
+  ).toBeVisible()
   expect(within(notice).getByRole("heading", { name: "勘誤後完整文字" })).toBeVisible()
-  expect(within(notice).getByText(/此版次是否印有舊文尚未確認/u)).toBeVisible()
+  expect(within(notice).getByText(/此版次的完整印刷文字尚未確認/u)).toBeVisible()
   expect(within(notice).getByText(/BP01-020（印刷文字未確認）/u)).toBeVisible()
 })
 

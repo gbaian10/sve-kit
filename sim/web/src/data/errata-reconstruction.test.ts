@@ -91,4 +91,14 @@ describe("printed wording reconstruction", () => {
     ])
     expect(result.before?.map(({ text }) => text).join("")).toBe("Pay {コスト1}. 😃")
   })
+
+  it("does not strike out unchanged old text when the correction only inserts text", () => {
+    expect(
+      reconstructPrintedWording(
+        "Draw a card, then pass.",
+        [change("Draw a card.", "Draw a card, then pass.")],
+        true,
+      ).before,
+    ).toEqual([{ text: "Draw a card.", changed: false }])
+  })
 })

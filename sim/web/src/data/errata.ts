@@ -98,8 +98,8 @@ async function readCardErrata(
     cardPrintings(client, snapshot, cardId, [region === "jp" ? "jp" : "en"]),
   ])
   const index = catalogOf(candidateSnapshot).index
-  const revision =
-    index.currentRevision(faceId, region) ?? index.displayRevision(faceId, region, printingId)
+  const current = index.currentRevision(faceId, region)
+  const revision = current ?? index.displayRevision(faceId, region, printingId)
   const revisionId = revision?.["id"]
   const effectNotices = notices.filter((notice) =>
     notice.changes.some((change) => change["field"] === "effect"),
@@ -121,19 +121,25 @@ async function readCardErrata(
     )
     return {
       ...notice,
-      printings: printings.map((printing) => ({
-        cardNo: stringValue(
-          printingCatalog.index.printing(stringValue(printing["printing_id"]))?.["card_no"],
-        ),
-        confirmed: printing["scope"] === "confirmed_applies",
-      })),
+      printings: printings.flatMap((printing) => {
+        // Other cards in the same notice have independent printing evidence.
+        const row = printingCatalog.index.printing(stringValue(printing["printing_id"]))
+        if (row && row["card_id"] !== cardId) return []
+        const cardNo = row?.["card_no"]
+        return [
+          {
+            cardNo: typeof cardNo === "string" ? cardNo : "",
+            confirmed: printing["scope"] === "confirmed_applies",
+          },
+        ]
+      }),
       printed:
-        effectNotices.length > 1
+        effectNotices.length > 1 && notice.changes.some((change) => change["field"] === "effect")
           ? { state: "unknown", reason: "multiple_notices" }
           : reconstructPrintedWording(
               selected ? stringValue(selected.original.unit["text"]) : undefined,
               notice.changes.filter((change) => change["field"] === "effect"),
-              confirmed,
+              confirmed && current !== undefined,
             ),
     }
   })

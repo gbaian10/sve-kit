@@ -50,7 +50,7 @@ function changedPassage(before: string, after: string): { text: string; changed:
     old[old.length - end - 1] === current[current.length - end - 1]
   )
     end++
-  if (start + end === old.length) return [{ text: before, changed: true }]
+  if (start + end === old.length) return [{ text: before, changed: false }]
   return [
     { text: old.slice(0, start).join(""), changed: false },
     { text: old.slice(start, old.length - end).join(""), changed: true },

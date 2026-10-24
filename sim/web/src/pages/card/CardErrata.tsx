@@ -104,18 +104,26 @@ export function CardErrata({
               {t("errata.official")}
             </Link>
           </div>
-          <p className="text-12 leading-relaxed text-text-3">
-            {t("errata.printings")}{" "}
-            {printings
-              .filter(({ cardNo }) => cardNo)
-              .map(({ cardNo, confirmed }) =>
-                t(confirmed ? "errata.printingConfirmed" : "errata.printingListed", { cardNo }),
-              )
-              .join(t("errata.listSeparator"))}
-          </p>
+          {printings.some(({ cardNo }) => cardNo) && (
+            <p className="text-12 leading-relaxed text-text-3">
+              {t("errata.printings")}{" "}
+              {printings
+                .filter(({ cardNo }) => cardNo)
+                .map(({ cardNo, confirmed }) =>
+                  t(confirmed ? "errata.printingConfirmed" : "errata.printingListed", { cardNo }),
+                )
+                .join(t("errata.listSeparator"))}
+            </p>
+          )}
           {printed.before && printed.after !== undefined ? (
             <div className="space-y-3 border-t border-border pt-3">
-              <h4 className="text-14 font-semibold text-text-1">{t("errata.printedHeading")}</h4>
+              <h4 className="text-14 font-semibold text-text-1">
+                {t(
+                  printed.state === "derived_from_errata"
+                    ? "errata.printedHeading"
+                    : "errata.reconstructedHeading",
+                )}
+              </h4>
               <p className="text-12 text-text-3">
                 {t(
                   printed.state === "derived_from_errata"

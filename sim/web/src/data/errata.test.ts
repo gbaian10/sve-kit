@@ -82,6 +82,36 @@ it("requires the selected printing's confirmed scope for derived_from_errata", a
   expect((await load())[0]?.printed.state).toBe("derived_from_errata")
 })
 
+it("keeps a display candidate unknown even when printing applicability is confirmed", async () => {
+  const { version, snapshot, load } = await source()
+  objectValue(arrayValue(version["printings"])[0])["scope"] = "confirmed_applies"
+  const face = snapshot.bootstrap
+    .flatMap((fragment) => (fragment.table === "face" ? fragment.rows : []))
+    .find((row) => row["id"] === "f:bp01-020")
+  if (!face) throw new Error("missing face")
+  const revisionId = arrayValue(face["current"])
+    .map((value) => objectValue(value))
+    .find((value) => value["region"] === "jp")?.["revision_id"]
+  if (typeof revisionId !== "string") throw new Error("missing current revision")
+  face["current"] = []
+  face["wording"] = [
+    {
+      region: "jp",
+      state: "pending",
+      display: { revision_id: revisionId, basis: "candidates" },
+      candidates: [{ printing_id: "p:bp01-020", revision_id: revisionId }],
+      undated_printing_ids: [],
+      common_name: null,
+      classification: "errata",
+      method: "mechanical",
+      decision_id: null,
+    },
+  ]
+  const [notice] = await load()
+  expect(notice?.printed.state).toBe("unknown")
+  expect(notice?.printed.before).toBeDefined()
+})
+
 it("preserves excerpts when no exact corrected passage matches", async () => {
   const { change, load } = await source()
   change["after"] = "Unmatched synthetic passage."
@@ -103,4 +133,40 @@ it("refuses to infer an order for multiple announcement versions", async () => {
   const notices = await load()
   expect(notices).toHaveLength(2)
   expect(notices.every((notice) => notice.printed.reason === "multiple_notices")).toBe(true)
+})
+
+it("keeps non-effect notices out of the multiple-effect-notice reason", async () => {
+  const { version, change, load, client, snapshot } = await source()
+  const nameOnly = {
+    ...version,
+    id: "name-only",
+    changes: [{ ...change, field: "name", before: "Old name", after: "New name" }],
+  }
+  for (const [key, file] of snapshot.files) {
+    if (!arrayValue(file["row_counts"]).some((count) => arrayValue(count)[0] === "errata")) continue
+    for (const fragment of await client.fragments(key)) {
+      if (fragment.table !== "errata") continue
+      const notice = fragment.rows.find((row) => row["id"] === "errata:bp01-020")
+      if (notice)
+        notice["versions"] = [version, { ...version, id: "another-version", revision: 2 }, nameOnly]
+    }
+  }
+  const reasons = (await load()).map((notice) => notice.printed.reason)
+  expect(reasons).toEqual(["multiple_notices", "multiple_notices", "unsupported"])
+})
+
+it("tolerates a listed printing whose row is not loaded", async () => {
+  const { version, load } = await source()
+  arrayValue(version["printings"]).push({ printing_id: "p:not-loaded", scope: "listed" })
+  const [notice] = await load()
+  expect(notice?.printings).toEqual([
+    { cardNo: "BP01-020", confirmed: false },
+    { cardNo: "", confirmed: false },
+  ])
+})
+
+it("does not list other cards in the announcement as this card's printings", async () => {
+  const { version, load } = await source()
+  arrayValue(version["printings"]).push({ printing_id: "p:bp01-001", scope: "listed" })
+  expect((await load())[0]?.printings).toEqual([{ cardNo: "BP01-020", confirmed: false }])
 })
