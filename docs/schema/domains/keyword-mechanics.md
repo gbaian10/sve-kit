@@ -83,7 +83,7 @@ token 原生 keyword 不會掛到母卡。主文明示額外授予生成 token �
 含「」的主文整欄略過，sections 全不檢查，因此 token 的原生能力仍屬 token。
 只在匹配行提交相應 relation 的局部檢查，`whole_field=false`；四關係都有 producer 仍不構成 complete。
 
-完整欄位 adapter `manual-keywords-fields-bp01-v2` 沿用固定首批集合、confirmed JP current
+完整欄位 adapter `manual-keywords-fields-bp01-v3` 沿用固定首批集合、confirmed JP current
 及十個已登錄 keyword。每個面先驗 exact owner 主文與凍結來源的完整有序 section 清單；
 來源與資料庫的 section 數量、順序或原文字節不符時，該面不提交完整檢查。
 空主文須明驗凍結來源為 null 或空字串、已 intern 的原文確為空字串；空 section 也須驗自己的來源位置。
@@ -94,8 +94,13 @@ token 原生 keyword 不會掛到母卡。主文明示額外授予生成 token �
 - 固定 PP 進化整行：exact 原文為 `{進化}{コストN}：これは進化する。`，N 為一位以上 ASCII 數字。
   以單一連續 body span 的原文字節完整匹配，不依正標籤、翻譯或 normalizer 的語意辨識結果。
   這句只支付 PP 並讓自身進化，不宣告、授予、參照或計數這十個 keyword；不產正標籤。
+- 固定傷害整行：`相手のフォロワー1体を選ぶ。それにNダメージ。`，N 為一位以上 ASCII 數字；
+  目標也可為 `相手のリーダー1人か相手のフォロワー1体`，兩者的フォロワー前均可有 `場の`。
+  行首只可無能力頭、`{ファンファーレ}` 或 `{起動}{コストN}これを{アクト}：`；
+  起動費用 N 與傷害 N 各自獨立。這些目標、固定 PP／act 費用及傷害均不宣告、授予、參照或計數十個 keyword。
+  同樣以單一連續 body span 的 exact 原文完整匹配，不產正標籤，也不接受條件、其他費用或額外前後句。
 
-其他費用、條件或前後句均不符合固定進化句。任何其他未證明句型、pending、reminder 或引號能力
+任何其他未證明句型、pending、reminder 或引號能力
 都留下缺口，不能以另一個正標籤補滿；固定句本身可獨立證明，不要求翻譯已實作。
 非空 sections 全數保留缺口，包含 token_definition；不把 token 原生 keyword 掛到母卡。
 
