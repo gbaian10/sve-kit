@@ -19,6 +19,7 @@ from sve_carddb.export.transport import export_snapshot
 from sve_carddb.workflows import offline
 from sve_carddb.workflows.offline import build
 
+from ..support.semantic_definition_fixtures import with_definitions
 from ..support.translation_source_fixtures import EnvelopeSources
 from .test_snapshot_offline import prepared as prepared  # ruff: ignore[useless-import-alias] -- reuse frozen regional fixture
 from .test_snapshot_offline_templates import RULE_CONTENT, SCHEMA
@@ -258,7 +259,9 @@ def test_english_reader_rejects_missing_targets_and_omitted_required_references(
 
     def load() -> None:
         raw = canonical({"format": 3, "kind": "translation_shard", "records": [target]})
-        from_files((("translations/overrides/english/000.yaml", raw, raw),))
+        from_files(
+            with_definitions((("translations/overrides/english/000.yaml", raw, raw),))
+        )
 
     with pytest.raises(ValueError, match="Invalid four-layer authored shard"):
         load()

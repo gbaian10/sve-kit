@@ -6,7 +6,7 @@ basis:
     recipe: v0-classification-candidates-1
     inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
   normalizer: four-layer-jp-v7
-  build_sha256: 7663e614a9cbf981162cbc7d09bb5841bcd3b18958c04b01fe55c5e4cb06ecf6
+  build_sha256: a492ac4459f33440844a4874ad644992dac317329773fca3a54765866f4e90f7
 groups:
   - id: shape:e3292809807f2c3c0ac9705e965ddc504f57f811cce3ec5f2c91aa5723d032f9
     priority: false
@@ -22,11 +22,11 @@ groups:
       Tc7760edb7f:
         - BP17-101
     frames:
-      - frame:04ad6204b780ccbc7bb16b4c3c5df8131aa4275563d6a19bc5fe159c5c3054b9
-      - frame:d5195657da87da3f2945c959b7e4cbf75fabc9664336006a0b19415788d798b4
+      - frame:b81f082030d27921366341f56e6b941b17bb83567d14aed64734bdc27638d949
+      - frame:93cbd637abba573ed42e5f769eee08c75ee35c97c0f213708807b51e324eeb0a
     uses:
-      - use:c02daa5ac37fe9a8d095951ee219e847792c365c22357bbda44f23225ad6f21b
-      - use:bd914a2f212d5dc109cd7e9cc2a710dc1e65a049b383157b467641bcb9cb32bc
+      - use:19b9579f80a612fb406c573e7d9abc661286e7eb41d5ac2fd5b77f39beac3d27
+      - use:f8ef3ab708c37409f9adc6144677de3c4c5c108aa4668c081ba9c36db1409116
     translation_review:
       required_uses: []
       conditional_uses: []
@@ -38,7 +38,7 @@ reverse_positions:
     section:
     line: 2
     frame_ids:
-      - frame:fc7c4e5cce7bfb481bd606ecac08eb3d96c5f1e591547a2070c8b7dd99c3ab40
+      - frame:dcb818451133e410b13bc01c45332e2911c5bedeccc7267c6c46167974f16ffc
     category: 跨行涵蓋
     rationale: 第三行 spell 的可選加費涵蓋第二行。
     covered_by:

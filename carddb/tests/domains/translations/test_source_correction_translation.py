@@ -30,6 +30,7 @@ from sve_carddb.domains.translations.inputs import load_glossary
 
 from ...support import digital_link_import_fixtures
 from ...support.digital_link_import_fixtures import make_fixture
+from ...support.semantic_definition_fixtures import with_definitions
 from ...support.translation_fixtures import template
 from .test_four_layer_classification import classifier
 from .test_four_layer_storage import compiled as compiled  # ruff: ignore[useless-import-alias] -- shared actual SQLite schema
@@ -153,7 +154,7 @@ def _inputs(
             {"format": 3, "kind": "translation_shard", "records": [record]}
         )
         files.append(("translations/" + path, content, content))
-    return from_files(tuple(files))
+    return from_files(with_definitions(tuple(files)))
 
 
 def _publish(
@@ -208,7 +209,7 @@ def _combine(*inputs: Inputs, excluded_frames: tuple[str, ...] = ()) -> Inputs:
         files.append(
             (f"translations/templates/{area}/{index:03}.yaml", content, content)
         )
-    return from_files(tuple(files))
+    return from_files(with_definitions(tuple(files)))
 
 
 def _field_inputs(

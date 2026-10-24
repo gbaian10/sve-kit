@@ -6,7 +6,7 @@ basis:
     recipe: v0-classification-candidates-1
     inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
   normalizer: four-layer-jp-v7
-  build_sha256: 7663e614a9cbf981162cbc7d09bb5841bcd3b18958c04b01fe55c5e4cb06ecf6
+  build_sha256: a492ac4459f33440844a4874ad644992dac317329773fca3a54765866f4e90f7
 groups:
   - id: shape:0080fc2201a85d64155cfe16cac5fc3d842c2ba90425cbd26431f8567636950a
     priority: true
@@ -27,13 +27,13 @@ groups:
         - BP09-065
         - PR-228
     frames:
-      - frame:a669b2470ae330cab83cd1a590be403886fecde8c0a2fb541850d526023653c8
-      - frame:eb40c6de75391ee883b0c6a2a72110a6f5eb0ea3f347bc911ec34136762790de
-      - frame:8ce09b3f9ea48d7a788f91a7d67a353ec54b47dda6671e4e705fa36fe3c2c89b
+      - frame:3f0c32dc22001ba3f48275d988de8afd515d94a8262e08312261f59c6d60ec37
+      - frame:2dd7a02076a7b75bbb008ae136c34682819af7d51870aae855705bb28e581c55
+      - frame:7fb2384e87ab0c90c9d8ed00e7a144c45d2a535545c60f3d35e2973980a4fdb6
     uses:
-      - use:b2473daf82af0d9bd4148d80db681486d56633c5211ff0e166f30fbcb24dbc37
-      - use:6f02c1f0167d395347858fc458c60353abcbe0d6b58db798c6b83564e26df86c
-      - use:88cfef25117316941666ba54dde45e4173a5bebbda9f8d070412329c1edfbb5c
+      - use:fcb6a95244f86c09e7217bb7a21681b702700d538a0c1349649487634075fec6
+      - use:c0c0e04933cd1767d3301afe5beacf13e04e1d19bd7c17915a791dce33a9faef
+      - use:e6658ce927f77d663121bad324d93186068f847350c3ed26d88fb1d190e77de2
     translation_review:
       required_uses: []
       conditional_uses: []
@@ -59,15 +59,15 @@ groups:
       Tbda403e786:
         - BP10-103
     frames:
-      - frame:9b2d35e74bbcdc72405c5a44aea0d4293c36f6e91f0643a7d5882b30a00b6c75
-      - frame:d2d0dfd4417a1d8060c9570e44aebbb0e20986df0f5e39990cde5cfb5985af25
-      - frame:0053b583ba97e210797eb15808f30a990fde4811cd7e65c74a6cb1e8a2d17026
-      - frame:9b65f2f23206c892eb5e1b055792b5de5d4465c45ac1aa0b16a8045538faaf50
+      - frame:01b857d7c45ece0d9266b8cb301644fecef084480335eabbdd9f748b423bbf3a
+      - frame:18d756c3e6eb5b9e359fddd3923463d7ecb655e561e529162b1fb33d7ce61d98
+      - frame:4f879ea8aa388d154b4e766bb1d25ed48a3e8f4a49d6272a967d1d55984aedf0
+      - frame:90d857a4d274cd43627b9b849946250ccaaed8edeefde53ee44badc41f1f514b
     uses:
-      - use:732b72e2929233f86b3404316fe70ade9d4b4ec8dbb9326d78ef731c5fca7bce
-      - use:9c68129bda33575cf7633b5dd516cac051c278723db8770c1541da2f886e0e0c
-      - use:11c4533792e3dc13e3c61521d06f76284b13938c2835efb3daf1c09251195b06
-      - use:54aea6be4a8176fbc62df04c9ddab788e10858579b4991e820ce85fdecded124
+      - use:7b1b847902bd13ce03157c52d68d94d8469104b24fe9b8066bc63aaf1705f22b
+      - use:c0aff8224e5e14546af8f28c690da63a447b51e8f472cf8fba40bf6c48c76c3d
+      - use:0aca03c2ab9b843e961667f08ea52396597e614e9cffa01c65f2d09966420167
+      - use:605592fe07ebb30bba6ce24622f4209c2deba784b747233e600fae2bf03e5062
     translation_review:
       required_uses: []
       conditional_uses: []
@@ -93,13 +93,13 @@ groups:
         - ECP01-042
         - ECP01-P22
     frames:
-      - frame:0b28987e899fe9e9c7bcbd74245546966d1923c51822b0f685c4d21ceb0b1319
-      - frame:0faa8ce547e8c7e8b960ea63ef415ead6eb572d7aaff6d41dd6289dead90a082
-      - frame:c5ba0a788799b1fdda5fc19880afe34b77044c0153adb03ef0b56937a44d7897
+      - frame:117fe3baaf02420a38cfcfa9b407b3abc33dd0f2c38faee34b8a3909fbd02cd9
+      - frame:7f415727beaabdeeebef5c7d2500d5db3a1631c2d35abb094076791da6d4e402
+      - frame:73478a453f3c6ec3c1e3ce5d613c832e49a8c4f564af3939a9c67d3f9271c8de
     uses:
-      - use:7b35279f80b36422db7a415e822d504cf5b67dc620836a2664db6eb2f29d86fd
-      - use:b7082a5446ab4c3215245a904ae3db63c3d21cc51a34220f7be42adc95b8d9a3
-      - use:e4b3455fa1d181c77d82fd9e0fdd28e9e3964e4fcc86cfc055cdcac31b09966b
+      - use:d339ab3383b6528af10980952fceb759c2d4a2b4c6a64003f4fb5f1a5ade69fb
+      - use:16444af4aef8781326b6f71f035882cdd476450cf2e943bd48cb1667001e178e
+      - use:ce8191fb3e4acd056ae97a85e9215f89ac7168758bada4397680b04f732b5791
     translation_review:
       required_uses: []
       conditional_uses: []
@@ -118,11 +118,11 @@ groups:
       Tde113dcc2c:
         - BP07-059
     frames:
-      - frame:f591c7c2011489a27a79c22de22a6e76e6df4b5c98f9daaa9ae6b05578304faf
-      - frame:60914233754af7708d5385271910f91e78eea347f976d87fd5ed7d141c33d930
+      - frame:4814f845969bffac061e9a6074fa4ee6f4e849d3a8e3004fbc5c27f6e1023fc5
+      - frame:e3bcf8b7b1747b9259fa869ba8cf944aa8b4ca9e10607c136a893a8f2c8ac6a8
     uses:
-      - use:e788a8965338ba1a0f8ae8cd61c87593aed93e1acd6301c01d3ae097dc8f7ddb
-      - use:28315f05f34ad623c7613e1e1fcf28d624c6d125e136fc6e62eb1ac22718ebc3
+      - use:99201624a90e170b161220482d17a8f71057a94702bf11b8e01a759ef190f142
+      - use:07a402ea8984aba674793246fb67e7e60a35336a2c9800109c6ef862b306b3b6
     translation_review:
       required_uses: []
       conditional_uses: []
@@ -134,8 +134,8 @@ reverse_positions:
     section: 0
     line: 1
     frame_ids:
-      - frame:7f8098abe40af6148dc13376ab469711aeea18b4cede9ca006d9ad389d8edf0b
-      - frame:4da937b0a8ebd4840e2dbfaddd08eb615503e7acec7490fbf35f2a1c7792c4be
+      - frame:b2fb11ba24e33123257e166a8662fd20748da8dc2a78696e96d0e87ae07a0ac9
+      - frame:0dcc68dc1c0d4a417b4339521f08bcced767228ecfe1bf691837f5c3bb66a1e2
     category: token
     rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。
   - card_no: BP07-035
@@ -144,7 +144,7 @@ reverse_positions:
     section: 0
     line: 1
     frame_ids:
-      - frame:d621a5cf99ff04ba597ddb87836f36a4031c86f6d3fd40c439cd0efe56cf7d7c
-      - frame:ea4fcb549c31203e613fbbf3d203cc3837d1fa1556292c713293b7c9c6ab65a8
+      - frame:262746f877f43f21a14b4c05fa2ad6a1aa42c22312de33b5c8aa5d1c71c5a3c5
+      - frame:500944fb6c62dfd36356d3b424c4952faa498ce1a15f55d0456f92f77266f959
     category: token
     rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。

@@ -2,9 +2,38 @@
 
 import re
 from dataclasses import dataclass
+from unicodedata import normalize
 
 # An unrestricted source NP includes both states; absence is not a non-token claim.
 _ALL_TOKENS = frozenset({False, True})
+
+_UNIT_MEASURES = {
+    "枚": "object_count",
+    "体": "object_count",
+    "つ": "object_count",
+    "人": "player_count",
+    "個": "counter_count",
+    "PP": "play_points",
+    "EP": "evolution_points",
+    "SEP": "super_evolution_points",
+    "ターン": "turn_count",
+    "ダメージ": "damage_amount",
+    "倍": "multiplier",
+    "回": "event_count",
+    "番": "ordinal",
+    "種": "distinct_kind_count",
+    "種類": "distinct_kind_count",
+}
+
+
+def unit_meaning(unit: str, role: str) -> str:
+    """Equivalent object counters share a dimension; source roles still distinguish their sets."""
+    unit = normalize("NFKC", unit)
+    if unit == "つ" and "counter" in role:
+        return "counter_count"
+    if unit not in _UNIT_MEASURES:
+        raise ValueError("Unclosed source unit meaning")
+    return _UNIT_MEASURES[unit]
 
 
 @dataclass(frozen=True)

@@ -6,7 +6,7 @@ basis:
     recipe: v0-classification-candidates-1
     inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
   normalizer: four-layer-jp-v7
-  build_sha256: 7663e614a9cbf981162cbc7d09bb5841bcd3b18958c04b01fe55c5e4cb06ecf6
+  build_sha256: a492ac4459f33440844a4874ad644992dac317329773fca3a54765866f4e90f7
 groups: []
 reverse_positions:
   - card_no: BP21-SL08
@@ -15,7 +15,7 @@ reverse_positions:
     section:
     line: 2
     frame_ids:
-      - frame:1c6e8f36a79e17c7335194a5ae8a4526e560e7590496a2a9274080bd21e99579
+      - frame:8a926ebfb951e54db5c345ac3ed963c7aa3d382a4cda5bef31b63b403297f8b7
     category: 跨行涵蓋
     rationale: 第一行入場 trigger 的 choice 包含第二行模式。
     covered_by:

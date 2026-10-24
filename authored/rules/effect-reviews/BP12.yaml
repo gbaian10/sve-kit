@@ -6,7 +6,7 @@ basis:
     recipe: v0-classification-candidates-1
     inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
   normalizer: four-layer-jp-v7
-  build_sha256: 7663e614a9cbf981162cbc7d09bb5841bcd3b18958c04b01fe55c5e4cb06ecf6
+  build_sha256: a492ac4459f33440844a4874ad644992dac317329773fca3a54765866f4e90f7
 groups: []
 reverse_positions:
   - card_no: BP12-073
@@ -15,8 +15,8 @@ reverse_positions:
     section: 0
     line: 1
     frame_ids:
-      - frame:77efd42b5a76ed102251906840585324a213b678a9c7db0c4f778ef62d7980aa
-      - frame:961472c4dc99f27ebcf58c58e513f01a8bbc1ab2fc018de437f67341d5e98ac8
+      - frame:2a448bea5dae70c8ff139ee405a8c73c3b628ad115d21e8609f7e32bb0360f37
+      - frame:2827bdd19abd009cae43e396c14224ec059e02c81a4e0bc4400234e1969be463
     category: token
     rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。
   - card_no: BP12-SL08
@@ -25,8 +25,8 @@ reverse_positions:
     section:
     line: 1
     frame_ids:
-      - frame:441da7d7ebd60cbe226ff39342e38d3009ca02028c888f00ccff40f63291f020
-      - frame:1c145889063325db75e2476a3505ae4f1e614d09f82f82ab6a10a7efc1a3a31d
+      - frame:927a96d8cc560c8dc93169fb21ba8ffb14d5379d8cf1352edb29a516db099e34
+      - frame:32b446a90572dce7d832a6b07330269af87213581118a734f336ac960f4dfc4a
     category: 跨行涵蓋
     rationale: 強制追加 act 費用附於下一行 spell，括號是費用說明。
     covered_by:

@@ -6,7 +6,7 @@ basis:
     recipe: v0-classification-candidates-1
     inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
   normalizer: four-layer-jp-v7
-  build_sha256: 7663e614a9cbf981162cbc7d09bb5841bcd3b18958c04b01fe55c5e4cb06ecf6
+  build_sha256: a492ac4459f33440844a4874ad644992dac317329773fca3a54765866f4e90f7
 groups: []
 reverse_positions:
   - card_no: BP20-P12
@@ -15,7 +15,7 @@ reverse_positions:
     section:
     line: 1
     frame_ids:
-      - frame:97f3af5b9126b7fdf66e85561de2024d222e46448525031d1867c99a5fad04ea
+      - frame:3f3282768d8fac0725c17a1414e20ed8db861791ffe46e840d8db4ebc11d2c10
     category: 跨行涵蓋
     rationale: 第二行 spell 的可選棄牌費用涵蓋第一行。
     covered_by:
@@ -27,8 +27,8 @@ reverse_positions:
     section: 0
     line: 1
     frame_ids:
-      - frame:6bab68790f86fa5e74e154adaed00da1bf63461d7d4bcf0332d37eef13159d61
-      - frame:0c75303540eab6dc61f493bbe3bba067b9cba99faf864c180cd0c9faa8191455
+      - frame:942877ad9a7ae884d39114c4a08bce241fb10cea77878c6cc8561504b67cadfe
+      - frame:892d7c851a19a387c55cde0b410588394eae21e0bb6936c01bbb68e9fc2b62c9
     category: token
     rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。
   - card_no: BP20-P47
@@ -37,7 +37,7 @@ reverse_positions:
     section: 0
     line: 1
     frame_ids:
-      - frame:47679547dbcff6d14494e4861abf4a9402e4dc38aef98337f2fcba02b3491bdd
-      - frame:fb7571aa9eb58c2ebb1952219cde25c8b543ae617e5cdc391295c091483811ce
+      - frame:9740a973eaf1373ea14dbade65181b5eadbeea857220963f0238c8fa2f386b0e
+      - frame:089ba9b318178f233d01ca30f291267f30d08a0fcc27ba3e853c8e5a13ba9e37
     category: token
     rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。

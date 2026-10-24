@@ -3,7 +3,7 @@
 from itertools import pairwise
 from typing import TYPE_CHECKING, Annotated, Literal, Self, cast
 
-from pydantic import ConfigDict, Field, field_validator, model_validator
+from pydantic import ConfigDict, Field, JsonValue, field_validator, model_validator
 
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.core.models import RecordData, Text, UInt
@@ -11,7 +11,6 @@ from sve_carddb.core.models import RecordData, Text, UInt
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
-    from pydantic import JsonValue
 
 Code = Annotated[str, Field(pattern=r"^[a-z][a-z0-9_.-]*$(?![\s\S])")]
 Hash = Annotated[str, Field(pattern=r"^[0-9a-f]{64}$(?![\s\S])")]
@@ -614,6 +613,7 @@ class Source(RecordData):
     source_lang: Literal["ja"]
     canonical_hash: Hash
     normalizer_version: Code
+    semantic_definitions: dict[Code, JsonValue] = Field(default_factory=dict)
 
 
 class Frame(RecordData):
@@ -651,7 +651,7 @@ class Frame(RecordData):
             raise ValueError("Pending projection requires pending semantics")
         return self
 
-    def payload(self, canonical_source: str) -> dict[str, object]:
+    def payload(self, canonical_source: str) -> dict[str, JsonValue]:
         """Exclude optional rendering choices and interface description from frame identity."""
         return {
             **(
@@ -663,10 +663,10 @@ class Frame(RecordData):
                 if self.mode_rules
                 else {}
             ),
-            "recipe": "frame-v1",
+            "recipe": "frame-v2",
             "source_lang": self.source.source_lang,
             "canonical_source": canonical_source,
-            "normalizer_version": self.source.normalizer_version,
+            "semantic_definitions": self.source.semantic_definitions,
             "role": self.role,
             "leaf_schema": self.leaf_schema.model_dump(mode="json"),
             "semantic_variant": self.semantic_variant.model_dump(mode="json"),
@@ -677,6 +677,15 @@ class Frame(RecordData):
 
     def verify(self, canonical_source: str) -> None:
         """Validate reconstructed source before trusting authored content-addressed identity."""
+        if set(self.source.semantic_definitions) != {
+            "domains",
+            "expressions",
+            "omissions",
+            "units",
+            "resolved",
+            "source_links",
+        }:
+            raise ValueError("Frame semantic definitions are not sealed")
         if digest(canonical_source.encode())[7:] != self.source.canonical_hash:
             raise ValueError("Frame canonical source hash mismatch")
         if hash_payload(self.payload(canonical_source)) != self.content_hash:
@@ -687,6 +696,15 @@ class Frame(RecordData):
             for span in slot.occurrences
         ):
             raise ValueError("Frame canonical leaf span is out of bounds")
+
+    def verify_same_identity(
+        self, canonical_source: str, other: Frame, other_source: str
+    ) -> None:
+        """Equal digests never authorize replacing a different semantic payload."""
+        if self.id == other.id and canonical(
+            self.payload(canonical_source)
+        ) != canonical(other.payload(other_source)):
+            raise ValueError("Frame hash collision: different semantic payloads")
 
 
 class SlotRef(RecordData):

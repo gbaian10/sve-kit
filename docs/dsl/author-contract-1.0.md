@@ -149,11 +149,11 @@ interfaces、rulings 及 BodyDependencies.sources 以完整 canonical-json-v1 by
 
 ### 4.3 normalizer 重鍵
 
-loader 只讀當前精確引用，不自動重映射。normalizer 變更時，由寫入工具按四層 §9 的「版本唯一差異」條件逐用途核對：去掉 normalizer_version 後完整 frame payload bytes 相同，occurrences／values／scope／接口語義不變，目標已存在且唯一，才改寫 frame、binding、source 與接口依賴鍵。其餘變更正常失效並重新審核。
+loader 只讀當前精確引用，不自動重映射。normalizer 變更時，按四層 §9 逐用途核對完整 frame-v2 payload、occurrences／values／scope／接口語義及目標唯一性。只換版本不改 frame／binding／use ID；來源基準及證據鍵仍須更新。語義改變則由 writer 更新受影響閉包的引用。其餘變更正常失效並重新審核。
 
 機械延續只限實際存在且先前有效的證據，不冒充審核者再看過新版。Review／body_boundary 可帶選用 `rekey`：恰為 `{original:{input_hash,record_key},before,after,mapping_recipe}`。original 釘既有 authored 證據或前次已驗 DB 輸入的 exact Digest／記錄鍵；before／after 是完整相同型別的依賴快照，mapping_recipe 為 `{id,hash}`。原始 Review 的日期／審核者／verdict／dependencies 不改，工具以 rekey.after 計算目前適用性；只准依上段證明改 normalizer 與其衍生識別，body／params／語義／案例／runner／裁定／展開配方皆不可改。寫入驗證要取得原證據及舊來源 payload 驗證，不可只相信映射自稱相同。
 
-延續鏈在寫入時壓成同一筆原證據到當前用途的完整證明；不是永久逐次帳本。普通建置只比 after 與當前依賴，不重新核准歷史。沒有原證據、非唯一映射或缺舊 payload 就不延續；上游更新須由寫入操作同步更新 meta。這保留四層契約既有的有限延續，不把全庫重鍵當成新審核。
+延續鏈在寫入時壓成同一筆原證據到當前用途的完整證明；不是永久逐次帳本。普通建置只比 after 與當前依賴，不重新核准歷史。沒有原證據、非唯一映射或缺舊 payload 就不延續；上游更新須由寫入操作同步更新 meta。這保留四層契約既有的有限延續，不把身分續接當成新審核。
 
 ### 4.4 來源固定向量
 

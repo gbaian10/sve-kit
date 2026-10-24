@@ -63,7 +63,7 @@ Anchor／alias／merge 與顯式 tag **讀取允許，寫入不產生**；普通
 | ruling | 2 |
 | registry_index、catalog_adoption_shard、display_override_shard | 2 |
 | digital_name_policy、digital_link_index、digital_link_shard、template_parameter_rules、effect_classification_shard | 2 |
-| author_effect_set、effect_body_shard、effects_index | 1 |
+| author_effect_set、effect_body_shard、effects_index、frame_semantics_index、frame_semantics_shard | 1 |
 | effect_set、keyword_registry、engine_rules、flavor_translation_shard、qa_translation_shard、image_crop_overrides、classification_source_shard | 1 |
 
 `effect_set`／`keyword_registry` format 1 精確選定 astra/1 原型文法，保留 Schema `$id: urn:sve-kit:effects:astra:1`；不是 DSL 1.0，正式 DSL 1.0 使用 author_effect_set／effect_body_shard，資源映射及已實作驗證邊界依[作者承載契約 §1](../../dsl/author-contract-1.0.md#1-版本承諾與入口)。ruling 的 format 2 production reader 已實作，revision 必填並保留原頂層本文。
@@ -309,10 +309,16 @@ F1 configuration 與診斷只記實際已驗的 pin（含固定 filename、targe
 ## 6. 模板、翻譯與語義例外
 
 正式翻譯分片為 `format: 3, kind: translation_shard`，reader、authored 與 builder 同步使用四層格式。
-依[共用契約 §2](four-layer-translation.md#2-authored-入口與替換界線)載入 forms，拒絕 source_exception 與舊格式，不設 index。
+依[共用契約 §2](four-layer-translation.md#2-authored-入口與替換界線)載入 forms，拒絕 source_exception 與舊格式；一般翻譯分片不設 index，共用語義定義使用獨立 index。
 完整欄位依[翻譯契約](translation-contract.md)與[來源位置契約](four-layer-source-positions.md)。
 舊決定封套、membership、核可收據、採納鏈、歷史 producer／expected 只供轉換，不是新 reader 的必要輸入。
 authored YAML 用 block style（縮排 2、序列 offset 2）。資料可直接改，退回用 git revert；只記來源類別 official/project/machine、低信心及必要資料理由。
+
+共用語義定義位於 `translations/semantic-definitions/index.yaml` 與同目錄數字分片，
+封套分別為 `format: 1, kind: frame_semantics_index`／`frame_semantics_shard`；完整引用編碼、
+內容 hash 與檔案閉包依[四層契約 §2.1](four-layer-translation.md#21-共用語義定義的儲存)。
+分片使用 §1 的完整 YAML 大小量測，目標 512 KiB、嚴格小於 1 MiB；新內容追加新序號，既有儲存 id 不重配。
+frame 只存儲存引用，loader 展開後的完整語義契約及 FrameId 不受分片位置或共用方式影響。
 
 效果模板保留固定字、參數、句型比對、術語、卡名引用、加粗、新卡自動套用及未匹配清單。
 [辨識規則](template-parameter-policy.md)由現行程式與當前設定提供；風味不走模板，依[直接對照表](flavor-translation.md)。

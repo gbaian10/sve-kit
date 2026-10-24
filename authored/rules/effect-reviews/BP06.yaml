@@ -6,7 +6,7 @@ basis:
     recipe: v0-classification-candidates-1
     inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
   normalizer: four-layer-jp-v7
-  build_sha256: 7663e614a9cbf981162cbc7d09bb5841bcd3b18958c04b01fe55c5e4cb06ecf6
+  build_sha256: a492ac4459f33440844a4874ad644992dac317329773fca3a54765866f4e90f7
 groups:
   - id: shape:d8ab5e67fa5f640efe6e32f1bfb7d0b57d5b2e04d98435c6367ce819be733ec9
     priority: false
@@ -24,11 +24,11 @@ groups:
         - SP01-041
         - SP01-SL41
     frames:
-      - frame:a73fb365426ea3c98590936e2f479c6ed091522b2429dd8b9f955ce031ea08a6
-      - frame:123570d9f445df5bfd22bdcfed36b51e12f5640a797e659d509c6876d78d1f75
+      - frame:63889746fb1f6b4dfc99c125bf2b444d15de2b76ec2cb9ab1608a5e2423ff3c4
+      - frame:333c2ad213561e81c3b113008f1d41a1742513cae0a6f2353a5920610f738e8d
     uses:
-      - use:f4f3b00a23c3d04e55c3907f5453dc4b84b1810435b88c26803216d41074f3ce
-      - use:609434eb2ec7cf0cc968d62ebf99ff9bea018e0727a03792fe1934e39ee9f4c6
+      - use:8689da5b7820e3b9cadb560c2c38fa1c2cd2192398ee3aeef56f2ec5b50daa1e
+      - use:9f70874350edb69549c76728de0a04a3c4df743f93e3a9352397c4bea8e24e08
     translation_review:
       required_uses: []
       conditional_uses: []
@@ -59,25 +59,25 @@ groups:
         - ECP02-057
         - ECP02-P30
     frames:
-      - frame:ca0756539323c8f8aa89915af61325915695aba13cb8b525e78c40abbf7279ea
-      - frame:aabd32a8e0bd8139a6015320fb03515edd28ee55c33ae911d7eec0b2380de472
-      - frame:1a990547c48aeaaea64f8c88c87ced8667a1f0a7eb52a682acb7fdcc0fedc15f
-      - frame:115b14bd2b73dcb081bb5832bfa9aff64c666b9397069b5aa846a202d6e5a121
-      - frame:3c9f28e202109e316584b7f9d0b1724011bef89c204c43ba9593720d14a3ec42
+      - frame:ef41ad3a57019fd54ed12d84aa0cbe3e227b0c492ac2a29b1f5d19c6f6eca95f
+      - frame:45a7c2c351185b6a049d9cab6b9304f74c6ecb2cc2e24ed2d7e0e18879ffada4
+      - frame:093291839c89490f672ba89265654d293d9b9cd1bf7035d65b6be35df210fff4
+      - frame:1c76603acb135155b20e3f6d601fe84f14c88a61a4bab312b17677c65f671200
+      - frame:3d50fa2e6315f673bdf260ba3285a5ffe8bc2689594e4b0fc082e75af14b0c66
     uses:
-      - use:ed6c3436ed39c76fb41a25a8ca5063f78382961c8bb1d9689938c782e5b85c10
-      - use:9c68595a7d78e850ea5a1d87236eb2426afc6a0f4d0c98bc598c5530a7cefefa
-      - use:1cfe08db6b3a65acdd1cc3745db5a0dae85b1993a824802d80f8e58efbd0186c
-      - use:3aec8b47137f9f91e79145b2571c5b4f34be870c01e0881cc22f839d3c658f27
-      - use:322ec134229c3261f8d3665e20a95c55ca152d1e23dff448b2e16d3d888c8341
+      - use:45f58591c072188ab64ea75077286d245f59185e730661341429e8ae540cc7a0
+      - use:cf29618857a71d21a463f16431f273899e5090d8de27334657ed5fc45bf1084c
+      - use:a3c16ac41154b6732f3b7de6d294bad6db60b3e50f75abca52fb7045ec008054
+      - use:f82a02e8edecb64434586690f0d09f0aba7f5dd90e9fe2875706b5f30995bb03
+      - use:f2564bb5f55c36ce8a57999d10f2b73d04e573eaf19e16db12573dd7e6cdf1dc
     translation_review:
       required_uses: []
       conditional_uses:
-        - use:ed6c3436ed39c76fb41a25a8ca5063f78382961c8bb1d9689938c782e5b85c10
-        - use:9c68595a7d78e850ea5a1d87236eb2426afc6a0f4d0c98bc598c5530a7cefefa
-        - use:1cfe08db6b3a65acdd1cc3745db5a0dae85b1993a824802d80f8e58efbd0186c
-        - use:3aec8b47137f9f91e79145b2571c5b4f34be870c01e0881cc22f839d3c658f27
-        - use:322ec134229c3261f8d3665e20a95c55ca152d1e23dff448b2e16d3d888c8341
+        - use:45f58591c072188ab64ea75077286d245f59185e730661341429e8ae540cc7a0
+        - use:cf29618857a71d21a463f16431f273899e5090d8de27334657ed5fc45bf1084c
+        - use:a3c16ac41154b6732f3b7de6d294bad6db60b3e50f75abca52fb7045ec008054
+        - use:f82a02e8edecb64434586690f0d09f0aba7f5dd90e9fe2875706b5f30995bb03
+        - use:f2564bb5f55c36ce8a57999d10f2b73d04e573eaf19e16db12573dd7e6cdf1dc
       trigger: follow-move 的追蹤與結果責任釐清並採納時逐 use 比對；只有來源語義、leaf 或中文 render 改變才重審，單純統一標註不重派。
   - id: shape:9ecbbb219f8fcbfbd8df9efba026b093f8801c22093543a01a1a59d012765273
     priority: false
@@ -93,11 +93,11 @@ groups:
       Tbc5684dbcd:
         - BP06-085
     frames:
-      - frame:50c61ebd79394552166c046c329f588392c96a05e897540f346b7c9606396786
-      - frame:737232987a0b34f33cb43edea08e19e009cb831b46ee267a2467735bc3314ad6
+      - frame:099eab3f5e64a8fcb5e2dba4e74c5026c70b406a440b8787c461f5d78b27e05a
+      - frame:2960289a8c63879111d4d8e859f9aa99870b06946232a8f6231c019545d37152
     uses:
-      - use:e6cc6f9705aed354cbbdfb64d26f62da61612835a3544054b811495efc4a4408
-      - use:7dc9760d26bd04ff88fb634ed9f8d16a775a2ab3ad8fff611949adc5c764900b
+      - use:ae855359fba956f070fa7d9329fced23c4d8ae9bb37579ac8eb11b637176ff0a
+      - use:696cb91b9f8e95b30f772cd783a68106ea46b34c09b9c44b30ece72951575c82
     translation_review:
       required_uses: []
       conditional_uses: []
@@ -116,11 +116,11 @@ groups:
       Tfb5fee5a0e:
         - BP09-085
     frames:
-      - frame:4efab9cd76575046c7ac8264beb84af0ae76414f1888765cd62c493906e51ba3
-      - frame:56245f077241380ab4eb97869787d29a4cc3347386a03eef14c3a792ad51a72b
+      - frame:1cb6068ec86e6f1b6a0a805a8dfe769c0a1618a7a90e9cf7d4f2224a17bc3920
+      - frame:9e408fc902e17d5da782f4166b80b448a81368383a5b3020af0d764c7bb3c911
     uses:
-      - use:4048e755116d53a8b64990b90bf48a108bbbf6c558df4e82f72f478518a513f3
-      - use:b0b3546498c8564e34529ab8416d7ca905d93a7212d287008f16bf99019f07b7
+      - use:ff27fa231de8faf59c29666b98e339dfe8d37db81d39a69297470fc11a76c7b9
+      - use:c0cf82d65bae6f6843f1067ae518004f15f6563e5404f4d218c5e063d23f199a
     translation_review:
       required_uses: []
       conditional_uses: []
@@ -132,8 +132,8 @@ reverse_positions:
     section: 0
     line: 1
     frame_ids:
-      - frame:76c02d0bf9a94a0a3fd74054e16c8b45a1b2e4e544618c9a714ce1043ee51522
-      - frame:0ef45b7a7b3bd515520d3bcf87cf0233e48db764ffa531249a8b8b29c512b935
+      - frame:4d332925c628953616efcae3fdbd98601d0bd02cc21e133e431abf0d57bffb1e
+      - frame:45591bab069f043252d2619d1a94ae373de5a0e4077bcf54aa91ffb516a479a3
     category: token
     rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。
   - card_no: BP06-042
@@ -142,8 +142,8 @@ reverse_positions:
     section: 0
     line: 1
     frame_ids:
-      - frame:9eb52bbbf38f300fb7d0c90f7fadbbed4e6c3284652fa1e638578442855e5774
-      - frame:0c75303540eab6dc61f493bbe3bba067b9cba99faf864c180cd0c9faa8191455
+      - frame:9b86abf02b255f20461f096a2fe88e504ac788f07f2f9aae64f01cdf9c0491e6
+      - frame:892d7c851a19a387c55cde0b410588394eae21e0bb6936c01bbb68e9fc2b62c9
     category: token
     rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。
   - card_no: BP06-073
@@ -152,7 +152,7 @@ reverse_positions:
     section: 0
     line: 1
     frame_ids:
-      - frame:5bb7b76c3b50004ac306d36817deaf2bda8b843b47daaa0534ef612fe50ae857
-      - frame:26ea701171ff652245548a1125f9171ac1e89867b64818ae8aa22e7df00f3a27
+      - frame:30f894ad4be5be92e8f1f3ea7d48b61fc28fc73b717c5ad29d72df9ef778f941
+      - frame:fd77831a642104a5f6d8865c02e51472ce5f6596a38bf11d858500d8205d8197
     category: token
     rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。

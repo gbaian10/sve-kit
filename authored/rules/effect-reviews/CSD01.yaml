@@ -6,7 +6,7 @@ basis:
     recipe: v0-classification-candidates-1
     inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
   normalizer: four-layer-jp-v7
-  build_sha256: 7663e614a9cbf981162cbc7d09bb5841bcd3b18958c04b01fe55c5e4cb06ecf6
+  build_sha256: a492ac4459f33440844a4874ad644992dac317329773fca3a54765866f4e90f7
 groups: []
 reverse_positions:
   - card_no: CSD01-032
@@ -15,8 +15,8 @@ reverse_positions:
     section:
     line: 1
     frame_ids:
-      - frame:7bcceaabc00af00f7324450855bb2136c3504faa0d759d162f24b2edb828e5d7
-      - frame:c7ca211f49d39bccb2864aa9b9080b3a4b5006d4b54747a124ec38276d53a263
+      - frame:da3172d8d72b107e7a39310c0603fba3943cc3a95ee49e6770ae11df8f068dc9
+      - frame:2829fbecff0fe0bf3d52d3e853e0a32a49deff8769a81097fc5e0709fac0b8db
     category: 通用規則
     rationale: 食事與出走由一般規則處理；這行是共通動作的說明，不新增本卡專屬能力，也不宣稱引擎已實作。
   - card_no: CSD01-T01
@@ -25,7 +25,7 @@ reverse_positions:
     section:
     line: 1
     frame_ids:
-      - frame:5ed08606c38a872c31c55654ddaba3968b9713a5d67e7883b3366a3af1db0893
+      - frame:06cf7d1e5fc383ca7a629268b06abace8f675bebbe9ea2b8dbe01c0879285606
     category: 通用規則
     rationale: 資源與 EP 的使用／開始配置由通用規則處理；不建立空卡效果來灌高完成率。
   - card_no: CSD01-T01
@@ -34,7 +34,7 @@ reverse_positions:
     section:
     line: 2
     frame_ids:
-      - frame:0359cb2e4aaeb97b5e162774934fdb4f1d3a6d2a982c659a08d6917011ff3507
-      - frame:f73a77196cad035daf1132d60585c18ec713bfb7238889caa2fb140173fd08ba
+      - frame:e7a86103c9645b31e5d87cc727330476cc97e49cdecf27c5f5f37224688cd488
+      - frame:5b6975120a988680468a1f68955cd1d7d7a51f75965d72282a9c20f3c2fe9de4
     category: 通用規則
     rationale: 資源與 EP 的使用／開始配置由通用規則處理；不建立空卡效果來灌高完成率。

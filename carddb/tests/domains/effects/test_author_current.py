@@ -35,6 +35,7 @@ from ...support.author_current_fixtures import (
     CurrentSourceFixture,
     current_source_fixture,
 )
+from ...support.semantic_definition_fixtures import with_definitions
 from .author_current_goldens import FACTS, golden
 from .author_current_synthetic import back_face, effect
 from .author_entry_cases import meta
@@ -49,7 +50,7 @@ CARDS = {
     "BP01-034": "c:b1d5ce73453a5efea8a2057e75743ea4",
     "BP01-092": "c:8c4b83cfcb625c0490eb8c66968f29dc",
 }
-FRAME = "frame:4e38fd488749ed51f1cf501759988e443549000c47bca7aba285a2f6009b902d"
+FRAME = "frame:f03820b9048f0bd911c528162f930b0e47d128493a84b4fe097f4c8a48608756"
 
 
 @pytest.fixture(scope="module")
@@ -381,7 +382,10 @@ def check_synthetic_sibling_root_closure(
         }
     )
     snapshot = Snapshot(
-        (), (("translations/templates/definitions/094.yaml", encoded, encoded),)
+        (),
+        with_definitions(
+            (("translations/templates/definitions/094.yaml", encoded, encoded),)
+        ),
     )
     synthetic = CurrentAuthorSources(
         current.db,

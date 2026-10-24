@@ -76,7 +76,10 @@ def frame(value: dict[str, JsonValue]) -> Frame:
         "id": "frame:" + checksum,
         "source": {
             "source_lang": semantic["source_lang"],
-            "normalizer_version": semantic["normalizer_version"],
+            "normalizer_version": value.get(
+                "normalizer_version", "fixture-normalizer-v1"
+            ),
+            "semantic_definitions": semantic["semantic_definitions"],
             "canonical_hash": digest(string(semantic["canonical_source"]).encode())[7:],
         },
         "role": semantic["role"],
@@ -484,10 +487,17 @@ def binding_sample() -> tuple[Frame, SourceBinding, str, str]:
     """Use one number next to a non-BMP scalar and layout to exercise source identity."""
     raw, normalized = "計数２😀\r\n", "計数N😀"
     semantic: dict[str, JsonValue] = {
-        "recipe": "frame-v1",
+        "recipe": "frame-v2",
         "source_lang": "ja",
         "canonical_source": normalized,
-        "normalizer_version": "fixture-normalizer-v1",
+        "semantic_definitions": {
+            "domains": {},
+            "expressions": {},
+            "omissions": {},
+            "units": {},
+            "resolved": {"kind": "synthetic_fixture"},
+            "source_links": {"ports": [], "scopes": []},
+        },
         "role": "body",
         "leaf_schema": {
             "format": 2,
