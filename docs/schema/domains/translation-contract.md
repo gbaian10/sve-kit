@@ -323,9 +323,7 @@ origin=official、authority=sve_official、bindings/terms 空。其 context/sour
 
 四層實作的 CI 須驗格式、key／ID 唯一、葉角色／域、引用與 owner、來源覆蓋及 render 位置，
 按[固定案例](four-layer-cases.md)逐項驗預期結果；這些案例目前是規格，不是程式通過紀錄。
-官方輸入存既有永久私有 testdata repo，公開 repo 只留 commit 與檔案 hash，依既有 deploy-key 流程取得；
-可信任 CI 缺資料失敗，fork 明示只跑合成檢查，不能宣稱完整資料驗收。
-CI 不讀個人檔案、不即時爬站；報告列 ID／原因，不在 log、cache 或 artifact 放官方全文。
+官方來源證據留在永久私有來源歸檔；CI 不 checkout 私有原始頁面，也不即時爬站。Python 主 repo 與 fork 使用相同公開 SVE fixtures 和合成案例，並以 90% 行／分支覆蓋率門檻驗收。報告列 ID／原因，不在 log、cache 或 artifact 放官方全文。
 保留能抓錯的行為反例；資料 PR 不要求每個 guard 都做一次定向突變，不另加人工合併前命令。
 
 ## 9. 舊格式的保存

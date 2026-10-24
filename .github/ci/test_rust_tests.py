@@ -13,18 +13,17 @@ import rust_tests
 
 
 class RustTests(unittest.TestCase):
-    def test_every_scope_regenerates_and_cleans_input(self) -> None:
-        """Neither fork mode nor an inherited private path may skip real tests."""
+    def test_regenerates_and_cleans_input(self) -> None:
+        """An inherited snapshot path cannot skip generation or cleanup."""
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             (root / "tests/engine").mkdir(parents=True)
             (root / "tests/engine/card-input.json").write_text(
                 json.dumps({"batch_id": "synthetic"})
             )
-            for mode, arguments in (
-                ("full", []),
-                ("fork", []),
-                ("full", ["mutants", "--workspace", "-j", "4", "--timeout", "120"]),
+            for arguments in (
+                [],
+                ["mutants", "--workspace", "-j", "4", "--timeout", "120"],
             ):
                 generated: list[Path] = []
 
@@ -63,8 +62,7 @@ class RustTests(unittest.TestCase):
                     patch.dict(
                         os.environ,
                         {
-                            "SVE_CI_TEST_MODE": mode,
-                            "SVE_TEST_SNAPSHOT": "/unused/private",
+                            "SVE_TEST_SNAPSHOT": "/unused/inherited-snapshot",
                         },
                     ),
                 ):

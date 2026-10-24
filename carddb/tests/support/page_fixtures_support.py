@@ -1,4 +1,4 @@
-"""Pinned, field-specific oracles shared by public and private parser fixtures.
+"""Pinned, field-specific oracles for parser fixtures.
 
 Text checks hash UTF-8 exactly; nulls and list lengths are separate checks.
 Mapping checks allow new output fields. Local verification never consults Git.
@@ -10,20 +10,13 @@ import json
 import re
 from dataclasses import asdict, dataclass
 from pathlib import Path, PurePosixPath
-from typing import TYPE_CHECKING, override
+from typing import override
 
 from sve_carddb.parse.pages import extract_en, extract_jp
 from sve_carddb.parse.pages import official_en as en
 from sve_carddb.parse.pages import official_jp as jp
-from sve_carddb.parse.pages import official_sv1 as sv1
-from sve_carddb.parse.pages import official_svwb as wb
 
-if TYPE_CHECKING:
-    from collections.abc import Mapping
-
-INDEX_PATH = Path(__file__).parents[1] / "fixtures" / "private-pages.json"
-MODE_ENV = "SVE_PRIVATE_TESTDATA_MODE"
-DIRECTORY_ENV = "SVE_PRIVATE_TESTDATA_DIR"
+INDEX_PATH = Path(__file__).parents[1] / "fixtures" / "official-pages.json"
 _HASH = re.compile(r"[0-9a-f]{64}")
 _COMMIT = re.compile(r"[0-9a-f]{40}")
 _CASE_ID = re.compile(r"F[0-9]{2}")
@@ -34,8 +27,6 @@ _PARSERS = frozenset(
         "sve-list-first",
         "sve-list-more",
         "sve-sets",
-        "sv1-card",
-        "wb-list",
     }
 )
 
@@ -82,13 +73,6 @@ class Case:
 class Index:
     commit: str
     cases: tuple[Case, ...]
-
-
-def mode(environment: Mapping[str, str]) -> str:
-    value = environment.get(MODE_ENV, "excluded")
-    if value not in {"required", "excluded"}:
-        raise PageFixtureError("private-page mode must be required or excluded")
-    return value
 
 
 def _object(value: object, fields: set[str]) -> dict[str, object]:
@@ -150,7 +134,7 @@ def _check(value: object) -> Check:
     return Check(tuple(segments), kind, expected)
 
 
-def _case(value: object, *, public: bool) -> Case:
+def _case(value: object) -> Case:
     raw = _object(value, {"id", "path", "sha256", "parser", "arguments", "checks"})
     identity = _string(raw["id"])
     if not _CASE_ID.fullmatch(identity):
@@ -162,11 +146,10 @@ def _case(value: object, *, public: bool) -> Case:
         or ".." in relative.parts
         or relative.as_posix() != path
         or relative.parts[:2]
-        not in (
-            {("fixtures", "official_jp"), ("fixtures", "official_en")}
-            if public
-            else {("fixtures", "carddb")}
-        )
+        not in {
+            ("fixtures", "official_jp"),
+            ("fixtures", "official_en"),
+        }
         or relative.suffix not in {".html", ".json"}
     ):
         raise PageFixtureError("unsafe page-fixture fixture path")
@@ -203,7 +186,7 @@ def _case(value: object, *, public: bool) -> Case:
     )
 
 
-def load_index(path: Path = INDEX_PATH, *, public: bool = False) -> Index:
+def load_index(path: Path = INDEX_PATH) -> Index:
     try:
         document: object = json.loads(path.read_bytes(), object_pairs_hook=_pairs)
     except OSError, json.JSONDecodeError, UnicodeDecodeError:
@@ -217,7 +200,7 @@ def load_index(path: Path = INDEX_PATH, *, public: bool = False) -> Index:
     cases = raw["cases"]
     if not isinstance(cases, list) or not cases:
         raise PageFixtureError("page-fixture index has no cases")
-    parsed = tuple(_case(case, public=public) for case in cases)
+    parsed = tuple(_case(case) for case in cases)
     if len({case.id for case in parsed}) != len(parsed) or len(
         {case.path for case in parsed}
     ) != len(parsed):
@@ -248,7 +231,7 @@ def read_inputs(index: Index, directory: Path) -> dict[str, bytes]:
 
 
 def project(case: Case, body: bytes) -> dict[str, object]:
-    __tracebackhide__ = True  # Pytest must not render private argument values.
+    __tracebackhide__ = True  # Pytest must not render source fixture values.
     try:
         if case.parser in {"jp-card", "en-card"} and case.number is not None:
             source = en if case.parser == "en-card" else jp
@@ -274,15 +257,8 @@ def project(case: Case, body: bytes) -> dict[str, object]:
             }
         if case.parser == "sve-sets":
             return {"sets": [asdict(product) for product in jp.parse_sets(body)]}
-        if case.parser == "sv1-card":
-            return {"images": asdict(sv1.parse_card_images(body))}
-        if case.parser == "wb-list":
-            return {
-                "page": asdict(wb.parse_list(body)),
-                "image_hashes": wb.image_hashes(body),
-            }
     except ValueError, LookupError, TypeError:
-        # Parser errors can quote private text; only expose the safe case location.
+        # Parser errors can quote source text; only expose the safe case location.
         raise PageFixtureError(f"{case.id}: parser rejected fixture") from None
     raise PageFixtureError(f"{case.id}: invalid parser arguments")
 
@@ -311,7 +287,7 @@ def _matches(check: Check, value: object) -> bool:
 
 
 def check_projection(case: Case, projection: dict[str, object]) -> None:
-    __tracebackhide__ = True  # Parsed text is private even when its hash is public.
+    __tracebackhide__ = True  # Parsed text can be lengthy even when its hash is public.
     for check in case.checks:
         value: object = projection
         location = ".".join(str(part) for part in check.path)

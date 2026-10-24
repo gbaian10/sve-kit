@@ -11,5 +11,5 @@
 [英文卡表](https://en.shadowverse-evolve.com/cards/) 與
 [日文卡表](https://shadowverse-evolve.com/cardlist/)。
 
-F17–F19 的其他遊戲資料仍在永久私有 testdata，未包含於本目錄。
+其他遊戲原始資料仍由永久私有 testdata 保存；SV1 與 SVWB parser 行為以合成輸入測試，不讀取那些原始頁面。
 官方名稱、卡文、商品與圖片網址等第三方內容不適用專案授權，見 [LICENSING](../../../LICENSING.md)。

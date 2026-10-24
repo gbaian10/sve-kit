@@ -79,7 +79,7 @@ def test_urls_follow_the_official_patterns() -> None:
     )
 
 
-def test_template_matches_the_synthetic_card_page() -> None:
+def test_synthetic_two_face_card_page_matches_image_template() -> None:
     images = sv1.parse_card_images(FakePortal().card_page(FOLLOWER).encode())
     assert images.urls == [sv1.image_url(FOLLOWER, face) for face in sv1.FACES]
     assert images.originals == [
@@ -87,7 +87,7 @@ def test_template_matches_the_synthetic_card_page() -> None:
     ]
 
 
-def test_the_synthetic_error_page_has_no_images() -> None:
+def test_synthetic_error_card_page_has_no_images() -> None:
     portal = FakePortal()
     portal.no_page.add(SPELL)
     images = sv1.parse_card_images(portal.card_page(SPELL).encode())

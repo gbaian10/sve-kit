@@ -338,7 +338,7 @@ origin 與 authority 分開，本站效果翻譯仍 unofficial；機器譯文人
 
 平常一個新包只需一個資料 PR 與一張低信心／新句型／缺項清單，
 不要求首輪抽查、逐筆雙模型、approved_policy、額外核可頁或手動合併前驗證。
-官方 CI 輸入沿現有私有 testdata repo 及鎖定檔，個人機器路徑與事件不得進 committed 資料。
+官方來源證據保存在永久私有來源歸檔；CI 測試使用公開 fixture 與合成輸入，不讀取私有 checkout。個人機器路徑與事件不得進 committed 資料。
 
 ### 6.1 卡包名稱 label
 

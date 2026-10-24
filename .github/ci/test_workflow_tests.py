@@ -66,7 +66,7 @@ class DirectTestTests(unittest.TestCase):
         tests = next(step for step in steps if step.get("id") == "publish-tests")
         assert tests["if"] == "${{ !cancelled() }}"
         assert "--locked pytest" in tests["run"]
-        assert "SVE_CI_COVERAGE_THRESHOLD" not in tests["run"]
+        assert "--cov-fail-under" not in tests["run"]
         config = tomllib.loads((ROOT / "publish/pyproject.toml").read_text())
         assert config["tool"]["coverage"]["run"]["branch"] is True
         assert config["tool"]["coverage"]["report"]["fail_under"] == 92
@@ -132,61 +132,27 @@ class DirectTestTests(unittest.TestCase):
                     if "actions/checkout@" in str(step.get("uses")):
                         assert cast("dict[str, object]", step["with"])["clean"] is True
 
-    def test_private_checkout_and_key_are_only_required_for_full_scope(self) -> None:
-        """Forks omit checkout rather than attempting it without credentials."""
+    def test_python_runs_full_scope_without_private_checkout(self) -> None:
+        """Every Python PR uses the same gate and needs no private credentials."""
         workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
-        for component in ("python",):
-            steps = workflow["jobs"][component]["steps"]
-            select = next(step for step in steps if step.get("id") == "pin")
-            assert (
-                select["run"] == f"python3 .github/ci/testdata.py configure {component}"
-            )
-            checkout = next(
-                step
-                for step in steps
-                if step.get("with", {}).get("path") == ".testdata"
-            )
-            key = next(
-                step
-                for step in steps
-                if step.get("name") == "Require the private-data deploy key"
-            )
-            verify = next(
-                step
-                for step in steps
-                if step.get("name") == "Verify required private test data"
-            )
-            for step in (checkout, key, verify):
-                assert step["if"] == "steps.pin.outputs.mode == 'required'"
-            assert checkout["with"]["ref"] == "${{ steps.pin.outputs.commit }}"
-            assert checkout["with"]["persist-credentials"] is False
-            assert verify["run"] == f"python3 .github/ci/testdata.py verify {component}"
-            assert (
-                steps.index(select)
-                < steps.index(key)
-                < steps.index(checkout)
-                < steps.index(verify)
-            )
-            for value, expected in (("", 1), ("synthetic-key", 0)):
-                result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- real fixed key guard, synthetic secret
-                    [shutil.which("bash") or "bash", "-eu", "-c", key["run"]],
-                    env={**os.environ, "DEPLOY_KEY": value},
-                    capture_output=True,
-                    check=False,
-                )
-                assert result.returncode == expected
-                assert not value or value not in result.stdout.decode()
+        steps = workflow["jobs"]["python"]["steps"]
+        checkouts = [
+            step for step in steps if "actions/checkout@" in str(step.get("uses", ""))
+        ]
+        assert len(checkouts) == 1
+        assert all("ssh-key" not in step.get("with", {}) for step in checkouts)
+        assert all("testdata.py" not in str(step.get("run", "")) for step in steps)
         test = next(
             step
             for step in workflow["jobs"]["python"]["steps"]
             if step.get("id") == "tests"
         )
-        assert '--cov-fail-under="$SVE_CI_COVERAGE_THRESHOLD"' in test["run"]
+        assert "--cov-fail-under=90" in test["run"]
         assert test["env"]["TMPDIR"] == "${{ runner.temp }}"
         cleanup = next(
             step
             for step in workflow["jobs"]["python"]["steps"]
-            if step.get("name") == "Remove private Python reports and test data"
+            if step.get("name") == "Remove Python reports and test data"
         )
         assert cleanup["if"] == "always()"
         assert '"${RUNNER_TEMP}"/pytest-of-*' in cleanup["run"]
@@ -323,8 +289,11 @@ class DirectTestTests(unittest.TestCase):
         """Data edits exercise consumers without private credentials or exclusions."""
         workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
         steps = workflow["jobs"]["rust"]["steps"]
-        assert all("TESTDATA_DEPLOY_KEY" not in str(step) for step in steps)
-        assert all(step.get("with", {}).get("path") != ".testdata" for step in steps)
+        checkouts = [
+            step for step in steps if "actions/checkout@" in str(step.get("uses", ""))
+        ]
+        assert len(checkouts) == 1
+        assert all("ssh-key" not in step.get("with", {}) for step in checkouts)
         tests = next(step for step in steps if step.get("id") == "tests")
         assert "rust_tests.py" in tests["run"]
         assert "--fail-under-lines 90" in tests["run"]

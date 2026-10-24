@@ -14,7 +14,7 @@ from ..support.page_fixtures_support import (
 )
 
 ROOT = Path(__file__).resolve().parents[1]
-INDEX = load_index(ROOT / "fixtures/official-pages.json", public=True)
+INDEX = load_index(ROOT / "fixtures/official-pages.json")
 
 
 @pytest.fixture(scope="module")
