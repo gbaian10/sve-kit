@@ -1,20 +1,21 @@
-import iconCost00 from "../../assets/official/texticon/icon_cost00.png"
-import iconCost01 from "../../assets/official/texticon/icon_cost01.png"
-import iconCost02 from "../../assets/official/texticon/icon_cost02.png"
-import iconCost03 from "../../assets/official/texticon/icon_cost03.png"
-import iconCost04 from "../../assets/official/texticon/icon_cost04.png"
-import iconCost05 from "../../assets/official/texticon/icon_cost05.png"
-import iconCost06 from "../../assets/official/texticon/icon_cost06.png"
-import iconCost07 from "../../assets/official/texticon/icon_cost07.png"
-import iconCost08 from "../../assets/official/texticon/icon_cost08.png"
-import iconCost09 from "../../assets/official/texticon/icon_cost09.png"
-import iconCost10 from "../../assets/official/texticon/icon_cost10.png"
-import iconCostX from "../../assets/official/texticon/icon_costX.png"
+import iconCost00 from "../../assets/card-labels/cost/cost-00.svg"
+import iconCost01 from "../../assets/card-labels/cost/cost-01.svg"
+import iconCost02 from "../../assets/card-labels/cost/cost-02.svg"
+import iconCost03 from "../../assets/card-labels/cost/cost-03.svg"
+import iconCost04 from "../../assets/card-labels/cost/cost-04.svg"
+import iconCost05 from "../../assets/card-labels/cost/cost-05.svg"
+import iconCost06 from "../../assets/card-labels/cost/cost-06.svg"
+import iconCost07 from "../../assets/card-labels/cost/cost-07.svg"
+import iconCost08 from "../../assets/card-labels/cost/cost-08.svg"
+import iconCost09 from "../../assets/card-labels/cost/cost-09.svg"
+import iconCost10 from "../../assets/card-labels/cost/cost-10.svg"
+import iconCostX from "../../assets/card-labels/cost/cost-x.svg"
 import iconHp from "../../assets/official/texticon/icon_hp.png"
 import iconPower from "../../assets/official/texticon/icon_power.png"
 
-// Official cost crystals, one file per value 0–10; anything else (the real data has costs up to
-// 15) shows the X crystal with the number written next to it by the caller.
+// Our own cost crystals (blank crystal plus the number), one file per value 0–10; anything else
+// (the real data has costs up to 15) shows the X crystal with the number written next to it by
+// the caller.
 const COST = [
   iconCost00,
   iconCost01,
