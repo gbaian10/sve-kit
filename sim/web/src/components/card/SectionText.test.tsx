@@ -101,8 +101,12 @@ async function sectionOrigin(options: {
   }
 }
 
-const paragraphs = (root: HTMLElement, lang: string) =>
-  [...root.querySelectorAll(`p[lang="${lang}"]`)].map((p) => p.textContent)
+// Paragraphs outside the framed originals, or inside them when `original` is set.
+const paragraphs = (root: HTMLElement, lang: string, original = false) =>
+  [...root.querySelectorAll(`p[lang="${lang}"]`)]
+    .filter((p) => (p.closest("[data-original]") !== null) === original)
+    .map((p) => p.textContent)
+const originals = (root: HTMLElement) => [...root.querySelectorAll<HTMLElement>("[data-original]")]
 const effectRegion = () => screen.getByRole("region", { name: "效果" })
 // Sections resolve a frame after the effect and may replace the region's subtree, so wait on a
 // fresh lookup until nothing in it is still loading and the section has appeared.
@@ -116,17 +120,6 @@ const settledRegion = async (name: string) => {
   return screen.getByRole("region", { name })
 }
 
-const originalBox = (region: HTMLElement) => {
-  const box = within(region).getByRole("button", { name: /原文/ }).closest(".rounded-block")
-  if (!(box instanceof HTMLElement)) throw new Error("original box missing")
-  return box
-}
-const translationBox = (region: HTMLElement) => {
-  const box = region.querySelector(".rounded-block")
-  if (!(box instanceof HTMLElement)) throw new Error("translation box missing")
-  return box
-}
-
 describe("sections under the effect in the Traditional Chinese interface", () => {
   it("prints the labelled section after a rule in both boxes with one shared source line", async () => {
     const client = await sectionOrigin({ effect: true, section: "same", label: true })
@@ -138,7 +131,7 @@ describe("sections under the effect in the Traditional Chinese interface", () =>
     expect(section?.translated?.unit["text"]).toBe("合成段落譯文")
     await renderInRouter(<CardText edition="jp" client={client} owner={owner} field="effect" />)
     const region = await settledRegion("效果")
-    const translated = translationBox(region)
+    const translated = region
     expect(paragraphs(translated, "zh-Hant")).toEqual(["Synthetic translation", "合成段落譯文"])
     expect(paragraphs(translated, "ja")).toEqual([])
     const rule = translated.querySelector("[data-section]")
@@ -154,10 +147,12 @@ describe("sections under the effect in the Traditional Chinese interface", () =>
     if (!rule) throw new Error("section missing")
     expect(line.compareDocumentPosition(rule)).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
     expect(rule).not.toContainElement(line)
-    const original = originalBox(region)
-    expect(paragraphs(original, "ja")).toEqual(["Synthetic text", "Synthetic text"])
-    expect(original.querySelector("[data-section]")).toHaveClass("border-t")
-    expect(within(original).getByText("Synthetic keyword")).toBeVisible()
+    // Each unit has its own original box: the effect's, then the section's inside the section.
+    expect(paragraphs(region, "ja", true)).toEqual(["Synthetic text", "Synthetic text"])
+    expect(originals(region)).toHaveLength(2)
+    expect(rule).toContainElement(originals(region)[1] ?? null)
+    // The label is the section's, printed once above its translation, not repeated in the box.
+    expect(within(originals(region)[1] as HTMLElement).queryByText("Synthetic keyword")).toBeNull()
     expect(screen.queryByText("附註")).not.toBeInTheDocument()
     expect(translated.querySelector("strong")).toHaveTextContent("Synthetic")
     // The language preference only changes what is shown, never which revision is resolved.
@@ -177,7 +172,7 @@ describe("sections under the effect in the Traditional Chinese interface", () =>
     const client = await sectionOrigin({ effect: true, section: "low" })
     await renderInRouter(<CardText edition="jp" client={client} owner={owner} field="effect" />)
     const region = await settledRegion("效果")
-    const translated = translationBox(region)
+    const translated = region
     expect(paragraphs(translated, "zh-Hant")).toEqual(["Synthetic translation", "合成段落譯文"])
     const rule = translated.querySelector("[data-section]")
     if (!(rule instanceof HTMLElement)) throw new Error("section missing")
@@ -193,14 +188,15 @@ describe("sections under the effect in the Traditional Chinese interface", () =>
     const client = await sectionOrigin({ effect: true, section: "none" })
     await renderInRouter(<CardText edition="jp" client={client} owner={owner} field="effect" />)
     const region = await settledRegion("效果")
-    const translated = translationBox(region)
+    const translated = region
     expect(paragraphs(translated, "zh-Hant")).toEqual(["Synthetic translation"])
     expect(paragraphs(translated, "ja")).toEqual(["Synthetic text"])
     const rule = translated.querySelector("[data-section]")
     if (!(rule instanceof HTMLElement)) throw new Error("section missing")
     expect(within(rule).getByText("缺少此語言譯文")).toBeVisible()
     expect(within(translated).getAllByText("缺少此語言譯文")).toHaveLength(1)
-    expect(paragraphs(originalBox(region), "ja")).toEqual(["Synthetic text", "Synthetic text"])
+    expect(paragraphs(region, "ja", true)).toEqual(["Synthetic text"])
+    expect(originals(region)).toHaveLength(1)
   })
 
   it("keeps an English card's own section in English instead of borrowing the Japanese source section", async () => {
@@ -236,16 +232,13 @@ describe("sections under the effect in the Traditional Chinese interface", () =>
     expect(value?.sourceSections).toBeUndefined()
     await renderInRouter(<CardText edition="en" client={patched} owner={receiver} field="effect" />)
     const region = await settledRegion("效果")
-    const translated = translationBox(region)
+    const translated = region
     expect(paragraphs(translated, "zh-Hant")).toEqual(["Synthetic translated source effect"])
     const rule = translated.querySelector("[data-section]")
     if (!(rule instanceof HTMLElement)) throw new Error("section missing")
     expect(paragraphs(rule, "en")).toEqual(["Synthetic English counterpart effect"])
     expect(within(rule).getByText("缺少此語言譯文")).toBeVisible()
-    expect(paragraphs(originalBox(region), "en")).toEqual([
-      "Synthetic English counterpart effect",
-      "Synthetic English counterpart effect",
-    ])
+    expect(paragraphs(region, "en", true)).toEqual(["Synthetic English counterpart effect"])
     expect(screen.queryByText("Synthetic Japanese source paragraph")).not.toBeInTheDocument()
   })
 })
@@ -261,8 +254,7 @@ describe("a translated section under an untranslated effect", () => {
       prefsStore.set({ effectLanguage })
       await renderInRouter(<CardText edition="jp" client={client} owner={owner} field="effect" />)
       const region = await settledRegion("效果")
-      // In the translated preference the region is the single box itself.
-      const translated = withOriginalBox ? translationBox(region) : region
+      const translated = region
       expect(paragraphs(translated, "ja")).toEqual(["Synthetic text"])
       expect(paragraphs(translated, "zh-Hant")).toEqual(["合成段落譯文"])
       const rule = translated.querySelector("[data-section]")
@@ -275,8 +267,11 @@ describe("a translated section under an untranslated effect", () => {
       expect(within(region).getAllByText(/譯文 · /)).toHaveLength(1)
       expect(within(region).queryByText(/專案譯文/)).not.toBeInTheDocument()
       if (withOriginalBox) {
-        expect(paragraphs(originalBox(region), "ja")).toEqual(["Synthetic text", "Synthetic text"])
-        expect(originalBox(region).querySelector('p[lang="zh-Hant"]')).toBeNull()
+        // Only the translated section gets a box; the untranslated effect is its own original.
+        expect(originals(region)).toHaveLength(1)
+        expect(rule).toContainElement(originals(region)[0] ?? null)
+        expect(paragraphs(region, "ja", true)).toEqual(["Synthetic text"])
+        expect(paragraphs(region, "zh-Hant", true)).toEqual([])
       } else {
         expect(within(region).queryByRole("button")).not.toBeInTheDocument()
         expect(paragraphs(region, "ja")).toEqual(["Synthetic text"])
@@ -327,14 +322,14 @@ describe("a translated section under an untranslated effect", () => {
     await renderInRouter(<CardText edition="jp" client={client} owner={owner} field="effect" />)
     const region = await settledRegion("效果")
     expect(screen.queryByText("這張卡沒有效果文字")).not.toBeInTheDocument()
-    const translated = translationBox(region)
+    const translated = region
     expect(paragraphs(translated, "zh-Hant")).toEqual(["合成段落譯文"])
     expect(paragraphs(translated, "ja")).toEqual([])
     expect(translated.querySelector("[data-section]")).not.toHaveClass("border-t")
     expect(within(translated).getByText(/專案譯文/)).toHaveTextContent("專案譯文 · 非官方")
     expect(within(translated).queryByText("缺少此語言譯文")).not.toBeInTheDocument()
-    expect(paragraphs(originalBox(region), "ja")).toEqual(["Synthetic text"])
-    expect(originalBox(region).querySelector("[data-section]")).not.toHaveClass("border-t")
+    expect(paragraphs(region, "ja", true)).toEqual(["Synthetic text"])
+    expect(originals(region)).toHaveLength(1)
   })
 })
 

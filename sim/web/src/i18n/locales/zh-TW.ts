@@ -24,8 +24,7 @@ const zhTW = {
     validationFailed: "Q&A 資料無法通過驗證，暫不顯示。",
     retry: "重新載入 Q&A",
     untranslated: "未翻譯",
-    showAll: "顯示全部 {{count}} 則",
-    collapse: "收合",
+    tabFallback: "Q&A {{count}}",
   },
   app: {
     title: "sve-kit",
@@ -323,8 +322,6 @@ const zhTW = {
     retry: "下載卡圖資訊",
   },
   card: {
-    expandText: "展開{{field}}",
-    collapseText: "收起{{field}}",
     originalText: "原文",
     sourcePending: "日文依據載入中",
     annotationsPending: "標註載入中",

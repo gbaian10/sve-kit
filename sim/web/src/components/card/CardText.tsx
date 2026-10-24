@@ -1,5 +1,4 @@
-import { Minus, Plus } from "lucide-react"
-import { type ReactNode, useId } from "react"
+import { type ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 
 import { type AnnotatedTextState, useAnnotatedText, useAnnotatedTexts } from "../../app/snapshot"
@@ -13,9 +12,10 @@ import {
 } from "../../data"
 import type { NameDisplay } from "../../domain/nameDisplay"
 import type { Region } from "../../domain/search"
-import { prefsStore, type TextBoxKind, usePrefs } from "../../settings"
+import { usePrefs } from "../../settings"
 import { cn } from "../ui/cn"
 import { AnnotatedText } from "./AnnotatedText"
+import { OriginalBox } from "./OriginalBox"
 import { useTextLanguage } from "./text-language"
 import { TextPurposeStatus } from "./TextPurposeStatus"
 import { TranslationSourceLine } from "./TranslationSourceLine"
@@ -26,59 +26,19 @@ const TEXT_BOX =
   "rounded-block border border-border bg-surface-1 text-14 leading-effect text-text-2"
 
 function TextBox({
-  kind,
   heading,
   field,
   children,
 }: {
-  readonly kind?: TextBoxKind
   readonly heading: string
-  readonly field?: string
+  readonly field: string
   readonly children: ReactNode
 }) {
-  const { t } = useTranslation()
-  const prefs = usePrefs()
-  const contentId = useId()
-  const expanded = kind === undefined || !prefs.collapsedText[kind]
-  const Container = field ? "section" : "div"
   return (
-    <Container
-      className={cn(TEXT_BOX, !kind && "px-3 py-2.5", field && "mt-3")}
-      aria-label={field ? heading : undefined}
-      data-field={field}
-    >
-      <h3 className="text-12 leading-5 text-text-3" aria-label={heading}>
-        {kind ? (
-          <button
-            type="button"
-            className="flex w-full cursor-pointer items-center justify-between gap-3 rounded-control px-3 py-1.5 text-start"
-            aria-expanded={expanded}
-            aria-controls={contentId}
-            aria-label={
-              expanded
-                ? t("card.collapseText", { field: heading })
-                : t("card.expandText", { field: heading })
-            }
-            onClick={() => {
-              const collapsedText = prefsStore.get().collapsedText
-              prefsStore.set({ collapsedText: { ...collapsedText, [kind]: !collapsedText[kind] } })
-            }}
-          >
-            <span>{heading}</span>
-            {expanded ? (
-              <Minus aria-hidden="true" size={14} />
-            ) : (
-              <Plus aria-hidden="true" size={14} />
-            )}
-          </button>
-        ) : (
-          heading
-        )}
-      </h3>
-      <div id={contentId} hidden={!expanded}>
-        <div className={cn("mt-1 space-y-2", kind && "px-3 pb-2.5")}>{children}</div>
-      </div>
-    </Container>
+    <section className={cn(TEXT_BOX, "mt-3 px-3 py-2.5")} aria-label={heading} data-field={field}>
+      <h3 className="text-12 leading-5 text-text-3">{heading}</h3>
+      <div className="mt-1 space-y-2">{children}</div>
+    </section>
   )
 }
 
@@ -94,6 +54,85 @@ function quality(value: SelectedText | null): string | undefined {
     : undefined
 }
 
+function sharedLines(
+  translated: { readonly unit: JsonObject } | undefined,
+  original: { readonly unit: JsonObject } | undefined,
+): number {
+  if (!translated || !original) return 1
+  const count = (text: { readonly unit: JsonObject }) =>
+    stringValue(text.unit["text"]).split("\n").length
+  return count(translated) === count(original) ? count(translated) : 1
+}
+
+/**
+ * A translation followed by its original in a box, line by line when `lines` > 1: line i of the
+ * translation is line i of the original (the build derives the translation per source line).
+ */
+function PairedLines({
+  lines,
+  translated,
+  original,
+}: {
+  readonly lines: number
+  readonly translated: (line?: number) => ReactNode
+  readonly original: ((line?: number) => ReactNode) | null
+}) {
+  if (lines <= 1)
+    return (
+      <>
+        {translated()}
+        {original && <OriginalBox>{original()}</OriginalBox>}
+      </>
+    )
+  return Array.from({ length: lines }, (_, line) => (
+    <div key={line} className="space-y-2" data-line={line}>
+      {translated(line)}
+      {original && <OriginalBox>{original(line)}</OriginalBox>}
+    </div>
+  ))
+}
+
+function OriginalText({
+  state,
+  line,
+  emphasis,
+  client,
+  edition,
+}: {
+  readonly state: AnnotatedTextState
+  readonly line?: number | undefined
+  readonly emphasis: boolean
+  readonly client: SnapshotClient
+  readonly edition: Region
+}) {
+  const { t } = useTranslation()
+  const { readiness, value } = state
+  if (readiness.basic === "pending")
+    return (
+      <p role="status" className="text-13">
+        {t("card.annotationPending")}
+      </p>
+    )
+  if (readiness.basic === "error")
+    return (
+      <p role="alert" className="text-13">
+        {readiness.error?.kind === "validation" ? t("card.textFailed") : t("card.textLoadFailed")}
+      </p>
+    )
+  if (!value) return <p className="text-13">{t("card.textUnavailable")}</p>
+  return (
+    <AnnotatedText
+      value={value.original}
+      context={value}
+      emphasis={emphasis}
+      annotationReady={readiness.annotations === "ready" || readiness.annotations === "none"}
+      client={client}
+      edition={edition}
+      line={line}
+    />
+  )
+}
+
 /** A section printed under the effect, separated from it by a rule like on the card face. */
 function SectionText({
   state,
@@ -104,6 +143,7 @@ function SectionText({
   sourceLine,
   rule,
   noteMissing,
+  pair,
   client,
   edition,
 }: {
@@ -118,9 +158,16 @@ function SectionText({
   readonly rule: boolean
   /** Say when this section lacks a translation; off when the whole box reports it once. */
   readonly noteMissing: boolean
+  /**
+   * Put the original in a box under the translation: `self` boxes this section's own original
+   * (only when it has a translation), a state boxes that state's original (the printed wording).
+   */
+  readonly pair?: "self" | AnnotatedTextState | undefined
 }) {
   const { t } = useTranslation()
   const { readiness, value } = state
+  const translated = show === "translated" ? value?.translated : undefined
+  const boxed = pair === "self" ? (translated ? state : undefined) : pair
   let body: ReactNode
   if (readiness.basic === "pending")
     body = (
@@ -136,31 +183,54 @@ function SectionText({
     )
   else if (!value) body = <p className="text-13">{t("card.textUnavailable")}</p>
   else {
-    const translated = show === "translated" ? value.translated : undefined
+    const shown = translated ?? value.original
     body = (
-      <>
-        <AnnotatedText
-          value={translated ?? value.original}
-          context={value}
-          emphasis={emphasis}
-          annotationReady={readiness.annotations === "ready" || readiness.annotations === "none"}
-          client={client}
-          edition={edition}
-        />
-        {translated && sourceLine && <TranslationSourceLine value={value} />}
-        {show === "translated" &&
-          noteMissing &&
-          !translated &&
-          stringValue(value.original.unit["lang"]) !== language && (
-            <p className="text-13 text-text-2">{t("card.translationMissing")}</p>
-          )}
-      </>
+      <PairedLines
+        lines={boxed ? sharedLines(translated, boxed.value?.original) : 1}
+        translated={(line) => (
+          <AnnotatedText
+            value={shown}
+            context={value}
+            emphasis={emphasis}
+            annotationReady={readiness.annotations === "ready" || readiness.annotations === "none"}
+            client={client}
+            edition={edition}
+            line={line}
+          />
+        )}
+        original={
+          boxed
+            ? (line) => (
+                <OriginalText
+                  state={boxed}
+                  line={line}
+                  emphasis={emphasis}
+                  client={client}
+                  edition={edition}
+                />
+              )
+            : null
+        }
+      />
     )
   }
   return (
     <div className={cn("space-y-1", rule && "border-t border-border pt-2")} data-section>
       {label !== undefined && <p className="text-13 text-text-3">{label}</p>}
       {body}
+      {boxed && !value && (
+        <OriginalBox>
+          <OriginalText state={boxed} emphasis={emphasis} client={client} edition={edition} />
+        </OriginalBox>
+      )}
+      {value && translated && sourceLine && <TranslationSourceLine value={value} />}
+      {value &&
+        show === "translated" &&
+        noteMissing &&
+        !translated &&
+        stringValue(value.original.unit["lang"]) !== language && (
+          <p className="text-13 text-text-2">{t("card.translationMissing")}</p>
+        )}
     </div>
   )
 }
@@ -289,6 +359,7 @@ export function CardText({
     list: typeof sections = sections,
     states: typeof sectionStates = sectionStates,
     blank: boolean = blankEffect,
+    pairOf?: (section: (typeof sections)[number]) => "self" | AnnotatedTextState | undefined,
   ) =>
     list.flatMap((section, index) => {
       const state = states[index]
@@ -304,6 +375,7 @@ export function CardText({
               sourceLine={!sharedLine}
               rule={index > 0 || !blank}
               noteMissing={anyTranslated}
+              pair={pairOf?.(section)}
               client={client}
               edition={edition}
             />,
@@ -332,53 +404,54 @@ export function CardText({
       sectionStates.some((state) => foreign(state.value?.original)))
       ? missingNote
       : null
-  // The original box: this printing's own text when it differs, else the owner's.
-  let printedBody: ReactNode
-  if (!printed)
-    printedBody = (
-      <>
-        {effectOriginal}
-        {sectionTexts("original")}
-      </>
-    )
-  else if (printedText.readiness.basic === "pending")
-    printedBody = (
-      <p role="status" className="text-13">
-        {t("card.annotationPending")}
-      </p>
-    )
-  else if (printedText.readiness.basic === "error")
-    printedBody = (
-      <p role="alert" className="text-13">
-        {printedText.readiness.error?.kind === "validation"
-          ? t("card.textFailed")
-          : t("card.textLoadFailed")}
-      </p>
-    )
-  else if (!printedText.value) printedBody = <p className="text-13">{t("card.textUnavailable")}</p>
+  // The original text: this printing's own wording when it differs, else the owner's.
+  let printedEffect: ReactNode
+  if (!printed) printedEffect = effectOriginal
   else {
-    const printedValue = printedText.value
-    const printedBlank = stringValue(printedValue.original.unit["text"]) === ""
-    printedBody = (
-      <>
-        {!printedBlank && (
-          <AnnotatedText
-            value={printedValue.original}
-            context={printedValue}
-            emphasis={prefs.termEmphasis}
-            annotationReady={
-              printedText.readiness.annotations === "ready" ||
-              printedText.readiness.annotations === "none"
-            }
-            client={client}
-            edition={edition}
-          />
-        )}
-        {sectionTexts("original", printedSections, printedSectionStates, printedBlank)}
-      </>
-    )
+    printedEffect =
+      printedText.value && stringValue(printedText.value.original.unit["text"]) === "" ? null : (
+        <OriginalText
+          state={printedText}
+          emphasis={prefs.termEmphasis}
+          client={client}
+          edition={edition}
+        />
+      )
   }
-  const original = <div className="space-y-2">{printedBody}</div>
+  const printedBlank = printed
+    ? stringValue(printedText.value?.original.unit["text"] ?? "") === ""
+    : blankEffect
+  const original = (
+    <div className="space-y-2">
+      {printedEffect}
+      {sectionTexts(
+        "original",
+        printed ? printedSections : sections,
+        printed ? printedSectionStates : sectionStates,
+        printedBlank,
+      )}
+    </div>
+  )
+  // Original-only sections of the printed wording that the latest wording has no counterpart for.
+  const printedOnly = printed
+    ? printedSections.flatMap((section, index) => {
+        const state = printedSectionStates[index]
+        return !state || sections.some((own) => own.ordinal === section.ordinal)
+          ? []
+          : [{ section, state }]
+      })
+    : []
+  // Pair each translated text with its original by the card's own units: the effect, then each
+  // section by ordinal; nothing is split or matched by position inside a unit.
+  const pairOf = (section: (typeof sections)[number]) => {
+    if (!showOriginal) return undefined
+    if (!printed) return "self" as const
+    const index = printedSections.findIndex((own) => own.ordinal === section.ordinal)
+    return index < 0 ? undefined : printedSectionStates[index]
+  }
+  const shown = value.translated ?? (blankEffect ? undefined : value.original)
+  const originalSide = printed ? printedText.value?.original : value.original
+  const effectBox = showOriginal && (value.translated || printed) && printedEffect !== null
   const jpSource = value.selection?.["basis"] === "jp_source"
   const content = (
     <>
@@ -397,21 +470,64 @@ export function CardText({
             </p>
           )}
           <div className={cn(BODY, "space-y-2")}>
-            {value.translated ? (
-              <AnnotatedText
-                value={value.translated}
-                context={value}
-                emphasis={prefs.termEmphasis}
-                annotationReady={annotationReady}
-                client={client}
-                edition={edition}
+            {shown ? (
+              <PairedLines
+                // Flavor text is one passage: it keeps a single original box.
+                lines={
+                  effectBox && field === "effect" ? sharedLines(value.translated, originalSide) : 1
+                }
+                translated={(line) => (
+                  <AnnotatedText
+                    value={shown}
+                    context={value}
+                    emphasis={prefs.termEmphasis}
+                    annotationReady={annotationReady}
+                    client={client}
+                    edition={edition}
+                    line={line}
+                  />
+                )}
+                original={
+                  effectBox
+                    ? (line) =>
+                        printed ? (
+                          <OriginalText
+                            state={printedText}
+                            line={line}
+                            emphasis={prefs.termEmphasis}
+                            client={client}
+                            edition={edition}
+                          />
+                        ) : (
+                          <AnnotatedText
+                            value={value.original}
+                            context={value}
+                            emphasis={prefs.termEmphasis}
+                            annotationReady={annotationReady}
+                            client={client}
+                            edition={edition}
+                            line={line}
+                          />
+                        )
+                    : null
+                }
               />
             ) : (
-              effectOriginal
+              effectBox && <OriginalBox>{printedEffect}</OriginalBox>
             )}
             {value.translated && !sharedLine && <TranslationSourceLine value={value} />}
             {effectMissing}
-            {sectionTexts("translated")}
+            {sectionTexts("translated", sections, sectionStates, blankEffect, pairOf)}
+            {printedOnly.length > 0 && showOriginal && (
+              <OriginalBox>
+                {sectionTexts(
+                  "original",
+                  printedOnly.map((entry) => entry.section),
+                  printedOnly.map((entry) => entry.state),
+                  true,
+                )}
+              </OriginalBox>
+            )}
           </div>
           {boxMissing}
         </>
@@ -420,32 +536,16 @@ export function CardText({
       )}
     </>
   )
-  if (boxed) {
-    if (showOriginal)
-      return (
-        <section className="mt-3 space-y-2" aria-label={heading} data-field={field}>
-          <TextBox heading={heading}>{content}</TextBox>
-          <TextBox kind={`${field}Original`} heading={t("card.originalText")}>
-            {original}
-          </TextBox>
-        </section>
-      )
+  if (boxed)
     return (
       <TextBox heading={heading} field={field}>
         {content}
       </TextBox>
     )
-  }
   return (
     <section className="mt-3 space-y-2" aria-label={heading} data-field={field}>
       <h3 className="text-13 font-semibold text-text-3">{heading}</h3>
       {content}
-      {showOriginal && (
-        <div className={cn(TEXT_BOX, "px-3 py-2.5")}>
-          <p className="mb-1 text-12 text-text-3">{t("card.originalText")}</p>
-          {original}
-        </div>
-      )}
     </section>
   )
 }

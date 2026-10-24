@@ -18,7 +18,6 @@ export {
   readPrefs,
   showsOtherEdition,
   TEXT_DISPLAYS,
-  type TextBoxKind,
   usePrefs,
 } from "./prefs"
 export { recentStore, useRecent } from "./recent"

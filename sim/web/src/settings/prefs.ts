@@ -35,10 +35,6 @@ type ViewMode = (typeof VIEW_MODES)[number]
 export const CARD_OPEN_MODES = ["auto", "panel", "modal", "page"] as const
 export type CardOpenMode = (typeof CARD_OPEN_MODES)[number]
 
-const TEXT_BOX_KINDS = ["effectOriginal", "flavorOriginal"] as const
-export type TextBoxKind = (typeof TEXT_BOX_KINDS)[number]
-type CollapsedText = Readonly<Record<TextBoxKind, boolean>>
-
 export interface Prefs {
   /** null = not chosen yet; the app detects it from the browser languages. */
   readonly uiLanguage: UiLanguage | null
@@ -53,7 +49,6 @@ export interface Prefs {
   readonly preloadNeighbours: boolean
   readonly backgroundDownloads: boolean
   readonly symbolLabels: boolean
-  readonly collapsedText: CollapsedText
   readonly termEmphasis: boolean
   /** Whether the card list's filter panel is expanded. */
   readonly filterPanelOpen: boolean
@@ -85,7 +80,6 @@ export const DEFAULT_PREFS: Prefs = {
   preloadNeighbours: false,
   backgroundDownloads: true,
   symbolLabels: false,
-  collapsedText: { effectOriginal: false, flavorOriginal: false },
   termEmphasis: true,
   filterPanelOpen: false,
   theme: "system",
@@ -124,11 +118,6 @@ const isEditionSwitches = (value: unknown): value is Readonly<Record<CardEdition
   value !== null &&
   CARD_EDITIONS.every((edition) => isBoolean((value as Record<string, unknown>)[edition]))
 
-const isCollapsedText = (value: unknown): value is CollapsedText =>
-  typeof value === "object" &&
-  value !== null &&
-  TEXT_BOX_KINDS.every((kind) => isBoolean((value as Record<string, unknown>)[kind]))
-
 type Sanitizers = { readonly [K in keyof Prefs]: (value: unknown) => Prefs[K] }
 
 function withDefault<T>(guard: (value: unknown) => value is T, fallback: T): (value: unknown) => T {
@@ -148,7 +137,6 @@ const sanitizers: Sanitizers = {
   preloadNeighbours: withDefault(isBoolean, DEFAULT_PREFS.preloadNeighbours),
   backgroundDownloads: withDefault(isBoolean, DEFAULT_PREFS.backgroundDownloads),
   symbolLabels: withDefault(isBoolean, DEFAULT_PREFS.symbolLabels),
-  collapsedText: withDefault(isCollapsedText, DEFAULT_PREFS.collapsedText),
   termEmphasis: withDefault(isBoolean, DEFAULT_PREFS.termEmphasis),
   filterPanelOpen: withDefault(isBoolean, DEFAULT_PREFS.filterPanelOpen),
   theme: withDefault(isThemePref, DEFAULT_PREFS.theme),

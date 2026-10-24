@@ -64,7 +64,7 @@ describe("a printing whose printed text differs from the latest wording", () => 
     )
     const effect = await screen.findByRole("region", { name: "效果" })
     expect(within(effect).getByText(paragraph("Synthetic translated source effect"))).toBeVisible()
-    const original = within(effect).getByRole("heading", { name: "原文" }).closest("div")
+    const original = effect.querySelector("[data-original]")
     expect(original).not.toBeNull()
     expect(
       within(original as HTMLElement).getByText(paragraph("Synthetic English counterpart effect")),
@@ -89,7 +89,7 @@ describe("a printing whose printed text differs from the latest wording", () => 
       { language: "en" },
     )
     await screen.findByText(paragraph("Synthetic English counterpart effect"))
-    expect(screen.queryByRole("heading", { name: "Original text" })).not.toBeInTheDocument()
+    expect(screen.queryByText("Original text")).not.toBeInTheDocument()
     view.unmount()
     prefsStore.set({ effectLanguage: "original" })
     await renderInRouter(

@@ -26,8 +26,7 @@ export default {
     validationFailed: "Q&A データの検証に失敗したため表示しません。",
     retry: "Q&A を再読み込み",
     untranslated: "未翻訳",
-    showAll: "全 {{count}} 件を表示",
-    collapse: "閉じる",
+    tabFallback: "Q&A {{count}}",
   },
   app: {
     title: "sve-kit",
@@ -337,8 +336,6 @@ export default {
     retry: "画像情報を取得",
   },
   card: {
-    expandText: "{{field}}を展開",
-    collapseText: "{{field}}を折りたたむ",
     originalText: "原文",
     sourcePending: "日本語の根拠を読み込み中",
     annotationsPending: "注釈を読み込み中",

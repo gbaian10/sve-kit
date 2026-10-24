@@ -1,12 +1,14 @@
-import { useEffect, useState } from "react"
+import { useEffect, useId, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { AnnotatedText } from "../../components/card/AnnotatedText"
+import { OriginalBox } from "../../components/card/OriginalBox"
 import { useTextLanguage } from "../../components/card/text-language"
 import { TranslationSourceLine } from "../../components/card/TranslationSourceLine"
 import { Button } from "../../components/ui/Button"
 import { Link } from "../../components/ui/Link"
 import { Notice } from "../../components/ui/Notice"
+import { rovingRadioKeyDown } from "../../components/ui/useRovingRadio"
 import {
   canonicalText,
   type LoadedSnapshot,
@@ -21,8 +23,6 @@ import type { Region } from "../../domain/search"
 import { type FieldDisplay, usePrefs } from "../../settings"
 import { type CardQa as CardQaResult, loadCardQa, type QaEntry } from "./qa-data"
 
-/** Entries shown before the rest folds behind a button. */
-const FOLDED = 3
 const PRIMARY = "text-15 leading-effect"
 const SECONDARY = "text-14 leading-effect text-text-2"
 
@@ -154,10 +154,7 @@ function QaLine({
         {annotated(translated ?? value.original, PRIMARY)}
         {foreign && <p className="text-12 text-text-3">{t("qa.untranslated")}</p>}
         {mode === "both" && translated && (
-          <div className="rounded-control border border-border px-3 py-2">
-            <p className="mb-1 text-12 text-text-3">{t("card.originalText")}</p>
-            {annotated(value.original, SECONDARY)}
-          </div>
+          <OriginalBox>{annotated(value.original, SECONDARY)}</OriginalBox>
         )}
         {translated && sourceLine && <TranslationSourceLine value={value} proofreading={false} />}
       </div>
@@ -251,8 +248,9 @@ function QaGroup({
 }) {
   const { t } = useTranslation()
   const snapshot: LoadedSnapshot | null = client.snapshot()
+  const idPrefix = useId()
   const [attempt, setAttempt] = useState(0)
-  const [expanded, setExpanded] = useState(false)
+  const [selection, setSelection] = useState<{ readonly key: string; readonly index: number }>()
   const key = canonicalText([snapshot?.manifestHash ?? null, cardId, edition, attempt])
   const [loaded, setLoaded] = useState<Loaded>()
   useEffect(() => {
@@ -311,31 +309,68 @@ function QaGroup({
     )
   else {
     const { entries } = current.result
-    const visible = expanded ? entries : entries.slice(0, FOLDED)
+    const selectedIndex = selection?.key === key ? Math.min(selection.index, entries.length - 1) : 0
+    const tabValues = entries.map((_, index) => String(index))
     body = (
       <>
-        <ul className="space-y-3">
-          {visible.map((entry) => (
-            <QaItem
-              key={entry.versionId}
-              client={client}
-              edition={edition}
-              entry={entry}
-              mode={mode}
-            />
-          ))}
-        </ul>
-        {entries.length > FOLDED && (
-          <Button
-            size="sm"
-            aria-expanded={expanded}
-            onClick={() => {
-              setExpanded(!expanded)
-            }}
+        <div className="max-w-full min-w-0 overflow-x-auto overscroll-x-contain">
+          <div
+            role="tablist"
+            aria-label={heading ?? t("qa.heading")}
+            className="flex w-max min-w-full gap-1 border-b border-border"
           >
-            {expanded ? t("qa.collapse") : t("qa.showAll", { count: entries.length })}
-          </Button>
-        )}
+            {entries.map((entry, index) => {
+              const value = String(index)
+              const selected = index === selectedIndex
+              return (
+                <button
+                  key={entry.versionId}
+                  type="button"
+                  role="tab"
+                  id={`${idPrefix}-${value}`}
+                  aria-selected={selected}
+                  aria-controls={`${idPrefix}-panel-${value}`}
+                  tabIndex={selected ? 0 : -1}
+                  onClick={() => {
+                    setSelection({ key, index })
+                  }}
+                  onKeyDown={(event) => {
+                    rovingRadioKeyDown(
+                      event,
+                      tabValues,
+                      String(selectedIndex),
+                      (next) => {
+                        setSelection({ key, index: Number(next) })
+                      },
+                      idPrefix,
+                    )
+                  }}
+                  className={`-mb-px h-10 shrink-0 border-b-2 px-3 text-13 font-semibold whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 ${selected ? "border-text-1 text-text-1" : "border-transparent text-text-2 hover:text-text-1"}`}
+                >
+                  {entry.number || t("qa.tabFallback", { count: index + 1 })}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+        {entries.map((entry, index) => {
+          const value = String(index)
+          return (
+            <div
+              key={entry.versionId}
+              role="tabpanel"
+              id={`${idPrefix}-panel-${value}`}
+              aria-labelledby={`${idPrefix}-${value}`}
+              // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- Static tabpanel content needs a keyboard entry point.
+              tabIndex={0}
+              hidden={index !== selectedIndex}
+            >
+              <ul className="space-y-3">
+                <QaItem client={client} edition={edition} entry={entry} mode={mode} />
+              </ul>
+            </div>
+          )
+        })}
       </>
     )
   }
