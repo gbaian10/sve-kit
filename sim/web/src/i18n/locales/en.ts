@@ -134,6 +134,8 @@ export default {
       preload: "Preload",
     },
     preview: {
+      termScope:
+        "Bolds the words the card text marks as terms, such as keywords, card names and zone or rules terms. Only the display changes, not the text.",
       help: "About {{name}}",
       current: "Current",
       hidden: "Hidden (nothing appears here)",

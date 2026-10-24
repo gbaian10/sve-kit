@@ -88,7 +88,7 @@ export function HelpTip({ label, children, className }: HelpTipProps) {
         <div
           id={panelId}
           role="tooltip"
-          className="pointer-events-none absolute inset-x-0 top-full z-30 mt-1 max-h-[70vh] max-w-4xl overflow-hidden rounded-block border border-border-strong bg-surface-1 p-3 text-14 shadow-lg"
+          className="pointer-events-none absolute inset-x-0 top-full z-30 mt-1 max-h-[70vh] max-w-4xl overflow-hidden rounded-block border-2 border-accent bg-surface-2 p-3 text-14 shadow-2xl"
         >
           {children}
         </div>

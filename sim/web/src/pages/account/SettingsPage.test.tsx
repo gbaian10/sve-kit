@@ -97,8 +97,14 @@ it("previews each option with the sample card and marks the chosen one", async (
   const toggles = within(screen.getByRole("tooltip")).getAllByRole("listitem")
   const [on, off] = toggles as [HTMLElement, HTMLElement]
   expect(current(toggles)).toEqual([null, "true"])
-  expect(on.querySelector("strong")).toHaveTextContent("【突進】")
+  // Only the data-marked terms are bold, mid-sentence ones included; the rest of the line is not.
+  expect([...on.querySelectorAll("strong")].map((node) => node.textContent)).toEqual([
+    "守護",
+    "鐵甲騎士",
+    "守護",
+  ])
   expect(off.querySelector("strong")).toBeNull()
+  expect(screen.getByRole("tooltip")).toHaveTextContent("加粗卡文中標為術語的字")
   await userEvent.keyboard("{Escape}")
   expect(screen.queryByRole("tooltip")).toBeNull()
 })

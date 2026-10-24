@@ -36,19 +36,16 @@ export function SymbolIcon({
 export function InlineText({
   text,
   emphasis = false,
-  bold,
   labels,
   changes,
 }: {
   readonly text: string
   readonly emphasis?: boolean
-  /** Overrides the term-emphasis and symbol-label preferences (settings previews only). */
-  readonly bold?: boolean | undefined
+  /** Overrides the symbol-label preference (settings previews only). */
   readonly labels?: boolean | undefined
   readonly changes?: { readonly kind: "removed" | "added"; readonly ranges: readonly TextRange[] }
 }) {
-  const prefs = usePrefs()
-  const termEmphasis = bold ?? prefs.termEmphasis
+  const { termEmphasis } = usePrefs()
   const pieces = useMemo(() => inlinePieces(text), [text])
   const mark = (content: ReactNode, key: number) =>
     changes?.kind === "removed" ? (

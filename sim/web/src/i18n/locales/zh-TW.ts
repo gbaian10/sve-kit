@@ -119,6 +119,8 @@ const zhTW = {
       preload: "預先下載",
     },
     preview: {
+      termScope:
+        "加粗卡文中標為術語的字，例如關鍵字、卡名與區域等規則用語（守護、鐵甲騎士、戰場…）；只改顯示，不改文字。",
       help: "說明：{{name}}",
       current: "目前",
       hidden: "不顯示（這裡不會出現）",
