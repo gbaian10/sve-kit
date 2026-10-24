@@ -37,7 +37,7 @@ if TYPE_CHECKING:
     from sve_carddb.domains.mechanic_coverage import FieldKey
     from sve_carddb.domains.mechanics import Inputs, Settings
 
-ADAPTER = "manual-keywords-fields-bp01-v5"
+ADAPTER = "manual-keywords-fields-bp01-v6"
 _EVOLUTION = re.compile(r"\{進化\}\{コスト[0-9]+\}：これは進化する。")
 _FIXED_EFFECT = re.compile(
     r"(?:\{ファンファーレ\}|\{ラストワード\}|【進化時】|"
@@ -76,6 +76,28 @@ _CONDITIONAL_STATS = re.compile(
     r"\{ファンファーレ\}【(?:覚醒|真紅)】状態なら、これは" + _STAT_GAIN
 )
 _QUICK = re.compile(r"\{クイック\}")
+_REMOVAL = re.compile(
+    r"(?:"
+    r"【進化時】アクト状態の相手のフォロワー1体を選ぶ。それを破壊する。|"
+    r"自分のフォロワー1体を選ぶ。それを破壊する。[0-9]+枚引く。|"
+    r"場のフォロワーすべてを破壊する。|"
+    r"体力[0-9]+以下の相手のフォロワー1体を選ぶ。それを消滅させる。|"
+    r"自分の場のカード1枚を選ぶ。それを破壊する。"
+    r"自分のリーダーは\{体力\}\+[0-9]+する。[0-9]+枚引く。|"
+    r"【進化時】相手のEXエリアのカード1枚を選ぶ。それを消滅させる。|"
+    r"相手の場のカード1枚を選ぶ。それを破壊する。"
+    r")"
+)
+_DRAW_HAND_MOVE = re.compile(
+    r"(?:(?:【攻撃時】|\{ファンファーレ\})[0-9]+枚引く。"
+    r"自分の手札[0-9]+枚を捨てる。|"
+    r"\{ファンファーレ\}[0-9]+枚引く。自分の手札[0-9]+枚をデッキの下に置く。)"
+)
+_DECK_SEARCH = re.compile(
+    r"(?:【進化時】自分のデッキから(?:\{進化\}を持つフォロワー|アミュレット)|"
+    r"\{ファンファーレ\}自分のデッキから(?:\{ロイヤル\}フォロワー|忍者・カード|スペル))"
+    r"1枚を探し、手札に加える。"
+)
 
 
 def _main_field(
@@ -103,6 +125,9 @@ def _main_field(
                 _FIXED_STATS,
                 _CONDITIONAL_STATS,
                 _QUICK,
+                _REMOVAL,
+                _DRAW_HAND_MOVE,
+                _DECK_SEARCH,
             )
         ):
             bodies += 1
