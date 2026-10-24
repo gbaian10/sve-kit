@@ -37,8 +37,11 @@ export function withoutCardParam(search: string): string {
 
 export type CardPresentation = Exclude<CardOpenMode, "auto">
 
-/** Set on the root element while the drawer is open; the app frame pads its right side by it. */
+/** Set on the root element while the drawer is open; the app frame pads the drawer's side by it. */
 export const DRAWER_WIDTH_VAR = "--drawer-width"
+/** 1 on the edge the drawer is docked to, 0 on the other: padding multiplies the width by them. */
+export const DRAWER_ON_LEFT_VAR = "--drawer-on-left"
+export const DRAWER_ON_RIGHT_VAR = "--drawer-on-right"
 export const DRAWER_MIN_PX = 600
 const DRAWER_MAX_PX = 1200
 // The default takes about a third of the window, within the band the maintainer asked for.

@@ -35,6 +35,10 @@ type ViewMode = (typeof VIEW_MODES)[number]
 export const CARD_OPEN_MODES = ["auto", "panel", "modal", "page"] as const
 export type CardOpenMode = (typeof CARD_OPEN_MODES)[number]
 
+/** Where the card drawer sits on the cards page at sidebar width: the filters take the other side. */
+export const CARDS_LAYOUTS = ["cardLeft", "filterLeft"] as const
+export type CardsLayout = (typeof CARDS_LAYOUTS)[number]
+
 export interface Prefs {
   /** null = not chosen yet; the app detects it from the browser languages. */
   readonly uiLanguage: UiLanguage | null
@@ -58,6 +62,7 @@ export interface Prefs {
   readonly gridDensity: GridDensity
   readonly viewMode: ViewMode
   readonly cardOpenMode: CardOpenMode
+  readonly cardsLayout: CardsLayout
   /** The card drawer's width in px once the user has dragged it; null = the default clamp. */
   readonly drawerWidth: number | null
   readonly listWidths: ListWidths
@@ -86,6 +91,7 @@ export const DEFAULT_PREFS: Prefs = {
   gridDensity: 2,
   viewMode: "grid",
   cardOpenMode: "auto",
+  cardsLayout: "cardLeft",
   drawerWidth: null,
   listWidths: {},
   listMobileWidths: {},
@@ -103,6 +109,7 @@ const isFieldDisplay = oneOf(FIELD_DISPLAYS)
 const isGridDensity = oneOf(GRID_DENSITIES)
 const isViewMode = oneOf(VIEW_MODES)
 const isCardOpenMode = oneOf(CARD_OPEN_MODES)
+const isCardsLayout = oneOf(CARDS_LAYOUTS)
 const isDrawerWidth = (value: unknown): value is number | null =>
   value === null ||
   (Number.isInteger(value) && (value as number) >= 600 && (value as number) <= 1200)
@@ -142,6 +149,7 @@ const sanitizers: Sanitizers = {
   gridDensity: withDefault(isGridDensity, DEFAULT_PREFS.gridDensity),
   viewMode: withDefault(isViewMode, DEFAULT_PREFS.viewMode),
   cardOpenMode: withDefault(isCardOpenMode, DEFAULT_PREFS.cardOpenMode),
+  cardsLayout: withDefault(isCardsLayout, DEFAULT_PREFS.cardsLayout),
   drawerWidth: withDefault(isDrawerWidth, DEFAULT_PREFS.drawerWidth),
   listWidths: withDefault(isListWidths, DEFAULT_PREFS.listWidths),
   listMobileWidths: withDefault(isListWidths, DEFAULT_PREFS.listMobileWidths),

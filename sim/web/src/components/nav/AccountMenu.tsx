@@ -305,7 +305,7 @@ export function AccountMenuButton() {
               }
         }
         aria-label={t("nav.account")}
-        className="flex size-11 items-center justify-center rounded-full text-text-2 hover:bg-surface-2"
+        className="flex size-11 shrink-0 items-center justify-center rounded-full text-text-2 hover:bg-surface-2"
       >
         <span className="flex size-8 items-center justify-center rounded-full border-2 border-dashed border-border-strong">
           <UserRound className="size-4" aria-hidden="true" />
@@ -318,7 +318,7 @@ export function AccountMenuButton() {
         className={cn(
           "m-0 rounded-block border border-border bg-surface-1 p-0 text-text-1 shadow-lg",
           POPOVER_SUPPORTED ? "inset-auto" : "fixed z-50",
-          "top-14 right-[calc(1rem+var(--drawer-width,0px))] lg:right-[calc(1.5rem+var(--drawer-width,0px))]",
+          "top-14 right-[calc(1rem+var(--drawer-width,0px)*var(--drawer-on-right,0))] lg:right-[calc(1.5rem+var(--drawer-width,0px)*var(--drawer-on-right,0))]",
         )}
       >
         <AccountMenuPanel onNavigate={close} />

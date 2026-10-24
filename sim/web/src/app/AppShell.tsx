@@ -1,10 +1,10 @@
 import { useTranslation } from "react-i18next"
-import { Outlet, ScrollRestoration } from "react-router"
+import { Outlet, ScrollRestoration, useLocation } from "react-router"
 
 import { BottomNav } from "../components/nav/BottomNav"
 import { Footer } from "../components/nav/Footer"
-import { SideRail } from "../components/nav/SideRail"
 import { TopBar } from "../components/nav/TopBar"
+import { cn } from "../components/ui/cn"
 import { ToastProvider } from "../components/ui/Toast"
 import { snapshotClient } from "../data"
 import { showsOtherEdition, usePrefs } from "../settings"
@@ -15,8 +15,8 @@ import { useActiveSnapshot, useRouteEdition, useSearchReadiness } from "./snapsh
 import { SnapshotNotice } from "./SnapshotNotice"
 import { useThemeAttributes } from "./theme-attributes"
 
-// Layout switches on content width (design §11): < lg bottom bar, ≥ lg left rail (72px, 200px
-// expanded from xl); content is capped at 1280 and centred.
+// Layout switches on content width (design §11): < lg bottom bar, ≥ lg the links join the top bar;
+// content is capped at 1280 and centred, except the cards list, which fills the window.
 // Switching the result view (grid / table / list) is the same list, so it keeps its scroll position;
 // so is opening a card beside it.
 function scrollKeySearch(search: string): string {
@@ -30,6 +30,8 @@ function scrollKeySearch(search: string): string {
 export function AppShell() {
   const { t } = useTranslation()
   useThemeAttributes()
+  // The cards list is not centred or capped, so its filter sidebar sits at the window edge.
+  const fullWidth = useLocation().pathname === "/cards"
   useUiLanguageSync()
   const { client, status, root } = useActiveSnapshot()
   const edition = useRouteEdition()
@@ -44,10 +46,10 @@ export function AppShell() {
   )
   return (
     <ToastProvider>
-      {/* The card drawer is a column at the right edge: the frame pads for it like for the rail. */}
+      {/* The card drawer is a column at one edge: the frame pads that side for it. */}
       <div
         data-app-frame=""
-        className="flex min-h-dvh flex-col pr-[var(--drawer-width,0px)] pb-21 transition-[padding-right] duration-200 ease-out motion-reduce:transition-none lg:pb-0 lg:pl-18 xl:pl-50 phone-landscape:pb-0 phone-landscape:pl-16"
+        className="flex min-h-dvh flex-col overflow-x-clip pr-[calc(var(--drawer-width,0px)*var(--drawer-on-right,0))] pb-21 pl-[calc(var(--drawer-width,0px)*var(--drawer-on-left,0))] transition-[padding] duration-200 ease-out motion-reduce:transition-none lg:pb-0 phone-landscape:pb-0 phone-landscape:pl-16"
       >
         <a
           href="#main"
@@ -55,10 +57,12 @@ export function AppShell() {
         >
           {t("nav.skipToContent")}
         </a>
-        <SideRail />
         <TopBar />
         <SnapshotNotice client={client} status={status} />
-        <main id="main" className="mx-auto w-full max-w-320 flex-1 px-4 lg:px-6">
+        <main
+          id="main"
+          className={cn("w-full flex-1 px-4", fullWidth ? "lg:px-3" : "mx-auto max-w-320 lg:px-6")}
+        >
           <Outlet />
         </main>
         <Footer dataVersion={status.state === "ready" ? status.dataVersion : undefined} />

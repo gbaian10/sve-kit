@@ -45,7 +45,7 @@ export function SearchBar({
   const filtersActive = filtersOpen || (filterCount ?? 0) > 0
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <div className="relative flex h-11 min-w-0 flex-1 items-center">
+      <div className="relative flex h-11 min-w-24 flex-1 basis-0 items-center">
         <svg
           aria-hidden="true"
           viewBox="0 0 24 24"

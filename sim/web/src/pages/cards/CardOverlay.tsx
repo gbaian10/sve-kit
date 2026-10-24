@@ -14,6 +14,8 @@ import {
   CARD_PARAM,
   cardParamOf,
   type CardPresentation,
+  DRAWER_ON_LEFT_VAR,
+  DRAWER_ON_RIGHT_VAR,
   DRAWER_WIDTH_VAR,
   effectiveDrawerWidth,
   parseCardParam,
@@ -21,6 +23,7 @@ import {
   useViewportWidth,
   withoutCardParam,
 } from "../../app/card-overlay"
+import { useDrawerSide } from "../../app/cards-layout"
 import {
   type CardEntryState,
   type ListEntryState,
@@ -29,6 +32,7 @@ import {
   routeState,
 } from "../../app/listEntryState"
 import { useRouteEdition } from "../../app/snapshot"
+import { cn } from "../../components/ui/cn"
 import { Dialog } from "../../components/ui/Dialog"
 import type { CardRouteInput, CardSummary } from "../../data"
 import { printingPath } from "../../domain/cardRoute"
@@ -70,16 +74,20 @@ export interface CardOverlay {
     suggested?: { readonly search: string; readonly list: ListEntryState },
   ) => boolean
   readonly close: () => void
-  /** The drawer at the app frame's right edge, kept while it slides out; null otherwise. */
+  /** The drawer at its configured app-frame edge, kept while it slides out; null otherwise. */
   readonly drawer: ReactNode
   /** The modal over the results; always rendered so its dialog can hand focus back on close. */
   readonly modal: ReactNode
 }
 
-// A column of the app frame like the side rail (same layer); the frame pads its right side by the
-// drawer width while it is open, so the results reflow instead of being covered.
+// A column at one edge of the app frame; the frame pads that side by the drawer width while it is
+// open, so the results reflow instead of being covered.
 const DRAWER_CLASS =
-  "fixed inset-y-0 right-0 z-40 flex border-l border-border bg-surface-1 shadow-lg outline-none transition-transform duration-200 ease-out starting:translate-x-full data-[state=closing]:translate-x-full motion-reduce:transition-none"
+  "fixed inset-y-0 z-40 flex border-border bg-surface-1 shadow-lg outline-none transition-transform duration-200 ease-out motion-reduce:transition-none"
+const DRAWER_SIDE_CLASS = {
+  left: "left-0 border-r starting:-translate-x-full data-[state=closing]:-translate-x-full",
+  right: "right-0 border-l starting:translate-x-full data-[state=closing]:translate-x-full",
+} as const
 const EXIT_MS = 200
 // Putting the opening cell back waits for the frame to give the width back, then for the position
 // to hold still; a layout that never settles gives up here and only keeps the cell in view.
@@ -132,6 +140,7 @@ export function useCardOverlay({
   const [params] = useSearchParams()
   const edition = useRouteEdition()
   const presentation = useCardPresentation()
+  const side = useDrawerSide()
   const { drawerWidth } = usePrefs()
   const viewportWidth = useViewportWidth()
   const width = effectiveDrawerWidth(drawerWidth, viewportWidth)
@@ -171,10 +180,14 @@ export function useCardOverlay({
     if (!drawerOpen) return
     const style = document.documentElement.style
     style.setProperty(DRAWER_WIDTH_VAR, `${String(width)}px`)
+    style.setProperty(DRAWER_ON_LEFT_VAR, side === "left" ? "1" : "0")
+    style.setProperty(DRAWER_ON_RIGHT_VAR, side === "right" ? "1" : "0")
     return () => {
       style.removeProperty(DRAWER_WIDTH_VAR)
+      style.removeProperty(DRAWER_ON_LEFT_VAR)
+      style.removeProperty(DRAWER_ON_RIGHT_VAR)
     }
-  }, [drawerOpen, width])
+  }, [drawerOpen, width, side])
 
   // The preference says "page" (or changed to it while open): the card URL becomes the page.
   useEffect(() => {
@@ -343,7 +356,7 @@ export function useCardOverlay({
       !window.matchMedia("(prefers-reduced-motion: reduce)").matches &&
       !/^(?:0s)?$/u.test(getComputedStyle(appFrame).transitionDuration)
     const onTransitionEnd = (event: TransitionEvent) => {
-      if (event.target !== appFrame || event.propertyName !== "padding-right") return
+      if (event.target !== appFrame || !event.propertyName.startsWith("padding-")) return
       appFrame?.removeEventListener("transitionend", onTransitionEnd)
       clearTimeout(fallback)
       start()
@@ -448,14 +461,15 @@ export function useCardOverlay({
         ref={drawerRef}
         tabIndex={-1}
         data-card-overlay=""
+        data-side={side}
         data-state={drawerOpen ? "open" : "closing"}
         aria-label={t("cardPage.panel")}
         aria-hidden={drawerOpen ? undefined : true}
         inert={!drawerOpen}
-        className={DRAWER_CLASS}
+        className={cn(DRAWER_CLASS, DRAWER_SIDE_CLASS[side])}
         style={{ width: `var(${DRAWER_WIDTH_VAR}, ${String(width)}px)` }}
       >
-        <DrawerHandle />
+        <DrawerHandle side={side} />
         <div className="@container min-w-0 flex-1 overflow-y-auto">{content}</div>
       </aside>
     ) : null,

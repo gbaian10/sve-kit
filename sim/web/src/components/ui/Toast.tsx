@@ -38,7 +38,7 @@ export function ToastProvider({ children }: { readonly children: ReactNode }) {
       {/* Announced politely; visually a stack above the bottom bar (design §7: radius 14, shadow). */}
       <div
         aria-live="polite"
-        className="pointer-events-none fixed right-[calc(1rem+var(--drawer-width,0px))] bottom-24 left-4 z-50 flex flex-col items-center gap-2 lg:bottom-6"
+        className="pointer-events-none fixed right-[calc(1rem+var(--drawer-width,0px)*var(--drawer-on-right,0))] bottom-24 left-[calc(1rem+var(--drawer-width,0px)*var(--drawer-on-left,0))] z-50 flex flex-col items-center gap-2 lg:bottom-6"
       >
         {items.map((item) => (
           <div

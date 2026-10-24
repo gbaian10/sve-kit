@@ -16,10 +16,10 @@ export interface DialogProps {
   readonly onClose: () => void
   readonly title: string
   /**
-   * `sheet` rises from the bottom on phones and centres on wide screens; `center` always centres;
-   * `card` fills a phone and becomes a wide centred window from the `md` breakpoint.
+   * `sheet` centres from `md`; `bottom` stays at the bottom at every width.
+   * `center` always centres; `card` fills phones and centres from `md`.
    */
-  readonly variant?: "sheet" | "center" | "card"
+  readonly variant?: "sheet" | "bottom" | "center" | "card"
   /** No built-in title bar: the body brings its own heading and close control; `title` names the dialog. */
   readonly bare?: boolean
   readonly children: ReactNode
@@ -92,6 +92,7 @@ export function Dialog({
         "m-0 max-h-dvh w-full bg-transparent p-0 text-text-1 backdrop:bg-scrim",
         variant === "sheet" &&
           "top-auto bottom-0 max-w-none md:top-1/2 md:bottom-auto md:left-1/2 md:max-w-lg md:-translate-x-1/2 md:-translate-y-1/2",
+        variant === "bottom" && "inset-x-0 top-auto bottom-0 max-w-none",
         variant === "center" && "top-1/2 left-1/2 max-w-lg -translate-x-1/2 -translate-y-1/2",
         variant === "card" &&
           "inset-0 h-dvh max-w-none md:inset-auto md:top-1/2 md:left-1/2 md:h-auto md:max-w-[min(100%-2rem,58rem)] md:-translate-x-1/2 md:-translate-y-1/2",
@@ -103,6 +104,7 @@ export function Dialog({
         className={cn(
           "flex flex-col bg-surface-1 outline-none",
           variant === "sheet" && "max-h-[92dvh] rounded-t-sheet md:rounded-dialog",
+          variant === "bottom" && "max-h-[88dvh] rounded-t-sheet",
           variant === "center" && "max-h-[92dvh] rounded-dialog",
           variant === "card" && "h-dvh max-h-dvh md:h-auto md:max-h-[92dvh] md:rounded-dialog",
           className,

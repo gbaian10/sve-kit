@@ -7,6 +7,7 @@ import { keepPagesBeside, type ListEntryState } from "../../app/listEntryState"
 import { routes } from "../../app/routes"
 import {
   type CardOpenMode,
+  type CardsLayout,
   DEFAULT_PREFS,
   prefsStore,
   readPrefs,
@@ -14,6 +15,9 @@ import {
 } from "../../settings"
 import { renderRoutes } from "../../test-utils"
 import { TestAppWorker } from "../../test-utils/app-workers"
+
+// The first case pays for the cold snapshot load, which stretches on a busy machine.
+vi.setConfig({ testTimeout: 15_000 })
 
 beforeEach(() => {
   vi.stubGlobal("Worker", TestAppWorker)
@@ -32,9 +36,11 @@ const built = await buildSnapshot({ encodeImage: stubImage })
 
 // jsdom has no layout: the window width the drawer fits itself to comes from this switch.
 let desktop = true
+// Whether the window is wide enough for the filter sidebar (the 1180px query).
+let sidebarWidth = false
 const matchMedia = (query: string): MediaQueryList =>
   ({
-    matches: false,
+    matches: sidebarWidth && query.includes("1180px"),
     media: query,
     onchange: null,
     addEventListener: () => undefined,
@@ -59,6 +65,7 @@ afterAll(() => {
 })
 afterEach(() => {
   desktop = true
+  sidebarWidth = false
   prefsStore.set(DEFAULT_PREFS)
   recentStore.clear()
 })
@@ -68,13 +75,23 @@ function resizeWindow(width: number) {
   window.dispatchEvent(new Event("resize"))
 }
 
-async function open(path: string, mode: CardOpenMode) {
-  prefsStore.set({ uiLanguage: "zh-TW", cardOpenMode: mode, nameDisplay: "translated" })
+async function open(path: string, mode: CardOpenMode, cardsLayout: CardsLayout = "filterLeft") {
+  // Most cases are about the drawer itself, so it stays on the right unless a case picks a side.
+  prefsStore.set({
+    uiLanguage: "zh-TW",
+    cardOpenMode: mode,
+    nameDisplay: "translated",
+    cardsLayout,
+  })
   vi.stubGlobal("innerWidth", desktop ? 1440 : 390)
   const rendered = await renderRoutes(routes, { initialEntries: [path] })
   // Scoping avoids computing accessible names for the collapsed filter panel on every retry.
-  const classes = await screen.findByRole("group", { name: "職業" })
-  await within(classes).findByRole("button", { name: "精靈" }, { timeout: 4000 })
+  const classes = await screen.findByRole(
+    "group",
+    { name: "職業", hidden: true },
+    { timeout: 8000 },
+  )
+  await within(classes).findAllByRole("button", { name: "精靈", hidden: true }, { timeout: 4000 })
   return rendered
 }
 
@@ -94,6 +111,33 @@ async function cells(): Promise<HTMLElement[]> {
 
 const panel = () => screen.getByRole("complementary", { name: "單卡面板" })
 const noPanel = () => screen.queryByRole("complementary", { name: "單卡面板" })
+
+describe("the layout setting", () => {
+  it.each([
+    ["cardLeft", "left", "right"],
+    ["filterLeft", "right", "left"],
+  ] as const)(
+    "with %s docks the card drawer on the %s and the filter sidebar on the %s",
+    async (cardsLayout, drawerSide, sidebarEdge) => {
+      sidebarWidth = true
+      prefsStore.set({ uiLanguage: "zh-TW", cardsLayout })
+      vi.stubGlobal("innerWidth", 1440)
+      await renderRoutes(routes, { initialEntries: ["/cards?q=bp01&card=BP01-001"] })
+      await screen.findByRole("complementary", { name: "單卡面板" })
+      expect(panel()).toHaveAttribute("data-side", drawerSide)
+      expect(screen.getByRole("complementary", { name: "篩選條件" })).toHaveAttribute(
+        "data-edge",
+        sidebarEdge,
+      )
+    },
+  )
+
+  it("below sidebar width there is no sidebar, but the drawer still follows the setting", async () => {
+    await open("/cards?q=bp01&card=BP01-001", "panel", "cardLeft")
+    expect(panel()).toHaveAttribute("data-side", "left")
+    expect(screen.queryByRole("complementary", { name: "篩選條件" })).not.toBeInTheDocument()
+  })
+})
 
 describe("opening a card beside the results", () => {
   it.each(["grid", "table", "list"])(
@@ -285,7 +329,6 @@ describe("opening a card beside the results", () => {
   ] as const)(
     "follows the open card to its %s → %s cell when the row unit changes",
     async (from, to, before, after) => {
-      prefsStore.set({ filterPanelOpen: true })
       const { router } = await open(`/cards?q=bp01${from === "card" ? "&unit=card" : ""}`, "panel")
       const user = userEvent.setup()
       const [first] = await cells()
@@ -294,7 +337,13 @@ describe("opening a card beside the results", () => {
       await user.click(first)
       const aside = panel()
       await within(aside).findByRole("heading", { name: "試作見習兵" }, { timeout: 5000 })
+      await user.click(screen.getByRole("button", { name: "篩選" }))
       await user.selectOptions(screen.getByRole("combobox", { name: "顯示方式" }), to)
+      await user.click(
+        within(screen.getByRole("dialog", { name: "篩選條件" })).getByRole("button", {
+          name: "關閉",
+        }),
+      )
       await waitFor(() => {
         expect(new URLSearchParams(router.state.location.search).get("unit")).toBe(
           to === "card" ? "card" : null,
@@ -321,7 +370,6 @@ describe("opening a card beside the results", () => {
   ] as const)(
     "returns to the opening cell, not the card moved to, after a %s → %s unit change",
     async (from, to, opened, openerAfter, shownAfter) => {
-      prefsStore.set({ filterPanelOpen: true })
       const { router } = await open(`/cards?q=bp01${from === "card" ? "&unit=card" : ""}`, "panel")
       const user = userEvent.setup()
       const [first] = await cells()
@@ -334,7 +382,13 @@ describe("opening a card beside the results", () => {
       await waitFor(() => expect(next).toBeEnabled())
       await user.click(next)
       await within(aside).findByRole("heading", { name: "試作隊長" }, { timeout: 5000 })
+      await user.click(screen.getByRole("button", { name: "篩選" }))
       await user.selectOptions(screen.getByRole("combobox", { name: "顯示方式" }), to)
+      await user.click(
+        within(screen.getByRole("dialog", { name: "篩選條件" })).getByRole("button", {
+          name: "關閉",
+        }),
+      )
       await waitFor(() => {
         expect(new URLSearchParams(router.state.location.search).get("unit")).toBe(
           to === "card" ? "card" : null,

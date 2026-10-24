@@ -41,6 +41,8 @@ export interface FilterPanelProps {
   readonly restrictions?: RestrictionStatus | undefined
   readonly resultTotal?: number | undefined
   readonly onClose?: () => void
+  /** One column of titled groups for the cards page sidebar, instead of the panel grid. */
+  readonly sidebar?: boolean
 }
 
 const EDITIONS = ["jp", "en"] as const
@@ -98,10 +100,7 @@ function FilterGroup({
   )
 }
 
-// Every button applies at once (the maintainer chose the reference site's behaviour over the
-// drafted "apply" step); the panel only renders the committed state it is given. The class row
-// lives outside the panel so it stays visible while this is collapsed, and the condition chip row
-// below the panel is the one place that clears everything.
+// Filters apply at once; the condition chips remain the single place to clear everything.
 export function FilterPanel({
   id,
   open,
@@ -115,6 +114,7 @@ export function FilterPanel({
   resultTotal,
   restrictions,
   onClose,
+  sidebar = false,
 }: FilterPanelProps) {
   const { t } = useTranslation()
   const collapsible = useMediaQuery("(width < 600px)")
@@ -152,6 +152,189 @@ export function FilterPanel({
       ))}
     </Section>
   )
+  const displayBlock = (
+    <>
+      <div className="flex flex-wrap items-center gap-1.5">
+        <select
+          aria-label={t("filters.display")}
+          value={query.unit}
+          className={SELECT}
+          onChange={(event) => {
+            const unit = QUERY_UNITS.find((unit) => unit === event.target.value)
+            if (unit) onChange({ ...query, unit })
+          }}
+        >
+          {QUERY_UNITS.map((unit) => (
+            <option key={unit} value={unit}>
+              {t(`filters.displayUnit.${unit}`)}
+            </option>
+          ))}
+        </select>
+        <select
+          aria-label={t("filters.representative")}
+          value={query.representative}
+          disabled={!merged}
+          className={SELECT}
+          onChange={(event) => {
+            const representative = REPRESENTATIVE_RARITIES.find(
+              (rarity) => rarity === event.target.value,
+            )
+            if (representative) onChange({ ...query, representative })
+          }}
+        >
+          {REPRESENTATIVE_RARITIES.map((rarity) => (
+            <option key={rarity} value={rarity}>
+              {t(`filters.representativeRarity.${rarity}`)}
+            </option>
+          ))}
+        </select>
+        <label
+          className={cn(
+            "flex h-9 items-center gap-2 px-1 text-13",
+            merged ? "cursor-pointer text-text-1" : "cursor-not-allowed text-text-3",
+          )}
+        >
+          <input
+            type="checkbox"
+            checked={query.prFirst}
+            disabled={!merged}
+            onChange={(event) => {
+              onChange({ ...query, prFirst: event.target.checked })
+            }}
+            className="size-4 shrink-0 accent-accent"
+          />
+          {t("filters.prFirst")}
+        </label>
+        <div className="flex w-full flex-wrap items-center gap-2">
+          <span className="text-13 text-text-2">{t("filters.reprints")}</span>
+          <Segmented
+            label={t("filters.reprints")}
+            size="sm"
+            value={query.reprints}
+            disabled={cardMerged}
+            describedBy={cardMerged ? `${id}-reprints-hint` : undefined}
+            options={REPRINT_MODES.map((mode) => ({
+              value: mode,
+              label: t(`filters.reprintModes.${mode}`),
+            }))}
+            onChange={(reprints) => {
+              onChange({ ...query, reprints })
+            }}
+          />
+        </div>
+        {cardMerged && (
+          <p id={`${id}-reprints-hint`} className="w-full text-12 text-text-3">
+            {t("filters.reprintsMerged")}
+          </p>
+        )}
+      </div>
+    </>
+  )
+  const errataBlock = (
+    <>
+      <div className="flex items-center gap-2">
+        <Switch
+          size="sm"
+          checked={query.errataOnly}
+          label={t("filters.errataOnly")}
+          describedBy={`${id}-errata-hint`}
+          onChange={(checked) => {
+            onChange({ ...query, errataOnly: checked })
+          }}
+        />
+        <div>
+          <div className="text-13 text-text-1">{t("filters.errataOnly")}</div>
+          <p id={`${id}-errata-hint`} className="text-12 text-text-3">
+            {t("filters.errataOnlyHint")}
+          </p>
+        </div>
+      </div>
+      <div className="flex items-center gap-2">
+        <Switch
+          size="sm"
+          checked={query.restrictionsOnly}
+          disabled={!restrictions || restrictions.state === "unknown"}
+          label={t("filters.restrictionsOnly")}
+          describedBy={`${id}-restriction-hint`}
+          onChange={(checked) => {
+            onChange({ ...query, restrictionsOnly: checked })
+          }}
+        />
+        <div>
+          <div className="text-13 text-text-1">{t("filters.restrictionsOnly")}</div>
+          <p id={`${id}-restriction-hint`} className="text-12 text-text-3">
+            {restrictions && restrictions.state !== "unknown"
+              ? t(
+                  restrictions.synthetic
+                    ? "filters.restrictionsSyntheticDate"
+                    : "filters.restrictionsDate",
+                  { date: restrictions.onDate },
+                )
+              : t("filters.restrictionsUnknown")}
+            {restrictions?.synthetic ? ` ${t("filters.restrictionsSynthetic")}` : ""}
+            {restrictions?.state === "partial" ? ` ${t("filters.restrictionsPartial")}` : ""}
+          </p>
+        </div>
+      </div>
+    </>
+  )
+  const group = (title: string, children: ReactNode) => (
+    <section className="space-y-3 border-b border-border pb-4">
+      <h3 className="text-13 font-semibold text-text-1">{title}</h3>
+      {children}
+    </section>
+  )
+  if (sidebar) {
+    return (
+      <section id={id} aria-label={t("filters.panel")} className="flex min-w-0 flex-col gap-4">
+        {group(
+          t("filters.groups.basic"),
+          <>
+            <Section title={t("filters.edition")}>
+              {EDITIONS.map((code) => (
+                <Toggle
+                  key={code}
+                  pressed={edition === code}
+                  onClick={() => {
+                    if (edition !== code) onEditionChange(code)
+                  }}
+                >
+                  {t(`options.edition.${code}`)}
+                </Toggle>
+              ))}
+            </Section>
+            {types}
+            {locations}
+          </>,
+        )}
+        {group(
+          t("filters.groups.stats"),
+          <>
+            {stat(t("filters.cost"), "cost", COST_CAP, query.cost)}
+            {stat(t("filters.attack"), "attack", STAT_CAP, query.attack)}
+            {stat(t("filters.defense"), "defense", STAT_CAP, query.defense)}
+          </>,
+        )}
+        {group(
+          t("filters.groups.collection"),
+          <>
+            {facets?.rarity}
+            {facets?.sets}
+            {facets?.artists}
+          </>,
+        )}
+        {group(
+          t("filters.groups.effects"),
+          <>
+            {facets?.traits}
+            {facets?.keywords}
+          </>,
+        )}
+        {group(t("filters.groups.more"), errataBlock)}
+        {group(t("filters.display"), displayBlock)}
+      </section>
+    )
+  }
   return (
     <section
       id={id}
@@ -208,50 +391,7 @@ export function FilterPanel({
           {facets?.artists}
         </div>
         <div className="md:col-start-1 md:row-start-5 md:rounded-bl-block md:border-t md:border-border md:bg-surface-2 md:p-4">
-          <div className="flex items-center gap-2">
-            <Switch
-              size="sm"
-              checked={query.errataOnly}
-              label={t("filters.errataOnly")}
-              describedBy={`${id}-errata-hint`}
-              onChange={(checked) => {
-                onChange({ ...query, errataOnly: checked })
-              }}
-            />
-            <div>
-              <div className="text-13 text-text-1">{t("filters.errataOnly")}</div>
-              <p id={`${id}-errata-hint`} className="text-12 text-text-3">
-                {t("filters.errataOnlyHint")}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Switch
-              size="sm"
-              checked={query.restrictionsOnly}
-              disabled={!restrictions || restrictions.state === "unknown"}
-              label={t("filters.restrictionsOnly")}
-              describedBy={`${id}-restriction-hint`}
-              onChange={(checked) => {
-                onChange({ ...query, restrictionsOnly: checked })
-              }}
-            />
-            <div>
-              <div className="text-13 text-text-1">{t("filters.restrictionsOnly")}</div>
-              <p id={`${id}-restriction-hint`} className="text-12 text-text-3">
-                {restrictions && restrictions.state !== "unknown"
-                  ? t(
-                      restrictions.synthetic
-                        ? "filters.restrictionsSyntheticDate"
-                        : "filters.restrictionsDate",
-                      { date: restrictions.onDate },
-                    )
-                  : t("filters.restrictionsUnknown")}
-                {restrictions?.synthetic ? ` ${t("filters.restrictionsSynthetic")}` : ""}
-                {restrictions?.state === "partial" ? ` ${t("filters.restrictionsPartial")}` : ""}
-              </p>
-            </div>
-          </div>
+          {errataBlock}
         </div>
       </FilterGroup>
       <FilterGroup
@@ -270,80 +410,7 @@ export function FilterPanel({
         <p className="mb-2 hidden text-12 font-semibold text-text-2 md:block">
           {t("filters.display")}
         </p>
-        <div className="flex flex-wrap items-center gap-1.5">
-          <select
-            aria-label={t("filters.display")}
-            value={query.unit}
-            className={SELECT}
-            onChange={(event) => {
-              const unit = QUERY_UNITS.find((unit) => unit === event.target.value)
-              if (unit) onChange({ ...query, unit })
-            }}
-          >
-            {QUERY_UNITS.map((unit) => (
-              <option key={unit} value={unit}>
-                {t(`filters.displayUnit.${unit}`)}
-              </option>
-            ))}
-          </select>
-          <select
-            aria-label={t("filters.representative")}
-            value={query.representative}
-            disabled={!merged}
-            className={SELECT}
-            onChange={(event) => {
-              const representative = REPRESENTATIVE_RARITIES.find(
-                (rarity) => rarity === event.target.value,
-              )
-              if (representative) onChange({ ...query, representative })
-            }}
-          >
-            {REPRESENTATIVE_RARITIES.map((rarity) => (
-              <option key={rarity} value={rarity}>
-                {t(`filters.representativeRarity.${rarity}`)}
-              </option>
-            ))}
-          </select>
-          <label
-            className={cn(
-              "flex h-9 items-center gap-2 px-1 text-13",
-              merged ? "cursor-pointer text-text-1" : "cursor-not-allowed text-text-3",
-            )}
-          >
-            <input
-              type="checkbox"
-              checked={query.prFirst}
-              disabled={!merged}
-              onChange={(event) => {
-                onChange({ ...query, prFirst: event.target.checked })
-              }}
-              className="size-4 shrink-0 accent-accent"
-            />
-            {t("filters.prFirst")}
-          </label>
-          <div className="flex w-full flex-wrap items-center gap-2">
-            <span className="text-13 text-text-2">{t("filters.reprints")}</span>
-            <Segmented
-              label={t("filters.reprints")}
-              size="sm"
-              value={query.reprints}
-              disabled={cardMerged}
-              describedBy={cardMerged ? `${id}-reprints-hint` : undefined}
-              options={REPRINT_MODES.map((mode) => ({
-                value: mode,
-                label: t(`filters.reprintModes.${mode}`),
-              }))}
-              onChange={(reprints) => {
-                onChange({ ...query, reprints })
-              }}
-            />
-          </div>
-          {cardMerged && (
-            <p id={`${id}-reprints-hint`} className="w-full text-12 text-text-3">
-              {t("filters.reprintsMerged")}
-            </p>
-          )}
-        </div>
+        {displayBlock}
       </FilterGroup>
       <div className="sticky bottom-21 z-50 -mx-3 -mb-3 rounded-b-block border-t border-border bg-surface-1 p-3 md:hidden phone-landscape:bottom-0">
         <Button

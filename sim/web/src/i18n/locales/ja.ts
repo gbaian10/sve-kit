@@ -75,7 +75,8 @@ export default {
     theme: { system: "システム", light: "ライト", dark: "ダーク" },
     accent: { amber: "アンバー", teal: "ティール", red: "レッド" },
     view: { grid: "画像", table: "表", list: "リスト" },
-    cardOpenMode: { auto: "自動", panel: "ドロワー", modal: "中央表示", page: "全ページ" },
+    cardOpenMode: { auto: "自動", panel: "サイド", modal: "中央表示", page: "全ページ" },
+    cardsLayout: { cardLeft: "カード左", filterLeft: "絞り込み左" },
   },
   settings: {
     downloads: "背景保存",
@@ -132,6 +133,7 @@ export default {
       hidden: "非表示（ここには出ません）",
       on: "オン",
       off: "オフ",
+      layout: { filters: "絞り込み", card: "カード", results: "結果" },
     },
     preloadPrintings: "すべての版を先読み",
     preloadPrintingsHint:
@@ -170,7 +172,10 @@ export default {
     cardEditionHint: "禁止・制限や Q&A などのデータもカードの版に従います",
     cardOpenMode: "カードの開き方",
     cardOpenModeHint:
-      "自動：PC では右側にドロワー、スマホでは中央に表示。全ページはカードページへ移動します。",
+      "自動：PC では横にドロワー、スマホでは中央に表示。全ページはカードページへ移動します。",
+    cardsLayout: "レイアウト",
+    cardsLayoutHint:
+      "絞り込みサイドバーは広い画面（1180px 以上）のみ。カードのドロワーは表示されるたびにこの左右配置に従います。",
   },
   pages: {
     home: "ホーム",
@@ -244,7 +249,10 @@ export default {
       stats: "数値",
       collection: "収録",
       effects: "効果",
+      more: "その他",
     },
+    sidebarCollapse: "絞り込みを折りたたむ",
+    sidebarExpand: "絞り込みを広げる",
     showResults: "{{count}}枚を表示",
     updatingResults: "結果を更新中…",
     restrictionsSynthetic: "合成テストデータ（公式の制限情報ではありません）",
