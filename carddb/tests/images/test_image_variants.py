@@ -269,7 +269,7 @@ def test_cache_skips_encoding_and_clean_runs_match(
 
 def test_default_recipe_has_golden_version() -> None:
     assert DEFAULT_RECIPE.version == (
-        "sha256:511d896fab7459dbcc98eb20046b0ed581e158da6c7435d236acb5c41534bbb5"
+        "sha256:381614c3b97c6cc036461056d8052f056fdd73e6eb66f88dfe5971bee553c79f"
     )
 
 
