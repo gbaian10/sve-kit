@@ -112,7 +112,9 @@ def test_tuple_length_nullable_and_object_required_fields() -> None:
                     with pytest.raises(ValidationError):
                         validate(name, changed)
         elif isinstance(value, dict):
-            for key in value:
+            for key in map(
+                string, array(definition(name).get("required", list(value)))
+            ):
                 changed_object = value.copy()
                 del changed_object[key]
                 with pytest.raises(ValidationError):
@@ -142,6 +144,22 @@ def test_golden_join_matches_independent_logical_view() -> None:
     assert read_snapshot(fixture("manifest.json"), payloads()) == fixture(
         "expected-logical.json"
     )
+
+
+def test_optional_qa_index_can_be_absent() -> None:
+    manifest = object_value(fixture("manifest.json"))
+    manifest.pop("qa_card_index")
+    assert read_snapshot(manifest, payloads()) == fixture("expected-logical.json")
+
+
+@pytest.mark.parametrize("index", [{}, {"en": {}}, {"jp": {"card": ["missing"]}}])
+def test_reader_rejects_qa_index_region_and_reference_mismatches(
+    index: JsonValue,
+) -> None:
+    manifest = object_value(fixture("manifest.json"))
+    manifest["qa_card_index"] = index
+    with pytest.raises(ValueError, match="QA card index mismatch"):
+        read_snapshot(manifest, payloads())
 
 
 @pytest.mark.parametrize("failure", ["row", "fragment"])

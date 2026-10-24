@@ -166,6 +166,7 @@ def test_text_collections_have_synthetic_rows_and_media_awaits_image_index(
         }
     ]
     assert result.metadata["qa_card_ids"] == ["card"]
+    assert result.metadata["qa_card_index"] == {"jp": {"card": ["qa_v"]}}
     assert result.metadata["errata_card_ids"] == {"jp": ["card"]}
 
 
@@ -1834,11 +1835,48 @@ def test_qa_current_is_highest_revision_even_when_inserted_last(db: Database) ->
     assert one(result, "qa", "qa")["current_version_id"] == "qa-new"
     assert one(result, "qa", "other-qa")["current_version_id"] == "other-version"
     assert one(result, "qa", "empty-qa")["current_version_id"] is None
+    assert result.metadata["qa_card_index"] == {"jp": {}}
     assert [row["id"] for row in result.tables["qa_version"]] == [
         "other-version",
         "qa-new",
         "qa_v",
     ]
+
+
+def test_qa_index_orders_official_numbers_and_separates_editions(db: Database) -> None:
+    with db.transaction():
+        db.update("qa", {"id": "qa"}, {"official_number": "Q10"})
+        for identifier, number, region in (
+            ("first", "Q2", "jp"),
+            ("unknown", None, "jp"),
+            ("english", "Q1", "en"),
+        ):
+            db.insert(
+                "qa",
+                dict(db.rows("qa")[0].values)
+                | {
+                    "id": identifier,
+                    "official_number": number,
+                    "stable_source_key": identifier,
+                    "region": region,
+                },
+            )
+            db.insert(
+                "qa_version",
+                dict(db.rows("qa_version")[0].values)
+                | {
+                    "id": identifier + "-v",
+                    "qa_id": identifier,
+                },
+            )
+            db.insert(
+                "qa_card", {"qa_version_id": identifier + "-v", "card_id": "card"}
+            )
+    result = project(db, regions=("en", "jp"), settings=SETTINGS, decisions=decisions())
+    assert result.metadata["qa_card_index"] == {
+        "jp": {"card": ["first-v", "qa_v", "unknown-v"]},
+        "en": {"card": ["english-v"]},
+    }
 
 
 def test_offline_schema_version_mismatch_fails_database_verification(

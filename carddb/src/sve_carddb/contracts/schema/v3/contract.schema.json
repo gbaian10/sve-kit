@@ -17427,6 +17427,29 @@
               "type": "null"
             }
           ]
+        },
+        "qa_card_index": {
+          "type": "object",
+          "propertyNames": {
+            "enum": [
+              "jp",
+              "en"
+            ]
+          },
+          "additionalProperties": {
+            "type": "object",
+            "propertyNames": {
+              "$ref": "#/$defs/ID"
+            },
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/ID"
+              },
+              "minItems": 1,
+              "uniqueItems": true
+            }
+          }
         }
       },
       "required": [

@@ -431,6 +431,8 @@ art.regions 由實際 `printing_face→printing.region` 唯一推導，`[en]` �
 
 卡表快照的 `printing_product.available_on/date_precision/date_raw` 分別映射建置資料庫的 `first_available_on/first_available_precision/first_available_raw`（都是覆寫值，不重複有效日期），有效日由例外否則 product 求得；`inclusion_kind` 與 note 直接投影。`product.date_precision=day/month/year/unknown`；day 才有 `released_on`，月年保持 `date_raw`；`printing_product.date_precision=null` 代表沒有例外、沿用 product 日期，unknown 表示確有例外但日期不明。不得用 1 號/1 月補日期或假稱初收錄。`inclusion_kind` 含 `qr_redemption`；`serial_total` 已知必 >0，null 是未查，不記持有人第 n 號。
 
+manifest 的可選 `qa_card_index` 提供每地區 card_id → 現行 qa_version ID 清單，依官方編號排序；只列有關聯的卡片。涵蓋範圍與截至日期沿同份 `source_windows`，不能由索引空集合推定沒有官方 Q&A；完整窗口與重疊 partial 的判斷及格式見[傳輸契約 §6](snapshot-transport.md#6-覆蓋與-qaerrata-摘要)。
+
 `source_windows` 是 `[{kind:errata/qa/cardlist/cr,region,scope_key,from_date,until_date?,as_of,state:complete/partial,source_url}]`，由建置資料庫的 `source_coverage` 投影；`scope_key` 採 `region:*` 或 `product:<id>` 白名單。complete 只證明已抓完指定官方範圍截至 `as_of`，until=null 不涵蓋未來。印刷推導需期間涵蓋該 printing 可能勘誤期間，且有頁面未被回寫的核對，不因來源覆蓋存在就自動 verified。
 
 `manifest.mechanic_universe_id` 是本次 keyword 的 canonical 集合（id、kind、`definition_unit_id`、actions）的 hash，含規則定義/動作變化；coverage.mechanics 為 `[{region,scope,total_cards,any_annotated_cards,fully_annotated_cards,unknown_cards,eligibility,by_keyword:[{keyword_id,complete_cards}]}]`。eligibility 固定 `all_non_retired_cards_in_region`（含 provisional，未可判者列 unknown），不以牌組政策偷偷改分母。`any_annotated_cards` 是有 fresh 標籤或 partial/complete 查核的去重卡數；`unknown_cards=total`−any；fully≤any≤total。`by_keyword` 不展開 card×keyword，最多 keyword 數筆。EN blocks 的卡不算 full，共用新鮮且可適用才算已查。

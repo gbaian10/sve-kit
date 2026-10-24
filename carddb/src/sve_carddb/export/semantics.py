@@ -1,6 +1,8 @@
 """Cross-row constraints that JSON Schema cannot express."""
 
+import re
 from dataclasses import dataclass
+from operator import itemgetter
 from typing import TYPE_CHECKING
 from urllib.parse import quote, urlsplit
 
@@ -357,12 +359,45 @@ def _summaries(view: View, manifest: Row) -> None:
         region: sorted(ids) for region, ids in errata.items()
     }:
         raise ValueError("QA/errata summary mismatch")
+    if "qa_card_index" in manifest:
+        _qa_card_index(view, manifest, versions)
     universe: list[JsonValue] = [
         {key: row[key] for key in ("id", "kind", "definition_unit_id", "actions")}
         for row in view["keyword"]
     ]
     if digest(canonical(universe)) != manifest["mechanic_universe_id"]:
         raise ValueError("Mechanic universe hash mismatch")
+
+
+def _qa_card_index(view: View, manifest: Row, versions: dict[str, Row]) -> None:
+    expected: Row = {string(region): {} for region in array(manifest["regions"])}
+    ordered: list[tuple[tuple[bool, int, str, str], Row]] = []
+    for question in view["qa"]:
+        number = string(question["official_number"] or "")
+        digits = re.search(r"[0-9]+", number)
+        ordered.append(
+            (
+                (
+                    digits is None,
+                    int(digits[0]) if digits else 0,
+                    number,
+                    string(question["id"]),
+                ),
+                question,
+            )
+        )
+    for _, question in sorted(ordered, key=itemgetter(0)):
+        identifier = question["current_version_id"]
+        if identifier is None:
+            continue
+        region = string(question["region"])
+        if region not in expected:
+            raise ValueError("QA index region outside snapshot")
+        cards = object_value(expected[region])
+        for card in array(versions[string(identifier)]["cards"]):
+            array(cards.setdefault(string(card), [])).append(identifier)
+    if manifest["qa_card_index"] != expected:
+        raise ValueError("QA card index mismatch")
 
 
 def _back_references(view: View, manifest: Row) -> None:

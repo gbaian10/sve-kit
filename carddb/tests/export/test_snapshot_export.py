@@ -17,6 +17,7 @@ from sve_carddb.build import create_database
 from sve_carddb.core.json import array, canonical, digest, object_value, parse, string
 from sve_carddb.export.buckets import bucket
 from sve_carddb.export.media import prepare_media
+from sve_carddb.export.reader import read_snapshot
 from sve_carddb.export.transport import (
     Batch,
     Brotli,
@@ -67,6 +68,26 @@ def test_join_equals_public_projection(
         if object_value(file)["key"] == "detail/shared/shared/8"
     )
     assert any(array(row)[0] == "qa_version" for row in array(qa_file["row_counts"]))
+
+
+@pytest.mark.parametrize(
+    "index",
+    [
+        {"jp": {}},
+        {"jp": {"old_card": ["qa_v"]}},
+        {"jp": {"card": ["missing"]}},
+        {"jp": {"card": ["qa_v", "qa_v"]}},
+        {"en": {"card": ["qa_v"]}},
+    ],
+)
+def test_reader_rejects_inexact_current_qa_index(
+    exported: Snapshot, index: JsonValue
+) -> None:
+    with pytest.raises((ValueError, ValidationError)):
+        read_snapshot(
+            exported.manifest | {"qa_card_index": index},
+            {key: blob.raw for key, blob in exported.payloads.items()},
+        )
 
 
 def test_clean_exports_are_exact_bytes(

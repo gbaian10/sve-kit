@@ -1,5 +1,6 @@
 """Public configuration and sparse summaries preserve unknown coverage."""
 
+import re
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -122,6 +123,7 @@ def summaries(
     ]
     result: Record = {
         "qa_card_ids": json_list(qa_ids),
+        "qa_card_index": _qa_index(view, regions),
         "errata_card_ids": {
             region: json_list(sorted(ids)) for region, ids in errata_ids.items()
         },
@@ -148,6 +150,25 @@ def summaries(
     ):
         for value in array(result[name]):
             validate(kind, value)
+    return result
+
+
+def _qa_order(row: Record) -> tuple[bool, int, str, str]:
+    number = string(row["official_number"]) if row["official_number"] else ""
+    match = re.search(r"[0-9]+", number)
+    return match is None, int(match[0]) if match else 0, number, string(row["id"])
+
+
+def _qa_index(view: dict[str, list[Record]], regions: tuple[str, ...]) -> Record:
+    versions = {string(row["id"]): row for row in view["qa_version"]}
+    result: Record = {region: {} for region in regions}
+    for qa in sorted(view["qa"], key=_qa_order):
+        version_id = qa["current_version_id"]
+        if version_id is None:
+            continue
+        cards = object_value(result[string(qa["region"])])
+        for identifier in array(versions[string(version_id)]["cards"]):
+            array(cards.setdefault(string(identifier), [])).append(version_id)
     return result
 
 
