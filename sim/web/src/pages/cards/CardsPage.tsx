@@ -438,6 +438,18 @@ export function CardsPage() {
       : location.search
     if (fromSuggest) {
       const position = { anchor: row.summary.printingId, scrollY: window.scrollY }
+      // Beside or over the results the card opens on the typed text's list; as a page it follows.
+      if (
+        openInPlace(row.summary, row.summary.printingId, {
+          search: background,
+          list: { pages: 1, ...position, listScroll: listScroll.current },
+        })
+      ) {
+        recentStore.push(row.summary.printingId)
+        setEdit(null)
+        setFocused(false)
+        return
+      }
       if (background !== location.search) {
         void navigate(location.pathname + background, {
           replace: true,

@@ -610,6 +610,8 @@ export function CardView({
         <ChevronLeft className="size-4.5" aria-hidden="true" />
         {t("cardPage.previous")}
       </Button>
+      {/* Where "add to deck" will sit; there is no deck builder yet, so no control is rendered. */}
+      {frame && <span aria-hidden="true" data-deck-slot="" className="w-14 shrink-0" />}
       <Button
         data-card-navigation
         className={cn("h-10 gap-1 px-3 text-14", frame && "flex-1")}

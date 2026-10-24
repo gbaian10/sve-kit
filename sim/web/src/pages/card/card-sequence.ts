@@ -10,6 +10,8 @@ import type { Region } from "../../domain/search"
 interface SequenceItem {
   readonly key: string
   readonly printingId: string
+  /** Set where one card can appear as several printings: the card also names its entries. */
+  readonly cardId?: string
   readonly summary?: CardSummary | undefined
 }
 
@@ -58,7 +60,9 @@ function locate(
 ): number {
   for (const target of targets) {
     if (target === null || target === undefined) continue
-    const position = order.findIndex((item) => item.key === target || item.printingId === target)
+    const position = order.findIndex(
+      (item) => item.key === target || item.printingId === target || item.cardId === target,
+    )
     if (position >= 0) return position
   }
   return -1
@@ -137,11 +141,13 @@ export function useCardSequence(
     )
       return answer.phase === "error" ? { phase: "missing" } : { phase: "pending" }
     const order: SequenceItem[] = (answer.suggestions ?? []).map(({ summary }) => ({
-      key: summary.cardId,
+      key: summary.printingId,
       printingId: summary.printingId,
+      cardId: summary.cardId,
       summary,
     }))
-    return found(order, locate(order, [resultKey, unitKey]))
+    // The shown printing first; another printing of its card (not suggested itself) stands in.
+    return found(order, locate(order, [resultKey, current?.printingId, unitKey]))
   }
   if (primary.result.phase === "error") return { phase: "missing" }
   if (!primaryOrder) return { phase: "pending" }

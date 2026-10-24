@@ -46,7 +46,7 @@ afterEach(() => {
 
 async function open(path = "/cards", { panel = true } = {}) {
   // jsdom reports en-US; the assertions below read the Traditional Chinese copy.
-  prefsStore.set({ uiLanguage: "zh-TW", filterPanelOpen: panel })
+  prefsStore.set({ uiLanguage: "zh-TW", filterPanelOpen: panel, cardOpenMode: "page" })
   const rendered = await renderRoutes(routes, { initialEntries: [path] })
   // Scope polling to the class row; whole-page role diagnostics can delay worker ready events.
   await waitFor(

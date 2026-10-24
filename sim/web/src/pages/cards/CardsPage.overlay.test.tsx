@@ -577,6 +577,69 @@ describe("opening a card over the results", () => {
   )
 })
 
+describe("opening a suggested card", () => {
+  async function pickSuggestion(text: string) {
+    const user = userEvent.setup()
+    const input = screen.getByRole("combobox", { name: "搜尋卡片" })
+    await user.clear(input)
+    await user.type(input, text)
+    await waitFor(() => expect(screen.getByRole("listbox")).toHaveAttribute("aria-busy", "false"), {
+      timeout: 4000,
+    })
+    await user.keyboard("{ArrowDown}{Enter}")
+    return input
+  }
+
+  it("opens the side panel on the typed text's list and back keeps the text", async () => {
+    const { router } = await open("/cards?q=bp01", "panel")
+    await act(() => router.navigate("/cards?q=bp01", { replace: true, state: { pages: 2 } }))
+    const input = await pickSuggestion("bp01-51")
+    await within(panel()).findByRole("heading", { name: "試作聖堂騎士" }, { timeout: 5000 })
+    expect(router.state.location.pathname).toBe("/cards")
+    expect(router.state.location.search).toBe("?q=bp01-51&card=BP01-051")
+    expect(router.state.location.state).toMatchObject({
+      pages: 1,
+      overlay: { source: "suggest", resultKey: "p:bp01-051", pushed: true },
+    })
+    await act(() => router.navigate(-1))
+    await waitFor(() => {
+      expect(noPanel()).toBeNull()
+    })
+    expect(router.state.location.search).toBe("?q=bp01-51")
+    expect(router.state.location.state).toMatchObject({ pages: 1 })
+    expect(input).toHaveValue("bp01-51")
+    await act(() => router.navigate(1))
+    const listId = (router.state.location.state as ListEntryState).overlay?.listId
+    await pickSuggestion("bp01-51")
+    expect(router.state.historyAction).toBe("REPLACE")
+    expect(router.state.location.state).toMatchObject({ overlay: { listId, pushed: true } })
+    act(() => {
+      prefsStore.set({ cardOpenMode: "page" })
+    })
+    await waitFor(() => {
+      expect(router.state.location.pathname).toMatch(/^\/cards\/BP01-051/u)
+    })
+    expect(router.state.location.state).toMatchObject({ source: "suggest" })
+  }, 15_000)
+
+  it("keeps one bottom bar over a phone modal: previous, a deck slot without a control, next", async () => {
+    desktop = false
+    await open("/cards", "auto")
+    await pickSuggestion("bp01-05")
+    const dialog = await screen.findByRole("dialog", { name: "單卡面板" })
+    const previous = await within(dialog).findByRole("button", { name: "上一張" })
+    const next = within(dialog).getByRole("button", { name: "下一張" })
+    expect(previous.parentElement).toBe(next.parentElement)
+    expect(previous.parentElement?.querySelector("[data-deck-slot]")).toHaveAttribute(
+      "aria-hidden",
+      "true",
+    )
+    expect(previous.parentElement?.querySelectorAll("button, a, [tabindex]")).toHaveLength(2)
+    // Only the side rail's navigation is left; the bottom one does not show over the modal.
+    expect(screen.getAllByRole("navigation", { name: "主要導覽" })).toHaveLength(1)
+  }, 15_000)
+})
+
 describe("opening a card as its page", () => {
   it("navigates to the card page when the preference says so", async () => {
     const { router } = await open("/cards?q=bp01", "page")

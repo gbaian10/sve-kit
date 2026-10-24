@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next"
-import { NavLink } from "react-router"
+import { NavLink, useSearchParams } from "react-router"
 
+import { CARD_PARAM, useCardPresentation } from "../../app/card-overlay"
 import { useRouteEdition } from "../../app/snapshot"
 import { editionUrl } from "../../domain/query/codec"
 import { cn } from "../ui/cn"
@@ -13,6 +14,10 @@ import { NAV_ITEMS } from "./nav-items"
 export function BottomNav() {
   const { t } = useTranslation()
   const edition = useRouteEdition()
+  const [params] = useSearchParams()
+  const presentation = useCardPresentation()
+  // The card over the results has its own bottom bar (previous / deck slot / next).
+  if (params.has(CARD_PARAM) && presentation === "modal") return null
   return (
     <BottomBar className="lg:hidden phone-landscape:inset-y-0 phone-landscape:right-auto phone-landscape:w-16 phone-landscape:border-t-0 phone-landscape:border-r phone-landscape:pb-0">
       <nav aria-label={t("nav.primary")} className="phone-landscape:h-full">
