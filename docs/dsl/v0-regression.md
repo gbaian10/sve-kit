@@ -19,8 +19,10 @@
   `1de5adc33023646bbc7ced36bb49bb1850fe54309fed29c246d060a40862bc53`。
   這是輸入指紋，不要求 clone 者取得原建置 DB 才能執行基線測試。
 - 判讀草案的 frame／use 引用與測試基線的反向 `frame_ids` 已依正式映射換成
-  `frame-v2` 身分（normalizer 仍為 `four-layer-jp-v7`）；對應凍結建置 SHA-256 為
-  `a492ac4459f33440844a4874ad644992dac317329773fca3a54765866f4e90f7`。
+  `frame-v2` 身分（normalizer 為 `four-layer-jp-v8`）；對應凍結建置 SHA-256 為
+  `9889d5ce18670019aaecc9f5e1ecb7aab59c1e222992f59a2bc80953933cd6ea`。
+  v8 只因 BP01-P25 的完整 Lastword 全主戰者固定傷害語義改變一個 frame；
+  其餘 frame 保號，草案依賴依正式 writer 映射重驗，未搬移審核核可。
   草案不保留 frame-v1 引用；分類輸入、結論與 `candidate` 狀態不變，不因此取得新審核核可。
   測試基線的正向 fragments、AST 與來源位置仍保留上述原凍結證據；只有反向
   `frame_ids` 與草案一起換成 frame-v2，沒有重錄其他歷史指紋。

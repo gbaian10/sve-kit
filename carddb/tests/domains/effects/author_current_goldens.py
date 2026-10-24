@@ -44,7 +44,7 @@ def golden(number: str) -> dict[str, JsonValue]:
     }[number]
     return {
         "recipe": "effect-source-v1",
-        "normalizer": "four-layer-jp-v7",
+        "normalizer": "four-layer-jp-v8",
         "region": "jp",
         "faces": [
             {

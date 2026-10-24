@@ -33,6 +33,7 @@ class CardContext:
     card_kind: str
     current: bool = False
     section_count: int | None = None
+    special_kinds: frozenset[str] | None = None
 
 
 @dataclass(frozen=True)

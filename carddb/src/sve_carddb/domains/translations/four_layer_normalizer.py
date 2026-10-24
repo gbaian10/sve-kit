@@ -35,7 +35,7 @@ __all__ = (
     "SourcePart",
     "normalize_source",
 )
-VERSION: Final = "four-layer-jp-v7"
+VERSION: Final = "four-layer-jp-v8"
 _NAME = re.compile(r"『[^』]*』")
 _REMINDER = re.compile(r"（[^（）]*）")
 _NUMBER = re.compile(r"[0-9０-９]+")

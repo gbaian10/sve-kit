@@ -275,7 +275,7 @@ pure_reminder 必須有完整具名提示文法及同欄的精確 body anchor；
 
 ### 4.3 N1 正式來源登錄
 
-`four_layer_derivation.derive_source` 使用正式版本 `four-layer-jp-v7`；正式 compile、authored reader 與 DB reader 只接受 v7，不保留舊版 reader。
+`four_layer_derivation.derive_source` 使用正式版本 `four-layer-jp-v8`；正式 compile、authored reader 與 DB reader 只接受 v8，不保留舊版 reader。
 N0 的來源構造與數值規則是 N1 明列的既有基礎；歷史對帳使用切換前已保存的 N0 建置資料，不從新 frame 反推舊版。
 此入口沿相同 source units、分段、catalog、數值規則及來源驗證邊界產葉，不另建來源驗證器。
 只擴充精確 face_revision／printing_face 的 effect／section 中 role=body 的部分；name、label、layout、reminder、token_header
@@ -301,7 +301,7 @@ Code 的概念對照為 Player.self/opponent → `term:player.self/opponent`、P
 ZoneKind 的 battlefield／hand／deck／evolve_deck／graveyard／ex／banish 依序對應
 `term:zone.battlefield`／`term:zone.hand`／`term:zone.deck`／`term:zone.evolve_deck`／`term:zone.cemetery`／`term:zone.ex`／`term:zone.banishment`。
 DeckPosition.top/bottom 對應完整 `term:zone.deck_top/deck_bottom`；TokenStatus.token 對應 `term:object.token`。
-這裡記錄來源型別含義；renderer 自 v3 起已接 Code→Reference、必要引用集合與新形式，正式來源 workflow 使用完整 v7 來源推導。
+這裡記錄來源型別含義；renderer 自 v3 起已接 Code→Reference、必要引用集合與新形式，正式來源 workflow 使用完整 v8 來源推導。
 
 P 為明示自分／相手，Z 為上列區域，DP 為完整デッキの上／下，PH 為具名階段。
 NP 以卡種、泛稱カード或完整 `『』` 名稱為核心；Q 沿既有合法數量與單位。
@@ -426,7 +426,7 @@ rule 只依 typed args 選具名 case；cases 必完整涵蓋該 rule 的簽章�
 keyword.display 可供括號，基礎名稱不含括號；別名與全名綁同概念，來源拼寫留 trace。
 形式內的 Label 產生概念範圍，Literal 後綴／括號不擴大該範圍。缺基礎選詞則整欄退回（FL-011），未知形式 ID 則結構拒絕。
 
-renderer 使用 `four-layer-renderer-v7`；正式來源 workflow、authored 與 DB reader 採 v6。
+renderer 使用 `four-layer-renderer-v7`；正式來源 workflow、authored 與 DB reader 採 `four-layer-jp-v8`。
 renderer 版本參與所有呈現依賴鍵，包含數位名稱政策；因此既有 translation ID 會重算。
 render-v3 的內容 hash recipe 與公共快照 wire 保持原契約。
 下列形式使用封閉 ID 與 type＋role 簽章；明示 Form 與 NP 隱式使用同一份 definition，不登錄舊 ID alias。
@@ -877,12 +877,12 @@ active 懸空引用必為零；所有 pending 與其候選不得進可執行閉�
 新版 producer／reader 必須同步切換 basis 與 annotation，不能用舊 shared_jp_unchecked 冒充新政策。
 固定案例是規格，並不代表 normalizer、renderer、全庫譯文、DSL adapter 或 runtime 已通過驗收。
 
-## 11. v7 來源推導與 expression 呈現
+## 11. v8 來源推導與 expression 呈現
 
 `four_layer_derivation.derive_source(raw, source, classifier)` 產生 `DerivedField`，
-由其 `bind` 建立 `four-layer-jp-v7` 身分；`verify` 從原始來源重新推導，
+由其 `bind` 建立 `four-layer-jp-v8` 身分；`verify` 從原始來源重新推導，
 再驗完整 frame、binding、語義及接口。正式 compile、classifier、authored 與
-SQLite 來源契約只接受 v7，沒有可選家族或舊版執行入口。
+SQLite 來源契約只接受 v8，沒有可選家族或舊版執行入口。
 
 此接口只在正式來源辨識上依序套用已封版的容量、具名參數與區域計數／SEP 規則，
 最後依最終葉建構常數選項接口；共用型別不授予其他來源句型。
@@ -1312,7 +1312,7 @@ EntryFact 的持久連接、Unknown、來源快照／LKI、授予能力持有者
 
 `four_layer_integrated.FAMILY` 由唯一正式入口 `derive_source` 啟用。它依來源依賴執行歷史、
 入場／打出來源、名稱、合計、讀值／支付 X，最後接選項 consumer；
-authored 只載入正式 v6 定義與譯文，來源家族由來源推導決定。
+authored 只載入正式 v8 定義與譯文，來源家族由來源推導決定。
 整合 registry 沿各家族的閉域簽章，不另建 parser 或常數域。
 
 同一來源構造只由一個 provider 擁有：
@@ -1354,7 +1354,7 @@ descriptor ID 可以把原文字面編進構造而不留槽，所以全部 provi
 
 ### 11.12 有限來源形狀與構築上限
 
-正式來源版本為 `four-layer-jp-v7`。既有 N0／N1／N2 仍經同一 `derive_source`，
+正式來源版本為 `four-layer-jp-v8`。既有 N0／N1／N2 仍經同一 `derive_source`，
 沒有按家族混用版本的入口。`four_layer_n3_numbers` 只在完整卡片效果／section 的
 具名形狀及同欄提醒 anchor 內補數值證據，不登錄新的 expression、Form 或 DSL 語義。
 lexical numeric veto 只有在整體來源守衛成立且無其他問題時才能解除；原先的低信心、
@@ -1411,7 +1411,7 @@ lexical numeric veto 只有在整體來源守衛成立且無其他問題時才�
 
 ### 11.13 #749 有限池、holder、事件與參數接口
 
-正式版本為 `four-layer-jp-v7`。本節與 §11.12 使用相同的正常 `derive_source`、
+正式版本為 `four-layer-jp-v8`。本節與 §11.12 使用相同的正常 `derive_source`、
 `bind`、來源重建驗證、SQLite reader 與 renderer；沒有另外的執行入口。
 `source_relations` 不增加任何種類。projection 的 provider／consumer 只用 port、
 scope、OccurrenceKey 與 capture 證據連接，操作次序保留於 canonical 來源。
@@ -1520,13 +1520,13 @@ up_to 接管原「至多」前綴，既有文字須保持相同，並交 #750 �
 
 ### 11.14 固定動作文字與必要詞界線
 
-`four-layer-jp-v7` 的十種原費用逐項支付句及課程提醒，保留既有完整來源句型、數值守衛與 pending 分類；動作「消滅」留在 canonical 固定文字，不另產生 `term:action.banish` 的 Concept/rule_term 葉。其他卡片、玩家、區域、能力與數值葉仍須完整引用；不改 glossary 概念或基礎選詞，也不新增動作受詞 form。
+`four-layer-jp-v8` 的十種原費用逐項支付句及課程提醒，保留既有完整來源句型、數值守衛與 pending 分類；動作「消滅」留在 canonical 固定文字，不另產生 `term:action.banish` 的 Concept/rule_term 葉。其他卡片、玩家、區域、能力與數值葉仍須完整引用；不改 glossary 概念或基礎選詞，也不新增動作受詞 form。
 
 來源葉規則換版仍全庫重建與驗證；frame-v2 只對語義 payload 改變的定義及引用重鍵，依 §9 比完整 payload，葉結構變更按精確來源 occurrence 重建。canonical 相同的 occurrence-scoped pending frame 仍保留各自 scope，不因中文完成而改成 resolved。
 
 ### 11.15 三種完整抽牌來源規則
 
-`four-layer-jp-v7` 在既有葉推導完成後，以 `four_layer_draw.prepare_draw` 判別下列三條規則。
+`four-layer-jp-v8` 在既有葉推導完成後，以 `four_layer_draw.prepare_draw` 判別下列三條規則。
 共同前提是 JP current 的精確 `face_revision`、`effect` 欄、無 section ordinal、role=body，且來源 span 恰為完整原始行。
 數量須為無前導零的 ASCII 十進位整數（含 0），使用單一 required `Nat/count` 葉 `leaf_0`，
 domain 為 0～9007199254740991、空 values，唯一 occurrence、葉值與原文字面均須完全相符。
@@ -1550,3 +1550,31 @@ projection 為 `ability_body`，唯一 scope 為 `ability_0`，imports／exports
 
 本節只確定來源分類，不增加 production author adapter 的入口、ports、裁定強度或執行資格；
 完整能力、逐用途審核與場景驗證仍依[共用能力作者契約](../../dsl/common-family-authoring.md)。
+
+## 12. Lastword 全主戰者固定傷害來源規則
+
+`four-layer-jp-v8` 在既有推導後加入唯一具名規則
+`damage_uniform_lastword_all_leaders.v1`。只有 current JP 的 FaceRevisionOwner、
+普通從者（normal、已知空 special kinds）、沒有 section，且完整 effect 欄位
+恰為 `{ラストワード}リーダーすべてにNダメージ。` 才可 resolved。
+完整 body span、canonical source、葉型別／角色／域／occurrence 與值均須重演一致。
+
+固定 `leaf_0` 是 Concept/ability，必須指向 `term:ability.last_words`，
+不能把任意能力頭當參數。`leaf_1` 是 Nat/damage_amount，允許 0 到
+9007199254740991 的標準 ASCII 十進位；不接受前導零、全形數字或超界值。
+projection 是 ability_body，唯一根 scope 為 ability_0，imports／exports 為空。
+
+語義為印刷 Lastword：來源 holder 實際從場進入卡片 owner 的墓場，使用離場前
+場上資訊及 master，待機至 checkpoint 播放後才結算。傷害來源保留原能力 holder
+的 snapshot／LKI；一次指示對包含自己的全部主戰者造成同量 Ability damage，
+不展開成逐玩家步驟、不選目標、不略過防止、不覆寫來源，零量不製造傷害事件。
+CR 12.5.1～3、10.7、10.11、10.12、5.14 與 1.3.2.2 支持此來源契約。
+
+對手限定、其他能力頭、動態量、分配、條件、may、費用、額外步驟、引號授予、
+reminder、token／crest／section 或額外 sibling 都不由此規則接受。
+此來源分類不授予 author admission、companion registration、current 整卡資格或執行能力；
+P／M／E 必須另驗完整接線。原型效果與中文呈現不因分類 resolved 自動改寫。
+
+normalizer release 是來源 metadata；只有本規則改變的封閉語義 payload 會換 FrameId。
+未引用此規則的 frame 保號。共用定義表透過 pack(existing=...) 追加，既有 storage ID
+及內容不變；review、裁定、作者與呈現依賴仍須全庫重驗，保號不等於沿用核可。
