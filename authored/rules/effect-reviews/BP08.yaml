@@ -5,8 +5,8 @@ basis:
   classifications:
     recipe: v0-classification-candidates-1
     inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
-  normalizer: four-layer-jp-v6
-  build_sha256: 1de5adc33023646bbc7ced36bb49bb1850fe54309fed29c246d060a40862bc53
+  normalizer: four-layer-jp-v7
+  build_sha256: 7663e614a9cbf981162cbc7d09bb5841bcd3b18958c04b01fe55c5e4cb06ecf6
 groups:
   - id: shape:23fdc1e8d5c1fe45354bd9c0e64a5c32654de4fe0ee7cc191c080d57eae4310e
     priority: false
@@ -22,11 +22,11 @@ groups:
       Tac75b03a5e:
         - BP08-077
     frames:
-      - frame:44d21b6a60df6f3effaa7712a155c7808f7c7aa8757ca642ab7fce3f38c2d998
-      - frame:ee6f4d062930357785c9cf9d45e3c67963cfe917b31a855d621ab47fdd9456a4
+      - frame:d19e1924d9fb6a8f3b2f642d8c08b8331ad635c9aea5f0b5fba0b28df580a575
+      - frame:1fe9a8e7abb2167b717e3c2a1ea2793d7bab73f2da25a934b06a6bd1e18eb252
     uses:
-      - use:a9d94a032361a9573878111452d5ad563c365cf25bbd5884301f932526fd77bc
-      - use:f8d87c01b647634b3820f42cb0dcc7e7acb7c28a95e87ecb024b9347d8ca5812
+      - use:0c958bbc59d0f714efe08fb0c27dad8bc021749aee7377860c2e4b3476901388
+      - use:e811aa4bdc30fc3f12247e25a9b56e5ba77040f3459e5906eb3fbfd9adcfd730
     translation_review:
       required_uses: []
       conditional_uses: []
@@ -61,17 +61,17 @@ groups:
         - PR-230
         - PR-488
     frames:
-      - frame:44fd37c71527c0f07e53fc9dc8ee77c96dbcfbb7ce1c10203f6f950234756c49
-      - frame:74e16c3b7fad3ad5ea4308bb0584f8fe38e8eb5395d9cc551cef016fd03fdbbe
-      - frame:c89a454bd3fb3a32edcbb2264a3f6fd54d66247575b40eacbea0f1484a39e8b5
-      - frame:f0bee19760f372eaba5322a3460f52ec8950c392058404ebbe5b28aa4a3ba9fe
-      - frame:f176f73488f0b9b6098cf0c52dd7181aa12431ac06bf4ee99620526314a16276
+      - frame:5dc462bfc3c7ae592a2e2a99ce2087c728db65549e4fd396fc4d2f085746f9d2
+      - frame:8db633e2799d45b885ea823deb985d70ff6890d6ea446b27507470e9947daeda
+      - frame:4af5563744425d543ed669c6f178204e85f2545003ecbe86cbd9a695dea22f4a
+      - frame:c5ad2b7e13243a0dc34c5b3b007dabc1622c50fc531a578256a0a5771c82e7d5
+      - frame:827598ea54e9c4407804e51361582d41f482c301aeb44ea0998d89c782c32e16
     uses:
-      - use:16fa43d55c2b95dff298bd2180de0d6266a1131e83ffd21b03656958eab9fab8
-      - use:5dca7c14e6c8be465409e9a095bf0f1e8fb8e5d3e8309fbc420ee71bebcc8663
-      - use:a05e663e97031886c39e294cd4d5c54e02c16fa36183430a5f03e02de822470a
-      - use:ce84be74921c45fbcc5d2ad46d298da6160992cf9e0c7c195f1f7fe7d6fa4be8
-      - use:eea0cda340b3ac4e89e3ab2a2fcc7ffa389b0592e238298b9523d794f9303edf
+      - use:0843eb0596aa3e311e4bebae595d7d84ca260a75b4e968b9d38b4895bade06f2
+      - use:3160143340f9bc9bff02989835c6522e6366dccda627c256e8b5289f06706edc
+      - use:c80b46ee676f2d595b1ea94fd475e595717a330423a156f62d0bcdf6b82cf18c
+      - use:1ee6b13ab9340d872c7fd821ecff53bf46f2df8eb848d7ae8e46969b27314fa7
+      - use:c047bf00aa15e638fc96ef39212983ed8d49e7e02251fc0bb60ea03bb699fddc
     translation_review:
       required_uses: []
       conditional_uses: []
@@ -92,16 +92,16 @@ groups:
         - SP01-U02
         - SP01-SL02
     frames:
-      - frame:773b16c0b6baa543d89c23bbd66a2569754ee348303fbf643a9c3ed003ccfe60
-      - frame:7d5cd4290cd1e10400e72cb632e41e917e11b154bc32e8bca14be531fd11f6b5
+      - frame:4378c72a6937313e616ceb199e95a28536147155cdf1954896fa97450e060cf2
+      - frame:caae46beb49ae48c3aebb73dbdc81ad90302e9ac6f6ea9923ef6dab2e6eacc39
     uses:
-      - use:7ce316378e67f7b82305e5fa5d88411718cde4016dcad65dc76e071a708271eb
-      - use:98e48c9684c95a7578cc7bb6ec2a196f40cf0e7575712502170fc9eebb268807
+      - use:b0b1b8a6381cd30e42baab8afd8f716251ca657159ac0870496c2efb56c2120f
+      - use:5be135b8999302fcd48558e9c796fe28f78e1783b32f220fe035c7a406fe954b
     translation_review:
       required_uses: []
       conditional_uses:
-        - use:7ce316378e67f7b82305e5fa5d88411718cde4016dcad65dc76e071a708271eb
-        - use:98e48c9684c95a7578cc7bb6ec2a196f40cf0e7575712502170fc9eebb268807
+        - use:b0b1b8a6381cd30e42baab8afd8f716251ca657159ac0870496c2efb56c2120f
+        - use:5be135b8999302fcd48558e9c796fe28f78e1783b32f220fe035c7a406fe954b
       trigger: 一般進化限制與費用責任釐清並採納時逐 use 比對；只有來源語義、leaf 或中文 render 改變才重審，單純統一標註不重派。
   - id: shape:9387f3bf4677c772441526b9e47989ee0174ae5b838e719dc2262c32c5fa10e9
     priority: false
@@ -119,11 +119,11 @@ groups:
         - SP01-SL24
         - BP08-043
     frames:
-      - frame:a8b19fea767508789793232a1f83f424c07992005e166dd4f3a22d0cb4415a0a
-      - frame:d826dbd84c49af0f1f49ba7bea5afbd3b29ec373c1e986735af54d7b0fd0f993
+      - frame:f666fed25a5ee979383482e6ebad3243847413f11b2b88171fce14bdd96677c8
+      - frame:691c43f4495fa562f7d3c2674226b458da7e7f3ac0bb233425000cb8261e1abb
     uses:
-      - use:13a784d4a10b90caed576b56d8f8b5c4e1afa8ce94ceca63496729a418fce4b2
-      - use:dfae27a0fe4bc472804ceab76eb37ce7f26a2c1cebca5e6667511428f0b34a7c
+      - use:01e7d13c016cb893c5d62a731fead2e7765268cc4c128751cb18d8058daafa1c
+      - use:4c51f30a692d935498ed6a714908dc84a22ac209876714c458ba23c42ca1c035
     translation_review:
       required_uses: []
       conditional_uses: []
@@ -135,8 +135,8 @@ reverse_positions:
     section: 0
     line: 1
     frame_ids:
-      - frame:746f8a2fcab5dda38fd74b6a1ce0f9af7aad42d85e57da2fcd150cc0b987a176
-      - frame:9cac90db56ce93b74136618c41a67628774a184b17bf36d6e38176a7d2437781
+      - frame:170cbdc8ac892122abb3e1b2528bf6379487a11c4607875dc79f23f9f735041f
+      - frame:020db62a9d202b5b184b5080dc10687e53696e3f1f276e2ad7a5c0df19e34c46
     category: token
     rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。
   - card_no: BP08-011
@@ -145,7 +145,7 @@ reverse_positions:
     section: 0
     line: 2
     frame_ids:
-      - frame:024890191069564357bdd8b63930d20c6aaa4771a94519f6514adfc72bee9c11
-      - frame:4feee3777730b775472caa216c3a57749f2ee1e3d94a82600a95b4f456baba98
+      - frame:0c9dfb98fb8ab4a18aae2ed5633400df77b0f325dec3662b4187d28dccbeba83
+      - frame:e6409d4d9fbbe91dfcafc594e7208e7aee4764e4b6ce9486d20e428c2fd429c1
     category: token
     rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。

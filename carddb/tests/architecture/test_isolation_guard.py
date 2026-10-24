@@ -410,7 +410,10 @@ def test_cold_import_outside_data_root_can_create_bytecode(
         assert spec is not None
         assert spec.loader is not None
         module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
+        # This synthetic import must exercise bytecode writes even under python -B.
+        with monkeypatch.context() as bytecode:
+            bytecode.setattr(sys, "dont_write_bytecode", False)
+            spec.loader.exec_module(module)
         assert module.SYNTHETIC is True
         assert spec.cached is not None
         assert source.parent / "__pycache__" in Path(spec.cached).parents

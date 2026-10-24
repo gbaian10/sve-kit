@@ -5,8 +5,8 @@ basis:
   classifications:
     recipe: v0-classification-candidates-1
     inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
-  normalizer: four-layer-jp-v6
-  build_sha256: 1de5adc33023646bbc7ced36bb49bb1850fe54309fed29c246d060a40862bc53
+  normalizer: four-layer-jp-v7
+  build_sha256: 7663e614a9cbf981162cbc7d09bb5841bcd3b18958c04b01fe55c5e4cb06ecf6
 groups:
   - id: shape:5fd254e13b4fcb2102212f339b4c6c73eca71d5d9aa0472c1ee411f7750f5316
     priority: false
@@ -24,11 +24,11 @@ groups:
         - ECP01-SSP18
         - ECP01-038
     frames:
-      - frame:2b8bfe86a5aaadb2582962c21083a7e038e8b2b5e4f6ce85951a089147f58828
-      - frame:9491b0ca360b32a20614074d9892d3de2e4dc719afcfc545c5226d1a637cc295
+      - frame:b5428ae4063f2f35275be81033195c76a29fe0a1f6bbd3593c42fc129ae44369
+      - frame:18bbe9fc979d2cbcfc1bea49081cb9017727c91e5b1745e169ab05d0bebb3600
     uses:
-      - use:cefe3d301938def7cbe015f77efbbeb4c6cbf8b980cb0011dbe0af63b3d9792b
-      - use:efdf1684b58617a379299a6e69986751afe469ec81dd1992538b321dfab5f593
+      - use:049489f7d70eed86c31d40174b464e83ca37f62b51474f80afb9f4d4f0b636f8
+      - use:8c36fb12430ce9d351e22c8afcb3b8c2660081800150843f6563b0cbf5e73091
     translation_review:
       required_uses: []
       conditional_uses: []

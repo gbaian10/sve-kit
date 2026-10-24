@@ -5,8 +5,8 @@ basis:
   classifications:
     recipe: v0-classification-candidates-1
     inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
-  normalizer: four-layer-jp-v6
-  build_sha256: 1de5adc33023646bbc7ced36bb49bb1850fe54309fed29c246d060a40862bc53
+  normalizer: four-layer-jp-v7
+  build_sha256: 7663e614a9cbf981162cbc7d09bb5841bcd3b18958c04b01fe55c5e4cb06ecf6
 groups: []
 reverse_positions:
   - card_no: ETD01-011
@@ -15,7 +15,7 @@ reverse_positions:
     section: 0
     line: 1
     frame_ids:
-      - frame:e705f8a935d89b72757903d8b3da410b1f3276e27dde53816909bede5059ae8e
-      - frame:e7438862882c353035751c076ab1ba444ec9c8a9604adf8126714d17d28b53ea
+      - frame:8628d9ed53018adb46cd4451a77af96ea4afb662f16a63d25d54409f5596738e
+      - frame:3c4646e3bc5a9463fac4cb80cd193fb5a4906f5d1a0fa97b9c9d6288a76c99b1
     category: token
     rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。

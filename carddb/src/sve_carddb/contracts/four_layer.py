@@ -630,7 +630,7 @@ class Frame(RecordData):
 
     @model_validator(mode="after")
     def _identity(self) -> Self:
-        if self.source.normalizer_version != "four-layer-jp-v6" and (
+        if self.source.normalizer_version != "four-layer-jp-v7" and (
             self.mode_rules
             or any(
                 s.type == "PredicateExpr" or s.expression is not None
@@ -641,7 +641,7 @@ class Frame(RecordData):
                 for p in (*self.projection.imports, *self.projection.exports)
             )
         ):
-            raise ValueError("Preparation structure requires a v6 frame")
+            raise ValueError("Preparation structure requires a v7 frame")
         if self.id != "frame:" + self.content_hash:
             raise ValueError("Frame ID differs from full content hash")
         if (

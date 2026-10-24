@@ -1,4 +1,4 @@
-"""Derive and verify the complete sealed v6 source construction."""
+"""Derive and verify the complete sealed source construction."""
 
 from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING
@@ -18,6 +18,7 @@ from sve_carddb.domains.translations.four_layer_context import (
     Descriptor,
     Registry,
 )
+from sve_carddb.domains.translations.four_layer_draw import prepare_draw
 from sve_carddb.domains.translations.four_layer_expressions import (
     DOMAIN,
     DOMAIN_CODE,
@@ -120,7 +121,7 @@ class DerivedField:
         lang: str = "zh-Hant",
         forms: Mapping[tuple[str, str], FormDefinition] | None = None,
     ) -> None:
-        """Reconstruct exact source evidence; a version label never proves v6 validity."""
+        """Reconstruct exact source evidence; a version label never proves validity."""
         if frame.source.normalizer_version != VERSION:
             raise ValueError("Unsupported four-layer normalizer version")
         expected = derive_source(
@@ -234,6 +235,7 @@ def derive_source(
     )
     prepared = N3.prepare(raw, prepared, classifier, context)
     prepared = LEXICAL.prepare(raw, prepared, classifier, context)
+    prepared = prepare_draw(raw, prepared, context)
     if len(prepared.interfaces) != len(prepared.derived.field.parts):
         raise ValueError("Source interfaces must preserve source part order")
     if prepared.mode_rules and len(prepared.mode_rules) != len(

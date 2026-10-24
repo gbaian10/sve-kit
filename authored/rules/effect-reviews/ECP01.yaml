@@ -5,8 +5,8 @@ basis:
   classifications:
     recipe: v0-classification-candidates-1
     inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
-  normalizer: four-layer-jp-v6
-  build_sha256: 1de5adc33023646bbc7ced36bb49bb1850fe54309fed29c246d060a40862bc53
+  normalizer: four-layer-jp-v7
+  build_sha256: 7663e614a9cbf981162cbc7d09bb5841bcd3b18958c04b01fe55c5e4cb06ecf6
 groups:
   - id: shape:ff92b6ec4c66ee04e17e28e8d5f11a69f856306777cae9895251801bc61aad0b
     priority: false
@@ -28,15 +28,15 @@ groups:
         - ECP01-016
         - ECP01-P08
     frames:
-      - frame:531ddec20ae1cc3858efddc13be933b7510bffdc7b6178d00776398c9e8ba823
-      - frame:85e39405198a2883e5065d925984de096d012ce96785d03f3e1f9426dc4deca1
-      - frame:ba05a349f53374a25ff3493f02477bf709830ac90bf3450f9c6ff09c6cfb3c01
-      - frame:ef25cf1dcdc37ccc53130b53225d6fc3e95bc46dfcde4151d9d4962b9ff57326
+      - frame:09ba7ce89d22549ec31355fae006e39c1eb619e8e16b65c5dc15d5aca399e9de
+      - frame:7851e33d76ff119e159be041be9034c2b455b46216972c3a51598d53758c355d
+      - frame:ec883578de6def0c22ae0559e8af5677b66c57cc0e59717aeb8c3e31f8aa6307
+      - frame:fcf47905186cdc93dd36f2cf1ae6c68e991caece4f11ac5d8a987bf7a5cd7d63
     uses:
-      - use:221fa6fa5b642611b7d3d2a16cafc734db554ab5fb8ca3073e64a94c6de1ba03
-      - use:488814637f0f2caa60b4df6a833001318fc9b27fbb070c257b38dbb3884989a5
-      - use:99970b92d841022ec8f258a49651f049336d0999d0685bfd8184d8c74da4c41e
-      - use:9d8faabcfee6ba91b108d4aeddb37538368e0ed52e4c58c888d80a0e928b241c
+      - use:b85a668e289f69dc6d0903c32ba63fdd2b2aaf5d49f9218645616bebeaf11cd6
+      - use:84439b3b966e73dc6552fa0a0df05bc5fd654684bba8072e53551fc09215d01b
+      - use:fdfac632fed0eefe0f8688ec5acd3b4b89746dd7177060bbcdf694152953fc54
+      - use:cd8bf3afdfd16f356f4ce350c01840b79c9b7d2ea1cba5e6cd7daf689d04594e
     translation_review:
       required_uses: []
       conditional_uses: []

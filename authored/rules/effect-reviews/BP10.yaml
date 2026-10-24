@@ -5,8 +5,8 @@ basis:
   classifications:
     recipe: v0-classification-candidates-1
     inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
-  normalizer: four-layer-jp-v6
-  build_sha256: 1de5adc33023646bbc7ced36bb49bb1850fe54309fed29c246d060a40862bc53
+  normalizer: four-layer-jp-v7
+  build_sha256: 7663e614a9cbf981162cbc7d09bb5841bcd3b18958c04b01fe55c5e4cb06ecf6
 groups:
   - id: shape:196e48e2e95db7ee32d3e611cb1827b12cb5602000cb394e09c22cbdcf28728a
     priority: false
@@ -22,11 +22,11 @@ groups:
       Tac1a96f95f:
         - BP10-013
     frames:
-      - frame:58161226959a37cc6971ef3c51bd0178dc06aa57c8ad4bddf2dc67f8daf98438
-      - frame:ab60c18192d71c1e77bb2194de3518d5bf00234c77bd5fc73517dffa9b8dff05
+      - frame:de82746904a9d75eaab99fe515ebaebc8a847bd8875d9096e3f0b1e5e0a64122
+      - frame:7d88db160ce04cf9ae457c7df1f3dbdcaad613c5cdeee0250af57575f35f95e6
     uses:
-      - use:a04db8504d964e0d17dcec336f4bd09b87bf43130a9e98e4a23ef07fec36b2c7
-      - use:b9bdf451d5fdbf86471d363f8715f132f34f6148296488975a65540a9b20bdd3
+      - use:cecdcf658b65a7d2c502d4a090101b55492aea2c80865b4baadf6fe8357558a5
+      - use:6e96343c17daa3df1595e82209d17ac16d189d5cc0db2450473f86016dd8b24a
     translation_review:
       required_uses: []
       conditional_uses: []
@@ -46,11 +46,11 @@ groups:
       T456dd66bb8:
         - BP10-014
     frames:
-      - frame:5b177855f475e3c087e818f2c95d773901d32b9261795f0a07d66feec7f53d1e
-      - frame:d958499d55b016b75a49639d75b0f8ab2ea8340d74ac65d2468eb59a5fd627b5
+      - frame:96c8369ccbf5a7f7f25cdfa6ccc424892a6a983aabdebacdce79eab4ce2503e2
+      - frame:2c2682116073ca210925a5a44d86903c95105ddb1dd16e714661c4c107ffb855
     uses:
-      - use:289853962154e8e49a895561a68da4a83a326a338c05393c3a81f908cf282add
-      - use:ce8460e8619745ef2b71f417a4efff48ac33ccd920b464f2678b63c00ba65f3b
+      - use:606ee8da277257e6e3b0fb3b7c4d59726b0847f679f94713c1d6c5c802fc7cc6
+      - use:fad2a7f06a0867eabbe5049fb446c443027be7e6d6d4c0e5ff145bd19c6673b1
     translation_review:
       required_uses: []
       conditional_uses: []
@@ -69,11 +69,11 @@ groups:
       Tff09295a18:
         - BP10-052
     frames:
-      - frame:f3924df4d790ed72fb79ce2cdcdc9031aededb746c89fe8b290b849e322ed1ba
-      - frame:ffb957cd8b197a3cf4d63c377bdbda283836716df2004c83b8b8776223240e14
+      - frame:26ad6d8a63fe9b72bcc70c0b917e62519058fbbdd2e43545e0bc88b4a7741d02
+      - frame:c926453aab5689a69beda7e55ed45c9880f00a5fcbd528b2bc05f09fc7d254e3
     uses:
-      - use:35eeff095c760bd2c9c76eb886d3e93e574e7b885767ca4e3d4ede329757c5ec
-      - use:7182829dbb8502577aa19b1ab249c37a62a4383778441228641e6079f2a9fc8c
+      - use:db4e85e955a73aa049251a1ad4c006cf422ef83347598a9a701622972a9eed64
+      - use:f5bce363f056d988ae1bdba3ef7f9d98de42ef64bc19afacd7a2ab7db5e4b79c
     translation_review:
       required_uses: []
       conditional_uses: []

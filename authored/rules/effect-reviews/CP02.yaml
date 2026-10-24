@@ -5,8 +5,8 @@ basis:
   classifications:
     recipe: v0-classification-candidates-1
     inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
-  normalizer: four-layer-jp-v6
-  build_sha256: 1de5adc33023646bbc7ced36bb49bb1850fe54309fed29c246d060a40862bc53
+  normalizer: four-layer-jp-v7
+  build_sha256: 7663e614a9cbf981162cbc7d09bb5841bcd3b18958c04b01fe55c5e4cb06ecf6
 groups:
   - id: shape:ab1d1feb15beac05631d2c2e658ecc28db70c59d8376d82fae36f5867766dc6f
     priority: false
@@ -24,13 +24,13 @@ groups:
         - CP04-P41
         - CP04-053
     frames:
-      - frame:0940cbb7cfbef5783b91fc7388a7fdda9743c03aca7f804648a2185cb47f9c1a
-      - frame:19a9e2a69dd9d1afcf640afe11e35863f9dadfc6451c469e72ddf6b750fb29e5
-      - frame:d757ae88dfe197c8143be6dbfcb62b2a4e6865d8598a2aa2e92d5d92e976e6b3
+      - frame:31a8b4aa50e79445db6dc6b234d579faccea564c48e09835b6d96af40ab8fdea
+      - frame:ae5ec67108f2266e6e14b8a0b87f1719f474dc3272bacf5dc9499b8ef0293fbe
+      - frame:c9164f7e95e404b705d96490416f30b8d75fd179f077c0761f82fb3ca2c03a2e
     uses:
-      - use:3aad9200104e474930e159a63a8ff88585576a9aecf41f4d80c52e3281de83c5
-      - use:7a94e83e75032d8fb0a5659dfcc99e3b972e19e8f6e17606385782ea0d3fd8d6
-      - use:a136031acd7b79e5d8da8fa72bdb16b79a76aeea8347e193df111b8b4a6bd46c
+      - use:2334d2e0d2cd781e067a533d30512b2c027cda1a78305967e89560a8edab623c
+      - use:11e378e0b128cc76fb9c95ee8e276c7c02e487d0ddb3c0725d343de74c6948ca
+      - use:bb11b6283d87d76fc4ab011c02d82b9d8af9d8b942cb40f826436e5cd7ce0770
     translation_review:
       required_uses: []
       conditional_uses: []
@@ -42,6 +42,6 @@ reverse_positions:
     section: 0
     line: 1
     frame_ids:
-      - frame:1776e800465c6ad932aaedaf39b4ccc22bab02bd0f70ccfb56701f091e8f3e6f
+      - frame:146d800148dec42f3e8b3ad90581ba95741073db8ea8ad6f4f25777b4a32d36f
     category: 說明
     rationale: 括號說明既有關鍵字或通用建構／裝備規則；不複製成另一個效果。

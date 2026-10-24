@@ -49,7 +49,7 @@ CARDS = {
     "BP01-034": "c:b1d5ce73453a5efea8a2057e75743ea4",
     "BP01-092": "c:8c4b83cfcb625c0490eb8c66968f29dc",
 }
-FRAME = "frame:8ebd201e08a1e14f57b700f2fb76dc11afbf7f16261350a117e2ca75f1aac18c"
+FRAME = "frame:4e38fd488749ed51f1cf501759988e443549000c47bca7aba285a2f6009b902d"
 
 
 @pytest.fixture(scope="module")

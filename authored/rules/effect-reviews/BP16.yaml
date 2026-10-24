@@ -5,8 +5,8 @@ basis:
   classifications:
     recipe: v0-classification-candidates-1
     inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
-  normalizer: four-layer-jp-v6
-  build_sha256: 1de5adc33023646bbc7ced36bb49bb1850fe54309fed29c246d060a40862bc53
+  normalizer: four-layer-jp-v7
+  build_sha256: 7663e614a9cbf981162cbc7d09bb5841bcd3b18958c04b01fe55c5e4cb06ecf6
 groups:
   - id: shape:df46907772d757a70d294aa89d04c066db8b6909cf0809b224708664bd771087
     priority: false
@@ -28,13 +28,13 @@ groups:
         - BP18-P26
         - BP18-066
     frames:
-      - frame:0368db8cd60ff68908bde77f7ca29b6ba0e3ea0e34480d9e68e9642b5ac2c735
-      - frame:918d5e33cc9d38405fbf85064838e2316558c904dac2d85848147fe27de1653d
-      - frame:acc25fe79758bc897d30932b0099a080daf2421a736e15633c752d173fa6f354
+      - frame:b18da705dd5f6267494b8edf0ec26056d9050b6c9a3fcf6ff7f7b37e3f824281
+      - frame:b51fa419051d2215ecbad62a18b63121810298f707dfdfe50411f6a85af7b3bd
+      - frame:858ef8adfb9fb0e16d0d9fb257bbb8f26ea94307f6e9ad87d8477018c1f05cc9
     uses:
-      - use:666be3af2d24e36f9dbf4f06959b49fa3b31c2dc5bffb1a60d6a71665901ad47
-      - use:7dba9e1d022c2860392568099c1bba865ce5f014a255a77d3f7d53038d1ee3c2
-      - use:ecb4d5a7c49b2379d395c99beeccce4290b264bde9df7b6f896a20282be66998
+      - use:4d527a4aceef01b5e205c59c72c4e282cd12eae56af1975468c9d9c5ca0ef39f
+      - use:01e5896f0c1751e0ceeca1850e885a22073608bb4bdfa162c595b2d7ed75dc2b
+      - use:bd26527f819f50879312252555395c54c71826d49ea034dc269102ec15241692
     translation_review:
       required_uses: []
       conditional_uses: []
@@ -46,8 +46,8 @@ reverse_positions:
     section:
     line: 1
     frame_ids:
-      - frame:1249343dd7b439c261bc0f87fb11b32f65f1c47696a88646c863f96c6a39bebd
-      - frame:a34835b8f9b33d25d306be56c06a85ca7b0852b5645e96dd695cb76dee989ed0
+      - frame:0081cc7e8a3810860cda8e3c26655236a0b6e982adc58ea38ac46f61102b465f
+      - frame:2a56037551ba72a3f1b782aa29da458869a4f3456ba9fea557d21579e50eae72
     category: 跨行涵蓋
     rationale: 追加 act 費用附於下一行 spell，括號是費用說明。
     covered_by:
@@ -59,7 +59,7 @@ reverse_positions:
     section:
     line: 2
     frame_ids:
-      - frame:10117703d44cfa6d0ee3607878b34ce3d063ac6a087894d408e78da586b3856b
+      - frame:178d77ea881215356ec83ef8bda3488e1a740768ba98ad13ad98c7fa2fbeae95
     category: 跨行涵蓋
     rationale: 第一行 choice 包含第二行的兩種模式。
     covered_by:
@@ -71,8 +71,8 @@ reverse_positions:
     section: 0
     line: 1
     frame_ids:
-      - frame:33a8febb6ed3b2eb58497e8c938db6843781ab327abbbf6c1c13c8d3ae879b94
-      - frame:4a9c988e93f1906bbd446d281fb1148f4722bd4032832d9b389c853e5040c29a
+      - frame:6638f7061941e820bea50fd73b396cf8cf83560ef71eb823b0325f447124f516
+      - frame:167068c72ef3e8782e24007373d5efed41ae10acd25a48fac21d61f4d061f1f1
     category: token
     rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。
   - card_no: BP16-SL08
@@ -81,7 +81,7 @@ reverse_positions:
     section:
     line: 2
     frame_ids:
-      - frame:7195d16354e1161e76007e9b2c8028d4130e4ce0ccb8ed6e869ab5957befe042
+      - frame:2492e836da374f71ec5b6abf25e045d76476f8d4b28c2a8171f548ce71ef164f
     category: 跨行涵蓋
     rationale: 第一行 choice 包含後續模式與各自決定。
     covered_by:

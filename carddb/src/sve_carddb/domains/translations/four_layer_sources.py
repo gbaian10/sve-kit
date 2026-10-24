@@ -283,4 +283,18 @@ def semantic_context(db: Database, source: CardSource) -> CardContext | None:
         if "advance" in special
         else "normal",
         _string(revision["type_code"]),
+        current=bool(
+            db.select(
+                "face_current",
+                db.columns("face_current"),
+                where={"revision_id": _string(revision["id"]), "region": "jp"},
+            )
+        ),
+        section_count=len(
+            db.select(
+                "face_text_section",
+                db.columns("face_text_section"),
+                where={"revision_id": _string(revision["id"])},
+            )
+        ),
     )

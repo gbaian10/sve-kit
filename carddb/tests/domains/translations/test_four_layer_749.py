@@ -169,7 +169,7 @@ def test_finite_sources_bind(
     assert not found.recognized[ordinal].issues
     frame, binding = found.bind(ordinal)
     found.verify_binding(raw, engine, frame, binding)
-    assert frame.source.normalizer_version == "four-layer-jp-v6"
+    assert frame.source.normalizer_version == "four-layer-jp-v7"
     assert frame.semantic_variant.state == "pending"
     assert frame == type(frame).model_validate_json(frame.model_dump_json())
     ports = frame.projection.imports

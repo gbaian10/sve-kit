@@ -247,7 +247,7 @@ pure_reminder 必須有完整具名提示文法及同欄的精確 body anchor；
 
 ### 4.3 N1 正式來源登錄
 
-`four_layer_derivation.derive_source` 使用正式版本 `four-layer-jp-v6`；正式 compile、authored reader 與 DB reader 只接受 v6，不保留舊版 reader。
+`four_layer_derivation.derive_source` 使用正式版本 `four-layer-jp-v7`；正式 compile、authored reader 與 DB reader 只接受 v7，不保留舊版 reader。
 N0 的來源構造與數值規則是 N1 明列的既有基礎；歷史對帳使用切換前已保存的 N0 建置資料，不從新 frame 反推舊版。
 此入口沿相同 source units、分段、catalog、數值規則及來源驗證邊界產葉，不另建來源驗證器。
 只擴充精確 face_revision／printing_face 的 effect／section 中 role=body 的部分；name、label、layout、reminder、token_header
@@ -273,7 +273,7 @@ Code 的概念對照為 Player.self/opponent → `term:player.self/opponent`、P
 ZoneKind 的 battlefield／hand／deck／evolve_deck／graveyard／ex／banish 依序對應
 `term:zone.battlefield`／`term:zone.hand`／`term:zone.deck`／`term:zone.evolve_deck`／`term:zone.cemetery`／`term:zone.ex`／`term:zone.banishment`。
 DeckPosition.top/bottom 對應完整 `term:zone.deck_top/deck_bottom`；TokenStatus.token 對應 `term:object.token`。
-這裡記錄來源型別含義；renderer 自 v3 起已接 Code→Reference、必要引用集合與新形式，正式來源 workflow 使用完整 v6 來源推導。
+這裡記錄來源型別含義；renderer 自 v3 起已接 Code→Reference、必要引用集合與新形式，正式來源 workflow 使用完整 v7 來源推導。
 
 P 為明示自分／相手，Z 為上列區域，DP 為完整デッキの上／下，PH 為具名階段。
 NP 以卡種、泛稱カード或完整 `『』` 名稱為核心；Q 沿既有合法數量與單位。
@@ -848,12 +848,12 @@ active 懸空引用必為零；所有 pending 與其候選不得進可執行閉�
 新版 producer／reader 必須同步切換 basis 與 annotation，不能用舊 shared_jp_unchecked 冒充新政策。
 固定案例是規格，並不代表 normalizer、renderer、全庫譯文、DSL adapter 或 runtime 已通過驗收。
 
-## 11. v6 來源推導與 expression 呈現
+## 11. v7 來源推導與 expression 呈現
 
 `four_layer_derivation.derive_source(raw, source, classifier)` 產生 `DerivedField`，
-由其 `bind` 建立 `four-layer-jp-v6` 身分；`verify` 從原始來源重新推導，
+由其 `bind` 建立 `four-layer-jp-v7` 身分；`verify` 從原始來源重新推導，
 再驗完整 frame、binding、語義及接口。正式 compile、classifier、authored 與
-SQLite 來源契約只接受 v6，沒有可選家族或舊版執行入口。
+SQLite 來源契約只接受 v7，沒有可選家族或舊版執行入口。
 
 此接口只在正式來源辨識上依序套用已封版的容量、具名參數與區域計數／SEP 規則，
 最後依最終葉建構常數選項接口；共用型別不授予其他來源句型。
@@ -1325,7 +1325,7 @@ descriptor ID 可以把原文字面編進構造而不留槽，所以全部 provi
 
 ### 11.12 有限來源形狀與構築上限
 
-正式來源版本為 `four-layer-jp-v6`。既有 N0／N1／N2 仍經同一 `derive_source`，
+正式來源版本為 `four-layer-jp-v7`。既有 N0／N1／N2 仍經同一 `derive_source`，
 沒有按家族混用版本的入口。`four_layer_n3_numbers` 只在完整卡片效果／section 的
 具名形狀及同欄提醒 anchor 內補數值證據，不登錄新的 expression、Form 或 DSL 語義。
 lexical numeric veto 只有在整體來源守衛成立且無其他問題時才能解除；原先的低信心、
@@ -1382,7 +1382,7 @@ lexical numeric veto 只有在整體來源守衛成立且無其他問題時才�
 
 ### 11.13 #749 有限池、holder、事件與參數接口
 
-正式版本為 `four-layer-jp-v6`。本節與 §11.12 使用相同的正常 `derive_source`、
+正式版本為 `four-layer-jp-v7`。本節與 §11.12 使用相同的正常 `derive_source`、
 `bind`、來源重建驗證、SQLite reader 與 renderer；沒有另外的執行入口。
 `source_relations` 不增加任何種類。projection 的 provider／consumer 只用 port、
 scope、OccurrenceKey 與 capture 證據連接，操作次序保留於 canonical 來源。
@@ -1491,6 +1491,33 @@ up_to 接管原「至多」前綴，既有文字須保持相同，並交 #750 �
 
 ### 11.14 固定動作文字與必要詞界線
 
-`four-layer-jp-v6` 的十種原費用逐項支付句及課程提醒，保留既有完整來源句型、數值守衛與 pending 分類；動作「消滅」留在 canonical 固定文字，不另產生 `term:action.banish` 的 Concept/rule_term 葉。其他卡片、玩家、區域、能力與數值葉仍須完整引用；不改 glossary 概念或基礎選詞，也不新增動作受詞 form。
+`four-layer-jp-v7` 的十種原費用逐項支付句及課程提醒，保留既有完整來源句型、數值守衛與 pending 分類；動作「消滅」留在 canonical 固定文字，不另產生 `term:action.banish` 的 Concept/rule_term 葉。其他卡片、玩家、區域、能力與數值葉仍須完整引用；不改 glossary 概念或基礎選詞，也不新增動作受詞 form。
 
 這是全庫來源葉規則換版，既有正式定義與引用同步重鍵；版本以外的轉移依 §9 比完整 payload，葉結構變更按精確來源 occurrence 重建。canonical 相同的 occurrence-scoped pending frame 仍保留各自 scope，不因中文完成而改成 resolved。
+
+### 11.15 三種完整抽牌來源規則
+
+`four-layer-jp-v7` 在既有葉推導完成後，以 `four_layer_draw.prepare_draw` 判別下列三條規則。
+共同前提是 JP current 的精確 `face_revision`、`effect` 欄、無 section ordinal、role=body，且來源 span 恰為完整原始行。
+數量須為無前導零的 ASCII 十進位整數（含 0），使用單一 required `Nat/count` 葉 `leaf_0`，
+domain 為 0～9007199254740991、空 values，唯一 occurrence、葉值與原文字面均須完全相符。
+
+| 規則 | 完整原始行 | 額外上下文 |
+| --- | --- | --- |
+| `draw_exact_spell.v1` | `N枚引く。` | normal spell、沒有 section，且整個 effect 僅此一行 |
+| `draw_exact_attack_time.v1` | `【攻撃時】N枚引く。` | follower；其他獨立 sibling 行保留原判別 |
+| `draw_exact_evolve_time.v1` | `【進化時】N枚引く。` | evolved follower；其他獨立 sibling 行保留原判別 |
+
+此處 N 只代表上述數量字面，不是任意參數。命中後 semantic variant 使用對應規則名，
+projection 為 `ability_body`，唯一 scope 為 `ability_0`，imports／exports 皆空。
+規則依綜合規則 1.28.0 的 3.1.2.4.1（省略玩家為效果 master）、5.10.1～3（抽牌與上限）、
+12.6.1～2（自身進化）及 12.7.1～2（自身攻擊），不推定其他 actor 或額外來源連接。
+
+缺上下文、歷史 revision、printing_face、section、非完整行、reminder、其他 actor、up_to、optional、
+條件、成本或額外動作均不命中。整欄存在 Quick（含正規化成相同標記的全形括號），或任一行有未閉合的
+引號／括號，也不命中；不能把跨行引述中的觸發句當獨立能力。全形數字與前導零保留原判別，超界數量沿用既有數值拒絕。
+已有 issue、葉 schema 不符或已有 interface 時不新增語義；其餘條件成立但已存在語義時，以 `ambiguous_semantic_variant` 拒絕衝突。
+未命中者維持既有分類，不能因局部字串相似而解除 pending。
+
+本節只確定來源分類，不增加 production author adapter 的入口、ports、裁定強度或執行資格；
+完整能力、逐用途審核與場景驗證仍依[共用能力作者契約](../../dsl/common-family-authoring.md)。
