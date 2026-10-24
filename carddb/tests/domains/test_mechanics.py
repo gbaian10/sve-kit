@@ -636,7 +636,7 @@ def test_first_batch_stats_and_quick_prove_absence_without_labels(
         "自分のフォロワー1体を選ぶ。それは{攻撃力}+1する。1枚引く。1枚引く。",
         "1枚引く。自分のフォロワー1体を選ぶ。それは{攻撃力}+1する。",
         "{起動}{コスト1}これを{アクト}：自分のフォロワー1体を選ぶ。それは{攻撃力}+1する。",
-        "【進化時】場の他のカード1枚を手札に戻す：これは{攻撃力}+1/{体力}+1する。",
+        "【進化時】場の他のカード1枚を手札に戻す：これは{攻撃力}+1/{体力}+1する。仮。",
         "自分のフォロワーすべては{攻撃力}+1する。1枚引く。",
         "相手のフォロワーすべては{攻撃力}+1する。",
         "自分の場に他のフォロワーが出たとき、それは{攻撃力}+1する。",
@@ -743,7 +743,7 @@ def test_bounded_movement_proves_all_relations(
     [
         "【進化時】スタンド状態の相手のフォロワー1体を選ぶ。それを破壊する。",
         "【進化時】【合成乙】を持つ相手のフォロワー1体を選ぶ。それを破壊する。",
-        "相手のフォロワー1体を選ぶ。それを破壊する。【スペルチェイン_10】それのリーダーに3ダメージ。",
+        "相手のフォロワー1体を選ぶ。それを破壊する。【スペルチェイン_10】それのリーダーに3ダメージ。仮。",
         "{起動}これを{アクト}：相手の場のカード1枚を選ぶ。それを破壊する。",
         "体力３以下の相手のフォロワー1体を選ぶ。それを消滅させる。",
         "体力X以下の相手のフォロワー1体を選ぶ。それを消滅させる。",
@@ -890,7 +890,7 @@ def test_bounded_trigger_grave_act_proves_all_relations(
         "【進化時】相手のフォロワー1体を選ぶ。それをアクトする。",
         "{起動}{コスト1}これを{アクト}：相手のフォロワー1体を選ぶ。それをアクトする。",
         "これはスタンド状態で場に出る。",
-        "{起動}これを{アクト}：相手のフォロワー1体を選ぶ。それを破壊する。",
+        "{起動}これを{アクト}：相手のフォロワー1体を選ぶ。それを破壊する。仮。",
         "{起動}これを{アクト}墓場に置く：相手のフォロワー1体を選ぶ。それを消滅させる。",
         "相手のエンドフェイズが来たとき、これは消滅する。",
         "【進化時】【合成乙】を持つフォロワー1体を墓場に置く：相手のフォロワー1体を選ぶ。それを破壊する。",
@@ -985,6 +985,59 @@ def test_proved_labels_do_not_close_unknown_conditional_grant(
             r.values["keyword_id"]: r.values["relations"]
             for r in db.rows("mechanic_projection")
         } == {"kw:ward": Json(["has"]), "kw:storm": Json(["grants"])}
+
+
+_LOOKCOST_LINES = (
+    "自分のデッキの上4枚を見る。その中から、スペル1枚を公開して手札に加えてよい。"
+    "スペル1枚を墓場に置いてよい。残りを好きな順にデッキの下に置く。\n"
+    "【進化時】場の他のカード1枚を手札に戻す：これは{攻撃力}+1/{体力}+1する。\n"
+    "相手のフォロワー1体を選ぶ。それを破壊する。【スペルチェイン_10】それのリーダーに3ダメージ。\n"
+    "{起動}これを{アクト}：相手のフォロワー1体を選ぶ。それを破壊する。\n"
+    "{起動}EXエリアの妖精・フォロワー1枚を消滅："
+    "自分のリーダーは{体力}+3する。1枚引く。この能力は1ターンに1回使える。\n"
+    "これをプレイする際、【スペルチェイン_5】コストを-3する。"
+    "【SC_10】代わりに-6する。【SC_15】代わりに-9する。"
+)
+
+
+def test_deck_look_cost_and_adjustment_complete_without_new_positive_labels(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    with case(
+        tmp_path, monkeypatch, "【合成甲】\n" + _LOOKCOST_LINES, first_batch=True
+    ) as (db, inputs, settings, _):
+        with db.transaction():
+            report = mechanics.apply(db, inputs, settings)
+        assert report["complete_cards"] == 1
+        assert db.rows("card_mechanic_coverage")[0].values["complete_all"] is True
+        assert {
+            r.values["keyword_id"]: r.values["relations"]
+            for r in db.rows("mechanic_projection")
+        } == {"kw:ward": Json(["has"])}
+
+
+def test_deck_look_keyword_filter_keeps_otherwise_proved_card_open(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    raw = "【合成甲】\n" + _LOOKCOST_LINES.replace(
+        "スペル1枚を公開", "【合成甲】を持つフォロワー1枚を公開"
+    )
+    with case(tmp_path, monkeypatch, raw, first_batch=True) as (
+        db,
+        inputs,
+        settings,
+        _,
+    ):
+        with db.transaction():
+            report = mechanics.apply(db, inputs, settings)
+        assert report["complete_cards"] == 0
+        coverage = db.rows("card_mechanic_coverage")[0].values
+        assert coverage["complete_all"] is False
+        assert coverage["complete_keyword_ids"] == Json([])
+        assert {
+            r.values["keyword_id"]: r.values["relations"]
+            for r in db.rows("mechanic_projection")
+        } == {"kw:ward": Json(["has"])}
 
 
 def test_first_batch_missing_current_back_prevents_complete(
