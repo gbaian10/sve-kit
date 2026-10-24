@@ -38,7 +38,7 @@ function Harness({ initial = "" }: { initial?: string }) {
         en
       </button>
       <ArtistFilter
-        textLang="zh-Hant"
+        edition={edition}
         selected={selected}
         onChange={onChange}
         options={EDITIONS[edition]}
@@ -50,24 +50,45 @@ function Harness({ initial = "" }: { initial?: string }) {
   )
 }
 
+// Same Han names in both orders: Japanese reading puts 漢字 (かんじ) before 久方 (ひさかた), while
+// code-point order puts 久方 first.
+const SORT_NAMES = [
+  { id: id("e"), name: "魚" },
+  { id: id("f"), name: "漢字" },
+  { id: id("g"), name: "虹原" },
+  { id: id("h"), name: "久方綜司" },
+]
+const ARTIST_LABEL = { "zh-TW": "繪師", ja: "イラストレーター", en: "Illustrator" } as const
+
+function Sorted({ edition }: { readonly edition: "jp" | "en" }) {
+  return (
+    <ArtistFilter
+      edition={edition}
+      selected={[]}
+      onChange={() => undefined}
+      options={{ artists: SORT_NAMES, counts: { credited: 0, uncredited: 0 } }}
+    />
+  )
+}
+
 const url = () => decodeURIComponent(screen.getByLabelText("url").textContent)
-const open = async () => {
-  const button = screen.getByRole("button", { name: /^繪師/u })
+const open = async (label = /^繪師/u) => {
+  const button = screen.getByRole("button", { name: label })
   await userEvent.click(button)
   return document.getElementById(button.getAttribute("aria-controls") ?? "") as HTMLElement
 }
+const names = (list: HTMLElement) =>
+  within(list)
+    .getAllByRole("checkbox")
+    .map((checkbox) => checkbox.getAttribute("aria-label"))
 const box = (list: HTMLElement, name: string) =>
   within(list).getByRole<HTMLInputElement>("checkbox", { name })
 
 it("puts the two summary rows above the list, with the whole edition's counts", async () => {
   await renderInRouter(<Harness />)
   const list = await open()
-  const names = within(list)
-    .getAllByRole("checkbox")
-    .map((checkbox) => checkbox.getAttribute("aria-label"))
-  // The artists follow the UI language's collation; the summary rows stay first.
-  expect(names.slice(0, 2)).toEqual(["官方有標示", "官方未標示"])
-  expect(names.slice(2).sort()).toEqual(["ぽんず", "久方綜司", "虹原"].sort())
+  // The artists follow the edition's collation (Japanese here); the summary rows stay first.
+  expect(names(list)).toEqual(["官方有標示", "官方未標示", "ぽんず", "久方綜司", "虹原"])
   expect(within(list).getByText("12")).toBeVisible()
   expect(within(list).getByText("8")).toBeVisible()
   // The search narrows the artists below, never the summary rows.
@@ -128,3 +149,21 @@ it("takes the counts of the edition it is given", async () => {
       .map((checkbox) => checkbox.getAttribute("aria-label")),
   ).toEqual(["官方有標示", "官方未標示", "Ponzu"])
 })
+
+it.each(["zh-TW", "ja", "en"] as const)(
+  "keeps the same order for a JP edition whatever the UI language (%s)",
+  async (language) => {
+    await renderInRouter(<Sorted edition="jp" />, { language })
+    const list = await open(new RegExp(`^${ARTIST_LABEL[language]}`, "u"))
+    expect(names(list)).toEqual(["漢字", "久方綜司", "魚", "虹原"])
+  },
+)
+
+it.each(["zh-TW", "ja", "en"] as const)(
+  "keeps the same order for an EN edition whatever the UI language (%s)",
+  async (language) => {
+    await renderInRouter(<Sorted edition="en" />, { language })
+    const list = await open(new RegExp(`^${ARTIST_LABEL[language]}`, "u"))
+    expect(names(list)).toEqual(["久方綜司", "漢字", "虹原", "魚"])
+  },
+)
