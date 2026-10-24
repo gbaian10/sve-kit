@@ -2,14 +2,17 @@
 
 import json
 import sqlite3
+from dataclasses import replace
 from datetime import date, datetime
 from typing import TYPE_CHECKING
 
 import pytest
 from pydantic import ValidationError
 
+from sve_carddb.ingest.archive.frozen_sources import FrozenSources
 from sve_carddb.ingest.archive.manifest import Manifest, ManifestError
 from sve_carddb.ingest.archive.source_archive import (
+    ArchiveError,
     ArchiveStore,
     backup_batch,
     restore_backup,
@@ -107,6 +110,14 @@ def test_date_and_instant_remain_distinct_through_reuse_and_restore(
             (URLS[0],),
         ).fetchone()
         assert row == ("2020-01-02",) * 3
+    frozen = FrozenSources(tmp_path / "restored", store.store_id, batch.batch_id)
+    version = next(
+        item.source_version_id
+        for item in frozen.current_versions
+        if item.url == URLS[0]
+    )
+    with pytest.raises(ArchiveError, match="date-aware adoption reader"):
+        frozen.metadata(version, parser_version="synthetic-date-rejection")
 
 
 @pytest.mark.parametrize(
@@ -224,3 +235,37 @@ def test_date_receipt_and_resources_cannot_be_reinterpreted(
             )
     with pytest.raises(ManifestError):
         Manifest.open_snapshot(database)
+
+
+@pytest.mark.parametrize(
+    "invalid", ["2020-01-02T03:04:05", "2020-01-02T03:04:05+01:00"]
+)
+def test_live_resources_require_utc_instants(
+    inputs: Inputs, tmp_path: Path, invalid: str
+) -> None:
+    output = tmp_path / "isolated"
+    register(prepare(inputs.input_dir, inputs.selection), output, inputs.program)
+    live = tmp_path / "live.sqlite"
+    with (
+        Manifest.open_snapshot(output / "manifest/manifest.sqlite") as imported,
+        Manifest.open(live) as manifest,
+    ):
+        resource = imported.resources.get(URLS[1])
+        assert resource is not None
+        with (
+            pytest.raises(ManifestError, match="full observation instants"),
+            manifest.transaction(),
+        ):
+            manifest.resources.put(
+                replace(resource, first_fetched_at=datetime.fromisoformat(invalid))
+            )
+        with manifest.transaction():
+            manifest.resources.put(resource)
+    with sqlite3.connect(live) as connection:
+        connection.execute("UPDATE resource SET first_fetched_at=?", (invalid,))
+    connection.close()
+    with (
+        Manifest.open_snapshot(live) as manifest,
+        pytest.raises(ManifestError, match="must be UTC"),
+    ):
+        manifest.resources.get(URLS[1])

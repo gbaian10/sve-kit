@@ -310,7 +310,7 @@ class ResourceStore(_Store):
     def put(self, resource: Resource) -> None:
         """Insert or replace a resource. Call inside `Manifest.transaction()`."""
         if not self._allow_date and any(
-            not isinstance(value, datetime)
+            not isinstance(value, datetime) or value.utcoffset() != UTC.utcoffset(None)
             for value in (
                 resource.first_fetched_at,
                 resource.last_checked_at,
@@ -1053,7 +1053,10 @@ def _generation(row: tuple[object, ...]) -> Generation:
 def _resource_time(value: object, *, allow_date: bool) -> datetime | date:
     text = _str(value)
     if "T" in text:
-        return _datetime(text)
+        instant = _datetime(text)
+        if instant.utcoffset() != UTC.utcoffset(None):
+            raise ManifestError("Resource observation instant must be UTC")
+        return instant
     if allow_date:
         observed = date.fromisoformat(text)
         if observed.isoformat() == text:
