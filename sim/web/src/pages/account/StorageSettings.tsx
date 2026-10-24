@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next"
 import { Button } from "../../components/ui/Button"
 import { Dialog } from "../../components/ui/Dialog"
 import { SettingRow } from "../../components/ui/SettingRow"
-import { estimateStorage, type StorageEstimate } from "../../data"
+import { appBackgroundDownloads, estimateStorage, type StorageEstimate } from "../../data"
 import { getCacheClearResult, requestColdStart } from "../../settings"
 
 export function StorageSettings() {
@@ -16,14 +16,29 @@ export function StorageSettings() {
 
   useEffect(() => {
     let active = true
-    void estimateStorage().then((value) => {
-      if (active) {
-        setUsage(value)
-        setBusy(false)
+    let complete = appBackgroundDownloads.getStatus().progress?.phase === "complete"
+    let latest = 0
+    const refresh = () => {
+      const request = ++latest
+      void estimateStorage().then((value) => {
+        if (active && request === latest) {
+          setUsage(value)
+          setBusy(false)
+        }
+      })
+    }
+    refresh()
+    const unsubscribe = appBackgroundDownloads.subscribe(() => {
+      const next = appBackgroundDownloads.getStatus().progress?.phase === "complete"
+      if (next && !complete) {
+        setBusy(true)
+        refresh()
       }
+      complete = next
     })
     return () => {
       active = false
+      unsubscribe()
     }
   }, [])
 

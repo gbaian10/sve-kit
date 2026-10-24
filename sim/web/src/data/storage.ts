@@ -19,7 +19,7 @@ async function imageCacheBytes(storage: CacheStorage): Promise<number> {
   return total
 }
 
-/** Call on settings entry or explicit refresh: counting images reads their payloads. */
+/** Counting images reads their payloads; avoid refreshing on each download progress update. */
 export async function estimateStorage(): Promise<StorageEstimate> {
   const [total, images, data] = await Promise.allSettled([
     Promise.resolve().then(async () => {

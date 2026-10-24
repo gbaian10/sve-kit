@@ -182,7 +182,8 @@ it("shows flavor text by default and remembers disabling it in advanced settings
 it("shows live download, pause, failed writes and completion only while the selected bytes remain saved", async () => {
   let hidden = false
   vi.spyOn(document, "hidden", "get").mockImplementation(() => hidden)
-  vi.spyOn(navigator, "onLine", "get").mockReturnValue(true)
+  const estimate = vi.fn(() => Promise.resolve({ usage: 1024 * 1024 }))
+  vi.stubGlobal("navigator", { onLine: true, storage: { estimate } })
   const bytes = new TextEncoder().encode("background bytes")
   const gate = Promise.withResolvers<undefined>()
   vi.stubGlobal("fetch", async () => {
@@ -224,6 +225,8 @@ it("shows live download, pause, failed writes and completion only while the sele
   try {
     await renderInRouter(<SettingsPage />)
     const downloads = within(screen.getByRole("region", { name: "背景下載" }))
+    const usage = within(screen.getByRole("region", { name: "儲存空間" }))
+    expect(await usage.findByText("1 MiB")).toBeInTheDocument()
     expect(await downloads.findByText("下載中")).toBeInTheDocument()
     act(() => {
       hidden = true
@@ -245,14 +248,21 @@ it("shows live download, pause, failed writes and completion only while the sele
       appBackgroundDownloads.select({ ...selection, manifestHash: "denied" })
     })
     expect(await downloads.findByText(/瀏覽器目前無法儲存資料/u)).toBeInTheDocument()
+    expect(estimate).toHaveBeenCalledTimes(1)
     const storage = memoryCache()
     vi.stubGlobal("caches", storage)
+    estimate.mockResolvedValue({ usage: 2 * 1024 * 1024 })
     act(() => {
       appBackgroundDownloads.select({ ...selection, manifestHash: "next" })
     })
     expect(await downloads.findByText("已完成")).toBeInTheDocument()
     expect(downloads.getByText("2026-10-24 · 日版")).toBeInTheDocument()
     expect(downloads.getByRole("progressbar")).toHaveAttribute("value", "1")
+    expect(await usage.findByText("2 MiB")).toBeInTheDocument()
+    await act(async () => {
+      await appBackgroundDownloads.recheck()
+    })
+    expect(estimate).toHaveBeenCalledTimes(2)
     await act(async () => {
       await storage.delete(`sve-raw:${encodeURIComponent(selection.base)}`)
       await appBackgroundDownloads.recheck()
@@ -261,6 +271,7 @@ it("shows live download, pause, failed writes and completion only while the sele
       expect(downloads.getByText("尚未全部下載")).toBeInTheDocument()
     })
     expect(downloads.getByText(/部分資料已被移除/u)).toBeInTheDocument()
+    expect(estimate).toHaveBeenCalledTimes(2)
   } finally {
     gate.resolve(undefined)
     appBackgroundDownloads.select(null)
