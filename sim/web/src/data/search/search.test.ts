@@ -2949,6 +2949,38 @@ it("filters evolve and advance by special kind and traits by the card's vocabula
     )
     expect(ids({ traits: ["synthetic-missing-trait"] })).toEqual([])
     expect(index.options.traits.every((trait) => trait.name.original.text !== "")).toBe(true)
+    // Artists follow the printing's face arts, and only the edition's own credits count.
+    const credits = new Map<string, Set<string>>()
+    for (const fragment of snapshot.bootstrap.filter((item) => item.table === "art"))
+      for (const row of fragment.rows)
+        credits.set(
+          stringValue(row["id"]),
+          new Set(
+            arrayValue(row["artists"] ?? [])
+              .filter((credit) => (credit as JsonObject)["role"] === "illustration_jp")
+              .map((credit) => stringValue((credit as JsonObject)["artist_id"])),
+          ),
+        )
+    const artistIds = index.options.artists.map((artist) => artist.id)
+    expect(artistIds.length).toBeGreaterThan(1)
+    for (const artist of artistIds) {
+      const expected = all
+        .filter((item) =>
+          arrayValue(
+            snapshot.bootstrap
+              .find(
+                (f) => f.table === "printing" && f.rows.some((r) => r["id"] === item.printingId),
+              )
+              ?.rows.find((r) => r["id"] === item.printingId)?.["faces"] ?? [],
+          ).some((face) => credits.get(stringValue((face as JsonObject)["art_id"]))?.has(artist)),
+        )
+        .map((item) => item.printingId)
+        .sort()
+      expect(expected.length, artist).toBeGreaterThan(0)
+      expect(ids({ artists: [artist] }), artist).toEqual(expected)
+      expect(index.options.artistCounts[artist], artist).toBe(expected.length)
+    }
+    expect(ids({ artists: ["synthetic-missing-artist"] })).toEqual([])
   }
 })
 

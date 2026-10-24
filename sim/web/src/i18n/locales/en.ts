@@ -245,6 +245,7 @@ export default {
     defense: "Defense",
     sets: "Sets",
     traits: "Trait",
+    artists: "Illustrator",
     searchIn: "Search {{label}}",
     noMatch: "No matching entries",
     display: "Display",
@@ -460,6 +461,8 @@ export default {
     routeFailedHint: "Card data is incomplete or failed to load. Update the data and try again.",
 
     noValue: "—",
+    artist: "Illustrator: ",
+    artistLink: "Show cards by {{name}}",
     previous: "Previous",
     next: "Next",
     zoom: "Enlarge card image: {{name}}",

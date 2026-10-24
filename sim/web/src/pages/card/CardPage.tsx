@@ -30,10 +30,12 @@ import { Link } from "../../components/ui/Link"
 import { useToast } from "../../components/ui/toast-context"
 import {
   arrayValue,
+  artCredits,
   cardPrintings,
   type CardRouteInput,
   type CardSummary,
   type Catalog,
+  type FaceArtist,
   faceBasics,
   type ImageIndex,
   type LocatedCard,
@@ -47,6 +49,8 @@ import { CardRouteError, printingPath } from "../../domain/cardRoute"
 import { classStyle } from "../../domain/classes"
 import { deckLocationBadges } from "../../domain/deckLocation"
 import { displayName, UI_TEXT_LANG } from "../../domain/nameDisplay"
+import { editionUrl, querySearch } from "../../domain/query/codec"
+import { DEFAULT_QUERY } from "../../domain/query/model"
 import type { Region } from "../../domain/search"
 import { currentUiLanguage } from "../../i18n"
 import { showsOtherEdition, usePrefs } from "../../settings"
@@ -223,6 +227,37 @@ export function CardView({
       active = false
     }
   }, [client, catalog, cardId, region, other.snapshot, other.catalog, printingAttempt])
+  // Artists come from the art rows of the card's home set; they appear once those files are in.
+  const owner = card?.["home_set_id"]
+  const faceArts = arrayValue(printing?.["faces"] ?? []).map((raw) => {
+    const face = raw as Row
+    return [stringValue(face["face_id"]), stringValue(face["art_id"] ?? "")] as const
+  })
+  const artsKey = JSON.stringify([client.base, client.snapshot()?.manifestHash, region, faceArts])
+  const [credited, setCredited] = useState<{
+    key: string
+    value: ReadonlyMap<string, readonly FaceArtist[]>
+  }>()
+  useEffect(() => {
+    const snapshot = client.snapshot()
+    const artIds = faceArts.map(([, art]) => art).filter((art) => art !== "")
+    if (!snapshot || typeof owner !== "string" || artIds.length === 0) return
+    let active = true
+    void artCredits(client, snapshot, owner, region, artIds).then(
+      (value) => {
+        if (active) setCredited({ key: artsKey, value })
+      },
+      () => {
+        // The artist line is optional; a failed read leaves it out instead of blocking the card.
+        if (active) setCredited({ key: artsKey, value: new Map() })
+      },
+    )
+    return () => {
+      active = false
+    }
+    // faceArts is derived from artsKey
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [client, owner, region, artsKey])
   const completePrintings =
     printingCatalog?.source === catalog &&
     printingCatalog.cardId === cardId &&
@@ -755,6 +790,10 @@ export function CardView({
               arrayValue(values?.["special_kinds"] ?? []),
             )
             const traits = (values?.["traits"] ?? []) as string[]
+            const artistsOfFace =
+              credited?.key === artsKey
+                ? (credited.value.get(faceArts.find(([face]) => face === faceId)?.[1] ?? "") ?? [])
+                : []
             const cost = typeof values?.["cost"] === "number" ? values["cost"] : null
             const attack = typeof values?.["attack"] === "number" ? values["attack"] : null
             const defense = typeof values?.["defense"] === "number" ? values["defense"] : null
@@ -812,6 +851,25 @@ export function CardView({
                         <span>{traits.map((code) => label("trait", code)).join(joiner)}</span>
                       )}
                     </p>
+                    {artistsOfFace.length > 0 && (
+                      <p data-card-artists="" className="text-13 text-text-2">
+                        {t("cardPage.artist")}
+                        {artistsOfFace.map((artist, index) => (
+                          <span key={artist.id}>
+                            {index > 0 && joiner}
+                            <Link
+                              to={editionUrl(
+                                `/cards${querySearch({ ...DEFAULT_QUERY, artists: [artist.id] })}`,
+                                region,
+                              )}
+                              aria-label={t("cardPage.artistLink", { name: artist.name })}
+                            >
+                              {artist.name}
+                            </Link>
+                          </span>
+                        ))}
+                      </p>
+                    )}
                     <StatCells className="mt-1" cost={cost} attack={attack} defense={defense} />
                     {!frame && ordinal === 0 && navigation && (
                       <div className="mt-2 flex gap-2">{navigation}</div>

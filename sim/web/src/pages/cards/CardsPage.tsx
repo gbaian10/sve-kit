@@ -49,6 +49,7 @@ import { ListColumnPicker } from "../../components/results/ListColumnPicker"
 import { PaginationTail } from "../../components/results/PaginationTail"
 import type { OpenOutcome } from "../../components/results/plain-click"
 import { SkeletonGrid } from "../../components/results/SkeletonGrid"
+import { ArtistFilter } from "../../components/search/ArtistFilter"
 import { ClassQuickBar, type QuickBarClass } from "../../components/search/ClassQuickBar"
 import { ConditionChips } from "../../components/search/ConditionChips"
 import { vocabularyOptionLabel } from "../../components/search/facet-labels"
@@ -798,6 +799,10 @@ export function CardsPage() {
           const option = printingOptions?.trait.traits.find((item) => item.code === code)
           return option ? vocabularyOptionLabel(option.name, textLang) : code
         }}
+        artistLabel={(id) => {
+          const option = printingOptions?.artist.artists.find((item) => item.id === id)
+          return option ? option.name : id
+        }}
         keywordLabel={(id) => {
           const option = printingOptions?.keyword.keywords.find((item) => item.id === id)
           return option ? vocabularyOptionLabel(option.name, textLang) : id
@@ -890,6 +895,16 @@ export function CardsPage() {
               selected={query.traits}
               onChange={(traits) => {
                 commit({ ...query, traits })
+              }}
+            />
+          ),
+          artists: (
+            <ArtistFilter
+              options={printingOptions?.artist}
+              textLang={textLang}
+              selected={query.artists}
+              onChange={(artists) => {
+                commit({ ...query, artists })
               }}
             />
           ),

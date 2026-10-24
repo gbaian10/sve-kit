@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest"
 
-import { formatQuery, parseQuery, querySearch } from "./codec"
+import { editionUrl, formatQuery, parseQuery, querySearch } from "./codec"
 import { activeFilterCount, DEFAULT_QUERY, statSelected, toggleClass, toggleValue } from "./model"
 
 describe("query codec", () => {
   it("reads every parameter and ignores unknown values", () => {
     const state = parseQuery(
       new URLSearchParams(
-        "q=%20試作%20&class=witch,elf,elf,Bad!&cost=3,1,3&atk=10,0&def=4&type=spell&loc=token:spell,main&trait=pixie,Bad!&mech=-kw:a,kw:b&set=set:bp01&rarity=gold&alt=1&reprint=only&unit=art&rep=high&prfirst=1&sort=cost&view=table",
+        "q=%20試作%20&class=witch,elf,elf,Bad!&cost=3,1,3&atk=10,0&def=4&type=spell&loc=token:spell,main&trait=pixie,Bad!&artist=y:bb,y:aa,y:aa,Bad!&mech=-kw:a,kw:b&set=set:bp01&rarity=gold&alt=1&reprint=only&unit=art&rep=high&prfirst=1&sort=cost&view=table",
       ),
     )
     expect(state).toEqual({
@@ -19,6 +19,7 @@ describe("query codec", () => {
       types: ["spell"],
       locations: ["main", "token:spell"],
       traits: ["pixie"],
+      artists: ["y:aa", "y:bb"],
       mechanics: { "kw:a": "not", "kw:b": "has" },
       sets: ["set:bp01"],
       rarities: ["gold"],
@@ -35,6 +36,15 @@ describe("query codec", () => {
     expect(
       parseQuery(new URLSearchParams("unit=nope&rep=nope&prfirst=0&sort=nope&view=nope&alt=0")),
     ).toEqual(DEFAULT_QUERY)
+  })
+
+  it("round-trips the link a card page builds for an artist, keeping the edition", () => {
+    const link = editionUrl(`/cards${querySearch({ ...DEFAULT_QUERY, artists: ["y:aa"] })}`, "en")
+    expect(link).toBe("/cards?artist=y%3Aaa&ed=en")
+    expect(parseQuery(new URLSearchParams(link.split("?")[1]))).toEqual({
+      ...DEFAULT_QUERY,
+      artists: ["y:aa"],
+    })
   })
 
   it("keeps the merged-cell settings in the URL and still reads the older card-unit links", () => {

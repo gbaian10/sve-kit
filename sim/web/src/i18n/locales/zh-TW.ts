@@ -233,6 +233,7 @@ const zhTW = {
     defense: "生命值",
     sets: "卡包",
     traits: "類型",
+    artists: "繪師",
     searchIn: "搜尋{{label}}",
     noMatch: "沒有符合的項目",
     display: "顯示方式",
@@ -440,6 +441,8 @@ const zhTW = {
     routeFailedHint: "卡片資料不完整或載入失敗，請更新資料後重試。",
 
     noValue: "—",
+    artist: "繪師：",
+    artistLink: "查看繪師 {{name}} 的卡片",
     previous: "上一張",
     next: "下一張",
     zoom: "放大卡圖：{{name}}",

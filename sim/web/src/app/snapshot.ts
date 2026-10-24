@@ -561,6 +561,8 @@ function useSummaryImages(result: SearchChannelStatus["previous"], edition: Regi
         locationCounts: {},
         traits: [],
         traitCounts: {},
+        artists: [],
+        artistCounts: {},
         setCounts: {},
       },
       faces,
@@ -628,6 +630,7 @@ export function usePrintingOptions() {
         type: { types: view.options.types, typeCounts: view.options.typeCounts },
         location: { types: view.options.types, counts: view.options.locationCounts },
         trait: { traits: view.options.traits, counts: view.options.traitCounts },
+        artist: { artists: view.options.artists, counts: view.options.artistCounts },
         keyword: { keywords: view.options.keywords, coverage: view.options.keywordCoverage },
       }
     : undefined

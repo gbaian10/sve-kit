@@ -243,6 +243,7 @@ export default {
     defense: "体力",
     sets: "カードセット",
     traits: "タイプ",
+    artists: "イラストレーター",
     searchIn: "{{label}}を検索",
     noMatch: "該当する項目はありません",
     display: "表示方法",
@@ -455,6 +456,8 @@ export default {
     routeFailedHint: "カードデータが不完全か、読み込みに失敗しました。更新して再試行してください。",
 
     noValue: "—",
+    artist: "イラストレーター：",
+    artistLink: "{{name}}のカードを見る",
     previous: "前のカード",
     next: "次のカード",
     zoom: "カード画像を拡大：{{name}}",
