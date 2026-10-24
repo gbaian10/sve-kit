@@ -41,6 +41,7 @@ export {
   loadImagePage,
   retainedImageIndex,
 } from "./images"
+export { createLocator, GLOBAL_OWNER } from "./locator"
 export {
   activeSnapshotRoot,
   setActiveSnapshotRoot,

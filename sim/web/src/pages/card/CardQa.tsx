@@ -258,8 +258,8 @@ function QaGroup({
   useEffect(() => {
     if (!snapshot) return
     let active = true
-    const today = new Date().toISOString().slice(0, 10)
-    void loadCardQa(client, snapshot, cardId, edition, today).then(
+    const queryDate = stringValue(snapshot.manifest["data_as_of"])
+    void loadCardQa(client, snapshot, cardId, edition, queryDate).then(
       (result) => {
         if (active) setLoaded({ key, result })
       },
@@ -310,7 +310,6 @@ function QaGroup({
       </Notice>
     )
   else {
-    // The list is complete here: every band that can name the card was read.
     const { entries } = current.result
     const visible = expanded ? entries : entries.slice(0, FOLDED)
     body = (
