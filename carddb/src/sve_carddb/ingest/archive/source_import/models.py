@@ -1,10 +1,11 @@
 """Strict receipts; acquisition metadata never substitutes for adoption."""
 
 import hashlib
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from pathlib import PurePosixPath
 from typing import Annotated, Literal
 from urllib.parse import urljoin, urlsplit
+from zoneinfo import ZoneInfo
 
 from pydantic import Field, field_validator, model_validator
 
@@ -16,6 +17,7 @@ from sve_carddb.ingest.urls import canonicalize
 
 _HOSTS = frozenset({"shadowverse-evolve.com", "en.shadowverse-evolve.com"})
 _REDIRECTS = frozenset({301, 302, 303, 307, 308})
+_DATE_PRECISION_FORMAT = 2
 RawHash = Annotated[str, Field(pattern=r"^[0-9a-f]{64}\Z")]
 type ImportKind = Literal["rules", "limit", "news"]
 
@@ -45,7 +47,19 @@ class Observation(RecordData):
     status: Literal[200]
     sha256: RawHash
     bytes: Annotated[int, Field(gt=0, le=64 * 1024 * 1024)]
-    fetched_at: Text
+    fetched_at: Text | None
+    observed_on: Text | None = Field(
+        default=None, exclude_if=lambda value: value is None
+    )
+    observed_precision: Literal["date"] | None = Field(
+        default=None, exclude_if=lambda value: value is None
+    )
+    observed_timezone: Text | None = Field(
+        default=None, exclude_if=lambda value: value is None
+    )
+    observed_basis: Text | None = Field(
+        default=None, exclude_if=lambda value: value is None
+    )
     content_type: Text
     etag: str | None
     last_modified: str | None
@@ -73,11 +87,49 @@ class Observation(RecordData):
                 or urljoin(previous.url, previous.location) != following.url
             ):
                 raise ValueError("Source import has an inconsistent redirect hop")
-        if timestamp(self.fetched_at).utcoffset() != UTC.utcoffset(None):
-            raise ValueError("Source import acquisition time must be UTC")
+        self.check_clock()
         if self.media_type not in {"text/html", "application/pdf"}:
             raise ValueError("Source import requires HTML or PDF media type")
         return self
+
+    def check_clock(self) -> None:
+        """A known date never supplies an unknown time of day."""
+        metadata = (
+            self.observed_on,
+            self.observed_precision,
+            self.observed_timezone,
+            self.observed_basis,
+        )
+        if self.fetched_at is not None:
+            if any(value is not None for value in metadata):
+                raise ValueError(
+                    "Instant observations cannot carry date precision metadata"
+                )
+            if timestamp(self.fetched_at).utcoffset() != UTC.utcoffset(None):
+                raise ValueError("Source import acquisition time must be UTC")
+        else:
+            if any(value is None for value in metadata):
+                raise ValueError(
+                    "Date observations require date, precision, timezone and basis"
+                )
+            assert self.observed_on is not None
+            assert self.observed_timezone is not None
+            if self.observed_basis is None or not self.observed_basis.strip():
+                raise ValueError("Date observation basis must not be blank")
+            if date.fromisoformat(self.observed_on).isoformat() != self.observed_on:
+                raise ValueError("Observed date must be a canonical calendar date")
+            try:
+                ZoneInfo(self.observed_timezone)
+            except (KeyError, ValueError) as exc:
+                raise ValueError("Observed date requires an IANA timezone") from exc
+
+    @property
+    def observation_time(self) -> datetime | date:
+        """Preserve the validated precision when projecting into the isolated manifest."""
+        if self.fetched_at is not None:
+            return timestamp(self.fetched_at)
+        assert self.observed_on is not None
+        return date.fromisoformat(self.observed_on)
 
     @property
     def media_type(self) -> str:
@@ -98,18 +150,34 @@ class Purpose(RecordData):
         return self
 
 
+class DatePrecisionApproval(RecordData):
+    authority: Literal["maintainer-approved-one-time"]
+    basis: Text
+
+    @field_validator("basis")
+    @classmethod
+    def nonblank_basis(cls, value: str) -> str:
+        """Keep the reviewable authorization explanation rather than a bare switch."""
+        if not value.strip():
+            raise ValueError("Date precision approval basis must not be blank")
+        return value
+
+
 class Selection(RecordData):
-    source_import_format: Literal[1]
+    source_import_format: Literal[1, 2]
     sources: tuple[Purpose, ...]
     program_revision: Revision
     dependencies: tuple[FilePin, ...]
+    date_precision_approval: DatePrecisionApproval | None = Field(
+        default=None, exclude_if=lambda value: value is None
+    )
 
     @field_validator("source_import_format", mode="before")
     @classmethod
     def integer_format(cls, value: object) -> object:
         """Boolean one is not a format version."""
         if type(value) is not int:
-            raise ValueError("Source import format must be integer 1")
+            raise ValueError("Source import format must be an integer")
         return value
 
     @model_validator(mode="after")
@@ -119,6 +187,12 @@ class Selection(RecordData):
         if not urls or len(urls) != len(set(urls)):
             raise ValueError("Source import selection must be nonempty and unique")
         check_dependencies(self.dependencies)
+        if (self.source_import_format == _DATE_PRECISION_FORMAT) != (
+            self.date_precision_approval is not None
+        ):
+            raise ValueError(
+                "Format 2 requires an explicit one-time date precision approval"
+            )
         return self
 
 
@@ -134,6 +208,9 @@ class Content(RecordData):
     source_mappings: tuple[Mapping, ...]
     program_revision: Revision
     dependencies: tuple[FilePin, ...]
+    date_precision_approval: DatePrecisionApproval | None = Field(
+        default=None, exclude_if=lambda value: value is None
+    )
 
     @model_validator(mode="after")
     def members(self) -> Content:
@@ -210,6 +287,7 @@ def check_purpose(purpose: Purpose, observation: Observation) -> None:
 def validate_content(index: bytes, content: Content) -> tuple[Observation, ...]:
     """Verify the entire resource mapping independently of the writing caller."""
     observations = {official_url(row.url): row for row in load_index(index)}
+    check_precision(tuple(observations.values()), content.date_precision_approval)
     if set(observations) != {item.url for item in content.source_mappings}:
         raise ValueError(
             "Import receipt mapping differs from the complete source index"
@@ -226,6 +304,14 @@ def validate_content(index: bytes, content: Content) -> tuple[Observation, ...]:
                 "Import receipt raw hash or path differs from the source index"
             )
     return tuple(observations[item.url] for item in content.source_mappings)
+
+
+def check_precision(
+    observations: tuple[Observation, ...], approval: DatePrecisionApproval | None
+) -> None:
+    """Only the explicitly approved isolated import can contain date observations."""
+    if any(row.fetched_at is None for row in observations) != (approval is not None):
+        raise ValueError("Date observations require an exact-index one-time approval")
 
 
 def receipt_id(index: bytes, content: Content) -> str:

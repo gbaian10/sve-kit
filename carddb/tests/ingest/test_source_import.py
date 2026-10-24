@@ -214,7 +214,7 @@ def test_selection_and_program_counterexamples(
         "missing": r"^Source selection differs from the complete index$",
         "region": r"^HTML source import URL does not match its explicit purpose$",
         "kind": r"^PDF source import must be explicitly classified as rules$",
-        "format": "Source import format must be integer 1",
+        "format": "Source import format must be an integer",
         "dependency": r"^Source import program dependency differs from executing code$",
         "program": r"^Source import program revision differs from the repository HEAD$",
     }
