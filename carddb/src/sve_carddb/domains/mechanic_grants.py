@@ -55,6 +55,15 @@ _SELECTED = re.compile(
 _CONTINUOUS = re.compile(r"これがある限り、自分の" + _NAME + "すべては" + _GRANT)
 
 
+def granted_keyword(line: str, terms: Mapping[str, str]) -> str | None:
+    """Share the exact positive grant boundary with whole-field proofs."""
+    match = _SELECTED.fullmatch(line) or _CONTINUOUS.fullmatch(line)
+    if match is None:
+        return None
+    matched = [key for key, spelling in terms.items() if spelling == match["keyword"]]
+    return matched[0] if len(matched) == 1 else None
+
+
 def apply(
     db: Database,
     inputs: Inputs,
@@ -118,15 +127,9 @@ def apply(
         if "「" in original.text or "」" in original.text:
             continue
         for ordinal, line in enumerate(original.text.splitlines()):
-            match = _SELECTED.fullmatch(line) or _CONTINUOUS.fullmatch(line)
-            if match is None:
+            keyword = granted_keyword(line, terms)
+            if keyword is None:
                 continue
-            matched = [
-                kid for kid, spelling in terms.items() if spelling == match["keyword"]
-            ]
-            if len(matched) != 1:
-                continue
-            keyword = matched[0]
             identifier = (
                 "mechanic:"
                 + digest(
