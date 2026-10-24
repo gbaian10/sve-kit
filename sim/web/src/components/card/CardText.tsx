@@ -54,53 +54,29 @@ function quality(value: SelectedText | null): string | undefined {
     : undefined
 }
 
-function sharedLines(
-  translated: { readonly unit: JsonObject } | undefined,
-  original: { readonly unit: JsonObject } | undefined,
-): number {
-  if (!translated || !original) return 1
-  const count = (text: { readonly unit: JsonObject }) =>
-    stringValue(text.unit["text"]).split("\n").length
-  return count(translated) === count(original) ? count(translated) : 1
-}
-
-/**
- * A translation followed by its original in a box, line by line when `lines` > 1: line i of the
- * translation is line i of the original (the build derives the translation per source line).
- */
-function PairedLines({
-  lines,
+/** Show a full translation followed by one box containing the full original text. */
+function PairedText({
   translated,
   original,
 }: {
-  readonly lines: number
-  readonly translated: (line?: number) => ReactNode
-  readonly original: ((line?: number) => ReactNode) | null
+  readonly translated: ReactNode
+  readonly original: ReactNode | null
 }) {
-  if (lines <= 1)
-    return (
-      <>
-        {translated()}
-        {original && <OriginalBox>{original()}</OriginalBox>}
-      </>
-    )
-  return Array.from({ length: lines }, (_, line) => (
-    <div key={line} className="space-y-2" data-line={line}>
-      {translated(line)}
-      {original && <OriginalBox>{original(line)}</OriginalBox>}
-    </div>
-  ))
+  return (
+    <>
+      {translated}
+      {original && <OriginalBox>{original}</OriginalBox>}
+    </>
+  )
 }
 
 function OriginalText({
   state,
-  line,
   emphasis,
   client,
   edition,
 }: {
   readonly state: AnnotatedTextState
-  readonly line?: number | undefined
   readonly emphasis: boolean
   readonly client: SnapshotClient
   readonly edition: Region
@@ -128,7 +104,6 @@ function OriginalText({
       annotationReady={readiness.annotations === "ready" || readiness.annotations === "none"}
       client={client}
       edition={edition}
-      line={line}
     />
   )
 }
@@ -185,9 +160,8 @@ function SectionText({
   else {
     const shown = translated ?? value.original
     body = (
-      <PairedLines
-        lines={boxed ? sharedLines(translated, boxed.value?.original) : 1}
-        translated={(line) => (
+      <PairedText
+        translated={
           <AnnotatedText
             value={shown}
             context={value}
@@ -195,21 +169,12 @@ function SectionText({
             annotationReady={readiness.annotations === "ready" || readiness.annotations === "none"}
             client={client}
             edition={edition}
-            line={line}
           />
-        )}
+        }
         original={
-          boxed
-            ? (line) => (
-                <OriginalText
-                  state={boxed}
-                  line={line}
-                  emphasis={emphasis}
-                  client={client}
-                  edition={edition}
-                />
-              )
-            : null
+          boxed ? (
+            <OriginalText state={boxed} emphasis={emphasis} client={client} edition={edition} />
+          ) : null
         }
       />
     )
@@ -450,7 +415,6 @@ export function CardText({
     return index < 0 ? undefined : printedSectionStates[index]
   }
   const shown = value.translated ?? (blankEffect ? undefined : value.original)
-  const originalSide = printed ? printedText.value?.original : value.original
   const effectBox = showOriginal && (value.translated || printed) && printedEffect !== null
   const jpSource = value.selection?.["basis"] === "jp_source"
   const content = (
@@ -471,12 +435,8 @@ export function CardText({
           )}
           <div className={cn(BODY, "space-y-2")}>
             {shown ? (
-              <PairedLines
-                // Flavor text is one passage: it keeps a single original box.
-                lines={
-                  effectBox && field === "effect" ? sharedLines(value.translated, originalSide) : 1
-                }
-                translated={(line) => (
+              <PairedText
+                translated={
                   <AnnotatedText
                     value={shown}
                     context={value}
@@ -484,32 +444,28 @@ export function CardText({
                     annotationReady={annotationReady}
                     client={client}
                     edition={edition}
-                    line={line}
                   />
-                )}
+                }
                 original={
-                  effectBox
-                    ? (line) =>
-                        printed ? (
-                          <OriginalText
-                            state={printedText}
-                            line={line}
-                            emphasis={prefs.termEmphasis}
-                            client={client}
-                            edition={edition}
-                          />
-                        ) : (
-                          <AnnotatedText
-                            value={value.original}
-                            context={value}
-                            emphasis={prefs.termEmphasis}
-                            annotationReady={annotationReady}
-                            client={client}
-                            edition={edition}
-                            line={line}
-                          />
-                        )
-                    : null
+                  effectBox ? (
+                    printed ? (
+                      <OriginalText
+                        state={printedText}
+                        emphasis={prefs.termEmphasis}
+                        client={client}
+                        edition={edition}
+                      />
+                    ) : (
+                      <AnnotatedText
+                        value={value.original}
+                        context={value}
+                        emphasis={prefs.termEmphasis}
+                        annotationReady={annotationReady}
+                        client={client}
+                        edition={edition}
+                      />
+                    )
+                  ) : null
                 }
               />
             ) : (

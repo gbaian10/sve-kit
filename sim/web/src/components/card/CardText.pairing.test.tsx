@@ -162,7 +162,7 @@ it.each(["latest", "printed"] as const)(
   },
 )
 
-it("interleaves translation and original line by line, and keeps one pair when the line counts differ", async () => {
+it("keeps a multi-line effect translation and its full original in one box", async () => {
   const { client, resolver, texts } = await pairingCase()
   texts.set("latest:effect:null", selected("一行目\n二行目\n三行目", "第一行\n第二行\n第三行"))
   const view = await renderInRouter(
@@ -175,17 +175,12 @@ it("interleaves translation and original line by line, and keeps one pair when t
     />,
   )
   const region = screen.getByRole("region", { name: "效果" })
-  const lines = [...region.querySelectorAll<HTMLElement>("[data-line]")]
-  expect(
-    lines.map((line) => [...line.querySelectorAll("p[lang]")].map((p) => p.textContent)),
-  ).toEqual([
-    ["第一行", "一行目"],
-    ["第二行", "二行目"],
-    ["第三行", "三行目"],
+  expect(region.querySelectorAll("[data-original]")).toHaveLength(1)
+  expect([...region.querySelectorAll("p[lang]")].map((p) => p.textContent)).toEqual([
+    "第一行\n第二行\n第三行",
+    "一行目\n二行目\n三行目",
   ])
-  expect(lines.every((line) => line.querySelectorAll("[data-original]").length === 1)).toBe(true)
   view.unmount()
-  // Two translated lines against three original lines cannot be matched without guessing.
   texts.set("latest:effect:null", selected("一行目\n二行目\n三行目", "第一行\n第二行"))
   await renderInRouter(
     <CardText
@@ -197,7 +192,6 @@ it("interleaves translation and original line by line, and keeps one pair when t
     />,
   )
   const whole = screen.getByRole("region", { name: "效果" })
-  expect(whole.querySelector("[data-line]")).toBeNull()
   expect(whole.querySelectorAll("[data-original]")).toHaveLength(1)
   expect([...whole.querySelectorAll("p[lang]")].map((p) => p.textContent)).toEqual([
     "第一行\n第二行",
@@ -230,7 +224,6 @@ it.each([true, false])(
       />,
     )
     const region = screen.getByRole("region", { name: "效果" })
-    expect(region.querySelector("[data-line]")).toBeNull()
     expect([...region.querySelectorAll("p[lang]")].map((p) => p.textContent)).toEqual([
       "Latest one\nLatest two",
       "Printed one\nPrinted two",
@@ -242,7 +235,7 @@ it.each([true, false])(
 )
 
 it.each([false, true])(
-  "pairs section lines using the matching original (printed: %s)",
+  "pairs each section's full text with its matching original (printed: %s)",
   async (borrowed) => {
     const { client, resolver, texts } = await pairingCase()
     texts.set("latest:section:3", selected("Latest A\nLatest B", "甲\n乙"))
@@ -258,26 +251,33 @@ it.each([false, true])(
       />,
     )
     const region = screen.getByRole("region", { name: "效果" })
-    const lines = [...region.querySelectorAll("[data-line]")]
-    expect(
-      lines.map((line) => [...line.querySelectorAll("p[lang]")].map((p) => p.textContent)),
-    ).toEqual([
-      ["甲", borrowed ? "Printed A" : "Latest A"],
-      ["乙", borrowed ? "Printed B" : "Latest B"],
+    const section = [...region.querySelectorAll<HTMLElement>("[data-section]")].find((candidate) =>
+      [...candidate.querySelectorAll("p[lang]")].some(
+        (paragraph) => paragraph.textContent === "甲\n乙",
+      ),
+    )
+    expect(section?.querySelectorAll("[data-original]")).toHaveLength(1)
+    expect([...(section?.querySelectorAll("p[lang]") ?? [])].map((p) => p.textContent)).toEqual([
+      "甲\n乙",
+      borrowed ? "Printed A\nPrinted B" : "Latest A\nLatest B",
     ])
   },
 )
 
 it.each([false, true])(
-  "falls back to whole printed effect and section when counts differ (mismatch: %s)",
-  async (mismatch) => {
+  "keeps one box per unit regardless of line counts (different: %s)",
+  async (differentLineCounts) => {
     const { client, resolver, texts } = await pairingCase()
     texts.set("latest:effect:null", {
       ...selected("Latest A\nLatest B", "譯文甲\n譯文乙"),
       originalSections: [{ ordinal: 3 }],
     })
-    const printedEffect = mismatch ? "Printed A\nPrinted B\nPrinted C" : "Printed A\nPrinted B"
-    const printedSection = mismatch ? "Section A\nSection B\nSection C" : "Section A\nSection B"
+    const printedEffect = differentLineCounts
+      ? "Printed A\nPrinted B\nPrinted C"
+      : "Printed A\nPrinted B"
+    const printedSection = differentLineCounts
+      ? "Section A\nSection B\nSection C"
+      : "Section A\nSection B"
     texts.set("printed:effect:null", {
       ...selected(printedEffect),
       originalSections: [{ ordinal: 3 }],
@@ -296,20 +296,11 @@ it.each([false, true])(
     )
     const region = screen.getByRole("region", { name: "效果" })
     expect([...region.querySelectorAll("p[lang]")].map((p) => p.textContent)).toEqual(
-      mismatch
+      differentLineCounts
         ? ["譯文甲\n譯文乙", printedEffect, "段落甲\n段落乙", printedSection]
-        : [
-            "譯文甲",
-            "Printed A",
-            "譯文乙",
-            "Printed B",
-            "段落甲",
-            "Section A",
-            "段落乙",
-            "Section B",
-          ],
+        : ["譯文甲\n譯文乙", "Printed A\nPrinted B", "段落甲\n段落乙", "Section A\nSection B"],
     )
-    expect(region.querySelectorAll("[data-line]")).toHaveLength(mismatch ? 0 : 4)
+    expect(region.querySelectorAll("[data-original]")).toHaveLength(2)
   },
 )
 
@@ -327,7 +318,6 @@ it("keeps multi-line flavor in one original box", async () => {
     />,
   )
   const region = screen.getByRole("region", { name: "風味文字" })
-  expect(region.querySelector("[data-line]")).toBeNull()
   expect(region.querySelectorAll("[data-original]")).toHaveLength(1)
   expect([...region.querySelectorAll("p[lang]")].map((p) => p.textContent)).toEqual([
     "譯文甲\n譯文乙",
@@ -335,7 +325,7 @@ it("keeps multi-line flavor in one original box", async () => {
   ])
 })
 
-it("interleaves jp_source lines in translated mode", async () => {
+it("shows jp_source as one translation followed by one full original box", async () => {
   const { client, resolver, texts } = await pairingCase()
   texts.set("latest:effect:null", {
     ...selected("JP one\nJP two", "譯文甲\n譯文乙"),
@@ -352,12 +342,9 @@ it("interleaves jp_source lines in translated mode", async () => {
     />,
   )
   const region = screen.getByRole("region", { name: "效果" })
-  expect(
-    [...region.querySelectorAll("[data-line]")].map((line) =>
-      [...line.querySelectorAll("p[lang]")].map((p) => p.textContent),
-    ),
-  ).toEqual([
-    ["譯文甲", "JP one"],
-    ["譯文乙", "JP two"],
+  expect(region.querySelectorAll("[data-original]")).toHaveLength(1)
+  expect([...region.querySelectorAll("p[lang]")].map((p) => p.textContent)).toEqual([
+    "譯文甲\n譯文乙",
+    "JP one\nJP two",
   ])
 })
