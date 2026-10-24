@@ -1,5 +1,6 @@
 const zhTW = {
   errata: {
+    diffHint: "刪除線表示刪除或替換前的文字；底線表示新增或替換後的文字。",
     heading: "勘誤",
     fragmentHint: "以下為官方公告列出的變更片段，不代表此版次的完整印刷卡文。",
     before: "勘誤前（公告片段）",

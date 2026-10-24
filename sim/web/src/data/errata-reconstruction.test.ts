@@ -5,6 +5,13 @@ import { reconstructPrintedWording } from "./errata-reconstruction"
 const change = (before: string, after: string) => ({ field: "effect", before, after })
 
 describe("printed wording reconstruction", () => {
+  it("does not delete the retained wording between two insertions", () => {
+    const before = "このターン中にプレイした枚数"
+    const after = "このターン中に自分がプレイしたカードの枚数"
+    const result = reconstructPrintedWording(after, [change(before, after)], false)
+    expect(result.diff?.removed.length).toBe(0)
+  })
+
   it("retains the whole effect and marks only the replaced passage", () => {
     expect(
       reconstructPrintedWording(
@@ -14,13 +21,8 @@ describe("printed wording reconstruction", () => {
       ),
     ).toEqual({
       state: "derived_from_errata",
-      before: [
-        { text: "First ability.\n", changed: false },
-        { text: "Draw ", changed: false },
-        { text: "one", changed: true },
-        { text: ".", changed: false },
-        { text: "\nLast ability.", changed: false },
-      ],
+      before: "First ability.\nDraw one.\nLast ability.",
+      diff: { removed: [{ start: 20, end: 23 }], added: [{ start: 20, end: 23 }] },
       after: "First ability.\nDraw two.\nLast ability.",
     })
   })
@@ -28,7 +30,7 @@ describe("printed wording reconstruction", () => {
   it("keeps printing unknown without confirmed applicability even if the old wording is unique", () => {
     const result = reconstructPrintedWording("Draw two.", [change("Draw one.", "Draw two.")], false)
     expect(result.state).toBe("unknown")
-    expect(result.before?.map(({ text }) => text).join("")).toBe("Draw one.")
+    expect(result.before).toBe("Draw one.")
   })
 
   it.each([
@@ -53,7 +55,7 @@ describe("printed wording reconstruction", () => {
       [change("Old B", "New B"), change("Old A", "New A")],
       true,
     )
-    expect(result.before?.map(({ text }) => text).join("")).toBe("😀 Old A\nOld B  ")
+    expect(result.before).toBe("😀 Old A\nOld B  ")
     expect(result.after).toBe("😀 New A\nNew B  ")
     expect(result.state).toBe("derived_from_errata")
   })
@@ -64,20 +66,17 @@ describe("printed wording reconstruction", () => {
       [change("{《ファンファーレ》}Old。", "{《ファンファーレ》}New。")],
       true,
     )
-    expect(result.before?.map(({ text }) => text).join("")).toBe("{ファンファーレ}Old。")
-    expect(result.before?.filter(({ changed }) => changed).map(({ text }) => text)).toEqual(["Old"])
-    expect(result.after).toBe("{ファンファーレ}New。")
-    expect(
-      reconstructPrintedWording(
-        "{ファンファーレ}New。",
-        [change("《ファンファーレ》Old。", "《ファンファーレ》New。")],
-        true,
-      ).before,
-    ).toEqual([
-      { text: "{ファンファーレ}", changed: false },
-      { text: "Old", changed: true },
-      { text: "。", changed: false },
+    expect(result.before).toBe("{ファンファーレ}Old。")
+    expect(result.diff?.removed.map(({ start, end }) => result.before?.slice(start, end))).toEqual([
+      "Old",
     ])
+    expect(result.after).toBe("{ファンファーレ}New。")
+    const bare = reconstructPrintedWording(
+      "{ファンファーレ}New。",
+      [change("《ファンファーレ》Old。", "《ファンファーレ》New。")],
+      true,
+    )
+    expect(bare.before === "{ファンファーレ}Old。").toBe(true)
   })
 
   it("does not split a changed icon marker or a Unicode scalar across deletion spans", () => {
@@ -86,10 +85,11 @@ describe("printed wording reconstruction", () => {
       [change("Pay {コスト1}. 😃", "Pay {コスト2}. 😀")],
       true,
     )
-    expect(result.before?.filter(({ changed }) => changed).map(({ text }) => text)).toEqual([
-      "{コスト1}. 😃",
+    expect(result.diff?.removed.map(({ start, end }) => result.before?.slice(start, end))).toEqual([
+      "{コスト1}",
+      "😃",
     ])
-    expect(result.before?.map(({ text }) => text).join("")).toBe("Pay {コスト1}. 😃")
+    expect(result.before).toBe("Pay {コスト1}. 😃")
   })
 
   it("does not strike out unchanged old text when the correction only inserts text", () => {
@@ -98,7 +98,7 @@ describe("printed wording reconstruction", () => {
         "Draw a card, then pass.",
         [change("Draw a card.", "Draw a card, then pass.")],
         true,
-      ).before,
-    ).toEqual([{ text: "Draw a card.", changed: false }])
+      ).diff?.removed.length,
+    ).toBe(0)
   })
 })

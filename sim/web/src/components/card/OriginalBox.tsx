@@ -14,3 +14,31 @@ export function OriginalBox({ children }: { readonly children: ReactNode }) {
     </div>
   )
 }
+
+/**
+ * A translation followed by its original in a box, line by line when `lines` > 1: line i of the
+ * translation is line i of the original (the build derives the translation per source line).
+ */
+export function PairedLines({
+  lines,
+  translated,
+  original,
+}: {
+  readonly lines: number
+  readonly translated: (line?: number) => ReactNode
+  readonly original: ((line?: number) => ReactNode) | null
+}) {
+  if (lines <= 1)
+    return (
+      <>
+        {translated()}
+        {original && <OriginalBox>{original()}</OriginalBox>}
+      </>
+    )
+  return Array.from({ length: lines }, (_, line) => (
+    <div key={line} className="space-y-2" data-line={line}>
+      {translated(line)}
+      {original && <OriginalBox>{original(line)}</OriginalBox>}
+    </div>
+  ))
+}

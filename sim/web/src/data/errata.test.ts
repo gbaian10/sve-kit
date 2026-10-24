@@ -53,6 +53,17 @@ it("keeps a listed printing unknown and exposes its card number", async () => {
   expect(notice?.printings).toEqual([{ cardNo: "BP01-020", confirmed: false }])
 })
 
+it("pairs a full translation only when both announcement sides cover the whole effect", async () => {
+  const { load } = await source()
+  expect((await load())[0]?.fullTranslation).toBeDefined()
+  const partial = await source()
+  partial.change["before"] = "2ダメージ"
+  partial.change["after"] = "3ダメージ"
+  // Its translation still covers the old full passage, so it must not be promoted.
+  expect((await partial.load())[0]?.printed.before).toBeDefined()
+  expect((await partial.load())[0]?.fullTranslation).toBeUndefined()
+})
+
 it("reuses the resolved data for repeated interactions in the same snapshot", async () => {
   const { load } = await source()
   const first = load()

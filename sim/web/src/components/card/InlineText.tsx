@@ -1,7 +1,8 @@
-import { Fragment, useMemo } from "react"
+import { Fragment, type ReactNode, useMemo } from "react"
 
+import type { TextRange } from "../../data"
 import { usePrefs } from "../../settings"
-import { inlinePieces, type SymbolPiece } from "./textSymbols"
+import { inlinePieces, lineWindow, type SymbolPiece } from "./textSymbols"
 
 // Alt preserves the marker's meaning; glyph-sized icons keep card text in normal flow.
 export function SymbolIcon({ piece }: { readonly piece: SymbolPiece }) {
@@ -27,33 +28,78 @@ export function SymbolIcon({ piece }: { readonly piece: SymbolPiece }) {
 export function InlineText({
   text,
   emphasis = false,
+  changes,
+  line,
 }: {
   readonly text: string
   readonly emphasis?: boolean
+  readonly changes?: { readonly kind: "removed" | "added"; readonly ranges: readonly TextRange[] }
+  readonly line?: number | undefined
 }) {
   const { termEmphasis } = usePrefs()
   const pieces = useMemo(() => inlinePieces(text), [text])
-  return (
-    <>
-      {pieces.map((piece, index) =>
-        piece.kind === "text" ? (
+  const window = line === undefined ? { start: 0, end: text.length } : lineWindow(text, line)
+  const mark = (content: ReactNode, key: number) =>
+    changes?.kind === "removed" ? (
+      <del key={key}>{content}</del>
+    ) : (
+      <ins key={key} className="decoration-2 underline-offset-2">
+        {content}
+      </ins>
+    )
+  const plain = (start: number, end: number): ReactNode => {
+    const content: ReactNode[] = []
+    let cursor = start
+    for (const range of changes?.ranges ?? []) {
+      const left = Math.max(start, range.start)
+      const right = Math.min(end, range.end)
+      if (left >= right) continue
+      if (cursor < left) content.push(text.slice(cursor, left))
+      content.push(mark(text.slice(left, right), left))
+      cursor = right
+    }
+    if (cursor < end) content.push(text.slice(cursor, end))
+    return content
+  }
+  const content = (start: number, end: number) =>
+    pieces.flatMap((piece, index) => {
+      if (piece.end <= start || piece.start >= end) return []
+      if (piece.kind === "text" || piece.start < start || piece.end > end)
+        return [
           <Fragment key={index}>
-            {emphasis && termEmphasis
-              ? piece.text
-                  .split(/(【[^】]+】)/u)
-                  .map((part, position) =>
-                    part.startsWith("【") && part.endsWith("】") ? (
-                      <strong key={position}>{part}</strong>
-                    ) : (
-                      part
-                    ),
-                  )
-              : piece.text}
-          </Fragment>
-        ) : (
-          <SymbolIcon key={index} piece={piece} />
-        ),
-      )}
-    </>
-  )
+            {plain(Math.max(start, piece.start), Math.min(end, piece.end))}
+          </Fragment>,
+        ]
+      const icon = <SymbolIcon key={index} piece={piece} />
+      return [
+        changes?.ranges.some((range) => range.start < piece.end && range.end > piece.start)
+          ? mark(icon, index)
+          : icon,
+      ]
+    })
+  // Parse emphasis on the full source before applying marks, including icons inside a heading.
+  const groups: ReactNode[] = []
+  let cursor = window.start
+  if (emphasis && termEmphasis)
+    for (const match of text.matchAll(/【[^】]+】/gu)) {
+      const end = match.index + match[0].length
+      if (end <= window.start || match.index >= window.end) continue
+      if (
+        pieces.some(
+          (piece) =>
+            piece.kind === "symbol" &&
+            ((piece.start < match.index && match.index < piece.end) ||
+              (piece.start < end && end < piece.end)),
+        )
+      )
+        continue
+      const left = Math.max(window.start, match.index)
+      const right = Math.min(window.end, end)
+      if (cursor < left) groups.push(<Fragment key={cursor}>{content(cursor, left)}</Fragment>)
+      groups.push(<strong key={left}>{content(left, right)}</strong>)
+      cursor = right
+    }
+  if (cursor < window.end)
+    groups.push(<Fragment key={cursor}>{content(cursor, window.end)}</Fragment>)
+  return <>{groups}</>
 }

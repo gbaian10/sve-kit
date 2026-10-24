@@ -2,7 +2,11 @@ import { sharedAnnotatedTextResolver } from "./annotated-text"
 import { catalogOf } from "./catalog"
 import type { LoadedSnapshot, SnapshotClient } from "./client"
 import { cardPrintings } from "./edition"
-import { type PrintedWording, reconstructPrintedWording } from "./errata-reconstruction"
+import {
+  errataFragment,
+  type PrintedWording,
+  reconstructPrintedWording,
+} from "./errata-reconstruction"
 import { loadFaceCandidates } from "./face-basics"
 import { arrayValue, type JsonObject, objectValue, stringValue } from "./format-v3/json"
 
@@ -11,6 +15,11 @@ export interface CardErratum {
   readonly version: JsonObject
   readonly changes: readonly JsonObject[]
   readonly printed: PrintedWording
+  readonly fullTranslation?: {
+    readonly before: string
+    readonly after: string
+    readonly lowConfidence: boolean
+  }
   readonly printings: readonly { readonly cardNo: string; readonly confirmed: boolean }[]
 }
 
@@ -119,6 +128,28 @@ async function readCardErrata(
       (printing) =>
         printing["printing_id"] === printingId && printing["scope"] === "confirmed_applies",
     )
+    const printed: PrintedWording =
+      effectNotices.length > 1 && notice.changes.some((change) => change["field"] === "effect")
+        ? { state: "unknown", reason: "multiple_notices" }
+        : reconstructPrintedWording(
+            selected ? stringValue(selected.original.unit["text"]) : undefined,
+            notice.changes.filter((change) => change["field"] === "effect"),
+            confirmed && current !== undefined,
+          )
+    // A translated excerpt is a full translation only when BOTH source sides cover the whole field.
+    const whole = notice.changes.find(
+      (change) =>
+        change["field"] === "effect" &&
+        typeof change["before"] === "string" &&
+        typeof change["after"] === "string" &&
+        errataFragment(change["before"]) === printed.before &&
+        errataFragment(change["after"]) === printed.after,
+    )
+    const translation =
+      whole &&
+      arrayValue(whole["wording_translations"])
+        .map((value) => objectValue(value))
+        .find((row) => row["lang"] === "zh-Hant")
     return {
       ...notice,
       printings: printings.flatMap((printing) => {
@@ -133,14 +164,18 @@ async function readCardErrata(
           },
         ]
       }),
-      printed:
-        effectNotices.length > 1 && notice.changes.some((change) => change["field"] === "effect")
-          ? { state: "unknown", reason: "multiple_notices" }
-          : reconstructPrintedWording(
-              selected ? stringValue(selected.original.unit["text"]) : undefined,
-              notice.changes.filter((change) => change["field"] === "effect"),
-              confirmed && current !== undefined,
-            ),
+      printed,
+      ...(translation &&
+      typeof translation["before"] === "string" &&
+      typeof translation["after"] === "string"
+        ? {
+            fullTranslation: {
+              before: translation["before"],
+              after: translation["after"],
+              lowConfidence: translation["low_confidence"] === true,
+            },
+          }
+        : {}),
     }
   })
 }

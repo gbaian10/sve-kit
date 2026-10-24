@@ -1,4 +1,5 @@
 import type { JsonObject } from "./format-v3/json"
+import { type TextDiff, textDiff } from "./text-diff"
 
 type ReconstructionReason =
   | "source_missing"
@@ -11,12 +12,13 @@ type ReconstructionReason =
 export interface PrintedWording {
   readonly state: "unknown" | "derived_from_errata"
   readonly reason?: ReconstructionReason
-  readonly before?: readonly { readonly text: string; readonly changed: boolean }[]
+  readonly before?: string
   readonly after?: string
+  readonly diff?: TextDiff
 }
 
 // Notices also spell these JP icons as bare 《…》; card pages encode them as {…}.
-function fragment(text: string): string {
+export function errataFragment(text: string): string {
   return text
     .replace(/\{《([^{}]+)》\}/gu, "{$1}")
     .replace(/《(ファンファーレ|ラストワード|アクト|起動|攻撃力|体力)》/gu, "{$1}")
@@ -34,28 +36,6 @@ interface Replacement {
   readonly start: number
   readonly end: number
   readonly text: string
-}
-
-function changedPassage(before: string, after: string): { text: string; changed: boolean }[] {
-  // Keep icon markers and Unicode scalars intact when finding unchanged context.
-  const tokens = (text: string) => text.match(/\{[^{}]+\}|[^]/gu) ?? []
-  const old = tokens(before)
-  const current = tokens(after)
-  let start = 0
-  while (start < old.length && start < current.length && old[start] === current[start]) start++
-  let end = 0
-  while (
-    end < old.length - start &&
-    end < current.length - start &&
-    old[old.length - end - 1] === current[current.length - end - 1]
-  )
-    end++
-  if (start + end === old.length) return [{ text: before, changed: false }]
-  return [
-    { text: old.slice(0, start).join(""), changed: false },
-    { text: old.slice(start, old.length - end).join(""), changed: true },
-    { text: end ? old.slice(-end).join("") : "", changed: false },
-  ].filter(({ text }) => text)
 }
 
 function apply(text: string, replacements: readonly Replacement[]): string {
@@ -88,8 +68,8 @@ export function reconstructPrintedWording(
     return { state: "unknown", reason: "unsupported" }
   if (current === undefined) return { state: "unknown", reason: "source_missing" }
   const pairs = changes.map((change) => ({
-    before: fragment(change["before"] as string),
-    after: fragment(change["after"] as string),
+    before: errataFragment(change["before"] as string),
+    after: errataFragment(change["after"] as string),
   }))
   const reverse: Replacement[] = []
   for (const pair of pairs) {
@@ -125,14 +105,10 @@ export function reconstructPrintedWording(
     apply(old, forward) !== current
   )
     return { state: "unknown", reason: "roundtrip_failed" }
-  const before: { text: string; changed: boolean }[] = []
-  let cursor = 0
-  for (const item of reverse) {
-    if (cursor < item.start)
-      before.push({ text: current.slice(cursor, item.start), changed: false })
-    before.push(...changedPassage(item.text, current.slice(item.start, item.end)))
-    cursor = item.end
+  return {
+    state: confirmedPrinting ? "derived_from_errata" : "unknown",
+    before: old,
+    after: current,
+    diff: textDiff(old, current),
   }
-  if (cursor < current.length) before.push({ text: current.slice(cursor), changed: false })
-  return { state: confirmedPrinting ? "derived_from_errata" : "unknown", before, after: current }
 }

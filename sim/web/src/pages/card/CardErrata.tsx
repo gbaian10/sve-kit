@@ -2,6 +2,8 @@ import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { InlineText } from "../../components/card/InlineText"
+import { OriginalBox, PairedLines } from "../../components/card/OriginalBox"
+import { useTextLanguage } from "../../components/card/text-language"
 import { Button } from "../../components/ui/Button"
 import { Link } from "../../components/ui/Link"
 import {
@@ -12,7 +14,10 @@ import {
   objectValue,
   type SnapshotClient,
   stringValue,
+  textDiff,
+  type TextRange,
 } from "../../data"
+import { usePrefs } from "../../settings"
 
 const SIDES = ["before", "after"] as const
 
@@ -28,17 +33,65 @@ const wording = (value: JsonValue | undefined) =>
 function Wording({
   text,
   lang,
-  before,
+  side,
+  ranges = [],
+  line,
 }: {
   readonly text: string
   readonly lang: string
-  readonly before: boolean
+  readonly side?: "before" | "after"
+  readonly ranges?: readonly TextRange[]
+  readonly line?: number | undefined
 }) {
-  const content = <InlineText text={text} emphasis />
   return (
-    <p lang={lang} className="text-16 leading-effect whitespace-pre-wrap text-text-1">
-      {before ? <del>{content}</del> : content}
+    <p lang={lang} className="whitespace-pre-wrap">
+      <InlineText
+        text={text}
+        emphasis
+        line={line}
+        changes={{ kind: side === "before" ? "removed" : "added", ranges }}
+      />
     </p>
+  )
+}
+
+function PairedWording({
+  original,
+  translation,
+  region,
+  side,
+  ranges,
+}: {
+  readonly original: string
+  readonly translation: string | undefined
+  readonly region: string
+  readonly side: "before" | "after"
+  readonly ranges: readonly TextRange[]
+}) {
+  const prefs = usePrefs()
+  const language = useTextLanguage()
+  const source = (line?: number) => (
+    <Wording
+      text={original}
+      lang={region === "jp" ? "ja" : "en"}
+      side={side}
+      ranges={ranges}
+      line={line}
+    />
+  )
+  if (!translation || language !== "zh-Hant" || prefs.effectLanguage === "original")
+    return <OriginalBox>{source()}</OriginalBox>
+  const lines = translation.split("\n").length
+  // JP-source translations keep their source alongside them, as the card text does.
+  const showOriginal = prefs.effectLanguage === "both" || region === "jp"
+  return (
+    <div className="space-y-2 text-16 leading-effect text-text-1">
+      <PairedLines
+        lines={lines === original.split("\n").length ? lines : 1}
+        translated={(line) => <Wording text={translation} lang="zh-Hant" line={line} />}
+        original={showOriginal ? source : null}
+      />
+    </div>
   )
 }
 
@@ -56,6 +109,8 @@ export function CardErrata({
   readonly region: string
 }) {
   const { t } = useTranslation()
+  const language = useTextLanguage()
+  const prefs = usePrefs()
   const snapshot = client.snapshot()
   const [attempt, retry] = useState(0)
   const key = JSON.stringify([snapshot?.manifestHash, cardId, printingId, faceId, region, attempt])
@@ -97,7 +152,8 @@ export function CardErrata({
       className="mt-4 space-y-4 rounded-block border border-border bg-surface-1 px-3 py-3"
     >
       <h3 className="text-14 font-semibold text-text-1">{t("errata.heading")}</h3>
-      {state.notices.map(({ url, version, changes, printed, printings }) => (
+      <p className="text-12 text-text-3">{t("errata.diffHint")}</p>
+      {state.notices.map(({ url, version, changes, printed, printings, fullTranslation }) => (
         <div key={stringValue(version["id"])} className="space-y-3">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-12 text-text-2">
             <Link to={url} target="_blank" rel="noreferrer">
@@ -131,22 +187,30 @@ export function CardErrata({
                     : "errata.reconstructedUnknown",
                 )}
               </p>
-              <p
-                lang={region === "jp" ? "ja" : "en"}
-                className="text-16 leading-effect whitespace-pre-wrap text-text-1"
-              >
-                {printed.before.map(({ text, changed }, index) =>
-                  changed ? (
-                    <del key={index}>
-                      <InlineText text={text} emphasis />
-                    </del>
-                  ) : (
-                    <InlineText key={index} text={text} emphasis />
-                  ),
-                )}
-              </p>
+              {fullTranslation && language === "zh-Hant" && prefs.effectLanguage !== "original" && (
+                <p className="text-12 text-text-3">
+                  {t(
+                    fullTranslation.lowConfidence
+                      ? "errata.translationLowConfidence"
+                      : "errata.translation",
+                  )}
+                </p>
+              )}
+              <PairedWording
+                original={printed.before}
+                translation={fullTranslation?.before}
+                region={region}
+                side="before"
+                ranges={printed.diff?.removed ?? []}
+              />
               <h4 className="text-12 text-text-3">{t("errata.correctedHeading")}</h4>
-              <Wording text={printed.after} lang={region === "jp" ? "ja" : "en"} before={false} />
+              <PairedWording
+                original={printed.after}
+                translation={fullTranslation?.after}
+                region={region}
+                side="after"
+                ranges={printed.diff?.added ?? []}
+              />
             </div>
           ) : (
             <>
@@ -163,10 +227,20 @@ export function CardErrata({
             const translation = arrayValue(change["wording_translations"])
               .map((value) => objectValue(value))
               .find((item) => item["lang"] === "zh-Hant")
-            if (printed.before && change["field"] === "effect" && !translation) return null
+            const showTranslation =
+              translation && language === "zh-Hant" && prefs.effectLanguage !== "original"
+            if (
+              printed.before &&
+              change["field"] === "effect" &&
+              (fullTranslation || !showTranslation)
+            )
+              return null
+            const before = wording(change["before"])
+            const after = wording(change["after"])
+            const diff = textDiff(before, after)
             return (
               <div key={index} className="space-y-3 border-t border-border pt-3">
-                {translation && (
+                {showTranslation && (
                   <p className="text-12 text-text-3">
                     {translation["low_confidence"] === true
                       ? t("errata.translationLowConfidence")
@@ -176,25 +250,13 @@ export function CardErrata({
                 {SIDES.map((side) => (
                   <div key={side}>
                     <h4 className="mb-1 text-12 text-text-3">{t(`errata.${side}`)}</h4>
-                    <div className="space-y-2">
-                      {translation && (
-                        <Wording
-                          text={stringValue(translation[side])}
-                          lang="zh-Hant"
-                          before={side === "before"}
-                        />
-                      )}
-                      {!(printed.before && change["field"] === "effect") && (
-                        <div className="rounded-control border border-border px-3 py-2">
-                          <p className="mb-1 text-12 text-text-3">{t("card.originalText")}</p>
-                          <Wording
-                            text={wording(change[side])}
-                            lang={region === "jp" ? "ja" : "en"}
-                            before={side === "before"}
-                          />
-                        </div>
-                      )}
-                    </div>
+                    <PairedWording
+                      original={side === "before" ? before : after}
+                      translation={showTranslation ? stringValue(translation[side]) : undefined}
+                      region={region}
+                      side={side}
+                      ranges={side === "before" ? diff.removed : diff.added}
+                    />
                   </div>
                 ))}
               </div>
