@@ -37,7 +37,7 @@ export default {
     answer: "答",
     official: "公式ページ",
     loading: "Q&A を読み込み中…",
-    noneAsOf: "{{date}} 時点の収録データでは、このカードの公式Q&Aはありません。",
+    noneAsOf: "{{date}} 時点で、このカードの公式Q&Aはありません。",
     loadFailed: "Q&A を読み込めませんでした。通信を確認して再試行してください。",
     validationFailed: "Q&A データの検証に失敗したため表示しません。",
     retry: "Q&A を再読み込み",

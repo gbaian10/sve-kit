@@ -253,6 +253,7 @@ function QaGroup({
   const [selection, setSelection] = useState<{ readonly key: string; readonly index: number }>()
   const key = canonicalText([snapshot?.manifestHash ?? null, cardId, edition, attempt])
   const [loaded, setLoaded] = useState<Loaded>()
+  // Use manifest data_as_of as the data baseline until #995 exposes the Q&A coverage window's as_of.
   const dataAsOf = snapshot ? stringValue(snapshot.manifest["data_as_of"]) : ""
   useEffect(() => {
     if (!snapshot) return
