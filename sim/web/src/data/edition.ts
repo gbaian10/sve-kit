@@ -14,13 +14,9 @@ export async function cardPrintings(
   const current = client.snapshot()
   if (current?.manifestHash === snapshot.manifestHash) {
     const present = new Set(snapshot.bootstrap.map((fragment) => fragment.identity))
-    snapshot = {
-      ...snapshot,
-      bootstrap: [
-        ...snapshot.bootstrap,
-        ...current.bootstrap.filter((fragment) => !present.has(fragment.identity)),
-      ],
-    }
+    const additional = current.bootstrap.filter((fragment) => !present.has(fragment.identity))
+    if (additional.length)
+      snapshot = { ...snapshot, bootstrap: [...snapshot.bootstrap, ...additional] }
   }
   const catalog = catalogOf(snapshot)
   const owners = new Set(
@@ -44,10 +40,10 @@ export async function cardPrintings(
   if (client.snapshot()?.manifestHash !== snapshot.manifestHash)
     throw new Error("snapshot replaced")
   const present = new Set(snapshot.bootstrap.map((fragment) => fragment.identity))
-  return catalogOf({
-    ...snapshot,
-    bootstrap: [...snapshot.bootstrap, ...parts.filter((part) => !present.has(part.identity))],
-  })
+  const additional = parts.filter((part) => !present.has(part.identity))
+  return additional.length
+    ? catalogOf({ ...snapshot, bootstrap: [...snapshot.bootstrap, ...additional] })
+    : catalog
 }
 
 /** Art identities are authored across regions; card numbers do not establish that relationship. */

@@ -111,7 +111,7 @@ async function setup(pendingCandidate = false, blockBackground = false) {
   const backgroundHold = new Promise<void>((resolve) => {
     releaseBackground = resolve
   })
-  const pinnedSnapshot = snapshot
+  let pinnedSnapshot = snapshot
   let foregroundReads = 0
   let inflightReads = 0
   state.client = {
@@ -159,6 +159,7 @@ async function setup(pendingCandidate = false, blockBackground = false) {
   if (!first) throw new Error("missing first card")
   const rendered = await renderRoutes(
     [
+      { path: "/elsewhere", element: <p>Elsewhere</p> },
       {
         path: "/cards/:cardNo/:slug?",
         element: (
@@ -200,6 +201,9 @@ async function setup(pendingCandidate = false, blockBackground = false) {
     backgroundReads,
     backgroundSignals,
     releaseBackground,
+    nextSnapshot: () => {
+      pinnedSnapshot = { ...pinnedSnapshot, manifestHash: "sha256:" + "0".repeat(64) }
+    },
     holdHistory: () => {
       let release: () => void = () => undefined
       historyHold = new Promise<void>((resolve) => {
@@ -237,6 +241,50 @@ afterEach(() => {
 })
 
 describe("card navigation commits", () => {
+  it("restores a prepared card after leaving the card route without waiting for a new read", async () => {
+    const h = await setup()
+    const first = state.order[0]
+    if (!first) throw new Error("missing first card")
+    await act(async () => {
+      await h.router.navigate("/elsewhere")
+    })
+    expect(screen.getByText("Elsewhere")).toBeInTheDocument()
+    const release = h.holdNextRead()
+    try {
+      await act(async () => {
+        await h.router.navigate("/cards/BP01-001", {
+          state: { background: "", resultKey: first.printingId, ...routeState(first) },
+        })
+      })
+      expect(screen.getByRole("heading", { name: "試作見習兵" })).toBeInTheDocument()
+      expect(document.querySelector("article")).toHaveAttribute("aria-busy", "false")
+    } finally {
+      await act(async () => {
+        release()
+        await Promise.resolve()
+      })
+    }
+  })
+
+  it("does not restore the retained card from a different snapshot", async () => {
+    const h = await setup()
+    const first = state.order[0]
+    if (!first) throw new Error("missing first card")
+    await act(async () => {
+      await h.router.navigate("/elsewhere")
+    })
+    h.nextSnapshot()
+    const release = h.holdNextRead()
+    await act(async () => {
+      await h.router.navigate("/cards/BP01-001", {
+        state: { background: "", resultKey: first.printingId, ...routeState(first) },
+      })
+    })
+    expect(screen.queryByRole("heading", { name: "試作見習兵" })).not.toBeInTheDocument()
+    act(release)
+    await screen.findByRole("heading", { name: "試作見習兵" })
+  })
+
   it("retains the whole page during A → B → C and rejects late B", async () => {
     const user = userEvent.setup()
     const h = await setup()
