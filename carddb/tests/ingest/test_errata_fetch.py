@@ -3,6 +3,7 @@ import json
 import os
 import re
 from dataclasses import dataclass, field, replace
+from datetime import datetime
 from functools import partial
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from itertools import pairwise
@@ -680,6 +681,7 @@ def test_recorded_untrusted_source_never_repaired(case: Case, damage: str) -> No
             resource = manifest.resources.get(URL)
             assert resource is not None
             if damage == "archived":
+                assert isinstance(resource.first_fetched_at, datetime)
                 resource = replace(resource, archived_at=resource.first_fetched_at)
             elif damage == "wrong-kind":
                 resource = replace(resource, kind=Kind.CARD)

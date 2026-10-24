@@ -103,6 +103,10 @@ class FrozenSources:
         if descriptor.id != version or descriptor.raw_sha256 != entry.blob.sha256:
             raise ArchiveError("Frozen source identity mismatch")
         resource = receipt.resource
+        if "T" not in resource.last_changed_at:
+            raise ArchiveError(
+                "Date-precision source needs a date-aware adoption reader"
+            )
         instant = datetime.fromisoformat(resource.last_changed_at)
         if instant.tzinfo is None:
             raise ArchiveError("Source receipt timestamp has no timezone")

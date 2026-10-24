@@ -10,7 +10,7 @@ import os
 import sqlite3
 from contextlib import AbstractContextManager, contextmanager
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from enum import StrEnum
 from pathlib import Path, PurePosixPath
 from typing import IO, TYPE_CHECKING, Self
@@ -194,9 +194,9 @@ class Resource:
     content_type: str
     etag: str | None
     last_modified: str | None
-    first_fetched_at: datetime
-    last_checked_at: datetime
-    last_changed_at: datetime
+    first_fetched_at: datetime | date
+    last_checked_at: datetime | date
+    last_changed_at: datetime | date
     archived_at: datetime | None
 
 
@@ -287,15 +287,18 @@ class _Store:
     _transaction: Callable[[], AbstractContextManager[None]]
 
 
+@dataclass(frozen=True)
 class ResourceStore(_Store):
     """Latest successful state of each canonical URL."""
+
+    _allow_date: bool = False
 
     def get(self, url: str) -> Resource | None:
         """Return the latest successful state of `url`, if any."""
         row = self._conn.execute(
             "SELECT * FROM resource WHERE url = ?", (url,)
         ).fetchone()
-        return None if row is None else _resource(row)
+        return None if row is None else _resource(row, allow_date=self._allow_date)
 
     def path_owner(self, path: PurePosixPath) -> str | None:
         """Return the URL that owns `path`, if any."""
@@ -306,6 +309,15 @@ class ResourceStore(_Store):
 
     def put(self, resource: Resource) -> None:
         """Insert or replace a resource. Call inside `Manifest.transaction()`."""
+        if not self._allow_date and any(
+            not isinstance(value, datetime) or value.utcoffset() != UTC.utcoffset(None)
+            for value in (
+                resource.first_fetched_at,
+                resource.last_checked_at,
+                resource.last_changed_at,
+            )
+        ):
+            raise ManifestError("Live manifest requires full observation instants")
         self._conn.execute(
             # Upsert on url only: OR REPLACE would also resolve a clash on the UNIQUE
             # path by deleting the other URL's row, silently losing its record.
@@ -342,7 +354,7 @@ class ResourceStore(_Store):
     def all(self) -> Iterator[Resource]:
         """Yield every resource, ordered by URL."""
         for row in self._conn.execute("SELECT * FROM resource ORDER BY url"):
-            yield _resource(row)
+            yield _resource(row, allow_date=self._allow_date)
 
 
 class RequestLog(_Store):
@@ -630,7 +642,9 @@ class Manifest:
         """Wrap an open connection; use `Manifest.open` instead."""
         self._conn = conn
         self.schema_version = schema_version
-        self.resources = ResourceStore(conn, self.transaction)
+        self.resources = ResourceStore(
+            conn, self.transaction, schema_version == IMPORT_SCHEMA_VERSION
+        )
         self.requests = RequestLog(conn, self.transaction)
         self.links = LinkStore(conn, self.transaction)
         self.generations = GenerationStore(conn, self.transaction)
@@ -951,10 +965,7 @@ def _schema_signature(conn: sqlite3.Connection) -> tuple[tuple[str, str, str], .
 
 
 def _import_resources(index: bytes, content: Content) -> tuple[Resource, ...]:
-    from sve_carddb.ingest.archive.source_import.models import (  # ruff: ignore[import-outside-top-level] -- v1 imports must not initialize pydantic or build models.
-        timestamp,
-        validate_content,
-    )
+    from sve_carddb.ingest.archive.source_import.models import validate_content  # ruff: ignore[import-outside-top-level] -- v1 imports must not initialize pydantic or build models.
 
     observations = validate_content(index, content)
     return tuple(
@@ -969,9 +980,9 @@ def _import_resources(index: bytes, content: Content) -> tuple[Resource, ...]:
             content_type=observation.content_type,
             etag=observation.etag,
             last_modified=observation.last_modified,
-            first_fetched_at=timestamp(observation.fetched_at),
-            last_checked_at=timestamp(observation.fetched_at),
-            last_changed_at=timestamp(observation.fetched_at),
+            first_fetched_at=observation.observation_time,
+            last_checked_at=observation.observation_time,
+            last_changed_at=observation.observation_time,
             archived_at=None,
         )
         for mapping, observation in zip(
@@ -1039,7 +1050,21 @@ def _generation(row: tuple[object, ...]) -> Generation:
     )
 
 
-def _resource(row: tuple[object, ...]) -> Resource:
+def _resource_time(value: object, *, allow_date: bool) -> datetime | date:
+    text = _str(value)
+    if "T" in text:
+        instant = _datetime(text)
+        if instant.utcoffset() != UTC.utcoffset(None):
+            raise ManifestError("Resource observation instant must be UTC")
+        return instant
+    if allow_date:
+        observed = date.fromisoformat(text)
+        if observed.isoformat() == text:
+            return observed
+    raise ManifestError("Manifest observation requires its declared precision")
+
+
+def _resource(row: tuple[object, ...], *, allow_date: bool = False) -> Resource:
     return Resource(
         url=_str(row[0]),
         region=SourceRegion(_str(row[1])),
@@ -1051,8 +1076,8 @@ def _resource(row: tuple[object, ...]) -> Resource:
         content_type=_str(row[7]),
         etag=_opt_str(row[8]),
         last_modified=_opt_str(row[9]),
-        first_fetched_at=_datetime(row[10]),
-        last_checked_at=_datetime(row[11]),
-        last_changed_at=_datetime(row[12]),
+        first_fetched_at=_resource_time(row[10], allow_date=allow_date),
+        last_checked_at=_resource_time(row[11], allow_date=allow_date),
+        last_changed_at=_resource_time(row[12], allow_date=allow_date),
         archived_at=_opt_datetime(row[13]),
     )

@@ -17,6 +17,7 @@ from sve_carddb.ingest.archive.source_import.models import (
     Content,
     Mapping,
     Selection,
+    check_precision,
     check_purpose,
     load_index,
     official_url,
@@ -165,6 +166,7 @@ def prepare(input_dir: Path, selection_path: Path) -> Plan:
     selection_bytes = read_regular(selection_path)
     selection = Selection.model_validate_json(canonical(parse(selection_bytes)))
     observations = {official_url(row.url): row for row in load_index(index)}
+    check_precision(tuple(observations.values()), selection.date_precision_approval)
     purposes = {item.url: item for item in selection.sources}
     if purposes.keys() != observations.keys():
         raise SourceImportError("Source selection differs from the complete index")
@@ -201,6 +203,7 @@ def prepare(input_dir: Path, selection_path: Path) -> Plan:
             source_mappings=tuple(mappings),
             program_revision=selection.program_revision,
             dependencies=selection.dependencies,
+            date_precision_approval=selection.date_precision_approval,
         ),
     )
 

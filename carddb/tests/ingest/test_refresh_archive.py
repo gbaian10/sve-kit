@@ -30,6 +30,7 @@ from sve_carddb.ingest.archive.manifest import (
     Outcome,
     RequestStart,
     Resource,
+    ResourceStore,
 )
 from sve_carddb.ingest.archive.source_archive import (
     ArchiveError,
@@ -1252,15 +1253,19 @@ def test_ordinary_unchanged_200_updates_conditional_headers(
 def test_final_path_owner_recheck_prevents_collision(
     writer: RefreshWriter, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    original = writer._manifest.resources.path_owner
+    original = ResourceStore.path_owner
     calls = 0
 
-    def owner(path: PurePosixPath) -> str | None:
+    def owner(self: ResourceStore, path: PurePosixPath) -> str | None:
         nonlocal calls
         calls += 1
-        return original(path) if calls == 1 else "https://example.invalid/other-owner"
+        return (
+            original(self, path)
+            if calls == 1
+            else "https://example.invalid/other-owner"
+        )
 
-    monkeypatch.setattr(writer._manifest.resources, "path_owner", owner)
+    monkeypatch.setattr(ResourceStore, "path_owner", owner)
     with pytest.raises(PathConflictError, match="already belongs"):
         write(writer, fetched())
     assert writer._manifest.resources.get(URL) is None

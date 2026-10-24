@@ -195,6 +195,8 @@ raw 歷史 logical bytes 為 `Σ(size(hash))`，只加總所有保留版本引�
 
 登錄收據由隔離 manifest 的 backup hash 納入 metadata 閉包；不能手工補一個未被釘住的旁檔冒充完成。seal＋獨立備份＋restore-check 後，已引用的 DB 副本／收據／raw 永久保留，工作副本也不自動清理；未引用工作檔的回收須另行核對全部引用與授權。正式批次／政策核對採納完成前，研究樣本或成功抓取 log 均不能成為構築 SourceUse。入口落後公告或沒有個別公告連結，只影響知識覆蓋，不影響原檔的不可變留存；seal 成功不等於 restriction_coverage=complete。
 
+維護者核准的一次性日期觀測可依構築採納 §2 使用 source-import selection 格式 2：`fetched_at=null`，明列 `observed_on`／`observed_precision="date"`／實際 IANA 時區 `observed_timezone`／非空白 `observed_basis`，並在 selection／登錄收據釘 `date_precision_approval`（一次性維護者核准聲明及依據）。一般 crawler 與 v1 manifest 不適用。隔離 v2 Resource 與 archive receipt 的三個觀測欄位保留 ISO 日期字串，原 index、時區、依據及核准物件由已 hash 的 manifest 副本驗回；registered_at／archive observed_at 仍各記自己的真實 UTC 時刻。來源版本 ID、v2 SQL DDL、inventory 格式與舊 instant-only receipt 身分不變。日期不可升成午夜或用 mtime 補時刻，也不自動滿足 §2.1 的 `Source.fetched_at` Instant 或構築的 UTC 知識範圍；消費者缺日期精度支援時必須拒絕。
+
 ### authored 的來源批次定位
 
 authored 的 `source_ref`、商品／身分證據與 `source_batches` 只保存 `batch_id`／`source_version_id` 等來源定位欄位，不保存 `store_id`。執行端以既有 CLI、環境變數或 ignored 本機設定提供具名 store 與根目錄；解析器在明示配置的 stores 中要求批次恰有一處，找不到或多處皆拒絕，再依原契約驗完整封存閉包及 `entry.blob.store_id` 與設定名稱相等。來源版本不在指定批次時拒絕，不能借用其他批次或 latest cache。

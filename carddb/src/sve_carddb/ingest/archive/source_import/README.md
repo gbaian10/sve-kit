@@ -20,19 +20,51 @@ Unknown fields, duplicate requested identities, orphan raw files, symlinks, chan
 bytes, missing metadata and unsupported types stop registration without cleaning
 the input set. A shared raw hash can support multiple distinct URL identities.
 
-`fetched_at` must be the observed full UTC instant. The original index bytes,
-headers and chain are retained verbatim. This timestamp populates all three
-Resource fetch/change/check times; registration records its own separate clock.
-It never guesses official publication or effective dates.
+Ordinary observations require the observed full UTC `fetched_at` instant. The
+original index bytes, headers and chain are retained verbatim. This timestamp
+populates all three Resource fetch/change/check times; registration records its
+own separate clock. It never guesses official publication or effective dates.
+
+For a maintainer-approved one-time import whose acquisition retained only a date,
+use `fetched_at: null` and all four additional fields: `observed_on` (canonical
+calendar date), `observed_precision: "date"`, `observed_timezone` (IANA timezone),
+and `observed_basis` (nonblank explanation of the actual evidence and its limits).
+For example, a local UTC+08:00 acquisition day uses `Asia/Taipei`; do not label it
+as a Japanese date without evidence. Instant observations cannot include non-null
+date metadata. Missing times are never replaced with midnight, file mtime,
+registration time or archive time.
+
+Date-bearing selections require `source_import_format: 2` and
+`date_precision_approval: {"authority":"maintainer-approved-one-time","basis":...}`.
+The nonblank basis must identify the actual authorization. This declaration is
+reviewable provenance, not a program-verified human signature. It is bound to the
+complete exact index in the import receipt. Format 1 rejects date observations;
+format 2 without approval, an approval without date observations, or another
+authority is rejected. Mixed sets retain each row's actual precision.
+
+The isolated v2 Resource stores a date as `YYYY-MM-DD` text and exposes a Python
+`date`, preserving all three observation fields without an invented time or UTC
+conversion. Its receipt retains timezone, basis and authorization. Archive receipts
+preserve the same date strings; the sealed manifest backup binds their metadata
+closure. SQL DDL and source version identity remain unchanged. The live v1 resource
+reader/writer refuses dates; normal crawls still record complete UTC instants.
+Date registration alone does not satisfy an adoption reader requiring an Instant
+(`Source.fetched_at`, knowledge cutoffs or discovery ranges).
 
 An explicit UTF-8 JSON selection contains exactly:
 
 | Field | Value |
 | --- | --- |
-| `source_import_format` | Integer `1` |
+| `source_import_format` | Integer `1`, or `2` for the approved date path above |
 | `sources` | Nonempty unique `{url,provider,kind}` items covering the complete index |
 | `program_revision` | Full immutable 40-hex Git HEAD of the registration program |
 | `dependencies` | Sorted unique `{name,sha256}` pins for exactly `PROGRAM_FILES` |
+
+Format 2 additionally requires the approval object described above. It is copied
+into the canonical receipt content and contributes to receipt identity. Absent
+approval is omitted from legacy receipt serialization, preserving historical
+instant-only receipt identities and schema signature. Older readers reject the
+new date index/approval fields; they must not reinterpret dates as instants.
 
 URLs in `sources` are canonical **requested** identities. Provider is `jp` or
 `en`; kind is `rules`, `limit` or `news`. HTML purposes match the regional
