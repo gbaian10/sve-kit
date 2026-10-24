@@ -251,6 +251,7 @@ export class BackgroundDownloads {
     void (async () => {
       const inspected = await plan.inspect(run.signal)
       if (this.run !== run || run.signal.aborted) return
+      this.publish({ selection: plan.selection, state: "running", progress: inspected })
       const reject = (reason: NonNullable<FetchProgress["reason"]>) => {
         this.publish({
           selection: plan.selection,
@@ -324,4 +325,4 @@ export class BackgroundDownloads {
   }
 }
 
-export const appBackgroundDownloads = new BackgroundDownloads()
+export const appBackgroundDownloads = new BackgroundDownloads({ enabled: true })

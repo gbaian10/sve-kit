@@ -26,7 +26,7 @@ function flatten(tree: Tree, prefix = ""): Map<string, string> {
 // home shortcuts share a third of a phone row each, so they get the same budget.
 const OPTION_BUDGET_EM = 6
 const SHORT_LABEL =
-  /^(?:options\.|home\.shortcut\.)|^filters\.keywords$|^card\.(?:currentText|printedText)$|^results\.(?:columns|sortBy)\./u
+  /^(?:options\.|home\.shortcut\.)|^settings\.downloadStatus\.|^settings\.(?:downloads|downloadAll)$|^filters\.keywords$|^card\.(?:currentText|printedText)$|^results\.(?:columns|sortBy)\./u
 // A whole segmented group must fit the 320px account menu (288px inside its padding): 13px text,
 // 24px horizontal padding per pill, 4px of group padding and border.
 const GROUP_BUDGET_PX = 288

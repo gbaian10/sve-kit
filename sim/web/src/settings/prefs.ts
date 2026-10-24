@@ -46,6 +46,7 @@ export interface Prefs {
   readonly infiniteScroll: boolean
   readonly preloadPrintings: boolean
   readonly preloadNeighbours: boolean
+  readonly backgroundDownloads: boolean
   readonly symbolLabels: boolean
   readonly collapsedText: CollapsedText
   readonly showFlavorText: boolean
@@ -76,6 +77,7 @@ export const DEFAULT_PREFS: Prefs = {
   infiniteScroll: true,
   preloadPrintings: false,
   preloadNeighbours: false,
+  backgroundDownloads: true,
   symbolLabels: false,
   collapsedText: { effectOriginal: false, flavorOriginal: false },
   showFlavorText: true,
@@ -136,6 +138,7 @@ const sanitizers: Sanitizers = {
   infiniteScroll: withDefault(isBoolean, DEFAULT_PREFS.infiniteScroll),
   preloadPrintings: withDefault(isBoolean, DEFAULT_PREFS.preloadPrintings),
   preloadNeighbours: withDefault(isBoolean, DEFAULT_PREFS.preloadNeighbours),
+  backgroundDownloads: withDefault(isBoolean, DEFAULT_PREFS.backgroundDownloads),
   symbolLabels: withDefault(isBoolean, DEFAULT_PREFS.symbolLabels),
   collapsedText: withDefault(isCollapsedText, DEFAULT_PREFS.collapsedText),
   showFlavorText: withDefault(isBoolean, DEFAULT_PREFS.showFlavorText),

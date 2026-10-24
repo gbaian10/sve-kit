@@ -47,6 +47,35 @@ export default {
     cardOpenMode: { auto: "自動", panel: "ドロワー", modal: "中央表示", page: "全ページ" },
   },
   settings: {
+    downloads: "背景保存",
+    downloadAll: "背景保存",
+    downloadAllHint:
+      "この版のテキストと関連データをバックグラウンドで保存します。カード画像は含みません。オフライン時やタブが非表示の間は一時停止します。",
+    downloadProgress: "{{done}} / {{total}} ファイル",
+    downloadVersion: "{{version}} · {{edition}}",
+    downloadScope: "完了はこのデータとカードの版に限ります。カード画像は別途読み込みます。",
+    downloadPausedHint:
+      "オフライン時やタブが非表示の間は一時停止し、接続してタブに戻ると再開します。",
+    downloadOffHint: "背景保存はオフです。保存済みデータは保持されます。",
+    downloadStatus: {
+      idle: "待機中",
+      checking: "確認中",
+      running: "保存中",
+      paused: "一時停止",
+      disabled: "オフ",
+      complete: "完了",
+      partial: "未完了",
+    },
+    downloadReason: {
+      capacity:
+        "容量不足のため未完了です。キャッシュを削除してから保存をオフ・オンにしてください。",
+      storage: "ブラウザーがデータを保存できないため未完了です。",
+      write: "書き込みの失敗または容量不足のため未完了です。",
+      cleared: "一部のデータが削除されたため未完了です。保存をオフ・オンにすると再開できます。",
+      network: "通信が中断され、未完了です。保存をオフ・オンにすると再試行できます。",
+      manifest: "データを確認できないため未完了です。保存をオフ・オンにすると再試行できます。",
+      "batch-limit": "全体の容量が自動保存の上限を超えるか、容量を確認できないため未完了です。",
+    },
     infiniteScroll: "無限スクロール",
     infiniteScrollHint:
       "一覧の末尾に近づくと自動読み込みします。オフの場合はボタンで読み込みます。",

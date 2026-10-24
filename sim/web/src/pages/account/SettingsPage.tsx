@@ -18,6 +18,7 @@ import {
   usePrefs,
 } from "../../settings"
 import { PageTitle } from "../PageTitle"
+import { DownloadSettings } from "./DownloadSettings"
 import { StorageSettings } from "./StorageSettings"
 
 const ROW = "min-h-14 border-b border-border py-2"
@@ -187,6 +188,7 @@ export function SettingsPage() {
           />
         </SettingRow>
       </section>
+      <DownloadSettings />
       <div className="mt-4">
         <Button
           onClick={() => {
