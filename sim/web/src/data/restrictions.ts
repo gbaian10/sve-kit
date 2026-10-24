@@ -2,7 +2,7 @@ import type { Region } from "../domain/search"
 import type { LoadedSnapshot, SnapshotClient } from "./client"
 import type { Row } from "./format-v3/decode"
 import { arrayValue, type JsonObject, objectValue, stringValue } from "./format-v3/json"
-import { mergedRows } from "./format-v3/reader"
+import { type Files, mergedRows } from "./format-v3/reader"
 import { type CardIndex, createCardIndex } from "./store"
 
 export interface RestrictionStatus {
@@ -26,6 +26,27 @@ export interface RestrictionSelection {
   readonly details: ReadonlyMap<string, readonly CardRestriction[]>
   readonly status: RestrictionStatus
   readonly cards: ReadonlySet<string>
+}
+
+export const RESTRICTION_TABLES: ReadonlySet<string> = new Set([
+  "rules_profile",
+  "restriction",
+  "rules_name",
+  "face_rules_name",
+])
+
+/** Files that carry the selected edition's restriction tables; empty when the snapshot has no coverage. */
+export function restrictionKeys(manifest: JsonObject, files: Files, edition: Region): string[] {
+  if (!arrayValue(manifest["restriction_coverage"] ?? []).length) return []
+  return [...files]
+    .filter(
+      ([, file]) =>
+        (file["region"] === null || file["region"] === edition) &&
+        arrayValue(file["row_counts"]).some((count) =>
+          RESTRICTION_TABLES.has(stringValue(arrayValue(count)[0])),
+        ),
+    )
+    .map(([key]) => key)
 }
 
 const contains = (row: Row, day: string, from: string, until: string) =>
@@ -169,16 +190,8 @@ export async function loadCardRestrictionDetails(
   cardId: string,
   edition: Region,
 ): Promise<CardRestrictionDetails> {
-  const keys = [...snapshot.files]
-    .filter(([, file]) =>
-      arrayValue(file["row_counts"]).some((count) =>
-        ["rules_profile", "restriction", "rules_name", "face_rules_name"].includes(
-          stringValue(arrayValue(count)[0]),
-        ),
-      ),
-    )
-    .map(([key]) => key)
-  if (!arrayValue(snapshot.manifest["restriction_coverage"] ?? []).length)
+  const keys = restrictionKeys(snapshot.manifest, snapshot.files, edition)
+  if (!keys.length)
     return {
       status: { state: "unknown", onDate: stringValue(snapshot.manifest["data_as_of"]) },
       restrictions: [],

@@ -68,10 +68,17 @@ it.each(["hash mismatch", "invalid JSON", "missing card ID"])(
 )
 
 it("shows how many startup files have arrived during a first download", async () => {
+  const rulesTables = ["rules_profile", "restriction", "rules_name", "face_rules_name"]
+  // Restriction rules ride the startup download so the filter never answers from partial data.
   const startup = (built.manifest["files"] as JsonObject[]).filter(
     (file) =>
-      file["role"] === "config" ||
-      (file["purpose"] === "catalog" && (file["region"] === "jp" || file["region"] === null)),
+      (file["region"] === "jp" || file["region"] === null) &&
+      (file["role"] === "config" ||
+        file["purpose"] === "catalog" ||
+        (file["purpose"] === "engine" &&
+          (file["row_counts"] as JsonValue[][]).some((count) =>
+            rulesTables.includes(stringValue(count[0])),
+          ))),
   )
   const held = stringValue(startup[0]?.["path"])
   // The page shares one client with the cases above, which published other indexes at the same

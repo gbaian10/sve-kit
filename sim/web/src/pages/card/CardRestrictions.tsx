@@ -95,7 +95,9 @@ export function CardRestrictions({
           </time>
           {entry.sourceUrl ? (
             <Link to={entry.sourceUrl} target="_blank" rel="noreferrer">
-              {t(value.status.synthetic ? "restrictions.syntheticSource" : "restrictions.source")}
+              {value.status.synthetic
+                ? t("restrictions.syntheticSource")
+                : t("restrictions.source")}
             </Link>
           ) : (
             <span>{t("restrictions.sourceMissing")}</span>

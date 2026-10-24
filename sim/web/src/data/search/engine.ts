@@ -16,7 +16,7 @@ import {
 import { catalogKeys, isCompatible } from "../format-v3/reader"
 import { checkEntry, entryFields, indexEntries } from "../index-entry"
 import { transferDigest } from "../integrity"
-import { selectRestrictions } from "../restrictions"
+import { RESTRICTION_TABLES, restrictionKeys, selectRestrictions } from "../restrictions"
 import { VerifiedCache } from "../verified-cache"
 import { SearchBlobs } from "./blobs"
 import { BootstrapColumns } from "./bootstrap"
@@ -35,20 +35,7 @@ import { PreviewReader } from "./preview"
 import { completeImages, type CompleteView, completeView, ViewCache, viewSlot } from "./view"
 
 const defaultPlan: BootstrapPlan = (manifest, files, region) => [
-  ...new Set([
-    ...catalogKeys(files, region),
-    ...(arrayValue(manifest["restriction_coverage"]).length
-      ? [...files]
-          .filter(([, file]) =>
-            arrayValue(file["row_counts"]).some((count) =>
-              ["rules_profile", "restriction", "rules_name", "face_rules_name"].includes(
-                stringValue(arrayValue(count)[0]),
-              ),
-            ),
-          )
-          .map(([key]) => key)
-      : []),
-  ]),
+  ...new Set([...catalogKeys(files, region), ...restrictionKeys(manifest, files, region)]),
 ]
 /** A stored index with what the ready event and the index entry check need from its manifest. */
 function readRecord(bytes: Uint8Array, edition: Region) {
@@ -754,11 +741,7 @@ export class SearchEngine {
             bootstrap?.ingest(
               basicKeys.has(key)
                 ? result.fragments
-                : result.fragments.filter((fragment) =>
-                    ["rules_profile", "restriction", "rules_name", "face_rules_name"].includes(
-                      fragment.table,
-                    ),
-                  ),
+                : result.fragments.filter((fragment) => RESTRICTION_TABLES.has(fragment.table)),
             ),
           )
         buildMs += performance.now() - mark
