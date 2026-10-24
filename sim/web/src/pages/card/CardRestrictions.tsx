@@ -56,7 +56,7 @@ export function CardRestrictions({
       </Button>
     )
   const value = state.value
-  if (!value) return null
+  if (!value || value.restrictions.length === 0) return null
   return (
     <section
       aria-label={t("restrictions.heading")}
@@ -64,21 +64,14 @@ export function CardRestrictions({
     >
       <h3 className="text-14 font-semibold">{t("restrictions.heading")}</h3>
       <p className="text-12 text-text-3">
-        {value.status.state === "unknown"
-          ? t("restrictions.unknown")
-          : t(
-              value.status.synthetic
-                ? "filters.restrictionsSyntheticDate"
-                : "filters.restrictionsDate",
-              { date: value.status.onDate },
-            )}{" "}
+        {t(
+          value.status.synthetic ? "filters.restrictionsSyntheticDate" : "filters.restrictionsDate",
+          { date: value.status.onDate },
+        )}{" "}
         {value.status.synthetic ? t("filters.restrictionsSynthetic") : ""}
       </p>
       {value.status.state === "partial" && (
         <p className="text-12 text-text-3">{t("filters.restrictionsPartial")}</p>
-      )}
-      {!value.restrictions.length && value.status.state === "complete" && (
-        <p className="text-13">{t("restrictions.notListed")}</p>
       )}
       {value.restrictions.map((entry) => (
         <div key={entry.id} className="flex flex-wrap items-center gap-2 text-13">

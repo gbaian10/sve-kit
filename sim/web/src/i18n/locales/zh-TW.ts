@@ -188,7 +188,6 @@ const zhTW = {
   restrictions: {
     syntheticSource: "合成一覽連結",
     combination: "組合限制",
-    unknown: "此地區的禁限一覽尚未確認。",
     heading: "禁限狀態",
     banned: "禁止",
     shortLimit: "限{{count}}",
@@ -197,7 +196,6 @@ const zhTW = {
     source: "官方禁限一覽",
     sourceMissing: "來源連結未收錄",
     retry: "重試禁限資料",
-    notListed: "此一覽未列出本卡的禁限。",
     badgeHint: "Standard · 以 {{date}} 一覽為準",
   },
   filters: {

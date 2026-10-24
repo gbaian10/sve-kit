@@ -200,7 +200,6 @@ export default {
   restrictions: {
     syntheticSource: "Synthetic source list",
     combination: "Combination restriction",
-    unknown: "The restriction list for this region is unconfirmed.",
     heading: "Restrictions",
     banned: "Banned",
     shortLimit: "Limit {{count}}",
@@ -209,7 +208,6 @@ export default {
     source: "Official restriction list",
     sourceMissing: "Source link unavailable",
     retry: "Retry restriction data",
-    notListed: "This card has no restriction listed in this source.",
     badgeHint: "Standard · List as of {{date}}",
   },
   filters: {
