@@ -1,9 +1,12 @@
-import { useEffect, useState } from "react"
+import { ChevronDown } from "lucide-react"
+import { useEffect, useId, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { InlineText } from "../../components/card/InlineText"
 import { OriginalBox } from "../../components/card/OriginalBox"
+import { useTextLanguage } from "../../components/card/text-language"
 import { Button } from "../../components/ui/Button"
+import { cn } from "../../components/ui/cn"
 import { Link } from "../../components/ui/Link"
 import {
   arrayValue,
@@ -13,7 +16,10 @@ import {
   objectValue,
   type SnapshotClient,
   stringValue,
+  textDiff,
+  type TextRange,
 } from "../../data"
+import { usePrefs } from "../../settings"
 
 const SIDES = ["before", "after"] as const
 
@@ -29,17 +35,55 @@ const wording = (value: JsonValue | undefined) =>
 function Wording({
   text,
   lang,
-  before,
+  side,
+  ranges = [],
 }: {
   readonly text: string
   readonly lang: string
-  readonly before: boolean
+  readonly side: "before" | "after"
+  readonly ranges?: readonly TextRange[]
 }) {
-  const content = <InlineText text={text} emphasis />
+  const content = (
+    <InlineText
+      text={text}
+      emphasis
+      changes={{ kind: "added", ranges: side === "after" ? ranges : [] }}
+    />
+  )
   return (
-    <p lang={lang} className="text-16 leading-effect whitespace-pre-wrap text-text-1">
-      {before ? <del>{content}</del> : content}
+    <p lang={lang} className="whitespace-pre-wrap">
+      {side === "before" ? <del className="line-through decoration-2">{content}</del> : content}
     </p>
+  )
+}
+
+function PairedWording({
+  original,
+  translation,
+  region,
+  side,
+  ranges = [],
+}: {
+  readonly original: string
+  readonly translation: string | undefined
+  readonly region: string
+  readonly side: "before" | "after"
+  readonly ranges?: readonly TextRange[]
+}) {
+  const prefs = usePrefs()
+  const language = useTextLanguage()
+  const source = (
+    <Wording text={original} lang={region === "jp" ? "ja" : "en"} side={side} ranges={ranges} />
+  )
+  if (!translation || language !== "zh-Hant" || prefs.effectLanguage === "original")
+    return <OriginalBox>{source}</OriginalBox>
+  // JP-source translations keep their source alongside them, as the card text does.
+  const showOriginal = prefs.effectLanguage === "both" || region === "jp"
+  return (
+    <div className="space-y-2 text-16 leading-effect text-text-1">
+      <Wording text={translation} lang="zh-Hant" side={side} />
+      {showOriginal && <OriginalBox>{source}</OriginalBox>}
+    </div>
   )
 }
 
@@ -57,7 +101,11 @@ export function CardErrata({
   readonly region: string
 }) {
   const { t } = useTranslation()
+  const language = useTextLanguage()
+  const prefs = usePrefs()
   const snapshot = client.snapshot()
+  const contentId = useId()
+  const [expanded, setExpanded] = useState(false)
   const [attempt, retry] = useState(0)
   const key = JSON.stringify([snapshot?.manifestHash, cardId, printingId, faceId, region, attempt])
   const [state, setState] = useState<{
@@ -95,67 +143,145 @@ export function CardErrata({
   return (
     <section
       aria-label={t("errata.heading")}
-      className="mt-4 space-y-4 rounded-block border border-border bg-surface-1 px-3 py-3"
+      className="mt-4 rounded-block border border-border bg-surface-1"
     >
-      <h3 className="text-14 font-semibold text-text-1">{t("errata.heading")}</h3>
-      <p className="text-12 text-text-3">{t("errata.fragmentHint")}</p>
-      {state.notices.map(({ url, version, changes }) => (
-        <div key={stringValue(version["id"])} className="space-y-3">
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-12 text-text-2">
-            {typeof version["announced_on"] === "string" && (
-              <time dateTime={version["announced_on"]}>
-                {t("errata.announced", { date: version["announced_on"] })}
-              </time>
-            )}
-            {typeof version["effective_on"] === "string" && (
-              <time dateTime={version["effective_on"]}>
-                {t("errata.effective", { date: version["effective_on"] })}
-              </time>
-            )}
-            <Link to={url} target="_blank" rel="noreferrer">
-              {t("errata.official")}
-            </Link>
-          </div>
-          {!changes.length && <p className="text-13 text-text-2">{t("errata.nonText")}</p>}
-          {changes.map((change, index) => {
-            const translation = arrayValue(change["wording_translations"])
-              .map((value) => objectValue(value))
-              .find((item) => item["lang"] === "zh-Hant")
-            return (
-              <div key={index} className="space-y-3 border-t border-border pt-3">
-                {translation && (
-                  <p className="text-12 text-text-3">
-                    {translation["low_confidence"] === true
-                      ? t("errata.translationLowConfidence")
-                      : t("errata.translation")}
+      <h3 className="text-14 font-semibold text-text-1">
+        <button
+          type="button"
+          aria-expanded={expanded}
+          aria-controls={contentId}
+          onClick={() => {
+            setExpanded(!expanded)
+          }}
+          className="flex min-h-11 w-full items-center justify-between gap-3 rounded-block px-3 py-2 text-left"
+        >
+          {t("errata.heading")}
+          <ChevronDown aria-hidden className={cn("size-4 text-text-3", expanded && "rotate-180")} />
+        </button>
+      </h3>
+      <div id={contentId} hidden={!expanded} className="space-y-4 px-3 pb-3">
+        {expanded && (
+          <>
+            <p className="text-12 text-text-3">{t("errata.diffHint")}</p>
+            {state.notices.map(({ url, version, changes, printed, printings, fullTranslation }) => (
+              <div key={stringValue(version["id"])} className="space-y-3">
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-12 text-text-2">
+                  <Link to={url} target="_blank" rel="noreferrer">
+                    {t("errata.official")}
+                  </Link>
+                </div>
+                {printings.some(({ cardNo }) => cardNo) && (
+                  <p className="text-12 leading-relaxed text-text-3">
+                    {t("errata.printings")}{" "}
+                    {printings
+                      .filter(({ cardNo }) => cardNo)
+                      .map(({ cardNo, confirmed }) =>
+                        t(confirmed ? "errata.printingConfirmed" : "errata.printingListed", {
+                          cardNo,
+                        }),
+                      )
+                      .join(t("errata.listSeparator"))}
                   </p>
                 )}
-                {SIDES.map((side) => (
-                  <div key={side}>
-                    <h4 className="mb-1 text-12 text-text-3">{t(`errata.${side}`)}</h4>
-                    <div className="space-y-2">
-                      {translation && (
-                        <Wording
-                          text={stringValue(translation[side])}
-                          lang="zh-Hant"
-                          before={side === "before"}
-                        />
+                {printed.before && printed.after !== undefined ? (
+                  <div className="space-y-3 border-t border-border pt-3">
+                    <h4 className="text-14 font-semibold text-text-1">
+                      {t(
+                        printed.state === "derived_from_errata"
+                          ? "errata.printedHeading"
+                          : "errata.reconstructedHeading",
                       )}
-                      <OriginalBox>
-                        <Wording
-                          text={wording(change[side])}
-                          lang={region === "jp" ? "ja" : "en"}
-                          before={side === "before"}
-                        />
-                      </OriginalBox>
-                    </div>
+                    </h4>
+                    <p className="text-12 text-text-3">
+                      {t(
+                        printed.state === "derived_from_errata"
+                          ? "errata.reconstructedConfirmed"
+                          : "errata.reconstructedUnknown",
+                      )}
+                    </p>
+                    {fullTranslation &&
+                      language === "zh-Hant" &&
+                      prefs.effectLanguage !== "original" && (
+                        <p className="text-12 text-text-3">
+                          {t(
+                            fullTranslation.lowConfidence
+                              ? "errata.translationLowConfidence"
+                              : "errata.translation",
+                          )}
+                        </p>
+                      )}
+                    <PairedWording
+                      original={printed.before}
+                      translation={fullTranslation?.before}
+                      region={region}
+                      side="before"
+                    />
+                    <h4 className="text-12 text-text-3">{t("errata.correctedHeading")}</h4>
+                    <PairedWording
+                      original={printed.after}
+                      translation={fullTranslation?.after}
+                      region={region}
+                      side="after"
+                      ranges={printed.diff?.added ?? []}
+                    />
                   </div>
-                ))}
+                ) : (
+                  <>
+                    <p className="text-12 text-text-3">{t("errata.fragmentHint")}</p>
+                    {changes.length > 0 && (
+                      <p className="text-12 text-text-3">
+                        {t(`errata.reason.${printed.reason ?? "source_missing"}`)}
+                      </p>
+                    )}
+                  </>
+                )}
+                {!changes.length && <p className="text-13 text-text-2">{t("errata.nonText")}</p>}
+                {changes.map((change, index) => {
+                  const translation = arrayValue(change["wording_translations"])
+                    .map((value) => objectValue(value))
+                    .find((item) => item["lang"] === "zh-Hant")
+                  const showTranslation =
+                    translation && language === "zh-Hant" && prefs.effectLanguage !== "original"
+                  if (
+                    printed.before &&
+                    change["field"] === "effect" &&
+                    (fullTranslation || !showTranslation)
+                  )
+                    return null
+                  const before = wording(change["before"])
+                  const after = wording(change["after"])
+                  const diff = textDiff(before, after)
+                  return (
+                    <div key={index} className="space-y-3 border-t border-border pt-3">
+                      {showTranslation && (
+                        <p className="text-12 text-text-3">
+                          {translation["low_confidence"] === true
+                            ? t("errata.translationLowConfidence")
+                            : t("errata.translation")}
+                        </p>
+                      )}
+                      {SIDES.map((side) => (
+                        <div key={side}>
+                          <h4 className="mb-1 text-12 text-text-3">{t(`errata.${side}`)}</h4>
+                          <PairedWording
+                            original={side === "before" ? before : after}
+                            translation={
+                              showTranslation ? stringValue(translation[side]) : undefined
+                            }
+                            region={region}
+                            side={side}
+                            ranges={side === "after" ? diff.added : []}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )
+                })}
               </div>
-            )
-          })}
-        </div>
-      ))}
+            ))}
+          </>
+        )}
+      </div>
     </section>
   )
 }

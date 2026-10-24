@@ -68,4 +68,5 @@ export {
 } from "./search/session"
 export { type CompleteView, type ViewFace, viewImages } from "./search/view"
 export { clearManagedCaches, estimateStorage, type StorageEstimate } from "./storage"
+export { textDiff, type TextRange } from "./text-diff"
 export { textRuns } from "./text-runs"

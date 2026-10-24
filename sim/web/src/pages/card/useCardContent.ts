@@ -5,13 +5,15 @@ import { prefetchCards, type PrefetchTarget, summaryRoute } from "../../app/card
 import type { CardEntryState } from "../../app/listEntryState"
 import { useCardSnapshot } from "../../app/snapshot"
 import { useTextLanguage } from "../../components/card/text-language"
-import { type CardRouteInput, locateCard } from "../../data"
+import { type CardRouteInput, locateCard, type SnapshotClient } from "../../data"
 import type { Region } from "../../domain/search"
 import type { CardViewProps } from "./CardPage"
 
 const IMAGE_SIZES = "(min-width: 600px) 340px, 72vw"
 // Each prepared card keeps its own catalog and text closure (several MB), so only nearby cards stay.
 const PREPARED_CARDS = 4
+// Route unmounts discard nearby cards; keep only the last ready card for a cached return.
+const lastPrepared = new WeakMap<SnapshotClient, { key: string; value: CardContent }>()
 
 /** The route hint a list or link handed over, as the card route input wants it. */
 export function routeInput(
@@ -58,7 +60,11 @@ export function useCardContent(
     preparedRef.current = prepared
   }, [prepared])
   const inputKey = cardContentKey(client, input, language, attempt)
-  const cached = prepared.get(inputKey)
+  const retained = lastPrepared.get(client)
+  const cached = prepared.get(inputKey) ?? (retained?.key === inputKey ? retained.value : undefined)
+  useEffect(() => {
+    if (cached) lastPrepared.set(client, { key: inputKey, value: cached })
+  }, [client, inputKey, cached])
   const [located, setLocated] = useState<{
     key: string
     value?: CardContent

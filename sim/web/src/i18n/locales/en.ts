@@ -2,13 +2,37 @@ import type { Messages } from "./zh-TW"
 
 export default {
   errata: {
+    diffHint:
+      "Strikethrough marks the old text; underlining marks added or replacement text in the correction.",
     heading: "Errata",
     fragmentHint:
       "These are the changed passages from the official notice, not the full printed text of this version.",
     before: "Before (notice excerpt)",
     after: "After (notice excerpt)",
-    announced: "Announced: {{date}}",
-    effective: "Effective: {{date}}",
+    printedHeading: "Physical card text",
+    reconstructedHeading: "Reconstructed old text",
+    correctedHeading: "Full corrected text",
+    reconstructedUnknown:
+      "Full old text reconstructed from the official notice. The full text printed on this version is unconfirmed.",
+    reconstructedConfirmed:
+      "Reconstructed from the official notice. This erratum is confirmed to apply to this version.",
+    printings: "Versions of this card listed in the notice:",
+    printingListed: "{{cardNo}} (printed text unconfirmed)",
+    printingConfirmed: "{{cardNo}} (application confirmed)",
+    listSeparator: ", ",
+    reason: {
+      source_missing: "A unique full text is unavailable. Showing the notice excerpts.",
+      fragment_missing:
+        "The corrected passage does not exactly match the current text, so the full old text cannot be reconstructed.",
+      ambiguous:
+        "The passages match multiple locations or overlap, so reconstruction is ambiguous.",
+      roundtrip_failed:
+        "Reapplying the correction does not uniquely reproduce the current text. Showing the notice excerpts.",
+      unsupported:
+        "This change is not an effect-text passage that can be reconstructed. Showing the notice excerpts.",
+      multiple_notices:
+        "There are multiple text corrections, and their reconstruction order is unconfirmed.",
+    },
     official: "Official errata notice",
     translation: "Traditional Chinese · unofficial machine translation from Japanese",
     translationLowConfidence:

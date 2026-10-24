@@ -1,16 +1,24 @@
 import { render, screen, within } from "@testing-library/react"
-import { expect, it } from "vitest"
+import userEvent from "@testing-library/user-event"
+import { afterEach, expect, it } from "vitest"
 
 import { buildSnapshot } from "../../../scripts/fixture/build"
+import { type Card, CARDS } from "../../../scripts/fixture/cards"
 import { InlineText } from "../../components/card/InlineText"
 import { createSnapshotClient, loadCardErrata } from "../../data"
+import { DEFAULT_PREFS, prefsStore } from "../../settings"
 import { renderInRouter } from "../../test-utils"
 import { annotatedOrigin } from "../../test-utils/annotated-snapshot"
 import { memoryCache } from "../../test-utils/cache"
 import { CardErrata } from "./CardErrata"
 
-it("shows both announcement passages, their translations, date and source without claiming printed text", async () => {
-  const built = await buildSnapshot({ encodeImage: () => Promise.resolve(new Uint8Array([1])) })
+afterEach(() => prefsStore.set(DEFAULT_PREFS))
+
+async function renderErrata(cards: readonly Card[] = CARDS) {
+  const built = await buildSnapshot({
+    cards,
+    encodeImage: () => Promise.resolve(new Uint8Array([1])),
+  })
   const client = createSnapshotClient("https://cdn.test", {
     region: "jp",
     cacheStorage: memoryCache(),
@@ -31,25 +39,131 @@ it("shows both announcement passages, their translations, date and source withou
       region="jp"
     />,
   )
-  const notice = await screen.findByRole("region", { name: "勘誤" })
-  expect(within(notice).getByText("公告：2026-03-01")).toBeVisible()
+  return screen.findByRole("region", { name: "勘誤" })
+}
+
+it("shows reconstructed full text and pairs excerpt translations with marked originals", async () => {
+  const notice = await renderErrata()
+  await userEvent.click(within(notice).getByRole("button", { name: "勘誤" }))
+  expect(notice.querySelector("time")).toBeNull()
+  expect(within(notice).queryByText(/2026-03-01/u)).not.toBeInTheDocument()
   expect(within(notice).getByRole("link", { name: "官方勘誤公告" })).toHaveAttribute(
     "href",
     "https://example.invalid/errata/bp01-020",
   )
   expect(notice.querySelectorAll("del")).toHaveLength(2)
   expect(within(notice).getAllByText("繁中・日文來源機器譯文（非官方）")).toHaveLength(1)
-  const translation = notice.querySelector('[lang="zh-Hant"]')
-  const original = notice.querySelector('[lang="ja"]')
+  expect(notice.querySelectorAll("ins")).toHaveLength(1)
+  expect(notice.querySelectorAll('[lang="zh-Hant"] del')).toHaveLength(1)
+  expect(notice.querySelectorAll('[lang="zh-Hant"] ins')).toHaveLength(0)
+  expect(notice.querySelectorAll("del del, del ins")).toHaveLength(0)
+  for (const old of notice.querySelectorAll("del"))
+    expect(old.textContent).toBe(old.closest("p")?.textContent)
+  for (const translation of notice.querySelectorAll('[lang="zh-Hant"]')) {
+    const original = translation.nextElementSibling
+    expect(original).toHaveAttribute("data-original")
+    expect(original?.querySelector('[lang="ja"]')).not.toBeNull()
+  }
+  expect(notice.querySelectorAll("ins").length).toBe(
+    notice.querySelectorAll("[data-original] ins").length,
+  )
   expect(
-    translation &&
-      original &&
-      translation.compareDocumentPosition(original) & Node.DOCUMENT_POSITION_FOLLOWING,
-  ).toBeTruthy()
+    within(notice).getByRole("heading", { name: "勘誤前完整文字（依公告還原）" }),
+  ).toBeVisible()
+  expect(within(notice).getByRole("heading", { name: "勘誤後完整文字" })).toBeVisible()
+  expect(within(notice).getByText(/此版次的完整印刷文字尚未確認/u)).toBeVisible()
+  expect(within(notice).getByText(/BP01-020（印刷文字未確認）/u)).toBeVisible()
+})
+
+it("hides excerpt translations when original-only is preferred", async () => {
+  prefsStore.set({ effectLanguage: "original" })
+  const notice = await renderErrata()
+  await userEvent.click(within(notice).getByRole("button", { name: "勘誤" }))
+  expect(notice.querySelector('[lang="zh-Hant"]')).toBeNull()
+  expect(notice.querySelectorAll("[data-original]")).toHaveLength(2)
+})
+
+it.each([true, false])(
+  "keeps each whole translation above one whole original even when line counts match (%s)",
+  async (matching) => {
+    const cards = CARDS.map((card) =>
+      card.id === "c:bp01-020"
+        ? {
+            ...card,
+            faces: card.faces.map((face) => ({
+              ...face,
+              previousEffectJa: "Old A.\nKeep B.",
+              previousEffectZh: matching ? "舊 A。\n保留 B。" : "整段舊譯。",
+              effect: {
+                ...face.effect,
+                ja: "New A.\nKeep B.",
+                zhHant: matching ? "新 A。\n保留 B。" : "整段新譯。",
+              },
+            })),
+          }
+        : card,
+    )
+    const notice = await renderErrata(cards)
+    await userEvent.click(within(notice).getByRole("button", { name: "勘誤" }))
+    expect(notice.querySelectorAll("[data-line]")).toHaveLength(0)
+    expect(notice.querySelectorAll("[data-original]")).toHaveLength(2)
+    expect([...notice.querySelectorAll('[lang="ja"]')].map((node) => node.textContent)).toEqual([
+      "Old A.\nKeep B.",
+      "New A.\nKeep B.",
+    ])
+    expect(
+      [...notice.querySelectorAll('[lang="zh-Hant"]')].map((node) => node.textContent),
+    ).toEqual([
+      matching ? "舊 A。\n保留 B。" : "整段舊譯。",
+      matching ? "新 A。\n保留 B。" : "整段新譯。",
+    ])
+    expect(notice.querySelectorAll('[lang="zh-Hant"] ins')).toHaveLength(0)
+    expect(notice.querySelector('[lang="ja"] del')?.textContent).toBe("Old A.\nKeep B.")
+    expect(notice.querySelector('[lang="zh-Hant"] del')?.textContent).toBe(
+      matching ? "舊 A。\n保留 B。" : "整段舊譯。",
+    )
+    expect(
+      [...notice.querySelectorAll("ins")].some((node) => node.textContent.includes("Keep")),
+    ).toBe(false)
+    for (const translation of notice.querySelectorAll('[lang="zh-Hant"]'))
+      expect(translation.nextElementSibling).toHaveAttribute("data-original")
+  },
+)
+
+it("starts collapsed and toggles the complete errata content with a click", async () => {
+  const notice = await renderErrata()
+  const toggle = within(notice).getByRole("button", { name: "勘誤", expanded: false })
+  const content = document.getElementById(toggle.getAttribute("aria-controls") ?? "")
+  expect(content).not.toBeVisible()
+  expect(within(notice).queryByRole("link", { name: "官方勘誤公告" })).not.toBeInTheDocument()
+  expect(within(notice).queryByText(/此版次的完整印刷文字尚未確認/u)).not.toBeInTheDocument()
+  await userEvent.click(toggle)
+  expect(toggle).toHaveAttribute("aria-expanded", "true")
+  expect(content).toBeVisible()
+  expect(within(notice).getByRole("link", { name: "官方勘誤公告" })).toBeVisible()
   expect(
-    notice.querySelector('del [lang="zh-Hant"]') ?? notice.querySelector('[lang="zh-Hant"] del'),
-  ).toHaveTextContent("2")
-  expect(within(notice).getByText(/不代表此版次的完整印刷卡文/u)).toBeVisible()
+    within(notice).getByRole("heading", { name: "勘誤前完整文字（依公告還原）" }),
+  ).toBeVisible()
+  expect(within(notice).getByRole("heading", { name: "勘誤後完整文字" })).toBeVisible()
+  expect(within(notice).getByText(/BP01-020（印刷文字未確認）/u)).toBeVisible()
+  await userEvent.click(toggle)
+  expect(toggle).toHaveAttribute("aria-expanded", "false")
+  expect(content).not.toBeVisible()
+  expect(within(notice).queryByRole("link")).not.toBeInTheDocument()
+})
+
+it.each(["{Enter}", " "])("toggles errata from the keyboard with %s", async (key) => {
+  const user = userEvent.setup()
+  const notice = await renderErrata()
+  const toggle = within(notice).getByRole("button", { name: "勘誤", expanded: false })
+  await user.tab()
+  expect(toggle).toHaveFocus()
+  await user.keyboard(key)
+  expect(toggle).toHaveAttribute("aria-expanded", "true")
+  expect(within(notice).getByRole("link", { name: "官方勘誤公告" })).toBeVisible()
+  await user.keyboard(key)
+  expect(toggle).toHaveAttribute("aria-expanded", "false")
+  expect(within(notice).queryByRole("link")).not.toBeInTheDocument()
 })
 
 it("emphasizes explicit keyword headings without inventing historical annotation references", () => {
