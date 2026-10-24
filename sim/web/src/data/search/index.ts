@@ -1,4 +1,4 @@
-import { UNCREDITED_ARTIST } from "../../domain/artistFilter"
+import { CREDITED_ARTIST, UNCREDITED_ARTIST } from "../../domain/artistFilter"
 import { cardNoKey, cardNoLookupKey } from "../../domain/cardNo"
 import { deckLocationBadges } from "../../domain/deckLocation"
 import {
@@ -438,12 +438,15 @@ function artsOf(row: JsonObject | undefined): string[] {
  * is credited at all: a snapshot without credits has nothing to tell the two apart.
  */
 function artistOptions(counts: Record<string, number>, names: ReadonlyMap<string, string>) {
-  const { [UNCREDITED_ARTIST]: uncredited, ...credited } = counts
+  const { [UNCREDITED_ARTIST]: uncredited, [CREDITED_ARTIST]: anyCredit, ...credited } = counts
   const hasCredits = Object.keys(credited).length > 0
   return {
     artists: Object.keys(credited).map((id) => ({ id, name: names.get(id) ?? id })),
-    artistCounts:
-      hasCredits && uncredited ? { ...credited, [UNCREDITED_ARTIST]: uncredited } : credited,
+    artistCounts: {
+      ...credited,
+      ...(hasCredits && anyCredit ? { [CREDITED_ARTIST]: anyCredit } : {}),
+      ...(hasCredits && uncredited ? { [UNCREDITED_ARTIST]: uncredited } : {}),
+    },
   }
 }
 
@@ -640,7 +643,7 @@ function build(
         ...new Set(artsOf(fullPrinting).flatMap((value) => artistsByArt.get(value) ?? [])),
       ].sort()
       printings.artists.push(pool.encode(credited))
-      tally(artistCounts, credited.length ? credited : [UNCREDITED_ARTIST])
+      tally(artistCounts, credited.length ? [...credited, CREDITED_ARTIST] : [UNCREDITED_ARTIST])
       printings.alt.push(Number(!!art && !!defaultArt && art !== defaultArt))
       printings.id.push(intern(printing.id))
       printings.releaseDate.push(intern(dates.get(printing.id)))
@@ -971,7 +974,7 @@ export class SearchIndex {
         printings.alt[ordinal] = Number(!!art && !!defaultArt && art !== defaultArt)
         const credited = [...new Set(artsOf(row).flatMap((value) => artistsByArt.get(value) ?? []))]
         printings.artists[ordinal] = this.pool.encode(credited.sort())
-        tally(artistCounts, credited.length ? credited : [UNCREDITED_ARTIST])
+        tally(artistCounts, credited.length ? [...credited, CREDITED_ARTIST] : [UNCREDITED_ARTIST])
         const bits = this.cards.kinds[card] ?? 0
         countPrinting(
           counts,
@@ -1493,7 +1496,8 @@ export class SearchIndex {
     return credited.length === 0
       ? Object.hasOwn(this.optionsValue.artistCounts, UNCREDITED_ARTIST) &&
           selected.includes(UNCREDITED_ARTIST)
-      : credited.some((id) => selected.includes(stringValue(id)))
+      : selected.includes(CREDITED_ARTIST) ||
+          credited.some((id) => selected.includes(stringValue(id)))
   }
 
   private traitsOf(card: number): string[] {

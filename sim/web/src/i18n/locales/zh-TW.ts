@@ -234,6 +234,7 @@ const zhTW = {
     sets: "卡包",
     traits: "類型",
     artists: "繪師",
+    artistCredited: "官方有標示",
     artistUncredited: "官方未標示",
     searchIn: "搜尋{{label}}",
     noMatch: "沒有符合的項目",

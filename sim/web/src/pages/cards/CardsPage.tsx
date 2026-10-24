@@ -68,7 +68,7 @@ import { Link } from "../../components/ui/Link"
 import { Notice } from "../../components/ui/Notice"
 import { Segmented } from "../../components/ui/Segmented"
 import { type CardSummary, type ImageSource, type SearchPage, type SearchQuery } from "../../data"
-import { UNCREDITED_ARTIST } from "../../domain/artistFilter"
+import { CREDITED_ARTIST, UNCREDITED_ARTIST } from "../../domain/artistFilter"
 import { printingPath } from "../../domain/cardRoute"
 import { quickBarClasses } from "../../domain/classes"
 import { leaderFrameTokens, tokenKindTokens } from "../../domain/deckLocation"
@@ -801,6 +801,7 @@ export function CardsPage() {
           return option ? vocabularyOptionLabel(option.name, textLang) : code
         }}
         artistLabel={(id) => {
+          if (id === CREDITED_ARTIST) return t("filters.artistCredited")
           if (id === UNCREDITED_ARTIST) return t("filters.artistUncredited")
           const option = printingOptions?.artist.artists.find((item) => item.id === id)
           return option ? option.name : id

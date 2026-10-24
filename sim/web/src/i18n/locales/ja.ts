@@ -244,6 +244,7 @@ export default {
     sets: "カードセット",
     traits: "タイプ",
     artists: "イラストレーター",
+    artistCredited: "公式表記あり",
     artistUncredited: "公式表記なし",
     searchIn: "{{label}}を検索",
     noMatch: "該当する項目はありません",

@@ -2,7 +2,7 @@
 import { describe, expect, it, vi } from "vitest"
 
 import { buildSnapshot } from "../../../scripts/fixture/build"
-import { UNCREDITED_ARTIST } from "../../domain/artistFilter"
+import { CREDITED_ARTIST, UNCREDITED_ARTIST } from "../../domain/artistFilter"
 import { cardNoKey } from "../../domain/cardNo"
 import { LOCATION_ORDER } from "../../domain/deckLocation"
 import { DEFAULT_QUERY } from "../../domain/query/model"
@@ -3005,6 +3005,15 @@ it("filters evolve and advance by special kind and traits by the card's vocabula
     expect(ids({ artists: [UNCREDITED_ARTIST] })).toEqual(uncredited)
     expect(index.options.artistCounts[UNCREDITED_ARTIST]).toBe(uncredited.length)
     expect(index.options.artists.some((artist) => artist.id === UNCREDITED_ARTIST)).toBe(false)
+    // "Credited" is every artist at once: all credited printings, and with "uncredited" everything.
+    const credited = all.filter((item) => !uncredited.includes(item.printingId))
+    expect(ids({ artists: [CREDITED_ARTIST] })).toEqual(
+      credited.map((item) => item.printingId).sort(),
+    )
+    expect(ids({ artists: artistIds })).toEqual(ids({ artists: [CREDITED_ARTIST] }))
+    expect(index.options.artistCounts[CREDITED_ARTIST]).toBe(credited.length)
+    expect(ids({ artists: [CREDITED_ARTIST, UNCREDITED_ARTIST] })).toEqual(ids({}))
+    expect(index.options.artists.some((artist) => artist.id === CREDITED_ARTIST)).toBe(false)
     const [someArtist = ""] = artistIds
     expect(ids({ artists: [someArtist, UNCREDITED_ARTIST] })).toEqual(
       [...new Set([...ids({ artists: [someArtist] }), ...uncredited])].sort(),

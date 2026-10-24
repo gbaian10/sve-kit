@@ -14,6 +14,7 @@ export function FacetCheckbox({
   label,
   content,
   checked,
+  indeterminate = false,
   count,
   onChange,
 }: {
@@ -21,6 +22,8 @@ export function FacetCheckbox({
   /** The visual (a badge image) shown in place of the label text; the label stays the name. */
   readonly content?: ReactNode
   readonly checked: boolean
+  /** Some of what the row stands for is selected: shown as a dash, announced as mixed. */
+  readonly indeterminate?: boolean
   readonly count: number
   readonly onChange: () => void
 }) {
@@ -30,6 +33,10 @@ export function FacetCheckbox({
       <input
         type="checkbox"
         checked={checked}
+        ref={(input) => {
+          if (input) input.indeterminate = indeterminate && !checked
+        }}
+        aria-checked={indeterminate && !checked ? "mixed" : checked}
         aria-label={label}
         aria-describedby={countId}
         onChange={onChange}
@@ -52,6 +59,10 @@ export function FacetFilter({
   onChange,
   searchable = false,
   quickOptions,
+  pinned,
+  isChecked,
+  onToggle,
+  labelOf,
 }: {
   readonly label: string
   readonly groups: readonly (readonly FacetOption[])[]
@@ -61,6 +72,13 @@ export function FacetFilter({
   /** Adds a text box that narrows the list by label (for long lists such as traits). */
   readonly searchable?: boolean
   readonly quickOptions?: ReactNode
+  /** Summary rows above the list; the search box never narrows them. */
+  readonly pinned?: ReactNode
+  /** Overrides how a list row reads as selected, for selections that stand for many values. */
+  readonly isChecked?: (code: string) => boolean
+  readonly onToggle?: (code: string) => void
+  /** Names a selected token the list does not carry (a reserved choice) in the closed summary. */
+  readonly labelOf?: (code: string) => string | undefined
 }) {
   const { t } = useTranslation()
   const [filter, setFilter] = useState("")
@@ -90,7 +108,12 @@ export function FacetFilter({
       summary={
         selected.length > 0
           ? selected
-              .map((code) => groups.flat().find((item) => item.code === code)?.label ?? code)
+              .map(
+                (code) =>
+                  groups.flat().find((item) => item.code === code)?.label ??
+                  labelOf?.(code) ??
+                  code,
+              )
               .join("、")
           : t("rarityBadge.all")
       }
@@ -118,6 +141,7 @@ export function FacetFilter({
       )}
       <fieldset disabled={!counts}>
         <legend className="sr-only">{label}</legend>
+        {pinned}
         {searchable && nothingMatches && (
           <p className="px-2 py-2 text-13 text-text-3">{t("filters.noMatch")}</p>
         )}
@@ -132,9 +156,10 @@ export function FacetFilter({
                   <FacetCheckbox
                     label={item.label}
                     count={counts?.[item.code] ?? 0}
-                    checked={selected.includes(item.code)}
+                    checked={isChecked ? isChecked(item.code) : selected.includes(item.code)}
                     onChange={() => {
-                      toggle(item.code)
+                      if (onToggle) onToggle(item.code)
+                      else toggle(item.code)
                     }}
                   />
                 </li>

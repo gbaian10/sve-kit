@@ -246,6 +246,7 @@ export default {
     sets: "Sets",
     traits: "Trait",
     artists: "Illustrator",
+    artistCredited: "Credited",
     artistUncredited: "Not credited",
     searchIn: "Search {{label}}",
     noMatch: "No matching entries",
