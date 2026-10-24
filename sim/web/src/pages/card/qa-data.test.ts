@@ -240,6 +240,54 @@ it("treats an earlier overlapping partial window as incomplete and does not comb
   }
 })
 
+it.each([
+  {
+    name: "a partial window ending exactly before the complete window",
+    windows: [
+      complete("jp"),
+      {
+        ...complete("jp"),
+        state: "partial",
+        from_date: "2025-01-01",
+        until_date: "2026-01-01",
+        as_of: "2025-12-31",
+      },
+    ],
+    reads: 4,
+    absence: "absent",
+  },
+  {
+    name: "a partial window after the complete window's evidence",
+    windows: [
+      complete("jp"),
+      { ...complete("jp"), state: "partial", from_date: "2026-10-25", as_of: "2026-10-30" },
+    ],
+    reads: 4,
+    absence: "absent",
+  },
+  {
+    name: "the exclusive until date",
+    windows: [{ ...complete("jp"), until_date: "2026-10-24" }],
+    reads: 24,
+    absence: "unknown",
+  },
+  {
+    name: "a query beyond as_of",
+    windows: [{ ...complete("jp"), as_of: "2026-10-23" }],
+    reads: 24,
+    absence: "unknown",
+  },
+])("keeps indexed window semantics at $name", async ({ windows, reads, absence }) => {
+  const { client, snapshot, requests } = snapshotOf(windows, ["c:a"], index)
+  expect(await loadCardQa(client, snapshot, "c:a", "jp", "2026-10-24")).toMatchObject({
+    coverage: "present",
+  })
+  expect(requests).toHaveLength(reads)
+  expect(await loadCardQa(client, snapshot, "c:c", "jp", "2026-10-24")).toEqual({
+    coverage: absence,
+  })
+})
+
 it("does not turn a missing target, download failure or snapshot replacement into absence", async () => {
   const broken = snapshotOf([complete("jp")], ["c:a"], { jp: { "c:a": ["nonexistent"] } })
   await expect(
