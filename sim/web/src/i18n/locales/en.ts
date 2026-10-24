@@ -29,8 +29,7 @@ export default {
     validationFailed: "The Q&A data failed validation and is not shown.",
     retry: "Reload Q&A",
     untranslated: "Not translated",
-    showAll: "Show all {{count}}",
-    collapse: "Collapse",
+    tabFallback: "Q&A {{count}}",
   },
   app: {
     title: "sve-kit",

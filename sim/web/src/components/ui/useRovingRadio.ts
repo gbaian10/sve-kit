@@ -1,8 +1,8 @@
 import type { KeyboardEvent } from "react"
 
 /**
- * Arrow-key movement for a radiogroup: one Tab stop (the checked item), arrows move and focus.
- * Each radio must have the id `${idPrefix}-${value}`.
+ * Arrow-key movement for a single-Tab-stop group such as a radiogroup or tablist.
+ * The active item receives focus; each item must have the id `${idPrefix}-${value}`.
  */
 export function rovingRadioKeyDown<T extends string>(
   event: KeyboardEvent<HTMLElement>,

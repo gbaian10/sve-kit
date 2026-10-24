@@ -61,7 +61,12 @@ it("shows a translated entry with its source, and falls back to the original wit
   const { unmount } = await renderInRouter(
     <CardQa client={client} cardId="c:bp01-002" edition="jp" showOther={false} />,
   )
-  const translated = await screen.findByRole("listitem", { name: "Q001" })
+  const tab = await screen.findByRole("tab", { name: "Q001" })
+  expect(tab).toHaveAttribute("aria-selected", "true")
+  const panel = screen.getByRole("tabpanel")
+  expect(tab).toHaveAttribute("aria-controls", panel.id)
+  expect(panel).toHaveAttribute("aria-labelledby", tab.id)
+  const translated = await within(panel).findByRole("listitem", { name: "Q001" })
   await waitFor(() => {
     expect(within(translated).getAllByRole("button", { name: "重新載入 Q&A" })).toHaveLength(2)
   })
@@ -80,8 +85,8 @@ it("shows a translated entry with its source, and falls back to the original wit
   act(() => {
     prefsStore.set({ qaDisplay: "translated" })
   })
-  expect(within(translated).queryByText(/試作の隊長が2体いる時/u)).toBeNull()
   expect(within(translated).getByText("有兩張試作隊長時，士兵攻擊力是 +2 嗎？")).toBeVisible()
+  expect(within(translated).queryByText(/試作の隊長が2体いる時/u)).toBeNull()
   act(() => {
     prefsStore.set({ qaDisplay: "original" })
   })
@@ -100,7 +105,12 @@ it("shows a translated entry with its source, and falls back to the original wit
   await renderInRouter(
     <CardQa client={client} cardId="c:bp01-011" edition="jp" showOther={false} />,
   )
-  const missing = await screen.findByRole("listitem", { name: "Q010" })
+  const qaTabs = await screen.findAllByRole("tab")
+  expect(qaTabs.map((item) => item.textContent)).toEqual(["Q010", "Q011"])
+  expect(qaTabs[0]).toHaveAttribute("aria-selected", "true")
+  expect(qaTabs[1]).toHaveAttribute("aria-selected", "false")
+  const firstPanel = screen.getByRole("tabpanel")
+  const missing = await within(firstPanel).findByRole("listitem", { name: "Q010" })
   expect(await within(missing).findByText(/フェアリーが進化していても/u)).toBeVisible()
   expect(await within(missing).findAllByText("未翻譯")).toHaveLength(2)
   expect(
@@ -108,8 +118,98 @@ it("shows a translated entry with its source, and falls back to the original wit
       .getAllByText("未翻譯")
       .map((note) => note.closest("[lang]")),
   ).toEqual([null, null])
-  // Two entries stay under the fold limit, so there is nothing to expand.
-  expect(screen.queryByRole("button", { name: /顯示全部/u })).toBeNull()
+  const secondTab = screen.getByRole("tab", { name: "Q011" })
+  await userEvent.click(secondTab)
+  expect(secondTab).toHaveAttribute("aria-selected", "true")
+  expect(screen.getByRole("tab", { name: "Q010" })).toHaveAttribute("aria-selected", "false")
+  expect(within(screen.getByRole("tabpanel")).getByRole("listitem", { name: "Q011" })).toBeVisible()
+})
+
+it("shows a single Q&A in its own selected tab", async () => {
+  const { client } = await loadedClient()
+  const snapshot = client.snapshot()
+  if (!snapshot) throw new Error("synthetic snapshot did not load")
+  const single = {
+    ...snapshot,
+    manifest: {
+      ...snapshot.manifest,
+      qa_card_index: {
+        jp: { "c:bp01-002": ["qa:bp01-002-1:v1"] },
+        en: {},
+      },
+    },
+  }
+  await renderInRouter(
+    <CardQa
+      client={{ ...client, snapshot: () => single }}
+      cardId="c:bp01-002"
+      edition="jp"
+      showOther={false}
+    />,
+  )
+  const tab = await screen.findByRole("tab", { name: "Q001" })
+  expect(tab).toHaveAttribute("aria-selected", "true")
+  expect(
+    await within(screen.getByRole("tabpanel")).findByRole("listitem", { name: "Q001" }),
+  ).toBeVisible()
+})
+
+it("uses an ordinal tab label and focusable panel when official metadata is empty", async () => {
+  const { client } = await loadedClient()
+  const withoutNumber = {
+    ...client,
+    fragments: async (...args: Parameters<typeof client.fragments>) => {
+      const fragments = await client.fragments(...args)
+      return fragments.map((fragment) =>
+        fragment.table === "qa"
+          ? {
+              ...fragment,
+              rows: fragment.rows.map((row) =>
+                stringValue(row["id"]) === "qa:bp01-002-1"
+                  ? { ...row, official_number: "", source_url: null }
+                  : row,
+              ),
+            }
+          : fragment,
+      )
+    },
+  }
+  await renderInRouter(
+    <CardQa client={withoutNumber} cardId="c:bp01-002" edition="jp" showOther={false} />,
+  )
+  expect(await screen.findByRole("tab", { name: "Q&A 1" })).toHaveAttribute("aria-selected", "true")
+  const panel = screen.getByRole("tabpanel")
+  expect(panel).toHaveAttribute("tabindex", "0")
+  panel.focus()
+  expect(panel).toHaveFocus()
+})
+
+it("moves focus and selection between Q&A tabs with arrow, Home and End keys", async () => {
+  const { client } = await loadedClient()
+  const fragments = vi.fn(client.fragments)
+  await renderInRouter(
+    <CardQa client={{ ...client, fragments }} cardId="c:bp01-011" edition="jp" showOther={false} />,
+  )
+  const first = await screen.findByRole("tab", { name: "Q010" })
+  const last = screen.getByRole("tab", { name: "Q011" })
+  const hiddenPanels = screen.getAllByRole("tabpanel", { hidden: true })
+  const lastPanel = hiddenPanels[1]
+  if (!lastPanel) throw new Error("second Q&A tab panel is missing")
+  await within(lastPanel).findByText(/相手の場のフェアリーは数えますか/u)
+  const loadedFragmentCount = fragments.mock.calls.length
+  first.focus()
+  await userEvent.keyboard("{ArrowRight}")
+  expect(last).toHaveFocus()
+  expect(last).toHaveAttribute("aria-selected", "true")
+  expect(fragments).toHaveBeenCalledTimes(loadedFragmentCount)
+  await userEvent.keyboard("{End}")
+  expect(last).toHaveFocus()
+  await userEvent.keyboard("{Home}")
+  expect(first).toHaveFocus()
+  expect(first).toHaveAttribute("aria-selected", "true")
+  await userEvent.keyboard("{ArrowLeft}")
+  expect(last).toHaveFocus()
+  expect(last).toHaveAttribute("aria-selected", "true")
 })
 
 it("only attributes visible translations when the question and answer have different sources", async () => {
@@ -117,6 +217,7 @@ it("only attributes visible translations when the question and answer have diffe
   await renderInRouter(
     <CardQa client={client} cardId="c:bp01-002" edition="jp" showOther={false} />,
   )
+  await screen.findByRole("tab", { name: "Q001" })
   const entry = await screen.findByRole("listitem", { name: "Q001" })
   expect(await within(entry).findByText(/專案譯文/u)).toBeVisible()
   expect(await within(entry).findByText(/機器譯文/u)).toBeVisible()

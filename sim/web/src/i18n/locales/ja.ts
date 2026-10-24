@@ -26,8 +26,7 @@ export default {
     validationFailed: "Q&A データの検証に失敗したため表示しません。",
     retry: "Q&A を再読み込み",
     untranslated: "未翻訳",
-    showAll: "全 {{count}} 件を表示",
-    collapse: "閉じる",
+    tabFallback: "Q&A {{count}}",
   },
   app: {
     title: "sve-kit",
