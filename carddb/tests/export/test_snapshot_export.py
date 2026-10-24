@@ -18,7 +18,6 @@ from sve_carddb.core.json import array, canonical, digest, object_value, parse, 
 from sve_carddb.export.buckets import bucket
 from sve_carddb.export.media import prepare_media
 from sve_carddb.export.reader import read_snapshot
-from sve_carddb.export.semantics import _qa_card_index
 from sve_carddb.export.transport import (
     Batch,
     Brotli,
@@ -91,32 +90,36 @@ def test_reader_rejects_inexact_current_qa_index(
         )
 
 
-def test_reader_rejects_qa_index_in_the_wrong_order() -> None:
-    def qa(identifier: str, number: str | None) -> JsonValue:
-        return {
-            "id": identifier,
-            "region": "jp",
-            "official_number": number,
-            "current_version_id": identifier + "-v",
-        }
-
-    view: dict[str, list[JsonValue]] = {
-        "qa": [qa("c", None), qa("b", "Q10"), qa("a", "Q2")],
-        "qa_version": [
-            {"id": key + "-v", "cards": ["card"]} for key in ("a", "b", "c")
-        ],
-    }
-    versions = {
-        string(object_value(row)["id"]): object_value(row) for row in view["qa_version"]
-    }
-    manifest = {
-        "regions": ["jp"],
-        "qa_card_index": {"jp": {"card": ["a-v", "b-v", "c-v"]}},
-    }
-    _qa_card_index(view, manifest, versions)  # type: ignore[arg-type]
-    manifest["qa_card_index"] = {"jp": {"card": ["b-v", "a-v", "c-v"]}}
+def test_reader_rejects_qa_index_in_the_wrong_order(
+    logical: tuple[Projection, Ownership],
+) -> None:
+    projection, ownership = cloned(logical)
+    for identifier, number in (("q2", "Q2"), ("q10", "Q10"), ("qx", None)):
+        projection.tables["qa"].append(
+            projection.tables["qa"][0]
+            | {
+                "id": identifier,
+                "official_number": number,
+                "current_version_id": identifier + "_v",
+            }
+        )
+        projection.tables["qa_version"].append(
+            projection.tables["qa_version"][0]
+            | {"id": identifier + "_v", "qa_id": identifier}
+        )
+    for table in ("qa", "qa_version"):
+        projection.tables[table].sort(key=lambda row: string(row["id"]))
+    projection = replace(
+        projection,
+        metadata=projection.metadata
+        | {"qa_card_index": {"jp": {"card": ["qa_v", "q2_v", "q10_v", "qx_v"]}}},
+    )
+    result = export_snapshot(projection, ownership, BATCH)
+    payloads = {key: blob.raw for key, blob in result.payloads.items()}
+    read_snapshot(result.manifest, payloads)
+    wrong: JsonValue = {"jp": {"card": ["qa_v", "q10_v", "q2_v", "qx_v"]}}
     with pytest.raises(ValueError, match="QA card index mismatch"):
-        _qa_card_index(view, manifest, versions)  # type: ignore[arg-type]
+        read_snapshot(result.manifest | {"qa_card_index": wrong}, payloads)
 
 
 def test_clean_exports_are_exact_bytes(
