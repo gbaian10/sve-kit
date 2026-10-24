@@ -1491,7 +1491,8 @@ export class SearchIndex {
   private artistAllowed(selected: readonly string[], printing: number): boolean {
     const credited = arrayValue(this.pool.decode(this.printings.artists[printing] ?? 0))
     return credited.length === 0
-      ? selected.includes(UNCREDITED_ARTIST)
+      ? Object.hasOwn(this.optionsValue.artistCounts, UNCREDITED_ARTIST) &&
+          selected.includes(UNCREDITED_ARTIST)
       : credited.some((id) => selected.includes(stringValue(id)))
   }
 

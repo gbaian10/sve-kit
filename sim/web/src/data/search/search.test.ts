@@ -3013,6 +3013,42 @@ it("filters evolve and advance by special kind and traits by the card's vocabula
   }
 })
 
+it("does not infer uncredited matches when a snapshot has no artist credits", async () => {
+  const client = createSnapshotClient(base, { fetch: origin().fetcher })
+  await client.load()
+  const snapshot = client.snapshot()
+  if (!snapshot) throw new Error("missing snapshot")
+  const columns = new BootstrapColumns()
+  columns.ingest(
+    snapshot.bootstrap.map((fragment) => ({
+      ...fragment,
+      rows: fragment.rows.map((row) => (fragment.table === "art" ? { ...row, artists: [] } : row)),
+    })),
+  )
+  columns.seal()
+
+  const created = new SearchIndex(columns, "jp")
+  const restored = new SearchIndex(created.encode(), "jp")
+  for (const index of [created, restored]) {
+    expect(index.options.artistCounts[UNCREDITED_ARTIST]).toBeUndefined()
+    expect(
+      index.search({
+        ...query,
+        state: { ...DEFAULT_QUERY, artists: [UNCREDITED_ARTIST] },
+      }).items,
+    ).toEqual([])
+  }
+
+  created.completePrintings(columns)
+  expect(created.options.artistCounts[UNCREDITED_ARTIST]).toBeUndefined()
+  expect(
+    created.search({
+      ...query,
+      state: { ...DEFAULT_QUERY, artists: [UNCREDITED_ARTIST] },
+    }).items,
+  ).toEqual([])
+})
+
 it("keeps family label translations in set options and releases after index restore", async () => {
   const client = createSnapshotClient(base, { fetch: origin().fetcher })
   await client.load()
