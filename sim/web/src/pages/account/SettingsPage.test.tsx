@@ -53,6 +53,56 @@ describe("SettingsPage", () => {
   })
 })
 
+it("groups settings by purpose, with downloads and storage before the reset button", async () => {
+  await renderInRouter(<SettingsPage />)
+  const headings = screen.getAllByRole("heading", { level: 2 }).map((node) => node.textContent)
+  expect(headings).toEqual([
+    "介面",
+    "卡片資料",
+    "卡文翻譯顯示",
+    "卡文樣式",
+    "瀏覽",
+    "預先下載",
+    "背景下載",
+    "儲存空間",
+  ])
+  const text = within(screen.getByRole("region", { name: "卡文翻譯顯示" }))
+  for (const name of ["卡名顯示", "效果文字", "風味文字", "Q&A"])
+    expect(text.getByRole("radiogroup", { name })).toBeInTheDocument()
+  const style = within(screen.getByRole("region", { name: "卡文樣式" }))
+  expect(style.getByRole("switch", { name: "術語加粗" })).toBeInTheDocument()
+  expect(style.getByRole("switch", { name: "圖示旁附名稱" })).toBeInTheDocument()
+  const reset = screen.getByRole("button", { name: "恢復預設" })
+  const storage = screen.getByRole("region", { name: "儲存空間" })
+  expect(storage.compareDocumentPosition(reset) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+})
+
+it("previews each option with the sample card and marks the chosen one", async () => {
+  prefsStore.set({ effectLanguage: "both", termEmphasis: false })
+  await renderInRouter(<SettingsPage />)
+  expect(screen.queryByRole("tooltip")).toBeNull()
+  await userEvent.hover(screen.getByRole("button", { name: "說明：效果文字" }))
+  const options = within(screen.getByRole("tooltip")).getAllByRole("listitem")
+  const current = (list: readonly HTMLElement[]) =>
+    list.map((node) => node.getAttribute("aria-current"))
+  expect(options).toHaveLength(3)
+  expect(current(options)).toEqual([null, null, "true"])
+  // The sample renders with the real card-text pieces: icons and the framed original text.
+  const [original, , both] = options as [HTMLElement, HTMLElement, HTMLElement]
+  expect(within(both).getByText("原文", { selector: "p" })).toBeInTheDocument()
+  expect(within(both).getAllByRole("img", { name: "入場曲" })).toHaveLength(1)
+  expect(original.querySelector("strong")).toBeNull()
+  await userEvent.unhover(screen.getByRole("button", { name: "說明：效果文字" }))
+  await userEvent.hover(screen.getByRole("button", { name: "說明：術語加粗" }))
+  const toggles = within(screen.getByRole("tooltip")).getAllByRole("listitem")
+  const [on, off] = toggles as [HTMLElement, HTMLElement]
+  expect(current(toggles)).toEqual([null, "true"])
+  expect(on.querySelector("strong")).toHaveTextContent("【突進】")
+  expect(off.querySelector("strong")).toBeNull()
+  await userEvent.keyboard("{Escape}")
+  expect(screen.queryByRole("tooltip")).toBeNull()
+})
+
 it("refreshes estimates on demand, leaves caches untouched when clearing is cancelled, and shows request failure", async () => {
   const storage = memoryCache()
   vi.stubGlobal("caches", storage)

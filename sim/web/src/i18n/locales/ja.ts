@@ -113,11 +113,24 @@ export default {
       "一覧の末尾に近づくと自動読み込みします。オフの場合はボタンで読み込みます。",
     resetDefaults: "初期設定に戻す",
     resetTitle: "初期設定に戻しますか？",
-    resetHint:
-      "表示と詳細設定をすべて初期値に戻します。ダウンロード済みデータと閲覧履歴は残ります。",
+    resetHint: "すべての設定を初期値に戻します。ダウンロード済みデータと閲覧履歴は残ります。",
     resetCancel: "キャンセル",
 
-    advanced: "詳細設定",
+    groups: {
+      interface: "インターフェース",
+      data: "カードデータ",
+      text: "カード文の訳表示",
+      style: "カード文のスタイル",
+      browse: "閲覧",
+      preload: "先読み",
+    },
+    preview: {
+      help: "説明：{{name}}",
+      current: "現在の設定",
+      hidden: "非表示（ここには出ません）",
+      on: "オン",
+      off: "オフ",
+    },
     preloadPrintings: "すべての版を先読み",
     preloadPrintingsHint:
       "表示中のカード画像が準備できてから他の版を読み込みます。別言語の版は英語版／日本語版データの表示設定に従います。",
@@ -144,7 +157,6 @@ export default {
       "キャッシュの削除に失敗したか、完了していません。他のタブを閉じて再試行してください。",
     storageCleared: "キャッシュを削除しました。必要なデータを再ダウンロードします。",
     title: "アカウントと設定",
-    display: "表示",
     fieldDisplay: { none: "非表示", original: "原文", translated: "訳", both: "訳＋原文" },
     effectLanguage: "効果テキスト",
     flavorDisplay: "フレーバーテキスト",

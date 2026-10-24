@@ -5,6 +5,8 @@ import { cn } from "./cn"
 export interface SettingRowProps {
   readonly label: string
   readonly hint?: string
+  /** A HelpTip beside the label; its panel opens under the row, so the row is its anchor. */
+  readonly help?: ReactNode
   readonly size?: "sm" | "md"
   readonly className?: string
   readonly children: ReactNode
@@ -14,15 +16,25 @@ export interface SettingRowProps {
 // wraps under the label, right-aligned. Long translations therefore never squeeze the label into
 // several lines or push the control past the container edge. The hint always takes a full line
 // of its own, so its length never decides where the control goes.
-export function SettingRow({ label, hint, size = "md", className, children }: SettingRowProps) {
+export function SettingRow({
+  label,
+  hint,
+  help,
+  size = "md",
+  className,
+  children,
+}: SettingRowProps) {
   return (
     <div
       className={cn(
-        "flex min-h-11 flex-wrap items-center justify-between gap-x-4 gap-y-1",
+        "relative flex min-h-11 flex-wrap items-center justify-between gap-x-4 gap-y-1",
         className,
       )}
     >
-      <div className={size === "sm" ? "text-14" : "text-15"}>{label}</div>
+      <div className={cn("flex items-center gap-1", size === "sm" ? "text-14" : "text-15")}>
+        {label}
+        {help}
+      </div>
       <div className="ml-auto flex shrink-0 items-center">{children}</div>
       {hint && <div className="basis-full text-12 text-text-3">{hint}</div>}
     </div>

@@ -122,11 +122,24 @@ export default {
     infiniteScrollHint: "Load the next page near the end of results. Turn off to use Load more.",
     resetDefaults: "Restore defaults",
     resetTitle: "Restore default settings?",
-    resetHint:
-      "Reset all display and advanced settings. Downloaded data and recent cards are kept.",
+    resetHint: "Reset all settings. Downloaded data and recent cards are kept.",
     resetCancel: "Cancel",
 
-    advanced: "Advanced settings",
+    groups: {
+      interface: "Interface",
+      data: "Card data",
+      text: "Card text translation",
+      style: "Card text style",
+      browse: "Browsing",
+      preload: "Preload",
+    },
+    preview: {
+      help: "About {{name}}",
+      current: "Current",
+      hidden: "Hidden (nothing appears here)",
+      on: "On",
+      off: "Off",
+    },
     preloadPrintings: "Preload all printings",
     preloadPrintingsHint:
       "Load other printings after the current card image is ready. Other languages follow the English/Japanese data display setting.",
@@ -152,7 +165,6 @@ export default {
     storageClearFailed: "Cache clearing failed or is incomplete. Close other tabs and try again.",
     storageCleared: "Caches cleared. Required data will download again.",
     title: "Account and settings",
-    display: "Display",
     fieldDisplay: { none: "Hidden", original: "Original", translated: "Translated", both: "Both" },
     effectLanguage: "Effect text",
     flavorDisplay: "Flavor text",
