@@ -25,12 +25,16 @@ const TABLES = new Set([
   "mechanic_projection",
   "card_mechanic_coverage",
   "card_engine_support",
+  "art",
+  "artist",
 ])
 
 const FIELDS: Readonly<Record<string, readonly string[]>> = {
   card: ["id", "home_set_id", "regions"],
   keyword: ["id", "code", "kind", "name_unit_id", "translations"],
   card_engine_support: ["card_id", "region_blocks"],
+  art: ["id", "artists"],
+  artist: ["id", "display_name"],
   face: ["id", "card_id", "ordinal", "current", "wording"],
   printing: [
     "id",

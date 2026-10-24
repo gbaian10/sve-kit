@@ -1,6 +1,7 @@
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 
+import { orderArtistTokens } from "../../domain/artistFilter"
 import { orderLocationTokens } from "../../domain/deckLocation"
 import { COST_CAP, type QueryState, STAT_CAP, toggleClass } from "../../domain/query/model"
 import { orderRarityTokens, UNRATED_RARITY } from "../../domain/rarityFilter"
@@ -19,6 +20,7 @@ export interface ConditionChipsProps {
   readonly typeLabel: (code: string) => string
   readonly keywordLabel: (id: string) => string
   readonly traitLabel: (code: string) => string
+  readonly artistLabel: (id: string) => string
   readonly setLabel: (code: string) => string
   /** A set implied by the page's path (`/sets/:code`): kept in the query, shown as no chip. */
   readonly impliedSet?: string | undefined
@@ -52,6 +54,7 @@ export function ConditionChips({
   rarityLabel,
   typeLabel,
   traitLabel,
+  artistLabel,
   keywordLabel,
   setLabel,
   impliedSet,
@@ -144,6 +147,11 @@ export function ConditionChips({
       key: `trait:${code}`,
       label: traitLabel(code),
       without: { ...query, traits: query.traits.filter((other) => other !== code) },
+    })),
+    ...orderArtistTokens(query.artists).map((id) => ({
+      key: `artist:${id}`,
+      label: artistLabel(id),
+      without: { ...query, artists: query.artists.filter((other) => other !== id) },
     })),
     ...Object.entries(query.mechanics).map(([id, state]) => ({
       key: `mechanic:${id}`,

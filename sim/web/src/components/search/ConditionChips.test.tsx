@@ -25,6 +25,7 @@ function Harness({ initial }: { readonly initial: string }) {
         rarityLabel={(code) => code.toUpperCase()}
         typeLabel={(code) => ({ spell: "法術", follower: "從者" })[code] ?? code}
         traitLabel={(code) => ({ pixie: "妖精" })[code] ?? code}
+        artistLabel={(id) => ({ "y:a": "Hisakata" })[id] ?? id}
         setLabel={(code) => code}
         keywordLabel={(id) => id}
         groups={GROUPS}
@@ -87,5 +88,12 @@ describe("condition chips for grouped values", () => {
     await userEvent.click(screen.getByRole("button", { name: "移除條件：妖精" }))
     expect(url()).toBe("type=spell&loc=evolve&trait=unknown")
     expect(chips()).toEqual(["法術", "進化", "unknown"])
+  })
+
+  it("shows one removable chip per artist, in the order the panel lists them", async () => {
+    await renderInRouter(<Harness initial="trait=pixie&artist=y:b,y:a" />)
+    expect(chips()).toEqual(["妖精", "Hisakata", "y:b"])
+    await userEvent.click(screen.getByRole("button", { name: "移除條件：Hisakata" }))
+    expect(url()).toBe("trait=pixie&artist=y:b")
   })
 })

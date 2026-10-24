@@ -2,6 +2,7 @@
 import { describe, expect, it, vi } from "vitest"
 
 import { buildSnapshot } from "../../../scripts/fixture/build"
+import { CREDITED_ARTIST, UNCREDITED_ARTIST } from "../../domain/artistFilter"
 import { cardNoKey } from "../../domain/cardNo"
 import { LOCATION_ORDER } from "../../domain/deckLocation"
 import { DEFAULT_QUERY } from "../../domain/query/model"
@@ -2869,11 +2870,20 @@ it("filters evolve and advance by special kind and traits by the card's vocabula
   const evolveFaces = new Set<string>(),
     advanceFaces = new Set<string>()
   const traitFaces = new Map<string, string[]>()
+  const uncreditedArts = new Set<string>()
+  const hashed = (text: string) =>
+    Array.from(text.matchAll(/[\s\S]/gu)).reduce((sum, char) => sum + char[0].charCodeAt(0), 0)
   const columns = new BootstrapColumns()
   columns.ingest(
     snapshot.bootstrap.map((fragment) => ({
       ...fragment,
       rows: fragment.rows.map((row) => {
+        // Every third art loses its credits, so some printings are uncredited.
+        if (fragment.table === "art") {
+          const lost = hashed(stringValue(row["id"])) % 3 === 0
+          if (lost) uncreditedArts.add(stringValue(row["id"]))
+          return lost ? { ...row, artists: [] } : row
+        }
         if (fragment.table !== "face_revision") return row
         const face = stringValue(row["face_id"])
         traitFaces.set(
@@ -2949,7 +2959,103 @@ it("filters evolve and advance by special kind and traits by the card's vocabula
     )
     expect(ids({ traits: ["synthetic-missing-trait"] })).toEqual([])
     expect(index.options.traits.every((trait) => trait.name.original.text !== "")).toBe(true)
+    // Artists follow the printing's face arts, and only the edition's own credits count.
+    const credits = new Map<string, Set<string>>()
+    for (const fragment of snapshot.bootstrap.filter((item) => item.table === "art"))
+      for (const row of fragment.rows)
+        credits.set(
+          stringValue(row["id"]),
+          new Set(
+            arrayValue(uncreditedArts.has(stringValue(row["id"])) ? [] : (row["artists"] ?? []))
+              .filter((credit) => (credit as JsonObject)["role"] === "illustration_jp")
+              .map((credit) => stringValue((credit as JsonObject)["artist_id"])),
+          ),
+        )
+    const artistIds = index.options.artists.map((artist) => artist.id)
+    expect(artistIds.length).toBeGreaterThan(1)
+    for (const artist of artistIds) {
+      const expected = all
+        .filter((item) =>
+          arrayValue(
+            snapshot.bootstrap
+              .find(
+                (f) => f.table === "printing" && f.rows.some((r) => r["id"] === item.printingId),
+              )
+              ?.rows.find((r) => r["id"] === item.printingId)?.["faces"] ?? [],
+          ).some((face) => credits.get(stringValue((face as JsonObject)["art_id"]))?.has(artist)),
+        )
+        .map((item) => item.printingId)
+        .sort()
+      expect(expected.length, artist).toBeGreaterThan(0)
+      expect(ids({ artists: [artist] }), artist).toEqual(expected)
+      expect(index.options.artistCounts[artist], artist).toBe(expected.length)
+    }
+    // The reserved "uncredited" choice matches printings nobody credits, alone or mixed (OR).
+    const creditedBy = (printingId: string, artist: string) =>
+      arrayValue(
+        snapshot.bootstrap
+          .find((f) => f.table === "printing" && f.rows.some((r) => r["id"] === printingId))
+          ?.rows.find((r) => r["id"] === printingId)?.["faces"] ?? [],
+      ).some((face) => credits.get(stringValue((face as JsonObject)["art_id"]))?.has(artist))
+    const uncredited = all
+      .filter((item) => !artistIds.some((artist) => creditedBy(item.printingId, artist)))
+      .map((item) => item.printingId)
+      .sort()
+    expect(uncredited.length).toBeGreaterThan(0)
+    expect(ids({ artists: [UNCREDITED_ARTIST] })).toEqual(uncredited)
+    expect(index.options.artistCounts[UNCREDITED_ARTIST]).toBe(uncredited.length)
+    expect(index.options.artists.some((artist) => artist.id === UNCREDITED_ARTIST)).toBe(false)
+    // "Credited" is every artist at once: all credited printings, and with "uncredited" everything.
+    const credited = all.filter((item) => !uncredited.includes(item.printingId))
+    expect(ids({ artists: [CREDITED_ARTIST] })).toEqual(
+      credited.map((item) => item.printingId).sort(),
+    )
+    expect(ids({ artists: artistIds })).toEqual(ids({ artists: [CREDITED_ARTIST] }))
+    expect(index.options.artistCounts[CREDITED_ARTIST]).toBe(credited.length)
+    expect(ids({ artists: [CREDITED_ARTIST, UNCREDITED_ARTIST] })).toEqual(ids({}))
+    expect(index.options.artists.some((artist) => artist.id === CREDITED_ARTIST)).toBe(false)
+    const [someArtist = ""] = artistIds
+    expect(ids({ artists: [someArtist, UNCREDITED_ARTIST] })).toEqual(
+      [...new Set([...ids({ artists: [someArtist] }), ...uncredited])].sort(),
+    )
+    expect(ids({ artists: ["synthetic-missing-artist"] })).toEqual([])
   }
+})
+
+it("does not infer uncredited matches when a snapshot has no artist credits", async () => {
+  const client = createSnapshotClient(base, { fetch: origin().fetcher })
+  await client.load()
+  const snapshot = client.snapshot()
+  if (!snapshot) throw new Error("missing snapshot")
+  const columns = new BootstrapColumns()
+  columns.ingest(
+    snapshot.bootstrap.map((fragment) => ({
+      ...fragment,
+      rows: fragment.rows.map((row) => (fragment.table === "art" ? { ...row, artists: [] } : row)),
+    })),
+  )
+  columns.seal()
+
+  const created = new SearchIndex(columns, "jp")
+  const restored = new SearchIndex(created.encode(), "jp")
+  for (const index of [created, restored]) {
+    expect(index.options.artistCounts[UNCREDITED_ARTIST]).toBeUndefined()
+    expect(
+      index.search({
+        ...query,
+        state: { ...DEFAULT_QUERY, artists: [UNCREDITED_ARTIST] },
+      }).items,
+    ).toEqual([])
+  }
+
+  created.completePrintings(columns)
+  expect(created.options.artistCounts[UNCREDITED_ARTIST]).toBeUndefined()
+  expect(
+    created.search({
+      ...query,
+      state: { ...DEFAULT_QUERY, artists: [UNCREDITED_ARTIST] },
+    }).items,
+  ).toEqual([])
 })
 
 it("keeps family label translations in set options and releases after index restore", async () => {

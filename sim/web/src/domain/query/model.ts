@@ -41,6 +41,8 @@ export interface QueryState {
   readonly locations: readonly string[]
   /** Trait vocabulary codes; a card with any selected trait passes. */
   readonly traits: readonly string[]
+  /** Artist ids of the edition; a printing whose front art credits any selected artist passes. */
+  readonly artists: readonly string[]
   /** Unlisted keyword ids are "either"; has selections form a union, not selections all require absence. */
   readonly mechanics: Readonly<Record<string, MechanicState>>
   readonly sets: readonly string[]
@@ -69,6 +71,7 @@ export const DEFAULT_QUERY: QueryState = {
   types: [],
   locations: [],
   traits: [],
+  artists: [],
   mechanics: {},
   sets: [],
   rarities: [],
@@ -92,6 +95,7 @@ export function activeFilterCount(state: QueryState): number {
     (state.types.length > 0 ? 1 : 0) +
     (state.locations.length > 0 ? 1 : 0) +
     (state.traits.length > 0 ? 1 : 0) +
+    (state.artists.length > 0 ? 1 : 0) +
     (Object.keys(state.mechanics).length > 0 ? 1 : 0) +
     (state.sets.length > 0 ? 1 : 0) +
     (state.rarities.length > 0 ? 1 : 0) +

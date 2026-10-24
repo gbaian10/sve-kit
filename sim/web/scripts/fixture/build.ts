@@ -846,8 +846,8 @@ function artistFor(ctx: CardContext, face: Face, index: number): string | null {
   return id
 }
 
-function artistRows(artistId: string | null): JsonObject[] {
-  return artistId === null ? [] : [{ artist_id: artistId, role: "illustrator" }]
+function artistRows(artistId: string | null, region: string): JsonObject[] {
+  return artistId === null ? [] : [{ artist_id: artistId, role: `illustration_${region}` }]
 }
 
 async function addPrintings(ctx: CardContext, faces: FaceRevisions): Promise<void> {
@@ -865,7 +865,7 @@ async function addPrintings(ctx: CardContext, faces: FaceRevisions): Promise<voi
         classification: printing.variant === "standard" ? "base" : "alternate",
         review_level: "unreviewed",
         regions: [printing.region],
-        artists: artistRows(artistFor(ctx, face, index)),
+        artists: artistRows(artistFor(ctx, face, index), printing.region),
       })
       facesBootstrap.push({
         face_id: face.id,

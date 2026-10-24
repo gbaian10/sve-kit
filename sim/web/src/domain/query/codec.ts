@@ -13,7 +13,7 @@ import {
   VIEW_MODES,
 } from "./model"
 
-// URL parameters: q class cost atk def type loc trait mech set rarity alt reprint unit rep prfirst
+// URL parameters: q class cost atk def type loc trait artist mech set rarity alt reprint unit rep prfirst
 // sort order view. Lists
 // are comma separated, de-duplicated and sorted so equal states always give equal URLs; unknown
 // values are dropped rather than failing, because URLs arrive from anywhere. `cost`, `atk` and `def`
@@ -24,6 +24,7 @@ const LIST_PARAMS = {
   types: "type",
   locations: "loc",
   traits: "trait",
+  artists: "artist",
   sets: "set",
   rarities: "rarity",
 } as const
@@ -84,6 +85,7 @@ export function parseQuery(params: URLSearchParams): QueryState {
       ...new Set([...list(params, LIST_PARAMS.locations), ...typed.filter(isLocationToken)]),
     ].sort(compareCodePoints),
     traits: list(params, LIST_PARAMS.traits),
+    artists: list(params, LIST_PARAMS.artists),
     mechanics: parseMechanics(params.get("mech")),
     sets: list(params, LIST_PARAMS.sets),
     rarities: list(params, LIST_PARAMS.rarities),

@@ -35,6 +35,7 @@ export interface FilterPanelProps {
     readonly rarity: ReactNode
     readonly sets: ReactNode
     readonly traits: ReactNode
+    readonly artists: ReactNode
     readonly keywords: ReactNode
   } | null
   readonly restrictions?: RestrictionStatus | undefined
@@ -202,7 +203,10 @@ export function FilterPanel({
         <div className="md:col-span-3 md:row-start-3 md:border-b md:border-border md:p-4">
           {facets?.rarity}
         </div>
-        <div className="md:col-start-2 md:row-start-4 md:p-4">{facets?.sets}</div>
+        <div className="space-y-4 md:col-start-2 md:row-start-4 md:p-4">
+          {facets?.sets}
+          {facets?.artists}
+        </div>
         <div className="md:col-start-1 md:row-start-5 md:rounded-bl-block md:border-t md:border-border md:bg-surface-2 md:p-4">
           <div className="flex items-center gap-2">
             <Switch

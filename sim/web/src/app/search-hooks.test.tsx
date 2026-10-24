@@ -136,6 +136,8 @@ function answerViews(
           locationCounts: {},
           traits: [],
           traitCounts: {},
+          artists: [],
+          artistCounts: {},
           classes,
           sets: [],
           quickSets: {},
@@ -607,6 +609,8 @@ it("keeps rarity and type lists pending independently of the basic set and class
           locationCounts: { leader: 2, "leader:gold": 2 },
           traits: [],
           traitCounts: {},
+          artists: [],
+          artistCounts: {},
           classes: [],
           sets: [],
           quickSets: {},
@@ -631,6 +635,7 @@ it("keeps rarity and type lists pending independently of the basic set and class
     type: { types: [], typeCounts: { leader: 2 } },
     location: { types: [], counts: { leader: 2, "leader:gold": 2 } },
     trait: { traits: [], counts: {} },
+    artist: { artists: [], counts: {} },
     keyword: { keywords, coverage: "unknown" },
   })
 })

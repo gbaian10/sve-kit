@@ -1,3 +1,4 @@
+import { CREDITED_ARTIST, UNCREDITED_ARTIST } from "../../domain/artistFilter"
 import { cardNoKey, cardNoLookupKey } from "../../domain/cardNo"
 import { deckLocationBadges } from "../../domain/deckLocation"
 import {
@@ -47,6 +48,11 @@ interface SearchOption {
   readonly publicCode?: string
   readonly name: CardSummary["name"]
 }
+interface ArtistOption {
+  readonly id: string
+  /** The credit as the official site prints it; never translated. */
+  readonly name: string
+}
 export interface SearchOptions {
   readonly restrictions?: RestrictionStatus
   readonly restrictionDetails?: Readonly<Record<string, readonly CardRestriction[]>>
@@ -60,6 +66,10 @@ export interface SearchOptions {
   readonly traits: readonly SearchOption[]
   /** Printings per trait code in this edition. */
   readonly traitCounts: Readonly<Record<string, number>>
+  /** Artists credited on this edition's printings; empty until the printing closure completes. */
+  readonly artists: readonly ArtistOption[]
+  /** Printings per artist id in this edition. */
+  readonly artistCounts: Readonly<Record<string, number>>
   readonly prBadgeStyles: readonly string[]
   readonly rarityCounts: Readonly<Record<string, number>>
   readonly rarities: readonly SearchOption[]
@@ -171,6 +181,7 @@ const PRINTING_COLUMNS = [
   "art",
   "alt",
   "releaseDate",
+  "artists",
 ] as const
 const uintColumns = <T extends string>(names: readonly T[]) =>
   Object.fromEntries(names.map((name) => [name, [] as number[]])) as Record<T, number[]>
@@ -180,7 +191,7 @@ const seal = <T extends string>(columns: Record<T, number[]>): Record<T, Uint32A
   ) as Record<T, Uint32Array>
 
 /** Bump when the stored layout or derived data changes, so older images are rebuilt. */
-export const INDEX_IMAGE_FORMAT = 24
+export const INDEX_IMAGE_FORMAT = 26
 
 // Card-level special kinds, packed into the `kinds` column; Token stays per printing.
 const KIND_EVOLVE = 1
@@ -381,6 +392,8 @@ function optionsOf(
     locationCounts,
     traits,
     traitCounts,
+    artists: [],
+    artistCounts: {},
     prBadgeStyles: [
       ...new Set(
         printingRows
@@ -409,6 +422,52 @@ function optionsOf(
 function artOf(row: JsonObject | undefined): string {
   const first = Array.isArray(row?.["faces"]) ? row["faces"][0] : undefined
   return first ? stringValue(objectValue(first)["art_id"] ?? "") : ""
+}
+
+/** Every face's art: a double-faced printing is credited to the artists of both faces. */
+function artsOf(row: JsonObject | undefined): string[] {
+  const faces = Array.isArray(row?.["faces"]) ? row["faces"] : []
+  return faces.flatMap((face) => {
+    const art = objectValue(face)["art_id"]
+    return typeof art === "string" && art !== "" ? [art] : []
+  })
+}
+
+/**
+ * Artist options with their printing counts. The uncredited count only counts when some printing
+ * is credited at all: a snapshot without credits has nothing to tell the two apart.
+ */
+function artistOptions(counts: Record<string, number>, names: ReadonlyMap<string, string>) {
+  const { [UNCREDITED_ARTIST]: uncredited, [CREDITED_ARTIST]: anyCredit, ...credited } = counts
+  const hasCredits = Object.keys(credited).length > 0
+  return {
+    artists: Object.keys(credited).map((id) => ({ id, name: names.get(id) ?? id })),
+    artistCounts: {
+      ...credited,
+      ...(hasCredits && anyCredit ? { [CREDITED_ARTIST]: anyCredit } : {}),
+      ...(hasCredits && uncredited ? { [UNCREDITED_ARTIST]: uncredited } : {}),
+    },
+  }
+}
+
+/** The role prefix an edition's credits carry (`illustration_jp`, `illustration_en`). */
+const artistRole = (edition: Region) => `illustration_${edition}`
+
+/** Art id to the credited artist ids of one edition, and the names those ids stand for. */
+function artistCredits(bootstrap: BootstrapColumns, edition: Region) {
+  const names = new Map<string, string>()
+  for (const row of bootstrap.rows("artist"))
+    names.set(stringValue(row["id"]), stringValue(row["display_name"]))
+  const credits = new Map<string, string[]>()
+  for (const row of bootstrap.rows("art")) {
+    const ids = arrayValue(row["artists"] ?? [])
+      .map((raw) => objectValue(raw))
+      .filter((credit) => credit["role"] === artistRole(edition))
+      .map((credit) => stringValue(credit["artist_id"]))
+      .filter((id) => names.has(id))
+    if (ids.length) credits.set(stringValue(row["id"]), [...new Set(ids)].sort())
+  }
+  return { names, credits }
 }
 
 function mechanicMembership(bootstrap: BootstrapColumns, edition: Region) {
@@ -513,6 +572,8 @@ function build(
   const attacks: number[] = []
   const defenses: number[] = []
   const counts = facetCounts()
+  const artistCounts: Record<string, number> = {}
+  const { names: artistNames, credits: artistsByArt } = artistCredits(bootstrap, edition)
   let batch: CardSummary[] = []
   let summaryCount = 0
   const intern = (value: string | null | undefined) => pool.intern(value ?? "")
@@ -578,6 +639,11 @@ function build(
         intern(fullPrinting ? (badgeOf(fullPrinting)?.style ?? "unknown") : "unknown"),
       )
       printings.art.push(intern(art || printing.id))
+      const credited = [
+        ...new Set(artsOf(fullPrinting).flatMap((value) => artistsByArt.get(value) ?? [])),
+      ].sort()
+      printings.artists.push(pool.encode(credited))
+      tally(artistCounts, credited.length ? [...credited, CREDITED_ARTIST] : [UNCREDITED_ARTIST])
       printings.alt.push(Number(!!art && !!defaultArt && art !== defaultArt))
       printings.id.push(intern(printing.id))
       printings.releaseDate.push(intern(dates.get(printing.id)))
@@ -657,6 +723,7 @@ function build(
     sets,
     options: {
       ...options,
+      ...artistOptions(artistCounts, artistNames),
       keywordCoverage: "pending",
       ...(restrictions
         ? {
@@ -873,6 +940,8 @@ export class SearchIndex {
       targets: ColumnEdit[] = []
     let summaryCount = 0
     const counts = facetCounts()
+    const artistCounts: Record<string, number> = {}
+    const { names: artistNames, credits: artistsByArt } = artistCredits(bootstrap, this.edition)
     const rarities = new Map<string, JsonValue | undefined>()
     this.pool.reopen()
     try {
@@ -903,6 +972,9 @@ export class SearchIndex {
         printings.badge[ordinal] = intern(badgeOf(row)?.style ?? "unknown")
         printings.art[ordinal] = intern(art || id)
         printings.alt[ordinal] = Number(!!art && !!defaultArt && art !== defaultArt)
+        const credited = [...new Set(artsOf(row).flatMap((value) => artistsByArt.get(value) ?? []))]
+        printings.artists[ordinal] = this.pool.encode(credited.sort())
+        tally(artistCounts, credited.length ? [...credited, CREDITED_ARTIST] : [UNCREDITED_ARTIST])
         const bits = this.cards.kinds[card] ?? 0
         countPrinting(
           counts,
@@ -988,6 +1060,7 @@ export class SearchIndex {
       this.order = order
       this.optionsValue = {
         ...options,
+        ...artistOptions(artistCounts, artistNames),
         keywordCoverage: this.optionsValue.keywordCoverage,
         ...(this.optionsValue.restrictions
           ? {
@@ -1105,6 +1178,7 @@ export class SearchIndex {
         this.traitsOf(this.printings.card[printing] ?? 0).some((trait) =>
           state.traits.includes(trait),
         )) &&
+      (!state.artists.length || this.artistAllowed(state.artists, printing)) &&
       (!state.rarities.length ||
         state.rarities.some((rarity) => {
           const official = this.pool.get(this.printings.rarity[printing] ?? 0)
@@ -1414,6 +1488,16 @@ export class SearchIndex {
       evolve: (bits & KIND_EVOLVE) !== 0,
       advance: (bits & KIND_ADVANCE) !== 0,
     }
+  }
+
+  /** Any selected artist credits the printing, or the uncredited choice and nobody does. */
+  private artistAllowed(selected: readonly string[], printing: number): boolean {
+    const credited = arrayValue(this.pool.decode(this.printings.artists[printing] ?? 0))
+    return credited.length === 0
+      ? Object.hasOwn(this.optionsValue.artistCounts, UNCREDITED_ARTIST) &&
+          selected.includes(UNCREDITED_ARTIST)
+      : selected.includes(CREDITED_ARTIST) ||
+          credited.some((id) => selected.includes(stringValue(id)))
   }
 
   private traitsOf(card: number): string[] {

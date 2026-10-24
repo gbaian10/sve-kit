@@ -44,6 +44,7 @@ function Harness({ textLang = "zh-Hant" }: { readonly textLang?: TextLang }) {
         rarityLabel={(code) => code}
         typeLabel={(code) => code}
         traitLabel={(code) => code}
+        artistLabel={(id) => id}
         setLabel={(code) => code}
         keywordLabel={(id) =>
           vocabularyOptionLabel(
