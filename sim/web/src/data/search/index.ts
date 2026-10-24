@@ -1,3 +1,4 @@
+import { UNCREDITED_ARTIST } from "../../domain/artistFilter"
 import { cardNoKey, cardNoLookupKey } from "../../domain/cardNo"
 import { deckLocationBadges } from "../../domain/deckLocation"
 import {
@@ -432,6 +433,20 @@ function artsOf(row: JsonObject | undefined): string[] {
   })
 }
 
+/**
+ * Artist options with their printing counts. The uncredited count only counts when some printing
+ * is credited at all: a snapshot without credits has nothing to tell the two apart.
+ */
+function artistOptions(counts: Record<string, number>, names: ReadonlyMap<string, string>) {
+  const { [UNCREDITED_ARTIST]: uncredited, ...credited } = counts
+  const hasCredits = Object.keys(credited).length > 0
+  return {
+    artists: Object.keys(credited).map((id) => ({ id, name: names.get(id) ?? id })),
+    artistCounts:
+      hasCredits && uncredited ? { ...credited, [UNCREDITED_ARTIST]: uncredited } : credited,
+  }
+}
+
 /** The role prefix an edition's credits carry (`illustration_jp`, `illustration_en`). */
 const artistRole = (edition: Region) => `illustration_${edition}`
 
@@ -625,7 +640,7 @@ function build(
         ...new Set(artsOf(fullPrinting).flatMap((value) => artistsByArt.get(value) ?? [])),
       ].sort()
       printings.artists.push(pool.encode(credited))
-      tally(artistCounts, credited)
+      tally(artistCounts, credited.length ? credited : [UNCREDITED_ARTIST])
       printings.alt.push(Number(!!art && !!defaultArt && art !== defaultArt))
       printings.id.push(intern(printing.id))
       printings.releaseDate.push(intern(dates.get(printing.id)))
@@ -705,8 +720,7 @@ function build(
     sets,
     options: {
       ...options,
-      artists: Object.keys(artistCounts).map((id) => ({ id, name: artistNames.get(id) ?? id })),
-      artistCounts,
+      ...artistOptions(artistCounts, artistNames),
       keywordCoverage: "pending",
       ...(restrictions
         ? {
@@ -957,7 +971,7 @@ export class SearchIndex {
         printings.alt[ordinal] = Number(!!art && !!defaultArt && art !== defaultArt)
         const credited = [...new Set(artsOf(row).flatMap((value) => artistsByArt.get(value) ?? []))]
         printings.artists[ordinal] = this.pool.encode(credited.sort())
-        tally(artistCounts, credited)
+        tally(artistCounts, credited.length ? credited : [UNCREDITED_ARTIST])
         const bits = this.cards.kinds[card] ?? 0
         countPrinting(
           counts,
@@ -1043,8 +1057,7 @@ export class SearchIndex {
       this.order = order
       this.optionsValue = {
         ...options,
-        artists: Object.keys(artistCounts).map((id) => ({ id, name: artistNames.get(id) ?? id })),
-        artistCounts,
+        ...artistOptions(artistCounts, artistNames),
         keywordCoverage: this.optionsValue.keywordCoverage,
         ...(this.optionsValue.restrictions
           ? {
@@ -1162,10 +1175,7 @@ export class SearchIndex {
         this.traitsOf(this.printings.card[printing] ?? 0).some((trait) =>
           state.traits.includes(trait),
         )) &&
-      (!state.artists.length ||
-        arrayValue(this.pool.decode(this.printings.artists[printing] ?? 0)).some((id) =>
-          state.artists.includes(stringValue(id)),
-        )) &&
+      (!state.artists.length || this.artistAllowed(state.artists, printing)) &&
       (!state.rarities.length ||
         state.rarities.some((rarity) => {
           const official = this.pool.get(this.printings.rarity[printing] ?? 0)
@@ -1475,6 +1485,14 @@ export class SearchIndex {
       evolve: (bits & KIND_EVOLVE) !== 0,
       advance: (bits & KIND_ADVANCE) !== 0,
     }
+  }
+
+  /** Any selected artist credits the printing, or the uncredited choice and nobody does. */
+  private artistAllowed(selected: readonly string[], printing: number): boolean {
+    const credited = arrayValue(this.pool.decode(this.printings.artists[printing] ?? 0))
+    return credited.length === 0
+      ? selected.includes(UNCREDITED_ARTIST)
+      : credited.some((id) => selected.includes(stringValue(id)))
   }
 
   private traitsOf(card: number): string[] {

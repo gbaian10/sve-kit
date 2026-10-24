@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next"
 
 import type { SearchOptions } from "../../data"
+import { UNCREDITED_ARTIST } from "../../domain/artistFilter"
 import type { TextLang } from "../../domain/search"
 import { FacetFilter } from "./FacetFilter"
 
@@ -27,7 +28,11 @@ export function ArtistFilter({
   return (
     <FacetFilter
       label={t("filters.artists")}
-      groups={[items]}
+      groups={
+        options?.counts[UNCREDITED_ARTIST]
+          ? [items, [{ code: UNCREDITED_ARTIST, label: t("filters.artistUncredited") }]]
+          : [items]
+      }
       counts={options?.counts}
       selected={selected}
       onChange={onChange}

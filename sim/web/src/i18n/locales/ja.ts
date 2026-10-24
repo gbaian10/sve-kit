@@ -244,6 +244,7 @@ export default {
     sets: "カードセット",
     traits: "タイプ",
     artists: "イラストレーター",
+    artistUncredited: "公式表記なし",
     searchIn: "{{label}}を検索",
     noMatch: "該当する項目はありません",
     display: "表示方法",
@@ -457,6 +458,7 @@ export default {
 
     noValue: "—",
     artist: "イラストレーター：",
+    artistNone: "公式表記なし",
     artistLink: "{{name}}のカードを見る",
     previous: "前のカード",
     next: "次のカード",

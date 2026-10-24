@@ -246,6 +246,7 @@ export default {
     sets: "Sets",
     traits: "Trait",
     artists: "Illustrator",
+    artistUncredited: "Not credited",
     searchIn: "Search {{label}}",
     noMatch: "No matching entries",
     display: "Display",
@@ -462,6 +463,7 @@ export default {
 
     noValue: "—",
     artist: "Illustrator: ",
+    artistNone: "Not credited",
     artistLink: "Show cards by {{name}}",
     previous: "Previous",
     next: "Next",

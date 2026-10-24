@@ -234,9 +234,10 @@ export function CardView({
     return [stringValue(face["face_id"]), stringValue(face["art_id"] ?? "")] as const
   })
   const artsKey = JSON.stringify([client.base, client.snapshot()?.manifestHash, region, faceArts])
+  // `value` is absent when the read failed: then the line stays out instead of claiming no credit.
   const [credited, setCredited] = useState<{
     key: string
-    value: ReadonlyMap<string, readonly FaceArtist[]>
+    value?: ReadonlyMap<string, readonly FaceArtist[]>
   }>()
   useEffect(() => {
     const snapshot = client.snapshot()
@@ -249,7 +250,7 @@ export function CardView({
       },
       () => {
         // The artist line is optional; a failed read leaves it out instead of blocking the card.
-        if (active) setCredited({ key: artsKey, value: new Map() })
+        if (active) setCredited({ key: artsKey })
       },
     )
     return () => {
@@ -790,10 +791,12 @@ export function CardView({
               arrayValue(values?.["special_kinds"] ?? []),
             )
             const traits = (values?.["traits"] ?? []) as string[]
+            // Undefined until the credits are read (or when the read failed): nothing is claimed then.
+            const faceArt = faceArts.find(([face]) => face === faceId)?.[1] ?? ""
             const artistsOfFace =
-              credited?.key === artsKey
-                ? (credited.value.get(faceArts.find(([face]) => face === faceId)?.[1] ?? "") ?? [])
-                : []
+              credited?.key === artsKey && credited.value !== undefined && faceArt !== ""
+                ? (credited.value.get(faceArt) ?? [])
+                : undefined
             const cost = typeof values?.["cost"] === "number" ? values["cost"] : null
             const attack = typeof values?.["attack"] === "number" ? values["attack"] : null
             const defense = typeof values?.["defense"] === "number" ? values["defense"] : null
@@ -851,7 +854,13 @@ export function CardView({
                         <span>{traits.map((code) => label("trait", code)).join(joiner)}</span>
                       )}
                     </p>
-                    {artistsOfFace.length > 0 && (
+                    {artistsOfFace?.length === 0 && (
+                      <p data-card-artists="none" className="text-13 text-text-3">
+                        {t("cardPage.artist")}
+                        {t("cardPage.artistNone")}
+                      </p>
+                    )}
+                    {artistsOfFace !== undefined && artistsOfFace.length > 0 && (
                       <p data-card-artists="" className="text-13 text-text-2">
                         {t("cardPage.artist")}
                         {artistsOfFace.map((artist, index) => (

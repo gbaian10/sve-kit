@@ -90,9 +90,24 @@ const state = vi.hoisted(() => ({
   blank: [] as string[],
   /** The face's `printed_text_state` in the print-detail band; the face itself has no text. */
   printedTextState: null as string | null,
+  /** What the artist read gives back: credited, nobody credited, or a failed read. */
+  credits: null as "found" | "none" | "failed" | null,
   basisPrintingId: "p:undated",
   undated: [{ id: "p:undated", cardNo: "PR-SYNTHETIC" }],
   wording: vi.fn(),
+}))
+vi.mock("../../data", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../../data")>()),
+  artCredits: () =>
+    state.credits === "failed"
+      ? Promise.reject(new Error("synthetic read failure"))
+      : Promise.resolve(
+          new Map(
+            state.credits === "found"
+              ? [["a:synthetic", [{ id: "y:synthetic", name: "合成繪師" }]]]
+              : [],
+          ),
+        ),
 }))
 vi.mock("../../app/printing-detail", () => ({
   loadPrintedTextState: () => Promise.resolve(state.printedTextState ?? undefined),
@@ -115,6 +130,7 @@ vi.mock("../../app/snapshot", () => {
     card_id: "c:synthetic",
     region: state.crossRegion ? "en" : "jp",
     int_id: 42,
+    faces: [{ face_id: "f:synthetic", art_id: "a:synthetic" }],
   })
   // Most cases leave the exact name pending to exercise the catalog stand-in.
   const annotatedText = (
@@ -271,7 +287,12 @@ vi.mock("../../app/snapshot", () => {
     },
     useCardSnapshot: () => ({
       status: { state: "ready" },
-      client: { snapshot: () => null },
+      client: {
+        snapshot: () =>
+          state.credits
+            ? { manifestHash: "synthetic", manifest: { data_as_of: "2026-10-24" } }
+            : null,
+      },
       catalog: {
         // Previous/next walk this order; the synthetic card is first, so only "next" is enabled.
         results: () =>
@@ -407,6 +428,7 @@ vi.mock("../../app/snapshot", () => {
 
 beforeEach(() => {
   state.evolve = false
+  state.credits = null
   state.traits = ["synthetic"]
   state.originalName = false
   state.available = false
@@ -485,6 +507,42 @@ it("shows the shared type line and stats without a display revision", async () =
   expect(within(attack).getByText("4")).toBeVisible()
   const defense = screen.getAllByRole("listitem", { name: "生命值 5" })[0] as HTMLElement
   expect(within(defense).getByText("5")).toBeVisible()
+})
+
+describe("the artist line", () => {
+  const open = () => {
+    state.summary = true
+    state.originalName = true
+    return renderRoutes([{ path: "/cards/:cardNo/:slug?", ...card }], {
+      initialEntries: ["/cards/BP-SYNTHETIC"],
+      language: "zh-TW",
+    })
+  }
+
+  it("links each credited artist to the list filtered by that artist", async () => {
+    state.credits = "found"
+    await open()
+    const link = await screen.findByRole("link", { name: "查看繪師 合成繪師 的卡片" })
+    expect(link).toHaveAttribute("href", "/cards?artist=y%3Asynthetic")
+  })
+
+  it("says so, as plain text, when the official page credits nobody", async () => {
+    state.credits = "none"
+    await open()
+    const line = await screen.findByText("官方未標示", { exact: false })
+    expect(line.closest("[data-card-artists]")).toHaveTextContent("繪師：官方未標示")
+    expect(line.closest("[data-card-artists]")?.querySelector("a")).toBeNull()
+  })
+
+  it("leaves the line out when the read failed instead of claiming nobody is credited", async () => {
+    state.credits = "failed"
+    await open()
+    await screen.findByRole("heading", { level: 2 })
+    await waitFor(() => {
+      expect(document.querySelector("[data-card-artists]")).toBeNull()
+    })
+    expect(screen.queryByText("官方未標示")).not.toBeInTheDocument()
+  })
 })
 
 describe("plain wording on the card page", () => {

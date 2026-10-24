@@ -1,6 +1,7 @@
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 
+import { orderArtistTokens } from "../../domain/artistFilter"
 import { orderLocationTokens } from "../../domain/deckLocation"
 import { COST_CAP, type QueryState, STAT_CAP, toggleClass } from "../../domain/query/model"
 import { orderRarityTokens, UNRATED_RARITY } from "../../domain/rarityFilter"
@@ -147,7 +148,7 @@ export function ConditionChips({
       label: traitLabel(code),
       without: { ...query, traits: query.traits.filter((other) => other !== code) },
     })),
-    ...query.artists.map((id) => ({
+    ...orderArtistTokens(query.artists).map((id) => ({
       key: `artist:${id}`,
       label: artistLabel(id),
       without: { ...query, artists: query.artists.filter((other) => other !== id) },

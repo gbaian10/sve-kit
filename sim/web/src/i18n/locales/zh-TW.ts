@@ -234,6 +234,7 @@ const zhTW = {
     sets: "卡包",
     traits: "類型",
     artists: "繪師",
+    artistUncredited: "官方未標示",
     searchIn: "搜尋{{label}}",
     noMatch: "沒有符合的項目",
     display: "顯示方式",
@@ -442,6 +443,7 @@ const zhTW = {
 
     noValue: "—",
     artist: "繪師：",
+    artistNone: "官方未標示",
     artistLink: "查看繪師 {{name}} 的卡片",
     previous: "上一張",
     next: "下一張",
