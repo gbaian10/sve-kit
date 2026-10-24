@@ -71,9 +71,9 @@ const heightOf = (width: Width): number => (width < 1000 ? 844 : 900)
 type Geometry = Pick<Shot, "effectTop" | "horizontalScroll" | "overflow">
 
 async function waitReady(page: Page): Promise<void> {
-  // Ready = the dev badge carries the data version (title); loading and errors leave it empty.
+  // Ready = the footer carries the data version (title); loading and errors leave it empty.
   await page.waitForFunction(
-    `Boolean(document.querySelector("[data-manifest-hash]")?.getAttribute("title"))`,
+    `Boolean(document.querySelector("footer p[title]")?.getAttribute("title"))`,
     undefined,
   )
 }
