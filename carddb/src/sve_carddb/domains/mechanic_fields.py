@@ -39,7 +39,7 @@ if TYPE_CHECKING:
     from sve_carddb.domains.translations.four_layer_classification import Recognized
     from sve_carddb.domains.translations.four_layer_normalizer import SourcePart
 
-ADAPTER = "manual-keywords-fields-bp01-v9"
+ADAPTER = "manual-keywords-fields-bp01-v10"
 _EVOLUTION = re.compile(r"\{進化\}\{コスト[0-9]+\}：これは進化する。")
 _FIXED_EFFECT = re.compile(
     r"(?:\{ファンファーレ\}|\{ラストワード\}|【進化時】|"
@@ -211,6 +211,52 @@ _COST_ADJUSTMENT = re.compile(
 )
 
 
+_REMINDER_EFFECT = re.compile(
+    r"(?:"
+    r"\{ファンファーレ\}場の他のカード1枚を手札に戻す：これは"
+    + _STAT_GAIN
+    + r"（手札に戻ったトークンはゲームから取り除く）|"
+    r"自分の場のカード1枚を選ぶ。それを手札に戻す。[0-9]+枚引く。"
+    r"（手札に戻ったトークンはゲームから取り除く）|"
+    r"相手の場のフォロワー1体を選ぶ。それに[0-9]+ダメージ。"
+    r"【覚醒】状態なら、代わりに[0-9]+ダメージ。"
+    r"\(自分のPP最大値が7以上なら、【覚醒】状態になる\)|"
+    r"\{ファンファーレ\}相手のフォロワー1体を選ぶ。それをEXエリアに置く。"
+    r"（EXエリアに置いたエボルヴフォロワーはゲームから取り除く）|"
+    r"相手のフォロワー1体を選ぶ。それのプレイヤーはそれをデッキの上か下に置く。"
+    r"【コンボ_[0-9]+】それをデッキに置く代わりに、相手のフォロワーすべてを"
+    r"それのプレイヤーはデッキの上か下に置く。"
+    r"（1体ずつ上か下か決める）（デッキに置いたトークンはゲームから取り除く）"
+    r")"
+)
+_STATE_REPLACEMENT = re.compile(
+    r"(?:"
+    r"相手のフォロワー1体を選ぶ。このターン、それはダメージを与えない。|"
+    r"これが場にいる限り、自分がゴーレム・フォロワーをプレイする際、コストを-[0-9]+する。|"
+    r"自分の場にゴーレム・フォロワーが出たとき、"
+    r"相手のリーダー1人か相手の場のフォロワー1体を選ぶ。それに[0-9]+ダメージ。|"
+    r"これがいる限り、自分のフォロワーは攻撃力ではなく体力と同じダメージを与える。|"
+    r"【攻撃時】相手のフォロワーすべてに[0-9]+ダメージ。"
+    r"自分の墓場に『ツインプリズナー・フラム』と『ツインプリズナー・グラス』があるなら、"
+    r"代わりに[0-9]+ダメージ。"
+    r")"
+)
+_ZONE_COST_REPLACEMENT = re.compile(
+    r"(?:"
+    r"\{ファンファーレ\}自分のデッキの上1枚をEXエリアに置く。"
+    r"それをプレイする際、コストを-[0-9]+する。|"
+    r"各プレイヤーは、手札すべてをデッキに戻し、シャッフルし、戻した枚数と同じだけ引く。"
+    r"自分は、さらに[0-9]+枚引く。|"
+    r"これをプレイする際、場のスタンド状態の\{ナイトメア\}カード4枚を墓場に置く、"
+    r"または、EXエリアの\{ナイトメア\}カード4枚を消滅：コストを-[0-9]+する。|"
+    r"これをプレイする際、墓場のスペル10枚を消滅：コストを[0-9]+にする。|"
+    r"このターンのあと、自分の追加ターンを行う。|"
+    r"自分のデッキの上1枚をEXエリアに置く。これをEXエリアが上限になるまでくり返す。|"
+    r"次に自分のエンドフェイズが来たとき、自分のEXエリアのカードすべてを消滅させる。"
+    r")"
+)
+
+
 _BOUNDED_BODIES = (
     _EVOLUTION,
     _FIXED_EFFECT,
@@ -228,6 +274,8 @@ _BOUNDED_BODIES = (
     _DECK_LOOK,
     _COSTED_EFFECT,
     _COST_ADJUSTMENT,
+    _STATE_REPLACEMENT,
+    _ZONE_COST_REPLACEMENT,
 )
 
 
@@ -289,9 +337,29 @@ def _main_field(
     if "「" in raw or "」" in raw:
         return False
     derived = analyze_source(raw, source, settings.classifier)
+    # Certify the attached reminder with its entire line, never in isolation.
+    reminder_lines: list[tuple[int, int]] = []
+    offset = 0
+    for line in raw.split("\n"):
+        if _REMINDER_EFFECT.fullmatch(line):
+            reminder_lines.append((offset, offset + len(line)))
+        offset += len(line) + 1
     bodies = 0
     for part, found in zip(derived.field.parts, derived.recognized, strict=True):
         if part.source_span.role == "layout":
+            continue
+        if (
+            part.source_span.role in {"body", "reminder"}
+            and part.source_span.segments
+            and any(
+                all(
+                    start <= span.start and span.end <= end
+                    for span in part.source_span.segments
+                )
+                for start, end in reminder_lines
+            )
+        ):
+            bodies += part.source_span.role == "body"
             continue
         if part.source_span.role != "body":
             return False
