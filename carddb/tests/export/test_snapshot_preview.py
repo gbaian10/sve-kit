@@ -246,7 +246,10 @@ def test_missing_coverage_cannot_be_invented_complete(
         metadata=logical[0].metadata
         | {"source_windows": [], "restriction_coverage": []},
         tables=logical[0].tables
-        | {name: [] for name in ("qa", "errata", "cr_version", "restriction")},
+        | {
+            name: []
+            for name in ("qa", "errata", "cr_version", "rules_profile", "restriction")
+        },
     )
     require_offline_coverage(projection, errata=False)
     broken = replace(
@@ -254,7 +257,7 @@ def test_missing_coverage_cannot_be_invented_complete(
     )
     with pytest.raises(ValueError, match="Uncovered"):
         require_offline_coverage(broken, errata=False)
-    for table in ("errata", "cr_version", "restriction"):
+    for table in ("errata", "cr_version", "rules_profile", "restriction"):
         with pytest.raises(ValueError, match="Unrequested"):
             require_offline_coverage(
                 replace(
