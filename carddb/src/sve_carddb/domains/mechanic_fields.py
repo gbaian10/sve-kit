@@ -39,7 +39,7 @@ if TYPE_CHECKING:
     from sve_carddb.domains.translations.four_layer_classification import Recognized
     from sve_carddb.domains.translations.four_layer_normalizer import SourcePart
 
-ADAPTER = "manual-keywords-fields-bp01-v10"
+ADAPTER = "manual-keywords-fields-bp01-v11"
 _EVOLUTION = re.compile(r"\{進化\}\{コスト[0-9]+\}：これは進化する。")
 _FIXED_EFFECT = re.compile(
     r"(?:\{ファンファーレ\}|\{ラストワード\}|【進化時】|"
@@ -257,6 +257,33 @@ _ZONE_COST_REPLACEMENT = re.compile(
 )
 
 
+_NAMED_TOKEN = re.compile(
+    r"(?:"
+    r"【進化時】『乙姫お守り隊』3枚を、場が上限になるまで出す。残りをEXエリアに置く。|"
+    r"(?:\{ファンファーレ\}|\{起動\}これを\{アクト\}【土の秘術】：)"
+    r"『防御型ゴーレム』1体か『攻撃型ゴーレム』1体を出す。|"
+    r"\{起動\}これを\{アクト\}：『大地の魔片』1つを出す。|"
+    r"\{ファンファーレ\}『冥焔の右腕・ミミ』1枚か『冥焔の左腕・ココ』1枚をEXエリアに置く。"
+    r"【ネクロチャージ_[0-9]+】代わりに1枚ずつ置く。|"
+    r"【進化時】『冥焔の右腕・ミミ』『冥焔の左腕・ココ』1枚ずつEXエリアに置く。|"
+    r"\{起動\}\{コスト[0-9]+\}これと『ツインプリズナー・グラス』1体を墓場に置く："
+    r"自分のデッキから『フラム＝グラス』1枚を探し、場に出す。"
+    r")"
+)
+_STACK_COUNTER = re.compile(
+    r"(?:"
+    r"【スタック】|"
+    r"\{ファンファーレ\}体力[0-9]+以下の相手のフォロワー1体を選ぶ。それを消滅させる。|"
+    r"\{ラストワード\}『大地の魔片』1つを出す。自分の場の【スタック】を\+[0-9]+する。|"
+    r"(?:\{ファンファーレ\}【土の秘術】|\{起動\}これを\{アクト\}【土の秘術】：)"
+    r"相手のフォロワー1体を選ぶ。それに[0-9]+ダメージ。それのリーダーに[0-9]+ダメージ。|"
+    r"自分がスペルをプレイしたとき、これにスペルカウンター[0-9]+つを置く。|"
+    r"\{起動\}これのスペルカウンター[0-9]+つを取る：相手のフォロワー1体を選ぶ。"
+    r"それに[0-9]+ダメージ。"
+    r")"
+)
+
+
 _BOUNDED_BODIES = (
     _EVOLUTION,
     _FIXED_EFFECT,
@@ -276,6 +303,8 @@ _BOUNDED_BODIES = (
     _COST_ADJUSTMENT,
     _STATE_REPLACEMENT,
     _ZONE_COST_REPLACEMENT,
+    _NAMED_TOKEN,
+    _STACK_COUNTER,
 )
 
 
