@@ -26,6 +26,7 @@ from .test_registry import inputs as inputs  # ruff: ignore[useless-import-alias
 if TYPE_CHECKING:
     from pathlib import Path
 
+    from sve_carddb.core.regions import Region
     from sve_carddb.domains.registry.review import Inputs
     from sve_carddb.domains.registry.storage import Entry
 
@@ -74,8 +75,17 @@ def test_reversed_source_face_map_retains_per_face_credits(
         assert face_credits[faces[1]["id"]] == "Synthetic artist 0"
 
 
+@pytest.mark.parametrize(
+    ("credit", "name"),
+    [
+        ("Synthetic artist 0", "Synthetic artist 0"),
+        (" \tDesign: A／B\nIllustration: C　\n", "Design: A／B\nIllustration: C"),
+        (None, None),
+        (" \t　\n", None),
+    ],
+)
 def test_shared_art_credit_becomes_one_regional_artist(
-    tmp_path: Path, inputs: Inputs
+    tmp_path: Path, inputs: Inputs, credit: str | None, name: str | None
 ) -> None:
     inputs.en["PR-002EN"] = inputs.en["BP02-070EN"].model_copy(
         deep=True, update={"number": "PR-002EN"}
@@ -84,18 +94,82 @@ def test_shared_art_credit_becomes_one_regional_artist(
     inputs.mapping.original_art.add("PR-002EN")
     inputs.decisions.art_groups = [["BP02-070EN", "PR-002EN"]]
     write_files(plan_files(tmp_path, build(inputs, {})))
-    plan = plan_preview(tmp_path, evidence(inputs), regions=("jp", "en"))
+    provider = evidence(inputs)
+    cards = dict(provider.cards)
+    for number in ("BP02-070EN", "PR-002EN"):
+        original = cards["en", number]
+        cards["en", number] = replace(
+            original, faces=(replace(original.faces[0], credit_raw=credit),)
+        )
+    plan = plan_preview(tmp_path, replace(provider, cards=cards), regions=("jp", "en"))
     with create_database(compile_build(("en", "related"))) as db:
         parents(db, plan)
         import_preview(db, plan, build=BUILD, authored_revision=REVISION)
         artists = [row.values for row in db.rows("artist")]
         links = [row.values for row in db.rows("art_artist")]
-    assert [(row["display_name"], row["region"]) for row in artists] == [
-        ("Synthetic artist 0", "en")
-    ]
+        assert {
+            row.values["credit_raw"]
+            for row in db.rows("printing_face")
+            if row.values["art_id"] is not None
+        } == {credit}
+    if name is None:
+        assert not artists
+        assert not links
+        return
+    assert [(row["display_name"], row["region"]) for row in artists] == [(name, "en")]
     assert [(row["artist_id"], row["role"]) for row in links] == [
         (artists[0]["id"], "illustration_en")
     ]
+
+
+@pytest.mark.parametrize("regions", [("jp", "en"), ("jp",), ("en",)])
+def test_shared_art_keeps_same_credit_separate_by_region(
+    tmp_path: Path, inputs: Inputs, regions: tuple[Region, ...]
+) -> None:
+    entries = build(inputs, {})
+    printing = next(
+        entry
+        for entry in entries
+        if entry.kind == "printing"
+        and entry.data["region"] == "jp"
+        and entry.data["card_no"] == "BP02-071"
+    )
+    write_files(plan_files(tmp_path, entries))
+
+    def share(entry: Entry) -> None:
+        uses = entry.data["uses"]
+        assert isinstance(uses, list)
+        uses.append(
+            {"printing_id": printing.data["id"], "face_id": entry.data["face_id"]}
+        )
+
+    edit_record(tmp_path, "art", share)
+    plan = plan_preview(tmp_path, evidence(inputs), regions=regions)
+    with create_database(compile_build(("en", "related"))) as db:
+        parents(db, plan)
+        import_preview(db, plan, build=BUILD, authored_revision=REVISION)
+        artists = {row.values["id"]: row.values for row in db.rows("artist")}
+        arts = db.rows("art")
+        assert len(arts) == 1
+        links = [row.values for row in db.rows("art_artist")]
+        assert {row["art_id"] for row in links} == {arts[0].values["id"]}
+        assert sorted(
+            (artists[row["artist_id"]]["region"], row["role"], row["source_id"])
+            for row in links
+        ) == sorted(
+            (
+                region,
+                f"illustration_{region}",
+                plan.evidence[
+                    region, "BP02-071" if region == "jp" else "BP02-070EN"
+                ].source.id,
+            )
+            for region in regions
+        )
+        assert {row["display_name"] for row in artists.values()} == {
+            "Synthetic artist 0"
+        }
+        assert len(artists) == len(regions)
 
 
 def test_reskin_requires_every_endpoint_variant_not_just_one(
