@@ -266,8 +266,8 @@ if (devHttps && (tlsCertPath !== undefined || tlsKeyPath !== undefined)) {
 
 export default defineConfig({
   build: { license: { fileName: "third-party-licenses.md" } },
-  // Only these two flags reach browser code: the badge hides its root switch without a preview,
-  // and dev starts on the preview root when /cdn is still the fixture (src/app/dev-root.ts).
+  // Only these two flags reach browser code: dev starts on the preview root when a preview is
+  // configured and /cdn is still the fixture (src/app/dev-root.ts).
   define: {
     "import.meta.env.SVE_PREVIEW_CONFIGURED": JSON.stringify(previewDir === undefined ? "" : "1"),
     "import.meta.env.SVE_CDN_IS_FIXTURE": JSON.stringify(cdnDir === FIXTURE_ROOT ? "1" : ""),

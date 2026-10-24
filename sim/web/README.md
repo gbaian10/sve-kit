@@ -24,8 +24,7 @@ Set `SVE_DEV_TLS_CERT` and `SVE_DEV_TLS_KEY` to absolute paths to use a certific
 Screens are developed and accepted against a real `4.0.0` preview export with real WebP images,
 never against the synthetic fixture. Point `SVE_PREVIEW_DIR` at the preview root (the directory
 that holds `snapshots/` and `images/`); its entry is `snapshots/preview/current.json`, not the
-formal version index. The dev server serves it under `/cdn-preview` and the dev badge shows
-「預覽資料」 with the data version.
+formal version index. The dev server serves it under `/cdn-preview`.
 
 ```bash
 SVE_EXPORT_DIR= SVE_PREVIEW_DIR=/path/to/preview-root bun run dev:lan
@@ -34,7 +33,8 @@ SVE_EXPORT_DIR= SVE_PREVIEW_DIR=/path/to/preview-root bun run dev:lan
 In dev the app starts on the preview root on its own when a preview is configured **and** `/cdn`
 is still the fixture (`src/app/dev-root.ts`); an empty `SVE_EXPORT_DIR` forces the fixture when a
 shell profile sets a real export directory. With a real `/cdn` export the app starts on the formal
-root and the badge switches roots by hand. Only two derived flags reach browser code
+root, and nothing in the UI switches roots any more; restart the dev server with other environment
+variables to change them. Only two derived flags reach browser code
 (`SVE_PREVIEW_CONFIGURED`, `SVE_CDN_IS_FIXTURE`); paths stay in the Vite server.
 
 ## Scripts

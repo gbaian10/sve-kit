@@ -9,7 +9,6 @@ import { ToastProvider } from "../components/ui/Toast"
 import { snapshotClient } from "../data"
 import { showsOtherEdition, usePrefs } from "../settings"
 import { CARD_PARAM } from "./card-overlay"
-import { DevBadge } from "./DevBadge"
 import { useUiLanguageSync } from "./language"
 import { useOtherEdition } from "./other-edition"
 import { useActiveSnapshot, useRouteEdition, useSearchReadiness } from "./snapshot"
@@ -64,9 +63,6 @@ export function AppShell() {
         </main>
         <Footer dataVersion={status.state === "ready" ? status.dataVersion : undefined} />
         <BottomNav />
-        {(import.meta.env.DEV || import.meta.env.VITE_SVE_DEV_TOOLS === "1") && (
-          <DevBadge client={client} />
-        )}
       </div>
       <ScrollRestoration
         getKey={(location) => location.pathname + scrollKeySearch(location.search)}
