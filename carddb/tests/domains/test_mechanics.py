@@ -432,7 +432,9 @@ def test_first_batch_fixed_effects_prove_absence_without_positive_labels(
         pytest.param("相手は1枚引く。", id="draw-other-player"),
         pytest.param("X枚引く。", id="draw-variable"),
         pytest.param("１枚引く。", id="draw-fullwidth"),
-        pytest.param("1枚引く。自分の手札1枚を捨てる。", id="draw-discard"),
+        pytest.param(
+            "1枚引く。自分の手札1枚を捨てる。", id="draw-discard-without-head"
+        ),
         pytest.param(
             "{起動}手札の【合成乙】を持つカード1枚を捨てる：1枚引く。",
             id="draw-keyword-cost",
@@ -665,6 +667,127 @@ def test_first_batch_stats_and_quick_prove_absence_without_labels(
 )
 @pytest.mark.parametrize("positive", [False, True])
 def test_stats_and_quick_leave_unproved_fields_open(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, raw: str, positive: bool
+) -> None:
+    with case(
+        tmp_path,
+        monkeypatch,
+        ("【合成甲】\n" if positive else "") + raw,
+        first_batch=True,
+    ) as (db, inputs, settings, _):
+        with db.transaction():
+            report = mechanics.apply(db, inputs, settings)
+        assert report["complete_cards"] == 0
+        coverage = db.rows("card_mechanic_coverage")
+        if positive or coverage:
+            assert coverage[0].values["complete_all"] is False
+            assert coverage[0].values["complete_keyword_ids"] == Json([])
+        else:
+            assert not db.rows("mechanic_projection")
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        "【進化時】アクト状態の相手のフォロワー1体を選ぶ。それを破壊する。",
+        "{クイック}\n自分のフォロワー1体を選ぶ。それを破壊する。2枚引く。",
+        "場のフォロワーすべてを破壊する。",
+        "{クイック}\n体力3以下の相手のフォロワー1体を選ぶ。それを消滅させる。",
+        (
+            "{クイック}\n自分の場のカード1枚を選ぶ。それを破壊する。"
+            "自分のリーダーは{体力}+3する。1枚引く。"
+        ),
+        "【進化時】相手のEXエリアのカード1枚を選ぶ。それを消滅させる。",
+        "{クイック}\n相手の場のカード1枚を選ぶ。それを破壊する。",
+        "【攻撃時】1枚引く。自分の手札1枚を捨てる。",
+        "{進化}{コスト2}：これは進化する。\n{ファンファーレ}2枚引く。自分の手札1枚を捨てる。",
+        "{ファンファーレ}1枚引く。自分の手札1枚をデッキの下に置く。",
+        "【進化時】自分のデッキから{進化}を持つフォロワー1枚を探し、手札に加える。",
+        "{ファンファーレ}自分のデッキから{ロイヤル}フォロワー1枚を探し、手札に加える。",
+        "{ファンファーレ}自分のデッキから忍者・カード1枚を探し、手札に加える。",
+        "{進化}{コスト2}：これは進化する。\n{ファンファーレ}自分のデッキからスペル1枚を探し、手札に加える。",
+        "【進化時】自分のデッキからアミュレット1枚を探し、手札に加える。",
+        "体力10以下の相手のフォロワー1体を選ぶ。それを消滅させる。",
+        "自分の場のカード1枚を選ぶ。それを破壊する。自分のリーダーは{体力}+0する。12枚引く。",
+        "【攻撃時】12枚引く。自分の手札0枚を捨てる。",
+        "{ファンファーレ}10枚引く。自分の手札2枚をデッキの下に置く。",
+    ],
+    ids=[f"movement-{index}" for index in range(19)],
+)
+@pytest.mark.parametrize("positive", [False, True])
+def test_bounded_movement_proves_all_relations(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, raw: str, positive: bool
+) -> None:
+    with case(
+        tmp_path,
+        monkeypatch,
+        ("【合成甲】\n" if positive else "") + raw,
+        first_batch=True,
+    ) as (db, inputs, settings, _):
+        with db.transaction():
+            report = mechanics.apply(db, inputs, settings)
+        assert report["complete_cards"] == 1
+        assert db.rows("card_mechanic_coverage")[0].values["complete_all"] is True
+        projection = db.rows("mechanic_projection")
+        if positive:
+            assert len(projection) == 1
+            assert projection[0].values["keyword_id"] == "kw:ward"
+            assert projection[0].values["relations"] == Json(["has"])
+        else:
+            assert not projection
+            assert not db.rows("card_mechanic")
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        "【進化時】スタンド状態の相手のフォロワー1体を選ぶ。それを破壊する。",
+        "【進化時】【合成乙】を持つ相手のフォロワー1体を選ぶ。それを破壊する。",
+        "相手のフォロワー1体を選ぶ。それを破壊する。【スペルチェイン_10】それのリーダーに3ダメージ。",
+        "{起動}これを{アクト}：相手の場のカード1枚を選ぶ。それを破壊する。",
+        "体力３以下の相手のフォロワー1体を選ぶ。それを消滅させる。",
+        "体力X以下の相手のフォロワー1体を選ぶ。それを消滅させる。",
+        "体力3以下の相手のフォロワー1体まで選ぶ。それを消滅させる。",
+        "体力3以下の相手のフォロワー1体を選ぶ。それを破壊する。",
+        "場の【合成乙】を持つフォロワーすべてを破壊する。",
+        "場のフォロワーすべてを破壊する。1枚引く。",
+        "自分のフォロワー1体を選ぶ。それを破壊する。２枚引く。",
+        "自分の場のカード1枚を選ぶ。それを破壊する。1枚引く。自分のリーダーは{体力}+3する。",
+        "【進化時】相手のEXエリアの【合成乙】を持つカード1枚を選ぶ。それを消滅させる。",
+        "相手の場のカード1枚を選ぶ。それを破壊する。（未証明）",
+        "相手の場のカード1枚を選ぶ。それを破壊する。仮。",
+        "これは「\n場のフォロワーすべてを破壊する。\n」を持つ。",
+        "【攻撃時】1枚引く。自分の手札の【合成乙】を持つカード1枚を捨てる。",
+        "【攻撃時】1枚引く。相手の手札1枚を捨てる。",
+        "【攻撃時】1枚引く。自分の手札１枚を捨てる。",
+        "【攻撃時】1枚引く。自分の手札X枚を捨てる。",
+        "【攻撃時】1枚引く。自分の手札1枚を捨てる。この能力は1ターンに1回使える。",
+        "【攻撃時】自分の手札1枚を捨てる：1枚引く。",
+        "{ファンファーレ}1枚引く。自分の手札1枚をデッキの上に置く。",
+        "{ファンファーレ}1枚引く。自分の手札1枚をデッキの下に置いてよい。",
+        "{ファンファーレ}自分の手札1枚をデッキの下に置く。1枚引く。",
+        "【進化時】自分のデッキから【合成乙】を持つフォロワー1枚を探し、手札に加える。",
+        "【進化時】相手のデッキからアミュレット1枚を探し、手札に加える。",
+        "【進化時】自分のデッキからアミュレット2枚を探し、手札に加える。",
+        "【進化時】自分のデッキからアミュレット1枚を探し、場に出す。",
+        "{ファンファーレ}【覚醒】状態なら、自分のデッキからスペル1枚を探し、手札に加える。",
+        "{ファンファーレ}自分のデッキからスペル1枚を探し、手札に加える。仮。",
+        "{ファンファーレ}自分のデッキからスペル1枚を探し、手札に加える。（未証明）",
+        "【進化時】自分のデッキから{進化}を持つフォロワー１枚を探し、手札に加える。",
+        "{ファンファーレ}自分のデッキからスペル1枚を探し、\n手札に加える。",
+        "【進化時】場のフォロワーすべてを破壊する。",
+        "{ファンファーレ}相手の場のカード1枚を選ぶ。それを破壊する。",
+        "【進化時】自分のフォロワー1体を選ぶ。それを破壊する。1枚引く。",
+        "【進化時】1枚引く。自分の手札1枚を捨てる。",
+        "【攻撃時】1枚引く。自分の手札1枚をデッキの下に置く。",
+        "【進化時】自分のデッキから忍者・カード1枚を探し、手札に加える。",
+        "{ファンファーレ}自分のデッキからアミュレット1枚を探し、手札に加える。",
+        "{ファンファーレ}自分のデッキから{進化}を持つフォロワー1枚を探し、手札に加える。",
+    ],
+    ids=[f"unproved-movement-{index}" for index in range(42)],
+)
+@pytest.mark.parametrize("positive", [False, True])
+def test_bounded_movement_leaves_unproved_fields_open(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, raw: str, positive: bool
 ) -> None:
     with case(
