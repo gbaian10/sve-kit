@@ -19,7 +19,7 @@ import { VerifiedCache } from "../verified-cache"
 import type { SearchBlobs } from "./blobs"
 import type { SearchIndex, SearchOptions, SearchPage, SearchQuery } from "./index"
 
-const VIEW_FORMAT = 8
+const VIEW_FORMAT = 9
 const REGION_POLICY = "selected-region"
 export interface ViewFace {
   readonly printingId: string

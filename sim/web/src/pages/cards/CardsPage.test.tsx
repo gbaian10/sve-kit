@@ -865,3 +865,12 @@ describe("CardsPage", () => {
     })
   })
 })
+
+it("shows the unknown restriction notice for a restored URL even with the filter panel closed", async () => {
+  await open("/cards?ed=en&restricted=1", { panel: false })
+  expect(
+    screen
+      .getAllByRole("status")
+      .some((notice) => notice.textContent.includes("禁限資料未確認，無法篩選")),
+  ).toBe(true)
+})

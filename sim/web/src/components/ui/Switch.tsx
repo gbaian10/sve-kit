@@ -1,6 +1,7 @@
 import { cn } from "./cn"
 
 export interface SwitchProps {
+  readonly disabled?: boolean
   readonly checked: boolean
   readonly onChange: (checked: boolean) => void
   readonly label: string
@@ -14,6 +15,7 @@ export interface SwitchProps {
 // a strong border. The button itself is 44px tall so the touch target meets the phone minimum.
 export function Switch({
   checked,
+  disabled = false,
   onChange,
   label,
   describedBy,
@@ -27,6 +29,7 @@ export function Switch({
     <button
       type="button"
       role="switch"
+      disabled={disabled}
       aria-checked={checked}
       aria-label={label}
       aria-describedby={describedBy}

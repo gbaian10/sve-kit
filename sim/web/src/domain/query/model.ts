@@ -47,6 +47,7 @@ export interface QueryState {
   readonly rarities: readonly string[]
   readonly altArtOnly: boolean
   readonly errataOnly: boolean
+  readonly restrictionsOnly: boolean
   /** Filters on registered reprint printings; a merged-by-card list ignores it. */
   readonly reprints: ReprintMode
   readonly unit: QueryUnit
@@ -73,6 +74,7 @@ export const DEFAULT_QUERY: QueryState = {
   rarities: [],
   altArtOnly: false,
   errataOnly: false,
+  restrictionsOnly: false,
   reprints: "all",
   unit: "printing",
   representative: "low",
@@ -95,6 +97,7 @@ export function activeFilterCount(state: QueryState): number {
     (state.rarities.length > 0 ? 1 : 0) +
     (state.altArtOnly ? 1 : 0) +
     (state.errataOnly ? 1 : 0) +
+    (state.restrictionsOnly ? 1 : 0) +
     (state.reprints !== DEFAULT_QUERY.reprints ? 1 : 0) +
     (state.unit !== DEFAULT_QUERY.unit ? 1 : 0)
   )

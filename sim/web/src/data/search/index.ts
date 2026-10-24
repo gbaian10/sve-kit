@@ -27,6 +27,7 @@ import {
   objectValue,
   stringValue,
 } from "../format-v3/json"
+import type { RestrictionSelection, RestrictionStatus } from "../restrictions"
 import type { CardIndex } from "../store"
 import type { BootstrapColumns } from "./bootstrap"
 import { cardNumberOrder } from "./card-number-order"
@@ -47,6 +48,7 @@ interface SearchOption {
   readonly name: CardSummary["name"]
 }
 export interface SearchOptions {
+  readonly restrictions?: RestrictionStatus
   readonly keywords: readonly SearchOption[]
   readonly keywordCoverage: "pending" | "unknown" | "partial" | "complete"
   readonly types: readonly SearchOption[]
@@ -148,6 +150,7 @@ const CARD_COLUMNS = [
   "present",
   "absent",
   "errata",
+  "restricted",
 ] as const
 const PRINTING_COLUMNS = [
   "id",
@@ -176,7 +179,7 @@ const seal = <T extends string>(columns: Record<T, number[]>): Record<T, Uint32A
   ) as Record<T, Uint32Array>
 
 /** Bump when the stored layout or derived data changes, so older images are rebuilt. */
-export const INDEX_IMAGE_FORMAT = 22
+export const INDEX_IMAGE_FORMAT = 23
 
 // Card-level special kinds, packed into the `kinds` column; Token stays per printing.
 const KIND_EVOLVE = 1
@@ -482,6 +485,7 @@ function build(
   bootstrap: BootstrapColumns,
   edition: Region,
   errataCards: ReadonlySet<string>,
+  restrictions?: RestrictionSelection,
 ): Parts {
   const dates = releaseDates(bootstrap)
   const pool = new StringPool()
@@ -524,6 +528,7 @@ function build(
     const card = cards.id.length
     cards.id.push(intern(entry.cardId))
     cards.errata.push(Number(errataCards.has(entry.cardId)))
+    cards.restricted.push(Number(restrictions?.cards.has(entry.cardId)))
     cards.class.push(intern(entry.classCode ?? NEUTRAL_CLASS))
     cards.printingStart.push(printings.id.length)
     cards.nameStart.push(names.length)
@@ -652,6 +657,7 @@ function build(
     options: {
       ...options,
       keywordCoverage: "pending",
+      ...(restrictions ? { restrictions: restrictions.status } : {}),
     },
     releases,
     targets,
@@ -767,11 +773,12 @@ export class SearchIndex {
     source: BootstrapColumns | Uint8Array,
     edition: Region,
     errataCards: ReadonlySet<string> = new Set(),
+    restrictions?: RestrictionSelection,
   ) {
     this.edition = edition
     const parts = ArrayBuffer.isView(source)
       ? restore(source, edition)
-      : build(source, edition, errataCards)
+      : build(source, edition, errataCards, restrictions)
     this.pool = parts.pool
     this.summaries = parts.summaries
     this.cards = parts.cards
@@ -973,7 +980,11 @@ export class SearchIndex {
       this.summaries = completedSummaries
       this.targets = completedTargets
       this.order = order
-      this.optionsValue = { ...options, keywordCoverage: this.optionsValue.keywordCoverage }
+      this.optionsValue = {
+        ...options,
+        keywordCoverage: this.optionsValue.keywordCoverage,
+        ...(this.optionsValue.restrictions ? { restrictions: this.optionsValue.restrictions } : {}),
+      }
       this.releasesValue = releases
       this.indexTargets()
     } finally {
@@ -1129,6 +1140,7 @@ export class SearchIndex {
     const negative = Object.keys(state.mechanics).filter((id) => state.mechanics[id] === "not")
     for (let card = 0; card < this.cards.id.length; card += 1) {
       if (state.errataOnly && this.cards.errata[card] !== 1) continue
+      if (state.restrictionsOnly && this.cards.restricted[card] !== 1) continue
       if (
         positive.length &&
         !arrayValue(this.pool.decode(this.cards.present[card] ?? 0)).some((id) =>

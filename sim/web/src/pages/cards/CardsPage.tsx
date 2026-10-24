@@ -700,6 +700,17 @@ export function CardsPage() {
         <h1 className="sr-only">{t("pages.cards")}</h1>
       )}
       <StatusStrip readiness={readiness} />
+      {query.restrictionsOnly && (
+        <Notice tone="info" role="status">
+          {!printingOptions?.restrictions || printingOptions.restrictions.state === "unknown"
+            ? t("filters.restrictionsUnknown")
+            : t("filters.restrictionsDate", { date: printingOptions.restrictions.onDate })}
+          {printingOptions?.restrictions?.synthetic ? ` ${t("filters.restrictionsSynthetic")}` : ""}
+          {printingOptions?.restrictions?.state === "partial"
+            ? ` ${t("filters.restrictionsPartial")}`
+            : ""}
+        </Notice>
+      )}
       <div className="relative z-20">
         <SearchBar
           value={input}
@@ -807,6 +818,7 @@ export function CardsPage() {
         onChange={commit}
         edition={edition}
         onEditionChange={commitEdition}
+        restrictions={printingOptions?.restrictions}
         resultTotal={page?.total}
         onClose={() => {
           prefsStore.set({ filterPanelOpen: false })

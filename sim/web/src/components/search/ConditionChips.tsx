@@ -164,6 +164,15 @@ export function ConditionChips({
         label: setLabel(code),
         without: { ...query, sets: query.sets.filter((other) => other !== code) },
       })),
+    ...(query.restrictionsOnly
+      ? [
+          {
+            key: "restricted",
+            label: t("filters.restrictionsOnly"),
+            without: { ...query, restrictionsOnly: false },
+          },
+        ]
+      : []),
     ...(query.errataOnly
       ? [
           {

@@ -31,6 +31,7 @@ import {
   stringValue,
 } from "./format-v3/json"
 import { type Fragment, mergedRowsCursor, validateCatalogCursor } from "./format-v3/reader"
+import { selectRestrictions } from "./restrictions"
 import { type CardIndex, cardIndexCursor } from "./store"
 
 /** What a list cell or suggestion row shows for one card without loading any detail file. */
@@ -358,6 +359,24 @@ function* catalogCursor(snapshot: LoadedSnapshot, lazy = false): Generator<void,
     const unit = index.textUnit(stringValue(row["label_unit_id"]))
     return unit ? stringValue(unit["text"]) : code
   }
+  const restrictionRows = new Map<string, import("./format-v3/decode").Row[]>()
+  for (const fragment of snapshot.bootstrap) {
+    const rows = restrictionRows.get(fragment.table) ?? []
+    rows.push(...fragment.rows)
+    restrictionRows.set(fragment.table, rows)
+  }
+  const restrictions = new Map(
+    (["jp", "en"] as const).map((region) => [
+      region,
+      selectRestrictions(
+        snapshot.manifest,
+        (table) => restrictionRows.get(table) ?? [],
+        index,
+        region,
+        stringValue(snapshot.manifest["data_as_of"]),
+      ),
+    ]),
+  )
   const errataCards = new Map(
     ["jp", "en"].map((region) => [
       region,
@@ -387,9 +406,12 @@ function* catalogCursor(snapshot: LoadedSnapshot, lazy = false): Generator<void,
     results: (state, edition) =>
       apply(
         state,
-        state.errataOnly
-          ? searchEntries().filter((entry) => errataCards.get(edition)?.has(entry.cardId) === true)
-          : searchEntries(),
+        searchEntries().filter(
+          (entry) =>
+            (!state.errataOnly || errataCards.get(edition)?.has(entry.cardId) === true) &&
+            (!state.restrictionsOnly ||
+              restrictions.get(edition)?.cards.has(entry.cardId) === true),
+        ),
         { edition, sets },
       ),
     summary: (printingId) => {

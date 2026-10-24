@@ -42,6 +42,7 @@ export {
   retainedImageIndex,
 } from "./images"
 export { createLocator, GLOBAL_OWNER } from "./locator"
+export type { RestrictionStatus } from "./restrictions"
 export {
   activeSnapshotRoot,
   setActiveSnapshotRoot,

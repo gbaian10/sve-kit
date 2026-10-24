@@ -16,6 +16,7 @@ import {
 import { catalogKeys, isCompatible } from "../format-v3/reader"
 import { checkEntry, entryFields, indexEntries } from "../index-entry"
 import { transferDigest } from "../integrity"
+import { selectRestrictions } from "../restrictions"
 import { VerifiedCache } from "../verified-cache"
 import { SearchBlobs } from "./blobs"
 import { BootstrapColumns } from "./bootstrap"
@@ -33,7 +34,22 @@ import type {
 import { PreviewReader } from "./preview"
 import { completeImages, type CompleteView, completeView, ViewCache, viewSlot } from "./view"
 
-const defaultPlan: BootstrapPlan = (_manifest, files, region) => catalogKeys(files, region)
+const defaultPlan: BootstrapPlan = (manifest, files, region) => [
+  ...new Set([
+    ...catalogKeys(files, region),
+    ...(arrayValue(manifest["restriction_coverage"]).length
+      ? [...files]
+          .filter(([, file]) =>
+            arrayValue(file["row_counts"]).some((count) =>
+              ["rules_profile", "restriction", "rules_name", "face_rules_name"].includes(
+                stringValue(arrayValue(count)[0]),
+              ),
+            ),
+          )
+          .map(([key]) => key)
+      : []),
+  ]),
+]
 /** A stored index with what the ready event and the index entry check need from its manifest. */
 function readRecord(bytes: Uint8Array, edition: Region) {
   const { header, arrays } = unpack(bytes)
@@ -441,6 +457,7 @@ export class SearchEngine {
       ...new Set(this.plan(manifest, files, request.edition).filter((key) => key !== configKey)),
     ]
     return {
+      manifest,
       manifestHash,
       version,
       configKey,
@@ -652,6 +669,7 @@ export class SearchEngine {
       }
       if (!sameSource() && (await publishStored(entry, false))) return
       const {
+        manifest,
         manifestHash,
         version,
         configKey,
@@ -665,6 +683,7 @@ export class SearchEngine {
       } = await this.prepare(request, entry, signal)
       let parseMs = manifestParseMs
       let mark = performance.now()
+      const basicKeys = new Set(catalogKeys(files, request.edition))
       let bootstrap: BootstrapColumns | undefined = new BootstrapColumns()
       let config: JsonObject | undefined
       let maxRawBytes = manifestRawBytes
@@ -731,7 +750,17 @@ export class SearchEngine {
         parseMs += performance.now() - mark
         mark = performance.now()
         if (result.kind === "fragments")
-          catalogWork("ingest", () => bootstrap?.ingest(result.fragments))
+          catalogWork("ingest", () =>
+            bootstrap?.ingest(
+              basicKeys.has(key)
+                ? result.fragments
+                : result.fragments.filter((fragment) =>
+                    ["rules_profile", "restriction", "rules_name", "face_rules_name"].includes(
+                      fragment.table,
+                    ),
+                  ),
+            ),
+          )
         buildMs += performance.now() - mark
         if (ordinal === 0) firstFileMs = performance.now() - start
         for (const owner of ownersOf(file)) {
@@ -749,7 +778,19 @@ export class SearchEngine {
       const sealedBootstrap = bootstrap
       const index = catalogWork(
         "SearchIndex",
-        () => new SearchIndex(sealedBootstrap, request.edition, errataCards),
+        () =>
+          new SearchIndex(
+            sealedBootstrap,
+            request.edition,
+            errataCards,
+            selectRestrictions(
+              manifest,
+              (table) => sealedBootstrap.rows(table),
+              sealedBootstrap.index(),
+              request.edition,
+              stringValue(manifest["data_as_of"]),
+            ),
+          ),
       )
       buildMs += performance.now() - mark
       signal.throwIfAborted()
