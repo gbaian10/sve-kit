@@ -584,7 +584,13 @@ describe("opening a card as its page", () => {
     const [first] = await cells()
     if (!first) throw new Error("missing cell")
     await user.click(first)
-    expect(router.state.location.pathname).toBe("/cards/BP01-001")
+    await screen.findByRole("heading", { name: "試作見習兵" })
+    // Prepared cards can canonicalize before the click completes; assert the final route.
+    await waitFor(() => {
+      expect(decodeURIComponent(router.state.location.pathname)).toBe(
+        "/cards/BP01-001/試作の見習い兵",
+      )
+    })
     expect(router.state.location.state).toMatchObject({
       source: "results",
       resultKey: "p:bp01-001",
@@ -596,8 +602,9 @@ describe("opening a card as its page", () => {
     const { router } = await renderRoutes(routes, {
       initialEntries: ["/cards?q=bp01&card=BP01-002"],
     })
+    await screen.findByRole("heading", { name: "試作隊長" })
     await waitFor(() => {
-      expect(router.state.location.pathname).toBe("/cards/BP01-002")
+      expect(decodeURIComponent(router.state.location.pathname)).toBe("/cards/BP01-002/試作の隊長")
     })
     expect(router.state.historyAction).toBe("REPLACE")
   })
