@@ -37,8 +37,13 @@ if TYPE_CHECKING:
     from sve_carddb.domains.mechanic_coverage import FieldKey
     from sve_carddb.domains.mechanics import Inputs, Settings
 
-ADAPTER = "manual-keywords-fields-bp01-v2"
+ADAPTER = "manual-keywords-fields-bp01-v3"
 _EVOLUTION = re.compile(r"\{進化\}\{コスト[0-9]+\}：これは進化する。")
+_DAMAGE = re.compile(
+    r"(?:\{ファンファーレ\}|\{起動\}\{コスト[0-9]+\}これを\{アクト\}：)?"
+    r"相手の(?:リーダー1人か相手の)?(?:場の)?フォロワー1体を選ぶ。"
+    r"それに[0-9]+ダメージ。"
+)
 
 
 def _main_field(
@@ -47,7 +52,7 @@ def _main_field(
     settings: Settings,
     keywords: Mapping[str, str],
 ) -> bool:
-    """Prove exact PP-only evolution clauses independently of H1 self declarations."""
+    """Prove bounded evolution and damage lines independently of H1 declarations."""
     if "「" in raw or "」" in raw:
         return False
     derived = analyze_source(raw, source, settings.classifier)
@@ -58,7 +63,10 @@ def _main_field(
         if part.source_span.role != "body":
             return False
         spans = part.source_span.segments
-        if len(spans) == 1 and _EVOLUTION.fullmatch(raw[spans[0].start : spans[0].end]):
+        if len(spans) == 1 and (
+            _EVOLUTION.fullmatch(raw[spans[0].start : spans[0].end])
+            or _DAMAGE.fullmatch(raw[spans[0].start : spans[0].end])
+        ):
             bodies += 1
             continue
         if (

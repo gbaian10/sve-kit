@@ -267,13 +267,170 @@ def test_first_batch_pp_evolution_with_unproved_reminder_stays_partial(
         assert report["complete_cards"] == 0
 
 
+@pytest.mark.parametrize(
+    "raw",
+    [
+        pytest.param("相手のフォロワー1体を選ぶ。それに2ダメージ。", id="follower"),
+        pytest.param(
+            "{ファンファーレ}相手のリーダー1人か相手のフォロワー1体を選ぶ。"
+            "それに7ダメージ。",
+            id="fanfare-choice",
+        ),
+        pytest.param(
+            "{ファンファーレ}相手のフォロワー1体を選ぶ。それに4ダメージ。\n"
+            "{起動}{コスト1}これを{アクト}：相手のフォロワー1体を選ぶ。"
+            "それに4ダメージ。",
+            id="fanfare-and-paid-activated",
+        ),
+        pytest.param(
+            "{起動}{コスト0}これを{アクト}："
+            "相手のリーダー1人か相手の場のフォロワー1体を選ぶ。それに10ダメージ。",
+            id="field-choice-and-multidigit",
+        ),
+    ],
+)
+def test_first_batch_fixed_damage_proves_absence_without_positive_labels(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, raw: str
+) -> None:
+    with case(tmp_path, monkeypatch, raw, first_batch=True) as (
+        db,
+        inputs,
+        settings,
+        _,
+    ):
+        support = db.rows("card_engine_support")
+        with db.transaction():
+            report = mechanics.apply(db, inputs, settings)
+        assert db.rows("card_mechanic_coverage")[0].values["complete_all"] is True
+        assert report["complete_cards"] == 1
+        assert not db.rows("mechanic_projection")
+        assert not db.rows("card_mechanic")
+        assert db.rows("card_engine_support") == support
+
+
+@pytest.mark.parametrize(
+    "unproved",
+    [
+        pytest.param(
+            "{ファンファーレ}【合成甲】を持つ相手のフォロワー1体を選ぶ。"
+            "それに2ダメージ。",
+            id="keyword-target",
+        ),
+        pytest.param(
+            "{起動}{コスト1}手札の【合成甲】を持つフォロワー1枚を捨てる："
+            "相手のフォロワー1体を選ぶ。それに2ダメージ。",
+            id="keyword-cost",
+        ),
+        pytest.param(
+            "{ファンファーレ}自分の場にフォロワーがいるなら、"
+            "相手のフォロワー1体を選ぶ。それに2ダメージ。",
+            id="condition",
+        ),
+        pytest.param(
+            "相手のフォロワー1体を選ぶ。それに2ダメージ。1枚引く。",
+            id="trailing-effect",
+        ),
+        pytest.param(
+            "1枚引く。相手のフォロワー1体を選ぶ。それに2ダメージ。",
+            id="leading-effect",
+        ),
+        pytest.param(
+            "相手のフォロワー1体を選ぶ。それに2ダメージ。（未証明の注記）",
+            id="reminder",
+        ),
+        pytest.param(
+            "相手のフォロワー1体を選ぶ。それに２ダメージ。",
+            id="fullwidth-damage",
+        ),
+        pytest.param(
+            "相手のフォロワー1体を選ぶ。それにXダメージ。",
+            id="variable-damage",
+        ),
+        pytest.param(
+            "{起動}{コスト１}これを{アクト}："
+            "相手のフォロワー1体を選ぶ。それに2ダメージ。",
+            id="fullwidth-cost",
+        ),
+        pytest.param(
+            "{起動}{コスト1}これを{アクト}墓場に置く："
+            "相手のフォロワー1体を選ぶ。それに2ダメージ。",
+            id="additional-cost",
+        ),
+        pytest.param(
+            "{クイック}\n相手のフォロワー1体を選ぶ。それに2ダメージ。",
+            id="unproved-ability-line",
+        ),
+        pytest.param(
+            "これは「\n相手のフォロワー1体を選ぶ。それに2ダメージ。\n」を持つ。",
+            id="quoted-ability",
+        ),
+    ],
+)
+def test_fixed_damage_cannot_close_unproved_content_with_a_positive_label(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, unproved: str
+) -> None:
+    with case(tmp_path, monkeypatch, "【合成甲】\n" + unproved, first_batch=True) as (
+        db,
+        inputs,
+        settings,
+        _,
+    ):
+        with db.transaction():
+            report = mechanics.apply(db, inputs, settings)
+        coverage = db.rows("card_mechanic_coverage")[0].values
+        assert coverage["complete_all"] is False
+        assert coverage["complete_keyword_ids"] == Json([])
+        assert report["complete_cards"] == 0
+        assert any(
+            row.values["keyword_id"] == "kw:ward"
+            and row.values["relations"] == Json(["has"])
+            for row in db.rows("mechanic_projection")
+        )
+
+
+def test_fixed_damage_composes_with_evolution_and_self_declaration(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    with case(
+        tmp_path,
+        monkeypatch,
+        "{進化}{コスト1}：これは進化する。\n【合成甲】\n"
+        "{ファンファーレ}相手のフォロワー1体を選ぶ。それに2ダメージ。",
+        back="相手のフォロワー1体を選ぶ。それに3ダメージ。",
+        first_batch=True,
+    ) as (db, inputs, settings, _):
+        with db.transaction():
+            mechanics.apply(db, inputs, settings)
+        assert db.rows("card_mechanic_coverage")[0].values["complete_all"] is True
+        projection = db.rows("mechanic_projection")
+        assert len(projection) == 1
+        assert projection[0].values["relations"] == Json(["has"])
+
+
+def test_unproved_damage_condition_without_labels_remains_unknown(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    with case(
+        tmp_path,
+        monkeypatch,
+        "{ファンファーレ}自分の場にフォロワーがいるなら、"
+        "相手のフォロワー1体を選ぶ。それに2ダメージ。",
+        first_batch=True,
+    ) as (db, inputs, settings, _):
+        with db.transaction():
+            mechanics.apply(db, inputs, settings)
+        assert not db.rows("card_mechanic_coverage")
+        assert not db.rows("mechanic_projection")
+
+
 def test_first_batch_missing_current_back_prevents_complete(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     with case(
         tmp_path,
         monkeypatch,
-        "{進化}{コスト2}：これは進化する。\n【合成甲】",
+        "{進化}{コスト2}：これは進化する。\n【合成甲】\n"
+        "相手のフォロワー1体を選ぶ。それに2ダメージ。",
         back="【合成乙】",
         first_batch=True,
     ) as (db, inputs, settings, _):
@@ -549,7 +706,12 @@ def test_duplicate_positive_evidence_deduplicates_and_stays_partial(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    with case(tmp_path, monkeypatch, "【合成甲】", first_batch=True) as (
+    with case(
+        tmp_path,
+        monkeypatch,
+        "【合成甲】\n相手のフォロワー1体を選ぶ。それに2ダメージ。",
+        first_batch=True,
+    ) as (
         db,
         inputs,
         settings,
