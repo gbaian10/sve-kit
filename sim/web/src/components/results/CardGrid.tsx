@@ -6,6 +6,7 @@ import { useHref, useNavigate } from "react-router"
 import type { CardSummary, ImageIndex } from "../../data"
 import type { DisplayedName } from "../../domain/nameDisplay"
 import { CardImage } from "../card/CardImage"
+import { RestrictionBadge } from "../card/RestrictionBadge"
 import { Badge } from "../ui/Badge"
 import { cn } from "../ui/cn"
 import { type ResultLabels, useResultLabels } from "./labels"
@@ -83,7 +84,10 @@ const CardCell = memo(function CardCell({
         translate={labels.t}
       />
       <span className="flex min-w-0 flex-col leading-tight">
-        <span className="h-4 text-11 font-semibold text-text-3">{rarityLabel}</span>
+        <span className="flex h-5.5 items-center justify-between gap-1 text-11 font-semibold text-text-3">
+          <span className="truncate">{rarityLabel}</span>
+          <RestrictionBadge restrictions={cell.summary.restrictions} />
+        </span>
         <span className="flex items-baseline gap-2">
           <span
             lang={cell.name.primary.lang}

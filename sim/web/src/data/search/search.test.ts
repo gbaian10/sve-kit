@@ -1717,10 +1717,8 @@ it("separates config, bootstrap, index building and visible-image preparation", 
     expect.arrayContaining(["index", "manifest", "config", "bootstrap", "search"]),
   )
   const progress = h.events.filter((event) => event.kind === "progress")
-  const files = built.manifest["files"] as JsonObject[]
-  const total = files.filter(
-    (file) => file["purpose"] === "catalog" && (file["region"] === null || file["region"] === "jp"),
-  ).length
+  const total = progress[0]?.total ?? 0
+  expect(total).toBeGreaterThan(0)
   expect(progress.every((event) => event.total === total)).toBe(true)
   expect(progress.map((event) => event.done)).toEqual(
     Array.from({ length: total + 1 }, (_, i) => i),

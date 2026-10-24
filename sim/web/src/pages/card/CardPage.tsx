@@ -53,6 +53,7 @@ import { showsOtherEdition, usePrefs } from "../../settings"
 import { PageTitle } from "../PageTitle"
 import { frontArtOf, useCardSequence } from "./card-sequence"
 import { CardQa } from "./CardQa"
+import { CardRestrictions } from "./CardRestrictions"
 import { CardTextPanel } from "./CardTextPanel"
 import { CardWording } from "./CardWording"
 import { printingGroups } from "./printing-order"
@@ -732,6 +733,9 @@ export function CardView({
           )}
         </div>
         <div className="mt-4 min-w-0 lg:mt-1">
+          {cardId && catalog && (
+            <CardRestrictions client={client} cardId={cardId} region={region} />
+          )}
           {views.map(({ faceId, ordinal, wording, revision, faceSummary, name }) => {
             const basics =
               faceCatalog && printingId

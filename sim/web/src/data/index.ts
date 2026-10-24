@@ -43,6 +43,12 @@ export {
 } from "./images"
 export { createLocator, GLOBAL_OWNER } from "./locator"
 export {
+  type CardRestriction,
+  type CardRestrictionDetails,
+  loadCardRestrictionDetails,
+  type RestrictionStatus,
+} from "./restrictions"
+export {
   activeSnapshotRoot,
   setActiveSnapshotRoot,
   snapshotClient,

@@ -8,7 +8,7 @@ import { DEFAULT_QUERY } from "../../domain/query/model"
 import { renderInRouter } from "../../test-utils"
 import { FilterPanel } from "./FilterPanel"
 
-function Harness() {
+function Harness({ covered = false }: { readonly covered?: boolean }) {
   const [query, setQuery] = useState(DEFAULT_QUERY)
   return (
     <>
@@ -20,6 +20,9 @@ function Harness() {
         edition="jp"
         onEditionChange={() => undefined}
         facets={null}
+        restrictions={
+          covered ? { state: "partial", onDate: "2026-09-29", synthetic: true } : undefined
+        }
       />
       <output aria-label="URL">{formatQuery(query).toString()}</output>
     </>
@@ -31,7 +34,7 @@ it("toggles errata independently before the display controls and round trips thr
   const user = userEvent.setup()
   const errata = screen.getByRole("switch", { name: "只顯示勘誤卡" })
   const grouping = screen.getByRole("combobox", { name: "顯示方式" })
-  expect(screen.getAllByRole("switch")).toHaveLength(1)
+  expect(screen.getByRole("switch", { name: "只顯示禁限卡" })).toBeDisabled()
   expect(errata).toHaveAccessibleDescription("官方發過勘誤公告的卡")
   expect(errata.compareDocumentPosition(grouping) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   await user.click(errata)
@@ -88,3 +91,28 @@ it.each([
   expect(screen.getByRole("radio", { name: copy.only })).toBeChecked()
   expect(group).toHaveAccessibleDescription(new RegExp(copy.note, "u"))
 })
+
+it.each([
+  { language: "zh-TW" as const, label: "只顯示禁限卡", unknown: "來源尚有缺口" },
+  { language: "ja" as const, label: "禁止・制限カードのみ", unknown: "情報に欠落" },
+  {
+    language: "en" as const,
+    label: "Only show restricted cards",
+    unknown: "source coverage is incomplete",
+  },
+])(
+  "round trips restricted filtering and exposes partial coverage in $language",
+  async ({ language, label, unknown }) => {
+    await renderInRouter(<Harness covered />, { language })
+    const user = userEvent.setup()
+    const control = screen.getByRole("switch", { name: label })
+    expect(control).toHaveAccessibleDescription(new RegExp(unknown, "u"))
+    await user.click(control)
+    expect(
+      parseQuery(new URLSearchParams(screen.getByLabelText("URL").textContent)).restrictionsOnly,
+    ).toBe(true)
+    expect(screen.getByLabelText("URL")).toHaveTextContent("restricted=1")
+    await user.click(control)
+    expect(screen.getByLabelText("URL")).not.toHaveTextContent("restricted")
+  },
+)

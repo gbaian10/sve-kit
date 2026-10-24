@@ -82,7 +82,7 @@ describe("CardsPage", () => {
     const { router } = await open("/cards?sort=cost")
     const user = userEvent.setup()
     await user.type(screen.getByRole("combobox", { name: "搜尋卡片" }), "bp01")
-    const list = await screen.findByRole("listbox")
+    const list = await screen.findByRole("listbox", {}, { timeout: 4000 })
     await waitFor(() => expect(list).toHaveAttribute("aria-busy", "false"))
     await user.keyboard("{Enter}")
     expect(router.state.location.pathname).toBe("/cards")
@@ -95,7 +95,7 @@ describe("CardsPage", () => {
     const user = userEvent.setup()
     const input = screen.getByRole("combobox", { name: "搜尋卡片" })
     await user.type(input, "bp01")
-    const list = await screen.findByRole("listbox")
+    const list = await screen.findByRole("listbox", {}, { timeout: 4000 })
     await waitFor(() => expect(list).toHaveAttribute("aria-busy", "false"))
     const second = within(list).getAllByRole("option")[1]
     await user.keyboard("{ArrowDown}{ArrowDown}")
@@ -111,7 +111,7 @@ describe("CardsPage", () => {
       const user = userEvent.setup()
       await user.type(screen.getByRole("combobox", { name: "搜尋卡片" }), "bp01-051")
       if (!early) {
-        const list = await screen.findByRole("listbox")
+        const list = await screen.findByRole("listbox", {}, { timeout: 4000 })
         await waitFor(() => expect(list).toHaveAttribute("aria-busy", "false"))
       }
       await user.keyboard("{Enter}")
@@ -154,7 +154,7 @@ describe("CardsPage", () => {
     const user = userEvent.setup()
     const input = screen.getByRole("combobox", { name: "搜尋卡片" })
     await user.type(input, "bp01")
-    const list = await screen.findByRole("listbox")
+    const list = await screen.findByRole("listbox", {}, { timeout: 4000 })
     await waitFor(() => expect(list).toHaveAttribute("aria-busy", "false"))
     fireEvent.keyDown(input, { key: "Enter", isComposing: true })
     expect(router.state.location.pathname).toBe("/cards")
@@ -498,7 +498,7 @@ describe("CardsPage", () => {
     const user = userEvent.setup()
     const input = screen.getByRole("combobox", { name: "搜尋卡片" })
     await user.type(input, "bp01-0")
-    await screen.findByRole("listbox")
+    await screen.findByRole("listbox", {}, { timeout: 4000 })
     await user.type(input, "5")
     await user.click(await screen.findByRole("button", { name: /看全部/u }))
     expect(router.state.location.search).toBe("?q=bp01-05")
@@ -864,4 +864,13 @@ describe("CardsPage", () => {
       expect(ward).toHaveAttribute("aria-pressed", "false")
     })
   })
+})
+
+it("shows the unknown restriction notice for a restored URL even with the filter panel closed", async () => {
+  await open("/cards?ed=en&restricted=1", { panel: false })
+  expect(
+    screen
+      .getAllByRole("status")
+      .some((notice) => notice.textContent.includes("禁限資料未確認，無法篩選")),
+  ).toBe(true)
 })

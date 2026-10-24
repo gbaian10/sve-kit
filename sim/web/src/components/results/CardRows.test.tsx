@@ -7,7 +7,7 @@ import { useAbilityPreview } from "../../app/snapshot"
 import { displayName } from "../../domain/nameDisplay"
 import { DEFAULT_PREFS, prefsStore, usePrefs } from "../../settings"
 import { renderInRouter, renderRoutes } from "../../test-utils"
-import type { GridCell } from "./CardGrid"
+import { CardGrid, type GridCell } from "./CardGrid"
 import { CardList, CardTable } from "./CardRows"
 import { ListColumnPicker } from "./ListColumnPicker"
 
@@ -865,5 +865,40 @@ it.each(["list", "table"] as const)(
         .map((img) => img.getAttribute("alt")),
     ).toEqual(["進化", "Token"])
     expect(screen.getByRole("img", { name: "從者" })).toBeVisible()
+  },
+)
+
+it.each(["grid", "table", "list"])(
+  "shows bans and copy limits next to existing labels in %s view",
+  async (view) => {
+    const cells = [0, 1].map((maxCopies) => ({
+      ...cell,
+      key: `restriction-${String(maxCopies)}`,
+      summary: {
+        ...cell.summary,
+        restrictions: [
+          {
+            id: `r-${String(maxCopies)}`,
+            formatCode: "standard" as const,
+            maxCopies,
+            effectiveFrom: "2026-01-01",
+            sourceUrl: "https://example.invalid/list",
+            asOf: "2026-09-25",
+          },
+        ],
+      },
+    }))
+    const props = { cells, onOpen: vi.fn(), images: undefined }
+    await renderInRouter(
+      view === "grid" ? (
+        <CardGrid {...props} />
+      ) : view === "table" ? (
+        <CardTable {...props} typeLabel={typeLabel} artOf={() => undefined} />
+      ) : (
+        <CardList {...props} typeLabel={typeLabel} classLabel={classLabel} />
+      ),
+    )
+    expect(screen.getByText("禁止")).toBeVisible()
+    expect(screen.getByText("限1")).toBeVisible()
   },
 )

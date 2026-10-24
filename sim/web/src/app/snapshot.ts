@@ -623,6 +623,7 @@ export function usePrintingOptions() {
   })
   return view
     ? {
+        restrictions: view.options.restrictions,
         rarity: { styles: view.options.prBadgeStyles, counts: view.options.rarityCounts },
         type: { types: view.options.types, typeCounts: view.options.typeCounts },
         location: { types: view.options.types, counts: view.options.locationCounts },

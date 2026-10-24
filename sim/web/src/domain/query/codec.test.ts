@@ -24,6 +24,7 @@ describe("query codec", () => {
       rarities: ["gold"],
       altArtOnly: true,
       errataOnly: false,
+      restrictionsOnly: false,
       reprints: "only",
       unit: "art",
       representative: "high",

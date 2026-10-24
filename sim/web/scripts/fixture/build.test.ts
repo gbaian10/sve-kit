@@ -117,3 +117,30 @@ describe("fixture snapshot", async () => {
     expect(canonicalSize(snapshot)).toBeLessThan(1024 * 1024)
   })
 })
+
+it("keeps preview dates and the version index consistent when overriding fixture metadata", async () => {
+  const preview = await buildSnapshot({
+    encodeImage: stubImage,
+    dataAsOf: "2026-09-25",
+    restrictionAsOf: "2026-09-24",
+    dataVersion: "preview-20261024T030000Z-0001",
+    publishedAt: "2026-10-24T03:00:00Z",
+  })
+  expect(preview.manifest["data_as_of"]).toBe("2026-09-25")
+  expect(preview.manifest["restriction_coverage"]).toMatchObject([
+    { from_date: "2026-09-24", until_date: "2026-09-25" },
+  ])
+  expect(
+    (preview.manifest["source_windows"] as JsonObject[]).every(
+      (window) => window["as_of"] === "2026-09-25",
+    ),
+  ).toBe(true)
+  const bytes = preview.files.get("snapshots/versions/index.json")
+  if (!bytes) throw new Error("missing synthetic version index")
+  const index = parseJson(bytes) as JsonObject
+  expect(index["current"]).toMatchObject({
+    data_version: "preview-20261024T030000Z-0001",
+    published_at: "2026-10-24T03:00:00Z",
+    manifest_path: preview.manifestPath,
+  })
+})

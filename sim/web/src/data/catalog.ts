@@ -31,10 +31,12 @@ import {
   stringValue,
 } from "./format-v3/json"
 import { type Fragment, mergedRowsCursor, validateCatalogCursor } from "./format-v3/reader"
+import type { CardRestriction } from "./restrictions"
 import { type CardIndex, cardIndexCursor } from "./store"
 
 /** What a list cell or suggestion row shows for one card without loading any detail file. */
 export interface CardSummary {
+  readonly restrictions?: readonly CardRestriction[]
   readonly cardId: string
   readonly printingId: string
   readonly faceId: string

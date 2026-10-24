@@ -93,6 +93,7 @@ export function parseQuery(params: URLSearchParams): QueryState {
       oneOf(params.get("rep"), REPRESENTATIVE_RARITIES) ?? DEFAULT_QUERY.representative,
     prFirst: params.get("prfirst") === "1",
     errataOnly: params.get("errata") === "1",
+    restrictionsOnly: params.get("restricted") === "1",
     reprints: oneOf(params.get("reprint"), REPRINT_MODES) ?? DEFAULT_QUERY.reprints,
     sort: oneOf(params.get("sort"), QUERY_SORTS) ?? DEFAULT_QUERY.sort,
     ...(params.get("order") === "desc" ? { order: "desc" as const } : {}),
@@ -127,6 +128,7 @@ export function formatQuery(state: QueryState): URLSearchParams {
   if (state.representative !== DEFAULT_QUERY.representative) params.set("rep", state.representative)
   if (state.prFirst) params.set("prfirst", "1")
   if (state.errataOnly) params.set("errata", "1")
+  if (state.restrictionsOnly) params.set("restricted", "1")
   if (state.reprints !== DEFAULT_QUERY.reprints) params.set("reprint", state.reprints)
   if (state.sort !== DEFAULT_QUERY.sort) params.set("sort", state.sort)
   if (state.order === "desc") params.set("order", "desc")

@@ -29,6 +29,7 @@ import { DeckLocationBadges } from "../card/DeckLocationBadges"
 import { InlineText } from "../card/InlineText"
 import { RarityBadges } from "../card/RarityBadges"
 import { RARITY_BADGE_HEIGHT, RARITY_COLUMN_MIN_WIDTH } from "../card/rarityBadgeSize"
+import { RestrictionBadge } from "../card/RestrictionBadge"
 import { StatLine } from "../card/StatLine"
 import { ATTACK_ICON, DEFENSE_ICON } from "../card/symbolIcons"
 import { Badge } from "../ui/Badge"
@@ -260,6 +261,7 @@ const TableRow = memo(function TableRow({
             <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-11 text-text-3 tabular-nums">
               {cell.summary.cardNo}
               <RarityBadges {...cell.summary} />
+              <RestrictionBadge restrictions={cell.summary.restrictions} />
               <DeckLocationBadges locations={cell.summary.deckLocations} />
               <CardTypeBadge
                 code={cell.summary.typeCode}
@@ -394,6 +396,7 @@ const ListRow = memo(function ListRow({
         }
       }}
     >
+      <RestrictionBadge restrictions={cell.summary.restrictions} className="mr-1" />
       {visibility.name ? cell.name.primary.text : cell.summary.cardNo}
       {visibility.name && cell.name.secondary && (
         <>

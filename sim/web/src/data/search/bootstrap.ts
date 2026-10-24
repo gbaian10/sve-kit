@@ -6,6 +6,10 @@ import type { CardIndex } from "../store"
 import { Columns, StringPool } from "./columns"
 
 const TABLES = new Set([
+  "rules_profile",
+  "restriction",
+  "rules_name",
+  "face_rules_name",
   "card",
   "face",
   "printing",
@@ -76,6 +80,7 @@ function project(table: string, row: Row): Row {
     projected["regions"] = ((row["regions"] ?? []) as Row[]).map((region) => ({
       region: region["region"] ?? null,
       default_printing_id: region["default_printing_id"] ?? null,
+      deck_role: region["deck_role"] ?? null,
     }))
   if (table === "face_revision")
     projected["translations"] = ((row["translations"] ?? []) as Row[]).filter(

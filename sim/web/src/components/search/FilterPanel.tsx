@@ -3,6 +3,7 @@ import { type ReactNode, useId, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { useMediaQuery } from "../../app/useMediaQuery"
+import type { RestrictionStatus } from "../../data"
 import {
   COST_CAP,
   QUERY_UNITS,
@@ -36,6 +37,7 @@ export interface FilterPanelProps {
     readonly traits: ReactNode
     readonly keywords: ReactNode
   } | null
+  readonly restrictions?: RestrictionStatus | undefined
   readonly resultTotal?: number | undefined
   readonly onClose?: () => void
 }
@@ -110,6 +112,7 @@ export function FilterPanel({
   types,
   locations,
   resultTotal,
+  restrictions,
   onClose,
 }: FilterPanelProps) {
   const { t } = useTranslation()
@@ -215,6 +218,33 @@ export function FilterPanel({
               <div className="text-13 text-text-1">{t("filters.errataOnly")}</div>
               <p id={`${id}-errata-hint`} className="text-12 text-text-3">
                 {t("filters.errataOnlyHint")}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Switch
+              size="sm"
+              checked={query.restrictionsOnly}
+              disabled={!restrictions || restrictions.state === "unknown"}
+              label={t("filters.restrictionsOnly")}
+              describedBy={`${id}-restriction-hint`}
+              onChange={(checked) => {
+                onChange({ ...query, restrictionsOnly: checked })
+              }}
+            />
+            <div>
+              <div className="text-13 text-text-1">{t("filters.restrictionsOnly")}</div>
+              <p id={`${id}-restriction-hint`} className="text-12 text-text-3">
+                {restrictions && restrictions.state !== "unknown"
+                  ? t(
+                      restrictions.synthetic
+                        ? "filters.restrictionsSyntheticDate"
+                        : "filters.restrictionsDate",
+                      { date: restrictions.onDate },
+                    )
+                  : t("filters.restrictionsUnknown")}
+                {restrictions?.synthetic ? ` ${t("filters.restrictionsSynthetic")}` : ""}
+                {restrictions?.state === "partial" ? ` ${t("filters.restrictionsPartial")}` : ""}
               </p>
             </div>
           </div>
