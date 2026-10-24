@@ -210,10 +210,18 @@ async function setup(pendingCandidate = false, blockBackground = false) {
     failReads: (purposes: readonly string[]) => {
       failedPurposes = new Set(purposes)
     },
+    // Holds the first read made once the router leaves its current location, so a late read of
+    // the page already shown (however slow the machine) cannot take the hold meant for the target.
     holdNextRead: () => {
       let release: () => void = () => undefined
-      hold = new Promise<void>((resolve) => {
+      const next = new Promise<void>((resolve) => {
         release = resolve
+      })
+      const from = rendered.router.state.location.key
+      const unsubscribe = rendered.router.subscribe((router) => {
+        if (router.location.key === from) return
+        unsubscribe()
+        hold = next
       })
       return release
     },
