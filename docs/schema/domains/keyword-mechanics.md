@@ -52,7 +52,7 @@ H1 只接受 `card_keywords.v2` 的完整 body part：整個片段由唯一解�
 token 定義的 keyword 不表示原卡自身具有。H1 不產 grants／refers／counts，
 沒有標籤亦不代表沒有能力。
 
-有限 grants adapter `manual-keywords-grants-bp01-v1` 只檢查首批固定永久 card ID 集合，
+有限授予 adapter `manual-keywords-grants-bp01-v2` 只檢查首批固定永久 card ID 集合，
 由 `mechanic_batch.FIRST_BATCH_CARDS` 承載。209 張來自固定解析輸入及 identity recipe 中
 JP printing 原樣卡號以 `BP01-` 開頭、card 為 confirmed（排除 retired）的去重集合；
 後續批次或新增 printing 不會自動擴張這份集合。執行時仍重驗 confirmed 與 JP current owner。
@@ -64,9 +64,30 @@ grants 只接受主文整行的有限句型：明示選擇自方從者、從墓�
 「これがある限り、自分の『具名 token』すべては【keyword】を持つ。」。
 前綴僅接受已列出的ファンファーレ、ラストワード或指定 PP／act 費用格式的起動；
 尾句僅接受指定的任意數量 act 句。其他費用、條件、片段、引號能力及未知句型均不算已檢查。
-含「」的主文整欄保守略過，避免跨行引述；sections（含 token_definition）不交給這個 producer，
+除下述 BP01-005 整欄例外外，含「」的主文整欄保守略過，避免跨行引述；sections（含 token_definition）不交給這個 producer，
 token 原生 keyword 不會掛到母卡。主文明示額外授予生成 token 的 keyword 則屬母卡 grants。
 來源 descriptor、current revision、exact field bytes 與凍結來源重驗後才交出正標籤，與翻譯無關。
+
+額外只對下列七個永久 card ID 接受 `mechanic_grants` 中逐字固定的**完整主文**。
+不以卡號重新選集合；卡號僅在此說明對應版次。必須先通過 confirmed／JP current owner、
+exact 來源與唯一已採納 keyword mapping 的相同檢查，才產以下正標籤：
+
+| 卡號 | 關係與 keyword | 整欄證明邊界 |
+| --- | --- | --- |
+| BP01-005 | has storm | 進化時二選一完整主文：選項一自身疾走；選項二對相手一體造成自身攻擊力的傷害，含完整引號公式。 |
+| BP01-028／SL06 | has aura | 突進／指定攻擊／守護完整宣告，以及 fanfare 選相手主戰者、其場上至少 3 張、自身 +2/+2 並取得オーラ的兩行全文。 |
+| BP01-112 | has rush | fanfare 真紅條件、自身 +1/+1 並取得突進的完整行。 |
+| BP01-113／P24 | has storm | fanfare 真紅條件下自身取得疾走的完整行。 |
+| BP01-119 | has rush | 必殺宣告與 fanfare 支付主戰者體力 2、自身取得突進、己方牌庫頂一張置墓的兩行全文。 |
+| BP01-141 | grants ward | 己方每回合一次、另一 amulet 離場時產生一體ホーリータイガー，再授予該 token 守護的完整行。 |
+| BP01-078／SL12 | grants rush | fanfare 將一張ドラゴン放入 EX，以及支付 2 PP／自身 act、從 EX 選一張ドラゴン進場、授予突進、覚醒時回復 2 PP 的兩行全文。 |
+
+自身條件授予屬 has，不屬 grants；005 的選項及引號、119 的支付與置墓、078 的
+EX 移動及 PP 回復不可省略。只有 005 這份 exact 全文可繞過原本整欄引號保守檢查，
+不接受外層引述、改字、額外尾句、替代換行或其他 owner。其餘既有正標籤沿原 producer 產生。
+七份完整主文規則、永久 ID、keyword／關係與拼寫均納入授予 producer_version；
+F1 configuration 釘授予 adapter v2。這裡只提交正標籤與局部 relation 檢查，
+不替代完整欄位 adapter 或未證明的其他面／sections。
 
 有限 refers／counts adapter `manual-keywords-references-bp01-v1` 沿用相同 209 張永久 ID、
 十個 keyword 及來源重驗。語意依用途分配：費用中依 keyword 選定捨棄的牌，以及依 keyword
@@ -83,11 +104,12 @@ token 原生 keyword 不會掛到母卡。主文明示額外授予生成 token �
 含「」的主文整欄略過，sections 全不檢查，因此 token 的原生能力仍屬 token。
 只在匹配行提交相應 relation 的局部檢查，`whole_field=false`；四關係都有 producer 仍不構成 complete。
 
-完整欄位 adapter `manual-keywords-fields-bp01-v13` 沿用固定首批集合、confirmed JP current
+完整欄位 adapter `manual-keywords-fields-bp01-v14` 沿用固定首批集合、confirmed JP current
 及十個已登錄 keyword。每個面先驗 exact owner 主文與凍結來源的完整有序 section 清單；
 來源與資料庫的 section 數量、順序或原文字節不符時，該面不提交完整檢查。
 空主文須明驗凍結來源為 null 或空字串、已 intern 的原文確為空字串；空 section 也須驗自己的來源位置。
-非空主文只接受整欄由下列已證明的 body part 及 layout 組成，至少須有一個 body：
+非空主文另共用上述七份逐 owner 限定、正標籤 producer 已完整匹配的全文判定；
+一般入口只接受整欄由下列已證明的 body part 及 layout 組成，至少須有一個 body：
 
 - H1 的 `card_keywords.v2` 自身宣告：所有葉均為已登錄的 Concept／keyword／GlossaryReference，
   逐 part 重驗 binding 與來源座標。
@@ -331,7 +353,7 @@ token 原生 keyword 不會掛到母卡。主文明示額外授予生成 token �
 - `【進化時】自分のリーダーに2ダメージ。相手プレイヤー1人は手札を公開する。自分はその中から1枚を選ぶ。相手はそれを捨てる。`。
   公開者、選擇者、張數、棄置者及前置傷害次序固定，不接受其他效果或目標替換。
 
-以上 exact field 只證明十個 keyword 的四種關係均不涉及，不產正標籤。含 `「」` 的其他主文仍不完整，包含自身條件授予（例如進化時二選一中「これは【疾走】を持つ」）；任何改字、額外效果、其他面或非空 sections 都各自留下缺口。
+以上 exact field 只證明十個 keyword 的四種關係均不涉及，不產正標籤。含 `「」` 的其他主文仍不完整；另有上述逐 owner 限定的 BP01-005 自身條件授予整欄例外；任何改字、額外效果、其他面或非空 sections 都各自留下缺口。
 
 任何其他未證明句型、pending、未證明 reminder 或引號能力
 都留下缺口，不能以另一個正標籤補滿；固定句本身可獨立證明，不要求翻譯已實作。
@@ -341,8 +363,9 @@ token 原生 keyword 不會掛到母卡。主文明示額外授予生成 token �
 - 全文逐行為具名 token 定義；逐行 fullmatch，不忽略空白、未知尾句或缺漏行。
   follower 的名稱／class／trait 組合限フェアリー、フェアリーウィスプ、ナイト、
   スティールナイト、ヴァイキング、乙姫お守り隊、攻撃型ゴーレム、防御型ゴーレム、
-  ドラゴン、ゴースト；cost／attack／health 均須明示 ASCII 數值。
+  ドラゴン、ゴースト、ホーリータイガー；cost／attack／health 均須明示 ASCII 數值。
   原生 keyword suffix 依名稱固定為無、疾走、守護或突進；ゴースト並須完整附上 end phase 消滅句。
+  ホーリータイガー只接受ビショップ／獣・フォロワー與原生突進，不能把守護取代或附加為原生 suffix。
   amulet 僅大地の魔片的土の印／stack 定義；spell 僅薔薇の一撃的植物族／固定傷害及抽牌定義。
   一個 section 含多個定義時，每行均須證明。
 
@@ -355,12 +378,18 @@ section kind（包括 unknown）不授證明資格，也不因本檢查重新分
 土の秘術的 choice／費用／ゴーレム增幅、combo 破壞後對手生成、三具名 token 生成、
 附固定 PP 費用的 act，以及破壞後由該從者玩家生成ドラゴン。每行完整 fullmatch；
 自身宣告、進化句、其他 body 仍各自證明。grants 行共用正標籤 producer 的有限句型與
-唯一 keyword mapping 判定，完整欄位不產正標籤，不證現有 producer 未涵蓋的 grants。
+唯一 keyword mapping 判定；只對 BP01-149 的永久 card ID，refers／counts 整行共用既有正標籤 producer 的完整判定。
+同文出現在其他卡時不授予新的完整欄位證明。
+例如 BP01-149 的 fanfare 授予守護及起動支付 PP／act／自身置墓後選守護從者增幅，
+其 grants／refers 正標籤已存在，本入口只新增完整四關係證明。完整欄位不產正標籤，
+不證現有 producer 未涵蓋的 keyword 用途。
 含引號主文仍拒絕，唯一新增例外是整欄恰為兩行：EX 妖精任意張數變身薔薇の一撃，
 再以アクト費用回復等於 EX 薔薇の一撃張數的 PP；全文必須完全匹配，沒有其他字元或行。
 
 已證明的空欄位與上述完整主文，對十個 keyword 的 has／grants／refers／counts 各提交
-`whole_field=true`，自身 has 正標籤仍只由 H1 產生。缺 current 的面不提交檢查，也不從必要範圍刪除。
+`whole_field=true`。一般自身宣告的 has 由 H1 產生；上述七份全文的條件 has／grants
+由授予 adapter v2 產生，完整欄位 adapter 不產正標籤。
+缺 current 的面不提交檢查，也不從必要範圍刪除。
 因此同卡另一面或任一 section 未證明時仍為 partial；沒有任何檢查的 keyword 維持 unknown。
 
 ## 新鮮度與補正
@@ -374,7 +403,7 @@ producer_version 包含 `manual-keywords-h1-v1`、來源 normalizer／葉規則�
 grants producer_version 另含自身 adapter、固定 card 集合及十個已登錄概念的 mapping／日文名稱；
 refers／counts 的 producer_version 同樣釘自身 adapter、固定 card 集合及 keyword mapping；
 F1 configuration 也釘兩個有限 adapter 與固定 card 集合 hash。
-完整欄位 producer_version 另釘自身 adapter、固定 card 集合及 H1 producer_version（含 normalizer、
+完整欄位 producer_version 另釘自身 adapter、固定 card 集合、授予與參照 adapter 版本及 H1 producer_version（含 normalizer、
 葉規則與完整 keyword mapping）；F1 configuration 同時釘完整欄位 adapter。
 抽取或 bundle 演算法變更必須更新 adapter／recipe 版本；keyword/action universe 與 coverage 每次重建。
 
@@ -394,7 +423,7 @@ decision 同上例且必須 confirmed。只有候選 ID、source hash 及 produc
 H1 提交已驗正標籤及自身宣告所在面／主文的局部 has 檢查，由共用 coverage reducer 合併；
 不把局部宣告當整欄位已查。內部範圍與 producer 鍵見[建置資料庫 §10](../build/build-db.md#10-dsl驗證與未實作卡片頁)。
 H1、grants、refers／counts 與完整欄位檢查均儲存後，才在共同編排點套用 suppression，並傳入全部有效 producer_version 投影一次。
-grants 只提交所在面／主文的局部 grants 檢查；has＋grants 也不能補滿 refers／counts 或 sections。
+授予 adapter 只提交所在面／主文的局部 has 或 grants 檢查；has＋grants 也不能補滿 refers／counts 或 sections。
 公開每 card／shared 一列，只有所有必要範圍均已完整檢查的 keyword 才進 complete 集合；
 全部 keyword 都完整時使用 complete_all。complete／partial 選較短 include／exclude，同長選 include；只投影 fresh coverage。
 has present 不證 grants absent；缺標籤且 partial／缺 coverage 仍 unknown。
