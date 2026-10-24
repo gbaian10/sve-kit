@@ -53,7 +53,7 @@ describe("SettingsPage", () => {
   })
 })
 
-it("groups settings by purpose, with downloads and storage before the reset button", async () => {
+it("groups settings by purpose, with the reset button above every group", async () => {
   await renderInRouter(<SettingsPage />)
   const headings = screen.getAllByRole("heading", { level: 2 }).map((node) => node.textContent)
   expect(headings).toEqual([
@@ -73,8 +73,10 @@ it("groups settings by purpose, with downloads and storage before the reset butt
   expect(style.getByRole("switch", { name: "術語加粗" })).toBeInTheDocument()
   expect(style.getByRole("switch", { name: "圖示旁附名稱" })).toBeInTheDocument()
   const reset = screen.getByRole("button", { name: "恢復預設" })
-  const storage = screen.getByRole("region", { name: "儲存空間" })
-  expect(storage.compareDocumentPosition(reset) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  // The reset button sits in the title row, before every group.
+  const first = screen.getByRole("region", { name: "介面" })
+  expect(reset.compareDocumentPosition(first) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  expect(screen.getAllByRole("button", { name: "恢復預設" })).toHaveLength(1)
 })
 
 it("previews each option with the sample card and marks the chosen one", async () => {
@@ -193,6 +195,7 @@ it("confirms restoring all defaults and keeps recent cards and downloaded data",
     infiniteScroll: false,
     flavorDisplay: "none",
     qaDisplay: "original",
+    backgroundDownloads: false,
     symbolLabels: true,
     termEmphasis: false,
     theme: "dark",
@@ -215,8 +218,10 @@ it("confirms restoring all defaults and keeps recent cards and downloaded data",
   await userEvent.click(
     within(screen.getByRole("dialog")).getByRole("button", { name: "恢復預設" }),
   )
-  expect(readPrefs()).toEqual(DEFAULT_PREFS)
-  expect(prefsStore.get()).toEqual(DEFAULT_PREFS)
+  // Everything returns to the defaults except the independent background-download setting.
+  const expected = { ...DEFAULT_PREFS, backgroundDownloads: false }
+  expect(readPrefs()).toEqual(expected)
+  expect(prefsStore.get()).toEqual(expected)
   expect(recentStore.get()).toEqual(recent)
   expect(await cache.keys()).toHaveLength(1)
 })

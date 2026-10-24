@@ -130,7 +130,16 @@ export function SettingsPage() {
   const [resetting, setResetting] = useState(false)
   return (
     <>
-      <PageTitle>{t("settings.title")}</PageTitle>
+      <div className="flex flex-wrap items-center justify-between gap-x-4">
+        <PageTitle>{t("settings.title")}</PageTitle>
+        <Button
+          onClick={() => {
+            setResetting(true)
+          }}
+        >
+          {t("settings.resetDefaults")}
+        </Button>
+      </div>
       <Group id="interface" title={t("settings.groups.interface")} first>
         <SettingRow className={ROW} label={t("account.uiLanguage")}>
           <Segmented
@@ -273,15 +282,6 @@ export function SettingsPage() {
       </Group>
       <DownloadSettings />
       <StorageSettings />
-      <div className="mt-4">
-        <Button
-          onClick={() => {
-            setResetting(true)
-          }}
-        >
-          {t("settings.resetDefaults")}
-        </Button>
-      </div>
       <Dialog
         open={resetting}
         onClose={() => {
@@ -301,7 +301,11 @@ export function SettingsPage() {
             <Button
               variant="primary"
               onClick={() => {
-                prefsStore.set(DEFAULT_PREFS)
+                // Background downloads are independent of the other preferences, so a reset keeps them.
+                prefsStore.set({
+                  ...DEFAULT_PREFS,
+                  backgroundDownloads: prefsStore.get().backgroundDownloads,
+                })
                 setResetting(false)
               }}
             >

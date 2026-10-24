@@ -122,7 +122,8 @@ export default {
     infiniteScrollHint: "Load the next page near the end of results. Turn off to use Load more.",
     resetDefaults: "Restore defaults",
     resetTitle: "Restore default settings?",
-    resetHint: "Reset all settings. Downloaded data and recent cards are kept.",
+    resetHint:
+      "Reset all settings. The background download setting, downloaded data and recent cards are kept.",
     resetCancel: "Cancel",
 
     groups: {

@@ -107,7 +107,7 @@ const zhTW = {
     infiniteScrollHint: "接近列表底部時自動載入；關閉後改用「載入更多」。",
     resetDefaults: "恢復預設",
     resetTitle: "恢復預設設定？",
-    resetHint: "將所有設定恢復為預設值。已下載資料與最近查看會保留。",
+    resetHint: "將所有設定恢復為預設值。背景下載設定、已下載資料與最近查看會保留。",
     resetCancel: "取消",
 
     groups: {
