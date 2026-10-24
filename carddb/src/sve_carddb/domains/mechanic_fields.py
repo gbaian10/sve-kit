@@ -37,7 +37,7 @@ if TYPE_CHECKING:
     from sve_carddb.domains.mechanic_coverage import FieldKey
     from sve_carddb.domains.mechanics import Inputs, Settings
 
-ADAPTER = "manual-keywords-fields-bp01-v4"
+ADAPTER = "manual-keywords-fields-bp01-v5"
 _EVOLUTION = re.compile(r"\{進化\}\{コスト[0-9]+\}：これは進化する。")
 _FIXED_EFFECT = re.compile(
     r"(?:\{ファンファーレ\}|\{ラストワード\}|【進化時】|"
@@ -53,6 +53,29 @@ _FIXED_EFFECT = re.compile(
     r"自分のリーダーは\{体力\}\+[0-9]+する。(?:[0-9]+枚引く。)?"
     r")"
 )
+_STAT_GAIN = r"(?:\{攻撃力\}\+[0-9]+(?:/\{体力\}\+[0-9]+)?|\{体力\}\+[0-9]+)する。"
+_FIXED_STATS = re.compile(
+    r"(?:"
+    r"(?:\{ファンファーレ\}|\{ラストワード\}|自分のエンドフェイズが来たとき、)?"
+    r"(?:自分の(?:他の|\{ロイヤル\})?フォロワーすべては"
+    + _STAT_GAIN
+    + r"|自分の(?:他の)?フォロワー1体を選ぶ。それは"
+    + _STAT_GAIN
+    + r"(?:[0-9]+枚引く。)?)|"
+    r"自分の場に他のフォロワーが出たとき、これは"
+    + _STAT_GAIN
+    + r"|自分の場に\{ロイヤル\}フォロワーが出たとき、それは"
+    + _STAT_GAIN
+    + r"|\{ファンファーレ\}自分の場の他の妖精・フォロワーすべてと、"
+    r"自分のEXエリアの妖精・フォロワーすべては"
+    + _STAT_GAIN
+    + r"|【進化時】相手のフォロワーすべてに[0-9]+ダメージ。"
+    r"自分の他のフォロワーすべては" + _STAT_GAIN + r")"
+)
+_CONDITIONAL_STATS = re.compile(
+    r"\{ファンファーレ\}【(?:覚醒|真紅)】状態なら、これは" + _STAT_GAIN
+)
+_QUICK = re.compile(r"\{クイック\}")
 
 
 def _main_field(
@@ -72,9 +95,15 @@ def _main_field(
         if part.source_span.role != "body":
             return False
         spans = part.source_span.segments
-        if len(spans) == 1 and (
-            _EVOLUTION.fullmatch(raw[spans[0].start : spans[0].end])
-            or _FIXED_EFFECT.fullmatch(raw[spans[0].start : spans[0].end])
+        if len(spans) == 1 and any(
+            pattern.fullmatch(raw[spans[0].start : spans[0].end])
+            for pattern in (
+                _EVOLUTION,
+                _FIXED_EFFECT,
+                _FIXED_STATS,
+                _CONDITIONAL_STATS,
+                _QUICK,
+            )
         ):
             bodies += 1
             continue
