@@ -17,6 +17,7 @@ from sve_carddb.ingest.http.client import (
     Request,
     StopCrawlError,
 )
+from sve_carddb.ingest.http.throttle import CircuitBreaker
 from sve_carddb.ingest.http.validate import require_media_type
 from sve_carddb.ingest.http.writer import Fetched, LocalState, sha256
 from sve_carddb.ingest.urls import canonicalize
@@ -46,6 +47,7 @@ _LIMITS = {
 _NOTICE = re.compile(r"/news/post-[1-9][0-9]*/?\Z")
 _INDEX = re.compile(r"/news/(?:page/[1-9][0-9]*/)?\Z")
 _OK = 200
+_BREAKER_THRESHOLD = 3
 
 
 class ConstructionSourceError(ValueError):
@@ -162,6 +164,7 @@ async def fetch_new(
         ),
     )
     pending_urls = {source.url for source in pending}
+    breaker = CircuitBreaker(_BREAKER_THRESHOLD)
     failures = 0
     for source in selection:
         if source.url not in pending_urls:
@@ -178,6 +181,7 @@ async def fetch_new(
         except FetchError:
             failures += 1
             report(SourceResult(source.url, "failed"))
+            breaker.record_failure("construction source fetch failed")
             continue
         try:
             _validate_response(response)
@@ -194,6 +198,7 @@ async def fetch_new(
                 )
             failures += 1
             report(SourceResult(source.url, "failed"))
+            breaker.record_failure("construction source failed validation")
             continue
         result = writer.write(
             Fetched(
@@ -209,5 +214,6 @@ async def fetch_new(
             ),
             request_id=response.request_id,
         )
+        breaker.record_success()
         report(SourceResult(source.url, "fetched", result.resource.sha256))
     return failures

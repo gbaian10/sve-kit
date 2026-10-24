@@ -174,10 +174,12 @@ def test_empty_category_or_effective_date_cannot_silently_lose_entries(
     [
         "合成禁止",
         "<br>合成制限",
+        "合成<span>制限</span>",
+        "合成 <em>制限</em>",
     ],
 )
 def test_conflicting_or_multiline_names_are_rejected(replacement: str) -> None:
-    with pytest.raises(ValueError, match=r"(conflicting entries|line breaks)"):
+    with pytest.raises(ValueError, match=r"(conflicting entries|nested markup)"):
         parse_restriction_list(
             JP.replace("合成制限", replacement).encode(), SourceRegion.JP
         )
@@ -215,6 +217,7 @@ def test_en_missing_structure_reports_domain_errors(
     [
         ("カードの使用制限に関するルール", "Unknown title", "lacks its regional title"),
         ("『合成禁止』", "『』", "name must not be blank"),
+        ("2026/1/30", "２０２６/1/30", "Unsupported JP restriction"),
     ],
 )
 def test_jp_missing_title_or_name_is_rejected(old: str, new: str, message: str) -> None:

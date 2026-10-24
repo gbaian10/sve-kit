@@ -12,10 +12,10 @@ from sve_carddb.parse.html import attribute, parse, require_one, select_all
 if TYPE_CHECKING:
     from selectolax.lexbor import LexborNode
 
-_JP_DATE = re.compile(r"(\d{4})/(\d{1,2})/(\d{1,2})\([^)]*\)より適用")
+_JP_DATE = re.compile(r"([0-9]{4})/([0-9]{1,2})/([0-9]{1,2})\([^)]*\)より適用")
 _EN_DATE = re.compile(
-    r"Effective as of ([A-Za-z]+) (\d{1,2}), "
-    r"(?:to be lifted on ([A-Za-z]+) (\d{1,2}), )?(\d{4})"
+    r"Effective as of ([A-Za-z]+) ([0-9]{1,2}), "
+    r"(?:to be lifted on ([A-Za-z]+) ([0-9]{1,2}), )?([0-9]{4})"
 )
 _MONTHS = (
     "January",
@@ -184,8 +184,8 @@ class _Cursor:
         if node.tag == "h4":
             self.effective(text, region)
         if node.tag == "a":
-            if select_all(node, "br"):
-                raise ValueError("Restriction name contains unsupported line breaks")
+            if len(select_all(node, "*")) > 1:
+                raise ValueError("Restriction name contains unsupported nested markup")
             href = attribute(node, "href")
             assert href is not None
             return self.entry(text, href, region, ordinal)

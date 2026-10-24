@@ -17,7 +17,7 @@ from sve_carddb.ingest.crawl.construction_sources import (
     select_sources,
 )
 from sve_carddb.ingest.http.client import StopCrawlError
-from sve_carddb.ingest.http.throttle import Throttle
+from sve_carddb.ingest.http.throttle import CircuitOpenError, Throttle
 from sve_carddb.ingest.http.writer import PathConflictError, Writer
 from sve_carddb.parse.html import MissingElementError
 from sve_carddb.parse.pages.construction_outline import parse_construction_outline
@@ -413,3 +413,26 @@ async def test_non_html_mime_is_not_admitted(tmp_path: Path) -> None:
         assert manifest.resources.get(JP) is None
         assert manifest.requests.outcomes(JP) == [Outcome.FAILED]
         assert not manifest.requests.has_started()
+
+
+async def test_consecutive_failures_open_the_circuit(tmp_path: Path) -> None:
+    calls: list[httpx.Request] = []
+    urls = [f"https://en.shadowverse-evolve.com/news/post-{n}" for n in range(1, 6)]
+
+    def respond(request: httpx.Request) -> httpx.Response:
+        calls.append(request)
+        return httpx.Response(404, content=BODY, headers={"content-type": "text/html"})
+
+    with Manifest.open(tmp_path / "manifest.sqlite") as manifest:
+        async with httpx.AsyncClient(transport=httpx.MockTransport(respond)) as http:
+            with pytest.raises(CircuitOpenError):
+                await fetch_new(
+                    urls,
+                    http,
+                    Writer(tmp_path / "data", manifest, create_only=True),
+                    throttle=Throttle(2, 0),
+                    run_id="circuit",
+                    report=lambda _: None,
+                )
+        assert not manifest.requests.has_started()
+    assert len(calls) == 3

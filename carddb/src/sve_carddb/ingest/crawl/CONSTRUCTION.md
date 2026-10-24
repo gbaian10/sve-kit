@@ -20,7 +20,7 @@ The future caller must use Settings' browser UA and >=2-second throttle, hold th
 data-root lock before opening the manifest, perform quiet/preflight checks and
 supply a create-only Writer. The batch uses the existing Client/Writer, records
 normal fetch metadata, allows at most one request per pending selected URL and
-refuses redirects and retries. Existing trusted sources are skipped; untrusted
+refuses redirects and retries; three consecutive failed sources raise `CircuitOpenError` and stop the batch. Existing trusted sources are skipped; untrusted
 sources fail the entire preflight. It neither refreshes nor repairs sources.
 An interrupted write can leave a started request; the caller must inspect and
 resolve interrupted state before resuming. The batch does not silently repair it.
