@@ -938,6 +938,55 @@ def test_bounded_trigger_grave_act_leaves_unproved_fields_open(
             assert not db.rows("mechanic_projection")
 
 
+_BOUNDED_LINES = (
+    "{ファンファーレ}自分の他のフォロワー1体を選ぶ。それは【合成乙】を持つ。\n"
+    "【進化時】【覚醒】状態なら、1枚引く。\n"
+    "これが受けるダメージを-1する。"
+)
+
+
+def test_conditional_state_and_bounded_grant_prove_exact_projection(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    with case(
+        tmp_path, monkeypatch, "【合成甲】\n" + _BOUNDED_LINES, first_batch=True
+    ) as (db, inputs, settings, _):
+        with db.transaction():
+            report = mechanics.apply(db, inputs, settings)
+        assert report["complete_cards"] == 1
+        assert db.rows("card_mechanic_coverage")[0].values["complete_all"] is True
+        assert {
+            r.values["keyword_id"]: r.values["relations"]
+            for r in db.rows("mechanic_projection")
+        } == {"kw:ward": Json(["has"]), "kw:storm": Json(["grants"])}
+
+
+def test_proved_labels_do_not_close_unknown_conditional_grant(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    raw = (
+        "【合成甲】\n"
+        + _BOUNDED_LINES
+        + "\n{ファンファーレ}【真紅】状態なら、これは【合成乙】を持つ。"
+    )
+    with case(tmp_path, monkeypatch, raw, first_batch=True) as (
+        db,
+        inputs,
+        settings,
+        _,
+    ):
+        with db.transaction():
+            report = mechanics.apply(db, inputs, settings)
+        assert report["complete_cards"] == 0
+        coverage = db.rows("card_mechanic_coverage")[0].values
+        assert coverage["complete_all"] is False
+        assert coverage["complete_keyword_ids"] == Json([])
+        assert {
+            r.values["keyword_id"]: r.values["relations"]
+            for r in db.rows("mechanic_projection")
+        } == {"kw:ward": Json(["has"]), "kw:storm": Json(["grants"])}
+
+
 def test_first_batch_missing_current_back_prevents_complete(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -968,7 +1017,7 @@ def test_first_batch_missing_current_back_prevents_complete(
         assert projection[0].values["keyword_id"] == "kw:ward"
 
 
-def test_other_card_grant_merges_with_self_declaration_but_stays_partial(
+def test_other_card_grant_merges_with_self_declaration_and_completes(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     raw = (
@@ -990,9 +1039,8 @@ def test_other_card_grant_merges_with_self_declaration_but_stays_partial(
         evidence = db.rows("card_mechanic")
         assert len({row.values["producer_version"] for row in evidence}) == 2
         coverage = db.rows("card_mechanic_coverage")[0].values
-        assert coverage["complete_all"] is False
-        assert coverage["complete_keyword_ids"] == Json([])
-        assert coverage["partial_keyword_ids"] == Json(["kw:ward"])
+        assert coverage["complete_all"] is True
+        assert coverage["partial_keyword_ids"] == Json([])
         with db.transaction():
             clear_projection(db)
             db.update(
