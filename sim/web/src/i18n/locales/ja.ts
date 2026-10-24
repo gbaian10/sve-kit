@@ -74,7 +74,6 @@ export default {
     language: { "zh-TW": "繁體中文", ja: "日本語", en: "English" },
     theme: { system: "システム", light: "ライト", dark: "ダーク" },
     accent: { amber: "アンバー", teal: "ティール", red: "レッド" },
-    region: { jp: "日本", en: "英語圏" },
     view: { grid: "画像", table: "表", list: "リスト" },
     cardOpenMode: { auto: "自動", panel: "ドロワー", modal: "中央表示", page: "全ページ" },
   },
@@ -114,10 +113,26 @@ export default {
     resetDefaults: "初期設定に戻す",
     resetTitle: "初期設定に戻しますか？",
     resetHint:
-      "表示と詳細設定をすべて初期値に戻します。ダウンロード済みデータと閲覧履歴は残ります。",
+      "すべての設定を初期値に戻します。表示言語、バックグラウンドダウンロードの設定、ダウンロード済みデータ、閲覧履歴は残ります。",
     resetCancel: "キャンセル",
 
-    advanced: "詳細設定",
+    groups: {
+      interface: "インターフェース",
+      data: "カードデータ",
+      text: "カード文の訳表示",
+      style: "カード文のスタイル",
+      browse: "閲覧",
+      preload: "先読み",
+    },
+    preview: {
+      termScope:
+        "カード文中で用語として登録された語（キーワード、カード名、領域などの用語）を太字にします。表示のみを変更し、文面は変わりません。",
+      help: "説明：{{name}}",
+      current: "現在の設定",
+      hidden: "非表示（ここには出ません）",
+      on: "オン",
+      off: "オフ",
+    },
     preloadPrintings: "すべての版を先読み",
     preloadPrintingsHint:
       "表示中のカード画像が準備できてから他の版を読み込みます。別言語の版は英語版／日本語版データの表示設定に従います。",
@@ -144,7 +159,6 @@ export default {
       "キャッシュの削除に失敗したか、完了していません。他のタブを閉じて再試行してください。",
     storageCleared: "キャッシュを削除しました。必要なデータを再ダウンロードします。",
     title: "アカウントと設定",
-    display: "表示",
     fieldDisplay: { none: "非表示", original: "原文", translated: "訳", both: "訳＋原文" },
     effectLanguage: "効果テキスト",
     flavorDisplay: "フレーバーテキスト",
@@ -153,7 +167,7 @@ export default {
     termEmphasisHint: "表示のみを変更し、本文と参照は保持します",
     symbolLabels: "アイコンに名称を添える",
     symbolLabelsHint: "キーワード系のみ名称を表示します",
-    banRegion: "禁止・制限の地域",
+    cardEditionHint: "禁止・制限や Q&A などのデータもカードの版に従います",
     cardOpenMode: "カードの開き方",
     cardOpenModeHint:
       "自動：PC では右側にドロワー、スマホでは中央に表示。全ページはカードページへ移動します。",

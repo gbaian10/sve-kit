@@ -55,7 +55,6 @@ export interface Prefs {
   readonly theme: ThemePref
   /** null = the theme's default accent. */
   readonly accent: Accent | null
-  readonly banRegion: CardEdition
   readonly gridDensity: GridDensity
   readonly viewMode: ViewMode
   readonly cardOpenMode: CardOpenMode
@@ -71,7 +70,7 @@ export const DEFAULT_PREFS: Prefs = {
   uiLanguage: null,
   cardEdition: "jp",
   showOtherEdition: { jp: false, en: true },
-  nameDisplay: "translated",
+  nameDisplay: "both",
   effectLanguage: "both",
   flavorDisplay: "both",
   qaDisplay: "both",
@@ -84,7 +83,6 @@ export const DEFAULT_PREFS: Prefs = {
   filterPanelOpen: false,
   theme: "system",
   accent: null,
-  banRegion: "jp",
   gridDensity: 2,
   viewMode: "grid",
   cardOpenMode: "auto",
@@ -141,7 +139,6 @@ const sanitizers: Sanitizers = {
   filterPanelOpen: withDefault(isBoolean, DEFAULT_PREFS.filterPanelOpen),
   theme: withDefault(isThemePref, DEFAULT_PREFS.theme),
   accent: withDefault(isNullableAccent, DEFAULT_PREFS.accent),
-  banRegion: withDefault(isCardEdition, DEFAULT_PREFS.banRegion),
   gridDensity: withDefault(isGridDensity, DEFAULT_PREFS.gridDensity),
   viewMode: withDefault(isViewMode, DEFAULT_PREFS.viewMode),
   cardOpenMode: withDefault(isCardOpenMode, DEFAULT_PREFS.cardOpenMode),

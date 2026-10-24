@@ -22,6 +22,7 @@ describe("CardNameHeading", () => {
   it("shows the catalog name until the exact owner resolves, then the annotated name with its origin", async () => {
     const { client } = await annotatedOrigin(fixture)
     await client.load()
+    prefsStore.set({ nameDisplay: "translated" })
     await renderInRouter(
       <CardNameHeading
         edition="jp"

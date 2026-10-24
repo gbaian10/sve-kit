@@ -22,7 +22,7 @@ describe("SettingsPage", () => {
     await renderInRouter(<SettingsPage />)
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("帳號與設定")
     await userEvent.click(screen.getByRole("switch", { name: "圖示旁附名稱" }))
-    await userEvent.click(screen.getByRole("radio", { name: "英文圈" }))
+    await userEvent.click(screen.getByRole("radio", { name: "英版" }))
     await userEvent.click(
       within(screen.getByRole("radiogroup", { name: "效果文字" })).getByRole("radio", {
         name: "翻譯＋原文",
@@ -34,13 +34,13 @@ describe("SettingsPage", () => {
       }),
     )
     await userEvent.click(
-      within(screen.getByRole("radiogroup", { name: "單卡開啟方式" })).getByRole("radio", {
+      within(screen.getByRole("radiogroup", { name: "卡片開啟" })).getByRole("radio", {
         name: "中間彈出",
       }),
     )
     expect(readPrefs()).toMatchObject({
       symbolLabels: true,
-      banRegion: "en",
+      cardEdition: "en",
       effectLanguage: "both",
       qaDisplay: "none",
       cardOpenMode: "modal",
@@ -51,6 +51,64 @@ describe("SettingsPage", () => {
     )
     expect(screen.queryByRole("switch", { name: "省流量" })).not.toBeInTheDocument()
   })
+})
+
+it("groups settings by purpose, with the reset button above every group", async () => {
+  await renderInRouter(<SettingsPage />)
+  const headings = screen.getAllByRole("heading", { level: 2 }).map((node) => node.textContent)
+  expect(headings).toEqual([
+    "介面",
+    "卡片資料",
+    "卡文翻譯顯示",
+    "卡文樣式",
+    "瀏覽",
+    "預先下載",
+    "背景下載",
+    "儲存空間",
+  ])
+  const text = within(screen.getByRole("region", { name: "卡文翻譯顯示" }))
+  for (const name of ["卡名顯示", "效果文字", "風味文字", "Q&A"])
+    expect(text.getByRole("radiogroup", { name })).toBeInTheDocument()
+  const style = within(screen.getByRole("region", { name: "卡文樣式" }))
+  expect(style.getByRole("switch", { name: "術語加粗" })).toBeInTheDocument()
+  expect(style.getByRole("switch", { name: "圖示旁附名稱" })).toBeInTheDocument()
+  const reset = screen.getByRole("button", { name: "恢復預設" })
+  // The reset button sits in the title row, before every group.
+  const first = screen.getByRole("region", { name: "介面" })
+  expect(reset.compareDocumentPosition(first) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  expect(screen.getAllByRole("button", { name: "恢復預設" })).toHaveLength(1)
+})
+
+it("previews each option with the sample card and marks the chosen one", async () => {
+  prefsStore.set({ effectLanguage: "both", termEmphasis: false })
+  await renderInRouter(<SettingsPage />)
+  expect(screen.queryByRole("tooltip")).toBeNull()
+  await userEvent.hover(screen.getByRole("button", { name: "說明：效果文字" }))
+  const options = within(screen.getByRole("tooltip")).getAllByRole("listitem")
+  const current = (list: readonly HTMLElement[]) =>
+    list.map((node) => node.getAttribute("aria-current"))
+  expect(options).toHaveLength(3)
+  expect(current(options)).toEqual([null, null, "true"])
+  // The sample renders with the real card-text pieces: icons and the framed original text.
+  const [original, , both] = options as [HTMLElement, HTMLElement, HTMLElement]
+  expect(within(both).getByText("原文", { selector: "p" })).toBeInTheDocument()
+  expect(within(both).getAllByRole("img", { name: "入場曲" })).toHaveLength(1)
+  expect(original.querySelector("strong")).toBeNull()
+  await userEvent.unhover(screen.getByRole("button", { name: "說明：效果文字" }))
+  await userEvent.hover(screen.getByRole("button", { name: "說明：術語加粗" }))
+  const toggles = within(screen.getByRole("tooltip")).getAllByRole("listitem")
+  const [on, off] = toggles as [HTMLElement, HTMLElement]
+  expect(current(toggles)).toEqual([null, "true"])
+  // Only the data-marked terms are bold, mid-sentence ones included; the rest of the line is not.
+  expect([...on.querySelectorAll("strong")].map((node) => node.textContent)).toEqual([
+    "守護",
+    "鐵甲騎士",
+    "守護",
+  ])
+  expect(off.querySelector("strong")).toBeNull()
+  expect(screen.getByRole("tooltip")).toHaveTextContent("加粗卡文中標為術語的字")
+  await userEvent.keyboard("{Escape}")
+  expect(screen.queryByRole("tooltip")).toBeNull()
 })
 
 it("refreshes estimates on demand, leaves caches untouched when clearing is cancelled, and shows request failure", async () => {
@@ -137,11 +195,11 @@ it("confirms restoring all defaults and keeps recent cards and downloaded data",
     infiniteScroll: false,
     flavorDisplay: "none",
     qaDisplay: "original",
+    backgroundDownloads: false,
     symbolLabels: true,
     termEmphasis: false,
     theme: "dark",
     accent: "red",
-    banRegion: "en",
     gridDensity: 3,
     viewMode: "list",
     showOtherEdition: { jp: true, en: false },
@@ -159,8 +217,10 @@ it("confirms restoring all defaults and keeps recent cards and downloaded data",
   await userEvent.click(
     within(screen.getByRole("dialog")).getByRole("button", { name: "恢復預設" }),
   )
-  expect(readPrefs()).toEqual(DEFAULT_PREFS)
-  expect(prefsStore.get()).toEqual(DEFAULT_PREFS)
+  // Everything returns to the defaults except the independent background-download setting.
+  const expected = { ...DEFAULT_PREFS, uiLanguage: "ja" as const, backgroundDownloads: false }
+  expect(readPrefs()).toEqual(expected)
+  expect(prefsStore.get()).toEqual(expected)
   expect(recentStore.get()).toEqual(recent)
   expect(await cache.keys()).toHaveLength(1)
 })

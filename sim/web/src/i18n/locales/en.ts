@@ -83,7 +83,6 @@ export default {
     language: { "zh-TW": "繁體中文", ja: "日本語", en: "English" },
     theme: { system: "System", light: "Light", dark: "Dark" },
     accent: { amber: "Amber", teal: "Teal", red: "Red" },
-    region: { jp: "Japanese", en: "English" },
     view: { grid: "Images", table: "Table", list: "List" },
     cardOpenMode: { auto: "Auto", panel: "Drawer", modal: "Pop-up", page: "Page" },
   },
@@ -123,10 +122,26 @@ export default {
     resetDefaults: "Restore defaults",
     resetTitle: "Restore default settings?",
     resetHint:
-      "Reset all display and advanced settings. Downloaded data and recent cards are kept.",
+      "Reset all settings. The interface language, the background download setting, downloaded data and recent cards are kept.",
     resetCancel: "Cancel",
 
-    advanced: "Advanced settings",
+    groups: {
+      interface: "Interface",
+      data: "Card data",
+      text: "Card text translation",
+      style: "Card text style",
+      browse: "Browsing",
+      preload: "Preload",
+    },
+    preview: {
+      termScope:
+        "Bolds the words the card text marks as terms, such as keywords, card names and zone or rules terms. Only the display changes, not the text.",
+      help: "About {{name}}",
+      current: "Current",
+      hidden: "Hidden (nothing appears here)",
+      on: "On",
+      off: "Off",
+    },
     preloadPrintings: "Preload all printings",
     preloadPrintingsHint:
       "Load other printings after the current card image is ready. Other languages follow the English/Japanese data display setting.",
@@ -152,7 +167,6 @@ export default {
     storageClearFailed: "Cache clearing failed or is incomplete. Close other tabs and try again.",
     storageCleared: "Caches cleared. Required data will download again.",
     title: "Account and settings",
-    display: "Display",
     fieldDisplay: { none: "Hidden", original: "Original", translated: "Translated", both: "Both" },
     effectLanguage: "Effect text",
     flavorDisplay: "Flavor text",
@@ -161,8 +175,8 @@ export default {
     termEmphasisHint: "Changes display while keeping text and references",
     symbolLabels: "Label symbols",
     symbolLabelsHint: "Only keyword symbols get a label",
-    banRegion: "Ban list region",
-    cardOpenMode: "Opening a card",
+    cardEditionHint: "Ban lists, Q&A and other data follow the card edition",
+    cardOpenMode: "Open cards",
     cardOpenModeHint:
       "Auto: a drawer on the right on desktop, a pop-up on phones. Page always goes to the card page.",
   },

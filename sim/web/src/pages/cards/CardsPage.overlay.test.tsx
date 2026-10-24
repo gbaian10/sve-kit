@@ -69,7 +69,7 @@ function resizeWindow(width: number) {
 }
 
 async function open(path: string, mode: CardOpenMode) {
-  prefsStore.set({ uiLanguage: "zh-TW", cardOpenMode: mode })
+  prefsStore.set({ uiLanguage: "zh-TW", cardOpenMode: mode, nameDisplay: "translated" })
   vi.stubGlobal("innerWidth", desktop ? 1440 : 390)
   const rendered = await renderRoutes(routes, { initialEntries: [path] })
   // Scoping avoids computing accessible names for the collapsed filter panel on every retry.
@@ -598,7 +598,7 @@ describe("opening a card as its page", () => {
   })
 
   it("turns a shared panel URL into the card page", async () => {
-    prefsStore.set({ uiLanguage: "zh-TW", cardOpenMode: "page" })
+    prefsStore.set({ uiLanguage: "zh-TW", cardOpenMode: "page", nameDisplay: "translated" })
     const { router } = await renderRoutes(routes, {
       initialEntries: ["/cards?q=bp01&card=BP01-002"],
     })

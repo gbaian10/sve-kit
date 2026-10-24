@@ -595,6 +595,7 @@ describe("annotation presentation", () => {
   })
 
   it("renders the actual native C/P/R text while the preference changes only emphasis", async () => {
+    prefsStore.set({ nameDisplay: "translated" })
     const { client } = await annotatedOrigin()
     await client.load()
     const { container } = await renderInRouter(

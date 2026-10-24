@@ -5,8 +5,16 @@ import { usePrefs } from "../../settings"
 import { inlinePieces, type SymbolPiece } from "./textSymbols"
 
 // Alt preserves the marker's meaning; glyph-sized icons keep card text in normal flow.
-export function SymbolIcon({ piece }: { readonly piece: SymbolPiece }) {
-  const { symbolLabels } = usePrefs()
+export function SymbolIcon({
+  piece,
+  labels,
+}: {
+  readonly piece: SymbolPiece
+  /** Overrides the preference, so a settings preview can show both choices side by side. */
+  readonly labels?: boolean | undefined
+}) {
+  const prefs = usePrefs()
+  const symbolLabels = labels ?? prefs.symbolLabels
   return (
     <>
       <img
@@ -28,10 +36,13 @@ export function SymbolIcon({ piece }: { readonly piece: SymbolPiece }) {
 export function InlineText({
   text,
   emphasis = false,
+  labels,
   changes,
 }: {
   readonly text: string
   readonly emphasis?: boolean
+  /** Overrides the symbol-label preference (settings previews only). */
+  readonly labels?: boolean | undefined
   readonly changes?: { readonly kind: "removed" | "added"; readonly ranges: readonly TextRange[] }
 }) {
   const { termEmphasis } = usePrefs()
@@ -67,7 +78,7 @@ export function InlineText({
             {plain(Math.max(start, piece.start), Math.min(end, piece.end))}
           </Fragment>,
         ]
-      const icon = <SymbolIcon key={index} piece={piece} />
+      const icon = <SymbolIcon key={index} piece={piece} labels={labels} />
       return [
         changes?.ranges.some((range) => range.start < piece.end && range.end > piece.start)
           ? mark(icon, index)
