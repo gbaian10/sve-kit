@@ -38,16 +38,19 @@ function Wording({
 }: {
   readonly text: string
   readonly lang: string
-  readonly side?: "before" | "after"
+  readonly side: "before" | "after"
   readonly ranges?: readonly TextRange[]
 }) {
+  const content = (
+    <InlineText
+      text={text}
+      emphasis
+      changes={{ kind: "added", ranges: side === "after" ? ranges : [] }}
+    />
+  )
   return (
     <p lang={lang} className="whitespace-pre-wrap">
-      <InlineText
-        text={text}
-        emphasis
-        changes={{ kind: side === "before" ? "removed" : "added", ranges }}
-      />
+      {side === "before" ? <del className="line-through decoration-2">{content}</del> : content}
     </p>
   )
 }
@@ -57,13 +60,13 @@ function PairedWording({
   translation,
   region,
   side,
-  ranges,
+  ranges = [],
 }: {
   readonly original: string
   readonly translation: string | undefined
   readonly region: string
   readonly side: "before" | "after"
-  readonly ranges: readonly TextRange[]
+  readonly ranges?: readonly TextRange[]
 }) {
   const prefs = usePrefs()
   const language = useTextLanguage()
@@ -76,7 +79,7 @@ function PairedWording({
   const showOriginal = prefs.effectLanguage === "both" || region === "jp"
   return (
     <div className="space-y-2 text-16 leading-effect text-text-1">
-      <Wording text={translation} lang="zh-Hant" />
+      <Wording text={translation} lang="zh-Hant" side={side} />
       {showOriginal && <OriginalBox>{source}</OriginalBox>}
     </div>
   )
@@ -188,7 +191,6 @@ export function CardErrata({
                 translation={fullTranslation?.before}
                 region={region}
                 side="before"
-                ranges={printed.diff?.removed ?? []}
               />
               <h4 className="text-12 text-text-3">{t("errata.correctedHeading")}</h4>
               <PairedWording
@@ -242,7 +244,7 @@ export function CardErrata({
                       translation={showTranslation ? stringValue(translation[side]) : undefined}
                       region={region}
                       side={side}
-                      ranges={side === "before" ? diff.removed : diff.added}
+                      ranges={side === "after" ? diff.added : []}
                     />
                   </div>
                 ))}

@@ -3,7 +3,7 @@ import type { Messages } from "./zh-TW"
 export default {
   errata: {
     diffHint:
-      "Strikethrough marks removed or replaced text; underlining marks added or replacement text.",
+      "Strikethrough marks the old text; underlining marks added or replacement text in the correction.",
     heading: "Errata",
     fragmentHint:
       "These are the changed passages from the official notice, not the full printed text of this version.",

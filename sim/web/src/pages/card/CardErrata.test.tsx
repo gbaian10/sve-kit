@@ -49,17 +49,21 @@ it("shows reconstructed full text and pairs excerpt translations with marked ori
     "href",
     "https://example.invalid/errata/bp01-020",
   )
-  expect(notice.querySelectorAll("del")).toHaveLength(1)
+  expect(notice.querySelectorAll("del")).toHaveLength(2)
   expect(within(notice).getAllByText("繁中・日文來源機器譯文（非官方）")).toHaveLength(1)
   expect(notice.querySelectorAll("ins")).toHaveLength(1)
-  expect(notice.querySelectorAll('[lang="zh-Hant"] del, [lang="zh-Hant"] ins')).toHaveLength(0)
+  expect(notice.querySelectorAll('[lang="zh-Hant"] del')).toHaveLength(1)
+  expect(notice.querySelectorAll('[lang="zh-Hant"] ins')).toHaveLength(0)
+  expect(notice.querySelectorAll("del del, del ins")).toHaveLength(0)
+  for (const old of notice.querySelectorAll("del"))
+    expect(old.textContent).toBe(old.closest("p")?.textContent)
   for (const translation of notice.querySelectorAll('[lang="zh-Hant"]')) {
     const original = translation.nextElementSibling
     expect(original).toHaveAttribute("data-original")
     expect(original?.querySelector('[lang="ja"]')).not.toBeNull()
   }
-  expect(notice.querySelectorAll("del, ins").length).toBe(
-    notice.querySelectorAll("[data-original] del, [data-original] ins").length,
+  expect(notice.querySelectorAll("ins").length).toBe(
+    notice.querySelectorAll("[data-original] ins").length,
   )
   expect(
     within(notice).getByRole("heading", { name: "勘誤前完整文字（依公告還原）" }),
@@ -109,9 +113,13 @@ it.each([true, false])(
       matching ? "舊 A。\n保留 B。" : "整段舊譯。",
       matching ? "新 A。\n保留 B。" : "整段新譯。",
     ])
-    expect(notice.querySelectorAll('[lang="zh-Hant"] del, [lang="zh-Hant"] ins')).toHaveLength(0)
+    expect(notice.querySelectorAll('[lang="zh-Hant"] ins')).toHaveLength(0)
+    expect(notice.querySelector('[lang="ja"] del')?.textContent).toBe("Old A.\nKeep B.")
+    expect(notice.querySelector('[lang="zh-Hant"] del')?.textContent).toBe(
+      matching ? "舊 A。\n保留 B。" : "整段舊譯。",
+    )
     expect(
-      [...notice.querySelectorAll("del, ins")].some((node) => node.textContent.includes("Keep")),
+      [...notice.querySelectorAll("ins")].some((node) => node.textContent.includes("Keep")),
     ).toBe(false)
     for (const translation of notice.querySelectorAll('[lang="zh-Hant"]'))
       expect(translation.nextElementSibling).toHaveAttribute("data-original")

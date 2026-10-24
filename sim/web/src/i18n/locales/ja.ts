@@ -2,7 +2,7 @@ import type { Messages } from "./zh-TW"
 
 export default {
   errata: {
-    diffHint: "取り消し線は削除・置換前の文字、下線は追加・置換後の文字を示します。",
+    diffHint: "取り消し線は訂正前の文章、下線は訂正後に追加・置換された文字を示します。",
     heading: "エラッタ",
     fragmentHint: "公式告知の変更箇所です。この版の印刷テキスト全文ではありません。",
     before: "訂正前（告知の抜粋）",
