@@ -1,0 +1,96 @@
+construction_adoption_format: 1
+kind: construction_adoption_shard
+review_context:
+  context:
+    configuration: '{"construction_review_stores":["c49-human-20261024"],"dependencies":[{"name":"carddb/pyproject.toml","sha256":"sha256:e566253358ed8f33c95ec7403c1dde06be20dbde5929006cb97d6fc209098ead"},{"name":"carddb/src/sve_carddb/core/provenance.py","sha256":"sha256:5140d8a5187802aa386792b066dfbd801dc0817b99c5380f6cad17b78c6955e0"},{"name":"carddb/src/sve_carddb/domains/construction/adoption_loader.py","sha256":"sha256:0cad7be7d784974e2b990699251deb5027f2e7cbe83fa80f781938e1fab0ecda"},{"name":"carddb/src/sve_carddb/domains/construction/adoption_models.py","sha256":"sha256:81352ae79cc33d1d4ab3064aed2c54b4dfd5921a29779915a24ecded43a037e2"},{"name":"carddb/src/sve_carddb/domains/construction/adoption_reports.py","sha256":"sha256:f50eb22cd1886d067f6788264abe7ef24fe4450a85f0aa026a378d46f5207097"},{"name":"carddb/src/sve_carddb/domains/construction/adoption_sources.py","sha256":"sha256:9d2f45330142c10b1092ab1e04ec8d4bbdbdd1372737a1949cf2f03f088853fb"},{"name":"carddb/src/sve_carddb/domains/construction/adoption_validation.py","sha256":"sha256:c5308f56b4c877010f88a25a1aa52a19b16b0add02fd087a59be64afce8ee2f1"},{"name":"carddb/src/sve_carddb/parse/pages/restriction_list.py","sha256":"sha256:860d283b4d54bd03ead80192e153159d24a6156fd37df65962c6539c672b06dd"},{"name":"carddb/uv.lock","sha256":"sha256:1d70edb799bb1cbb1b950f16fa2ba09038b7e20801245108951ad296489960ff"}],"recipe":"construction-two-models-v1","scope":"current-list-day-v1"}'
+    program_revision: afe10a727411057de8860323aa9bcb9f12625d1f
+  source_batches:
+    - batch_id: sha256:7bac066571b5513ce89dea249370e3a2296286e8feb09ca4fb6f9bb5df3ba61b
+default_decision_id: d:9b86a651c27f7a441ecb15ccc6a441fe3c461a2fec82650c97e915519906704d
+records:
+  - data:
+      adoption_no: 1
+      dependencies: []
+      predecessor: null
+      reason: 供現行 Standard 一覽核對的 profile；一般構築規則及 CR 仍未實作。
+      review_context_hash: sha256:a7f38b1774a747d19dc077043c2688fcaa3387ca0bd37062f3896b12a14b243e
+      subject:
+        profile_id: rules-profile:en:standard
+      value:
+        format_code: standard
+        name:
+          lang: en
+          text: Standard
+        region: en
+    evidence:
+      - primary: true
+        role: profile
+        use:
+          locator: "{\"context_key\":\"standard\",\"field\":\"value\",\"location\":{\"kind\":\"projection_pointer\",\"page_numbers\":[],\"pointer\":\"\"},\"number\":null,\"record_key\":\"[\\\"construction_profile\\\",{\\\"profile_id\\\":\\\"rules-profile:en:standard\\\"},1]\",\"result_hash\":\"sha256:4633c15cf06bb0a02977f90cd24bf65820baf4b94816986228f03aa4f9a10ec5\"}"
+          source:
+            archive:
+              batch_id: sha256:7bac066571b5513ce89dea249370e3a2296286e8feb09ca4fb6f9bb5df3ba61b
+              descriptor_sha256: sha256:cee7c5b01df00577543961680b33251656c5de57d18a8068e7f02c36ab9a30a9
+              first_receipt_id: sha256:e351d63857cce1ce88660ec27710f369b2e72de92373d06aa1e29f2fce5ca335
+              store_id: c49-restrictions-20260925
+            etag: null
+            fetched_at: null
+            id: src:v1:c5e881af964e05dfcf2bd19d95693307476ea431d155557afea1c209c92096ce
+            import_receipt_id: sha256:e19a4d241eb1173ec8a3806a1a52c721a76c25cbd906311a8f10a14839d54c82
+            kind: official_page
+            last_modified: null
+            observed_basis: "P05 research acquisition: retained log records this URL with HTTP 200, byte count and null Location/ETag/Last-Modified, but no timestamp. Delegated coordinator decision 2026-10-24 confirms the P05 execution day was 2026-09-25 in local UTC+08:00; mtime is a rename/copy time and is not used. Registration index is transcribed from that log and decision, not an original timestamped index."
+            observed_on: 2026-09-25
+            observed_precision: date
+            observed_timezone: Asia/Taipei
+            parser_version: construction-current-list-v1
+            raw_locator: c49-restrictions-20260925:raw/sha256/43/431a7e8d55e01920bb05c8d5d6f92146aafafc877936fc693eded8ade2093aee.raw
+            sha256: sha256:431a7e8d55e01920bb05c8d5d6f92146aafafc877936fc693eded8ade2093aee
+            url: https://en.shadowverse-evolve.com/restrictions/
+          usage: construction_profile
+    filing_key: en-standard
+    kind: construction_profile
+    record_key: '["construction_profile",{"profile_id":"rules-profile:en:standard"},1]'
+    review:
+      basis_hash: sha256:df7c4f3cafd5f8028cac054ea0db8847b50aa1da69044039a2f07c748f94d146
+      model_reviews:
+        - vendor: anthropic
+          model: Claude Sonnet
+          version: "5.5"
+          reviewed_at: 2026-10-24T09:54:23Z
+          basis_hash: sha256:df7c4f3cafd5f8028cac054ea0db8847b50aa1da69044039a2f07c748f94d146
+          outcome: agreed
+          report_hash: sha256:f78df4fd46e11f0e55cada214385a7501a553fde4b179d57c306ce822d943b41
+        - vendor: openai
+          model: Codex
+          version: gpt-6.1-sol
+          reviewed_at: 2026-10-24T09:52:42Z
+          basis_hash: sha256:df7c4f3cafd5f8028cac054ea0db8847b50aa1da69044039a2f07c748f94d146
+          outcome: agreed
+          report_hash: sha256:e5a3fc0124b02f969a4e790b2d57ea5c2d2e4850182ed491d7cd6c9fa7a1b6e0
+      maintainer_resolution:
+        reviewed_by: gbaian10
+        reviewed_at: 2026-10-24T00:00:00Z
+        reviewed_precision: day
+        basis_hash: sha256:df7c4f3cafd5f8028cac054ea0db8847b50aa1da69044039a2f07c748f94d146
+        outcome: adopted
+        note: 維護者於 2026-10-24 核可原採納表（sha256:d8282306ff788351b7fc09e3b2c8a896a0202928c2f72eaf494a0d21835f6c1c）及其更正：JP07 亦維持 main，EN01 排除；16 筆禁限、2 profiles、9/25 單日 coverage。時間只知日期，午夜為明示日精度編碼。
+      maintainer_samples: []
+    adoption_review:
+      mode: human
+      policy: null
+      initial_sample_decisions: []
+decisions:
+  - id: d:9b86a651c27f7a441ecb15ccc6a441fe3c461a2fec82650c97e915519906704d
+    state: confirmed
+    scope: batch
+    category: construction_profile
+    members:
+      - - '["construction_profile",{"profile_id":"rules-profile:en:standard"},1]'
+        - sha256:0e65c10f652e007b5b7c779854628e8f8b8056cc58579599ae5fcda53847d6a0
+    membership_hash: sha256:9b86a651c27f7a441ecb15ccc6a441fe3c461a2fec82650c97e915519906704d
+    policy_id: construction-human-v1
+    sample_ids:
+      - '["construction_profile",{"profile_id":"rules-profile:en:standard"},1]'
+    confidence: null
+    note: 首輪逐項真人核可；construction-human-v1 是確認方式，未啟用後續 policy 採納。

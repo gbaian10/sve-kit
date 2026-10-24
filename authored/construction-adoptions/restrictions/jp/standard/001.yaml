@@ -1,0 +1,867 @@
+construction_adoption_format: 1
+kind: construction_adoption_shard
+review_context:
+  context:
+    configuration: '{"construction_review_stores":["c49-human-20261024"],"dependencies":[{"name":"carddb/pyproject.toml","sha256":"sha256:e566253358ed8f33c95ec7403c1dde06be20dbde5929006cb97d6fc209098ead"},{"name":"carddb/src/sve_carddb/core/provenance.py","sha256":"sha256:5140d8a5187802aa386792b066dfbd801dc0817b99c5380f6cad17b78c6955e0"},{"name":"carddb/src/sve_carddb/domains/construction/adoption_loader.py","sha256":"sha256:0cad7be7d784974e2b990699251deb5027f2e7cbe83fa80f781938e1fab0ecda"},{"name":"carddb/src/sve_carddb/domains/construction/adoption_models.py","sha256":"sha256:81352ae79cc33d1d4ab3064aed2c54b4dfd5921a29779915a24ecded43a037e2"},{"name":"carddb/src/sve_carddb/domains/construction/adoption_reports.py","sha256":"sha256:f50eb22cd1886d067f6788264abe7ef24fe4450a85f0aa026a378d46f5207097"},{"name":"carddb/src/sve_carddb/domains/construction/adoption_sources.py","sha256":"sha256:9d2f45330142c10b1092ab1e04ec8d4bbdbdd1372737a1949cf2f03f088853fb"},{"name":"carddb/src/sve_carddb/domains/construction/adoption_validation.py","sha256":"sha256:c5308f56b4c877010f88a25a1aa52a19b16b0add02fd087a59be64afce8ee2f1"},{"name":"carddb/src/sve_carddb/parse/pages/restriction_list.py","sha256":"sha256:860d283b4d54bd03ead80192e153159d24a6156fd37df65962c6539c672b06dd"},{"name":"carddb/uv.lock","sha256":"sha256:1d70edb799bb1cbb1b950f16fa2ba09038b7e20801245108951ad296489960ff"}],"recipe":"construction-two-models-v1","scope":"current-list-day-v1"}'
+    program_revision: afe10a727411057de8860323aa9bcb9f12625d1f
+  source_batches:
+    - batch_id: sha256:7bac066571b5513ce89dea249370e3a2296286e8feb09ca4fb6f9bb5df3ba61b
+default_decision_id: d:f00803694511435944074c993ce38f1c23d6d56a7b5af059f1f63719410f82ea
+records:
+  - data:
+      adoption_no: 1
+      dependencies:
+        - basis_hash: sha256:209fb1efbfd6092fb2b5e68d6a6939693f1a15874adf2faf60bb01c3b5df6034
+          id: rn:v1:0317720ef44e00e7f9f142af39e4734c075875fa83c449e3dd6fe0e87e20dbf2
+          kind: rules_name
+          region: jp
+        - basis_hash: sha256:3d2fd5f1a8b0f75e8d1f4777d623c71387004626b0cb171d43c052d42d97f9a0
+          id: c:f64badd875975ce8980236d7a832cd79
+          kind: card
+          region: jp
+        - basis_hash: sha256:4a3ebb3739318fc92ffab2af0deba48913844974c8d93a540451af30fb69b0fe
+          id: rules-profile:jp:standard
+          kind: profile
+          region: jp
+      predecessor: null
+      reason: 依維護者核可的一覽採納表及更正採納 main 範圍；未由生效日推造公告日。
+      review_context_hash: sha256:a7f38b1774a747d19dc077043c2688fcaa3387ca0bd37062f3896b12a14b243e
+      subject:
+        restriction_id: restriction:v1:13042ebe5dcd3dc64ee8d50d267d76a15b97db510d69f2dabbf19055d721c6c4
+      value:
+        announced_on: null
+        effective_from: 2025-10-01
+        effective_until: null
+        kind: copy_limit
+        max_copies: 0
+        max_selected_groups: null
+        members:
+          - choice_option: 0
+            deck_scope: main
+            rules_name_id: rn:v1:0317720ef44e00e7f9f142af39e4734c075875fa83c449e3dd6fe0e87e20dbf2
+        profile_id: rules-profile:jp:standard
+        state: confirmed
+    evidence:
+      - primary: true
+        role: restriction
+        use:
+          locator: "{\"context_key\":\"standard\",\"field\":\"value\",\"location\":{\"kind\":\"projection_pointer\",\"page_numbers\":[],\"pointer\":\"/entries/2\"},\"number\":null,\"record_key\":\"[\\\"construction_restriction\\\",{\\\"restriction_id\\\":\\\"restriction:v1:13042ebe5dcd3dc64ee8d50d267d76a15b97db510d69f2dabbf19055d721c6c4\\\"},1]\",\"result_hash\":\"sha256:78bda79373f0a4a94b65330e7eb64d507e88ae3590554783f64588d9c8c99763\"}"
+          source:
+            archive:
+              batch_id: sha256:7bac066571b5513ce89dea249370e3a2296286e8feb09ca4fb6f9bb5df3ba61b
+              descriptor_sha256: sha256:c6b831cd501994e6e51491b91516ac2a73346721d6f314b83d2324a64fe7ff6f
+              first_receipt_id: sha256:4d57e2784d0077ffb8cb1aac3ddc9cf90c80d3ab2a9ef631348f99cfb4f31d74
+              store_id: c49-restrictions-20260925
+            etag: null
+            fetched_at: null
+            id: src:v1:0dd2e285fe7542fc83a7af021aeca7c9acb325ed29aa884503afadd46647e0b2
+            import_receipt_id: sha256:e19a4d241eb1173ec8a3806a1a52c721a76c25cbd906311a8f10a14839d54c82
+            kind: official_page
+            last_modified: null
+            observed_basis: "P05 research acquisition: retained log records this URL with HTTP 200, byte count and null Location/ETag/Last-Modified, but no timestamp. Delegated coordinator decision 2026-10-24 confirms the P05 execution day was 2026-09-25 in local UTC+08:00; mtime is a rename/copy time and is not used. Registration index is transcribed from that log and decision, not an original timestamped index."
+            observed_on: 2026-09-25
+            observed_precision: date
+            observed_timezone: Asia/Taipei
+            parser_version: construction-current-list-v1
+            raw_locator: c49-restrictions-20260925:raw/sha256/c4/c4220dae87cd66806d383fcb9cb62be1321e05ec5cede317c72fc9d4c055a91c.raw
+            sha256: sha256:c4220dae87cd66806d383fcb9cb62be1321e05ec5cede317c72fc9d4c055a91c
+            url: https://shadowverse-evolve.com/card_limit/
+          usage: construction_restriction
+    filing_key: jp-standard
+    kind: construction_restriction
+    record_key: '["construction_restriction",{"restriction_id":"restriction:v1:13042ebe5dcd3dc64ee8d50d267d76a15b97db510d69f2dabbf19055d721c6c4"},1]'
+    review:
+      basis_hash: sha256:dd2dbc3071b22c41885df32c1e8829a6595ee9b615c22843251fe9b225de640d
+      model_reviews:
+        - vendor: anthropic
+          model: Claude Sonnet
+          version: "5.5"
+          reviewed_at: 2026-10-24T09:54:23Z
+          basis_hash: sha256:dd2dbc3071b22c41885df32c1e8829a6595ee9b615c22843251fe9b225de640d
+          outcome: agreed
+          report_hash: sha256:3c5c69b5aebc2af59995ec62c6e6f2ab680de7b41dc0b3b4e23ddeff8abf6441
+        - vendor: openai
+          model: Codex
+          version: gpt-6.1-sol
+          reviewed_at: 2026-10-24T09:52:42Z
+          basis_hash: sha256:dd2dbc3071b22c41885df32c1e8829a6595ee9b615c22843251fe9b225de640d
+          outcome: agreed
+          report_hash: sha256:f475526e20bee5c081b7924318182b53d20b70983e837b940ff3f40ee6042c4f
+      maintainer_resolution:
+        reviewed_by: gbaian10
+        reviewed_at: 2026-10-24T00:00:00Z
+        reviewed_precision: day
+        basis_hash: sha256:dd2dbc3071b22c41885df32c1e8829a6595ee9b615c22843251fe9b225de640d
+        outcome: adopted
+        note: 維護者於 2026-10-24 核可原採納表（sha256:d8282306ff788351b7fc09e3b2c8a896a0202928c2f72eaf494a0d21835f6c1c）及其更正：JP07 亦維持 main，EN01 排除；16 筆禁限、2 profiles、9/25 單日 coverage。時間只知日期，午夜為明示日精度編碼。
+      maintainer_samples: []
+    adoption_review:
+      mode: human
+      policy: null
+      initial_sample_decisions: []
+  - data:
+      adoption_no: 1
+      dependencies:
+        - basis_hash: sha256:1ae4984ad7224348124f59eb8e0f8cfebda893f9dfa20b4592256ce5326bb878
+          id: c:dd8e5f6ba3d758c0a5ae95d23135f2b0
+          kind: card
+          region: jp
+        - basis_hash: sha256:4a3ebb3739318fc92ffab2af0deba48913844974c8d93a540451af30fb69b0fe
+          id: rules-profile:jp:standard
+          kind: profile
+          region: jp
+        - basis_hash: sha256:92fa3567a815b1b86d494e85105102bc90c3062623dd6759ad53495bc86ee6db
+          id: rn:v1:939d76dc49d5b6062388da855a6fc1b6a4c221e50e39b65a01992608b97c2f21
+          kind: rules_name
+          region: jp
+      predecessor: null
+      reason: 依維護者核可的一覽採納表及更正採納 main 範圍；未由生效日推造公告日。
+      review_context_hash: sha256:a7f38b1774a747d19dc077043c2688fcaa3387ca0bd37062f3896b12a14b243e
+      subject:
+        restriction_id: restriction:v1:6aa28d77afbd543326ea38afc35a6b0228ebd00fd9fedd8b9d01cc6b74de12de
+      value:
+        announced_on: null
+        effective_from: 2024-06-28
+        effective_until: null
+        kind: copy_limit
+        max_copies: 1
+        max_selected_groups: null
+        members:
+          - choice_option: 0
+            deck_scope: main
+            rules_name_id: rn:v1:939d76dc49d5b6062388da855a6fc1b6a4c221e50e39b65a01992608b97c2f21
+        profile_id: rules-profile:jp:standard
+        state: confirmed
+    evidence:
+      - primary: true
+        role: restriction
+        use:
+          locator: "{\"context_key\":\"standard\",\"field\":\"value\",\"location\":{\"kind\":\"projection_pointer\",\"page_numbers\":[],\"pointer\":\"/entries/8\"},\"number\":null,\"record_key\":\"[\\\"construction_restriction\\\",{\\\"restriction_id\\\":\\\"restriction:v1:6aa28d77afbd543326ea38afc35a6b0228ebd00fd9fedd8b9d01cc6b74de12de\\\"},1]\",\"result_hash\":\"sha256:c1fb17b7db77eabd84af5a16f89c0bfd8a29096b4ba3fe9d44cbab8ac0821650\"}"
+          source:
+            archive:
+              batch_id: sha256:7bac066571b5513ce89dea249370e3a2296286e8feb09ca4fb6f9bb5df3ba61b
+              descriptor_sha256: sha256:c6b831cd501994e6e51491b91516ac2a73346721d6f314b83d2324a64fe7ff6f
+              first_receipt_id: sha256:4d57e2784d0077ffb8cb1aac3ddc9cf90c80d3ab2a9ef631348f99cfb4f31d74
+              store_id: c49-restrictions-20260925
+            etag: null
+            fetched_at: null
+            id: src:v1:0dd2e285fe7542fc83a7af021aeca7c9acb325ed29aa884503afadd46647e0b2
+            import_receipt_id: sha256:e19a4d241eb1173ec8a3806a1a52c721a76c25cbd906311a8f10a14839d54c82
+            kind: official_page
+            last_modified: null
+            observed_basis: "P05 research acquisition: retained log records this URL with HTTP 200, byte count and null Location/ETag/Last-Modified, but no timestamp. Delegated coordinator decision 2026-10-24 confirms the P05 execution day was 2026-09-25 in local UTC+08:00; mtime is a rename/copy time and is not used. Registration index is transcribed from that log and decision, not an original timestamped index."
+            observed_on: 2026-09-25
+            observed_precision: date
+            observed_timezone: Asia/Taipei
+            parser_version: construction-current-list-v1
+            raw_locator: c49-restrictions-20260925:raw/sha256/c4/c4220dae87cd66806d383fcb9cb62be1321e05ec5cede317c72fc9d4c055a91c.raw
+            sha256: sha256:c4220dae87cd66806d383fcb9cb62be1321e05ec5cede317c72fc9d4c055a91c
+            url: https://shadowverse-evolve.com/card_limit/
+          usage: construction_restriction
+    filing_key: jp-standard
+    kind: construction_restriction
+    record_key: '["construction_restriction",{"restriction_id":"restriction:v1:6aa28d77afbd543326ea38afc35a6b0228ebd00fd9fedd8b9d01cc6b74de12de"},1]'
+    review:
+      basis_hash: sha256:075ac29f41155e6f8e047e4d4ed837676451dee7053d32efdefb657376869b9d
+      model_reviews:
+        - vendor: anthropic
+          model: Claude Sonnet
+          version: "5.5"
+          reviewed_at: 2026-10-24T09:54:23Z
+          basis_hash: sha256:075ac29f41155e6f8e047e4d4ed837676451dee7053d32efdefb657376869b9d
+          outcome: agreed
+          report_hash: sha256:97d393b352102987e2623a0e8f9fae859f1f405e777dc7005d3ab26ea25d5b8a
+        - vendor: openai
+          model: Codex
+          version: gpt-6.1-sol
+          reviewed_at: 2026-10-24T09:52:42Z
+          basis_hash: sha256:075ac29f41155e6f8e047e4d4ed837676451dee7053d32efdefb657376869b9d
+          outcome: agreed
+          report_hash: sha256:283c59df7b6ae2f8f7904a598dac646b3531ae7dbc4dfc6e4ee11e4899d8ddbb
+      maintainer_resolution:
+        reviewed_by: gbaian10
+        reviewed_at: 2026-10-24T00:00:00Z
+        reviewed_precision: day
+        basis_hash: sha256:075ac29f41155e6f8e047e4d4ed837676451dee7053d32efdefb657376869b9d
+        outcome: adopted
+        note: 維護者於 2026-10-24 核可原採納表（sha256:d8282306ff788351b7fc09e3b2c8a896a0202928c2f72eaf494a0d21835f6c1c）及其更正：JP07 亦維持 main，EN01 排除；16 筆禁限、2 profiles、9/25 單日 coverage。時間只知日期，午夜為明示日精度編碼。
+      maintainer_samples: []
+    adoption_review:
+      mode: human
+      policy: null
+      initial_sample_decisions: []
+  - data:
+      adoption_no: 1
+      dependencies:
+        - basis_hash: sha256:48d90d06efeb639a0fed6d919ecb65c5b02ea9548f0cb92a355c71f08b0d54c6
+          id: c:01cbf55d77d65ec4931881cfbf53e1de
+          kind: card
+          region: jp
+        - basis_hash: sha256:4a3ebb3739318fc92ffab2af0deba48913844974c8d93a540451af30fb69b0fe
+          id: rules-profile:jp:standard
+          kind: profile
+          region: jp
+        - basis_hash: sha256:e649ce65bcda6eb3adb398c2ce88e84dc7ef5fcbab98f4c9ba22133e6ed3d4fb
+          id: rn:v1:829b28e327211f2227e41a479594b49800a19d140f73648f5ac346db4e31c28c
+          kind: rules_name
+          region: jp
+      predecessor: null
+      reason: 依維護者核可的一覽採納表及更正採納 main 範圍；未由生效日推造公告日。
+      review_context_hash: sha256:a7f38b1774a747d19dc077043c2688fcaa3387ca0bd37062f3896b12a14b243e
+      subject:
+        restriction_id: restriction:v1:79a0e2bf932fb8296d114ca01ec640193ece4e3f16241ddbe06bc456921ed0e6
+      value:
+        announced_on: null
+        effective_from: 2024-12-13
+        effective_until: null
+        kind: copy_limit
+        max_copies: 0
+        max_selected_groups: null
+        members:
+          - choice_option: 0
+            deck_scope: main
+            rules_name_id: rn:v1:829b28e327211f2227e41a479594b49800a19d140f73648f5ac346db4e31c28c
+        profile_id: rules-profile:jp:standard
+        state: confirmed
+    evidence:
+      - primary: true
+        role: restriction
+        use:
+          locator: "{\"context_key\":\"standard\",\"field\":\"value\",\"location\":{\"kind\":\"projection_pointer\",\"page_numbers\":[],\"pointer\":\"/entries/4\"},\"number\":null,\"record_key\":\"[\\\"construction_restriction\\\",{\\\"restriction_id\\\":\\\"restriction:v1:79a0e2bf932fb8296d114ca01ec640193ece4e3f16241ddbe06bc456921ed0e6\\\"},1]\",\"result_hash\":\"sha256:89ee9d738af51a8102390770be7dd4c3ba3287fbbc9f255157228aaaa17f3184\"}"
+          source:
+            archive:
+              batch_id: sha256:7bac066571b5513ce89dea249370e3a2296286e8feb09ca4fb6f9bb5df3ba61b
+              descriptor_sha256: sha256:c6b831cd501994e6e51491b91516ac2a73346721d6f314b83d2324a64fe7ff6f
+              first_receipt_id: sha256:4d57e2784d0077ffb8cb1aac3ddc9cf90c80d3ab2a9ef631348f99cfb4f31d74
+              store_id: c49-restrictions-20260925
+            etag: null
+            fetched_at: null
+            id: src:v1:0dd2e285fe7542fc83a7af021aeca7c9acb325ed29aa884503afadd46647e0b2
+            import_receipt_id: sha256:e19a4d241eb1173ec8a3806a1a52c721a76c25cbd906311a8f10a14839d54c82
+            kind: official_page
+            last_modified: null
+            observed_basis: "P05 research acquisition: retained log records this URL with HTTP 200, byte count and null Location/ETag/Last-Modified, but no timestamp. Delegated coordinator decision 2026-10-24 confirms the P05 execution day was 2026-09-25 in local UTC+08:00; mtime is a rename/copy time and is not used. Registration index is transcribed from that log and decision, not an original timestamped index."
+            observed_on: 2026-09-25
+            observed_precision: date
+            observed_timezone: Asia/Taipei
+            parser_version: construction-current-list-v1
+            raw_locator: c49-restrictions-20260925:raw/sha256/c4/c4220dae87cd66806d383fcb9cb62be1321e05ec5cede317c72fc9d4c055a91c.raw
+            sha256: sha256:c4220dae87cd66806d383fcb9cb62be1321e05ec5cede317c72fc9d4c055a91c
+            url: https://shadowverse-evolve.com/card_limit/
+          usage: construction_restriction
+    filing_key: jp-standard
+    kind: construction_restriction
+    record_key: '["construction_restriction",{"restriction_id":"restriction:v1:79a0e2bf932fb8296d114ca01ec640193ece4e3f16241ddbe06bc456921ed0e6"},1]'
+    review:
+      basis_hash: sha256:0518987a14535472e9fbc82b4c091d3694cdf9b00ba104b351a9fa8adfbd3719
+      model_reviews:
+        - vendor: anthropic
+          model: Claude Sonnet
+          version: "5.5"
+          reviewed_at: 2026-10-24T09:54:23Z
+          basis_hash: sha256:0518987a14535472e9fbc82b4c091d3694cdf9b00ba104b351a9fa8adfbd3719
+          outcome: agreed
+          report_hash: sha256:7aa94b54a0848ff36188fe262fdd5cef0222a6711663c82eceb6ec236d006e38
+        - vendor: openai
+          model: Codex
+          version: gpt-6.1-sol
+          reviewed_at: 2026-10-24T09:52:42Z
+          basis_hash: sha256:0518987a14535472e9fbc82b4c091d3694cdf9b00ba104b351a9fa8adfbd3719
+          outcome: agreed
+          report_hash: sha256:23d9176f90306c60efddef124878fa4938438520377c2b78c58e9d87be04a24d
+      maintainer_resolution:
+        reviewed_by: gbaian10
+        reviewed_at: 2026-10-24T00:00:00Z
+        reviewed_precision: day
+        basis_hash: sha256:0518987a14535472e9fbc82b4c091d3694cdf9b00ba104b351a9fa8adfbd3719
+        outcome: adopted
+        note: 維護者於 2026-10-24 核可原採納表（sha256:d8282306ff788351b7fc09e3b2c8a896a0202928c2f72eaf494a0d21835f6c1c）及其更正：JP07 亦維持 main，EN01 排除；16 筆禁限、2 profiles、9/25 單日 coverage。時間只知日期，午夜為明示日精度編碼。
+      maintainer_samples: []
+    adoption_review:
+      mode: human
+      policy: null
+      initial_sample_decisions: []
+  - data:
+      adoption_no: 1
+      dependencies:
+        - basis_hash: sha256:4a3ebb3739318fc92ffab2af0deba48913844974c8d93a540451af30fb69b0fe
+          id: rules-profile:jp:standard
+          kind: profile
+          region: jp
+        - basis_hash: sha256:aea01baadfe9d20b22c753ebed8df8a78de599d5712c17799bb3af07ced57ca6
+          id: rn:v1:95ac2be227967735e6c8ab3aae9cdde6fbf73f5227860c2069442cc222ec2d0f
+          kind: rules_name
+          region: jp
+        - basis_hash: sha256:cf102e6345d82d33d5d687930e6843edb0e8dd7fc2359e61170f6dda0bfa941b
+          id: c:e6ad99855bc95a6184fc22290ecd4b8d
+          kind: card
+          region: jp
+      predecessor: null
+      reason: 依維護者核可的一覽採納表及更正採納 main 範圍；未由生效日推造公告日。
+      review_context_hash: sha256:a7f38b1774a747d19dc077043c2688fcaa3387ca0bd37062f3896b12a14b243e
+      subject:
+        restriction_id: restriction:v1:854164c5c8737545e7f26706fbb5c347b3f258b0d976d96a8e1be0d1237c73b6
+      value:
+        announced_on: null
+        effective_from: 2025-11-21
+        effective_until: null
+        kind: copy_limit
+        max_copies: 0
+        max_selected_groups: null
+        members:
+          - choice_option: 0
+            deck_scope: main
+            rules_name_id: rn:v1:95ac2be227967735e6c8ab3aae9cdde6fbf73f5227860c2069442cc222ec2d0f
+        profile_id: rules-profile:jp:standard
+        state: confirmed
+    evidence:
+      - primary: true
+        role: restriction
+        use:
+          locator: "{\"context_key\":\"standard\",\"field\":\"value\",\"location\":{\"kind\":\"projection_pointer\",\"page_numbers\":[],\"pointer\":\"/entries/1\"},\"number\":null,\"record_key\":\"[\\\"construction_restriction\\\",{\\\"restriction_id\\\":\\\"restriction:v1:854164c5c8737545e7f26706fbb5c347b3f258b0d976d96a8e1be0d1237c73b6\\\"},1]\",\"result_hash\":\"sha256:08dfa0dfab18d0d4b3795344a688330d21bb156ecbaadb93e46ea77814e975d1\"}"
+          source:
+            archive:
+              batch_id: sha256:7bac066571b5513ce89dea249370e3a2296286e8feb09ca4fb6f9bb5df3ba61b
+              descriptor_sha256: sha256:c6b831cd501994e6e51491b91516ac2a73346721d6f314b83d2324a64fe7ff6f
+              first_receipt_id: sha256:4d57e2784d0077ffb8cb1aac3ddc9cf90c80d3ab2a9ef631348f99cfb4f31d74
+              store_id: c49-restrictions-20260925
+            etag: null
+            fetched_at: null
+            id: src:v1:0dd2e285fe7542fc83a7af021aeca7c9acb325ed29aa884503afadd46647e0b2
+            import_receipt_id: sha256:e19a4d241eb1173ec8a3806a1a52c721a76c25cbd906311a8f10a14839d54c82
+            kind: official_page
+            last_modified: null
+            observed_basis: "P05 research acquisition: retained log records this URL with HTTP 200, byte count and null Location/ETag/Last-Modified, but no timestamp. Delegated coordinator decision 2026-10-24 confirms the P05 execution day was 2026-09-25 in local UTC+08:00; mtime is a rename/copy time and is not used. Registration index is transcribed from that log and decision, not an original timestamped index."
+            observed_on: 2026-09-25
+            observed_precision: date
+            observed_timezone: Asia/Taipei
+            parser_version: construction-current-list-v1
+            raw_locator: c49-restrictions-20260925:raw/sha256/c4/c4220dae87cd66806d383fcb9cb62be1321e05ec5cede317c72fc9d4c055a91c.raw
+            sha256: sha256:c4220dae87cd66806d383fcb9cb62be1321e05ec5cede317c72fc9d4c055a91c
+            url: https://shadowverse-evolve.com/card_limit/
+          usage: construction_restriction
+    filing_key: jp-standard
+    kind: construction_restriction
+    record_key: '["construction_restriction",{"restriction_id":"restriction:v1:854164c5c8737545e7f26706fbb5c347b3f258b0d976d96a8e1be0d1237c73b6"},1]'
+    review:
+      basis_hash: sha256:59eee145a78c0a509952e305d3bbe6049a967cc770a1dff6aae8f96324b0f596
+      model_reviews:
+        - vendor: anthropic
+          model: Claude Sonnet
+          version: "5.5"
+          reviewed_at: 2026-10-24T09:54:23Z
+          basis_hash: sha256:59eee145a78c0a509952e305d3bbe6049a967cc770a1dff6aae8f96324b0f596
+          outcome: agreed
+          report_hash: sha256:07f50d6d0d42f87a88afb01ba5ec9c39fbdb05c434cbe448a3476efee7ccce4e
+        - vendor: openai
+          model: Codex
+          version: gpt-6.1-sol
+          reviewed_at: 2026-10-24T09:52:42Z
+          basis_hash: sha256:59eee145a78c0a509952e305d3bbe6049a967cc770a1dff6aae8f96324b0f596
+          outcome: agreed
+          report_hash: sha256:43c114278285a01636aff681504d6a3fad66e3276925f476b9e540e251a4ab2a
+      maintainer_resolution:
+        reviewed_by: gbaian10
+        reviewed_at: 2026-10-24T00:00:00Z
+        reviewed_precision: day
+        basis_hash: sha256:59eee145a78c0a509952e305d3bbe6049a967cc770a1dff6aae8f96324b0f596
+        outcome: adopted
+        note: 維護者於 2026-10-24 核可原採納表（sha256:d8282306ff788351b7fc09e3b2c8a896a0202928c2f72eaf494a0d21835f6c1c）及其更正：JP07 亦維持 main，EN01 排除；16 筆禁限、2 profiles、9/25 單日 coverage。時間只知日期，午夜為明示日精度編碼。
+      maintainer_samples: []
+    adoption_review:
+      mode: human
+      policy: null
+      initial_sample_decisions: []
+  - data:
+      adoption_no: 1
+      dependencies:
+        - basis_hash: sha256:2d4a03be4cf32d465754330a7e1ef013ec2bccc7be93da6331e3a02fc962011b
+          id: c:8783ae6de40b54ed9fa1949189ec2f53
+          kind: card
+          region: jp
+        - basis_hash: sha256:4a3ebb3739318fc92ffab2af0deba48913844974c8d93a540451af30fb69b0fe
+          id: rules-profile:jp:standard
+          kind: profile
+          region: jp
+        - basis_hash: sha256:b567da1790e67b1f49b711df3012d50dfa6fe194bc6af21d809162848767cebd
+          id: rn:v1:cc85ae56e219f8be1d0e5875b69572f2dae239ebdc80a017d37ed0c03404a2ad
+          kind: rules_name
+          region: jp
+      predecessor: null
+      reason: 依維護者核可的一覽採納表及更正採納 main 範圍；未由生效日推造公告日。
+      review_context_hash: sha256:a7f38b1774a747d19dc077043c2688fcaa3387ca0bd37062f3896b12a14b243e
+      subject:
+        restriction_id: restriction:v1:877b0e9421c7af2cacf9d5794e63e48b1094cfdb5d2937e2b28bc342257c941a
+      value:
+        announced_on: null
+        effective_from: 2026-01-30
+        effective_until: null
+        kind: copy_limit
+        max_copies: 1
+        max_selected_groups: null
+        members:
+          - choice_option: 0
+            deck_scope: main
+            rules_name_id: rn:v1:cc85ae56e219f8be1d0e5875b69572f2dae239ebdc80a017d37ed0c03404a2ad
+        profile_id: rules-profile:jp:standard
+        state: confirmed
+    evidence:
+      - primary: true
+        role: restriction
+        use:
+          locator: "{\"context_key\":\"standard\",\"field\":\"value\",\"location\":{\"kind\":\"projection_pointer\",\"page_numbers\":[],\"pointer\":\"/entries/5\"},\"number\":null,\"record_key\":\"[\\\"construction_restriction\\\",{\\\"restriction_id\\\":\\\"restriction:v1:877b0e9421c7af2cacf9d5794e63e48b1094cfdb5d2937e2b28bc342257c941a\\\"},1]\",\"result_hash\":\"sha256:30b6ddbc7b6844aba9d60560fd06504b59662d0bd7afce8fcedecc87079497eb\"}"
+          source:
+            archive:
+              batch_id: sha256:7bac066571b5513ce89dea249370e3a2296286e8feb09ca4fb6f9bb5df3ba61b
+              descriptor_sha256: sha256:c6b831cd501994e6e51491b91516ac2a73346721d6f314b83d2324a64fe7ff6f
+              first_receipt_id: sha256:4d57e2784d0077ffb8cb1aac3ddc9cf90c80d3ab2a9ef631348f99cfb4f31d74
+              store_id: c49-restrictions-20260925
+            etag: null
+            fetched_at: null
+            id: src:v1:0dd2e285fe7542fc83a7af021aeca7c9acb325ed29aa884503afadd46647e0b2
+            import_receipt_id: sha256:e19a4d241eb1173ec8a3806a1a52c721a76c25cbd906311a8f10a14839d54c82
+            kind: official_page
+            last_modified: null
+            observed_basis: "P05 research acquisition: retained log records this URL with HTTP 200, byte count and null Location/ETag/Last-Modified, but no timestamp. Delegated coordinator decision 2026-10-24 confirms the P05 execution day was 2026-09-25 in local UTC+08:00; mtime is a rename/copy time and is not used. Registration index is transcribed from that log and decision, not an original timestamped index."
+            observed_on: 2026-09-25
+            observed_precision: date
+            observed_timezone: Asia/Taipei
+            parser_version: construction-current-list-v1
+            raw_locator: c49-restrictions-20260925:raw/sha256/c4/c4220dae87cd66806d383fcb9cb62be1321e05ec5cede317c72fc9d4c055a91c.raw
+            sha256: sha256:c4220dae87cd66806d383fcb9cb62be1321e05ec5cede317c72fc9d4c055a91c
+            url: https://shadowverse-evolve.com/card_limit/
+          usage: construction_restriction
+    filing_key: jp-standard
+    kind: construction_restriction
+    record_key: '["construction_restriction",{"restriction_id":"restriction:v1:877b0e9421c7af2cacf9d5794e63e48b1094cfdb5d2937e2b28bc342257c941a"},1]'
+    review:
+      basis_hash: sha256:031d826b778b0660d6569e856cd83b92bc0023447255db4c4f726fa4449481d1
+      model_reviews:
+        - vendor: anthropic
+          model: Claude Sonnet
+          version: "5.5"
+          reviewed_at: 2026-10-24T09:54:23Z
+          basis_hash: sha256:031d826b778b0660d6569e856cd83b92bc0023447255db4c4f726fa4449481d1
+          outcome: agreed
+          report_hash: sha256:8b4ee4354cd7e5bfeeeac2e207af9c97e1deffa7409a1894a3217e6df76d18ba
+        - vendor: openai
+          model: Codex
+          version: gpt-6.1-sol
+          reviewed_at: 2026-10-24T09:52:42Z
+          basis_hash: sha256:031d826b778b0660d6569e856cd83b92bc0023447255db4c4f726fa4449481d1
+          outcome: agreed
+          report_hash: sha256:17566747897e20ac360684f32ac8ac60bacf7e827f971eb1e02cbed5423c61d4
+      maintainer_resolution:
+        reviewed_by: gbaian10
+        reviewed_at: 2026-10-24T00:00:00Z
+        reviewed_precision: day
+        basis_hash: sha256:031d826b778b0660d6569e856cd83b92bc0023447255db4c4f726fa4449481d1
+        outcome: adopted
+        note: 維護者於 2026-10-24 核可原採納表（sha256:d8282306ff788351b7fc09e3b2c8a896a0202928c2f72eaf494a0d21835f6c1c）及其更正：JP07 亦維持 main，EN01 排除；16 筆禁限、2 profiles、9/25 單日 coverage。時間只知日期，午夜為明示日精度編碼。
+      maintainer_samples: []
+    adoption_review:
+      mode: human
+      policy: null
+      initial_sample_decisions: []
+  - data:
+      adoption_no: 1
+      dependencies:
+        - basis_hash: sha256:3db3f6bc7da286345c8278eed1f3ef2d311bf2c95e11f72f135be42e0317b980
+          id: rn:v1:ec6fbd416d9221d3cb6021697729d8ac94c84a8a46dacc9b4e4741d330469328
+          kind: rules_name
+          region: jp
+        - basis_hash: sha256:4a3ebb3739318fc92ffab2af0deba48913844974c8d93a540451af30fb69b0fe
+          id: rules-profile:jp:standard
+          kind: profile
+          region: jp
+        - basis_hash: sha256:7104582dbee580b74d31d18e992d58f901bdfd82e3afee988abeb3182470605b
+          id: c:6fb7ccaf09b053c09e23f5c396fabce4
+          kind: card
+          region: jp
+      predecessor: null
+      reason: 依維護者核可的一覽採納表及更正採納 main 範圍；未由生效日推造公告日。
+      review_context_hash: sha256:a7f38b1774a747d19dc077043c2688fcaa3387ca0bd37062f3896b12a14b243e
+      subject:
+        restriction_id: restriction:v1:a433fbc93f20fdb7dbe25fee212db09a62373acac3052d5b8bf6d75942af98d0
+      value:
+        announced_on: null
+        effective_from: 2026-01-30
+        effective_until: null
+        kind: copy_limit
+        max_copies: 1
+        max_selected_groups: null
+        members:
+          - choice_option: 0
+            deck_scope: main
+            rules_name_id: rn:v1:ec6fbd416d9221d3cb6021697729d8ac94c84a8a46dacc9b4e4741d330469328
+        profile_id: rules-profile:jp:standard
+        state: confirmed
+    evidence:
+      - primary: true
+        role: restriction
+        use:
+          locator: "{\"context_key\":\"standard\",\"field\":\"value\",\"location\":{\"kind\":\"projection_pointer\",\"page_numbers\":[],\"pointer\":\"/entries/6\"},\"number\":null,\"record_key\":\"[\\\"construction_restriction\\\",{\\\"restriction_id\\\":\\\"restriction:v1:a433fbc93f20fdb7dbe25fee212db09a62373acac3052d5b8bf6d75942af98d0\\\"},1]\",\"result_hash\":\"sha256:fff7c8d2d401c77000742b2a01c852a9c1382e28ac46dfdcbf41d9a6ec3c9d7d\"}"
+          source:
+            archive:
+              batch_id: sha256:7bac066571b5513ce89dea249370e3a2296286e8feb09ca4fb6f9bb5df3ba61b
+              descriptor_sha256: sha256:c6b831cd501994e6e51491b91516ac2a73346721d6f314b83d2324a64fe7ff6f
+              first_receipt_id: sha256:4d57e2784d0077ffb8cb1aac3ddc9cf90c80d3ab2a9ef631348f99cfb4f31d74
+              store_id: c49-restrictions-20260925
+            etag: null
+            fetched_at: null
+            id: src:v1:0dd2e285fe7542fc83a7af021aeca7c9acb325ed29aa884503afadd46647e0b2
+            import_receipt_id: sha256:e19a4d241eb1173ec8a3806a1a52c721a76c25cbd906311a8f10a14839d54c82
+            kind: official_page
+            last_modified: null
+            observed_basis: "P05 research acquisition: retained log records this URL with HTTP 200, byte count and null Location/ETag/Last-Modified, but no timestamp. Delegated coordinator decision 2026-10-24 confirms the P05 execution day was 2026-09-25 in local UTC+08:00; mtime is a rename/copy time and is not used. Registration index is transcribed from that log and decision, not an original timestamped index."
+            observed_on: 2026-09-25
+            observed_precision: date
+            observed_timezone: Asia/Taipei
+            parser_version: construction-current-list-v1
+            raw_locator: c49-restrictions-20260925:raw/sha256/c4/c4220dae87cd66806d383fcb9cb62be1321e05ec5cede317c72fc9d4c055a91c.raw
+            sha256: sha256:c4220dae87cd66806d383fcb9cb62be1321e05ec5cede317c72fc9d4c055a91c
+            url: https://shadowverse-evolve.com/card_limit/
+          usage: construction_restriction
+    filing_key: jp-standard
+    kind: construction_restriction
+    record_key: '["construction_restriction",{"restriction_id":"restriction:v1:a433fbc93f20fdb7dbe25fee212db09a62373acac3052d5b8bf6d75942af98d0"},1]'
+    review:
+      basis_hash: sha256:dbf71a3f06215a9f874949a1ff629173fb77b12694aa8fb381d576495015ce79
+      model_reviews:
+        - vendor: anthropic
+          model: Claude Sonnet
+          version: "5.5"
+          reviewed_at: 2026-10-24T09:54:23Z
+          basis_hash: sha256:dbf71a3f06215a9f874949a1ff629173fb77b12694aa8fb381d576495015ce79
+          outcome: agreed
+          report_hash: sha256:2ecf51c65ecd04833ed9625a1767bfc3ff55c16daafe3fd5d9c30cb3e0931127
+        - vendor: openai
+          model: Codex
+          version: gpt-6.1-sol
+          reviewed_at: 2026-10-24T09:52:42Z
+          basis_hash: sha256:dbf71a3f06215a9f874949a1ff629173fb77b12694aa8fb381d576495015ce79
+          outcome: agreed
+          report_hash: sha256:2127fa2128955ffc11c5b67980aa88df053ea6e08ecd6ebb2a968d3d4b43377f
+      maintainer_resolution:
+        reviewed_by: gbaian10
+        reviewed_at: 2026-10-24T00:00:00Z
+        reviewed_precision: day
+        basis_hash: sha256:dbf71a3f06215a9f874949a1ff629173fb77b12694aa8fb381d576495015ce79
+        outcome: adopted
+        note: 維護者於 2026-10-24 核可原採納表（sha256:d8282306ff788351b7fc09e3b2c8a896a0202928c2f72eaf494a0d21835f6c1c）及其更正：JP07 亦維持 main，EN01 排除；16 筆禁限、2 profiles、9/25 單日 coverage。時間只知日期，午夜為明示日精度編碼。
+      maintainer_samples: []
+    adoption_review:
+      mode: human
+      policy: null
+      initial_sample_decisions: []
+  - data:
+      adoption_no: 1
+      dependencies:
+        - basis_hash: sha256:087944c00de47b0b4c74b9278ae36da64c1c93c9767081441e8b3f34aac69f69
+          id: rn:v1:23f50579cf12ac88dc95bb18c226e43b2620c84979b4ccc0273da7ee4e2507c8
+          kind: rules_name
+          region: jp
+        - basis_hash: sha256:4a3ebb3739318fc92ffab2af0deba48913844974c8d93a540451af30fb69b0fe
+          id: rules-profile:jp:standard
+          kind: profile
+          region: jp
+        - basis_hash: sha256:a483b01a196ad0b4fb281535df1a98fab3dbe7fec62740bd6495b0b906d24af8
+          id: c:903e106d3f49586ead1af45883b7fb14
+          kind: card
+          region: jp
+      predecessor: null
+      reason: 依維護者核可的一覽採納表及更正採納 main 範圍；未由生效日推造公告日。
+      review_context_hash: sha256:a7f38b1774a747d19dc077043c2688fcaa3387ca0bd37062f3896b12a14b243e
+      subject:
+        restriction_id: restriction:v1:ab68c56d7f452a7e3a0b05b58ff73216e9540fe8c17b88d3fb75efea9cf7694b
+      value:
+        announced_on: null
+        effective_from: 2024-12-13
+        effective_until: null
+        kind: copy_limit
+        max_copies: 0
+        max_selected_groups: null
+        members:
+          - choice_option: 0
+            deck_scope: main
+            rules_name_id: rn:v1:23f50579cf12ac88dc95bb18c226e43b2620c84979b4ccc0273da7ee4e2507c8
+        profile_id: rules-profile:jp:standard
+        state: confirmed
+    evidence:
+      - primary: true
+        role: restriction
+        use:
+          locator: "{\"context_key\":\"standard\",\"field\":\"value\",\"location\":{\"kind\":\"projection_pointer\",\"page_numbers\":[],\"pointer\":\"/entries/3\"},\"number\":null,\"record_key\":\"[\\\"construction_restriction\\\",{\\\"restriction_id\\\":\\\"restriction:v1:ab68c56d7f452a7e3a0b05b58ff73216e9540fe8c17b88d3fb75efea9cf7694b\\\"},1]\",\"result_hash\":\"sha256:3e683ff9c22ed49187c1ac7b615acf68aa726e2e1d228e6a1675ce0e74ca0fe4\"}"
+          source:
+            archive:
+              batch_id: sha256:7bac066571b5513ce89dea249370e3a2296286e8feb09ca4fb6f9bb5df3ba61b
+              descriptor_sha256: sha256:c6b831cd501994e6e51491b91516ac2a73346721d6f314b83d2324a64fe7ff6f
+              first_receipt_id: sha256:4d57e2784d0077ffb8cb1aac3ddc9cf90c80d3ab2a9ef631348f99cfb4f31d74
+              store_id: c49-restrictions-20260925
+            etag: null
+            fetched_at: null
+            id: src:v1:0dd2e285fe7542fc83a7af021aeca7c9acb325ed29aa884503afadd46647e0b2
+            import_receipt_id: sha256:e19a4d241eb1173ec8a3806a1a52c721a76c25cbd906311a8f10a14839d54c82
+            kind: official_page
+            last_modified: null
+            observed_basis: "P05 research acquisition: retained log records this URL with HTTP 200, byte count and null Location/ETag/Last-Modified, but no timestamp. Delegated coordinator decision 2026-10-24 confirms the P05 execution day was 2026-09-25 in local UTC+08:00; mtime is a rename/copy time and is not used. Registration index is transcribed from that log and decision, not an original timestamped index."
+            observed_on: 2026-09-25
+            observed_precision: date
+            observed_timezone: Asia/Taipei
+            parser_version: construction-current-list-v1
+            raw_locator: c49-restrictions-20260925:raw/sha256/c4/c4220dae87cd66806d383fcb9cb62be1321e05ec5cede317c72fc9d4c055a91c.raw
+            sha256: sha256:c4220dae87cd66806d383fcb9cb62be1321e05ec5cede317c72fc9d4c055a91c
+            url: https://shadowverse-evolve.com/card_limit/
+          usage: construction_restriction
+    filing_key: jp-standard
+    kind: construction_restriction
+    record_key: '["construction_restriction",{"restriction_id":"restriction:v1:ab68c56d7f452a7e3a0b05b58ff73216e9540fe8c17b88d3fb75efea9cf7694b"},1]'
+    review:
+      basis_hash: sha256:4a1b6f4a5840904ce5b910e44902b64cef3012f9edd09def21d649930a5c7aaf
+      model_reviews:
+        - vendor: anthropic
+          model: Claude Sonnet
+          version: "5.5"
+          reviewed_at: 2026-10-24T09:54:23Z
+          basis_hash: sha256:4a1b6f4a5840904ce5b910e44902b64cef3012f9edd09def21d649930a5c7aaf
+          outcome: agreed
+          report_hash: sha256:7ae28e6fc81bb97ba50b064bfaad29406b2e461f1e54e013c0ad3a698b3e1a3a
+        - vendor: openai
+          model: Codex
+          version: gpt-6.1-sol
+          reviewed_at: 2026-10-24T09:52:42Z
+          basis_hash: sha256:4a1b6f4a5840904ce5b910e44902b64cef3012f9edd09def21d649930a5c7aaf
+          outcome: agreed
+          report_hash: sha256:1fa251033841cc9b0b8b2537beaa6d43efa4370959b5fe11f25f50565f7a4cc7
+      maintainer_resolution:
+        reviewed_by: gbaian10
+        reviewed_at: 2026-10-24T00:00:00Z
+        reviewed_precision: day
+        basis_hash: sha256:4a1b6f4a5840904ce5b910e44902b64cef3012f9edd09def21d649930a5c7aaf
+        outcome: adopted
+        note: 維護者於 2026-10-24 核可原採納表（sha256:d8282306ff788351b7fc09e3b2c8a896a0202928c2f72eaf494a0d21835f6c1c）及其更正：JP07 亦維持 main，EN01 排除；16 筆禁限、2 profiles、9/25 單日 coverage。時間只知日期，午夜為明示日精度編碼。
+      maintainer_samples: []
+    adoption_review:
+      mode: human
+      policy: null
+      initial_sample_decisions: []
+  - data:
+      adoption_no: 1
+      dependencies:
+        - basis_hash: sha256:04065cecf54da54c6712d07418208a5c3ccf87e50bb73939f32f2db43ca9d77b
+          id: c:2a91d6b525625e95ac2b5ba2568ff838
+          kind: card
+          region: jp
+        - basis_hash: sha256:4a3ebb3739318fc92ffab2af0deba48913844974c8d93a540451af30fb69b0fe
+          id: rules-profile:jp:standard
+          kind: profile
+          region: jp
+        - basis_hash: sha256:c03555620a78fa6852e588ac363f881c28a4618cc09e03eeafe58a5e551c22b8
+          id: rn:v1:d15709c84b5b1f52bbb4ded14d71382cf58b1fe76896a26e81c2fdd9263cb1a4
+          kind: rules_name
+          region: jp
+      predecessor: null
+      reason: 依維護者核可的一覽採納表及更正採納 main 範圍；未由生效日推造公告日。
+      review_context_hash: sha256:a7f38b1774a747d19dc077043c2688fcaa3387ca0bd37062f3896b12a14b243e
+      subject:
+        restriction_id: restriction:v1:db610a5370cc7c948706dc78d78f3f52f8e41ec0ef4886543d2ce161b68ad4a0
+      value:
+        announced_on: null
+        effective_from: 2026-01-30
+        effective_until: null
+        kind: copy_limit
+        max_copies: 0
+        max_selected_groups: null
+        members:
+          - choice_option: 0
+            deck_scope: main
+            rules_name_id: rn:v1:d15709c84b5b1f52bbb4ded14d71382cf58b1fe76896a26e81c2fdd9263cb1a4
+        profile_id: rules-profile:jp:standard
+        state: confirmed
+    evidence:
+      - primary: true
+        role: restriction
+        use:
+          locator: "{\"context_key\":\"standard\",\"field\":\"value\",\"location\":{\"kind\":\"projection_pointer\",\"page_numbers\":[],\"pointer\":\"/entries/0\"},\"number\":null,\"record_key\":\"[\\\"construction_restriction\\\",{\\\"restriction_id\\\":\\\"restriction:v1:db610a5370cc7c948706dc78d78f3f52f8e41ec0ef4886543d2ce161b68ad4a0\\\"},1]\",\"result_hash\":\"sha256:d982b4b06c02986e219992c58261a7de2a723a98d4ee3e097c160d1544baa649\"}"
+          source:
+            archive:
+              batch_id: sha256:7bac066571b5513ce89dea249370e3a2296286e8feb09ca4fb6f9bb5df3ba61b
+              descriptor_sha256: sha256:c6b831cd501994e6e51491b91516ac2a73346721d6f314b83d2324a64fe7ff6f
+              first_receipt_id: sha256:4d57e2784d0077ffb8cb1aac3ddc9cf90c80d3ab2a9ef631348f99cfb4f31d74
+              store_id: c49-restrictions-20260925
+            etag: null
+            fetched_at: null
+            id: src:v1:0dd2e285fe7542fc83a7af021aeca7c9acb325ed29aa884503afadd46647e0b2
+            import_receipt_id: sha256:e19a4d241eb1173ec8a3806a1a52c721a76c25cbd906311a8f10a14839d54c82
+            kind: official_page
+            last_modified: null
+            observed_basis: "P05 research acquisition: retained log records this URL with HTTP 200, byte count and null Location/ETag/Last-Modified, but no timestamp. Delegated coordinator decision 2026-10-24 confirms the P05 execution day was 2026-09-25 in local UTC+08:00; mtime is a rename/copy time and is not used. Registration index is transcribed from that log and decision, not an original timestamped index."
+            observed_on: 2026-09-25
+            observed_precision: date
+            observed_timezone: Asia/Taipei
+            parser_version: construction-current-list-v1
+            raw_locator: c49-restrictions-20260925:raw/sha256/c4/c4220dae87cd66806d383fcb9cb62be1321e05ec5cede317c72fc9d4c055a91c.raw
+            sha256: sha256:c4220dae87cd66806d383fcb9cb62be1321e05ec5cede317c72fc9d4c055a91c
+            url: https://shadowverse-evolve.com/card_limit/
+          usage: construction_restriction
+    filing_key: jp-standard
+    kind: construction_restriction
+    record_key: '["construction_restriction",{"restriction_id":"restriction:v1:db610a5370cc7c948706dc78d78f3f52f8e41ec0ef4886543d2ce161b68ad4a0"},1]'
+    review:
+      basis_hash: sha256:ffea2f6dcfa237e73c193721939b63c47f31a37e3fec2825caddfbfec876e921
+      model_reviews:
+        - vendor: anthropic
+          model: Claude Sonnet
+          version: "5.5"
+          reviewed_at: 2026-10-24T09:54:23Z
+          basis_hash: sha256:ffea2f6dcfa237e73c193721939b63c47f31a37e3fec2825caddfbfec876e921
+          outcome: agreed
+          report_hash: sha256:1bff3179c171bbe1f6c47eb8a48194506010f9f16f57e4f7c8a373bd80f4377b
+        - vendor: openai
+          model: Codex
+          version: gpt-6.1-sol
+          reviewed_at: 2026-10-24T09:52:42Z
+          basis_hash: sha256:ffea2f6dcfa237e73c193721939b63c47f31a37e3fec2825caddfbfec876e921
+          outcome: agreed
+          report_hash: sha256:cb0921884fac727c6061020a7a24dd3c86d0fe2a6678aab86c5cc18d6fd6baab
+      maintainer_resolution:
+        reviewed_by: gbaian10
+        reviewed_at: 2026-10-24T00:00:00Z
+        reviewed_precision: day
+        basis_hash: sha256:ffea2f6dcfa237e73c193721939b63c47f31a37e3fec2825caddfbfec876e921
+        outcome: adopted
+        note: 維護者於 2026-10-24 核可原採納表（sha256:d8282306ff788351b7fc09e3b2c8a896a0202928c2f72eaf494a0d21835f6c1c）及其更正：JP07 亦維持 main，EN01 排除；16 筆禁限、2 profiles、9/25 單日 coverage。時間只知日期，午夜為明示日精度編碼。
+      maintainer_samples: []
+    adoption_review:
+      mode: human
+      policy: null
+      initial_sample_decisions: []
+  - data:
+      adoption_no: 1
+      dependencies:
+        - basis_hash: sha256:4a3ebb3739318fc92ffab2af0deba48913844974c8d93a540451af30fb69b0fe
+          id: rules-profile:jp:standard
+          kind: profile
+          region: jp
+        - basis_hash: sha256:5c56f8b4cd92e4ab7ec3c8ea990da2ef831dd810b0e85c8b4bb30e27d51f112a
+          id: rn:v1:beb9cba706c6ef79c35c6154ec9b2a9fd23c05ade295127f9db5395cc0340403
+          kind: rules_name
+          region: jp
+        - basis_hash: sha256:61d21884103f7eac53adc058cfaa0e2f3a7473268967b299a2ae63264434ce07
+          id: c:e5af3041c8f35009992c3ecadf28cb45
+          kind: card
+          region: jp
+      predecessor: null
+      reason: 依維護者核可的一覽採納表及更正採納 main 範圍；未由生效日推造公告日。
+      review_context_hash: sha256:a7f38b1774a747d19dc077043c2688fcaa3387ca0bd37062f3896b12a14b243e
+      subject:
+        restriction_id: restriction:v1:eae0748cbe4e1ddfcbef4bb07bca0d64bbc30b9706304a63dddf1ea51556728d
+      value:
+        announced_on: null
+        effective_from: 2025-04-11
+        effective_until: null
+        kind: copy_limit
+        max_copies: 1
+        max_selected_groups: null
+        members:
+          - choice_option: 0
+            deck_scope: main
+            rules_name_id: rn:v1:beb9cba706c6ef79c35c6154ec9b2a9fd23c05ade295127f9db5395cc0340403
+        profile_id: rules-profile:jp:standard
+        state: confirmed
+    evidence:
+      - primary: true
+        role: restriction
+        use:
+          locator: "{\"context_key\":\"standard\",\"field\":\"value\",\"location\":{\"kind\":\"projection_pointer\",\"page_numbers\":[],\"pointer\":\"/entries/7\"},\"number\":null,\"record_key\":\"[\\\"construction_restriction\\\",{\\\"restriction_id\\\":\\\"restriction:v1:eae0748cbe4e1ddfcbef4bb07bca0d64bbc30b9706304a63dddf1ea51556728d\\\"},1]\",\"result_hash\":\"sha256:710505a95372fdf481a6b22a8e1e85c8a45d9e9e726262a1551a77527e5f28ea\"}"
+          source:
+            archive:
+              batch_id: sha256:7bac066571b5513ce89dea249370e3a2296286e8feb09ca4fb6f9bb5df3ba61b
+              descriptor_sha256: sha256:c6b831cd501994e6e51491b91516ac2a73346721d6f314b83d2324a64fe7ff6f
+              first_receipt_id: sha256:4d57e2784d0077ffb8cb1aac3ddc9cf90c80d3ab2a9ef631348f99cfb4f31d74
+              store_id: c49-restrictions-20260925
+            etag: null
+            fetched_at: null
+            id: src:v1:0dd2e285fe7542fc83a7af021aeca7c9acb325ed29aa884503afadd46647e0b2
+            import_receipt_id: sha256:e19a4d241eb1173ec8a3806a1a52c721a76c25cbd906311a8f10a14839d54c82
+            kind: official_page
+            last_modified: null
+            observed_basis: "P05 research acquisition: retained log records this URL with HTTP 200, byte count and null Location/ETag/Last-Modified, but no timestamp. Delegated coordinator decision 2026-10-24 confirms the P05 execution day was 2026-09-25 in local UTC+08:00; mtime is a rename/copy time and is not used. Registration index is transcribed from that log and decision, not an original timestamped index."
+            observed_on: 2026-09-25
+            observed_precision: date
+            observed_timezone: Asia/Taipei
+            parser_version: construction-current-list-v1
+            raw_locator: c49-restrictions-20260925:raw/sha256/c4/c4220dae87cd66806d383fcb9cb62be1321e05ec5cede317c72fc9d4c055a91c.raw
+            sha256: sha256:c4220dae87cd66806d383fcb9cb62be1321e05ec5cede317c72fc9d4c055a91c
+            url: https://shadowverse-evolve.com/card_limit/
+          usage: construction_restriction
+    filing_key: jp-standard
+    kind: construction_restriction
+    record_key: '["construction_restriction",{"restriction_id":"restriction:v1:eae0748cbe4e1ddfcbef4bb07bca0d64bbc30b9706304a63dddf1ea51556728d"},1]'
+    review:
+      basis_hash: sha256:2a6035c4ddc3ebb8612de0f2d7fd72bd89ea8fa0222a191327f5006b275e4a2a
+      model_reviews:
+        - vendor: anthropic
+          model: Claude Sonnet
+          version: "5.5"
+          reviewed_at: 2026-10-24T09:54:23Z
+          basis_hash: sha256:2a6035c4ddc3ebb8612de0f2d7fd72bd89ea8fa0222a191327f5006b275e4a2a
+          outcome: agreed
+          report_hash: sha256:79e77e477923bb1e51884f605f549d531b5b15cf9a5a6bd8a6b2cad5796fe7ff
+        - vendor: openai
+          model: Codex
+          version: gpt-6.1-sol
+          reviewed_at: 2026-10-24T09:52:42Z
+          basis_hash: sha256:2a6035c4ddc3ebb8612de0f2d7fd72bd89ea8fa0222a191327f5006b275e4a2a
+          outcome: agreed
+          report_hash: sha256:c07a55082d7fb368322d61ac48cb8f5f9e004dfd6c3db51f07bb09e740161c4a
+      maintainer_resolution:
+        reviewed_by: gbaian10
+        reviewed_at: 2026-10-24T00:00:00Z
+        reviewed_precision: day
+        basis_hash: sha256:2a6035c4ddc3ebb8612de0f2d7fd72bd89ea8fa0222a191327f5006b275e4a2a
+        outcome: adopted
+        note: 維護者於 2026-10-24 核可原採納表（sha256:d8282306ff788351b7fc09e3b2c8a896a0202928c2f72eaf494a0d21835f6c1c）及其更正：JP07 亦維持 main，EN01 排除；16 筆禁限、2 profiles、9/25 單日 coverage。時間只知日期，午夜為明示日精度編碼。
+      maintainer_samples: []
+    adoption_review:
+      mode: human
+      policy: null
+      initial_sample_decisions: []
+decisions:
+  - id: d:f00803694511435944074c993ce38f1c23d6d56a7b5af059f1f63719410f82ea
+    state: confirmed
+    scope: batch
+    category: construction_restriction
+    members:
+      - - '["construction_restriction",{"restriction_id":"restriction:v1:13042ebe5dcd3dc64ee8d50d267d76a15b97db510d69f2dabbf19055d721c6c4"},1]'
+        - sha256:73f01eade916bcc61873ec52a073b2c7323f83ec01c1eb86fcb37b39a2fb9600
+      - - '["construction_restriction",{"restriction_id":"restriction:v1:6aa28d77afbd543326ea38afc35a6b0228ebd00fd9fedd8b9d01cc6b74de12de"},1]'
+        - sha256:8098ba2604fbd68ae1e4a23911ff90df5de0e2fb75efe25d186515a8a9084939
+      - - '["construction_restriction",{"restriction_id":"restriction:v1:79a0e2bf932fb8296d114ca01ec640193ece4e3f16241ddbe06bc456921ed0e6"},1]'
+        - sha256:f228536088af166ffea7fb1cd293a4956d6755aa0cedab20d1e61b89248907a6
+      - - '["construction_restriction",{"restriction_id":"restriction:v1:854164c5c8737545e7f26706fbb5c347b3f258b0d976d96a8e1be0d1237c73b6"},1]'
+        - sha256:c7ec55466387daed8ff8f1999d19401ddcdda079896ba2200a5ee6ac1778c6f8
+      - - '["construction_restriction",{"restriction_id":"restriction:v1:877b0e9421c7af2cacf9d5794e63e48b1094cfdb5d2937e2b28bc342257c941a"},1]'
+        - sha256:439b33a5d93bdd6bbcdc053e91043d45083faa805dfce21e2320e24c80c96d5b
+      - - '["construction_restriction",{"restriction_id":"restriction:v1:a433fbc93f20fdb7dbe25fee212db09a62373acac3052d5b8bf6d75942af98d0"},1]'
+        - sha256:4167722c4689cbe11f651492088ebe6a3364f680c21fd8ec733a27cf00cd2e9b
+      - - '["construction_restriction",{"restriction_id":"restriction:v1:ab68c56d7f452a7e3a0b05b58ff73216e9540fe8c17b88d3fb75efea9cf7694b"},1]'
+        - sha256:3efc3bfb42a1b986e14868937175350be1f480588015e50d56b45c1aaf8e5791
+      - - '["construction_restriction",{"restriction_id":"restriction:v1:db610a5370cc7c948706dc78d78f3f52f8e41ec0ef4886543d2ce161b68ad4a0"},1]'
+        - sha256:1c41c26c917d9b908ecce66bb922f870a7ee660b5c5b8a17e19c9d650dd21f3d
+      - - '["construction_restriction",{"restriction_id":"restriction:v1:eae0748cbe4e1ddfcbef4bb07bca0d64bbc30b9706304a63dddf1ea51556728d"},1]'
+        - sha256:e7f43dd405e8d03655e7c997c6f455f28f761fdb21b90fa958c03ac579a6d51d
+    membership_hash: sha256:f00803694511435944074c993ce38f1c23d6d56a7b5af059f1f63719410f82ea
+    policy_id: construction-human-v1
+    sample_ids:
+      - '["construction_restriction",{"restriction_id":"restriction:v1:13042ebe5dcd3dc64ee8d50d267d76a15b97db510d69f2dabbf19055d721c6c4"},1]'
+      - '["construction_restriction",{"restriction_id":"restriction:v1:6aa28d77afbd543326ea38afc35a6b0228ebd00fd9fedd8b9d01cc6b74de12de"},1]'
+      - '["construction_restriction",{"restriction_id":"restriction:v1:79a0e2bf932fb8296d114ca01ec640193ece4e3f16241ddbe06bc456921ed0e6"},1]'
+      - '["construction_restriction",{"restriction_id":"restriction:v1:854164c5c8737545e7f26706fbb5c347b3f258b0d976d96a8e1be0d1237c73b6"},1]'
+      - '["construction_restriction",{"restriction_id":"restriction:v1:877b0e9421c7af2cacf9d5794e63e48b1094cfdb5d2937e2b28bc342257c941a"},1]'
+      - '["construction_restriction",{"restriction_id":"restriction:v1:a433fbc93f20fdb7dbe25fee212db09a62373acac3052d5b8bf6d75942af98d0"},1]'
+      - '["construction_restriction",{"restriction_id":"restriction:v1:ab68c56d7f452a7e3a0b05b58ff73216e9540fe8c17b88d3fb75efea9cf7694b"},1]'
+      - '["construction_restriction",{"restriction_id":"restriction:v1:db610a5370cc7c948706dc78d78f3f52f8e41ec0ef4886543d2ce161b68ad4a0"},1]'
+      - '["construction_restriction",{"restriction_id":"restriction:v1:eae0748cbe4e1ddfcbef4bb07bca0d64bbc30b9706304a63dddf1ea51556728d"},1]'
+    confidence: null
+    note: 首輪逐項真人核可；construction-human-v1 是確認方式，未啟用後續 policy 採納。
