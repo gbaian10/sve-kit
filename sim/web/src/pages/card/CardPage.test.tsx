@@ -497,24 +497,24 @@ describe("plain wording on the card page", () => {
       initialEntries: ["/cards/BP-SYNTHETIC"],
     })
     const region = screen.getByRole("region", { name: "效果" })
-    // This printing's own translation in the first box, its own text in the second.
-    const [translation, original] = [...region.children] as HTMLElement[]
-    if (!translation || !original) throw new Error("two boxes expected")
+    // One box: each translation with this printing's own text in a box under it, by section ordinal.
+    const translation = region
+    const boxes = [...region.querySelectorAll<HTMLElement>("[data-original]")]
+    expect(boxes).toHaveLength(3)
     expect(paragraphs(translation, "zh-Hant")).toEqual([
       "合成舊版譯文",
       "合成舊版補充譯文 1",
       "合成舊版補充譯文 3",
     ])
-    expect(paragraphs(translation, "ja")).toEqual([])
     expect(within(translation).getByText("Synthetic older heading")).toBeVisible()
     expect(translation.querySelectorAll("[data-section]")).toHaveLength(2)
-    expect(within(original).getByRole("heading", { name: "原文" })).toBeVisible()
-    expect(paragraphs(original, "ja")).toEqual([
-      "Synthetic older effect",
-      "Synthetic older reminder 1",
-      "Synthetic older reminder 3",
+    expect(boxes.map((box) => paragraphs(box, "ja"))).toEqual([
+      ["Synthetic older effect"],
+      ["Synthetic older reminder 1"],
+      ["Synthetic older reminder 3"],
     ])
-    expect(original.querySelectorAll("[data-section]")).toHaveLength(2)
+    for (const [index, section] of [...translation.querySelectorAll("[data-section]")].entries())
+      expect(section).toContainElement(boxes[index + 1] ?? null)
     expect(screen.queryByText("合成新版譯文")).not.toBeInTheDocument()
     expect(screen.queryByText("Synthetic selected effect")).not.toBeInTheDocument()
     expect(screen.queryByText("附註")).not.toBeInTheDocument()
@@ -594,8 +594,9 @@ describe("plain wording on the card page", () => {
       initialEntries: ["/cards/BP-SYNTHETIC"],
     })
     const region = screen.getByRole("region", { name: "效果" })
-    const [translation, original] = [...region.children] as HTMLElement[]
-    if (!translation || !original) throw new Error("two boxes expected")
+    const translation = region
+    const original = region.querySelector<HTMLElement>("[data-original]")
+    if (!original) throw new Error("original box expected")
     expect(paragraphs(translation, "zh-Hant")).toEqual(["合成新版譯文"])
     expect(within(translation).getByText("機器譯文 · 非官方")).toBeVisible()
     expect(
@@ -663,7 +664,7 @@ describe("plain wording on the card page", () => {
     })
     expect(screen.getByText("合成新版譯文")).toBeVisible()
     expect(screen.getByText("Synthetic selected effect")).toBeVisible()
-    expect(screen.getByRole("heading", { name: "原文" })).toBeVisible()
+    expect(screen.getAllByText("原文")[0]).toBeVisible()
     // The state comes from the print-detail band, not from a printed text unit (there is none).
     expect(await screen.findByText("印刷文字尚未確認")).toBeVisible()
     expect(screen.queryByText("這張卡沒有效果文字")).not.toBeInTheDocument()
@@ -792,7 +793,7 @@ describe("plain wording on the card page", () => {
     expect(screen.getByText("合成舊版譯文")).toBeVisible()
     expect(screen.queryByText("合成新版譯文")).not.toBeInTheDocument()
     expect(screen.queryByText("Synthetic selected effect")).not.toBeInTheDocument()
-    expect(screen.getByRole("heading", { name: "原文" })).toBeVisible()
+    expect(screen.getAllByText("原文")[0]).toBeVisible()
     // The translation stacks above this printing's original, never beside it.
     expect(
       screen

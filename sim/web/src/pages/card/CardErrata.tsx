@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { InlineText } from "../../components/card/InlineText"
+import { OriginalBox } from "../../components/card/OriginalBox"
 import { Button } from "../../components/ui/Button"
 import { Link } from "../../components/ui/Link"
 import {
@@ -140,14 +141,13 @@ export function CardErrata({
                           before={side === "before"}
                         />
                       )}
-                      <div className="rounded-control border border-border px-3 py-2">
-                        <p className="mb-1 text-12 text-text-3">{t("card.originalText")}</p>
+                      <OriginalBox>
                         <Wording
                           text={wording(change[side])}
                           lang={region === "jp" ? "ja" : "en"}
                           before={side === "before"}
                         />
-                      </div>
+                      </OriginalBox>
                     </div>
                   </div>
                 ))}

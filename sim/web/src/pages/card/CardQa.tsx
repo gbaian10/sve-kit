@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { AnnotatedText } from "../../components/card/AnnotatedText"
+import { OriginalBox } from "../../components/card/OriginalBox"
 import { useTextLanguage } from "../../components/card/text-language"
 import { TranslationSourceLine } from "../../components/card/TranslationSourceLine"
 import { Button } from "../../components/ui/Button"
@@ -154,10 +155,7 @@ function QaLine({
         {annotated(translated ?? value.original, PRIMARY)}
         {foreign && <p className="text-12 text-text-3">{t("qa.untranslated")}</p>}
         {mode === "both" && translated && (
-          <div className="rounded-control border border-border px-3 py-2">
-            <p className="mb-1 text-12 text-text-3">{t("card.originalText")}</p>
-            {annotated(value.original, SECONDARY)}
-          </div>
+          <OriginalBox>{annotated(value.original, SECONDARY)}</OriginalBox>
         )}
         {translated && sourceLine && <TranslationSourceLine value={value} proofreading={false} />}
       </div>

@@ -335,8 +335,6 @@ export default {
     retry: "Download metadata",
   },
   card: {
-    expandText: "Expand {{field}}",
-    collapseText: "Collapse {{field}}",
     originalText: "Original text",
     sourcePending: "Loading Japanese source",
     annotationsPending: "Loading annotations",

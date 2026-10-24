@@ -323,8 +323,6 @@ const zhTW = {
     retry: "下載卡圖資訊",
   },
   card: {
-    expandText: "展開{{field}}",
-    collapseText: "收起{{field}}",
     originalText: "原文",
     sourcePending: "日文依據載入中",
     annotationsPending: "標註載入中",
