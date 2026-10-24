@@ -308,7 +308,7 @@ function* catalogCardCursor(
   yield
 }
 
-function* catalogCursor(snapshot: LoadedSnapshot): Generator<void, Catalog> {
+function* catalogCursor(snapshot: LoadedSnapshot, lazy = false): Generator<void, Catalog> {
   let visited = 0
   const index = yield* cardIndexCursor(snapshot)
   const sets = new Set<string>()
@@ -322,20 +322,31 @@ function* catalogCursor(snapshot: LoadedSnapshot): Generator<void, Catalog> {
     if ((++visited & 31) === 0) yield
   }
   const aliasRows = yield* mergedRowsCursor(snapshot.bootstrap, "search_alias")
-  const entries: SearchEntry[] = []
+  let entries: readonly SearchEntry[] | undefined
+  const included = new Set<string>()
   const summaries = new Map<string, CardSummary>()
-  for (const card of catalogCardCursor(index, index.cards, aliasRows, sets)) {
-    if (card === undefined) {
-      yield
-      continue
-    }
-    if ((++visited & 31) === 0) yield
-    entries.push(card.entry)
-    for (const summary of card.summaries) {
-      summaries.set(summary.printingId, summary)
+  function* populate(): Generator<void, readonly SearchEntry[]> {
+    const next: SearchEntry[] = []
+    for (const card of catalogCardCursor(index, index.cards, aliasRows, sets)) {
+      if (card === undefined) {
+        yield
+        continue
+      }
       if ((++visited & 31) === 0) yield
+      next.push(card.entry)
+      included.add(card.entry.cardId)
+      for (const summary of card.summaries) {
+        if (!summaries.has(summary.printingId)) summaries.set(summary.printingId, summary)
+        if ((++visited & 31) === 0) yield
+      }
     }
+    return next
   }
+  const searchEntries = (): readonly SearchEntry[] => {
+    return (entries ??= drain(populate()))
+  }
+  // Detail readers need the full index now, but only summaries of the cards they show.
+  if (!lazy) entries = yield* populate()
   const classLabel = (code: string, lang: TextLang): string => {
     const row = index.vocabulary("class", code)
     if (!row) return code
@@ -366,20 +377,34 @@ function* catalogCursor(snapshot: LoadedSnapshot): Generator<void, Catalog> {
   yield
   return {
     index,
-    entries,
+    get entries() {
+      return searchEntries()
+    },
     sets,
     classCodes,
     normalizerMatches,
-    suggest: (text, edition, limit) => suggest(text, entries, { edition, sets, limit }),
+    suggest: (text, edition, limit) => suggest(text, searchEntries(), { edition, sets, limit }),
     results: (state, edition) =>
       apply(
         state,
         state.errataOnly
-          ? entries.filter((entry) => errataCards.get(edition)?.has(entry.cardId) === true)
-          : entries,
+          ? searchEntries().filter((entry) => errataCards.get(edition)?.has(entry.cardId) === true)
+          : searchEntries(),
         { edition, sets },
       ),
-    summary: (printingId) => summaries.get(printingId),
+    summary: (printingId) => {
+      if (!summaries.has(printingId)) {
+        const printing = index.printing(printingId)
+        const card = printing ? index.card(stringValue(printing["card_id"])) : undefined
+        if (card && !included.has(stringValue(card["id"])))
+          catalogWork("catalogSummary", () => {
+            for (const result of catalogCards(index, [card], [], sets))
+              for (const summary of result.summaries) summaries.set(summary.printingId, summary)
+            included.add(stringValue(card["id"]))
+          })
+      }
+      return summaries.get(printingId)
+    },
     classLabel,
   }
 }
@@ -510,8 +535,16 @@ export function preparePrintingOverlay(
   }
   const summaries = new Map<string, CardSummary>()
   catalogs.set(snapshot, {
-    ...base,
     index,
+    get entries() {
+      return base.entries
+    },
+    sets: base.sets,
+    classCodes: base.classCodes,
+    normalizerMatches: base.normalizerMatches,
+    suggest: base.suggest,
+    results: base.results,
+    classLabel: base.classLabel,
     summary: (id) => {
       const cached = summaries.get(id)
       if (cached) return cached
@@ -540,7 +573,7 @@ export async function prepareCatalog(
   try {
     if (validate) await budget.drain(validateCatalogCursor(snapshot.bootstrap), "validate")
     const catalog =
-      catalogs.get(snapshot) ?? (await budget.drain(catalogCursor(snapshot), "catalogOf"))
+      catalogs.get(snapshot) ?? (await budget.drain(catalogCursor(snapshot, true), "catalogOf"))
     check()
     catalogs.set(snapshot, catalog)
     prepared.add(snapshot)

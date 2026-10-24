@@ -3,11 +3,12 @@ import { describe, expect, it } from "vitest"
 
 import { buildSnapshot } from "../../scripts/fixture/build"
 import { DEFAULT_QUERY } from "../domain/query/model"
-import { catalogOf, createCatalog } from "./catalog"
+import { catalogOf, createCatalog, prepareCatalog } from "./catalog"
 import type { Fetcher } from "./cdn"
 import { createSnapshotClient } from "./client"
 import { faceBasics } from "./face-basics"
 import type { Row } from "./format-v3/decode"
+import { stringValue } from "./format-v3/json"
 import { BootstrapColumns } from "./search/bootstrap"
 import { SearchIndex } from "./search/index"
 
@@ -34,6 +35,42 @@ if (!snapshot) throw new Error("fixture did not load")
 const catalog = createCatalog(snapshot)
 
 describe("catalog", () => {
+  it("keeps prepared summaries and search results equal regardless of which is read first", async () => {
+    const candidate = { ...snapshot }
+    await prepareCatalog(candidate, () => undefined)
+    const prepared = catalogOf(candidate)
+    const eager = createCatalog(candidate)
+    const summaries = new Map(
+      eager.index.cards.flatMap((card) =>
+        eager.index.printingsOf(stringValue(card["id"])).map((printing) => {
+          const id = stringValue(printing["id"])
+          const summary = prepared.summary(id)
+          expect(summary).toEqual(eager.summary(id))
+          return [id, summary] as const
+        }),
+      ),
+    )
+    expect(prepared.summary("p:missing")).toBeUndefined()
+    expect(prepared.entries).toEqual(eager.entries)
+    for (const region of ["jp", "en"] as const) {
+      expect(prepared.results(DEFAULT_QUERY, region)).toEqual(eager.results(DEFAULT_QUERY, region))
+      expect(prepared.suggest("BP01", region, 20)).toEqual(eager.suggest("BP01", region, 20))
+      expect(prepared.suggest("テンプラー", region, 5)).toEqual(
+        eager.suggest("テンプラー", region, 5),
+      )
+    }
+    for (const [id, summary] of summaries) expect(prepared.summary(id)).toBe(summary)
+    expect(catalogOf(candidate)).toBe(prepared)
+    expect(prepared.entries).toBe(prepared.entries)
+
+    const searchFirst = { ...snapshot }
+    await prepareCatalog(searchFirst, () => undefined)
+    const searched = catalogOf(searchFirst)
+    expect(searched.entries).toEqual(eager.entries)
+    for (const [id, summary] of summaries) expect(searched.summary(id)).toEqual(summary)
+    expect(searched.summary("p:missing")).toBeUndefined()
+  })
+
   it("flattens every card into one search entry with names in every shipped language", () => {
     expect(catalog.entries).toHaveLength(catalog.index.cards.length)
     const recruit = catalog.entries.find((entry) => entry.cardId === "c:bp01-001")
