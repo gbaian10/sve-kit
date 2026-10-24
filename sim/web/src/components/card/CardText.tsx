@@ -182,7 +182,7 @@ export function CardText({
   readonly owner: JsonObject
   readonly field: "name" | "effect" | "flavor"
   readonly ordinal?: number | null
-  readonly display?: NameDisplay | undefined
+  readonly display?: NameDisplay | "none" | undefined
   readonly label?: string | undefined
   /**
    * The text this printing actually prints when its own revision has no translation and the
@@ -193,6 +193,13 @@ export function CardText({
   const { t } = useTranslation()
   const prefs = usePrefs()
   const language = useTextLanguage()
+  const mode =
+    display ??
+    (field === "name"
+      ? prefs.nameDisplay
+      : field === "flavor"
+        ? prefs.flavorDisplay
+        : prefs.effectLanguage)
   const { readiness, value } = useAnnotatedText(
     client,
     owner,
@@ -231,6 +238,7 @@ export function CardText({
     edition,
     sharedResolver,
   )
+  if (mode === "none") return null
   if (readiness.basic === "pending") return <p role="status">{t("card.annotationPending")}</p>
   if (readiness.basic === "error")
     return (
@@ -252,7 +260,6 @@ export function CardText({
       </p>
     )
   const annotationReady = readiness.annotations === "ready" || readiness.annotations === "none"
-  const mode = display ?? (field === "name" ? prefs.nameDisplay : prefs.effectLanguage)
   // Each text falls back on its own when translating; a box with no translation at all says so once
   // at its end, while a partly translated box marks each untranslated text.
   const translating = mode !== "original"

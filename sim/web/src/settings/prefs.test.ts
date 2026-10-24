@@ -32,13 +32,41 @@ describe("readPrefs", () => {
       nameDisplay: "translated",
       effectLanguage: "both",
       symbolLabels: false,
-      showFlavorText: true,
+      flavorDisplay: "both",
+      qaDisplay: "both",
       theme: "system",
       accent: null,
       banRegion: "jp",
       gridDensity: 2,
       viewMode: "grid",
     })
+  })
+
+  it("carries the old effect, flavor and Q&A choices over once", () => {
+    localStorage.setItem(
+      PREFS_KEY,
+      JSON.stringify({ v: 1, effectLanguage: "original", showFlavorText: false }),
+    )
+    expect(readPrefs()).toMatchObject({
+      effectLanguage: "original",
+      flavorDisplay: "none",
+      qaDisplay: "original",
+    })
+    localStorage.setItem(
+      PREFS_KEY,
+      JSON.stringify({ v: 1, effectLanguage: "translated", showFlavorText: true }),
+    )
+    expect(readPrefs()).toMatchObject({ flavorDisplay: "translated", qaDisplay: "translated" })
+    localStorage.setItem(
+      PREFS_KEY,
+      JSON.stringify({
+        v: 1,
+        effectLanguage: "original",
+        flavorDisplay: "both",
+        qaDisplay: "none",
+      }),
+    )
+    expect(readPrefs()).toMatchObject({ flavorDisplay: "both", qaDisplay: "none" })
   })
 
   it("round-trips a full object", () => {

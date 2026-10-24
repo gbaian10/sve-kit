@@ -11,7 +11,8 @@ interface SegmentedOption<T extends string> {
 export interface SegmentedProps<T extends string> {
   readonly label: string
   readonly options: readonly SegmentedOption<T>[]
-  readonly value: T
+  /** null = none of the options applies (a mixed setting): no radio is checked. */
+  readonly value: T | null
   readonly onChange: (value: T) => void
   readonly disabled?: boolean
   readonly describedBy?: string | undefined
@@ -36,7 +37,7 @@ export function Segmented<T extends string>({
   const id = useId()
   const values = options.map((option) => option.value)
   const onKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
-    rovingRadioKeyDown(event, values, value, onChange, id)
+    rovingRadioKeyDown(event, values, value ?? (values[0] as T), onChange, id)
   }
   return (
     <div
@@ -60,7 +61,7 @@ export function Segmented<T extends string>({
             role="radio"
             aria-checked={checked}
             disabled={disabled}
-            tabIndex={checked ? 0 : -1}
+            tabIndex={checked || (value === null && option.value === values[0]) ? 0 : -1}
             onKeyDown={onKeyDown}
             onClick={() => {
               onChange(option.value)

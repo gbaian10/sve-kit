@@ -1,10 +1,11 @@
 import { isInaccessible } from "@testing-library/dom"
-import { screen, waitFor, within } from "@testing-library/react"
+import { act, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { expect, it } from "vitest"
 
 import { buildSnapshot } from "../../../scripts/fixture/build"
 import { createSnapshotClient } from "../../data"
+import { prefsStore } from "../../settings"
 import { renderInRouter } from "../../test-utils"
 import { memoryCache } from "../../test-utils/cache"
 import { CardQa } from "./CardQa"
@@ -60,9 +61,27 @@ it("shows a translated entry with its source, and falls back to the original wit
   expect(isInaccessible(within(translated).getByText("問", { ignore: "details span" }))).toBe(false)
   expect(isInaccessible(within(translated).getByText("答", { ignore: "details span" }))).toBe(false)
   expect(await within(translated).findAllByText(/專案譯文/u)).toHaveLength(1)
-  await userEvent.click(within(translated).getByText("顯示原文"))
   expect(within(translated).getByText(/試作の隊長が2体いる時/u)).toBeVisible()
   expect(within(translated).queryByText("未翻譯")).toBeNull()
+  expect(within(translated).queryByText("待校對")).toBeNull()
+  act(() => {
+    prefsStore.set({ qaDisplay: "translated" })
+  })
+  expect(within(translated).queryByText(/試作の隊長が2体いる時/u)).toBeNull()
+  expect(within(translated).getByText("有兩張試作隊長時，士兵攻擊力是 +2 嗎？")).toBeVisible()
+  act(() => {
+    prefsStore.set({ qaDisplay: "original" })
+  })
+  expect(within(translated).getByText(/試作の隊長が2体いる時/u)).toBeVisible()
+  expect(within(translated).queryByText("有兩張試作隊長時，士兵攻擊力是 +2 嗎？")).toBeNull()
+  expect(within(translated).queryByText(/專案譯文/u)).toBeNull()
+  act(() => {
+    prefsStore.set({ qaDisplay: "none" })
+  })
+  expect(screen.queryByRole("region", { name: "Q&A" })).toBeNull()
+  act(() => {
+    prefsStore.set({ qaDisplay: "both" })
+  })
   unmount()
 
   await renderInRouter(
@@ -76,7 +95,6 @@ it("shows a translated entry with its source, and falls back to the original wit
       .getAllByText("未翻譯")
       .map((note) => note.closest("[lang]")),
   ).toEqual([null, null])
-  expect(within(missing).queryByText("顯示原文")).toBeNull()
   // Two entries stay under the fold limit, so there is nothing to expand.
   expect(screen.queryByRole("button", { name: /顯示全部/u })).toBeNull()
 })

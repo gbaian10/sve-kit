@@ -19,8 +19,11 @@ const PREFS_VERSION = 1
 export const CARD_EDITIONS = ["jp", "en"] as const
 type CardEdition = (typeof CARD_EDITIONS)[number]
 
-export const TEXT_DISPLAYS = ["translated", "original", "both"] as const
+export const TEXT_DISPLAYS = ["original", "translated", "both"] as const
 type TextDisplay = (typeof TEXT_DISPLAYS)[number]
+/** Effect, flavor and Q&A text may also be hidden; a card name always shows. */
+export const FIELD_DISPLAYS = ["none", ...TEXT_DISPLAYS] as const
+export type FieldDisplay = (typeof FIELD_DISPLAYS)[number]
 
 const GRID_DENSITIES = [2, 3] as const
 type GridDensity = (typeof GRID_DENSITIES)[number]
@@ -42,14 +45,15 @@ export interface Prefs {
   readonly cardEdition: CardEdition
   readonly showOtherEdition: Readonly<Record<CardEdition, boolean>>
   readonly nameDisplay: TextDisplay
-  readonly effectLanguage: TextDisplay
+  readonly effectLanguage: FieldDisplay
+  readonly flavorDisplay: FieldDisplay
+  readonly qaDisplay: FieldDisplay
   readonly infiniteScroll: boolean
   readonly preloadPrintings: boolean
   readonly preloadNeighbours: boolean
   readonly backgroundDownloads: boolean
   readonly symbolLabels: boolean
   readonly collapsedText: CollapsedText
-  readonly showFlavorText: boolean
   readonly termEmphasis: boolean
   /** Whether the card list's filter panel is expanded. */
   readonly filterPanelOpen: boolean
@@ -74,13 +78,14 @@ export const DEFAULT_PREFS: Prefs = {
   showOtherEdition: { jp: false, en: true },
   nameDisplay: "translated",
   effectLanguage: "both",
+  flavorDisplay: "both",
+  qaDisplay: "both",
   infiniteScroll: true,
   preloadPrintings: false,
   preloadNeighbours: false,
   backgroundDownloads: true,
   symbolLabels: false,
   collapsedText: { effectOriginal: false, flavorOriginal: false },
-  showFlavorText: true,
   termEmphasis: true,
   filterPanelOpen: false,
   theme: "system",
@@ -102,6 +107,7 @@ function oneOf<T extends string | number>(values: readonly T[]): (value: unknown
 
 const isCardEdition = oneOf(CARD_EDITIONS)
 const isTextDisplay = oneOf(TEXT_DISPLAYS)
+const isFieldDisplay = oneOf(FIELD_DISPLAYS)
 const isGridDensity = oneOf(GRID_DENSITIES)
 const isViewMode = oneOf(VIEW_MODES)
 const isCardOpenMode = oneOf(CARD_OPEN_MODES)
@@ -134,14 +140,15 @@ const sanitizers: Sanitizers = {
   cardEdition: withDefault(isCardEdition, DEFAULT_PREFS.cardEdition),
   showOtherEdition: withDefault(isEditionSwitches, DEFAULT_PREFS.showOtherEdition),
   nameDisplay: withDefault(isTextDisplay, DEFAULT_PREFS.nameDisplay),
-  effectLanguage: withDefault(isTextDisplay, DEFAULT_PREFS.effectLanguage),
+  effectLanguage: withDefault(isFieldDisplay, DEFAULT_PREFS.effectLanguage),
+  flavorDisplay: withDefault(isFieldDisplay, DEFAULT_PREFS.flavorDisplay),
+  qaDisplay: withDefault(isFieldDisplay, DEFAULT_PREFS.qaDisplay),
   infiniteScroll: withDefault(isBoolean, DEFAULT_PREFS.infiniteScroll),
   preloadPrintings: withDefault(isBoolean, DEFAULT_PREFS.preloadPrintings),
   preloadNeighbours: withDefault(isBoolean, DEFAULT_PREFS.preloadNeighbours),
   backgroundDownloads: withDefault(isBoolean, DEFAULT_PREFS.backgroundDownloads),
   symbolLabels: withDefault(isBoolean, DEFAULT_PREFS.symbolLabels),
   collapsedText: withDefault(isCollapsedText, DEFAULT_PREFS.collapsedText),
-  showFlavorText: withDefault(isBoolean, DEFAULT_PREFS.showFlavorText),
   termEmphasis: withDefault(isBoolean, DEFAULT_PREFS.termEmphasis),
   filterPanelOpen: withDefault(isBoolean, DEFAULT_PREFS.filterPanelOpen),
   theme: withDefault(isThemePref, DEFAULT_PREFS.theme),
@@ -170,9 +177,16 @@ function sanitize(raw: unknown): Prefs {
   if (typeof raw !== "object" || raw === null || Array.isArray(raw)) return DEFAULT_PREFS
   const record = raw as Record<string, unknown>
   if (record["v"] !== PREFS_VERSION) return DEFAULT_PREFS
+  // Flavor and Q&A used to follow the effect text, and flavor had its own on/off switch; a stored
+  // choice from before the split carries over once, and the next write drops the old keys.
+  const carried: Record<string, unknown> = {
+    flavorDisplay: record["showFlavorText"] === false ? "none" : record["effectLanguage"],
+    qaDisplay: record["effectLanguage"],
+    ...record,
+  }
   const prefs: Record<string, unknown> = {}
   for (const key of Object.keys(DEFAULT_PREFS) as (keyof Prefs)[]) {
-    prefs[key] = sanitizers[key](record[key])
+    prefs[key] = sanitizers[key](carried[key])
   }
   return prefs as unknown as Prefs
 }
@@ -238,4 +252,18 @@ export function usePrefs(): Prefs {
 
 export function showsOtherEdition(prefs: Prefs, edition: CardEdition): boolean {
   return prefs.showOtherEdition[edition]
+}
+
+/** The one value all four text fields share, or "custom" when they differ or one is hidden. */
+export function cardTranslation(prefs: Prefs): TextDisplay | "custom" {
+  const shared = prefs.nameDisplay
+  return [prefs.effectLanguage, prefs.flavorDisplay, prefs.qaDisplay].every(
+    (value) => value === shared,
+  )
+    ? shared
+    : "custom"
+}
+
+export function cardTranslationPatch(value: TextDisplay): Partial<Prefs> {
+  return { nameDisplay: value, effectLanguage: value, flavorDisplay: value, qaDisplay: value }
 }

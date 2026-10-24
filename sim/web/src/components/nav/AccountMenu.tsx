@@ -14,6 +14,8 @@ import { currentUiLanguage, UI_LANGUAGES } from "../../i18n"
 import {
   CARD_EDITIONS,
   CARD_OPEN_MODES,
+  cardTranslation,
+  cardTranslationPatch,
   prefsStore,
   showsOtherEdition,
   TEXT_DISPLAYS,
@@ -161,9 +163,10 @@ export function AccountMenuPanel({ onNavigate }: { readonly onNavigate?: () => v
       setTransition({ key: switchKey, edition: cardEdition, state: "error" })
     }
   }
+  const translation = cardTranslation(prefs)
   const textDisplayOptions = TEXT_DISPLAYS.map((value) => ({
     value,
-    label: t(`options.nameDisplay.${value}`),
+    label: t(`options.textDisplay.${value}`),
   }))
   return (
     <div className="flex w-80 max-w-[calc(100vw-2rem)] flex-col gap-1 p-4">
@@ -213,22 +216,16 @@ export function AccountMenuPanel({ onNavigate }: { readonly onNavigate?: () => v
           }
         />
       </SettingRow>
-      <SettingRow size="sm" label={t("account.nameDisplay")}>
+      <SettingRow size="sm" label={t("account.cardTranslation")}>
+        {translation === "custom" && (
+          <span className="me-2 text-12 text-text-3">{t("account.cardTranslationCustom")}</span>
+        )}
         <Segmented
           size="sm"
-          label={t("account.nameDisplay")}
+          label={t("account.cardTranslation")}
           options={textDisplayOptions}
-          value={prefs.nameDisplay}
-          onChange={(nameDisplay) => prefsStore.set({ nameDisplay })}
-        />
-      </SettingRow>
-      <SettingRow size="sm" label={t("settings.effectLanguage")}>
-        <Segmented
-          size="sm"
-          label={t("settings.effectLanguage")}
-          options={textDisplayOptions}
-          value={prefs.effectLanguage}
-          onChange={(effectLanguage) => prefsStore.set({ effectLanguage })}
+          value={translation === "custom" ? null : translation}
+          onChange={(value) => prefsStore.set(cardTranslationPatch(value))}
         />
       </SettingRow>
       <SettingRow size="sm" label={t("settings.cardOpenMode")}>

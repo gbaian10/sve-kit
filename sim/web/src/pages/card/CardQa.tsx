@@ -18,11 +18,13 @@ import {
   stringValue,
 } from "../../data"
 import type { Region } from "../../domain/search"
-import { usePrefs } from "../../settings"
+import { type FieldDisplay, usePrefs } from "../../settings"
 import { type CardQa as CardQaResult, loadCardQa, type QaEntry } from "./qa-data"
 
 /** Entries shown before the rest folds behind a button. */
 const FOLDED = 3
+const PRIMARY = "text-15 leading-effect"
+const SECONDARY = "text-14 leading-effect text-text-2"
 
 type QaField = "question" | "answer"
 
@@ -98,6 +100,7 @@ function QaLine({
   label,
   state,
   language,
+  mode,
   sourceLine,
 }: {
   readonly client: SnapshotClient
@@ -105,6 +108,7 @@ function QaLine({
   readonly label: string
   readonly state: TextState
   readonly language: string
+  readonly mode: Exclude<FieldDisplay, "none">
   readonly sourceLine: boolean
 }) {
   const { t } = useTranslation()
@@ -132,20 +136,30 @@ function QaLine({
   else if (!state.value) body = <p className="text-13 text-text-2">{t("card.textUnavailable")}</p>
   else {
     const { value } = state
-    const shown = value.translated ?? value.original
-    const foreign = !value.translated && stringValue(value.original.unit["lang"]) !== language
+    const translated = mode === "original" ? undefined : value.translated
+    const foreign =
+      mode !== "original" && !translated && stringValue(value.original.unit["lang"]) !== language
+    const annotated = (text: typeof value.original, className: string) => (
+      <AnnotatedText
+        value={text}
+        context={value}
+        emphasis={prefs.termEmphasis}
+        client={client}
+        edition={edition}
+        className={className}
+      />
+    )
     body = (
       <div className="space-y-1">
-        <AnnotatedText
-          value={shown}
-          context={value}
-          emphasis={prefs.termEmphasis}
-          client={client}
-          edition={edition}
-          className="text-15 leading-effect"
-        />
+        {annotated(translated ?? value.original, PRIMARY)}
         {foreign && <p className="text-12 text-text-3">{t("qa.untranslated")}</p>}
-        {sourceLine && <TranslationSourceLine value={value} />}
+        {mode === "both" && translated && (
+          <div className="rounded-control border border-border px-3 py-2">
+            <p className="mb-1 text-12 text-text-3">{t("card.originalText")}</p>
+            {annotated(value.original, SECONDARY)}
+          </div>
+        )}
+        {sourceLine && <TranslationSourceLine value={value} proofreading={false} />}
       </div>
     )
   }
@@ -163,10 +177,12 @@ function QaItem({
   client,
   edition,
   entry,
+  mode,
 }: {
   readonly client: SnapshotClient
   readonly edition: Region
   readonly entry: QaEntry
+  readonly mode: Exclude<FieldDisplay, "none">
 }) {
   const { t } = useTranslation()
   const language = useTextLanguage()
@@ -176,7 +192,7 @@ function QaItem({
   const qualities = values.flatMap((value) => qualityOf(value) ?? [])
   // One source line covers both texts unless their translations differ in kind or confidence.
   const shared = qualities.length > 0 && qualities.every((quality) => quality === qualities[0])
-  const translated = values.filter((value) => value?.translated)
+  const translated = mode === "original" ? [] : values.filter((value) => value?.translated)
   return (
     <li
       aria-label={entry.number ?? undefined}
@@ -197,6 +213,7 @@ function QaItem({
         label={t("qa.question")}
         state={question}
         language={language}
+        mode={mode}
         sourceLine={!shared}
       />
       <QaLine
@@ -205,28 +222,11 @@ function QaItem({
         label={t("qa.answer")}
         state={answer}
         language={language}
+        mode={mode}
         sourceLine={!shared}
       />
-      {shared && translated[0] && <TranslationSourceLine value={translated[0]} />}
-      {translated.length > 0 && (
-        <details className="text-13">
-          <summary className="cursor-pointer text-text-2">{t("qa.showOriginal")}</summary>
-          <div className="mt-2 space-y-2 rounded-control border border-border px-3 py-2">
-            {values.map(
-              (value, index) =>
-                value && (
-                  <p key={index} className="text-14 leading-effect whitespace-pre-wrap text-text-2">
-                    <span className="me-2 font-semibold text-text-3">
-                      {t(index === 0 ? "qa.question" : "qa.answer")}
-                    </span>
-                    <span lang={stringValue(value.original.unit["lang"])}>
-                      {stringValue(value.original.unit["text"])}
-                    </span>
-                  </p>
-                ),
-            )}
-          </div>
-        </details>
+      {shared && translated[0] && (
+        <TranslationSourceLine value={translated[0]} proofreading={false} />
       )}
     </li>
   )
@@ -241,11 +241,13 @@ function QaGroup({
   cardId,
   edition,
   heading,
+  mode,
 }: {
   readonly client: SnapshotClient
   readonly cardId: string
   readonly edition: Region
   readonly heading?: string
+  readonly mode: Exclude<FieldDisplay, "none">
 }) {
   const { t } = useTranslation()
   const snapshot: LoadedSnapshot | null = client.snapshot()
@@ -315,7 +317,13 @@ function QaGroup({
       <>
         <ul className="space-y-3">
           {visible.map((entry) => (
-            <QaItem key={entry.versionId} client={client} edition={edition} entry={entry} />
+            <QaItem
+              key={entry.versionId}
+              client={client}
+              edition={edition}
+              entry={entry}
+              mode={mode}
+            />
           ))}
         </ul>
         {entries.length > FOLDED && (
@@ -353,6 +361,8 @@ export function CardQa({
   readonly showOther: boolean
 }) {
   const { t } = useTranslation()
+  const { qaDisplay } = usePrefs()
+  if (qaDisplay === "none") return null
   const editions: Region[] = showOther ? [edition, edition === "jp" ? "en" : "jp"] : [edition]
   return (
     <section aria-label={t("qa.heading")} className="mt-6 space-y-3">
@@ -363,6 +373,7 @@ export function CardQa({
           client={client}
           cardId={cardId}
           edition={value}
+          mode={qaDisplay}
           {...(showOther ? { heading: t(`options.edition.${value}`) } : {})}
         />
       ))}
