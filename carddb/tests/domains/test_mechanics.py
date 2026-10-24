@@ -1109,6 +1109,91 @@ def test_unproved_reminder_keeps_otherwise_proved_field_open(
         } == {"kw:ward": Json(["has"])}
 
 
+def test_named_tokens_in_ex_do_not_supply_parent_keyword_labels(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    raw = (
+        "{ファンファーレ}『冥焔の右腕・ミミ』1枚か『冥焔の左腕・ココ』1枚をEXエリアに置く。"
+        "【ネクロチャージ_10】代わりに1枚ずつ置く。"
+    )
+    with case(tmp_path, monkeypatch, raw, first_batch=True) as (
+        db,
+        inputs,
+        settings,
+        _,
+    ):
+        with db.transaction():
+            report = mechanics.apply(db, inputs, settings)
+        assert report["complete_cards"] == 1
+        assert db.rows("card_mechanic_coverage")[0].values["complete_all"] is True
+        assert db.rows("mechanic_projection") == ()
+
+
+def test_named_token_field_with_unproved_remainder_stays_partial(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    raw = (
+        "【合成甲】\n"
+        "【進化時】『乙姫お守り隊』3枚を、場が上限になるまで出す。"
+        "残りを【合成乙】を持つ状態でEXエリアに置く。"
+    )
+    with case(tmp_path, monkeypatch, raw, first_batch=True) as (
+        db,
+        inputs,
+        settings,
+        _,
+    ):
+        with db.transaction():
+            report = mechanics.apply(db, inputs, settings)
+        assert report["complete_cards"] == 0
+        assert db.rows("card_mechanic_coverage")[0].values["complete_all"] is False
+        assert {
+            row.values["keyword_id"]: row.values["relations"]
+            for row in db.rows("mechanic_projection")
+        } == {"kw:ward": Json(["has"])}
+
+
+def test_stack_declaration_and_spell_counter_do_not_add_tracked_keywords(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    raw = (
+        "【スタック】\n"
+        "自分がスペルをプレイしたとき、これにスペルカウンター1つを置く。\n"
+        "{起動}これのスペルカウンター3つを取る：相手のフォロワー1体を選ぶ。それに5ダメージ。"
+    )
+    with case(tmp_path, monkeypatch, raw, first_batch=True) as (
+        db,
+        inputs,
+        settings,
+        _,
+    ):
+        with db.transaction():
+            report = mechanics.apply(db, inputs, settings)
+        assert report["complete_cards"] == 1
+        assert db.rows("card_mechanic_coverage")[0].values["complete_all"] is True
+        assert db.rows("mechanic_projection") == ()
+
+
+def test_stack_quoted_reminder_is_not_proved_by_its_declaration(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    raw = "【合成甲】\n【スタック】（【スタック】を持つアミュレットは、下記の能力を持つ。「これは【合成乙】を持つ」）"
+    with case(tmp_path, monkeypatch, raw, first_batch=True) as (
+        db,
+        inputs,
+        settings,
+        _,
+    ):
+        with db.transaction():
+            report = mechanics.apply(db, inputs, settings)
+        assert report["complete_cards"] == 0
+        assert db.rows("card_mechanic_coverage")[0].values["complete_all"] is False
+        assert {
+            row.values["keyword_id"]: row.values["relations"]
+            for row in db.rows("mechanic_projection")
+        } == {"kw:ward": Json(["has"])}
+
+
 def test_first_batch_missing_current_back_prevents_complete(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
