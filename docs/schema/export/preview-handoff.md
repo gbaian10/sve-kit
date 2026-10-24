@@ -128,10 +128,12 @@ SVE_PREVIEW_DIR=/explicit/isolated/preview \
 mise exec -- bun run --cwd sim/web dev
 ```
 
-前端 dev server 以 `/cdn-preview` 提供唯讀檔案。開啟查卡畫面，用前端開發徽章內的 preview 切換
-選擇該 root；client 讀 `snapshots/preview/current.json`，驗清單 hash，載入 config 與
-bootstrap，卡片詳情再取 detail。preview 切換使用獨立 client 與記憶體狀態，不修改
-正式選版、永久分享或回放 pin。正式 CDN 可以仍指向合成 fixture。
+前端 dev server 以 `/cdn-preview` 提供唯讀檔案。設定 `SVE_PREVIEW_DIR` 且 `/cdn` 仍是合成 fixture
+時，dev 啟動即以 preview root 開始（`sim/web/src/app/dev-root.ts`）；畫面內已無切換入口，
+要換資料根需重啟 dev server 並調整環境變數（見 `sim/web/README.md`）。client 讀
+`snapshots/preview/current.json`，驗清單 hash，載入 config 與 bootstrap，卡片詳情再取 detail。
+preview root 使用獨立 client 與記憶體狀態，不修改正式選版、永久分享或回放 pin。
+正式 CDN 可以仍指向合成 fixture。
 
 卡文未定會有候選／展示文字與 pending 狀態，不能把顯示文字當現行已確認卡文。
 `errata_card_ids`／`qa_card_ids` 為空不代表沒有勘誤／問答；應以 `source_windows` 為空
