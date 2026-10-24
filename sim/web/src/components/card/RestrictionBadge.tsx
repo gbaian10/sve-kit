@@ -5,8 +5,10 @@ import { Badge } from "../ui/Badge"
 
 export function RestrictionBadge({
   restrictions,
+  className,
 }: {
   readonly restrictions: readonly CardRestriction[] | undefined
+  readonly className?: string
 }) {
   const { t } = useTranslation()
   const limits = (restrictions ?? []).flatMap((entry) =>
@@ -15,7 +17,10 @@ export function RestrictionBadge({
   if (!limits.length) return null
   const count = Math.min(...limits)
   return (
-    <span title={t("restrictions.badgeHint", { date: restrictions?.[0]?.asOf ?? "" })}>
+    <span
+      className={className}
+      title={t("restrictions.badgeHint", { date: restrictions?.[0]?.asOf ?? "" })}
+    >
       <Badge tone={count === 0 ? "danger" : "warning"}>
         {count === 0 ? t("restrictions.banned") : t("restrictions.shortLimit", { count })}
       </Badge>

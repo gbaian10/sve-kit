@@ -396,9 +396,7 @@ const ListRow = memo(function ListRow({
         }
       }}
     >
-      <span className="mr-1">
-        <RestrictionBadge restrictions={cell.summary.restrictions} />
-      </span>
+      <RestrictionBadge restrictions={cell.summary.restrictions} className="mr-1" />
       {visibility.name ? cell.name.primary.text : cell.summary.cardNo}
       {visibility.name && cell.name.secondary && (
         <>
