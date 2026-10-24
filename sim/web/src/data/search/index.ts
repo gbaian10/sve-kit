@@ -528,7 +528,7 @@ function build(
     const card = cards.id.length
     cards.id.push(intern(entry.cardId))
     cards.errata.push(Number(errataCards.has(entry.cardId)))
-    cards.restricted.push(Number(restrictions?.cards.has(entry.cardId)))
+    cards.restricted.push(restrictions?.cards.has(entry.cardId) ? 1 : 0)
     cards.class.push(intern(entry.classCode ?? NEUTRAL_CLASS))
     cards.printingStart.push(printings.id.length)
     cards.nameStart.push(names.length)

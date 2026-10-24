@@ -95,7 +95,11 @@ export function selectRestrictions(
           .map((value) => objectValue(value))
           .find((row) => row["region"] === edition)
         const scope = member["deck_scope"]
-        if (scope === "all" || region?.["deck_role"] === scope)
+        if (!region || (scope !== "all" && region["deck_role"] == null)) {
+          incomplete = true
+          continue
+        }
+        if (scope === "all" || region["deck_role"] === scope)
           cards.add(stringValue(face["card_id"]))
       }
     }

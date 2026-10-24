@@ -164,3 +164,50 @@ it("includes other cards with the same construction name and counts a two-faced 
   })
   expect([...selection.cards].sort()).toEqual(["c:bp01-001", "c:bp01-021", "c:bp01-060"])
 })
+
+it.each([null, "missing"])(
+  "reports partial coverage when a scoped member has unknown deck role: %s",
+  (role) => {
+    const index = bootstrap.index()
+    const card = index.card("c:bp01-021")
+    if (!card) throw new Error("missing synthetic card")
+    const restriction = bootstrap.rows("restriction").find((row) => row["id"] === "restr:bp01-021")
+    if (!restriction) throw new Error("missing synthetic restriction")
+    const changed = {
+      ...index,
+      card: (id: string) =>
+        id === "c:bp01-021"
+          ? {
+              ...card,
+              regions:
+                role === "missing"
+                  ? []
+                  : (card["regions"] as JsonObject[]).map((region) => ({
+                      ...region,
+                      deck_role: null,
+                    })),
+            }
+          : index.card(id),
+    }
+    const selection = selectRestrictions(
+      built.manifest,
+      (table) =>
+        table === "restriction"
+          ? [
+              {
+                ...restriction,
+                members: (restriction["members"] as JsonObject[]).map((member) => ({
+                  ...member,
+                  deck_scope: "main",
+                })),
+              },
+            ]
+          : bootstrap.rows(table),
+      changed,
+      "jp",
+      "2026-09-29",
+    )
+    expect(selection.status.state).toBe("partial")
+    expect(selection.cards.size).toBe(0)
+  },
+)
