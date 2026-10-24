@@ -9,7 +9,7 @@ import { annotatedOrigin } from "../../test-utils/annotated-snapshot"
 import { memoryCache } from "../../test-utils/cache"
 import { CardErrata } from "./CardErrata"
 
-it("shows both announcement passages, their translations, date and source without claiming printed text", async () => {
+it("shows reconstructed full text, excerpt translations and source while keeping printing unconfirmed", async () => {
   const built = await buildSnapshot({ encodeImage: () => Promise.resolve(new Uint8Array([1])) })
   const client = createSnapshotClient("https://cdn.test", {
     region: "jp",
@@ -32,7 +32,8 @@ it("shows both announcement passages, their translations, date and source withou
     />,
   )
   const notice = await screen.findByRole("region", { name: "勘誤" })
-  expect(within(notice).getByText("公告：2026-03-01")).toBeVisible()
+  expect(notice.querySelector("time")).toBeNull()
+  expect(within(notice).queryByText(/2026-03-01/u)).not.toBeInTheDocument()
   expect(within(notice).getByRole("link", { name: "官方勘誤公告" })).toHaveAttribute(
     "href",
     "https://example.invalid/errata/bp01-020",
@@ -44,12 +45,15 @@ it("shows both announcement passages, their translations, date and source withou
   expect(
     translation &&
       original &&
-      translation.compareDocumentPosition(original) & Node.DOCUMENT_POSITION_FOLLOWING,
+      original.compareDocumentPosition(translation) & Node.DOCUMENT_POSITION_FOLLOWING,
   ).toBeTruthy()
   expect(
     notice.querySelector('del [lang="zh-Hant"]') ?? notice.querySelector('[lang="zh-Hant"] del'),
   ).toHaveTextContent("2")
-  expect(within(notice).getByText(/不代表此版次的完整印刷卡文/u)).toBeVisible()
+  expect(within(notice).getByRole("heading", { name: "實體卡印刷文字" })).toBeVisible()
+  expect(within(notice).getByRole("heading", { name: "勘誤後完整文字" })).toBeVisible()
+  expect(within(notice).getByText(/此版次是否印有舊文尚未確認/u)).toBeVisible()
+  expect(within(notice).getByText(/BP01-020（印刷文字未確認）/u)).toBeVisible()
 })
 
 it("emphasizes explicit keyword headings without inventing historical annotation references", () => {
