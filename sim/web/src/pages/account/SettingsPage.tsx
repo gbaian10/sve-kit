@@ -76,7 +76,7 @@ export function SettingsPage() {
           <Segmented
             size="sm"
             label={t("settings.effectLanguage")}
-            options={FIELD_DISPLAYS.map((value) => ({
+            options={TEXT_DISPLAYS.map((value) => ({
               value,
               label: t(`settings.fieldDisplay.${value}`),
             }))}

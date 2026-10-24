@@ -2,7 +2,6 @@ import { act, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterEach, describe, expect, it } from "vitest"
 
-import { CardText } from "../../components/card/CardText"
 import {
   createAnnotatedTextResolver,
   type Row,
@@ -59,28 +58,6 @@ async function originWithPrintedText(available: boolean, flavor = false) {
 }
 
 describe("printed-text availability", () => {
-  it("hides forced original wording when effect text is hidden and restores it on change", async () => {
-    const { client, printingId, faceId } = await originWithPrintedText(true)
-    await renderInRouter(
-      <CardText
-        client={client}
-        edition="jp"
-        owner={{ kind: "printing_face", id: printingId, face_id: faceId }}
-        field="effect"
-        display="original"
-      />,
-    )
-    expect(await screen.findByRole("region", { name: "效果" })).toBeVisible()
-    act(() => {
-      prefsStore.set({ effectLanguage: "none" })
-    })
-    expect(screen.queryByRole("region", { name: "效果" })).not.toBeInTheDocument()
-    expect(screen.queryByText("Synthetic text")).not.toBeInTheDocument()
-    act(() => {
-      prefsStore.set({ effectLanguage: "translated" })
-    })
-    expect(screen.getByRole("region", { name: "效果" })).toHaveTextContent("Synthetic text")
-  })
   it("keeps the switch hidden after verifying a printing has no printed text", async () => {
     const props = await originWithPrintedText(false)
     await renderInRouter(

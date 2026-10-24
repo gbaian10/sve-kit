@@ -67,6 +67,9 @@ describe("readPrefs", () => {
       }),
     )
     expect(readPrefs()).toMatchObject({ flavorDisplay: "both", qaDisplay: "none" })
+    // The effect text cannot be hidden, so a stored "none" is not a choice.
+    localStorage.setItem(PREFS_KEY, JSON.stringify({ v: 1, effectLanguage: "none" }))
+    expect(readPrefs().effectLanguage).toBe(DEFAULT_PREFS.effectLanguage)
   })
 
   it("round-trips a full object", () => {

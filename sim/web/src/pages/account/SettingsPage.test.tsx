@@ -177,6 +177,11 @@ it("shows flavor text by default and remembers hiding it among the text settings
     "aria-checked",
     "true",
   )
+  // Only flavor text and Q&A can be hidden; names and effect text always show.
+  for (const name of ["卡名顯示", "效果文字"])
+    expect(
+      within(screen.getByRole("radiogroup", { name })).queryByRole("radio", { name: "不顯示" }),
+    ).toBeNull()
   await userEvent.click(within(flavor()).getByRole("radio", { name: "不顯示" }))
   expect(readPrefs().flavorDisplay).toBe("none")
   view.unmount()

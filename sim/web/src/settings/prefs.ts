@@ -21,7 +21,7 @@ type CardEdition = (typeof CARD_EDITIONS)[number]
 
 export const TEXT_DISPLAYS = ["original", "translated", "both"] as const
 type TextDisplay = (typeof TEXT_DISPLAYS)[number]
-/** Effect, flavor and Q&A text may also be hidden; a card name always shows. */
+/** Flavor text and Q&A may also be hidden; a card name and the effect text always show. */
 export const FIELD_DISPLAYS = ["none", ...TEXT_DISPLAYS] as const
 export type FieldDisplay = (typeof FIELD_DISPLAYS)[number]
 
@@ -45,7 +45,7 @@ export interface Prefs {
   readonly cardEdition: CardEdition
   readonly showOtherEdition: Readonly<Record<CardEdition, boolean>>
   readonly nameDisplay: TextDisplay
-  readonly effectLanguage: FieldDisplay
+  readonly effectLanguage: TextDisplay
   readonly flavorDisplay: FieldDisplay
   readonly qaDisplay: FieldDisplay
   readonly infiniteScroll: boolean
@@ -140,7 +140,7 @@ const sanitizers: Sanitizers = {
   cardEdition: withDefault(isCardEdition, DEFAULT_PREFS.cardEdition),
   showOtherEdition: withDefault(isEditionSwitches, DEFAULT_PREFS.showOtherEdition),
   nameDisplay: withDefault(isTextDisplay, DEFAULT_PREFS.nameDisplay),
-  effectLanguage: withDefault(isFieldDisplay, DEFAULT_PREFS.effectLanguage),
+  effectLanguage: withDefault(isTextDisplay, DEFAULT_PREFS.effectLanguage),
   flavorDisplay: withDefault(isFieldDisplay, DEFAULT_PREFS.flavorDisplay),
   qaDisplay: withDefault(isFieldDisplay, DEFAULT_PREFS.qaDisplay),
   infiniteScroll: withDefault(isBoolean, DEFAULT_PREFS.infiniteScroll),

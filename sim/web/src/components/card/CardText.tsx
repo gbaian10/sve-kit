@@ -182,7 +182,7 @@ export function CardText({
   readonly owner: JsonObject
   readonly field: "name" | "effect" | "flavor"
   readonly ordinal?: number | null
-  readonly display?: NameDisplay | "none" | undefined
+  readonly display?: NameDisplay | undefined
   readonly label?: string | undefined
   /**
    * The text this printing actually prints when its own revision has no translation and the
@@ -199,7 +199,7 @@ export function CardText({
       : field === "flavor"
         ? prefs.flavorDisplay
         : prefs.effectLanguage
-  const mode = preference === "none" ? "none" : (display ?? preference)
+  const mode = display ?? preference
   const { readiness, value } = useAnnotatedText(
     client,
     owner,
