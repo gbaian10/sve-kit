@@ -22,9 +22,7 @@ export default {
     answer: "A",
     official: "Official page",
     loading: "Loading Q&A…",
-    none: "This card has no official Q&A.",
-    unknown:
-      "Q&A for this edition is not fully collected yet, so we cannot tell whether this card has any.",
+    noneAsOf: "No official Q&A for this card in our data as of {{date}}.",
     loadFailed: "Could not load Q&A. Check your connection and retry.",
     validationFailed: "The Q&A data failed validation and is not shown.",
     retry: "Reload Q&A",
@@ -200,7 +198,6 @@ export default {
   restrictions: {
     syntheticSource: "Synthetic source list",
     combination: "Combination restriction",
-    unknown: "The restriction list for this region is unconfirmed.",
     heading: "Restrictions",
     banned: "Banned",
     shortLimit: "Limit {{count}}",
@@ -209,7 +206,6 @@ export default {
     source: "Official restriction list",
     sourceMissing: "Source link unavailable",
     retry: "Retry restriction data",
-    notListed: "This card has no restriction listed in this source.",
     badgeHint: "Standard · List as of {{date}}",
   },
   filters: {

@@ -20,8 +20,7 @@ export default {
     answer: "答",
     official: "公式ページ",
     loading: "Q&A を読み込み中…",
-    none: "このカードに公式 Q&A はありません。",
-    unknown: "この版の Q&A は整理中のため、このカードの公式 Q&A の有無を判断できません。",
+    noneAsOf: "{{date}} 時点の収録データでは、このカードの公式Q&Aはありません。",
     loadFailed: "Q&A を読み込めませんでした。通信を確認して再試行してください。",
     validationFailed: "Q&A データの検証に失敗したため表示しません。",
     retry: "Q&A を再読み込み",
@@ -198,7 +197,6 @@ export default {
   restrictions: {
     syntheticSource: "合成テストの一覧",
     combination: "組み合わせ制限",
-    unknown: "この地域の使用制限一覧は未確認です。",
     heading: "禁止・制限情報",
     banned: "禁止",
     shortLimit: "{{count}}枚制限",
@@ -207,7 +205,6 @@ export default {
     source: "公式使用制限一覧",
     sourceMissing: "出典リンク未収録",
     retry: "制限情報を再読み込み",
-    notListed: "この一覧に本カードの制限は記載されていません。",
     badgeHint: "Standard · {{date}} 時点の一覧",
   },
   filters: {

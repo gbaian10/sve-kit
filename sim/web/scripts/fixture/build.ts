@@ -46,6 +46,7 @@ export interface BuildOptions {
   readonly cards?: readonly Card[]
   readonly dataAsOf?: string
   readonly restrictionAsOf?: string
+  readonly restrictionCoverageState?: "complete" | "partial"
   readonly dataVersion?: string
   readonly publishedAt?: string
 }
@@ -2105,7 +2106,7 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
               .toISOString()
               .slice(0, 10)
           : null,
-        state: "complete",
+        state: options.restrictionCoverageState ?? "complete",
         source_url: "https://example.invalid/restrictions",
       },
     ],
