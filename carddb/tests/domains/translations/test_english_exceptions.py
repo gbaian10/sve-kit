@@ -31,6 +31,7 @@ from sve_carddb.parse.pages.official_en import card_url
 
 from ...ingest.test_source_archive import _put, _resource, _store
 from ...support.build_db_fixtures import rows
+from ...support.semantic_definition_fixtures import with_definitions
 from ...support.translation_fixtures import name_term
 from ...workflows.test_snapshot_offline_english import records
 from ..text_observations.test_effect_presence import page
@@ -167,7 +168,9 @@ def english(  # ruff: ignore[too-many-locals] -- seal two independent real EN pa
 
 def inputs(values: list[JsonValue]) -> Inputs:
     raw = canonical({"format": 3, "kind": "translation_shard", "records": values})
-    return from_files((("translations/overrides/english/000.yaml", raw, raw),))
+    return from_files(
+        with_definitions((("translations/overrides/english/000.yaml", raw, raw),))
+    )
 
 
 @pytest.mark.parametrize("wrong_source", [False, True])
@@ -508,9 +511,11 @@ def test_english_leaf_uses_official_name_and_preserves_target_quality(
         {"format": 3, "kind": "translation_shard", "records": values}
     )
     authored = from_files(
-        (
-            ("translations/overrides/english/000.yaml", english_raw, english_raw),
-            ("translations/glossary/concepts/001.yaml", raw, raw),
+        with_definitions(
+            (
+                ("translations/overrides/english/000.yaml", english_raw, english_raw),
+                ("translations/glossary/concepts/001.yaml", raw, raw),
+            )
         )
     )
     with db.transaction():

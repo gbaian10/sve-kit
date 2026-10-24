@@ -6,7 +6,7 @@ basis:
     recipe: v0-classification-candidates-1
     inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
   normalizer: four-layer-jp-v7
-  build_sha256: 7663e614a9cbf981162cbc7d09bb5841bcd3b18958c04b01fe55c5e4cb06ecf6
+  build_sha256: a492ac4459f33440844a4874ad644992dac317329773fca3a54765866f4e90f7
 groups:
   - id: shape:98acee45bf16639ff6ea3919788e7fa3993d8086c0a5961069794a45f3583ed2
     priority: true
@@ -29,13 +29,13 @@ groups:
         - ECP01-020
         - ECP01-SL10
     frames:
-      - frame:f9d0c5521f4ff9969549404c97f07e354983a0fa5fbc659d47207445feccdeac
-      - frame:2560d58ce901fc8b7eb496f3b4dd28c525a829c05d0b2b56dcbbb6adc3cd21e4
-      - frame:202d0df8c77d38e32883aafeab3889edb9e1a676cc331e9853090a7a8f5351ae
+      - frame:e71f0f4fab6f4f34d8b4542c3ed861c9d49cc0105852695f3df44caa283302c1
+      - frame:1c999a64edd8ccb30b22fcc6a17c72c812e8a1edbb7bfa475ab295f412f77435
+      - frame:37b11793b5de3b5ea9b8ae35e97e158ceb32f3b27d4c6e7816e928a418639de3
     uses:
-      - use:818c3766e17f6a89dabfd8205ea3ffe74589f42e6d254daeaab7fed972729110
-      - use:a9405147ec408e6694676af9769b040032da4938e8e19d000c5f4dc29cc726ec
-      - use:bfba0d70efa3359fcec82003095109862ba543dabbe2ace870050ce07e4d1ed4
+      - use:f76628eff20251a1f866bb83dd45b88b89a91563750d6f80338c9a676f5579a1
+      - use:1920926034c756ab1c82be7405553fb794dde2ae84230c76a45bb6e47525df18
+      - use:e1e7aa6e956e2a7c8d4a50f7135ceed09535e6f447b89e41f51f6dd4e52bc794
     translation_review:
       required_uses: []
       conditional_uses: []
@@ -56,13 +56,13 @@ groups:
         - CSD03a-P08
         - CSD03b-016
     frames:
-      - frame:a1c36ea93e4e526a1287b7d10ee3030c77bf6b78d184ac9d72969b2dd8a5c804
-      - frame:d4e64b74c868b088db1e90a1d7910e90dcf221b9e8dc9e53ade13dfbfe3d22fc
-      - frame:b1f610f51b8c83f88d371f0a65068213076f12cd403f68a3b9a5560e171692a9
+      - frame:3a4a1097167e0da052ccf95a0fe88681f6751fd30115b182a6a58b9a425a6d50
+      - frame:3f0879e53ca32b649fe117155cc4f1b937340609f7c039b198bdae47acc4bc43
+      - frame:ce509ef58076dcfb65493549beb70166b6044044548993828d96ce41c053b18f
     uses:
-      - use:7601c57496e9877a1f47923d40b3e0aba18b846ff9d22c3cd501f95eeb70a5a0
-      - use:d67aba8582753795575ec024ada78736bb4237f999b84cf858fd0eaf1e6714ac
-      - use:aee3f121fca482f6c38838a958c5be44f601bd849984ef5cb2fc982a09944996
+      - use:5939de82e63f2daa2d567cae6eb7a917b9267d92af290e596b755017540af37a
+      - use:43496d8ee714a2b0e928028226a192b254cc4870392dc7bcff644d7e6b437fe7
+      - use:d8fc97a3c38b73987fdee8ddb4a4f982c62d3be9f3e687a43ad7cab4b39b2f06
     translation_review:
       required_uses: []
       conditional_uses: []
@@ -83,11 +83,11 @@ groups:
         - BP18-P31
         - BP18-076
     frames:
-      - frame:244e461159bef6c6f54eaa6fc6fe4b7ed7d2f1d8c6f2f67c46d98081ea8e9ec6
-      - frame:02c8e46b6ecc44b72f2d8681ec712a2850656a9b729dfe783ae7ec068aa0865b
+      - frame:3f5572364c1d106007210294050e171629566319a3de4daeb6a665573110b0dd
+      - frame:24fd23106f7b1404cc0dc6b2b48ee3b54c440ad7a87537a46ff7181ef14d9830
     uses:
-      - use:781e40b7a980de23db125dd97384a5454c08a7a2e1879f805adfcd6757018ca8
-      - use:cf091c3218aed14ae2143ebeb7ac955b71504f86330a0a40590ba5e3a93b46ca
+      - use:d3f764b496abfaccdd2d3f5f459d56018da85892c3e887c573702948cb11eb6a
+      - use:6a337bd9baea6b0a7a140ef56541ed6bdf3767dfe6c6d6c70489a5acb5284172
     translation_review:
       required_uses: []
       conditional_uses: []
@@ -107,11 +107,11 @@ groups:
         - BP18-P34
         - BP18-085
     frames:
-      - frame:046944e5c696e209d70603df2f24f5be0b058ead3a2f73c48161b11572b6f0ae
-      - frame:fa26b2dd6af73d6a29f50adc0abf91424a2859c9949abfe101514f105f932b04
+      - frame:5d4af7790e8eb2610b2225163d7dc3ec7111dad4cdffa4aa6502cfa3057dbaea
+      - frame:c2946eb57add2f6b5bd8d6324ca7af2a03b01e2f09d7f09b7cfbd493616c2ddb
     uses:
-      - use:5bf708c6eb2979b5e64fc0ba4780152e754a5d3a235343b1ca3ed32692c533bc
-      - use:154c818850f9292eb62b20a6b0db98afe898f8e3facc0eaf0a4ce221472af26a
+      - use:a1068f09666e3a0d40e84cde555bfa0c715bd8b1b3db120c8101f699d047e5b9
+      - use:85e049782d2ef67dcb1f2b52dafc1a38e9894067546db677121b21cdb3e530d5
     translation_review:
       required_uses: []
       conditional_uses: []
@@ -121,7 +121,7 @@ handwritten_differences:
   - card_nos:
       - BP18-059
       - BP18-SL14
-    frame: frame:7f97c5a6c490882b043cba7b6518997289057f1e8fb80226f17810ee7f4c120b
+    frame: frame:443485331f087308128b81b1fff2f3f3a36a8076f507910e303a7acf304e13fb
     classifications:
       Tfccbd93286: 9466c301dfb8ac36e0ff475d4a7b40b06c072315024f6fbd2d8e2d8ab1f4df88
     conclusion: 舊標註修正

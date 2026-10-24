@@ -24,6 +24,7 @@ from sve_carddb.domains.translations.four_layer_derivation import derive_source
 from sve_carddb.domains.translations.four_layer_matching import bind_recognized
 from sve_carddb.domains.translations.four_layer_normalizer import VERSION
 
+from ...support.semantic_definition_fixtures import with_definitions
 from .test_four_layer_classification import classifier, source
 from .test_four_layer_n1 import n1_classifier
 
@@ -100,7 +101,11 @@ def test_production_authored_and_binding_entry_reject_preparation_versions(
         }
     )
     with pytest.raises(ValueError, match="normalizer version"):
-        from_files((("translations/templates/definitions/001.yaml", content, content),))
+        from_files(
+            with_definitions(
+                (("translations/templates/definitions/001.yaml", content, content),)
+            )
+        )
     if version != VERSION:
         with pytest.raises(ValueError, match="Unsupported"):
             found.bind(old.field.source, old.field.parts[0], normalizer_version=version)
@@ -290,5 +295,7 @@ def test_production_authored_admits_typed_choice_context_ports() -> None:
         }
     )
     assert from_files(
-        (("translations/templates/definitions/001.yaml", content, content),)
+        with_definitions(
+            (("translations/templates/definitions/001.yaml", content, content),)
+        )
     ).records

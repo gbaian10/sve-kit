@@ -16,7 +16,7 @@ N0 不推導省略來源；必要引用未解時，完整欄位維持原文 fall
 
 ## 2. Frame 與來源用途
 
-Frame 依 canonical hash、normalizer 版本、角色、leaf schema、語義變體及 projection 匹配。
+Frame 依 canonical hash、normalizer 版本、角色、leaf schema、語義變體、被引用的封閉語義定義及 projection 匹配。normalizer 版本是驗證基準，不進 FrameId。
 canonical hash 相同不足以合併不同語義。resolved 變體可以共用；pending 只對精確 occurrence scope 有效。
 同一位置至多選用一個有效 frame；人工 match pin 也必須通過同一個來源邊界。
 

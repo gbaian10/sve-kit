@@ -6,7 +6,7 @@ basis:
     recipe: v0-classification-candidates-1
     inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
   normalizer: four-layer-jp-v7
-  build_sha256: 7663e614a9cbf981162cbc7d09bb5841bcd3b18958c04b01fe55c5e4cb06ecf6
+  build_sha256: a492ac4459f33440844a4874ad644992dac317329773fca3a54765866f4e90f7
 groups:
   - id: shape:66a4fc6d3a4a95ed1ac7c36f5cdcdea715dfb73fc85f15dc10aea77a250852ad
     priority: false
@@ -23,11 +23,11 @@ groups:
         - CP02-P40
         - CP02-049
     frames:
-      - frame:fbd7496cde0789f35c05d9712a1d5bb594f17697b57cdc924cb49b108f0d0c5e
-      - frame:6e0273cca38759b948dc9544301cedd8662c5aa90c56dfe37a6665be9be03710
+      - frame:bef65ce0461ea653abba514be03bd8db86e3ebcecc758a96efb9c763fb1d6f23
+      - frame:9555d9c1f39ad193cd6343434c9b13327d2b14b5c2533028d4464dff5b20c6d1
     uses:
-      - use:8edf399677540905f9ffd4fce6b45ba598f3fede19099fe3e49844f21c7c2045
-      - use:b5ca44087f0e713be6396cf3b55e8314b0c269eecb3516a8a05ee398d88585bc
+      - use:33ca059c28683184d7819782f36a24fc457a62d39992fcccea4685de2d77ed75
+      - use:be8863f27ca0a888cd54e278430ddcad9bd1f1c4483d6d2cc25c88d83b688ed6
     translation_review:
       required_uses: []
       conditional_uses: []

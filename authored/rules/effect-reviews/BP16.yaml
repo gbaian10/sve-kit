@@ -6,7 +6,7 @@ basis:
     recipe: v0-classification-candidates-1
     inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
   normalizer: four-layer-jp-v7
-  build_sha256: 7663e614a9cbf981162cbc7d09bb5841bcd3b18958c04b01fe55c5e4cb06ecf6
+  build_sha256: a492ac4459f33440844a4874ad644992dac317329773fca3a54765866f4e90f7
 groups:
   - id: shape:df46907772d757a70d294aa89d04c066db8b6909cf0809b224708664bd771087
     priority: false
@@ -28,13 +28,13 @@ groups:
         - BP18-P26
         - BP18-066
     frames:
-      - frame:b18da705dd5f6267494b8edf0ec26056d9050b6c9a3fcf6ff7f7b37e3f824281
-      - frame:b51fa419051d2215ecbad62a18b63121810298f707dfdfe50411f6a85af7b3bd
-      - frame:858ef8adfb9fb0e16d0d9fb257bbb8f26ea94307f6e9ad87d8477018c1f05cc9
+      - frame:71a4d8e7e34d0fa23b17a5e76592066abb18a5efa0cd82226040be6b79fa4983
+      - frame:25f892f8e75326e3bf88fa61fae6519f23fe2628b2c2deeb6da91d17495b2672
+      - frame:091edad5bf85359294a5ccc59413e97decab7d570876489d93bc7720e8808f1e
     uses:
-      - use:4d527a4aceef01b5e205c59c72c4e282cd12eae56af1975468c9d9c5ca0ef39f
-      - use:01e5896f0c1751e0ceeca1850e885a22073608bb4bdfa162c595b2d7ed75dc2b
-      - use:bd26527f819f50879312252555395c54c71826d49ea034dc269102ec15241692
+      - use:620e60317ed5e60f72dfc6b5bdea277bc9b36c800180a09f7ff4908b9731a124
+      - use:1a97a6bb1331181c8cde4f1cbcc7c52cec8bd4f532cce35a90e24603879d5497
+      - use:2ad077d48e6cab88dc418838f07b20dc0fc73d9eda143f61880d27c1cf054f88
     translation_review:
       required_uses: []
       conditional_uses: []
@@ -46,8 +46,8 @@ reverse_positions:
     section:
     line: 1
     frame_ids:
-      - frame:0081cc7e8a3810860cda8e3c26655236a0b6e982adc58ea38ac46f61102b465f
-      - frame:2a56037551ba72a3f1b782aa29da458869a4f3456ba9fea557d21579e50eae72
+      - frame:ad4422d9d539f993c32dcbfb737898433980bed7a4d6551879f06c5436d6819a
+      - frame:1689e75baf8fae46efa8dacd67bca3bd78398c229943a5e670dc92e01866cb19
     category: 跨行涵蓋
     rationale: 追加 act 費用附於下一行 spell，括號是費用說明。
     covered_by:
@@ -59,7 +59,7 @@ reverse_positions:
     section:
     line: 2
     frame_ids:
-      - frame:178d77ea881215356ec83ef8bda3488e1a740768ba98ad13ad98c7fa2fbeae95
+      - frame:2a07c620a10882cad44b3598b0dda0d0dd87a0e4e74dad38d75993fff7774258
     category: 跨行涵蓋
     rationale: 第一行 choice 包含第二行的兩種模式。
     covered_by:
@@ -71,8 +71,8 @@ reverse_positions:
     section: 0
     line: 1
     frame_ids:
-      - frame:6638f7061941e820bea50fd73b396cf8cf83560ef71eb823b0325f447124f516
-      - frame:167068c72ef3e8782e24007373d5efed41ae10acd25a48fac21d61f4d061f1f1
+      - frame:c89ee5ff349ea63fb1eb64dbecf37939f7a434d3b6be658b3866d1cadb20fed7
+      - frame:e2fc2eca42f5e5e79e0bfbd1cb0d483899c87632528c7066a30d194a8ed011be
     category: token
     rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。
   - card_no: BP16-SL08
@@ -81,7 +81,7 @@ reverse_positions:
     section:
     line: 2
     frame_ids:
-      - frame:2492e836da374f71ec5b6abf25e045d76476f8d4b28c2a8171f548ce71ef164f
+      - frame:b03e1c4dfb1ee1628815bc38352b8a7e84b456605701a6a78b13356e832d63b4
     category: 跨行涵蓋
     rationale: 第一行 choice 包含後續模式與各自決定。
     covered_by:

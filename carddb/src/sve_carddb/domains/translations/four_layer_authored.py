@@ -27,6 +27,7 @@ from sve_carddb.contracts.source_binding import SourceSpan, TypedValue
 from sve_carddb.core.authored import check_path, read, require_directory, shards
 from sve_carddb.core.json import canonical, parse
 from sve_carddb.core.models import Hash, RecordData, Text
+from sve_carddb.domains.translations import four_layer_definitions
 from sve_carddb.domains.translations.english_records import (
     EnglishTargetRecord,
     EnglishUseRecord,
@@ -346,7 +347,10 @@ def from_files(files: tuple[tuple[str, bytes, bytes], ...]) -> Inputs:
     """A single loaded closure supplies every consumer; filenames do not resolve duplicate keys."""
     selected: dict[str, Record] = {}
     locations: dict[str, str] = {}
+    definitions = four_layer_definitions.from_files(files)
     for path, _, content in files:
+        if path.startswith(four_layer_definitions.AREA):
+            continue
         match = _PATH.fullmatch(path)
         if match is None:
             raise ValueError(
@@ -354,7 +358,7 @@ def from_files(files: tuple[tuple[str, bytes, bytes], ...]) -> Inputs:
             )
         area = next(g for g in match.groups() if g is not None)
         try:
-            records_in_file = shard(content).records
+            records_in_file = shard(definitions.expand_shard(content)).records
         except ValueError as error:
             raise ValueError(f"authored/{path}: {error}") from None
         for record in records_in_file:
@@ -382,6 +386,7 @@ def read_inputs(root: Path) -> Inputs:
         "translations/templates",
     )
     files = list(shards(root, areas, optional=areas))
+    files.extend(four_layer_definitions.read_files(root))
     forms = root / "translations/forms"
     check_path(root, forms)
     if forms.exists():

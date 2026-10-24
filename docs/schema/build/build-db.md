@@ -367,7 +367,7 @@ EN 接收端引用 JP owner 的合法 use，不將 EN source_unit 改成 JP；�
 
 | 資料                                       | 責任                                                                                                                                                          |
 | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| sentence_template                          | Frame 身分包含 canonical source、型別／角色／域、語義變體、normalizer 及投影分類；scopes/imports/exports 由 DSL 的 interface_key 追蹤；NP/form 不入身分       |
+| sentence_template                          | Frame 身分包含 canonical source、型別／角色／域、語義變體、封閉定義及投影分類；scopes/imports/exports 由 DSL 的 interface_key 追蹤；NP/form 不入身分          |
 | template_translation／glossary_translation | 前者保存有型別 Target；後者繼續保存單一基礎選詞，translation_form 以引用組合形式，不複製每種文法形的名字                                                      |
 | text_template_binding                      | 逐 use 的 SourceBinding；保存 owner／來源定位、trace、typed values 與每葉 occurrence，不能只按 context 去重                                                   |
 | translation_context／translation           | context 的變體鍵聚合來源 frame／values；render-v3 包含實際 target、形式、選詞／加粗、位置與 renderer 版本的依賴                                               |
@@ -509,7 +509,7 @@ card_route_alias 的有效轉址圖仍無環、展平到同 printing 的 canonic
 
 canonical-json-v1：null/bool/Unicode string/安全整數/array/object；拒浮點和未配對 surrogate。鍵以 Unicode code point 排序、無空白/BOM、UTF-8；控制字元一律小寫 `\u00xx`，其餘僅跳脫引號/反斜線，不正規化 Unicode。有序 array 不排序，集合依本契約排序。`source_record` 雜湊取 exact raw bytes，不重序列化。
 
-`text_unit` hash＝exact text UTF-8；相同 hash 仍比 bytes。舊 T／C 模板身分只用於[共用契約 §9](../domains/four-layer-translation.md#9-舊模板重鍵與裁定引用)的舊模板映射辨識；四層的 frame-v1 完整 payload／ID 依[共用契約 §3](../domains/four-layer-translation.md#3-frame-與語義身分)，normalizer、角色／域或語義變體變更須重鍵，NP／中文形式不入身分。
+`text_unit` hash＝exact text UTF-8；相同 hash 仍比 bytes。舊 T／C 模板身分只用於[共用契約 §9](../domains/four-layer-translation.md#9-舊模板重鍵與裁定引用)的舊模板映射辨識；四層的 frame-v2 完整 payload／ID 依[共用契約 §3](../domains/four-layer-translation.md#3-frame-與語義身分)，角色／域、語義變體或被引用定義變更須重鍵，單純 normalizer 版本改變只更新基準並重驗，NP／中文形式不入身分。
 
 `program_hash`＝canonical `{dsl_version,ast}`；正式作者 1.0 的 body_version 依[承載 §4.1](../../dsl/author-contract-1.0.md#41-body-recipe)的 effect-body-v1 完整 payload（含 params、ability_scope、ports），取代舊 macro `{dsl_version,body}` 配方。既有 face-bundle-v1 保留完整觀測 recipe（含 revision ID、原始 name/effect/sections/kind、數值與類型），只作觀測追溯，不充當 DSL 新鮮度鍵。
 

@@ -6,7 +6,7 @@ basis:
     recipe: v0-classification-candidates-1
     inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
   normalizer: four-layer-jp-v7
-  build_sha256: 7663e614a9cbf981162cbc7d09bb5841bcd3b18958c04b01fe55c5e4cb06ecf6
+  build_sha256: a492ac4459f33440844a4874ad644992dac317329773fca3a54765866f4e90f7
 groups:
   - id: shape:23fdc1e8d5c1fe45354bd9c0e64a5c32654de4fe0ee7cc191c080d57eae4310e
     priority: false
@@ -22,11 +22,11 @@ groups:
       Tac75b03a5e:
         - BP08-077
     frames:
-      - frame:d19e1924d9fb6a8f3b2f642d8c08b8331ad635c9aea5f0b5fba0b28df580a575
-      - frame:1fe9a8e7abb2167b717e3c2a1ea2793d7bab73f2da25a934b06a6bd1e18eb252
+      - frame:a38dd1db96721b5ed6e28fa1f59d33f615ce9483d7bfb071e5b111d7829882a2
+      - frame:9993d6c750657e4c5eaf1b366a8b21bc1259bf26e8d511095d043248845c848a
     uses:
-      - use:0c958bbc59d0f714efe08fb0c27dad8bc021749aee7377860c2e4b3476901388
-      - use:e811aa4bdc30fc3f12247e25a9b56e5ba77040f3459e5906eb3fbfd9adcfd730
+      - use:3fc9b13b1ef9d25e73b72f6ef118703a1c40148e1f7e3fb54bb9961830e0ceed
+      - use:d545bd521e02c4b2ceef8824c50c79423879abb46f5aadf41b832b5d3925abdb
     translation_review:
       required_uses: []
       conditional_uses: []
@@ -61,17 +61,17 @@ groups:
         - PR-230
         - PR-488
     frames:
-      - frame:5dc462bfc3c7ae592a2e2a99ce2087c728db65549e4fd396fc4d2f085746f9d2
-      - frame:8db633e2799d45b885ea823deb985d70ff6890d6ea446b27507470e9947daeda
-      - frame:4af5563744425d543ed669c6f178204e85f2545003ecbe86cbd9a695dea22f4a
-      - frame:c5ad2b7e13243a0dc34c5b3b007dabc1622c50fc531a578256a0a5771c82e7d5
-      - frame:827598ea54e9c4407804e51361582d41f482c301aeb44ea0998d89c782c32e16
+      - frame:127df2f8471452ef59b003a0cb3facc954525b1c4dee70788522847da62f58c2
+      - frame:8e62f3a896418da2a42456e3aa98747675ed9c07e7e5673084bd36d4676e9d59
+      - frame:9f3e86e028382b0bb079764cdf43b8ef81f32411efec8808bdc3f685f224a7c1
+      - frame:870e262e976b68e2ae1de27a82fb6eaa604d6a724cd840e123fd673eaa024bea
+      - frame:a1755244b5732ac321601eb78aa24dc05450bc478e184028fdd88272eaef40ad
     uses:
-      - use:0843eb0596aa3e311e4bebae595d7d84ca260a75b4e968b9d38b4895bade06f2
-      - use:3160143340f9bc9bff02989835c6522e6366dccda627c256e8b5289f06706edc
-      - use:c80b46ee676f2d595b1ea94fd475e595717a330423a156f62d0bcdf6b82cf18c
-      - use:1ee6b13ab9340d872c7fd821ecff53bf46f2df8eb848d7ae8e46969b27314fa7
-      - use:c047bf00aa15e638fc96ef39212983ed8d49e7e02251fc0bb60ea03bb699fddc
+      - use:4552e635af7431fb76ceb5a283be20f9ba29e20001c61ec055b4f4bb5b66c47e
+      - use:4c33880d0ee318bca04442cc39bfaf117d17d8b8dfb24ddaba7ba7f4c3ef8884
+      - use:7c4585604d008a79587fc2d092454cb9bd6adc6e504fcbcdc2b4c99984567a31
+      - use:6de9f3dcffa124055bf29dc5a32e7a1bfe6733c28b9e6c58519d89a5301a89a5
+      - use:e429f08246b27cc5e750786baf587186b725c74eb2a0629a11f98c3b86bd19ad
     translation_review:
       required_uses: []
       conditional_uses: []
@@ -92,16 +92,16 @@ groups:
         - SP01-U02
         - SP01-SL02
     frames:
-      - frame:4378c72a6937313e616ceb199e95a28536147155cdf1954896fa97450e060cf2
-      - frame:caae46beb49ae48c3aebb73dbdc81ad90302e9ac6f6ea9923ef6dab2e6eacc39
+      - frame:a481c71bbc4559adc1a99fc5446ef73427f928299e525a5b480e0a325cf1ab47
+      - frame:8421ed905da98d66033e61ae64ee7991a0d8f0386574ff0de021e19e1106ba63
     uses:
-      - use:b0b1b8a6381cd30e42baab8afd8f716251ca657159ac0870496c2efb56c2120f
-      - use:5be135b8999302fcd48558e9c796fe28f78e1783b32f220fe035c7a406fe954b
+      - use:1d9c782ae6c6ebbd7a795f92c6c835bb58bd8255414662a91245d742121c9cd8
+      - use:5a6025b572e862751d3ba6e01ec99b9ca1216d215d24723dd6776666169165e0
     translation_review:
       required_uses: []
       conditional_uses:
-        - use:b0b1b8a6381cd30e42baab8afd8f716251ca657159ac0870496c2efb56c2120f
-        - use:5be135b8999302fcd48558e9c796fe28f78e1783b32f220fe035c7a406fe954b
+        - use:1d9c782ae6c6ebbd7a795f92c6c835bb58bd8255414662a91245d742121c9cd8
+        - use:5a6025b572e862751d3ba6e01ec99b9ca1216d215d24723dd6776666169165e0
       trigger: 一般進化限制與費用責任釐清並採納時逐 use 比對；只有來源語義、leaf 或中文 render 改變才重審，單純統一標註不重派。
   - id: shape:9387f3bf4677c772441526b9e47989ee0174ae5b838e719dc2262c32c5fa10e9
     priority: false
@@ -119,11 +119,11 @@ groups:
         - SP01-SL24
         - BP08-043
     frames:
-      - frame:f666fed25a5ee979383482e6ebad3243847413f11b2b88171fce14bdd96677c8
-      - frame:691c43f4495fa562f7d3c2674226b458da7e7f3ac0bb233425000cb8261e1abb
+      - frame:70062e4e6366d3d506b9b8bcfc63abd15338a446cc676e0b1a1893fcc5bb8346
+      - frame:56e5c3a3d4299743a03e204da726e0a20e88afa333d5f9891fb4bbb031a664f8
     uses:
-      - use:01e7d13c016cb893c5d62a731fead2e7765268cc4c128751cb18d8058daafa1c
-      - use:4c51f30a692d935498ed6a714908dc84a22ac209876714c458ba23c42ca1c035
+      - use:8a8834f0463bb93191603f198e347d4c5e6e8e1aec8c19a7bd5c87d3c8d53b0e
+      - use:fb94dc5b03750d23972c968c7f452f68297394fe3cb8394577c350cac10c989c
     translation_review:
       required_uses: []
       conditional_uses: []
@@ -135,8 +135,8 @@ reverse_positions:
     section: 0
     line: 1
     frame_ids:
-      - frame:170cbdc8ac892122abb3e1b2528bf6379487a11c4607875dc79f23f9f735041f
-      - frame:020db62a9d202b5b184b5080dc10687e53696e3f1f276e2ad7a5c0df19e34c46
+      - frame:ef91540844529a6370a4f166f91486a63a21115d0700f4d74e4cceed19419563
+      - frame:6c7d9b72bffc56556056e4e487445312e0416a7df1125598264e26735f1d6aa9
     category: token
     rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。
   - card_no: BP08-011
@@ -145,7 +145,7 @@ reverse_positions:
     section: 0
     line: 2
     frame_ids:
-      - frame:0c9dfb98fb8ab4a18aae2ed5633400df77b0f325dec3662b4187d28dccbeba83
-      - frame:e6409d4d9fbbe91dfcafc594e7208e7aee4764e4b6ce9486d20e428c2fd429c1
+      - frame:85096e5a484e227ac83ca2cc250d5d9da8b32b5f5b90e90fa22de8cb2567d4b3
+      - frame:e9fc1e20b7ab33f746182ee078cb80f0eafd924bb586a24dc433c8b934d90605
     category: token
     rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。

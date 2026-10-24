@@ -25,6 +25,7 @@ from sve_carddb.domains.translations.four_layer_render import (
 )
 from sve_carddb.domains.translations.four_layer_semantics import CardContext
 
+from ...support.semantic_definition_fixtures import with_definitions
 from .test_four_layer_classification import classifier as n0_classifier
 from .test_four_layer_classification import source
 
@@ -357,7 +358,9 @@ def test_production_reader_accepts_only_current_v3_frames(version: str) -> None:
         }
     )
     loaded = from_files(
-        (("translations/templates/definitions/000.yaml", payload, payload),)
+        with_definitions(
+            (("translations/templates/definitions/000.yaml", payload, payload),)
+        )
     )
     assert any(r.data == frame for r in loaded.records)
     old_frame = frame.model_copy(
@@ -376,7 +379,15 @@ def test_production_reader_accepts_only_current_v3_frames(version: str) -> None:
     )
     with pytest.raises(ValueError, match="Unsupported four-layer authored normalizer"):
         from_files(
-            (("translations/templates/definitions/000.yaml", old_payload, old_payload),)
+            with_definitions(
+                (
+                    (
+                        "translations/templates/definitions/000.yaml",
+                        old_payload,
+                        old_payload,
+                    ),
+                )
+            )
         )
 
 

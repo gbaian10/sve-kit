@@ -6,7 +6,7 @@ basis:
     recipe: v0-classification-candidates-1
     inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
   normalizer: four-layer-jp-v7
-  build_sha256: 7663e614a9cbf981162cbc7d09bb5841bcd3b18958c04b01fe55c5e4cb06ecf6
+  build_sha256: a492ac4459f33440844a4874ad644992dac317329773fca3a54765866f4e90f7
 groups: []
 reverse_positions:
   - card_no: SD01-016
@@ -15,6 +15,6 @@ reverse_positions:
     section: 0
     line: 1
     frame_ids:
-      - frame:4f0b49fd269cd79bd9c1aa1f17c3517c5e6bb3032d87f82e4f79963ac046e2c9
+      - frame:5352d127f11f5f5652ace90fc372cae2274828b5060da35f14025eab6c3d9f62
     category: token
     rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。

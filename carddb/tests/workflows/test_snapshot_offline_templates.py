@@ -28,6 +28,7 @@ from sve_carddb.workflows import offline
 from sve_carddb.workflows.offline import build
 
 from ..domains.registry.test_registry import card, make_inputs
+from ..support.semantic_definition_fixtures import with_definitions
 from ..support.shared_case_fixtures import TextCaseTemplate
 from ..support.text_observation_fixtures import make_case
 from ..support.translation_source_fixtures import EnvelopeSources
@@ -170,6 +171,13 @@ def test_normal_offline_build_reads_authored_frames_and_keeps_whole_field_fallba
             }
         )
     )
+    raw = definitions.read_bytes()
+    for relative, encoded, _ in with_definitions(
+        ((definitions.relative_to(root).as_posix(), raw, raw),)
+    ):
+        path = root / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(encoded)
     if translated:
         target = TargetRecord.model_validate_json(
             canonical(

@@ -4,10 +4,9 @@
   "fixtures": {
     "g07": {
       "semantic": {
-        "recipe": "frame-v1",
+        "recipe": "frame-v2",
         "source_lang": "ja",
         "canonical_source": "PG380_G07({owner},{zone},{kind},{quantity})",
-        "normalizer_version": "fixture-pg380-global-v2",
         "role": "body",
         "leaf_schema": {
           "format": 2,
@@ -105,6 +104,36 @@
         "projection": {
           "projection_kind": "ability_body",
           "discriminator": "fixture.pg380.g07"
+        },
+        "semantic_definitions": {
+          "domains": {
+            "opponent": {
+              "kind": "synthetic_domain",
+              "name": "opponent"
+            },
+            "self": {
+              "kind": "synthetic_domain",
+              "name": "self"
+            },
+            "fixture.pg380.zone": {
+              "kind": "synthetic_domain",
+              "name": "fixture.pg380.zone"
+            },
+            "fixture.pg380.quantity": {
+              "kind": "synthetic_domain",
+              "name": "fixture.pg380.quantity"
+            }
+          },
+          "expressions": {},
+          "omissions": {},
+          "units": {},
+          "resolved": {
+            "kind": "synthetic_fixture"
+          },
+          "source_links": {
+            "ports": [],
+            "scopes": []
+          }
         }
       },
       "values": {
@@ -207,14 +236,14 @@
           }
         ]
       },
-      "source_unit": "枚"
+      "source_unit": "枚",
+      "normalizer_version": "fixture-pg380-global-v2"
     },
     "g08": {
       "semantic": {
-        "recipe": "frame-v1",
+        "recipe": "frame-v2",
         "source_lang": "ja",
         "canonical_source": "PG380_G08({owner},{zone},{kind},{quantity})",
-        "normalizer_version": "fixture-pg380-global-v2",
         "role": "body",
         "leaf_schema": {
           "format": 2,
@@ -312,6 +341,36 @@
         "projection": {
           "projection_kind": "ability_body",
           "discriminator": "fixture.pg380.g08"
+        },
+        "semantic_definitions": {
+          "domains": {
+            "opponent": {
+              "kind": "synthetic_domain",
+              "name": "opponent"
+            },
+            "self": {
+              "kind": "synthetic_domain",
+              "name": "self"
+            },
+            "fixture.pg380.zone": {
+              "kind": "synthetic_domain",
+              "name": "fixture.pg380.zone"
+            },
+            "fixture.pg380.quantity": {
+              "kind": "synthetic_domain",
+              "name": "fixture.pg380.quantity"
+            }
+          },
+          "expressions": {},
+          "omissions": {},
+          "units": {},
+          "resolved": {
+            "kind": "synthetic_fixture"
+          },
+          "source_links": {
+            "ports": [],
+            "scopes": []
+          }
         }
       },
       "values": {
@@ -414,14 +473,14 @@
           }
         ]
       },
-      "source_unit": "体"
+      "source_unit": "体",
+      "normalizer_version": "fixture-pg380-global-v2"
     },
     "g09": {
       "semantic": {
-        "recipe": "frame-v1",
+        "recipe": "frame-v2",
         "source_lang": "ja",
         "canonical_source": "PG380_G09({owner},{zone},{trait},{token},{kind},{quantity})",
-        "normalizer_version": "fixture-pg380-global-v2",
         "role": "body",
         "leaf_schema": {
           "format": 2,
@@ -561,6 +620,44 @@
         "projection": {
           "projection_kind": "ability_body",
           "discriminator": "fixture.pg380.g09"
+        },
+        "semantic_definitions": {
+          "domains": {
+            "opponent": {
+              "kind": "synthetic_domain",
+              "name": "opponent"
+            },
+            "self": {
+              "kind": "synthetic_domain",
+              "name": "self"
+            },
+            "fixture.pg380.zone": {
+              "kind": "synthetic_domain",
+              "name": "fixture.pg380.zone"
+            },
+            "non_token": {
+              "kind": "synthetic_domain",
+              "name": "non_token"
+            },
+            "token": {
+              "kind": "synthetic_domain",
+              "name": "token"
+            },
+            "fixture.pg380.quantity": {
+              "kind": "synthetic_domain",
+              "name": "fixture.pg380.quantity"
+            }
+          },
+          "expressions": {},
+          "omissions": {},
+          "units": {},
+          "resolved": {
+            "kind": "synthetic_fixture"
+          },
+          "source_links": {
+            "ports": [],
+            "scopes": []
+          }
         }
       },
       "values": {
@@ -688,14 +785,14 @@
           }
         ]
       },
-      "source_unit": "体"
+      "source_unit": "体",
+      "normalizer_version": "fixture-pg380-global-v2"
     },
     "g09_class": {
       "semantic": {
-        "recipe": "frame-v1",
+        "recipe": "frame-v2",
         "source_lang": "ja",
         "canonical_source": "PG380_G09({owner},{zone},{class},{kind},{quantity})",
-        "normalizer_version": "fixture-pg380-global-v2",
         "role": "body",
         "leaf_schema": {
           "format": 2,
@@ -818,6 +915,36 @@
         "projection": {
           "projection_kind": "ability_body",
           "discriminator": "fixture.pg380.g09_class"
+        },
+        "semantic_definitions": {
+          "domains": {
+            "opponent": {
+              "kind": "synthetic_domain",
+              "name": "opponent"
+            },
+            "self": {
+              "kind": "synthetic_domain",
+              "name": "self"
+            },
+            "fixture.pg380.zone": {
+              "kind": "synthetic_domain",
+              "name": "fixture.pg380.zone"
+            },
+            "fixture.pg380.quantity": {
+              "kind": "synthetic_domain",
+              "name": "fixture.pg380.quantity"
+            }
+          },
+          "expressions": {},
+          "omissions": {},
+          "units": {},
+          "resolved": {
+            "kind": "synthetic_fixture"
+          },
+          "source_links": {
+            "ports": [],
+            "scopes": []
+          }
         }
       },
       "values": {
@@ -934,14 +1061,14 @@
           }
         ]
       },
-      "source_unit": "枚"
+      "source_unit": "枚",
+      "normalizer_version": "fixture-pg380-global-v2"
     },
     "g10": {
       "semantic": {
-        "recipe": "frame-v1",
+        "recipe": "frame-v2",
         "source_lang": "ja",
         "canonical_source": "PG380_G10({owner},{zone},{kind},{quantity})",
-        "normalizer_version": "fixture-pg380-global-v2",
         "role": "body",
         "leaf_schema": {
           "format": 2,
@@ -1039,6 +1166,36 @@
         "projection": {
           "projection_kind": "ability_body",
           "discriminator": "fixture.pg380.g10"
+        },
+        "semantic_definitions": {
+          "domains": {
+            "opponent": {
+              "kind": "synthetic_domain",
+              "name": "opponent"
+            },
+            "self": {
+              "kind": "synthetic_domain",
+              "name": "self"
+            },
+            "fixture.pg380.zone_union": {
+              "kind": "synthetic_domain",
+              "name": "fixture.pg380.zone_union"
+            },
+            "fixture.pg380.quantity": {
+              "kind": "synthetic_domain",
+              "name": "fixture.pg380.quantity"
+            }
+          },
+          "expressions": {},
+          "omissions": {},
+          "units": {},
+          "resolved": {
+            "kind": "synthetic_fixture"
+          },
+          "source_links": {
+            "ports": [],
+            "scopes": []
+          }
         }
       },
       "values": {
@@ -1142,7 +1299,8 @@
           }
         ]
       },
-      "source_unit": "枚"
+      "source_unit": "枚",
+      "normalizer_version": "fixture-pg380-global-v2"
     }
   },
   "forms": [

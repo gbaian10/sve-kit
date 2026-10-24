@@ -1,6 +1,6 @@
 """Derive and verify the complete sealed source construction."""
 
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 from typing import TYPE_CHECKING
 
 from sve_carddb.contracts.four_layer import (
@@ -8,6 +8,7 @@ from sve_carddb.contracts.four_layer import (
     PrintingFaceOwner,
     hash_payload,
 )
+from sve_carddb.core.json import canonical
 from sve_carddb.domains.translations.four_layer_analysis import (
     SourceAnalysis,
     analyze_source,
@@ -25,6 +26,7 @@ from sve_carddb.domains.translations.four_layer_expressions import (
     target_dependencies,
     verify_quantities,
 )
+from sve_carddb.domains.translations.four_layer_identity import seal
 from sve_carddb.domains.translations.four_layer_matching import bind_recognized
 from sve_carddb.domains.translations.four_layer_n2_counters import prepare_capacities
 from sve_carddb.domains.translations.four_layer_n2_parameters import prepare_parameters
@@ -43,7 +45,11 @@ if TYPE_CHECKING:
         Projection,
         Target,
     )
-    from sve_carddb.contracts.source_binding import SourceBinding, SourceDescriptor
+    from sve_carddb.contracts.source_binding import (
+        ClosedDomain,
+        SourceBinding,
+        SourceDescriptor,
+    )
     from sve_carddb.domains.translations.four_layer_classification import (
         Classifier,
         Recognized,
@@ -58,6 +64,7 @@ class DerivedField:
     interfaces: tuple[Projection | None, ...]
     mode_rules: tuple[tuple[ModeCountRule, ...], ...] = ()
     families: tuple[SourceFamily, ...] = ()
+    source_domains: Mapping[str, ClosedDomain] = field(default_factory=dict)
 
     @property
     def field(self) -> SourceField:
@@ -91,6 +98,7 @@ class DerivedField:
             self.derived.field.source,
             self.derived.field.parts[ordinal],
             normalizer_version=VERSION,
+            semantic_catalog=(self.source_domains, self.registry),
         )
         interface = self.interfaces[ordinal]
         if interface is not None:
@@ -107,7 +115,13 @@ class DerivedField:
             binding = binding.model_copy(
                 update={"id": "bind:" + hash_payload(binding.payload())}
             )
-        return frame, binding
+        return seal(
+            frame,
+            binding,
+            self.field.parts[ordinal].canonical_source,
+            self.source_domains,
+            self.registry,
+        )
 
     def verify(  # ruff: ignore[too-many-arguments] -- optional authored targets need their own language and forms
         self,
@@ -172,6 +186,8 @@ class DerivedField:
         reconstructed = bind_recognized(frame, self.derived.field, part, found)
         if (
             reconstructed != binding
+            or canonical(frame.source.semantic_definitions)
+            != canonical(expected_frame.source.semantic_definitions)
             or frame.semantic_variant != expected_frame.semantic_variant
             or frame.projection != expected_frame.projection
             or frame.mode_rules != expected_frame.mode_rules
@@ -199,6 +215,15 @@ class SourceFamily:
     prepare: Callable[[str, DerivedField, Classifier, CardContext | None], DerivedField]
 
 
+def source_families() -> tuple[SourceFamily, ...]:
+    """Lexical and complete bindings must resolve names from the same providers."""
+    from sve_carddb.domains.translations.four_layer_integrated import FAMILY  # ruff: ignore[import-outside-top-level] -- providers share this source construction type
+    from sve_carddb.domains.translations.four_layer_lexical import FAMILY as LEXICAL  # ruff: ignore[import-outside-top-level] -- lexical completion depends on the shared derivation boundary
+    from sve_carddb.domains.translations.four_layer_n3_sources import FAMILY as N3  # ruff: ignore[import-outside-top-level] -- source adapters depend on the shared derivation boundary
+
+    return FAMILY, N3, LEXICAL
+
+
 def derive_source(
     raw: str,
     source: SourceDescriptor,
@@ -207,10 +232,6 @@ def derive_source(
     context: CardContext | None = None,
 ) -> DerivedField:
     """Apply every sealed family through the sole production source entry."""
-    from sve_carddb.domains.translations.four_layer_integrated import FAMILY  # ruff: ignore[import-outside-top-level] -- providers share this source construction type
-    from sve_carddb.domains.translations.four_layer_lexical import FAMILY as LEXICAL  # ruff: ignore[import-outside-top-level] -- lexical completion depends on the shared derivation boundary
-    from sve_carddb.domains.translations.four_layer_n3_sources import FAMILY as N3  # ruff: ignore[import-outside-top-level] -- source adapters depend on the shared derivation boundary
-
     derived = analyze_source(raw, source, classifier, context=context)
     derived = prepare_capacities(raw, derived, classifier)
     derived = prepare_parameters(raw, derived, classifier)
@@ -230,11 +251,10 @@ def derive_source(
             derived.field.parts, derived.original.parts, derived.recognized, strict=True
         )
     )
-    prepared = FAMILY.prepare(
-        raw, DerivedField(derived, interfaces), classifier, context
-    )
-    prepared = N3.prepare(raw, prepared, classifier, context)
-    prepared = LEXICAL.prepare(raw, prepared, classifier, context)
+    families = source_families()
+    prepared = DerivedField(derived, interfaces, source_domains=classifier.domains)
+    for family in families:
+        prepared = family.prepare(raw, prepared, classifier, context)
     prepared = prepare_draw(raw, prepared, context)
     if len(prepared.interfaces) != len(prepared.derived.field.parts):
         raise ValueError("Source interfaces must preserve source part order")
@@ -242,4 +262,4 @@ def derive_source(
         prepared.derived.field.parts
     ):
         raise ValueError("Mode rules must preserve source part order")
-    return replace(prepared, families=(FAMILY, N3, LEXICAL))
+    return replace(prepared, families=families)

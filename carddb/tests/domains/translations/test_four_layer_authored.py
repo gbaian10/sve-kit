@@ -16,6 +16,8 @@ from sve_carddb.domains.translations.four_layer_authored import (
 )
 from sve_carddb.domains.translations.four_layer_normalizer import VERSION
 
+from ...support.semantic_definition_fixtures import with_definitions
+
 if TYPE_CHECKING:
     from pathlib import Path
 
@@ -113,7 +115,7 @@ def valid_files() -> tuple[tuple[str, bytes, bytes], ...]:
 def test_new_authored_tree_loads_once_with_typed_targets_and_default_quality(
     tmp_path: Path,
 ) -> None:
-    for name, raw, _ in valid_files():
+    for name, raw, _ in with_definitions(valid_files()):
         path = tmp_path / name
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(raw)
@@ -169,14 +171,18 @@ def test_duplicate_json_and_selection_keys_cannot_replace_previous_values() -> N
     frame = definition()
     with pytest.raises(ValueError, match="Duplicate four-layer authored selection key"):
         from_files(
-            (
-                file("translations/templates/definitions/001.yaml", [frame]),
-                file("translations/templates/definitions/002.yaml", [frame]),
+            with_definitions(
+                (
+                    file("translations/templates/definitions/001.yaml", [frame]),
+                    file("translations/templates/definitions/002.yaml", [frame]),
+                )
             )
         )
     with pytest.raises(ValueError, match="Duplicate four-layer authored selection key"):
         from_files(
-            (file("translations/templates/definitions/001.yaml", [frame, frame]),)
+            with_definitions(
+                (file("translations/templates/definitions/001.yaml", [frame, frame]),)
+            )
         )
 
 
@@ -194,7 +200,9 @@ def test_missing_required_leaf_and_old_placeholder_text_are_rejected() -> None:
     }
     with pytest.raises(ValueError, match="Invalid four-layer authored shard"):
         from_files(
-            (records[0], file("translations/templates/values/001.yaml", [invalid]))
+            with_definitions(
+                (records[0], file("translations/templates/values/001.yaml", [invalid]))
+            )
         )
     target_data["target"] = {
         "format": 1,
@@ -202,27 +210,37 @@ def test_missing_required_leaf_and_old_placeholder_text_are_rejected() -> None:
     }
     with pytest.raises(ValueError, match="every required leaf"):
         from_files(
-            (records[0], file("translations/templates/values/001.yaml", [invalid]))
+            with_definitions(
+                (records[0], file("translations/templates/values/001.yaml", [invalid]))
+            )
         )
     target_data.pop("target")
     target_data["text"] = "旧字串"
     with pytest.raises(ValueError, match="Invalid four-layer authored shard"):
         from_files(
-            (records[0], file("translations/templates/values/001.yaml", [invalid]))
+            with_definitions(
+                (records[0], file("translations/templates/values/001.yaml", [invalid]))
+            )
         )
 
 
 def test_wrong_area_and_unregistered_normalizer_are_rejected() -> None:
     frame = definition()
     with pytest.raises(ValueError, match="outside its kind's area"):
-        from_files((file("translations/templates/values/001.yaml", [frame]),))
+        from_files(
+            with_definitions((file("translations/templates/values/001.yaml", [frame]),))
+        )
     data = frame["data"]
     assert isinstance(data, dict)
     source = data["source"]
     assert isinstance(source, dict)
     source["normalizer_version"] = "unregistered-jp-v1"
     with pytest.raises(ValueError, match="Unsupported four-layer authored normalizer"):
-        from_files((file("translations/templates/definitions/001.yaml", [frame]),))
+        from_files(
+            with_definitions(
+                (file("translations/templates/definitions/001.yaml", [frame]),)
+            )
+        )
 
 
 def test_shard_quality_is_strict_and_record_keys_are_derived() -> None:
@@ -269,13 +287,15 @@ def test_pin_selects_an_actual_reusable_value_and_checks_its_language() -> None:
     identifier = object_value(definition()["data"])["id"]
     selection = override(identifier)
     extra = file("translations/overrides/fixture/001.yaml", [selection])
-    assert len(from_files((*files, extra)).records) == 3
+    assert len(from_files(with_definitions((*files, extra))).records) == 3
     with pytest.raises(ValueError, match="existing reusable template"):
-        from_files((files[0], extra))
+        from_files(with_definitions((files[0], extra)))
     object_value(selection["data"])["lang"] = "en"
     with pytest.raises(ValueError, match="Invalid four-layer authored shard"):
         from_files(
-            (*files, file("translations/overrides/fixture/001.yaml", [selection]))
+            with_definitions(
+                (*files, file("translations/overrides/fixture/001.yaml", [selection]))
+            )
         )
 
 
@@ -290,10 +310,12 @@ def test_named_target_variant_uses_the_contract_code_grammar() -> None:
     assert isinstance(templates, list)
     object_value(templates[0])["variant_key"] = "display.formal-v1"
     records = from_files(
-        (
-            *valid_files(),
-            file("translations/templates/values/002.yaml", [variant]),
-            file("translations/overrides/fixture/001.yaml", [selected]),
+        with_definitions(
+            (
+                *valid_files(),
+                file("translations/templates/values/002.yaml", [variant]),
+                file("translations/overrides/fixture/001.yaml", [selected]),
+            )
         )
     ).records
     assert len(records) == 4
@@ -305,18 +327,22 @@ def test_nonpin_override_cannot_hide_a_selection(action: str) -> None:
     object_value(selection["data"])["action"] = action
     with pytest.raises(ValueError, match="Invalid four-layer authored shard"):
         from_files(
-            (
-                *valid_files(),
-                file("translations/overrides/fixture/001.yaml", [selection]),
+            with_definitions(
+                (
+                    *valid_files(),
+                    file("translations/overrides/fixture/001.yaml", [selection]),
+                )
             )
         )
     object_value(selection["data"])["templates"] = []
     assert (
         len(
             from_files(
-                (
-                    *valid_files(),
-                    file("translations/overrides/fixture/001.yaml", [selection]),
+                with_definitions(
+                    (
+                        *valid_files(),
+                        file("translations/overrides/fixture/001.yaml", [selection]),
+                    )
                 )
             ).records
         )
@@ -361,9 +387,13 @@ def test_duplicate_concept_key_identifies_only_the_two_conflicting_paths() -> No
     paths = tuple(f"translations/glossary/fixture/{i:03}.yaml" for i in (1, 2, 3))
     with pytest.raises(ValueError, match="Duplicate glossary concept key") as error:
         from_files(
-            tuple(
-                file(path, [term])
-                for path, term in zip(paths, (first, second, unrelated), strict=True)
+            with_definitions(
+                tuple(
+                    file(path, [term])
+                    for path, term in zip(
+                        paths, (first, second, unrelated), strict=True
+                    )
+                )
             )
         )
     message = str(error.value)
@@ -388,9 +418,9 @@ def test_term_pin_rejects_a_withdrawn_choice(value: JsonValue) -> None:
     )
     if value is None:
         with pytest.raises(ValueError, match="existing usable glossary"):
-            from_files(files)
+            from_files(with_definitions(files))
     else:
-        assert len(from_files(files).records) == 3
+        assert len(from_files(with_definitions(files)).records) == 3
 
 
 def test_manual_match_requires_its_frame_role_and_complete_values() -> None:
@@ -416,18 +446,28 @@ def test_manual_match_requires_its_frame_role_and_complete_values() -> None:
     assert (
         len(
             from_files(
-                (*files, file("translations/overrides/fixture/001.yaml", [record]))
+                with_definitions(
+                    (*files, file("translations/overrides/fixture/001.yaml", [record]))
+                )
             ).records
         )
         == 3
     )
     match["values"] = {}
     with pytest.raises(ValueError, match="missing or unknown leaf"):
-        from_files((*files, file("translations/overrides/fixture/001.yaml", [record])))
+        from_files(
+            with_definitions(
+                (*files, file("translations/overrides/fixture/001.yaml", [record]))
+            )
+        )
     match["values"] = {"n": 2}
     object_value(match["source_span"])["role"] = "layout"
     with pytest.raises(ValueError, match="exact frame role"):
-        from_files((*files, file("translations/overrides/fixture/001.yaml", [record])))
+        from_files(
+            with_definitions(
+                (*files, file("translations/overrides/fixture/001.yaml", [record]))
+            )
+        )
 
 
 def test_form_references_resolve_the_same_language_and_registered_signature() -> None:
@@ -446,7 +486,9 @@ def test_form_references_resolve_the_same_language_and_registered_signature() ->
     }
     with pytest.raises(ValueError, match="form in its own language"):
         from_files(
-            (files[0], file("translations/templates/values/001.yaml", [selected]))
+            with_definitions(
+                (files[0], file("translations/templates/values/001.yaml", [selected]))
+            )
         )
     form: dict[str, JsonValue] = {
         "kind": "translation_form",
@@ -459,7 +501,9 @@ def test_form_references_resolve_the_same_language_and_registered_signature() ->
         },
     }
     with pytest.raises(ValueError, match="Unknown four-layer form rule"):
-        from_files((*files, file("translations/forms/001.yaml", [form])))
+        from_files(
+            with_definitions((*files, file("translations/forms/001.yaml", [form])))
+        )
 
 
 def test_invalid_authored_diagnostic_has_path_and_location_without_input_text() -> None:
@@ -476,7 +520,11 @@ def test_invalid_authored_diagnostic_has_path_and_location_without_input_text() 
         ],
     }
     with pytest.raises(ValueError, match="Invalid four-layer authored shard") as raised:
-        from_files((file("translations/templates/values/007.yaml", [invalid]),))
+        from_files(
+            with_definitions(
+                (file("translations/templates/values/007.yaml", [invalid]),)
+            )
+        )
     message = str(raised.value)
     assert "authored/translations/templates/values/007.yaml" in message
     assert "records.0.template_translation.data.target.nodes.0.Literal.extra" in message

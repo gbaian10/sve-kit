@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 import pytest
 from pydantic import BaseModel, JsonValue, ValidationError
 
-from sve_carddb.core.json import canonical
+from sve_carddb.core.json import canonical, object_value, parse
 from sve_carddb.domains.catalog.records import Shard as CatalogShard
 from sve_carddb.domains.digital.name_policies.records import LinkPolicy, Policy
 from sve_carddb.domains.mechanics import Registry as KeywordRegistry
@@ -17,6 +17,7 @@ from sve_carddb.domains.registry.badges import BadgeOverrides
 from sve_carddb.domains.registry.leader_frames import LeaderFrames
 from sve_carddb.domains.registry.reprints import Reprints
 from sve_carddb.domains.registry.storage import read_base_files, read_yaml
+from sve_carddb.domains.translations import four_layer_definitions
 from sve_carddb.domains.translations.flavor import Shard as FlavorShard
 from sve_carddb.domains.translations.four_layer_authored import Shard
 from sve_carddb.domains.translations.recognition.rules import Rules
@@ -59,6 +60,11 @@ def document(
     model, path, former = request.param
     raw = read_yaml(AUTHORED / path)
     assert isinstance(raw, dict)
+    if model is Shard:
+        definitions = four_layer_definitions.from_files(
+            four_layer_definitions.read_files(AUTHORED)
+        )
+        raw = object_value(parse(definitions.expand_shard(canonical(raw))))
     model.model_validate_json(canonical(raw))
     return model, raw, former
 

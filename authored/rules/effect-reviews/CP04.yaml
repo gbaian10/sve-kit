@@ -6,7 +6,7 @@ basis:
     recipe: v0-classification-candidates-1
     inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
   normalizer: four-layer-jp-v7
-  build_sha256: 7663e614a9cbf981162cbc7d09bb5841bcd3b18958c04b01fe55c5e4cb06ecf6
+  build_sha256: a492ac4459f33440844a4874ad644992dac317329773fca3a54765866f4e90f7
 groups:
   - id: shape:b4b0dea12888e4944be153fdb03dbaa2322dbf9dc29a435845c44bbf7fc99e8c
     priority: true
@@ -24,13 +24,13 @@ groups:
         - CP04-004
         - CP04-SL04
     frames:
-      - frame:5c63db6a8c79ccc289939936f6faa572b2b84d2e705becd0bea900d24ba6fb30
-      - frame:ed12aad5647378104537555e9412ba0a134653135cc148cc7c4a67335bf28e51
-      - frame:997efc207a7324a72167ffc5c43f2f8fd59481473261ab8a4687596799a7df10
+      - frame:ae03e2b66fe0c9535ed5293f9649491c4f57a081c328d9bc54a514a7f073e3f9
+      - frame:960e3ddf38f05b2f9cb54913a91bcd22dc062b66de37d82970f3bb1b563edbf6
+      - frame:e3d3fccb871f21bce74dd159b2dd91695c88237635914505642f1c8cab1f5ff2
     uses:
-      - use:d3c493161c8aa644c97cface4f7d0af450307821d82d3bf0146e069c10191bb8
-      - use:37195a500576ed691c18adb0dfcaf7362cb6dedeccbdc1b66b0d84ac69a724f6
-      - use:b77f3c929b8373940010f21040950fc7fde117807adb46045421f32d4d3587f5
+      - use:0779d08ae9f28c20ce5e304b9034067d6828ceed4e730d86fb2db605f9590cc1
+      - use:d2672788912fe70ec8cbb88d555de138a97cd4003495eb3c8b2171d6e6b6fd75
+      - use:1724e49a6553c88d0ff4d3a977d96230f384e5cffc47d616d088790d061248b0
     translation_review:
       required_uses: []
       conditional_uses: []
@@ -42,8 +42,8 @@ reverse_positions:
     section: 0
     line: 1
     frame_ids:
-      - frame:58a79935e495113370187fc788be4b78ff96b6a37f82f1d9691d7d562899e37f
-      - frame:935fef4036997d7d91e14dd88e49a2fddd73c7dab5ba4ada8ecb66820544ac98
+      - frame:1ba9d65c0202d42858a09c466adb5bfcad795185a36ff5f2c2c09673a86de826
+      - frame:2acd7afd4d040e3b5ff4b01dc45623e7175fe276b2f6e9f3c83897b428fe5c78
     category: token
     rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。
   - card_no: CP04-PR16
@@ -52,7 +52,7 @@ reverse_positions:
     section: 0
     line: 1
     frame_ids:
-      - frame:93989a71c3ba38fa5bdd5146ce347bc9e036400b764d4d706d579f2b0c26af5e
+      - frame:fd0ee60f7ae3c556eea50146275f0b844de8b6841ad855c6fe968feca45ea359
     category: 說明
     rationale: 括號說明既有關鍵字或通用建構／裝備規則；不複製成另一個效果。
   - card_no: CP04-T02
@@ -61,6 +61,6 @@ reverse_positions:
     section: 0
     line: 1
     frame_ids:
-      - frame:93989a71c3ba38fa5bdd5146ce347bc9e036400b764d4d706d579f2b0c26af5e
+      - frame:fd0ee60f7ae3c556eea50146275f0b844de8b6841ad855c6fe968feca45ea359
     category: 說明
     rationale: 括號說明既有關鍵字或通用建構／裝備規則；不複製成另一個效果。

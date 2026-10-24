@@ -15,7 +15,7 @@ input 的 `fixture` 指 fixtures 的 key，先深複製 fixture，再套用 `cha
 `remove` 列的 JSON Pointer 表示刪除欄位。若有 `changes`，比較原值與變更後值；不是把替換後結果當基準。
 其他 input 欄位是該操作的直接參數，不隱含預設值。沒有 fixture 的操作只讀自己 input。
 JSON 中的 fixture owner／concept／domain ID 是合成登錄，測試須在隔離資料根建立，不連官網。
-`identity_base` 的 `semantic` 是完整 frame-v1 hash payload，projection 只含分類；
+`identity_base` 的 `semantic` 是完整 frame-v2 hash payload；normalizer_version 位於 payload 外，projection 只含分類；
 同層 `projection_interface` 存 scopes／imports／exports，與 frame_id 組成共用契約 §7 的 frame-interface-v1 payload。
 frame_identity 同時驗 frame ID 與 interface_key 的固定 hash；render 部分不入這兩個 hash。
 expected 的 before_interface_hash／after_interface_hash 就是前後 interface_key 的完整 SHA-256 值。
@@ -32,7 +32,8 @@ expected 的 reason 是本規格原因碼，實作可映射既有公開診斷，
 | 組／operation | 固定輸入的重點 | 必須驗到的結果 |
 | --- | --- | --- |
 | FL-001／frame_identity | 同來源與葉 schema，只開關 NP、改 form／note／中文或有效的接口描述 | frame ID 相同；葉值不變；只有接口描述改動會改 interface_key |
-| FL-002／frame_identity | targets/choose、cost/effect 變體、normalizer、域、canonical 或投影分類改動 | frame ID 必不同，interface_key 隨之改變；固定完整 hash 可獨立核對 |
+| FL-001／frame_identity | 只有 normalizer_version 改動 | frame ID 與 interface_key 不變；版本驗證仍獨立執行 |
+| FL-002／frame_identity | targets/choose、cost/effect 變體、域、canonical 或投影分類改動 | frame ID 必不同，interface_key 隨之改變；固定完整 hash 可獨立核對 |
 | FL-003／source_unit | 計數物、計數時區域集合、token、角色與實際單位 | EX 体、跨區枚、護符つ／枚、主戰者人通過；錯單位拒絕合併 |
 | FL-004／leaf_domain | 數量、次數、傷害、序數、布林與域 | 錯型別／角色或超界拒絕，不因數字相同合併 |
 | FL-005／target_references | 完整 target、缺葉、錯概念、required 被 literal 取代 | 完整引用通過；必要葉遺失／懸空拒絕 |

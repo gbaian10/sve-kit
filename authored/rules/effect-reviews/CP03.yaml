@@ -6,7 +6,7 @@ basis:
     recipe: v0-classification-candidates-1
     inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
   normalizer: four-layer-jp-v7
-  build_sha256: 7663e614a9cbf981162cbc7d09bb5841bcd3b18958c04b01fe55c5e4cb06ecf6
+  build_sha256: a492ac4459f33440844a4874ad644992dac317329773fca3a54765866f4e90f7
 groups:
   - id: shape:1171d222df704aeb08ecb33a693260320e4e54241e2a1df0146b2d5f784dab9d
     priority: false
@@ -23,11 +23,11 @@ groups:
         - ECP02-002
         - ECP02-SL02
     frames:
-      - frame:77eeda6d278d5e1b41cbca9d823a68dfad13f81bde97f26f77773498c68dbbdd
-      - frame:77c2e2aa88010b712ca766b1454a42943ab59ffb788bfe9e69b779e00e29eff3
+      - frame:855a8525fe0df4b56632f64414cdc14cc0242801d1e3d2203efe58babaddb1c0
+      - frame:6b9ea1e3c4e680bf01519222551e560d2b308c9531a4815a56817e91ed348cfc
     uses:
-      - use:6f662406be134777c9a9182e5bc5c8072405788fca241f729823bac06cd0c4c6
-      - use:1a45a590f9a173bb37aea93b7004823e9997a5a0af2995b2fd4243a076f17a49
+      - use:f006f2a9fa75ebff7e2840ca87357b16d9a8dbee8cf92e8ec5d58dbfab5317e8
+      - use:a5ef32b85251ba2e0253feccb038f721c8af8901bb1e7c09f6c8aa1a9e9e7b6e
     translation_review:
       required_uses: []
       conditional_uses: []
@@ -39,7 +39,7 @@ reverse_positions:
     section: 0
     line: 1
     frame_ids:
-      - frame:74ace97a625b0de5e9bafde5cc395d868afb39c076d6d39c59f6834835288a6e
+      - frame:09e603ccceb77e96d632df8760442051dfbd1c729c7a869ea82fc56a837d4f16
     category: 說明
     rationale: 括號說明既有關鍵字或通用建構／裝備規則；不複製成另一個效果。
   - card_no: CP03-016
@@ -48,7 +48,7 @@ reverse_positions:
     section: 0
     line: 1
     frame_ids:
-      - frame:78f6bbf4edb93c82bcbfdcd20616f4d4538c77c683a76fc69a4c8b48984e6ba5
+      - frame:727935a099ca55a91e7805b0a464ee55da43383d698e7a850af7eeb600a34dde
     category: 說明
     rationale: 括號說明既有關鍵字或通用建構／裝備規則；不複製成另一個效果。
   - card_no: CP03-017
@@ -57,7 +57,7 @@ reverse_positions:
     section: 0
     line: 1
     frame_ids:
-      - frame:56f3f560ed9a506b3fadce8e4eb5024de876fdfcd7be4da6781430d94a8aea56
+      - frame:b7c6b04352c5c0a0a94c7d12307530bc4847406d2e551a79be9093b878011457
     category: 說明
     rationale: 括號說明既有關鍵字或通用建構／裝備規則；不複製成另一個效果。
   - card_no: CP03-018
@@ -66,7 +66,7 @@ reverse_positions:
     section: 0
     line: 1
     frame_ids:
-      - frame:d3bf837263de05e36b1c6ee13f41129cf69a9bdd76bfbedcd74d07f77ed4316b
+      - frame:b5a086e888f7aa13a41d557cf75bfa70226628d3bce8af1b1c1ac7097a125a2a
     category: 說明
     rationale: 括號說明既有關鍵字或通用建構／裝備規則；不複製成另一個效果。
   - card_no: CP03-127
@@ -75,7 +75,7 @@ reverse_positions:
     section: 0
     line: 1
     frame_ids:
-      - frame:993a4f8bda3b6e0a3fdeb4ba158a0ad2c642fbc50c81a326500bb81ac2dbd10b
+      - frame:cd00f28416acfe81e9714f1512120b425c9c5051f7e8af49bc44347ca1cc17c5
     category: 說明
     rationale: 括號說明既有關鍵字或通用建構／裝備規則；不複製成另一個效果。
 handwritten_differences:
@@ -83,7 +83,7 @@ handwritten_differences:
       - CP03-009
       - CP03-112
       - CSD03a-006
-    frame: frame:2cc380e2b204104c3af676c780f36d471e531f2ed5ee97dbb5001cb65991a181
+    frame: frame:326a1baa65f2275dc9b26bbdda9cdd5e1ae8b9cc6169e607bd3fc659ddb26796
     classifications:
       T85fc4f7014: c100543df9b94744d1c9094276ee05aa022e69530615251d0642220c22089d03
     conclusion: 等價寫法

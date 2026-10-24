@@ -69,6 +69,7 @@ if TYPE_CHECKING:
         SourceDescriptor,
         TypedValue,
     )
+    from sve_carddb.domains.translations.four_layer_context import Registry
     from sve_carddb.domains.translations.four_layer_normalizer import SourceField
     from sve_carddb.domains.translations.recognition.models import Candidate, Hint
     from sve_carddb.domains.translations.recognition.rules import Rules
@@ -146,6 +147,7 @@ class Recognized:
         part: SourcePart,
         *,
         normalizer_version: str = VERSION,
+        semantic_catalog: tuple[Mapping[str, ClosedDomain], Registry] | None = None,
     ) -> tuple[Frame, SourceBinding]:
         """Unknown body semantics stay scoped to the exact occurrence, without macro eligibility."""
         if normalizer_version != VERSION:
@@ -207,7 +209,13 @@ class Recognized:
         binding = binding.model_copy(
             update={"id": "bind:" + hash_payload(binding.payload())}
         )
-        return frame, binding
+        from sve_carddb.domains.translations.four_layer_identity import (  # ruff: ignore[import-outside-top-level] -- identity catalog initialization needs the completed classifier
+            lexical_catalog,
+            seal,
+        )
+
+        domains, registry = semantic_catalog or lexical_catalog()
+        return seal(frame, binding, part.canonical_source, domains, registry)
 
 
 class Classifier:
@@ -560,6 +568,8 @@ class Classifier:
         )
 
     def _build_domains(self) -> dict[str, ClosedDomain]:
+        from sve_carddb.domains.translations.four_layer_identity import KIND_SELECTIONS  # ruff: ignore[import-outside-top-level] -- source definitions depend on completed classifier modules
+
         result = {**DOMAINS, **N1_DOMAINS}
         for category in ("card_name", "keyword", "ability", "rule_term", "trait"):
             type_name = "CardName" if category == "card_name" else "Concept"
@@ -604,24 +614,14 @@ class Classifier:
             )
         adopted = result.get("card_kind.any.v1")
         if isinstance(adopted, ReferenceDomain):
-            result["card_kind.selection.v1"] = ReferenceDomain(
-                type="CardKind",
-                category="type",
-                references=tuple(
-                    r
-                    for r in adopted.references
-                    if isinstance(r, VocabularyReference)
-                    and r.key[1] in {"follower", "amulet", "spell"}
-                ),
-            )
-            for kind in ("follower", "amulet", "spell"):
-                result["card_kind." + kind + ".v1"] = ReferenceDomain(
+            for name, kinds in KIND_SELECTIONS.items():
+                result[name] = ReferenceDomain(
                     type="CardKind",
                     category="type",
                     references=tuple(
                         r
                         for r in adopted.references
-                        if isinstance(r, VocabularyReference) and r.key[1] == kind
+                        if isinstance(r, VocabularyReference) and r.key[1] in kinds
                     ),
                 )
         return result

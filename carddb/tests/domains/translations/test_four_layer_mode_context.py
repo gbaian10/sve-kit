@@ -29,6 +29,7 @@ from sve_carddb.domains.translations.four_layer_expressions import (
     ExpressionTargets,
     verify_quantities,
 )
+from sve_carddb.domains.translations.four_layer_identity import RESOLVED
 from sve_carddb.domains.translations.four_layer_mode_context import FAMILY, mode_sources
 from sve_carddb.domains.translations.four_layer_render import (
     BoundTarget,
@@ -342,10 +343,18 @@ def test_leader_life_condition_does_not_borrow_a_card_set_owner_role() -> None:
         verify_quantities(changed, binding, scopes={}, registry=prepared.registry)
 
 
-def test_mode_family_preserves_existing_semantics_and_projection_kind() -> None:
+def test_mode_family_preserves_existing_semantics_and_projection_kind(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setitem(RESOLVED, "synthetic.existing.v1", {"kind": "synthetic"})
     raw = _INTRO + _CONDITION + "\n" + _OPTIONS
     base = analyze_source(raw, source(raw), n1_classifier())
-    original = DerivedField(base, tuple(None for _ in base.field.parts))
+    original = DerivedField(
+        base,
+        tuple(None for _ in base.field.parts),
+        source_domains=n1_classifier().domains,
+        families=(FAMILY,),
+    )
     projection = Projection(
         projection_kind="ability_body",
         discriminator="synthetic.existing.v1",

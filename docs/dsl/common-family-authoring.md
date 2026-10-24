@@ -100,7 +100,7 @@ compiled 須含完整 expanded 樹與 typed IR 的良構證據，executed 須指
   出處：[官方卡頁](https://shadowverse-evolve.com/cardlist/?cardno=CP04-060)，
   document `documents-7bf83dea87454cf4`。這張卡是複合反例，不是「單一搜尋」可直接執行證明。
 
-## 5. normalizer 批次升版與全庫重鍵
+## 5. normalizer 批次升版與語義差異換號
 
 以下為寫入工具及操作者必須完成的程序；第一版 loader 不代做 rekey，
 目前缺少的寫入工具須先實作並驗證，不能手改 hash 後稱已完成。
@@ -114,21 +114,20 @@ compiled 須含完整 expanded 樹與 typed IR 的良構證據，executed 須指
 2. **提出具名規則與候選。** 明列新增 resolved 的判別、未命中／衝突／pending 尾端、
    typed 值及 scope。以同一批輸入產生新全庫候選，除本批規則外不混入文字更正、
    裁定升級或 adapter 改版。來源變動另列，不能混稱純版本差異。
-3. **逐 frame 比 payload。** 去掉 normalizer_version 後，比較完整 frame-v1 payload bytes，
+3. **逐 frame 比 payload。** 直接比較完整 frame-v2 payload bytes（發布版本不在其中），
    包括 canonical_source、語義變體、葉 schema／domain／occurrences 及 Projection。
    只有 payload 相同、occurrences／values／scope／接口語義不變，且新目標已存在而唯一，
-   才列「版本唯一差異」。不可只比較 canonical_hash、中文、body hash 或舊 T ID。
-4. **建立完整映射。** 列出版本唯一差異、語義變更、拆分、合併、新增、刪除、
+   才列「語義身分不變」；FrameId 與用途 ID 保持不變。不可只比較 canonical_hash、中文、body hash 或舊 T ID。
+4. **建立完整映射。** 列出身分不變、語義變更、拆分、合併、新增、刪除、
    無唯一目標與缺證據。mapping 按精確來源用途處理多對多；即使多個舊 frame 合併，
    也逐用途驗證，禁止依最大覆蓋率或相同中文任選。集合差必須有原因，不能只抽樣對帳。
-5. **遷移所有依賴。** 全庫重算 FrameId、SourceBindingId、source 及 interface_key，
-   不只本批效果。對帳 targets／expression_targets、forms、binding values／trace、
+5. **遷移所有依賴。** 全庫檢查 FrameId、SourceBindingId、source 及 interface_key；只改寫語義變更與新增 frame 的相依閉包。所有檔頭版本及來源證據仍須重驗與更新，不能把保號當作免驗。對帳 targets／expression_targets、forms、binding values／trace、
    render、翻譯選用、裁定 reference／candidate／用途域、effects-index、
    companion frame／ability_scope、generated_by、sources、imports／ports、
    effect-source-v1 與直接及傳遞上游的用途依賴。未採納的裁定候選保持候選，
    原 pending 與證據 strength 不升級；不能把未知歷史域重算成已知。
 6. **區分延續與失效。** 第一版不實作作者證據 rekey 或用途依賴 consumer。
-   因 normalizer 重鍵而改變依賴的舊 `ok` review 只留 Git 歷史，不留在當前
+   因語義變更或證據變更而失效的舊 `ok` review 只留 Git 歷史，不留在當前
    meta.reviewed_by 或 registration.reviews，也不計為新版有效審核；當前用途需重新取得
    獨立審核並記錄新依賴。現行 `revise`／`disputed` 不是過期核可：寫入時沿精確用途保留
    原審核者、日期、verdict、reason 及原依賴快照，繼續阻擋 ok 類資格，不以重鍵或過期

@@ -17,6 +17,7 @@ from sve_carddb.domains.translations.four_layer_pipeline import CompiledField
 from sve_carddb.domains.translations.four_layer_render import SelectedTarget
 from sve_carddb.domains.translations.four_layer_sources import CardSource
 
+from ...support.semantic_definition_fixtures import with_definitions
 from .context_fixtures import contract_case
 from .test_four_layer_authored import file
 from .test_four_layer_classification import classifier
@@ -214,16 +215,18 @@ def test_unselected_variant_is_statically_checked(bad: str, error: str) -> None:
     }
     with pytest.raises(ValueError, match=error):
         from_files(
-            (
-                file(
-                    "translations/templates/definitions/001.yaml",
-                    [
-                        {
-                            "kind": "sentence_template",
-                            "data": item.frame.model_dump(mode="json"),
-                        }
-                    ],
-                ),
-                file("translations/templates/values/001.yaml", [record]),
+            with_definitions(
+                (
+                    file(
+                        "translations/templates/definitions/001.yaml",
+                        [
+                            {
+                                "kind": "sentence_template",
+                                "data": item.frame.model_dump(mode="json"),
+                            }
+                        ],
+                    ),
+                    file("translations/templates/values/001.yaml", [record]),
+                )
             )
         )

@@ -6,7 +6,7 @@ basis:
     recipe: v0-classification-candidates-1
     inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
   normalizer: four-layer-jp-v7
-  build_sha256: 7663e614a9cbf981162cbc7d09bb5841bcd3b18958c04b01fe55c5e4cb06ecf6
+  build_sha256: a492ac4459f33440844a4874ad644992dac317329773fca3a54765866f4e90f7
 groups: []
 reverse_positions:
   - card_no: ETD02-015
@@ -15,8 +15,8 @@ reverse_positions:
     section: 0
     line: 1
     frame_ids:
-      - frame:1ab6d1870e97c6f46e892688a8df1a095c85b42d6a00b0a5eb990568cf9fa819
-      - frame:15c8837189a17009d4bad91818586aee4348ced34eea01084c605f69f53a5b37
+      - frame:ef41ae72aeeac4041c0beb56f3470284d027d92cd65bed8587c71e3b3c72916e
+      - frame:d60c6bc0f7f261cf90bb38b6b7c243da9f3b60d35a3fef1c0cb28bba49d071e8
     category: token
     rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。
   - card_no: ETD02-015
@@ -25,7 +25,7 @@ reverse_positions:
     section:
     line: 2
     frame_ids:
-      - frame:92c134b8562e916f684db604075874ba6449ad44056fd48d566a95994eebee3f
+      - frame:00c36f87325198444b9c145e503ce3d2998c03782ff27b27c642e43070f8e4b7
     category: 跨行涵蓋
     rationale: 第一行 choice 包含第二行模式。
     covered_by:

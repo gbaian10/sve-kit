@@ -17,6 +17,7 @@ from sve_carddb.contracts.four_layer import (
     PrintingFaceOwner,
 )
 from sve_carddb.core.json import canonical, digest
+from sve_carddb.domains.translations import four_layer_definitions
 from sve_carddb.domains.translations.english_exceptions import apply as apply_english
 from sve_carddb.domains.translations.four_layer_authored import (
     FormRecord,
@@ -50,6 +51,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterator, Mapping
 
     from sve_carddb.build import Database
+    from sve_carddb.contracts.four_layer import Frame
     from sve_carddb.domains.text_observations.vocabulary import Vocabulary
     from sve_carddb.domains.translations.four_layer_authored import Inputs
     from sve_carddb.domains.translations.four_layer_classification import Classifier
@@ -177,6 +179,7 @@ def owner_fields(db: Database) -> Iterator[OwnerField]:
 
 def _authored(db: Database, inputs: Inputs, revision: str) -> dict[str, str]:
     audit = {}
+    definitions = four_layer_definitions.from_files(inputs.files)
     for path, exact, content in inputs.files:
         identifier = (
             "authored:translations:"
@@ -195,7 +198,9 @@ def _authored(db: Database, inputs: Inputs, revision: str) -> dict[str, str]:
             },
             ("id",),
         )
-        for record in shard(content).records:
+        if path.startswith(four_layer_definitions.AREA):
+            continue
+        for record in shard(definitions.expand_shard(content)).records:
             audit[record.record_key] = identifier
     return audit
 
@@ -251,6 +256,7 @@ def _compile(
 ) -> _Plan:
     compiled: list[CompiledField] = []
     canonical_sources: dict[str, str] = {}
+    semantic_frames: dict[str, Frame] = {}
     reasons: Counter[str] = Counter()
     pending: Counter[str] = Counter()
     total = 0
@@ -311,6 +317,13 @@ def _compile(
         compiled.append(result)
         for part, match in zip(result.field.parts, result.matches, strict=True):
             assert match is not None
+            if match.frame.id in semantic_frames:
+                semantic_frames[match.frame.id].verify_same_identity(
+                    canonical_sources[match.frame.id],
+                    match.frame,
+                    part.canonical_source,
+                )
+            semantic_frames[match.frame.id] = match.frame
             previous = canonical_sources.setdefault(
                 match.frame.id, part.canonical_source
             )

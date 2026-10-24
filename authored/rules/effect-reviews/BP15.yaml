@@ -6,7 +6,7 @@ basis:
     recipe: v0-classification-candidates-1
     inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
   normalizer: four-layer-jp-v7
-  build_sha256: 7663e614a9cbf981162cbc7d09bb5841bcd3b18958c04b01fe55c5e4cb06ecf6
+  build_sha256: a492ac4459f33440844a4874ad644992dac317329773fca3a54765866f4e90f7
 groups:
   - id: shape:4dfadc8dd94f069987fcc96617a45e6b47862f7553b353c3c70543d55f9aff3d
     priority: false
@@ -25,15 +25,15 @@ groups:
         - BP15-039
         - PR-418
     frames:
-      - frame:818e622e062fb2e6be2da29d3299798b93cd1f2221befd4ea5fbd31d85efe246
-      - frame:da73b494e392ba7e77b9207dd9f0807ddbdc5ca258f679693b3b2b7a40b003e9
-      - frame:0839d3a854f518d6927579f08b473cbec32e411d86cbe98d47f8d86b7402327a
-      - frame:0fd96912f0a522cc00ef275abe0227539b2cc7fe8b3f6cbabbc74e53145f1fbd
+      - frame:c7d125532c1ff5318875d6f78ca7e035856fa4555ff6390e9cf0ab98ad84b080
+      - frame:d2259cf512fa5586799d6c6d95fdd97dfa367d59c594056decf2ab496728aa76
+      - frame:4d053c6e49ca2b8240d106d68b7e92478bf5f6953cc197995f2a6ba7d49f9f47
+      - frame:1ee286dcc292fce9195349f7c035d8684664bec8250f7090957b56f0baf7053b
     uses:
-      - use:35c739fb29ac14a0b9afc56a417887898a3a5f411d3ee638f1bd634fed9eaabc
-      - use:1744a22a08c90aa4562d1fc2eb156db09c56be9fed443b1a2c8652176271c997
-      - use:5b86bcaa38597af474a2d4245cd53b7ddd985bdd429a09d2b104bf808c1ad324
-      - use:e061adb193a394c1893b55fbe959b0090ccba38cf72dfc0774c9e38fca32fb48
+      - use:8b91447408b9b9d61a804e0338ab47b3ff94bb05846c67bd95a4afda65469cb1
+      - use:fe0ad64de62244866021e59cd2b7d3d2381b9394d488255d8852a36c0680450e
+      - use:1cc548ac7db71b7d0b38c5631d2f91722e1bb62582eaedb9f06f8aa295bcca36
+      - use:af057fb7fe32190367fa17f68ba2148bd1a0dc76d1ca90ae7821170a4aa3f1c8
     translation_review:
       required_uses: []
       conditional_uses: []
@@ -54,11 +54,11 @@ groups:
         - BP15-SL05
         - PR-395
     frames:
-      - frame:cd06fe0c09befdad69d71f1f516d75d4f66ed7c2eb924daaac8f57c2e7149a6c
-      - frame:298bf40a1c879b335fd9b188b2eda4e711225dd0744ed7ff85bed892348a57c2
+      - frame:0a8a9bdefc88d42e4acb0df415c4737f4b6fa8f5b30eca14316cabfc342becab
+      - frame:ffd4691c2a3abeefdad9c14bd71e62747fb11b371861c72d920bb0c42d00bfd2
     uses:
-      - use:91a7b369951fdfb322846ace5b7fe1de47fb69f0d8c97e67950207cd1ab90c5f
-      - use:400817e6a6092746068bc59cc1b1ed1aa3972be1a900396a4493976dbc7da924
+      - use:8b3501b7000cdb9eefb6acc428391abf68ca1dd7141e7894037f929462a58288
+      - use:5aca93a5fb4898ad4afaff2a38b119532d15a28d3cfd8b8685a489ac14c12402
     translation_review:
       required_uses: []
       conditional_uses: []
@@ -78,11 +78,11 @@ groups:
         - BP15-P15
         - BP15-067
     frames:
-      - frame:05319bc886f378f5a7e6be54c52859a113cec04164d2b573e544e6eeab730865
-      - frame:65db8aeaa7afd8b089508a884fc9971d1fbf78b5499e4fd520049ef039cf0641
+      - frame:29892fa18bb4c8253c7a39a084d513eedfa2f1ae80ed647be8b5b7a58406c83f
+      - frame:c8220b131479eff822e65fd98770aba46e879f8391f4facdfff56c65fd848291
     uses:
-      - use:ffeb2c1b289e527664c65244d2f1a31a874bcb3a3c3de1785fdf13c4d7edc1fd
-      - use:eca526d912ee6368518c4eab8537a6f6b39e48da8151b69d31239c507228f38f
+      - use:573148c52e3da8ddfe5b118db4f9fb7bd2ca408381455e443e843a4f4ec49b95
+      - use:aed06fa28e59e4578419af9e075eafd9d5377f553c59050750342efa4066b6da
     translation_review:
       required_uses: []
       conditional_uses: []
@@ -101,11 +101,11 @@ groups:
       T829a458872:
         - BP15-055
     frames:
-      - frame:87707db262ccb71bd6cc17b0acf29cf1c7c0272a2df648f72f771939d22275ef
-      - frame:927c831a0e7bcf668e189a70a68d3d57e175c8ff36c2096bc9fee1f7aa00c6df
+      - frame:a4205a627f60158edbd65bfb716586682e581a144110906582b70caac697bdc1
+      - frame:719beed5bde4d00f22f384d38ea58bdc397953c8d32bfa6006d68aa4b1aa64a7
     uses:
-      - use:5a29faf90453869596ddd603667e60bba73813d177582b820f8a007280b2ec80
-      - use:9885b22effb1014b87875e385a4b59be0c02a3b941f552f398231fbfa05bf33f
+      - use:798199df5e6ff9a914c4a5eb05e7e444359ffd20add094857dd5b423b00f1667
+      - use:26d7740001c99ad28ec6848ec4f4898f03689e62cbc97adc895bab537e3a28fe
     translation_review:
       required_uses: []
       conditional_uses: []
@@ -117,8 +117,8 @@ reverse_positions:
     section: 0
     line: 1
     frame_ids:
-      - frame:ec63c23533238254ff2c521be50d96c77c23ea712083f08e9d3345f88eb5721a
-      - frame:fd66b5076d4dfa5657437b071841a20c48f291dce50590c665f1407d46fda8b7
+      - frame:7740947bf93407c5012198a6af06bd5f29a3b93f11bcfd434ad4106c27829d4a
+      - frame:ed8b045bf564601eecdd197dce033943fa51e189b5e87e7a3fa30bfe1d0f5dd7
     category: token
     rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。
   - card_no: BP15-079
@@ -127,8 +127,8 @@ reverse_positions:
     section: 0
     line: 1
     frame_ids:
-      - frame:5bb7b76c3b50004ac306d36817deaf2bda8b843b47daaa0534ef612fe50ae857
-      - frame:26ea701171ff652245548a1125f9171ac1e89867b64818ae8aa22e7df00f3a27
+      - frame:30f894ad4be5be92e8f1f3ea7d48b61fc28fc73b717c5ad29d72df9ef778f941
+      - frame:fd77831a642104a5f6d8865c02e51472ce5f6596a38bf11d858500d8205d8197
     category: token
     rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。
   - card_no: BP15-083
@@ -137,8 +137,8 @@ reverse_positions:
     section: 0
     line: 1
     frame_ids:
-      - frame:e7e1ba66d5f7358a71ae1d213b328a7f0ad8cb022f97c89f380432ae3d680ecd
-      - frame:d7d90e7b1b7b927508279278a4c07c56ede3d3420828397c2325c0fa76e8426f
+      - frame:c81bbb742623e091f015312dc5261cf261db688489f5db2f522d984d6b2cbf0c
+      - frame:bf0bc26fbd962ec8d9c316354d1b8ea22b51c4f908f226853a628ba6ce2730f7
     category: 跨行涵蓋
     rationale: section 的兩隻 token 移墓場費用附在主 spell，括號是費用說明。
     covered_by:
@@ -150,7 +150,7 @@ reverse_positions:
     section:
     line: 2
     frame_ids:
-      - frame:662cfd4264a73a463abbeb3fbdd27e78dd4385ef26ebb7e6079c448a7f39b37d
+      - frame:9547acdbd6e4bc87156d785861f7a9edfbfc61180665625e8e0cc82834ef3901
     category: 跨行涵蓋
     rationale: 第一行 choice 的兩個模式共同涵蓋第二行。
     covered_by:
@@ -162,7 +162,7 @@ reverse_positions:
     section: 0
     line: 1
     frame_ids:
-      - frame:5bb7b76c3b50004ac306d36817deaf2bda8b843b47daaa0534ef612fe50ae857
-      - frame:26ea701171ff652245548a1125f9171ac1e89867b64818ae8aa22e7df00f3a27
+      - frame:30f894ad4be5be92e8f1f3ea7d48b61fc28fc73b717c5ad29d72df9ef778f941
+      - frame:fd77831a642104a5f6d8865c02e51472ce5f6596a38bf11d858500d8205d8197
     category: token
     rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。

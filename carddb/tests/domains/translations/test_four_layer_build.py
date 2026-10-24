@@ -34,6 +34,7 @@ from sve_carddb.domains.translations.inputs import load_glossary
 from ...support import digital_link_import_fixtures
 from ...support.build_db_fixtures import rows
 from ...support.digital_link_import_fixtures import make_fixture
+from ...support.semantic_definition_fixtures import with_definitions
 from ...support.translation_fixtures import template
 from ..effects.test_classifications import classification, member
 from ..rulings.test_rulings import ruling
@@ -80,7 +81,7 @@ def test_profile_stride_limits_fields_only_when_configured(
             )
             for revision in ("link-revision", "other-link-revision-1"):
                 db.update("face_revision", {"id": revision}, {"effect_unit_id": unit})
-            report = apply(db, from_files(()), snapshot, settings)
+            report = apply(db, from_files(with_definitions(())), snapshot, settings)
         expected = {"link-revision"}
         if stride is None:
             expected.add("other-link-revision-1")
@@ -199,7 +200,7 @@ def test_producer_uses_exact_owner_and_preserves_whole_field_fallback(  # ruff: 
                 {"format": 3, "kind": "translation_shard", "records": [record]}
             )
             files.append((f"translations/templates/{area}/000.yaml", raw, raw))
-        inputs = from_files(tuple(files))
+        inputs = from_files(with_definitions(tuple(files)))
         settings = Settings(
             sources, vocabulary, rules, fixture.jp.batch_id, fixture.authored, "zh-Hant"
         )
@@ -432,7 +433,7 @@ def test_producer_stores_language_forms_before_targets_that_use_them(  # ruff: i
                 }
             )
             files.append((path, content, content))
-        inputs = from_files(tuple(files))
+        inputs = from_files(with_definitions(tuple(files)))
         with db.transaction():
             report = apply(
                 db,

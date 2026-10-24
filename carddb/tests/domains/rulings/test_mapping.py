@@ -81,6 +81,14 @@ class SyntheticSources:
                 source_lang="ja",
                 canonical_hash=digest(part.canonical_source.encode())[7:],
                 normalizer_version="four-layer-jp-v7",
+                semantic_definitions={
+                    "domains": {},
+                    "expressions": {},
+                    "omissions": {},
+                    "units": {},
+                    "resolved": {"synthetic_effect": variant} if variant else None,
+                    "source_links": {"ports": [], "scopes": []},
+                },
             ),
             role="body",
             semantic_variant=SemanticVariant(

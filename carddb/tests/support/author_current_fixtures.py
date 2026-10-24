@@ -21,6 +21,7 @@ from sve_carddb.domains.text_observations import (
     Vocabulary,
 )
 from sve_carddb.domains.text_observations.closure import close_preview
+from sve_carddb.domains.translations import four_layer_definitions
 from sve_carddb.domains.translations.four_layer_authored import FrameRecord, Shard
 from sve_carddb.domains.translations.glossary.records import TermRecord
 from sve_carddb.domains.translations.inputs import Snapshot, validate_snapshot
@@ -28,6 +29,7 @@ from sve_carddb.domains.translations.recognition.rules import Rules, load
 from sve_carddb.domains.translations.sources import Sources
 
 from .database_template import DatabaseTemplate
+from .semantic_definition_fixtures import with_definitions
 
 REPOSITORY = Path(__file__).resolve().parents[3]
 REVISION = "8ca79f0935dd97340991c057cb1b226fe745da50"
@@ -39,7 +41,7 @@ CARD_NUMBERS = frozenset(
         "BP01-092",
     }
 )
-EVOLVE_FRAME = "frame:4e38fd488749ed51f1cf501759988e443549000c47bca7aba285a2f6009b902d"
+EVOLVE_FRAME = "frame:f03820b9048f0bd911c528162f930b0e47d128493a84b4fe097f4c8a48608756"
 
 
 @dataclass(frozen=True)
@@ -59,6 +61,9 @@ def entry_snapshot() -> Snapshot:
     This does not verify the full registry's private digital concept sources.
     """
     authored = REPOSITORY / "authored"
+    definitions = four_layer_definitions.from_files(
+        four_layer_definitions.read_files(authored)
+    )
     records = tuple(
         record
         for name in (
@@ -66,7 +71,7 @@ def entry_snapshot() -> Snapshot:
             "translations/templates/definitions/094.yaml",
         )
         for record in Shard.model_validate_json(
-            read_authored(authored / name, root=authored)[1]
+            definitions.expand_shard(read_authored(authored / name, root=authored)[1])
         ).records
     )
     selected = tuple(
@@ -100,9 +105,11 @@ def entry_snapshot() -> Snapshot:
     glossary_file = ("translations/glossary/concepts/004.yaml", glossary, glossary)
     snapshot = Snapshot(
         (glossary_file,),
-        (
-            glossary_file,
-            ("translations/templates/definitions/094.yaml", content, content),
+        with_definitions(
+            (
+                glossary_file,
+                ("translations/templates/definitions/094.yaml", content, content),
+            )
         ),
     )
     validate_snapshot(snapshot)

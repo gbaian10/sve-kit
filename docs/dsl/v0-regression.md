@@ -19,11 +19,11 @@
   `1de5adc33023646bbc7ced36bb49bb1850fe54309fed29c246d060a40862bc53`。
   這是輸入指紋，不要求 clone 者取得原建置 DB 才能執行基線測試。
 - 判讀草案的 frame／use 引用與測試基線的反向 `frame_ids` 已依正式映射換成
-  `four-layer-jp-v7`；對應凍結建置 SHA-256 為
-  `7663e614a9cbf981162cbc7d09bb5841bcd3b18958c04b01fe55c5e4cb06ecf6`。
-  草案不保留 v6 引用；分類輸入、結論與 `candidate` 狀態不變，不因此取得新審核核可。
+  `frame-v2` 身分（normalizer 仍為 `four-layer-jp-v7`）；對應凍結建置 SHA-256 為
+  `a492ac4459f33440844a4874ad644992dac317329773fca3a54765866f4e90f7`。
+  草案不保留 frame-v1 引用；分類輸入、結論與 `candidate` 狀態不變，不因此取得新審核核可。
   測試基線的正向 fragments、AST 與來源位置仍保留上述原凍結證據；只有反向
-  `frame_ids` 與草案一起換成 v7，沒有重錄其他歷史指紋。
+  `frame_ids` 與草案一起換成 frame-v2，沒有重錄其他歷史指紋。
 - 正向位置連接只比較 JP printing、face、欄位、section 與行號，沒有證明歷史 v0
   卡文與目前來源完全相同。[分類文字版本驗證](../schema/domains/effect-classifications.md#分類文字版本)與本基線的位置證據不得互相取代。
 

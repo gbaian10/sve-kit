@@ -162,6 +162,14 @@ def bound_number(raw: str) -> tuple[SourceField, Frame, SourceBinding]:
             source_lang="ja",
             normalizer_version=VERSION,
             canonical_hash=digest(part.canonical_source.encode())[7:],
+            semantic_definitions={
+                "domains": {},
+                "expressions": {},
+                "omissions": {},
+                "units": {},
+                "resolved": None,
+                "source_links": {"ports": [], "scopes": []},
+            },
         ),
         role="body",
         leaf_schema=LeafSchema(

@@ -6,7 +6,7 @@ basis:
     recipe: v0-classification-candidates-1
     inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
   normalizer: four-layer-jp-v7
-  build_sha256: 7663e614a9cbf981162cbc7d09bb5841bcd3b18958c04b01fe55c5e4cb06ecf6
+  build_sha256: a492ac4459f33440844a4874ad644992dac317329773fca3a54765866f4e90f7
 groups:
   - id: shape:5fd254e13b4fcb2102212f339b4c6c73eca71d5d9aa0472c1ee411f7750f5316
     priority: false
@@ -24,11 +24,11 @@ groups:
         - ECP01-SSP18
         - ECP01-038
     frames:
-      - frame:b5428ae4063f2f35275be81033195c76a29fe0a1f6bbd3593c42fc129ae44369
-      - frame:18bbe9fc979d2cbcfc1bea49081cb9017727c91e5b1745e169ab05d0bebb3600
+      - frame:43b8a23458ad75dd70420596bf214e989e06db8f5d166c4b16e56776494fdff5
+      - frame:1cf4b3f2a96a36e5f895de10fce660d6778532bbe0778fe9c105efb81195a2ea
     uses:
-      - use:049489f7d70eed86c31d40174b464e83ca37f62b51474f80afb9f4d4f0b636f8
-      - use:8c36fb12430ce9d351e22c8afcb3b8c2660081800150843f6563b0cbf5e73091
+      - use:f3e5c2f71c5a135c46f165f7eacb661cce760a13a059b8ebfb66c43f186b360f
+      - use:670c5ecfdc4eef5a9783c9632d69094863e45fbd6bf818cbc9be284e84f24182
     translation_review:
       required_uses: []
       conditional_uses: []

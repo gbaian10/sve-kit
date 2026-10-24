@@ -6,7 +6,7 @@ basis:
     recipe: v0-classification-candidates-1
     inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
   normalizer: four-layer-jp-v7
-  build_sha256: 7663e614a9cbf981162cbc7d09bb5841bcd3b18958c04b01fe55c5e4cb06ecf6
+  build_sha256: a492ac4459f33440844a4874ad644992dac317329773fca3a54765866f4e90f7
 groups:
   - id: shape:8b77236ef10214a61af8c884119326ebbd02bebe615d38b2fb922e3ebcd12067
     priority: false
@@ -25,13 +25,13 @@ groups:
       T963ac04dc4:
         - BP04-036
     frames:
-      - frame:c39eebfc282d48f4e1b70c1d2728fa39c3d32b01fba8225bf7c25712fb110fec
-      - frame:ca148c2e349b2b0e340794fca5ef3022332b7d5bf0ce95f0454be9d4d2ec68e5
-      - frame:59637e81ef43c262688950d6399c88fed44299da52d6ff2bd2b9d1c12fc92cc3
+      - frame:b674f0906768a2506e535cd986606135fa22601a0e777e38eb07667f859ca8bf
+      - frame:08ae61fd8b27784af74d49a120e3feb445d9e471c315d3e508d0773ed6979343
+      - frame:7fbb112b6a438ab63984fadfdf74f7619ee0e82c0d86ddc3dbb5910f7455128a
     uses:
-      - use:1c8c94ab4d22409a465022b16c688dc64d386615c206d7a5baad94b858e8e070
-      - use:6f857f8c90c991625e11988e8ee8faad5db1e5b543cc008b81c02768c146ddc2
-      - use:482732d368f9d4a5152bfcfde7dfc2caf1fe99f68f2f00cabd815da8a3d04452
+      - use:a67ecfe10c8f5e2015e14871c2f736667804252339f924c1214a67bcb42c0e5b
+      - use:6ecb789082f8ed3a81f621a420b4ffa39c0a6d15f8c28d164d1731bcf1f9bd25
+      - use:5f9bc0ab56028b02438a6e1026324e276808bc5840349613ecdb642e9d0e2459
     translation_review:
       required_uses: []
       conditional_uses: []
@@ -43,7 +43,7 @@ reverse_positions:
     section:
     line: 2
     frame_ids:
-      - frame:9712e304b0a56dae59cee109c85e8141482aac706ce74d05d568451e7e389129
+      - frame:e33975191129abbed95055e4b52f253f84a459fba7681ecfd6f681a60158f529
     category: 跨行涵蓋
     rationale: 加費選項附在第三行 spell，第二行不是獨立效果。
     covered_by:

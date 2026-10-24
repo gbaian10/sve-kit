@@ -42,7 +42,7 @@ authored frame 未在本次建置的完整來源欄位被使用時，不使整�
 A 驗封閉形狀與全入口唯一鍵，缺欄／錯版／重複鍵拒絕（FL-009／FL-010）。
 正式翻譯入口只讀此 format 3；reader、authored 資料與建置端同步切換，不建立 format 2／3 永久雙軌。
 parameter-rules 的 format 2 與風味的獨立封套不隨之升版。
-沿[翻譯契約 §2](translation-contract.md#2-當前資料入口)的安全路徑、分片大小與排序規則；不新增 includes/checksum index。
+沿[翻譯契約 §2](translation-contract.md#2-當前資料入口)的安全路徑、分片大小與排序規則；一般翻譯分片不設 includes/checksum index；共用語義定義另有下述完整檔案索引。
 
 | Record 欄位 | 型別／必填與合法域、引用 | 驗證者；失敗／案例 |
 | --- | --- | --- |
@@ -74,6 +74,32 @@ source_exception 整個 kind 移除，divergence/default_jp 都沒有新入口�
 不屬於 Frame 或一般每卡覆寫，不復活 source_exception。
 舊模板與裁定重鍵依 §9；無法綁定的原稿仍是 candidate。永久 card／face／printing／int_id、配號游標、人工日英對應與歸檔 bytes 均不改。
 
+### 2.1 共用語義定義的儲存
+
+`translations/semantic-definitions/index.yaml` 恰有 `format: 1`、`kind: frame_semantics_index`、
+`includes: [三位以上十進位序號.yaml]`。includes 不重複，與該目錄的全部分片精確相等；
+缺檔、多檔、子目錄、非數字檔名及 symlink 拒絕。分片恰有 `format: 1`、
+`kind: frame_semantics_shard`、`definitions: [Entry]`，大小及追加規則沿 authored-layout；目標 512 KiB、嚴格小於 1 MiB。
+一般 glossary／forms 等沒有 frame 的輸入可以沒有此目錄；frame 的引用必須可在同次讀取的完整閉包內解析。
+
+Entry 恰有 `{id: UInt, hash: Hash, value: Json}`。id 必須大於零，只是此資料集合內的儲存引用，
+不是 FrameId 或規則版本；id 與完整內容 hash 各自全域唯一。新增內容沿用既有 id，分配比現有最大值大的 id，
+不重新編排舊引用。hash 是 **展開後 value** 的 canonical-json-v1 完整 SHA-256；不是編碼文字或分片 hash。
+相同 hash 不同 canonical bytes 一律拒絕。
+
+共用表內的 Json 使用以下封閉引用編碼（只在 Entry.value 內解讀）：
+
+- `"@123"` 引用 id 123，可出現在值或物件鍵；數字為無前導零的正整數。
+- 字面字串若以 `@` 開頭，寫成多一個 `@` 的字串；例如 `"@@123"` 展開為字面 `"@123"`，不再解析為引用。
+- 其他字串、數字、Bool、null、陣列與物件沿原 Json 型別；物件鍵展開後必須是字串且不可重複。
+- 缺失引用、循環、超過 64 層引用依賴或 hash 不符拒絕整個閉包；未被 frame 使用的 entry 也驗證。
+
+同一複合物件、陣列或較長字串可共享；儲存引用只縮短重複內容，沒有語義預設或規則推導。
+`sentence_template.data.source.semantic_definitions` 在 authored 中只存正整數引用；不接受內嵌物件舊寫法。
+reader 先展開與驗 hash，再交給原有 Frame 型別、來源重演與碰撞檢查。
+記憶體 Frame、DB 及 frame-v2 payload **仍持有完整六類定義物件**；儲存 id、索引、分片路徑與引用編碼都不進 FrameId。
+來源紀錄保存原始 authored 檔案 bytes，包含共用表與 index；展開資料不冒充檔案原文。
+
 ## 3. Frame 與語義身分
 
 Frame 是整行的語義定義，句中 reminder 可拆出並以 anchor 接回；不是按每個句號自由拼接的翻譯片段。
@@ -82,10 +108,11 @@ Frame 是整行的語義定義，句中 reminder 可拆出並以 anchor 接回�
 | authored 欄位 | 型別／合法域與引用 | 驗證者；失敗／案例 |
 | --- | --- | --- |
 | id | FrameID，`frame:`＋完整 content_hash | A/B/C；格式或重算不符；FL-001／FL-002 |
-| source | `{source_lang,canonical_hash,normalizer_version}`，如下三欄 | A/B；來源描述不完整；FL-007 |
+| source | `{source_lang,canonical_hash,normalizer_version,semantic_definitions}`；authored 的定義欄是 §2.1 引用，記憶體／DB 展開 | A/B；來源描述不完整；FL-007 |
 | source.source_lang | 固定 ja | A/B；EN 冒充 JP 拒絕；FL-023 |
 | source.canonical_hash | Hash；建置重建 canonical_source 的 UTF-8 hash | B/C；模式錯配；FL-007 |
-| source.normalizer_version | Code；本次具名、釘版且受支援的 normalizer | A/B；不支援拒絕，版本變更重鍵；FL-002 |
+| source.normalizer_version | Code；本次具名、釘版且受支援的 normalizer | A/B；不支援拒絕，單純版本變更不改身分；FL-002 |
+| source.semantic_definitions | authored 為 §2.1 正整數引用；展開後為本 frame 的完整封閉語義定義，由來源推導產生並重驗 | B/C；缺定義或與重演不符即拒絕；FL-002 |
 | role | body/reminder/token_header/layout/name/label | A/B/C；角色錯配；FL-006 |
 | semantic_variant | `{state,key,scope}`，依下段 | A/B/C；未解卻共用、分類錯配；FL-002／FL-006 |
 | leaf_schema | `{format:2,slots:[LeafSlot]}`，§4，依首次 canonical 位置排序 | A/B/C；重名、域或角色錯配；FL-004／FL-005 |
@@ -94,7 +121,7 @@ Frame 是整行的語義定義，句中 reminder 可拆出並以 anchor 接回�
 
 `semantic_variant.state` 是 resolved/pending；`key:Code?` 在 resolved 時必填非空，pending 時 null；
 `scope:OccurrenceKey?` 在 resolved 時 null，pending 時必指自身精確來源 occurrence（§6）。
-resolved key 引用具名且釘在 normalizer_version 的分類規則；該規則須明列來源語法、必要上下文與語義判別，不能是任意註解。
+resolved key 引用具名分類規則；normalizer_version 記錄產生版本，該 key 的語義定義另納入 semantic_definitions。resolved 定義是產生端必須符合的宣告契約；來源語法及必要上下文由具名來源辨識器實作並重演驗證，不能只憑固定名稱推定相同語義。
 projection_kind=pending 時 semantic_variant 也必為 pending；分類原因列本次 build_issue，不假造 resolved key。
 例如 play_targets_effect 與 resolution_choose_effect 分開，cost_material 與 effect_material 分開。
 未知角色可以用保守精確 frame 翻譯，但 pending scope 限本 occurrence，不跨來源湊巨集數量。
@@ -113,23 +140,24 @@ projection_kind=pending 時 semantic_variant 也必為 pending；分類原因列
 ID 使用 build-db §14 的 canonical-json-v1，payload 恰為：
 
 ```text
-{recipe:"frame-v1",source_lang,canonical_source,normalizer_version,
+{recipe:"frame-v2",source_lang,canonical_source,semantic_definitions,
  role,leaf_schema,semantic_variant,
- projection:{projection_kind,discriminator}}
+ projection:{projection_kind,discriminator},mode_rules?}
 ```
 
-projection 只有 `projection_kind` 與 `discriminator` 入 frame hash；`scopes/imports/exports` 由 §7 的 interface_key 追蹤。
+projection 的 `projection_kind` 與 `discriminator` 直接入 hash；帶來源 evidence 的 ports 及其祖先 scopes 另入 semantic_definitions.source_links。純接口 `scopes/imports/exports` 仍由 §7 的 interface_key 追蹤。
 來源語義相同時，補足或調整 DSL 接口描述不應使譯文、binding 與裁定映射重鍵；相依 DSL 必須重驗接口（FL-001／FL-016）。
 這不容許用接口改動偷換來源語義：選取／付款時點、能力或分支作用域、跨句關係改變，
 仍須反映到 canonical source、葉角色／域、semantic_variant 或投影分類，重鍵後依 §9 處理引用（FL-002／FL-022）。
 未知來源語義轉為已確認也須按 semantic_variant 重鍵；只新增已知語義的 adapter 支援則不必。
 DSL 本體／body version 不入 frame hash。
-變體 key 的含義改變須改分類器版本，不能原 key 偷換語義。
-normalizer_version 是全庫單一版本，同時釘住分段、Unicode／canonical、葉角色、域、單位、alias、省略及 resolved 規則。
-不按規則族另釘版本；封版後改任一項語義均須新版本及全庫重鍵。N0 的 reminder／token_header 保留 raw Unicode，
+semantic_definitions 保存 domains、expressions、omissions、units、resolved 與 source_links；只展開實際引用的定義，不放整庫規則 hash、發布版本或純 adapter 的 IR bridge。具名域的合法值／模式與型別、運算的參數／維度／capture、來源省略值與關係均屬語義。卡名／概念目錄成員在 binding 階段驗證；frame 保存目錄種類與選取條件，避免新增卡名使所有 frame 重鍵。未知定義拒絕，不以空物件代替已知依賴；來源重演須核對完整定義。`Frame.verify` 要求上述六類欄位齊備；內部尚未 seal 的中間物件不能當作已驗證 frame。
+normalizer_version 仍是全庫單一產生與驗證版本，涵蓋分段、Unicode／canonical、葉角色、域、單位、alias、省略及 resolved 規則，但不再入 frame hash。
+封閉定義的 QuantityDomain.modes／imports 與具名 descriptor imports 按名稱排序，純集合排列不影響身分；參數序列保留位置語義。省略 owner／amount 必須與 binding 值一致，aggregate 省略只允許具名 count 表達式，不一致即拒絕。槽上 expression 即使沒有綁定值也必須封閉。
+只升版本不改 ID；語義 payload 相同即同 ID，變更語義只使受影響的 frame 及依賴閉包重鍵。同 ID 異完整 payload 一律拒絕，不能憑 digest 覆寫。N0 的 reminder／token_header 保留 raw Unicode，
 不套 body 的 NFKC；所有角色共用同一來源 units／trace，分類器不能重新用另一套正規化索取位置。
 葉的實值、來源卡片／頁面（resolved 時）、譯文、form、NP 分組、加粗與 note 不入 frame hash。
-新增語義槽、改合法域／canonical pattern／正規化規則須新 ID；只開關 NP、修中文形式或改選詞不換 ID。
+新增語義槽、改合法域／canonical 或其引用的語義定義須新 ID；只開關 NP、修中文形式或改選詞不換 ID。
 同 hash 必比完整 payload，碰撞即錯誤，不截短或覆蓋已有 frame。
 
 ## 4. 有型別葉槽與值
@@ -637,8 +665,9 @@ interface_key 及 scopes/imports/exports 不入 render 依賴，相關引用仍�
 | --- | --- | --- | --- |
 | 選詞、form 中文風格、target NP 覆蓋、emphasis、品質旗標 | 所有依賴 render／annotation／selection；文字未變但 bold 改也重算 annotation | frame ID、葉值與 DSL 語義審查 | FL-001／FL-015 |
 | source owner／face／hash、葉值或原單位 | 該來源 binding、use、render、裁定用途及相依 DSL freshness | 無關來源；resolved frame 語義 payload 相同可重用 ID | FL-007／FL-016 |
-| canonical、normalizer、slot role/domain、semantic_variant、projection_kind／discriminator | frame 重鍵、全用途 binding／render／裁定映射／相依 DSL 重驗 | 永久卡片身分 | FL-002／FL-016 |
+| canonical、slot role/domain、semantic_variant、projection_kind／discriminator、被引用的語義定義 | frame 重鍵、全用途 binding／render／裁定映射／相依 DSL 重驗 | 永久卡片身分 | FL-002／FL-016 |
 | 來源語義與既有引用不變，只調整 scopes／imports／exports 描述 | interface_key 重算；相依 DSL 的接口連接、用途審查與實跑資格失效並重驗 | frame ID、binding／context、target、render／annotation、裁定映射及永久卡片身分 | FL-001／FL-016／FL-022 |
+| 只有 normalizer 發布版本改動 | 更新基準並全庫重驗；effect-source 等證據 hash 可更新 | 語義不變的 frame／binding／context／use ID | FL-001／FL-002 |
 | DSL body 或 adapter lowering | 其 body version／用途審查與實跑資格 | 純呈現與未改的 frame 語義身分 | FL-016 |
 
 依賴反查可由本次型別列建索引；不用每詞採納收據或永久失效帳本。建置每次產生新 DB，舊快照不原地修補。
@@ -648,7 +677,7 @@ interface_key 及 scopes/imports/exports 不入 render 依賴，相關引用仍�
 舊 T/C ID 與新 frame 的關係是多對多；不能依 hash 前綴、相同中文字、
 `supersedes_id` 線索或最大覆蓋率選一個新 ID。
 映射只在一次重建及當前裁定檢查使用，舊格式仍留 Git；不建長期相容 reader。
-版本唯一差異的自動映射須先移除 normalizer_version 後比完整 frame-v1 payload bytes，並確認 occurrences／values／scope／接口語義不變、新目標存在且唯一。
+frame-v2 的跨版本對帳直接比較完整語義 payload bytes，並確認 occurrences／values／scope／接口語義不變、目標存在且唯一；單純版本差異不再產生新 ID。正式 reader 不接受 frame-v1。
 其他 canonical／schema 改動依精確來源用途重建，不因中文相同授予語義等價。interface_key 重算，相依 DSL 只延續實際存在且先前合格、通過既有型別／來源／可見範圍檢查的用途；不捏造 reviewed。
 不能從新版本重算未知歷史域，原 reference pending 與裁定 strength 保留。
 明示舊域格式及寫入端驗證見 §9.1.1；正式 reader 不因保留舊引用而恢復舊翻譯格式。
@@ -1493,7 +1522,7 @@ up_to 接管原「至多」前綴，既有文字須保持相同，並交 #750 �
 
 `four-layer-jp-v7` 的十種原費用逐項支付句及課程提醒，保留既有完整來源句型、數值守衛與 pending 分類；動作「消滅」留在 canonical 固定文字，不另產生 `term:action.banish` 的 Concept/rule_term 葉。其他卡片、玩家、區域、能力與數值葉仍須完整引用；不改 glossary 概念或基礎選詞，也不新增動作受詞 form。
 
-這是全庫來源葉規則換版，既有正式定義與引用同步重鍵；版本以外的轉移依 §9 比完整 payload，葉結構變更按精確來源 occurrence 重建。canonical 相同的 occurrence-scoped pending frame 仍保留各自 scope，不因中文完成而改成 resolved。
+來源葉規則換版仍全庫重建與驗證；frame-v2 只對語義 payload 改變的定義及引用重鍵，依 §9 比完整 payload，葉結構變更按精確來源 occurrence 重建。canonical 相同的 occurrence-scoped pending frame 仍保留各自 scope，不因中文完成而改成 resolved。
 
 ### 11.15 三種完整抽牌來源規則
 
