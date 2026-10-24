@@ -62,7 +62,7 @@ REGISTRY = Registry(
             tuple(table.name for table in four_layer.FRAME_TABLES),
             requires=("translation_names",),
         ),
-        Capability("art", ("art",)),
+        Capability("art", ("art", "artist", "art_artist")),
         Capability(
             "rulings",
             tuple(table.name for table in t1_rulings.TABLES),
@@ -75,7 +75,11 @@ REGISTRY = Registry(
         ),
         Capability(
             "en",
-            tuple(table.name for table in t1_en.TABLES if table.name != "art"),
+            tuple(
+                table.name
+                for table in t1_en.TABLES
+                if table.name not in {"art", "artist", "art_artist"}
+            ),
             requires=("art",),
         ),
         *(

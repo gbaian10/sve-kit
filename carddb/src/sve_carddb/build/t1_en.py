@@ -34,6 +34,32 @@ TABLES = (
         unique=(Unique(("id", "face_id")),),
     ),
     Table(
+        "artist",
+        (
+            Column("id", Kind.ID),
+            Column("display_name", Kind.TEXT),
+            Column("region", Kind.TEXT, choices=("jp", "en")),
+        ),
+        ("id",),
+        unique=(Unique(("region", "display_name")),),
+        checks=(Check("length(display_name) > 0"),),
+    ),
+    Table(
+        "art_artist",
+        (
+            Column("art_id", Kind.ID),
+            Column("artist_id", Kind.ID),
+            Column("role", Kind.TEXT),
+            Column("source_id", Kind.ID),
+        ),
+        ("art_id", "artist_id", "role"),
+        foreign_keys=(
+            ForeignKey(("art_id",), "art", ("id",)),
+            ForeignKey(("artist_id",), "artist", ("id",)),
+            ForeignKey(("source_id",), "source_record", ("id",)),
+        ),
+    ),
+    Table(
         "region_mapping_review",
         (
             Column("card_id", Kind.ID),

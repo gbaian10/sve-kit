@@ -113,7 +113,9 @@ remains NULL for the product/vocabulary stage. Premium is unknown except the
 specified exact pure-premium label. Conflicting rarity evidence between faces
 fails for review instead of choosing a value. Printed text/current/errata are
 not built here: text references are NULL and printed state is unknown. Raw face
-credits are retained, but no artist grouping is inferred.
+credits are retained. Each non-empty credit string also becomes one `artist` per
+region (no cross-region pairing, no separator splitting) linked to the face's art
+through `art_artist` with role `illustration_<region>`.
 
 `import_preview` owns **one** transaction for sources, selected identities,
 printings, face uses and permanent integer IDs.

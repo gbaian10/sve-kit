@@ -12,7 +12,14 @@ from .build_db_t1_fixtures import populate as populate_a
 if TYPE_CHECKING:
     from sve_carddb.build import Database, Value
 
-EN_TABLES = {"art", "region_mapping_review", "region_text_review", "region_divergence"}
+EN_TABLES = {
+    "art",
+    "artist",
+    "art_artist",
+    "region_mapping_review",
+    "region_text_review",
+    "region_divergence",
+}
 
 
 def rows(*, include_en: bool = True) -> dict[str, dict[str, Value]]:
@@ -109,6 +116,13 @@ def rows(*, include_en: bool = True) -> dict[str, dict[str, Value]]:
             "card_id": "card",
             "face_id": "face",
             "classification": "unclassified",
+        },
+        "artist": {"id": "artist", "display_name": "Synthetic artist", "region": "jp"},
+        "art_artist": {
+            "art_id": "art",
+            "artist_id": "artist",
+            "role": "illustration",
+            "source_id": "source",
         },
         "region_mapping_review": {
             "card_id": "card2",

@@ -40,7 +40,14 @@ MINIMUM_TABLES = {
     "qa_card",
     "card_related",
 }
-EN_TABLES = {"art", "region_mapping_review", "region_text_review", "region_divergence"}
+EN_TABLES = {
+    "art",
+    "artist",
+    "art_artist",
+    "region_mapping_review",
+    "region_text_review",
+    "region_divergence",
+}
 
 
 @pytest.fixture
@@ -63,7 +70,7 @@ def test_exact_minimum_inventory_and_real_rows(include_en: bool) -> None:
         | (EN_TABLES if include_en else set())
     )
     assert {table.name for table in schema.tables} == expected
-    assert len(schema.tables) == (60 if include_en else 56)
+    assert len(schema.tables) == (62 if include_en else 56)
     with create_database(schema) as database:
         with database.transaction():
             populate(database, include_en=include_en)
@@ -95,7 +102,7 @@ def test_exact_minimum_inventory_and_real_rows(include_en: bool) -> None:
         ),
         ("qa", {"qa", "qa_version", "qa_card"}),
         ("related", {"card_related"}),
-        ("art", {"art"}),
+        ("art", {"art", "artist", "art_artist"}),
         ("en", EN_TABLES),
     ],
 )

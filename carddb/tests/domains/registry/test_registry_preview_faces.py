@@ -74,6 +74,30 @@ def test_reversed_source_face_map_retains_per_face_credits(
         assert face_credits[faces[1]["id"]] == "Synthetic artist 0"
 
 
+def test_shared_art_credit_becomes_one_regional_artist(
+    tmp_path: Path, inputs: Inputs
+) -> None:
+    inputs.en["PR-002EN"] = inputs.en["BP02-070EN"].model_copy(
+        deep=True, update={"number": "PR-002EN"}
+    )
+    inputs.mapping.targets["PR-002EN"] = "BP02-071"
+    inputs.mapping.original_art.add("PR-002EN")
+    inputs.decisions.art_groups = [["BP02-070EN", "PR-002EN"]]
+    write_files(plan_files(tmp_path, build(inputs, {})))
+    plan = plan_preview(tmp_path, evidence(inputs), regions=("jp", "en"))
+    with create_database(compile_build(("en", "related"))) as db:
+        parents(db, plan)
+        import_preview(db, plan, build=BUILD, authored_revision=REVISION)
+        artists = [row.values for row in db.rows("artist")]
+        links = [row.values for row in db.rows("art_artist")]
+    assert [(row["display_name"], row["region"]) for row in artists] == [
+        ("Synthetic artist 0", "en")
+    ]
+    assert [(row["artist_id"], row["role"]) for row in links] == [
+        (artists[0]["id"], "illustration_en")
+    ]
+
+
 def test_reskin_requires_every_endpoint_variant_not_just_one(
     tmp_path: Path, inputs: Inputs
 ) -> None:

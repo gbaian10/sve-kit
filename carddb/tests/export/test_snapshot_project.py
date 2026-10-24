@@ -479,7 +479,7 @@ def test_historical_art_and_artist_are_pruned_with_tombstone(db: Database) -> No
             {
                 "id": "old-artist",
                 "display_name": "Private history",
-                "decision_id": "decision",
+                "region": "jp",
             },
         )
         db.insert(

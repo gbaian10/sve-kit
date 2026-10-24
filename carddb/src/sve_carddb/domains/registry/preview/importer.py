@@ -94,7 +94,54 @@ def populate_identity_rows(
                 art_uses[key] = data.id
     for record in plan.included("printing"):
         _printing(db, plan, record, art_uses)
+    _artists(db, plan, art_uses)
     return input_record(build, uses)
+
+
+def _artists(
+    db: Database, plan: PreviewPlan, art_uses: dict[tuple[str, str], str]
+) -> None:
+    """Credits become per-region artists; names are never paired across regions.
+
+    The printed credit string is the whole identity: a combined credit such as
+    ``A／B`` stays one artist rather than being split by a guessed separator.
+    """
+    artists: dict[tuple[str, str], str] = {}
+    links: set[tuple[str, str, str]] = set()
+    for record in plan.included("printing"):
+        data = record.data
+        if not isinstance(data, PrintingData):
+            raise TypeError("Expected printing record")
+        evidence = plan.evidence[data.region, data.card_no]
+        for mapping in data.source_face_map:
+            art_id = art_uses.get((data.id, mapping.face_id))
+            credit = evidence.faces[mapping.source_index].credit_raw
+            name = credit.strip() if credit else ""
+            if art_id is None or not name:
+                continue
+            key = data.region, name
+            artist_id = artists.get(key)
+            if artist_id is None:
+                artist_id = (
+                    "y:" + digest(canonical(list(key))).removeprefix("sha256:")[:32]
+                )
+                artists[key] = artist_id
+                db.insert(
+                    "artist",
+                    {"id": artist_id, "display_name": name, "region": data.region},
+                )
+            link = art_id, artist_id, f"illustration_{data.region}"
+            if link not in links:
+                links.add(link)
+                db.insert(
+                    "art_artist",
+                    {
+                        "art_id": link[0],
+                        "artist_id": link[1],
+                        "role": link[2],
+                        "source_id": evidence.source.id,
+                    },
+                )
 
 
 def _authored(db: Database, plan: PreviewPlan, revision: str) -> dict[str, str]:
