@@ -65,6 +65,13 @@ class RestrictionList:
     semantic_state: Literal["unreviewed"] = "unreviewed"
 
 
+def _month(name: str) -> int:
+    try:
+        return _MONTHS.index(name) + 1
+    except ValueError:
+        raise ValueError("Unsupported EN restriction month") from None
+
+
 def _dates(heading: str, region: SourceRegion) -> tuple[date, date | None]:
     if region is SourceRegion.JP:
         match = _JP_DATE.fullmatch(heading)
@@ -75,11 +82,9 @@ def _dates(heading: str, region: SourceRegion) -> tuple[date, date | None]:
     if match is None:
         raise ValueError("Unsupported EN restriction effective-date heading")
     month, day, end_month, end_day, year = match.groups()
-    start = date(int(year), _MONTHS.index(month) + 1, int(day))
+    start = date(int(year), _month(month), int(day))
     end = (
-        None
-        if end_month is None
-        else date(int(year), _MONTHS.index(end_month) + 1, int(end_day))
+        None if end_month is None else date(int(year), _month(end_month), int(end_day))
     )
     if end is not None and end <= start:
         raise ValueError("Restriction effective-date interval must be nonempty")
@@ -112,11 +117,18 @@ class _Cursor:
     max_copies: int | None = None
     heading: str = ""
     dates: tuple[date, date | None] | None = None
+    date_entries: int = 0
+
+    def finish_heading(self) -> None:
+        if self.dates is not None and not self.date_entries:
+            raise ValueError("Restriction effective-date heading has no entries")
 
     def category(self, max_copies: int | None) -> None:
+        self.finish_heading()
         self.max_copies = max_copies
         self.heading = ""
         self.dates = None
+        self.date_entries = 0
 
     def section(self, text: str, region: SourceRegion) -> str | None:
         if region is SourceRegion.JP:
@@ -136,7 +148,9 @@ class _Cursor:
     def effective(self, text: str, region: SourceRegion) -> None:
         if self.max_copies is None:
             raise ValueError("Restriction date precedes its category")
+        self.finish_heading()
         self.heading, self.dates = text, _dates(text, region)
+        self.date_entries = 0
 
     def entry(
         self, text: str, href: str, region: SourceRegion, ordinal: int
@@ -149,7 +163,7 @@ class _Cursor:
             text = text[1:-1]
         if not text.strip():
             raise ValueError("Restriction entry name must not be blank")
-        return ListRestriction(
+        result = ListRestriction(
             text,
             _card_no(href, region),
             href,
@@ -158,6 +172,8 @@ class _Cursor:
             self.heading,
             f"css:.sw-Lower_Container;query=h2,h3,h4,p,a[href];ordinal={ordinal}",
         )
+        self.date_entries += 1
+        return result
 
     def consume(
         self, node: LexborNode, region: SourceRegion, ordinal: int
@@ -168,6 +184,8 @@ class _Cursor:
         if node.tag == "h4":
             self.effective(text, region)
         if node.tag == "a":
+            if select_all(node, "br"):
+                raise ValueError("Restriction name contains unsupported line breaks")
             href = attribute(node, "href")
             assert href is not None
             return self.entry(text, href, region, ordinal)
@@ -207,8 +225,8 @@ def parse_restriction_list(body: bytes, region: SourceRegion) -> RestrictionList
             continue
         if (entry := cursor.consume(node, region, ordinal)) is not None:
             entries.append(entry)
-        if cursor.max_copies is not None:
-            seen.add(cursor.max_copies)
+            seen.add(entry.max_copies)
+    cursor.finish_heading()
     if seen != {0, 1} or not entries:
         raise ValueError("Restriction list lacks both Standard categories")
     identities = [
@@ -217,4 +235,10 @@ def parse_restriction_list(body: bytes, region: SourceRegion) -> RestrictionList
     ]
     if len(identities) != len(set(identities)):
         raise ValueError("Restriction list repeats an entry")
+    names = [entry.name for entry in entries]
+    numbers = [entry.card_no for entry in entries if entry.card_no is not None]
+    if len(names) != len(set(names)) or len(numbers) != len(set(numbers)):
+        raise ValueError(
+            "Restriction list has conflicting entries for one name or card number"
+        )
     return RestrictionList(region, tuple(entries), tuple(excluded))

@@ -119,9 +119,7 @@ def test_jp_changes_fail_instead_of_guessing(old: str, new: str) -> None:
     ],
 )
 def test_en_changes_fail_instead_of_guessing(old: str, new: str) -> None:
-    with pytest.raises(
-        ValueError, match=r"(Restriction|restriction|format|month|tuple\.index)"
-    ):
+    with pytest.raises(ValueError, match=r"(Restriction|restriction|format|month)"):
         parse_restriction_list(EN.replace(old, new).encode(), SourceRegion.EN)
 
 
@@ -131,3 +129,94 @@ def test_duplicate_entry_is_not_silently_merged() -> None:
         parse_restriction_list(
             JP.replace(entry, entry + entry).encode(), SourceRegion.JP
         )
+
+
+@pytest.mark.parametrize(
+    ("region", "original", "old", "new"),
+    [
+        (
+            SourceRegion.JP,
+            JP,
+            '<p><a href="https://shadowverse-evolve.com/cardlist/?cardno=TEST-2">『合成制限』</a></p>',
+            "",
+        ),
+        (
+            SourceRegion.JP,
+            JP,
+            '<p><a href="https://shadowverse-evolve.com/cardlist/?cardno=TEST-a">『合成禁止』</a></p>',
+            "",
+        ),
+        (
+            SourceRegion.EN,
+            EN,
+            '<strong><a href="https://en.shadowverse-evolve.com/cards/?cardno= TEST-aEN"> Nested Synthetic</a></strong>',
+            "",
+        ),
+        (
+            SourceRegion.JP,
+            JP,
+            "<h4>2026/1/30(金)より適用</h4>",
+            "<h4>2025/1/30(木)より適用</h4><h4>2026/1/30(金)より適用</h4>",
+        ),
+    ],
+)
+def test_empty_category_or_effective_date_cannot_silently_lose_entries(
+    region: SourceRegion, original: str, old: str, new: str
+) -> None:
+    with pytest.raises(
+        ValueError, match=r"(no entries|lacks both Standard categories)"
+    ):
+        parse_restriction_list(original.replace(old, new).encode(), region)
+
+
+@pytest.mark.parametrize(
+    "replacement",
+    [
+        "合成禁止",
+        "<br>合成制限",
+    ],
+)
+def test_conflicting_or_multiline_names_are_rejected(replacement: str) -> None:
+    with pytest.raises(ValueError, match=r"(conflicting entries|line breaks)"):
+        parse_restriction_list(
+            JP.replace("合成制限", replacement).encode(), SourceRegion.JP
+        )
+
+
+def test_same_card_number_with_different_names_is_rejected() -> None:
+    with pytest.raises(ValueError, match="conflicting entries"):
+        parse_restriction_list(
+            JP.replace("cardno=TEST-2", "cardno=TEST-a").encode(), SourceRegion.JP
+        )
+
+
+@pytest.mark.parametrize(
+    ("old", "new", "message"),
+    [
+        (
+            "Effective as of August 21, 2026",
+            "Effective later",
+            "Unsupported EN restriction effective-date heading",
+        ),
+        ("<p><strong>Banned</strong></p>", "", "date precedes its category"),
+        ("Synthetic Ban", "", "lacks category, date or name"),
+        ("September 4", "UnknownMonth 4", "Unsupported EN restriction month"),
+    ],
+)
+def test_en_missing_structure_reports_domain_errors(
+    old: str, new: str, message: str
+) -> None:
+    with pytest.raises(ValueError, match=message):
+        parse_restriction_list(EN.replace(old, new).encode(), SourceRegion.EN)
+
+
+@pytest.mark.parametrize(
+    ("old", "new", "message"),
+    [
+        ("カードの使用制限に関するルール", "Unknown title", "lacks its regional title"),
+        ("『合成禁止』", "『』", "name must not be blank"),
+    ],
+)
+def test_jp_missing_title_or_name_is_rejected(old: str, new: str, message: str) -> None:
+    with pytest.raises(ValueError, match=message):
+        parse_restriction_list(JP.replace(old, new).encode(), SourceRegion.JP)

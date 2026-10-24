@@ -6,9 +6,12 @@ link, copy limit, effective dates and source heading. Lift dates are exclusive.
 It reports the intentionally excluded history/Cross Craft/Gloryfinder sections.
 It never follows links, downloads images or treats another format as Standard.
 
-The parser requires both ban and limit categories, supported date headings and
-regional official entry links. Unsupported structure, missing dates, invalid
-calendar dates and duplicate entries fail. This is an adapter for these layouts,
+The parser requires at least one entry in each ban and limit category and under
+each effective-date heading, supported date headings and regional official entry
+links. Unsupported structure, missing dates, invalid calendar dates, repeated
+names/card numbers and line breaks inside names fail. A genuinely empty category
+needs an explicitly supported layout rather than an inferred empty result.
+This is an adapter for these layouts,
 not a generic interpretation of arbitrary official announcements or proof of
 complete historical coverage. A terminal HTML marker rejects obvious truncation.
 
