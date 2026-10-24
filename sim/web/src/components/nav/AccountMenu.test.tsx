@@ -47,7 +47,7 @@ describe("AccountMenuPanel", () => {
     await renderInRouter(<AccountMenuPanel />)
     await userEvent.click(screen.getByRole("radio", { name: "英版" }))
     await userEvent.click(
-      within(screen.getByRole("radiogroup", { name: "卡名顯示" })).getByRole("radio", {
+      within(screen.getByRole("radiogroup", { name: "卡片翻譯" })).getByRole("radio", {
         name: "原文",
       }),
     )
@@ -56,20 +56,29 @@ describe("AccountMenuPanel", () => {
     expect(readPrefs()).toMatchObject({
       cardEdition: "en",
       nameDisplay: "original",
+      effectLanguage: "original",
+      flavorDisplay: "original",
+      qaDisplay: "original",
       theme: "dark",
       accent: "red",
     })
     expect(screen.getByRole("radio", { name: "英版" })).toHaveAttribute("aria-checked", "true")
   })
 
-  it("offers the effect-text setting too", async () => {
+  it("sets the four text fields together and says custom when they differ", async () => {
+    prefsStore.set({ qaDisplay: "none" })
     await renderInRouter(<AccountMenuPanel />)
-    await userEvent.click(
-      within(screen.getByRole("radiogroup", { name: "效果文字" })).getByRole("radio", {
-        name: "兩者",
-      }),
-    )
-    expect(readPrefs().effectLanguage).toBe("both")
+    const group = screen.getByRole("radiogroup", { name: "卡片翻譯" })
+    expect(screen.getByText("自訂")).toBeVisible()
+    expect(within(group).queryByRole("radio", { checked: true })).toBeNull()
+    await userEvent.click(within(group).getByRole("radio", { name: "翻譯" }))
+    expect(readPrefs()).toMatchObject({
+      nameDisplay: "translated",
+      effectLanguage: "translated",
+      flavorDisplay: "translated",
+      qaDisplay: "translated",
+    })
+    expect(screen.queryByText("自訂")).toBeNull()
   })
 
   it("shows the detected language when none is stored (jsdom reports en-US)", async () => {
@@ -79,6 +88,31 @@ describe("AccountMenuPanel", () => {
         name: "English",
       }),
     ).toHaveAttribute("aria-checked", "true")
+  })
+
+  it("can enter the mixed translation setting by keyboard and select all four fields", async () => {
+    await renderInRouter(<AccountMenuPanel />)
+    const group = screen.getByRole("radiogroup", { name: "卡片翻譯" })
+    const radios = within(group).getAllByRole("radio")
+    expect(radios.map((radio) => radio.tabIndex)).toEqual([0, -1, -1])
+    expect(within(group).queryByRole("radio", { checked: true })).toBeNull()
+    within(group).getByRole("radio", { name: "原文" }).focus()
+    await userEvent.keyboard("{ArrowLeft}")
+    const both = within(group).getByRole("radio", { name: "兩者" })
+    expect(both).toHaveFocus()
+    expect(both).toHaveAttribute("aria-checked", "true")
+    expect(readPrefs()).toMatchObject({
+      nameDisplay: "both",
+      effectLanguage: "both",
+      flavorDisplay: "both",
+      qaDisplay: "both",
+    })
+    await userEvent.keyboard("{Home}")
+    expect(within(group).getByRole("radio", { name: "原文" })).toHaveFocus()
+    expect(within(group).getByRole("radio", { name: "原文" })).toHaveAttribute(
+      "aria-checked",
+      "true",
+    )
   })
 
   it("marks the accent the page actually uses before any choice (light system → teal)", async () => {

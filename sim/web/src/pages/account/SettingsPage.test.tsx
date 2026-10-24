@@ -25,7 +25,12 @@ describe("SettingsPage", () => {
     await userEvent.click(screen.getByRole("radio", { name: "英文圈" }))
     await userEvent.click(
       within(screen.getByRole("radiogroup", { name: "效果文字" })).getByRole("radio", {
-        name: "兩者",
+        name: "翻譯＋原文",
+      }),
+    )
+    await userEvent.click(
+      within(screen.getByRole("radiogroup", { name: "Q&A" })).getByRole("radio", {
+        name: "不顯示",
       }),
     )
     await userEvent.click(
@@ -37,6 +42,7 @@ describe("SettingsPage", () => {
       symbolLabels: true,
       banRegion: "en",
       effectLanguage: "both",
+      qaDisplay: "none",
       cardOpenMode: "modal",
     })
     expect(screen.getByRole("switch", { name: "圖示旁附名稱" })).toHaveAttribute(
@@ -130,7 +136,8 @@ it("confirms restoring all defaults and keeps recent cards and downloaded data",
     preloadNeighbours: true,
     infiniteScroll: false,
     collapsedText: { effectOriginal: true, flavorOriginal: true },
-    showFlavorText: false,
+    flavorDisplay: "none",
+    qaDisplay: "original",
     symbolLabels: true,
     termEmphasis: false,
     theme: "dark",
@@ -163,19 +170,26 @@ it("confirms restoring all defaults and keeps recent cards and downloaded data",
   expect(await cache.keys()).toHaveLength(1)
 })
 
-it("shows flavor text by default and remembers disabling it in advanced settings", async () => {
+it("shows flavor text by default and remembers hiding it among the text settings", async () => {
   const view = await renderInRouter(<SettingsPage />)
-  const advanced = within(screen.getByRole("region", { name: "進階設定" }))
-  const toggle = advanced.getByRole("switch", { name: "顯示風味文字" })
-  expect(toggle).toHaveAttribute("aria-checked", "true")
-  await userEvent.click(toggle)
-  expect(readPrefs().showFlavorText).toBe(false)
+  const flavor = () => screen.getByRole("radiogroup", { name: "風味文字" })
+  expect(within(flavor()).getByRole("radio", { name: "翻譯＋原文" })).toHaveAttribute(
+    "aria-checked",
+    "true",
+  )
+  // Only flavor text and Q&A can be hidden; names and effect text always show.
+  for (const name of ["卡名顯示", "效果文字"])
+    expect(
+      within(screen.getByRole("radiogroup", { name })).queryByRole("radio", { name: "不顯示" }),
+    ).toBeNull()
+  await userEvent.click(within(flavor()).getByRole("radio", { name: "不顯示" }))
+  expect(readPrefs().flavorDisplay).toBe("none")
   view.unmount()
   prefsStore.reload()
   await renderInRouter(<SettingsPage />)
-  expect(screen.getByRole("switch", { name: "顯示風味文字" })).toHaveAttribute(
+  expect(within(flavor()).getByRole("radio", { name: "不顯示" })).toHaveAttribute(
     "aria-checked",
-    "false",
+    "true",
   )
 })
 

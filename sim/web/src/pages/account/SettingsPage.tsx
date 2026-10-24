@@ -13,6 +13,7 @@ import {
   CARD_EDITIONS,
   CARD_OPEN_MODES,
   DEFAULT_PREFS,
+  FIELD_DISPLAYS,
   prefsStore,
   TEXT_DISPLAYS,
   usePrefs,
@@ -65,7 +66,7 @@ export function SettingsPage() {
             label={t("account.nameDisplay")}
             options={TEXT_DISPLAYS.map((value) => ({
               value,
-              label: t(`options.nameDisplay.${value}`),
+              label: t(`settings.fieldDisplay.${value}`),
             }))}
             value={prefs.nameDisplay}
             onChange={(nameDisplay) => prefsStore.set({ nameDisplay })}
@@ -77,10 +78,34 @@ export function SettingsPage() {
             label={t("settings.effectLanguage")}
             options={TEXT_DISPLAYS.map((value) => ({
               value,
-              label: t(`options.nameDisplay.${value}`),
+              label: t(`settings.fieldDisplay.${value}`),
             }))}
             value={prefs.effectLanguage}
             onChange={(effectLanguage) => prefsStore.set({ effectLanguage })}
+          />
+        </SettingRow>
+        <SettingRow className={ROW} label={t("settings.flavorDisplay")}>
+          <Segmented
+            size="sm"
+            label={t("settings.flavorDisplay")}
+            options={FIELD_DISPLAYS.map((value) => ({
+              value,
+              label: t(`settings.fieldDisplay.${value}`),
+            }))}
+            value={prefs.flavorDisplay}
+            onChange={(flavorDisplay) => prefsStore.set({ flavorDisplay })}
+          />
+        </SettingRow>
+        <SettingRow className={ROW} label={t("settings.qaDisplay")}>
+          <Segmented
+            size="sm"
+            label={t("settings.qaDisplay")}
+            options={FIELD_DISPLAYS.map((value) => ({
+              value,
+              label: t(`settings.fieldDisplay.${value}`),
+            }))}
+            value={prefs.qaDisplay}
+            onChange={(qaDisplay) => prefsStore.set({ qaDisplay })}
           />
         </SettingRow>
         <SettingRow
@@ -147,13 +172,6 @@ export function SettingsPage() {
         <h2 id="settings-advanced" className="pt-3 text-13 font-semibold text-text-3">
           {t("settings.advanced")}
         </h2>
-        <SettingRow className={ROW} label={t("settings.showFlavorText")}>
-          <Switch
-            label={t("settings.showFlavorText")}
-            checked={prefs.showFlavorText}
-            onChange={(showFlavorText) => prefsStore.set({ showFlavorText })}
-          />
-        </SettingRow>
         <SettingRow
           className={ROW}
           label={t("settings.infiniteScroll")}

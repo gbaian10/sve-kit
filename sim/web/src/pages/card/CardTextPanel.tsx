@@ -50,7 +50,7 @@ export function CardTextPanel({
         children
       )}
       {/* Flavor belongs to this printing alone, so both views show it. */}
-      {prefs.showFlavorText && flavor.value && (
+      {prefs.flavorDisplay !== "none" && flavor.value && (
         <CardText client={client} edition={edition} owner={owner} field="flavor" />
       )}
       <CardErrata

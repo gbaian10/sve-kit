@@ -3,7 +3,14 @@ import { useTranslation } from "react-i18next"
 import type { SelectedText } from "../../data"
 
 /** Origin · authority of the shown translation, plus the proofreading notice when it is low confidence. */
-export function TranslationSourceLine({ value }: { readonly value: SelectedText }) {
+export function TranslationSourceLine({
+  value,
+  proofreading = true,
+}: {
+  readonly value: SelectedText
+  /** Whether a low-confidence translation also gets the proofreading notice. */
+  readonly proofreading?: boolean
+}) {
   const { t } = useTranslation()
   if (!value.translated) return null
   const origin =
@@ -23,7 +30,7 @@ export function TranslationSourceLine({ value }: { readonly value: SelectedText 
       <p className="text-12 text-text-3">
         {origin} · {authority}
       </p>
-      {value.translation?.["low_confidence"] === true && (
+      {proofreading && value.translation?.["low_confidence"] === true && (
         <p className="text-13">{t("card.translationProofreading")}</p>
       )}
     </>

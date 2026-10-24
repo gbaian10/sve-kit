@@ -109,7 +109,7 @@ describe("printed-text availability", () => {
     expect(screen.queryByRole("radiogroup", { name: "卡文版本" })).not.toBeInTheDocument()
     expect(screen.queryByText("印刷文字尚未確認")).not.toBeInTheDocument()
     act(() => {
-      prefsStore.set({ showFlavorText: false })
+      prefsStore.set({ flavorDisplay: "none" })
     })
     expect(screen.queryByRole("region", { name: "風味文字" })).not.toBeInTheDocument()
     expect(screen.getByText("Synthetic current wording")).toBeVisible()
