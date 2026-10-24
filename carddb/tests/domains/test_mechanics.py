@@ -66,6 +66,7 @@ def case(
     *,
     back: str | None = None,
     first_batch: bool = False,
+    sections: tuple[str, ...] = (),
 ) -> Generator[tuple[Database, mechanics.Inputs, mechanics.Settings, str]]:
     html = digital_link_import_fixtures.RAW
     if back is not None:
@@ -81,7 +82,12 @@ def case(
     monkeypatch.setattr(
         digital_link_import_fixtures,
         "RAW",
-        html.replace(b"Synthetic rule.", raw.replace("\n", "<br>").encode()),
+        html.replace(
+            b"Synthetic rule.",
+            (raw + "".join("\n-----\n" + section for section in sections))
+            .replace("\n", "<br>")
+            .encode(),
+        ),
     )
     fixture = make_fixture(tmp_path)
     faces = sorted(
@@ -134,6 +140,18 @@ def case(
                     "basis": "latest_observed_no_errata",
                 },
             )
+            for ordinal, text in enumerate(sections):
+                db.insert(
+                    "face_text_section",
+                    {
+                        "revision_id": "link-revision",
+                        "ordinal": ordinal,
+                        "text_unit_id": TextInterner(db).intern(
+                            LocalizedText(lang="ja", text=text)
+                        ),
+                        "kind": "unknown",
+                    },
+                )
             if back is not None:
                 db.insert("face", faces[1].model_dump(mode="json", round_trip=True))
                 revision = db.select(
@@ -647,7 +665,7 @@ def test_first_batch_stats_and_quick_prove_absence_without_labels(
         "これは「\n{クイック}\n」を持つ。",
         "{クイック}相手のフォロワーすべてに1ダメージ。",
         "{クイック}\n相手のフォロワーすべてに1ダメージ。仮。",
-        "{クイック}\n自分のフォロワー1体を選ぶ。それは【合成乙】を持つ。",
+        "{クイック}\n自分のフォロワー1体を選ぶ。それは【合成乙】を持つ。仮。",
         (
             "{ファンファーレ}自分の場の他の妖精・フォロワーすべてと、\n"
             "自分のEXエリアの妖精・フォロワーすべては{攻撃力}+1/{体力}+1する。"
@@ -888,7 +906,7 @@ def test_bounded_trigger_grave_act_proves_all_relations(
         "{ファンファーレ}自分のデッキの上2枚をEXエリアに置く。",
         "{ラストワード}自分のデッキの上2枚を墓場に置く。",
         "【進化時】相手のフォロワー1体を選ぶ。それをアクトする。",
-        "{起動}{コスト1}これを{アクト}：相手のフォロワー1体を選ぶ。それをアクトする。",
+        "{起動}{コスト1}これを{アクト}：相手のフォロワー1体を選ぶ。それをアクトする。仮。",
         "これはスタンド状態で場に出る。",
         "{起動}これを{アクト}：相手のフォロワー1体を選ぶ。それを破壊する。仮。",
         "{起動}これを{アクト}墓場に置く：相手のフォロワー1体を選ぶ。それを消滅させる。",
@@ -2021,3 +2039,393 @@ def test_reducer_requires_every_relation_on_every_face_and_section(
         assert coverage["complete_keyword_ids"] == Json(["kw:test-a"])
         assert coverage["complete_all"] is False
         assert coverage["partial_keyword_ids"] == Json([])
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        "これを自分の手札から捨てたとき、7枚引く。",
+        "{起動}{コスト7}これを{アクト}：相手のフォロワー1体を選ぶ。それをアクトする。",
+        "{起動}これを{アクト}：フォロワー1体を選ぶ。それを破壊する。それのプレイヤーは『ドラゴン』5体を出す。",
+        "{ラストワード}『大地の魔片』5つを出す。",
+        "{ファンファーレ}下記から1つチョイスする。【1】【土の秘術】これは{攻撃力}+3/{体力}+4する。【2】『大地の魔片』5つを出す。",
+        "{ファンファーレ}『フェアリー』5体を出す。『フェアリー』7枚をEXエリアに置く。",
+        "『ゴースト』5体を出す。",
+        "相手のフォロワー1体を選ぶ。それに7ダメージ。『ナイト』5枚をEXエリアに置く。",
+        "【進化時】『フェアリーウィスプ』5枚をEXエリアに置く。",
+        "『フェアリー』5枚をEXエリアに置く。",
+        "{ファンファーレ}『乙姫お守り隊』5体を出す。",
+        "『防御型ゴーレム』5体を出す。\n【土の秘術】自分のゴーレム・フォロワーすべては{攻撃力}+3/{体力}+4する。",
+        "{ファンファーレ}【土の秘術】『防御型ゴーレム』5枚をEXエリアに置く。",
+        "{ファンファーレ}『攻撃型ゴーレム』5体を出す。",
+        "{ファンファーレ}【コンボ_7】相手のフォロワー1体を選ぶ。それを破壊する。相手の場に『フェアリー』5体を出す。",
+        "『ヴァイキング』5体と『スティールナイト』7体と『ナイト』9体を出す。",
+    ],
+    ids=[
+        "discard-draw",
+        "costed-act",
+        "destroy-and-dragon",
+        "earth-fragment",
+        "earth-choice",
+        "fairy-field-ex",
+        "ghost",
+        "damage-and-knight",
+        "wisp-ex",
+        "fairy-ex",
+        "escort",
+        "earth-stats",
+        "earth-ex",
+        "attack-golem",
+        "combo-opponent",
+        "three-tokens",
+    ],
+)
+@pytest.mark.parametrize("remainder", [False, True], ids=["whole", "unknown-tail"])
+def test_section_card_bodies_require_every_clause(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, raw: str, remainder: bool
+) -> None:
+    with case(
+        tmp_path,
+        monkeypatch,
+        raw + ("未知の効果。" if remainder else ""),
+        first_batch=True,
+        sections=("7枚引く。",),
+    ) as (db, inputs, settings, _):
+        with db.transaction():
+            report = mechanics.apply(db, inputs, settings)
+        assert report["complete_cards"] == (0 if remainder else 1)
+        assert db.rows("mechanic_projection") == ()
+
+
+_ROSE_FIELD = (
+    "{ファンファーレ}自分のEXエリアの妖精・フォロワーを好きな枚数選ぶ。"
+    "それは『薔薇の一撃』に変身する。\n"
+    "{起動}これを{アクト}：自分のPPを「自分のEXエリアの『薔薇の一撃』の枚数」"
+    "と同じだけ回復する。"
+)
+
+
+@pytest.mark.parametrize("suffix", ["", "\n未知の能力。", "それは【合成乙】を持つ。"])
+def test_named_ex_count_quote_proves_only_the_entire_bounded_field(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, suffix: str
+) -> None:
+    with case(
+        tmp_path,
+        monkeypatch,
+        _ROSE_FIELD + suffix,
+        first_batch=True,
+        sections=("7枚引く。",),
+    ) as (db, inputs, settings, _):
+        with db.transaction():
+            report = mechanics.apply(db, inputs, settings)
+        assert report["complete_cards"] == (0 if suffix else 1)
+        assert db.rows("mechanic_projection") == ()
+
+
+@pytest.mark.parametrize(
+    "section",
+    [
+        "7枚引く。",
+        "『フェアリー』{エルフ}妖精・フォロワー{コスト7}{攻撃力}8/{体力}9",
+        "『攻撃型ゴーレム』{ウィッチ}ゴーレム・フォロワー{コスト7}{攻撃力}8/{体力}9【突進】",
+        "『乙姫お守り隊』{ロイヤル}兵士・フォロワー{コスト7}{攻撃力}8/{体力}9【守護】",
+        "『ゴースト』{ナイトメア}死者・フォロワー{コスト7}{攻撃力}8/{体力}9【疾走】自分のエンドフェイズが来たとき、これは消滅する。",
+        "『大地の魔片』{ウィッチ}土の印・アミュレット{コスト7}【スタック】",
+        "『薔薇の一撃』{エルフ}植物族・スペル{コスト7}相手のリーダー1人か相手のフォロワー1体を選ぶ。それに7ダメージ。8枚引く。",
+        "『ヴァイキング』{ロイヤル}盗賊・フォロワー{コスト7}{攻撃力}8/{体力}9【疾走】\n『スティールナイト』{ロイヤル}兵士・フォロワー{コスト7}{攻撃力}8/{体力}9\n『ナイト』{ロイヤル}兵士・フォロワー{コスト7}{攻撃力}8/{体力}9",
+    ],
+    ids=["draw", "fairy", "rush", "ward", "ghost", "stack", "spell", "multi-token"],
+)
+@pytest.mark.parametrize("extra", ["", "【合成乙】", "\nそれは【合成乙】を持つ。"])
+def test_section_proof_preserves_token_ownership_and_rejects_unknown_tails(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, section: str, extra: str
+) -> None:
+    with case(
+        tmp_path,
+        monkeypatch,
+        "【合成甲】",
+        first_batch=True,
+        sections=(section + extra,),
+    ) as (db, inputs, settings, _):
+        with db.transaction():
+            report = mechanics.apply(db, inputs, settings)
+        assert report["complete_cards"] == (0 if extra else 1)
+        assert {
+            r.values["keyword_id"]: r.values["relations"]
+            for r in db.rows("mechanic_projection")
+        } == {"kw:ward": Json(["has"])}
+
+
+@pytest.mark.parametrize("mutation", ["remove", "add", "gap", "reorder"])
+def test_section_proof_requires_the_whole_ordered_frozen_list(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, mutation: str
+) -> None:
+    with case(
+        tmp_path,
+        monkeypatch,
+        "【合成甲】",
+        first_batch=True,
+        sections=("7枚引く。", "8枚引く。"),
+    ) as (db, inputs, settings, _):
+        with db.transaction():
+            rows = db.select(
+                "face_text_section",
+                db.columns("face_text_section"),
+                where={"revision_id": "link-revision"},
+            )
+            key: dict[str, Value] = {"revision_id": "link-revision", "ordinal": 1}
+            if mutation == "remove":
+                db.delete("face_text_section", key)
+            elif mutation == "add":
+                db.insert("face_text_section", dict(rows[1].values) | {"ordinal": 2})
+            elif mutation == "gap":
+                db.update("face_text_section", key, {"ordinal": 2})
+            else:
+                db.update(
+                    "face_text_section",
+                    key,
+                    {"text_unit_id": rows[0].values["text_unit_id"]},
+                )
+                db.update(
+                    "face_text_section",
+                    {"revision_id": "link-revision", "ordinal": 0},
+                    {"text_unit_id": rows[1].values["text_unit_id"]},
+                )
+            report = mechanics.apply(db, inputs, settings)
+        assert report["complete_cards"] == 0
+        assert db.rows("card_mechanic_coverage")[0].values["complete_all"] is False
+
+
+@pytest.mark.parametrize("back", [None, "未知の効果。"])
+def test_known_sections_never_close_an_unproved_main_or_other_face(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, back: str | None
+) -> None:
+    with case(
+        tmp_path,
+        monkeypatch,
+        "未知の効果。" if back is None else "【合成甲】",
+        back=back,
+        first_batch=True,
+        sections=("7枚引く。",),
+    ) as (db, inputs, settings, _):
+        with db.transaction():
+            report = mechanics.apply(db, inputs, settings)
+        assert report["complete_cards"] == 0
+        if back is None:
+            assert db.rows("card_mechanic_coverage") == ()
+        else:
+            assert db.rows("card_mechanic_coverage")[0].values["complete_all"] is False
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        "{ラストワード}『スティールナイト』5体を出す。それは【合成乙】を持つ。それを好きな枚数アクトしてよい。",
+        "{起動}{コスト7}これを{アクト}：『ナイト』5体を出す。それは【合成乙】を持つ。",
+        "これがある限り、自分の『ドラゴン』すべては【合成乙】を持つ。",
+    ],
+)
+def test_existing_token_grants_close_without_adding_positive_facts(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, raw: str
+) -> None:
+    with case(
+        tmp_path, monkeypatch, raw, first_batch=True, sections=("7枚引く。",)
+    ) as (db, inputs, settings, _):
+        with db.transaction():
+            report = mechanics.apply(db, inputs, settings)
+        assert report["complete_cards"] == 1
+        assert {
+            r.values["keyword_id"]: r.values["relations"]
+            for r in db.rows("mechanic_projection")
+        } == {"kw:storm": Json(["grants"])}
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        "自分のターンごとに1回、自分の他のアミュレットが場を離れたとき、『ホーリータイガー』1体を出す。それは【合成乙】を持つ。",
+        "{起動}{コスト2}これを{アクト}：自分のEXエリアの『ドラゴン』1枚を選ぶ。それを場に出す。それは【合成乙】を持つ。【覚醒】状態なら、自分のPPを2回復する。",
+    ],
+)
+def test_unproduced_token_grants_remain_unknown_with_known_sections(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, raw: str
+) -> None:
+    with case(
+        tmp_path, monkeypatch, raw, first_batch=True, sections=("7枚引く。",)
+    ) as (db, inputs, settings, _):
+        with db.transaction():
+            report = mechanics.apply(db, inputs, settings)
+        assert report["complete_cards"] == 0
+        assert db.rows("mechanic_projection") == ()
+        assert db.rows("card_mechanic_coverage") == ()
+
+
+@pytest.mark.parametrize(
+    "section",
+    [
+        "７枚引く。",
+        "『攻撃型ゴーレム』{ウィッチ}ゴーレム・フォロワー{コスト2}{攻撃力}3/{体力}2【突進】【守護】",
+        "『ナイト』{ロイヤル}兵士・フォロワー{コスト1}{攻撃力}1/{体力}1自分のエンドフェイズが来たとき、これは消滅する。",
+    ],
+)
+def test_section_proof_does_not_normalize_unknown_structure(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, section: str
+) -> None:
+    with case(
+        tmp_path, monkeypatch, "【合成甲】", first_batch=True, sections=(section,)
+    ) as (db, inputs, settings, _):
+        with db.transaction():
+            report = mechanics.apply(db, inputs, settings)
+        assert report["complete_cards"] == 0
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        _ROSE_FIELD.replace("『薔薇の一撃』の枚数", "『ゴースト』の枚数"),
+        _ROSE_FIELD.replace("の枚数」", "の【合成乙】の枚数」"),
+        _ROSE_FIELD.split("\n", 1)[0],
+        "\n".join(reversed(_ROSE_FIELD.split("\n"))),
+    ],
+)
+def test_named_ex_count_quote_rejects_altered_dependencies(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, raw: str
+) -> None:
+    with case(
+        tmp_path, monkeypatch, raw, first_batch=True, sections=("7枚引く。",)
+    ) as (db, inputs, settings, _):
+        with db.transaction():
+            report = mechanics.apply(db, inputs, settings)
+        assert report["complete_cards"] == 0
+        assert db.rows("mechanic_projection") == ()
+
+
+def test_proved_sections_do_not_authorize_cards_outside_the_batch(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    with case(tmp_path, monkeypatch, "7枚引く。", sections=("8枚引く。",)) as (
+        db,
+        inputs,
+        settings,
+        _,
+    ):
+        with db.transaction():
+            report = mechanics.apply(db, inputs, settings)
+        assert report["complete_cards"] == 0
+        assert db.rows("card_mechanic_coverage") == ()
+
+
+@pytest.mark.parametrize("separator", ["", "\n"], ids=["same-line", "separate-lines"])
+def test_grant_followed_by_a_known_body_requires_the_producers_whole_line(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, separator: str
+) -> None:
+    raw = (
+        "{ラストワード}『スティールナイト』5体を出す。それは【合成乙】を持つ。"
+        + separator
+        + "7枚引く。"
+    )
+    with case(
+        tmp_path, monkeypatch, raw, first_batch=True, sections=("8枚引く。",)
+    ) as (db, inputs, settings, _):
+        with db.transaction():
+            report = mechanics.apply(db, inputs, settings)
+        assert report["complete_cards"] == (1 if separator else 0)
+        assert {
+            r.values["keyword_id"]: r.values["relations"]
+            for r in db.rows("mechanic_projection")
+        } == ({"kw:storm": Json(["grants"])} if separator else {})
+
+
+@pytest.mark.parametrize(
+    "separator", ["\u2028", "\x1c"], ids=["unicode-line", "file-separator"]
+)
+@pytest.mark.parametrize("in_section", [False, True], ids=["main", "section"])
+def test_non_lf_boundaries_never_separate_provable_clauses(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, separator: str, in_section: bool
+) -> None:
+    text = "7枚引く。" + separator + "8枚引く。"
+    with case(
+        tmp_path,
+        monkeypatch,
+        "【合成甲】" if in_section else text,
+        first_batch=True,
+        sections=(text if in_section else "9枚引く。",),
+    ) as (db, inputs, settings, _):
+        with db.transaction():
+            report = mechanics.apply(db, inputs, settings)
+        assert report["complete_cards"] == 0
+
+
+@pytest.mark.parametrize(
+    "section",
+    [
+        "『フェアリー』{ロイヤル}妖精・フォロワー{コスト1}{攻撃力}1/{体力}1",
+        "『合成トークン』{エルフ}妖精・フォロワー{コスト1}{攻撃力}1/{体力}1",
+        "『ヴァイキング』{ロイヤル}盗賊・フォロワー{コスト3}{攻撃力}3/{体力}2【守護】",
+    ],
+)
+def test_token_definition_requires_its_named_class_trait_and_native_suffix(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, section: str
+) -> None:
+    with case(
+        tmp_path, monkeypatch, "【合成甲】", first_batch=True, sections=(section,)
+    ) as (db, inputs, settings, _):
+        with db.transaction():
+            report = mechanics.apply(db, inputs, settings)
+        assert report["complete_cards"] == 0
+        assert {
+            r.values["keyword_id"]: r.values["relations"]
+            for r in db.rows("mechanic_projection")
+        } == {"kw:ward": Json(["has"])}
+
+
+@pytest.mark.parametrize(
+    "space", [" ", "\u3000"], ids=["ascii-space", "ideographic-space"]
+)
+@pytest.mark.parametrize("leading", [False, True], ids=["trailing", "leading"])
+def test_grant_boundary_keeps_the_producers_exact_untrimmed_line(
+    space: str, leading: bool
+) -> None:
+    line = "{ラストワード}『スティールナイト』5体を出す。それは【合成乙】を持つ。"
+    terms = {"kw:storm": "合成乙"}
+    assert mechanic_grants.granted_keyword(line, terms) == "kw:storm"
+    assert (
+        mechanic_grants.granted_keyword(
+            space + line if leading else line + space, terms
+        )
+        is None
+    )
+
+
+@pytest.mark.parametrize(
+    "grant", [False, True], ids=["fixed-pp-act", "quick-with-existing-grant"]
+)
+@pytest.mark.parametrize(
+    "positive", [False, True], ids=["no-self-keyword", "self-keyword"]
+)
+def test_newly_proved_whole_lines_replace_the_previous_bounded_gaps(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, grant: bool, positive: bool
+) -> None:
+    raw = (
+        "{クイック}\n自分のフォロワー1体を選ぶ。それは【合成乙】を持つ。"
+        if grant
+        else "{起動}{コスト1}これを{アクト}：相手のフォロワー1体を選ぶ。それをアクトする。"
+    )
+    with case(
+        tmp_path,
+        monkeypatch,
+        ("【合成甲】\n" if positive else "") + raw,
+        first_batch=True,
+    ) as (db, inputs, settings, _):
+        with db.transaction():
+            report = mechanics.apply(db, inputs, settings)
+        assert report["complete_cards"] == 1
+        expected = {}
+        if grant:
+            expected["kw:storm"] = Json(["grants"])
+        if positive:
+            expected["kw:ward"] = Json(["has"])
+        assert {
+            r.values["keyword_id"]: r.values["relations"]
+            for r in db.rows("mechanic_projection")
+        } == expected

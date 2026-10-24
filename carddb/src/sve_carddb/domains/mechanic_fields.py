@@ -20,7 +20,7 @@ from sve_carddb.domains.mechanic_coverage import (
     required_fields,
     store_evidence,
 )
-from sve_carddb.domains.mechanic_grants import KEYWORDS
+from sve_carddb.domains.mechanic_grants import KEYWORDS, granted_keyword
 from sve_carddb.domains.translations.four_layer_analysis import analyze_source
 from sve_carddb.domains.translations.four_layer_sources import (
     card_field,
@@ -39,7 +39,8 @@ if TYPE_CHECKING:
     from sve_carddb.domains.translations.four_layer_classification import Recognized
     from sve_carddb.domains.translations.four_layer_normalizer import SourcePart
 
-ADAPTER = "manual-keywords-fields-bp01-v11"
+ADAPTER = "manual-keywords-fields-bp01-v12"
+_OTHER_LINE_BREAKS = "\r\v\f\x1c\x1d\x1e\x85\u2028\u2029"
 _EVOLUTION = re.compile(r"\{進化\}\{コスト[0-9]+\}：これは進化する。")
 _FIXED_EFFECT = re.compile(
     r"(?:\{ファンファーレ\}|\{ラストワード\}|【進化時】|"
@@ -157,14 +158,6 @@ _STATE_RULE = re.compile(
     r"自分のエンドフェイズが来たとき、これは\{体力\}\+[0-9]+する。"
     r")"
 )
-_BOUNDED_GRANT = re.compile(
-    r"(?:\{ファンファーレ\}自分の他のフォロワー1体を選ぶ。|"
-    r"自分の墓場のコスト[0-9]+以下のフォロワー1枚を選ぶ。それを場に出す。)"
-    r"それは(?:\{攻撃力\}\+[0-9]+/\{体力\}\+[0-9]+して、)?"
-    r"【(?P<keyword>[^【】]+)】を持つ。"
-)
-
-
 _DECK_LOOK = re.compile(
     r"(?:"
     r"\{ファンファーレ\}自分のデッキの上1枚を見る。その中から、"
@@ -284,6 +277,71 @@ _STACK_COUNTER = re.compile(
 )
 
 
+_TOKEN_CARD_EFFECT = re.compile(
+    r"(?:"
+    r"これを自分の手札から捨てたとき、[0-9]+枚引く。|"
+    r"\{起動\}\{コスト[0-9]+\}これを\{アクト\}：相手のフォロワー1体を選ぶ。"
+    r"それをアクトする。|"
+    r"\{起動\}これを\{アクト\}：フォロワー1体を選ぶ。それを破壊する。"
+    r"それのプレイヤーは『ドラゴン』[1-9][0-9]*体を出す。|"
+    r"(?:\{ファンファーレ\}(?:【土の秘術】)?|\{ラストワード\}|【進化時】)?"
+    r"(?:『(?:大地の魔片|ゴースト|攻撃型ゴーレム|防御型ゴーレム|乙姫お守り隊)』"
+    r"[1-9][0-9]*(?:体|つ)を出す。|"
+    r"『(?:フェアリー|フェアリーウィスプ|防御型ゴーレム)』[1-9][0-9]*枚をEXエリアに置く。)|"
+    r"\{ファンファーレ\}『フェアリー』[1-9][0-9]*体を出す。"
+    r"『フェアリー』[1-9][0-9]*枚をEXエリアに置く。|"
+    r"相手のフォロワー1体を選ぶ。それに[0-9]+ダメージ。"
+    r"『ナイト』[1-9][0-9]*枚をEXエリアに置く。|"
+    r"\{ファンファーレ\}下記から1つチョイスする。【1】【土の秘術】これは"
+    + _STAT_GAIN
+    + r"【2】『大地の魔片』[1-9][0-9]*つを出す。|"
+    r"【土の秘術】自分のゴーレム・フォロワーすべては" + _STAT_GAIN + r"|"
+    r"\{ファンファーレ\}【コンボ_[0-9]+】相手のフォロワー1体を選ぶ。"
+    r"それを破壊する。相手の場に『フェアリー』[1-9][0-9]*体を出す。|"
+    r"『ヴァイキング』[1-9][0-9]*体と『スティールナイト』[1-9][0-9]*体と"
+    r"『ナイト』[1-9][0-9]*体を出す。"
+    r")"
+)
+_NAMED_EX_COUNT = re.compile(
+    r"\{ファンファーレ\}自分のEXエリアの妖精・フォロワーを好きな枚数選ぶ。"
+    r"それは『薔薇の一撃』に変身する。\n"
+    r"\{起動\}これを\{アクト\}：自分のPPを「自分のEXエリアの『薔薇の一撃』の枚数」"
+    r"と同じだけ回復する。"
+)
+_TOKEN_DEFINITION = re.compile(
+    r"(?:"
+    r"『(?:フェアリー|フェアリーウィスプ)』\{エルフ\}妖精・フォロワー"
+    r"\{コスト[0-9]+\}\{攻撃力\}[0-9]+/\{体力\}[0-9]+|"
+    r"『(?:ナイト|スティールナイト)』\{ロイヤル\}兵士・フォロワー"
+    r"\{コスト[0-9]+\}\{攻撃力\}[0-9]+/\{体力\}[0-9]+|"
+    r"『ヴァイキング』\{ロイヤル\}盗賊・フォロワー"
+    r"\{コスト[0-9]+\}\{攻撃力\}[0-9]+/\{体力\}[0-9]+【疾走】|"
+    r"『乙姫お守り隊』\{ロイヤル\}兵士・フォロワー"
+    r"\{コスト[0-9]+\}\{攻撃力\}[0-9]+/\{体力\}[0-9]+【守護】|"
+    r"『攻撃型ゴーレム』\{ウィッチ\}ゴーレム・フォロワー"
+    r"\{コスト[0-9]+\}\{攻撃力\}[0-9]+/\{体力\}[0-9]+【突進】|"
+    r"『防御型ゴーレム』\{ウィッチ\}ゴーレム・フォロワー"
+    r"\{コスト[0-9]+\}\{攻撃力\}[0-9]+/\{体力\}[0-9]+【守護】|"
+    r"『ドラゴン』\{ドラゴン\}竜族・フォロワー"
+    r"\{コスト[0-9]+\}\{攻撃力\}[0-9]+/\{体力\}[0-9]+|"
+    r"『ゴースト』\{ナイトメア\}死者・フォロワー"
+    r"\{コスト[0-9]+\}\{攻撃力\}[0-9]+/\{体力\}[0-9]+【疾走】"
+    r"自分のエンドフェイズが来たとき、これは消滅する。|"
+    r"『大地の魔片』\{ウィッチ\}土の印・アミュレット\{コスト[0-9]+\}【スタック】|"
+    r"『薔薇の一撃』\{エルフ\}植物族・スペル\{コスト[0-9]+\}"
+    r"相手のリーダー1人か相手のフォロワー1体を選ぶ。それに[0-9]+ダメージ。[0-9]+枚引く。"
+    r")"
+)
+
+
+def _section_field(raw: str) -> bool:
+    """Native token abilities belong to the definition's token, never its parent."""
+    return not any(char in raw for char in _OTHER_LINE_BREAKS) and (
+        bool(re.fullmatch(r"[0-9]+枚引く。", raw))
+        or all(_TOKEN_DEFINITION.fullmatch(line) for line in raw.split("\n"))
+    )
+
+
 _BOUNDED_BODIES = (
     _EVOLUTION,
     _FIXED_EFFECT,
@@ -305,25 +363,8 @@ _BOUNDED_BODIES = (
     _ZONE_COST_REPLACEMENT,
     _NAMED_TOKEN,
     _STACK_COUNTER,
+    _TOKEN_CARD_EFFECT,
 )
-
-
-def _bounded_body(
-    text: str, settings: Settings, keywords: Mapping[str, str]
-) -> bool | None:
-    """None: no bounded form applies; False: a grant whose keyword is not unique."""
-    if any(pattern.fullmatch(text) for pattern in _BOUNDED_BODIES):
-        return True
-    grant = _BOUNDED_GRANT.fullmatch(text)
-    if grant is None:
-        return None
-    return (
-        sum(
-            settings.classifier.terms[term].source_ja == grant["keyword"]
-            for term in keywords
-        )
-        == 1
-    )
 
 
 def _declared_keywords(
@@ -363,15 +404,16 @@ def _main_field(
     keywords: Mapping[str, str],
 ) -> bool:
     """Prove bounded fixed effects independently of H1 declarations."""
-    if "「" in raw or "」" in raw:
-        return False
+    if any(char in raw for char in _OTHER_LINE_BREAKS + "「」"):
+        return _NAMED_EX_COUNT.fullmatch(raw) is not None
     derived = analyze_source(raw, source, settings.classifier)
-    # Certify the attached reminder with its entire line, never in isolation.
-    reminder_lines: list[tuple[int, int]] = []
+    # Grants must match the producer's untrimmed line, not a normalized body slice.
+    terms = {term: settings.classifier.terms[term].source_ja for term in keywords}
+    proved_lines: list[tuple[int, int]] = []
     offset = 0
     for line in raw.split("\n"):
-        if _REMINDER_EFFECT.fullmatch(line):
-            reminder_lines.append((offset, offset + len(line)))
+        if _REMINDER_EFFECT.fullmatch(line) or granted_keyword(line, terms) is not None:
+            proved_lines.append((offset, offset + len(line)))
         offset += len(line) + 1
     bodies = 0
     for part, found in zip(derived.field.parts, derived.recognized, strict=True):
@@ -385,7 +427,7 @@ def _main_field(
                     start <= span.start and span.end <= end
                     for span in part.source_span.segments
                 )
-                for start, end in reminder_lines
+                for start, end in proved_lines
             )
         ):
             bodies += part.source_span.role == "body"
@@ -394,11 +436,14 @@ def _main_field(
             return False
         spans = part.source_span.segments
         bounded = (
-            _bounded_body(raw[spans[0].start : spans[0].end], settings, keywords)
+            any(
+                pattern.fullmatch(raw[spans[0].start : spans[0].end])
+                for pattern in _BOUNDED_BODIES
+            )
             if len(spans) == 1
-            else None
+            else False
         )
-        if bounded is None:
+        if not bounded:
             bounded = _declared_keywords(raw, source, settings, keywords, part, found)
         if not bounded:
             return False
@@ -422,10 +467,13 @@ def _sections_closed(
         )
     )
     frozen = pointer(document, ref.locator.rsplit("/", 1)[0] + "/sections")
-    rows = db.select(
-        "face_text_section",
-        db.columns("face_text_section"),
-        where={"revision_id": source.owner.revision_id},
+    rows = sorted(
+        db.select(
+            "face_text_section",
+            db.columns("face_text_section"),
+            where={"revision_id": source.owner.revision_id},
+        ),
+        key=lambda row: int(str(row.values["ordinal"])),
     )
     actual = [
         card_field(
@@ -448,6 +496,8 @@ def _proved(
     if not raw:
         return True
     if source.field == "section":
+        if _section_field(raw):
+            return True
         reasons["nonempty_section"] += 1
         return False
     if not _main_field(raw, source, settings, keywords):
@@ -466,6 +516,7 @@ def _checks(
 ) -> tuple[FieldCheck, ...]:
     checks: list[FieldCheck] = []
     closed: dict[str, bool] = {}
+    main_proved: set[str] = set()
     for face, revision, field, ordinal, relation in sorted(required):
         if relation != "has":
             continue
@@ -477,7 +528,7 @@ def _checks(
             field="effect" if field == "effect" else "section",
             ordinal=ordinal,
         )
-        if field == "section" and not closed[face]:
+        if field == "section" and (not closed[face] or face not in main_proved):
             continue
         source = descriptor(db, settings.sources, owner, settings.batch_id)
         original = card_source(db, settings.sources, source)
@@ -490,6 +541,8 @@ def _checks(
                 continue
         if not _proved(original.text, source, settings, keywords, reasons):
             continue
+        if field == "effect":
+            main_proved.add(face)
         checks.extend(
             FieldCheck(
                 face_id=face,

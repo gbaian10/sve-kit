@@ -83,7 +83,7 @@ token 原生 keyword 不會掛到母卡。主文明示額外授予生成 token �
 含「」的主文整欄略過，sections 全不檢查，因此 token 的原生能力仍屬 token。
 只在匹配行提交相應 relation 的局部檢查，`whole_field=false`；四關係都有 producer 仍不構成 complete。
 
-完整欄位 adapter `manual-keywords-fields-bp01-v11` 沿用固定首批集合、confirmed JP current
+完整欄位 adapter `manual-keywords-fields-bp01-v12` 沿用固定首批集合、confirmed JP current
 及十個已登錄 keyword。每個面先驗 exact owner 主文與凍結來源的完整有序 section 清單；
 來源與資料庫的 section 數量、順序或原文字節不符時，該面不提交完整檢查。
 空主文須明驗凍結來源為 null 或空字串、已 intern 的原文確為空字串；空 section 也須驗自己的來源位置。
@@ -322,7 +322,29 @@ token 原生 keyword 不會掛到母卡。主文明示額外授予生成 token �
 
 任何其他未證明句型、pending、未證明 reminder 或引號能力
 都留下缺口，不能以另一個正標籤補滿；固定句本身可獨立證明，不要求翻譯已實作。
-非空 sections 全數保留缺口，包含 token_definition；不把 token 原生 keyword 掛到母卡。
+非空 section 只在同面主文完整證明、完整有序來源清單已重驗後，逐 ordinal 檢查以下有限入口：
+
+- 全文為固定張數抽牌句。
+- 全文逐行為具名 token 定義；逐行 fullmatch，不忽略空白、未知尾句或缺漏行。
+  follower 的名稱／class／trait 組合限フェアリー、フェアリーウィスプ、ナイト、
+  スティールナイト、ヴァイキング、乙姫お守り隊、攻撃型ゴーレム、防御型ゴーレム、
+  ドラゴン、ゴースト；cost／attack／health 均須明示 ASCII 數值。
+  原生 keyword suffix 依名稱固定為無、疾走、守護或突進；ゴースト並須完整附上 end phase 消滅句。
+  amulet 僅大地の魔片的土の印／stack 定義；spell 僅薔薇の一撃的植物族／固定傷害及抽牌定義。
+  一個 section 含多個定義時，每行均須證明。
+
+section kind（包括 unknown）不授證明資格，也不因本檢查重新分類；上述入口靠 exact 原文結構
+證明十個 keyword 四關係，不授 verified DSL。token 原生 keyword 仍只屬 token，
+不把它掛到母卡。未知 section、未知主文、未證其他面各自保留缺口。
+主文與 section 不接受 CR、Unicode 行界等替代換行；定義以 LF 分行完整檢查。
+
+配套主文有限入口另檢查：discard 觸發固定抽牌、具名生成／EX 放置、傷害後 EX 放置、
+土の秘術的 choice／費用／ゴーレム增幅、combo 破壞後對手生成、三具名 token 生成、
+附固定 PP 費用的 act，以及破壞後由該從者玩家生成ドラゴン。每行完整 fullmatch；
+自身宣告、進化句、其他 body 仍各自證明。grants 行共用正標籤 producer 的有限句型與
+唯一 keyword mapping 判定，完整欄位不產正標籤，不證現有 producer 未涵蓋的 grants。
+含引號主文仍拒絕，唯一新增例外是整欄恰為兩行：EX 妖精任意張數變身薔薇の一撃，
+再以アクト費用回復等於 EX 薔薇の一撃張數的 PP；全文必須完全匹配，沒有其他字元或行。
 
 已證明的空欄位與上述完整主文，對十個 keyword 的 has／grants／refers／counts 各提交
 `whole_field=true`，自身 has 正標籤仍只由 H1 產生。缺 current 的面不提交檢查，也不從必要範圍刪除。
