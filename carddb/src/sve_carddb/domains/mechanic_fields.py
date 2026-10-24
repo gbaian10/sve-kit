@@ -39,7 +39,7 @@ if TYPE_CHECKING:
     from sve_carddb.domains.translations.four_layer_classification import Recognized
     from sve_carddb.domains.translations.four_layer_normalizer import SourcePart
 
-ADAPTER = "manual-keywords-fields-bp01-v12"
+ADAPTER = "manual-keywords-fields-bp01-v13"
 _OTHER_LINE_BREAKS = "\r\v\f\x1c\x1d\x1e\x85\u2028\u2029"
 _EVOLUTION = re.compile(r"\{進化\}\{コスト[0-9]+\}：これは進化する。")
 _FIXED_EFFECT = re.compile(
@@ -250,6 +250,33 @@ _ZONE_COST_REPLACEMENT = re.compile(
 )
 
 
+_QUOTED_MAIN_FIELD = re.compile(
+    r"(?:"
+    r"\{進化\}\{コスト0\}：これは進化する。\n【突進】\n"
+    r"\{ファンファーレ\}これは\{攻撃力\}\+Xする。"
+    r"Xは「これを含めず、このターン中に自分がプレイしたカードの枚数」である。|"
+    r"\{クイック\}\n"
+    r"相手のリーダー1人か相手のフォロワー1体を選ぶ。1枚引く。"
+    r"それに「自分の手札の枚数」と同じダメージ。|"
+    r"【突進】\n"
+    r"\{ファンファーレ\}他のフォロワー1体を選ぶ。"
+    r"これは\{攻撃力\}\+Xする。"
+    r"Xは「選んだフォロワーの攻撃力」である。|"
+    r"【スタック】（【スタック】を持つアミュレットは、下記の能力を持つ。"
+    r"「これはスタックカウンター1個を置いた状態で場に出る」"
+    r"「これが場を離れる際、代わりにこれのスタックカウンター1個を取る」"
+    r"「これのスタックカウンターが0個なら、これを墓場に置く」"
+    r"「\{起動\}これを\{アクト\}：自分の場の他の【スタック】を持つアミュレット1つを選ぶ。"
+    r"それにこれのスタックカウンターすべてを移す」）"
+    r")"
+)
+_PUBLIC_HAND_DISCARD_FIELD = re.compile(
+    r"【進化時】自分のリーダーに2ダメージ。"
+    r"相手プレイヤー1人は手札を公開する。"
+    r"自分はその中から1枚を選ぶ。相手はそれを捨てる。"
+)
+
+
 _NAMED_TOKEN = re.compile(
     r"(?:"
     r"【進化時】『乙姫お守り隊』3枚を、場が上限になるまで出す。残りをEXエリアに置く。|"
@@ -397,6 +424,24 @@ def _declared_keywords(
     return True
 
 
+def _quoted_field_decision(raw: str) -> bool | None:
+    if (
+        _NAMED_EX_COUNT.fullmatch(raw)
+        or _QUOTED_MAIN_FIELD.fullmatch(raw)
+        or _PUBLIC_HAND_DISCARD_FIELD.fullmatch(raw)
+    ):
+        return True
+    if "「" in raw or "」" in raw:
+        return False
+    return None
+
+
+def _special_field_decision(raw: str) -> bool | None:
+    if any(char in raw for char in _OTHER_LINE_BREAKS):
+        return _NAMED_EX_COUNT.fullmatch(raw) is not None
+    return _quoted_field_decision(raw)
+
+
 def _main_field(
     raw: str,
     source: SourceDescriptor,
@@ -404,8 +449,9 @@ def _main_field(
     keywords: Mapping[str, str],
 ) -> bool:
     """Prove bounded fixed effects independently of H1 declarations."""
-    if any(char in raw for char in _OTHER_LINE_BREAKS + "「」"):
-        return _NAMED_EX_COUNT.fullmatch(raw) is not None
+    quoted_decision = _special_field_decision(raw)
+    if quoted_decision is not None:
+        return quoted_decision
     derived = analyze_source(raw, source, settings.classifier)
     # Grants must match the producer's untrimmed line, not a normalized body slice.
     terms = {term: settings.classifier.terms[term].source_ja for term in keywords}
