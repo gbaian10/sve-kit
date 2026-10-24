@@ -28,6 +28,8 @@ class ConstructionOutline:
 
 def parse_construction_outline(body: bytes) -> ConstructionOutline:
     """Extract observations only; official selectors and semantic recipes await a pilot."""
+    if not body.rstrip().lower().endswith(b"</html>"):
+        raise ValueError("construction source lacks a terminal HTML document marker")
     document = parse(body.decode("utf-8"))
     title = require_one(document, "title").text().strip()
     content = require_one(document, "main, article")

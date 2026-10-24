@@ -18,7 +18,7 @@ from sve_carddb.ingest.crawl.construction_sources import (
 )
 from sve_carddb.ingest.http.client import StopCrawlError
 from sve_carddb.ingest.http.throttle import Throttle
-from sve_carddb.ingest.http.writer import Writer
+from sve_carddb.ingest.http.writer import PathConflictError, Writer
 from sve_carddb.parse.html import MissingElementError
 from sve_carddb.parse.pages.construction_outline import parse_construction_outline
 
@@ -138,11 +138,22 @@ async def test_mock_batch_records_metadata_spaces_requests_and_skips_existing(
             throttle = Throttle(2.5, 0, clock=clock, sleep=clock.sleep)
             assert (
                 await fetch_new(
-                    [JP, EN],
+                    [JP],
                     http,
                     writer,
                     throttle=throttle,
                     run_id="synthetic",
+                    report=reports.append,
+                )
+                == 0
+            )
+            assert (
+                await fetch_new(
+                    [JP, EN],
+                    http,
+                    writer,
+                    throttle=throttle,
+                    run_id="mixed",
                     report=reports.append,
                 )
                 == 0
@@ -174,16 +185,28 @@ async def test_mock_batch_records_metadata_spaces_requests_and_skips_existing(
         assert not manifest.requests.has_started()
     assert [report.outcome for report in reports] == [
         "fetched",
+        "existing-trusted",
         "fetched",
         "existing-trusted",
         "existing-trusted",
     ]
 
 
-@pytest.mark.parametrize("status", [200, 304, 404, 503])
+@pytest.mark.parametrize(
+    ("status", "body"),
+    [
+        (200, b"<title>Challenge</title>"),
+        (304, BODY),
+        (404, BODY),
+        (503, BODY),
+        (200, b"<html><head><title>T</title></head><body><main><h1>x</h1><p>abc"),
+    ],
+    ids=["incomplete", "not-modified", "missing", "unavailable", "truncated"],
+)
 async def test_invalid_response_is_not_stored_or_retried(
     tmp_path: Path,
     status: int,
+    body: bytes,
 ) -> None:
     calls: list[httpx.Request] = []
 
@@ -191,7 +214,7 @@ async def test_invalid_response_is_not_stored_or_retried(
         calls.append(request)
         return httpx.Response(
             status,
-            content=b"<title>Challenge</title>",
+            content=body,
             headers={"content-type": "text/html"},
         )
 
@@ -212,6 +235,66 @@ async def test_invalid_response_is_not_stored_or_retried(
         assert manifest.requests.outcomes(JP) == [Outcome.FAILED]
         assert not manifest.requests.has_started()
     assert len(calls) == 1
+
+
+@pytest.mark.parametrize("status", [403, 429])
+async def test_error_status_never_retries(tmp_path: Path, status: int) -> None:
+    calls: list[httpx.Request] = []
+
+    def respond(request: httpx.Request) -> httpx.Response:
+        calls.append(request)
+        return httpx.Response(status, content=BODY)
+
+    with Manifest.open(tmp_path / "manifest.sqlite") as manifest:
+        async with httpx.AsyncClient(transport=httpx.MockTransport(respond)) as http:
+
+            async def fetch() -> int:
+                return await fetch_new(
+                    [JP],
+                    http,
+                    Writer(tmp_path / "data", manifest, create_only=True),
+                    throttle=Throttle(2, 0),
+                    run_id="status",
+                    report=lambda _: None,
+                )
+
+            if status == 403:
+                with pytest.raises(StopCrawlError):
+                    await fetch()
+            else:
+                assert await fetch() == 1
+        assert manifest.resources.get(JP) is None
+        assert manifest.requests.outcomes(JP) == [Outcome.FAILED]
+        assert not manifest.requests.has_started()
+    assert len(calls) == 1
+
+
+async def test_existing_destination_blocks_all_requests(tmp_path: Path) -> None:
+    calls: list[httpx.Request] = []
+    source = select_sources([JP])[0]
+    destination = tmp_path / "data" / source.path
+    destination.parent.mkdir(parents=True)
+    destination.write_bytes(b"unowned")
+
+    def respond(request: httpx.Request) -> httpx.Response:
+        calls.append(request)
+        return httpx.Response(200, content=BODY)
+
+    with Manifest.open(tmp_path / "manifest.sqlite") as manifest:
+        async with httpx.AsyncClient(transport=httpx.MockTransport(respond)) as http:
+            with pytest.raises(PathConflictError):
+                await fetch_new(
+                    [EN, JP],
+                    http,
+                    Writer(tmp_path / "data", manifest, create_only=True),
+                    throttle=Throttle(2, 0),
+                    run_id="destination",
+                    report=lambda _: None,
+                )
+        assert not manifest.requests.has_started()
+        assert list(manifest.resources.all()) == []
+    assert calls == []
+    assert destination.read_bytes() == b"unowned"
 
 
 async def test_refuses_redirect_even_to_another_selected_url(tmp_path: Path) -> None:
