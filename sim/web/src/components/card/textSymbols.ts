@@ -160,19 +160,3 @@ export function inlinePieces(text: string): readonly InlinePiece[] {
     pieces.push({ kind: "text", text: text.slice(cursor), start: cursor, end: text.length })
   return pieces
 }
-
-/** The offsets of the `line`th newline-separated line of `text`; the data's own line structure. */
-export function lineWindow(
-  text: string,
-  line: number,
-): { readonly start: number; readonly end: number } {
-  if (!Number.isInteger(line) || line < 0) return { start: text.length, end: text.length }
-  let start = 0
-  for (let index = 0; index < line; index++) {
-    const newline = text.indexOf("\n", start)
-    if (newline < 0) return { start: text.length, end: text.length }
-    start = newline + 1
-  }
-  const end = text.indexOf("\n", start)
-  return { start, end: end < 0 ? text.length : end }
-}
