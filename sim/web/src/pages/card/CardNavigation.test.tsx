@@ -241,6 +241,25 @@ afterEach(() => {
 })
 
 describe("card navigation commits", () => {
+  it("collapses errata again when returning to a retained card", async () => {
+    const h = await setup()
+    await act(async () => {
+      await h.router.navigate("/cards/BP01-020")
+    })
+    const toggle = await screen.findByRole("button", { name: "勘誤", expanded: false })
+    await userEvent.click(toggle)
+    expect(screen.getByRole("link", { name: "官方勘誤公告" })).toBeVisible()
+    await act(async () => {
+      await h.router.navigate("/elsewhere")
+    })
+    expect(screen.getByText("Elsewhere")).toBeVisible()
+    await act(async () => {
+      await h.router.navigate("/cards/BP01-020")
+    })
+    expect(await screen.findByRole("button", { name: "勘誤", expanded: false })).toBeVisible()
+    expect(screen.queryByRole("link", { name: "官方勘誤公告" })).not.toBeInTheDocument()
+  })
+
   it("restores a prepared card after leaving the card route without waiting for a new read", async () => {
     const h = await setup()
     const first = state.order[0]

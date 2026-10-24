@@ -1,4 +1,5 @@
 import { render, screen, within } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
 import { afterEach, expect, it } from "vitest"
 
 import { buildSnapshot } from "../../../scripts/fixture/build"
@@ -43,6 +44,7 @@ async function renderErrata(cards: readonly Card[] = CARDS) {
 
 it("shows reconstructed full text and pairs excerpt translations with marked originals", async () => {
   const notice = await renderErrata()
+  await userEvent.click(within(notice).getByRole("button", { name: "勘誤" }))
   expect(notice.querySelector("time")).toBeNull()
   expect(within(notice).queryByText(/2026-03-01/u)).not.toBeInTheDocument()
   expect(within(notice).getByRole("link", { name: "官方勘誤公告" })).toHaveAttribute(
@@ -76,6 +78,7 @@ it("shows reconstructed full text and pairs excerpt translations with marked ori
 it("hides excerpt translations when original-only is preferred", async () => {
   prefsStore.set({ effectLanguage: "original" })
   const notice = await renderErrata()
+  await userEvent.click(within(notice).getByRole("button", { name: "勘誤" }))
   expect(notice.querySelector('[lang="zh-Hant"]')).toBeNull()
   expect(notice.querySelectorAll("[data-original]")).toHaveLength(2)
 })
@@ -101,6 +104,7 @@ it.each([true, false])(
         : card,
     )
     const notice = await renderErrata(cards)
+    await userEvent.click(within(notice).getByRole("button", { name: "勘誤" }))
     expect(notice.querySelectorAll("[data-line]")).toHaveLength(0)
     expect(notice.querySelectorAll("[data-original]")).toHaveLength(2)
     expect([...notice.querySelectorAll('[lang="ja"]')].map((node) => node.textContent)).toEqual([
@@ -125,6 +129,42 @@ it.each([true, false])(
       expect(translation.nextElementSibling).toHaveAttribute("data-original")
   },
 )
+
+it("starts collapsed and toggles the complete errata content with a click", async () => {
+  const notice = await renderErrata()
+  const toggle = within(notice).getByRole("button", { name: "勘誤", expanded: false })
+  const content = document.getElementById(toggle.getAttribute("aria-controls") ?? "")
+  expect(content).not.toBeVisible()
+  expect(within(notice).queryByRole("link", { name: "官方勘誤公告" })).not.toBeInTheDocument()
+  expect(within(notice).queryByText(/此版次的完整印刷文字尚未確認/u)).not.toBeInTheDocument()
+  await userEvent.click(toggle)
+  expect(toggle).toHaveAttribute("aria-expanded", "true")
+  expect(content).toBeVisible()
+  expect(within(notice).getByRole("link", { name: "官方勘誤公告" })).toBeVisible()
+  expect(
+    within(notice).getByRole("heading", { name: "勘誤前完整文字（依公告還原）" }),
+  ).toBeVisible()
+  expect(within(notice).getByRole("heading", { name: "勘誤後完整文字" })).toBeVisible()
+  expect(within(notice).getByText(/BP01-020（印刷文字未確認）/u)).toBeVisible()
+  await userEvent.click(toggle)
+  expect(toggle).toHaveAttribute("aria-expanded", "false")
+  expect(content).not.toBeVisible()
+  expect(within(notice).queryByRole("link")).not.toBeInTheDocument()
+})
+
+it.each(["{Enter}", " "])("toggles errata from the keyboard with %s", async (key) => {
+  const user = userEvent.setup()
+  const notice = await renderErrata()
+  const toggle = within(notice).getByRole("button", { name: "勘誤", expanded: false })
+  await user.tab()
+  expect(toggle).toHaveFocus()
+  await user.keyboard(key)
+  expect(toggle).toHaveAttribute("aria-expanded", "true")
+  expect(within(notice).getByRole("link", { name: "官方勘誤公告" })).toBeVisible()
+  await user.keyboard(key)
+  expect(toggle).toHaveAttribute("aria-expanded", "false")
+  expect(within(notice).queryByRole("link")).not.toBeInTheDocument()
+})
 
 it("emphasizes explicit keyword headings without inventing historical annotation references", () => {
   const { container } = render(<InlineText text="【連擊 5】改為選擇。" emphasis />)
