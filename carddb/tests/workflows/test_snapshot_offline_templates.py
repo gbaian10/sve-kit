@@ -52,11 +52,14 @@ SCHEMA = (
     "rulings",
 )
 RAW = "カードを2枚引く。"
+FRESH_NAME = "Synthetic Fresh Name"
+PENDING_NAME = "第三"
+PENDING_SENTENCE = "Synthetic units may choose a distant token."
 TEXTS = {
-    "BP02-071": ("数値仮名", RAW),
+    "BP02-071": (FRESH_NAME, RAW),
     "PR-001": ("名前", "『名前』を1枚手札に加える。"),
     "BP02-072": ("別名", "『別名』を1枚手札に加える。"),
-    "BP02-073": ("第三", "Rule."),
+    "BP02-073": (PENDING_NAME, PENDING_SENTENCE),
 }
 RULE_CONTENT = canonical(
     {
@@ -127,11 +130,13 @@ def test_normal_offline_build_reads_authored_frames_and_keeps_whole_field_fallba
             db, load_glossary(root), sources, case.vocabulary, rules
         )
         units = {row.values["id"]: row.values["text"] for row in db.rows("text_unit")}
-        revision = next(
+        revisions = [
             r.values
             for r in db.rows("face_revision")
             if r.values["region"] == "jp" and units[r.values["effect_unit_id"]] == RAW
-        )
+        ]
+        assert len(revisions) == 1
+        revision = revisions[0]
         field = OwnerField(
             owner=FaceRevisionOwner(
                 kind="face_revision", revision_id=str(revision["id"])
@@ -201,6 +206,48 @@ def test_normal_offline_build_reads_authored_frames_and_keeps_whole_field_fallba
     after = build(recipe, bundle_dir=tmp_path / "after")
     report = object_value(after.report["effect_translations"])
     assert report["translated"] == int(translated)
+    pending_sentence_hash = digest(PENDING_SENTENCE.encode())[7:]
+    pending_fresh_owner = [
+        object_value(item)
+        for item in array(report["owner_fields"])
+        if object_value(item)["source_hash"] == pending_sentence_hash
+    ]
+    assert len(pending_fresh_owner) == 1
+    assert pending_fresh_owner[0]["translated"] is False
+    assert pending_fresh_owner[0]["reasons"] == ["unmatched_source_frame"]
+    pending_owner_id = str(object_value(pending_fresh_owner[0]["owner"])["revision_id"])
+    pending_owner = next(
+        object_value(row)
+        for row in after.projection.tables["face_revision"]
+        if object_value(row)["id"] == pending_owner_id
+    )
+    units = {
+        str(object_value(row)["id"]): str(object_value(row)["text"])
+        for row in after.projection.tables["text_unit"]
+    }
+    assert units[str(pending_owner["name_unit_id"])] == PENDING_NAME
+    pending_effect_translations = [
+        object_value(item)
+        for item in array(pending_owner["translations"])
+        if object_value(item)["field"] == "effect"
+    ]
+    assert pending_effect_translations == []
+    reused_frame_owners = [
+        object_value(item)
+        for item in array(report["owner_fields"])
+        if object_value(item)["source_hash"] == digest(RAW.encode())[7:]
+    ]
+    assert len(reused_frame_owners) == 1
+    reused_frame_owner = reused_frame_owners[0]
+    assert reused_frame_owner["translated"] is translated
+    reused_owner_id = str(object_value(reused_frame_owner["owner"])["revision_id"])
+    reused_owner = next(
+        object_value(row)
+        for row in after.projection.tables["face_revision"]
+        if object_value(row)["id"] == reused_owner_id
+    )
+    assert units[str(reused_owner["name_unit_id"])] == FRESH_NAME
+
     if translated:
         assert report["low_confidence"] == 1
     else:
