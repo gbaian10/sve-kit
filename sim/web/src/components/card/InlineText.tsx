@@ -2,7 +2,7 @@ import { Fragment, type ReactNode, useMemo } from "react"
 
 import type { TextRange } from "../../data"
 import { usePrefs } from "../../settings"
-import { inlinePieces, lineWindow, type SymbolPiece } from "./textSymbols"
+import { inlinePieces, type SymbolPiece } from "./textSymbols"
 
 // Alt preserves the marker's meaning; glyph-sized icons keep card text in normal flow.
 export function SymbolIcon({ piece }: { readonly piece: SymbolPiece }) {
@@ -29,16 +29,13 @@ export function InlineText({
   text,
   emphasis = false,
   changes,
-  line,
 }: {
   readonly text: string
   readonly emphasis?: boolean
   readonly changes?: { readonly kind: "removed" | "added"; readonly ranges: readonly TextRange[] }
-  readonly line?: number | undefined
 }) {
   const { termEmphasis } = usePrefs()
   const pieces = useMemo(() => inlinePieces(text), [text])
-  const window = line === undefined ? { start: 0, end: text.length } : lineWindow(text, line)
   const mark = (content: ReactNode, key: number) =>
     changes?.kind === "removed" ? (
       <del key={key}>{content}</del>
@@ -64,7 +61,7 @@ export function InlineText({
   const content = (start: number, end: number) =>
     pieces.flatMap((piece, index) => {
       if (piece.end <= start || piece.start >= end) return []
-      if (piece.kind === "text" || piece.start < start || piece.end > end)
+      if (piece.kind === "text")
         return [
           <Fragment key={index}>
             {plain(Math.max(start, piece.start), Math.min(end, piece.end))}
@@ -79,11 +76,10 @@ export function InlineText({
     })
   // Parse emphasis on the full source before applying marks, including icons inside a heading.
   const groups: ReactNode[] = []
-  let cursor = window.start
+  let cursor = 0
   if (emphasis && termEmphasis)
     for (const match of text.matchAll(/【[^】]+】/gu)) {
       const end = match.index + match[0].length
-      if (end <= window.start || match.index >= window.end) continue
       if (
         pieces.some(
           (piece) =>
@@ -93,13 +89,12 @@ export function InlineText({
         )
       )
         continue
-      const left = Math.max(window.start, match.index)
-      const right = Math.min(window.end, end)
-      if (cursor < left) groups.push(<Fragment key={cursor}>{content(cursor, left)}</Fragment>)
-      groups.push(<strong key={left}>{content(left, right)}</strong>)
-      cursor = right
+      if (cursor < match.index)
+        groups.push(<Fragment key={cursor}>{content(cursor, match.index)}</Fragment>)
+      groups.push(<strong key={match.index}>{content(match.index, end)}</strong>)
+      cursor = end
     }
-  if (cursor < window.end)
-    groups.push(<Fragment key={cursor}>{content(cursor, window.end)}</Fragment>)
+  if (cursor < text.length)
+    groups.push(<Fragment key={cursor}>{content(cursor, text.length)}</Fragment>)
   return <>{groups}</>
 }

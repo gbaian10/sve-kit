@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { InlineText } from "../../components/card/InlineText"
-import { OriginalBox, PairedLines } from "../../components/card/OriginalBox"
+import { OriginalBox } from "../../components/card/OriginalBox"
 import { useTextLanguage } from "../../components/card/text-language"
 import { Button } from "../../components/ui/Button"
 import { Link } from "../../components/ui/Link"
@@ -35,20 +35,17 @@ function Wording({
   lang,
   side,
   ranges = [],
-  line,
 }: {
   readonly text: string
   readonly lang: string
   readonly side?: "before" | "after"
   readonly ranges?: readonly TextRange[]
-  readonly line?: number | undefined
 }) {
   return (
     <p lang={lang} className="whitespace-pre-wrap">
       <InlineText
         text={text}
         emphasis
-        line={line}
         changes={{ kind: side === "before" ? "removed" : "added", ranges }}
       />
     </p>
@@ -70,27 +67,17 @@ function PairedWording({
 }) {
   const prefs = usePrefs()
   const language = useTextLanguage()
-  const source = (line?: number) => (
-    <Wording
-      text={original}
-      lang={region === "jp" ? "ja" : "en"}
-      side={side}
-      ranges={ranges}
-      line={line}
-    />
+  const source = (
+    <Wording text={original} lang={region === "jp" ? "ja" : "en"} side={side} ranges={ranges} />
   )
   if (!translation || language !== "zh-Hant" || prefs.effectLanguage === "original")
-    return <OriginalBox>{source()}</OriginalBox>
-  const lines = translation.split("\n").length
+    return <OriginalBox>{source}</OriginalBox>
   // JP-source translations keep their source alongside them, as the card text does.
   const showOriginal = prefs.effectLanguage === "both" || region === "jp"
   return (
     <div className="space-y-2 text-16 leading-effect text-text-1">
-      <PairedLines
-        lines={lines === original.split("\n").length ? lines : 1}
-        translated={(line) => <Wording text={translation} lang="zh-Hant" line={line} />}
-        original={showOriginal ? source : null}
-      />
+      <Wording text={translation} lang="zh-Hant" />
+      {showOriginal && <OriginalBox>{source}</OriginalBox>}
     </div>
   )
 }

@@ -77,7 +77,7 @@ it("hides excerpt translations when original-only is preferred", async () => {
 })
 
 it.each([true, false])(
-  "pairs source lines only when translation line counts match (%s)",
+  "keeps each whole translation above one whole original even when line counts match (%s)",
   async (matching) => {
     const cards = CARDS.map((card) =>
       card.id === "c:bp01-020"
@@ -97,15 +97,24 @@ it.each([true, false])(
         : card,
     )
     const notice = await renderErrata(cards)
-    expect(notice.querySelectorAll("[data-line]")).toHaveLength(matching ? 4 : 0)
+    expect(notice.querySelectorAll("[data-line]")).toHaveLength(0)
+    expect(notice.querySelectorAll("[data-original]")).toHaveLength(2)
+    expect([...notice.querySelectorAll('[lang="ja"]')].map((node) => node.textContent)).toEqual([
+      "Old A.\nKeep B.",
+      "New A.\nKeep B.",
+    ])
+    expect(
+      [...notice.querySelectorAll('[lang="zh-Hant"]')].map((node) => node.textContent),
+    ).toEqual([
+      matching ? "舊 A。\n保留 B。" : "整段舊譯。",
+      matching ? "新 A。\n保留 B。" : "整段新譯。",
+    ])
     expect(notice.querySelectorAll('[lang="zh-Hant"] del, [lang="zh-Hant"] ins')).toHaveLength(0)
     expect(
       [...notice.querySelectorAll("del, ins")].some((node) => node.textContent.includes("Keep")),
     ).toBe(false)
-    if (matching)
-      for (const line of notice.querySelectorAll("[data-line]")) {
-        expect(line.querySelector('[lang="zh-Hant"] + [data-original] [lang="ja"]')).not.toBeNull()
-      }
+    for (const translation of notice.querySelectorAll('[lang="zh-Hant"]'))
+      expect(translation.nextElementSibling).toHaveAttribute("data-original")
   },
 )
 
