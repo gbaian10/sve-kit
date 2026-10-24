@@ -1040,6 +1040,75 @@ def test_deck_look_keyword_filter_keeps_otherwise_proved_card_open(
         } == {"kw:ward": Json(["has"])}
 
 
+_REMINDER_STATE_ZONE_LINES = (
+    "自分の場のカード1枚を選ぶ。それを手札に戻す。1枚引く。（手札に戻ったトークンはゲームから取り除く）\n"
+    "{進化}{コスト1}：これは進化する。\n"
+    "【合成甲】\n"
+    "{ファンファーレ}場の他のカード1枚を手札に戻す：これは{攻撃力}+1/{体力}+1する。（手札に戻ったトークンはゲームから取り除く）\n"
+    "{クイック}\n"
+    "相手の場のフォロワー1体を選ぶ。それに2ダメージ。【覚醒】状態なら、代わりに4ダメージ。(自分のPP最大値が7以上なら、【覚醒】状態になる)\n"
+    "相手のフォロワー1体を選ぶ。それのプレイヤーはそれをデッキの上か下に置く。【コンボ_5】それをデッキに置く代わりに、相手のフォロワーすべてをそれのプレイヤーはデッキの上か下に置く。（1体ずつ上か下か決める）（デッキに置いたトークンはゲームから取り除く）\n"
+    "{ファンファーレ}相手のフォロワー1体を選ぶ。それをEXエリアに置く。（EXエリアに置いたエボルヴフォロワーはゲームから取り除く）\n"
+    "これがいる限り、自分のフォロワーは攻撃力ではなく体力と同じダメージを与える。\n"
+    "これが場にいる限り、自分がゴーレム・フォロワーをプレイする際、コストを-1する。\n"
+    "自分の場にゴーレム・フォロワーが出たとき、相手のリーダー1人か相手の場のフォロワー1体を選ぶ。それに3ダメージ。\n"
+    "【攻撃時】相手のフォロワーすべてに3ダメージ。自分の墓場に『ツインプリズナー・フラム』と『ツインプリズナー・グラス』があるなら、代わりに7ダメージ。\n"
+    "自分のエンドフェイズが来たとき、これは{体力}+2する。\n"
+    "相手のフォロワー1体を選ぶ。このターン、それはダメージを与えない。\n"
+    "各プレイヤーは、手札すべてをデッキに戻し、シャッフルし、戻した枚数と同じだけ引く。自分は、さらに1枚引く。\n"
+    "これをプレイする際、場のスタンド状態の{ナイトメア}カード4枚を墓場に置く、または、EXエリアの{ナイトメア}カード4枚を消滅：コストを-9する。\n"
+    "これをプレイする際、墓場のスペル10枚を消滅：コストを7にする。\n"
+    "このターンのあと、自分の追加ターンを行う。\n"
+    "{ファンファーレ}自分のデッキの上1枚をEXエリアに置く。それをプレイする際、コストを-2する。\n"
+    "自分のデッキの上1枚をEXエリアに置く。これをEXエリアが上限になるまでくり返す。\n"
+    "次に自分のエンドフェイズが来たとき、自分のEXエリアのカードすべてを消滅させる。"
+)
+
+
+def test_reminder_state_and_zone_replacements_keep_only_self_labels(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    with case(tmp_path, monkeypatch, _REMINDER_STATE_ZONE_LINES, first_batch=True) as (
+        db,
+        inputs,
+        settings,
+        _,
+    ):
+        with db.transaction():
+            report = mechanics.apply(db, inputs, settings)
+        assert report["complete_cards"] == 1
+        assert db.rows("card_mechanic_coverage")[0].values["complete_all"] is True
+        assert {
+            r.values["keyword_id"]: r.values["relations"]
+            for r in db.rows("mechanic_projection")
+        } == {"kw:ward": Json(["has"])}
+
+
+def test_unproved_reminder_keeps_otherwise_proved_field_open(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    raw = _REMINDER_STATE_ZONE_LINES.replace(
+        "（手札に戻ったトークンはゲームから取り除く）",
+        "（手札に戻ったトークンはゲームから取り除く。それは【合成乙】を持つ）",
+    )
+    with case(tmp_path, monkeypatch, raw, first_batch=True) as (
+        db,
+        inputs,
+        settings,
+        _,
+    ):
+        with db.transaction():
+            report = mechanics.apply(db, inputs, settings)
+        assert report["complete_cards"] == 0
+        coverage = db.rows("card_mechanic_coverage")[0].values
+        assert coverage["complete_all"] is False
+        assert coverage["complete_keyword_ids"] == Json([])
+        assert {
+            r.values["keyword_id"]: r.values["relations"]
+            for r in db.rows("mechanic_projection")
+        } == {"kw:ward": Json(["has"])}
+
+
 def test_first_batch_missing_current_back_prevents_complete(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
