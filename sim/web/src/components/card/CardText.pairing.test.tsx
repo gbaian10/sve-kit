@@ -199,4 +199,165 @@ it("interleaves translation and original line by line, and keeps one pair when t
   const whole = screen.getByRole("region", { name: "效果" })
   expect(whole.querySelector("[data-line]")).toBeNull()
   expect(whole.querySelectorAll("[data-original]")).toHaveLength(1)
+  expect([...whole.querySelectorAll("p[lang]")].map((p) => p.textContent)).toEqual([
+    "第一行\n第二行",
+    "一行目\n二行目\n三行目",
+  ])
+})
+
+it.each([true, false])(
+  "keeps missing translations whole in printed pairs (sections: %s)",
+  async (section) => {
+    const { client, resolver, texts } = await pairingCase()
+    texts.set("latest:effect:null", {
+      ...selected("Latest one\nLatest two"),
+      ...(section ? { originalSections: [{ ordinal: 3 }] } : {}),
+    })
+    texts.set("printed:effect:null", {
+      ...selected("Printed one\nPrinted two"),
+      ...(section ? { originalSections: [{ ordinal: 3 }] } : {}),
+    })
+    texts.set("latest:section:3", selected("Latest section one\nLatest section two"))
+    texts.set("printed:section:3", selected("Printed section one\nPrinted section two"))
+    await renderInRouter(
+      <CardText
+        client={client}
+        edition="jp"
+        owner={latest}
+        printed={printed}
+        field="effect"
+        sharedResolver={resolver}
+      />,
+    )
+    const region = screen.getByRole("region", { name: "效果" })
+    expect(region.querySelector("[data-line]")).toBeNull()
+    expect([...region.querySelectorAll("p[lang]")].map((p) => p.textContent)).toEqual([
+      "Latest one\nLatest two",
+      "Printed one\nPrinted two",
+      ...(section
+        ? ["Latest section one\nLatest section two", "Printed section one\nPrinted section two"]
+        : []),
+    ])
+  },
+)
+
+it.each([false, true])(
+  "pairs section lines using the matching original (printed: %s)",
+  async (borrowed) => {
+    const { client, resolver, texts } = await pairingCase()
+    texts.set("latest:section:3", selected("Latest A\nLatest B", "甲\n乙"))
+    texts.set("printed:section:3", selected("Printed A\nPrinted B"))
+    await renderInRouter(
+      <CardText
+        client={client}
+        edition="jp"
+        owner={latest}
+        {...(borrowed ? { printed } : {})}
+        field="effect"
+        sharedResolver={resolver}
+      />,
+    )
+    const region = screen.getByRole("region", { name: "效果" })
+    const lines = [...region.querySelectorAll("[data-line]")]
+    expect(
+      lines.map((line) => [...line.querySelectorAll("p[lang]")].map((p) => p.textContent)),
+    ).toEqual([
+      ["甲", borrowed ? "Printed A" : "Latest A"],
+      ["乙", borrowed ? "Printed B" : "Latest B"],
+    ])
+  },
+)
+
+it.each([false, true])(
+  "falls back to whole printed effect and section when counts differ (mismatch: %s)",
+  async (mismatch) => {
+    const { client, resolver, texts } = await pairingCase()
+    texts.set("latest:effect:null", {
+      ...selected("Latest A\nLatest B", "譯文甲\n譯文乙"),
+      originalSections: [{ ordinal: 3 }],
+    })
+    const printedEffect = mismatch ? "Printed A\nPrinted B\nPrinted C" : "Printed A\nPrinted B"
+    const printedSection = mismatch ? "Section A\nSection B\nSection C" : "Section A\nSection B"
+    texts.set("printed:effect:null", {
+      ...selected(printedEffect),
+      originalSections: [{ ordinal: 3 }],
+    })
+    texts.set("latest:section:3", selected("Latest section A\nLatest section B", "段落甲\n段落乙"))
+    texts.set("printed:section:3", selected(printedSection))
+    await renderInRouter(
+      <CardText
+        client={client}
+        edition="jp"
+        owner={latest}
+        printed={printed}
+        field="effect"
+        sharedResolver={resolver}
+      />,
+    )
+    const region = screen.getByRole("region", { name: "效果" })
+    expect([...region.querySelectorAll("p[lang]")].map((p) => p.textContent)).toEqual(
+      mismatch
+        ? ["譯文甲\n譯文乙", printedEffect, "段落甲\n段落乙", printedSection]
+        : [
+            "譯文甲",
+            "Printed A",
+            "譯文乙",
+            "Printed B",
+            "段落甲",
+            "Section A",
+            "段落乙",
+            "Section B",
+          ],
+    )
+    expect(region.querySelectorAll("[data-line]")).toHaveLength(mismatch ? 0 : 4)
+  },
+)
+
+it("keeps multi-line flavor in one original box", async () => {
+  const { client, resolver, texts } = await pairingCase()
+  texts.set("latest:flavor:null", selected("Original A\nOriginal B", "譯文甲\n譯文乙"))
+  prefsStore.set({ flavorDisplay: "both" })
+  await renderInRouter(
+    <CardText
+      client={client}
+      edition="jp"
+      owner={latest}
+      field="flavor"
+      sharedResolver={resolver}
+    />,
+  )
+  const region = screen.getByRole("region", { name: "風味文字" })
+  expect(region.querySelector("[data-line]")).toBeNull()
+  expect(region.querySelectorAll("[data-original]")).toHaveLength(1)
+  expect([...region.querySelectorAll("p[lang]")].map((p) => p.textContent)).toEqual([
+    "譯文甲\n譯文乙",
+    "Original A\nOriginal B",
+  ])
+})
+
+it("interleaves jp_source lines in translated mode", async () => {
+  const { client, resolver, texts } = await pairingCase()
+  texts.set("latest:effect:null", {
+    ...selected("JP one\nJP two", "譯文甲\n譯文乙"),
+    selection: { basis: "jp_source" },
+  })
+  prefsStore.set({ effectLanguage: "translated" })
+  await renderInRouter(
+    <CardText
+      client={client}
+      edition="en"
+      owner={latest}
+      field="effect"
+      sharedResolver={resolver}
+    />,
+  )
+  const region = screen.getByRole("region", { name: "效果" })
+  expect(
+    [...region.querySelectorAll("[data-line]")].map((line) =>
+      [...line.querySelectorAll("p[lang]")].map((p) => p.textContent),
+    ),
+  ).toEqual([
+    ["譯文甲", "JP one"],
+    ["譯文乙", "JP two"],
+  ])
 })

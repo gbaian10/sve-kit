@@ -62,7 +62,8 @@ function layOut(
   const segments: Segment[] = []
   for (const piece of inlinePieces(text)) {
     if (piece.end <= window.start || piece.start >= window.end) continue
-    if (piece.kind === "symbol") {
+    // Only a complete marker can become an icon; a clipped marker stays source text.
+    if (piece.kind === "symbol" && piece.start >= window.start && piece.end <= window.end) {
       const span = spans.find(
         (candidate) =>
           candidate.reference !== null &&

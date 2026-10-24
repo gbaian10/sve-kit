@@ -166,8 +166,13 @@ export function lineWindow(
   text: string,
   line: number,
 ): { readonly start: number; readonly end: number } {
+  if (!Number.isInteger(line) || line < 0) return { start: text.length, end: text.length }
   let start = 0
-  for (let index = 0; index < line; index++) start = text.indexOf("\n", start) + 1
+  for (let index = 0; index < line; index++) {
+    const newline = text.indexOf("\n", start)
+    if (newline < 0) return { start: text.length, end: text.length }
+    start = newline + 1
+  }
   const end = text.indexOf("\n", start)
   return { start, end: end < 0 ? text.length : end }
 }

@@ -54,7 +54,6 @@ function quality(value: SelectedText | null): string | undefined {
     : undefined
 }
 
-/** How many lines a translation and its original share: their own count when equal, else 1. */
 function sharedLines(
   translated: { readonly unit: JsonObject } | undefined,
   original: { readonly unit: JsonObject } | undefined,
@@ -76,7 +75,6 @@ function PairedLines({
 }: {
   readonly lines: number
   readonly translated: (line?: number) => ReactNode
-  /** null leaves the translation without a box. */
   readonly original: ((line?: number) => ReactNode) | null
 }) {
   if (lines <= 1)
@@ -188,7 +186,7 @@ function SectionText({
     const shown = translated ?? value.original
     body = (
       <PairedLines
-        lines={boxed ? sharedLines(shown, boxed.value?.original) : 1}
+        lines={boxed ? sharedLines(translated, boxed.value?.original) : 1}
         translated={(line) => (
           <AnnotatedText
             value={shown}
@@ -451,7 +449,6 @@ export function CardText({
     const index = printedSections.findIndex((own) => own.ordinal === section.ordinal)
     return index < 0 ? undefined : printedSectionStates[index]
   }
-  // The effect's own translated (or, untranslated, original) text and the original it pairs with.
   const shown = value.translated ?? (blankEffect ? undefined : value.original)
   const originalSide = printed ? printedText.value?.original : value.original
   const effectBox = showOriginal && (value.translated || printed) && printedEffect !== null
@@ -476,7 +473,9 @@ export function CardText({
             {shown ? (
               <PairedLines
                 // Flavor text is one passage: it keeps a single original box.
-                lines={effectBox && field === "effect" ? sharedLines(shown, originalSide) : 1}
+                lines={
+                  effectBox && field === "effect" ? sharedLines(value.translated, originalSide) : 1
+                }
                 translated={(line) => (
                   <AnnotatedText
                     value={shown}
