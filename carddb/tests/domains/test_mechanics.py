@@ -404,7 +404,7 @@ def test_first_batch_fixed_effects_prove_absence_without_positive_labels(
             id="additional-cost",
         ),
         pytest.param(
-            "{クイック}\n相手のフォロワー1体を選ぶ。それに2ダメージ。",
+            "{スタック}\n相手のフォロワー1体を選ぶ。それに2ダメージ。",
             id="unproved-ability-line",
         ),
         pytest.param(
@@ -426,7 +426,7 @@ def test_first_batch_fixed_effects_prove_absence_without_positive_labels(
         pytest.param("リーダーすべてに２ダメージ。", id="all-fullwidth"),
         pytest.param("リーダーすべてにXダメージ。", id="all-variable"),
         pytest.param("相手のリーダーすべてに1ダメージ。仮。", id="all-extra-effect"),
-        pytest.param("{クイック}\n相手のフォロワーすべてに1ダメージ。", id="all-quick"),
+        pytest.param("{スタック}\n相手のフォロワーすべてに1ダメージ。", id="all-stack"),
         pytest.param("{ラストワード}1枚引く。（未証明の注記）", id="draw-reminder"),
         pytest.param("【合成乙】を持つなら、1枚引く。", id="draw-keyword-condition"),
         pytest.param("相手は1枚引く。", id="draw-other-player"),
@@ -545,6 +545,143 @@ def test_unproved_fixed_effect_without_labels_remains_unknown(
             mechanics.apply(db, inputs, settings)
         assert not db.rows("card_mechanic_coverage")
         assert not db.rows("mechanic_projection")
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        "自分の場に他のフォロワーが出たとき、これは{攻撃力}+1/{体力}+1する。",
+        (
+            "自分の場に{ロイヤル}フォロワーが出たとき、それは{攻撃力}+1/{体力}+1する。\n"
+            "{ファンファーレ}自分の{ロイヤル}フォロワーすべては{攻撃力}+1/{体力}+1する。"
+        ),
+        "{ファンファーレ}自分の他のフォロワーすべては{攻撃力}+1/{体力}+1する。",
+        (
+            "{進化}{コスト2}：これは進化する。\n"
+            "自分の場に他のフォロワーが出たとき、これは{攻撃力}+1する。"
+        ),
+        "自分の場に他のフォロワーが出たとき、これは{攻撃力}+1する。",
+        (
+            "{ファンファーレ}自分の他のフォロワー1体を選ぶ。それは{攻撃力}+1する。\n"
+            "{ラストワード}自分のフォロワー1体を選ぶ。それは{攻撃力}+1する。"
+        ),
+        (
+            "【進化時】相手のフォロワーすべてに2ダメージ。"
+            "自分の他のフォロワーすべては{体力}+2する。"
+        ),
+        (
+            "自分のエンドフェイズが来たとき、自分のフォロワーすべては{攻撃力}+1する。\n"
+            "{ファンファーレ}自分のフォロワー1体を選ぶ。それは{攻撃力}+1する。"
+        ),
+        "自分のフォロワー1体を選ぶ。それは{攻撃力}+2する。",
+        (
+            "{ファンファーレ}自分の場の他の妖精・フォロワーすべてと、"
+            "自分のEXエリアの妖精・フォロワーすべては{攻撃力}+1/{体力}+1する。"
+        ),
+        (
+            "{進化}{コスト1}：これは進化する。\n"
+            "{ファンファーレ}【覚醒】状態なら、これは{攻撃力}+3/{体力}+3する。"
+        ),
+        "{ファンファーレ}【真紅】状態なら、これは{攻撃力}+1/{体力}+1する。",
+        (
+            "{クイック}\n自分のフォロワー1体を選ぶ。"
+            "それは{攻撃力}+1/{体力}+1する。1枚引く。"
+        ),
+        (
+            "{クイック}\n自分のリーダーに2ダメージ。\n"
+            "相手のリーダー1人か相手のフォロワー1体を選ぶ。それに3ダメージ。"
+        ),
+        "{クイック}\n相手のフォロワー1体を選ぶ。それに2ダメージ。",
+        "{クイック}\n相手のフォロワーすべてに1ダメージ。",
+        (
+            "{ファンファーレ}自分の他のフォロワー1体を選ぶ。"
+            "それは{攻撃力}+10/{体力}+0する。12枚引く。"
+        ),
+    ],
+    ids=[f"stats-{index}" for index in range(17)],
+)
+def test_first_batch_stats_and_quick_prove_absence_without_labels(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, raw: str
+) -> None:
+    with case(tmp_path, monkeypatch, raw, first_batch=True) as (
+        db,
+        inputs,
+        settings,
+        _,
+    ):
+        with db.transaction():
+            report = mechanics.apply(db, inputs, settings)
+        assert db.rows("card_mechanic_coverage")[0].values["complete_all"] is True
+        assert report["complete_cards"] == 1
+        assert not db.rows("card_mechanic")
+        assert not db.rows("mechanic_projection")
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        "{ファンファーレ}自分の【合成乙】を持つフォロワーすべては{攻撃力}+1する。",
+        "自分の場に【合成乙】を持つフォロワーが出たとき、これは{攻撃力}+1する。",
+        "{ファンファーレ}【合成乙】状態なら、これは{攻撃力}+1する。",
+        "{ファンファーレ}【真紅】状態なら、これは{攻撃力}+1/{体力}+1して、【突進】を持つ。",
+        "{ファンファーレ}【覚醒】状態なら、これは{攻撃力}+Xする。",
+        "{ファンファーレ}【真紅】状態なら、これは{攻撃力}+１する。",
+        "自分のフォロワー1体を選ぶ。それは{攻撃力}+Xする。",
+        "自分のフォロワー1体を選ぶ。それは{攻撃力}+１する。",
+        "自分のフォロワー1体を選ぶ。それは{攻撃力}-1する。",
+        "自分のフォロワー1体を選ぶ。それは{攻撃力}+1する。（未証明）",
+        "自分のフォロワー1体を選ぶ。それは{攻撃力}+1する。仮。",
+        "自分のフォロワー1体を選ぶ。それは{攻撃力}+1する。1枚引く。1枚引く。",
+        "1枚引く。自分のフォロワー1体を選ぶ。それは{攻撃力}+1する。",
+        "{起動}{コスト1}これを{アクト}：自分のフォロワー1体を選ぶ。それは{攻撃力}+1する。",
+        "【進化時】場の他のカード1枚を手札に戻す：これは{攻撃力}+1/{体力}+1する。",
+        "自分のフォロワーすべては{攻撃力}+1する。1枚引く。",
+        "相手のフォロワーすべては{攻撃力}+1する。",
+        "自分の場に他のフォロワーが出たとき、それは{攻撃力}+1する。",
+        "自分の場に{ロイヤル}フォロワーが出たとき、これは{攻撃力}+1する。",
+        "相手のエンドフェイズが来たとき、自分のフォロワーすべては{攻撃力}+1する。",
+        "【進化時】相手のフォロワーすべてに2ダメージ。自分のリーダーは{体力}+2する。",
+        "これは「\n自分のフォロワー1体を選ぶ。それは{攻撃力}+1する。\n」を持つ。",
+        "これは「\n{クイック}\n」を持つ。",
+        "{クイック}相手のフォロワーすべてに1ダメージ。",
+        "{クイック}\n相手のフォロワーすべてに1ダメージ。仮。",
+        "{クイック}\n自分のフォロワー1体を選ぶ。それは【合成乙】を持つ。",
+        (
+            "{ファンファーレ}自分の場の他の妖精・フォロワーすべてと、\n"
+            "自分のEXエリアの妖精・フォロワーすべては{攻撃力}+1/{体力}+1する。"
+        ),
+        "{ファンファーレ}自分の場の他の妖精・フォロワーすべては{攻撃力}+1/{体力}+1する。",
+        (
+            "【進化時】自分の他のフォロワーすべては{体力}+2する。"
+            "相手のフォロワーすべてに2ダメージ。"
+        ),
+        (
+            "【進化時】相手のフォロワーすべてに２ダメージ。"
+            "自分の他のフォロワーすべては{体力}+2する。"
+        ),
+        "{クイック}{クイック}",
+    ],
+    ids=[f"unproved-stats-{index}" for index in range(31)],
+)
+@pytest.mark.parametrize("positive", [False, True])
+def test_stats_and_quick_leave_unproved_fields_open(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, raw: str, positive: bool
+) -> None:
+    with case(
+        tmp_path,
+        monkeypatch,
+        ("【合成甲】\n" if positive else "") + raw,
+        first_batch=True,
+    ) as (db, inputs, settings, _):
+        with db.transaction():
+            report = mechanics.apply(db, inputs, settings)
+        assert report["complete_cards"] == 0
+        coverage = db.rows("card_mechanic_coverage")
+        if positive or coverage:
+            assert coverage[0].values["complete_all"] is False
+            assert coverage[0].values["complete_keyword_ids"] == Json([])
+        else:
+            assert not db.rows("mechanic_projection")
 
 
 def test_first_batch_missing_current_back_prevents_complete(
