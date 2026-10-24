@@ -23,7 +23,11 @@ import {
 import { CARD_PARAM, withoutCardParam } from "../../app/card-overlay"
 import {
   type CardEntryState,
+  forgetPagesBeside,
+  keepPagesBeside,
   type ListEntryState,
+  newListId,
+  pagesBeside,
   routeState,
   useListEntryState,
 } from "../../app/listEntryState"
@@ -86,6 +90,15 @@ import { SetHeader } from "../sets/SetHeader"
 import { useCardOverlay } from "./CardOverlay"
 
 const DEBOUNCE_MS = 150
+/** How long a cell returned to from a card stays outlined (#522: about a second). */
+const RETURN_FLASH_MS = 1000
+const RETURN_FRAMES = 30
+
+function resultCell(root: HTMLElement | null, key: string): HTMLElement | undefined {
+  return [...(root?.querySelectorAll<HTMLElement>("a[data-result-key]") ?? [])].find(
+    (link) => link.getAttribute("data-result-key") === key,
+  )
+}
 
 function cardPath(summary: CardSummary): string {
   return printingPath(summary)
@@ -177,18 +190,22 @@ export function CardsPage() {
     }
     if (openCardParam === null) {
       updateEntry({ pages, listScroll: listScroll.current, scrollY: window.scrollY })
-      setParams(next, { state, preventScrollReset })
+      setParams(next, { state: { ...state, listId: newListId() }, preventScrollReset })
       return
     }
+    const listed: ListEntryState = { ...state, listId: newListId() }
     void navigate(
       { pathname: location.pathname, search: searchOf(next) },
-      { replace: true, state, preventScrollReset },
+      { replace: true, state: listed, preventScrollReset },
     )
     const withCard = new URLSearchParams(next)
     withCard.set(CARD_PARAM, openCardParam)
     void navigate(
       { pathname: location.pathname, search: searchOf(withCard) },
-      { state: { ...state, overlay: { ...overlay, pushed: true } }, preventScrollReset: true },
+      {
+        state: { ...listed, overlay: { ...overlay, listId: listed.listId, pushed: true } },
+        preventScrollReset: true,
+      },
     )
   }
   // Changing a condition leaves the window where the user is (usually inside the filter panel):
@@ -254,11 +271,23 @@ export function CardsPage() {
     readiness.edition === edition &&
     readiness.searchReady !== false
 
-  const pages = Math.max(1, entry.pages ?? 1)
   // The view is presentation only: switching it must not run the search again, so the query
   // handed to the search keeps its identity while everything but the view is unchanged.
   const { view: chosenView, ...conditions } = query
   const conditionsKey = formatQuery(conditions).toString()
+  const positionQuery = JSON.stringify([location.pathname, conditionsKey, edition])
+  const openCard = params.get(CARD_PARAM)
+  // Pages loaded while a card was open beside the results were written to the card's entry; the
+  // list's own entry takes them up once it is current again, however the card was left.
+  const entryPages = Math.max(1, entry.pages ?? 1)
+  const carried = openCard === null ? pagesBeside(entry.listId) : undefined
+  const pages = Math.max(entryPages, carried ?? 0)
+  const entryListId = entry.listId
+  useEffect(() => {
+    if (carried === undefined || entryListId === undefined) return
+    if (carried > entryPages) updateEntry({ pages: carried })
+    forgetPagesBeside(entryListId)
+  }, [carried, entryPages, entryListId, updateEntry])
   const searchState = useMemo(() => parseQuery(new URLSearchParams(conditionsKey)), [conditionsKey])
   const searchQuery = useMemo<SearchQuery>(
     () => ({ state: searchState, edition }),
@@ -274,8 +303,6 @@ export function CardsPage() {
     retry: retryView,
   } = useListView(searchQuery, pages)
   const page = listView?.page ?? null
-  const positionQuery = JSON.stringify([location.pathname, conditionsKey, edition])
-  const openCard = params.get(CARD_PARAM)
   const positionRef = useRef({ query: positionQuery, key: location.key, card: openCard })
   useLayoutEffect(() => {
     const previous = positionRef.current
@@ -309,11 +336,68 @@ export function CardsPage() {
     entry.scrollY,
     imageRoot,
   ])
+  const [flash, setFlash] = useState<string | undefined>(undefined)
+  const flashTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const flashCell = useCallback((key: string) => {
+    clearTimeout(flashTimer.current)
+    setFlash(key)
+    flashTimer.current = setTimeout(() => {
+      setFlash(undefined)
+    }, RETURN_FLASH_MS)
+  }, [])
+  useEffect(
+    () => () => {
+      clearTimeout(flashTimer.current)
+    },
+    [],
+  )
+  // A pages write replaces the router key, so a return follows the list's stable id.
+  // Rows render around the restored scroll position; wait until the target cell exists.
+  const returnEntryId = entry.listId ?? location.key
+  const returnTo = useRef({
+    id: returnEntryId,
+    query: positionQuery,
+    anchor: navigationType === NavigationType.Pop ? entry.anchor : undefined,
+  })
   useLayoutEffect(() => {
-    if (!page || pageLoading || restoreScroll.current === undefined) return
-    window.scrollTo(0, restoreScroll.current)
-    restoreScroll.current = undefined
-  }, [page, pageLoading, positionQuery, location.key])
+    if (
+      returnTo.current.id !== returnEntryId ||
+      returnTo.current.query !== positionQuery ||
+      openCard !== null
+    )
+      returnTo.current.anchor = undefined
+    if (!page || pageLoading) return
+    if (restoreScroll.current !== undefined) {
+      window.scrollTo(0, restoreScroll.current)
+      restoreScroll.current = undefined
+    }
+    const anchor = returnTo.current.anchor
+    if (anchor === undefined) return
+    let tries = 0
+    let frame: number
+    const settle = () => {
+      const cell = resultCell(imageRoot.current, anchor)
+      if (cell) {
+        returnTo.current.anchor = undefined
+        cell.focus({ preventScroll: true })
+        flashCell(anchor)
+      } else if (++tries < RETURN_FRAMES) frame = requestAnimationFrame(settle)
+      else returnTo.current.anchor = undefined
+    }
+    frame = requestAnimationFrame(settle)
+    return () => {
+      cancelAnimationFrame(frame)
+    }
+  }, [
+    page,
+    pageLoading,
+    positionQuery,
+    location.key,
+    returnEntryId,
+    openCard,
+    imageRoot,
+    flashCell,
+  ])
   const cellOf = useMemo(() => createCellReader(nameOf), [nameOf])
   const cells: GridCell[] = useMemo(
     () =>
@@ -332,10 +416,10 @@ export function CardsPage() {
     cells,
     listScroll,
     root: imageRoot,
+    onReturned: flashCell,
   })
   const openInPlace = cardOverlay.openInPlace
-  // The cell a closed card came back to, or the one a card page returned to.
-  const returnAnchor = cardOverlay.open ? undefined : (cardOverlay.returned ?? entry.anchor)
+  const returnAnchor = cardOverlay.open ? undefined : flash
   const openContextRef = useRef({ pages, updateEntry, background, openInPlace })
   useLayoutEffect(() => {
     openContextRef.current = { pages, updateEntry, background, openInPlace }
@@ -350,8 +434,14 @@ export function CardsPage() {
     const background = fromSuggest
       ? `?${urlParams({ ...DEFAULT_QUERY, text: typed }).toString()}`
       : location.search
-    if (fromSuggest && background !== location.search) {
-      void navigate(location.pathname + background, { replace: true, state: { pages: 1 } })
+    if (fromSuggest) {
+      const position = { anchor: row.summary.printingId, scrollY: window.scrollY }
+      if (background !== location.search) {
+        void navigate(location.pathname + background, {
+          replace: true,
+          state: { pages: 1, ...position },
+        })
+      } else updateEntry({ ...position, listScroll: listScroll.current })
     }
     const state: CardEntryState = {
       background,
@@ -455,9 +545,11 @@ export function CardsPage() {
     return { kind: "navigate", state }
   }, [])
 
+  const overlayListId = overlay?.pushed ? overlay.listId : undefined
   const loadNextPage = useCallback(() => {
+    if (overlayListId !== undefined) keepPagesBeside(overlayListId, pages + 1)
     updateEntry({ pages: pages + 1, listScroll: listScroll.current, scrollY: window.scrollY })
-  }, [updateEntry, pages])
+  }, [updateEntry, pages, overlayListId])
 
   const quickBar: QuickBarClass[] = useMemo(
     () =>

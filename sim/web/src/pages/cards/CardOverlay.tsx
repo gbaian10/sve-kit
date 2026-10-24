@@ -1,4 +1,12 @@
-import { type ReactNode, type RefObject, useEffect, useMemo, useRef, useState } from "react"
+import {
+  type ReactNode,
+  type RefObject,
+  useEffect,
+  useEffectEvent,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
 import { useTranslation } from "react-i18next"
 import { useLocation, useNavigate, useSearchParams } from "react-router"
 
@@ -16,6 +24,7 @@ import {
 import {
   type CardEntryState,
   type ListEntryState,
+  newListId,
   type OverlayEntryState,
   routeState,
 } from "../../app/listEntryState"
@@ -41,6 +50,8 @@ export interface CardOverlayArgs {
   readonly cells: readonly { readonly key: string; readonly summary: CardSummary }[]
   readonly listScroll: RefObject<{ readonly top: number; readonly left: number }>
   readonly root: RefObject<HTMLElement | null>
+  /** The closed card's cell is back in place and focused; the list flashes it. */
+  readonly onReturned: (key: string) => void
 }
 
 export interface CardOverlay {
@@ -49,8 +60,6 @@ export interface CardOverlay {
   readonly open: boolean
   /** The result cell whose card is open, when the list knows it. */
   readonly selected: string | undefined
-  /** The cell the last closed card returns to, highlighted like a cell returned to from the page. */
-  readonly returned: string | undefined
   /** Opens the cell's card in place; false when cards open as pages, so the caller navigates. */
   readonly openInPlace: (summary: CardSummary, key: string) => boolean
   readonly close: () => void
@@ -108,6 +117,7 @@ export function useCardOverlay({
   cells,
   listScroll,
   root,
+  onReturned,
 }: CardOverlayArgs): CardOverlay {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -187,8 +197,27 @@ export function useCardOverlay({
     next.set(CARD_PARAM, cardParamOf(summary))
     const { overlay: previous, ...list } = entry
     const top = cellOf(root.current, key)?.getBoundingClientRect().top
+    // A page preference can replace the card's entry, so its opener belongs to the list below it.
+    const listId = alreadyOpen ? previous?.listId : (list.listId ?? newListId())
+    if (!alreadyOpen)
+      void navigate(
+        { pathname: location.pathname, search: location.search },
+        {
+          replace: true,
+          preventScrollReset: true,
+          state: {
+            ...list,
+            listId,
+            anchor: key,
+            pages,
+            listScroll: listScroll.current,
+            scrollY: window.scrollY,
+          },
+        },
+      )
     const state: ListEntryState = {
       ...list,
+      anchor: key,
       pages,
       listScroll: listScroll.current,
       scrollY: window.scrollY,
@@ -196,6 +225,7 @@ export function useCardOverlay({
         resultKey: key,
         ...routeState(summary),
         pushed: alreadyOpen ? (previous?.pushed ?? false) : true,
+        ...(listId === undefined ? {} : { listId }),
         opener: key,
         ...(summary.route ? { openerRoute: routeState(summary).route } : {}),
         ...(top === undefined ? {} : { openerTop: Math.round(top) }),
@@ -224,9 +254,15 @@ export function useCardOverlay({
   // it closed. The frame's padding takes a moment to give the width back, so the cell is put back
   // where it was only after that; the modal's dialog hands focus back on its own.
   const drawerRef = useRef<HTMLElement>(null)
+  const returned = useEffectEvent(onReturned)
   const opened = useRef<{ opener: string; top: number | undefined; drawer: boolean } | null>(null)
-  const [returned, setReturned] = useState<string | undefined>(undefined)
-  const selected = open ? currentKey(overlay?.resultKey, overlay?.route, unit, cells) : undefined
+  // The cell the shown card was found in when its own key names none (another printing of an art
+  // cell, say); it belongs to the card shown, so it lapses once another card is.
+  const [placed, setPlaced] = useState<{ readonly param: string; readonly key: string } | null>(
+    null,
+  )
+  const resultKey = placed !== null && placed.param === param ? placed.key : overlay?.resultKey
+  const selected = open ? currentKey(resultKey, overlay?.route, unit, cells) : undefined
   // The opening cell keeps its own identity: previous/next and printing links change the shown
   // card, not where focus returns to.
   const opener = open
@@ -267,7 +303,7 @@ export function useCardOverlay({
       } else stable += 1
       if (stable >= STABLE_FRAMES) {
         done = true
-        setReturned(last.opener)
+        returned(last.opener)
         return
       }
       if (performance.now() - started > RESTORE_LIMIT_MS) {
@@ -357,6 +393,7 @@ export function useCardOverlay({
         ...(resultKey === undefined ? {} : { resultKey }),
         ...(to.route ? { route: to.route } : {}),
         ...(previous?.pushed ? { pushed: true } : {}),
+        ...(previous?.listId === undefined ? {} : { listId: previous.listId }),
         ...(previous?.opener === undefined ? {} : { opener: previous.opener }),
         ...(previous?.openerRoute === undefined ? {} : { openerRoute: previous.openerRoute }),
         ...(previous?.openerTop === undefined ? {} : { openerTop: previous.openerTop }),
@@ -375,6 +412,9 @@ export function useCardOverlay({
         },
         key: target.key,
         link,
+        onPlaced: (resultKey) => {
+          if (contentParam !== null) setPlaced({ param: contentParam, key: resultKey })
+        },
         onClose: close,
       }
     : null
@@ -384,7 +424,6 @@ export function useCardOverlay({
     presentation,
     open,
     selected,
-    returned: open ? undefined : returned,
     openInPlace,
     close,
     drawer: drawerShown ? (

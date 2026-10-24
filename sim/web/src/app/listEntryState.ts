@@ -11,6 +11,8 @@ export interface ListEntryState {
   readonly scrollY?: number
   readonly listScroll?: { readonly top: number; readonly left: number }
   readonly anchor?: string
+  /** Names this list entry for the cards pushed over it; replacing the entry keeps it. */
+  readonly listId?: string
   /** The card open beside or over the results (`?card=`), with what the opening cell knew. */
   readonly overlay?: OverlayEntryState
 }
@@ -20,6 +22,8 @@ export interface OverlayEntryState {
   readonly route?: CardEntryState["route"]
   /** Opening pushed a history entry, so closing from the UI pops it instead of replacing. */
   readonly pushed?: boolean
+  /** The `listId` of the list entry this card was pushed over. */
+  readonly listId?: string
   /** The result cell that opened the card: focus returns to it when the card closes. */
   readonly opener?: string
   /** That cell's card, kept apart from the shown card so unit changes still find the cell. */
@@ -55,6 +59,28 @@ export function routeState(summary: CardSummary): Pick<CardEntryState, "route"> 
         },
       }
     : {}
+}
+
+// The router can only write the current entry, so the list takes these pages up on return.
+// Reloading drops this note; the list keeps the pages already in its history entry.
+const pagesByListEntry = new Map<string, number>()
+let listIds = 0
+
+export function newListId(): string {
+  listIds += 1
+  return `${Date.now().toString(36)}-${String(listIds)}`
+}
+
+export function keepPagesBeside(listId: string, pages: number): void {
+  pagesByListEntry.set(listId, Math.max(pages, pagesByListEntry.get(listId) ?? 0))
+}
+
+export function pagesBeside(listId: string | undefined): number | undefined {
+  return listId === undefined ? undefined : pagesByListEntry.get(listId)
+}
+
+export function forgetPagesBeside(listId: string): void {
+  pagesByListEntry.delete(listId)
 }
 
 function isListEntryState(value: unknown): value is ListEntryState {

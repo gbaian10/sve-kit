@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event"
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { buildSnapshot } from "../../../scripts/fixture/build"
+import { keepPagesBeside, type ListEntryState } from "../../app/listEntryState"
 import { routes } from "../../app/routes"
 import {
   type CardOpenMode,
@@ -415,6 +416,118 @@ describe("opening a card beside the results", () => {
     expect(new URLSearchParams(router.state.location.search).get("card")).toBe("BP01-002")
     expect(cellLink("p:bp01-002")).toHaveAttribute("aria-current", "true")
   })
+
+  it("keeps loaded pages with their own entry when history skips another view", async () => {
+    const { router } = await open("/cards?q=bp01", "panel")
+    const user = userEvent.setup()
+    const [first] = await cells()
+    if (!first) throw new Error("missing cell")
+    await user.click(first)
+    await within(panel()).findByRole("heading", { name: "試作見習兵" }, { timeout: 5000 })
+    await act(() => router.navigate(-1))
+    await user.click(screen.getByRole("radio", { name: "表格" }))
+    await user.click(cellLink("p:bp01-001"))
+    await within(panel()).findByRole("heading", { name: "試作見習兵" }, { timeout: 5000 })
+    const { pathname, search } = router.state.location
+    const state = router.state.location.state as ListEntryState
+    const listId = state.overlay?.listId
+    if (listId === undefined) throw new Error("missing list id")
+    keepPagesBeside(listId, 2)
+    await act(() =>
+      router.navigate(pathname + search, { replace: true, state: { ...state, pages: 2 } }),
+    )
+    await act(() => router.navigate(-2))
+    await waitFor(() => {
+      expect(router.state.location.search).toBe("?q=bp01")
+    })
+    const older = router.state.location.state as ListEntryState
+    await act(() => router.navigate(1))
+    await waitFor(() => {
+      expect(router.state.location.search).toBe("?q=bp01&view=table")
+      const current = router.state.location.state as ListEntryState
+      expect({ olderPages: older.pages, currentPages: current.pages }).toEqual({
+        olderPages: 1,
+        currentPages: 2,
+      })
+    })
+  }, 15_000)
+
+  it.each([
+    { leave: "back closes it, and again after forward", how: "back" },
+    { leave: "it turns into its page first", how: "page" },
+    { leave: "the view changes beside it first", how: "view" },
+  ])(
+    "keeps pages loaded beside the card when $leave",
+    async ({ how }) => {
+      const { router } = await open("/cards?q=bp01", "panel")
+      const user = userEvent.setup()
+      const [first] = await cells()
+      if (!first) throw new Error("missing cell")
+      await user.click(first)
+      await within(panel()).findByRole("heading", { name: "試作見習兵" }, { timeout: 5000 })
+      if (how === "view") await user.click(screen.getByRole("radio", { name: "表格" }))
+      // What loading another page beside the card does: the card's own entry and the list's note.
+      const loadBeside = async (pages: number) => {
+        const { pathname, search } = router.state.location
+        const state = router.state.location.state as ListEntryState
+        const listId = state.overlay?.listId
+        if (listId === undefined) throw new Error("missing list id")
+        keepPagesBeside(listId, pages)
+        await act(() =>
+          router.navigate(pathname + search, { replace: true, state: { ...state, pages } }),
+        )
+      }
+      const list = how === "view" ? "?q=bp01&view=table" : "?q=bp01"
+      await loadBeside(2)
+      if (how === "page") {
+        act(() => {
+          prefsStore.set({ cardOpenMode: "page" })
+        })
+        await waitFor(() => {
+          expect(router.state.location.pathname).toContain("/cards/BP01-001")
+        })
+      }
+      await act(() => router.navigate(-1))
+      await waitFor(() => {
+        expect(router.state.location).toMatchObject({ search: list, state: { pages: 2 } })
+      })
+      if (how === "page") {
+        await waitFor(() => {
+          expect(cellLink("p:bp01-001")).toHaveFocus()
+          expect(cellLink("p:bp01-001")).toHaveClass("ring-text-1")
+        })
+      }
+      if (how === "view") {
+        await act(() => router.navigate(1))
+        await within(panel()).findByRole("heading", { name: "試作見習兵" }, { timeout: 5000 })
+        act(() => {
+          prefsStore.set({ cardOpenMode: "page" })
+        })
+        await waitFor(() => {
+          expect(router.state.location.pathname).toContain("/cards/BP01-001/")
+        })
+        await act(() => router.navigate(-1))
+        await waitFor(
+          () => {
+            expect(cellLink("p:bp01-001")).toHaveFocus()
+          },
+          { timeout: 5000 },
+        )
+      }
+      if (how !== "back") return
+      // Writing the pages back replaces the list's entry; forward to the card still finds it.
+      await act(() => router.navigate(1))
+      await waitFor(() => {
+        expect(new URLSearchParams(router.state.location.search).get("card")).toBe("BP01-001")
+      })
+      await loadBeside(3)
+      await act(() => router.navigate(-1))
+      await waitFor(() => {
+        expect(router.state.location).toMatchObject({ search: list, state: { pages: 3 } })
+      })
+    },
+    15_000,
+  )
 })
 
 describe("opening a card over the results", () => {

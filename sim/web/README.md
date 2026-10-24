@@ -317,6 +317,12 @@ The list keeps `pages` and `anchor` on its own history entry through `useListEnt
 (router `navigate(..., { replace: true, state })`, never `history.replaceState`). Opening a card
 writes the anchor first, then pushes `/cards/:cardNo` with `{ background, source, pages, resultKey, route }`; `route` carries the printing and card IDs, each owner, and the region.
 `src/app/listEntryState.test.tsx` pins that replace-then-push keeps both states in the data router.
+A card opened beside the results (`?card=`) gives its list entry a `listId` first, the same way.
+Pages loaded while that card is open land on the card's entry, and the router cannot write the
+list's entry below it, so they are noted in memory under the `listId` and written to the list's
+own state once it is current again. A reload forgets the note: the list then keeps only the pages
+already in its own entry. Back from a card focuses the cell it opened from and outlines it for
+about a second.
 
 Each grid cell shows the name with the card number at the right of the same line (user request
 2026-09-29), then the translation line when the name display asks for one. The `view` URL

@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event"
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { buildSnapshot } from "../../../scripts/fixture/build"
+import { keepPagesBeside, newListId } from "../../app/listEntryState"
 import { routes } from "../../app/routes"
 import { DEFAULT_PREFS, prefsStore, recentStore } from "../../settings"
 import { renderRoutes } from "../../test-utils"
@@ -276,6 +277,29 @@ describe("CardsPage", () => {
       listScroll: { top: 240, left: 120 },
     })
   })
+  it.each([false, true])(
+    "focuses and briefly outlines the returned cell (carried pages: %s)",
+    async (carried) => {
+      // Back from a card page mounts the list on its own entry, as a reload of that entry does.
+      prefsStore.set({ uiLanguage: "zh-TW" })
+      const listId = newListId()
+      if (carried) keepPagesBeside(listId, 2)
+      await renderRoutes(routes, {
+        initialEntries: [
+          {
+            pathname: "/cards",
+            search: "?q=bp01",
+            state: { pages: 1, anchor: "p:bp01-002", scrollY: 0, listId },
+          },
+        ],
+      })
+      const cell = () => document.querySelector('a[data-result-key="p:bp01-002"]')
+      await waitFor(() => expect(cell()).toHaveFocus(), { timeout: 5000 })
+      expect(cell()).toHaveClass("ring-text-1")
+      await waitFor(() => expect(cell()).not.toHaveClass("ring-text-1"), { timeout: 3000 })
+    },
+    15_000,
+  )
   it("resets list scroll on a sort change and restores the previous query on back", async () => {
     const { router } = await open("/cards?view=list")
     const root = document.querySelector<HTMLElement>("[data-list-scroll]")
@@ -418,13 +442,18 @@ describe("CardsPage", () => {
       pages: 1,
       resultKey: "p:bp01-051",
     })
-    // Back lands on the list with the typed text in the URL and the input.
-    await router.navigate(-1)
+    // Back keeps the typed query and returns focus to the suggested card's result cell.
+    await act(() => router.navigate(-1))
     await waitFor(() => {
       expect(screen.getByRole("combobox", { name: "搜尋卡片" })).toHaveValue("bp01-51")
     })
+    await waitFor(() => {
+      const cell = document.querySelector('a[data-result-key="p:bp01-051"]')
+      expect(cell).toHaveFocus()
+      expect(cell).toHaveClass("ring-text-1")
+    })
     expect(router.state.location.search).toBe("?q=bp01-51")
-  })
+  }, 15_000)
 
   it("marks alias hits, shows all with the see-all link and keeps the text on back", async () => {
     prefsStore.set({ cardOpenMode: "page" })
