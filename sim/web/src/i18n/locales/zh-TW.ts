@@ -18,7 +18,7 @@ const zhTW = {
     answer: "答",
     official: "官方原頁",
     loading: "Q&A 載入中…",
-    noneAsOf: "截至 {{date}} 的收錄資料，此卡沒有官方 Q&A。",
+    noneAsOf: "截至 {{date}} 為止，此卡沒有官方 Q&A。",
     loadFailed: "Q&A 載入失敗，請檢查網路後重試。",
     validationFailed: "Q&A 資料無法通過驗證，暫不顯示。",
     retry: "重新載入 Q&A",

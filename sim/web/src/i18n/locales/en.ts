@@ -22,7 +22,7 @@ export default {
     answer: "A",
     official: "Official page",
     loading: "Loading Q&A…",
-    noneAsOf: "No official Q&A for this card in our data as of {{date}}.",
+    noneAsOf: "No official Q&A for this card as of {{date}}.",
     loadFailed: "Could not load Q&A. Check your connection and retry.",
     validationFailed: "The Q&A data failed validation and is not shown.",
     retry: "Reload Q&A",

@@ -273,7 +273,7 @@ it("proves absence at the snapshot date even when today is later than the source
         showOther={false}
       />,
     )
-    expect(await screen.findByText(`截至 ${date} 的收錄資料，此卡沒有官方 Q&A。`)).toBeVisible()
+    expect(await screen.findByText(`截至 ${date} 為止，此卡沒有官方 Q&A。`)).toBeVisible()
     expect(fragments).not.toHaveBeenCalled()
   } finally {
     vi.useRealTimers()
@@ -302,7 +302,7 @@ it("shows the snapshot date when Q&A coverage is unknown", async () => {
     />,
   )
 
-  expect(await screen.findByText("截至 2031-07-04 的收錄資料，此卡沒有官方 Q&A。")).toBeVisible()
+  expect(await screen.findByText("截至 2031-07-04 為止，此卡沒有官方 Q&A。")).toBeVisible()
 })
 
 it("keeps the retry button when loading the Q&A list fails", async () => {
