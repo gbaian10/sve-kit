@@ -1,0 +1,35 @@
+format: 1
+kind: frame_semantics_shard
+definitions:
+  - id: 4289
+    hash: 2fedb8d204834f53db2052b45a617bde262b164f2627dbadfd513baa5713d026
+    value:
+      domains: "@3577"
+      expressions: {}
+      omissions: {}
+      resolved:
+        ability_scope: complete_single_line_normal_follower_effect
+        amount:
+          mode: uniform
+          slot: leaf_1
+        batch: single_simultaneous_instruction
+        damage_kind: ability
+        fixed_head:
+          glossary: term:ability.last_words
+          slot: leaf_0
+        ignores_prevention: false
+        kind: damage
+        recipients: all_leaders_including_self
+        source: original_ability_holder_snapshot_or_lki
+        source_override:
+        trigger:
+          event: actual_field_to_card_owner_cemetery
+          holder: source_holder
+          kind: printed_lastword
+          master: source_master_before_exit
+          multiplicity: per_fact
+          resolution: pending_until_checkpoint_play
+          view: before_exit_field
+        zero: no_damage_event
+      source_links: "@41"
+      units: "@1999"

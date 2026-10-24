@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from sve_carddb.contracts.source_binding import SourceDescriptor
 
 
-def _ascii_id(value: object) -> str | None:
+def ascii_id(value: object) -> str | None:
     # Keep source wording out of test IDs and reports.
     if isinstance(value, str) and not value.isascii():
         return "text-" + hashlib.sha256(value.encode()).hexdigest()[:8]
@@ -31,7 +31,7 @@ def _ascii_id(value: object) -> str | None:
         ("【攻撃時】", "follower", "normal", "draw_exact_attack_time.v1"),
         ("【進化時】", "follower", "evolved", "draw_exact_evolve_time.v1"),
     ],
-    ids=_ascii_id,
+    ids=ascii_id,
 )
 @pytest.mark.parametrize("count", [0, 1, 3, 9007199254740991])
 def test_draw_replays_exact_source_and_fixed_scope(
@@ -69,7 +69,7 @@ def test_draw_replays_exact_source_and_fixed_scope(
         "【ファンファーレ】1枚引く。",
         "【超進化時】1枚引く。",
     ],
-    ids=_ascii_id,
+    ids=ascii_id,
 )
 def test_other_complete_constructions_do_not_gain_draw_semantics(raw: str) -> None:
     facts = CardContext(
@@ -133,7 +133,7 @@ def _printed(facts: CardContext) -> SourceDescriptor:
 @pytest.mark.parametrize(
     ("head", "phase"),
     [("【攻撃時】", "normal"), ("【進化時】", "evolved")],
-    ids=_ascii_id,
+    ids=ascii_id,
 )
 @pytest.mark.parametrize(
     "mutation", ["history", "spell", "amulet", "field", "printing", "missing"]
@@ -182,7 +182,7 @@ def test_trigger_keeps_siblings_without_claiming_whole_card() -> None:
     assert derived.recognized[-1].semantics is None
 
 
-@pytest.mark.parametrize("head", ["【攻撃時】", "【進化時】"], ids=_ascii_id)
+@pytest.mark.parametrize("head", ["【攻撃時】", "【進化時】"], ids=ascii_id)
 @pytest.mark.parametrize(
     "body",
     [
@@ -193,7 +193,7 @@ def test_trigger_keeps_siblings_without_claiming_whole_card() -> None:
         "条件なら、1枚引く。",
         "1枚引く。1枚捨てる。",
     ],
-    ids=_ascii_id,
+    ids=ascii_id,
 )
 def test_trigger_does_not_drop_control_or_actor(head: str, body: str) -> None:
     raw = head + body
@@ -204,8 +204,8 @@ def test_trigger_does_not_drop_control_or_actor(head: str, body: str) -> None:
     assert derived.recognized[0].semantics is None
 
 
-@pytest.mark.parametrize("head", ["【攻撃時】", "【進化時】"], ids=_ascii_id)
-@pytest.mark.parametrize("quick", ["{クイック}", "｛クイック｝"], ids=_ascii_id)
+@pytest.mark.parametrize("head", ["【攻撃時】", "【進化時】"], ids=ascii_id)
+@pytest.mark.parametrize("quick", ["{クイック}", "｛クイック｝"], ids=ascii_id)
 def test_quick_prefix_does_not_authorize_an_independent_trigger(
     head: str, quick: str
 ) -> None:
@@ -217,7 +217,7 @@ def test_quick_prefix_does_not_authorize_an_independent_trigger(
     assert derived.recognized[-1].semantics is None
 
 
-@pytest.mark.parametrize("head", ["【攻撃時】", "【進化時】"], ids=_ascii_id)
+@pytest.mark.parametrize("head", ["【攻撃時】", "【進化時】"], ids=ascii_id)
 @pytest.mark.parametrize(
     ("before", "after"),
     [
@@ -228,7 +228,7 @@ def test_quick_prefix_does_not_authorize_an_independent_trigger(
         ("「仮\n", ""),
         ("", "\n仮」"),
     ],
-    ids=_ascii_id,
+    ids=ascii_id,
 )
 def test_line_inside_cross_line_brackets_is_not_an_ability(
     head: str, before: str, after: str
@@ -244,7 +244,7 @@ def test_line_inside_cross_line_brackets_is_not_an_ability(
     )
 
 
-@pytest.mark.parametrize("sibling", ["「仮」", "（仮）"], ids=_ascii_id)
+@pytest.mark.parametrize("sibling", ["「仮」", "（仮）"], ids=ascii_id)
 def test_closed_sibling_brackets_keep_the_independent_trigger(sibling: str) -> None:
     raw = sibling + "\n【進化時】1枚引く。"
     facts = CardContext(
@@ -263,7 +263,7 @@ def test_closed_sibling_brackets_keep_the_independent_trigger(sibling: str) -> N
         ("【攻撃時】9007199254740992枚引く。", "follower", "normal"),
         ("【進化時】9007199254740992枚引く。", "follower", "evolved"),
     ],
-    ids=_ascii_id,
+    ids=ascii_id,
 )
 def test_count_above_safe_integer_keeps_the_numeric_rejection(
     raw: str, kind: str, phase: str

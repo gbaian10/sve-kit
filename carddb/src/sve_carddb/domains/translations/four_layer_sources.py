@@ -297,4 +297,5 @@ def semantic_context(db: Database, source: CardSource) -> CardContext | None:
                 where={"revision_id": _string(revision["id"])},
             )
         ),
+        special_kinds=frozenset(special),
     )

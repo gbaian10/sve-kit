@@ -32,6 +32,28 @@ _DEFINITION = TypeAdapter(object)
 
 # These describe source meaning, not grammar coverage or interpreter implementation.
 RESOLVED: dict[str, JsonValue] = {
+    "damage_uniform_lastword_all_leaders.v1": {
+        "kind": "damage",
+        "trigger": {
+            "kind": "printed_lastword",
+            "holder": "source_holder",
+            "event": "actual_field_to_card_owner_cemetery",
+            "view": "before_exit_field",
+            "multiplicity": "per_fact",
+            "resolution": "pending_until_checkpoint_play",
+            "master": "source_master_before_exit",
+        },
+        "recipients": "all_leaders_including_self",
+        "amount": {"mode": "uniform", "slot": "leaf_1"},
+        "damage_kind": "ability",
+        "batch": "single_simultaneous_instruction",
+        "source": "original_ability_holder_snapshot_or_lki",
+        "ignores_prevention": False,
+        "source_override": None,
+        "zero": "no_damage_event",
+        "ability_scope": "complete_single_line_normal_follower_effect",
+        "fixed_head": {"slot": "leaf_0", "glossary": "term:ability.last_words"},
+    },
     "metadata.name.v1": {"kind": "metadata", "field": "name"},
     "metadata.label.v1": {"kind": "metadata", "field": "label"},
     "metadata.layout.v1": {"kind": "metadata", "field": "layout"},

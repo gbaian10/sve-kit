@@ -30,7 +30,7 @@ def frozen_context(card_no: str, checksum: str) -> tuple[str, CardContext]:
     )
     faces = [
         face
-        for path in root.glob("[0-9][0-9][0-9]-[0-9][0-9][0-9].json")
+        for path in root.rglob("[0-9][0-9][0-9]-[0-9][0-9][0-9].json")
         for card in json.loads(path.read_bytes())["cards"]
         if card["card_no"] == card_no
         for document in card["documents"].values()
