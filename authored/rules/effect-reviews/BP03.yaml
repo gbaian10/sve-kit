@@ -5,8 +5,8 @@ basis:
   classifications:
     recipe: v0-classification-candidates-1
     inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
-  normalizer: four-layer-jp-v6
-  build_sha256: 1de5adc33023646bbc7ced36bb49bb1850fe54309fed29c246d060a40862bc53
+  normalizer: four-layer-jp-v7
+  build_sha256: 7663e614a9cbf981162cbc7d09bb5841bcd3b18958c04b01fe55c5e4cb06ecf6
 groups:
   - id: shape:08bfbacf6469f60dff3c8beb08e5cb86713d4110a10fd7a214c3b980af478452
     priority: false
@@ -22,13 +22,13 @@ groups:
       Tf29c2206e7:
         - BP13-111
     frames:
-      - frame:2121ddb8843c795d25e04d093268450b960903ff43c1d5db633fd2e89e96e6a1
-      - frame:90f56b94a1651334a980c0a11353771bb29e0b30022c7e3211ac376d8bb25a5c
-      - frame:c1a6678e3966906d30ad86540f00878b75bf5dff65a87f98df2d0f04d5eed269
+      - frame:04c1ab2001d297f943652244afeb65096d5f9ac547428b2f952601972bc6a605
+      - frame:f600a9f5ad0b246277d3a1081d6a97a1f24eae6c989ed1b89237570fc65feece
+      - frame:f21ea398aec51afc0c24deb73cd9993fff8d69d92e04257cf984c6b76aca21d3
     uses:
-      - use:410cf216795d6f6b3137242d297f0e9d675dda7fb9f414d5422d7157b0d8de2d
-      - use:63ae7f99143d5777a6d4a7505f53735e4841c702779cfa171b95d75158c8adb7
-      - use:d21cda8e66c54e596a8a89dbee1a28d481334aa5d09159c3d19f3e7ca300dc0d
+      - use:35e450c11284c4226861215b6d51cffb62bf8d9d74aed293ca62d274b595438b
+      - use:f14bd429ed106c8c18d1b8ab029dba3b069c626b1f5a2032047fd4c9ee5d407e
+      - use:9ca309fa888cc76a73b58fcc36d13bb8d32a0321a9cb507c4549d4edf3d26256
     translation_review:
       required_uses: []
       conditional_uses: []
@@ -40,7 +40,7 @@ reverse_positions:
     section: 0
     line: 1
     frame_ids:
-      - frame:3932d15513e5072f6380810bea3da5e6c1fd77e2d98a186d0d8837567a705b57
+      - frame:4f0b49fd269cd79bd9c1aa1f17c3517c5e6bb3032d87f82e4f79963ac046e2c9
     category: token
     rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。
   - card_no: BP03-SL07
@@ -49,7 +49,7 @@ reverse_positions:
     section: 0
     line: 1
     frame_ids:
-      - frame:598d47a987304643013b3973140c74af4d5772a40544d865017bb67e336cbdd4
-      - frame:c9da241be877f8de18f9b0f6322c41865ed209b014e6f88b2f747f426e88905e
+      - frame:3001a7b79a85d09220e1bd9412b28883a182d52c17b86cba145776398c1033a3
+      - frame:f6fe7ad3e35f23cd79749d080f2117e954c06ba13d07685bd6da9d0c053f70e4
     category: token
     rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。

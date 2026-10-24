@@ -5,8 +5,8 @@ basis:
   classifications:
     recipe: v0-classification-candidates-1
     inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
-  normalizer: four-layer-jp-v6
-  build_sha256: 1de5adc33023646bbc7ced36bb49bb1850fe54309fed29c246d060a40862bc53
+  normalizer: four-layer-jp-v7
+  build_sha256: 7663e614a9cbf981162cbc7d09bb5841bcd3b18958c04b01fe55c5e4cb06ecf6
 groups:
   - id: shape:e7f88a72173c57d22edacd72b400dfe0aca72a38dd68098f39f85b70502e477a
     priority: true
@@ -24,15 +24,15 @@ groups:
         - BP15-P16
         - BP15-072
     frames:
-      - frame:06e8bc5f966b6261e09dfe2bd2e60be2f48e824eecbd600d42c2d064eec491e8
-      - frame:276034a313efd36550eab7a31ea0317f81d32c11560be2fdb66055a57cbde5e9
-      - frame:5bbb42f4ef4fb0df2c96ea6a660c0b39d89d24c5a0fd131001fe7c73ea252602
-      - frame:e41e220ea2d63a3c63b3a8004893db394ca0597364bd40fac6376375b5e4c9bb
+      - frame:c92bd291b73f1e04252743b334139b023628582c2cc9ab47c6f64abd4301fff0
+      - frame:b1f456f9832a58e7b7354b4ff4a5dc44174e9935a21cf2e079b9ca8354d40f39
+      - frame:bceca4ae8eb9c6fb530e8b30dc7fa29adddcced5599e8d03ff8afacbd3d24c3f
+      - frame:2084f4768249ab892bc57178478bc6f4d049339e607201a389772e90112b07aa
     uses:
-      - use:7a1be2e5cb846a7d683757be184b18d31edc91343e41160f2cd7b76e546d3604
-      - use:939ea85c33eae5ca724515b5c75a317924bcf544abf285229db188718e950f96
-      - use:ddb3106058c1fc7a1d2c259ad737dd33f139ffd22289fe3a0cd426c6020432f3
-      - use:ee8df3839e0b51b16f6681682abd1e04d917cce165e8e1c274ecbedc7ce8e97d
+      - use:6048b96542510f3d5154caefc45f63ff82b56f1722a9f8c8445e6b61fcba1288
+      - use:fc9395802f64a45a7f864b183b10781a0bf5fad6f15e4b748d2defd14eaa806c
+      - use:3532d3d5ebb99bf86787eec199efebcb7cfce49ccf60df2372cf112bd132c027
+      - use:1e22c70a53ffddc75c30482dfb362f9fd238a1337817ef8a4030def62e454756
     translation_review:
       required_uses: []
       conditional_uses: []
@@ -57,15 +57,15 @@ groups:
         - BP16-080
         - BP13-083
     frames:
-      - frame:0c2232bbc8be2095deb5e0a2ac8b9c206be40b8c2e7d38d6347805b03b855897
-      - frame:3cb5398763a356f323a5e51c193d27868c38738e46194363c6f34ae501f4bc19
-      - frame:c68143421e91249f22aa44ce751adadf5a333e04fa39aa047894415b9adfee2d
-      - frame:fe8969df524834eafa9663e13111725243fdc725d6bb4a1942f666c818c92d51
+      - frame:ae0752eb1f7c4784707e5c9d56c2e5084ff3707aba6ab1e9935fb94f4b273a64
+      - frame:9b8152f1af5d6811f1ab49b531ff9cdaf4dc99b6433aa26c2d86e38324e33e75
+      - frame:69641c54679e500d0c8904264bca8e274cf20b76cc86b7893782099f8a38b429
+      - frame:ecc9d8277c5c3ec4d8314cc1e614ac364db0f77af8a64a1d6b3f2e4c398b796c
     uses:
-      - use:1ef497a0532c98433819a4bd80d3cbdda54750b30583288a488ca4e3cd2c07d7
-      - use:43feedd6b8ecdcee9dfbcf3be0f3415aceead21e2ca08dc6d99dd6b57be2aa67
-      - use:9869898bf0d22caf39a5fead161a8b6d4113421135051783360afe50eeb08b15
-      - use:dbb06f5d0aa547a0a6e9a93cb46a42c66553b5bad2e9668f83d68c6212312ea5
+      - use:4de2478b336012e7ee15a9efb733a2c3018b3a53812a543a08b68ba135286d20
+      - use:d8322f51d57889b87f7af45d8eb1680da2b82b48b02c38563b85bddc8f9b071b
+      - use:68a29df5e5b3f5fd81e6f9e7ddf703eb3eb687094f49d6b2f802a835f51afa9c
+      - use:12014293ab677f244f01a28cfe37e4e2c8b06d458315c89d4d1a4c364ddf4970
     translation_review:
       required_uses: []
       conditional_uses: []
@@ -115,31 +115,31 @@ groups:
         - CP03-P46
         - CP03-068
     frames:
-      - frame:267f4c951c239afed99acaede708afc2ba8b1e63cd974912960daea04f4a47ed
-      - frame:27d6b6e2445521457b9a536721376bf79f4d213276c56d3b473b6f8ba4d82368
-      - frame:30ed7cd085dc3933252cc007dd1ccb7fad01ab92bb287b8a033a3fe15e0fee50
-      - frame:336eec062aede40d1abba4047d159417a95b619cafec80b29276464b49bd1191
-      - frame:57636218cfdf2e663a2d7374492ceb4933ffd4150e3be6eb7b6dd3d96db04031
-      - frame:5f7d40a9fd26aa9c23656b0c01b8e40915ebab12e3b91331478a78831b651d2e
-      - frame:b7fa609fc01983e9067a6124e0c3c513b5e96038493fdaf66c9319c1bc69ea4c
-      - frame:db23b3a020bcd3afd4415ee1efa6dc941ea4c641b87b77b913f4f602e1032b85
-      - frame:dd1f430abc435365da80b3cf06bc89f8f14401a9afb3087140eea96d2a3428a4
-      - frame:e3dabf432f8c77995e0b7e445bc01d22216ce6a4b5e9590810cb891f84b890ef
-      - frame:e7e37dea641c44d200b747ca6a5c2e9d3e7bbc6d9eee9830be0b420deb55c9af
-      - frame:f69583f3fdd6a444f915fe7ced96f2a49c217a2feb3f196086db23d62cbd8a8d
+      - frame:2dee56b4c02c992bfe46c137b98fccbc8184fe286b4da8faf071ae706912a230
+      - frame:1795240c5fd459385ebc0e56eb6404fe71bc6f9eed674aa948a54c4466ca8907
+      - frame:8f426e1c3a0545fad43b067fe7a5940b46b819dba77af0aef12b5b39b7eeb98b
+      - frame:e3fab402e5077144532af71532991f7389aa49e056f88bd1a9e83a6cb284b0ef
+      - frame:bda1cf0bcf82a08756fe937ec17a766304b873b647a922dcaf0a206e87d76e10
+      - frame:be3f1670590b836cbaf6a64b3a1b73b752501c8b846d7d4e571f74030d093fd7
+      - frame:3911a7b6825790eab23c60f4859284ea3d04df087d68a94df06860c39e26452c
+      - frame:c11ddc50a003cade62582ad7364746f35c1e5be3b3512d1c5e2c53381f9be900
+      - frame:dd324d0b07f5bd2d144a24e8b3c96630ad7e43f18e84f6ba0ec0db9dda8909b8
+      - frame:08b56c689495e10322c816c056e2d0eff2a36aa39415ea86c59e909467972829
+      - frame:d35b82620ec42ac0f50c6d79f92b18fa58fd770f32f12efbd1be355d93b70c58
+      - frame:d12088635e3d38e4c655426e04e56c25015796b4d276ab3573744f5a421b8c76
     uses:
-      - use:2a9c4d29e792a88f64e5e0f2c54897fbb2df24ec4eecdc4ab0b64152dbd5f7d7
-      - use:37926b130dbaa69da79bfc52f95ba3da8671936efd5d1e7ef9e6d0f9e6f5db02
-      - use:42a7584e98a4db731138a0db5b13416f2bdcd9c60b131fc6bdaf1eef15d529fa
-      - use:4aa5a72e4cecd865e1f178d89f2a4f01fadb5407863f61e422b30c41c4427e34
-      - use:6b5c6ada6a3f03946987aae73d1b3bb31a1dcf19f7bfb934add00cfd81b6f8e5
-      - use:6de14c396223d591b99a36d520f8c5d3534023438844cad61e15aefe4a607e69
-      - use:996ba2bddf3ddc81815da349fe01a7cb165bf1f8c9bf69d17a9dae7abc945ae2
-      - use:b142afa04d00564f1de827f26d7053326eada2f4c8b0f23a33a1a5a6cb7b4c18
-      - use:c58a92c550f0cdf0afd446e168b9bc1c69ae6018aea6aaca8074308f7832ff93
-      - use:c605adbe606d73643844b24c818d7588bbc158c0a2c052edf74eb54088a10d54
-      - use:ca3b3d44cc8d41166d898010a1bf29da90d2a87a590401cfe01ceef7e4c42e20
-      - use:f593393e7133240fef6c2996d6d42884b627d317a9cbb6490e3693af900a6211
+      - use:99695070ac628c0db49c9e631c05c843d4573497589cd97e3a83b42c2c74eac8
+      - use:da83b99bde7db80198da511827af6f78fcdcfed59eb52b5eecd3b29aec8cf1a2
+      - use:c9fd3acc2165fb82aab5b1403b7f64ea179dac1edbb9b96f8c28d23f30c5e58b
+      - use:1986fe62ff5eb002e0f8e1cb0156bddf9a836d6401bc4223ea7855313f06171f
+      - use:e6c7019566e76221331dde0a85866b313750a88728a91eb13131a704c8d7abc4
+      - use:31c391cb6b408f727ef9ee90f350c3becb71ad06966632499c2a24cd0b40ae11
+      - use:66dbc03f7ac5faba7b0c7b6f789ea4cad28dc6ee84971a5b3fc1b7304c483d35
+      - use:aace4fa6ffd06c9a0d9d197a3e89b469ef19e8960cda1db55b5564824cb9b177
+      - use:1fe6a86b5ee31f92d17a1d5a39c566689624a2c8e8b1f83b82e52137b537d3b6
+      - use:aca6fb67c473ac30074dc485465db53d9d3142b2086f4b08fde9a3e6f451541a
+      - use:a5b3ac0e765928257c7028444472a8a753b2c08c130381d657d5b53c13de1b23
+      - use:0b97f9c7c654325c89948a302f26163ab987ba5e7b9cc665e3562ea89c228bf8
     translation_review:
       required_uses: []
       conditional_uses: []
@@ -158,11 +158,11 @@ groups:
       Tcd9624c114:
         - BP15-054
     frames:
-      - frame:2ca01e265eb740a68641984d8cba0f1bbae27c63c0b0786ea05a7185fe972ef9
-      - frame:887d08807ad03c0c41a95f5734f7f77689fe26777363d53c5a9b69b4ec1b4823
+      - frame:5b1ec3935600339cfadfa89f5cd9de4dffb31e13d97e726f3488363d47e74977
+      - frame:dc77d807969a259a002e80c7d7999fb73a7c397325b2b0edf86a6eecb67dd202
     uses:
-      - use:1f72bad20a07691766d412cca936671fb30e72101e40ea4f07a50a5c928394b2
-      - use:acbd860097bed53af687bb9302423d6e925980c9893947b1b69acae3bdf77fc9
+      - use:2e6d0e1a9ef82b536417ca59d65f63f62e4baa0a3c04cf88540750eabfb248cb
+      - use:01d268ce25e0f7f88e1e65ebc207a3913bb5c30f29b0f83ef5c4fad475860011
     translation_review:
       required_uses: []
       conditional_uses: []
@@ -174,7 +174,7 @@ reverse_positions:
     section:
     line: 1
     frame_ids:
-      - frame:a7492b277f4cd11db4b8bdebeb13434a28e4182ba4cedc3caa53dfe5e639fc6e
+      - frame:60af2855c6cc03a51badafdf2170555993e35249747e00116b9f8d99cc0179cc
     category: 跨行涵蓋
     rationale: 加費選項附於下一行 spell。
     covered_by:

@@ -10,6 +10,7 @@ from pydantic import JsonValue, TypeAdapter
 
 from sve_carddb.core.yaml import JSON_VALUE, parse_yaml
 from sve_carddb.domains.effects.reader import Catalog, load
+from sve_carddb.domains.translations.four_layer_normalizer import VERSION
 
 ROOT = Path(__file__).resolve().parents[4]
 BASELINE = ROOT / "carddb/tests/fixtures/effect_baseline"
@@ -122,6 +123,37 @@ def test_review_drafts_are_bound_to_the_classifications_they_explain(
             assert f"fn {difference['scenario']}()" in scenarios
             assert difference["conclusion"] in conclusions
             assert difference["rationale"]
+
+
+def test_review_drafts_reference_the_current_frame_catalog() -> None:
+    frames = {
+        str(object_value(object_value(record)["data"])["id"])
+        for path in (ROOT / "authored/translations/templates/definitions").glob(
+            "*.yaml"
+        )
+        for record in array(read_yaml(path)["records"])
+        if object_value(record)["kind"] == "sentence_template"
+    }
+    assert frames
+    for path in (ROOT / "authored/rules/effect-reviews").glob("*.yaml"):
+        draft = read_yaml(path)
+        assert draft["kind"] == "effect_review_draft"
+        assert object_value(draft["basis"])["normalizer"] == VERSION, path.stem
+        references = {
+            str(frame)
+            for group in array(draft["groups"])
+            for frame in array(object_value(group)["frames"])
+        }
+        references.update(
+            str(object_value(row)["frame"])
+            for row in array(draft.get("handwritten_differences", []))
+        )
+        references.update(
+            str(frame)
+            for row in array(draft["reverse_positions"])
+            for frame in array(object_value(row)["frame_ids"])
+        )
+        assert references <= frames, path.stem
 
 
 def test_bp07_p06_uses_the_corrected_main_text_without_duplicate_coverage() -> None:

@@ -5,8 +5,8 @@ basis:
   classifications:
     recipe: v0-classification-candidates-1
     inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
-  normalizer: four-layer-jp-v6
-  build_sha256: 1de5adc33023646bbc7ced36bb49bb1850fe54309fed29c246d060a40862bc53
+  normalizer: four-layer-jp-v7
+  build_sha256: 7663e614a9cbf981162cbc7d09bb5841bcd3b18958c04b01fe55c5e4cb06ecf6
 groups:
   - id: shape:8d7eec23fc609f17bd4797bbc0843780d7d623fa6c62f60d2235390319ddfa03
     priority: false
@@ -22,11 +22,11 @@ groups:
       Td5357a692d:
         - BP14-015
     frames:
-      - frame:2ce358bce99be80b9b395e8e5ffe26deadc41915c4782d9f3e89741e8885b527
-      - frame:d5d399a5dcae20bd06e721ea813ead07832e8b8890a134cfd1ea763b234c7820
+      - frame:7ac89b0ae68a586821db28b9179cd1989c53e4754ce419b8ff619622a2f00aa4
+      - frame:d5c9a762102efbed21fe6d0d86dfda3bc178f8f5cc01c4ba8d83d65a00e6dccd
     uses:
-      - use:05e30f3495436351f7090cf96201899434983c89164ab5f2c6a48fc6600d99f4
-      - use:58733c8f29cc0ffa0351b9718102cfe88a5190f854fb3fd3bb490e54a383c83c
+      - use:c26bc273f614f300ef37b663f54d6e7f1f4b1f730db7f825f01b824c98223651
+      - use:c8c81442024ab75649a45c8bc46afb9de2e296f1bb6eca3936814bec1e7db4ed
     translation_review:
       required_uses: []
       conditional_uses: []
@@ -38,8 +38,8 @@ reverse_positions:
     section: 0
     line: 1
     frame_ids:
-      - frame:1f6423414e8423bf2dd31b2d41b15e4816119f53ac2acafeb99046565bc71326
-      - frame:b95bd292358b919e00118236219c51a475d964955eafd4dc7ed1a46b2269b9d4
+      - frame:b8b0d58fa5b284416538c59665487f93370db5518af95ed08e6c8583f0538a39
+      - frame:3125a63e52fc3d21bfec11ac1a275f19362ef718b25272409211b1e44ccef631
     category: token
     rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。
   - card_no: BP14-026
@@ -48,8 +48,8 @@ reverse_positions:
     section: 0
     line: 1
     frame_ids:
-      - frame:368d23617266c9aac2ea602a8044379d876fd4526448a3b1ca507bd9dc6f7b99
-      - frame:b95bd292358b919e00118236219c51a475d964955eafd4dc7ed1a46b2269b9d4
+      - frame:ceac1282dd35d49f8bc4093fb6b714f6bf0530f79f81591ac60fb4e2d80b06ea
+      - frame:3125a63e52fc3d21bfec11ac1a275f19362ef718b25272409211b1e44ccef631
     category: token
     rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。
   - card_no: BP14-030
@@ -58,8 +58,8 @@ reverse_positions:
     section: 0
     line: 1
     frame_ids:
-      - frame:1173cc4c89c49211365e29d5c50bd4b70d77a24336d357dffcfbbe791f70fd12
-      - frame:b95bd292358b919e00118236219c51a475d964955eafd4dc7ed1a46b2269b9d4
+      - frame:912b2d16c7165188d70f1e7a2ff12adaba293efc5048b299462b65aea891d1b4
+      - frame:3125a63e52fc3d21bfec11ac1a275f19362ef718b25272409211b1e44ccef631
     category: token
     rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。
   - card_no: BP14-034
@@ -68,8 +68,8 @@ reverse_positions:
     section: 0
     line: 1
     frame_ids:
-      - frame:b95bd292358b919e00118236219c51a475d964955eafd4dc7ed1a46b2269b9d4
-      - frame:f416386b9093115124fabb6704e5aa4c852327e27d315a479e40e7c0dffacc86
+      - frame:3125a63e52fc3d21bfec11ac1a275f19362ef718b25272409211b1e44ccef631
+      - frame:bee4270ab654b2958e2f3451baa1a6f8ae68cd19e0c4c98b8887047f3b9bdb77
     category: token
     rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。
   - card_no: BP14-090
@@ -78,7 +78,7 @@ reverse_positions:
     section: 0
     line: 1
     frame_ids:
-      - frame:1d0b2e3a8082efb7dbc1db8164038c636aacd7ec4988272bad1a987aa1c45482
-      - frame:929d86ccc02ebf9f23fd05de000932f2be7e2cc1a7181213fcf88f7a2a788419
+      - frame:7e0907e36c2b850ef3b7d9641a73339a8dace4b226d4af6dccf23b647193a52d
+      - frame:8d0b0fee11b672cd24e8b29dbec491fd108c0753a0688f7c83914b085abb5192
     category: token
     rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。

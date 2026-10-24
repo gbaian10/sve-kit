@@ -5,8 +5,8 @@ basis:
   classifications:
     recipe: v0-classification-candidates-1
     inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
-  normalizer: four-layer-jp-v6
-  build_sha256: 1de5adc33023646bbc7ced36bb49bb1850fe54309fed29c246d060a40862bc53
+  normalizer: four-layer-jp-v7
+  build_sha256: 7663e614a9cbf981162cbc7d09bb5841bcd3b18958c04b01fe55c5e4cb06ecf6
 groups:
   - id: shape:c5df6613d4cda1795e06ae58ad7600cad591fdbc28c8bdc5919d26dbcf6231c0
     priority: false
@@ -24,13 +24,13 @@ groups:
         - BP19-SL17
         - BP19-059
     frames:
-      - frame:af930668557b9360583b24c1412b185c9d677cf51ca6ec6b9d9d8e88aead078f
-      - frame:b0f616137dede9c3f9f2a22b5f42451c8576b6601c99994e0e314216e564d558
-      - frame:e05de18c8e83dfe32c2def34e240b9efb4aa498ba77af4fbefc29f5e348cecad
+      - frame:d495adbe0efba3430bd68af6cbb842bd44cb4fb694d0f9eda7b47865d35be470
+      - frame:88d7e9483f20083d648969cf5da5475674ff67bbcf3ae4a358c5b95bca06d8ef
+      - frame:0c43c197e032da5eee6e8d9f69c9f3ad349fb8a52377d92a142fb563b0f5cb0e
     uses:
-      - use:526bb523de2e1a946a503e0a520daf1421b0bb0e82fd59078da64bcfe45fdcb7
-      - use:841155d2c78342782a3beed31a8adcfcab4d8dd73d407943204f4596507a0f37
-      - use:c2cdc9c210dd2a138ecbb4c6daee35138c23331a6561f1c8706bebe3835faf53
+      - use:0e0de0ce0d33a6cb10eabc6af6262dcbb0ffe4b4eb8b540ca9bba0919c2cf282
+      - use:b0135ca644be71f8adfe86e4b3edadda49bfd0005c7afa4daf85ea6b0bc285dc
+      - use:d8814fe900b67c293da0382cb200286ae93a5a4994b16762e601512d507f4658
     translation_review:
       required_uses: []
       conditional_uses: []
@@ -42,7 +42,7 @@ reverse_positions:
     section:
     line: 2
     frame_ids:
-      - frame:21e964501c24ba7ad512544eab5916e2fb5bfff65f2889d35201e138c5c5432b
+      - frame:acee6ecf5013f02a9fbf9c4ac012d780c64a1cb49530ebe9dc3822a0ed31731a
     category: 跨行涵蓋
     rationale: 第一行進化時 choice 包含第二行模式。
     covered_by:
@@ -54,7 +54,7 @@ reverse_positions:
     section:
     line: 3
     frame_ids:
-      - frame:f05c549f3a17a784870ab41d7ce5eb4ba4717a1d2bd618fa059f6a9462e890af
+      - frame:2de579a1471a146de3dbebf5f1fae9e23be611ec45f852a297cac4a8747aa57a
     category: 跨行涵蓋
     rationale: 第二行 end trigger 的 choice 包含第三行模式。
     covered_by:

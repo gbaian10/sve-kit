@@ -5,8 +5,8 @@ basis:
   classifications:
     recipe: v0-classification-candidates-1
     inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
-  normalizer: four-layer-jp-v6
-  build_sha256: 1de5adc33023646bbc7ced36bb49bb1850fe54309fed29c246d060a40862bc53
+  normalizer: four-layer-jp-v7
+  build_sha256: 7663e614a9cbf981162cbc7d09bb5841bcd3b18958c04b01fe55c5e4cb06ecf6
 groups:
   - id: shape:b4b0dea12888e4944be153fdb03dbaa2322dbf9dc29a435845c44bbf7fc99e8c
     priority: true
@@ -24,13 +24,13 @@ groups:
         - CP04-004
         - CP04-SL04
     frames:
-      - frame:13456bf15bffb4790ab435feb220eff2f0268e6d9b140a6129c4b06bb125b1a0
-      - frame:9c52a9d14874e244717ea9362cedec2b6958e1c20f1d8503dbbda997c0c7819f
-      - frame:d826ff2b1e2561939503f33005a47ba6ba270768982cd4a952cb04e191c8fa67
+      - frame:5c63db6a8c79ccc289939936f6faa572b2b84d2e705becd0bea900d24ba6fb30
+      - frame:ed12aad5647378104537555e9412ba0a134653135cc148cc7c4a67335bf28e51
+      - frame:997efc207a7324a72167ffc5c43f2f8fd59481473261ab8a4687596799a7df10
     uses:
-      - use:4d8c1490d6a5b6c0f80e74d53b75af443900e949cbdd8f30820b08b791cef9ef
-      - use:5d875b6f951fffb9f5de42ce6d48ef1ebe3dc98924697ff7eb7c6b17f7a1fd3c
-      - use:edfb5d3edf0bad4eea690e43fbd34e7018c3a1e9245da5b8bfd313f235968bd6
+      - use:d3c493161c8aa644c97cface4f7d0af450307821d82d3bf0146e069c10191bb8
+      - use:37195a500576ed691c18adb0dfcaf7362cb6dedeccbdc1b66b0d84ac69a724f6
+      - use:b77f3c929b8373940010f21040950fc7fde117807adb46045421f32d4d3587f5
     translation_review:
       required_uses: []
       conditional_uses: []
@@ -42,8 +42,8 @@ reverse_positions:
     section: 0
     line: 1
     frame_ids:
-      - frame:1c0718b8e80e5698e0077510538b9189c213100cc2b4e02f9089a7109e754f9b
-      - frame:67d163acfd98a907be5d44f65aaf10a6f33c9e4dbdb6a5847bf2601d15891ad5
+      - frame:58a79935e495113370187fc788be4b78ff96b6a37f82f1d9691d7d562899e37f
+      - frame:935fef4036997d7d91e14dd88e49a2fddd73c7dab5ba4ada8ecb66820544ac98
     category: token
     rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。
   - card_no: CP04-PR16
@@ -52,7 +52,7 @@ reverse_positions:
     section: 0
     line: 1
     frame_ids:
-      - frame:dd3fa6dd4662fb89fd235315933d314233e9553660c3c7af95146dd32797409a
+      - frame:93989a71c3ba38fa5bdd5146ce347bc9e036400b764d4d706d579f2b0c26af5e
     category: 說明
     rationale: 括號說明既有關鍵字或通用建構／裝備規則；不複製成另一個效果。
   - card_no: CP04-T02
@@ -61,6 +61,6 @@ reverse_positions:
     section: 0
     line: 1
     frame_ids:
-      - frame:dd3fa6dd4662fb89fd235315933d314233e9553660c3c7af95146dd32797409a
+      - frame:93989a71c3ba38fa5bdd5146ce347bc9e036400b764d4d706d579f2b0c26af5e
     category: 說明
     rationale: 括號說明既有關鍵字或通用建構／裝備規則；不複製成另一個效果。

@@ -5,8 +5,8 @@ basis:
   classifications:
     recipe: v0-classification-candidates-1
     inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
-  normalizer: four-layer-jp-v6
-  build_sha256: 1de5adc33023646bbc7ced36bb49bb1850fe54309fed29c246d060a40862bc53
+  normalizer: four-layer-jp-v7
+  build_sha256: 7663e614a9cbf981162cbc7d09bb5841bcd3b18958c04b01fe55c5e4cb06ecf6
 groups:
   - id: shape:45767369c9b376134bff02b22114fe01a966ab207b47db65cbd3c10aa5203551
     priority: false
@@ -42,21 +42,21 @@ groups:
         - CP01-P59
         - CP01-077
     frames:
-      - frame:162ab6019656d8ddf9408c76bbf06da0cba2433d002265b896d014e298bd6e25
-      - frame:271dbb8f956e643187b8dd5029a4b1f2b0b97c38a11ea7a936dd3fc2f80f6ccb
-      - frame:876f185f1c7e0dc75a458d3c64e7b306ce1fb08a3fc3b75f3ff4399d27c92e0f
-      - frame:923f27ddfd019c1e313c70538129e710a773d601b430729864b145ea0d528b34
-      - frame:9b933d739ceb45125da9303d9b7c80985ccc12a8d98c5ac48be40670405c76f5
-      - frame:bbdfac96ad608a2ae17edbe850e8d911386b5a6ede0ee935660a1537c8ae16cd
-      - frame:f7ae3e66588382862e7f41b5773b06bb2911f89dd1304b7c3889df3c43fdc0cb
+      - frame:e893098a7b380fa92a86571b86c7ab9da97b14f220c6a1505eb3b67bd53a6c28
+      - frame:196850866bff3f035b88822e48cd6f66b493cd6408043975a55cbbaabf560fb8
+      - frame:c90f621cf1e6cef3fa4d819faa91f8b2155c6d6923b8a53390fea0bbeb7866a3
+      - frame:3f16885d38cc06e54bdfbf162487be8405cb0fb8ea5181259bd9b26e20d7bd23
+      - frame:06f4ccc9a61569402818f3040e0d1daca48718b56b9c46d5b5989a46ddf9987f
+      - frame:13c4182a1667658604df9425a9e09638a152b9ba162812be095531d4f58e2d29
+      - frame:bdaedd5c17c001abd4e6e3f804173469f561dbe4058b3089a9f9db6b6156b254
     uses:
-      - use:03267fc4fc2c1588b000f024df79a1e34da9221ba635c54de292c1fc453be45d
-      - use:1632d89d72f7d6c269873bf0d5af1dde03a7db34462b1a99f227d32b41b57789
-      - use:2446929feaa85cf78133072e576741826f584f5ef79b4ee18a6582b364fc736f
-      - use:45bc8d672d01f25bbaf0487bc1ca314f3fb2ecae99d60cfd7f8e2cd85bcaf590
-      - use:47d6956c7d28642cc1b3ae6820b63a65dd0bcc85ce29f388e5fd56d3805dd01d
-      - use:510da94347edaff47916cd4bc644216aaeed27c9cbe1f14fadc39b11ee7c5a58
-      - use:ec1ab1a3b01f03e29fa080c6562ef9b9d1bd9ea46e79449218e749ba322fd166
+      - use:e4e86817f1dfe0478163177ed1df1545887e603b6ba889245ebd4e6c70820c2a
+      - use:4314afcb252e50b8324cd0a96bd4edc1656bb1ab2803cd0cf93829a27517a5c6
+      - use:d8d789d25d568d1d110e6e36af18d54d93d4fd28389f28b64e41c5aa31b08b4c
+      - use:6892b91be174ed27c4bea3a26cd3ca0ae4291d989ab70bb27715e4641f771826
+      - use:64dcb2125595f3736ef74a589d1d6c445e036bcc49522e8cc27d5d50f50efd2f
+      - use:e7afce93674c2c5a67d5873d8548b97e73ad346dca10c69a1397c574a0c1714c
+      - use:9e36910578a60043fefc6aa9b8a0c84cb700fb2f1296708bb5b1de86a22f4e59
     translation_review:
       required_uses: []
       conditional_uses: []
@@ -74,11 +74,11 @@ groups:
       Taf6727e46e:
         - BP02-103
     frames:
-      - frame:3681a64a7548b89da1ae0aeee190859832c74b9752bcc7f874e9bc64fd84028c
-      - frame:b1d9143bfc76c21eea5c66c90e435592eeb45cf93b882eabbc6c06da8a0023db
+      - frame:666a4c67bd92596a39a78bb524ba5d8aa1b55ea50d576d4a2d177a953fedd886
+      - frame:f71fd4ebfc0508fe7f09b28041d25f21678ce33452a9b3b2ceaa01dee66f4a69
     uses:
-      - use:76d9d653298e4f78a2dedc1e071eb56d9c4cc259b1819c5c40f6d56b14f4e61e
-      - use:e15de9ef9d8aefe4646d8701a964c930f02c14e1f0a6c6f7a3e0fd62fb3a1392
+      - use:5cba7675ed7a0b4599c6a5ca1e9cb52cd33fd72a4f29c9e163aba701c6c85242
+      - use:aa6a2ffd7562f81b80d26ec964e9f47b13407093dab8fed0a8fd601021670bf1
     translation_review:
       required_uses: []
       conditional_uses: []
