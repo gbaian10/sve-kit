@@ -20,7 +20,10 @@ from sve_carddb.domains.mechanic_coverage import (
     required_fields,
     store_evidence,
 )
-from sve_carddb.domains.mechanic_grants import KEYWORDS, granted_keyword
+from sve_carddb.domains.mechanic_grants import ADAPTER as GRANTS_ADAPTER
+from sve_carddb.domains.mechanic_grants import KEYWORDS, field_fact, granted_keyword
+from sve_carddb.domains.mechanic_references import ADAPTER as REFERENCES_ADAPTER
+from sve_carddb.domains.mechanic_references import referenced_keyword
 from sve_carddb.domains.translations.four_layer_analysis import analyze_source
 from sve_carddb.domains.translations.four_layer_sources import (
     card_field,
@@ -39,7 +42,7 @@ if TYPE_CHECKING:
     from sve_carddb.domains.translations.four_layer_classification import Recognized
     from sve_carddb.domains.translations.four_layer_normalizer import SourcePart
 
-ADAPTER = "manual-keywords-fields-bp01-v13"
+ADAPTER = "manual-keywords-fields-bp01-v14"
 _OTHER_LINE_BREAKS = "\r\v\f\x1c\x1d\x1e\x85\u2028\u2029"
 _EVOLUTION = re.compile(r"\{進化\}\{コスト[0-9]+\}：これは進化する。")
 _FIXED_EFFECT = re.compile(
@@ -349,6 +352,8 @@ _TOKEN_DEFINITION = re.compile(
     r"\{コスト[0-9]+\}\{攻撃力\}[0-9]+/\{体力\}[0-9]+【突進】|"
     r"『防御型ゴーレム』\{ウィッチ\}ゴーレム・フォロワー"
     r"\{コスト[0-9]+\}\{攻撃力\}[0-9]+/\{体力\}[0-9]+【守護】|"
+    r"『ホーリータイガー』\{ビショップ\}獣・フォロワー"
+    r"\{コスト[0-9]+\}\{攻撃力\}[0-9]+/\{体力\}[0-9]+【突進】|"
     r"『ドラゴン』\{ドラゴン\}竜族・フォロワー"
     r"\{コスト[0-9]+\}\{攻撃力\}[0-9]+/\{体力\}[0-9]+|"
     r"『ゴースト』\{ナイトメア\}死者・フォロワー"
@@ -436,10 +441,34 @@ def _quoted_field_decision(raw: str) -> bool | None:
     return None
 
 
-def _special_field_decision(raw: str) -> bool | None:
+def _special_field_decision(
+    raw: str, card_id: str, terms: Mapping[str, str]
+) -> bool | None:
+    if field_fact(card_id, raw, terms) is not None:
+        return True
     if any(char in raw for char in _OTHER_LINE_BREAKS):
         return _NAMED_EX_COUNT.fullmatch(raw) is not None
     return _quoted_field_decision(raw)
+
+
+def _proved_lines(
+    raw: str, card_id: str, terms: Mapping[str, str]
+) -> list[tuple[int, int]]:
+    # Producers require the untrimmed source line; a normalized body is insufficient.
+    proved_lines: list[tuple[int, int]] = []
+    offset = 0
+    for line in raw.split("\n"):
+        if (
+            _REMINDER_EFFECT.fullmatch(line)
+            or granted_keyword(line, terms) is not None
+            or (
+                card_id == "c:b2e2e26709a65e08979ba5d0e6d0fb20"
+                and referenced_keyword(line, terms) is not None
+            )
+        ):
+            proved_lines.append((offset, offset + len(line)))
+        offset += len(line) + 1
+    return proved_lines
 
 
 def _main_field(
@@ -447,20 +476,17 @@ def _main_field(
     source: SourceDescriptor,
     settings: Settings,
     keywords: Mapping[str, str],
+    card_id: str,
 ) -> bool:
-    """Prove bounded fixed effects independently of H1 declarations."""
-    quoted_decision = _special_field_decision(raw)
+    """Require the positive producer's exact boundary before proving acquisitions."""
+    terms = {
+        kid: settings.classifier.terms[term].source_ja for term, kid in keywords.items()
+    }
+    quoted_decision = _special_field_decision(raw, card_id, terms)
     if quoted_decision is not None:
         return quoted_decision
     derived = analyze_source(raw, source, settings.classifier)
-    # Grants must match the producer's untrimmed line, not a normalized body slice.
-    terms = {term: settings.classifier.terms[term].source_ja for term in keywords}
-    proved_lines: list[tuple[int, int]] = []
-    offset = 0
-    for line in raw.split("\n"):
-        if _REMINDER_EFFECT.fullmatch(line) or granted_keyword(line, terms) is not None:
-            proved_lines.append((offset, offset + len(line)))
-        offset += len(line) + 1
+    proved_lines = _proved_lines(raw, card_id, terms)
     bodies = 0
     for part, found in zip(derived.field.parts, derived.recognized, strict=True):
         if part.source_span.role == "layout":
@@ -538,6 +564,7 @@ def _proved(
     settings: Settings,
     keywords: Mapping[str, str],
     reasons: Counter[str],
+    card_id: str,
 ) -> bool:
     if not raw:
         return True
@@ -546,7 +573,7 @@ def _proved(
             return True
         reasons["nonempty_section"] += 1
         return False
-    if not _main_field(raw, source, settings, keywords):
+    if not _main_field(raw, source, settings, keywords, card_id):
         reasons["unproved_main_field"] += 1
         return False
     return True
@@ -585,7 +612,7 @@ def _checks(
             if not closed[face]:
                 reasons["source_section_gap"] += 1
                 continue
-        if not _proved(original.text, source, settings, keywords, reasons):
+        if not _proved(original.text, source, settings, keywords, reasons, cid):
             continue
         if field == "effect":
             main_proved.add(face)
@@ -624,6 +651,8 @@ def apply(
                 {
                     "adapter": ADAPTER,
                     "h1_producer": h1_version,
+                    "grants_adapter": GRANTS_ADAPTER,
+                    "references_adapter": REFERENCES_ADAPTER,
                     "cards": list[JsonValue](sorted(settings.first_batch_cards)),
                 }
             )

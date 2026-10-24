@@ -38,6 +38,21 @@ _COUNT = re.compile(
 )
 
 
+def referenced_keyword(
+    line: str, terms: Mapping[str, str]
+) -> tuple[Literal["refers", "counts"], str] | None:
+    """Share the complete reference boundary with whole-field proofs."""
+    match = _COUNT.fullmatch(line)
+    relation: Literal["refers", "counts"] = "counts"
+    if match is None:
+        match = _SELECT.fullmatch(line) or _DISCARD.fullmatch(line)
+        relation = "refers"
+    if match is None:
+        return None
+    matched = [kid for kid, spelling in terms.items() if spelling == match["keyword"]]
+    return (relation, matched[0]) if len(matched) == 1 else None
+
+
 def apply(
     db: Database,
     inputs: Inputs,
@@ -101,18 +116,10 @@ def apply(
         if "「" in original.text or "」" in original.text:
             continue
         for ordinal, line in enumerate(original.text.splitlines()):
-            match = _COUNT.fullmatch(line)
-            relation: Literal["refers", "counts"] = "counts"
-            if match is None:
-                match = _SELECT.fullmatch(line) or _DISCARD.fullmatch(line)
-                relation = "refers"
-            if match is None:
+            fact = referenced_keyword(line, terms)
+            if fact is None:
                 continue
-            matched = [
-                kid for kid, spelling in terms.items() if spelling == match["keyword"]
-            ]
-            if len(matched) != 1:
-                continue
+            relation, keyword = fact
             identifier = (
                 "mechanic:"
                 + digest(
@@ -121,7 +128,7 @@ def apply(
                             "source": source.model_dump(mode="json"),
                             "line": ordinal,
                             "card_id": cid,
-                            "keyword_id": matched[0],
+                            "keyword_id": keyword,
                             "scope": "shared",
                             "relation": relation,
                             "source_text_hash": hashes[cid],
@@ -134,7 +141,7 @@ def apply(
                 {
                     "id": identifier,
                     "card_id": cid,
-                    "keyword_id": matched[0],
+                    "keyword_id": keyword,
                     "relation": relation,
                     "action": None,
                     "scope": "shared",
@@ -146,7 +153,7 @@ def apply(
                     "decision_id": inputs.registry.decision.id,
                 }
             )
-            checks.setdefault((cid, matched[0]), set()).add(
+            checks.setdefault((cid, keyword), set()).add(
                 FieldCheck(
                     face_id=original.face_id,
                     revision_id=str(current["revision_id"]),

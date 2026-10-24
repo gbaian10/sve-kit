@@ -6,7 +6,7 @@ from dataclasses import replace
 from typing import TYPE_CHECKING, Literal
 
 import pytest
-from pydantic import ValidationError
+from pydantic import JsonValue, ValidationError
 
 from sve_carddb.build import Json, create_database
 from sve_carddb.build.t1 import compile_build
@@ -16,7 +16,7 @@ from sve_carddb.domains.products.models import LocalizedText
 from sve_carddb.domains.registry.records import FaceData
 from sve_carddb.domains.registry.snapshot import load_registry
 from sve_carddb.domains.text_observations.intern import TextInterner
-from sve_carddb.domains.translations.four_layer_classification import Term
+from sve_carddb.domains.translations.four_layer_classification import Classifier, Term
 
 from ..support import digital_link_import_fixtures
 from ..support.digital_link_import_fixtures import make_fixture
@@ -58,6 +58,61 @@ def registry() -> mechanics.Registry:
     )
 
 
+def _case_keywords(first_batch: bool | str) -> tuple[mechanics.Inputs, Classifier]:
+    inputs = mechanics.Inputs(registry(), canonical(registry().model_dump(mode="json")))
+    if first_batch:
+        adopted = inputs.registry.model_copy(
+            update={
+                "records": tuple(
+                    record.model_copy(update={"id": "kw:" + code, "code": code})
+                    for record, code in zip(
+                        inputs.registry.records, ("ward", "storm"), strict=True
+                    )
+                )
+            }
+        )
+        inputs = mechanics.Inputs(adopted, canonical(adopted.model_dump(mode="json")))
+    engine = classifier(
+        (
+            Term("term:keyword.test_a", "keyword", "合成甲"),
+            Term("term:keyword.test_b", "keyword", "合成乙"),
+        ),
+        extra=("bracket_keyword_reference",),
+    )
+    if isinstance(first_batch, str):
+        spellings = {
+            "ward": "守護",
+            "storm": "疾走",
+            "rush": "突進",
+            "bane": "必殺",
+            "assail": "指定攻撃",
+            "intimidate": "威圧",
+            "aura": "オーラ",
+            "drain": "ドレイン",
+            "ambush": "潜伏",
+            "barrier": "バリア",
+        }
+        adopted = inputs.registry.model_copy(
+            update={
+                "records": tuple(
+                    mechanics.Keyword(
+                        id="kw:" + code, code=code, term_id="term:keyword." + code
+                    )
+                    for code in spellings
+                )
+            }
+        )
+        inputs = mechanics.Inputs(adopted, canonical(adopted.model_dump(mode="json")))
+        engine = classifier(
+            tuple(
+                Term("term:keyword." + code, "keyword", spelling)
+                for code, spelling in spellings.items()
+            ),
+            extra=("bracket_keyword_reference",),
+        )
+    return inputs, engine
+
+
 @contextmanager
 def case(
     tmp_path: Path,
@@ -65,7 +120,7 @@ def case(
     raw: str,
     *,
     back: str | None = None,
-    first_batch: bool = False,
+    first_batch: bool | str = False,
     sections: tuple[str, ...] = (),
 ) -> Generator[tuple[Database, mechanics.Inputs, mechanics.Settings, str]]:
     html = digital_link_import_fixtures.RAW
@@ -98,27 +153,13 @@ def case(
         ),
         key=lambda face: face.ordinal,
     )
-    fixture = replace(fixture, face=faces[0])
-    inputs = mechanics.Inputs(registry(), canonical(registry().model_dump(mode="json")))
-    if first_batch:
-        adopted = inputs.registry.model_copy(
-            update={
-                "records": tuple(
-                    record.model_copy(update={"id": "kw:" + code, "code": code})
-                    for record, code in zip(
-                        inputs.registry.records, ("ward", "storm"), strict=True
-                    )
-                )
-            }
+    if isinstance(first_batch, str):
+        faces = [face.model_copy(update={"card_id": first_batch}) for face in faces]
+        fixture = replace(
+            fixture, card=fixture.card.model_copy(update={"id": first_batch})
         )
-        inputs = mechanics.Inputs(adopted, canonical(adopted.model_dump(mode="json")))
-    engine = classifier(
-        (
-            Term("term:keyword.test_a", "keyword", "合成甲"),
-            Term("term:keyword.test_b", "keyword", "合成乙"),
-        ),
-        extra=("bracket_keyword_reference",),
-    )
+    fixture = replace(fixture, face=faces[0])
+    inputs, engine = _case_keywords(first_batch)
     schema = compile_build(("keyword", "correction"))
     with create_database(schema) as db, template().copy() as baseline:
         with db.transaction():
@@ -2546,3 +2587,230 @@ def test_newly_proved_whole_lines_replace_the_previous_bounded_gaps(
             r.values["keyword_id"]: r.values["relations"]
             for r in db.rows("mechanic_projection")
         } == expected
+
+
+_FINAL_FIELDS = [
+    pytest.param(
+        "c:0354bd9a205250be958580f4b74b9c44",
+        "自分のターンごとに1回、自分の他のアミュレットが場を離れたとき、『ホーリータイガー』1体を出す。それは【守護】を持つ。",
+        (
+            "『ホーリータイガー』{ビショップ}獣・フォロワー{コスト4}{攻撃力}4/{体力}4【突進】",
+        ),
+        {"kw:ward": ["grants"]},
+        id="BP01-141",
+    ),
+    pytest.param(
+        "c:1c1df3db02625a6688c3a79f1f4628bb",
+        "【進化時】下記から1つチョイスする。【1】これは【疾走】を持つ。【2】相手のフォロワー1体を選ぶ。それに「これの攻撃力」と同じダメージ。",
+        (),
+        {"kw:storm": ["has"]},
+        id="BP01-005",
+    ),
+    pytest.param(
+        "c:21fe3e24746457e88fd5f9cef0039c3e",
+        "{ファンファーレ}【真紅】状態なら、これは{攻撃力}+1/{体力}+1して、【突進】を持つ。",
+        (),
+        {"kw:rush": ["has"]},
+        id="BP01-112",
+    ),
+    pytest.param(
+        "c:3853b3eeb8845ecab213a36f94376fe6",
+        "【突進】【指定攻撃】【守護】\n{ファンファーレ}相手のリーダー1人を選ぶ。それの場のカードが3枚以上なら、これは{攻撃力}+2/{体力}+2して、【オーラ】を持つ。",
+        (),
+        {
+            "kw:aura": ["has"],
+            "kw:rush": ["has"],
+            "kw:assail": ["has"],
+            "kw:ward": ["has"],
+        },
+        id="BP01-028",
+    ),
+    pytest.param(
+        "c:53097053c3f652b290299c681f47f346",
+        "{ファンファーレ}【真紅】状態なら、これは【疾走】を持つ。",
+        (),
+        {"kw:storm": ["has"]},
+        id="BP01-113",
+    ),
+    pytest.param(
+        "c:b2e2e26709a65e08979ba5d0e6d0fb20",
+        "{ファンファーレ}自分のフォロワー1体を選ぶ。それは【守護】を持つ。\n{起動}{コスト2}これを{アクト}墓場に置く：【守護】を持つ自分のフォロワー1体を選ぶ。それは{攻撃力}+2/{体力}+2する。",
+        (),
+        {"kw:ward": ["grants", "refers"]},
+        id="BP01-149",
+    ),
+    pytest.param(
+        "c:bcf2ca13d83252188db0e7494b818c61",
+        "【必殺】\n{ファンファーレ}リーダーの{体力}-2：これは【突進】を持つ。自分のデッキの上1枚を墓場に置く。",
+        (),
+        {"kw:rush": ["has"], "kw:bane": ["has"]},
+        id="BP01-119",
+    ),
+    pytest.param(
+        "c:d680c6d777c853a5a32e0ca6d2ab2f76",
+        "{ファンファーレ}『ドラゴン』1枚をEXエリアに置く。\n{起動}{コスト2}これを{アクト}：自分のEXエリアの『ドラゴン』1枚を選ぶ。それを場に出す。それは【突進】を持つ。【覚醒】状態なら、自分のPPを2回復する。",
+        ("『ドラゴン』{ドラゴン}竜族・フォロワー{コスト4}{攻撃力}5/{体力}5",),
+        {"kw:rush": ["grants"]},
+        id="BP01-078",
+    ),
+]
+
+
+@pytest.mark.parametrize(("card_id", "raw", "sections", "expected"), _FINAL_FIELDS)
+def test_final_fields_preserve_keyword_ownership_and_complete_all_relations(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    card_id: str,
+    raw: str,
+    sections: tuple[str, ...],
+    expected: dict[str, list[str]],
+) -> None:
+    with case(
+        tmp_path,
+        monkeypatch,
+        raw,
+        first_batch=card_id,
+        sections=sections,
+    ) as (db, inputs, settings, _):
+        support = db.rows("card_engine_support")
+        with db.transaction():
+            report = mechanics.apply(db, inputs, settings)
+        assert report["complete_cards"] == 1
+        assert db.rows("card_mechanic_coverage")[0].values["complete_all"] is True
+        assert {
+            str(row.values["keyword_id"]): row.values["relations"]
+            for row in db.rows("mechanic_projection")
+        } == {key: Json(list[JsonValue](value)) for key, value in expected.items()}
+        assert db.rows("card_engine_support") == support
+        assert all(row.values["dsl_id"] is None for row in db.rows("card_mechanic"))
+
+
+@pytest.mark.parametrize(
+    ("card_id", "raw", "sections", "expected"),
+    [item for item in _FINAL_FIELDS if item.id != "BP01-149"],
+)
+@pytest.mark.parametrize("change", ["tail", "quote", "different-owner"])
+def test_final_field_proofs_reject_unadmitted_contexts(  # ruff: ignore[too-many-arguments,too-many-positional-arguments] -- each parameter describes an independent source boundary
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    card_id: str,
+    raw: str,
+    sections: tuple[str, ...],
+    expected: dict[str, list[str]],
+    change: str,
+) -> None:
+    if change == "tail":
+        raw += "1枚引く。"
+    elif change == "quote":
+        raw = "これは「\n" + raw + "\n」を持つ。"
+    else:
+        card_id = "c:00010e129e9e56c5ac66b7b7c597b6e6"
+    with case(
+        tmp_path,
+        monkeypatch,
+        raw,
+        first_batch=card_id,
+        sections=sections,
+    ) as (db, inputs, settings, _):
+        with db.transaction():
+            report = mechanics.apply(db, inputs, settings)
+        assert report["complete_cards"] == 0
+        projections = {
+            str(row.values["keyword_id"]): row.values["relations"]
+            for row in db.rows("mechanic_projection")
+        }
+        # Existing standalone declarations may survive, but no new acquisition may do so.
+        acquired = next(key for key in expected if key not in {"kw:bane", "kw:assail"})
+        assert acquired not in projections
+
+
+@pytest.mark.parametrize("suffix", ["【守護】", "自分のPPを1回復する。"])
+def test_holy_tiger_definition_needs_its_complete_native_rush_suffix(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    suffix: str,
+) -> None:
+    raw = "自分のターンごとに1回、自分の他のアミュレットが場を離れたとき、『ホーリータイガー』1体を出す。それは【守護】を持つ。"
+    section = (
+        "『ホーリータイガー』{ビショップ}獣・フォロワー{コスト4}{攻撃力}4/{体力}4"
+        + suffix
+    )
+    with case(
+        tmp_path,
+        monkeypatch,
+        raw,
+        first_batch="c:0354bd9a205250be958580f4b74b9c44",
+        sections=(section,),
+    ) as (db, inputs, settings, _):
+        with db.transaction():
+            report = mechanics.apply(db, inputs, settings)
+        assert report["complete_cards"] == 0
+        assert {
+            str(row.values["keyword_id"]): row.values["relations"]
+            for row in db.rows("mechanic_projection")
+        } == {"kw:ward": Json(["grants"])}
+
+
+@pytest.mark.parametrize(
+    ("card_id", "raw", "_sections", "expected"),
+    [item for item in _FINAL_FIELDS if item.id != "BP01-149"],
+)
+def test_final_field_fact_rejects_cr_and_nonunique_keyword_mapping(
+    card_id: str,
+    raw: str,
+    _sections: tuple[str, ...],
+    expected: dict[str, list[str]],
+) -> None:
+    terms = {
+        "kw:ward": "守護",
+        "kw:storm": "疾走",
+        "kw:rush": "突進",
+        "kw:aura": "オーラ",
+    }
+    assert mechanic_grants.field_fact(card_id, raw, terms) is not None
+    assert mechanic_grants.field_fact(card_id, raw + "\r", terms) is None
+    # A spelling shared by a second adopted concept cannot identify a unique keyword.
+    keyword = next(key for key in expected if key not in {"kw:bane", "kw:assail"})
+    assert (
+        mechanic_grants.field_fact(card_id, raw, dict(terms, duplicate=terms[keyword]))
+        is None
+    )
+    assert mechanic_grants.field_fact(card_id, raw, {}) is None
+
+
+def test_final_field_source_bytes_cannot_be_normalized_to_match_the_frozen_owner(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    raw = "{ファンファーレ}【真紅】状態なら、これは【疾走】を持つ。"
+    with case(
+        tmp_path, monkeypatch, raw, first_batch="c:53097053c3f652b290299c681f47f346"
+    ) as (db, inputs, settings, _):
+        with db.transaction():
+            unit = TextInterner(db).intern(LocalizedText(lang="ja", text=raw + "\r"))
+            db.update(
+                "face_revision", {"id": "link-revision"}, {"effect_unit_id": unit}
+            )
+        with pytest.raises(ValueError, match="Card source frozen field differs"):
+            with db.transaction():
+                mechanics.apply(db, inputs, settings)
+
+
+def test_reference_field_proof_does_not_close_the_same_text_on_another_card(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    raw = (
+        "{ファンファーレ}自分のフォロワー1体を選ぶ。それは【守護】を持つ。\n"
+        "{起動}{コスト2}これを{アクト}墓場に置く：【守護】を持つ自分のフォロワー1体を選ぶ。それは{攻撃力}+2/{体力}+2する。"
+    )
+    with case(
+        tmp_path, monkeypatch, raw, first_batch="c:00010e129e9e56c5ac66b7b7c597b6e6"
+    ) as (db, inputs, settings, _):
+        with db.transaction():
+            report = mechanics.apply(db, inputs, settings)
+        assert report["complete_cards"] == 0
+        assert {
+            str(row.values["keyword_id"]): row.values["relations"]
+            for row in db.rows("mechanic_projection")
+        } == {"kw:ward": Json(["grants", "refers"])}
