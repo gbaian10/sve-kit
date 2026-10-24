@@ -1,7 +1,7 @@
 import { isInaccessible } from "@testing-library/dom"
 import { act, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { expect, it } from "vitest"
+import { expect, it, vi } from "vitest"
 
 import { buildSnapshot } from "../../../scripts/fixture/build"
 import { createSnapshotClient, stringValue } from "../../data"
@@ -133,4 +133,42 @@ it("only attributes visible translations when the question and answer have diffe
   expect(within(entry).getByText(/機器譯文/u)).toBeVisible()
   expect(within(entry).queryByText("待校對")).toBeNull()
   expect(within(entry).queryByText(/試作の隊長が2体いる時/u)).toBeNull()
+})
+
+it("proves absence at the snapshot date even when today is later than the source window", async () => {
+  const { client } = await loadedClient()
+  const snapshot = client.snapshot()
+  if (!snapshot) throw new Error("synthetic snapshot did not load")
+  const covered = {
+    ...snapshot,
+    manifest: {
+      ...snapshot.manifest,
+      qa_card_index: {
+        jp: {
+          "c:bp01-002": ["qa:bp01-002-1:v1"],
+          "c:bp01-011": ["qa:bp01-011-1:v2", "qa:bp01-011-2:v1"],
+        },
+        en: {},
+      },
+    },
+  }
+  const fragments = vi.fn(client.fragments)
+  prefsStore.set({ uiLanguage: "zh-TW", qaDisplay: "both" })
+  vi.useFakeTimers({ toFake: ["Date"] })
+  vi.setSystemTime(new Date("2030-01-01T00:00:00Z"))
+  try {
+    expect(Date.now()).toBeGreaterThan(Date.parse(stringValue(snapshot.manifest["data_as_of"])))
+    await renderInRouter(
+      <CardQa
+        client={{ ...client, snapshot: () => covered, fragments }}
+        cardId="c:bp01-001"
+        edition="jp"
+        showOther={false}
+      />,
+    )
+    expect(await screen.findByText("此卡沒有官方 Q&A。")).toBeVisible()
+    expect(fragments).not.toHaveBeenCalled()
+  } finally {
+    vi.useRealTimers()
+  }
 })

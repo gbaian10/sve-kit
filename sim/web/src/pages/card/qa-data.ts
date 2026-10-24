@@ -38,8 +38,8 @@ const tableFiles = (snapshot: LoadedSnapshot, table: string, region?: string) =>
     )
     .map(([key]) => key)
 
-/** A complete source window of the whole edition that covers `today` proves the absence. */
-function windowCovers(snapshot: LoadedSnapshot, region: string, today: string): boolean {
+/** A complete source window of the whole edition that covers `queryDate` proves the absence. */
+function windowCovers(snapshot: LoadedSnapshot, region: string, queryDate: string): boolean {
   const windows = arrayValue(snapshot.manifest["source_windows"])
     .map((raw) => objectValue(raw))
     .filter((window) => window["kind"] === "qa" && window["region"] === region)
@@ -48,9 +48,9 @@ function windowCovers(snapshot: LoadedSnapshot, region: string, today: string): 
     return (
       window["scope_key"] === "region:*" &&
       window["state"] === "complete" &&
-      stringValue(window["from_date"]) <= today &&
-      (typeof until !== "string" || today < until) &&
-      today <= stringValue(window["as_of"]) &&
+      stringValue(window["from_date"]) <= queryDate &&
+      (typeof until !== "string" || queryDate < until) &&
+      queryDate <= stringValue(window["as_of"]) &&
       !windows.some((partial) => {
         const partialUntil = partial["until_date"]
         return (
@@ -139,9 +139,9 @@ export async function loadCardQa(
   snapshot: LoadedSnapshot,
   cardId: string,
   region: string,
-  today: string,
+  queryDate: string,
 ): Promise<CardQa> {
-  const complete = windowCovers(snapshot, region, today)
+  const complete = windowCovers(snapshot, region, queryDate)
   const index = snapshot.manifest["qa_card_index"]
   if (index !== undefined && complete) {
     const edition = objectValue(objectValue(index)[region])
