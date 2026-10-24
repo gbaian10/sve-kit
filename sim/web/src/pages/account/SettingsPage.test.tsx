@@ -22,7 +22,7 @@ describe("SettingsPage", () => {
     await renderInRouter(<SettingsPage />)
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("帳號與設定")
     await userEvent.click(screen.getByRole("switch", { name: "圖示旁附名稱" }))
-    await userEvent.click(screen.getByRole("radio", { name: "英文圈" }))
+    await userEvent.click(screen.getByRole("radio", { name: "英版" }))
     await userEvent.click(
       within(screen.getByRole("radiogroup", { name: "效果文字" })).getByRole("radio", {
         name: "翻譯＋原文",
@@ -34,13 +34,13 @@ describe("SettingsPage", () => {
       }),
     )
     await userEvent.click(
-      within(screen.getByRole("radiogroup", { name: "單卡開啟方式" })).getByRole("radio", {
+      within(screen.getByRole("radiogroup", { name: "卡片開啟" })).getByRole("radio", {
         name: "中間彈出",
       }),
     )
     expect(readPrefs()).toMatchObject({
       symbolLabels: true,
-      banRegion: "en",
+      cardEdition: "en",
       effectLanguage: "both",
       qaDisplay: "none",
       cardOpenMode: "modal",
@@ -200,7 +200,6 @@ it("confirms restoring all defaults and keeps recent cards and downloaded data",
     termEmphasis: false,
     theme: "dark",
     accent: "red",
-    banRegion: "en",
     gridDensity: 3,
     viewMode: "list",
     showOtherEdition: { jp: true, en: false },
@@ -219,7 +218,7 @@ it("confirms restoring all defaults and keeps recent cards and downloaded data",
     within(screen.getByRole("dialog")).getByRole("button", { name: "恢復預設" }),
   )
   // Everything returns to the defaults except the independent background-download setting.
-  const expected = { ...DEFAULT_PREFS, backgroundDownloads: false }
+  const expected = { ...DEFAULT_PREFS, uiLanguage: "ja" as const, backgroundDownloads: false }
   expect(readPrefs()).toEqual(expected)
   expect(prefsStore.get()).toEqual(expected)
   expect(recentStore.get()).toEqual(recent)

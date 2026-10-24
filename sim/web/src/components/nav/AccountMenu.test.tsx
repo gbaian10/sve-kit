@@ -91,6 +91,8 @@ describe("AccountMenuPanel", () => {
   })
 
   it("can enter the mixed translation setting by keyboard and select all four fields", async () => {
+    // The defaults are all "both" now, so start from a mixed state.
+    prefsStore.set({ nameDisplay: "translated" })
     await renderInRouter(<AccountMenuPanel />)
     const group = screen.getByRole("radiogroup", { name: "卡片翻譯" })
     const radios = within(group).getAllByRole("radio")

@@ -49,6 +49,7 @@ function FieldRow({
   return (
     <SettingRow
       className={ROW}
+      stack
       label={label}
       help={
         <HelpTip label={t("settings.preview.help", { name: label })}>
@@ -167,7 +168,11 @@ export function SettingsPage() {
         </SettingRow>
       </Group>
       <Group id="data" title={t("settings.groups.data")}>
-        <SettingRow className={ROW} label={t("account.cardEdition")}>
+        <SettingRow
+          className={ROW}
+          label={t("account.cardEdition")}
+          hint={t("settings.cardEditionHint")}
+        >
           <Segmented
             size="sm"
             label={t("account.cardEdition")}
@@ -177,15 +182,6 @@ export function SettingsPage() {
             }))}
             value={prefs.cardEdition}
             onChange={(cardEdition) => prefsStore.set({ cardEdition })}
-          />
-        </SettingRow>
-        <SettingRow className={ROW} label={t("settings.banRegion")}>
-          <Segmented
-            size="sm"
-            label={t("settings.banRegion")}
-            options={CARD_EDITIONS.map((value) => ({ value, label: t(`options.region.${value}`) }))}
-            value={prefs.banRegion}
-            onChange={(banRegion) => prefsStore.set({ banRegion })}
           />
         </SettingRow>
       </Group>
@@ -230,6 +226,7 @@ export function SettingsPage() {
       <Group id="browse" title={t("settings.groups.browse")}>
         <SettingRow
           className={ROW}
+          stack
           label={t("settings.cardOpenMode")}
           hint={t("settings.cardOpenModeHint")}
         >
@@ -301,11 +298,10 @@ export function SettingsPage() {
             <Button
               variant="primary"
               onClick={() => {
-                // Background downloads are independent of the other preferences, so a reset keeps them.
-                prefsStore.set({
-                  ...DEFAULT_PREFS,
-                  backgroundDownloads: prefsStore.get().backgroundDownloads,
-                })
+                // The interface language and background downloads are independent of the other
+                // preferences, so a reset keeps them.
+                const { uiLanguage, backgroundDownloads } = prefsStore.get()
+                prefsStore.set({ ...DEFAULT_PREFS, uiLanguage, backgroundDownloads })
                 setResetting(false)
               }}
             >

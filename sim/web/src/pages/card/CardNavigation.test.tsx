@@ -230,7 +230,7 @@ async function setup(pendingCandidate = false, blockBackground = false) {
 }
 
 beforeEach(() => {
-  prefsStore.set({ ...DEFAULT_PREFS, uiLanguage: "zh-TW" })
+  prefsStore.set({ ...DEFAULT_PREFS, uiLanguage: "zh-TW", nameDisplay: "translated" })
   Object.defineProperty(HTMLImageElement.prototype, "decode", {
     configurable: true,
     value: () => Promise.resolve(),

@@ -8,6 +8,8 @@ export interface SettingRowProps {
   /** A HelpTip beside the label; its panel opens under the row, so the row is its anchor. */
   readonly help?: ReactNode
   readonly size?: "sm" | "md"
+  /** On a phone, always put the control on its own line under the label (many-option choices). */
+  readonly stack?: boolean
   readonly className?: string
   readonly children: ReactNode
 }
@@ -21,6 +23,7 @@ export function SettingRow({
   hint,
   help,
   size = "md",
+  stack = false,
   className,
   children,
 }: SettingRowProps) {
@@ -28,6 +31,7 @@ export function SettingRow({
     <div
       className={cn(
         "relative flex min-h-11 flex-wrap items-center justify-between gap-x-4 gap-y-1",
+        stack && "max-sm:flex-col max-sm:items-stretch",
         className,
       )}
     >
@@ -35,7 +39,14 @@ export function SettingRow({
         {label}
         {help}
       </div>
-      <div className="ml-auto flex shrink-0 items-center">{children}</div>
+      <div
+        className={cn(
+          "ml-auto flex shrink-0 items-center",
+          stack && "max-sm:ml-0 max-sm:justify-end",
+        )}
+      >
+        {children}
+      </div>
       {hint && <div className="basis-full text-12 text-text-3">{hint}</div>}
     </div>
   )

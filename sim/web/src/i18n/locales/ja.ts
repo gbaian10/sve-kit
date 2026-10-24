@@ -74,7 +74,6 @@ export default {
     language: { "zh-TW": "繁體中文", ja: "日本語", en: "English" },
     theme: { system: "システム", light: "ライト", dark: "ダーク" },
     accent: { amber: "アンバー", teal: "ティール", red: "レッド" },
-    region: { jp: "日本", en: "英語圏" },
     view: { grid: "画像", table: "表", list: "リスト" },
     cardOpenMode: { auto: "自動", panel: "ドロワー", modal: "中央表示", page: "全ページ" },
   },
@@ -114,7 +113,7 @@ export default {
     resetDefaults: "初期設定に戻す",
     resetTitle: "初期設定に戻しますか？",
     resetHint:
-      "すべての設定を初期値に戻します。バックグラウンドダウンロードの設定、ダウンロード済みデータ、閲覧履歴は残ります。",
+      "すべての設定を初期値に戻します。表示言語、バックグラウンドダウンロードの設定、ダウンロード済みデータ、閲覧履歴は残ります。",
     resetCancel: "キャンセル",
 
     groups: {
@@ -168,7 +167,7 @@ export default {
     termEmphasisHint: "表示のみを変更し、本文と参照は保持します",
     symbolLabels: "アイコンに名称を添える",
     symbolLabelsHint: "キーワード系のみ名称を表示します",
-    banRegion: "禁止・制限の地域",
+    cardEditionHint: "禁止・制限や Q&A などのデータもカードの版に従います",
     cardOpenMode: "カードの開き方",
     cardOpenModeHint:
       "自動：PC では右側にドロワー、スマホでは中央に表示。全ページはカードページへ移動します。",

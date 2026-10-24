@@ -29,17 +29,23 @@ describe("readPrefs", () => {
     expect(DEFAULT_PREFS).toMatchObject({
       uiLanguage: null,
       cardEdition: "jp",
-      nameDisplay: "translated",
+      nameDisplay: "both",
       effectLanguage: "both",
       symbolLabels: false,
       flavorDisplay: "both",
       qaDisplay: "both",
       theme: "system",
       accent: null,
-      banRegion: "jp",
       gridDensity: 2,
       viewMode: "grid",
     })
+  })
+
+  it("ignores the retired ban-region key stored by older versions", () => {
+    localStorage.setItem(PREFS_KEY, JSON.stringify({ v: 1, banRegion: "en", cardEdition: "en" }))
+    const prefs = readPrefs()
+    expect(prefs.cardEdition).toBe("en")
+    expect("banRegion" in prefs).toBe(false)
   })
 
   it("carries the old effect, flavor and Q&A choices over once", () => {
@@ -183,8 +189,8 @@ describe("createPrefsStore", () => {
   it("keeps the in-memory value even when persisting fails", () => {
     vi.spyOn(Storage.prototype, "setItem").mockImplementation(blocked)
     const store = createPrefsStore()
-    expect(store.set({ banRegion: "en" })).toBe(false)
-    expect(store.get().banRegion).toBe("en")
+    expect(store.set({ gridDensity: 3 })).toBe(false)
+    expect(store.get().gridDensity).toBe(3)
   })
 
   it("uses an explicitly passed storage", () => {

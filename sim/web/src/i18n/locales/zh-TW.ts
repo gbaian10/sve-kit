@@ -71,7 +71,6 @@ const zhTW = {
     language: { "zh-TW": "繁體中文", ja: "日本語", en: "English" },
     theme: { system: "跟隨系統", light: "淺色", dark: "深色" },
     accent: { amber: "琥珀", teal: "青綠", red: "紅" },
-    region: { jp: "日本", en: "英文圈" },
     view: { grid: "卡圖", table: "表格", list: "清單" },
     cardOpenMode: { auto: "自動", panel: "右側抽屜", modal: "中間彈出", page: "整頁" },
   },
@@ -107,7 +106,7 @@ const zhTW = {
     infiniteScrollHint: "接近列表底部時自動載入；關閉後改用「載入更多」。",
     resetDefaults: "恢復預設",
     resetTitle: "恢復預設設定？",
-    resetHint: "將所有設定恢復為預設值。背景下載設定、已下載資料與最近查看會保留。",
+    resetHint: "將所有設定恢復為預設值。介面語言、背景下載設定、已下載資料與最近查看會保留。",
     resetCancel: "取消",
 
     groups: {
@@ -159,8 +158,8 @@ const zhTW = {
     termEmphasisHint: "只調整顯示，保留文字與說明引用",
     symbolLabels: "圖示旁附名稱",
     symbolLabelsHint: "只有關鍵字類會顯示名稱",
-    banRegion: "禁限地區",
-    cardOpenMode: "單卡開啟方式",
+    cardEditionHint: "禁限、Q&A 等資料都跟著卡片版本",
+    cardOpenMode: "卡片開啟",
     cardOpenModeHint: "自動：電腦從右側推開抽屜，手機從中間彈出。選整頁則一律跳到單卡頁。",
   },
   pages: {
