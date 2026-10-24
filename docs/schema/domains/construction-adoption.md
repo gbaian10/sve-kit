@@ -89,6 +89,20 @@ restriction.state 的 confirmed／announced／withdrawn 是限制的生命周期
 
 來源未明示完整生效日的限制，不填猜測日期、不偽裝 active，也不丟掉已知公告：保留 evidence 與 reconciliation 的 conflict／unresolved、可查「生效日未確認」的候選及原始官方來源。此候選不是正式 restriction 列，coverage 不得 complete，日期查詢仍 unknown；後續補得正式日期與核對收據才匯入。候選查詢介面屬後續投影能力，未實作時至少由私有診斷列出缺口，不能宣稱已完整可查。
 
+### 1.4 現行一覽的單日 human confirmed 入口
+
+`domains.construction.adoption.prepare`／`Prepared.populate` 支援 profiles、copy-limit restrictions 與 coverage 的 human confirmed 採納；其餘 kind、approved_policy、CR／ref／角色覆寫與完整事件 adapter 仍拒絕。全入口先驗 immutable authored revision 的 index／全部分片 exact bytes、canonical hash、完整決定成員、連續採納鏈、兩廠商最終 basis 與真人事件，再對當前建置驗完整 rules_name／card／profile 依賴。既有 `populate_construction` 的 decision-backed staging 仍 fail-closed，沒有 caller 放行旗標。
+
+一覽資料使用獨立 `DateSourceUse`：外形仍為 `{source,usage,locator}`，source 是 `DateSource`，kind 固定 official_page，fetched_at=null；另有 observed_precision=date、observed_on、observed_timezone、observed_basis、import_receipt_id，其他 raw／archive 欄位沿 §3。來源須可從 sealed v2 manifest 的完整匯入收據驗回一次性日期核准；只讀其 immutable manifest 副本。generic Source／FrozenSources 維持 Instant 邊界，不以午夜或歸檔時刻替代。
+
+此窄入口的 coverage.reconciliation 使用獨立 variant `{mode:current-list-day-v1,observed_on,observed_timezone,projection_hash,excluded_entry_pointers}`。source_set.baseline 恰為一個當區 limit 來源，其餘三組皆空；從全部釘住批次重建的當區 limit/news 來源全集亦須恰為該基線。它只描述完整現行一覽在實際觀測日的狀態，**不宣稱 §5 的新聞探索／UTC 知識閉包**。from_date、as_of、observed_on 與來源觀測日相同，until_date 恰為隔日，不能延長。observed_timezone 是取得原檔的觀測時區，不冒稱 EN 公告發布時區。完整 parser 投影 hash 必須重播；所有當日有效列恰採納一次，未生效／已解除列恰列入 excluded_entry_pointers，其他賽制保留在 parser 的 excluded_sections。main scope 及 null announced_on 依明示 human 確認，不由日期或 parser 自動推導。
+
+核對證據 store 的私人 `inventory.json` 完整欄位為 `{construction_review_inventory_format:1,store_id,reports,dependencies,review_inputs}`。reports 為完整 Hash 排序集合；dependencies 與 review_inputs 為 FilePin 排序集合。報告路徑沿 §1.1；依賴 bytes 位於 `dependencies/sha256/<64hex>`；review_inputs 必含 `inputs/basis-inputs.json`，以 basis_hash 對完整最終 `{record_key,kind,filing_key,data,evidence}`，另可釘原核可與互審輸入。採納時唯讀驗 primary／backup／restored 三個互不重疊根的 inventory、每份報告、依賴與私人輸入 exact bytes，並驗回最終 basis；私人路徑不進 authored 或公開資料。工具身分有限登錄在 adoption_loader.MODEL_IDENTITIES，依賴清單由 adoption_reports.REQUIRED_DEPENDENCIES 定義；形成報告時從實際程式 revision 取得，後續逐項驗回備份 bytes 與 report/context 的相同 pin，不依賴 squash 前 commit 永久留在 clone。程式 revision 仍記實際使用的 immutable SHA，不捏造新的來源身分。
+
+F1 保留既有 Instant uses，另以排序唯一的 date_uses 保存日期證據，空集合不輸出；兩種精度不能共用同一來源版本。日期用途的 expected 集合由完整採納重建，必與實際重播集合及 DB 的日期 raw 列逐項相等。configuration 另釘完整 index／shard bytes、current staging、實際 report 使用集合及 inventory hash。每片 authored source_record 與 decision_source 保留完整封套及全部 evidence，內容 raw ID／parser_version=null 不變。
+
+offline recipe 的 construction 設定明示 source_stores 與 review_stores；啟用 authored 入口卻缺設定即拒絕。匯出前 `require_offline_coverage` 逐欄比對已驗採納的 profiles、restrictions 與單日 coverage，額外／缺少值均拒絕。公開 tuple 與格式不變，profiles.revisions=[]，CR／一般 copy 算法及整副牌合法性維持 unknown。
+
 ## 2. 一次性抓回原檔如何正式登錄與釘版
 
 此節定義 carddb 已提供的**離線登錄能力**，入口為 [`source-import register`](../../../carddb/src/sve_carddb/ingest/archive/source_import/README.md)，預設只檢查，明示 `--execute` 才登錄；程式合併與本契約均不授權真實執行。輸入是維護者認可的一次性來源集合：index 記 URL／final URL／status／sha256／bytes／fetched_at／content_type／ETag／Last-Modified／chain，raw 以內容 hash 保存。原始 index 與 raw 保留不動，登錄不會對任何外部服務發請求，不開 live manifest 或以它補 metadata。
@@ -218,4 +232,4 @@ Decklog 可用性與 profile／禁限正交，沿 regional_decklog 的版次目�
 
 反例須覆蓋：缺首輪真人抽查／模型名冒 reviewed_by／政策 sample_ids 少一成員／首輪未實際核對卻偽填 sample_ids 全體 checked／禁限或角色 human sampled 被放行／缺政策 index 或三檔／政策 pin 或 decision.policy_id 不一致／未實作 loader 卻放行／同廠商兩型號／報告缺檔或 hash、vendor、最終 basis 不符／缺證據備份還原；非構築 category／錯全成員／兩次同模型或不同最終 basis／未解分歧／冒充真人抽查／少 source use；隔離登錄碰 live、原 hash／時間／redirect／media 不符、少一 raw、重複收據衝突、seal／backup／restore 缺一步；CR 空／少一子節／錯上下文／跨區／同官版換 raw；ref 任意 URL／未定義／內容 hash 不符／少依據／未知例外／與 profile 不合；限制空 members／選項缺成員／混區／兩種 max 同填／日期重疊；JP 新公告不在入口卻被丟掉、EN 沒鏈接被當無限制、只讀 news 首頁便 complete、解除未統整、來源全集少列／探索範圍有洞／cutoff 超過觀測／EN 時區未定卻 complete／較早發布晚生效公告被跳過／列表非 post href 被漏分類／historical_same_url 跨 URL 或丟舊 href／superseded 無替代證據／成員同名 scope 重複／as_of 之外；名稱／型別更正後照套舊決定；以及「資料 ready 等於合法」的錯誤。全部用合成資料／MockTransport／localhost，不依賴正式原檔，不把一次性全量比對放進每次測試。
 
-目前程式的 decision-backed 匯入仍 fail-closed；本契約合併不會自動放行、不授權本 worker 執行來源登錄／抓取／正式建置。沒有實作／來源／採納就如實回 unknown。
+通用 decision-backed staging、政策、CR 與完整事件匯入仍 fail-closed；已實作的窄 human 入口見 §1.4。契約本身不授權來源登錄、抓取或正式建置；缺必要來源／採納／報告時如實拒絕或回 unknown。

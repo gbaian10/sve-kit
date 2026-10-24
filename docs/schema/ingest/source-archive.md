@@ -56,6 +56,8 @@ metadata 依 hash 保存：`receipts/<64hex>.json`、`descriptors/<64hex>.json` 
 
 ### 2.2 建置 source_record 的投影
 
+構築單日一覽的明示日期入口使用 DateSource，fetched_at=null，DB 另保存 observed_on、observed_timezone、observed_basis、import_receipt_id；僅 official_page 可用，四欄須完整。Instant 與 authored 來源的四個日期欄皆 null。同版 raw 不得混用兩種精度；以下 UTC 轉換只適用 Instant 來源，generic FrozenSources 仍拒絕日期。見[構築採納 §1.4](../domains/construction-adoption.md#14-現行一覽的單日-human-confirmed-入口)。
+
 raw 來源的 `source_record.id` 使用 source_version_id，`sha256` 是 raw_sha256，`raw_locator` 是具名 store＋相對內容定址 path；來源 kind 依實際用途映射 official_page/official_api/official_pdf/image 等建置 enum。`url` 沿 descriptor；fetched_at／ETag 等採 first_receipt_id 的已知來源值，後續觀測留收據，不就地修改同一版本。不能把 observed_at 填成未知的原始 fetched_at。
 
 **使用者核可（2026-10-01，F1 方案 A）**：同一 raw 來源版本只投影一列 `source_record`，`parser_version` 一律 null；每個實際使用的 `(source_version_id, usage, parser pin)` 另存於與 DB／report 一起輸出的建置輸入紀錄。不能以不同 parser 或用途配假 raw ID。authored 來源記實際 Git／檔案內容版號；其 `parser_version` 是接受的文件封套與產生 source identity 所用 recipe 的 profile，不混成爬取 raw，也不假造人工核可。任一部分改變都升 profile，ASCII 內容碰巧同 hash 也不沿用舊版。
@@ -80,6 +82,7 @@ profile 版號與文件 format 版號獨立，例如 #476 後 catalog 文件可�
 
 四層來源核心依[來源位置契約](../domains/four-layer-source-positions.md)每次建置用本次程式及指定來源產生 binding／未匹配清單。
 建置輸入紀錄為 `input_format: 1`，包含 `context` 與排序唯一的實際 `uses`，採 canonical-json-v1。
+構築的一次性日期來源另存排序唯一的 `date_uses`（空集合不輸出），沿[構築採納 §1.4](../domains/construction-adoption.md#14-現行一覽的單日-human-confirmed-入口)的 DateSourceUse；不混入 Instant uses。此窄入口另驗完整 expected／實際用途／DB 日期 raw 集合，並驗 immutable Git bytes、報告與依賴 pins；以下一般入口的追蹤邊界維持原狀。
 它是本次輸入摘要，不作逐欄 expected 使用閉包的驗收證明；不含卡片效果文或私人絕對路徑。
 
 - `context` 保存完整 40 碼 `program_revision` 與明示設定的 canonical JSON 字串 `configuration`。

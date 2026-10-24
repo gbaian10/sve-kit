@@ -32,11 +32,21 @@ TABLES = (
             Column("parser_version", Kind.TEXT, nullable=True),
             Column("authored_path", Kind.TEXT, nullable=True),
             Column("authored_revision", Kind.TEXT, nullable=True),
+            Column("observed_on", Kind.TEXT, nullable=True, pattern=DATE),
+            Column("observed_timezone", Kind.TEXT, nullable=True),
+            Column("observed_basis", Kind.TEXT, nullable=True),
+            Column("import_receipt_id", Kind.TEXT, nullable=True, pattern=HASH),
         ),
         ("id",),
         checks=(
             Check(
-                "kind = 'authored' OR (url IS NOT NULL AND length(url) > 0 AND fetched_at IS NOT NULL)"
+                "(kind = 'authored' OR (url IS NOT NULL AND length(url) > 0)) AND "
+                "(((kind = 'authored' OR fetched_at IS NOT NULL) AND observed_on IS NULL "
+                "AND observed_timezone IS NULL AND observed_basis IS NULL AND import_receipt_id IS NULL) OR "
+                "(kind = 'official_page' AND fetched_at IS NULL AND observed_on IS NOT NULL "
+                "AND observed_timezone IS NOT NULL AND length(observed_timezone) > 0 "
+                "AND observed_basis IS NOT NULL AND length(observed_basis) > 0 "
+                "AND import_receipt_id IS NOT NULL AND raw_locator IS NOT NULL))"
             ),
         ),
     ),

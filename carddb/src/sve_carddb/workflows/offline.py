@@ -28,6 +28,12 @@ from sve_carddb.domains.card_extras.reviewed_errata import (
     configuration as errata_configuration,
 )
 from sve_carddb.domains.card_extras.reviewed_errata import read as read_errata
+from sve_carddb.domains.construction.adoption import Settings as ConstructionSettings
+from sve_carddb.domains.construction.adoption import prepare as prepare_construction
+from sve_carddb.domains.construction.adoption_models import (
+    ProfileRecord,
+    RestrictionRecord,
+)
 from sve_carddb.domains.mechanics import Settings as MechanicSettings
 from sve_carddb.domains.mechanics import apply as apply_mechanics
 from sve_carddb.domains.mechanics import load as load_mechanics
@@ -69,6 +75,7 @@ from sve_carddb.domains.text_observations import (
 )
 from sve_carddb.domains.text_observations.composition import populate_text_preview
 from sve_carddb.domains.text_observations.equivalence import load_decisions
+from sve_carddb.domains.text_observations.intern import text_values
 from sve_carddb.domains.translations.corrected_sources import Corrections
 from sve_carddb.domains.translations.errata import apply as apply_errata_translations
 from sve_carddb.domains.translations.errata import load as load_errata_translations
@@ -101,6 +108,7 @@ if TYPE_CHECKING:
     from sve_carddb.domains.card_extras import ErrataPage, ExtrasPlan
     from sve_carddb.domains.catalog.adoption_importer import AdoptionInputs
     from sve_carddb.domains.catalog.loader import Prepared
+    from sve_carddb.domains.construction.adoption import Adopted
     from sve_carddb.domains.registry.snapshot import RegistrySnapshot
     from sve_carddb.domains.translations.four_layer_authored import (
         Inputs as FrameInputs,
@@ -135,6 +143,7 @@ class Inputs(RecordData):
     name_policy: Literal["approved-frozen-v1"] | None = None
     registry_review_inputs: ReviewInputPin | None = None
     source_mode: Literal["parsed", "archive"] = "parsed"
+    construction: ConstructionSettings | None = None
 
     @model_validator(mode="after")
     def regional_scope(self) -> Inputs:
@@ -148,8 +157,18 @@ class Inputs(RecordData):
 
     def protected_inputs(self) -> tuple[Path, ...]:
         """Output must never overwrite permanent review inputs either."""
-        return (self.repo, self.archive) + (
-            (self.registry_review_inputs.root,) if self.registry_review_inputs else ()
+        return (
+            (self.repo, self.archive)
+            + (
+                (self.registry_review_inputs.root,)
+                if self.registry_review_inputs
+                else ()
+            )
+            + (
+                ()
+                if self.construction is None
+                else self.construction.protected_inputs()
+            )
         )
 
     def batch(self) -> Batch:
@@ -203,16 +222,74 @@ class Built:
     report: dict[str, JsonValue]
 
 
-def require_offline_coverage(projection: Projection, *, errata: bool) -> None:
+def require_offline_coverage(
+    projection: Projection, *, errata: bool, construction: Adopted | None = None
+) -> None:
     """Card pages prove observations, not index completeness or rules coverage."""
-    if (
-        projection.metadata["source_windows"]
-        or projection.metadata["restriction_coverage"]
+    if projection.metadata["source_windows"] or (
+        construction is None and projection.metadata["restriction_coverage"]
     ):
         raise ValueError("Uncovered sources must remain empty windows / unknown")
-    disabled = ("cr_version", "restriction") + (() if errata else ("errata",))
+    if construction is not None:
+        _require_construction_projection(projection, construction)
+    disabled = (
+        ("cr_version",)
+        + (("rules_profile", "restriction") if construction is None else ())
+        + (() if errata else ("errata",))
+    )
     if any(projection.tables[table] for table in disabled):
         raise ValueError("Unrequested ancillary sources cannot become public facts")
+
+
+def _require_construction_projection(projection: Projection, adopted: Adopted) -> None:
+    """Reject public rows outside the exact verified adoption result."""
+    profiles: list[JsonValue] = []
+    restrictions: list[JsonValue] = []
+    coverage: list[JsonValue] = []
+    for record in adopted.records:
+        if isinstance(record, ProfileRecord):
+            assert record.data.value is not None
+            name_id = text_values(record.data.value.name)["id"]
+            assert isinstance(name_id, str)
+            profiles.append(
+                {
+                    "id": record.data.subject.profile_id,
+                    "region": record.data.value.region,
+                    "format_code": "standard",
+                    "name_unit_id": name_id,
+                    "revisions": [],
+                }
+            )
+        elif isinstance(record, RestrictionRecord):
+            assert record.data.value is not None
+            restrictions.append(
+                record.data.value.model_dump(mode="json")
+                | {"id": record.data.subject.restriction_id}
+            )
+        else:
+            assert record.data.value is not None
+            primary = next(item.use for item in record.evidence if item.primary)
+            coverage.append(
+                {
+                    "profile_id": record.data.subject.profile_id,
+                    "from_date": record.data.subject.from_date,
+                    "until_date": record.data.value.until_date,
+                    "state": record.data.value.state,
+                    "source_url": primary.source.url,
+                }
+            )
+    expected = {"rules_profile": profiles, "restriction": restrictions}
+    for name, values in expected.items():
+        if sorted(canonical(row) for row in projection.tables[name]) != sorted(
+            canonical(row) for row in values
+        ):
+            raise ValueError(
+                "Public construction projection differs from verified adoption"
+            )
+    if sorted(canonical(row) for row in coverage) != sorted(
+        canonical(row) for row in array(projection.metadata["restriction_coverage"])
+    ):
+        raise ValueError("Public coverage differs from verified single-day adoption")
 
 
 def _translation_sources(
@@ -371,6 +448,24 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
 
     if errata is None:
         errata = read_errata(inputs.repo / "card-data", store_id=inputs.store_id)
+    construction = (
+        None
+        if inputs.construction is None
+        else prepare_construction(
+            authored_root(inputs.repo),
+            inputs.repo,
+            inputs.revision,
+            inputs.construction,
+        )
+    )
+    if (
+        construction is None
+        and (authored_root(inputs.repo) / "construction-adoptions").exists()
+    ):
+        raise ValueError(
+            "Enabled construction adoptions require explicit source and review stores"
+        )
+    construction_result = None
     if bundle_dir is not None:
         for protected in inputs.protected_inputs():
             output, source = bundle_dir.resolve(), protected.resolve()
@@ -481,6 +576,8 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
         "selected_regions": ["en", "jp"],
         "published_history": "explicit-empty-no-releases",
     }
+    if construction is not None:
+        configuration |= construction.configuration()
     rulings = load_rulings(inputs.repo)
     configuration["ruling_references"] = {
         "profile": RULING_PROFILE,
@@ -661,6 +758,8 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                 else rebuild_rulings(rulings, template_report.compiled),
             )
             name_uses = () if name_result is None else name_result.record.uses
+            if construction is not None:
+                construction_result = construction.populate(db, context)
             mark("db: rulings")
             record = input_record(
                 context,
@@ -671,6 +770,11 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                     *link_uses,
                     *name_uses,
                     *name_sources.uses,
+                ),
+                date_uses=(
+                    ()
+                    if construction_result is None
+                    else construction_result.record.date_uses
                 ),
             )
         restrictions = require_card_extras_ready(
@@ -712,7 +816,9 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             decisions=decisions,
             publication_printings=printings,
         )
-        require_offline_coverage(projection, errata=bool(errata))
+        require_offline_coverage(
+            projection, errata=bool(errata), construction=construction_result
+        )
         if image_index is not None:
             projection = image_index.attach(projection, texts)
         mark("project public tables")
