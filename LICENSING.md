@@ -132,7 +132,7 @@ Distributions must carry the notices required for components actually included.
 In particular, Lucide includes ISC and Feather MIT notices, and IBM Plex Sans
 uses OFL-1.1. The rarity badges contain glyph outlines from Liberation Serif Bold 2.1.5 under
 OFL-1.1; their font copyright and license are in `sim/web/src/assets/rarity/OFL.txt`.
-The card labels use outlines from Caudex 1.01, Libre Caslon Text 2.000,
+The card labels use outlines from Caudex 1.01, Cinzel 2.000, Libre Caslon Text 2.000,
 Lusitana 1.001, Marcellus 1.000 and Philosopher 2.001 under OFL-1.1.
 Their font copyright and licenses are in the `OFL-*.txt` files under
 `sim/web/src/assets/card-labels/`; the directory README identifies each font. Root NOTICE is not a substitute for a release's dependency notices.
