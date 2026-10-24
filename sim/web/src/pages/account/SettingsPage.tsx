@@ -14,6 +14,7 @@ import { currentUiLanguage, UI_LANGUAGES } from "../../i18n"
 import {
   CARD_EDITIONS,
   CARD_OPEN_MODES,
+  CARDS_LAYOUTS,
   DEFAULT_PREFS,
   FIELD_DISPLAYS,
   type FieldDisplay,
@@ -25,6 +26,7 @@ import { PageTitle } from "../PageTitle"
 import { DownloadSettings } from "./DownloadSettings"
 import {
   FieldPreview,
+  LayoutPreview,
   type PreviewField,
   type PreviewToggle,
   TogglePreview,
@@ -239,6 +241,28 @@ export function SettingsPage() {
             }))}
             value={prefs.cardOpenMode}
             onChange={(cardOpenMode) => prefsStore.set({ cardOpenMode })}
+          />
+        </SettingRow>
+        <SettingRow
+          className={ROW}
+          stack
+          label={t("settings.cardsLayout")}
+          hint={t("settings.cardsLayoutHint")}
+          help={
+            <HelpTip label={t("settings.preview.help", { name: t("settings.cardsLayout") })}>
+              <LayoutPreview />
+            </HelpTip>
+          }
+        >
+          <Segmented
+            size="sm"
+            label={t("settings.cardsLayout")}
+            options={CARDS_LAYOUTS.map((value) => ({
+              value,
+              label: t(`options.cardsLayout.${value}`),
+            }))}
+            value={prefs.cardsLayout}
+            onChange={(cardsLayout) => prefsStore.set({ cardsLayout })}
           />
         </SettingRow>
         <SettingRow

@@ -121,7 +121,7 @@ export function CardGrid({ cells, images, onOpen, anchor, selected }: CardGridPr
     <div className="@container">
       <ul
         data-view="grid"
-        className="grid grid-cols-[repeat(var(--result-columns),minmax(0,1fr))] gap-x-3 gap-y-3.5 [--result-columns:2] @min-[520px]:[--result-columns:4] @min-[840px]:[--result-columns:5] @min-[1100px]:[--result-columns:6]"
+        className="grid grid-cols-[repeat(var(--result-columns),minmax(0,1fr))] gap-x-3 gap-y-3.5 [--result-columns:2] @min-[520px]:[--result-columns:4] @min-[840px]:[--result-columns:5] @min-[1100px]:[--result-columns:6] @min-[1350px]:[--result-columns:7] @min-[1600px]:[--result-columns:8]"
       >
         {cells.map((cell) => (
           <li key={cell.key} className="min-w-0">

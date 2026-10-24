@@ -9,6 +9,8 @@ export {
   CARD_EDITIONS,
   CARD_OPEN_MODES,
   type CardOpenMode,
+  CARDS_LAYOUTS,
+  type CardsLayout,
   cardTranslation,
   cardTranslationPatch,
   DEFAULT_PREFS,

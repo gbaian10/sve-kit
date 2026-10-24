@@ -914,7 +914,7 @@ export function CardView({
           })}
           {catalog && cardId !== undefined && (
             <CardQa
-              key={cardId}
+              key={`qa:${cardId}`}
               client={client}
               cardId={cardId}
               edition={region}
@@ -970,7 +970,7 @@ export function CardView({
           )}
           {catalog && cardId !== undefined && printingId !== null && (
             <RelatedCards
-              key={cardId}
+              key={`related:${cardId}`}
               client={client}
               catalog={catalog}
               edition={region}

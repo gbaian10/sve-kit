@@ -1,3 +1,4 @@
+import { ListFilter, SlidersHorizontal } from "lucide-react"
 import {
   type KeyboardEvent,
   useCallback,
@@ -21,6 +22,7 @@ import {
 } from "react-router"
 
 import { CARD_PARAM, withoutCardParam } from "../../app/card-overlay"
+import { BOTH_PANES_MIN_PX, useDrawerSide, useSidebarLayout } from "../../app/cards-layout"
 import {
   type CardEntryState,
   forgetPagesBeside,
@@ -43,6 +45,7 @@ import {
 } from "../../app/snapshot"
 import { StatusStrip } from "../../app/StatusStrip"
 import { useDebouncedValue } from "../../app/useDebouncedValue"
+import { useMediaQuery } from "../../app/useMediaQuery"
 import { CardGrid, type GridCell } from "../../components/results/CardGrid"
 import { CardList, CardTable } from "../../components/results/CardRows"
 import { ListColumnPicker } from "../../components/results/ListColumnPicker"
@@ -50,7 +53,11 @@ import { PaginationTail } from "../../components/results/PaginationTail"
 import type { OpenOutcome } from "../../components/results/plain-click"
 import { SkeletonGrid } from "../../components/results/SkeletonGrid"
 import { ArtistFilter } from "../../components/search/ArtistFilter"
-import { ClassQuickBar, type QuickBarClass } from "../../components/search/ClassQuickBar"
+import {
+  ClassQuickBar,
+  ClassQuickBarSkeleton,
+  type QuickBarClass,
+} from "../../components/search/ClassQuickBar"
 import { ConditionChips } from "../../components/search/ConditionChips"
 import { vocabularyOptionLabel } from "../../components/search/facet-labels"
 import { FilterPanel } from "../../components/search/FilterPanel"
@@ -64,6 +71,7 @@ import { SuggestList, type SuggestRow } from "../../components/search/SuggestLis
 import { TraitFilter } from "../../components/search/TraitFilter"
 import { TypeFilter } from "../../components/search/TypeFilter"
 import { Button } from "../../components/ui/Button"
+import { cn } from "../../components/ui/cn"
 import { Link } from "../../components/ui/Link"
 import { Notice } from "../../components/ui/Notice"
 import { Segmented } from "../../components/ui/Segmented"
@@ -90,6 +98,11 @@ import { currentUiLanguage } from "../../i18n"
 import { prefsStore, recentStore, usePrefs, useRecent } from "../../settings"
 import { SetHeader } from "../sets/SetHeader"
 import { useCardOverlay } from "./CardOverlay"
+import { CompactHeaderMenu } from "./CompactHeaderMenu"
+import { FilterSheet } from "./FilterSheet"
+import { FilterSidebar } from "./FilterSidebar"
+import { sidebarGridClass } from "./sidebar-layout"
+import { useCompactHeader } from "./useCompactHeader"
 
 const DEBOUNCE_MS = 150
 /** How long a cell returned to from a card stays outlined (#522: about a second). */
@@ -124,7 +137,10 @@ function createCellReader(nameOf: (summary: CardSummary) => GridCell["name"]) {
   }
 }
 
-// The URL holds committed conditions; the input draft drives independent Worker suggestions.
+// Clip only the gutter backdrop, so suggestions can extend below the sticky bar.
+const FULL_BLEED =
+  "isolate before:pointer-events-none before:absolute before:inset-0 before:-z-10 before:bg-bg before:shadow-[0_0_0_100vmax_var(--color-bg)] before:[clip-path:inset(0_-100vmax)]"
+
 export function CardsPage() {
   const { t } = useTranslation()
   const prefs = usePrefs()
@@ -595,6 +611,15 @@ export function CardsPage() {
   const filterCount = activeFilterCount(countedConditions)
   const hasConditions = countedConditions.text !== "" || filterCount > 0
   const panelOpen = prefs.filterPanelOpen
+  const wideEnoughForBoth = useMediaQuery(`(min-width: ${String(BOTH_PANES_MIN_PX)}px)`)
+  const sidebar = useSidebarLayout()
+  const drawerSide = useDrawerSide()
+  const { sentinelRef, headRef, compact, narrow, foldedGap } = useCompactHeader(sidebar)
+  const headerMenus = compact && narrow
+  const [sidebarChoice, setSidebarChoice] = useState<boolean | null>(null)
+  // With a card open the sidebar folds unless the window is wide enough for both, or it was chosen.
+  const sidebarEdge = drawerSide === "left" ? ("right" as const) : ("left" as const)
+  const sidebarCollapsed = sidebarChoice ?? (cardOverlay.drawer !== null && !wideEnoughForBoth)
   const countScope = JSON.stringify([readiness.root, readiness.manifestHash, edition, query.unit])
   const [lastCount, setLastCount] = useState({ scope: countScope, total: page?.total ?? null })
   // Keep the count through a new query, but never carry it into another dataset or result unit.
@@ -606,7 +631,10 @@ export function CardsPage() {
   const resultCount =
     total !== null ? (
       <div
-        className="shrink-0 text-right text-13 whitespace-nowrap text-text-2"
+        className={cn(
+          "shrink-0 text-right text-13 whitespace-nowrap text-text-2",
+          compact && "@max-[640px]:hidden",
+        )}
         aria-live="polite"
         aria-busy={page === null}
       >
@@ -614,11 +642,13 @@ export function CardsPage() {
           <b className="inline-block min-w-14 font-semibold text-text-1 tabular-nums">
             {new Intl.NumberFormat(uiLanguage).format(total)}
           </b>{" "}
-          {query.unit === "printing"
-            ? t("results.countPrintingUnit")
-            : query.unit === "art"
-              ? t("results.countArtUnit")
-              : t("results.countUnit")}
+          <span className="max-[479px]:hidden">
+            {query.unit === "printing"
+              ? t("results.countPrintingUnit")
+              : query.unit === "art"
+                ? t("results.countArtUnit")
+                : t("results.countUnit")}
+          </span>
         </p>
         {Object.keys(query.mechanics).length > 0 &&
           printingOptions?.keyword.coverage === "partial" && (
@@ -706,6 +736,235 @@ export function CardsPage() {
     )
   }
 
+  const classBar = (
+    <>
+      {classes === undefined && <ClassQuickBarSkeleton />}
+      {classes !== undefined && quickBar.length > 0 && (
+        <ClassQuickBar
+          label={t("search.classes")}
+          classes={quickBar}
+          selected={query.classes}
+          onToggle={(code) => {
+            commit(toggleClass(query, code))
+          }}
+        />
+      )}
+    </>
+  )
+  const panelEl = (
+    <FilterPanel
+      sidebar={sidebar}
+      id={panelId}
+      open={panelOpen}
+      query={query}
+      onChange={commit}
+      edition={edition}
+      onEditionChange={commitEdition}
+      restrictions={printingOptions?.restrictions}
+      resultTotal={page?.total}
+      onClose={() => {
+        prefsStore.set({ filterPanelOpen: false })
+        requestAnimationFrame(() => {
+          resultsRef.current?.scrollIntoView({ block: "start" })
+        })
+      }}
+      types={
+        <TypeFilter
+          options={printingOptions?.type}
+          textLang={textLang}
+          selected={query.types}
+          onChange={(types) => {
+            commit({ ...query, types })
+          }}
+        />
+      }
+      locations={
+        <LocationFilter
+          options={printingOptions?.location}
+          textLang={textLang}
+          selected={query.locations}
+          onChange={(locations) => {
+            commit({ ...query, locations })
+          }}
+        />
+      }
+      facets={{
+        rarity: (
+          <RarityFilter
+            rarities={(rarities ?? []).map((rarity) => ({
+              code: rarity.code,
+              label: rarity.name.translations[textLang] ?? rarity.name.original.text,
+            }))}
+            options={printingOptions?.rarity}
+            edition={edition}
+            selected={query.rarities}
+            onChange={(rarities) => {
+              commit({ ...query, rarities })
+            }}
+          />
+        ),
+        sets: (
+          <>
+            {/* A set page's set comes from its path, so the dropdown would only show one choice. */}
+            {!code && (
+              <SetFilter
+                sets={sets}
+                quickSets={quickSets}
+                counts={setCounts}
+                textLang={textLang}
+                selected={query.sets}
+                onChange={(sets) => {
+                  commit({ ...query, sets })
+                }}
+              />
+            )}
+          </>
+        ),
+        traits: (
+          <TraitFilter
+            options={printingOptions?.trait}
+            textLang={textLang}
+            selected={query.traits}
+            onChange={(traits) => {
+              commit({ ...query, traits })
+            }}
+          />
+        ),
+        artists: (
+          <ArtistFilter
+            options={printingOptions?.artist}
+            edition={edition}
+            selected={query.artists}
+            onChange={(artists) => {
+              commit({ ...query, artists })
+            }}
+          />
+        ),
+        keywords: (
+          <KeywordFilter
+            options={printingOptions?.keyword}
+            textLang={textLang}
+            edition={edition}
+            selected={query.mechanics}
+            onChange={(mechanics) => {
+              commit({ ...query, mechanics })
+            }}
+          />
+        ),
+      }}
+    />
+  )
+  const conditionChips = (
+    <ConditionChips
+      query={query}
+      impliedSet={set?.code}
+      edition={edition}
+      classLabel={classLabel}
+      rarityLabel={(code) => {
+        const option = rarities?.find((item) => item.code === code)
+        return option
+          ? (option.name.translations[textLang] ?? option.name.original.text)
+          : code.toUpperCase()
+      }}
+      typeLabel={typeLabel}
+      traitLabel={(code) => {
+        const option = printingOptions?.trait.traits.find((item) => item.code === code)
+        return option ? vocabularyOptionLabel(option.name, textLang) : code
+      }}
+      artistLabel={(id) => {
+        if (id === CREDITED_ARTIST) return t("filters.artistCredited")
+        if (id === UNCREDITED_ARTIST) return t("filters.artistUncredited")
+        const option = printingOptions?.artist.artists.find((item) => item.id === id)
+        return option ? option.name : id
+      }}
+      keywordLabel={(id) => {
+        const option = printingOptions?.keyword.keywords.find((item) => item.id === id)
+        return option ? vocabularyOptionLabel(option.name, textLang) : id
+      }}
+      setLabel={(code) => {
+        const option = sets?.find((item) => item.code === code)
+        return option ? setCaption(option, textLang).text : code
+      }}
+      groups={{
+        pr: prStyleTokens(printingOptions?.rarity.styles ?? []),
+        token: tokenKindTokens(printingOptions?.location.counts ?? {}),
+        leader: leaderFrameTokens(printingOptions?.location.counts ?? {}),
+      }}
+      onChange={commit}
+      onClear={() => {
+        commit(DEFAULT_QUERY)
+      }}
+    />
+  )
+  const sortRow =
+    page !== null && page.total > 0 ? (
+      <div
+        className={cn(
+          "flex gap-x-3 gap-y-2",
+          headerMenus ? "flex-col items-stretch" : "items-center",
+          !compact && "flex-wrap",
+        )}
+      >
+        {view === "list" && <ListColumnPicker inline={headerMenus} />}
+        <div
+          className={cn(
+            "flex items-center gap-2",
+            !headerMenus && "ml-auto",
+            (!compact || headerMenus) && "flex-wrap",
+          )}
+        >
+          <label className="flex items-center gap-1 text-13">
+            <span className={cn(compact && "@max-[640px]:hidden")}>{t("results.sort")}</span>
+            <select
+              aria-label={t("results.sort")}
+              value={query.sort}
+              className="h-8 rounded-control border border-border bg-surface-1 px-2 text-text-1"
+              onChange={(event) => {
+                const sort = QUERY_SORTS.find((sort) => sort === event.target.value)
+                if (sort) commit({ ...query, sort })
+              }}
+            >
+              {QUERY_SORTS.map((sort) => (
+                <option key={sort} value={sort}>
+                  {t(`results.sortBy.${sort}`)}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button
+            type="button"
+            aria-label={t("results.descending")}
+            aria-pressed={query.order === "desc"}
+            className="h-8 rounded-control border border-border bg-surface-1 px-2 text-13"
+            onClick={() => {
+              const { order, ...rest } = query
+              commit(order === "desc" ? rest : { ...rest, order: "desc" })
+            }}
+          >
+            {query.order === "desc" ? "↓" : "↑"}
+          </button>
+          <Segmented
+            size="sm"
+            tone="accent"
+            label={t("results.view")}
+            options={VIEW_MODES.map((value) => ({
+              value,
+              label: t(`options.view.${value}`),
+            }))}
+            value={view}
+            onChange={(next) => {
+              prefsStore.set({ viewMode: next })
+              setEdit(null)
+              commitList(
+                urlParams({ ...query, view: next }),
+                { ...listEntry, listScroll: listScroll.current, scrollY: window.scrollY },
+                true,
+              )
+            }}
+          />
+        </div>
+      </div>
+    ) : null
   return (
     <div ref={imageRoot} className="flex flex-col gap-3 pt-2 pb-6">
       {set ? (
@@ -730,383 +989,269 @@ export function CardsPage() {
             : ""}
         </Notice>
       )}
-      <div className="relative z-20">
-        <SearchBar
-          value={input}
-          onChange={(value) => {
-            armed.current = null
-            setInput(value)
-            setFocused(true)
-          }}
-          onKeyDown={onKeyDown}
-          onFocus={() => {
-            setFocused(true)
-          }}
-          onBlur={() => {
-            armed.current = null
-            setFocused(false)
-          }}
-          inputRef={inputRef}
-          listId={listId}
-          expanded={listOpen}
-          {...(active >= 0 ? { activeOptionId: optionId(listId, active) } : {})}
-          filterCount={filterCount}
-          filtersOpen={panelOpen}
-          filtersId={panelId}
-          onToggleFilters={() => {
-            prefsStore.set({ filterPanelOpen: !panelOpen })
-          }}
-          summary={resultCount}
-        />
-        {focused && !listOpen && readiness.phase !== "error" && (
-          <p role="status" className="mt-2 text-13 text-text-2">
-            {t("home.searchPending")}
-          </p>
-        )}
-        {listOpen && (
-          <div className="absolute inset-x-0 top-full mt-1">
-            <SuggestList
-              id={listId}
-              rows={rows}
-              activeIndex={active}
-              images={suggestionImages}
-              onPick={openSuggestion}
-              onHover={setActive}
-              stale={stale}
-              {...(debounced !== ""
-                ? { query: { text: typed, total: suggestTotal, onSeeAll: seeAll } }
-                : {
-                    onClearRecent: () => {
-                      recentStore.clear()
-                    },
-                  })}
-            />
-          </div>
-        )}
-      </div>
-      {/* The class row is the one filter outside the panel: always visible, so the page is never bare. */}
-      {quickBar.length > 0 && (
-        <ClassQuickBar
-          label={t("search.classes")}
-          classes={quickBar}
-          selected={query.classes}
-          onToggle={(code) => {
-            commit(toggleClass(query, code))
-          }}
-        />
-      )}
-      {/* The chip row sits with the class row, above the panel, so it stays in view either way. */}
-      <ConditionChips
-        query={query}
-        impliedSet={set?.code}
-        edition={edition}
-        classLabel={classLabel}
-        rarityLabel={(code) => {
-          const option = rarities?.find((item) => item.code === code)
-          return option
-            ? (option.name.translations[textLang] ?? option.name.original.text)
-            : code.toUpperCase()
-        }}
-        typeLabel={typeLabel}
-        traitLabel={(code) => {
-          const option = printingOptions?.trait.traits.find((item) => item.code === code)
-          return option ? vocabularyOptionLabel(option.name, textLang) : code
-        }}
-        artistLabel={(id) => {
-          if (id === CREDITED_ARTIST) return t("filters.artistCredited")
-          if (id === UNCREDITED_ARTIST) return t("filters.artistUncredited")
-          const option = printingOptions?.artist.artists.find((item) => item.id === id)
-          return option ? option.name : id
-        }}
-        keywordLabel={(id) => {
-          const option = printingOptions?.keyword.keywords.find((item) => item.id === id)
-          return option ? vocabularyOptionLabel(option.name, textLang) : id
-        }}
-        setLabel={(code) => {
-          const option = sets?.find((item) => item.code === code)
-          return option ? setCaption(option, textLang).text : code
-        }}
-        groups={{
-          pr: prStyleTokens(printingOptions?.rarity.styles ?? []),
-          token: tokenKindTokens(printingOptions?.location.counts ?? {}),
-          leader: leaderFrameTokens(printingOptions?.location.counts ?? {}),
-        }}
-        onChange={commit}
-        onClear={() => {
-          commit(DEFAULT_QUERY)
-        }}
-      />
-      <FilterPanel
-        id={panelId}
-        open={panelOpen}
-        query={query}
-        onChange={commit}
-        edition={edition}
-        onEditionChange={commitEdition}
-        restrictions={printingOptions?.restrictions}
-        resultTotal={page?.total}
-        onClose={() => {
-          prefsStore.set({ filterPanelOpen: false })
-          requestAnimationFrame(() => {
-            resultsRef.current?.scrollIntoView({ block: "start" })
-          })
-        }}
-        types={
-          <TypeFilter
-            options={printingOptions?.type}
-            textLang={textLang}
-            selected={query.types}
-            onChange={(types) => {
-              commit({ ...query, types })
-            }}
-          />
+      <div
+        className={
+          sidebar
+            ? cn("grid items-start gap-6", sidebarGridClass(sidebarEdge, sidebarCollapsed))
+            : "flex flex-col gap-3"
         }
-        locations={
-          <LocationFilter
-            options={printingOptions?.location}
-            textLang={textLang}
-            selected={query.locations}
-            onChange={(locations) => {
-              commit({ ...query, locations })
+      >
+        {sidebar && (
+          <FilterSidebar
+            edge={sidebarEdge}
+            collapsed={sidebarCollapsed}
+            onToggle={() => {
+              setSidebarChoice(!sidebarCollapsed)
             }}
-          />
-        }
-        facets={{
-          rarity: (
-            <RarityFilter
-              rarities={(rarities ?? []).map((rarity) => ({
-                code: rarity.code,
-                label: rarity.name.translations[textLang] ?? rarity.name.original.text,
-              }))}
-              options={printingOptions?.rarity}
-              edition={edition}
-              selected={query.rarities}
-              onChange={(rarities) => {
-                commit({ ...query, rarities })
-              }}
-            />
-          ),
-          sets: (
-            <>
-              {/* A set page's set comes from its path, so the dropdown would only show one choice. */}
-              {!code && (
-                <SetFilter
-                  sets={sets}
-                  quickSets={quickSets}
-                  counts={setCounts}
-                  textLang={textLang}
-                  selected={query.sets}
-                  onChange={(sets) => {
-                    commit({ ...query, sets })
-                  }}
-                />
+            filterCount={filterCount}
+          >
+            {classBar}
+            {panelEl}
+          </FilterSidebar>
+        )}
+        <div className="flex min-w-0 flex-col gap-3">
+          {sidebar && <div ref={sentinelRef} aria-hidden="true" className="-mb-3 h-px" />}
+          <div
+            ref={headRef}
+            style={foldedGap > 0 ? { marginBottom: foldedGap } : undefined}
+            className={cn(
+              sidebar ? `@container sticky top-13 z-30 flex gap-3 ${FULL_BLEED}` : "contents",
+              compact ? "h-14 flex-row items-center border-b border-border" : "flex-col",
+            )}
+          >
+            <div
+              className={cn(
+                "relative z-20",
+                !sidebar && `sticky top-13 z-30 py-2 ${FULL_BLEED}`,
+                compact && "max-w-96 flex-1 basis-40",
+                compact && (headerMenus ? "min-w-0" : "min-w-52"),
               )}
-            </>
-          ),
-          traits: (
-            <TraitFilter
-              options={printingOptions?.trait}
-              textLang={textLang}
-              selected={query.traits}
-              onChange={(traits) => {
-                commit({ ...query, traits })
-              }}
-            />
-          ),
-          artists: (
-            <ArtistFilter
-              options={printingOptions?.artist}
-              edition={edition}
-              selected={query.artists}
-              onChange={(artists) => {
-                commit({ ...query, artists })
-              }}
-            />
-          ),
-          keywords: (
-            <KeywordFilter
-              options={printingOptions?.keyword}
-              textLang={textLang}
-              edition={edition}
-              selected={query.mechanics}
-              onChange={(mechanics) => {
-                commit({ ...query, mechanics })
-              }}
-            />
-          ),
-        }}
-      />
-      {unsupported && (
-        <Notice
-          tone="warning"
-          role="alert"
-          actions={
-            <Button
-              className="h-9"
-              onClick={() => {
-                commit({ ...DEFAULT_QUERY, text: query.text, classes: query.classes })
-              }}
             >
-              {t("results.clearAll")}
-            </Button>
-          }
-        >
-          {t("results.unsupported", {
-            facets: (queryError.facets ?? [])
-              .map((facet) => t(`results.facet.${facet}`))
-              .join("、"),
-          })}
-        </Notice>
-      )}
-      {queryError && !unsupported && page === null && readiness.phase !== "error" && (
-        <Notice
-          tone="danger"
-          role="alert"
-          actions={
-            <Button
-              onClick={() => {
-                retryView()
-                // A failed background closure is fetched again only by a new load.
-                readiness.retry()
-              }}
-            >
-              {t("results.retry")}
-            </Button>
-          }
-        >
-          {t("results.loadFailed")}
-        </Notice>
-      )}
-      <div ref={resultsRef} data-results="" className="flex min-w-0 flex-col gap-3">
-        {/* The status strip above says what is downloading; the list only shows its skeleton. */}
-        {pending && readiness.phase !== "error" && (
-          <>
-            {readiness.phase === "ready" && (
-              <p role="status" className="text-13 text-text-2">
-                {progress
-                  ? t("results.searchProgress", progress)
-                  : t("results.dependenciesPending")}
-              </p>
-            )}
-            <SkeletonGrid />
-          </>
-        )}
-        {page !== null && page.total === 0 && (
-          <div className="flex flex-col items-center gap-3 rounded-block border border-dashed border-border-strong px-4 py-10 text-center">
-            <p className="text-16 font-semibold">{t("results.empty")}</p>
-            <p className="text-13 text-text-3">{t("results.emptyHint")}</p>
-            {hasConditions && (
-              <Button
-                onClick={() => {
-                  commit(DEFAULT_QUERY)
+              <SearchBar
+                value={input}
+                onChange={(value) => {
+                  armed.current = null
+                  setInput(value)
+                  setFocused(true)
                 }}
-              >
-                {t("results.clearAll")}
-              </Button>
+                onKeyDown={onKeyDown}
+                onFocus={() => {
+                  setFocused(true)
+                }}
+                onBlur={() => {
+                  armed.current = null
+                  setFocused(false)
+                }}
+                inputRef={inputRef}
+                listId={listId}
+                expanded={listOpen}
+                {...(active >= 0 ? { activeOptionId: optionId(listId, active) } : {})}
+                {...(sidebar ? {} : { filterCount })}
+                filtersOpen={panelOpen}
+                filtersId={panelId}
+                onToggleFilters={() => {
+                  prefsStore.set({ filterPanelOpen: !panelOpen })
+                }}
+                summary={resultCount}
+              />
+              {focused && !listOpen && readiness.phase !== "error" && (
+                <p role="status" className="mt-2 text-13 text-text-2">
+                  {t("home.searchPending")}
+                </p>
+              )}
+              {listOpen && (
+                <div className="absolute inset-x-0 top-full mt-1">
+                  <SuggestList
+                    id={listId}
+                    rows={rows}
+                    activeIndex={active}
+                    images={suggestionImages}
+                    onPick={openSuggestion}
+                    onHover={setActive}
+                    stale={stale}
+                    {...(debounced !== ""
+                      ? { query: { text: typed, total: suggestTotal, onSeeAll: seeAll } }
+                      : {
+                          onClearRecent: () => {
+                            recentStore.clear()
+                          },
+                        })}
+                  />
+                </div>
+              )}
+            </div>
+            {headerMenus ? (
+              <>
+                {hasConditions && (
+                  <CompactHeaderMenu
+                    label={t("results.conditions")}
+                    icon={<ListFilter aria-hidden="true" className="size-4" />}
+                    fallbackFocusRef={inputRef}
+                  >
+                    {conditionChips}
+                  </CompactHeaderMenu>
+                )}
+                {sortRow && (
+                  <CompactHeaderMenu
+                    label={`${t("results.sort")} / ${t("results.view")}`}
+                    icon={<SlidersHorizontal aria-hidden="true" className="size-4" />}
+                    fallbackFocusRef={inputRef}
+                  >
+                    {sortRow}
+                  </CompactHeaderMenu>
+                )}
+              </>
+            ) : (
+              <>
+                <div
+                  className={cn(
+                    compact &&
+                      "min-w-0 flex-1 overflow-x-auto [&>[role=group]]:flex-nowrap [&>[role=group]>*]:shrink-0",
+                  )}
+                >
+                  {conditionChips}
+                </div>
+                {sidebar && sortRow}
+              </>
             )}
           </div>
-        )}
-        {page !== null && page.total > 0 && (
-          <>
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-              {view === "list" && <ListColumnPicker />}
-              <div className="ml-auto flex flex-wrap items-center gap-2">
-                <label className="flex items-center gap-1 text-13">
-                  <span>{t("results.sort")}</span>
-                  <select
-                    aria-label={t("results.sort")}
-                    value={query.sort}
-                    className="h-8 rounded-control border border-border bg-surface-1 px-2 text-text-1"
-                    onChange={(event) => {
-                      const sort = QUERY_SORTS.find((sort) => sort === event.target.value)
-                      if (sort) commit({ ...query, sort })
-                    }}
-                  >
-                    {QUERY_SORTS.map((sort) => (
-                      <option key={sort} value={sort}>
-                        {t(`results.sortBy.${sort}`)}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <button
-                  type="button"
-                  aria-label={t("results.descending")}
-                  aria-pressed={query.order === "desc"}
-                  className="h-8 rounded-control border border-border bg-surface-1 px-2 text-13"
+          {!sidebar && (
+            <FilterSheet
+              open={panelOpen}
+              onClose={() => {
+                prefsStore.set({ filterPanelOpen: false })
+              }}
+            >
+              {classBar}
+              {panelEl}
+            </FilterSheet>
+          )}
+          {unsupported && (
+            <Notice
+              tone="warning"
+              role="alert"
+              actions={
+                <Button
+                  className="h-9"
                   onClick={() => {
-                    const { order, ...rest } = query
-                    commit(order === "desc" ? rest : { ...rest, order: "desc" })
+                    commit({ ...DEFAULT_QUERY, text: query.text, classes: query.classes })
                   }}
                 >
-                  {query.order === "desc" ? "↓" : "↑"}
-                </button>
-                <Segmented
-                  size="sm"
-                  tone="accent"
-                  label={t("results.view")}
-                  options={VIEW_MODES.map((value) => ({
-                    value,
-                    label: t(`options.view.${value}`),
-                  }))}
-                  value={view}
-                  onChange={(next) => {
-                    prefsStore.set({ viewMode: next })
-                    setEdit(null)
-                    commitList(
-                      urlParams({ ...query, view: next }),
-                      { ...listEntry, listScroll: listScroll.current, scrollY: window.scrollY },
-                      true,
-                    )
+                  {t("results.clearAll")}
+                </Button>
+              }
+            >
+              {t("results.unsupported", {
+                facets: (queryError.facets ?? [])
+                  .map((facet) => t(`results.facet.${facet}`))
+                  .join("、"),
+              })}
+            </Notice>
+          )}
+          {queryError && !unsupported && page === null && readiness.phase !== "error" && (
+            <Notice
+              tone="danger"
+              role="alert"
+              actions={
+                <Button
+                  onClick={() => {
+                    retryView()
+                    // A failed background closure is fetched again only by a new load.
+                    readiness.retry()
                   }}
-                />
+                >
+                  {t("results.retry")}
+                </Button>
+              }
+            >
+              {t("results.loadFailed")}
+            </Notice>
+          )}
+          <div ref={resultsRef} data-results="" className="flex min-w-0 flex-col gap-3">
+            {/* The status strip above says what is downloading; the list only shows its skeleton. */}
+            {pending && readiness.phase !== "error" && (
+              <>
+                {readiness.phase === "ready" && (
+                  <p role="status" className="text-13 text-text-2">
+                    {progress
+                      ? t("results.searchProgress", progress)
+                      : t("results.dependenciesPending")}
+                  </p>
+                )}
+                <SkeletonGrid />
+              </>
+            )}
+            {page !== null && page.total === 0 && (
+              <div className="flex flex-col items-center gap-3 rounded-block border border-dashed border-border-strong px-4 py-10 text-center">
+                <p className="text-16 font-semibold">{t("results.empty")}</p>
+                <p className="text-13 text-text-3">{t("results.emptyHint")}</p>
+                {hasConditions && (
+                  <Button
+                    onClick={() => {
+                      commit(DEFAULT_QUERY)
+                    }}
+                  >
+                    {t("results.clearAll")}
+                  </Button>
+                )}
               </div>
-            </div>
-            {view === "grid" && (
-              <CardGrid
-                cells={cells}
-                images={images}
-                onOpen={openCell}
-                {...(returnAnchor === undefined ? {} : { anchor: returnAnchor })}
-                {...(cardOverlay.selected === undefined ? {} : { selected: cardOverlay.selected })}
-              />
             )}
-            {view === "table" && (
-              <CardTable
-                typeLabel={typeLabel}
-                cells={cells}
-                images={images}
-                onOpen={openCell}
-                artOf={artOf}
-                {...(returnAnchor === undefined ? {} : { anchor: returnAnchor })}
-                {...(cardOverlay.selected === undefined ? {} : { selected: cardOverlay.selected })}
-              />
+            {page !== null && page.total > 0 && (
+              <>
+                {!sidebar && sortRow}
+                {view === "grid" && (
+                  <CardGrid
+                    cells={cells}
+                    images={images}
+                    onOpen={openCell}
+                    {...(returnAnchor === undefined ? {} : { anchor: returnAnchor })}
+                    {...(cardOverlay.selected === undefined
+                      ? {}
+                      : { selected: cardOverlay.selected })}
+                  />
+                )}
+                {view === "table" && (
+                  <CardTable
+                    typeLabel={typeLabel}
+                    cells={cells}
+                    images={images}
+                    onOpen={openCell}
+                    artOf={artOf}
+                    {...(returnAnchor === undefined ? {} : { anchor: returnAnchor })}
+                    {...(cardOverlay.selected === undefined
+                      ? {}
+                      : { selected: cardOverlay.selected })}
+                  />
+                )}
+                {view === "list" && (
+                  <CardList
+                    classLabel={classLabel}
+                    typeLabel={typeLabel}
+                    footer={pagination}
+                    sort={query.sort}
+                    descending={query.order === "desc"}
+                    onSort={(sort) => {
+                      const { order, ...rest } = query
+                      commit(
+                        sort === query.sort && order !== "desc"
+                          ? { ...rest, sort, order: "desc" }
+                          : { ...rest, sort },
+                      )
+                    }}
+                    scrollPositionRef={listScroll}
+                    cells={cells}
+                    onOpen={openCell}
+                    {...(returnAnchor === undefined ? {} : { anchor: returnAnchor })}
+                    {...(cardOverlay.selected === undefined
+                      ? {}
+                      : { selected: cardOverlay.selected })}
+                  />
+                )}
+                {view !== "list" && pagination}
+              </>
             )}
-            {view === "list" && (
-              <CardList
-                classLabel={classLabel}
-                typeLabel={typeLabel}
-                footer={pagination}
-                sort={query.sort}
-                descending={query.order === "desc"}
-                onSort={(sort) => {
-                  const { order, ...rest } = query
-                  commit(
-                    sort === query.sort && order !== "desc"
-                      ? { ...rest, sort, order: "desc" }
-                      : { ...rest, sort },
-                  )
-                }}
-                scrollPositionRef={listScroll}
-                cells={cells}
-                onOpen={openCell}
-                {...(returnAnchor === undefined ? {} : { anchor: returnAnchor })}
-                {...(cardOverlay.selected === undefined ? {} : { selected: cardOverlay.selected })}
-              />
-            )}
-            {view !== "list" && pagination}
-          </>
-        )}
+          </div>
+        </div>
       </div>
       {cardOverlay.drawer}
       {cardOverlay.modal}

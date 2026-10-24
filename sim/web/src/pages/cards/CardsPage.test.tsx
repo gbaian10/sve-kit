@@ -53,12 +53,19 @@ async function open(path = "/cards", { panel = true } = {}) {
     () => {
       const classes = screen.queryByLabelText("職業", { selector: '[role="group"]' })
       expect(
-        classes ? within(classes).queryByRole("button", { name: "精靈" }) : null,
-      ).toBeInTheDocument()
+        classes ? within(classes).queryAllByRole("button", { name: "精靈", hidden: true }) : [],
+      ).not.toHaveLength(0)
     },
     { timeout: 4000 },
   )
   return rendered
+}
+
+/** The result count line: its unit sits in a span that narrow screens hide. */
+function resultCount(unitText = "個版次"): HTMLElement {
+  const unit = screen.getByText(unitText)
+  if (!unit.parentElement) throw new Error("missing result count")
+  return unit.parentElement
 }
 
 /** The condition chips' names, in row order. */
@@ -71,7 +78,7 @@ function chips(conditions: HTMLElement) {
 /** The result count beside the filter button, once the current page has arrived. */
 async function expectCount(total: number) {
   await waitFor(() => {
-    expect(screen.getByText("個版次")).toHaveTextContent(`${String(total)} 個版次`)
+    expect(resultCount()).toHaveTextContent(`${String(total)} 個版次`)
   })
 }
 
@@ -135,7 +142,7 @@ describe("CardsPage", () => {
           "p:bp01-021-sp",
         ])
       })
-      expect(screen.getByText("個版次")).toHaveTextContent("5 個版次")
+      expect(resultCount()).toHaveTextContent("5 個版次")
       expect(screen.getByText("共 5 個版次")).toBeVisible()
       if (view === "grid") {
         await waitFor(() => {
@@ -326,7 +333,7 @@ describe("CardsPage", () => {
     const scrollTo = vi.spyOn(window, "scrollTo").mockImplementation(() => undefined)
     const { router } = await open()
     await expectCount(27)
-    const count = screen.getByText("個版次")
+    const count = resultCount()
     // The first render's scroll reset is the router's; only what a condition change does counts.
     scrollTo.mockClear()
     const results = document.querySelector<HTMLElement>("[data-results]")
@@ -342,12 +349,12 @@ describe("CardsPage", () => {
     expect(count).toHaveTextContent("27 個版次")
     expect(count.parentElement).toHaveAttribute("aria-busy", "true")
     await waitFor(() => {
-      expect(screen.getByText("個版次")).not.toHaveTextContent("27 個版次")
+      expect(resultCount()).not.toHaveTextContent("27 個版次")
     })
     await waitFor(() => {
       expect(results.style.minHeight).toBe("")
     })
-    expect(screen.getByText("個版次")).toBe(count)
+    expect(resultCount()).toBe(count)
     expect(count.parentElement).toHaveAttribute("aria-busy", "false")
     expect(scrollTo).not.toHaveBeenCalled()
     // Returning restores the saved window position as before.
@@ -388,19 +395,27 @@ describe("CardsPage", () => {
     expect(new URLSearchParams(router.state.location.search).get("class")).toBe("bishop")
   })
 
+  it("holds the class row's place with a skeleton until the options load", async () => {
+    prefsStore.set({ uiLanguage: "zh-TW", filterPanelOpen: true, cardOpenMode: "page" })
+    await renderRoutes(routes, { initialEntries: ["/cards"] })
+    // Before the index answers there is no list of classes: not even the neutral cell appears.
+    expect(screen.queryByRole("button", { name: "中立" })).not.toBeInTheDocument()
+    expect(document.querySelectorAll('[aria-hidden="true"].grid-cols-7 > span')).toHaveLength(7)
+    expect(await screen.findByRole("button", { name: "中立" }, { timeout: 4000 })).toBeVisible()
+    expect(document.querySelector('[aria-hidden="true"].grid-cols-7')).toBeNull()
+  })
+
   it("lists the snapshot and keeps the class filter in the URL", async () => {
     const { router } = await open()
     const user = userEvent.setup()
     const filter = screen.getByRole("button", { name: "篩選" })
-    await user.click(filter)
-    expect(filter).not.toHaveClass("bg-accent")
+    expect(filter).toHaveAttribute("aria-expanded", "true")
     expect(
       screen.getAllByRole("link").filter((a) => a.hasAttribute("data-result-key")).length,
     ).toBeGreaterThan(20)
     await user.click(screen.getByRole("button", { name: "主教" }))
     expect(router.state.location.search).toBe("?class=bishop")
     expect(screen.getByRole("button", { name: "主教" })).toHaveAttribute("aria-pressed", "true")
-    expect(filter).toHaveClass("bg-accent")
     expect(
       document.getElementById(filter.getAttribute("aria-describedby") ?? ""),
     ).toHaveTextContent("已啟用 1 個篩選條件")
@@ -410,7 +425,6 @@ describe("CardsPage", () => {
       document.getElementById(filter.getAttribute("aria-describedby") ?? ""),
     ).toHaveTextContent("已啟用 1 個篩選條件")
     await user.click(screen.getByRole("button", { name: "清除" }))
-    expect(filter).not.toHaveClass("bg-accent")
     expect(filter).not.toHaveAttribute("aria-describedby")
   })
 
@@ -579,24 +593,19 @@ describe("CardsPage", () => {
   })
 
   describe("filter panel", () => {
-    it("expands from the search bar button, takes no space while collapsed and remembers the choice", async () => {
+    it("opens as a sheet from the search bar button, without a place of its own while closed, and remembers the choice", async () => {
       await open("/cards?class=bishop", { panel: false })
       const button = screen.getByRole("button", { name: "篩選" })
       expect(button).toHaveAttribute("aria-expanded", "false")
-      // Collapsed: the condition chips keep the only clear entry on screen.
+      // Closed: the condition chips keep the only clear entry on screen.
       const conditions = screen.getByRole("group", { name: "目前條件" })
       expect(within(conditions).getByRole("button", { name: "清除" })).toBeVisible()
       const panel = document.getElementById(button.getAttribute("aria-controls") ?? "")
       expect(panel).not.toBeNull()
       expect(panel).not.toBeVisible()
-      // The class row stays outside the panel and its active condition counts while collapsed.
-      const classRow = screen.getByRole("group", { name: "職業" })
-      expect(classRow).toBeVisible()
-      expect(panel).not.toContainElement(classRow)
-      expect(within(classRow).getByRole("button", { name: "主教" })).toHaveAttribute(
-        "aria-pressed",
-        "true",
-      )
+      // The class row lives in the sheet with the rest of the filters; its condition still counts.
+      const classRow = screen.getByRole("group", { name: "職業", hidden: true })
+      expect(classRow).not.toBeVisible()
       expect(button).toHaveTextContent("篩選")
       expect(button).toHaveClass("bg-accent")
       expect(
@@ -605,25 +614,31 @@ describe("CardsPage", () => {
       await userEvent.click(button)
       expect(button).toHaveAttribute("aria-expanded", "true")
       expect(panel).toBeVisible()
-      expect(panel).not.toContainElement(classRow)
+      const dialog = screen.getByRole("dialog", { name: "篩選條件" })
+      expect(screen.getByRole("button", { name: "關閉" })).toHaveFocus()
+      expect(classRow).toBeVisible()
+      expect(within(classRow).getByRole("button", { name: "主教" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      )
       expect(prefsStore.get().filterPanelOpen).toBe(true)
-      // Search bar → class row → chip row → panel: the chips stay in view while the panel is open.
-      const follows = (first: Element, second: Element) =>
-        Boolean(first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING)
-      expect(follows(classRow, conditions)).toBe(true)
-      expect(panel && follows(conditions, panel)).toBe(true)
+      // The chips stay where they are, outside the sheet, and remain the one clear entry.
       expect(panel).not.toContainElement(conditions)
-      // The chip row stays the one clear entry; the panel has none of its own.
-      expect(within(conditions).getByRole("button", { name: "清除" })).toBeVisible()
       expect(
         within(screen.getByRole("region", { name: "篩選條件" })).queryByRole("button", {
           name: /^清除/u,
         }),
       ).not.toBeInTheDocument()
-      await userEvent.click(button)
+      await userEvent.click(screen.getByRole("button", { name: "關閉" }))
+      expect(button).toHaveFocus()
       expect(button).toHaveAttribute("aria-expanded", "false")
       expect(panel).not.toBeVisible()
       expect(prefsStore.get().filterPanelOpen).toBe(false)
+      await userEvent.click(button)
+      expect(document.getElementById(button.getAttribute("aria-controls") ?? "")).toBe(panel)
+      fireEvent(dialog, new Event("cancel", { cancelable: true }))
+      expect(button).toHaveAttribute("aria-expanded", "false")
+      expect(button).toHaveFocus()
     })
 
     it("unions the values of one stat, intersects stats and writes both to the URL", async () => {
@@ -791,7 +806,7 @@ describe("CardsPage", () => {
       await user.selectOptions(display, "card")
       expect(router.state.location.search).toBe("?unit=card")
       await waitFor(() => {
-        expect(screen.getByText("張卡片")).toHaveTextContent(/^\d+ 張卡片$/u)
+        expect(resultCount("張卡片")).toHaveTextContent(/^\d+ 張卡片$/u)
       })
       // Merging counts as a condition: one chip at the end of the row, and the badge shows it.
       const conditions = screen.getByRole("group", { name: "目前條件" })
@@ -806,7 +821,7 @@ describe("CardsPage", () => {
       await user.selectOptions(display, "art")
       expect(router.state.location.search).toBe("?unit=art&rep=high&prfirst=1")
       await waitFor(() => {
-        expect(screen.getByText("張圖")).toHaveTextContent(/^\d+ 張圖$/u)
+        expect(resultCount("張圖")).toHaveTextContent(/^\d+ 張圖$/u)
       })
       expect(chips(conditions)).toEqual(["同圖合併成一張"])
       // Back to every printing: the representative is kept in the URL, disabled in the panel.
@@ -857,7 +872,7 @@ describe("CardsPage", () => {
       expect(within(group).getByText(/標註尚未完整/u)).toBeVisible()
       expect(screen.getByText("標註尚未完整")).toBeVisible()
       await userEvent.selectOptions(screen.getByRole("combobox", { name: "顯示方式" }), "card")
-      await waitFor(() => expect(screen.getByText("張卡片")).toHaveTextContent("3 張卡片"))
+      await waitFor(() => expect(resultCount("張卡片")).toHaveTextContent("3 張卡片"))
       expect(router.state.location.search).toBe("?mech=kw%3Award&unit=card")
       await userEvent.click(screen.getByRole("button", { name: "移除條件：關鍵字：守護" }))
       expect(router.state.location.search).toBe("?unit=card")

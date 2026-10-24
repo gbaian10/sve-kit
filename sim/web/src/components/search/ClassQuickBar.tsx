@@ -101,3 +101,17 @@ export function ClassQuickBar({
     </div>
   )
 }
+
+/** The row's place while the options load: seven cells of the real size, so nothing jumps. */
+export function ClassQuickBarSkeleton() {
+  return (
+    <div aria-hidden="true" className="grid grid-cols-7 gap-1.5">
+      {Array.from({ length: 7 }, (_, index) => (
+        <span
+          key={index}
+          className="h-11 rounded-button border border-border bg-surface-2 motion-safe:animate-pulse"
+        />
+      ))}
+    </div>
+  )
+}

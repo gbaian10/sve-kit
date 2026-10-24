@@ -84,7 +84,8 @@ export default {
     theme: { system: "System", light: "Light", dark: "Dark" },
     accent: { amber: "Amber", teal: "Teal", red: "Red" },
     view: { grid: "Images", table: "Table", list: "List" },
-    cardOpenMode: { auto: "Auto", panel: "Drawer", modal: "Pop-up", page: "Page" },
+    cardOpenMode: { auto: "Auto", panel: "Side drawer", modal: "Pop-up", page: "Page" },
+    cardsLayout: { cardLeft: "Card left", filterLeft: "Filter left" },
   },
   settings: {
     downloads: "Downloads",
@@ -141,6 +142,7 @@ export default {
       hidden: "Hidden (nothing appears here)",
       on: "On",
       off: "Off",
+      layout: { filters: "Filters", card: "Card", results: "Results" },
     },
     preloadPrintings: "Preload all printings",
     preloadPrintingsHint:
@@ -178,7 +180,10 @@ export default {
     cardEditionHint: "Ban lists, Q&A and other data follow the card edition",
     cardOpenMode: "Open cards",
     cardOpenModeHint:
-      "Auto: a drawer on the right on desktop, a pop-up on phones. Page always goes to the card page.",
+      "Auto: a side drawer on desktop, a pop-up on phones. Page always goes to the card page.",
+    cardsLayout: "Layout",
+    cardsLayoutHint:
+      "The filter sidebar appears only on wide screens (1180px and up). The card drawer follows this left–right layout whenever it shows.",
   },
   pages: {
     home: "Home",
@@ -252,7 +257,10 @@ export default {
       stats: "Stats",
       collection: "Collection",
       effects: "Effects",
+      more: "More",
     },
+    sidebarCollapse: "Collapse filters",
+    sidebarExpand: "Expand filters",
     showResults: "Show {{count}} results",
     updatingResults: "Updating results…",
     restrictionsSynthetic: "Synthetic test data; not official restrictions",

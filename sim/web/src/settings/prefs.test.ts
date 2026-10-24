@@ -38,6 +38,7 @@ describe("readPrefs", () => {
       accent: null,
       gridDensity: 2,
       viewMode: "grid",
+      cardsLayout: "cardLeft",
     })
   })
 
@@ -98,9 +99,15 @@ describe("readPrefs", () => {
         gridDensity: 5,
         viewMode: "table",
         symbolLabels: "yes",
+        cardsLayout: "sideways",
       }),
     )
     expect(readPrefs()).toEqual({ ...DEFAULT_PREFS, theme: "dark", viewMode: "table" })
+  })
+
+  it("keeps a stored layout choice", () => {
+    localStorage.setItem(PREFS_KEY, JSON.stringify({ v: 1, cardsLayout: "filterLeft" }))
+    expect(readPrefs().cardsLayout).toBe("filterLeft")
   })
 
   it("ignores the removed data-saver field without touching the rest", () => {

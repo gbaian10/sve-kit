@@ -38,12 +38,16 @@ describe("SettingsPage", () => {
         name: "中間彈出",
       }),
     )
+    const layout = within(screen.getByRole("radiogroup", { name: "版面" }))
+    expect(layout.getByRole("radio", { name: "卡片在左" })).toBeChecked()
+    await userEvent.click(layout.getByRole("radio", { name: "篩選在左" }))
     expect(readPrefs()).toMatchObject({
       symbolLabels: true,
       cardEdition: "en",
       effectLanguage: "both",
       qaDisplay: "none",
       cardOpenMode: "modal",
+      cardsLayout: "filterLeft",
     })
     expect(screen.getByRole("switch", { name: "圖示旁附名稱" })).toHaveAttribute(
       "aria-checked",

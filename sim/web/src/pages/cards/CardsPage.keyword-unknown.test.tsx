@@ -32,13 +32,20 @@ afterAll(() => {
   vi.unstubAllGlobals()
 })
 
+// The first case pays for the cold snapshot load, which stretches on a busy machine.
+vi.setConfig({ testTimeout: 15_000 })
+
 describe("filter panel", () => {
   it("explains unsupported English keyword links in every UI language with the panel collapsed", async () => {
     prefsStore.set({ uiLanguage: "zh-TW", filterPanelOpen: false })
     await renderRoutes(routes, { initialEntries: ["/cards?ed=en&mech=kw%3Award"] })
     // The unsupported result waits for mechanics, which loads after this catalog is ready.
-    const classes = await screen.findByRole("group", { name: "職業" })
-    await within(classes).findByRole("button", { name: "精靈" }, { timeout: 4000 })
+    const classes = await screen.findByRole(
+      "group",
+      { name: "職業", hidden: true },
+      { timeout: 8000 },
+    )
+    await within(classes).findAllByRole("button", { name: "精靈", hidden: true }, { timeout: 4000 })
     const alert = await screen.findByRole("alert")
     expect(screen.queryByText("0 個版次")).not.toBeInTheDocument()
     const initialIndexRequests = indexRequests

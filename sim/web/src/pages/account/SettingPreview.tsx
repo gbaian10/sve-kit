@@ -5,7 +5,14 @@ import { InlineText } from "../../components/card/InlineText"
 import { OriginalBox } from "../../components/card/OriginalBox"
 import { cn } from "../../components/ui/cn"
 import { isUiLanguage, type UiLanguage } from "../../i18n/languages"
-import { FIELD_DISPLAYS, type FieldDisplay, TEXT_DISPLAYS, usePrefs } from "../../settings"
+import {
+  CARDS_LAYOUTS,
+  type CardsLayout,
+  FIELD_DISPLAYS,
+  type FieldDisplay,
+  TEXT_DISPLAYS,
+  usePrefs,
+} from "../../settings"
 import {
   ORIGINAL_SAMPLE,
   type Segments,
@@ -203,5 +210,42 @@ export function TogglePreview({ setting }: { readonly setting: PreviewToggle }) 
         ))}
       </ul>
     </div>
+  )
+}
+
+const LAYOUT_PANES: Readonly<Record<CardsLayout, readonly ("filters" | "results" | "card")[]>> = {
+  cardLeft: ["card", "results", "filters"],
+  filterLeft: ["filters", "results", "card"],
+}
+const PANE_WIDTH = { filters: "flex-[2]", results: "flex-[3]", card: "flex-[3]" } as const
+
+/** Both arrangements of the cards page at desktop width as little maps, the chosen one marked. */
+export function LayoutPreview() {
+  const { t } = useTranslation()
+  const { cardsLayout } = usePrefs()
+  return (
+    <ul className="grid gap-2 md:grid-cols-2">
+      {CARDS_LAYOUTS.map((layout) => (
+        <Option
+          key={layout}
+          label={t(`options.cardsLayout.${layout}`)}
+          current={cardsLayout === layout}
+        >
+          <div className="flex h-16 gap-1" aria-hidden="true">
+            {LAYOUT_PANES[layout].map((pane) => (
+              <div
+                key={pane}
+                className={cn(
+                  "flex min-w-0 items-center justify-center rounded-control border border-border bg-surface-2 text-11 text-text-2",
+                  PANE_WIDTH[pane],
+                )}
+              >
+                <span className="truncate px-1">{t(`settings.preview.layout.${pane}`)}</span>
+              </div>
+            ))}
+          </div>
+        </Option>
+      ))}
+    </ul>
   )
 }
