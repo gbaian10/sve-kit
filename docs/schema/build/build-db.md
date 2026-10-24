@@ -430,9 +430,9 @@ producer_version 是內部鍵的一部分，不同 producer 不互覆；每列 s
 reducer 依目前全部面（含缺 current 的面）、主文與所有 sections 建必要範圍，四種 relation 全部滿足才 complete；
 缺範圍為 partial，沒有檢查維持 unknown。新鮮度仍依完整 source bundle、當次 producer 集合及重建的 keyword universe，不能沿用舊 complete。
 目前 producer 為 H1 與固定首批集合的有限 grants、refers／counts（僅局部檢查），
-以及同批完整欄位 adapter（驗來源閉包後，空欄位及僅含自身宣告／固定 PP 進化句／有限固定傷害、抽牌、主戰者體力回復、從者增幅、覚醒／真紅條件自身增幅、獨立クイック、有限移除、抽牌後移動手牌、有限牌庫搜尋、有限觸發傷害、墓場移動、act／移除、有限條件固定效果、狀態規則、有限授予、有限牌庫頂檢視、有限費用與條件效果、有限費用調整、固定移動與完整 reminder、有限狀態與數值替換、有限區域移動與費用替換、具名 token 放置／生成與具名搜尋進場或 stack／counter 整行、具名生成及有序 section 定義的有限主文可完整檢查），scope 仍僅 shared；
+以及同批完整欄位 adapter（驗來源閉包後，空欄位及僅含自身宣告／固定 PP 進化句／有限固定傷害、抽牌、主戰者體力回復、從者增幅、覚醒／真紅條件自身增幅、獨立クイック、有限移除、抽牌後移動手牌、有限牌庫搜尋、有限觸發傷害、墓場移動、act／移除、有限條件固定效果、狀態規則、有限授予、有限牌庫頂檢視、有限費用與條件效果、有限費用調整、固定移動與完整 reminder、有限狀態與數值替換、有限區域移動與費用替換、具名 token 放置／生成與具名搜尋進場或 stack／counter 整行、具名生成及有序 section 定義、精確引號／數值相依整欄、BP01-T10 四段 stack reminder 與公開手牌選棄的有限主文可完整檢查），scope 仍僅 shared；
 全部 producer 儲存、suppression 套用後才以當次完整 producer_version 集合投影一次。
-完整欄位 adapter 為 `manual-keywords-fields-bp01-v12`；非空 section 僅在同面主文證完後，
+完整欄位 adapter 為 `manual-keywords-fields-bp01-v13`；非空 section 僅在同面主文證完後，
 依 exact owner／來源與有序 ordinal 檢查有限固定抽牌或逐行具名 token 定義。
 kind 不授完整證明或 verified DSL，token 原生 keyword 不掛到母卡。
 四關係的局部檢查仍不滿足完整欄位及 sections；缺 current 面與未知 sections 保留缺口。

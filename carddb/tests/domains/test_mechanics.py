@@ -285,6 +285,16 @@ def test_first_batch_pp_evolution_with_unproved_reminder_stays_partial(
         assert report["complete_cards"] == 0
 
 
+_T10_QUOTED_FIELD = (
+    "【スタック】（【スタック】を持つアミュレットは、下記の能力を持つ。"
+    "「これはスタックカウンター1個を置いた状態で場に出る」"
+    "「これが場を離れる際、代わりにこれのスタックカウンター1個を取る」"
+    "「これのスタックカウンターが0個なら、これを墓場に置く」"
+    "「{起動}これを{アクト}：自分の場の他の【スタック】を持つアミュレット1つを選ぶ。"
+    "それにこれのスタックカウンターすべてを移す」）"
+)
+
+
 @pytest.mark.parametrize(
     "raw",
     [
@@ -538,6 +548,113 @@ def test_fixed_damage_composes_with_evolution_and_self_declaration(
         projection = db.rows("mechanic_projection")
         assert len(projection) == 1
         assert projection[0].values["relations"] == Json(["has"])
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        (
+            "{進化}{コスト0}：これは進化する。\n【突進】\n"
+            "{ファンファーレ}これは{攻撃力}+Xする。"
+            "Xは「これを含めず、このターン中に自分がプレイしたカードの枚数」である。"
+        ),
+        (
+            "{クイック}\n"
+            "相手のリーダー1人か相手のフォロワー1体を選ぶ。1枚引く。"
+            "それに「自分の手札の枚数」と同じダメージ。"
+        ),
+        (
+            "【突進】\n"
+            "{ファンファーレ}他のフォロワー1体を選ぶ。"
+            "これは{攻撃力}+Xする。Xは「選んだフォロワーの攻撃力」である。"
+        ),
+        (
+            "【進化時】自分のリーダーに2ダメージ。"
+            "相手プレイヤー1人は手札を公開する。"
+            "自分はその中から1枚を選ぶ。相手はそれを捨てる。"
+        ),
+        _T10_QUOTED_FIELD,
+    ],
+    ids=[
+        "bp01-004",
+        "bp01-007",
+        "bp01-095",
+        "bp01-111-p23",
+        "bp01-t10-four-stack-reminders",
+    ],
+)
+def test_quoted_and_public_hand_fields_are_proved_only_as_exact_whole_fields(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, raw: str
+) -> None:
+    with case(tmp_path, monkeypatch, raw, first_batch=True) as (
+        db,
+        inputs,
+        settings,
+        _,
+    ):
+        with db.transaction():
+            report = mechanics.apply(db, inputs, settings)
+        assert report["complete_cards"] == 1
+        assert db.rows("card_mechanic_coverage")[0].values["complete_all"] is True
+        assert db.rows("mechanic_projection") == ()
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        (
+            "{クイック}\n"
+            "相手のリーダー1人か相手のフォロワー1体を選ぶ。1枚引く。"
+            "それに「自分の手札の枚数」と同じダメージ。1枚引く。"
+        ),
+        (
+            "【進化時】下記から1つチョイスする。"
+            "【1】これは【疾走】を持つ。"
+            "【2】相手のフォロワー1体を選ぶ。それに「これの攻撃力」と同じダメージ。"
+        ),
+        (
+            "{クイック}\n"
+            "相手のリーダー1人か相手のフォロワー1体を選ぶ。1枚引く。"
+            "それに「自分の場の手札枚数」と同じダメージ。"
+        ),
+        (
+            "【進化時】自分のリーダーに2ダメージ。"
+            "相手プレイヤー1人は手札を公開する。"
+            "自分はその中から1枚を選ぶ。相手はそれを捨てる。1枚引く。"
+        ),
+        _T10_QUOTED_FIELD.replace("スタックカウンター1個", "スタックカウンター2個", 1),
+        _T10_QUOTED_FIELD.replace("代わりに", "", 1),
+        _T10_QUOTED_FIELD.replace(
+            "スタックカウンターが0個", "スタックカウンターが1個", 1
+        ),
+        _T10_QUOTED_FIELD.replace(
+            "スタックカウンターすべて", "スタックカウンター1つ", 1
+        ),
+    ],
+    ids=[
+        "quoted-extra-effect",
+        "self-conditional-grant",
+        "quoted-formula-change",
+        "hand-discard-extra-effect",
+        "bp01-t10-entry-counter-changed",
+        "bp01-t10-leave-replacement-changed",
+        "bp01-t10-empty-counter-condition-changed",
+        "bp01-t10-counter-transfer-changed",
+    ],
+)
+def test_quoted_and_public_hand_near_misses_do_not_close_the_field(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, raw: str
+) -> None:
+    with case(tmp_path, monkeypatch, raw, first_batch=True) as (
+        db,
+        inputs,
+        settings,
+        _,
+    ):
+        with db.transaction():
+            mechanics.apply(db, inputs, settings)
+        coverage = db.rows("card_mechanic_coverage")
+        assert not coverage or coverage[0].values["complete_all"] is False
 
 
 @pytest.mark.parametrize(
