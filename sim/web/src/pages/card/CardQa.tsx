@@ -159,7 +159,7 @@ function QaLine({
             {annotated(value.original, SECONDARY)}
           </div>
         )}
-        {sourceLine && <TranslationSourceLine value={value} proofreading={false} />}
+        {translated && sourceLine && <TranslationSourceLine value={value} proofreading={false} />}
       </div>
     )
   }

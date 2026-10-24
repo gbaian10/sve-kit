@@ -4,13 +4,13 @@ import userEvent from "@testing-library/user-event"
 import { expect, it } from "vitest"
 
 import { buildSnapshot } from "../../../scripts/fixture/build"
-import { createSnapshotClient } from "../../data"
+import { createSnapshotClient, stringValue } from "../../data"
 import { prefsStore } from "../../settings"
 import { renderInRouter } from "../../test-utils"
 import { memoryCache } from "../../test-utils/cache"
 import { CardQa } from "./CardQa"
 
-async function loadedClient(disconnectAfterList = false) {
+async function loadedClient(disconnectAfterList = false, mixedSources = false) {
   const built = await buildSnapshot({ encodeImage: () => Promise.resolve(new Uint8Array([1])) })
   const client = createSnapshotClient("https://cdn.test", {
     region: "jp",
@@ -33,7 +33,20 @@ async function loadedClient(disconnectAfterList = false) {
         // Lose access after the list's reads finish, before the text resolver reads its owners.
         if (disconnectAfterList && fragments.some((fragment) => fragment.table === "qa_version"))
           offline = true
-        return fragments
+        return mixedSources
+          ? fragments.map((fragment) =>
+              fragment.table === "translation"
+                ? {
+                    ...fragment,
+                    rows: fragment.rows.map((row) =>
+                      stringValue(row["id"]).includes(":answer:")
+                        ? { ...row, origin: "machine", low_confidence: true }
+                        : row,
+                    ),
+                  }
+                : fragment,
+            )
+          : fragments
       },
     },
     reconnect: () => {
@@ -97,4 +110,27 @@ it("shows a translated entry with its source, and falls back to the original wit
   ).toEqual([null, null])
   // Two entries stay under the fold limit, so there is nothing to expand.
   expect(screen.queryByRole("button", { name: /顯示全部/u })).toBeNull()
+})
+
+it("only attributes visible translations when the question and answer have different sources", async () => {
+  const { client } = await loadedClient(false, true)
+  await renderInRouter(
+    <CardQa client={client} cardId="c:bp01-002" edition="jp" showOther={false} />,
+  )
+  const entry = await screen.findByRole("listitem", { name: "Q001" })
+  expect(await within(entry).findByText(/專案譯文/u)).toBeVisible()
+  expect(await within(entry).findByText(/機器譯文/u)).toBeVisible()
+  expect(within(entry).queryByText("待校對")).toBeNull()
+  act(() => {
+    prefsStore.set({ qaDisplay: "original" })
+  })
+  expect(within(entry).getByText(/試作の隊長が2体いる時/u)).toBeVisible()
+  expect(within(entry).queryByText(/專案譯文|機器譯文/u)).toBeNull()
+  act(() => {
+    prefsStore.set({ qaDisplay: "translated" })
+  })
+  expect(within(entry).getByText(/專案譯文/u)).toBeVisible()
+  expect(within(entry).getByText(/機器譯文/u)).toBeVisible()
+  expect(within(entry).queryByText("待校對")).toBeNull()
+  expect(within(entry).queryByText(/試作の隊長が2体いる時/u)).toBeNull()
 })

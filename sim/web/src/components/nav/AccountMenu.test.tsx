@@ -90,6 +90,31 @@ describe("AccountMenuPanel", () => {
     ).toHaveAttribute("aria-checked", "true")
   })
 
+  it("can enter the mixed translation setting by keyboard and select all four fields", async () => {
+    await renderInRouter(<AccountMenuPanel />)
+    const group = screen.getByRole("radiogroup", { name: "卡片翻譯" })
+    const radios = within(group).getAllByRole("radio")
+    expect(radios.map((radio) => radio.tabIndex)).toEqual([0, -1, -1])
+    expect(within(group).queryByRole("radio", { checked: true })).toBeNull()
+    within(group).getByRole("radio", { name: "原文" }).focus()
+    await userEvent.keyboard("{ArrowLeft}")
+    const both = within(group).getByRole("radio", { name: "兩者" })
+    expect(both).toHaveFocus()
+    expect(both).toHaveAttribute("aria-checked", "true")
+    expect(readPrefs()).toMatchObject({
+      nameDisplay: "both",
+      effectLanguage: "both",
+      flavorDisplay: "both",
+      qaDisplay: "both",
+    })
+    await userEvent.keyboard("{Home}")
+    expect(within(group).getByRole("radio", { name: "原文" })).toHaveFocus()
+    expect(within(group).getByRole("radio", { name: "原文" })).toHaveAttribute(
+      "aria-checked",
+      "true",
+    )
+  })
+
   it("marks the accent the page actually uses before any choice (light system → teal)", async () => {
     await renderInRouter(<AccountMenuPanel />)
     const group = screen.getByRole("radiogroup", { name: "強調色" })

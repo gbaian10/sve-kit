@@ -193,13 +193,13 @@ export function CardText({
   const { t } = useTranslation()
   const prefs = usePrefs()
   const language = useTextLanguage()
-  const mode =
-    display ??
-    (field === "name"
+  const preference =
+    field === "name"
       ? prefs.nameDisplay
       : field === "flavor"
         ? prefs.flavorDisplay
-        : prefs.effectLanguage)
+        : prefs.effectLanguage
+  const mode = preference === "none" ? "none" : (display ?? preference)
   const { readiness, value } = useAnnotatedText(
     client,
     owner,
