@@ -26,17 +26,6 @@ SETTINGS = Settings("https://example.invalid/feedback", "synthetic-v1", "synthet
 
 def extras() -> dict[str, dict[str, Value]]:
     return {
-        "artist": {
-            "id": "artist",
-            "display_name": "Synthetic artist",
-            "decision_id": "decision",
-        },
-        "art_artist": {
-            "art_id": "art",
-            "artist_id": "artist",
-            "role": "illustration",
-            "source_id": "source",
-        },
         "stamp": {
             "id": "stamp",
             "code": "synthetic",
