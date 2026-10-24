@@ -36,8 +36,10 @@ if TYPE_CHECKING:
     from sve_carddb.contracts.source_binding import SourceDescriptor
     from sve_carddb.domains.mechanic_coverage import FieldKey
     from sve_carddb.domains.mechanics import Inputs, Settings
+    from sve_carddb.domains.translations.four_layer_classification import Recognized
+    from sve_carddb.domains.translations.four_layer_normalizer import SourcePart
 
-ADAPTER = "manual-keywords-fields-bp01-v7"
+ADAPTER = "manual-keywords-fields-bp01-v8"
 _EVOLUTION = re.compile(r"\{進化\}\{コスト[0-9]+\}：これは進化する。")
 _FIXED_EFFECT = re.compile(
     r"(?:\{ファンファーレ\}|\{ラストワード\}|【進化時】|"
@@ -129,6 +131,103 @@ _ACT_REMOVAL = re.compile(
     r"【進化時】フォロワー1体を墓場に置く：相手のフォロワー1体を選ぶ。それを破壊する。"
     r")"
 )
+_CONDITIONAL_EFFECT = re.compile(
+    r"(?:"
+    r"【進化時】【覚醒】状態なら、[0-9]+枚引く。|"
+    r"相手のフォロワー1体を選ぶ。それに[0-9]+ダメージ。"
+    r"【覚醒】状態なら、[0-9]+枚引く。|"
+    r"フォロワーすべてに[0-9]+ダメージ。【覚醒】状態なら、代わりに[0-9]+ダメージ。|"
+    r"\{ファンファーレ\}相手のフォロワー1体を選ぶ。それに[0-9]+ダメージ。"
+    r"【コンボ_[0-9]+】代わりに[0-9]+ダメージ。|"
+    r"(?:\{ファンファーレ\})?相手のフォロワー1体を選ぶ。それに[0-9]+ダメージ。"
+    r"【スペルチェイン_[0-9]+】代わりに[0-9]+ダメージ。"
+    r"(?:【SC_[0-9]+】それのリーダーに[0-9]+ダメージ。)?|"
+    r"\{ファンファーレ\}自分の場にアミュレットがあるなら、"
+    r"自分のリーダーは\{体力\}\+[0-9]+する。"
+    r")"
+)
+_STATE_RULE = re.compile(
+    r"(?:"
+    r"これが受けるダメージを-[0-9]+する。|"
+    r"相手のターン中、これが与えるダメージを\+[0-9]+する。|"
+    r"これは相手を攻撃できない。|"
+    r"\{ラストワード\}自分のPP最大値を\+[0-9]+する。|"
+    r"\{進化\}リーダーの\{体力\}-[0-9]+：これは進化する。|"
+    r"【攻撃時】フォロワーへの攻撃なら、これは\{攻撃力\}\+[0-9]+する。|"
+    r"自分のエンドフェイズが来たとき、これは\{体力\}\+[0-9]+する。"
+    r")"
+)
+_BOUNDED_GRANT = re.compile(
+    r"(?:\{ファンファーレ\}自分の他のフォロワー1体を選ぶ。|"
+    r"自分の墓場のコスト[0-9]+以下のフォロワー1枚を選ぶ。それを場に出す。)"
+    r"それは(?:\{攻撃力\}\+[0-9]+/\{体力\}\+[0-9]+して、)?"
+    r"【(?P<keyword>[^【】]+)】を持つ。"
+)
+
+
+_BOUNDED_BODIES = (
+    _EVOLUTION,
+    _FIXED_EFFECT,
+    _FIXED_STATS,
+    _CONDITIONAL_STATS,
+    _QUICK,
+    _REMOVAL,
+    _DRAW_HAND_MOVE,
+    _DECK_SEARCH,
+    _TRIGGER_DAMAGE,
+    _GRAVE_MOVE,
+    _ACT_REMOVAL,
+    _CONDITIONAL_EFFECT,
+    _STATE_RULE,
+)
+
+
+def _bounded_body(
+    text: str, settings: Settings, keywords: Mapping[str, str]
+) -> bool | None:
+    """None: no bounded form applies; False: a grant whose keyword is not unique."""
+    if any(pattern.fullmatch(text) for pattern in _BOUNDED_BODIES):
+        return True
+    grant = _BOUNDED_GRANT.fullmatch(text)
+    if grant is None:
+        return None
+    return (
+        sum(
+            settings.classifier.terms[term].source_ja == grant["keyword"]
+            for term in keywords
+        )
+        == 1
+    )
+
+
+def _declared_keywords(
+    raw: str,
+    source: SourceDescriptor,
+    settings: Settings,
+    keywords: Mapping[str, str],
+    part: SourcePart,
+    found: Recognized,
+) -> bool:
+    if (
+        found.issues
+        or found.semantics is None
+        or found.semantics.key != "card_keywords.v2"
+    ):
+        return False
+    frame, binding = found.bind(source, part)
+    part.verify(raw, frame, binding, settings.classifier.domains)
+    if not frame.leaf_schema.slots:
+        return False
+    for slot in frame.leaf_schema.slots:
+        concept = binding.values[slot.name]
+        if (
+            slot.type != "Concept"
+            or slot.role != "keyword"
+            or not isinstance(concept, GlossaryReference)
+            or concept.key not in keywords
+        ):
+            return False
+    return True
 
 
 def _main_field(
@@ -148,43 +247,15 @@ def _main_field(
         if part.source_span.role != "body":
             return False
         spans = part.source_span.segments
-        if len(spans) == 1 and any(
-            pattern.fullmatch(raw[spans[0].start : spans[0].end])
-            for pattern in (
-                _EVOLUTION,
-                _FIXED_EFFECT,
-                _FIXED_STATS,
-                _CONDITIONAL_STATS,
-                _QUICK,
-                _REMOVAL,
-                _DRAW_HAND_MOVE,
-                _DECK_SEARCH,
-                _TRIGGER_DAMAGE,
-                _GRAVE_MOVE,
-                _ACT_REMOVAL,
-            )
-        ):
-            bodies += 1
-            continue
-        if (
-            found.issues
-            or found.semantics is None
-            or found.semantics.key != "card_keywords.v2"
-        ):
+        bounded = (
+            _bounded_body(raw[spans[0].start : spans[0].end], settings, keywords)
+            if len(spans) == 1
+            else None
+        )
+        if bounded is None:
+            bounded = _declared_keywords(raw, source, settings, keywords, part, found)
+        if not bounded:
             return False
-        frame, binding = found.bind(source, part)
-        part.verify(raw, frame, binding, settings.classifier.domains)
-        if not frame.leaf_schema.slots:
-            return False
-        for slot in frame.leaf_schema.slots:
-            concept = binding.values[slot.name]
-            if (
-                slot.type != "Concept"
-                or slot.role != "keyword"
-                or not isinstance(concept, GlossaryReference)
-                or concept.key not in keywords
-            ):
-                return False
         bodies += 1
     return bodies > 0
 
