@@ -287,9 +287,56 @@ def test_first_batch_pp_evolution_with_unproved_reminder_stays_partial(
             "相手のリーダー1人か相手の場のフォロワー1体を選ぶ。それに10ダメージ。",
             id="field-choice-and-multidigit",
         ),
+        pytest.param("相手のフォロワーすべてに4ダメージ。", id="opposing-all"),
+        pytest.param("フォロワーすべてに5ダメージ。", id="both-all"),
+        pytest.param(
+            "{進化}{コスト2}：これは進化する。\n"
+            "{ファンファーレ}相手の場のフォロワーすべてに2ダメージ。",
+            id="evolution-and-field-all",
+        ),
+        pytest.param(
+            "{ファンファーレ}自分の他のフォロワーすべてに2ダメージ。",
+            id="own-other-all",
+        ),
+        pytest.param("{ファンファーレ}リーダーすべてに1ダメージ。", id="leaders"),
+        pytest.param("{ラストワード}リーダーすべてに2ダメージ。", id="last-words"),
+        pytest.param(
+            "自分のエンドフェイズが来たとき、相手のリーダーすべてに4ダメージ。",
+            id="end-phase-damage",
+        ),
+        pytest.param(
+            "{ファンファーレ}自分のリーダーに1ダメージ。1枚引く。\n"
+            "{起動}{コスト2}これを{アクト}墓場に置く：自分のリーダーに1ダメージ。1枚引く。",
+            id="self-damage-draw-and-sacrifice",
+        ),
+        pytest.param(
+            "相手のリーダー1人か相手の場のフォロワー1体を選ぶ。それに3ダメージ。1枚引く。",
+            id="target-damage-draw",
+        ),
+        pytest.param("{ラストワード}1枚引く。", id="last-words-draw"),
+        pytest.param(
+            "【進化時】相手のフォロワー1体を選ぶ。それに2ダメージ。\n"
+            "{ラストワード}1枚引く。",
+            id="evolve-damage-and-last-words-draw",
+        ),
+        pytest.param(
+            "{起動}これを{アクト}墓場に置く：1枚引く。\n"
+            "{起動}{コスト2}これを{アクト}墓場に置く：2枚引く。",
+            id="sacrifice-draw-with-and-without-pp",
+        ),
+        pytest.param("これが場を離れたとき、1枚引く。", id="leave-field-draw"),
+        pytest.param(
+            "{ファンファーレ}自分のリーダーは{体力}+5する。1枚引く。",
+            id="recovery-and-draw",
+        ),
+        pytest.param("【進化時】自分のリーダーは{体力}+2する。", id="evolve-recovery"),
+        pytest.param(
+            "自分のエンドフェイズが来たとき、自分のリーダーは{体力}+4する。",
+            id="end-phase-recovery",
+        ),
     ],
 )
-def test_first_batch_fixed_damage_proves_absence_without_positive_labels(
+def test_first_batch_fixed_effects_prove_absence_without_positive_labels(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, raw: str
 ) -> None:
     with case(tmp_path, monkeypatch, raw, first_batch=True) as (
@@ -327,7 +374,7 @@ def test_first_batch_fixed_damage_proves_absence_without_positive_labels(
             id="condition",
         ),
         pytest.param(
-            "相手のフォロワー1体を選ぶ。それに2ダメージ。1枚引く。",
+            "相手のフォロワー1体を選ぶ。それに2ダメージ。1枚捨てる。",
             id="trailing-effect",
         ),
         pytest.param(
@@ -352,7 +399,7 @@ def test_first_batch_fixed_damage_proves_absence_without_positive_labels(
             id="fullwidth-cost",
         ),
         pytest.param(
-            "{起動}{コスト1}これを{アクト}墓場に置く："
+            "{起動}{コスト1}これを{アクト}手札1枚を捨てる："
             "相手のフォロワー1体を選ぶ。それに2ダメージ。",
             id="additional-cost",
         ),
@@ -364,9 +411,75 @@ def test_first_batch_fixed_damage_proves_absence_without_positive_labels(
             "これは「\n相手のフォロワー1体を選ぶ。それに2ダメージ。\n」を持つ。",
             id="quoted-ability",
         ),
+        pytest.param(
+            "【攻撃時】相手のフォロワーすべてに3ダメージ。",
+            id="unproved-trigger",
+        ),
+        pytest.param(
+            "相手のフォロワーすべてに2ダメージ。【覚醒】状態なら、代わりに3ダメージ。",
+            id="conditional-replacement",
+        ),
+        pytest.param(
+            "{ファンファーレ}【合成甲】を持つフォロワーすべてに2ダメージ。",
+            id="keyword-all-target",
+        ),
+        pytest.param("リーダーすべてに２ダメージ。", id="all-fullwidth"),
+        pytest.param("リーダーすべてにXダメージ。", id="all-variable"),
+        pytest.param("相手のリーダーすべてに1ダメージ。仮。", id="all-extra-effect"),
+        pytest.param("{クイック}\n相手のフォロワーすべてに1ダメージ。", id="all-quick"),
+        pytest.param("{ラストワード}1枚引く。（未証明の注記）", id="draw-reminder"),
+        pytest.param("【合成乙】を持つなら、1枚引く。", id="draw-keyword-condition"),
+        pytest.param("相手は1枚引く。", id="draw-other-player"),
+        pytest.param("X枚引く。", id="draw-variable"),
+        pytest.param("１枚引く。", id="draw-fullwidth"),
+        pytest.param("1枚引く。自分の手札1枚を捨てる。", id="draw-discard"),
+        pytest.param(
+            "{起動}手札の【合成乙】を持つカード1枚を捨てる：1枚引く。",
+            id="draw-keyword-cost",
+        ),
+        pytest.param(
+            "{起動}これを{アクト}墓場に置く：1枚引く。この能力は1ターンに1回使える。",
+            id="activation-limit",
+        ),
+        pytest.param(
+            "自分のリーダーは{体力}+2して、【合成乙】を持つ。",
+            id="recovery-keyword-grant",
+        ),
+        pytest.param(
+            "【合成乙】を持つなら、自分のリーダーは{体力}+2する。",
+            id="recovery-condition",
+        ),
+        pytest.param("自分のリーダーは{体力}+Xする。", id="recovery-variable"),
+        pytest.param("自分のリーダーは{体力}+２する。", id="recovery-fullwidth"),
+        pytest.param("自分のリーダーは{体力}+2する。仮。", id="recovery-extra-effect"),
+        pytest.param("これは「\n{ラストワード}1枚引く。\n」を持つ。", id="quoted-draw"),
+        pytest.param(
+            "これは「\n自分のリーダーは{体力}+2する。\n」を持つ。", id="quoted-recovery"
+        ),
+        pytest.param("{ラストワード}1枚引く。1枚引く。", id="draw-twice"),
+        pytest.param(
+            "相手のフォロワーすべてに1ダメージ。1枚引く。1枚引く。",
+            id="damage-draw-twice",
+        ),
+        pytest.param(
+            "自分のリーダーは{体力}+2する。自分のリーダーに1ダメージ。",
+            id="recovery-then-damage",
+        ),
+        pytest.param("自分のフォロワーすべてに1ダメージ。", id="own-all-followers"),
+        pytest.param(
+            "相手のエンドフェイズが来たとき、1枚引く。", id="opponent-end-phase"
+        ),
+        pytest.param("{起動}これを{アクト}：1枚引く。", id="act-without-pp"),
+        pytest.param(
+            "{起動}{コスト1}墓場に置く：1枚引く。", id="graveyard-without-act"
+        ),
+        pytest.param(
+            "{起動}{コスト１}これを{アクト}墓場に置く：1枚引く。",
+            id="fullwidth-graveyard-cost",
+        ),
     ],
 )
-def test_fixed_damage_cannot_close_unproved_content_with_a_positive_label(
+def test_fixed_effects_cannot_close_unproved_content_with_a_positive_label(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, unproved: str
 ) -> None:
     with case(tmp_path, monkeypatch, "【合成甲】\n" + unproved, first_batch=True) as (
@@ -395,8 +508,8 @@ def test_fixed_damage_composes_with_evolution_and_self_declaration(
         tmp_path,
         monkeypatch,
         "{進化}{コスト1}：これは進化する。\n【合成甲】\n"
-        "{ファンファーレ}相手のフォロワー1体を選ぶ。それに2ダメージ。",
-        back="相手のフォロワー1体を選ぶ。それに3ダメージ。",
+        "{ファンファーレ}自分の他のフォロワーすべてに2ダメージ。",
+        back="{ラストワード}1枚引く。",
         first_batch=True,
     ) as (db, inputs, settings, _):
         with db.transaction():
@@ -407,16 +520,27 @@ def test_fixed_damage_composes_with_evolution_and_self_declaration(
         assert projection[0].values["relations"] == Json(["has"])
 
 
-def test_unproved_damage_condition_without_labels_remains_unknown(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+@pytest.mark.parametrize(
+    "raw",
+    [
+        pytest.param(
+            "{ファンファーレ}自分の場にフォロワーがいるなら、"
+            "相手のフォロワーすべてに2ダメージ。",
+            id="damage-condition",
+        ),
+        pytest.param("{ラストワード}1枚引く。仮。", id="draw-extra-effect"),
+        pytest.param("自分のリーダーは{体力}+2する。（仮）", id="recovery-reminder"),
+    ],
+)
+def test_unproved_fixed_effect_without_labels_remains_unknown(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, raw: str
 ) -> None:
-    with case(
-        tmp_path,
-        monkeypatch,
-        "{ファンファーレ}自分の場にフォロワーがいるなら、"
-        "相手のフォロワー1体を選ぶ。それに2ダメージ。",
-        first_batch=True,
-    ) as (db, inputs, settings, _):
+    with case(tmp_path, monkeypatch, raw, first_batch=True) as (
+        db,
+        inputs,
+        settings,
+        _,
+    ):
         with db.transaction():
             mechanics.apply(db, inputs, settings)
         assert not db.rows("card_mechanic_coverage")
@@ -430,7 +554,7 @@ def test_first_batch_missing_current_back_prevents_complete(
         tmp_path,
         monkeypatch,
         "{進化}{コスト2}：これは進化する。\n【合成甲】\n"
-        "相手のフォロワー1体を選ぶ。それに2ダメージ。",
+        "相手のフォロワーすべてに2ダメージ。",
         back="【合成乙】",
         first_batch=True,
     ) as (db, inputs, settings, _):
@@ -751,7 +875,7 @@ def test_duplicate_positive_evidence_deduplicates_and_stays_partial(
 def test_keyword_only_in_token_section_does_not_mark_the_original_card(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    with case(tmp_path, monkeypatch, "Synthetic undecoded effect.") as (
+    with case(tmp_path, monkeypatch, "{ラストワード}1枚引く。", first_batch=True) as (
         db,
         inputs,
         settings,
