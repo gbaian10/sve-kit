@@ -22,9 +22,7 @@ export default {
     answer: "A",
     official: "Official page",
     loading: "Loading Q&A…",
-    none: "This card has no official Q&A.",
-    unknown:
-      "Q&A for this edition is not fully collected yet, so we cannot tell whether this card has any.",
+    noneAsOf: "No official Q&A for this card in our data as of {{date}}.",
     loadFailed: "Could not load Q&A. Check your connection and retry.",
     validationFailed: "The Q&A data failed validation and is not shown.",
     retry: "Reload Q&A",

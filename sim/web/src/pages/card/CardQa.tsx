@@ -253,6 +253,7 @@ function QaGroup({
   const [selection, setSelection] = useState<{ readonly key: string; readonly index: number }>()
   const key = canonicalText([snapshot?.manifestHash ?? null, cardId, edition, attempt])
   const [loaded, setLoaded] = useState<Loaded>()
+  const dataAsOf = snapshot ? stringValue(snapshot.manifest["data_as_of"]) : ""
   useEffect(() => {
     if (!snapshot) return
     let active = true
@@ -299,14 +300,8 @@ function QaGroup({
         {current.failed === "network" ? t("qa.loadFailed") : t("qa.validationFailed")}
       </Notice>
     )
-  else if (current.result.coverage === "absent")
-    body = <p className="text-13 text-text-2">{t("qa.none")}</p>
-  else if (current.result.coverage === "unknown")
-    body = (
-      <Notice tone="info" role="status">
-        {t("qa.unknown")}
-      </Notice>
-    )
+  else if (current.result.coverage === "absent" || current.result.coverage === "unknown")
+    body = <p className="text-13 text-text-2">{t("qa.noneAsOf", { date: dataAsOf })}</p>
   else {
     const { entries } = current.result
     const selectedIndex = selection?.key === key ? Math.min(selection.index, entries.length - 1) : 0

@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event"
 import { expect, it, vi } from "vitest"
 
 import { buildSnapshot } from "../../../scripts/fixture/build"
-import { createSnapshotClient, stringValue } from "../../data"
+import { arrayValue, createSnapshotClient, objectValue, stringValue } from "../../data"
 import { prefsStore } from "../../settings"
 import { renderInRouter } from "../../test-utils"
 import { memoryCache } from "../../test-utils/cache"
@@ -240,10 +240,16 @@ it("proves absence at the snapshot date even when today is later than the source
   const { client } = await loadedClient()
   const snapshot = client.snapshot()
   if (!snapshot) throw new Error("synthetic snapshot did not load")
+  const date = "2029-07-04"
   const covered = {
     ...snapshot,
     manifest: {
       ...snapshot.manifest,
+      data_as_of: date,
+      source_windows: arrayValue(snapshot.manifest["source_windows"]).map((raw) => ({
+        ...objectValue(raw),
+        as_of: date,
+      })),
       qa_card_index: {
         jp: {
           "c:bp01-002": ["qa:bp01-002-1:v1"],
@@ -258,7 +264,7 @@ it("proves absence at the snapshot date even when today is later than the source
   vi.useFakeTimers({ toFake: ["Date"] })
   vi.setSystemTime(new Date("2030-01-01T00:00:00Z"))
   try {
-    expect(Date.now()).toBeGreaterThan(Date.parse(stringValue(snapshot.manifest["data_as_of"])))
+    expect(Date.now()).toBeGreaterThan(Date.parse(date))
     await renderInRouter(
       <CardQa
         client={{ ...client, snapshot: () => covered, fragments }}
@@ -267,9 +273,47 @@ it("proves absence at the snapshot date even when today is later than the source
         showOther={false}
       />,
     )
-    expect(await screen.findByText("此卡沒有官方 Q&A。")).toBeVisible()
+    expect(await screen.findByText(`截至 ${date} 的收錄資料，此卡沒有官方 Q&A。`)).toBeVisible()
     expect(fragments).not.toHaveBeenCalled()
   } finally {
     vi.useRealTimers()
   }
+})
+
+it("shows the snapshot date when Q&A coverage is unknown", async () => {
+  const { client } = await loadedClient()
+  const snapshot = client.snapshot()
+  if (!snapshot) throw new Error("synthetic snapshot did not load")
+  const unknown = {
+    ...snapshot,
+    manifest: {
+      ...snapshot.manifest,
+      data_as_of: "2031-07-04",
+      source_windows: [],
+      qa_card_ids: [],
+    },
+  }
+  await renderInRouter(
+    <CardQa
+      client={{ ...client, snapshot: () => unknown }}
+      cardId="c:bp01-001"
+      edition="jp"
+      showOther={false}
+    />,
+  )
+
+  expect(await screen.findByText("截至 2031-07-04 的收錄資料，此卡沒有官方 Q&A。")).toBeVisible()
+})
+
+it("keeps the retry button when loading the Q&A list fails", async () => {
+  const { client } = await loadedClient()
+  const failingClient = {
+    ...client,
+    fragments: () => Promise.reject(new TypeError("network unavailable")),
+  }
+  await renderInRouter(
+    <CardQa client={failingClient} cardId="c:bp01-002" edition="jp" showOther={false} />,
+  )
+
+  expect(await screen.findByRole("button", { name: "重新載入 Q&A" })).toBeVisible()
 })
