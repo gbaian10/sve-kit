@@ -31,7 +31,7 @@ export function SettingRow({
     <div
       className={cn(
         "relative flex min-h-11 flex-wrap items-center justify-between gap-x-4 gap-y-1",
-        stack && "max-sm:flex-col max-sm:items-stretch",
+        stack && "max-md:flex-col max-md:items-stretch",
         className,
       )}
     >
@@ -42,7 +42,7 @@ export function SettingRow({
       <div
         className={cn(
           "ml-auto flex shrink-0 items-center",
-          stack && "max-sm:ml-0 max-sm:justify-end",
+          stack && "max-md:ml-0 max-md:justify-end",
         )}
       >
         {children}
