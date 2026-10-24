@@ -2,6 +2,8 @@
 
 from typing import TYPE_CHECKING
 
+from sve_carddb.core.provenance import DateSource
+
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
@@ -9,9 +11,9 @@ if TYPE_CHECKING:
     from sve_carddb.core.provenance import Source
 
 
-def source_values(source: Source) -> dict[str, Value]:
+def source_values(source: Source | DateSource) -> dict[str, Value]:
     """Project only version metadata; parser provenance belongs to each use."""
-    return {
+    values: dict[str, Value] = {
         "id": source.id,
         "kind": source.kind,
         "url": source.url,
@@ -23,10 +25,22 @@ def source_values(source: Source) -> dict[str, Value]:
         "parser_version": None,
         "authored_path": None,
         "authored_revision": None,
+        "observed_on": None,
+        "observed_timezone": None,
+        "observed_basis": None,
+        "import_receipt_id": None,
     }
+    if isinstance(source, DateSource):
+        values.update(
+            observed_on=source.observed_on,
+            observed_timezone=source.observed_timezone,
+            observed_basis=source.observed_basis,
+            import_receipt_id=source.import_receipt_id,
+        )
+    return values
 
 
-def raw_values(sources: Iterable[Source]) -> dict[str, dict[str, Value]]:
+def raw_values(sources: Iterable[Source | DateSource]) -> dict[str, dict[str, Value]]:
     """Validate repeated version metadata before any database writes."""
     result: dict[str, dict[str, Value]] = {}
     for source in sources:
@@ -37,7 +51,7 @@ def raw_values(sources: Iterable[Source]) -> dict[str, dict[str, Value]]:
     return result
 
 
-def insert_raw_sources(db: Database, sources: Iterable[Source]) -> None:
+def insert_raw_sources(db: Database, sources: Iterable[Source | DateSource]) -> None:
     """Reuse exact metadata only; never discard a conflicting version or its provenance."""
     required = raw_values(sources)
     for values in required.values():
