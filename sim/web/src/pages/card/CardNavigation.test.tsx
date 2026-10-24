@@ -117,6 +117,12 @@ async function setup(pendingCandidate = false, blockBackground = false) {
   state.client = {
     ...source,
     snapshot: () => pinnedSnapshot,
+    selectRegion: async (region) => {
+      const pending = hold
+      hold = undefined
+      await pending
+      await source.selectRegion?.(region)
+    },
     fragments: async (key, backgroundSignal) => {
       if (backgroundSignal) {
         backgroundReads.push(key)
@@ -128,9 +134,6 @@ async function setup(pendingCandidate = false, blockBackground = false) {
         inflightReads += 1
       }
       try {
-        const pending = hold
-        hold = undefined
-        await pending
         if (pendingCandidate && key === historyKey) {
           await historyHold
           if (historyFailure) throw new Error("synthetic candidate history unavailable")
@@ -210,18 +213,12 @@ async function setup(pendingCandidate = false, blockBackground = false) {
     failReads: (purposes: readonly string[]) => {
       failedPurposes = new Set(purposes)
     },
-    // Holds the first read made once the router leaves its current location, so a late read of
-    // the page already shown (however slow the machine) cannot take the hold meant for the target.
+    // Locating the target always starts at selectRegion, so the hold waits there: no read the
+    // page already shown makes late (images, relations) can take it, however slow the machine.
     holdNextRead: () => {
       let release: () => void = () => undefined
-      const next = new Promise<void>((resolve) => {
+      hold = new Promise<void>((resolve) => {
         release = resolve
-      })
-      const from = rendered.router.state.location.key
-      const unsubscribe = rendered.router.subscribe((router) => {
-        if (router.location.key === from) return
-        unsubscribe()
-        hold = next
       })
       return release
     },
