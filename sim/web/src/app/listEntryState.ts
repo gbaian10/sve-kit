@@ -19,6 +19,8 @@ export interface ListEntryState {
 
 export interface OverlayEntryState {
   readonly resultKey?: string
+  /** `suggest` when the search box's suggestion list opened the card; previous/next follow that list. */
+  readonly source?: CardEntryState["source"]
   readonly route?: CardEntryState["route"]
   /** Opening pushed a history entry, so closing from the UI pops it instead of replacing. */
   readonly pushed?: boolean

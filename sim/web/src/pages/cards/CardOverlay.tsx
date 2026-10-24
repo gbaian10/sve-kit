@@ -60,8 +60,15 @@ export interface CardOverlay {
   readonly open: boolean
   /** The result cell whose card is open, when the list knows it. */
   readonly selected: string | undefined
-  /** Opens the cell's card in place; false when cards open as pages, so the caller navigates. */
-  readonly openInPlace: (summary: CardSummary, key: string) => boolean
+  /**
+   * Returns false for pages so the caller navigates; suggestions supply their own background
+   * list so both Back and previous/next follow the typed text.
+   */
+  readonly openInPlace: (
+    summary: CardSummary,
+    key: string,
+    suggested?: { readonly search: string; readonly list: ListEntryState },
+  ) => boolean
   readonly close: () => void
   /** The drawer at the app frame's right edge, kept while it slides out; null otherwise. */
   readonly drawer: ReactNode
@@ -181,7 +188,7 @@ export function useCardOverlay({
     const state: CardEntryState | null = overlay?.resultKey
       ? {
           background,
-          source: "results",
+          source: overlay.source ?? "results",
           pages,
           resultKey: overlay.resultKey,
           ...(overlay.route ? { route: overlay.route } : {}),
@@ -190,18 +197,26 @@ export function useCardOverlay({
     void navigate(path, { replace: true, state })
   }, [param, presentation, overlay, background, pages, navigate])
 
-  const openInPlace = (summary: CardSummary, key: string) => {
+  const openInPlace = (
+    summary: CardSummary,
+    key: string,
+    suggested?: { readonly search: string; readonly list: ListEntryState },
+  ) => {
     if (presentation === "page") return false
-    const next = new URLSearchParams(location.search)
-    const alreadyOpen = next.has(CARD_PARAM)
+    const search = suggested?.search ?? location.search
+    const next = new URLSearchParams(search)
+    // A changed suggestion background starts a list entry; the same background only swaps cards.
+    const sameList = suggested === undefined || search === withoutCardParam(location.search)
+    const alreadyOpen = sameList && param !== null
     next.set(CARD_PARAM, cardParamOf(summary))
-    const { overlay: previous, ...list } = entry
+    const { overlay: previous, ...list } = sameList ? entry : suggested.list
+    const openedPages = sameList ? pages : (suggested.list.pages ?? 1)
     const top = cellOf(root.current, key)?.getBoundingClientRect().top
     // A page preference can replace the card's entry, so its opener belongs to the list below it.
     const listId = alreadyOpen ? previous?.listId : (list.listId ?? newListId())
     if (!alreadyOpen)
       void navigate(
-        { pathname: location.pathname, search: location.search },
+        { pathname: location.pathname, search },
         {
           replace: true,
           preventScrollReset: true,
@@ -209,7 +224,7 @@ export function useCardOverlay({
             ...list,
             listId,
             anchor: key,
-            pages,
+            pages: openedPages,
             listScroll: listScroll.current,
             scrollY: window.scrollY,
           },
@@ -218,11 +233,12 @@ export function useCardOverlay({
     const state: ListEntryState = {
       ...list,
       anchor: key,
-      pages,
+      pages: openedPages,
       listScroll: listScroll.current,
       scrollY: window.scrollY,
       overlay: {
         resultKey: key,
+        ...(suggested ? { source: "suggest" as const } : {}),
         ...routeState(summary),
         pushed: alreadyOpen ? (previous?.pushed ?? false) : true,
         ...(listId === undefined ? {} : { listId }),
@@ -391,6 +407,7 @@ export function useCardOverlay({
       ...list,
       overlay: {
         ...(resultKey === undefined ? {} : { resultKey }),
+        ...(previous?.source === undefined ? {} : { source: previous.source }),
         ...(to.route ? { route: to.route } : {}),
         ...(previous?.pushed ? { pushed: true } : {}),
         ...(previous?.listId === undefined ? {} : { listId: previous.listId }),
@@ -405,7 +422,7 @@ export function useCardOverlay({
     ? {
         entry: {
           background,
-          source: "results",
+          source: overlay?.source ?? "results",
           pages,
           ...(selected === undefined ? {} : { resultKey: selected }),
           ...(overlay?.route ? { route: overlay.route } : {}),
