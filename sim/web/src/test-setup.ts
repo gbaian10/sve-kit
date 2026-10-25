@@ -4,8 +4,11 @@ import "./test-utils/popover"
 
 import { webcrypto } from "node:crypto"
 
-import { cleanup } from "@testing-library/react"
+import { cleanup, configure } from "@testing-library/react"
 import { afterEach } from "vitest"
+
+// findBy/waitFor wait 1 s by default, which the debounced search misses when coverage slows the run.
+configure({ asyncUtilTimeout: 4000 })
 
 // jsdom does not provide SubtleCrypto; tests use the same native SHA-256 boundary as browsers.
 if (!("subtle" in globalThis.crypto))
