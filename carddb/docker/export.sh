@@ -18,7 +18,9 @@ HOST_GID=$(id -g)
 export EXPORT_RUN_DIR=$run_dir HOST_UID HOST_GID
 mkdir -p "$run_dir/tmp"
 mounts_file=$run_dir/compose.mounts.yaml
-export EXPORT_REPO=$(uv --directory "$here/.." run python -m sve_carddb.docker_mounts "$run_dir/recipe.json" "$mounts_file")
+# Assigned apart from export so a failing derivation stops the script instead of being masked.
+EXPORT_REPO=$(uv --directory "$here/.." run python -m sve_carddb.workflows.docker_mounts "$run_dir/recipe.json" "$mounts_file")
+export EXPORT_REPO
 compose=(docker compose -f "$here/compose.yaml" -f "$mounts_file")
 
 # Whole GiB only, so the host check below compares like with like before anything starts.
