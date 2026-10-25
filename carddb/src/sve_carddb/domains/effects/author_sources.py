@@ -110,6 +110,7 @@ BINARY_ARITY = 2
 ENTRY_HEADS = {
     DAMAGE_KEY: ("lastword",),
     "draw_exact_spell.v1": ("spell",),
+    "draw_exact_attack_time.v1": ("attack_time",),
     "evolve_entry.v1": ("evolve",),
     "feed_entry.v1": ("feed",),
     "ride_entry.v1": ("ride",),
@@ -138,7 +139,7 @@ ADAPTER_RECIPE = digest(
             ],
             "ports": "empty-only;unsupported-source-ports",
             "entry_heads": {key: list(value) for key, value in ENTRY_HEADS.items()},
-            "entry_payload": "exact-head.cost.pp;lastword-uniform-all-leaders-v1;spell.draw.self.n;empty-ports;no-imports",
+            "entry_payload": "exact-head.cost.pp;lastword-uniform-all-leaders-v1;spell.draw.self.n;attack_time.draw.self.n;empty-ports;no-imports",
             "entry_operands": "Nat-cost_value-occurrence-order-or-single-Nat-count-v2",
             "token_closure": "mapped-ability-heads-only-no-token-v2",
             "token_free_metadata": list(NO_TOKEN_METADATA),
@@ -148,7 +149,7 @@ ADAPTER_RECIPE = digest(
             "inventory": "authored-root-complete-files-v1",
             "resolved_nonentry": "unsupported_source_projection",
             "damage_operand": "fixed-lastword-concept;Nat-damage_amount-leaf_1;exact-body-v1",
-            "draw_operand": "draw_exact_spell.v1;required-Nat-count-value;single-source-leaf",
+            "draw_operand": "draw_exact_spell.v1;draw_exact_attack_time.v1;required-Nat-count-value;single-source-leaf",
             "draw_payload": "complete-head-body-canonical-equality-v1",
         }
     )
@@ -226,9 +227,12 @@ def entry_payload(source: SourceContext, scope: str) -> dict[str, JsonValue]:
             },
             "ports": {"imports": {}, "exports": {}},
         }
-    if source.frame.semantic_variant.key == "draw_exact_spell.v1":
+    if source.frame.semantic_variant.key in {
+        "draw_exact_spell.v1",
+        "draw_exact_attack_time.v1",
+    }:
         return {
-            "spell": {"do": [{"draw": {"who": "self", "n": _draw_count(source)}}]},
+            heads[0]: {"do": [{"draw": {"who": "self", "n": _draw_count(source)}}]},
             "ports": {"imports": {}, "exports": {}},
         }
     slots = {slot.name: slot for slot in source.frame.leaf_schema.slots}
@@ -595,7 +599,8 @@ def parameter_expected(
             raise SourceError("parameter_source_operand_mismatch")
         return expected
     if (
-        source.frame.semantic_variant.key == "draw_exact_spell.v1"
+        source.frame.semantic_variant.key
+        in {"draw_exact_spell.v1", "draw_exact_attack_time.v1"}
         and owner == "A.act.draw"
         and relative_path == ("n",)
     ):

@@ -454,7 +454,11 @@ class AuthorExpander:
                 or ability.get("imports")
             ):
                 raise ExpansionError("unsupported_port_source_mapping", evidence.path)
-            if source.frame.semantic_variant.key in {DAMAGE_KEY, "draw_exact_spell.v1"}:
+            if source.frame.semantic_variant.key in {
+                DAMAGE_KEY,
+                "draw_exact_spell.v1",
+                "draw_exact_attack_time.v1",
+            }:
                 use = SourceUse.model_validate_json(
                     canonical(array(ability["sources"])[0]), strict=True
                 )

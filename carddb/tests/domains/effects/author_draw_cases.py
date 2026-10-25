@@ -1,4 +1,4 @@
-"""Closed spell bodies and source candidates for author admission tests."""
+"""Closed draw bodies and source candidates for author admission tests."""
 
 from typing import TYPE_CHECKING
 
@@ -21,15 +21,25 @@ if TYPE_CHECKING:
 PATH = ("cards", "FIX-001", "abilities", 0)
 
 
-def head(count: JsonValue = 3) -> dict[str, JsonValue]:
-    return {"spell": {"do": [{"draw": {"who": "self", "n": count}}]}}
+def head(count: JsonValue = 3, *, name: str = "spell") -> dict[str, JsonValue]:
+    return {name: {"do": [{"draw": {"who": "self", "n": count}}]}}
 
 
-def spell_source(raw: str = "3枚引く。") -> tuple[SourceCandidate, SourceUse, Frame]:
+def draw_source(
+    raw: str = "3枚引く。", *, name: str = "spell"
+) -> tuple[SourceCandidate, SourceUse, Frame]:
+    if name == "attack_time":
+        raw = "【攻撃時】" + raw
     descriptor = source(raw)
     engine = classifier()
     context = CardContext(
-        descriptor, "c:synthetic", "f:synthetic", "normal", "spell", True, 0
+        descriptor,
+        "c:synthetic",
+        "f:synthetic",
+        "normal",
+        "spell" if name == "spell" else "follower",
+        True,
+        0,
     )
     candidate = SourceCandidate(raw, descriptor, engine, context)
     derived = derive_source(raw, descriptor, engine, context=context)
@@ -45,12 +55,19 @@ def spell_source(raw: str = "3枚引く。") -> tuple[SourceCandidate, SourceUse
     )
 
 
-def spell_ability(
-    frame: Frame, use: SourceUse, *, companion: bool, count: int = 3
+def draw_ability(
+    frame: Frame,
+    use: SourceUse,
+    *,
+    companion: bool,
+    count: int = 3,
+    name: str = "spell",
 ) -> tuple[dict[str, JsonValue], list[bytes]]:
     if not companion:
-        return ability(head(count)) | {"sources": [use.model_dump(mode="json")]}, []
-    record = registered(head({"param": "n"}))
+        return ability(head(count, name=name)) | {
+            "sources": [use.model_dump(mode="json")]
+        }, []
+    record = registered(head({"param": "n"}, name=name))
     record["frame_id"] = frame.id
     record["params"] = {
         "n": {"type": "Nat", "source": {"slot": "leaf_0", "component": "value"}}

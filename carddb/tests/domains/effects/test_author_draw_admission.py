@@ -1,4 +1,4 @@
-"""Only the admitted spell variant maps resolved draw sources to author bodies."""
+"""Only admitted spell and attack variants map resolved draw sources to author bodies."""
 
 import hashlib
 import json
@@ -213,9 +213,11 @@ def test_frozen_draw_sources_resolve_without_author_admission(
     declaration = ParamDecl(
         type="Nat", source=ParamSource(slot="leaf_0", component="value")
     )
-    if variant == "draw_exact_spell.v1":
+    if variant in {"draw_exact_spell.v1", "draw_exact_attack_time.v1"}:
         assert entry_payload(checked, "ability_0") == {
-            "spell": {"do": [{"draw": {"who": "self", "n": count}}]},
+            ("spell" if variant == "draw_exact_spell.v1" else "attack_time"): {
+                "do": [{"draw": {"who": "self", "n": count}}]
+            },
             "ports": {"imports": {}, "exports": {}},
         }
         assert (
