@@ -394,6 +394,10 @@ runs directly with its 90% line threshold. Web formatting, lint, types, Vitest, 
 checks and build use the existing package scripts in separate steps. Local manual test hooks
 remain available. The hook ownership table marks direct steps so pre-commit skips them.
 
+CI also uploads the carddb, Web and Rust coverage reports (file names and line hits, no card text) and the
+Web bundle size to Codecov for reference. Codecov statuses are informational; the gates above stay in the
+test steps, and a failed or slow upload never fails the job (each upload step has its own timeout).
+
 Draft pull requests run only the quick checks (repository hooks, commit messages and the
 title). The Python, Rust, Web and card-data jobs are skipped and `ci-ok` fails with a note that tests
 were not run. Marking the PR ready for review starts the full run, which decides `ci-ok`.

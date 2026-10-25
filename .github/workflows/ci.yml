@@ -346,7 +346,8 @@ jobs:
     needs: changes
     if: ${{ needs.changes.outputs.rust == 'true' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    # The required steps keep 45 minutes; each of the two Codecov steps has its own 5.
+    timeout-minutes: 55
     env:
       MISE_EXEC_AUTO_INSTALL: "false" # the cargo hooks go through `mise exec`; Rust itself comes from rustup
     steps:
@@ -414,6 +415,27 @@ jobs:
         env:
           REPORT_DIR: ${{ runner.temp }}/sve-rust-reports
         run: python3 .github/ci/test_summary.py rust "$REPORT_DIR"
+      # Informational: the 90% line gate above stays the gate. The profile data from the run is still
+      # in target/, so the lcov export needs no second test run; both steps have their own 5 minutes.
+      - name: Export Rust coverage as lcov
+        id: lcov
+        if: ${{ !cancelled() && (steps.tests.outcome == 'success' || steps.tests.outcome == 'failure') }}
+        continue-on-error: true
+        timeout-minutes: 5
+        env:
+          REPORT_DIR: ${{ runner.temp }}/sve-rust-reports
+        run: mise exec -- cargo llvm-cov report --lcov --output-path "$REPORT_DIR/lcov.info"
+      - name: Upload Rust coverage to Codecov
+        if: ${{ !cancelled() && steps.lcov.outcome == 'success' }}
+        continue-on-error: true
+        timeout-minutes: 5
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ${{ runner.temp }}/sve-rust-reports/lcov.info
+          disable_search: true
+          flags: rust
+          fail_ci_if_error: false
       - name: Remove Rust reports
         if: always()
         env:
