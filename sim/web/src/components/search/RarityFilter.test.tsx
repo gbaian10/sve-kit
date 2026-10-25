@@ -65,6 +65,15 @@ describe("rarity chips", () => {
     )
   })
 
+  it("explains the unrated chip to hover and assistive technology only", async () => {
+    await renderInRouter(<Harness />)
+    const hint = "官方沒有登記稀有度的卡，例如 PR 系列的 EP、SEP 與主戰者"
+    const unrated = screen.getByRole("button", { name: "無分類" })
+    expect(unrated).toHaveAccessibleDescription(hint)
+    expect(unrated).toHaveAttribute("title", `無分類（4）\n${hint}`)
+    expect(screen.getByRole("button", { name: "SP" })).not.toHaveAttribute("aria-describedby")
+  })
+
   it("selects or clears every PR appearance from the chip and shows a partial selection", async () => {
     await renderInRouter(<Harness />)
     const parent = screen.getByRole("button", { name: "PR" })
