@@ -36,6 +36,8 @@ test = [
 
 [tool.uv]
 default-groups = ["dev", "test"]
+# brotli-stubs only types the API and pins brotli exactly; override it so the decoder fix (GHSA-9v8h-qqgm-4m35) applies.
+override-dependencies = ["brotli==1.2.1"]
 
 [build-system]
 requires = ["hatchling"]

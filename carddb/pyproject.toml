@@ -20,7 +20,7 @@ dependencies = [
     "pillow==13.0.0",
     "jsonschema>=4.26.0",
     "pyyaml>=6.0.3",
-    "brotli==1.2.0",
+    "brotli==1.2.1",
     "psutil>=7.2.2",
     "yamlrocks==0.7.0",
     "jsonschema-rs==0.58.6",
@@ -75,6 +75,8 @@ cache-keys = [
     { git = { commit = true, tags = true } },
 ]
 default-groups = ["dev", "test"]
+# brotli-stubs only types the API and pins brotli exactly; override it so the decoder fix (GHSA-9v8h-qqgm-4m35) applies.
+override-dependencies = ["brotli==1.2.1"]
 
 [build-system]
 requires = ["hatchling", "hatch-vcs"]
