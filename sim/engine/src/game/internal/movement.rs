@@ -4,9 +4,10 @@ use super::{Execution, Fact, Game, InstructionOutcome, Result, invalid, player_i
 use crate::ir::{
     Action, ActionPattern, Bool, Cause, CausePattern, DestroyOutcome, DurationEnd, Effect,
     EffectSource, Expr, Generation, Instruction, MoveDestination, MoveMethod, MoveOutcome,
-    MoveReason, MoveResult, MoveSpec, MovementReceipt, ObjectReceipt, ObjectRef, OwnerZone,
-    PlayerId, PlayerRef, Polarity, ReceiptId, ReceiptLocation, ResultMember, ResultMemberId,
-    RuntimeObjectView, RuntimeZoneRef, Selector, SnapshotId, TimeAnchor, ZoneKind,
+    MoveReason, MoveResult, MoveSpec, MovementReceipt, Nat, ObjectReceipt, ObjectRef, OwnerZone,
+    PlayerId, PlayerRef, PlayerRelation, Polarity, ReceiptId, ReceiptLocation, ResultMember,
+    ResultMemberId, RuntimeObjectView, RuntimeZoneRef, SelectionView, Selector, SnapshotId,
+    TimeAnchor, ZoneKind,
 };
 use serde_json::json;
 
@@ -104,6 +105,18 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
         }
         _ => Ok(()),
     }
+}
+
+pub(super) fn advance_entry(action: &Action) -> bool {
+    matches!(action, Action::Move { objects: Selector::Zone {
+        zone: ZoneKind::Evolve, players, view: SelectionView::Current {}, predicate, ..
+    }, movement, reason: MoveReason::Put }
+        if field_move(movement)
+            && players.relation == PlayerRelation::SelfPlayer
+            && players.relative_to == (PlayerRef::Controller {})
+            && players.cardinality.minimum.0 == 1
+            && players.cardinality.maximum == Some(Nat(1))
+            && **predicate == Expr::Literal(Bool(true)))
 }
 
 pub(super) fn field_move(movement: &MoveSpec) -> bool {
@@ -234,7 +247,30 @@ impl Game {
         instruction: &Instruction,
         objects: &Selector,
     ) -> Result<()> {
-        let members = execution.objects(self, objects)?;
+        let members = if let Selector::Zone {
+            zone: ZoneKind::Evolve,
+            players,
+            predicate,
+            ..
+        } = objects
+        {
+            // CR 9.2 grants no player action: only this admitted effect may put Advance cards.
+            if players.relation != PlayerRelation::SelfPlayer
+                || players.relative_to != (PlayerRef::Controller {})
+                || **predicate != Expr::Literal(Bool(true))
+            {
+                return Err(unsupported("own evolve-deck Advance entry selector"));
+            }
+            self.zone_ids(
+                super::seat_name(execution.context.controller)?,
+                "evolve_deck",
+            )
+            .iter()
+            .map(|id| execution.reference(self, id))
+            .collect::<Result<Vec<_>>>()?
+        } else {
+            execution.objects(self, objects)?
+        };
         let seat = super::seat_name(execution.context.controller)?;
         let mut incoming = 0_i64;
         for &member in &members {
@@ -242,13 +278,16 @@ impl Game {
             if object.generation != member.generation.0 {
                 continue;
             }
-            if !matches!(object.zone.as_str(), "cemetery" | "ex")
+            let ordinary = self.object_type(&object.id)? == "フォロワー"
+                && matches!(object.zone.as_str(), "cemetery" | "ex");
+            let advance = self.object_type(&object.id)? == "フォロワー・アドバンス"
+                && matches!(object.zone.as_str(), "evolve_deck" | "ex");
+            if !(ordinary || advance)
                 || object.owner != seat
                 || object.controller != seat
-                || self.object_type(&object.id)? != "フォロワー"
                 || object.state["face"] != 0_i64
             {
-                return Err(unsupported("ordinary public controller field entry"));
+                return Err(unsupported("admitted controller field entry"));
             }
             incoming = incoming
                 .checked_add(1)
@@ -361,20 +400,32 @@ impl Game {
             if method == MoveMethod::Destroy && previous.zone != "field" {
                 return Err(unsupported("off-field destruction"));
             }
-            let from_kind = if previous.zone == "deck" && method == MoveMethod::Put {
-                ZoneKind::Deck
-            } else {
-                public_zone(&previous.zone)?
-            };
+            let from_kind =
+                if method == MoveMethod::Put && previous.zone == "evolve_deck" && zone == "field" {
+                    ZoneKind::Evolve
+                } else if previous.zone == "deck" && method == MoveMethod::Put {
+                    ZoneKind::Deck
+                } else {
+                    public_zone(&previous.zone)?
+                };
             if previous.zone == zone
                 || (method == MoveMethod::Destroy && execution.destroy_guards.contains(&before))
             {
                 continue;
             }
-            // Tokens, advance cards and links entail additional rule moves not yet represented here.
+            // Linked departures still need their own typed rule receipts.
             let card_type = self.object_type(&id)?;
-            if card_type.contains("トークン")
-                || card_type.contains("アドバンス")
+            let special = card_type.contains("トークン") || card_type.contains("アドバンス");
+            if special {
+                if execution.ability.is_none() {
+                    return Err(unsupported(
+                        "special-card movement requires whole-card authority",
+                    ));
+                }
+                self.check_internal_cards()?;
+            }
+            if ((card_type.contains("トークン") || card_type.contains("アドバンス"))
+                && !matches!(card_type, "フォロワー・アドバンス" | "フォロワー・トークン"))
                 || previous
                     .state
                     .get("evolved_with")
@@ -393,15 +444,32 @@ impl Game {
                     "movement requires linked or special-card rules",
                 ));
             }
+            let followup = if card_type == "フォロワー・アドバンス"
+                && !matches!(zone, "field" | "ex" | "resolution" | "evolve_deck")
+            {
+                Some("evolve_deck")
+            } else if card_type == "フォロワー・トークン"
+                && !matches!(zone, "field" | "ex" | "resolution")
+            {
+                Some("void")
+            } else {
+                None
+            };
             previous
                 .generation
-                .checked_add(1)
+                .checked_add(if followup.is_some() { 2 } else { 1 })
                 .ok_or_else(|| invalid("movement generation exhausted"))?;
-            plans.push((moves.len().saturating_sub(1), id, previous, from_kind));
+            plans.push((
+                moves.len().saturating_sub(1),
+                id,
+                previous,
+                from_kind,
+                followup,
+            ));
         }
         let ids = plans
             .iter()
-            .map(|(_, id, _, _)| id.clone())
+            .map(|(_, id, _, _, _)| id.clone())
             .collect::<Vec<_>>();
         let departing_source = execution.source_before_move(self, &ids)?;
         let mut frame = execution.frame();
@@ -424,7 +492,7 @@ impl Game {
         )?;
         if kind == ZoneKind::Hand {
             // As with draws, the public card stays known but its new hand slot is not located.
-            for (_, id, previous, _) in &plans {
+            for (_, id, previous, _, _) in &plans {
                 for (viewer, knowledge) in &mut self.state.knowledge {
                     if *viewer != previous.owner {
                         knowledge.located.remove(id);
@@ -439,10 +507,15 @@ impl Game {
             .ok_or_else(|| invalid("IR epoch exhausted"))?;
         let after_snapshot = SnapshotId(self.state.ir_epoch);
         let group = self.group();
-        for (index, id, previous, from_kind) in plans {
-            let after = execution.reference(self, &id)?;
-            if after.generation != Generation(previous.generation.saturating_add(1))
-                || self.object(&id)?.zone != zone
+        for (index, id, previous, from_kind, followup) in plans {
+            let current = self.object(&id)?;
+            let mut after = execution.reference(self, &id)?;
+            after.generation = Generation(previous.generation.saturating_add(1));
+            if current.generation
+                != previous
+                    .generation
+                    .saturating_add(if followup.is_some() { 2 } else { 1 })
+                || current.zone != followup.unwrap_or(zone)
                 || player_id(&self.object(&id)?.controller)?
                     != moves
                         .get(index)
@@ -479,7 +552,8 @@ impl Game {
                         object: result.before,
                         snapshot,
                     }),
-                    after: Some(RuntimeObjectView {
+                    // A rule return or erasure already replaced this endpoint.
+                    after: followup.is_none().then_some(RuntimeObjectView {
                         object: after,
                         snapshot: after_snapshot,
                     }),

@@ -60,6 +60,7 @@ fn entry_origin(previous: &Object) -> Result<ZoneKind> {
         "ex" => Ok(ZoneKind::Ex),
         "cemetery" => Ok(ZoneKind::Cemetery),
         "banish" => Ok(ZoneKind::Banish),
+        "evolve_deck" => Ok(ZoneKind::Evolve),
         _ => Err(unsupported("unadmitted entry origin")),
     }
 }

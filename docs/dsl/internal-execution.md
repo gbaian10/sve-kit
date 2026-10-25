@@ -278,6 +278,14 @@ Spell 的來源資訊綁定進 Resolution 後的新世代；本文 Move／Destro
 
 此子集也保存上述待機來源的後續離場資訊、受限成本送墓與共同規則移區。公開入場與回場新世代也更新此生命週期；其他隱藏區入場、Creation 與未受驗的跨區承接仍拒絕。
 
+整卡能力的 `Action::Move` 到 controller field 可將 own follower Advance 從 EX／evolve deck
+置入場，保留 face 0、owner／controller 與場容量檢查。evolve-deck 僅在該指令的精確 selector
+位置接受 SelfPlayer／Controller、Current、單玩家與常真集合；不開放一般私有區查詢或具名選牌。
+進場走完整 EnterField／AfterEntry／SourceHolder Fanfare pending，不直接執行能力本文。
+這不授予新的玩家動作或未印的 AdvanceActivate；evolve-deck 直接打出維持拒絕。
+此子集以明示合成完整 current 卡驗證 runtime，不代表 BP19-P32 等官方卡已完成作者遷移、
+關鍵字承載或整卡 executed／qualified。
+
 ### 成功 After 的當回合減費片段
 
 `InstallEffect CostModifier` 只接受 InstructionStart、成功 `MoveAfter`、精確 affected binding、
@@ -431,8 +439,14 @@ Destroy 是獨立 action，僅接受仍在 Field 的目前世代；過期 captur
 目前世代位於其他區域時整次執行失敗並回復，不外推場外 Destroy 語義。
 
 同一指示先固定並去重物件，再共用 Game 的 `move_objects` 原語提交；目的區逐物件取其 owner，
-不沿用來源控制者。token、advance 與連結規則尚未納入 typed 移動結果，遇到需要這些規則的
-物件時拒絕整次執行。世代耗盡同樣拒絕，不能飽和後重用世代。
+不沿用來源控制者。整卡能力可承載 follower Advance／token 的離場：先完成原本的 owner 目的地
+移動，再依 CR9.2.2 讓 Advance 立即回 owner evolve deck 表面，或依 CR9.1.4.4 立即消去 token。
+原指示回執保留該次移動，不把立即規則當成原指示的直接目的地。片段 execution、其他特殊卡型、
+連結／進化關聯仍拒絕；世代耗盡同樣拒絕，不能飽和後重用世代。
+
+立即規則已移除或替換端點時，`DestroyOutcome.successful.after` 為 None；`MoveResult.after`
+仍保存首次移區的世代。後續 follow 不自動跨越 Advance 的規則移區；token 消去使舊引用失效，
+不能藉舊 receipt 對已消去的 token 執行後續動作。
 
 MoveOutcome 與 DestroyOutcome 不互換。每個輸入均保留 MoveResult 的 before、requested_to／
 requested_position；沒有實際移動時 after／actual_to／actual_position 為 None。
