@@ -13,6 +13,7 @@ from sve_carddb.core.json import array, canonical, digest, object_value
 from sve_carddb.domains.catalog import adoption_importer
 from sve_carddb.domains.catalog.models import Catalog
 from sve_carddb.domains.catalog.projection import CatalogProjection
+from sve_carddb.domains.digital.links.loader import load_links
 from sve_carddb.domains.products import Language
 from sve_carddb.domains.registry.storage import read_yaml
 from sve_carddb.domains.text_observations import Binding, Vocabulary
@@ -23,6 +24,7 @@ from sve_carddb.workflows.offline_names import composer
 
 from ..export.test_snapshot_preview import EmptySources
 from ..support.adoption_fixtures import REPO, commit, git
+from ..support.digital_link_fixtures import write as write_links
 from ..support.digital_name_policy_fixtures import make_policy_fixture
 from ..support.product_fixtures import envelope, family, install
 from ..support.translation_fixtures import name_term, write
@@ -242,8 +244,10 @@ def test_offline_name_policy_reconstructs_identical_bundle(
         )["translation_id"]
         == first.projection.tables["translation"][0]["id"]
     )
-    assert not first.projection.tables["digital_link"]
-    assert first.projection.config["digital_endpoints"] == []
+    assert len(first.projection.tables["digital_link"]) == 1
+    assert first.projection.tables["digital_link_coverage"] == []
+    assert first.projection.tables["digital_art"] == []
+    assert first.projection.tables["voice"] == []
     schema = compile_build(
         (*MINIMUM_CAPABILITIES, "en", "translation_evidence", "translation_names")
     )
@@ -314,3 +318,63 @@ def test_name_composition_rejects_symlinked_authored_entry(
     assert names is not None
     with pytest.raises(ValueError, match=r"^Symlink digital-link input$"):
         names.configuration(checkout)
+
+
+@pytest.mark.parametrize("name_policy", [None, "approved-frozen-v1"])
+def test_model_browse_intake_is_independent_of_name_policy(
+    recipe: offline.Inputs,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    name_policy: str | None,
+) -> None:
+    catalogue(monkeypatch)
+    chosen = recipe.model_copy(update={"name_policy": name_policy})
+    original = offline.build(chosen)
+    root = tmp_path / "checkout"
+    git(tmp_path, "clone", "--local", "--no-hardlinks", str(recipe.repo), str(root))
+    for directory in ("products/identities", "rules/rulings"):
+        (root / "authored" / directory).mkdir(parents=True, exist_ok=True)
+    records = list[JsonValue](
+        record.model_copy(update={"review_level": "model_reviewed"}).model_dump(
+            mode="json"
+        )
+        for record in load_links(root / "authored").records()
+    )
+    write_links(
+        root / "authored",
+        {
+            "digital/links/synthetic/001.yaml": {
+                "format": 2,
+                "kind": "digital_link_shard",
+                "records": records,
+            }
+        },
+    )
+    changed = chosen.model_copy(update={"repo": root, "revision": commit(root)})
+    composed = composer(changed)
+    assert composed is not None
+    assert composed.links is not None
+    assert (composed.inputs is None) is (name_policy is None)
+    built = offline.build(changed)
+    assert len(built.projection.tables["digital_link"]) == 1
+    assert (
+        built.projection.tables["digital_link"][0]["review_level"] == "model_reviewed"
+    )
+    for table, rows in original.projection.tables.items():
+        if table != "digital_link":
+            assert built.projection.tables[table] == rows
+    assert built.projection.tables["digital_link_coverage"] == []
+    assert object_value(built.report["digital_links"])["stale"] == []
+    if name_policy is None:
+        assert "name_application" not in built.report
+
+
+def test_no_composition_without_either_capability(
+    recipe: offline.Inputs, tmp_path: Path
+) -> None:
+    root = tmp_path / "checkout"
+    git(tmp_path, "clone", "--local", "--no-hardlinks", str(recipe.repo), str(root))
+    shutil.rmtree(root / "authored/digital/links")
+    assert (
+        composer(recipe.model_copy(update={"repo": root, "name_policy": None})) is None
+    )

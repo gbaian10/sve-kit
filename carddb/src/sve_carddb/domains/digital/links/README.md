@@ -6,8 +6,8 @@ never adopt a relationship or manufacture a human receipt.
 
 Load the entry with `load_links(authored_root)`. Each record is the current
 relation for one subject: `subject`, `value` (relation, effect similarity and the
-SVE/digital name references), `review_level` (`sampled` for a batch the maintainer
-spot-checked, `confirmed` for an individually checked link) and a nonblank
+SVE/digital name references), `review_level` (`model_reviewed` for model checks,
+`sampled` for a batch the maintainer spot-checked, `confirmed` for an individually checked link) and a nonblank
 `reason`. Git keeps earlier versions;
 there are no adoption numbers, predecessors or batch decisions. `Inputs` reads the current working tree once and
 `Inputs.configuration()` supplies descriptive `digital_link_authored` settings.
@@ -31,6 +31,10 @@ application consumes each owner's link proof through
 `DigitalLinkResult.eligible_owner(db, sources, owner, name_ref=...)`, independently
 revalidating its Japanese name, card, face, printing source and exact linked
 digital name. Missing coverage does not prevent an eligible name.
+Model-reviewed links, including exact-face same-card links, never grant names.
+Only same-card and same-character relations are accepted by this intake;
+name-only candidates remain excluded. Offline browse projection retains verified
+links and their digital IDs independently of name policy, without digital text or media.
 
 `translations.names.resolve.prepare()` validates current concept associations
 and semantic assignments. Its resolver reports `ambiguous_name_concept` or
@@ -69,6 +73,7 @@ adoption remains the authority for production classification.
 Reports contain IDs, references/hashes, row numbers and overlapping failure counts,
 without card names or wording. Per-game tier counts inherit whole-row failures;
 local counts describe that game's failures. Source occurrences count draft links,
-not adopted links. Phase candidates still require human assignment. A candidate
-never becomes a `same_card` record automatically; the maintainer writes the
-record after checking it.
+not adopted links. Phase candidates still require an explicit phase assignment. A
+candidate never becomes a record automatically; a record is written through a PR
+after an explicit check, and its `review_level` states who checked it
+(`model_reviewed` is never presented as a human `sampled` or `confirmed` check).

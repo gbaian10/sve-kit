@@ -173,6 +173,9 @@ class Evidence:
     def __init__(self, sources: Sources) -> None:
         self.sources = sources
         self.registries = sources.identities
+        self.inventories: dict[
+            tuple[str, tuple[Batch, ...]], dict[tuple[str, str, str, str], Name]
+        ] = {}
 
     def registry(self) -> RegistrySnapshot:
         """Replay the pinned registry before trusting its identity associations."""
@@ -300,7 +303,12 @@ class Evidence:
                 {name.name_ref.batch_id for name in value.digital_names}
             )
         )
-        names = inventory(self.sources, batch_refs(self.sources, batches, subject.game))
+        key = subject.game, batches
+        if key not in self.inventories:
+            self.inventories[key] = inventory(
+                self.sources, batch_refs(self.sources, batches, subject.game)
+            )
+        names = self.inventories[key]
         actual: dict[tuple[str, str], str] = {
             (name.phase, name.lang): self.digital(name, record, names)
             for name in value.digital_names

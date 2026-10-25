@@ -103,6 +103,8 @@ def _counterparts(
     if links is None:
         return ()
     eligible = links.eligible_owner(db, sources, owner, name_ref=name_ref)
+    if not eligible:
+        return ()
     faces = {r.values["id"]: r.values for r in db.rows("digital_face")}
     cards = {r.values["id"]: r.values for r in db.rows("digital_card")}
     units = {r.values["id"]: r.values for r in db.rows("text_unit")}

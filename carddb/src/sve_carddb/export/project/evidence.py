@@ -38,7 +38,8 @@ class Decisions:
     card_name_targets: Mapping[str, tuple[str, ...]] = field(default_factory=dict)
     display_bindings: tuple[DisplayBinding, ...] = ()
     display_checks: tuple[DisplayCheck, ...] = ()
-    private_digital: bool = False
+    digital_links: frozenset[str] | None = None
+    digital_assets: bool = True
     related_regions: Mapping[str, tuple[str, ...]] = field(default_factory=dict)
     active_scopes: Mapping[str, tuple[str, ...]] = field(default_factory=dict)
     aligned_regions: frozenset[tuple[str, str]] = frozenset()

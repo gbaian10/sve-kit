@@ -34,6 +34,7 @@ from sve_carddb.domains.construction.adoption_models import (
     ProfileRecord,
     RestrictionRecord,
 )
+from sve_carddb.domains.digital.links.loader import link_id
 from sve_carddb.domains.mechanics import Settings as MechanicSettings
 from sve_carddb.domains.mechanics import apply as apply_mechanics
 from sve_carddb.domains.mechanics import load as load_mechanics
@@ -683,7 +684,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             missing_badges = populate_badges(db, badges)
             populate_leader_frames(db, leader_frames)
             populate_reprints(db, reprints)
-            if names is not None:
+            if names is not None and names.inputs is not None:
                 replay = _current_names(adoptions, context, stores, db, name_sources)
                 assert replay is not None
                 if link_result is not None:
@@ -804,7 +805,14 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                     db, names=() if name_result is None else name_result.bindings
                 ),
             ),
-            private_digital=names is not None,
+            digital_links=frozenset(
+                link_id(record)
+                for records in (
+                    () if link_result is None else link_result.by_owner.values()
+                )
+                for record in records
+            ),
+            digital_assets=False,
         ).with_text_views(views.wording, views.observed)
         mark("views + decisions")
         projection = project(
@@ -901,6 +909,14 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             ],
         }
         report["missing_pr_badges"] = list(missing_badges)
+        if link_result is not None:
+            report["digital_links"] = {
+                "fresh": len(link_result.fresh),
+                "stale": [
+                    {"id": identifier, "reason": reason}
+                    for identifier, reason in link_result.stale
+                ],
+            }
         report["registry_reviews"] = {
             "registry_review_inputs": identity.review_input_pin,
             "uncovered_jp_card_numbers": list[JsonValue](

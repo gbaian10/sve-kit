@@ -128,7 +128,7 @@ TABLES = (
             ),
             QueryCheck(
                 "digital_link_adopted",
-                "SELECT 1 FROM digital_link AS l JOIN decision AS d ON d.id=l.decision_id WHERE d.state NOT IN ('sampled','confirmed') LIMIT 1",
+                "SELECT 1 FROM digital_link AS l JOIN decision AS d ON d.id=l.decision_id WHERE d.state NOT IN ('model_reviewed','sampled','confirmed') LIMIT 1",
                 ("digital_link", "decision"),
             ),
             QueryCheck(

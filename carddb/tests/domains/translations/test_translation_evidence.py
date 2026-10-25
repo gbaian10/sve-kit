@@ -144,7 +144,7 @@ def test_nondata_files_are_ignored(
     assert load_glossary(root).current_records()
 
 
-@pytest.mark.parametrize("state", ["proposed", "model_reviewed"])
+@pytest.mark.parametrize("state", ["proposed"])
 def test_high_confidence_does_not_promote_review(
     digital_template: DatabaseTemplate, state: str
 ) -> None:
