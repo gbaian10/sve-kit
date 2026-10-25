@@ -25,6 +25,12 @@ if TYPE_CHECKING:
 
 META = {"content-type": "application/json", "cache-control": "no-store"}
 KEY = "snapshots/blobs/" + "a" * 64 + ".json"
+IMAGE_KEY = "images/card_l/63603.webp"
+
+
+def _mock_store(http: httpx.Client) -> R2Store:
+    client = mock_client(http, account=ACCOUNT, bucket=BUCKET, credentials=CREDENTIALS)
+    return R2Store(ACCOUNT, BUCKET, CREDENTIALS, client)
 
 
 @pytest.mark.parametrize(
@@ -164,6 +170,65 @@ def test_image_put_retries_temporary_failure_and_reports_progress(
     )
 
 
+def test_image_put_retries_read_timeout_and_then_succeeds() -> None:
+    calls = 0
+    lines: list[str] = []
+
+    def respond(request: httpx.Request) -> httpx.Response:
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            raise httpx.ReadTimeout("synthetic timeout", request=request)
+        return httpx.Response(200, headers={"ETag": '"synthetic"'})
+
+    with httpx.Client(transport=httpx.MockTransport(respond)) as http:
+        _mock_store(http).put_image(
+            IMAGE_KEY, b"synthetic image", progress=lines.append, sleep=lambda _: None
+        )
+    assert calls == 2
+    assert any("ReadTimeoutError" in line for line in lines)
+
+
+def test_image_put_stops_after_three_endpoint_connection_errors() -> None:
+    calls = 0
+    delays: list[float] = []
+
+    def fail(request: httpx.Request) -> httpx.Response:
+        nonlocal calls
+        calls += 1
+        raise httpx.ConnectError("synthetic connection failure", request=request)
+
+    with httpx.Client(transport=httpx.MockTransport(fail)) as http:
+        with pytest.raises(
+            ExportError,
+            match=r"EndpointConnectionError.*rerun the same image input",
+        ):
+            _mock_store(http).put_image(
+                IMAGE_KEY, b"synthetic image", sleep=delays.append
+            )
+    assert calls == 3
+    assert delays == [1, 4]
+
+
+def test_image_put_does_not_retry_other_botocore_errors() -> None:
+    calls = 0
+
+    def fail(request: httpx.Request) -> httpx.Response:
+        nonlocal calls
+        calls += 1
+        raise httpx.ProtocolError("synthetic protocol failure", request=request)
+
+    with httpx.Client(transport=httpx.MockTransport(fail)) as http:
+        with pytest.raises(
+            ExportError,
+            match=r"BotoCoreError.*rerun the same image input",
+        ):
+            _mock_store(http).put_image(
+                IMAGE_KEY, b"synthetic image", sleep=lambda _: None
+            )
+    assert calls == 1
+
+
 def test_image_put_stops_after_three_server_errors_with_status(
     remote: tuple[R2Store, ServerState, Loopback],
     monkeypatch: pytest.MonkeyPatch,
@@ -235,7 +300,7 @@ def test_stopped_pool_does_not_start_an_image_retry(
 
     with pytest.raises(ExportError, match="503"):
         store.put_image(
-            key, b"synthetic image", stopped=stopped, sleep=stop_during_backoff
+            key, b"synthetic image", stopped=stopped.is_set, sleep=stop_during_backoff
         )
     assert len(state.requests) == 1
 
