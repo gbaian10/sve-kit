@@ -1,0 +1,35 @@
+format: 1
+kind: effect_body_shard
+scope: shared
+records:
+  - frame_id: frame:afb3cbfd3a7ee62702db9ace4555fbdc76fa4029ae76c67568f6623aedace221
+    ability_scope: ability_0
+    dsl: "1.0"
+    params:
+      n:
+        type: Nat
+        source:
+          slot: leaf_0
+          component: value
+    body:
+      spell:
+        do:
+          - draw:
+              who: self
+              n:
+                param: n
+    ports:
+      imports: {}
+      exports: {}
+    written_by:
+      - actor:
+          who: Codex
+          model: gpt-6.1-sol
+        date: "2026-10-25"
+    registrations:
+      - id: jp
+        domain:
+          regions:
+            - jp
+        reviews: []
+    body_version: effect-body-v1:sha256:96de5a4264ebc234dfe4e2280338a3cbb3f317b5367fe659ad43f7880eeaf4a1

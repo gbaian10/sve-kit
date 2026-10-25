@@ -37,16 +37,6 @@ cards:
             count: 1
           - op: pp
             amount: 1
-  ECP01-002:
-    status: complete
-    abilities:
-      - line: 1
-        kind: trigger
-        body:
-          op: draw
-          count: 1
-        event: evolve
-        subject: self
   ECP01-010:
     status: complete
     abilities:

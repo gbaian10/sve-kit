@@ -303,16 +303,6 @@ cards:
                       subjects: discard_self
         event: enter
         subject: self
-  BP10-122:
-    status: complete
-    abilities:
-      - line: 1
-        kind: trigger
-        body:
-          op: draw
-          count: 1
-        event: attack
-        subject: self
   BP10-SL06:
     status: complete
     abilities:
