@@ -626,3 +626,28 @@ fn accepted_current_follower_can_be_played_from_hand() {
         assert!(game.internal_pending_choice().unwrap().is_none());
     }
 }
+
+fn draw_position() -> Value {
+    json!({
+        "history":"explicit",
+        "turn":{"active":"P1","first_player":"P1","phase":"main",
+            "elapsed_turns":{"P1":3_u8,"P2":3_u8}},
+        "players":{
+            "P1":{"leader":{"class":"ニュートラル","life":20_u8},
+                "pp":{"current":10_u8,"max":10_u8},"ep":0_u8,"sep":0_u8,"zones":{}},
+            "P2":{"leader":{"class":"ニュートラル","life":20_u8},
+                "pp":{"current":10_u8,"max":10_u8},"ep":0_u8,"sep":0_u8,"zones":{}}
+        }
+    })
+}
+
+#[path = "runtime/bp10_122.rs"]
+mod bp10_122;
+
+fn projected_zone_count(zone: &Value) -> u64 {
+    zone.as_array()
+        .unwrap()
+        .iter()
+        .map(|card| card.get("filler").and_then(Value::as_u64).unwrap_or(1))
+        .sum()
+}
