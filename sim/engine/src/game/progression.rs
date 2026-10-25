@@ -122,6 +122,7 @@ impl Game {
             || next.zone != "evolve_deck"
             || next.state["face_up"] == true
             || object.controller != next.controller
+            || object.owner != next.owner
         {
             return Ok(false);
         }
@@ -380,6 +381,7 @@ impl Game {
             self.object_mut(source)?.state["super_evolved"] = json!(sep > 0);
         }
         self.internal_evolve_event(source, evolve, sep > 0, typed_evolution, frame)?;
+        self.stop_unadmitted_resource(evolve, face)?;
         Ok(())
     }
 }

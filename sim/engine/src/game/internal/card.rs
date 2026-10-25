@@ -30,6 +30,7 @@ pub(super) mod exchange;
 mod fanfare;
 mod printed;
 pub(super) mod quick;
+mod resources;
 pub(in crate::game::internal) mod triggers;
 pub use triggers::{PendingOption, QuotaDomain, QuotaSelection};
 pub(super) mod play;
@@ -64,6 +65,8 @@ pub struct Activation {
 pub(in crate::game) struct CardRuntime {
     cards: BTreeMap<String, WellFormedCardProgram>,
     current: BTreeMap<String, Arc<CurrentCard>>,
+    resources: BTreeMap<String, String>,
+    unadmitted: BTreeSet<String>,
     instances: BTreeMap<(String, u64, String, usize, AbilityId), AbilityInstanceId>,
     links: BTreeMap<(u64, u64, u64, u64), AssociationId>,
     quotas: BTreeMap<(AbilityInstanceId, ConsumptionPoint), (TurnId, u64)>,
@@ -115,6 +118,7 @@ impl CardRuntime {
 
     pub(in crate::game::internal) fn terminate(&mut self) {
         self.pending.clear();
+        self.unadmitted.clear();
         self.admission = None;
         self.question = None;
         self.checkpoint = None;
@@ -123,8 +127,8 @@ impl CardRuntime {
         self.quick_start = false;
     }
 
-    pub(in crate::game) const fn has_pending(&self) -> bool {
-        !self.pending.is_empty()
+    pub(in crate::game) fn has_pending(&self) -> bool {
+        !self.pending.is_empty() || !self.unadmitted.is_empty()
     }
 
     pub(in crate::game) fn requires_typed_play(&self) -> bool {
@@ -190,6 +194,7 @@ impl Game {
         }
         let mut game = Self::new(catalog, setup, facts, random, seed)?;
         game.card_runtime.current = current;
+        game.admit_evolution_resources()?;
         let cards = game
             .card_runtime
             .current
@@ -359,7 +364,7 @@ impl Game {
 
     /// Inspect the authority's explicit next stage without advancing the turn.
     #[must_use]
-    pub const fn internal_card_stage(&self) -> Option<ResumeStage> {
+    pub fn internal_card_stage(&self) -> Option<ResumeStage> {
         if self.card_runtime.checkpoint.is_some() {
             Some(ResumeStage::CheckTiming)
         } else if self.card_runtime.has_pending() {
@@ -449,7 +454,9 @@ impl Game {
 
     pub(in crate::game) fn check_internal_cards(&self) -> Result<()> {
         for current in self.state.objects.values() {
-            if !self.card_runtime.cards.contains_key(&current.card) {
+            if !self.card_runtime.cards.contains_key(&current.card)
+                && !self.internal_evolution_resource(&current.id)?
+            {
                 return Err(unsupported("context contains an unloaded whole card"));
             }
         }
