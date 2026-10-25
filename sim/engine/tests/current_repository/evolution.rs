@@ -7,7 +7,7 @@ fn initial(card: &str, resource: &str, seat: &str) -> Value {
     initial["turn"]["elapsed_turns"] = json!({"P1":7_u8,"P2":6_u8});
     initial["players"][seat]["zones"]["field"] = json!([{"id":"base","card":card}]);
     initial["players"][seat]["zones"]["evolve_deck"] = json!([{"id":"resource","card":resource}]);
-    initial["players"][seat]["pp"]["current"] = json!(1_u8);
+    initial["players"][seat]["pp"]["current"] = json!(10_u8);
     initial["players"][seat]["ep"] = json!(1_u8);
     initial["players"][seat]["sep"] = json!(1_u8);
     initial
@@ -17,6 +17,28 @@ fn evolve(game: &mut Game, pay: &Value) -> Step {
     game.internal_rule_action(&json!({
         "do":"evolve","source":"base","evolve_card":"resource","pay":pay
     }))
+    .unwrap()
+}
+
+fn selected_game(initial: &Value, card: &str) -> Game {
+    let (snapshot, keywords, input) = inputs();
+    let selected = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
+    assert!(
+        selected.current.contains_key(card),
+        "{card} is formally selected"
+    );
+    let prototypes = serde_json::to_value(&*selected.prototypes).unwrap();
+    assert!(
+        prototypes["programs"].get(card).is_none(),
+        "{card} has no prototype executor"
+    );
+    Game::from_selected_effects(
+        selected,
+        initial,
+        &Value::Null,
+        &Value::Null,
+        "current-runtime",
+    )
     .unwrap()
 }
 
@@ -86,7 +108,7 @@ fn check_events(step: &Step, seat: &str, super_evolved: bool) {
     );
 }
 
-fn check_views(game: &Game, seat: &str, base: &str, stats: u8, remaining: [u8; 3]) {
+fn check_views(game: &Game, seat: &str, base: &str, resource: &str, stats: u8, remaining: [u8; 3]) {
     for state in views(game) {
         assert_eq!(
             state[seat]["evolve_deck"],
@@ -105,6 +127,14 @@ fn check_views(game: &Game, seat: &str, base: &str, stats: u8, remaining: [u8; 3
         assert_eq!(
             state["objects"]["base"]["evolved_with"], "resource",
             "the base retains the resource association"
+        );
+        assert_eq!(
+            state["objects"]["resource"]["card"], resource,
+            "the linked object is the selected same-name Evolve print"
+        );
+        assert_eq!(
+            state["objects"]["base"]["name"], state["objects"]["resource"]["name"],
+            "the Evolve print has the same printed name"
         );
         assert_eq!(
             state["objects"]["base"]["generation"], 0_u8,
@@ -127,8 +157,9 @@ fn check_views(game: &Game, seat: &str, base: &str, stats: u8, remaining: [u8; 3
             "attack follows the evolution print and SEP bonus"
         );
         assert_eq!(
-            state["objects"]["base"]["hp"], stats,
-            "life follows the evolution print and SEP bonus"
+            state["objects"]["base"]["hp"],
+            stats.saturating_add(u8::from(base == "BP01-174")),
+            "life follows the evolution print (BP01-175 is printed 5/6) and SEP bonus"
         );
         assert_eq!(
             state[seat]["pp"]["current"], remaining[0],
@@ -145,56 +176,218 @@ fn check_views(game: &Game, seat: &str, base: &str, stats: u8, remaining: [u8; 3
     }
 }
 
-#[test]
-fn current_evolution_uses_real_resource_events_and_printed_stats() {
-    // CR 5.16.1.1.1-.3, 12.2.1-.4; Q2065 permits SEP with a zero PP cost.
+type EvolutionCase = (&'static str, &'static str, Value, u8, [u8; 3]);
+
+/// Every E-B7 permanent card, its Evolve print and the printed evolution PP cost.
+const B7_CARDS: [(&str, &str, u8); 9] = [
+    ("BP01-110", "BP01-111", 1),
+    ("BP01-171", "BP01-172", 4),
+    ("BP01-174", "BP01-175", 2),
+    ("BP03-115", "BP03-116", 0),
+    ("BP04-010", "BP04-011", 1),
+    ("BP17-077", "BP17-078", 1),
+    ("BP18-058", "BP18-059", 1),
+    ("BP19-001", "BP19-002", 1),
+    ("BP19-050", "BP19-051", 1),
+];
+
+fn run_cases(cases: &[EvolutionCase]) {
     for seat in ["P1", "P2"] {
-        for (base, resource, pay, stats, remaining) in [
-            (
-                "BP01-110",
-                "BP01-111",
-                json!({"pp":0_u8,"ep":1_u8}),
-                3_u8,
-                [1_u8, 0, 1],
-            ),
-            (
-                "BP01-110",
-                "BP01-111",
-                json!({"pp":1_u8}),
-                3_u8,
-                [0_u8, 1, 1],
-            ),
-            (
-                "BP03-115",
-                "BP03-116",
-                json!({"pp":0_u8,"sep":1_u8}),
-                5_u8,
-                [1_u8, 1, 0],
-            ),
-            (
-                "BP03-115",
-                "BP03-116",
-                json!({"pp":0_u8}),
-                4_u8,
-                [1_u8, 1, 1],
-            ),
-        ] {
-            let mut game = game(&initial(base, resource, seat));
-            let step = evolve(&mut game, &pay);
-            assert_eq!(step.outcome, "resolved");
+        for (base, resource, pay, stats, remaining) in cases {
+            let base = *base;
+            let resource = *resource;
+            let mut game = selected_game(&initial(base, resource, seat), base);
+            let opponent_view = if seat == "P1" { View::P2 } else { View::P1 };
+            let before_public = game.projection(opponent_view).unwrap();
+            assert!(
+                before_public["objects"].get("resource").is_none(),
+                "the opponent cannot identify the hidden resource object"
+            );
+            assert!(
+                !before_public["knowledge"]["identifiable"]
+                    .as_array()
+                    .unwrap()
+                    .contains(&json!("resource")),
+                "the opponent cannot track the hidden resource id"
+            );
+            let step = evolve(&mut game, pay);
+            assert_eq!(step.outcome, "resolved", "{base} evolution resolves");
             check_events(&step, seat, pay["sep"] == 1_u8);
-            check_views(&game, seat, base, stats, remaining);
+            check_views(&game, seat, base, resource, *stats, *remaining);
             // Printed abilities are not authored here: later actions stop, never skip them.
-            assert_eq!(game.legal().unwrap(), Vec::<Value>::new());
+            assert_eq!(
+                game.legal().unwrap(),
+                Vec::<Value>::new(),
+                "{base} resource ability remains pending, so no further action is legal"
+            );
             assert!(
                 matches!(game.internal_pending_choice(), Err(EngineFailure::Unsupported(reason))
-                if reason.contains("printed abilities are not admitted"))
+                if reason.contains("printed abilities are not admitted")),
+                "{base} resource printed ability stops at the unsupported boundary"
             );
-            assert!(matches!(
-                game.internal_rule_action(&json!({"do":"end-phase"})),
-                Err(EngineFailure::Unsupported(_))
-            ));
+            assert!(
+                matches!(
+                    game.internal_rule_action(&json!({"do":"end-phase"})),
+                    Err(EngineFailure::Unsupported(_))
+                ),
+                "{base} cannot continue while its resource ability is unadmitted"
+            );
         }
+    }
+}
+
+#[test]
+fn e_b7_001_current_evolutions_use_the_accepted_resource_path() {
+    run_cases(&[
+        (
+            "BP01-110",
+            "BP01-111",
+            json!({"pp":0_u8,"ep":1_u8}),
+            3,
+            [10, 0, 1],
+        ),
+        ("BP01-110", "BP01-111", json!({"pp":1_u8}), 3, [9, 1, 1]),
+        ("BP01-171", "BP01-172", json!({"pp":4_u8}), 4, [6, 1, 1]),
+        (
+            "BP01-171",
+            "BP01-172",
+            json!({"pp":3_u8,"ep":1_u8}),
+            4,
+            [7, 0, 1],
+        ),
+        (
+            "BP01-171",
+            "BP01-172",
+            json!({"pp":4_u8,"sep":1_u8}),
+            5,
+            [6, 1, 0],
+        ),
+        ("BP01-174", "BP01-175", json!({"pp":2_u8}), 5, [8, 1, 1]),
+        (
+            "BP01-174",
+            "BP01-175",
+            json!({"pp":1_u8,"ep":1_u8}),
+            5,
+            [9, 0, 1],
+        ),
+        (
+            "BP01-174",
+            "BP01-175",
+            json!({"pp":2_u8,"sep":1_u8}),
+            6,
+            [8, 1, 0],
+        ),
+    ]);
+}
+
+#[test]
+fn each_b7_evolution_rejects_a_missing_current_ability() {
+    for (base, resource, cost) in B7_CARDS {
+        let (snapshot, keywords, mut input) = inputs();
+        input["authors"]
+            .as_array_mut()
+            .unwrap()
+            .retain(|author| author["input"]["card_no"] != base);
+        let selected = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
+        assert!(
+            !selected.current.contains_key(base),
+            "{base} is not accepted"
+        );
+        let mut game = Game::from_selected_effects(
+            selected,
+            &initial(base, resource, "P1"),
+            &Value::Null,
+            &Value::Null,
+            "current-runtime",
+        )
+        .unwrap();
+        let before = game.legal().unwrap_err();
+        assert!(
+            matches!(&before, EngineFailure::Unsupported(_)),
+            "the missing current program makes the context unsupported"
+        );
+        let error = game
+            .internal_rule_action(&json!({
+                "do":"evolve","source":"base","evolve_card":"resource",
+                "pay":{"pp":cost,"ep":0_u8}
+            }))
+            .unwrap_err();
+        assert!(
+            matches!(error, EngineFailure::Unsupported(_)),
+            "{base} must not evolve without its accepted current ability: {error:?}"
+        );
+        let after = game.legal().unwrap_err();
+        assert!(matches!(after, EngineFailure::Unsupported(_)));
+        assert_eq!(
+            format!("{before:?}"),
+            format!("{after:?}"),
+            "{base} rejection preserves the unsupported context"
+        );
+    }
+}
+
+#[test]
+fn each_b7_evolution_rejects_wrong_source_owner_and_missing_payment_atomically() {
+    for (base, resource, cost) in B7_CARDS {
+        for invalid in 0_u8..3 {
+            // A zero printed cost cannot be underpaid.
+            if invalid == 2 && cost == 0 {
+                continue;
+            }
+            let mut initial = initial(base, resource, "P1");
+            let mut source = "base";
+            // Always the exact printed cost, so only the injected defect can reject.
+            let pay = json!({"pp":cost});
+            match invalid {
+                0 => {
+                    initial["players"]["P1"]["zones"]["evolve_deck"][0]["owner"] = json!("P2");
+                }
+                1 => source = "not-the-field-base",
+                _ => {
+                    initial["players"]["P1"]["pp"]["current"] = json!(cost.saturating_sub(1));
+                    initial["players"]["P1"]["ep"] = json!(0_u8);
+                }
+            }
+            let mut game = game(&initial);
+            let before = views(&game);
+            let result = game.internal_rule_action(&json!({
+                "do":"evolve",
+                "source":source,
+                "evolve_card":"resource",
+                "pay":pay
+            }));
+            if invalid == 1 {
+                assert!(result.is_err(), "{base}, case {invalid}");
+            } else {
+                let result = result.unwrap();
+                assert_eq!(result.outcome, "cannot-evolve", "{base}, case {invalid}");
+                assert!(result.events.is_empty(), "{base}, case {invalid}");
+            }
+            assert_eq!(views(&game), before, "{base}, case {invalid}");
+        }
+    }
+}
+
+#[test]
+fn printed_four_and_two_pp_costs_cannot_be_replaced_by_two_ep() {
+    // CR 12.2.3 permits one EP to replace one PP for evolution.
+    for (base, resource) in [("BP01-171", "BP01-172"), ("BP01-174", "BP01-175")] {
+        let mut initial = initial(base, resource, "P1");
+        initial["players"]["P1"]["pp"]["current"] = json!(0_u8);
+        initial["players"]["P1"]["ep"] = json!(2_u8);
+        let mut game = game(&initial);
+        let before = views(&game);
+        let result = game
+            .internal_rule_action(&json!({
+                "do":"evolve",
+                "source":"base",
+                "evolve_card":"resource",
+                "pay":{"pp":0_u8,"ep":2_u8}
+            }))
+            .unwrap();
+        assert_eq!(result.outcome, "cannot-evolve", "{base}");
+        assert!(result.events.is_empty(), "{base}");
+        assert_eq!(views(&game), before, "{base}");
     }
 }
 
