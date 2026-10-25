@@ -52,7 +52,9 @@ def _require_sizes(active: set[str], variants: list[Record]) -> None:
     expected = {size.key for size in SIZES}
     for identifier in active:
         if sizes.get(identifier, set()) != expected:
-            raise ValueError("Available preview printing image requires all five sizes")
+            raise ValueError(
+                "Available preview printing image requires all three sizes"
+            )
 
 
 def image_blobs(

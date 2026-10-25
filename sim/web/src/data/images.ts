@@ -6,8 +6,10 @@ import { mediaImageSource } from "./image-url"
 import { createLocator } from "./locator"
 
 export interface ImageSource {
+  /** The `card_l` file (or `art_s` for an illustration): every slot of 72 CSS px and above. */
   readonly src: string
-  readonly srcSet: string
+  /** The `card_s` file for 28–40 px slots; absent for illustrations. */
+  readonly small?: string
   readonly width: number
   readonly height: number
 }

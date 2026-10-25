@@ -28,7 +28,7 @@ def opencv_version() -> str:
 
 
 def features(raw: bytes) -> Features:
-    """Extract the session's SIFT recipe from a checked art_m bitmap."""
+    """Extract the session's SIFT recipe from a checked art_s bitmap."""
     cv2.setNumThreads(1)
     image = cv2.imdecode(np.frombuffer(raw, dtype=np.uint8), cv2.IMREAD_GRAYSCALE)
     if image is None:

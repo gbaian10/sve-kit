@@ -32,7 +32,7 @@ interface EdgeCache {
 const PREFIX = "/cdn-preview/"
 const INDEX = "snapshots/versions/index.json"
 const JSON_KEY = /^snapshots\/(?:blobs|manifests)\/[0-9a-f]{64}\.json(?:\.br)?$/
-const IMAGE_KEY = /^images\/(?:card_[sml]|art_[sm])\/([1-9][0-9]*)(?:-f([1-9][0-9]*))?\.webp$/
+const IMAGE_KEY = /^images\/(?:card_[sl]|art_s)\/([1-9][0-9]*)(?:-f([1-9][0-9]*))?\.webp$/
 const BROWSER_CACHE_CONTROL = "X-Sve-Browser-Cache-Control"
 const EDGE_CACHE_CONTROL = "public, max-age=31536000, immutable"
 // Vite names its build output by content hash, so a reload need not revalidate these files.

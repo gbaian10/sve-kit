@@ -174,7 +174,7 @@ function Thumbnail({
           name={name.primary}
           images={images}
           alt="decorative"
-          sizes="72px"
+          size="large"
           className="w-full group-aria-[current=page]:ring-2 group-aria-[current=page]:ring-accent"
         />
         <span className="w-full text-center font-mono text-11 leading-tight wrap-anywhere tabular-nums">

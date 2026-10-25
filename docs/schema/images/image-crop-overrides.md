@@ -1,6 +1,6 @@
 # 插畫裁切覆寫契約
 
-本文件定義來源綁定的插畫裁切覆寫 `authored/images/crops.yaml`，沿用[卡圖衍生檔契約](image-variants.md)的整數框與五檔 WebP，不新增影像表或快照欄位；公開 2.0 投影另依 snapshot-format §2.1。`jp` 與 `en` 共用 loader、產圖與建置驗證。
+本文件定義來源綁定的插畫裁切覆寫 `authored/images/crops.yaml`，沿用[卡圖衍生檔契約](image-variants.md)的整數框與三檔 WebP，不新增影像表或快照欄位；公開 2.0 投影另依 snapshot-format §2.1。`jp` 與 `en` 共用 loader、產圖與建置驗證。
 
 ## 1. 鍵
 
@@ -45,7 +45,7 @@ region／card_no 不參與來源查找、跨區配對或採納判定；已驗證
 
 先完整驗證整個檔案，再大量轉檔；未被選中的列列為未使用，不是錯誤。`build_regional_assets(region=…)` 明示 `jp` 或 `en`，只接受相符地區的 image batch。頁面綁定使用該地區萃取器的原始 `<img src>` 與人工 source_face_map。
 
-`images build-index` 的 Inputs.sources 分別釘日英兩區 card／image batch 與 parser version，圖片庫、快取、固定 key 輸出根與圖片私有根彼此隔離。入口對每區呼叫上述 API：完整五檔快取命中時核對存在與大小，缺檔或過時（來源、覆寫或 recipe 改變）的來源當場產圖並完整驗回，寫入圖片庫與快取；`--verify-all` 另完整驗回 PNG 與 WebP。頁面綁定由 `media_projection` 的文字觀察、採納身分及 source_face_map 產生，不查文字 DB。詳細參數見[圖片索引契約](image-index.md)。正式發布仍依既有來源涵蓋與 readiness 門檻。
+`images build-index` 的 Inputs.sources 分別釘日英兩區 card／image batch 與 parser version，圖片庫、快取、固定 key 輸出根與圖片私有根彼此隔離。入口對每區呼叫上述 API：完整三檔快取命中時核對存在與大小，缺檔或過時（來源、覆寫或 recipe 改變）的來源當場產圖並完整驗回，寫入圖片庫與快取；`--verify-all` 另完整驗回 PNG 與 WebP。頁面綁定由 `media_projection` 的文字觀察、採納身分及 source_face_map 產生，不查文字 DB。詳細參數見[圖片索引契約](image-index.md)。正式發布仍依既有來源涵蓋與 readiness 門檻。
 
 文字 `snapshot export-offline --image-index` 只讀已釘選的圖片索引，不讀原圖、WebP、裁切檔、快取或圖片版本 state，不再負責產圖或來源驗回。
 
@@ -74,9 +74,9 @@ region／card_no 不參與來源查找、跨區配對或採納判定；已驗證
 
 ## 5. 變體、快照與上傳的版本策略
 
-既有 recipe 已支援來源綁定的整數覆寫，新增採納資料不改 recipe_version；解碼、編碼、縮放或框演算法改變才按既有規則換 recipe。快取 key 包含來源 hash、覆寫設定（無覆寫時為 null）與完整 recipe，命中時仍核對依尺寸算出的實際框：新框取得新 key，沒有新框結果時重新產製，不得借用舊框的完整五檔。
+既有 recipe 已支援來源綁定的整數覆寫，新增採納資料不改 recipe_version；解碼、編碼、縮放或框演算法改變才按既有規則換 recipe。快取 key 包含來源 hash、覆寫設定（無覆寫時為 null）與完整 recipe，命中時仍核對依尺寸算出的實際框：新框取得新 key，沒有新框結果時重新產製，不得借用舊框的完整三檔。
 
-新 key 下五檔會重新產製。在來源與 recipe 不變時，card 三檔輸入不變，內容定址後仍可共用原 blob；art 兩檔改為新 WebP hash／path。不改寫內容定址的建置 blob。`img:binding:` 不依賴裁切，來源／頁面 binding 不變時保持原值。2.0 的公開 key 固定、只換 art_version 並覆寫有變動的 art bytes，card 三檔版本沿用；欄序依 snapshot-format §2.1，不公開框。
+新 key 下三檔會重新產製。在來源與 recipe 不變時，card 兩檔輸入不變，內容定址後仍可共用原 blob；art_s 改為新 WebP hash／path。不改寫內容定址的建置 blob。`img:binding:` 不依賴裁切，來源／頁面 binding 不變時保持原值。2.0 的公開 key 固定、只換 art_version 並覆寫有變動的 art bytes，card 兩檔版本沿用；欄序依 snapshot-format §2.1，不公開框。
 
 裁切檔變動後，須重產受影響的預覽、影像分片、清單與壓縮旁檔，不拿舊清單充作已完成覆寫。`sve-publish images upload` 先按成功圖片描述同步變動卡圖，`sve-publish snapshot upload` 再上傳 preview 根目前清單的 JSON 引用閉包，並核對遠端卡圖上傳清單的精確版本。保留窗口分開看 current＋previous 的 metadata 聯集及僅 current 的圖片集合；previous 圖片引用不保留舊 WebP，不要求同 key 符合兩版輸出。新圖驗妥才切索引，之後由另行執行的回收清理失去 current 引用的 key；無引用的舊檔不會被上傳。
 

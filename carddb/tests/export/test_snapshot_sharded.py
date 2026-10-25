@@ -77,10 +77,8 @@ def expanded(logical: tuple[Projection, Ownership]) -> tuple[Projection, Ownersh
             "bytes": 100,
         }
         for size, width, height in [
-            ("art_m", 160, 120),
             ("art_s", 80, 60),
             ("card_l", 320, 448),
-            ("card_m", 160, 224),
             ("card_s", 80, 112),
         ]
     ]

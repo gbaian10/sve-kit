@@ -52,21 +52,11 @@ it("limits shared work to two cards and cancels queued and late results", async 
   const first = new AbortController()
   const second = new AbortController()
   const accepted: CardContent[] = []
-  const one = prefetchCards(
-    client,
-    targets.slice(0, 2),
-    "zh-Hant",
-    "340px",
-    first.signal,
-    (_, value) => accepted.push(value),
+  const one = prefetchCards(client, targets.slice(0, 2), "zh-Hant", first.signal, (_, value) =>
+    accepted.push(value),
   )
-  const two = prefetchCards(
-    client,
-    targets.slice(2),
-    "zh-Hant",
-    "340px",
-    second.signal,
-    (_, value) => accepted.push(value),
+  const two = prefetchCards(client, targets.slice(2), "zh-Hant", second.signal, (_, value) =>
+    accepted.push(value),
   )
   await vi.waitFor(() => {
     expect(images).toHaveLength(2)
@@ -97,7 +87,6 @@ it("prepares route, basic wording and images without selecting another active re
     client,
     [jp, { summary: english, neighbour: false }],
     "zh-Hant",
-    "340px",
     new AbortController().signal,
     (_, value) => accepted.push(value),
   )
@@ -128,7 +117,6 @@ it("ignores a failed prefetch and prepares the remaining card", async () => {
     client,
     targets.slice(0, 2),
     "zh-Hant",
-    "340px",
     new AbortController().signal,
     (_, value) => accepted.push(value),
   )

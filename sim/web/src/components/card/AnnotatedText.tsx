@@ -131,7 +131,7 @@ function LinkedCard({
         name={name.primary}
         images={images}
         alt="decorative"
-        sizes={size === "preview" ? "96px" : "40px"}
+        size={size === "preview" ? "large" : "small"}
         className={size === "preview" ? "w-24 shrink-0" : "w-10 shrink-0"}
       />
       <span className="flex min-w-0 flex-col leading-tight">

@@ -122,7 +122,7 @@ class ImageIndex(RecordData):
             if active and {string(item["size_key"]) for item in sizes} != {
                 size.key for size in SIZES
             }:
-                raise ValueError("Image index requires all five sizes")
+                raise ValueError("Image index requires all three sizes")
         if len(
             {(row["image_id"], row["size_key"]) for row in self.tables["image_variant"]}
         ) != len(self.tables["image_variant"]):

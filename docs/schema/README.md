@@ -65,7 +65,7 @@
 | 文件 | 內容 |
 | --- | --- |
 | [插畫裁切覆寫](images/image-crop-overrides.md) | 來源鍵與 raw hash、單檔與預設框、建置端框比對與重印診斷 |
-| [卡圖衍生檔契約](images/image-variants.md) | 直向／橫向五檔 WebP、裁切取整與原圖邊界 |
+| [卡圖衍生檔契約](images/image-variants.md) | 直向／橫向三檔 WebP、裁切取整與原圖邊界 |
 
 ### 匯出（export）
 

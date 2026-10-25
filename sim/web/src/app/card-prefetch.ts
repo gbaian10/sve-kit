@@ -34,7 +34,6 @@ export async function prefetchCards(
   client: SnapshotClient,
   targets: readonly PrefetchTarget[],
   language: string,
-  sizes: string,
   signal: AbortSignal,
   accept: (input: CardRouteInput, value: CardContent) => void,
 ): Promise<void> {
@@ -78,7 +77,7 @@ export async function prefetchCards(
               const input = summaryRoute(summary)
               const located = await locateCard(scoped, input)
               signal.throwIfAborted()
-              const value = await prepareCardContent(scoped, located, language, sizes, signal)
+              const value = await prepareCardContent(scoped, located, language, signal)
               signal.throwIfAborted()
               if (client.snapshot()?.manifestHash !== hash || value.images.failed) return
               preparing = false

@@ -122,7 +122,7 @@ export function SuggestList({
                   name={row.name.primary}
                   images={images}
                   alt="redundant"
-                  sizes="32px"
+                  size="small"
                   className="w-8 shrink-0"
                 />
                 <span className="flex min-w-0 flex-1 flex-col leading-tight">

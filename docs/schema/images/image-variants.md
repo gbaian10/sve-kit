@@ -4,17 +4,17 @@
 
 ## 檔位與尺寸
 
-| size_key | purpose | max_width | max_height | 直向來源的輸出 |
-| --- | --- | --- | --- | --- |
-| card_s | card | 128 | 179 | 整卡寬 128，等比例 |
-| card_m | card | 320 | 447 | 整卡寬 320，等比例 |
-| card_l | card | 459 | 641 | 整卡寬 459，等比例 |
-| art_s | art | 160 | 120 | 插畫裁切 4:3 |
-| art_m | art | 384 | 288 | 插畫裁切 4:3 |
+| size_key | purpose | max_width | max_height | 直向來源的輸出 | 前端用途 |
+| --- | --- | --- | --- | --- | --- |
+| card_s | card | 128 | 179 | 整卡寬 128，等比例 | 28～40 CSS px 的小縮圖（搜尋建議、最近卡片、卡名列） |
+| card_l | card | 459 | 641 | 整卡寬 459，等比例 | 72 CSS px 以上的所有卡面（結果格、單卡頁、抽屜、放大圖、相關卡片、卡名預覽） |
+| art_s | art | 160 | 120 | 插畫裁切 4:3 | 插畫縮圖（48～80 CSS px 寬） |
 
-上述為五個固定 WebP 檔位，尺寸是上限而非保證每張原圖有足夠解析度。先 decode 並套用來源方向資訊，再依實際 W/H 判斷：W≤H 視為直向；W>H 為橫向；兩種方向均輸出 card 三檔與 art 兩檔。雙面各自處理。2.0 前端讀 printing_image.variants 的實際 width／height，以 contain 顯示整張卡，不能固定假設每張都是 459×641。
+前端不用 `srcset` 讓瀏覽器挑尺寸，每個使用處明確指定其中一檔，同一張卡各處用同一個 URL。
 
-直向 card 縮放倍率為 `min(1,max_width/W,max_height/H)`；橫向 card 三檔分別限制最長邊 179／447／641，倍率為 `min(1,max_height/max(W,H))`，不把直向 max_width 再套到橫向。縮放後寬高用 `floor(x+0.5)`，最小 1；不放大、不拉伸、不裁整卡。例：459×641 產 128×179、320×447、459×641；641×459 產 179×128、447×320、641×459。異常長寬比依高度上限可使直向寬小於名義寬，metadata 永遠記實際尺寸。
+上述為三個固定 WebP 檔位，尺寸是上限而非保證每張原圖有足夠解析度。先 decode 並套用來源方向資訊，再依實際 W/H 判斷：W≤H 視為直向；W>H 為橫向；兩種方向均輸出 card 兩檔與 art 一檔。雙面各自處理。2.0 前端讀 printing_image.variants 的實際 width／height，以 contain 顯示整張卡，不能固定假設每張都是 459×641。
+
+直向 card 縮放倍率為 `min(1,max_width/W,max_height/H)`；橫向 card 兩檔分別限制最長邊 179／641，倍率為 `min(1,max_height/max(W,H))`，不把直向 max_width 再套到橫向。縮放後寬高用 `floor(x+0.5)`，最小 1；不放大、不拉伸、不裁整卡。例：459×641 產 128×179、459×641；641×459 產 179×128、641×459。異常長寬比依高度上限可使直向寬小於名義寬，metadata 永遠記實際尺寸。
 
 ## 插畫裁切與覆寫
 
@@ -24,7 +24,7 @@
 
 倒吊版型的 12 張來源圖（日英各 6 張）下移插畫框，保持倒吊、不旋轉；畫內標誌／簽名的圖維持標準框。目前僅這 12 張採例外，精確框與來源綁定的採納方式見[插畫裁切覆寫契約](image-crop-overrides.md)。
 
-art_s／art_m 由同一框分別縮放，輸出為 `4n×3n`，n 分別取 `min(k,40)`、`min(k,96)`；不放大，不因原圖太小填補像素。k≤0 屬無法產圖的診斷，不能發布聲稱完整的五檔結果。
+art_s 由框縮放，輸出為 `4n×3n`，n 取 `min(k,40)`；不放大，不因原圖太小填補像素。k≤0 屬無法產圖的診斷，不能發布聲稱完整的三檔結果。
 
 產圖 API 的覆寫只傳框 `CropBox{left,top,width,height}`。呼叫端以 `(source_key,source_sha256)` 從[覆寫契約](image-crop-overrides.md)的裁切檔查出框，覆寫列不存 image ID。
 
@@ -32,13 +32,13 @@ art_s／art_m 由同一框分別縮放，輸出為 `4n×3n`，n 分別取 `min(k
 
 ## recipe、原圖與發布
 
-固定五檔設定由圖片 recipe 與公開 config.image_sizes 定義，文字建置 DB 不另存 image_size。五檔均為重新編碼的 WebP，card_l 即使與來源同尺寸也不是原始 bytes 副本；發布器拒絕任何 is_original=true 或 format 非 webp 的 variant，不為原 PNG 建公開檔位。
+固定三檔設定由圖片 recipe 與公開 config.image_sizes 定義，文字建置 DB 不另存 image_size。三檔均為重新編碼的 WebP，card_l 即使與來源同尺寸也不是原始 bytes 副本；發布器拒絕任何 is_original=true 或 format 非 webp 的 variant，不為原 PNG 建公開檔位。
 
 recipe 必須固定解碼／編碼器與底層 libwebp 版本、品質、色彩轉換、alpha、metadata 移除、縮放濾鏡、方向處理及以上取整規則。recipe_version 連到完整建置 recipe；相同來源 hash＋覆寫框＋recipe 必須產生相同 bytes，不以「品質約 80」作可重現性保證。recipe 變更產新的建置 hash/path 並重新分層抽驗版型、地區、來源寬度、文字邊、細線與臉部；不覆寫內容定址的建置 blob。不同檔位若產出完全相同 bytes 可共用建置 blob，但公開 2.0 的每版次／面／尺寸 key 仍各一份。
 
 建置 path 仍為 `images/sha256/<前兩碼>/<64hex>.webp`，hex 為實際 WebP bytes 的 SHA-256；2.0 公開 key 如下節，不由來源 image_id／hash 決定。image_variant.bytes/width/height 記當次輸出；發布器驗完整 SHA／尺寸／bytes，不能只驗清單。2.0 reader 不用歷史 SHA 去拒絕同 key 的新 bytes；JSON hash 與建置來源 pin 不變。
 
-官方圖片經來源驗證成為 approved 的規則見 [build-db.md §17.1](../build/build-db.md#171-mirror_reviewed)。只有 availability=available 且 publication_state=approved 才可出 variant；missing/unfetched/pending 不出 path。直向與橫向 approved available 的圖都需五個檔位，缺檔不得宣稱影像閉包備妥；文字預覽可明示尚無影像結果。先完成資產閉包才發布引用它的影像清單；目前沒有第三方圖片，其逐圖確認政策仍依 [build-db.md §17](../build/build-db.md#17-已決政策非官方圖鏡像與地區-decklog-建牌資格)。
+官方圖片經來源驗證成為 approved 的規則見 [build-db.md §17.1](../build/build-db.md#171-mirror_reviewed)。只有 availability=available 且 publication_state=approved 才可出 variant；missing/unfetched/pending 不出 path。直向與橫向 approved available 的圖都需三個檔位，缺檔不得宣稱影像閉包備妥；文字預覽可明示尚無影像結果。先完成資產閉包才發布引用它的影像清單；目前沒有第三方圖片，其逐圖確認政策仍依 [build-db.md §17](../build/build-db.md#17-已決政策非官方圖鏡像與地區-decklog-建牌資格)。
 
 卡圖按需快取或只抓已選牌組與雙面，不預抓全庫；數位卡圖僅連官方頁，不混入 SVE 衍生檔。裁切圖的使用頁仍保留來源與版權標示；原始卡圖不是專案可再授權素材。
 
@@ -47,10 +47,10 @@ recipe 必須固定解碼／編碼器與底層 libwebp 版本、品質、色彩�
 依 [ADR-0012](../../adr/0012-image-url-version.md)，公開 key 為
 `images/<size>/<int_id>[-f<ordinal>].webp`，reader 加上 `?v=<version>`。
 f0 省略，其他面用永久 face.ordinal；printing.int_id 永不重配，不能用卡號、image_id 或列位置代替。
-例如 `images/card_m/20001.webp?v=3` 與 `images/art_s/20001-f1.webp?v=7`。
-五個 size_key 固定；int_id／ordinal／version 的 URL 向量須由 Python／TS 共用合成測試驗證。
+例如 `images/card_l/20001.webp?v=3` 與 `images/art_s/20001-f1.webp?v=7`。
+三個 size_key 固定；int_id／ordinal／version 的 URL 向量須由 Python／TS 共用合成測試驗證。
 
-版本由 printing.home_set 的 printing_image media 列提供。card 三檔共用 card_version，art 兩檔共用 art_version。
+版本由 printing.home_set 的 printing_image media 列提供。card 兩檔共用 card_version，art 一檔用 art_version。
 使用獨立圖片 producer 配發的單調正安全整數 revision，各組沿用最後變更號，不需每圖連號；純文字更新不全庫換 v。
 依輸出 bytes、尺寸、binding／可用性比較是否變更；crop 只換 art，組內一尺寸變更可使該組一起換 URL。
 缺圖或不再公開後恢復、改面與 A→B→A 回復均配新號，不能回用古老 v；舊 query 冷讀可能已快取較新的 bytes。
@@ -76,7 +76,7 @@ binding／指紋／版本。每次圖片建置先 reserve H+1，失敗也消耗�
 previous 的舊 v 冷讀拿到目前 bytes 可接受，metadata 不重寫，也不要求 origin 同時符合兩版圖片 hash。
 圖片 producer 的固定 key 與文字快照分開保存；只有成功圖片建置的索引與圖片根可交給上傳。
 
-新快照啟用後，browser 的 src／srcset 和 SW cache key 一律切新 v；SW 禁止 ignoreSearch 或只按 ID／尺寸匹配，
+新快照啟用後，browser 的 src 和 SW cache key 一律切新 v；SW 禁止 ignoreSearch 或只按 ID／尺寸匹配，
 舊 response 晚到不得回寫新版 view。新圖下載／decode 未完成顯示 placeholder，失敗明示，不拿舊 v 當 fallback。
 尚未取得新版的離線裝置無法得知更新，須明示時效；接受新版後不得等待舊 TTL 才換圖。
 CDN cache key 必須包含 v，rewrite／Worker 不得去掉 query；只 purge CDN 清不到 browser／SW。

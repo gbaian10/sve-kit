@@ -150,7 +150,7 @@ M3 畫面驗收與其餘正式閘門應分別確認，不因成功載入 preview
 `unfetched`／`missing` 只有 metadata，沒有變體或假路徑；`pending` 亦無公開變體。
 目前只產生官方圖，preview 不能繞過既有資料完整性規則。
 
-M3 可直接選 `purpose=art` 的 `art_s`／`art_m`（上限 160×120／384×288，實際維持
+M3 可直接選 `purpose=art` 的 `art_s`（上限 160×120，實際維持
 4:3，配方為 integer-4x3-v2），依 producer 的 media 版本組出固定 ID URL，無須再套用前端裁切公式。
-詳情／正反面使用 `card_s`／`card_m`／`card_l`；縮圖不可放大原圖，應以變體實際尺寸
+詳情／正反面使用 `card_l`，28～40 CSS px 的小縮圖使用 `card_s`；縮圖不可放大原圖，應以變體實際尺寸
 為準。缺圖或狀態未核可時維持佔位，不把 metadata 的來源網址當公開資產路徑。

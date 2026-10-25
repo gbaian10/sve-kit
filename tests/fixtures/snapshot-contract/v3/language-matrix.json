@@ -834,9 +834,9 @@
           }
         },
         {
-          "path": "snapshots/blobs/117d238650eff67674101cacf74fd99a4d1289fb46625ad0696cb7cad43eb6a3.json",
-          "sha256": "sha256:117d238650eff67674101cacf74fd99a4d1289fb46625ad0696cb7cad43eb6a3",
-          "bytes": 1288,
+          "path": "snapshots/blobs/082b0e401372c7a4cae16081cc7328c771eb70abd04344cdbb23c9f3182b73ab.json",
+          "sha256": "sha256:082b0e401372c7a4cae16081cc7328c771eb70abd04344cdbb23c9f3182b73ab",
+          "bytes": 1156,
           "key": "config",
           "role": "config",
           "purpose": "config",
@@ -1226,7 +1226,7 @@
       ],
       "config_ref": {
         "key": "config",
-        "sha256": "sha256:117d238650eff67674101cacf74fd99a4d1289fb46625ad0696cb7cad43eb6a3"
+        "sha256": "sha256:082b0e401372c7a4cae16081cc7328c771eb70abd04344cdbb23c9f3182b73ab"
       },
       "partitioning": {
         "algorithm": "sha256-mod-v1",
@@ -1265,12 +1265,6 @@
         "format_version": "4.0.0",
         "image_sizes": [
           {
-            "key": "art_m",
-            "max_height": 288,
-            "max_width": 384,
-            "purpose": "art"
-          },
-          {
             "key": "art_s",
             "max_height": 120,
             "max_width": 160,
@@ -1280,12 +1274,6 @@
             "key": "card_l",
             "max_height": 641,
             "max_width": 459,
-            "purpose": "card"
-          },
-          {
-            "key": "card_m",
-            "max_height": 447,
-            "max_width": 320,
             "purpose": "card"
           },
           {

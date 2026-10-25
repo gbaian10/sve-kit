@@ -9,7 +9,6 @@ import { type CardRouteInput, locateCard, type SnapshotClient } from "../../data
 import type { Region } from "../../domain/search"
 import type { CardViewProps } from "./CardPage"
 
-const IMAGE_SIZES = "(min-width: 600px) 340px, 72vw"
 // Each prepared card keeps its own catalog and text closure (several MB), so only nearby cards stay.
 const PREPARED_CARDS = 4
 // Route unmounts discard nearby cards; keep only the last ready card for a cached return.
@@ -76,7 +75,7 @@ export function useCardContent(
     if (!manifestHash || cached) return
     let active = true
     const loading = locateCard(client, input).then((value) =>
-      prepareCardContent(client, value, language, IMAGE_SIZES),
+      prepareCardContent(client, value, language),
     )
     void loading.then(
       (value) => {
@@ -137,7 +136,6 @@ export function useCardContent(
           return !preparedRef.current.has(key) && (neighbour || !completedEditions.current.has(key))
         }),
         language,
-        IMAGE_SIZES,
         signal,
         (target, value) => {
           if (signal.aborted || client.snapshot()?.manifestHash !== manifestHash) return

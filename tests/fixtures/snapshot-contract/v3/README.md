@@ -15,7 +15,7 @@ The golden carries a BR-style badge with printed BR on one printing and a badge 
 The golden has permanent printing identities 1/2, front/back ordinals 0/1,
 separate card/art versions 7/11, and two available printing bindings sharing one
 image. Pending back images, missing on the first printing and unfetched on the
-second, expose neither versions nor variants. Five display sizes retain their
+second, expose neither versions nor variants. Three display sizes retain their
 actual dimensions. Two synthetic card-level `same_name` links are unreviewed,
 with both sv1/svwb endpoints present and offline status unknown. They demonstrate
 wire capability only, not adoption of any real name-policy links.

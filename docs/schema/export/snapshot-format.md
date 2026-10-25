@@ -202,13 +202,13 @@ Token 為父項，子項依序為有資料的從者／法術／護符／紋章�
 
 publication_state 為 `pending|approved`，availability 為 `available|missing|unfetched`；公開格式只在 printing_image 放狀態，image_asset 不重複。兩個 version 為正安全整數或 null。
 variants 是按 size_key 排序唯一的 `ImageDisplayVariant=[size_key:Code,width:UInt,height:UInt]` tuple 陣列，尺寸皆 >0。
-approved 且 available 時 card_version／art_version 均非 null、恰有五檔；其他狀態兩者均 null、variants=[]，不得組可用 URL。
+approved 且 available 時 card_version／art_version 均非 null、恰有三檔；其他狀態兩者均 null、variants=[]，不得組可用 URL。
 每個 display variant 與 image_variant 的尺寸一致；完整 bytes／SHA 由發布器核實，不能只驗 metadata。
 同 image_id 被不同版次引用時，各版次的路徑及版本獨立，來源詳情可共用。
 
 卡圖 URL 為 `images/<size>/<int_id>[-f<ordinal>].webp?v=<version>`；ordinal=0 省略後綴，其餘使用永久 face.ordinal，不用陣列位置。
 int_id 讀 printing 的永久配號，不能由卡號或號段推 region；image_id 只供來源／詳情 join。
-card_s／m／l 取 card_version，art_s／m 取 art_version；ID、ordinal、版本皆用無前導零的十進位整數。
+card_s／l 取 card_version，art_s 取 art_version；ID、ordinal、版本皆用無前導零的十進位整數。
 query 由 reader 附加，不寫入 File.path；背景資源 URL 與玩家卡片頁路由分開。
 版本配發、產製／覆寫及新鮮度規則見 [卡圖衍生檔契約](../images/image-variants.md)。
 

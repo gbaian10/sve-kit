@@ -176,7 +176,7 @@ def test_text_change_keeps_versions_and_same_payloads(images: PublicImages) -> N
     b = export_snapshot(later.projection, images.ownership, BATCH, format_version=MEDIA)
     changed = array(update(a, b)["changed_keys"])
     # Bootstrap hashes are exact media dependencies, so changed bases reseal media JSON;
-    # their displayed image versions and all five target bytes remain unchanged.
+    # their displayed image versions and all three target bytes remain unchanged.
     assert first.assets == later.assets
     assert changed
 
@@ -259,9 +259,9 @@ def test_binding_and_a_b_a_never_reuse_token(
     ("change", "message"),
     [
         ("version", "Available media requires both image versions"),
-        ("missing_size", "Available media requires sorted five display variants"),
-        ("duplicate_size", "Available media requires sorted five display variants"),
-        ("size_order", "Available media requires sorted five display variants"),
+        ("missing_size", "Available media requires sorted three display variants"),
+        ("duplicate_size", "Available media requires sorted three display variants"),
+        ("size_order", "Available media requires sorted three display variants"),
         ("dimensions", "Media dimensions differ from image variant"),
     ],
 )
@@ -480,8 +480,8 @@ def test_two_printings_and_permanent_back_ordinal_share_source_not_target(
     )
     plan = prepare_media(projection, images.library, revision=7)
     paths = {string(a["path"]) for a in plan.assets}
-    assert len(paths) == 15
-    assert "images/art_m/345-f7.webp" in paths
+    assert len(paths) == 9
+    assert "images/art_s/345-f7.webp" in paths
     assert "images/card_s/345.webp" in paths
     assert "images/card_s/345-f1.webp" not in paths
     assert len({string(a["sha256"]) for a in plan.assets}) == 3
@@ -533,7 +533,7 @@ def test_prepare_requires_complete_verified_outputs(
         r for r in projection.tables["image_variant"] if r["size_key"] != missing
     ]
     with pytest.raises(
-        ValueError, match=r"^Available preview printing image requires all five sizes$"
+        ValueError, match=r"^Available preview printing image requires all three sizes$"
     ):
         prepare_media(projection, images.library, revision=7)
 
@@ -684,7 +684,7 @@ def test_group_version_selector_and_disabled_urls(images: PublicImages) -> None:
         images.projection.tables["face"][0],
     )
     assert string(display_url(printing, face, media, "card_s")).endswith("?v=7")
-    assert string(display_url(printing, face, media, "art_m")).endswith("?v=11")
+    assert string(display_url(printing, face, media, "art_s")).endswith("?v=11")
     media["availability"] = "missing"
     assert display_url(printing, face, media, "card_s") is None
     with pytest.raises(

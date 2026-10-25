@@ -79,7 +79,7 @@ def image_input(
             )
             bindings.append(binding)
             asset = "img:" + printing.id + mapping.face_id
-            path = root / image_path(binding.int_id, ordinal, "art_m")
+            path = root / image_path(binding.int_id, ordinal, "art_s")
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_bytes(raw)
             variants: list[JsonValue] = [

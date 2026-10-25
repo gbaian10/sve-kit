@@ -133,7 +133,7 @@ Wrangler 設定放在 **`sim/web/wrangler.dev.jsonc`**；未來正式設定另�
 資料路徑讀 R2，其餘委派 `ASSETS.fetch`；所有靜態路徑亦會經過 Worker，可能有額外計費。
 `/assets/` 下以內容雜湊命名的建置輸出（200／304，且不是 SPA fallback 的 HTML）改為 `private, max-age=31536000, immutable`，
 重新整理時不必逐檔回源確認；`index.html` 與 `public/` 的固定檔名檔案維持平台預設的重新驗證。
-`/cdn-preview/` 僅接受 GET／HEAD 與 2.0 公開 JSON／五檔 WebP key，缺件或拒絕均不回 HTML；
+`/cdn-preview/` 僅接受 GET／HEAD 與 2.0 公開 JSON／三檔 WebP key，缺件或拒絕均不回 HTML；
 R2 壓縮旁檔依 [Response 官方文件](https://developers.cloudflare.com/workers/runtime-apis/response/)
 以 `encodeBody: "manual"` 保留 wire bytes。Access 保護與平台行為仍需維護者實測。
 沿用發布器設定的 Cache-Control，dev 改為 private（僅將 public 換成 private），其餘指令保持原樣。
@@ -232,7 +232,7 @@ producer 的私有 `media-state.json` 與備份必須跨次保存，不由遠端
 
 圖片建置、上傳與 GC 都不能並行。固定順序是圖片成功 → 快照成功 → 視需要 GC，兩次上傳間不要回收。
 `sve-publish snapshot gc` 僅列舉／刪除 JSON，保留 current＋previous；
-`sve-publish images gc` 只處理五種卡圖 prefix，保留 current，刪前先移除清單列，亦以 LIST 找中斷孤兒。
+`sve-publish images gc` 只處理三種卡圖 prefix，保留 current，刪前先移除清單列，亦以 LIST 找中斷孤兒。
 兩者 dry-run 都會連遠端、需要憑證，詳細恢復與限制見 publish。
 
 維護者的 dev 演練應記錄首次接管與同輸入重跑的耗時／PUT 數、無圖片掛載的文字上傳、

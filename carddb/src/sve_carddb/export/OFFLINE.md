@@ -170,7 +170,7 @@ real-card, catalog and translation acceptance.
 
 Select `--format-version 4.0.0` to export printing-owned media with permanent
 image keys. The source library still uses verified content-addressed WebPs;
-the image producer writes the five display sizes to
+the image producer writes the three display sizes to
 `images/<size>/<int_id>[-f<ordinal>].webp`. `display_url` selects the card or art
 version from media, never from the card number or an array position.
 

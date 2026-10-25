@@ -164,7 +164,7 @@ def build_regional_assets(
 def verify_assets(
     build: ImageBuild, preview: Path, *, checks: ImageChecks | None = None
 ) -> None:
-    """Recheck five-size closure, provenance and actual decoded blob metadata."""
+    """Recheck three-size closure, provenance and actual decoded blob metadata."""
     checks = checks or ImageChecks()
     ids = [item.result.image_id for item in build.images]
     urls = [item.source.url for item in build.images]
@@ -179,7 +179,7 @@ def verify_assets(
             or result.recipe_version != DEFAULT_RECIPE.version
             or [v.size_key for v in result.variants] != [size.key for size in SIZES]
         ):
-            raise ValueError("Image source, recipe or five-size closure mismatch")
+            raise ValueError("Image source, recipe or three-size closure mismatch")
         if (result.source_src_raw, "sha256:" + result.source_sha256) != (
             item.source.url,
             item.source.sha256,

@@ -283,7 +283,7 @@ def test_missing_capabilities_have_empty_arrays_nulls_and_unknown_not_absent() -
         == "unknown"
     )
     assert one(result, "face")["wording"] == []
-    assert len(array(result.config["image_sizes"])) == 5
+    assert len(array(result.config["image_sizes"])) == 3
 
 
 def test_selected_translation_is_owner_bound_and_missing_language_keeps_source(

@@ -71,13 +71,13 @@ def test_override_changes_only_art_and_keeps_orientation(
         old = by_id[item.result.image_id]
         if adopted(crops, item):
             assert item.result.crop_box == CropBox(4, 24, 64, 48)
-            assert [v.path for v in item.result.variants[:3]] == [
-                v.path for v in old.variants[:3]
+            assert [v.path for v in item.result.variants[:2]] == [
+                v.path for v in old.variants[:2]
             ]
-            assert [v.path for v in item.result.variants[3:]] != [
-                v.path for v in old.variants[3:]
+            assert [v.path for v in item.result.variants[2:]] != [
+                v.path for v in old.variants[2:]
             ]
-            art = next(v for v in item.result.variants if v.size_key == "art_m")
+            art = next(v for v in item.result.variants if v.size_key == "art_s")
             with Image.open(
                 BytesIO((output.preview / art.path).read_bytes())
             ) as opened:

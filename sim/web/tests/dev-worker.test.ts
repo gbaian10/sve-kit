@@ -151,7 +151,7 @@ describe("development Worker", () => {
     }
   })
 
-  it.each([INDEX, "images/card_m/20001.webp", "images/art_s/20001-f1.webp"])(
+  it.each([INDEX, "images/card_l/20001.webp", "images/art_s/20001-f1.webp"])(
     "reads updated %s from R2 even with a version query",
     async (key) => {
       const f = fixture()
@@ -302,10 +302,10 @@ describe("development Worker", () => {
     `snapshots/manifests/${HASH}.json.br`,
     INDEX,
     "images/card_s/20001.webp",
-    "images/card_m/20001-f1.webp",
+    "images/card_l/20001-f1.webp",
     "images/card_l/20001.webp",
     "images/art_s/20001-f2.webp",
-    "images/art_m/9007199254740991.webp",
+    "images/art_s/9007199254740991.webp",
   ])("reads only the public key %s", async (key) => {
     const f = fixture()
     const response = await worker.fetch(request(`/cdn-preview/${key}?v=3`), f.env, f.ctx)
@@ -332,13 +332,14 @@ describe("development Worker", () => {
     `/cdn-preview/snapshots/blobs/${HASH}.json.png`,
     "/cdn-preview/images/sha256/aa/example.webp",
     "/cdn-preview/images/card_x/20001.webp",
-    "/cdn-preview/images/card_m/20001.png",
-    "/cdn-preview/images/card_m/0.webp",
-    "/cdn-preview/images/card_m/020001.webp",
-    "/cdn-preview/images/card_m/20001-f0.webp",
-    "/cdn-preview/images/card_m/20001-f01.webp",
-    "/cdn-preview/images/card_m/9007199254740992.webp",
-    "/cdn-preview/images/card_m/20001-f9007199254740992.webp",
+    "/cdn-preview/images/card_m/20001.webp",
+    "/cdn-preview/images/card_l/20001.png",
+    "/cdn-preview/images/card_l/0.webp",
+    "/cdn-preview/images/card_l/020001.webp",
+    "/cdn-preview/images/card_l/20001-f0.webp",
+    "/cdn-preview/images/card_l/20001-f01.webp",
+    "/cdn-preview/images/card_l/9007199254740992.webp",
+    "/cdn-preview/images/card_l/20001-f9007199254740992.webp",
     `/cdn-preview/snapshots/blobs/../blobs/${HASH}.json`,
     `/cdn-preview/snapshots/blobs/./${HASH}.json`,
     `/cdn-preview/snapshots/blobs//${HASH}.json`,
@@ -490,7 +491,7 @@ describe("development Worker", () => {
     [`snapshots/manifests/${HASH}.json.br`, "public, max-age=31536000, immutable", IMMUTABLE],
     [INDEX, "no-store", "no-store"],
     [
-      "images/card_m/20001.webp?v=3",
+      "images/card_l/20001.webp?v=3",
       "public,max-age=86400,must-revalidate",
       "private,max-age=86400,must-revalidate",
     ],
@@ -500,7 +501,7 @@ describe("development Worker", () => {
       "private,max-age=86400,must-revalidate",
     ],
     [
-      "images/card_m/20001.webp?v=invalid",
+      "images/card_l/20001.webp?v=invalid",
       "public,max-age=86400,must-revalidate",
       "private,max-age=86400,must-revalidate",
     ],
@@ -509,7 +510,7 @@ describe("development Worker", () => {
     [BLOB, "private, no-cache", "private, no-cache"],
     [BLOB, 'max-age=60, x-public=1, note="public"', 'max-age=60, x-public=1, note="public"'],
     [BLOB, undefined, "private, no-cache"],
-    ["images/card_m/20001.webp?v=3", undefined, "private, no-cache"],
+    ["images/card_l/20001.webp?v=3", undefined, "private, no-cache"],
     [INDEX, undefined, "private, no-cache"],
     [BLOB, "no-store", "no-store"],
     [INDEX, "public, max-age=60", "private, max-age=60"],

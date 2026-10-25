@@ -56,27 +56,28 @@ describe("4.0 display projection", () => {
       ),
     ).toBe(`https://cdn.test/${stringValue(item["url"])}`)
   })
-  it("uses the art token separately and emits only distinct width descriptors for tiny sources", () => {
+  it("uses the art token separately and names the explicit card files for tiny sources", () => {
     const row = (
       objectValue(v3Fixture("expected-logical.json"))["printing_image"] as JsonObject[]
     )[0]
     if (!row) throw new Error("missing media")
     expect(mediaImageSource("/cdn", 20001, 7, row, "art")?.src).toBe(
-      "/cdn/images/art_m/20001-f7.webp?v=11",
+      "/cdn/images/art_s/20001-f7.webp?v=11",
     )
     const cropChanged = { ...row, art_version: 12 }
     expect(mediaImageSource("/cdn", 20001, 7, cropChanged, "card")?.src).toBe(
       mediaImageSource("/cdn", 20001, 7, row, "card")?.src,
     )
     expect(mediaImageSource("/cdn", 20001, 7, cropChanged, "art")?.src).toBe(
-      "/cdn/images/art_m/20001-f7.webp?v=12",
+      "/cdn/images/art_s/20001-f7.webp?v=12",
     )
     const tiny = {
       ...row,
       variants: (row["variants"] as JsonObject[]).map((v) => ({ ...v, width: 1, height: 1 })),
     }
     const source = mediaImageSource("/cdn", 1, 0, tiny, "card")
-    expect(source?.srcSet.split(", ")).toHaveLength(1)
+    expect(source?.src).toContain("/images/card_l/")
+    expect(source?.small).toContain("/images/card_s/")
     expect(source?.width).toBe(1)
     expect(source?.height).toBe(1)
     const landscape = {
@@ -85,7 +86,7 @@ describe("4.0 display projection", () => {
     }
     expect(mediaImageSource("/cdn", 1, 0, landscape, "card")?.height).toBe(64)
   })
-  it("fetches one home media file, never global source details, and preserves real width srcset", async () => {
+  it("fetches one home media file, never global source details, and names the explicit card files", async () => {
     const served = origin()
     const client = createSnapshotClient("https://cdn.test", {
       fetch: served.fetcher,
@@ -98,8 +99,7 @@ describe("4.0 display projection", () => {
     expect(served.requests.slice(before)).toHaveLength(1)
     expect(page.cardImage("p:a", "f:a")).toEqual({
       src: "https://cdn.test/images/card_l/1.webp?v=7",
-      srcSet:
-        "https://cdn.test/images/card_s/1.webp?v=7 128w, https://cdn.test/images/card_m/1.webp?v=7 320w, https://cdn.test/images/card_l/1.webp?v=7 459w",
+      small: "https://cdn.test/images/card_s/1.webp?v=7",
       width: 459,
       height: 641,
     })
@@ -165,7 +165,7 @@ describe("4.0 display projection", () => {
       ).toBe(state)
     },
   )
-  it("uses new v for every src/srcset after snapshot adoption; same bytes returning still get a new token", async () => {
+  it("uses new v for every card file after snapshot adoption; same bytes returning still get a new token", async () => {
     const served = origin()
     const client = createSnapshotClient("https://cdn.test", { fetch: served.fetcher })
     await client.load()
@@ -179,9 +179,7 @@ describe("4.0 display projection", () => {
       await client.reload()
       const source = (await loadImagePage(client, [front])).cardImage("p:a", "f:a")
       expect(source?.src.endsWith(`?v=${String(token)}`)).toBe(true)
-      expect(source?.srcSet.split(", ").every((url) => url.includes(`?v=${String(token)} `))).toBe(
-        true,
-      )
+      expect(source?.small?.endsWith(`?v=${String(token)}`)).toBe(true)
     }
   })
 })

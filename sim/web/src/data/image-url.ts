@@ -23,23 +23,17 @@ export function mediaImageSource(
   if (row["publication_state"] !== "approved" || row["availability"] !== "available")
     return undefined
   const version = integerValue(row[purpose === "card" ? "card_version" : "art_version"])
-  const variants = arrayValue(row["variants"])
-    .map((v) => objectValue(v))
-    .filter((v) => stringValue(v["size_key"]).startsWith(`${purpose}_`))
-    .sort((a, b) => integerValue(a["width"]) - integerValue(b["width"]))
-  const widths = new Map<number, Row>()
-  // Non-upscaled tiny images can have identical widths; srcset needs one candidate per width.
-  for (const variant of variants)
-    if (!widths.has(integerValue(variant["width"])))
-      widths.set(integerValue(variant["width"]), variant)
-  const distinct = [...widths.values()]
-  const largest = distinct.at(-1)
-  if (!largest) return undefined
+  const variants = arrayValue(row["variants"]).map((v) => objectValue(v))
+  const find = (key: string) => variants.find((v) => stringValue(v["size_key"]) === key)
+  // Each slot names its file explicitly, so one card uses one URL everywhere and downloads once.
+  const large = find(purpose === "card" ? "card_l" : "art_s")
+  if (!large) return undefined
   const url = (v: Row) => imageUrl(base, intId, ordinal, stringValue(v["size_key"]), version)
+  const small = purpose === "card" ? find("card_s") : undefined
   return {
-    src: url(largest),
-    srcSet: distinct.map((v) => `${url(v)} ${String(integerValue(v["width"]))}w`).join(", "),
-    width: integerValue(largest["width"]),
-    height: integerValue(largest["height"]),
+    src: url(large),
+    ...(small ? { small: url(small) } : {}),
+    width: integerValue(large["width"]),
+    height: integerValue(large["height"]),
   }
 }

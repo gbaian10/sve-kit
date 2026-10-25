@@ -2,7 +2,7 @@
 
 `images build-index` 獨立產圖、驗證圖片來源及裁切、配發事件版本，產出私有圖片索引。
 `snapshot export-offline --image-index` 只讀索引與文字來源，不開 PNG／WebP，不複製圖片，也不讀寫圖片版本狀態。
-公開影像清單的欄位、固定 ID key、五尺寸及 `?v=` 語意不變。
+公開影像清單的欄位、固定 ID key、三尺寸及 `?v=` 語意不變。
 文字建置 DB 不存圖片或尺寸表，公開 media 三集合由此索引加入文字投影。
 
 ## 圖片建置
@@ -48,7 +48,7 @@ uv --directory carddb run sve-carddb images build-index --inputs /private/inputs
 | `tables` | 已配號的 `image_asset`、`printing_image`、`image_variant` 三種既有公開列 |
 
 索引不含 bitmap、本機圖片路徑或第二份卡表。文字端用已解析卡頁核對每面原始 `img src`、解析 URL、區域與永久 ID，
-並核對公開狀態、五尺寸及版本 metadata；校正核對精確的區域／URL／hash／來源 pin，不重驗圖本體。
+並核對公開狀態、三尺寸及版本 metadata；校正核對精確的區域／URL／hash／來源 pin，不重驗圖本體。
 索引與校正來源 pins 只留在私人建置環境，不放公開根、git 或測試 artifact。
 
 `sve-publish images upload` 使用成功圖片描述與 `--image-dir` 的固定 key 圖片根，只比對清單並驗讀變動候選。

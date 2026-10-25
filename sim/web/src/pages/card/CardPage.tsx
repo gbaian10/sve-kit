@@ -68,7 +68,6 @@ const ICON_BUTTON =
   "flex size-11 shrink-0 items-center justify-center rounded-button text-text-1 hover:bg-surface-2"
 // Phone: 72% of the width, as the reference sites do; tablet and desktop: the 340px column.
 const IMAGE_SLOT = "w-[72%] max-w-85 lg:w-full lg:max-w-none"
-const IMAGE_SIZES = "(min-width: 600px) 340px, 72vw"
 
 export function CardPage() {
   const { cardNo, intId } = useParams()
@@ -763,7 +762,7 @@ export function CardView({
                     name={name.primary}
                     images={images}
                     alt="decorative"
-                    sizes={IMAGE_SIZES}
+                    size="large"
                     className="w-full"
                   />
                 </button>
@@ -1015,7 +1014,7 @@ export function CardView({
             name={zoomedView.name.primary}
             images={images}
             alt="identify"
-            sizes="(min-width: 600px) 512px, 100vw"
+            size="large"
             className="mx-auto w-[min(100%,calc((92dvh-7rem)*63/88))]"
           />
         )}

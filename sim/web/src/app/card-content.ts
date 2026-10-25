@@ -24,7 +24,6 @@ export async function prepareCardContent(
   client: SnapshotClient,
   located: LocatedCard,
   language: string,
-  sizes: string,
   preloadSignal?: AbortSignal,
 ): Promise<CardContent> {
   if (preloadSignal) await yieldCardPreload(preloadSignal)
@@ -94,7 +93,7 @@ export async function prepareCardContent(
   ])
   const prepareFace = ({ printingId, faceId }: { printingId: string; faceId: string }) => {
     const source = images.cardImage(printingId, faceId)
-    return source ? prepareImage(source, sizes, preloadSignal) : Promise.resolve()
+    return source ? prepareImage(source, preloadSignal) : Promise.resolve()
   }
   if (preloadSignal) {
     for (const face of faces) await prepareFace(face)

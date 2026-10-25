@@ -14,7 +14,7 @@ it("estimates origin and both payload categories independently without trimming 
   vi.stubGlobal("caches", storage)
   vi.stubGlobal("navigator", { storage: { estimate: () => Promise.resolve({ usage: 999 }) } })
   const images = await storage.open("sve-image-responses-v2")
-  await images.put("https://cdn.test/images/card_m/1.webp?v=1", new Response("image"))
+  await images.put("https://cdn.test/images/card_l/1.webp?v=1", new Response("image"))
   const data = await storage.open("sve-search-index:root")
   await data.put(
     "https://cdn.test/data",
