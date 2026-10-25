@@ -1,13 +1,14 @@
 """Minimal synthetic glossary envelopes and a reusable digital-name database."""
 
+from functools import cache
 from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
 from sve_carddb.build import Json, create_database
-from sve_carddb.build.t1 import compile_build
 from sve_carddb.core.json import canonical, digest, object_value
 
+from .compiled_schemas import compile_build
 from .database_template import DatabaseTemplate
 
 if TYPE_CHECKING:
@@ -84,7 +85,9 @@ def write(root: Path, shards: dict[str, dict[str, JsonValue]]) -> None:
         path.write_bytes(canonical(value))
 
 
+@cache
 def template() -> DatabaseTemplate:
+    # Immutable bytes; `copy()` hands each caller its own connection.
     schema = compile_build(("t0", "translation_evidence"))
     with create_database(schema) as db:
         with db.transaction():

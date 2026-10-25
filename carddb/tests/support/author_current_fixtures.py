@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from sve_carddb.build import create_database
-from sve_carddb.build.t1 import MINIMUM_CAPABILITIES, compile_build
+from sve_carddb.build.t1 import MINIMUM_CAPABILITIES
 from sve_carddb.core.authored import read as read_authored
 from sve_carddb.core.json import canonical, object_value, parse, string
 from sve_carddb.core.provenance import BuildContext
@@ -28,6 +28,7 @@ from sve_carddb.domains.translations.inputs import Snapshot, validate_snapshot
 from sve_carddb.domains.translations.recognition.rules import Rules, load
 from sve_carddb.domains.translations.sources import Sources
 
+from .compiled_schemas import compile_build
 from .database_template import DatabaseTemplate
 from .semantic_definition_fixtures import with_definitions
 
