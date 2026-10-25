@@ -675,6 +675,7 @@ describe("development Worker", () => {
       preview_urls: false,
       routes: [{ pattern: "dev.svekit.app", custom_domain: true }],
       r2_buckets: [{ binding: "PREVIEW_BUCKET", bucket_name: "svekit-dev" }],
+      observability: { enabled: true },
       assets: {
         directory: "./dist",
         binding: "ASSETS",
