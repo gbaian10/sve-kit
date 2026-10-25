@@ -708,7 +708,10 @@ impl Game {
             {
                 items.retain(|v| v.as_str() != Some(&id));
             }
-            self.object_mut(&id)?.zone = "void".into();
+            let token = self.object_mut(&id)?;
+            token.zone = "void".into();
+            // Erasure invalidates every earlier reference to the token (CR 9.1.3, 9.1.4.4).
+            token.generation = token.generation.saturating_add(1);
             self.emit(
                 json!({"kind":"消去","object":id,"by":"rule-9.1.4.4"}),
                 &json!({"rule":"9.1.4.4"}),

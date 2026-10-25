@@ -79,6 +79,9 @@ fn source_paths(
         let path = format!("{path}/steps/{index}");
         match &step.node {
             Node::Instruction { instruction } if instruction.source == *origin => {
+                if super::movement::advance_entry(&instruction.action) {
+                    paths.insert(format!("{path}/instruction/action/objects/zone"));
+                }
                 if matches!(
                     origin.origin,
                     AbilityOrigin::Keyword {
@@ -153,7 +156,8 @@ fn check_requirements(
                     || (card && play_requirement(requirement.capability.code))
                     || (matches!(
                         requirement.capability.code,
-                        "shape.AbilityOrigin.Keyword"
+                        "internal.ZoneKind.Evolve"
+                            | "shape.AbilityOrigin.Keyword"
                             | "shape.ObjectFrozen.EnterFieldObject"
                             | "shape.IntFrozen.DamageAmount"
                             | "reference.expression"

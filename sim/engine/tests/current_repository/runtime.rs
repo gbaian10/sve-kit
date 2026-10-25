@@ -83,7 +83,12 @@ fn pending(game: &mut Game, seat: &str) -> Activation {
 
 // The fixture supplies only the external instruction producer. The real card's
 // accepted selection, complete program and permanent source are never modified.
-fn producer(action: Action) -> WellFormedCardProgram {
+pub(super) fn producer(action: Action) -> WellFormedCardProgram {
+    producer_steps(vec![action])
+}
+
+// Instruction N of the producer owns receipt N, so later steps can follow earlier ones.
+pub(super) fn producer_steps(actions: Vec<Action>) -> WellFormedCardProgram {
     let source = SourceSpan {
         card_id: "producer".into(),
         card_no: "producer".into(),
@@ -126,20 +131,24 @@ fn producer(action: Action) -> WellFormedCardProgram {
                 declarations: vec![],
                 body: Some(Program {
                     scope: ScopeId(1),
-                    steps: vec![Located {
-                        source,
-                        node: Node::Instruction {
-                            instruction: Box::new(Instruction {
-                                id: InstructionId(1),
-                                precondition: None,
-                                receipt: ReceiptId(1),
-                                actor: PlayerRef::Controller {},
-                                source: origin,
-                                context: InstructionContext::Effect,
-                                action,
-                            }),
-                        },
-                    }],
+                    steps: actions
+                        .into_iter()
+                        .zip(1_u64..)
+                        .map(|(action, number)| Located {
+                            source: source.clone(),
+                            node: Node::Instruction {
+                                instruction: Box::new(Instruction {
+                                    id: InstructionId(number),
+                                    precondition: None,
+                                    receipt: ReceiptId(number),
+                                    actor: PlayerRef::Controller {},
+                                    source: origin.clone(),
+                                    context: InstructionContext::Effect,
+                                    action,
+                                }),
+                            },
+                        })
+                        .collect(),
                 }),
             },
         }],

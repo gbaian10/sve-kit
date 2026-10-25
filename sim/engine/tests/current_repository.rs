@@ -161,3 +161,6 @@ fn repository_lastword_rejects_missing_sources_and_unknown_or_unsupported_steps(
 
 #[path = "current_repository/evolution.rs"]
 mod evolution;
+
+#[path = "current_repository/advance.rs"]
+mod advance;
