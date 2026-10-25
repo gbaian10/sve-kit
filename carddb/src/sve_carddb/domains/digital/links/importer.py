@@ -38,6 +38,9 @@ if TYPE_CHECKING:
     from sve_carddb.core.provenance import BuildContext
 
 
+_HUMAN = frozenset({"sampled", "confirmed"})
+
+
 @dataclass(frozen=True)
 class Inputs:
     root: Path
@@ -95,6 +98,15 @@ class Result:
             {key: tuple(records) for key, records in grouped.items()}
         )
 
+    @cached_property
+    def has_human_review(self) -> bool:
+        """Model-only intake never supplies names, so owners need no per-owner replay."""
+        return any(
+            record.review_level in _HUMAN
+            for records in self.by_owner.values()
+            for record in records
+        )
+
     def eligible_owner(  # ruff: ignore[complex-structure,too-many-branches,too-many-locals] -- current printed state and the authored relation are independent owner proofs
         self,
         db: Database,
@@ -106,6 +118,8 @@ class Result:
         """Recheck this owner's own name; unknown printings never borrow current."""
         if self.record.context != sources.build:
             raise ValueError("Digital-link name proof uses another build context")
+        if self.by_owner and not self.has_human_review:
+            return frozenset()
         source = name_source(db, owner)
         if source is None:
             return frozenset()
@@ -146,7 +160,8 @@ class Result:
         for record in self.by_owner.get((str(face["card_id"]), str(face["id"])), ()):
             subject, value = record.subject, record.value
             if (
-                value.relation != "same_card"
+                record.review_level not in _HUMAN
+                or value.relation != "same_card"
                 or subject.face_id != face["id"]
                 or subject.card_id != face["card_id"]
             ):

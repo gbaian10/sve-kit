@@ -148,8 +148,8 @@ def project(
         or not set(regions) <= {"jp", "en"}
     ):
         raise ValueError("Explicit sorted nonempty regions required")
-    if type(decisions.private_digital) is not bool:
-        raise ValueError("Private digital projection flag must be boolean")
+    if type(decisions.digital_assets) is not bool:
+        raise ValueError("Digital asset projection flag must be boolean")
     source = Source(db)
     view = initial(source)
     if publication_printings is not None:
@@ -165,13 +165,14 @@ def project(
     ancillary_records(source, view)
     art_records(source, view)
     digital_records(source, view)
-    if decisions.private_digital:
+    if decisions.digital_links is not None:
+        view["digital_link"] = [
+            row for row in view["digital_link"] if row["id"] in decisions.digital_links
+        ]
+    if not decisions.digital_assets:
         for table in (
-            "digital_card",
             "digital_art",
-            "digital_link",
             "digital_art_link",
-            "digital_link_coverage",
             "voice",
             "card_voice",
         ):
@@ -200,6 +201,10 @@ def project(
     _validate(view)
     config = configuration(source, settings)
     metadata = summaries(source, view, regions, decisions)
-    if decisions.private_digital:
+    if (
+        not decisions.digital_assets
+        and not view["digital_link"]
+        and not view["digital_link_coverage"]
+    ):
         config["digital_endpoints"] = []
     return Projection(view, config, metadata)

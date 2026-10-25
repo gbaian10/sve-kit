@@ -46,7 +46,7 @@ class DigitalName(RecordData):
 
 
 class Value(RecordData):
-    relation: Literal["same_card", "same_character", "name_only"]
+    relation: Literal["same_card", "same_character"]
     effect_similarity: Literal["near_identical", "core_kept", "reworked"] | None
     sve_names: Annotated[tuple[SveName, ...], Field(min_length=1)]
     digital_names: Annotated[tuple[DigitalName, ...], Field(min_length=1)]
@@ -56,7 +56,7 @@ class Record(RecordData):
     subject: Subject
     value: Value
     # Batch-sampled links must not be shown as individually confirmed.
-    review_level: Literal["sampled", "confirmed"]
+    review_level: Literal["model_reviewed", "sampled", "confirmed"]
     reason: Text
 
     @field_validator("reason")

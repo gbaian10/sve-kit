@@ -1,0 +1,48 @@
+format: 2
+kind: digital_link_shard
+records:
+  - subject:
+      card_id: c:fd34c9c1085757a9b01f327f3448a2c4
+      face_id:
+      game: svwb
+      official_id: "10143130"
+      digital_phase:
+    value:
+      relation: same_card
+      effect_similarity:
+      sve_names:
+        - printing_id: p:80ef361950215cbbaadcdd62e3207aac
+          face_id: f:5072c52200d959d49c0037524f977647
+          name_ref:
+            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+            source_version_id: src:v1:3429443a6b453706d5a6f72dd0eb52ba70a87ee6d63aae936fe147c4a435d4ae
+            parser: translation-jp-v1
+            locator: /faces/0/name
+            text_hash: sha256:e8f2e3d5d107cb0e627bb204a16388c84c831aaf8ee524f8e4539155e5df2f14
+      digital_names:
+        - phase: normal
+          lang: en
+          name_ref:
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:186b5d1e498afc3ecf85d82d04ae6f0646a24e74b101c8abafec0cf94a1c63db
+            parser: translation-svwb-v1
+            locator: /data/card_details/10143130/common/name
+            text_hash: sha256:6395431632cb6abb89dd513188ccfa776ae2d3d9074f2c3b4490fb662a9cb000
+        - phase: normal
+          lang: ja
+          name_ref:
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:7cd8e4a33d652f426e37d8e7ad352cbf48fc71fc88e1d6e0750937e3be278fd9
+            parser: translation-svwb-v1
+            locator: /data/card_details/10143130/common/name
+            text_hash: sha256:e8f2e3d5d107cb0e627bb204a16388c84c831aaf8ee524f8e4539155e5df2f14
+        - phase: normal
+          lang: zh-Hant
+          name_ref:
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:ed9f51d7cd6a6774b9264f36c1a8de37c52e004debe3156c5519c03be8e0cbb8
+            parser: translation-svwb-v1
+            locator: /data/card_details/10143130/common/name
+            text_hash: sha256:80df5e19ddd8bcbeea8142c802f4b4a375fe57be4646d5efd42e2ed9d123a72a
+    review_level: model_reviewed
+    reason: 同一改編卡片概念；兩個不同廠商模型各自逐筆看圖與卡文判斷一致，包含有證據改判與審核擴查。只供瀏覽，不供名。

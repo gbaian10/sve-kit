@@ -1,0 +1,498 @@
+format: 2
+kind: digital_link_shard
+records:
+  - subject:
+      card_id: c:082c289cbfee53dc98f166eaa6ba23c6
+      face_id:
+      game: sv1
+      official_id: "107311010"
+      digital_phase:
+    value:
+      relation: same_card
+      effect_similarity:
+      sve_names:
+        - printing_id: p:83a23af945f65a81b4b5cb87e9c2e94f
+          face_id: f:1953b522c4995fa9a5aec8b13e101669
+          name_ref:
+            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+            source_version_id: src:v1:86f59f61426557b828dce3d9107575ef6e5aee0665fd85cedac913b059bd558f
+            parser: translation-jp-v1
+            locator: /faces/0/name
+            text_hash: sha256:11fb60a162ac7d89587056cc207394b0c6a45d32c8e4c6fdec5d12a3be42c5ce
+      digital_names:
+        - phase: normal
+          lang: en
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:4c183f0e6c27155d37d8aef43e7a743b0b291f7a2aec8387f484ebad7ca9cdd8
+            parser: translation-sv1-v1
+            locator: /data/cards/2832/card_name
+            text_hash: sha256:c1206b47ec070c8fc2510c81ac912197a28bf9b4fc83229341599962dc90177c
+        - phase: normal
+          lang: ja
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:86de774acfcbb1869f83c75fff58d85841f98d8a531064ecc230e8abb1470529
+            parser: translation-sv1-v1
+            locator: /data/cards/2832/card_name
+            text_hash: sha256:11fb60a162ac7d89587056cc207394b0c6a45d32c8e4c6fdec5d12a3be42c5ce
+        - phase: normal
+          lang: zh-Hant
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
+            parser: translation-sv1-v1
+            locator: /data/cards/2832/card_name
+            text_hash: sha256:9e8d69ae7bf97b5cc7bd182f10e7189e64d882ede5fbd32c27cf07e72d584ce7
+    review_level: model_reviewed
+    reason: 同一改編卡片概念；單一模型判斷；另一模型以固定種子 5% 抽樣校準（0／97 錯）與 token 型態全量機械掃描接受的未抽中成員。只供瀏覽，不供名。
+  - subject:
+      card_id: c:0bff6efb1643594d95449da31162ad56
+      face_id:
+      game: sv1
+      official_id: "107324010"
+      digital_phase:
+    value:
+      relation: same_card
+      effect_similarity:
+      sve_names:
+        - printing_id: p:a67ebfbace49506f959c79ba3163700e
+          face_id: f:44d14435460d5831a4b740a4e404870b
+          name_ref:
+            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+            source_version_id: src:v1:228bed6fe55bfee9909ca5cc0219b2d08e6d47a28c0b07da08ff8bb1fcb5580b
+            parser: translation-jp-v1
+            locator: /faces/0/name
+            text_hash: sha256:54482eaf35adc13a20f1fb889a587c2dddccebe4d0f392af38633c9af69e0544
+      digital_names:
+        - phase: normal
+          lang: en
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:4c183f0e6c27155d37d8aef43e7a743b0b291f7a2aec8387f484ebad7ca9cdd8
+            parser: translation-sv1-v1
+            locator: /data/cards/479/card_name
+            text_hash: sha256:00aa505c7bdf444907d8d92d7bfbdbff86e20b3af5d3ac81f39e8b2dd2fcd440
+        - phase: normal
+          lang: ja
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:86de774acfcbb1869f83c75fff58d85841f98d8a531064ecc230e8abb1470529
+            parser: translation-sv1-v1
+            locator: /data/cards/479/card_name
+            text_hash: sha256:54482eaf35adc13a20f1fb889a587c2dddccebe4d0f392af38633c9af69e0544
+        - phase: normal
+          lang: zh-Hant
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
+            parser: translation-sv1-v1
+            locator: /data/cards/479/card_name
+            text_hash: sha256:e415027cd59a1c988f816ad8a846d25647e4e59c9b727b2b21f99bf17a17e0eb
+    review_level: model_reviewed
+    reason: 同一改編卡片概念；單一模型判斷；另一模型以固定種子 5% 抽樣校準（0／97 錯）與 token 型態全量機械掃描接受的未抽中成員。只供瀏覽，不供名。
+  - subject:
+      card_id: c:3654b2c800df5fec8eaec42a0b6b3c92
+      face_id:
+      game: sv1
+      official_id: "110331030"
+      digital_phase:
+    value:
+      relation: same_card
+      effect_similarity:
+      sve_names:
+        - printing_id: p:021e4534733f5576af7c9a4682d76e05
+          face_id: f:febf47a0dc5e5973a72c176a1569116c
+          name_ref:
+            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+            source_version_id: src:v1:b97a3f69b5d17d6f3f9e4f0459a85a7987270b4f6cc88e098b17d59f27d76913
+            parser: translation-jp-v1
+            locator: /faces/0/name
+            text_hash: sha256:9dabdafcf9171dbcac4fbe68ad22a4d9f11b81b679f321f500715b2df7c9c63a
+      digital_names:
+        - phase: normal
+          lang: en
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:4c183f0e6c27155d37d8aef43e7a743b0b291f7a2aec8387f484ebad7ca9cdd8
+            parser: translation-sv1-v1
+            locator: /data/cards/2836/card_name
+            text_hash: sha256:328ac00a8731540f361269f1b62f568b7959103d99fbbadf9f9e6f850938cdeb
+        - phase: normal
+          lang: ja
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:86de774acfcbb1869f83c75fff58d85841f98d8a531064ecc230e8abb1470529
+            parser: translation-sv1-v1
+            locator: /data/cards/2836/card_name
+            text_hash: sha256:9dabdafcf9171dbcac4fbe68ad22a4d9f11b81b679f321f500715b2df7c9c63a
+        - phase: normal
+          lang: zh-Hant
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
+            parser: translation-sv1-v1
+            locator: /data/cards/2836/card_name
+            text_hash: sha256:a684050208fcc54d43046160349afae0a033a3a430a1fa1960f9895a037c9a34
+    review_level: model_reviewed
+    reason: 同一改編卡片概念；單一模型判斷；另一模型以固定種子 5% 抽樣校準（0／97 錯）與 token 型態全量機械掃描接受的未抽中成員。只供瀏覽，不供名。
+  - subject:
+      card_id: c:5728a1cc3e8b5fe6a34aa606d95e4073
+      face_id:
+      game: sv1
+      official_id: "900314040"
+      digital_phase:
+    value:
+      relation: same_card
+      effect_similarity:
+      sve_names:
+        - printing_id: p:0965fd69a56950fa9d5d8554f5e0d630
+          face_id: f:23c91a5993025b88b46b5bae2c1ab299
+          name_ref:
+            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+            source_version_id: src:v1:e5f3f7efb0f084c403fd2fd69addc5817d8837bb820ec3235f0eab3608270fab
+            parser: translation-jp-v1
+            locator: /faces/0/name
+            text_hash: sha256:d3c658659183a50290210288eb587323f94c599a4d3a637595bf7ea89c7e4576
+      digital_names:
+        - phase: normal
+          lang: en
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:4c183f0e6c27155d37d8aef43e7a743b0b291f7a2aec8387f484ebad7ca9cdd8
+            parser: translation-sv1-v1
+            locator: /data/cards/1615/card_name
+            text_hash: sha256:fa889062f9eb6bd9ccdd57afe5a9c52e713373f2be87ee013462b5c0c9ee2887
+        - phase: normal
+          lang: ja
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:86de774acfcbb1869f83c75fff58d85841f98d8a531064ecc230e8abb1470529
+            parser: translation-sv1-v1
+            locator: /data/cards/1615/card_name
+            text_hash: sha256:d3c658659183a50290210288eb587323f94c599a4d3a637595bf7ea89c7e4576
+        - phase: normal
+          lang: zh-Hant
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
+            parser: translation-sv1-v1
+            locator: /data/cards/1615/card_name
+            text_hash: sha256:2dfecd0f9bd9dbf6415fe03deec763640791da0db3658503c533b4f18bc8ff40
+    review_level: model_reviewed
+    reason: 同一改編卡片概念；單一模型判斷；另一模型以固定種子 5% 抽樣校準（0／97 錯）與 token 型態全量機械掃描接受的未抽中成員。只供瀏覽，不供名。
+  - subject:
+      card_id: c:5728a1cc3e8b5fe6a34aa606d95e4073
+      face_id:
+      game: svwb
+      official_id: "90031310"
+      digital_phase:
+    value:
+      relation: same_card
+      effect_similarity:
+      sve_names:
+        - printing_id: p:0965fd69a56950fa9d5d8554f5e0d630
+          face_id: f:23c91a5993025b88b46b5bae2c1ab299
+          name_ref:
+            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+            source_version_id: src:v1:e5f3f7efb0f084c403fd2fd69addc5817d8837bb820ec3235f0eab3608270fab
+            parser: translation-jp-v1
+            locator: /faces/0/name
+            text_hash: sha256:d3c658659183a50290210288eb587323f94c599a4d3a637595bf7ea89c7e4576
+      digital_names:
+        - phase: normal
+          lang: en
+          name_ref:
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:03302c590da5c962a155083cc66f2677934f7210c10b291abf5ee51c2d1b7444
+            parser: translation-svwb-v1
+            locator: /data/card_details/90031310/common/name
+            text_hash: sha256:fa889062f9eb6bd9ccdd57afe5a9c52e713373f2be87ee013462b5c0c9ee2887
+        - phase: normal
+          lang: ja
+          name_ref:
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:1729bed65c91d5e81fed8dbc7156d72c5f830800b5e4fe7d3475f9061fecec8a
+            parser: translation-svwb-v1
+            locator: /data/card_details/90031310/common/name
+            text_hash: sha256:d3c658659183a50290210288eb587323f94c599a4d3a637595bf7ea89c7e4576
+        - phase: normal
+          lang: zh-Hant
+          name_ref:
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:05774cf1a374bac040beec915d98395cea93dc27bfdc9d6ed25da6f350f132fb
+            parser: translation-svwb-v1
+            locator: /data/card_details/90031310/common/name
+            text_hash: sha256:2dfecd0f9bd9dbf6415fe03deec763640791da0db3658503c533b4f18bc8ff40
+    review_level: model_reviewed
+    reason: 同一改編卡片概念；單一模型判斷；另一模型以固定種子 5% 抽樣校準（0／97 錯）與 token 型態全量機械掃描接受的未抽中成員。只供瀏覽，不供名。
+  - subject:
+      card_id: c:5f273be39d6e54c3a9863814af95bca5
+      face_id:
+      game: sv1
+      official_id: "110331030"
+      digital_phase:
+    value:
+      relation: same_card
+      effect_similarity:
+      sve_names:
+        - printing_id: p:6054d567c98451ebabc4a03dc09b0182
+          face_id: f:93aa239cc4ca5315b5ba054e002803fa
+          name_ref:
+            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+            source_version_id: src:v1:ef069719e12215a4683c730cf5f991a283d83b0e92bc3121d367a2d6ea3f5483
+            parser: translation-jp-v1
+            locator: /faces/0/name
+            text_hash: sha256:9dabdafcf9171dbcac4fbe68ad22a4d9f11b81b679f321f500715b2df7c9c63a
+      digital_names:
+        - phase: normal
+          lang: en
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:4c183f0e6c27155d37d8aef43e7a743b0b291f7a2aec8387f484ebad7ca9cdd8
+            parser: translation-sv1-v1
+            locator: /data/cards/2836/card_name
+            text_hash: sha256:328ac00a8731540f361269f1b62f568b7959103d99fbbadf9f9e6f850938cdeb
+        - phase: normal
+          lang: ja
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:86de774acfcbb1869f83c75fff58d85841f98d8a531064ecc230e8abb1470529
+            parser: translation-sv1-v1
+            locator: /data/cards/2836/card_name
+            text_hash: sha256:9dabdafcf9171dbcac4fbe68ad22a4d9f11b81b679f321f500715b2df7c9c63a
+        - phase: normal
+          lang: zh-Hant
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
+            parser: translation-sv1-v1
+            locator: /data/cards/2836/card_name
+            text_hash: sha256:a684050208fcc54d43046160349afae0a033a3a430a1fa1960f9895a037c9a34
+    review_level: model_reviewed
+    reason: 同一改編卡片概念；單一模型判斷；另一模型以固定種子 5% 抽樣校準（0／97 錯）與 token 型態全量機械掃描接受的未抽中成員。只供瀏覽，不供名。
+  - subject:
+      card_id: c:afe07906e1345490ab8c1474f3005425
+      face_id:
+      game: sv1
+      official_id: "110331010"
+      digital_phase:
+    value:
+      relation: same_card
+      effect_similarity:
+      sve_names:
+        - printing_id: p:3c932cd44e425cc6a1990bd405fa424e
+          face_id: f:28951bc3e7585694ae9dbd2a99b6233e
+          name_ref:
+            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+            source_version_id: src:v1:c85b4198d74835c4db0c0266b60081e08e53e6183103b00ac6ef86028f873856
+            parser: translation-jp-v1
+            locator: /faces/0/name
+            text_hash: sha256:f0e8606e30bf2928113c13dd64f63c9f4305ff57edf0388ed3d1d60969876b9c
+      digital_names:
+        - phase: normal
+          lang: en
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:4c183f0e6c27155d37d8aef43e7a743b0b291f7a2aec8387f484ebad7ca9cdd8
+            parser: translation-sv1-v1
+            locator: /data/cards/5744/card_name
+            text_hash: sha256:c45424331e055efd3ef8e491ba9ef0393c51a3eb95cbf66d06bf9c53a99ad636
+        - phase: normal
+          lang: ja
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:86de774acfcbb1869f83c75fff58d85841f98d8a531064ecc230e8abb1470529
+            parser: translation-sv1-v1
+            locator: /data/cards/5744/card_name
+            text_hash: sha256:f0e8606e30bf2928113c13dd64f63c9f4305ff57edf0388ed3d1d60969876b9c
+        - phase: normal
+          lang: zh-Hant
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
+            parser: translation-sv1-v1
+            locator: /data/cards/5744/card_name
+            text_hash: sha256:d8d06e48def1d68118f18a44635264322d2fcc2b18c3a61f05637ae2c9100479
+    review_level: model_reviewed
+    reason: 同一改編卡片概念；單一模型判斷；另一模型以固定種子 5% 抽樣校準（0／97 錯）與 token 型態全量機械掃描接受的未抽中成員。只供瀏覽，不供名。
+  - subject:
+      card_id: c:bb7791cbf9965d3184644f772088f71a
+      face_id:
+      game: sv1
+      official_id: "107311010"
+      digital_phase:
+    value:
+      relation: same_card
+      effect_similarity:
+      sve_names:
+        - printing_id: p:2b4675699ee95735a29acabcf3d007e7
+          face_id: f:ae7d49589faa504983d60e3fed1373ac
+          name_ref:
+            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+            source_version_id: src:v1:4d53e82bef1ace79979dd31095b56ff49530100ec624e0fc4e764b2898e80673
+            parser: translation-jp-v1
+            locator: /faces/0/name
+            text_hash: sha256:11fb60a162ac7d89587056cc207394b0c6a45d32c8e4c6fdec5d12a3be42c5ce
+      digital_names:
+        - phase: normal
+          lang: en
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:4c183f0e6c27155d37d8aef43e7a743b0b291f7a2aec8387f484ebad7ca9cdd8
+            parser: translation-sv1-v1
+            locator: /data/cards/2832/card_name
+            text_hash: sha256:c1206b47ec070c8fc2510c81ac912197a28bf9b4fc83229341599962dc90177c
+        - phase: normal
+          lang: ja
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:86de774acfcbb1869f83c75fff58d85841f98d8a531064ecc230e8abb1470529
+            parser: translation-sv1-v1
+            locator: /data/cards/2832/card_name
+            text_hash: sha256:11fb60a162ac7d89587056cc207394b0c6a45d32c8e4c6fdec5d12a3be42c5ce
+        - phase: normal
+          lang: zh-Hant
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
+            parser: translation-sv1-v1
+            locator: /data/cards/2832/card_name
+            text_hash: sha256:9e8d69ae7bf97b5cc7bd182f10e7189e64d882ede5fbd32c27cf07e72d584ce7
+    review_level: model_reviewed
+    reason: 同一改編卡片概念；單一模型判斷；另一模型以固定種子 5% 抽樣校準（0／97 錯）與 token 型態全量機械掃描接受的未抽中成員。只供瀏覽，不供名。
+  - subject:
+      card_id: c:c1a7e10c96e458638cb5262a958f21f2
+      face_id:
+      game: sv1
+      official_id: "900334040"
+      digital_phase:
+    value:
+      relation: same_character
+      effect_similarity:
+      sve_names:
+        - printing_id: p:2749613de1f05780a5d84c62c34e335b
+          face_id: f:8be4564d79125a60b2aa718b2d33df3b
+          name_ref:
+            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+            source_version_id: src:v1:f6a73b22767dfe68da0d72c431358e309e438b151135ccc1e8a38cc4d5b176e6
+            parser: translation-jp-v1
+            locator: /faces/0/name
+            text_hash: sha256:dc84dc4c36f7e985016fecc3295aba1d08f7a8b205f2dd130ae70540a9c2e23d
+      digital_names:
+        - phase: normal
+          lang: en
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:4c183f0e6c27155d37d8aef43e7a743b0b291f7a2aec8387f484ebad7ca9cdd8
+            parser: translation-sv1-v1
+            locator: /data/cards/5856/card_name
+            text_hash: sha256:0ed3b6109ee3de5721acbd922a6bb84f86c7155cc90d878349b7aa9ab7c55c9e
+        - phase: normal
+          lang: ja
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:86de774acfcbb1869f83c75fff58d85841f98d8a531064ecc230e8abb1470529
+            parser: translation-sv1-v1
+            locator: /data/cards/5856/card_name
+            text_hash: sha256:dc84dc4c36f7e985016fecc3295aba1d08f7a8b205f2dd130ae70540a9c2e23d
+        - phase: normal
+          lang: zh-Hant
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
+            parser: translation-sv1-v1
+            locator: /data/cards/5856/card_name
+            text_hash: sha256:64da540c6bdafefa978ddef9694d22e61ab145caf312e190ca4e4d928f21af72
+    review_level: model_reviewed
+    reason: 同角色的不同卡片概念；兩個不同廠商模型各自逐筆看圖與卡文判斷一致，包含有證據改判與審核擴查。只供瀏覽，不供名。
+  - subject:
+      card_id: c:c313fe0b8a6f5b6eaa659e0b5d522fd9
+      face_id:
+      game: sv1
+      official_id: "107311020"
+      digital_phase:
+    value:
+      relation: same_card
+      effect_similarity:
+      sve_names:
+        - printing_id: p:4a74a266ad8955b884d05d9e3eb30be5
+          face_id: f:ceb7e35335a751a798aa957ffef35e6f
+          name_ref:
+            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+            source_version_id: src:v1:b8240270eea17d30947fdb48459e4206f180fdeef9bb1f7f07f0cd3364ae7460
+            parser: translation-jp-v1
+            locator: /faces/0/name
+            text_hash: sha256:9a9208f98483a8d87678f94fc846040053d3c4d93c1fd8857b93216f2285045e
+      digital_names:
+        - phase: normal
+          lang: en
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:4c183f0e6c27155d37d8aef43e7a743b0b291f7a2aec8387f484ebad7ca9cdd8
+            parser: translation-sv1-v1
+            locator: /data/cards/1493/card_name
+            text_hash: sha256:15b13619fd078ad48a7a0e5a2c45e8d0cd1bc0d9985ab61108c8ffb7921ec29b
+        - phase: normal
+          lang: ja
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:86de774acfcbb1869f83c75fff58d85841f98d8a531064ecc230e8abb1470529
+            parser: translation-sv1-v1
+            locator: /data/cards/1493/card_name
+            text_hash: sha256:9a9208f98483a8d87678f94fc846040053d3c4d93c1fd8857b93216f2285045e
+        - phase: normal
+          lang: zh-Hant
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
+            parser: translation-sv1-v1
+            locator: /data/cards/1493/card_name
+            text_hash: sha256:8dac8b32142ecb0ba4f9b71e01b4b84ae03d6ee48fbde2d2184716b6e5a71e40
+    review_level: model_reviewed
+    reason: 同一改編卡片概念；單一模型判斷；另一模型以固定種子 5% 抽樣校準（0／97 錯）與 token 型態全量機械掃描接受的未抽中成員。只供瀏覽，不供名。
+  - subject:
+      card_id: c:d605f700a4105013afee2e21816c3739
+      face_id:
+      game: sv1
+      official_id: "110311010"
+      digital_phase:
+    value:
+      relation: same_card
+      effect_similarity:
+      sve_names:
+        - printing_id: p:0f3f6818575e5ecbb16336724c9b4d03
+          face_id: f:0fa4e8c040cb5156a6da3468fff9ab0b
+          name_ref:
+            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+            source_version_id: src:v1:30b6f0ac9b13d59e0788ff7323f4664965f51ed8eea69f02399b54a0d51216e0
+            parser: translation-jp-v1
+            locator: /faces/0/name
+            text_hash: sha256:179b80cd2bcc6c6b6617bbec86ca2b75f590adcf113211f292dfd7c06ddfba59
+      digital_names:
+        - phase: normal
+          lang: en
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:4c183f0e6c27155d37d8aef43e7a743b0b291f7a2aec8387f484ebad7ca9cdd8
+            parser: translation-sv1-v1
+            locator: /data/cards/1498/card_name
+            text_hash: sha256:e3a56ab265e500426113a1476963163cd39fe5400dfcc1d94802bb46d873da1c
+        - phase: normal
+          lang: ja
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:86de774acfcbb1869f83c75fff58d85841f98d8a531064ecc230e8abb1470529
+            parser: translation-sv1-v1
+            locator: /data/cards/1498/card_name
+            text_hash: sha256:179b80cd2bcc6c6b6617bbec86ca2b75f590adcf113211f292dfd7c06ddfba59
+        - phase: normal
+          lang: zh-Hant
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
+            parser: translation-sv1-v1
+            locator: /data/cards/1498/card_name
+            text_hash: sha256:564eb034ffb1470c5b3d1d9701a514f0397a0478d0e1fdc511f75d57ffbaee93
+    review_level: model_reviewed
+    reason: 同一改編卡片概念；單一模型判斷；另一模型以固定種子 5% 抽樣校準（0／97 錯）與 token 型態全量機械掃描接受的未抽中成員。只供瀏覽，不供名。

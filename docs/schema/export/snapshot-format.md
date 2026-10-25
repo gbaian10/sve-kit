@@ -67,7 +67,7 @@ reader 編譯具型別 accessor，詳情分片保留 tuples＋ID→row 索引；
 | `card_mentioned_by` | `card_id, region, from_card_id` | 卡名標註與官方單向關聯的反查；`card_id` 是被提到者，`from_card_id` 是提到者。複合 `PK(card_id,region,from_card_id)`，依序排序；同地區同一對卡只出一列，不含自我提及。採現行版本效果與段落的卡名標註，聯集官方 `official_unspecified` 單向相關卡的反向列；單向判定與地區選擇見[反查投影](public-projection.md#卡名反查投影) |
 | `digital_card` | `id, game, official_id` | 官方數位頁連結，僅 SVE 所需閉包 |
 | `digital_art` | `id, digital_card_id, phase, style_key` | 數位進化面/styles/異畫對照 |
-| `digital_link` | `id, card_id, face_id?, digital_card_id, digital_phase?, relation, effect_similarity?, review_level` | 區分 `same_card/character/name_only` |
+| `digital_link` | `id, card_id, face_id?, digital_card_id, digital_phase?, relation, effect_similarity?, review_level` | 區分 `same_card/same_character/name_only/same_name`；`same_name` 待能力實作，本批不產生；`model_reviewed` 只供瀏覽、不供名 |
 | `digital_art_link` | `art_id, digital_art_id, relation, review_level` | 複合 `PK(art_id,digital_art_id)`；實體圖對數位圖 |
 | `digital_link_coverage` | `card_id, game, state, as_of` | 複合 `PK(card_id,game)`；尚未核對與核對無結果分開 |
 | `voice` | `id, digital_card_id, digital_phase?, lang, kind_code, variant?, interaction_target_id?, label_raw?, source_url, asset_path?, mime?, bytes?, duration_ms?, availability` | 語音瀏覽與來源切換；不預載音檔 |
@@ -81,6 +81,8 @@ reader 編譯具型別 accessor，詳情分片保留 tuples＋ID→row 索引；
 | `text_symbol` | `id, code, parameter_schema, keyword_id?, spellings:[Spelling], localizations:[Localization]` | 自製圖示、aria、tooltip、複製文字 |
 | `card_route_alias` | `namespace, old_key, target_namespace, target_key, reason` | PK(`namespace`,`old_key`)；改卡號永久轉址；official 路由由已確認 `card_no` 推導；provisional 用 `int_id` 保留命名空間 |
 | `route_override` | `route_key, printing_id` | PK(`route_key`)；僅多 variant 的穩定入口例外，正常卡不重複 route 列 |
+
+數位瀏覽採用既有 `model_reviewed` 值；不改欄序、公開 enum、格式版號或必要能力。真人 `sampled`／`confirmed` 的語義不變。模型連結的逐筆或抽樣查核方法保存在 authored reason，不作官方名稱證據。離線匯出只公開 fresh `same_card`／`same_character` 連結與其 `digital_card` 引用閉包，不公開數位卡文、面、圖或語音。本入口不採納 `name_only`；coverage 未實作時維持 `[]`，無候選仍是「尚未核對」，不能推導 `reviewed_none`。入口與來源重驗見[數位對應採納](../domains/digital-link-adoption.md)。
 
 上述共 43 個公開文字陣列；這是物件投影的集合數量，不是建置表數。config 是單一設定物件，精確型別見 [傳輸契約 §3](snapshot-transport.md#3-config-與巢狀-tuple-型別)：languages（`code/fallback_order/display_name`）、`digital_endpoints`（`game/card_url_template/language_map/status/refresh_policy`）、`shop_links`（`id/url_template/parameters/feature_key/enabled_dev/enabled_prod`）、`image_sizes`（key/purpose/max_width/max_height）、search（`grammar_version/normalizer_version`），另含 `catalog_feedback_url`、`third_party_image_policy`（固定 `mirror_reviewed`）、`deck_eligibility_policy`（固定 `regional_decklog`）；v1 producer/reader 必須實施這兩項已決政策。不含作者/hash/審核流程。僅 `image_sizes` 在影像清單中也會被引用；避免兩份獨立設定，快照清單指向同一 config 檔。
 

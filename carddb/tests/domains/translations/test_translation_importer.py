@@ -725,6 +725,7 @@ def test_source_recipe_and_descriptor_refusals(
         ("field", "Digital name locator must reference a card name"),
         ("card", "Digital name locator points to another card"),
         ("decision", "Same-character/name-only is not same-concept name evidence"),
+        ("model_review", "Same-character/name-only is not same-concept name evidence"),
         ("names", "Digital name evidence does not locate the adopted face names"),
     ],
 )
@@ -768,10 +769,22 @@ def test_digital_concept_location_guards(
         importer_template.copy() as db,
         pytest.raises(ValueError, match="^" + message + "$"),
     ):
-        if fault in {"decision", "names"}:
+        if fault in {"decision", "names", "model_review"}:
             if fault == "decision":
                 with db.transaction():
                     db.delete("digital_link", {"id": "svwb:normal"})
+            elif fault == "model_review":
+                with db.transaction():
+                    link = next(
+                        r.values
+                        for r in db.rows("digital_link")
+                        if r.values["id"] == "svwb:normal"
+                    )
+                    db.update(
+                        "decision",
+                        {"id": link["decision_id"]},
+                        {"state": "model_reviewed"},
+                    )
             _digital_evidence(
                 evidence, "Wrong synthetic name", "svwb:normal zh-Hant", "zh-Hant", db
             )

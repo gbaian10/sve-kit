@@ -54,7 +54,8 @@ def test_missing_and_explicit_empty(tmp_path: Path) -> None:
         ("bool-format", "Invalid digital-link fields"),
         ("old-format", "Invalid digital-link fields"),
         ("withdrawn", "Invalid digital-link fields"),
-        ("machine-review", "Invalid digital-link fields"),
+        ("proposed-review", "Invalid digital-link fields"),
+        ("name-only", "Invalid digital-link fields"),
         ("one-face", "Invalid digital-link fields"),
         ("id-width", "Invalid digital-link fields"),
         ("super-phase", "Invalid digital-link fields"),
@@ -74,8 +75,10 @@ def test_record_refusals(  # ruff: ignore[complex-structure,too-many-branches] -
         r["confidence"] = "high"
     elif fault == "withdrawn":
         r["value"] = None
-    elif fault == "machine-review":
-        r["review_level"] = "model_reviewed"
+    elif fault == "proposed-review":
+        r["review_level"] = "proposed"
+    elif fault == "name-only":
+        value["relation"] = "name_only"
     elif fault == "one-face":
         subject["face_id"] = None
     elif fault == "id-width":
@@ -161,7 +164,7 @@ def test_one_relation_per_subject(tmp_path: Path, fault: str, message: str) -> N
         records *= 2
     elif fault == "relation_change":
         other = record()
-        object_value(other["value"])["relation"] = "name_only"
+        object_value(other["value"])["relation"] = "same_character"
         records.append(other)
     elif fault == "duplicate_sve":
         value["sve_names"] = array(value["sve_names"]) * 2

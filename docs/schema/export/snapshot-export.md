@@ -100,7 +100,7 @@ printing 與 display revision 的詳情片一對一提供每個 base row，保�
 再加入 C0 直接引用的 source／counterpart owner 所在檔及其呈現所需的卡片／面上下文，
 最後補齊聯集的強依賴。來源檔自身的其他來源引用不再遞移展開。
 Python measure 與 Web 共用 manifest File 的 `source_refs`：先驗 exact FileRef，再取一跳來源及其強依賴。
-單區完整文字 Brotli ≤8 MiB；兩區全部文字 raw（全部文字分片＋manifest）每次報告、
+單區完整文字 Brotli ≤10 MiB（10,485,760 bytes）；兩區全部文字 raw（全部文字分片＋manifest）每次報告、
 明顯成長時檢討。基本文字就緒而日文依據／標註未備妥時亦不免計來源資料。
 
 manifest 的 raw／Brotli 獨立列出，亦計入各閉包；無 Brotli 表示時不宣稱壓縮閘門通過。

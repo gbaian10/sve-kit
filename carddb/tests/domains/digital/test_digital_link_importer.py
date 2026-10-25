@@ -15,7 +15,7 @@ from sve_carddb.domains.digital.links.evidence import (
     inventory,
 )
 from sve_carddb.domains.digital.links.importer import import_links, review_context
-from sve_carddb.domains.digital.links.loader import decision_id
+from sve_carddb.domains.digital.links.loader import decision_id, link_id
 from sve_carddb.domains.digital.links.models import Record, SveName
 from sve_carddb.domains.products.models import LocalizedText
 from sve_carddb.domains.registry.records import EnglishPrintingData
@@ -635,3 +635,105 @@ def test_legacy_digital_import_does_not_allow_declared_target_superset(
             ValueError, match=r"^Build configuration does not pin digital inputs$"
         ):
             import_digital(db, sources, baseline.refs, (("svwb", "22345678"),))
+
+
+@pytest.mark.parametrize("relation", ["same_card", "same_character"])
+@pytest.mark.parametrize("card_level", [False, True])
+def test_model_links_are_browse_only_even_with_exact_name_faces(
+    baseline: Fixture,
+    database: DatabaseTemplate,
+    tmp_path: Path,
+    relation: str,
+    card_level: bool,
+) -> None:
+    record = object_value(parse(baseline.record))
+    record["review_level"] = "model_reviewed"
+    object_value(record["value"])["relation"] = relation
+    if card_level:
+        object_value(record["subject"]).update(face_id=None, digital_phase=None)
+    fixture = with_records(copied(baseline, tmp_path / "repo"), [record])
+    with database.copy() as db:
+        fixture.publish(db)
+        translations = db.rows("translation")
+        result = import_links(
+            db,
+            fixture.inputs(),
+            build=fixture.build,
+            stores={"test-store": fixture.store},
+        )
+        assert len(result.fresh) == 1
+        assert not result.stale
+        assert db.rows("digital_text")
+        assert db.rows("digital_link_coverage") == ()
+        assert db.rows("translation") == translations
+        assert (
+            result.eligible_owner(
+                db, fixture.sources(), NameOwner("face_revision", "link-revision")
+            )
+            == frozenset()
+        )
+        assert any(r.values["state"] == "model_reviewed" for r in db.rows("decision"))
+
+
+def test_reviewed_alias_can_materialize_without_equal_japanese_names(
+    baseline: Fixture, database: DatabaseTemplate, tmp_path: Path
+) -> None:
+    def transform(data: dict[str, JsonValue], lang: str) -> None:
+        if lang == "ja":
+            common = object_value(
+                object_value(object_value(data["card_details"])["22345678"])["common"]
+            )
+            common["name"] = "Synthetic alias"
+
+    fixture = current_api(copied(baseline, tmp_path / "repo"), transform)
+    record = object_value(parse(baseline.record))
+    record["review_level"] = "model_reviewed"
+    value = object_value(record["value"])
+    value["digital_names"] = sorted(
+        [
+            {
+                "phase": "normal",
+                "lang": fixture.sources().document(ref)[0],
+                "name_ref": ref.model_dump(mode="json"),
+            }
+            for ref in fixture.refs
+        ],
+        key=lambda name: str(object_value(name)["lang"]),
+    )
+    fixture = with_records(fixture, [record])
+    with database.copy() as db:
+        fixture.publish(db)
+        result = import_links(
+            db,
+            fixture.inputs(),
+            build=fixture.build,
+            stores={"test-store": fixture.store},
+        )
+        assert len(result.fresh) == 1
+        assert result.stale == ()
+        assert any(r.values["relation"] == "same_card" for r in db.rows("digital_link"))
+
+
+def test_mixed_reviews_grant_only_the_human_link_for_the_same_owner(
+    dual: Fixture, database: DatabaseTemplate, tmp_path: Path
+) -> None:
+    human = object_value(parse(dual.record))
+    model = object_value(array(object_value(parse(dual.shard))["records"])[1])
+    model["review_level"] = "model_reviewed"
+    object_value(model["subject"]).update(card_id=dual.card.id, face_id=dual.face.id)
+    object_value(model["value"])["sve_names"] = object_value(human["value"])[
+        "sve_names"
+    ]
+    fixture = with_records(copied(dual, tmp_path / "repo"), [human, model])
+    with database.copy() as db:
+        fixture.publish(db)
+        result = import_links(
+            db,
+            fixture.inputs(),
+            build=fixture.build,
+            stores={"test-store": fixture.store},
+        )
+        assert len(result.fresh) == 2
+        assert result.eligible_owner(
+            db, fixture.sources(), NameOwner("face_revision", "link-revision")
+        ) == {link_id(Record.model_validate_json(canonical(human)))}

@@ -17,6 +17,7 @@ from sve_carddb.contracts.snapshot import tables
 from sve_carddb.core.json import array, canonical, digest, object_value, parse, string
 from sve_carddb.domains.routes.defaults import select_defaults
 from sve_carddb.domains.translations.names.bindings import DisplayBinding
+from sve_carddb.export.media_config import offline_configuration
 from sve_carddb.export.project import (
     Decisions,
     DisplayCheck,
@@ -2086,7 +2087,11 @@ def test_direct_own_name_never_transfers_to_another_owner(db: Database) -> None:
 
 
 def test_names_only_projection_keeps_digital_evidence_private(db: Database) -> None:
-    result = projected(db, replace(decisions(), private_digital=True))
+    with db.transaction():
+        db.delete("digital_link_coverage", {"card_id": "card"})
+    result = projected(
+        db, replace(decisions(), digital_links=frozenset(), digital_assets=False)
+    )
     assert all(
         not result.tables[name]
         for name in (
@@ -2094,12 +2099,70 @@ def test_names_only_projection_keeps_digital_evidence_private(db: Database) -> N
             "digital_art",
             "digital_link",
             "digital_art_link",
-            "digital_link_coverage",
             "voice",
             "card_voice",
         )
     )
     assert not result.config["digital_endpoints"]
+
+
+def test_browse_projection_retains_only_linked_digital_ids(db: Database) -> None:
+    with db.transaction():
+        decision = next(
+            r.values for r in db.rows("decision") if r.values["id"] == "decision"
+        )
+        db.insert(
+            "decision",
+            dict(decision) | {"id": "model-decision", "state": "model_reviewed"},
+        )
+        db.update(
+            "digital_link", {"id": "digital-link"}, {"decision_id": "model-decision"}
+        )
+        db.insert(
+            "digital_card",
+            {
+                "id": "private-only-digital",
+                "game": "sv1",
+                "official_id": "100000002",
+                "source_id": "source",
+            },
+        )
+    result = projected(
+        db,
+        replace(
+            decisions(), digital_links=frozenset({"digital-link"}), digital_assets=False
+        ),
+    )
+    assert result.tables["digital_card"] == [
+        {"id": "digital", "game": "sv1", "official_id": "100000001"}
+    ]
+    assert one(result, "digital_link")["review_level"] == "model_reviewed"
+    assert one(result, "digital_link")["digital_phase"] == "normal"
+    assert result.tables["digital_link_coverage"]
+    for table in ("digital_art", "digital_art_link", "voice", "card_voice"):
+        assert result.tables[table] == []
+    assert "digital_text" not in result.tables
+    assert "digital_face" not in result.tables
+    validate_closure(result.tables)
+    public = replace(result, config=offline_configuration(result.config))
+    exported = export_snapshot(
+        public,
+        Ownership.from_database(db, result),
+        Batch(
+            "preview-20261002T010203Z-0001",
+            "2026-10-02T01:02:03Z",
+            "2026-10-02",
+            ("jp",),
+        ),
+    )
+    exported.verify(public)
+
+
+def test_digital_assets_capability_rejects_non_boolean(db: Database) -> None:
+    with pytest.raises(
+        ValueError, match=r"^Digital asset projection flag must be boolean$"
+    ):
+        projected(db, replace(decisions(), digital_assets=1))  # type: ignore[arg-type]  # Deliberately invalid runtime adapter input.
 
 
 def test_section_only_correction_does_not_mark_unchanged_effect(db: Database) -> None:
