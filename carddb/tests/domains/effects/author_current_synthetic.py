@@ -27,7 +27,9 @@ def effect(
     row = current.db.select(
         "face_revision", current.db.columns("face_revision"), where={"id": revision}
     )[0]
-    identifier = "unit:synthetic-effect"
+    identifier = "unit:synthetic-effect:" + digest(text.encode()).removeprefix(
+        "sha256:"
+    )
     with current.db.transaction():
         existing = current.db.select(
             "text_unit",
@@ -118,12 +120,18 @@ def back_face(
 
 
 def token_section(
-    current: CurrentAuthorSources, monkeypatch: pytest.MonkeyPatch, revision: str
+    current: CurrentAuthorSources,
+    monkeypatch: pytest.MonkeyPatch,
+    revision: str,
+    *,
+    text: str | None = None,
+    kind: str = "token_definition",
 ) -> None:
-    text = (
-        "『仮トークン』{仮クラス}仮種族・フォロワー{コスト2}{攻撃力}3/{体力}4"
-        "{ラストワード}リーダーすべてに2ダメージ。"
-    )
+    if text is None:
+        text = (
+            "『仮トークン』{仮クラス}仮種族・フォロワー{コスト2}{攻撃力}3/{体力}4"
+            "{ラストワード}リーダーすべてに2ダメージ。"
+        )
     source_id = current.db.select(
         "face_revision", ("source_id",), where={"id": revision}
     )[0].values["source_id"]
@@ -144,7 +152,7 @@ def token_section(
                 "revision_id": revision,
                 "ordinal": 0,
                 "text_unit_id": identifier,
-                "kind": "token_definition",
+                "kind": kind,
                 "decision_id": None,
             },
         )

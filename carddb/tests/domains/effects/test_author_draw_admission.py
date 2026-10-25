@@ -1,4 +1,4 @@
-"""Resolved draw sources must not borrow the unrelated author entry adapter."""
+"""Only the admitted spell variant maps resolved draw sources to author bodies."""
 
 import hashlib
 import json
@@ -204,11 +204,23 @@ def test_frozen_draw_sources_resolve_without_author_admission(
     checked = resolve_source(candidate, use)
     # Reconstructed wording with synthetic identities is not a current registry proof.
     assert checked.source_proof == "derived_self_consistent"
-    with pytest.raises(SourceError, match="unsupported_source_ability_mapping"):
-        entry_payload(checked, "ability_0")
     declaration = ParamDecl(
         type="Nat", source=ParamSource(slot="leaf_0", component="value")
     )
+    if variant == "draw_exact_spell.v1":
+        assert entry_payload(checked, "ability_0") == {
+            "spell": {"do": [{"draw": {"who": "self", "n": count}}]},
+            "ports": {"imports": {}, "exports": {}},
+        }
+        assert (
+            parameter_expected(
+                checked, declaration, "A.act.draw", ("n",), {"n": {"param": "n"}}
+            )
+            == count
+        )
+        return
+    with pytest.raises(SourceError, match="unsupported_source_ability_mapping"):
+        entry_payload(checked, "ability_0")
     with pytest.raises(SourceError, match="unsupported_source_construct"):
         parameter_expected(
             checked, declaration, "A.act.draw", ("n",), {"n": {"param": "n"}}

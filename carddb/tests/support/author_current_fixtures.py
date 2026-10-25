@@ -70,6 +70,7 @@ def entry_snapshot() -> Snapshot:
         for name in (
             "translations/glossary/concepts/004.yaml",
             "translations/templates/definitions/094.yaml",
+            "translations/templates/definitions/117.yaml",
         )
         for record in Shard.model_validate_json(
             definitions.expand_shard(read_authored(authored / name, root=authored)[1])
@@ -78,9 +79,13 @@ def entry_snapshot() -> Snapshot:
     selected = tuple(
         record
         for record in records
-        if isinstance(record, FrameRecord) and record.data.id == EVOLVE_FRAME
+        if isinstance(record, FrameRecord)
+        and (
+            record.data.id == EVOLVE_FRAME
+            or record.data.semantic_variant.key == "draw_exact_spell.v1"
+        )
     )
-    assert len(selected) == 1
+    assert len(selected) == 2
     storm = tuple(
         record
         for record in records
@@ -92,7 +97,8 @@ def entry_snapshot() -> Snapshot:
             "format": 3,
             "kind": "translation_shard",
             "records": [
-                selected[0].model_dump(mode="json", exclude_computed_fields=True)
+                record.model_dump(mode="json", exclude_computed_fields=True)
+                for record in selected
             ],
         }
     )
