@@ -1,4 +1,4 @@
-"""Source resolution alone does not register the Lastword author adapter."""
+"""Printed Lastword has a closed adapter, separate from current-card proof."""
 
 from dataclasses import replace
 
@@ -8,7 +8,6 @@ from sve_carddb.contracts.author_evidence import SourceUse
 from sve_carddb.contracts.author_leaves import ParamDecl, ParamSource
 from sve_carddb.domains.effects.author_sources import (
     SourceCandidate,
-    SourceError,
     entry_payload,
     parameter_expected,
     resolve_source,
@@ -22,7 +21,7 @@ from .test_author_draw_admission import frozen_context
 
 
 @pytest.mark.parametrize("card_no", ["BP01-P25", "BP01-121"])
-def test_printed_lastword_resolves_without_author_admission(card_no: str) -> None:
+def test_printed_lastword_resolves_without_current_proof(card_no: str) -> None:
     raw, context = frozen_context(
         card_no, "3aeefc3819be4412d9e8891136fd813bbb27ce55011343f51d38289d4ee1d196"
     )
@@ -46,12 +45,16 @@ def test_printed_lastword_resolves_without_author_admission(card_no: str) -> Non
     checked = resolve_source(SourceCandidate(raw, context.source, engine, context), use)
     # Frozen wording and synthetic identities cannot prove current whole-card admission.
     assert checked.source_proof == "derived_self_consistent"
-    with pytest.raises(SourceError, match="unsupported_source_ability_mapping"):
-        entry_payload(checked, "ability_0")
+    assert entry_payload(checked, "ability_0") == {
+        "lastword": {"do": [{"damage": {"to": {"leaders": "all"}, "n": 2}}]},
+        "ports": {"imports": {}, "exports": {}},
+    }
     declaration = ParamDecl(
         type="Nat", source=ParamSource(slot="leaf_1", component="value")
     )
-    with pytest.raises(SourceError, match="unsupported_source_construct"):
+    assert (
         parameter_expected(
             checked, declaration, "A.act.damage", ("n",), {"n": {"param": "n"}}
         )
+        == 2
+    )
