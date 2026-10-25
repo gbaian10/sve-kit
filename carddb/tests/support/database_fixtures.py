@@ -4,11 +4,12 @@ import pytest
 
 from sve_carddb.build import create_database
 from sve_carddb.build.t0 import compile_t0
-from sve_carddb.build.t1 import compile_build, compile_minimum
+from sve_carddb.build.t1 import compile_minimum
 
 from .build_db_fixtures import seed
 from .build_db_t1_fixtures import populate as populate_t1
 from .build_db_t1b_fixtures import populate as populate_t1b
+from .compiled_schemas import compile_build
 from .database_template import DatabaseTemplate
 
 

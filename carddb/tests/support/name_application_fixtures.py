@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from sve_carddb.build import create_database
-from sve_carddb.build.t1 import compile_build
 from sve_carddb.core.json import object_value, parse
 from sve_carddb.core.provenance import BuildContext
 from sve_carddb.domains.digital.name_policies.application import Inputs
@@ -18,6 +17,7 @@ from sve_carddb.domains.translations.sources import Sources
 
 from .adoption_fixtures import commit
 from .build_db_fixtures import rows
+from .compiled_schemas import compile_build
 from .database_template import DatabaseTemplate
 from .digital_name_policy_fixtures import PolicyFixture, make_policy_fixture
 from .translation_fixtures import template, write

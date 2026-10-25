@@ -9,7 +9,6 @@ import pytest
 from pydantic import JsonValue, ValidationError
 
 from sve_carddb.build import Json, create_database
-from sve_carddb.build.t1 import compile_build
 from sve_carddb.core.json import array, canonical, object_value
 from sve_carddb.domains import mechanic_coverage, mechanic_grants, mechanics
 from sve_carddb.domains.products.models import LocalizedText
@@ -19,6 +18,7 @@ from sve_carddb.domains.text_observations.intern import TextInterner
 from sve_carddb.domains.translations.four_layer_classification import Classifier, Term
 
 from ..support import digital_link_import_fixtures
+from ..support.compiled_schemas import compile_build
 from ..support.digital_link_import_fixtures import make_fixture
 from ..support.translation_fixtures import template
 from .translations.test_four_layer_classification import classifier
@@ -163,7 +163,7 @@ def case(
     schema = compile_build(("keyword", "correction"))
     with create_database(schema) as db, template().copy() as baseline:
         with db.transaction():
-            for table in compile_build(("t0", "translation_evidence")).tables:
+            for table in template().schema.tables:
                 for row in baseline.rows(table.name):
                     db.insert(table.name, row.values)
         fixture.publish(db)
