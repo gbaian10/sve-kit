@@ -14,6 +14,7 @@ import {
   useSearchReadiness,
 } from "../../app/snapshot"
 import { StatusStrip } from "../../app/StatusStrip"
+import { CardLinkContext } from "../../components/card/card-link-context"
 import { CardImage } from "../../components/card/CardImage"
 import { CardNameHeading, PlainNameHeading } from "../../components/card/CardNameHeading"
 import { CardTypeBadge } from "../../components/card/CardTypeBadge"
@@ -63,6 +64,7 @@ import { CardWording } from "./CardWording"
 import { printingGroups } from "./printing-order"
 import { type CardLink, type PrintingEntry, RelatedCards } from "./RelatedCards"
 import { routeInput, useCardContent } from "./useCardContent"
+import { useFrameScroll } from "./useFrameScroll"
 
 const ICON_BUTTON =
   "flex size-11 shrink-0 items-center justify-center rounded-button text-text-1 hover:bg-surface-2"
@@ -171,6 +173,7 @@ export function CardView({
     },
   }
   const toast = useToast()
+  const articleRef = useRef<HTMLElement>(null)
   const [zoomed, setZoomed] = useState<string | null>(null)
   const closeZoom = useDialogHistory("card-zoom", zoomed !== null, () => {
     setZoomed(null)
@@ -195,6 +198,13 @@ export function CardView({
     client.snapshot()?.manifestHash,
   )
   const cardId = typeof card?.["id"] === "string" ? card["id"] : undefined
+  useFrameScroll({
+    article: articleRef,
+    active: frame !== undefined,
+    pending,
+    cardId,
+    entryKey: location.key,
+  })
   const [printingAttempt, setPrintingAttempt] = useState(0)
   const [printingCatalog, setPrintingCatalog] = useState<{
     source: Catalog
@@ -480,6 +490,16 @@ export function CardView({
       state: { ...(sameCard ? entry : listEntry), ...(route === undefined ? {} : { route }) },
     }
   }
+  const summaryLink = (target: CardSummary): CardLink =>
+    cardLink(
+      {
+        cardNo: target.cardNo,
+        ...(target.cardNoState === undefined ? {} : { cardNoState: target.cardNoState }),
+        ...(target.intId === undefined ? {} : { intId: target.intId }),
+        ...routeState(target),
+      },
+      false,
+    )
   const printingEntries = printingGroups(printings).map(
     ({ region: printingRegion, printings: regionalPrintings }) => ({
       region: printingRegion,
@@ -625,400 +645,395 @@ export function CardView({
     </>
   )
   return (
-    <article
-      aria-busy={pending}
-      className={cn("relative w-full", frame ? "flex min-h-full flex-col" : "mx-auto max-w-270")}
-    >
-      {pending && showPending && catalog && (
-        <p
-          role="status"
-          className={cn(
-            "pointer-events-none absolute top-13 z-10 rounded-control bg-surface-2 px-3 py-1 text-13 text-text-2 shadow",
-            frame ? "right-4" : "right-0",
-          )}
-        >
-          {t("cardPage.switchingCard")}
-        </p>
-      )}
-      {!frame && <StatusStrip readiness={readiness} />}
-      {/* Top row (design 06): back 44, set tag 28, number centred in Plex 600 15px, copy link 44. */}
-      <div
-        className={cn(
-          "flex h-13 items-center gap-1",
-          frame && "sticky top-0 z-20 bg-surface-1 px-4",
-        )}
+    <CardLinkContext value={frame ? summaryLink : null}>
+      <article
+        ref={articleRef}
+        aria-busy={pending}
+        className={cn("relative w-full", frame ? "flex min-h-full flex-col" : "mx-auto max-w-270")}
       >
-        {frame ? null : fromList ? (
-          <button
-            type="button"
-            aria-label={t("cardPage.back")}
-            title={t("cardPage.back")}
-            onClick={() => void navigate(-1)}
-            className={ICON_BUTTON}
+        {pending && showPending && catalog && (
+          <p
+            role="status"
+            className={cn(
+              "pointer-events-none absolute top-13 z-10 rounded-control bg-surface-2 px-3 py-1 text-13 text-text-2 shadow",
+              frame ? "right-4" : "right-0",
+            )}
           >
-            <ArrowLeft className="size-5.5" aria-hidden="true" />
-          </button>
-        ) : (
-          <RouterLink
-            to={region === "en" ? "/cards?ed=en" : "/cards"}
-            aria-label={t("cardPage.back")}
-            title={t("cardPage.back")}
-            className={ICON_BUTTON}
-          >
-            <ArrowLeft className="size-5.5" aria-hidden="true" />
-          </RouterLink>
+            {t("cardPage.switchingCard")}
+          </p>
         )}
-        {setCode !== undefined && (
-          <RouterLink
-            to={`/sets/${encodeURIComponent(setCode)}${region === "en" ? "?ed=en" : ""}`}
-            aria-label={t("cardPage.set", { code: setCode })}
-            className="flex h-7 shrink-0 items-center rounded-sm bg-surface-2 px-2 text-12 font-semibold text-text-2 hover:bg-surface-3"
-          >
-            {setCode}
-          </RouterLink>
-        )}
-        <Heading className="min-w-0 flex-1 truncate text-center font-sans text-15 font-semibold tabular-nums">
-          {resolved?.cardNo ?? frame?.key ?? cardNo ?? intId}
-        </Heading>
-        <button
-          type="button"
-          aria-label={t("cardPage.copyLink")}
-          title={t("cardPage.copyLink")}
-          onClick={() => void copyLink()}
-          className={ICON_BUTTON}
-        >
-          <Link2 className="size-5" aria-hidden="true" />
-        </button>
-        {frame && (
-          <>
-            <button
-              type="button"
-              aria-label={t("cardPage.fullscreen")}
-              title={t("cardPage.fullscreen")}
-              disabled={!summary}
-              onClick={openFullPage}
-              className={ICON_BUTTON}
-            >
-              <Maximize2 className="size-5" aria-hidden="true" />
-            </button>
-            <button
-              type="button"
-              aria-label={t("cardPage.closePanel")}
-              title={t("cardPage.closePanel")}
-              onClick={frame.onClose}
-              className={ICON_BUTTON}
-            >
-              <X className="size-5" aria-hidden="true" />
-            </button>
-          </>
-        )}
-      </div>
-      {/* Phone and tablet: the large image first, then the text; desktop: a sticky image column. */}
-      <div
-        className={cn(
-          frame === undefined && "lg:grid lg:grid-cols-[340px_minmax(0,1fr)] lg:gap-x-10",
-          // The drawer and the modal are containers: side by side only once they are wide enough.
-          frame !== undefined && "px-4 @4xl:grid @4xl:grid-cols-[280px_minmax(0,1fr)] @4xl:gap-x-6",
-        )}
-        onClickCapture={(event) => {
-          if (
-            pending &&
-            event.target instanceof Element &&
-            !event.target.closest("[data-card-navigation]")
-          ) {
-            event.preventDefault()
-            event.stopPropagation()
-          }
-        }}
-      >
+        {!frame && <StatusStrip readiness={readiness} />}
+        {/* Top row (design 06): back 44, set tag 28, number centred in Plex 600 15px, copy link 44. */}
         <div
           className={cn(
-            "mt-1 flex flex-col items-center gap-3",
-            frame === undefined && "lg:sticky lg:top-4 lg:self-start",
-            frame !== undefined && "@4xl:sticky @4xl:top-13 @4xl:self-start",
+            "flex h-13 items-center gap-1",
+            frame && "sticky top-0 z-20 bg-surface-1 px-4",
           )}
         >
-          {views.map(
-            ({ faceId, ordinal, faceSummary, name }) =>
-              faceSummary &&
-              name && (
-                <button
-                  key={faceId}
-                  type="button"
-                  disabled={pending}
-                  aria-label={t("cardPage.zoom", { name: name.primary.text })}
-                  onClick={() => {
-                    setZoomed(faceId)
-                  }}
-                  className={cn(
-                    "block rounded-card shadow-lg transition-transform hover:scale-[1.01]",
-                    frame === undefined && IMAGE_SLOT,
-                    frame !== undefined && "w-[64%] max-w-64 @4xl:w-full @4xl:max-w-none",
-                  )}
-                >
-                  <CardImage
-                    summary={faceSummary}
-                    onReady={ordinal === 0 ? imageReady : undefined}
-                    name={name.primary}
-                    images={images}
-                    alt="decorative"
-                    size="large"
-                    className="w-full"
-                  />
-                </button>
-              ),
+          {frame ? null : fromList ? (
+            <button
+              type="button"
+              aria-label={t("cardPage.back")}
+              title={t("cardPage.back")}
+              onClick={() => void navigate(-1)}
+              className={ICON_BUTTON}
+            >
+              <ArrowLeft className="size-5.5" aria-hidden="true" />
+            </button>
+          ) : (
+            <RouterLink
+              to={region === "en" ? "/cards?ed=en" : "/cards"}
+              aria-label={t("cardPage.back")}
+              title={t("cardPage.back")}
+              className={ICON_BUTTON}
+            >
+              <ArrowLeft className="size-5.5" aria-hidden="true" />
+            </RouterLink>
+          )}
+          {setCode !== undefined && (
+            <RouterLink
+              to={`/sets/${encodeURIComponent(setCode)}${region === "en" ? "?ed=en" : ""}`}
+              aria-label={t("cardPage.set", { code: setCode })}
+              className="flex h-7 shrink-0 items-center rounded-sm bg-surface-2 px-2 text-12 font-semibold text-text-2 hover:bg-surface-3"
+            >
+              {setCode}
+            </RouterLink>
+          )}
+          <Heading className="min-w-0 flex-1 truncate text-center font-sans text-15 font-semibold tabular-nums">
+            {resolved?.cardNo ?? frame?.key ?? cardNo ?? intId}
+          </Heading>
+          <button
+            type="button"
+            aria-label={t("cardPage.copyLink")}
+            title={t("cardPage.copyLink")}
+            onClick={() => void copyLink()}
+            className={ICON_BUTTON}
+          >
+            <Link2 className="size-5" aria-hidden="true" />
+          </button>
+          {frame && (
+            <>
+              <button
+                type="button"
+                aria-label={t("cardPage.fullscreen")}
+                title={t("cardPage.fullscreen")}
+                disabled={!summary}
+                onClick={openFullPage}
+                className={ICON_BUTTON}
+              >
+                <Maximize2 className="size-5" aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                aria-label={t("cardPage.closePanel")}
+                title={t("cardPage.closePanel")}
+                onClick={frame.onClose}
+                className={ICON_BUTTON}
+              >
+                <X className="size-5" aria-hidden="true" />
+              </button>
+            </>
           )}
         </div>
-        <div className="mt-4 min-w-0 lg:mt-1">
-          {cardId && catalog && (
-            <CardRestrictions client={client} cardId={cardId} region={region} />
+        {/* Phone and tablet: the large image first, then the text; desktop: a sticky image column. */}
+        <div
+          className={cn(
+            frame === undefined && "lg:grid lg:grid-cols-[340px_minmax(0,1fr)] lg:gap-x-10",
+            // The drawer and the modal are containers: side by side only once they are wide enough.
+            frame !== undefined &&
+              "px-4 @4xl:grid @4xl:grid-cols-[280px_minmax(0,1fr)] @4xl:gap-x-6",
           )}
-          {views.map(({ faceId, ordinal, wording, revision, faceSummary, name }) => {
-            const basics =
-              faceCatalog && printingId
-                ? faceBasics(faceCatalog.index, faceId, region, printingId)
-                : undefined
-            const nameRevisionId = basics?.revision?.["id"]
-            const values = basics?.values
-            const classCode =
-              typeof values?.["class_code"] === "string"
-                ? values["class_code"]
-                : values?.["class_code"] === null
-                  ? null
-                  : undefined
-            const typeCode = typeof values?.["type_code"] === "string" ? values["type_code"] : null
-            const locations = deckLocationBadges(
-              typeCode ?? "",
-              arrayValue(values?.["special_kinds"] ?? []),
-            )
-            const traits = (values?.["traits"] ?? []) as string[]
-            // Undefined until the credits are read (or when the read failed): nothing is claimed then.
-            const faceArt = faceArts.find(([face]) => face === faceId)?.[1] ?? ""
-            const artistsOfFace =
-              credited?.key === artsKey && credited.value !== undefined && faceArt !== ""
-                ? (credited.value.get(faceArt) ?? [])
-                : undefined
-            const cost = typeof values?.["cost"] === "number" ? values["cost"] : null
-            const attack = typeof values?.["attack"] === "number" ? values["attack"] : null
-            const defense = typeof values?.["defense"] === "number" ? values["defense"] : null
-            return (
-              <section
-                key={faceId}
-                aria-label={name?.primary.text ?? faceId}
-                className={cn(ordinal > 0 && "mt-6 border-t border-border pt-4")}
-              >
-                {faceSummary && name && (
-                  <div className="flex flex-col gap-1.5">
-                    {ordinal > 0 && <Badge className="self-start">{t("cardPage.backFace")}</Badge>}
-                    <div className="flex items-start gap-2">
-                      <div className="min-w-0 flex-1">
-                        {typeof nameRevisionId === "string" ? (
-                          <CardNameHeading
-                            client={client}
-                            edition={region}
-                            resolver={null}
-                            owner={{ kind: "face_revision", id: nameRevisionId }}
-                            fallback={name}
-                          />
-                        ) : (
-                          <PlainNameHeading name={name} />
-                        )}
-                      </div>
-                    </div>
-                    <p
-                      data-card-classification=""
-                      className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-13 text-text-2"
-                    >
-                      {classCode !== undefined && (
-                        <>
-                          <img
-                            src={CLASS_ICON[classStyle(classCode)]}
-                            alt=""
-                            className="size-5 shrink-0"
-                          />
-                          <span>
-                            {classCode === null ? t("search.neutral") : label("class", classCode)}
-                            {joiner}
-                          </span>
-                        </>
-                      )}
-                      {typeCode !== "leader" && (
-                        <CardTypeBadge
-                          code={typeCode}
-                          label={typeCode ? label("type", typeCode) : ""}
-                          fallback
-                        />
-                      )}
-                      <DeckLocationBadges locations={locations} />
-                      <RarityBadges {...faceSummary} />
-                      {traits.length > 0 && (
-                        <span>{traits.map((code) => label("trait", code)).join(joiner)}</span>
-                      )}
-                    </p>
-                    {artistsOfFace?.length === 0 && (
-                      <p data-card-artists="none" className="text-13 text-text-3">
-                        {t("cardPage.artist")}
-                        {t("cardPage.artistNone")}
-                      </p>
+          onClickCapture={(event) => {
+            if (
+              pending &&
+              event.target instanceof Element &&
+              !event.target.closest("[data-card-navigation]")
+            ) {
+              event.preventDefault()
+              event.stopPropagation()
+            }
+          }}
+        >
+          <div
+            className={cn(
+              "mt-1 flex flex-col items-center gap-3",
+              frame === undefined && "lg:sticky lg:top-4 lg:self-start",
+              frame !== undefined && "@4xl:sticky @4xl:top-13 @4xl:self-start",
+            )}
+          >
+            {views.map(
+              ({ faceId, ordinal, faceSummary, name }) =>
+                faceSummary &&
+                name && (
+                  <button
+                    key={faceId}
+                    type="button"
+                    disabled={pending}
+                    aria-label={t("cardPage.zoom", { name: name.primary.text })}
+                    onClick={() => {
+                      setZoomed(faceId)
+                    }}
+                    className={cn(
+                      "block rounded-card shadow-lg transition-transform hover:scale-[1.01]",
+                      frame === undefined && IMAGE_SLOT,
+                      frame !== undefined && "w-[64%] max-w-64 @4xl:w-full @4xl:max-w-none",
                     )}
-                    {artistsOfFace !== undefined && artistsOfFace.length > 0 && (
-                      <p data-card-artists="" className="text-13 text-text-2">
-                        {t("cardPage.artist")}
-                        {artistsOfFace.map((artist, index) => (
-                          <span key={artist.id}>
-                            {index > 0 && joiner}
-                            <Link
-                              to={editionUrl(
-                                `/cards${querySearch({ ...DEFAULT_QUERY, artists: [artist.id] })}`,
-                                region,
-                              )}
-                              aria-label={t("cardPage.artistLink", { name: artist.name })}
-                            >
-                              {artist.name}
-                            </Link>
-                          </span>
-                        ))}
-                      </p>
-                    )}
-                    <StatCells className="mt-1" cost={cost} attack={attack} defense={defense} />
-                    {!frame && ordinal === 0 && navigation && (
-                      <div className="mt-2 flex gap-2">{navigation}</div>
-                    )}
-                  </div>
-                )}
-                {printingId && catalog && (
-                  <CardTextPanel
-                    cardId={cardId ?? ""}
-                    key={printingId}
-                    client={client}
-                    edition={region}
-                    printingId={printingId}
-                    faceId={faceId}
                   >
-                    <CardWording
+                    <CardImage
+                      summary={faceSummary}
+                      onReady={ordinal === 0 ? imageReady : undefined}
+                      name={name.primary}
+                      images={images}
+                      alt="decorative"
+                      size="large"
+                      className="w-full"
+                    />
+                  </button>
+                ),
+            )}
+          </div>
+          <div className="mt-4 min-w-0 lg:mt-1">
+            {cardId && catalog && (
+              <CardRestrictions client={client} cardId={cardId} region={region} />
+            )}
+            {views.map(({ faceId, ordinal, wording, revision, faceSummary, name }) => {
+              const basics =
+                faceCatalog && printingId
+                  ? faceBasics(faceCatalog.index, faceId, region, printingId)
+                  : undefined
+              const nameRevisionId = basics?.revision?.["id"]
+              const values = basics?.values
+              const classCode =
+                typeof values?.["class_code"] === "string"
+                  ? values["class_code"]
+                  : values?.["class_code"] === null
+                    ? null
+                    : undefined
+              const typeCode =
+                typeof values?.["type_code"] === "string" ? values["type_code"] : null
+              const locations = deckLocationBadges(
+                typeCode ?? "",
+                arrayValue(values?.["special_kinds"] ?? []),
+              )
+              const traits = (values?.["traits"] ?? []) as string[]
+              // Undefined until the credits are read (or when the read failed): nothing is claimed then.
+              const faceArt = faceArts.find(([face]) => face === faceId)?.[1] ?? ""
+              const artistsOfFace =
+                credited?.key === artsKey && credited.value !== undefined && faceArt !== ""
+                  ? (credited.value.get(faceArt) ?? [])
+                  : undefined
+              const cost = typeof values?.["cost"] === "number" ? values["cost"] : null
+              const attack = typeof values?.["attack"] === "number" ? values["attack"] : null
+              const defense = typeof values?.["defense"] === "number" ? values["defense"] : null
+              return (
+                <section
+                  key={faceId}
+                  aria-label={name?.primary.text ?? faceId}
+                  className={cn(ordinal > 0 && "mt-6 border-t border-border pt-4")}
+                >
+                  {faceSummary && name && (
+                    <div className="flex flex-col gap-1.5">
+                      {ordinal > 0 && (
+                        <Badge className="self-start">{t("cardPage.backFace")}</Badge>
+                      )}
+                      <div className="flex items-start gap-2">
+                        <div className="min-w-0 flex-1">
+                          {typeof nameRevisionId === "string" ? (
+                            <CardNameHeading
+                              client={client}
+                              edition={region}
+                              resolver={null}
+                              owner={{ kind: "face_revision", id: nameRevisionId }}
+                              fallback={name}
+                            />
+                          ) : (
+                            <PlainNameHeading name={name} />
+                          )}
+                        </div>
+                      </div>
+                      <p
+                        data-card-classification=""
+                        className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-13 text-text-2"
+                      >
+                        {classCode !== undefined && (
+                          <>
+                            <img
+                              src={CLASS_ICON[classStyle(classCode)]}
+                              alt=""
+                              className="size-5 shrink-0"
+                            />
+                            <span>
+                              {classCode === null ? t("search.neutral") : label("class", classCode)}
+                              {joiner}
+                            </span>
+                          </>
+                        )}
+                        {typeCode !== "leader" && (
+                          <CardTypeBadge
+                            code={typeCode}
+                            label={typeCode ? label("type", typeCode) : ""}
+                            fallback
+                          />
+                        )}
+                        <DeckLocationBadges locations={locations} />
+                        <RarityBadges {...faceSummary} />
+                        {traits.length > 0 && (
+                          <span>{traits.map((code) => label("trait", code)).join(joiner)}</span>
+                        )}
+                      </p>
+                      {artistsOfFace?.length === 0 && (
+                        <p data-card-artists="none" className="text-13 text-text-3">
+                          {t("cardPage.artist")}
+                          {t("cardPage.artistNone")}
+                        </p>
+                      )}
+                      {artistsOfFace !== undefined && artistsOfFace.length > 0 && (
+                        <p data-card-artists="" className="text-13 text-text-2">
+                          {t("cardPage.artist")}
+                          {artistsOfFace.map((artist, index) => (
+                            <span key={artist.id}>
+                              {index > 0 && joiner}
+                              <Link
+                                to={editionUrl(
+                                  `/cards${querySearch({ ...DEFAULT_QUERY, artists: [artist.id] })}`,
+                                  region,
+                                )}
+                                aria-label={t("cardPage.artistLink", { name: artist.name })}
+                              >
+                                {artist.name}
+                              </Link>
+                            </span>
+                          ))}
+                        </p>
+                      )}
+                      <StatCells className="mt-1" cost={cost} attack={attack} defense={defense} />
+                      {!frame && ordinal === 0 && navigation && (
+                        <div className="mt-2 flex gap-2">{navigation}</div>
+                      )}
+                    </div>
+                  )}
+                  {printingId && catalog && (
+                    <CardTextPanel
+                      cardId={cardId ?? ""}
+                      key={printingId}
                       client={client}
                       edition={region}
-                      // The completed printings carry rarity and premium, which order the chips
-                      // and so the printing named by the wording note.
-                      catalog={completePrintings?.value ?? catalog}
                       printingId={printingId}
-                      wording={wording}
-                      revision={revision}
-                      linkOf={(id) => printingLinks.get(id)}
-                    />
-                  </CardTextPanel>
-                )}
+                      faceId={faceId}
+                    >
+                      <CardWording
+                        client={client}
+                        edition={region}
+                        // The completed printings carry rarity and premium, which order the chips
+                        // and so the printing named by the wording note.
+                        catalog={completePrintings?.value ?? catalog}
+                        printingId={printingId}
+                        wording={wording}
+                        revision={revision}
+                        linkOf={(id) => printingLinks.get(id)}
+                      />
+                    </CardTextPanel>
+                  )}
+                </section>
+              )
+            })}
+            {catalog && cardId !== undefined && (
+              <CardQa
+                key={`qa:${cardId}`}
+                client={client}
+                cardId={cardId}
+                edition={region}
+                showOther={showOther}
+              />
+            )}
+            {showOther && !other.catalog && !other.error && (
+              <p role="status" className="mt-6 text-13 text-text-2">
+                {t("cardPage.switchingEdition")}
+              </p>
+            )}
+            {(other.error !== undefined || completePrintings?.error !== undefined) && (
+              <div role="alert" className="mt-6 text-13 text-text-2">
+                {t("cardPage.otherEditionFailed")}
+                <Button
+                  onClick={() => {
+                    other.retry()
+                    setPrintingAttempt((value) => value + 1)
+                  }}
+                >
+                  {t("status.retry")}
+                </Button>
+              </div>
+            )}
+            {printings.length > 1 && (
+              <section className="mt-6" aria-label={t("cardPage.printings")}>
+                <h3 className="text-13 font-semibold text-text-3">{t("cardPage.printings")}</h3>
+                {printingEntries.map(({ region: printingRegion, printings: regionalPrintings }) => (
+                  <div key={printingRegion} className="mt-1.5 flex items-start gap-2">
+                    <span className="inline-flex h-8 items-center text-13 font-semibold text-text-3">
+                      {printingRegion.toUpperCase()}:
+                    </span>
+                    <ul aria-label={printingRegion.toUpperCase()} className="flex flex-wrap gap-2">
+                      {regionalPrintings.map(({ id, cardNo: no, rarity, link }) => (
+                        <li key={id}>
+                          <RouterLink
+                            to={link.to}
+                            state={link.state}
+                            replace
+                            preventScrollReset
+                            aria-current={id === printingId ? "page" : undefined}
+                            className="inline-flex h-8 items-center rounded-pill border border-border px-2.5 font-mono text-13 hover:bg-surface-2 aria-[current=page]:border-accent aria-[current=page]:bg-accent-soft aria-[current=page]:font-semibold"
+                          >
+                            {no}
+                            {rarity !== undefined && rarity !== "" && ` (${rarity})`}
+                          </RouterLink>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
               </section>
-            )
-          })}
-          {catalog && cardId !== undefined && (
-            <CardQa
-              key={`qa:${cardId}`}
-              client={client}
-              cardId={cardId}
-              edition={region}
-              showOther={showOther}
-            />
-          )}
-          {showOther && !other.catalog && !other.error && (
-            <p role="status" className="mt-6 text-13 text-text-2">
-              {t("cardPage.switchingEdition")}
-            </p>
-          )}
-          {(other.error !== undefined || completePrintings?.error !== undefined) && (
-            <div role="alert" className="mt-6 text-13 text-text-2">
-              {t("cardPage.otherEditionFailed")}
-              <Button
-                onClick={() => {
-                  other.retry()
-                  setPrintingAttempt((value) => value + 1)
-                }}
-              >
-                {t("status.retry")}
-              </Button>
-            </div>
-          )}
-          {printings.length > 1 && (
-            <section className="mt-6" aria-label={t("cardPage.printings")}>
-              <h3 className="text-13 font-semibold text-text-3">{t("cardPage.printings")}</h3>
-              {printingEntries.map(({ region: printingRegion, printings: regionalPrintings }) => (
-                <div key={printingRegion} className="mt-1.5 flex items-start gap-2">
-                  <span className="inline-flex h-8 items-center text-13 font-semibold text-text-3">
-                    {printingRegion.toUpperCase()}:
-                  </span>
-                  <ul aria-label={printingRegion.toUpperCase()} className="flex flex-wrap gap-2">
-                    {regionalPrintings.map(({ id, cardNo: no, rarity, link }) => (
-                      <li key={id}>
-                        <RouterLink
-                          to={link.to}
-                          state={link.state}
-                          replace
-                          preventScrollReset
-                          aria-current={id === printingId ? "page" : undefined}
-                          className="inline-flex h-8 items-center rounded-pill border border-border px-2.5 font-mono text-13 hover:bg-surface-2 aria-[current=page]:border-accent aria-[current=page]:bg-accent-soft aria-[current=page]:font-semibold"
-                        >
-                          {no}
-                          {rarity !== undefined && rarity !== "" && ` (${rarity})`}
-                        </RouterLink>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </section>
-          )}
-          {catalog && cardId !== undefined && printingId !== null && (
-            <RelatedCards
-              key={`related:${cardId}`}
-              client={client}
-              catalog={catalog}
-              edition={region}
-              cardId={cardId}
-              printingId={printingId}
-              revisionIds={views.flatMap(({ revision }) =>
-                typeof revision?.["id"] === "string" ? [revision["id"]] : [],
-              )}
-              printings={printingThumbnails}
-              otherSnapshot={showOther ? other.snapshot : undefined}
-              linkTo={(target) =>
-                cardLink(
-                  {
-                    cardNo: target.cardNo,
-                    ...(target.cardNoState === undefined
-                      ? {}
-                      : { cardNoState: target.cardNoState }),
-                    ...(target.intId === undefined ? {} : { intId: target.intId }),
-                    ...routeState(target),
-                  },
-                  false,
-                )
-              }
-            />
-          )}
+            )}
+            {catalog && cardId !== undefined && printingId !== null && (
+              <RelatedCards
+                key={`related:${cardId}`}
+                client={client}
+                catalog={catalog}
+                edition={region}
+                cardId={cardId}
+                printingId={printingId}
+                revisionIds={views.flatMap(({ revision }) =>
+                  typeof revision?.["id"] === "string" ? [revision["id"]] : [],
+                )}
+                printings={printingThumbnails}
+                otherSnapshot={showOther ? other.snapshot : undefined}
+                linkTo={summaryLink}
+              />
+            )}
+          </div>
         </div>
-      </div>
-      {frame && navigation && (
-        <div className="sticky bottom-0 z-20 mt-auto flex gap-2 border-t border-border bg-surface-1 px-4 py-3 pb-[max(env(safe-area-inset-bottom),0.75rem)]">
-          {navigation}
-        </div>
-      )}
-      <Dialog
-        open={!pending && zoomedView !== undefined}
-        onClose={closeZoom}
-        title={zoomedView?.name?.primary.text ?? ""}
-        variant="center"
-      >
-        {zoomedView?.faceSummary && zoomedView.name && (
-          <CardImage
-            summary={zoomedView.faceSummary}
-            name={zoomedView.name.primary}
-            images={images}
-            alt="identify"
-            size="large"
-            className="mx-auto w-[min(100%,calc((92dvh-7rem)*63/88))]"
-          />
+        {frame && navigation && (
+          <div className="sticky bottom-0 z-20 mt-auto flex gap-2 border-t border-border bg-surface-1 px-4 py-3 pb-[max(env(safe-area-inset-bottom),0.75rem)]">
+            {navigation}
+          </div>
         )}
-      </Dialog>
-    </article>
+        <Dialog
+          open={!pending && zoomedView !== undefined}
+          onClose={closeZoom}
+          title={zoomedView?.name?.primary.text ?? ""}
+          variant="center"
+        >
+          {zoomedView?.faceSummary && zoomedView.name && (
+            <CardImage
+              summary={zoomedView.faceSummary}
+              name={zoomedView.name.primary}
+              images={images}
+              alt="identify"
+              size="large"
+              className="mx-auto w-[min(100%,calc((92dvh-7rem)*63/88))]"
+            />
+          )}
+        </Dialog>
+      </article>
+    </CardLinkContext>
   )
 }

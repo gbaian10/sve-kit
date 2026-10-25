@@ -22,7 +22,6 @@ import {
   stringValue,
   textRuns,
 } from "../../data"
-import { printingPath } from "../../domain/cardRoute"
 import { displayName } from "../../domain/nameDisplay"
 import { editionUrl, querySearch } from "../../domain/query/codec"
 import { DEFAULT_QUERY } from "../../domain/query/model"
@@ -32,6 +31,7 @@ import { representatives } from "../../pages/card/related-cards"
 import { usePrefs } from "../../settings"
 import { cn } from "../ui/cn"
 import { Link } from "../ui/Link"
+import { useCardLinkTarget } from "./card-link-context"
 import { CardImage } from "./CardImage"
 import { SymbolIcon } from "./InlineText"
 import { inlinePieces, type SymbolPiece } from "./textSymbols"
@@ -177,6 +177,7 @@ function CardReference({
   readonly onList: (trigger: HTMLElement) => void
   readonly children: ReactNode
 }) {
+  const linkOf = useCardLinkTarget()
   const single = cards.length === 1 ? cards[0] : undefined
   const underline = "cursor-pointer text-inherit underline decoration-dotted underline-offset-4"
   // The preview holds block elements, so it is positioned from here but rendered outside the <p>.
@@ -195,9 +196,11 @@ function CardReference({
     onPreview(null)
   }
   const hovering = { onMouseEnter: show, onMouseLeave: hide, onFocus: show, onBlur: hide }
-  return single ? (
+  const target = single ? linkOf(single) : undefined
+  return single && target ? (
     <Link
-      to={printingPath(single)}
+      to={target.to}
+      state={target.state}
       className={cn(underline, "hover:no-underline")}
       aria-describedby={tooltipId}
       {...hovering}
@@ -265,6 +268,7 @@ function CardList({
 }) {
   const { t } = useTranslation()
   const images = useImageIndex(client, true)
+  const linkOf = useCardLinkTarget()
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape" && !event.defaultPrevented) {
@@ -293,16 +297,20 @@ function CardList({
       </button>
       <p className="text-12 text-text-3">{t("card.reference.cardName")}</p>
       <ul className="mt-1 flex flex-col gap-1">
-        {cards.map((card) => (
-          <li key={card.printingId}>
-            <Link
-              to={printingPath(card)}
-              className="flex items-center gap-2.5 rounded-control p-1 text-text-1 hover:bg-surface-3 hover:no-underline"
-            >
-              <LinkedCard card={card} edition={edition} images={images} size="row" />
-            </Link>
-          </li>
-        ))}
+        {cards.map((card) => {
+          const target = linkOf(card)
+          return (
+            <li key={card.printingId}>
+              <Link
+                to={target.to}
+                state={target.state}
+                className="flex items-center gap-2.5 rounded-control p-1 text-text-1 hover:bg-surface-3 hover:no-underline"
+              >
+                <LinkedCard card={card} edition={edition} images={images} size="row" />
+              </Link>
+            </li>
+          )
+        })}
       </ul>
     </aside>
   )

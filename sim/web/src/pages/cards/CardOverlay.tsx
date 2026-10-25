@@ -470,7 +470,9 @@ export function useCardOverlay({
         style={{ width: `var(${DRAWER_WIDTH_VAR}, ${String(width)}px)` }}
       >
         <DrawerHandle side={side} />
-        <div className="@container min-w-0 flex-1 overflow-y-auto">{content}</div>
+        <div data-card-scroll="" className="@container min-w-0 flex-1 overflow-y-auto">
+          {content}
+        </div>
       </aside>
     ) : null,
     modal: (
