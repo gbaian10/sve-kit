@@ -37,6 +37,7 @@ class ServerState:
     sequence: int = 0
     status: int | None = None
     fail_put: int | None = None
+    put_statuses: list[int] = field(default_factory=list)
     fail_key: str | None = None
     delete_status: int | None = None
     delete_errors: set[str] = field(default_factory=set)
@@ -204,6 +205,9 @@ class Handler(BaseHTTPRequestHandler):
     def put_object(self, key: str, raw: bytes, headers: dict[str, str]) -> None:
         state = self.state
         obj = state.objects.get(key)
+        if state.put_statuses:
+            self.respond(state.put_statuses.pop(0), state.error_body)
+            return
         if state.fail_put is not None or key == state.fail_key:
             self.respond(state.fail_put or 500, state.error_body)
             return

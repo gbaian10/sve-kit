@@ -1,12 +1,23 @@
 """R2 S3 boundary: exact reads, conditional writes and public-only listing."""
 
+from __future__ import annotations
+
 import re
+import sys
 from contextlib import contextmanager
 from dataclasses import dataclass
 from http import HTTPStatus
+from time import sleep as sleep_for
 from typing import TYPE_CHECKING
 
-from botocore.exceptions import BotoCoreError, ClientError
+from botocore.exceptions import (
+    BotoCoreError,
+    ClientError,
+    ConnectionClosedError,
+    ConnectTimeoutError,
+    EndpointConnectionError,
+    ReadTimeoutError,
+)
 from botocore.parsers import ResponseParserError
 from sve_carddb.export.read_api import IMAGE_KEY, JSON_KEY, ExportError
 
@@ -22,7 +33,8 @@ from sve_publish.sdk import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Generator
+    from collections.abc import Callable, Generator
+    from threading import Event
 
     from types_boto3_s3 import S3Client
     from types_boto3_s3.type_defs import (
@@ -39,6 +51,20 @@ IMAGE_PREFIXES = PUBLIC_PREFIXES - SNAPSHOT_PREFIXES
 MAX_OBJECT = 128 * 1024 * 1024
 # R2 processes roughly 60 ms per key, so each batch must finish within the 30-second read timeout.
 MAX_DELETE_BATCH = 100
+IMAGE_RETRY_DELAYS = (1, 4)
+HTTP_STATUS_LIMIT = 600
+IMAGE_TRANSPORT_ERRORS = (
+    EndpointConnectionError,
+    ConnectionClosedError,
+    ReadTimeoutError,
+    ConnectTimeoutError,
+)
+
+
+def _retryable_image_status(code: int) -> bool:
+    return code in {HTTPStatus.REQUEST_TIMEOUT, HTTPStatus.TOO_MANY_REQUESTS} or (
+        HTTPStatus.INTERNAL_SERVER_ERROR <= code < HTTP_STATUS_LIMIT
+    )
 
 
 @dataclass(frozen=True, repr=False)
@@ -73,7 +99,7 @@ class R2Store:
 
     @staticmethod
     @contextmanager
-    def _operation(key: str) -> Generator[None]:
+    def _operation(key: str, *, preserve_boundary: bool = False) -> Generator[None]:
         try:
             validate_key(key)
         except ExportError:
@@ -81,6 +107,8 @@ class R2Store:
         try:
             yield
         except BoundaryError as error:
+            if preserve_boundary:
+                raise
             raise ExportError(str(error)) from None
         except BotoCoreError:
             raise ExportError("R2 transport or protocol failed") from None
@@ -133,19 +161,56 @@ class R2Store:
                 ) from None
             return True
 
-    def put_image(self, key: str, raw: bytes) -> None:
+    def put_image(  # ruff: ignore[complex-structure] -- classify bounded image retry failures
+        self,
+        key: str,
+        raw: bytes,
+        *,
+        stopped: Event | None = None,
+        progress: Callable[[str], None] | None = None,
+        sleep: Callable[[float], None] | None = None,
+    ) -> None:
         """Overwrite only image keys after the inventory stopped advertising them."""
         if not IMAGE_KEY.fullmatch(key):
             raise ExportError("Image PUT requires a public WebP key")
-        with self._operation(key):
+        last_reason = "retry stopped"
+        for attempt in range(1, len(IMAGE_RETRY_DELAYS) + 2):
+            if attempt > 1 and stopped is not None and stopped.is_set():
+                raise ExportError(f"R2 image PUT failed ({last_reason})")
             try:
-                self.client.put_object(
-                    **put_parameters(self.bucket, key, raw, IMAGE_HEADERS, image=True)
+                with self._operation(key, preserve_boundary=True):
+                    self.client.put_object(
+                        **put_parameters(
+                            self.bucket, key, raw, IMAGE_HEADERS, image=True
+                        )
+                    )
+            except BoundaryError:
+                raise ExportError("R2 image PUT failed (BoundaryError)") from None
+            except (ClientError, *IMAGE_TRANSPORT_ERRORS) as error:
+                code = status(error) if isinstance(error, ClientError) else None
+                retryable = (
+                    code is not None and _retryable_image_status(code)
+                    if isinstance(error, ClientError)
+                    else isinstance(error, IMAGE_TRANSPORT_ERRORS)
                 )
-            except ClientError:
+                reason = str(code) if code is not None else type(error).__name__
+                last_reason = reason
+                if not retryable or attempt > len(IMAGE_RETRY_DELAYS):
+                    raise ExportError(f"R2 image PUT failed ({reason})") from None
+                if stopped is not None and stopped.is_set():
+                    raise ExportError(f"R2 image PUT failed ({reason})") from None
+                line = f"Retrying image PUT {key}, attempt {attempt + 1}/3 ({reason})"
+                if progress is None:
+                    sys.stderr.write(line + "\n")
+                else:
+                    progress(line)
+                (sleep or sleep_for)(IMAGE_RETRY_DELAYS[attempt - 1])
+            except BotoCoreError as error:
                 raise ExportError(
-                    "R2 image PUT failed; rerun the same image input"
+                    f"R2 image PUT failed ({type(error).__name__})"
                 ) from None
+            else:
+                return
 
     def delete_many(self, keys: list[str]) -> None:
         """Delete one public-only batch; validate every key before sending it."""

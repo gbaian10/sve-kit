@@ -123,7 +123,9 @@ class UploadPool:
         if self.stopped.is_set():
             return None
         if item.image:
-            self.store.put_image(item.key, raw)
+            self.store.put_image(
+                item.key, raw, stopped=self.stopped, progress=self.progress
+            )
             return 1
         if self.store.put(item.key, raw, item.headers, expected=None):
             return 1

@@ -1,5 +1,6 @@
 """No external network: localhost S3 tests and redacted failure counterexamples."""
 
+from threading import Event
 from typing import TYPE_CHECKING
 
 import brotli
@@ -9,6 +10,8 @@ from sve_carddb.export.read_api import ExportError
 
 from sve_publish import adapter
 from sve_publish.adapter import MAX_DELETE_BATCH, R2Store, Stored
+from sve_publish.parallel import UploadObject, UploadPool
+from sve_publish.sdk import BoundaryError
 
 from .r2_fixtures import ACCOUNT, BUCKET, CREDENTIALS
 from .r2_fixtures import remote as remote  # ruff: ignore[useless-import-alias] -- register shared pytest fixture
@@ -133,6 +136,108 @@ def test_unsupported_or_failed_conditions_have_no_fallback_and_no_secret_output(
     finally:
         state.fail_put = None
     assert KEY not in state.objects
+
+
+def test_image_put_retries_temporary_failure_and_reports_progress(
+    remote: tuple[R2Store, ServerState, Loopback],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    store, state, _ = remote
+    key = "images/card_l/63603.webp"
+    state.put_statuses = [503]
+    lines: list[str] = []
+    delays: list[float] = []
+    pool = UploadPool(
+        store,
+        1,
+        1,
+        lines.append,
+    )
+    # Inject sleep at the adapter boundary so the test never waits.
+    monkeypatch.setattr(adapter, "sleep_for", delays.append)
+    pool.sync([UploadObject(key, lambda: b"synthetic image", {}, image=True)])
+    assert [request[0] for request in state.requests] == ["PUT", "PUT"]
+    assert state.objects[key].raw == b"synthetic image"
+    assert delays == [1]
+    assert any(
+        "Retrying image PUT" in line and key in line and "503" in line for line in lines
+    )
+
+
+def test_image_put_stops_after_three_server_errors_with_status(
+    remote: tuple[R2Store, ServerState, Loopback],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    store, state, _ = remote
+    key = "images/card_l/63603.webp"
+    state.put_statuses = [503, 503, 503]
+    delays: list[float] = []
+    monkeypatch.setattr(adapter, "sleep_for", delays.append)
+    with pytest.raises(ExportError, match=r"503.*" + key):
+        UploadPool(store, 1, 1).sync(
+            [UploadObject(key, lambda: b"synthetic image", {}, image=True)]
+        )
+    assert [request[0] for request in state.requests] == ["PUT"] * 3
+    assert delays == [1, 4]
+
+
+def test_image_put_does_not_retry_forbidden_or_boundary_error(
+    remote: tuple[R2Store, ServerState, Loopback],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    store, state, _ = remote
+    key = "images/card_l/63603.webp"
+    state.fail_put = 403
+    with pytest.raises(ExportError, match=r"403.*" + key):
+        UploadPool(store, 1, 1).sync(
+            [UploadObject(key, lambda: b"synthetic image", {}, image=True)]
+        )
+    assert len(state.requests) == 1
+
+    state.fail_put = None
+    state.requests.clear()
+    calls = 0
+
+    def reject_put(**_kwargs: object) -> None:
+        nonlocal calls
+        calls += 1
+        raise BoundaryError("synthetic boundary rejection")
+
+    monkeypatch.setattr(store.client, "put_object", reject_put)
+    with pytest.raises(ExportError, match=r"BoundaryError.*" + key):
+        UploadPool(store, 1, 1).sync(
+            [UploadObject(key, lambda: b"synthetic image", {}, image=True)]
+        )
+    assert calls == 1
+    assert state.requests == []
+
+
+def test_conditional_json_put_still_sends_once_on_server_error(
+    remote: tuple[R2Store, ServerState, Loopback],
+) -> None:
+    store, state, _ = remote
+    state.fail_put = 503
+    with pytest.raises(ExportError, match="conditional PUT failed"):
+        store.put(KEY, b"synthetic json", META, expected=None)
+    assert len(state.requests) == 1
+
+
+def test_stopped_pool_does_not_start_an_image_retry(
+    remote: tuple[R2Store, ServerState, Loopback],
+) -> None:
+    store, state, _ = remote
+    key = "images/card_l/63603.webp"
+    state.put_statuses = [503]
+    stopped = Event()
+
+    def stop_during_backoff(_delay: float) -> None:
+        stopped.set()
+
+    with pytest.raises(ExportError, match="503"):
+        store.put_image(
+            key, b"synthetic image", stopped=stopped, sleep=stop_during_backoff
+        )
+    assert len(state.requests) == 1
 
 
 @pytest.mark.parametrize(
