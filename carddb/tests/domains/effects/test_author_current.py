@@ -485,7 +485,9 @@ def test_real_current_author_set(
         "rules/author-effects/BP18/001.yaml",
         "rules/author-effects/BP19/001.yaml",
     }
-    assert real.body_files == ()
+    assert {file.path for file in real.body_files} == {
+        "rules/effect-bodies/BP01/000.yaml"
+    }
     assert {file.path for file in real.prototype_files} == {
         path.relative_to(SCHEMAS.parent / "authored").as_posix()
         for path in (SCHEMAS.parent / "authored/rules/effects").glob("*.yaml")

@@ -109,8 +109,7 @@ def test_handwritten_programs_keep_the_reviewed_positions_and_inputs(
     records = author_records(path.stem)
     migrated = set(records)
     migrated.update(
-        file.stem
-        for file in (BASELINE / "migrated").glob(f"{path.stem}-*.json")
+        file.stem for file in (BASELINE / "migrated").glob(f"{path.stem}-*.json")
     )
     migrated.update(
         alias
@@ -138,6 +137,21 @@ def test_handwritten_programs_keep_the_reviewed_positions_and_inputs(
 
     for number, record in records.items():
         assert_migrated_evolve(number, record, object_value(expected[number]))
+
+
+@pytest.mark.parametrize(
+    "path", sorted((BASELINE / "migrated").glob("*.json")), ids=lambda p: p.stem
+)
+def test_migrated_prototype_asts_equal_the_frozen_baseline(path: Path) -> None:
+    number = path.stem
+    frozen = object_value(
+        OBJECT.validate_json((BASELINE / f"{number.split('-')[0]}.json").read_bytes())[
+            number
+        ]
+    )
+    original = OBJECT.validate_json(path.read_bytes())
+    assert fingerprint(original) == frozen["ast_sha256"]
+    assert author_records(number.split("-")[0]).get(number) or number == "BP01-P25"
 
 
 def test_migrated_lastword_preserves_the_frozen_ast_and_position() -> None:
