@@ -12,5 +12,10 @@ coverage:
       default:
         informational: true
 
+# Bundle size of sim/web: warn on a change above the threshold, never fail.
+bundle_analysis:
+  warning_threshold: "5%"
+  status: informational
+
 github_checks:
   annotations: false

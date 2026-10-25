@@ -13,6 +13,7 @@ import path from "node:path"
 import { promisify } from "node:util"
 import { brotliCompress, constants as zlib } from "node:zlib"
 
+import { codecovVitePlugin } from "@codecov/vite-plugin"
 import tailwindcss from "@tailwindcss/vite"
 import basicSsl from "@vitejs/plugin-basic-ssl"
 import react from "@vitejs/plugin-react"
@@ -245,6 +246,7 @@ const { cdn: cdnDir, preview: previewDir } = snapshotRoots(process.env)
 const devHttps = process.env["SVE_DEV_HTTPS"] === "1"
 const tlsCertPath = process.env["SVE_DEV_TLS_CERT"]
 const tlsKeyPath = process.env["SVE_DEV_TLS_KEY"]
+const codecovToken = process.env["CODECOV_TOKEN"]
 let tlsCertificate: { cert: Buffer; key: Buffer } | undefined
 
 if (devHttps && (tlsCertPath !== undefined || tlsKeyPath !== undefined)) {
@@ -281,6 +283,18 @@ export default defineConfig({
     tailwindcss(),
     serveSnapshotRoot("/cdn", cdnDir),
     serveSnapshotRoot("/cdn-preview", previewDir),
+    // Only the CI bundle analysis step has a token, so local builds and deploys never write the stats file into dist/.
+    // The plugin declares Vite 4-6 only; re-check it after a Vite or plugin upgrade.
+    ...(codecovToken
+      ? [
+          codecovVitePlugin({
+            enableBundleAnalysis: true,
+            bundleName: "sve-web",
+            uploadToken: codecovToken,
+            telemetry: false,
+          }),
+        ]
+      : []),
   ],
   server: {
     ...(tlsCertificate === undefined ? {} : { https: tlsCertificate }),
