@@ -1,17 +1,6 @@
 format: 1
 kind: effect_set
 cards:
-  BP19-001:
-    status: complete
-    abilities:
-      - line: 1
-        kind: evolve
-        body:
-          op: evolve
-          subjects: self
-        costs:
-          - op: pp
-            amount: 1
   BP19-002:
     status: complete
     abilities:
@@ -309,17 +298,6 @@ cards:
           - op: move
             subjects: self
             to: ex
-  BP19-050:
-    status: complete
-    abilities:
-      - line: 1
-        kind: evolve
-        body:
-          op: evolve
-          subjects: self
-        costs:
-          - op: pp
-            amount: 1
   BP19-051:
     status: complete
     abilities:
