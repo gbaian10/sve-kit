@@ -14,18 +14,41 @@
   BP07-P06 後續依來源更正 [#824](https://github.com/gbaian10/sve-kit/pull/824)
   （`77340d8e33c0134f3292b6f2c9bcf8cc61614034`）移動能力 2 的錨點；
   只更新該卡 AST 與位置，保留原 body、目標選取及 additional_costs。
-- 位置對照使用 `four-layer-jp-v6` 的凍結卡表建置（as-of 2026-10-06，
-  data version `preview-20261018T170627Z-0001`），建置 SQLite SHA-256 為
+- 正向位置片段的基準已改用 2026-10-25 建置的 `four-layer-jp-v8` 卡表
+  （as-of 仍為 2026-10-06，data version `preview-20261025T051811Z-0001`），
+  建置 SQLite SHA-256 為
+  `ae40461ab23b4c4e41f61c731fe6212c92e305376da33275af782d31694e050f`，
+  建置 revision 為 `d8bd3b7f86b3b823d703997a9ce2c54a8cac4c21`。
+  JP 解析輸入批次為
+  `sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4`
+  （`official-jp-exact-v1`）。此基準只承載位置證據，不把新建置當作當年的判讀輸入。
+  clone 者仍只讀 repo 內 fixture 執行基線測試，不需要原建置 DB。
+- AST 與判讀仍保留原凍結證據：原位置片段來自 `four-layer-jp-v6`
+  （as-of 2026-10-06，data version `preview-20261018T170627Z-0001`），
+  SQLite SHA-256 為
   `1de5adc33023646bbc7ced36bb49bb1850fe54309fed29c246d060a40862bc53`。
-  這是輸入指紋，不要求 clone 者取得原建置 DB 才能執行基線測試。
+  本次沒有重錄 `ast_sha256`、移動 ability 或修改分類版本、結論、理由、
+  `candidate` 狀態及審核紀錄；BP07-P06 沿用上述已採納的錨點更正。
 - 判讀草案的 frame／use 引用與測試基線的反向 `frame_ids` 已依正式映射換成
   `frame-v2` 身分（normalizer 為 `four-layer-jp-v8`）；對應凍結建置 SHA-256 為
   `9889d5ce18670019aaecc9f5e1ecb7aab59c1e222992f59a2bc80953933cd6ea`。
   v8 只因 BP01-P25 的完整 Lastword 全主戰者固定傷害語義改變一個 frame；
   其餘 frame 保號，草案依賴依正式 writer 映射重驗，未搬移審核核可。
   草案不保留 frame-v1 引用；分類輸入、結論與 `candidate` 狀態不變，不因此取得新審核核可。
-  測試基線的正向 fragments、AST 與來源位置仍保留上述原凍結證據；只有反向
-  `frame_ids` 與草案一起換成 frame-v2，沒有重錄其他歷史指紋。
+  草案的 `basis` 仍指向此判讀建置，反向 `frame_ids` 與草案的引用維持不變；
+  正向 `fragments` 則依上述新位置基準重算，不回填或搬移舊審核核可。
+- 重算範圍為全部 422 卡、780 個正向位置及其 801 個非 layout 片段
+  （`unclassified_positions` 不在本次正向片段重算範圍，維持不變）。
+  JP printing、face、欄位、section、行號、`ability_indices`、來源全文 hash 與 span
+  均逐項核對不變；20 個多能力位置中多出的 22 個 abilities，以及
+  21 個多來源片段位置完整保留。
+  780 個位置的 binding／use／frame 引用更新；其中三個抽牌位置
+  （BP10-122、CP02-068、ECP01-002）涉及 [K-B1](https://github.com/gbaian10/sve-kit/pull/962)
+  的來源語義變更，BP01-P25 涉及 [K-B2](https://github.com/gbaian10/sve-kit/pull/990)
+  的來源語義變更。其餘沿版本與 [FrameId 改版](https://github.com/gbaian10/sve-kit/pull/977)
+  映射換號；BP07-P06 的三個片段另反映 #824 清空錯植 section 後的 revision 身分。
+  正式映射拒絕延續舊審核的語義變更，只用來核對 occurrence 的新位置證據，
+  不作為等價或審核通過的證明。60 個反向位置與其分類、`covered_by` 保持不變。
 - 正向位置連接只比較 JP printing、face、欄位、section 與行號，沒有證明歷史 v0
   卡文與目前來源完全相同。[分類文字版本驗證](../schema/domains/effect-classifications.md#分類文字版本)與本基線的位置證據不得互相取代。
 
@@ -91,9 +114,10 @@ use ID、來源 hash 和 span。`face`、`section`、ability index 是零起算�
 
 「通用規則」及「說明」只區分責任，不代表引擎已實作；例如ドライブチェック與タイトル構築開局配置仍須獨立確認支援。
 
-BP07-P06 的基線依來源更正 `x:d529a2a90bd757f2be41c721eb0eaf4b` 不含補充段落的位置，
-因此與凍結建置刻意不同：凍結建置仍有 section 0 line 1／2。
-能力 2 對應的 effect line 3 片段取自凍結建置，其本文全文 hash 與現行更正相同；
+BP07-P06 的基線依來源更正 `x:d529a2a90bd757f2be41c721eb0eaf4b` 不含補充段落的位置。
+原 v6 建置仍有 section 0 line 1／2；新位置基準已採納清空錯植 section 的更正，
+不再需要刻意排除該兩行。三個 effect 片段改用新 revision 的 binding／use／frame，
+其本文全文 hash 與 span 均不變；能力 2 仍位於 effect line 3，
 測試以更正後全文核對 hash 及第三行範圍。
 
 CSD01-T01 的兩行歸通用規則。其餘 15 個空 abilities 卡的主 effect
