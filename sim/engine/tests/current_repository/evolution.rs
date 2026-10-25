@@ -281,6 +281,52 @@ fn e_b7_001_current_evolutions_use_the_accepted_resource_path() {
 }
 
 #[test]
+fn e_b7_002_current_evolutions_use_the_accepted_resource_path() {
+    // CR 5.16.1.1.1-.3 and 12.2.1-.4 govern the resource face. Q2064 requires
+    // applicable printed abilities to be processed; Q2065 permits a zero-cost super evolution.
+    run_cases(&[
+        ("BP03-115", "BP03-116", json!({"pp":0_u8}), 4, [10, 1, 1]),
+        (
+            "BP03-115",
+            "BP03-116",
+            json!({"pp":0_u8,"sep":1_u8}),
+            5,
+            [10, 1, 0],
+        ),
+        ("BP04-010", "BP04-011", json!({"pp":1_u8}), 2, [9, 1, 1]),
+        (
+            "BP04-010",
+            "BP04-011",
+            json!({"pp":0_u8,"ep":1_u8}),
+            2,
+            [10, 0, 1],
+        ),
+        (
+            "BP04-010",
+            "BP04-011",
+            json!({"pp":1_u8,"sep":1_u8}),
+            3,
+            [9, 1, 0],
+        ),
+        ("BP17-077", "BP17-078", json!({"pp":1_u8}), 2, [9, 1, 1]),
+        (
+            "BP17-077",
+            "BP17-078",
+            json!({"pp":0_u8,"ep":1_u8}),
+            2,
+            [10, 0, 1],
+        ),
+        (
+            "BP17-077",
+            "BP17-078",
+            json!({"pp":1_u8,"sep":1_u8}),
+            3,
+            [9, 1, 0],
+        ),
+    ]);
+}
+
+#[test]
 fn each_b7_evolution_rejects_a_missing_current_ability() {
     for (base, resource, cost) in B7_CARDS {
         let (snapshot, keywords, mut input) = inputs();
