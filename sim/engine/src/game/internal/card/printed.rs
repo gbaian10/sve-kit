@@ -1,9 +1,9 @@
 //! Effective printed definitions are resolved once at the catalogue boundary.
-use super::{Ability, Game, Located, Result, face_ordinal, invalid, player_id, printed_origin};
+use super::{Ability, Game, Located, Result, invalid, player_id, printed_origin};
 use crate::EngineFailure;
 use crate::ir::{
-    AssociationId, CardKind, CardName, Characteristics, ClassId, EvolutionState, FaceId,
-    Generation, Info, Int, ObjectRef, RuntimeAbilityReference, Stat, TitleId, TraitId,
+    AssociationId, CardKind, CardName, Characteristics, ClassId, EvolutionState, Generation, Info,
+    Int, ObjectRef, RuntimeAbilityReference, Stat, TitleId, TraitId,
 };
 use serde_json::Value;
 
@@ -63,7 +63,8 @@ impl Game {
             .iter()
             .filter(|ability| {
                 printed_origin(&ability.node.source.origin).is_ok_and(|(printed, _)| {
-                    face_ordinal(printed).is_ok_and(|ordinal| ordinal == face)
+                    self.printed_face_ordinal(&card, printed)
+                        .is_ok_and(|ordinal| ordinal == face)
                 })
             })
             .cloned()
@@ -118,7 +119,7 @@ impl Game {
         holder: &str,
     ) -> Result<Characteristics> {
         let object = self.object(holder)?.clone();
-        let (_, face) = self.internal_effective_print(holder)?;
+        let (card, face) = self.internal_effective_print(holder)?;
         let printed = self.face(holder)?.clone();
         let kind = match self.object_type(holder)? {
             kind if kind.contains("フォロワー") => CardKind::Follower,
@@ -169,7 +170,7 @@ impl Game {
             attack,
             life,
             abilities,
-            face: FaceId(face.to_string()),
+            face: self.printed_face_id(&card, face)?,
             evolution: if object.state["super_evolved"] == true {
                 EvolutionState::SuperEvolved
             } else if object.state["evolved_with"].is_string() {

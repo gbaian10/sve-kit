@@ -1,8 +1,8 @@
 //! Rule-owned Quick questions; actions never accept caller-supplied sources or programs.
 use super::super::{Answer, DecisionToken, DecisionView, InputDomain};
 use super::{
-    AbilityKind, CardPlay, Game, Generation, PlayerId, Result, face_ordinal, int, invalid,
-    printed_origin, seat_name, unsupported,
+    AbilityKind, CardPlay, Game, Generation, PlayerId, Result, int, invalid, printed_origin,
+    seat_name, unsupported,
 };
 use crate::ir::quick::{card_permission, is_printed_quick};
 use crate::ir::{AbilityId, Cardinality, Nat, TextQuantifier};
@@ -42,13 +42,21 @@ pub(in crate::game::internal) struct Question {
     actions: Vec<Candidate>,
 }
 
-pub(super) fn check_spell_face(card: &CardProgram, ordinal: usize, printed: &Value) -> Result<()> {
+pub(super) fn check_spell_face(
+    game: &Game,
+    card_no: &str,
+    card: &CardProgram,
+    ordinal: usize,
+    printed: &Value,
+) -> Result<()> {
     if ordinal != 0
         || printed["card_type"] != "スペル"
         || !card.abilities.iter().any(|a| {
             a.node.kind == AbilityKind::Spell
-                && printed_origin(&a.node.source.origin)
-                    .is_ok_and(|(face, _)| face_ordinal(face).is_ok_and(|face| face == ordinal))
+                && printed_origin(&a.node.source.origin).is_ok_and(|(face, _)| {
+                    game.printed_face_ordinal(card_no, face)
+                        .is_ok_and(|face| face == ordinal)
+                })
         })
         || card
             .abilities

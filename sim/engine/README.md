@@ -101,6 +101,15 @@ codes are saved inside the existing prototype `astra-save/1`; missing fields fai
 rather than restoring empty defaults. Restore uses that saved background. This
 does not provide cross-version migration, `save/2`, or server input authorization.
 
+`Catalog::from_current_selection` consumes the complete accepted author selection.
+`Game::from_selected_effects` resolves its permanent face identities against the
+snapshot's source text hashes and admits every current whole card before returning
+a game. Replacing the prototype catalogue or any candidate after selection
+rejects the whole construction. Missing, ambiguous or unsupported cards reject the entire construction;
+current cards never acquire prototype programs. Source proof stays inside the
+authority, including after departure. Loaded internal cards still reject saves;
+this entry does not publish capabilities or grant use qualification.
+
 The default `runner` feature enables evaluation adapters and the CLI. The
 library builds for `wasm32-unknown-unknown` with `--no-default-features`; browser
 bindings, host time and execution have not been validated.

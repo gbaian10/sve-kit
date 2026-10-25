@@ -3,6 +3,8 @@ use super::{
     Context, Execution, Fact, Game, InstructionOutcome, Progress, admission, int, player_id,
     seat_name, unsupported,
 };
+use crate::catalog::SelectedEffects;
+use crate::catalog::current::CurrentCard;
 use crate::ir::TurnId;
 use crate::ir::quick::{card_permission, is_printed_quick};
 use crate::ir::{
@@ -16,6 +18,7 @@ use crate::ir::{
 use crate::ir::{ConsumptionPoint, LimitSpec, ModeUse};
 use crate::{Result, invalid};
 use alloc::collections::{BTreeMap, BTreeSet};
+use alloc::sync::Arc;
 use core::{mem::take, result, slice};
 use serde::Serializer;
 use serde::ser::Error as _;
@@ -60,6 +63,7 @@ pub struct Activation {
 #[derive(Clone, Debug, Default)]
 pub(in crate::game) struct CardRuntime {
     cards: BTreeMap<String, WellFormedCardProgram>,
+    current: BTreeMap<String, Arc<CurrentCard>>,
     instances: BTreeMap<(String, u64, String, usize, AbilityId), AbilityInstanceId>,
     links: BTreeMap<(u64, u64, u64, u64), AssociationId>,
     quotas: BTreeMap<(AbilityInstanceId, ConsumptionPoint), (TurnId, u64)>,
@@ -163,6 +167,71 @@ where
     reason = "Whole-card admission and activation share the authoritative game."
 )]
 impl Game {
+    /// Construct a game from the complete accepted selection and admit every current card.
+    /// Provenance remains authority-only; loaded cards retain the existing save rejection.
+    ///
+    /// # Errors
+    /// Rejects snapshot/source mismatches and any unsupported whole card without returning a game.
+    pub fn from_selected_effects(
+        selected: SelectedEffects,
+        setup: &serde_json::Value,
+        facts: &serde_json::Value,
+        random: &serde_json::Value,
+        seed: &str,
+    ) -> Result<Self> {
+        selected.check_runtime()?;
+        let catalog = selected.prototypes;
+        let mut current = BTreeMap::new();
+        for (number, candidate) in selected.current {
+            if number != candidate.card_no {
+                return Err(invalid("current selection card key mismatch"));
+            }
+            current.insert(number, Arc::new(catalog.resolve_current(candidate)?));
+        }
+        let mut game = Self::new(catalog, setup, facts, random, seed)?;
+        game.card_runtime.current = current;
+        let cards = game
+            .card_runtime
+            .current
+            .values()
+            .cloned()
+            .collect::<Vec<_>>();
+        for card in cards {
+            game.load_internal_card(&card.candidate.card_no, &card.candidate.program)?;
+        }
+        Ok(game)
+    }
+
+    fn printed_face_ordinal(&self, card: &str, face: &FaceId) -> Result<usize> {
+        self.card_runtime
+            .current
+            .get(card)
+            .map_or_else(|| face_ordinal(face), |current| current.ordinal(face))
+    }
+
+    fn printed_face_id(&self, card: &str, ordinal: usize) -> Result<FaceId> {
+        self.card_runtime.current.get(card).map_or_else(
+            || Ok(FaceId(ordinal.to_string())),
+            |current| current.face(ordinal),
+        )
+    }
+
+    fn check_card_source(
+        &self,
+        source: &SourceSpan,
+        card: &str,
+        face: &str,
+        line: u64,
+    ) -> Result<()> {
+        if let Some(current) = self.card_runtime.current.get(card) {
+            if source.face != face || u64::from(source.line) != line {
+                return Err(invalid("current printed source coordinate mismatch"));
+            }
+            return current.check_source(source);
+        }
+        check_source(source, card, face, line)
+    }
+
     /// Load one complete internal card against this game's exact catalogue.
     /// Candidate base faces map to ordinal zero without granting public qualification.
     ///
@@ -192,8 +261,14 @@ impl Game {
         {
             return Err(invalid("duplicate card or busy internal card loader"));
         }
-        if !list(&self.catalog.program(card_no)?["abilities"]).is_empty() {
-            return Err(unsupported("typed card mixed with prototype abilities"));
+        match self.card_runtime.current.get(card_no) {
+            Some(current) if card != &current.candidate.program => {
+                return Err(invalid("card differs from accepted current selection"));
+            }
+            None if !list(&self.catalog.program(card_no)?["abilities"]).is_empty() => {
+                return Err(unsupported("typed card mixed with prototype abilities"));
+            }
+            _ => {}
         }
         let mut origins = BTreeSet::new();
         let mut spell_face = None;
@@ -201,7 +276,7 @@ impl Game {
             let ability = &located.node;
             check_header(ability)?;
             let (face, line) = printed_origin(&ability.source.origin)?;
-            let ordinal = face_ordinal(face)?;
+            let ordinal = self.printed_face_ordinal(card_no, face)?;
             if ability.kind == AbilityKind::Spell
                 && (ordinal != 0 || spell_face.replace(ordinal).is_some())
             {
@@ -230,16 +305,16 @@ impl Game {
             if ability.kind == AbilityKind::Spell {
                 play::check_spell(ability, printed)?;
             }
-            check_source(&located.source, card_no, &face.0, line.0)?;
+            self.check_card_source(&located.source, card_no, &face.0, line.0)?;
             if card_permission(ability) {
-                quick::check_spell_face(card.card(), ordinal, base_print)?;
+                quick::check_spell_face(self, card_no, card.card(), ordinal, base_print)?;
                 continue;
             }
             if is_printed_quick(ability) && ordinal != 0 {
                 return Err(unsupported("Quick special face"));
             }
             if evolution::intrinsic(ability) {
-                evolution::check(located)?;
+                evolution::check(self, located)?;
                 continue;
             }
             if matches!(ability.kind, AbilityKind::Activated | AbilityKind::Spell) {
@@ -249,7 +324,7 @@ impl Game {
                 .body
                 .as_ref()
                 .ok_or_else(|| invalid("missing body"))?;
-            check_nodes(&body.steps, &located.source, &ability.source)?;
+            check_nodes(self, &body.steps, &located.source, &ability.source)?;
             admission::check_card(
                 body,
                 &located.source,
@@ -345,7 +420,8 @@ impl Game {
             return Err(unsupported("activation holder, controller or timing"));
         }
         let (face, _) = printed_origin(&ability.node.source.origin)?;
-        if face_ordinal(face)? != self.internal_effective_print(holder)?.1 {
+        let (card, ordinal) = self.internal_effective_print(holder)?;
+        if self.printed_face_ordinal(&card, face)? != ordinal {
             return Err(invalid("printed ability belongs to another face"));
         }
         let context = Context {
@@ -661,6 +737,7 @@ fn face_ordinal(face: &FaceId) -> Result<usize> {
 }
 
 fn check_nodes(
+    game: &Game,
     nodes: &[Located<Node>],
     source: &SourceSpan,
     ability_source: &AbilitySource,
@@ -672,7 +749,7 @@ fn check_nodes(
         {
             return Err(invalid("instruction source evidence mapping mismatch"));
         }
-        check_source(
+        game.check_card_source(
             &located.source,
             &source.card_no,
             &source.face,
@@ -707,7 +784,7 @@ fn check_nodes(
             Node::Control {
                 control: Control::Sequence { body },
             } => {
-                check_nodes(&body.steps, source, ability_source)?;
+                check_nodes(game, &body.steps, source, ability_source)?;
             }
             Node::Control {
                 control:
@@ -717,16 +794,16 @@ fn check_nodes(
                         ..
                     },
             } => {
-                check_nodes(&then_body.steps, source, ability_source)?;
+                check_nodes(game, &then_body.steps, source, ability_source)?;
                 if let Some(body) = else_body {
-                    check_nodes(&body.steps, source, ability_source)?;
+                    check_nodes(game, &body.steps, source, ability_source)?;
                 }
             }
             Node::Control {
                 control: Control::Mode { modes, .. },
             } => {
                 for mode in modes {
-                    check_nodes(&mode.body.steps, source, ability_source)?;
+                    check_nodes(game, &mode.body.steps, source, ability_source)?;
                 }
             }
             Node::Capture { .. } => {}

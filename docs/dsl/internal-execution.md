@@ -15,6 +15,12 @@
 YAML。印刷 face 的十進位 ordinal 與 lowering candidate 的 `base`（對應 face 0）都保留原本
 owner、field、fragment；這不授予永久來源身分或公開 capability。整卡的良構入口環境直接帶入
 本文，不把依賴 play binding 的本文重新當成封閉 `WellFormedProgram`。
+正式 current 卡由 `Game::from_selected_effects()` 接受完整 accepted selection，先核對來源與
+快照面的唯一對應，再自動呼叫相同整卡准入；不能只傳一份良構程式冒充 accepted 卡。
+原型與 current 維持不相交，current 的永久來源座標不改寫為 `base` 或卡號；
+選用結果的原型 Catalog 與 current 候選以同一份固定集合保存，替換任一者都使整次建立失敗。
+能力篩選、printed characteristics、事件與離場 LKI 共用 catalog 邊界解析出的面對應；
+沒有對應即拒絕。來源 sidecar 與完整程式保存在 authority，不發布 capability 或新存檔欄位。
 base face 的普通打出費用必須是非負數字；缺欄、null、「-」、其他非數字及負值拒絕，明示的零費用仍有效。
 非打出用的進化 face 不套用此數字限制；能力引用 face 的原有缺欄檢查仍適用。
 Printed Activated 的印刷面限普通從者、官方進化從者（フォロワー・エボルヴ）或護符；卡種由同一 Catalog face 驗證。

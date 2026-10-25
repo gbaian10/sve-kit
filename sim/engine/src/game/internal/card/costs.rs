@@ -1,7 +1,4 @@
-use super::{
-    Execution, Game, Result, WellFormedCardProgram, check_source, face_ordinal, invalid,
-    unsupported,
-};
+use super::{Execution, Game, Result, WellFormedCardProgram, invalid, unsupported};
 use crate::game::internal::{search, values::compare};
 use crate::ir::{AbilityOrigin, AbilityQualification, AbilitySource, CostSpec, ObjectOperand};
 use crate::ir::{
@@ -21,7 +18,8 @@ pub(super) fn check(game: &Game, card_no: &str, card: &WellFormedCardProgram) ->
     let mut faces = BTreeSet::new();
     for face in &card.card().card_play_costs {
         let mut check = || {
-            if face_ordinal(&face.node.face)? != 0 || !faces.insert(face_ordinal(&face.node.face)?)
+            if game.printed_face_ordinal(card_no, &face.node.face)? != 0
+                || !faces.insert(game.printed_face_ordinal(card_no, &face.node.face)?)
             {
                 return Err(unsupported("play cost requires base face"));
             }
@@ -30,7 +28,7 @@ pub(super) fn check(game: &Game, card_no: &str, card: &WellFormedCardProgram) ->
                 return Err(unsupported("play cost card kind"));
             }
             super::super::cost::printed_play_cost(&printed["cost"])?;
-            check_source(
+            game.check_card_source(
                 &face.source,
                 card_no,
                 &face.node.face.0,
@@ -57,7 +55,7 @@ pub(super) fn check(game: &Game, card_no: &str, card: &WellFormedCardProgram) ->
             {
                 return Err(unsupported("exchange requires ordinary card play"));
             }
-            check_source(
+            game.check_card_source(
                 &exchange.source,
                 card_no,
                 &face.node.face.0,
@@ -91,7 +89,7 @@ pub(super) fn check(game: &Game, card_no: &str, card: &WellFormedCardProgram) ->
                 {
                     return Err(invalid("incomplete play cost source"));
                 }
-                check_source(
+                game.check_card_source(
                     &modifier.source,
                     card_no,
                     &face.node.face.0,

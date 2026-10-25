@@ -663,6 +663,9 @@ impl Game {
             return Ok(Vec::new());
         }
         let source = self.information_source(id)?;
+        if self.card_runtime.is_loaded(&source.card) {
+            return Ok(Vec::new());
+        }
         Ok(list(&self.catalog.program(&source.card)?["abilities"])
             .into_iter()
             .filter(|ability| {
