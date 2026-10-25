@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 from pydantic import JsonValue
 
 from sve_carddb.build.model import Column, Kind, QueryCheck, Table, identifier, literal
-from sve_carddb.build.validation import BOUNDS, Rules
+from sve_carddb.build.validation import BOUNDS, shared_rules
 from sve_carddb.core.json import canonical
 
 if TYPE_CHECKING:
@@ -130,7 +130,8 @@ def compile_schema(
     schemas = {
         name: canonical(value).decode() for name, value in (json_schemas or {}).items()
     }
-    Rules(schemas)
+    ordered = tuple(sorted(schemas.items()))
+    shared_rules(ordered)
     for table in tables:
         for column in table.columns:
             if column.json_schema is not None and column.json_schema not in schemas:
@@ -142,7 +143,7 @@ def compile_schema(
             f"PRAGMA user_version = {version};",
             *(statement for table in tables for statement in _table(table, enabled)),
         ),
-        tuple(sorted(schemas.items())),
+        ordered,
         version,
         tuple(check for table in tables for check in table.query_checks),
     )

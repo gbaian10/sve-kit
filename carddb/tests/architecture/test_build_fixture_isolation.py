@@ -37,7 +37,6 @@ def test_database_copies_isolate_rows_transactions_and_connection_settings(
             assert second.rows("language") == expected
             assert not second._connection.in_transaction
             assert first._connection is not second._connection
-            assert first._rules is not second._rules
             second.verify()
             with pytest.raises(sqlite3.IntegrityError), second.transaction():
                 second._connection.execute("UPDATE card_int_id SET int_id=-1")

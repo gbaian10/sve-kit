@@ -10,7 +10,14 @@ from typing import TYPE_CHECKING
 
 from sve_carddb.build.model import Table, Value, identifier
 from sve_carddb.build.t0_json import sorted_unique, symbol_valid
-from sve_carddb.build.validation import Rules, SQLValue, decode, encode, fullmatch
+from sve_carddb.build.validation import (
+    Rules,
+    SQLValue,
+    decode,
+    encode,
+    fullmatch,
+    shared_rules,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Generator, Mapping
@@ -44,7 +51,7 @@ def _raw_rows(value: object) -> tuple[tuple[SQLValue, ...], ...]:
 
 def install_functions(connection: sqlite3.Connection, schema: CompiledSchema) -> Rules:
     """Install deterministic CHECK functions before executing compiled DDL."""
-    rules = Rules(dict(schema.json_schemas))
+    rules = shared_rules(schema.json_schemas)
     connection.create_function("sve_fullmatch", 2, fullmatch, deterministic=True)
     connection.create_function("sve_json_valid", 2, rules.sql_json, deterministic=True)
     connection.create_function(
