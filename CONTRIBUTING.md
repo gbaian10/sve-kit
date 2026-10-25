@@ -397,6 +397,9 @@ remain available. The hook ownership table marks direct steps so pre-commit skip
 CI also uploads the carddb, Web and Rust coverage reports (file names and line hits, no card text) and the
 Web bundle size to Codecov for reference. Codecov statuses are informational; the gates above stay in the
 test steps, and a failed or slow upload never fails the job (each upload step has its own timeout).
+The carddb pytest results go to Codecov Test Analytics only after `.github/ci/junit_public.py` rewrites them:
+parameters become a short hash, failure messages and captured output are dropped, because the raw JUnit
+can hold card wording.
 
 Draft pull requests run only the quick checks (repository hooks, commit messages and the
 title). The Python, Rust, Web and card-data jobs are skipped and `ci-ok` fails with a note that tests

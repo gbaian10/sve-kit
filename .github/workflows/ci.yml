@@ -300,6 +300,28 @@ jobs:
           disable_search: true
           flags: carddb
           fail_ci_if_error: false
+      # Test Analytics gets a copy with parameters hashed and no failure text or output: the raw report can hold
+      # card wording. Informational, so a failure or slow upload here never reaches the job result.
+      - name: Sanitize carddb test results
+        id: public-junit
+        if: ${{ !cancelled() && (steps.tests.outcome == 'success' || steps.tests.outcome == 'failure') }}
+        continue-on-error: true
+        timeout-minutes: 5
+        env:
+          REPORT_DIR: ${{ runner.temp }}/sve-python-reports
+        run: python3 .github/ci/junit_public.py "$REPORT_DIR/junit.xml" "$REPORT_DIR/junit-public.xml"
+      - name: Upload carddb test results to Codecov
+        if: ${{ !cancelled() && steps.public-junit.outcome == 'success' }}
+        continue-on-error: true
+        timeout-minutes: 5
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          report_type: test_results
+          files: ${{ runner.temp }}/sve-python-reports/junit-public.xml
+          disable_search: true
+          flags: carddb
+          fail_ci_if_error: false
       - name: publish pytest (independent synthetic coverage gate)
         id: publish-tests
         if: ${{ !cancelled() }}
