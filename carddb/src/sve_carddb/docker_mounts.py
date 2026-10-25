@@ -15,7 +15,7 @@ def readonly_roots(recipe_path: Path) -> tuple[Path, ...]:
     repo = recipe.repo.resolve(strict=True)
     inputs = recipe.protected_inputs()
     roots = [path.resolve(strict=True) for path in inputs]
-    common = Path(
+    common_path = Path(
         subprocess.check_output(  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed Git metadata query; repo path is recipe input
             [
                 shutil.which("git") or "git",
@@ -27,15 +27,18 @@ def readonly_roots(recipe_path: Path) -> tuple[Path, ...]:
             ],
             text=True,
         ).strip()
-    ).resolve(strict=True)
+    ).absolute()
+    common = common_path.resolve(strict=True)
     unique = dict.fromkeys((*roots, common))
     for original, root in zip(inputs, roots, strict=True):
         if not original.is_absolute() or original != root:
             raise ValueError(
                 f"Protected mount root must be absolute and symlink-free: {root}"
             )
-    if not common.is_absolute():
-        raise ValueError(f"Git common dir must be absolute: {common}")
+    if not common_path.is_absolute() or common_path != common:
+        raise ValueError(
+            f"Git common dir must be absolute and symlink-free: {common_path}"
+        )
     return tuple(unique)
 
 
@@ -49,8 +52,10 @@ def compose_override(roots: tuple[Path, ...]) -> str:
 
 
 def main() -> None:
-    """Write the generated override to stdout for export.sh."""
-    sys.stdout.write(compose_override(readonly_roots(Path(sys.argv[1]))))
+    """Write the override file and print its recipe-owned repository root."""
+    roots = readonly_roots(Path(sys.argv[1]))
+    Path(sys.argv[2]).write_text(compose_override(roots), encoding="utf-8")
+    sys.stdout.write(f"{roots[0]}\n")
 
 
 if __name__ == "__main__":
