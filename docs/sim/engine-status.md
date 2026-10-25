@@ -16,7 +16,7 @@
 - 引擎讀的是 D 階段的原型文法 `astra/1`：`authored/rules/effects/*.yaml` 與 `dsl/effects.schema.json` 使用 `format: 1, kind: effect_set` 文件封套選定這個文法；keywords 使用 `kind: keyword_registry`、format 1。
   `astra/1` 的語法以該 Schema 為準，語義以引擎程式與測試為準
 - [DSL 1.0](../dsl/README.md)（入口 `format: 1, kind: author_effect_set`）目前只有規格：還沒有對應的 JSON Schema、載入器或 IR，
-  也還沒有卡片用它撰寫。引擎改讀 DSL 1.0 之前，這裡的限制都是針對 `astra/1`；兩者的落差見 #478
+  也還沒有卡片用它DSL。引擎改讀 DSL 1.0 之前，這裡的限制都是針對 `astra/1`；兩者的落差見 #478
 - Schema 通過不代表卡文正確，也不代表引擎能正確執行；載入期檢查只擋下已知不支援的構造（見下一節）
 
 ## 載入期檢查

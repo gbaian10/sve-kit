@@ -1,7 +1,7 @@
 # 打出費用修正
 
 本文件補足 [play 程序](play-semantics.md)步驟 5，定義內部 typed IR 的實作義務，
-不宣稱 executor 或正式來源准入已完成。作者語法仍以 `dsl/` 為權威；不變更公開 program、
+不宣稱 executor 或正式來源准入已完成。DSL 語法仍以 `dsl/` 為權威；不變更公開 program、
 capability、最低版本或 body hash recipe。
 
 本文件的無付款第一版界線不變；後續單一材料換常值修正依
@@ -120,7 +120,7 @@ CR 10.4.7–.7.2、10.6.2.2.2：打出時的「材料：減費／設值」是同
 
 現有 `PlaySpec {captures, parameters, costs}` 屬 ability play；`CardProgram` 目前只有
 abilities，無法讓 Follower 自身的卡片打出修正與 Fanfare 分離。以下是**待實作的內部
-型別增補**，不是新作者欄位或序列化格式：
+型別增補**，不是新 DSL 欄位或序列化格式：
 
 ```text
 CardProgram.card_play_costs: List<Located<FacePlayCost>>   // absent input lowers to empty
@@ -142,13 +142,13 @@ EX 限定由 lowering 明確映射，不能讓一般 Current ObjectInfo 讀到�
 capability 推導也須走到新入口（含條件不成立的分支），並以有別於安裝 CostModifier 的
 內部需求碼標示；不能因內部准入已列 `effect.cost-delta` 就讓卡片自身修正通過。
 
-lowering 將自身 cost_delta／cost_set 的條件列表保留來源位置。分段由作者資料直接寫成
+lowering 將自身 cost_delta／cost_set 的條件列表保留來源位置。分段由DSL 資料直接寫成
 互斥條件（如 SC≥15、10≤SC<15、5≤SC<10），lowering 原樣保留，不從列表推斷或改寫互斥；
 獨立兩行不互斥。這些不是 InstallEffect，不配 EffectId，不污染一般 Cost 讀值。
 由別張卡已執行效果給特定卡的修正才用 `InstallEffect CostModifier`，保留成功 After、
 安裝來源、EffectId、期限與世代；aura 應走 Static declaration 的生命週期，本版不造它。
-所有未准入作者欄位、無法完整展開的關鍵字、未知條件與不完整整卡來源在降低／准入
-時拒絕，包含死分支，不靜默丟欄。沿用作者短 Cost 單操作／多操作 steps，
+所有未准入 DSL 欄位、無法完整展開的關鍵字、未知條件與不完整整卡來源在降低／准入
+時拒絕，包含死分支，不靜默丟欄。沿用DSL 短 Cost 單操作／多操作 steps，
 不變更 canonical；`cost_delta` 直接 param 白名單亦不擴張。
 
 代表良構正反例：合成 base face，單一 set 7 加兩條常值 delta −2、−1，空條件表示 true，

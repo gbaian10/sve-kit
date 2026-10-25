@@ -1,9 +1,9 @@
-# 作者 1.0：費用與目標形狀
+# DSL 1.0：費用與目標形狀
 
 本表細化[語法 §3](author-syntax-1.0.md#3-費用目標與打出程序)。
 [author-nodes.schema.json](../../dsl/author-nodes.schema.json) 是機器語法權威；
 Python 的 `author_costs`、`author_selection_parents` 提供對應的封閉節點型別。
-節點檢查不提供完整能力頭、作者 reader、binding／來源准入或付款執行。
+節點檢查不提供完整能力頭、DSL reader、binding／來源准入或付款執行。
 
 Q＝Quantity，T＝SelectionQuantity；[數量矩陣](author-quantity-shapes-1.0.md)的非負字面量、
 安全整數、內層算式及參數位置規則不變。下表未列欄位一律拒絕；true 不接受 false、1。
@@ -167,8 +167,8 @@ name／names／name_contains 互斥，token／not_token 互斥。內層算式的
 | cost_sum_le | BP07-071 | 整體總原費用上限 |
 | distinct_by:name | exact BP08-104；up-to BP03-040 | distinct_names 舊拼法、Target distinct_by:orig_cost／class 為合成 |
 
-CP03-042 的三組是分組語義的證據；其消滅領域來源尚無作者 Zone 代碼，
-依承載契約的封閉映射，不把 banished／banish 當可用作者來源，不能宣稱整個 Target 已可寫。
+CP03-042 的三組是分組語義的證據；其消滅領域來源尚無DSL Zone 代碼，
+依承載契約的封閉映射，不把 banished／banish 當可用 DSL 來源，不能宣稱整個 Target 已可寫。
 
 各能力頭是否可帶 targets 仍依語法 §3 與規則登錄；完整能力頭與 delayed 的適用欄位見[能力矩陣](author-ability-shapes-1.0.md)。
 本文 choose 是結算時決定，不能代替打出時 Target。roles、option、總量約束的其他交叉格
@@ -212,4 +212,4 @@ C1／D0 不得讓前一欄任意讀另一欄的 receipt。one_of 分支內 resul
 
 以真正 Cost／Targets 節點解碼再 canonical：payload mapping 換鍵序 bytes 相同，
 steps／targets 對調 bytes 不同，重複步驟不能去重，單元素 steps 形狀拒絕。
-不改 body recipe、不在 hash 前語義正規化，也不聲稱完整作者 reader 已整合此驗收。
+不改 body recipe、不在 hash 前語義正規化，也不聲稱完整DSL reader 已整合此驗收。

@@ -64,7 +64,7 @@ scope 不是 root 回報 `WrongScope`。
 讀值、數量 receipt／collect 投影、集合及局部 candidate。支援的式子依各運算元
 遞迴檢查，不以整個型別家族推定所有變體都通過。
 有號數不會先截成零；Add、Subtract、Multiply、FloorDivide 要求兩個運算元，
-HalfUp 要求一個，Minimum／Maximum 與作者 `min`／`max` 相同，至少一個。
+HalfUp 要求一個，Minimum／Maximum 與 DSL 的 `min`／`max` 相同，至少一個。
 FloorDivide 只接受可靜態確認的正整數常值除數，其他動態除數明確拒絕。
 InformationOrZero 接受 Cost／Stats 的 Original／Effective 特徵讀值；LastKnown 與
 ProspectiveEntry 尚未接受，不能用一般讀值替代 LKI 或入場取代情境。
@@ -75,7 +75,7 @@ ProspectiveEntry 尚未接受，不能用一般讀值替代 LKI 或入場取代�
 未驗的事件投影、下述範圍以外的 effect 安裝及能力宣告。未承載的 decision／付款時點回報 `DecisionTiming`，
 其餘未驗形狀回報 `UnsupportedShape`。
 拒絕形狀的程式不會得到已驗包裝。這個拒絕不是「語法無效」或「引擎已實作」的宣稱。
-通用 `A.comb.instead` 沒有可構造的 typed IR 節點；作者輸入的拒絕診斷仍屬 lowering
+通用 `A.comb.instead` 沒有可構造的 typed IR 節點；DSL 輸入的拒絕診斷仍屬 lowering
 邊界，不能靠塞入佔位節點繞過。
 
 ## 結算選擇與付款
@@ -317,7 +317,7 @@ NextTurnEnd 以「下一回合的開始」找 occurrence，NextTurnEdge 以指�
 兩者在指定玩家的目前回合可能不同。數值 Set、Combined 的 runtime 限制及具體期限
 依[數值修正、排序與期限](numeric-timing.md)，不由本 checker 推定。
 
-CP02-007 的本文 buff 依撰寫語法降為 I.modify＋L.continuous；Action::Modify 的結構
+CP02-007 的本文 buff 依DSL 語法降為 I.modify＋L.continuous；Action::Modify 的結構
 已由本文件前節接受，runtime 的固定 Add 子集見[內部執行](internal-execution.md)。
 本片只借它的 Numeric patch、NoTemporalExpiry 與單一目標形狀作合成安裝例，不是該卡的
 lowering，也未包含完整成本、另一能力及實際執行。BP02-089 只提供 Destroy 保護述詞
@@ -454,7 +454,7 @@ SelectionSnapshot 為 AtDecision；Inline 的 actor 必須等於 play controller
 已回答的不可變 binding，不改讀付款後 live 狀態，詳見[快照契約](play-semantics.md#3-同次-play-的快照與-binding)。
 X 影響模式數或任意追加費用的形狀尚未接受（CR10.6.2.2.1），不能外推模式一律先於 X。
 Modes 由 ModeDecision 承載；Distribution 與費用承載見上節。獨立 CostMaterials、
-OptionalCost 仍未接受；Face 僅接受下述限定進化入口，不能據此宣稱作者語法禁止其他形狀。
+OptionalCost 仍未接受；Face 僅接受下述限定進化入口，不能據此宣稱DSL 語法禁止其他形狀。
 
 ### 單面進化與自身入場
 

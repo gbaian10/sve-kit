@@ -209,4 +209,4 @@ power_of、hp_of、cost_of、orig_cost_of、history_count、history_sum。
 新定義逐一對照 Python，測試移除 required、開放 extra、改錯值域與分支；獨立行為例驗
 事件角色、主體互斥、phase 參數位置、history 頂層／where 分工、sum 窄化、骰值邊界、
 LKI 消費、paid 關鍵字撞名、Player cmp 同型，以及捕捉矩陣。
-這些檢查不取代完整 Cost／Target、父動作、作者入口、Rust decoder 或引擎行為測試。
+這些檢查不取代完整 Cost／Target、父動作、DSL 入口、Rust decoder 或引擎行為測試。

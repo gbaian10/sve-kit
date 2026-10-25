@@ -2,7 +2,7 @@
 
 本文件是內部 typed IR 的執行義務，補足[執行語義](runtime-semantics.md)的完整 play 程序。
 它不代表 executor 已完成；已驗子集以[內部執行入口](internal-execution.md)為準。
-不新增作者語法、公開 program、capability 或最低版本。一般觸發與來源離場後的 LKI、
+不新增DSL 語法、公開 program、capability 或最低版本。一般觸發與來源離場後的 LKI、
 prepared play 終局接點另依[觸發與 LKI 契約](trigger-lki-semantics.md)。
 模式數、本回合模式排除與起動限次的擴充子集依[選擇與限次契約](choice-limit-semantics.md)。
 

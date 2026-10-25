@@ -2,7 +2,7 @@
 
 本文件補充 [執行語義 §5](runtime-semantics.md#5-numericusage-與-timestamp-的首批範圍)，
 定義 executor 必須滿足的契約；不是現有執行器已完成的功能表。
-公開 program、capability、最低版本及作者語法均不在此變更。
+公開 program、capability、最低版本及DSL 語法均不在此變更。
 IR 型別／良構的接受不代表 runtime 准入，現行限制仍見 [內部執行](internal-execution.md)。
 
 規則依據為日文 [CR 1.28.0（2026-09-28）](https://shadowverse-evolve.com/wordpress/wp-content/uploads/2026/09/28121513/ShadowverseEVOLVE_cr_1.28.0_260928.pdf)，

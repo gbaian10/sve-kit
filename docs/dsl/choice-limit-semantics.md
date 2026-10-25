@@ -2,7 +2,7 @@
 
 本文件補充[正式 play](play-semantics.md)、[執行語義](runtime-semantics.md)與
 [觸發額度](trigger-lki-semantics.md#3-限次與同時批次)，是內部契約。
-現行支援以[內部執行入口](internal-execution.md)為準；不新增作者語法、公開 program、
+現行支援以[內部執行入口](internal-execution.md)為準；不新增DSL 語法、公開 program、
 capability、最低版本或整卡資格，也不擴張 Quick、費用及結算重驗的支援範圍。
 
 規則依據為[日文 CR 1.28.0（2026-09-28）](https://shadowverse-evolve.com/wordpress/wp-content/uploads/2026/09/28121513/ShadowverseEVOLVE_cr_1.28.0_260928.pdf)，
@@ -149,8 +149,8 @@ Q471（2022-12-09）確認自己與對手的回合各可使用一次，不因此
 
 ### 4.1 輸入與 lowering
 
-輸入為現有作者 schema 的 `choice.n`／`upto`／`instead`／`exclude_chosen`、
-`activate.per_turn`，以及能定位 owner／face／能力行／fragment／作者路徑的來源證據。
+輸入為現有 DSL schema 的 `choice.n`／`upto`／`instead`／`exclude_chosen`、
+`activate.per_turn`，以及能定位 owner／face／能力行／fragment／DSL 路徑的來源證據。
 不要從 regex 盤點或卡名自行製造正式 authored 來源。所有未選模式、成本與能力都須
 保留原來源閉包；無法映射的形狀按能力／整卡拒絕，不刪掉欄位後假裝無限次。
 
@@ -178,7 +178,7 @@ scope、consume_at 為 §3.1 的精確組合；
 不新增 caller 可填的 instance、已用次數或核可旗標。准入能接受結構，不代表當前局面
 可以起動；已耗盡是 IllegalPlay，錯答是 Invalid，未支援形狀是 Unsupported。
 
-兩個代表良構例，以結構摘要表示，非新作者語法：
+兩個代表良構例，以結構摘要表示，非新DSL 語法：
 
 ```text
 正：Activated.play.limit = { maximum: 1, window: Turn,

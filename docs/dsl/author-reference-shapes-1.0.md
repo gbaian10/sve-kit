@@ -1,6 +1,6 @@
-# 作者 1.0：引用、玩家與期限形狀
+# DSL 1.0：引用、玩家與期限形狀
 
-本表細化[撰寫語法 §6／§9](author-syntax-1.0.md#6-玩家引用結果)的引用原子；
+本表細化[DSL 語法 §6／§9](author-syntax-1.0.md#6-玩家引用結果)的引用原子；
 機器語法以 [author-nodes.schema.json](../../dsl/author-nodes.schema.json) 為準。
 每列先區分變體的必填、選填、互斥與角色，不從構造清冊的聚合鍵集合推導。
 這些原子不依賴 Expr／Cond／Sel／Steps，不能當成動作的完整位置型別：
@@ -69,13 +69,13 @@ schema 通過不授予這些語義。
 不是已登錄的移動追蹤授權。普通 receipt binding 是否具有合法移動結果、ReceiptList
 是否已離開迴圈、事件是否真有 move_receipt，以及新世代是否仍有效，仍須另驗。
 
-`A.event-object-ref` 只收已有明確作者形狀的 holder；
+`A.event-object-ref` 只收已有明確 DSL 形狀的 holder；
 amount／value 是表達式讀值，move_receipt 是收據，不得混成物件。
 holder 是否存在於該 on 事件仍須由事件型別推導。
-不能把 IR 任意欄位直接當成作者欄位，也不能輸入自由字串路徑。
+不能把 IR 任意欄位直接當成DSL 欄位，也不能輸入自由字串路徑。
 
 本表定義領袖葉形狀，不定義完整 Sel 的 filter 組合或 `rest`。
-`first/second/rest` 的作者編碼須與 Target 的順序／角色視圖一併定形，不從 §6 的簡寫推斷出
+`first/second/rest` 的DSL 編碼須與 Target 的順序／角色視圖一併定形，不從 §6 的簡寫推斷出
 `"first:t"` 或 `{first: t}` 都合法。這不刪除原語義，也不宣稱完整 Ref 語法已交付。
 已定形的 Target roles 與接線責任見[角色與選取位置矩陣](author-selection-shapes-1.0.md)。
 
@@ -86,6 +86,6 @@ holder 是否存在於該 on 事件仍須由事件型別推導。
 不等於期限的 phase 也能參數化。以上原子可供 authored／expanded 共用，
 不表示整棵樹的兩個遞迴入口已實作。
 
-Schema 根仍拒絕 standalone 文件；沒有新的完整作者 reader。
+Schema 根仍拒絕 standalone 文件；沒有新的完整DSL reader。
 Python 型別與每個定義的結構及合成正反例同步驗證。
 這些驗證不提供來源准入、作用域、事件投影、receipt 授權或引擎 capability 保證。

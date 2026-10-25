@@ -1,9 +1,9 @@
-# 作者效果形狀 1.0
+# DSL 效果形狀 1.0
 
 本文件定義 `A.effect`（EffectSpec）的封閉形狀及安裝位置契約。
 語法唯一權威為 [`author-nodes.schema.json`](../../dsl/author-nodes.schema.json)；
 Python 對應型別在 `contracts/author_programs.py`，與 selector／數值共用同一遞迴圖。
-本片段不是完整能力、Steps、作者入口或 expanded profile，不能據此宣稱可執行。
+本片段不是完整能力、Steps、DSL 入口或 expanded profile，不能據此宣稱可執行。
 
 ## 1. 共通邊界
 
@@ -21,7 +21,7 @@ EffectSpec.grant 接受 `{on?,keywords?,abilities?}`：內容至少一項且各�
 | N | `NumericExpr`；整數常值可負，bool 不算整數 |
 | Q | `Quantity`；整數常值非負，運算式的結果仍由 C1／D0 檢查 |
 | Text | 非空文字；name／trait／keyword 共用 CardName／Concept 葉型別 |
-| Code | 既有作者代碼；形狀不保證 registry 已登錄 |
+| Code | 既有 DSL 代碼；形狀不保證 registry 已登錄 |
 | Phase | start／main／end |
 | Zone | field／hand／deck／evolve_deck／cemetery／ex |
 | TriggerKind | fanfare／lastword／evolve_time／super_evolve_time／attack_time／race_time／drive_time |
@@ -125,8 +125,8 @@ cost_mod.when_playing 是獨立的打出篩選，不從這張表補範圍。
 能力控制者、binding 可見性、capture、期限／UsageId、世代與 LKI、入場掃描前安裝及 capability
 仍需 C1／D0；C0 形狀接受不證明實際上下文合法。
 
-已有專用本文動作的加攻體／設攻體／失去能力／改種類，作者優先用對應動作；
-自身打出許可優先用 play 頭。這是作者選用偏好，C0 不強制；
+已有專用本文動作的加攻體／設攻體／失去能力／改種類，DSL 優先用對應動作；
+自身打出許可優先用 play 頭。這是DSL 選用偏好，C0 不強制；
 不推定與 apply.effect 的等義拼法同 hash，也不另造 C1 同義禁令。
 
 ## 5. variant 證據

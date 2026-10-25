@@ -2,7 +2,7 @@
 
 本文件補充 [play](play-semantics.md)、[執行語義](runtime-semantics.md)與
 [數值時序](numeric-timing.md)。這是 D1 的實作義務，不宣稱現行 executor 已完成；
-[內部執行](internal-execution.md)仍記錄已驗子集。不變更作者語法、公開 program、
+[內部執行](internal-execution.md)仍記錄已驗子集。不變更DSL 語法、公開 program、
 capability、最低版本或正式整卡來源資格。
 
 依據為日文 [CR 1.28.0（2026-09-28）](https://shadowverse-evolve.com/wordpress/wp-content/uploads/2026/09/28121513/ShadowverseEVOLVE_cr_1.28.0_260928.pdf)，
@@ -147,7 +147,7 @@ Add，也不得進化時刪 Set 或重抓 D_set。Set 已確實到期、無未�
 `CharacteristicView`、`Binding` 與 `Duration` 足以承載；runtime 的穩定性證明不由
 caller 自填布林或 capability 提供。通用良構不冒稱已驗「結算時條件不變」。
 
-lowering 接續 `ir/lowering/play.rs` 的 target 產生點，將作者已存在的種類／タイプ
+lowering 接續 `ir/lowering/play.rs` 的 target 產生點，將DSL 已存在的種類／タイプ
 條件保留為 typed predicate 與來源座標，不再用恆真域或列舉當下卡號替代。連同
 `ir/lowering/ast.rs` 的受限輸入檢查一起更新；既有未支援欄位不可靜默忽略。
 本文 If、AtSelection、原值／有效值及原期限維持原位置；不把全部 selector 都當作

@@ -1,4 +1,4 @@
-# 作者事件 payload 與 history.where 矩陣 1.0
+# DSL 事件 payload 與 history.where 矩陣 1.0
 
 這兩張表展開[事件與歷史契約](author-history-shapes-1.0.md)，沒有新增事件語義。
 語法權威為 [`author-nodes.schema.json`](../../dsl/author-nodes.schema.json) 的

@@ -2,7 +2,7 @@
 
 本契約補足[打出費用修正](play-cost-semantics.md) §3：只定同一次 card play 中，
 一個可選材料成本換一個常值 delta／set 的內部語義。它是 D0 的實作義務，並非 executor
-已支援的聲明；作者語法仍以 `dsl/` 為權威，不改公開 program、capability 或最低版本。
+已支援的聲明；DSL 語法仍以 `dsl/` 為權威，不改公開 program、capability 或最低版本。
 
 依據為[日文 CR 1.28.0（2026-09-28）](https://shadowverse-evolve.com/wordpress/wp-content/uploads/2026/09/28121513/ShadowverseEVOLVE_cr_1.28.0_260928.pdf)，
 核對日 2026-10-23；條號皆指該版。卡文與 Q&A 使用已保存的
@@ -144,7 +144,7 @@ face 可以只有 exchange 而沒有普通 modifiers；兩者都空才是空項�
 `receipt` 是整組交換的 PaymentResult：拒絕在步驟 5 結束記 Declined／不完整；接受且
 固有 PP 與材料都付完才記 PaymentComplete=true。付不起不產生可供本文消費的結果。
 材料自身的動作 receipt 仍供 authority 記錄；本片不將其 actual、before／after 或成功
-材料集合開放給作者本文。既有合法置換可算付款成功是 CR 10.6.2.5.2 的一般規則，
+材料集合開放給 DSL 本文。既有合法置換可算付款成功是 CR 10.6.2.5.2 的一般規則，
 但本版依 §3.2 拒絕置換，不據物理移動數替未支援置換猜付款成功。
 
 wrapper.result 若有名稱，只降低為上述 CardPlay 的具名 PaymentComplete 讀值；
@@ -158,13 +158,13 @@ optional，整卡拒絕。同次本文只透過上述 PaymentComplete 讀值，�
 
 ## 5. lowering、良構與准入
 
-- 作者入口只接 `play.optional_cost` 的單一 mapping（§1 的 exact Material，wrapper.result
+- DSL 入口只接 `play.optional_cost` 的單一 mapping（§1 的 exact Material，wrapper.result
   可省略），並且恰有一個 literal `optional_cost_delta` 或 `optional_cost_set`。
   不帶 option、不帶 choice 關聯；缺修正、帶列表或條件式交換修正均拒絕。
 - lowering 把這對欄位構成 face 的唯一 exchange，與一般 modifiers 並列；不讓 exchange
   change 同時進普通 modifiers。Spell 的 `PlaySpec.costs` 保持唯一印刷 PP literal，
   Follower 仍走卡片規則成本。既有來源 reader 若只能看 abilities，須接 card-level play
-  才能開放此功能；不新增作者欄位或從卡文 regex 自動撰寫效果。
+  才能開放此功能；不新增DSL 欄位或從卡文 regex 自動由 DSL 推導效果。
 - WF traversal 檢查新增樹、scope／支配、decision 與材料身分、receipt 定義及時點，
   合計 set 宣告數與 literal 值域。整卡准入另驗來源、卡表、印刷費用、所有未選分支及
   §3.2 動態局面；保留既有 qualification 與來源閉包 guard。

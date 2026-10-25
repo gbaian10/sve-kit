@@ -1,7 +1,7 @@
 # 內部已驗程式體執行入口
 
 `Game::execute_internal` 接受 `WellFormedProgram`、來源座標及 authority 提供的來源物件／世代／控制者。
-它只供合成與卡片段測試使用，不接作者 YAML、不執行整張 `CardProgram`，也不發布公開 capability。
+它只供合成與卡片段測試使用，不接DSL YAML、不執行整張 `CardProgram`，也不發布公開 capability。
 `Registry::current().supported()` 仍為空；良構通過不能取代本入口的執行准入。
 
 正式卡片與能力打出的程序以[正式 play 契約](play-semantics.md)為準；以下列出執行器已驗子集。
@@ -11,7 +11,7 @@
 
 ## 整卡與正式 play 的內部邊界
 
-`load_internal_card(card_no, WellFormedCardProgram)` 在同一個 Game 載入完整整卡，不直接解析作者
+`load_internal_card(card_no, WellFormedCardProgram)` 在同一個 Game 載入完整整卡，不直接解析 DSL
 YAML。印刷 face 的十進位 ordinal 與 lowering candidate 的 `base`（對應 face 0）都保留原本
 owner、field、fragment；這不授予永久來源身分或公開 capability。整卡的良構入口環境直接帶入
 本文，不把依賴 play binding 的本文重新當成封閉 `WellFormedProgram`。
@@ -32,7 +32,7 @@ Printed Fanfare／Lastword／OnAttack 及 End Begin。Spell 的唯一固有 Orde
 前置 X、追加／替代成本、一般 trigger、通用 Static 與任意對象 LKI 仍整棵拒絕。
 Quick 僅接受 [Quick 契約 §1、§5](quick-semantics.md) 的普通 Spell 獨立 Static 許可與
 普通場上從者的指定 Activated；共用精確形狀檢查，不開放一般 PlayCard Permission。
-目前只由內部 typed 輸入承載；作者入口與正式來源 lowering 尚未完成。
+目前只由內部 typed 輸入承載；DSL 入口與正式來源 lowering 尚未完成。
 
 載入逐能力驗證 card／face／line、印刷座標唯一、所有 instruction 的來源閉包，以及包含未選模式
 與死分支的 requirement 集合。Fanfare Keyword 例外只接受已驗 instruction source 的精確位置，
@@ -69,7 +69,7 @@ Printed、Field 起動可帶 `PlaySpec.limit` 的每回合 1／2 次額度；以
 
 護符的 Fanfare、Lastword、已支援的 Printed EnterField 與 End Begin 沿共同 producer、
 pending 與 LKI，不另設護符待機。護符入場仍可被「從者入場」條件排除。
-lowering 與良構檢查原已按能力形狀而非卡種承載上述成本／觸發，這片不新增作者語法或 IR 欄位，
+lowering 與良構檢查原已按能力形狀而非卡種承載上述成本／觸發，這片不新增DSL 語法或 IR 欄位，
 亦不擴大 `Registry::current().supported()`。
 
 BP01-041 的候選起動片段由 C0 展開、lowering、良構與整卡執行驗 PP／Act；BP20-100
@@ -91,7 +91,7 @@ count 支援常值 exact／upto 與良構的 SC／NC 條件樹；在 AtPlay 固�
 沒有 mode 內 Distribution、capture 或與根 parameters 混用，未選模式仍通過整樹支援閉包。
 exact 1 可帶 `CurrentTurnAbilityInstance` 排除；Authority 以既有 ModeUse 保存
 (execution, ability_instance, mode, turn)，AbilityPlayed 才原子提交，本文 false 仍保留紀錄。
-作者 lowering 接常值 n／upto、單一 SC／NC instead 及 this_turn 排除；混合 exact>1、
+DSL lowering 接常值 n／upto、單一 SC／NC instead 及 this_turn 排除；混合 exact>1、
 多個 instead 的優先序、改計數母體的 rule modifier、Handoff、未支援的參數依賴、其他 actor 與任意私有 choose 保持拒絕。
 Quick 起動的模式歷史排除在整卡准入保持拒絕；既有 Quick preflight 尚未承載歷史。
 Quick 起動的 PlaySpec.limit 已由 Printed 限制拒絕，不因本片擴張 Quick。
@@ -104,7 +104,7 @@ AtSelection 在驗答後讀這份 snapshot 與已公開 binding；不讀付款�
 及非空 And／Or、Not。有效種類與タイプ由目前特徵讀取；已准入的完整成本、本文與 context
 閉包不含控制轉移、種類／タイプ修改、static 或未受驗 continuous，故仍在場的原世代條件不變。
 不能以這次候選剛好匹配取代預檢；可能翻轉的管線及數值、姿態、進化狀態、名稱等 predicate
-仍在付款前拒絕。lowering 保留作者 target 的 kind／trait 為 typed predicate 與原來源座標，其他欄位仍拒絕。
+仍在付款前拒絕。lowering 保留DSL target 的 kind／trait 為 typed predicate 與原來源座標，其他欄位仍拒絕。
 沒有分配時可有多個 target decision。Bound 只讀受驗的 target producer，與 InstallEffect affected 局部 binding 分開。
 每個 Damage／Modify／Move 使用點固定完整輸入，核對原世代及存活目標的選擇特徵；
 若特徵意外翻轉，整次回復 origin。離場換世代只使該指示無實際作用，不刪原 binding、不重綁或補選，
@@ -195,7 +195,7 @@ OnSuperEvolve 在受驗超進化付款及加值後，與 OnEvolve 共用同一 E
 0 或全防止不發生；致命傷先跑規則破壞，再選取仍保留原來源資訊的待機。
 DamageAmount 只准入自身已綁定 Damage 事件的有限讀值路徑，不授權 closed Program 偽造事件。
 
-作者 `whose=each` 尚不符合現有 A.player-ref schema，作者 lowering 維持拒絕；
+DSL 的 `whose=each` 尚不符合現有 A.player-ref schema，DSL lowering 維持拒絕；
 內部 typed Phase 可表示不限制回合玩家。其他物件監看、LifeChange、一般 Move 訂閱、
 Grant／Delay、非 Field 入口、離場取代與 BP01-083 均維持拒絕。
 
@@ -304,7 +304,7 @@ Activated、Fanfare 與進化不讀這個入口。完整付款、場容量與回
 
 純條件限 Bool 常值、And／Or／Not、公開 Field／Cemetery 的 Exists 或計數對常值比較；
 查詢可按同一卡表的 kind、trait、name 過濾。這個入口使用隔離的封閉求值器，
-不擴大一般 selector 的 predicate 子集。分段區間由作者明示，原樣保留；兩條獨立減費各計一次。
+不擴大一般 selector 的 predicate 子集。分段區間由DSL 明示，原樣保留；兩條獨立減費各計一次。
 SC 可明示為墓地 Spell 計數；未展開的關鍵字及缺少封閉原區域讀值的 EX 限定自身條件仍拒絕。
 付款交換、additional／optional／alt、X、動態值、正 delta、複數 set、aura、next-play 共享額度，
 以及無明示期限的特定卡修正維持拒絕。完整合成、時點與來源義務見

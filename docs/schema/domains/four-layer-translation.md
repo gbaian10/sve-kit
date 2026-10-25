@@ -553,8 +553,8 @@ NFKC 的前後字元由 raw_span 與 canonical_spans 取出，允許多對多，
 
 ## 7. 規則投影接口
 
-本節只固定來源角色、型別與 scope；不新增作者 A.* 語法、遊戲原子或正式 DSL adapter。
-完整本體仍依[作者語法](../../dsl/author-syntax-1.0.md)與 `dsl/` 的實作狀態。
+本節只固定來源角色、型別與 scope；不新增 DSL A.* 語法、遊戲原子或正式 DSL adapter。
+完整本體仍依[DSL 語法](../../dsl/author-syntax-1.0.md)與 `dsl/` 的實作狀態。
 
 | Projection 欄位 | 型別／合法域與引用 | 驗證者；失敗／案例 |
 | --- | --- | --- |
@@ -588,7 +588,7 @@ scope 指同 frame 宣告的 ability／branch／sequence 作用域。A 驗簽章
 
 各頻次 frame 都可保存 DSL；是否取得合格巨集資格是另一條軸，同一 resolved 變體至少三張不同卡
 （卡名概念＋是否進化；重印／異圖不累計）僅滿足頻次條件。完整資格依 [#497](https://github.com/gbaian10/sve-kit/issues/497)，
-本文件不改作者語法 §10，也不授 reviewed／verified。後四類不計為完成的 ability_body。
+本文件不改DSL 語法 §10，也不授 reviewed／verified。後四類不計為完成的 ability_body。
 
 ## 8. 建置 DB、render projection 與依賴
 
@@ -1549,7 +1549,7 @@ projection 為 `ability_body`，唯一 scope 為 `ability_0`，imports／exports
 未命中者維持既有分類，不能因局部字串相似而解除 pending。
 
 本節只確定來源分類，不增加 production author adapter 的入口、ports、裁定強度或執行資格；
-完整能力、逐用途審核與場景驗證仍依[共用能力作者契約](../../dsl/common-family-authoring.md)。
+完整能力、逐用途審核與場景驗證仍依[共用能力 DSL 契約](../../dsl/common-family-authoring.md)。
 
 ## 12. Lastword 全主戰者固定傷害來源規則
 
@@ -1586,7 +1586,7 @@ normalizer release 是來源 metadata；只有本規則改變的封閉語義 pay
 advance follower，沒有 section；完整面只有 `【守護】【オーラ】`、換行及
 `{ファンファーレ}相手の場のフォロワーすべてを破壊する。`。
 第二行完整 body 的 Concept/ability 葉固定為 `term:ability.fanfare`；
-沒有作者參數，projection 為 ability_body／ability_0，imports／exports 皆空。
+沒有DSL 參數，projection 為 ability_body／ability_0，imports／exports 皆空。
 守護／Aura 的 card_field 與換行 layout 保留為獨立 binding，不納入 body。
 
 封閉語義保留合法場外進場觸發、進場後視圖、待機到 check timing 播放，
@@ -1599,5 +1599,5 @@ CR 12.4.1/3、5.6.1、9.2.2、9.1.4、1.3.2/3 與 10.7 支持此契約。
 普通 follower、其他能力頭、己方／雙方、選定目標、amulet／card、banish／move、
 條件、費用、may、額外指示、section／token／crest 或不同 sibling 都不採納。
 固定 Concept 不開放通用參數。已存在的另一個來源語義命中必須拒絕衝突。
-此來源規則不建立 companion、正式作者資料、current 整卡准入或新的 executor；
+此來源規則不建立 companion、正式DSL 資料、current 整卡准入或新的 executor；
 完整 Fanfare adapter、非 body 義務與遊戲情境仍由各用途驗證。

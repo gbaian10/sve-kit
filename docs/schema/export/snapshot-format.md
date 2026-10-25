@@ -411,7 +411,7 @@ changes 是相鄰發布摘要，不是重建鏈。previous manifest 引用的 ch
 
 ## 7. 發布閘門與變動報告
 
-除了建置資料庫完整性，卡表快照需驗：所有表與內嵌 reference 有公開目標；43 個文字集合＋3 個影像集合逐欄白名單；current/translation 選用/region blocks 完整；每卡 support 恰一列；所有非 passed 有原因；passed 的建置資料庫證據吻合；分片重接與公開邏輯投影等價；bytes/hash/count/依賴 closure 正確；無來源本機路徑、作者候選 YAML、逐列稽核 hash。
+除了建置資料庫完整性，卡表快照需驗：所有表與內嵌 reference 有公開目標；43 個文字集合＋3 個影像集合逐欄白名單；current/translation 選用/region blocks 完整；每卡 support 恰一列；所有非 passed 有原因；passed 的建置資料庫證據吻合；分片重接與公開邏輯投影等價；bytes/hash/count/依賴 closure 正確；無來源本機路徑、DSL 候選 YAML、逐列稽核 hash。
 
 changes 是內容定址的公開摘要 `{format_version,from_data_version,to_data_version,added,modified,retired,errata,new_qa_versions,identity_changes,coverage_changes,support_changes}`，元素型別與複合主鍵表示見 [傳輸契約 §7](snapshot-transport.md#7-changes-元素)；建置待辦與原報告留建置資料庫。只是抓取時間/ETag 改變而內容相同不列修改。引擎版本/政策變化即使卡文不動仍發布新 `support/data_version`。
 

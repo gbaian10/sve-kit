@@ -1,10 +1,10 @@
-# 作者 1.0：要求量、切片與單組選取
+# DSL 1.0：要求量、切片與單組選取
 
 本表細化[語法 §3–7](author-syntax-1.0.md#3-費用目標與打出程序)的數量位置，
 機器語法以 [author-nodes.schema.json](../../dsl/author-nodes.schema.json) 為準。
 Target、choose、search 的**單組數量父變體**包含來源與必要的 binding／目的地；
 Target.groups 與其餘 Cost 另見[費用與目標矩陣](author-cost-target-shapes-1.0.md)。
-不是可放進任意父節點的數量 mapping。這些型別仍不提供完整作者入口或執行准入。
+不是可放進任意父節點的數量 mapping。這些型別仍不提供完整DSL 入口或執行准入。
 
 ## 共用數量與參數
 
@@ -69,11 +69,11 @@ holder 個數與每個 holder 的 counter 要求量是不同位置，兩者都�
 | choose | by:PlayerRef、may:bool、reveal:bool、order:bool、position:top_or_bottom、groups、cost_sum_le:Q、distinct_by:DistinctBy |
 | search | result、precondition、cost_sum_le:Q、distinct_by:DistinctBy、entry_effects、instead；不收 bind |
 
-Target 的 distinct_by 與 distinct_names 互斥。名稱互異的作者標準形為 distinct_by:name；
+Target 的 distinct_by 與 distinct_names 互斥。名稱互異的DSL 標準形為 distinct_by:name；
 既有 distinct_names:true 保留，但兩者不推定相同 body hash。
 cost_sum_le 是總原費用的上限位置，直接常量是 Nat，不收直接 param；
 合法算式不在 shape 層求值或截零。
-may 拒絕整項與 upto／any 選零不同；false 與省略仍保留不同作者 bytes。
+may 拒絕整項與 upto／any 選零不同；false 與省略仍保留不同 DSL bytes。
 
 choose 的本片來源為 ObjectSel。結算時接受者選取須另有明確規則依據，
 不能把打出時 Target 改成 choose；本表不宣告永遠排除領袖。

@@ -1,12 +1,12 @@
-# 作者 1.0：角色宣告與選取位置
+# DSL 1.0：角色宣告與選取位置
 
-本表細化[撰寫語法 §3／§5／§14](author-syntax-1.0.md#3-費用目標與打出程序)的角色與數量位置。
+本表細化[DSL 語法 §3／§5／§14](author-syntax-1.0.md#3-費用目標與打出程序)的角色與數量位置。
 機器語法以 [author-nodes.schema.json](../../dsl/author-nodes.schema.json) 為準。
 節點定義包含下列角色宣告、[領袖引用](author-reference-shapes-1.0.md#變體矩陣)
 及獨立的[物件來源／計數片段](author-object-query-shapes-1.0.md)；
 本表另定義具名 `RecipientSel`；單組 Target／choose／search 與 counter 的數量父變體
 見[要求量與切片矩陣](author-quantity-shapes-1.0.md)，其餘父動作仍未完成。
-這些片段不提供作者文件入口、作用域驗證或執行准入。
+這些片段不提供DSL 文件入口、作用域驗證或執行准入。
 
 ## 角色宣告矩陣
 
@@ -85,14 +85,14 @@ RecipientUnion 在 any_of 陣列層以 `contains` 要求至少一個領袖類；
 單 limb、重複 limb 均允許；limb 本身仍須通過完整封閉型別。
 節點聯集採 anyOf，測試遞迴攤平 root 聯集，查重複葉分支並驗每個正例恰命中一支。
 
-### 語義與作者選用規則
+### 語義與 DSL 選用規則
 
 `leader_or` 表示單一 PlayerRef 的領袖與該玩家場上的從者；zone 省略也只表示 field。
 BP01-125 鋭利な一裂き、BP02-062 竜巫女の儀式對應省略形，
 BP05-057 ゴッドバレットゴーレム對應明示 field；數量由父 Target 等節點指定。
 SingleLeader 的 self／opp 不因這個新型別擴為任意 PlayerRef。
 
-單一玩家領袖加上同玩家、無 filter 的場上從者，作者寫 leader_or：
+單一玩家領袖加上同玩家、無 filter 的場上從者，寫 DSL 時用 leader_or：
 包含 BP03-093 ホワイトスワン・オデット的 Last Words 與 BP04-103 アンドロメダ。
 領袖集合、跨玩家或從者 limb 帶 filter 時寫 RecipientUnion，從者 limb 明寫 zone:field，
 不能把 ZoneObjects 的省略 zone 當成固定 field。
@@ -116,11 +116,11 @@ any_of 按相同身分去重後供整個父節點使用，不是每個 limb 各�
 聯集不從 limb 次序產生物件順序；世代與視角不相容時拒絕。
 全體傷害仍是同一批次，不能改成每 limb 一個傷害動作。
 
-Schema 仍接受與 leader_or 等義的 any_of，作者選用偏好尚未由 C0 lint 強制。
+Schema 仍接受與 leader_or 等義的 any_of，DSL 選用偏好尚未由 C0 lint 強制。
 **不推定等義拼法有相同 body hash**：包括 leader_or 與聯集、
 省略與明示 zone:field、limb 排列或重複，以及物件／計數聯集與
 [集合形欄位](author-object-query-shapes-1.0.md#選取位置的物件聯集)的等義拼法。
-canonical JSON 不重寫上述結構；執行成員去重不表示作者 bytes 去重。
+canonical JSON 不重寫上述結構；執行成員去重不表示DSL bytes 去重。
 
 ### 消費位置與接線邊界
 

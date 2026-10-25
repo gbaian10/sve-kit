@@ -1,6 +1,6 @@
 # 動作與 Steps 形狀矩陣
 
-本文件對應 `author-nodes.schema.json` 的 `A.action`、`A.step`、`A.steps` 與內層定義；Python 對照為 `author_programs`。JSON Schema 是語法權威。這些是封閉片段，完整能力頭見[能力矩陣](author-ability-shapes-1.0.md)，不含作者入口、展開或執行准入。通過形狀不代表來源、作用域、物件世代或 capability 已驗證。
+本文件對應 `author-nodes.schema.json` 的 `A.action`、`A.step`、`A.steps` 與內層定義；Python 對照為 `author_programs`。JSON Schema 是語法權威。這些是封閉片段，完整能力頭見[能力矩陣](author-ability-shapes-1.0.md)，不含DSL 入口、展開或執行准入。通過形狀不代表來源、作用域、物件世代或 capability 已驗證。
 
 `A.action` 恰一動作鍵；`A.step` 恰一動作或控制鍵；`A.steps` 是保序列表，保留重複步驟和空列表。所有固定物件拒絕未知鍵，不補預設。`optional.do` 需要最後一個指示的 receipt，`simultaneous.do` 沿 IR 批次契約，這兩處要求非空。其他空 Steps 仍須通過 C1 的來源及終止檢查。
 
@@ -27,11 +27,11 @@ Search 的 found 是私有找到集合，revealed 是公開證明，moved 是實
 
 Position 有三支：top/bottom/{nth:正安全整數}；`{one_of:[上述位置至少兩項],by:PlayerRef}`；`{chosen:B}`。nth:1 合法。one_of 對每個物件決定位置，by 是位置選擇者，與 move.by 執行者分開。
 
-同一句「選卡＋上か下」標準形為 choose.position:top_or_bottom，再 move.position:{chosen:同名 binding}（BP16-022）。回答同時保存所選物件及逐物件位置，不能拆成第二次詢問。chosen 只接同 execution 的支配宣告，move.ref 必須原樣引用同一 B，不准子集或另一名稱；目的地只能 deck。這些跨節點限制由 C1 驗。它不是 A.cond.chosen 的目標快照條件。既定集合（残り、既選目標、this）使用 one_of（BP01-008、BP14-039）；此為作者標準形，不是額外 C0 拒絕規則。
+同一句「選卡＋上か下」標準形為 choose.position:top_or_bottom，再 move.position:{chosen:同名 binding}（BP16-022）。回答同時保存所選物件及逐物件位置，不能拆成第二次詢問。chosen 只接同 execution 的支配宣告，move.ref 必須原樣引用同一 B，不准子集或另一名稱；目的地只能 deck。這些跨節點限制由 C1 驗。它不是 A.cond.chosen 的目標快照條件。既定集合（残り、既選目標、this）使用 one_of（BP01-008、BP14-039）；此為DSL 標準形，不是額外 C0 拒絕規則。
 
 move.order 為 chooser/shuffle，要求 deck 且明寫 position；chooser 由 move.by 排序，shuffle 洗指定集合。choose.order:true 在同一次選擇回答已排序，後續引用該 binding 不再次 order；false 不建立排序證據。C1 驗來源順序，未展開目的地參數延至展開後驗。
 
-「残り」寫 `{in:seen,except:{in:{objects_of:moved,view:before}}}`，扣除成功搬移的 before，保留容量不足而未搬走者。多次搬移可用 except.any_of。差集保留觀察順序，不重新查牌庫頂；不新增 rest/first/second/底來源節點。前者／後者使用兩個 Target binding 或既有 roles；分組搜尋使用 per_group。同牌庫 move 重排降低為 Order，不變世代；其 receipt 仍須提供成功 before 成員供差集消費。獨立 order 作者鍵不接受；既有分類 ID A.order 對應 choose.order／move.order。
+「残り」寫 `{in:seen,except:{in:{objects_of:moved,view:before}}}`，扣除成功搬移的 before，保留容量不足而未搬走者。多次搬移可用 except.any_of。差集保留觀察順序，不重新查牌庫頂；不新增 rest/first/second/底來源節點。前者／後者使用兩個 Target binding 或既有 roles；分組搜尋使用 per_group。同牌庫 move 重排降低為 Order，不變世代；其 receipt 仍須提供成功 before 成員供差集消費。獨立 order DSL 鍵不接受；既有分類 ID A.order 對應 choose.order／move.order。
 
 ## 動作逐 variant
 
@@ -125,7 +125,7 @@ Stage=Steps 或 `{do:Steps,mode:choice|nonchoice}` 或 `{do:Steps,mode:explicit,
 
 `{payment_decided:optional}` 是付款前的決定，定位到同一張卡、同一次 play 的唯一可選費用宣告；不是 paid，也不是 x_paid。C1 只准 choice.instead.if 及其布林組合，拒絕跨 play、多組歧義、其他本文／selector／history 位置和循環依賴。共用 Condition 的形狀驗證不代替位置准入。paid:optional 以同樣規則定位費用，但只讀已完成付款。
 
-BP21-026 與 PR-585 是同卡異印，來源文分別含可選 +2 費用及一項→至多兩項模式。能力內容示意如下（完整作者容器仍須將 play、spell 分成各自的 A.ability，不允許單一能力兩個頭）：
+BP21-026 與 PR-585 是同卡異印，來源文分別含可選 +2 費用及一項→至多兩項模式。能力內容示意如下（完整 DSL 容器仍須將 play、spell 分成各自的 A.ability，不允許單一能力兩個頭）：
 
 ```yaml
 play:

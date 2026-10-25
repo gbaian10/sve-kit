@@ -3,7 +3,7 @@
 本文件定義內部 typed IR 的執行義務，補充[執行語義](runtime-semantics.md)、
 [打出程序](play-semantics.md)與 [IR §7](ir-vocabulary-1.0.md#7-事件cause-與誘發)。
 這是待實作契約；不代表[良構檢查](typed-ir-validation.md)或
-[executor](internal-execution.md)已准入，也不變更作者語法、公開 program、capability 或最低版本。
+[executor](internal-execution.md)已准入，也不變更DSL 語法、公開 program、capability 或最低版本。
 
 規則依據為[日文 CR 1.28.0（2026-09-28）](https://shadowverse-evolve.com/wordpress/wp-content/uploads/2026/09/28121513/ShadowverseEVOLVE_cr_1.28.0_260928.pdf)，
 PDF SHA-256 `c44b8f2ff7e1019bc2b4ec59df894d6a067179ff05eac2542b7723648a22cd47`。

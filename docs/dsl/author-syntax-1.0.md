@@ -1,13 +1,13 @@
-# SVE 效果 DSL：撰寫語法 1.0
+# SVE 效果 DSL：DSL 1.0
 
 引用與授權：下列卡名、卡文與規則／Q&A 原文片段屬來源引用，不在本專案 Apache-2.0 授權內。
 卡文區塊與其下的專案 YAML／解讀分開閱讀；來源記法及權利界線見[文件引用說明](../quotations.md)。
 
-版本 1.0，2026-09-28 採用。配對 [IR 詞彙](ir-vocabulary-1.0.md)；總覽見 [README](README.md)。本文件定義撰寫語法，不是已發布的 JSON Schema，也不宣稱引擎已接受示例。日文卡文與 Q&A 以 2026-09-26 凍結資料為準，CR 1.27.0。以下新增欄位都是封閉型別；不能用 `custom_effect`、自由字串路徑或手寫 IR 逃避登錄。
+版本 1.0，2026-09-28 採用。配對 [IR 詞彙](ir-vocabulary-1.0.md)；總覽見 [README](README.md)。本文件定義DSL 語法，不是已發布的 JSON Schema，也不宣稱引擎已接受示例。日文卡文與 Q&A 以 2026-09-26 凍結資料為準，CR 1.27.0。以下新增欄位都是封閉型別；不能用 `custom_effect`、自由字串路徑或手寫 IR 逃避登錄。
 
 ## 0. 原則與記法
 
-只有一種卡片 YAML。`A.*` 是撰寫構造的穩定 ID，動作為 `A.act.<鍵>`，`each_player / foreach / repeat / instead / simultaneous` 為 `A.comb.<鍵>`；`A.if / A.pay / A.optional / A.choice / A.either` 不加 comb 前綴。讀值與條件是 `A.expr / A.cond`，效果子鍵統一 `A.effect`。巨集在載入時展開成有型別 IR，不能從物件所在公開區域猜決定時點。
+只有一種卡片 YAML。`A.*` 是DSL 構造的穩定 ID，動作為 `A.act.<鍵>`，`each_player / foreach / repeat / instead / simultaneous` 為 `A.comb.<鍵>`；`A.if / A.pay / A.optional / A.choice / A.either` 不加 comb 前綴。讀值與條件是 `A.expr / A.cond`，效果子鍵統一 `A.effect`。巨集在載入時展開成有型別 IR，不能從物件所在公開區域猜決定時點。
 
 `Expr` 是純表達式，`Cond` 是布林表達式，`Sel` 是有型別集合或保序視圖，`Ref` 是物件／目標引用，`Steps` 是有序步驟列表。`n` 精確數量、`upto` 0..N、`any: true` 0..候選上限，三者互斥；只有チョイス的 `upto` 依 CR 5.18.2.1 為 1..N。`may` 表示可以拒絕整項，與選零個分開。
 
@@ -19,7 +19,7 @@
 
 完整容器的 Schema 與 Python 結構 reader 已提供；逐欄矩陣及來源／展開邊界見[入口形狀](author-entry-shapes-1.0.md)。結構通過不表示來源已准入或引擎可執行。
 
-`A.file = {format: 1, kind: author_effect_set, scope: shared|en_override, cards: Map<CardNumber,A.card>}`。封套、Schema 資源、companion 與精確用途依[作者承載契約](author-contract-1.0.md)。卡號照官網保存。卡表快照提供印刷名稱、種類、數值、種族、圖示，這裡不維護另一套卡表。
+`A.file = {format: 1, kind: author_effect_set, scope: shared|en_override, cards: Map<CardNumber,A.card>}`。封套、Schema 資源、companion 與精確用途依[DSL 承載契約](author-contract-1.0.md)。卡號照官網保存。卡表快照提供印刷名稱、種類、數值、種族、圖示，這裡不維護另一套卡表。
 
 `A.card = {meta, note?, abilities?, faces?, deck_rule?}`；faces 為 `Map<FaceId,{abilities}>`，用穩定 FaceId，不依名稱猜日英對應。`A.ability = {line, section?, sources, ports?, imports?, <一個能力頭或 generated_by>}`；sources／ability_scope、inline 必填 ports、imports 與引用版見承載契約 §2.3。line 從 1、section 從 0 起算，與分類 index 的零起算 line 轉換時加 1。同一行多能力分成多條，保留相同行號。token 說明段落必須掛 token 定義，不能掛母卡。
 
@@ -44,7 +44,7 @@ cards:
         keywords: [ward]
 ```
 
-這是容器片段，省略 sources／ports，不能直接作完整輸入驗收；§13 的真實例子則省略工具自動填入的 meta，只列指定能力行或指定構造片段，並明示片段範圍。meta 的狀態為 `draft → reviewed → verified`，爭議為 `disputed`。逐卡本體與每個用途須經與作者不同模型的獨立語義審核；只有已取得 §10 資格的巨集，才可由每用途三項機械檢查取得 reviewed。共用框架存放或頻次達標不會自動 reviewed；該版本引擎實跑才可 verified。`rulings` 指裁定 ID，不直接堆 Q&A；巨集產物在各能力位置記 `generated_by: {macro, version, params}`，精確形狀依承載契約 §2.3；不以卡片層單一巨集紀錄涵蓋多個用途。舊 `review / ruling` 不沿用為驗收狀態。
+這是容器片段，省略 sources／ports，不能直接作完整輸入驗收；§13 的真實例子則省略工具自動填入的 meta，只列指定能力行或指定構造片段，並明示片段範圍。meta 的狀態為 `draft → reviewed → verified`，爭議為 `disputed`。逐卡本體與每個用途須經與寫檔者不同模型的獨立語義審核；只有已取得 §10 資格的巨集，才可由每用途三項機械檢查取得 reviewed。共用框架存放或頻次達標不會自動 reviewed；該版本引擎實跑才可 verified。`rulings` 指裁定 ID，不直接堆 Q&A；巨集產物在各能力位置記 `generated_by: {macro, version, params}`，精確形狀依承載契約 §2.3；不以卡片層單一巨集紀錄涵蓋多個用途。舊 `review / ruling` 不沿用為驗收狀態。
 
 各頻次框架都可存放及重用有版本的 DSL 本體；版本、精確 frame／語義變體、適用域與所有來源用途須可追蹤，不能只記巨集名稱。來源綁定與投影接口依[四層契約 §6／§7](../schema/domains/four-layer-translation.md#6-sourcebindingtrace-與逐-occurrence-位置)，仍組裝既有 A.card／A.ability，不另建每卡語法。body version 不入 frame 身分；呈現、來源語義與本體的版本／失效責任依[四層契約 §8](../schema/domains/four-layer-translation.md#8-建置-dbrender-projection-與依賴)。
 
@@ -72,7 +72,7 @@ DSL 用主版.次版：次版只容許舊資料不必修改且降低語義不變
 | `static: {while?, zone?, effects}` | 宣告動態效果，while 每次求值；有效區由接受者種類與明寫 zone 決定 |
 | `play: {cost_delta?, cost_set?, additional_cost?, optional_cost?, optional_cost_delta?, optional_cost_set?, alt_cost?, cannot_if?, playable_from?, define?}` | 改打出程序；必要追加、可選追加、替代費用與增減／set 分開 |
 
-**裁定修訂**：長寫「〜とき、…なら」也在事件發生時誘發，本文條件寫 `do: [{if: …}]`，不寫 `when`（R-0009 取代舊裁定 #1；R-0002 保留結算時條件範圍；R-0003 同樣適用關鍵字頭）。`when` 從 1.0 撰寫層移除，真正事件限定放 `on` 的型別化 filter，狀態誘發放 state。事件凍結資料可以在本文 if 讀，不代表條件曾在誘發時判一次。
+**裁定修訂**：長寫「〜とき、…なら」也在事件發生時誘發，本文條件寫 `do: [{if: …}]`，不寫 `when`（R-0009 取代舊裁定 #1；R-0002 保留結算時條件範圍；R-0003 同樣適用關鍵字頭）。`when` 從 1.0 DSL 層移除，真正事件限定放 `on` 的型別化 filter，狀態誘發放 state。事件凍結資料可以在本文 if 讀，不代表條件曾在誘發時判一次。
 
 `usable_if` 可查有型別歷史，在打出時依目前 this 的世代比對事件 subject。例如 **BP21-096／PR-579**：本回合這個從者曾有體力增加事實才可使用進化；進化基礎替換不算，超進化的明示 +1 算（Q2758／Q2759，IR S-008）。
 
@@ -112,7 +112,7 @@ BP09-092 天狐の社亦先選傷害目標，解決時才決定是否橫置，�
 roles 的逐 variant 形狀與數量位置分型見[角色與選取位置矩陣](author-selection-shapes-1.0.md)。
 單組 Target／choose／search 與 counter 的數量父變體見[要求量矩陣](author-quantity-shapes-1.0.md)；
 Cost、wrapper 與 Target.groups 已定形，見[費用與目標矩陣](author-cost-target-shapes-1.0.md)；
-choose／search groups 與已定動作欄位見[動作矩陣](author-step-shapes-1.0.md)，不表示完整作者樹已實作。
+choose／search groups 與已定動作欄位見[動作矩陣](author-step-shapes-1.0.md)，不表示完整DSL 樹已實作。
 
 `A.cost` 保留 v0 的 pp、ep、act_self、self_to_cemetery、banish_self、discard、banish、to_cemetery、return_to_hand、reveal、counter、flip_down、flip_up、leader_life、lesson、earth_rite、stack_counter_from；增加 §13 的 act、to_ex、to_deck_bottom、to_deck、pp_max、skip_turn、one_of。其中 stack_counter_from 只保留舊名稱登錄、沒有接受形狀，不是獨立付款操作。外層有兩種互斥形狀：
 
@@ -121,7 +121,7 @@ choose／search groups 與已定動作欄位見[動作矩陣](author-step-shapes
 | 短形 `{<費用鍵>: payload}` | 恰一個費用操作 | 多個費用操作鍵 |
 | 長形 `{steps: [{<費用鍵>: payload}, …]}` | 至少兩項，依卡文排列並按陣列順序付款；重複操作也逐項保留 | 空或單元素 steps、steps 混其他費用操作鍵、每項多個操作鍵或 step 層級 metadata |
 
-「費用操作鍵」不含所在 wrapper 已登錄的 metadata：`optional_cost`／`additional_cost` 的整次付款 `result` 不算操作鍵，不能據此讓其他位置任填 metadata。step 本身恰有一個操作鍵；操作 payload 內已登錄的 `result`（例如 counter）仍在 payload 內。metadata 的位置與可用鍵集合須按完整 Cost 父型別封閉列舉，不能接受任意 mapping。單一操作一律用短形；空 steps 不能表示零費用。作者樹保留這些明示形狀，不在計算 body hash 前將短形轉成 steps。
+「費用操作鍵」不含所在 wrapper 已登錄的 metadata：`optional_cost`／`additional_cost` 的整次付款 `result` 不算操作鍵，不能據此讓其他位置任填 metadata。step 本身恰有一個操作鍵；操作 payload 內已登錄的 `result`（例如 counter）仍在 payload 內。metadata 的位置與可用鍵集合須按完整 Cost 父型別封閉列舉，不能接受任意 mapping。單一操作一律用短形；空 steps 不能表示零費用。DSL 樹保留這些明示形狀，不在計算 body hash 前將短形轉成 steps。
 
 `targets` 陣列保持卡文順序，不能排序；`roles` 的 mapping 鍵序不建立選取順序，`groups` 的陣列位置不把同時選取改成逐組貪婪。`play` 的 additional_cost／optional_cost／alt_cost 等不同欄位，以及能力頭的 cost／optional_cost，依各自規則合併與付款，不能從 mapping 鍵序推導跨欄位順序。若需表達卡文要求的跨欄位特定順序，須先登錄明示陣列構造，不得借鍵序補上。
 
@@ -133,7 +133,7 @@ to_deck 的材料 payload 必填 shuffle:true。discard 的 random 只接受 `{s
 
 ## 4. 決定與控制流程
 
-| 撰寫構造       | 欄位及 IR                                                                                                                                           |
+| DSL 構造       | 欄位及 IR                                                                                                                                           |
 | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `choose`       | `{bind, from, n\|upto\|any, by?, groups?, cost_sum_le?, distinct_by?, reveal?, order?, position?, may?}` → D.resolve-choice                         |
 | `optional`     | `{who?, do, then?, result?}` → K.may；result 包含 Declined 或 body 最後指示 receipt，then 用該指示 typed did                                        |
@@ -200,7 +200,7 @@ Sel.top/bottom 不接受，頂部來源使用動作同層 top:DeckSlice；
 已定形的長短讀值、快照 view、材料 filter 與降低時的成功判準責任見
 [收據讀值矩陣](author-expression-shapes-1.0.md#快照與收據讀值矩陣)。
 其中 objects_of 須明示 before／after；「預設成功成員」不授予省略 view 的語義。
-這些仍是片段，不代表完整 Sel、作者入口或收據接線已完成。
+這些仍是片段，不代表完整 Sel、DSL 入口或收據接線已完成。
 
 ## 7. 動作原子
 
@@ -244,7 +244,7 @@ move／banish／look／reveal 的 top 一律在動作同層使用
 
 `A.event` 保留 enter_field、left_field、placed_ex、discarded、banished、destroyed、damaged、dealt_damage、attacked、attack_target、evolved、super_evolved、phase、played、ability_played、life_changed、stat_changed、counter_changed、acted、stood、raced、drive_gained、ub_activated、fused、targeted、state。新增 dice_rolled、drive_checked、drive_trigger、moved、drew、equipped、fused_as_material；any_of 合併多種事件但仍是一條能力／限次。payload 必須按事件型別窄化，不可讀不存在欄位。
 
-共同事件 filter `by: {ability_of: EventObjectSel}` 判直接來源；入場加 entered_by，UB 加 holder，傷害加 recipient，融合加 material，drew 加 not_phase，counter_reached 為 counter_changed 的 after 比較。`stat_changed: {ref,stat: power|hp或清單,direction:up|down}` 對應 Attack/Life，同一指示對同一主體的攻體增減保存為一個事實的多個 facet，不重複計（`strength: inferred`；Q2075 只證明超進化會誘發，未證明次數）。stat_changed 的 history.where 同樣只用 ref／stat／direction：ref 降為 IR subject，stat 的 power／hp 降為 StatDelta.property 的 Attack／Life；撰寫層不接受 subject／property 別名。從者事件只由明示數值指示或超進化 CR 12.2.4.1 的 +1 步驟產生；進化基礎替換不產生（Q2758），超進化產生（Q2759）。持續效果條件變化、期限到期、種類還原與快取重算不產生，標 `strength: inferred`；領袖的傷害／回復／生命支付仍保留獨立來源。
+共同事件 filter `by: {ability_of: EventObjectSel}` 判直接來源；入場加 entered_by，UB 加 holder，傷害加 recipient，融合加 material，drew 加 not_phase，counter_reached 為 counter_changed 的 after 比較。`stat_changed: {ref,stat: power|hp或清單,direction:up|down}` 對應 Attack/Life，同一指示對同一主體的攻體增減保存為一個事實的多個 facet，不重複計（`strength: inferred`；Q2075 只證明超進化會誘發，未證明次數）。stat_changed 的 history.where 同樣只用 ref／stat／direction：ref 降為 IR subject，stat 的 power／hp 降為 StatDelta.property 的 Attack／Life；DSL 層不接受 subject／property 別名。從者事件只由明示數值指示或超進化 CR 12.2.4.1 的 +1 步驟產生；進化基礎替換不產生（Q2758），超進化產生（Q2759）。持續效果條件變化、期限到期、種類還原與快取重算不產生，標 `strength: inferred`；領袖的傷害／回復／生命支付仍保留獨立來源。
 
 `history: {event,who?,zone?,from?,to?,sel?,where?,window:this_turn|game|{since:BindingName},at_least?,distinct?:facts|subjects,exclude?}` 是條件；`history_count` 回數量；`history_sum: {… ,field}` 回 typed payload 總量。事件鍵取上表的非 state 事件加 history-only payment（骰子統一 dice_rolled）；where 只接該事件登錄欄位，phase.which 在歷史不收 param。完整封閉形狀見[事件與歷史形狀](author-history-shapes-1.0.md)。exclude=this_execution 排除本次 AbilityExecutionId，不排除同卡過去執行或外層執行。UB 在適正打出完成的 E.play 記一次發動，內層查詢已可見外層；另見 IR §13 GAP-S-015。所有歷史保存事件當時特徵，不查目前卡片；內部歷史身份不洩漏隱藏牌固定 ID。
 
@@ -276,11 +276,11 @@ Until 保留 turn、next_opp_turn、this_and_next_opp_turn、game；明確長形
 
 ### 10.1 存放與資格
 
-各頻次框架都可存放及重用有版本的 DSL 本體；版本、精確 frame／語義變體、適用域與所有來源用途須可追蹤。只有 1～2 張不同卡的本體及每個用途，仍依逐卡標準接受與作者不同模型的獨立語義審核；引用同一框架不能自動取得 reviewed。
+各頻次框架都可存放及重用有版本的 DSL 本體；版本、精確 frame／語義變體、適用域與所有來源用途須可追蹤。只有 1～2 張不同卡的本體及每個用途，仍依逐卡標準接受與寫檔者不同模型的獨立語義審核；引用同一框架不能自動取得 reviewed。
 
-同一 resolved 語義變體達至少 3 張不同卡（卡名概念＋是否進化；重印／異圖不累計），且完成兩個不同模型各自獨立審核、適用邊界測試及版本／適用域登錄，才取得合格巨集資格；作者不得自審。進化前後分開計；不同變體不得合計，中文文字相同也不證明相同語義。
+同一 resolved 語義變體達至少 3 張不同卡（卡名概念＋是否進化；重印／異圖不累計），且完成兩個不同模型各自獨立審核、適用邊界測試及版本／適用域登錄，才取得合格巨集資格；寫的人不得自審。進化前後分開計；不同變體不得合計，中文文字相同也不證明相同語義。
 
-本體保存撰寫者、審核者、版本與適用域；人寫證據在 authored、版本化案例在 tests、已驗執行結果與計算資格在建置 DB，封閉輸入及失效依[承載契約 §5](author-contract-1.0.md#5-審核測試證據與-meta)。邊界測試須含 0 張、無合法目標、大數值、時點／資訊邊界。頻次滿足只是 `threshold_eligible`，不是 `qualified`。2→3 張時升級同一版本本體的資格，不搬移本體；只採計對該版本、該適用域仍有效的審核與測試。
+本體保存DSL 寫入者、審核者、版本與適用域；人寫證據在 authored、版本化案例在 tests、已驗執行結果與計算資格在建置 DB，封閉輸入及失效依[承載契約 §5](author-contract-1.0.md#5-審核測試證據與-meta)。邊界測試須含 0 張、無合法目標、大數值、時點／資訊邊界。頻次滿足只是 `threshold_eligible`，不是 `qualified`。2→3 張時升級同一版本本體的資格，不搬移本體；只採計對該版本、該適用域仍有效的審核與測試。
 
 已分類的 ability_flag、card_field、none 行不納入可執行本體／巨集資格計數；pending 另列，不能當確定的 none。語義變體仍 pending 的來源可用保守精確框架翻譯，但須保留自身來源 scope，不得跨來源累計資格或自動生成可執行本體；確認後再依實際變體重鍵並審用途。
 
@@ -306,15 +306,15 @@ Until 保留 turn、next_opp_turn、this_and_next_opp_turn、game；明確長形
 
 每個鍵必須在**目前構造上下文**的登錄表：例如 cannot 沒有 n，buff 有 on；不能以另一構造曾使用 n 就放行。cards、define、roles 的動態名稱須符合其專屬卡號／識別字規則，不是任意額外欄位。未知鍵附卡號、行與完整路徑報錯。event 與 history 的欄位依[事件與歷史形狀](author-history-shapes-1.0.md)分工；登錄的 who/zone/from/to/sel 提升到 history 頂層，不留在 where。
 
-`carddb` 的 authored 讀取採 `yamlrocks==0.7.0`，以套件選項拒絕重複鍵與複合鍵，再由 strict JSON 與 canonical 拒絕其他非字串鍵、自訂 tag 物件與非有限數；anchor／alias／merge 與顯式 tag 讀取允許、寫入不產生，字元與數字拼法完整邊界見 [authored 格式 §1](../schema/domains/authored-layout.md#1-路徑與共同格式)。寫出維持 ruamel，不自製 parser／resolver 或 PyYAML fallback；其他既有 Python DSL 工具維持 `ruamel.yaml` 的 `YAML(typ="safe", pure=True)`、版本 `(1, 2)`、`allow_duplicate_keys=False`，本次未替換。正式 1.0 由 Python C0 嚴格讀 YAML 並交付已驗且完全展開的作者 JSON 樹，Rust D0 只接該樹降低 IR；不要求第二套 Rust 作者 YAML parser。既有 astra/1 Rust 入口不在此變更。YAML 原始文字作來源證據保存，不以 load→dump 作反向翻譯來源。
+`carddb` 的 authored 讀取採 `yamlrocks==0.7.0`，以套件選項拒絕重複鍵與複合鍵，再由 strict JSON 與 canonical 拒絕其他非字串鍵、自訂 tag 物件與非有限數；anchor／alias／merge 與顯式 tag 讀取允許、寫入不產生，字元與數字拼法完整邊界見 [authored 格式 §1](../schema/domains/authored-layout.md#1-路徑與共同格式)。寫出維持 ruamel，不自製 parser／resolver 或 PyYAML fallback；其他既有 Python DSL 工具維持 `ruamel.yaml` 的 `YAML(typ="safe", pure=True)`、版本 `(1, 2)`、`allow_duplicate_keys=False`，本次未替換。正式 1.0 由 Python C0 嚴格讀 YAML 並交付已驗且完全展開的DSL JSON 樹，Rust D0 只接該樹降低 IR；不要求第二套 Rust DSL YAML parser。既有 astra/1 Rust 入口不在此變更。YAML 原始文字作來源證據保存，不以 load→dump 作反向翻譯來源。
 
 Python YAML 載入器必過金絲雀：含 on、n、yes／no 值的最小卡片保留字串與數字；true 值仍為布林；布林鍵、字串 true 鍵、重複 on、未知鍵、cannot.draw.n、stat_changed 歷史中的 subject／property 舊別名均拒絕。Rust D0 接入時另驗 JSON 型別化解碼、未知節點／錯型別／scope／版本與能力拒絕，並比較同一份 canonical 展開樹；不以 Python 結果宣稱 Rust 已驗收。
 
-完整作者採納依序做上述 YAML 版本／純量與 JSON 型別／鍵型別／重複鍵／構造鍵名檢查、format／kind 選定資源及 DSL 支援集、卡表／source hash、欄位／registry 型別、binding scope、捕捉時點、receipt 可用性、目標／費用時點、效果安裝型別、引擎 capability；任一失敗都不能進入自動結算。各項執行邊界依[承載契約 §8](author-contract-1.0.md#8-驗證時點與拒絕診斷)分工；普通建置只讀並比對依賴，瀏覽器不重跑完整 Schema。正向 YAML 語法檢查不能替代此流程。禁止一般字串 selector、缺值回 0、未支援欄位默默忽略。詳 [ADR-0002](../adr/0002-author-ir.md)、[DSL 驗收規格](validation.md)。
+完整DSL 採納依序做上述 YAML 版本／純量與 JSON 型別／鍵型別／重複鍵／構造鍵名檢查、format／kind 選定資源及 DSL 支援集、卡表／source hash、欄位／registry 型別、binding scope、捕捉時點、receipt 可用性、目標／費用時點、效果安裝型別、引擎 capability；任一失敗都不能進入自動結算。各項執行邊界依[承載契約 §8](author-contract-1.0.md#8-驗證時點與拒絕診斷)分工；普通建置只讀並比對依賴，瀏覽器不重跑完整 Schema。正向 YAML 語法檢查不能替代此流程。禁止一般字串 selector、缺值回 0、未支援欄位默默忽略。詳 [ADR-0002](../adr/0002-author-ir.md)、[DSL 驗收規格](validation.md)。
 
 ## 12. 狀態與證據
 
-meta.status／reviewed_by 由寫入工具依真實證據產生；建置重算後比對，不一致即拒絕該卡自動執行及程式出貨，保留其他文字建置；資料變更 CI 失敗，普通建置不回寫作者資料。全卡彙總、disputed 保留與審核／已驗結果承載依[承載契約 §5](author-contract-1.0.md#5-審核測試證據與-meta)。
+meta.status／reviewed_by 由寫入工具依真實證據產生；建置重算後比對，不一致即拒絕該卡自動執行及程式出貨，保留其他文字建置；資料變更 CI 失敗，普通建置不回寫DSL 資料。全卡彙總、disputed 保留與審核／已驗結果承載依[承載契約 §5](author-contract-1.0.md#5-審核測試證據與-meta)。
 
 R-0001～R-0009 的效力、strength、取代關係以裁定登錄為準，完整對照在 IR §0。第 9～17 族本文件補語法；第 18、19 族統一 capture，第 20 族因 R-0009 不再需要兩次條件求值而結案，第 21 族以遷移稽核處理。沒有改寫 v0 標註。每族是否能提升「兩層通過」須聯合檢查該句型所有缺口，不可加總重疊族行數。
 
@@ -854,7 +854,7 @@ evolve_time:
 
 ### GAP-A-029
 
-history.where 是 typed payload 條件；stat_changed 的 ref 相等比較包含世代（IR subject），不接受撰寫欄位 subject。history_sum.field 明列 amount/delta/removed_stack 等可加總欄位，不能 count 代 sum。
+history.where 是 typed payload 條件；stat_changed 的 ref 相等比較包含世代（IR subject），不接受DSL 欄位 subject。history_sum.field 明列 amount/delta/removed_stack 等可加總欄位，不能 count 代 sum。
 
 真實卡例：**BP20-P37 吹雪のドラゴニュート**；來源 `BP20-P37#0/text/0`，句型 `T4fa538d54e`。
 
@@ -2204,7 +2204,7 @@ fanfare:
 
 `move`、`search`、`create`、`transform` 均接受 `entry_effects: List<EffectSpec>`；後兩者轉交 I.token，在成功新建世代上安裝。這是共用型別能力，不表示 BP08-011 自帶禁止 fanfare。
 
-entry_effects 中 entering 為此次入場新世代、其能力來源尚未掃描的物件，不是可由撰寫者猜測的 ID。若卡文只禁止「這一次入場」的誘發，作用域為 EntryOccurrence；若禁止這些物件的能力打出，依 cannot.play_ability 的 duration 處理，不混為一種期限。
+entry_effects 中 entering 為此次入場新世代、其能力來源尚未掃描的物件，不是可由DSL 寫入者猜測的 ID。若卡文只禁止「這一次入場」的誘發，作用域為 EntryOccurrence；若禁止這些物件的能力打出，依 cannot.play_ability 的 duration 處理，不混為一種期限。
 
 ### 批次誘發與封閉變體補記
 
