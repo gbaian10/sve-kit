@@ -43,7 +43,13 @@ def frozen_context(card_no: str, checksum: str) -> tuple[str, CardContext]:
     facts = {(face["card_type"], len(face.get("sections", []))) for face in faces}
     assert len(facts) == 1
     card_type, sections = facts.pop()
-    phase = "evolved" if "エボルヴ" in card_type else "normal"
+    phase = (
+        "evolved"
+        if "エボルヴ" in card_type
+        else "advance"
+        if "アドバンス" in card_type
+        else "normal"
+    )
     kind = "spell" if "スペル" in card_type else "follower"
     return raw, CardContext(
         source(raw), "c:synthetic", "f:synthetic", phase, kind, True, sections

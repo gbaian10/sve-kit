@@ -235,7 +235,7 @@ def _special_conditions(rule: Rule) -> dict[str, JsonValue]:
     result: dict[str, JsonValue] = {}
     if rule.id == "bracket_keyword_reference":
         result["keyword_evidence"] = {
-            "producer": "four-layer-jp-v8",
+            "producer": "four-layer-jp-v9",
             "category": "keyword",
             "adopted_count": 1,
             "spelling_remains_literal": True,

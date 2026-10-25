@@ -1,0 +1,46 @@
+format: 1
+kind: frame_semantics_shard
+definitions:
+  - id: 4290
+    hash: e79a755bee40a19e2c4f83ca0f097f9acdee37319b8ee8b76d89b8fb33c06903
+    value:
+      domains: "@3577"
+      expressions: {}
+      omissions: {}
+      resolved:
+        ability_scope: complete_second_line_with_ward_aura_and_layout_siblings
+        advance: immediately_return_face_up_to_owner_evolve_deck_after_move
+        batch: single_set_instruction
+        destination: each_card_owner_cemetery
+        empty: no_destroy_fact
+        fixed_head:
+          glossary: term:ability.fanfare
+          slot: leaf_0
+        holder:
+          kind: follower
+          special_kinds:
+            - advance
+        "@4291": false
+        kind: destroy
+        params: {}
+        recipients:
+          kind: follower
+          who: opp
+          zone: field
+        selection: all_at_resolution_without_target
+        token: cease_after_entering_cemetery
+        trigger:
+          event: enter_field_from_outside_field
+          holder: source_holder
+          kind: printed_fanfare
+          master: ability_master
+          resolution: "@4292"
+          view: after_entry
+      source_links: "@41"
+      units: {}
+  - id: 4291
+    hash: 5c46eedb67b50b6db459a69134db24264598f8ce5c5f89775b9633e74b26ce7c
+    value: ignores_prevention
+  - id: 4292
+    hash: ceeed11a11faf8903a09f1b3dab49004a4f5c9826818fd07cdf4cc2fbf13a301
+    value: pending_until_checkpoint_play
