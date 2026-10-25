@@ -4,7 +4,7 @@ JSON Schema `dsl/author-nodes.schema.json` 是語法權威；Python 對照為 `c
 
 ## 單一遞迴圖與封閉邊界
 
-A.ability-head 恰含一個能力頭，不含用途 line/section/sources/ports/imports/generated_by。companion.body 與 inline 的能力內容會消費它，完整容器由獨立契約承載。GrantedAbilityHead 為同一頭 payload 的子集合（見下表），不是另一套能力語法。遞迴路徑為 ability→Steps→grant/delayed→ability，以及 static→EffectSpec.grant→ability。
+A.ability-head 恰含一個頭，不含用途 line/section/sources/ports/imports/generated_by。inline 的能力／宣告內容使用它；companion.body 使用排除獨立 keywords 的 A.companion-head，不能經 generated_by 引入非本體宣告。完整容器由獨立契約承載。GrantedAbilityHead 為同一頭 payload 的子集合（見下表），不是另一套能力語法。遞迴路徑為 ability→Steps→grant/delayed→ability，以及 static→EffectSpec.grant→ability。
 
 Python 的 author_programs 承載能力、效果、Steps 的強連通圖，不使用動態 namespace 注入。Action／Step／GrantedAbilityHead 使用透明 RootModel 名目入口，避免型別檢查器逐路徑展開遞迴別名；內部仍是相同封閉 Fields，序列化不新增 root 鍵。Python 消費者以 `.root` 取得這三種入口的 Fields；Steps 是 Step 的 tuple，授予清單是 GrantedAbilityHead 的 tuple，D0 遍歷時須在這些邊界解包。Cost／Event／Target／Until 保留原模組與公開型別。Schema 現有 ID 保留，根仍拒絕裸片段。名稱使用 Concept／CardName 具名葉（Python alias 與 schema 同步），目前均沿 Text 的非空值域；registry 不是 C0 字串形狀。
 
@@ -33,6 +33,8 @@ T=既有非空、保序 Targets；O=OptionalCosts；X=XParameter；D=非空 Map<
 | play | 至少一個打出修飾鍵 | PlayCosts 的欄＋cannot_if、playable_from、D | 三張條件減費、BP13-093、BP18-007、BP06-016 D、CP01-057 cannot_if；define 單獨拒絕 |
 
 所有欄位封閉。7 個觸發巨集頭不接受 zone；事件定義與 LKI 已決定自身的觸發位置。auto／activate／static 的 zone 用 AbilityZone=既有六值＋equipment，允許單值或非空列表，保留重數，不接受 param；不擴張 Sel／參數的 Zone。auto/activate.zone 的合法值及對應卡文由 C1 驗證，C0 不把只標合成的組合當全卡准入。
+
+獨立 keywords 是非本體宣告，完整 A.ability.keywords 用 CardKeywordSourceUse `{binding_id,occurrence}`，不含 ability_scope；ports 兩個 map 必空，imports／generated_by 不合法，清單元素不可重複。裸 A.ability-head 仍供片段型別與葉位驗證，不能把其結構可讀當 companion 准入；完整 inline 的 ParamRef 仍拒絕。含此宣告的卡目前只接受 draft、空 reviewed_by／verified_by_exam，正式 current 來源及 Ward／Aura runtime 尚未接通。
 
 per_turn 是 ≥1 的安全整數；拒絕舊鍵與 bool/0/負數/字串。自動能力按 PendingAdmission 消耗、起動按 PlayCommitted 消耗，不提供 consume_at 自訂入口。起動 BP08-084 n=2、auto BP07-036 n=4、授予 CP04-PR20 n=2。per_turn 不表示「只在自己回合」；額外的回合限定需要獨立的規則准入。ub:true 為獨立標誌，不是 per_turn。
 

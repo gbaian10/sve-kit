@@ -72,6 +72,8 @@ DSL 用主版.次版：次版只容許舊資料不必修改且降低語義不變
 | `static: {while?, zone?, effects}` | 宣告動態效果，while 每次求值；有效區由接受者種類與明寫 zone 決定 |
 | `play: {cost_delta?, cost_set?, additional_cost?, optional_cost?, optional_cost_delta?, optional_cost_set?, alt_cost?, cannot_if?, playable_from?, define?}` | 改打出程序；必要追加、可選追加、替代費用與增減／set 分開 |
 
+獨立 keywords 沿用 abilities 陣列中的外觀，但它是卡／面的非本體宣告，不是 ability_body。完整輸入必須帶 line、sources 恰一筆 CardKeywordSourceUse `{binding_id,occurrence}` 與空 ports；該來源不含 ability_scope，不能填 `card`／`ability_0` 代造 scope。其他能力與 generated_by 仍用含真實 ability_scope 的 SourceUse。keywords 清單非空、保留來源順序且不可重複；宣告不接受 imports 或 generated_by，也不能作 companion 本體。owner 決定持有面，卡級容器不代表全卡常駐；grant.keywords 與 activate.quick 的原有語法不變。完整來源、current 對帳及引擎支援另驗，目前此承載不授予 keyword 的正式 current／執行准入，含宣告的卡保持 draft 與空 review／exam。
+
 **裁定修訂**：長寫「〜とき、…なら」也在事件發生時誘發，本文條件寫 `do: [{if: …}]`，不寫 `when`（R-0009 取代舊裁定 #1；R-0002 保留結算時條件範圍；R-0003 同樣適用關鍵字頭）。`when` 從 1.0 DSL 層移除，真正事件限定放 `on` 的型別化 filter，狀態誘發放 state。事件凍結資料可以在本文 if 讀，不代表條件曾在誘發時判一次。
 
 `usable_if` 可查有型別歷史，在打出時依目前 this 的世代比對事件 subject。例如 **BP21-096／PR-579**：本回合這個從者曾有體力增加事實才可使用進化；進化基礎替換不算，超進化的明示 +1 算（Q2758／Q2759，IR S-008）。

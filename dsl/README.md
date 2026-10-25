@@ -161,6 +161,17 @@ version and applicability scope. Nonempty `verified_by_exam` remains unsupported
 These readers do not establish source admission, qualification or executable support.
 No prototype data is migrated.
 
+Independent `A.ability.keywords` declarations use exactly one
+`CardKeywordSourceUse {binding_id, occurrence}`, without `ability_scope`.
+Other heads still require the scoped `SourceUse`. Keyword declarations require
+empty ports, distinct keywords, and no imports or `generated_by`; companion
+bodies use `A.companion-head`, which excludes this declaration head. Cards with
+these declarations currently require draft status and empty review/exam evidence.
+This is structural support only: source expansion and current D0 admission still
+reject keyword source mapping. Existing synthetic expanded Quick lowering uses
+a compiler-local `keyword_declaration:<author_path>` source coordinate, which
+never supplies a source Projection scope. Ward/Aura runtime support is unchanged.
+
 ## Expansion candidates
 
 `AuthorExpander` in `carddb/src/sve_carddb/domains/effects/author_expansion.py`

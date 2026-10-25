@@ -19532,24 +19532,14 @@
         },
         "sources": {
           "items": {
-            "$ref": "#/$defs/SourceUse"
+            "$ref": "#/$defs/CardKeywordSourceUse"
           },
           "maxItems": 1,
           "minItems": 1,
           "type": "array"
         },
-        "imports": {
-          "minProperties": 1,
-          "type": "object",
-          "propertyNames": {
-            "$ref": "#/$defs/Code"
-          },
-          "additionalProperties": {
-            "$ref": "#/$defs/ImportUse"
-          }
-        },
         "ports": {
-          "$ref": "#/$defs/Ports"
+          "$ref": "#/$defs/EmptyPorts"
         },
         "keywords": {
           "type": "array",
@@ -19563,7 +19553,8 @@
               }
             ]
           },
-          "minItems": 1
+          "minItems": 1,
+          "uniqueItems": true
         }
       },
       "required": [
@@ -20673,7 +20664,7 @@
           "$ref": "#/$defs/ParamDeclarations"
         },
         "body": {
-          "$ref": "#/$defs/A.ability-head"
+          "$ref": "#/$defs/A.companion-head"
         },
         "ports": {
           "$ref": "#/$defs/Ports"
@@ -20860,6 +20851,106 @@
           "not": {}
         }
       }
+    },
+    "CardKeywordSourceUse": {
+      "additionalProperties": false,
+      "properties": {
+        "binding_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "occurrence": {
+          "$ref": "#/$defs/OccurrenceKey"
+        }
+      },
+      "required": [
+        "binding_id",
+        "occurrence"
+      ],
+      "type": "object"
+    },
+    "EmptyPorts": {
+      "additionalProperties": false,
+      "properties": {
+        "imports": {
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/Code"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/ImportBinding"
+          },
+          "maxProperties": 0
+        },
+        "exports": {
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/Code"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/LocalBinding"
+          },
+          "maxProperties": 0
+        }
+      },
+      "required": [
+        "imports",
+        "exports"
+      ],
+      "type": "object"
+    },
+    "A.companion-head": {
+      "type": "object",
+      "properties": {
+        "fanfare": {
+          "$ref": "#/$defs/A.head.trigger"
+        },
+        "lastword": {
+          "$ref": "#/$defs/A.head.lastword"
+        },
+        "evolve_time": {
+          "$ref": "#/$defs/A.head.trigger"
+        },
+        "super_evolve_time": {
+          "$ref": "#/$defs/A.head.trigger"
+        },
+        "attack_time": {
+          "$ref": "#/$defs/A.head.trigger"
+        },
+        "race_time": {
+          "$ref": "#/$defs/A.head.trigger"
+        },
+        "drive_time": {
+          "$ref": "#/$defs/A.head.trigger"
+        },
+        "auto": {
+          "$ref": "#/$defs/A.head.auto"
+        },
+        "activate": {
+          "$ref": "#/$defs/A.head.activate"
+        },
+        "static": {
+          "$ref": "#/$defs/A.head.static"
+        },
+        "play": {
+          "$ref": "#/$defs/A.head.play"
+        },
+        "evolve": {
+          "$ref": "#/$defs/A.head.evolve"
+        },
+        "ride": {
+          "$ref": "#/$defs/A.head.ride"
+        },
+        "feed": {
+          "$ref": "#/$defs/A.head.feed"
+        },
+        "spell": {
+          "$ref": "#/$defs/A.head.spell"
+        }
+      },
+      "additionalProperties": false,
+      "minProperties": 1,
+      "maxProperties": 1
     }
   },
   "description": "Closed shared author graph and authored containers. Expansion and source/execution admission are separate; the root rejects standalone documents."

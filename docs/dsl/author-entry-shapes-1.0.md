@@ -16,7 +16,9 @@ DSL 檔與伴隨本體共用 `author-nodes.schema.json` 的能力內容圖。`au
 | 本體分片 | format:1、kind:effect_body_shard、scope:shared、records | 無其他鍵 |
 | companion | frame_id、ability_scope、body_version、dsl、params、body、ports、written_by、registrations | note；body 不含用途位置或 generated_by |
 
-sources 恰一筆，OccurrenceKey.segments 可以保留多段，不複製能力執行。line 從 1 起算，section 從 0 起算。通用 OccurrenceKey 的四層 owner 型別包含 Q&A 等來源，結構可讀不表示這是合法 JP DSL 來源；shared 來源准入仍需已採納 JP face_revision 及精確 owner／field／face／line／scope。
+sources 恰一筆，OccurrenceKey.segments 可以保留多段，不複製能力執行。普通能力／generated_by 使用 SourceUse，含真實 ability_scope；獨立 keywords 宣告只用 CardKeywordSourceUse `{binding_id,occurrence}`，不含 ability_scope。keywords 宣告的 ports 必空，imports／generated_by／舊 SourceUse 均拒絕；companion.body 的子圖排除 keywords。line 從 1 起算，section 從 0 起算。通用 OccurrenceKey 的四層 owner 型別包含 Q&A 等來源，結構可讀不表示這是合法 JP DSL 來源；shared 來源准入仍需已採納 JP face_revision 及精確 owner／field／face／line 與該種類的來源定位。
+
+含獨立 keywords 宣告的卡目前只接受 draft、reviewed_by:[]、verified_by_exam:[]；不新增非本體用途 hash／review recipe，不使用本體 body_version 代填。這是結構承載，keyword current 來源與非本體 inventory 的對帳仍未實作，來源展開明確拒絕 unsupported_keyword_source_mapping。原 card_field 的整卡來源拒絕保留，不由結構 reader 授 current proof。
 
 inline 的能力 payload 與 companion 使用同一型別圖。單跑 Schema／TypeAdapter 可能接受合法葉位的 ParamRef；完整結構 reader 另走 decoded 型別圖，對 inline 內任何 ParamRef 報 inline_param_reference。走訪透明 RootModel、保留 BaseModel 的序列化 alias 與 TypedDict wire 鍵，不掃全域同名鍵，因此不把依賴 params 誤認成能力參數。這項 inline 檢查不取代下述完整 expanded profile。
 
