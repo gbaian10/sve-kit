@@ -7,7 +7,7 @@ import pytest
 from pydantic import JsonValue
 
 from sve_carddb.contracts.four_layer import FaceRevisionOwner
-from sve_carddb.domains.effects.author_current import CardRejected
+from sve_carddb.domains.effects.author_current import CardAccepted
 from sve_carddb.domains.effects.author_expansion import AuthorExpander
 from sve_carddb.domains.effects.author_source_hash import source_version
 from sve_carddb.domains.effects.author_sources import ADAPTER_RECIPE, SourceError
@@ -237,7 +237,7 @@ def test_unclosed_token_owner_still_rejects_entire_source(
             sources.keyword_obligations(CARDS["BP01-009"])
 
 
-def test_source_obligations_do_not_admit_keyword_authors(
+def test_source_obligations_are_consumed_by_current_keyword_authors(
     fixture: CurrentSourceFixture, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     with current(fixture) as sources:
@@ -261,5 +261,6 @@ def test_source_obligations_do_not_admit_keyword_authors(
         (result,) = validate_files(
             sources, inputs({"BP01-009": card}), AuthorExpander(SCHEMAS)
         )
-        assert isinstance(result, CardRejected)
-        assert result.diagnostic.reason == "unsupported_keyword_source_mapping"
+        assert isinstance(result, CardAccepted)
+        assert result.candidate.sidecar == ()
+        assert result.candidate.declarations[0].source_proof == "current_source_checked"

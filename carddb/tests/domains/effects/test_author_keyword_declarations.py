@@ -45,7 +45,8 @@ def test_keyword_source_is_not_an_ability_source(schemas: AuthorSchemas) -> None
         assert schemas.author_tree(canonical(value)) == value
         assert schemas.expanded(canonical(value)).model_dump(mode="json") == value
     expanded = AuthorExpander(SCHEMAS).expand(canonical(document(entry)), ())
-    assert expanded.sidecar[0].source_proof == "none"
+    assert expanded.sidecar == ()
+    assert expanded.declarations[0].source_proof == "none"
 
 
 @pytest.mark.parametrize(
@@ -161,9 +162,9 @@ def test_keyword_structure_does_not_grant_source_mapping() -> None:
     expander = AuthorExpander(SCHEMAS)
     with pytest.raises(ExpansionError, match="unsupported_keyword_source_mapping"):
         expander.expand_sources(raw, (), {})
-    with pytest.raises(ExpansionError, match="source_candidates_mismatch"):
+    with pytest.raises(ExpansionError, match="source_declaration_candidates_mismatch"):
         expander.expand_contexts(raw, (), {})
-    with pytest.raises(ExpansionError, match="unsupported_keyword_source_mapping"):
+    with pytest.raises(ExpansionError, match="source_candidates_mismatch"):
         expander.expand_contexts(
             raw,
             (),
@@ -193,4 +194,4 @@ def test_current_keyword_cannot_borrow_a_real_body_source(tmp_path: Path) -> Non
             sources, inputs({"BP01-009": card}), AuthorExpander(SCHEMAS)
         )[0]
     assert isinstance(result, CardRejected)
-    assert result.diagnostic.reason == "unsupported_keyword_source_mapping"
+    assert result.diagnostic.reason == "source_keyword_occurrence_mismatch"

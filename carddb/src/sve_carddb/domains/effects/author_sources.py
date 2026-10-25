@@ -37,6 +37,7 @@ if TYPE_CHECKING:
 
     from pydantic import JsonValue
 
+    from sve_carddb.contracts.author_handoff import PrintedKeyword
     from sve_carddb.contracts.four_layer import LeafType
     from sve_carddb.contracts.source_binding import ClosedDomain, SourceDescriptor
     from sve_carddb.domains.translations.four_layer_classification import Classifier
@@ -137,7 +138,6 @@ NO_TOKEN_METADATA = (
     "metadata.layout.v1",
     "pure_reminder.v1",
 )
-type PrintedKeyword = Literal["ward", "aura"]
 PRINTED_KEYWORDS: dict[str, PrintedKeyword] = {
     "term:keyword.ward": "ward",
     "term:keyword.aura": "aura",
@@ -160,7 +160,7 @@ ADAPTER_RECIPE = digest(
             "entry_heads": {key: list(value) for key, value in ENTRY_HEADS.items()},
             "entry_payload": "exact-head.cost.pp;lastword-uniform-all-leaders-v1;spell.draw.self.n;attack_time.draw.self.n;evolve_time.draw.self.n;lastword.search.self.deck.shikigami.hand.exact.n;empty-ports;no-imports",
             "entry_operands": "Nat-cost_value-occurrence-order-or-single-Nat-count;QuantitySpec-selection_count-constant-exact-v3",
-            "token_closure": "mapped-ability-heads-and-printed-keywords;keyword-token-faces-and-headers-rejected-v3",
+            "token_closure": "all-current-cards;token-faces-and-headers-rejected-v4",
             "token_free_metadata": list(NO_TOKEN_METADATA),
             "current_owner": "current-jp-face-revision;card-membership;exact-face-container",
             "known_null_attributes": "spell.attack;spell.defense;evolve-follower.cost;rules-proven-absence-v2",
@@ -180,6 +180,7 @@ ADAPTER_RECIPE = digest(
                 "concepts": dict(PRINTED_KEYWORDS),
                 "contract": "required-Concept-keyword;concept.keyword.v1;explicit-occurrence-order;card_field;empty-scopes-ports;current-face-owner;no-same-face-duplicates-v1",
             },
+            "declaration_consumption": "exact-binding-occurrence;current-owner-face-location;complete-ordered-payload;separate-body-and-keyword-closure;no-token-v1",
         }
     )
 )
