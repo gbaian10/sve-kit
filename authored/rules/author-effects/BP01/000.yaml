@@ -5,7 +5,7 @@ cards:
   BP01-P25:
     meta:
       dsl: "1.0"
-      source: effect-source-v1:sha256:aa24af81fc181b0b4467d5f570da63f5b85304a1411d535a20875f090901bf9a
+      source: effect-source-v1:sha256:807b96543ba53c88c4d2051a75dbd9d010f44221efbdea1d6bd8776f60428536
       written_by:
         - actor:
             who: Codex
@@ -24,7 +24,7 @@ cards:
                 kind: face_revision
                 revision_id: rev:v1:b80f1859d443f62a5ae9affe8b22d26a9711d6e4e27a48d0b16a5c2d148cd25d
               field: effect
-              ordinal: null
+              ordinal:
               source_hash: 3aeefc3819be4412d9e8891136fd813bbb27ce55011343f51d38289d4ee1d196
               line_ordinal: 0
               role: body

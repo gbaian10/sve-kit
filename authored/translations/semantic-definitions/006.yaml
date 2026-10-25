@@ -1,0 +1,129 @@
+format: 1
+kind: frame_semantics_shard
+definitions:
+  - id: 4293
+    hash: 9fa79da975f41b3223796b01390b03cc78177681745d5059ec937bbfdcd32d75
+    value:
+      domains: "@1984"
+      expressions: {}
+      omissions: "@32"
+      resolved:
+        ability_scope: "@4294"
+        cleanup: shuffle_source_deck_once_even_if_no_card_found_or_moved
+        costs: []
+        destination: ability_master_hand
+        fail_to_find: permitted_for_hidden_zone_name_condition
+        kind: search
+        movement: subject_to_prevention_capacity_and_replacement
+        "@4295": term:name.shikigami_employment
+        params:
+          n: leaf_4.constant
+        private_observation: authorized_at_search_start
+        proof: show_found_cards_before_movement
+        quantity:
+          component: constant
+          mode: exact
+          slot: leaf_4
+        selector:
+          name: 式神の使役
+          who: self
+          zone: deck
+        targets: []
+        trigger: "@4296"
+      source_links: "@41"
+      units: "@69"
+  - id: 4294
+    hash: 1be95ce7129b2cfb3ec46cec5ff7122a4ef3d6d68bd9cf7725d1b8bf7c90a9da
+    value: complete_single_line_normal_follower_effect
+  - id: 4295
+    hash: 94343d392d9c503fa4537c6f564f3b969aea4613f61e7d96054c715689c2f13c
+    value: name_reference
+  - id: 4296
+    hash: c1222e705b4817e9d1a7dc941179565aebc0bac08fecce91bfdea42f4858a62e
+    value:
+      event: "@4297"
+      holder: source_holder
+      kind: "@4298"
+      master: "@4299"
+      multiplicity: per_fact
+      resolution: "@4292"
+      view: "@4300"
+  - id: 4297
+    hash: 0aa8a30b15b196522f01ed9c65523dad5a43d41161472c1dc07f0cf45a9b5a71
+    value: actual_field_to_card_owner_cemetery
+  - id: 4298
+    hash: 9d6773ee4ef09cf3180c31e3fe2c775fcff92415fbc259a16ae6cdf9eef196c9
+    value: printed_lastword
+  - id: 4299
+    hash: 93fc187bb6ab8f07314b254c1fa7dfb7690e7c80f60ccdf85fc67b312478d805
+    value: source_master_before_exit
+  - id: 4300
+    hash: 1b77ca4928ca2f3ac9882ad193f29e3aaee1738edc6b578d38a116669d16861a
+    value: before_exit_field
+  - id: 4301
+    hash: a5aff97b95b0554fd46e95ff1bff60fb617a0e685b7bb4efdb4f30e429fd27dd
+    value:
+      domains: "@3042"
+      expressions: {}
+      omissions: {}
+      resolved:
+        ability_scope: "@4294"
+        aura: false
+        costs: []
+        duration: permanent_delta_subject_to_generation_and_zone_rules
+        hp: 1
+        kind: buff
+        operation: add
+        params: {}
+        power: 1
+        recipients:
+          kind: follower
+          other: true
+          who: self
+          zone: field
+        selection: all_eligible_at_resolution_without_target
+        trigger:
+          event: "@4302"
+          holder: source_holder
+          kind: "@4303"
+          master: "@4304"
+          resolution: "@4292"
+      source_links: "@41"
+      units: {}
+  - id: 4302
+    hash: f13ce23264c65c524c950398f03215fe7a7368f8b58b8a324d9db9d62cdead6f
+    value: enter_field_from_outside_field
+  - id: 4303
+    hash: f0f44c08858c7d78dc1e6b34da94ec2f8ab3dc4a9ea7c110cbf8b8d03c974ea4
+    value: printed_fanfare
+  - id: 4304
+    hash: b128e31954f44aa0567e9205d876f9dc506b0e6887f710e7910d5e3d52da6c2a
+    value: ability_master
+  - id: 4305
+    hash: 95e65f3b1087ce0458390d1868a9033e3e72a039f39b83222e7d47931052c885
+    value:
+      domains: "@3559"
+      expressions: {}
+      omissions: {}
+      resolved:
+        ability_scope: complete_second_line_with_independent_leave_draw_discard_sibling
+        active_zone: field
+        cost:
+          payer: "@4304"
+          pp: 1
+        destination: card_owner_cemetery
+        destroy: false
+        head: ordinary_activated_ability
+        holder:
+          kind: amulet
+          special_kinds:
+            - token
+        kind: move
+        method: put
+        params: {}
+        sibling_admission: false
+        subject: source_holder_current_generation
+        targets: []
+        token: erased_in_destination_immediately_after_move_without_check_timing
+      source_links: "@41"
+      units: {}

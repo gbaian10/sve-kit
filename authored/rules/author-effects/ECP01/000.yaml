@@ -5,7 +5,7 @@ cards:
   ECP01-002:
     meta:
       dsl: "1.0"
-      source: effect-source-v1:sha256:35cfb9cb36ccdb5138096b5f0acc06dea069c214b6b2dd9b1888bbd347727a5b
+      source: effect-source-v1:sha256:d1a39ccafd90ac82bd754078a95175be24ff5de8a070ba1570dcbe2d007c46d6
       written_by:
         - actor:
             who: Codex
@@ -24,7 +24,7 @@ cards:
                 kind: face_revision
                 revision_id: rev:v1:9f85ee2d40580a7da0989e35c990af9920299a5b24eb88c44da03ed6af5954de
               field: effect
-              ordinal: null
+              ordinal:
               source_hash: 1ed4c4e8e1c709c0af61cb8f42212e10759728f264197898321166f8e5fa5c47
               line_ordinal: 0
               role: body
