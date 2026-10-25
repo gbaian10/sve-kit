@@ -1,0 +1,16 @@
+# Codecov is informational: the 90% gate lives in pytest and ci-ok is the only required check.
+comment:
+  layout: "header, diff, files, footer"
+  require_changes: false # comment on every PR, not only when coverage drops
+
+coverage:
+  status:
+    project:
+      default:
+        informational: true
+    patch:
+      default:
+        informational: true
+
+github_checks:
+  annotations: false

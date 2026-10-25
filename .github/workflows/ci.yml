@@ -277,6 +277,7 @@ jobs:
           uv --directory carddb run --locked pytest -n "$PYTEST_WORKERS" --cov --durations=30 \
             --cov-fail-under=90 \
             --junitxml="$REPORT_DIR/junit.xml" --cov-report="json:$REPORT_DIR/coverage.json" \
+            --cov-report="xml:$REPORT_DIR/coverage.xml" \
             > "$REPORT_DIR/test.log" 2>&1 || status=$?
           echo "$((SECONDS - start))" > "$REPORT_DIR/elapsed.txt"
           echo "pytest exit status: $status (statistics in the next step; raw output stays private)"
@@ -286,6 +287,19 @@ jobs:
         env:
           REPORT_DIR: ${{ runner.temp }}/sve-python-reports
         run: python3 .github/ci/test_summary.py python "$REPORT_DIR"
+      # Informational only: the 90% gate stays in pytest. continue-on-error keeps a failure of the action's
+      # own setup steps (fail_ci_if_error only covers the upload) from failing the job and so ci-ok.
+      # The report holds file names and line hits, no card text. Fork PRs have no secret and upload tokenless.
+      - name: Upload carddb coverage to Codecov
+        if: ${{ !cancelled() && (steps.tests.outcome == 'success' || steps.tests.outcome == 'failure') }}
+        continue-on-error: true
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ${{ runner.temp }}/sve-python-reports/coverage.xml
+          disable_search: true
+          flags: carddb
+          fail_ci_if_error: false
       - name: publish pytest (independent synthetic coverage gate)
         id: publish-tests
         if: ${{ !cancelled() }}
