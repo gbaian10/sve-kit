@@ -1,13 +1,6 @@
 format: 1
 kind: effects_index
 records:
-<<<<<<< HEAD
-  - card_id: c:efb62b3ef53e576797625688d75164d9
-    scope: shared
-    file: rules/author-effects/BP01/000.yaml
-    kind: author_effect_set
-    record_key: BP01-P25
-=======
   - card_id: c:9c467cdec10851c3958323fe461496dd
     scope: shared
     file: rules/author-effects/BP01/001.yaml
@@ -23,6 +16,11 @@ records:
     file: rules/author-effects/BP01/001.yaml
     kind: author_effect_set
     record_key: BP01-174
+  - card_id: c:efb62b3ef53e576797625688d75164d9
+    scope: shared
+    file: rules/author-effects/BP01/000.yaml
+    kind: author_effect_set
+    record_key: BP01-P25
   - card_id: c:91c75753f00c53beacd94342dbcd5f17
     scope: shared
     file: rules/author-effects/BP03/001.yaml
@@ -43,4 +41,3 @@ records:
     file: rules/author-effects/BP18/001.yaml
     kind: author_effect_set
     record_key: BP18-058
->>>>>>> 7714e79d (✨ feat(authored): 遷移 B7 純進化原型卡至作者格式)
