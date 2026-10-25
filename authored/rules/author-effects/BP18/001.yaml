@@ -1,0 +1,42 @@
+format: 1
+kind: author_effect_set
+scope: shared
+cards:
+  BP18-058:
+    meta:
+      dsl: "1.0"
+      source: effect-source-v1:sha256:1fc902ac42d15606aec8b38e4d8994820868469e7bfb77facf3eaa369920611f
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-luna
+          date: "2026-10-25"
+      reviewed_by: []
+      status: draft
+      verified_by_exam: []
+      rulings: []
+    faces:
+      f:7307b20b927e5ef09ec8345ea04c6b41:
+        abilities:
+          - line: 1
+            sources:
+              - binding_id: bind:b6fd9ba3574248772ba0a2a5f5f5ca7f5a5b2b23ee26ac826caf20c999d9781e
+                occurrence:
+                  owner:
+                    kind: face_revision
+                    revision_id: rev:v1:9c2e06043168f0e2b0bcfd2df9bbcc87baa2f93eb5eaf3ca0f7352ab9e070814
+                  field: effect
+                  ordinal:
+                  source_hash: a8887965f53a99dde02284d7deb217df4a20c000490c5fdc42330865aee829a3
+                  line_ordinal: 0
+                  role: body
+                  segments:
+                    - start: 0
+                      end: 19
+                ability_scope: ability_0
+            ports:
+              imports: {}
+              exports: {}
+            evolve:
+              cost:
+                pp: 1
