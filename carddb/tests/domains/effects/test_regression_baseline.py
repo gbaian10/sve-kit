@@ -17,6 +17,8 @@ from sve_carddb.domains.translations.four_layer_normalizer import VERSION
 
 ROOT = Path(__file__).resolve().parents[4]
 BASELINE = ROOT / "carddb/tests/fixtures/effect_baseline"
+AUTHOR_INDEX = ROOT / "authored/rules/effects-index.yaml"
+MIGRATED_ALIASES = {"BP18-SL13": "BP18-058"}
 OBJECT = TypeAdapter(dict[str, JsonValue])
 
 
@@ -58,6 +60,44 @@ def test_baseline_covers_every_authored_pack() -> None:
     }
 
 
+def author_records(pack: str) -> dict[str, dict[str, JsonValue]]:
+    """Index rows whose author shard belongs to ``pack``, keyed by CardNumber."""
+    return {
+        str(row["record_key"]): row
+        for row in map(object_value, array(read_yaml(AUTHOR_INDEX)["records"]))
+        if str(row["file"]).endswith(f"/{pack}/001.yaml")
+    }
+
+
+def assert_migrated_evolve(
+    number: str, record: dict[str, JsonValue], baseline: dict[str, JsonValue]
+) -> None:
+    """The author entry keeps the prototype's single evolve ability at its position."""
+    document = read_yaml(ROOT / "authored" / str(record["file"]))
+    card = object_value(object_value(document["cards"])[number])
+    faces = object_value(card["faces"])
+    assert len(faces) == 1, number
+    abilities = array(object_value(next(iter(faces.values())))["abilities"])
+    assert len(abilities) == 1, number
+    ability = object_value(abilities[0])
+    assert ability["line"] == 1, number
+    assert set(ability) == {"line", "sources", "ports", "evolve"}, number
+    cost = object_value(object_value(ability["evolve"])["cost"])
+    assert set(object_value(ability["evolve"])) == {"cost"}, number
+    assert set(cost) == {"pp"}, number
+    assert baseline["unclassified_positions"] == [], number
+    rows = array(baseline["positions"])
+    assert len(rows) == 1, number
+    row = object_value(rows[0])
+    assert (row["face"], row["field"], row["section"], row["line"]) == (
+        0,
+        "effect",
+        None,
+        1,
+    ), number
+    assert array(row["ability_indices"]) == [0], number
+
+
 @pytest.mark.parametrize("path", sorted(BASELINE.glob("*.json")), ids=lambda p: p.stem)
 def test_handwritten_programs_keep_the_reviewed_positions_and_inputs(
     path: Path,
@@ -66,13 +106,17 @@ def test_handwritten_programs_keep_the_reviewed_positions_and_inputs(
     actual = object_value(
         read_yaml(ROOT / "authored/rules/effects" / f"{path.stem}.yaml")["cards"]
     )
-    migrated = {
-        file.stem: OBJECT.validate_json(file.read_bytes())
-        for file in (BASELINE / "migrated").glob(f"{path.stem}-*.json")
-    }
-    assert actual.keys().isdisjoint(migrated)
-    actual.update(migrated)
-    assert actual.keys() == expected.keys()
+    records = author_records(path.stem)
+    migrated = set(records)
+    migrated.update(
+        file.stem for file in (BASELINE / "migrated").glob(f"{path.stem}-*.json")
+    )
+    migrated.update(
+        alias
+        for alias, target in MIGRATED_ALIASES.items()
+        if target in migrated and alias in expected
+    )
+    assert set(actual) == set(expected) - migrated
     for number, value in actual.items():
         baseline = object_value(expected[number])
         # Hash diagnostics cannot disclose official wording on a failing test.
@@ -90,6 +134,24 @@ def test_handwritten_programs_keep_the_reviewed_positions_and_inputs(
             assert fragments, number
             assert len({str(f["id"]) for f in fragments}) == len(fragments), number
         assert dict(positions) == frozen, number
+
+    for number, record in records.items():
+        assert_migrated_evolve(number, record, object_value(expected[number]))
+
+
+@pytest.mark.parametrize(
+    "path", sorted((BASELINE / "migrated").glob("*.json")), ids=lambda p: p.stem
+)
+def test_migrated_prototype_asts_equal_the_frozen_baseline(path: Path) -> None:
+    number = path.stem
+    frozen = object_value(
+        OBJECT.validate_json((BASELINE / f"{number.split('-')[0]}.json").read_bytes())[
+            number
+        ]
+    )
+    original = OBJECT.validate_json(path.read_bytes())
+    assert fingerprint(original) == frozen["ast_sha256"]
+    assert author_records(number.split("-")[0]).get(number) or number == "BP01-P25"
 
 
 def test_migrated_lastword_preserves_the_frozen_ast_and_position() -> None:

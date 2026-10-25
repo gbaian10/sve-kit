@@ -253,17 +253,6 @@ cards:
         body:
           op: macro
           name: bane
-  BP01-110:
-    status: complete
-    abilities:
-      - line: 1
-        kind: evolve
-        body:
-          op: evolve
-          subjects: self
-        costs:
-          - op: pp
-            amount: 1
   BP01-115:
     status: complete
     abilities:
@@ -515,34 +504,12 @@ cards:
           op: draw
           count: 1
         section: 0
-  BP01-171:
-    status: complete
-    abilities:
-      - line: 1
-        kind: evolve
-        body:
-          op: evolve
-          subjects: self
-        costs:
-          - op: pp
-            amount: 4
   BP01-172:
     status: complete
     abilities: []
   BP01-173:
     status: complete
     abilities: []
-  BP01-174:
-    status: complete
-    abilities:
-      - line: 1
-        kind: evolve
-        body:
-          op: evolve
-          subjects: self
-        costs:
-          - op: pp
-            amount: 2
   BP01-175:
     status: complete
     abilities: []

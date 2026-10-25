@@ -1,0 +1,80 @@
+format: 1
+kind: author_effect_set
+scope: shared
+cards:
+  BP19-001:
+    meta:
+      dsl: "1.0"
+      source: effect-source-v1:sha256:af9267fec3d9418a216e5786e2cc803d2eab9d2708daa7d0c5caf7d1a1d5988e
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-luna
+          date: "2026-10-25"
+      reviewed_by: []
+      status: draft
+      verified_by_exam: []
+      rulings: []
+    faces:
+      f:353ccad8c7ff5c30bafe4c7152322169:
+        abilities:
+          - line: 1
+            sources:
+              - binding_id: bind:9c3383a786bcc7eb6b209ec89de8649bdc981ca65eb40329d41828a6b8530ecf
+                occurrence:
+                  owner:
+                    kind: face_revision
+                    revision_id: rev:v1:21827447b0640c966f0983b8405012dd5c8d0e749452016f106c84cb61ad206d
+                  field: effect
+                  ordinal:
+                  source_hash: a8887965f53a99dde02284d7deb217df4a20c000490c5fdc42330865aee829a3
+                  line_ordinal: 0
+                  role: body
+                  segments:
+                    - start: 0
+                      end: 19
+                ability_scope: ability_0
+            ports:
+              imports: {}
+              exports: {}
+            evolve:
+              cost:
+                pp: 1
+  BP19-050:
+    meta:
+      dsl: "1.0"
+      source: effect-source-v1:sha256:c9b2f6606b03380fdc229db146eed13339eeef04bfd15181bf8b2de709a17e35
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-luna
+          date: "2026-10-25"
+      reviewed_by: []
+      status: draft
+      verified_by_exam: []
+      rulings: []
+    faces:
+      f:3784a31741f451ff81ad3eb1140f360e:
+        abilities:
+          - line: 1
+            sources:
+              - binding_id: bind:5569e28c7d3df889a5c7fb1504194b3eaec9ed757de31622de16051afa448b2b
+                occurrence:
+                  owner:
+                    kind: face_revision
+                    revision_id: rev:v1:d79d6c892ed4ab5532428ee0b0ac4029372084004663298f6b928948ae0a4410
+                  field: effect
+                  ordinal:
+                  source_hash: a8887965f53a99dde02284d7deb217df4a20c000490c5fdc42330865aee829a3
+                  line_ordinal: 0
+                  role: body
+                  segments:
+                    - start: 0
+                      end: 19
+                ability_scope: ability_0
+            ports:
+              imports: {}
+              exports: {}
+            evolve:
+              cost:
+                pp: 1

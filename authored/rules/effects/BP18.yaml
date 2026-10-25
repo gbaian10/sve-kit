@@ -149,17 +149,6 @@ cards:
               type: follower
             min: 1
             max: 1
-  BP18-058:
-    status: complete
-    abilities:
-      - line: 1
-        kind: evolve
-        body:
-          op: evolve
-          subjects: self
-        costs:
-          - op: pp
-            amount: 1
   BP18-059:
     status: complete
     abilities:
@@ -404,17 +393,6 @@ cards:
             min: 0
             max: 3
             distinct_by: name
-  BP18-SL13:
-    status: complete
-    abilities:
-      - line: 1
-        kind: evolve
-        body:
-          op: evolve
-          subjects: self
-        costs:
-          - op: pp
-            amount: 1
   BP18-SL14:
     status: complete
     abilities:

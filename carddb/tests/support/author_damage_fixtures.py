@@ -12,6 +12,7 @@ from sve_carddb.domains.translations.glossary.records import TermRecord
 from sve_carddb.domains.translations.inputs import Snapshot, validate_snapshot
 
 from .author_current_fixtures import (
+    EVOLVE_FRAME,
     REPOSITORY,
     CurrentSourceFixture,
     current_source_fixture,
@@ -40,7 +41,9 @@ def damage_fixture(
     files = []
     for name, identifier in (
         ("translations/glossary/concepts/001.yaml", "term:ability.last_words"),
+        ("translations/glossary/concepts/004.yaml", "term:keyword.storm"),
         ("translations/templates/definitions/029.yaml", FRAME),
+        ("translations/templates/definitions/094.yaml", EVOLVE_FRAME),
     ):
         shard = Shard.model_validate_json(
             definitions.expand_shard(read(authored / name, root=authored)[1])
@@ -54,7 +57,13 @@ def damage_fixture(
         assert len(records) == 1
         raw = canonical({"format": 3, "kind": "translation_shard", "records": records})
         files.append((name, raw, raw))
-    snapshot = Snapshot((files[0],), with_definitions(tuple(files)))
+    shards = tuple(
+        file for file in files if file[0].startswith("translations/glossary/")
+    )
+    snapshot = Snapshot(
+        shards,
+        with_definitions(tuple(files)),
+    )
     validate_snapshot(snapshot)
     return current_source_fixture(
         store,

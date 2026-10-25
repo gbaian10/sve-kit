@@ -50,6 +50,17 @@ CARDS = {
     "BP01-034": "c:b1d5ce73453a5efea8a2057e75743ea4",
     "BP01-092": "c:8c4b83cfcb625c0490eb8c66968f29dc",
 }
+REAL_AUTHOR_CARDS = {
+    "BP01-110",
+    "BP01-171",
+    "BP01-174",
+    "BP03-115",
+    "BP04-010",
+    "BP17-077",
+    "BP18-058",
+    "BP19-001",
+    "BP19-050",
+}
 FRAME = "frame:f03820b9048f0bd911c528162f930b0e47d128493a84b4fe097f4c8a48608756"
 
 
@@ -460,8 +471,23 @@ def test_real_current_author_set(
     # One test keeps the real tree/database build on one xdist worker.
     real = load_author_set(SCHEMAS.parent / "authored", expander.schemas)
     assert real.index_file is not None
-    assert {record.record_key for record in real.index.records} == {"BP01-P25"}
-    assert len(real.author_files) == len(real.body_files) == 1
+    assert {record.record_key for record in real.index.records} == (
+        REAL_AUTHOR_CARDS | {"BP01-P25"}
+    )
+    assert all(record.scope == "shared" for record in real.index.records)
+    assert all(record.kind == "author_effect_set" for record in real.index.records)
+    assert {file.path for file in real.author_files} == {
+        "rules/author-effects/BP01/000.yaml",
+        "rules/author-effects/BP01/001.yaml",
+        "rules/author-effects/BP03/001.yaml",
+        "rules/author-effects/BP04/001.yaml",
+        "rules/author-effects/BP17/001.yaml",
+        "rules/author-effects/BP18/001.yaml",
+        "rules/author-effects/BP19/001.yaml",
+    }
+    assert {file.path for file in real.body_files} == {
+        "rules/effect-bodies/BP01/000.yaml"
+    }
     assert {file.path for file in real.prototype_files} == {
         path.relative_to(SCHEMAS.parent / "authored").as_posix()
         for path in (SCHEMAS.parent / "authored/rules/effects").glob("*.yaml")

@@ -116,17 +116,6 @@ cards:
         costs:
           - op: act
             subjects: self
-  BP04-010:
-    status: complete
-    abilities:
-      - line: 1
-        kind: evolve
-        body:
-          op: evolve
-          subjects: self
-        costs:
-          - op: pp
-            amount: 1
   BP04-011:
     status: complete
     abilities:

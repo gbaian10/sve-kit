@@ -157,17 +157,6 @@ cards:
           - op: banish
             subjects: cost.1
         limit: 1
-  BP03-115:
-    status: complete
-    abilities:
-      - line: 1
-        kind: evolve
-        body:
-          op: evolve
-          subjects: self
-        costs:
-          - op: pp
-            amount: 0
   BP03-116:
     status: complete
     abilities:
