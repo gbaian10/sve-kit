@@ -425,7 +425,6 @@ class AuthorExpander:
         if contexts.keys() != originals.keys():
             raise ExpansionError("source_candidates_mismatch")
         library = BodyLibrary(self.schemas, shard_inputs)
-        expanded = dict(ability_nodes(result.tree))
         sidecar: list[ExpansionEvidence] = []
         for evidence in result.sidecar:
             ability = originals[evidence.path]
