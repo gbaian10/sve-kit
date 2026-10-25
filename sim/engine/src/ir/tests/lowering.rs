@@ -395,6 +395,88 @@ fn expanded_dynamic_scope_rejects_a_parameter_that_authored_accepts() {
 }
 
 #[test]
+fn keyword_sources_are_scope_free_and_keep_their_own_coordinate() {
+    let mut tree = expanded::tree().clone();
+    let mut seed = tree["cards"]["BP08-038"].clone();
+    let mut declaration = seed["abilities"][0].clone();
+    declaration.as_object_mut().unwrap().remove("fanfare");
+    declaration["sources"][0]
+        .as_object_mut()
+        .unwrap()
+        .remove("ability_scope");
+    declaration["keywords"] = json!(["quick"]);
+    seed["abilities"] = json!([declaration.clone()]);
+    tree["cards"] = json!({"synthetic": seed});
+    let authored = validator("authored").unwrap();
+    let expanded = validator("expanded").unwrap();
+    assert!(authored.is_valid(&tree));
+    assert!(expanded.is_valid(&tree));
+    let lowerer = ExpandedLowerer::new().unwrap();
+    let programs = lowerer.lower(&tree).unwrap();
+    let source = &programs["synthetic"].card().abilities[0].source;
+    assert_eq!(
+        source.scope,
+        "keyword_declaration:/cards/synthetic/abilities/0"
+    );
+    assert_eq!(source.author_path, "/cards/synthetic/abilities/0");
+    assert_eq!(
+        source.fragment.as_deref(),
+        declaration["sources"][0]["binding_id"].as_str()
+    );
+
+    let pointer = "/cards/synthetic/abilities/0";
+    let mut old = tree.clone();
+    old.pointer_mut(pointer).unwrap()["sources"][0]["ability_scope"] = json!("ability_0");
+    let mut ordinary = tree.clone();
+    ordinary
+        .pointer_mut(pointer)
+        .unwrap()
+        .as_object_mut()
+        .unwrap()
+        .remove("keywords");
+    ordinary.pointer_mut(pointer).unwrap()["spell"] = json!({"do":[]});
+    let mut imports = tree.clone();
+    imports.pointer_mut(pointer).unwrap()["imports"] =
+        json!({"p":{"binding_id":"b","ability_scope":"ability_0","port":"p"}});
+    let mut port = tree.clone();
+    port.pointer_mut(pointer).unwrap()["ports"]["exports"] = json!({"p":{"path":[],"bind":"x"}});
+    let mut duplicate = tree.clone();
+    duplicate.pointer_mut(pointer).unwrap()["keywords"] = json!(["quick", "quick"]);
+    let mut generated = tree.clone();
+    generated.pointer_mut(pointer).unwrap()["generated_by"] = json!({});
+    for rejected in [old, ordinary, imports, port, duplicate, generated] {
+        assert!(!authored.is_valid(&rejected));
+        assert!(!expanded.is_valid(&rejected));
+        lowerer.lower(&rejected).unwrap_err();
+    }
+    for keywords in [json!(["ward"]), json!(["aura"]), json!(["quick", "aura"])] {
+        let mut unsupported = tree.clone();
+        unsupported.pointer_mut(pointer).unwrap()["keywords"] = keywords;
+        assert!(expanded.is_valid(&unsupported));
+        let failure = lowerer.lower(&unsupported).unwrap_err();
+        assert_eq!(failure.code, "unsupported_construct");
+        assert_eq!(failure.path, format!("{pointer}/keywords"));
+    }
+}
+
+#[test]
+fn a_keyword_cannot_borrow_a_current_body_obligation() {
+    let mut input = current_inputs()["switch"]["after"]["authors"][0]["input"].clone();
+    let ability = &mut input["tree"]["cards"]["BP01-009"]["abilities"][0];
+    ability.as_object_mut().unwrap().remove("evolve");
+    ability["sources"][0]
+        .as_object_mut()
+        .unwrap()
+        .remove("ability_scope");
+    ability["keywords"] = json!(["quick"]);
+    let failure = ExpandedLowerer::new()
+        .unwrap()
+        .lower_current(&input)
+        .unwrap_err();
+    assert_eq!(failure.code, "unsupported_keyword_source_mapping");
+}
+
+#[test]
 fn bp08_candidate_matches_the_handwritten_card_program() {
     let cards = ExpandedLowerer::new()
         .unwrap()

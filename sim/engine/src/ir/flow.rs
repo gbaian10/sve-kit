@@ -19,7 +19,8 @@ pub struct SourceSpan {
     pub card_id: String,
     /// Original official number.
     pub card_no: String,
-    /// Ability scope within the card.
+    /// Source ability scope, or a compiler-local `keyword_declaration:<author_path>` coordinate.
+    /// The latter never denotes a source Projection scope or changes its identity.
     pub scope: String,
     /// Card or token owner coordinate.
     pub owner: String,

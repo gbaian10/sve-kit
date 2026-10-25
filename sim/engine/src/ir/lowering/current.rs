@@ -148,8 +148,12 @@ fn checked_sources(
     };
     let mut result = BTreeMap::new();
     for (path, ability) in entries {
+        if ability.keywords.is_some() {
+            return Err(error("unsupported_keyword_source_mapping", &path));
+        }
         let evidence = supplied.get(&path).ok_or_else(|| invalid_source(&path))?;
-        let source_use = &ability.sources[0];
+        let source_value = ability.sources[0].json();
+        let source_use = &source_value;
         // `line == 0` must fail here: `None == None` below would otherwise pass it.
         let line_ordinal = source_use
             .pointer("/occurrence/line_ordinal")

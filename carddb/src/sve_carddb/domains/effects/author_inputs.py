@@ -16,7 +16,7 @@ from sve_carddb.contracts.author_entries import (
     AuthorEffectSet,
     EffectBodyShard,
 )
-from sve_carddb.contracts.author_evidence import SourceUse
+from sve_carddb.contracts.author_evidence import CardKeywordSourceUse, SourceUse
 from sve_carddb.contracts.author_leaves import (
     AuthorIndexRecord,
     EffectsIndex,
@@ -84,7 +84,7 @@ class Diagnostic:
     card_id: str | None = None
     card_no: str | None = None
     scope: str | None = None
-    source: SourceUse | None = None
+    source: SourceUse | CardKeywordSourceUse | None = None
 
 
 class AuthorInputError(ValueError):
@@ -138,7 +138,9 @@ def _contextual(
     )
 
 
-def _source_at(value: JsonValue, path: PathParts) -> SourceUse | None:
+def _source_at(
+    value: JsonValue, path: PathParts
+) -> SourceUse | CardKeywordSourceUse | None:
     prefixes = (
         ("cards", str, "abilities", int),
         ("cards", str, "faces", str, "abilities", int),
@@ -172,7 +174,8 @@ def _source_at(value: JsonValue, path: PathParts) -> SourceUse | None:
         if not isinstance(sources, list) or len(sources) != 1:
             return None
         try:
-            return SourceUse.model_validate_json(canonical(sources[0]), strict=True)
+            source_type = CardKeywordSourceUse if "keywords" in node else SourceUse
+            return source_type.model_validate_json(canonical(sources[0]), strict=True)
         except ValidationError:
             return None
     return None
@@ -354,6 +357,20 @@ def _local_invariants(
         return
     for path, ability in _abilities(decoded):
         node = ability.root
+        if "keywords" in node:
+            key = str(path[1])
+            metadata = decoded.cards[key]["meta"]
+            if metadata.status != "draft" or metadata.reviewed_by:
+                raise AuthorInputError(
+                    _located(
+                        document,
+                        document.diagnostic(
+                            "container",
+                            "unsupported_keyword_review_evidence",
+                            ("cards", key, "meta"),
+                        ),
+                    )
+                )
         if "generated_by" in node:
             continue
         for violation in inline_parameters(node, path):

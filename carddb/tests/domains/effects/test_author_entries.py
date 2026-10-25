@@ -30,9 +30,12 @@ def schemas() -> AuthorSchemas:
 
 
 def ability(head: dict[str, JsonValue]) -> dict[str, JsonValue]:
+    source = source_use()
+    if "keywords" in head:
+        source.pop("ability_scope")
     return {
         "line": 1,
-        "sources": [source_use()],
+        "sources": [source],
         "ports": {"imports": {}, "exports": {}},
         **head,
     }

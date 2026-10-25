@@ -30,6 +30,7 @@ ABILITY_NAMES = {
     "A.head.play": "PlayHead",
     "A.granted-ability-head": "GrantedAbilityHead",
     "A.ability-head": "AbilityHead",
+    "A.companion-head": "CompanionHead",
     "A.effect.grant": "GrantEffect",
     "A.act.delayed": "DelayedAction",
 }

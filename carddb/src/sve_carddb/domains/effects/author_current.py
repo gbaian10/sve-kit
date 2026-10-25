@@ -659,6 +659,8 @@ class CurrentAuthorSources:
         used: set[tuple[str, str]] = set()
         contexts: dict[PathParts, SourceContext] = {}
         for path, ability in ability_nodes(tree):
+            if "keywords" in ability:
+                raise ExpansionError("unsupported_keyword_source_mapping", path)
             use = SourceUse.model_validate_json(
                 canonical(array(ability["sources"])[0]), strict=True
             )

@@ -15,6 +15,10 @@ fn permit() -> Located<Ability> {
     header.as_object_mut().unwrap().remove("activate");
     header["line"] = json!(2);
     header["keywords"] = json!(["quick"]);
+    header["sources"][0]
+        .as_object_mut()
+        .unwrap()
+        .remove("ability_scope");
     seed["abilities"] = json!([header]);
     tree["cards"] = json!({"unit-spell": seed});
     let lowered = ExpandedLowerer::new().unwrap().lower(&tree).unwrap();

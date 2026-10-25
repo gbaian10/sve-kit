@@ -17,6 +17,7 @@ from sve_carddb.domains.effects.author_expansion import (
     body_version,
     equivalent_ability,
 )
+from sve_carddb.domains.effects.author_inputs import AuthorInputError
 
 from ...contracts.test_author_abilities import HEADS
 from .test_author_entries import GOLDEN, SCHEMAS, ability, companion, document, shard
@@ -62,6 +63,12 @@ def test_all_heads_exact_equivalence(
     expander: AuthorExpander, key: str, payload: JsonValue
 ) -> None:
     record = registered({key: payload})
+    if key == "keywords":
+        with pytest.raises(AuthorInputError):
+            expander.expand(
+                canonical(document(generated(record))), [canonical(shard(record))]
+            )
+        return
     result = expander.expand(
         canonical(document(generated(record))), [canonical(shard(record))]
     )
@@ -217,7 +224,7 @@ def test_hash_collision_compares_complete_payload(
     expander: AuthorExpander, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     first = registered({"spell": {"do": []}})
-    second = registered({"keywords": ["quick"]})
+    second = registered({"spell": {"do": [{"draw": {"n": 1}}]}})
     fixed = "a" * 64
     first["body_version"] = second["body_version"] = "effect-body-v1:sha256:" + fixed
     monkeypatch.setattr(

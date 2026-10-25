@@ -38,7 +38,7 @@ pub(super) struct Face {
 pub(super) struct Ability {
     pub line: u32,
     pub section: Option<u64>,
-    pub sources: [Value; 1],
+    pub sources: [SourceUse; 1],
     #[serde(rename = "ports")]
     pub _ports: Ports,
     pub imports: Option<IgnoredAny>,
@@ -53,6 +53,44 @@ pub(super) struct Ability {
     pub spell: Option<Body>,
     pub play: Option<PlayCosts>,
     pub keywords: Option<Vec<String>>,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged)]
+pub(super) enum SourceUse {
+    Ability(AbilitySourceUse),
+    CardKeyword(CardKeywordSourceUse),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct AbilitySourceUse {
+    pub binding_id: String,
+    pub occurrence: Value,
+    pub ability_scope: String,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct CardKeywordSourceUse {
+    pub binding_id: String,
+    pub occurrence: Value,
+}
+
+impl SourceUse {
+    pub(super) fn json(&self) -> Value {
+        match self {
+            Self::Ability(source) => serde_json::json!({
+                "binding_id": source.binding_id,
+                "occurrence": source.occurrence,
+                "ability_scope": source.ability_scope,
+            }),
+            Self::CardKeyword(source) => serde_json::json!({
+                "binding_id": source.binding_id,
+                "occurrence": source.occurrence,
+            }),
+        }
+    }
 }
 
 #[derive(Deserialize)]

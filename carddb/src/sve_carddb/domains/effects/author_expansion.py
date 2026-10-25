@@ -391,6 +391,9 @@ class AuthorExpander:
     ) -> ExpansionCandidate:
         """Reconstruct supplied sources; this still does not prove current admission."""
         originals = dict(ability_nodes(self.schemas.author_tree(raw)))
+        for path, ability in originals.items():
+            if "keywords" in ability:
+                raise ExpansionError("unsupported_keyword_source_mapping", path)
         if candidates.keys() != originals.keys():
             raise ExpansionError("source_candidates_mismatch")
         contexts = {
@@ -430,6 +433,10 @@ class AuthorExpander:
         sidecar: list[ExpansionEvidence] = []
         for evidence in result.sidecar:
             ability = originals[evidence.path]
+            if "keywords" in ability:
+                raise ExpansionError(
+                    "unsupported_keyword_source_mapping", evidence.path
+                )
             source = contexts[evidence.path]
             generated_value = ability.get("generated_by")
             if generated_value is not None:
