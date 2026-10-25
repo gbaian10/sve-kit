@@ -5,6 +5,7 @@ import { Link as RouterLink, type To } from "react-router"
 import { loadCardRelated } from "../../app/card-related"
 import { relatedPrintings } from "../../app/printing-snapshot"
 import { useAnnotatedTexts, useImageIndex } from "../../app/snapshot"
+import { useCardLinkClick } from "../../components/card/card-link-context"
 import { CardImage } from "../../components/card/CardImage"
 import { useTextLanguage } from "../../components/card/text-language"
 import { Button } from "../../components/ui/Button"
@@ -34,6 +35,8 @@ import {
 export interface CardLink {
   readonly to: To
   readonly state: unknown
+  /** The target is the printing this card was reached from: following it goes back one entry. */
+  readonly back?: boolean
 }
 
 /** A printing of this card as the "other printings" tab shows it. */
@@ -148,12 +151,13 @@ function Thumbnail({
   readonly card: CardSummary
   readonly link: CardLink
   readonly images: ReturnType<typeof useImageIndex>
-  /** Set for this card's own printings: the current one is marked and a switch replaces history. */
+  /** Set for this card's own printings: the current one is marked and a switch keeps the scroll position. */
   readonly current?: boolean
   readonly children?: ReactNode
 }) {
   const { t } = useTranslation()
   const prefs = usePrefs()
+  const linkClick = useCardLinkClick()
   const name = displayName(card.name, currentUiLanguage(prefs.uiLanguage), prefs.nameDisplay)
   // The number is the visible label (names truncate too easily at this size); the name is the
   // accessible name and the hover tooltip.
@@ -162,7 +166,7 @@ function Thumbnail({
       <RouterLink
         to={link.to}
         state={link.state}
-        replace={current !== undefined}
+        onClick={linkClick(link)}
         preventScrollReset={current !== undefined}
         aria-current={current ? "page" : undefined}
         aria-label={t("card.imageAlt", { name: name.primary.text, cardNo: card.cardNo })}

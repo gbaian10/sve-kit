@@ -33,6 +33,7 @@ import { cn } from "../ui/cn"
 import { Link } from "../ui/Link"
 import { useCardLinkTarget } from "./card-link-context"
 import { CardImage } from "./CardImage"
+import { CardLink } from "./CardLink"
 import { SymbolIcon } from "./InlineText"
 import { inlinePieces, type SymbolPiece } from "./textSymbols"
 
@@ -198,15 +199,14 @@ function CardReference({
   const hovering = { onMouseEnter: show, onMouseLeave: hide, onFocus: show, onBlur: hide }
   const target = single ? linkOf(single) : undefined
   return single && target ? (
-    <Link
-      to={target.to}
-      state={target.state}
+    <CardLink
+      link={target}
       className={cn(underline, "hover:no-underline")}
       aria-describedby={tooltipId}
       {...hovering}
     >
       {children}
-    </Link>
+    </CardLink>
   ) : (
     <button
       type="button"
@@ -301,13 +301,12 @@ function CardList({
           const target = linkOf(card)
           return (
             <li key={card.printingId}>
-              <Link
-                to={target.to}
-                state={target.state}
+              <CardLink
+                link={target}
                 className="flex items-center gap-2.5 rounded-control p-1 text-text-1 hover:bg-surface-3 hover:no-underline"
               >
                 <LinkedCard card={card} edition={edition} images={images} size="row" />
-              </Link>
+              </CardLink>
             </li>
           )
         })}

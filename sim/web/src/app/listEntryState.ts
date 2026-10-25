@@ -24,6 +24,8 @@ export interface OverlayEntryState {
   readonly route?: CardEntryState["route"]
   /** Opening pushed a history entry, so closing from the UI pops it instead of replacing. */
   readonly pushed?: boolean
+  /** How many entries were pushed over the list (default 1 when `pushed`): closing pops them all. */
+  readonly depth?: number
   /** The `listId` of the list entry this card was pushed over. */
   readonly listId?: string
   /** The result cell that opened the card: focus returns to it when the card closes. */
@@ -32,6 +34,8 @@ export interface OverlayEntryState {
   readonly openerRoute?: CardEntryState["route"]
   /** Where that cell sat in the viewport when it opened, so closing can put it back there. */
   readonly openerTop?: number
+  /** The printing this entry was pushed from; linking back to it goes back instead of pushing. */
+  readonly previous?: string
 }
 
 /** What a card entry receives from the list or suggest list that opened it. */
@@ -47,6 +51,8 @@ export interface CardEntryState {
   readonly source: "results" | "suggest"
   readonly pages: number
   readonly resultKey: string
+  /** The printing this entry was pushed from; linking back to it goes back instead of pushing. */
+  readonly previous?: string
 }
 
 /** In-site links carry the printing and both owners, so the card page skips the cold lookup. */

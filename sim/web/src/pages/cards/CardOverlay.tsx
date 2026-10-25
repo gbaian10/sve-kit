@@ -254,6 +254,7 @@ export function useCardOverlay({
         ...(suggested ? { source: "suggest" as const } : {}),
         ...routeState(summary),
         pushed: alreadyOpen ? (previous?.pushed ?? false) : true,
+        ...(alreadyOpen && previous?.depth !== undefined ? { depth: previous.depth } : {}),
         ...(listId === undefined ? {} : { listId }),
         opener: key,
         ...(summary.route ? { openerRoute: routeState(summary).route } : {}),
@@ -269,7 +270,7 @@ export function useCardOverlay({
 
   const close = () => {
     if (overlay?.pushed) {
-      void navigate(-1)
+      void navigate(-(overlay.depth ?? 1))
       return
     }
     const { overlay: _closed, ...list } = entry
@@ -406,7 +407,7 @@ export function useCardOverlay({
   )
   // Another printing of the same card keeps the card's own result cell when cells are cards;
   // otherwise the printing stands in, and previous/next find it if it is in the loaded results.
-  const link = (to: OverlayLinkTarget) => {
+  const link = (to: OverlayLinkTarget, from?: string) => {
     const next = new URLSearchParams(location.search)
     next.set(CARD_PARAM, cardParamOf(to))
     const { overlay: previous, ...list } = entry
@@ -422,14 +423,26 @@ export function useCardOverlay({
         ...(resultKey === undefined ? {} : { resultKey }),
         ...(previous?.source === undefined ? {} : { source: previous.source }),
         ...(to.route ? { route: to.route } : {}),
-        ...(previous?.pushed ? { pushed: true } : {}),
+        ...(previous?.pushed
+          ? { pushed: true, depth: (previous.depth ?? 1) + (from === undefined ? 0 : 1) }
+          : {}),
+        // Pushing remembers the printing it left; replacing (previous/next) keeps the old one.
+        ...(from === undefined
+          ? previous?.previous === undefined
+            ? {}
+            : { previous: previous.previous }
+          : { previous: from }),
         ...(previous?.listId === undefined ? {} : { listId: previous.listId }),
         ...(previous?.opener === undefined ? {} : { opener: previous.opener }),
         ...(previous?.openerRoute === undefined ? {} : { openerRoute: previous.openerRoute }),
         ...(previous?.openerTop === undefined ? {} : { openerTop: previous.openerTop }),
       },
     }
-    return { to: { pathname: location.pathname, search: `?${next.toString()}` }, state }
+    return {
+      to: { pathname: location.pathname, search: `?${next.toString()}` },
+      state,
+      back: from !== undefined && previous?.previous === to.printingId,
+    }
   }
   const frame: CardFrame | null = target
     ? {

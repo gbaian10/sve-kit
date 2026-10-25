@@ -14,7 +14,7 @@ import {
   useSearchReadiness,
 } from "../../app/snapshot"
 import { StatusStrip } from "../../app/StatusStrip"
-import { CardLinkContext } from "../../components/card/card-link-context"
+import { CardLinkContext, useCardLinkClick } from "../../components/card/card-link-context"
 import { CardImage } from "../../components/card/CardImage"
 import { CardNameHeading, PlainNameHeading } from "../../components/card/CardNameHeading"
 import { CardTypeBadge } from "../../components/card/CardTypeBadge"
@@ -97,6 +97,8 @@ export interface OverlayLinkTarget {
   readonly intId?: number
   readonly route?: CardEntryState["route"]
   readonly resultKey?: string
+  /** The printing the link points at, which decides whether following it goes back. */
+  readonly printingId: string
 }
 
 /** The list's panel or modal around the card: same content as the page, other links and chrome. */
@@ -105,8 +107,15 @@ export interface CardFrame {
   readonly entry: Record<string, unknown>
   /** The route key shown until the card resolves. */
   readonly key: string
-  /** Where a link to another printing goes while the overlay stays open. */
-  readonly link: (target: OverlayLinkTarget) => { readonly to: To; readonly state: unknown }
+  /**
+   * Where a link to another card or printing goes while the overlay stays open. `from` is the
+   * shown printing when the link pushes a history entry; without it the entry is replaced and
+   * keeps the printing it was pushed from.
+   */
+  readonly link: (
+    target: OverlayLinkTarget,
+    from?: string,
+  ) => { readonly to: To; readonly state: unknown; readonly back?: boolean }
   /** The card was found in the list under another key (its card or art cell). */
   readonly onPlaced: (resultKey: string) => void
   readonly onClose: () => void
@@ -143,6 +152,7 @@ export function CardView({
   const { cardNo, intId } = useParams()
   const location = useLocation()
   const navigate = useNavigate()
+  const linkClick = useCardLinkClick()
   const observedImages = useImageIndex(client, catalog !== null && preparedImages === undefined)
   const images = preparedImages ?? observedImages
   const prefs = usePrefs()
@@ -378,6 +388,7 @@ export function CardView({
         ...(intId === undefined ? {} : { intId }),
         ...routeState(target.summary),
         resultKey: target.key,
+        printingId: target.summary.printingId,
       })
       void navigate(link.to, { replace: true, state: link.state, preventScrollReset: true })
       return
@@ -473,21 +484,34 @@ export function CardView({
       readonly cardNoState?: string
       readonly intId?: number
       readonly route?: CardEntryState["route"]
+      readonly printingId: string
     },
     sameCard: boolean,
   ): CardLink => {
     const { cardNo, cardNoState, intId, route } = target
     if (frame)
-      return frame.link({
-        cardNo,
-        ...(cardNoState === undefined ? {} : { cardNoState }),
-        ...(intId === undefined ? {} : { intId }),
-        ...(route === undefined ? {} : { route }),
-      })
-    const { resultKey: _resultKey, ...listEntry } = entry ?? {}
+      return frame.link(
+        {
+          cardNo,
+          ...(cardNoState === undefined ? {} : { cardNoState }),
+          ...(intId === undefined ? {} : { intId }),
+          ...(route === undefined ? {} : { route }),
+          printingId: target.printingId,
+        },
+        printingId ?? undefined,
+      )
+    // A link pushes an entry that remembers the printing it left; the one it left from decides
+    // whether this link goes back instead.
+    const { resultKey: _resultKey, previous: _previous, ...listEntry } = entry ?? {}
+    const { previous: back, ...sameEntry } = entry ?? {}
     return {
       to: printingPath(target),
-      state: { ...(sameCard ? entry : listEntry), ...(route === undefined ? {} : { route }) },
+      state: {
+        ...(sameCard ? sameEntry : listEntry),
+        ...(printingId === null ? {} : { previous: printingId }),
+        ...(route === undefined ? {} : { route }),
+      },
+      back: back === target.printingId,
     }
   }
   const summaryLink = (target: CardSummary): CardLink =>
@@ -497,6 +521,7 @@ export function CardView({
         ...(target.cardNoState === undefined ? {} : { cardNoState: target.cardNoState }),
         ...(target.intId === undefined ? {} : { intId: target.intId }),
         ...routeState(target),
+        printingId: target.printingId,
       },
       false,
     )
@@ -525,6 +550,7 @@ export function CardView({
               printingOwner: stringValue(row["home_set_id"]),
               region: printingRegion,
             },
+            printingId: id,
           },
           true,
         )
@@ -645,7 +671,7 @@ export function CardView({
     </>
   )
   return (
-    <CardLinkContext value={frame ? summaryLink : null}>
+    <CardLinkContext value={summaryLink}>
       <article
         ref={articleRef}
         aria-busy={pending}
@@ -978,7 +1004,7 @@ export function CardView({
                           <RouterLink
                             to={link.to}
                             state={link.state}
-                            replace
+                            onClick={linkClick(link)}
                             preventScrollReset
                             aria-current={id === printingId ? "page" : undefined}
                             className="inline-flex h-8 items-center rounded-pill border border-border px-2.5 font-mono text-13 hover:bg-surface-2 aria-[current=page]:border-accent aria-[current=page]:bg-accent-soft aria-[current=page]:font-semibold"
