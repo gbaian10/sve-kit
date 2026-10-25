@@ -30,6 +30,5 @@ canonical hash 相同不足以合併不同語義。resolved 變體可以共用�
 同次建置共用已讀來源，避免重複解析；一般讀檔不觸發全量分類。
 不新增成功收據、歷史 expected root、持久核可快取或需要使用者操作的驗證命令。
 
-官方測試輸入沿既有私有 testdata repo 的鎖定版本與檔案 hash 取得，原始來源歸檔繼續保留。
-可信任 CI 缺輸入即失敗；fork 明示排除依賴私有輸入的案例，不輸出官方全文 log／cache／artifact。
+來源位置與真實案例的歷史證據由永久私有來源歸檔保存。CI 測試使用 repo 中的公開 SVE fixtures 及合成輸入；主 repo 與 fork 執行相同完整測試範圍與 90% Python 行／分支覆蓋率門檻，不需要私有 checkout。log、cache 與 artifact 不放官方全文。
 建置 inputs 記錄當次程式、輸入與實際使用資料，不替舊環境生成新的凍結證明。

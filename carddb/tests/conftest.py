@@ -27,8 +27,6 @@ from .support.shared_case_fixtures import (
 )
 from .support.shared_case_fixtures import default_text_case as default_text_case  # ruff: ignore[useless-import-alias] -- register session fixture dependency
 
-pytest_plugins = ("tests.support.private_pages_plugin",)
-
 if TYPE_CHECKING:
     from collections.abc import Iterator
 

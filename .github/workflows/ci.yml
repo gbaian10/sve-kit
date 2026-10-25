@@ -202,28 +202,6 @@ jobs:
         with:
           persist-credentials: false
           clean: true
-      - name: Clear prior private checkout
-        run: rm -rf .testdata
-      - name: Select explicit test scope and read the pin
-        id: pin
-        run: python3 .github/ci/testdata.py configure python
-      - name: Require the private-data deploy key
-        if: steps.pin.outputs.mode == 'required'
-        env:
-          DEPLOY_KEY: ${{ secrets.TESTDATA_DEPLOY_KEY }}
-        run: test -n "$DEPLOY_KEY" || { echo 'Required private test data key is missing'; exit 1; }
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        if: steps.pin.outputs.mode == 'required'
-        with:
-          repository: ${{ steps.pin.outputs.repo }}
-          ref: ${{ steps.pin.outputs.commit }}
-          ssh-key: ${{ secrets.TESTDATA_DEPLOY_KEY }}
-          path: .testdata
-          persist-credentials: false
-          clean: true
-      - name: Verify required private test data
-        if: steps.pin.outputs.mode == 'required'
-        run: python3 .github/ci/testdata.py verify python
       # Hooks pin language_version python3.14 (.pre-commit-config.yaml).
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
@@ -297,7 +275,7 @@ jobs:
           [[ "$PYTEST_WORKERS" =~ ^[1-4]$ ]] || { echo 'CI_PYTEST_WORKERS must be 1–4'; exit 1; }
           status=0
           uv --directory carddb run --locked pytest -n "$PYTEST_WORKERS" --cov --durations=30 \
-            --cov-fail-under="$SVE_CI_COVERAGE_THRESHOLD" \
+            --cov-fail-under=90 \
             --junitxml="$REPORT_DIR/junit.xml" --cov-report="json:$REPORT_DIR/coverage.json" \
             > "$REPORT_DIR/test.log" 2>&1 || status=$?
           echo "$((SECONDS - start))" > "$REPORT_DIR/elapsed.txt"
@@ -331,12 +309,12 @@ jobs:
         env:
           REPORT_DIR: ${{ runner.temp }}/sve-publish-reports
         run: python3 .github/ci/test_summary.py publish "$REPORT_DIR"
-      - name: Remove private Python reports and test data
+      - name: Remove Python reports and test data
         if: always()
         env:
           REPORT_DIR: ${{ runner.temp }}/sve-python-reports
           SVE_DATA_DIR: ${{ runner.temp }}/sve-carddb-test-data
-        run: rm -rf "$REPORT_DIR" "$SVE_DATA_DIR" carddb/htmlcov carddb/.pytest_cache publish/htmlcov publish/.pytest_cache "${RUNNER_TEMP}/sve-publish-reports" .testdata "${RUNNER_TEMP}"/pytest-of-*
+        run: rm -rf "$REPORT_DIR" "$SVE_DATA_DIR" carddb/htmlcov carddb/.pytest_cache publish/htmlcov publish/.pytest_cache "${RUNNER_TEMP}/sve-publish-reports" "${RUNNER_TEMP}"/pytest-of-*
       - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.mypy-cache.outputs.cache-hit != 'true'
         with:

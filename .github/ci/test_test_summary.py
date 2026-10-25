@@ -61,87 +61,55 @@ class SummaryTests(unittest.TestCase):
         assert PRIVATE not in summary
         assert "[" not in summary
 
-    def test_publish_keeps_its_gate_in_fork_mode(self) -> None:
-        """Publisher coverage never borrows carddb's remaining-test threshold."""
+    def test_publish_keeps_its_independent_gate(self) -> None:
+        """Publisher coverage retains its separate synthetic-test gate."""
         self.write_junit()
-        with patch.dict(
-            os.environ,
-            {"SVE_CI_TEST_MODE": "fork", "SVE_CI_COVERAGE_THRESHOLD": "70"},
-        ):
-            assert coverage_scope("publish") == ("synthetic", 92)
-            summary = junit_summary("publish", self.folder)
-            assert "required **92%**" in summary
-            assert "no private test data required" in summary
-            assert "tests/test_alpha.py::test_fail" in summary
-            assert PRIVATE not in summary
-            with contextlib.redirect_stdout(io.StringIO()):
-                assert main(["publish", str(self.folder)]) == 1
-                (self.folder / "coverage.json").write_text(
-                    json.dumps({"totals": {"percent_covered": 92.5}}),
-                    encoding="utf-8",
-                )
-                assert main(["publish", str(self.folder)]) == 0
+        assert coverage_scope("publish") == ("synthetic", 92)
+        summary = junit_summary("publish", self.folder)
+        assert "required **92%**" in summary
+        assert "no private test data required" in summary
+        assert "tests/test_alpha.py::test_fail" in summary
+        assert PRIVATE not in summary
+        with contextlib.redirect_stdout(io.StringIO()):
+            assert main(["publish", str(self.folder)]) == 1
+            (self.folder / "coverage.json").write_text(
+                json.dumps({"totals": {"percent_covered": 92.5}}),
+                encoding="utf-8",
+            )
+            assert main(["publish", str(self.folder)]) == 0
 
-    def test_fork_coverage_uses_its_own_gate_and_disclosure(self) -> None:
-        """The same report can fail the full gate and pass the remaining-test gate."""
+    def test_python_uses_the_same_full_gate_for_every_run(self) -> None:
+        """Python coverage always measures complete acceptance at 90 percent."""
         self.write_junit()
         (self.folder / "coverage.json").write_text(
-            json.dumps({"totals": {"percent_covered": 74.5}}), encoding="utf-8"
+            json.dumps({"totals": {"percent_covered": 89.5}}), encoding="utf-8"
         )
-        for mode, threshold, expected in (
-            ("full", "90", 1),
-            ("fork", "73", 0),
-            ("fork", "75", 1),
-        ):
-            output = io.StringIO()
-            with (
-                patch.dict(
-                    os.environ,
-                    {"SVE_CI_TEST_MODE": mode, "SVE_CI_COVERAGE_THRESHOLD": threshold},
-                    clear=True,
-                ),
-                contextlib.redirect_stdout(output),
-            ):
-                assert main(["python", str(self.folder)]) == expected
-            summary = output.getvalue()
-            assert f"required **{threshold}%**" in summary
-            assert "Failed/errors: **2**" in summary
-            assert PRIVATE not in summary
-            if mode == "fork":
-                assert "私有真實頁測試未執行" in summary
-                assert "This is not full coverage acceptance" in summary
-            else:
-                assert "Test scope: **full**" in summary
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            assert main(["python", str(self.folder)]) == 1
+        assert "required **90%**" in output.getvalue()
+        assert (
+            "Test scope: **full**; public SVE fixtures and synthetic cases"
+            in output.getvalue()
+        )
+        assert "Failed/errors: **2**" in output.getvalue()
+        assert PRIVATE not in output.getvalue()
 
-    def test_invalid_scope_or_threshold_never_falls_back_to_full(self) -> None:
-        """Unknown flags and a missing fork gate must fail closed."""
-        for environment in (
-            {"SVE_CI_TEST_MODE": "fork"},
-            {"SVE_CI_TEST_MODE": "unknown", "SVE_CI_COVERAGE_THRESHOLD": "73"},
-            {"SVE_CI_TEST_MODE": "full", "SVE_CI_COVERAGE_THRESHOLD": "73"},
-            {"SVE_CI_TEST_MODE": "fork", "SVE_CI_COVERAGE_THRESHOLD": "NaN"},
-            {"SVE_CI_TEST_MODE": "fork", "SVE_CI_COVERAGE_THRESHOLD": "0"},
-        ):
-            with patch.dict(os.environ, environment, clear=True):
-                with self.assertRaises(ValueError):
-                    coverage_scope()
+        (self.folder / "coverage.json").write_text(
+            json.dumps({"totals": {"percent_covered": 90}}), encoding="utf-8"
+        )
+        with contextlib.redirect_stdout(io.StringIO()):
+            assert main(["python", str(self.folder)]) == 0
 
-    def test_missing_fork_coverage_fails_but_preserves_safe_counts(self) -> None:
-        """A test crash cannot make the remaining-test summary a green gate."""
+    def test_missing_python_coverage_fails_but_preserves_safe_counts(self) -> None:
+        """A test crash cannot make the full-coverage gate pass."""
         self.write_junit()
         (self.folder / "coverage.json").unlink()
         output = io.StringIO()
-        with (
-            patch.dict(
-                os.environ,
-                {"SVE_CI_TEST_MODE": "fork", "SVE_CI_COVERAGE_THRESHOLD": "73"},
-                clear=True,
-            ),
-            contextlib.redirect_stdout(output),
-        ):
+        with contextlib.redirect_stdout(output):
             assert main(["python", str(self.folder)]) == 1
         assert "Failed/errors: **2**" in output.getvalue()
-        assert "coverage unavailable; required **73%**" in output.getvalue()
+        assert "coverage unavailable; required **90%**" in output.getvalue()
         assert PRIVATE not in output.getvalue()
 
     def test_web_labels_and_malformed_locations_stay_private(self) -> None:
@@ -262,19 +230,12 @@ test result: FAILED. 1 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; 
             json.dumps({"data": [{"totals": {"lines": {"percent": 95.5}}}]}),
             encoding="utf-8",
         )
-        summary = ""
-        for environment in (
-            {},
-            {"SVE_CI_TEST_MODE": "fork", "SVE_CI_COVERAGE_THRESHOLD": "94"},
-        ):
-            with patch.dict(os.environ, environment, clear=True):
-                summary = rust_summary(self.folder)
-                assert (
-                    "generated public card input, identical for project and fork PRs"
-                    in summary
-                )
-                assert "private test data required" not in summary
-                assert "required **90%**" in summary
+        summary = rust_summary(self.folder)
+        assert (
+            "generated public card input, identical for project and fork PRs" in summary
+        )
+        assert "private test data required" not in summary
+        assert "required **90%**" in summary
         assert (
             "Total: **7** · Passed: **4** · Skipped/ignored: **1** · Failed: **2**"
             in summary

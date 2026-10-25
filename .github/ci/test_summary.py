@@ -13,7 +13,6 @@ from typing import cast
 
 EXPECTED_ARGS = 2
 FULL_THRESHOLD = 90
-MAX_THRESHOLD = 100
 
 
 @dataclass(frozen=True)
@@ -106,38 +105,21 @@ def coverage(path: Path, *, rust: bool) -> float:
 
 
 def coverage_scope(kind: str = "python") -> tuple[str, float]:
-    """Scope comes from the event classifier, never from missing private files."""
+    """Return the fixed acceptance gate for each test component."""
     if kind == "publish":
         return "synthetic", 92
-    if kind == "rust":
+    if kind in {"python", "rust"}:
         return "full", FULL_THRESHOLD
-    selected = os.environ.get("SVE_CI_TEST_MODE", "full")
-    raw = os.environ.get(
-        "SVE_CI_COVERAGE_THRESHOLD", "90" if selected == "full" else ""
-    )
-    if selected not in {"full", "fork"} or not re.fullmatch(r"[0-9]+", raw):
-        raise ValueError("Invalid coverage scope")
-    minimum = number(raw)
-    if not 1 <= minimum <= MAX_THRESHOLD or (
-        selected == "full" and minimum != FULL_THRESHOLD
-    ):
-        raise ValueError("Invalid coverage threshold")
-    return selected, minimum
+    raise ValueError("Unknown test component")
 
 
 def scope_description(kind: str = "python") -> str:
-    """Distinguish remaining-test coverage from complete acceptance."""
-    selected, _ = coverage_scope(kind)
+    """Describe the tests and their acceptance scope."""
     if kind == "rust":
         return "Test scope: **full**; generated public card input, identical for project and fork PRs."
-    if selected == "synthetic":
-        return "Test scope: **synthetic publish tests**; no private test data required, including fork PRs."
-    if selected == "full":
-        return "Test scope: **full**; private test data required."
-    return (
-        "Test scope: **fork / remaining tests**. The three other-game private real-page tests were not run; public SVE cases ran. "
-        "私有真實頁測試未執行。 This is not full coverage acceptance."
-    )
+    if kind == "publish":
+        return "Test scope: **synthetic publish tests**; no private test data required."
+    return "Test scope: **full**; public SVE fixtures and synthetic cases run for every PR."
 
 
 def coverage_description(folder: Path, *, rust: bool, kind: str = "python") -> str:

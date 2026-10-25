@@ -300,10 +300,6 @@ workflow steps and does not depend on local mise configuration.
 | `SVE_USER_AGENT` | Browser User-Agent | carddb `ingest.config.Settings` | Optional; existing browser UA |
 | `SVE_BREAKER_THRESHOLD` | HTTP circuit breaker threshold | carddb `ingest.config.Settings` | Optional; 5, positive integer |
 | `SVE_TEST_SNAPSHOT` | Generated temporary JP test JSONL | Rust card tests | Set by `.github/ci/rust_tests.py`; direct Cargo tests fail if it is missing |
-| `SVE_PRIVATE_TESTDATA_MODE` | Private fixture policy | Python tests | CI sets `required` or `excluded`; local unset runs public SVE and synthetic tests and reports three private cases excluded |
-| `SVE_PRIVATE_TESTDATA_DIR` | Private page fixtures | Python tests | Required in `required` mode; no default |
-| `SVE_CI_TEST_MODE` | Full or fork Python test scope | CI helpers | Set by CI; Rust always runs the full public scope; no mise default |
-| `SVE_CI_COVERAGE_THRESHOLD` | Coverage acceptance threshold | CI helpers | Set from CI policy; no mise default |
 | `SVE_R2_ACCESS_KEY_ID`, `SVE_R2_SECRET_ACCESS_KEY` | R2 credentials | publish upload/remote GC SDK | Required for remote execution only; no default; keep secrets outside the repo |
 | `R2_ACCOUNT_ID`, `R2_DEV_BUCKET` | R2 account and target bucket | publish upload/remote GC | Execution requires CLI or env; no default |
 | `SVE_PREVIEW_CONFIGURED` | Browser preview-root flag | Vite → Web UI | Derived by Vite; do not configure manually |
@@ -327,7 +323,7 @@ The git hooks run the quick checks on every commit and push. `pytest`, `cargo-te
 are manual hooks, because a full run takes minutes; CI runs each of them when a pull request changes
 that component or a shared input. The Python manual hook enforces 90% combined line and branch
 coverage; Rust tests enforce 90% line coverage for both project and fork PRs.
-Python fork PRs use the separate remaining-test threshold described below.
+Python project and fork PRs use the same complete test scope and 90% combined line and branch threshold.
 publish has its own 92% combined line and branch coverage gate, including fork PRs,
 and requires no private test data.
 Direct `pytest` runs do not enable coverage, so you can run selected files or tests without the
@@ -435,10 +431,10 @@ prepared and saved separately to avoid mixing pre-commit databases. Existing myp
 is carried forward; PR mypy still validates source hashes and checks changed modules,
 so a retained cache is never proof that current types passed. Rust target caching remains
 enabled: official test data is read at runtime and is not embedded in the compiled tests.
-Private test data, raw reports and output are never cached. Checkout explicitly cleans
+Official test content, raw reports and output are never cached. Checkout explicitly cleans
 the workspace so test execution does not depend on a previous job's outputs.
 
-### Private test data and fork PRs
+### Official fixtures and fork PRs
 
 The 16 SVE JP/EN parser fixtures are public under `carddb/tests/fixtures/official_jp/`
 and `official_en/`. `official-pages.json` retains their original file and field hashes;
@@ -456,24 +452,13 @@ manual `cargo-test` hook and CI use it. Project and fork PRs run the same comple
 workspace with the 90% line coverage gate, without private credentials. Direct
 Cargo snapshot tests fail if the generated input is missing; they never skip.
 
-The permanently private repository keeps all old files and history. Python only
-reads F17–F19 (three other-game fixtures). `.github/ci/testdata.lock` pins its repo
-and full commit, while `private-pages.json` records the paths, file hashes and
-field oracles. The pins must agree. Update private data by adding commits, never
-rewriting or deleting history, then update the public pin in a separate PR.
-
-Project Python PRs and `main` use `SVE_PRIVATE_TESTDATA_MODE=required`; missing keys,
-checkouts, files or matching hashes fail. Forks are classified by head repository,
-not actor or credential availability. They use `excluded` only for the three
-remaining private cases, with the existing independent threshold in
-`.github/ci/fork-coverage.json` and an explicit remaining-test summary.
-
-Local Python defaults to `excluded` and runs public SVE plus synthetic cases.
-Maintainers running the full Python hook set `SVE_PRIVATE_TESTDATA_MODE=required`
-and `SVE_PRIVATE_TESTDATA_DIR=/path/to/private-testdata` in ignored configuration.
-Never add `--showlocals`/`-l` to private-page tests: local-variable dumps can expose
-private wording despite the fixture wrapper's safe representation. Generated
-JSONL, official test content and raw test logs are not cached or uploaded as artifacts.
+The permanently private repository keeps its old JSONL, 19 original files and full
+history; do not delete, publish or rewrite it. Python does not read that repository.
+The 16 public SVE fixtures retain their field-level hashes, and synthetic SV1/SVWB
+pages exercise the other parser shapes without copying third-party wording.
+Project and fork Python runs execute the same public fixtures and synthetic tests
+with the complete 90% combined line and branch coverage gate. Generated JSONL,
+official test content and raw test logs are not cached or uploaded as artifacts.
 
 Now and then, and before a release, run the mutation test. Every surviving mutant
 is a bug the tests would not notice; add a test, or explain why it cannot change behaviour:

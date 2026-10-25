@@ -129,6 +129,24 @@ def test_parses_a_synthetic_page() -> None:
     assert parsed.card_ids == [10_000_902, 10_000_903]
 
 
+def test_parses_a_synthetic_two_card_short_page_and_image_hashes() -> None:
+    card_ids = [700_001, 700_002]
+    details = {
+        str(card_id): FakeWb.details(card_id, f"Synthetic card {card_id}")
+        for card_id in card_ids
+    }
+    for card in details.values():
+        card["evo"] = []
+        card["style_card_list"] = []
+    body = page_body(sort_card_id_list=card_ids, card_details=details)
+
+    parsed = svwb.parse_list(body)
+
+    assert parsed.count == svwb.MIN_CARDS
+    assert parsed.card_ids == card_ids
+    assert svwb.image_hashes(body) == [image_hash(card_id, "c") for card_id in card_ids]
+
+
 @pytest.mark.parametrize(
     ("body", "reason"),
     [

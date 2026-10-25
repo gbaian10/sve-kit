@@ -100,8 +100,8 @@ namespace 為 `classification-v0`，recipe 為 `v0-classification-candidates-1`�
 v0 擷取索引使用 **2026-09-26 凍結、於 2026-09-27 分類流程使用**的卡表批次；
 原卡表 SHA-256 為 `4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632`，
 對應永久保留的私有 testdata commit `309b766885d49faff9db80f5b97cd56d8601c55b`
-之 `fixtures/engine/cards.jsonl`。這是 v0 的歷史來源 pin；目前引擎測試改由公開 `card-data/` 產生暫存輸入，
-不再以 `.github/ci/testdata.lock` 鎖定引擎卡表，也不改變此 v0 原始 SHA-256。
+之 `fixtures/engine/cards.jsonl`。這是 v0 的歷史來源 pin；目前引擎測試由公開 `card-data/` 產生暫存輸入，
+不依賴私有測試資料 checkout，也不改變此 v0 原始 SHA-256。
 這段日期界定 v0 的輸入與分類時段，不是每張官方頁面的抓取日期，也不表示涵蓋其後的官方勘誤。
 `basis.inputs_hash` 固定該批 v0 索引、分類與標註的完整來源集合；文字版本 ID 另固定實際保存的 raw／body。
 官方文字與識別碼內的官方名稱不在專案授權範圍，依 [LICENSING](../../../LICENSING.md)。

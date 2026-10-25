@@ -58,7 +58,7 @@ Shadowverse: EVOLVE（實體卡牌遊戲，簡稱 SVE）的非官方工具組，
 | 人寫資料                                   | `authored/`                             | ✅            |
 | 日英解析卡片輸入與來源證據                 | `card-data/`                            | ✅ 審查後保存 |
 | 官方 SVE 日英卡文                          | `authored/` 證據資料、測試 fixture 等   | ✅            |
-| 私有其他遊戲案例與歷史測試卡表             | 專用私有 GitHub testdata repo           | 見下述流程    |
+| 私有其他遊戲原始資料與歷史                 | 永久私有 testdata repo                  | ❌            |
 
 `SVE_DATA_DIR` 的 latest cache 只保存可替換的工作副本；清理或替換前，所需來源版本須已歸檔並可從獨立備份驗回。
 **抓取 manifest 與歷史 raw／來源版本 inventory 都不可刪**；官網回寫後無法靠重抓還原，建置 DB 可重建不代表來源歷史可丟棄。
@@ -75,14 +75,10 @@ HTML、PDF、API JSON 與卡圖 PNG 均屬凍結來源；WebP 已發布不代表
 個人設定、秘密、本機的研究筆記不屬於這個 repo。
 `authored/` 依卡包切檔（原型如 `authored/rules/effects/BP01.yaml`；正式作者入口依[作者承載契約](docs/dsl/author-contract-1.0.md)分片），單檔不要超過 1 MiB（1024 KiB）。
 
-16 個 SVE 日英官方頁面 fixture 存在 `carddb/tests/fixtures/official_jp/`、`official_en/`，來源說明及原有逐欄 hash 保存在旁邊；公開與 fork 測試都執行。合成案例繼續驗證結構與邊界。
+16 個 SVE 日英官方頁面 fixture 存在 `carddb/tests/fixtures/official_jp/`、`official_en/`，來源說明及原有逐欄 hash 保存在旁邊。Python 測試使用這些公開 fixture 與合成案例，主 repo 與 fork 跑相同完整範圍及 90% 行／分支覆蓋率門檻，不需要私有 checkout 或憑證。
 引擎測試由 carddb 讀取 `card-data/` 及 `tests/engine/card-input.json` 明示的 JP 批次，產生暫存 JSONL；不提交衍生卡表。引擎仍自行載入 authored 效果、規則名稱與 token 選用，不另造一套卡表規則。
 本機 `cargo-test` hook 與 Rust CI 共用 `.github/ci/rust_tests.py`，每次重產輸入且清除暫存；缺資料必須失敗。Rust 不需要私有 checkout 或 deploy key，主 repo 與 fork 均跑完整 workspace，行覆蓋率門檻 90%。
-永久私有 testdata 保留舊 JSONL、19 個原檔及全部歷史，不能刪除或改公開；Python 現在只讀其中 F17–F19 三個其他遊戲案例。
-私有測試輸入以 `.github/ci/testdata.lock` 釘 repo／完整 commit，`private-pages.json` 釘各檔 SHA-256 與逐欄期望；CI 以唯讀 deploy key 取得指定 commit 並驗 hash。可信任 Python job 缺資料、憑證或 hash 不符即失敗。
-更新私有案例時先新增私有 repo commit、保留舊歷史，再以 sve-kit PR 更新 pin。
-主分支與專案自己的 Python PR 跑完整測試，行與分支覆蓋率合計門檻 90%（本機 hook 與 CI 相同）；fork 依來源 repo 判定，以 `excluded` 排除三個私有案例，仍執行公開 SVE 與合成案例。
-Python fork 使用 `.github/ci/fork-coverage.json` 的獨立門檻，summary 標明排除範圍，不宣稱完整覆蓋率驗收通過；Rust 不使用 fork 降低門檻。
+永久私有 testdata 保存舊 JSONL、19 個原檔及全部歷史；不得刪除、公開或改寫。Python 不讀取這個 repo。
 測試卡文與含卡文的衍生產物不放 Actions cache／artifact；失敗 log 不印整行卡文。私有存放只是存取控制，不等於授權；公開保存也是專案的風險決定，不是官方許可。授權相關 PR 仍須審查並在合併前交維護者確認。
 
 ## 已定案的設計原則
@@ -93,7 +89,7 @@ Python fork 使用 `.github/ci/fork-coverage.json` 的獨立門檻，summary 標
 - **卡號照官網原樣保存**（含 `Ⓢ`、小寫 `a`）；卡圖網址**從頁面 `<img src>` 原樣抓**，不能由卡號推算
   - 例外：一代數位版官網 shadowverse-portal.com（`parse/pages/official_sv1.py`，只用來對應數位卡）的卡圖網址格式固定，
     用模板組網址；抓不到（官網會 302 轉到 HTML 頁，或 404）就改抓該卡的卡片頁、取實際的 `<img src>` 再試。
-    合成頁測試模板與 fallback；私有真實頁測試驗證已鎖定的來源欄位
+    合成頁測試模板與 fallback
 - **SQLite 只在建置時用來檢查資料完整性**，使用者拿到的是 JSON 快照
 - 資訊洩漏原則：用戶端只能拿到公開資訊；未公開的對手手牌不能有可追蹤的固定 ID
 
