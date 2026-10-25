@@ -207,7 +207,8 @@ class R2Store:
                     raise ExportError(
                         f"R2 image PUT failed ({reason}); rerun the same image input"
                     ) from None
-                line = f"Retrying image PUT {key}, attempt {attempt + 1}/3 ({reason})"
+                attempts = len(IMAGE_RETRY_DELAYS) + 1
+                line = f"Retrying image PUT {key}, attempt {attempt + 1}/{attempts} ({reason})"
                 if progress is None:
                     sys.stderr.write(line + "\n")
                 else:

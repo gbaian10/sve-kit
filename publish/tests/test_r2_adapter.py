@@ -6,6 +6,13 @@ from typing import TYPE_CHECKING
 import brotli
 import httpx
 import pytest
+from botocore.exceptions import (
+    BotoCoreError,
+    ConnectionClosedError,
+    ConnectTimeoutError,
+    EndpointConnectionError,
+    ReadTimeoutError,
+)
 from sve_carddb.export.read_api import ExportError
 
 from sve_publish import adapter
@@ -303,6 +310,55 @@ def test_stopped_pool_does_not_start_an_image_retry(
             key, b"synthetic image", stopped=stopped.is_set, sleep=stop_during_backoff
         )
     assert len(state.requests) == 1
+
+
+@pytest.mark.parametrize("status_code", [408, 429, 500])
+def test_image_put_retries_retryable_status_then_succeeds(
+    remote: tuple[R2Store, ServerState, Loopback],
+    monkeypatch: pytest.MonkeyPatch,
+    status_code: int,
+) -> None:
+    store, state, _ = remote
+    state.put_statuses = [status_code]
+    delays: list[float] = []
+    monkeypatch.setattr(adapter, "sleep_for", delays.append)
+    store.put_image(IMAGE_KEY, b"synthetic image")
+    assert len(state.requests) == 2
+    assert delays == [1]
+
+
+@pytest.mark.parametrize(
+    "error_type",
+    [
+        ConnectTimeoutError,
+        ConnectionClosedError,
+        EndpointConnectionError,
+        ReadTimeoutError,
+    ],
+)
+def test_image_put_retries_each_transport_error_class(
+    error_type: type[BotoCoreError],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls = 0
+    lines: list[str] = []
+
+    def fail_once(**_kwargs: object) -> None:
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            raise error_type(endpoint_url="https://synthetic.example")
+
+    with httpx.Client(
+        transport=httpx.MockTransport(lambda _r: httpx.Response(500))
+    ) as http:
+        store = _mock_store(http)
+        monkeypatch.setattr(store.client, "put_object", fail_once)
+        store.put_image(
+            IMAGE_KEY, b"synthetic image", progress=lines.append, sleep=lambda _: None
+        )
+    assert calls == 2
+    assert any(error_type.__name__ in line for line in lines)
 
 
 @pytest.mark.parametrize(
