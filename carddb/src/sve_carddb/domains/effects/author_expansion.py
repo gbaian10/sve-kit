@@ -425,6 +425,7 @@ class AuthorExpander:
         if contexts.keys() != originals.keys():
             raise ExpansionError("source_candidates_mismatch")
         library = BodyLibrary(self.schemas, shard_inputs)
+        expanded = dict(ability_nodes(result.tree))
         sidecar: list[ExpansionEvidence] = []
         for evidence in result.sidecar:
             ability = originals[evidence.path]
@@ -454,7 +455,7 @@ class AuthorExpander:
                 or ability.get("imports")
             ):
                 raise ExpansionError("unsupported_port_source_mapping", evidence.path)
-            if source.frame.semantic_variant.key == DAMAGE_KEY:
+            if source.frame.semantic_variant.key in {DAMAGE_KEY, "draw_exact_spell.v1"}:
                 use = SourceUse.model_validate_json(
                     canonical(array(ability["sources"])[0]), strict=True
                 )

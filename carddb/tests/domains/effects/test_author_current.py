@@ -237,11 +237,20 @@ def check_database_null_is_unknown_and_rejected(
     current: CurrentAuthorSources, expander: AuthorExpander, attribute: str
 ) -> None:
     card = author(current)
+    original = current.db.select(
+        "face_revision", (attribute,), where={"id": FACTS["BP01-009"]["revision"]}
+    )[0].values[attribute]
     with current.db.transaction():
         current.db.update(
             "face_revision", {"id": FACTS["BP01-009"]["revision"]}, {attribute: None}
         )
     rejected(current, expander, card, "source_unknown")
+    with current.db.transaction():
+        current.db.update(
+            "face_revision",
+            {"id": FACTS["BP01-009"]["revision"]},
+            {attribute: original},
+        )
 
 
 def check_complete_head_payload(
@@ -489,7 +498,8 @@ def test_real_current_author_set(
         ):
             check_exact_current_use(source, expander, change, reason)
     with current(fixture) as source:
-        check_database_null_is_unknown_and_rejected(source, expander, "cost")
+        for attribute in ("cost", "attack", "defense"):
+            check_database_null_is_unknown_and_rejected(source, expander, attribute)
     for face_container in (False, True):
         with current(fixture) as source, pytest.MonkeyPatch.context() as patch:
             check_synthetic_multiface_owner_controls_both_containers(

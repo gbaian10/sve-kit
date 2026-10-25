@@ -323,6 +323,13 @@ class CurrentAuthorSources:
             if value is not None and not isinstance(value, str | int):
                 raise SourceError("source_database_shape")
             result[key] = _known(value)
+            # Spells have no combat stats; this is known absence under P1 §4.1.
+            if (
+                value is None
+                and revision["type_code"] == "spell"
+                and key in {"attack", "defense"}
+            ):
+                result[key] = {"state": "known", "value": None}
         for key, table, column in (
             ("traits", "face_trait", "trait_code"),
             ("titles", "face_title", "title_code"),

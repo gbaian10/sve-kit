@@ -109,6 +109,7 @@ SOURCE_SITES: dict[tuple[str, tuple[str | int, ...]], tuple[str, str, str, str]]
 BINARY_ARITY = 2
 ENTRY_HEADS = {
     DAMAGE_KEY: ("lastword",),
+    "draw_exact_spell.v1": ("spell",),
     "evolve_entry.v1": ("evolve",),
     "feed_entry.v1": ("feed",),
     "ride_entry.v1": ("ride",),
@@ -137,15 +138,18 @@ ADAPTER_RECIPE = digest(
             ],
             "ports": "empty-only;unsupported-source-ports",
             "entry_heads": {key: list(value) for key, value in ENTRY_HEADS.items()},
-            "entry_payload": "exact-head.cost.pp;lastword-uniform-all-leaders-v1;empty-ports;no-imports",
-            "entry_operands": "Nat-cost_value-canonical-occurrence-order-v1",
-            "token_closure": "mapped-ability-heads-only-no-token-v1",
+            "entry_payload": "exact-head.cost.pp;lastword-uniform-all-leaders-v1;spell.draw.self.n;empty-ports;no-imports",
+            "entry_operands": "Nat-cost_value-occurrence-order-or-single-Nat-count-v2",
+            "token_closure": "mapped-ability-heads-only-no-token-v2",
             "token_free_metadata": list(NO_TOKEN_METADATA),
             "current_owner": "current-jp-face-revision;card-membership;exact-face-container",
+            "known_null_attributes": "spell.attack;spell.defense;rules-proven-absence-v1",
             "prototype": "all-jp-printing-identities;shared-overlap;no-execution",
             "inventory": "authored-root-complete-files-v1",
             "resolved_nonentry": "unsupported_source_projection",
             "damage_operand": "fixed-lastword-concept;Nat-damage_amount-leaf_1;exact-body-v1",
+            "draw_operand": "draw_exact_spell.v1;required-Nat-count-value;single-source-leaf",
+            "draw_payload": "complete-head-body-canonical-equality-v1",
         }
     )
 )
@@ -222,6 +226,11 @@ def entry_payload(source: SourceContext, scope: str) -> dict[str, JsonValue]:
             },
             "ports": {"imports": {}, "exports": {}},
         }
+    if source.frame.semantic_variant.key == "draw_exact_spell.v1":
+        return {
+            "spell": {"do": [{"draw": {"who": "self", "n": _draw_count(source)}}]},
+            "ports": {"imports": {}, "exports": {}},
+        }
     slots = {slot.name: slot for slot in source.frame.leaf_schema.slots}
     operands = []
     for occurrence in source.binding.occurrences:
@@ -290,6 +299,26 @@ def _lastword_amount(source: SourceContext) -> int:
     if type(amount) is not int or not 0 <= amount <= SAFE_INTEGER:
         raise SourceError("source_damage_operand_mismatch")
     return amount
+
+
+def _draw_count(source: SourceContext) -> int:
+    slots = source.frame.leaf_schema.slots
+    if len(slots) != 1:
+        raise SourceError("source_draw_operand_mismatch")
+    slot = slots[0]
+    if slot.type != "Nat" or slot.role != "count" or not slot.required:
+        raise SourceError("unsupported_source_draw_operand")
+    if (
+        set(source.binding.values) != {slot.name}
+        or len(source.binding.occurrences) != 1
+        or source.binding.occurrences[0].slot != slot.name
+        or len(source.binding.occurrences[0].canonical_spans) != 1
+    ):
+        raise SourceError("source_draw_operand_mismatch")
+    value = source.binding.values[slot.name]
+    if type(value) is not int or not 0 <= value <= SAFE_INTEGER:
+        raise SourceError("unsupported_source_draw_operand")
+    return value
 
 
 def _structure(frame: Frame, binding: SourceBinding) -> None:
@@ -564,6 +593,13 @@ def parameter_expected(
             or relative_path != ("n",)
         ):
             raise SourceError("parameter_source_operand_mismatch")
+        return expected
+    if (
+        source.frame.semantic_variant.key == "draw_exact_spell.v1"
+        and owner == "A.act.draw"
+        and relative_path == ("n",)
+    ):
+        entry_payload(source, "ability_0")
         return expected
     if slot.role != "arithmetic_offset":
         raise SourceError("unsupported_source_construct")
