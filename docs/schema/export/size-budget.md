@@ -31,7 +31,9 @@ MiB = 1,048,576 bytes，KiB = 1,024 bytes。raw 是 canonical-json-v1 未壓縮 
 | 基本目錄容器 | 解壓後 ≤ 2 MiB | 每包每區的家族檔與共用檔；整個 File 的 types、字典、fragment metadata、rows 都計入 |
 | 詳情與其他資料檔 | 解壓後 ≤ 512 KiB（524,288 bytes） | 基本目錄容器以外裝 fragment 的實際 File，含詳情、印刷擴充、history 與 images；整檔計，不只量單一 fragment；config／programs 另報 |
 | 全部文字 raw | 每次報告、明顯成長時檢討 | 全部分片的 bootstrap／text／config 聯集＋manifest，兩區合計；changes 另報 |
-| 完整文字閉包，依單一版本 | Brotli ≤ 8 MiB（8,388,608 bytes） | 該區全部文字、共用檔及直接來源呈現的一跳閉包＋manifest，含共享、JP 來源與必要跨區資料 |
+| 完整文字閉包，依單一版本 | Brotli ≤ 10 MiB（10,485,760 bytes） | 該區全部文字、共用檔及直接來源呈現的一跳閉包＋manifest，含共享、JP 來源與必要跨區資料 |
+
+英版加入數位連結前已接近 8 MiB，連結只增加約 147 KB；維護者於 2026-10-26 決定提高完整文字門檻，不為這批小量資料另外分片。
 
 基本目錄略超 2 MiB 可接受，報精確 bytes、差額 `actual_br - 2,097,152` 與比例；明顯超出才交維護者看數字與改善方案。
 不自行發明「略超」的百分比硬門檻，不把跨過分界一律當停止條件，也不自行放寬分界。

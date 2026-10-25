@@ -42,7 +42,8 @@ record scope 的 `membership_hash/policy_id/sample_ids` 均為 null，決定由�
 | 類別                                           | 最低發布要求                                                                       | 未達要求                                                     |
 | ---------------------------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------ |
 | 日英卡片身分對應                               | 兩端與全部 face 都經人確認後才寫進 registry                                        | EN 可有獨立 provisional card；不合併 JP，不共用譯文/DSL      |
-| 插畫、標誌、數位對應、序號                     | sampled 或 confirmed，批次模型處理＋人抽查，例外另審                               | `proposed/model_reviewed` 不進已採納功能；顯示未知           |
+| 插畫、標誌、序號                               | sampled 或 confirmed，批次模型處理＋人抽查，例外另審                               | `proposed/model_reviewed` 不進已採納功能；顯示未知           |
+| 數位對應                                       | model_reviewed 只供瀏覽；sampled／confirmed 的真人門檻不變                         | 模型級不得供名、圖或語音；coverage 仍沿真人門檻              |
 | 再錄表記差異                                   | 不提供採納封套；表記差異只留觀測並顯示                                             | 未核對候選不替換已採納 current/DSL；無舊版時可讀來源並手動   |
 | 確認無跨區對應                                 | registry 的 confirmed_none，記查核範圍與 `as_of`；這是已查無對應，不是永遠不會發行 | 未查/證據不足維持 unmapped/pending                           |
 | JP 身分初始化                                  | 工具以所有面卡名/卡種/數值/效果/sections 產候選，批次採納，歧義逐項處理            | 依 §3.1 同卡通則；真語義歧義才隔離，不因插畫/表記差異拆 card |
@@ -58,7 +59,7 @@ record scope 的 `membership_hash/policy_id/sample_ids` 均為 null，決定由�
 
 sampled 與上述政策採納均不能顯示「逐筆人工確認」；卡表快照以 `review_level` 或快照清單的 coverage 區分人工抽查與政策檢查。非翻譯的 confidence 沿原用途；翻譯 low_confidence 亦供待校對呈現。
 
-獨立 same_name 規則的待啟用投影另依 [數位名字政策](../domains/digital-name-policy.md)：公開 unreviewed、relation 區分規則與真人，coverage 不代替規則依據；規則連結沒有真人決定。真人 digital-links 每筆以自己的 review_level（sampled／confirmed）產生 record 範圍決定列，見[數位對應採納 §2.1](../domains/digital-link-adoption.md#21-建置-db-的決定列)；當前翻譯資料已不用 samples。
+獨立 same_name 規則的待啟用投影另依 [數位名字政策](../domains/digital-name-policy.md)：公開 unreviewed、relation 區分規則與真人，coverage 不代替規則依據；規則連結沒有真人決定。digital-links 每筆以自己的 review_level（model_reviewed／sampled／confirmed）產生 record 範圍決定列，模型級僅供瀏覽，見[數位對應採納 §2.1](../domains/digital-link-adoption.md#21-建置-db-的決定列)；當前翻譯資料已不用 samples。
 
 vocabulary 的 code 自身就是 `[a-z][a-z0-9_-]*`；官方 GR 等另留 raw。實作複合 FK 時，子欄另加普通 TEXT kind 欄、DEFAULT 與 CHECK 固定值，例如 `class_kind='class'`，`FK(class_kind,class_code)→vocabulary(kind,code)`。不依賴尚未實測的 generated column。全文邏輯表省略這些固定欄，DDL 產生器必須展開；可空 code 仍要 kind 非空且固定。
 
