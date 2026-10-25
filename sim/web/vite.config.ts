@@ -322,5 +322,14 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: ["./src/test-setup.ts"],
     include: ["src/**/*.test.{ts,tsx}", "tests/**/*.test.ts", "scripts/**/*.test.ts"],
+    // Off by default so local runs stay fast; CI passes --coverage. Branch coverage was 86.3% when
+    // this gate was added: raise the threshold as tests grow.
+    coverage: {
+      provider: "v8",
+      include: ["src/**/*.{ts,tsx}"],
+      exclude: ["**/*.test.*", "**/*.d.ts"],
+      reporter: ["lcovonly", "json-summary", "text-summary"],
+      thresholds: { branches: 85 },
+    },
   },
 })
