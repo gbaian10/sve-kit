@@ -89,8 +89,6 @@ def _case_keywords(first_batch: bool | str) -> tuple[mechanics.Inputs, Classifie
             "intimidate": "威圧",
             "aura": "オーラ",
             "drain": "ドレイン",
-            "ambush": "潜伏",
-            "barrier": "バリア",
         }
         adopted = inputs.registry.model_copy(
             update={
