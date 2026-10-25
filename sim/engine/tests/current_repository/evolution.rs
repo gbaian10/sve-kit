@@ -327,6 +327,53 @@ fn e_b7_002_current_evolutions_use_the_accepted_resource_path() {
 }
 
 #[test]
+fn e_b7_003_current_evolutions_use_the_accepted_resource_path() {
+    run_cases(&[
+        ("BP18-058", "BP18-059", json!({"pp":1_u8}), 4, [9, 1, 1]),
+        (
+            "BP18-058",
+            "BP18-059",
+            json!({"pp":0_u8,"ep":1_u8}),
+            4,
+            [10, 0, 1],
+        ),
+        (
+            "BP18-058",
+            "BP18-059",
+            json!({"pp":1_u8,"sep":1_u8}),
+            5,
+            [9, 1, 0],
+        ),
+        ("BP19-001", "BP19-002", json!({"pp":1_u8}), 3, [9, 1, 1]),
+        (
+            "BP19-001",
+            "BP19-002",
+            json!({"pp":0_u8,"ep":1_u8}),
+            3,
+            [10, 0, 1],
+        ),
+        (
+            "BP19-001",
+            "BP19-002",
+            json!({"pp":1_u8,"sep":1_u8}),
+            4,
+            [9, 1, 0],
+        ),
+    ]);
+}
+
+#[test]
+fn bp18_058_keeps_the_permanent_card_id_shared_with_the_bp18_sl13_printing() {
+    // The authored registry maps both printings to this one permanent card; it counts once.
+    let (snapshot, keywords, input) = inputs();
+    let selected = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
+    assert_eq!(
+        selected.current["BP18-058"].card_id, "c:03ce0722b7b05b2a9b3077d274b0c621",
+        "BP18-058 remains the permanent card shared with the BP18-SL13 printing"
+    );
+}
+
+#[test]
 fn each_b7_evolution_rejects_a_missing_current_ability() {
     for (base, resource, cost) in B7_CARDS {
         let (snapshot, keywords, mut input) = inputs();
