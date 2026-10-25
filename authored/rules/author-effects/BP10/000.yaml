@@ -5,7 +5,7 @@ cards:
   BP10-122:
     meta:
       dsl: "1.0"
-      source: effect-source-v1:sha256:e7cd1cf3649d148650dbc40096a72ef4126bb8bb61c1b5dceed18675c61686a2
+      source: effect-source-v1:sha256:46560cef5567a3ca0d6b8e8172b80d10a0e2e13787bf315ff59a6fa62091226b
       written_by:
         - actor:
             who: Codex
@@ -24,7 +24,7 @@ cards:
                 kind: face_revision
                 revision_id: rev:v1:6a26ae38dd33b5137b54aee9e343a488f9da6acf56e4832066250b01dba2a8b3
               field: effect
-              ordinal: null
+              ordinal:
               source_hash: ace9cac1e1f1feca911aab489957cbc51980ec818163a67f47690cd6a0745ff8
               line_ordinal: 0
               role: body

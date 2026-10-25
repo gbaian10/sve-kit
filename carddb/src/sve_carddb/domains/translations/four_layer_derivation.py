@@ -28,6 +28,9 @@ from sve_carddb.domains.translations.four_layer_expressions import (
     target_dependencies,
     verify_quantities,
 )
+from sve_carddb.domains.translations.four_layer_fixed_actions import (
+    prepare_fixed_actions,
+)
 from sve_carddb.domains.translations.four_layer_identity import seal
 from sve_carddb.domains.translations.four_layer_matching import bind_recognized
 from sve_carddb.domains.translations.four_layer_n2_counters import prepare_capacities
@@ -260,6 +263,7 @@ def derive_source(
     prepared = prepare_draw(raw, prepared, context)
     prepared = prepare_damage(raw, prepared, context)
     prepared = prepare_destroy(raw, prepared, context)
+    prepared = prepare_fixed_actions(raw, prepared, context)
     if len(prepared.interfaces) != len(prepared.derived.field.parts):
         raise ValueError("Source interfaces must preserve source part order")
     if prepared.mode_rules and len(prepared.mode_rules) != len(
