@@ -644,6 +644,9 @@ fn draw_position() -> Value {
 #[path = "runtime/bp10_122.rs"]
 mod bp10_122;
 
+#[path = "runtime/cp02_068.rs"]
+mod cp02_068;
+
 fn projected_zone_count(zone: &Value) -> u64 {
     zone.as_array()
         .unwrap()
