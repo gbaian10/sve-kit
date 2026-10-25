@@ -429,7 +429,8 @@ jobs:
     needs: changes
     if: ${{ needs.changes.outputs.web == 'true' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # The required steps keep 20 minutes; the Codecov analysis step below has its own 5.
+    timeout-minutes: 25
     defaults:
       run:
         working-directory: sim/web
@@ -477,6 +478,14 @@ jobs:
           REPORT_DIR: ${{ runner.temp }}/sve-web-reports
         run: rm -rf "$REPORT_DIR"
       - name: Web build
+        run: bun run build:all
+      # Informational: the plugin is only added when CODECOV_TOKEN is set, so the build above stays the gate.
+      # The upload has no timeout of its own: failure and the 5 minutes here must not reach the job result.
+      - name: Web bundle analysis (Codecov)
+        continue-on-error: true
+        timeout-minutes: 5
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         run: bun run build:all
       - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.hook-cache.outputs.cache-hit != 'true'
