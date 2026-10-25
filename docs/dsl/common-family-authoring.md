@@ -184,7 +184,12 @@ Rust `Catalog::from_current_selection()` 消費這份內部交接：原型沿用
 任一卡拒絕、重疊或 lowering 失敗都拒絕整次選用，不回傳半份結果。
 
 成功結果 `SelectedEffects` 分別保留原型 Catalog 與完整 current D0 候選；
-這不是 D1 runtime 准入，也不讓永久 owner 自動進入舊原型執行器。
+選用本身不是 D1 runtime 准入，也不讓永久 owner 自動進入舊原型執行器。
+`Game::from_selected_effects()` 消費這份完整結果，在 catalog 邊界以來源文字雜湊
+核對快照的完整面集合，建立永久 FaceId 到快照面序的唯一對應，再逐張執行整卡准入。
+無唯一對應、選用結果遭刪改或任一卡不受執行器支援時，整次建立對局失敗；
+不補空原型 program，不回退到原型。永久 CardId、FaceId、revision owner 與來源 sidecar
+保留在 authority，事件與 LKI 使用同一套解析。此入口不提供載入後存檔格式。
 尚未提供 current 來源上下文的 `Catalog::load()`／`load_with_identity()`，
 遇到作者索引、作者卡或 companion 目錄即明確拒絕，不再只掃原型目錄而漏載已切換卡。
 `from_documents()` 仍是 caller 明示提供原型 bytes 的入口，不能用它代替完整作者目錄選用。
