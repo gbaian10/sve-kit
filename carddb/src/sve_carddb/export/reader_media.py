@@ -7,7 +7,7 @@ from sve_carddb.core.json import array, integer, object_value, string
 if TYPE_CHECKING:
     from sve_carddb.export.reader import Fragment, Row, View
 
-SIZES = {"art_m", "art_s", "card_l", "card_m", "card_s"}
+SIZES = {"art_s", "card_l", "card_s"}
 
 
 def validate_media(
@@ -72,7 +72,7 @@ def _rows(view: View) -> None:
                 raise ValueError("Available media requires both image versions")
             if keys != sorted(SIZES):
                 raise ValueError(
-                    "Available media requires sorted five display variants"
+                    "Available media requires sorted three display variants"
                 )
             for size in display:
                 variant = variants.get(

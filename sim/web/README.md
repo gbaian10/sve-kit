@@ -285,7 +285,7 @@ a dev server without real data; screens are never judged on it. `bun run fixture
 regenerates it from `scripts/fixture/cards.ts` (about two dozen handwritten cards covering
 double faces, alternate printings, errata, Q&A, bans, the JP/EN mapping states and image
 states) through `scripts/fixture/build.ts`, which emits snapshot 4.0.0 with index format 2, 64 buckets,
-fixed bands, five display sizes and permanent-ID image URLs, emits the column partitions, sorts every
+fixed bands, three display sizes and permanent-ID image URLs, emits the column partitions, sorts every
 collection the way the reader requires and hashes every blob. The output is deterministic and
 the reader must accept it (`scripts/fixture/build.test.ts`), so a change to either the reader or
 the generator that breaks the contract fails the tests, not the pages.

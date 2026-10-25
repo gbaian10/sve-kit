@@ -3,9 +3,8 @@ export const IMAGE_CACHE = "sve-image-responses-v2"
 export function versionedImage(url: string): boolean {
   const value = new URL(url)
   return (
-    /^.*\/images\/(card_[sml]|art_[sm])\/[1-9][0-9]*(?:-f[1-9][0-9]*)?\.webp$/.test(
-      value.pathname,
-    ) && /^\?v=[1-9][0-9]*$/.test(value.search)
+    /^.*\/images\/(card_[sl]|art_s)\/[1-9][0-9]*(?:-f[1-9][0-9]*)?\.webp$/.test(value.pathname) &&
+    /^\?v=[1-9][0-9]*$/.test(value.search)
   )
 }
 

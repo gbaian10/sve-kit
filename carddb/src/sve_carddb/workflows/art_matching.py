@@ -48,7 +48,7 @@ def art_inputs(
     sizes = {
         string(row["image_id"]): integer(row["bytes"])
         for row in index.tables["image_variant"]
-        if row["size_key"] == "art_m"
+        if row["size_key"] == "art_s"
     }
     result = []
     unavailable = []
@@ -69,7 +69,7 @@ def art_inputs(
         if row["availability"] != "available" or row["publication_state"] != "approved":
             unavailable.append(parent.id + "/" + face.id)
             continue
-        path = image_root / image_path(binding.int_id, binding.ordinal, "art_m")
+        path = image_root / image_path(binding.int_id, binding.ordinal, "art_s")
         if path.is_symlink() or not path.resolve().is_relative_to(image_root.resolve()):
             raise ValueError("Art bitmap escapes image root")
         raw = path.read_bytes()
@@ -96,7 +96,7 @@ def art_inputs(
 def art_candidates(
     image_index: Annotated[Path, typer.Option(help="Pinned producer image index.")],
     image_root: Annotated[
-        Path, typer.Option(help="Read-only root containing images/art_m.")
+        Path, typer.Option(help="Read-only root containing images/art_s.")
     ],
     authored: Annotated[Path, typer.Option(help="Complete registered identities.")],
     output: Annotated[
@@ -106,7 +106,7 @@ def art_candidates(
         Path | None, typer.Option(help="Reuse scores for unchanged old members.")
     ] = None,
 ) -> None:
-    """Compare art_m images of the same face; emit groups, scores and review pairs."""
+    """Compare art_s images of the same face; emit groups, scores and review pairs."""
     paths = [
         image_index,
         image_root,

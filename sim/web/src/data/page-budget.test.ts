@@ -73,7 +73,7 @@ function page(extra: number) {
             availability: "available",
             card_version: 1,
             art_version: 1,
-            variants: ["art_m", "art_s", "card_l", "card_m", "card_s"].map((size_key) => ({
+            variants: ["art_s", "card_l", "card_s"].map((size_key) => ({
               size_key,
               width: 128,
               height: 179,

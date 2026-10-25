@@ -32,7 +32,7 @@ if TYPE_CHECKING:
 
 PUBLIC_PREFIXES = frozenset(
     {"snapshots/blobs/", "snapshots/manifests/"}
-    | {"images/" + s + "/" for s in ("card_s", "card_m", "card_l", "art_s", "art_m")}
+    | {"images/" + s + "/" for s in ("card_s", "card_l", "art_s")}
 )
 SNAPSHOT_PREFIXES = frozenset(p for p in PUBLIC_PREFIXES if p.startswith("snapshots/"))
 IMAGE_PREFIXES = PUBLIC_PREFIXES - SNAPSHOT_PREFIXES

@@ -60,7 +60,7 @@ describe("dev snapshot responses", () => {
   it.each([
     [blob, ""],
     [manifest, ""],
-    ["images/card_m/12.webp", "?v=3"],
+    ["images/card_l/12.webp", "?v=3"],
   ])("caches content-addressed %s for good", (relative, search) => {
     expect(snapshotCacheControl(relative, search)).toBe("public, max-age=31536000, immutable")
   })
@@ -68,8 +68,8 @@ describe("dev snapshot responses", () => {
   it.each([
     ["snapshots/preview/current.json", ""],
     ["snapshots/versions/index.json", ""],
-    ["images/card_m/12.webp", ""],
-    ["images/card_m/12.webp", "?v=0"],
+    ["images/card_l/12.webp", ""],
+    ["images/card_l/12.webp", "?v=0"],
     ["snapshots/blobs/short.json", ""],
   ])("never caches %s%s", (relative, search) => {
     expect(snapshotCacheControl(relative, search)).toBe("no-store")

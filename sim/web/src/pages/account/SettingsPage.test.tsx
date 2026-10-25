@@ -120,14 +120,14 @@ it("refreshes estimates on demand, leaves caches untouched when clearing is canc
   vi.stubGlobal("caches", storage)
   const cache = await storage.open("sve-image-responses-v2")
   await cache.put(
-    "https://cdn.test/images/card_m/1.webp?v=1",
+    "https://cdn.test/images/card_l/1.webp?v=1",
     new Response(new Uint8Array(1024 * 1024)),
   )
   await renderInRouter(<SettingsPage />)
   expect(await screen.findByText("1 MiB")).toBeInTheDocument()
   expect(screen.getByText("無法估算")).toBeInTheDocument()
   await cache.put(
-    "https://cdn.test/images/card_m/2.webp?v=1",
+    "https://cdn.test/images/card_l/2.webp?v=1",
     new Response(new Uint8Array(1024 * 1024)),
   )
   await userEvent.click(screen.getByRole("radio", { name: "深色" }))
@@ -184,7 +184,7 @@ it("confirms restoring all defaults and keeps recent cards and downloaded data",
   vi.stubGlobal("caches", storage)
   const cache = await storage.open("sve-image-responses-v2")
   await cache.put(
-    "https://cdn.test/images/card_m/synthetic.webp?v=1",
+    "https://cdn.test/images/card_l/synthetic.webp?v=1",
     new Response(new Uint8Array([1])),
   )
   recentStore.push("p:synthetic-recent")

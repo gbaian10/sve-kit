@@ -24,7 +24,7 @@ sve-carddb images art-candidates \
   bytes、內容位址檔名及表間引用。
 - authored 提供完整已驗證的 printing／face／整數編號與來源面對應。
   卡號、語言及 card_id 從登錄取得，不以日英卡號猜配對。
-- `image-root` 下讀取 `images/art_m/<int_id>[-f<ordinal>].webp`，核對索引內的
+- `image-root` 下讀取 `images/art_s/<int_id>[-f<ordinal>].webp`，核對索引內的
   byte 數，並將實際 bytes 的 SHA-256 寫入候選。缺檔或 byte 數不符即失敗；
   索引中本來未公開或不可用的圖片列入 `unavailable`。
 - 全程不開 live manifest、不抓網路。OpenCV 延遲載入，其他 CLI 指令不需要它。

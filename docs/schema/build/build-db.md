@@ -465,7 +465,7 @@ shared 預設、EN 真差異才 override；同樣的 region blocks 使共用機�
 卡圖看過快取、牌組離線備妥只抓實選版次與雙面；未抓圖顯示文字；無全圖下載。
 語音按需。sprite 不入卡表，自製固定 UI 圖示屬 app shell，未來動態拼圖只用自己牌組與已公開對手卡。
 卡店僅 HTTPS 白名單參數模板，dev 開/prod 關，不抓價格。
-`language/digital_endpoint/shop` 與公開契約的固定五檔 `image_sizes` 合為卡表快照 config，
+`language/digital_endpoint/shop` 與公開契約的固定三檔 `image_sizes` 合為卡表快照 config，
 不做客戶端小表 join；文字 DB 不另存尺寸設定。
 
 ## 12. 建置品質與新卡包流程

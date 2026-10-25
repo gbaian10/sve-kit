@@ -62,10 +62,8 @@ export interface BuiltSnapshot {
 const FORMAT = "4.0.0"
 const AS_OF = "2026-09-29"
 const IMAGE_SIZES = [
-  { key: "art_m", purpose: "art", max_width: 384, max_height: 288 },
   { key: "art_s", purpose: "art", max_width: 160, max_height: 120 },
   { key: "card_l", purpose: "card", max_width: 459, max_height: 641 },
-  { key: "card_m", purpose: "card", max_width: 320, max_height: 447 },
   { key: "card_s", purpose: "card", max_width: 128, max_height: 179 },
 ] as const
 const LANGS = { ja: "ja", zhHant: "zh-Hant", en: "en" } as const

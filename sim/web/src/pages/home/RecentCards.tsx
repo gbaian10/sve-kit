@@ -122,7 +122,7 @@ function RecentLink({
         name={row.name.primary}
         images={images}
         alt="redundant"
-        sizes="28px"
+        size="small"
         className="w-7 shrink-0"
       />
       <span className="block min-w-0 flex-1 leading-tight">

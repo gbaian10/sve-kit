@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
 
 MAX_SAFE = 9007199254740991
-SIZE_KEYS = ("art_m", "art_s", "card_l", "card_m", "card_s")
+SIZE_KEYS = ("art_s", "card_l", "card_s")
 
 
 def uint(value: int, *, positive: bool) -> int:

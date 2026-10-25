@@ -92,7 +92,7 @@ uv --directory carddb run python ../.github/ci/snapshot_format.py
 
 | 檔案 | 驗收用途 |
 | --- | --- |
-| manifest.json、payloads/*.json | bootstrap、detail、history、config、images、空 programs；雙面、兩版次、跨片翻譯、印刷面 sections／更正、五種 image_variant、text_symbol／多語 hints |
+| manifest.json、payloads/*.json | bootstrap、detail、history、config、images、空 programs；雙面、兩版次、跨片翻譯、印刷面 sections／更正、三種 image_variant、text_symbol／多語 hints |
 | expected-logical.json | join 後全部 46 集合；未使用集合為 []，無 row_index／face_ordinal |
 | schema-valid.json | 各集合／巢狀型別與附屬容器的正例；形狀例不要求獨立形成引用閉包 |
 | schema-invalid-core.json、schema-invalid.json | 共用核心與圖片形狀反例，含非法日期／時間、非 ASCII 數字與 URI；有 raw_json 時先驗原始 JSON bytes 邊界 |
@@ -155,7 +155,7 @@ Index 的 revision／Entry 欄位、JSON 閉包及 changes 非遞迴規則依 sn
 unknown index_format 必拒收，不能把它當成空 pages。
 
 Python／TS 共用合成向量須覆蓋 int_id、f0／f1、JP／EN、手動版次、card／art 分組版本、
-pending／missing、尺寸不足與 srcset、同 image_id 多 printing、回復 bytes 不重用 v。
+pending／missing、尺寸不足、同 image_id 多 printing、回復 bytes 不重用 v。
 新增 changes 的 PK／changed_fields 白名單；資料版次 A→B→C 只保 C／B，B.changes.from 不保留 A。
 另驗無相容 current／previous、本機 active、落後多版全量更新、下載中輪替導致缺檔後重抓 current。
 JSON hash 在瀏覽器下載邊界維持；canonical／FK／base 一致性由匯出與上傳前的 Python reader 驗證；圖片 SHA 由產製／發布端驗，不用歷史圖 hash 拒絕新 bytes。

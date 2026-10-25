@@ -24,7 +24,7 @@ Each bucket independently records successful uploads in `_publish/images.json`:
 ```
 
 The wire format is canonical JSON, sorted by key with unique keys. Versions and
-sizes are positive integers; only the five public WebP namespaces are accepted.
+sizes are positive integers; only the three public WebP namespaces are accepted.
 Unknown formats, extra fields, malformed JSON or invalid metadata stop execution.
 The inventory contains only public image information: production CDN readers may
 fetch it. The development Worker refuses `_publish/`; publication uses S3 directly.

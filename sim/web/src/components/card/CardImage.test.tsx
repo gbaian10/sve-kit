@@ -33,7 +33,7 @@ const images = (availability: string, publication = "approved"): ImageIndex => (
     availability === "available"
       ? {
           src: "/cdn/a.webp",
-          srcSet: "/cdn/a.webp 128w, /cdn/b.webp 320w",
+          small: "/cdn/a-small.webp",
           width: 320,
           height: 447,
         }
@@ -46,6 +46,32 @@ afterEach(() => {
 })
 
 describe("CardImage", () => {
+  it("shows the card_s file in a small slot and the card_l file in a large one", async () => {
+    const index = images("available")
+    const { rerender } = await renderInRouter(
+      <CardImage
+        summary={summary}
+        name={name}
+        images={index}
+        alt="redundant"
+        size="small"
+        className="w-8"
+      />,
+    )
+    expect(document.querySelector("img")).toHaveAttribute("src", "/cdn/a-small.webp")
+    rerender(
+      <CardImage
+        summary={summary}
+        name={name}
+        images={index}
+        alt="redundant"
+        size="large"
+        className="w-8"
+      />,
+    )
+    expect(document.querySelector("img")).toHaveAttribute("src", "/cdn/a.webp")
+  })
+
   it("returns to a decoded face with its URL and no loading placeholder in the same render", async () => {
     vi.stubGlobal("IntersectionObserver", undefined)
     const { client } = imageSnapshot(2)
@@ -58,28 +84,22 @@ describe("CardImage", () => {
           name={name}
           images={index}
           alt="redundant"
-          sizes="50vw"
+          size="large"
           className="w-full"
         />
       )
     }
     const { rerender } = await renderInRouter(<Viewer id={0} />)
     await waitFor(() => {
-      expect(document.querySelector("img[srcset]")).not.toBeNull()
+      expect(document.querySelector("img")).not.toBeNull()
     })
     rerender(<Viewer id={1} />)
     await waitFor(() =>
-      expect(document.querySelector("img[srcset]")).toHaveAttribute(
-        "src",
-        "/cdn/images/card_l/2.webp?v=1",
-      ),
+      expect(document.querySelector("img")).toHaveAttribute("src", "/cdn/images/card_l/2.webp?v=1"),
     )
     const reads = read.mock.calls.length
     rerender(<Viewer id={0} />)
-    expect(document.querySelector("img[srcset]")).toHaveAttribute(
-      "src",
-      "/cdn/images/card_l/1.webp?v=1",
-    )
+    expect(document.querySelector("img")).toHaveAttribute("src", "/cdn/images/card_l/1.webp?v=1")
     expect(screen.queryByText("卡圖資訊載入中")).not.toBeInTheDocument()
     expect(read).toHaveBeenCalledTimes(reads)
   })
@@ -92,7 +112,7 @@ describe("CardImage", () => {
       failed: true,
       failedFace: (printingId) => printingId === "failed",
     }
-    const props = { summary, name, sizes: "50vw", className: "w-full" }
+    const props = { summary, name, size: "large" as const, className: "w-full" }
     const { rerender } = await renderInRouter(
       <CardImage {...props} alt="redundant" images={failedIndex} />,
     )
@@ -112,27 +132,26 @@ describe("CardImage", () => {
   })
   it("removes a loaded old-v image once unpublished and shows failure instead of falling back to it", async () => {
     const old = images("available")
-    const props = { summary, name, sizes: "50vw", className: "w-full" }
+    const props = { summary, name, size: "large" as const, className: "w-full" }
     const { rerender } = await renderInRouter(<CardImage {...props} alt="redundant" images={old} />)
-    const oldImage = document.querySelector("img[srcset]")
+    const oldImage = document.querySelector("img")
     if (!oldImage) throw new Error("missing image")
     act(() => {
       oldImage.dispatchEvent(new Event("load"))
     })
     rerender(<CardImage {...props} alt="redundant" images={images("available", "pending")} />)
-    expect(document.querySelector("img[srcset]")).toBeNull()
+    expect(document.querySelector("img")).toBeNull()
     const changed: ImageIndex = {
       asset: old.asset,
       eager: () => true,
       cardImage: () => ({
         src: "/cdn/images/card_l/1.webp?v=2",
-        srcSet: "/cdn/images/card_l/1.webp?v=2 459w",
         width: 459,
         height: 641,
       }),
     }
     rerender(<CardImage {...props} alt="redundant" images={changed} />)
-    const replacement = document.querySelector("img[srcset]")
+    const replacement = document.querySelector("img")
     expect(replacement).toHaveAttribute("loading", "eager")
     act(() => {
       oldImage.dispatchEvent(new Event("load"))
@@ -141,7 +160,7 @@ describe("CardImage", () => {
     act(() => {
       replacement?.dispatchEvent(new Event("error"))
     })
-    expect(document.querySelector("img[srcset]")).toBeNull()
+    expect(document.querySelector("img")).toBeNull()
     expect(screen.getByText("卡圖載入失敗", { selector: ".sr-only" })).toBeInTheDocument()
   })
   it("names the card in identify mode and stays silent in redundant mode", async () => {
@@ -151,16 +170,16 @@ describe("CardImage", () => {
         name={name}
         images={images("available")}
         alt="identify"
-        sizes="50vw"
+        size="large"
         className="w-full"
       />,
     )
     expect(screen.getByRole("img", { name: "試作見習兵（BP01-001）" })).toBeInTheDocument()
-    const img = document.querySelector("img[srcset]")
+    const img = document.querySelector("img")
     if (!img) throw new Error("no image")
     expect(img).toHaveAttribute("alt", "")
-    expect(img).toHaveAttribute("srcset", "/cdn/a.webp 128w, /cdn/b.webp 320w")
-    expect(img).toHaveAttribute("sizes", "50vw")
+    expect(img).toHaveAttribute("src", "/cdn/a.webp")
+    expect(img).not.toHaveAttribute("srcset")
     expect(img).toHaveAttribute("loading", "lazy")
   })
 
@@ -170,7 +189,6 @@ describe("CardImage", () => {
       asset: () => ({ id: "img", availability: "available", publication_state: "approved" }),
       cardImage: () => ({
         src: "/cdn/fresh.webp",
-        srcSet: "/cdn/fresh.webp 320w",
         width: 320,
         height: 447,
       }),
@@ -181,11 +199,11 @@ describe("CardImage", () => {
         name={name}
         images={fresh}
         alt="redundant"
-        sizes="50vw"
+        size="large"
         className="w-full"
       />,
     )
-    const img = document.querySelector("img[srcset]")
+    const img = document.querySelector("img")
     if (!img) throw new Error("no image")
     expect(img).toHaveAttribute("alt", "")
     expect(screen.getByText("卡圖載入中", { selector: ".sr-only" })).toBeInTheDocument()
@@ -204,11 +222,11 @@ describe("CardImage", () => {
         name={name}
         images={images("available")}
         alt="redundant"
-        sizes="50vw"
+        size="large"
         className="w-full"
       />,
     )
-    const original = document.querySelector("img[srcset]")
+    const original = document.querySelector("img")
     if (!original) throw new Error("no image")
     act(() => {
       original.dispatchEvent(new Event("load"))
@@ -218,7 +236,6 @@ describe("CardImage", () => {
       asset: images("available").asset,
       cardImage: () => ({
         src: "/cdn/new.webp",
-        srcSet: "/cdn/new.webp 320w",
         width: 320,
         height: 447,
       }),
@@ -229,12 +246,12 @@ describe("CardImage", () => {
         name={name}
         images={changed}
         alt="redundant"
-        sizes="50vw"
+        size="large"
         className="w-full"
       />,
     )
     expect(document.querySelector("[aria-hidden] svg")).not.toBeNull()
-    const replacement = document.querySelector("img[srcset]")
+    const replacement = document.querySelector("img")
     if (!replacement) throw new Error("no replacement")
     act(() => {
       replacement.dispatchEvent(new Event("load"))
@@ -249,7 +266,7 @@ describe("CardImage", () => {
         name={name}
         images={images("missing")}
         alt="redundant"
-        sizes="50vw"
+        size="large"
         className="w-full"
       />,
     )
@@ -261,12 +278,12 @@ describe("CardImage", () => {
         name={name}
         images={images("unfetched", "pending")}
         alt="redundant"
-        sizes="50vw"
+        size="large"
         className="w-full"
       />,
     )
     expect(screen.getByText("卡圖待確認", { selector: ".sr-only" })).toBeInTheDocument()
-    expect(document.querySelector("img[srcset]")).toBeNull()
+    expect(document.querySelector("img")).toBeNull()
     pending.unmount()
   })
 
@@ -275,7 +292,6 @@ describe("CardImage", () => {
       asset: images("available").asset,
       cardImage: () => ({
         src: "/cdn/wide.webp",
-        srcSet: "/cdn/wide.webp 641w",
         width: 641,
         height: 459,
       }),
@@ -286,11 +302,11 @@ describe("CardImage", () => {
         name={name}
         images={landscape}
         alt="redundant"
-        sizes="50vw"
+        size="large"
         className="w-full"
       />,
     )
-    expect(document.querySelector("img[srcset]")).toHaveClass("object-contain")
+    expect(document.querySelector("img")).toHaveClass("object-contain")
   })
 
   it("shows the shared placeholder, never the text card, in every non-image state", async () => {
@@ -316,7 +332,7 @@ describe("CardImage", () => {
           name={name}
           images={index}
           alt="redundant"
-          sizes="50vw"
+          size="large"
           className="w-full"
         />,
       )
@@ -335,7 +351,7 @@ describe("CardImage", () => {
         name={name}
         images={images("missing")}
         alt="identify"
-        sizes="50vw"
+        size="large"
         className="w-full"
       />,
     )
@@ -349,12 +365,12 @@ describe("CardImage", () => {
         name={name}
         images={undefined}
         alt="redundant"
-        sizes="50vw"
+        size="large"
         className="w-full"
       />,
     )
     expect(screen.getByText("卡圖資訊載入中", { selector: ".sr-only" })).toBeInTheDocument()
-    expect(document.querySelector("img[srcset]")).toBeNull()
+    expect(document.querySelector("img")).toBeNull()
   })
 })
 
@@ -373,7 +389,7 @@ it("labels only the failed face while untouched faces remain loading", async () 
       name={name}
       images={scoped}
       alt="redundant"
-      sizes="96px"
+      size="large"
       className="w-full"
     />,
   )
@@ -384,7 +400,7 @@ it("labels only the failed face while untouched faces remain loading", async () 
       name={name}
       images={scoped}
       alt="redundant"
-      sizes="96px"
+      size="large"
       className="w-full"
     />,
   )
@@ -396,7 +412,7 @@ it("labels only the failed face while untouched faces remain loading", async () 
       name={name}
       images={{ ...scoped, known: () => true }}
       alt="redundant"
-      sizes="96px"
+      size="large"
       className="w-full"
     />,
   )

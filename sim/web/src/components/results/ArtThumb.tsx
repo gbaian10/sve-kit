@@ -27,7 +27,7 @@ export function ArtThumb({
         name={name}
         images={images}
         alt="redundant"
-        sizes="48px"
+        size="large"
         className="w-12 shrink-0 self-start"
         translate={labels.t}
       />
@@ -41,8 +41,6 @@ export function ArtThumb({
     >
       <img
         src={art.src}
-        srcSet={art.srcSet}
-        sizes="80px"
         width={art.width}
         height={art.height}
         alt=""

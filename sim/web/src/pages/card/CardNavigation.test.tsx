@@ -528,7 +528,6 @@ it("keeps the retained card paused when router context changes before the new co
     client,
     await locateCard(client, { namespace: "official", key: "BP01-001", edition: "jp" }),
     "zh-Hant",
-    "340px",
   )
   state.order = ["p:bp01-001", "p:bp01-002"].map((id) => {
     const summary = content.catalog.summary(id)

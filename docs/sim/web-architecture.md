@@ -249,8 +249,8 @@ interface QueryState {
 
 ## 6. 卡圖
 
-`components/card/CardImage.tsx`：由 `data/images.ts` 從 2.0 的卡包 `printing_image` media 取得版本／尺寸，配合 int_id／face.ordinal 組 `srcset`、`width`、`height`；不為首圖載 global `image_variant`；`alt` 三種語境
-（`identify`＝卡名＋版次；`redundant`＝旁邊已有同樣文字；`decorative`）；`sizes` 由呼叫端依版面給；`fit: cover | contain`（橫向卡用 contain）；
+`components/card/CardImage.tsx`：由 `data/images.ts` 從 2.0 的卡包 `printing_image` media 取得版本／尺寸，配合 int_id／face.ordinal 組 `card_l`（72 CSS px 以上）與 `card_s`（28～40 CSS px）的單一 URL、`width`、`height`，每個使用處明確指定其一，不用 `srcset`；不為首圖載 global `image_variant`；`alt` 三種語境
+（`identify`＝卡名＋版次；`redundant`＝旁邊已有同樣文字；`decorative`）；`size: large | small` 由呼叫端依版面指定；`fit: cover | contain`（橫向卡用 contain）；
 固定比例、`loading="lazy"`、`decoding="async"`。`/cards` 預設圖卡格；隨 app 打包自行設計的共用佔位圖，尺寸比例與卡片相同，不使用官方卡背。載入中／缺圖共用它，缺圖與待確認另加標示。
 列表與建議清單用整張卡圖檔位，放大層用最大檔位；查卡不用插畫裁切檔位。
 
@@ -319,7 +319,7 @@ interface QueryState {
 現行 reader 僅支援 4.0；圖片沿用 [傳輸契約 §5.4](../schema/export/snapshot-transport.md#54-卡包-media-與-id-圖片) 的卡包 media 與 Index v2。
 公開 annotation 與 JP 來源閉包依 [公開 annotation 契約](../schema/export/public-annotation.md)，不能只放寬版本範圍。
 卡包 media 提供 card／art 版本與實際尺寸，int_id＋永久 face.ordinal＋size 直接組背景圖片 URL；玩家頁面路由不變。
-切新快照時更新 src／srcset、取消舊工作、拒絕晚到舊 response；SW 以完整含 v URL 匹配，不忽略 query 或回退舊圖。
+切新快照時更新 src、取消舊工作、拒絕晚到舊 response；SW 以完整含 v URL 匹配，不忽略 query 或回退舊圖。
 新圖未完成／失敗用 placeholder；離線舊 active 明示時效，不宣稱圖片最新。
 只在 current／previous 或本機已驗完整 active 選相容者，無相容者更新 reader；落後多版、舊片回收則重取 current。
 本機 pin 不延長伺服器保留。query 分離已實測，瀏覽器／SW 的暖快取與故障整合仍須實作驗收。

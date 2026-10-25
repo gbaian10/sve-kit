@@ -48,39 +48,21 @@ describe("visible wording label in card results", () => {
   })
 })
 
-it("offers each grid card only its largest available image candidate", async () => {
-  const largestFiles: ImageIndex = {
+it("shows each grid card from its card_l file without a srcset", async () => {
+  const files: ImageIndex = {
     asset: () => ({ availability: "available", publication_state: "approved" }),
-    cardImage: (printingId) => {
-      const file =
-        printingId === "p:small"
-          ? { size: "card_m", width: 320, height: 447 }
-          : { size: "card_l", width: 459, height: 641 }
-      const path = `/cdn/images/${file.size}/synthetic.webp?v=1`
-      return {
-        src: path,
-        srcSet: `/cdn/images/card_s/synthetic.webp?v=1 128w, /cdn/images/card_m/synthetic.webp?v=1 320w, /cdn/images/card_l/synthetic.webp?v=1 459w`,
-        width: file.width,
-        height: file.height,
-      }
-    },
+    cardImage: () => ({
+      src: "/cdn/images/card_l/synthetic.webp?v=1",
+      small: "/cdn/images/card_s/synthetic.webp?v=1",
+      width: 459,
+      height: 641,
+    }),
   }
-  const small = cell(false)
-  const large = cell(false)
-  await renderInRouter(
-    <CardGrid
-      cells={[
-        { ...large, key: "large", summary: { ...large.summary, printingId: "p:large" } },
-        { ...small, key: "small", summary: { ...small.summary, printingId: "p:small" } },
-      ]}
-      images={largestFiles}
-      onOpen={vi.fn()}
-    />,
-  )
+  await renderInRouter(<CardGrid cells={[cell(false)]} images={files} onOpen={vi.fn()} />)
 
-  const [largeImage, smallImage] = document.querySelectorAll("img[srcset]")
-  expect(largeImage?.getAttribute("srcset")).toBe("/cdn/images/card_l/synthetic.webp?v=1 459w")
-  expect(smallImage?.getAttribute("srcset")).toBe("/cdn/images/card_m/synthetic.webp?v=1 320w")
+  const image = document.querySelector("img")
+  expect(image?.getAttribute("src")).toBe("/cdn/images/card_l/synthetic.webp?v=1")
+  expect(image).not.toHaveAttribute("srcset")
 })
 
 describe("card results omit translation quality notices", () => {

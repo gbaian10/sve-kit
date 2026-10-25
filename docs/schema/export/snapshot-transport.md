@@ -81,7 +81,7 @@ config 是 `{format_version,languages,digital_endpoints,shop_links,image_sizes,s
 | languages | `[{code:Lang,fallback_order:[Lang],display_name:Text}]`，按 code；fallback 不含自己、不重複、目標存在 |
 | digital_endpoints | `[{game:sv1/svwb,card_url_template:Text,language_map:{Lang:Text},status:unknown/available/unavailable,refresh_policy:frozen/on_sve_release}]`，按 game |
 | shop_links | `[{id:ID,url_template:Text,parameters:[Code],feature_key:Code,enabled_dev:Bool,enabled_prod:Bool}]`，按 id；parameters 排序去重 |
-| image_sizes | `[{key:Code,purpose:card/art,max_width:UInt,max_height:UInt}]`，按 key；五檔數值見 [image-variants.md](../images/image-variants.md) |
+| image_sizes | `[{key:Code,purpose:card/art,max_width:UInt,max_height:UInt}]`，按 key；三檔數值見 [image-variants.md](../images/image-variants.md) |
 | search | `{grammar_version:Code,normalizer_version:Code}`，兩者非空、按 reader 支援表判斷 |
 | catalog_feedback_url | URL |
 | third_party_image_policy | 固定 `mirror_reviewed` |
@@ -398,13 +398,13 @@ media File.dependencies 恰為 config 加上該檔各 printing_id／face_id 所�
 不依賴 global images 詳情，不用 row_index。全域影像詳情依賴 config；所有公開 FK 仍由 producer 整體驗證。
 printing.home_set_id 是建置所有權，不出貨新 printing 欄位；reader 由已驗 printing bootstrap fragment 的 owner 定位相同 home_set media。
 圖片狀態只放在 media 列；局部列的尺寸是明示顯示投影，producer 驗其與 image_variant 一致，不新增第二資料來源。
-`ImageDisplayVariant` descriptor 固定為 `[Code,UInt,UInt]`，各 size_key 限 config 五檔且尺寸 >0；
+`ImageDisplayVariant` descriptor 固定為 `[Code,UInt,UInt]`，各 size_key 限 config 三檔且尺寸 >0；
 version 為 1..2^53−1 或 null，狀態／空陣列約束依 snapshot-format §2.1。
 
 首屏只取可見面的 media，拿到該列即由 int_id／face.ordinal／size／version 組 URL；
 來源詳情按使用者需要再載，不全量預取 global images，亦不建立全庫影像 Map。
 最多四個 metadata in-flight，有界 byte／row LRU；沿 §5.2 的工作集上限與手機量測要求。
-前一頁解除 pin 即釋放列，切新版取消舊工作；src、srcset、SW key 必須包含新 v，失敗不能 fallback 舊圖。
+前一頁解除 pin 即釋放列，切新版取消舊工作；src、SW key 必須包含新 v，失敗不能 fallback 舊圖。
 按實際可見面 eager、其餘 lazy，不能把固定 100 張 eager 當規格。
 
 本配置仍須用 4.0 雙區輸出核對 ≤512 KiB 單片、manifest、首屏 24 面同包／混包及單面成本、增量重建與真實 heap；

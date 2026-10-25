@@ -15,7 +15,7 @@ function opaqueResponse(): Response {
 
 it("never stores opaque responses: each request reaches the network", async () => {
   const storage = memoryCache()
-  const request = new Request("https://cdn.test/images/card_m/1.webp?v=2")
+  const request = new Request("https://cdn.test/images/card_l/1.webp?v=2")
   let requests = 0
   const network: typeof fetch = () => {
     requests += 1
@@ -29,7 +29,7 @@ it("never stores opaque responses: each request reaches the network", async () =
 it("discards an older opaque cache hit before fetching instead of retaining padded quota", async () => {
   const storage = memoryCache()
   const cache = await storage.open("sve-image-responses-v2")
-  const request = new Request("https://cdn.test/images/card_m/1.webp?v=2")
+  const request = new Request("https://cdn.test/images/card_l/1.webp?v=2")
   await cache.put(request, opaqueResponse())
   let requests = 0
   const response = await cachedImage(request, storage, () => {
@@ -51,7 +51,7 @@ it("matches the complete versioned URL: old cached bytes never satisfy a new v o
     return failed ? Promise.reject(new TypeError("offline")) : Promise.resolve(new Response(bytes))
   }
   const request = (v: number) =>
-    new Request(`https://cdn.test/images/card_m/20001.webp?v=${String(v)}`)
+    new Request(`https://cdn.test/images/card_l/20001.webp?v=${String(v)}`)
   expect(await (await cachedImage(request(1), storage, network)).text()).toBe("A")
   bytes = "B"
   expect(await (await cachedImage(request(2), storage, network)).text()).toBe("B")
@@ -63,7 +63,7 @@ it("matches the complete versioned URL: old cached bytes never satisfy a new v o
 it("does not cache negative responses, and tolerates storage failure without an old-image fallback", async () => {
   const storage = memoryCache()
   let status = 404
-  const request = new Request("https://cdn.test/images/card_m/1.webp?v=2")
+  const request = new Request("https://cdn.test/images/card_l/1.webp?v=2")
   const fetcher: typeof fetch = () => Promise.resolve(new Response("synthetic", { status }))
   expect((await cachedImage(request, storage, fetcher)).status).toBe(404)
   status = 200
@@ -75,14 +75,14 @@ it("keeps more than 128 image URLs available offline", async () => {
   const storage = memoryCache()
   for (let i = 1; i <= 130; i += 1)
     await cachedImage(
-      new Request(`https://cdn.test/images/card_m/${String(i)}.webp?v=1`),
+      new Request(`https://cdn.test/images/card_l/${String(i)}.webp?v=1`),
       storage,
       () => Promise.resolve(new Response(String(i))),
     )
   const offline: typeof fetch = () => Promise.reject(new TypeError("offline"))
   expect(
     await (
-      await cachedImage(new Request("https://cdn.test/images/card_m/1.webp?v=1"), storage, offline)
+      await cachedImage(new Request("https://cdn.test/images/card_l/1.webp?v=1"), storage, offline)
     ).text(),
   ).toBe("1")
   expect(await (await storage.open("sve-image-responses-v2")).keys()).toHaveLength(130)
@@ -90,12 +90,12 @@ it("keeps more than 128 image URLs available offline", async () => {
 
 it("removes older versions only for the same origin and pathname after a successful write", async () => {
   const storage = memoryCache()
-  const base = "https://cdn.test/images/card_m/1.webp"
+  const base = "https://cdn.test/images/card_s/1.webp"
   const unchanged = [
-    "https://preview.test/images/card_m/1.webp?v=1",
+    "https://preview.test/images/card_s/1.webp?v=1",
     "https://cdn.test/images/card_l/1.webp?v=1",
-    "https://cdn.test/images/card_m/1-f2.webp?v=1",
-    "https://cdn.test/other/images/card_m/1.webp?v=1",
+    "https://cdn.test/images/card_s/1-f2.webp?v=1",
+    "https://cdn.test/other/images/card_s/1.webp?v=1",
   ]
   const network: typeof fetch = () => Promise.resolve(new Response("synthetic"))
   for (const url of [...unchanged, `${base}?v=9`, `${base}?v=10`])
@@ -108,7 +108,7 @@ it("removes older versions only for the same origin and pathname after a success
 
 it("a late older response cannot remove the newer cached version", async () => {
   const storage = memoryCache()
-  const request = (v: number) => new Request(`https://cdn.test/images/card_m/1.webp?v=${String(v)}`)
+  const request = (v: number) => new Request(`https://cdn.test/images/card_l/1.webp?v=${String(v)}`)
   let release!: (response: Response) => void
   const pending = cachedImage(
     request(1),
@@ -130,7 +130,7 @@ it("a late older response cannot remove the newer cached version", async () => {
 
 it("preserves the previous image and returns the network response when the replacement write fails", async () => {
   const storage = memoryCache()
-  const url = "https://cdn.test/images/card_m/1.webp"
+  const url = "https://cdn.test/images/card_l/1.webp"
   await cachedImage(new Request(`${url}?v=1`), storage, () => Promise.resolve(new Response("old")))
   const cache = await storage.open("sve-image-responses-v2")
   vi.spyOn(cache, "put").mockRejectedValue(new Error("quota"))
@@ -147,11 +147,11 @@ it("preserves the previous image and returns the network response when the repla
 it("intercepts only exact Bq GET URL shapes, keeping unversioned or duplicate query variants out", () => {
   expect(versionedImage("https://cdn.test/images/card_l/1-f7.webp?v=9")).toBe(true)
   for (const path of [
-    "images/card_m/01.webp?v=2",
-    "images/card_m/1-f0.webp?v=2",
-    "images/card_m/1.webp",
-    "images/card_m/1.webp?v=2&v=3",
-    "images/card_m/1.webp?v=0",
+    "images/card_l/01.webp?v=2",
+    "images/card_l/1-f0.webp?v=2",
+    "images/card_l/1.webp",
+    "images/card_l/1.webp?v=2&v=3",
+    "images/card_l/1.webp?v=0",
     "images/sha256/abc.webp?v=2",
   ])
     expect(versionedImage(`https://cdn.test/${path}`)).toBe(false)

@@ -79,10 +79,10 @@ def test_serial_parallel_resume_and_hashes_use_only_frozen_bytes(
         parallel, parallel_roots.preview
     )
     assert len(serial.images) == 3
-    assert all(len(item.result.variants) == 5 for item in serial.images)
+    assert all(len(item.result.variants) == 3 for item in serial.images)
     assert serial.images[0].result.variants[0].format == "webp"
     blobs = bytes_by_path(serial, serial_roots.preview)
-    assert sum(len(item.result.variants) for item in serial.images) == 15
+    assert sum(len(item.result.variants) for item in serial.images) == 9
     for path, data in blobs.items():
         assert (
             path

@@ -214,7 +214,6 @@ vi.mock("../../app/snapshot", () => {
         ? {
             cardImage: (printingId: string, faceId: string) => ({
               src: `/synthetic/${printingId}/${faceId}.webp`,
-              srcSet: "",
               width: 63,
               height: 88,
             }),

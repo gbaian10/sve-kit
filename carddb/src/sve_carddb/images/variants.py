@@ -46,10 +46,8 @@ class SizeSpec:
 
 SIZES = (
     SizeSpec("card_s", "card", 128, 179),
-    SizeSpec("card_m", "card", 320, 447),
     SizeSpec("card_l", "card", 459, 641),
     SizeSpec("art_s", "art", 160, 120),
-    SizeSpec("art_m", "art", 384, 288),
 )
 
 

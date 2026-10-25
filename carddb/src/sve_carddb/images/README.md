@@ -11,7 +11,7 @@ scores only pairs containing a new member. See the
 
 - `build_regional_assets(FrozenSources, PreviewRoots, region=, crops=, workers=)`
   converts every **current** source of one exclusively `jp` or `en` image batch to
-  five WebP files under `images/sha256/<prefix>/<digest>.webp`, plus a private
+  three WebP files under `images/sha256/<prefix>/<digest>.webp`, plus a private
   recipe cache. Verified cache hits are reused and only misses are encoded. It
   reads only `FrozenSources`, never live manifests or the network, and gives
   identical bytes for one to four workers. Roots must be absolute and disjoint;

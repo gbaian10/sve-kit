@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from sve_carddb.export.media import MediaPlan
 
 IMAGE_KEY = re.compile(
-    r"images/(?:card_[sml]|art_[sm])/[1-9][0-9]*(?:-f[1-9][0-9]*)?\.webp\Z"
+    r"images/(?:card_[sl]|art_s)/[1-9][0-9]*(?:-f[1-9][0-9]*)?\.webp\Z"
 )
 HASH = r"^sha256:[0-9a-f]{64}$"
 
@@ -28,7 +28,7 @@ class ImageObject(BaseModel):
     @field_validator("key")
     @classmethod
     def public_key(cls, value: str) -> str:
-        """Allow only the five established public WebP namespaces."""
+        """Allow only the three established public WebP namespaces."""
         if IMAGE_KEY.fullmatch(value) is None:
             raise ValueError("Invalid public image key")
         return value

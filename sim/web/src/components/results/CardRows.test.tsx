@@ -86,7 +86,7 @@ describe("row costs", () => {
 })
 
 describe("table thumbnails", () => {
-  const art = { src: "/cdn/images/art_m/1.webp", srcSet: "", width: 384, height: 288 }
+  const art = { src: "/cdn/images/art_s/1.webp", width: 160, height: 120 }
   it("shows the 4:3 illustration crop and falls back to the card thumbnail when it fails", async () => {
     await renderInRouter(
       <CardTable

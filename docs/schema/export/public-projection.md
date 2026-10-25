@@ -57,7 +57,7 @@ logical Schema；其他相同形狀的 row 不在投影重驗。完整 wire Sche
 | `keyword.name_unit_id/actions` | 同概念 `glossary_term.source_ja` 與 mechanic_action | 明列 glossary 概念；符號不推測機制；無能力集合為 [] |
 | `mechanic_projection/card_mechanic_coverage` | 建置端新鮮投影直投，驗最短 include/exclude 編碼 | 缺 coverage 為未知；partial 不證明 absent；EN block 不計 full |
 | `image_asset`、`printing_image`、`image_variant` | `ImageIndex.attach` 加入已驗證、已配號的圖片索引公開列 | DB 投影時三集合為 []；接入索引後沿用既有公開 media 格式；不讀取 DB 圖片列、不輸出原 PNG blob |
-| config | language、digital_endpoint、shop_link_template、固定五檔 image sizes、明示 search/feedback 設定 | 缺 optional 能力陣列為 []；固定政策與大小仍完整；normalizer 不一致拒絕 |
+| config | language、digital_endpoint、shop_link_template、固定三檔 image sizes、明示 search/feedback 設定 | 缺 optional 能力陣列為 []；固定政策與大小仍完整；normalizer 不一致拒絕 |
 | metadata | source_coverage 的公開 windows、restriction_coverage、QA/errata ID 集合、mechanic universe/coverage | 不造 complete；window 只准 region:* 或此次公開 product；target 三欄全 null；未實作 review/translation coverage 為 [] |
 | `card_engine_support` | R1 每 card 一列 missing_dsl，包括墓碑；再附缺來源、未核對、divergence、wording 等區域 block | 無 DSL／program；`effective_support` 先 override、後 block；automatic=false；passed 被 block 降 reviewed |
 

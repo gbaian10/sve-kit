@@ -13,7 +13,11 @@ import { shownSources } from "./image-loading"
  * so alt is empty; `decorative`: no meaning at all.
  */
 type ImageAlt = "identify" | "redundant" | "decorative"
-type CandidatePolicy = "responsive" | "largest"
+/**
+ * `large` is the `card_l` file (slots of 72 CSS px and above); `small` the `card_s` file
+ * (28–40 px thumbnails). Every slot names one, so a card is downloaded once per file.
+ */
+type ImageSlot = "large" | "small"
 
 export interface CardImageProps {
   readonly summary: CardSummary
@@ -21,10 +25,8 @@ export interface CardImageProps {
   /** Undefined until the image file index has loaded; the placeholder shows meanwhile. */
   readonly images: ImageIndex | undefined
   readonly alt: ImageAlt
-  /** The `sizes` attribute for this slot, chosen by the layout that places the image. */
-  readonly sizes: string
-  /** Choose from every available size, or offer only the largest available file. */
-  readonly candidatePolicy?: CandidatePolicy
+  /** Which file this slot displays, chosen by the layout that places the image. */
+  readonly size: ImageSlot
   /** Must set the width (`w-full`, `w-8`); the height follows the 63:88 ratio. */
   readonly className: string
   readonly onReady?: (() => void) | undefined
@@ -51,8 +53,7 @@ function ImageContent({
   name,
   images,
   alt,
-  sizes,
-  candidatePolicy = "responsive",
+  size,
   className,
   onReady,
   t,
@@ -60,7 +61,8 @@ function ImageContent({
   const [loaded, setLoaded] = useState("")
   const [failed, setFailed] = useState("")
   const asset = images?.asset(summary.printingId, summary.faceId)
-  const source = images?.cardImage(summary.printingId, summary.faceId)
+  const card = images?.cardImage(summary.printingId, summary.faceId)
+  const source = card && { ...card, src: size === "small" ? (card.small ?? card.src) : card.src }
   const availability = asset?.["availability"]
   const publication = asset?.["publication_state"]
   const loading =
@@ -120,12 +122,6 @@ function ImageContent({
           <img
             key={source.src}
             src={source.src}
-            srcSet={
-              candidatePolicy === "largest"
-                ? `${source.src} ${String(source.width)}w`
-                : source.srcSet
-            }
-            sizes={sizes}
             width={source.width}
             height={source.height}
             alt=""
