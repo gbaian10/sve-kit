@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next"
 
 import { InlineText } from "../../components/card/InlineText"
 import { OriginalBox } from "../../components/card/OriginalBox"
+import { Badge } from "../../components/ui/Badge"
 import { cn } from "../../components/ui/cn"
 import { isUiLanguage, type UiLanguage } from "../../i18n/languages"
 import {
@@ -24,7 +25,7 @@ import {
 const ORIGINAL_LANG = "ja"
 
 export type PreviewField = "name" | "effect" | "flavor" | "qa"
-export type PreviewToggle = "termEmphasis" | "symbolLabels"
+export type PreviewToggle = "termEmphasis" | "symbolLabels" | "showDigitalLinks"
 
 const PREF_OF = {
   name: "nameDisplay",
@@ -179,8 +180,44 @@ export function FieldPreview({ field }: { readonly field: PreviewField }) {
   )
 }
 
-/** An on/off setting shown on a card line that has terms mid-sentence and a keyword icon. */
 export function TogglePreview({ setting }: { readonly setting: PreviewToggle }) {
+  return setting === "showDigitalLinks" ? (
+    <DigitalLinksPreview />
+  ) : (
+    <TextTogglePreview setting={setting} />
+  )
+}
+
+function DigitalLinksPreview() {
+  const { t } = useTranslation()
+  const { showDigitalLinks } = usePrefs()
+  return (
+    <ul className="grid gap-2 md:grid-cols-2">
+      {([true, false] as const).map((value) => (
+        <Option
+          key={String(value)}
+          label={value ? t("settings.preview.on") : t("settings.preview.off")}
+          current={showDigitalLinks === value}
+        >
+          {value ? (
+            <div className="text-13">
+              <p className="font-semibold text-text-3">{t("digital.sectionTitle")}</p>
+              <p className="mt-1 text-text-3">{t("digital.heading")}</p>
+              <p className="mt-0.5 flex flex-wrap items-center gap-x-2">
+                <span className="text-text-2">{t("digital.game.svwb")}</span>
+                <Badge>{t("digital.relation.same_card")}</Badge>
+              </p>
+            </div>
+          ) : (
+            <p className="text-13 text-text-3">{t("settings.preview.hidden")}</p>
+          )}
+        </Option>
+      ))}
+    </ul>
+  )
+}
+
+function TextTogglePreview({ setting }: { readonly setting: "termEmphasis" | "symbolLabels" }) {
   const { t } = useTranslation()
   const prefs = usePrefs()
   const language = useSampleLanguage()

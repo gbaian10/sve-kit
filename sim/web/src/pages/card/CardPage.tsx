@@ -57,6 +57,7 @@ import { currentUiLanguage } from "../../i18n"
 import { showsOtherEdition, usePrefs } from "../../settings"
 import { PageTitle } from "../PageTitle"
 import { frontArtOf, useCardSequence } from "./card-sequence"
+import { CardExternalLinks } from "./CardExternalLinks"
 import { CardQa } from "./CardQa"
 import { CardRestrictions } from "./CardRestrictions"
 import { CardTextPanel } from "./CardTextPanel"
@@ -1033,6 +1034,14 @@ export function CardView({
                 printings={printingThumbnails}
                 otherSnapshot={showOther ? other.snapshot : undefined}
                 linkTo={summaryLink}
+              />
+            )}
+            {catalog && cardId !== undefined && (
+              <CardExternalLinks
+                key={`external:${cardId}`}
+                client={client}
+                catalog={catalog}
+                cardId={cardId}
               />
             )}
           </div>

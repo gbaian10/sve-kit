@@ -54,6 +54,7 @@ export interface Prefs {
   readonly backgroundDownloads: boolean
   readonly symbolLabels: boolean
   readonly termEmphasis: boolean
+  readonly showDigitalLinks: boolean
   /** Whether the card list's filter panel is expanded. */
   readonly filterPanelOpen: boolean
   readonly theme: ThemePref
@@ -85,6 +86,7 @@ export const DEFAULT_PREFS: Prefs = {
   backgroundDownloads: true,
   symbolLabels: false,
   termEmphasis: true,
+  showDigitalLinks: true,
   filterPanelOpen: false,
   theme: "system",
   accent: null,
@@ -143,6 +145,7 @@ const sanitizers: Sanitizers = {
   backgroundDownloads: withDefault(isBoolean, DEFAULT_PREFS.backgroundDownloads),
   symbolLabels: withDefault(isBoolean, DEFAULT_PREFS.symbolLabels),
   termEmphasis: withDefault(isBoolean, DEFAULT_PREFS.termEmphasis),
+  showDigitalLinks: withDefault(isBoolean, DEFAULT_PREFS.showDigitalLinks),
   filterPanelOpen: withDefault(isBoolean, DEFAULT_PREFS.filterPanelOpen),
   theme: withDefault(isThemePref, DEFAULT_PREFS.theme),
   accent: withDefault(isNullableAccent, DEFAULT_PREFS.accent),

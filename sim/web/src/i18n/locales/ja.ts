@@ -169,6 +169,9 @@ export default {
     termEmphasisHint: "表示のみを変更し、本文と参照は保持します",
     symbolLabels: "アイコンに名称を添える",
     symbolLabelsHint: "キーワード系のみ名称を表示します",
+    showDigitalLinks: "デジタル版カードのリンクを表示",
+    showDigitalLinksHint:
+      "カードページの「外部リンク」に、対応する Shadowverse・Worlds Beyond のカードへのリンクを表示します。オフにするとセクションごと非表示になります",
     cardEditionHint: "禁止・制限や Q&A などのデータもカードの版に従います",
     cardOpenMode: "カードの開き方",
     cardOpenModeHint:
@@ -484,6 +487,23 @@ export default {
     specialProducts: "構築済みデッキ・特別商品",
     switchEdition: "{{edition}}を見る",
     empty: "この版にはまだ表示できるカードパックがありません。",
+  },
+  digital: {
+    sectionTitle: "外部リンク",
+    heading: "デジタル版",
+    generation: { sv1: "Shadowverse（初代）", svwb: "Worlds Beyond" },
+    game: { sv1: "Shadowverse", svwb: "Worlds Beyond" },
+    numbered: "{{name}} {{n}}",
+    relation: {
+      same_card: "同一カード",
+      same_character: "同キャラ",
+      name_only: "名前のみ一致",
+      same_name: "名前のみ一致",
+    },
+    unchecked: "未確認",
+    loading: "読み込み中…",
+    failed: "デジタル版のリンクを読み込めませんでした",
+    newTab: "（新しいタブで開く）",
   },
   cardPage: {
     switchingCard: "カードを切り替え中…",
