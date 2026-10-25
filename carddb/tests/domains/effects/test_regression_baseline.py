@@ -8,7 +8,10 @@ from pathlib import Path
 import pytest
 from pydantic import JsonValue, TypeAdapter
 
+from sve_carddb.core.json import canonical
 from sve_carddb.core.yaml import JSON_VALUE, parse_yaml
+from sve_carddb.domains.effects.author_expansion import AuthorExpander
+from sve_carddb.domains.effects.author_set import load_author_set
 from sve_carddb.domains.effects.reader import Catalog, load
 from sve_carddb.domains.translations.four_layer_normalizer import VERSION
 
@@ -63,6 +66,12 @@ def test_handwritten_programs_keep_the_reviewed_positions_and_inputs(
     actual = object_value(
         read_yaml(ROOT / "authored/rules/effects" / f"{path.stem}.yaml")["cards"]
     )
+    migrated = {
+        file.stem: OBJECT.validate_json(file.read_bytes())
+        for file in (BASELINE / "migrated").glob(f"{path.stem}-*.json")
+    }
+    assert actual.keys().isdisjoint(migrated)
+    actual.update(migrated)
     assert actual.keys() == expected.keys()
     for number, value in actual.items():
         baseline = object_value(expected[number])
@@ -81,6 +90,52 @@ def test_handwritten_programs_keep_the_reviewed_positions_and_inputs(
             assert fragments, number
             assert len({str(f["id"]) for f in fragments}) == len(fragments), number
         assert dict(positions) == frozen, number
+
+
+def test_migrated_lastword_preserves_the_frozen_ast_and_position() -> None:
+    number = "BP01-P25"
+    original = OBJECT.validate_json(
+        (BASELINE / "migrated" / f"{number}.json").read_bytes()
+    )
+    frozen = object_value(
+        OBJECT.validate_json((BASELINE / "BP01.json").read_bytes())[number]
+    )
+    assert fingerprint(original) == frozen["ast_sha256"]
+    author = object_value(
+        object_value(
+            read_yaml(ROOT / "authored/rules/author-effects/BP01/000.yaml")["cards"]
+        )[number]
+    )
+    ability = object_value(array(author["abilities"])[0])
+    assert len(array(author["abilities"])) == 1
+    expander = AuthorExpander(ROOT / "dsl")
+    inputs = load_author_set(ROOT / "authored", expander.schemas)
+    expanded = expander.expand(
+        canonical(read_yaml(ROOT / "authored/rules/author-effects/BP01/000.yaml")),
+        [file.raw for file in inputs.body_files],
+    )
+    body = object_value(
+        array(
+            object_value(object_value(object_value(expanded.tree)["cards"])[number])[
+                "abilities"
+            ]
+        )[0]
+    )
+    assert body["lastword"] == {"do": [{"damage": {"to": {"leaders": "all"}, "n": 2}}]}
+    use = object_value(array(ability["sources"])[0])
+    occurrence = object_value(use["occurrence"])
+    position = object_value(array(frozen["positions"])[0])
+    fragment = object_value(array(position["fragments"])[0])
+    assert ability["line"] == position["line"] == 1
+    assert use["ability_scope"] == "ability_0"
+    assert use["binding_id"] == fragment["id"]
+    assert occurrence["field"] == position["field"] == "effect"
+    assert occurrence["ordinal"] == position["section"] is None
+    assert occurrence["line_ordinal"] == 0
+    assert occurrence["source_hash"] == fragment["source_sha256"]
+    assert occurrence["segments"] == object_value(fragment["span"])["segments"]
+    assert position["ability_indices"] == [0]
+    assert frozen["unclassified_positions"] == []
 
 
 @pytest.fixture(scope="module")

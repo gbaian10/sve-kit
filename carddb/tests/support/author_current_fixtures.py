@@ -130,6 +130,7 @@ def current_source_fixture(
     *,
     card_numbers: frozenset[str] = CARD_NUMBERS,
     snapshot: Snapshot | None = None,
+    parser_version: str = PARSER,
 ) -> CurrentSourceFixture:
     """Build from public parsed inputs; the store is only an explicit provenance root."""
     from sve_carddb.domains.catalog.loader import prepare  # ruff: ignore[import-outside-top-level] -- initialize the production text interner before the catalog importer
@@ -145,7 +146,11 @@ def current_source_fixture(
     identity = plan_preview(
         authored,
         FrozenJP(
-            store, "public-fixture", batch_id, parser_version=PARSER, sources=frozen
+            store,
+            "public-fixture",
+            batch_id,
+            parser_version=parser_version,
+            sources=frozen,
         ),
         regions=("jp",),
     )
@@ -172,7 +177,7 @@ def current_source_fixture(
             "public-fixture",
             batch_id,
             region="jp",
-            parser_version=PARSER,
+            parser_version=parser_version,
             sources=frozen,
         ),
     )
