@@ -117,7 +117,12 @@ def entry_snapshot() -> Snapshot:
     return snapshot
 
 
-def current_source_fixture(store: Path) -> CurrentSourceFixture:
+def current_source_fixture(
+    store: Path,
+    *,
+    card_numbers: frozenset[str] = CARD_NUMBERS,
+    snapshot: Snapshot | None = None,
+) -> CurrentSourceFixture:
     """Build from public parsed inputs; the store is only an explicit provenance root."""
     from sve_carddb.domains.catalog.loader import prepare  # ruff: ignore[import-outside-top-level] -- initialize the production text interner before the catalog importer
 
@@ -142,7 +147,7 @@ def current_source_fixture(store: Path) -> CurrentSourceFixture:
         if isinstance(record.data, PrintingData)
     )
     cards = {
-        printing.card_id for printing in printings if printing.card_no in CARD_NUMBERS
+        printing.card_id for printing in printings if printing.card_no in card_numbers
     }
     selected = close_preview(
         identity,
@@ -195,7 +200,7 @@ def current_source_fixture(store: Path) -> CurrentSourceFixture:
     return CurrentSourceFixture(
         template,
         Sources(stores, REPOSITORY, build, identity.snapshot, batches=batches),
-        entry_snapshot(),
+        entry_snapshot() if snapshot is None else snapshot,
         vocabulary,
         load(REPOSITORY),
         batch_id,

@@ -8,13 +8,19 @@ from sve_carddb.contracts.author_leaves import ParamDecl
 from sve_carddb.contracts.four_layer import (
     CardNameReference,
     Constant,
+    Domain,
     Expression,
     Frame,
+    GlossaryReference,
+    LeafSchema,
+    LeafSlot,
     QuantitySpec,
+    Span,
 )
 from sve_carddb.contracts.n0 import SAFE_INTEGER
 from sve_carddb.contracts.source_binding import SourceBinding
 from sve_carddb.core.json import canonical, digest
+from sve_carddb.domains.translations.four_layer_damage import KEY as DAMAGE_KEY
 from sve_carddb.domains.translations.four_layer_derivation import derive_source
 from sve_carddb.domains.translations.four_layer_expressions import definition
 
@@ -23,7 +29,6 @@ if TYPE_CHECKING:
 
     from pydantic import JsonValue
 
-    from sve_carddb.contracts.four_layer import LeafSlot
     from sve_carddb.contracts.source_binding import ClosedDomain, SourceDescriptor
     from sve_carddb.domains.translations.four_layer_classification import Classifier
     from sve_carddb.domains.translations.four_layer_semantics import CardContext
@@ -103,6 +108,7 @@ SOURCE_SITES: dict[tuple[str, tuple[str | int, ...]], tuple[str, str, str, str]]
 }
 BINARY_ARITY = 2
 ENTRY_HEADS = {
+    DAMAGE_KEY: ("lastword",),
     "evolve_entry.v1": ("evolve",),
     "feed_entry.v1": ("feed",),
     "ride_entry.v1": ("ride",),
@@ -131,14 +137,15 @@ ADAPTER_RECIPE = digest(
             ],
             "ports": "empty-only;unsupported-source-ports",
             "entry_heads": {key: list(value) for key, value in ENTRY_HEADS.items()},
-            "entry_payload": "exact-head.cost.pp;empty-ports;no-imports",
+            "entry_payload": "exact-head.cost.pp;lastword-uniform-all-leaders-v1;empty-ports;no-imports",
             "entry_operands": "Nat-cost_value-canonical-occurrence-order-v1",
-            "token_closure": "entry-heads-only-no-token-v1",
+            "token_closure": "mapped-ability-heads-only-no-token-v1",
             "token_free_metadata": list(NO_TOKEN_METADATA),
             "current_owner": "current-jp-face-revision;card-membership;exact-face-container",
             "prototype": "all-jp-printing-identities;shared-overlap;no-execution",
             "inventory": "authored-root-complete-files-v1",
             "resolved_nonentry": "unsupported_source_projection",
+            "damage_operand": "fixed-lastword-concept;Nat-damage_amount-leaf_1;exact-body-v1",
         }
     )
 )
@@ -173,7 +180,7 @@ class SourceContext:
 
 
 def entry_heads(frame: Frame) -> tuple[str, ...]:
-    """Only complete registered entry projections have a proven author head."""
+    """Only complete registered ability projections have a proven author head."""
     variant = frame.semantic_variant
     if variant.state != "resolved" or variant.key is None:
         raise SourceError("source_pending")
@@ -201,6 +208,20 @@ def entry_payload(source: SourceContext, scope: str) -> dict[str, JsonValue]:
     scopes = tuple(f"ability_{index}" for index in range(len(heads)))
     if scope not in scopes:
         raise SourceError("source_ability_scope_mismatch")
+    if source.frame.semantic_variant.key == DAMAGE_KEY:
+        return {
+            "lastword": {
+                "do": [
+                    {
+                        "damage": {
+                            "to": {"leaders": "all"},
+                            "n": _lastword_amount(source),
+                        }
+                    }
+                ]
+            },
+            "ports": {"imports": {}, "exports": {}},
+        }
     slots = {slot.name: slot for slot in source.frame.leaf_schema.slots}
     operands = []
     for occurrence in source.binding.occurrences:
@@ -223,6 +244,52 @@ def entry_payload(source: SourceContext, scope: str) -> dict[str, JsonValue]:
         heads[index]: {"cost": {"pp": operands[index][1]}},
         "ports": {"imports": {}, "exports": {}},
     }
+
+
+def _lastword_amount(source: SourceContext) -> int:
+    # The ability Concept is a fixed printed head, never a generic parameter.
+    expected = LeafSchema(
+        format=2,
+        slots=(
+            LeafSlot(
+                name="leaf_0",
+                type="Concept",
+                role="ability",
+                required=True,
+                domain=Domain(min=None, max=None, values=("concept.ability.v1",)),
+                occurrences=(Span(start=1, end=7),),
+            ),
+            LeafSlot(
+                name="leaf_1",
+                type="Nat",
+                role="damage_amount",
+                required=True,
+                domain=Domain(min=0, max=SAFE_INTEGER, values=()),
+                occurrences=(Span(start=16, end=17),),
+            ),
+        ),
+    )
+    if (
+        source.canonical_source != "{ラストワード}リーダーすべてにNダメージ。"
+        or source.frame.leaf_schema != expected
+        or source.binding.source.field != "effect"
+        or source.binding.source.ordinal is not None
+        or source.binding.occurrence_key().role != "body"
+    ):
+        raise SourceError("source_lastword_contract_mismatch")
+    if (
+        set(source.binding.values) != {"leaf_0", "leaf_1"}
+        or source.binding.frame_id != source.frame.id
+        or source.binding.values["leaf_0"]
+        != GlossaryReference(kind="glossary", key="term:ability.last_words")
+        or tuple((o.slot, o.canonical_spans) for o in source.binding.occurrences)
+        != tuple((s.name, s.occurrences) for s in expected.slots)
+    ):
+        raise SourceError("source_lastword_contract_mismatch")
+    amount = source.binding.values["leaf_1"]
+    if type(amount) is not int or not 0 <= amount <= SAFE_INTEGER:
+        raise SourceError("source_damage_operand_mismatch")
+    return amount
 
 
 def _structure(frame: Frame, binding: SourceBinding) -> None:
@@ -489,6 +556,15 @@ def parameter_expected(
     ):
         raise SourceError("parameter_source_mode_mismatch")
     expected = _value(source, declaration, slot)
+    if source.frame.semantic_variant.key == DAMAGE_KEY:
+        entry_payload(source, "ability_0")
+        if (
+            declaration.source.slot != "leaf_1"
+            or owner != "A.act.damage"
+            or relative_path != ("n",)
+        ):
+            raise SourceError("parameter_source_operand_mismatch")
+        return expected
     if slot.role != "arithmetic_offset":
         raise SourceError("unsupported_source_construct")
     _offset(source, slot, owner, relative_path, fragment)

@@ -18,9 +18,12 @@ if TYPE_CHECKING:
 
 
 def effect(
-    current: CurrentAuthorSources, monkeypatch: pytest.MonkeyPatch, text: str
+    current: CurrentAuthorSources,
+    monkeypatch: pytest.MonkeyPatch,
+    text: str,
+    *,
+    revision: str = FACTS["BP01-009"]["revision"],
 ) -> None:
-    revision = FACTS["BP01-009"]["revision"]
     row = current.db.select(
         "face_revision", current.db.columns("face_revision"), where={"id": revision}
     )[0]
@@ -112,3 +115,46 @@ def back_face(
 
     monkeypatch.setattr(current.sources, "document", document)
     return face_id, revision_id
+
+
+def token_section(
+    current: CurrentAuthorSources, monkeypatch: pytest.MonkeyPatch, revision: str
+) -> None:
+    text = (
+        "『仮トークン』{仮クラス}仮種族・フォロワー{コスト2}{攻撃力}3/{体力}4"
+        "{ラストワード}リーダーすべてに2ダメージ。"
+    )
+    source_id = current.db.select(
+        "face_revision", ("source_id",), where={"id": revision}
+    )[0].values["source_id"]
+    identifier = "unit:synthetic-token-section"
+    with current.db.transaction():
+        current.db.insert(
+            "text_unit",
+            {
+                "id": identifier,
+                "lang": "ja",
+                "text": text,
+                "content_hash": digest(text.encode()),
+            },
+        )
+        current.db.insert(
+            "face_text_section",
+            {
+                "revision_id": revision,
+                "ordinal": 0,
+                "text_unit_id": identifier,
+                "kind": "token_definition",
+                "decision_id": None,
+            },
+        )
+    original = current.sources.document
+
+    def document(ref: SourceRef) -> tuple[str, JsonValue, Source]:
+        lang, value, source = original(ref)
+        if source.id == source_id:
+            value = deepcopy(value)
+            object_value(array(object_value(value)["faces"])[0])["sections"] = [text]
+        return lang, value, source
+
+    monkeypatch.setattr(current.sources, "document", document)

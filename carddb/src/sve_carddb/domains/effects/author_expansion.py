@@ -22,9 +22,11 @@ from sve_carddb.domains.effects.author_sites import (
 )
 from sve_carddb.domains.effects.author_sources import (
     ADAPTER_RECIPE,
+    entry_payload,
     parameter_expected,
     resolve_source,
 )
+from sve_carddb.domains.translations.four_layer_damage import KEY as DAMAGE_KEY
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator, Mapping
@@ -418,6 +420,7 @@ class AuthorExpander:
         """Expand supplied contexts without granting any source proof."""
         shard_inputs = tuple(shards)
         result = self.expand(raw, shard_inputs)
+        expanded = dict(ability_nodes(result.tree))
         originals = dict(ability_nodes(self.schemas.author_tree(raw)))
         if contexts.keys() != originals.keys():
             raise ExpansionError("source_candidates_mismatch")
@@ -451,6 +454,16 @@ class AuthorExpander:
                 or ability.get("imports")
             ):
                 raise ExpansionError("unsupported_port_source_mapping", evidence.path)
+            if source.frame.semantic_variant.key == DAMAGE_KEY:
+                use = SourceUse.model_validate_json(
+                    canonical(array(ability["sources"])[0]), strict=True
+                )
+                if equivalent_ability(expanded[evidence.path]) != canonical(
+                    entry_payload(source, use.ability_scope)
+                ):
+                    raise ExpansionError(
+                        "source_head_payload_mismatch", evidence.path, use
+                    )
             sidecar.append(
                 replace(
                     evidence,
