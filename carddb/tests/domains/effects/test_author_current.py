@@ -58,6 +58,8 @@ REAL_AUTHOR_CARDS = {
     "BP04-010",
     "BP17-077",
     "BP18-058",
+    "BP19-001",
+    "BP19-050",
 }
 FRAME = "frame:f03820b9048f0bd911c528162f930b0e47d128493a84b4fe097f4c8a48608756"
 
@@ -481,6 +483,7 @@ def test_real_current_author_set(
         "rules/author-effects/BP04/001.yaml",
         "rules/author-effects/BP17/001.yaml",
         "rules/author-effects/BP18/001.yaml",
+        "rules/author-effects/BP19/001.yaml",
     }
     assert real.body_files == ()
     assert {file.path for file in real.prototype_files} == {
