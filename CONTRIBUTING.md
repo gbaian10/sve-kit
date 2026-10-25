@@ -328,6 +328,8 @@ publish has its own 92% combined line and branch coverage gate, including fork P
 and requires no private test data.
 Direct `pytest` runs do not enable coverage, so you can run selected files or tests without the
 full-suite gate; use the Python manual hook for the complete coverage check.
+Web tests enforce 85% branch coverage (`coverage.thresholds` in `sim/web/vite.config.ts`) when CI runs
+Vitest with `--coverage`; local `vitest` runs do not enable it.
 
 carddb and publish tests each use their own session-wide isolation guard. It supplies a temporary
 `SVE_DATA_DIR` and requires file-backed SQLite databases and source writes to stay

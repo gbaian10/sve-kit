@@ -429,8 +429,8 @@ jobs:
     needs: changes
     if: ${{ needs.changes.outputs.web == 'true' }}
     runs-on: ubuntu-latest
-    # The required steps keep 20 minutes; the Codecov analysis step below has its own 5.
-    timeout-minutes: 25
+    # The required steps keep 20 minutes; each of the two Codecov steps below has its own 5.
+    timeout-minutes: 30
     defaults:
       run:
         working-directory: sim/web
@@ -463,6 +463,7 @@ jobs:
           status=0
           start=$SECONDS
           bun run test:all --maxWorkers=4 --reporter=junit --outputFile="$REPORT_DIR/junit.xml" \
+            --coverage --coverage.reportsDirectory="$REPORT_DIR/coverage" \
             > "$REPORT_DIR/test.log" 2>&1 || status=$?
           echo "$((SECONDS - start))" > "$REPORT_DIR/elapsed.txt"
           echo "vitest exit status: $status (statistics in the next step; raw output stays private)"
@@ -472,6 +473,30 @@ jobs:
         env:
           REPORT_DIR: ${{ runner.temp }}/sve-web-reports
         run: python3 ../../.github/ci/test_summary.py web "$REPORT_DIR"
+      - name: Web coverage summary
+        if: ${{ !cancelled() && (steps.tests.outcome == 'success' || steps.tests.outcome == 'failure') }}
+        env:
+          REPORT_DIR: ${{ runner.temp }}/sve-web-reports
+        run: |
+          # vitest only exports coverage when the tests pass; the 85% branch gate itself is in vite.config.ts.
+          if [ -f "$REPORT_DIR/coverage/coverage-summary.json" ]; then
+            jq -r '.total | "Web coverage: branches **\(.branches.pct)%** (required **85%**), lines **\(.lines.pct)%**."' \
+              "$REPORT_DIR/coverage/coverage-summary.json" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Web coverage unavailable; branches required **85%**." >> "$GITHUB_STEP_SUMMARY"
+          fi
+      # Informational: the branch gate stays in vitest. The upload may fail or hang without touching the job result.
+      - name: Upload Web coverage to Codecov
+        if: ${{ !cancelled() && steps.tests.outcome == 'success' }}
+        continue-on-error: true
+        timeout-minutes: 5
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ${{ runner.temp }}/sve-web-reports/coverage/lcov.info
+          disable_search: true
+          flags: web
+          fail_ci_if_error: false
       - name: Remove private Web reports
         if: always()
         env:
