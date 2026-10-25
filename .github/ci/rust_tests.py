@@ -32,6 +32,7 @@ def main(arguments: list[str]) -> int:
     pin = json.loads((ROOT / "tests/engine/card-input.json").read_bytes())
     with tempfile.TemporaryDirectory(prefix="sve-engine-input-") as temporary:
         output = Path(temporary) / "cards.jsonl"
+        selection = Path(temporary) / "selection.json"
         subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed local CLI
             [
                 executable("uv"),
@@ -49,7 +50,26 @@ def main(arguments: list[str]) -> int:
             ],
             check=True,
         )
-        environment = {**os.environ, "SVE_TEST_SNAPSHOT": str(output)}
+        subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed local test adapter
+            [
+                executable("uv"),
+                "run",
+                "--directory",
+                str(ROOT / "carddb"),
+                "--locked",
+                "--no-default-groups",
+                "python",
+                "-m",
+                "tests.support.repository_current",
+                str(selection),
+            ],
+            check=True,
+        )
+        environment = {
+            **os.environ,
+            "SVE_TEST_SNAPSHOT": str(output),
+            "SVE_TEST_CURRENT_SELECTION": str(selection),
+        }
         return subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- Cargo receives explicit argument boundaries
             [executable("mise"), "exec", "--", "cargo", *(arguments or DEFAULT)],
             cwd=ROOT,
