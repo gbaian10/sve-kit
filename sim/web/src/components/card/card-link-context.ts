@@ -1,5 +1,5 @@
-import { createContext, useContext } from "react"
-import type { To } from "react-router"
+import { createContext, type MouseEvent, useContext } from "react"
+import { type To, useNavigate } from "react-router"
 
 import type { CardSummary } from "../../data"
 import { printingPath } from "../../domain/cardRoute"
@@ -8,6 +8,32 @@ import { printingPath } from "../../domain/cardRoute"
 export interface CardLinkTarget {
   readonly to: To
   readonly state?: unknown
+  /** The target is the printing the shown one was reached from: following it goes back one entry. */
+  readonly back?: boolean
+}
+
+/**
+ * Click handler for a card link: a link back to the previous entry's printing performs the
+ * browser's back (restoring that entry's scroll position) instead of stacking another entry.
+ */
+export function useCardLinkClick(): (
+  link: Pick<CardLinkTarget, "back">,
+) => (event: MouseEvent<HTMLAnchorElement>) => void {
+  const navigate = useNavigate()
+  return (link) => (event) => {
+    if (
+      !link.back ||
+      event.defaultPrevented ||
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey
+    )
+      return
+    event.preventDefault()
+    void navigate(-1)
+  }
 }
 
 /**

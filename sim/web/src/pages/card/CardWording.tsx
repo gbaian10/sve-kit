@@ -4,6 +4,7 @@ import { Link as RouterLink } from "react-router"
 
 import { loadPrintedTextState } from "../../app/printing-detail"
 import { useAnnotatedText } from "../../app/snapshot"
+import { useCardLinkClick } from "../../components/card/card-link-context"
 import { CardText } from "../../components/card/CardText"
 import { useTextLanguage } from "../../components/card/text-language"
 import { type Catalog, type Row, type SnapshotClient, stringValue } from "../../data"
@@ -140,6 +141,7 @@ function PrintingWording({
   readonly linkOf: (printingId: string) => CardLink | undefined
 }) {
   const { t } = useTranslation()
+  const linkClick = useCardLinkClick()
   const language = useTextLanguage()
   const own = useAnnotatedText(
     client,
@@ -224,7 +226,7 @@ function PrintingWording({
                   <RouterLink
                     to={link.to}
                     state={link.state}
-                    replace
+                    onClick={linkClick(link)}
                     preventScrollReset
                     className="font-mono underline decoration-dotted underline-offset-2 hover:text-text-1"
                   >

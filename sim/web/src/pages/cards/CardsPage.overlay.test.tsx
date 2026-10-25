@@ -307,9 +307,9 @@ describe("opening a card beside the results", () => {
     await waitFor(() => {
       expect(new URLSearchParams(router.state.location.search).get("card")).toBe("BP01-002a")
     })
-    expect(router.state.historyAction).toBe("REPLACE")
+    expect(router.state.historyAction).toBe("PUSH")
     expect(router.state.location.state).toMatchObject({
-      overlay: { resultKey: key, opener: key, pushed: true },
+      overlay: { resultKey: key, opener: key, pushed: true, previous: "p:bp01-002" },
     })
     expect(cellLink(key)).toHaveAttribute("aria-current", "true")
     await within(aside).findByRole("button", { name: "下一張" }, { timeout: 5000 })
@@ -321,6 +321,53 @@ describe("opening a card beside the results", () => {
       expect(noPanel()).toBeNull()
     })
     expect(cellLink(key)).toHaveFocus()
+  })
+
+  it.each(["panel", "modal"] as const)(
+    "stacks a printing switch in the %s and goes back when the switch returns to the previous printing",
+    async (mode) => {
+      const { router } = await open("/cards?q=bp01-002&unit=card", mode)
+      const user = userEvent.setup()
+      const [first] = await cells()
+      if (!first) throw new Error("missing cell")
+      await user.click(first)
+      const frame = () => (mode === "panel" ? panel() : screen.getByRole("dialog"))
+      await within(frame()).findByRole("heading", { name: "試作隊長" }, { timeout: 5000 })
+      const opened = router.state.location.key
+      const pill = (no: RegExp) =>
+        within(frame()).findByRole("link", { name: no }, { timeout: 5000 })
+      await user.click(await pill(/^BP01-002a/u))
+      await waitFor(() => {
+        expect(new URLSearchParams(router.state.location.search).get("card")).toBe("BP01-002a")
+      })
+      expect(router.state.historyAction).toBe("PUSH")
+      await user.click(await pill(/^BP01-002 /u))
+      await waitFor(() => {
+        expect(new URLSearchParams(router.state.location.search).get("card")).toBe("BP01-002")
+      })
+      expect(router.state.historyAction).toBe("POP")
+      expect(router.state.location.key).toBe(opened)
+    },
+  )
+
+  it("keeps the printing it was pushed from through previous and next", async () => {
+    const { router } = await open("/cards?q=bp01-002&unit=card", "panel")
+    const user = userEvent.setup()
+    const [first] = await cells()
+    if (!first) throw new Error("missing cell")
+    await user.click(first)
+    const aside = panel()
+    await user.click(
+      await within(aside).findByRole("link", { name: /^BP01-002a/u }, { timeout: 5000 }),
+    )
+    await waitFor(() => {
+      expect(new URLSearchParams(router.state.location.search).get("card")).toBe("BP01-002a")
+    })
+    const next = await within(aside).findByRole("button", { name: "下一張" })
+    await waitFor(() => expect(next).toBeEnabled())
+    await user.click(next)
+    expect(router.state.historyAction).toBe("REPLACE")
+    expect(router.state.location.state).toMatchObject({ overlay: { previous: "p:bp01-002" } })
   })
 
   it.each([

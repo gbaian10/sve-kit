@@ -607,3 +607,128 @@ describe("related cards", () => {
     )
   })
 })
+
+describe("history stack", () => {
+  // The related tabs hold the same cards under different tabs: open each until the link shows up.
+  async function relatedLink(user: ReturnType<typeof userEvent.setup>, cardNo: string) {
+    const region = await screen.findByRole("region", { name: "關聯卡牌" })
+    for (const tab of within(region).getAllByRole("tab")) {
+      await user.click(tab)
+      const link = region.querySelector<HTMLAnchorElement>(`a[href="/cards/${cardNo}"]`)
+      if (link) return link
+    }
+    throw new Error(`no related link to ${cardNo}`)
+  }
+  const settled = async (name: string) => {
+    await screen.findByRole("heading", { name })
+    await waitFor(() =>
+      expect(document.querySelector("article")).toHaveAttribute("aria-busy", "false"),
+    )
+  }
+
+  it("replaces the entry for previous and next, so back skips every card walked", async () => {
+    const user = userEvent.setup()
+    const h = await setup()
+    await user.click(screen.getByRole("button", { name: "下一張" }))
+    await settled("試作隊長")
+    expect(h.router.state.historyAction).toBe("REPLACE")
+    await user.click(screen.getByRole("button", { name: "下一張" }))
+    expect(h.router.state.historyAction).toBe("REPLACE")
+    await user.click(screen.getByRole("button", { name: "上一張" }))
+    expect(h.router.state.historyAction).toBe("REPLACE")
+    expect(h.router.state.location.pathname).toContain("/cards/BP01-002")
+  })
+
+  // Entries reached by a link are replaced once by the canonical address, so they are told apart
+  // by walking back from them rather than by history action or key.
+  const stepBack = async (h: Awaited<ReturnType<typeof setup>>) => {
+    await act(async () => {
+      await h.router.navigate(-1)
+    })
+    return h.router.state.location.pathname
+  }
+
+  // A card entered the way a link from `previous` would have entered it.
+  const enterFrom = async (h: Awaited<ReturnType<typeof setup>>, previous: string) => {
+    await act(() =>
+      h.router.navigate("/cards/BP01-002", {
+        state: { background: "", resultKey: "p:bp01-002", previous },
+      }),
+    )
+    await settled("試作隊長")
+  }
+
+  it("goes back for a link to the card it was reached from", async () => {
+    const user = userEvent.setup()
+    const h = await setup()
+    await enterFrom(h, "p:bp01-001")
+    await user.click(await relatedLink(user, "BP01-001"))
+    await settled("試作見習兵")
+    // Going back landed on the first entry, so the entry the link left is still ahead.
+    await act(async () => {
+      await h.router.navigate(1)
+    })
+    expect(h.router.state.location.pathname).toContain("/cards/BP01-002")
+  })
+
+  it("stacks a link whose target is not the card it was reached from", async () => {
+    const user = userEvent.setup()
+    const h = await setup()
+    await enterFrom(h, "p:bp01-003")
+    await user.click(await relatedLink(user, "BP01-001"))
+    await settled("試作見習兵")
+    await act(async () => {
+      await h.router.navigate(1)
+    })
+    expect(h.router.state.location.pathname).toContain("/cards/BP01-001")
+    expect(await stepBack(h)).toContain("/cards/BP01-002")
+  })
+
+  it("goes back for 002 → 002a → 002 and records the printing, not the card, as previous", async () => {
+    const user = userEvent.setup()
+    const h = await setup()
+    await user.click(screen.getByRole("button", { name: "下一張" }))
+    await settled("試作隊長")
+    await user.click(await relatedLink(user, "BP01-002a"))
+    await waitFor(() => {
+      expect(h.router.state.location.pathname).toContain("/cards/BP01-002a")
+    })
+    expect(h.router.state.location.state).toMatchObject({ previous: "p:bp01-002" })
+    await user.click(await relatedLink(user, "BP01-001"))
+    await settled("試作見習兵")
+    // 001 was reached from 002a: a link to 002 (the same card) would not be a way back.
+    expect(h.router.state.location.state).toMatchObject({ previous: "p:bp01-002-alt" })
+    expect(await stepBack(h)).toContain("/cards/BP01-002a")
+    expect(await stepBack(h)).toContain("/cards/BP01-002")
+    await user.click(await relatedLink(user, "BP01-002a"))
+    await waitFor(() => {
+      expect(h.router.state.location.pathname).toContain("/cards/BP01-002a")
+    })
+    await user.click(await relatedLink(user, "BP01-002"))
+    await waitFor(() => {
+      expect(h.router.state.location.pathname).not.toContain("002a")
+    })
+    // Back landed on the first entry again, so the 002a entry is still ahead.
+    await act(async () => {
+      await h.router.navigate(1)
+    })
+    expect(h.router.state.location.pathname).toContain("/cards/BP01-002a")
+  })
+
+  it("leaves a modified click on a link back to the browser", async () => {
+    const user = userEvent.setup()
+    const h = await setup()
+    await enterFrom(h, "p:bp01-001")
+    const link = await relatedLink(user, "BP01-001")
+    act(() => {
+      link.dispatchEvent(
+        new MouseEvent("click", { bubbles: true, cancelable: true, ctrlKey: true }),
+      )
+    })
+    expect(h.router.state.location.pathname).toContain("/cards/BP01-002")
+    await act(async () => {
+      await h.router.navigate(1)
+    })
+    expect(h.router.state.location.pathname).toContain("/cards/BP01-002")
+  })
+})

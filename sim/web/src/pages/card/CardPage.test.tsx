@@ -639,7 +639,7 @@ describe("plain wording on the card page", () => {
     expect(note).toHaveTextContent("與 BP-SECOND 文字描述略有差異，但意思相同。")
     expect(note).not.toHaveTextContent("BP-THIRD")
     await userEvent.click(within(note as HTMLElement).getByRole("link", { name: "BP-SECOND" }))
-    expect(router.state.historyAction).toBe("REPLACE")
+    expect(router.state.historyAction).toBe("PUSH")
     expect(router.state.location.pathname).toContain("/cards/BP-SECOND")
   })
   it("borrows the latest wording's translation when this printing's revision has none", async () => {
@@ -1031,10 +1031,14 @@ describe("double-face headers", () => {
     await waitFor(() => {
       expect(router.state.location.state).toMatchObject({ dialog: "card-zoom" })
     })
-    await act(() => router.navigate(-1))
+    await act(async () => {
+      await router.navigate(-1)
+    })
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument())
     expect(router.state.location.pathname).toBe("/cards/BP-SYNTHETIC/Synthetic%20front")
-    await act(() => router.navigate(-1))
+    await act(async () => {
+      await router.navigate(-1)
+    })
     expect(screen.getByText("Synthetic list")).toBeVisible()
   })
   it("offers previous/next from the list order and enlarges the image in a dialog", async () => {
@@ -1060,7 +1064,7 @@ describe("double-face headers", () => {
 
 describe("returning from printing changes", () => {
   it.each(["button", "browser"] as const)(
-    "returns to the same list entry using %s back",
+    "steps back through each printing to the same list entry using %s back",
     async (method) => {
       state.multiplePrintings = true
       const { router } = await renderRoutes(
@@ -1085,8 +1089,18 @@ describe("returning from printing changes", () => {
       await userEvent.click(screen.getByRole("link", { name: "BP-SECOND" }))
       await userEvent.click(screen.getByRole("link", { name: "BP-THIRD" }))
       expect(router.state.location.pathname).toBe("/cards/BP-THIRD")
-      if (method === "button") await userEvent.click(screen.getByRole("button", { name: "返回" }))
-      else await act(() => router.navigate(-1))
+      const back = async () => {
+        if (method === "button")
+          await userEvent.click(await screen.findByRole("button", { name: "返回" }))
+        else
+          await act(async () => {
+            await router.navigate(-1)
+          })
+      }
+      await back()
+      expect(router.state.location.pathname).toContain("/cards/BP-SECOND")
+      await back()
+      await back()
       expect(router.state.location).toMatchObject({
         pathname: "/cards",
         search: "?q=synthetic",
@@ -1095,6 +1109,52 @@ describe("returning from printing changes", () => {
       })
     },
   )
+  async function openPrinting(
+    printingLinks: string[],
+  ): Promise<Awaited<ReturnType<typeof renderRoutes>>> {
+    state.multiplePrintings = true
+    const rendered = await renderRoutes(
+      [
+        { path: "/cards", element: <p>Synthetic list</p> },
+        { path: "/cards/:cardNo/:slug?", ...card },
+      ],
+      { initialEntries: ["/cards?q=synthetic"] },
+    )
+    await act(() =>
+      rendered.router.navigate("/cards/BP-SYNTHETIC", {
+        state: { background: "?q=synthetic", source: "results", pages: 1, resultKey: "c:anchor" },
+      }),
+    )
+    for (const no of printingLinks) {
+      await userEvent.click(screen.getByRole("link", { name: no }))
+      await waitFor(() => {
+        expect(rendered.router.state.location.pathname).toContain(no)
+      })
+    }
+    return rendered
+  }
+
+  // This route mock gives every printing the same id, so it only shows that returning to the
+  // entered-from address goes back; the printing-id comparison itself is covered against the real
+  // fixture in CardNavigation.test.tsx.
+  it("goes back for printing 1 → 2 → 1 instead of stacking a third entry", async () => {
+    const { router } = await openPrinting(["BP-SECOND", "BP-SYNTHETIC"])
+    expect(router.state.location.pathname).toContain("/cards/BP-SYNTHETIC")
+    // Back landed on the first entry, so printing 2's entry is still ahead and nothing follows it.
+    await act(async () => {
+      await router.navigate(1)
+    })
+    expect(router.state.location.pathname).toContain("/cards/BP-SECOND")
+    await act(async () => {
+      await router.navigate(1)
+    })
+    expect(router.state.location.pathname).toContain("/cards/BP-SECOND")
+    await act(async () => {
+      await router.navigate(-2)
+    })
+    expect(router.state.location.pathname).toBe("/cards")
+  })
+
   it("returns to /cards when opened directly", async () => {
     const { router } = await renderRoutes(
       [
