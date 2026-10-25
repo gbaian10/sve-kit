@@ -2,8 +2,8 @@
 
 本文件補充[第一批觸發契約](trigger-lki-semantics.md)，只定義內部 typed IR 的執行義務。
 以下四個有限入口取代第一批 §1 對應的暫時拒絕；未列出的形狀維持拒絕。
-lowering／checker／executor 已接上以下有限入口；作者 `whose=each` 仍受現有 A.player-ref
-schema 限制而拒絕。這不改作者 schema、公開 program、capability 或最低版本；
+lowering／checker／executor 已接上以下有限入口；DSL 的 `whose=each` 仍受現有 A.player-ref
+schema 限制而拒絕。這不改 DSL schema、公開 program、capability 或最低版本；
 本文、選項、成本及所有介入效果仍須整棵准入。執行與資訊邊界見
 [內部執行契約](internal-execution.md#第二批自動能力入口)。
 
@@ -180,7 +180,7 @@ source 為傷害來源的 RuntimeObjectView，controller 是該傷害來源的 c
 
 ## 7. lowering、良構與最小驗收
 
-沿[作者事件矩陣](author-event-matrix-1.0.md)與 schema 既有寫法，不新增別名。
+沿[DSL 事件矩陣](author-event-matrix-1.0.md)與 schema 既有寫法，不新增別名。
 lowering 的 `Ability` 補 `super_evolve_time`，phase 解碼接受 main，Auto 補本片的
 left_field／damaged 有限 payload；現有 `During` 只收 self，damaged 須另收 opp。
 未列欄位與 shape 靜態拒絕，不忽略。

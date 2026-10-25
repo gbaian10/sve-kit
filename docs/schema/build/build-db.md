@@ -48,7 +48,7 @@ record scope 的 `membership_hash/policy_id/sample_ids` 均為 null，決定由�
 | JP 身分初始化                                  | 工具以所有面卡名/卡種/數值/效果/sections 產候選，批次採納，歧義逐項處理            | 依 §3.1 同卡通則；真語義歧義才隔離，不因插畫/表記差異拆 card |
 | 正式勘誤適用範圍、來源更正、身分修復、語義分歧 | confirmed，需精確來源證據                                                          | 隔離衝突；不得自動執行受影響規則                             |
 | 官方頁現行文字、路由、流水配號、預設入口       | 確定性規則與來源可重建，不要求人工 decision                                        | 衝突才交人工                                                 |
-| DSL                                            | §10 的不同作者審核或巨集機械門檻；實跑另判定                                       | 卡文可發布，自動能力不放行                                   |
+| DSL                                            | §10 的不同於寫檔者的審核或巨集機械門檻；實跑另判定                                 | 卡文可發布，自動能力不放行                                   |
 
 **翻譯及詞彙當前資料**：依[翻譯契約](../domains/translation-contract.md)及 catalog format 2，
 只驗格式、來源、唯一鍵、參數、引用與本次來源 binding／未匹配清單一致；低信心顯示待校對，不使用 sampled／confirmed 或批准收據。
@@ -210,7 +210,7 @@ errata_change 的 field 與 before_value／after_value 型別依 [傳輸契約 �
 
 官方相關連結先以目標地區＋原卡號解到 printing，建置資料庫的 `target_printing_id` 留原證據，`to_card_id` 必須等於該 `printing.card_id`；不能因 token 名稱相同就猜另一 card。未知目標留 staging；provisional 政策依 §17。ゴースト/大地の魔片 若只是已核對表記差異依同卡通則，缺消滅句等仍待更正，不能自動等義。追加區用相同 target card/printing 候選，使用者仍可換版次。
 
-相關列表沒說關係時用 `official_unspecified`，不自動變 `produces_token`。未爬到 target 留 staging，正式 FK 不得懸空。`same_rules_reskin` 由換皮卡（`from`）指向經人工核對、規則相同的原卡（`to`）。採納：只來自 registry（`source_kind=authored`），每筆以 evidence 記兩端官方觀測；`suggested_count`、`dsl_id` 為 null，`target_printing_id` 除非有明確版次證據否則為 null。唯一性：同一 `(from_card_id,to_card_id,relation)` 至多一筆；不建反向列（查原卡的換皮卡用反查）；每個 `from` 至多一個已採納的 `to`。地區與失效：只在**兩端都有該地區版次**的地區成立，且以兩端該地區目前有效的面與規則 bundle 為準；建置每次比對兩端該地區目前的面、規則內容與 registry 記錄所釘住的兩端觀測；任一端來源或已採納語義改變，該地區先不投影，須重新人工核對並更新 registry 記錄後才恢復，即使新舊兩端經機械比對仍相同也不自動沿用舊觀測。比對時卡名與自身名稱引用以對應變數替換（保留「此卡」「名稱含…」等語義），不可整段刪除；無法機械對應的引用逐案人工核對。此關係不推出日英同卡或跨區等義，跨區對應與 `region_divergence` 各自處理。用途：只供查卡顯示「規則與某卡相同」與 DSL **撰寫候選**；不得直接繼承原卡的 `dsl_document`、`card_engine_support`、mechanic、載入或考題結果，換皮卡須依自身面、地區、規則名稱與依賴另建 `dsl_document` 並依 §10 驗證。兩張仍是不同卡、不同 `rules_name`，構築張數不合併（除非另有官方裁定）。`produces_token/extra_aid` 才產追加區建議；數量由玩家調整，不算合法性，也不匯出 Decklog。`card_related/qa_card` 不做面級；`digital_link.face_id` 保留，因實際插畫/數位面對照需要。
+相關列表沒說關係時用 `official_unspecified`，不自動變 `produces_token`。未爬到 target 留 staging，正式 FK 不得懸空。`same_rules_reskin` 由換皮卡（`from`）指向經人工核對、規則相同的原卡（`to`）。採納：只來自 registry（`source_kind=authored`），每筆以 evidence 記兩端官方觀測；`suggested_count`、`dsl_id` 為 null，`target_printing_id` 除非有明確版次證據否則為 null。唯一性：同一 `(from_card_id,to_card_id,relation)` 至多一筆；不建反向列（查原卡的換皮卡用反查）；每個 `from` 至多一個已採納的 `to`。地區與失效：只在**兩端都有該地區版次**的地區成立，且以兩端該地區目前有效的面與規則 bundle 為準；建置每次比對兩端該地區目前的面、規則內容與 registry 記錄所釘住的兩端觀測；任一端來源或已採納語義改變，該地區先不投影，須重新人工核對並更新 registry 記錄後才恢復，即使新舊兩端經機械比對仍相同也不自動沿用舊觀測。比對時卡名與自身名稱引用以對應變數替換（保留「此卡」「名稱含…」等語義），不可整段刪除；無法機械對應的引用逐案人工核對。此關係不推出日英同卡或跨區等義，跨區對應與 `region_divergence` 各自處理。用途：只供查卡顯示「規則與某卡相同」與 DSL **DSL 候選**；不得直接繼承原卡的 `dsl_document`、`card_engine_support`、mechanic、載入或考題結果，換皮卡須依自身面、地區、規則名稱與依賴另建 `dsl_document` 並依 §10 驗證。兩張仍是不同卡、不同 `rules_name`，構築張數不合併（除非另有官方裁定）。`produces_token/extra_aid` 才產追加區建議；數量由玩家調整，不算合法性，也不匯出 Decklog。`card_related/qa_card` 不做面級；`digital_link.face_id` 保留，因實際插畫/數位面對照需要。
 
 region_mapping_review 只來自 registry，confirmed_none 即已人工確認；pending 可保留待審。region_text_review 的 aligned 必須有 sampled／confirmed decision；pending 不放行規則等義或官方 counterpart；§9 的 JP 繁中顯示不要求 aligned。region_divergence 依 §2 的語義分歧政策要求 confirmed decision。以上在提交前重驗，不能藉修改 decision 繞過；兩端 bundle freshness、精確查核範圍與有效 divergence 的投影仍由領域驗證器判定。
 
@@ -378,11 +378,11 @@ EN 接收端引用 JP owner 的合法 use，不將 EN source_unit 改成 JP；�
 四層資料不新增逐詞核可、成功收據或不可變翻譯帳本；DB 邊界只驗必要結構與建置閉包。
 §9.1 與 ER 圖描述目前 DDL；已知舊域的用途級裁定解析及 N1 新葉由 #499／#380 接續。
 公開 basis=jp_source、annotation 承載、tuple 與 reader 依[公開契約](../export/public-annotation.md)，不能直接 dump 本節邏輯列。
-巨集資格依[撰寫語法 §10](../../dsl/author-syntax-1.0.md#10-巨集規範)，本節不修改 §10 或授予可執行資格。
+巨集資格依[DSL 語法 §10](../../dsl/author-syntax-1.0.md#10-巨集規範)，本節不修改 §10 或授予可執行資格。
 
 ## 10. DSL、驗證與未實作卡片頁
 
-下表的 DSL／巨集表為未實作的舊儲存設計。正式作者 1.0 的承載與資格改依[作者承載契約](../../dsl/author-contract-1.0.md)：`dsl_document` 的 meta／來源、`dsl_review` 的證據和型別、`author_macro`／`macro_review`／`dsl_macro_use` 的鍵與依賴均以該契約為準，實作時再同步 DDL，本表不能當成另一套作者入口。body_boundary 當前結果依承載 §5 存於 caller 明示選用位置的當前已驗 DB 並供新建 DB 消費；其原子更新不刪改下表逐用途 dsl_exam 的診斷歷史，舊 pass 也不能推翻新的 fail。DB 內部表如何配置為可調整細節。
+下表的 DSL／巨集表為未實作的舊儲存設計。正式 DSL 1.0 的承載與資格改依[DSL 承載契約](../../dsl/author-contract-1.0.md)：`dsl_document` 的 meta／來源、`dsl_review` 的證據和型別、`author_macro`／`macro_review`／`dsl_macro_use` 的鍵與依賴均以該契約為準，實作時再同步 DDL，本表不能當成另一套DSL 入口。body_boundary 當前結果依承載 §5 存於 caller 明示選用位置的當前已驗 DB 並供新建 DB 消費；其原子更新不刪改下表逐用途 dsl_exam 的診斷歷史，舊 pass 也不能推翻新的 fail。DB 內部表如何配置為可調整細節。
 
 | 表                       | 建置期欄位、鍵與約束                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -405,9 +405,9 @@ EN 接收端引用 JP owner 的合法 use，不將 EN source_unit 改成 JP；�
 | `mechanic_projection`    | `card_id→card,keyword_id→keyword,scope:shared\|en_override,relations:Json,actions:Json`；`PK(card_id,keyword_id,scope)`，陣列 ID 逐項驗 FK；只出有新鮮正標籤的 (card,keyword,scope)，relations/actions 不得同時空；不輸出 absent/unknown 列                                                                                                                                                                                                                                                                                                                  |
 | `card_mechanic_coverage` | `card_id→card,scope:shared\|en_override,complete_all:Bool,complete_mode:include\|exclude,complete_keyword_ids:Json,partial_mode:include\|exclude,partial_keyword_ids:Json`；`PK(card_id,scope)`，D 從新鮮建置資料庫的 `mechanic_coverage` 推導；陣列 ID 逐項→keyword(id) 驗引用；解碼後集合唯一/互斥，`complete_all=true` 時兩 mode=include、兩陣列空，涵蓋此快照清單的 keyword universe                                                                                                                                                                     |
 
-建置資料庫的 `card_engine_support` 可逐 card/region 保存推導；卡表快照合併共用狀態，每卡一列＋只對真正區域差異存 overrides，不重複日英文件。shared 文件以 JP 全面卡文為 source；EN 無對照/未完成語義核對/差異尚未解決，不繼承 automatic。EN-only 卡的目標 scope 為 `en_override`，不能編造 JP hash；正式作者 1.0 在 EN 來源契約未定義前以明確診斷拒絕該入口，見作者承載 §2.1，不把此表的預定 scope 當成已支援。
+建置資料庫的 `card_engine_support` 可逐 card/region 保存推導；卡表快照合併共用狀態，每卡一列＋只對真正區域差異存 overrides，不重複日英文件。shared 文件以 JP 全面卡文為 source；EN 無對照/未完成語義核對/差異尚未解決，不繼承 automatic。EN-only 卡的目標 scope 為 `en_override`，不能編造 JP hash；正式 DSL 1.0 在 EN 來源契約未定義前以明確診斷拒絕該入口，見DSL 承載 §2.1，不把此表的預定 scope 當成已支援。
 
-手寫 reviewed：不同作者語意審核 ok。巨集需兩個模型審核與測試，逐卡三項機械檢查（句型、參數、反譯）全過。驗證政策要求新卡載入＋基本局面以及所有必要題本；每次 run 追加，exact program/source/exam/engine build/policy/測試輸入 manifest 取最新結果，最新 fail 不沿用舊 pass。`policy_id`、`engine_version/build`、source/program/candidate hash 任何變更都重算；測試輸入 manifest 不必等於包含結果的新 manifest，避免自我 hash 循環。
+手寫 reviewed：不同於寫檔者的語意審核 ok。巨集需兩個模型審核與測試，逐卡三項機械檢查（句型、參數、反譯）全過。驗證政策要求新卡載入＋基本局面以及所有必要題本；每次 run 追加，exact program/source/exam/engine build/policy/測試輸入 manifest 取最新結果，最新 fail 不沿用舊 pass。`policy_id`、`engine_version/build`、source/program/candidate hash 任何變更都重算；測試輸入 manifest 不必等於包含結果的新 manifest，避免自我 hash 循環。
 
 | support status  | 必要事實                                                                 | automatic |
 | --------------- | ------------------------------------------------------------------------ | --------- |
@@ -516,9 +516,9 @@ canonical-json-v1：null/bool/Unicode string/安全整數/array/object；拒浮�
 
 `text_unit` hash＝exact text UTF-8；相同 hash 仍比 bytes。舊 T／C 模板身分只用於[共用契約 §9](../domains/four-layer-translation.md#9-舊模板重鍵與裁定引用)的舊模板映射辨識；四層的 frame-v2 完整 payload／ID 依[共用契約 §3](../domains/four-layer-translation.md#3-frame-與語義身分)，角色／域、語義變體或被引用定義變更須重鍵，單純 normalizer 版本改變只更新基準並重驗，NP／中文形式不入身分。
 
-`program_hash`＝canonical `{dsl_version,ast}`；正式作者 1.0 的 body_version 依[承載 §4.1](../../dsl/author-contract-1.0.md#41-body-recipe)的 effect-body-v1 完整 payload（含 params、ability_scope、ports），取代舊 macro `{dsl_version,body}` 配方。既有 face-bundle-v1 保留完整觀測 recipe（含 revision ID、原始 name/effect/sections/kind、數值與類型），只作觀測追溯，不充當 DSL 新鮮度鍵。
+`program_hash`＝canonical `{dsl_version,ast}`；正式 DSL 1.0 的 body_version 依[承載 §4.1](../../dsl/author-contract-1.0.md#41-body-recipe)的 effect-body-v1 完整 payload（含 params、ability_scope、ports），取代舊 macro `{dsl_version,body}` 配方。既有 face-bundle-v1 保留完整觀測 recipe（含 revision ID、原始 name/effect/sections/kind、數值與類型），只作觀測追溯，不充當 DSL 新鮮度鍵。
 
-目前不提供規則等義 bundle 或跨表記重用 DSL 的建置能力；未實作的語義表與 hash recipe 已移除。正式作者 1.0 的來源新鮮度文稿依[承載 §4.2](../../dsl/author-contract-1.0.md#42-來源與用途依賴)，尚未實作；不能只改 recipe 名稱沿用舊驗證結果。翻譯仍比自己的 exact source/context。
+目前不提供規則等義 bundle 或跨表記重用 DSL 的建置能力；未實作的語義表與 hash recipe 已移除。正式 DSL 1.0 的來源新鮮度文稿依[承載 §4.2](../../dsl/author-contract-1.0.md#42-來源與用途依賴)，尚未實作；不能只改 recipe 名稱沿用舊驗證結果。翻譯仍比自己的 exact source/context。
 
 卡表快照不出逐列稽核 hash；`program_ref` 由快照清單的檔案雜湊驗證。發布 metadata 不能改寫歷史審核事實。
 
@@ -526,9 +526,9 @@ canonical-json-v1：null/bool/Unicode string/安全整數/array/object；拒浮�
 來源規則本文、數值、類型、rules_names、normalizer 或 token 規則依賴變動須重驗，翻譯與 counterpart 仍按 exact source/context 及各 owner 失效。
 若需承接真正存在的舊驗證物件，保留舊觀測、決定與歷史快照，先依該實例定義新舊 hash、來源及重驗證據的保存契約，再啟用遷移；不預建空收據庫。
 
-### 14.1 DSL 撰寫/題本的文字來源
+### 14.1 DSL 與題本的文字來源
 
-DSL 撰寫與題本須保留實際使用的原文觀測及完整規則依賴。`dsl_source` 保留當時採用的觀測 revision，不因 current 改字而改寫歷史證據。沒有正式規則等義驗證時，暫顯或身分分組均不能作為沿用 DSL／題本驗證結果的依據。
+DSL 與題本須保留實際使用的原文觀測及完整規則依賴。`dsl_source` 保留當時採用的觀測 revision，不因 current 改字而改寫歷史證據。沒有正式規則等義驗證時，暫顯或身分分組均不能作為沿用 DSL／題本驗證結果的依據。
 
 ## 15. 網址、搜尋、預設版次與記號
 

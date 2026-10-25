@@ -33,7 +33,7 @@
 | 技術契約 | 卡面標籤外觀 | `catalog/rarity-badges.yaml` 單檔，見下方「卡面標籤外觀」 |
 | 技術契約 | 再錄版次 | `catalog/reprints.yaml` 單檔，見下方「再錄版次」 |
 | 定案（技術契約） | 來源綁定的插畫裁切覆寫 | `images/crops.yaml` 單檔，`format: 1, kind: image_crop_overrides, records`、全檔查重，依[覆寫契約](../images/image-crop-overrides.md) |
-| 結構、檔案／索引閉包、展開與有限 current 來源驗證已實作；資格未實作 | 作者 1.0 與本體伴隨檔 | `rules/author-effects/<owner>/<sequence>.yaml`、`rules/effect-bodies/<owner>/<sequence>.yaml`、`rules/effects-index.yaml`；來源能力限五類 entry／空 ports，見[入口形狀](../../dsl/author-entry-shapes-1.0.md)與[作者承載契約](../../dsl/author-contract-1.0.md) |
+| 結構、檔案／索引閉包、展開與有限 current 來源驗證已實作；資格未實作 | DSL 1.0 與本體伴隨檔 | `rules/author-effects/<owner>/<sequence>.yaml`、`rules/effect-bodies/<owner>/<sequence>.yaml`、`rules/effects-index.yaml`；來源能力限五類 entry／空 ports，見[入口形狀](../../dsl/author-entry-shapes-1.0.md)與[DSL 承載契約](../../dsl/author-contract-1.0.md) |
 | 原型／提案設定 | DSL、設定 | `rules/effects/`、`rules/keywords.yaml`、`rules/engine/index.yaml`；其他 macros／config 仍為提案，見後續各節；跨區語義差異採納改走 translations/region-reviews |
 | 定案（技術契約） | 查卡 keyword 登錄與 manual H1 | `rules/keyword-registry.yaml`，明示既有 glossary mapping 與 confirmed 採納；沿既有投影，只產 has／partial，見[關鍵字機制契約](keyword-mechanics.md)。與 astra/1 原型入口不同 |
 | 定案（內部候選格式） | 效果分類與來源範圍 | `rules/classifications/<owner>/<sequence>.yaml`，`format: 2, kind: effect_classification_shard`；只保存候選，見[效果分類候選](effect-classifications.md)，不作 DSL 或公開搜尋選項 |
@@ -44,7 +44,7 @@
 
 分片內記錄依對應 printing 的 `(region, card_no, variant_key, printing id)` 排序（`card_no` 為原樣字串的 code-point 字典序）：printing、配號、來源更正用自身或所指 printing；art 用第一個 use 的 printing；card、face、英文獨有查核、換皮卡用該 card 所有 printing 中最小的鍵（face 再加 ordinal）；最後一律以 `record_key` 收尾。排序只作用於**同一次寫入的新記錄**：正常追加只排序本次新增、寫到該 `(area, owner)` 的下一個序號檔，舊分片不動，所以同一 owner 的多個分片合起來不保證是全域卡號序。2026-09-28 首次公開前曾一次性全量重新分片（見 §3.2）；此後不再重排。
 
-YAML 為單一文件、UTF-8；省略版本指示或明示 `%YAML 1.2` 可讀，其他版本指示拒絕。`carddb` 使用 `yamlrocks==0.7.0` 的純量與詞法語意，不宣稱完全等同 YAML 1.2 core resolver，也不保留舊數字拼法相容層：例如 plain `0777`、`0b101`、`1_000` 是字串；正常十進位、`0o17`、`0xFF` 與指數形式依套件解讀。日期仍是字串，不啟用 timestamp；作者的日期字串加引號慣例不變。所有鍵必須是字串，禁止重複鍵；套件先拒絕重複鍵與複合鍵，載入後仍做 strict JSON、core canonical 雜湊、結構與引用檢查。canonical 拒絕所有浮點（含 NaN／Infinity）與不安全整數。大小限制與分片規則不變，另見 [DSL 1.0 §11](../../dsl/author-syntax-1.0.md#11-載入與錯誤)。
+YAML 為單一文件、UTF-8；省略版本指示或明示 `%YAML 1.2` 可讀，其他版本指示拒絕。`carddb` 使用 `yamlrocks==0.7.0` 的純量與詞法語意，不宣稱完全等同 YAML 1.2 core resolver，也不保留舊數字拼法相容層：例如 plain `0777`、`0b101`、`1_000` 是字串；正常十進位、`0o17`、`0xFF` 與指數形式依套件解讀。日期仍是字串，不啟用 timestamp；日期字串加引號慣例不變。所有鍵必須是字串，禁止重複鍵；套件先拒絕重複鍵與複合鍵，載入後仍做 strict JSON、core canonical 雜湊、結構與引用檢查。canonical 拒絕所有浮點（含 NaN／Infinity）與不安全整數。大小限制與分片規則不變，另見 [DSL 1.0 §11](../../dsl/author-syntax-1.0.md#11-載入與錯誤)。
 
 Anchor／alias／merge 與顯式 tag **讀取允許，寫入不產生**；普通 alias 與 merge 由套件展開，循環 alias 報錯，quoted `"<<"` 保留為一般字串鍵。標準 tag 依套件解讀；自訂 tag 保留為物件，再由 strict JSON 拒絕，不註冊 tag callback，也不啟用 include／env／secret／Python 物件執行。合法位置的 tab、NEL／LS／PS、interior BOM 與未知指示由套件處理，不另設 libyaml 字元禁令或 lint；縮排等語法錯誤仍拒絕。Parser 錯誤只回報安全類別，不附原始文字。寫出維持 `ruamel.yaml` 與原有 `storage.encode`，不設 PyYAML fallback；套件升級須重驗 canonical 差分與邊界案例。
 
@@ -66,7 +66,7 @@ Anchor／alias／merge 與顯式 tag **讀取允許，寫入不產生**；普通
 | author_effect_set、effect_body_shard、effects_index、frame_semantics_index、frame_semantics_shard | 1 |
 | effect_set、keyword_registry、engine_rules、flavor_translation_shard、qa_translation_shard、image_crop_overrides、classification_source_shard | 1 |
 
-`effect_set`／`keyword_registry` format 1 精確選定 astra/1 原型文法，保留 Schema `$id: urn:sve-kit:effects:astra:1`；不是 DSL 1.0，正式 DSL 1.0 使用 author_effect_set／effect_body_shard，資源映射及已實作驗證邊界依[作者承載契約 §1](../../dsl/author-contract-1.0.md#1-版本承諾與入口)。ruling 的 format 2 production reader 已實作，revision 必填並保留原頂層本文。
+`effect_set`／`keyword_registry` format 1 精確選定 astra/1 原型文法，保留 Schema `$id: urn:sve-kit:effects:astra:1`；不是 DSL 1.0，正式 DSL 1.0 使用 author_effect_set／effect_body_shard，資源映射及已實作驗證邊界依[DSL 承載契約 §1](../../dsl/author-contract-1.0.md#1-版本承諾與入口)。ruling 的 format 2 production reader 已實作，revision 必填並保留原頂層本文。
 
 [#476](https://github.com/gbaian10/sve-kit/issues/476) 使用新封套及路徑重建私人 source-record ID／provenance，Rust authored／settings／schemas fingerprints 亦如實重算。舊私人 provenance、序列化背景與回放指紋不相容，不保留舊 reader。各種 exact／canonical authored source hash 包含封套；raw 來源 hash、record-level 語義 hash 與公開匯出契約不因此改變。公開 323 JSON、媒體及 token 必須逐 byte 同值。
 
@@ -362,11 +362,11 @@ official 缺來源或文字不一致即拒絕；project／machine 不得附此�
 
 ## 7. DSL 與拒絕輸入
 
-正式作者 1.0 的封套、scope、逐卡 meta、本體伴隨檔、effects-index、來源新鮮度與資格依[作者承載契約](../../dsl/author-contract-1.0.md)。作者／companion Schema、strict reader、完整檔案集合與有限 current JP 來源驗證已實作；完整用途依賴、資格與採納結果接線尚未實作；既有 effect_set 仍是 astra/1。shared 是預設，EN exception 才 scope=en_override，但本版來源准入拒絕該入口，見承載 §2.1；不把新的本體欄位塞入 translation_shard。
+正式 DSL 1.0 的封套、scope、逐卡 meta、本體伴隨檔、effects-index、來源新鮮度與資格依[DSL 承載契約](../../dsl/author-contract-1.0.md)。DSL／companion Schema、strict reader、完整檔案集合與有限 current JP 來源驗證已實作；完整用途依賴、資格與採納結果接線尚未實作；既有 effect_set 仍是 astra/1。shared 是預設，EN exception 才 scope=en_override，但本版來源准入拒絕該入口，見承載 §2.1；不把新的本體欄位塞入 translation_shard。
 
-`authored/rules/effects-index.yaml` 以 card_id＋scope 定位 file／kind／record_key，封閉形狀見作者承載 §2.4；候選 YAML 解析失敗仍可定位卡。current 入口從 authored 根目錄載入完整集合，不能由外部刪減的檔案清單取得來源證明。candidate hash 取 exact authored bytes。後續建置接線須由 load_report 記 accepted/rejected＋目標版本，valid AST 才進 dsl_document；無效候選不進公開附件，support 仍可列 rejected_yaml。
+`authored/rules/effects-index.yaml` 以 card_id＋scope 定位 file／kind／record_key，封閉形狀見DSL 承載 §2.4；候選 YAML 解析失敗仍可定位卡。current 入口從 authored 根目錄載入完整集合，不能由外部刪減的檔案清單取得來源證明。candidate hash 取 exact authored bytes。後續建置接線須由 load_report 記 accepted/rejected＋目標版本，valid AST 才進 dsl_document；無效候選不進公開附件，support 仍可列 rejected_yaml。
 
-人寫作者／審核紀錄存 authored，版本化案例存 tests，已驗結果、逐用途機械三檢查及計算資格存建置 DB；普通建置只讀並比對當前依賴，不重跑歷史全量驗證。meta.status／reviewed_by 不符有效證據即拒絕該卡自動執行與程式出貨，由寫入端更新；資料變更 CI 失敗，不阻斷其他卡的普通文字建置。題本／載入結果須與 program/source/engine build/policy/測試輸入版本匹配，當前 fail 不沿用舊 pass。引擎未指定時不冒充 engine_passed；公開只投影 support 和 program_ref，private raw 報告不出貨。傳輸 4.0.0 程式包仍只准空 entries，啟用須另升版；詳[傳輸契約 §3.4](../export/snapshot-transport.md#34-dsl-程式包與版本准入)。
+人寫DSL／審核紀錄存 authored，版本化案例存 tests，已驗結果、逐用途機械三檢查及計算資格存建置 DB；普通建置只讀並比對當前依賴，不重跑歷史全量驗證。meta.status／reviewed_by 不符有效證據即拒絕該卡自動執行與程式出貨，由寫入端更新；資料變更 CI 失敗，不阻斷其他卡的普通文字建置。題本／載入結果須與 program/source/engine build/policy/測試輸入版本匹配，當前 fail 不沿用舊 pass。引擎未指定時不冒充 engine_passed；公開只投影 support 和 program_ref，private raw 報告不出貨。傳輸 4.0.0 程式包仍只准空 entries，啟用須另升版；詳[傳輸契約 §3.4](../export/snapshot-transport.md#34-dsl-程式包與版本准入)。
 
 ## 8. 更正、路由與設定
 

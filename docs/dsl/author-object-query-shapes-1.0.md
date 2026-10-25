@@ -1,9 +1,9 @@
-# 作者 1.0：物件來源與計數形狀
+# DSL 1.0：物件來源與計數形狀
 
-本表細化[撰寫語法 §5](author-syntax-1.0.md#5-表達式捕捉與選擇器)的物件來源與計數，
+本表細化[DSL 語法 §5](author-syntax-1.0.md#5-表達式捕捉與選擇器)的物件來源與計數，
 機器語法以 [author-nodes.schema.json](../../dsl/author-nodes.schema.json) 為準。
 `ObjectSel` 表 A.sel.object-core，含區域物件、binding／快照物件與這些來源的物件聯集；
-它不接受領袖 recipient，未涵蓋完整 Sel，也不提供完整作者 reader 或執行准入。
+它不接受領袖 recipient，未涵蓋完整 Sel，也不提供完整DSL reader 或執行准入。
 已定形的單組選取父節點與要求量見[數量矩陣](author-quantity-shapes-1.0.md)。
 DeckSlice 只定動作同層 top 的共用 payload；ObjectSel 不因而接受 top／bottom。
 不接受 Sel.top/bottom；頂部來源使用動作同層 top:DeckSlice，底部只有目的地 position:bottom。
@@ -84,12 +84,12 @@ CollectionSource 是 agg、distinct 與 count.except 的來源；區域 who／zo
 CountIn 與 CollectionIn 共用 A.collection.in，except 一律接 CollectionSource，不能繼承 counted 參數權限。
 相同 wire 在兩個位置各自合法時，來源角色仍不同。
 
-作者在 limb 只一個欄位不同、且該欄已有等義集合形時，優先寫 zone 列表、names 或 PlayerSet；
+DSL 在 limb 只一個欄位不同、且該欄已有等義集合形時，優先寫 zone 列表、names 或 PlayerSet；
 kind 不同或多欄不同時寫 any_of。PlayerSet 必須保留原文基數，不以二席假設任意拆解。
 物件聯集與這些集合形、計數聯集與其等義集合形，都**不推定相同 body hash**；
 traits_any 也適用此原則。
 canonical JSON 保留 limb 次序、重複及欄位有無；不執行排序、代數化簡或語義去重。
-執行時集合成員去重與作者 body bytes 的等值是不同責任。
+執行時集合成員去重與DSL body bytes 的等值是不同責任。
 接受領袖的聯集另見[接受者矩陣](author-selection-shapes-1.0.md#領袖與聯集)，
 不能從 ObjectSel、except 或 CountSource 進入。
 
@@ -106,7 +106,7 @@ F 共用基本葉值域與欄位互斥；來源與計數有不同父型別，不
 MaterialFilter 保留自己的三欄常量域，不隨 F 取得參數權限。
 下表的 ParamRef **只適用於 ObjectSel**；Count F 的 kind、class、trait、
 traits_all 元素及 name 全部排除 ParamRef，其餘值域不變。
-計數的 counted_kind 與篩選的 filter_kind 是不同來源角色，前者尚無作者參數白名單位置。
+計數的 counted_kind 與篩選的 filter_kind 是不同來源角色，前者尚無DSL 參數白名單位置。
 
 | 欄位 | 值域 | 依據／限制 |
 | --- | --- | --- |
@@ -132,7 +132,7 @@ traits_all 元素及 name 全部排除 ParamRef，其餘值域不變。
 | boxed | 嚴格 bool | true：BP11-024；false 合成 |
 | evolved | 嚴格 bool | false：BP02-041、ECP01-054；true 合成 |
 | entered_this_turn | 嚴格 true | BP02-101 スカイスピリット |
-| advance_follower | 嚴格 true | 契約登錄、合成；沒有直接布林欄位卡例，作者優先 kind:advance_follower |
+| advance_follower | 嚴格 true | 契約登錄、合成；沒有直接布林欄位卡例，DSL 優先 kind:advance_follower |
 | hp_le | Quantity | BP01-066、BP02-060；算式域由共用要求量定形，無直接算式卡例 |
 | acted／racing | 嚴格 bool | A-016d、A-036；false 與省略不同 |
 | token／not_token | 嚴格 true | GAP-A-059、BP19-038 的融合素材；兩鍵互斥 |
@@ -145,7 +145,7 @@ name、names、name_contains 三鍵互斥；same_as 只能出現在 name 或 kin
 class 與 not_class、trait 與 not_trait 等同時出現只表示 AND，不因可能空集合而拒絕。
 
 power_max 在同 atom 的其他 F、except 與 where 都套用後，保留有效攻擊力最大值的**全部並列者**；
-空集合仍空，不要求作者選一張。聯集每個 limb 分別取極值，limb 排列不建立順序。
+空集合仍空，不要求 DSL 選一張。聯集每個 limb 分別取極值，limb 排列不建立順序。
 Q1204 確認 BP09-077 有多個最大攻擊力從者時，由該玩家從並列者中選一體；
 power_max 先保留並列候選，再由外層選取決定，不能以內部順序任取一張。
 費用 filter 的 cost_*與 orig_cost_* 依 Q773／CR 5.24.1 都比較卡面費用，進化從者
@@ -156,7 +156,7 @@ BP10-063 デュアルレイジ 是 kind:advance_follower 的例，不能充作�
 CR 14.4.1.2 明定「トリガーを持つ」是具有 TriggerIcon，不是具有任意自動能力。
 「エボルヴフォロワー」則須同時符合從者與特殊種類 Evolve（CR 2.3.3.1、2.3.4）；
 Q2277／Q1572 明確排除 Advance 卡及 Drive Point，不能只用 kind:follower 或所在
-EvolveDeck 判斷。作者 `kind:evolve_follower` 須經 registry／來源接線確認，代碼尚未
+EvolveDeck 判斷。DSL 的 `kind:evolve_follower` 須經 registry／來源接線確認，代碼尚未
 准入時拒絕，不能退回 follower；CP03-029、BP08-053、BP17-116 的翻面材料亦同。
 keyword 的 OR 以 any_of 表達（例如 BP03-092），不新增 keywords_any。
 

@@ -1,8 +1,8 @@
 # Quick 許可與規則窗口
 
 本文件定義內部 typed IR 的執行義務；已驗範圍仍以
-[內部執行入口](internal-execution.md)為準。不變更作者語法、公開 program、capability
-或最低版本。卡片 Quick 與起動能力 Quick 是不同許可，不由作者容器的位置推斷。
+[內部執行入口](internal-execution.md)為準。不變更DSL 語法、公開 program、capability
+或最低版本。卡片 Quick 與起動能力 Quick 是不同許可，不由DSL 容器的位置推斷。
 
 依據為[日文 CR 1.28.0（2026-09-28）](https://shadowverse-evolve.com/wordpress/wp-content/uploads/2026/09/28121513/ShadowverseEVOLVE_cr_1.28.0_260928.pdf)，
 核對日 2026-10-23，以下條號均指此版。IR 承載、token 與交易是專案表示約定。
@@ -119,7 +119,7 @@ view 的 audience 與 observation epoch；待答保存只有在完整保留續�
 
 ## 5. 內部 IR 正規形與 lowering 邊界
 
-以下是內部狹窄語義准入，不定義新的作者寫法。
+以下是內部狹窄語義准入，不定義新的DSL 寫法。
 沿既有 `Ability`、`AbilityOrigin::Keyword` 與 `Effect::Permission`，不新增 IR 型別：
 
 | 類別 | 首批內部承載 |
@@ -140,7 +140,7 @@ Installation anchor、無 usage／intervals。selector 恰為 `Objects([SourceHo
 它辨識 Quick，而以 origin 與精確形狀判定。origin 只能包一層 Quick＋Printed，不接受任意
 巢狀 Keyword、Granted 或 Triggered Quick。authority 再比對整卡、face、來源座標閉包與實際時點。
 
-代表正反例（示意，不是作者 YAML）：
+代表正反例（示意，不是DSL YAML）：
 
 1. 正例：BP01-024 的已核對獨立 Quick 位置 lower 成上述 Static 許可，另保留原 Spell 本文；
    可在 Hand 的 Attack 窗口選該卡，進 Resolution 後按原本文執行。反例：把同一許可的
@@ -151,9 +151,9 @@ Installation anchor、無 usage／intervals。selector 恰為 `Objects([SourceHo
 lowering 必須保留 Quick 自身與被修飾起動的真實 face／印刷行，無法定位就拒絕，不猜 line；
 來源閉包涵蓋許可與本文。未選模式或死分支中的不支援內容仍令整卡拒絕。候選診斷須分清
 「Quick 許可已可 lower」與「整卡其他形狀未受驗」，不能只丟棄 Quick 而宣稱 main 可執行。
-作者端的 card_field 或能力頭應由各自入口映到同一語義形；本文件不改 P1 的分類、hash
-或來源格式，不把 card_field 假造為 ability_body。未具備所選作者入口的正式來源映射前，
-可以用內部 typed 合成輸入驗 D1，不冒稱作者端已完成。
+DSL 端的 card_field 或能力頭應由各自入口映到同一語義形；本文件不改 P1 的分類、hash
+或來源格式，不把 card_field 假造為 ability_body。未具備所選DSL 入口的正式來源映射前，
+可以用內部 typed 合成輸入驗 D1，不冒稱DSL 端已完成。
 
 ## 6. 代表驗收與實作接點
 

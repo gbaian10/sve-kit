@@ -1,12 +1,12 @@
-# 效果作者 1.0：承載、版本與執行邊界
+# 效果 DSL 1.0：承載、版本與執行邊界
 
 第一版保留嚴格 reader、精確展開、來源綁定及 expanded JSON 與 typed IR 的交接。§4–5 的資格、用途依賴追蹤、rekey、邊界案例及實跑 DB 屬延伸契約，第一版不執行；review 證據只驗封閉形狀，不授予准入。
 
-本文是作者 1.0 的文件契約，與[撰寫語法](author-syntax-1.0.md)、[IR 詞彙](ir-vocabulary-1.0.md)共同閱讀；實作範圍見 §1，不表示格式已發布或來源已准入。語法的唯一機器權威仍在 `dsl/`，不能把既有 astra/1 Schema 當作作者 1.0 驗證器。決定方向見 [#799 的維護者決定](https://github.com/gbaian10/sve-kit/issues/799#issuecomment-6282231068)。
+本文是DSL 1.0 的文件契約，與[DSL 語法](author-syntax-1.0.md)、[IR 詞彙](ir-vocabulary-1.0.md)共同閱讀；實作範圍見 §1，不表示格式已發布或來源已准入。語法的唯一機器權威仍在 `dsl/`，不能把既有 astra/1 Schema 當作 DSL 1.0 驗證器。決定方向見 [#799 的維護者決定](https://github.com/gbaian10/sve-kit/issues/799#issuecomment-6282231068)。
 
 ## 1. 版本承諾與入口
 
-封套、共用本體承載、內容版本及用途依賴、公開 typed IR 與能力准入是單向門：改變時須重新審查契約與遷移影響。本文的資料欄位是具體可審的 1.0 文稿；尚未發布前可同步修訂。內部資料表、函式、快取、診斷代碼拼字、支援登錄的分檔方式及 adapter 實作是雙向門，可在 1.x 文件修訂，不因此放寬既有語義或來源責任。發布後沿作者語法的主／次版規則，不用文件小版掩蓋不相容變更。
+封套、共用本體承載、內容版本及用途依賴、公開 typed IR 與能力准入是單向門：改變時須重新審查契約與遷移影響。本文的資料欄位是具體可審的 1.0 文稿；尚未發布前可同步修訂。內部資料表、函式、快取、診斷代碼拼字、支援登錄的分檔方式及 adapter 實作是雙向門，可在 1.x 文件修訂，不因此放寬既有語義或來源責任。發布後沿DSL 語法的主／次版規則，不用文件小版掩蓋不相容變更。
 
 | format／kind | DSL 支援集 | Schema `$id` | 資源（實作範圍見下文） |
 | --- | --- | --- | --- |
@@ -16,7 +16,7 @@
 
 目前三個入口都有封閉 Schema 與 Python 結構 reader；共用 `author-nodes.schema.json` 提供完整能力圖、`A.file`、`A.card` 與 `$defs/authored`。結構 reader 不授予來源或資格證明。明示 API 已提供檔案／索引雙向閉包、generated_by／具型別葉展開、原 JSON body hash 及 `expanded` profile；current 入口核對 JP current、registry Frame／Binding 與 effect-source-v1，能力映射限五類 entry 的完整 payload 與空 ports。輸出為 JSON 樹及分離 sidecar；current_source_checked 仍不代表用途依賴、review／exam 資格或可執行。完整用途依賴、rekey、資格與正式執行准入仍待完成。能力持有面由 SourceUse.owner 的 face 決定，卡級／面級容器只表示位置，多面卡的卡級能力不表示全卡常駐。完整容器形狀與檢查邊界見[入口形狀矩陣](author-entry-shapes-1.0.md)，可用 API 見 [dsl/README](../../dsl/README.md)。
 
-兩個作者資源共用 `urn:sve-kit:author-nodes:1.0`（`dsl/author-nodes.schema.json`）的 A.* 定義。Schema 採 JSON Schema 2020-12。所有固定物件封閉；動態 map 只接受各自卡號／識別字規則，不以任意額外欄位吸收未知構造。Python 型別與 `$defs` 必須逐一對應並驗漂移；Rust 依同一資源的展開 profile 解碼並做漂移測試，不能另立語法。
+兩個DSL 資源共用 `urn:sve-kit:author-nodes:1.0`（`dsl/author-nodes.schema.json`）的 A.* 定義。Schema 採 JSON Schema 2020-12。所有固定物件封閉；動態 map 只接受各自卡號／識別字規則，不以任意額外欄位吸收未知構造。Python 型別與 `$defs` 必須逐一對應並驗漂移；Rust 依同一資源的展開 profile 解碼並做漂移測試，不能另立語法。
 
 `format/kind` 選入口，卡片 `meta.dsl` 與本體 `dsl` 必須在該資源的支援集中；沒有額外頂層 `schema` 選擇器。每個 loader 發行版將 `(format,kind)` 對應到恰好一個現行 Schema 資源；逐卡 meta.dsl 只檢查是否在其支援集中，不另選 Schema。相容次版以新 `$id` 及指紋取代該映射，支援集保留先前相容版本；同檔可含支援集內不同版本，Schema 依 dsl 窄化適用構造。舊 `$id` 只供已釘輸入重現，不原地替換資源內容。沒有登錄的版本拒絕，不選「最新可用」Schema。封套變更另升 format。既有 `effect_set`／`keyword_registry` format 1 與 `urn:sve-kit:effects:astra:1` 維持原型契約。
 
@@ -24,7 +24,7 @@
 
 ### 2.1 封套與分片
 
-逐卡檔恰為 `{format:1,kind:author_effect_set,scope,cards}`，`cards` 沿 A.card；`scope` 必填 `shared | en_override`，產生器預設 shared，只有已確認英文例外才選 en_override。四層契約目前只定 JP Frame／SourceBinding；本版對 en_override 在來源准入明確報 `en_source_contract_unavailable`，不產可執行樹，不借 JP 來源。此值保留給另行定義的 EN 作者來源契約，不代表已有 EN 支援。本體檔的 scope 本版只准 shared，恰為 `{format:1,kind:effect_body_shard,scope,records}`。路徑分別為 `authored/rules/author-effects/<owner>/<sequence>.yaml` 與 `authored/rules/effect-bodies/<owner>/<sequence>.yaml`。
+逐卡檔恰為 `{format:1,kind:author_effect_set,scope,cards}`，`cards` 沿 A.card；`scope` 必填 `shared | en_override`，產生器預設 shared，只有已確認英文例外才選 en_override。四層契約目前只定 JP Frame／SourceBinding；本版對 en_override 在來源准入明確報 `en_source_contract_unavailable`，不產可執行樹，不借 JP 來源。此值保留給另行定義的 EN DSL 來源契約，不代表已有 EN 支援。本體檔的 scope 本版只准 shared，恰為 `{format:1,kind:effect_body_shard,scope,records}`。路徑分別為 `authored/rules/author-effects/<owner>/<sequence>.yaml` 與 `authored/rules/effect-bodies/<owner>/<sequence>.yaml`。
 
 分片大小、排序與只增序號沿 [authored 格式 §1](../schema/domains/authored-layout.md#1-路徑與共同格式)。跨包本體首次以當次已知用途最小 `(region,card_no,variant_key,printing_id)` 所屬 owner 歸檔，新增用途不搬檔；owner／檔名不是本體身分。同一採納輸入集合的 `(frame_id,ability_scope,body_version)` 只准一筆，連完全相同的重複也拒絕；同內容可有多個用途與多個適用域登錄。
 
@@ -47,7 +47,7 @@
 
 Domain 恰為 `{regions}`：非空、排序唯一的 `jp/en` 集合。本版 shared 的來源驗證地區集合恰為 `{jp}`；不因 shared 可用於對齊的 EN 版次而捏造 EN 來源已驗。用途在域內恰為「同 frame／ability_scope／resolved 語義變體，且來源驗證地區集合是 domain.regions 的子集」；EN 仍受 §2.1 的來源准入限制。這個初版域不表示局面 predicate：需要更細邊界時須新增封閉可檢查構造，不得用 note 收窄後宣稱已驗。本體可不登錄而存放；要引用至少有一筆 registration，reviews 可空、頻次不足仍可引用，但逐用途須獨立審核。域內容改動使域指紋及其證據失效；id 不是版本。域指紋為 canonical-json-v1 的 `{recipe:"effect-domain-v1",domain}` 完整 Digest。
 
-LocalBinding 恰為 `{path,bind}`：path 是由該能力頭起算、只含物件鍵字串及非負陣列索引的結構路徑，bind 是作者 binding 名。imports 的 path 固定空陣列，明示在能力根作用域宣告該 local 名，型別及來源角色取自對應 Port；exports 的 path 指向實際宣告 binding 的構造。路徑只定位已存在作者節點，不能執行任意查詢。兩端都須存在且型別、source_role、支配與 scope 相符；branch local 不因 export 越域。ports 入本體語義 hash，不靠名字相同猜接線。
+LocalBinding 恰為 `{path,bind}`：path 是由該能力頭起算、只含物件鍵字串及非負陣列索引的結構路徑，bind 是 DSL binding 名。imports 的 path 固定空陣列，明示在能力根作用域宣告該 local 名，型別及來源角色取自對應 Port；exports 的 path 指向實際宣告 binding 的構造。路徑只定位已存在DSL 節點，不能執行任意查詢。兩端都須存在且型別、source_role、支配與 scope 相符；branch local 不因 export 越域。ports 入本體語義 hash，不靠名字相同猜接線。
 
 ### 2.3 逐用途選版與 inline
 
@@ -57,7 +57,7 @@ A.ability 沿用 `line`（1 起算）、選用 `section`（0 起算），正式�
 
 inline 能力另有必填 `ports`，形狀與 companion 相同，無接線時兩個 map 為空；generated_by 能力從本體取得 ports，不另覆寫。每個能力另有選用 `imports`：`Map<Code,{binding_id,ability_scope,port}>`；鍵為其 Projection import 名，值精確選定本用途已驗且可見的上游 export。inline 同樣須驗 ports／scope；沒有 import 時省略。同一 projection ability scope 的多片段只組成一次能力；同位置多能力分別保留，不能按 source 數量複製執行。token 能力必掛 token 的 A.card／face，不能借母卡 owner。sources 的 owner、face、field、section、行與能力容器必須一致；classification 零起算 line 到 A.ability.line 只轉換一次。
 
-`A.card.faces` 為 `Map<FaceId,{abilities}>`，FaceId 是永久 `f:` 加 32 lowercase hex；面容器不再嵌 meta。卡級 abilities／faces 與面級 abilities 可空，不將空與省略改寫成同一份作者 bytes。選填的能力 imports 若出現必非空。inline 沒有參數宣告：共用節點 Schema／TypeAdapter 仍接受合法葉位的 ParamRef，完整結構 reader 另沿已解碼型別圖拒絕 inline 內的 ParamRef（`inline_param_reference`），不以 raw dict 同名鍵判斷。
+`A.card.faces` 為 `Map<FaceId,{abilities}>`，FaceId 是永久 `f:` 加 32 lowercase hex；面容器不再嵌 meta。卡級 abilities／faces 與面級 abilities 可空，不將空與省略改寫成同一份DSL bytes。選填的能力 imports 若出現必非空。inline 沒有參數宣告：共用節點 Schema／TypeAdapter 仍接受合法葉位的 ParamRef，完整結構 reader 另沿已解碼型別圖拒絕 inline 內的 ParamRef（`inline_param_reference`），不以 raw dict 同名鍵判斷。
 
 用途總是明示 body 版本及適用域，沒有依檔序、最高版本或「先找到」選版。跨域皆符合也不自動挑一個；inline 不隱式套用候選 body。本版一個能力的 sources 僅准相同 `(frame_id,ability_scope)` 且同來源能力實例；同 binding 的多段 segments 已在 OccurrenceKey 中保留，不拆成重複執行。不同 frame 合成一個能力尚無封閉角色接線，保持 pending，不以同名 scope 猜關係。由 imports 連來的其他 frame 則是先前能力輸出，不當作本能力片段；依賴追蹤仍涵蓋這些上游接口。`evolve_feed_entries.v1` 的 ability_0／ability_1 各產一筆有明確 scope 的 A.ability；缺 scope、重複同能力或漏掉需輸出的 sibling scope 均拒絕。
 
@@ -75,7 +75,7 @@ ability_flag 只填對應宣告、card_field 只填 A.card 欄位、none 不產�
 
 以下是葉參數的**完整初版白名單**，未列的角色／位置不接受 param，仍可使用既定 inline 常量。路徑按 A.* 型別位置判，不按全域鍵名字串判；中間的列表代表逐元素，不准替換整個列表。每次轉換還須核對來源構造、operand、域與目標語義角色，不能跨 operand 借同數值。
 
-| 作者 type | 來源型別／role／component | 作者葉位置 |
+| DSL type | 來源型別／role／component | DSL 葉位置 |
 | --- | --- | --- |
 | `Int` | Nat/arithmetic_offset/value | A.expr.minus 的第二個常量 operand；A.expr.plus 的偏移常量 operand；加減方向固定留 body；minus 只配來源 descriptor 的 subtract_offset，plus 只配 add_offset，不符即拒絕 |
 | `Int` | Nat/cost_delta_magnitude/negated_magnitude | A.effect.cost_mod.delta，僅來源明示負向減費 |
@@ -90,7 +90,7 @@ ability_flag 只填對應宣告、card_field 只填 A.card 欄位、none 不產�
 | `Zone` | ZoneSet/counted_zone/value；ZoneSet/source_zone/value；ZoneSet/destination_zone/value | 依序只配 A.expr.count.zone、Sel.zone、A.act.move.to／A.act.search.to／A.act.create.to；只接受單元素集合並取該成員 |
 | `Phase` | Phase/phase_trigger/value | A.event.phase.which |
 
-來源沒有 Int 葉型別；有號算式由作者 Expr 保留。CardName 解成已採納的日文規則名稱，Concept 按 category 解成已登錄的作者字串，沿用 inline 的種族／職業名稱及關鍵字拼法，不限於來源 Code 的 ASCII 語法；來源引用及映射版本保留在依賴，不由中文譯文推值。Zone 的封閉對照為 battlefield→field、hand→hand、deck→deck、evolve_deck→evolve_deck、graveyard→cemetery、ex→ex；第七種來源 banish 在本版葉參數映射中拒絕，待作者區域代碼明確登錄，不用「同義」猜字串。任何前端已定的構造若不在此表，只是不能參數化，不刪除原作者語法。
+來源沒有 Int 葉型別；有號算式由 DSL Expr 保留。CardName 解成已採納的日文規則名稱，Concept 按 category 解成已登錄的 DSL 字串，沿用 inline 的種族／職業名稱及關鍵字拼法，不限於來源 Code 的 ASCII 語法；來源引用及映射版本保留在依賴，不由中文譯文推值。Zone 的封閉對照為 battlefield→field、hand→hand、deck→deck、evolve_deck→evolve_deck、graveyard→cemetery、ex→ex；第七種來源 banish 在本版葉參數映射中拒絕，待作者區域代碼明確登錄，不用「同義」猜字串。任何前端已定的構造若不在此表，只是不能參數化，不刪除原有 DSL 語法。
 
 封閉引用節點恰為 `{param: ParamName}`（A.param），實值恰為 `{type:<同宣告>,value:<整數或字串>}`。型別完全匹配，值由上表轉換，禁止缺參數、多參數、bool 冒整數、數字字串。不得取代 do、define 整體、selector 整體、能力頭、運算子、binding 名、scope、ports、result、capture 時點或期限結構。ObjectRef／ReceiptId／CapturedValue 經 ports 接線，不是葉參數。展開後不得殘留 param／generated_by。
 
@@ -106,7 +106,7 @@ body_version 格式固定 `effect-body-v1:sha256:<64 lowercase hex>`。完整 SH
 {"ability_scope":"ability_0","body":{"spell":{"do":[]}},"dsl":"1.0","params":{},"ports":{"exports":{},"imports":{}},"recipe":"effect-body-v1"}
 ```
 
-payload 恰含 `recipe,dsl,ability_scope,params,ports,body`。ability_scope 是本體的來源能力 scope；body 是參數展開前的作者節點，params 含完整宣告（含來源 slot／component），ports 含接線。alias／merge 先由嚴格 YAML loader 展開；不補語義預設、不重新命名 binding、不重排步驟、不做代數化簡。canonical-json-v1：UTF-8、物件鍵排序、陣列順序保留、無空白、無 Unicode 正規化；U+0000–U+001F 用小寫 `\u00xx`，引號／反斜線 JSON escape，其他 Unicode 原字輸出。只准 null／bool／字串／安全整數／陣列／物件，拒絕浮點、孤立 surrogate、非字串或重複鍵；安全整數範圍 ±9007199254740991。沿用既有 core canonical，不另造 JCS 變體。
+payload 恰含 `recipe,dsl,ability_scope,params,ports,body`。ability_scope 是本體的來源能力 scope；body 是參數展開前的DSL 節點，params 含完整宣告（含來源 slot／component），ports 含接線。alias／merge 先由嚴格 YAML loader 展開；不補語義預設、不重新命名 binding、不重排步驟、不做代數化簡。canonical-json-v1：UTF-8、物件鍵排序、陣列順序保留、無空白、無 Unicode 正規化；U+0000–U+001F 用小寫 `\u00xx`，引號／反斜線 JSON escape，其他 Unicode 原字輸出。只准 null／bool／字串／安全整數／陣列／物件，拒絕浮點、孤立 surrogate、非字串或重複鍵；安全整數範圍 ±9007199254740991。沿用既有 core canonical，不另造 JCS 變體。
 
 frame、variant、域、作者、日期、note、行號與檔名不入 body hash；它們另參與用途與證據依賴。改縮排／鍵序不改版；改 minus、follow、ports 或宣告來源槽即改版。相同 hash 還須比較完整 payload bytes，碰撞拒絕。exact authored bytes 另作候選來源 hash，不拿它當語義版本。
 
@@ -143,7 +143,7 @@ token_links 是按 canonical bytes 排序且唯一的 `{source_owner,section,tok
 
 interfaces、rulings 及 BodyDependencies.sources 以完整 canonical-json-v1 bytes 排序且唯一；Domain.regions 以字串排序且唯一。UseDependencies.sources、written_by、reviewed_by、registrations、registration.reviews、meta.rulings 與能力陣列保留原序，不由 reader 重排。
 
-每個配方 pin 恰為 `{id:Code,hash:Digest}`。依賴鍵是 canonical-json-v1 `{recipe:"effect-use-v1",dependencies:<上表物件>}` 的 Digest。不同用途不得借同卡號的證據；C0 內部來源位置 sidecar 以作者 JSON 路徑對應此依賴，不塞私有欄位進 A.* 樹。
+每個配方 pin 恰為 `{id:Code,hash:Digest}`。依賴鍵是 canonical-json-v1 `{recipe:"effect-use-v1",dependencies:<上表物件>}` 的 Digest。不同用途不得借同卡號的證據；C0 內部來源位置 sidecar 以DSL JSON 路徑對應此依賴，不塞私有欄位進 A.* 樹。
 
 有效資格在建置時比對當前依賴；任何一項不符都失效，列出 changed dependency、舊值／新值及用途位置。verified 另釘 D0 lowering recipe、完整 program hash、engine build、policy、測試輸入版本。裁定／adapter 改版即使 body hash 未變仍失效；只改中文譯名字串不影響這些規則輸入。反向用途索引可重建，不存永久逐次收據或歷次接口帳本。
 
@@ -171,7 +171,7 @@ loader 只讀當前精確引用，不自動重映射。normalizer 變更時，�
 
 已驗 DB 是由 validate 或資料變更驗證入口產生、含精確依賴及真實執行結果的完整候選。普通建置由 caller 明示結果的選用位置，讀取該位置由驗證入口最近一次原子更新選定的 DB；不是任意歷史 DB，不准手動退回舊 pass。普通建置唯讀載入其中的當前結果，在新建 DB 中重算依賴後保留仍有效的結果，並記錄所消費 DB 的 exact bytes Digest；普通建置產物不改選用位置，也不能成為選用結果輸入。寫入／validate 以選用位置的輸入為基礎執行受影響案例，產生完整的新 DB 候選，連同當次 fail 原子替換該選用結果，之後才由建置消費。未受影響的結果可沿用精確依賴；失敗不能留下舊 pass 當「目前結果」。初次、結果遺失或無可驗 DB 時，先獨立 validate 建立結果；普通建置不代跑，缺證據即不 qualified，依下述範圍拒絕。CI 不保留、上傳或快取結果 DB；資料變更 CI 以無結果輸入重新執行當次採納資料所需的全部案例，不沿用前次結果。DB 儲存／選用指標的實作是雙向門，須明示輸入與成功／失敗更新，不新增永久收據帳本，也不原地改已發布快照。
 
-Actor 恰為 `{who:Text,model:Text|null}`；模型的 model 必填標準產品與精確版本，真人為 null。所有 written_by 使用非空 `{actor:Actor,date}` 陣列，reviewer 使用同一 Actor；model 用 AGENTS.md trailer 的「產品名 版本」標準形式，例如 `Claude Opus 5.5`、`Codex gpt-6-astra`；不接受 API ID（如 claude-opus-5-5）、縮寫或別名。寫入端核對實際模型並填標準名稱，不靠作者自由改拼法。排除自審與模型去重以此精確字串比對，不按 who 的自由顯示字串。
+Actor 恰為 `{who:Text,model:Text|null}`；模型的 model 必填標準產品與精確版本，真人為 null。所有 written_by 使用非空 `{actor:Actor,date}` 陣列，reviewer 使用同一 Actor；model 用 AGENTS.md trailer 的「產品名 版本」標準形式，例如 `Claude Opus 5.5`、`Codex gpt-6-astra`；不接受 API ID（如 claude-opus-5-5）、縮寫或別名。寫入端核對實際模型並填標準名稱，不靠寫入者自由改拼法。排除自審與模型去重以此精確字串比對，不按 who 的自由顯示字串。
 
 BodyDependencies 恰為 `{frame_id,ability_scope,body_version,applicability_scope,domain_hash,interfaces,sources,rulings,expansion_recipe,adapter_recipe}`。interfaces 沿 §4.2，sources 為排序唯一的已審 `{binding_id,occurrence,ability_scope,source}` 集合；新增來源不自動使同版 body 審核失效，但新用途仍驗三項檢查；已審來源變動則失效。
 
@@ -179,15 +179,15 @@ Review 是封閉和型別：`{kind:"body",reviewer,date,verdict,reason,dependenc
 
 meta.reviewed_by 的 use review 可保存同一用途的多個不同獨立審核者；另准一種機械項：`{kind:"macro_mechanical",body:{frame_id,ability_scope,body_version,applicability_scope},use_dependencies:<§4.2完整物件>}`。它不列名真人／模型，建置反查 body 的真實 reviews 及本用途機械三檢查；不能冒充這些模型親審該卡。每個用途只准獨立 use review 或 macro_mechanical 一類資格條目，兩類並存即拒絕，不由建置挑較有利者；未完成可為空。
 
-同一審核者、同一依賴組只准一筆當前 verdict；改 verdict 的寫入保留 Git 歷史，相矛盾重複拒絕。同一 body／用途的任何現行 revise 或 disputed 都阻擋其取得 ok 類資格，不以其他 ok 的票數抵銷。body 有 disputed 時該 registration 不得 qualified，引用它的 macro_mechanical 用途保留 disputed 並退回獨立審核；切換條目類型也須明示解決原爭議，不能藉切換消除。body 作者的所有模型都排除於「兩個不同非作者模型」計數；真人 review 不冒充第二模型。disputed 是人工未解爭議：來源改版不自行清除，寫入工具須沿精確用途保留該爭議，只有明示解決 reason 且經獨立審核的寫入才可更新 verdict；不能以過期不計數解除。
+同一審核者、同一依賴組只准一筆當前 verdict；改 verdict 的寫入保留 Git 歷史，相矛盾重複拒絕。同一 body／用途的任何現行 revise 或 disputed 都阻擋其取得 ok 類資格，不以其他 ok 的票數抵銷。body 有 disputed 時該 registration 不得 qualified，引用它的 macro_mechanical 用途保留 disputed 並退回獨立審核；切換條目類型也須明示解決原爭議，不能藉切換消除。寫這份 body 的人所用模型都不計入「兩個不同非 DSL 模型」的數量；真人 review 不冒充第二模型。disputed 是人工未解爭議：來源改版不自行清除，寫入工具須沿精確用途保留該爭議，只有明示解決 reason 且經獨立審核的寫入才可更新 verdict；不能以過期不計數解除。
 
 邊界測試輸入恰為 `{kind:"body_boundary",dependencies:BodyDependencies,case_set:{id,hash},runner:{id,hash},results,rekey?}`。case_set／runner 是 Code＋Digest，results 為非空 `{case_id,boundary,result}` 陣列；case_id 唯一，boundary 僅 `zero_cards | no_legal_targets | large_values | timing | information`，result 僅 `pass | fail`。case_set hash 覆蓋全部案例內容與版本，runner hash 覆蓋實際驗證配方；只有真實執行入口可以寫入，缺任一邊界、未知案例、依賴不符、fail 或無當前結果皆不 qualified。
 
 指定 DB 中同一依賴／case_set／runner 只准一組當前結果；執行完整組原子替換前組，fail 不與舊 pass 合併，不向歷史 DB 回找 pass。舊引擎實跑報告可留診斷歷史，不能覆蓋當前結果選擇；body_boundary 與逐用途 engine exam 是不同類型，不把前者當 verified。
 
-頻次、兩模型、五類邊界、登錄與逐用途三檢查仍依[作者 §10](author-syntax-1.0.md#10-巨集規範)及 [MQ](macro-qualification-cases.md)。只有實際展開 DSL 產生的反譯才算檢查，回放原文不算。未取得 qualified 可走逐用途獨立審核。
+頻次、兩模型、五類邊界、登錄與逐用途三檢查仍依[DSL §10](author-syntax-1.0.md#10-巨集規範)及 [MQ](macro-qualification-cases.md)。只有實際展開 DSL 產生的反譯才算檢查，回放原文不算。未取得 qualified 可走逐用途獨立審核。
 
-寫入工具依真實證據產生 meta.status／reviewed_by，建置逐項重算是否仍有效，過期／不一致即報診斷。普通建置只拒絕該卡當前 scope 的自動執行及程式出貨，保留文字與拒絕理由，不使其他卡建置失敗，也不回寫 authored；格式／引用閉包損壞仍依既有入口拒絕。資料變更 CI 必須因 meta 不一致失敗，上游來源、裁定或配方 PR 須同步更新相依作者狀態，不能把缺證據留 main 卻宣稱 reviewed。
+寫入工具依真實證據產生 meta.status／reviewed_by，建置逐項重算是否仍有效，過期／不一致即報診斷。普通建置只拒絕該卡當前 scope 的自動執行及程式出貨，保留文字與拒絕理由，不使其他卡建置失敗，也不回寫 authored；格式／引用閉包損壞仍依既有入口拒絕。資料變更 CI 必須因 meta 不一致失敗，上游來源、裁定或配方 PR 須同步更新相依 DSL 狀態，不能把缺證據留 main 卻宣稱 reviewed。
 
 卡片 status 為全卡彙總：有未解爭議為 disputed；其餘任一用途 draft 則 draft，全部至少 reviewed 才 reviewed，全部有有效引擎實跑才 verified。非 body 宣告仍須來源／型別及獨立審核，不以無步驟自動 verified。主版遷移沿既有降級規則；draft 不提升，disputed 不消失。過去 review 與實跑的原始內容保留 Git／已指定 DB 證據，但不混進有效名單。
 
@@ -195,12 +195,12 @@ meta.reviewed_by 的 use review 可保存同一用途的多個不同獨立審核
 
 ## 6. C0 與 D0 的交接
 
-C0 讀嚴格 YAML、驗作者型別、展開共用本體與葉參數，交出通過共用作者 Schema 的 `expanded` profile 的 JSON 樹；D0 讀這棵完全展開的作者樹並降低 typed IR。sources／meta 為作者資源本有欄位；共用資源提供兩個封閉入口 `$defs/authored` 與 `$defs/expanded`：後者遞迴排除 A.param／generated_by，展開產物一律用後者驗，Rust 型別亦對它測漂移。C0 額外的逐節點位置與依賴 sidecar 是內部介面，和樹分開，不是新公開 wire 格式。C0 的等值驗收比較去除 line／section／sources 與審核 metadata 後的 canonical 能力樹（ports 保留）；inline 與 companion 的同義能力必須逐 byte 相同，IR 等值與執行則是 D0 的責任。
+C0 讀嚴格 YAML、驗 DSL 型別、展開共用本體與葉參數，交出通過共用 DSL Schema 的 `expanded` profile 的 JSON 樹；D0 讀這棵完全展開的 DSL 樹並降低 typed IR。sources／meta 為DSL 資源本有欄位；共用資源提供兩個封閉入口 `$defs/authored` 與 `$defs/expanded`：後者遞迴排除 A.param／generated_by，展開產物一律用後者驗，Rust 型別亦對它測漂移。C0 額外的逐節點位置與依賴 sidecar 是內部介面，和樹分開，不是新公開 wire 格式。C0 的等值驗收比較去除 line／section／sources 與審核 metadata 後的 canonical 能力樹（ports 保留）；inline 與 companion 的同義能力必須逐 byte 相同，IR 等值與執行則是 D0 的責任。
 
-目前 `CardAccepted.lowering_input()` 另交接逐能力的 `current_source_checked`、已檢查的完整 SourceUse、作者輸入與來源文字 hash。D0 對帳 sidecar 與 expanded 能力路徑的精確集合、SourceUse 與行／section；缺漏、重複、非 current proof 或來源不符均整卡拒絕。`CurrentCardProgram` 分別保留 expanded 樹、來源 sidecar 與 IR；`source_at(author_path)` 沿能力祖先路徑回查永久 CardId／FaceId／revision、原 field／section／line／fragment 及 occurrence segments，IR instruction 沿既有 SourceSpan.author_path 使用同一對應。來源證明不等於用途資格或執行准入；原型 base／ordinal 入口不變。
+目前 `CardAccepted.lowering_input()` 另交接逐能力的 `current_source_checked`、已檢查的完整 SourceUse、DSL 輸入與來源文字 hash。D0 對帳 sidecar 與 expanded 能力路徑的精確集合、SourceUse 與行／section；缺漏、重複、非 current proof 或來源不符均整卡拒絕。`CurrentCardProgram` 分別保留 expanded 樹、來源 sidecar 與 IR；`source_at(author_path)` 沿能力祖先路徑回查永久 CardId／FaceId／revision、原 field／section／line／fragment 及 occurrence segments，IR instruction 沿既有 SourceSpan.author_path 使用同一對應。來源證明不等於用途資格或執行准入；原型 base／ordinal 入口不變。
 
 current 入口另從全部 current 面與 sections 的 registry 來源建立獨立 `source_inventory`，
-不從作者樹或 sidecar 回推必需能力。每個 `(binding_id, ability_scope)` 保存完整 SourceUse
+不從DSL 樹或 sidecar 回推必需能力。每個 `(binding_id, ability_scope)` 保存完整 SourceUse
 與去掉 line／section／sources 的能力本文（含 ports、費用、全部分支）。D0 逐一消耗這個集合；
 即使 expanded 與 sidecar 同時漏掉 sibling 或 section 能力，仍整卡拒絕；多出、重複或改變
 未選模式本文也拒絕。清單沿用既有來源 hash，不新增 hash 配方或公開格式。
@@ -216,13 +216,13 @@ current 入口另從全部 current 面與 sections 的 registry 來源建立獨�
 | scope／ports | 能力、分支、序列及 execution 邊界不穿透；前向引用、異型別分支合流、未登錄 port／source_role 拒絕 |
 | source | 卡、面、token owner、欄、section、行、fragment 與 A.* 路徑可回溯；公開來源只用可發布定位，不帶私人路徑或隱藏物件 ID |
 | 失效輸入 | 未知 DSL／recipe／Schema 指紋、stale interface／來源／裁定不能以 fallback 載入；報精確依賴差異 |
-| 缺能力 | 列出所有缺失代碼及引發它的 IR／作者位置；整張卡拒絕自動執行，仍可顯示文字與診斷 |
+| 缺能力 | 列出所有缺失代碼及引發它的 IR／DSL 位置；整張卡拒絕自動執行，仍可顯示文字與診斷 |
 
 CP04-060 只對 search 實際 moved 的新世代安裝 delta -2、until:turn；不替 found 但未移動者減費，不把 delta 改 set 0。替代移動是否算某種 receipt 的成功由精確規則定義，不能靠模糊成功布林或這份承載契約補裁定。
 
 ## 7. 公開 typed IR 與引擎能力
 
-公開 `{id,dsl_version,ast}` 的 ast 承載巨集完全展開、通過 typed lowering 的 IR 樹；讀者不下載 companion、不自行展開巨集或降低作者語法。IR 須保有型別、決定時點、capture、receipt 型別、世代／follow、scope 與可發布 source 定位。公開節點編碼、program ID recipe、IR Schema `$id`／資源指紋映射、最低 reader 版本須在啟用格式時一起定義；本文不虛構可發布的節點 wire 清冊。
+公開 `{id,dsl_version,ast}` 的 ast 承載巨集完全展開、通過 typed lowering 的 IR 樹；讀者不下載 companion、不自行展開巨集或降低DSL 語法。IR 須保有型別、決定時點、capture、receipt 型別、世代／follow、scope 與可發布 source 定位。公開節點編碼、program ID recipe、IR Schema `$id`／資源指紋映射、最低 reader 版本須在啟用格式時一起定義；本文不虛構可發布的節點 wire 清冊。
 
 **傳輸 4.0.0 的 dsl-programs.entries 維持空陣列。** 啟用非空 entries 必須獨立升傳輸格式版本（至少 minor，具體版號不預留），依[傳輸 §3.4](../schema/export/snapshot-transport.md#34-dsl-程式包與版本准入)更新 required_capabilities、reader 准入、Schema 與固定案例；未滿足不得發布。未知 DSL 或未展開巨集整包拒絕；不偷加程式封套欄位，也不發布永久私有過渡 wire。
 
@@ -254,6 +254,6 @@ CP04-060 只對 search 實際 moved 的新世代安裝 delta -2、until:turn；�
 | 瀏覽器下載／快取 | 驗 bytes hash／長度、格式、最低 reader、傳輸能力；自有已驗 JSON 不重跑 Schema |
 | 引擎執行入口 | 型別化解碼、DSL／IR／engine 版本與語義能力准入；失敗拒絕，不補缺值或忽略未知節點 |
 
-來源版本／ID recipe、分類、companion、逐用途輸入、裁定、展開配方、案例或測試 runner 變更都須觸發受影響驗證。尚未實作的入口與 CI 接線不得宣稱已保證。開發用未驗作者輸入也先走寫入驗證，不把 runtime 當另一個全文驗證器。
+來源版本／ID recipe、分類、companion、逐用途輸入、裁定、展開配方、案例或測試 runner 變更都須觸發受影響驗證。尚未實作的入口與 CI 接線不得宣稱已保證。開發用未驗DSL 輸入也先走寫入驗證，不把 runtime 當另一個全文驗證器。
 
-診斷至少帶 stage、reason、card_id／card_no、scope、owner／face、來源欄／section／line／fragment、作者節點路徑，錯型別帶 expected／actual，stale 帶 dependency，缺能力帶 code／version。無可解析候選時用 index 定位並附安全 parser 類別；不把整段卡文、私人路徑或秘密印進 log。內部診斷欄位編碼可改，定位與整張拒絕的責任不可省。
+診斷至少帶 stage、reason、card_id／card_no、scope、owner／face、來源欄／section／line／fragment、DSL 節點路徑，錯型別帶 expected／actual，stale 帶 dependency，缺能力帶 code／version。無可解析候選時用 index 定位並附安全 parser 類別；不把整段卡文、私人路徑或秘密印進 log。內部診斷欄位編碼可改，定位與整張拒絕的責任不可省。

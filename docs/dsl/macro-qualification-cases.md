@@ -1,8 +1,8 @@
 # 框架 DSL 巨集資格固定案例規格
 
-本文件與 [macro-qualification-cases.json](macro-qualification-cases.json) 是 [#497](https://github.com/gbaian10/sve-kit/issues/497) 交付的固定輸入／預期，供後續 carddb 資格 consumer 驗收使用，**不是測試程式或已通過紀錄**。規範依[作者語法 §1／§10](author-syntax-1.0.md#10-巨集規範)、[ADR-0010](../adr/0010-version-meta.md)與[四層契約 §7／§8](../schema/domains/four-layer-translation.md#7-規則投影接口)。
+本文件與 [macro-qualification-cases.json](macro-qualification-cases.json) 是 [#497](https://github.com/gbaian10/sve-kit/issues/497) 交付的固定輸入／預期，供後續 carddb 資格 consumer 驗收使用，**不是測試程式或已通過紀錄**。規範依[DSL 語法 §1／§10](author-syntax-1.0.md#10-巨集規範)、[ADR-0010](../adr/0010-version-meta.md)與[四層契約 §7／§8](../schema/domains/four-layer-translation.md#7-規則投影接口)。
 
-資料僅含自撰合成識別與資格事實，不含官方卡文、不裁定個別卡片、不授予既有候選資格。frame／卡名概念／scope／模型 ID 均為合成登錄，後續測試須在隔離資料根建立。資料中的欄位是測試輸入的邏輯事實，不新增 production 表、meta 或作者引用語法。
+資料僅含自撰合成識別與資格事實，不含官方卡文、不裁定個別卡片、不授予既有候選資格。frame／卡名概念／scope／模型 ID 均為合成登錄，後續測試須在隔離資料根建立。資料中的欄位是測試輸入的邏輯事實，不新增 production 表、meta 或DSL 引用語法。
 
 ## 1. 讀取方式與輸入
 
@@ -17,7 +17,7 @@ input 恰含 `fixture` 與 `changes`。先深複製指定 fixture，再依 chang
 | candidate | `{frame_id,semantic_variant,projection_kind,body_version,applicability_scope,written_by,version_registered,scope_registered}`；識別為字串，body_version 為可 null 字串，只有 resolved ability_body 候選有本體版本，其餘不假造本體；兩個 registered 為 Bool，表示版本／適用域登錄的已驗事實 |
 | candidate.semantic_variant | 四層契約的 `{state,key,scope}`；resolved 時 key 非空且 scope=null，pending 時 key=null 且 scope 為自身精確 OccurrenceKey |
 | uses | `{frame_id,semantic_variant,projection_kind,card_name_concept,evolved,printing_id}` 陣列；evolved 為 Bool。來源 binding、卡名概念與面歸屬已按四層契約驗妥，不能以此 fixture 跳過來源驗證 |
-| reviews | `{model,body_version,applicability_scope,verdict,current}` 陣列；model 為模型識別，verdict=ok/revise，current 為 Bool，表示來源／接口等依賴仍有效的已驗事實，不能由作者手填 current 冒充驗證 |
+| reviews | `{model,body_version,applicability_scope,verdict,current}` 陣列；model 為模型識別，verdict=ok/revise，current 為 Bool，表示來源／接口等依賴仍有效的已驗事實，不能由資料提交者手填 current 冒充驗證 |
 | boundary_test | 可 null；非 null 恰為 `{body_version,applicability_scope,result,current,covered_boundaries}`。result=pass/fail，current 為 Bool，covered_boundaries 為唯一字串陣列 |
 | application | 可 null；qualification 案例為 null；use_review 時為下節的逐用途檢查事實 |
 
@@ -39,9 +39,9 @@ threshold_eligible 恰為 count≥3；qualified 還須同時具備：
 2. 至少兩個不同模型的獨立 ok 審核，模型皆不同於 written_by；每筆都對候選本體版本／適用域有效且 current=true。重複同模型不算第二模型，過期或不適用的審核不能補足數量。
 3. 同本體版本／適用域、current=true 且 result=pass 的邊界測試，涵蓋 zero_cards、no_legal_targets、large_values、timing、information 五項責任。
 
-同版本同範圍的有效審核可在 2→3 張時採計；本體或適用域變動後，舊紀錄保留但不作新資格。current=false 的案例只表達已失效的事實；每個 frame 用途依賴須包含 interface_key，建置重算不符即失效接口連接、用途審查與實跑資格，不重鍵有效來源的翻譯。鍵的存放承載及 stale 比較依[作者承載契約 §4–5](author-contract-1.0.md#4-本體版本與新鮮度)；本檔的 current 仍只是固定測試事實，不是 production 作者欄位。
+同版本同範圍的有效審核可在 2→3 張時採計；本體或適用域變動後，舊紀錄保留但不作新資格。current=false 的案例只表達已失效的事實；每個 frame 用途依賴須包含 interface_key，建置重算不符即失效接口連接、用途審查與實跑資格，不重鍵有效來源的翻譯。鍵的存放承載及 stale 比較依[DSL 承載契約 §4–5](author-contract-1.0.md#4-本體版本與新鮮度)；本檔的 current 仍只是固定測試事實，不是 production DSL 欄位。
 
-use_review 的 application 恰為 `{frame_variant_match,in_scope,typed_params_match,source_roles_match,roundtrip_match,roundtrip_from_dsl,unresolved_semantics,engine_run_passed}`，皆為 Bool。三項機械檢查依作者語法 §10.2；roundtrip_from_dsl=false 表示回放儲存的原文，不能算反譯。engine_run_passed 表示當前 exact 版本的有效實跑證據，不是 YAML 作者的宣告。
+use_review 的 application 恰為 `{frame_variant_match,in_scope,typed_params_match,source_roles_match,roundtrip_match,roundtrip_from_dsl,unresolved_semantics,engine_run_passed}`，皆為 Bool。三項機械檢查依 DSL 語法 §10.2；roundtrip_from_dsl=false 表示回放儲存的原文，不能算反譯。engine_run_passed 表示當前 exact 版本的有效實跑證據，不是 YAML 寫入者的宣告。
 
 use_review 的 expected 除三個資格欄位外，還有 `reviewed_by_macro_checks:Bool,requires_independent_review:Bool,verified:Bool`。只有 qualified 且精確 frame／variant、適用域、typed 參數、來源角色、由 DSL 產生的反譯全部通過且無未解語義時，reviewed_by_macro_checks 才為 true；否則 requires_independent_review=true，不表示獨立審核已完成。verified 還需 engine_run_passed=true；本 fixture 不另提供獨立審核的通過證據。
 
@@ -53,7 +53,7 @@ use_review 的 expected 除三個資格欄位外，還有 `reviewed_by_macro_che
 | MQ-002 | A 未進化的三個印刷（含異圖），加 B 未進化 | count=2，頻次不足 |
 | MQ-003 | A 未進化、A 進化、B 未進化，同一有效變體 | count=3、threshold_eligible=true；其餘資格完備才 qualified |
 | MQ-004 | 上例缺一模型審核、缺測試、測試失敗或漏邊界 | count=3、threshold_eligible=true、qualified=false |
-| MQ-005 | 同模型重複、作者自審、revise、舊版本／異域／失效審核與測試、未登錄 | 頻次足夠仍不得 qualified |
+| MQ-005 | 同模型重複、寫的人自審、revise、舊版本／異域／失效審核與測試、未登錄 | 頻次足夠仍不得 qualified |
 | MQ-006 | 0／1／2 張；2→3 保留本體與有效審核；重複用途／不同 frame | 精確去重與隔離；只有補足第三卡且資格仍有效才 qualified |
 | MQ-007 | ability_flag／card_field／none／pending；resolved frame 的其他 pending 來源 | 非本體及 pending 不累計；pending 與 none 分開保存 |
 | MQ-008 | 合格巨集逐用途三項檢查、超域、未解語義、原文回放、未實跑 | 資格不代替用途 reviewed／verified；任一失敗退回逐用途審核 |

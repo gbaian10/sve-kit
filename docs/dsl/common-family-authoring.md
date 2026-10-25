@@ -1,9 +1,9 @@
 # 常見效果的框架本體與重鍵作業
 
-本契約規定從 typed 來源建立作者 1.0 本體時的合併邊界，以及 normalizer 批次升版的核對程序。
-語法以 `dsl/` 為唯一權威；本文件不新增作者節點、公開格式、capability 或資格 consumer。
+本契約規定從 typed 來源建立DSL 1.0 本體時的合併邊界，以及 normalizer 批次升版的核對程序。
+語法以 `dsl/` 為唯一權威；本文件不新增DSL 節點、公開格式、capability 或資格 consumer。
 來源依[四層契約](../schema/domains/four-layer-translation.md)，用途及本體依
-[作者承載契約](author-contract-1.0.md)。卡號集合、數量、切片與完成狀態留在工作追蹤，
+[DSL 承載契約](author-contract-1.0.md)。卡號集合、數量、切片與完成狀態留在工作追蹤，
 不由本文件凍結。來源 pending 不得因 v0 操作標籤或原型 `status: complete` 而升級。
 
 ## 1. 從候選來源到完整能力
@@ -28,7 +28,7 @@ frame 硬併成一筆 companion。可重用轉換程式，但每個 frame 仍保
 ## 2. 框架本體與葉參數的界線
 
 框架本體（名詞表的 frame body）的能力頭、控制圖、動作種類與來源角色固定；可變之處只限
-[作者承載 §3](author-contract-1.0.md#3-封閉葉參數)白名單的精確葉位置。
+[DSL 承載 §3](author-contract-1.0.md#3-封閉葉參數)白名單的精確葉位置。
 型別相同仍須核對 role、operand 與來源構造；相同整數或中文相同不能替代這項核對。
 
 | 差異 | 同本體的條件 | 必須保留為不同本體／用途的情況 |
@@ -42,7 +42,7 @@ frame 硬併成一筆 companion。可重用轉換程式，但每個 frame 仍保
 | 能力及控制圖 | 頭、費用位置、選取時點、條件範圍、模式及步序全部固定 | fanfare／spell／進化時互換，optional／pay／if／instead 互換，分支重排 |
 | 結果與期限 | result、receipt 類型、follow、capture 時點及 until 結構固定 | chosen／found 冒 moved、舊世代追同卡號、live 改 capture、永久改本回合 |
 
-合法作者常量也不代表現有來源 adapter 或 executor 接受。先核對
+合法DSL 常量也不代表現有來源 adapter 或 executor 接受。先核對
 [來源展開邊界](author-entry-shapes-1.0.md)與[內部執行子集](internal-execution.md)，
 遇到未支援葉轉碼／ports 逐用途拒絕，不擴大白名單。整個 selector、Steps、binding 名稱、
 scope、port、運算子及 capture／期限結構不能參數化。
@@ -68,12 +68,12 @@ ports 保留；再交 D0 lowering，不能只比較稀疏 v0 IR 標籤。
 
 [MQ 固定案例](macro-qualification-cases.md)定義的完整資格門檻為：同精確 frame、
 resolved 變體與 ability_body，按不同 `(card_name_concept, evolved)` 去重至少三個；
-重印／異圖不加計，進化前後依該鍵區分。還要兩個不同且均非任何 body 作者模型的
+重印／異圖不加計，進化前後依該鍵區分。還要兩個不同且均非任何 body DSL 模型的
 獨立有效審核，以及同版本／域的零卡、無合法目標、大值、時點、資訊五類邊界證據。
 沒有永久卡名概念或 evolved 證據時不能用卡號張數代算。
 
 第一版依 [#800 的維護者決定](https://github.com/gbaian10/sve-kit/issues/800#issuecomment-6307831555)
-不實作這套資格機制，也不宣稱 qualified。規劃共用本體時保留上述三卡、兩個非作者模型
+不實作這套資格機制，也不宣稱 qualified。規劃共用本體時保留上述三卡、兩個非DSL 模型
 及邊界案例作設計證據；證據不足不擋本體存放或合法引用，但所有用途仍逐用途獨立審核。
 單一審核者的設計核可不補足兩模型，不自動給新用途 reviewed。
 不使用尚未實作的 macro_mechanical 或 verified_by_exam 來繞過第一版邊界。
@@ -84,7 +84,7 @@ compiled 須含完整 expanded 樹與 typed IR 的良構證據，executed 須指
 
 ## 4. 真卡的合併與拒絕示例
 
-以下是已審解析輸入中的日文片段，供設計核對；不是正式作者採納或新增裁定。
+以下是已審解析輸入中的日文片段，供設計核對；不是正式 DSL 採納或新增裁定。
 官方內容仍依 [LICENSING.md](../../LICENSING.md)排除於專案授權之外。
 
 - [BP01-041](../../card-data/jp/BP01/000-099.json)「騎士王の威光」面 0、effect 第三行：
@@ -108,7 +108,7 @@ compiled 須含完整 expanded 樹與 typed IR 的良構證據，executed 須指
 重鍵候選與對帳資料不覆寫已發布快照，也不新增長期相容 reader。
 
 1. **凍結輸入。** 記錄 base、舊 normalizer、規則 recipe／資源指紋、JP 採納批次、
-   current 及歷史來源、registry／token 選用、全部 authored 來源、裁定與作者資源。
+   current 及歷史來源、registry／token 選用、全部 authored 來源、裁定與DSL 資源。
    保存舊 DB／payload 與 exact bytes hash，先取得完整 frame、binding、用途與反向依賴盤點。
    缺舊 payload、來源域或原證據先列拒絕，不能從新版回推歷史。
 2. **提出具名規則與候選。** 明列新增 resolved 的判別、未命中／衝突／pending 尾端、
@@ -126,12 +126,12 @@ compiled 須含完整 expanded 樹與 typed IR 的良構證據，executed 須指
    companion frame／ability_scope、generated_by、sources、imports／ports、
    effect-source-v1 與直接及傳遞上游的用途依賴。未採納的裁定候選保持候選，
    原 pending 與證據 strength 不升級；不能把未知歷史域重算成已知。
-6. **區分延續與失效。** 第一版不實作作者證據 rekey 或用途依賴 consumer。
+6. **區分延續與失效。** 第一版不實作DSL 證據 rekey 或用途依賴 consumer。
    因語義變更或證據變更而失效的舊 `ok` review 只留 Git 歷史，不留在當前
    meta.reviewed_by 或 registration.reviews，也不計為新版有效審核；當前用途需重新取得
    獨立審核並記錄新依賴。現行 `revise`／`disputed` 不是過期核可：寫入時沿精確用途保留
    原審核者、日期、verdict、reason 及原依賴快照，繼續阻擋 ok 類資格，不以重鍵或過期
-   不計數解除；disputed 只有明示解決原因並經獨立審核的寫入才可更新 verdict（作者承載 §5）。
+   不計數解除；disputed 只有明示解決原因並經獨立審核的寫入才可更新 verdict（DSL 承載 §5）。
    找不到唯一承接用途時也不刪除這些未解項，改列入批次報告。meta.status 依剩餘有效審核
    及保留的未解項重算：有未解 disputed 仍為 disputed，不自動洗成 draft 或 reviewed；
    含 revise 或缺有效審核的用途不計為 reviewed。原始審核者、日期與 verdict 不改成新版證據，
@@ -143,7 +143,7 @@ compiled 須含完整 expanded 樹與 typed IR 的良構證據，executed 須指
    展開配方有變，或非唯一／缺輸入時正常失效，重新逐用途審核及驗證；不得偽造延續。
    第一版未實作的資格失效資料不新建 consumer，只在批次報告列受影響證據與後續義務。
 7. **產生用途差異。** 每個用途列舊／新來源原文、typed 值、render 輸出、
-   frame／binding／接口與作者依賴差異及理由。區分純 ID 改變、同語義輸出不變、
+   frame／binding／接口與DSL 依賴差異及理由。區分純 ID 改變、同語義輸出不變、
    來源語義改變、中文輸出改變及未解；保留未選模式、token 及歷史用途。
    中文語義真正改變才派人工重查；純重鍵不重翻，同文字不構成語義相同證明。
    render 未變但來源語義改變的用途仍須人工判斷譯文是否足夠，不直接沿用核可。
@@ -151,8 +151,8 @@ compiled 須含完整 expanded 樹與 typed IR 的良構證據，executed 須指
    所有 current 引用無懸空、每卡完整能力閉包、無殘留舊 normalizer；
    歷史原始證據保留舊 ID，不當成漏改。先前有效與失效證據數、保留的未解 revise／disputed、
    中文重審清單、reviewed／compiled／executed 及 pending 數分開回報。通過來源、展開、
-   A2 基線差異且既有作者用途的真卡場景不退步後，單一 PR 原子切換該批 normalizer 與全部引用；
-   新 resolved 來源的本體只能在切換後撰寫，其真卡場景另逐用途驗收。
+   A2 基線差異且既有 DSL 用途的真卡場景不退步後，單一 PR 原子切換該批 normalizer 與全部引用；
+   新 resolved 來源的本體只能在切換後DSL，其真卡場景另逐用途驗收。
    未完成的卡明示拒絕，不輸出可執行程式。下一批合併前以當前 main 重新核對。
 
 ## 6. 正式身分、完整能力與原型替換
@@ -160,10 +160,10 @@ compiled 須含完整 expanded 樹與 typed IR 的良構證據，executed 須指
 逐卡來源從已採納 JP printing 唯一解出永久 CardId、FaceId、revision/current 與 token 選用，
 不得以卡號前綴、去後綴或顯示名生成身分。所有同號 printing、全部面、sections 與 token
 能力都在閉包內；SourceUse.owner 決定能力持有面，來源及 instructions 可逐節點回溯。
-索引與作者檔雙向閉合；未知／歧義身分、漏 sibling、未選模式或未知 token 都拒絕整卡自動執行。
+索引與DSL 檔雙向閉合；未知／歧義身分、漏 sibling、未選模式或未知 token 都拒絕整卡自動執行。
 
-原型以完整卡為切換單位：同卡 shared scope 不得同時有 astra/1 與作者 1.0 記錄。
-依上述雙向閉合，含多類效果的卡在全部能力都能寫成作者 1.0 前不建作者卡檔；
+原型以完整卡為切換單位：同卡 shared scope 不得同時有 astra/1 與DSL 1.0 記錄。
+依上述雙向閉合，含多類效果的卡在全部能力都能寫成DSL 1.0 前不建DSL 檔；
 可先存放的只有 resolved ability_body 的 companion 本體。不能只搬一個能力就刪原型。
 用 [A2 基線](v0-regression.md)的 AST、正反向位置與差異場景確認行為；它保存舊缺陷，
 不能不經原文判讀便將舊輸出當正確期望。修正只更新已審的卡與案例，保留變更原因。
@@ -173,14 +173,14 @@ compiled 須含完整 expanded 樹與 typed IR 的良構證據，executed 須指
 
 ### 逐批選用入口
 
-每張完整卡的作者檔、`effects-index` 記錄與原型條目在同一個 PR 切換；
-不能先刪原型、再等另一個 PR 補作者卡或索引。切換回退用正常 revert，保留來源歷史。
+每張完整卡的DSL 檔、`effects-index` 記錄與原型條目在同一個 PR 切換；
+不能先刪原型、再等另一個 PR 補DSL 檔或索引。切換回退用正常 revert，保留來源歷史。
 
 `CurrentAuthorSources.selection_input()` 從同一次 `load_author_set()` 的完整輸入清單，
-沿用索引閉包、永久身分重疊與 current 完整能力驗證，交接原型文件及每張作者卡的
+沿用索引閉包、永久身分重疊與 current 完整能力驗證，交接原型文件及每張DSL 檔的
 accepted／rejected 結果。它不略過拒絕卡，也不把拒絕卡換回原型。
 Rust `Catalog::from_current_selection()` 消費這份內部交接：原型沿用既有 Catalog，
-作者卡逐張經 `ExpandedLowerer::lower_current()` 的完整能力對帳與整樹 lowering。
+DSL 檔逐張經 `ExpandedLowerer::lower_current()` 的完整能力對帳與整樹 lowering。
 任一卡拒絕、重疊或 lowering 失敗都拒絕整次選用，不回傳半份結果。
 
 成功結果 `SelectedEffects` 分別保留原型 Catalog 與完整 current D0 候選；
@@ -191,6 +191,6 @@ Rust `Catalog::from_current_selection()` 消費這份內部交接：原型沿用
 不補空原型 program，不回退到原型。永久 CardId、FaceId、revision owner 與來源 sidecar
 保留在 authority，事件與 LKI 使用同一套解析。此入口不提供載入後存檔格式。
 尚未提供 current 來源上下文的 `Catalog::load()`／`load_with_identity()`，
-遇到作者索引、作者卡或 companion 目錄即明確拒絕，不再只掃原型目錄而漏載已切換卡。
-`from_documents()` 仍是 caller 明示提供原型 bytes 的入口，不能用它代替完整作者目錄選用。
+遇到DSL 索引、DSL 檔或 companion 目錄即明確拒絕，不再只掃原型目錄而漏載已切換卡。
+`from_documents()` 仍是 caller 明示提供原型 bytes 的入口，不能用它代替完整DSL 目錄選用。
 這些介面不新增公開 wire、快照欄位、capability 或用途資格。

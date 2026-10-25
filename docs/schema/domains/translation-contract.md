@@ -135,7 +135,7 @@ text、reasons、note 不參與身分；同鍵原稿有不同文字時拒絕，�
 
 data 恰含上表七欄；record 及分片沿既有封閉結構、鍵唯一、安全路徑與引用檢查。
 normalized_hash 是舊 normalizer 的歷史 pattern hash，只供人工與 #499 對照，不在建置中驗證。
-原稿只存我們撰寫／生成的譯文，不保存官方原文、JP normalized、完整來源欄位、私人路徑、核可 hash 或事件。
+原稿只存我們DSL／生成的譯文，不保存官方原文、JP normalized、完整來源欄位、私人路徑、核可 hash 或事件。
 來源文字依固定來源的 source_ref／locator 取得，不另抄進 text 或 note；候選的歷史 hash 不構成當前來源 binding。
 
 候選不加入 active targets、bindings、renderer、pin 選用或公開翻譯投影，也不計為機械有效／已翻譯覆蓋。

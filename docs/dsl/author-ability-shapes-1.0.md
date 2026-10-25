@@ -1,6 +1,6 @@
 # 能力頭、授予與延遲形狀矩陣
 
-JSON Schema `dsl/author-nodes.schema.json` 是語法權威；Python 對照為 `contracts/author_programs.py`。本文只定義封閉節點；完整作者入口、展開與執行准入另驗。
+JSON Schema `dsl/author-nodes.schema.json` 是語法權威；Python 對照為 `contracts/author_programs.py`。本文只定義封閉節點；完整DSL 入口、展開與執行准入另驗。
 
 ## 單一遞迴圖與封閉邊界
 
@@ -58,7 +58,7 @@ GrantedAbilityHead 共用普通頭 payload，接受 7 個觸發巨集頭、auto�
 - 一個 grant 的 until 適用全部內容。BP20-036 的 keywords 無期限、abilities until:turn，寫兩個有序 grant 步驟。官方英文卡文將「本回合」只掛在後面的防傷能力；Q629 亦確認未限期的指定攻擊不在回合末失去，CR 10.2.1.2／7.4.8 分別規定無明示期限及回合末到期。同型卡名還有 BP05-112、BP16-103、BP18-017（突進）、BP18-026（オーラ），各用途仍核對其官方卡文；不以一個 grant 把期限擴到前面的關鍵字。此為文字範圍判讀，官方 Q&A 未直接回答 BP20-036 的掛接範圍，Q2647 只確認防傷能力不擋非傷害的攻擊力與體力減少；C1 仍須驗證用途來源與資格。
 - 純關鍵字優先現有 keywords 形，混合例 BP12-029/BP13-033/CP03-023/ECP01-043；多能力 ECP02-061；授予 play BP17-079、lastword BP07-038；grant 頭子集合的其他無實例格標合成。
 
-Quick：卡片本身持有時寫 `keywords: [quick]`，起動能力仍寫 `activate.quick: true`。授予子集合排除 keywords 頭，關鍵字由 grant.keywords 承載；既有 grant.keywords 與 EffectSpec.keywords 繼續接受 quick 字串，不新增同義拼法禁令。BP12-058 的作者標準形是 static.while＋EffectSpec.keywords(list:[quick])；不做語義正規化，不推定不同形狀有相同 body hash。
+Quick：卡片本身持有時寫 `keywords: [quick]`，起動能力仍寫 `activate.quick: true`。授予子集合排除 keywords 頭，關鍵字由 grant.keywords 承載；既有 grant.keywords 與 EffectSpec.keywords 繼續接受 quick 字串，不新增同義拼法禁令。BP12-058 的DSL 標準形是 static.while＋EffectSpec.keywords(list:[quick])；不做語義正規化，不推定不同形狀有相同 body hash。
 
 巢狀 this 指接受者、self 指能力控制者，文字提供者來源保留。host 已登錄：CP04-PR21 是外層 static(zone:equipment)→grant(on:host)→static；內層 this 是裝備者。host 在裝備不存在／不在有效位置時不可假造物件，接附改變須重算。CP04-PR18 是 UB 起動、PR20 是 per_turn=2、PR25 是 batch、CP04-058 sections/0 是混合授予。
 

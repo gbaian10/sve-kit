@@ -1,9 +1,9 @@
-# 作者 1.0：數值、條件與收據讀值形狀
+# DSL 1.0：數值、條件與收據讀值形狀
 
-本表細化[撰寫語法 §5／§6](author-syntax-1.0.md#5-表達式捕捉與選擇器)的數值、條件與收據讀值，
+本表細化[DSL 語法 §5／§6](author-syntax-1.0.md#5-表達式捕捉與選擇器)的數值、條件與收據讀值，
 機器語法以 [author-nodes.schema.json](../../dsl/author-nodes.schema.json) 為準。
 `A.expr.numeric` 與 `A.cond` 是共用遞迴圖中的數值與條件共用入口型別，**不是完整 Expr／Cond**。
-它們供節點契約驗證使用，不新增完整作者 reader，也不代表已通過來源或執行准入。
+它們供節點契約驗證使用，不新增完整DSL reader，也不代表已通過來源或執行准入。
 表中**每個 variant 定義也只在片段層封閉**；它們的 E、C、A.ref operand 目前不是完整值域。
 完整型別可相容擴展這些 operand 參照，不縮減現在合法的輸入。
 `cmp` 收數值比較與同型 PlayerExpr 的 eq/ne；history、paid、chosen 與捕捉形狀見
@@ -76,9 +76,9 @@ define 因而有兩種已記載的拼法重疊，本表不選標準形，也不�
 費用資訊讀值的 `cost_of` 與 `orig_cost_of` 依 Q773 同樣讀卡面印刷費用；進化從者讀
 進化前的費用（Q1707、CR 5.24.1）。打出時的費用增減不改此資訊（Q935），不讀
 已支付 PP；BP04-098 的「コスト」與 SP01-043 的「元のコスト」在這個讀值上同義。
-作者仍保留來源用詞與各自語法節點，不因此推定 body hash 相同。
+DSL 仍保留來源用詞與各自語法節點，不因此推定 body hash 相同。
 all、any、min、max 均允許單元素列表；min/max 非空另有 GAP-A-028 的明文依據。
-不從 IR 型別偷偷推出其他撰寫形狀。`A.cond` 收上表四種條件、下表的 did、非歷史條件矩陣及事件與歷史矩陣的 history／paid／chosen，
+不從 IR 型別偷偷推出其他DSL 形狀。`A.cond` 收上表四種條件、下表的 did、非歷史條件矩陣及事件與歷史矩陣的 history／paid／chosen，
 不收裸 bool，也不把讀值 `{zone_free:{who,zone}}` 視為條件。
 
 ## 快照與收據讀值矩陣
@@ -113,7 +113,7 @@ all、any、min、max 均允許單元素列表；min/max 非空另有 GAP-A-028 
 以下是 D0／lowering 的接線契約，**不是節點 Schema 或 Python 型別已驗證的執行行為**。
 形狀只能確認 ReceiptRef；實際 receipt 類別、可見性、材料投影與操作授權取自宣告。
 
-- 短形 did 採[撰寫語法 §6](author-syntax-1.0.md#6-玩家引用結果)的類別判準。
+- 短形 did 採[DSL 語法 §6](author-syntax-1.0.md#6-玩家引用結果)的類別判準。
   「卡片移動」包含適用的捨牌、破壞、消滅等指示，不只鍵名 move。
   未登錄成功判準的 receipt 拒絕短形 did，不退回 actual>0 或 Status 的布林轉換。
 - optional 的 result 在 Declined 時為 false；否則取本文最後一個指示的 typed did，

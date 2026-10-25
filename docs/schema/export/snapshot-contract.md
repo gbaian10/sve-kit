@@ -88,7 +88,7 @@ uv --directory carddb run python ../.github/ci/snapshot_format.py
 
 ## 共用合成樣本
 
-索引為 `tests/fixtures/snapshot-contract/v3/index.json`。所有內容都是手寫合成資料，不含官方卡文；沒有爬取、建置 DB 或 producer 依賴。`expected-logical.json` 的物件列與 wire tuples 分別撰寫，不從 reader 解碼或 producer 匯出產生預期值。
+索引為 `tests/fixtures/snapshot-contract/v3/index.json`。所有內容都是手寫合成資料，不含官方卡文；沒有爬取、建置 DB 或 producer 依賴。`expected-logical.json` 的物件列與 wire tuples 分別DSL，不從 reader 解碼或 producer 匯出產生預期值。
 
 | 檔案 | 驗收用途 |
 | --- | --- |

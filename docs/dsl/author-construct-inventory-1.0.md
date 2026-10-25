@@ -1,8 +1,8 @@
-# 作者 1.0 構造與鍵清冊
+# DSL 1.0 構造與鍵清冊
 
-本表整理[作者語法](author-syntax-1.0.md) §2–9、§13–14 與[承載契約](author-contract-1.0.md)的上下文。它是已定語法的導覽，**不是第二份機器語法，也不代表整棵作者樹已實作**；可用資源及入口見 [dsl/README](../../dsl/README.md)。固定物件只接受所屬變體的欄位。相同拼字出現在不同上下文，不表示型別或時點相同。
+本表整理[DSL 語法](author-syntax-1.0.md) §2–9、§13–14 與[承載契約](author-contract-1.0.md)的上下文。它是已定語法的導覽，**不是第二份機器語法，也不代表整棵DSL 樹已實作**；可用資源及入口見 [dsl/README](../../dsl/README.md)。固定物件只接受所屬變體的欄位。相同拼字出現在不同上下文，不表示型別或時點相同。
 
-若清冊與作者語法／承載契約衝突，以後者為準；原文形狀有差異時列明出處，不以清冊增添限制。
+若清冊與DSL 語法／承載契約衝突，以後者為準；原文形狀有差異時列明出處，不以清冊增添限制。
 
 以下 `?` 表選用、`|` 表互斥，`[]` 表列表元素；只有標明的 map 可用動態鍵。`Expr` 保留有號讀值，動作要求量不先轉 Nat；Nat 葉參數仍不能是負值。bool 不作 Int，數字字串不作整數。關鍵字、職業、種類及卡名的語法型別不等於登錄已存在，後者由來源／registry 驗證。
 
@@ -127,7 +127,7 @@ move／banish／look／reveal 的同層 top 共用 DeckSlice，不接受 ref:{to
 | reveal／look | ref\|top、bind、result?、by?、random? | random={n}，與 cost.discard.random=true 不同 |
 | reveal_until | sel、n、bind、matched | 結果區分公開與匹配 |
 | search | sel＋n\|upto 或 groups、to、cost_sum_le?、distinct_by?、entry_effects?、instead?、result? | search 特例與普通 choose 分開；不多次洗牌 |
-| shuffle／order | shuffle:{who}；order 由 choose.order／move.order 承載 | A.order 分類 ID 保留，獨立 order 作者鍵不接受 |
+| shuffle／order | shuffle:{who}；order 由 choose.order／move.order 承載 | A.order 分類 ID 保留，獨立 order DSL 鍵不接受 |
 | dice／declare | {bind,who?}／控制流程表 | 骰子與宣告分開 |
 | equip | on、token | 裝備不占普通場格 |
 | steal／give | ref、to?、precondition? | 同世代控制轉移 |
@@ -147,9 +147,9 @@ move／banish／look／reveal 的同層 top 共用 DeckSlice，不接受 ref:{to
 
 ## 事件與歷史的封閉變體
 
-33 個直接事件鍵如下。`any_of` 是事件組合，`counter_reached` 是 counter_changed.after 的比較，均不計成第 34 種。每一列須分開窄化，**不是可套在每個事件的總欄位池**。以下只列作者文件明示的 filter；事件當時可讀的 payload 另依配對 IR 型別，不自動成為 filter。
+33 個直接事件鍵如下。`any_of` 是事件組合，`counter_reached` 是 counter_changed.after 的比較，均不計成第 34 種。每一列須分開窄化，**不是可套在每個事件的總欄位池**。以下只列DSL 文件明示的 filter；事件當時可讀的 payload 另依配對 IR 型別，不自動成為 filter。
 
-| 直接事件 | 作者明示的專屬 filter／責任 |
+| 直接事件 | DSL 明示的專屬 filter／責任 |
 | --- | --- |
 | enter_field | entered_by；此次入場的新世代 |
 | left_field | 離場主體／move_receipt；不以現在卡號追蹤 |
@@ -168,7 +168,7 @@ move／banish／look／reveal 的同層 top 共用 DeckSlice，不接受 ref:{to
 | ability_played | 能力打出，不以 played 代替 |
 | life_changed | 生命變更；history_sum.delta 先窄化方向 |
 | stat_changed | ref、stat=power/hp 或列表、direction=up/down；不收 subject/property |
-| counter_changed | after 比較；作者別名 counter_reached:{ref,name,value} 降為 counter_changed.after 比較（§8、§13 GAP-A-043），不另算直接事件 |
+| counter_changed | after 比較；DSL 別名 counter_reached:{ref,name,value} 降為 counter_changed.after 比較（§8、§13 GAP-A-043），不另算直接事件 |
 | acted | 姿態實變 |
 | stood | 姿態實變 |
 | raced | 出走主體 |

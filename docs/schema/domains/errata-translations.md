@@ -7,7 +7,7 @@
 
 舊片段的錯誤或歧義須如實保留，不能在翻譯時先修正。`origin=machine` 不因審讀而改成 project；
 `low_confidence` 標出卡名選詞、原文誤植或風味修辭仍需確認的譯稿。
-本批依現行模板的用詞及翻譯風格 v1.14、term sheet 撰寫；歷史公告不具有現行模板要求的卡頁 owner 綁定，
+本批依現行模板的用詞及翻譯風格 v1.14、term sheet DSL；歷史公告不具有現行模板要求的卡頁 owner 綁定，
 因此不借用現行卡文的來源位置或把公告片段拼成完整卡文。
 
 離線建置載入並驗證當次譯稿一次，在 configuration 釘住檔案 hash，寫入 authored source_record，
