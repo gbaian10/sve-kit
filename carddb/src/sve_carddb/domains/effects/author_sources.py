@@ -111,6 +111,7 @@ ENTRY_HEADS = {
     DAMAGE_KEY: ("lastword",),
     "draw_exact_spell.v1": ("spell",),
     "draw_exact_attack_time.v1": ("attack_time",),
+    "draw_exact_evolve_time.v1": ("evolve_time",),
     "evolve_entry.v1": ("evolve",),
     "feed_entry.v1": ("feed",),
     "ride_entry.v1": ("ride",),
@@ -139,17 +140,17 @@ ADAPTER_RECIPE = digest(
             ],
             "ports": "empty-only;unsupported-source-ports",
             "entry_heads": {key: list(value) for key, value in ENTRY_HEADS.items()},
-            "entry_payload": "exact-head.cost.pp;lastword-uniform-all-leaders-v1;spell.draw.self.n;attack_time.draw.self.n;empty-ports;no-imports",
+            "entry_payload": "exact-head.cost.pp;lastword-uniform-all-leaders-v1;spell.draw.self.n;attack_time.draw.self.n;evolve_time.draw.self.n;empty-ports;no-imports",
             "entry_operands": "Nat-cost_value-occurrence-order-or-single-Nat-count-v2",
             "token_closure": "mapped-ability-heads-only-no-token-v2",
             "token_free_metadata": list(NO_TOKEN_METADATA),
             "current_owner": "current-jp-face-revision;card-membership;exact-face-container",
-            "known_null_attributes": "spell.attack;spell.defense;rules-proven-absence-v1",
+            "known_null_attributes": "spell.attack;spell.defense;evolve-follower.cost;rules-proven-absence-v2",
             "prototype": "all-jp-printing-identities;shared-overlap;no-execution",
             "inventory": "authored-root-complete-files-v1",
             "resolved_nonentry": "unsupported_source_projection",
             "damage_operand": "fixed-lastword-concept;Nat-damage_amount-leaf_1;exact-body-v1",
-            "draw_operand": "draw_exact_spell.v1;draw_exact_attack_time.v1;required-Nat-count-value;single-source-leaf",
+            "draw_operand": "draw_exact_spell.v1;draw_exact_attack_time.v1;draw_exact_evolve_time.v1;required-Nat-count-value;single-source-leaf",
             "draw_payload": "complete-head-body-canonical-equality-v1",
         }
     )
@@ -230,6 +231,7 @@ def entry_payload(source: SourceContext, scope: str) -> dict[str, JsonValue]:
     if source.frame.semantic_variant.key in {
         "draw_exact_spell.v1",
         "draw_exact_attack_time.v1",
+        "draw_exact_evolve_time.v1",
     }:
         return {
             heads[0]: {"do": [{"draw": {"who": "self", "n": _draw_count(source)}}]},
@@ -600,7 +602,11 @@ def parameter_expected(
         return expected
     if (
         source.frame.semantic_variant.key
-        in {"draw_exact_spell.v1", "draw_exact_attack_time.v1"}
+        in {
+            "draw_exact_spell.v1",
+            "draw_exact_attack_time.v1",
+            "draw_exact_evolve_time.v1",
+        }
         and owner == "A.act.draw"
         and relative_path == ("n",)
     ):

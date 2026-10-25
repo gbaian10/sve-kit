@@ -52,7 +52,9 @@ UseDependencies.imports 值恰為 binding_id／ability_scope／port／dependency
 
 current 邊界重建真實 registry 的 Frame／Binding，核對全部 JP current 面、exact owner／field／section／line／root scope 及完整來源根集合，並驗所有 companion 的 resolved ability_body／root scope／ports，包括未引用本體。能力屬於哪一面，由 SourceUse.owner 的 revision 對應 face 決定；作者卡級／面級容器只表示位置，多面卡的卡級容器不表示全卡常駐。面容器另驗精確 FaceId，跨容器重複同來源 scope 拒絕。
 
-`effect-source-v1` 依 P1 完整 payload 計算；純 hash 函式不授予來源准入。DB 的非 null 數值／代碼與建置保證完整的種族、稱號、特殊類型集合可判 known；type_code 為 spell 時，null attack／defense 依 P1 的規則確定不存在判為 known-null。其餘 null 屬性及無確定 absent 證據的空 effect 保留 unknown，拒絕准入。token 依賴未閉合時不產完整來源 hash，也不把缺少 token 選用結果當空集合。
+`effect-source-v1` 依 P1 完整 payload 計算；純 hash 函式不授予來源准入。DB 的非 null 數值／代碼與建置保證完整的種族、稱號、特殊類型集合可判 known；type_code 為 spell 時，null attack／defense 依 P1 的規則確定不存在判為 known-null。type_code 為 follower 且同一 revision 已採納的 special_kinds 含 evolve 時，null cost 也依 P1 §4.2 記錄印刷費用確定不存在；advance 或普通 follower 不適用，其他 null 仍是 unknown。無確定 absent 證據的空 effect 同樣保留 unknown，拒絕准入。token 依賴未閉合時不產完整來源 hash，也不把缺少 token 選用結果當空集合。
+
+進化面的費用證據以已審 [ECP01-002 解析輸入](../../card-data/jp/ECP01/000-099.json)為例：document `documents-4a1197c7caf47383` 的 card_type 是 `フォロワー・エボルヴ`、cost 是 `-`；正式建置映成 follower／evolve 與 null cost。[日文 CR 1.28.0（2026-09-28）](https://shadowverse-evolve.com/wordpress/wp-content/uploads/2026/09/28121513/ShadowverseEVOLVE_cr_1.28.0_260928.pdf) §2.3.3.1 區別 EVOLVE 特殊類型，§5.16.1.2 規定場上進化後的費用仍沿用原卡。這裡記錄的是進化面印刷值的缺席，不把 null 改成 0、不推算場上費用，也不授予普通打出資格。
 
 | resolved 來源族 | scope → 作者頭 | 接受的完整 payload |
 | --- | --- | --- |
@@ -63,11 +65,12 @@ current 邊界重建真實 registry 的 Frame／Binding，核對全部 JP curren
 | evolve_ride_entries.v1 | ability_0 → evolve；ability_1 → ride | 各 scope 的獨立來源 cost |
 | draw_exact_spell.v1 | ability_0 → spell | `spell: {do: [{draw: {who: self, n: N}}]}`；單一 required Nat/count/value 葉 |
 | draw_exact_attack_time.v1 | ability_0 → attack_time | `attack_time: {do: [{draw: {who: self, n: N}}]}`；單一 required Nat/count/value 葉 |
+| draw_exact_evolve_time.v1 | ability_0 → evolve_time | `evolve_time: {do: [{draw: {who: self, n: N}}]}`；單一 required Nat/count/value 葉 |
 | damage_uniform_lastword_all_leaders.v1 | ability_0 → lastword | `lastword: {do: [{damage: {to: {leaders: all}, n: N}}]}`；固定 Lastword Concept 與 Nat/damage_amount/value 葉 |
 
 表列各族皆只配空 imports／exports ports，能力 imports 必須省略。去掉 line／section／sources 後完整 canonical 能力必須相等；多加 into、usable_if、times、其他費用或 expression 都不符來源。N 可為 0，須取該構造的 operand，不能借相同數值。非空 ports 與其他執行 scope 保持明示 unsupported；不把跨 owner 或作者陣列較晚定為永久非法。真卡整卡正例為 BP01-009／034／092 的純進化入口；feed／ride 與雙入口的有限機制測試不宣稱已有真卡整卡准入。
 
-spell 與 attack_time 抽牌同樣只配空 ports、不得有能力 imports。spell 來源重建要求既有 normalizer 的完整 current normal spell effect、無 sections、單行 exact self 抽牌；attack_time 要求 current follower effect 的完整獨立 `【攻撃時】N枚引く。` body 行，自身攻擊事件固定在頭內。只對照來源 Nat/count/value 到 draw.n，不參數化 actor、能力頭或控制圖。`expand_sources` 與 current 入口都比對完整展開能力的 canonical bytes；省略 who、改張數、增加條件／費用／步驟或換頭皆拒絕。真卡正例分別為 CP02-068 與 BP10-122；up_to、對手／雙方、動態量、Quick、token 位置仍拒絕，進化時抽牌尚未接入作者 adapter。同卡有其他 sibling 時必須逐一接通並驗證，不能只截出 attack_time 抽牌就准入整卡。來源准入不等於 reviewed、compiled、executed 或 qualified。
+spell、attack_time 與 evolve_time 抽牌同樣只配空 ports、不得有能力 imports。spell 來源重建要求既有 normalizer 的完整 current normal spell effect、無 sections、單行 exact self 抽牌；attack_time 要求 current follower effect 的完整獨立 `【攻撃時】N枚引く。` body 行，自身攻擊事件固定在頭內；evolve_time 要求 current evolved follower effect 的完整獨立 `【進化時】N枚引く。` body 行，固定自身進化事件，與 evolve 費用入口分開。只對照來源 Nat/count/value 到 draw.n，不參數化 actor、能力頭或控制圖。`expand_sources` 與 current 入口都比對完整展開能力的 canonical bytes；省略 who、改張數、增加條件／費用／步驟或換頭皆拒絕。真卡正例分別為 CP02-068、BP10-122 與 ECP01-002；up_to、對手／雙方、動態量、Quick、token 位置仍拒絕。同卡有其他 sibling 時必須逐一接通並驗證，不能只截出抽牌就准入整卡。來源准入不等於 reviewed、compiled、executed 或 qualified。
 
 固定內容種子：BP08-038 的 Live count−5 與 draw；CP04-060 的 search→follow→本回合 cost delta −2；ECP01-058 的 evolve deck_rule 10；BP09-SL05 兩面定位及第二面 create 名稱列表。它們的內容來源是真卡，測試 SourceUse／FrameId／meta 為明示合成，不能冒充已採納來源或實跑資格。
 

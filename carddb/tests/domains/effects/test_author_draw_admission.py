@@ -1,4 +1,4 @@
-"""Only admitted spell and attack variants map resolved draw sources to author bodies."""
+"""Each closed draw variant admits only its exact source head and body."""
 
 import hashlib
 import json
@@ -10,7 +10,6 @@ from sve_carddb.contracts.author_evidence import SourceUse
 from sve_carddb.contracts.author_leaves import ParamDecl, ParamSource
 from sve_carddb.domains.effects.author_sources import (
     SourceCandidate,
-    SourceError,
     entry_payload,
     parameter_expected,
     resolve_source,
@@ -187,7 +186,7 @@ def frozen_context(card_no: str, checksum: str) -> tuple[str, CardContext]:
         ),
     ],
 )
-def test_frozen_draw_sources_resolve_without_author_admission(
+def test_frozen_draw_sources_admit_their_complete_ability(
     card_no: str, checksum: str, line: int, variant: str, count: int
 ) -> None:
     raw, context = frozen_context(card_no, checksum)
@@ -213,23 +212,18 @@ def test_frozen_draw_sources_resolve_without_author_admission(
     declaration = ParamDecl(
         type="Nat", source=ParamSource(slot="leaf_0", component="value")
     )
-    if variant in {"draw_exact_spell.v1", "draw_exact_attack_time.v1"}:
-        assert entry_payload(checked, "ability_0") == {
-            ("spell" if variant == "draw_exact_spell.v1" else "attack_time"): {
-                "do": [{"draw": {"who": "self", "n": count}}]
-            },
-            "ports": {"imports": {}, "exports": {}},
-        }
-        assert (
-            parameter_expected(
-                checked, declaration, "A.act.draw", ("n",), {"n": {"param": "n"}}
-            )
-            == count
-        )
-        return
-    with pytest.raises(SourceError, match="unsupported_source_ability_mapping"):
-        entry_payload(checked, "ability_0")
-    with pytest.raises(SourceError, match="unsupported_source_construct"):
+    name = {
+        "draw_exact_spell.v1": "spell",
+        "draw_exact_attack_time.v1": "attack_time",
+        "draw_exact_evolve_time.v1": "evolve_time",
+    }[variant]
+    assert entry_payload(checked, "ability_0") == {
+        name: {"do": [{"draw": {"who": "self", "n": count}}]},
+        "ports": {"imports": {}, "exports": {}},
+    }
+    assert (
         parameter_expected(
             checked, declaration, "A.act.draw", ("n",), {"n": {"param": "n"}}
         )
+        == count
+    )

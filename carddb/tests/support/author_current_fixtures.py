@@ -69,6 +69,7 @@ def entry_snapshot() -> Snapshot:
         record
         for name in (
             "translations/glossary/concepts/004.yaml",
+            "translations/templates/definitions/002.yaml",
             "translations/templates/definitions/059.yaml",
             "translations/templates/definitions/094.yaml",
             "translations/templates/definitions/117.yaml",
@@ -84,10 +85,14 @@ def entry_snapshot() -> Snapshot:
         and (
             record.data.id == EVOLVE_FRAME
             or record.data.semantic_variant.key
-            in {"draw_exact_spell.v1", "draw_exact_attack_time.v1"}
+            in {
+                "draw_exact_spell.v1",
+                "draw_exact_attack_time.v1",
+                "draw_exact_evolve_time.v1",
+            }
         )
     )
-    assert len(selected) == 3
+    assert len(selected) == 4
     storm = tuple(
         record
         for record in records

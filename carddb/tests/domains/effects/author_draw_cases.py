@@ -30,13 +30,15 @@ def draw_source(
 ) -> tuple[SourceCandidate, SourceUse, Frame]:
     if name == "attack_time":
         raw = "【攻撃時】" + raw
+    elif name == "evolve_time":
+        raw = "【進化時】" + raw
     descriptor = source(raw)
     engine = classifier()
     context = CardContext(
         descriptor,
         "c:synthetic",
         "f:synthetic",
-        "normal",
+        "evolved" if name == "evolve_time" else "normal",
         "spell" if name == "spell" else "follower",
         True,
         0,

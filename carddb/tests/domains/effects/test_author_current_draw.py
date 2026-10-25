@@ -37,12 +37,12 @@ class DrawCard:
     face_id: str
     head: str
     count: int
-    cost: int
+    cost: int | None
     attack: int | None
     defense: int | None
 
 
-@pytest.fixture(params=["spell", "attack_time"])
+@pytest.fixture(params=["spell", "attack_time", "evolve_time"])
 def draw_card(request: pytest.FixtureRequest) -> DrawCard:
     if request.param == "spell":
         return DrawCard(
@@ -54,6 +54,17 @@ def draw_card(request: pytest.FixtureRequest) -> DrawCard:
             4,
             None,
             None,
+        )
+    if request.param == "evolve_time":
+        return DrawCard(
+            "ECP01-002",
+            "c:d02c2e5925ce5e7e94d6d7b3ea6be009",
+            "f:c36dfb4e110457918ea92a19a9188265",
+            "evolve_time",
+            1,
+            None,
+            3,
+            3,
         )
     return DrawCard(
         "BP10-122",
@@ -143,6 +154,8 @@ def check_accepted(result: CardAccepted | CardRejected, card: DrawCard) -> None:
         ("defense", card.defense),
     ):
         assert attributes[stat] == {"state": "known", "value": value}
+    if card.head == "evolve_time":
+        assert attributes["special_kinds"] == {"state": "known", "value": ["evolve"]}
 
 
 def check_mutation(
@@ -185,8 +198,15 @@ def check_unknown_attributes(
 ) -> None:
     revision = next(iter(source._card_payload(card.card_id).revisions))
     for attribute in (
-        ("cost",) if card.head == "spell" else ("cost", "attack", "defense")
+        ("cost",)
+        if card.head == "spell"
+        else ("class_code", "attack", "defense")
+        if card.head == "evolve_time"
+        else ("cost", "attack", "defense")
     ):
+        original = source.db.select(
+            "face_revision", (attribute,), where={"id": revision}
+        )[0].values[attribute]
         with source.db.transaction():
             source.db.update("face_revision", {"id": revision}, {attribute: None})
         rejected = source.validate(root, AuthorExpander(SCHEMAS))[0]
@@ -196,7 +216,7 @@ def check_unknown_attributes(
             source.db.update(
                 "face_revision",
                 {"id": revision},
-                {attribute: getattr(card, attribute)},
+                {attribute: original},
             )
 
 
@@ -233,11 +253,64 @@ def test_real_current_draw(tmp_path: Path, draw_card: DrawCard) -> None:
                 )
             write_inputs(root, inputs)
             check_unknown_attributes(source, root, draw_card)
-            if draw_card.head == "attack_time":
+            if draw_card.head != "spell":
                 check_unregistered_sibling(source, root, draw_card, companion=companion)
         negative_root = tmp_path / "negative-sources"
         write_inputs(negative_root, collection(source, draw_card, companion=False))
+        if draw_card.head == "evolve_time":
+            check_evolve_kind_evidence(source, negative_root, draw_card)
+        elif draw_card.head == "attack_time":
+            check_other_kinds_keep_unknown_cost(source, negative_root, draw_card)
         check_unadmitted_current_sources(source, negative_root, draw_card)
+
+
+def check_evolve_kind_evidence(
+    source: CurrentAuthorSources, root: Path, card: DrawCard
+) -> None:
+    revision = next(iter(source._card_payload(card.card_id).revisions))
+    for other_kind in ("advance", "token"):
+        with source.db.transaction():
+            source.db.update(
+                "face_special_kind",
+                {"revision_id": revision, "special_kind_code": "evolve"},
+                {"special_kind_code": other_kind},
+            )
+        rejected = source.validate(root, AuthorExpander(SCHEMAS))[0]
+        assert isinstance(rejected, CardRejected)
+        assert rejected.diagnostic.reason == "source_pending"
+        with source.db.transaction():
+            source.db.update(
+                "face_special_kind",
+                {"revision_id": revision, "special_kind_code": other_kind},
+                {"special_kind_code": "evolve"},
+            )
+
+
+def check_other_kinds_keep_unknown_cost(
+    source: CurrentAuthorSources, root: Path, card: DrawCard
+) -> None:
+    revision = next(iter(source._card_payload(card.card_id).revisions))
+    for other_kind in ("advance", "token"):
+        with source.db.transaction():
+            source.db.update("face_revision", {"id": revision}, {"cost": None})
+            source.db.insert(
+                "face_special_kind",
+                {
+                    "revision_id": revision,
+                    "special_kind_code": other_kind,
+                    "special_kind_kind": "special_kind",
+                },
+            )
+        # The attack source still resolves, so rejection exercises unknown cost.
+        rejected = source.validate(root, AuthorExpander(SCHEMAS))[0]
+        assert isinstance(rejected, CardRejected)
+        assert rejected.diagnostic.reason == "source_unknown"
+        with source.db.transaction():
+            source.db.update("face_revision", {"id": revision}, {"cost": card.cost})
+            source.db.delete(
+                "face_special_kind",
+                {"revision_id": revision, "special_kind_code": other_kind},
+            )
 
 
 def check_unregistered_sibling(
@@ -249,7 +322,14 @@ def check_unregistered_sibling(
     )[0].values["effect_unit_id"]
     with pytest.MonkeyPatch.context() as patch:
         effect(
-            source, patch, "【攻撃時】1枚引く。\n【攻撃時】2枚引く。", revision=revision
+            source,
+            patch,
+            (
+                "【攻撃時】1枚引く。\n【攻撃時】2枚引く。"
+                if card.head == "attack_time"
+                else "【進化時】1枚引く。\n【進化時】2枚引く。"
+            ),
+            revision=revision,
         )
         # A new sibling needs registry admission even when its draw shape is supported.
         write_inputs(root, collection(source, card, companion=companion))
@@ -285,7 +365,14 @@ def check_unadmitted_current_sources(
             effect(
                 source,
                 patch,
-                ("【攻撃時】" if card.head == "attack_time" else "") + text,
+                (
+                    {
+                        "spell": "",
+                        "attack_time": "【攻撃時】",
+                        "evolve_time": "【進化時】",
+                    }[card.head]
+                )
+                + text,
                 revision=revision,
             )
             rejected = source.validate(root, expander)[0]
@@ -298,10 +385,11 @@ def check_unadmitted_current_sources(
         source.db.update(
             "face_revision", {"id": revision}, {"effect_unit_id": original}
         )
-    if card.head == "attack_time":
+    if card.head != "spell":
+        prefix = "【攻撃時】" if card.head == "attack_time" else "【進化時】"
         for text in (
-            "{クイック}\n【攻撃時】1枚引く。",
-            "【攻撃時】1枚引く。\n未知の追加能力。",
+            "{クイック}\n" + prefix + "1枚引く。",
+            prefix + "1枚引く。\n未知の追加能力。",
         ):
             with pytest.MonkeyPatch.context() as patch:
                 effect(source, patch, text, revision=revision)
@@ -321,7 +409,11 @@ def check_unadmitted_current_sources(
             patch,
             revision,
             text="『仮トークン』{ニュートラル}フォロワー{コスト1}{攻撃力}1/{体力}1\n"
-            + ("【攻撃時】" if card.head == "attack_time" else "")
+            + (
+                {"spell": "", "attack_time": "【攻撃時】", "evolve_time": "【進化時】"}[
+                    card.head
+                ]
+            )
             + "3枚引く。",
             kind="unknown",
         )
