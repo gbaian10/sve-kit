@@ -67,12 +67,23 @@ current 邊界重建真實 registry 的 Frame／Binding，核對全部 JP curren
 | draw_exact_attack_time.v1 | ability_0 → attack_time | `attack_time: {do: [{draw: {who: self, n: N}}]}`；單一 required Nat/count/value 葉 |
 | draw_exact_evolve_time.v1 | ability_0 → evolve_time | `evolve_time: {do: [{draw: {who: self, n: N}}]}`；單一 required Nat/count/value 葉 |
 | damage_uniform_lastword_all_leaders.v1 | ability_0 → lastword | `lastword: {do: [{damage: {to: {leaders: all}, n: N}}]}`；固定 Lastword Concept 與 Nat/damage_amount/value 葉 |
+| move_self_to_owner_cemetery_activated_pp.v1 | ability_0 → activate | `activate: {zone: field, cost: {pp: 1}, do: [{move: {ref: this, to: cemetery}}]}`；三個來源葉皆固定，無參數 |
 
 表列各族皆只配空 imports／exports ports，能力 imports 必須省略。去掉 line／section／sources 後完整 canonical 能力必須相等；多加 into、usable_if、times、其他費用或 expression 都不符來源。N 可為 0，須取該構造的 operand，不能借相同數值。非空 ports 與其他執行 scope 保持明示 unsupported；不把跨 owner 或DSL 陣列較晚定為永久非法。真卡整卡正例為 BP01-009／034／092 的純進化入口；feed／ride 與雙入口的有限機制測試不宣稱已有真卡整卡准入。
 
 spell、attack_time 與 evolve_time 抽牌同樣只配空 ports、不得有能力 imports。spell 來源重建要求既有 normalizer 的完整 current normal spell effect、無 sections、單行 exact self 抽牌；attack_time 要求 current follower effect 的完整獨立 `【攻撃時】N枚引く。` body 行，自身攻擊事件固定在頭內；evolve_time 要求 current evolved follower effect 的完整獨立 `【進化時】N枚引く。` body 行，固定自身進化事件，與 evolve 費用入口分開。只對照來源 Nat/count/value 到 draw.n，不參數化 actor、能力頭或控制圖。`expand_sources` 與 current 入口都比對完整展開能力的 canonical bytes；省略 who、改張數、增加條件／費用／步驟或換頭皆拒絕。真卡正例分別為 CP02-068、BP10-122 與 ECP01-002；up_to、對手／雙方、動態量、Quick、token 位置仍拒絕。同卡有其他 sibling 時必須逐一接通並驗證，不能只截出抽牌就准入整卡。來源准入不等於 reviewed、compiled、executed 或 qualified。
 
 固定內容種子：BP08-038 的 Live count−5 與 draw；CP04-060 的 search→follow→本回合 cost delta −2；ECP01-058 的 evolve deck_rule 10；BP09-SL05 兩面定位及第二面 create 名稱列表。它們的內容來源是真卡，測試 SourceUse／FrameId／meta 為明示合成，不能冒充已採納來源或實跑資格。
+
+自身送墓來源只接 normalizer 已採納的完整永久 token amulet effect 第二行
+`{起動}{コスト1}：これを墓場に置く。`，第一行離場抽1棄1仍是獨立 pending sibling。
+固定 activation Concept、PP1 的 Nat/cost_value 與 graveyard 的 ZoneSet/destination_zone，
+不開放費用或目的區參數。普通起動先支付 PP1，本文以 Put 將 SourceHolder 目前世代送到
+card owner 的墓場；不是 ability master 的墓場、犧牲費用或 destroy，token 隨即在目的區消去。
+inline／companion 都須完整 canonical head/body 相等；換頭、對象、目的區、追加條件、
+費用或指示皆拒絕。BP07-T03、BP12-T12、BP17-T19、PR-195 與 SP01-T03 是同一永久 token
+的印刷，能力來源可展開，完整 current validate／selection_input 仍因 pending sibling 拒絕，
+不能省略第一行或把 token 能力掛在母卡來取得整卡證明。
 
 ## 展開與 D0 消費邊界
 
