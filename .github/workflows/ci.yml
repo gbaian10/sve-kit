@@ -473,8 +473,8 @@ jobs:
     needs: changes
     if: ${{ needs.changes.outputs.web == 'true' }}
     runs-on: ubuntu-latest
-    # The required steps keep 20 minutes; each of the two Codecov steps below has its own 5.
-    timeout-minutes: 30
+    # The required steps keep 20 minutes; each of the three Codecov steps below has its own 5.
+    timeout-minutes: 35
     defaults:
       run:
         working-directory: sim/web
@@ -506,7 +506,9 @@ jobs:
           mkdir -p "$REPORT_DIR"
           status=0
           start=$SECONDS
+          export SVE_PUBLIC_JUNIT="$REPORT_DIR/junit-public.xml"
           bun run test:all --maxWorkers=4 --reporter=junit --outputFile="$REPORT_DIR/junit.xml" \
+            --reporter=./scripts/ci/public-junit-reporter.ts \
             --retry=2 --coverage --coverage.reportsDirectory="$REPORT_DIR/coverage" \
             > "$REPORT_DIR/test.log" 2>&1 || status=$?
           echo "$((SECONDS - start))" > "$REPORT_DIR/elapsed.txt"
@@ -538,6 +540,20 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ${{ runner.temp }}/sve-web-reports/coverage/lcov.info
+          disable_search: true
+          flags: web
+          fail_ci_if_error: false
+      # Test Analytics: the reporter records each retry as a failed attempt, so a test that passed only on
+      # retry shows up as flaky. Names are title hashes and no message leaves the runner.
+      - name: Upload Web test results to Codecov
+        if: ${{ !cancelled() && (steps.tests.outcome == 'success' || steps.tests.outcome == 'failure') }}
+        continue-on-error: true
+        timeout-minutes: 5
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          report_type: test_results
+          files: ${{ runner.temp }}/sve-web-reports/junit-public.xml
           disable_search: true
           flags: web
           fail_ci_if_error: false
