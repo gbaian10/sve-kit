@@ -458,6 +458,7 @@ class AuthorExpander:
                 DAMAGE_KEY,
                 "draw_exact_spell.v1",
                 "draw_exact_attack_time.v1",
+                "draw_exact_evolve_time.v1",
             }:
                 use = SourceUse.model_validate_json(
                     canonical(array(ability["sources"])[0]), strict=True

@@ -323,7 +323,7 @@ class CurrentAuthorSources:
             if value is not None and not isinstance(value, str | int):
                 raise SourceError("source_database_shape")
             result[key] = _known(value)
-            # Spells have no combat stats; this is known absence under P1 §4.1.
+            # Spells have no combat stats; this is known absence under P1 §4.2.
             if (
                 value is None
                 and revision["type_code"] == "spell"
@@ -344,6 +344,14 @@ class CurrentAuthorSources:
                 )
             )
             result[key] = _known(list[JsonValue](values))
+            # An EVOLVE follower has no printed cost; field cost stays with its base (CR 5.16.1.2).
+            if (
+                key == "special_kinds"
+                and "evolve" in values
+                and revision["type_code"] == "follower"
+                and revision["cost"] is None
+            ):
+                result["cost"] = {"state": "known", "value": None}
         return result
 
     def _rules_names(self, face: str) -> list[JsonValue]:

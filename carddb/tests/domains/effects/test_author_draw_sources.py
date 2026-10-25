@@ -36,7 +36,7 @@ if TYPE_CHECKING:
     from sve_carddb.domains.effects.author_sources import SourceContext
 
 
-@pytest.fixture(params=["spell", "attack_time"])
+@pytest.fixture(params=["spell", "attack_time", "evolve_time"])
 def draw_head(request: pytest.FixtureRequest) -> str:
     assert isinstance(request.param, str)
     return request.param
@@ -74,6 +74,8 @@ def test_draw_source_expansion(
         ("spell", "evolve_time"),
         ("attack_time", "spell"),
         ("attack_time", "evolve_time"),
+        ("evolve_time", "spell"),
+        ("evolve_time", "attack_time"),
     ],
 )
 @pytest.mark.parametrize("companion", [False, True])
@@ -88,9 +90,37 @@ def test_draw_heads_are_not_interchangeable(
         expander.expand_sources(raw, bodies, {PATH: candidate})
 
 
+@pytest.mark.parametrize(
+    ("raw", "phase", "kind"),
+    [
+        ("【進化時】3枚引く。", "normal", "follower"),
+        ("【進化時】3枚引く。", "advance", "follower"),
+        ("【進化時】3枚引く。", "evolved", "spell"),
+        ("【超進化時】3枚引く。", "evolved", "follower"),
+    ],
+)
+def test_evolve_time_requires_an_evolved_follower(
+    raw: str, phase: str, kind: str
+) -> None:
+    descriptor = source(raw)
+    engine = classifier()
+    context = CardContext(
+        descriptor, "c:synthetic", "f:synthetic", phase, kind, True, 0
+    )
+    derived = derive_source(raw, descriptor, engine, context=context)
+    _, binding = derived.bind(0)
+    use = SourceUse(
+        binding_id=binding.id,
+        occurrence=binding.occurrence_key(),
+        ability_scope="ability_0",
+    )
+    with pytest.raises(SourceError, match="source_pending"):
+        resolve_source(SourceCandidate(raw, descriptor, engine, context), use)
+
+
 BAD_HEADS: list[dict[str, JsonValue]] = [
     {"fanfare": {"do": [{"draw": {"who": "self", "n": 3}}]}},
-    {"evolve_time": {"do": [{"draw": {"who": "self", "n": 3}}]}},
+    {"evolve": {"cost": {"pp": 3}}},
     {"spell": {"do": [{"draw": {"who": "opp", "n": 3}}]}},
     {"spell": {"do": [{"draw": {"who": "each", "n": 3}}]}},
     {"spell": {"do": [{"draw": {"n": 3}}]}},
@@ -125,7 +155,7 @@ BAD_HEADS: list[dict[str, JsonValue]] = [
     BAD_HEADS,
     ids=[
         "head",
-        "evolve-head",
+        "evolve-entry",
         "opponent",
         "both",
         "implicit-actor",
@@ -193,15 +223,15 @@ def test_draw_rejects_complete_payload_drift(
 def test_unadmitted_source_constructions_fail_closed(
     expander: AuthorExpander, raw: str, draw_head: str
 ) -> None:
-    if draw_head == "attack_time":
-        raw = "【攻撃時】" + raw
+    if draw_head != "spell":
+        raw = ("【攻撃時】" if draw_head == "attack_time" else "【進化時】") + raw
     descriptor = source(raw)
     engine = classifier()
     context = CardContext(
         descriptor,
         "c:synthetic",
         "f:synthetic",
-        "normal",
+        "evolved" if draw_head == "evolve_time" else "normal",
         "spell" if draw_head == "spell" else "follower",
         True,
         0,
