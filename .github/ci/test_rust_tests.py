@@ -42,6 +42,9 @@ class RustTests(unittest.TestCase):
                     environment = kwargs["env"]
                     assert isinstance(environment, dict)
                     assert Path(environment["SVE_TEST_SNAPSHOT"]) == generated[0]
+                    assert (
+                        Path(environment["SVE_TEST_CURRENT_SELECTION"]) == generated[1]
+                    )
                     assert argv == [
                         "mise",
                         "exec",
@@ -63,8 +66,10 @@ class RustTests(unittest.TestCase):
                         os.environ,
                         {
                             "SVE_TEST_SNAPSHOT": "/unused/inherited-snapshot",
+                            "SVE_TEST_CURRENT_SELECTION": "/unused/inherited-selection",
                         },
                     ),
                 ):
                     assert rust_tests.main(arguments) == 7
                 assert not generated[0].exists()
+                assert not generated[1].exists()

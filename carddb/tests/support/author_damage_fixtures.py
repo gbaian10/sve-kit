@@ -27,7 +27,12 @@ FACE = "f:90c74424f2435907a035f70ce37463d4"
 HASH = "3aeefc3819be4412d9e8891136fd813bbb27ce55011343f51d38289d4ee1d196"
 
 
-def damage_fixture(store: Path) -> CurrentSourceFixture:
+def damage_fixture(
+    store: Path,
+    *,
+    card_numbers: frozenset[str] = frozenset({"BP01-P25", "BP01-121"}),
+    parser_version: str = "author-current-fixture-v1",
+) -> CurrentSourceFixture:
     authored = REPOSITORY / "authored"
     definitions = four_layer_definitions.from_files(
         four_layer_definitions.read_files(authored)
@@ -52,5 +57,8 @@ def damage_fixture(store: Path) -> CurrentSourceFixture:
     snapshot = Snapshot((files[0],), with_definitions(tuple(files)))
     validate_snapshot(snapshot)
     return current_source_fixture(
-        store, card_numbers=frozenset({"BP01-P25", "BP01-121"}), snapshot=snapshot
+        store,
+        card_numbers=card_numbers,
+        snapshot=snapshot,
+        parser_version=parser_version,
     )

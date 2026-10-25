@@ -1,0 +1,16 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "trigger",
+      "body": {
+        "op": "damage",
+        "subjects": "both.leaders",
+        "amount": 2
+      },
+      "event": "field_to_cemetery",
+      "subject": "self"
+    }
+  ]
+}

@@ -459,9 +459,9 @@ def test_real_current_author_set(
 ) -> None:
     # One test keeps the real tree/database build on one xdist worker.
     real = load_author_set(SCHEMAS.parent / "authored", expander.schemas)
-    assert real.index_file is None
-    assert real.index.records == ()
-    assert real.author_files == real.body_files == ()
+    assert real.index_file is not None
+    assert {record.record_key for record in real.index.records} == {"BP01-P25"}
+    assert len(real.author_files) == len(real.body_files) == 1
     assert {file.path for file in real.prototype_files} == {
         path.relative_to(SCHEMAS.parent / "authored").as_posix()
         for path in (SCHEMAS.parent / "authored/rules/effects").glob("*.yaml")

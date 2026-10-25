@@ -153,6 +153,20 @@ cargo test --locked -p sve-engine --test boundaries
 Python 基線測試驗證 AST、位置、分類版本與跨行 pointer；Rust 情境才驗證上述具體行為。
 兩者都不宣稱 780 個位置全部可執行，亦不改變原 `status: complete` 的歷史性質。
 
+### 已遷移到作者 1.0 的卡
+
+整卡切換到作者 1.0 後，原型條目離開 `authored/rules/effects/`，其原 AST 原樣保存在
+`carddb/tests/fixtures/effect_baseline/migrated/<卡號>.json`，作為 before fixture；
+基線測試把它與現存原型合併後，仍對全部卡檢查原 AST 指紋與位置。
+
+舊 Rust 執行器的共享場景（`shared`、`cards`）只驗**歷史回歸**：測試 catalog 以明確命名的
+輔助函式，在已通過 `Catalog::from_current_selection()` 的原型文件上還原這些保存的原 AST，
+場景、期望值與已知失敗清單維持原樣。這個 catalog 不是 current 選用結果，也不讓遷移卡取得
+runtime 資格。
+
+真正的 current 選用另由 `current_repository` 測試直接驗證：選用結果的原型側不含已遷移卡，
+作者卡走完整 D0 候選。歷史 fixture 不得填回選用結果，也不得當成 current 的 fallback。
+
 ## 採納與中文重審
 
 目前 `required_uses` 為空：草案沒有修改正式來源語義或中文 render。
