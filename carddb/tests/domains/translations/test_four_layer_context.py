@@ -719,15 +719,15 @@ def test_play_event_contract_is_separate_from_entry_and_checks_subject_generatio
             )
 
 
-def test_preparation_structure_changes_identity_and_requires_v8() -> None:
+def test_preparation_structure_changes_identity_and_requires_v9() -> None:
     case = contract_case("A11")
     frame = case.item.frame
     changed = frame.model_copy(update={"mode_rules": (case.mode_rule,)})
     assert frame.payload("synthetic") != changed.payload("synthetic")
     document = changed.model_dump()
-    for version in ("four-layer-jp-v2", "four-layer-jp-v7"):
+    for version in ("four-layer-jp-v2", "four-layer-jp-v7", "four-layer-jp-v8"):
         document["source"]["normalizer_version"] = version
-        with pytest.raises(ValueError, match="requires a v8"):
+        with pytest.raises(ValueError, match="requires a v9"):
             type(frame).model_validate(document)
     read = contract_case("A1").item.binding.values["read"]
     slot = next(

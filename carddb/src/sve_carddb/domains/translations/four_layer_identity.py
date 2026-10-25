@@ -32,6 +32,29 @@ _DEFINITION = TypeAdapter(object)
 
 # These describe source meaning, not grammar coverage or interpreter implementation.
 RESOLVED: dict[str, JsonValue] = {
+    "destroy_fanfare_opponent_all_field_followers.v1": {
+        "kind": "destroy",
+        "trigger": {
+            "kind": "printed_fanfare",
+            "holder": "source_holder",
+            "event": "enter_field_from_outside_field",
+            "view": "after_entry",
+            "resolution": "pending_until_checkpoint_play",
+            "master": "ability_master",
+        },
+        "holder": {"kind": "follower", "special_kinds": ["advance"]},
+        "recipients": {"who": "opp", "zone": "field", "kind": "follower"},
+        "selection": "all_at_resolution_without_target",
+        "destination": "each_card_owner_cemetery",
+        "advance": "immediately_return_face_up_to_owner_evolve_deck_after_move",
+        "token": "cease_after_entering_cemetery",
+        "batch": "single_set_instruction",
+        "ignores_prevention": False,
+        "empty": "no_destroy_fact",
+        "ability_scope": "complete_second_line_with_ward_aura_and_layout_siblings",
+        "fixed_head": {"slot": "leaf_0", "glossary": "term:ability.fanfare"},
+        "params": {},
+    },
     "damage_uniform_lastword_all_leaders.v1": {
         "kind": "damage",
         "trigger": {

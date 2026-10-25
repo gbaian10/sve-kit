@@ -29,13 +29,13 @@
   `1de5adc33023646bbc7ced36bb49bb1850fe54309fed29c246d060a40862bc53`。
   本次沒有重錄 `ast_sha256`、移動 ability 或修改分類版本、結論、理由、
   `candidate` 狀態及審核紀錄；BP07-P06 沿用上述已採納的錨點更正。
-- 判讀草案的 frame／use 引用與測試基線的反向 `frame_ids` 已依正式映射換成
+- v8 時，判讀草案的 frame／use 引用與測試基線的反向 `frame_ids` 已依正式映射換成
   `frame-v2` 身分（normalizer 為 `four-layer-jp-v8`）；對應凍結建置 SHA-256 為
   `9889d5ce18670019aaecc9f5e1ecb7aab59c1e222992f59a2bc80953933cd6ea`。
   v8 只因 BP01-P25 的完整 Lastword 全主戰者固定傷害語義改變一個 frame；
   其餘 frame 保號，草案依賴依正式 writer 映射重驗，未搬移審核核可。
   草案不保留 frame-v1 引用；分類輸入、結論與 `candidate` 狀態不變，不因此取得新審核核可。
-  草案的 `basis` 仍指向此判讀建置，反向 `frame_ids` 與草案的引用維持不變；
+  當時草案的 `basis` 指向此判讀建置，反向 `frame_ids` 與草案的引用維持不變；
   正向 `fragments` 則依上述新位置基準重算，不回填或搬移舊審核核可。
 - 重算範圍為全部 422 卡、780 個正向位置及其 801 個非 layout 片段
   （`unclassified_positions` 不在本次正向片段重算範圍，維持不變）。
@@ -49,6 +49,12 @@
   映射換號；BP07-P06 的三個片段另反映 #824 清空錯植 section 後的 revision 身分。
   正式映射拒絕延續舊審核的語義變更，只用來核對 occurrence 的新位置證據，
   不作為等價或審核通過的證明。60 個反向位置與其分類、`covered_by` 保持不變。
+- v9 採納 BP19-P32 的完整 Advance Fanfare 破壞來源後，只更新該卡正向位置的
+  四個 frame／binding／use 引用葉；兩個 sibling binding、原文全文 hash、span、
+  `ability_indices` 與全部 `ast_sha256` 保留。其餘正向位置仍以上述 v8 位置基準為證據。
+  草案的 frame／use 引用與 `basis` 同步重驗為 `four-layer-jp-v9`，凍結候選 DB SHA-256 為
+  `954cec76c925454f30236a0468bd87b71270b4d6e696f16402fac0a94df1dfec`；分類、結論、理由、`candidate` 狀態及既有審核歷史不改，
+  不因來源 resolved 取得本體、整卡或執行資格。
 - 正向位置連接只比較 JP printing、face、欄位、section 與行號，沒有證明歷史 v0
   卡文與目前來源完全相同。[分類文字版本驗證](../schema/domains/effect-classifications.md#分類文字版本)與本基線的位置證據不得互相取代。
 

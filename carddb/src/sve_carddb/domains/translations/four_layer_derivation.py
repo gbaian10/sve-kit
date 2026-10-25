@@ -20,6 +20,7 @@ from sve_carddb.domains.translations.four_layer_context import (
     Registry,
 )
 from sve_carddb.domains.translations.four_layer_damage import prepare_damage
+from sve_carddb.domains.translations.four_layer_destroy import prepare_destroy
 from sve_carddb.domains.translations.four_layer_draw import prepare_draw
 from sve_carddb.domains.translations.four_layer_expressions import (
     DOMAIN,
@@ -258,6 +259,7 @@ def derive_source(
         prepared = family.prepare(raw, prepared, classifier, context)
     prepared = prepare_draw(raw, prepared, context)
     prepared = prepare_damage(raw, prepared, context)
+    prepared = prepare_destroy(raw, prepared, context)
     if len(prepared.interfaces) != len(prepared.derived.field.parts):
         raise ValueError("Source interfaces must preserve source part order")
     if prepared.mode_rules and len(prepared.mode_rules) != len(

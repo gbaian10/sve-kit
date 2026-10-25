@@ -284,5 +284,5 @@ def schemas() -> dict[str, JsonValue]:
     source_properties = object_value(
         object_value(declarations["FrameSource"])["properties"]
     )
-    object_value(source_properties["normalizer_version"])["const"] = "four-layer-jp-v8"
+    object_value(source_properties["normalizer_version"])["const"] = "four-layer-jp-v9"
     return declarations
