@@ -10,6 +10,7 @@ from sve_carddb.contracts.four_layer import (
     Constant,
     Domain,
     Expression,
+    FaceRevisionOwner,
     Frame,
     GlossaryReference,
     LeafSchema,
@@ -23,6 +24,7 @@ from sve_carddb.core.json import canonical, digest
 from sve_carddb.domains.translations.four_layer_damage import KEY as DAMAGE_KEY
 from sve_carddb.domains.translations.four_layer_derivation import derive_source
 from sve_carddb.domains.translations.four_layer_expressions import definition
+from sve_carddb.domains.translations.four_layer_fixed_actions import MOVE
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -109,6 +111,7 @@ SOURCE_SITES: dict[tuple[str, tuple[str | int, ...]], tuple[str, str, str, str]]
 BINARY_ARITY = 2
 ENTRY_HEADS = {
     DAMAGE_KEY: ("lastword",),
+    MOVE: ("activate",),
     "draw_exact_spell.v1": ("spell",),
     "draw_exact_attack_time.v1": ("attack_time",),
     "draw_exact_evolve_time.v1": ("evolve_time",),
@@ -152,6 +155,7 @@ ADAPTER_RECIPE = digest(
             "damage_operand": "fixed-lastword-concept;Nat-damage_amount-leaf_1;exact-body-v1",
             "draw_operand": "draw_exact_spell.v1;draw_exact_attack_time.v1;draw_exact_evolve_time.v1;required-Nat-count-value;single-source-leaf",
             "draw_payload": "complete-head-body-canonical-equality-v1",
+            "move_payload": "fixed-activation-PP1;SourceHolder-current-generation;Put-card-owner-cemetery;exact-three-leaves;no-params;complete-head-body-v1",
         }
     )
 )
@@ -214,6 +218,16 @@ def entry_payload(source: SourceContext, scope: str) -> dict[str, JsonValue]:
     scopes = tuple(f"ability_{index}" for index in range(len(heads)))
     if scope not in scopes:
         raise SourceError("source_ability_scope_mismatch")
+    if source.frame.semantic_variant.key == MOVE:
+        _move_contract(source)
+        return {
+            "activate": {
+                "zone": "field",
+                "cost": {"pp": 1},
+                "do": [{"move": {"ref": "this", "to": "cemetery"}}],
+            },
+            "ports": {"imports": {}, "exports": {}},
+        }
     if source.frame.semantic_variant.key == DAMAGE_KEY:
         return {
             "lastword": {
@@ -259,6 +273,67 @@ def entry_payload(source: SourceContext, scope: str) -> dict[str, JsonValue]:
         heads[index]: {"cost": {"pp": operands[index][1]}},
         "ports": {"imports": {}, "exports": {}},
     }
+
+
+def _move_contract(source: SourceContext) -> None:
+    # All three leaves are fixed; neither PP nor destination is a parameter here.
+    expected = LeafSchema(
+        format=2,
+        slots=(
+            LeafSlot(
+                name="leaf_0",
+                type="Concept",
+                role="ability",
+                required=True,
+                domain=Domain(min=None, max=None, values=("concept.ability.v1",)),
+                occurrences=(Span(start=1, end=3),),
+            ),
+            LeafSlot(
+                name="leaf_1",
+                type="Nat",
+                role="cost_value",
+                required=True,
+                domain=Domain(min=0, max=SAFE_INTEGER, values=()),
+                occurrences=(Span(start=8, end=9),),
+            ),
+            LeafSlot(
+                name="leaf_2",
+                type="ZoneSet",
+                role="destination_zone",
+                required=True,
+                domain=Domain(min=None, max=None, values=("zone.single.v1",)),
+                occurrences=(Span(start=14, end=22),),
+            ),
+        ),
+    )
+    occurrence = source.binding.occurrence_key()
+    if (
+        source.canonical_source != "{起動}{コストN}:これを{leaf_2}に置く。"
+        or source.frame.leaf_schema != expected
+        or not isinstance(occurrence.owner, FaceRevisionOwner)
+        or occurrence.field != "effect"
+        or occurrence.ordinal is not None
+    ):
+        raise SourceError("source_move_contract_mismatch")
+    if (
+        occurrence.line_ordinal != 1
+        or occurrence.role != "body"
+        or occurrence.segments != (Span(start=29, end=49),)
+        or source.binding.frame_id != source.frame.id
+    ):
+        raise SourceError("source_move_contract_mismatch")
+    if (
+        source.binding.values
+        != {
+            "leaf_0": GlossaryReference(kind="glossary", key="term:ability.activation"),
+            "leaf_1": 1,
+            "leaf_2": ("graveyard",),
+        }
+        or type(source.binding.values.get("leaf_1")) is not int
+        or tuple((o.slot, o.canonical_spans) for o in source.binding.occurrences)
+        != tuple((s.name, s.occurrences) for s in expected.slots)
+    ):
+        raise SourceError("source_move_contract_mismatch")
 
 
 def _lastword_amount(source: SourceContext) -> int:
@@ -566,6 +641,8 @@ def parameter_expected(
     fragment: JsonValue,
 ) -> int | str:
     """A matching scalar is insufficient without a registered operand construction."""
+    if source.frame.semantic_variant.key == MOVE:
+        raise SourceError("unsupported_source_construct")
     try:
         declaration = ParamDecl.model_validate(declaration.model_dump(mode="python"))
     except ValueError:
