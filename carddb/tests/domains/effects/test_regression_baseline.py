@@ -61,11 +61,11 @@ def test_baseline_covers_every_authored_pack() -> None:
 
 
 def author_records(pack: str) -> dict[str, dict[str, JsonValue]]:
-    """Index rows whose author shard belongs to ``pack``, keyed by CardNumber."""
+    """Index rows from every author shard in ``pack``, keyed by CardNumber."""
     return {
         str(row["record_key"]): row
         for row in map(object_value, array(read_yaml(AUTHOR_INDEX)["records"]))
-        if str(row["file"]).endswith(f"/{pack}/001.yaml")
+        if str(row["file"]).startswith(f"rules/author-effects/{pack}/")
     }
 
 
@@ -136,7 +136,8 @@ def test_handwritten_programs_keep_the_reviewed_positions_and_inputs(
         assert dict(positions) == frozen, number
 
     for number, record in records.items():
-        assert_migrated_evolve(number, record, object_value(expected[number]))
+        if str(record["file"]).endswith("/001.yaml"):
+            assert_migrated_evolve(number, record, object_value(expected[number]))
 
 
 @pytest.mark.parametrize(

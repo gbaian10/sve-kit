@@ -64,6 +64,53 @@ fn repository_lastword_keeps_its_permanent_source_and_complete_damage_body() {
 mod runtime;
 
 #[test]
+fn repository_draw_cards_lower_as_complete_current_candidates() {
+    let (snapshot, keywords, input) = inputs();
+    let selected = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
+    let prototypes = serde_json::to_value(&selected.prototypes).unwrap();
+    let cases = [
+        (
+            "BP10-122",
+            "c:9c92781995b55d629c700b5f25179da6",
+            "attack_time",
+            1_u8,
+        ),
+        (
+            "CP02-068",
+            "c:0850c7b7bda15bbaa0cbd019e7fba60c",
+            "spell",
+            3_u8,
+        ),
+        (
+            "ECP01-002",
+            "c:d02c2e5925ce5e7e94d6d7b3ea6be009",
+            "evolve_time",
+            1_u8,
+        ),
+    ];
+
+    for (card_no, card_id, head, count) in cases {
+        assert!(prototypes["programs"].get(card_no).is_none());
+        let card = &selected.current[card_no];
+        assert_eq!(card.card_id, card_id);
+        assert_eq!(card.program.card().abilities.len(), 1);
+        assert_eq!(
+            card.expanded["cards"][card_no]["abilities"][0][head]["do"][0]["draw"],
+            json!({"who":"self", "n":count})
+        );
+        let source = card
+            .source_at(&format!("/cards/{card_no}/abilities/0/{head}/do/0/draw/n"))
+            .unwrap();
+        assert_eq!(source.source.card_id, card_id);
+        assert_eq!(source.source.card_no, card_no);
+        assert_eq!(source.source.scope, "ability_0");
+        assert_eq!(source.source.field, "effect");
+        assert_eq!(source.source.line, 1);
+        assert_eq!(source.source.section, None);
+    }
+}
+
+#[test]
 fn repository_lastword_rejects_missing_sources_and_unknown_or_unsupported_steps() {
     let (snapshot, keywords, input) = inputs();
     let lowerer = ExpandedLowerer::new().unwrap();

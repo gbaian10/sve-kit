@@ -10,8 +10,7 @@ from sve_carddb.domains.effects.author_current import CurrentAuthorSources
 from sve_carddb.domains.effects.author_expansion import AuthorExpander
 from sve_carddb.domains.effects.author_set import load_author_set
 
-from .author_current_fixtures import REPOSITORY
-from .author_damage_fixtures import damage_fixture
+from .author_current_fixtures import REPOSITORY, current_source_fixture, entry_snapshot
 
 
 def selection_input(root: Path) -> JsonValue:
@@ -24,10 +23,11 @@ def selection_input(root: Path) -> JsonValue:
         )
     # Identity covers every printing; limiting text sources to author cards keeps
     # unrelated prototype cards' scoped source corrections (pinned images) out.
-    fixture = damage_fixture(
+    fixture = current_source_fixture(
         root / "sources",
         card_numbers=frozenset(numbers),
         parser_version="official-jp-exact-v1",
+        snapshot=entry_snapshot(),
     )
     with fixture.template.copy() as db:
         current = CurrentAuthorSources(

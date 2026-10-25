@@ -68,11 +68,13 @@ def entry_snapshot() -> Snapshot:
     records = tuple(
         record
         for name in (
+            "translations/glossary/concepts/001.yaml",
             "translations/glossary/concepts/004.yaml",
             "translations/templates/definitions/002.yaml",
             "translations/templates/definitions/059.yaml",
             "translations/templates/definitions/094.yaml",
             "translations/templates/definitions/117.yaml",
+            "translations/templates/definitions/029.yaml",
         )
         for record in Shard.model_validate_json(
             definitions.expand_shard(read_authored(authored / name, root=authored)[1])
@@ -86,19 +88,26 @@ def entry_snapshot() -> Snapshot:
             record.data.id == EVOLVE_FRAME
             or record.data.semantic_variant.key
             in {
+                "damage_uniform_lastword_all_leaders.v1",
                 "draw_exact_spell.v1",
                 "draw_exact_attack_time.v1",
                 "draw_exact_evolve_time.v1",
             }
         )
     )
-    assert len(selected) == 4
-    storm = tuple(
-        record
-        for record in records
-        if isinstance(record, TermRecord) and record.data.id == "term:keyword.storm"
-    )
-    assert len(storm) == 1
+    assert len(selected) == 5
+    terms = {
+        name: tuple(
+            record
+            for record in records
+            if isinstance(record, TermRecord) and record.data.id == identifier
+        )
+        for name, identifier in (
+            ("translations/glossary/concepts/001.yaml", "term:ability.last_words"),
+            ("translations/glossary/concepts/004.yaml", "term:keyword.storm"),
+        )
+    }
+    assert all(len(records) == 1 for records in terms.values())
     content = canonical(
         {
             "format": 3,
@@ -109,19 +118,35 @@ def entry_snapshot() -> Snapshot:
             ],
         }
     )
-    glossary = canonical(
-        {
-            "format": 3,
-            "kind": "translation_shard",
-            "records": [storm[0].model_dump(mode="json", exclude_computed_fields=True)],
-        }
+    glossary_files = tuple(
+        (
+            name,
+            canonical(
+                {
+                    "format": 3,
+                    "kind": "translation_shard",
+                    "records": [
+                        records[0].model_dump(mode="json", exclude_computed_fields=True)
+                    ],
+                }
+            ),
+            canonical(
+                {
+                    "format": 3,
+                    "kind": "translation_shard",
+                    "records": [
+                        records[0].model_dump(mode="json", exclude_computed_fields=True)
+                    ],
+                }
+            ),
+        )
+        for name, records in terms.items()
     )
-    glossary_file = ("translations/glossary/concepts/004.yaml", glossary, glossary)
     snapshot = Snapshot(
-        (glossary_file,),
+        glossary_files,
         with_definitions(
             (
-                glossary_file,
+                *glossary_files,
                 ("translations/templates/definitions/094.yaml", content, content),
             )
         ),
