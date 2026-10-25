@@ -16,6 +16,7 @@ use serde_json::{Value, json};
 
 use crate::{EngineFailure, Result, invalid};
 
+pub(crate) mod current;
 mod rule_bindings;
 mod selection;
 mod semantics;

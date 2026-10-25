@@ -2,8 +2,7 @@ use super::super::{Answer, DecisionToken, DecisionView, InputDomain, Slot, Wait}
 use super::{
     Ability, AbilityKind, Activation, Context, Execution, ExecutionId, Expr, Fact, Game,
     Generation, Int, Located, Nat, Node, PlayerId, Result, ResumeStage, RuntimeAbilitySource,
-    SourceSpan, Step, admission, face_ordinal, int, invalid, printed_origin, seat_name,
-    unsupported,
+    SourceSpan, Step, admission, int, invalid, printed_origin, seat_name, unsupported,
 };
 use crate::game::legal::subsets;
 use crate::ir::quick::is_printed_quick;
@@ -471,7 +470,7 @@ impl Game {
         };
         let ability = located.node.clone();
         let (face, _) = printed_origin(&ability.source.origin)?;
-        if face_ordinal(face)? != 0 {
+        if self.printed_face_ordinal(&object.card, face)? != 0 {
             return Err(unsupported("Spell belongs to another face"));
         }
         let old_context = Context {

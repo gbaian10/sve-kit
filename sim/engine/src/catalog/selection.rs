@@ -3,16 +3,39 @@
 use super::{Catalog, EngineFailure, Result, invalid};
 use crate::ir::lowering::{CurrentCardProgram, ExpandedLowerer};
 use alloc::collections::{BTreeMap, BTreeSet};
+use alloc::sync::Arc;
 use serde::Deserialize;
 use serde_json::Value;
 
 /// Disjoint prototype programs and complete, current-source checked D0 candidates.
 #[derive(Debug)]
+#[expect(
+    clippy::partial_pub_fields,
+    reason = "The public candidates are checked against private accepted copies before use."
+)]
 pub struct SelectedEffects {
     /// Existing prototype runtime, without any switched card's prototype program.
-    pub prototypes: Catalog,
+    pub prototypes: Arc<Catalog>,
     /// Whole-card candidates; selection does not grant execution or use qualification.
-    pub current: BTreeMap<String, CurrentCardProgram>,
+    pub current: BTreeMap<String, Arc<CurrentCardProgram>>,
+    accepted: BTreeMap<String, Arc<CurrentCardProgram>>,
+    accepted_prototypes: Arc<Catalog>,
+}
+
+impl SelectedEffects {
+    pub(crate) fn check_runtime(&self) -> Result<()> {
+        if !Arc::ptr_eq(&self.prototypes, &self.accepted_prototypes)
+            || self.current.len() != self.accepted.len()
+            || self.current.iter().any(|(number, candidate)| {
+                self.accepted
+                    .get(number)
+                    .is_none_or(|accepted| !Arc::ptr_eq(candidate, accepted))
+            })
+        {
+            return Err(invalid("current selection changed after acceptance"));
+        }
+        Ok(())
+    }
 }
 
 #[derive(Deserialize)]
@@ -59,13 +82,16 @@ pub(super) fn select(snapshot: &str, keywords: &str, handoff: &Value) -> Result<
             || prototypes.programs.contains_key(&number)
             || prototypes.rejected.contains_key(&number)
             || !identities.insert(program.card_id.clone())
-            || current.insert(number, program).is_some()
+            || current.insert(number, Arc::new(program)).is_some()
         {
             return Err(invalid("current selection identity or prototype overlap"));
         }
     }
+    let prototypes = Arc::new(prototypes);
     Ok(SelectedEffects {
+        accepted_prototypes: Arc::clone(&prototypes),
         prototypes,
+        accepted: current.clone(),
         current,
     })
 }

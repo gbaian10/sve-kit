@@ -1,7 +1,7 @@
 //! Only a checked intrinsic evolution projection may enter the shared rule procedure.
 use super::{
     Ability, AbilityOrigin, Action, CostSpec, Expr, Game, KeywordId, Located, Node, Result,
-    SourceSpan, check_source, invalid, unsupported,
+    SourceSpan, invalid, unsupported,
 };
 use crate::game::string;
 use crate::ir::{Control, Int, PlayerRef, Resource, ResourceOperation};
@@ -40,14 +40,14 @@ pub(super) fn cost(ability: &Ability) -> Result<i64> {
     Ok(*value)
 }
 
-fn span(source: &SourceSpan, expected: &SourceSpan) -> Result<()> {
+fn span(game: &Game, source: &SourceSpan, expected: &SourceSpan) -> Result<()> {
     if source.owner != expected.owner
         || source.field != expected.field
         || source.fragment != expected.fragment
     {
         return Err(invalid("evolution source evidence mapping mismatch"));
     }
-    check_source(
+    game.check_card_source(
         source,
         &expected.card_no,
         &expected.face,
@@ -55,7 +55,7 @@ fn span(source: &SourceSpan, expected: &SourceSpan) -> Result<()> {
     )
 }
 
-pub(super) fn check(ability: &Located<Ability>) -> Result<()> {
+pub(super) fn check(game: &Game, ability: &Located<Ability>) -> Result<()> {
     cost(&ability.node)?;
     let body = ability
         .node
@@ -65,7 +65,7 @@ pub(super) fn check(ability: &Located<Ability>) -> Result<()> {
     let [projection] = body.steps.as_slice() else {
         return Err(unsupported("evolution projection"));
     };
-    span(&projection.source, &ability.source)?;
+    span(game, &projection.source, &ability.source)?;
     let Node::Control {
         control: Control::EachObject {
             body: projected, ..
@@ -77,7 +77,7 @@ pub(super) fn check(ability: &Located<Ability>) -> Result<()> {
     let [step] = projected.steps.as_slice() else {
         return Err(unsupported("evolution instruction"));
     };
-    span(&step.source, &ability.source)?;
+    span(game, &step.source, &ability.source)?;
     let Node::Instruction { instruction } = &step.node else {
         return Err(unsupported("evolution instruction"));
     };

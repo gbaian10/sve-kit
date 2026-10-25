@@ -1,4 +1,4 @@
-//! Migrated repository cards stay complete D0 candidates, separate from runtime admission.
+//! Formal current selections preserve provenance through whole-card execution.
 
 #![cfg(feature = "runner")]
 #![expect(
@@ -7,16 +7,9 @@
     reason = "Shared fixture readers fail immediately on a missing or malformed input."
 )]
 
-extern crate alloc;
-use alloc::sync::Arc;
 use serde_json::{Value, json};
 use std::{env::var_os, fs::read_to_string, path::PathBuf};
-use sve_engine::{
-    EngineFailure,
-    catalog::Catalog,
-    game::{Game, View},
-    ir::lowering::ExpandedLowerer,
-};
+use sve_engine::{EngineFailure, catalog::Catalog, ir::lowering::ExpandedLowerer};
 
 fn inputs() -> (String, String, Value) {
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
@@ -42,7 +35,7 @@ fn p25(input: &Value) -> &Value {
 fn repository_lastword_keeps_its_permanent_source_and_complete_damage_body() {
     let (snapshot, keywords, input) = inputs();
     let selected = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
-    let prototypes = serde_json::to_value(&selected.prototypes).unwrap();
+    let prototypes = serde_json::to_value(&*selected.prototypes).unwrap();
     assert!(prototypes["programs"].get("BP01-P25").is_none());
     let card = &selected.current["BP01-P25"];
     assert_eq!(card.card_id, "c:efb62b3ef53e576797625688d75164d9");
@@ -67,48 +60,8 @@ fn repository_lastword_keeps_its_permanent_source_and_complete_damage_body() {
     assert_eq!(source.source.section, None);
 }
 
-#[test]
-fn repository_lastword_current_identity_is_blocked_at_whole_card_admission() {
-    let (snapshot, keywords, input) = inputs();
-    let selected = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
-    let program = &selected.current["BP01-P25"].program;
-    let catalog = Arc::new(selected.prototypes);
-    for seat in ["P1", "P2"] {
-        let mut initial = json!({
-            "history":"explicit",
-            "turn":{"active":seat,"first_player":"P1","phase":"main",
-                "elapsed_turns":{"P1":3_u8,"P2":3_u8}},
-            "players":{
-                "P1":{"leader":{"class":"ニュートラル","life":20_u8},
-                    "pp":{"current":10_u8,"max":10_u8},"ep":0_u8,"sep":0_u8,"zones":{}},
-                "P2":{"leader":{"class":"ニュートラル","life":20_u8},
-                    "pp":{"current":10_u8,"max":10_u8},"ep":0_u8,"sep":0_u8,"zones":{}}
-            }
-        });
-        initial["players"][seat]["zones"]["field"] = json!([{"id":"departing","card":"BP01-P25"}]);
-        let mut game = Game::new(
-            Arc::clone(&catalog),
-            &initial,
-            &Value::Null,
-            &Value::Null,
-            "E-B2-admission",
-        )
-        .unwrap();
-        let before = format!("{game:?}");
-        // This records the real D0/D1 barrier, not Lastword execution evidence.
-        let admission = game.load_internal_card("BP01-P25", program).unwrap_err();
-        assert!(matches!(&admission, EngineFailure::Unsupported(reason)
-            if reason == "no authored program: BP01-P25"));
-        assert_eq!(format!("{game:?}"), before);
-        assert_eq!(game.internal_card_stage(), None);
-        for view in [View::P1, View::P2, View::Referee] {
-            let projection = game.projection(view).unwrap_err();
-            assert!(matches!(&projection, EngineFailure::Unsupported(reason)
-                if reason == "no authored program: BP01-P25"));
-        }
-        assert_eq!(format!("{game:?}"), before);
-    }
-}
+#[path = "current_repository/runtime.rs"]
+mod runtime;
 
 #[test]
 fn repository_lastword_rejects_missing_sources_and_unknown_or_unsupported_steps() {
@@ -140,7 +93,7 @@ fn repository_lastword_rejects_missing_sources_and_unknown_or_unsupported_steps(
             "/cards/BP01-P25/abilities/0",
         ),
     ] {
-        let failure = lowerer.lower_current(&candidate).unwrap_err();
+        let failure = lowerer.lower_current(&candidate).err().unwrap();
         assert_eq!(failure.code, code);
         assert_eq!(failure.path, path);
         let mut rejected = input.clone();
@@ -151,8 +104,9 @@ fn repository_lastword_rejects_missing_sources_and_unknown_or_unsupported_steps(
             .find(|author| author["input"]["card_no"] == "BP01-P25")
             .unwrap();
         author["input"] = candidate;
-        let selection =
-            Catalog::from_current_selection(&snapshot, &keywords, &rejected).unwrap_err();
+        let selection = Catalog::from_current_selection(&snapshot, &keywords, &rejected)
+            .err()
+            .unwrap();
         assert!(matches!(&selection, EngineFailure::Invalid(reason)
             if reason == &format!("{code} at {path}")));
     }

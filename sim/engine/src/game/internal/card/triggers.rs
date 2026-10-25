@@ -6,7 +6,7 @@ use super::super::source::{SourceInformation, SourceSnapshot};
 use super::super::{Answer, DecisionToken, DecisionView, InputDomain, player_id};
 use super::{
     Ability, AbilityKind, AbilityOrigin, CardPlay, Context, Game, Located, PlayerId, Result,
-    RuntimeAbilitySource, ZoneKind, face_ordinal, invalid, printed_origin, unsupported,
+    RuntimeAbilitySource, ZoneKind, invalid, printed_origin, unsupported,
 };
 use crate::game::{Frame, Object};
 use crate::ir::{
