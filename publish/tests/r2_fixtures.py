@@ -2,14 +2,14 @@
 
 import hashlib
 import hmac
+import re
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from threading import RLock, Thread
 from typing import TYPE_CHECKING, override
 from urllib.parse import parse_qs, parse_qsl, quote, unquote, urlsplit
-from xml.etree import ElementTree as ET  # ruff: ignore[suspicious-xml-etree-import] -- only parses synthetic SDK requests on loopback
-from xml.sax.saxutils import escape
+from xml.sax.saxutils import escape, unescape
 
 import httpx
 import pytest
@@ -26,6 +26,11 @@ ACCOUNT = "d" * 32
 BUCKET = "synthetic-v2"
 NOW = datetime(2026, 10, 4, tzinfo=UTC)
 CREDENTIALS = Credentials("synthetic-access", "synthetic-secret")
+DELETE_KEY = re.compile(r"<Key>(.*?)</Key>", re.DOTALL)
+DELETE_BODY = re.compile(
+    r"<Delete[^>]*>((?:<Object>\s*<Key>.*?</Key>\s*</Object>)+)<Quiet>true</Quiet></Delete>",
+    re.DOTALL,
+)
 
 
 @dataclass(repr=False)
@@ -171,11 +176,12 @@ class Handler(BaseHTTPRequestHandler):
 
     def delete_objects(self, raw: bytes) -> None:
         state = self.state
-        root = ET.fromstring(raw)  # ruff: ignore[suspicious-xml-element-tree-usage] -- trusted synthetic SDK payload
-        namespace = {"s3": "http://s3.amazonaws.com/doc/2006-03-01/"}
-        keys = [node.text or "" for node in root.findall("s3:Object/s3:Key", namespace)]
+        # The SDK writes a flat <Delete><Object><Key>…</Object><Quiet>true</Quiet></Delete>; matching that
+        # exact shape (Quiet at the root, after the objects) avoids a general XML parser here.
+        body = DELETE_BODY.fullmatch(raw.decode().strip())
+        assert body is not None
+        keys = [unescape(key) for key in DELETE_KEY.findall(body[1])]
         assert 1 <= len(keys) <= MAX_DELETE_BATCH
-        assert root.findtext("s3:Quiet", namespaces=namespace) == "true"
         state.delete_batches.append(keys)
         state.operations.extend(("DELETE", key, None) for key in keys)
         if state.delete_status is not None:
