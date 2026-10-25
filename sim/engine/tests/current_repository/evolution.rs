@@ -363,6 +363,27 @@ fn e_b7_003_current_evolutions_use_the_accepted_resource_path() {
 }
 
 #[test]
+fn e_b7_004_current_evolution_uses_the_accepted_resource_path() {
+    run_cases(&[
+        ("BP19-050", "BP19-051", json!({"pp":1_u8}), 3, [9, 1, 1]),
+        (
+            "BP19-050",
+            "BP19-051",
+            json!({"pp":0_u8,"ep":1_u8}),
+            3,
+            [10, 0, 1],
+        ),
+        (
+            "BP19-050",
+            "BP19-051",
+            json!({"pp":1_u8,"sep":1_u8}),
+            4,
+            [9, 1, 0],
+        ),
+    ]);
+}
+
+#[test]
 fn bp18_058_keeps_the_permanent_card_id_shared_with_the_bp18_sl13_printing() {
     // The authored registry maps both printings to this one permanent card; it counts once.
     let (snapshot, keywords, input) = inputs();
