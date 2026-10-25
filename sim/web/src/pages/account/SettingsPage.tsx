@@ -224,6 +224,11 @@ export function SettingsPage() {
           label={t("settings.symbolLabels")}
           hint={t("settings.symbolLabelsHint")}
         />
+        <ToggleRow
+          setting="showDigitalLinks"
+          label={t("settings.showDigitalLinks")}
+          hint={t("settings.showDigitalLinksHint")}
+        />
       </Group>
       <Group id="browse" title={t("settings.groups.browse")}>
         <SettingRow

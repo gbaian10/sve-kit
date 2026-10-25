@@ -177,6 +177,9 @@ export default {
     termEmphasisHint: "Changes display while keeping text and references",
     symbolLabels: "Label symbols",
     symbolLabelsHint: "Only keyword symbols get a label",
+    showDigitalLinks: "Show digital card links",
+    showDigitalLinksHint:
+      "Lists the matching Shadowverse and Worlds Beyond cards under External links on a card page. Turning this off hides the whole section",
     cardEditionHint: "Ban lists, Q&A and other data follow the card edition",
     cardOpenMode: "Open cards",
     cardOpenModeHint:
@@ -492,6 +495,23 @@ export default {
     specialProducts: "Decks and special products",
     switchEdition: "Show the {{edition}} edition",
     empty: "This edition has no sets to list yet.",
+  },
+  digital: {
+    sectionTitle: "External links",
+    heading: "Digital",
+    generation: { sv1: "Shadowverse (original)", svwb: "Worlds Beyond" },
+    game: { sv1: "Shadowverse", svwb: "Worlds Beyond" },
+    numbered: "{{name}} {{n}}",
+    relation: {
+      same_card: "Same card",
+      same_character: "Same character",
+      name_only: "Name only",
+      same_name: "Name only",
+    },
+    unchecked: "Not checked yet",
+    loading: "Loading…",
+    failed: "Couldn't load the digital card links",
+    newTab: "(opens in a new tab)",
   },
   cardPage: {
     switchingCard: "Switching card…",

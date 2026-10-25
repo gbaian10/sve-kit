@@ -18,6 +18,7 @@ export {
   type SnapshotClient,
   type SnapshotStatus,
 } from "./client"
+export { type DigitalLink, digitalLinkUrl, loadCardDigitalLinks } from "./digital-links"
 export { cardPrintings, editionPrinting, locateEdition } from "./edition"
 export { type CardErratum, loadCardErrata } from "./errata"
 export { faceBasics, loadFaceCandidates } from "./face-basics"

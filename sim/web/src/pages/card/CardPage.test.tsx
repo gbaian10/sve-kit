@@ -1344,3 +1344,40 @@ it("separates multiple traits with the printed classification joiner", async () 
   })
   expect(screen.getByText("synthetic・second")).toBeVisible()
 })
+
+describe("the external links block", () => {
+  const open = (language: "zh-TW" | "ja" | "en") =>
+    renderRoutes([{ path: "/cards/:cardNo/:slug?", ...card }], {
+      initialEntries: ["/cards/BP-SYNTHETIC"],
+      language,
+    })
+
+  it.each([
+    ["zh-TW", "外部連結", "數位版"],
+    ["ja", "外部リンク", "デジタル版"],
+    ["en", "External links", "Digital"],
+  ] as const)(
+    "shows the digital section in %s for a card with no checked links",
+    async (language, title, heading) => {
+      prefsStore.set({ uiLanguage: language })
+      await open(language)
+      const section = await screen.findByRole("region", { name: title })
+      expect(within(section).getByRole("heading", { name: heading })).toBeVisible()
+    },
+  )
+
+  it("shows the same section on an English-edition card under a Chinese interface", async () => {
+    state.crossRegion = true
+    await open("zh-TW")
+    expect(await screen.findByRole("region", { name: "外部連結" })).toBeVisible()
+  })
+
+  it("hides the section when the setting is off", async () => {
+    state.originalName = true
+    state.doubleFace = true
+    prefsStore.set({ showDigitalLinks: false })
+    await open("zh-TW")
+    await screen.findAllByRole("heading", { level: 2, name: "Synthetic original name" })
+    expect(screen.queryByRole("region", { name: "外部連結" })).not.toBeInTheDocument()
+  })
+})

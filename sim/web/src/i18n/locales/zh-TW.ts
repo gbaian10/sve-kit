@@ -160,6 +160,9 @@ const zhTW = {
     termEmphasisHint: "只調整顯示，保留文字與說明引用",
     symbolLabels: "圖示旁附名稱",
     symbolLabelsHint: "只有關鍵字類會顯示名稱",
+    showDigitalLinks: "顯示數位版卡片連結",
+    showDigitalLinksHint:
+      "單卡頁的「外部連結」會列出對應的 Shadowverse、Worlds Beyond 卡片；關閉後整個區塊都不顯示",
     cardEditionHint: "禁限、Q&A 等資料都跟著卡片版本",
     cardOpenMode: "卡片開啟",
     cardOpenModeHint: "自動：電腦從側邊推開抽屜，手機從中間彈出。選整頁則一律跳到單卡頁。",
@@ -467,6 +470,23 @@ const zhTW = {
     specialProducts: "牌組與特別商品",
     switchEdition: "改看{{edition}}",
     empty: "這個版本還沒有可列出的卡包。",
+  },
+  digital: {
+    sectionTitle: "外部連結",
+    heading: "數位版",
+    generation: { sv1: "SV 一代", svwb: "Worlds Beyond" },
+    game: { sv1: "Shadowverse", svwb: "Worlds Beyond" },
+    numbered: "{{name}} {{n}}",
+    relation: {
+      same_card: "同一張卡",
+      same_character: "同角色",
+      name_only: "僅同名",
+      same_name: "僅同名",
+    },
+    unchecked: "尚未核對",
+    loading: "載入中…",
+    failed: "數位版連結載入失敗",
+    newTab: "（另開分頁）",
   },
   cardPage: {
     switchingCard: "切換卡片中…",
