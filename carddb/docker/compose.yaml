@@ -16,20 +16,17 @@ services:
     cpus: ${EXPORT_CPUS:-2}
     mem_limit: ${EXPORT_MEMORY:-16g}
     memswap_limit: ${EXPORT_MEMORY:-16g}
-    working_dir: ${SVE_REPO:?}
+    working_dir: ${EXPORT_REPO:?}
     environment:
       # The caller's uid has no passwd entry in the image, so give home lookups a writable path.
       HOME: /tmp
-      PYTHONPATH: ${SVE_REPO:?}/carddb/src
+      PYTHONPATH: ${EXPORT_REPO:?}/carddb/src
       TMPDIR: ${EXPORT_RUN_DIR:?}/tmp
       # Completed stages must survive the wrapper or container stopping.
       SVE_STAGE_LOG: ${EXPORT_RUN_DIR:?}/stages.tsv
       SVE_PROFILE_FIELD_STRIDE: ${SVE_PROFILE_FIELD_STRIDE:-}
-    # Same paths inside and out keep recipe paths valid; code, authored data, sources and review inputs are read-only.
+    # Dynamic read-only recipe roots are supplied by export.sh's generated override.
     volumes:
-      - ${SVE_REPO:?}:${SVE_REPO:?}:ro
-      - ${SVE_ARCHIVE:?}:${SVE_ARCHIVE:?}:ro
-      - ${SVE_REGISTRY_REVIEW_INPUTS:?}:${SVE_REGISTRY_REVIEW_INPUTS:?}:ro
       - ${EXPORT_RUN_DIR:?}:${EXPORT_RUN_DIR:?}
       - ${SVE_EXPORT_DIR:?}:${SVE_EXPORT_DIR:?}
       - ${SVE_CARDDB_PRIVATE_DIR:?}:${SVE_CARDDB_PRIVATE_DIR:?}

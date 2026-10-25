@@ -4,7 +4,6 @@
 set -euo pipefail
 
 here=$(cd "$(dirname "$0")" && pwd)
-compose=(docker compose -f "$here/compose.yaml")
 run_dir=$(realpath "${1:?usage: export.sh <run-dir> [export-offline options]}")
 shift
 [[ -f $run_dir/recipe.json ]] || { echo "missing $run_dir/recipe.json" >&2; exit 2; }
@@ -17,7 +16,11 @@ done <"$here/.env"
 HOST_UID=$(id -u)
 HOST_GID=$(id -g)
 export EXPORT_RUN_DIR=$run_dir HOST_UID HOST_GID
+export EXPORT_REPO=$(realpath "$here/../..")
 mkdir -p "$run_dir/tmp"
+mounts_file=$run_dir/compose.mounts.yaml
+uv --directory "$here/.." run python -m sve_carddb.docker_mounts "$run_dir/recipe.json" >"$mounts_file"
+compose=(docker compose -f "$here/compose.yaml" -f "$mounts_file")
 
 # Whole GiB only, so the host check below compares like with like before anything starts.
 export EXPORT_MEMORY=${EXPORT_MEMORY:-16g}

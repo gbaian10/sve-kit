@@ -68,7 +68,7 @@ F1 configuration 與診斷記錄已驗 pin，排除私人 root 及 inventory 的
 
 將 `carddb/docker/.env.example` 複製為同目錄的 `.env`，填入配方使用的絕對路徑；
 在 repo 外的執行目錄放 `recipe.json`，執行 `carddb/docker/export.sh <執行目錄>`。
-容器以呼叫者的 uid／gid 執行，repo／人寫資料、封存庫與 `SVE_REGISTRY_REVIEW_INPUTS`（即配方的 `registry_review_inputs.root`）唯讀掛載；
+容器以呼叫者的 uid／gid 執行，從配方推導 repo、封存庫、registry review 與 construction stores 的唯讀掛載，並額外唯讀掛載 Git common dir，讓 revision 驗證可在一般 clone 與 worktree 執行；
 `EXPORT_CPUS`、`EXPORT_MEMORY` 設 CPU／記憶體硬上限，swap 停用。
 `SVE_IMAGE_INDEX` 指定索引檔；容器不掛載圖片庫或轉檔快取。`EXPORT_BROTLI=0` 略過 Brotli，`EXPORT_PROFILE=1` 啟用 py-spy。
 每完成一段即寫 stderr；`SVE_STAGE_LOG` 指定追加時間、CPU 與記憶體的 TSV，
