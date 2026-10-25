@@ -2,7 +2,7 @@
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "ignore": ["tests/lint-fixtures/**"],
   "ignoreDependencies": ["@fontsource/ibm-plex-sans"],
-  "entry": ["bench/driver.ts"],
+  "entry": ["bench/driver.ts", "scripts/ci/public-junit-reporter.ts"],
   // knip 6.38 does not know Bun's newer `bun check` and `bun fmt` commands and reads them as binaries.
   "ignoreBinaries": ["systemd-run", "check", "fmt"],
 }

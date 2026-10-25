@@ -399,7 +399,9 @@ Web bundle size to Codecov for reference. Codecov statuses are informational; th
 test steps, and a failed or slow upload never fails the job (each upload step has its own timeout).
 The carddb pytest results go to Codecov Test Analytics only after `.github/ci/junit_public.py` rewrites them:
 parameters become a short hash, failure messages and captured output are dropped, because the raw JUnit
-can hold card wording.
+can hold card wording. The Web results come from `sim/web/scripts/ci/public-junit-reporter.ts`, which names
+a case by a hash of its title and records each Vitest retry as a failed attempt, so tests that pass only on
+retry show up as flaky (`--retry=2` hides them from the built-in reports).
 
 Draft pull requests run only the quick checks (repository hooks, commit messages and the
 title). The Python, Rust, Web and card-data jobs are skipped and `ci-ok` fails with a note that tests
