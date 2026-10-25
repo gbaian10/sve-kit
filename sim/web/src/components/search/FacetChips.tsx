@@ -1,4 +1,4 @@
-import type { ReactNode } from "react"
+import { type ReactNode, useId } from "react"
 import { useTranslation } from "react-i18next"
 
 import { toggleFacet } from "../../domain/rarityFilter"
@@ -12,6 +12,8 @@ export interface FacetChipOption {
   /** Accessible name and tooltip; `content` is the visual (a badge image), the label by default. */
   readonly label: string
   readonly content?: ReactNode
+  /** Extra explanation shown in the tooltip and read by assistive technology. */
+  readonly hint?: string
 }
 
 export interface FacetChip extends FacetChipOption {
@@ -37,6 +39,7 @@ export function FacetChips({
   readonly onChange: (selected: string[]) => void
 }) {
   const { t } = useTranslation()
+  const idPrefix = useId()
   const content = (
     <div
       className={
@@ -61,12 +64,18 @@ export function FacetChips({
             ),
           )
         }
+        const hintId = item.hint === undefined ? undefined : `${idPrefix}-${item.code}-hint`
+        const chipTitle = t("filters.chipTitle", {
+          label: item.label,
+          count: counts?.[item.code] ?? 0,
+        })
         const chip = (
           <Toggle
             pressed={all ? true : some ? "mixed" : false}
             disabled={!counts}
             label={item.label}
-            title={t("filters.chipTitle", { label: item.label, count: counts?.[item.code] ?? 0 })}
+            title={item.hint === undefined ? chipTitle : `${chipTitle}\n${item.hint}`}
+            describedBy={hintId}
             className={cn(
               children.length > 0 && "rounded-r-none",
               locationGrid && "max-md:h-11 max-md:min-w-0 max-md:flex-1 max-md:px-1",
@@ -88,6 +97,11 @@ export function FacetChips({
             )}
           >
             {chip}
+            {hintId !== undefined && (
+              <span id={hintId} className="sr-only">
+                {item.hint}
+              </span>
+            )}
             {children.length > 0 && (
               <FilterDropdown
                 label={t("filters.details", { label: item.label })}

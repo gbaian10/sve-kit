@@ -11,6 +11,7 @@ export function Toggle({
   disabled = false,
   label,
   title,
+  describedBy,
   onClick,
   className,
   children,
@@ -20,6 +21,8 @@ export function Toggle({
   /** Accessible name when the content is an image or differs from the spoken label. */
   readonly label?: string | undefined
   readonly title?: string | undefined
+  /** Id of an element that describes the button beyond its name. */
+  readonly describedBy?: string | undefined
   readonly onClick: () => void
   readonly className?: string | undefined
   readonly children: ReactNode
@@ -30,6 +33,7 @@ export function Toggle({
       aria-pressed={pressed}
       aria-label={label}
       title={title}
+      aria-describedby={describedBy}
       disabled={disabled}
       onClick={onClick}
       className={cn(

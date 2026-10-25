@@ -324,6 +324,7 @@ export default {
   },
   rarityBadge: {
     unrated: "Unrated",
+    unratedHint: "Cards with no official rarity, such as some PR-series cards",
     selected: "{{count}} selected",
     none: "No badge",
     unknown: "Unconfirmed",

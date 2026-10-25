@@ -35,7 +35,7 @@ export function RarityFilter({
         ? { ...rarity, content: prBadgeVisual(), children }
         : { ...rarity, ...visual(rarityBadgeVisual({ rarityCode: rarity.code, region: edition })) },
     ),
-    { code: UNRATED_RARITY, label: t("rarityBadge.unrated") },
+    { code: UNRATED_RARITY, label: t("rarityBadge.unrated"), hint: t("rarityBadge.unratedHint") },
   ]
   return (
     <FacetChips
