@@ -2,7 +2,6 @@
 
 import hashlib
 import hmac
-import re
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -26,11 +25,23 @@ ACCOUNT = "d" * 32
 BUCKET = "synthetic-v2"
 NOW = datetime(2026, 10, 4, tzinfo=UTC)
 CREDENTIALS = Credentials("synthetic-access", "synthetic-secret")
-DELETE_KEY = re.compile(r"<Key>(.*?)</Key>", re.DOTALL)
-DELETE_BODY = re.compile(
-    r"<Delete[^>]*>((?:<Object>\s*<Key>.*?</Key>\s*</Object>)+)<Quiet>true</Quiet></Delete>",
-    re.DOTALL,
-)
+DELETE_TAIL = "<Quiet>true</Quiet></Delete>"
+
+
+def delete_keys(text: str) -> list[str]:
+    """Keys of a DeleteObjects body, which the SDK writes as a flat <Delete><Object><Key>…, then Quiet."""
+    # Plain string steps keep this linear (no backtracking) and avoid a general XML parser on request data.
+    opening, _, rest = text.strip().partition(">")
+    assert opening.startswith("<Delete")
+    assert rest.endswith(DELETE_TAIL)
+    objects = rest.removesuffix(DELETE_TAIL).split("</Object>")
+    assert not objects.pop()
+    keys: list[str] = []
+    for item in objects:
+        assert item.startswith("<Object><Key>")
+        assert item.endswith("</Key>")
+        keys.append(unescape(item.removeprefix("<Object><Key>").removesuffix("</Key>")))
+    return keys
 
 
 @dataclass(repr=False)
@@ -176,11 +187,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def delete_objects(self, raw: bytes) -> None:
         state = self.state
-        # The SDK writes a flat <Delete><Object><Key>…</Object><Quiet>true</Quiet></Delete>; matching that
-        # exact shape (Quiet at the root, after the objects) avoids a general XML parser here.
-        body = DELETE_BODY.fullmatch(raw.decode().strip())
-        assert body is not None
-        keys = [unescape(key) for key in DELETE_KEY.findall(body[1])]
+        keys = delete_keys(raw.decode())
         assert 1 <= len(keys) <= MAX_DELETE_BATCH
         state.delete_batches.append(keys)
         state.operations.extend(("DELETE", key, None) for key in keys)
