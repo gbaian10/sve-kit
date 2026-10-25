@@ -14,6 +14,7 @@ import { DEFAULT_PREFS, prefsStore } from "../../settings"
 import { renderInRouter } from "../../test-utils"
 import { annotatedOrigin } from "../../test-utils/annotated-snapshot"
 import { AnnotatedText } from "./AnnotatedText"
+import { CardLinkContext } from "./card-link-context"
 import { CardText } from "./CardText"
 
 afterEach(() => {
@@ -269,6 +270,72 @@ describe("annotation presentation", () => {
     expect(screen.queryByRole("tooltip")).not.toBeInTheDocument()
     await userEvent.click(link)
     expect(router.state.location.pathname).toBe("/cards/BP01-001")
+  })
+
+  it("opens a single reference where the surrounding frame says, not on the card's page", async () => {
+    const value = cardName("手牌の王", "king")
+    const context: SelectedText = {
+      original: value,
+      concepts: [{ id: "king", category: "card_name", explanations: [], card_ids: ["c:king"] }],
+      explanations: [],
+      cards: [
+        summary({ cardId: "c:king", printingId: "p:king", cardNo: "BP01-001", region: "jp" }),
+      ],
+    }
+    const { router } = await renderInRouter(
+      <CardLinkContext
+        value={(card) => ({ to: `/cards?card=${card.cardNo}`, state: { opened: card.cardNo } })}
+      >
+        <AnnotatedText
+          value={value}
+          context={context}
+          emphasis={true}
+          client={await client()}
+          edition="jp"
+        />
+      </CardLinkContext>,
+    )
+    const link = screen.getByRole("link", { name: "手牌の王" })
+    expect(link).toHaveAttribute("href", "/cards?card=BP01-001")
+    await userEvent.click(link)
+    expect(router.state.location.pathname).toBe("/cards")
+    expect(router.state.location.search).toBe("?card=BP01-001")
+    expect(router.state.location.state).toEqual({ opened: "BP01-001" })
+  })
+
+  it("opens each card of a reference list where the surrounding frame says", async () => {
+    const value = cardName("手牌の王", "king")
+    const context: SelectedText = {
+      original: value,
+      concepts: [
+        { id: "king", category: "card_name", explanations: [], card_ids: ["c:king", "c:other"] },
+      ],
+      explanations: [],
+      cards: [
+        summary({ cardId: "c:king", printingId: "p:king", cardNo: "BP01-001", region: "jp" }),
+        summary({ cardId: "c:other", printingId: "p:other", cardNo: "BP01-002", region: "jp" }),
+      ],
+    }
+    const { router } = await renderInRouter(
+      <CardLinkContext value={(card) => ({ to: `/cards?card=${card.cardNo}` })}>
+        <AnnotatedText
+          value={value}
+          context={context}
+          emphasis={true}
+          client={await client()}
+          edition="jp"
+        />
+      </CardLinkContext>,
+    )
+    await userEvent.click(screen.getByRole("button", { name: "手牌の王" }))
+    const links = within(screen.getByRole("complementary")).getAllByRole("link")
+    expect(links.map((link) => link.getAttribute("href"))).toEqual([
+      "/cards?card=BP01-001",
+      "/cards?card=BP01-002",
+    ])
+    await userEvent.click(links[1] as HTMLElement)
+    expect(router.state.location.pathname).toBe("/cards")
+    expect(router.state.location.search).toBe("?card=BP01-002")
   })
 
   it("lists several linked cards with image, preferred name and edition, closing by × or Escape", async () => {
