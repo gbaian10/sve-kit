@@ -1,0 +1,44 @@
+format: 1
+kind: author_effect_set
+scope: shared
+cards:
+  BP01-P25:
+    meta:
+      dsl: "1.0"
+      source: effect-source-v1:sha256:08b904ea037da209dd49e46ba9f551e5e84678bdd5cc3c930e2e84c0572ed95e
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-25"
+      reviewed_by: []
+      status: draft
+      verified_by_exam: []
+      rulings: []
+    abilities:
+      - line: 1
+        sources:
+          - binding_id: bind:bfa76b74ee5cdd771fbd206b5e6ef0a73a0ecd4da0b69208d9ca05ca78a5b253
+            occurrence:
+              owner:
+                kind: face_revision
+                revision_id: rev:v1:b80f1859d443f62a5ae9affe8b22d26a9711d6e4e27a48d0b16a5c2d148cd25d
+              field: effect
+              ordinal: null
+              source_hash: 3aeefc3819be4412d9e8891136fd813bbb27ce55011343f51d38289d4ee1d196
+              line_ordinal: 0
+              role: body
+              segments:
+                - start: 0
+                  end: 22
+            ability_scope: ability_0
+        generated_by:
+          macro:
+            frame_id: frame:40c2ea2338dd3fd85116c967fd193c7d9d3b96ff2ddb0633de44bed2b62f7f5d
+            ability_scope: ability_0
+            applicability_scope: jp
+          version: effect-body-v1:sha256:010b429c27cbed927cdeb53969e03a387d5eee23692bd27967c901f1e017b887
+          params:
+            n:
+              type: Nat
+              value: 2
