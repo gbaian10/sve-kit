@@ -4,6 +4,7 @@ from dataclasses import replace
 from functools import partial
 from pathlib import PurePosixPath
 from typing import TYPE_CHECKING
+from urllib.parse import urlsplit
 
 import httpx
 import orjson
@@ -608,7 +609,9 @@ def test_en_pipeline(en_site: FakeSite, data_dir: Path) -> None:
     assert "PR: 3 cards on 1 pages" in p1.output
     p2 = invoke("crawl", "en-p2", "--set", "PR")
     assert p2.exit_code == 0, p2.output
-    assert all("://en.shadowverse-evolve.com/" in c for c in en_site.calls)
+    assert all(
+        urlsplit(c).hostname == "en.shadowverse-evolve.com" for c in en_site.calls
+    )
     with manifest_at(data_dir) as manifest:
         assert manifest.resources.get(en.card_url("PR-003EN")) is not None
         assert manifest.resources.get(en.card_url("BP01-001EN")) is None

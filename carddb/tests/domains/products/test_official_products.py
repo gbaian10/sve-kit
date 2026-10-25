@@ -1,6 +1,7 @@
 """Pinned official link grammar, block boundaries and date precision."""
 
 from typing import TYPE_CHECKING
+from urllib.parse import urlsplit
 
 import pytest
 
@@ -157,7 +158,10 @@ def test_dev_url_is_retained_while_official_search_can_match(
         page.blocks[0].matches[0].search_url
         == "https://shadowverse-evolve.com/cardlist/cardsearch?expansion=BP14"
     )
-    assert "dev.shadowverse-evolve.com" in page.blocks[0].resolved_urls[0]
+    assert (
+        urlsplit(page.blocks[0].resolved_urls[0]).hostname
+        == "dev.shadowverse-evolve.com"
+    )
 
 
 @pytest.mark.parametrize(

@@ -8,8 +8,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from threading import RLock, Thread
 from typing import TYPE_CHECKING, override
 from urllib.parse import parse_qs, parse_qsl, quote, unquote, urlsplit
-from xml.etree import ElementTree as ET  # ruff: ignore[suspicious-xml-etree-import] -- only parses synthetic SDK requests on loopback
-from xml.sax.saxutils import escape
+from xml.sax.saxutils import escape, unescape
 
 import httpx
 import pytest
@@ -26,6 +25,23 @@ ACCOUNT = "d" * 32
 BUCKET = "synthetic-v2"
 NOW = datetime(2026, 10, 4, tzinfo=UTC)
 CREDENTIALS = Credentials("synthetic-access", "synthetic-secret")
+DELETE_TAIL = "<Quiet>true</Quiet></Delete>"
+
+
+def delete_keys(text: str) -> list[str]:
+    """Keys of a DeleteObjects body, which the SDK writes as a flat <Delete><Object><Key>…, then Quiet."""
+    # Plain string steps keep this linear (no backtracking) and avoid a general XML parser on request data.
+    opening, _, rest = text.strip().partition(">")
+    assert opening.startswith("<Delete")
+    assert rest.endswith(DELETE_TAIL)
+    objects = rest.removesuffix(DELETE_TAIL).split("</Object>")
+    assert not objects.pop()
+    keys: list[str] = []
+    for item in objects:
+        assert item.startswith("<Object><Key>")
+        assert item.endswith("</Key>")
+        keys.append(unescape(item.removeprefix("<Object><Key>").removesuffix("</Key>")))
+    return keys
 
 
 @dataclass(repr=False)
@@ -171,11 +187,8 @@ class Handler(BaseHTTPRequestHandler):
 
     def delete_objects(self, raw: bytes) -> None:
         state = self.state
-        root = ET.fromstring(raw)  # ruff: ignore[suspicious-xml-element-tree-usage] -- trusted synthetic SDK payload
-        namespace = {"s3": "http://s3.amazonaws.com/doc/2006-03-01/"}
-        keys = [node.text or "" for node in root.findall("s3:Object/s3:Key", namespace)]
+        keys = delete_keys(raw.decode())
         assert 1 <= len(keys) <= MAX_DELETE_BATCH
-        assert root.findtext("s3:Quiet", namespaces=namespace) == "true"
         state.delete_batches.append(keys)
         state.operations.extend(("DELETE", key, None) for key in keys)
         if state.delete_status is not None:
