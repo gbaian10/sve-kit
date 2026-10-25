@@ -1,7 +1,8 @@
 # Codecov is informational: the 90% gate lives in pytest and ci-ok is the only required check.
 comment:
-  layout: "header, diff, files, footer"
+  layout: "header, diff, flags, components, files, footer"
   require_changes: false # comment on every PR, not only when coverage drops
+  show_carryforward_flags: true # keep carried-forward data from reading as freshly measured
 
 coverage:
   status:
@@ -19,3 +20,74 @@ bundle_analysis:
 
 github_checks:
   annotations: false
+
+# CI only runs a component's tests when its paths change, so most commits upload some flags and not others.
+# Carry the last data of a flag forward, or every report (and every PR comment) would miss the other flags.
+flag_management:
+  default_rules:
+    carryforward: true
+
+# Coverage by directory; the carddb groups follow the stage layers in AGENTS.md.
+component_management:
+  individual_components:
+    - component_id: carddb_foundation
+      name: carddb foundation
+      paths:
+        - carddb/src/sve_carddb/core/**
+        - carddb/src/sve_carddb/contracts/**
+        - carddb/src/sve_carddb/__init__.py
+        - carddb/src/sve_carddb/cli.py
+        - carddb/src/sve_carddb/cli_paths.py
+    - component_id: carddb_ingest
+      name: carddb ingest
+      paths:
+        - carddb/src/sve_carddb/ingest/**
+    - component_id: carddb_parse
+      name: carddb parse
+      paths:
+        - carddb/src/sve_carddb/parse/**
+    - component_id: carddb_build
+      name: carddb build
+      paths:
+        - carddb/src/sve_carddb/build/**
+    - component_id: carddb_domains
+      name: carddb domains
+      paths:
+        - carddb/src/sve_carddb/domains/**
+    - component_id: carddb_export
+      name: carddb export
+      paths:
+        - carddb/src/sve_carddb/export/**
+        - carddb/src/sve_carddb/images/**
+    - component_id: carddb_workflows
+      name: carddb workflows
+      paths:
+        - carddb/src/sve_carddb/workflows/**
+    - component_id: web_pages
+      name: web pages
+      paths:
+        - sim/web/src/pages/**
+    - component_id: web_components
+      name: web components
+      paths:
+        - sim/web/src/components/**
+    - component_id: web_data
+      name: web data
+      paths:
+        - sim/web/src/data/**
+        - sim/web/src/domain/**
+    - component_id: web_app
+      name: web app
+      paths:
+        - sim/web/src/app/**
+        - sim/web/src/settings/**
+        - sim/web/src/i18n/**
+        - sim/web/src/cloudflare/**
+    - component_id: engine
+      name: engine
+      paths:
+        - sim/engine/src/**
+    - component_id: scenario_runner
+      name: scenario runner
+      paths:
+        - sim/scenario-runner/src/**
