@@ -125,8 +125,9 @@ longer retain a complete version high-water history. Back up producer media stat
 `--jobs` caps both object worker pools (default 16, minimum 1). A failure stops new
 PUT admission and drains in-flight operations; admitted writes may still finish.
 Progress goes to stderr every 100 completions or about five seconds; stdout is a
-JSON summary. Each I/O has a 30-second timeout, no write retry or plain-PUT fallback
-for conditional objects. Responses are bounded to 128 MiB per object and 2 MiB
+JSON summary. Each I/O has a 30-second timeout. Image PUTs retry transient failures
+at most twice; conditional JSON writes are not retried and never fall back to plain PUT.
+Responses are bounded to 128 MiB per object and 2 MiB
 per list page. Errors omit response bodies and credentials; avoid wire logging.
 
 | Object | Content-Type | Cache-Control | Content-Encoding |
