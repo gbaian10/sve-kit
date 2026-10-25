@@ -647,6 +647,9 @@ mod bp10_122;
 #[path = "runtime/cp02_068.rs"]
 mod cp02_068;
 
+#[path = "runtime/ecp01_002.rs"]
+mod ecp01_002;
+
 fn projected_zone_count(zone: &Value) -> u64 {
     zone.as_array()
         .unwrap()
