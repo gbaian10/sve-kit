@@ -119,6 +119,7 @@ Wrangler 設定放在 **`sim/web/wrangler.dev.jsonc`**；未來正式設定另�
   "preview_urls": false,
   "routes": [{ "pattern": "dev.svekit.app", "custom_domain": true }],
   "r2_buckets": [{ "binding": "PREVIEW_BUCKET", "bucket_name": "svekit-dev" }],
+  "observability": { "enabled": true },
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
@@ -131,6 +132,12 @@ Wrangler 設定放在 **`sim/web/wrangler.dev.jsonc`**；未來正式設定另�
 `main` 指向受審的 Worker entrypoint，`PREVIEW_BUCKET` 綁開發桶，`ASSETS` 提供前端。
 配置以 `assets.run_worker_first: true` 讓 handler 在 SPA fallback 之前驗 host，
 資料路徑讀 R2，其餘委派 `ASSETS.fetch`；所有靜態路徑亦會經過 Worker，可能有額外計費。
+`observability.enabled` 開啟 Workers Logs；設定以此檔為準，不在後台手動切換，部署時才不會與後台設定不一致。
+依官方文件（2026-10-25 查核），Workers Logs 免費方案每天 20 萬筆、保留 3 天；2026-12-01 起改用
+Cloudflare Observability 計價，額度以當時公告為準。開發環境的卡圖與快照也經 Worker：2026-10-25 的一次
+24 小時觀測為約 1,280 次 Worker 執行對 182 次頁面瀏覽，僅供參考，不是固定倍率。
+Workers 免費方案每天 10 萬次，超過會失敗（官方文件，2026-10-25 查核）。正式環境資料走
+`cdn.svekit.app` 不經 Worker，是否保留 `run_worker_first` 上線前評估。
 `/assets/` 下以內容雜湊命名的建置輸出（200／304，且不是 SPA fallback 的 HTML）改為 `private, max-age=31536000, immutable`，
 重新整理時不必逐檔回源確認；`index.html` 與 `public/` 的固定檔名檔案維持平台預設的重新驗證。
 `/cdn-preview/` 僅接受 GET／HEAD 與 2.0 公開 JSON／三檔 WebP key，缺件或拒絕均不回 HTML；
