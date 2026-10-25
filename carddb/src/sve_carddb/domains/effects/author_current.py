@@ -26,8 +26,10 @@ from sve_carddb.domains.effects.author_source_hash import (
 )
 from sve_carddb.domains.effects.author_sources import (
     NO_TOKEN_METADATA,
+    PrintedKeywordObligation,
     SourceContext,
     SourceError,
+    card_keyword_values,
     entry_heads,
     entry_payload,
 )
@@ -179,6 +181,38 @@ class CurrentAuthorSources:
                 else "provisional_record_key"
             )
         return identities.pop()
+
+    def keyword_obligations(self, card_id: str) -> tuple[PrintedKeywordObligation, ...]:
+        """Reconstruct complete current sources; this grants no author or D0 admission."""
+        card = self._card_payload(card_id)
+        self._require_known(card)
+        if any(
+            "token" in (face.attributes.special_kinds.value or ())
+            for face in card.payload.faces
+        ):
+            raise SourceError("token_source_contract_unavailable")
+        result: list[PrintedKeywordObligation] = []
+        used: set[tuple[str, str]] = set()
+        bindings: set[str] = set()
+        for source in self._checked_sources(card):
+            if source.frame.projection.projection_kind != "card_field":
+                continue
+            owner = source.binding.source.owner
+            if (
+                not isinstance(owner, FaceRevisionOwner)
+                or owner.revision_id not in card.revisions
+            ):
+                raise SourceError("source_keyword_owner_mismatch")
+            face_id = card.revisions[owner.revision_id]
+            keywords = card_keyword_values(source)
+            if source.binding.id in bindings or any(
+                (face_id, keyword) in used for keyword in keywords
+            ):
+                raise SourceError("unsupported_duplicate_source_keyword")
+            bindings.add(source.binding.id)
+            used.update((face_id, keyword) for keyword in keywords)
+            result.append(PrintedKeywordObligation(face_id, source, keywords))
+        return tuple(result)
 
     def _prepare(self, inputs: AuthorInputSet, expander: AuthorExpander) -> None:
         try:
@@ -493,8 +527,7 @@ class CurrentAuthorSources:
             )
         return texts, fields
 
-    @staticmethod
-    def _no_tokens(fields: list[CompiledField]) -> None:
+    def _no_tokens(self, fields: list[CompiledField]) -> None:
         if any(
             part.source_span.role == "token_header"
             for field in fields
@@ -510,23 +543,35 @@ class CurrentAuthorSources:
                 if field.derived.pending_causes[index]:
                     raise SourceError("source_pending")
                 # Dependency analysis precedes registry admission and never supplies its binding.
-                frame, _ = field.derived.bind(index)
+                frame, binding = field.derived.bind(index)
                 if (
                     frame.projection.projection_kind == "none"
                     and frame.semantic_variant.state == "resolved"
                     and frame.semantic_variant.key in NO_TOKEN_METADATA
                 ):
                     continue
+                if frame.semantic_variant.key == "card_keywords.v2":
+                    card_keyword_values(
+                        SourceContext(
+                            frame,
+                            binding,
+                            field.field.parts[index].canonical_source,
+                            self.classifier,
+                        )
+                    )
+                    continue
                 try:
                     entry_heads(frame)
                 except SourceError:
                     raise SourceError("unsupported_source_projection") from None
 
-    def _contexts(self, card: _CurrentCard) -> dict[tuple[str, str], SourceContext]:
-        result: dict[tuple[str, str], SourceContext] = {}
+    def _checked_sources(self, card: _CurrentCard) -> tuple[SourceContext, ...]:
+        result: list[SourceContext] = []
         for field in card.fields:
             for index, matched in enumerate(field.matches):
                 if matched is None:
+                    raise SourceError("source_registry_mismatch")
+                if matched.binding.source != field.field.source:
                     raise SourceError("source_registry_mismatch")
                 try:
                     field.derived.verify_binding(
@@ -537,17 +582,26 @@ class CurrentAuthorSources:
                     )
                 except ValueError:
                     raise SourceError("source_registry_mismatch") from None
-                if matched.frame.projection.projection_kind == "none":
-                    continue
-                heads = entry_heads(matched.frame)
-                source = SourceContext(
-                    matched.frame,
-                    matched.binding,
-                    field.field.parts[index].canonical_source,
-                    self.classifier,
+                result.append(
+                    SourceContext(
+                        matched.frame,
+                        matched.binding,
+                        field.field.parts[index].canonical_source,
+                        self.classifier,
+                    )
                 )
-                for root in range(len(heads)):
-                    result[matched.binding.id, f"ability_{root}"] = source
+        return tuple(result)
+
+    def _contexts(self, card: _CurrentCard) -> dict[tuple[str, str], SourceContext]:
+        result: dict[tuple[str, str], SourceContext] = {}
+        for source in self._checked_sources(card):
+            if source.frame.projection.projection_kind == "none":
+                continue
+            if source.frame.projection.projection_kind == "card_field":
+                raise SourceError("unsupported_keyword_source_mapping")
+            heads = entry_heads(source.frame)
+            for root in range(len(heads)):
+                result[source.binding.id, f"ability_{root}"] = source
         return result
 
     def _validate_card(
@@ -563,16 +617,7 @@ class CurrentAuthorSources:
         card = self._card_payload(record.card_id)
         payload = source_payload(card.payload)
         version = source_version(card.payload)
-        for face in array(object_value(card.payload.model_dump(mode="json"))["faces"]):
-            data = object_value(face)
-            if any(
-                object_value(value)["state"] == "unknown"
-                for value in object_value(data["attributes"]).values()
-            ) or any(
-                object_value(value)["state"] == "unknown"
-                for value in array(data["texts"])
-            ):
-                raise SourceError("source_unknown")
+        self._require_known(card)
         authored = object_value(
             object_value(object_value(tree)["cards"])[record.record_key]
         )
@@ -612,6 +657,19 @@ class CurrentAuthorSources:
             version,
             inventory,
         )
+
+    @staticmethod
+    def _require_known(card: _CurrentCard) -> None:
+        for face in array(object_value(card.payload.model_dump(mode="json"))["faces"]):
+            data = object_value(face)
+            if any(
+                object_value(value)["state"] == "unknown"
+                for value in object_value(data["attributes"]).values()
+            ) or any(
+                object_value(value)["state"] == "unknown"
+                for value in array(data["texts"])
+            ):
+                raise SourceError("source_unknown")
 
     @staticmethod
     def _source_inventory(
