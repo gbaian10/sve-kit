@@ -56,7 +56,7 @@ token 定義的 keyword 不表示原卡自身具有。H1 不產 grants／refers�
 由 `mechanic_batch.FIRST_BATCH_CARDS` 承載。209 張來自固定解析輸入及 identity recipe 中
 JP printing 原樣卡號以 `BP01-` 開頭、card 為 confirmed（排除 retired）的去重集合；
 後續批次或新增 printing 不會自動擴張這份集合。執行時仍重驗 confirmed 與 JP current owner。
-只使用既有 ward、storm、rush、bane、assail、intimidate、aura、drain、ambush、barrier 十個已登錄 ID，
+只使用既有 ward、storm、rush、bane、assail、intimidate、aura、drain 八個已登錄 ID，
 依相同 glossary 的唯一日文拼寫匹配，不新增概念。
 
 grants 只接受主文整行的有限句型：明示選擇自方從者、從墓場選擇並出場或產生具名 token 後，
@@ -90,7 +90,7 @@ F1 configuration 釘授予 adapter v2。這裡只提交正標籤與局部 relati
 不替代完整欄位 adapter 或未證明的其他面／sections。
 
 有限 refers／counts adapter `manual-keywords-references-bp01-v1` 沿用相同 209 張永久 ID、
-十個 keyword 及來源重驗。語意依用途分配：費用中依 keyword 選定捨棄的牌，以及依 keyword
+八個 keyword 及來源重驗。語意依用途分配：費用中依 keyword 選定捨棄的牌，以及依 keyword
 選擇目標，屬 refers；明示符合 keyword 的從者數量門檻，屬 counts，不因同時提到 keyword 再加 refers。
 固定捨棄一張牌是費用選擇，並非對 keyword 數量的統計。
 
@@ -105,7 +105,7 @@ F1 configuration 釘授予 adapter v2。這裡只提交正標籤與局部 relati
 只在匹配行提交相應 relation 的局部檢查，`whole_field=false`；四關係都有 producer 仍不構成 complete。
 
 完整欄位 adapter `manual-keywords-fields-bp01-v14` 沿用固定首批集合、confirmed JP current
-及十個已登錄 keyword。每個面先驗 exact owner 主文與凍結來源的完整有序 section 清單；
+及八個已登錄 keyword。每個面先驗 exact owner 主文與凍結來源的完整有序 section 清單；
 來源與資料庫的 section 數量、順序或原文字節不符時，該面不提交完整檢查。
 空主文須明驗凍結來源為 null 或空字串、已 intern 的原文確為空字串；空 section 也須驗自己的來源位置。
 非空主文另共用上述七份逐 owner 限定、正標籤 producer 已完整匹配的全文判定；
@@ -115,7 +115,7 @@ F1 configuration 釘授予 adapter v2。這裡只提交正標籤與局部 relati
   逐 part 重驗 binding 與來源座標。
 - 固定 PP 進化整行：exact 原文為 `{進化}{コストN}：これは進化する。`，N 為一位以上 ASCII 數字。
   以單一連續 body span 的原文字節完整匹配，不依正標籤、翻譯或 normalizer 的語意辨識結果。
-  這句只支付 PP 並讓自身進化，不宣告、授予、參照或計數這十個 keyword；不產正標籤。
+  這句只支付 PP 並讓自身進化，不宣告、授予、參照或計數這八個 keyword；不產正標籤。
 - 固定傷害整行：`相手のフォロワー1体を選ぶ。それにNダメージ。`，N 為一位以上 ASCII 數字；
   目標也可為 `相手のリーダー1人か相手のフォロワー1体`，兩者的フォロワー前均可有 `場の`。
   亦接受 `フォロワーすべてにNダメージ。`，フォロワー前可有 `相手の`、`相手の場の` 或 `自分の他の`；
@@ -130,7 +130,7 @@ F1 configuration 釘授予 adapter v2。這裡只提交正標籤與局部 relati
 `{起動}{コストN}これを{アクト}：` 或 `{起動}{コストN}これを{アクト}墓場に置く：`；
 最後一種的 PP 費用可省略，但自身 act 與置入墓場不可省略。
 這些能力頭、觸發時點、目標、固定 PP／自身 act／自身置入墓場費用與數值效果
-均不宣告、授予、參照或計數十個 keyword，不產正標籤。
+均不宣告、授予、參照或計數八個 keyword，不產正標籤。
 整行仍須以單一連續 body span 的 exact 原文完整匹配；不接受其他任意效果排列、
 條件、其他費用、次數限制、未知能力頭或額外前後句。
 
@@ -148,9 +148,9 @@ F1 configuration 釘授予 adapter v2。這裡只提交正標籤與局部 relati
   傷害與增幅串接只接受 `【進化時】相手のフォロワーすべてにNダメージ。自分の他のフォロワーすべては`
   接同樣增幅；不作任意句子組合。
 - 有限條件自身增幅：`{ファンファーレ}【覚醒】状態なら、これは` 或
-  `{ファンファーレ}【真紅】状態なら、これは` 接上述增幅；這兩個狀態不屬於十個 keyword。
+  `{ファンファーレ}【真紅】状態なら、これは` 接上述增幅；這兩個狀態不屬於八個 keyword。
   不接受其他條件、能力授予或額外尾句。
-- 獨立 `{クイック}` body 行：只證明該行不涉及十個 keyword，其他 body 仍須各自完整證明。
+- 獨立 `{クイック}` body 行：只證明該行不涉及八個 keyword，其他 body 仍須各自完整證明。
   不接受與效果黏在同一行的形式，也不能藉此關閉未知效果。
 
 以上各分支也須單一連續 body span fullmatch；royal 類別、妖精名稱及雙區域目標
@@ -175,9 +175,9 @@ F1 configuration 釘授予 adapter v2。這裡只提交正標籤與局部 relati
   `{進化}を持つフォロワー` 或 `アミュレット`；
   `{ファンファーレ}自分のデッキから` 後只接受 `{ロイヤル}フォロワー`、`忍者・カード` 或 `スペル`。
   兩分支皆恰接 `1枚を探し、手札に加える。`，不改變數量或目的地。
-  進化、royal 類別、忍者名稱與卡片種類均不屬於十個 keyword；沒有任意 keyword 篩選。
+  進化、royal 類別、忍者名稱與卡片種類均不屬於八個 keyword；沒有任意 keyword 篩選。
 
-這三組只證明十個 keyword 的四種關係均不涉及，不產正標籤；獨立 quick、進化、
+這三組只證明八個 keyword 的四種關係均不涉及，不產正標籤；獨立 quick、進化、
 自身 keyword 宣告、其他面與 sections 仍須各自證明，不能由已證明的移動行補滿。
 
 另接受三組有限觸發、墓場移動與 act／移除整行；各 N 獨立且限一位以上 ASCII 數字，
@@ -207,7 +207,7 @@ F1 configuration 釘授予 adapter v2。這裡只提交正標籤與局部 relati
   `【進化時】フォロワー1体を墓場に置く：相手のフォロワー1体を選ぶ。それを破壊する。`。
   自身進場狀態、觸發時點、費用與移除種類各自固定，不接受額外 PP 或其他犧牲條件。
 
-這三組不宣告、授予、參照或計數十個 keyword，不新增正標籤；既有自身宣告、
+這三組不宣告、授予、參照或計數八個 keyword，不新增正標籤；既有自身宣告、
 固定 PP 進化、其他 body、面與 sections 仍須各自證明。token 原生能力仍屬於 token。
 
 另接受三組有限條件、狀態規則與已有正標籤的授予整行；各 N 獨立且限一位以上 ASCII 數字，
@@ -221,7 +221,7 @@ F1 configuration 釘授予 adapter v2。這裡只提交正標籤與局部 relati
   `相手のフォロワー1体を選ぶ。それにNダメージ。【スペルチェイン_N】代わりにNダメージ。`
   （只此分支可帶 fanfare，且可恰接一次 `【SC_N】それのリーダーにNダメージ。`）；
   `{ファンファーレ}自分の場にアミュレットがあるなら、自分のリーダーは{体力}+Nする。`。
-  覚醒、コンボ、スペルチェイン／SC 及 amulet 存在條件不涉及十個 keyword；
+  覚醒、コンボ、スペルチェイン／SC 及 amulet 存在條件不涉及八個 keyword；
   不擴張其他條件、任意 SC 別名排列、目標、能力頭或 reminder。
 - 有限狀態規則只接受：`これが受けるダメージを-Nする。`；
   `相手のターン中、これが与えるダメージを+Nする。`；`これは相手を攻撃できない。`；
@@ -229,11 +229,11 @@ F1 configuration 釘授予 adapter v2。這裡只提交正標籤與局部 relati
   `{進化}リーダーの{体力}-N：これは進化する。`；
   `【攻撃時】フォロワーへの攻撃なら、これは{攻撃力}+Nする。`；
   `自分のエンドフェイズが来たとき、これは{体力}+Nする。`。
-  傷害方向與正負、回合、PP 最大值、支付主戰者體力及攻擊對象各自固定，均不涉及十個 keyword。
+  傷害方向與正負、回合、PP 最大值、支付主戰者體力及攻擊對象各自固定，均不涉及八個 keyword。
 - 有限授予只接受 `{ファンファーレ}自分の他のフォロワー1体を選ぶ。` 或
   `自分の墓場のコストN以下のフォロワー1枚を選ぶ。それを場に出す。` 後恰接
   `それは【K】を持つ。`，`それは` 後可有 `{攻撃力}+N/{体力}+Nして、`。
-  K 必須唯一匹配已登錄十個 keyword 的日文名稱，不能因正標籤已存在就略過未知效果。
+  K 必須唯一匹配已登錄八個 keyword 的日文名稱，不能因正標籤已存在就略過未知效果。
   整行可完整證明 grants，其他三種關係均不涉及；正標籤仍由有限 grants adapter 產生，
   完整欄位 adapter 不新增正標籤。自身條件授予、其他選擇／目的地、未知或歧義 K 仍留缺口。
 
@@ -273,7 +273,7 @@ F1 configuration 釘授予 adapter v2。這裡只提交正標籤與局部 relati
   以及獨立 `{起動}これを{アクト}：相手のフォロワー1体を選ぶ。それを破壊する。`。
   元のコスト、免費施放、SC 三段替換及真紅／ネクロチャージ條件不可互換或省略。
 
-這三組只證明十個 keyword 的四種關係均不涉及，不產正標籤；進場或施放另一張卡
+這三組只證明八個 keyword 的四種關係均不涉及，不產正標籤；進場或施放另一張卡
 不把它的原生 keyword 掛到本卡。各行以外的自身宣告、其他面與 sections 仍須各自完整證明。
 
 另接受下列三組有限整行；N 仍為一位以上 ASCII 數字，各 N 獨立。區域、種類、
@@ -311,7 +311,7 @@ F1 configuration 釘授予 adapter v2。這裡只提交正標籤與局部 relati
   費用支付的區域、stand 狀態、數量 4／10、減費或定值、追加回合時點、EX 上限重複及
   下一次 end phase 清除各自固定；不接受任意卡片篩選或未證明尾句。
 
-這三組只證明十個 keyword 的四種關係均不涉及，不產正標籤；被移動卡片的原生能力
+這三組只證明八個 keyword 的四種關係均不涉及，不產正標籤；被移動卡片的原生能力
 仍屬該卡。其他行、其他面與 sections 各自證明，JP complete 不授 EN 資格。
 
 另接受兩組有限整行，均以單一連續 body span 完整匹配；下列各 N 獨立，
@@ -335,11 +335,11 @@ F1 configuration 釘授予 adapter v2。這裡只提交正標籤與局部 relati
   `{起動}これを{アクト}【土の秘術】：相手のフォロワー1体を選ぶ。それにNダメージ。それのリーダーにNダメージ。`；
   `自分がスペルをプレイしたとき、これにスペルカウンターNつを置く。`；
   `{起動}これのスペルカウンターNつを取る：相手のフォロワー1体を選ぶ。それにNダメージ。`。
-  stack 不是本批十個 keyword；其獨立宣告與上述放置／增加不產正標籤。
+  stack 不是本批八個 keyword；其獨立宣告與上述放置／增加不產正標籤。
   spell 施放觸發、自身 counter 累積與支付、土の秘術費用及傷害的兩個目標各自完整證明。
   stack 宣告不核可附帶的 reminder，更不核可其中引號內能力；BP01-T10 只由下方精確列出的四段 reminder 整欄證明。
 
-這兩組只證明十個 keyword 的四種關係均不涉及，不產正標籤；其他行、面與 sections
+這兩組只證明八個 keyword 的四種關係均不涉及，不產正標籤；其他行、面與 sections
 仍須各自證明，JP complete 不授 EN 資格。
 
 另接受三組逐字固定的完整主文；含「」的主文只有前兩組列出的四種可通過引號保守檢查，第三組公開手牌棄置不含引號：
@@ -349,11 +349,11 @@ F1 configuration 釘授予 adapter v2。這裡只提交正標籤與局部 relati
   `【突進】\n{ファンファーレ}他のフォロワー1体を選ぶ。これは{攻撃力}+Xする。Xは「選んだフォロワーの攻撃力」である。`。
   各公式、選項、目標、抽牌次序、傷害／增幅及其他主文均在整欄逐字比對；不以通用 reminder、引號內片段或正標籤補證。
 - `【スタック】（【スタック】を持つアミュレットは、下記の能力を持つ。「これはスタックカウンター1個を置いた状態で場に出る」「これが場を離れる際、代わりにこれのスタックカウンター1個を取る」「これのスタックカウンターが0個なら、これを墓場に置く」「{起動}これを{アクト}：自分の場の他の【スタック】を持つアミュレット1つを選ぶ。それにこれのスタックカウンターすべてを移す」）`。
-  BP01-T10 的四段引號能力各自完整限定為進場時置一枚 counter、離場時取一枚 counter 代替、counter 為零時置入墓場，以及 act 後選另一 stack amulet 並移轉全部 counter；整欄 exact match 同時涵蓋 stack 宣告與四段 reminder。`スタック` 不在十個追蹤 keyword 中，四段只描述 stack counter，不產正標籤；任一段改字或增刪內容都不核可。
+  BP01-T10 的四段引號能力各自完整限定為進場時置一枚 counter、離場時取一枚 counter 代替、counter 為零時置入墓場，以及 act 後選另一 stack amulet 並移轉全部 counter；整欄 exact match 同時涵蓋 stack 宣告與四段 reminder。`スタック` 不在八個追蹤 keyword 中，四段只描述 stack counter，不產正標籤；任一段改字或增刪內容都不核可。
 - `【進化時】自分のリーダーに2ダメージ。相手プレイヤー1人は手札を公開する。自分はその中から1枚を選ぶ。相手はそれを捨てる。`。
   公開者、選擇者、張數、棄置者及前置傷害次序固定，不接受其他效果或目標替換。
 
-以上 exact field 只證明十個 keyword 的四種關係均不涉及，不產正標籤。含 `「」` 的其他主文仍不完整；另有上述逐 owner 限定的 BP01-005 自身條件授予整欄例外；任何改字、額外效果、其他面或非空 sections 都各自留下缺口。
+以上 exact field 只證明八個 keyword 的四種關係均不涉及，不產正標籤。含 `「」` 的其他主文仍不完整；另有上述逐 owner 限定的 BP01-005 自身條件授予整欄例外；任何改字、額外效果、其他面或非空 sections 都各自留下缺口。
 
 任何其他未證明句型、pending、未證明 reminder 或引號能力
 都留下缺口，不能以另一個正標籤補滿；固定句本身可獨立證明，不要求翻譯已實作。
@@ -370,7 +370,7 @@ F1 configuration 釘授予 adapter v2。這裡只提交正標籤與局部 relati
   一個 section 含多個定義時，每行均須證明。
 
 section kind（包括 unknown）不授證明資格，也不因本檢查重新分類；上述入口靠 exact 原文結構
-證明十個 keyword 四關係，不授 verified DSL。token 原生 keyword 仍只屬 token，
+證明八個 keyword 四關係，不授 verified DSL。token 原生 keyword 仍只屬 token，
 不把它掛到母卡。未知 section、未知主文、未證其他面各自保留缺口。
 主文與 section 不接受 CR、Unicode 行界等替代換行；定義以 LF 分行完整檢查。
 
@@ -386,7 +386,7 @@ section kind（包括 unknown）不授證明資格，也不因本檢查重新分
 含引號主文仍拒絕，唯一新增例外是整欄恰為兩行：EX 妖精任意張數變身薔薇の一撃，
 再以アクト費用回復等於 EX 薔薇の一撃張數的 PP；全文必須完全匹配，沒有其他字元或行。
 
-已證明的空欄位與上述完整主文，對十個 keyword 的 has／grants／refers／counts 各提交
+已證明的空欄位與上述完整主文，對八個 keyword 的 has／grants／refers／counts 各提交
 `whole_field=true`。一般自身宣告的 has 由 H1 產生；上述七份全文的條件 has／grants
 由授予 adapter v2 產生，完整欄位 adapter 不產正標籤。
 缺 current 的面不提交檢查，也不從必要範圍刪除。
@@ -400,7 +400,7 @@ section kind（包括 unknown）不授證明資格，也不因本檢查重新分
 
 producer_version 包含 `manual-keywords-h1-v1`、來源 normalizer／葉規則、keyword mapping
 與 keyword 概念集合，不含中文呈現、無關 commit 或 suppression。
-grants producer_version 另含自身 adapter、固定 card 集合及十個已登錄概念的 mapping／日文名稱；
+grants producer_version 另含自身 adapter、固定 card 集合及八個已登錄概念的 mapping／日文名稱；
 refers／counts 的 producer_version 同樣釘自身 adapter、固定 card 集合及 keyword mapping；
 F1 configuration 也釘兩個有限 adapter 與固定 card 集合 hash。
 完整欄位 producer_version 另釘自身 adapter、固定 card 集合、授予與參照 adapter 版本及 H1 producer_version（含 normalizer、

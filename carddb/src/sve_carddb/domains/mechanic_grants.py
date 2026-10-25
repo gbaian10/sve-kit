@@ -32,8 +32,6 @@ KEYWORDS = frozenset(
         "intimidate",
         "aura",
         "drain",
-        "ambush",
-        "barrier",
     )
 )
 _PREFIX = r"(?:\{ファンファーレ\}|\{ラストワード\}|\{起動\}\{コスト[0-9]+\}これを\{アクト\}：)?"
