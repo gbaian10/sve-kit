@@ -322,6 +322,8 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: ["./src/test-setup.ts"],
     include: ["src/**/*.test.{ts,tsx}", "tests/**/*.test.ts", "scripts/**/*.test.ts"],
+    // v8 coverage makes the UI tests about 1.7x slower; several CardsPage cases sit near the 5 s default.
+    testTimeout: 15_000,
     // Off by default so local runs stay fast; CI passes --coverage. Branch coverage was 86.3% when
     // this gate was added: raise the threshold as tests grow.
     coverage: {

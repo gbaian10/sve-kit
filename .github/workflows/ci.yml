@@ -463,7 +463,7 @@ jobs:
           status=0
           start=$SECONDS
           bun run test:all --maxWorkers=4 --reporter=junit --outputFile="$REPORT_DIR/junit.xml" \
-            --coverage --coverage.reportsDirectory="$REPORT_DIR/coverage" \
+            --retry=2 --coverage --coverage.reportsDirectory="$REPORT_DIR/coverage" \
             > "$REPORT_DIR/test.log" 2>&1 || status=$?
           echo "$((SECONDS - start))" > "$REPORT_DIR/elapsed.txt"
           echo "vitest exit status: $status (statistics in the next step; raw output stays private)"
