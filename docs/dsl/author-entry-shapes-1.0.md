@@ -52,7 +52,7 @@ UseDependencies.imports 值恰為 binding_id／ability_scope／port／dependency
 
 current 邊界重建真實 registry 的 Frame／Binding，核對全部 JP current 面、exact owner／field／section／line／root scope 及完整來源根集合，並驗所有 companion 的 resolved ability_body／root scope／ports，包括未引用本體。能力屬於哪一面，由 SourceUse.owner 的 revision 對應 face 決定；作者卡級／面級容器只表示位置，多面卡的卡級容器不表示全卡常駐。面容器另驗精確 FaceId，跨容器重複同來源 scope 拒絕。
 
-`effect-source-v1` 依 P1 完整 payload 計算；純 hash 函式不授予來源准入。DB 的非 null 數值／代碼與建置保證完整的種族、稱號、特殊類型集合可判 known；null 屬性及無確定 absent 證據的空 effect 保留 unknown，拒絕准入。token 依賴未閉合時不產完整來源 hash，也不把缺少 token 選用結果當空集合。
+`effect-source-v1` 依 P1 完整 payload 計算；純 hash 函式不授予來源准入。DB 的非 null 數值／代碼與建置保證完整的種族、稱號、特殊類型集合可判 known；type_code 為 spell 時，null attack／defense 依 P1 的規則確定不存在判為 known-null。其餘 null 屬性及無確定 absent 證據的空 effect 保留 unknown，拒絕准入。token 依賴未閉合時不產完整來源 hash，也不把缺少 token 選用結果當空集合。
 
 | resolved 來源族 | scope → 作者頭 | 接受的完整 payload |
 | --- | --- | --- |
@@ -61,8 +61,11 @@ current 邊界重建真實 registry 的 Frame／Binding，核對全部 JP curren
 | ride_entry.v1 | ability_0 → ride | `ride: {cost: {pp: N}}` |
 | evolve_feed_entries.v1 | ability_0 → evolve；ability_1 → feed | 各 scope 的獨立來源 cost |
 | evolve_ride_entries.v1 | ability_0 → evolve；ability_1 → ride | 各 scope 的獨立來源 cost |
+| draw_exact_spell.v1 | ability_0 → spell | `spell: {do: [{draw: {who: self, n: N}}]}`；單一 required Nat/count/value 葉 |
 
-五族皆只配空 imports／exports ports，能力 imports 必須省略。去掉 line／section／sources 後完整 canonical 能力必須相等；多加 into、usable_if、times、其他費用或 expression 都不符來源。N 可為 0，須取該構造的 operand，不能借相同數值。非空 ports 與其他執行 scope 保持明示 unsupported；不把跨 owner 或作者陣列較晚定為永久非法。真卡整卡正例為 BP01-009／034／092 的純進化入口；feed／ride 與雙入口的有限機制測試不宣稱已有真卡整卡准入。
+表列各族皆只配空 imports／exports ports，能力 imports 必須省略。去掉 line／section／sources 後完整 canonical 能力必須相等；多加 into、usable_if、times、其他費用或 expression 都不符來源。N 可為 0，須取該構造的 operand，不能借相同數值。非空 ports 與其他執行 scope 保持明示 unsupported；不把跨 owner 或作者陣列較晚定為永久非法。真卡整卡正例為 BP01-009／034／092 的純進化入口；feed／ride 與雙入口的有限機制測試不宣稱已有真卡整卡准入。
+
+spell 抽牌同樣只配空 ports、不得有能力 imports；來源重建要求既有 normalizer 的完整 current normal spell effect、無 sections、單行 exact self 抽牌。只對照來源 Nat/count/value 到 draw.n，不參數化 actor、能力頭或控制圖。`expand_sources` 與 current 入口都比對完整展開能力的 canonical bytes；省略 who、改張數、增加條件／費用／步驟或換頭皆拒絕。真卡正例為 CP02-068；up_to、對手／雙方、動態量、Quick、token 位置仍拒絕，攻擊時與進化時抽牌尚未接入作者 adapter。來源准入不等於 reviewed、compiled、executed 或 qualified。
 
 固定內容種子：BP08-038 的 Live count−5 與 draw；CP04-060 的 search→follow→本回合 cost delta −2；ECP01-058 的 evolve deck_rule 10；BP09-SL05 兩面定位及第二面 create 名稱列表。它們的內容來源是真卡，測試 SourceUse／FrameId／meta 為明示合成，不能冒充已採納來源或實跑資格。
 
