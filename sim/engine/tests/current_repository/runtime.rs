@@ -8,7 +8,7 @@ use sve_engine::ir::*;
 
 const NUMBER: &str = "BP01-P25";
 
-fn setup(seat: &str, owner: &str, life: [u8; 2]) -> Value {
+pub(super) fn setup(seat: &str, owner: &str, life: [u8; 2]) -> Value {
     let mut initial = json!({
         "history":"explicit",
         "turn":{"active":seat,"first_player":"P1","phase":"main",
@@ -25,7 +25,7 @@ fn setup(seat: &str, owner: &str, life: [u8; 2]) -> Value {
     initial
 }
 
-fn game(initial: &Value) -> Game {
+pub(super) fn game(initial: &Value) -> Game {
     let (snapshot, keywords, input) = inputs();
     let selected = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
     Game::from_selected_effects(

@@ -395,6 +395,11 @@ impl Game {
     /// # Errors
     /// Rejects a busy execution or a required check timing without changing its input question.
     pub fn internal_pending_choice(&mut self) -> Result<Option<DecisionView>> {
+        if !self.card_runtime.unadmitted.is_empty() {
+            return Err(unsupported(
+                "evolution resource printed abilities are not admitted",
+            ));
+        }
         if self.typed.is_some()
             || self.card_runtime.checkpoint.is_some()
             || !self.prepared.is_empty()
