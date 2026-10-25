@@ -45,6 +45,11 @@ def git(repository: Path, *args: str) -> None:
             "user.email=test@example.invalid",
             "-c",
             "commit.gpgsign=false",
+            # Background auto maintenance can still write .git while the temporary repository is removed.
+            "-c",
+            "gc.auto=0",
+            "-c",
+            "maintenance.auto=false",
             *args,
         ],
         cwd=repository,
