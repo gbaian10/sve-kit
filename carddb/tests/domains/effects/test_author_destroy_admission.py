@@ -1,4 +1,4 @@
-"""Resolved destroy sources still require their own author adapter."""
+"""Real Advance destroy sources resolve to the fixed author Fanfare payload."""
 
 from dataclasses import replace
 
@@ -7,7 +7,6 @@ import pytest
 from sve_carddb.contracts.author_evidence import SourceUse
 from sve_carddb.domains.effects.author_sources import (
     SourceCandidate,
-    SourceError,
     entry_payload,
     resolve_source,
 )
@@ -20,7 +19,7 @@ from .test_author_draw_admission import frozen_context
 
 
 @pytest.mark.parametrize("card_no", ["BP19-P32", "BP19-114"])
-def test_real_advance_fanfare_resolves_without_author_admission(card_no: str) -> None:
+def test_real_advance_fanfare_resolves_to_fixed_payload(card_no: str) -> None:
     raw, context = frozen_context(
         card_no, "ac6120f93e44b52c4e69f413ed4717b87c86f58b1105b9eb81f038ebd28522ad"
     )
@@ -45,5 +44,15 @@ def test_real_advance_fanfare_resolves_without_author_admission(card_no: str) ->
     )
     checked = resolve_source(SourceCandidate(raw, context.source, engine, context), use)
     assert checked.source_proof == "derived_self_consistent"
-    with pytest.raises(SourceError, match="unsupported_source_ability_mapping"):
-        entry_payload(checked, "ability_0")
+    assert entry_payload(checked, "ability_0") == {
+        "fanfare": {
+            "do": [
+                {
+                    "destroy": {
+                        "ref": {"who": "opp", "zone": "field", "kind": "follower"}
+                    }
+                }
+            ]
+        },
+        "ports": {"imports": {}, "exports": {}},
+    }

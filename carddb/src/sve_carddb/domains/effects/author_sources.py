@@ -23,6 +23,7 @@ from sve_carddb.contracts.source_binding import SourceBinding
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.domains.translations.four_layer_damage import KEY as DAMAGE_KEY
 from sve_carddb.domains.translations.four_layer_derivation import derive_source
+from sve_carddb.domains.translations.four_layer_destroy import KEY as DESTROY_KEY
 from sve_carddb.domains.translations.four_layer_expressions import definition
 from sve_carddb.domains.translations.four_layer_fixed_actions import MOVE
 
@@ -111,6 +112,7 @@ SOURCE_SITES: dict[tuple[str, tuple[str | int, ...]], tuple[str, str, str, str]]
 BINARY_ARITY = 2
 ENTRY_HEADS = {
     DAMAGE_KEY: ("lastword",),
+    DESTROY_KEY: ("fanfare",),
     MOVE: ("activate",),
     "draw_exact_spell.v1": ("spell",),
     "draw_exact_attack_time.v1": ("attack_time",),
@@ -152,6 +154,7 @@ ADAPTER_RECIPE = digest(
             "prototype": "all-jp-printing-identities;shared-overlap;no-execution",
             "inventory": "authored-root-complete-files-v1",
             "resolved_nonentry": "unsupported_source_projection",
+            "destroy_payload": "fixed-advance-printed-fanfare;opponent-field-all-followers;no-params;exact-Concept-and-source-location-v1",
             "damage_operand": "fixed-lastword-concept;Nat-damage_amount-leaf_1;exact-body-v1",
             "draw_operand": "draw_exact_spell.v1;draw_exact_attack_time.v1;draw_exact_evolve_time.v1;required-Nat-count-value;single-source-leaf",
             "draw_payload": "complete-head-body-canonical-equality-v1",
@@ -218,6 +221,20 @@ def entry_payload(source: SourceContext, scope: str) -> dict[str, JsonValue]:
     scopes = tuple(f"ability_{index}" for index in range(len(heads)))
     if scope not in scopes:
         raise SourceError("source_ability_scope_mismatch")
+    if source.frame.semantic_variant.key == DESTROY_KEY:
+        _destroy_contract(source)
+        return {
+            "fanfare": {
+                "do": [
+                    {
+                        "destroy": {
+                            "ref": {"who": "opp", "zone": "field", "kind": "follower"}
+                        }
+                    }
+                ]
+            },
+            "ports": {"imports": {}, "exports": {}},
+        }
     if source.frame.semantic_variant.key == MOVE:
         _move_contract(source)
         return {
@@ -273,6 +290,43 @@ def entry_payload(source: SourceContext, scope: str) -> dict[str, JsonValue]:
         heads[index]: {"cost": {"pp": operands[index][1]}},
         "ports": {"imports": {}, "exports": {}},
     }
+
+
+def _destroy_contract(source: SourceContext) -> None:
+    expected = LeafSchema(
+        format=2,
+        slots=(
+            LeafSlot(
+                name="leaf_0",
+                type="Concept",
+                role="ability",
+                required=True,
+                domain=Domain(min=None, max=None, values=("concept.ability.v1",)),
+                occurrences=(Span(start=1, end=8),),
+            ),
+        ),
+    )
+    if (
+        source.canonical_source
+        != "{ファンファーレ}相手の場のフォロワーすべてを破壊する。"
+        or source.frame.leaf_schema != expected
+        or source.binding.frame_id != source.frame.id
+    ):
+        raise SourceError("source_destroy_contract_mismatch")
+    if (
+        (source.binding.source.field, source.binding.source.ordinal) != ("effect", None)
+        or source.binding.source.owner.kind != "face_revision"
+        or source.binding.line_ordinal != 1
+        or source.binding.source_span.role != "body"
+        or source.binding.source_span.segments != (Span(start=10, end=38),)
+    ):
+        raise SourceError("source_destroy_contract_mismatch")
+    if source.binding.values != {
+        "leaf_0": GlossaryReference(kind="glossary", key="term:ability.fanfare")
+    } or tuple(
+        (o.slot, o.canonical_spans) for o in source.binding.occurrences
+    ) != tuple((s.name, s.occurrences) for s in expected.slots):
+        raise SourceError("source_destroy_contract_mismatch")
 
 
 def _move_contract(source: SourceContext) -> None:
