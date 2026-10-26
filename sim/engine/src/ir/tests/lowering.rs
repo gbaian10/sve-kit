@@ -452,7 +452,16 @@ fn keyword_sources_are_scope_free_and_keep_their_own_coordinate() {
         assert!(!expanded.is_valid(&rejected));
         lowerer.lower(&rejected).unwrap_err();
     }
-    for keywords in [json!(["ward"]), json!(["aura"]), json!(["quick", "aura"])] {
+    for keywords in [json!(["ward"]), json!(["aura"]), json!(["ward", "aura"])] {
+        let mut supported = tree.clone();
+        supported.pointer_mut(pointer).unwrap()["keywords"] = keywords;
+        lowerer.lower(&supported).unwrap();
+    }
+    for keywords in [
+        json!(["storm"]),
+        json!(["ward", "storm"]),
+        json!(["quick", "aura"]),
+    ] {
         let mut unsupported = tree.clone();
         unsupported.pointer_mut(pointer).unwrap()["keywords"] = keywords;
         assert!(expanded.is_valid(&unsupported));

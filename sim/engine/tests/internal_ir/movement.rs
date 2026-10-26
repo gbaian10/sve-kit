@@ -87,6 +87,113 @@ fn destroy_outcome(progress: &Progress, id: u64) -> &DestroyOutcome {
     outcome
 }
 
+fn field_followers(zone: ZoneKind) -> Selector {
+    let binding = Binding::new(9, ScopeId(1));
+    Selector::Zone {
+        players: players(PlayerRelation::Opponents),
+        zone,
+        view: SelectionView::Current {},
+        binding,
+        predicate: Box::new(Expr::Compute(Box::new(Predicate::And {
+            predicates: vec![Expr::Compute(Box::new(Predicate::KindEquals {
+                left: Expr::Live(Box::new(KindRead::Kind {
+                    object: ObjectView::Current {
+                        object: Box::new(ObjectOperand::Bound { binding }),
+                    },
+                    view: CharacteristicView::Effective,
+                })),
+                right: Expr::Literal(CardKind::Follower),
+            }))],
+        }))),
+    }
+}
+
+#[test]
+fn synthetic_public_field_destroy_filters_each_candidate_and_keeps_amulets() {
+    for seat in [1, 2] {
+        let actor = if seat == 1 { "P1" } else { "P2" };
+        let opponent = if seat == 1 { "P2" } else { "P1" };
+        let mut position = setup(seat, json!([]));
+        position["players"][actor]["zones"]["field"] = json!([{"id":"own","card":"unit-follower"}]);
+        position["players"][opponent]["zones"]["field"] = json!([
+            {"id":"f","card":"unit-follower"}, {"id":"a","card":"unit-amulet"}
+        ]);
+        let mut game = Game::new(
+            catalog(),
+            &position,
+            &Value::Null,
+            &Value::Null,
+            "field-filter",
+        )
+        .unwrap();
+        let result = game
+            .execute_internal(
+                &checked(vec![destroy(1, field_followers(ZoneKind::Field))]),
+                &source("synthetic"),
+                context(seat),
+            )
+            .unwrap();
+        assert_eq!(destroy_outcome(&result, 1).successful.len(), 1);
+        let state = game.projection(View::Referee).unwrap();
+        assert_eq!(state[opponent]["field"], json!(["a"]));
+        assert_eq!(state[actor]["field"], json!(["own"]));
+        assert_eq!(state[opponent]["cemetery"], json!(["f"]));
+    }
+}
+
+#[test]
+fn public_field_destroy_does_not_authorize_hidden_or_other_candidate_reads() {
+    let mut hidden = field_followers(ZoneKind::Deck);
+    let mut name = field_followers(ZoneKind::Field);
+    if let Selector::Zone {
+        predicate, binding, ..
+    } = &mut name
+    {
+        **predicate = Expr::Compute(Box::new(Predicate::NamesIntersect {
+            left: Expr::Live(Box::new(NamesRead::Names {
+                object: ObjectView::Current {
+                    object: Box::new(ObjectOperand::Bound { binding: *binding }),
+                },
+            })),
+            right: Expr::Literal(vec![CardName("unit-follower".into())]),
+        }));
+    }
+    if let Selector::Zone { players, .. } = &mut hidden {
+        players.relation = PlayerRelation::SelfPlayer;
+    }
+    for selector in [hidden, name] {
+        let mut game = game(1, 1);
+        let before = game.projection(View::Referee).unwrap();
+        game.execute_internal(
+            &checked(vec![destroy(1, selector)]),
+            &source("synthetic"),
+            context(1),
+        )
+        .unwrap_err();
+        assert_eq!(game.projection(View::Referee).unwrap(), before);
+    }
+}
+
+#[test]
+fn field_destroy_keeps_candidate_independent_false_conditions() {
+    let mut selector = zone(ZoneKind::Field, 1);
+    if let Selector::Zone { predicate, .. } = &mut selector {
+        **predicate = Expr::Literal(Bool(false));
+    }
+    let mut game = game(1, 0);
+    let result = game
+        .execute_internal(
+            &checked(vec![destroy(1, selector)]),
+            &source("synthetic"),
+            context(1),
+        )
+        .unwrap();
+    assert_eq!(
+        destroy_outcome(&result, 1).successful,
+        Vec::<ResultMember>::new()
+    );
+}
+
 #[test]
 fn mixed_owners_return_to_their_own_cemeteries_with_independent_generations() {
     for seat in [1, 2] {

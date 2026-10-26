@@ -263,6 +263,7 @@ pub(super) enum Objects {
 pub(super) struct ObjectQuery {
     pub who: Side,
     pub zone: Zone,
+    pub kind: Option<Follower>,
 }
 
 #[derive(Clone, Deserialize)]
@@ -634,7 +635,7 @@ pub(super) struct EntrySubject {
     #[serde(rename = "trait")]
     pub trait_id: Option<String>,
 }
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 pub(super) enum Follower {
     #[serde(rename = "follower")]
     Follower,

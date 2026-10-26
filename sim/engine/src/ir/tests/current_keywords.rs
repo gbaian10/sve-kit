@@ -1,7 +1,15 @@
-use super::{current_inputs, selected_catalog};
+use super::current_inputs;
+use crate::EngineFailure;
+use crate::catalog::Catalog;
+use crate::game::Game;
 use crate::ir::lowering::{ExpandedLowerer, PrintedKeyword};
-use alloc::collections::BTreeSet;
+use crate::ir::{
+    AbilityOrigin, Binding, CardProgram, Effect, KeywordId, ObjectOperand, PlayerRef, Polarity,
+    WellFormedCardProgram, ZoneKind,
+};
+use alloc::{collections::BTreeSet, sync::Arc};
 use serde_json::{Value, json};
+use std::{env::var_os, fs::read_to_string};
 
 fn input() -> Value {
     current_inputs()["keywords"]["authors"][0]["input"].clone()
@@ -36,12 +44,38 @@ fn real_current_keyword_selection_checks_complete_declarations_before_lowering()
         input["declaration_sidecar"][0]["input_hash"]
     );
     assert_ne!(evidence.adapter_recipe, reference["source_adapter_recipe"]);
-    // Source reconciliation is a separate success boundary from executable lowering.
-    assert_eq!(
-        lowerer.lower_current(&input).unwrap_err().code,
-        "unsupported_construct"
-    );
-    selected_catalog(&current_inputs()["keywords"]).unwrap_err();
+    let candidate = lowerer.lower_current(&input).unwrap();
+    assert_eq!(candidate.program.card().abilities.len(), 2);
+    for (index, ability) in candidate.program.card().abilities.iter().enumerate() {
+        assert_eq!(
+            ability.source.author_path,
+            format!("/cards/BP01-138/abilities/0/keywords/{index}")
+        );
+        assert_eq!(ability.source.scope, evidence.source.scope);
+        assert!(candidate.source_at(&ability.source.author_path).is_none());
+        assert_eq!(
+            candidate
+                .declaration_at(&ability.source.author_path)
+                .unwrap()
+                .reference,
+            evidence.reference
+        );
+    }
+    let snapshot = read_to_string(var_os("SVE_TEST_SNAPSHOT").unwrap()).unwrap();
+    let selected = Catalog::from_current_selection(
+        &snapshot,
+        "format: 1\nkind: keyword_registry\nkeywords: {}\n",
+        &current_inputs()["keywords"],
+    )
+    .unwrap();
+    Game::from_selected_effects(
+        selected,
+        &json!({}),
+        &Value::Null,
+        &Value::Null,
+        "keyword-admission",
+    )
+    .unwrap();
 }
 
 #[test]
@@ -340,6 +374,19 @@ fn same_keywords_on_two_faces_consume_separate_obligations() {
         .map(|evidence| &evidence.source.face)
         .collect();
     assert_eq!(faces.len(), 2);
+    let candidate = lowerer.lower_current(&input).unwrap();
+    assert_eq!(candidate.program.card().abilities.len(), 4);
+    assert_eq!(
+        candidate
+            .program
+            .card()
+            .abilities
+            .iter()
+            .map(|ability| ability.node.scope)
+            .collect::<BTreeSet<_>>()
+            .len(),
+        4
+    );
     let mut omitted = input.clone();
     omitted["tree"]["cards"]["BP01-138"]["faces"] = json!({});
     omitted["declaration_sidecar"].as_array_mut().unwrap().pop();
@@ -361,6 +408,183 @@ fn same_keywords_on_two_faces_consume_separate_obligations() {
     wrong_face["tree"]["cards"]["BP01-138"]["faces"][&face]["abilities"][0]["sources"][0] =
         wrong_face["declaration_sidecar"][1]["source_use"].clone();
     assert_rejected(vec![omitted, borrowed, container, wrong_face]);
+}
+
+fn snapshot() -> String {
+    read_to_string(var_os("SVE_TEST_SNAPSHOT").unwrap()).unwrap()
+}
+
+fn admission(selection: &Value) -> crate::Result<Game> {
+    let selected = Catalog::from_current_selection(
+        &snapshot(),
+        "format: 1\nkind: keyword_registry\nkeywords: {}\n",
+        selection,
+    )?;
+    Game::from_selected_effects(
+        selected,
+        &json!({}),
+        &Value::Null,
+        &Value::Null,
+        "keyword-admission",
+    )
+}
+
+#[test]
+fn real_advance_printings_lower_both_keywords_and_the_complete_fanfare() {
+    let lowerer = ExpandedLowerer::new().unwrap();
+    for number in ["BP19-P32", "BP19-114"] {
+        let selection = &current_inputs()["keyword_fanfare"][number];
+        let input = &selection["authors"][0]["input"];
+        let candidate = lowerer.lower_current(input).unwrap();
+        let abilities = &candidate.program.card().abilities;
+        assert_eq!(abilities.len(), 3);
+        assert_eq!(candidate.source_sidecar.len(), 1);
+        assert_eq!(candidate.declaration_sidecar.len(), 1);
+        for (index, keyword) in [KeywordId::Ward, KeywordId::Aura, KeywordId::Fanfare]
+            .into_iter()
+            .enumerate()
+        {
+            assert!(
+                matches!(&abilities[index].node.source.origin, AbilityOrigin::Keyword { keyword: found, origin }
+                if *found == keyword && matches!(origin.as_ref(), AbilityOrigin::Printed { face, line }
+                    if face.0 == abilities[index].source.face && line.0 == u64::from(abilities[index].source.line)))
+            );
+        }
+        assert!(
+            abilities[2]
+                .node
+                .body
+                .as_ref()
+                .is_some_and(|body| !body.steps.is_empty())
+        );
+        assert_eq!(
+            abilities
+                .iter()
+                .map(|ability| ability.node.scope)
+                .collect::<BTreeSet<_>>()
+                .len(),
+            3
+        );
+        admission(selection).unwrap();
+        let mut missing = input.clone();
+        missing["tree"]["cards"][number]["abilities"]
+            .as_array_mut()
+            .unwrap()
+            .remove(0);
+        missing["declaration_sidecar"] = json!([]);
+        // Keep the remaining body's sidecar path aligned so only keyword closure can fail.
+        missing["sidecar"][0]["path"] = json!(["cards", number, "abilities", 0_u64]);
+        assert_eq!(
+            lowerer.lower_current(&missing).unwrap_err().code,
+            "current_keyword_closure_mismatch"
+        );
+    }
+}
+
+#[test]
+fn runtime_rejects_changed_permission_headers_expansions_and_source_chains() {
+    let input = input();
+    let lowerer = ExpandedLowerer::new().unwrap();
+    let card = lowerer.lower_current(&input).unwrap();
+    let original = raw_keyword_coordinates(card.program.card());
+    let baseline = WellFormedCardProgram::check(original.clone()).unwrap();
+    let unproven = raw_keyword_game()
+        .load_internal_card("BP01-138", &baseline)
+        .unwrap_err();
+    assert!(
+        matches!(unproven, EngineFailure::Unsupported(reason) if reason.contains("requires current declaration proof"))
+    );
+    let mut candidates = Vec::new();
+    let mut zone = original.clone();
+    zone.abilities[0].node.active_zones = vec![ZoneKind::Hand];
+    candidates.push(zone);
+    let mut holder = original.clone();
+    holder.abilities[0].node.source.holder = ObjectOperand::Bound {
+        binding: Binding::new(1, holder.abilities[0].node.scope),
+    };
+    candidates.push(holder);
+    let mut controller = original.clone();
+    controller.abilities[0].node.source.controller = PlayerRef::Owner {};
+    candidates.push(controller);
+    let mut missing = original.clone();
+    missing.abilities[0].node.declarations.clear();
+    candidates.push(missing);
+    let mut extra = original.clone();
+    extra.abilities[0]
+        .node
+        .declarations
+        .push(original.abilities[0].node.declarations[0].clone());
+    candidates.push(extra);
+    let mut rule = original.clone();
+    if let Effect::Permission { rule, .. } = &mut rule.abilities[0].node.declarations[0] {
+        rule.0 = 0;
+    }
+    candidates.push(rule);
+    let mut polarity = original.clone();
+    if let Effect::Permission { polarity, .. } = &mut polarity.abilities[0].node.declarations[0] {
+        *polarity = Polarity::Allow;
+    }
+    candidates.push(polarity);
+    let mut nested = original.clone();
+    if let AbilityOrigin::Keyword { origin, .. } = &mut nested.abilities[0].node.source.origin {
+        **origin = original.abilities[1].node.source.origin.clone();
+    }
+    candidates.push(nested);
+    let mut unsupported = original;
+    if let AbilityOrigin::Keyword { keyword, .. } = &mut unsupported.abilities[0].node.source.origin
+    {
+        *keyword = KeywordId::Storm;
+    }
+    candidates.push(unsupported);
+    for candidate in candidates {
+        if let Ok(checked) = WellFormedCardProgram::check(candidate) {
+            let failure = raw_keyword_game()
+                .load_internal_card("BP01-138", &checked)
+                .unwrap_err();
+            assert!(
+                matches!(failure, EngineFailure::Unsupported(reason) if reason.contains("whole-card ability"))
+            );
+        }
+    }
+}
+
+fn raw_keyword_coordinates(card: &CardProgram) -> CardProgram {
+    // This synthetic coordinate probe reaches the raw loader, without granting current proof.
+    let mut card = card.clone();
+    for ability in &mut card.abilities {
+        ability.source.card_id.clone_from(&ability.source.card_no);
+        ability.source.face = "base".into();
+        ability.source.owner = "card".into();
+        ability.source.field = "text".into();
+        ability.source.fragment = None;
+        if let AbilityOrigin::Keyword { origin, .. } = &mut ability.node.source.origin
+            && let AbilityOrigin::Printed { face, .. } = origin.as_mut()
+        {
+            face.0 = "base".into();
+        }
+    }
+    card
+}
+
+fn raw_keyword_game() -> Game {
+    let document = json!({"format":1_u8,"kind":"effect_set","cards":{
+        "BP01-138":{"status":"complete","abilities":[]}
+    }})
+    .to_string();
+    let catalog = Catalog::from_documents(
+        &snapshot(),
+        "format: 1\nkind: keyword_registry\nkeywords: {}\n",
+        &[("synthetic.yaml".into(), document)],
+    )
+    .unwrap();
+    Game::new(
+        Arc::new(catalog),
+        &json!({}),
+        &Value::Null,
+        &Value::Null,
+        "rejection",
+    )
+    .unwrap()
 }
 
 #[test]

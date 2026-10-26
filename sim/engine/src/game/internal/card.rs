@@ -5,7 +5,6 @@ use super::{
 };
 use crate::catalog::SelectedEffects;
 use crate::catalog::current::CurrentCard;
-use crate::ir::TurnId;
 use crate::ir::quick::{card_permission, is_printed_quick};
 use crate::ir::{
     Ability, AbilityId, AbilityInstanceId, AbilityKind, AbilityOrigin, AbilitySource, Action,
@@ -16,6 +15,7 @@ use crate::ir::{
     StepwiseMode, WellFormedCardProgram, ZoneKind,
 };
 use crate::ir::{ConsumptionPoint, LimitSpec, ModeUse};
+use crate::ir::{TurnId, printed_keywords};
 use crate::{Result, invalid};
 use alloc::collections::{BTreeMap, BTreeSet};
 use alloc::sync::Arc;
@@ -28,6 +28,7 @@ mod costs;
 mod evolution;
 pub(super) mod exchange;
 mod fanfare;
+mod keywords;
 mod printed;
 pub(super) mod quick;
 mod resources;
@@ -287,9 +288,8 @@ impl Game {
             {
                 return Err(unsupported("one base Printed Spell per card"));
             }
-            if line.0 == 0 || !origins.insert((ordinal, line.0)) {
-                return Err(invalid("invalid or duplicate printed ability coordinate"));
-            }
+            let declaration = printed_keywords::card_declaration(ability);
+            keywords::check_coordinate(&mut origins, ordinal, line.0, declaration)?;
             let printed = self.catalog.face(card_no, ordinal)?;
             check_printed_face(printed)?;
             if is_printed_quick(ability)
@@ -311,6 +311,10 @@ impl Game {
                 play::check_spell(ability, printed)?;
             }
             self.check_card_source(&located.source, card_no, &face.0, line.0)?;
+            if let Some(keyword) = declaration {
+                keywords::check(self, card_no, located, printed, keyword)?;
+                continue;
+            }
             if card_permission(ability) {
                 quick::check_spell_face(self, card_no, card.card(), ordinal, base_print)?;
                 continue;
@@ -593,7 +597,7 @@ fn activation_type(kind: &str) -> bool {
 }
 
 fn check_header(ability: &Ability) -> Result<()> {
-    if card_permission(ability) {
+    if card_permission(ability) || printed_keywords::card_declaration(ability).is_some() {
         return Ok(());
     }
     let zones = if ability.kind == AbilityKind::Spell {
@@ -719,7 +723,9 @@ fn printed_origin(origin: &AbilityOrigin) -> Result<(&FaceId, &Nat)> {
                 | KeywordId::OnEvolve
                 | KeywordId::OnSuperEvolve
                 | KeywordId::Evolution
-                | KeywordId::Quick,
+                | KeywordId::Quick
+                | KeywordId::Ward
+                | KeywordId::Aura,
             origin,
         } => {
             if let AbilityOrigin::Printed { face, line } = origin.as_ref() {

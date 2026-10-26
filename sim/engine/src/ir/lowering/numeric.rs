@@ -4,9 +4,9 @@ use super::super::{
     NumericChange, ObjectRef, Stat, TimeAnchor, TimestampBasis,
 };
 use super::{
-    AbilitySource, Action, BTreeSet, Binding, BodyContext, Bool, Cardinality, Expr, Int,
-    LoweringError, Nat, ObjectOperand, PlayerRef, PlayerRelation, PlayerSet, SelectionView,
-    Selector, TextQuantifier, ZoneKind, ast, unsupported,
+    AbilitySource, Action, BTreeSet, Binding, BodyContext, Cardinality, Expr, Int, LoweringError,
+    Nat, ObjectOperand, PlayerRef, PlayerRelation, PlayerSet, SelectionView, Selector,
+    TextQuantifier, ZoneKind, ast, unsupported,
 };
 
 pub(super) fn holder() -> Selector {
@@ -63,6 +63,7 @@ impl BodyContext<'_> {
             };
         };
         let binding: Binding<ObjectRef> = Binding::new(self.allocator.id(path)?, self.scope);
+        let kind = query.kind.as_ref().map(|_| ast::SearchKind::Follower);
         Ok(Selector::Zone {
             players: PlayerSet {
                 relation: match query.who {
@@ -86,7 +87,12 @@ impl BodyContext<'_> {
             },
             view: SelectionView::Current {},
             binding,
-            predicate: Box::new(Expr::Literal(Bool(true))),
+            predicate: Box::new(super::search::object_filter(
+                kind.as_ref(),
+                None,
+                None,
+                binding,
+            )),
         })
     }
 

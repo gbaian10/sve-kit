@@ -76,6 +76,17 @@ pub struct CurrentSourceEvidence {
 }
 
 impl CurrentCardProgram {
+    /// Resolve a printed declaration or its lowered keyword element separately from bodies.
+    #[must_use]
+    pub fn declaration_at(&self, mut author_path: &str) -> Option<&CurrentKeywordEvidence> {
+        loop {
+            if let Some(evidence) = self.declaration_sidecar.get(author_path) {
+                return Some(evidence);
+            }
+            (author_path, _) = author_path.rsplit_once('/')?;
+        }
+    }
+
     /// Resolve an expanded node or IR instruction's author path to its checked use.
     #[must_use]
     pub fn source_at(&self, mut author_path: &str) -> Option<&CurrentSourceEvidence> {
