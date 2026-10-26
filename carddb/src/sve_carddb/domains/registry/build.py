@@ -401,4 +401,8 @@ def build(inputs: Inputs, existing: dict[str, Entry]) -> list[Entry]:
     builder.identities()
     builder.allocations()
     builder.curation()
+    # Later curation is independent of the initialization decisions; never drop it.
+    for key, entry in existing.items():
+        if entry.kind in {"art", "source_correction"}:
+            builder.entries.setdefault(key, entry)
     return sorted(builder.entries.values(), key=lambda entry: entry.record_key)
