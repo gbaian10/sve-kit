@@ -1,10 +1,13 @@
 use super::*;
-use crate::ir::lowering::{CurrentCardProgram, ExpandedLowerer, validator};
+use crate::ir::lowering::{CurrentCardProgram, ExpandedLowerer, NonBodySource, validator};
 use alloc::collections::BTreeMap;
 use serde_json::{Value, json};
 
 #[path = "../../../tests/support/expanded.rs"]
 mod expanded;
+
+#[path = "current_keywords.rs"]
+mod current_keywords;
 
 use crate::catalog::{Catalog, SelectedEffects};
 use std::{
@@ -323,7 +326,7 @@ fn complete_current_inventory_covers_faces_sections_siblings_and_all_modes() {
         .unwrap();
     assert_eq!(admitted.program.card().abilities.len(), 3);
     assert_eq!(admitted.source_sidecar.len(), 3);
-    assert_eq!(admitted.non_body_sources, Vec::<Value>::new());
+    assert_eq!(admitted.non_body_sources, Vec::<NonBodySource>::new());
     let Node::Control {
         control: Control::Mode { modes, .. },
     } = &admitted.program.card().abilities[1]
@@ -469,11 +472,13 @@ fn a_keyword_cannot_borrow_a_current_body_obligation() {
         .unwrap()
         .remove("ability_scope");
     ability["keywords"] = json!(["quick"]);
-    let failure = ExpandedLowerer::new()
-        .unwrap()
-        .lower_current(&input)
-        .unwrap_err();
-    assert_eq!(failure.code, "unsupported_keyword_source_mapping");
+    let lowerer = ExpandedLowerer::new().unwrap();
+    for failure in [
+        lowerer.check_current(&input).unwrap_err(),
+        lowerer.lower_current(&input).unwrap_err(),
+    ] {
+        assert_eq!(failure.code, "invalid_current_source");
+    }
 }
 
 #[test]

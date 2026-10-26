@@ -21,7 +21,11 @@ use super::{
     RecipientSet, ScopeId, SelectionView, Selector, SourceSpan, StepwiseMode, TextQuantifier,
     TriggerAggregation, TriggerCondition, TriggerSpec, WellFormedCardProgram, ZoneKind,
 };
-pub use current::{CurrentCardProgram, CurrentSourceEvidence};
+pub use current::{
+    CardKeywordSourceUse, CurrentCardProgram, CurrentKeywordEvidence, CurrentSourceCheck,
+    CurrentSourceEvidence, KeywordDeclarationPayload, MetadataObligation, NonBodySource,
+    PrintedKeyword, PrintedKeywordsObligation,
+};
 
 use alloc::collections::{BTreeMap, BTreeSet};
 use serde::de::DeserializeOwned;
@@ -122,6 +126,17 @@ impl ExpandedLowerer {
     /// without a supported source contract and every unsupported expanded construct.
     pub fn lower_current(&self, input: &Value) -> Result<CurrentCardProgram, LoweringError> {
         current::lower(self, input)
+    }
+
+    /// Reconcile a complete trusted C0 handoff before attempting executable lowering.
+    ///
+    /// Success preserves declaration provenance but grants no runtime support. C0
+    /// remains responsible for original author bytes and current registry admission.
+    ///
+    /// # Errors
+    /// Rejects malformed wire, source or author mismatches and unconsumed obligations.
+    pub fn check_current(&self, input: &Value) -> Result<CurrentSourceCheck, LoweringError> {
+        current::check(self, input)
     }
 
     fn lower_coordinates(

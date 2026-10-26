@@ -71,7 +71,7 @@ keywords 為非空、保序、元素不重複的清單，ports 必為 `{imports:
 
 companion.body 的 A.companion-head 子圖排除 keywords，未引用本體也必須驗；generated_by 不得產生 keyword 宣告。grant.keywords 與 activate.quick 是原有本體內的不同語法，不適用此 sources 型別。完整 reader 仍拒絕 inline ParamRef；本片不開非本體 companion 或新的葉參數位置。
 
-目前僅實作此結構承載與封閉型別。正式 current keyword 來源映射與非本體 inventory 對帳尚未接通：expand_sources／expand_contexts 遇 keyword 宣告回 unsupported_keyword_source_mapping，current card_field 仍拒絕 unsupported_source_projection；D0 current 也不接受以普通本體義務冒充 keyword。結構可讀不表示來源已驗、已降低或可執行。
+正式 current reader 已從完整 current 來源獨立重建 ward／aura 義務，逐筆對帳作者宣告並產生獨立 declaration sidecar；metadata 與 printed_keywords 使用封閉的非本體 inventory 型別。本體與宣告在 D0 分別精確消耗，tree 與 sidecar 同時漏項仍由獨立 inventory 拒絕，普通本體義務不能冒充 keyword。純結構展開或外供 context 不授 current proof；D0 的來源對帳成功也不代表已降低、可執行或取得用途資格。Ward／Aura 的 executable lowering 與 runtime 仍未接通。
 
 ### 2.4 effects-index
 
@@ -220,7 +220,7 @@ current 入口另從全部 current 面與 sections 的 registry 來源建立獨�
 不當成缺能力，也不因沒有本文而聲稱已執行。token 來源與非空 token 選用目前仍整卡拒絕，
 不把 token 能力複製到母卡。來源 adapter 未支援的能力圖也維持拒絕，清單對帳不擴張來源支援範圍。
 
-獨立 keywords 的來源沒有 ability_scope，未來的 current handoff 必須有獨立、封閉的宣告義務與 declaration sidecar，不能把它塞入能力 scope 對帳或只保留任意 Value 就聲稱已降低。目前尚未實作此 current 接線。對純 expanded 合成輸入，既有 Quick lowering 的 SourceSpan.scope 使用 `keyword_declaration:<author_path>` 作編譯期局部座標，與普通 SourceUse.ability_scope 分開；它不屬 Projection.scopes、不入 FrameId／BindingId 或來源 hash，不能拿來選 companion／port。ScopeId／AbilityId 仍是引擎分配的執行期識別。來源定位保留原 occurrence 與 binding、owner／face／field／section／line；正式 current 回查待宣告 sidecar 完整接通後才可聲稱。
+獨立 keywords 的來源沒有 ability_scope；current handoff 已使用封閉的宣告義務與獨立 declaration sidecar，將本體與宣告分別精確消耗。不能把它塞入能力 scope 對帳或只保留任意 Value 就聲稱已降低。純 expanded 與 current 宣告的 SourceSpan.scope 使用 `keyword_declaration:<author_path>` 作編譯期局部座標，與普通 SourceUse.ability_scope 分開；它不屬 Projection.scopes、不入 FrameId／BindingId 或來源 hash，不能拿來選 companion／port。ScopeId／AbilityId 仍是引擎分配的執行期識別。宣告的已驗來源可由獨立 sidecar 回查，保留原 occurrence 與 binding、owner／face／field／section／line；這不代表 Ward／Aura 已有 executable lowering、runtime 准入或用途資格。
 
 | 接縫 | 必須保留／拒絕的責任 |
 | --- | --- |

@@ -167,10 +167,12 @@ Other heads still require the scoped `SourceUse`. Keyword declarations require
 empty ports, distinct keywords, and no imports or `generated_by`; companion
 bodies use `A.companion-head`, which excludes this declaration head. Cards with
 these declarations currently require draft status and empty review/exam evidence.
-This is structural support only: source expansion and current D0 admission still
-reject keyword source mapping. Existing synthetic expanded Quick lowering uses
-a compiler-local `keyword_declaration:<author_path>` source coordinate, which
-never supplies a source Projection scope. Ward/Aura runtime support is unchanged.
+Current-source reconstruction, author declaration reconciliation, and D0 source-closure
+checks are implemented for Ward/Aura through a separate declaration sidecar. Pure
+expansion does not grant current-source proof. Keyword source coordinates use the
+compiler-local `keyword_declaration:<author_path>` namespace, which never supplies
+a source Projection scope. Ward/Aura executable lowering and runtime admission
+remain unsupported; source reconciliation does not grant use qualification.
 
 ## Expansion candidates
 
