@@ -1,0 +1,60 @@
+bodies: {}
+cards:
+  BP19-001:
+    basis: effect-anchor-v1:sha256:b447d77b4bcad275cd6f93cd7b29cf009bc42628b8e35a287b709a3625fe8426
+    card_id: c:dee39190e5d35ae8af3476da12c37395
+    legacy_shape:
+      container: faces
+    source: effect-source-v1:sha256:7836743302ab232fe580861128c86e9ae027c1571ca536db068d487431bebb9e
+    uses:
+      - ability_scope: ability_0
+        binding_id: bind:9c3383a786bcc7eb6b209ec89de8649bdc981ca65eb40329d41828a6b8530ecf
+        face_id: f:353ccad8c7ff5c30bafe4c7152322169
+        frame_id: frame:f03820b9048f0bd911c528162f930b0e47d128493a84b4fe097f4c8a48608756
+        line: 1
+        occurrence:
+          field: effect
+          line_ordinal: 0
+          ordinal: null
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:21827447b0640c966f0983b8405012dd5c8d0e749452016f106c84cb61ad206d
+          role: body
+          segments:
+            - end: 19
+              start: 0
+          source_hash: a8887965f53a99dde02284d7deb217df4a20c000490c5fdc42330865aee829a3
+        ports:
+          exports: {}
+          imports: {}
+  BP19-050:
+    basis: effect-anchor-v1:sha256:b6dd937cfee5da88310924ab990eb244fb06af975303a43e20e2166509158b18
+    card_id: c:273ac330168158078c8bec28a9daafec
+    legacy_shape:
+      container: faces
+    source: effect-source-v1:sha256:c51a152d0af32892dafc35b5524981d032cb2878f88b1ec905e8f9c146d463e8
+    uses:
+      - ability_scope: ability_0
+        binding_id: bind:5569e28c7d3df889a5c7fb1504194b3eaec9ed757de31622de16051afa448b2b
+        face_id: f:3784a31741f451ff81ad3eb1140f360e
+        frame_id: frame:f03820b9048f0bd911c528162f930b0e47d128493a84b4fe097f4c8a48608756
+        line: 1
+        occurrence:
+          field: effect
+          line_ordinal: 0
+          ordinal: null
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:d79d6c892ed4ab5532428ee0b0ac4029372084004663298f6b928948ae0a4410
+          role: body
+          segments:
+            - end: 19
+              start: 0
+          source_hash: a8887965f53a99dde02284d7deb217df4a20c000490c5fdc42330865aee829a3
+        ports:
+          exports: {}
+          imports: {}
+format: 1
+kind: effect_anchor_set
+owner: BP19
+recipe: effect-anchor-v1

@@ -1,118 +1,39 @@
-format: 1
-kind: author_effect_set
-scope: shared
 cards:
   BP01-110:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
     meta:
-      dsl: "1.0"
-      source: effect-source-v1:sha256:2038897ac387535ef58ce669a4cf9b0ff70b229e73876e9e5eed4cd9edcbdab0
       written_by:
         - actor:
-            who: Codex
             model: Codex gpt-6-luna
+            who: Codex
           date: "2026-10-25"
-      reviewed_by: []
-      status: draft
-      verified_by_exam: []
-      rulings: []
-    faces:
-      f:3e38b54244a5545bb20e58bf9e35913f:
-        abilities:
-          - line: 1
-            sources:
-              - binding_id: bind:8b2440b281c76332cbc9c6a96a85d3a6d369f61e8103749c81c2c5edda1e162b
-                occurrence:
-                  owner:
-                    kind: face_revision
-                    revision_id: rev:v1:ccd9041330bdd75cb98a14c5188e1ca5ac3366b13e42c45a05eca02e4714e2f1
-                  field: effect
-                  ordinal:
-                  source_hash: a8887965f53a99dde02284d7deb217df4a20c000490c5fdc42330865aee829a3
-                  line_ordinal: 0
-                  role: body
-                  segments:
-                    - start: 0
-                      end: 19
-                ability_scope: ability_0
-            ports:
-              imports: {}
-              exports: {}
-            evolve:
-              cost:
-                pp: 1
   BP01-171:
+    abilities:
+      - evolve:
+          cost:
+            pp: 4
+        line: 1
     meta:
-      dsl: "1.0"
-      source: effect-source-v1:sha256:c0f075a54a1d17c1243ee36be0164f388e3ab3d766cc1cd6d1687d7bee75042b
       written_by:
         - actor:
-            who: Codex
             model: Codex gpt-6-luna
+            who: Codex
           date: "2026-10-25"
-      reviewed_by: []
-      status: draft
-      verified_by_exam: []
-      rulings: []
-    faces:
-      f:1a954dc4b5535c2d8e8e1ffff3a50e20:
-        abilities:
-          - line: 1
-            sources:
-              - binding_id: bind:b4bcbe80951f0a9d81c6474857f81a0dfd44fadadd8021bedc2f286823b12c3b
-                occurrence:
-                  owner:
-                    kind: face_revision
-                    revision_id: rev:v1:40efcaf3cff234ac42fbc2a1f07c1000d1f09b2b0e5e69a4df59372bfdb3e758
-                  field: effect
-                  ordinal:
-                  source_hash: 5ccec4bda6df827320ba015dab8d76a814e6d62048ade7962c1d52c086e75700
-                  line_ordinal: 0
-                  role: body
-                  segments:
-                    - start: 0
-                      end: 19
-                ability_scope: ability_0
-            ports:
-              imports: {}
-              exports: {}
-            evolve:
-              cost:
-                pp: 4
   BP01-174:
+    abilities:
+      - evolve:
+          cost:
+            pp: 2
+        line: 1
     meta:
-      dsl: "1.0"
-      source: effect-source-v1:sha256:7be4128dfd0a94115ce9079a2559af99d7f88504fc64c260a1b8806892a513b7
       written_by:
         - actor:
-            who: Codex
             model: Codex gpt-6-luna
+            who: Codex
           date: "2026-10-25"
-      reviewed_by: []
-      status: draft
-      verified_by_exam: []
-      rulings: []
-    faces:
-      f:adb2bd92a4b75ca1bcdadb0660bf80da:
-        abilities:
-          - line: 1
-            sources:
-              - binding_id: bind:ed0aeab776d816af2e6b7f2edf0e1ae0486851ab0581ea98e7dba1a330ccbfcb
-                occurrence:
-                  owner:
-                    kind: face_revision
-                    revision_id: rev:v1:52275548596dff0e64c78803db851956e3dbfe0641b180b0432954ef1a020d62
-                  field: effect
-                  ordinal:
-                  source_hash: 86914ad53ab5adaa76c687ce4caf0685686cb5061c8c9e9d6f1ba5ced789656f
-                  line_ordinal: 0
-                  role: body
-                  segments:
-                    - start: 0
-                      end: 19
-                ability_scope: ability_0
-            ports:
-              imports: {}
-              exports: {}
-            evolve:
-              cost:
-                pp: 2
+format: 2
+kind: author_effect_set

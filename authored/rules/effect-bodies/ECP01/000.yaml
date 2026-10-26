@@ -1,35 +1,18 @@
-format: 1
+format: 2
 kind: effect_body_shard
-scope: shared
 records:
-  - frame_id: frame:1e6e3d1694c7557eed8a8f8ca8530e1c66c6ad17c344c287b34124a7f6ded08e
-    ability_scope: ability_0
-    dsl: "1.0"
-    params:
-      n:
-        type: Nat
-        source:
-          slot: leaf_0
-          component: value
-    body:
+  - body:
       evolve_time:
         do:
           - draw:
-              who: self
               n:
                 param: n
-    ports:
-      imports: {}
-      exports: {}
+              who: self
+    id: draw_exact_evolve_time.v1
+    params:
+      n: Nat
     written_by:
       - actor:
-          who: Codex
           model: gpt-6.1-sol
+          who: Codex
         date: "2026-10-25"
-    registrations:
-      - id: jp
-        domain:
-          regions:
-            - jp
-        reviews: []
-    body_version: effect-body-v1:sha256:962bc874a8c21cfb8c3298b7447a0474e8e2adb45aaaff257bc9df0c5515fbd5

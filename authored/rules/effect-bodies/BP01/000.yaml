@@ -1,36 +1,19 @@
-format: 1
+format: 2
 kind: effect_body_shard
-scope: shared
 records:
-  - frame_id: frame:40c2ea2338dd3fd85116c967fd193c7d9d3b96ff2ddb0633de44bed2b62f7f5d
-    ability_scope: ability_0
-    dsl: "1.0"
-    params:
-      n:
-        type: Nat
-        source:
-          slot: leaf_1
-          component: value
-    body:
+  - body:
       lastword:
         do:
           - damage:
-              to:
-                leaders: all
               n:
                 param: n
-    ports:
-      imports: {}
-      exports: {}
+              to:
+                leaders: all
+    id: damage_uniform_lastword_all_leaders.v1
+    params:
+      n: Nat
     written_by:
       - actor:
-          who: Codex
           model: gpt-6.1-sol
+          who: Codex
         date: "2026-10-25"
-    registrations:
-      - id: jp
-        domain:
-          regions:
-            - jp
-        reviews: []
-    body_version: effect-body-v1:sha256:010b429c27cbed927cdeb53969e03a387d5eee23692bd27967c901f1e017b887

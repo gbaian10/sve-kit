@@ -1,0 +1,57 @@
+bodies:
+  draw_exact_evolve_time.v1/1:
+    ability_scope: ability_0
+    basis: effect-anchor-v1:sha256:661064724e6d3be354d002e3d32cf2c30ede8224a4af1174b3437f3941ca9d8e
+    body_version: effect-body-v1:sha256:962bc874a8c21cfb8c3298b7447a0474e8e2adb45aaaff257bc9df0c5515fbd5
+    frame_id: frame:1e6e3d1694c7557eed8a8f8ca8530e1c66c6ad17c344c287b34124a7f6ded08e
+    params:
+      n:
+        source:
+          component: value
+          slot: leaf_0
+        type: Nat
+    ports:
+      exports: {}
+      imports: {}
+    registrations:
+      - domain:
+          regions:
+            - jp
+        id: jp
+cards:
+  ECP01-002:
+    basis: effect-anchor-v1:sha256:fb098e55fc0d0d104a53690a81ff0ad8b527d3a6d2d4907554f0882f2d5fd9d0
+    card_id: c:d02c2e5925ce5e7e94d6d7b3ea6be009
+    legacy_shape:
+      container: card
+    source: effect-source-v1:sha256:d1a39ccafd90ac82bd754078a95175be24ff5de8a070ba1570dcbe2d007c46d6
+    uses:
+      - ability_scope: ability_0
+        binding_id: bind:b8b9ef412f7c72678304cbaeeef265a95744cca4b2a7cf9ff5b7db74618dc731
+        body: draw_exact_evolve_time.v1
+        body_version: effect-body-v1:sha256:962bc874a8c21cfb8c3298b7447a0474e8e2adb45aaaff257bc9df0c5515fbd5
+        edition: 1
+        face_id: f:c36dfb4e110457918ea92a19a9188265
+        frame_id: frame:1e6e3d1694c7557eed8a8f8ca8530e1c66c6ad17c344c287b34124a7f6ded08e
+        line: 1
+        occurrence:
+          field: effect
+          line_ordinal: 0
+          ordinal: null
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:9f85ee2d40580a7da0989e35c990af9920299a5b24eb88c44da03ed6af5954de
+          role: body
+          segments:
+            - end: 10
+              start: 0
+          source_hash: 1ed4c4e8e1c709c0af61cb8f42212e10759728f264197898321166f8e5fa5c47
+        params:
+          n:
+            type: Nat
+            value: 1
+        registration: jp
+format: 1
+kind: effect_anchor_set
+owner: ECP01
+recipe: effect-anchor-v1
