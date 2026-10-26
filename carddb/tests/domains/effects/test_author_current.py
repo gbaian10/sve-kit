@@ -51,14 +51,19 @@ CARDS = {
 }
 REAL_AUTHOR_CARDS = {
     "BP06-048",
+    "BP01-046",
+    "BP01-144",
+    "BP01-176",
     "BP01-110",
     "BP01-171",
     "BP01-174",
     "BP03-115",
     "BP04-010",
+    "BP04-075",
     "BP17-077",
     "BP18-058",
     "BP19-001",
+    "BP19-P32",
     "BP19-050",
 }
 FRAME = "frame:f03820b9048f0bd911c528162f930b0e47d128493a84b4fe097f4c8a48608756"
@@ -480,10 +485,15 @@ def test_real_current_author_set(
     assert {file.path for file in real.author_files} == {
         "rules/author-effects/BP01/000.yaml",
         "rules/author-effects/BP01/001.yaml",
+        "rules/author-effects/BP01/002.yaml",
+        "rules/author-effects/BP01/003.yaml",
+        "rules/author-effects/BP01/004.yaml",
         "rules/author-effects/BP03/001.yaml",
+        "rules/author-effects/BP04/000.yaml",
         "rules/author-effects/BP04/001.yaml",
         "rules/author-effects/BP17/001.yaml",
         "rules/author-effects/BP18/001.yaml",
+        "rules/author-effects/BP19/000.yaml",
         "rules/author-effects/BP19/001.yaml",
         "rules/author-effects/BP06/000.yaml",
         "rules/author-effects/BP10/000.yaml",
@@ -496,6 +506,7 @@ def test_real_current_author_set(
         "rules/effect-bodies/BP10/000.yaml",
         "rules/effect-bodies/CP02/000.yaml",
         "rules/effect-bodies/ECP01/000.yaml",
+        "rules/effect-bodies/BP19/000.yaml",
     }
     assert {file.path for file in real.prototype_files} == {
         path.relative_to(SCHEMAS.parent / "authored").as_posix()
