@@ -34,7 +34,7 @@ export function RarityFilter({
     const style = code.slice("pr:".length)
     return { code, label: prStyleLabel(t, style), ...visual(prStyleVisual(style, edition)) }
   })
-  const items: FacetChip[] = orderRarities([
+  const orderedItems: FacetChip[] = orderRarities([
     ...rarities,
     { code: PREMIUM_RARITY, label: t("rarityBadge.premium") },
   ]).map((rarity) =>
@@ -44,11 +44,17 @@ export function RarityFilter({
         ? rarity
         : { ...rarity, ...visual(rarityBadgeVisual({ rarityCode: rarity.code, region: edition })) },
   )
+  const items = orderedItems.filter((item) => item.code !== PREMIUM_RARITY)
   items.push({
     code: UNRATED_RARITY,
     label: t("rarityBadge.unrated"),
     hint: t("rarityBadge.unratedHint"),
   })
+  items.push(
+    ...orderedItems
+      .filter((item) => item.code === PREMIUM_RARITY)
+      .map((item) => ({ ...item, ownRow: true })),
+  )
   return (
     <FacetChips
       title={t("rarityBadge.label")}

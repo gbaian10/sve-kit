@@ -61,7 +61,7 @@ const chips = () =>
 describe("rarity chips", () => {
   it("orders the chips low to high and draws the edition's badge on each", async () => {
     const { unmount } = await renderInRouter(<Harness />)
-    expect(chips()).toEqual(["BR", "SP", "SSP", "碎閃", "PR", "無分類"])
+    expect(chips()).toEqual(["BR", "SP", "SSP", "PR", "無分類", "碎閃"])
     const bronze = screen.getByRole("button", { name: "BR" })
     expect(bronze).toHaveAttribute("title", "BR（9）")
     expect(bronze.querySelector("img")).toHaveAttribute("src", br)
@@ -82,7 +82,18 @@ describe("rarity chips", () => {
 
   it("shows premium after SSP even when the vocabulary has no PR option", async () => {
     await renderInRouter(<Harness omitPr />)
-    expect(chips()).toEqual(["BR", "SP", "SSP", "碎閃", "無分類"])
+    expect(chips()).toEqual(["BR", "SP", "SSP", "無分類", "碎閃"])
+  })
+
+  it("puts premium on its own row after the ordinary rarity filters", async () => {
+    await renderInRouter(<Harness />)
+    const group = screen.getByRole("group", { name: "稀有度" })
+    const premium = screen.getByRole("button", { name: "碎閃" })
+    const isolatedRow = group.querySelector('[data-filter-chip-row="isolated"]')
+    expect(isolatedRow).toContainElement(premium)
+    expect(isolatedRow).toHaveClass("basis-full")
+    expect(isolatedRow?.querySelectorAll("button")).toHaveLength(1)
+    expect(chips()).toEqual(["BR", "SP", "SSP", "PR", "無分類", "碎閃"])
   })
 
   it.each([
@@ -104,14 +115,35 @@ describe("rarity chips", () => {
     expect(screen.getByLabelText("selection")).toBeEmptyDOMElement()
   })
 
-  it("explains the unrated chip to hover and assistive technology only", async () => {
-    await renderInRouter(<Harness />)
-    const hint = "官方沒有登記稀有度的卡，例如 PR 系列的 EP、SEP 與主戰者"
-    const unrated = screen.getByRole("button", { name: "無分類" })
-    expect(unrated).toHaveAccessibleDescription(hint)
-    expect(unrated).toHaveAttribute("title", `無分類（4）\n${hint}`)
-    expect(screen.getByRole("button", { name: "SP" })).not.toHaveAttribute("aria-describedby")
-  })
+  it.each([
+    [
+      "zh-TW",
+      "無分類",
+      "官方沒有登記稀有度的卡，例如 Token、主戰者，以及 PR 系列的 EP、SEP",
+      "無分類（4）",
+    ],
+    [
+      "ja",
+      "分類なし",
+      "公式のレアリティ表記がないカード（トークン、リーダー、PRのEP・SEPなど）",
+      "分類なし（4）",
+    ],
+    [
+      "en",
+      "Unrated",
+      "Cards with no official rarity, such as Tokens, leaders, and PR-series EP and SEP cards",
+      "Unrated (4)",
+    ],
+  ] as const)(
+    "explains the unrated chip in %s to hover and assistive technology only",
+    async (language, label, hint, chipTitle) => {
+      await renderInRouter(<Harness />, { language })
+      const unrated = screen.getByRole("button", { name: label })
+      expect(unrated).toHaveAccessibleDescription(hint)
+      expect(unrated).toHaveAttribute("title", `${chipTitle}\n${hint}`)
+      expect(screen.getByRole("button", { name: "SP" })).not.toHaveAttribute("aria-describedby")
+    },
+  )
 
   it("selects or clears every PR appearance from the chip and shows a partial selection", async () => {
     await renderInRouter(<Harness />)

@@ -328,7 +328,8 @@ export default {
   rarityBadge: {
     premium: "Premium",
     unrated: "Unrated",
-    unratedHint: "Cards with no official rarity, such as some PR-series cards",
+    unratedHint:
+      "Cards with no official rarity, such as Tokens, leaders, and PR-series EP and SEP cards",
     selected: "{{count}} selected",
     none: "No badge",
     unknown: "Unconfirmed",
