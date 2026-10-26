@@ -26,13 +26,18 @@ from sve_carddb.domains.translations.four_layer_damage import KEY as DAMAGE_KEY
 from sve_carddb.domains.translations.four_layer_derivation import derive_source
 from sve_carddb.domains.translations.four_layer_destroy import KEY as DESTROY_KEY
 from sve_carddb.domains.translations.four_layer_expressions import definition
-from sve_carddb.domains.translations.four_layer_fixed_actions import MOVE, SEARCH
+from sve_carddb.domains.translations.four_layer_fixed_actions import (
+    MOVE,
+    NUMERIC,
+    SEARCH,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from pydantic import JsonValue
 
+    from sve_carddb.contracts.four_layer import LeafType
     from sve_carddb.contracts.source_binding import ClosedDomain, SourceDescriptor
     from sve_carddb.domains.translations.four_layer_classification import Classifier
     from sve_carddb.domains.translations.four_layer_semantics import CardContext
@@ -114,6 +119,7 @@ BINARY_ARITY = 2
 ENTRY_HEADS = {
     DAMAGE_KEY: ("lastword",),
     DESTROY_KEY: ("fanfare",),
+    NUMERIC: ("fanfare",),
     MOVE: ("activate",),
     SEARCH: ("lastword",),
     "draw_exact_spell.v1": ("spell",),
@@ -163,6 +169,7 @@ ADAPTER_RECIPE = digest(
             "move_payload": "fixed-activation-PP1;SourceHolder-current-generation;Put-card-owner-cemetery;exact-three-leaves;no-params;complete-head-body-v1",
             "search_operand": "fixed-lastword-self-deck-shikigami-hand;required-QuantitySpec-selection_count-leaf_4-constant-exact-v1",
             "search_payload": "complete-head-body-canonical-equality-v1",
+            "numeric_payload": "fixed-fanfare-other-allied-field-followers-permanent-add-1-1;exact-five-typed-leaves;no-params;complete-head-body-canonical-equality-v1",
         }
     )
 )
@@ -225,20 +232,8 @@ def entry_payload(source: SourceContext, scope: str) -> dict[str, JsonValue]:
     scopes = tuple(f"ability_{index}" for index in range(len(heads)))
     if scope not in scopes:
         raise SourceError("source_ability_scope_mismatch")
-    if source.frame.semantic_variant.key == DESTROY_KEY:
-        _destroy_contract(source)
-        return {
-            "fanfare": {
-                "do": [
-                    {
-                        "destroy": {
-                            "ref": {"who": "opp", "zone": "field", "kind": "follower"}
-                        }
-                    }
-                ]
-            },
-            "ports": {"imports": {}, "exports": {}},
-        }
+    if source.frame.semantic_variant.key in {DESTROY_KEY, NUMERIC}:
+        return _fanfare_payload(source)
     if source.frame.semantic_variant.key == MOVE:
         _move_contract(source)
         return {
@@ -293,6 +288,24 @@ def entry_payload(source: SourceContext, scope: str) -> dict[str, JsonValue]:
             "ports": {"imports": {}, "exports": {}},
         }
     return _entry_cost_payload(source, heads, scopes.index(scope))
+
+
+def _fanfare_payload(source: SourceContext) -> dict[str, JsonValue]:
+    if source.frame.semantic_variant.key == NUMERIC:
+        return _numeric_payload(source)
+    _destroy_contract(source)
+    return {
+        "fanfare": {
+            "do": [
+                {
+                    "destroy": {
+                        "ref": {"who": "opp", "zone": "field", "kind": "follower"}
+                    }
+                }
+            ]
+        },
+        "ports": {"imports": {}, "exports": {}},
+    }
 
 
 def _entry_cost_payload(
@@ -504,6 +517,88 @@ def _search_count(source: SourceContext) -> int:
     ):
         raise SourceError("source_search_operand_mismatch")
     return count.expr.value
+
+
+def _numeric_payload(source: SourceContext) -> dict[str, JsonValue]:
+    leaves: tuple[tuple[LeafType, str, str, int, int], ...] = (
+        ("Concept", "ability", "concept.ability.v1", 1, 8),
+        ("Concept", "rule_term", "concept.rule_term.v1", 24, 27),
+        ("Nat", "stat_delta_magnitude", "", 29, 30),
+        ("Concept", "rule_term", "concept.rule_term.v1", 32, 34),
+        ("Nat", "stat_delta_magnitude", "", 36, 37),
+    )
+    expected = LeafSchema(
+        format=2,
+        slots=tuple(
+            LeafSlot(
+                name=f"leaf_{index}",
+                type=kind,
+                role=role,
+                required=True,
+                domain=Domain(min=0, max=SAFE_INTEGER, values=())
+                if kind == "Nat"
+                else Domain(min=None, max=None, values=(domain,)),
+                occurrences=(Span(start=start, end=end),),
+            )
+            for index, (kind, role, domain, start, end) in enumerate(leaves)
+        ),
+    )
+    occurrence = source.binding.occurrence_key()
+    if (
+        source.canonical_source
+        != "{ファンファーレ}自分の他のフォロワーすべては{攻撃力}+N/{体力}+Nする。"
+        or source.frame.leaf_schema != expected
+    ):
+        raise SourceError("source_numeric_contract_mismatch")
+    if (
+        source.binding.frame_id != source.frame.id
+        or not isinstance(occurrence.owner, FaceRevisionOwner)
+        or source.binding.source.field != "effect"
+        or source.binding.source.ordinal is not None
+    ):
+        raise SourceError("source_numeric_contract_mismatch")
+    if (
+        occurrence.line_ordinal != 0
+        or occurrence.role != "body"
+        or occurrence.segments != (Span(start=0, end=40),)
+    ):
+        raise SourceError("source_numeric_contract_mismatch")
+    if (
+        source.binding.values
+        != {
+            "leaf_0": GlossaryReference(kind="glossary", key="term:ability.fanfare"),
+            "leaf_1": GlossaryReference(kind="glossary", key="term:stat.attack"),
+            "leaf_2": 1,
+            "leaf_3": GlossaryReference(kind="glossary", key="term:stat.health"),
+            "leaf_4": 1,
+        }
+        or any(
+            type(source.binding.values.get(name)) is not int
+            for name in ("leaf_2", "leaf_4")
+        )
+        or tuple((o.slot, o.canonical_spans) for o in source.binding.occurrences)
+        != tuple((s.name, s.occurrences) for s in expected.slots)
+    ):
+        raise SourceError("source_numeric_contract_mismatch")
+    return {
+        "fanfare": {
+            "do": [
+                {
+                    "buff": {
+                        "on": {
+                            "who": "self",
+                            "zone": "field",
+                            "kind": "follower",
+                            "other": True,
+                        },
+                        "power": 1,
+                        "hp": 1,
+                    }
+                }
+            ]
+        },
+        "ports": {"imports": {}, "exports": {}},
+    }
 
 
 def _lastword_amount(source: SourceContext) -> int:
@@ -811,7 +906,7 @@ def parameter_expected(
     fragment: JsonValue,
 ) -> int | str:
     """A matching scalar is insufficient without a registered operand construction."""
-    if source.frame.semantic_variant.key == MOVE:
+    if source.frame.semantic_variant.key in {MOVE, NUMERIC}:
         raise SourceError("unsupported_source_construct")
     try:
         declaration = ParamDecl.model_validate(declaration.model_dump(mode="python"))

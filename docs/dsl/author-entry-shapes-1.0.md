@@ -70,6 +70,7 @@ current 邊界重建真實 registry 的 Frame／Binding，核對全部 JP curren
 | damage_uniform_lastword_all_leaders.v1 | ability_0 → lastword | `lastword: {do: [{damage: {to: {leaders: all}, n: N}}]}`；固定 Lastword Concept 與 Nat/damage_amount/value 葉 |
 | move_self_to_owner_cemetery_activated_pp.v1 | ability_0 → activate | `activate: {zone: field, cost: {pp: 1}, do: [{move: {ref: this, to: cemetery}}]}`；三個來源葉皆固定，無參數 |
 | search_lastword_self_deck_named_hand.v1 | ability_0 → lastword | `lastword: {do: [{search: {sel: {who: self, zone: deck, name: 式神の使役}, n: N, to: hand}}]}`；唯一可變葉為 QuantitySpec/selection_count/constant 的 exact 數量 |
+| numeric_fanfare_other_allied_followers_add_1_1.v1 | ability_0 → fanfare | `fanfare: {do: [{buff: {on: {who: self, zone: field, kind: follower, other: true}, power: 1, hp: 1}}]}`；五個 typed 葉固定，無參數 |
 
 表列各族皆只配空 imports／exports ports，能力 imports 必須省略。去掉 line／section／sources 後完整 canonical 能力必須相等；多加 into、usable_if、times、其他費用或 expression 都不符來源。N 可為 0，須取該構造的 operand，不能借相同數值。非空 ports 與其他執行 scope 保持明示 unsupported；不把跨 owner 或DSL 陣列較晚定為永久非法。真卡整卡正例為 BP01-009／034／092 的純進化入口；feed／ride 與雙入口的有限機制測試不宣稱已有真卡整卡准入。
 
@@ -101,6 +102,8 @@ inline／companion 都須完整 canonical head/body 相等；換頭、對象、�
 費用或指示皆拒絕。BP07-T03、BP12-T12、BP17-T19、PR-195 與 SP01-T03 是同一永久 token
 的印刷，能力來源可展開，完整 current validate／selection_input 仍因 pending sibling 拒絕，
 不能省略第一行或把 token 能力掛在母卡來取得整卡證明。
+
+固定 Fanfare 數值來源只接受 current JP 普通 follower 面的完整單行 effect、無 sections／特殊類型。能力頭 Concept、攻擊力／體力 Concept、兩個 required Nat/stat_delta_magnitude 葉及各自 occurrence、domain、binding 值皆精確核對；兩個數值都固定為 1，不提供攻／體參數位置。效果為能力 master 的場上其他全部合格 follower 永久 Add 1/1，依既有 Fanfare 待機與播放時點處理；無目標、條件、能力費用、期限或 aura。inline 與 companion 均比較完整 canonical 能力；換頭、換對象／範圍、Set、動態量、追加步驟／條件／費用／期限皆拒絕。BP01-037／BP01-P09 由正式 JP printing 解為同一永久卡，完整 current inventory 與 selection 可接受測試暫存的 DSL 檔；漏能力、錯 owner、額外 sibling 或 token 仍拒絕。這不遷移正式 DSL 檔、不授予用途審核或執行資格。
 
 ## 展開與 D0 消費邊界
 
