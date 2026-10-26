@@ -132,6 +132,9 @@ filterwarnings = ["ignore::DeprecationWarning"]
 disable_test_id_escaping_and_forfeit_all_rights_to_community_support = true # show non-ASCII test IDs as-is
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
+markers = [
+    "slow(reason): allow a test over the time budget with a concrete reason",
+]
 env_files = [
     ".env",
 ]

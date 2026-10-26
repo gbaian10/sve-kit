@@ -7,7 +7,7 @@ import pytest
 from typer.testing import CliRunner
 
 from sve_carddb.cli import app
-from sve_carddb.core.json import object_value, parse, string
+from sve_carddb.core.json import array, object_value, parse
 from sve_carddb.workflows import authoring
 
 REPO = Path(__file__).resolve().parents[3]
@@ -40,26 +40,24 @@ def test_configuration_exit_codes(tmp_path: Path, case: str, expected: int) -> N
     assert "Traceback" not in result.output
 
 
-def test_cli_public_check_writes_the_complete_report(tmp_path: Path) -> None:
-    batch = string(
-        object_value(parse((REPO / "tests/engine/card-input.json").read_bytes()))[
-            "batch_id"
-        ]
-    )
-    inputs = authoring.Inputs(
-        profile="public",
-        repo=REPO,
-        jp_batch_id=batch,
-        revision="1036aa89bb1ce52cf4a964df8461663ab644b614",
-    )
+@pytest.mark.slow(
+    reason="Keep one CLI end-to-end check that prepares the real public profile and validates the complete authored repository"
+)
+def test_cli_public_check_writes_the_complete_report(
+    tmp_path: Path, authoring_inputs: authoring.Inputs
+) -> None:
     path = tmp_path / "inputs.json"
-    path.write_text(inputs.model_dump_json())
+    path.write_text(authoring_inputs.model_dump_json())
     output = tmp_path / "report.json"
     result = CliRunner().invoke(
         app, ["author", "check", "--inputs", str(path), "--output", str(output)]
     )
     assert result.exit_code == 0
-    assert object_value(parse(output.read_bytes()))["status"] == "ok"
+    report = object_value(parse(output.read_bytes()))
+    assert report["status"] == "ok"
+    authors = array(object_value(report["selection"])["authors"])
+    assert len(authors) >= 14
+    assert all(object_value(item)["status"] == "accepted" for item in authors)
     assert not result.stdout
 
 
@@ -68,22 +66,16 @@ def test_write_requires_explicit_selection_and_storage() -> None:
     assert result.exit_code == 2
 
 
-def test_check_reports_index_location_and_card_without_wording(tmp_path: Path) -> None:
+@pytest.mark.slow(
+    reason="Verify real CLI index diagnostics after public-profile identity and glossary preparation, without mocking prepare"
+)
+def test_check_reports_index_location_and_card_without_wording(
+    tmp_path: Path, authoring_inputs: authoring.Inputs
+) -> None:
     authored = Path(shutil.copytree(REPO / "authored", tmp_path / "authored"))
     missing = "rules/author-effects/BP06/000.yaml"
     (authored / missing).unlink()
-    batch = string(
-        object_value(parse((REPO / "tests/engine/card-input.json").read_bytes()))[
-            "batch_id"
-        ]
-    )
-    inputs = authoring.Inputs(
-        profile="public",
-        repo=REPO,
-        authored=authored,
-        jp_batch_id=batch,
-        revision="1036aa89bb1ce52cf4a964df8461663ab644b614",
-    )
+    inputs = authoring_inputs.model_copy(update={"authored": authored})
     path = tmp_path / "inputs.json"
     path.write_text(inputs.model_dump_json())
     output = tmp_path / "report.json"

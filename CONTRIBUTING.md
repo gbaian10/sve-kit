@@ -162,6 +162,20 @@ Snapshot wire changes must pass the [format lock check](docs/schema/export/snaps
 - Test behaviour through the public interface. A test that restates the
   implementation (copied constants, private call order or counts, source text) is a defect.
 - Do not mock the code under test.
+- Build expensive setup once. Anything that loads the real repository (author set,
+  public profile, catalog, build database or real-current results) is a session-scoped
+  fixture shared by every test that needs it; tests copy before they write.
+- Keep one real-data end-to-end test per behaviour. Rejection paths, edge cases and
+  parameter combinations use the smallest synthetic input that shows them; never
+  parametrize a full-repository run.
+- CI fails any test whose setup, call and teardown together exceed 30 seconds
+  (`SVE_TEST_TIME_LIMIT` overrides the limit); local runs warn instead. An exception
+  requires `@pytest.mark.slow(reason="concrete reason")`. Shared preparation is
+  counted only for its first consumer. For an expensive shared fixture, put
+  `@slow_fixture(reason="concrete reason")` below `@pytest.fixture(scope="session")`
+  (import it from `tests.support.time_budget`); its setup and finalizers are exempt
+  from the consumer's budget. Empty or missing reasons are errors. Record the
+  touched files' pytest time and explain remaining slow tests in the PR.
 - Architecture boundary, fresh-import and isolation tests are deliberate structural
   checks. A new boundary rule comes with a negative case that proves it fails.
 - Never print official card wording in test output.
