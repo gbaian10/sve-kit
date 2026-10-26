@@ -12,11 +12,14 @@
 
 | format／kind | DSL 支援集 | Schema `$id` | 資源（實作範圍見下文） |
 | --- | --- | --- | --- |
-| `1 / author_effect_set` | `1.0` | `urn:sve-kit:author:1.0` | `dsl/author.schema.json` |
-| `1 / effect_body_shard` | `1.0` | `urn:sve-kit:effect-bodies:1.0` | `dsl/effect-bodies.schema.json` |
+| `2 / author_effect_set` | `1.0` | `urn:sve-kit:author-storage:2` | `dsl/author-storage.schema.json` |
+| `2 / effect_body_shard` | `1.0` | `urn:sve-kit:effect-body-storage:2` | `dsl/effect-body-storage.schema.json` |
+| `1 / effect_anchor_set` | 精確引用，不選語義 | `urn:sve-kit:effect-anchors:1` | `dsl/effect-anchors.schema.json` |
 | `1 / effects_index` | 定位資訊，不選語義 | `urn:sve-kit:effects-index:1` | `dsl/effects-index.schema.json` |
 
-目前三個入口都有封閉 Schema 與 Python 結構 reader；共用 `author-nodes.schema.json` 提供完整能力圖、`A.file`、`A.card` 與 `$defs/authored`。結構 reader 不授予來源或資格證明。明示 API 已提供檔案／索引雙向閉包、generated_by／具型別葉展開、原 JSON body hash 及 `expanded` profile；current 入口核對 JP current、registry Frame／Binding 與 effect-source-v1，能力映射限五類 entry 的完整 payload 與空 ports。輸出為 JSON 樹及分離 sidecar；current_source_checked 仍不代表用途依賴、review／exam 資格或可執行。完整用途依賴、rekey、資格與正式執行准入仍待完成。能力持有面由 SourceUse.owner 的 face 決定，卡級／面級容器只表示位置，多面卡的卡級能力不表示全卡常駐。完整容器形狀與檢查邊界見[入口形狀矩陣](author-entry-shapes-1.0.md)，可用 API 見 [dsl/README](../../dsl/README.md)。
+儲存入口固定為上表，拒絕舊 format 1 作者／本體檔及混合儲存。reader 在記憶體材料化成既有 `urn:sve-kit:author:1.0`／`urn:sve-kit:effect-bodies:1.0` 語意模型，再進同一個展開與 current 邊界；這兩個 Schema 保留為內部語意入口，不是另一套持久格式。
+
+目前各入口都有封閉 Schema 與 Python 結構 reader；共用 `author-nodes.schema.json` 提供完整能力圖、`A.file`、`A.card` 與 `$defs/authored`。結構 reader 不授予來源或資格證明。明示 API 已提供檔案／索引雙向閉包、generated_by／具型別葉展開、原 JSON body hash 及 `expanded` profile；current 入口核對 JP current、registry Frame／Binding 與 effect-source-v1，能力映射限五類 entry 的完整 payload 與空 ports。輸出為 JSON 樹及分離 sidecar；current_source_checked 仍不代表用途依賴、review／exam 資格或可執行。完整用途依賴、rekey、資格與正式執行准入仍待完成。能力持有面由 SourceUse.owner 的 face 決定，卡級／面級容器只表示位置，多面卡的卡級能力不表示全卡常駐。完整容器形狀與檢查邊界見[入口形狀矩陣](author-entry-shapes-1.0.md)，可用 API 見 [dsl/README](../../dsl/README.md)。
 
 兩個DSL 資源共用 `urn:sve-kit:author-nodes:1.0`（`dsl/author-nodes.schema.json`）的 A.* 定義。Schema 採 JSON Schema 2020-12。所有固定物件封閉；動態 map 只接受各自卡號／識別字規則，不以任意額外欄位吸收未知構造。Python 型別與 `$defs` 必須逐一對應並驗漂移；Rust 依同一資源的展開 profile 解碼並做漂移測試，不能另立語法。
 
@@ -26,11 +29,28 @@
 
 ### 2.1 封套與分片
 
+主檔為 `{format:2,kind:author_effect_set,scope?,dsl?,cards}`，scope／dsl 預設 shared／1.0；
+cards 每卡固定為 `{meta,abilities,note?,deck_rule?}`。每卡 meta.written_by 必填，status 預設 draft，
+reviewed_by／verified_by_exam／rulings 預設空陣列。作者欄位不繼承、不代填；主檔不保存來源指紋或永久 ID。
+能力只寫 1 起的 line，與 `use`／裸 params、inline 能力頭、或小寫 keywords 三者之一。
+`use` 精確選本體 id；只有唯一 edition 才能省選版，不挑最新版。定位不能按本體名稱、參數值或能力頭縮減候選；
+真正歧義才依 face→section→scope 補欄。face 是 1 起序號或唯一 front/back，section:main 是 effect、數字 N 是 ordinal N−1，
+scope 是該面／欄／行中的來源能力次序。完整規則及例子見[作者工具](authoring-tools.md#查詢與手寫)。
+
+手寫本體為 `{format:2,kind:effect_body_shard,scope?,dsl?,records}`。每筆必填 id／body／written_by；
+params／ports／ability_scope／edition／registrations 分別預設空 map、兩個空 map、ability_0、1、JP domain 且 reviews 空陣列。
+參數型別必明寫，source 只在 typed DSL 位置與來源 type／role／component 唯一時推導，否則要求明寫；不按相同數值配葉。
+同 `(id,edition)` 跨檔只准一筆，同名多用途必回到相同 frame／root／body_version；新增版次保留舊本體，未引用本體也驗。
+未引用的新本體不能取得來源 pin；既有未引用本體須保有可驗 frame／版本與完整宣告。手寫檔位置為
+`authored/rules/author-effects/<owner>/<sequence>.yaml` 與 `authored/rules/effect-bodies/<owner>/<sequence>.yaml`，
+各檔小於 1 MiB，指定卡更新不重排其他包。
+
+以下 §2.2–2.3 描述**記憶體中的精確語意模型**，不是手寫格式：
 逐卡檔恰為 `{format:1,kind:author_effect_set,scope,cards}`，`cards` 沿 A.card；`scope` 必填 `shared | en_override`，產生器預設 shared，只有已確認英文例外才選 en_override。四層契約目前只定 JP Frame／SourceBinding；本版對 en_override 在來源准入明確報 `en_source_contract_unavailable`，不產可執行樹，不借 JP 來源。此值保留給另行定義的 EN DSL 來源契約，不代表已有 EN 支援。本體檔的 scope 本版只准 shared，恰為 `{format:1,kind:effect_body_shard,scope,records}`。路徑分別為 `authored/rules/author-effects/<owner>/<sequence>.yaml` 與 `authored/rules/effect-bodies/<owner>/<sequence>.yaml`。
 
 分片大小、排序與只增序號沿 [authored 格式 §1](../schema/domains/authored-layout.md#1-路徑與共同格式)。跨包本體首次以當次已知用途最小 `(region,card_no,variant_key,printing_id)` 所屬 owner 歸檔，新增用途不搬檔；owner／檔名不是本體身分。同一採納輸入集合的 `(frame_id,ability_scope,body_version)` 只准一筆，連完全相同的重複也拒絕；同內容可有多個用途與多個適用域登錄。
 
-### 2.2 companion record
+### 2.2 材料化 companion record
 
 每筆 record 恰含以下欄位；未註選用的欄位必填。`Code` 沿四層的小寫代碼規則；本文件新增的 `ParamName` 為 `^[A-Za-z][A-Za-z0-9_]*$`，不是來源 Code。`Digest` 是 `sha256:` 加 64 個小寫十六進位字元；四層原有 Hash／interface_key／source_hash 保留無前綴 64 hex，不混用。檔案 scope（地區選擇）、ability_scope（來源能力作用域）及 applicability_scope（本體適用域登錄 ID）是不同欄位；分片 owner 是歸檔代號，來源 owner 是 SourceDescriptor 身分。
 
@@ -51,7 +71,7 @@ Domain 恰為 `{regions}`：非空、排序唯一的 `jp/en` 集合。本版 sha
 
 LocalBinding 恰為 `{path,bind}`：path 是由該能力頭起算、只含物件鍵字串及非負陣列索引的結構路徑，bind 是 DSL binding 名。imports 的 path 固定空陣列，明示在能力根作用域宣告該 local 名，型別及來源角色取自對應 Port；exports 的 path 指向實際宣告 binding 的構造。路徑只定位已存在DSL 節點，不能執行任意查詢。兩端都須存在且型別、source_role、支配與 scope 相符；branch local 不因 export 越域。ports 入本體語義 hash，不靠名字相同猜接線。
 
-### 2.3 逐用途選版與 inline
+### 2.3 材料化逐用途選版與 inline
 
 A.ability 沿用 `line`（1 起算）、選用 `section`（0 起算），正式完整輸入另有必填 `sources`。普通能力與 generated_by 使用恰一筆的 SourceUse `{binding_id,occurrence,ability_scope}`；獨立 keywords 宣告只使用下述 CardKeywordSourceUse。兩者精確沿四層契約的 SourceBindingId／OccurrenceKey，參與片段完整列在該 OccurrenceKey.segments，不另拆來源記錄。這是位置證據，不是另創來源身分；同一行有多個能力時，必由真實 projection scope 區分，不能只靠 line 配對。
 
@@ -80,6 +100,34 @@ companion.body 的 A.companion-head 子圖排除 keywords，未引用本體也�
 `authored/rules/effects-index.yaml` 恰為 `{format:1,kind:effects_index,records}`。每筆恰為 `{card_id,scope,file,kind,record_key}`：card_id 是既有永久 CardId，scope 同上，file 是 authored 根相對 POSIX 路徑（禁止絕對路徑、`.`、`..`），kind 是 `effect_set | author_effect_set`；原型 effect_set 項的 scope 固定 shared，因其封套沒有 scope。record_key 是檔內 cards 的原樣 CardNumber。先驗 index 再讀候選；候選 YAML 失敗仍可診斷到 card_id。
 
 同 `(card_id,scope)` 只准一筆；index 與被選檔案的全部 cards 記錄須雙向閉合，孤兒記錄或懸空 index 均拒絕。載入成功後核對卡號、永久身分、kind 與 scope。companion 不進逐卡索引，依 body key 從本體分片集合定位，重複鍵即拒絕。原型與新格式不能同時覆蓋同卡同 scope；shared 與 en_override 是地區選擇，不是兩段都執行。原型整批切換的操作由實作處理，不新增永久雙格式 runtime。
+
+### 2.5 每包機器錨點
+
+`authored/rules/effect-anchors/<owner>.yaml` 固定為 `{format:1,kind:effect_anchor_set,owner,recipe,cards,bodies}`，
+recipe 是 `effect-anchor-v1`。工具產生、提交、不手改；錨點不重複保存 body AST，不是第二份卡表。
+每卡保存 card_id／effect-source-v1、原序 uses 的作者定位與 FaceId／binding／完整 occurrence／frame／root，
+以及選定本體名稱／edition／body_version／registration／typed params／接線；scope-free keyword 不造 ability_scope 或 body_version。
+每本體保存 frame／root／body_version、完整 params／ports／domain。`legacy_shape.container: card|faces` 只保留原容器以精確回建，
+不是另一個作者入口，也不保存任意 shape metadata。
+
+`basis` 為 `effect-anchor-v1:sha256:<64hex>`：canonical-json-v1／UTF-8／SHA-256，payload 置於
+`{recipe:"effect-anchor-v1",payload}` 中。H_card 涵蓋卡／面與來源基準、全部 checked source 的完整 frame／binding／typed leaves／直接 interface_key、
+用途與宣告、選定本體完整宣告／實值／ports／domain、作者明寫 rulings、deck_rule、token 閉包及全域 adapter／expansion／storage Schema 資源 pin。
+H_body 只涵蓋精確本體 frame／root／版本／宣告／ports／domain、直接 interface_key 與配方，不依任意用途卡或 witness；
+作者日期、note、review 本身與本機路徑均不入兩者，避免循環與排版失效。有意義陣列保序，集合依既有 canonical 規則處理。
+
+普通讀取／建置／check 獨立重算並比對已提交值，不符整卡拒絕、不落回原型、不重新綁定。
+write 明示選卡才更新，`--all` 選完整手寫集合；共享本體影響未選卡即拒絕。全域資源 pin 較保守，
+新增 adapter 或 Schema 也可能使多包失效，須同一 PR 明示全量更新；沒有 scoped pin／trace 平台。
+只多一個新外層 recipe，既有 source／body／frame／binding／use 配方不改。
+
+新 use review 的 `anchor` 保存審核當時 H_card literal，新 body review 保存 H_body literal，原 dependencies 不拆。
+既有沒有 anchor 的 review 保留原事實並標 stale，不補造摘要、不延續資格、不清 disputed；write 不改既有 reviewer／date／dependencies／anchor。
+anchor 相符也不能取代原 PR 審查或授予尚未實作的資格。裁定適用性與接口傳遞閉包仍不在第一版執行範圍；
+只對作者明寫 rulings 摘要，登錄裁定單獨改版不保證失效，不宣稱已追蹤未實作依賴。
+
+診斷保留 card／line／stage；精確欄位均相符、只有 basis 不同時只報 anchor，說明其餘摘要依賴變動。
+不由摘要反推舊配方，也不執行舊 Git tree；先 inspect／看 git diff，再由作者決定明示 write。
 
 ## 3. 封閉葉參數
 
