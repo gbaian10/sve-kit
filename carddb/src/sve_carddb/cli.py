@@ -97,6 +97,7 @@ from sve_carddb.ingest.queries import card_numbers, current_sets
 from sve_carddb.parse.pages import official_sv1 as sv1
 from sve_carddb.parse.pages import official_svwb as svwb
 from sve_carddb.parse.pages.official_jp import parse_list_first
+from sve_carddb.workflows.authoring_commands import app as author_app
 from sve_carddb.workflows.export import app as snapshot_app
 from sve_carddb.workflows.extract import extract_cards
 from sve_carddb.workflows.image_index import app as images_app
@@ -108,6 +109,7 @@ app = typer.Typer(no_args_is_help=True, help="Crawl and build the SVE card datab
 app.add_typer(digital_links_app, name="digital-links")
 app.add_typer(digital_name_policies_app, name="digital-name-policies")
 app.add_typer(parsed_cards_app, name="parsed-cards")
+app.add_typer(author_app, name="author")
 app.add_typer(rulings_app, name="rulings")
 app.add_typer(qa_translations_app, name="qa-translations")
 crawl_app = typer.Typer(
