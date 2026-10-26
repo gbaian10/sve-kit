@@ -124,7 +124,7 @@ uv --directory /absolute/project/carddb run sve-carddb author write \
 main/bodies 各可指定單檔或 `<owner>/<序號>.yaml` 的目錄；main 的 owner 必須與卡包
 一致。同一 id/edition 不可重複定義。`--card` 只更新指定卡；`--all` 才選全部手寫卡。
 重用已提交本體也必須提供完整簡寫定義，工具算回原 frame/root/body_version 並逐欄
-比對；作者、registration、review 或 note 衝突會拒絕，不合併或覆寫事實。
+比對；作者、status、registration、review 或 note 衝突會拒絕，不合併或覆寫事實。
 新增不同本體版本須明寫新 edition；原本體保留。既有作者的 card/faces 容器原樣保留，
 其他卡與未引用本體不重排。
 
