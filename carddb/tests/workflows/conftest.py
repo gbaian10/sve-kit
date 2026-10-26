@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.core.json import array, canonical, object_value, parse, string
+from sve_carddb.core.json import array, object_value, parse, string
 from sve_carddb.core.yaml import JSON_VALUE, parse_yaml
 from sve_carddb.workflows import authoring
 
@@ -83,7 +83,7 @@ def authoring_inventory(tmp_path_factory: pytest.TempPathFactory) -> Path:
                     bodies.add(use)
         target = root / name
         target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_bytes(canonical(tree))
+        target.write_bytes(authoring.format_yaml(tree))
     for owner in ("BP01", "BP06", "BP10", "ECP01"):
         anchor = read_tree(REPO / f"authored/rules/effect-anchors/{owner}.yaml")
         anchor["cards"] = {
@@ -98,19 +98,25 @@ def authoring_inventory(tmp_path_factory: pytest.TempPathFactory) -> Path:
         }
         target = root / f"rules/effect-anchors/{owner}.yaml"
         target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_bytes(canonical(anchor))
+        target.write_bytes(authoring.format_yaml(anchor))
         if owner != "BP01":
             source = REPO / f"authored/rules/effect-bodies/{owner}/000.yaml"
             target = root / source.relative_to(REPO / "authored")
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(source, target)
-    for owner, number in (("BP01", "BP01-001"), ("BP10", "BP10-020")):
+    # A BP01 sibling keeps deletion past the nonempty-card schema check.
+    for owner, prototypes in (
+        ("BP01", ("BP01-001", "BP01-013")),
+        ("BP10", ("BP10-020",)),
+    ):
         prototype = read_tree(REPO / f"authored/rules/effects/{owner}.yaml")
-        prototype["cards"] = {number: object_value(prototype["cards"])[number]}
+        prototype["cards"] = {
+            number: object_value(prototype["cards"])[number] for number in prototypes
+        }
         target = root / f"rules/effects/{owner}.yaml"
         target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_bytes(canonical(prototype))
-    (root / "rules/effects-index.yaml").write_bytes(canonical(index))
+        target.write_bytes(authoring.format_yaml(prototype))
+    (root / "rules/effects-index.yaml").write_bytes(authoring.format_yaml(index))
     return root
 
 
