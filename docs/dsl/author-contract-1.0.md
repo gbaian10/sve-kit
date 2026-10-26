@@ -238,6 +238,8 @@ CP04-060 只對 search 實際 moved 的新世代安裝 delta -2、until:turn；�
 
 ### 守護與光紋的具名宣告准入
 
+關鍵字可用性需要持有者及能力來源的完整證據；未載入卡的未知能力不得視為空集合，也不以原型能力補足。需要這些資訊的完整投影、守護程序與光紋目標查詢會精確停止；公開區域張數仍可獨立查詢，玩家投影錯誤不暴露內部卡號或物件識別。
+
 `sim/engine/src/ir/printed_keywords.rs` 定義兩個封閉的 Field／Ordinary／Static 形狀，來源恰為 `Keyword(Ward|Aura, Printed(face,line))`，holder=SourceHolder、controller=Controller，沒有 body、play、trigger 或 event captures。Ward 的權限在持有者橫置時禁止對手從者攻擊己方領袖及不屬於橫置 Ward 的己方從者；以有效能力視圖保留多個 Ward 的合法目標。Aura 的權限禁止對手選取持有者作為能力目標，不擴及己方選取或無目標的集合效果。兩者保留無時間到期、installation anchor 與對應規則定位。Ward 的可選姿態選擇屬規則程序，不降低為無條件橫置。
 
 准入逐欄比較整個具名形狀，並透過獨立 declaration reference 核對原 owner／face／field／section／line／fragment、local scope 與確切 keyword index；不開放任意 KeywordId、Granted 或巢狀 origin。只有不同的 Ward／Aura 元素可共用同一印刷面與行，本體能力仍不能與它們混用座標。完整有序清單原子降低，未支援元素使整卡失敗。
