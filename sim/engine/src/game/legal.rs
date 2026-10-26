@@ -187,14 +187,12 @@ impl Game {
                 .map(|select| json!({"do":"end-discard","select":select}))
                 .collect());
         }
-        let ids = self
-            .zone_ids(seat, "field")
-            .into_iter()
-            .filter(|id| {
-                self.object(id).is_ok_and(|o| o.state["acted"] != true)
-                    && self.keywords(id).is_ok_and(|k| k.contains("guard"))
-            })
-            .collect::<Vec<_>>();
+        let mut ids = Vec::new();
+        for id in self.zone_ids(seat, "field") {
+            if self.object(&id)?.state["acted"] != true && self.keywords(&id)?.contains("guard") {
+                ids.push(id);
+            }
+        }
         Ok(subsets(&ids, 0, ids.len())
             .into_iter()
             .map(|select| json!({"do":"guard-act","select":select}))
@@ -409,19 +407,15 @@ impl Game {
         if self.restricted(id, "ignore_guard")? {
             return Ok(true);
         }
-        let guards = self
-            .zone_ids(other(seat), "field")
-            .into_iter()
-            .filter(|guard| {
-                self.object(guard).is_ok_and(|o| o.state["acted"] == true)
-                    && self
-                        .object_type(guard)
-                        .is_ok_and(|kind| kind.contains("フォロワー"))
-                    && self
-                        .keywords(guard)
-                        .is_ok_and(|guard_keys| guard_keys.contains("guard"))
-            })
-            .collect::<Vec<_>>();
+        let mut guards = Vec::new();
+        for guard in self.zone_ids(other(seat), "field") {
+            if self.object(&guard)?.state["acted"] == true
+                && self.object_type(&guard)?.contains("フォロワー")
+                && self.keywords(&guard)?.contains("guard")
+            {
+                guards.push(guard);
+            }
+        }
         Ok(guards.is_empty() || guards.iter().any(|guard_id| guard_id == target))
     }
 
@@ -763,14 +757,18 @@ impl Game {
             .collect()
     }
 
-    fn targetable(&self, id: &str, frame: &Frame) -> Result<bool> {
+    pub(super) fn targetable_by(&self, id: &str, controller: &str) -> Result<bool> {
         if let Some(object) = self.state.objects.get(id)
-            && object.controller != frame.controller
+            && object.controller != controller
             && object.zone == "field"
         {
             return self.keywords(id).map(|keywords| !keywords.contains("aura"));
         }
         Ok(true)
+    }
+
+    fn targetable(&self, id: &str, frame: &Frame) -> Result<bool> {
+        self.targetable_by(id, &frame.controller)
     }
 
     pub(super) fn ability_zone(&self, id: &str, code: &Value) -> Result<bool> {

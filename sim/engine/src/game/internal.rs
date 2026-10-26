@@ -108,6 +108,17 @@ pub struct DecisionView {
 /// First-slice input shapes.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum InputDomain {
+    /// CR 12.8.2: enter standing, then optionally act before continuing the rule procedure.
+    WardEntry {
+        /// Printed identity known to the entering controller, without a hidden object ID.
+        card: String,
+        /// Public printed name of this arriving face.
+        name: String,
+        /// The controller's current source zone, before the batch moves.
+        zone: String,
+        /// One-based position in that zone, valid only for this question.
+        position: u64,
+    },
     /// Legal private plays plus an explicit Pass, bound to the current rule procedure.
     Quick {
         /// Authority-selected rule window.
@@ -153,6 +164,8 @@ pub enum InputDomain {
 /// Internal answer, checked against actor and the entire decision token.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Answer {
+    /// Accept or decline only the current Ward entry posture choice.
+    WardEntry(bool),
     /// One Quick action handle, or an explicit Pass (`None`).
     Quick(Option<u64>),
     /// The dedicated exchange decision; independent of its payment result.
@@ -268,7 +281,7 @@ pub enum Fact {
         /// The same producer as the play fact.
         source: RuntimeAbilitySource,
     },
-    /// A successful posture cost, before the play fact.
+    /// A successful posture cost or a rule-owned Ward entry posture change.
     Posture(PostureEvent),
     /// A performed full-source shuffle, even when the deck has zero or one member.
     Shuffled {
@@ -299,6 +312,7 @@ enum Slot {
 
 #[derive(Clone, Debug)]
 enum Wait {
+    WardEntry(ObjectRef),
     OptionalCost,
     CostMaterials(card::exchange::MaterialWait),
     TriggerQuota {
@@ -349,6 +363,7 @@ pub(super) struct Execution {
     field_entry: bool,
     card_payment: Option<(FaceId, ReceiptId)>,
     play_counts: BTreeMap<u32, (Nat, Nat)>,
+    ward_entries: Vec<(ObjectRef, bool)>,
 }
 
 #[expect(
@@ -515,6 +530,7 @@ impl Game {
                 field_entry: false,
                 card_payment: None,
                 play_counts: BTreeMap::new(),
+                ward_entries: Vec::new(),
             };
             self.internal_run(&mut execution)?;
             let progress = execution.progress();
@@ -574,6 +590,10 @@ impl Game {
                 return Err(invalid("wrong actor or stale internal answer"));
             }
             match (wait, answer) {
+                (Wait::WardEntry(object), Answer::WardEntry(acted)) => {
+                    rollback = execution.origin.take();
+                    execution.ward_entries.push((object, acted));
+                }
                 (Wait::OptionalCost, Answer::OptionalCost(accepted)) => {
                     rollback = execution.origin.take();
                     card::exchange::accept(&mut execution, accepted)?;
@@ -738,6 +758,7 @@ impl Game {
     pub(super) fn internal_decision_packet(&self, view: View) -> Value {
         self.internal_decision(view).map_or(Value::Null, |question| {
             let domain = match question.domain {
+                InputDomain::WardEntry { card, name, zone, position } => json!({"kind":"ward-entry","card":card,"name":name,"zone":zone,"position":position}),
                 InputDomain::Quick { window, options } => card::quick::packet(window, &options),
                 InputDomain::TriggerQuota(domain) => json!({"kind":"trigger-quota","candidates":domain.candidates.iter().map(|option| json!({"handle":option.handle,"card":option.card,"line":option.line,"event":option.event})).collect::<Vec<_>>(),"earlier":domain.earlier.iter().map(|selection| json!({"actor":selection.actor.seat,"card":selection.occurrence.card,"line":selection.occurrence.line,"event":selection.occurrence.event})).collect::<Vec<_>>()}),
                 InputDomain::Targets(domain) => card::selection::packet(&domain),
@@ -839,7 +860,7 @@ impl Game {
         };
         for object in self.state.objects.values() {
             if !self.abilities(&object.id)?.iter().all(admitted)
-                || !self.keywords(&object.id)?.is_empty()
+                || !self.prototype_keywords(&object.id)?.is_empty()
             {
                 return Err(unsupported(
                     "context requires prototype abilities or keywords",

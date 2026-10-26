@@ -37,6 +37,13 @@ impl Game {
     }
 
     pub(super) fn keywords(&self, id: &str) -> Result<BTreeSet<String>> {
+        if let Some(keywords) = self.internal_keywords(id)? {
+            return Ok(keywords);
+        }
+        self.prototype_keywords(id)
+    }
+
+    pub(super) fn prototype_keywords(&self, id: &str) -> Result<BTreeSet<String>> {
         let object = self.object(id)?;
         let mut result: BTreeSet<String> = list(&object.state["keywords"])
             .iter()

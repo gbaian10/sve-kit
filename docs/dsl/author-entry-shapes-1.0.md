@@ -18,7 +18,7 @@ DSL 檔與伴隨本體共用 `author-nodes.schema.json` 的能力內容圖。`au
 
 sources 恰一筆，OccurrenceKey.segments 可以保留多段，不複製能力執行。普通能力／generated_by 使用 SourceUse，含真實 ability_scope；獨立 keywords 宣告只用 CardKeywordSourceUse `{binding_id,occurrence}`，不含 ability_scope。keywords 宣告的 ports 必空，imports／generated_by／舊 SourceUse 均拒絕；companion.body 的子圖排除 keywords。line 從 1 起算，section 從 0 起算。通用 OccurrenceKey 的四層 owner 型別包含 Q&A 等來源，結構可讀不表示這是合法 JP DSL 來源；shared 來源准入仍需已採納 JP face_revision 及精確 owner／field／face／line 與該種類的來源定位。
 
-含獨立 keywords 宣告的卡目前只接受 draft、reviewed_by:[]、verified_by_exam:[]；不新增非本體用途 hash／review recipe，不使用本體 body_version 代填。正式 current reader 已對 ward／aura 完成來源與作者整卡對帳，使用獨立 declaration sidecar 與分型非本體 inventory；D0 分別精確消耗本體與宣告義務。純結構或外供 context 展開不授 current proof；來源對帳不代表 executable lowering、runtime 或用途資格已通過，Ward／Aura 的執行接線仍未完成。
+含獨立 keywords 宣告的卡目前只接受 draft、reviewed_by:[]、verified_by_exam:[]；不新增非本體用途 hash／review recipe，不使用本體 body_version 代填。正式 current reader 已對 ward／aura 完成來源與作者整卡對帳，使用獨立 declaration sidecar 與分型非本體 inventory；D0 分別精確消耗本體與宣告義務。純結構或外供 context 展開不授 current proof；來源對帳不代表 executable lowering、runtime 或用途資格已通過，Ward／Aura 的封閉執行邊界見 author-contract-1.0〈守護與光紋的具名宣告准入〉。
 
 inline 的能力 payload 與 companion 使用同一型別圖。單跑 Schema／TypeAdapter 可能接受合法葉位的 ParamRef；完整結構 reader 另走 decoded 型別圖，對 inline 內任何 ParamRef 報 inline_param_reference。走訪透明 RootModel、保留 BaseModel 的序列化 alias 與 TypedDict wire 鍵，不掃全域同名鍵，因此不把依賴 params 誤認成能力參數。這項 inline 檢查不取代下述完整 expanded profile。
 
@@ -80,7 +80,7 @@ spell、attack_time 與 evolve_time 抽牌同樣只配空 ports、不得有能�
 
 `destroy_fanfare_opponent_all_field_followers.v1` 只接已採納來源規則的完整 Advance 面：current JP follower、special_kinds 恰為 advance，effect 第一行守護／光紋、第二行完整入場曲，無 sections。固定 Concept/ability 葉、canonical occurrence、body 來源位置與空 ports 全部核對；inline 與 companion 都比較完整能力 bytes，不參數化 selector、能力頭、條件或費用。Fanfare 保留來源持有者由場外新進場的事件語義，不限普通打出，也不因卡型補造 AdvanceActivate。對手以能力 master 為準，destroy 的移動目的地依各卡 owner；不改成 banish／move，也不宣稱忽略破壞禁止、Advance／token 後續規則。
 
-這項能力來源映射不表示 BP19-P32／BP19-114 整卡已准入：兩者同永久身分，來源仍包含 `card_keywords.v2` 的守護／光紋非本體義務。current 入口尚未承載該 card_field，完整 `validate`／`selection_input` 明確回 `unsupported_source_projection`，不產生 current_source_checked 或缺 sibling 的 source_inventory。合法 Advance 進場與整卡執行仍需各自的 D0／runtime 證據；純來源展開成功只有 derived_self_consistent。
+BP19-P32／BP19-114 同永久身分；完整 current 入口分別保留 `card_keywords.v2` 的守護／光紋非本體義務與入場曲本體。測試以公開來源重建完整選取，通過 D0、整卡准入及合法效果入場後的守護選擇與入場曲結算；不在同一選取重複註冊兩個印刷。正式 authored 尚須依遷移流程另行處理，不能用純來源展開的 derived_self_consistent 冒充用途資格。
 
 具名謝幕曲搜尋只接受 current 普通 follower、無特殊種類與 sections 的完整單行 effect；
 真卡為 BP06-048 與同永久身分的 BP06-P15。固定 Lastword Concept、自方 deck、目的 hand、

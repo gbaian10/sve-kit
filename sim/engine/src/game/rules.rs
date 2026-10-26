@@ -956,10 +956,14 @@ impl Game {
             && self.state.flow["kind"] == "end"
             && self.state.flow["stage"] == "triggers"
         {
-            let guards = self.zone_ids(self.active(), "field").iter().any(|id| {
-                self.object(id).is_ok_and(|o| o.state["acted"] != true)
-                    && self.keywords(id).is_ok_and(|k| k.contains("guard"))
-            });
+            let mut guards = false;
+            for id in self.zone_ids(self.active(), "field") {
+                if self.object(&id)?.state["acted"] != true && self.keywords(&id)?.contains("guard")
+                {
+                    guards = true;
+                    break;
+                }
+            }
             self.state.flow["stage"] = json!(if guards { "guard" } else { "quick" });
         }
         if self.state.pending.is_empty()

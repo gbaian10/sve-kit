@@ -4,10 +4,10 @@ use super::{Execution, Fact, Game, InstructionOutcome, Result, invalid, player_i
 use crate::ir::{
     Action, ActionPattern, Bool, Cause, CausePattern, DestroyOutcome, DurationEnd, Effect,
     EffectSource, Expr, Generation, Instruction, MoveDestination, MoveMethod, MoveOutcome,
-    MoveReason, MoveResult, MoveSpec, MovementReceipt, Nat, ObjectReceipt, ObjectRef, OwnerZone,
-    PlayerId, PlayerRef, PlayerRelation, Polarity, ReceiptId, ReceiptLocation, ResultMember,
-    ResultMemberId, RuntimeObjectView, RuntimeZoneRef, SelectionView, Selector, SnapshotId,
-    TimeAnchor, ZoneKind,
+    MoveReason, MoveResult, MoveSpec, MovementReceipt, Nat, Node, ObjectReceipt, ObjectRef,
+    OwnerZone, PlayerId, PlayerRef, PlayerRelation, Polarity, ReceiptId, ReceiptLocation,
+    ResultMember, ResultMemberId, RuntimeObjectView, RuntimeZoneRef, SelectionView, Selector,
+    SnapshotId, TimeAnchor, ZoneKind,
 };
 use serde_json::json;
 
@@ -300,6 +300,17 @@ impl Game {
         {
             return Err(unsupported("field entry needs capacity selection"));
         }
+        for &member in &members {
+            let id = execution.object_id(member)?.to_owned();
+            if self.object(&id)?.generation == member.generation.0
+                && self.internal_ward_entry_choice(execution, &id)?
+            {
+                execution.todo.push_front(Node::Instruction {
+                    instruction: Box::new(instruction.clone()),
+                });
+                return Ok(());
+            }
+        }
         let (moved, _) = self.internal_move_members(
             execution,
             &members,
@@ -307,6 +318,11 @@ impl Game {
             ZoneKind::Field,
             MoveMethod::Put,
         )?;
+        for member in &moved {
+            if member.after.is_some() {
+                self.internal_ward_entry_posture(execution, member.before)?;
+            }
+        }
         execution.receipts.insert(
             instruction.receipt,
             InstructionOutcome::Move(MoveOutcome { moved }),

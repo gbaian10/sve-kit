@@ -260,7 +260,15 @@ impl Game {
         let [group] = constraint.groups.as_slice() else {
             return Err(unsupported("target groups"));
         };
-        let members = execution.public_field_objects(self, &group.selector)?;
+        let mut members = Vec::new();
+        for member in execution.public_field_objects(self, &group.selector)? {
+            if self.targetable_by(
+                execution.object_id(member)?,
+                super::seat_name(execution.context.controller)?,
+            )? {
+                members.push(member);
+            }
+        }
         let bounds = Cardinality {
             minimum: Nat(constraint
                 .cardinality
@@ -282,7 +290,7 @@ impl Game {
                 let object = self.object(id)?;
                 if object.zone != "field"
                     || object.generation != reference.generation.0
-                    || self.object_type(id)? != "フォロワー"
+                    || !self.object_type(id)?.contains("フォロワー")
                 {
                     return Err(unsupported("target is not a current public field follower"));
                 }
