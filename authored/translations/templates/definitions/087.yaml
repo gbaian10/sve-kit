@@ -1647,12 +1647,12 @@ records:
   - origin: machine
     kind: sentence_template
     data:
-      id: frame:73148bde0200476939759efb3122e28bcc2357e3d0babf34499254e315487fae
+      id: frame:eb5ba9849b80f070d29882b2ec1af7d520621cbda22813f20b7463e3f8d90d86
       source:
         source_lang: ja
         canonical_hash: b2de4a60771043e980aa7210958b336664bb8b46bd7d02304a4e694ac4eeafdb
         normalizer_version: four-layer-jp-v10
-        semantic_definitions: 2086
+        semantic_definitions: 4434
       role: body
       semantic_variant:
         state: pending
@@ -1760,7 +1760,7 @@ records:
               capture: play_parameter
               value:
                 kind: CapturedValue
-                binding_id: source-declared-x:a94e79c6c5a9b21c2588babe5973c1d18c2d3d7f3f54e9a17bfcbb1ccafb5383
+                binding_id: source-declared-x:a87c1691800d596b59be0a725b268934329c5009c01bb681e7b849ccd5b30a3b
                 result_type: Nat
                 measure: declared_x
               source_leaves: []
@@ -1784,11 +1784,11 @@ records:
               capture: receipt
               value:
                 kind: ReceiptId
-                receipt_id: source-payment:a94e79c6c5a9b21c2588babe5973c1d18c2d3d7f3f54e9a17bfcbb1ccafb5383
+                receipt_id: source-payment:a87c1691800d596b59be0a725b268934329c5009c01bb681e7b849ccd5b30a3b
                 result: payment_complete
               source_leaves: []
         exports: []
-      content_hash: 73148bde0200476939759efb3122e28bcc2357e3d0babf34499254e315487fae
+      content_hash: eb5ba9849b80f070d29882b2ec1af7d520621cbda22813f20b7463e3f8d90d86
   - origin: machine
     kind: sentence_template
     data:

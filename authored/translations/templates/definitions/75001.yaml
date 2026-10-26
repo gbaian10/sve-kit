@@ -420,12 +420,12 @@ records:
       content_hash: 7dab0a770618a3f758ecf7da202c6ec85790cabcd50eb1e83eb95db02bb8dd4a
   - kind: sentence_template
     data:
-      id: frame:e838044e28ed87e0dbe31ea172dcc494990c2397c3b1c106a0a1b921803828eb
+      id: frame:4633e7011b5a13b33830c713fa2e7443a2b5fab7a8ef578dc1829a7138efe272
       source:
         source_lang: ja
         canonical_hash: 98728b3340dc423d376f0da703e823d8ac693cd8355eba2ba3bd3a06d4aae108
         normalizer_version: four-layer-jp-v10
-        semantic_definitions: 3757
+        semantic_definitions: 4520
       role: body
       semantic_variant:
         state: pending
@@ -669,7 +669,7 @@ records:
               value:
                 kind: ObjectSet
                 objects:
-                  - object_id: source-holder:562a5b89a9d0c0954733701015bba8cbaafaf42520b86dd70bbc203c0ded9f03
+                  - object_id: source-holder:1b5493af1ba339dce5fe64118da351aee7ad615438f065efd800bb4360a38e04
                     generation: 0
                 origin: selection
               source_leaves:
@@ -678,7 +678,7 @@ records:
                 - leaf_3
                 - leaf_2
         exports: []
-      content_hash: e838044e28ed87e0dbe31ea172dcc494990c2397c3b1c106a0a1b921803828eb
+      content_hash: 4633e7011b5a13b33830c713fa2e7443a2b5fab7a8ef578dc1829a7138efe272
   - kind: sentence_template
     data:
       id: frame:5e95b0678b0ad26aa7d8dfe69dfb997a70b8b6c4b17bbacd92e47945fc49e79c
@@ -1362,12 +1362,12 @@ records:
       content_hash: 4952f7557b7a401fb9576060bae565ec055ad5ae74eaff7ae0e864c1dad81a5f
   - kind: sentence_template
     data:
-      id: frame:c2c824909d04757b590efa5d3c457337daf90ef2c9024eee6b7d53d83fc10523
+      id: frame:8a4f8c87882cd68f61afc4f7a944713273a2cf6d7229b7949709806e5e549127
       source:
         source_lang: ja
         canonical_hash: 9f5087aa1aff1be2ccdfc17c573b553871867d7add0c14dcbf449372d8489be2
         normalizer_version: four-layer-jp-v10
-        semantic_definitions: 2052
+        semantic_definitions: 4425
       role: body
       semantic_variant:
         state: pending
@@ -1656,7 +1656,7 @@ records:
               capture: selection
               value:
                 kind: PoolContext
-                pool_id: source-pool:ed133aa2b4716968bb8b4a35af074b48fbcbc5c7f590f75ed2cecbcfa9b7274e
+                pool_id: source-pool:002a412ae7ef959e9b0159e3e96a8a11538875fb85a1c2590ea208ea4458f3c3
                 source_kind: search_result
                 members: []
                 receipt: n3_port_0
@@ -1683,7 +1683,7 @@ records:
               value:
                 kind: ObjectSet
                 objects:
-                  - object_id: source-remaining:7be0603bcc9a648a4a8ede2b684c55854262a3b9ed7e9afc627228586002bf4e
+                  - object_id: source-remaining:1efb394cbbca59659a40be12f328d1232f0147c0bd0842dc5ed82f86685fcaba
                     generation: 0
                 origin: pool_remainder
                 pool: n3_port_1
@@ -1735,7 +1735,7 @@ records:
               capture: receipt
               value:
                 kind: ReceiptId
-                receipt_id: source-search:ed133aa2b4716968bb8b4a35af074b48fbcbc5c7f590f75ed2cecbcfa9b7274e
+                receipt_id: source-search:002a412ae7ef959e9b0159e3e96a8a11538875fb85a1c2590ea208ea4458f3c3
                 result: objects
               source_leaves: []
           - name: n3_port_1
@@ -1758,7 +1758,7 @@ records:
               capture: selection
               value:
                 kind: PoolContext
-                pool_id: source-pool:ed133aa2b4716968bb8b4a35af074b48fbcbc5c7f590f75ed2cecbcfa9b7274e
+                pool_id: source-pool:002a412ae7ef959e9b0159e3e96a8a11538875fb85a1c2590ea208ea4458f3c3
                 source_kind: search_result
                 members: []
                 receipt: n3_port_0
@@ -1784,7 +1784,7 @@ records:
               capture: receipt
               value:
                 kind: ReceiptId
-                receipt_id: source-placement:7be0603bcc9a648a4a8ede2b684c55854262a3b9ed7e9afc627228586002bf4e
+                receipt_id: source-placement:1efb394cbbca59659a40be12f328d1232f0147c0bd0842dc5ed82f86685fcaba
                 result: objects
               source_leaves: []
           - name: n3_port_4
@@ -1808,13 +1808,13 @@ records:
               value:
                 kind: ObjectSet
                 objects:
-                  - object_id: source-remaining:7be0603bcc9a648a4a8ede2b684c55854262a3b9ed7e9afc627228586002bf4e
+                  - object_id: source-remaining:1efb394cbbca59659a40be12f328d1232f0147c0bd0842dc5ed82f86685fcaba
                     generation: 0
                 origin: pool_remainder
                 pool: n3_port_1
                 placement: n3_port_3
               source_leaves: []
-      content_hash: c2c824909d04757b590efa5d3c457337daf90ef2c9024eee6b7d53d83fc10523
+      content_hash: 8a4f8c87882cd68f61afc4f7a944713273a2cf6d7229b7949709806e5e549127
   - kind: sentence_template
     data:
       id: frame:e298e3d0add892de85466745a6ed581b067e5c3ba439afe51cd3ebee6b44b586
@@ -2619,12 +2619,12 @@ records:
       content_hash: a9aaebe952dc16f12a4042308bda53e09c678fa32d051f3f85e3fbf74c7454d7
   - kind: sentence_template
     data:
-      id: frame:be24d20eb3bde9610d1e3b7faf01ca2173a4c00ac18ba427086ef2b28f8b857c
+      id: frame:ada43b9e7d13b2f4d35fcff9a6703255bbc757612153a9fe3d5dab13eea3dae6
       source:
         source_lang: ja
         canonical_hash: c76d250866788ac048aaa1a765ef0a2046f91b1ceab4ec05c1bdd8e1ef4d7d85
         normalizer_version: four-layer-jp-v10
-        semantic_definitions: 634
+        semantic_definitions: 4401
       role: body
       semantic_variant:
         state: pending
@@ -2892,7 +2892,7 @@ records:
               capture: play_parameter
               value:
                 kind: ChoiceContext
-                ability_instance: source-choice:d39d7fc65b29b8404e1f8e7607c3d96fa68c1634bc8246940114e3907106808d
+                ability_instance: source-choice:d2ba3f810e965c2fc05df3d1bc493c2b8c0c7460d0764a110a5e047aec732d99
                 turn: CurrentTurn
                 modes:
                   - mode_1
@@ -2900,7 +2900,7 @@ records:
                   - mode_3
               source_leaves: []
         exports: []
-      content_hash: be24d20eb3bde9610d1e3b7faf01ca2173a4c00ac18ba427086ef2b28f8b857c
+      content_hash: ada43b9e7d13b2f4d35fcff9a6703255bbc757612153a9fe3d5dab13eea3dae6
   - kind: sentence_template
     data:
       id: frame:616053d14224856a90c4fe697d795cd669e9aab2a283ca9c85f5c9472fab67e6
@@ -3304,12 +3304,12 @@ records:
       content_hash: f4d0d0e2ada63aa884517c7c05b26ab6e84a94b7f3ef4ba128b529b27877ae90
   - kind: sentence_template
     data:
-      id: frame:e6d116b9a97ba7b4efffcbddde3c0a1dcdf3ec2d6ce3539862d3b9f29677c9ca
+      id: frame:40540a4d0e30baa2305e6070cb1f70fb73458ff71ee193fb2178d34a748662e5
       source:
         source_lang: ja
         canonical_hash: 2273657eb215e27e4a444acb8b4e7156287fd6f3f448651c6182f764031b024b
         normalizer_version: four-layer-jp-v10
-        semantic_definitions: 765
+        semantic_definitions: 4404
       role: body
       semantic_variant:
         state: pending
@@ -3625,7 +3625,7 @@ records:
               value:
                 kind: ObjectSet
                 objects:
-                  - object_id: source-holder:80ca9c4c4c295c6cef5b8d465e1aac089b6e51222c1af508673295028f8c9156
+                  - object_id: source-holder:a296f2920294f4e4e3bd2a971c97f74bad2fcd421dda0296b89cd14824415ec2
                     generation: 0
                 origin: selection
               source_leaves:
@@ -3634,7 +3634,7 @@ records:
                 - leaf_9
                 - leaf_8
         exports: []
-      content_hash: e6d116b9a97ba7b4efffcbddde3c0a1dcdf3ec2d6ce3539862d3b9f29677c9ca
+      content_hash: 40540a4d0e30baa2305e6070cb1f70fb73458ff71ee193fb2178d34a748662e5
   - kind: sentence_template
     data:
       id: frame:0164dfba59139bf7c1cfee823a5122b89326b1e2fb48832264b6c9c39548cf89
@@ -3982,12 +3982,12 @@ records:
       content_hash: 16ced193832d82488dd4a231885d498f727115a641e108dd9b4b447b01531376
   - kind: sentence_template
     data:
-      id: frame:c63f4df75b4b84696faa65286e21efc76adf50fd6a1370d0f9f3e26b0a2b2bfb
+      id: frame:896a23d82da4bc8e586cb13c62a0535d08a2ea3a41e3c3ae06cd1c2a0e3942be
       source:
         source_lang: ja
         canonical_hash: a52df2fe334023a8cefa1eb315629348d7d28176af386a6b1b02167e3427e836
         normalizer_version: four-layer-jp-v10
-        semantic_definitions: 3078
+        semantic_definitions: 4506
       role: body
       semantic_variant:
         state: pending
@@ -4097,7 +4097,7 @@ records:
               value:
                 kind: AbilitySetRef
                 holder_generation:
-                  object_id: source-holder:ac1d772ffd8fc78d1bd942d7724725285590e7f51a8aa7be04a9bc80cb91f6d8
+                  object_id: source-holder:7d2e2c63090ec25f9830f74640eca93400eeec80aff8c64e90311cd299ca0cd4
                   generation: 0
                 ability_kind: term:event.evolve
                 source_selector:
@@ -4114,7 +4114,7 @@ records:
                       end: 184
               source_leaves: []
         exports: []
-      content_hash: c63f4df75b4b84696faa65286e21efc76adf50fd6a1370d0f9f3e26b0a2b2bfb
+      content_hash: 896a23d82da4bc8e586cb13c62a0535d08a2ea3a41e3c3ae06cd1c2a0e3942be
   - kind: sentence_template
     data:
       id: frame:1946975574d2dd76c3133dafeac657d5ed7fb2b326c7ea2a19988c892508b9dc
@@ -4430,12 +4430,12 @@ records:
       content_hash: 90a085cd67fc2601bb1ac647566a0244f2d41feec55de4f8aefd0d3fec81b8d6
   - kind: sentence_template
     data:
-      id: frame:d6231bab2f9a354643be3f4e57e54eb032c37de1a3dcbab7ca938e648c712559
+      id: frame:b4473c12a7475a7add7f4b20c5b5620c02094a3f87f9909cf990b7e158c4aaf7
       source:
         source_lang: ja
         canonical_hash: 618581a8823d958247d526e10c4c079ae0c43ea0a5a350c82b7d7c727a7d70d6
         normalizer_version: four-layer-jp-v10
-        semantic_definitions: 480
+        semantic_definitions: 4398
       role: body
       semantic_variant:
         state: pending
@@ -4616,11 +4616,11 @@ records:
               capture: receipt
               value:
                 kind: ReceiptId
-                receipt_id: source-receipt:a372b377b07f6c5da9794b594d713a71ea976be8148b066e02eabc5e67470d1b
+                receipt_id: source-receipt:0115321b7c4ee6b79cc8753f185ea4de16c81d2c5b095f1d664031e7ad8cbac6
                 result: objects
               source_leaves: []
         exports: []
-      content_hash: d6231bab2f9a354643be3f4e57e54eb032c37de1a3dcbab7ca938e648c712559
+      content_hash: b4473c12a7475a7add7f4b20c5b5620c02094a3f87f9909cf990b7e158c4aaf7
   - kind: sentence_template
     data:
       id: frame:e966a3de21770e9e3c0b30f1edc6324821a02baeef311418ab31d9bf512c3e83

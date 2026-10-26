@@ -2713,12 +2713,12 @@ records:
       content_hash: c971806a88bf4f95f9b7ccfef5261522497d19ed225d27d4bbcb1b1f20a1cab6
   - kind: sentence_template
     data:
-      id: frame:eda30c8769b7cd393797f462a38764172eadcbbf335c95913303dc575f5c5d54
+      id: frame:33c3905aa6268c5a0587fdff215f846bea0bdaef1a93e146ab5dd8658a62613d
       source:
         source_lang: ja
         canonical_hash: b71f9f1de962dce96ae62661baecee2ce534d9a15486ab241a685a0eca0423fc
         normalizer_version: four-layer-jp-v10
-        semantic_definitions: 2875
+        semantic_definitions: 4488
       role: body
       semantic_variant:
         state: pending
@@ -2951,7 +2951,7 @@ records:
               capture: declaration
               value:
                 kind: CapturedValue
-                binding_id: source-dice-declaration:f09b98af28470254355cde7a61dc32ac4a84aa0f31a908df628a6f78ed836402
+                binding_id: source-dice-declaration:6831ac826893806e3a8fef45f3725f7f97a25f47a79e698d4c87d90b5dfce820
                 result_type: Nat
                 measure: declared_dice_face
               source_leaves: []
@@ -2998,7 +2998,7 @@ records:
               value:
                 kind: EventRef
                 event_kind: DiceRoll
-                event_id: source-dice-roll:b829fab1d5d49ae0fd96a165ce7a43a3f7215db658d551e098e0231eb8f9e004
+                event_id: source-dice-roll:2481217a7a826952139d117ff95ea0d2436e510aac3fa7b070633462c0921264
                 direct_ability_source:
                 actor:
                   kind: PlayerRef
@@ -3024,12 +3024,12 @@ records:
               capture: receipt
               value:
                 kind: CapturedValue
-                binding_id: source-dice-result:b829fab1d5d49ae0fd96a165ce7a43a3f7215db658d551e098e0231eb8f9e004
+                binding_id: source-dice-result:2481217a7a826952139d117ff95ea0d2436e510aac3fa7b070633462c0921264
                 result_type: Nat
                 measure: die_face
               source_leaves: []
         exports: []
-      content_hash: eda30c8769b7cd393797f462a38764172eadcbbf335c95913303dc575f5c5d54
+      content_hash: 33c3905aa6268c5a0587fdff215f846bea0bdaef1a93e146ab5dd8658a62613d
   - kind: sentence_template
     data:
       id: frame:e3c00cf975ff8bbb7b5db393a436b374c401011eba8ce45a6553fe2a8b041fe6

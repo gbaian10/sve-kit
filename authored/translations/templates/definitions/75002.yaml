@@ -234,12 +234,12 @@ records:
       content_hash: 1b78dd93152ace3bcab4eb064c2ec3eead871f4a0d9cf57ba1047d2236e377d8
   - kind: sentence_template
     data:
-      id: frame:677289b3be2844ee14e2fe0b8ebb7f0b3e81683123bda33029326c6b1d5ba422
+      id: frame:8e0391bf3c38e1b40e8c03a88178d94e56854e83f771ad4504e3f124bb337708
       source:
         source_lang: ja
         canonical_hash: f0023fc3352be4e840845ac31a6ba23a6fef882a50b3791ea3fa5e69be8a915b
         normalizer_version: four-layer-jp-v10
-        semantic_definitions: 3760
+        semantic_definitions: 4521
       role: body
       semantic_variant:
         state: pending
@@ -472,7 +472,7 @@ records:
               value:
                 kind: ObjectSet
                 objects:
-                  - object_id: source-holder:4bde42ae822c81d781a0e90c3a7be9479c3cadce1213bcbd0b54668e82eefe45
+                  - object_id: source-holder:90939e5456b69a3ad30864c34da58bcd8fc272829e0ba624912d0d6e1207bb16
                     generation: 0
                 origin: selection
               source_leaves:
@@ -481,7 +481,7 @@ records:
                 - leaf_3
                 - leaf_2
         exports: []
-      content_hash: 677289b3be2844ee14e2fe0b8ebb7f0b3e81683123bda33029326c6b1d5ba422
+      content_hash: 8e0391bf3c38e1b40e8c03a88178d94e56854e83f771ad4504e3f124bb337708
   - kind: sentence_template
     data:
       id: frame:3a65c3aa8d76d6c02ac0bfd1f0c5263349601014c7e8fb98cb843c636603d23a
@@ -971,12 +971,12 @@ records:
       content_hash: c7da84d65d8a7f25ca5cf5ace6be9d0cc3146089a459acb7f06c822d01b8c000
   - kind: sentence_template
     data:
-      id: frame:185919e48fc61eb8ee10b7c8f3bb479548808ffb9f2c368b31ff43d3c1c8d157
+      id: frame:7099e97a0b93d29551f94feeeb61e4ad3e33bbd950deb499194e9efce8b67a39
       source:
         source_lang: ja
         canonical_hash: f2999d57205e16d7f98369bf2f4d603c547a111eac528eb175d644a960c2c937
         normalizer_version: four-layer-jp-v10
-        semantic_definitions: 752
+        semantic_definitions: 4403
       role: body
       semantic_variant:
         state: pending
@@ -1291,7 +1291,7 @@ records:
               value:
                 kind: ObjectSet
                 objects:
-                  - object_id: source-holder:71530dbed670d3c229e136564f61531e21452003fe7917cf73ee102c08f8b4a6
+                  - object_id: source-holder:bc8d66f6d81c1de886c80930eb68f8c6b2ab61855845a8ef7441d3ba9736a3aa
                     generation: 0
                 origin: selection
               source_leaves:
@@ -1300,7 +1300,7 @@ records:
                 - leaf_9
                 - leaf_8
         exports: []
-      content_hash: 185919e48fc61eb8ee10b7c8f3bb479548808ffb9f2c368b31ff43d3c1c8d157
+      content_hash: 7099e97a0b93d29551f94feeeb61e4ad3e33bbd950deb499194e9efce8b67a39
   - kind: sentence_template
     data:
       id: frame:cc6d4a0ee637f0fcf4696af44d8ac159f11a7d56547dba82ddd036d5d4ab3123
@@ -1395,12 +1395,12 @@ records:
       content_hash: cc6d4a0ee637f0fcf4696af44d8ac159f11a7d56547dba82ddd036d5d4ab3123
   - kind: sentence_template
     data:
-      id: frame:9574148d2f58170915017655fd4be469b536a499c3ab1b518690518602e3705c
+      id: frame:e230f3fa4374b9f57dd1e9761895447e4cc653499e7007fe61ecce4cb514d782
       source:
         source_lang: ja
         canonical_hash: 2764ec46b9dab6debde3e34a8c3f445fa73de88a202c4730341473d261d2cd3e
         normalizer_version: four-layer-jp-v10
-        semantic_definitions: 2836
+        semantic_definitions: 4483
       role: body
       semantic_variant:
         state: pending
@@ -1585,7 +1585,7 @@ records:
               capture: play_parameter
               value:
                 kind: CapturedValue
-                binding_id: source-fusion-x:a8120aeb6cf161b587549db45751ff924c8d51b52e0bcbabe58de02b4ad9491a
+                binding_id: source-fusion-x:a5aeb651cf4dbb3dd6789bd26ae4478536eb2af49e87b06129328c642f50a44e
                 result_type: Nat
                 measure: declared_x
               source_leaves: []
@@ -1609,11 +1609,11 @@ records:
               capture: receipt
               value:
                 kind: ReceiptId
-                receipt_id: source-fusion-payment:a8120aeb6cf161b587549db45751ff924c8d51b52e0bcbabe58de02b4ad9491a
+                receipt_id: source-fusion-payment:a5aeb651cf4dbb3dd6789bd26ae4478536eb2af49e87b06129328c642f50a44e
                 result: payment_complete
               source_leaves: []
         exports: []
-      content_hash: 9574148d2f58170915017655fd4be469b536a499c3ab1b518690518602e3705c
+      content_hash: e230f3fa4374b9f57dd1e9761895447e4cc653499e7007fe61ecce4cb514d782
   - kind: sentence_template
     data:
       id: frame:707434cccd93f43760f55f3773387e9c60476b145a17e50b4a54f009d1d39ece
@@ -4127,12 +4127,12 @@ records:
       content_hash: d913f0098374aa2377ceb5a0e2225e33124568fdad4e20e55de5618c879ab64e
   - kind: sentence_template
     data:
-      id: frame:e31b683ee109f1bb978cdf23f882ce203418879533d3e5b77cf12c6a4d278b09
+      id: frame:6f2d07470f40fd8e0a8fae64d6ae6b3145def9ed79bd001f92313eb7f32f55a1
       source:
         source_lang: ja
         canonical_hash: ef47241713a1113f07c37220655375aac951c91d99f78447f0b7dfd536bf2b38
         normalizer_version: four-layer-jp-v10
-        semantic_definitions: 3993
+        semantic_definitions: 4526
       role: body
       semantic_variant:
         state: pending
@@ -4268,11 +4268,11 @@ records:
               capture: receipt
               value:
                 kind: ReceiptId
-                receipt_id: source-receipt:b96e110d0e6d29997d70296170c1016c848fd90e8e970a856d9916f3093b41cf
+                receipt_id: source-receipt:b4968795138c75307895d0cb47c47bfb181dfb50498e64cdca402ae64d3fd260
                 result: objects
               source_leaves: []
         exports: []
-      content_hash: e31b683ee109f1bb978cdf23f882ce203418879533d3e5b77cf12c6a4d278b09
+      content_hash: 6f2d07470f40fd8e0a8fae64d6ae6b3145def9ed79bd001f92313eb7f32f55a1
   - kind: sentence_template
     data:
       id: frame:e342d2b95f57d06729017c1c1a57f261ed8a99a2eeadcd7716f53660ad453f16

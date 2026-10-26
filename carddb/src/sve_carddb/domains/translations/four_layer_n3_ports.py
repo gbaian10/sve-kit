@@ -21,6 +21,7 @@ from sve_carddb.domains.translations.four_layer_context import (
 from sve_carddb.domains.translations.four_layer_event_preparation import (
     occurrence,
     origins,
+    source_identity,
 )
 from sve_carddb.domains.translations.four_layer_n3_forms import POOL_FIRST, POOL_SECOND
 from sve_carddb.domains.translations.four_layer_n3_shapes import ABILITY_REPLAY
@@ -36,8 +37,7 @@ if TYPE_CHECKING:
 def holder(builder: Builder) -> ObjectGeneration:
     """A source symbol denotes the holder; it is never an evaluated game object."""
     return ObjectGeneration(
-        object_id="source-holder:"
-        + hash_payload(builder.source.model_dump(mode="json")),
+        object_id="source-holder:" + hash_payload(source_identity(builder.source)),
         generation=0,
     )
 

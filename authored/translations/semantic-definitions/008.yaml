@@ -1,0 +1,4257 @@
+format: 1
+kind: frame_semantics_shard
+definitions:
+  - id: 4394
+    hash: dc80916f318e52d9ffc87513d72d3c0260e58315e7f1c3a8f5f6fc02a53bc518
+    value:
+      domains:
+        "@5": "@6"
+        "@147": "@148"
+        "@9": "@10"
+        "@16": "@17"
+        "@362": "@199"
+        "@319": "@199"
+        "@19": "@17"
+        "@81":
+          category: class
+          membership: "@4"
+          selection: []
+          type: Concept
+        "@21": "@22"
+      expressions:
+        "@319": "@321"
+        "@363":
+          domain: "@362"
+          history:
+          id: "@363"
+          imports: "@364"
+          measure: attack
+          parameters: "@366"
+          result_type: Nat
+          role: read_value
+          scalable: true
+          source_family: A1
+        "@369":
+          domain: "@362"
+          history:
+          id: "@369"
+          imports: "@364"
+          measure: attack
+          parameters: "@366"
+          result_type: Nat
+          role: read_value
+          scalable: true
+          source_family: A1
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: lki
+              source:
+                field: effect
+                line_ordinal: 0
+                ordinal:
+                owner: "@370"
+                role: body
+                segments:
+                  - end: 39
+                    start: 15
+                source_hash: "@372"
+              source_leaves: []
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source-object:b3023d608a4c4c37faeac89c36d171b0fc08d5eb912745b130da55489e1c92aa
+                origin: selection
+            name: read_port_0
+            scope: "@373"
+            source_role: read_subject
+            type: ObjectSet
+          - evidence:
+              capture: lki
+              source:
+                field: effect
+                line_ordinal: 0
+                ordinal:
+                owner: "@370"
+                role: body
+                segments:
+                  - end: 124
+                    start: 95
+                source_hash: "@372"
+              source_leaves: []
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source-object:ca65cccfa5ad4f1ebc7393e96b64bdd7e6f5a79b0763f282648b249f8527bd26
+                origin: selection
+            name: read_port_1
+            scope: "@374"
+            source_role: read_subject
+            type: ObjectSet
+        scopes:
+          - "@37"
+          - id: "@373"
+            kind: branch
+            parent: "@38"
+          - "@376"
+      units:
+        leaf_0: object_count
+        leaf_15: object_count
+        leaf_19: object_count
+        leaf_3: object_count
+        leaf_7: object_count
+  - id: 4395
+    hash: 8016ce85d017388163afa51e69704047ac4b0b364b6399be4c231c5b77d90690
+    value:
+      domains:
+        "@5": "@6"
+        "@49": "@50"
+        "@7": "@8"
+        "@64": "@65"
+        "@9": "@10"
+        "@397": "@15"
+        "@398": "@399"
+        "@362": "@199"
+        "@19": "@17"
+        "@21": "@22"
+      expressions:
+        "@400": "@401"
+        "@405": "@406"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: "@304"
+              source:
+                field: effect
+                line_ordinal: 1
+                ordinal:
+                owner: "@409"
+                role: body
+                segments:
+                  - end: 35
+                    start: 34
+                source_hash: "@411"
+              source_leaves: []
+              value:
+                "@312": source-choice:1e82576fd460b9e6f430533e43584ad66f5b11543c13d723cec658c49c938d8d
+                kind: ChoiceContext
+                modes: "@314"
+                turn: CurrentTurn
+            name: n3_port_0
+            scope: "@143"
+            source_role: "@315"
+            type: ChoiceContext
+          - evidence:
+              capture: selection
+              source:
+                field: effect
+                line_ordinal: 1
+                ordinal:
+                owner: "@409"
+                role: body
+                segments:
+                  - end: 137
+                    start: 5
+                source_hash: "@411"
+              source_leaves: []
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source:572d0eee32e29472724ae5afc27ff7267f451b9420544b661566e9a1481c06dd
+                origin: selection
+            name: names_port_572d0eee32e29472
+            scope: "@412"
+            source_role: name_source
+            type: ObjectSet
+          - evidence:
+              capture: "@304"
+              source: "@413"
+              source_leaves: []
+              value:
+                binding_id: source-declared-x:4cd137b47149d0e4a468a37c1c224ff90b6f5932424e506c090952c72433e4f9
+                kind: CapturedValue
+                measure: declared_x
+                result_type: Nat
+            name: read_port_0
+            scope: "@143"
+            source_role: declared_x
+            type: CapturedValue
+          - evidence:
+              capture: receipt
+              source: "@413"
+              source_leaves: []
+              value:
+                kind: ReceiptId
+                receipt_id: source-payment:4cd137b47149d0e4a468a37c1c224ff90b6f5932424e506c090952c72433e4f9
+                result: "@416"
+            name: read_port_1
+            scope: "@143"
+            source_role: "@416"
+            type: ReceiptId
+        scopes:
+          - "@145"
+          - id: "@412"
+            kind: branch
+            parent: "@143"
+      units:
+        leaf_11: object_count
+        leaf_8: object_count
+  - id: 4396
+    hash: 0f189f0210b47f46e4b98e7ea2152d7acd9119ab03c0f40a2eb65ce6c635c9b5
+    value:
+      domains:
+        "@5": "@6"
+        "@49": "@50"
+        "@7": "@8"
+        "@429": "@430"
+        "@9": "@10"
+        "@362": "@199"
+        "@19": "@17"
+        zone.hand.v1: "@20"
+        "@21": "@22"
+      expressions: "@433"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: selection
+              source:
+                field: effect
+                line_ordinal: 1
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:b62749e7503d5ec4ea36064f0fd6e1e70e2edf5f4a62a51e5a32d1cd52fe1f33
+                role: body
+                segments:
+                  - end: 117
+                    start: 102
+                source_hash: 41627b5aaf7469c540d22c33df2f7cff5cb70acd0dfb59808e4da62cf2b51b1c
+              source_leaves: []
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source-object:6810028d40d7631a6bf44a398995906e258b2e2722a3a113a9e1fb0f65fc47d4
+                origin: selection
+            name: read_port_0
+            scope: "@143"
+            source_role: read_subject
+            type: ObjectSet
+        scopes: "@144"
+      units:
+        leaf_6: object_count
+        leaf_9: object_count
+  - id: 4397
+    hash: ffd5e611fe790f9dc50dcb22b4b2ee5c10cbbc4fdb6f4c7a75769137365777bb
+    value:
+      domains: "@471"
+      expressions: "@477"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: lki
+              source:
+                field: effect
+                line_ordinal: 1
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:28e1f08cd57785b19de45c12102ada78558b65fd4874e46c913340c9afdfae03
+                role: body
+                segments:
+                  - end: 76
+                    start: 37
+                source_hash: e4dab68d0256c23c9aa54109ce6a90e227af0e15cd24f93a5d0246c4d45bedd4
+              source_leaves: []
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source-object:07e7ef50ae8f198aec9259eceefa502f0f70280072c072ace1995a36c1037d30
+                origin: selection
+            name: read_port_0
+            scope: "@143"
+            source_role: read_subject
+            type: ObjectSet
+        scopes: "@144"
+      units:
+        leaf_4: object_count
+        leaf_8: object_count
+  - id: 4398
+    hash: c78c304f19b47643e2e54ea20d09cde13c24722ddc10c9a50504e9ea5521872c
+    value:
+      domains: "@471"
+      expressions:
+        "@481":
+          domain: "@362"
+          history:
+          id: "@481"
+          imports: "@482"
+          measure: card_count
+          parameters:
+            - "@97": []
+              domain: "@49"
+              name: name
+              role: read_name
+              type: CardName
+              values: []
+          result_type: Nat
+          role: read_value
+          scalable: true
+          source_family: A1
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: receipt
+              source:
+                field: effect
+                line_ordinal: 1
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:c13b4db866df3704ec26c5a37ca1718165926f3375ff9318fe5a95dff97c2c96
+                role: body
+                segments:
+                  - end: 69
+                    start: 35
+                source_hash: 49383a29e99fb8f7ac51d89a8e34be3b7cbe68cd908a751afa7c1f63b79150af
+              source_leaves: []
+              value:
+                kind: ReceiptId
+                receipt_id: source-receipt:0115321b7c4ee6b79cc8753f185ea4de16c81d2c5b095f1d664031e7ad8cbac6
+                result: objects
+            name: read_port_0
+            scope: "@143"
+            source_role: read_receipt
+            type: ReceiptId
+        scopes: "@144"
+      units:
+        leaf_7: object_count
+  - id: 4399
+    hash: 728e372bdecc3faa121dea3a1e0e4566a6c5665fe5832b41ceffa0345a1eb88a
+    value:
+      domains:
+        "@5": "@6"
+        "@49": "@50"
+        "@58": "@59"
+        "@9": "@10"
+        "@16": "@17"
+        "@362": "@199"
+        "@19": "@17"
+        "@21": "@22"
+      expressions: "@513"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: "@304"
+              source: "@514"
+              source_leaves: []
+              value:
+                binding_id: source-declared-x:ac5bab503022824ddc19c75705868af761fe9b4d88217583fe2c92543e67008d
+                kind: CapturedValue
+                measure: declared_x
+                result_type: Nat
+            name: read_port_0
+            scope: "@374"
+            source_role: declared_x
+            type: CapturedValue
+          - evidence:
+              capture: receipt
+              source: "@514"
+              source_leaves: []
+              value:
+                kind: ReceiptId
+                receipt_id: source-payment:ac5bab503022824ddc19c75705868af761fe9b4d88217583fe2c92543e67008d
+                result: "@416"
+            name: read_port_1
+            scope: "@374"
+            source_role: "@416"
+            type: ReceiptId
+        scopes: "@520"
+      units:
+        leaf_0: object_count
+        leaf_5: object_count
+        leaf_6: damage_amount
+  - id: 4400
+    hash: d838f0ea46a4f45f50e8a019eb72f990aa47407249fa72726daedd64fe5db408
+    value:
+      domains:
+        "@5": "@6"
+        "@49": "@50"
+        "@64": "@65"
+        "@9": "@10"
+        "@362": "@199"
+        "@19": "@17"
+        zone.hand.v1: "@20"
+        "@21": "@22"
+      expressions:
+        "@533": "@534"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: lki
+              source:
+                field: effect
+                line_ordinal: 1
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:daca5ffe65f9b62746b63de95f7325636e0dbbf45c9b37e7382adb80cdc6d14b
+                role: body
+                segments:
+                  - end: 25
+                    start: 5
+                source_hash: dbb48aee2ac701b03c7a2464edce061eae8891f14b230536093f61fe7c954a7f
+              source_leaves: []
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source-object:d0d97bf918a17845334ed854d47a392b76e8ccafac76e7cdf8adee435ee12d27
+                origin: selection
+            name: read_port_0
+            scope: "@143"
+            source_role: read_subject
+            type: ObjectSet
+        scopes: "@144"
+      units: "@535"
+  - id: 4401
+    hash: e2828be6bf7ed0d5c46a8ff5075bd8348a46a1591b59dd3685f5701410ce517b
+    value:
+      domains:
+        "@5": "@6"
+        "@7": "@8"
+        "@58": "@59"
+        "@64": "@65"
+        "@89": "@90"
+        "@9": "@10"
+        "@398": "@399"
+        quantity.count_expression.current_zone.v1:
+          constant_only: false
+          imports: []
+          modes: []
+          type: QuantityExpr
+        "@19": "@17"
+        "@21": "@22"
+      expressions:
+        "@636":
+          id: "@636"
+          operator:
+          parameters:
+            - owner
+            - zone
+            - card
+            - trait
+          qualifiers: []
+          read_structure: current_zone_count
+          result_measure: card_count
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: "@304"
+              source:
+                field: effect
+                line_ordinal: 1
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:9093b8f2f2d55641ec5986b13bba0ecd1775393b9cd96792f072d8ddd4a99158
+                role: body
+                segments: "@639"
+                source_hash: e0bb10a578299f11384a244991f6ed0aa4276d6f0dbcdfee745d722f4be16b0f
+              source_leaves: []
+              value:
+                "@312": source-choice:d2ba3f810e965c2fc05df3d1bc493c2b8c0c7460d0764a110a5e047aec732d99
+                kind: ChoiceContext
+                modes: "@314"
+                turn: CurrentTurn
+            name: n3_port_0
+            scope: "@641"
+            source_role: "@315"
+            type: ChoiceContext
+        scopes: "@642"
+      units:
+        leaf_11: object_count
+        leaf_17: object_count
+  - id: 4402
+    hash: 5dc9cca306a0eec2dfde5a022c0bf750a558e4e8641079565428fdf7789b4154
+    value:
+      domains:
+        "@5": "@6"
+        "@7": "@8"
+        "@64": "@65"
+        "@429": "@430"
+        "@9": "@10"
+        "@362": "@199"
+        "@19": "@17"
+        "@21": "@22"
+      expressions: "@433"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: selection
+              source:
+                field: effect
+                line_ordinal: 1
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:b40a5169f9331d9a8d04a3914b13fb158bf09fd0093888783fababc3c160fea1
+                role: body
+                segments:
+                  - end: 45
+                    start: 30
+                source_hash: 6037d7dfff73ea6b1f4bfd593744eaff6239101200d4ff3282c4af7a78ad484d
+              source_leaves: []
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source-object:4324edb0f5a40dcb1b9e95a3558c2430a862707c68441a8b4bce7a2b51f503bb
+                origin: selection
+            name: read_port_0
+            scope: "@143"
+            source_role: read_subject
+            type: ObjectSet
+        scopes: "@144"
+      units:
+        leaf_10: object_count
+        leaf_4: object_count
+        leaf_7: object_count
+  - id: 4403
+    hash: 9dbe20c2583339f492c8a0c6c29592d5e2c295421826dbcf1558ccb0233be8ad
+    value:
+      domains: "@753"
+      expressions: "@754"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: live
+              source:
+                field: effect
+                line_ordinal: 0
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:46cb13a3b5b261a0a111f3cfdd29be66d6e3213f79afb83b18ff61f7d9a6d7b0
+                role: body
+                segments: "@761"
+                source_hash: a90f6485d37caf1a8eefdce0009f488657f5a80008e1944065d09ec4d8c0ab20
+              source_leaves: "@763"
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source-holder:bc8d66f6d81c1de886c80930eb68f8c6b2ab61855845a8ef7441d3ba9736a3aa
+                origin: selection
+            name: n3_port_0
+            scope: "@641"
+            source_role: "@764"
+            type: ObjectSet
+        scopes: "@642"
+      units:
+        leaf_14: damage_amount
+        leaf_4: object_count
+        leaf_5: damage_amount
+  - id: 4404
+    hash: 97d71efc0539a3b554fcf55c5ea345749a8668e8ef1a72f30044a39a4257cc02
+    value:
+      domains: "@753"
+      expressions: "@754"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: live
+              source:
+                field: effect
+                line_ordinal: 2
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:9bb466ce1cc6ace1aae00319b7496f0c0ec0f29f28346c736fb0ac5f9b14e937
+                role: body
+                segments:
+                  - end: 110
+                    start: 88
+                source_hash: 70f10363821589fa948b786cb09ad7966ae24a5cb0af521c59a7576dda80d611
+              source_leaves: "@763"
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source-holder:a296f2920294f4e4e3bd2a971c97f74bad2fcd421dda0296b89cd14824415ec2
+                origin: selection
+            name: n3_port_0
+            scope: "@641"
+            source_role: "@764"
+            type: ObjectSet
+        scopes: "@642"
+      units:
+        leaf_14: damage_amount
+        leaf_5: object_count
+  - id: 4405
+    hash: 95151be7de8d6b0c5cfceee1c8b126f79d0e3f973ce7da2a6c1853299a7206e3
+    value:
+      domains: "@775"
+      expressions: "@477"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: lki
+              source:
+                field: effect
+                line_ordinal: 1
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:a390419034f57bfad6726b2a8ed052254765b36ca805e53c6d45bb01fe50fc27
+                role: body
+                segments:
+                  - end: 28
+                    start: 5
+                source_hash: 92a25c09613f7f009c8a1063226016bb570a1b2dcd99807431829b3b20683f74
+              source_leaves: []
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source-object:d2c850eabf8c7b1ebd5f3848e1c6d2f6dca1f89e4f7fd198133fb569c9b599e7
+                origin: selection
+            name: read_port_0
+            scope: "@143"
+            source_role: read_subject
+            type: ObjectSet
+        scopes: "@144"
+      units:
+        leaf_4: object_count
+  - id: 4406
+    hash: 6abeae4f8375ab3758135e0e26a07b93a8ea2c34840b4e47846b66796d7cbbf2
+    value:
+      domains: "@775"
+      expressions: "@433"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: selection
+              source:
+                field: effect
+                line_ordinal: 1
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:58142ada8cd44b0c0087f4921b52823cdc7b465cdbafbbdc59cbc870256f37a3
+                role: body
+                segments:
+                  - end: 99
+                    start: 84
+                source_hash: 6d82252b67b630ed4c54eb994f07f40194ec97b5a4605643f75195cde7543d87
+              source_leaves: []
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source-object:fcbd4eff7327b15e0e57e90c3a1efa69601acf582aa3a5b3a036c9f7930d5442
+                origin: selection
+            name: read_port_0
+            scope: "@143"
+            source_role: read_subject
+            type: ObjectSet
+        scopes: "@144"
+      units: "@79"
+  - id: 4407
+    hash: e1473841fe1bd4ab8213e87ba9aadb33435e009901517207ea05bc95047aa30a
+    value:
+      domains:
+        "@5": "@6"
+        "@7": "@8"
+        "@9": "@10"
+        "@12": "@13"
+        "@362": "@199"
+        "@19": "@17"
+        "@21": "@22"
+      expressions: "@858"
+      omissions: "@243"
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: lki
+              source:
+                field: effect
+                line_ordinal: 2
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:d571aff5b875aeb03787646bfd8a996de8af0defe9f951a30bb47ee47d56035c
+                role: body
+                segments:
+                  - end: 89
+                    start: 72
+                source_hash: 06d1ab929bdd999e4a07f5a760dfe0d35061a1505bb71a7262a160c5bcd55c1d
+              source_leaves: []
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source-object:3b2eb99985e80a3831ad8b191639fbbfcde430e05551eef03fd40fadd2f6c3d5
+                origin: selection
+            name: read_port_0
+            scope: "@789"
+            source_role: read_subject
+            type: ObjectSet
+        scopes: "@790"
+      units:
+        leaf_2: object_count
+        leaf_6: object_count
+        leaf_8: object_count
+  - id: 4408
+    hash: 7fa772d45bbdd22460952f325a4db3fbcbb5aff730871a3664f009eace24a649
+    value:
+      domains:
+        "@5": "@6"
+        "@7": "@8"
+        "@9": "@10"
+        "@362": "@199"
+        "@19": "@17"
+        "@21": "@22"
+      expressions: "@433"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: selection
+              source:
+                field: effect
+                line_ordinal: 0
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:13002ac1a0ee112c20b6cc93d3b7974d399e4a22e09cef8359e83e2c8632ad28
+                role: body
+                segments: "@998"
+                source_hash: 0cdd5d9af2c574cf0cf46ece6c51c22f2a123931f9f21f305c9368372b0ef012
+              source_leaves: []
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source-object:27b87b7ad1afe2226f9d56099f0f3fda9d44a52cde89ce9c07e73ec1c49c1349
+                origin: selection
+            name: read_port_0
+            scope: "@38"
+            source_role: read_subject
+            type: ObjectSet
+        scopes: "@316"
+      units: "@53"
+  - id: 4409
+    hash: f60fc807471f1d2c2675fad554fa3a59e52eec2bb8e0f6a50b2c5f88c73e66fe
+    value:
+      domains:
+        "@5": "@6"
+        "@7": "@8"
+        "@362": "@199"
+        "@19": "@17"
+        "@21": "@22"
+      expressions: "@477"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: lki
+              source:
+                field: effect
+                line_ordinal: 1
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:6c0f357bc0d6b9c57a2a98e8b14c44f3500209e39fe10a47079dce0f7be9442f
+                role: body
+                segments:
+                  - end: 48
+                    start: 19
+                source_hash: 59b3c422556cf031be05afc345d9a0466a6294cbbb8c28a3a5bfff768570e607
+              source_leaves: []
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source-object:5095c39ff53f3d6fc6b8664712536c6d6342d83e70508a5b714c77a4267c759b
+                origin: selection
+            name: read_port_0
+            scope: "@143"
+            source_role: read_subject
+            type: ObjectSet
+        scopes: "@144"
+      units:
+        leaf_4: object_count
+        leaf_5: player_count
+        leaf_6: object_count
+  - id: 4410
+    hash: 117edcacb5dca1f312ba7d26d7dd2f1b84df246fb5ea49ecf407eb11b2029cb1
+    value:
+      domains:
+        "@5": "@6"
+        "@64": "@65"
+        "@89": "@90"
+        "@9": "@10"
+        "@176": "@177"
+        "@362": "@199"
+        "@19": "@17"
+        "@21": "@22"
+      expressions:
+        "@1107":
+          domain: "@362"
+          history:
+          id: "@1107"
+          imports: []
+          measure: operand
+          parameters: "@1108"
+          result_type: Nat
+          role: read_value
+          scalable: false
+          source_family: A1
+        "@1112":
+          domain: "@362"
+          history:
+          id: "@1112"
+          imports: "@436"
+          measure: health
+          parameters: []
+          result_type: Nat
+          role: read_value
+          scalable: true
+          source_family: A1
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: selection
+              source:
+                field: effect
+                line_ordinal: 0
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:ffd597b7722fe7a91dcc1951e5392022ed4c297ef50265eb20af2f73922d43ff
+                role: body
+                segments: "@1113"
+                source_hash: bd63589db235268bc29175aadbd34026b974c5f3c7470cc27bc7806f5e160f73
+              source_leaves: []
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source-object:dd76030c0ae195f4d5285d8b814729fe2346b7d3874538f97683a5796d761ddd
+                origin: selection
+            name: read_port_0
+            scope: "@38"
+            source_role: read_subject
+            type: ObjectSet
+        scopes: "@316"
+      units:
+        leaf_11: object_count
+        leaf_12: object_count
+        leaf_3: object_count
+  - id: 4411
+    hash: 49d094979ce8370b6e7f0de6791d4a5d8c61498bfb188002593e759adf3fe877
+    value:
+      domains: "@1124"
+      expressions: "@1125"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: receipt
+              source:
+                field: effect
+                line_ordinal: 0
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:e29832b74bf6e17456ba2f8b062dc246e712d61ba7ed42210de6a96b7a2e7a62
+                role: body
+                segments:
+                  - end: 42
+                    start: 0
+                source_hash: 2a516ade016fa3200db35d82449a75938b44a98a6b6f49d6a7a2d9bf9f95bd0c
+              source_leaves: []
+              value:
+                kind: ReceiptId
+                receipt_id: source-extra-cost:3bb64f26ba3e20bd6764baa7e9f7e39d7be5878a1887922705097a85555ddd2c
+                result: objects
+            name: read_port_0
+            scope: "@38"
+            source_role: read_receipt
+            type: ReceiptId
+        scopes: "@316"
+      units: "@61"
+  - id: 4412
+    hash: ad33a46d9017c8b6a84662a36f2457cc09346d50dcf04e887422eed6b2c224c6
+    value:
+      domains: "@1124"
+      expressions: "@1125"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: receipt
+              source:
+                field: section
+                line_ordinal: 0
+                ordinal: 0
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:3cb3fd59ef995546077616ecd9185025e83dd095e711972056efa56f9e527f60
+                role: body
+                segments: "@1131"
+                source_hash: "@1133"
+              source_leaves: []
+              value:
+                kind: ReceiptId
+                receipt_id: source-receipt:94411a3c7d6b7049edda11e94122a960b6b86b0d398f79f026ad1153dc9f2056
+                result: objects
+            name: read_port_0
+            scope: "@38"
+            source_role: read_receipt
+            type: ReceiptId
+        scopes: "@316"
+      units: "@61"
+  - id: 4413
+    hash: b681ad5283479b5d030df5e0e22abbb7d2e5155096ec4a4632a5e72b95262301
+    value:
+      domains: "@1124"
+      expressions: "@1125"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: receipt
+              source:
+                field: section
+                line_ordinal: 0
+                ordinal: 0
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:d4a66a562b571a370ef646d17350cc4f1bea7e327a4f221f5649b52559a39b8e
+                role: body
+                segments: "@1131"
+                source_hash: "@1133"
+              source_leaves: []
+              value:
+                kind: ReceiptId
+                receipt_id: source-receipt:91618d1ad19e68640442fec139f194e939ad6edae2bbfffb7d13fa83dddf51cd
+                result: objects
+            name: read_port_0
+            scope: "@38"
+            source_role: read_receipt
+            type: ReceiptId
+        scopes: "@316"
+      units: "@61"
+  - id: 4414
+    hash: f3ba0b6e89a83f5766277801b88fbf19ed0b9bea0fd5d0ad99f35fc1f82b10a8
+    value:
+      domains:
+        "@5": "@6"
+        "@89": "@90"
+        "@9": "@10"
+        "@362": "@199"
+        "@19": "@17"
+        "@21": "@22"
+      expressions:
+        "@533": "@534"
+        "@1237": "@1238"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: lki
+              source:
+                field: effect
+                line_ordinal: 1
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:5c188f2ff70cd6c69ec0841f870a922132cdfa775cde3a1a8d7e7391a83ae7fd
+                role: body
+                segments:
+                  - end: 60
+                    start: 41
+                source_hash: cb8d7f1b8682c5e9a91c45ffc58e35d370a9ac9bf532565a1bf17598e3f01625
+              source_leaves: []
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source-object:ffe713612a821520e86de95170da9b65cba3453b6f2ef5a40d33d72bab300834
+                origin: selection
+            name: read_port_0
+            scope: "@38"
+            source_role: read_subject
+            type: ObjectSet
+        scopes: "@316"
+      units: "@53"
+  - id: 4415
+    hash: a74c9f0a110ed2f4de2e8fad0f7d2f08d63cf81e253f4557b56dd2a121ae85b2
+    value:
+      domains:
+        "@5": "@6"
+        "@429": "@430"
+        "@9": "@10"
+        "@362": "@199"
+        "@19": "@17"
+        "@21": "@22"
+      expressions: "@433"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: selection
+              source:
+                field: effect
+                line_ordinal: 0
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:aceb7776508b81ce85bac04ea4a5f65a8b3bfd1ed7cec587e3c7ffab3ef00c16
+                role: body
+                segments:
+                  - end: 36
+                    start: 21
+                source_hash: d279cd5a581e056ddd18145f96d37c6ba668e4ce7489ec76a4a4b0a5bd7a01d5
+              source_leaves: []
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source-object:14d93b1ace6e387fe44bb1120369f39a8388754156fd4b6e5563b43908706493
+                origin: selection
+            name: read_port_0
+            scope: "@38"
+            source_role: read_subject
+            type: ObjectSet
+        scopes: "@316"
+      units: "@535"
+  - id: 4416
+    hash: 88609bfb0ec263d8a48d7526c1be12065f71ae4ccffed5375ad99fb0152a7d78
+    value:
+      domains:
+        "@5": "@6"
+        "@9": "@10"
+        "@12": "@13"
+        "@362": "@199"
+        "@19": "@17"
+        "@21": "@22"
+      expressions: "@858"
+      omissions: "@243"
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: lki
+              source:
+                field: effect
+                line_ordinal: 1
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:c04d6ada9249ad9e12574c5d5793caf37a4923ad66ab6a84db4f568c256db123
+                role: body
+                segments:
+                  - end: 79
+                    start: 66
+                source_hash: ad270f4b52602eadedf94d420b4d95f264b7c4c3c48799b43b85c6d0fada55b1
+              source_leaves: []
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source-object:b03c398f04b54152a10925f0d4283f19a2e3051847979e58d3106879f1caa3e1
+                origin: selection
+            name: read_port_0
+            scope: "@143"
+            source_role: read_subject
+            type: ObjectSet
+        scopes: "@144"
+      units:
+        leaf_1: object_count
+        leaf_5: object_count
+        leaf_7: object_count
+  - id: 4417
+    hash: 96a1f07e788f4023df545e0dbcdb180fc229060eb4b97b6af431d3bf0c804b20
+    value:
+      domains: "@1327"
+      expressions:
+        "@1328": "@1329"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: receipt
+              source:
+                field: effect
+                line_ordinal: 0
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:991c58c4f787d44cbfe3e996f39f08066313b11307ca80687454c11b99bf687f
+                role: body
+                segments:
+                  - end: 14
+                    start: 0
+                source_hash: d3dd1c6831881b265ef5a0f4f3b312278a8a9bc2f8bb3ea13ba7d8bceb9d1706
+              source_leaves: []
+              value:
+                binding_id: source-dice:e79f62acffde7f6ffe098d6cbf5fa86e364d4634ff83b7126f2aad45f437d95c
+                kind: CapturedValue
+                measure: die_face
+                result_type: Nat
+            name: read_port_0
+            scope: "@38"
+            source_role: dice_result
+            type: CapturedValue
+        scopes: "@316"
+      units: "@61"
+  - id: 4418
+    hash: 4449a5b36b4ebfbbc8854d2ade59be26401e9ff238def90ccd66c7052d762068
+    value:
+      domains: "@1327"
+      expressions:
+        "@1350":
+          domain: "@362"
+          history:
+          id: "@1350"
+          imports: "@436"
+          measure: card_count
+          parameters:
+            - "@97": []
+              domain: "@21"
+              name: zone
+              role: read_zone
+              type: ZoneSet
+              values: []
+          result_type: Nat
+          role: read_value
+          scalable: true
+          source_family: A1
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: selection
+              source:
+                field: effect
+                line_ordinal: 0
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:40d88af6bb321fee9764e49b56cb73622d811d8b95fbe98ea5c320685e161b17
+                role: body
+                segments:
+                  - end: 20
+                    start: 0
+                source_hash: ad2f06a21afe0e9f76340a603a90e63d6feb4444714abc434adbbdf451532704
+              source_leaves: []
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source-object:52494ea1c42f51d65afb2d6bf916bf4e0fcfaeb7db5ef23df18082e9e999161e
+                origin: selection
+            name: read_port_0
+            scope: "@38"
+            source_role: read_subject
+            type: ObjectSet
+        scopes: "@316"
+      units: "@61"
+  - id: 4419
+    hash: 2fba3f2ebef59e2dc1015f9b63274df92efdeea016622e329d9f62166cda8e40
+    value:
+      domains:
+        "@147": "@148"
+        "@49": "@50"
+        "@7": "@8"
+        "@362": "@199"
+        "@21": "@22"
+      expressions:
+        "@1438":
+          domain: "@362"
+          history:
+          id: "@1438"
+          imports:
+            - capture: receipt
+              cardinality:
+              event_kind:
+              measure:
+              name: player
+              origin:
+              "@30":
+              result_type:
+              "@31":
+              type: PlayerRef
+            - "@483"
+          measure: card_count
+          parameters:
+            - "@97": []
+              domain: "@147"
+              name: kind
+              role: read_kind
+              type: CardKind
+              values:
+                - key:
+                    - type
+                    - follower
+                  kind: vocabulary
+          result_type: Nat
+          role: read_value
+          scalable: false
+          source_family: U07
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: receipt
+              source: "@1442"
+              source_leaves: []
+              value:
+                kind: ReceiptId
+                receipt_id: source-destroy:eb11d26367a6f5d63bde44dfa23a5e524b8f267f19accce29d539123202e29e8
+                result: objects
+            name: n3_port_0
+            scope: "@641"
+            source_role: read_receipt
+            type: ReceiptId
+          - evidence:
+              capture: receipt
+              source: "@1442"
+              source_leaves: []
+              value:
+                kind: PlayerRef
+                player: each_player_at_destroy
+            name: n3_port_1
+            scope: "@641"
+            source_role: read_player
+            type: PlayerRef
+        scopes: "@642"
+      units: "@79"
+  - id: 4420
+    hash: b26b18026ab0ea69c80046507511309dced6fc7c203e407da0fe0280298ac0f2
+    value:
+      domains:
+        "@147": "@148"
+        "@7": "@8"
+        "@429": "@430"
+        "@9": "@10"
+        "@362": "@199"
+        "@21": "@22"
+      expressions:
+        "@1603":
+          domain: "@362"
+          history:
+          id: "@1603"
+          imports: "@482"
+          measure: card_count
+          parameters: "@1604"
+          result_type: Nat
+          role: read_value
+          scalable: true
+          source_family: A1
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: receipt
+              source:
+                field: effect
+                line_ordinal: 0
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:8af90f52a5debe22ccf0854001fb30a047a1c878e8c8cc29f8a292cbaf5bb760
+                role: body
+                segments:
+                  - end: 25
+                    start: 0
+                source_hash: 53b163a501be4aa6a8a3de6c7694065f613824edd6ba32ee37e99f936ffac091
+              source_leaves: []
+              value:
+                kind: ReceiptId
+                receipt_id: source-receipt:5a02e3fa85a1e35dbfdd2b02999430a6401cca5ac1968a71570dc9abaed513fa
+                result: objects
+            name: read_port_0
+            scope: "@38"
+            source_role: read_receipt
+            type: ReceiptId
+        scopes: "@316"
+      units: "@61"
+  - id: 4421
+    hash: 02d31dffd211c38e7850dda21ece0d599d4968b38394cb6c2491f00810419196
+    value:
+      domains:
+        "@147": "@148"
+        "@64": "@65"
+        "@362": "@199"
+      expressions:
+        "@1707":
+          domain: "@362"
+          history:
+          id: "@1707"
+          imports: "@482"
+          measure: card_count
+          parameters: "@1604"
+          result_type: Nat
+          role: read_value
+          scalable: true
+          source_family: A1
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: receipt
+              source:
+                field: effect
+                line_ordinal: 0
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:0a6bf5883338614326a2facea5ef22814a4855e2498b68e122a008493f396147
+                role: body
+                segments: "@998"
+                source_hash: 009a38f9facc7dfdfd4093b6627a721df53ed56f902e9d367f00f2ad04660ac8
+              source_leaves: []
+              value:
+                kind: ReceiptId
+                receipt_id: source-receipt:1caf91ad1ef071c0c531d31d8921b2d0b766de1050e1eb98481066aa5bc197b7
+                result: objects
+            name: read_port_0
+            scope: "@38"
+            source_role: read_receipt
+            type: ReceiptId
+        scopes: "@316"
+      units: {}
+  - id: 4422
+    hash: 426a86e5a7823505747f87b269d37e708be0168ce83e4d87f61560289498e654
+    value:
+      domains:
+        "@147": "@148"
+        "@89": "@90"
+        "@429": "@430"
+        "@9": "@10"
+        "@362": "@199"
+        "@21": "@22"
+      expressions:
+        "@1712":
+          domain: "@362"
+          history:
+          id: "@1712"
+          imports: "@436"
+          measure: health
+          parameters:
+            - "@368"
+            - "@1129"
+          result_type: Nat
+          role: read_value
+          scalable: true
+          source_family: A1
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: selection
+              source:
+                field: effect
+                line_ordinal: 0
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:e94d8aab8a3381e69c8aae6c7cc87af2db5457d13128ff19d29432985cb95954
+                role: body
+                segments:
+                  - end: 39
+                    start: 14
+                source_hash: 5ea4f9621b503083cc20aa782fe96f91b306217471573c094b94a801be7ab7d8
+              source_leaves: []
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source-object:be63df0dc6bd865f454c94ada8fb3baada3e5eaa0adf72d85a6a4174f2fe614a
+                origin: selection
+            name: read_port_0
+            scope: "@38"
+            source_role: read_subject
+            type: ObjectSet
+        scopes: "@316"
+      units: "@1713"
+  - id: 4423
+    hash: 6e5cf376b1f04390637b05b01f1b5f3a1cdf70db5ef4973075fd12771e64cb8d
+    value:
+      domains:
+        "@147": "@148"
+        "@9": "@10"
+        "@362": "@199"
+        "@19": "@17"
+        zone.selection.battlefield_ex.v1:
+          combinations:
+            - "@557"
+          type: ZoneSet
+          zones: "@557"
+      expressions: "@1807"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: selection
+              source:
+                field: effect
+                line_ordinal: 0
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:efc5cf14a51909b7ad470def2362dfca4995192948b3e6d566d05f595ee7885f
+                role: body
+                segments:
+                  - end: 34
+                    start: 13
+                source_hash: 1a3eb8da3ebe0373bd9f1c34bf3a99cc61a790d02ee9487ed5d1f83f9f161221
+              source_leaves: []
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source-object:0bd72d494e7c1a910be7536f0e8d121921ca6f350143585caffc8656553bd3a0
+                origin: selection
+            name: read_port_0
+            scope: "@38"
+            source_role: read_subject
+            type: ObjectSet
+        scopes: "@316"
+      units:
+        leaf_0: object_count
+        leaf_4: object_count
+  - id: 4424
+    hash: e0c464c39c97a5cb2393d443f25ae3e99237da9658a5486402ec0592c867896c
+    value:
+      domains:
+        "@49": "@50"
+        "@7": "@8"
+        "@64": "@65"
+        "@362": "@199"
+        "@19": "@17"
+      expressions: "@1807"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: selection
+              source:
+                field: effect
+                line_ordinal: 0
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:da9db4d183b26302f7ff8387060a80dbca657ad84549625bb0c6add33ac6a91a
+                role: body
+                segments: "@1917"
+                source_hash: 442a05ac5d107dcfd6d623f073869d2ba3524c12a0c9a465fc17bc9ed0d68dde
+              source_leaves: []
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source-object:70e78284224846785a2e5698acd37e75d527c3a245228f275b353ff77920bc81
+                origin: selection
+            name: read_port_0
+            scope: "@38"
+            source_role: read_subject
+            type: ObjectSet
+        scopes: "@316"
+      units: "@1451"
+  - id: 4425
+    hash: 33088fb63b7eadc93c5da7b49060887cf11322764e9a2dec67df5c6b2e1a89f1
+    value:
+      domains:
+        "@49": "@50"
+        "@7": "@8"
+        "@441": "@15"
+        "@397": "@15"
+        "@19": "@17"
+        "@21": "@22"
+      expressions:
+        "@2053":
+          domain: "@441"
+          history:
+          id: "@2053"
+          imports: []
+          measure: truth
+          parameters:
+            - "@97": []
+              domain: "@49"
+              name: fragment_0
+              role: name_fragment
+              type: CardName
+              values: []
+            - "@97": []
+              domain: "@49"
+              name: fragment_1
+              role: name_fragment
+              type: CardName
+              values: []
+            - "@97": []
+              domain: "@49"
+              name: fragment_2
+              role: name_fragment
+              type: CardName
+              values: []
+            - "@97": []
+              domain: "@49"
+              name: fragment_3
+              role: name_fragment
+              type: CardName
+              values: []
+            - "@97": []
+              domain: "@49"
+              name: fragment_4
+              role: name_fragment
+              type: CardName
+              values: []
+            - "@97": []
+              domain: "@49"
+              name: fragment_5
+              role: name_fragment
+              type: CardName
+              values: []
+            - "@97": []
+              domain: "@49"
+              name: fragment_6
+              role: name_fragment
+              type: CardName
+              values: []
+            - "@97": []
+              domain: "@49"
+              name: fragment_7
+              role: name_fragment
+              type: CardName
+              values: []
+            - "@97": []
+              domain: "@49"
+              name: fragment_8
+              role: name_fragment
+              type: CardName
+              values: []
+            - "@97": []
+              domain: "@49"
+              name: fragment_9
+              role: name_fragment
+              type: CardName
+              values: []
+          result_type: Bool
+          role: "@447"
+          scalable: false
+          source_family: A5
+        "@400": "@401"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence: "@4426"
+            name: n3_port_1
+            scope: "@641"
+            source_role: "@2063"
+            type: PoolContext
+          - evidence: "@4429"
+            name: n3_port_4
+            scope: "@641"
+            source_role: "@2063"
+            type: ObjectSet
+          - evidence:
+              capture: selection
+              source:
+                field: effect
+                line_ordinal: 0
+                ordinal:
+                owner: "@2056"
+                role: body
+                segments:
+                  - end: 181
+                    start: 0
+                source_hash: "@2060"
+              source_leaves: []
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source:3036ba56c064c1e4394dd802dabc058a8e742d4893b8739e5eaa60212c49ebfe
+                origin: selection
+            name: names_port_3036ba56c064c1e4
+            scope: "@38"
+            source_role: name_source
+            type: ObjectSet
+          - evidence:
+              capture: receipt
+              source: "@2055"
+              source_leaves: []
+              value:
+                kind: ReceiptId
+                receipt_id: source-search:002a412ae7ef959e9b0159e3e96a8a11538875fb85a1c2590ea208ea4458f3c3
+                result: objects
+            name: n3_port_0
+            scope: "@641"
+            source_role: pool_search_result
+            type: ReceiptId
+          - evidence: "@4426"
+            name: n3_port_1
+            scope: "@641"
+            source_role: pool_source
+            type: PoolContext
+          - evidence:
+              capture: receipt
+              source:
+                field: effect
+                line_ordinal: 0
+                ordinal:
+                owner: "@2056"
+                role: body
+                segments:
+                  - end: 165
+                    start: 155
+                source_hash: "@2060"
+              source_leaves: []
+              value:
+                kind: ReceiptId
+                receipt_id: source-placement:1efb394cbbca59659a40be12f328d1232f0147c0bd0842dc5ed82f86685fcaba
+                result: objects
+            name: n3_port_3
+            scope: "@641"
+            source_role: "@2063"
+            type: ReceiptId
+          - evidence: "@4429"
+            name: n3_port_4
+            scope: "@641"
+            source_role: "@2073"
+            type: ObjectSet
+        scopes:
+          - "@643"
+          - "@37"
+      units: {}
+  - id: 4426
+    hash: 7353ff9dde1ee34ab8de296792a31cb049bfff65d30ed684286ff69fa9f3c55e
+    value:
+      capture: selection
+      source: "@2055"
+      source_leaves: []
+      value: "@4427"
+  - id: 4427
+    hash: f85ddb06e70495c91a9325dff4fd90e707e7265463499e37afa07c6b971d1e42
+    value:
+      kind: PoolContext
+      members: []
+      pool_id: "@4428"
+      receipt: n3_port_0
+      scope: "@641"
+      source_kind: search_result
+  - id: 4428
+    hash: c96dbff37940b1485554727c4b5baa6823385a2781d79dc85ed8ad2879c89c49
+    value: source-pool:002a412ae7ef959e9b0159e3e96a8a11538875fb85a1c2590ea208ea4458f3c3
+  - id: 4429
+    hash: e87ef62199993862efd1f74fa2cfe658050d803a3e120bc4a67683fb70e8e342
+    value:
+      capture: receipt
+      source: "@2065"
+      source_leaves: []
+      value: "@4430"
+  - id: 4430
+    hash: 6d5ae88054bd2dd170e6443a388a68b3ed0e8d266641720558a7f6368590a9ca
+    value:
+      kind: ObjectSet
+      objects: "@4431"
+      origin: "@2072"
+      placement: n3_port_3
+      pool: n3_port_1
+  - id: 4431
+    hash: 76db02ee4552371b57023c58598aa400594209319054827d1c82a26f4a3b1dd5
+    value:
+      - "@4432"
+  - id: 4432
+    hash: 238dcaa5da36fffd76cb132e740c35a1e30f7352c5957e7911715fa646da5e50
+    value:
+      generation: 0
+      object_id: "@4433"
+  - id: 4433
+    hash: b10a1496f4c213ef268c4a10996e67f024a40cd1368efe994dcdf76bc0694274
+    value: source-remaining:1efb394cbbca59659a40be12f328d1232f0147c0bd0842dc5ed82f86685fcaba
+  - id: 4434
+    hash: ab24ca434d8166c8901acf564f6f92a48cb26a0d30d0f6f802986fc272a8b883
+    value:
+      domains:
+        "@49": "@50"
+        "@7": "@8"
+        "@362": "@199"
+        "@21": "@22"
+      expressions: "@513"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: "@304"
+              source: "@2087"
+              source_leaves: []
+              value:
+                binding_id: source-declared-x:a87c1691800d596b59be0a725b268934329c5009c01bb681e7b849ccd5b30a3b
+                kind: CapturedValue
+                measure: declared_x
+                result_type: Nat
+            name: read_port_0
+            scope: "@38"
+            source_role: declared_x
+            type: CapturedValue
+          - evidence:
+              capture: receipt
+              source: "@2087"
+              source_leaves: []
+              value:
+                kind: ReceiptId
+                receipt_id: source-payment:a87c1691800d596b59be0a725b268934329c5009c01bb681e7b849ccd5b30a3b
+                result: "@416"
+            name: read_port_1
+            scope: "@38"
+            source_role: "@416"
+            type: ReceiptId
+        scopes: "@316"
+      units: {}
+  - id: 4435
+    hash: 56b64644ca2c1402a8641a173e907e6b282b5bf9374d888ca9fbbd5975a6559d
+    value:
+      domains: "@2108"
+      expressions: {}
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence: "@4436"
+            name: n3_port_0
+            scope: "@641"
+            source_role: "@2154"
+            type: PoolContext
+          - evidence: "@4439"
+            name: n3_port_3
+            scope: "@641"
+            source_role: "@2154"
+            type: ObjectSet
+          - evidence: "@4436"
+            name: n3_port_0
+            scope: "@641"
+            source_role: pool_source
+            type: PoolContext
+          - evidence:
+              capture: receipt
+              source:
+                field: effect
+                line_ordinal: 0
+                ordinal:
+                owner: "@2143"
+                role: body
+                segments:
+                  - end: 58
+                    start: 51
+                source_hash: "@2147"
+              source_leaves: []
+              value:
+                kind: ReceiptId
+                receipt_id: source-placement:d6a1f1af2ecad8a7a58af89c7b0651290575ade6b174b78e85a86225e622a229
+                result: objects
+            name: n3_port_2
+            scope: "@641"
+            source_role: "@2154"
+            type: ReceiptId
+          - evidence: "@4439"
+            name: n3_port_3
+            scope: "@641"
+            source_role: "@2073"
+            type: ObjectSet
+        scopes: "@642"
+      units: {}
+  - id: 4436
+    hash: e2993f54bde35ca03b432ca69033e32166ce97c7e30f15121ced7edac3db70a3
+    value:
+      capture: selection
+      source: "@2142"
+      source_leaves: "@2148"
+      value: "@4437"
+  - id: 4437
+    hash: 6c75ad2f6b25622c49e3bdfde8f534d8abb1dcd2a21d58ac5e305c2202c7871d
+    value:
+      kind: PoolContext
+      members: "@2150"
+      pool_id: "@4438"
+      receipt:
+      scope: "@641"
+      source_kind: generated
+  - id: 4438
+    hash: 14cdaf5f562779286413767a4da0b7b233458a7ce754d7ac32a4fe4066d770a4
+    value: source-pool:c397fb506942129c165609a7a3cd0b94bcb32d8e28159edd19e5521f64f648d2
+  - id: 4439
+    hash: 72444280438b7e3e9e83d2c1bfe01ec9451aa6c3d6c647b98efa2c53e627f2a1
+    value:
+      capture: receipt
+      source: "@2156"
+      source_leaves: []
+      value: "@4440"
+  - id: 4440
+    hash: f988702089381311c8936927e4517acae9bcaeba1eb35c57c5acfcc37d0f1531
+    value:
+      kind: ObjectSet
+      objects: "@4441"
+      origin: "@2072"
+      placement: n3_port_2
+      pool: n3_port_0
+  - id: 4441
+    hash: bca45cd24cf682cd852b97d8e84692c2dd3b5b90c51ccbf4e2138068e0b9fe1d
+    value:
+      - "@4442"
+  - id: 4442
+    hash: 19bb6bf94aa416c48b7ed94d7daf9a672692a437955c9de11f7178174ba5765d
+    value:
+      generation: 0
+      object_id: "@4443"
+  - id: 4443
+    hash: 3b45347972acf36f6fe0d826da7665186aed3475556d4ac1632cd463b667a881
+    value: source-remaining:d6a1f1af2ecad8a7a58af89c7b0651290575ade6b174b78e85a86225e622a229
+  - id: 4444
+    hash: 5b48ba420a27d9127dc9ff68bc931328c10f0c5291aab2e2c84f78ea17b4716c
+    value:
+      domains: "@2108"
+      expressions: {}
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence: "@4445"
+            name: n3_port_0
+            scope: "@641"
+            source_role: "@2174"
+            type: PoolContext
+          - evidence:
+              capture: live
+              source: "@2175"
+              source_leaves: []
+              value: "@277"
+            name: n3_port_2
+            scope: "@641"
+            source_role: source_actor
+            type: PlayerRef
+          - evidence: "@4448"
+            name: n3_port_4
+            scope: "@641"
+            source_role: "@2186"
+            type: ObjectSet
+          - evidence: "@4445"
+            name: n3_port_0
+            scope: "@641"
+            source_role: pool_source
+            type: PoolContext
+          - evidence:
+              capture: receipt
+              source: "@2175"
+              source_leaves: []
+              value:
+                kind: ReceiptId
+                receipt_id: source-placement:0914d3f446a77250bd4fe117cd865e6518f203b59096f0a91df06e808aef538b
+                result: objects
+            name: n3_port_3
+            scope: "@641"
+            source_role: "@2174"
+            type: ReceiptId
+          - evidence: "@4448"
+            name: n3_port_4
+            scope: "@641"
+            source_role: "@2073"
+            type: ObjectSet
+        scopes: "@642"
+      units: {}
+  - id: 4445
+    hash: ac17f2e7d3d5be0d8d2989fdd87561a89d665d9019ed1aacd00663d048c69c37
+    value:
+      capture: selection
+      source: "@2165"
+      source_leaves: "@2151"
+      value: "@4446"
+  - id: 4446
+    hash: 83da4b7fc5f2fc67e863a4565ebccdf54f860a6d0d51e7210485638aef3c7bcb
+    value:
+      kind: PoolContext
+      members: "@2172"
+      pool_id: "@4447"
+      receipt:
+      scope: "@641"
+      source_kind: generated
+  - id: 4447
+    hash: 0aec9ce3f3710f9ed825c550d5c9220eaa5db1dcdbf5a877f3611cb4414be0c0
+    value: source-pool:dfa55caf07c47d22b8ffe7dc6cbfa1fdebf8c14eef36455678f01f6217814fb3
+  - id: 4448
+    hash: 3a04dd2cf8df1072cbd9f5e80bfb178c5267e4da1bed0d8874a299f60c4a1eee
+    value:
+      capture: receipt
+      source: "@2179"
+      source_leaves: []
+      value: "@4449"
+  - id: 4449
+    hash: d06958ce1dbca7a870491451a8a2138a01dd1ff1e12e0a24fc75b14f95a285cb
+    value:
+      kind: ObjectSet
+      objects: "@4450"
+      origin: "@2072"
+      placement: n3_port_3
+      pool: n3_port_0
+  - id: 4450
+    hash: e07cdd06679c15f0654689843419d4169cff3a0f237dd203c2986246f697fd47
+    value:
+      - "@4451"
+  - id: 4451
+    hash: d87c76d2464a14120f41e43a8aa5f8d6ed0a56b6ada160ddba6516c4d185834c
+    value:
+      generation: 0
+      object_id: "@4452"
+  - id: 4452
+    hash: 724d5ce0fd09c04cbabeecddd892d41170c40b43ee4d83c195b388df520f3be8
+    value: source-remaining:0914d3f446a77250bd4fe117cd865e6518f203b59096f0a91df06e808aef538b
+  - id: 4453
+    hash: c377084d09a7b7f8def1ee032f840f1b11acf2427c7b24318c95c85fd6e6090b
+    value:
+      domains: "@2108"
+      expressions: {}
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence: "@4454"
+            name: n3_port_0
+            scope: "@641"
+            source_role: "@2063"
+            type: PoolContext
+          - evidence: "@4457"
+            name: n3_port_3
+            scope: "@641"
+            source_role: "@2063"
+            type: ObjectSet
+          - evidence: "@4454"
+            name: n3_port_0
+            scope: "@641"
+            source_role: pool_source
+            type: PoolContext
+          - evidence:
+              capture: receipt
+              source:
+                field: effect
+                line_ordinal: 2
+                ordinal:
+                owner: "@2190"
+                role: body
+                segments:
+                  - end: 72
+                    start: 62
+                source_hash: "@2194"
+              source_leaves: []
+              value:
+                kind: ReceiptId
+                receipt_id: source-placement:e5586cd63c975920eb9f68580d1b3fc33a48a08fa6217b4e8381243a6213e59d
+                result: objects
+            name: n3_port_2
+            scope: "@641"
+            source_role: "@2063"
+            type: ReceiptId
+          - evidence: "@4457"
+            name: n3_port_3
+            scope: "@641"
+            source_role: "@2073"
+            type: ObjectSet
+        scopes: "@642"
+      units: {}
+  - id: 4454
+    hash: 69603f0c2790eaf67ca86d72a115ba2bbeab9e8c0bf237e177246bf2385c84ee
+    value:
+      capture: selection
+      source: "@2189"
+      source_leaves: "@2151"
+      value: "@4455"
+  - id: 4455
+    hash: 555a0486695e69953aece57f687a192cd65cb3fa1e4e69c6e054bd91b589f86b
+    value:
+      kind: PoolContext
+      members: "@2172"
+      pool_id: "@4456"
+      receipt:
+      scope: "@641"
+      source_kind: generated
+  - id: 4456
+    hash: fa4d0aa65ddb50f7119174ffa2c0c394caceada4235342ae661e5e10289de67a
+    value: source-pool:9422581a05d1183390c5ad7b596a0e3d31c61fac77c3fa703ad349d9f32df62f
+  - id: 4457
+    hash: 87926722c2319b8e5830842ed9497ba011c804b55c6a7b3171bb4a0c1387b96c
+    value:
+      capture: receipt
+      source: "@2198"
+      source_leaves: []
+      value: "@4458"
+  - id: 4458
+    hash: 8b007a5cdba096378a894b8407411d669bed10d5428aafdaf67c46bc5666bdba
+    value:
+      kind: ObjectSet
+      objects: "@4459"
+      origin: "@2072"
+      placement: n3_port_2
+      pool: n3_port_0
+  - id: 4459
+    hash: 0a241945e31fd05e7e0fc9067965d624f936149728c9a69d9d4deae28f8817f6
+    value:
+      - "@4460"
+  - id: 4460
+    hash: 0ee341adea4bfa6e8cb24f3d549b11a31252a92fb283b8a2851af63143677595
+    value:
+      generation: 0
+      object_id: "@4461"
+  - id: 4461
+    hash: b377362ad3526e4db058a6e1fe51af7388b6a7a3bf1f2041ea13f57e9946df01
+    value: source-remaining:e5586cd63c975920eb9f68580d1b3fc33a48a08fa6217b4e8381243a6213e59d
+  - id: 4462
+    hash: 13357f6afa6d23850f883a873e0c7c1736a3c43449a974118ffa06a8fc676e68
+    value:
+      domains: "@2108"
+      expressions: {}
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence: "@4463"
+            name: n3_port_0
+            scope: "@641"
+            source_role: "@2063"
+            type: PoolContext
+          - evidence: "@4466"
+            name: n3_port_3
+            scope: "@641"
+            source_role: "@2063"
+            type: ObjectSet
+          - evidence: "@4463"
+            name: n3_port_0
+            scope: "@641"
+            source_role: pool_source
+            type: PoolContext
+          - evidence:
+              capture: receipt
+              source:
+                field: effect
+                line_ordinal: 2
+                ordinal:
+                owner: "@2208"
+                role: body
+                segments:
+                  - end: 76
+                    start: 66
+                source_hash: "@2212"
+              source_leaves: []
+              value:
+                kind: ReceiptId
+                receipt_id: source-placement:a96c445ceafda8279481466a2ae8758e7cf6dcbcd3d4876ca8e38a1fe74c4359
+                result: objects
+            name: n3_port_2
+            scope: "@641"
+            source_role: "@2063"
+            type: ReceiptId
+          - evidence: "@4466"
+            name: n3_port_3
+            scope: "@641"
+            source_role: "@2073"
+            type: ObjectSet
+        scopes: "@642"
+      units: {}
+  - id: 4463
+    hash: a107f7c6557a13d8e0963eeba89090030b04ebab7fe2689f1165c9c4bdb10fe5
+    value:
+      capture: selection
+      source: "@2207"
+      source_leaves: "@2151"
+      value: "@4464"
+  - id: 4464
+    hash: c0e53007a089cf482ca7cf94d9d4cf2443724335263b192eef510ed8f82f73eb
+    value:
+      kind: PoolContext
+      members: "@2172"
+      pool_id: "@4465"
+      receipt:
+      scope: "@641"
+      source_kind: generated
+  - id: 4465
+    hash: c8c0abd4b956c7bc9154d5f4d7395186db348dd6da938ae3bae1130a3c7dea60
+    value: source-pool:07964c8731772f650819df5a782deea365e84b0713f1d1264661dc831f66e6b5
+  - id: 4466
+    hash: e6c52a70daa6b2659b249d3e0751011960bde127a0e3d11ebbee793dca533806
+    value:
+      capture: receipt
+      source: "@2216"
+      source_leaves: []
+      value: "@4467"
+  - id: 4467
+    hash: f9e8de55ae12820f5aac760192159806b4134f6bc56e3d26dbe344ad0b226e85
+    value:
+      kind: ObjectSet
+      objects: "@4468"
+      origin: "@2072"
+      placement: n3_port_2
+      pool: n3_port_0
+  - id: 4468
+    hash: cbc015eab6487953700c2fb3d8425ff5a4e12774d292736ffd4ae5b558367b35
+    value:
+      - "@4469"
+  - id: 4469
+    hash: a206f18eff0c7b216fb33519b66ba7fea6c8c3e826a69f9a75e3fab0e0f1986f
+    value:
+      generation: 0
+      object_id: "@4470"
+  - id: 4470
+    hash: 586f56a345ed476931b41d1472d56d4cb648cf31d43bac9f33d3c28a2fbcd863
+    value: source-remaining:a96c445ceafda8279481466a2ae8758e7cf6dcbcd3d4876ca8e38a1fe74c4359
+  - id: 4471
+    hash: 0c2c8a163bf88e3452c4d9777951a445d35c00d8a66f12b49500a8cb5cb52c28
+    value:
+      domains:
+        "@49": "@50"
+        "@58": "@59"
+        "@64": "@65"
+        "@441": "@15"
+        "@16": "@17"
+        "@176": "@177"
+        "@362": "@199"
+        "@19": "@17"
+      expressions:
+        "@443":
+          domain: "@441"
+          history:
+          id: "@443"
+          imports: []
+          measure: truth
+          parameters:
+            - "@97": []
+              domain: "@49"
+              name: fragment
+              role: name_fragment
+              type: CardName
+              values: []
+          result_type: Bool
+          role: "@447"
+          scalable: false
+          source_family: A5
+        "@1808": "@1809"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: selection
+              source:
+                field: effect
+                line_ordinal: 0
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:4f59f49e9dc349f4b0c5d8052eb5ab47fc4428771d5c4c34afb5e86ef0801fbe
+                role: body
+                segments:
+                  - end: 112
+                    start: 82
+                source_hash: 7cc56b154fe75e7e0b468e24c449b8c25520cb3fef6ce4a26bbe98ede4b03083
+              source_leaves: []
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source-object:a6d66f8f980f5f74b9496235e015ba77d5a720998fb545c04ab2acdad3d2d693
+                origin: selection
+            name: read_port_0
+            scope: "@374"
+            source_role: read_subject
+            type: ObjectSet
+        scopes: "@520"
+      units:
+        leaf_0: object_count
+        leaf_13: object_count
+        leaf_14: object_count
+        leaf_3: object_count
+        leaf_4: object_count
+  - id: 4472
+    hash: be87f76d05dbd0394b1928de1dd739bdf2317208eeb525e94491a6f5829f227b
+    value:
+      domains: "@2501"
+      expressions: "@513"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: "@304"
+              source: "@2502"
+              source_leaves: []
+              value:
+                binding_id: source-declared-x:1e7f163b3dc9d9099da3e61c8cd0839ee4ece76a178f22ed00f04251e8d6de2a
+                kind: CapturedValue
+                measure: declared_x
+                result_type: Nat
+            name: read_port_0
+            scope: "@38"
+            source_role: declared_x
+            type: CapturedValue
+          - evidence:
+              capture: receipt
+              source: "@2502"
+              source_leaves: []
+              value:
+                kind: ReceiptId
+                receipt_id: source-payment:1e7f163b3dc9d9099da3e61c8cd0839ee4ece76a178f22ed00f04251e8d6de2a
+                result: "@416"
+            name: read_port_1
+            scope: "@38"
+            source_role: "@416"
+            type: ReceiptId
+        scopes: "@316"
+      units: "@2508"
+  - id: 4473
+    hash: 5a10920808b4777210aa03ecc66f88891ecdcfef3d4ff7e1631306e3b06c64af
+    value:
+      domains: "@2501"
+      expressions: "@513"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: "@304"
+              source: "@2510"
+              source_leaves: []
+              value:
+                binding_id: source-declared-x:c1ccf019004bc5b7be404316ef10a58a4a544cb58336c83238ad196f445b09d4
+                kind: CapturedValue
+                measure: declared_x
+                result_type: Nat
+            name: read_port_0
+            scope: "@38"
+            source_role: declared_x
+            type: CapturedValue
+          - evidence:
+              capture: receipt
+              source: "@2510"
+              source_leaves: []
+              value:
+                kind: ReceiptId
+                receipt_id: source-payment:c1ccf019004bc5b7be404316ef10a58a4a544cb58336c83238ad196f445b09d4
+                result: "@416"
+            name: read_port_1
+            scope: "@38"
+            source_role: "@416"
+            type: ReceiptId
+        scopes: "@316"
+      units: "@2508"
+  - id: 4474
+    hash: bf8e626077bd8404f321d1eb0e188720ae76ac29ab369a31fa7199289c880d4b
+    value:
+      domains:
+        "@49": "@50"
+        "@21": "@22"
+      expressions: {}
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence: "@4475"
+            name: n3_port_0
+            scope: "@641"
+            source_role: "@2174"
+            type: PoolContext
+          - evidence:
+              capture: live
+              source: "@2574"
+              source_leaves: []
+              value: "@277"
+            name: n3_port_2
+            scope: "@641"
+            source_role: source_actor
+            type: PlayerRef
+          - evidence: "@4478"
+            name: n3_port_4
+            scope: "@641"
+            source_role: "@2186"
+            type: ObjectSet
+          - evidence: "@4475"
+            name: n3_port_0
+            scope: "@641"
+            source_role: pool_source
+            type: PoolContext
+          - evidence:
+              capture: receipt
+              source: "@2574"
+              source_leaves: []
+              value:
+                kind: ReceiptId
+                receipt_id: source-placement:fba59e4b7238b9cf8b2eec3e5ef31968df3c3d3ff183861cd6d15ac201a2f59b
+                result: objects
+            name: n3_port_3
+            scope: "@641"
+            source_role: "@2174"
+            type: ReceiptId
+          - evidence: "@4478"
+            name: n3_port_4
+            scope: "@641"
+            source_role: "@2073"
+            type: ObjectSet
+        scopes: "@642"
+      units: {}
+  - id: 4475
+    hash: 7b748d8c15b1f5419df7f662d0492029cd21bd7bc0b78069595f8232f3c24a48
+    value:
+      capture: selection
+      source: "@2564"
+      source_leaves: "@2570"
+      value: "@4476"
+  - id: 4476
+    hash: 9f0c6a32c926aa8acea35b0bf476fd80cac830287467b74b4f088349ecbff452
+    value:
+      kind: PoolContext
+      members: "@2572"
+      pool_id: "@4477"
+      receipt:
+      scope: "@641"
+      source_kind: generated
+  - id: 4477
+    hash: 5d48e395d836bd750e4db961a9c38840891a48c545f066026fb69f15072a9951
+    value: source-pool:e52719a713131670fd691d96f27cb3f87eda55e4696076bdacc563d1a8a0d1fa
+  - id: 4478
+    hash: 23ddf0ecb351c1cc47f18985b86f855bb8b69ac95b16f419f7d6bb22214c185a
+    value:
+      capture: receipt
+      source: "@2578"
+      source_leaves: []
+      value: "@4479"
+  - id: 4479
+    hash: 43751496468ed556cd2d439d238c23d3027950f0b6813dbe78a43fde067ce0a0
+    value:
+      kind: ObjectSet
+      objects: "@4480"
+      origin: "@2072"
+      placement: n3_port_3
+      pool: n3_port_0
+  - id: 4480
+    hash: 39f728097f3fbbe9bb0be09084981362789677d12376c3fa2b611049c1e387e8
+    value:
+      - "@4481"
+  - id: 4481
+    hash: 3eff1681445f77ab65f49f93fd013bba7061be23cd87a4159e38e152b74ae18a
+    value:
+      generation: 0
+      object_id: "@4482"
+  - id: 4482
+    hash: 43b2564e7df6e8ff1b73976a678ff2a374d16f615fcbf5f6b45805b63f5efcf2
+    value: source-remaining:fba59e4b7238b9cf8b2eec3e5ef31968df3c3d3ff183861cd6d15ac201a2f59b
+  - id: 4483
+    hash: 405a1efe658c9db57ac7952b2bc326976b8e83312353516eb681d5a108fa3f89
+    value:
+      domains:
+        "@7": "@8"
+        "@64": "@65"
+        "@89": "@90"
+        "@252": "@15"
+        "@362": "@199"
+      expressions:
+        "@2837":
+          domain: "@252"
+          history:
+          id: "@2837"
+          imports: []
+          measure: truth
+          parameters: "@256"
+          result_type: Bool
+          role: "@264"
+          scalable: false
+          source_family: U13
+        "@405": "@406"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: "@304"
+              source: "@2838"
+              source_leaves: []
+              value:
+                binding_id: source-fusion-x:a5aeb651cf4dbb3dd6789bd26ae4478536eb2af49e87b06129328c642f50a44e
+                kind: CapturedValue
+                measure: declared_x
+                result_type: Nat
+            name: n3_port_0
+            scope: "@641"
+            source_role: declared_x
+            type: CapturedValue
+          - evidence:
+              capture: receipt
+              source: "@2838"
+              source_leaves: []
+              value:
+                kind: ReceiptId
+                receipt_id: source-fusion-payment:a5aeb651cf4dbb3dd6789bd26ae4478536eb2af49e87b06129328c642f50a44e
+                result: "@416"
+            name: n3_port_1
+            scope: "@641"
+            source_role: "@416"
+            type: ReceiptId
+        scopes: "@642"
+      units: {}
+  - id: 4484
+    hash: 94e980f6e5df4365151e9c816f9e425d9e30ea293ace9961da87239c651bfb05
+    value:
+      domains:
+        "@7": "@8"
+        "@64": "@65"
+        "@429": "@430"
+        "@9": "@10"
+        "@362": "@199"
+        "@19": "@17"
+        "@21": "@22"
+      expressions:
+        "@2852":
+          domain: "@362"
+          history:
+          id: "@2852"
+          imports: "@482"
+          measure: card_count
+          parameters:
+            - "@782"
+          result_type: Nat
+          role: read_value
+          scalable: true
+          source_family: A1
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: receipt
+              source:
+                field: effect
+                line_ordinal: 1
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:ca67adf9e2c1ee340cefb3bd07f460e4de6bf99b6bd2ec43f1e5fcfa3db36ea4
+                role: body
+                segments:
+                  - end: 57
+                    start: 41
+                source_hash: 4ed45b41c7a8dad02ee0b2c3accebd67b45db8c2ef4d7228a4f0910f7d74f50a
+              source_leaves: []
+              value:
+                kind: ReceiptId
+                receipt_id: source-receipt:b445b4faf883cceba2b1a9d6f5fb5b24b759314378dab3f2eb992c6b72fbd9a5
+                result: objects
+            name: read_port_0
+            scope: "@143"
+            source_role: read_receipt
+            type: ReceiptId
+        scopes: "@144"
+      units:
+        leaf_1: object_count
+        leaf_4: object_count
+  - id: 4485
+    hash: 3d1f775b6ff95855918f62e28fc85b38a5a473a19347ee8c36a0df3dd8740795
+    value:
+      domains:
+        "@7": "@8"
+        "@64": "@65"
+        "@429": "@430"
+        "@9": "@10"
+        "@362": "@199"
+        "@21": "@22"
+      expressions: "@433"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: selection
+              source:
+                field: effect
+                line_ordinal: 0
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:a2d6ad546dabbba48f19f9a0f656e2cbfad243546e4037bc00928a5611eb53e1
+                role: body
+                segments:
+                  - end: 28
+                    start: 0
+                source_hash: b821aae846e5a52cebdf61745cdfeccc46a38f6d754b0fcbea4b28fb85238b57
+              source_leaves: []
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source-object:3682b6e39f344d863a008a6d0edd9876f8f5b190efbe8f4cdeb9c2e9c5acc437
+                origin: selection
+            name: read_port_0
+            scope: "@38"
+            source_role: read_subject
+            type: ObjectSet
+        scopes: "@316"
+      units: "@61"
+  - id: 4486
+    hash: 0846da550615adb06b034e34c1cf6b9aaffe8f4a643a50c086e027cd20a9592b
+    value:
+      domains: "@2855"
+      expressions: "@2856"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: selection
+              source:
+                field: effect
+                line_ordinal: 0
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:043b8d759f655e5bcc53797a969dab7292c55dd0f3288720f7f53d5f5e6c070e
+                role: body
+                segments: "@998"
+                source_hash: 4d22ad468cad0c9e580ece87b9f70ee7cd5ae52c01f1db966926baf6751763c4
+              source_leaves: []
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source-object:7e858c7c15369703b222bc41436ba9bfd022e43ec3886a1abb8083b25c01d8db
+                origin: selection
+            name: read_port_0
+            scope: "@38"
+            source_role: read_subject
+            type: ObjectSet
+        scopes: "@316"
+      units: "@61"
+  - id: 4487
+    hash: 12becc764107681361fee4fe6b36b0abdd4f421862806527d4feab226e9b6b5c
+    value:
+      domains: "@2855"
+      expressions: "@2856"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: selection
+              source:
+                field: effect
+                line_ordinal: 1
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:3e073969564f67bb8a30cad7b51c3eb3cc2b37093d5187f7d425d55417b62709
+                role: body
+                segments:
+                  - end: 44
+                    start: 20
+                source_hash: d076914293c099ac03e2e4fa615e707fd65bba50574ff56b7547866aabd26047
+              source_leaves: []
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source-object:480540960780c56e44dd9db257ca51ecdbd378b1cfb3a3f722471022010e2756
+                origin: selection
+            name: read_port_0
+            scope: "@143"
+            source_role: read_subject
+            type: ObjectSet
+        scopes: "@144"
+      units: "@61"
+  - id: 4488
+    hash: 2aa6f5f6c5c1fc202b80be39e09473bae4a6d6b61455aa260ff6dc1e7f896531
+    value:
+      domains:
+        "@7": "@8"
+        "@64": "@65"
+        "@9": "@10"
+        "@2876": "@15"
+        "@362": "@199"
+        "@19": "@17"
+        "@21": "@22"
+      expressions:
+        "@2877":
+          domain: "@2876"
+          history:
+          id: "@2877"
+          imports:
+            - capture: declaration
+              cardinality:
+              event_kind:
+              measure: "@2878"
+              name: declared
+              origin:
+              "@30":
+              result_type: Nat
+              "@31":
+              type: CapturedValue
+            - capture: at_event
+              cardinality:
+              event_kind: DiceRoll
+              measure:
+              name: event
+              origin:
+              "@30":
+              result_type:
+              "@31":
+              type: EventRef
+            - capture: receipt
+              cardinality:
+              event_kind:
+              measure: die_face
+              name: result
+              origin:
+              "@30":
+              result_type: Nat
+              "@31":
+              type: CapturedValue
+          measure: truth
+          parameters:
+            - "@97": []
+              domain: ""
+              name: lower
+              role: declaration_lower_bound
+              type: Nat
+              values:
+                - 1
+            - "@97": []
+              domain: ""
+              name: upper
+              role: declaration_upper_bound
+              type: Nat
+              values:
+                - 6
+            - "@97": []
+              domain: "@19"
+              name: selection
+              role: selection_count
+              type: QuantitySpec
+              values: []
+            - "@97": []
+              domain: "@64"
+              name: die
+              role: rule_term
+              type: Concept
+              values:
+                - key: term:object.die
+                  kind: glossary
+          result_type: Bool
+          role: declaration_match
+          scalable: false
+          source_family: U12
+        "@1328": "@1329"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: declaration
+              source: "@2883"
+              source_leaves: []
+              value:
+                binding_id: source-dice-declaration:6831ac826893806e3a8fef45f3725f7f97a25f47a79e698d4c87d90b5dfce820
+                kind: CapturedValue
+                measure: "@2878"
+                result_type: Nat
+            name: n3_port_0
+            scope: "@641"
+            source_role: "@2878"
+            type: CapturedValue
+          - evidence:
+              capture: live
+              source: "@2883"
+              source_leaves: []
+              value: "@277"
+            name: n3_port_1
+            scope: "@641"
+            source_role: source_actor
+            type: PlayerRef
+          - evidence:
+              capture: at_event
+              source: "@2889"
+              source_leaves: []
+              value:
+                actor: "@277"
+                "@131":
+                event_id: source-dice-roll:2481217a7a826952139d117ff95ea0d2436e510aac3fa7b070633462c0921264
+                event_kind: DiceRoll
+                kind: EventRef
+            name: n3_port_2
+            scope: "@641"
+            source_role: dice_event
+            type: EventRef
+          - evidence:
+              capture: receipt
+              source: "@2889"
+              source_leaves: []
+              value:
+                binding_id: source-dice-result:2481217a7a826952139d117ff95ea0d2436e510aac3fa7b070633462c0921264
+                kind: CapturedValue
+                measure: die_face
+                result_type: Nat
+            name: n3_port_3
+            scope: "@641"
+            source_role: dice_result
+            type: CapturedValue
+        scopes: "@642"
+      units:
+        leaf_12: object_count
+  - id: 4489
+    hash: e5b4accaaec84ae4887c61ca5569237abe58462259bdab1e62a31e17ab64844a
+    value:
+      domains:
+        "@7": "@8"
+        "@64": "@65"
+        "@9": "@10"
+        "@252": "@15"
+        "@362": "@199"
+        "@21": "@22"
+      expressions: "@754"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: live
+              source:
+                field: effect
+                line_ordinal: 2
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:eef523d7ecaafad96c0b6966c72300f1c0acc5226cb582d019b685a5c4c3a3c9
+                role: body
+                segments:
+                  - end: 54
+                    start: 32
+                source_hash: 00bc7247d80c0560d61c37e5fe8e351af9cd1e3f1b7484d09465035bb9914638
+              source_leaves:
+                - leaf_2
+                - leaf_3
+                - leaf_5
+                - leaf_4
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source-holder:f77ab0b630d3d3b410f6342042fd7c5b6fc40ad93ca24e622bc7d3ede46001c5
+                origin: selection
+            name: n3_port_0
+            scope: "@641"
+            source_role: "@764"
+            type: ObjectSet
+        scopes: "@642"
+      units: {}
+  - id: 4490
+    hash: 139a4369e5a8a2051ecb968c5fad366bcc5a51041220eb097dba552b3136e08f
+    value:
+      domains: "@2995"
+      expressions: "@477"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: lki
+              source:
+                field: effect
+                line_ordinal: 1
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:4e08ca2b558384ca8e486c5946c8cc9a1f65ac31932f7d5f3c68a886968c313a
+                role: body
+                segments: "@2996"
+                source_hash: 9eb6d582fcc12d43e29fe67155c6d04b376884496eea506ade4de2ccf6e5b7b8
+              source_leaves: []
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source-object:1efd132ea0a492d17e72b0950795d40bb6e4bd77dfddb728676cf5ea3b5da265
+                origin: selection
+            name: read_port_0
+            scope: "@143"
+            source_role: read_subject
+            type: ObjectSet
+        scopes: "@144"
+      units: "@1451"
+  - id: 4491
+    hash: a6686cc87a849cc527ca4244293a2b869a1d1917a2b52d4d4538175a351fc4a2
+    value:
+      domains: "@2995"
+      expressions: "@1807"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: selection
+              source:
+                field: effect
+                line_ordinal: 1
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:86bf7ba562a108805ae68e8221486ee995e3b94bccff3cd357cbcd47bbdc8d22
+                role: body
+                segments: "@2996"
+                source_hash: a4ff14d804f9f3bd00d1b3ebe5295270ccebb57a5b251d00de2d069109f4a616
+              source_leaves: []
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source-object:7020d41cbf6212e6a91cbf3cd13608b3c7c19f04283a0d02305e52d2613fd021
+                origin: selection
+            name: read_port_0
+            scope: "@143"
+            source_role: read_subject
+            type: ObjectSet
+        scopes: "@144"
+      units: "@1451"
+  - id: 4492
+    hash: f19cb4d61a3f2de2b623e8b538be2de375b8ccd73be3c7c21cfbd00140da4da2
+    value:
+      domains: "@3000"
+      expressions: "@513"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: "@304"
+              source: "@3002"
+              source_leaves: []
+              value:
+                binding_id: source-declared-x:f042dbbdbd5d3ee7693872463b62cf4a2abd1aba6303546bc2827d5a0aa2be60
+                kind: CapturedValue
+                measure: declared_x
+                result_type: Nat
+            name: read_port_0
+            scope: "@38"
+            source_role: declared_x
+            type: CapturedValue
+          - evidence:
+              capture: receipt
+              source: "@3002"
+              source_leaves: []
+              value:
+                kind: ReceiptId
+                receipt_id: source-payment:f042dbbdbd5d3ee7693872463b62cf4a2abd1aba6303546bc2827d5a0aa2be60
+                result: "@416"
+            name: read_port_1
+            scope: "@38"
+            source_role: "@416"
+            type: ReceiptId
+        scopes: "@316"
+      units: {}
+  - id: 4493
+    hash: ac06f89a51206a7ee5d5d22031d0cb98713159d539dddbe72457d3a463d9d26e
+    value:
+      domains: "@3000"
+      expressions:
+        "@3007":
+          domain: "@362"
+          history:
+          id: "@3007"
+          imports:
+            - capture: receipt
+              cardinality:
+              event_kind:
+              measure:
+              name: receipt
+              origin:
+              "@30": amount
+              result_type:
+              "@31":
+              type: ReceiptId
+          measure: counter_count
+          parameters: "@759"
+          result_type: Nat
+          role: read_value
+          scalable: true
+          source_family: A1
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: receipt
+              source:
+                field: effect
+                line_ordinal: 2
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:aa326bd50a10e2e47658f7742765c2ba90f3983741d6fd33dc2ee3ceb2c6ae00
+                role: body
+                segments:
+                  - end: 92
+                    start: 65
+                source_hash: fc26bd54a1a53538738d83c8b196acf0d31b0c5ed4134f1b7f5842b9711d9c67
+              source_leaves: []
+              value:
+                kind: ReceiptId
+                receipt_id: source-receipt:41c1a233d121035f6376dfacaa4a89473614f2cfd2bba9f11366384a3218159c
+                result: amount
+            name: read_port_0
+            scope: "@789"
+            source_role: read_receipt
+            type: ReceiptId
+        scopes: "@790"
+      units: {}
+  - id: 4494
+    hash: 80611e00baadc3571a0a7662e0339ebfe20d22077b85ed048ae664b4c0d2ba2e
+    value:
+      domains:
+        "@7": "@8"
+        "@64": "@65"
+        "@19": "@17"
+      expressions: {}
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: live
+              source:
+                field: effect
+                line_ordinal: 0
+                ordinal:
+                owner: "@3024"
+                role: reminder
+                segments:
+                  - end: 47
+                    start: 46
+                source_hash: "@3026"
+              source_leaves: []
+              value: "@4495"
+            name: n3_port_0
+            scope: "@641"
+            source_role: read_subject
+            type: ObjectSet
+          - evidence:
+              capture: live
+              source:
+                field: effect
+                line_ordinal: 0
+                ordinal:
+                owner: "@3024"
+                role: reminder
+                segments:
+                  - end: 88
+                    start: 87
+                source_hash: "@3026"
+              source_leaves: []
+              value: "@4495"
+            name: n3_port_1
+            scope: "@641"
+            source_role: read_subject
+            type: ObjectSet
+          - evidence:
+              capture: live
+              source:
+                field: effect
+                line_ordinal: 0
+                ordinal:
+                owner: "@3024"
+                role: reminder
+                segments:
+                  - end: 108
+                    start: 107
+                source_hash: "@3026"
+              source_leaves: []
+              value: "@4495"
+            name: n3_port_2
+            scope: "@641"
+            source_role: read_subject
+            type: ObjectSet
+          - evidence:
+              capture: live
+              source:
+                field: effect
+                line_ordinal: 0
+                ordinal:
+                owner: "@3024"
+                role: reminder
+                segments:
+                  - end: 181
+                    start: 169
+                source_hash: "@3026"
+              source_leaves: []
+              value: "@4495"
+            name: n3_port_3
+            scope: "@3031"
+            source_role: read_subject
+            type: ObjectSet
+        scopes:
+          - "@643"
+          - id: "@3031"
+            kind: ability
+            parent:
+      units:
+        leaf_13: object_count
+  - id: 4495
+    hash: a3c0ce0b22da64d2bfd75eafd38e6429c9bdd54fdfe2dd4016cc7379d1c77b09
+    value:
+      kind: ObjectSet
+      objects: "@4496"
+      origin: holder
+  - id: 4496
+    hash: 31b8d11bb20d89d98f2c75d2e3ea759319e1f32dc2e73fdee25b8ace8a777615
+    value:
+      - "@4497"
+  - id: 4497
+    hash: 05aea25d7dcdb59c639b5c058473f646f68eb74a77d9cbe2ed6d7b4ac47957d5
+    value:
+      generation: 0
+      object_id: "@4498"
+  - id: 4498
+    hash: 1b9fad9da37bf08096cfa5259285b16593cc4c664265b2ca2f8da1eb24de4bb6
+    value: source-holder:a7921304b3eabf49e4258a2b473dacf5ceb55f73896a356a4a8e2824d2488164
+  - id: 4499
+    hash: 4c715d87b2525a21e636cb506022a97208a38bb9392194dcc96119715a29a1e4
+    value:
+      domains: "@3042"
+      expressions: {}
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: live
+              source:
+                field: effect
+                line_ordinal: 0
+                ordinal:
+                owner: "@3069"
+                role: reminder
+                segments: "@639"
+                source_hash: "@3071"
+              source_leaves: []
+              value: "@4500"
+            name: n3_port_0
+            scope: "@641"
+            source_role: read_subject
+            type: ObjectSet
+        scopes: "@642"
+      units: {}
+  - id: 4500
+    hash: 54cd6a599223544e7c9623b0723215c10eb353f53513dfb83e39ee6eb5ad62b4
+    value:
+      kind: ObjectSet
+      objects: "@4501"
+      origin: holder
+  - id: 4501
+    hash: 790987beed5a3b9f64952e7410396d5e9dd479340138694d24a7793c7417c01d
+    value:
+      - "@4502"
+  - id: 4502
+    hash: 7d5670c3b6df24a4965684c4ab1d40a964624ba16249390889ed10cb8c6cff5a
+    value:
+      generation: 0
+      object_id: "@4503"
+  - id: 4503
+    hash: 5c6be77f3a8da125135f70506064182fcfea4c46bbd2f1da6586e2cf47e97fb2
+    value: source-holder:f24fa3042896ccdb25fc82b678f22820bb7ad1be745f764f2872895784f2090c
+  - id: 4504
+    hash: acf57ca024043fa5c8ff0a869be2e31881e5f786238999a8914907c111ecec46
+    value:
+      domains: "@3042"
+      expressions: {}
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: live
+              source:
+                field: effect
+                line_ordinal: 1
+                ordinal:
+                owner: "@3069"
+                role: body
+                segments:
+                  - end: 85
+                    start: 84
+                source_hash: "@3071"
+              source_leaves: []
+              value: "@4500"
+            name: n3_port_0
+            scope: "@641"
+            source_role: read_subject
+            type: ObjectSet
+        scopes: "@642"
+      units: {}
+  - id: 4505
+    hash: 702e5cef5d7a1ea514942537fa4e75dc60b8efffcbf138e74d33e1f25d05fd74
+    value:
+      domains: "@3042"
+      expressions: {}
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: live
+              source:
+                field: effect
+                line_ordinal: 2
+                ordinal:
+                owner: "@3069"
+                role: body
+                segments:
+                  - end: 105
+                    start: 104
+                source_hash: "@3071"
+              source_leaves: []
+              value: "@4500"
+            name: n3_port_0
+            scope: "@641"
+            source_role: read_subject
+            type: ObjectSet
+        scopes: "@642"
+      units: {}
+  - id: 4506
+    hash: 643a0fa3370773b75ad5d17b83bda85cd46fdd2607b9c09136b0d872abe46381
+    value:
+      domains: "@3042"
+      expressions: {}
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: selection
+              source: "@3079"
+              source_leaves: []
+              value:
+                ability_kind: term:event.evolve
+                holder_generation:
+                  generation: 0
+                  object_id: source-holder:7d2e2c63090ec25f9830f74640eca93400eeec80aff8c64e90311cd299ca0cd4
+                kind: AbilitySetRef
+                source_selector: "@3079"
+            name: n3_port_0
+            scope: "@641"
+            source_role: ability_source
+            type: AbilitySetRef
+        scopes: "@642"
+      units: {}
+  - id: 4507
+    hash: a53c4060106be3f11a1c056447748e6d2cb6e343b8b215458bbadf6e74b81b7e
+    value:
+      domains: "@3190"
+      expressions: "@3191"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: live
+              source:
+                field: effect
+                line_ordinal: 0
+                ordinal:
+                owner: "@3192"
+                role: body
+                segments:
+                  - end: 66
+                    start: 0
+                source_hash: "@3196"
+              source_leaves: []
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source:2cfd40c10d719554f7e12d9713b5fc97429a70a2166f8a4d33d3c2e375d20750
+                origin: holder
+            name: names_port_9513c27e0487bd4a
+            scope: "@38"
+            source_role: name_source
+            type: ObjectSet
+          - evidence:
+              capture: "@304"
+              source: "@3197"
+              source_leaves: []
+              value:
+                binding_id: source-declared-x:08b64365ec62199d67328af9881a64b7d262310311ed2a907022e5edb011ea2d
+                kind: CapturedValue
+                measure: declared_x
+                result_type: Nat
+            name: read_port_0
+            scope: "@38"
+            source_role: declared_x
+            type: CapturedValue
+          - evidence:
+              capture: receipt
+              source: "@3197"
+              source_leaves: []
+              value:
+                kind: ReceiptId
+                receipt_id: source-payment:08b64365ec62199d67328af9881a64b7d262310311ed2a907022e5edb011ea2d
+                result: "@416"
+            name: read_port_1
+            scope: "@38"
+            source_role: "@416"
+            type: ReceiptId
+        scopes: "@316"
+      units: "@79"
+  - id: 4508
+    hash: 16ed1cdf74df1c9499ebbe991e906d2959d81aeb90f652a3b445698e66586b19
+    value:
+      domains: "@3190"
+      expressions: "@3191"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: live
+              source:
+                field: section
+                line_ordinal: 1
+                ordinal: 0
+                owner: "@3201"
+                role: body
+                segments:
+                  - end: 114
+                    start: 23
+                source_hash: "@3203"
+              source_leaves: []
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source:9dc0ade1f995a24ee4bb4ed84a4d554425e0dce6e344f5e1ab529ce0195a9ca9
+                origin: holder
+            name: names_port_a804b0fe04ca10a2
+            scope: "@143"
+            source_role: name_source
+            type: ObjectSet
+          - evidence:
+              capture: "@304"
+              source: "@3204"
+              source_leaves: []
+              value:
+                binding_id: source-declared-x:ec56ff4ae01a15a57ce05d6a2880bd0baa526f380732d3f3226be9545457c445
+                kind: CapturedValue
+                measure: declared_x
+                result_type: Nat
+            name: read_port_0
+            scope: "@143"
+            source_role: declared_x
+            type: CapturedValue
+          - evidence:
+              capture: receipt
+              source: "@3204"
+              source_leaves: []
+              value:
+                kind: ReceiptId
+                receipt_id: source-payment:ec56ff4ae01a15a57ce05d6a2880bd0baa526f380732d3f3226be9545457c445
+                result: "@416"
+            name: read_port_1
+            scope: "@143"
+            source_role: "@416"
+            type: ReceiptId
+        scopes: "@144"
+      units: "@79"
+  - id: 4509
+    hash: e0fcbd26d3b68172c0e7adf6740e5ab24a944a56e3fd33da0a46a159037baa09
+    value:
+      domains:
+        "@7": "@8"
+        "@362": "@199"
+        "@319": "@199"
+      expressions:
+        "@319": "@321"
+        "@3456":
+          domain: "@362"
+          history:
+          id: "@3456"
+          imports: "@482"
+          measure: card_count
+          parameters: []
+          result_type: Nat
+          role: read_value
+          scalable: true
+          source_family: A1
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: receipt
+              source:
+                field: effect
+                line_ordinal: 1
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:ceb7c195a7bc48fc2e1c787edd779fb6c8fc7ce977a36422265c26ee7b7f4c76
+                role: body
+                segments:
+                  - end: 51
+                    start: 20
+                source_hash: 5c31eaa13b4a8e57bdc51d0d84b87c5df0bcc520b887a9057cfb1c7f1b91f6c9
+              source_leaves: []
+              value:
+                kind: ReceiptId
+                receipt_id: source-receipt:3b816a59444fae04848aa9b81d576085e669a90de90911c7d9b52bec1688afcb
+                result: objects
+            name: read_port_0
+            scope: "@143"
+            source_role: read_receipt
+            type: ReceiptId
+        scopes: "@144"
+      units: {}
+  - id: 4510
+    hash: 818b7b0b886f859b19ee8223a5cb49583b360c904a893b2a55942ec71d10ea68
+    value:
+      domains:
+        "@7": "@8"
+        "@362": "@199"
+        "@19": "@17"
+        "@21": "@22"
+      expressions: "@513"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: "@304"
+              source: "@3458"
+              source_leaves: []
+              value:
+                binding_id: source-declared-x:7cf4554b3410fd84ee8fa176eb94787220bc5e1f6afc8020367284b16a819e7d
+                kind: CapturedValue
+                measure: declared_x
+                result_type: Nat
+            name: read_port_0
+            scope: "@143"
+            source_role: declared_x
+            type: CapturedValue
+          - evidence:
+              capture: receipt
+              source: "@3458"
+              source_leaves: []
+              value:
+                kind: ReceiptId
+                receipt_id: source-payment:7cf4554b3410fd84ee8fa176eb94787220bc5e1f6afc8020367284b16a819e7d
+                result: "@416"
+            name: read_port_1
+            scope: "@143"
+            source_role: "@416"
+            type: ReceiptId
+        scopes: "@144"
+      units: "@84"
+  - id: 4511
+    hash: e44f6ddb601ffea78f2c6892b7df9818e428dc7bdd097f04bfce90e4d8003e80
+    value:
+      domains:
+        "@7": "@8"
+        "@362": "@199"
+        "@19": "@17"
+      expressions:
+        "@3466":
+          domain: "@362"
+          history:
+          id: "@3466"
+          imports: []
+          measure: operand
+          parameters:
+            - "@1109"
+          result_type: Nat
+          role: read_value
+          scalable: false
+          source_family: A1
+        "@859": "@860"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence: "@4512"
+            name: read_port_0
+            scope: "@38"
+            source_role: read_subject
+            type: ObjectSet
+          - evidence: "@4512"
+            name: read_port_1
+            scope: "@38"
+            source_role: read_subject
+            type: ObjectSet
+        scopes: "@316"
+      units: "@1713"
+  - id: 4512
+    hash: 4f27b82f1f90a884ce3432fc7e9c68dfc1cf5bf0dc5e925eff9d27acbcf1783d
+    value:
+      capture: lki
+      source: "@3470"
+      source_leaves: []
+      value: "@4513"
+  - id: 4513
+    hash: 965a9aac342ad86654aad1d5db916a2116cfc54640148148a570a291a25575d9
+    value:
+      kind: ObjectSet
+      objects: "@4514"
+      origin: selection
+  - id: 4514
+    hash: 0f5f9813f1bade43bdd46a48d382dc73735e27d6007679f41b0779abd98d43ba
+    value:
+      - "@4515"
+  - id: 4515
+    hash: 83797969963842ac289dac805f1289caff47d4a7c8f92566631e1880dec2700d
+    value:
+      generation: 0
+      object_id: "@4516"
+  - id: 4516
+    hash: 2919753460fa889a5da0b06ed17fc92e21cfaad7b9c610986519ccc31a073d0a
+    value: source-object:5d59a4c81150197af66024f7cc24b5a00a2b0dd50c9b0b0c99ceb0175ed45a77
+  - id: 4517
+    hash: 75c0707906028c7b78b35afbd393bfd19ef44e8d89834a9d332b5e5d9bee09a5
+    value:
+      domains: "@3482"
+      expressions: "@513"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: "@304"
+              source: "@3483"
+              source_leaves: []
+              value:
+                binding_id: source-declared-x:108c7eaef834a62918b5b8ebde2afc4e4b136ceec04d5c963f90225f402cf570
+                kind: CapturedValue
+                measure: declared_x
+                result_type: Nat
+            name: read_port_0
+            scope: "@143"
+            source_role: declared_x
+            type: CapturedValue
+          - evidence:
+              capture: receipt
+              source: "@3483"
+              source_leaves: []
+              value:
+                kind: ReceiptId
+                receipt_id: source-payment:108c7eaef834a62918b5b8ebde2afc4e4b136ceec04d5c963f90225f402cf570
+                result: "@416"
+            name: read_port_1
+            scope: "@143"
+            source_role: "@416"
+            type: ReceiptId
+        scopes: "@144"
+      units:
+        leaf_3: damage_amount
+  - id: 4518
+    hash: 29d686a58c4863025f298c2c8482c3fcc4a946492ffedf86a63d698727b8da0d
+    value:
+      domains: "@3482"
+      expressions: "@513"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: "@304"
+              source: "@3490"
+              source_leaves: []
+              value:
+                binding_id: source-declared-x:1a61aa26a4decee85cb459dd09c01f182f3002e0644cd2a32b51c6b9812b2e35
+                kind: CapturedValue
+                measure: declared_x
+                result_type: Nat
+            name: read_port_0
+            scope: "@143"
+            source_role: declared_x
+            type: CapturedValue
+          - evidence:
+              capture: receipt
+              source: "@3490"
+              source_leaves: []
+              value:
+                kind: ReceiptId
+                receipt_id: source-payment:1a61aa26a4decee85cb459dd09c01f182f3002e0644cd2a32b51c6b9812b2e35
+                result: "@416"
+            name: read_port_1
+            scope: "@143"
+            source_role: "@416"
+            type: ReceiptId
+        scopes: "@144"
+      units: {}
+  - id: 4519
+    hash: 757e49272ec6d55598a8c65a64544ab92807ef5e347dcf639a4592a8a62f9f35
+    value:
+      domains:
+        "@64": "@65"
+        "@89": "@90"
+        "@429": "@430"
+        "@9": "@10"
+        "@362": "@199"
+        "@21": "@22"
+      expressions:
+        "@3668":
+          domain: "@362"
+          history:
+          id: "@3668"
+          imports: "@482"
+          measure: card_count
+          parameters: "@1128"
+          result_type: Nat
+          role: read_value
+          scalable: true
+          source_family: A1
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: receipt
+              source:
+                field: effect
+                line_ordinal: 0
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:8c944b16c335e43cc2c3414066fd03242f97544086cb019bae4491212b111859
+                role: body
+                segments:
+                  - end: 16
+                    start: 0
+                source_hash: 4e23d0e4a29d99e6092c76c644031020392d06ab72028a4b447920c67efb0107
+              source_leaves: []
+              value:
+                kind: ReceiptId
+                receipt_id: source-receipt:db543e60c12c91b2faf905d43bee781ea0e9b5f36618e51d106ff4d1e50470d7
+                result: objects
+            name: read_port_0
+            scope: "@38"
+            source_role: read_receipt
+            type: ReceiptId
+        scopes: "@316"
+      units: "@84"
+  - id: 4520
+    hash: cd337bdecc797ed2932ae6a4b30e51659af215a031e8769ac7195d334269046e
+    value:
+      domains: "@3758"
+      expressions: "@754"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: live
+              source:
+                field: effect
+                line_ordinal: 1
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:1eff100048852acfaf5c23647df5a4a5cd0c755a137f1149784fe25d7c2e59d0
+                role: body
+                segments:
+                  - end: 38
+                    start: 16
+                source_hash: 5ca8c31242e7e5556a1f58bed24d754c3ad9dd71102f41e06479cb013b3fbf60
+              source_leaves: "@3759"
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source-holder:1b5493af1ba339dce5fe64118da351aee7ad615438f065efd800bb4360a38e04
+                origin: selection
+            name: n3_port_0
+            scope: "@641"
+            source_role: "@764"
+            type: ObjectSet
+        scopes: "@642"
+      units: {}
+  - id: 4521
+    hash: 9efba6fae2986308caaba7dab1ae88cbfd2e16e2431ae2969fabf1c5cff93bb7
+    value:
+      domains: "@3758"
+      expressions: "@754"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: live
+              source:
+                field: effect
+                line_ordinal: 2
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:218f331babb65789632158a0eb46efc936bb3b4976152deded22ba9cf89f777e
+                role: body
+                segments: "@761"
+                source_hash: 3ed5daf57593df6ead42813dc496a204d5f54d46c1282508e622867d9bc83f85
+              source_leaves: "@3759"
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source-holder:90939e5456b69a3ad30864c34da58bcd8fc272829e0ba624912d0d6e1207bb16
+                origin: selection
+            name: n3_port_0
+            scope: "@641"
+            source_role: "@764"
+            type: ObjectSet
+        scopes: "@642"
+      units: {}
+  - id: 4522
+    hash: 6d8ad4b74b6bd4ba08e37855c9c77491da32eb01cd8c48d3b90c086558b6526b
+    value:
+      domains:
+        "@64": "@65"
+        "@9": "@10"
+        "@362": "@199"
+        "@19": "@17"
+        "@21": "@22"
+      expressions: "@433"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: selection
+              source:
+                field: effect
+                line_ordinal: 0
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:15dbde983ad61b8b1879b1bba757c61ff63ac0227c307762a0481cff862b6b9c
+                role: body
+                segments: "@1917"
+                source_hash: bd683ec8c497afe3adacfa33a21e3d3748d40fe8eb9c4fafc9395425796d052c
+              source_leaves: []
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source-object:412ca35588bd93f2a855f1c6ecea3bba29e02642286eea1eb3ec2837fba2c83c
+                origin: selection
+            name: read_port_0
+            scope: "@38"
+            source_role: read_subject
+            type: ObjectSet
+        scopes: "@316"
+      units: "@61"
+  - id: 4523
+    hash: 7078cf99ae58559ab3b9356dfb767a8e55144186ca049ed41a19b1cc1a2e845d
+    value:
+      domains: "@3817"
+      expressions: "@477"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: lki
+              source:
+                field: effect
+                line_ordinal: 1
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:c5f6c1e37332bed0c6d0284df3c8bc7706dec8208b3af575acd6933b9208073f
+                role: body
+                segments: "@1445"
+                source_hash: 6e72b85e64370489b2b4dfc6ae00c46f9ea8149b70d34b9adb7de80eb0fd61de
+              source_leaves: []
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source-object:641b1d1f35c15110afa345ab85e47bb96c7909c1071745301ac9eeb8c0461715
+                origin: selection
+            name: read_port_0
+            scope: "@143"
+            source_role: read_subject
+            type: ObjectSet
+        scopes: "@144"
+      units: "@1691"
+  - id: 4524
+    hash: 900ea950ec8ae7d5455571c0af207f3d32a76370694806592f3ad736f71e03ae
+    value:
+      domains: "@3817"
+      expressions: "@1807"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: selection
+              source:
+                field: effect
+                line_ordinal: 0
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:fbbbd0812d2ec46bb71fd708dea39402cfa88eacc6501a43bab1b60382f05b49
+                role: body
+                segments: "@3819"
+                source_hash: af89af00b72c5e35148c6145e595ea3cf42cc0d4ea6e13e778e541ca612c92d2
+              source_leaves: []
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source-object:9f1961439e1dd6257ecf221186e9ebdcc038aef6b77f7cf7dce0b57038fe2c25
+                origin: selection
+            name: read_port_0
+            scope: "@38"
+            source_role: read_subject
+            type: ObjectSet
+        scopes: "@316"
+      units: "@1689"
+  - id: 4525
+    hash: 3087400331bb67b258444531546b249f7bc5203d69ac887ae6013e5097591cbe
+    value:
+      domains:
+        "@64": "@65"
+        "@362": "@199"
+      expressions:
+        "@3825":
+          domain: "@362"
+          history:
+          id: "@3825"
+          imports: "@482"
+          measure: card_count
+          parameters:
+            - "@782"
+            - "@97": []
+              domain: ""
+              name: cost
+              role: read_original_cost
+              type: Nat
+              values: []
+          result_type: Nat
+          role: read_value
+          scalable: true
+          source_family: A1
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: receipt
+              source:
+                field: effect
+                line_ordinal: 1
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:b47ef8bc5859b423343aee953aef9a229c7e96fa04419546f64b8fa312b83970
+                role: body
+                segments:
+                  - end: 111
+                    start: 96
+                source_hash: 9adf5cf0295ecf1ad8b2896d6d5b321d0b1a53c274af9349a924af67291f4009
+              source_leaves: []
+              value:
+                kind: ReceiptId
+                receipt_id: source-receipt:49292f6a7b3406e62dde83e450ea878e927783c3b91af2ab060133fa9b990419
+                result: objects
+            name: read_port_0
+            scope: "@143"
+            source_role: read_receipt
+            type: ReceiptId
+        scopes: "@144"
+      units: {}
+  - id: 4526
+    hash: 5721dc00ae60b42d21f843dc1d9fbd8ba3ae66e59ab26055f4d1f96586f120ef
+    value:
+      domains:
+        phase.named.v1:
+          codes:
+            - end
+            - main
+            - start
+          type: Phase
+        "@9": "@10"
+        "@176": "@177"
+        "@362": "@199"
+      expressions:
+        "@1237": "@1238"
+        "@3994":
+          domain: "@362"
+          history:
+          id: "@3994"
+          imports: "@482"
+          measure: card_count
+          parameters: []
+          result_type: Nat
+          role: read_value
+          scalable: true
+          source_family: A1
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: receipt
+              source:
+                field: effect
+                line_ordinal: 1
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:d128a3eb6fe20df26815debd4d102a727141831710abd78356573a88b0f1b08f
+                role: body
+                segments:
+                  - end: 35
+                    start: 5
+                source_hash: 569cce95137321947fc7017a8f3ed5b90fb9dcb2d86f585b0065c6b9641ea12e
+              source_leaves: []
+              value:
+                kind: ReceiptId
+                receipt_id: source-receipt:b4968795138c75307895d0cb47c47bfb181dfb50498e64cdca402ae64d3fd260
+                result: objects
+            name: read_port_0
+            scope: "@38"
+            source_role: read_receipt
+            type: ReceiptId
+        scopes: "@316"
+      units: {}
+  - id: 4527
+    hash: a860089be759bd094f65354e5ac3b7da99b804b27545f24395b0b8665f9b2a31
+    value:
+      domains:
+        "@9": "@10"
+        "@362": "@199"
+        "@19": "@17"
+        "@21": "@22"
+      expressions: "@513"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: "@304"
+              source: "@4061"
+              source_leaves: []
+              value:
+                binding_id: source-declared-x:2f82c970b8f8e5e89f78c2893ebb979b968270a8bf063a84330b8642eecc41a2
+                kind: CapturedValue
+                measure: declared_x
+                result_type: Nat
+            name: read_port_0
+            scope: "@143"
+            source_role: declared_x
+            type: CapturedValue
+          - evidence:
+              capture: receipt
+              source: "@4061"
+              source_leaves: []
+              value:
+                kind: ReceiptId
+                receipt_id: source-payment:2f82c970b8f8e5e89f78c2893ebb979b968270a8bf063a84330b8642eecc41a2
+                result: "@416"
+            name: read_port_1
+            scope: "@143"
+            source_role: "@416"
+            type: ReceiptId
+        scopes: "@144"
+      units: "@61"
+  - id: 4528
+    hash: e52160d17a18a6387afdafb28ba91be8f78e7f4f7e3f2f8739ce5f4537906f49
+    value:
+      domains:
+        "@252": "@15"
+        "@362": "@199"
+      expressions:
+        "@254": "@255"
+        "@4127":
+          domain: "@362"
+          history:
+          id: "@4127"
+          imports:
+            - capture: at_event
+              cardinality:
+              event_kind: Damage
+              measure:
+              name: event
+              origin:
+              "@30":
+              result_type:
+              "@31": subject
+              type: EventRef
+            - "@4128"
+          measure: damage
+          parameters: []
+          result_type: Nat
+          role: read_value
+          scalable: false
+          source_family: U14
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: at_event
+              source: "@4129"
+              source_leaves: []
+              value:
+                kind: ObjectSet
+                objects:
+                  - "@4529"
+                origin: event_subject
+            name: n3_port_0
+            scope: "@641"
+            source_role: read_subject
+            type: ObjectSet
+          - evidence:
+              capture: at_event
+              source: "@4129"
+              source_leaves: []
+              value:
+                "@131":
+                event_id: source-damage:c7e2f39f0b690d5b0fb674f65e76b5c68d01dbdfdce4e49fc2bef354955b3708
+                event_kind: Damage
+                kind: EventRef
+                subject: "@4529"
+            name: n3_port_1
+            scope: "@641"
+            source_role: read_event
+            type: EventRef
+        scopes: "@642"
+      units: {}
+  - id: 4529
+    hash: 94fcea3a6db0eb7648994533a0eafccc94fdac54330dcf7fcb6896b16f38eb0f
+    value:
+      generation: 0
+      object_id: "@4530"
+  - id: 4530
+    hash: e0ae54858e6678ff857c0d30e8662c25d178476085dbb1c780ce4cd4d2270035
+    value: source-holder:dbf7730d316c7568391462e3056fa10fa446c40e794a333bf3e7f43f5b41be42
+  - id: 4531
+    hash: 9f402f2dacdcf174ebe29478d161c81d6ae26f6f18ee944e598761b6b9a71a22
+    value:
+      domains:
+        "@362": "@199"
+        "@19": "@17"
+        token_status.token.v1:
+          codes:
+            - token
+          type: TokenStatus
+      expressions: "@1807"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: selection
+              source:
+                field: effect
+                line_ordinal: 1
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:bcf5d2fff502bdb29a02faf4da0a47ed14fe2a3d6710c39cc055418f5c5a614a
+                role: body
+                segments:
+                  - end: 66
+                    start: 49
+                source_hash: 663b7cfd71ce752973a1eb458dfe827912033044e70a3f770d58897d6b4fc97b
+              source_leaves: []
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source-object:356fe08e06c4ebd1168db5f697ab0e668cd872d4fb19cd91a432c1563d3e5b51
+                origin: selection
+            name: read_port_0
+            scope: "@38"
+            source_role: read_subject
+            type: ObjectSet
+        scopes: "@316"
+      units: "@1691"
+  - id: 4532
+    hash: 651be5784917c2f30450a393fd9144abfc6f75a08deeeae3afa9e0c50e36744d
+    value:
+      domains: "@4157"
+      expressions: "@4158"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: at_event
+              source:
+                field: effect
+                line_ordinal: 0
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:61d7347aa97618130a1d041671da3bb3f28d9dd0fa85e3f3521ee15ae27b0bc8
+                role: body
+                segments: "@4162"
+                source_hash: "@4164"
+              source_leaves: []
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source-object:defb698dff131a56d0c05388e99e93f8c96c2bf20c5dfd24ce690984c9cc638b
+                origin: event_subject
+            name: read_port_0
+            scope: "@38"
+            source_role: read_subject
+            type: ObjectSet
+        scopes: "@316"
+      units: "@1691"
+  - id: 4533
+    hash: 55e491ef10ad418887a1a925434b2aff8355b1e586be6680d5995be1d971aa14
+    value:
+      domains: "@4157"
+      expressions: "@4158"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: at_event
+              source:
+                field: effect
+                line_ordinal: 0
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:df2bad030dd64125fb74096df0cf4f67531291b96acd4f07cf8e692108b53299
+                role: body
+                segments: "@4162"
+                source_hash: "@4164"
+              source_leaves: []
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source-object:39afd4d9b39dea4c5010a8e41a8eea84c1ba2823f340252a7e2b5e7b8d50ccf3
+                origin: event_subject
+            name: read_port_0
+            scope: "@38"
+            source_role: read_subject
+            type: ObjectSet
+        scopes: "@316"
+      units: "@1691"
+  - id: 4534
+    hash: 77cc55e514f61633f5d75f8df58fef649d0720ce7820af20bfd35688ed0805fe
+    value:
+      domains: "@4157"
+      expressions: "@4158"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: at_event
+              source:
+                field: effect
+                line_ordinal: 1
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:32d8ab8c49ffdba4c286f71df7b284cc0f618300b9444a365baeeadc534a99c6
+                role: body
+                segments:
+                  - end: 37
+                    start: 20
+                source_hash: 6f14c3916f241e8307b9201815bba89e030f8e29afb1e2ea139957419b4a53c4
+              source_leaves: []
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source-object:3cad01a398cab2dd7d32f68bde7603561a17bc07b779e5244949487784fc83b6
+                origin: event_subject
+            name: read_port_0
+            scope: "@38"
+            source_role: read_subject
+            type: ObjectSet
+        scopes: "@316"
+      units: "@1691"
+  - id: 4535
+    hash: f9ed4226da08c42b61b31bb356804d74f0d89cb254630128b5eadd1d857ed494
+    value:
+      domains: "@4157"
+      expressions: "@1807"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: selection
+              source:
+                field: effect
+                line_ordinal: 0
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:1eee65f11b5bd0855979f21073e58d6d56a3f3e2658e81b9cb0e7e0d4d5931cc
+                role: body
+                segments: "@4162"
+                source_hash: "@4172"
+              source_leaves: []
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source-object:8ca6220d8d57fa44da569c1c6ec15dc73dd4dd4f92fc5787d757266cd6de9a83
+                origin: selection
+            name: read_port_0
+            scope: "@38"
+            source_role: read_subject
+            type: ObjectSet
+        scopes: "@316"
+      units: "@1691"
+  - id: 4536
+    hash: a898599108de992d2f5118ac5927f333216c3b05e7d504315026cff23cdad512
+    value:
+      domains: "@4157"
+      expressions: "@1807"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: selection
+              source:
+                field: effect
+                line_ordinal: 0
+                ordinal:
+                owner: "@4174"
+                role: body
+                segments:
+                  - end: 25
+                    start: 13
+                source_hash: "@4176"
+              source_leaves: []
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source-object:eecf62f2bd8bac4227a4b12fa36ef123dd3536f5edb7b5ce217c4951e46fff5b
+                origin: selection
+            name: read_port_0
+            scope: "@38"
+            source_role: read_subject
+            type: ObjectSet
+          - evidence:
+              capture: selection
+              source:
+                field: effect
+                line_ordinal: 0
+                ordinal:
+                owner: "@4174"
+                role: body
+                segments: "@3819"
+                source_hash: "@4176"
+              source_leaves: []
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source-object:a76f7e82f61d7c26047c8580a6c77d78cceec72cf5cfeffd9459b866d314bdf3
+                origin: selection
+            name: read_port_1
+            scope: "@38"
+            source_role: read_subject
+            type: ObjectSet
+        scopes: "@316"
+      units: "@1689"
+  - id: 4537
+    hash: e5c31add8ce8211ed533fc05be8a23d4c879462bdda6888642168f08007ea40b
+    value:
+      domains: "@4157"
+      expressions: "@1807"
+      omissions: {}
+      resolved:
+      source_links:
+        ports:
+          - evidence:
+              capture: selection
+              source:
+                field: effect
+                line_ordinal: 0
+                ordinal:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:eeb78fdaff70eb640fc2071a666ee5d9410689c639c718dc90a5dabe5d7e8a1b
+                role: body
+                segments: "@4162"
+                source_hash: "@4172"
+              source_leaves: []
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source-object:d44b2e9f592a06ef9cd4b26eb5f89a84888cfbf9e294d455ff8a75008f4282a8
+                origin: selection
+            name: read_port_0
+            scope: "@38"
+            source_role: read_subject
+            type: ObjectSet
+        scopes: "@316"
+      units: "@1691"

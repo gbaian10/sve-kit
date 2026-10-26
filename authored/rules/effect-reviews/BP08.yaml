@@ -6,7 +6,7 @@ basis:
     recipe: v0-classification-candidates-1
     inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
   normalizer: four-layer-jp-v10
-  build_sha256: f809760b55c7ddabe2d64df5ec0a7d15d2ee62c576a23f1bf9537d06c34fa2c7
+  build_sha256: a76f3b3fbc00a2a34b60bde16ff6a6908f43621cfef3f85732ad725a298782db
 groups:
   - id: shape:23fdc1e8d5c1fe45354bd9c0e64a5c32654de4fe0ee7cc191c080d57eae4310e
     priority: false
@@ -70,7 +70,7 @@ groups:
       - use:4552e635af7431fb76ceb5a283be20f9ba29e20001c61ec055b4f4bb5b66c47e
       - use:4c33880d0ee318bca04442cc39bfaf117d17d8b8dfb24ddaba7ba7f4c3ef8884
       - use:7c4585604d008a79587fc2d092454cb9bd6adc6e504fcbcdc2b4c99984567a31
-      - use:6de9f3dcffa124055bf29dc5a32e7a1bfe6733c28b9e6c58519d89a5301a89a5
+      - use:e9d4f514cd21b3778e6c38487faaaea9c89cb3c2990b84370972d0ee52794c25
       - use:e429f08246b27cc5e750786baf587186b725c74eb2a0629a11f98c3b86bd19ad
     translation_review:
       required_uses: []

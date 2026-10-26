@@ -3137,12 +3137,12 @@ records:
       content_hash: a5e7ba6409168838b2ee97ec0b19d9a6abf3cff5364070cb8a143f17f13ab7a4
   - kind: sentence_template
     data:
-      id: frame:1664594cfb5ec4e5a2cb5d33e7db03e1c6a20464ba0cc7e94a91d71584ffd187
+      id: frame:e93fc0964c9f0e045aafe990a230d869500a1e19f43043dc9017414dae9bf37e
       source:
         source_lang: ja
         canonical_hash: 50673533aa4d23a36a52958b7ab89c96965fc2a6f4f58f88998698264fc5889e
         normalizer_version: four-layer-jp-v10
-        semantic_definitions: 2163
+        semantic_definitions: 4444
       role: body
       semantic_variant:
         state: pending
@@ -3237,7 +3237,7 @@ records:
               capture: selection
               value:
                 kind: PoolContext
-                pool_id: source-pool:320577bc5962359975c9ed20ca84dc668d31a53fb2a30b55b266c0be992751ee
+                pool_id: source-pool:dfa55caf07c47d22b8ffe7dc6cbfa1fdebf8c14eef36455678f01f6217814fb3
                 source_kind: generated
                 members:
                   - - leaf_1
@@ -3290,7 +3290,7 @@ records:
               value:
                 kind: ObjectSet
                 objects:
-                  - object_id: source-remaining:63fc9911b79582b5b22f05d17d776631b3e098fc368f3e388fc4108b4b1fc40a
+                  - object_id: source-remaining:0914d3f446a77250bd4fe117cd865e6518f203b59096f0a91df06e808aef538b
                     generation: 0
                 origin: pool_remainder
                 pool: n3_port_0
@@ -3317,7 +3317,7 @@ records:
               capture: selection
               value:
                 kind: PoolContext
-                pool_id: source-pool:320577bc5962359975c9ed20ca84dc668d31a53fb2a30b55b266c0be992751ee
+                pool_id: source-pool:dfa55caf07c47d22b8ffe7dc6cbfa1fdebf8c14eef36455678f01f6217814fb3
                 source_kind: generated
                 members:
                   - - leaf_1
@@ -3347,7 +3347,7 @@ records:
               capture: receipt
               value:
                 kind: ReceiptId
-                receipt_id: source-placement:63fc9911b79582b5b22f05d17d776631b3e098fc368f3e388fc4108b4b1fc40a
+                receipt_id: source-placement:0914d3f446a77250bd4fe117cd865e6518f203b59096f0a91df06e808aef538b
                 result: objects
               source_leaves: []
           - name: n3_port_4
@@ -3371,13 +3371,13 @@ records:
               value:
                 kind: ObjectSet
                 objects:
-                  - object_id: source-remaining:63fc9911b79582b5b22f05d17d776631b3e098fc368f3e388fc4108b4b1fc40a
+                  - object_id: source-remaining:0914d3f446a77250bd4fe117cd865e6518f203b59096f0a91df06e808aef538b
                     generation: 0
                 origin: pool_remainder
                 pool: n3_port_0
                 placement: n3_port_3
               source_leaves: []
-      content_hash: 1664594cfb5ec4e5a2cb5d33e7db03e1c6a20464ba0cc7e94a91d71584ffd187
+      content_hash: e93fc0964c9f0e045aafe990a230d869500a1e19f43043dc9017414dae9bf37e
   - kind: sentence_template
     data:
       id: frame:4ab5a3d04aeaaef616e617b1cefd4d1b5ef77b2cf6a60c2a4a09e97a1d2a4b4a

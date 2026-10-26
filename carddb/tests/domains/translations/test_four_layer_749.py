@@ -785,3 +785,29 @@ def test_target_shape_defers_binding_supplied_choice_count(engine: Classifier) -
     with pytest.raises(ValueError, match="Target must use every required leaf"):
         target.verify(frame.leaf_schema, "zh-Hant", {})
     verify_target_shape(frame, target, {}, "zh-Hant", {})
+
+
+@pytest.mark.parametrize(
+    ("case", "raw", "ordinal"),
+    [row for row in CASES if row[0] in {"P01", "H02", "A01"}],
+    ids=["pool", "holder-counter", "holder-ability"],
+)
+def test_archive_batch_does_not_change_finite_source_identity(
+    case: str, raw: str, ordinal: int, engine: Classifier
+) -> None:
+    descriptor = source(raw)
+    changed = descriptor.model_copy(
+        update={
+            "source_ref": descriptor.source_ref.model_copy(
+                update={"batch_id": "sha256:" + "c" * 64}
+            )
+        }
+    )
+    before = derive(raw, engine, case)
+    after = derive_source(raw, changed, engine)
+    frame, binding = before.bind(ordinal)
+    rebuilt, rebound = after.bind(ordinal)
+    assert frame == rebuilt
+    assert binding.values == rebound.values
+    assert binding.occurrences == rebound.occurrences
+    assert binding.id == rebound.id

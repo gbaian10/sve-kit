@@ -48,12 +48,12 @@ records:
       content_hash: 76f5b5fb79a320e6e921020ad672ba221e83636b2eb873a004c34413a4289483
   - kind: sentence_template
     data:
-      id: frame:5e643ac692e30dd43ffacacd27cddc5e0adbf8c7f19b1b7910725f6b35b54da9
+      id: frame:f34e2a7b0ff25b5bc4afa5c00c3790e053fce1bc068c1caca9e97ebc6ff069be
       source:
         source_lang: ja
         canonical_hash: 24853b15fe6a816aa73f28427258912caca8aff57f2205cfb10e554d3923bc87
         normalizer_version: four-layer-jp-v10
-        semantic_definitions: 2853
+        semantic_definitions: 4485
       role: body
       semantic_variant:
         state: pending
@@ -194,12 +194,12 @@ records:
               value:
                 kind: ObjectSet
                 objects:
-                  - object_id: source-object:cecf33ea5ab8b0924af3bab2c3bc40e98cd24eb570901e0e6cc501a9f77dd609
+                  - object_id: source-object:3682b6e39f344d863a008a6d0edd9876f8f5b190efbe8f4cdeb9c2e9c5acc437
                     generation: 0
                 origin: selection
               source_leaves: []
         exports: []
-      content_hash: 5e643ac692e30dd43ffacacd27cddc5e0adbf8c7f19b1b7910725f6b35b54da9
+      content_hash: f34e2a7b0ff25b5bc4afa5c00c3790e053fce1bc068c1caca9e97ebc6ff069be
   - origin: machine
     kind: sentence_template
     data:

@@ -27,6 +27,7 @@ from sve_carddb.domains.translations.four_layer_derivation import SourceFamily
 from sve_carddb.domains.translations.four_layer_event_preparation import (
     occurrence,
     origins,
+    source_identity,
     update_source,
 )
 from sve_carddb.domains.translations.four_layer_n1_leaves import Leaf, leaf
@@ -100,7 +101,7 @@ class Builder:
             + ":"
             + hash_payload(
                 {
-                    "source": self.source.model_dump(mode="json"),
+                    "source": source_identity(self.source),
                     "scope": self.scope(span.start),
                     "segments": [
                         s.model_dump(mode="json") for s in origins(self.original, span)
