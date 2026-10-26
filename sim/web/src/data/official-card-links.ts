@@ -7,34 +7,18 @@ export type OfficialCardLink = {
   readonly url: string
 }
 
-const OFFICIAL_PREFIXES = [
-  "https://shadowverse-evolve.com/",
-  "https://en.shadowverse-evolve.com/",
-] as const
-const OFFICIAL_ORIGINS = new Set(OFFICIAL_PREFIXES.map((prefix) => new URL(prefix).origin))
-
-function officialUrl(value: unknown): string | undefined {
-  if (typeof value !== "string" || !OFFICIAL_PREFIXES.some((prefix) => value.startsWith(prefix)))
-    return undefined
-  try {
-    const url = new URL(value)
-    return OFFICIAL_ORIGINS.has(url.origin) ? value : undefined
-  } catch {
-    return undefined
-  }
+function officialUrl(printing: Row | undefined, region: "jp" | "en"): string | undefined {
+  if (printing?.["catalog_state"] !== "official") return undefined
+  const cardNo = stringValue(printing["card_no"])
+  if (!cardNo) return undefined
+  const base =
+    region === "jp"
+      ? "https://shadowverse-evolve.com/cardlist/"
+      : "https://en.shadowverse-evolve.com/cards/"
+  return `${base}?cardno=${encodeURIComponent(cardNo)}`
 }
 
-function sourceUrl(printing: Row | undefined): string | undefined {
-  for (const rawFace of arrayValue(printing?.["faces"] ?? [])) {
-    for (const rawObservation of arrayValue(objectValue(rawFace)["observations"] ?? [])) {
-      const url = officialUrl(objectValue(rawObservation)["source_url"])
-      if (url) return url
-    }
-  }
-  return undefined
-}
-
-/** Return official pages in the selected printing's region order, using observed snapshot URLs. */
+/** Return official pages in the selected printing's region order, using its exact catalog number. */
 export function officialCardLinks(
   catalog: Catalog,
   cardId: string,
@@ -47,7 +31,10 @@ export function officialCardLinks(
   const links: OfficialCardLink[] = []
   for (const targetRegion of orderedRegions) {
     const candidates = printings
-      .filter((printing) => printing["region"] === targetRegion)
+      .filter(
+        (printing) =>
+          printing["region"] === targetRegion && printing["catalog_state"] === "official",
+      )
       .sort((left, right) =>
         stringValue(left["card_no"]).localeCompare(stringValue(right["card_no"]), "en", {
           numeric: true,
@@ -65,7 +52,7 @@ export function officialCardLinks(
               )
             })
           }) ?? candidates[0])
-    const url = sourceUrl(selected)
+    const url = officialUrl(selected, targetRegion)
     if (url) links.push({ region: targetRegion, url })
   }
   return links

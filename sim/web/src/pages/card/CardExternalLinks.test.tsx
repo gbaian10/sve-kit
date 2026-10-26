@@ -48,17 +48,21 @@ function catalogWithPrintings(printings: readonly Record<string, unknown>[]): Ca
   } as unknown as Catalog
 }
 
-const jpPrinting = (url = "https://shadowverse-evolve.com/cards/1/") => ({
+const jpPrinting = () => ({
   id: "p:jp",
   region: "jp",
   card_no: "BP01-001",
-  faces: [{ observations: [{ source_url: url }] }],
+  catalog_state: "official",
+  decklog_source_url: "https://decklog.example/printing/1/",
+  faces: [{ observations: [{ source_url: "https://shadowverse-evolve.com/observed/1/" }] }],
 })
-const enPrinting = (url = "https://en.shadowverse-evolve.com/cards/1/") => ({
+const enPrinting = () => ({
   id: "p:en",
   region: "en",
-  card_no: "BP01-001",
-  faces: [{ observations: [{ source_url: url }] }],
+  card_no: "BP01-P28EN",
+  catalog_state: "official",
+  decklog_source_url: "https://decklog.example/printing/2/",
+  faces: [{ observations: [{ source_url: "https://en.shadowverse-evolve.com/observed/2/" }] }],
 })
 
 const linkRow = (digital: string, relation = "same_card") => ({
@@ -137,7 +141,7 @@ afterEach(() => {
 })
 
 describe("CardExternalLinks", () => {
-  it("shows the selected region first, then the other official card page", async () => {
+  it("builds links from each official printing's exact card number", async () => {
     const { client } = makeClient([linkRow("d:1")])
     await show(
       client,
@@ -152,8 +156,8 @@ describe("CardExternalLinks", () => {
     })
     const links = screen.getAllByRole("link")
     expect(links.map((link) => link.getAttribute("href"))).toEqual([
-      "https://en.shadowverse-evolve.com/cards/1/",
-      "https://shadowverse-evolve.com/cards/1/",
+      "https://en.shadowverse-evolve.com/cards/?cardno=BP01-P28EN",
+      "https://shadowverse-evolve.com/cardlist/?cardno=BP01-001",
       "https://portal.example/card/900211010?lang=en",
     ])
     expect(links.slice(0, 2).map((link) => link.textContent)).toEqual([
@@ -166,12 +170,48 @@ describe("CardExternalLinks", () => {
     expect(firstOfficialLink.getAttribute("rel")).toBe("noopener noreferrer")
   })
 
+  it.each([
+    ["jp", "BP01-001Ⓢ", "https://shadowverse-evolve.com/cardlist/?cardno=BP01-001%E2%93%88"],
+    ["jp", "BP01-053a", "https://shadowverse-evolve.com/cardlist/?cardno=BP01-053a"],
+    ["en", "BP01-053EN", "https://en.shadowverse-evolve.com/cards/?cardno=BP01-053EN"],
+  ] as const)(
+    "keeps the exact card number %s in its official URL",
+    async (region, cardNo, expected) => {
+      const { client } = makeClient([])
+      await show(
+        client,
+        region === "jp" ? "zh-TW" : "en",
+        "c:one",
+        catalogWithPrintings([
+          { ...(region === "jp" ? jpPrinting() : enPrinting()), card_no: cardNo },
+        ]),
+        region === "jp" ? "p:jp" : "p:en",
+        region,
+      )
+      expect(hrefs()).toEqual([expected])
+    },
+  )
+
+  it("does not show a URL for an unlisted printing", async () => {
+    const { client } = makeClient([])
+    const printing = { ...jpPrinting(), catalog_state: "unlisted" }
+    await show(client, "zh-TW", "c:one", catalogWithPrintings([printing]))
+    expect(screen.queryByRole("link")).toBeNull()
+  })
+
+  it("skips an unlisted printing when selecting another region's official page", async () => {
+    const { client } = makeClient([])
+    const unlisted = { ...jpPrinting(), id: "p:jp-unlisted", catalog_state: "unlisted" }
+    await show(client, "en", "c:one", catalogWithPrintings([unlisted, enPrinting()]), "p:en", "en")
+    expect(hrefs()).toEqual(["https://en.shadowverse-evolve.com/cards/?cardno=BP01-P28EN"])
+  })
+
   it("puts the Japanese region first when the selected printing is Japanese", async () => {
     const { client } = makeClient([])
     await show(client, "zh-TW", "c:one", catalogWithPrintings([enPrinting(), jpPrinting()]), "p:jp")
     expect(hrefs()).toEqual([
-      "https://shadowverse-evolve.com/cards/1/",
-      "https://en.shadowverse-evolve.com/cards/1/",
+      "https://shadowverse-evolve.com/cardlist/?cardno=BP01-001",
+      "https://en.shadowverse-evolve.com/cards/?cardno=BP01-P28EN",
     ])
   })
 
@@ -185,14 +225,14 @@ describe("CardExternalLinks", () => {
     expect(screen.getByRole("link").textContent).toContain(label)
   })
 
-  it("does not borrow another printing's official URL when the selected printing has none", async () => {
+  it("does not borrow another printing when the selected printing is unlisted", async () => {
     const { client } = makeClient([])
     const sibling = { ...jpPrinting(), id: "p:jp-2", card_no: "BP01-002" }
     await show(
       client,
       "zh-TW",
       "c:one",
-      catalogWithPrintings([{ ...jpPrinting(), faces: [] }, sibling]),
+      catalogWithPrintings([{ ...jpPrinting(), catalog_state: "unlisted" }, sibling]),
     )
     expect(screen.queryByRole("link")).toBeNull()
   })
@@ -200,22 +240,12 @@ describe("CardExternalLinks", () => {
   it("shows only the Japanese official page when only a Japanese printing exists", async () => {
     const { client } = makeClient([])
     await show(client, "zh-TW", "c:one", catalogWithPrintings([jpPrinting()]))
-    expect(hrefs()).toEqual(["https://shadowverse-evolve.com/cards/1/"])
+    expect(hrefs()).toEqual(["https://shadowverse-evolve.com/cardlist/?cardno=BP01-001"])
   })
 
-  it("shows no official link when the printing has no source URL", async () => {
+  it("shows no official link when the printing has no official card number", async () => {
     const { client } = makeClient([])
-    await show(client, "zh-TW", "c:one", catalogWithPrintings([{ ...jpPrinting(), faces: [] }]))
-    expect(screen.queryByRole("link")).toBeNull()
-  })
-
-  it.each([
-    "https://shadowverse-evolve.com.evil.example/cards/1/",
-    "http://shadowverse-evolve.com/cards/1/",
-    "https://unofficial.example/cards/1/",
-  ])("ignores non-official source URLs: %s", async (url) => {
-    const { client } = makeClient([])
-    await show(client, "zh-TW", "c:one", catalogWithPrintings([jpPrinting(url)]))
+    await show(client, "zh-TW", "c:one", catalogWithPrintings([{ ...jpPrinting(), card_no: "" }]))
     expect(screen.queryByRole("link")).toBeNull()
   })
 
@@ -223,7 +253,7 @@ describe("CardExternalLinks", () => {
     prefsStore.set({ showDigitalLinks: false })
     const { client, fragments } = makeClient([])
     await show(client, "zh-TW", "c:one", catalogWithPrintings([jpPrinting()]))
-    expect(hrefs()).toEqual(["https://shadowverse-evolve.com/cards/1/"])
+    expect(hrefs()).toEqual(["https://shadowverse-evolve.com/cardlist/?cardno=BP01-001"])
     expect(fragments).not.toHaveBeenCalled()
   })
 
