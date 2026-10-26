@@ -39,10 +39,13 @@ FACE = "f:e9d8deca215953a99d12bd07acd566fa"
 
 
 @pytest.fixture(scope="module")
-def fixture(tmp_path_factory: pytest.TempPathFactory) -> CurrentSourceFixture:
+def fixture(
+    tmp_path_factory: pytest.TempPathFactory, author_source_preparation: bytes
+) -> CurrentSourceFixture:
     return current_source_fixture(
         tmp_path_factory.mktemp("search-sources"),
         card_numbers=frozenset({"BP06-048", "BP06-P15"}),
+        preparation=author_source_preparation,
     )
 
 

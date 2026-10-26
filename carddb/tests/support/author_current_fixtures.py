@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from sve_carddb.build import create_database
 from sve_carddb.build.t1 import MINIMUM_CAPABILITIES
@@ -30,7 +31,14 @@ from sve_carddb.domains.translations.sources import Sources
 
 from .compiled_schemas import compile_build
 from .database_template import DatabaseTemplate
+from .prepared_values import restore
 from .semantic_definition_fixtures import with_definitions
+
+if TYPE_CHECKING:
+    from sve_carddb.domains.parsed_cards.storage import Catalog
+    from sve_carddb.domains.products import Language
+    from sve_carddb.domains.products.loader import ProductSnapshot
+    from sve_carddb.domains.registry.preview import PreviewPlan
 
 REPOSITORY = Path(__file__).resolve().parents[3]
 REVISION = "8ca79f0935dd97340991c057cb1b226fe745da50"
@@ -53,6 +61,19 @@ class CurrentSourceFixture:
     vocabulary: Vocabulary
     rules: Rules
     jp_batch_id: str
+
+
+@dataclass(frozen=True)
+class CurrentSourceInputs:
+    catalog: Catalog
+    identity: PreviewPlan
+    vocabulary: Vocabulary
+    languages: tuple[Language, ...]
+    products: ProductSnapshot
+    snapshot: Snapshot
+    rules: Rules
+    batch_id: str
+    parser_version: str
 
 
 def entry_snapshot(
@@ -186,14 +207,10 @@ def entry_snapshot(
     return snapshot
 
 
-def current_source_fixture(
-    store: Path,
-    *,
-    card_numbers: frozenset[str] = CARD_NUMBERS,
-    snapshot: Snapshot | None = None,
-    parser_version: str = PARSER,
-) -> CurrentSourceFixture:
-    """Build from public parsed inputs; the store is only an explicit provenance root."""
+def current_source_inputs(
+    store: Path, *, parser_version: str = PARSER
+) -> CurrentSourceInputs:
+    """Prepare the fixed repository inputs independently of each test's card selection."""
     from sve_carddb.domains.catalog.loader import prepare  # ruff: ignore[import-outside-top-level] -- initialize the production text interner before the catalog importer
 
     authored = REPOSITORY / "authored"
@@ -215,6 +232,46 @@ def current_source_fixture(
         ),
         regions=("jp",),
     )
+    prepared = prepare(
+        (load_adoptions(authored, entry="catalog/adoptions"),),
+        REPOSITORY,
+        BuildContext.from_inputs(REVISION, {}),
+        {"public-fixture": store},
+        identity.snapshot,
+        batches=batches,
+    )
+    return CurrentSourceInputs(
+        batches.catalog,
+        identity,
+        prepared.projection.vocabulary,
+        prepared.projection.catalog.languages,
+        load_products(authored, registry=identity.snapshot),
+        entry_snapshot(),
+        load(REPOSITORY),
+        batch_id,
+        parser_version,
+    )
+
+
+def current_source_fixture(
+    store: Path,
+    *,
+    card_numbers: frozenset[str] = CARD_NUMBERS,
+    snapshot: Snapshot | None = None,
+    parser_version: str = PARSER,
+    preparation: bytes | None = None,
+) -> CurrentSourceFixture:
+    """Build selected text into a private DB from detached, genuinely prepared inputs."""
+    inputs = (
+        current_source_inputs(store, parser_version=parser_version)
+        if preparation is None
+        else restore(preparation, CurrentSourceInputs)
+    )
+    assert inputs.parser_version == parser_version
+    batch_id = inputs.batch_id
+    identity = inputs.identity
+    batches = ParsedBatches(inputs.catalog)
+    frozen = batches.batch(store, "public-fixture", batch_id)
     printings = tuple(
         record.data
         for record in identity.included("printing")
@@ -243,15 +300,7 @@ def current_source_fixture(
         ),
     )
     stores = {"public-fixture": store}
-    prepared = prepare(
-        (load_adoptions(authored, entry="catalog/adoptions"),),
-        REPOSITORY,
-        BuildContext.from_inputs(REVISION, {}),
-        stores,
-        identity.snapshot,
-        batches=batches,
-    )
-    vocabulary = prepared.projection.vocabulary
+    vocabulary = inputs.vocabulary
     build = BuildContext.from_inputs(
         REVISION, observations.configuration(vocabulary, ())
     )
@@ -260,11 +309,11 @@ def current_source_fixture(
         with db.transaction():
             populate_product_preview(
                 db,
-                load_products(authored, registry=identity.snapshot),
+                inputs.products,
                 identity,
                 authored_revision=REVISION,
                 build=build,
-                languages=prepared.projection.catalog.languages,
+                languages=inputs.languages,
                 stores=stores,
                 batches=batches,
             )
@@ -274,8 +323,8 @@ def current_source_fixture(
     return CurrentSourceFixture(
         template,
         Sources(stores, REPOSITORY, build, identity.snapshot, batches=batches),
-        entry_snapshot() if snapshot is None else snapshot,
+        inputs.snapshot if snapshot is None else snapshot,
         vocabulary,
-        load(REPOSITORY),
+        inputs.rules,
         batch_id,
     )

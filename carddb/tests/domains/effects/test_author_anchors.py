@@ -40,9 +40,13 @@ WRITER: list[JsonValue] = [
 
 
 @pytest.fixture(scope="module")
-def fixture(tmp_path_factory: pytest.TempPathFactory) -> CurrentSourceFixture:
+def fixture(
+    tmp_path_factory: pytest.TempPathFactory, author_source_preparation: bytes
+) -> CurrentSourceFixture:
     return current_source_fixture(
-        tmp_path_factory.mktemp("anchors"), card_numbers=frozenset({NUMBER})
+        tmp_path_factory.mktemp("anchors"),
+        card_numbers=frozenset({NUMBER}),
+        preparation=author_source_preparation,
     )
 
 
