@@ -429,3 +429,36 @@ def test_named_descriptor_import_reordering_preserves_identity() -> None:
         changed,
     )
     assert after.id == frame.id
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        "相手にXダメージ。Xは「これの攻撃力」である。",
+        "自分の場のフォロワー1体を選ぶ。それに「それの攻撃力」と同じダメージ。",
+        (
+            "これをプレイする際、追加コストとして場の仮族・カードを好きな枚数アクトしてよい。"
+            "\nそれに「これの追加コストとしてアクトした仮族・カードの枚数」の3倍のダメージ。"
+        ),
+    ],
+    ids=["holder", "selection", "previous-line-receipt"],
+)
+def test_archive_batch_does_not_change_source_handles_or_frames(raw: str) -> None:
+    original = source(raw)
+    moved = original.model_copy(
+        update={
+            "source_ref": original.source_ref.model_copy(
+                update={"batch_id": "sha256:" + "c" * 64}
+            )
+        }
+    )
+    engine = n1_classifier()
+    before = derive_source(raw, original, engine)
+    after = derive_source(raw, moved, engine)
+    for index in range(len(before.field.parts)):
+        frame, binding = before.bind(index)
+        changed, rebound = after.bind(index)
+        assert frame == changed
+        assert binding.values == rebound.values
+        assert binding.occurrences == rebound.occurrences
+        assert binding.id == rebound.id

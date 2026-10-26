@@ -530,6 +530,9 @@ OccurrenceKey 恰為 `{owner,field,ordinal,source_hash,line_ordinal,role,segment
 它指來源實例，不含新 frame ID，故 pending 語義身分不循環。相同實例的 source_ref 改封存批次不會重配語義身分。
 binding-v2 payload 恰為 `{recipe:"binding-v2",occurrence:OccurrenceKey,frame_id,source_span,values,occurrences,trace}`；
 source_ref／source_unit_id 仍驗來源並存 DB，但不是封存批次改名的 ID 擾動來源。
+讀值、有限池與額外支付的來源物件／holder／receipt 符號也只以
+`owner,field,ordinal,source_hash` 加上各構造原有的 scope／來源範圍衍生；
+不把 `source_ref` 或 `source_unit_id` 帶入符號 hash，以免透過 source_links 改變 FrameId。
 
 | 位置／trace 子物件欄位 | 型別／合法域與引用 | 驗證者；失敗／案例 |
 | --- | --- | --- |

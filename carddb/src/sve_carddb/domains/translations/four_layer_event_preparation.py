@@ -29,6 +29,8 @@ from sve_carddb.domains.translations.recognition.provenance import merged
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
+    from pydantic import JsonValue
+
     from sve_carddb.contracts.four_layer import CaptureTime, PortValue
     from sve_carddb.contracts.source_binding import SourceDescriptor, TypedValue
     from sve_carddb.domains.translations.four_layer_classification import (
@@ -36,6 +38,13 @@ if TYPE_CHECKING:
         Recognized,
     )
     from sve_carddb.domains.translations.four_layer_normalizer import SourcePart
+
+
+def source_identity(source: SourceDescriptor) -> dict[str, JsonValue]:
+    """Archive membership is evidence bookkeeping, not a different source occurrence."""
+    return source.model_dump(
+        mode="json", include={"owner", "field", "ordinal", "source_hash"}
+    )
 
 
 def origins(part: SourcePart, span: Span) -> tuple[Span, ...]:

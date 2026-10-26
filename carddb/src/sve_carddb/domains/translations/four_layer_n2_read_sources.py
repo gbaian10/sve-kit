@@ -25,6 +25,7 @@ from sve_carddb.contracts.four_layer import (
 )
 from sve_carddb.contracts.n0 import SAFE_INTEGER
 from sve_carddb.domains.translations.four_layer_ability import HEAD, OPTION_LABEL
+from sve_carddb.domains.translations.four_layer_event_preparation import source_identity
 from sve_carddb.domains.translations.four_layer_expressions import (
     DEFINITIONS,
     DOMAIN_CODE,
@@ -319,7 +320,7 @@ class ReadSources:
             + ":"
             + hash_payload(
                 {
-                    "source": self.source.model_dump(mode="json"),
+                    "source": source_identity(self.source),
                     "scope": self._scope(provider.start),
                     "segments": []
                     if kind == "holder"
@@ -1145,7 +1146,7 @@ class ReadSources:
         segments = origins(part, Span(start=match.start(), end=match.end()))
         receipt_id = "source-extra-cost:" + hash_payload(
             {
-                "source": self.source.model_dump(mode="json"),
+                "source": source_identity(self.source),
                 "segments": [s.model_dump(mode="json") for s in segments],
             }
         )
