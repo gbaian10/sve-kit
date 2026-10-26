@@ -1,0 +1,154 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP22",
+  "range": "SSP/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-e12c10cf359dc750": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "db7576955e534cdc159c82e6906c2f5a50717f52"
+      }
+    },
+    "parsers": {
+      "parsers-21c8e47f7d6d7dbe": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "jp-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-fef43e41d001b695": {
+        "parser": "parsers-21c8e47f7d6d7dbe",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "present",
+        "reason_code": "nonempty_container"
+      }
+    },
+    "products": {
+      "products-8905f0bb53119d54": [
+        {
+          "ordinal": 0,
+          "name": "ブースターパック「Over the Calamity/オーバー・ザ・カラミティ」",
+          "date_raw": "2026-10-02",
+          "href_raw": [
+            "/cardlist/cardsearch?expansion=BP22",
+            "https://shadowverse-evolve.com/products/bp22/"
+          ],
+          "resolved_urls": [
+            "https://shadowverse-evolve.com/cardlist/cardsearch?expansion=BP22",
+            "https://shadowverse-evolve.com/products/bp22/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://shadowverse-evolve.com/products/bp22/",
+              "expansion_code": "BP22"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-4f53cda18c2baa0c": [],
+      "qa-9a1eaa3fbaf2a1bc": [
+        {
+          "stable_source_key": "Q2859",
+          "official_number": "Q2859",
+          "locator": "qa-block:0",
+          "published_on": "2026-09-28",
+          "date_raw": "2026-09-28"
+        },
+        {
+          "stable_source_key": "Q2858",
+          "official_number": "Q2858",
+          "locator": "qa-block:1",
+          "published_on": "2026-09-28",
+          "date_raw": "2026-09-28"
+        }
+      ]
+    },
+    "related": {
+      "related-8e7c5c6d8cc750f2": [
+        {
+          "locator": "related-link:0",
+          "href_raw": "/cardlist/?cardno=BP22-117"
+        }
+      ],
+      "related-a669eff4b6a3e3de": [
+        {
+          "locator": "related-link:0",
+          "href_raw": "/cardlist/?cardno=CP01-085"
+        }
+      ]
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:ac8d123c34e76ac1a6d72b5df085eebe116eaa35707e43e56d837668de5e1c01": {
+      "recipe": "recipes-e12c10cf359dc750",
+      "raw": {
+        "raw_sha256": "sha256:ab67873a319ac883afdf755c35bb1330e13ae749c37c377c815c3418b2dc3d3e",
+        "raw_bytes": 37374,
+        "first_receipt_id": "sha256:09da77ef3c02aad3d6d641c1f5564c88295577891edfb09a3a7e868b044a64f6",
+        "descriptor_sha256": "sha256:15f229816f7baa0270b0d6bc7d24c3869b1c7e8ddfd81d2f0b493f24c07a8409",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-fef43e41d001b695",
+            "result_hash": "sha256:76ce05f658ad338b35ab3fb19dc1dea8433b63a8724caac0dfc95a3a46263e75"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-8905f0bb53119d54",
+        "qa": "qa-9a1eaa3fbaf2a1bc",
+        "related": "related-8e7c5c6d8cc750f2",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:6278ac4f38122ba91369360ab9540f483e5f0a8f10e9eab23e7970afc7d84db5"
+    },
+    "src:v1:c785c2d5775d53d79622ef849c78bff0ef4cb254cde4773c135dd67644bfdaad": {
+      "recipe": "recipes-e12c10cf359dc750",
+      "raw": {
+        "raw_sha256": "sha256:44a6c5e7eadd13bd9341baf348a25895b62f36a3012dd011be994fd04f75ef6c",
+        "raw_bytes": 36335,
+        "first_receipt_id": "sha256:d66799508bdd024b32f22b0279b363bf77d4b2690e30374d64ca34afc138d56f",
+        "descriptor_sha256": "sha256:1692ebdc27408e87ddfda5b41fc24a1803a5a1d3744df7eaf2d76996f8dc6474",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-fef43e41d001b695",
+            "result_hash": "sha256:aa31d29709e710c813f4250714437b70efdba59f837d0852edc4b5cfe87585f2"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-8905f0bb53119d54",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-a669eff4b6a3e3de",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:bd66f3f96dc047dd776bfe999ef9b163d6d61eb54ee06ed4f8c10d30553fa571"
+    }
+  }
+}

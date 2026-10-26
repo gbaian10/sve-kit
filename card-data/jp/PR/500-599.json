@@ -5196,6 +5196,190 @@
       ]
     },
     {
+      "card_no": "PR-586",
+      "documents": {
+        "documents-528cb858609e1037": {
+          "region": "jp",
+          "record": {
+            "number": "PR-586",
+            "faces": [
+              {
+                "name": "粛清の器・メイシア",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "超克"
+                ],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト1}：これは進化する。",
+                "sections": [],
+                "flavor": "落涙ノ反応、行キ着きし果てが為、器と選バン。\n――『粛清』のネルヴァ",
+                "illustrator": "ねつき",
+                "image": "/wordpress/wp-content/images/cardlist/PR/PR-586.png",
+                "trait_raw": "超克"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP17-111"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:86a5b327c024406be6fbd1102cddd3b21daf64b79d1bd43751a07671a5cce371",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-586",
+            "fetched_at": "2026-10-26T10:47:38.377702Z"
+          },
+          "document_ref": "documents-528cb858609e1037"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-587",
+      "documents": {
+        "documents-f4e29c88aac5579e": {
+          "region": "jp",
+          "record": {
+            "number": "PR-587",
+            "faces": [
+              {
+                "name": "灼熱のアナテマ・バーンドナイト",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "アナテマ",
+                  "ドラゴニュート"
+                ],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": null,
+                "cost": "7",
+                "power": "5",
+                "hp": "5",
+                "text": "これをプレイする際、自分の墓場の元のコスト7以上の{ドラゴン}カードが4枚以上なら、コストを-2する。\n{進化}{コスト1}：これは進化する。\n{ファンファーレ}手札1枚を捨てる：相手の場のフォロワー1体を選ぶ。それに「捨てたカードのコスト」と同じダメージ。1枚引く。",
+                "sections": [],
+                "flavor": "「アナテマとは何か、私は彼女に全て話したよ」\n――バベロンメイヤー・エルタロ",
+                "illustrator": "岡田学彌",
+                "image": "/wordpress/wp-content/images/cardlist/PR/PR-587.png",
+                "trait_raw": "アナテマ・ドラゴニュート"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2109",
+                "date": "2025-07-07",
+                "question": "相手の場のフォロワーを選ぶことができない場合、『灼熱のアナテマ・バーンドナイト』の《ファンファーレ》能力をプレイして1枚引くことができますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、『灼熱のアナテマ・バーンドナイト』の《ファンファーレ》能力をプレイすることができず、1枚引くことができません。"
+              }
+            ],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=PR-588"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:93d161504db35d372c188358d8c15143b6a43e438204bd027e5f3d8e39dea5fc",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-587",
+            "fetched_at": "2026-10-26T10:47:40.958518Z"
+          },
+          "document_ref": "documents-f4e29c88aac5579e"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-588",
+      "documents": {
+        "documents-29f31b683fe3debb": {
+          "region": "jp",
+          "record": {
+            "number": "PR-588",
+            "faces": [
+              {
+                "name": "灼熱のアナテマ・バーンドナイト",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "アナテマ",
+                  "ドラゴニュート"
+                ],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": null,
+                "cost": "-",
+                "power": "6",
+                "hp": "6",
+                "text": "自分のエンドフェイズが来たとき、自分の墓場の元のコスト7以上の{ドラゴン}カードが7枚以上なら、相手のリーダーすべてに7ダメージ。\n【進化時】手札1枚を捨てる：相手の場のフォロワー1体を選ぶ。それに「捨てたカードのコスト」と同じダメージ。1枚引く。\n【超進化時】自分のリーダーは{体力}+5する。",
+                "sections": [],
+                "flavor": "「理解できたのは『神と戦える』だけかもしれないけどね」\n――バベロンメイヤー・エルタロ",
+                "illustrator": "岡田学彌",
+                "image": "/wordpress/wp-content/images/cardlist/PR/PR-588.png",
+                "trait_raw": "アナテマ・ドラゴニュート"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2110",
+                "date": "2025-07-07",
+                "question": "相手の場のフォロワーを選ぶことができない場合、『灼熱のアナテマ・バーンドナイト』の【進化時】能力をプレイして1枚引くことができますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、『灼熱のアナテマ・バーンドナイト』の【進化時】能力をプレイすることができず、1枚引くことができません。"
+              },
+              {
+                "id": "Q2078",
+                "date": "2025-07-07",
+                "question": "【進化時】能力と【超進化時】能力を持つフォロワーが超進化した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=PR-587"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e5c0b9e0c917bf358a986c0c08de18de16c74d26925bfca10c3cc198e703d96d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-588",
+            "fetched_at": "2026-10-26T10:47:43.730037Z"
+          },
+          "document_ref": "documents-29f31b683fe3debb"
+        }
+      ]
+    },
+    {
       "card_no": "PR-589",
       "documents": {
         "documents-5fa6da0d46ce0de1": {
@@ -5248,6 +5432,592 @@
             "fetched_at": "2026-09-25T00:07:31.132106Z"
           },
           "document_ref": "documents-5fa6da0d46ce0de1"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-590",
+      "documents": {
+        "documents-dcfd31c728f50547": {
+          "region": "jp",
+          "record": {
+            "number": "PR-590",
+            "faces": [
+              {
+                "name": "バイオレントスクリーム",
+                "card_class": "ナイトメア",
+                "card_type": "スペル",
+                "traits": [
+                  "獣"
+                ],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": null,
+                "cost": "0",
+                "power": "-",
+                "hp": "-",
+                "text": "下記から2つまでチョイスする。【1】{コスト1}：相手の場のフォロワー1体を選ぶ。それに2ダメージ。自分のリーダーに1ダメージ。【2】{コスト1}：自分のリーダーに1ダメージ。1枚引く。",
+                "sections": [],
+                "flavor": "犠牲者の前に開かれる、最期の扉。",
+                "illustrator": "りょうへい",
+                "image": "/wordpress/wp-content/images/cardlist/PR/PR-590.png",
+                "trait_raw": "獣"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2622",
+                "date": "2026-04-09",
+                "question": "2つまでチョイスするとき、1つもチョイスしないことを選択することはできますか？",
+                "answer": "いいえ。必ず1つ以上チョイスする必要があります。"
+              },
+              {
+                "id": "Q2601",
+                "date": "2026-03-25",
+                "question": "相手の場のフォロワーを選ぶことができない場合、【1】をチョイスして自分のリーダーに1ダメージ与えることができますか？",
+                "answer": "いいえ。適切な目標を選ぶことができない場合、【1】をチョイスすることができず、【2】をチョイスする必要があります。"
+              },
+              {
+                "id": "Q2573",
+                "date": "2026-03-25",
+                "question": "2つ以上の選択肢をチョイスするとき、1つの選択肢を2回以上チョイスすることはできますか？",
+                "answer": "いいえ。1つの選択肢を2回以上チョイスすることはできません。"
+              }
+            ],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:7884080c1aaa76c18b2bea07df2d2d35fb1159c49693cc330467dfc4d7437a6b",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-590",
+            "fetched_at": "2026-10-26T10:47:46.303070Z"
+          },
+          "document_ref": "documents-dcfd31c728f50547"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-591",
+      "documents": {
+        "documents-5751f1682aa55774": {
+          "region": "jp",
+          "record": {
+            "number": "PR-591",
+            "faces": [
+              {
+                "name": "宿題やるですぅ！",
+                "card_class": "ウィッチ",
+                "card_type": "スペル",
+                "traits": [
+                  "魔法使い",
+                  "学院"
+                ],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "1枚引く。自分の墓場の学院・カードが5枚以上なら、『成長したですぅ！』1枚をEXエリアに置く。",
+                "sections": [
+                  "『成長したですぅ！』{ウィッチ}魔法使い・学院・スペル{コスト0}相手の場のフォロワー1体を選ぶ。それに2ダメージ。1枚引く。自分の手札1枚を捨てる。"
+                ],
+                "flavor": null,
+                "illustrator": "えなれいん",
+                "image": "/wordpress/wp-content/images/cardlist/PR/PR-591.png",
+                "trait_raw": "魔法使い・学院"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP16-T02"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:315eafbc7ef6c057efad0930cb4b7e8decb2da800638e857f2a2b3d8626b140a",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-591",
+            "fetched_at": "2026-10-26T10:47:48.837367Z"
+          },
+          "document_ref": "documents-5751f1682aa55774"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-592",
+      "documents": {
+        "documents-c06aab93c9bced2d": {
+          "region": "jp",
+          "record": {
+            "number": "PR-592",
+            "faces": [
+              {
+                "name": "ブラストフェアリー",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "妖精",
+                  "キラー"
+                ],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": null,
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": "{ファンファーレ}相手の場のフォロワー1体を選ぶ。それに「自分のEXエリアの妖精・カードの枚数」と同じダメージ。",
+                "sections": [],
+                "flavor": "「たまには遊んでみるのもいいでしょう」\n――ヴァネッサ・ジュスティーヌ",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/PR/PR-592.png",
+                "trait_raw": "妖精・キラー"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:edc9897ccf05006cb454eac1c63f246cd09cfab63a3b9be6d314aa79cb8ad21d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-592",
+            "fetched_at": "2026-10-26T10:47:51.747992Z"
+          },
+          "document_ref": "documents-c06aab93c9bced2d"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-593",
+      "documents": {
+        "documents-41776ef63a2c68c7": {
+          "region": "jp",
+          "record": {
+            "number": "PR-593",
+            "faces": [
+              {
+                "name": "EP",
+                "card_class": "-",
+                "card_type": "EP",
+                "traits": [],
+                "rarity": "-",
+                "product": "PRカード",
+                "title": null,
+                "cost": "-",
+                "power": "-",
+                "hp": "-",
+                "text": "バトル開始時、後攻プレイヤーはEPを3つ持つ。\n自分が{進化}のコストを払うとき、表向きのEPを1つ裏向きにすることで、1PPを払える。（進化1回につき使えるEPは1つ）",
+                "sections": [],
+                "flavor": "夏の大冒険って、とってもドキドキするものなのね！\n私もちょっとは大人になれたかしら？",
+                "illustrator": "umio",
+                "image": "/wordpress/wp-content/images/cardlist/PR/PR-593.png",
+                "trait_raw": "-"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:29da64135bb61bb1b413918dc186ee17006d3225ced476eeabb9380a96b4c091",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-593",
+            "fetched_at": "2026-10-26T10:47:55.342509Z"
+          },
+          "document_ref": "documents-41776ef63a2c68c7"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-594",
+      "documents": {
+        "documents-f37fbc0b4611e51b": {
+          "region": "jp",
+          "record": {
+            "number": "PR-594",
+            "faces": [
+              {
+                "name": "EP",
+                "card_class": "-",
+                "card_type": "EP",
+                "traits": [],
+                "rarity": "-",
+                "product": "PRカード",
+                "title": null,
+                "cost": "-",
+                "power": "-",
+                "hp": "-",
+                "text": null,
+                "sections": [],
+                "flavor": "夏の大冒険って、とってもドキドキするものなのね！\n私もちょっとは大人になれたかしら？",
+                "illustrator": "umio",
+                "image": "/wordpress/wp-content/images/cardlist/PR/PR-594.png",
+                "trait_raw": "-"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:53330136cb41e061bedf1d1ca3fbd8b1b37e58221891e800853460325eab8d40",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-594",
+            "fetched_at": "2026-10-26T10:47:58.923163Z"
+          },
+          "document_ref": "documents-f37fbc0b4611e51b"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-595",
+      "documents": {
+        "documents-44e7a97c50553925": {
+          "region": "jp",
+          "record": {
+            "number": "PR-595",
+            "faces": [
+              {
+                "name": "繚乱の庭",
+                "card_class": "エルフ",
+                "card_type": "アミュレット",
+                "traits": [
+                  "妖精"
+                ],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": null,
+                "cost": "2",
+                "power": "-",
+                "hp": "-",
+                "text": "{ファンファーレ}『フェアリー』1体を場に出す。\n{起動}これを{アクト}墓場に置く：相手の場のフォロワー1体を選ぶ。それにXダメージ。Xは「自分の場と自分のEXエリアの妖精・トークン・フォロワーの枚数の合計」である。",
+                "sections": [
+                  "『フェアリー』{エルフ}妖精・フォロワー{コスト1}{攻撃力}1/{体力}1"
+                ],
+                "flavor": "ミツリョーシャって、キレイな花を咲かせるんだね！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/PR/PR-595.png",
+                "trait_raw": "妖精"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=PR-108"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c8e1fc569d6e11a6d840b0667c4f0ad3730053e8569db0cc3acde9242230d6ac",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-595",
+            "fetched_at": "2026-10-26T10:48:02.497878Z"
+          },
+          "document_ref": "documents-44e7a97c50553925"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-596",
+      "documents": {
+        "documents-cb0b3ad7c52f24e8": {
+          "region": "jp",
+          "record": {
+            "number": "PR-596",
+            "faces": [
+              {
+                "name": "アサルトナイト",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "兵士"
+                ],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": null,
+                "cost": "1",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト2}：これは進化する。\n{ファンファーレ}自分の場に『ビクトリーブレイダー』がいるなら、これは進化する。",
+                "sections": [],
+                "flavor": "「行くじゃんね！やるじゃんね！」\n――進藤カズキ",
+                "illustrator": "岡田学彌",
+                "image": "/wordpress/wp-content/images/cardlist/PR/PR-596.png",
+                "trait_raw": "兵士"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2802",
+                "date": "2026-09-28",
+                "question": "このフォロワーが《ファンファーレ》能力によって進化した場合、その進化は、進化前の『ゴブリン』が持っているような《進化》能力（進化することができる起動能力・「丸E」のアイコン）をプレイすることができる回数である1ターンに1回に含まれますか？",
+                "answer": "いいえ。1ターンに1回の回数に含まれません。\n進化前の『ゴブリン』が持っているような《進化》能力（進化することができる起動能力・「丸E」のアイコン）は1ターンに1回のみ使用することができます。それ以外の能力によって進化するものなどに、この制限はありません。"
+              }
+            ],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP22-019"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=PR-597"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:76b1a3171539d5cff9179230c3e329707b09ae944623f245ac0134a5453a5fb2",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-596",
+            "fetched_at": "2026-10-26T10:48:05.626403Z"
+          },
+          "document_ref": "documents-cb0b3ad7c52f24e8"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-597",
+      "documents": {
+        "documents-003265f72fd16c11": {
+          "region": "jp",
+          "record": {
+            "number": "PR-597",
+            "faces": [
+              {
+                "name": "アサルトナイト",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "兵士"
+                ],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "【指定攻撃】\n【進化時】自分の場のフォロワー1体を選ぶ。それはこのターン、「これは交戦ダメージを受けない」を持つ。",
+                "sections": [],
+                "flavor": "「攻めて攻めて攻めれば、いつかきっと勝てるじゃんねぇ！」\n――進藤カズキ",
+                "illustrator": "岡田学彌",
+                "image": "/wordpress/wp-content/images/cardlist/PR/PR-597.png",
+                "trait_raw": "兵士"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2797",
+                "date": "2026-09-28",
+                "question": "交戦ダメージとは何ですか？",
+                "answer": "交戦ダメージとは、攻撃フォロワーと攻撃目標のフォロワーが交戦状態のときに、それらのフォロワーが互いに与える攻撃力に等しいダメージのことを指します。"
+              }
+            ],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=PR-596"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:08a458037f87e834f7ad0fd5f0c40437bc0ba38dd3c0b30bbe6548382621c6a4",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-597",
+            "fetched_at": "2026-10-26T10:48:08.475005Z"
+          },
+          "document_ref": "documents-003265f72fd16c11"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-598",
+      "documents": {
+        "documents-27cf0aca1750cc49": {
+          "region": "jp",
+          "record": {
+            "number": "PR-598",
+            "faces": [
+              {
+                "name": "界門のホムンクルス・ラズリ",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "超克"
+                ],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "3",
+                "text": "{ファンファーレ}自分のデッキの上2枚を消滅させる。\n{起動}{コスト2}これを{アクト}：『エンシェントアーティファクト』1体と『レディアントアーティファクト』1体を場に出す。この能力は自分の消滅領域が10枚以上なら使える。",
+                "sections": [
+                  "『エンシェントアーティファクト』{ニュートラル}超克・フォロワー{コスト1}{攻撃力}3/{体力}1【突進】\n『レディアントアーティファクト』{ニュートラル}超克・フォロワー{コスト5}{攻撃力}4/{体力}3【疾走】"
+                ],
+                "flavor": "私は天威の護り手です。攻め寄る敵は払いましょう。\n封印解けるその日まで、いつか訪れる御方のために。",
+                "illustrator": "ヘスン",
+                "image": "/wordpress/wp-content/images/cardlist/PR/PR-598.png",
+                "trait_raw": "超克"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2823",
+                "date": "2026-09-28",
+                "question": "自分の場のカードが『界門のホムンクルス・ラズリ』を含めて4枚の状況で、《起動》能力をプレイした場合、『エンシェントアーティファクト』と『レディアントアーティファクト』のどちらを場に出すか選択することができますか？",
+                "answer": "はい。どちらを場に出すかを選択することができます。"
+              }
+            ],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP17-T16"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP22-T03"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9ec62abd8e37d76d35e435328089823d0e658b29621dc246b906e38b71eeca01",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-598",
+            "fetched_at": "2026-10-26T10:48:11.291879Z"
+          },
+          "document_ref": "documents-27cf0aca1750cc49"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-599",
+      "documents": {
+        "documents-f0ecd7e977bf4f4d": {
+          "region": "jp",
+          "record": {
+            "number": "PR-599",
+            "faces": [
+              {
+                "name": "竜の託宣",
+                "card_class": "ドラゴン",
+                "card_type": "スペル",
+                "traits": [
+                  "竜族"
+                ],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": null,
+                "cost": "2",
+                "power": "-",
+                "hp": "-",
+                "text": "下記から1つチョイスする。【1】自分のPP最大値を+1する。【2】1枚引く。",
+                "sections": [],
+                "flavor": "俺のシャドバは、ここからだ！\n行くぜ！竜の託宣！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/PR/PR-599.png",
+                "trait_raw": "竜族"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q298",
+                "date": "2022-06-24",
+                "question": "自分のPP最大値を+1したとき、自分の残りPPは+1しますか？",
+                "answer": "いいえ。自分の残りPPは+1しません。"
+              },
+              {
+                "id": "Q102",
+                "date": "2022-04-26",
+                "question": "このスペルの【1】をチョイスしてプレイし、自分のPP最大値を11以上にすることはできますか？",
+                "answer": "いいえ。PP最大値は10より多くなることはないため、自分のPP最大値を11以上にすることはできません。"
+              },
+              {
+                "id": "Q101",
+                "date": "2022-04-26",
+                "question": "自分のPP最大値が10のとき、このスペルの【1】をチョイスしてプレイすることはできますか？",
+                "answer": "はい。プレイすることができます。その場合、PP最大値は10のままとなります。"
+              }
+            ],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:434e8d8e8773ecead825876fe1e1818f3656fcedd5d3b0a7e7ab7198350b80ad",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-599",
+            "fetched_at": "2026-10-26T10:48:13.748137Z"
+          },
+          "document_ref": "documents-f0ecd7e977bf4f4d"
         }
       ]
     }
