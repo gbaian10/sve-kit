@@ -813,6 +813,25 @@ impl Game {
     /// Only future prototype actions and phase triggers can coexist without consuming typed facts.
     /// Waiting and delayed codes count too: a grant can outlive its holder's generation there.
     pub(in crate::game) fn internal_prototype_abilities(&self) -> Result<()> {
+        if !self.card_runtime.is_empty() {
+            if !self.state.pending.is_empty()
+                || !self.state.delayed.is_empty()
+                || !self.state.continuous.is_empty()
+            {
+                return Err(unsupported(
+                    "current game contains prototype pending, delayed or continuous abilities",
+                ));
+            }
+            for object in self.state.objects.values() {
+                if self.card_runtime.is_loaded(&object.card)
+                    && (!super::list(&object.state["keywords"]).is_empty()
+                        || !super::list(&object.state["links"]["出走"]).is_empty())
+                {
+                    return Err(unsupported("current holder carries prototype keywords"));
+                }
+            }
+            return Ok(());
+        }
         let admitted = |ability: &Value| match string(&ability["kind"]) {
             "spell" | "activated" | "evolve" => true,
             "trigger" => matches!(string(&ability["event"]), "end" | "main_start"),

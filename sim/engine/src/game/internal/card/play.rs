@@ -435,6 +435,7 @@ impl Game {
     /// # Errors
     /// Rejects unsupported cards, timing, carry, payment and body failures atomically.
     pub fn play_internal_card(&mut self, holder: &str, actor: PlayerId) -> Result<CardPlay> {
+        self.require_internal_abilities(holder, "card play")?;
         if self.card_runtime.quick.is_some() {
             return Err(invalid("Quick requires its authority question"));
         }
@@ -513,7 +514,7 @@ impl Game {
         {
             return Err(unsupported("card play holder, permission or timing"));
         }
-        self.check_internal_cards()
+        self.check_internal_resources()
     }
 
     pub(super) fn start_internal_ability(

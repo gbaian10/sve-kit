@@ -1,8 +1,11 @@
 use super::*;
 use sve_engine::game::{Game, Step, View, internal::DecisionView};
 
-const CONTEXT_GATE: &str =
-    "internal D1 does not support context requires prototype abilities or keywords";
+fn missing_base_ability(reason: &str) -> bool {
+    reason.contains("unloaded whole card ECP01-001/0")
+        && reason.contains("query evolution")
+        && reason.contains("current ability definitions unavailable")
+}
 
 fn evolve_position(seat: &str) -> Value {
     let mut initial = draw_position();
@@ -50,7 +53,10 @@ fn assert_pre_evolve_gate(
     seat: &str,
     reason: &str,
 ) {
-    assert_eq!(reason, CONTEXT_GATE, "only the recorded D1 gate may block");
+    assert!(
+        missing_base_ability(reason),
+        "only the missing base ability may block"
+    );
     assert_eq!(
         game.internal_card_stage(),
         stage_before,
@@ -66,7 +72,7 @@ fn assert_pre_evolve_gate(
     );
     record(
         seat,
-        &format!("blocked before evolve events by the D1 admission gate: {reason}"),
+        &format!("blocked before evolve events by the base ability query: {reason}"),
     );
 }
 
@@ -178,7 +184,8 @@ fn report_post_evolve_gate(game: &Game, seat: &str, reason: &str) {
     match projections(game) {
         Ok(states) => assert_evolved_states(&states, seat, other_seat(seat)),
         Err(EngineFailure::Unsupported(view_reason))
-            if view_reason.contains("unloaded whole card") =>
+            if view_reason.contains("unloaded whole card")
+                || view_reason == "current projection requires unavailable abilities" =>
         {
             record(
                 seat,
@@ -309,7 +316,7 @@ fn run_real_evolution(seat: &str) {
         "do":"evolve","source":"base","evolve_card":"resource","pay":{"pp":1_u8}
     })) {
         Ok(step) => step,
-        Err(EngineFailure::Unsupported(reason)) if reason == CONTEXT_GATE => {
+        Err(EngineFailure::Unsupported(reason)) if missing_base_ability(&reason) => {
             assert_pre_evolve_gate(&mut game, stage_before, seat, &reason);
             return;
         }

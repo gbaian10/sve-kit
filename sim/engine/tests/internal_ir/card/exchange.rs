@@ -357,3 +357,40 @@ fn exchange_rejects_early_receipt_and_material_triggers_before_any_observable_ch
     ));
     transactions::assert_restored(&game, &origin);
 }
+
+#[test]
+fn exchange_play_does_not_assume_unloaded_cemetery_materials_have_no_abilities() {
+    let tree = candidate(
+        "unit-follower",
+        json!({"optional_cost":{"banish":{"sel":{"who":"self","zone":"cemetery","kind":"spell"},"n":1}},"optional_cost_delta":-1}),
+        false,
+    );
+    let program = lower(&tree, 0);
+    assert!(program.card().card_play_costs[0].node.exchange.is_some());
+    let mut game = Game::new(
+        catalog_with_cost(&json!("0")),
+        &initial("unit-follower", "cemetery", 1, 6),
+        &Value::Null,
+        &Value::Null,
+        "unloaded-exchange-material",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &program).unwrap();
+    let before = exact_authority(&game);
+    let observations = [View::P1, View::P2, View::Referee]
+        .map(|view| game.projection(view).map_err(|failure| failure.to_string()));
+    let error = game
+        .play_internal_card("s", PlayerId { seat: 1 })
+        .unwrap_err();
+    assert!(
+        matches!(error, sve_engine::EngineFailure::Unsupported(reason)
+        if reason.contains("unit-spell/0") && reason.contains("current ability definitions unavailable"))
+    );
+    assert_eq!(exact_authority(&game), before);
+    assert_eq!(
+        [View::P1, View::P2, View::Referee]
+            .map(|view| game.projection(view).map_err(|failure| failure.to_string())),
+        observations
+    );
+    assert_eq!(game.internal_card_stage(), None);
+}

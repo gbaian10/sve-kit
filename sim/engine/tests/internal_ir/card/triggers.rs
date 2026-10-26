@@ -55,7 +55,7 @@ fn choose(game: &mut Game, question: &DecisionView, handle: u64) -> CardPlay {
         .unwrap()
 }
 
-fn activated(initial: &Value, program: &WellFormedCardProgram, seat: u32) -> Game {
+fn loaded(initial: &Value, program: &WellFormedCardProgram) -> Game {
     let mut game = Game::new(
         catalog(),
         initial,
@@ -67,6 +67,11 @@ fn activated(initial: &Value, program: &WellFormedCardProgram, seat: u32) -> Gam
     game.load_internal_card("unit-follower", program).unwrap();
     game.load_internal_card("unit-spell", &card(vec![]))
         .unwrap();
+    game
+}
+
+fn activated(initial: &Value, program: &WellFormedCardProgram, seat: u32) -> Game {
+    let mut game = loaded(initial, program);
     activate(&mut game, seat);
     game
 }
@@ -206,9 +211,11 @@ fn pending_order_keeps_departed_source_lki_and_checks_defeat_before_the_other_pl
         evolved["players"][opponent]["zones"]["field"][0]["state"] = json!({"evolved_with":"e"});
         evolved["players"][opponent]["zones"]["evolution"] =
             json!([{"id":"e","card":"unit-follower"}]);
-        let mut game = activated(&evolved, &program, seat);
+        let mut game = loaded(&evolved, &program);
         let before = exact_authority(&game);
-        let error = game.resume_internal_card().unwrap_err();
+        let error = game
+            .activate_internal_card("s", AbilityId(1), PlayerId { seat })
+            .unwrap_err();
         assert!(format!("{error:?}").contains("evolution information association"));
         assert_eq!(before, exact_authority(&game));
         let mut game = activated(&initial, &program, seat);

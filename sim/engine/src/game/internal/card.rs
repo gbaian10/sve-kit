@@ -64,6 +64,7 @@ pub struct Activation {
 
 #[derive(Clone, Debug, Default)]
 pub(in crate::game) struct CardRuntime {
+    selected: bool,
     cards: BTreeMap<String, WellFormedCardProgram>,
     current: BTreeMap<String, Arc<CurrentCard>>,
     resources: BTreeMap<String, String>,
@@ -150,7 +151,7 @@ impl CardRuntime {
         })
     }
     pub(in crate::game) fn is_empty(&self) -> bool {
-        self.cards.is_empty()
+        self.cards.is_empty() && !self.selected
     }
 
     pub(in crate::game) fn is_loaded(&self, card: &str) -> bool {
@@ -194,6 +195,7 @@ impl Game {
             current.insert(number, Arc::new(catalog.resolve_current(candidate)?));
         }
         let mut game = Self::new(catalog, setup, facts, random, seed)?;
+        game.card_runtime.selected = true;
         game.card_runtime.current = current;
         game.admit_evolution_resources()?;
         let cards = game
@@ -410,6 +412,7 @@ impl Game {
         definition: AbilityId,
         actor: PlayerId,
     ) -> Result<CardPlay> {
+        self.require_internal_abilities(holder, &format!("activate ability {}", definition.0))?;
         let object = self.object(holder)?.clone();
         let ability = self
             .internal_printed_abilities(holder)?
@@ -439,8 +442,7 @@ impl Game {
             controller: player_id(&object.controller)?,
         };
         self.internal_context(&context)?;
-        // Even unselected cards must have an admitted whole tree before they can intervene.
-        self.check_internal_cards()?;
+        self.check_internal_resources()?;
         let source = self.internal_card_source(holder, definition, actor)?;
         if let Some(limit) = ability.node.play.as_ref().and_then(|play| play.limit)
             && !self.card_runtime.quota_available(
@@ -456,13 +458,9 @@ impl Game {
         self.start_internal_ability(ability.node, context, source, false)
     }
 
-    pub(in crate::game) fn check_internal_cards(&self) -> Result<()> {
-        for current in self.state.objects.values() {
-            if !self.card_runtime.cards.contains_key(&current.card)
-                && !self.internal_evolution_resource(&current.id)?
-            {
-                return Err(unsupported("context contains an unloaded whole card"));
-            }
+    pub(in crate::game) fn check_internal_resources(&self) -> Result<()> {
+        for holder in self.card_runtime.resources.keys() {
+            self.internal_evolution_resource(holder)?;
         }
         Ok(())
     }

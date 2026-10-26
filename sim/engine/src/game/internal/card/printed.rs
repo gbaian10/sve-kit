@@ -14,11 +14,37 @@ fn text(value: &Value) -> Result<&str> {
         .ok_or_else(|| invalid("missing characteristic text"))
 }
 
+fn unavailable(
+    card: &str,
+    face: usize,
+    holder: &str,
+    generation: u64,
+    query: &str,
+) -> EngineFailure {
+    super::unsupported(&format!(
+        "unloaded whole card {card}/{face}, holder {holder} generation {generation}, query {query}: current ability definitions unavailable"
+    ))
+}
+
 #[expect(
     clippy::multiple_inherent_impl,
     reason = "Printed abilities and immutable event characteristics share the catalogue boundary."
 )]
 impl Game {
+    pub(in crate::game) fn require_internal_abilities(
+        &self,
+        holder: &str,
+        query: &str,
+    ) -> Result<()> {
+        let object = self.object(holder)?;
+        let printed = object.state["evolved_with"].as_str().unwrap_or(holder);
+        let (card, face) = self.internal_effective_print(holder)?;
+        if self.card_runtime.is_loaded(&card) || self.internal_evolution_resource(printed)? {
+            return Ok(());
+        }
+        Err(unavailable(&card, face, holder, object.generation, query))
+    }
+
     pub(in crate::game::internal) fn internal_effective_print(
         &self,
         holder: &str,
@@ -50,13 +76,32 @@ impl Game {
         holder: &str,
     ) -> Result<Vec<Located<Ability>>> {
         let object = self.object(holder)?;
+        if self.card_runtime.is_empty() {
+            if object.state["silenced"] != true {
+                self.internal_effective_print(holder)?;
+            }
+            return Ok(Vec::new());
+        }
+        self.require_internal_abilities(holder, "printed ability set")?;
+        let (card, face) = self.internal_effective_print(holder)?;
+        let Some(program) = self.card_runtime.cards.get(&card) else {
+            let printed = self.catalog.face(&card, face)?;
+            if printed["text"].as_str() == Some("")
+                && printed["sections"].as_array().is_some_and(Vec::is_empty)
+            {
+                return Ok(Vec::new());
+            }
+            return Err(unavailable(
+                &card,
+                face,
+                holder,
+                object.generation,
+                "printed ability set",
+            ));
+        };
         if object.state["silenced"] == true {
             return Ok(Vec::new());
         }
-        let (card, face) = self.internal_effective_print(holder)?;
-        let Some(program) = self.card_runtime.cards.get(&card) else {
-            return Ok(Vec::new());
-        };
         Ok(program
             .card()
             .abilities
@@ -118,6 +163,7 @@ impl Game {
         &mut self,
         holder: &str,
     ) -> Result<Characteristics> {
+        self.require_internal_abilities(holder, "event characteristics and LKI abilities")?;
         let object = self.object(holder)?.clone();
         let (card, face) = self.internal_effective_print(holder)?;
         let printed = self.face(holder)?.clone();

@@ -422,7 +422,7 @@ impl Game {
                         "special-card movement requires whole-card authority",
                     ));
                 }
-                self.check_internal_cards()?;
+                self.check_internal_resources()?;
             }
             if ((card_type.contains("トークン") || card_type.contains("アドバンス"))
                 && !matches!(card_type, "フォロワー・アドバンス" | "フォロワー・トークン"))

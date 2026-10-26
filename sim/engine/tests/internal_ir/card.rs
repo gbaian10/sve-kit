@@ -381,7 +381,7 @@ fn unsupported_interactive_bodies_are_not_admitted() {
 }
 
 #[test]
-fn every_context_card_must_be_loaded_and_saved_typed_cards_fail_explicitly() {
+fn unrelated_unloaded_cards_allow_zero_draw_but_saved_typed_cards_fail_explicitly() {
     for seat in [1, 2] {
         let mut initial = setup(seat, json!([]));
         let actor = if seat == 1 { "P1" } else { "P2" };
@@ -392,25 +392,34 @@ fn every_context_card_must_be_loaded_and_saved_typed_cards_fail_explicitly() {
             Game::new(catalog(), &initial, &Value::Null, &Value::Null, "load-seed").unwrap();
         game.load_internal_card("unit-follower", &card(vec![ability(1, vec![draw(1, 0)])]))
             .unwrap();
-        let before = exact_authority(&game);
-        game.activate_internal_card("s", AbilityId(1), PlayerId { seat })
-            .unwrap_err();
-        assert_eq!(before, exact_authority(&game));
-        serde_json::to_value(&game).unwrap_err();
         assert!(
             game.load_internal_card("unit-follower", &card(vec![]))
                 .is_err()
         );
         assert!(game.load_internal_card("unknown", &card(vec![])).is_err());
-        game.load_internal_card("unit-spell", &card(vec![]))
+        let mut fully_loaded = game.clone();
+        let result = resolved(
+            game.activate_internal_card("s", AbilityId(1), PlayerId { seat })
+                .unwrap(),
+        );
+        assert!(result.progress.complete);
+        assert_eq!(
+            game.query(View::Referee, &format!("{actor}.hand_count"))
+                .unwrap(),
+            Some(json!(1_u8))
+        );
+        serde_json::to_value(&game).unwrap_err();
+        fully_loaded
+            .load_internal_card("unit-spell", &card(vec![]))
             .unwrap();
-        activate(&mut game, seat);
-        let before = exact_authority(&game);
+        activate(&mut fully_loaded, seat);
+        let before = exact_authority(&fully_loaded);
         assert!(
-            game.load_internal_card("unit-amulet", &card(vec![]))
+            fully_loaded
+                .load_internal_card("unit-amulet", &card(vec![]))
                 .is_err()
         );
-        assert_eq!(before, exact_authority(&game));
+        assert_eq!(before, exact_authority(&fully_loaded));
     }
 }
 

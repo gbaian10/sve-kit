@@ -227,6 +227,7 @@ impl Game {
         let mut destinations = BTreeMap::new();
         let group = self.group();
         for id in ids {
+            self.require_ability_sources("movement replacement")?;
             let mut destination = zone.to_owned();
             for source in self.field_ids() {
                 for code in self.abilities(&source)? {

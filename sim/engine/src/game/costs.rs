@@ -141,6 +141,7 @@ impl Game {
         context: &Frame,
         kind: CostKind,
     ) -> Result<i64> {
+        self.require_ability_sources("cost adjustment")?;
         let mut adjustment = 0_i64;
         let mut sources = self.field_ids();
         if !sources.iter().any(|source| source == id) {

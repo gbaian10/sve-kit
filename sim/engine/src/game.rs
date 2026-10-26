@@ -658,6 +658,9 @@ impl Game {
             .unwrap_or(string(&self.face(id)?["card_type"])))
     }
     pub(super) fn printed_abilities(&self, id: &str) -> Result<Vec<Value>> {
+        if !self.card_runtime.is_empty() {
+            self.require_internal_abilities(id, "printed ability set")?;
+        }
         let object = self.object(id)?;
         if object.state["silenced"] == true {
             return Ok(Vec::new());
@@ -695,6 +698,7 @@ impl Game {
     fn abilities(&self, id: &str) -> Result<Vec<Value>> {
         let mut abilities = self.local_abilities(id)?;
         if self.object(id)?.zone == "field" {
+            self.require_ability_sources("granted abilities")?;
             for source in self.field_ids() {
                 for ability in self.local_abilities(&source)? {
                     let body = &ability["body"];
@@ -738,8 +742,24 @@ impl Game {
         value["controller"] = json!(object.controller);
         Ok(value)
     }
-    fn ability_sources(&self) -> Vec<String> {
-        self.state
+    fn require_ability_sources(&self, query: &str) -> Result<()> {
+        if !self.card_runtime.is_empty() {
+            // Off-field subscriptions cannot be excluded using unadmitted prototype headers.
+            let query = format!("{query} active zones");
+            for holder in self.state.objects.keys() {
+                self.require_internal_abilities(holder, &query)?;
+            }
+        }
+        Ok(())
+    }
+
+    fn ability_sources(&self, query: &str) -> Result<Vec<String>> {
+        self.require_ability_sources(query)?;
+        if !self.card_runtime.is_empty() {
+            return Ok(self.field_ids());
+        }
+        Ok(self
+            .state
             .objects
             .values()
             .filter(|object| {
@@ -755,7 +775,7 @@ impl Game {
                         })
             })
             .map(|object| object.id.clone())
-            .collect()
+            .collect())
     }
     fn ability(&self, id: &str, reference: &Value) -> Result<Value> {
         if let Some(code) = self.abilities(id)?.into_iter().find(|code| {

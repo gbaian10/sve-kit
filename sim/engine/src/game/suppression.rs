@@ -44,6 +44,7 @@ impl Game {
     }
 
     fn trigger_suppression(&self, controller: &str, event: &str) -> Result<Option<String>> {
+        self.require_ability_sources("trigger suppression")?;
         let (name, label) = if event == "enter" {
             ("fanfare", "ファンファーレ")
         } else {
