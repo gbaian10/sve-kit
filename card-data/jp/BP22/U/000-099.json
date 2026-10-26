@@ -1,0 +1,447 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP22",
+  "range": "U/000-099",
+  "products": {
+    "products-8914edae9c419bc1": [
+      {
+        "name": "ブースターパック「Over the Calamity/オーバー・ザ・カラミティ」",
+        "date": "2026-10-02",
+        "links": [
+          "/cardlist/cardsearch?expansion=BP22",
+          "https://shadowverse-evolve.com/products/bp22/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP22-U01",
+      "documents": {
+        "documents-e6833d522ad1ee7c": {
+          "region": "jp",
+          "record": {
+            "number": "BP22-U01",
+            "faces": [
+              {
+                "name": "ブリリアントフェアリー",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "妖精"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック「Over the Calamity/オーバー・ザ・カラミティ」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "4",
+                "text": "これが場にいる限り、自分の場の妖精・トークン・フォロワーすべては【疾走】を持つ。\n{起動}{コスト0}：相手の場のフォロワー1体を選ぶ。それにXダメージ。Xは「このターン中に自分がプレイしたカードの枚数」である。この能力は1ターンに1回使える。",
+                "sections": [],
+                "flavor": "私の旋律に羽根を揺らして。\n――ブリリアントフェアリー",
+                "illustrator": "irua",
+                "image": "/wordpress/wp-content/images/cardlist/BP22/bp22-u01.png",
+                "trait_raw": "妖精"
+              }
+            ],
+            "release_date": "2026-10-02",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2787",
+                "date": "2026-09-28",
+                "question": "『ブリリアントフェアリー』の能力によって【疾走】を持った自分の場の『フェアリー』が攻撃し、攻撃目標に相手のアクト状態のフォロワーを選択しました。その後のクイックタイミングにおいて『堕天』などで自分の場の『ブリリアントフェアリー』が消滅され、攻撃している『フェアリー』が【疾走】を失った場合、その攻撃は行われますか？",
+                "answer": "はい。攻撃している途中で【疾走】を失っていても、その攻撃は行われます。"
+              }
+            ],
+            "products_ref": "products-8914edae9c419bc1",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5fe4839ac870e78038bcd119f349c753e33db79babdfe2dee0cf7bb917e7a2dc",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP22-U01",
+            "fetched_at": "2026-10-26T10:41:21.808733Z"
+          },
+          "document_ref": "documents-e6833d522ad1ee7c"
+        }
+      ]
+    },
+    {
+      "card_no": "BP22-U02",
+      "documents": {
+        "documents-e8535f5f780ad5ad": {
+          "region": "jp",
+          "record": {
+            "number": "BP22-U02",
+            "faces": [
+              {
+                "name": "ビクトリーブレイダー",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "指揮官"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック「Over the Calamity/オーバー・ザ・カラミティ」",
+                "title": null,
+                "cost": "6",
+                "power": "4",
+                "hp": "8",
+                "text": "【突進】【指定攻撃】\n自分のターンごとに10回、これが交戦ダメージを与えたとき、これをスタンドする。\n【攻撃時】これは{体力}+1する。自分のPPを1回復する。",
+                "sections": [],
+                "flavor": "必勝、常勝、俺の戦だ！\n――ビクトリーブレイダー",
+                "illustrator": "やまもも",
+                "image": "/wordpress/wp-content/images/cardlist/BP22/bp22-u02.png",
+                "trait_raw": "指揮官"
+              }
+            ],
+            "release_date": "2026-10-02",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2798",
+                "date": "2026-09-28",
+                "question": "このフォロワーが相手のリーダーに攻撃したとき、このフォロワーの「自分のターンごとに10回、これが交戦ダメージを与えたとき、これをスタンドする。」能力は誘発しますか？",
+                "answer": "いいえ。フォロワーが相手のリーダーへ攻撃したときに発生するダメージは交戦ダメージではないため、このフォロワーをスタンドすることはできません。"
+              },
+              {
+                "id": "Q2797",
+                "date": "2026-09-28",
+                "question": "交戦ダメージとは何ですか？",
+                "answer": "交戦ダメージとは、攻撃フォロワーと攻撃目標のフォロワーが交戦状態のときに、それらのフォロワーが互いに与える攻撃力に等しいダメージのことを指します。"
+              }
+            ],
+            "products_ref": "products-8914edae9c419bc1",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:b825ed4b182aa7324de70b01fd08c4cdae23781e749fe50f143ca8a95636e88d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP22-U02",
+            "fetched_at": "2026-10-26T10:41:24.880040Z"
+          },
+          "document_ref": "documents-e8535f5f780ad5ad"
+        }
+      ]
+    },
+    {
+      "card_no": "BP22-U03",
+      "documents": {
+        "documents-191dccadd45de2e1": {
+          "region": "jp",
+          "record": {
+            "number": "BP22-U03",
+            "faces": [
+              {
+                "name": "巡りの大魔術師・レヴィ",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "魔法使い"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック「Over the Calamity/オーバー・ザ・カラミティ」",
+                "title": null,
+                "cost": "-",
+                "power": "5",
+                "hp": "5",
+                "text": "【進化時】相手のリーダー1人か相手の場のフォロワー1体を選ぶ。それに3ダメージ。\n{起動}{コスト1}【土の秘術】：相手のリーダー1人か相手の場のフォロワー1体を選ぶ。それに3ダメージ。この能力は1ターンに1回使える。",
+                "sections": [],
+                "flavor": "魔術の真理を掴んだぞ！\n――巡りの大魔術師・レヴィ",
+                "illustrator": "藤木ゆう",
+                "image": "/wordpress/wp-content/images/cardlist/BP22/bp22-u03.png",
+                "trait_raw": "魔法使い"
+              }
+            ],
+            "release_date": "2026-10-02",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-8914edae9c419bc1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP22-040"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e9ac5b847867ef1e4e5d3b511279432c8aaae701aa6901e81ef619ba282ca397",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP22-U03",
+            "fetched_at": "2026-10-26T10:41:27.882835Z"
+          },
+          "document_ref": "documents-191dccadd45de2e1"
+        }
+      ]
+    },
+    {
+      "card_no": "BP22-U04",
+      "documents": {
+        "documents-4d0d098f68d6e314": {
+          "region": "jp",
+          "record": {
+            "number": "BP22-U04",
+            "faces": [
+              {
+                "name": "イグニスドラゴン",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "竜族"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック「Over the Calamity/オーバー・ザ・カラミティ」",
+                "title": null,
+                "cost": "7",
+                "power": "4",
+                "hp": "6",
+                "text": "これを自分の手札から捨てたとき、{コスト2}：自分のPP最大値を+1する。\n{進化}{コスト1}：これは進化する。\n{ファンファーレ}自分の手札が3枚以下なら、これは進化する。",
+                "sections": [],
+                "flavor": "どんなピンチだってチャンスに変える！\n――竜ヶ崎ヒイロ",
+                "illustrator": "ねじ太",
+                "image": "/wordpress/wp-content/images/cardlist/BP22/bp22-u04.png",
+                "trait_raw": "竜族"
+              }
+            ],
+            "release_date": "2026-10-02",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2833",
+                "date": "2026-09-28",
+                "question": "自分の手札が『イグニスドラゴン』を含めて4枚の状況で、その『イグニスドラゴン』をプレイした場合、《ファンファーレ》能力の「自分の手札が3枚以下なら、」の条件を満たしますか？",
+                "answer": "はい。満たします。"
+              },
+              {
+                "id": "Q2832",
+                "date": "2026-09-28",
+                "question": "何らかの能力により、相手のターン中に『イグニスドラゴン』を自分の手札から捨てたとき、「これを自分の手札から捨てたとき、～」という能力は誘発しますか？",
+                "answer": "はい。相手のターン中であっても誘発します。"
+              },
+              {
+                "id": "Q2831",
+                "date": "2026-09-28",
+                "question": "自分のエンドフェイズに手札の枚数上限の超過によって『イグニスドラゴン』を捨てたとき、『イグニスドラゴン』の能力で自分のPP最大値を+1することはできますか？",
+                "answer": "はい。自分のPP最大値を+1することができます。"
+              },
+              {
+                "id": "Q2802",
+                "date": "2026-09-28",
+                "question": "このフォロワーが《ファンファーレ》能力によって進化した場合、その進化は、進化前の『ゴブリン』が持っているような《進化》能力（進化することができる起動能力・「丸E」のアイコン）をプレイすることができる回数である1ターンに1回に含まれますか？",
+                "answer": "いいえ。1ターンに1回の回数に含まれません。\n進化前の『ゴブリン』が持っているような《進化》能力（進化することができる起動能力・「丸E」のアイコン）は1ターンに1回のみ使用することができます。それ以外の能力によって進化するものなどに、この制限はありません。"
+              }
+            ],
+            "products_ref": "products-8914edae9c419bc1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP22-057"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:a11f95d2eda9f0de8c38c38a9eb0c8bddd3ddda5808039426692acef591d0dec",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP22-U04",
+            "fetched_at": "2026-10-26T10:41:30.811992Z"
+          },
+          "document_ref": "documents-4d0d098f68d6e314"
+        }
+      ]
+    },
+    {
+      "card_no": "BP22-U05",
+      "documents": {
+        "documents-2635a99d48e86ac5": {
+          "region": "jp",
+          "record": {
+            "number": "BP22-U05",
+            "faces": [
+              {
+                "name": "ケルヌンノス",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔界"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック「Over the Calamity/オーバー・ザ・カラミティ」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "3",
+                "text": "{ファンファーレ}手札の元のコスト2のカード1枚を捨てる：1枚引く。\n{起動}{コスト4}これを{アクト}：自分の墓場の「これと同名を除く元のコスト2の{ナイトメア}フォロワー」をカード名が異なるように2枚まで選ぶ。それを場に出す。この能力は自分の墓場の元のコスト2のカードが10枚以上なら使える。",
+                "sections": [],
+                "flavor": "いのち果たせや、ケモノども。\n――ケルヌンノス",
+                "illustrator": "liiko",
+                "image": "/wordpress/wp-content/images/cardlist/BP22/bp22-u05.png",
+                "trait_raw": "魔界"
+              }
+            ],
+            "release_date": "2026-10-02",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-8914edae9c419bc1",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5819cc9132c8f57874b059675b892697c11dd052ecf372bd5efe2357d632355b",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP22-U05",
+            "fetched_at": "2026-10-26T10:41:33.601200Z"
+          },
+          "document_ref": "documents-2635a99d48e86ac5"
+        }
+      ]
+    },
+    {
+      "card_no": "BP22-U06",
+      "documents": {
+        "documents-7d81c939c9351d10": {
+          "region": "jp",
+          "record": {
+            "number": "BP22-U06",
+            "faces": [
+              {
+                "name": "ホーリーセイバー",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "先導"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック「Over the Calamity/オーバー・ザ・カラミティ」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "【守護】\n【進化時】相手の場のフォロワー1体を選ぶ。それに2ダメージ。\n【超進化時】『聖女の号令』1枚をEXエリアに置く。",
+                "sections": [],
+                "flavor": "思うがままに、刃を振るう！\n――ホーリーセイバー",
+                "illustrator": "岡田学彌",
+                "image": "/wordpress/wp-content/images/cardlist/BP22/bp22-u06.png",
+                "trait_raw": "先導"
+              }
+            ],
+            "release_date": "2026-10-02",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2859",
+                "date": "2026-09-28",
+                "question": "【進化時】能力を持つフォロワーが超進化した場合、そのフォロワーの【進化時】能力は誘発しますか？",
+                "answer": "はい。【超進化時】能力だけではなく、【進化時】能力も誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2858",
+                "date": "2026-09-28",
+                "question": "【進化時】能力と【超進化時】能力を持つフォロワーが超進化した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-8914edae9c419bc1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP22-093"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP22-T01"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:254e3cf350f624c64333f4b7f44dba08efb0fd8ed7175edae836059a53e95824",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP22-U06",
+            "fetched_at": "2026-10-26T10:41:36.291237Z"
+          },
+          "document_ref": "documents-7d81c939c9351d10"
+        }
+      ]
+    },
+    {
+      "card_no": "BP22-U07",
+      "documents": {
+        "documents-5232efbe63bb7810": {
+          "region": "jp",
+          "record": {
+            "number": "BP22-U07",
+            "faces": [
+              {
+                "name": "ゴブリンエンペラー",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ゴブリン"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック「Over the Calamity/オーバー・ザ・カラミティ」",
+                "title": null,
+                "cost": "5",
+                "power": "3",
+                "hp": "3",
+                "text": "自分の場に他のゴブリン・フォロワーが出たとき、相手の場のフォロワー1体を選ぶ。それに2ダメージ。\n{ファンファーレ}自分のデッキの上5枚を見る。その中から、ゴブリン・カードを元のコストの合計が4以下になるように2枚までEXエリアに置いてよい。残りを好きな順にデッキの下に置く。このターン、それをプレイする際、コストを0にする。",
+                "sections": [],
+                "flavor": "ひれふせ！あがめよ！ひれふせー！\nワシこそゴブリン集落の上に立つ、王の中のキングだ！",
+                "illustrator": "Akefumi",
+                "image": "/wordpress/wp-content/images/cardlist/BP22/bp22-u07.png",
+                "trait_raw": "ゴブリン"
+              }
+            ],
+            "release_date": "2026-10-02",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2864",
+                "date": "2026-09-28",
+                "question": "何らかの能力により、相手のターン中に自分の場に他のゴブリン・フォロワーが出た場合、「自分の場に他のゴブリン・フォロワーが出たとき、～」という能力は誘発しますか？",
+                "answer": "はい。相手のターン中であっても誘発します。"
+              }
+            ],
+            "products_ref": "products-8914edae9c419bc1",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e0d1d269ecf1b872367749fba8e80c53cb99027a2176611f73af028b9c560b29",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP22-U07",
+            "fetched_at": "2026-10-26T10:41:39.492023Z"
+          },
+          "document_ref": "documents-5232efbe63bb7810"
+        }
+      ]
+    }
+  ]
+}

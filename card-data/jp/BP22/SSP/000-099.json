@@ -1,0 +1,141 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP22",
+  "range": "SSP/000-099",
+  "products": {
+    "products-8914edae9c419bc1": [
+      {
+        "name": "ブースターパック「Over the Calamity/オーバー・ザ・カラミティ」",
+        "date": "2026-10-02",
+        "links": [
+          "/cardlist/cardsearch?expansion=BP22",
+          "https://shadowverse-evolve.com/products/bp22/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP22-SSP01",
+      "documents": {
+        "documents-c66800954bacc07f": {
+          "region": "jp",
+          "record": {
+            "number": "BP22-SSP01",
+            "faces": [
+              {
+                "name": "〔勝利目指して〕ハルウララ",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "SSP",
+                "product": "ブースターパック「Over the Calamity/オーバー・ザ・カラミティ」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "2",
+                "power": "1",
+                "hp": "3",
+                "text": "自分のウマ娘・カードの能力によってこれを自分の手札から捨てたとき、1枚引く。\n{食事}{コスト1}：これは出走する。\n{ファンファーレ}自分の場の他のウマ娘・フォロワー1体を選ぶ。それは{攻撃力}+1/{体力}+1する。",
+                "sections": [],
+                "flavor": "出走だぁー！\n――ハルウララ",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP22/bp22-ssp01.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2026-10-02",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-8914edae9c419bc1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c785c2d5775d53d79622ef849c78bff0ef4cb254cde4773c135dd67644bfdaad",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP22-SSP01",
+            "fetched_at": "2026-10-26T10:40:47.168402Z"
+          },
+          "document_ref": "documents-c66800954bacc07f"
+        }
+      ]
+    },
+    {
+      "card_no": "BP22-SSP02",
+      "documents": {
+        "documents-05f44b960c62b159": {
+          "region": "jp",
+          "record": {
+            "number": "BP22-SSP02",
+            "faces": [
+              {
+                "name": "〔全力疾走〕オグリキャップ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "SSP",
+                "product": "ブースターパック「Over the Calamity/オーバー・ザ・カラミティ」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "【疾走】\n【進化時】相手の場のフォロワー1体を選ぶ。それに4ダメージ。\n【超進化時】場の他のウマ娘・カードX枚を{アクト}：これは{攻撃力}+X/{体力}+Xする。",
+                "sections": [],
+                "flavor": "精一杯やるとしよう！\n――オグリキャップ",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP22/bp22-ssp02.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2026-10-02",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2859",
+                "date": "2026-09-28",
+                "question": "【進化時】能力を持つフォロワーが超進化した場合、そのフォロワーの【進化時】能力は誘発しますか？",
+                "answer": "はい。【超進化時】能力だけではなく、【進化時】能力も誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2858",
+                "date": "2026-09-28",
+                "question": "【進化時】能力と【超進化時】能力を持つフォロワーが超進化した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-8914edae9c419bc1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP22-117"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ac8d123c34e76ac1a6d72b5df085eebe116eaa35707e43e56d837668de5e1c01",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP22-SSP02",
+            "fetched_at": "2026-10-26T10:40:50.120083Z"
+          },
+          "document_ref": "documents-05f44b960c62b159"
+        }
+      ]
+    }
+  ]
+}
