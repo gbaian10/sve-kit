@@ -70,11 +70,13 @@ def entry_snapshot() -> Snapshot:
         for name in (
             "translations/glossary/concepts/001.yaml",
             "translations/glossary/concepts/004.yaml",
+            "translations/glossary/p1_names_batch06/001.yaml",
             "translations/templates/definitions/002.yaml",
             "translations/templates/definitions/059.yaml",
             "translations/templates/definitions/094.yaml",
             "translations/templates/definitions/117.yaml",
             "translations/templates/definitions/029.yaml",
+            "translations/templates/definitions/056.yaml",
         )
         for record in Shard.model_validate_json(
             definitions.expand_shard(read_authored(authored / name, root=authored)[1])
@@ -92,10 +94,11 @@ def entry_snapshot() -> Snapshot:
                 "draw_exact_spell.v1",
                 "draw_exact_attack_time.v1",
                 "draw_exact_evolve_time.v1",
+                "search_lastword_self_deck_named_hand.v1",
             }
         )
     )
-    assert len(selected) == 5
+    assert len(selected) == 6
     terms = {
         name: tuple(
             record
@@ -105,6 +108,10 @@ def entry_snapshot() -> Snapshot:
         for name, identifier in (
             ("translations/glossary/concepts/001.yaml", "term:ability.last_words"),
             ("translations/glossary/concepts/004.yaml", "term:keyword.storm"),
+            (
+                "translations/glossary/p1_names_batch06/001.yaml",
+                "term:name.shikigami_employment",
+            ),
         )
     }
     assert all(len(records) == 1 for records in terms.values())
