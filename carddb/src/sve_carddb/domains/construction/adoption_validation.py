@@ -7,6 +7,7 @@ from pydantic import JsonValue
 
 from sve_carddb.build import Json
 from sve_carddb.core.json import array, canonical, digest, object_value, parse
+from sve_carddb.core.provenance import DateSource
 from sve_carddb.domains.construction.adoption_models import (
     CoverageRecord,
     Dependency,
@@ -14,6 +15,7 @@ from sve_carddb.domains.construction.adoption_models import (
     Record,
     RestrictionRecord,
 )
+from sve_carddb.domains.construction.adoption_sources import observed_day
 
 if TYPE_CHECKING:
     from sve_carddb.build import Database
@@ -220,12 +222,54 @@ class Freshness:
             )
 
 
+def _restriction_observation(
+    observation: JsonValue, additional: list[JsonValue], region: Region
+) -> JsonValue:
+    if not additional:
+        return observation
+    entry = object_value(observation)
+    if len(additional) != 1:
+        raise ValueError("A closed restriction needs one explicit lift notice")
+    lift = object_value(additional[0])
+    if (
+        region != "jp"  # ruff: ignore[too-many-boolean-expressions] -- The lift must match the original entry on every identity field.
+        or set(lift) != {"name", "card_no", "card_link", "effective_until", "locator"}
+        or any(
+            lift.get(field) != entry.get(field)
+            for field in ("name", "card_no", "card_link")
+        )
+        or entry.get("effective_until") is not None
+        or not isinstance(lift.get("effective_until"), str)
+        or str(lift["effective_until"]) <= str(entry.get("effective_from"))
+    ):
+        raise ValueError("Lift notice must match the original linked restriction")
+    return entry | {"effective_until": lift["effective_until"]}
+
+
+def _context_records(snapshot: Snapshot, context_hash: str) -> tuple[Record, ...]:
+    latest: dict[bytes, Record] = {}
+    for candidate in sorted(
+        (
+            record
+            for shard in snapshot.shards
+            for record in shard.shard.records
+            if record.data.review_context_hash == context_hash
+        ),
+        key=lambda item: item.data.adoption_no,
+    ):
+        latest[
+            canonical([candidate.kind, candidate.data.subject.model_dump(mode="json")])
+        ] = candidate
+    return tuple(latest.values())
+
+
 def validate(  # ruff: ignore[complex-structure] -- Validate all evidence and effective records together.
     snapshot: Snapshot, db: Database, lists: Lists
 ) -> None:
     """Reconcile every active list entry with complete current adoption data."""
     freshness = Freshness(db, snapshot.current)
     primary_values: dict[str, JsonValue] = {}
+    reconciled: dict[str, list[JsonValue]] = {}
     for loaded in snapshot.shards:
         for record in loaded.shard.records:
             region: Region = "jp" if record.filing_key == "jp-standard" else "en"
@@ -233,6 +277,8 @@ def validate(  # ruff: ignore[complex-structure] -- Validate all evidence and ef
                 observed = lists.verify(evidence.use, region, record.record_key)
                 if evidence.primary:
                     primary_values[record.record_key] = observed
+                else:
+                    reconciled.setdefault(record.record_key, []).append(observed)
     for record in snapshot.current:
         region = "jp" if record.filing_key == "jp-standard" else "en"
         if isinstance(record, ProfileRecord):
@@ -243,12 +289,18 @@ def validate(  # ruff: ignore[complex-structure] -- Validate all evidence and ef
                 raise ValueError("Current profile evidence or dependency set mismatch")
         elif isinstance(record, RestrictionRecord):
             freshness.verify_restriction(
-                record, primary_values[record.record_key], region
+                record,
+                _restriction_observation(
+                    primary_values[record.record_key],
+                    reconciled.get(record.record_key, []),
+                    region,
+                ),
+                region,
             )
         else:
             _coverage(
                 record,
-                snapshot.current,
+                _context_records(snapshot, record.data.review_context_hash),
                 primary_values[record.record_key],
                 freshness,
                 lists,
@@ -264,8 +316,8 @@ def validate(  # ruff: ignore[complex-structure] -- Validate all evidence and ef
         for record in snapshot.current
         if isinstance(record, CoverageRecord)
     ]
-    if len(covered) != len(set(covered)) or profiles != set(covered):
-        raise ValueError("Current-list profiles require one exact day coverage each")
+    if profiles != set(covered):
+        raise ValueError("Current-list profiles require exact day coverage each")
     if any(
         isinstance(record, RestrictionRecord)
         and record.data.value is not None
@@ -275,7 +327,7 @@ def validate(  # ruff: ignore[complex-structure] -- Validate all evidence and ef
         raise ValueError("Restriction has no current adopted profile")
 
 
-def _coverage(
+def _coverage(  # ruff: ignore[complex-structure] -- Reconcile the declared day and its complete list denominator together.
     record: CoverageRecord,
     records: tuple[Record, ...],
     observation: JsonValue,
@@ -288,14 +340,19 @@ def _coverage(
     evidence = next(item.use for item in record.evidence if item.primary)
     day = record.data.subject.from_date
     reconciliation = value.reconciliation
+    legacy = reconciliation.mode == "current-list-day-v1"
     if (
         value.until_date != (date.fromisoformat(day) + timedelta(days=1)).isoformat()  # ruff: ignore[too-many-boolean-expressions] -- Day, baseline and provenance must all describe the same observation.
         or value.as_of != day
         or reconciliation.observed_on != day
-        or evidence.source.observed_on != day
-        or reconciliation.observed_timezone != evidence.source.observed_timezone
+        or observed_day(evidence.source, reconciliation.observed_timezone) != day
+        or (legacy and not isinstance(evidence.source, DateSource))
         or value.source_set.baseline != (evidence.source.id,)
-        or lists.regional_versions(region) != {evidence.source.id}
+        or (
+            legacy
+            and lists.regional_versions(region, evidence.source.archive.batch_id)
+            != {evidence.source.id}
+        )
         or reconciliation.projection_hash != digest(canonical(observation))
     ):
         raise ValueError(
@@ -312,7 +369,7 @@ def _coverage(
     for index, raw in enumerate(entries):
         entry = object_value(raw)
         pointer = "/entries/" + str(index)
-        if str(entry["effective_from"]) <= day and (
+        if (not legacy or str(entry["effective_from"]) <= day) and (
             entry["effective_until"] is None or day < str(entry["effective_until"])
         ):
             required.add(pointer)
@@ -331,6 +388,13 @@ def _coverage(
         ):
             continue
         use = next(item.use for item in restriction.evidence if item.primary)
+        restriction_value = restriction.data.value
+        if (
+            not legacy
+            and restriction_value.effective_until is not None
+            and restriction_value.effective_until <= day
+        ):
+            continue
         if use.source != evidence.source:
             raise ValueError(
                 "Current-list restriction differs from the coverage baseline"

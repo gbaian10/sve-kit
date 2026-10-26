@@ -11,6 +11,7 @@ from pydantic import JsonValue
 from sve_carddb.core.json import array, canonical, digest, object_value, parse
 from sve_carddb.domains.construction.adoption import Settings
 from sve_carddb.domains.construction.adoption_reports import (
+    OBSERVED_LIST_DEPENDENCIES,
     REQUIRED_DEPENDENCIES,
     StorePin,
 )
@@ -290,9 +291,12 @@ def append_successor(fixture: AdoptionFixture, *, broken: bool = False) -> None:
     fixture.revision = git(fixture.repository, "rev-parse", "HEAD")
 
 
-def create(root: Path) -> AdoptionFixture:  # ruff: ignore[too-many-locals] -- Keep the complete admission boundary visible.
+def create(  # ruff: ignore[too-many-locals, too-many-statements] -- Keep the complete synthetic admission setup together.
+    root: Path, *, instant: bool = False, future: bool = False, lift: bool = False
+) -> AdoptionFixture:
     inputs = create_seed(root)
-    for name in REQUIRED_DEPENDENCIES:
+    tool_dependencies = OBSERVED_LIST_DEPENDENCIES if instant else REQUIRED_DEPENDENCIES
+    for name in tool_dependencies:
         target = inputs.program / name
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes((REPO / name).read_bytes())
@@ -301,31 +305,60 @@ def create(root: Path) -> AdoptionFixture:  # ruff: ignore[too-many-locals] -- K
     tool_revision = git(inputs.program, "rev-parse", "HEAD")
     selection = json.loads(inputs.selection.read_bytes())
     selection["program_revision"] = tool_revision
-    selection["sources"] = selection["sources"][:1]
-    selection["source_import_format"] = 2
-    selection["date_precision_approval"] = {
-        "authority": "maintainer-approved-one-time",
-        "basis": "Synthetic date observation authorization.",
-    }
+    selection["sources"] = selection["sources"][: 2 if lift else 1]
+    if not instant:
+        selection["source_import_format"] = 2
+        selection["date_precision_approval"] = {
+            "authority": "maintainer-approved-one-time",
+            "basis": "Synthetic date observation authorization.",
+        }
     inputs.selection.write_text(json.dumps(selection))
     observation = json.loads(
         (inputs.input_dir / "index.jsonl").read_text().splitlines()[0]
     )
     raw = synthetic_html()
+    if future:
+        raw = raw.replace(
+            "<h3>殿堂入りカード</h3><h4>2020/1/1".encode(),
+            "<h3>殿堂入りカード</h3><h4>2020/2/1".encode(),
+        )
     checksum = hashlib.sha256(raw).hexdigest()
     for unused in (inputs.input_dir / "raw").iterdir():
         unused.unlink()
     (inputs.input_dir / "raw" / checksum).write_bytes(raw)
-    observation.update(
-        sha256=checksum,
-        bytes=len(raw),
-        fetched_at=None,
-        observed_on=DAY,
-        observed_precision="date",
-        observed_timezone="Asia/Taipei",
-        observed_basis="Synthetic known date without an acquisition instant.",
-    )
+    observation.update(sha256=checksum, bytes=len(raw))
+    if not instant:
+        observation.update(
+            fetched_at=None,
+            observed_on=DAY,
+            observed_precision="date",
+            observed_timezone="Asia/Taipei",
+            observed_basis="Synthetic known date without an acquisition instant.",
+        )
     (inputs.input_dir / "index.jsonl").write_text(json.dumps(observation) + "\n")
+    if lift:
+        notice = (
+            b"""<html><head><title>Synthetic notice</title></head><body><div class="news_Detail"><div class="heading"><h1>TITLE</h1></div>
+<div class="contents"><p>HEADING</p><p><a href="https://shadowverse-evolve.com/cardlist/?cardno=TEST-002">NAME</a></p>
+<p>END</p></div></div></body></html>""".decode()
+            .replace("TITLE", "「スタンダード」殿堂入り解除のお知らせ")
+            .replace("HEADING", "■2020年2月1日(土)から殿堂入り解除になるカード")
+            .replace("NAME", "『Synthetic two』")
+            .replace("END", "■「殿堂入り解除」とは")
+            .encode()
+        )
+        notice_hash = hashlib.sha256(notice).hexdigest()
+        (inputs.input_dir / "raw" / notice_hash).write_bytes(notice)
+        url = "https://shadowverse-evolve.com/news/post-900001/"
+        row = observation | {
+            "url": url,
+            "final_url": url,
+            "sha256": notice_hash,
+            "bytes": len(notice),
+            "chain": [{"url": url, "status": 200, "location": None}],
+        }
+        with (inputs.input_dir / "index.jsonl").open("a") as output:
+            output.write(json.dumps(row) + "\n")
     acquired = root / "registered"
     register(prepare(inputs.input_dir, inputs.selection), acquired, inputs.program)
     store = ArchiveStore(
@@ -338,12 +371,16 @@ def create(root: Path) -> AdoptionFixture:  # ruff: ignore[too-many-locals] -- K
     batch_id = seal_batch(store).batch_id
     lists = Lists({store.store_id: store.root}, (batch_id,))
     frozen = lists.batches[0]
-    version = frozen.current_versions[0].source_version_id
+    version = next(
+        current.source_version_id
+        for current in frozen.current_versions
+        if frozen.descriptor(current.source_version_id).kind == "limit"
+    )
     source = lists.source(batch_id, version)
     projection = lists.projection(batch_id, version, "jp")
     dependencies: list[JsonValue] = [
         {"name": name, "sha256": digest((inputs.program / name).read_bytes())}
-        for name in REQUIRED_DEPENDENCIES
+        for name in tool_dependencies
     ]
     context: dict[str, JsonValue] = {
         "context": {
@@ -351,7 +388,9 @@ def create(root: Path) -> AdoptionFixture:  # ruff: ignore[too-many-locals] -- K
             "configuration": canonical(
                 {
                     "recipe": "construction-two-models-v1",
-                    "scope": "current-list-day-v1",
+                    "scope": "observed-list-day-v1"
+                    if instant
+                    else "current-list-day-v1",
                     "dependencies": dependencies,
                     "construction_review_stores": ["synthetic-reviews"],
                 }
@@ -487,7 +526,7 @@ def create(root: Path) -> AdoptionFixture:  # ruff: ignore[too-many-locals] -- K
             {
                 "profile_id": "standard",
                 "announced_on": None,
-                "effective_from": "2020-01-01",
+                "effective_from": entry["effective_from"],
                 "effective_until": None,
                 "kind": "copy_limit",
                 "state": "confirmed",
@@ -519,7 +558,7 @@ def create(root: Path) -> AdoptionFixture:  # ruff: ignore[too-many-locals] -- K
                 "excluded": [],
             },
             "reconciliation": {
-                "mode": "current-list-day-v1",
+                "mode": "observed-list-day-v1" if instant else "current-list-day-v1",
                 "observed_on": DAY,
                 "observed_timezone": "Asia/Taipei",
                 "projection_hash": digest(canonical(projection)),
@@ -530,6 +569,47 @@ def create(root: Path) -> AdoptionFixture:  # ruff: ignore[too-many-locals] -- K
         projection,
         [profile_dependency],
     )
+    if lift:
+        notice_version = next(
+            version
+            for version in frozen.version_ids
+            if frozen.descriptor(version).kind == "news"
+        )
+        lifted = object_value(
+            array(lists.projection(batch_id, notice_version, "jp")["lifts"])[0]
+        )
+        record = next(
+            record
+            for record in records
+            if record["kind"] == "construction_restriction"
+            and object_value(object_value(record["data"])["value"])["max_copies"] == 1
+        )
+        object_value(object_value(record["data"])["value"])["effective_until"] = lifted[
+            "effective_until"
+        ]
+        evidence = array(record["evidence"])
+        use = object_value(object_value(evidence[0])["use"])
+        locator = object_value(parse(str(use["locator"]).encode()))
+        locator["location"] = {
+            "kind": "projection_pointer",
+            "pointer": "/lifts/0",
+            "page_numbers": [],
+        }
+        locator["result_hash"] = digest(canonical(lifted))
+        evidence.append(
+            {
+                "role": "reconciliation",
+                "primary": False,
+                "use": use
+                | {
+                    "source": lists.source(batch_id, notice_version).model_dump(
+                        mode="json"
+                    ),
+                    "locator": canonical(locator).decode(),
+                },
+            }
+        )
+        record["evidence"] = sorted(evidence, key=canonical)
     fixture = AdoptionFixture(
         inputs.program,
         root,

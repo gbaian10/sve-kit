@@ -20,7 +20,7 @@
 | 待審技術契約 | 人工序號版次／官方序號補充 | `manual-printings/index.yaml`、`manual-printings/{printings,serials}/<filing_key>/<sequence>.yaml`，見 manual-printings-v1；不表示已有採納資料 |
 | 已定案（ADR-0009） | 裁定 | `rules/rulings/R-0001.yaml`，`format: 2, kind: ruling`，revision 必填正整數，原本文不另包 data；依[四層契約 §9](four-layer-translation.md#9-舊模板重鍵與裁定引用) |
 | 定案（格式） | 身分修復與決定續版 | `identity-transitions/<sequence>.yaml`，見 §12 |
-| 部分實作 | Standard 構築／禁限／角色與必要 CR 引用 | `construction-adoptions/index.yaml`、`construction-adoptions/<area>/<region>/standard/<sequence>.yaml`；已採納 JP／EN Standard 的 16 筆 main 禁限、2 profiles 與 2026-09-25 單日 coverage，見[構築採納契約](construction-adoption.md#14-現行一覽的單日-human-confirmed-入口)。roles／cr 為 `<area>/<region>/<sequence>.yaml` 整區共用；CR、一般張數算法與 policy 採納仍未實作 |
+| 部分實作 | Standard 構築／禁限／角色與必要 CR 引用 | `construction-adoptions/index.yaml`、`construction-adoptions/<area>/<region>/standard/<sequence>.yaml`；已採納 JP／EN Standard 的 24 筆 main 禁限（含已解除區間與未來生效項）、2 profiles，保留 2026-09-25／2026-10-26 單日 coverage，以 2026-10-26 官方一覽為準；見[構築採納契約](construction-adoption.md#14-現行一覽的單日-human-confirmed-入口)。roles／cr 為 `<area>/<region>/<sequence>.yaml` 整區共用；CR、一般張數算法與 policy 採納仍未實作 |
 | 提案 | 其他策展、標誌 | `curation/BP01/001.yaml` |
 | 待審（技術契約） | 數位對應與查核覆蓋採納 | `digital/links/index.yaml`、`digital/links/<filing_key>/<sequence>.yaml`；見[數位對應採納契約](digital-link-adoption.md)，真人link入口已實作、尚無逐卡正式遷入；coverage未實作 |
 | 定案（技術契約） | 模板、詞彙、翻譯採納 | `translations/templates/{definitions,values,candidates}/<sequence>.yaml`、`translations/{glossary,overrides,labels}/<filing_key>/<sequence>.yaml`；形式位於 `translations/forms/<sequence>.yaml`；推導結果不進 authored，見 §6 |

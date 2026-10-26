@@ -1,0 +1,96 @@
+construction_adoption_format: 1
+kind: construction_adoption_shard
+review_context:
+  context:
+    configuration: '{"construction_review_stores":["c49-human-20261026"],"dependencies":[{"name":"carddb/pyproject.toml","sha256":"sha256:f90cc57961877ea2ba7e0671fb0828a69b417fc1ee0c26b3d27654a467982607"},{"name":"carddb/src/sve_carddb/core/provenance.py","sha256":"sha256:5140d8a5187802aa386792b066dfbd801dc0817b99c5380f6cad17b78c6955e0"},{"name":"carddb/src/sve_carddb/domains/construction/adoption_loader.py","sha256":"sha256:0cad7be7d784974e2b990699251deb5027f2e7cbe83fa80f781938e1fab0ecda"},{"name":"carddb/src/sve_carddb/domains/construction/adoption_models.py","sha256":"sha256:0c55d5a2ddcc786679f882387d1d55c23ac88486499ec4e725e064aee8df88b4"},{"name":"carddb/src/sve_carddb/domains/construction/adoption_reports.py","sha256":"sha256:086b731c68e7ac495ced74aa24bece46ab43ffc492c624227aee04b1764830ca"},{"name":"carddb/src/sve_carddb/domains/construction/adoption_sources.py","sha256":"sha256:9d74f60b7744530e5b7e3f26a559e7efa78350e3debc6d84d2ff13b7ec6c4cbb"},{"name":"carddb/src/sve_carddb/domains/construction/adoption_validation.py","sha256":"sha256:80e35c06b7d580424c1f19261e468799a9f5d563394a67fa69c55f22e5f4e233"},{"name":"carddb/src/sve_carddb/parse/pages/restriction_lifts.py","sha256":"sha256:435109bdb0c18a78fc0aa918e581f048bf359e21b61fe890b802586985ddb56d"},{"name":"carddb/src/sve_carddb/parse/pages/restriction_list.py","sha256":"sha256:286042037b7823e366420c09ada79b3e8f7872061b60c8cdddcc3fd7b982af23"},{"name":"carddb/uv.lock","sha256":"sha256:37f949e156b0b1e9c9e5e312940d46f97484f317f88c6c02dfb5711af2188254"}],"recipe":"construction-two-models-v1","scope":"observed-list-day-v1"}'
+    program_revision: ceb0483114839100d371508eaac1f5e5e7541045
+  source_batches:
+    - batch_id: sha256:7bac066571b5513ce89dea249370e3a2296286e8feb09ca4fb6f9bb5df3ba61b
+    - batch_id: sha256:b88cd73ca2845af27f5dc066687e53d7bbbe3e32dfd1244f44137b4f452de15a
+    - batch_id: sha256:f4e8e713d45fb85539f5c3dc884206791db4e9ea4fd3df9ab1c501d29010dbc3
+default_decision_id: d:b782b739ccc264caedaa9138273f4f60ad2404947bce3b88e77e8a29d2eaecbd
+records:
+  - data:
+      adoption_no: 2
+      dependencies: []
+      predecessor:
+        decision_id: d:d0c2f0db614bb56bef21ff5cd3d5ff4670bfecc23b58fb67c78b76b10599ba2a
+        record_hash: sha256:a93d0fd3c29138e4a46e858dc2d5554e3b44cb54820d618086dacb1010c63e3e
+        record_key: '["construction_profile",{"profile_id":"rules-profile:jp:standard"},1]'
+      reason: 維護者 2026-10-26 核可 JP／EN Standard 範圍；CR 與一般構築規則仍未實作。
+      review_context_hash: sha256:8b28c1728abe066e682a2456aabfdf3f02797a1d622200e6df49b43543a44cc7
+      subject:
+        profile_id: rules-profile:jp:standard
+      value:
+        format_code: standard
+        name:
+          lang: ja
+          text: スタンダード
+        region: jp
+    evidence:
+      - primary: true
+        role: profile
+        use:
+          locator: "{\"context_key\":\"standard\",\"field\":\"value\",\"location\":{\"kind\":\"projection_pointer\",\"page_numbers\":[],\"pointer\":\"\"},\"number\":null,\"record_key\":\"[\\\"construction_profile\\\",{\\\"profile_id\\\":\\\"rules-profile:jp:standard\\\"},2]\",\"result_hash\":\"sha256:91512cec1aaf8c2059c77c735d2d40c3c37ed08031372d41adcb4b8dc720a5d6\"}"
+          source:
+            archive:
+              batch_id: sha256:b88cd73ca2845af27f5dc066687e53d7bbbe3e32dfd1244f44137b4f452de15a
+              descriptor_sha256: sha256:2e125be261909fe08948391a250fd37f20f80204911ea53df0f02ce9c0a89447
+              first_receipt_id: sha256:76a23742045363dd62d8ea341eb3121b3ba00149bdf55337b5fa23f2a60e1397
+              store_id: c49-restrictions-20261026
+            etag: null
+            fetched_at: 2026-10-26T08:51:06.031622Z
+            id: src:v1:8ab3dfa84a18ec7a2008a2fed0d24006064af04b790eeb620c7cf800107b7fa1
+            kind: official_page
+            last_modified: null
+            parser_version: construction-current-list-v1
+            raw_locator: c49-restrictions-20261026:raw/sha256/c7/c76980963a9c8fbf9ade4082e4ca48c5ad4729dbd175dc740a11ad4380851d04.raw
+            sha256: sha256:c76980963a9c8fbf9ade4082e4ca48c5ad4729dbd175dc740a11ad4380851d04
+            url: https://shadowverse-evolve.com/card_limit/
+          usage: construction_profile
+    filing_key: jp-standard
+    kind: construction_profile
+    record_key: '["construction_profile",{"profile_id":"rules-profile:jp:standard"},2]'
+    review:
+      basis_hash: sha256:34fae4244ccf61e40bd4f2f2132c3ff20cd47e622d9c510230ca48b6277830a1
+      model_reviews:
+        - vendor: anthropic
+          model: Claude Sonnet
+          version: "5.5"
+          reviewed_at: 2026-10-26T11:40:12.960202Z
+          basis_hash: sha256:34fae4244ccf61e40bd4f2f2132c3ff20cd47e622d9c510230ca48b6277830a1
+          outcome: agreed
+          report_hash: sha256:f0a8173b08acce9039d626d759fb04bb042b9bb70fd25a38df8bf23512d3b9af
+        - vendor: openai
+          model: Codex
+          version: gpt-6.1-sol
+          reviewed_at: 2026-10-26T11:00:48Z
+          basis_hash: sha256:34fae4244ccf61e40bd4f2f2132c3ff20cd47e622d9c510230ca48b6277830a1
+          outcome: agreed
+          report_hash: sha256:36fdd948e8d7db4a011202c437b73d138b41cb2bc95720045d6d18bec714fb68
+      maintainer_resolution:
+        reviewed_by: gbaian10
+        reviewed_at: 2026-10-26T00:00:00Z
+        reviewed_precision: day
+        basis_hash: sha256:34fae4244ccf61e40bd4f2f2132c3ff20cd47e622d9c510230ca48b6277830a1
+        outcome: adopted
+        note: 維護者 2026-10-26 核可：全部採納 JP Standard 6 項已生效變動與 EN Standard 8 項未來變動，保留生效／解除日，查詢來源日改為 2026-10-26；其餘原值延續，全部 main，EN01 排除，其他賽制不採納。時間只知日期，午夜為明示日精度編碼。
+      maintainer_samples: []
+    adoption_review:
+      mode: human
+      policy: null
+      initial_sample_decisions: []
+decisions:
+  - id: d:b782b739ccc264caedaa9138273f4f60ad2404947bce3b88e77e8a29d2eaecbd
+    state: confirmed
+    scope: batch
+    category: construction_profile
+    members:
+      - - '["construction_profile",{"profile_id":"rules-profile:jp:standard"},2]'
+        - sha256:ebb9ce2136933d04fd5da34977d8e0ee0244bfa19a2aac29e95ed0c8e831e564
+    membership_hash: sha256:b782b739ccc264caedaa9138273f4f60ad2404947bce3b88e77e8a29d2eaecbd
+    policy_id: construction-human-v1
+    sample_ids:
+      - '["construction_profile",{"profile_id":"rules-profile:jp:standard"},2]'
+    confidence: null
+    note: 維護者 2026-10-26 逐項核可當日 Standard 一覽、解除與未來生效變動；未啟用 policy 採納。

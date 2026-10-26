@@ -13,7 +13,10 @@ from sve_carddb.core.json import array, canonical, digest, object_value, parse
 from sve_carddb.core.provenance import BuildContext, InputRecord
 from sve_carddb.domains.construction.adoption import prepare
 from sve_carddb.domains.construction.adoption_loader import load
-from sve_carddb.domains.construction.adoption_reports import StorePin
+from sve_carddb.domains.construction.adoption_reports import (
+    REQUIRED_DEPENDENCIES,
+    StorePin,
+)
 from sve_carddb.export.project import Decisions, project
 from sve_carddb.export.project import Settings as ProjectSettings
 from sve_carddb.workflows.offline import require_offline_coverage
@@ -209,6 +212,153 @@ def test_history_selects_the_successor_and_keeps_both_receipts(
     assert len(db.rows("restriction")) == 2
     assert len(result.record.date_uses) == 5
     assert len(db.rows("decision")) == 5
+
+
+@pytest.mark.parametrize("missing_future", [False, True])
+def test_instant_list_adopts_future_dates_without_extending_coverage(
+    tmp_path: Path, db: Database, missing_future: bool
+) -> None:
+    fixture = create(tmp_path, instant=True, future=True)
+    if missing_future:
+        fixture.records = [
+            record
+            for record in fixture.records
+            if not (
+                record["kind"] == "construction_restriction"
+                and object_value(object_value(record["data"])["value"])["max_copies"]
+                == 1
+            )
+        ]
+        fixture.write()
+    assert fixture.settings is not None
+    prepared = prepare(
+        fixture.repository / "authored",
+        fixture.repository,
+        fixture.revision,
+        fixture.settings,
+    )
+    build = BuildContext.from_inputs(fixture.tool_revision, prepared.configuration())
+    if missing_future:
+        with pytest.raises(ValueError, match="every active entry"), db.transaction():
+            prepared.populate(db, build)
+        assert not db.rows("restriction")
+    else:
+        with db.transaction():
+            result = prepared.populate(db, build)
+        assert not result.record.date_uses
+        assert len(result.record.uses) == 4
+        assert {row.values["effective_from"] for row in db.rows("restriction")} == {
+            "2020-01-01",
+            "2020-02-01",
+        }
+        assert db.rows("restriction_coverage")[0].values["until_date"] == "2020-01-03"
+        assert InputRecord.model_validate_json(result.record.content()) == result.record
+
+
+@pytest.mark.parametrize("wrong_card", [False, True])
+def test_explicit_lift_reconciles_only_the_original_linked_card(
+    tmp_path: Path, db: Database, wrong_card: bool
+) -> None:
+    fixture = create(tmp_path, instant=True, lift=True)
+    if wrong_card:
+        records = [
+            record
+            for record in fixture.records
+            if record["kind"] == "construction_restriction"
+        ]
+        original = next(
+            record for record in records if len(array(record["evidence"])) == 2
+        )
+        other = next(
+            record for record in records if len(array(record["evidence"])) == 1
+        )
+        reconciliation = next(
+            object_value(item)
+            for item in array(original["evidence"])
+            if not object_value(item)["primary"]
+        )
+        use = object_value(reconciliation["use"])
+        locator = object_value(parse(str(use["locator"]).encode()))
+        locator["record_key"] = other["record_key"]
+        use["locator"] = canonical(locator).decode()
+        array(original["evidence"]).remove(reconciliation)
+        other["evidence"] = sorted(
+            [*array(other["evidence"]), reconciliation], key=canonical
+        )
+        fixture.write()
+    assert fixture.settings is not None
+    prepared = prepare(
+        fixture.repository / "authored",
+        fixture.repository,
+        fixture.revision,
+        fixture.settings,
+    )
+    build = BuildContext.from_inputs(fixture.tool_revision, prepared.configuration())
+    if wrong_card:
+        with (
+            pytest.raises(ValueError, match="Lift notice must match"),
+            db.transaction(),
+        ):
+            prepared.populate(db, build)
+        assert not db.rows("restriction")
+    else:
+        with db.transaction():
+            result = prepared.populate(db, build)
+        assert {row.values["effective_until"] for row in db.rows("restriction")} == {
+            None,
+            "2020-02-01",
+        }
+        assert len(result.record.uses) == 5
+        assert {use.source.url for use in result.record.uses} == {
+            "https://shadowverse-evolve.com/card_limit/",
+            "https://shadowverse-evolve.com/news/post-900001/",
+        }
+
+
+def test_coverage_mode_cannot_escape_its_review_scope(
+    authored: AdoptionFixture,
+) -> None:
+    coverage = next(
+        record
+        for record in authored.records
+        if record["kind"] == "construction_coverage"
+    )
+    object_value(
+        object_value(object_value(coverage["data"])["value"])["reconciliation"]
+    )["mode"] = "observed-list-day-v1"
+    authored.write()
+    assert authored.settings is not None
+    with pytest.raises(ValueError, match="Coverage mode differs"):
+        prepare(
+            authored.repository / "authored",
+            authored.repository,
+            authored.revision,
+            authored.settings,
+        )
+
+
+def test_instant_evidence_cannot_use_the_original_date_only_review_scope(
+    tmp_path: Path,
+) -> None:
+    fixture = create(tmp_path, instant=True)
+    context = object_value(fixture.context["context"])
+    configuration = object_value(parse(str(context["configuration"]).encode()))
+    configuration["scope"] = "current-list-day-v1"
+    configuration["dependencies"] = [
+        pin
+        for pin in array(configuration["dependencies"])
+        if object_value(pin)["name"] in REQUIRED_DEPENDENCIES
+    ]
+    context["configuration"] = canonical(configuration).decode()
+    fixture.write()
+    assert fixture.settings is not None
+    with pytest.raises(ValueError, match="Instant or reconciled evidence"):
+        prepare(
+            fixture.repository / "authored",
+            fixture.repository,
+            fixture.revision,
+            fixture.settings,
+        )
 
 
 def test_history_rejects_a_signed_wrong_predecessor(authored: AdoptionFixture) -> None:

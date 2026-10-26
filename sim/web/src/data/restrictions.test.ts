@@ -248,6 +248,47 @@ it("uses the source cutoff rather than a newer card snapshot date", () => {
   ).toBe("unknown")
 })
 
+it("uses the newest restriction observation even when card data is older", () => {
+  const manifest = {
+    ...built.manifest,
+    data_as_of: "2026-10-06",
+    restriction_coverage: ["2026-09-25", "2026-10-26"].flatMap((day) =>
+      (built.manifest["restriction_coverage"] as JsonObject[]).map((window) => ({
+        ...window,
+        from_date: day,
+        until_date: day === "2026-10-26" ? "2026-10-27" : "2026-09-26",
+      })),
+    ),
+  }
+  const selection = selectRestrictions(
+    manifest,
+    (table) => bootstrap.rows(table),
+    bootstrap.index(),
+    "jp",
+  )
+  expect(selection.status.onDate).toBe("2026-10-26")
+  expect(
+    selectRestrictions(
+      manifest,
+      (table) => bootstrap.rows(table),
+      bootstrap.index(),
+      "jp",
+      "2026-10-26",
+    ).status.state,
+  ).toBe("complete")
+  expect(selection.cards.has("c:bp01-021")).toBe(true)
+  expect(selection.details.get("c:bp01-021")?.[0]?.asOf).toBe("2026-10-26")
+  expect(
+    selectRestrictions(
+      manifest,
+      (table) => bootstrap.rows(table),
+      bootstrap.index(),
+      "jp",
+      "2026-11-02",
+    ).status.state,
+  ).toBe("unknown")
+})
+
 it("keeps directly evidenced bans and one-copy limits queryable before general construction rules arrive", () => {
   const profiles = bootstrap.rows("rules_profile").map((profile) => ({ ...profile, revisions: [] }))
   const selection = lookup({ rules_profile: profiles })
