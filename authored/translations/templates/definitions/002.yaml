@@ -3,12 +3,12 @@ kind: translation_shard
 records:
   - kind: sentence_template
     data:
-      id: frame:db021f31b4bee79e2288d2637b04ae7993b2e07a0b540b38addfdbe0b458d528
+      id: frame:1f1e513333211b60a154dba740e6891e7259d93b80c8e5c4e42c903f42bb581c
       source:
         source_lang: ja
         canonical_hash: 09772fd951209885291b2eaed84f2155e944ab1f6cc29ad9a36fa008f5b37859
         normalizer_version: four-layer-jp-v10
-        semantic_definitions: 857
+        semantic_definitions: 4407
       role: body
       semantic_variant:
         state: pending
@@ -186,12 +186,12 @@ records:
               value:
                 kind: ObjectSet
                 objects:
-                  - object_id: source-object:84c1bbf2c66bd34a4999932a0889b48b3c66f1962b893e14369b073a2eb28f6e
+                  - object_id: source-object:3b2eb99985e80a3831ad8b191639fbbfcde430e05551eef03fd40fadd2f6c3d5
                     generation: 0
                 origin: selection
               source_leaves: []
         exports: []
-      content_hash: db021f31b4bee79e2288d2637b04ae7993b2e07a0b540b38addfdbe0b458d528
+      content_hash: 1f1e513333211b60a154dba740e6891e7259d93b80c8e5c4e42c903f42bb581c
   - origin: machine
     kind: sentence_template
     data:

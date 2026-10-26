@@ -6,7 +6,7 @@ basis:
     recipe: v0-classification-candidates-1
     inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
   normalizer: four-layer-jp-v10
-  build_sha256: f809760b55c7ddabe2d64df5ec0a7d15d2ee62c576a23f1bf9537d06c34fa2c7
+  build_sha256: a76f3b3fbc00a2a34b60bde16ff6a6908f43621cfef3f85732ad725a298782db
 groups:
   - id: shape:5ec6be1fbbe4ccb7b3732364280882f188ba4b936d0a6ce93652630baef90901
     priority: false
@@ -143,12 +143,12 @@ groups:
       - frame:8c7f468b31ff7fb2b9e704e6efa8771cff4da23bcd975c8000021d3f3c3e7251
       - frame:50aaedd335dec768c93cac58222aea2a7acde3f28fea47bc5d5363fdb24cae0f
     uses:
-      - use:03cecec0029393cfdad993180bd9873d21882d3f8d78956092824fc8a22efc83
+      - use:b12a3272c64e3fd23d8ab965d09679a6f4d73a5b4b2663bb386d9e611dbc9ab7
       - use:b91e6436881c47589f5f1413ea09ca87e723089974704ac76e1e046d3b01b419
     translation_review:
       required_uses: []
       conditional_uses:
-        - use:03cecec0029393cfdad993180bd9873d21882d3f8d78956092824fc8a22efc83
+        - use:b12a3272c64e3fd23d8ab965d09679a6f4d73a5b4b2663bb386d9e611dbc9ab7
         - use:b91e6436881c47589f5f1413ea09ca87e723089974704ac76e1e046d3b01b419
       trigger: 來源變體／選取語義採納時逐 use 比對，只有語義、leaf 或中文 render 改變才重審。
   - id: shape:ecc4a5b0ba4090bbdba8e007e4b859ef4ffc686813e0fb6a846ac5ef45fba7c6

@@ -778,12 +778,12 @@ records:
       content_hash: a90527aabbe7cbe8f320d13efd55db17fecdffee450e115fba6c4f3d4a910ae9
   - kind: sentence_template
     data:
-      id: frame:de7f1e2b95a8659e0b2b9f96b6e1f3956be65e01d6ef35e7b96c9f12328263a9
+      id: frame:2b7b52ad77c205d7f043f4e9444912d6df7c1f1b22f82a50250c48873191a9d3
       source:
         source_lang: ja
         canonical_hash: 7b1b1902c1bdddce2065bcd54168b9461171c950a1322d8b9f456f7c0963e6db
         normalizer_version: four-layer-jp-v10
-        semantic_definitions: 3006
+        semantic_definitions: 4493
       role: body
       semantic_variant:
         state: pending
@@ -923,11 +923,11 @@ records:
               capture: receipt
               value:
                 kind: ReceiptId
-                receipt_id: source-receipt:a465dc9eb9f82dca61cfa6a4c9aeb4239d9871059b0d7f39e1a623fbb1d9b101
+                receipt_id: source-receipt:41c1a233d121035f6376dfacaa4a89473614f2cfd2bba9f11366384a3218159c
                 result: amount
               source_leaves: []
         exports: []
-      content_hash: de7f1e2b95a8659e0b2b9f96b6e1f3956be65e01d6ef35e7b96c9f12328263a9
+      content_hash: 2b7b52ad77c205d7f043f4e9444912d6df7c1f1b22f82a50250c48873191a9d3
   - kind: sentence_template
     data:
       id: frame:4417465dead78059d1ee3ce588a18ef6861cb900f7dc62b534c921ad8ef975c0

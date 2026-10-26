@@ -1480,12 +1480,12 @@ records:
       content_hash: 799c4047bff4040fc33356c53bf83dcc1b13493ed78ceeaba23207c2e16681af
   - kind: sentence_template
     data:
-      id: frame:63dd830b120aca6f25ff745a935b758409b63cce3ec46420a0b97dca8a7b9536
+      id: frame:dd96e13e38648c8c24cbbcbbe6ecb817826e2425d7b8f8cc2ddc452c6085d453
       source:
         source_lang: ja
         canonical_hash: 45cd9415e39d13152db2ea6ced2756996c997f5437fc750936f86659defa6e06
         normalizer_version: four-layer-jp-v10
-        semantic_definitions: 2140
+        semantic_definitions: 4435
       role: body
       semantic_variant:
         state: pending
@@ -1637,7 +1637,7 @@ records:
               capture: selection
               value:
                 kind: PoolContext
-                pool_id: source-pool:fb507a5174fa045cc2f52c0da9df1d78967df3bf79a66350183003913e45187f
+                pool_id: source-pool:c397fb506942129c165609a7a3cd0b94bcb32d8e28159edd19e5521f64f648d2
                 source_kind: generated
                 members:
                   - - leaf_1
@@ -1672,7 +1672,7 @@ records:
               value:
                 kind: ObjectSet
                 objects:
-                  - object_id: source-remaining:036982a3393758b08709fe796253ddf2ea927afef7b4cb542647159987ca54c2
+                  - object_id: source-remaining:d6a1f1af2ecad8a7a58af89c7b0651290575ade6b174b78e85a86225e622a229
                     generation: 0
                 origin: pool_remainder
                 pool: n3_port_0
@@ -1699,7 +1699,7 @@ records:
               capture: selection
               value:
                 kind: PoolContext
-                pool_id: source-pool:fb507a5174fa045cc2f52c0da9df1d78967df3bf79a66350183003913e45187f
+                pool_id: source-pool:c397fb506942129c165609a7a3cd0b94bcb32d8e28159edd19e5521f64f648d2
                 source_kind: generated
                 members:
                   - - leaf_1
@@ -1733,7 +1733,7 @@ records:
               capture: receipt
               value:
                 kind: ReceiptId
-                receipt_id: source-placement:036982a3393758b08709fe796253ddf2ea927afef7b4cb542647159987ca54c2
+                receipt_id: source-placement:d6a1f1af2ecad8a7a58af89c7b0651290575ade6b174b78e85a86225e622a229
                 result: objects
               source_leaves: []
           - name: n3_port_3
@@ -1757,13 +1757,13 @@ records:
               value:
                 kind: ObjectSet
                 objects:
-                  - object_id: source-remaining:036982a3393758b08709fe796253ddf2ea927afef7b4cb542647159987ca54c2
+                  - object_id: source-remaining:d6a1f1af2ecad8a7a58af89c7b0651290575ade6b174b78e85a86225e622a229
                     generation: 0
                 origin: pool_remainder
                 pool: n3_port_0
                 placement: n3_port_2
               source_leaves: []
-      content_hash: 63dd830b120aca6f25ff745a935b758409b63cce3ec46420a0b97dca8a7b9536
+      content_hash: dd96e13e38648c8c24cbbcbbe6ecb817826e2425d7b8f8cc2ddc452c6085d453
   - kind: sentence_template
     data:
       id: frame:ad76c4dbca6a768631f566b7057b23c312c90fc1f41402a3049c28eab806fe26
@@ -3114,12 +3114,12 @@ records:
       content_hash: 57c30913a4ba320c526666b39311218e4ede86f8f4c060b8571344a3a08a634b
   - kind: sentence_template
     data:
-      id: frame:87700b799de177e5c944bdcc8693ba2ada99062e2b7d447ceca18ef9e19ae803
+      id: frame:aecbc7b041a6b264f1a58b416a392ff6697cc7f7cd36fe6bff9757dd474addb6
       source:
         source_lang: ja
         canonical_hash: a84a7d0332d002b80aa76820f27bffd7723dfd28e7a02264725cda4028d0158a
         normalizer_version: four-layer-jp-v10
-        semantic_definitions: 1437
+        semantic_definitions: 4419
       role: body
       semantic_variant:
         state: pending
@@ -3181,8 +3181,8 @@ records:
               leaves:
                 - leaf_3
               imports:
-                player: n3_port_1
                 receipt: n3_port_0
+                player: n3_port_1
               scope: n3_read_ability_0
           - name: leaf_3
             type: CardKind
@@ -3270,7 +3270,7 @@ records:
               capture: receipt
               value:
                 kind: ReceiptId
-                receipt_id: source-destroy:6a34cf0543065eb82da06b9d6e183debed088d73e3c83f9f8ab5c3f454dca4f2
+                receipt_id: source-destroy:eb11d26367a6f5d63bde44dfa23a5e524b8f267f19accce29d539123202e29e8
                 result: objects
               source_leaves: []
           - name: n3_port_1
@@ -3296,7 +3296,7 @@ records:
                 player: each_player_at_destroy
               source_leaves: []
         exports: []
-      content_hash: 87700b799de177e5c944bdcc8693ba2ada99062e2b7d447ceca18ef9e19ae803
+      content_hash: aecbc7b041a6b264f1a58b416a392ff6697cc7f7cd36fe6bff9757dd474addb6
   - kind: sentence_template
     data:
       id: frame:96fde401dd6115c218d6fb964523c40af1234af11e487f6788f64c5d7e5f3035
@@ -4604,12 +4604,12 @@ records:
       content_hash: 40ac7803692067deacac30d2ceb209d5b71c1f95ad0eac4f3e0443053e60b56b
   - kind: sentence_template
     data:
-      id: frame:7605213c67a4f8190afb4ebfe8e5a879c4ee9f4992d1da1e74d3bd4e6f7cd0aa
+      id: frame:33337ed74e8c0dd69a084018891e6bebe6c4d6761ad0727980c4858b375402f0
       source:
         source_lang: ja
         canonical_hash: b0996c2610c23c5df4f46025254d339721d450e8ebb692f82ed0fd8b9d27ae06
         normalizer_version: four-layer-jp-v10
-        semantic_definitions: 2562
+        semantic_definitions: 4474
       role: body
       semantic_variant:
         state: pending
@@ -4692,7 +4692,7 @@ records:
               capture: selection
               value:
                 kind: PoolContext
-                pool_id: source-pool:f08fd8765c64319af630fa9f25218ec4cb6294b811a193d1228857e5d00dacca
+                pool_id: source-pool:e52719a713131670fd691d96f27cb3f87eda55e4696076bdacc563d1a8a0d1fa
                 source_kind: generated
                 members:
                   - - leaf_0
@@ -4745,7 +4745,7 @@ records:
               value:
                 kind: ObjectSet
                 objects:
-                  - object_id: source-remaining:dc9496950f4d4ffaba816561d9a7a2dce0c0d80306e4dda67b046f2094faebda
+                  - object_id: source-remaining:fba59e4b7238b9cf8b2eec3e5ef31968df3c3d3ff183861cd6d15ac201a2f59b
                     generation: 0
                 origin: pool_remainder
                 pool: n3_port_0
@@ -4772,7 +4772,7 @@ records:
               capture: selection
               value:
                 kind: PoolContext
-                pool_id: source-pool:f08fd8765c64319af630fa9f25218ec4cb6294b811a193d1228857e5d00dacca
+                pool_id: source-pool:e52719a713131670fd691d96f27cb3f87eda55e4696076bdacc563d1a8a0d1fa
                 source_kind: generated
                 members:
                   - - leaf_0
@@ -4802,7 +4802,7 @@ records:
               capture: receipt
               value:
                 kind: ReceiptId
-                receipt_id: source-placement:dc9496950f4d4ffaba816561d9a7a2dce0c0d80306e4dda67b046f2094faebda
+                receipt_id: source-placement:fba59e4b7238b9cf8b2eec3e5ef31968df3c3d3ff183861cd6d15ac201a2f59b
                 result: objects
               source_leaves: []
           - name: n3_port_4
@@ -4826,13 +4826,13 @@ records:
               value:
                 kind: ObjectSet
                 objects:
-                  - object_id: source-remaining:dc9496950f4d4ffaba816561d9a7a2dce0c0d80306e4dda67b046f2094faebda
+                  - object_id: source-remaining:fba59e4b7238b9cf8b2eec3e5ef31968df3c3d3ff183861cd6d15ac201a2f59b
                     generation: 0
                 origin: pool_remainder
                 pool: n3_port_0
                 placement: n3_port_3
               source_leaves: []
-      content_hash: 7605213c67a4f8190afb4ebfe8e5a879c4ee9f4992d1da1e74d3bd4e6f7cd0aa
+      content_hash: 33337ed74e8c0dd69a084018891e6bebe6c4d6761ad0727980c4858b375402f0
   - kind: sentence_template
     data:
       id: frame:ae8b8d86790e511e446f7c246c325434a961e605dffd97a0ca95314e7c2f6146
@@ -5199,12 +5199,12 @@ records:
       content_hash: 91e6a1f894a1699761f8edb23c7f36c5becf7751ebdb1f791dfba679ecb0ade9
   - kind: sentence_template
     data:
-      id: frame:1124769542c645d014833c581b82a97e4c383f4051cbf499ec109da3aebdcaac
+      id: frame:7dc1bee38bac04f9b6a591442d6944292779d4093c5ecc05eb9e1b31de76cbac
       source:
         source_lang: ja
         canonical_hash: d59f650ee1be0ca2d11b2b4ac99e4d053c6cdbab373ad00f1c8a58541b394be9
         normalizer_version: four-layer-jp-v10
-        semantic_definitions: 2899
+        semantic_definitions: 4489
       role: body
       semantic_variant:
         state: pending
@@ -5484,7 +5484,7 @@ records:
               value:
                 kind: ObjectSet
                 objects:
-                  - object_id: source-holder:7b4d4e36d56c08b1d247a734cc8ec98f8cb02acff8c946daf3af54f6667bba4b
+                  - object_id: source-holder:f77ab0b630d3d3b410f6342042fd7c5b6fc40ad93ca24e622bc7d3ede46001c5
                     generation: 0
                 origin: selection
               source_leaves:
@@ -5493,15 +5493,15 @@ records:
                 - leaf_5
                 - leaf_4
         exports: []
-      content_hash: 1124769542c645d014833c581b82a97e4c383f4051cbf499ec109da3aebdcaac
+      content_hash: 7dc1bee38bac04f9b6a591442d6944292779d4093c5ecc05eb9e1b31de76cbac
   - kind: sentence_template
     data:
-      id: frame:9a8ec1de87d33f4c670c0034c870e9faec5e906fc01780a7201687656faff3cc
+      id: frame:688e540e90b9eecffb49eefce0de3c34ee7bfa07e348566a9267bd181fc686b7
       source:
         source_lang: ja
         canonical_hash: 0e7e9cc7d52a0819dddcc6dcb4d777f6bf3dbebc13f6ae4f2e1d4837617d419c
         normalizer_version: four-layer-jp-v10
-        semantic_definitions: 4126
+        semantic_definitions: 4528
       role: body
       semantic_variant:
         state: pending
@@ -5538,8 +5538,8 @@ records:
               expression_id: read.event.damage_amount.v1
               leaves: []
               imports:
-                event: n3_port_1
                 subject: n3_port_0
+                event: n3_port_1
               scope: n3_read_ability_0
           - name: leaf_1
             type: Nat
@@ -5612,7 +5612,7 @@ records:
               value:
                 kind: ObjectSet
                 objects:
-                  - object_id: source-holder:0958aafa3722b507f26800a21000f143ae1368275e6609a9d88e56caae0d9758
+                  - object_id: source-holder:dbf7730d316c7568391462e3056fa10fa446c40e794a333bf3e7f43f5b41be42
                     generation: 0
                 origin: event_subject
               source_leaves: []
@@ -5637,14 +5637,14 @@ records:
               value:
                 kind: EventRef
                 event_kind: Damage
-                event_id: source-damage:1b52bf4c6a1f7038a6add1e9eec0cda5421d576a45bf7abb269747b60202f850
+                event_id: source-damage:c7e2f39f0b690d5b0fb674f65e76b5c68d01dbdfdce4e49fc2bef354955b3708
                 subject:
-                  object_id: source-holder:0958aafa3722b507f26800a21000f143ae1368275e6609a9d88e56caae0d9758
+                  object_id: source-holder:dbf7730d316c7568391462e3056fa10fa446c40e794a333bf3e7f43f5b41be42
                   generation: 0
                 direct_ability_source:
               source_leaves: []
         exports: []
-      content_hash: 9a8ec1de87d33f4c670c0034c870e9faec5e906fc01780a7201687656faff3cc
+      content_hash: 688e540e90b9eecffb49eefce0de3c34ee7bfa07e348566a9267bd181fc686b7
   - kind: sentence_template
     data:
       id: frame:4bb19cca7d4b8b277c46420068061cf2061f5c091532a468d970a88a28c3bcbf

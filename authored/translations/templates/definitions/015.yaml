@@ -594,12 +594,12 @@ records:
       content_hash: 7f955e756978b44a2ac41b48bd811b0b930576fe281d2420cd6f0ad3586f378a
   - kind: sentence_template
     data:
-      id: frame:ac8ec613fa734918ee792c574b833beea1c3f5d3b3fdc5ae718c6fa35ccdb785
+      id: frame:065b1232279d2ae66c2feea7bc1baa81025861eac4717f978d8781c99cb4471a
       source:
         source_lang: ja
         canonical_hash: 8f14ae9c989f5bb9679a8670e63c832345b12d2e0e7e227dd444e5fd5e7368f4
         normalizer_version: four-layer-jp-v10
-        semantic_definitions: 3001
+        semantic_definitions: 4492
       role: body
       semantic_variant:
         state: pending
@@ -706,7 +706,7 @@ records:
               capture: play_parameter
               value:
                 kind: CapturedValue
-                binding_id: source-declared-x:55e935d1c163e84ba120549e9a99d8147fcd3ba86a9364c7c38c67785a208e51
+                binding_id: source-declared-x:f042dbbdbd5d3ee7693872463b62cf4a2abd1aba6303546bc2827d5a0aa2be60
                 result_type: Nat
                 measure: declared_x
               source_leaves: []
@@ -730,11 +730,11 @@ records:
               capture: receipt
               value:
                 kind: ReceiptId
-                receipt_id: source-payment:55e935d1c163e84ba120549e9a99d8147fcd3ba86a9364c7c38c67785a208e51
+                receipt_id: source-payment:f042dbbdbd5d3ee7693872463b62cf4a2abd1aba6303546bc2827d5a0aa2be60
                 result: payment_complete
               source_leaves: []
         exports: []
-      content_hash: ac8ec613fa734918ee792c574b833beea1c3f5d3b3fdc5ae718c6fa35ccdb785
+      content_hash: 065b1232279d2ae66c2feea7bc1baa81025861eac4717f978d8781c99cb4471a
   - kind: sentence_template
     data:
       id: frame:fd1b3595935e72e6e9fa8ebc2344f0730763ce032808af5dfa290c7d052e4213
@@ -1557,12 +1557,12 @@ records:
       content_hash: 61e123ebd9e53f90e83316dd1e0783be5793eaaa1c289bfab4a837a964d095b7
   - kind: sentence_template
     data:
-      id: frame:136749175e5dba3c6d0b2986beb8c627a78b8c15e5fc5ab08bf728672df8f851
+      id: frame:99a5d6c4649ef3c19b5c963e66ff67e120c7d7d5bf503995ae02d46e563430c8
       source:
         source_lang: ja
         canonical_hash: 7c6f356d282ca1c113cdc439c5d66589af4ef430a6794fa5d65c74eb354c2758
         normalizer_version: four-layer-jp-v10
-        semantic_definitions: 4171
+        semantic_definitions: 4535
       role: body
       semantic_variant:
         state: pending
@@ -1642,12 +1642,12 @@ records:
               value:
                 kind: ObjectSet
                 objects:
-                  - object_id: source-object:e753496d0078b702b09d1c58a4ffa8b32c44b5c6138e97971c2e26ff286fbe4b
+                  - object_id: source-object:8ca6220d8d57fa44da569c1c6ec15dc73dd4dd4f92fc5787d757266cd6de9a83
                     generation: 0
                 origin: selection
               source_leaves: []
         exports: []
-      content_hash: 136749175e5dba3c6d0b2986beb8c627a78b8c15e5fc5ab08bf728672df8f851
+      content_hash: 99a5d6c4649ef3c19b5c963e66ff67e120c7d7d5bf503995ae02d46e563430c8
   - kind: sentence_template
     data:
       id: frame:ddf31fd52158ea982bd31679e0d270f8d822b86fe7eae4677ad2ebd061dab4ca

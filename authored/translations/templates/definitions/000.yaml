@@ -1796,12 +1796,12 @@ records:
       content_hash: c05b0461e8f7f2ec7aa5421119898fe46bd32ed7580eb73afdf39dc156a14ffa
   - kind: sentence_template
     data:
-      id: frame:a089b1d89527541339521501b7ebb7d319f9899ecc8485365080e377cc252dc7
+      id: frame:daa28298e77315d85de3a9973e93c4d0cba83b6622a3d2c63719574008ecfb3b
       source:
         source_lang: ja
         canonical_hash: acf76f345285b3f1e6cdfee51b076eb87893b3da093029bddf916edcbe209429
         normalizer_version: four-layer-jp-v10
-        semantic_definitions: 3824
+        semantic_definitions: 4525
       role: body
       semantic_variant:
         state: pending
@@ -1906,11 +1906,11 @@ records:
               capture: receipt
               value:
                 kind: ReceiptId
-                receipt_id: source-receipt:c690c80465ff386ccf605f720a5f8d7bb2fc0a11badc132ddb2fa4e7e9808d82
+                receipt_id: source-receipt:49292f6a7b3406e62dde83e450ea878e927783c3b91af2ab060133fa9b990419
                 result: objects
               source_leaves: []
         exports: []
-      content_hash: a089b1d89527541339521501b7ebb7d319f9899ecc8485365080e377cc252dc7
+      content_hash: daa28298e77315d85de3a9973e93c4d0cba83b6622a3d2c63719574008ecfb3b
   - origin: machine
     kind: sentence_template
     data:
