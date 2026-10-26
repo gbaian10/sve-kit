@@ -223,6 +223,29 @@ def test_append_rejects_explicit_curation_changes(
         plan_files(tmp_path, build(inputs, load(tmp_path)[1]))
 
 
+def test_append_rejects_changed_correction_decision(
+    inputs: Inputs, tmp_path: Path
+) -> None:
+    inputs.mapping.reskins = {}
+    inputs.decisions.corrections = [
+        Correction(
+            region="jp",
+            card_no="BP02-071",
+            field="effect",
+            expected_raw_value="Rule.",
+            corrected_value="Corrected rule.",
+            image_sha256="sha256:" + "0" * 64,
+            locator="Rules box",
+            state="active",
+            reason="Printed rules were reviewed separately.",
+        )
+    ]
+    write_files(plan_files(tmp_path, build(inputs, {})))
+    inputs.decisions.corrections[0].corrected_value = "Another rule."
+    with pytest.raises(ValueError, match="Existing registry record changed"):
+        plan_files(tmp_path, build(inputs, load(tmp_path)[1]))
+
+
 @pytest.mark.parametrize(
     ("field", "value", "message"),
     [
