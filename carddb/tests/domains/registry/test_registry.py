@@ -383,7 +383,7 @@ def official_registry(
 ) -> list[Entry]:
     root = Path(__file__).resolve().parents[4] / "authored"
     index = official_snapshot.files.index()
-    assert index.next_int_id == {"en": 67421, "jp": 27370}
+    assert index.next_int_id == {"en": 67421, "jp": 27638}
     assert all(
         path.stat().st_size <= TARGET_BYTES
         for directory in (root / "ids", root / "registry")
@@ -399,10 +399,10 @@ def test_official_registry_special_mappings(official_registry: list[Entry]) -> N
         for entry in official_registry
         if entry.kind == "printing"
     }
-    assert len(printings) == 14789
+    assert len(printings) == 15057
     assert sum(region == "en" for region, _ in printings) == 7420
     ids = region_allocations(official_registry)
-    assert sorted(ids["jp"]) == list(range(20001, 27370))
+    assert sorted(ids["jp"]) == list(range(20001, 27638))
     assert sorted(ids["en"]) == list(range(60001, 67421))
     pairs = [
         ("BP09-P50EN", "DSD01b-T01"),
