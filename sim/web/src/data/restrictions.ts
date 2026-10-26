@@ -54,7 +54,7 @@ const contains = (row: Row, day: string, from: string, until: string) =>
   row[from] <= day &&
   (row[until] === null || (typeof row[until] === "string" && day < row[until]))
 
-/** A source cutoff cannot exceed the snapshot date; missing coverage never proves absence. */
+/** Restriction observations have their own cutoff; missing coverage never proves absence. */
 export function selectRestrictions(
   manifest: JsonObject,
   rows: (table: string) => readonly Row[],
@@ -66,7 +66,6 @@ export function selectRestrictions(
   const cards = new Set<string>()
   const details = new Map<string, CardRestriction[]>()
   const unknown = () => ({ status: { state: "unknown", onDate }, cards, details }) as const
-  if (onDate > stringValue(manifest["data_as_of"])) return unknown()
   const profiles = rows("rules_profile").filter(
     (row) => row["region"] === edition && row["format_code"] === "standard",
   )
@@ -78,17 +77,18 @@ export function selectRestrictions(
   const snapshotDate = stringValue(manifest["data_as_of"])
   const coveredDates = sourceWindows.flatMap((window) => {
     const from = stringValue(window["from_date"])
-    if (from > snapshotDate) return []
     const until = window["until_date"]
     // Coverage has an exclusive end; a one-day source window pins its exact list date.
     const last =
       typeof until === "string"
         ? new Date(Date.parse(`${until}T00:00:00Z`) - 86_400_000).toISOString().slice(0, 10)
         : snapshotDate
-    const day = last < snapshotDate ? last : snapshotDate
-    return day < from ? [] : [day]
+    return last < from ? [] : [last]
   })
-  if (requestedDate === undefined) onDate = coveredDates.sort().at(-1) ?? snapshotDate
+  const latestCovered = coveredDates.sort().at(-1)
+  if (requestedDate === undefined) onDate = latestCovered ?? snapshotDate
+  // Finite windows may postdate the card snapshot; an open tail is only known to the snapshot.
+  else if (latestCovered === undefined || requestedDate > latestCovered) return unknown()
   const revisions = arrayValue(profile?.["revisions"] ?? [])
     .map((value) => objectValue(value))
     .filter((row) => contains(row, onDate, "effective_from", "effective_until"))
