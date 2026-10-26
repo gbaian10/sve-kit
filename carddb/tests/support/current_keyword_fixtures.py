@@ -46,7 +46,7 @@ def current_keyword_inputs(root: Path, number: str = "BP01-138") -> JsonValue:
             "printing", ("card_id",), where={"region": "jp", "card_no": number}
         )[0].values["card_id"]
         assert isinstance(identity, str)
-        complete = source._card_payload(identity)
+        complete = source.card_payload(identity)
         abilities: list[JsonValue] = []
         for obligation in source.keyword_obligations(identity):
             occurrence = obligation.source_use.occurrence

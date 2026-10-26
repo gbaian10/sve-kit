@@ -44,7 +44,7 @@ def text(value: object) -> str:
 def real_source(
     source: CurrentAuthorSources,
 ) -> tuple[SourceCandidate, SourceUse, Frame]:
-    cards = {source._printing_card(number) for number in NUMBERS}
+    cards = {source.printing_card(number) for number in NUMBERS}
     assert len(cards) == 1
     card_id = cards.pop()
     faces = source.db.select("face", ("id",), where={"card_id": card_id})
@@ -171,9 +171,7 @@ def test_real_permanent_token_sources_and_whole_card_rejection(tmp_path: Path) -
         for number in NUMBERS:
             for companion in (False, True):
                 entry, bodies = move_ability(frame, use, companion=companion)
-                inputs = collection(
-                    number, source._printing_card(number), entry, bodies
-                )
+                inputs = collection(number, source.printing_card(number), entry, bodies)
                 result = expander.expand_sources(
                     inputs.author_files[0].raw,
                     bodies,

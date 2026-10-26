@@ -85,6 +85,7 @@ class Diagnostic:
     card_no: str | None = None
     scope: str | None = None
     source: SourceUse | CardKeywordSourceUse | None = None
+    card_line: int | None = None
 
 
 class AuthorInputError(ValueError):
@@ -120,7 +121,7 @@ class _Locations:
 
 
 @dataclass(frozen=True)
-class _Document(_Locations):
+class ParsedDocument(_Locations):
     value: JsonValue
     context: AuthorIndexRecord | None = None
 
@@ -181,7 +182,7 @@ def _source_at(
     return None
 
 
-def _located(document: _Document, diagnostic: Diagnostic) -> Diagnostic:
+def _located(document: ParsedDocument, diagnostic: Diagnostic) -> Diagnostic:
     value = document.value
     if isinstance(value, dict):
         scope = value.get("scope")
@@ -215,7 +216,7 @@ def _references(value: JsonValue) -> list[str]:
     return result
 
 
-def _entry_decode[T](document: _Document, adapter: TypeAdapter[T]) -> T:
+def _entry_decode[T](document: ParsedDocument, adapter: TypeAdapter[T]) -> T:
     try:
         return adapter.validate_json(canonical(document.value), strict=True)
     except ValidationError as error:
@@ -242,7 +243,7 @@ def _entry_decode[T](document: _Document, adapter: TypeAdapter[T]) -> T:
         ) from None
 
 
-def _envelope(document: _Document, expected: str) -> dict[str, JsonValue]:
+def _envelope(document: ParsedDocument, expected: str) -> dict[str, JsonValue]:
     value = document.value
     if not isinstance(value, dict):
         raise AuthorInputError(
@@ -264,7 +265,7 @@ def _envelope(document: _Document, expected: str) -> dict[str, JsonValue]:
     return value
 
 
-def _entry_preflight(document: _Document, expected: str) -> None:
+def _entry_preflight(document: ParsedDocument, expected: str) -> None:
     value = _envelope(document, expected)
     if expected == "author_effect_set" and value.get("scope") == "en_override":
         raise AuthorInputError(
@@ -292,7 +293,7 @@ def _entry_preflight(document: _Document, expected: str) -> None:
 
 
 def _candidate_checks(
-    document: _Document, candidates: list[tuple[PathParts, JsonValue]]
+    document: ParsedDocument, candidates: list[tuple[PathParts, JsonValue]]
 ) -> None:
     for path, candidate in candidates:
         if not isinstance(candidate, dict):
@@ -327,7 +328,7 @@ def _abilities(decoded: AuthorEffectSet) -> Iterator[tuple[PathParts, Ability]]:
                 yield ("cards", key, "faces", face_id, "abilities", index), ability
 
 
-def _body_duplicates(document: _Document, decoded: EffectBodyShard) -> None:
+def _body_duplicates(document: ParsedDocument, decoded: EffectBodyShard) -> None:
     keys: set[tuple[str, str, str]] = set()
     for offset, record in enumerate(decoded.records):
         key = (record["frame_id"], record["ability_scope"], record["body_version"])
@@ -350,7 +351,7 @@ def _body_duplicates(document: _Document, decoded: EffectBodyShard) -> None:
 
 
 def _local_invariants(
-    document: _Document, decoded: AuthorEffectSet | EffectBodyShard
+    document: ParsedDocument, decoded: AuthorEffectSet | EffectBodyShard
 ) -> None:
     if isinstance(decoded, EffectBodyShard):
         _body_duplicates(document, decoded)
@@ -415,7 +416,8 @@ def _json_value(
     return scalar
 
 
-def _parse_document(raw: bytes) -> _Document:
+def parse_document(raw: bytes) -> ParsedDocument:
+    """Decode strict, bounded JSON-compatible YAML with safe source coordinates."""
     if len(raw) >= MAX_BYTES:
         raise AuthorInputError(Diagnostic("yaml", "size_limit"))
     try:
@@ -430,17 +432,17 @@ def _parse_document(raw: bytes) -> _Document:
     locations = yamlrocks.loads(raw, option=yamlrocks.OPT_ROUND_TRIP)
     if not isinstance(locations, yamlrocks.YAMLRocksDocument):
         raise AuthorInputError(Diagnostic("yaml", "missing_document"))
-    return _Document(locations, _json_value(parsed, _Locations(locations)))
+    return ParsedDocument(locations, _json_value(parsed, _Locations(locations)))
 
 
-def _document(raw: bytes, context: AuthorIndexRecord | None = None) -> _Document:
+def _document(raw: bytes, context: AuthorIndexRecord | None = None) -> ParsedDocument:
     try:
-        return replace(_parse_document(raw), context=context)
+        return replace(parse_document(raw), context=context)
     except AuthorInputError as error:
         raise AuthorInputError(_contextual(error.diagnostic, context)) from None
 
 
-def _schema_diagnostic(document: _Document, error: SchemaError) -> Diagnostic:
+def _schema_diagnostic(document: ParsedDocument, error: SchemaError) -> Diagnostic:
     if error.validator in {"oneOf", "anyOf"}:
         mismatched = {
             child.schema_path[0]
@@ -508,7 +510,9 @@ class _HeadShape:
     keys: frozenset[str]
     branches: dict[str, int] | None = None
 
-    def diagnostic(self, document: _Document, error: SchemaError) -> Diagnostic | None:
+    def diagnostic(
+        self, document: ParsedDocument, error: SchemaError
+    ) -> Diagnostic | None:
         value = error.instance
         if error.schema != self.schema or not isinstance(value, dict):
             return None
@@ -643,10 +647,10 @@ class AuthorSchemas:
             },
         }
 
-    def _validate(self, document: _Document, reference: str) -> None:
+    def _validate(self, document: ParsedDocument, reference: str) -> None:
         self._validate_schema(document, {"$ref": reference})
 
-    def _validate_schema(self, document: _Document, schema: Schema) -> None:
+    def _validate_schema(self, document: ParsedDocument, schema: Schema) -> None:
         validator = Draft202012Validator(schema, registry=self._registry)
         error = best_match(validator.iter_errors(document.value))
         if error is not None:
@@ -677,7 +681,7 @@ class AuthorSchemas:
         return self._author(document)
 
     def _author(
-        self, document: _Document, *, expanded: bool = False
+        self, document: ParsedDocument, *, expanded: bool = False
     ) -> AuthorEffectSet:
         _entry_preflight(document, "author_effect_set")
         reference = _NODES + "#/$defs/expanded" if expanded else _AUTHOR
@@ -738,7 +742,7 @@ class AuthorSchemas:
         document = _document(raw)
         return self._bodies(document)
 
-    def _bodies(self, document: _Document) -> EffectBodyShard:
+    def _bodies(self, document: ParsedDocument) -> EffectBodyShard:
         _entry_preflight(document, "effect_body_shard")
         self._validate(document, _BODIES)
         decoded = _entry_decode(document, _BODIES_VALUE)
@@ -803,7 +807,7 @@ class AuthorSchemas:
         document = _document(raw)
         return self._index(document)
 
-    def _index(self, document: _Document) -> EffectsIndex:
+    def _index(self, document: ParsedDocument) -> EffectsIndex:
         self._validate(document, _INDEX)
         index = _decode(_INDEX_VALUE, document.value)
         seen: set[tuple[str, str]] = set()

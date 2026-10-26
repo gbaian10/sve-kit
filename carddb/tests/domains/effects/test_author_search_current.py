@@ -48,7 +48,7 @@ def fixture(tmp_path_factory: pytest.TempPathFactory) -> CurrentSourceFixture:
 def collection(
     source: CurrentAuthorSources, *, companion: bool, number: str = "BP06-048"
 ) -> AuthorInputSet:
-    complete = source._card_payload(CARD)
+    complete = source.card_payload(CARD)
     matched = complete.fields[0].matches[0]
     assert matched is not None
     use = SourceUse(
@@ -99,7 +99,7 @@ def test_real_named_search_current(
 ) -> None:
     expander = AuthorExpander(SCHEMAS)
     with current(fixture) as source:
-        assert source._printing_card(number) == CARD
+        assert source.printing_card(number) == CARD
         write_inputs(tmp_path, collection(source, companion=companion, number=number))
         accepted = source.validate(tmp_path, expander)[0]
         assert isinstance(accepted, CardAccepted)
@@ -191,7 +191,7 @@ def test_search_does_not_drop_unmapped_siblings(
 ) -> None:
     with current(fixture) as source:
         write_inputs(tmp_path, collection(source, companion=False))
-        revision = next(iter(source._card_payload(CARD).revisions))
+        revision = next(iter(source.card_payload(CARD).revisions))
         effect(source, monkeypatch, SEARCH_RAW + suffix, revision=revision)
         rejected = source.validate(tmp_path, AuthorExpander(SCHEMAS))[0]
         assert isinstance(rejected, CardRejected)
@@ -203,7 +203,7 @@ def test_search_does_not_admit_a_token_section(
 ) -> None:
     with current(fixture) as source:
         write_inputs(tmp_path, collection(source, companion=False))
-        revision = next(iter(source._card_payload(CARD).revisions))
+        revision = next(iter(source.card_payload(CARD).revisions))
         token_section(
             source,
             monkeypatch,
