@@ -5,6 +5,7 @@ mod costs;
 mod current;
 mod evolution;
 mod exchange;
+mod keywords;
 mod numeric;
 mod ordering;
 mod payment;
@@ -205,16 +206,23 @@ impl ExpandedLowerer {
                 if ability.play.is_some() {
                     continue;
                 }
-                let scope = u64::try_from(index)
-                    .ok()
-                    .and_then(|index| index.checked_mul(3))
-                    .and_then(|index| index.checked_add(1))
-                    .ok_or_else(|| unsupported(&entry_path))?;
+                if let Some(keywords) = &ability.keywords
+                    && !matches!(keywords.as_slice(), [keyword] if keyword == "quick")
+                {
+                    abilities.extend(keywords::lower(
+                        &mut allocator,
+                        &coordinates,
+                        &entry_path,
+                        &ability,
+                        keywords,
+                    )?);
+                    continue;
+                }
                 abilities.push(allocator.ability(
                     &coordinates,
                     &entry_path,
                     &ability,
-                    ScopeId(scope),
+                    entry_scope(index, &entry_path)?,
                     match identity {
                         Some(identity) => {
                             identity.printed_cost(&ability.sources[0].json(), &entry_path)?
@@ -238,6 +246,15 @@ impl ExpandedLowerer {
         }
         Ok(cards)
     }
+}
+
+fn entry_scope(index: usize, path: &str) -> Result<ScopeId, LoweringError> {
+    u64::try_from(index)
+        .ok()
+        .and_then(|index| index.checked_mul(3))
+        .and_then(|index| index.checked_add(1))
+        .map(ScopeId)
+        .ok_or_else(|| unsupported(path))
 }
 
 /// Face play costs and their payment receipt belong to one printed face.

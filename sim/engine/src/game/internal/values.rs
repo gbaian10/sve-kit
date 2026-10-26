@@ -122,6 +122,12 @@ impl Execution {
 
     pub(super) fn objects(&self, game: &Game, selector: &Selector) -> Result<Vec<ObjectRef>> {
         let objects = match selector {
+            Selector::Zone {
+                zone: ZoneKind::Field,
+                ..
+            } if super::card::selection::field_selector(selector).is_ok() => {
+                self.public_field_objects(game, selector)?
+            }
             Selector::Objects { objects } => objects
                 .iter()
                 .map(|object| self.object(game, object))
@@ -133,7 +139,7 @@ impl Execution {
                 ..
             } => {
                 let mut objects = Vec::new();
-                // Admitted predicates cannot read the candidate binding, so one evaluation filters all.
+                // Other admitted predicates do not read a candidate binding.
                 if self.boolean(game, predicate)?.0 {
                     for player in self.players(game, players)? {
                         for id in game.zone_ids(seat_name(player)?, zone_name(*zone)?) {

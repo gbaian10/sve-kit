@@ -327,8 +327,10 @@ impl Checker {
         }
         self.card_payment_body = previous_payment;
         for (index, effect) in ability.declarations.iter().enumerate() {
-            // Only this complete header grants PlayCard; generic permission remains closed.
-            if super::super::quick::card_permission(ability) {
+            // Only complete named keyword shapes bypass the generic permission gate.
+            if super::super::quick::card_permission(ability)
+                || super::super::printed_keywords::card_declaration(ability).is_some()
+            {
                 continue;
             }
             self.at(&format!("declarations/{index}"), |checker| {

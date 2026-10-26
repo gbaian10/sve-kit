@@ -71,7 +71,7 @@ keywords 為非空、保序、元素不重複的清單，ports 必為 `{imports:
 
 companion.body 的 A.companion-head 子圖排除 keywords，未引用本體也必須驗；generated_by 不得產生 keyword 宣告。grant.keywords 與 activate.quick 是原有本體內的不同語法，不適用此 sources 型別。完整 reader 仍拒絕 inline ParamRef；本片不開非本體 companion 或新的葉參數位置。
 
-正式 current reader 已從完整 current 來源獨立重建 ward／aura 義務，逐筆對帳作者宣告並產生獨立 declaration sidecar；metadata 與 printed_keywords 使用封閉的非本體 inventory 型別。本體與宣告在 D0 分別精確消耗，tree 與 sidecar 同時漏項仍由獨立 inventory 拒絕，普通本體義務不能冒充 keyword。純結構展開或外供 context 不授 current proof；D0 的來源對帳成功也不代表已降低、可執行或取得用途資格。Ward／Aura 的 executable lowering 與 runtime 仍未接通。
+正式 current reader 已從完整 current 來源獨立重建 ward／aura 義務，逐筆對帳作者宣告並產生獨立 declaration sidecar；metadata 與 printed_keywords 使用封閉的非本體 inventory 型別。本體與宣告在 D0 分別精確消耗，tree 與 sidecar 同時漏項仍由獨立 inventory 拒絕，普通本體義務不能冒充 keyword。純結構展開或外供 context 不授 current proof；D0 的來源對帳成功也不代表已降低、可執行或取得用途資格。Ward／Aura 已降低為具名權限宣告並通過精確整卡准入；守護的攻擊限制與可選橫置、光紋的目標限制及生命週期規則仍未接通。
 
 ### 2.4 effects-index
 
@@ -220,7 +220,7 @@ current 入口另從全部 current 面與 sections 的 registry 來源建立獨�
 不當成缺能力，也不因沒有本文而聲稱已執行。token 來源與非空 token 選用目前仍整卡拒絕，
 不把 token 能力複製到母卡。來源 adapter 未支援的能力圖也維持拒絕，清單對帳不擴張來源支援範圍。
 
-獨立 keywords 的來源沒有 ability_scope；current handoff 已使用封閉的宣告義務與獨立 declaration sidecar，將本體與宣告分別精確消耗。不能把它塞入能力 scope 對帳或只保留任意 Value 就聲稱已降低。純 expanded 與 current 宣告的 SourceSpan.scope 使用 `keyword_declaration:<author_path>` 作編譯期局部座標，與普通 SourceUse.ability_scope 分開；它不屬 Projection.scopes、不入 FrameId／BindingId 或來源 hash，不能拿來選 companion／port。ScopeId／AbilityId 仍是引擎分配的執行期識別。宣告的已驗來源可由獨立 sidecar 回查，保留原 occurrence 與 binding、owner／face／field／section／line；這不代表 Ward／Aura 已有 executable lowering、runtime 准入或用途資格。
+獨立 keywords 的來源沒有 ability_scope；current handoff 已使用封閉的宣告義務與獨立 declaration sidecar，將本體與宣告分別精確消耗。不能把它塞入能力 scope 對帳或只保留任意 Value 就聲稱已降低。純 expanded 與 current 宣告的 SourceSpan.scope 使用 `keyword_declaration:<author_path>` 作編譯期局部座標，與普通 SourceUse.ability_scope 分開；它不屬 Projection.scopes、不入 FrameId／BindingId 或來源 hash，不能拿來選 companion／port。ScopeId／AbilityId 仍是引擎分配的執行期識別。宣告的已驗來源可由獨立 sidecar 回查，保留原 occurrence 與 binding、owner／face／field／section／line；Ward／Aura 已具名降低並可精確准入，但尚未執行對局規則或取得用途資格。每個元素的 SourceSpan.author_path 保留 `/keywords/<index>`，共用原宣告的編譯期 scope 與無來源 scope 的 reference；各元素另分配 runtime ScopeId／AbilityId。
 
 | 接縫 | 必須保留／拒絕的責任 |
 | --- | --- |
@@ -233,6 +233,14 @@ current 入口另從全部 current 面與 sections 的 registry 來源建立獨�
 | 缺能力 | 列出所有缺失代碼及引發它的 IR／DSL 位置；整張卡拒絕自動執行，仍可顯示文字與診斷 |
 
 CP04-060 只對 search 實際 moved 的新世代安裝 delta -2、until:turn；不替 found 但未移動者減費，不把 delta 改 set 0。替代移動是否算某種 receipt 的成功由精確規則定義，不能靠模糊成功布林或這份承載契約補裁定。
+
+### 守護與光紋的具名宣告准入
+
+`sim/engine/src/ir/printed_keywords.rs` 定義兩個封閉的 Field／Ordinary／Static 形狀，來源恰為 `Keyword(Ward|Aura, Printed(face,line))`，holder=SourceHolder、controller=Controller，沒有 body、play、trigger 或 event captures。Ward 的權限在持有者橫置時禁止對手從者攻擊己方領袖及不屬於橫置 Ward 的己方從者；以有效能力視圖保留多個 Ward 的合法目標。Aura 的權限禁止對手選取持有者作為能力目標，不擴及己方選取或無目標的集合效果。兩者保留無時間到期、installation anchor 與對應規則定位；區域及有效面的可用性由後續規則消費者判斷。Ward 的可選姿態選擇屬規則程序，不降低為無條件橫置。
+
+准入逐欄比較整個具名形狀，並透過獨立 declaration reference 核對原 owner／face／field／section／line／fragment、local scope 與確切 keyword index；不開放任意 KeywordId、Granted 或巢狀 origin。只有不同的 Ward／Aura 元素可共用同一印刷面與行，本體能力仍不能與它們混用座標。完整有序清單原子降低，未支援元素使整卡失敗。這些權限尚未接入攻擊、目標選取、姿態選擇或生命週期的 runtime authority，不能用成功載入主張規則已生效。
+
+BP19 完整入場曲所需的 `kind:follower` 公開 Field 破壞集合沿用 `card/selection.rs` 的候選述詞與逐候選篩選器。私有觀察閘只對已驗的 Field Destroy 集合述詞消耗這份授權，其他節點位置、私有區域與未支援讀值仍拒絕；不以放寬 `read.kind` 等全域責任白名單取代。這條接線不啟用 Ward／Aura 規則。
 
 ## 7. 公開 typed IR 與引擎能力
 

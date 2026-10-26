@@ -151,6 +151,10 @@ def current_lowering_inputs(root: Path) -> JsonValue:
         return {
             "accepted": accepted.lowering_input(),
             "keywords": current_keyword_inputs(root / "keywords"),
+            "keyword_fanfare": {
+                number: current_keyword_inputs(root / number, number)
+                for number in ("BP19-P32", "BP19-114")
+            },
             "rejected": {"reason": rejected.diagnostic.reason},
             "switch": switch,
         }

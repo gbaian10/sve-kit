@@ -84,6 +84,21 @@ pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
     }
     let mut inspected = node.clone();
     if let Node::Instruction { instruction } = &mut inspected
+        && let Action::Destroy {
+            objects:
+                selector @ Selector::Zone {
+                    zone: ZoneKind::Field,
+                    ..
+                },
+        } = &mut instruction.action
+        && super::card::selection::field_selector(selector).is_ok()
+    {
+        // Only this public candidate grammar is evaluated per object by the field authority.
+        if let Selector::Zone { predicate, .. } = selector {
+            **predicate = Expr::Literal(super::Bool(true));
+        }
+    }
+    if let Node::Instruction { instruction } = &mut inspected
         && (super::movement::observed_move(&instruction.action)
             || matches!(&instruction.action, Action::Move { movement, .. } if super::movement::field_move(movement) || movement.to == (MoveDestination::Owners { zone: OwnerZone::Hand })))
     {

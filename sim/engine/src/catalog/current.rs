@@ -128,11 +128,16 @@ impl CurrentCard {
     }
 
     pub(crate) fn check_source(&self, source: &SourceSpan) -> Result<()> {
-        let proof = self
+        let expected = self
             .candidate
             .source_at(&source.author_path)
+            .map(|proof| &proof.source)
+            .or_else(|| {
+                self.candidate
+                    .declaration_at(&source.author_path)
+                    .map(|proof| &proof.source)
+            })
             .ok_or_else(|| invalid("missing current runtime source proof"))?;
-        let expected = &proof.source;
         if source.card_id != self.candidate.card_id
             || source.card_no != self.candidate.card_no
             || source.face != expected.face
@@ -141,6 +146,7 @@ impl CurrentCard {
             || source.line != expected.line
             || source.section != expected.section
             || source.fragment != expected.fragment
+            || source.scope != expected.scope
         {
             return Err(invalid("current runtime source mapping mismatch"));
         }

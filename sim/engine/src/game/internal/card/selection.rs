@@ -115,7 +115,7 @@ pub(super) fn check(constraint: &SelectionConstraint) -> Result<()> {
     field_selector(&group.selector)
 }
 
-fn field_selector(selector: &Selector) -> Result<()> {
+pub(in crate::game::internal) fn field_selector(selector: &Selector) -> Result<()> {
     match selector {
         Selector::Zone {
             zone: ZoneKind::Field,
@@ -260,7 +260,7 @@ impl Game {
         let [group] = constraint.groups.as_slice() else {
             return Err(unsupported("target groups"));
         };
-        let members = execution.target_objects(self, &group.selector)?;
+        let members = execution.public_field_objects(self, &group.selector)?;
         let bounds = Cardinality {
             minimum: Nat(constraint
                 .cardinality
@@ -406,7 +406,11 @@ impl Game {
     reason = "Selected targets retain a checked producer separate from installation locals."
 )]
 impl Execution {
-    fn target_objects(&self, game: &Game, selector: &Selector) -> Result<Vec<ObjectRef>> {
+    pub(in crate::game::internal) fn public_field_objects(
+        &self,
+        game: &Game,
+        selector: &Selector,
+    ) -> Result<Vec<ObjectRef>> {
         let members = match selector {
             Selector::Zone {
                 players,
@@ -427,7 +431,7 @@ impl Execution {
             }
             Selector::Union { sets } => sets
                 .iter()
-                .map(|set| self.target_objects(game, set))
+                .map(|set| self.public_field_objects(game, set))
                 .collect::<Result<Vec<_>>>()?
                 .into_iter()
                 .flatten()
