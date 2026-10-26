@@ -31,6 +31,15 @@ fn p25(input: &Value) -> &Value {
         .unwrap()["input"]
 }
 
+fn b4(input: &Value) -> &Value {
+    &input["authors"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|author| author["input"]["card_no"] == "BP06-048")
+        .unwrap()["input"]
+}
+
 #[test]
 fn repository_lastword_keeps_its_permanent_source_and_complete_damage_body() {
     let (snapshot, keywords, input) = inputs();
@@ -108,6 +117,42 @@ fn repository_draw_cards_lower_as_complete_current_candidates() {
         assert_eq!(source.source.line, 1);
         assert_eq!(source.source.section, None);
     }
+}
+
+#[test]
+fn repository_named_search_lowers_as_a_complete_current_candidate() {
+    let (snapshot, keywords, input) = inputs();
+    let selected = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
+    let prototypes = serde_json::to_value(&selected.prototypes).unwrap();
+    let card_no = "BP06-048";
+    let card_id = "c:e7b93196e1175515a42771a72c7b12da";
+    let face_id = "f:e9d8deca215953a99d12bd07acd566fa";
+
+    assert!(prototypes["programs"].get(card_no).is_none());
+    let card = &selected.current[card_no];
+    assert_eq!(card.card_id, card_id);
+    assert_eq!(card.program.card().abilities.len(), 1);
+    assert_eq!(
+        card.expanded["cards"][card_no]["faces"][face_id]["abilities"][0]["lastword"]["do"][0]["search"],
+        json!({"sel":{"who":"self","zone":"deck","name":"式神の使役"},"n":1_i32,"to":"hand"})
+    );
+    let direct = ExpandedLowerer::new()
+        .unwrap()
+        .lower_current(b4(&input))
+        .unwrap();
+    assert_eq!(card.source_version, direct.source_version);
+    let source = card
+        .source_at(&format!(
+            "/cards/{card_no}/faces/{face_id}/abilities/0/lastword/do/0/search/n"
+        ))
+        .unwrap();
+    assert_eq!(source.source.card_id, card_id);
+    assert_eq!(source.source.card_no, card_no);
+    assert_eq!(source.source.face, face_id);
+    assert_eq!(source.source.scope, "ability_0");
+    assert_eq!(source.source.field, "effect");
+    assert_eq!(source.source.line, 1);
+    assert_eq!(source.source.section, None);
 }
 
 #[test]

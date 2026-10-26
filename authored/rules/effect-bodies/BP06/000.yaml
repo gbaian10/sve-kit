@@ -1,0 +1,39 @@
+format: 1
+kind: effect_body_shard
+scope: shared
+records:
+  - frame_id: frame:6a55cf6e98ec1adde395ab302424932112d12a49bd3fbb17b410a117b9ea8e2a
+    ability_scope: ability_0
+    dsl: "1.0"
+    params:
+      n:
+        type: Nat
+        source:
+          slot: leaf_4
+          component: constant
+    body:
+      lastword:
+        do:
+          - search:
+              sel:
+                who: self
+                zone: deck
+                name: 式神の使役
+              n:
+                param: n
+              to: hand
+    ports:
+      imports: {}
+      exports: {}
+    written_by:
+      - actor:
+          who: Codex
+          model: gpt-6-luna
+        date: "2026-10-26"
+    registrations:
+      - id: jp
+        domain:
+          regions:
+            - jp
+        reviews: []
+    body_version: effect-body-v1:sha256:e0d4c6ac8426c31ec9a2d2050838c9e2ffcef0544b0d80509c3fbcd8930fdc9a

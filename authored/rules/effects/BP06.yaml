@@ -119,22 +119,6 @@ cards:
               then:
                 op: draw
                 count: 1
-  BP06-048:
-    status: complete
-    abilities:
-      - line: 1
-        kind: trigger
-        body:
-          op: search
-          select:
-            side: self
-            zone: deck
-            name: 式神の使役
-          min: 0
-          max: 1
-          to: hand
-        event: field_to_cemetery
-        subject: self
   BP06-072:
     status: complete
     abilities:
