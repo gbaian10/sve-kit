@@ -268,6 +268,12 @@ def entry_payload(source: SourceContext, scope: str) -> dict[str, JsonValue]:
             heads[0]: {"do": [{"draw": {"who": "self", "n": _draw_count(source)}}]},
             "ports": {"imports": {}, "exports": {}},
         }
+    return _entry_cost_payload(source, heads, scopes.index(scope))
+
+
+def _entry_cost_payload(
+    source: SourceContext, heads: tuple[str, ...], index: int
+) -> dict[str, JsonValue]:
     slots = {slot.name: slot for slot in source.frame.leaf_schema.slots}
     operands = []
     for occurrence in source.binding.occurrences:
@@ -285,7 +291,6 @@ def entry_payload(source: SourceContext, scope: str) -> dict[str, JsonValue]:
         {position for position, _ in operands}
     ) != len(heads):
         raise SourceError("source_cost_operand_mismatch")
-    index = scopes.index(scope)
     return {
         heads[index]: {"cost": {"pp": operands[index][1]}},
         "ports": {"imports": {}, "exports": {}},
