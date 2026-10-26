@@ -596,6 +596,98 @@ fn bp01_118_is_one_uniform_instruction_for_all_leaders() {
 }
 
 #[test]
+fn bp01_037_fanfare_buffs_own_field_followers_except_its_source() {
+    let mut tree = expanded::tree().clone();
+    let mut card = tree["cards"]["BP08-038"].clone();
+    card["abilities"][0]["fanfare"] = json!({"do":[{"buff":{
+        "on":{"who":"self","zone":"field","kind":"follower","other":true},
+        "power":1_i64,"hp":1_i64
+    }}]});
+    tree["cards"] = json!({"BP01-037":card});
+    let lowerer = ExpandedLowerer::new().unwrap();
+    let cards = lowerer.lower(&tree).unwrap();
+    let ability = &cards["BP01-037"].card().abilities[0].node;
+    assert!(matches!(
+        ability.source.origin,
+        AbilityOrigin::Keyword {
+            keyword: KeywordId::Fanfare,
+            ..
+        }
+    ));
+    let [step] = ability.body.as_ref().unwrap().steps.as_slice() else {
+        panic!("one buff instruction");
+    };
+    let Node::Instruction { instruction } = &step.node else {
+        panic!("buff instruction");
+    };
+    let Action::Modify {
+        subjects,
+        patch,
+        expires,
+        ..
+    } = &instruction.action
+    else {
+        panic!("numeric modification");
+    };
+    let Selector::Difference { input, except } = subjects else {
+        panic!("source exclusion");
+    };
+    assert!(matches!(input.as_ref(), Selector::Zone {
+        players: PlayerSet { relation: PlayerRelation::SelfPlayer, .. },
+        zone: ZoneKind::Field,
+        predicate,
+        ..
+    } if matches!(predicate.as_ref(), Expr::Compute(predicate)
+        if matches!(predicate.as_ref(), Predicate::And { predicates }
+            if matches!(predicates.as_slice(), [Expr::Compute(kind)]
+                if matches!(kind.as_ref(), Predicate::KindEquals {
+                    right: Expr::Literal(CardKind::Follower), ..
+                }))))));
+    assert_eq!(
+        except.as_ref(),
+        &Selector::Objects {
+            objects: vec![ObjectOperand::SourceHolder {}]
+        }
+    );
+    assert_eq!(
+        patch,
+        &CharacteristicPatch::Combined {
+            patches: vec![
+                CharacteristicPatch::Numeric {
+                    stat: Stat::Attack,
+                    change: NumericChange::Add {
+                        amount: Expr::Literal(Int(1))
+                    }
+                },
+                CharacteristicPatch::Numeric {
+                    stat: Stat::Life,
+                    change: NumericChange::Add {
+                        amount: Expr::Literal(Int(1))
+                    }
+                },
+            ]
+        }
+    );
+    assert!(matches!(expires.end, DurationEnd::NoTemporalExpiry {}));
+
+    tree["cards"]["BP01-037"]["abilities"][0]["fanfare"]["do"][0]["buff"]["on"]
+        .as_object_mut()
+        .unwrap()
+        .remove("other");
+    let unrestricted = lowerer.lower(&tree).unwrap();
+    let unrestricted_step = &unrestricted["BP01-037"].card().abilities[0]
+        .node
+        .body
+        .as_ref()
+        .unwrap()
+        .steps[0];
+    assert!(
+        matches!(&unrestricted_step.node, Node::Instruction { instruction: unfiltered }
+        if matches!(unfiltered.action, Action::Modify { subjects: Selector::Zone { .. }, .. }))
+    );
+}
+
+#[test]
 fn numeric_duration_and_continuous_preserve_distinct_semantics() {
     let mut tree = expanded::tree().clone();
     let steps = &mut tree["cards"]["BP08-038"]["abilities"][0]["fanfare"]["do"];

@@ -18,7 +18,50 @@ bodies:
           regions:
             - jp
         id: jp
+  numeric_fanfare_other_allied_followers_add_1_1.v1/1:
+    ability_scope: ability_0
+    basis: effect-anchor-v1:sha256:fca6dc61e2013dc6b19d8ccc6d9b751d8f9fedbe7badfb9a45bda33546acb0be
+    body_version: effect-body-v1:sha256:cbd9aa95d737a094ed2b683a656bbaebaa2a4a7bd17882d6bddef389168b3cf4
+    frame_id: frame:df3e447f70b99e27658e92037da38c02a10b8e4366cda137d93e4e75e77b2a49
+    params: {}
+    ports:
+      exports: {}
+      imports: {}
+    registrations:
+      - domain:
+          regions:
+            - jp
+        id: jp
 cards:
+  BP01-037:
+    basis: effect-anchor-v1:sha256:402695e58c4dbaf42b6bc0636c1d482534033ed0e1054ebd7c79dcd73a87c820
+    card_id: c:5dc2ea15a3a55a559c27a4f630c2e333
+    legacy_shape:
+      container: faces
+    source: effect-source-v1:sha256:e3e0cb2592ba304c8e27e02c33dd32ec67d3516b996b1500fbdc0b18fedef190
+    uses:
+      - ability_scope: ability_0
+        binding_id: bind:193764dc3f6d17ecc3443e3717ce7190112c272d283082a474521369e8ad564a
+        body: numeric_fanfare_other_allied_followers_add_1_1.v1
+        body_version: effect-body-v1:sha256:cbd9aa95d737a094ed2b683a656bbaebaa2a4a7bd17882d6bddef389168b3cf4
+        edition: 1
+        face_id: f:199fa75484985d99a482b0054cc968f7
+        frame_id: frame:df3e447f70b99e27658e92037da38c02a10b8e4366cda137d93e4e75e77b2a49
+        line: 1
+        occurrence:
+          field: effect
+          line_ordinal: 0
+          ordinal: null
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:7976eccc7ea2f13134e11efea2a7e237a8fb67a91c5e01ce47eb6832cae513ac
+          role: body
+          segments:
+            - end: 40
+              start: 0
+          source_hash: 97565c4472c3b751a11f2dcb0f7f88f7c6d61d8a3c06607d41290c4e2e4e1e37
+        params: {}
+        registration: jp
   BP01-046:
     basis: effect-anchor-v1:sha256:2c744d3193d900ed86acd18ed3ce57fc4ca2ce3cdbdbb6ca31250d04640e9158
     card_id: c:53a02d8082c75adab4ca7ad06ad97987

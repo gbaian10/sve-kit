@@ -64,7 +64,7 @@ impl BodyContext<'_> {
         };
         let binding: Binding<ObjectRef> = Binding::new(self.allocator.id(path)?, self.scope);
         let kind = query.kind.as_ref().map(|_| ast::SearchKind::Follower);
-        Ok(Selector::Zone {
+        let objects = Selector::Zone {
             players: PlayerSet {
                 relation: match query.who {
                     ast::Side::Controller => PlayerRelation::SelfPlayer,
@@ -93,6 +93,14 @@ impl BodyContext<'_> {
                 None,
                 binding,
             )),
+        };
+        Ok(if query.other {
+            Selector::Difference {
+                input: Box::new(objects),
+                except: Box::new(holder()),
+            }
+        } else {
+            objects
         })
     }
 

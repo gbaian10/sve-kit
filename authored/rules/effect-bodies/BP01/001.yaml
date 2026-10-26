@@ -1,0 +1,21 @@
+format: 2
+kind: effect_body_shard
+records:
+  - body:
+      fanfare:
+        do:
+          - buff:
+              hp: 1
+              on:
+                kind: follower
+                other: true
+                who: self
+                zone: field
+              power: 1
+    id: numeric_fanfare_other_allied_followers_add_1_1.v1
+    params: {}
+    written_by:
+      - actor:
+          model: gpt-6-luna
+          who: Codex
+        date: "2026-10-26"
