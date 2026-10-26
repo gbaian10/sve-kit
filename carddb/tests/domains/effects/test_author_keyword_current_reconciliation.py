@@ -30,6 +30,7 @@ from ...support.author_current_fixtures import (
 )
 from ...support.author_semantic_inputs import load_semantic_inputs
 from ...support.semantic_definition_fixtures import with_definitions
+from ...support.time_budget import slow_fixture
 from .author_current_goldens import FACTS
 from .author_current_synthetic import back_face, effect, token_section
 from .author_entry_cases import meta
@@ -50,6 +51,10 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture(scope="module")
+@slow_fixture(
+    reason="Build the real current-source database for whole-card keyword reconciliation "
+    "once for this module; each test copies the database before writing."
+)
 def fixture(
     tmp_path_factory: pytest.TempPathFactory, author_source_preparation: bytes
 ) -> CurrentSourceFixture:

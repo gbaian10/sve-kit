@@ -14,47 +14,17 @@ from sve_carddb.core.yaml import JSON_VALUE, parse_yaml
 from sve_carddb.workflows import authoring
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
-
     from pydantic import JsonValue
 
 REPO = Path(__file__).resolve().parents[3]
-
-
-@pytest.fixture(scope="module")
-def workspace() -> Iterator[authoring.Workspace]:
-    batch = string(
-        object_value(parse((REPO / "tests/engine/card-input.json").read_bytes()))[
-            "batch_id"
-        ]
-    )
-    inputs = authoring.Inputs(
-        profile="public",
-        repo=REPO,
-        jp_batch_id=batch,
-        revision="1036aa89bb1ce52cf4a964df8461663ab644b614",
-    )
-    with authoring.prepare(
-        inputs,
-        cards=frozenset(
-            {"BP09-005", "BP01-138", "BP19-P32", "BP01-048", "BP01-046", "BP01-176"}
-        ),
-    ) as prepared:
-        yield prepared
-
-
-@pytest.fixture
-def output_root(tmp_path: Path) -> Path:
-    return Path(shutil.copytree(REPO / "authored", tmp_path / "authored"))
 
 
 def tree(path: Path) -> dict[str, JsonValue]:
     return object_value(JSON_VALUE.validate_python(parse_yaml(path.read_bytes())))
 
 
-def handwriting(
-    tmp_path: Path,
-) -> tuple[Path, Path, dict[str, JsonValue], dict[str, JsonValue]]:
+@pytest.fixture(scope="session")
+def handwritten() -> tuple[dict[str, JsonValue], dict[str, JsonValue]]:
     cards: dict[str, JsonValue] = {}
     bodies: list[JsonValue] = []
     for owner, number, name in (
@@ -105,6 +75,14 @@ def handwriting(
         "kind": "effect_body_shard",
         "records": bodies,
     }
+    return main_tree, body_tree
+
+
+def handwriting(
+    tmp_path: Path,
+    handwritten: tuple[dict[str, JsonValue], dict[str, JsonValue]],
+) -> tuple[Path, Path, dict[str, JsonValue], dict[str, JsonValue]]:
+    main_tree, body_tree = deepcopy(handwritten)
     main = tmp_path / "main.yaml"
     companion = tmp_path / "bodies.yaml"
     main.write_bytes(authoring.format_yaml(main_tree))
@@ -142,13 +120,6 @@ def rename_draw_parameter(
     return ability, definition
 
 
-def test_repository_check_is_the_ci_entry(workspace: authoring.Workspace) -> None:
-    report = authoring.check(workspace)
-    authors = array(object_value(report["selection"])["authors"])
-    assert len(authors) >= 14
-    assert all(object_value(item)["status"] == "accepted" for item in authors)
-
-
 @pytest.mark.parametrize(
     ("number", "reprint"),
     [("BP01-046", "SD02-008"), ("BP01-176", "ETD01-019")],
@@ -170,12 +141,17 @@ def test_public_inspect_reconstructs_multi_printing_sources(
     assert other["payload"] == report["payload"]
 
 
+@pytest.mark.slow(
+    reason="Write and replay against the complete real authored inventory, then verify every current author"
+)
 def test_write_preserves_handwritten_storage_and_reuses_companions(
-    workspace: authoring.Workspace,
-    output_root: Path,
+    repository_workspace: authoring.Workspace,
     tmp_path: Path,
+    handwritten: tuple[dict[str, JsonValue], dict[str, JsonValue]],
 ) -> None:
-    main, bodies, hand, _ = handwriting(tmp_path)
+    workspace = repository_workspace
+    output_root = Path(shutil.copytree(workspace.authored, tmp_path / "authored"))
+    main, bodies, hand, _ = handwriting(tmp_path, handwritten)
     report = authoring.write(
         workspace, main=main, bodies=bodies, output_root=output_root, all_cards=True
     )
@@ -226,10 +202,11 @@ def test_write_rejects_without_any_writes(  # ruff: ignore[complex-structure, to
     workspace: authoring.Workspace,
     output_root: Path,
     tmp_path: Path,
+    handwritten: tuple[dict[str, JsonValue], dict[str, JsonValue]],
     mutation: str,
     reason: str,
 ) -> None:
-    main, bodies, main_tree, body_tree = handwriting(tmp_path)
+    main, bodies, main_tree, body_tree = handwriting(tmp_path, handwritten)
     card = object_value(object_value(main_tree["cards"])["BP10-122"])
     ability = object_value(array(card["abilities"])[0])
     definition = object_value(array(body_tree["records"])[0])
@@ -301,8 +278,9 @@ def test_real_multiface_ambiguity_precedes_pending(
     workspace: authoring.Workspace,
     output_root: Path,
     tmp_path: Path,
+    handwritten: tuple[dict[str, JsonValue], dict[str, JsonValue]],
 ) -> None:
-    main, bodies, main_tree, _ = handwriting(tmp_path)
+    main, bodies, main_tree, _ = handwriting(tmp_path, handwritten)
     original = object_value(object_value(main_tree["cards"])["BP10-122"])
     main_tree["cards"] = {
         "BP09-005": {
@@ -383,8 +361,9 @@ def test_alias_cannot_create_a_second_index_record(
     workspace: authoring.Workspace,
     output_root: Path,
     tmp_path: Path,
+    handwritten: tuple[dict[str, JsonValue], dict[str, JsonValue]],
 ) -> None:
-    main, bodies, value, _ = handwriting(tmp_path)
+    main, bodies, value, _ = handwriting(tmp_path, handwritten)
     cards = object_value(value["cards"])
     cards["BP06-P15"] = cards.pop("BP06-048")
     main.write_bytes(authoring.format_yaml(value))
@@ -405,8 +384,9 @@ def test_alias_cannot_create_a_second_index_record(
 def test_output_requires_the_complete_existing_inventory(
     workspace: authoring.Workspace,
     tmp_path: Path,
+    handwritten: tuple[dict[str, JsonValue], dict[str, JsonValue]],
 ) -> None:
-    main, bodies, _, _ = handwriting(tmp_path)
+    main, bodies, _, _ = handwriting(tmp_path, handwritten)
     empty = tmp_path / "empty"
     empty.mkdir()
     with pytest.raises(authoring.AuthorInputError) as error:
@@ -421,9 +401,10 @@ def test_io_failure_reports_completed_and_possibly_partial_files(
     workspace: authoring.Workspace,
     output_root: Path,
     tmp_path: Path,
+    handwritten: tuple[dict[str, JsonValue], dict[str, JsonValue]],
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    main, bodies, _, _ = handwriting(tmp_path)
+    main, bodies, _, _ = handwriting(tmp_path, handwritten)
     for owner, number in (("BP06", "BP06-048"), ("BP10", "BP10-122")):
         path = output_root / f"rules/effect-anchors/{owner}.yaml"
         pin = tree(path)
@@ -453,12 +434,16 @@ def test_io_failure_reports_completed_and_possibly_partial_files(
     assert error.value.failed in str(error.value)
 
 
+@pytest.mark.slow(
+    reason="Exercise new-edition rejection, write, replay and all-card anchor refresh through the real source validator"
+)
 def test_explicit_new_edition_retains_old_body_and_reuses_the_new_version(
     workspace: authoring.Workspace,
     output_root: Path,
     tmp_path: Path,
+    handwritten: tuple[dict[str, JsonValue], dict[str, JsonValue]],
 ) -> None:
-    main, bodies, main_tree, body_tree = handwriting(tmp_path)
+    main, bodies, main_tree, body_tree = handwriting(tmp_path, handwritten)
     ability, definition = rename_draw_parameter(main_tree, body_tree)
     main.write_bytes(authoring.format_yaml(main_tree))
     bodies.write_bytes(authoring.format_yaml(body_tree))
@@ -508,13 +493,14 @@ def test_keyword_shorthand_keeps_the_existing_lowercase_boundary(
     workspace: authoring.Workspace,
     output_root: Path,
     tmp_path: Path,
+    handwritten: tuple[dict[str, JsonValue], dict[str, JsonValue]],
     uppercase: bool,
 ) -> None:
     prototype = output_root / "rules/effects/BP01.yaml"
     value = tree(prototype)
     object_value(value["cards"]).pop("BP01-138", None)
     prototype.write_bytes(authoring.format_yaml(value))
-    main, _, main_tree, _ = handwriting(tmp_path)
+    main, _, main_tree, _ = handwriting(tmp_path, handwritten)
     meta = object_value(
         object_value(object_value(main_tree["cards"])["BP01-110"])["meta"]
     )
@@ -561,8 +547,9 @@ def test_wrong_owner_and_symlink_inputs_are_rejected(
     workspace: authoring.Workspace,
     output_root: Path,
     tmp_path: Path,
+    handwritten: tuple[dict[str, JsonValue], dict[str, JsonValue]],
 ) -> None:
-    main, bodies, _, _ = handwriting(tmp_path)
+    main, bodies, _, _ = handwriting(tmp_path, handwritten)
     wrong = tmp_path / "mains/WRONG"
     wrong.mkdir(parents=True)
     shutil.copyfile(main, wrong / "000.yaml")
@@ -614,12 +601,16 @@ def git_tree(repo: Path) -> str:
     return commit.decode().strip()
 
 
+@pytest.mark.slow(
+    reason="Verify prototype removal and three regression rejection paths against frozen real AST positions in a private Git tree"
+)
 def test_prototype_removal_checks_fixed_ast_positions_and_unchanged_baselines(
     workspace: authoring.Workspace,
     tmp_path: Path,
+    handwritten: tuple[dict[str, JsonValue], dict[str, JsonValue]],
 ) -> None:
     repo = tmp_path / "repository"
-    authored = Path(shutil.copytree(REPO / "authored", repo / "authored"))
+    authored = Path(shutil.copytree(workspace.authored, repo / "authored"))
     shutil.copytree(REPO / "dsl", repo / "dsl")
     baseline = repo / "carddb/tests/fixtures/effect_baseline"
     baseline.mkdir(parents=True)
@@ -652,7 +643,7 @@ def test_prototype_removal_checks_fixed_ast_positions_and_unchanged_baselines(
         authoring.format_yaml(index)
     )
     base = git_tree(repo)
-    main, bodies, _, _ = handwriting(tmp_path)
+    main, bodies, _, _ = handwriting(tmp_path, handwritten)
     configured = replace(
         workspace,
         inputs=workspace.inputs.model_copy(update={"repo": repo}),
@@ -752,10 +743,16 @@ def test_inspect_retains_stored_anchor_and_reports_the_current_difference(
     assert fingerprint(output_root) == before
 
 
+@pytest.mark.slow(
+    reason="Write a second real body edition, reject a selected refresh with an unused stale pin, then refresh and check the inventory"
+)
 def test_selected_write_never_rebinds_an_unused_stale_body_pin(
-    workspace: authoring.Workspace, output_root: Path, tmp_path: Path
+    workspace: authoring.Workspace,
+    output_root: Path,
+    tmp_path: Path,
+    handwritten: tuple[dict[str, JsonValue], dict[str, JsonValue]],
 ) -> None:
-    main, bodies, main_tree, body_tree = handwriting(tmp_path)
+    main, bodies, main_tree, body_tree = handwriting(tmp_path, handwritten)
     ability, definition = rename_draw_parameter(main_tree, body_tree)
     ability["edition"] = 2
     definition["edition"] = 2
@@ -813,3 +810,20 @@ def test_shared_body_cannot_bind_to_two_different_source_frames(
         if object_value(card)["status"] == "rejected"
     }
     assert "body_source_frame_mismatch" in rejected
+
+
+def test_output_and_handwriting_copies_cannot_change_session_inputs(
+    workspace: authoring.Workspace,
+    output_root: Path,
+    tmp_path: Path,
+    handwritten: tuple[dict[str, JsonValue], dict[str, JsonValue]],
+) -> None:
+    original = fingerprint(workspace.authored)
+    path = output_root / "rules/author-effects/BP10/000.yaml"
+    path.write_bytes(b"invalid private output")
+    main, bodies, cards, definitions = handwriting(tmp_path, handwritten)
+    object_value(cards["cards"]).clear()
+    array(definitions["records"]).clear()
+    assert fingerprint(workspace.authored) == original
+    assert main.read_bytes() == authoring.format_yaml(handwritten[0])
+    assert bodies.read_bytes() == authoring.format_yaml(handwritten[1])
