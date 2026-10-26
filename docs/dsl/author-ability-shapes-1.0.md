@@ -34,7 +34,7 @@ T=既有非空、保序 Targets；O=OptionalCosts；X=XParameter；D=非空 Map<
 
 所有欄位封閉。7 個觸發巨集頭不接受 zone；事件定義與 LKI 已決定自身的觸發位置。auto／activate／static 的 zone 用 AbilityZone=既有六值＋equipment，允許單值或非空列表，保留重數，不接受 param；不擴張 Sel／參數的 Zone。auto/activate.zone 的合法值及對應卡文由 C1 驗證，C0 不把只標合成的組合當全卡准入。
 
-獨立 keywords 是非本體宣告，完整 A.ability.keywords 用 CardKeywordSourceUse `{binding_id,occurrence}`，不含 ability_scope；ports 兩個 map 必空，imports／generated_by 不合法，清單元素不可重複。裸 A.ability-head 仍供片段型別與葉位驗證，不能把其結構可讀當 companion 准入；完整 inline 的 ParamRef 仍拒絕。含此宣告的卡目前只接受 draft、空 reviewed_by／verified_by_exam；正式 current 來源與作者宣告對帳、D0 的獨立義務精確消耗、Ward／Aura 具名權限宣告的 lowering 與精確整卡准入已實作。已准入 Ward／Aura 的有效性、攻擊、可選橫置與選目標規則以 author-contract-1.0〈守護與光紋的具名宣告准入〉為準；用途資格仍須獨立證據。
+獨立 keywords 是非本體宣告，完整 A.ability.keywords 用 CardKeywordSourceUse `{binding_id,occurrence}`，不含 ability_scope；ports 兩個 map 必空，imports／generated_by 不合法，清單元素不可重複。裸 A.ability-head 仍供片段型別與葉位驗證，不能把其結構可讀當 companion 准入；完整 inline 的 ParamRef 仍拒絕。含此宣告的卡目前只接受 draft、空 reviewed_by／verified_by_exam；正式 current 來源與作者宣告對帳、D0 的獨立義務精確消耗，以及 Ward／Aura／Storm／Rush／Bane／Intimidate／Assail 的具名降低與精確整卡准入已實作。有效性及對局規則以 author-contract-1.0〈守護與光紋的具名宣告准入〉為準；用途資格仍須獨立證據。
 
 per_turn 是 ≥1 的安全整數；拒絕舊鍵與 bool/0/負數/字串。自動能力按 PendingAdmission 消耗、起動按 PlayCommitted 消耗，不提供 consume_at 自訂入口。起動 BP08-084 n=2、auto BP07-036 n=4、授予 CP04-PR20 n=2。per_turn 不表示「只在自己回合」；額外的回合限定需要獨立的規則准入。ub:true 為獨立標誌，不是 per_turn。
 
