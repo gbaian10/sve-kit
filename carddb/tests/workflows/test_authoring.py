@@ -188,6 +188,7 @@ def test_write_emits_legacy_sources_and_reuses_companions(
         ("body_syntax", "invalid_syntax_tree"),
         ("body_source", "missing_parameter_source"),
         ("author", "author_metadata_conflict"),
+        ("status", "author_metadata_conflict"),
         ("closure", "source_ability_closure_mismatch"),
         ("unknown", "ability_head_conflict"),
         ("duplicate_body", "duplicate_body_id"),
@@ -241,6 +242,8 @@ def test_write_rejects_without_any_writes(  # ruff: ignore[complex-structure, to
             object_value(card["meta"])["written_by"] = [
                 {"actor": {"who": "Another"}, "date": "2026-10-26"}
             ]
+        case "status":
+            object_value(card["meta"])["status"] = "disputed"
         case "closure":
             card["abilities"] = []
         case "unknown":
@@ -559,9 +562,17 @@ def git_tree(repo: Path) -> str:
     run("init", "--quiet")
     run("add", ".")
     tree_id = run("write-tree").decode().strip()
-    return (
-        run("commit-tree", tree_id, "-m", "Frozen regression fixture").decode().strip()
+    commit = run(
+        "-c",
+        "user.name=Synthetic author",
+        "-c",
+        "user.email=synthetic@example.invalid",
+        "commit-tree",
+        tree_id,
+        "-m",
+        "Frozen regression fixture",
     )
+    return commit.decode().strip()
 
 
 def test_prototype_removal_checks_fixed_ast_positions_and_unchanged_baselines(

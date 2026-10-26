@@ -216,7 +216,13 @@ def _card(  # ruff: ignore[complex-structure, too-many-branches, too-many-locals
         if "abilities" in previous and "faces" in previous:
             raise SourceError("unsupported_legacy_container_shape")
         original = object_value(previous["meta"])
-        for key in ("written_by", "reviewed_by", "verified_by_exam", "rulings"):
+        for key in (
+            "written_by",
+            "reviewed_by",
+            "status",
+            "verified_by_exam",
+            "rulings",
+        ):
             if original.get(key) != generated_meta[key]:
                 raise SourceError("author_metadata_conflict")
         if "note" in previous and previous.get("note") != value.get("note"):
@@ -434,7 +440,7 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
                 "scope": "shared",
                 "cards": {},
             }
-        try:  # ruff: ignore[too-many-statements-in-try-clause] -- attach the selected card identity to materialization failures
+        try:
             card_id, value, materialized, card_locations = _card(
                 workspace, number, handwritten, previous
             )
@@ -451,7 +457,7 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
                 )
                 if added is not None:
                     changed.add(added)
-            for ability, (body, _) in zip(
+            for ability, (body, resolved_edition) in zip(
                 (
                     object_value(a)
                     for a in array(handwritten.cards[number]["abilities"])
@@ -460,17 +466,7 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
                 materialized,
                 strict=True,
             ):
-                name = string(ability["use"])
-                editions = [
-                    edition
-                    for identifier, edition in handwritten.bodies
-                    if identifier == name
-                ]
-                resolved_edition = ability.get(
-                    "edition", editions[0] if len(editions) == 1 else None
-                )
-                assert type(resolved_edition) is int
-                key = name, resolved_edition
+                key = string(ability["use"]), resolved_edition
                 identity = body["frame_id"], body["ability_scope"], body["body_version"]
                 if key in body_bindings and body_bindings[key] != identity:
                     raise SourceError("body_source_frame_mismatch")  # ruff: ignore[raise-within-try] -- add the selected card to this source diagnostic

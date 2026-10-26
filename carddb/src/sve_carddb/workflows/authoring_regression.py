@@ -182,11 +182,10 @@ def check_regression(  # ruff: ignore[complex-structure, too-many-branches, too-
         if number not in accepted:
             _reject("prototype_replacement_not_current", number)
         pack = baseline_root / f"{number.split('-', 1)[0]}.json"
-        legacy = old[number]
         baseline = object_value(object_value(parse(pack.read_bytes()))[number])
-        if legacy != old[number] or digest(canonical(legacy)).removeprefix(
-            "sha256:"
-        ) != string(baseline["ast_sha256"]):
+        if digest(canonical(old[number])).removeprefix("sha256:") != string(
+            baseline["ast_sha256"]
+        ):
             _reject("prototype_ast_mismatch", number)
         result = accepted[number]
         _positions(
