@@ -26,7 +26,11 @@ from sve_carddb.domains.translations.four_layer_damage import KEY as DAMAGE_KEY
 from sve_carddb.domains.translations.four_layer_derivation import derive_source
 from sve_carddb.domains.translations.four_layer_destroy import KEY as DESTROY_KEY
 from sve_carddb.domains.translations.four_layer_expressions import definition
-from sve_carddb.domains.translations.four_layer_fixed_actions import MOVE, NUMERIC, SEARCH
+from sve_carddb.domains.translations.four_layer_fixed_actions import (
+    MOVE,
+    NUMERIC,
+    SEARCH,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -228,22 +232,8 @@ def entry_payload(source: SourceContext, scope: str) -> dict[str, JsonValue]:
     scopes = tuple(f"ability_{index}" for index in range(len(heads)))
     if scope not in scopes:
         raise SourceError("source_ability_scope_mismatch")
-    if source.frame.semantic_variant.key == NUMERIC:
-        return _numeric_payload(source)
-    if source.frame.semantic_variant.key == DESTROY_KEY:
-        _destroy_contract(source)
-        return {
-            "fanfare": {
-                "do": [
-                    {
-                        "destroy": {
-                            "ref": {"who": "opp", "zone": "field", "kind": "follower"}
-                        }
-                    }
-                ]
-            },
-            "ports": {"imports": {}, "exports": {}},
-        }
+    if source.frame.semantic_variant.key in {DESTROY_KEY, NUMERIC}:
+        return _fanfare_payload(source)
     if source.frame.semantic_variant.key == MOVE:
         _move_contract(source)
         return {
@@ -298,6 +288,24 @@ def entry_payload(source: SourceContext, scope: str) -> dict[str, JsonValue]:
             "ports": {"imports": {}, "exports": {}},
         }
     return _entry_cost_payload(source, heads, scopes.index(scope))
+
+
+def _fanfare_payload(source: SourceContext) -> dict[str, JsonValue]:
+    if source.frame.semantic_variant.key == NUMERIC:
+        return _numeric_payload(source)
+    _destroy_contract(source)
+    return {
+        "fanfare": {
+            "do": [
+                {
+                    "destroy": {
+                        "ref": {"who": "opp", "zone": "field", "kind": "follower"}
+                    }
+                }
+            ]
+        },
+        "ports": {"imports": {}, "exports": {}},
+    }
 
 
 def _entry_cost_payload(
@@ -898,14 +906,12 @@ def parameter_expected(
     fragment: JsonValue,
 ) -> int | str:
     """A matching scalar is insufficient without a registered operand construction."""
-    if source.frame.semantic_variant.key == MOVE:
+    if source.frame.semantic_variant.key in {MOVE, NUMERIC}:
         raise SourceError("unsupported_source_construct")
     try:
         declaration = ParamDecl.model_validate(declaration.model_dump(mode="python"))
     except ValueError:
         raise SourceError("parameter_source_declaration_invalid") from None
-    if source.frame.semantic_variant.key == NUMERIC:
-        raise SourceError("unsupported_source_construct")
     slot = _slot(source, declaration)
     if declaration.source.component == "negated_magnitude" or declaration.type in {
         "Concept",
