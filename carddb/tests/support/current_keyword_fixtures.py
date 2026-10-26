@@ -8,12 +8,11 @@ from sve_carddb.contracts.author_evidence import SourceUse
 from sve_carddb.core.json import canonical, object_value
 from sve_carddb.domains.effects.author_current import CurrentAuthorSources
 from sve_carddb.domains.effects.author_expansion import AuthorExpander
-from sve_carddb.domains.effects.author_source_hash import source_version
 from sve_carddb.domains.effects.author_sources import entry_payload
 
 from .author_current_fixtures import REPOSITORY, current_source_fixture, entry_snapshot
 from .author_destroy_fixtures import destroy_fixture
-from .author_semantic_inputs import load_semantic_inputs
+from .current_author_storage import write_current_anchors
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -53,7 +52,6 @@ def current_keyword_inputs(root: Path, number: str = "BP01-138") -> JsonValue:
             occurrence = obligation.source_use.occurrence
             entry: dict[str, JsonValue] = {
                 "line": occurrence.line_ordinal + 1,
-                "sources": [obligation.source_use.model_dump(mode="json")],
                 **obligation.declaration_payload(),
             }
             if occurrence.ordinal is not None:
@@ -69,7 +67,6 @@ def current_keyword_inputs(root: Path, number: str = "BP01-138") -> JsonValue:
             )
             body: dict[str, JsonValue] = {
                 "line": use.occurrence.line_ordinal + 1,
-                "sources": [use.model_dump(mode="json")],
                 **entry_payload(context, scope),
             }
             if use.occurrence.ordinal is not None:
@@ -78,24 +75,18 @@ def current_keyword_inputs(root: Path, number: str = "BP01-138") -> JsonValue:
         file.write_bytes(
             canonical(
                 {
-                    "format": 1,
+                    "format": 2,
                     "kind": "author_effect_set",
                     "scope": "shared",
                     "cards": {
                         number: {
                             "meta": {
-                                "dsl": "1.0",
-                                "source": source_version(complete.payload),
                                 "written_by": [
                                     {
                                         "actor": {"who": "test fixture", "model": None},
                                         "date": "2026-10-26",
                                     }
                                 ],
-                                "reviewed_by": [],
-                                "status": "draft",
-                                "verified_by_exam": [],
-                                "rulings": [],
                             },
                             "abilities": abilities,
                         }
@@ -121,9 +112,8 @@ def current_keyword_inputs(root: Path, number: str = "BP01-138") -> JsonValue:
             )
         )
         expander = AuthorExpander(REPOSITORY / "dsl")
-        selection = source.selection_inputs(
-            load_semantic_inputs(authored, expander), expander
-        )
+        write_current_anchors(authored, source, expander, number)
+        selection = source.selection_input(authored, expander)
         author = object_value(selection)["authors"]
         assert isinstance(author, list)
         assert len(author) == 1
