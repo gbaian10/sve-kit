@@ -16,9 +16,10 @@ records:
   - face_id: f:8063363aac9a5b16a965d004e2698102
     region: jp
     comparison_hash: sha256:dfc96dbe8b4cddb2e570c0e886681f736702301392620ca5af867ab2a72e864b
-    classification: pending_review
-    method: ai
-    reason: 依實質效果差異交維護者確認規則：BP22-R05 主文缺少 BP09 兩版共有的入場能力，包含土之秘術及將生成物置入 EX 區的完整步驟；各版仍有相同生成物定義段落，無法視為僅省略提醒或補充欄，保留待確認，不判定同效或勘誤。
+    classification: same_effect
+    method: manual
+    reason: 官網卡頁漏載入場曲一行；卡圖印有與 BP09-035 相同的完整效果，依卡圖核對指定 BP09-035 為完整卡文依據。
+    basis_printing_id: p:99292a3321695269a1f8e1dea5be7122
   - face_id: f:afe660f656315787abfe7c376f004810
     region: jp
     comparison_hash: sha256:4cc6fbbac3179ebe084d485b7f5995cfbcab45f736f159776fcda8598a514aa2
