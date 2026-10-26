@@ -12,18 +12,17 @@ from sve_carddb.contracts.author_leaves import EffectsIndex
 from sve_carddb.contracts.four_layer import FaceRevisionOwner
 from sve_carddb.core.json import array, object_value, parse
 from sve_carddb.domains.effects.author_current import CardAccepted, CardRejected
-from sve_carddb.domains.effects.author_expansion import AuthorExpander
 from sve_carddb.domains.effects.author_set import AuthorInputSet
 from sve_carddb.domains.effects.author_source_hash import source_version
 from sve_carddb.domains.effects.author_sources import SourceContext
 
-from ...support.author_numeric_fixtures import FRAME, numeric_fixture
+from ...support.author_numeric_fixtures import FRAME
 from ...support.author_semantic_inputs import load_semantic_inputs
 from ..translations.test_four_layer_fixed_actions import NUMERIC_RAW as RAW
 from .author_current_synthetic import effect, token_section
 from .author_entry_cases import meta
 from .test_author_current import current, input_file, validate_files, write_inputs
-from .test_author_entries import SCHEMAS, shard
+from .test_author_entries import shard
 from .test_author_expansion import generated
 from .test_author_numeric_sources import CHANGES, changed_head, companion, head
 
@@ -33,6 +32,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from sve_carddb.domains.effects.author_current import CurrentAuthorSources
+    from sve_carddb.domains.effects.author_expansion import AuthorExpander
 
     from ...support.author_current_fixtures import CurrentSourceFixture
 
@@ -68,10 +68,12 @@ def inputs(number: str, card: JsonValue) -> AuthorInputSet:
     )
 
 
-def test_real_numeric_current_boundary(tmp_path: Path) -> None:
-    fixture = numeric_fixture(tmp_path / "store")
-    expander = AuthorExpander(SCHEMAS)
-    with current(fixture) as source:
+def test_real_numeric_current_boundary(
+    numeric_current_fixture: CurrentSourceFixture,
+    expander: AuthorExpander,
+    tmp_path: Path,
+) -> None:
+    with current(numeric_current_fixture) as source:
         complete = source.card_payload(CARD)
         assert set(complete.revisions.values()) == {
             "f:199fa75484985d99a482b0054cc968f7"
@@ -138,7 +140,9 @@ def test_real_numeric_current_boundary(tmp_path: Path) -> None:
         check_rejected_payloads(source, expander, node, metadata)
         check_source_closure(source, expander, card)
         check_selection_input(source, expander, card, tmp_path / "authored")
-        check_unsupported_source_siblings(fixture, expander, card, owner.revision_id)
+        check_unsupported_source_siblings(
+            numeric_current_fixture, expander, card, owner.revision_id
+        )
 
 
 def check_face_container(

@@ -25,7 +25,9 @@ FRAME = "frame:3685e2f120d9a679e483ccccc28ef3f37d93bd9e0892b130807e55c5c2b461a9"
 NUMBERS = ("BP07-T03", "BP12-T12", "BP17-T19", "PR-195", "SP01-T03")
 
 
-def move_fixture(store: Path) -> CurrentSourceFixture:
+def move_fixture(
+    store: Path, *, preparation: bytes | None = None
+) -> CurrentSourceFixture:
     authored = REPOSITORY / "authored"
     definitions = four_layer_definitions.from_files(
         four_layer_definitions.read_files(authored)
@@ -50,5 +52,8 @@ def move_fixture(store: Path) -> CurrentSourceFixture:
     snapshot = Snapshot((files[0],), with_definitions(tuple(files)))
     validate_snapshot(snapshot)
     return current_source_fixture(
-        store, card_numbers=frozenset(NUMBERS), snapshot=snapshot
+        store,
+        card_numbers=frozenset(NUMBERS),
+        snapshot=snapshot,
+        preparation=preparation,
     )

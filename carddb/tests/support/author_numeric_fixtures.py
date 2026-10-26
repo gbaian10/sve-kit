@@ -29,6 +29,7 @@ def numeric_fixture(
     *,
     card_numbers: frozenset[str] = frozenset({"BP01-P09", "BP01-037"}),
     parser_version: str = "author-current-fixture-v1",
+    preparation: bytes | None = None,
 ) -> CurrentSourceFixture:
     authored = REPOSITORY / "authored"
     definitions = four_layer_definitions.from_files(
@@ -71,4 +72,5 @@ def numeric_fixture(
         card_numbers=card_numbers,
         snapshot=snapshot,
         parser_version=parser_version,
+        preparation=preparation,
     )

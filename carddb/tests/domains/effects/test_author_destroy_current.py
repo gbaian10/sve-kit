@@ -7,7 +7,6 @@ from sve_carddb.contracts.author_leaves import EffectsIndex
 from sve_carddb.contracts.four_layer import FaceRevisionOwner, OwnerField
 from sve_carddb.core.json import array, canonical, object_value
 from sve_carddb.domains.effects.author_current import CardRejected
-from sve_carddb.domains.effects.author_expansion import AuthorExpander
 from sve_carddb.domains.effects.author_set import AuthorInputSet
 from sve_carddb.domains.effects.author_source_hash import source_version
 from sve_carddb.domains.effects.author_sources import (
@@ -19,26 +18,28 @@ from sve_carddb.domains.effects.author_sources import (
 from sve_carddb.domains.translations.four_layer_destroy import KEY
 from sve_carddb.domains.translations.four_layer_sources import semantic_context
 
-from ...support.author_destroy_fixtures import destroy_fixture
 from ...support.author_semantic_inputs import load_semantic_inputs
 from .author_entry_cases import meta
 from .test_author_current import current, input_file, write_inputs
 from .test_author_destroy_sources import companion, head
-from .test_author_entries import SCHEMAS, ability, shard
+from .test_author_entries import ability, shard
 from .test_author_expansion import generated
 
 if TYPE_CHECKING:
     from pathlib import Path
 
     from sve_carddb.domains.effects.author_current import CurrentAuthorSources
-    from sve_carddb.domains.effects.author_sources import SourceContext
+    from sve_carddb.domains.effects.author_expansion import AuthorExpander
+
+    from ...support.author_current_fixtures import CurrentSourceFixture
 
 
 def test_real_advance_body_requires_complete_keyword_declaration(
+    destroy_current_fixture: CurrentSourceFixture,
+    expander: AuthorExpander,
     tmp_path: Path,
 ) -> None:
-    fixture = destroy_fixture(tmp_path / "store")
-    with current(fixture) as source:
+    with current(destroy_current_fixture) as source:
         card_id = source.printing_card("BP19-P32")
         assert source.printing_card("BP19-114") == card_id
         face = source.db.select("face", ("id",), where={"card_id": card_id})[0].values[
@@ -85,20 +86,19 @@ def test_real_advance_body_requires_complete_keyword_declaration(
         )
         assert meaning["destination"] == "each_card_owner_cemetery"
         check_current_requires_keyword_declaration(
-            source, resolved, candidate, use, card_id, tmp_path
+            expander, source, candidate, use, card_id, tmp_path
         )
 
 
 def check_current_requires_keyword_declaration(
+    expander: AuthorExpander,
     source: CurrentAuthorSources,
-    resolved: SourceContext,
     candidate: SourceCandidate,
     use: SourceUse,
     card_id: str,
     tmp_path: Path,
 ) -> None:
-    expander = AuthorExpander(SCHEMAS)
-    record = companion(resolved)
+    record = companion(resolve_source(candidate, use))
     metadata = meta()
     metadata["source"] = source_version(source.card_payload(card_id).payload)
     for number in ("BP19-P32", "BP19-114"):

@@ -14,7 +14,7 @@ from sve_carddb.contracts.author_handoff import (
 )
 from sve_carddb.contracts.author_leaves import EffectsIndex
 from sve_carddb.contracts.four_layer import FaceRevisionOwner
-from sve_carddb.core.json import array, canonical, object_value
+from sve_carddb.core.json import array, canonical, object_value, parse
 from sve_carddb.domains.effects.author_current import CardAccepted, CardRejected
 from sve_carddb.domains.effects.author_expansion import AuthorExpander, ability_nodes
 from sve_carddb.domains.effects.author_inputs import AuthorInputError
@@ -22,15 +22,8 @@ from sve_carddb.domains.effects.author_set import AuthorInputSet
 from sve_carddb.domains.effects.author_source_hash import source_version
 from sve_carddb.domains.translations.inputs import Snapshot, validate_snapshot
 
-from ...support.author_current_fixtures import (
-    CARD_NUMBERS,
-    CurrentSourceFixture,
-    current_source_fixture,
-    entry_snapshot,
-)
 from ...support.author_semantic_inputs import load_semantic_inputs
 from ...support.semantic_definition_fixtures import with_definitions
-from ...support.time_budget import slow_fixture
 from .author_current_goldens import FACTS
 from .author_current_synthetic import back_face, effect, token_section
 from .author_entry_cases import meta
@@ -41,34 +34,15 @@ from .test_author_current import (
     validate_files,
     write_inputs,
 )
-from .test_author_entries import SCHEMAS
 from .test_author_keyword_sources import context
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
     from pathlib import Path
 
     from sve_carddb.domains.effects.author_current import CurrentAuthorSources
 
-
-@pytest.fixture(scope="module")
-@slow_fixture(
-    reason="Build the real current-source database for whole-card keyword reconciliation "
-    "once for this module; each test copies the database before writing."
-)
-def fixture(
-    tmp_path_factory: pytest.TempPathFactory, author_source_preparation: bytes
-) -> CurrentSourceFixture:
-    return current_source_fixture(
-        tmp_path_factory.mktemp("keyword-reconciliation"),
-        card_numbers=CARD_NUMBERS | {"BP01-138"},
-        snapshot=entry_snapshot(include_keywords=True),
-        preparation=author_source_preparation,
-    )
-
-
-@pytest.fixture(scope="module")
-def expander() -> AuthorExpander:
-    return AuthorExpander(SCHEMAS)
+    from ...support.author_current_fixtures import CurrentSourceFixture
 
 
 def card(
@@ -161,9 +135,9 @@ def nodes(value: dict[str, JsonValue]) -> list[dict[str, JsonValue]]:
 
 
 def test_real_current_card_emits_closed_keyword_handoff(
-    fixture: CurrentSourceFixture, expander: AuthorExpander
+    keyword_current_fixture: CurrentSourceFixture, expander: AuthorExpander
 ) -> None:
-    with current(fixture) as source:
+    with current(keyword_current_fixture) as source:
         (result,) = validate_files(
             source, collection(source, {"BP01-138": card(source, "BP01-138")}), expander
         )
@@ -192,12 +166,12 @@ def test_real_current_card_emits_closed_keyword_handoff(
 
 @pytest.mark.parametrize("faces", [False, True])
 def test_body_and_keyword_evidence_have_disjoint_paths(
-    fixture: CurrentSourceFixture,
+    keyword_current_fixture: CurrentSourceFixture,
     expander: AuthorExpander,
     monkeypatch: pytest.MonkeyPatch,
     faces: bool,
 ) -> None:
-    with current(fixture) as source:
+    with current(keyword_current_fixture) as source:
         body = source.card_payload(CARDS["BP01-009"]).fields[0].source.text
         effect(source, monkeypatch, "【守護】【オーラ】\n" + body)
         (result,) = validate_files(
@@ -241,13 +215,13 @@ def test_body_and_keyword_evidence_have_disjoint_paths(
     ],
 )
 def test_whole_card_rejects_keyword_mismatch(
-    fixture: CurrentSourceFixture,
+    keyword_current_fixture: CurrentSourceFixture,
     expander: AuthorExpander,
     monkeypatch: pytest.MonkeyPatch,
     change: str,
     reason: str,
 ) -> None:
-    with current(fixture) as source:
+    with current(keyword_current_fixture) as source:
         body = source.card_payload(CARDS["BP01-009"]).fields[0].source.text
         raw = "【守護】" if change in {"replace", "extra"} else "【守護】【オーラ】"
         effect(source, monkeypatch, raw + "\n" + body)
@@ -301,11 +275,11 @@ def test_whole_card_rejects_keyword_mismatch(
 
 
 def test_duplicate_list_is_rejected_by_author_schema(
-    fixture: CurrentSourceFixture,
+    keyword_current_fixture: CurrentSourceFixture,
     expander: AuthorExpander,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    with current(fixture) as source:
+    with current(keyword_current_fixture) as source:
         effect(source, monkeypatch, "【守護】")
         authored = card(source, keywords=("ward", "ward"))
         with pytest.raises(AuthorInputError):
@@ -314,12 +288,12 @@ def test_duplicate_list_is_rejected_by_author_schema(
 
 @pytest.mark.parametrize("change", ["valid", "missing-face", "borrow-face"])
 def test_two_faces_consume_independent_same_keyword(
-    fixture: CurrentSourceFixture,
+    keyword_current_fixture: CurrentSourceFixture,
     expander: AuthorExpander,
     monkeypatch: pytest.MonkeyPatch,
     change: str,
 ) -> None:
-    with current(fixture) as source:
+    with current(keyword_current_fixture) as source:
         _, revision = back_face(source, monkeypatch)
         effect(source, monkeypatch, "【守護】")
         effect(source, monkeypatch, "【守護】", revision=revision, face_ordinal=1)
@@ -356,7 +330,7 @@ def test_two_faces_consume_independent_same_keyword(
 
 
 def test_source_printed_reverse_order_is_the_positive_order(
-    fixture: CurrentSourceFixture,
+    keyword_current_fixture: CurrentSourceFixture,
     expander: AuthorExpander,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -374,10 +348,10 @@ def test_source_printed_reverse_order_is_the_positive_order(
         }
     )
     snapshot = Snapshot(
-        fixture.snapshot.shards,
+        keyword_current_fixture.snapshot.shards,
         with_definitions(
             (
-                *fixture.snapshot.closure,
+                *keyword_current_fixture.snapshot.closure,
                 (
                     "translations/templates/definitions/999.yaml",
                     content,
@@ -387,7 +361,7 @@ def test_source_printed_reverse_order_is_the_positive_order(
         ),
     )
     validate_snapshot(snapshot)
-    with current(replace(fixture, snapshot=snapshot)) as source:
+    with current(replace(keyword_current_fixture, snapshot=snapshot)) as source:
         effect(source, monkeypatch, "【オーラ】【守護】")
         (result,) = validate_files(
             source,
@@ -401,11 +375,11 @@ def test_source_printed_reverse_order_is_the_positive_order(
 
 
 def test_structural_expansion_and_replacement_do_not_grant_proof(
-    fixture: CurrentSourceFixture,
+    keyword_current_fixture: CurrentSourceFixture,
     expander: AuthorExpander,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    with current(fixture) as source:
+    with current(keyword_current_fixture) as source:
         effect(source, monkeypatch, "【守護】")
         inputs = collection(source, {"BP01-009": card(source, keywords=("ward",))})
         structural = expander.expand(inputs.author_files[0].raw, ())
@@ -427,12 +401,12 @@ def test_structural_expansion_and_replacement_do_not_grant_proof(
 
 
 def test_selection_keeps_keyword_failures_without_fallback(
-    fixture: CurrentSourceFixture,
+    keyword_current_fixture: CurrentSourceFixture,
     expander: AuthorExpander,
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
-    with current(fixture) as source:
+    with current(keyword_current_fixture) as source:
         effect(source, monkeypatch, "【守護】")
         inputs = collection(
             source,
@@ -453,11 +427,11 @@ def test_selection_keeps_keyword_failures_without_fallback(
 
 
 def test_token_section_rejects_whole_current_author(
-    fixture: CurrentSourceFixture,
+    keyword_current_fixture: CurrentSourceFixture,
     expander: AuthorExpander,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    with current(fixture) as source:
+    with current(keyword_current_fixture) as source:
         effect(source, monkeypatch, "【守護】")
         authored = card(source, keywords=("ward",))
         token_section(source, monkeypatch, FACTS["BP01-009"]["revision"])
@@ -468,14 +442,16 @@ def test_token_section_rejects_whole_current_author(
     assert result.diagnostic.reason == "token_source_contract_unavailable"
 
 
-@pytest.fixture(scope="module")
-def handoff(fixture: CurrentSourceFixture, expander: AuthorExpander) -> JsonValue:
-    with current(fixture) as source:
+@pytest.fixture(scope="session")
+def handoff(
+    keyword_current_fixture: CurrentSourceFixture, expander: AuthorExpander
+) -> bytes:
+    with current(keyword_current_fixture) as source:
         (result,) = validate_files(
             source, collection(source, {"BP01-138": card(source, "BP01-138")}), expander
         )
     assert isinstance(result, CardAccepted)
-    return result.lowering_input()
+    return canonical(result.lowering_input())
 
 
 @pytest.mark.parametrize(
@@ -495,8 +471,8 @@ def handoff(fixture: CurrentSourceFixture, expander: AuthorExpander) -> JsonValu
         "negative-path",
     ],
 )
-def test_internal_handoff_types_are_closed(handoff: JsonValue, change: str) -> None:
-    wire = object_value(deepcopy(handoff))
+def test_internal_handoff_types_are_closed(handoff: bytes, change: str) -> None:
+    wire = object_value(parse(handoff))
     declaration = object_value(array(wire["declaration_sidecar"])[0])
     inventory = object_value(wire["source_inventory"])
     expected = object_value(array(inventory["non_body"])[0])
@@ -543,21 +519,20 @@ def test_internal_handoff_types_are_closed(handoff: JsonValue, change: str) -> N
     "missing", ["card_keywords.v2", "metadata.layout.v1", "evolve_entry.v1"]
 )
 def test_missing_registry_sibling_rejects_entire_author(
-    fixture: CurrentSourceFixture,
+    keyword_registry_snapshots: Mapping[str, Snapshot],
+    keyword_current_fixture: CurrentSourceFixture,
     expander: AuthorExpander,
     monkeypatch: pytest.MonkeyPatch,
     missing: str,
 ) -> None:
-    with monkeypatch.context() as setup, current(fixture) as source:
+    with monkeypatch.context() as setup, current(keyword_current_fixture) as source:
         body = source.card_payload(CARDS["BP01-009"]).fields[0].source.text
-        raw = "【守護】【オーラ】\n" + body
+        raw = "【守護】\n" + body
         effect(source, setup, raw)
-        authored = card(source)
+        authored = card(source, keywords=("ward",))
     incomplete = replace(
-        fixture,
-        snapshot=entry_snapshot(
-            include_keywords=True, exclude_semantics=frozenset({missing})
-        ),
+        keyword_current_fixture,
+        snapshot=keyword_registry_snapshots[missing],
     )
     with current(incomplete) as source:
         effect(source, monkeypatch, raw)
@@ -569,9 +544,9 @@ def test_missing_registry_sibling_rejects_entire_author(
 
 
 def test_body_only_token_face_is_outside_first_batch(
-    fixture: CurrentSourceFixture, expander: AuthorExpander
+    keyword_current_fixture: CurrentSourceFixture, expander: AuthorExpander
 ) -> None:
-    with current(fixture) as source:
+    with current(keyword_current_fixture) as source:
         with source.db.transaction():
             source.db.insert(
                 "face_special_kind",
@@ -599,13 +574,13 @@ def test_body_only_token_face_is_outside_first_batch(
     ids=("unsupported-source", "duplicate-source", "pending-source"),
 )
 def test_source_side_failure_rejects_whole_card(
-    fixture: CurrentSourceFixture,
+    keyword_current_fixture: CurrentSourceFixture,
     expander: AuthorExpander,
     monkeypatch: pytest.MonkeyPatch,
     raw: str,
     reason: str,
 ) -> None:
-    with current(fixture) as source:
+    with current(keyword_current_fixture) as source:
         effect(source, monkeypatch, "【守護】")
         authored = card(source, keywords=("ward",))
         effect(source, monkeypatch, raw)
@@ -621,11 +596,11 @@ def test_source_side_failure_rejects_whole_card(
 
 
 def test_root_declaration_on_second_face_keeps_its_owner(
-    fixture: CurrentSourceFixture,
+    keyword_current_fixture: CurrentSourceFixture,
     expander: AuthorExpander,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    with current(fixture) as source:
+    with current(keyword_current_fixture) as source:
         face, revision = back_face(source, monkeypatch)
         effect(source, monkeypatch, "【守護】", revision=revision, face_ordinal=1)
         authored = card(source, keywords=("ward",))

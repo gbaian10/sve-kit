@@ -15,7 +15,7 @@ from sve_carddb.domains.effects.author_expansion import (
     ExpansionError,
     body_version,
 )
-from sve_carddb.domains.effects.author_inputs import AuthorInputError, AuthorSchemas
+from sve_carddb.domains.effects.author_inputs import AuthorInputError
 from sve_carddb.domains.effects.author_sources import (
     SourceCandidate,
     SourceError,
@@ -29,7 +29,7 @@ from sve_carddb.domains.translations.four_layer_fixed_actions import NUMERIC
 from ..translations.test_four_layer_classification import classifier
 from ..translations.test_four_layer_fixed_actions import EXTRA, TERMS, facts
 from ..translations.test_four_layer_fixed_actions import NUMERIC_RAW as RAW
-from .test_author_entries import SCHEMAS, ability, document, shard
+from .test_author_entries import ability, document, shard
 from .test_author_expansion import generated, registered
 from .test_author_source_expansion import ABILITY_PATH
 
@@ -78,7 +78,7 @@ def companion(source: SourceContext) -> dict[str, JsonValue]:
     return record
 
 
-def test_inline_and_companion_exact_source_expansion() -> None:
+def test_inline_and_companion_exact_source_expansion(expander: AuthorExpander) -> None:
     candidate, use = source_case()
     source = resolve_source(candidate, use)
     record = companion(source)
@@ -86,7 +86,7 @@ def test_inline_and_companion_exact_source_expansion() -> None:
     for node in (inline, reference):
         node["sources"] = [use.model_dump(mode="json")]
     results = [
-        AuthorExpander(SCHEMAS).expand_sources(
+        expander.expand_sources(
             canonical(document(node)), shards, {ABILITY_PATH: candidate}
         )
         for node, shards in ((inline, []), (reference, [canonical(shard(record))]))
@@ -170,11 +170,13 @@ CHANGES = (
 
 @pytest.mark.parametrize("change", CHANGES)
 @pytest.mark.parametrize("macro", [False, True], ids=["inline", "companion"])
-def test_complete_payload_cannot_change(change: str, macro: bool) -> None:
+def test_complete_payload_cannot_change(
+    expander: AuthorExpander, change: str, macro: bool
+) -> None:
     candidate, use = source_case()
     body = changed_head(change)
     # Establish structural validity before testing the stricter source boundary.
-    AuthorSchemas(SCHEMAS).author_effect_set(canonical(document(ability(body))))
+    expander.schemas.author_effect_set(canonical(document(ability(body))))
     shards = []
     if macro:
         record = companion(resolve_source(candidate, use))
@@ -186,7 +188,7 @@ def test_complete_payload_cannot_change(change: str, macro: bool) -> None:
         node = ability(body)
     node["sources"] = [use.model_dump(mode="json")]
     with pytest.raises(ExpansionError, match="source_head_payload_mismatch"):
-        AuthorExpander(SCHEMAS).expand_sources(
+        expander.expand_sources(
             canonical(document(node)), shards, {ABILITY_PATH: candidate}
         )
 
@@ -308,7 +310,7 @@ def test_numeric_constants_are_not_parameters(
         "sibling",
     ],
 )
-def test_other_sources_remain_rejected(raw: str) -> None:
+def test_other_sources_remain_rejected(expander: AuthorExpander, raw: str) -> None:
     candidate, use = source_case()
     context = facts(raw, NUMERIC)
     candidate = replace(candidate, raw=raw, descriptor=context.source, context=context)
@@ -328,7 +330,7 @@ def test_other_sources_remain_rejected(raw: str) -> None:
     node = ability(head())
     node["sources"] = [use.model_dump(mode="json")]
     with pytest.raises(SourceError, match=r"source_pending|source_unresolved_issue"):
-        AuthorExpander(SCHEMAS).expand_sources(
+        expander.expand_sources(
             canonical(document(node)), [], {ABILITY_PATH: candidate}
         )
 
@@ -360,7 +362,9 @@ def test_exact_context_is_required(change: str) -> None:
 
 
 @pytest.mark.parametrize("stat", ["power", "hp"])
-def test_companion_cannot_parameterize_stat_constants(stat: str) -> None:
+def test_companion_cannot_parameterize_stat_constants(
+    expander: AuthorExpander, stat: str
+) -> None:
     candidate, use = source_case()
     record = companion(resolve_source(candidate, use))
     buff = object_value(
@@ -384,7 +388,7 @@ def test_companion_cannot_parameterize_stat_constants(stat: str) -> None:
     # The buff stat fields take numeric expressions only, so the schema rejects
     # a ParamRef before any parameter-site check can run.
     with pytest.raises(AuthorInputError, match="schema"):
-        AuthorExpander(SCHEMAS).expand_sources(
+        expander.expand_sources(
             canonical(document(node)),
             [canonical(shard(record))],
             {ABILITY_PATH: candidate},
@@ -408,7 +412,9 @@ def test_each_stat_operand_retains_its_own_meaning(slot: str) -> None:
         entry_payload(source, "ability_0")
 
 
-def test_companion_cannot_borrow_a_numeric_leaf_for_draw() -> None:
+def test_companion_cannot_borrow_a_numeric_leaf_for_draw(
+    expander: AuthorExpander,
+) -> None:
     candidate, use = source_case()
     record = companion(resolve_source(candidate, use))
     record["body"] = {
@@ -421,7 +427,7 @@ def test_companion_cannot_borrow_a_numeric_leaf_for_draw() -> None:
     node = generated(record, {"n": {"type": "Nat", "value": 1}})
     node["sources"] = [use.model_dump(mode="json")]
     with pytest.raises(SourceError, match="unsupported_source_construct"):
-        AuthorExpander(SCHEMAS).expand_sources(
+        expander.expand_sources(
             canonical(document(node)),
             [canonical(shard(record))],
             {ABILITY_PATH: candidate},

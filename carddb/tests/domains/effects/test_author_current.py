@@ -16,12 +16,7 @@ from sve_carddb.domains.effects.author_current import (
     CardRejected,
     CurrentAuthorSources,
 )
-from sve_carddb.domains.effects.author_expansion import AuthorExpander
-from sve_carddb.domains.effects.author_set import (
-    AuthorInputSet,
-    InputFile,
-    load_author_set,
-)
+from sve_carddb.domains.effects.author_set import AuthorInputSet, InputFile
 from sve_carddb.domains.effects.author_source_hash import (
     AuthorSourcePayload,
     source_version,
@@ -29,10 +24,6 @@ from sve_carddb.domains.effects.author_source_hash import (
 from sve_carddb.domains.translations.four_layer_authored import FrameRecord
 from sve_carddb.domains.translations.inputs import Snapshot
 
-from ...support.author_current_fixtures import (
-    CurrentSourceFixture,
-    current_source_fixture,
-)
 from ...support.semantic_definition_fixtures import with_definitions
 from .author_current_goldens import FACTS, golden
 from .author_current_synthetic import back_face, effect
@@ -42,6 +33,10 @@ from .test_author_entries import SCHEMAS
 if TYPE_CHECKING:
     from collections.abc import Generator
     from pathlib import Path
+
+    from sve_carddb.domains.effects.author_expansion import AuthorExpander
+
+    from ...support.author_current_fixtures import CurrentSourceFixture
 
 
 CARDS = {
@@ -70,31 +65,18 @@ REAL_AUTHOR_CARDS = {
 FRAME = "frame:f03820b9048f0bd911c528162f930b0e47d128493a84b4fe097f4c8a48608756"
 
 
-@pytest.fixture(scope="module")
-def fixture(
-    tmp_path_factory: pytest.TempPathFactory, author_source_preparation: bytes
-) -> CurrentSourceFixture:
-    return current_source_fixture(
-        tmp_path_factory.mktemp("current-source-store"),
-        preparation=author_source_preparation,
-    )
-
-
-@pytest.fixture(scope="module")
-def expander() -> AuthorExpander:
-    return AuthorExpander(SCHEMAS)
-
-
 @contextmanager
-def current(fixture: CurrentSourceFixture) -> Generator[CurrentAuthorSources]:
-    with fixture.template.copy() as db:
+def current(
+    base_current_fixture: CurrentSourceFixture,
+) -> Generator[CurrentAuthorSources]:
+    with base_current_fixture.template.copy() as db:
         yield CurrentAuthorSources(
             db,
-            fixture.sources,
-            fixture.snapshot,
-            fixture.vocabulary,
-            fixture.rules,
-            fixture.jp_batch_id,
+            base_current_fixture.sources.stage(base_current_fixture.sources.build),
+            base_current_fixture.snapshot,
+            base_current_fixture.vocabulary,
+            base_current_fixture.rules,
+            base_current_fixture.jp_batch_id,
         )
 
 
@@ -381,7 +363,7 @@ def check_current_evidence_replacement_drops_proof(
 
 def check_synthetic_sibling_root_closure(
     current: CurrentAuthorSources,
-    fixture: CurrentSourceFixture,
+    base_current_fixture: CurrentSourceFixture,
     expander: AuthorExpander,
     monkeypatch: pytest.MonkeyPatch,
     family: str,
@@ -398,7 +380,7 @@ def check_synthetic_sibling_root_closure(
     frame, _ = compiled.derived.bind(0)
     original = next(
         record
-        for record in fixture.snapshot.four_layer.records
+        for record in base_current_fixture.snapshot.four_layer.records
         if isinstance(record, FrameRecord) and record.data.id == FRAME
     )
     record = original.model_copy(update={"data": frame})
@@ -419,9 +401,9 @@ def check_synthetic_sibling_root_closure(
         current.db,
         current.sources,
         snapshot,
-        fixture.vocabulary,
-        fixture.rules,
-        fixture.jp_batch_id,
+        base_current_fixture.vocabulary,
+        base_current_fixture.rules,
+        base_current_fixture.jp_batch_id,
     )
     # Synthetic source setup has no independent adopted payload golden.
     complete = synthetic.card_payload(CARDS["BP01-009"])
@@ -473,11 +455,16 @@ def check_synthetic_sibling_root_closure(
         )
 
 
+@pytest.mark.slow(
+    reason="Checks every committed prototype shard against real current author sources once; "
+    "retains the repository-wide prototype/author overlap regression (#1104)."
+)
 def test_real_current_author_set(
-    fixture: CurrentSourceFixture, expander: AuthorExpander
+    base_current_fixture: CurrentSourceFixture,
+    expander: AuthorExpander,
+    real_author_inputs: AuthorInputSet,
 ) -> None:
-    # One test keeps the real tree/database build on one xdist worker.
-    real = load_author_set(SCHEMAS.parent / "authored", expander.schemas)
+    real = real_author_inputs
     assert real.index_file is not None
     record_keys = {record.record_key for record in real.index.records}
     assert record_keys == REAL_AUTHOR_CARDS | {
@@ -521,7 +508,7 @@ def test_real_current_author_set(
         for path in (SCHEMAS.parent / "authored/rules/effects").glob("*.yaml")
     }
     assert real.prototype_files
-    with current(fixture) as source:
+    with current(base_current_fixture) as source:
         for index, number in enumerate(CARDS):
             check_real_current_entry_and_container(
                 source,
@@ -532,6 +519,12 @@ def test_real_current_author_set(
             )
         check_mixed_same_file_retains_success(source, expander)
         check_current_evidence_replacement_drops_proof(source, expander)
+
+
+def test_current_author_rejects_incomplete_or_wrong_source(
+    base_current_fixture: CurrentSourceFixture, expander: AuthorExpander
+) -> None:
+    with current(base_current_fixture) as source:
         heads: tuple[dict[str, JsonValue], ...] = (
             {"spell": {"do": []}},
             {"evolve": {"cost": {"pp": 2}}},
@@ -551,14 +544,32 @@ def test_real_current_author_set(
             ("deck", "unsupported_source_deck_rule"),
         ):
             check_exact_current_use(source, expander, change, reason)
-    with current(fixture) as source:
+
+
+def test_current_author_requires_known_attributes(
+    base_current_fixture: CurrentSourceFixture, expander: AuthorExpander
+) -> None:
+    with current(base_current_fixture) as source:
         for attribute in ("cost", "attack", "defense"):
             check_database_null_is_unknown_and_rejected(source, expander, attribute)
+
+
+def test_synthetic_current_author_preserves_face_owners(
+    base_current_fixture: CurrentSourceFixture, expander: AuthorExpander
+) -> None:
     for face_container in (False, True):
-        with current(fixture) as source, pytest.MonkeyPatch.context() as patch:
+        with (
+            current(base_current_fixture) as source,
+            pytest.MonkeyPatch.context() as patch,
+        ):
             check_synthetic_multiface_owner_controls_both_containers(
                 source, expander, patch, face_container
             )
+
+
+def test_synthetic_current_author_preserves_root_sibling_closure(
+    base_current_fixture: CurrentSourceFixture, expander: AuthorExpander
+) -> None:
     for family, change in (
         ("feed", "none"),
         ("feed", "missing"),
@@ -566,7 +577,10 @@ def test_real_current_author_set(
         ("feed", "times"),
         ("ride", "none"),
     ):
-        with current(fixture) as source, pytest.MonkeyPatch.context() as patch:
+        with (
+            current(base_current_fixture) as source,
+            pytest.MonkeyPatch.context() as patch,
+        ):
             check_synthetic_sibling_root_closure(
-                source, fixture, expander, patch, family, change
+                source, base_current_fixture, expander, patch, family, change
             )

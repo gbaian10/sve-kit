@@ -2,50 +2,34 @@
 
 from dataclasses import replace
 from sqlite3 import IntegrityError
+from typing import TYPE_CHECKING
 
 import pytest
 from pydantic import JsonValue
 
 from sve_carddb.contracts.four_layer import FaceRevisionOwner
 from sve_carddb.domains.effects.author_current import CardAccepted
-from sve_carddb.domains.effects.author_expansion import AuthorExpander
 from sve_carddb.domains.effects.author_source_hash import source_version
 from sve_carddb.domains.effects.author_sources import ADAPTER_RECIPE, SourceError
 
-from ...support.author_current_fixtures import (
-    CARD_NUMBERS,
-    CurrentSourceFixture,
-    current_source_fixture,
-    entry_snapshot,
-)
-from ...support.time_budget import slow_fixture
 from .author_current_goldens import FACTS
 from .author_current_synthetic import back_face, effect, token_section
 from .author_entry_cases import meta
 from .test_author_current import CARDS, current, inputs, validate_files
-from .test_author_entries import SCHEMAS
 
+if TYPE_CHECKING:
+    from collections.abc import Mapping
 
-@pytest.fixture(scope="module")
-@slow_fixture(
-    reason="Build the real current-source database for keyword declarations "
-    "once for this module; each test copies the database before writing."
-)
-def fixture(
-    tmp_path_factory: pytest.TempPathFactory, author_source_preparation: bytes
-) -> CurrentSourceFixture:
-    return current_source_fixture(
-        tmp_path_factory.mktemp("keyword-current"),
-        card_numbers=CARD_NUMBERS | {"BP01-138"},
-        snapshot=entry_snapshot(include_keywords=True),
-        preparation=author_source_preparation,
-    )
+    from sve_carddb.domains.effects.author_expansion import AuthorExpander
+    from sve_carddb.domains.translations.inputs import Snapshot
+
+    from ...support.author_current_fixtures import CurrentSourceFixture
 
 
 def test_real_printed_keywords_retain_exact_current_face(
-    fixture: CurrentSourceFixture,
+    keyword_current_fixture: CurrentSourceFixture,
 ) -> None:
-    with current(fixture) as sources:
+    with current(keyword_current_fixture) as sources:
         row = sources.db.select(
             "printing", ("card_id",), where={"region": "jp", "card_no": "BP01-138"}
         )[0]
@@ -88,12 +72,12 @@ def test_real_printed_keywords_retain_exact_current_face(
     ids=("ward", "aura", "both"),
 )
 def test_synthetic_current_source_preserves_full_declaration(
-    fixture: CurrentSourceFixture,
+    keyword_current_fixture: CurrentSourceFixture,
     monkeypatch: pytest.MonkeyPatch,
     raw: str,
     expected: tuple[str, ...],
 ) -> None:
-    with current(fixture) as sources:
+    with current(keyword_current_fixture) as sources:
         effect(sources, monkeypatch, raw)
         (found,) = sources.keyword_obligations(CARDS["BP01-009"])
         assert found.keywords == expected
@@ -102,9 +86,9 @@ def test_synthetic_current_source_preserves_full_declaration(
 
 
 def test_body_and_layout_do_not_create_keyword_obligations(
-    fixture: CurrentSourceFixture, monkeypatch: pytest.MonkeyPatch
+    keyword_current_fixture: CurrentSourceFixture, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    with current(fixture) as sources:
+    with current(keyword_current_fixture) as sources:
         assert sources.keyword_obligations(CARDS["BP01-009"]) == ()
         body = sources.card_payload(CARDS["BP01-009"]).fields[0].source.text
         effect(sources, monkeypatch, "【守護】\n" + body)
@@ -113,9 +97,9 @@ def test_body_and_layout_do_not_create_keyword_obligations(
 
 
 def test_two_faces_with_same_keyword_are_independent_obligations(
-    fixture: CurrentSourceFixture, monkeypatch: pytest.MonkeyPatch
+    keyword_current_fixture: CurrentSourceFixture, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    with current(fixture) as sources:
+    with current(keyword_current_fixture) as sources:
         face, revision = back_face(sources, monkeypatch)
         effect(sources, monkeypatch, "【守護】")
         effect(sources, monkeypatch, "【守護】", revision=revision, face_ordinal=1)
@@ -127,9 +111,9 @@ def test_two_faces_with_same_keyword_are_independent_obligations(
 
 
 def test_unknown_sibling_text_cannot_hide_a_keyword_obligation(
-    fixture: CurrentSourceFixture, monkeypatch: pytest.MonkeyPatch
+    keyword_current_fixture: CurrentSourceFixture, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    with current(fixture) as sources:
+    with current(keyword_current_fixture) as sources:
         _, revision = back_face(sources, monkeypatch)
         effect(sources, monkeypatch, "【守護】")
         effect(sources, monkeypatch, "", revision=revision, face_ordinal=1)
@@ -138,9 +122,9 @@ def test_unknown_sibling_text_cannot_hide_a_keyword_obligation(
 
 
 def test_unknown_source_attribute_is_not_a_complete_current_source(
-    fixture: CurrentSourceFixture, monkeypatch: pytest.MonkeyPatch
+    keyword_current_fixture: CurrentSourceFixture, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    with current(fixture) as sources:
+    with current(keyword_current_fixture) as sources:
         effect(sources, monkeypatch, "【守護】")
         with sources.db.transaction():
             sources.db.update(
@@ -151,9 +135,9 @@ def test_unknown_source_attribute_is_not_a_complete_current_source(
 
 
 def test_token_face_keyword_requires_a_separate_owner_contract(
-    fixture: CurrentSourceFixture, monkeypatch: pytest.MonkeyPatch
+    keyword_current_fixture: CurrentSourceFixture, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    with current(fixture) as sources:
+    with current(keyword_current_fixture) as sources:
         effect(sources, monkeypatch, "【守護】")
         with sources.db.transaction():
             sources.db.insert(
@@ -193,12 +177,12 @@ def test_token_face_keyword_requires_a_separate_owner_contract(
     ),
 )
 def test_entire_source_must_be_supported(
-    fixture: CurrentSourceFixture,
+    keyword_current_fixture: CurrentSourceFixture,
     monkeypatch: pytest.MonkeyPatch,
     raw: str,
     reason: str,
 ) -> None:
-    with current(fixture) as sources:
+    with current(keyword_current_fixture) as sources:
         effect(sources, monkeypatch, raw)
         with pytest.raises(SourceError, match=reason):
             sources.keyword_obligations(CARDS["BP01-009"])
@@ -208,13 +192,14 @@ def test_entire_source_must_be_supported(
     "missing", ["card_keywords.v2", "metadata.layout.v1", "evolve_entry.v1"]
 )
 def test_missing_registry_sibling_never_yields_partial_expectations(
-    fixture: CurrentSourceFixture, monkeypatch: pytest.MonkeyPatch, missing: str
+    keyword_registry_snapshots: Mapping[str, Snapshot],
+    keyword_current_fixture: CurrentSourceFixture,
+    monkeypatch: pytest.MonkeyPatch,
+    missing: str,
 ) -> None:
     incomplete = replace(
-        fixture,
-        snapshot=entry_snapshot(
-            include_keywords=True, exclude_semantics=frozenset({missing})
-        ),
+        keyword_current_fixture,
+        snapshot=keyword_registry_snapshots[missing],
     )
     with current(incomplete) as sources:
         body = sources.card_payload(CARDS["BP01-009"]).fields[0].source.text
@@ -224,9 +209,9 @@ def test_missing_registry_sibling_never_yields_partial_expectations(
 
 
 def test_database_rejects_cross_card_current_revision(
-    fixture: CurrentSourceFixture,
+    keyword_current_fixture: CurrentSourceFixture,
 ) -> None:
-    with current(fixture) as sources:
+    with current(keyword_current_fixture) as sources:
         with (
             pytest.raises(IntegrityError, match="Foreign key check failed"),
             sources.db.transaction(),
@@ -240,9 +225,9 @@ def test_database_rejects_cross_card_current_revision(
 
 
 def test_unclosed_token_owner_still_rejects_entire_source(
-    fixture: CurrentSourceFixture, monkeypatch: pytest.MonkeyPatch
+    keyword_current_fixture: CurrentSourceFixture, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    with current(fixture) as sources:
+    with current(keyword_current_fixture) as sources:
         effect(sources, monkeypatch, "【守護】")
         token_section(sources, monkeypatch, FACTS["BP01-009"]["revision"])
         with pytest.raises(SourceError, match="token_source_contract_unavailable"):
@@ -250,9 +235,11 @@ def test_unclosed_token_owner_still_rejects_entire_source(
 
 
 def test_source_obligations_are_consumed_by_current_keyword_authors(
-    fixture: CurrentSourceFixture, monkeypatch: pytest.MonkeyPatch
+    expander: AuthorExpander,
+    keyword_current_fixture: CurrentSourceFixture,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    with current(fixture) as sources:
+    with current(keyword_current_fixture) as sources:
         effect(sources, monkeypatch, "【守護】")
         (found,) = sources.keyword_obligations(CARDS["BP01-009"])
         metadata = meta()
@@ -270,9 +257,7 @@ def test_source_obligations_are_consumed_by_current_keyword_authors(
                 }
             ],
         }
-        (result,) = validate_files(
-            sources, inputs({"BP01-009": card}), AuthorExpander(SCHEMAS)
-        )
+        (result,) = validate_files(sources, inputs({"BP01-009": card}), expander)
         assert isinstance(result, CardAccepted)
         assert result.candidate.sidecar == ()
         assert result.candidate.declarations[0].source_proof == "current_source_checked"

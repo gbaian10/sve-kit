@@ -22,19 +22,20 @@ from sve_carddb.domains.effects.author_sources import (
 )
 from sve_carddb.domains.translations.four_layer_semantics import CardContext
 
-from ...support.author_move_fixtures import FRAME, NUMBERS, move_fixture
+from ...support.author_move_fixtures import FRAME, NUMBERS
 from ...support.author_semantic_inputs import load_semantic_inputs
 from ..translations.test_four_layer_fixed_actions import MOVE_RAW
 from .author_entry_cases import meta
 from .author_move_cases import head, move_ability
 from .test_author_current import current, input_file, write_inputs
-from .test_author_entries import SCHEMAS
 
 if TYPE_CHECKING:
     from pathlib import Path
 
     from sve_carddb.contracts.four_layer import Frame
     from sve_carddb.domains.effects.author_current import CurrentAuthorSources
+
+    from ...support.author_current_fixtures import CurrentSourceFixture
 
 
 def text(value: object) -> str:
@@ -158,10 +159,10 @@ def collection(
     )
 
 
-def test_real_permanent_token_sources_and_whole_card_rejection(tmp_path: Path) -> None:
-    fixture = move_fixture(tmp_path / "sources")
-    expander = AuthorExpander(SCHEMAS)
-    with current(fixture) as source:
+def test_real_permanent_token_sources_and_whole_card_rejection(
+    move_current_fixture: CurrentSourceFixture, expander: AuthorExpander, tmp_path: Path
+) -> None:
+    with current(move_current_fixture) as source:
         candidate, use, frame = real_source(source)
         check_amulet_stats_stay_unknown(source, use)
         expected = canonical(head() | {"ports": {"imports": {}, "exports": {}}})

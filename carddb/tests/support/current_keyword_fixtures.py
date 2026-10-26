@@ -61,7 +61,11 @@ def current_combat_keyword_inputs(root: Path) -> dict[str, JsonValue]:
 
 
 def current_keyword_inputs(
-    root: Path, number: str = "BP01-138", *, fixture: CurrentSourceFixture | None = None
+    root: Path,
+    number: str = "BP01-138",
+    *,
+    fixture: CurrentSourceFixture | None = None,
+    expander: AuthorExpander | None = None,
 ) -> JsonValue:
     """Rebuild a complete real declaration and all siblings from public current inputs."""
     fixture = fixture or (
@@ -80,7 +84,7 @@ def current_keyword_inputs(
     with fixture.template.copy() as db:
         source = CurrentAuthorSources(
             db,
-            fixture.sources,
+            fixture.sources.stage(fixture.sources.build),
             fixture.snapshot,
             fixture.vocabulary,
             fixture.rules,
@@ -155,7 +159,7 @@ def current_keyword_inputs(
                 }
             )
         )
-        expander = AuthorExpander(REPOSITORY / "dsl")
+        expander = expander or AuthorExpander(REPOSITORY / "dsl")
         write_current_anchors(authored, source, expander, number)
         selection = source.selection_input(authored, expander)
         author = object_value(selection)["authors"]

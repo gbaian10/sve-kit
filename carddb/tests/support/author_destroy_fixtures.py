@@ -22,7 +22,9 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 
-def destroy_fixture(store: Path) -> CurrentSourceFixture:
+def destroy_fixture(
+    store: Path, *, preparation: bytes | None = None
+) -> CurrentSourceFixture:
     authored = REPOSITORY / "authored"
     definitions = four_layer_definitions.from_files(
         four_layer_definitions.read_files(authored)
@@ -64,5 +66,8 @@ def destroy_fixture(store: Path) -> CurrentSourceFixture:
     )
     validate_snapshot(snapshot)
     return current_source_fixture(
-        store, card_numbers=frozenset({"BP19-P32", "BP19-114"}), snapshot=snapshot
+        store,
+        card_numbers=frozenset({"BP19-P32", "BP19-114"}),
+        snapshot=snapshot,
+        preparation=preparation,
     )

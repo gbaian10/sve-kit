@@ -28,7 +28,7 @@ from sve_carddb.domains.translations.four_layer_semantics import CardContext
 
 from ..translations.test_four_layer_classification import classifier, source
 from .author_draw_cases import PATH, draw_ability, draw_source, head
-from .test_author_entries import SCHEMAS, ability, document, shard
+from .test_author_entries import ability, document, shard
 from .test_author_expansion import generated, registered
 
 if TYPE_CHECKING:
@@ -40,11 +40,6 @@ if TYPE_CHECKING:
 def draw_head(request: pytest.FixtureRequest) -> str:
     assert isinstance(request.param, str)
     return request.param
-
-
-@pytest.fixture(scope="module")
-def expander() -> AuthorExpander:
-    return AuthorExpander(SCHEMAS)
 
 
 @pytest.mark.parametrize("count", [0, 1, 3, 9007199254740991])

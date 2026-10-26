@@ -17,18 +17,18 @@ from sve_carddb.domains.effects.author_expansion import (
 from sve_carddb.domains.effects.author_set import AuthorInputSet
 from sve_carddb.domains.effects.author_source_hash import source_version
 
-from ...support.author_current_fixtures import current_source_fixture
 from ...support.author_semantic_inputs import load_semantic_inputs
 from .author_current_synthetic import effect, token_section
 from .author_draw_cases import draw_ability, head
 from .author_entry_cases import meta
 from .test_author_current import current, input_file, write_inputs
-from .test_author_entries import SCHEMAS
 
 if TYPE_CHECKING:
     from pathlib import Path
 
     from sve_carddb.domains.effects.author_current import CurrentAuthorSources
+
+    from ...support.author_current_fixtures import CurrentSourceFixture
 
 
 @dataclass(frozen=True)
@@ -160,14 +160,14 @@ def check_accepted(result: CardAccepted | CardRejected, card: DrawCard) -> None:
 
 
 def check_mutation(
+    expander: AuthorExpander,
     source: CurrentAuthorSources,
     root: Path,
     inputs: AuthorInputSet,
-    change: str,
-    reason: str,
+    mutation: tuple[str, str],
     case: DrawCard,
 ) -> None:
-    expander = AuthorExpander(SCHEMAS)
+    change, reason = mutation
     tree = expander.schemas.author_tree(inputs.author_files[0].raw)
     card = object_value(object_value(object_value(tree)["cards"])[case.number])
     node = object_value(array(card["abilities"])[0])
@@ -195,7 +195,7 @@ def check_mutation(
 
 
 def check_unknown_attributes(
-    source: CurrentAuthorSources, root: Path, card: DrawCard
+    expander: AuthorExpander, source: CurrentAuthorSources, root: Path, card: DrawCard
 ) -> None:
     revision = next(iter(source.card_payload(card.card_id).revisions))
     for attribute in (
@@ -211,7 +211,7 @@ def check_unknown_attributes(
         with source.db.transaction():
             source.db.update("face_revision", {"id": revision}, {attribute: None})
         rejected = source.validate_inputs(
-            load_semantic_inputs(root, AuthorExpander(SCHEMAS)), AuthorExpander(SCHEMAS)
+            load_semantic_inputs(root, expander), expander
         )[0]
         assert isinstance(rejected, CardRejected)
         assert rejected.diagnostic.reason == "source_unknown"
@@ -223,63 +223,97 @@ def check_unknown_attributes(
             )
 
 
+@pytest.mark.parametrize("companion", [False, True], ids=["inline", "companion"])
 def test_real_current_draw(
-    tmp_path: Path, draw_card: DrawCard, author_source_preparation: bytes
+    expander: AuthorExpander,
+    tmp_path: Path,
+    draw_card: DrawCard,
+    draw_current_fixture: CurrentSourceFixture,
+    *,
+    companion: bool,
 ) -> None:
-    fixture = current_source_fixture(
-        tmp_path / "sources",
-        card_numbers=frozenset({draw_card.number}),
-        preparation=author_source_preparation,
-    )
-    expander = AuthorExpander(SCHEMAS)
-    with current(fixture) as source:
-        for companion in (False, True):
-            root = tmp_path / str(companion)
-            inputs = collection(source, draw_card, companion=companion)
-            write_inputs(root, inputs)
-            check_accepted(
-                source.validate_inputs(load_semantic_inputs(root, expander), expander)[
-                    0
-                ],
+    with current(draw_current_fixture) as source:
+        inputs = collection(source, draw_card, companion=companion)
+        write_inputs(tmp_path, inputs)
+        check_accepted(
+            source.validate_inputs(load_semantic_inputs(tmp_path, expander), expander)[
+                0
+            ],
+            draw_card,
+        )
+        selection = object_value(
+            source.selection_inputs(load_semantic_inputs(tmp_path, expander), expander)
+        )
+        selected = object_value(array(selection["authors"])[0])
+        assert selected["status"] == "accepted"
+
+
+@pytest.mark.parametrize("companion", [False, True], ids=["inline", "companion"])
+def test_current_draw_rejects_incomplete_or_wrong_source(
+    expander: AuthorExpander,
+    tmp_path: Path,
+    draw_card: DrawCard,
+    draw_current_fixture: CurrentSourceFixture,
+    *,
+    companion: bool,
+) -> None:
+    with current(draw_current_fixture) as source:
+        inputs = collection(source, draw_card, companion=companion)
+        write_inputs(tmp_path, inputs)
+        for mutation in (
+            ("missing", "source_ability_closure_mismatch"),
+            ("line", "source_location_mismatch"),
+            ("binding", "source_occurrence_mismatch"),
+            ("owner", "source_current_owner_mismatch"),
+            ("face", "source_face_container_mismatch"),
+        ):
+            check_mutation(expander, source, tmp_path, inputs, mutation, draw_card)
+        if not companion:
+            check_mutation(
+                expander,
+                source,
+                tmp_path,
+                inputs,
+                ("count", "source_head_payload_mismatch"),
                 draw_card,
             )
-            selection = object_value(
-                source.selection_inputs(load_semantic_inputs(root, expander), expander)
+
+
+@pytest.mark.parametrize("companion", [False, True], ids=["inline", "companion"])
+def test_current_draw_requires_known_attributes_and_admitted_siblings(
+    expander: AuthorExpander,
+    tmp_path: Path,
+    draw_card: DrawCard,
+    draw_current_fixture: CurrentSourceFixture,
+    *,
+    companion: bool,
+) -> None:
+    with current(draw_current_fixture) as source:
+        write_inputs(tmp_path, collection(source, draw_card, companion=companion))
+        check_unknown_attributes(expander, source, tmp_path, draw_card)
+        if draw_card.head != "spell":
+            check_unregistered_sibling(
+                expander, source, tmp_path, draw_card, companion=companion
             )
-            selected = object_value(array(selection["authors"])[0])
-            assert selected["status"] == "accepted"
-            for change, reason in (
-                ("missing", "source_ability_closure_mismatch"),
-                ("line", "source_location_mismatch"),
-                ("binding", "source_occurrence_mismatch"),
-                ("owner", "source_current_owner_mismatch"),
-                ("face", "source_face_container_mismatch"),
-            ):
-                check_mutation(source, root, inputs, change, reason, draw_card)
-            if not companion:
-                check_mutation(
-                    source,
-                    root,
-                    inputs,
-                    "count",
-                    "source_head_payload_mismatch",
-                    draw_card,
-                )
-            write_inputs(root, inputs)
-            check_unknown_attributes(source, root, draw_card)
-            if draw_card.head != "spell":
-                check_unregistered_sibling(source, root, draw_card, companion=companion)
-        negative_root = tmp_path / "negative-sources"
-        write_inputs(negative_root, collection(source, draw_card, companion=False))
+
+
+def test_current_draw_rejects_unadmitted_current_sources(
+    expander: AuthorExpander,
+    tmp_path: Path,
+    draw_card: DrawCard,
+    draw_current_fixture: CurrentSourceFixture,
+) -> None:
+    with current(draw_current_fixture) as source:
+        write_inputs(tmp_path, collection(source, draw_card, companion=False))
         if draw_card.head == "evolve_time":
-            check_evolve_kind_evidence(source, negative_root, draw_card)
+            check_evolve_kind_evidence(expander, source, tmp_path, draw_card)
         elif draw_card.head == "attack_time":
-            check_other_kinds_keep_unknown_cost(source, negative_root, draw_card)
-        check_unadmitted_current_sources(source, negative_root, draw_card)
+            check_other_kinds_keep_unknown_cost(expander, source, tmp_path, draw_card)
+        check_unadmitted_current_sources(expander, source, tmp_path, draw_card)
 
 
 def check_evolve_kind_evidence(
-    source: CurrentAuthorSources, root: Path, card: DrawCard
+    expander: AuthorExpander, source: CurrentAuthorSources, root: Path, card: DrawCard
 ) -> None:
     revision = next(iter(source.card_payload(card.card_id).revisions))
     for other_kind in ("advance", "token"):
@@ -290,7 +324,7 @@ def check_evolve_kind_evidence(
                 {"special_kind_code": other_kind},
             )
         rejected = source.validate_inputs(
-            load_semantic_inputs(root, AuthorExpander(SCHEMAS)), AuthorExpander(SCHEMAS)
+            load_semantic_inputs(root, expander), expander
         )[0]
         assert isinstance(rejected, CardRejected)
         assert rejected.diagnostic.reason == "source_pending"
@@ -303,7 +337,7 @@ def check_evolve_kind_evidence(
 
 
 def check_other_kinds_keep_unknown_cost(
-    source: CurrentAuthorSources, root: Path, card: DrawCard
+    expander: AuthorExpander, source: CurrentAuthorSources, root: Path, card: DrawCard
 ) -> None:
     revision = next(iter(source.card_payload(card.card_id).revisions))
     for other_kind in ("advance", "token"):
@@ -319,7 +353,7 @@ def check_other_kinds_keep_unknown_cost(
             )
         # The attack source still resolves, so rejection exercises unknown cost.
         rejected = source.validate_inputs(
-            load_semantic_inputs(root, AuthorExpander(SCHEMAS)), AuthorExpander(SCHEMAS)
+            load_semantic_inputs(root, expander), expander
         )[0]
         assert isinstance(rejected, CardRejected)
         assert rejected.diagnostic.reason == "source_unknown"
@@ -332,7 +366,12 @@ def check_other_kinds_keep_unknown_cost(
 
 
 def check_unregistered_sibling(
-    source: CurrentAuthorSources, root: Path, card: DrawCard, *, companion: bool
+    expander: AuthorExpander,
+    source: CurrentAuthorSources,
+    root: Path,
+    card: DrawCard,
+    *,
+    companion: bool,
 ) -> None:
     revision = next(iter(source.card_payload(card.card_id).revisions))
     original = source.db.select(
@@ -351,7 +390,6 @@ def check_unregistered_sibling(
         )
         # A new sibling needs registry admission even when its draw shape is supported.
         write_inputs(root, collection(source, card, companion=companion))
-        expander = AuthorExpander(SCHEMAS)
         rejected = source.validate_inputs(
             load_semantic_inputs(root, expander), expander
         )[0]
@@ -368,13 +406,12 @@ def check_unregistered_sibling(
 
 
 def check_unadmitted_current_sources(
-    source: CurrentAuthorSources, root: Path, card: DrawCard
+    expander: AuthorExpander, source: CurrentAuthorSources, root: Path, card: DrawCard
 ) -> None:
     revision = next(iter(source.card_payload(card.card_id).revisions))
     original = source.db.select(
         "face_revision", ("effect_unit_id",), where={"id": revision}
     )[0].values["effect_unit_id"]
-    expander = AuthorExpander(SCHEMAS)
     for text in (
         "3枚まで引く。",
         "相手は3枚引く。",

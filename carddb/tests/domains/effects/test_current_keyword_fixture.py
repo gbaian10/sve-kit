@@ -1,25 +1,13 @@
 """Real whole-card handoffs preserve declarations and Fanfare independently."""
 
-from typing import TYPE_CHECKING
-
-import pytest
-
-from sve_carddb.core.json import array, object_value
-
-from ...support.current_keyword_fixtures import (
-    current_combat_keyword_inputs,
-    current_keyword_inputs,
-)
-
-if TYPE_CHECKING:
-    from pathlib import Path
+from sve_carddb.core.json import array, object_value, parse
 
 
-@pytest.mark.parametrize("number", ["BP01-138", "BP19-P32", "BP19-114"])
 def test_real_keyword_handoff_contains_every_printed_sibling(
-    tmp_path: Path, number: str
+    keyword_handoff: tuple[str, bytes],
 ) -> None:
-    selection = object_value(current_keyword_inputs(tmp_path, number))
+    number, value = keyword_handoff
+    selection = object_value(parse(value))
     author = object_value(array(selection["authors"])[0])
     assert author["status"] == "accepted"
     handoff = object_value(author["input"])
@@ -48,7 +36,7 @@ def test_real_keyword_handoff_contains_every_printed_sibling(
     "printings, including every printed sibling, until shared preparation lands."
 )
 def test_combat_handoffs_include_all_current_printings_after_public_reconstruction(
-    tmp_path: Path,
+    combat_keyword_handoffs: bytes,
 ) -> None:
     expected = {
         "BP01-096": (["intimidate"], 0),
@@ -63,7 +51,7 @@ def test_combat_handoffs_include_all_current_printings_after_public_reconstructi
         "SD07-006": (["storm"], 1),
         "BP09-114": (["rush"], 1),
     }
-    selections = current_combat_keyword_inputs(tmp_path)
+    selections = object_value(parse(combat_keyword_handoffs))
     assert selections.keys() == expected.keys()
     for number, selection in selections.items():
         author = object_value(array(object_value(selection)["authors"])[0])
