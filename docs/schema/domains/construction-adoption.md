@@ -97,9 +97,15 @@ restriction.state 的 confirmed／announced／withdrawn 是限制的生命周期
 
 此窄入口的 coverage.reconciliation 使用獨立 variant `{mode:current-list-day-v1,observed_on,observed_timezone,projection_hash,excluded_entry_pointers}`。source_set.baseline 恰為一個當區 limit 來源，其餘三組皆空；從全部釘住批次重建的當區 limit/news 來源全集亦須恰為該基線。它只描述完整現行一覽在實際觀測日的狀態，**不宣稱 §5 的新聞探索／UTC 知識閉包**。from_date、as_of、observed_on 與來源觀測日相同，until_date 恰為隔日，不能延長。observed_timezone 是取得原檔的觀測時區，不冒稱 EN 公告發布時區。完整 parser 投影 hash 必須重播；所有當日有效列恰採納一次，未生效／已解除列恰列入 excluded_entry_pointers，其他賽制保留在 parser 的 excluded_sections。main scope 及 null announced_on 依明示 human 確認，不由日期或 parser 自動推導。
 
+精確抓取的一覽使用 `SourceUse`，保留原 UTC fetched_at，不轉成日期精度。`observed-list-day-v1` reconciliation 與上述欄位相同，觀測日由 fetched_at 在明示 observed_timezone 換算；from_date／as_of／until_date 仍限同一觀測日與隔日。此 variant 採納一覽內所有尚未解除的列，包含未來生效者；只有已解除列進 excluded_entry_pointers。每筆仍保留原 effective_from／effective_until，未來列不提前生效。source_set 仍只有該一覽 baseline；批次中同時封存的新聞或其他來源不構成此單日一覽的探索分母，亦不宣稱其完整歷史已核對。
+
+新採納追加連續分片與 predecessor，不改舊分片；各單日 coverage 依自己核對背景中的最新 subject 核對分母，保留舊觀測日。JP 一覽已移除的解除項目可保留舊限制值，以舊一覽為 primary、新公告明示的 Standard 殿堂入り解除區塊為 reconciliation，僅補 effective_until；公告卡名、原樣 href、卡號必須與舊項逐欄相同。除此以外的公告變動仍拒絕。解除不新增 max_copies=3 列。模型報告的 `observed-list-day-v1` 工具依賴另釘解除 parser，歷史報告維持當時的依賴 bytes。
+
+介面預設採用該地區最新已採納的一覽觀測日，可晚於卡片資料截至日；沒有該日 coverage 仍為 unknown。現有 JP／EN Standard 的最新來源日為 2026-10-26，文字顯示「以 2026-10-26 官方一覽為準」；這不延長至未來生效日的 coverage，也不宣稱完整牌組合法性。
+
 核對證據 store 的私人 `inventory.json` 完整欄位為 `{construction_review_inventory_format:1,store_id,reports,dependencies,review_inputs}`。reports 為完整 Hash 排序集合；dependencies 與 review_inputs 為 FilePin 排序集合。報告路徑沿 §1.1；依賴 bytes 位於 `dependencies/sha256/<64hex>`；review_inputs 必含 `inputs/basis-inputs.json`，以 basis_hash 對完整最終 `{record_key,kind,filing_key,data,evidence}`，另可釘原核可與互審輸入。採納時唯讀驗 primary／backup／restored 三個互不重疊根的 inventory、每份報告、依賴與私人輸入 exact bytes，並驗回最終 basis；私人路徑不進 authored 或公開資料。工具身分有限登錄在 adoption_loader.MODEL_IDENTITIES，依賴清單由 adoption_reports.REQUIRED_DEPENDENCIES 定義；形成報告時從實際程式 revision 取得，後續逐項驗回備份 bytes 與 report/context 的相同 pin，不依賴 squash 前 commit 永久留在 clone。程式 revision 仍記實際使用的 immutable SHA，不捏造新的來源身分。
 
-F1 保留既有 Instant uses，另以排序唯一的 date_uses 保存日期證據，空集合不輸出；兩種精度不能共用同一來源版本。日期用途的 expected 集合由完整採納重建，必與實際重播集合及 DB 的日期 raw 列逐項相等。configuration 另釘完整 index／shard bytes、current staging、實際 report 使用集合及 inventory hash。每片 authored source_record 與 decision_source 保留完整封套及全部 evidence，內容 raw ID／parser_version=null 不變。
+F1 保留既有 Instant uses，另以排序唯一的 date_uses 保存日期證據，空集合不輸出；兩種精度不能共用同一來源版本。全部 expected 用途由完整採納重建，必與實際重播集合相等；日期用途另與 DB 的日期 raw 列逐項相等。configuration 另釘完整 index／shard bytes、current staging、實際 report 使用集合及 inventory hash。每片 authored source_record 與 decision_source 保留完整封套及全部 evidence，內容 raw ID／parser_version=null 不變。
 
 offline recipe 的 construction 設定明示 source_stores 與 review_stores；啟用 authored 入口卻缺設定即拒絕。匯出前 `require_offline_coverage` 逐欄比對已驗採納的 profiles、restrictions 與單日 coverage，額外／缺少值均拒絕。公開 tuple 與格式不變，profiles.revisions=[]，CR／一般 copy 算法及整副牌合法性維持 unknown。
 
