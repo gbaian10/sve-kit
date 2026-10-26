@@ -647,6 +647,9 @@ mod bp10_122;
 #[path = "runtime/bp06_048.rs"]
 mod bp06_048;
 
+#[path = "runtime/bp01_037.rs"]
+mod bp01_037;
+
 #[path = "runtime/unloaded.rs"]
 mod unloaded;
 

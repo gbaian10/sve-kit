@@ -175,6 +175,77 @@ fn public_field_destroy_does_not_authorize_hidden_or_other_candidate_reads() {
 }
 
 #[test]
+fn public_field_buff_does_not_authorize_hidden_or_other_candidate_reads() {
+    let mut hidden = field_followers(ZoneKind::Deck);
+    if let Selector::Zone {
+        players,
+        binding,
+        predicate,
+        ..
+    } = &mut hidden
+    {
+        players.relation = PlayerRelation::SelfPlayer;
+        *binding = Binding::new(10, ScopeId(1));
+        **predicate = Expr::Literal(Bool(true));
+    }
+    let mut name = field_followers(ZoneKind::Field);
+    if let Selector::Zone {
+        predicate, binding, ..
+    } = &mut name
+    {
+        **predicate = Expr::Compute(Box::new(Predicate::NamesIntersect {
+            left: Expr::Live(Box::new(NamesRead::Names {
+                object: ObjectView::Current {
+                    object: Box::new(ObjectOperand::Bound { binding: *binding }),
+                },
+            })),
+            right: Expr::Literal(vec![CardName("unit-follower".into())]),
+        }));
+    }
+    let hidden_exclusion = Selector::Difference {
+        input: Box::new(field_followers(ZoneKind::Field)),
+        except: Box::new(hidden.clone()),
+    };
+    let hidden_amount = CharacteristicPatch::Numeric {
+        stat: Stat::Attack,
+        change: NumericChange::Add {
+            amount: Expr::Compute(Box::new(IntOperation::FromNat {
+                value: Expr::Compute(Box::new(NatOperation::Count {
+                    objects: hidden.clone(),
+                })),
+            })),
+        },
+    };
+    for (selector, patch) in [
+        (hidden, numeric::pair(1, 1)),
+        (name, numeric::pair(1, 1)),
+        (hidden_exclusion, numeric::pair(1, 1)),
+        (field_followers(ZoneKind::Field), hidden_amount),
+    ] {
+        let mut game = game(1, 1);
+        let before = game.projection(View::Referee).unwrap();
+        let error = game
+            .execute_internal(
+                &checked(vec![numeric::modify(
+                    1,
+                    selector,
+                    patch,
+                    DurationEnd::NoTemporalExpiry {},
+                )]),
+                &source("synthetic"),
+                context(1),
+            )
+            .unwrap_err();
+        assert!(
+            matches!(error, sve_engine::EngineFailure::Unsupported(reason)
+            if reason.contains("private observation outside an authorized selector spine")),
+            "public field subjects do not authorize private reads elsewhere"
+        );
+        assert_eq!(game.projection(View::Referee).unwrap(), before);
+    }
+}
+
+#[test]
 fn field_destroy_keeps_candidate_independent_false_conditions() {
     let mut selector = zone(ZoneKind::Field, 1);
     if let Selector::Zone { predicate, .. } = &mut selector {

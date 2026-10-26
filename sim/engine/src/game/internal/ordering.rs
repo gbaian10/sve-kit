@@ -5,10 +5,10 @@ use super::{
 };
 use crate::ir::{
     Action, Binding, Capture, CaptureRef, CaptureTime, Control, Expr, Instruction, Int, Located,
-    LookOutcome, MemberProjection, MoveDestination, Node, ObjectReceipt, ObjectRef, OrderAnswer,
-    OrderOutcome, OwnerZone, PlayerId, PlayerRelation, Position, Program, ReceiptLocation,
-    Requirements, ResultMember, ResultMemberId, RuntimeObjectView, ScopeId, Selector, SnapshotId,
-    SourceSpan, StepwiseMode, Visibility, ZoneKind,
+    LookOutcome, MemberProjection, MoveDestination, Node, ObjectOperand, ObjectReceipt, ObjectRef,
+    OrderAnswer, OrderOutcome, OwnerZone, PlayerId, PlayerRelation, Position, Program,
+    ReceiptLocation, Requirements, ResultMember, ResultMemberId, RuntimeObjectView, ScopeId,
+    Selector, SnapshotId, SourceSpan, StepwiseMode, Visibility, ZoneKind,
 };
 use alloc::collections::BTreeSet;
 
@@ -84,19 +84,12 @@ pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
     }
     let mut inspected = node.clone();
     if let Node::Instruction { instruction } = &mut inspected
-        && let Action::Destroy {
-            objects:
-                selector @ Selector::Zone {
-                    zone: ZoneKind::Field,
-                    ..
-                },
+        && let Action::Destroy { objects: selector }
+        | Action::Modify {
+            subjects: selector, ..
         } = &mut instruction.action
-        && super::card::selection::field_selector(selector).is_ok()
     {
-        // Only this public candidate grammar is evaluated per object by the field authority.
-        if let Selector::Zone { predicate, .. } = selector {
-            **predicate = Expr::Literal(super::Bool(true));
-        }
+        mask_public_field_predicate(selector);
     }
     if let Node::Instruction { instruction } = &mut inspected
         && (super::movement::observed_move(&instruction.action)
@@ -174,6 +167,32 @@ pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
         }
     }
     Ok(())
+}
+
+fn mask_public_field_predicate(selector: &mut Selector) {
+    match selector {
+        Selector::Difference { input, except }
+            if matches!(except.as_ref(), Selector::Objects { objects }
+                if matches!(objects.as_slice(), [ObjectOperand::SourceHolder {}])) =>
+        {
+            mask_public_field_predicate(input);
+        }
+        selector
+            if matches!(
+                selector,
+                Selector::Zone {
+                    zone: ZoneKind::Field,
+                    ..
+                }
+            ) && super::card::selection::field_selector(selector).is_ok() =>
+        {
+            // Only this public candidate grammar is evaluated per object by the field authority.
+            if let Selector::Zone { predicate, .. } = selector {
+                **predicate = Expr::Literal(super::Bool(true));
+            }
+        }
+        _ => {}
+    }
 }
 
 fn order_leaves<'selector>(selector: &'selector Selector, leaves: &mut Vec<&'selector Selector>) {
