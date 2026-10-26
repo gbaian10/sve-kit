@@ -13,24 +13,20 @@ from sve_carddb.domains.effects.author_current import CardRejected
 from sve_carddb.domains.effects.author_expansion import AuthorExpander, ExpansionError
 from sve_carddb.domains.effects.author_inputs import AuthorInputError, AuthorSchemas
 
-from ...support.author_current_fixtures import current_source_fixture
 from .author_entry_cases import source_use
 from .author_source_cases import synthetic_offset
 from .test_author_current import author, current, inputs, validate_files
-from .test_author_entries import SCHEMAS, ability, companion, document, shard
+from .test_author_entries import ability, companion, document, shard
 
 if TYPE_CHECKING:
-    from pathlib import Path
-
     from pydantic import JsonValue
 
-
-@pytest.fixture(scope="module")
-def schemas() -> AuthorSchemas:
-    return AuthorSchemas(SCHEMAS)
+    from ...support.author_current_fixtures import CurrentSourceFixture
 
 
-def test_keyword_source_is_not_an_ability_source(schemas: AuthorSchemas) -> None:
+def test_keyword_source_is_not_an_ability_source(
+    expander: AuthorExpander, schemas: AuthorSchemas
+) -> None:
     entry = ability({"keywords": ["ward", "aura"]})
     reference = object_value(array(entry["sources"])[0])
     declared = CardKeywordSourceUse.model_validate_json(canonical(reference))
@@ -44,7 +40,7 @@ def test_keyword_source_is_not_an_ability_source(schemas: AuthorSchemas) -> None
             card["faces"] = {"f:" + "1" * 32: {"abilities": card.pop("abilities")}}
         assert schemas.author_tree(canonical(value)) == value
         assert schemas.expanded(canonical(value)).model_dump(mode="json") == value
-    expanded = AuthorExpander(SCHEMAS).expand(canonical(document(entry)), ())
+    expanded = expander.expand(canonical(document(entry)), ())
     assert expanded.sidecar == ()
     assert expanded.declarations[0].source_proof == "none"
 
@@ -90,12 +86,14 @@ def test_plain_ability_still_requires_its_real_scope(schemas: AuthorSchemas) -> 
             reader(canonical(document(entry)))
 
 
-def test_unreferenced_keyword_companion_is_rejected(schemas: AuthorSchemas) -> None:
+def test_unreferenced_keyword_companion_is_rejected(
+    expander: AuthorExpander, schemas: AuthorSchemas
+) -> None:
     value = shard(companion({"keywords": ["ward"]}))
     with pytest.raises(AuthorInputError):
         schemas.body_tree(canonical(value))
     with pytest.raises(AuthorInputError):
-        AuthorExpander(SCHEMAS).expand(
+        expander.expand(
             canonical(document(ability({"spell": {"do": []}}))),
             (canonical(value),),
         )
@@ -157,9 +155,10 @@ def test_body_review_cannot_qualify_a_card_with_keyword_declarations(
         assert caught.value.diagnostic.reason == "unsupported_keyword_review_evidence"
 
 
-def test_keyword_structure_does_not_grant_source_mapping() -> None:
+def test_keyword_structure_does_not_grant_source_mapping(
+    expander: AuthorExpander,
+) -> None:
     raw = canonical(document(ability({"keywords": ["ward", "aura"]})))
-    expander = AuthorExpander(SCHEMAS)
     with pytest.raises(ExpansionError, match="unsupported_keyword_source_mapping"):
         expander.expand_sources(raw, (), {})
     with pytest.raises(ExpansionError, match="source_declaration_candidates_mismatch"):
@@ -183,19 +182,14 @@ def test_keyword_inline_parameter_diagnostic_keeps_its_source(
 
 
 def test_current_keyword_cannot_borrow_a_real_body_source(
-    tmp_path: Path, author_source_preparation: bytes
+    expander: AuthorExpander, base_current_fixture: CurrentSourceFixture
 ) -> None:
-    fixture = current_source_fixture(
-        tmp_path / "sources", preparation=author_source_preparation
-    )
-    with current(fixture) as sources:
+    with current(base_current_fixture) as sources:
         card = author(sources)
         node = object_value(array(card["abilities"])[0])
         node.pop("evolve")
         node["keywords"] = ["ward"]
         object_value(array(node["sources"])[0]).pop("ability_scope")
-        result = validate_files(
-            sources, inputs({"BP01-009": card}), AuthorExpander(SCHEMAS)
-        )[0]
+        result = validate_files(sources, inputs({"BP01-009": card}), expander)[0]
     assert isinstance(result, CardRejected)
     assert result.diagnostic.reason == "source_keyword_occurrence_mismatch"

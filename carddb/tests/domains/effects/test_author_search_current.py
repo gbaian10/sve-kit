@@ -16,18 +16,12 @@ from sve_carddb.domains.effects.author_expansion import (
 from sve_carddb.domains.effects.author_set import AuthorInputSet
 from sve_carddb.domains.effects.author_source_hash import source_version
 
-from ...support.author_current_fixtures import (
-    CurrentSourceFixture,
-    current_source_fixture,
-)
 from ...support.author_semantic_inputs import load_semantic_inputs
-from ...support.time_budget import slow_fixture
 from ..translations.test_four_layer_fixed_actions import SEARCH_RAW
 from .author_current_synthetic import effect, token_section
 from .author_entry_cases import meta
 from .author_search_cases import head, search_ability
 from .test_author_current import current, input_file, write_inputs
-from .test_author_entries import SCHEMAS
 from .test_author_search_sources import bad_payload
 
 if TYPE_CHECKING:
@@ -35,22 +29,10 @@ if TYPE_CHECKING:
 
     from sve_carddb.domains.effects.author_current import CurrentAuthorSources
 
+    from ...support.author_current_fixtures import CurrentSourceFixture
+
 CARD = "c:e7b93196e1175515a42771a72c7b12da"
 FACE = "f:e9d8deca215953a99d12bd07acd566fa"
-
-
-@pytest.fixture(scope="module")
-@slow_fixture(
-    reason="Build the search real-current database template once per worker from fixed public inputs; each test uses an independent database copy."
-)
-def fixture(
-    tmp_path_factory: pytest.TempPathFactory, author_source_preparation: bytes
-) -> CurrentSourceFixture:
-    return current_source_fixture(
-        tmp_path_factory.mktemp("search-sources"),
-        card_numbers=frozenset({"BP06-048", "BP06-P15"}),
-        preparation=author_source_preparation,
-    )
 
 
 def collection(
@@ -103,10 +85,14 @@ def collection(
 @pytest.mark.parametrize("number", ["BP06-048", "BP06-P15"])
 @pytest.mark.parametrize("companion", [False, True])
 def test_real_named_search_current(
-    fixture: CurrentSourceFixture, tmp_path: Path, number: str, *, companion: bool
+    expander: AuthorExpander,
+    search_current_fixture: CurrentSourceFixture,
+    tmp_path: Path,
+    number: str,
+    *,
+    companion: bool,
 ) -> None:
-    expander = AuthorExpander(SCHEMAS)
-    with current(fixture) as source:
+    with current(search_current_fixture) as source:
         assert source.printing_card(number) == CARD
         write_inputs(tmp_path, collection(source, companion=companion, number=number))
         accepted = source.validate_inputs(
@@ -153,10 +139,13 @@ def test_real_named_search_current(
     ],
 )
 def test_current_search_rejects_incomplete_or_wrong_source(
-    fixture: CurrentSourceFixture, tmp_path: Path, change: str, reason: str
+    expander: AuthorExpander,
+    search_current_fixture: CurrentSourceFixture,
+    tmp_path: Path,
+    change: str,
+    reason: str,
 ) -> None:
-    expander = AuthorExpander(SCHEMAS)
-    with current(fixture) as source:
+    with current(search_current_fixture) as source:
         inputs = collection(source, companion=False)
         write_inputs(tmp_path, inputs)
         tree = expander.schemas.author_tree(inputs.author_files[0].raw)
@@ -202,27 +191,31 @@ def test_current_search_rejects_incomplete_or_wrong_source(
     "suffix", ["\n1枚引く。", "\n{守護}"], ids=["draw-sibling", "keyword-sibling"]
 )
 def test_search_does_not_drop_unmapped_siblings(
-    fixture: CurrentSourceFixture,
+    expander: AuthorExpander,
+    search_current_fixture: CurrentSourceFixture,
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
     suffix: str,
 ) -> None:
-    with current(fixture) as source:
+    with current(search_current_fixture) as source:
         write_inputs(tmp_path, collection(source, companion=False))
         revision = next(iter(source.card_payload(CARD).revisions))
         effect(source, monkeypatch, SEARCH_RAW + suffix, revision=revision)
         rejected = source.validate_inputs(
-            load_semantic_inputs(tmp_path, AuthorExpander(SCHEMAS)),
-            AuthorExpander(SCHEMAS),
+            load_semantic_inputs(tmp_path, expander),
+            expander,
         )[0]
         assert isinstance(rejected, CardRejected)
         assert rejected.diagnostic.reason == "source_pending"
 
 
 def test_search_does_not_admit_a_token_section(
-    fixture: CurrentSourceFixture, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    expander: AuthorExpander,
+    search_current_fixture: CurrentSourceFixture,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    with current(fixture) as source:
+    with current(search_current_fixture) as source:
         write_inputs(tmp_path, collection(source, companion=False))
         revision = next(iter(source.card_payload(CARD).revisions))
         token_section(
@@ -234,8 +227,8 @@ def test_search_does_not_admit_a_token_section(
             kind="unknown",
         )
         rejected = source.validate_inputs(
-            load_semantic_inputs(tmp_path, AuthorExpander(SCHEMAS)),
-            AuthorExpander(SCHEMAS),
+            load_semantic_inputs(tmp_path, expander),
+            expander,
         )[0]
         assert isinstance(rejected, CardRejected)
         assert rejected.diagnostic.reason == "token_source_contract_unavailable"

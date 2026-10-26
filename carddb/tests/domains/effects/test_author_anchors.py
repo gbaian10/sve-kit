@@ -1,6 +1,6 @@
 """Committed anchors reject stale or incomplete current author programs."""
 
-from copy import deepcopy
+from copy import copy, deepcopy
 from dataclasses import replace
 from typing import TYPE_CHECKING
 
@@ -15,21 +15,19 @@ from sve_carddb.domains.effects.author_anchors import (
     review_states,
 )
 from sve_carddb.domains.effects.author_current import CardAccepted, CardRejected
-from sve_carddb.domains.effects.author_expansion import AuthorExpander
 from sve_carddb.domains.effects.author_inputs import AuthorInputError, parse_document
 from sve_carddb.domains.effects.author_set import AuthorInputSet
 
-from ...support.author_current_fixtures import current_source_fixture, entry_snapshot
-from ...support.time_budget import slow_fixture
 from .author_current_synthetic import effect
 from .test_author_current import current
-from .test_author_entries import SCHEMAS
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
 
     from sve_carddb.domains.effects.author_current import CurrentAuthorSources
+    from sve_carddb.domains.effects.author_expansion import AuthorExpander
     from sve_carddb.domains.effects.author_inputs import Diagnostic
+    from sve_carddb.domains.translations.inputs import Snapshot
 
     from ...support.author_current_fixtures import CurrentSourceFixture
 
@@ -38,26 +36,6 @@ BODY_KEY = "draw/1"
 WRITER: list[JsonValue] = [
     {"actor": {"who": "Synthetic author", "model": None}, "date": "2026-10-26"}
 ]
-
-
-@pytest.fixture(scope="module")
-@slow_fixture(
-    reason="Build the real current-source database for committed anchor validation "
-    "once for this module; each test copies the database before writing."
-)
-def fixture(
-    tmp_path_factory: pytest.TempPathFactory, author_source_preparation: bytes
-) -> CurrentSourceFixture:
-    return current_source_fixture(
-        tmp_path_factory.mktemp("anchors"),
-        card_numbers=frozenset({NUMBER}),
-        preparation=author_source_preparation,
-    )
-
-
-@pytest.fixture(scope="module")
-def expander() -> AuthorExpander:
-    return AuthorExpander(SCHEMAS)
 
 
 def collection(
@@ -155,9 +133,9 @@ def rejection(
 
 
 def test_current_anchor_grants_the_same_complete_semantic_handoff(
-    fixture: CurrentSourceFixture, expander: AuthorExpander
+    draw_current_fixture: CurrentSourceFixture, expander: AuthorExpander
 ) -> None:
-    with current(fixture) as source:
+    with current(draw_current_fixture) as source:
         inputs = collection(source, expander)
         first = source.validate_inputs(inputs, expander)
         second = source.validate_inputs(inputs, expander)
@@ -198,9 +176,12 @@ def test_current_anchor_grants_the_same_complete_semantic_handoff(
     ],
 )
 def test_tampered_anchor_rejects_the_whole_card(  # ruff: ignore[complex-structure] -- exercise independently tampered exact anchor fields
-    fixture: CurrentSourceFixture, expander: AuthorExpander, field: str, stage: str
+    draw_current_fixture: CurrentSourceFixture,
+    expander: AuthorExpander,
+    field: str,
+    stage: str,
 ) -> None:
-    with current(fixture) as source:
+    with current(draw_current_fixture) as source:
         inputs = collection(source, expander)
         tree = anchor_tree(inputs)
         card = object_value(object_value(tree["cards"])[NUMBER])
@@ -256,12 +237,12 @@ def test_tampered_anchor_rejects_the_whole_card(  # ruff: ignore[complex-structu
     ],
 )
 def test_anchor_inventory_is_closed(
-    fixture: CurrentSourceFixture,
+    draw_current_fixture: CurrentSourceFixture,
     expander: AuthorExpander,
     mutation: str,
     reason: str,
 ) -> None:
-    with current(fixture) as source:
+    with current(draw_current_fixture) as source:
         inputs = collection(source, expander)
         tree = anchor_tree(inputs)
         cards, bodies = object_value(tree["cards"]), object_value(tree["bodies"])
@@ -295,12 +276,13 @@ def test_anchor_inventory_is_closed(
 
 @pytest.mark.parametrize("recipe", ["adapter_recipe", "expansion_recipe"])
 def test_recipe_change_never_refreshes_pins(
-    fixture: CurrentSourceFixture,
+    draw_current_fixture: CurrentSourceFixture,
     expander: AuthorExpander,
     monkeypatch: pytest.MonkeyPatch,
     recipe: str,
 ) -> None:
-    with current(fixture) as source:
+    expander = copy(expander)
+    with current(draw_current_fixture) as source:
         inputs = collection(source, expander)
         before = inputs.anchor_files
         monkeypatch.setattr(expander, recipe, "sha256:" + "0" * 64)
@@ -326,12 +308,13 @@ def test_recipe_change_never_refreshes_pins(
     ],
 )
 def test_current_changes_require_explicit_rebinding(
-    fixture: CurrentSourceFixture,
+    draw_registry_without_attack: Snapshot,
+    draw_current_fixture: CurrentSourceFixture,
     expander: AuthorExpander,
     monkeypatch: pytest.MonkeyPatch,
     field: str,
 ) -> None:
-    with current(fixture) as source:
+    with current(draw_current_fixture) as source:
         inputs = collection(source, expander)
         main = object_value(parse_document(inputs.author_files[0].raw).value)
         card = object_value(object_value(main["cards"])[NUMBER])
@@ -359,10 +342,8 @@ def test_current_changes_require_explicit_rebinding(
             monkeypatch.setattr(author_current, "VERSION", "four-layer-jp-v999")
         elif field == "classification":
             incomplete = replace(
-                fixture,
-                snapshot=entry_snapshot(
-                    exclude_semantics=frozenset({"draw_exact_attack_time.v1"})
-                ),
+                draw_current_fixture,
+                snapshot=draw_registry_without_attack,
             )
             with current(incomplete) as changed_source:
                 (result,) = changed_source.validate_inputs(inputs, expander)
@@ -380,9 +361,9 @@ def test_current_changes_require_explicit_rebinding(
 
 
 def test_review_freshness_uses_literal_and_preserves_disputed(
-    fixture: CurrentSourceFixture, expander: AuthorExpander
+    draw_current_fixture: CurrentSourceFixture, expander: AuthorExpander
 ) -> None:
-    with current(fixture) as source:
+    with current(draw_current_fixture) as source:
         inputs = collection(source, expander)
         tree = anchor_tree(inputs)
         basis = object_value(object_value(tree["cards"])[NUMBER])["basis"]
@@ -476,9 +457,9 @@ def test_review_freshness_uses_literal_and_preserves_disputed(
 
 
 def test_unreferenced_body_without_a_pin_is_rejected(
-    fixture: CurrentSourceFixture, expander: AuthorExpander
+    draw_current_fixture: CurrentSourceFixture, expander: AuthorExpander
 ) -> None:
-    with current(fixture) as source:
+    with current(draw_current_fixture) as source:
         inputs = collection(source, expander)
         body = object_value(parse_document(inputs.body_files[0].raw).value)
         extra = deepcopy(object_value(array(body["records"])[0]))
@@ -493,9 +474,9 @@ def test_unreferenced_body_without_a_pin_is_rejected(
 
 
 def test_mixed_storage_formats_are_rejected(
-    fixture: CurrentSourceFixture, expander: AuthorExpander
+    draw_current_fixture: CurrentSourceFixture, expander: AuthorExpander
 ) -> None:
-    with current(fixture) as source:
+    with current(draw_current_fixture) as source:
         inputs = collection(source, expander)
         body = object_value(parse_document(inputs.body_files[0].raw).value)
         body["format"] = 1
