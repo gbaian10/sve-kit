@@ -68,9 +68,22 @@ class PreviewPlan:
     review_input_pin: dict[str, JsonValue] | None = None
     uncovered_jp_card_numbers: tuple[str, ...] = ()
 
+    def renewal_configuration(self) -> list[JsonValue]:
+        """Retain every reviewed context without runtime store or artifact roots."""
+        return [
+            {
+                "path": shard.path,
+                "sha256": shard.content_hash,
+                "review_context": shard.envelope()
+                .records[0]
+                .review_context.model_dump(mode="json"),
+            }
+            for shard in self.snapshot.transitions
+        ]
+
     def source_uses(self) -> tuple[SourceUse, ...]:
         """Declare all successfully read observations, including excluded identity evidence."""
-        return tuple(
+        return self.snapshot.transition_uses + tuple(
             SourceUse(
                 source=item.source,
                 usage="registry_observation",
@@ -93,6 +106,7 @@ class PreviewPlan:
         return {
             "regions": list[JsonValue](self.regions),
             "registry_review_inputs": self.review_input_pin,
+            "identity_transitions": self.renewal_configuration(),
             "uncovered_jp_card_numbers": list[JsonValue](
                 self.uncovered_jp_card_numbers
             ),
@@ -168,10 +182,14 @@ def _observations(data: PrintingData) -> tuple[Observation, ...]:
 
 
 def plan_preview(
-    authored: Path, provider: EvidenceProvider, *, regions: tuple[Region, ...]
+    authored: Path,
+    provider: EvidenceProvider,
+    *,
+    regions: tuple[Region, ...],
+    snapshot: RegistrySnapshot | None = None,
 ) -> PreviewPlan:
     """Validate all indexed data first, then explicitly select output regions."""
-    snapshot = load_registry(authored)
+    snapshot = load_registry(authored) if snapshot is None else snapshot
     if (
         not regions
         or len(set(regions)) != len(regions)

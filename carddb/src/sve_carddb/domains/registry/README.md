@@ -80,3 +80,13 @@ flagged for permanent-identity review, but this report does not write it into th
 registry. Adopt it through the existing identity repair procedure, separately
 from classification. Inventory conclusions do not select translations or grant
 DSL eligibility.
+
+## Mapping-review renewal and existing art extension
+
+The explicit `sve-carddb registry renew-reviews` and `registry extend-art` commands
+use the approved identity-transition-v1 envelope without rewriting original shards.
+Text/image builds reconstruct supported transitions through the shared registry
+plan factory; generic legacy readers still fail closed on nonempty transitions.
+The allocator's `--renewal-inputs` option verifies that history before an original
+append, without extending absence approval. See the
+[operation guide](../../../../../docs/schema/domains/registry-renewal.md).

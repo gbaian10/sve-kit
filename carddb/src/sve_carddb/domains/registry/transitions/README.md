@@ -95,8 +95,9 @@ Card merging by itself does not create a route alias.
 
 ### Remaining gates
 
-All old `load`/`read_registry_files`/`load_registry`, append planner (including its
-preloaded input) and relayout guards remain unchanged for nonempty transitions.
+Legacy `load`/`read_registry_files`/`load_registry`, append planner (including its
+preloaded input) and relayout calls still reject nonempty transitions. The explicit
+reviewed append path below accepts a fully verified renewal snapshot.
 `storage.read_base_files` reads only original envelopes for the replay boundary;
 it is not a replacement builder/reader and does not apply transitions. An empty
 or missing directory retains the existing complete build/publication path and
@@ -107,7 +108,7 @@ source freshness, target coverage reconstruction, complete capability dependency
 reconstruction, DB/snapshot event export, first-publication evidence or the
 fixed-order write/recovery transaction. Full public artist/baseline
 reference closure belongs to the future DB/snapshot adapter; this view cannot
-make those rows public. Real registry repair/publication remains blocked until
+make those rows public. General identity repair/publication remains blocked until
 those gates are implemented and reviewed. Named revert fails closed in this core;
 inverse state, dependency closure and route restoration are stage C.
 
@@ -122,3 +123,29 @@ Synthetic acceptance and counterexamples:
 ```bash
 uv --directory carddb run pytest tests/domains/registry/test_identity_replay.py tests/domains/registry/test_identity_replay_history.py tests/domains/registry/test_identity_replay_rejections.py tests/domains/registry/test_identity_transition_loader.py --durations=20
 ```
+
+## Verified absence renewal and art-use extension
+
+`registry renew-reviews` and `registry extend-art` implement two narrow production
+adapters for the existing wire format. Both require explicit human decisions,
+an immutable Git registry basis, a clean pinned program/lock revision, and sealed
+sources. No parent ID, art classification, original shard or allocation changes.
+They write complete after records with exact latest before refs and append one
+transition only after independently reconstructing its full evidence.
+
+`history.History` reconstructs the actual original Git bytes.
+`review_sources.ReviewSources` verifies portable permanent JP inputs and every
+reviewed EN observation, or every old/new art member and its original image.
+`renewal.load_renewed_registry` applies only these two profiles; unsupported repair,
+revert, deactivation and ownership changes continue to fail closed. All historical
+contexts and raw uses remain in the build input closure. The normal text/image
+workflow shares `registry_plan`, and authored transition source records use
+`identity-transition-v1`. Pure renewal never emits public identity-change events.
+
+The allocator module CLI can take `--renewal-inputs` to verify the complete existing
+renewal chain before planning an original append. `storage.plan_files(reviewed=...)`
+requires that snapshot to match current original and transition bytes; it still
+preserves every original record and shard. This does not expand absence approval
+for newly appended JP scope, or relax the existing EN-only/reskin evidence gate.
+
+See the [operation guide](../../../../../../docs/schema/domains/registry-renewal.md).

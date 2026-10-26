@@ -31,10 +31,15 @@ from sve_carddb.domains.registry.allocation import (
     cursors,
     region_allocations,
 )
-from sve_carddb.domains.registry.transitions.files import require_empty_transitions
+from sve_carddb.domains.registry.transitions.files import (
+    read_transition_files,
+    require_empty_transitions,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+
+    from sve_carddb.domains.registry.snapshot import RegistrySnapshot
 
 TARGET_BYTES = 524_288
 
@@ -348,9 +353,30 @@ def plan_files(
     entries: list[Entry],
     *,
     loaded: tuple[Index, dict[str, Entry]] | None = None,
+    reviewed: RegistrySnapshot | None = None,
 ) -> dict[Path, bytes]:
     """Preserve all old entries and shards; only append newly allocated state."""
-    require_empty_transitions(root)
+    if reviewed is None:
+        require_empty_transitions(root)
+    else:
+        if (
+            reviewed.files != read_base_files(root)
+            or reviewed.transitions != read_transition_files(root).shards
+        ):
+            raise ValueError(
+                "Reviewed renewal projection differs from current registry bytes"
+            )
+        original = (
+            reviewed.files.index(),
+            {
+                entry.record_key: entry
+                for shard in reviewed.files.shards
+                for entry in shard.envelope().records
+            },
+        )
+        if loaded is not None and loaded != original:
+            raise ValueError("Append inputs differ from verified original registry")
+        loaded = original
     index, old = load(root) if loaded is None else loaded
     new: dict[tuple[str, str], list[Entry]] = defaultdict(list)
     for entry in entries:

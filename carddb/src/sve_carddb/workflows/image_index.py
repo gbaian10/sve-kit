@@ -8,7 +8,6 @@ from pydantic import JsonValue
 
 from sve_carddb.core.authored import authored_root
 from sve_carddb.core.json import array, canonical, digest, integer, object_value, string
-from sve_carddb.domains.registry.preview import plan_preview
 from sve_carddb.domains.registry.records import AllocationData, FaceData, PrintingData
 from sve_carddb.domains.source_corrections import FrozenImages
 from sve_carddb.domains.text_observations import (
@@ -44,7 +43,7 @@ from sve_carddb.images.variants import DEFAULT_RECIPE
 from sve_carddb.ingest.archive.frozen_sources import FrozenSources
 from sve_carddb.parse.pages.official_jp import image_url
 from sve_carddb.workflows.art_matching import art_candidates
-from sve_carddb.workflows.offline import Inputs, registry_provider, source_batches
+from sve_carddb.workflows.offline import Inputs, registry_plan, source_batches
 
 if TYPE_CHECKING:
     from sve_carddb.core.provenance import Source
@@ -305,11 +304,7 @@ def build_index_command(  # ruff: ignore[too-many-arguments, too-many-positional
         tuple(item for part in parts for item in part.images),
         sum(part.elapsed_seconds for part in parts),
     )
-    identity = plan_preview(
-        authored_root(recipe.repo),
-        registry_provider(recipe, text_batches),
-        regions=("en", "jp"),
-    )
+    identity = registry_plan(recipe, text_batches)
     texts = TextObservations(
         identity,
         RegionalTexts(

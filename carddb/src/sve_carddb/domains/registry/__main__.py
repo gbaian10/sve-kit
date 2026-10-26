@@ -7,12 +7,40 @@ import sys
 from collections import Counter
 from datetime import date
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from sve_carddb.domains.registry.build import build
 from sve_carddb.domains.registry.corrections import project_corrections
 from sve_carddb.domains.registry.review import read_inputs
 from sve_carddb.domains.registry.storage import load, plan_files, write_files
+from sve_carddb.domains.registry.transitions.renewal import load_renewed_registry
+from sve_carddb.domains.registry.transitions.writer import Recipe
 from sve_carddb.domains.registry.validate import check_cursors, validate
+
+if TYPE_CHECKING:
+    from sve_carddb.domains.registry.snapshot import RegistrySnapshot
+    from sve_carddb.domains.registry.storage import Entry, Index
+
+
+def _registry(
+    root: Path, inputs: Path | None
+) -> tuple[Index, dict[str, Entry], RegistrySnapshot | None]:
+    if inputs is None:
+        index, existing = load(root)
+        return index, existing, None
+    recipe = Recipe.model_validate_json(inputs.read_bytes())
+    if recipe.repo.resolve() != root.parent.resolve():
+        raise ValueError("Renewal recipe must name this authored repository")
+    reviewed = load_renewed_registry(root, recipe.evidence())
+    return (
+        reviewed.files.index(),
+        {
+            entry.record_key: entry
+            for shard in reviewed.files.shards
+            for entry in shard.envelope().records
+        },
+        reviewed,
+    )
 
 
 def main() -> None:
@@ -45,6 +73,11 @@ def main() -> None:
         type=Path,
         help="Write field-local build projections and correction markers",
     )
+    parser.add_argument(
+        "--renewal-inputs",
+        type=Path,
+        help="Verify existing review/art transitions with an explicit renewal recipe before appending",
+    )
     args = parser.parse_args()
     root: Path = args.authored
     cache = root.parent / "carddb" / ".cache"
@@ -59,7 +92,7 @@ def main() -> None:
             "original_art": args.original_art,
         }
         inputs = read_inputs(paths, args.decisions, args.images, as_of=args.as_of)
-        index, existing = load(root)
+        index, existing, reviewed = _registry(root, args.renewal_inputs)
         if existing:
             validate(list(existing.values()))
         check_cursors(index.next_int_id, list(existing.values()))
@@ -72,6 +105,7 @@ def main() -> None:
             root,
             entries,
             loaded=(index, existing),
+            reviewed=reviewed,
         )
         if args.check and files:
             raise ValueError("Registry is incomplete; generation would append files")

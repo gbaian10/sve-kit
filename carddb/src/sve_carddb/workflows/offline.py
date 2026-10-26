@@ -65,6 +65,9 @@ from sve_carddb.domains.registry.preview.review_inputs import (
 from sve_carddb.domains.registry.rarity import populate as populate_rarities
 from sve_carddb.domains.registry.records import PrintingData
 from sve_carddb.domains.registry.reprints import load_reprints, populate_reprints
+from sve_carddb.domains.registry.transitions.files import read_transition_files
+from sve_carddb.domains.registry.transitions.renewal import load_renewed_registry
+from sve_carddb.domains.registry.transitions.review_sources import ReviewSources
 from sve_carddb.domains.rulings.historical import rebuild as rebuild_rulings
 from sve_carddb.domains.rulings.reader import load as load_rulings
 from sve_carddb.domains.rulings.storage import PROFILE as RULING_PROFILE
@@ -110,6 +113,7 @@ if TYPE_CHECKING:
     from sve_carddb.domains.catalog.adoption_importer import AdoptionInputs
     from sve_carddb.domains.catalog.loader import Prepared
     from sve_carddb.domains.construction.adoption import Adopted
+    from sve_carddb.domains.registry.preview.plan import PreviewPlan
     from sve_carddb.domains.registry.snapshot import RegistrySnapshot
     from sve_carddb.domains.translations.four_layer_authored import (
         Inputs as FrameInputs,
@@ -213,6 +217,26 @@ def registry_provider(inputs: Inputs, batches: FrozenBatches) -> FrozenRegions:
         ),
         review_inputs=review,
     )
+
+
+def registry_plan(inputs: Inputs, batches: FrozenBatches) -> PreviewPlan:
+    """Share verified review renewal between text and image publication paths."""
+    root = authored_root(inputs.repo)
+    provider = registry_provider(inputs, batches)
+    snapshot = None
+    if read_transition_files(root).shards:
+        if inputs.registry_review_inputs is None:
+            raise ValueError(
+                "Renewal projection requires permanent registry review inputs"
+            )
+        sources = ReviewSources(
+            inputs.repo,
+            inputs.archive,
+            inputs.store_id,
+            inputs.registry_review_inputs.root,
+        )
+        snapshot = load_renewed_registry(root, sources)
+    return plan_preview(root, provider, regions=("en", "jp"), snapshot=snapshot)
 
 
 @dataclass(frozen=True)
@@ -487,11 +511,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             )
     mark("load image index metadata")
     _, jp = inputs.sources
-    identity = plan_preview(
-        authored_root(inputs.repo),
-        registry_provider(inputs, batches),
-        regions=("en", "jp"),
-    )
+    identity = registry_plan(inputs, batches)
     mark("plan preview identity")
     observations = TextObservations(
         identity,
@@ -574,6 +594,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             exclude={"repo", "archive", "registry_review_inputs"},
         ),
         "registry_review_inputs": identity.review_input_pin,
+        "identity_transitions": identity.renewal_configuration(),
         "selected_regions": ["en", "jp"],
         "published_history": "explicit-empty-no-releases",
     }
