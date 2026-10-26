@@ -141,6 +141,11 @@ NO_TOKEN_METADATA = (
 PRINTED_KEYWORDS: dict[str, PrintedKeyword] = {
     "term:keyword.ward": "ward",
     "term:keyword.aura": "aura",
+    "term:keyword.storm": "storm",
+    "term:keyword.rush": "rush",
+    "term:keyword.bane": "bane",
+    "term:keyword.intimidate": "intimidate",
+    "term:keyword.assail": "assail",
 }
 
 ADAPTER_RECIPE = digest(

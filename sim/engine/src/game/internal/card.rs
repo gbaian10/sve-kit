@@ -723,7 +723,12 @@ fn printed_origin(origin: &AbilityOrigin) -> Result<(&FaceId, &Nat)> {
                 | KeywordId::Evolution
                 | KeywordId::Quick
                 | KeywordId::Ward
-                | KeywordId::Aura,
+                | KeywordId::Aura
+                | KeywordId::Storm
+                | KeywordId::Rush
+                | KeywordId::Bane
+                | KeywordId::Intimidate
+                | KeywordId::Assail,
             origin,
         } => {
             if let AbilityOrigin::Printed { face, line } = origin.as_ref() {

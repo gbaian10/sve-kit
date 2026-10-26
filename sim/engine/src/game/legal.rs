@@ -382,8 +382,7 @@ impl Game {
         }
         if object.state["entered_this_turn"] == true
             && !keys.contains("storm")
-            && (leader || !keys.contains("rush"))
-            && object.state["evolved"] != true
+            && (leader || (!keys.contains("rush") && object.state["evolved"] != true))
         {
             return Ok(false);
         }
@@ -412,6 +411,7 @@ impl Game {
             if self.object(&guard)?.state["acted"] == true
                 && self.object_type(&guard)?.contains("フォロワー")
                 && self.keywords(&guard)?.contains("guard")
+                && !self.keywords(&guard)?.contains("intimidate")
             {
                 guards.push(guard);
             }

@@ -1,4 +1,4 @@
-//! Closed printed Ward/Aura declarations; rule procedures are admitted separately.
+//! Closed named printed abilities consumed by the corresponding rule procedures.
 use super::{
     AbilitiesRead, Ability, AbilityId, AbilityKind, AbilityOrigin, AbilityPredicate,
     AbilityQualification, AbilitySource, ActionPattern, Binding, Bool, CardKind, Cardinality,
@@ -51,27 +51,35 @@ fn followers(relation: PlayerRelation, binding: Binding<ObjectRef>) -> Selector 
     }
 }
 
+fn has_keyword(object: ObjectOperand, keyword: KeywordId) -> Expr<Bool> {
+    Expr::Compute(Box::new(Predicate::HasAbility {
+        abilities: Expr::Live(Box::new(AbilitiesRead::Abilities {
+            object: view(object),
+            view: CharacteristicView::Effective,
+        })),
+        predicate: Box::new(AbilityPredicate {
+            kind: None,
+            keyword: Some(keyword),
+            except: vec![],
+            holder: None,
+            origin: None,
+        }),
+    }))
+}
+
 fn ward(scope: ScopeId) -> (ActionPattern, Expr<Bool>, RuleId) {
     let own = followers(PlayerRelation::SelfPlayer, Binding::new(0, scope));
     let binding = Binding::new(1, scope);
+    // Official Q819: an acted Ward that also has Intimidate creates no guard obligation.
     let wards = Selector::Filter {
         input: Box::new(own.clone()),
         binding,
         predicate: Box::new(Expr::Compute(Box::new(Predicate::And {
             predicates: vec![
                 acted(ObjectOperand::Bound { binding }),
-                Expr::Compute(Box::new(Predicate::HasAbility {
-                    abilities: Expr::Live(Box::new(AbilitiesRead::Abilities {
-                        object: view(ObjectOperand::Bound { binding }),
-                        view: CharacteristicView::Effective,
-                    })),
-                    predicate: Box::new(AbilityPredicate {
-                        kind: None,
-                        keyword: Some(KeywordId::Ward),
-                        except: vec![],
-                        holder: None,
-                        origin: None,
-                    }),
+                has_keyword(ObjectOperand::Bound { binding }, KeywordId::Ward),
+                Expr::Compute(Box::new(Predicate::Not {
+                    predicate: has_keyword(ObjectOperand::Bound { binding }, KeywordId::Intimidate),
                 })),
             ],
         }))),
@@ -93,16 +101,23 @@ fn ward(scope: ScopeId) -> (ActionPattern, Expr<Bool>, RuleId) {
                 ],
             }),
         },
-        acted(ObjectOperand::SourceHolder {}),
+        Expr::Compute(Box::new(Predicate::And {
+            predicates: vec![
+                acted(ObjectOperand::SourceHolder {}),
+                Expr::Compute(Box::new(Predicate::Not {
+                    predicate: has_keyword(ObjectOperand::SourceHolder {}, KeywordId::Intimidate),
+                })),
+            ],
+        })),
         RuleId(128),
     )
 }
 
-/// Build the complete, named permission shape. Ward's optional posture choices
-/// belong to rule procedures, not an unconditional effect of this declaration.
+/// Build a complete named definition. Intrinsic combat keywords are interpreted
+/// by rule procedures; they do not install a generic permission or triggered body.
 #[expect(
     clippy::wildcard_enum_match_arm,
-    reason = "Only these two complete printed keyword shapes are supported."
+    reason = "Only the closed complete printed keyword shapes are supported."
 )]
 pub(crate) fn definition(
     keyword: KeywordId,
@@ -111,9 +126,9 @@ pub(crate) fn definition(
     id: AbilityId,
     scope: ScopeId,
 ) -> Option<Ability> {
-    let (action, condition, rule) = match keyword {
-        KeywordId::Ward => ward(scope),
-        KeywordId::Aura => (
+    let permission = match keyword {
+        KeywordId::Ward => Some(ward(scope)),
+        KeywordId::Aura => Some((
             ActionPattern::ChooseTarget {
                 objects: Selector::Objects {
                     objects: vec![ObjectOperand::SourceHolder {}],
@@ -121,7 +136,12 @@ pub(crate) fn definition(
             },
             Expr::Literal(Bool(true)),
             RuleId(1215),
-        ),
+        )),
+        KeywordId::Storm
+        | KeywordId::Rush
+        | KeywordId::Bane
+        | KeywordId::Intimidate
+        | KeywordId::Assail => None,
         _ => return None,
     };
     Some(Ability {
@@ -142,21 +162,24 @@ pub(crate) fn definition(
         play: None,
         trigger: None,
         body: None,
-        declarations: vec![Effect::Permission {
-            subject: PermissionSubject::Players {
-                players: players(PlayerRelation::Opponents),
-            },
-            action,
-            polarity: Polarity::Forbid,
-            condition,
-            duration: Duration {
-                end: DurationEnd::NoTemporalExpiry {},
-                anchor: TimeAnchor::Installation {},
-                usage: None,
-                intervals: vec![],
-            },
-            rule,
-        }],
+        declarations: permission
+            .into_iter()
+            .map(|(action, condition, rule)| Effect::Permission {
+                subject: PermissionSubject::Players {
+                    players: players(PlayerRelation::Opponents),
+                },
+                action,
+                polarity: Polarity::Forbid,
+                condition,
+                duration: Duration {
+                    end: DurationEnd::NoTemporalExpiry {},
+                    anchor: TimeAnchor::Installation {},
+                    usage: None,
+                    intervals: vec![],
+                },
+                rule,
+            })
+            .collect(),
     })
 }
 
