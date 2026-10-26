@@ -1,0 +1,17 @@
+cards:
+  BP19-P32:
+    abilities:
+      - keywords:
+          - ward
+          - aura
+        line: 1
+      - line: 2
+        use: destroy_fanfare_opponent_all_field_followers.v1
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-luna
+            who: Codex
+          date: "2026-10-26"
+format: 2
+kind: author_effect_set

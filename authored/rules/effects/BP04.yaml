@@ -190,22 +190,6 @@ cards:
             costs:
               - op: pp
                 amount: 5
-  BP04-075:
-    status: complete
-    abilities:
-      - line: 1
-        kind: evolve
-        body:
-          op: evolve
-          subjects: self
-        costs:
-          - op: pp
-            amount: 4
-      - line: 2
-        kind: static
-        body:
-          op: macro
-          name: guard
   BP04-080:
     status: complete
     review: 真紅要求目前為自己的回合，並記錄生命減少次數，非只檢查已受傷。

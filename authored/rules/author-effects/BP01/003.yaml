@@ -1,0 +1,18 @@
+cards:
+  BP01-144:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - keywords:
+          - aura
+        line: 2
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-luna
+            who: Codex
+          date: "2026-10-26"
+format: 2
+kind: author_effect_set

@@ -1,0 +1,35 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "static",
+      "body": {
+        "op": "macro",
+        "name": "guard"
+      }
+    },
+    {
+      "line": 1,
+      "kind": "static",
+      "body": {
+        "op": "macro",
+        "name": "aura"
+      }
+    },
+    {
+      "line": 2,
+      "kind": "trigger",
+      "body": {
+        "op": "destroy",
+        "subjects": {
+          "side": "opponent",
+          "zone": "field",
+          "type": "follower"
+        }
+      },
+      "event": "enter",
+      "subject": "self"
+    }
+  ]
+}
