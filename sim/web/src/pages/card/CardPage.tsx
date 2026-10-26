@@ -225,26 +225,37 @@ export function CardView({
     error?: unknown
   }>()
   useEffect(() => {
-    const snapshot = other.snapshot ?? client.snapshot()
-    if (!snapshot || !catalog || !cardId) return
-    let active = true
-    void cardPrintings(client, snapshot, cardId, other.snapshot ? ["jp", "en"] : [region]).then(
-      (value) => {
-        if (active) setPrintingCatalog({ source: catalog, cardId, other: other.catalog, value })
-      },
-      (error: unknown) => {
-        if (active)
-          setPrintingCatalog({
-            source: catalog,
-            cardId,
-            other: other.catalog,
-            value: catalog,
-            error,
-          })
-      },
-    )
+    const activeSnapshot = client.snapshot()
+    if (!activeSnapshot || !catalog || !cardId) return
+    const abort = new AbortController()
+    void (async () => {
+      // Here the other region only adds official links; its failure is not this view's error.
+      const snapshot =
+        other.snapshot ??
+        (await client
+          .catalog?.(region === "jp" ? "en" : "jp", abort.signal)
+          .catch(() => undefined)) ??
+        activeSnapshot
+      abort.signal.throwIfAborted()
+      const value = await cardPrintings(client, snapshot, cardId, ["jp", "en"])
+      abort.signal.throwIfAborted()
+      setPrintingCatalog({ source: catalog, cardId, other: other.catalog, value })
+    })().catch((error: unknown) => {
+      try {
+        abort.signal.throwIfAborted()
+      } catch {
+        return
+      }
+      setPrintingCatalog({
+        source: catalog,
+        cardId,
+        other: other.catalog,
+        value: catalog,
+        error,
+      })
+    })
     return () => {
-      active = false
+      abort.abort()
     }
   }, [client, catalog, cardId, region, other.snapshot, other.catalog, printingAttempt])
   // Artists come from the art rows of the card's home set; they appear once those files are in.
@@ -1040,8 +1051,10 @@ export function CardView({
               <CardExternalLinks
                 key={`external:${cardId}`}
                 client={client}
-                catalog={catalog}
+                catalog={completePrintings?.value ?? catalog}
                 cardId={cardId}
+                printingId={printingId ?? ""}
+                region={region}
               />
             )}
           </div>

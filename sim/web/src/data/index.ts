@@ -44,6 +44,7 @@ export {
   retainedImageIndex,
 } from "./images"
 export { createLocator, GLOBAL_OWNER } from "./locator"
+export { type OfficialCardLink, officialCardLinks } from "./official-card-links"
 export {
   type CardRestriction,
   type CardRestrictionDetails,
