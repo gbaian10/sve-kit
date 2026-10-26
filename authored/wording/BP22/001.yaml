@@ -1,0 +1,34 @@
+format: 1
+kind: wording_decisions
+records:
+  - face_id: f:0ae6cbb7ad4158869a9ea7b0c513cea9
+    region: jp
+    comparison_hash: sha256:87fd6a343073b5d7e4dc453a43fb9eb8aac5c2bedcdfe12e6824ca3781152330
+    classification: same_effect
+    method: ai
+    reason: 依補充段落完整者優先規則：三版主文、名稱、數值及特徵一致，U06 僅省略主文所引用生成物的定義段落；094 與 SL24 保留該段落，不增加主文的條件、數量或解決步驟。
+  - face_id: f:0ef7748edf2953b780677c8f9363cfbf
+    region: jp
+    comparison_hash: sha256:d9b52b3576b7095fccf5ce753f0519974a7fbed3b49a8f0416afc32d93ef6ca0
+    classification: same_effect
+    method: ai
+    reason: 依措辭改動選最新較清楚版本規則：BP22-R10 將主階段觸發及起動能力第二選項的生成物出場位置明示為場；舊版的出場操作相同，觸發條件、費用、生成數量及其他選項未變，各版均無補充段落。
+  - face_id: f:8063363aac9a5b16a965d004e2698102
+    region: jp
+    comparison_hash: sha256:dfc96dbe8b4cddb2e570c0e886681f736702301392620ca5af867ab2a72e864b
+    classification: same_effect
+    method: manual
+    reason: 官網卡頁漏載入場曲一行；卡圖印有與 BP09-035 相同的完整效果，依卡圖核對指定 BP09-035 為完整卡文依據。
+    basis_printing_id: p:99292a3321695269a1f8e1dea5be7122
+  - face_id: f:afe660f656315787abfe7c376f004810
+    region: jp
+    comparison_hash: sha256:4cc6fbbac3179ebe084d485b7f5995cfbcab45f736f159776fcda8598a514aa2
+    classification: same_effect
+    method: ai
+    reason: 依措辭改動選最新較清楚版本規則：BP22-R13 僅將持續賦予突進能力的生效位置明示為場；守護、賦予對象、入場復活條件與數量、起動費用、強化數值及次數限制均未變，各版均無補充段落。
+  - face_id: f:c9596f1d3af35e67a83ebac2e6145243
+    region: jp
+    comparison_hash: sha256:e9fa3b458b3ee828e31d10aa44554d6e2dfbbf9d5086041af5c0e5ebf4146c9f
+    classification: same_effect
+    method: ai
+    reason: 依措辭改動選最新較清楚版本規則：BP22-R06 僅將持續減費能力的生效位置明示為場；每回合第一張禁忌生成物的條件、減費數值、進化時能力及補充段落中的復活對象、突進與結束階段破壞均未變。
