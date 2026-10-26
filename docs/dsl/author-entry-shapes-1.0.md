@@ -66,12 +66,17 @@ current 邊界重建真實 registry 的 Frame／Binding，核對全部 JP curren
 | draw_exact_spell.v1 | ability_0 → spell | `spell: {do: [{draw: {who: self, n: N}}]}`；單一 required Nat/count/value 葉 |
 | draw_exact_attack_time.v1 | ability_0 → attack_time | `attack_time: {do: [{draw: {who: self, n: N}}]}`；單一 required Nat/count/value 葉 |
 | draw_exact_evolve_time.v1 | ability_0 → evolve_time | `evolve_time: {do: [{draw: {who: self, n: N}}]}`；單一 required Nat/count/value 葉 |
+| destroy_fanfare_opponent_all_field_followers.v1 | ability_0 → fanfare | `fanfare: {do: [{destroy: {ref: {who: opp, zone: field, kind: follower}}}]}`；固定 Fanfare Concept，無參數 |
 | damage_uniform_lastword_all_leaders.v1 | ability_0 → lastword | `lastword: {do: [{damage: {to: {leaders: all}, n: N}}]}`；固定 Lastword Concept 與 Nat/damage_amount/value 葉 |
 | move_self_to_owner_cemetery_activated_pp.v1 | ability_0 → activate | `activate: {zone: field, cost: {pp: 1}, do: [{move: {ref: this, to: cemetery}}]}`；三個來源葉皆固定，無參數 |
 
 表列各族皆只配空 imports／exports ports，能力 imports 必須省略。去掉 line／section／sources 後完整 canonical 能力必須相等；多加 into、usable_if、times、其他費用或 expression 都不符來源。N 可為 0，須取該構造的 operand，不能借相同數值。非空 ports 與其他執行 scope 保持明示 unsupported；不把跨 owner 或DSL 陣列較晚定為永久非法。真卡整卡正例為 BP01-009／034／092 的純進化入口；feed／ride 與雙入口的有限機制測試不宣稱已有真卡整卡准入。
 
 spell、attack_time 與 evolve_time 抽牌同樣只配空 ports、不得有能力 imports。spell 來源重建要求既有 normalizer 的完整 current normal spell effect、無 sections、單行 exact self 抽牌；attack_time 要求 current follower effect 的完整獨立 `【攻撃時】N枚引く。` body 行，自身攻擊事件固定在頭內；evolve_time 要求 current evolved follower effect 的完整獨立 `【進化時】N枚引く。` body 行，固定自身進化事件，與 evolve 費用入口分開。只對照來源 Nat/count/value 到 draw.n，不參數化 actor、能力頭或控制圖。`expand_sources` 與 current 入口都比對完整展開能力的 canonical bytes；省略 who、改張數、增加條件／費用／步驟或換頭皆拒絕。真卡正例分別為 CP02-068、BP10-122 與 ECP01-002；up_to、對手／雙方、動態量、Quick、token 位置仍拒絕。同卡有其他 sibling 時必須逐一接通並驗證，不能只截出抽牌就准入整卡。來源准入不等於 reviewed、compiled、executed 或 qualified。
+
+`destroy_fanfare_opponent_all_field_followers.v1` 只接已採納來源規則的完整 Advance 面：current JP follower、special_kinds 恰為 advance，effect 第一行守護／光紋、第二行完整入場曲，無 sections。固定 Concept/ability 葉、canonical occurrence、body 來源位置與空 ports 全部核對；inline 與 companion 都比較完整能力 bytes，不參數化 selector、能力頭、條件或費用。Fanfare 保留來源持有者由場外新進場的事件語義，不限普通打出，也不因卡型補造 AdvanceActivate。對手以能力 master 為準，destroy 的移動目的地依各卡 owner；不改成 banish／move，也不宣稱忽略破壞禁止、Advance／token 後續規則。
+
+這項能力來源映射不表示 BP19-P32／BP19-114 整卡已准入：兩者同永久身分，來源仍包含 `card_keywords.v2` 的守護／光紋非本體義務。current 入口尚未承載該 card_field，完整 `validate`／`selection_input` 明確回 `unsupported_source_projection`，不產生 current_source_checked 或缺 sibling 的 source_inventory。合法 Advance 進場與整卡執行仍需各自的 D0／runtime 證據；純來源展開成功只有 derived_self_consistent。
 
 固定內容種子：BP08-038 的 Live count−5 與 draw；CP04-060 的 search→follow→本回合 cost delta −2；ECP01-058 的 evolve deck_rule 10；BP09-SL05 兩面定位及第二面 create 名稱列表。它們的內容來源是真卡，測試 SourceUse／FrameId／meta 為明示合成，不能冒充已採納來源或實跑資格。
 

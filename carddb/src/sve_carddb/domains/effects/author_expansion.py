@@ -27,6 +27,7 @@ from sve_carddb.domains.effects.author_sources import (
     resolve_source,
 )
 from sve_carddb.domains.translations.four_layer_damage import KEY as DAMAGE_KEY
+from sve_carddb.domains.translations.four_layer_destroy import KEY as DESTROY_KEY
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator, Mapping
@@ -456,6 +457,7 @@ class AuthorExpander:
                 raise ExpansionError("unsupported_port_source_mapping", evidence.path)
             if source.frame.semantic_variant.key in {
                 DAMAGE_KEY,
+                DESTROY_KEY,
                 "draw_exact_spell.v1",
                 "draw_exact_attack_time.v1",
                 "draw_exact_evolve_time.v1",
