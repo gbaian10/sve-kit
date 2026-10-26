@@ -1,0 +1,26 @@
+format: 1
+kind: registry_shard
+records:
+  - kind: source_correction
+    owner: BP22
+    data:
+      id: x:56b527d6c13c5709ad63f692d0f4f503
+      printing_id: p:e9e0e70d298c54d99e1ae94755433086
+      face_id: f:8063363aac9a5b16a965d004e2698102
+      field: effect
+      expected_raw_value: '{進化}{コスト1}：これは進化する。'
+      corrected_value: "{進化}{コスト1}：これは進化する。\n{ファンファーレ}【土の秘術】『刹那の劇薬』1枚をEXエリアに置く。"
+      expected_source_hash: sha256:e14187b705f06d87f9a61a94c4822b142380e58212b1ca713b506663629570c7
+      source_hash_recipe: registry-observation-v2
+      reason: >-
+        AI reviewers Codex Sol, Claude Sonnet and coordinator Claude Opus checked the card image: the official page omits the printed Fanfare Earth Rite ability below the evolution ability. Restore that line in printed order and leave the supplementary section unchanged. The maintainer has not yet confirmed this correction.
+      state: active
+      reported_to_official: false
+      reported_on:
+      report_url:
+      evidence:
+        - kind: card_image
+          sha256: sha256:9770d1b6e6dd6a496596877661216ee346e18192ba49f939a7a97c83bd4ad5c0
+          image_src: /wordpress/wp-content/images/cardlist/BP22/bp22-r05.png
+          region: jp
+          locator: Card rules text box, evolution ability followed by the Fanfare Earth Rite line
