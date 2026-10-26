@@ -52,6 +52,7 @@ def _run(action: Callable[[], JsonValue], output: Path | None = None) -> None:
     except authoring.AuthorInputError as error:
         diagnostic = asdict(error.diagnostic)
         diagnostic.pop("source", None)
+        diagnostic["path"] = list(error.diagnostic.path)
         typer.echo(canonical(diagnostic).decode(), err=True)
         raise typer.Exit(3) from None
     except authoring.SourceError as error:

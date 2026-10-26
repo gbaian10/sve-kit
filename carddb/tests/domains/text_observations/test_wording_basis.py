@@ -32,7 +32,15 @@ if TYPE_CHECKING:
 @pytest.mark.parametrize("region", ["jp", "en"])
 @pytest.mark.parametrize(
     "mode",
-    ["main_reminder", "token_reminder", "supplement", "wording", "tie", "undated"],
+    [
+        "main_reminder",
+        "token_reminder",
+        "supplement",
+        "wording",
+        "tie",
+        "undated",
+        "undated_reminder",
+    ],
 )
 def test_current_wording_preferences_precede_release_dates(
     tmp_path: Path,
@@ -57,10 +65,12 @@ def test_current_wording_preferences_precede_release_dates(
         if region == "jp"
         else "Bane. (After this follower fights, synthetic reminder.)"
     )
-    older.faces[0].text = plain if mode == "main_reminder" else "Create a token."
+    older.faces[0].text = (
+        plain if mode in {"main_reminder", "undated_reminder"} else "Create a token."
+    )
     newer.faces[0].text = (
         reminder
-        if mode == "main_reminder"
+        if mode in {"main_reminder", "undated_reminder"}
         else "Create two tokens."
         if mode in {"wording", "tie", "undated"}
         else "Create a token."
@@ -81,11 +91,11 @@ def test_current_wording_preferences_precede_release_dates(
                 db,
                 item.printing_id,
                 None
-                if mode == "undated"
+                if mode in {"undated", "undated_reminder"}
                 else "2020-01-01"
                 if mode == "tie" or item.card_no == older.number
                 else "2026-01-01",
-                "unknown" if mode == "undated" else "day",
+                "unknown" if mode in {"undated", "undated_reminder"} else "day",
             )
         with db.transaction():
             for row in db.rows("face_wording"):
@@ -94,7 +104,7 @@ def test_current_wording_preferences_precede_release_dates(
                     {key: row.values[key] for key in ("face_id", "region")},
                 )
             populate_wording_basis(db, case.plan)
-        if mode == "undated":
+        if mode in {"undated", "undated_reminder"}:
             assert not db.rows("face_current")
             assert db.rows("face_wording")[0].values["reason"] == "no_known_release_day"
             return

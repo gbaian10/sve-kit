@@ -1,5 +1,6 @@
 """CLI exit codes and local reports use the public authoring workflow."""
 
+import shutil
 from pathlib import Path
 
 import pytest
@@ -65,6 +66,38 @@ def test_cli_public_check_writes_the_complete_report(tmp_path: Path) -> None:
 def test_write_requires_explicit_selection_and_storage() -> None:
     result = CliRunner().invoke(app, ["author", "write"])
     assert result.exit_code == 2
+
+
+def test_check_reports_index_location_and_card_without_wording(tmp_path: Path) -> None:
+    authored = Path(shutil.copytree(REPO / "authored", tmp_path / "authored"))
+    missing = "rules/author-effects/BP06/000.yaml"
+    (authored / missing).unlink()
+    batch = string(
+        object_value(parse((REPO / "tests/engine/card-input.json").read_bytes()))[
+            "batch_id"
+        ]
+    )
+    inputs = authoring.Inputs(
+        profile="public",
+        repo=REPO,
+        authored=authored,
+        jp_batch_id=batch,
+        revision="1036aa89bb1ce52cf4a964df8461663ab644b614",
+    )
+    path = tmp_path / "inputs.json"
+    path.write_text(inputs.model_dump_json())
+    output = tmp_path / "report.json"
+    result = CliRunner().invoke(
+        app, ["author", "check", "--inputs", str(path), "--output", str(output)]
+    )
+    assert result.exit_code == 3
+    diagnostic = object_value(parse(result.stderr.encode()))
+    assert diagnostic["stage"] == "index"
+    assert diagnostic["reason"] == "index_file_missing"
+    assert diagnostic["path"] == [missing]
+    assert diagnostic["card_no"] == "BP06-048"
+    assert "source" not in diagnostic
+    assert not output.exists()
 
 
 def test_output_symlink_is_rejected_before_inputs_are_opened(tmp_path: Path) -> None:

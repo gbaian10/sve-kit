@@ -35,7 +35,10 @@ def workspace() -> Iterator[authoring.Workspace]:
         revision="1036aa89bb1ce52cf4a964df8461663ab644b614",
     )
     with authoring.prepare(
-        inputs, cards=frozenset({"BP09-005", "BP01-138", "BP19-P32", "BP01-048"})
+        inputs,
+        cards=frozenset(
+            {"BP09-005", "BP01-138", "BP19-P32", "BP01-048", "BP01-046", "BP01-176"}
+        ),
     ) as prepared:
         yield prepared
 
@@ -122,6 +125,27 @@ def test_repository_check_is_the_ci_entry(workspace: authoring.Workspace) -> Non
     authors = array(object_value(report["selection"])["authors"])
     assert len(authors) >= 14
     assert all(object_value(item)["status"] == "accepted" for item in authors)
+
+
+@pytest.mark.parametrize(
+    ("number", "reprint"),
+    [("BP01-046", "SD02-008"), ("BP01-176", "ETD01-019")],
+)
+def test_public_inspect_reconstructs_multi_printing_sources(
+    workspace: authoring.Workspace, number: str, reprint: str
+) -> None:
+    report = authoring.inspect(workspace, number)
+    assert report["gaps"] == []
+    assert report["card_gap"] is None
+    assert report["candidates"]
+    assert all(
+        object_value(candidate)["supported"]
+        for candidate in array(report["candidates"])
+    )
+    other = authoring.inspect(workspace, reprint)
+    assert other["card_id"] == report["card_id"]
+    assert other["source"] == report["source"]
+    assert other["payload"] == report["payload"]
 
 
 def test_write_emits_legacy_sources_and_reuses_companions(
