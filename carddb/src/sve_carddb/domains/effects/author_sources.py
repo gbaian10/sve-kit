@@ -1,6 +1,7 @@
 """Reconstructed source candidates and conservative author operand compatibility."""
 
 from dataclasses import dataclass, field
+from operator import itemgetter
 from typing import TYPE_CHECKING, Literal
 
 from sve_carddb.contracts.author_evidence import SourceUse
@@ -25,7 +26,7 @@ from sve_carddb.domains.translations.four_layer_damage import KEY as DAMAGE_KEY
 from sve_carddb.domains.translations.four_layer_derivation import derive_source
 from sve_carddb.domains.translations.four_layer_destroy import KEY as DESTROY_KEY
 from sve_carddb.domains.translations.four_layer_expressions import definition
-from sve_carddb.domains.translations.four_layer_fixed_actions import MOVE
+from sve_carddb.domains.translations.four_layer_fixed_actions import MOVE, SEARCH
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -114,6 +115,7 @@ ENTRY_HEADS = {
     DAMAGE_KEY: ("lastword",),
     DESTROY_KEY: ("fanfare",),
     MOVE: ("activate",),
+    SEARCH: ("lastword",),
     "draw_exact_spell.v1": ("spell",),
     "draw_exact_attack_time.v1": ("attack_time",),
     "draw_exact_evolve_time.v1": ("evolve_time",),
@@ -145,8 +147,8 @@ ADAPTER_RECIPE = digest(
             ],
             "ports": "empty-only;unsupported-source-ports",
             "entry_heads": {key: list(value) for key, value in ENTRY_HEADS.items()},
-            "entry_payload": "exact-head.cost.pp;lastword-uniform-all-leaders-v1;spell.draw.self.n;attack_time.draw.self.n;evolve_time.draw.self.n;empty-ports;no-imports",
-            "entry_operands": "Nat-cost_value-occurrence-order-or-single-Nat-count-v2",
+            "entry_payload": "exact-head.cost.pp;lastword-uniform-all-leaders-v1;spell.draw.self.n;attack_time.draw.self.n;evolve_time.draw.self.n;lastword.search.self.deck.shikigami.hand.exact.n;empty-ports;no-imports",
+            "entry_operands": "Nat-cost_value-occurrence-order-or-single-Nat-count;QuantitySpec-selection_count-constant-exact-v3",
             "token_closure": "mapped-ability-heads-only-no-token-v2",
             "token_free_metadata": list(NO_TOKEN_METADATA),
             "current_owner": "current-jp-face-revision;card-membership;exact-face-container",
@@ -159,6 +161,8 @@ ADAPTER_RECIPE = digest(
             "draw_operand": "draw_exact_spell.v1;draw_exact_attack_time.v1;draw_exact_evolve_time.v1;required-Nat-count-value;single-source-leaf",
             "draw_payload": "complete-head-body-canonical-equality-v1",
             "move_payload": "fixed-activation-PP1;SourceHolder-current-generation;Put-card-owner-cemetery;exact-three-leaves;no-params;complete-head-body-v1",
+            "search_operand": "fixed-lastword-self-deck-shikigami-hand;required-QuantitySpec-selection_count-leaf_4-constant-exact-v1",
+            "search_payload": "complete-head-body-canonical-equality-v1",
         }
     )
 )
@@ -242,6 +246,26 @@ def entry_payload(source: SourceContext, scope: str) -> dict[str, JsonValue]:
                 "zone": "field",
                 "cost": {"pp": 1},
                 "do": [{"move": {"ref": "this", "to": "cemetery"}}],
+            },
+            "ports": {"imports": {}, "exports": {}},
+        }
+
+    if source.frame.semantic_variant.key == SEARCH:
+        return {
+            "lastword": {
+                "do": [
+                    {
+                        "search": {
+                            "sel": {
+                                "who": "self",
+                                "zone": "deck",
+                                "name": "式神の使役",
+                            },
+                            "n": _search_count(source),
+                            "to": "hand",
+                        }
+                    }
+                ]
             },
             "ports": {"imports": {}, "exports": {}},
         }
@@ -393,6 +417,93 @@ def _move_contract(source: SourceContext) -> None:
         != tuple((s.name, s.occurrences) for s in expected.slots)
     ):
         raise SourceError("source_move_contract_mismatch")
+
+
+def _search_count(source: SourceContext) -> int:
+    expected = LeafSchema.model_validate(
+        {
+            "format": 2,
+            "slots": tuple(
+                {
+                    "name": f"leaf_{index}",
+                    "type": kind,
+                    "role": role,
+                    "domain": {"min": None, "max": None, "values": (domain,)},
+                    "required": start != end,
+                    "occurrences": ()
+                    if start == end
+                    else (Span(start=start, end=end),),
+                }
+                for index, (kind, role, domain, start, end) in enumerate(
+                    (
+                        ("Concept", "ability", "concept.ability.v1", 1, 7),
+                        ("Player", "source_owner", "player.relative.v1", 8, 16),
+                        ("ZoneSet", "source_zone", "zone.single.v1", 17, 25),
+                        ("CardName", "name_reference", "card_name.any.v1", 28, 29),
+                        (
+                            "QuantitySpec",
+                            "selection_count",
+                            "quantity.selection_count.constant.v1",
+                            30,
+                            31,
+                        ),
+                        ("ZoneSet", "destination_zone", "zone.hand.v1", 36, 44),
+                        ("Player", "destination_owner", "player.self.v1", 0, 0),
+                    )
+                )
+            ),
+        }
+    )
+    binding = source.binding
+    if (
+        source.canonical_source
+        != "{ラストワード}{leaf_1}の{leaf_2}から『X』N枚を探し、{leaf_5}に加える。"
+        or source.frame.leaf_schema != expected
+    ):
+        raise SourceError("source_search_contract_mismatch")
+    if (
+        not isinstance(binding.source.owner, FaceRevisionOwner)
+        or binding.source.field != "effect"
+        or binding.source.ordinal is not None
+        or binding.line_ordinal != 0
+    ):
+        raise SourceError("source_search_contract_mismatch")
+    if (
+        binding.source_span.role != "body"
+        or binding.frame_id != source.frame.id
+        or tuple(
+            sorted(
+                ((o.slot, o.canonical_spans) for o in binding.occurrences),
+                key=itemgetter(0),
+            )
+        )
+        != tuple(sorted((s.name, s.occurrences) for s in expected.slots))
+        or set(binding.values) != {s.name for s in expected.slots}
+        or {key: value for key, value in binding.values.items() if key != "leaf_4"}
+        != {
+            "leaf_0": GlossaryReference(kind="glossary", key="term:ability.last_words"),
+            "leaf_1": "self",
+            "leaf_2": ("deck",),
+            "leaf_3": CardNameReference(
+                kind="card_name", term_id="term:name.shikigami_employment"
+            ),
+            "leaf_5": ("hand",),
+            "leaf_6": "self",
+        }
+    ):
+        raise SourceError("source_search_contract_mismatch")
+    if _name(source, binding.values["leaf_3"]) != "式神の使役":
+        raise SourceError("source_search_contract_mismatch")
+    count = binding.values["leaf_4"]
+    if (
+        not isinstance(count, QuantitySpec)
+        or count.mode != "exact"
+        or not isinstance(count.expr, Constant)
+        or type(count.expr.value) is not int
+        or not 0 <= count.expr.value <= SAFE_INTEGER
+    ):
+        raise SourceError("source_search_operand_mismatch")
+    return count.expr.value
 
 
 def _lastword_amount(source: SourceContext) -> int:
@@ -727,13 +838,14 @@ def parameter_expected(
     ):
         raise SourceError("parameter_source_mode_mismatch")
     expected = _value(source, declaration, slot)
-    if source.frame.semantic_variant.key == DAMAGE_KEY:
+    if source.frame.semantic_variant.key in {DAMAGE_KEY, SEARCH}:
         entry_payload(source, "ability_0")
-        if (
-            declaration.source.slot != "leaf_1"
-            or owner != "A.act.damage"
-            or relative_path != ("n",)
-        ):
+        operand = (
+            ("leaf_1", "A.act.damage", ("n",))
+            if source.frame.semantic_variant.key == DAMAGE_KEY
+            else ("leaf_4", "A.act.search.exact", ("n",))
+        )
+        if (declaration.source.slot, owner, relative_path) != operand:
             raise SourceError("parameter_source_operand_mismatch")
         return expected
     if (

@@ -28,6 +28,7 @@ from sve_carddb.domains.effects.author_sources import (
 )
 from sve_carddb.domains.translations.four_layer_damage import KEY as DAMAGE_KEY
 from sve_carddb.domains.translations.four_layer_destroy import KEY as DESTROY_KEY
+from sve_carddb.domains.translations.four_layer_fixed_actions import SEARCH
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator, Mapping
@@ -458,6 +459,7 @@ class AuthorExpander:
             if source.frame.semantic_variant.key in {
                 DAMAGE_KEY,
                 DESTROY_KEY,
+                SEARCH,
                 "draw_exact_spell.v1",
                 "draw_exact_attack_time.v1",
                 "draw_exact_evolve_time.v1",

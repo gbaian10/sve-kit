@@ -69,6 +69,7 @@ current 邊界重建真實 registry 的 Frame／Binding，核對全部 JP curren
 | destroy_fanfare_opponent_all_field_followers.v1 | ability_0 → fanfare | `fanfare: {do: [{destroy: {ref: {who: opp, zone: field, kind: follower}}}]}`；固定 Fanfare Concept，無參數 |
 | damage_uniform_lastword_all_leaders.v1 | ability_0 → lastword | `lastword: {do: [{damage: {to: {leaders: all}, n: N}}]}`；固定 Lastword Concept 與 Nat/damage_amount/value 葉 |
 | move_self_to_owner_cemetery_activated_pp.v1 | ability_0 → activate | `activate: {zone: field, cost: {pp: 1}, do: [{move: {ref: this, to: cemetery}}]}`；三個來源葉皆固定，無參數 |
+| search_lastword_self_deck_named_hand.v1 | ability_0 → lastword | `lastword: {do: [{search: {sel: {who: self, zone: deck, name: 式神の使役}, n: N, to: hand}}]}`；唯一可變葉為 QuantitySpec/selection_count/constant 的 exact 數量 |
 
 表列各族皆只配空 imports／exports ports，能力 imports 必須省略。去掉 line／section／sources 後完整 canonical 能力必須相等；多加 into、usable_if、times、其他費用或 expression 都不符來源。N 可為 0，須取該構造的 operand，不能借相同數值。非空 ports 與其他執行 scope 保持明示 unsupported；不把跨 owner 或DSL 陣列較晚定為永久非法。真卡整卡正例為 BP01-009／034／092 的純進化入口；feed／ride 與雙入口的有限機制測試不宣稱已有真卡整卡准入。
 
@@ -77,6 +78,17 @@ spell、attack_time 與 evolve_time 抽牌同樣只配空 ports、不得有能�
 `destroy_fanfare_opponent_all_field_followers.v1` 只接已採納來源規則的完整 Advance 面：current JP follower、special_kinds 恰為 advance，effect 第一行守護／光紋、第二行完整入場曲，無 sections。固定 Concept/ability 葉、canonical occurrence、body 來源位置與空 ports 全部核對；inline 與 companion 都比較完整能力 bytes，不參數化 selector、能力頭、條件或費用。Fanfare 保留來源持有者由場外新進場的事件語義，不限普通打出，也不因卡型補造 AdvanceActivate。對手以能力 master 為準，destroy 的移動目的地依各卡 owner；不改成 banish／move，也不宣稱忽略破壞禁止、Advance／token 後續規則。
 
 這項能力來源映射不表示 BP19-P32／BP19-114 整卡已准入：兩者同永久身分，來源仍包含 `card_keywords.v2` 的守護／光紋非本體義務。current 入口尚未承載該 card_field，完整 `validate`／`selection_input` 明確回 `unsupported_source_projection`，不產生 current_source_checked 或缺 sibling 的 source_inventory。合法 Advance 進場與整卡執行仍需各自的 D0／runtime 證據；純來源展開成功只有 derived_self_consistent。
+
+具名謝幕曲搜尋只接受 current 普通 follower、無特殊種類與 sections 的完整單行 effect；
+真卡為 BP06-048 與同永久身分的 BP06-P15。固定 Lastword Concept、自方 deck、目的 hand、
+省略的自方目的 owner 及 CardName 引用 `term:name.shikigami_employment` 均逐葉核對，
+並驗其日文原文恰為「式神の使役」。CardName 的 name_reference 角色不能當 name_filter
+參數；只有 leaf_4 的 exact constant 映至 search.n。inline 與 companion 都比較完整能力，
+換頭、換對象／區域／卡名、up_to、動態量、追加條件／費用／步驟、漏 sibling 或錯 owner
+均拒絕。一個 Search 節點保留私有觀察、找到後先證明再移動及最後洗來源牌庫一次的義務；
+非公開具名搜尋可找不到，但不改成 up_to，也不另加 reveal／move／shuffle 步驟。
+沒找到或未成功移動仍須洗牌；self 取離場前能力 master。這些語義依既有搜尋與 Lastword
+契約，本來源 adapter 的測試只證來源展開及 current 准入，不宣稱 D0／整卡執行或用途資格。
 
 固定內容種子：BP08-038 的 Live count−5 與 draw；CP04-060 的 search→follow→本回合 cost delta −2；ECP01-058 的 evolve deck_rule 10；BP09-SL05 兩面定位及第二面 create 名稱列表。它們的內容來源是真卡，測試 SourceUse／FrameId／meta 為明示合成，不能冒充已採納來源或實跑資格。
 
