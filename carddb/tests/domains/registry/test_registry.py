@@ -504,9 +504,9 @@ def test_official_curation_and_corrections(official_registry: list[Entry]) -> No
     corrections = [
         entry for entry in official_registry if entry.kind == "source_correction"
     ]
-    assert len(corrections) == 9
+    assert len(corrections) == 10
     active = [entry for entry in corrections if entry.data["state"] == "active"]
-    assert len(active) == 9
+    assert len(active) == 10
     original = next(
         entry
         for entry in active
@@ -744,7 +744,7 @@ def test_official_promotions_are_active_corrections(
         name = path.relative_to(root.parents[1]).as_posix()
         records = shards[name].envelope().records
         assert all(record.data["state"] == "active" for record in records)
-        if path.parent.name != "BP07":
+        if path.parent.name in {"BP15", "BP20", "CP03", "PR"}:
             promoted.extend(records)
     assert len(promoted) == 8
 

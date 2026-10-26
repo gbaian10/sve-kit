@@ -123,7 +123,7 @@ def test_index_symlink_rejected(registry_root: Path, tmp_path: Path) -> None:
         load_registry(registry_root)
 
 
-def test_official_snapshot_preserves_all_allocations_and_nine_corrections(
+def test_official_snapshot_preserves_all_allocations_and_ten_corrections(
     official_snapshot: RegistrySnapshot,
 ) -> None:
     root = Path(__file__).resolve().parents[4] / "authored"
@@ -137,7 +137,7 @@ def test_official_snapshot_preserves_all_allocations_and_nine_corrections(
     corrections = [
         r for r in snapshot.records.values() if isinstance(r.data, CorrectionData)
     ]
-    assert len(corrections) == 9
+    assert len(corrections) == 10
     assert all(
         isinstance(r.data, CorrectionData) and r.data.state == "active"
         for r in corrections
