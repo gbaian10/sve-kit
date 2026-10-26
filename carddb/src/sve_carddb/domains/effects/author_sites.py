@@ -195,6 +195,7 @@ SITE_RULES = (
     SiteRule("A.effect.cost-mod", ("set",), "Nat", "Nat", "cost_value"),
     SiteRule("A.event.phase-payload", ("which",), "Phase", "Phase", "phase_trigger"),
     SiteRule("A.act.grant", ("keywords", "*"), "Concept", "Concept", "keyword"),
+    # Bare keyword heads remain fragment types; companion bodies exclude declarations.
     SiteRule("A.ability-head", ("keywords", "*"), "Concept", "Concept", "keyword"),
     SiteRule("A.ability.keywords", ("keywords", "*"), "Concept", "Concept", "keyword"),
     SiteRule("A.act.create", ("token",), "CardName", "CardName", "created_name"),

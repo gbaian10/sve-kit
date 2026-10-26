@@ -39,7 +39,7 @@
 | `body_version` | §4 的帶 recipe 內容版本 |
 | `dsl` | 精確 DSL 版本；本版為 `"1.0"` |
 | `params` | `Map<ParamName,ParamDecl>`，可空；§3 |
-| `body` | 一個 A.ability 的能力頭及 payload；不含 line、section、sources、generated_by，位置由用途提供；可含 §3 的封閉 param 節點 |
+| `body` | 一個 A.companion-head 的能力頭及 payload；沿用 A.ability-head 的本體子圖並排除 keywords，不含 line、section、sources、generated_by，位置由用途提供；可含 §3 的封閉 param 節點 |
 | `ports` | `{imports:Map<Code,LocalBinding>,exports:Map<Code,LocalBinding>}`；Projection port 名到本體 binding 的接線，空 map 仍必填 |
 | `written_by` | 非空 `{actor:Actor,date:YYYY-MM-DD}` 陣列；與卡片 meta.written_by 同型，Actor 見 §5 |
 | `registrations` | `{id:Code,domain:Domain,reviews:[Review]}` 陣列，id 唯一；未登錄可空，不取得 qualified |
@@ -51,7 +51,7 @@ LocalBinding 恰為 `{path,bind}`：path 是由該能力頭起算、只含物件
 
 ### 2.3 逐用途選版與 inline
 
-A.ability 沿用 `line`（1 起算）、選用 `section`（0 起算），正式完整輸入另有必填 `sources`：本版恰一筆的 `{binding_id,occurrence,ability_scope}` 陣列，精確沿四層契約的 SourceBindingId／OccurrenceKey，參與片段完整列在該 OccurrenceKey.segments，不另拆來源記錄。這是位置證據，不是另創來源身分；同一行有多個能力時，必由 projection scope 區分，不能只靠 line 配對。
+A.ability 沿用 `line`（1 起算）、選用 `section`（0 起算），正式完整輸入另有必填 `sources`。普通能力與 generated_by 使用恰一筆的 SourceUse `{binding_id,occurrence,ability_scope}`；獨立 keywords 宣告只使用下述 CardKeywordSourceUse。兩者精確沿四層契約的 SourceBindingId／OccurrenceKey，參與片段完整列在該 OccurrenceKey.segments，不另拆來源記錄。這是位置證據，不是另創來源身分；同一行有多個能力時，必由真實 projection scope 區分，不能只靠 line 配對。
 
 能力內容二選一：既有單一能力頭（inline），或 `generated_by`。後者恰為 `{macro:{frame_id,ability_scope,applicability_scope},version,params}`；version 是 body_version，params 是 §3 的具型別實值 map。`applicability_scope` 指向該 record 的 registration.id。generated_by 記在產生的能力位置，不用一筆卡片 meta 假裝整張卡只依賴一個巨集；卡片 meta 保留逐卡彙總證據。同一能力同時有能力頭和 generated_by、未指定版本、找不到本體／域、scope 不符，一律拒絕。
 
@@ -61,7 +61,17 @@ inline 能力另有必填 `ports`，形狀與 companion 相同，無接線時兩
 
 用途總是明示 body 版本及適用域，沒有依檔序、最高版本或「先找到」選版。跨域皆符合也不自動挑一個；inline 不隱式套用候選 body。本版一個能力的 sources 僅准相同 `(frame_id,ability_scope)` 且同來源能力實例；同 binding 的多段 segments 已在 OccurrenceKey 中保留，不拆成重複執行。不同 frame 合成一個能力尚無封閉角色接線，保持 pending，不以同名 scope 猜關係。由 imports 連來的其他 frame 則是先前能力輸出，不當作本能力片段；依賴追蹤仍涵蓋這些上游接口。`evolve_feed_entries.v1` 的 ability_0／ability_1 各產一筆有明確 scope 的 A.ability；缺 scope、重複同能力或漏掉需輸出的 sibling scope 均拒絕。
 
-ability_flag 只填對應宣告、card_field 只填 A.card 欄位、none 不產指令，pending 保留原因並拒絕相依自動結算；不能用空 do 冒充分類完成。A.card.deck_rule 等卡片層宣告的來源以卡片 meta.source 覆蓋，並在建置依賴保留其精確 binding，不偽造 ability_body。
+ability_flag 只填對應宣告，card_field 只填已登錄的卡片宣告容器：一般欄位如 A.card.deck_rule，或 abilities 容器內的 A.ability.keywords。容器位置不將 card_field 改成 ability_body。none 不產指令，pending 保留原因並拒絕相依自動結算；不能用空 do 冒充分類完成。卡片層宣告的來源以卡片 meta.source 覆蓋，並在建置依賴保留其精確 binding。
+
+#### 獨立 keywords 的非本體來源
+
+CardKeywordSourceUse 恰為 `{binding_id,occurrence}`，不含 ability_scope。A.ability.keywords 的 sources 在 authored 與 expanded 都**只**接受恰一筆此型別；不是與舊 SourceUse 的 anyOf，其他頭也不能改用無 scope 來源。這是外部承載形狀的替換，不是新增四層 scope；不改 card_keywords.v2 的 card_field、空 Projection.scopes 或永久 frame／binding／原文 hash。
+
+keywords 為非空、保序、元素不重複的清單，ports 必為 `{imports:{},exports:{}}`，imports 與 generated_by 必須省略。一筆精確來源 binding 對應一個完整宣告，不得把同一行的多個 keyword 拆成多次使用同 binding。來源清單與宣告逐元素全等；漏、換、多出、換序、重複、未知或未支援 keyword、錯 owner／面／定位及漏 sibling 都應整卡拒絕。不同面各印相同 keyword 是獨立來源義務，不能跨面合併或當成全卡常駐。token owner 尚未閉合時仍拒絕，純 reminder／layout 不新增宣告。
+
+companion.body 的 A.companion-head 子圖排除 keywords，未引用本體也必須驗；generated_by 不得產生 keyword 宣告。grant.keywords 與 activate.quick 是原有本體內的不同語法，不適用此 sources 型別。完整 reader 仍拒絕 inline ParamRef；本片不開非本體 companion 或新的葉參數位置。
+
+正式 current reader 已從完整 current 來源獨立重建 ward／aura 義務，逐筆對帳作者宣告並產生獨立 declaration sidecar；metadata 與 printed_keywords 使用封閉的非本體 inventory 型別。本體與宣告在 D0 分別精確消耗，tree 與 sidecar 同時漏項仍由獨立 inventory 拒絕，普通本體義務不能冒充 keyword。純結構展開或外供 context 不授 current proof；D0 的來源對帳成功也不代表已降低、可執行或取得用途資格。Ward／Aura 的 executable lowering 與 runtime 仍未接通。
 
 ### 2.4 effects-index
 
@@ -191,6 +201,8 @@ meta.reviewed_by 的 use review 可保存同一用途的多個不同獨立審核
 
 卡片 status 為全卡彙總：有未解爭議為 disputed；其餘任一用途 draft 則 draft，全部至少 reviewed 才 reviewed，全部有有效引擎實跑才 verified。非 body 宣告仍須來源／型別及獨立審核，不以無步驟自動 verified。主版遷移沿既有降級規則；draft 不提升，disputed 不消失。過去 review 與實跑的原始內容保留 Git／已指定 DB 證據，但不混進有效名單。
 
+獨立 keywords 的非本體用途依賴／審核尚未實作，不能套用含 body_version／ability_scope 的本體 UseReview。第一版 reader 對含獨立 keyword 宣告的卡只接受 status:draft、reviewed_by:[]、verified_by_exam:[]；不滿足時精確拒絕，不回寫或清除爭議／歷史。此保守限制也排除該卡混入其他用途 review，避免將部分本體審核當整卡核可；後續具備逐用途非本體證據型別時再縮小限制。這次不新增持久 declaration-use recipe，不改 effect-source-v1／effect-body-v1／effect-use-v1 的 payload 定義；schema 指紋進入既有 adapter／expansion 配方所造成的相依失效仍須重驗。未來非空非本體 review 須另定封閉依賴、定位、hash 與失效契約，不能用假 body_version 或空 scope 代填。
+
 目前結構 reader 對非空 `meta.verified_by_exam` 報 `unsupported_exam_evidence`，其封閉逐用途實跑格式須另行實作；空陣列不授予 verified 資格。reader 保留 review／rekey 的封閉形狀與原序；review 重複、相依關係、爭議及資格檢查不屬第一版 reader。body_boundary 是測試輸入與建置 DB 的實跑證據，不是這兩種 authored 容器的欄位。
 
 ## 6. C0 與 D0 的交接
@@ -207,6 +219,8 @@ current 入口另從全部 current 面與 sections 的 registry 來源建立獨�
 非 body 的來源宣告另存在 `non_body_sources`；卡面屬性與普通費用仍在 source_payload，
 不當成缺能力，也不因沒有本文而聲稱已執行。token 來源與非空 token 選用目前仍整卡拒絕，
 不把 token 能力複製到母卡。來源 adapter 未支援的能力圖也維持拒絕，清單對帳不擴張來源支援範圍。
+
+獨立 keywords 的來源沒有 ability_scope；current handoff 已使用封閉的宣告義務與獨立 declaration sidecar，將本體與宣告分別精確消耗。不能把它塞入能力 scope 對帳或只保留任意 Value 就聲稱已降低。純 expanded 與 current 宣告的 SourceSpan.scope 使用 `keyword_declaration:<author_path>` 作編譯期局部座標，與普通 SourceUse.ability_scope 分開；它不屬 Projection.scopes、不入 FrameId／BindingId 或來源 hash，不能拿來選 companion／port。ScopeId／AbilityId 仍是引擎分配的執行期識別。宣告的已驗來源可由獨立 sidecar 回查，保留原 occurrence 與 binding、owner／face／field／section／line；這不代表 Ward／Aura 已有 executable lowering、runtime 准入或用途資格。
 
 | 接縫 | 必須保留／拒絕的責任 |
 | --- | --- |

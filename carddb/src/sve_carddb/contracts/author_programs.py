@@ -3254,7 +3254,7 @@ class GrantedAbilityHead(
 @with_config(
     ConfigDict(**CONFIG, json_schema_extra={"minProperties": 1, "maxProperties": 1})
 )
-class AbilityHeadFields(TypedDict):
+class CompanionHeadFields(TypedDict):
     fanfare: NotRequired[TriggerHead]
 
     lastword: NotRequired[LastwordHead]
@@ -3277,10 +3277,6 @@ class AbilityHeadFields(TypedDict):
 
     play: NotRequired[PlayHead]
 
-    keywords: NotRequired[
-        Annotated[tuple[Concept | ParamRef, ...], Field(min_length=1)]
-    ]
-
     evolve: NotRequired[EvolveHead]
 
     ride: NotRequired[RideHead]
@@ -3288,6 +3284,18 @@ class AbilityHeadFields(TypedDict):
     feed: NotRequired[FeedHead]
 
     spell: NotRequired[SpellHead]
+
+
+type CompanionHead = Annotated[CompanionHeadFields, AfterValidator(_single)]
+
+
+@with_config(
+    ConfigDict(**CONFIG, json_schema_extra={"minProperties": 1, "maxProperties": 1})
+)
+class AbilityHeadFields(CompanionHeadFields):
+    keywords: NotRequired[
+        Annotated[tuple[Concept | ParamRef, ...], Field(min_length=1)]
+    ]
 
 
 type AbilityHead = Annotated[AbilityHeadFields, AfterValidator(_single)]

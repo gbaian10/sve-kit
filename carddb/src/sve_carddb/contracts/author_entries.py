@@ -2,11 +2,20 @@
 
 from typing import Annotated, Literal, NotRequired, TypedDict
 
-from pydantic import BeforeValidator, ConfigDict, Field, RootModel, with_config
+from pydantic import (
+    AfterValidator,
+    BeforeValidator,
+    ConfigDict,
+    Field,
+    RootModel,
+    with_config,
+)
 
 from sve_carddb.contracts import author_programs as programs  # ruff: ignore[typing-only-first-party-import] -- Pydantic resolves TypedDict payloads at runtime.
 from sve_carddb.contracts.author_evidence import (
     BodyVersion,
+    CardKeywordSources,
+    EmptyPorts,
     FaceId,
     ImportMap,
     Meta,
@@ -142,9 +151,25 @@ class PlayAbilityFields(InlineFields):
 type PlayAbility = PlayAbilityFields
 
 
+def _unique_keywords(
+    values: tuple[Concept | ParamRef, ...],
+) -> tuple[Concept | ParamRef, ...]:
+    if any(value in values[:index] for index, value in enumerate(values)):
+        raise ValueError("Duplicate keyword declaration")
+    return values
+
+
 @with_config(CONFIG)
-class KeywordsAbilityFields(InlineFields):
-    keywords: Annotated[tuple[Concept | ParamRef, ...], Field(min_length=1)]
+class KeywordsAbilityFields(TypedDict):
+    line: Positive
+    section: NotRequired[UInt]
+    sources: CardKeywordSources
+    ports: EmptyPorts
+    keywords: Annotated[
+        tuple[Concept | ParamRef, ...],
+        Field(min_length=1, json_schema_extra={"uniqueItems": True}),
+        AfterValidator(_unique_keywords),
+    ]
 
 
 type KeywordsAbility = KeywordsAbilityFields
@@ -249,7 +274,7 @@ class CompanionFields(TypedDict):
     body_version: BodyVersion
     dsl: Literal["1.0"]
     params: ParamDeclarations
-    body: programs.AbilityHead
+    body: programs.CompanionHead
     ports: Ports
     written_by: Writers
     registrations: tuple[Registration, ...]

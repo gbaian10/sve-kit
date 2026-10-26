@@ -16,6 +16,7 @@ from sve_carddb.domains.effects.author_inputs import AuthorInputError
 from sve_carddb.domains.effects.author_source_hash import source_version
 
 from .author_current_fixtures import REPOSITORY, current_source_fixture
+from .current_keyword_fixtures import current_keyword_inputs
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -149,6 +150,7 @@ def current_lowering_inputs(root: Path) -> JsonValue:
         assert isinstance(rejected, CardRejected)
         return {
             "accepted": accepted.lowering_input(),
+            "keywords": current_keyword_inputs(root / "keywords"),
             "rejected": {"reason": rejected.diagnostic.reason},
             "switch": switch,
         }

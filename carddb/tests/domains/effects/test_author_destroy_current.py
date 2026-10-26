@@ -9,6 +9,7 @@ from sve_carddb.core.json import array, canonical, object_value
 from sve_carddb.domains.effects.author_current import CardRejected
 from sve_carddb.domains.effects.author_expansion import AuthorExpander
 from sve_carddb.domains.effects.author_set import AuthorInputSet
+from sve_carddb.domains.effects.author_source_hash import source_version
 from sve_carddb.domains.effects.author_sources import (
     SourceCandidate,
     entry_heads,
@@ -32,7 +33,9 @@ if TYPE_CHECKING:
     from sve_carddb.domains.effects.author_sources import SourceContext
 
 
-def test_real_advance_body_and_current_keyword_gap(tmp_path: Path) -> None:
+def test_real_advance_body_requires_complete_keyword_declaration(
+    tmp_path: Path,
+) -> None:
     fixture = destroy_fixture(tmp_path / "store")
     with current(fixture) as source:
         card_id = source._printing_card("BP19-P32")
@@ -80,10 +83,12 @@ def test_real_advance_body_and_current_keyword_gap(tmp_path: Path) -> None:
             == "enter_field_from_outside_field"
         )
         assert meaning["destination"] == "each_card_owner_cemetery"
-        check_current_rejection(source, resolved, candidate, use, card_id, tmp_path)
+        check_current_requires_keyword_declaration(
+            source, resolved, candidate, use, card_id, tmp_path
+        )
 
 
-def check_current_rejection(
+def check_current_requires_keyword_declaration(
     source: CurrentAuthorSources,
     resolved: SourceContext,
     candidate: SourceCandidate,
@@ -93,6 +98,8 @@ def check_current_rejection(
 ) -> None:
     expander = AuthorExpander(SCHEMAS)
     record = companion(resolved)
+    metadata = meta()
+    metadata["source"] = source_version(source._card_payload(card_id).payload)
     for number in ("BP19-P32", "BP19-114"):
         for node in (ability(head()), generated(record)):
             node["line"] = 2
@@ -103,7 +110,7 @@ def check_current_rejection(
                     "format": 1,
                     "kind": "author_effect_set",
                     "scope": "shared",
-                    "cards": {number: {"meta": meta(), "abilities": [node]}},
+                    "cards": {number: {"meta": metadata, "abilities": [node]}},
                 },
             )
             index = input_file(
@@ -133,11 +140,11 @@ def check_current_rejection(
             write_inputs(root, inputs)
             result = source.validate(root, expander)[0]
             assert isinstance(result, CardRejected)
-            assert result.diagnostic.reason == "unsupported_source_projection"
+            assert result.diagnostic.reason == "source_keyword_closure_mismatch"
             selected = object_value(source.selection_input(root, expander))
             assert (
                 object_value(array(selected["authors"])[0])["reason"]
-                == "unsupported_source_projection"
+                == "source_keyword_closure_mismatch"
             )
             path = ("cards", number, "abilities", 0)
             expanded = expander.expand_sources(

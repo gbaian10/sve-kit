@@ -21,7 +21,11 @@ use super::{
     RecipientSet, ScopeId, SelectionView, Selector, SourceSpan, StepwiseMode, TextQuantifier,
     TriggerAggregation, TriggerCondition, TriggerSpec, WellFormedCardProgram, ZoneKind,
 };
-pub use current::{CurrentCardProgram, CurrentSourceEvidence};
+pub use current::{
+    CardKeywordSourceUse, CurrentCardProgram, CurrentKeywordEvidence, CurrentSourceCheck,
+    CurrentSourceEvidence, KeywordDeclarationPayload, MetadataObligation, NonBodySource,
+    PrintedKeyword, PrintedKeywordsObligation,
+};
 
 use alloc::collections::{BTreeMap, BTreeSet};
 use serde::de::DeserializeOwned;
@@ -124,6 +128,17 @@ impl ExpandedLowerer {
         current::lower(self, input)
     }
 
+    /// Reconcile a complete trusted C0 handoff before attempting executable lowering.
+    ///
+    /// Success preserves declaration provenance but grants no runtime support. C0
+    /// remains responsible for original author bytes and current registry admission.
+    ///
+    /// # Errors
+    /// Rejects malformed wire, source or author mismatches and unconsumed obligations.
+    pub fn check_current(&self, input: &Value) -> Result<CurrentSourceCheck, LoweringError> {
+        current::check(self, input)
+    }
+
     fn lower_coordinates(
         &self,
         tree: &Value,
@@ -202,7 +217,7 @@ impl ExpandedLowerer {
                     ScopeId(scope),
                     match identity {
                         Some(identity) => {
-                            identity.printed_cost(&ability.sources[0], &entry_path)?
+                            identity.printed_cost(&ability.sources[0].json(), &entry_path)?
                         }
                         None => printed_costs.get(&key).copied(),
                     },
@@ -290,7 +305,16 @@ fn ability_entries(
                     )
                 })
         }))
-        .map(|(entry_path, value)| decode(value, &entry_path).map(|ability| (entry_path, ability)))
+        .map(|(entry_path, value)| {
+            let ability: ast::Ability = decode(value, &entry_path)?;
+            if !matches!(
+                (&ability.sources[0], ability.keywords.is_some()),
+                (ast::SourceUse::CardKeyword(_), true) | (ast::SourceUse::Ability(_), false)
+            ) {
+                return Err(unsupported(&entry_path));
+            }
+            Ok((entry_path, ability))
+        })
         .collect()
 }
 
@@ -862,7 +886,7 @@ fn source_span(
     path: &str,
     entry: &ast::Ability,
 ) -> Result<SourceSpan, LoweringError> {
-    let [source] = &entry.sources;
+    let source = entry.sources[0].json();
     let text = |pointer| {
         source
             .pointer(pointer)
@@ -872,7 +896,7 @@ fn source_span(
     };
     let (card_id, face) = key.identity.map_or_else(
         || Ok((key.key.to_owned(), "base".to_owned())),
-        |identity| identity.owner(source, path),
+        |identity| identity.owner(&source, path),
     )?;
     if key.identity.is_some()
         && path.contains("/faces/")
@@ -887,7 +911,10 @@ fn source_span(
     Ok(SourceSpan {
         card_id,
         card_no: key.key.to_owned(),
-        scope: text("/ability_scope")?,
+        scope: match &entry.sources[0] {
+            ast::SourceUse::Ability(scoped) => scoped.ability_scope.clone(),
+            ast::SourceUse::CardKeyword(_) => format!("keyword_declaration:{path}"),
+        },
         owner: source
             .pointer("/occurrence/owner")
             .ok_or_else(|| unsupported(path))?

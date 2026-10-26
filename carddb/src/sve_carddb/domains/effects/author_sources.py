@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from operator import itemgetter
 from typing import TYPE_CHECKING, Literal
 
-from sve_carddb.contracts.author_evidence import SourceUse
+from sve_carddb.contracts.author_evidence import CardKeywordSourceUse, SourceUse
 from sve_carddb.contracts.author_leaves import ParamDecl
 from sve_carddb.contracts.four_layer import (
     CardNameReference,
@@ -37,6 +37,7 @@ if TYPE_CHECKING:
 
     from pydantic import JsonValue
 
+    from sve_carddb.contracts.author_handoff import PrintedKeyword
     from sve_carddb.contracts.four_layer import LeafType
     from sve_carddb.contracts.source_binding import ClosedDomain, SourceDescriptor
     from sve_carddb.domains.translations.four_layer_classification import Classifier
@@ -137,6 +138,10 @@ NO_TOKEN_METADATA = (
     "metadata.layout.v1",
     "pure_reminder.v1",
 )
+PRINTED_KEYWORDS: dict[str, PrintedKeyword] = {
+    "term:keyword.ward": "ward",
+    "term:keyword.aura": "aura",
+}
 
 ADAPTER_RECIPE = digest(
     canonical(
@@ -155,13 +160,13 @@ ADAPTER_RECIPE = digest(
             "entry_heads": {key: list(value) for key, value in ENTRY_HEADS.items()},
             "entry_payload": "exact-head.cost.pp;lastword-uniform-all-leaders-v1;spell.draw.self.n;attack_time.draw.self.n;evolve_time.draw.self.n;lastword.search.self.deck.shikigami.hand.exact.n;empty-ports;no-imports",
             "entry_operands": "Nat-cost_value-occurrence-order-or-single-Nat-count;QuantitySpec-selection_count-constant-exact-v3",
-            "token_closure": "mapped-ability-heads-only-no-token-v2",
+            "token_closure": "all-current-cards;token-faces-and-headers-rejected-v4",
             "token_free_metadata": list(NO_TOKEN_METADATA),
             "current_owner": "current-jp-face-revision;card-membership;exact-face-container",
             "known_null_attributes": "spell.attack;spell.defense;evolve-follower.cost;rules-proven-absence-v2",
             "prototype": "all-jp-printing-identities;shared-overlap;no-execution",
             "inventory": "authored-root-complete-files-v1",
-            "resolved_nonentry": "unsupported_source_projection",
+            "resolved_nonentry": "printed-keyword-obligations-only;author-admission-unsupported_keyword_source_mapping;other-unsupported_source_projection",
             "destroy_payload": "fixed-advance-printed-fanfare;opponent-field-all-followers;no-params;exact-Concept-and-source-location-v1",
             "damage_operand": "fixed-lastword-concept;Nat-damage_amount-leaf_1;exact-body-v1",
             "draw_operand": "draw_exact_spell.v1;draw_exact_attack_time.v1;draw_exact_evolve_time.v1;required-Nat-count-value;single-source-leaf",
@@ -170,6 +175,12 @@ ADAPTER_RECIPE = digest(
             "search_operand": "fixed-lastword-self-deck-shikigami-hand;required-QuantitySpec-selection_count-leaf_4-constant-exact-v1",
             "search_payload": "complete-head-body-canonical-equality-v1",
             "numeric_payload": "fixed-fanfare-other-allied-field-followers-permanent-add-1-1;exact-five-typed-leaves;no-params;complete-head-body-canonical-equality-v1",
+            "printed_keywords": {
+                "semantic_key": "card_keywords.v2",
+                "concepts": dict(PRINTED_KEYWORDS),
+                "contract": "required-Concept-keyword;concept.keyword.v1;explicit-occurrence-order;card_field;empty-scopes-ports;current-face-owner;no-same-face-duplicates-v1",
+            },
+            "declaration_consumption": "exact-binding-occurrence;current-owner-face-location;complete-ordered-payload;separate-body-and-keyword-closure;no-token-v1",
         }
     )
 )
@@ -201,6 +212,94 @@ class SourceContext:
     source_proof: Literal["none", "derived_self_consistent"] = field(
         default="none", init=False
     )
+
+
+@dataclass(frozen=True)
+class PrintedKeywordObligation:
+    """CurrentAuthorSources produces expectations, without author/D0 admission proof."""
+
+    face_id: str
+    source: SourceContext
+    keywords: tuple[PrintedKeyword, ...]
+    kind: Literal["printed_keywords"] = field(default="printed_keywords", init=False)
+    adapter_recipe: str = field(default=ADAPTER_RECIPE, init=False)
+
+    @property
+    def source_use(self) -> CardKeywordSourceUse:
+        """Preserve the exact non-body reference without manufacturing a scope."""
+        return CardKeywordSourceUse(
+            binding_id=self.source.binding.id,
+            occurrence=self.source.binding.occurrence_key(),
+        )
+
+    def declaration_payload(self) -> dict[str, JsonValue]:
+        """Expose the entire expected declaration for the later author-consumption boundary."""
+        return {
+            "keywords": list(self.keywords),
+            "ports": {"imports": {}, "exports": {}},
+        }
+
+
+def _keyword_slots(source: SourceContext) -> dict[str, LeafSlot]:
+    try:
+        frame = Frame.model_validate(source.frame.model_dump(mode="python"))
+        binding = SourceBinding.model_validate(source.binding.model_dump(mode="python"))
+        frame.verify(source.canonical_source)
+        binding.verify(frame, source.classifier.domains if source.classifier else {})
+    except ValueError:
+        raise SourceError("source_keyword_contract_mismatch") from None
+    if (
+        (frame.semantic_variant.state, frame.semantic_variant.key)
+        != ("resolved", "card_keywords.v2")
+        or (frame.projection.discriminator, frame.projection.projection_kind)
+        != ("card_keywords.v2", "card_field")
+        or frame.role != "body"
+        or frame.projection.scopes
+        or frame.mode_rules
+    ):
+        raise SourceError("source_keyword_contract_mismatch")
+    if binding.source.field not in {"effect", "section"}:
+        raise SourceError("source_keyword_contract_mismatch")
+    _ports(frame)
+    slots = {slot.name: slot for slot in frame.leaf_schema.slots}
+    if not slots or set(binding.values) != slots.keys():
+        raise SourceError("source_keyword_contract_mismatch")
+    for slot in slots.values():
+        if (
+            (slot.type, slot.role) != ("Concept", "keyword")
+            or not slot.required
+            or slot.domain != Domain(values=("concept.keyword.v1",), min=None, max=None)
+            or not slot.occurrences
+            or slot.expression is not None
+        ):
+            raise SourceError("source_keyword_contract_mismatch")
+    return slots
+
+
+def card_keyword_values(source: SourceContext) -> tuple[PrintedKeyword, ...]:
+    """Map a complete keyword construction; callers still verify source reconstruction."""
+    slots = _keyword_slots(source)
+    binding = source.binding
+    keywords: list[PrintedKeyword] = []
+    for occurrence in binding.occurrences:
+        if (
+            occurrence.slot not in slots
+            or occurrence.source_presence != "explicit"
+            or occurrence.resolution_rule is not None
+            or len(occurrence.canonical_spans) != 1
+            or len(occurrence.raw_spans) != 1
+        ):
+            raise SourceError("source_keyword_contract_mismatch")
+        value = binding.values[occurrence.slot]
+        if (
+            not isinstance(value, GlossaryReference)
+            or value.key not in PRINTED_KEYWORDS
+        ):
+            raise SourceError("unsupported_source_keyword")
+        keywords.append(PRINTED_KEYWORDS[value.key])
+    if not keywords or len(set(keywords)) != len(keywords):
+        raise SourceError("unsupported_duplicate_source_keyword")
+    return tuple(keywords)
 
 
 def entry_heads(frame: Frame) -> tuple[str, ...]:

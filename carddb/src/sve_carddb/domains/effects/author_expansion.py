@@ -6,9 +6,13 @@ from typing import TYPE_CHECKING, Literal
 
 from pydantic import ConfigDict, JsonValue, TypeAdapter
 
-from sve_carddb.contracts.author_evidence import Ports, SourceUse
+from sve_carddb.contracts.author_evidence import CardKeywordSourceUse, Ports, SourceUse
+from sve_carddb.contracts.author_handoff import (
+    CurrentKeywordDeclaration,
+    KeywordDeclarationPayload,
+)
 from sve_carddb.contracts.author_leaves import ParamDeclarations, ParamValues
-from sve_carddb.core.json import array, canonical, digest, object_value, string
+from sve_carddb.core.json import array, canonical, digest, object_value, parse, string
 from sve_carddb.domains.effects.author_bindings import (
     analyze_bindings,
     validate_author_ports,
@@ -22,6 +26,7 @@ from sve_carddb.domains.effects.author_sites import (
 )
 from sve_carddb.domains.effects.author_sources import (
     ADAPTER_RECIPE,
+    card_keyword_values,
     entry_payload,
     parameter_expected,
     resolve_source,
@@ -34,7 +39,11 @@ if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator, Mapping
     from pathlib import Path
 
-    from sve_carddb.domains.effects.author_sources import SourceCandidate, SourceContext
+    from sve_carddb.domains.effects.author_sources import (
+        PrintedKeywordObligation,
+        SourceCandidate,
+        SourceContext,
+    )
     from sve_carddb.domains.effects.author_validation import PathParts
 
 _DECLARATIONS = TypeAdapter(
@@ -48,7 +57,10 @@ _BODY_FIELDS = ("dsl", "ability_scope", "params", "ports", "body")
 
 class ExpansionError(ValueError):
     def __init__(
-        self, reason: str, path: PathParts = (), source: SourceUse | None = None
+        self,
+        reason: str,
+        path: PathParts = (),
+        source: SourceUse | CardKeywordSourceUse | None = None,
     ) -> None:
         self.reason = reason
         self.path = path
@@ -85,9 +97,54 @@ class ExpansionEvidence:
 
 
 @dataclass(frozen=True)
+class DeclarationEvidence:
+    path: PathParts
+    input_hash: str
+    declaration_payload: bytes
+    expansion_recipe: str
+    adapter_recipe: str
+    face_id: str | None = None
+    frame_id: str | None = None
+    interface_key: str | None = None
+    source_input_hash: str | None = None
+    current_source: CardKeywordSourceUse | None = None
+    source_adapter_recipe: str | None = None
+    source_proof: Literal["none", "current_source_checked"] = field(
+        default="none", init=False
+    )
+
+    def lowering_input(self) -> JsonValue:
+        """Only complete current evidence fits the closed internal handoff."""
+        return CurrentKeywordDeclaration.model_validate_json(
+            canonical(
+                {
+                    "kind": "printed_keywords",
+                    "path": list(self.path),
+                    "source_proof": self.source_proof,
+                    "input_hash": self.input_hash,
+                    "source_input_hash": self.source_input_hash,
+                    "source_use": self.current_source.model_dump(mode="json")
+                    if self.current_source is not None
+                    else None,
+                    "face_id": self.face_id,
+                    "frame_id": self.frame_id,
+                    "interface_key": self.interface_key,
+                    "semantic_key": "card_keywords.v2",
+                    "declaration": parse(self.declaration_payload),
+                    "source_adapter_recipe": self.source_adapter_recipe,
+                    "expansion_recipe": self.expansion_recipe,
+                    "adapter_recipe": self.adapter_recipe,
+                }
+            ),
+            strict=True,
+        ).model_dump(mode="json")
+
+
+@dataclass(frozen=True)
 class ExpansionCandidate:
     tree: JsonValue
     sidecar: tuple[ExpansionEvidence, ...]
+    declarations: tuple[DeclarationEvidence, ...] = ()
 
 
 def body_payload(record: dict[str, JsonValue]) -> bytes:
@@ -127,6 +184,29 @@ def ability_nodes(tree: JsonValue) -> Iterator[tuple[PathParts, dict[str, JsonVa
                     ("cards", key, "faces", face_id, "abilities", index),
                     object_value(ability),
                 )
+
+
+def check_keyword_declaration(
+    ability: dict[str, JsonValue], obligation: PrintedKeywordObligation, path: PathParts
+) -> None:
+    """Self-consistent declaration contexts never grant current-source proof."""
+    use = CardKeywordSourceUse.model_validate_json(
+        canonical(array(ability["sources"])[0]), strict=True
+    )
+    if use != obligation.source_use:
+        raise ExpansionError("source_keyword_occurrence_mismatch", path, use)
+    try:
+        KeywordDeclarationPayload.model_validate_json(
+            equivalent_ability(ability), strict=True
+        )
+    except ValueError:
+        raise ExpansionError("unsupported_keyword_declaration", path, use) from None
+    if card_keyword_values(
+        obligation.source
+    ) != obligation.keywords or equivalent_ability(ability) != canonical(
+        obligation.declaration_payload()
+    ):
+        raise ExpansionError("source_keyword_payload_mismatch", path, use)
 
 
 class BodyLibrary:
@@ -308,6 +388,7 @@ class AuthorExpander:
                     "schemas": schemas,
                     "sites": rules,
                     "substitution": "typed-leaf-only-v1",
+                    "declarations": "inline-keywords;separate-evidence;no-body-version-v1",
                 }
             )
         )
@@ -329,7 +410,19 @@ class AuthorExpander:
         tree = self.schemas.author_tree(raw)
         library = BodyLibrary(self.schemas, shards)
         sidecar: list[ExpansionEvidence] = []
+        declarations: list[DeclarationEvidence] = []
         for path, ability in ability_nodes(tree):
+            if "keywords" in ability:
+                declarations.append(
+                    DeclarationEvidence(
+                        path,
+                        digest(raw),
+                        equivalent_ability(ability),
+                        self.expansion_recipe,
+                        self.adapter_recipe,
+                    )
+                )
+                continue
             evidence = ExpansionEvidence(
                 path,
                 digest(raw),
@@ -381,7 +474,7 @@ class AuthorExpander:
         self.schemas.expanded(canonical(tree))
         for path, ability in ability_nodes(tree):
             _local_bindings(ability, self.sites, path)
-        return ExpansionCandidate(tree, tuple(sidecar))
+        return ExpansionCandidate(tree, tuple(sidecar), tuple(declarations))
 
     def expand_sources(
         self,
@@ -391,6 +484,9 @@ class AuthorExpander:
     ) -> ExpansionCandidate:
         """Reconstruct supplied sources; this still does not prove current admission."""
         originals = dict(ability_nodes(self.schemas.author_tree(raw)))
+        for path, ability in originals.items():
+            if "keywords" in ability:
+                raise ExpansionError("unsupported_keyword_source_mapping", path)
         if candidates.keys() != originals.keys():
             raise ExpansionError("source_candidates_mismatch")
         contexts = {
@@ -418,13 +514,17 @@ class AuthorExpander:
         raw: bytes,
         shards: Iterable[bytes],
         contexts: Mapping[PathParts, SourceContext],
+        *,
+        declarations: Mapping[PathParts, PrintedKeywordObligation] | None = None,
     ) -> ExpansionCandidate:
         """Expand supplied contexts without granting any source proof."""
         shard_inputs = tuple(shards)
         result = self.expand(raw, shard_inputs)
         expanded = dict(ability_nodes(result.tree))
         originals = dict(ability_nodes(self.schemas.author_tree(raw)))
-        if contexts.keys() != originals.keys():
+        if contexts.keys() != {
+            path for path, ability in originals.items() if "keywords" not in ability
+        }:
             raise ExpansionError("source_candidates_mismatch")
         library = BodyLibrary(self.schemas, shard_inputs)
         sidecar: list[ExpansionEvidence] = []
@@ -484,4 +584,37 @@ class AuthorExpander:
                     ),
                 )
             )
-        return ExpansionCandidate(result.tree, tuple(sidecar))
+        return ExpansionCandidate(
+            result.tree, tuple(sidecar), self._expand_declarations(result, declarations)
+        )
+
+    @staticmethod
+    def _expand_declarations(
+        result: ExpansionCandidate,
+        declarations: Mapping[PathParts, PrintedKeywordObligation] | None,
+    ) -> tuple[DeclarationEvidence, ...]:
+        expanded = dict(ability_nodes(result.tree))
+        contexts = {} if declarations is None else declarations
+        if contexts.keys() != {
+            path for path, ability in expanded.items() if "keywords" in ability
+        }:
+            raise ExpansionError("source_declaration_candidates_mismatch")
+        declaration_evidence = []
+        for evidence in result.declarations:
+            obligation = contexts[evidence.path]
+            check_keyword_declaration(
+                expanded[evidence.path], obligation, evidence.path
+            )
+            source = obligation.source
+            declaration_evidence.append(
+                replace(
+                    evidence,
+                    face_id=obligation.face_id,
+                    frame_id=source.frame.id,
+                    interface_key=source.frame.projection.interface_key(
+                        source.frame.id
+                    ),
+                    source_adapter_recipe=obligation.adapter_recipe,
+                )
+            )
+        return tuple(declaration_evidence)

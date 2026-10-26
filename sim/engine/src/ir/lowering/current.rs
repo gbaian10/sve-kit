@@ -8,6 +8,37 @@ use alloc::collections::{BTreeMap, BTreeSet};
 use serde::Deserialize;
 use serde_json::Value;
 
+mod declarations;
+mod recipes;
+pub use declarations::{
+    CardKeywordSourceUse, CurrentKeywordEvidence, KeywordDeclarationPayload, MetadataObligation,
+    NonBodySource, PrintedKeyword, PrintedKeywordsObligation,
+};
+
+/// Checked whole-card evidence, without lowering, runtime admission or qualification.
+#[derive(Debug)]
+pub struct CurrentSourceCheck {
+    /// Exact body uses indexed by original author path.
+    pub source_sidecar: BTreeMap<String, CurrentSourceEvidence>,
+    /// Exact printed declarations, separate from scoped ability bodies.
+    pub declaration_sidecar: BTreeMap<String, CurrentKeywordEvidence>,
+    /// Closed non-body inventory, including inert metadata evidence.
+    pub non_body_sources: Vec<NonBodySource>,
+}
+
+impl CurrentSourceCheck {
+    /// Resolve a declaration or one of its keyword elements to its checked reference.
+    #[must_use]
+    pub fn declaration_at(&self, mut author_path: &str) -> Option<&CurrentKeywordEvidence> {
+        loop {
+            if let Some(evidence) = self.declaration_sidecar.get(author_path) {
+                return Some(evidence);
+            }
+            (author_path, _) = author_path.rsplit_once('/')?;
+        }
+    }
+}
+
 /// Current source facts and their lowered candidate, without use qualification.
 #[derive(Debug)]
 pub struct CurrentCardProgram {
@@ -24,7 +55,9 @@ pub struct CurrentCardProgram {
     /// One current-checked source per ability, keyed by its author JSON pointer.
     pub source_sidecar: BTreeMap<String, CurrentSourceEvidence>,
     /// Source declarations outside ability bodies; retained without claiming execution.
-    pub non_body_sources: Vec<Value>,
+    pub non_body_sources: Vec<NonBodySource>,
+    /// Printed declaration evidence; an empty map for body-only cards.
+    pub declaration_sidecar: BTreeMap<String, CurrentKeywordEvidence>,
     /// Well-formed IR; this alone grants neither whole-card admission nor execution.
     pub program: WellFormedCardProgram,
 }
@@ -65,13 +98,14 @@ struct CurrentInput {
     source_payload: Value,
     source_inventory: SourceInventory,
     sidecar: Vec<SourceEvidenceInput>,
+    declaration_sidecar: Vec<declarations::DeclarationInput>,
 }
 
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 struct SourceInventory {
     abilities: Vec<RequiredAbility>,
-    non_body: Vec<Value>,
+    non_body: Vec<NonBodySource>,
 }
 
 #[derive(Deserialize)]
@@ -115,13 +149,13 @@ fn evidence_path(parts: &[Value]) -> Result<String, LoweringError> {
 fn checked_sources(
     input: &CurrentInput,
     identity: &CurrentIdentity,
+    entries: &[(String, super::ast::Ability)],
 ) -> Result<BTreeMap<String, CurrentSourceEvidence>, LoweringError> {
     let card_path = format!("/cards/{}", pointer_key(&input.card_no));
-    let card = input
-        .tree
-        .pointer(&card_path)
-        .ok_or_else(|| invalid(&card_path))?;
-    let entries = ability_entries(decode(card.clone(), &card_path)?, &card_path)?;
+    let entries: Vec<_> = entries
+        .iter()
+        .filter(|(_, ability)| ability.keywords.is_none())
+        .collect();
     let mut supplied = BTreeMap::new();
     for item in &input.sidecar {
         let path = evidence_path(&item.path)?;
@@ -148,8 +182,11 @@ fn checked_sources(
     };
     let mut result = BTreeMap::new();
     for (path, ability) in entries {
-        let evidence = supplied.get(&path).ok_or_else(|| invalid_source(&path))?;
-        let source_use = &ability.sources[0];
+        let evidence = supplied
+            .get(path.as_str())
+            .ok_or_else(|| invalid_source(path))?;
+        let source_value = ability.sources[0].json();
+        let source_use = &source_value;
         // `line == 0` must fail here: `None == None` below would otherwise pass it.
         let line_ordinal = source_use
             .pointer("/occurrence/line_ordinal")
@@ -169,27 +206,27 @@ fn checked_sources(
             || source_hash.map(|hash| format!("sha256:{hash}")).as_deref()
                 != Some(evidence.source_input_hash.as_str())
         {
-            return Err(invalid_source(&path));
+            return Err(invalid_source(path));
         }
         let obligation = required
-            .remove(&source_key(source_use, &path)?)
-            .ok_or_else(|| closure_error(&path))?;
+            .remove(&source_key(source_use, path)?)
+            .ok_or_else(|| closure_error(path))?;
         let mut body = input
             .tree
-            .pointer(&path)
+            .pointer(path)
             .and_then(Value::as_object)
             .cloned()
-            .ok_or_else(|| invalid_source(&path))?;
+            .ok_or_else(|| invalid_source(path))?;
         for key in ["line", "section", "sources"] {
             body.remove(key);
         }
         if obligation.source_use != *source_use || obligation.body != Value::Object(body) {
-            return Err(closure_error(&path));
+            return Err(closure_error(path));
         }
         result.insert(
             path.clone(),
             CurrentSourceEvidence {
-                source: source_span(&coordinates, &path, &ability)?,
+                source: source_span(&coordinates, path, ability)?,
                 source_use: evidence.source_use.clone(),
                 input_hash: evidence.input_hash.clone(),
                 source_input_hash: evidence.source_input_hash.clone(),
@@ -266,10 +303,7 @@ impl CurrentIdentity {
     }
 }
 
-pub(super) fn lower(
-    compiler: &ExpandedLowerer,
-    input: &Value,
-) -> Result<CurrentCardProgram, LoweringError> {
+fn read(input: &Value) -> Result<(CurrentInput, CurrentIdentity), LoweringError> {
     let input: CurrentInput =
         serde_json::from_value(input.clone()).map_err(|_private| invalid(""))?;
     let cards = input
@@ -343,7 +377,47 @@ pub(super) fn lower(
             return Err(invalid("/source_payload/faces"));
         }
     }
-    let source_sidecar = checked_sources(&input, &identity)?;
+    Ok((input, identity))
+}
+
+fn check_input(
+    compiler: &ExpandedLowerer,
+    input: &CurrentInput,
+    identity: &CurrentIdentity,
+) -> Result<CurrentSourceCheck, LoweringError> {
+    let card_path = format!("/cards/{}", pointer_key(&input.card_no));
+    let card = input
+        .tree
+        .pointer(&card_path)
+        .ok_or_else(|| invalid(&card_path))?;
+    let entries = ability_entries(decode(card.clone(), &card_path)?, &card_path)?;
+    let source_sidecar = checked_sources(input, identity, &entries)?;
+    let declaration_sidecar = declarations::checked(input, identity, &entries, &source_sidecar)?;
+    compiler
+        .validator
+        .validate(&input.tree)
+        .map_err(|failure| error("invalid_expanded", &failure.instance_path().to_string()))?;
+    Ok(CurrentSourceCheck {
+        source_sidecar,
+        declaration_sidecar,
+        non_body_sources: input.source_inventory.non_body.clone(),
+    })
+}
+
+pub(super) fn check(
+    compiler: &ExpandedLowerer,
+    input: &Value,
+) -> Result<CurrentSourceCheck, LoweringError> {
+    let (input, identity) = read(input)?;
+    check_input(compiler, &input, &identity)
+}
+
+pub(super) fn lower(
+    compiler: &ExpandedLowerer,
+    input: &Value,
+) -> Result<CurrentCardProgram, LoweringError> {
+    let (input, identity) = read(input)?;
+    let checked = check_input(compiler, &input, &identity)?;
     let mut lowered = compiler.lower_coordinates(&input.tree, &BTreeMap::new(), Some(&identity))?;
     let program = lowered
         .remove(&input.card_no)
@@ -354,8 +428,9 @@ pub(super) fn lower(
         source_version: input.source_version,
         source_payload: input.source_payload,
         expanded: input.tree,
-        source_sidecar,
-        non_body_sources: input.source_inventory.non_body,
+        source_sidecar: checked.source_sidecar,
+        non_body_sources: checked.non_body_sources,
+        declaration_sidecar: checked.declaration_sidecar,
         program,
     })
 }

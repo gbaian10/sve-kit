@@ -27,7 +27,15 @@ class SourceUse(RecordData):
     ability_scope: Code
 
 
+class CardKeywordSourceUse(RecordData):
+    binding_id: Id
+    occurrence: OccurrenceKey
+
+
 Sources = Annotated[tuple[SourceUse, ...], Field(min_length=1, max_length=1)]
+CardKeywordSources = Annotated[
+    tuple[CardKeywordSourceUse, ...], Field(min_length=1, max_length=1)
+]
 
 
 class LocalBinding(RecordData):
@@ -43,6 +51,11 @@ class ImportBinding(RecordData):
 class Ports(RecordData):
     imports: dict[Code, ImportBinding]
     exports: dict[Code, LocalBinding]
+
+
+class EmptyPorts(Ports):
+    imports: Annotated[dict[Code, ImportBinding], Field(max_length=0)]
+    exports: Annotated[dict[Code, LocalBinding], Field(max_length=0)]
 
 
 class ImportUse(RecordData):

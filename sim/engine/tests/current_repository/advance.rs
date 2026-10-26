@@ -44,6 +44,7 @@ fn handoff() -> Value {
                 "texts":[{"field":"name","ordinal":null,"state":"present","source_hash":digest(ADVANCE)},
                     {"field":"effect","ordinal":null,"state":"present","source_hash":digest(text)}]}]},
         "source_inventory":{"abilities":[{"source_use":source,"body":body}],"non_body":[]},
+        "declaration_sidecar":[],
         "sidecar":[{"path":["cards",ADVANCE,"abilities",0_u8],"source_proof":"current_source_checked",
             "source_use":source,"input_hash":format!("sha256:{}",digest("synthetic-input")),
             "source_input_hash":format!("sha256:{}",digest(text))}]})

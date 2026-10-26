@@ -23,6 +23,7 @@ def effect(
     text: str,
     *,
     revision: str = FACTS["BP01-009"]["revision"],
+    face_ordinal: int = 0,
 ) -> None:
     row = current.db.select(
         "face_revision", current.db.columns("face_revision"), where={"id": revision}
@@ -59,7 +60,9 @@ def effect(
         lang, value, source = original(ref)
         if source.id == row.values["source_id"]:
             value = deepcopy(value)
-            object_value(array(object_value(value)["faces"])[0])["text"] = text
+            object_value(array(object_value(value)["faces"])[face_ordinal])["text"] = (
+                text
+            )
         return lang, value, source
 
     monkeypatch.setattr(current.sources, "document", document)

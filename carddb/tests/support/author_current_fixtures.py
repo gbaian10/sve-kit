@@ -55,7 +55,9 @@ class CurrentSourceFixture:
     jp_batch_id: str
 
 
-def entry_snapshot() -> Snapshot:
+def entry_snapshot(
+    *, include_keywords: bool = False, exclude_semantics: frozenset[str] = frozenset()
+) -> Snapshot:
     """Read only the real frame and term shards needed by the adopted entries.
 
     The adopted entry frame and Storm term retain their existing definitions.
@@ -77,6 +79,11 @@ def entry_snapshot() -> Snapshot:
             "translations/templates/definitions/117.yaml",
             "translations/templates/definitions/029.yaml",
             "translations/templates/definitions/056.yaml",
+            *(
+                f"translations/templates/definitions/{number}.yaml"
+                for number in ("068", "072", "084", "109", "110")
+                if include_keywords
+            ),
         )
         for record in Shard.model_validate_json(
             definitions.expand_shard(read_authored(authored / name, root=authored)[1])
@@ -86,6 +93,7 @@ def entry_snapshot() -> Snapshot:
         record
         for record in records
         if isinstance(record, FrameRecord)
+        and record.data.semantic_variant.key not in exclude_semantics
         and (
             record.data.id == EVOLVE_FRAME
             or record.data.semantic_variant.key
@@ -96,25 +104,39 @@ def entry_snapshot() -> Snapshot:
                 "draw_exact_evolve_time.v1",
                 "search_lastword_self_deck_named_hand.v1",
             }
+            or (
+                include_keywords
+                and record.data.semantic_variant.key
+                in {"card_keywords.v2", "metadata.layout.v1", "pure_reminder.v1"}
+            )
         )
     )
-    assert len(selected) == 6
+    if not include_keywords and not exclude_semantics:
+        assert len(selected) == 6
     terms = {
         name: tuple(
             record
             for record in records
-            if isinstance(record, TermRecord) and record.data.id == identifier
+            if isinstance(record, TermRecord) and record.data.id in identifiers
         )
-        for name, identifier in (
-            ("translations/glossary/concepts/001.yaml", "term:ability.last_words"),
-            ("translations/glossary/concepts/004.yaml", "term:keyword.storm"),
+        for name, identifiers in (
+            ("translations/glossary/concepts/001.yaml", {"term:ability.last_words"}),
+            (
+                "translations/glossary/concepts/004.yaml",
+                {"term:keyword.storm"}
+                | (
+                    {"term:keyword.ward", "term:keyword.aura"}
+                    if include_keywords
+                    else set()
+                ),
+            ),
             (
                 "translations/glossary/p1_names_batch06/001.yaml",
-                "term:name.shikigami_employment",
+                {"term:name.shikigami_employment"},
             ),
         )
     }
-    assert all(len(records) == 1 for records in terms.values())
+    assert all(terms.values())
     content = canonical(
         {
             "format": 3,
@@ -133,7 +155,8 @@ def entry_snapshot() -> Snapshot:
                     "format": 3,
                     "kind": "translation_shard",
                     "records": [
-                        records[0].model_dump(mode="json", exclude_computed_fields=True)
+                        record.model_dump(mode="json", exclude_computed_fields=True)
+                        for record in records
                     ],
                 }
             ),
@@ -142,7 +165,8 @@ def entry_snapshot() -> Snapshot:
                     "format": 3,
                     "kind": "translation_shard",
                     "records": [
-                        records[0].model_dump(mode="json", exclude_computed_fields=True)
+                        record.model_dump(mode="json", exclude_computed_fields=True)
+                        for record in records
                     ],
                 }
             ),

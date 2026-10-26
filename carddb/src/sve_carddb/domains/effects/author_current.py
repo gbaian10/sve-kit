@@ -6,7 +6,8 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
-from sve_carddb.contracts.author_evidence import SourceUse
+from sve_carddb.contracts.author_evidence import CardKeywordSourceUse, SourceUse
+from sve_carddb.contracts.author_handoff import SourceInventory
 from sve_carddb.contracts.author_leaves import AuthorIndexRecord
 from sve_carddb.contracts.four_layer import FaceRevisionOwner, OwnerField
 from sve_carddb.core.json import array, canonical, digest, object_value, parse, string
@@ -15,6 +16,7 @@ from sve_carddb.domains.effects.author_expansion import (
     ExpansionCandidate,
     ExpansionError,
     ability_nodes,
+    check_keyword_declaration,
     equivalent_ability,
 )
 from sve_carddb.domains.effects.author_inputs import AuthorInputError, Diagnostic
@@ -26,8 +28,10 @@ from sve_carddb.domains.effects.author_source_hash import (
 )
 from sve_carddb.domains.effects.author_sources import (
     NO_TOKEN_METADATA,
+    PrintedKeywordObligation,
     SourceContext,
     SourceError,
+    card_keyword_values,
     entry_heads,
     entry_payload,
 )
@@ -84,6 +88,9 @@ class CardAccepted:
                     else None,
                 }
                 for item in self.candidate.sidecar
+            ],
+            "declaration_sidecar": [
+                item.lowering_input() for item in self.candidate.declarations
             ],
         }
 
@@ -179,6 +186,43 @@ class CurrentAuthorSources:
                 else "provisional_record_key"
             )
         return identities.pop()
+
+    def keyword_obligations(self, card_id: str) -> tuple[PrintedKeywordObligation, ...]:
+        """Reconstruct complete current sources; this grants no author or D0 admission."""
+        card = self._card_payload(card_id)
+        return self._keyword_obligations(card, self._checked_sources(card))
+
+    def _keyword_obligations(
+        self, card: _CurrentCard, sources: tuple[SourceContext, ...]
+    ) -> tuple[PrintedKeywordObligation, ...]:
+        self._require_known(card)
+        if any(
+            "token" in (face.attributes.special_kinds.value or ())
+            for face in card.payload.faces
+        ):
+            raise SourceError("token_source_contract_unavailable")
+        result: list[PrintedKeywordObligation] = []
+        used: set[tuple[str, str]] = set()
+        bindings: set[str] = set()
+        for source in sources:
+            if source.frame.projection.projection_kind != "card_field":
+                continue
+            owner = source.binding.source.owner
+            if (
+                not isinstance(owner, FaceRevisionOwner)
+                or owner.revision_id not in card.revisions
+            ):
+                raise SourceError("source_keyword_owner_mismatch")
+            face_id = card.revisions[owner.revision_id]
+            keywords = card_keyword_values(source)
+            if source.binding.id in bindings or any(
+                (face_id, keyword) in used for keyword in keywords
+            ):
+                raise SourceError("unsupported_duplicate_source_keyword")
+            bindings.add(source.binding.id)
+            used.update((face_id, keyword) for keyword in keywords)
+            result.append(PrintedKeywordObligation(face_id, source, keywords))
+        return tuple(result)
 
     def _prepare(self, inputs: AuthorInputSet, expander: AuthorExpander) -> None:
         try:
@@ -493,8 +537,7 @@ class CurrentAuthorSources:
             )
         return texts, fields
 
-    @staticmethod
-    def _no_tokens(fields: list[CompiledField]) -> None:
+    def _no_tokens(self, fields: list[CompiledField]) -> None:
         if any(
             part.source_span.role == "token_header"
             for field in fields
@@ -510,23 +553,35 @@ class CurrentAuthorSources:
                 if field.derived.pending_causes[index]:
                     raise SourceError("source_pending")
                 # Dependency analysis precedes registry admission and never supplies its binding.
-                frame, _ = field.derived.bind(index)
+                frame, binding = field.derived.bind(index)
                 if (
                     frame.projection.projection_kind == "none"
                     and frame.semantic_variant.state == "resolved"
                     and frame.semantic_variant.key in NO_TOKEN_METADATA
                 ):
                     continue
+                if frame.semantic_variant.key == "card_keywords.v2":
+                    card_keyword_values(
+                        SourceContext(
+                            frame,
+                            binding,
+                            field.field.parts[index].canonical_source,
+                            self.classifier,
+                        )
+                    )
+                    continue
                 try:
                     entry_heads(frame)
                 except SourceError:
                     raise SourceError("unsupported_source_projection") from None
 
-    def _contexts(self, card: _CurrentCard) -> dict[tuple[str, str], SourceContext]:
-        result: dict[tuple[str, str], SourceContext] = {}
+    def _checked_sources(self, card: _CurrentCard) -> tuple[SourceContext, ...]:
+        result: list[SourceContext] = []
         for field in card.fields:
             for index, matched in enumerate(field.matches):
                 if matched is None:
+                    raise SourceError("source_registry_mismatch")
+                if matched.binding.source != field.field.source:
                     raise SourceError("source_registry_mismatch")
                 try:
                     field.derived.verify_binding(
@@ -537,17 +592,29 @@ class CurrentAuthorSources:
                     )
                 except ValueError:
                     raise SourceError("source_registry_mismatch") from None
-                if matched.frame.projection.projection_kind == "none":
-                    continue
-                heads = entry_heads(matched.frame)
-                source = SourceContext(
-                    matched.frame,
-                    matched.binding,
-                    field.field.parts[index].canonical_source,
-                    self.classifier,
+                result.append(
+                    SourceContext(
+                        matched.frame,
+                        matched.binding,
+                        field.field.parts[index].canonical_source,
+                        self.classifier,
+                    )
                 )
-                for root in range(len(heads)):
-                    result[matched.binding.id, f"ability_{root}"] = source
+        return tuple(result)
+
+    @staticmethod
+    def _contexts(
+        sources: tuple[SourceContext, ...],
+    ) -> dict[tuple[str, str], SourceContext]:
+        result: dict[tuple[str, str], SourceContext] = {}
+        for source in sources:
+            if source.frame.projection.projection_kind == "none":
+                continue
+            if source.frame.projection.projection_kind == "card_field":
+                continue
+            heads = entry_heads(source.frame)
+            for root in range(len(heads)):
+                result[source.binding.id, f"ability_{root}"] = source
         return result
 
     def _validate_card(
@@ -563,29 +630,53 @@ class CurrentAuthorSources:
         card = self._card_payload(record.card_id)
         payload = source_payload(card.payload)
         version = source_version(card.payload)
-        for face in array(object_value(card.payload.model_dump(mode="json"))["faces"]):
-            data = object_value(face)
-            if any(
-                object_value(value)["state"] == "unknown"
-                for value in object_value(data["attributes"]).values()
-            ) or any(
-                object_value(value)["state"] == "unknown"
-                for value in array(data["texts"])
-            ):
-                raise SourceError("source_unknown")
+        self._require_known(card)
         authored = object_value(
             object_value(object_value(tree)["cards"])[record.record_key]
         )
         if object_value(authored["meta"])["source"] != version:
             raise SourceError("source_version_mismatch")
-        expected = self._contexts(card)
-        inventory = self._source_inventory(card, expected)
+        candidate, inventory = self._reconcile_card(
+            card, tree, input_hash, inputs, expander
+        )
+        return CardAccepted(record, candidate, payload, version, inventory)
+
+    def _reconcile_card(
+        self,
+        card: _CurrentCard,
+        tree: JsonValue,
+        input_hash: str,
+        inputs: AuthorInputSet,
+        expander: AuthorExpander,
+    ) -> tuple[ExpansionCandidate, bytes]:
+        checked_sources = self._checked_sources(card)
+        expected = self._contexts(checked_sources)
+        keywords = self._keyword_obligations(card, checked_sources)
+        inventory = self._source_inventory(card, expected, keywords)
+        declarations = self._declaration_uses(card, tree, keywords)
         contexts = self._uses(card, tree, expected)
         result = expander.expand_contexts(
-            canonical(tree), (file.raw for file in inputs.body_files), contexts
+            canonical(tree),
+            (file.raw for file in inputs.body_files),
+            contexts,
+            declarations=declarations,
         )
+        return self._checked_candidate(
+            result, contexts, declarations, input_hash
+        ), inventory
+
+    @staticmethod
+    def _checked_candidate(
+        result: ExpansionCandidate,
+        contexts: Mapping[PathParts, SourceContext],
+        declarations: Mapping[PathParts, PrintedKeywordObligation],
+        input_hash: str,
+    ) -> ExpansionCandidate:
         checked_uses = {}
         for path, ability in ability_nodes(result.tree):
+            if "keywords" in ability:
+                check_keyword_declaration(ability, declarations[path], path)
+                continue
             use = SourceUse.model_validate_json(
                 canonical(array(ability["sources"])[0]), strict=True
             )
@@ -605,17 +696,42 @@ class CurrentAuthorSources:
             )
             object.__setattr__(checked, "source_proof", "current_source_checked")  # ruff: ignore[unnecessary-dunder-call] -- only the complete current boundary grants this proof
             evidence.append(checked)
-        return CardAccepted(
-            record,
-            ExpansionCandidate(result.tree, tuple(evidence)),
-            payload,
-            version,
-            inventory,
+        declaration_evidence = []
+        for declaration in result.declarations:
+            obligation = declarations[declaration.path]
+            checked_declaration = replace(
+                declaration,
+                input_hash=input_hash,
+                source_input_hash="sha256:"
+                + obligation.source.binding.source.source_hash,
+                current_source=obligation.source_use,
+            )
+            object.__setattr__(  # ruff: ignore[unnecessary-dunder-call] -- only the complete current boundary grants proof
+                checked_declaration, "source_proof", "current_source_checked"
+            )
+            declaration_evidence.append(checked_declaration)
+        return ExpansionCandidate(
+            result.tree, tuple(evidence), tuple(declaration_evidence)
         )
 
     @staticmethod
+    def _require_known(card: _CurrentCard) -> None:
+        for face in array(object_value(card.payload.model_dump(mode="json"))["faces"]):
+            data = object_value(face)
+            if any(
+                object_value(value)["state"] == "unknown"
+                for value in object_value(data["attributes"]).values()
+            ) or any(
+                object_value(value)["state"] == "unknown"
+                for value in array(data["texts"])
+            ):
+                raise SourceError("source_unknown")
+
+    @staticmethod
     def _source_inventory(
-        card: _CurrentCard, expected: Mapping[tuple[str, str], SourceContext]
+        card: _CurrentCard,
+        expected: Mapping[tuple[str, str], SourceContext],
+        keywords: tuple[PrintedKeywordObligation, ...],
     ) -> bytes:
         # Derive obligations from current sources, never from the supplied author tree.
         abilities: list[JsonValue] = [
@@ -631,6 +747,7 @@ class CurrentAuthorSources:
         ]
         non_body: list[JsonValue] = [
             {
+                "kind": "metadata",
                 "binding_id": matched.binding.id,
                 "occurrence": matched.binding.occurrence_key().model_dump(mode="json"),
                 "semantic_key": matched.frame.semantic_variant.key,
@@ -640,7 +757,25 @@ class CurrentAuthorSources:
             if matched is not None
             and matched.frame.projection.projection_kind == "none"
         ]
-        return canonical({"abilities": abilities, "non_body": non_body})
+        non_body.extend(
+            {
+                "kind": "printed_keywords",
+                "source_use": item.source_use.model_dump(mode="json"),
+                "face_id": item.face_id,
+                "frame_id": item.source.frame.id,
+                "interface_key": item.source.frame.projection.interface_key(
+                    item.source.frame.id
+                ),
+                "semantic_key": "card_keywords.v2",
+                "declaration": item.declaration_payload(),
+                "source_adapter_recipe": item.adapter_recipe,
+            }
+            for item in keywords
+        )
+        inventory = SourceInventory.model_validate_json(
+            canonical({"abilities": abilities, "non_body": non_body}), strict=True
+        )
+        return canonical(inventory.model_dump(mode="json"))
 
     def _uses(
         self,
@@ -659,6 +794,8 @@ class CurrentAuthorSources:
         used: set[tuple[str, str]] = set()
         contexts: dict[PathParts, SourceContext] = {}
         for path, ability in ability_nodes(tree):
+            if "keywords" in ability:
+                continue
             use = SourceUse.model_validate_json(
                 canonical(array(ability["sources"])[0]), strict=True
             )
@@ -676,6 +813,34 @@ class CurrentAuthorSources:
             raise SourceError("source_ability_closure_mismatch")
         return contexts
 
+    def _declaration_uses(
+        self,
+        card: _CurrentCard,
+        tree: JsonValue,
+        keywords: tuple[PrintedKeywordObligation, ...],
+    ) -> dict[PathParts, PrintedKeywordObligation]:
+        expected = {item.source_use.binding_id: item for item in keywords}
+        result: dict[PathParts, PrintedKeywordObligation] = {}
+        used: set[str] = set()
+        for path, ability in ability_nodes(tree):
+            if "keywords" not in ability:
+                continue
+            use = CardKeywordSourceUse.model_validate_json(
+                canonical(array(ability["sources"])[0]), strict=True
+            )
+            self._use_location(card, path, ability, use)
+            obligation = expected.get(use.binding_id)
+            if obligation is None or obligation.source_use != use:
+                raise ExpansionError("source_keyword_occurrence_mismatch", path, use)
+            if use.binding_id in used:
+                raise ExpansionError("duplicate_source_keyword", path, use)
+            check_keyword_declaration(ability, obligation, path)
+            result[path] = obligation
+            used.add(use.binding_id)
+        if used != expected.keys():
+            raise SourceError("source_keyword_closure_mismatch")
+        return result
+
     @staticmethod
     def _use_context(
         card: _CurrentCard,
@@ -684,23 +849,32 @@ class CurrentAuthorSources:
         ability: dict[str, JsonValue],
         use: SourceUse,
     ) -> SourceContext:
-        owner = use.occurrence.owner
-        if not isinstance(owner, FaceRevisionOwner):
-            raise ExpansionError("unsupported_source_owner_" + owner.kind, path)
-        face = card.revisions.get(owner.revision_id)
-        if face is None:
-            raise ExpansionError("source_current_owner_mismatch", path)
-        if "faces" in path and path[3] != face:
-            raise ExpansionError("source_face_container_mismatch", path)
-        if use.occurrence.field not in {"effect", "section"}:
-            raise ExpansionError("unsupported_source_field", path)
-        if (
-            ability.get("section") != use.occurrence.ordinal
-            or ability["line"] != use.occurrence.line_ordinal + 1
-        ):
-            raise ExpansionError("source_location_mismatch", path)
+        CurrentAuthorSources._use_location(card, path, ability, use)
         key = use.binding_id, use.ability_scope
         source = expected.get(key)
         if source is None or source.binding.occurrence_key() != use.occurrence:
             raise ExpansionError("source_occurrence_mismatch", path)
         return source
+
+    @staticmethod
+    def _use_location(
+        card: _CurrentCard,
+        path: PathParts,
+        ability: dict[str, JsonValue],
+        use: SourceUse | CardKeywordSourceUse,
+    ) -> None:
+        owner = use.occurrence.owner
+        if not isinstance(owner, FaceRevisionOwner):
+            raise ExpansionError("unsupported_source_owner_" + owner.kind, path, use)
+        face = card.revisions.get(owner.revision_id)
+        if face is None:
+            raise ExpansionError("source_current_owner_mismatch", path, use)
+        if "faces" in path and path[3] != face:
+            raise ExpansionError("source_face_container_mismatch", path, use)
+        if use.occurrence.field not in {"effect", "section"}:
+            raise ExpansionError("unsupported_source_field", path, use)
+        if (
+            ability.get("section") != use.occurrence.ordinal
+            or ability["line"] != use.occurrence.line_ordinal + 1
+        ):
+            raise ExpansionError("source_location_mismatch", path, use)
