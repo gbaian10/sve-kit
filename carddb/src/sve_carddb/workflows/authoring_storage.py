@@ -3,14 +3,17 @@
 from dataclasses import replace
 from io import StringIO
 from pathlib import Path
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Literal, override
 
 from pydantic import JsonValue
 from ruamel.yaml import YAML
+from ruamel.yaml.emitter import RoundTripEmitter
+from ruamel.yaml.nodes import ScalarNode
+from ruamel.yaml.representer import RoundTripRepresenter
 
 from sve_carddb.contracts.author_leaves import AuthorIndexRecord
 from sve_carddb.core.authored import check_path
-from sve_carddb.core.json import array, digest, object_value
+from sve_carddb.core.json import array, canonical, digest, object_value, parse
 from sve_carddb.core.yaml import MAX_BYTES
 from sve_carddb.domains.effects.author_anchors import handwriting, materialize_inputs
 from sve_carddb.domains.effects.author_current import CardRejected
@@ -37,15 +40,39 @@ if TYPE_CHECKING:
     from sve_carddb.workflows.authoring import Workspace
 
 
+class _YamlEmitter(RoundTripEmitter):
+    @override
+    def choose_scalar_style(self) -> str:
+        """Match the repository formatter's quote policy."""
+        style = super().choose_scalar_style()
+        if not isinstance(style, str):
+            raise TypeError("Unsupported YAML scalar style")
+        return '"' if style == "'" else style
+
+
+class _YamlRepresenter(RoundTripRepresenter):
+    pass
+
+
+def _represent_null(_representer: RoundTripRepresenter, _value: None) -> ScalarNode:
+    return ScalarNode("tag:yaml.org,2002:null", "null")
+
+
+_YamlRepresenter.add_representer(type(None), _represent_null)
+
+
 def format_yaml(tree: JsonValue) -> bytes:
     """Use one deterministic formatter for comparison and persisted inputs."""
-    formatter = YAML(typ="safe")
+    formatter = YAML(typ="rt")
+    formatter.Emitter = _YamlEmitter
+    formatter.Representer = _YamlRepresenter
+    formatter.indent(mapping=2, sequence=4, offset=2)
     formatter.default_flow_style = False
     formatter.allow_unicode = True
     # Keep fingerprints on one line; wrapping can leave trailing spaces.
     formatter.width = MAX_BYTES
     stream = StringIO()
-    formatter.dump(tree, stream)
+    formatter.dump(parse(canonical(tree)), stream)
     return stream.getvalue().encode("utf-8")
 
 
