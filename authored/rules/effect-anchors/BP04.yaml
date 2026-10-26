@@ -27,6 +27,54 @@ cards:
         ports:
           exports: {}
           imports: {}
+  BP04-075:
+    basis: effect-anchor-v1:sha256:a4582db098c9f855172e193deb4abebbfa6b836691b401eb1747a3aadaa68af6
+    card_id: c:8f0cbb11f3bd5224aeca9c6f118b923c
+    legacy_shape:
+      container: faces
+    source: effect-source-v1:sha256:534cabe22e3cac221a894f9ba48a28f4312ba4ba2947d44f2e6e89c0aad25610
+    uses:
+      - ability_scope: ability_0
+        binding_id: bind:e79f86a4f92e683563dc61d4b89c77f86fac8cae45a5bae047088efe5efe26e3
+        face_id: f:95591aa1eb195e01868f33bf217c74eb
+        frame_id: frame:f03820b9048f0bd911c528162f930b0e47d128493a84b4fe097f4c8a48608756
+        line: 1
+        occurrence:
+          field: effect
+          line_ordinal: 0
+          ordinal: null
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:adf65a77b93850cac13913f7db4121f6a975d18b35e1d596a627f4a417c84a50
+          role: body
+          segments:
+            - end: 19
+              start: 0
+          source_hash: 0e0fef1b7c30d902d33ea1da8a3cdd71d5bcb652853f649b4c5acb63fcea72c8
+        ports:
+          exports: {}
+          imports: {}
+      - binding_id: bind:36152985dabee05648bdde69bbfb667a019cc1640c47681833b9cb80c477f4ec
+        face_id: f:95591aa1eb195e01868f33bf217c74eb
+        frame_id: frame:2f202ff66ff2e4c06c345d577a2a79cdfa07bb0dd5c1948ab6ac1255e676d4c9
+        keywords:
+          - ward
+        line: 2
+        occurrence:
+          field: effect
+          line_ordinal: 1
+          ordinal: null
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:adf65a77b93850cac13913f7db4121f6a975d18b35e1d596a627f4a417c84a50
+          role: body
+          segments:
+            - end: 24
+              start: 20
+          source_hash: 0e0fef1b7c30d902d33ea1da8a3cdd71d5bcb652853f649b4c5acb63fcea72c8
+        ports:
+          exports: {}
+          imports: {}
 format: 1
 kind: effect_anchor_set
 owner: BP04

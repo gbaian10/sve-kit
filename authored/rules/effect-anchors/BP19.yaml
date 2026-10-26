@@ -1,4 +1,18 @@
-bodies: {}
+bodies:
+  destroy_fanfare_opponent_all_field_followers.v1/1:
+    ability_scope: ability_0
+    basis: effect-anchor-v1:sha256:bfea5506057066f246291da01c4c684c92342a4e3c4481fea1e96e647d187938
+    body_version: effect-body-v1:sha256:2c9792f48653e50da98b3860b4796e8abfa8ae671de5d075a74a3abcb4c810c8
+    frame_id: frame:670a31a77da9cf2f0b98574793ccba99fcf47a03ec72150a6f9732e05f056f46
+    params: {}
+    ports:
+      exports: {}
+      imports: {}
+    registrations:
+      - domain:
+          regions:
+            - jp
+        id: jp
 cards:
   BP19-001:
     basis: effect-anchor-v1:sha256:b447d77b4bcad275cd6f93cd7b29cf009bc42628b8e35a287b709a3625fe8426
@@ -54,6 +68,57 @@ cards:
         ports:
           exports: {}
           imports: {}
+  BP19-P32:
+    basis: effect-anchor-v1:sha256:0099678f815015e01264b6f6b784f75f3a43834f83c41d542ab70f36ab0a7330
+    card_id: c:84f4caef779d54f39836ec5978cd4e96
+    legacy_shape:
+      container: faces
+    source: effect-source-v1:sha256:b134d80cb6a486276924f30a7646a565e742ee03bce4eb0c513f5eaaa9abea89
+    uses:
+      - binding_id: bind:d24e9dc6b5552d4bbcaebc0de8239d6075f4a8cd0da231b0897524974361c265
+        face_id: f:53f04c41236453299bc3310c51a8cf45
+        frame_id: frame:64da92f0cc558dbb1263aeda997edd8a39e461aaa9ede71161d1e5c2586307f2
+        keywords:
+          - ward
+          - aura
+        line: 1
+        occurrence:
+          field: effect
+          line_ordinal: 0
+          ordinal: null
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:0149b98f325523514dc93373094ded8f96f3fb844af5b6e77a0ccadb7bfbeb12
+          role: body
+          segments:
+            - end: 9
+              start: 0
+          source_hash: ac6120f93e44b52c4e69f413ed4717b87c86f58b1105b9eb81f038ebd28522ad
+        ports:
+          exports: {}
+          imports: {}
+      - ability_scope: ability_0
+        binding_id: bind:839e77646d6fc7874a2c28a83a352a214559fc6452da0142b0ce76377ca81f20
+        body: destroy_fanfare_opponent_all_field_followers.v1
+        body_version: effect-body-v1:sha256:2c9792f48653e50da98b3860b4796e8abfa8ae671de5d075a74a3abcb4c810c8
+        edition: 1
+        face_id: f:53f04c41236453299bc3310c51a8cf45
+        frame_id: frame:670a31a77da9cf2f0b98574793ccba99fcf47a03ec72150a6f9732e05f056f46
+        line: 2
+        occurrence:
+          field: effect
+          line_ordinal: 1
+          ordinal: null
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:0149b98f325523514dc93373094ded8f96f3fb844af5b6e77a0ccadb7bfbeb12
+          role: body
+          segments:
+            - end: 38
+              start: 10
+          source_hash: ac6120f93e44b52c4e69f413ed4717b87c86f58b1105b9eb81f038ebd28522ad
+        params: {}
+        registration: jp
 format: 1
 kind: effect_anchor_set
 owner: BP19

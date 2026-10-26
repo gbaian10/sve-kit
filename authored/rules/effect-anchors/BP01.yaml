@@ -19,6 +19,34 @@ bodies:
             - jp
         id: jp
 cards:
+  BP01-046:
+    basis: effect-anchor-v1:sha256:2c744d3193d900ed86acd18ed3ce57fc4ca2ce3cdbdbb6ca31250d04640e9158
+    card_id: c:53a02d8082c75adab4ca7ad06ad97987
+    legacy_shape:
+      container: faces
+    source: effect-source-v1:sha256:4862b52688ecb2cd7117a6317528b3d82d7243f56453d2a5c82409c38acdedc5
+    uses:
+      - binding_id: bind:535ca836a61f81c5d9a182a196dbc80eafd9834815d43f7b1d4c277e1d8b4f49
+        face_id: f:22681cc2040b5e0981164398201ee1d8
+        frame_id: frame:2f202ff66ff2e4c06c345d577a2a79cdfa07bb0dd5c1948ab6ac1255e676d4c9
+        keywords:
+          - ward
+        line: 1
+        occurrence:
+          field: effect
+          line_ordinal: 0
+          ordinal: null
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:9e47aae6057a2516b1a429d919c6adbf6c2e262d8f4412ceff318699042bd161
+          role: body
+          segments:
+            - end: 4
+              start: 0
+          source_hash: 921ff9f9b9bc3d5ec6eb30c1a903f03858202059cbd4e98a8c7c43d4d96fa0df
+        ports:
+          exports: {}
+          imports: {}
   BP01-110:
     basis: effect-anchor-v1:sha256:2beb121030f563767169cb1a857152deae7c7bf9e2fac77692e2286121940d59
     card_id: c:9c467cdec10851c3958323fe461496dd
@@ -43,6 +71,54 @@ cards:
             - end: 19
               start: 0
           source_hash: a8887965f53a99dde02284d7deb217df4a20c000490c5fdc42330865aee829a3
+        ports:
+          exports: {}
+          imports: {}
+  BP01-144:
+    basis: effect-anchor-v1:sha256:c89392c07f7c04d15f4068f80aab7d6d5f909549403e21a4f8660b2f164cdbdb
+    card_id: c:f616c78fd5b95da387f9b3940e72565d
+    legacy_shape:
+      container: faces
+    source: effect-source-v1:sha256:b10956dda10ac911d9fe6423cc51b48b979bd0136b219395029127cba79ccbe4
+    uses:
+      - ability_scope: ability_0
+        binding_id: bind:105af92880b897146e47052ec86dc6be2954b279c0404ca15d2e531fbe914391
+        face_id: f:ebfd0de0a1c75dcea752c3ec79a753f0
+        frame_id: frame:f03820b9048f0bd911c528162f930b0e47d128493a84b4fe097f4c8a48608756
+        line: 1
+        occurrence:
+          field: effect
+          line_ordinal: 0
+          ordinal: null
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:324037ea17c2e058a4f0a17df73a23a4f2f6a9f1ff353c457a38a6887bc3dcb1
+          role: body
+          segments:
+            - end: 19
+              start: 0
+          source_hash: 576ad8ee2e900fe83482a95873ffb720cf6bdc46ce21ec517434c704b9addebe
+        ports:
+          exports: {}
+          imports: {}
+      - binding_id: bind:c4f315146830298da10100ced468685a259ef2f55b96e0e409b0aadc929bd23d
+        face_id: f:ebfd0de0a1c75dcea752c3ec79a753f0
+        frame_id: frame:4d332925c628953616efcae3fdbd98601d0bd02cc21e133e431abf0d57bffb1e
+        keywords:
+          - aura
+        line: 2
+        occurrence:
+          field: effect
+          line_ordinal: 1
+          ordinal: null
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:324037ea17c2e058a4f0a17df73a23a4f2f6a9f1ff353c457a38a6887bc3dcb1
+          role: body
+          segments:
+            - end: 25
+              start: 20
+          source_hash: 576ad8ee2e900fe83482a95873ffb720cf6bdc46ce21ec517434c704b9addebe
         ports:
           exports: {}
           imports: {}
@@ -97,6 +173,34 @@ cards:
             - end: 19
               start: 0
           source_hash: 86914ad53ab5adaa76c687ce4caf0685686cb5061c8c9e9d6f1ba5ced789656f
+        ports:
+          exports: {}
+          imports: {}
+  BP01-176:
+    basis: effect-anchor-v1:sha256:6b0fac06887d590f280b84b2d14465cc0641775ad3926f3ab0f75a857061b1e7
+    card_id: c:5b70c7caa4ca58e5bc4daa9e4b9c3cf9
+    legacy_shape:
+      container: faces
+    source: effect-source-v1:sha256:69e311f81412c6be7dd6e73def19919ee011d7aa601dc1218faea8b60759e2a3
+    uses:
+      - binding_id: bind:02850e784ee99b5ab064e928191b5fcea1247a04e05ae59b8acc2bf135dbc8eb
+        face_id: f:12efcffea9dd55ce8763d2cfd1972d74
+        frame_id: frame:2f202ff66ff2e4c06c345d577a2a79cdfa07bb0dd5c1948ab6ac1255e676d4c9
+        keywords:
+          - ward
+        line: 1
+        occurrence:
+          field: effect
+          line_ordinal: 0
+          ordinal: null
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:18a7c84079ad98d728cdda56f8922b5e2d5d1644caa0b112766cabe1a415531a
+          role: body
+          segments:
+            - end: 4
+              start: 0
+          source_hash: 921ff9f9b9bc3d5ec6eb30c1a903f03858202059cbd4e98a8c7c43d4d96fa0df
         ports:
           exports: {}
           imports: {}

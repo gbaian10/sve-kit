@@ -98,14 +98,6 @@ cards:
   BP01-042:
     status: complete
     abilities: []
-  BP01-046:
-    status: complete
-    abilities:
-      - line: 1
-        kind: static
-        body:
-          op: macro
-          name: guard
   BP01-056:
     status: complete
     review: 依 Q189／Q190：補 EX 的第二段與登錄下次結束延遲的第三段各保留印刷行號，延遲不依來源仍在場。
@@ -348,22 +340,6 @@ cards:
                   - 3
             min: 1
             max: 1
-  BP01-144:
-    status: complete
-    abilities:
-      - line: 1
-        kind: evolve
-        body:
-          op: evolve
-          subjects: self
-        costs:
-          - op: pp
-            amount: 1
-      - line: 2
-        kind: static
-        body:
-          op: macro
-          name: aura
   BP01-149:
     status: complete
     abilities:
@@ -513,14 +489,6 @@ cards:
   BP01-175:
     status: complete
     abilities: []
-  BP01-176:
-    status: complete
-    abilities:
-      - line: 1
-        kind: static
-        body:
-          op: macro
-          name: guard
   BP01-177:
     status: complete
     abilities:

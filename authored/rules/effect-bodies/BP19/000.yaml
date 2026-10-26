@@ -1,0 +1,17 @@
+format: 2
+kind: effect_body_shard
+records:
+  - body:
+      fanfare:
+        do:
+          - destroy:
+              ref:
+                kind: follower
+                who: opp
+                zone: field
+    id: destroy_fanfare_opponent_all_field_followers.v1
+    written_by:
+      - actor:
+          model: gpt-6-luna
+          who: Codex
+        date: "2026-10-26"
