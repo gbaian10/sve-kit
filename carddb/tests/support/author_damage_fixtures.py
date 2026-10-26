@@ -15,6 +15,7 @@ from .author_current_fixtures import (
     EVOLVE_FRAME,
     REPOSITORY,
     CurrentSourceFixture,
+    CurrentSourceInputs,
     current_source_fixture,
 )
 from .semantic_definition_fixtures import with_definitions
@@ -33,7 +34,7 @@ def damage_fixture(
     *,
     card_numbers: frozenset[str] = frozenset({"BP01-P25", "BP01-121"}),
     parser_version: str = "author-current-fixture-v1",
-    preparation: bytes | None = None,
+    preparation: bytes | CurrentSourceInputs | None = None,
 ) -> CurrentSourceFixture:
     authored = REPOSITORY / "authored"
     definitions = four_layer_definitions.from_files(

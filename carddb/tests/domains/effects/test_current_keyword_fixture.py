@@ -31,10 +31,6 @@ def test_real_keyword_handoff_contains_every_printed_sibling(
         }
 
 
-@pytest.mark.slow(
-    reason="Reconstruct complete current-source combat handoffs for eleven real "
-    "printings, including every printed sibling, until shared preparation lands."
-)
 def test_combat_handoffs_include_all_current_printings_after_public_reconstruction(
     combat_keyword_handoffs: bytes,
 ) -> None:

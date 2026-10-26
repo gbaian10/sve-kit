@@ -14,6 +14,7 @@ from sve_carddb.domains.translations.inputs import Snapshot, validate_snapshot
 from .author_current_fixtures import (
     REPOSITORY,
     CurrentSourceFixture,
+    CurrentSourceInputs,
     current_source_fixture,
 )
 from .semantic_definition_fixtures import with_definitions
@@ -29,7 +30,7 @@ def numeric_fixture(
     *,
     card_numbers: frozenset[str] = frozenset({"BP01-P09", "BP01-037"}),
     parser_version: str = "author-current-fixture-v1",
-    preparation: bytes | None = None,
+    preparation: bytes | CurrentSourceInputs | None = None,
 ) -> CurrentSourceFixture:
     authored = REPOSITORY / "authored"
     definitions = four_layer_definitions.from_files(

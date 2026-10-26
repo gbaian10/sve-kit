@@ -14,6 +14,7 @@ from sve_carddb.domains.translations.inputs import Snapshot, validate_snapshot
 from .author_current_fixtures import (
     REPOSITORY,
     CurrentSourceFixture,
+    CurrentSourceInputs,
     current_source_fixture,
 )
 from .semantic_definition_fixtures import with_definitions
@@ -26,7 +27,7 @@ NUMBERS = ("BP07-T03", "BP12-T12", "BP17-T19", "PR-195", "SP01-T03")
 
 
 def move_fixture(
-    store: Path, *, preparation: bytes | None = None
+    store: Path, *, preparation: bytes | CurrentSourceInputs | None = None
 ) -> CurrentSourceFixture:
     authored = REPOSITORY / "authored"
     definitions = four_layer_definitions.from_files(

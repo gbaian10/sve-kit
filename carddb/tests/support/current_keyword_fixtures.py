@@ -38,19 +38,25 @@ COMBAT_CARDS = (
 )
 
 
-def current_combat_keyword_inputs(root: Path) -> dict[str, JsonValue]:
+def current_combat_keyword_inputs(
+    root: Path,
+    *,
+    fixture: CurrentSourceFixture | None = None,
+    expander: AuthorExpander | None = None,
+) -> dict[str, JsonValue]:
     """Use real printings with current evidence, retaining every sibling and declaration."""
-    fixture = current_source_fixture(
+    fixture = fixture or current_source_fixture(
         root / "sources",
         card_numbers=frozenset(COMBAT_CARDS),
         snapshot=entry_snapshot(include_keywords=True),
     )
+    expander = expander or AuthorExpander(REPOSITORY / "dsl")
     inputs: dict[str, JsonValue] = {}
     failures: list[str] = []
     for number in COMBAT_CARDS:
         try:
             inputs[number] = current_keyword_inputs(
-                root / number, number, fixture=fixture
+                root / number, number, fixture=fixture, expander=expander
             )
         except SourceError as error:
             failures.append(f"{number}: {error}")

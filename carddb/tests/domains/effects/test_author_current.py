@@ -21,6 +21,8 @@ from sve_carddb.domains.effects.author_source_hash import (
     AuthorSourcePayload,
     source_version,
 )
+from sve_carddb.domains.parsed_cards.sources import ParsedBatches
+from sve_carddb.domains.physical_sources import page
 from sve_carddb.domains.translations.four_layer_authored import FrameRecord
 from sve_carddb.domains.translations.inputs import Snapshot
 
@@ -36,7 +38,10 @@ if TYPE_CHECKING:
 
     from sve_carddb.domains.effects.author_expansion import AuthorExpander
 
-    from ...support.author_current_fixtures import CurrentSourceFixture
+    from ...support.author_current_fixtures import (
+        CurrentSourceFixture,
+        CurrentSourceInputs,
+    )
 
 
 CARDS = {
@@ -584,3 +589,19 @@ def test_synthetic_current_author_preserves_root_sibling_closure(
             check_synthetic_sibling_root_closure(
                 source, base_current_fixture, expander, patch, family, change
             )
+
+
+def test_shared_fixed_catalog_keeps_parser_caches_private(
+    current_source_preparation: CurrentSourceInputs, tmp_path: Path
+) -> None:
+    for parser in ("first-v1", "second-v2"):
+        inputs = current_source_preparation
+        batches = ParsedBatches(inputs.catalog)
+        frozen = batches.batch(tmp_path / "sources", "public-fixture", inputs.batch_id)
+        physical = page(
+            frozen,
+            frozen.current_versions[0].source_version_id,
+            region="jp",
+            parser_version=parser,
+        )
+        assert physical.text.get().source.parser_version == parser

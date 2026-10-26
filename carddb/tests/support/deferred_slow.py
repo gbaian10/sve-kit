@@ -2,11 +2,7 @@
 
 REASON = "Paused until the real-repository test is made cheaper (#1104)"
 
-DEFERRED = frozenset(
-    {
-        "tests/domains/effects/test_author_anchors.py::test_current_anchor_grants_the_same_complete_semantic_handoff",
-    }
-)
+DEFERRED: frozenset[str] = frozenset()
 
 
 def is_deferred(nodeid: str) -> bool:

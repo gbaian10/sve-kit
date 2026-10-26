@@ -301,14 +301,17 @@ def current_source_fixture(
     card_numbers: frozenset[str] = CARD_NUMBERS,
     snapshot: Snapshot | None = None,
     parser_version: str = PARSER,
-    preparation: bytes | None = None,
+    preparation: bytes | CurrentSourceInputs | None = None,
 ) -> CurrentSourceFixture:
-    """Build selected text into a private DB from detached, genuinely prepared inputs."""
-    inputs = (
-        current_source_inputs(store, parser_version=parser_version)
-        if preparation is None
-        else restore(preparation, CurrentSourceInputs)
-    )
+    """Share fixed input graphs while keeping each database and page cache private."""
+    if isinstance(preparation, CurrentSourceInputs):
+        inputs = preparation
+    else:
+        inputs = (
+            current_source_inputs(store, parser_version=parser_version)
+            if preparation is None
+            else restore(preparation, CurrentSourceInputs)
+        )
     assert inputs.parser_version == parser_version
     batch_id = inputs.batch_id
     identity = inputs.identity
@@ -366,7 +369,14 @@ def current_source_fixture(
         template = DatabaseTemplate(schema, db._connection.serialize())
     return CurrentSourceFixture(
         template,
-        Sources(stores, REPOSITORY, build, identity.snapshot, batches=batches),
+        # Product building warms unrelated physical pages; do not retain them for the session.
+        Sources(
+            stores,
+            REPOSITORY,
+            build,
+            identity.snapshot,
+            batches=ParsedBatches(inputs.catalog),
+        ),
         inputs.snapshot if snapshot is None else snapshot,
         vocabulary,
         inputs.rules,
