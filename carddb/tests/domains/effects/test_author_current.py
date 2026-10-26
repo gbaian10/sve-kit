@@ -70,8 +70,13 @@ FRAME = "frame:f03820b9048f0bd911c528162f930b0e47d128493a84b4fe097f4c8a48608756"
 
 
 @pytest.fixture(scope="module")
-def fixture(tmp_path_factory: pytest.TempPathFactory) -> CurrentSourceFixture:
-    return current_source_fixture(tmp_path_factory.mktemp("current-source-store"))
+def fixture(
+    tmp_path_factory: pytest.TempPathFactory, author_source_preparation: bytes
+) -> CurrentSourceFixture:
+    return current_source_fixture(
+        tmp_path_factory.mktemp("current-source-store"),
+        preparation=author_source_preparation,
+    )
 
 
 @pytest.fixture(scope="module")

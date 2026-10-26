@@ -50,11 +50,14 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture(scope="module")
-def fixture(tmp_path_factory: pytest.TempPathFactory) -> CurrentSourceFixture:
+def fixture(
+    tmp_path_factory: pytest.TempPathFactory, author_source_preparation: bytes
+) -> CurrentSourceFixture:
     return current_source_fixture(
         tmp_path_factory.mktemp("keyword-reconciliation"),
         card_numbers=CARD_NUMBERS | {"BP01-138"},
         snapshot=entry_snapshot(include_keywords=True),
+        preparation=author_source_preparation,
     )
 
 

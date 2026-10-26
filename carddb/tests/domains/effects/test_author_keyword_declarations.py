@@ -182,8 +182,12 @@ def test_keyword_inline_parameter_diagnostic_keeps_its_source(
     assert isinstance(caught.value.diagnostic.source, CardKeywordSourceUse)
 
 
-def test_current_keyword_cannot_borrow_a_real_body_source(tmp_path: Path) -> None:
-    fixture = current_source_fixture(tmp_path / "sources")
+def test_current_keyword_cannot_borrow_a_real_body_source(
+    tmp_path: Path, author_source_preparation: bytes
+) -> None:
+    fixture = current_source_fixture(
+        tmp_path / "sources", preparation=author_source_preparation
+    )
     with current(fixture) as sources:
         card = author(sources)
         node = object_value(array(card["abilities"])[0])

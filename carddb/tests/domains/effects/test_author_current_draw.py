@@ -223,9 +223,13 @@ def check_unknown_attributes(
             )
 
 
-def test_real_current_draw(tmp_path: Path, draw_card: DrawCard) -> None:
+def test_real_current_draw(
+    tmp_path: Path, draw_card: DrawCard, author_source_preparation: bytes
+) -> None:
     fixture = current_source_fixture(
-        tmp_path / "sources", card_numbers=frozenset({draw_card.number})
+        tmp_path / "sources",
+        card_numbers=frozenset({draw_card.number}),
+        preparation=author_source_preparation,
     )
     expander = AuthorExpander(SCHEMAS)
     with current(fixture) as source:
