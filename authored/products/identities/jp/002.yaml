@@ -1,0 +1,17 @@
+format: 1
+kind: product_identity_shard
+records:
+  - kind: product_identity
+    filing_key: jp
+    data:
+      product_id: jp-bp22
+      region: jp
+      match:
+        kind: product_link
+        product_url: https://shadowverse-evolve.com/products/bp22/
+        expansion_code: BP22
+    evidence:
+      - batch_id: sha256:139be07a281797f06baeb00b6aa8da56265ccd22ba4b42246630ba3d283e9ac3
+        source_version_id: src:v1:a33e19548de422cfb181e51aa1b6d517a7481ff59e6bf7d76f1a0080de1cec55
+        locator: '{"product_block_ordinal":0}'
+        role: product_identity_match
