@@ -644,6 +644,9 @@ fn draw_position() -> Value {
 #[path = "runtime/bp10_122.rs"]
 mod bp10_122;
 
+#[path = "runtime/bp06_048.rs"]
+mod bp06_048;
+
 #[path = "runtime/cp02_068.rs"]
 mod cp02_068;
 
