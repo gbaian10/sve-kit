@@ -1,4 +1,4 @@
-use super::current_inputs;
+use super::{CURRENT_FACE, current_inputs};
 use crate::EngineFailure;
 use crate::catalog::Catalog;
 use crate::game::Game;
@@ -14,6 +14,8 @@ use std::{env::var_os, fs::read_to_string};
 #[path = "current_keywords/runtime.rs"]
 mod runtime;
 
+const KEYWORD_FACE: &str = "f:0a2de2c8ea0d5629b3f899fc2cc52c88";
+
 fn input() -> Value {
     current_inputs()["keywords"]["authors"][0]["input"].clone()
 }
@@ -25,7 +27,7 @@ fn real_current_keyword_selection_checks_complete_declarations_before_lowering()
     let checked = lowerer.check_current(&input).unwrap();
     assert!(checked.source_sidecar.is_empty());
     assert_eq!(checked.declaration_sidecar.len(), 1);
-    let evidence = &checked.declaration_sidecar["/cards/BP01-138/abilities/0"];
+    let evidence = &checked.declaration_sidecar["/cards/BP01-138/faces/f:0a2de2c8ea0d5629b3f899fc2cc52c88/abilities/0"];
     assert_eq!(
         evidence.keywords(),
         [PrintedKeyword::Ward, PrintedKeyword::Aura]
@@ -33,7 +35,7 @@ fn real_current_keyword_selection_checks_complete_declarations_before_lowering()
     assert_eq!(evidence.source.face, "f:0a2de2c8ea0d5629b3f899fc2cc52c88");
     assert_eq!(
         evidence.source.scope,
-        "keyword_declaration:/cards/BP01-138/abilities/0"
+        "keyword_declaration:/cards/BP01-138/faces/f:0a2de2c8ea0d5629b3f899fc2cc52c88/abilities/0"
     );
     let reference = serde_json::to_value(&evidence.reference).unwrap();
     assert_eq!(
@@ -52,7 +54,9 @@ fn real_current_keyword_selection_checks_complete_declarations_before_lowering()
     for (index, ability) in candidate.program.card().abilities.iter().enumerate() {
         assert_eq!(
             ability.source.author_path,
-            format!("/cards/BP01-138/abilities/0/keywords/{index}")
+            format!(
+                "/cards/BP01-138/faces/f:0a2de2c8ea0d5629b3f899fc2cc52c88/abilities/0/keywords/{index}"
+            )
         );
         assert_eq!(ability.source.scope, evidence.source.scope);
         assert!(candidate.source_at(&ability.source.author_path).is_none());
@@ -91,17 +95,16 @@ fn declaration_containers_and_each_list_element_keep_the_checked_source() {
     let abilities = input["tree"]["cards"]["BP01-138"]
         .as_object_mut()
         .unwrap()
-        .remove("abilities")
+        .remove("faces")
         .unwrap();
-    input["tree"]["cards"]["BP01-138"]["faces"] = json!({&face:{"abilities":abilities}});
-    input["declaration_sidecar"][0]["path"] =
-        json!(["cards", "BP01-138", "faces", face, "abilities", 0_u64]);
+    input["tree"]["cards"]["BP01-138"]["abilities"] = abilities[&face]["abilities"].clone();
+    input["declaration_sidecar"][0]["path"] = json!(["cards", "BP01-138", "abilities", 0_u64]);
     let checked = ExpandedLowerer::new()
         .unwrap()
         .check_current(&input)
         .unwrap();
-    let path = format!("/cards/BP01-138/faces/{face}/abilities/0");
-    let evidence = &checked.declaration_sidecar[&path];
+    let path = "/cards/BP01-138/abilities/0";
+    let evidence = &checked.declaration_sidecar[path];
     assert_eq!(evidence.source.face, face);
     assert_eq!(evidence.source.scope, format!("keyword_declaration:{path}"));
     assert_eq!(evidence.keywords().len(), 2);
@@ -130,7 +133,7 @@ fn assert_rejected(candidates: Vec<Value>) {
 fn declaration_closure_rejects_joint_omission_duplicates_extras_and_inert_metadata() {
     let input = input();
     let mut omitted = input.clone();
-    omitted["tree"]["cards"]["BP01-138"]["abilities"] = json!([]);
+    omitted["tree"]["cards"]["BP01-138"]["faces"][KEYWORD_FACE]["abilities"] = json!([]);
     omitted["declaration_sidecar"] = json!([]);
     let mut missing = input.clone();
     missing["declaration_sidecar"] = json!([]);
@@ -217,11 +220,21 @@ fn complete_declaration_payload_and_all_independent_source_coordinates_must_matc
         ),
         (
             "/declaration_sidecar/0/path",
-            json!(["cards", "BP01-138", "abilities", 1_u64]),
+            json!([
+                "cards",
+                "BP01-138",
+                "faces",
+                KEYWORD_FACE,
+                "abilities",
+                1_u64
+            ]),
         ),
-        ("/tree/cards/BP01-138/abilities/0/line", json!(2_u64)),
         (
-            "/tree/cards/BP01-138/abilities/0/keywords",
+            "/tree/cards/BP01-138/faces/f:0a2de2c8ea0d5629b3f899fc2cc52c88/abilities/0/line",
+            json!(2_u64),
+        ),
+        (
+            "/tree/cards/BP01-138/faces/f:0a2de2c8ea0d5629b3f899fc2cc52c88/abilities/0/keywords",
             json!(["aura", "ward"]),
         ),
         (
@@ -234,7 +247,8 @@ fn complete_declaration_payload_and_all_independent_source_coordinates_must_matc
         candidates.push(candidate);
     }
     let mut section = input.clone();
-    section["tree"]["cards"]["BP01-138"]["abilities"][0]["section"] = json!(1_u64);
+    section["tree"]["cards"]["BP01-138"]["faces"][KEYWORD_FACE]["abilities"][0]["section"] =
+        json!(1_u64);
     candidates.push(section);
     let mut ordinal = input;
     ordinal["declaration_sidecar"][0]["source_use"]["occurrence"]["ordinal"] = json!(1_u64);
@@ -262,7 +276,7 @@ fn current_internal_keyword_wire_is_closed_and_required() {
         ),
         ("/declaration_sidecar/0/source_proof", json!("none")),
         ("/declaration_sidecar/0/input_hash", Value::Null),
-        ("/declaration_sidecar/0/path/3", json!(-1_i64)),
+        ("/declaration_sidecar/0/path/5", json!(-1_i64)),
         (
             "/source_inventory/non_body/0/source_use/occurrence/segments",
             json!([]),
@@ -344,7 +358,8 @@ fn synthetic_two_faces() -> Value {
         .as_array_mut()
         .unwrap()
         .push(back);
-    let mut entry = input["tree"]["cards"]["BP01-138"]["abilities"][0].clone();
+    let mut entry =
+        input["tree"]["cards"]["BP01-138"]["faces"][KEYWORD_FACE]["abilities"][0].clone();
     entry["sources"][0]["binding_id"] = json!(format!("bind:{}", "e".repeat(64)));
     entry["sources"][0]["occurrence"]["owner"]["revision_id"] = json!(revision);
     let mut evidence = input["declaration_sidecar"][0].clone();
@@ -354,7 +369,7 @@ fn synthetic_two_faces() -> Value {
     let mut obligation = input["source_inventory"]["non_body"][0].clone();
     obligation["source_use"] = evidence["source_use"].clone();
     obligation["face_id"] = json!(face);
-    input["tree"]["cards"]["BP01-138"]["faces"] = json!({face:{"abilities":[entry]}});
+    input["tree"]["cards"]["BP01-138"]["faces"][&face] = json!({"abilities":[entry]});
     input["declaration_sidecar"]
         .as_array_mut()
         .unwrap()
@@ -391,7 +406,10 @@ fn same_keywords_on_two_faces_consume_separate_obligations() {
         4
     );
     let mut omitted = input.clone();
-    omitted["tree"]["cards"]["BP01-138"]["faces"] = json!({});
+    omitted["tree"]["cards"]["BP01-138"]["faces"]
+        .as_object_mut()
+        .unwrap()
+        .remove(&format!("f:{}", "e".repeat(32)));
     omitted["declaration_sidecar"].as_array_mut().unwrap().pop();
     let mut borrowed = input.clone();
     borrowed["declaration_sidecar"][1]["source_use"] =
@@ -399,7 +417,7 @@ fn same_keywords_on_two_faces_consume_separate_obligations() {
     let mut container = input.clone();
     let face = format!("f:{}", "e".repeat(32));
     container["tree"]["cards"]["BP01-138"]["faces"][&face]["abilities"][0] =
-        input["tree"]["cards"]["BP01-138"]["abilities"][0].clone();
+        input["tree"]["cards"]["BP01-138"]["faces"][KEYWORD_FACE]["abilities"][0].clone();
     container["declaration_sidecar"][1] = input["declaration_sidecar"][0].clone();
     container["declaration_sidecar"][1]["path"] =
         json!(["cards", "BP01-138", "faces", face, "abilities", 0_u64]);
@@ -469,14 +487,18 @@ fn real_advance_printings_lower_both_keywords_and_the_complete_fanfare() {
             3
         );
         admission(selection).unwrap();
+        let face = input["declaration_sidecar"][0]["face_id"]
+            .as_str()
+            .unwrap()
+            .to_owned();
         let mut missing = input.clone();
-        missing["tree"]["cards"][number]["abilities"]
+        missing["tree"]["cards"][number]["faces"][&face]["abilities"]
             .as_array_mut()
             .unwrap()
             .remove(0);
         missing["declaration_sidecar"] = json!([]);
         // Keep the remaining body's sidecar path aligned so only keyword closure can fail.
-        missing["sidecar"][0]["path"] = json!(["cards", number, "abilities", 0_u64]);
+        missing["sidecar"][0]["path"] = json!(["cards", number, "faces", face, "abilities", 0_u64]);
         assert_eq!(
             lowerer.lower_current(&missing).unwrap_err().code,
             "current_keyword_closure_mismatch"
@@ -594,19 +616,27 @@ fn raw_keyword_game() -> Game {
 fn body_and_declaration_obligations_are_consumed_independently() {
     let mut input = input();
     let body = &current_inputs()["accepted"];
-    let mut entry = body["tree"]["cards"]["BP01-009"]["abilities"][0].clone();
+    let mut entry =
+        body["tree"]["cards"]["BP01-009"]["faces"][CURRENT_FACE]["abilities"][0].clone();
     let mut source = input["declaration_sidecar"][0]["source_use"].clone();
     source["binding_id"] = json!(format!("bind:{}", "e".repeat(64)));
     source["ability_scope"] = json!("ability_0");
     entry["sources"] = json!([source]);
     let mut evidence = body["sidecar"][0].clone();
-    evidence["path"] = json!(["cards", "BP01-138", "abilities", 1_u64]);
+    evidence["path"] = json!([
+        "cards",
+        "BP01-138",
+        "faces",
+        KEYWORD_FACE,
+        "abilities",
+        1_u64
+    ]);
     evidence["source_use"] = source.clone();
     evidence["input_hash"] = input["declaration_sidecar"][0]["input_hash"].clone();
     evidence["source_input_hash"] = input["declaration_sidecar"][0]["source_input_hash"].clone();
     let mut obligation = body["source_inventory"]["abilities"][0].clone();
     obligation["source_use"] = source;
-    input["tree"]["cards"]["BP01-138"]["abilities"]
+    input["tree"]["cards"]["BP01-138"]["faces"][KEYWORD_FACE]["abilities"]
         .as_array_mut()
         .unwrap()
         .push(entry);
@@ -617,7 +647,7 @@ fn body_and_declaration_obligations_are_consumed_independently() {
     assert_eq!(checked.source_sidecar.len(), 1);
     assert_eq!(checked.declaration_sidecar.len(), 1);
     let mut missing = input.clone();
-    missing["tree"]["cards"]["BP01-138"]["abilities"]
+    missing["tree"]["cards"]["BP01-138"]["faces"][KEYWORD_FACE]["abilities"]
         .as_array_mut()
         .unwrap()
         .pop();

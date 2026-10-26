@@ -18,6 +18,8 @@ use std::{
     sync::OnceLock,
 };
 
+const CURRENT_FACE: &str = "f:8708790ca2995a0f9f9e5ffd1af52668";
+
 fn current_inputs() -> &'static Value {
     static CURRENT: OnceLock<Value> = OnceLock::new();
     CURRENT.get_or_init(|| {
@@ -87,7 +89,8 @@ fn batch_switch_rejects_missing_abilities_and_overlapping_versions() {
     overlap["documents"] = switch["before"]["documents"].clone();
     selected_catalog(&overlap).unwrap_err();
     let mut missing_body = switch["after"].clone();
-    missing_body["authors"][0]["input"]["tree"]["cards"]["BP01-009"]["abilities"] = json!([]);
+    missing_body["authors"][0]["input"]["tree"]["cards"]["BP01-009"]["faces"][CURRENT_FACE]["abilities"] =
+        json!([]);
     missing_body["authors"][0]["input"]["sidecar"] = json!([]);
     selected_catalog(&missing_body).unwrap_err();
     assert_legacy_loader_refuses_current_inventory();
@@ -104,7 +107,9 @@ fn assert_legacy_loader_refuses_current_inventory() {
 
 fn assert_current_sources(admitted: &CurrentCardProgram, input: &Value, face: &str) {
     let evidence = admitted
-        .source_at("/cards/BP01-009/abilities/0/evolve/cost/pp")
+        .source_at(
+            "/cards/BP01-009/faces/f:8708790ca2995a0f9f9e5ffd1af52668/abilities/0/evolve/cost/pp",
+        )
         .unwrap();
     assert_eq!(evidence.source.card_id, admitted.card_id);
     assert_eq!(evidence.source.face, face);
@@ -124,7 +129,11 @@ fn assert_current_sources(admitted: &CurrentCardProgram, input: &Value, face: &s
         evidence.source_input_hash,
         input["sidecar"][0]["source_input_hash"]
     );
-    assert!(admitted.source_at("/cards/BP01-009/abilities/01").is_none());
+    assert!(
+        admitted
+            .source_at("/cards/BP01-009/faces/f:8708790ca2995a0f9f9e5ffd1af52668/abilities/01")
+            .is_none()
+    );
     let requirements = Requirements::derive(&Located {
         source: admitted.program.card().abilities[0].source.clone(),
         node: admitted.program.card().clone(),
@@ -172,18 +181,17 @@ fn current_reader_hands_permanent_owner_and_token_selection_to_lowering() {
     let abilities = container["tree"]["cards"]["BP01-009"]
         .as_object_mut()
         .unwrap()
-        .remove("abilities")
+        .remove("faces")
         .unwrap();
-    container["tree"]["cards"]["BP01-009"]["faces"] = json!({face:{"abilities":abilities}});
-    container["sidecar"][0]["path"] =
-        json!(["cards", "BP01-009", "faces", face, "abilities", 0_u64]);
+    container["tree"]["cards"]["BP01-009"]["abilities"] = abilities[face]["abilities"].clone();
+    container["sidecar"][0]["path"] = json!(["cards", "BP01-009", "abilities", 0_u64]);
     let nested = lowerer.lower_current(&container).unwrap();
     assert_eq!(nested.program.card().abilities[0].source.face, face);
     assert!(
         nested.program.card().abilities[0]
             .source
             .author_path
-            .contains("/faces/")
+            .starts_with("/cards/BP01-009/abilities/")
     );
 }
 
@@ -220,8 +228,8 @@ fn provisional_current_printing_and_unresolved_handoffs_cannot_lower() {
         "/sidecar/0/input_hash",
         "/sidecar/0/source_use/occurrence/owner/revision_id",
         "/sidecar/0/path/1",
-        "/tree/cards/BP01-009/abilities/0/sources/0/occurrence/owner/revision_id",
-        "/tree/cards/BP01-009/abilities/0/sources/0/occurrence/line_ordinal",
+        "/tree/cards/BP01-009/faces/f:8708790ca2995a0f9f9e5ffd1af52668/abilities/0/sources/0/occurrence/owner/revision_id",
+        "/tree/cards/BP01-009/faces/f:8708790ca2995a0f9f9e5ffd1af52668/abilities/0/sources/0/occurrence/line_ordinal",
     ] {
         let mut mismatched = inputs["accepted"].clone();
         *mismatched.pointer_mut(pointer).unwrap() = json!("mismatch");
@@ -237,9 +245,10 @@ fn provisional_current_printing_and_unresolved_handoffs_cannot_lower() {
         "invalid_current_source"
     );
     let mut zero_line = inputs["accepted"].clone();
-    zero_line["tree"]["cards"]["BP01-009"]["abilities"][0]["line"] = json!(0_u32);
+    zero_line["tree"]["cards"]["BP01-009"]["faces"][CURRENT_FACE]["abilities"][0]["line"] =
+        json!(0_u32);
     for use_path in [
-        "/tree/cards/BP01-009/abilities/0/sources/0/occurrence",
+        "/tree/cards/BP01-009/faces/f:8708790ca2995a0f9f9e5ffd1af52668/abilities/0/sources/0/occurrence",
         "/sidecar/0/source_use/occurrence",
     ] {
         zero_line
@@ -313,7 +322,7 @@ fn synthetic_current_closure() -> Value {
             .unwrap()
             .push(json!({"source_use":uses,"body":body}));
     }
-    input["tree"]["cards"]["BP01-009"]["faces"] = json!({face:{"abilities":abilities}});
+    input["tree"]["cards"]["BP01-009"]["faces"][&face] = json!({"abilities":abilities});
     input
 }
 
@@ -474,7 +483,7 @@ fn keyword_sources_are_scope_free_and_keep_their_own_coordinate() {
 #[test]
 fn a_keyword_cannot_borrow_a_current_body_obligation() {
     let mut input = current_inputs()["switch"]["after"]["authors"][0]["input"].clone();
-    let ability = &mut input["tree"]["cards"]["BP01-009"]["abilities"][0];
+    let ability = &mut input["tree"]["cards"]["BP01-009"]["faces"][CURRENT_FACE]["abilities"][0];
     ability.as_object_mut().unwrap().remove("evolve");
     ability["sources"][0]
         .as_object_mut()
