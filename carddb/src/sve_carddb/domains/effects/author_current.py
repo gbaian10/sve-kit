@@ -300,8 +300,9 @@ class CurrentAuthorSources:
         from sve_carddb.domains.effects.author_set import validate_author_set  # ruff: ignore[import-outside-top-level] -- share the disk reader's complete inventory boundary
 
         validate_author_set(inputs, expander.schemas)
+        inputs, failures = self.resolve_inputs(inputs, expander)
         self._prepare(inputs, expander)
-        return self._validate(inputs, expander)
+        return self._validate(inputs, expander, failures)
 
     def selection_input(
         self, authored_root: Path, expander: AuthorExpander
@@ -311,10 +312,21 @@ class CurrentAuthorSources:
         Card-local failures remain explicit; consumers must not drop them or fall
         back to a prototype. This internal handoff grants no runtime qualification.
         """
-        inputs = load_author_set(authored_root, expander.schemas)
+        return self.selection_inputs(
+            load_author_set(authored_root, expander.schemas), expander
+        )
+
+    def selection_inputs(
+        self, inputs: AuthorInputSet, expander: AuthorExpander
+    ) -> JsonValue:
+        """Select from a complete in-memory semantic inventory without loading storage."""
+        from sve_carddb.domains.effects.author_set import validate_author_set  # ruff: ignore[import-outside-top-level] -- avoid the inventory/expansion initialization cycle
+
+        validate_author_set(inputs, expander.schemas)
+        inputs, failures = self.resolve_inputs(inputs, expander)
         self._prepare(inputs, expander)
         authors: list[JsonValue] = []
-        for result in self._validate(inputs, expander):
+        for result in self._validate(inputs, expander, failures):
             if not isinstance(result.record, AuthorIndexRecord):
                 continue
             authors.append(
@@ -333,12 +345,32 @@ class CurrentAuthorSources:
             "authors": authors,
         }
 
-    def _validate(
+    def resolve_inputs(
         self, inputs: AuthorInputSet, expander: AuthorExpander
+    ) -> tuple[AuthorInputSet, dict[str, Diagnostic]]:
+        """Materialize storage with committed pins; this never refreshes an anchor."""
+        from sve_carddb.domains.effects.author_anchors import (  # ruff: ignore[import-outside-top-level] -- materialization consumes this current-source boundary
+            is_handwritten,
+            materialize_inputs,
+        )
+
+        if not is_handwritten(inputs):
+            return inputs, {}
+        result = materialize_inputs(inputs, self, expander)
+        return result.inputs, result.failures
+
+    def _validate(
+        self,
+        inputs: AuthorInputSet,
+        expander: AuthorExpander,
+        failures: dict[str, Diagnostic] | None = None,
     ) -> tuple[CardResult, ...]:
         files = {file.path: file for file in inputs.author_files}
         results: list[CardResult] = []
         for record in inputs.index.records:
+            if failures and record.record_key in failures:
+                results.append(CardRejected(record, failures[record.record_key]))
+                continue
             try:
                 supported = self._supported(record)
                 file = files[record.file]

@@ -8,7 +8,7 @@ import pytest
 from sve_carddb.core.json import canonical
 from sve_carddb.core.provenance import BuildContext
 from sve_carddb.domains.effects.author_current import CardRejected, CurrentAuthorSources
-from sve_carddb.domains.effects.author_expansion import AuthorExpander, body_version
+from sve_carddb.domains.effects.author_expansion import AuthorExpander
 from sve_carddb.domains.effects.author_inputs import AuthorInputError, AuthorSchemas
 from sve_carddb.domains.effects.author_set import load_author_set, validate_author_set
 from sve_carddb.domains.text_observations import Vocabulary
@@ -16,7 +16,7 @@ from sve_carddb.domains.translations.inputs import Snapshot
 from sve_carddb.domains.translations.recognition.rules import load
 from sve_carddb.domains.translations.sources import Sources
 
-from .author_entry_cases import meta, source_use
+from .author_entry_cases import meta
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
@@ -63,25 +63,20 @@ def index(root: Path, *records: dict[str, JsonValue]) -> None:
 
 
 def author(root: Path, *keys: str, scope: str = "shared") -> None:
-    card: JsonValue = {
-        "meta": meta(),
-        "abilities": [
-            {
-                "line": 1,
-                "sources": [source_use()],
-                "ports": {"imports": {}, "exports": {}},
-                "evolve": {"cost": {"pp": 1}},
-            }
-        ],
-    }
     write(
         root,
         AUTHOR,
         {
-            "format": 1,
+            "format": 2,
             "kind": "author_effect_set",
             "scope": scope,
-            "cards": dict.fromkeys(keys, card),
+            "cards": {
+                key: {
+                    "meta": {"written_by": meta()["written_by"]},
+                    "abilities": [{"line": 1, "evolve": {"cost": {"pp": 1}}}],
+                }
+                for key in keys
+            },
         },
     )
 
@@ -99,26 +94,19 @@ def prototype(root: Path, *keys: str) -> None:
 
 
 def companion(root: Path, path: str = BODY) -> None:
-    record: dict[str, JsonValue] = {
-        "frame_id": "frame:" + "1" * 64,
-        "ability_scope": "ability_0",
-        "body_version": "",
-        "dsl": "1.0",
-        "params": {},
-        "ports": {"imports": {}, "exports": {}},
-        "body": {"evolve": {"cost": {"pp": 1}}},
-        "written_by": meta()["written_by"],
-        "registrations": [],
-    }
-    record["body_version"] = body_version(record)
     write(
         root,
         path,
         {
-            "format": 1,
+            "format": 2,
             "kind": "effect_body_shard",
-            "scope": "shared",
-            "records": [record],
+            "records": [
+                {
+                    "id": "synthetic",
+                    "body": {"evolve": {"cost": {"pp": 1}}},
+                    "written_by": meta()["written_by"],
+                }
+            ],
         },
     )
 
@@ -164,9 +152,8 @@ def test_prototype_inventory_uses_database_identity(
                 with pytest.raises(AuthorInputError, match="prototype_author_overlap"):
                     current.validate(tmp_path, expander)
             else:
-                result = current.validate(tmp_path, expander)
-                assert isinstance(result[0], CardRejected)
-                assert result[0].diagnostic.reason == "en_source_contract_unavailable"
+                with pytest.raises(AuthorInputError, match="schema/const"):
+                    current.validate(tmp_path, expander)
 
 
 def test_complete_inventory_retains_bytes_and_unused_bodies(

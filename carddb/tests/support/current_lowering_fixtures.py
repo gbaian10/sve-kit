@@ -16,6 +16,7 @@ from sve_carddb.domains.effects.author_inputs import AuthorInputError
 from sve_carddb.domains.effects.author_source_hash import source_version
 
 from .author_current_fixtures import REPOSITORY, current_source_fixture
+from .author_semantic_inputs import load_semantic_inputs
 from .current_keyword_fixtures import current_keyword_inputs
 
 if TYPE_CHECKING:
@@ -71,7 +72,9 @@ def current_lowering_inputs(root: Path) -> JsonValue:
             )
         )
         switch: dict[str, JsonValue] = {
-            "before": current.selection_input(authored, expander)
+            "before": current.selection_inputs(
+                load_semantic_inputs(authored, expander), expander
+            )
         }
         file.parent.mkdir(parents=True)
         file.write_bytes(
@@ -127,15 +130,19 @@ def current_lowering_inputs(root: Path) -> JsonValue:
             )
         )
         try:
-            current.selection_input(authored, expander)
+            current.selection_inputs(load_semantic_inputs(authored, expander), expander)
         except AuthorInputError as error:
             switch["overlap"] = error.diagnostic.reason
         else:
             raise AssertionError("synthetic prototype overlap was accepted")
         prototype.unlink()
-        accepted = current.validate(authored, expander)[0]
+        accepted = current.validate_inputs(
+            load_semantic_inputs(authored, expander), expander
+        )[0]
         assert isinstance(accepted, CardAccepted)
-        switch["after"] = current.selection_input(authored, expander)
+        switch["after"] = current.selection_inputs(
+            load_semantic_inputs(authored, expander), expander
+        )
         switch["missing"] = missing_selection(file, authored, current, expander)
         with db.transaction():
             for printing in db.select(
@@ -146,7 +153,9 @@ def current_lowering_inputs(root: Path) -> JsonValue:
                     {"id": printing.values["id"]},
                     {"card_no_state": "provisional"},
                 )
-        rejected = current.validate(authored, expander)[0]
+        rejected = current.validate_inputs(
+            load_semantic_inputs(authored, expander), expander
+        )[0]
         assert isinstance(rejected, CardRejected)
         return {
             "accepted": accepted.lowering_input(),
@@ -168,6 +177,8 @@ def missing_selection(
     object_value(object_value(tree["cards"])["BP01-009"])["abilities"] = []
     file.write_bytes(canonical(tree))
     try:
-        return current.selection_input(authored, expander)
+        return current.selection_inputs(
+            load_semantic_inputs(authored, expander), expander
+        )
     finally:
         file.write_bytes(original)

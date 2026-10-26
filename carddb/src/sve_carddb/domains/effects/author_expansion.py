@@ -359,6 +359,7 @@ class AuthorExpander:
     """Expand candidates, keeping provenance separate from the D0 JSON tree."""
 
     def __init__(self, schema_directory: Path) -> None:
+        self.schema_directory = schema_directory
         self.schemas = AuthorSchemas(schema_directory)
         self.sites = NodeSites(schema_directory)
         schemas: dict[str, JsonValue] = {

@@ -10,10 +10,12 @@ from sve_carddb.core.authored import check_path, require_directory
 from sve_carddb.core.json import canonical, digest, object_value
 from sve_carddb.core.yaml import MAX_BYTES
 from sve_carddb.domains.effects.author_expansion import BodyLibrary
+from sve_carddb.domains.effects.author_handwritten import BodyFile, MainFile, decode
 from sve_carddb.domains.effects.author_inputs import (
     AuthorInputError,
     AuthorSchemas,
     Diagnostic,
+    parse_document,
 )
 
 if TYPE_CHECKING:
@@ -23,10 +25,13 @@ if TYPE_CHECKING:
 
     from sve_carddb.contracts.author_leaves import IndexRecord
 
+STORAGE_FORMAT = 2
+
 _INDEX = "rules/effects-index.yaml"
 _AUTHOR = "rules/author-effects"
 _BODIES = "rules/effect-bodies"
 _PROTOTYPE = "rules/effects"
+_ANCHORS = "rules/effect-anchors"
 _OWNER = r"[A-Za-z0-9_-]+"
 _SHARD = r"[0-9]{3,}\.yaml"
 
@@ -45,6 +50,7 @@ class AuthorInputSet:
     author_files: tuple[InputFile, ...]
     body_files: tuple[InputFile, ...]
     prototype_files: tuple[InputFile, ...]
+    anchor_files: tuple[InputFile, ...] = ()
 
 
 def _reject(reason: str, path: str, record: IndexRecord | None = None) -> Never:
@@ -111,7 +117,9 @@ def _files(root: Path, area: str, *, sharded: bool) -> tuple[InputFile, ...]:
 
 
 def _path_matches(path: str, area: str) -> bool:
-    suffix = _OWNER + r"\.yaml" if area == _PROTOTYPE else _OWNER + "/" + _SHARD
+    suffix = (
+        _OWNER + r"\.yaml" if area in {_PROTOTYPE, _ANCHORS} else _OWNER + "/" + _SHARD
+    )
     return re.fullmatch(re.escape(area) + "/" + suffix, path) is not None
 
 
@@ -134,6 +142,8 @@ def _tree(
     try:
         if item.path.startswith(_PROTOTYPE + "/"):
             return object_value(schemas.prototype_tree(item.raw))
+        if object_value(parse_document(item.raw).value).get("format") == STORAGE_FORMAT:
+            return object_value(schemas.storage_tree(item.raw, "author_effect_set"))
         return object_value(schemas.author_inventory_tree(item.raw, context=context))
     except AuthorInputError as error:
         raise AuthorInputError(
@@ -207,7 +217,24 @@ def validate_author_set(inputs: AuthorInputSet, schemas: AuthorSchemas) -> None:
                     or tree.get("scope", "shared") != record.scope
                 ):
                     _reject("index_envelope_mismatch", path, record)
-    BodyLibrary(schemas, (item.raw for item in inputs.body_files))
+
+    _validate_storage(inputs, schemas)
+
+
+def _validate_storage(inputs: AuthorInputSet, schemas: AuthorSchemas) -> None:
+    formats = {
+        object_value(parse_document(item.raw).value).get("format")
+        for item in (*inputs.author_files, *inputs.body_files)
+    }
+    if len(formats) > 1:
+        _reject("mixed_storage_formats", _AUTHOR)
+    anchors = _inventory(inputs.anchor_files, _ANCHORS)
+    if formats == {STORAGE_FORMAT}:
+        _handwritten_inventory(inputs, schemas, anchors)
+    else:
+        if anchors:
+            _reject("mixed_storage_formats", _ANCHORS)
+        BodyLibrary(schemas, (item.raw for item in inputs.body_files))
 
 
 def load_author_set(authored_root: Path, schemas: AuthorSchemas) -> AuthorInputSet:
@@ -236,6 +263,39 @@ def load_author_set(authored_root: Path, schemas: AuthorSchemas) -> AuthorInputS
         _files(authored_root, _AUTHOR, sharded=True),
         _files(authored_root, _BODIES, sharded=True),
         _files(authored_root, _PROTOTYPE, sharded=False),
+        _files(authored_root, _ANCHORS, sharded=False),
     )
+    for item in (*result.author_files, *result.body_files):
+        if object_value(parse_document(item.raw).value).get("format") != STORAGE_FORMAT:
+            _reject("unsupported_storage_format", item.path)
     validate_author_set(result, schemas)
     return result
+
+
+def _handwritten_inventory(
+    inputs: AuthorInputSet, schemas: AuthorSchemas, anchors: dict[str, InputFile]
+) -> None:
+    names: set[tuple[str, int]] = set()
+    for item in inputs.author_files:
+        decode(parse_document(item.raw), MainFile)
+        for number in object_value(
+            object_value(parse_document(item.raw).value)["cards"]
+        ):
+            if item.path.split("/")[-2] != number.split("-", 1)[0]:
+                _reject("wrong_owner", item.path)
+    for item in inputs.body_files:
+        try:
+            schemas.storage_tree(item.raw, "effect_body_shard")
+        except AuthorInputError as error:
+            raise AuthorInputError(
+                replace(error.diagnostic, path=(item.path, *error.diagnostic.path))
+            ) from None
+        for body in decode(parse_document(item.raw), BodyFile).records:
+            key = body.id, body.edition
+            if key in names:
+                _reject("duplicate_body_id", item.path)
+            names.add(key)
+    for item in anchors.values():
+        tree = object_value(schemas.storage_tree(item.raw, "effect_anchor_set"))
+        if item.path != f"{_ANCHORS}/{tree['owner']}.yaml":
+            _reject("wrong_anchor_owner", item.path)

@@ -18,6 +18,7 @@ from sve_carddb.domains.effects.author_source_hash import source_version
 from sve_carddb.domains.effects.author_sources import SourceContext
 
 from ...support.author_damage_fixtures import CARD, FACE, FRAME, HASH, damage_fixture
+from ...support.author_semantic_inputs import load_semantic_inputs
 from ..translations.test_four_layer_damage import RAW
 from .author_current_synthetic import effect, token_section
 from .author_entry_cases import meta
@@ -143,7 +144,9 @@ def check_selection_input(
     root: Path,
 ) -> None:
     write_inputs(root, inputs("BP01-P25", card))
-    selected = object_value(source.selection_input(root, expander))
+    selected = object_value(
+        source.selection_inputs(load_semantic_inputs(root, expander), expander)
+    )
     assert selected["documents"] == []
     authors = array(selected["authors"])
     assert len(authors) == 1
@@ -153,7 +156,9 @@ def check_selection_input(
     changed = deepcopy(card)
     changed["abilities"] = []
     write_inputs(root, inputs("BP01-P25", changed))
-    assert object_value(source.selection_input(root, expander))["authors"] == [
+    assert object_value(
+        source.selection_inputs(load_semantic_inputs(root, expander), expander)
+    )["authors"] == [
         {
             "status": "rejected",
             "card_no": "BP01-P25",

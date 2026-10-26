@@ -13,6 +13,7 @@ from sve_carddb.domains.effects.author_sources import entry_payload
 
 from .author_current_fixtures import REPOSITORY, current_source_fixture, entry_snapshot
 from .author_destroy_fixtures import destroy_fixture
+from .author_semantic_inputs import load_semantic_inputs
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -119,7 +120,10 @@ def current_keyword_inputs(root: Path, number: str = "BP01-138") -> JsonValue:
                 }
             )
         )
-        selection = source.selection_input(authored, AuthorExpander(REPOSITORY / "dsl"))
+        expander = AuthorExpander(REPOSITORY / "dsl")
+        selection = source.selection_inputs(
+            load_semantic_inputs(authored, expander), expander
+        )
         author = object_value(selection)["authors"]
         assert isinstance(author, list)
         assert len(author) == 1

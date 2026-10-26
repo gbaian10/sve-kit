@@ -17,6 +17,7 @@ from sve_carddb.core.models import RecordData
 from sve_carddb.core.provenance import BuildContext, Revision
 from sve_carddb.domains.catalog.adoption_loader import load_adoptions
 from sve_carddb.domains.catalog.rules_names import populate_rules_names
+from sve_carddb.domains.effects.author_anchors import review_states
 from sve_carddb.domains.effects.author_current import CardRejected, CurrentAuthorSources
 from sve_carddb.domains.effects.author_expansion import AuthorExpander
 from sve_carddb.domains.effects.author_handwritten import ConfigurationError, positions
@@ -381,6 +382,7 @@ def inspect(workspace: Workspace, card: str) -> dict[str, JsonValue]:
     ]
     candidates = positions(payload, current.classifier)
     inputs = load_author_set(workspace.authored, workspace.expander.schemas)
+    inputs, _ = current.resolve_inputs(inputs, workspace.expander)
     uses: list[JsonValue] = []
     record_keys = {
         record.record_key
@@ -470,4 +472,7 @@ def check(
         "selection": selection,
         "compared_public": compare_public is not None,
         "regression": regression,
+        "reviews": review_states(
+            load_author_set(workspace.authored, workspace.expander.schemas)
+        ),
     }

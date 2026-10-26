@@ -3,8 +3,6 @@
 from contextlib import contextmanager
 from copy import deepcopy
 from dataclasses import replace
-from pathlib import Path
-from tempfile import TemporaryDirectory
 from typing import TYPE_CHECKING
 
 import pytest
@@ -43,6 +41,7 @@ from .test_author_entries import SCHEMAS
 
 if TYPE_CHECKING:
     from collections.abc import Generator
+    from pathlib import Path
 
 
 CARDS = {
@@ -144,10 +143,7 @@ def write_inputs(root: Path, collection: AuthorInputSet) -> None:
 def validate_files(
     current: CurrentAuthorSources, collection: AuthorInputSet, expander: AuthorExpander
 ) -> tuple[CardAccepted | CardRejected, ...]:
-    with TemporaryDirectory() as temporary:
-        root = Path(temporary)
-        write_inputs(root, collection)
-        return current.validate(root, expander)
+    return current.validate_inputs(collection, expander)
 
 
 def author(

@@ -1,28 +1,26 @@
-"""Materialize shorthand into the existing indexed author inventory."""
+"""Write handwritten author shards and explicitly refresh generated anchors."""
 
-from copy import deepcopy
 from dataclasses import replace
 from io import StringIO
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
-from pydantic import JsonValue, ValidationError
+from pydantic import JsonValue
 from ruamel.yaml import YAML
 
 from sve_carddb.contracts.author_leaves import AuthorIndexRecord
 from sve_carddb.core.authored import check_path
-from sve_carddb.core.json import array, canonical, digest, object_value, string
+from sve_carddb.core.json import array, digest, object_value
 from sve_carddb.core.yaml import MAX_BYTES
+from sve_carddb.domains.effects.author_anchors import handwriting, materialize_inputs
 from sve_carddb.domains.effects.author_current import CardRejected
 from sve_carddb.domains.effects.author_handwritten import (
+    Body,
+    BodyFile,
     ConfigurationError,
     Handwritten,
-    Locator,
     decode,
-    materialize,
-    positions,
     read,
-    resolve,
 )
 from sve_carddb.domains.effects.author_inputs import (
     AuthorInputError,
@@ -34,23 +32,13 @@ from sve_carddb.domains.effects.author_set import (
     InputFile,
     load_author_set,
 )
-from sve_carddb.domains.effects.author_sites import NodeSites, SiteError
-from sve_carddb.domains.effects.author_source_hash import source_version
-from sve_carddb.domains.effects.author_sources import SourceContext, SourceError
 
 if TYPE_CHECKING:
-    from sve_carddb.domains.effects.author_current import CurrentCard
-    from sve_carddb.domains.effects.author_validation import PathParts
     from sve_carddb.workflows.authoring import Workspace
-
-_EMPTY_PORTS: dict[str, JsonValue] = {"imports": {}, "exports": {}}
-_LOCATORS = frozenset({"line", "face", "section", "scope"})
-_USE = frozenset({"use", "params", "edition", "registration"})
-_CARD_KEYS = frozenset({"meta", "abilities", "note", "deck_rule"})
 
 
 def format_yaml(tree: JsonValue) -> bytes:
-    """Use one deterministic formatter for both sides of a round-trip comparison."""
+    """Use one deterministic formatter for comparison and persisted inputs."""
     formatter = YAML(typ="safe")
     formatter.default_flow_style = False
     formatter.allow_unicode = True
@@ -74,255 +62,8 @@ def _new_path(files: dict[str, InputFile], area: str, owner: str) -> str:
     raise ValueError("Author shard numbers exhausted")
 
 
-def _body(
-    value: dict[str, JsonValue],
-    handwritten: Handwritten,
-    source: SourceContext,
-    scope: str,
-    sites: NodeSites,
-) -> tuple[dict[str, JsonValue], int]:
-    name = string(value["use"])
-    editions = [
-        edition for identifier, edition in handwritten.bodies if identifier == name
-    ]
-    edition = value.get("edition")
-    if edition is None:
-        if len(editions) != 1:
-            raise SourceError("ambiguous_body_version" if editions else "body_missing")
-        edition = editions[0]
-    if type(edition) is not int or edition < 1:
-        raise SourceError("invalid_body_edition")
-    definition = handwritten.bodies.get((name, edition))
-    if definition is None:
-        raise SourceError("body_missing")
-    if definition.ability_scope != scope:
-        raise SourceError("body_scope_mismatch")
-    try:
-        return materialize(definition, source, sites), edition
-    except SiteError as error:
-        raise AuthorInputError(Diagnostic("source", error.reason, error.path)) from None
-    except ValidationError as error:
-        path = tuple(error.errors(include_input=False, include_url=False)[0]["loc"])
-        raise AuthorInputError(
-            Diagnostic("schema", "invalid_syntax_tree", path)
-        ) from None
-
-
-def _ability(
-    value: dict[str, JsonValue],
-    card: CurrentCard,
-    handwritten: Handwritten,
-    workspace: Workspace,
-    sites: NodeSites,
-) -> tuple[str, dict[str, JsonValue], dict[str, JsonValue] | None, int]:
-    locator = decode(
-        parse_document(
-            canonical({key: item for key, item in value.items() if key in _LOCATORS})
-        ),
-        Locator,
-    )
-    if (
-        isinstance(locator.face, str)
-        and sum(side == locator.face for _, side in card.face_positions.values()) > 1
-    ):
-        raise SourceError("ambiguous_face_alias")
-    located = resolve(
-        positions(card, workspace.current.classifier),
-        locator,
-        keywords="keywords" in value,
-    )
-    occurrence = located.source.binding.occurrence_key()
-    source: dict[str, JsonValue] = {
-        "binding_id": located.source.binding.id,
-        "occurrence": occurrence.model_dump(mode="json"),
-    }
-    result: dict[str, JsonValue] = {"line": locator.line, "sources": [source]}
-    if occurrence.ordinal is not None:
-        result["section"] = occurrence.ordinal
-    body = None
-    edition = 1
-    if "use" in value:
-        if value.keys() - (_LOCATORS | _USE):
-            raise SourceError("ability_head_conflict")
-        assert located.ability_scope is not None
-        # Obtain the checked classifier, not the inspection-only derived context.
-        contexts = workspace.current.contexts(workspace.current.checked_sources(card))
-        context = contexts[located.source.binding.id, located.ability_scope]
-        body, edition = _body(value, handwritten, context, located.ability_scope, sites)
-        source["ability_scope"] = located.ability_scope
-        params = object_value(value.get("params", {}))
-        declarations = object_value(body["params"])
-        if params.keys() != declarations.keys():
-            raise SourceError("parameter_name_mismatch")
-        result["generated_by"] = {
-            "macro": {
-                "frame_id": body["frame_id"],
-                "ability_scope": body["ability_scope"],
-                "applicability_scope": value.get("registration", "jp"),
-            },
-            "version": body["body_version"],
-            "params": {
-                name: {"type": object_value(declarations[name])["type"], "value": item}
-                for name, item in params.items()
-            },
-        }
-    else:
-        if value.keys() & _USE:
-            raise SourceError("ability_head_conflict")
-        if located.ability_scope is not None:
-            source["ability_scope"] = located.ability_scope
-        result.update(
-            {key: item for key, item in value.items() if key not in _LOCATORS}
-        )
-        result.setdefault("ports", deepcopy(_EMPTY_PORTS))
-    return located.face_id, result, body, edition
-
-
-def _card(  # ruff: ignore[complex-structure, too-many-branches, too-many-locals] -- keep the complete ordered boundary in one operation
-    workspace: Workspace,
-    number: str,
-    handwritten: Handwritten,
-    previous: dict[str, JsonValue] | None,
-) -> tuple[
-    str,
-    dict[str, JsonValue],
-    list[tuple[dict[str, JsonValue], int]],
-    dict[PathParts, int],
-]:
-    value = handwritten.cards[number]
-    if value.keys() - _CARD_KEYS or not {"meta", "abilities"} <= value.keys():
-        raise SourceError("invalid_card_keys")
-    meta = object_value(value["meta"])
-    if meta.keys() - {
-        "written_by",
-        "reviewed_by",
-        "status",
-        "verified_by_exam",
-        "rulings",
-    } or not meta.get("written_by"):
-        raise SourceError("invalid_card_metadata")
-    card_id = workspace.current.printing_card(number)
-    card = workspace.current.card_payload(card_id, inspect=True)
-    generated_meta: dict[str, JsonValue] = {
-        "dsl": "1.0",
-        "source": source_version(card.payload),
-        "written_by": meta["written_by"],
-        "reviewed_by": meta.get("reviewed_by", []),
-        "status": meta.get("status", "draft"),
-        "verified_by_exam": meta.get("verified_by_exam", []),
-        "rulings": meta.get("rulings", []),
-    }
-    if previous is not None:
-        if "abilities" in previous and "faces" in previous:
-            raise SourceError("unsupported_legacy_container_shape")
-        original = object_value(previous["meta"])
-        for key in (
-            "written_by",
-            "reviewed_by",
-            "status",
-            "verified_by_exam",
-            "rulings",
-        ):
-            if original.get(key) != generated_meta[key]:
-                raise SourceError("author_metadata_conflict")
-        if "note" in previous and previous.get("note") != value.get("note"):
-            raise SourceError("author_note_conflict")
-    result: dict[str, JsonValue] = {"meta": generated_meta}
-    for key in ("note", "deck_rule"):
-        if key in value:
-            result[key] = value[key]
-    use_faces = previous is None or "faces" in previous
-    result["faces" if use_faces else "abilities"] = {} if use_faces else []
-    bodies: list[tuple[dict[str, JsonValue], int]] = []
-    locations: dict[PathParts, int] = {}
-    sites = NodeSites(workspace.inputs.repo / "dsl")
-    for index, ability in enumerate(array(value["abilities"])):
-        try:
-            face, expanded, body, edition = _ability(
-                object_value(ability), card, handwritten, workspace, sites
-            )
-            if use_faces:
-                container = object_value(result["faces"])
-                face_card = object_value(container.setdefault(face, {"abilities": []}))
-                locations[
-                    "cards",
-                    number,
-                    "faces",
-                    face,
-                    "abilities",
-                    len(array(face_card["abilities"])),
-                ] = index
-                array(face_card["abilities"]).append(expanded)
-            else:
-                locations["cards", number, "abilities", index] = index
-                array(result["abilities"]).append(expanded)
-            if body is not None:
-                bodies.append((body, edition))
-        except (AuthorInputError, SourceError) as error:
-            diagnostic = (
-                error.diagnostic
-                if isinstance(error, AuthorInputError)
-                else Diagnostic("source", error.reason)
-            )
-            path = ("cards", number, "abilities", index, *diagnostic.path)
-            cursor = handwritten.documents[number].diagnostic(
-                diagnostic.stage,
-                diagnostic.reason,
-                path,
-                diagnostic.expected,
-                diagnostic.actual,
-            )
-            line = object_value(ability).get("line")
-            raise AuthorInputError(
-                replace(
-                    cursor,
-                    card_no=number,
-                    card_id=card_id,
-                    card_line=line if type(line) is int else None,
-                )
-            ) from None
-    return card_id, result, bodies, locations
-
-
-def _merge_body(
-    workspace: Workspace,
-    files: dict[str, InputFile],
-    body: dict[str, JsonValue],
-    edition: int,
-    owner: str,
-) -> str | None:
-    same_frame = False
-    for file in files.values():
-        tree = object_value(workspace.expander.schemas.body_tree(file.raw))
-        for item in array(tree["records"]):
-            record = object_value(item)
-            if (record["frame_id"], record["ability_scope"]) != (
-                body["frame_id"],
-                body["ability_scope"],
-            ):
-                continue
-            same_frame = True
-            if record["body_version"] == body["body_version"]:
-                if record != body:
-                    raise SourceError("body_metadata_conflict")
-                return None
-    if same_frame and edition == 1:
-        raise SourceError("new_body_requires_explicit_edition")
-    path = _new_path(files, "effect-bodies", owner)
-    files[path] = _file(
-        path,
-        {
-            "format": 1,
-            "kind": "effect_body_shard",
-            "scope": "shared",
-            "records": [body],
-        },
-    )
-    return path
-
-
 class WriteError(OSError):
-    """Retain the exact completed writes when a filesystem operation fails."""
+    """Retain exact completed writes when a filesystem operation fails."""
 
     def __init__(self, written: tuple[str, ...], failed: str) -> None:
         self.written = written
@@ -335,7 +76,100 @@ class WriteError(OSError):
         )
 
 
-def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branches, too-many-statements, too-many-locals] -- keep the complete ordered boundary in one operation
+def _facts(
+    before: dict[str, JsonValue], after: dict[str, JsonValue], number: str
+) -> None:
+    defaults: tuple[tuple[str, JsonValue], ...] = (
+        ("written_by", None),
+        ("reviewed_by", []),
+        ("status", "draft"),
+        ("verified_by_exam", []),
+        ("rulings", []),
+    )
+    for key, default in defaults:
+        if before.get(key, default) != after.get(key, default):
+            raise AuthorInputError(
+                Diagnostic("source", "author_metadata_conflict", card_no=number)
+            )
+
+
+_BODY_RECORD_PATH_LENGTH = 3
+
+
+def _located_error(
+    inputs: AuthorInputSet, supplied: Handwritten, diagnostic: Diagnostic
+) -> AuthorInputError:
+    hand = handwriting(inputs)
+    number = diagnostic.card_no
+    ability_index = 0
+    path = diagnostic.path
+    if (
+        number is None
+        and len(path) >= _BODY_RECORD_PATH_LENGTH
+        and isinstance(path[0], str)
+        and path[1] == "records"
+        and type(path[2]) is int
+    ):
+        file = next((f for f in inputs.body_files if f.path == path[0]), None)
+        if file is not None:
+            definition = decode_bodies(file)[path[2]]
+            selected = [
+                (n, i)
+                for n, card in hand.cards.items()
+                for i, ability in enumerate(array(card["abilities"]))
+                if object_value(ability).get("use") == definition.id
+            ]
+            if selected:
+                number, ability_index = selected[0]
+    if number is None or number not in hand.cards:
+        return AuthorInputError(diagnostic)
+    values = array(hand.cards[number]["abilities"])
+    if "abilities" in path:
+        offset = path.index("abilities") + 1
+        if offset < len(path) and type(path[offset]) is int:
+            selected_index = path[offset]
+            assert type(selected_index) is int
+            ability_index = selected_index
+    ability_index = _face_ability_index(inputs, number, path, ability_index)
+    if ability_index >= len(values):
+        return AuthorInputError(diagnostic)
+    ability = object_value(values[ability_index])
+    line = ability.get("line")
+    document = supplied.documents.get(number, hand.documents[number])
+    cursor_path = ("cards", number, "abilities", ability_index)
+    cursor = document.diagnostic(diagnostic.stage, diagnostic.reason, cursor_path)
+    return AuthorInputError(
+        replace(
+            diagnostic,
+            card_no=number,
+            card_line=diagnostic.card_line or (line if type(line) is int else None),
+            line=cursor.line,
+            column=cursor.column,
+        )
+    )
+
+
+def _face_ability_index(
+    inputs: AuthorInputSet, number: str, path: tuple[str | int, ...], ability_index: int
+) -> int:
+    if "faces" in path:
+        face = path[path.index("faces") + 1]
+        for file in inputs.anchor_files:
+            cards = object_value(object_value(parse_document(file.raw).value)["cards"])
+            if number in cards:
+                uses = array(object_value(cards[number])["uses"])
+                matching = [
+                    index
+                    for index, use in enumerate(uses)
+                    if object_value(use)["face_id"] == face
+                ]
+                if ability_index < len(matching):
+                    return matching[ability_index]
+                break
+    return ability_index
+
+
+def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branches, too-many-statements, too-many-locals] -- validate the complete candidate before performing any write
     workspace: Workspace,
     *,
     main: Path,
@@ -343,149 +177,100 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
     output_root: Path,
     cards: frozenset[str] = frozenset(),
     all_cards: bool = False,
+    storage: Literal["anchors"] = "anchors",
     remove_prototype: bool = False,
     base: str | None = None,
     baseline_root: Path | None = None,
 ) -> dict[str, JsonValue]:
-    """Validate a complete candidate in memory, then directly write selected files."""
-    if bool(cards) == all_cards:
-        raise ConfigurationError("Specify cards or --all")
-    for configured_path in (main, bodies, output_root):
-        if configured_path is not None and not configured_path.is_absolute():
-            raise ConfigurationError("Author write requires absolute paths")
+    """Refresh only explicitly selected cards, retaining every recorded review literal."""
+    if bool(cards) == all_cards or storage != "anchors":
+        raise ConfigurationError("Specify cards or --all and storage anchors")
+    for configured in (main, bodies, output_root):
+        if configured is not None and (
+            not configured.is_absolute() or ".." in configured.parts
+        ):
+            raise ConfigurationError(
+                "Author write requires absolute paths without traversal"
+            )
     if remove_prototype and (base is None or baseline_root is None):
         raise ConfigurationError("Prototype removal requires base and baseline_root")
-    handwritten = read(main, bodies)
-    selected = frozenset(handwritten.cards) if all_cards else cards
-    if selected - handwritten.cards.keys():
+    supplied = read(main, bodies)
+    selected = frozenset(supplied.cards) if all_cards else cards
+    if selected - supplied.cards.keys():
         raise AuthorInputError(Diagnostic("schema", "handwritten_card_missing"))
-    original = load_author_set(output_root, workspace.expander.schemas)
+    schemas = workspace.expander.schemas
+    original = load_author_set(output_root, schemas)
     if output_root != workspace.authored:
-        reference = load_author_set(workspace.authored, workspace.expander.schemas)
-        expected_files = {
-            file.path
-            for file in (
+        reference = load_author_set(workspace.authored, schemas)
+        expected = {
+            f.path
+            for f in (
                 *reference.author_files,
                 *reference.body_files,
                 *reference.prototype_files,
+                *reference.anchor_files,
             )
         }
-        actual_files = {
-            file.path
-            for file in (
+        actual = {
+            f.path
+            for f in (
                 *original.author_files,
                 *original.body_files,
                 *original.prototype_files,
+                *original.anchor_files,
             )
         }
-        expected_cards = {
-            (record.card_id, record.scope) for record in reference.index.records
-        }
-        actual_cards = {
-            (record.card_id, record.scope) for record in original.index.records
-        }
-        if expected_files - actual_files or expected_cards - actual_cards:
+        if expected - actual or {
+            (r.card_id, r.scope) for r in reference.index.records
+        } - {(r.card_id, r.scope) for r in original.index.records}:
             raise AuthorInputError(Diagnostic("index", "output_inventory_incomplete"))
-    authors = {file.path: file for file in original.author_files}
-    companions = {file.path: file for file in original.body_files}
-    prototypes = {file.path: file for file in original.prototype_files}
+    previous = handwriting(original)
+    authors = {f.path: f for f in original.author_files}
+    companions = {f.path: f for f in original.body_files}
+    prototypes = {f.path: f for f in original.prototype_files}
     records = list(original.index.records)
-    changed: set[str] = set()
-    body_bindings: dict[tuple[str, int], tuple[JsonValue, JsonValue, JsonValue]] = {}
-    locations: dict[PathParts, int] = {}
+    changed = set()
     for number in sorted(selected):
-        try:
-            card_id = workspace.current.printing_card(number)
-        except SourceError as error:
-            raise AuthorInputError(
-                Diagnostic("source", error.reason, card_no=number)
-            ) from None
-        alias = next(
-            (
-                record
-                for record in records
-                if record.card_id == card_id
-                and record.scope == "shared"
-                and record.record_key != number
-            ),
-            None,
+        card_id = workspace.current.printing_card(number)
+        old = next(
+            (r for r in records if r.card_id == card_id and r.scope == "shared"), None
         )
-        if alias is not None:
+        if old is not None and old.record_key != number:
             raise AuthorInputError(
                 Diagnostic(
                     "index",
                     "card_alias_already_authored",
                     card_no=number,
-                    card_id=card_id,
-                    expected=alias.record_key,
+                    expected=old.record_key,
                 )
             )
-        old = next((record for record in records if record.record_key == number), None)
-        previous = None
-        if old is not None and isinstance(old, AuthorIndexRecord):
-            if old.file.split("/")[-2] != number.split("-", 1)[0]:
-                raise AuthorInputError(
-                    Diagnostic("index", "wrong_owner", card_no=number)
-                )
-            tree = object_value(
-                workspace.expander.schemas.author_tree(authors[old.file].raw)
-            )
-            previous = object_value(object_value(tree["cards"])[number])
-            path = old.file
-        else:
-            path = _new_path(authors, "author-effects", number.split("-", 1)[0])
-            tree = {
-                "format": 1,
-                "kind": "author_effect_set",
-                "scope": "shared",
-                "cards": {},
-            }
-        try:
-            card_id, value, materialized, card_locations = _card(
-                workspace, number, handwritten, previous
-            )
-            locations.update(card_locations)
-            if (
-                old is not None
-                and not isinstance(old, AuthorIndexRecord)
-                and not remove_prototype
-            ):
-                raise SourceError("prototype_author_overlap")  # ruff: ignore[raise-within-try] -- add the selected card to this source diagnostic
-            for body, edition in materialized:
-                added = _merge_body(
-                    workspace, companions, body, edition, number.split("-", 1)[0]
-                )
-                if added is not None:
-                    changed.add(added)
-            for ability, (body, resolved_edition) in zip(
-                (
-                    object_value(a)
-                    for a in array(handwritten.cards[number]["abilities"])
-                    if "use" in object_value(a)
-                ),
-                materialized,
-                strict=True,
-            ):
-                key = string(ability["use"]), resolved_edition
-                identity = body["frame_id"], body["ability_scope"], body["body_version"]
-                if key in body_bindings and body_bindings[key] != identity:
-                    raise SourceError("body_source_frame_mismatch")  # ruff: ignore[raise-within-try] -- add the selected card to this source diagnostic
-                body_bindings[key] = identity
-        except SourceError as error:
+        if old is not None and old.kind != "author_effect_set" and not remove_prototype:
             raise AuthorInputError(
-                Diagnostic("source", error.reason, card_no=number)
-            ) from None
-        if remove_prototype:
-            for prototype_path, file in tuple(prototypes.items()):
-                prototype = object_value(
-                    workspace.expander.schemas.prototype_tree(file.raw)
+                Diagnostic("source", "prototype_author_overlap", card_no=number)
+            )
+        if number in previous.cards:
+            _facts(
+                object_value(previous.cards[number]["meta"]),
+                object_value(supplied.cards[number]["meta"]),
+                number,
+            )
+            if "note" in previous.cards[number] and previous.cards[number].get(
+                "note"
+            ) != supplied.cards[number].get("note"):
+                raise AuthorInputError(
+                    Diagnostic("source", "author_note_conflict", card_no=number)
                 )
-                mapping = object_value(prototype["cards"])
-                if number in mapping:
-                    del mapping[number]
-                    prototypes[prototype_path] = _file(prototype_path, prototype)
-                    changed.add(prototype_path)
-        object_value(tree["cards"])[number] = value
+        path = (
+            old.file
+            if isinstance(old, AuthorIndexRecord)
+            else _new_path(authors, "author-effects", number.split("-", 1)[0])
+        )
+        tree: dict[str, JsonValue] = (
+            object_value(parse_document(authors[path].raw).value)
+            if path in authors
+            else {"format": 2, "kind": "author_effect_set", "cards": {}}
+        )
+        object_value(tree["cards"])[number] = supplied.cards[number]
         authors[path] = _file(path, tree)
         changed.add(path)
         replacement = AuthorIndexRecord(
@@ -499,8 +284,64 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
             records.append(replacement)
         else:
             records[records.index(old)] = replacement
-    if all_cards and handwritten.bodies.keys() - body_bindings.keys():
-        raise AuthorInputError(Diagnostic("source", "unused_body_definition"))
+        if remove_prototype:
+            for path, file in tuple(prototypes.items()):
+                tree = object_value(schemas.prototype_tree(file.raw))
+                mapping = object_value(tree["cards"])
+                if number in mapping:
+                    del mapping[number]
+                    prototypes[path] = _file(path, tree)
+                    changed.add(path)
+    for key, definition in supplied.bodies.items():
+        used = [
+            number
+            for number in selected
+            if any(
+                object_value(a).get("use") == key[0]
+                and object_value(a).get("edition", definition.edition)
+                == definition.edition
+                for a in array(supplied.cards[number]["abilities"])
+            )
+        ]
+        if not used and key not in previous.bodies:
+            if all_cards:
+                raise AuthorInputError(Diagnostic("source", "unused_body_definition"))
+            continue
+        if not used and not all_cards:
+            continue
+        body_path = next(
+            (
+                f.path
+                for f in companions.values()
+                if any((b.id, b.edition) == key for b in decode_bodies(f))
+            ),
+            None,
+        )
+        raw_definition = definition.model_dump(mode="json", exclude_unset=True)
+        if key in previous.bodies:
+            old_body = previous.bodies[key]
+            if (
+                old_body.written_by != definition.written_by
+                or old_body.registrations != definition.registrations
+                or old_body.note != definition.note
+            ):
+                raise AuthorInputError(Diagnostic("source", "body_metadata_conflict"))
+        if body_path is None:
+            path = _new_path(companions, "effect-bodies", used[0].split("-", 1)[0])
+            tree = {
+                "format": 2,
+                "kind": "effect_body_shard",
+                "records": [raw_definition],
+            }
+        else:
+            path = body_path
+            tree = object_value(parse_document(companions[path].raw).value)
+            definitions = array(tree["records"])
+            for body_index, body in enumerate(decode_bodies(companions[path])):
+                if (body.id, body.edition) == key:
+                    definitions[body_index] = raw_definition
+        companions[path] = _file(path, tree)
+        changed.add(path)
     index = original.index.model_copy(update={"records": tuple(records)})
     index_file = _file("rules/effects-index.yaml", index.model_dump(mode="json"))
     candidate = AuthorInputSet(
@@ -509,55 +350,59 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
         tuple(authors.values()),
         tuple(companions.values()),
         tuple(prototypes.values()),
+        original.anchor_files,
+    )
+    from sve_carddb.domains.effects.author_set import validate_author_set  # ruff: ignore[import-outside-top-level] -- candidate inventory validation follows complete construction
+
+    try:
+        validate_author_set(candidate, schemas)
+    except AuthorInputError as error:
+        raise _located_error(candidate, supplied, error.diagnostic) from None
+    materialized = materialize_inputs(
+        candidate, workspace.current, workspace.expander, refresh=selected
+    )
+    old_pins = {
+        key: object_value(pin)
+        for file in original.anchor_files
+        for key, pin in object_value(
+            object_value(parse_document(file.raw).value)["bodies"]
+        ).items()
+    }
+    for anchor in materialized.anchors.values():
+        for pin_key, value in object_value(anchor["bodies"]).items():
+            if pin_key in old_pins and any(
+                old_pins[pin_key][field] != object_value(value)[field]
+                for field in ("frame_id", "ability_scope", "body_version")
+            ):
+                raise AuthorInputError(
+                    Diagnostic("body", "new_body_requires_explicit_edition")
+                )
+    if materialized.failures:
+        raise _located_error(
+            candidate, supplied, next(iter(materialized.failures.values()))
+        )
+    anchors = tuple(
+        _file(f"rules/effect-anchors/{owner}.yaml", tree)
+        for owner, tree in sorted(materialized.anchors.items())
+    )
+    candidate = AuthorInputSet(
+        index,
+        index_file,
+        candidate.author_files,
+        candidate.body_files,
+        candidate.prototype_files,
+        anchors,
     )
     results = workspace.current.validate_inputs(candidate, workspace.expander)
     rejected = [
-        result
-        for result in results
-        if isinstance(result, CardRejected)
-        and isinstance(result.record, AuthorIndexRecord)
+        r
+        for r in results
+        if isinstance(r, CardRejected) and isinstance(r.record, AuthorIndexRecord)
     ]
     if rejected:
-        diagnostic = rejected[0].diagnostic
-        rejected_number = diagnostic.card_no
-        if rejected_number is not None and rejected_number in handwritten.documents:
-            input_path: PathParts = ("cards", rejected_number)
-            line = (
-                diagnostic.source.occurrence.line_ordinal + 1
-                if diagnostic.source is not None
-                else None
-            )
-            for legacy_path, index_in_handwritten in locations.items():
-                if diagnostic.path[: len(legacy_path)] == legacy_path:
-                    input_path = (
-                        "cards",
-                        rejected_number,
-                        "abilities",
-                        index_in_handwritten,
-                        *diagnostic.path[len(legacy_path) :],
-                    )
-                    selected_ability = object_value(
-                        array(handwritten.cards[rejected_number]["abilities"])[
-                            index_in_handwritten
-                        ]
-                    )
-                    selected_line = selected_ability["line"]
-                    assert type(selected_line) is int
-                    line = selected_line
-                    break
-            cursor = handwritten.documents[rejected_number].diagnostic(
-                diagnostic.stage, diagnostic.reason, input_path
-            )
-            diagnostic = replace(
-                diagnostic,
-                path=input_path,
-                line=cursor.line,
-                column=cursor.column,
-                card_line=line,
-            )
-        raise AuthorInputError(diagnostic)
+        raise _located_error(candidate, supplied, rejected[0].diagnostic)
     if remove_prototype:
-        from sve_carddb.workflows.authoring_regression import check_regression  # ruff: ignore[import-outside-top-level] -- regression is only needed for explicitly requested prototype removal
+        from sve_carddb.workflows.authoring_regression import check_regression  # ruff: ignore[import-outside-top-level] -- regression is optional for explicit prototype removal
 
         assert base is not None
         assert baseline_root is not None
@@ -565,15 +410,22 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
             workspace,
             base,
             baseline_root,
-            candidate,
+            materialized.inputs,
             results,
             expected_removed=selected,
         )
+    outputs = {
+        **authors,
+        **companions,
+        **prototypes,
+        index_file.path: index_file,
+        **{f.path: f for f in anchors},
+    }
+    changed.update(f.path for f in anchors)
     changed.add(index_file.path)
-    outputs = {**authors, **companions, **prototypes, index_file.path: index_file}
-    written: list[str] = []
     for path in sorted(changed):
         check_path(Path(output_root.anchor), output_root / path)
+    written: list[str] = []
     try:
         for path in sorted(changed):
             destination = output_root / path
@@ -588,5 +440,10 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
         "status": "ok",
         "cards": list[JsonValue](sorted(selected)),
         "written": list(written),
-        "storage": "legacy",
+        "storage": storage,
     }
+
+
+def decode_bodies(file: InputFile) -> list[Body]:
+    """Decode the name table for one already validated handwritten shard."""
+    return decode(parse_document(file.raw), BodyFile).records

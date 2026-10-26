@@ -53,6 +53,9 @@ _RESOURCES = {
     "author.schema.json": _AUTHOR,
     "effect-bodies.schema.json": _BODIES,
     "effects.schema.json": _PROTOTYPE,
+    "author-storage.schema.json": "urn:sve-kit:author-storage:2",
+    "effect-body-storage.schema.json": "urn:sve-kit:effect-body-storage:2",
+    "effect-anchors.schema.json": "urn:sve-kit:effect-anchors:1",
 }
 _PARAM_REF = TypeAdapter(ParamRef)
 _PARAM_DECL = TypeAdapter(ParamDecl)
@@ -68,7 +71,20 @@ _AUTHOR_VALUE = TypeAdapter(AuthorEffectSet)
 _BODIES_VALUE = TypeAdapter(EffectBodyShard)
 type AuthorDocument = AuthorEffectSet | EffectBodyShard | EffectsIndex
 type Stage = Literal[
-    "yaml", "json", "schema", "index", "envelope", "container", "source"
+    "yaml",
+    "json",
+    "schema",
+    "index",
+    "envelope",
+    "container",
+    "source",
+    "binding",
+    "frame",
+    "body",
+    "params",
+    "recipe",
+    "dependency",
+    "anchor",
 ]
 
 
@@ -672,6 +688,25 @@ class AuthorSchemas:
             raise AuthorInputError(
                 _located(document, _schema_diagnostic(document, error))
             )
+
+    def storage_tree(self, raw: bytes, kind: str) -> JsonValue:
+        """Validate persisted handwritten data or generated anchors, retaining defaults absent."""
+        references = {
+            "author_effect_set": "urn:sve-kit:author-storage:2",
+            "effect_body_shard": "urn:sve-kit:effect-body-storage:2",
+            "effect_anchor_set": "urn:sve-kit:effect-anchors:1",
+        }
+        document = _document(raw)
+        if (
+            kind == "effect_anchor_set"
+            and isinstance(document.value, dict)
+            and document.value.get("recipe") != "effect-anchor-v1"
+        ):
+            raise AuthorInputError(
+                document.diagnostic("recipe", "unsupported_anchor_recipe", ("recipe",))
+            )
+        self._validate(document, references[kind])
+        return document.value
 
     def author_effect_set(
         self, raw: bytes, *, context: AuthorIndexRecord | None = None
