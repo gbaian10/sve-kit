@@ -365,7 +365,15 @@ def test_inspect_lists_pending_faces_and_exact_body_definitions(
     alias = authoring.inspect(workspace, "BP06-P15")
     assert object_value(array(alias["existing"])[0])["record_key"] == "BP06-048"
     storm = authoring.inspect(workspace, "BP01-048")
-    assert any(
+    # Storm is admitted now; inspection must expose its supported keyword candidate.
+    keywords = [
+        object_value(item)
+        for item in array(storm["candidates"])
+        if object_value(item)["sentence"] == "card_keywords.v2"
+    ]
+    assert keywords
+    assert all(item["supported"] is True and item["gap"] is None for item in keywords)
+    assert not any(
         object_value(item)["gap"] == "unsupported_source_keyword"
         for item in array(storm["gaps"])
     )

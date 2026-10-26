@@ -13,7 +13,13 @@ from sve_carddb.domains.catalog.adoption_loader import load_adoptions
 from sve_carddb.domains.catalog.rules_names import populate_rules_names
 from sve_carddb.domains.parsed_cards.reader import read
 from sve_carddb.domains.parsed_cards.sources import ParsedBatches
-from sve_carddb.domains.products import load_products, populate_product_preview
+from sve_carddb.domains.products import (
+    FrozenProducts,
+    load_product_identities,
+    load_products,
+    plan_official_products,
+    populate_product_preview,
+)
 from sve_carddb.domains.registry.preview import FrozenJP, plan_preview
 from sve_carddb.domains.registry.records import PrintingData
 from sve_carddb.domains.text_observations import (
@@ -36,7 +42,7 @@ from .semantic_definition_fixtures import with_definitions
 
 if TYPE_CHECKING:
     from sve_carddb.domains.parsed_cards.storage import Catalog
-    from sve_carddb.domains.products import Language
+    from sve_carddb.domains.products import Language, OfficialProducts
     from sve_carddb.domains.products.loader import ProductSnapshot
     from sve_carddb.domains.registry.preview import PreviewPlan
 
@@ -70,6 +76,7 @@ class CurrentSourceInputs:
     vocabulary: Vocabulary
     languages: tuple[Language, ...]
     products: ProductSnapshot
+    official: OfficialProducts
     snapshot: Snapshot
     rules: Rules
     batch_id: str
@@ -102,7 +109,19 @@ def entry_snapshot(
             "translations/templates/definitions/056.yaml",
             *(
                 f"translations/templates/definitions/{number}.yaml"
-                for number in ("068", "072", "084", "109", "110")
+                for number in (
+                    "018",
+                    "038",
+                    "049",
+                    "068",
+                    "070",
+                    "072",
+                    "084",
+                    "103",
+                    "106",
+                    "109",
+                    "110",
+                )
                 if include_keywords
             ),
         )
@@ -146,7 +165,15 @@ def entry_snapshot(
                 "translations/glossary/concepts/004.yaml",
                 {"term:keyword.storm"}
                 | (
-                    {"term:keyword.ward", "term:keyword.aura"}
+                    {
+                        "term:keyword.ward",
+                        "term:keyword.aura",
+                        "term:keyword.rush",
+                        "term:keyword.bane",
+                        "term:keyword.intimidate",
+                        "term:keyword.assail",
+                        "term:keyword.drain",
+                    }
                     if include_keywords
                     else set()
                 ),
@@ -240,12 +267,27 @@ def current_source_inputs(
         identity.snapshot,
         batches=batches,
     )
+    # Product dates select current wording across printings; share the frozen plan too.
+    official = plan_official_products(
+        load_product_identities(
+            authored,
+            authored_revision=REVISION,
+            catalog=load_products(authored, registry=identity.snapshot),
+            stores={"public-fixture": store},
+            batches=batches,
+        ),
+        FrozenProducts(
+            store, "public-fixture", batch_id, region="jp", sources=frozen
+        ).pages(),
+        identity,
+    )
     return CurrentSourceInputs(
         batches.catalog,
         identity,
         prepared.projection.vocabulary,
         prepared.projection.catalog.languages,
-        load_products(authored, registry=identity.snapshot),
+        official.identities.catalog,
+        official,
         entry_snapshot(),
         load(REPOSITORY),
         batch_id,
@@ -280,16 +322,15 @@ def current_source_fixture(
     cards = {
         printing.card_id for printing in printings if printing.card_no in card_numbers
     }
-    selected = close_preview(
-        identity,
-        frozenset(
-            (printing.card_id, printing.region)
-            for printing in printings
-            if printing.card_id not in cards
-        ),
-    )
     observations = TextObservations(
-        selected,
+        close_preview(
+            identity,
+            frozenset(
+                (printing.card_id, printing.region)
+                for printing in printings
+                if printing.card_id not in cards
+            ),
+        ),
         FrozenTexts(
             store,
             "public-fixture",
@@ -302,7 +343,9 @@ def current_source_fixture(
     stores = {"public-fixture": store}
     vocabulary = inputs.vocabulary
     build = BuildContext.from_inputs(
-        REVISION, observations.configuration(vocabulary, ())
+        REVISION,
+        observations.configuration(vocabulary, ())
+        | {"product_identity": inputs.official.identities.configuration()},
     )
     schema = compile_build((*MINIMUM_CAPABILITIES, "en", "translation_evidence"))
     with create_database(schema) as db:
@@ -316,6 +359,7 @@ def current_source_fixture(
                 languages=inputs.languages,
                 stores=stores,
                 batches=batches,
+                official=inputs.official,
             )
             observations.populate(db, build=build, vocabulary=vocabulary, published=())
             populate_rules_names(db)

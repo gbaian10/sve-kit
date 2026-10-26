@@ -112,6 +112,16 @@ pub enum PrintedKeyword {
     Ward,
     /// Aura declaration, without claiming its rules are executable.
     Aura,
+    /// Printed Storm; runtime admission still requires the complete named shape.
+    Storm,
+    /// Printed Rush.
+    Rush,
+    /// Printed Bane.
+    Bane,
+    /// Printed Intimidate.
+    Intimidate,
+    /// Printed Assail.
+    Assail,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Deserialize, Serialize)]
@@ -264,7 +274,7 @@ impl PrintedKeywordsObligation {
             && permanent(&self.interface_key, "", 64)
             && self.source_adapter_recipe == super::recipes::SOURCE_ADAPTER
             && !self.declaration.keywords.is_empty()
-            && self.declaration.keywords.len() <= 2
+            && self.declaration.keywords.len() <= 7
             && self
                 .declaration
                 .keywords

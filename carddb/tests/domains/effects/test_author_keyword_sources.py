@@ -34,6 +34,10 @@ TERMS = (
     Term("term:keyword.ward", "keyword", "守護"),
     Term("term:keyword.aura", "keyword", "オーラ"),
     Term("term:keyword.storm", "keyword", "疾走"),
+    Term("term:keyword.rush", "keyword", "突進"),
+    Term("term:keyword.bane", "keyword", "必殺"),
+    Term("term:keyword.intimidate", "keyword", "威圧"),
+    Term("term:keyword.assail", "keyword", "指定攻撃"),
     Term("term:keyword.other", "keyword", "仮語"),
 )
 
@@ -69,8 +73,25 @@ def reseal(
         ("【オーラ】", ("aura",)),
         ("【守護】【オーラ】", ("ward", "aura")),
         ("【オーラ】【守護】", ("aura", "ward")),
+        ("【疾走】", ("storm",)),
+        ("【突進】", ("rush",)),
+        ("【必殺】", ("bane",)),
+        ("【威圧】", ("intimidate",)),
+        ("【指定攻撃】", ("assail",)),
+        ("【守護】【疾走】", ("ward", "storm")),
     ],
-    ids=("ward", "aura", "ward-aura", "aura-ward"),
+    ids=(
+        "ward",
+        "aura",
+        "ward-aura",
+        "aura-ward",
+        "storm",
+        "rush",
+        "bane",
+        "intimidate",
+        "assail",
+        "ward-storm",
+    ),
 )
 def test_complete_keyword_order_is_printed_order(
     raw: str, expected: tuple[str, ...]
@@ -82,8 +103,8 @@ def test_complete_keyword_order_is_printed_order(
 
 @pytest.mark.parametrize(
     "raw",
-    ["【疾走】", "【守護】【疾走】", "【仮語】"],
-    ids=("storm", "mixed", "unknown"),
+    ["【仮語】", "【守護】【仮語】"],
+    ids=("unknown", "mixed"),
 )
 def test_registered_concept_does_not_imply_author_mapping(raw: str) -> None:
     with pytest.raises(SourceError, match="unsupported_source_keyword"):
@@ -142,7 +163,7 @@ def test_complete_keyword_contract_rejects_tampering(change: str) -> None:
             values.pop("leaf_1")
         elif change == "swapped-value":
             values["leaf_1"] = GlossaryReference(
-                kind="glossary", key="term:keyword.storm"
+                kind="glossary", key="term:keyword.other"
             )
         else:
             values["extra"] = values["leaf_0"]

@@ -93,7 +93,7 @@ keywords 為非空、保序、元素不重複的清單，ports 必為 `{imports:
 
 companion.body 的 A.companion-head 子圖排除 keywords，未引用本體也必須驗；generated_by 不得產生 keyword 宣告。grant.keywords 與 activate.quick 是原有本體內的不同語法，不適用此 sources 型別。完整 reader 仍拒絕 inline ParamRef；本片不開非本體 companion 或新的葉參數位置。
 
-正式 current reader 已從完整 current 來源獨立重建 ward／aura 義務，逐筆對帳作者宣告並產生獨立 declaration sidecar；metadata 與 printed_keywords 使用封閉的非本體 inventory 型別。本體與宣告在 D0 分別精確消耗，tree 與 sidecar 同時漏項仍由獨立 inventory 拒絕，普通本體義務不能冒充 keyword。純結構展開或外供 context 不授 current proof；D0 的來源對帳成功也不代表已降低、可執行或取得用途資格。Ward／Aura 的具名降低、精確整卡准入與封閉對局規則見下方〈守護與光紋的具名宣告准入〉；用途資格仍須獨立證據。
+正式 current reader 已從完整 current 來源獨立重建 ward／aura／storm／rush／bane／intimidate／assail 義務，逐筆對帳作者宣告並產生獨立 declaration sidecar；metadata 與 printed_keywords 使用封閉的非本體 inventory 型別。本體與宣告在 D0 分別精確消耗，tree 與 sidecar 同時漏項仍由獨立 inventory 拒絕，普通本體義務不能冒充 keyword。純結構展開或外供 context 不授 current proof；D0 的來源對帳成功也不代表已降低、可執行或取得用途資格。具名降低、精確整卡准入與封閉對局規則見下方〈守護與光紋的具名宣告准入〉；用途資格仍須獨立證據。
 
 ### 2.4 effects-index
 
@@ -289,15 +289,19 @@ CP04-060 只對 search 實際 moved 的新世代安裝 delta -2、until:turn；�
 
 關鍵字可用性需要持有者及能力來源的完整證據；未載入卡的未知能力不得視為空集合，也不以原型能力補足。需要這些資訊的完整投影、守護程序與光紋目標查詢會精確停止；公開區域張數仍可獨立查詢，玩家投影錯誤不暴露內部卡號或物件識別。
 
-`sim/engine/src/ir/printed_keywords.rs` 定義兩個封閉的 Field／Ordinary／Static 形狀，來源恰為 `Keyword(Ward|Aura, Printed(face,line))`，holder=SourceHolder、controller=Controller，沒有 body、play、trigger 或 event captures。Ward 的權限在持有者橫置時禁止對手從者攻擊己方領袖及不屬於橫置 Ward 的己方從者；以有效能力視圖保留多個 Ward 的合法目標。Aura 的權限禁止對手選取持有者作為能力目標，不擴及己方選取或無目標的集合效果。兩者保留無時間到期、installation anchor 與對應規則定位。Ward 的可選姿態選擇屬規則程序，不降低為無條件橫置。
+`sim/engine/src/ir/printed_keywords.rs` 定義兩個封閉的 Field／Ordinary／Static 形狀，來源恰為 `Keyword(Ward|Aura, Printed(face,line))`，holder=SourceHolder、controller=Controller，沒有 body、play、trigger 或 event captures。Ward 的權限在持有者橫置時禁止對手從者攻擊己方領袖及不屬於橫置 Ward 的己方從者；以有效能力視圖保留多個 Ward 的合法目標；同時具有威圧的橫置 Ward 不計入（官方 Q819）。Aura 的權限禁止對手選取持有者作為能力目標，不擴及己方選取或無目標的集合效果。兩者保留無時間到期、installation anchor 與對應規則定位。Ward 的可選姿態選擇屬規則程序，不降低為無條件橫置。
 
-准入逐欄比較整個具名形狀，並透過獨立 declaration reference 核對原 owner／face／field／section／line／fragment、local scope 與確切 keyword index；不開放任意 KeywordId、Granted 或巢狀 origin。只有不同的 Ward／Aura 元素可共用同一印刷面與行，本體能力仍不能與它們混用座標。完整有序清單原子降低，未支援元素使整卡失敗。
+同一模組另定義 Storm／Rush／Bane／Intimidate／Assail 的封閉 Field／Ordinary／Static 具名能力，保留各自的直接 Printed origin 與同樣的 holder／controller。這五者沒有 declarations、body、play、trigger 或 event captures；其具名身分由對應交戰規則直接解釋，不偽造通用權限或誘發能力。這些規則不開放任意空 Static 能力。
+
+准入逐欄比較整個具名形狀，並透過獨立 declaration reference 核對原 owner／face／field／section／line／fragment、local scope 與確切 keyword index；不開放任意 KeywordId、Granted 或巢狀 origin。七種已支援的不同元素可共用同一印刷面與行，本體能力仍不能與它們混用座標。完整有序清單原子降低，未支援元素使整卡失敗。
 
 執行期以 `card/printed.rs` 的有效印刷能力視圖為共同依據：已載入整卡、有效印刷面、Field 有效區域且未失去能力的精確宣告才可用。`card/keywords.rs` 將這個視圖提供給攻擊、選目標、姿態程序與投影；入場事件的能力資訊也讀同一視圖。`state.keywords`、原型能力及 enum 名稱不補足正式卡的宣告。owner 不決定敵我，必須使用當前持有者 controller 或已固定的能力 controller。離場後查詢新世代，既有待處理能力則保留其舊世代及離場前來源資訊，不從新區域補讀舊能力。
 
 守護入場依 CR 12.8.2，先以預計入場資訊產生控制者的 `WardEntry` 決定，再直立入場，接受時才以規則原因橫置。決定 token、actor 與舊世代均由引擎綁定；問題提供當時區域及一次性位置區分同名卡，不暴露固定隱藏 ID。整批入場先完成各張決定，再共同入場。普通打出與已准入的效果入場共用此程序。結束階段沿既有 CR 7.4.3，在誘發能力完成後可選任意張直立守護橫置，再開對手 Quick；多個橫置守護均為合法攻擊目標，直立或失去能力的守護不限制攻擊。
 
 光紋依 CR 12.15，只從打出時的目標候選排除對手控制的光紋，不排除己方光紋，不禁止攻擊。無目標的 Field Destroy 集合及已選定目標的結算集合不套這個過濾；目標可行性與正式目標決定使用相同候選。能力授予、ignore-ward、通用 suppress／換面指示與其他關鍵字形狀仍未准入；有效面及既有失去能力狀態不因此繞過檢查。
+
+疾走（CR 12.9.2）允許當回合入場的從者攻擊領袖或合法從者；突進（12.10.2）只放寬當回合對從者的攻擊。指定攻擊 assail（12.11.2）可選直立從者，但不單獨放寬當回合入場限制，亦不忽略守護或威圧。威圧（12.12.2）只禁止選為攻擊目標，不過濾打出能力時的目標；兼具威圧的橫置守護不構成守護義務（官方 Q819）。必殺（12.14.2、11.3.2）由實際交戰在下一次規則處理破壞對方從者；攻防雙方均適用，零傷害仍成立，宣告攻擊與單純能力傷害均不構成交戰。各項均沿上述共同有效能力視圖。
 
 BP19 完整入場曲所需的 `kind:follower` 公開 Field 破壞集合沿用 `card/selection.rs` 的候選述詞與逐候選篩選器。私有觀察閘只對已驗的 Field Destroy 集合述詞消耗這份授權，其他節點位置、私有區域與未支援讀值仍拒絕；不以放寬 `read.kind` 等全域責任白名單取代。
 
