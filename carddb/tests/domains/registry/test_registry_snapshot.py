@@ -131,9 +131,9 @@ def test_official_snapshot_preserves_all_allocations_and_nine_corrections(
     before = {p: hashlib.sha256(p.read_bytes()).digest() for p in paths}
     snapshot = official_snapshot
     assert (
-        len([r for r in snapshot.records.values() if r.kind == "card_int_id"]) == 14789
+        len([r for r in snapshot.records.values() if r.kind == "card_int_id"]) == 15057
     )
-    assert snapshot.files.index().next_int_id == {"jp": 27370, "en": 67421}
+    assert snapshot.files.index().next_int_id == {"jp": 27638, "en": 67421}
     corrections = [
         r for r in snapshot.records.values() if isinstance(r.data, CorrectionData)
     ]

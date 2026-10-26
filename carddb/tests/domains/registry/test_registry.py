@@ -170,6 +170,82 @@ def test_source_changes_and_deletions_fail_closed(
         plan_files(tmp_path, first[:-1])
 
 
+def test_append_preserves_independent_curation(inputs: Inputs, tmp_path: Path) -> None:
+    inputs.mapping.reskins = {}
+    inputs.decisions.corrections = [
+        Correction(
+            region="jp",
+            card_no="BP02-071",
+            field="effect",
+            expected_raw_value="Rule.",
+            corrected_value="Corrected rule.",
+            image_sha256="sha256:" + "0" * 64,
+            locator="Rules box",
+            state="active",
+            reason="Printed rules were reviewed separately.",
+        )
+    ]
+    first = build(inputs, {})
+    art = next(entry for entry in first if entry.kind == "art").model_copy(deep=True)
+    art.data["id"] = permanent_id("a", "independently-reviewed-jp-art")
+    art.data["uses"] = [
+        {
+            "printing_id": permanent_id("p", "jp:PR-001"),
+            "face_id": art.data["face_id"],
+        }
+    ]
+    first.append(art)
+    validate(first)
+    write_files(plan_files(tmp_path, first))
+    index, old = load(tmp_path)
+    inputs.decisions.corrections = []
+    assert plan_files(tmp_path, build(inputs, old)) == {}
+    inputs.jp["BP22-001"] = card("BP22-001", "New name")
+    second = build(inputs, old)
+    validate(second)
+    current = {entry.record_key: entry for entry in second}
+    assert all(current[key] == entry for key, entry in old.items())
+    assert project_corrections(inputs, second)[0]["status"] == "applied"
+    write_files(plan_files(tmp_path, second))
+    assert load(tmp_path)[0].next_int_id["jp"] == index.next_int_id["jp"] + 1
+    assert plan_files(tmp_path, build(inputs, load(tmp_path)[1])) == {}
+
+
+def test_append_rejects_explicit_curation_changes(
+    inputs: Inputs, tmp_path: Path
+) -> None:
+    inputs.mapping.reskins = {}
+    first = build(inputs, {})
+    art = next(entry for entry in first if entry.kind == "art")
+    art.data["classification"] = "base"
+    write_files(plan_files(tmp_path, first))
+    with pytest.raises(ValueError, match="Existing registry record changed"):
+        plan_files(tmp_path, build(inputs, load(tmp_path)[1]))
+
+
+def test_append_rejects_changed_correction_decision(
+    inputs: Inputs, tmp_path: Path
+) -> None:
+    inputs.mapping.reskins = {}
+    inputs.decisions.corrections = [
+        Correction(
+            region="jp",
+            card_no="BP02-071",
+            field="effect",
+            expected_raw_value="Rule.",
+            corrected_value="Corrected rule.",
+            image_sha256="sha256:" + "0" * 64,
+            locator="Rules box",
+            state="active",
+            reason="Printed rules were reviewed separately.",
+        )
+    ]
+    write_files(plan_files(tmp_path, build(inputs, {})))
+    inputs.decisions.corrections[0].corrected_value = "Another rule."
+    with pytest.raises(ValueError, match="Existing registry record changed"):
+        plan_files(tmp_path, build(inputs, load(tmp_path)[1]))
+
+
 @pytest.mark.parametrize(
     ("field", "value", "message"),
     [
@@ -330,7 +406,7 @@ def official_registry(
 ) -> list[Entry]:
     root = Path(__file__).resolve().parents[4] / "authored"
     index = official_snapshot.files.index()
-    assert index.next_int_id == {"en": 67421, "jp": 27370}
+    assert index.next_int_id == {"en": 67421, "jp": 27638}
     assert all(
         path.stat().st_size <= TARGET_BYTES
         for directory in (root / "ids", root / "registry")
@@ -346,10 +422,10 @@ def test_official_registry_special_mappings(official_registry: list[Entry]) -> N
         for entry in official_registry
         if entry.kind == "printing"
     }
-    assert len(printings) == 14789
+    assert len(printings) == 15057
     assert sum(region == "en" for region, _ in printings) == 7420
     ids = region_allocations(official_registry)
-    assert sorted(ids["jp"]) == list(range(20001, 27370))
+    assert sorted(ids["jp"]) == list(range(20001, 27638))
     assert sorted(ids["en"]) == list(range(60001, 67421))
     pairs = [
         ("BP09-P50EN", "DSD01b-T01"),
