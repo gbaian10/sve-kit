@@ -98,7 +98,7 @@ def test_body_and_layout_do_not_create_keyword_obligations(
 ) -> None:
     with current(fixture) as sources:
         assert sources.keyword_obligations(CARDS["BP01-009"]) == ()
-        body = sources._card_payload(CARDS["BP01-009"]).fields[0].source.text
+        body = sources.card_payload(CARDS["BP01-009"]).fields[0].source.text
         effect(sources, monkeypatch, "【守護】\n" + body)
         (found,) = sources.keyword_obligations(CARDS["BP01-009"])
         assert found.keywords == ("ward",)
@@ -205,7 +205,7 @@ def test_missing_registry_sibling_never_yields_partial_expectations(
         ),
     )
     with current(incomplete) as sources:
-        body = sources._card_payload(CARDS["BP01-009"]).fields[0].source.text
+        body = sources.card_payload(CARDS["BP01-009"]).fields[0].source.text
         effect(sources, monkeypatch, "【守護】\n" + body)
         with pytest.raises(SourceError, match="source_registry_mismatch"):
             sources.keyword_obligations(CARDS["BP01-009"])
@@ -245,7 +245,7 @@ def test_source_obligations_are_consumed_by_current_keyword_authors(
         (found,) = sources.keyword_obligations(CARDS["BP01-009"])
         metadata = meta()
         metadata["source"] = source_version(
-            sources._card_payload(CARDS["BP01-009"]).payload
+            sources.card_payload(CARDS["BP01-009"]).payload
         )
         card: dict[str, JsonValue] = {
             "meta": metadata,

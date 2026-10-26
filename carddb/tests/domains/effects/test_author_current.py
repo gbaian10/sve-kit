@@ -154,7 +154,7 @@ def author(
     current: CurrentAuthorSources, number: str = "BP01-009"
 ) -> dict[str, JsonValue]:
     # Registry matches only construct the author input; independent goldens pin its hash.
-    card = current._card_payload(CARDS[number])
+    card = current.card_payload(CARDS[number])
     matched = card.fields[0].matches[0]
     assert matched is not None
     assert matched.frame.id == FRAME
@@ -295,7 +295,7 @@ def check_exact_current_use(
     elif change == "missing":
         card["abilities"] = []
     elif change == "duplicate":
-        face = next(iter(current._card_payload(CARDS["BP01-009"]).revisions.values()))
+        face = next(iter(current.card_payload(CARDS["BP01-009"]).revisions.values()))
         card["faces"] = {face: {"abilities": [deepcopy(node)]}}
     elif change == "face":
         card["faces"] = {"f:" + "f" * 32: {"abilities": card.pop("abilities")}}
@@ -326,7 +326,7 @@ def check_synthetic_multiface_owner_controls_both_containers(
     card = author(current)
     face, _ = back_face(current, monkeypatch)
     # Synthetic source setup has no independent adopted payload golden.
-    complete = current._card_payload(CARDS["BP01-009"])
+    complete = current.card_payload(CARDS["BP01-009"])
     field = next(field for field in complete.fields if field.source.face_id == face)
     matched = field.matches[0]
     assert matched is not None
@@ -387,7 +387,7 @@ def check_synthetic_sibling_root_closure(
     )
     effect(current, monkeypatch, raw)
     # The compiled field is setup for a registry mutation, not the assertion.
-    compiled = current._card_payload(CARDS["BP01-009"]).fields[0]
+    compiled = current.card_payload(CARDS["BP01-009"]).fields[0]
     frame, _ = compiled.derived.bind(0)
     original = next(
         record
@@ -417,7 +417,7 @@ def check_synthetic_sibling_root_closure(
         fixture.jp_batch_id,
     )
     # Synthetic source setup has no independent adopted payload golden.
-    complete = synthetic._card_payload(CARDS["BP01-009"])
+    complete = synthetic.card_payload(CARDS["BP01-009"])
     matched = complete.fields[0].matches[0]
     assert matched is not None
     abilities: list[JsonValue] = []

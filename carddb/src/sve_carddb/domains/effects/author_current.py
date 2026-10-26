@@ -105,10 +105,11 @@ type CardResult = CardAccepted | CardRejected
 
 
 @dataclass(frozen=True)
-class _CurrentCard:
+class CurrentCard:
     payload: AuthorSourcePayload
     fields: tuple[CompiledField, ...]
     revisions: dict[str, str]
+    face_positions: dict[str, tuple[int, str]]
 
 
 def _text(value: Value) -> str:
@@ -166,7 +167,8 @@ class CurrentAuthorSources:
                 Diagnostic("source", "source_classifier_invalid")
             ) from None
 
-    def _printing_card(self, number: str, *, prototype: bool = False) -> str:
+    def printing_card(self, number: str, *, prototype: bool = False) -> str:
+        """Resolve an official JP printing only when all rows agree on identity."""
         rows = self.db.select(
             "printing",
             self.db.columns("printing"),
@@ -189,11 +191,11 @@ class CurrentAuthorSources:
 
     def keyword_obligations(self, card_id: str) -> tuple[PrintedKeywordObligation, ...]:
         """Reconstruct complete current sources; this grants no author or D0 admission."""
-        card = self._card_payload(card_id)
-        return self._keyword_obligations(card, self._checked_sources(card))
+        card = self.card_payload(card_id)
+        return self._keyword_obligations(card, self.checked_sources(card))
 
     def _keyword_obligations(
-        self, card: _CurrentCard, sources: tuple[SourceContext, ...]
+        self, card: CurrentCard, sources: tuple[SourceContext, ...]
     ) -> tuple[PrintedKeywordObligation, ...]:
         self._require_known(card)
         if any(
@@ -236,7 +238,7 @@ class CurrentAuthorSources:
         for file in inputs.prototype_files:
             tree = object_value(expander.schemas.prototype_tree(file.raw))
             prototypes.update(
-                self._printing_card(number, prototype=True)
+                self.printing_card(number, prototype=True)
                 for number in object_value(tree["cards"])
             )
         if prototypes & {
@@ -248,7 +250,7 @@ class CurrentAuthorSources:
         for record in inputs.index.records:
             if (
                 not isinstance(record, AuthorIndexRecord)
-                and self._printing_card(record.record_key, prototype=True)
+                and self.printing_card(record.record_key, prototype=True)
                 != record.card_id
             ):
                 raise SourceError("prototype_index_identity_mismatch")
@@ -289,6 +291,15 @@ class CurrentAuthorSources:
         if not isinstance(authored_root, Path):
             raise AuthorInputError(Diagnostic("source", "author_root_required"))
         inputs = load_author_set(authored_root, expander.schemas)
+        return self.validate_inputs(inputs, expander)
+
+    def validate_inputs(
+        self, inputs: AuthorInputSet, expander: AuthorExpander
+    ) -> tuple[CardResult, ...]:
+        """Validate an in-memory complete inventory before writing any authored file."""
+        from sve_carddb.domains.effects.author_set import validate_author_set  # ruff: ignore[import-outside-top-level] -- share the disk reader's complete inventory boundary
+
+        validate_author_set(inputs, expander.schemas)
         self._prepare(inputs, expander)
         return self._validate(inputs, expander)
 
@@ -419,16 +430,22 @@ class CurrentAuthorSources:
             for identifier, role in sorted(result)
         ]
 
-    def _card_payload(self, card_id: str) -> _CurrentCard:
+    def card_payload(self, card_id: str, *, inspect: bool = False) -> CurrentCard:
+        """Reconstruct all current fields; inspection alone may retain pending parts."""
         if _one(self.db, "card", {"id": card_id})["identity_state"] != "confirmed":
             raise SourceError("source_identity_unconfirmed")
         faces: list[JsonValue] = []
         fields: list[CompiledField] = []
         revisions: dict[str, str] = {}
+        face_positions: dict[str, tuple[int, str]] = {}
         for face in self.db.select(
             "face", self.db.columns("face"), where={"card_id": card_id}
         ):
             face_id = _text(face.values["id"])
+            ordinal = face.values["ordinal"]
+            if type(ordinal) is not int:
+                raise SourceError("source_database_shape")
+            face_positions[face_id] = ordinal + 1, _text(face.values["side"])
             current = _one(
                 self.db, "face_current", {"face_id": face_id, "region": "jp"}
             )
@@ -466,7 +483,8 @@ class CurrentAuthorSources:
             )
         if not faces:
             raise SourceError("source_current_missing")
-        self._no_tokens(fields)
+        if not inspect:
+            self._no_tokens(fields)
         try:
             payload = AuthorSourcePayload.model_validate_json(
                 canonical(
@@ -481,7 +499,7 @@ class CurrentAuthorSources:
             )
         except ValueError:
             raise SourceError("source_payload_invalid") from None
-        return _CurrentCard(payload, tuple(fields), revisions)
+        return CurrentCard(payload, tuple(fields), revisions, face_positions)
 
     def _texts(
         self, locations: list[OwnerField]
@@ -575,7 +593,9 @@ class CurrentAuthorSources:
                 except SourceError:
                     raise SourceError("unsupported_source_projection") from None
 
-    def _checked_sources(self, card: _CurrentCard) -> tuple[SourceContext, ...]:
+    def checked_sources(self, card: CurrentCard) -> tuple[SourceContext, ...]:
+        """Verify every exact registry match; this is not an admission proof."""
+        self._no_tokens(list(card.fields))
         result: list[SourceContext] = []
         for field in card.fields:
             for index, matched in enumerate(field.matches):
@@ -603,9 +623,10 @@ class CurrentAuthorSources:
         return tuple(result)
 
     @staticmethod
-    def _contexts(
+    def contexts(
         sources: tuple[SourceContext, ...],
     ) -> dict[tuple[str, str], SourceContext]:
+        """Expose exact binding/root contexts for checked source obligations."""
         result: dict[tuple[str, str], SourceContext] = {}
         for source in sources:
             if source.frame.projection.projection_kind == "none":
@@ -625,9 +646,9 @@ class CurrentAuthorSources:
         inputs: AuthorInputSet,
         expander: AuthorExpander,
     ) -> CardAccepted:
-        if self._printing_card(record.record_key) != record.card_id:
+        if self.printing_card(record.record_key) != record.card_id:
             raise SourceError("record_key_identity_mismatch")
-        card = self._card_payload(record.card_id)
+        card = self.card_payload(record.card_id)
         payload = source_payload(card.payload)
         version = source_version(card.payload)
         self._require_known(card)
@@ -643,16 +664,16 @@ class CurrentAuthorSources:
 
     def _reconcile_card(
         self,
-        card: _CurrentCard,
+        card: CurrentCard,
         tree: JsonValue,
         input_hash: str,
         inputs: AuthorInputSet,
         expander: AuthorExpander,
     ) -> tuple[ExpansionCandidate, bytes]:
-        checked_sources = self._checked_sources(card)
-        expected = self._contexts(checked_sources)
+        checked_sources = self.checked_sources(card)
+        expected = self.contexts(checked_sources)
         keywords = self._keyword_obligations(card, checked_sources)
-        inventory = self._source_inventory(card, expected, keywords)
+        inventory = self.source_inventory(card, expected, keywords)
         declarations = self._declaration_uses(card, tree, keywords)
         contexts = self._uses(card, tree, expected)
         result = expander.expand_contexts(
@@ -715,7 +736,7 @@ class CurrentAuthorSources:
         )
 
     @staticmethod
-    def _require_known(card: _CurrentCard) -> None:
+    def _require_known(card: CurrentCard) -> None:
         for face in array(object_value(card.payload.model_dump(mode="json"))["faces"]):
             data = object_value(face)
             if any(
@@ -728,11 +749,12 @@ class CurrentAuthorSources:
                 raise SourceError("source_unknown")
 
     @staticmethod
-    def _source_inventory(
-        card: _CurrentCard,
+    def source_inventory(
+        card: CurrentCard,
         expected: Mapping[tuple[str, str], SourceContext],
         keywords: tuple[PrintedKeywordObligation, ...],
     ) -> bytes:
+        """Expose the entire typed inventory independently of the author tree."""
         # Derive obligations from current sources, never from the supplied author tree.
         abilities: list[JsonValue] = [
             {
@@ -779,7 +801,7 @@ class CurrentAuthorSources:
 
     def _uses(
         self,
-        card: _CurrentCard,
+        card: CurrentCard,
         tree: JsonValue,
         expected: Mapping[tuple[str, str], SourceContext],
     ) -> dict[PathParts, SourceContext]:
@@ -815,7 +837,7 @@ class CurrentAuthorSources:
 
     def _declaration_uses(
         self,
-        card: _CurrentCard,
+        card: CurrentCard,
         tree: JsonValue,
         keywords: tuple[PrintedKeywordObligation, ...],
     ) -> dict[PathParts, PrintedKeywordObligation]:
@@ -843,7 +865,7 @@ class CurrentAuthorSources:
 
     @staticmethod
     def _use_context(
-        card: _CurrentCard,
+        card: CurrentCard,
         expected: Mapping[tuple[str, str], SourceContext],
         path: PathParts,
         ability: dict[str, JsonValue],
@@ -858,7 +880,7 @@ class CurrentAuthorSources:
 
     @staticmethod
     def _use_location(
-        card: _CurrentCard,
+        card: CurrentCard,
         path: PathParts,
         ability: dict[str, JsonValue],
         use: SourceUse | CardKeywordSourceUse,

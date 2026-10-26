@@ -69,7 +69,7 @@ def test_real_lastword_current_boundary(tmp_path: Path) -> None:
     fixture = damage_fixture(tmp_path / "store")
     expander = AuthorExpander(SCHEMAS)
     with current(fixture) as source:
-        complete = source._card_payload(CARD)
+        complete = source.card_payload(CARD)
         assert set(complete.revisions.values()) == {FACE}
         matched = complete.fields[0].matches[0]
         assert matched is not None

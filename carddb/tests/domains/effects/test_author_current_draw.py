@@ -81,7 +81,7 @@ def draw_card(request: pytest.FixtureRequest) -> DrawCard:
 def collection(
     source: CurrentAuthorSources, card: DrawCard, *, companion: bool
 ) -> AuthorInputSet:
-    complete = source._card_payload(card.card_id)
+    complete = source.card_payload(card.card_id)
     matched = complete.fields[0].matches[0]
     assert matched is not None
     use = SourceUse(
@@ -196,7 +196,7 @@ def check_mutation(
 def check_unknown_attributes(
     source: CurrentAuthorSources, root: Path, card: DrawCard
 ) -> None:
-    revision = next(iter(source._card_payload(card.card_id).revisions))
+    revision = next(iter(source.card_payload(card.card_id).revisions))
     for attribute in (
         ("cost",)
         if card.head == "spell"
@@ -267,7 +267,7 @@ def test_real_current_draw(tmp_path: Path, draw_card: DrawCard) -> None:
 def check_evolve_kind_evidence(
     source: CurrentAuthorSources, root: Path, card: DrawCard
 ) -> None:
-    revision = next(iter(source._card_payload(card.card_id).revisions))
+    revision = next(iter(source.card_payload(card.card_id).revisions))
     for other_kind in ("advance", "token"):
         with source.db.transaction():
             source.db.update(
@@ -289,7 +289,7 @@ def check_evolve_kind_evidence(
 def check_other_kinds_keep_unknown_cost(
     source: CurrentAuthorSources, root: Path, card: DrawCard
 ) -> None:
-    revision = next(iter(source._card_payload(card.card_id).revisions))
+    revision = next(iter(source.card_payload(card.card_id).revisions))
     for other_kind in ("advance", "token"):
         with source.db.transaction():
             source.db.update("face_revision", {"id": revision}, {"cost": None})
@@ -316,7 +316,7 @@ def check_other_kinds_keep_unknown_cost(
 def check_unregistered_sibling(
     source: CurrentAuthorSources, root: Path, card: DrawCard, *, companion: bool
 ) -> None:
-    revision = next(iter(source._card_payload(card.card_id).revisions))
+    revision = next(iter(source.card_payload(card.card_id).revisions))
     original = source.db.select(
         "face_revision", ("effect_unit_id",), where={"id": revision}
     )[0].values["effect_unit_id"]
@@ -348,7 +348,7 @@ def check_unregistered_sibling(
 def check_unadmitted_current_sources(
     source: CurrentAuthorSources, root: Path, card: DrawCard
 ) -> None:
-    revision = next(iter(source._card_payload(card.card_id).revisions))
+    revision = next(iter(source.card_payload(card.card_id).revisions))
     original = source.db.select(
         "face_revision", ("effect_unit_id",), where={"id": revision}
     )[0].values["effect_unit_id"]

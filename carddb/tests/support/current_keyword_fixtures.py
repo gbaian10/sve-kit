@@ -46,7 +46,7 @@ def current_keyword_inputs(root: Path, number: str = "BP01-138") -> JsonValue:
             "printing", ("card_id",), where={"region": "jp", "card_no": number}
         )[0].values["card_id"]
         assert isinstance(identity, str)
-        complete = source._card_payload(identity)
+        complete = source.card_payload(identity)
         abilities: list[JsonValue] = []
         for obligation in source.keyword_obligations(identity):
             occurrence = obligation.source_use.occurrence
@@ -58,8 +58,8 @@ def current_keyword_inputs(root: Path, number: str = "BP01-138") -> JsonValue:
             if occurrence.ordinal is not None:
                 entry["section"] = occurrence.ordinal
             abilities.append(entry)
-        for (binding, scope), context in source._contexts(
-            source._checked_sources(complete)
+        for (binding, scope), context in source.contexts(
+            source.checked_sources(complete)
         ).items():
             use = SourceUse(
                 binding_id=binding,

@@ -71,7 +71,7 @@ def test_real_numeric_current_boundary(tmp_path: Path) -> None:
     fixture = numeric_fixture(tmp_path / "store")
     expander = AuthorExpander(SCHEMAS)
     with current(fixture) as source:
-        complete = source._card_payload(CARD)
+        complete = source.card_payload(CARD)
         assert set(complete.revisions.values()) == {
             "f:199fa75484985d99a482b0054cc968f7"
         }

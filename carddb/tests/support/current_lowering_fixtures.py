@@ -38,7 +38,7 @@ def current_lowering_inputs(root: Path) -> JsonValue:
             fixture.rules,
             fixture.jp_batch_id,
         )
-        card = current._card_payload(card_id)
+        card = current.card_payload(card_id)
         matched = card.fields[0].matches[0]
         assert matched is not None
         use = SourceUse(

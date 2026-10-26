@@ -73,7 +73,7 @@ def card(
         "printing", ("card_id",), where={"region": "jp", "card_no": number}
     )[0].values["card_id"]
     assert isinstance(identity, str)
-    complete = source._card_payload(identity)
+    complete = source.card_payload(identity)
     metadata = meta()
     metadata["source"] = source_version(complete.payload)
     result: dict[str, JsonValue] = {"meta": metadata, "abilities": []}
@@ -189,7 +189,7 @@ def test_body_and_keyword_evidence_have_disjoint_paths(
     faces: bool,
 ) -> None:
     with current(fixture) as source:
-        body = source._card_payload(CARDS["BP01-009"]).fields[0].source.text
+        body = source.card_payload(CARDS["BP01-009"]).fields[0].source.text
         effect(source, monkeypatch, "【守護】【オーラ】\n" + body)
         (result,) = validate_files(
             source,
@@ -239,7 +239,7 @@ def test_whole_card_rejects_keyword_mismatch(
     reason: str,
 ) -> None:
     with current(fixture) as source:
-        body = source._card_payload(CARDS["BP01-009"]).fields[0].source.text
+        body = source.card_payload(CARDS["BP01-009"]).fields[0].source.text
         raw = "【守護】" if change in {"replace", "extra"} else "【守護】【オーラ】"
         effect(source, monkeypatch, raw + "\n" + body)
         authored = card(
@@ -538,7 +538,7 @@ def test_missing_registry_sibling_rejects_entire_author(
     missing: str,
 ) -> None:
     with monkeypatch.context() as setup, current(fixture) as source:
-        body = source._card_payload(CARDS["BP01-009"]).fields[0].source.text
+        body = source.card_payload(CARDS["BP01-009"]).fields[0].source.text
         raw = "【守護】【オーラ】\n" + body
         effect(source, setup, raw)
         authored = card(source)
@@ -600,7 +600,7 @@ def test_source_side_failure_rejects_whole_card(
         effect(source, monkeypatch, raw)
         if reason == "unsupported_duplicate_source_keyword":
             object_value(authored["meta"])["source"] = source_version(
-                source._card_payload(CARDS["BP01-009"]).payload
+                source.card_payload(CARDS["BP01-009"]).payload
             )
         (result,) = validate_files(
             source, collection(source, {"BP01-009": authored}), expander

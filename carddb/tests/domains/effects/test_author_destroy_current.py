@@ -38,8 +38,8 @@ def test_real_advance_body_requires_complete_keyword_declaration(
 ) -> None:
     fixture = destroy_fixture(tmp_path / "store")
     with current(fixture) as source:
-        card_id = source._printing_card("BP19-P32")
-        assert source._printing_card("BP19-114") == card_id
+        card_id = source.printing_card("BP19-P32")
+        assert source.printing_card("BP19-114") == card_id
         face = source.db.select("face", ("id",), where={"card_id": card_id})[0].values[
             "id"
         ]
@@ -99,7 +99,7 @@ def check_current_requires_keyword_declaration(
     expander = AuthorExpander(SCHEMAS)
     record = companion(resolved)
     metadata = meta()
-    metadata["source"] = source_version(source._card_payload(card_id).payload)
+    metadata["source"] = source_version(source.card_payload(card_id).payload)
     for number in ("BP19-P32", "BP19-114"):
         for node in (ability(head()), generated(record)):
             node["line"] = 2

@@ -1,5 +1,7 @@
 # 效果 DSL 1.0：承載、版本與執行邊界
 
+作者查詢、簡寫輸入與現行格式寫入指令見[效果作者工具](authoring-tools.md)。
+
 第一版保留嚴格 reader、精確展開、來源綁定及 expanded JSON 與 typed IR 的交接。§4–5 的資格、用途依賴追蹤、rekey、邊界案例及實跑 DB 屬延伸契約，第一版不執行；review 證據只驗封閉形狀，不授予准入。
 
 本文是DSL 1.0 的文件契約，與[DSL 語法](author-syntax-1.0.md)、[IR 詞彙](ir-vocabulary-1.0.md)共同閱讀；實作範圍見 §1，不表示格式已發布或來源已准入。語法的唯一機器權威仍在 `dsl/`，不能把既有 astra/1 Schema 當作 DSL 1.0 驗證器。決定方向見 [#799 的維護者決定](https://github.com/gbaian10/sve-kit/issues/799#issuecomment-6282231068)。
