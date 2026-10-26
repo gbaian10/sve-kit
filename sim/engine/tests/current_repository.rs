@@ -246,6 +246,73 @@ fn repository_lastword_rejects_missing_sources_and_unknown_or_unsupported_steps(
     }
 }
 
+#[test]
+fn repository_selection_rejects_mixed_formats_and_never_falls_back() {
+    let (snapshot, keywords, input) = inputs();
+    let prototype = json!({
+        "format": 1_u8,
+        "kind": "effect_set",
+        "cards": {
+            "BP01-P25": {
+                "status": "complete",
+                "abilities": [{
+                    "line": 1_u8,
+                    "kind": "trigger",
+                    "event": "field_to_cemetery",
+                    "subject": "self",
+                    "body": {"op": "damage", "subjects": "both.leaders", "amount": 2_u8}
+                }]
+            }
+        }
+    });
+    let mut mixed = input;
+    mixed["documents"].as_array_mut().unwrap().push(json!([
+        "probe.yaml",
+        serde_json::to_string(&prototype).unwrap()
+    ]));
+    let prototype_only = json!({"documents": mixed["documents"], "authors": []});
+    let available = Catalog::from_current_selection(&snapshot, &keywords, &prototype_only).unwrap();
+    let programs = serde_json::to_value(&available.prototypes).unwrap();
+    assert!(programs["programs"].get("BP01-P25").is_some());
+
+    let overlap = Catalog::from_current_selection(&snapshot, &keywords, &mixed)
+        .err()
+        .unwrap();
+    assert!(matches!(&overlap, EngineFailure::Invalid(reason)
+        if reason == "current selection identity or prototype overlap"));
+
+    let mut invalid = mixed.clone();
+    let invalid_author = invalid["authors"]
+        .as_array_mut()
+        .unwrap()
+        .iter_mut()
+        .find(|author| author["input"]["card_no"] == "BP01-P25")
+        .unwrap();
+    invalid_author["input"]["sidecar"] = json!([]);
+    let failure = Catalog::from_current_selection(&snapshot, &keywords, &invalid)
+        .err()
+        .unwrap();
+    assert!(matches!(&failure, EngineFailure::Invalid(reason)
+        if reason == "invalid_current_source at /cards/BP01-P25"));
+
+    let author = mixed["authors"]
+        .as_array_mut()
+        .unwrap()
+        .iter_mut()
+        .find(|author| author["input"]["card_no"] == "BP01-P25")
+        .unwrap();
+    *author = json!({
+        "status": "rejected",
+        "card_no": "BP01-P25",
+        "reason": "source_pending"
+    });
+    let rejection = Catalog::from_current_selection(&snapshot, &keywords, &mixed)
+        .err()
+        .unwrap();
+    assert!(matches!(&rejection, EngineFailure::Unsupported(reason)
+        if reason == "current card rejected: BP01-P25: source_pending"));
+}
+
 #[path = "current_repository/evolution.rs"]
 mod evolution;
 
