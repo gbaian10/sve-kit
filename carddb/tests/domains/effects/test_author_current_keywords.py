@@ -18,6 +18,7 @@ from ...support.author_current_fixtures import (
     current_source_fixture,
     entry_snapshot,
 )
+from ...support.time_budget import slow_fixture
 from .author_current_goldens import FACTS
 from .author_current_synthetic import back_face, effect, token_section
 from .author_entry_cases import meta
@@ -26,6 +27,10 @@ from .test_author_entries import SCHEMAS
 
 
 @pytest.fixture(scope="module")
+@slow_fixture(
+    reason="Build the real current-source database for keyword declarations "
+    "once for this module; each test copies the database before writing."
+)
 def fixture(
     tmp_path_factory: pytest.TempPathFactory, author_source_preparation: bytes
 ) -> CurrentSourceFixture:

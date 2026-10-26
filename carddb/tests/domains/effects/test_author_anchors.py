@@ -20,6 +20,7 @@ from sve_carddb.domains.effects.author_inputs import AuthorInputError, parse_doc
 from sve_carddb.domains.effects.author_set import AuthorInputSet
 
 from ...support.author_current_fixtures import current_source_fixture, entry_snapshot
+from ...support.time_budget import slow_fixture
 from .author_current_synthetic import effect
 from .test_author_current import current
 from .test_author_entries import SCHEMAS
@@ -40,6 +41,10 @@ WRITER: list[JsonValue] = [
 
 
 @pytest.fixture(scope="module")
+@slow_fixture(
+    reason="Build the real current-source database for committed anchor validation "
+    "once for this module; each test copies the database before writing."
+)
 def fixture(
     tmp_path_factory: pytest.TempPathFactory, author_source_preparation: bytes
 ) -> CurrentSourceFixture:
