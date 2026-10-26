@@ -109,6 +109,7 @@ recipe 是 `effect-anchor-v1`。工具產生、提交、不手改；錨點不重
 以及選定本體名稱／edition／body_version／registration／typed params／接線；scope-free keyword 不造 ability_scope 或 body_version。
 每本體保存 frame／root／body_version、完整 params／ports／domain。`legacy_shape.container: card|faces` 只保留原容器以精確回建，
 不是另一個作者入口，也不保存任意 shape metadata。
+新卡首次寫入固定使用 faces 容器，將各能力放入已唯一定位的面；既有卡則沿已提交的容器回建。
 
 `basis` 為 `effect-anchor-v1:sha256:<64hex>`：canonical-json-v1／UTF-8／SHA-256，payload 置於
 `{recipe:"effect-anchor-v1",payload}` 中。H_card 涵蓋卡／面與來源基準、全部 checked source 的完整 frame／binding／typed leaves／直接 interface_key、
