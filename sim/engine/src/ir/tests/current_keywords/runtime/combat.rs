@@ -9,15 +9,11 @@ const BANE: &str = "BP03-033";
 
 fn selection() -> Value {
     let mut selection = current_inputs()["keywords"].clone();
-    for entry in current_inputs()["combat_keywords"]
-        .as_object()
-        .unwrap()
-        .values()
-    {
+    for number in [STORM, RUSH, ASSAIL, INTIMIDATE, BANE] {
         selection["authors"]
             .as_array_mut()
             .unwrap()
-            .push(entry["authors"][0].clone());
+            .push(current_inputs()["combat_keywords"][number]["authors"][0].clone());
     }
     selection
 }
@@ -70,7 +66,22 @@ fn real_combat_printings_preserve_every_source_and_sibling_before_admission() {
                 );
             }
         }
-        super::super::admission(entry).unwrap();
+        if !matches!(number.as_str(), "DSD01b-005" | "SD07-006") {
+            super::super::admission(entry).unwrap();
+        }
+    }
+}
+
+#[test]
+fn current_multi_printing_handoffs_reject_a_legacy_printing_text_snapshot() {
+    // The legacy snapshot preserves original printing text, not the latest shared wording.
+    for number in ["DSD01b-005", "SD07-006"] {
+        let entry = &current_inputs()["combat_keywords"][number];
+        assert!(matches!(
+            super::super::admission(entry),
+            Err(crate::EngineFailure::Invalid(message))
+                if message == "current face has no unique snapshot source"
+        ));
     }
 }
 
@@ -367,14 +378,19 @@ fn combat_names_do_not_admit_unproven_partial_or_nested_definitions() {
                     .unwrap_err();
             }
         }
+        let face = input["declaration_sidecar"][0]["face_id"]
+            .as_str()
+            .unwrap()
+            .to_owned();
         let mut missing = input.clone();
-        missing["tree"]["cards"][number]["abilities"]
+        missing["tree"]["cards"][number]["faces"][&face]["abilities"]
             .as_array_mut()
             .unwrap()
             .remove(0);
         missing["declaration_sidecar"] = json!([]);
+        // Index 5 is the ability position inside the format-2 face container path.
         for sidecar in missing["sidecar"].as_array_mut().unwrap() {
-            sidecar["path"][3] = json!(0_u8);
+            sidecar["path"][5] = json!(0_u8);
         }
         assert_eq!(
             lowerer.lower_current(&missing).unwrap_err().code,
@@ -388,12 +404,18 @@ fn synthetic_combination(keywords: &[&str], text: &str) -> (Value, String) {
     let hash = text_hash(text);
     let mut selection = current_inputs()["combat_keywords"][INTIMIDATE].clone();
     let input = &mut selection["authors"][0]["input"];
-    input["tree"]["cards"][INTIMIDATE]["abilities"][0]["keywords"] = json!(keywords);
+    let face = input["declaration_sidecar"][0]["face_id"]
+        .as_str()
+        .unwrap()
+        .to_owned();
+    let ability = &mut input["tree"]["cards"][INTIMIDATE]["faces"][&face]["abilities"][0];
+    ability["keywords"] = json!(keywords);
     input["source_payload"]["faces"][0]["texts"][1]["source_hash"] = json!(hash);
     let mut source = input["declaration_sidecar"][0]["source_use"].clone();
     source["occurrence"]["source_hash"] = json!(hash);
     source["occurrence"]["segments"] = json!([{"start":0_usize,"end":text.chars().count()}]);
-    input["tree"]["cards"][INTIMIDATE]["abilities"][0]["sources"][0] = source.clone();
+    input["tree"]["cards"][INTIMIDATE]["faces"][&face]["abilities"][0]["sources"][0] =
+        source.clone();
     input["source_inventory"]["non_body"][0]["source_use"] = source.clone();
     input["source_inventory"]["non_body"][0]["declaration"]["keywords"] = json!(keywords);
     input["declaration_sidecar"][0]["source_use"] = source;
