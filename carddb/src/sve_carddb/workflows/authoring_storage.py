@@ -388,7 +388,11 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
     except AuthorInputError as error:
         raise _located_error(candidate, supplied, error.diagnostic) from None
     materialized = materialize_inputs(
-        candidate, workspace.current, workspace.expander, refresh=selected
+        candidate,
+        workspace.current,
+        workspace.expander,
+        refresh=selected,
+        refresh_unused=all_cards,
     )
     old_pins = {
         key: object_value(pin)

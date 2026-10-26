@@ -16,7 +16,7 @@ from sve_carddb.domains.translations.inputs import Snapshot
 from sve_carddb.domains.translations.recognition.rules import load
 from sve_carddb.domains.translations.sources import Sources
 
-from .author_entry_cases import meta
+from .author_entry_cases import meta, source_use
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
@@ -109,6 +109,45 @@ def companion(root: Path, path: str = BODY) -> None:
             ],
         },
     )
+
+
+@pytest.mark.parametrize("path", [AUTHOR, BODY])
+def test_disk_loader_rejects_legacy_storage(
+    tmp_path: Path, schemas: AuthorSchemas, path: str
+) -> None:
+    author(tmp_path, "FIX-001")
+    index(tmp_path, selection())
+    if path == AUTHOR:
+        document: JsonValue = {
+            "format": 1,
+            "kind": "author_effect_set",
+            "scope": "shared",
+            "cards": {
+                "FIX-001": {
+                    "meta": meta(),
+                    "abilities": [
+                        {
+                            "line": 1,
+                            "sources": [source_use()],
+                            "ports": {"imports": {}, "exports": {}},
+                            "evolve": {"cost": {"pp": 1}},
+                        }
+                    ],
+                }
+            },
+        }
+    else:
+        document = {
+            "format": 1,
+            "kind": "effect_body_shard",
+            "scope": "shared",
+            "records": [],
+        }
+    write(tmp_path, path, document)
+    with pytest.raises(AuthorInputError) as error:
+        load_author_set(tmp_path, schemas)
+    assert error.value.diagnostic.reason == "unsupported_storage_format"
+    assert error.value.diagnostic.path == (path,)
 
 
 def test_prototype_inventory_uses_database_identity(

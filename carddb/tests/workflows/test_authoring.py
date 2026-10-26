@@ -120,6 +120,28 @@ def fingerprint(root: Path) -> dict[str, str]:
     }
 
 
+def rename_draw_parameter(
+    main_tree: dict[str, JsonValue], body_tree: dict[str, JsonValue]
+) -> tuple[dict[str, JsonValue], dict[str, JsonValue]]:
+    ability = object_value(
+        array(object_value(object_value(main_tree["cards"])["BP10-122"])["abilities"])[
+            0
+        ]
+    )
+    definition = object_value(array(body_tree["records"])[0])
+    definition["params"] = {"N": "Nat"}
+    draw = object_value(
+        object_value(
+            array(object_value(object_value(definition["body"])["attack_time"])["do"])[
+                0
+            ]
+        )["draw"]
+    )
+    draw["n"] = {"param": "N"}
+    ability["params"] = {"N": 1}
+    return ability, definition
+
+
 def test_repository_check_is_the_ci_entry(workspace: authoring.Workspace) -> None:
     report = authoring.check(workspace)
     authors = array(object_value(report["selection"])["authors"])
@@ -429,22 +451,7 @@ def test_explicit_new_edition_retains_old_body_and_reuses_the_new_version(
     tmp_path: Path,
 ) -> None:
     main, bodies, main_tree, body_tree = handwriting(tmp_path)
-    ability = object_value(
-        array(object_value(object_value(main_tree["cards"])["BP10-122"])["abilities"])[
-            0
-        ]
-    )
-    definition = object_value(array(body_tree["records"])[0])
-    definition["params"] = {"N": "Nat"}
-    draw = object_value(
-        object_value(
-            array(object_value(object_value(definition["body"])["attack_time"])["do"])[
-                0
-            ]
-        )["draw"]
-    )
-    draw["n"] = {"param": "N"}
-    ability["params"] = {"N": 1}
+    ability, definition = rename_draw_parameter(main_tree, body_tree)
     main.write_bytes(authoring.format_yaml(main_tree))
     bodies.write_bytes(authoring.format_yaml(body_tree))
     with pytest.raises(authoring.AuthorInputError) as error:
@@ -735,3 +742,66 @@ def test_inspect_retains_stored_anchor_and_reports_the_current_difference(
     assert failure["actual"] == current_basis
     assert failure["card_line"] == 1
     assert fingerprint(output_root) == before
+
+
+def test_selected_write_never_rebinds_an_unused_stale_body_pin(
+    workspace: authoring.Workspace, output_root: Path, tmp_path: Path
+) -> None:
+    main, bodies, main_tree, body_tree = handwriting(tmp_path)
+    ability, definition = rename_draw_parameter(main_tree, body_tree)
+    ability["edition"] = 2
+    definition["edition"] = 2
+    main.write_bytes(authoring.format_yaml(main_tree))
+    bodies.write_bytes(authoring.format_yaml(body_tree))
+    authoring.write(
+        workspace,
+        main=main,
+        bodies=bodies,
+        output_root=output_root,
+        cards=frozenset({"BP10-122"}),
+    )
+    anchor_path = output_root / "rules/effect-anchors/BP10.yaml"
+    anchors = tree(anchor_path)
+    pins = object_value(anchors["bodies"])
+    pin = object_value(pins["draw_exact_attack_time.v1/1"])
+    pin["basis"] = "effect-anchor-v1:sha256:" + "0" * 64
+    anchor_path.write_bytes(authoring.format_yaml(anchors))
+    before = fingerprint(output_root)
+    with pytest.raises(authoring.AuthorInputError) as error:
+        authoring.write(
+            workspace,
+            main=main,
+            bodies=bodies,
+            output_root=output_root,
+            cards=frozenset({"BP01-110"}),
+        )
+    assert error.value.diagnostic.reason == "stale_body_anchor"
+    assert fingerprint(output_root) == before
+    refreshed = authoring.write(
+        workspace,
+        main=output_root / "rules/author-effects",
+        bodies=output_root / "rules/effect-bodies",
+        output_root=output_root,
+        all_cards=True,
+    )
+    assert refreshed["written"] == ["rules/effect-anchors/BP10.yaml"]
+    assert authoring.check(replace(workspace, authored=output_root))["status"] == "ok"
+
+
+def test_shared_body_cannot_bind_to_two_different_source_frames(
+    workspace: authoring.Workspace, output_root: Path
+) -> None:
+    path = output_root / "rules/author-effects/ECP01/000.yaml"
+    main = tree(path)
+    ability = object_value(
+        array(object_value(object_value(main["cards"])["ECP01-002"])["abilities"])[0]
+    )
+    ability["use"] = "draw_exact_attack_time.v1"
+    path.write_bytes(authoring.format_yaml(main))
+    selection = workspace.current.selection_input(output_root, workspace.expander)
+    rejected = {
+        string(object_value(card)["reason"])
+        for card in array(object_value(selection)["authors"])
+        if object_value(card)["status"] == "rejected"
+    }
+    assert "body_source_frame_mismatch" in rejected

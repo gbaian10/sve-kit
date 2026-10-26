@@ -115,8 +115,13 @@ def materialize_inputs(  # ruff: ignore[too-many-locals, too-many-statements, to
     expander: AuthorExpander,
     *,
     refresh: frozenset[str] = frozenset(),
+    refresh_unused: bool = False,
 ) -> Materialized:
-    """Recompute independently; refresh is reserved for the explicit writer."""
+    """Recompute independently; refresh is reserved for the explicit writer.
+
+    Unused bodies have no selected card to justify a refresh, so only a
+    write over the whole handwritten set may rebind their stale pins.
+    """
     handwritten = handwriting(inputs)
     old_cards: dict[str, dict[str, JsonValue]] = {}
     old_bodies: dict[str, dict[str, JsonValue]] = {}
@@ -258,7 +263,7 @@ def materialize_inputs(  # ruff: ignore[too-many-locals, too-many-statements, to
                                 card_no=number,
                             ),
                         )
-                elif not affected and key in old_bodies and not refresh:
+                elif not affected and key in old_bodies and not refresh_unused:
                     raise AuthorInputError(Diagnostic("body", "stale_body_anchor"))
     for anchor in anchors.values():
         expander.schemas.storage_tree(canonical(anchor), "effect_anchor_set")

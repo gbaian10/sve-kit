@@ -28,6 +28,7 @@ if TYPE_CHECKING:
     from pydantic import JsonValue
 
     from sve_carddb.domains.effects.author_current import CurrentAuthorSources
+    from sve_carddb.domains.effects.author_inputs import Diagnostic
 
     from ...support.author_current_fixtures import CurrentSourceFixture
 
@@ -132,6 +133,18 @@ def replace_anchor(
     )
 
 
+def rejection(
+    source: CurrentAuthorSources, inputs: AuthorInputSet, expander: AuthorExpander
+) -> Diagnostic:
+    try:
+        results = source.validate_inputs(inputs, expander)
+    except AuthorInputError as error:
+        return error.diagnostic
+    assert len(results) == 1
+    assert isinstance(results[0], CardRejected)
+    return results[0].diagnostic
+
+
 def test_current_anchor_grants_the_same_complete_semantic_handoff(
     fixture: CurrentSourceFixture, expander: AuthorExpander
 ) -> None:
@@ -210,6 +223,9 @@ def test_tampered_anchor_rejects_the_whole_card(  # ruff: ignore[complex-structu
         (result,) = source.validate_inputs(changed, expander)
         assert isinstance(result, CardRejected)
         assert result.diagnostic.stage == stage
+        assert result.diagnostic.reason == (
+            "anchor_use_closure" if field == "count" else "stale_anchor"
+        )
         assert result.diagnostic.card_no == NUMBER
         assert (
             changed.anchor_files[0].raw
@@ -218,20 +234,23 @@ def test_tampered_anchor_rejects_the_whole_card(  # ruff: ignore[complex-structu
 
 
 @pytest.mark.parametrize(
-    "mutation",
+    ("mutation", "reason"),
     [
-        "missing_card",
-        "missing_body",
-        "extra_card",
-        "extra_body",
-        "body_basis",
-        "extra_owner",
-        "wrong_owner",
-        "recipe",
+        ("missing_card", "missing_card_anchor"),
+        ("missing_body", "missing_body_anchor"),
+        ("extra_card", "extra_card_anchor"),
+        ("extra_body", "extra_body_anchor"),
+        ("body_basis", "stale_body_anchor"),
+        ("extra_owner", "extra_anchor_owner"),
+        ("wrong_owner", "wrong_anchor_owner"),
+        ("recipe", "unsupported_anchor_recipe"),
     ],
 )
 def test_anchor_inventory_is_closed(
-    fixture: CurrentSourceFixture, expander: AuthorExpander, mutation: str
+    fixture: CurrentSourceFixture,
+    expander: AuthorExpander,
+    mutation: str,
+    reason: str,
 ) -> None:
     with current(fixture) as source:
         inputs = collection(source, expander)
@@ -257,12 +276,12 @@ def test_anchor_inventory_is_closed(
             case "recipe":
                 tree["recipe"] = "effect-anchor-v0"
         changed = replace_anchor(inputs, tree)
-        try:
-            results = source.validate_inputs(changed, expander)
-        except AuthorInputError:
-            return
-        assert len(results) == 1
-        assert isinstance(results[0], CardRejected)
+        if mutation == "extra_owner":
+            changed = replace(
+                changed,
+                anchor_files=(input_file("rules/effect-anchors/OTHER.yaml", tree),),
+            )
+        assert rejection(source, changed, expander).reason == reason
 
 
 @pytest.mark.parametrize("recipe", ["adapter_recipe", "expansion_recipe"])
@@ -445,3 +464,35 @@ def test_review_freshness_uses_literal_and_preserves_disputed(
         changed = replace_anchor(inputs, tree)
         assert object_value(review_states(changed)[1])["state"] == "stale"
         assert inputs.author_files == changed.author_files
+
+
+def test_unreferenced_body_without_a_pin_is_rejected(
+    fixture: CurrentSourceFixture, expander: AuthorExpander
+) -> None:
+    with current(fixture) as source:
+        inputs = collection(source, expander)
+        body = object_value(parse_document(inputs.body_files[0].raw).value)
+        extra = deepcopy(object_value(array(body["records"])[0]))
+        extra["id"] = "unbound"
+        array(body["records"]).append(extra)
+        changed = replace(
+            inputs, body_files=(input_file(inputs.body_files[0].path, body),)
+        )
+        with pytest.raises(AuthorInputError) as error:
+            source.validate_inputs(changed, expander)
+        assert error.value.diagnostic.reason == "unbound_body_definition"
+
+
+def test_mixed_storage_formats_are_rejected(
+    fixture: CurrentSourceFixture, expander: AuthorExpander
+) -> None:
+    with current(fixture) as source:
+        inputs = collection(source, expander)
+        body = object_value(parse_document(inputs.body_files[0].raw).value)
+        body["format"] = 1
+        changed = replace(
+            inputs, body_files=(input_file(inputs.body_files[0].path, body),)
+        )
+        with pytest.raises(AuthorInputError) as error:
+            source.validate_inputs(changed, expander)
+        assert error.value.diagnostic.reason == "mixed_storage_formats"
