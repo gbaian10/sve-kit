@@ -136,7 +136,7 @@ impl Game {
             return Err(unsupported("internal rule action or timing"));
         }
         self.internal_prototype_abilities()?;
-        self.check_internal_cards()?;
+        self.check_internal_resources()?;
         let node = format!("internal-rule-{}", self.state.next_decision);
         let result = self.apply_rule_decision(decision, &node)?;
         self.state.next_decision = self.state.next_decision.saturating_add(1);

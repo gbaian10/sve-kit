@@ -14,6 +14,7 @@ use crate::{EngineFailure, Result};
 )]
 impl Game {
     fn keyword_grants(&self, id: &str) -> Result<Vec<(String, Value)>> {
+        self.require_ability_sources("keyword grants")?;
         let mut grants = Vec::new();
         for source in self.field_ids() {
             for ability in self.abilities(&source)? {

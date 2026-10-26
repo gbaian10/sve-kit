@@ -8,7 +8,7 @@ use serde_json::{Value, json};
 use sha2::{Digest as _, Sha256};
 
 use super::{Game, View, int, string};
-use crate::{Result, invalid};
+use crate::{EngineFailure, Result, invalid};
 
 #[expect(
     clippy::multiple_inherent_impl,
@@ -33,6 +33,21 @@ impl Game {
     /// # Errors
     /// A visible card is not in the supplied snapshot or its effects cannot be inspected.
     pub fn projection(&self, view: View) -> Result<Value> {
+        self.project(view).map_err(|error| match error {
+            EngineFailure::Unsupported(_)
+                if !self.card_runtime.is_empty() && view.player().is_some() =>
+            {
+                EngineFailure::Unsupported(
+                    "current projection requires unavailable abilities".into(),
+                )
+            }
+            other @ (EngineFailure::IllegalPlay(_)
+            | EngineFailure::Unsupported(_)
+            | EngineFailure::Invalid(_)) => other,
+        })
+    }
+
+    fn project(&self, view: View) -> Result<Value> {
         let seat = view.player();
         let mut packet = json!({"version":"astra-state/1","turn":self.state.turn,"room":self.state.room,"game":self.state.game,"objects":{}});
         for player in ["P1", "P2"] {
@@ -236,11 +251,20 @@ impl Game {
         Ok(json!({"by":seat,"at":point["at"],"choices":choices}))
     }
 
-    /// Reads a path from the exact same packet used by clients.
+    /// Reads a public zone count or a path from the packet used by clients.
+    /// Counts do not imply that abilities are loaded.
     ///
     /// # Errors
     /// When packet serialization cannot inspect a visible card.
     pub fn query(&self, view: View, path: &str) -> Result<Option<Value>> {
+        if let Some((seat, key)) = path.split_once('.')
+            && matches!(seat, "P1" | "P2")
+            && let Some(zone) = key.strip_suffix("_count")
+            && zone != "void"
+            && self.player(seat)?.zones.contains_key(zone)
+        {
+            return Ok(Some(json!(self.zone_count(seat, zone))));
+        }
         Ok(Self::packet_query(&self.projection(view)?, path))
     }
 

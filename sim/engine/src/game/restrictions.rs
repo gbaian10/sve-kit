@@ -50,7 +50,7 @@ impl Game {
                 return Ok(true);
             }
         }
-        for source in self.ability_sources() {
+        for source in self.ability_sources(&format!("restriction {action}"))? {
             for code in self.abilities(&source)? {
                 if code["kind"] != "static" || !self.ability_zone(&source, &code)? {
                     continue;

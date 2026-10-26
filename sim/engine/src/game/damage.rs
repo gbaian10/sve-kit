@@ -193,7 +193,7 @@ impl Game {
         consumed: &BTreeMap<usize, i64>,
     ) -> Result<Vec<DamageReplacement>> {
         let mut result = Vec::new();
-        for source in self.ability_sources() {
+        for source in self.ability_sources("damage replacement")? {
             for ability in self.abilities(&source)? {
                 let body = &ability["body"];
                 if ability["kind"] != "static"

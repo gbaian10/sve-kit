@@ -148,6 +148,7 @@ impl Game {
     }
 
     pub(in crate::game::internal) fn internal_quick_spell(&self, holder: &str) -> Result<bool> {
+        self.require_internal_abilities(holder, "Quick permission")?;
         let object = self.object(holder)?;
         Ok(self
             .card_runtime
@@ -190,7 +191,7 @@ impl Game {
     }
 
     fn prepare_quick(&mut self, window: QuickWindow) -> Result<DecisionView> {
-        self.check_internal_cards()?;
+        self.check_internal_resources()?;
         self.internal_prototype_abilities()?;
         let actor = super::player_id(super::super::super::other(self.active()))?;
         let mut actions = Vec::new();

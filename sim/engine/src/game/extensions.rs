@@ -78,7 +78,7 @@ impl Game {
         let mut min = self.number(&node["min"], frame)?.max(0);
         let mut max = self.number(&node["max"], frame)?.max(0);
         let modes = i64::try_from(list(&node["modes"]).len()).map_err(invalid)?;
-        for source in self.ability_sources() {
+        for source in self.ability_sources("choice replacement")? {
             for code in self.abilities(&source)? {
                 let body = &code["body"];
                 if code["kind"] != "static"

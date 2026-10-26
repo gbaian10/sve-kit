@@ -225,6 +225,7 @@ impl Game {
     }
 
     fn printed_departures(&self, object: &Object, to: &str) -> Result<Vec<Located<Ability>>> {
+        let abilities = self.internal_printed_abilities(&object.id)?;
         if !self.card_runtime.cards.values().any(|program| {
             program.card().abilities.iter().any(|a| {
                 matches!(
@@ -238,8 +239,7 @@ impl Game {
             return Ok(Vec::new());
         }
         let own_turn = object.controller == self.active();
-        Ok(self
-            .internal_printed_abilities(&object.id)?
+        Ok(abilities
             .into_iter()
             .filter(|a| {
                 if is_lastword(&a.node) {
@@ -525,7 +525,7 @@ impl Game {
                 return Err(unsupported("unadmitted pending intervention"));
             }
             self.internal_prototype_abilities()?;
-            self.check_internal_cards()?;
+            self.check_internal_resources()?;
             if pending.header.after.0 < pending.header.before.0
                 || pending.leave.is_some_and(|leave| {
                     leave.lki.snapshot != pending.header.before

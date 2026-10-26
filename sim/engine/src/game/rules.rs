@@ -33,7 +33,7 @@ impl Game {
     /// Returns unsupported semantics or malformed transport data; legal rejections are outcomes.
     pub fn decide(&mut self, decision: &Value, node: &str) -> Result<Step> {
         if !self.card_runtime.is_empty() {
-            self.check_internal_cards()?;
+            self.check_internal_resources()?;
         }
         if self.typed.is_some()
             || self.card_runtime.checkpoint.is_some()
@@ -666,6 +666,9 @@ impl Game {
     fn evolve_decision(&mut self, decision: &Value) -> Result<bool> {
         // A loaded card evolves only through its checked intrinsic proof; prototype holders keep theirs.
         let source = self.object(string(&decision["source"]))?;
+        if !self.card_runtime.is_empty() {
+            self.require_internal_abilities(&source.id, "evolution")?;
+        }
         if self.card_runtime.is_loaded(&source.card) {
             self.internal_evolve_action(decision)
         } else {
@@ -1024,8 +1027,11 @@ impl Game {
         metadata: &Value,
         fanfare_reason: Option<&str>,
     ) -> Result<Vec<Pending>> {
+        if affected.is_empty() && !matches!(event, "end" | "main_start" | "drive_trigger") {
+            return Ok(Vec::new());
+        }
         let mut result = Vec::new();
-        for source in self.ability_sources() {
+        for source in self.ability_sources(&format!("event {event} subscriptions"))? {
             for code in self.abilities(&source)? {
                 if code["kind"] != "trigger"
                     || code["event"] != event
@@ -1143,6 +1149,7 @@ impl Game {
     }
 
     fn trigger_copies(&self, event: &str, controller: &str) -> Result<i64> {
+        self.require_ability_sources("trigger copies")?;
         let mut count = 1_i64;
         for source in self.field_ids() {
             for code in self.abilities(&source)? {

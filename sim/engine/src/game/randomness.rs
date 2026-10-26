@@ -163,7 +163,7 @@ impl Game {
 
     fn reroll_count(&self, frame: &Frame) -> Result<i64> {
         let mut count = 0_i64;
-        for source in self.ability_sources() {
+        for source in self.ability_sources("reroll permission")? {
             for code in self.abilities(&source)? {
                 if code["kind"] != "static"
                     || code["body"]["op"] != "allow_reroll"

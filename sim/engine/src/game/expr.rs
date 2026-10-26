@@ -313,13 +313,12 @@ impl Game {
     /// "これは『X』でもある" (static `name_alias`): extra names while in the given zone.
     fn name_aliases(&self, id: &str) -> Result<Vec<String>> {
         let zone = self.object(id)?.zone.clone();
-        // A card without an executable program has no alias to offer; its other
-        // abilities still fail closed when something tries to use them.
-        // Only the card's own printed abilities: an alias is never granted, and
-        // `abilities()` evaluates auras whose conditions may compare names again.
+        // Printed lookup avoids aura recursion; whole-card queries must preserve missing definitions.
         let abilities = match self.printed_abilities(id) {
             Ok(abilities) => abilities,
-            Err(crate::EngineFailure::Unsupported(_)) => return Ok(Vec::new()),
+            Err(crate::EngineFailure::Unsupported(_)) if self.card_runtime.is_empty() => {
+                return Ok(Vec::new());
+            }
             Err(error) => return Err(error),
         };
         Ok(abilities

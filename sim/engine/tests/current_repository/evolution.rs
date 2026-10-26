@@ -1,6 +1,7 @@
 use super::runtime::{game, setup};
 use super::*;
 use sve_engine::game::{Game, Step, View};
+use sve_engine::ir::{AbilityId, PlayerId};
 
 fn initial(card: &str, resource: &str, seat: &str) -> Value {
     let mut initial = setup(seat, seat, [20, 20]);
@@ -415,11 +416,8 @@ fn each_b7_evolution_rejects_a_missing_current_ability() {
             "current-runtime",
         )
         .unwrap();
-        let before = game.legal().unwrap_err();
-        assert!(
-            matches!(&before, EngineFailure::Unsupported(_)),
-            "the missing current program makes the context unsupported"
-        );
+        let before = [View::P1, View::P2, View::Referee]
+            .map(|view| game.projection(view).map_err(|failure| failure.to_string()));
         let error = game
             .internal_rule_action(&json!({
                 "do":"evolve","source":"base","evolve_card":"resource",
@@ -430,11 +428,10 @@ fn each_b7_evolution_rejects_a_missing_current_ability() {
             matches!(error, EngineFailure::Unsupported(_)),
             "{base} must not evolve without its accepted current ability: {error:?}"
         );
-        let after = game.legal().unwrap_err();
-        assert!(matches!(after, EngineFailure::Unsupported(_)));
+        let after = [View::P1, View::P2, View::Referee]
+            .map(|view| game.projection(view).map_err(|failure| failure.to_string()));
         assert_eq!(
-            format!("{before:?}"),
-            format!("{after:?}"),
+            before, after,
             "{base} rejection preserves the unsupported context"
         );
     }
@@ -547,23 +544,37 @@ fn current_evolution_rejects_wrong_owner_name_and_unpayable_cost_atomically() {
 }
 
 #[test]
-fn evolution_resource_role_cannot_admit_an_ordinary_unloaded_card() {
-    // A same-number card outside the evolve deck gets no role; a vanilla one reaches the role check itself.
-    for (card, reason) in [
-        ("BP03-116", "prototype abilities"),
-        ("BP01-042", "unloaded whole card"),
-    ] {
+fn ordinary_unloaded_cards_have_no_evolution_resource_ability_exemption() {
+    for card in ["BP03-116", "BP01-042"] {
         let mut initial = initial("BP01-110", "BP01-111", "P1");
+        initial["players"]["P1"]["zones"]["field"] = json!([]);
         initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"unloaded","card":card}]);
         let mut game = game(&initial);
+        let before = views(&game);
         let error = game
             .internal_rule_action(&json!({"do":"end-phase"}))
             .unwrap_err();
         assert!(
-            matches!(&error, EngineFailure::Unsupported(text) if text.contains(reason)),
+            matches!(&error, EngineFailure::Unsupported(text)
+                if text.contains(card) && text.contains("current ability definitions unavailable")),
             "{card}: {error:?}"
         );
+        assert_eq!(views(&game), before);
     }
+}
+
+#[test]
+fn an_admitted_resource_role_does_not_prove_an_empty_printed_ability_set() {
+    let mut game = selected_game(&initial("BP01-110", "BP01-111", "P1"), "BP01-110");
+    evolve(&mut game, &json!({"pp":0_u8,"ep":1_u8}));
+    let before = views(&game);
+    let error = game
+        .activate_internal_card("base", AbilityId(777), PlayerId { seat: 1 })
+        .unwrap_err();
+    assert!(matches!(error, EngineFailure::Unsupported(reason)
+        if reason.contains("BP01-111/0") && reason.contains("current ability definitions unavailable")));
+    assert_eq!(views(&game), before);
+    game.internal_pending_choice().unwrap_err();
 }
 
 /// Synthetic resource faces (a copy of BP01-111 under a new number) probe the ability-free rule.

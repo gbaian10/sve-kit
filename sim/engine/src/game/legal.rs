@@ -211,7 +211,7 @@ impl Game {
     )]
     pub fn legal(&self) -> Result<Vec<Value>> {
         if !self.card_runtime.is_empty() {
-            self.check_internal_cards()?;
+            self.check_internal_resources()?;
         }
         if self.typed.is_some()
             || self.card_runtime.checkpoint.is_some()
@@ -365,6 +365,9 @@ impl Game {
     }
 
     pub(super) fn can_attack(&self, id: &str, target: &str) -> Result<bool> {
+        if !self.card_runtime.is_empty() {
+            self.require_internal_abilities(id, "attack")?;
+        }
         let object = self.object(id)?;
         let seat = &object.controller;
         if object.zone != "field"

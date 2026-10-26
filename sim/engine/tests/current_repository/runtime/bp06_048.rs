@@ -179,11 +179,13 @@ fn shuffled_for(result: &Activation, seat: &str) -> usize {
 }
 
 #[test]
-fn bp06_048_cannot_load_a_real_search_match_not_in_the_current_selection() {
+fn bp06_048_reports_the_missing_ability_source_evidence_for_a_real_search_match() {
     // The unselected official spell is a real BP06-048 search candidate, not a synthetic substitute.
     for (controller, owner) in [("P1", "P2"), ("P2", "P1")] {
         let initial = position(controller, owner, json!([{"id":"spell","card":SPELL}]));
         let mut game = game_with_destroyer(&initial);
+        let before = [View::P1, View::P2, View::Referee]
+            .map(|view| game.projection(view).map_err(|error| error.to_string()));
         let error = failure(game.activate_internal_card(
             "producer",
             AbilityId(1),
@@ -191,10 +193,15 @@ fn bp06_048_cannot_load_a_real_search_match_not_in_the_current_selection() {
                 seat: seat_number(controller),
             },
         ));
+        eprintln!("BP06-048 {controller} blocked before Search: {error}");
+        assert!(error.contains("unloaded whole card BP06-042/0"));
+        assert!(error.contains("holder spell generation 0"));
+        assert!(error.contains("active zones"));
+        assert!(error.contains("current ability definitions unavailable"));
         assert_eq!(
-            error,
-            "unsupported: internal D1 does not support context contains an unloaded whole card",
-            "the real official search candidate blocks the context before the producer acts"
+            [View::P1, View::P2, View::Referee]
+                .map(|view| game.projection(view).map_err(|failure| failure.to_string())),
+            before
         );
         assert!(game.internal_pending_choice().unwrap().is_none());
         assert!(

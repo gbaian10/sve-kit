@@ -47,8 +47,24 @@ Move／Destroy 沿用已驗公開區來源與 owner 墓地／消滅目的地；S
 來源、世代、instance 與 execution 都由 authority 建立；起動讀目前有效的印刷定義，`base` 比對 face 0。
 Printed、Field 起動可帶 `PlaySpec.limit` 的每回合 1／2 次額度；以 AbilityInstanceId 與實際 TurnId
 計數，全部付款完成的 AbilityPlayed 才耗次。耗盡回 IllegalPlay，不出題、不付款；失敗回復沿下節。
-所有局內卡片都須完整載入，空能力卡也須明示；未准入的原型能力、keyword、continuous、delayed
-與忙碌 context 拒絕。已載入 Spell／Fanfare 時封住合成 prepare 與原型打出，不略過正式 producer。
+current 局面可保存未載入整卡的物件；單純存在或不讀取能力的快照計數，不因缺 program
+整局拒絕。打出、攻擊、指定能力、Quick 許可及完整事件能力資料／LKI 的能力集合查詢仍要求載入，
+真正無印刷能力的普通卡也須明示整卡，不能將缺 program 當空能力集合或回退原型效果。
+進化資源沿既有角色准入，可先完成數值與資源程序，再於未准入能力的 pending 邊界停止；
+該角色不代表能力完整載入。typed printed set 與完整事件能力資料／LKI 仍須有 program 或既有的明確空卡文證明。
+`Game::query` 的既有公開區域張數路徑（例如 `P1.hand_count`）直接讀取區域，不先建立可能需要能力的完整投影；
+所有視角得到相同公開張數，不回傳隱藏物件身分，也不新增 packet 欄位。
+
+current 不以原型 header 判定未載入卡的 active zones。需要列舉訂閱、限制、取代或交換付款介入時，
+若不能證明某物件的能力與該次操作無關，即以卡號、有效面、holder 世代及查詢用途精確拒絕。
+移動取代、關鍵字／能力授予、減費、觸發抑制與重複觸發等直接掃描場上來源的讀取，也須先檢查此能力需求。
+這仍可能使有未載入牌庫／手牌卡的實際事件或回合推進停止，不保證任意局面都可完成；
+不能只排除非場上卡而漏掉手牌棄置等觸發。沒有實際 subject 的非 phase 事件不查訂閱。
+已知 definition 的要求保留 AbilityId；未知能力集合明示定義不可用，不捏造來源行。
+authority 保留完整錯誤，玩家 projection 的 unsupported 錯誤不包含隱藏卡號或物件身分。
+
+未准入的原型 keyword、continuous、delayed 與忙碌 context 仍拒絕。
+已載入 Spell／Fanfare 時封住合成 prepare 與原型打出，不略過正式 producer。
 
 上述入口回傳 `CardPlay`：`Awaiting` 只有本次 token、actor 與授權的題目；`Resolved` 含完整
 `Activation`；從者／護符卡片 play 的 `Entered` 含 `CardEntry`（本次 execution、完整付款／card facts、

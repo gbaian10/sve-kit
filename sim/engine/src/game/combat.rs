@@ -13,7 +13,7 @@ impl Game {
     pub(super) fn attack_required(&self) -> Result<bool> {
         let mut targets = self.zone_ids(other(self.active()), "field");
         targets.push(format!("{}.leader", other(self.active())));
-        for source in self.ability_sources() {
+        for source in self.ability_sources("attack requirement")? {
             let frame = self.frame_for(&source)?;
             for code in self.abilities(&source)? {
                 let body = &code["body"];
