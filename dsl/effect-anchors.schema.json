@@ -1,0 +1,226 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sve-kit:effect-anchors:1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "format": {
+      "type": "integer",
+      "const": 1
+    },
+    "kind": {
+      "const": "effect_anchor_set"
+    },
+    "owner": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]+$"
+    },
+    "recipe": {
+      "const": "effect-anchor-v1"
+    },
+    "cards": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "card_id": {
+            "type": "string",
+            "pattern": "^c:[0-9a-f]{32}$"
+          },
+          "source": {
+            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Meta/properties/source"
+          },
+          "uses": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "line": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "face": {
+                  "oneOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "enum": [
+                        "front",
+                        "back"
+                      ]
+                    }
+                  ]
+                },
+                "section": {
+                  "oneOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "const": "main"
+                    }
+                  ]
+                },
+                "scope": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "face_id": {
+                  "type": "string",
+                  "pattern": "^f:[0-9a-f]{32}$(?![\\s\\S])"
+                },
+                "binding_id": {
+                  "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/SourceUse/properties/binding_id"
+                },
+                "occurrence": {
+                  "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/OccurrenceKey"
+                },
+                "frame_id": {
+                  "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Companion/properties/frame_id"
+                },
+                "ability_scope": {
+                  "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/SourceUse/properties/ability_scope"
+                },
+                "body": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "edition": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "body_version": {
+                  "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Companion/properties/body_version"
+                },
+                "registration": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "params": {
+                  "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/ParamValues"
+                },
+                "ports": {
+                  "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Ports"
+                },
+                "imports": {
+                  "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.ability.generated/properties/imports"
+                },
+                "keywords": {
+                  "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.ability.keywords/properties/keywords"
+                }
+              },
+              "required": [
+                "line",
+                "face_id",
+                "binding_id",
+                "occurrence",
+                "frame_id"
+              ]
+            }
+          },
+          "legacy_shape": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "container": {
+                "enum": [
+                  "card",
+                  "faces"
+                ]
+              }
+            },
+            "required": [
+              "container"
+            ]
+          },
+          "basis": {
+            "type": "string",
+            "pattern": "^effect-anchor-v1:sha256:[0-9a-f]{64}$(?![\\s\\S])"
+          }
+        },
+        "required": [
+          "card_id",
+          "source",
+          "uses",
+          "legacy_shape",
+          "basis"
+        ]
+      }
+    },
+    "bodies": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "frame_id": {
+            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Companion/properties/frame_id"
+          },
+          "ability_scope": {
+            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Companion/properties/ability_scope"
+          },
+          "body_version": {
+            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Companion/properties/body_version"
+          },
+          "params": {
+            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/ParamDeclarations"
+          },
+          "ports": {
+            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Ports"
+          },
+          "registrations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "domain": {
+                  "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Domain"
+                }
+              },
+              "required": [
+                "id",
+                "domain"
+              ]
+            }
+          },
+          "basis": {
+            "type": "string",
+            "pattern": "^effect-anchor-v1:sha256:[0-9a-f]{64}$(?![\\s\\S])"
+          }
+        },
+        "required": [
+          "frame_id",
+          "ability_scope",
+          "body_version",
+          "params",
+          "ports",
+          "registrations",
+          "basis"
+        ]
+      }
+    }
+  },
+  "required": [
+    "format",
+    "kind",
+    "owner",
+    "recipe",
+    "cards",
+    "bodies"
+  ]
+}

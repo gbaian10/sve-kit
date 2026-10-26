@@ -5,7 +5,13 @@
 use `format: 1, kind: keyword_registry`. These envelopes select the existing
 prototype grammar and keep Schema `$id: urn:sve-kit:effects:astra:1`.
 The [author 1.0 contract](../docs/dsl/author-contract-1.0.md) specifies separate
-`author_effect_set` and `effect_body_shard` entries. Their closed schemas and
+`author_effect_set` and `effect_body_shard` entries. Persisted handwritten inputs
+use format 2 through [author-storage.schema.json](author-storage.schema.json) and
+[effect-body-storage.schema.json](effect-body-storage.schema.json); generated per-owner
+pins use [effect-anchors.schema.json](effect-anchors.schema.json). Commit these anchors,
+refresh them only with explicit `author write --storage anchors`, and let ordinary readers
+recompute and compare them. The format 1 author/body schemas remain internal semantic
+interfaces; the disk reader rejects them and mixed storage. Their closed schemas and
 Python structural readers and explicit expansion APIs are available; source admission remains separate. The prototype's 73 node variants contain 47 action atoms, 10 combinators,
 14 declarations and two loading/unsupported markers.
 

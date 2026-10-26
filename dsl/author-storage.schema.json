@@ -1,0 +1,1160 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sve-kit:author-storage:2",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "format": {
+      "type": "integer",
+      "const": 2
+    },
+    "kind": {
+      "const": "author_effect_set"
+    },
+    "scope": {
+      "const": "shared"
+    },
+    "dsl": {
+      "const": "1.0"
+    },
+    "cards": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "minLength": 1
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "meta": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "written_by": {
+                "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Meta/properties/written_by"
+              },
+              "status": {
+                "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Meta/properties/status"
+              },
+              "reviewed_by": {
+                "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Meta/properties/reviewed_by"
+              },
+              "verified_by_exam": {
+                "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Meta/properties/verified_by_exam"
+              },
+              "rulings": {
+                "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Meta/properties/rulings"
+              }
+            },
+            "required": [
+              "written_by"
+            ]
+          },
+          "abilities": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "line": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    "face": {
+                      "oneOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "enum": [
+                            "front",
+                            "back"
+                          ]
+                        }
+                      ]
+                    },
+                    "section": {
+                      "oneOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "const": "main"
+                        }
+                      ]
+                    },
+                    "scope": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    "use": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "edition": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    "registration": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "params": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": [
+                          "string",
+                          "integer"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "line",
+                    "use"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "line": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    "face": {
+                      "oneOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "enum": [
+                            "front",
+                            "back"
+                          ]
+                        }
+                      ]
+                    },
+                    "section": {
+                      "oneOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "const": "main"
+                        }
+                      ]
+                    },
+                    "scope": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    "imports": {
+                      "minProperties": 1,
+                      "type": "object",
+                      "propertyNames": {
+                        "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Code"
+                      },
+                      "additionalProperties": {
+                        "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/ImportUse"
+                      }
+                    },
+                    "ports": {
+                      "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Ports"
+                    },
+                    "fanfare": {
+                      "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.head.trigger"
+                    }
+                  },
+                  "required": [
+                    "line",
+                    "fanfare"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "line": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    "face": {
+                      "oneOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "enum": [
+                            "front",
+                            "back"
+                          ]
+                        }
+                      ]
+                    },
+                    "section": {
+                      "oneOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "const": "main"
+                        }
+                      ]
+                    },
+                    "scope": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    "imports": {
+                      "minProperties": 1,
+                      "type": "object",
+                      "propertyNames": {
+                        "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Code"
+                      },
+                      "additionalProperties": {
+                        "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/ImportUse"
+                      }
+                    },
+                    "ports": {
+                      "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Ports"
+                    },
+                    "lastword": {
+                      "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.head.lastword"
+                    }
+                  },
+                  "required": [
+                    "line",
+                    "lastword"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "line": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    "face": {
+                      "oneOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "enum": [
+                            "front",
+                            "back"
+                          ]
+                        }
+                      ]
+                    },
+                    "section": {
+                      "oneOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "const": "main"
+                        }
+                      ]
+                    },
+                    "scope": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    "imports": {
+                      "minProperties": 1,
+                      "type": "object",
+                      "propertyNames": {
+                        "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Code"
+                      },
+                      "additionalProperties": {
+                        "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/ImportUse"
+                      }
+                    },
+                    "ports": {
+                      "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Ports"
+                    },
+                    "evolve_time": {
+                      "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.head.trigger"
+                    }
+                  },
+                  "required": [
+                    "line",
+                    "evolve_time"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "line": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    "face": {
+                      "oneOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "enum": [
+                            "front",
+                            "back"
+                          ]
+                        }
+                      ]
+                    },
+                    "section": {
+                      "oneOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "const": "main"
+                        }
+                      ]
+                    },
+                    "scope": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    "imports": {
+                      "minProperties": 1,
+                      "type": "object",
+                      "propertyNames": {
+                        "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Code"
+                      },
+                      "additionalProperties": {
+                        "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/ImportUse"
+                      }
+                    },
+                    "ports": {
+                      "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Ports"
+                    },
+                    "super_evolve_time": {
+                      "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.head.trigger"
+                    }
+                  },
+                  "required": [
+                    "line",
+                    "super_evolve_time"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "line": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    "face": {
+                      "oneOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "enum": [
+                            "front",
+                            "back"
+                          ]
+                        }
+                      ]
+                    },
+                    "section": {
+                      "oneOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "const": "main"
+                        }
+                      ]
+                    },
+                    "scope": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    "imports": {
+                      "minProperties": 1,
+                      "type": "object",
+                      "propertyNames": {
+                        "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Code"
+                      },
+                      "additionalProperties": {
+                        "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/ImportUse"
+                      }
+                    },
+                    "ports": {
+                      "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Ports"
+                    },
+                    "attack_time": {
+                      "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.head.trigger"
+                    }
+                  },
+                  "required": [
+                    "line",
+                    "attack_time"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "line": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    "face": {
+                      "oneOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "enum": [
+                            "front",
+                            "back"
+                          ]
+                        }
+                      ]
+                    },
+                    "section": {
+                      "oneOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "const": "main"
+                        }
+                      ]
+                    },
+                    "scope": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    "imports": {
+                      "minProperties": 1,
+                      "type": "object",
+                      "propertyNames": {
+                        "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Code"
+                      },
+                      "additionalProperties": {
+                        "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/ImportUse"
+                      }
+                    },
+                    "ports": {
+                      "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Ports"
+                    },
+                    "race_time": {
+                      "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.head.trigger"
+                    }
+                  },
+                  "required": [
+                    "line",
+                    "race_time"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "line": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    "face": {
+                      "oneOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "enum": [
+                            "front",
+                            "back"
+                          ]
+                        }
+                      ]
+                    },
+                    "section": {
+                      "oneOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "const": "main"
+                        }
+                      ]
+                    },
+                    "scope": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    "imports": {
+                      "minProperties": 1,
+                      "type": "object",
+                      "propertyNames": {
+                        "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Code"
+                      },
+                      "additionalProperties": {
+                        "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/ImportUse"
+                      }
+                    },
+                    "ports": {
+                      "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Ports"
+                    },
+                    "drive_time": {
+                      "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.head.trigger"
+                    }
+                  },
+                  "required": [
+                    "line",
+                    "drive_time"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "line": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    "face": {
+                      "oneOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "enum": [
+                            "front",
+                            "back"
+                          ]
+                        }
+                      ]
+                    },
+                    "section": {
+                      "oneOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "const": "main"
+                        }
+                      ]
+                    },
+                    "scope": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    "imports": {
+                      "minProperties": 1,
+                      "type": "object",
+                      "propertyNames": {
+                        "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Code"
+                      },
+                      "additionalProperties": {
+                        "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/ImportUse"
+                      }
+                    },
+                    "ports": {
+                      "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Ports"
+                    },
+                    "auto": {
+                      "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.head.auto"
+                    }
+                  },
+                  "required": [
+                    "line",
+                    "auto"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "line": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    "face": {
+                      "oneOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "enum": [
+                            "front",
+                            "back"
+                          ]
+                        }
+                      ]
+                    },
+                    "section": {
+                      "oneOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "const": "main"
+                        }
+                      ]
+                    },
+                    "scope": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    "imports": {
+                      "minProperties": 1,
+                      "type": "object",
+                      "propertyNames": {
+                        "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Code"
+                      },
+                      "additionalProperties": {
+                        "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/ImportUse"
+                      }
+                    },
+                    "ports": {
+                      "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Ports"
+                    },
+                    "activate": {
+                      "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.head.activate"
+                    }
+                  },
+                  "required": [
+                    "line",
+                    "activate"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "line": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    "face": {
+                      "oneOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "enum": [
+                            "front",
+                            "back"
+                          ]
+                        }
+                      ]
+                    },
+                    "section": {
+                      "oneOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "const": "main"
+                        }
+                      ]
+                    },
+                    "scope": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    "imports": {
+                      "minProperties": 1,
+                      "type": "object",
+                      "propertyNames": {
+                        "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Code"
+                      },
+                      "additionalProperties": {
+                        "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/ImportUse"
+                      }
+                    },
+                    "ports": {
+                      "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Ports"
+                    },
+                    "static": {
+                      "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.head.static"
+                    }
+                  },
+                  "required": [
+                    "line",
+                    "static"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "line": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    "face": {
+                      "oneOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "enum": [
+                            "front",
+                            "back"
+                          ]
+                        }
+                      ]
+                    },
+                    "section": {
+                      "oneOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "const": "main"
+                        }
+                      ]
+                    },
+                    "scope": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    "imports": {
+                      "minProperties": 1,
+                      "type": "object",
+                      "propertyNames": {
+                        "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Code"
+                      },
+                      "additionalProperties": {
+                        "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/ImportUse"
+                      }
+                    },
+                    "ports": {
+                      "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Ports"
+                    },
+                    "play": {
+                      "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.head.play"
+                    }
+                  },
+                  "required": [
+                    "line",
+                    "play"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "line": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    "face": {
+                      "oneOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "enum": [
+                            "front",
+                            "back"
+                          ]
+                        }
+                      ]
+                    },
+                    "section": {
+                      "oneOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "const": "main"
+                        }
+                      ]
+                    },
+                    "scope": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    "ports": {
+                      "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/EmptyPorts"
+                    },
+                    "keywords": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Concept"
+                          },
+                          {
+                            "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
+                          }
+                        ]
+                      },
+                      "minItems": 1,
+                      "uniqueItems": true
+                    }
+                  },
+                  "required": [
+                    "line",
+                    "keywords"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "line": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    "face": {
+                      "oneOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "enum": [
+                            "front",
+                            "back"
+                          ]
+                        }
+                      ]
+                    },
+                    "section": {
+                      "oneOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "const": "main"
+                        }
+                      ]
+                    },
+                    "scope": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    "imports": {
+                      "minProperties": 1,
+                      "type": "object",
+                      "propertyNames": {
+                        "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Code"
+                      },
+                      "additionalProperties": {
+                        "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/ImportUse"
+                      }
+                    },
+                    "ports": {
+                      "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Ports"
+                    },
+                    "evolve": {
+                      "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.head.evolve"
+                    }
+                  },
+                  "required": [
+                    "line",
+                    "evolve"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "line": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    "face": {
+                      "oneOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "enum": [
+                            "front",
+                            "back"
+                          ]
+                        }
+                      ]
+                    },
+                    "section": {
+                      "oneOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "const": "main"
+                        }
+                      ]
+                    },
+                    "scope": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    "imports": {
+                      "minProperties": 1,
+                      "type": "object",
+                      "propertyNames": {
+                        "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Code"
+                      },
+                      "additionalProperties": {
+                        "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/ImportUse"
+                      }
+                    },
+                    "ports": {
+                      "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Ports"
+                    },
+                    "ride": {
+                      "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.head.ride"
+                    }
+                  },
+                  "required": [
+                    "line",
+                    "ride"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "line": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    "face": {
+                      "oneOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "enum": [
+                            "front",
+                            "back"
+                          ]
+                        }
+                      ]
+                    },
+                    "section": {
+                      "oneOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "const": "main"
+                        }
+                      ]
+                    },
+                    "scope": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    "imports": {
+                      "minProperties": 1,
+                      "type": "object",
+                      "propertyNames": {
+                        "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Code"
+                      },
+                      "additionalProperties": {
+                        "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/ImportUse"
+                      }
+                    },
+                    "ports": {
+                      "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Ports"
+                    },
+                    "feed": {
+                      "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.head.feed"
+                    }
+                  },
+                  "required": [
+                    "line",
+                    "feed"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "line": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    "face": {
+                      "oneOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "enum": [
+                            "front",
+                            "back"
+                          ]
+                        }
+                      ]
+                    },
+                    "section": {
+                      "oneOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "const": "main"
+                        }
+                      ]
+                    },
+                    "scope": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    "imports": {
+                      "minProperties": 1,
+                      "type": "object",
+                      "propertyNames": {
+                        "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Code"
+                      },
+                      "additionalProperties": {
+                        "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/ImportUse"
+                      }
+                    },
+                    "ports": {
+                      "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Ports"
+                    },
+                    "spell": {
+                      "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.head.spell"
+                    }
+                  },
+                  "required": [
+                    "line",
+                    "spell"
+                  ]
+                }
+              ]
+            }
+          },
+          "note": {
+            "type": "string",
+            "minLength": 1
+          },
+          "deck_rule": {
+            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.card/properties/deck_rule"
+          }
+        },
+        "required": [
+          "meta",
+          "abilities"
+        ]
+      }
+    }
+  },
+  "required": [
+    "format",
+    "kind",
+    "cards"
+  ]
+}
