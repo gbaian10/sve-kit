@@ -9,7 +9,10 @@
 
 use serde_json::{Value, json};
 use std::{env::var_os, fs::read_to_string, path::PathBuf};
+use sve_engine::game::Game;
 use sve_engine::{EngineFailure, catalog::Catalog, ir::lowering::ExpandedLowerer};
+
+const BP06_048_FACE: &str = "f:e9d8deca215953a99d12bd07acd566fa";
 
 fn inputs() -> (String, String, Value) {
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
@@ -153,6 +156,45 @@ fn repository_named_search_lowers_as_a_complete_current_candidate() {
     assert_eq!(source.source.field, "effect");
     assert_eq!(source.source.line, 1);
     assert_eq!(source.source.section, None);
+}
+
+#[test]
+fn repository_named_search_rejects_wrong_owner_missing_source_and_incomplete_closure() {
+    let (snapshot, keywords, input) = inputs();
+    let lowerer = ExpandedLowerer::new().unwrap();
+
+    let mut wrong_owner = b4(&input).clone();
+    wrong_owner["tree"]["cards"]["BP06-048"]["faces"][BP06_048_FACE]["abilities"][0]["lastword"]
+        ["do"][0]["search"]["sel"]["who"] = json!("opponent");
+    let owner_failure = lowerer.lower_current(&wrong_owner).err().unwrap();
+    assert_eq!(owner_failure.code, "unsupported_construct");
+    assert_eq!(
+        owner_failure.path,
+        format!("/cards/BP06-048/faces/{BP06_048_FACE}/abilities/0")
+    );
+
+    let mut missing_source = b4(&input).clone();
+    missing_source["sidecar"] = json!([]);
+    let source_failure = lowerer.lower_current(&missing_source).err().unwrap();
+    assert_eq!(source_failure.code, "invalid_current_source");
+    assert_eq!(source_failure.path, "/cards/BP06-048");
+
+    let mut incomplete = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
+    incomplete.current.remove("BP06-048");
+    let error = Game::from_selected_effects(
+        incomplete,
+        &runtime::setup("P1", "P1", [20, 20]),
+        &Value::Null,
+        &Value::Null,
+        "incomplete-bp06-selection",
+    )
+    .err()
+    .unwrap();
+    assert!(
+        matches!(&error, EngineFailure::Invalid(reason)
+            if reason == "current selection changed after acceptance"),
+        "the whole current Game rejects a closure with BP06-048 removed"
+    );
 }
 
 #[test]
