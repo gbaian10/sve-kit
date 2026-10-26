@@ -1,0 +1,93 @@
+format: 2
+kind: digital_link_shard
+records:
+  - subject:
+      card_id: c:eb6d39b54a9852b4abaae84620ad85e7
+      face_id:
+      game: sv1
+      official_id: "122531020"
+      digital_phase:
+    value:
+      relation: same_character
+      effect_similarity:
+      sve_names:
+        - printing_id: p:04a6576aa6f2589ead456a157b602e26
+          face_id: f:bef1881f489b55c48ab856dd0f374f90
+          name_ref:
+            batch_id: sha256:139be07a281797f06baeb00b6aa8da56265ccd22ba4b42246630ba3d283e9ac3
+            source_version_id: src:v1:75daf57b2142d050a2b8a1db00203d49cd92ead78333e4c66b773b9b6a83f367
+            parser: translation-jp-v1
+            locator: /faces/0/name
+            text_hash: sha256:d91fe01e582cb3758584d82c7798dcbeaa7e161d10a8b8d0ecd7dd55a80d9f69
+      digital_names:
+        - phase: normal
+          lang: en
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:4c183f0e6c27155d37d8aef43e7a743b0b291f7a2aec8387f484ebad7ca9cdd8
+            parser: translation-sv1-v1
+            locator: /data/cards/3876/card_name
+            text_hash: sha256:875de8f98dc22e3258057811d34f095de34260a354dadb4561454dfa561886cf
+        - phase: normal
+          lang: ja
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:86de774acfcbb1869f83c75fff58d85841f98d8a531064ecc230e8abb1470529
+            parser: translation-sv1-v1
+            locator: /data/cards/3876/card_name
+            text_hash: sha256:8c9f153bab56d6a59436bf217dca19d3a837c87a955ccae6cb88d7562f4bb0cc
+        - phase: normal
+          lang: zh-Hant
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
+            parser: translation-sv1-v1
+            locator: /data/cards/3876/card_name
+            text_hash: sha256:0110d613f66c00770d46697a793578cde525944799f613a0968bef7a1ddf37a3
+    review_level: model_reviewed
+    reason: 兩個不同廠商模型各自逐組核對卡名、卡文與本體插畫，判斷一致。三方白短髮、尖耳、深膚色與綠瞳角色及魔導書等特徵一致，日文稱號、能力、數值與插畫各異；僅採同角色瀏覽關係，不採同卡、數位官方完整名稱或同圖。只供瀏覽，不供名。
+  - subject:
+      card_id: c:eb6d39b54a9852b4abaae84620ad85e7
+      face_id:
+      game: svwb
+      official_id: "10853110"
+      digital_phase:
+    value:
+      relation: same_character
+      effect_similarity:
+      sve_names:
+        - printing_id: p:04a6576aa6f2589ead456a157b602e26
+          face_id: f:bef1881f489b55c48ab856dd0f374f90
+          name_ref:
+            batch_id: sha256:139be07a281797f06baeb00b6aa8da56265ccd22ba4b42246630ba3d283e9ac3
+            source_version_id: src:v1:75daf57b2142d050a2b8a1db00203d49cd92ead78333e4c66b773b9b6a83f367
+            parser: translation-jp-v1
+            locator: /faces/0/name
+            text_hash: sha256:d91fe01e582cb3758584d82c7798dcbeaa7e161d10a8b8d0ecd7dd55a80d9f69
+      digital_names:
+        - phase: normal
+          lang: en
+          name_ref:
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:ac92cc065659e0fddb54360a08a6c50f77df830ff687ebeabf3c332c7152d8d4
+            parser: translation-svwb-v1
+            locator: /data/card_details/10853110/common/name
+            text_hash: sha256:605ddb27fee713331a47662b465e726d5f79fdfb67cc613ceca478683053acd0
+        - phase: normal
+          lang: ja
+          name_ref:
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:a7c60625d15da9d5520d0f7b19daad81515413f89628b08d3090c0fe532068ad
+            parser: translation-svwb-v1
+            locator: /data/card_details/10853110/common/name
+            text_hash: sha256:f906b367435f3db8d9b8b85f0632cfbba52bb7059a47df2e56b290944ec8efc1
+        - phase: normal
+          lang: zh-Hant
+          name_ref:
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:722d0a83e0c2fb7dda709b1736729c63f0f7a88f054bfe63847ed2f1cf584c6e
+            parser: translation-svwb-v1
+            locator: /data/card_details/10853110/common/name
+            text_hash: sha256:f006b438d716fcdddea37d94fb9bcd20f20e35f87e54b673bff9d5155ca106c6
+    review_level: model_reviewed
+    reason: 兩個不同廠商模型各自逐組核對卡名、卡文與本體插畫，判斷一致。三方白短髮、尖耳、深膚色與綠瞳角色及魔導書等特徵一致，日文稱號、能力、數值與插畫各異；僅採同角色瀏覽關係，不採同卡、數位官方完整名稱或同圖。只供瀏覽，不供名。

@@ -1,0 +1,32 @@
+format: 3
+kind: translation_shard
+records:
+  - origin: machine
+    low_confidence: false
+    note: 完整稱號為機器譯名；人名沿一代與二代官方繁中「絲姞」，不宣稱完整卡名是官方翻譯。
+    kind: glossary_choice
+    data:
+      term_id: term:name.suzy_kindly_curse
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 懇切的詛咒‧絲姞
+      concept_evidence: []
+      source_claim:
+        source_work: Shadowverse
+        source_urls:
+          - https://shadowverse-portal.com/card/122531020?lang=zh-tw
+        claimed_source: 人名「絲姞」沿一代官方「詛咒製造家‧絲姞」；「懇切的詛咒」為機器新譯。
+  - kind: glossary_term
+    data:
+      id: term:name.suzy_kindly_curse
+      category: card_name
+      concept_key: name.suzy_kindly_curse
+      source_ref:
+        batch_id: sha256:139be07a281797f06baeb00b6aa8da56265ccd22ba4b42246630ba3d283e9ac3
+        source_version_id: src:v1:75daf57b2142d050a2b8a1db00203d49cd92ead78333e4c66b773b9b6a83f367
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:d91fe01e582cb3758584d82c7798dcbeaa7e161d10a8b8d0ecd7dd55a80d9f69
+      source_span:
+      authored_source_ja:
