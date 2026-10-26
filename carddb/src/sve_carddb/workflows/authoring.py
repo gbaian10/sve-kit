@@ -26,7 +26,13 @@ from sve_carddb.domains.effects.author_source_hash import source_version
 from sve_carddb.domains.effects.author_sources import SourceError
 from sve_carddb.domains.parsed_cards.reader import read as read_parsed
 from sve_carddb.domains.parsed_cards.sources import ParsedBatches
-from sve_carddb.domains.products import load_products, populate_product_preview
+from sve_carddb.domains.products import (
+    FrozenProducts,
+    load_product_identities,
+    load_products,
+    plan_official_products,
+    populate_product_preview,
+)
 from sve_carddb.domains.registry.preview import FrozenJP, plan_preview
 from sve_carddb.domains.registry.records import PrintingData
 from sve_carddb.domains.text_observations import FrozenTexts, TextObservations
@@ -40,6 +46,9 @@ from sve_carddb.workflows.authoring_storage import WriteError, format_yaml, writ
 
 if TYPE_CHECKING:
     from collections.abc import Generator
+
+    from sve_carddb.domains.products import OfficialProducts
+    from sve_carddb.domains.registry.preview import PreviewPlan
 
 __all__ = [
     "AuthorInputError",
@@ -162,8 +171,35 @@ def _public_snapshot(snapshot: Snapshot, batch: str) -> Snapshot:
     )
 
 
+def _public_products(
+    inputs: Inputs,
+    authored: Path,
+    identity: PreviewPlan,
+    batches: ParsedBatches,
+    store: Path,
+) -> OfficialProducts:
+    identities = load_product_identities(
+        authored,
+        authored_revision=inputs.revision,
+        catalog=load_products(authored, registry=identity.snapshot),
+        stores={"public-authoring": store},
+        batches=batches,
+    )
+    return plan_official_products(
+        identities,
+        FrozenProducts(
+            store,
+            "public-authoring",
+            inputs.jp_batch_id,
+            region="jp",
+            sources=batches.batch(store, "public-authoring", inputs.jp_batch_id),
+        ).pages(),
+        identity,
+    )
+
+
 @contextmanager
-def prepare(  # ruff: ignore[too-many-locals] -- keep the complete ordered boundary in one operation
+def prepare(  # ruff: ignore[too-many-locals, too-many-statements] -- keep the complete ordered boundary in one operation
     inputs: Inputs, *, cards: frozenset[str] = frozenset(), main: Path | None = None
 ) -> Generator[Workspace]:
     """Prepare production identity, vocabulary, sources and the immutable JP reader."""
@@ -294,21 +330,25 @@ def prepare(  # ruff: ignore[too-many-locals] -- keep the complete ordered bound
         batches=batches,
     )
     vocabulary = prepared.projection.vocabulary
+    official = _public_products(inputs, authored, identity, batches, store)
     context = BuildContext.from_inputs(
-        inputs.revision, observations.configuration(vocabulary, ())
+        inputs.revision,
+        observations.configuration(vocabulary, ())
+        | {"product_identity": official.identities.configuration()},
     )
     sources = Sources(stores, inputs.repo, context, identity.snapshot, batches=batches)
     with create_database(compile_build(capabilities)) as db:
         with db.transaction():
             populate_product_preview(
                 db,
-                load_products(authored, registry=identity.snapshot),
+                official.identities.catalog,
                 identity,
                 authored_revision=inputs.revision,
                 build=context,
                 languages=prepared.projection.catalog.languages,
                 stores=stores,
                 batches=batches,
+                official=official,
             )
             observations.populate(
                 db, build=context, vocabulary=vocabulary, published=()
