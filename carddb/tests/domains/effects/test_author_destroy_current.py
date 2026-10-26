@@ -20,6 +20,7 @@ from sve_carddb.domains.translations.four_layer_destroy import KEY
 from sve_carddb.domains.translations.four_layer_sources import semantic_context
 
 from ...support.author_destroy_fixtures import destroy_fixture
+from ...support.author_semantic_inputs import load_semantic_inputs
 from .author_entry_cases import meta
 from .test_author_current import current, input_file, write_inputs
 from .test_author_destroy_sources import companion, head
@@ -138,10 +139,14 @@ def check_current_requires_keyword_declaration(
             )
             root = tmp_path / "authored"
             write_inputs(root, inputs)
-            result = source.validate(root, expander)[0]
+            result = source.validate_inputs(
+                load_semantic_inputs(root, expander), expander
+            )[0]
             assert isinstance(result, CardRejected)
             assert result.diagnostic.reason == "source_keyword_closure_mismatch"
-            selected = object_value(source.selection_input(root, expander))
+            selected = object_value(
+                source.selection_inputs(load_semantic_inputs(root, expander), expander)
+            )
             assert (
                 object_value(array(selected["authors"])[0])["reason"]
                 == "source_keyword_closure_mismatch"

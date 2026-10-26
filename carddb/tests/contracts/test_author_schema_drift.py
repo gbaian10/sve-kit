@@ -11,7 +11,7 @@ from pydantic import ConfigDict, TypeAdapter
 from sve_carddb.contracts import author_leaves as author
 from sve_carddb.contracts import author_references as references
 from sve_carddb.contracts.four_layer import Code
-from sve_carddb.core.json import canonical, object_value, parse
+from sve_carddb.core.json import array, canonical, object_value, parse, string
 from sve_carddb.core.models import Text, UInt
 
 from .author_ability_types import ABILITIES, ABILITY_NAMES
@@ -300,3 +300,58 @@ def test_schema_alignment_detects_an_open_object() -> None:
     definition["additionalProperties"] = True
     with pytest.raises(AssertionError):
         _assert_definition(changed, "IntParamValue", LEAVES["IntParamValue"])
+
+
+def _local_author_references(node: JsonValue) -> JsonValue:
+    if isinstance(node, list):
+        return [_local_author_references(value) for value in node]
+    if not isinstance(node, dict):
+        return node
+    return {
+        key: value.removeprefix("urn:sve-kit:author-nodes:1.0")
+        if key == "$ref" and isinstance(value, str)
+        else _local_author_references(value)
+        for key, value in node.items()
+    }
+
+
+def test_storage_ability_heads_follow_the_authority() -> None:
+    storage = object_value(parse((SCHEMAS / "author-storage.schema.json").read_bytes()))
+    cards = object_value(object_value(storage["properties"])["cards"])
+    card = object_value(cards["additionalProperties"])
+    abilities = object_value(object_value(card["properties"])["abilities"])
+    variants = array(object_value(abilities["items"])["oneOf"])
+    stored = {}
+    for value in variants:
+        variant = object_value(value)
+        heads = {string(name) for name in array(variant["required"])} - {"line"}
+        assert len(heads) == 1
+        (head,) = heads
+        assert head not in stored
+        assert variant["additionalProperties"] is False
+        stored[head] = object_value(variant["properties"])
+    definitions = object_value(NODES["$defs"])
+    assert stored.keys() == object_value(
+        object_value(definitions["A.ability-head"])["properties"]
+    ).keys() | {"use"}
+    for reference in array(object_value(definitions["A.inline-ability"])["anyOf"]):
+        name = string(object_value(reference)["$ref"]).removeprefix("#/$defs/")
+        variant = object_value(definitions[name])
+        heads = {string(key) for key in array(variant["required"])} - {
+            "line",
+            "sources",
+            "ports",
+        }
+        assert len(heads) == 1
+        (head,) = heads
+        expected = {
+            key: value
+            for key, value in object_value(variant["properties"]).items()
+            if key not in {"line", "section", "sources"}
+        }
+        actual = {
+            key: value
+            for key, value in stored[head].items()
+            if key not in {"line", "face", "section", "scope"}
+        }
+        assert _local_author_references(actual) == _local_author_references(expected)

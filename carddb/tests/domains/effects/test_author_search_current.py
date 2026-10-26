@@ -20,6 +20,7 @@ from ...support.author_current_fixtures import (
     CurrentSourceFixture,
     current_source_fixture,
 )
+from ...support.author_semantic_inputs import load_semantic_inputs
 from ..translations.test_four_layer_fixed_actions import SEARCH_RAW
 from .author_current_synthetic import effect, token_section
 from .author_entry_cases import meta
@@ -101,7 +102,9 @@ def test_real_named_search_current(
     with current(fixture) as source:
         assert source.printing_card(number) == CARD
         write_inputs(tmp_path, collection(source, companion=companion, number=number))
-        accepted = source.validate(tmp_path, expander)[0]
+        accepted = source.validate_inputs(
+            load_semantic_inputs(tmp_path, expander), expander
+        )[0]
         assert isinstance(accepted, CardAccepted)
         expected = canonical(head() | {"ports": {"imports": {}, "exports": {}}})
         assert (
@@ -123,7 +126,9 @@ def test_real_named_search_current(
         faces = array(payload["faces"])
         assert len(faces) == 1
         assert object_value(faces[0])["face_id"] == FACE
-        selection = object_value(source.selection_input(tmp_path, expander))
+        selection = object_value(
+            source.selection_inputs(load_semantic_inputs(tmp_path, expander), expander)
+        )
         selected = object_value(array(selection["authors"])[0])
         assert selected["status"] == "accepted"
 
@@ -169,13 +174,19 @@ def test_current_search_rejects_incomplete_or_wrong_source(
         else:
             node["lastword"] = bad_payload("up-to")["lastword"]
         (tmp_path / inputs.author_files[0].path).write_bytes(canonical(tree))
-        rejected = source.validate(tmp_path, expander)[0]
+        rejected = source.validate_inputs(
+            load_semantic_inputs(tmp_path, expander), expander
+        )[0]
         assert isinstance(rejected, CardRejected)
         assert rejected.diagnostic.reason == reason
         selected = object_value(
-            array(object_value(source.selection_input(tmp_path, expander))["authors"])[
-                0
-            ]
+            array(
+                object_value(
+                    source.selection_inputs(
+                        load_semantic_inputs(tmp_path, expander), expander
+                    )
+                )["authors"]
+            )[0]
         )
         assert selected["status"] == "rejected"
 
@@ -193,7 +204,10 @@ def test_search_does_not_drop_unmapped_siblings(
         write_inputs(tmp_path, collection(source, companion=False))
         revision = next(iter(source.card_payload(CARD).revisions))
         effect(source, monkeypatch, SEARCH_RAW + suffix, revision=revision)
-        rejected = source.validate(tmp_path, AuthorExpander(SCHEMAS))[0]
+        rejected = source.validate_inputs(
+            load_semantic_inputs(tmp_path, AuthorExpander(SCHEMAS)),
+            AuthorExpander(SCHEMAS),
+        )[0]
         assert isinstance(rejected, CardRejected)
         assert rejected.diagnostic.reason == "source_pending"
 
@@ -212,6 +226,9 @@ def test_search_does_not_admit_a_token_section(
             + SEARCH_RAW,
             kind="unknown",
         )
-        rejected = source.validate(tmp_path, AuthorExpander(SCHEMAS))[0]
+        rejected = source.validate_inputs(
+            load_semantic_inputs(tmp_path, AuthorExpander(SCHEMAS)),
+            AuthorExpander(SCHEMAS),
+        )[0]
         assert isinstance(rejected, CardRejected)
         assert rejected.diagnostic.reason == "token_source_contract_unavailable"

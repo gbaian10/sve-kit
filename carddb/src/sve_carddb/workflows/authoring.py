@@ -17,6 +17,7 @@ from sve_carddb.core.models import RecordData
 from sve_carddb.core.provenance import BuildContext, Revision
 from sve_carddb.domains.catalog.adoption_loader import load_adoptions
 from sve_carddb.domains.catalog.rules_names import populate_rules_names
+from sve_carddb.domains.effects.author_anchors import review_states
 from sve_carddb.domains.effects.author_current import CardRejected, CurrentAuthorSources
 from sve_carddb.domains.effects.author_expansion import AuthorExpander
 from sve_carddb.domains.effects.author_handwritten import ConfigurationError, positions
@@ -47,6 +48,8 @@ from sve_carddb.workflows.authoring_storage import WriteError, format_yaml, writ
 if TYPE_CHECKING:
     from collections.abc import Generator
 
+    from sve_carddb.domains.effects.author_inputs import AuthorSchemas
+    from sve_carddb.domains.effects.author_set import AuthorInputSet
     from sve_carddb.domains.products import OfficialProducts
     from sve_carddb.domains.registry.preview import PreviewPlan
 
@@ -381,6 +384,8 @@ def inspect(workspace: Workspace, card: str) -> dict[str, JsonValue]:
     ]
     candidates = positions(payload, current.classifier)
     inputs = load_author_set(workspace.authored, workspace.expander.schemas)
+    stored_inputs = inputs
+    inputs, failures = current.resolve_inputs(inputs, workspace.expander)
     uses: list[JsonValue] = []
     record_keys = {
         record.record_key
@@ -400,6 +405,9 @@ def inspect(workspace: Workspace, card: str) -> dict[str, JsonValue]:
     bodies = [
         workspace.expander.schemas.body_tree(file.raw) for file in inputs.body_files
     ]
+    stored = _stored_inspection(
+        stored_inputs, workspace.expander.schemas, record_keys, failures
+    )
     card_gap = None
     try:
         current.keyword_obligations(card_id)
@@ -413,11 +421,67 @@ def inspect(workspace: Workspace, card: str) -> dict[str, JsonValue]:
         "fields": fields,
         "candidates": [candidate.report() for candidate in candidates],
         "existing": uses,
+        **stored,
         "bodies": bodies,
         "gaps": [
             candidate.report() for candidate in candidates if not candidate.supported
         ],
         "card_gap": card_gap,
+    }
+
+
+def _stored_inspection(
+    inputs: AuthorInputSet,
+    schemas: AuthorSchemas,
+    record_keys: set[str],
+    failures: dict[str, Diagnostic],
+) -> dict[str, JsonValue]:
+    stored_anchors: list[JsonValue] = []
+    handwritten: list[JsonValue] = []
+    for file in inputs.anchor_files:
+        tree = object_value(schemas.storage_tree(file.raw, "effect_anchor_set"))
+        stored_anchors.extend(
+            {
+                "file": file.path,
+                "record_key": key,
+                "card": object_value(tree["cards"])[key],
+            }
+            for key in object_value(tree["cards"]).keys() & record_keys
+        )
+    for file in inputs.author_files:
+        tree = object_value(schemas.storage_tree(file.raw, "author_effect_set"))
+        handwritten.extend(
+            {
+                "file": file.path,
+                "record_key": key,
+                "card": object_value(tree["cards"])[key],
+            }
+            for key in object_value(tree["cards"]).keys() & record_keys
+        )
+    failure = next(
+        (failure for number, failure in failures.items() if number in record_keys), None
+    )
+    anchor_diagnostic: JsonValue = (
+        None
+        if failure is None
+        else {
+            "stage": failure.stage,
+            "reason": failure.reason,
+            "card_no": failure.card_no,
+            "card_line": failure.card_line,
+            "path": list[JsonValue](failure.path),
+            "expected": failure.expected,
+            "actual": failure.actual,
+        }
+    )
+    return {
+        "handwritten": handwritten,
+        "stored_anchors": stored_anchors,
+        "anchor_diagnostic": anchor_diagnostic,
+        "body_definitions": [
+            schemas.storage_tree(file.raw, "effect_body_shard")
+            for file in inputs.body_files
+        ],
     }
 
 
@@ -470,4 +534,7 @@ def check(
         "selection": selection,
         "compared_public": compare_public is not None,
         "regression": regression,
+        "reviews": review_states(
+            load_author_set(workspace.authored, workspace.expander.schemas)
+        ),
     }

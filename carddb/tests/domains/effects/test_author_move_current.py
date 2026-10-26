@@ -23,6 +23,7 @@ from sve_carddb.domains.effects.author_sources import (
 from sve_carddb.domains.translations.four_layer_semantics import CardContext
 
 from ...support.author_move_fixtures import FRAME, NUMBERS, move_fixture
+from ...support.author_semantic_inputs import load_semantic_inputs
 from ..translations.test_four_layer_fixed_actions import MOVE_RAW
 from .author_entry_cases import meta
 from .author_move_cases import head, move_ability
@@ -183,10 +184,16 @@ def test_real_permanent_token_sources_and_whole_card_rejection(tmp_path: Path) -
                 assert result.sidecar[0].source_proof == "derived_self_consistent"
                 root = tmp_path / number / str(companion)
                 write_inputs(root, inputs)
-                rejected = source.validate(root, expander)[0]
+                rejected = source.validate_inputs(
+                    load_semantic_inputs(root, expander), expander
+                )[0]
                 assert isinstance(rejected, CardRejected)
                 assert rejected.diagnostic.reason == "source_pending"
-                selected = object_value(source.selection_input(root, expander))
+                selected = object_value(
+                    source.selection_inputs(
+                        load_semantic_inputs(root, expander), expander
+                    )
+                )
                 assert object_value(array(selected["authors"])[0]) == {
                     "status": "rejected",
                     "card_no": number,

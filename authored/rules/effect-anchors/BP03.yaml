@@ -1,0 +1,33 @@
+bodies: {}
+cards:
+  BP03-115:
+    basis: effect-anchor-v1:sha256:c41775008d43918644a37fcb4bfc45ddfd70948f062b47d11b139df78db4fbcc
+    card_id: c:91c75753f00c53beacd94342dbcd5f17
+    legacy_shape:
+      container: faces
+    source: effect-source-v1:sha256:3f6f94faaa3ca6248d85f2607036cb4ab83d820a24fda48eb23b61a628bd1cf2
+    uses:
+      - ability_scope: ability_0
+        binding_id: bind:df649849733bc4cbfaa89faaf17eb35943bd204a44ea859a3afef3e8a32b9f11
+        face_id: f:6c4da039730257858e8b8554092a310e
+        frame_id: frame:f03820b9048f0bd911c528162f930b0e47d128493a84b4fe097f4c8a48608756
+        line: 1
+        occurrence:
+          field: effect
+          line_ordinal: 0
+          ordinal: null
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:c7fb953c0b94ff3e694ab8e83e7245e6ae08437dcea303365840bebe52d29ac8
+          role: body
+          segments:
+            - end: 19
+              start: 0
+          source_hash: 8cd3570fc03b55f778eb909ac8e496ed6e48afa8e039529e7b85de7bbd1a2695
+        ports:
+          exports: {}
+          imports: {}
+format: 1
+kind: effect_anchor_set
+owner: BP03
+recipe: effect-anchor-v1

@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
-from sve_carddb.contracts.author_evidence import SourceUse
 from sve_carddb.core.json import canonical, object_value
 from sve_carddb.domains.effects.author_current import (
     CardAccepted,
@@ -12,10 +11,10 @@ from sve_carddb.domains.effects.author_current import (
     CurrentAuthorSources,
 )
 from sve_carddb.domains.effects.author_expansion import AuthorExpander
-from sve_carddb.domains.effects.author_inputs import AuthorInputError
-from sve_carddb.domains.effects.author_source_hash import source_version
+from sve_carddb.domains.effects.author_inputs import AuthorInputError, parse_document
 
 from .author_current_fixtures import REPOSITORY, current_source_fixture
+from .current_author_storage import write_current_anchors
 from .current_keyword_fixtures import current_keyword_inputs
 
 if TYPE_CHECKING:
@@ -37,14 +36,6 @@ def current_lowering_inputs(root: Path) -> JsonValue:
             fixture.vocabulary,
             fixture.rules,
             fixture.jp_batch_id,
-        )
-        card = current.card_payload(card_id)
-        matched = card.fields[0].matches[0]
-        assert matched is not None
-        use = SourceUse(
-            binding_id=matched.binding.id,
-            occurrence=matched.binding.occurrence_key(),
-            ability_scope="ability_0",
         )
         expander = AuthorExpander(REPOSITORY / "dsl")
         prototype = authored / "rules/effects/BP01.yaml"
@@ -77,30 +68,22 @@ def current_lowering_inputs(root: Path) -> JsonValue:
         file.write_bytes(
             canonical(
                 {
-                    "format": 1,
+                    "format": 2,
                     "kind": "author_effect_set",
                     "scope": "shared",
                     "cards": {
                         number: {
                             "meta": {
-                                "dsl": "1.0",
-                                "source": source_version(card.payload),
                                 "written_by": [
                                     {
                                         "actor": {"who": "test fixture", "model": None},
                                         "date": "2026-10-23",
                                     }
                                 ],
-                                "reviewed_by": [],
-                                "status": "draft",
-                                "verified_by_exam": [],
-                                "rulings": [],
                             },
                             "abilities": [
                                 {
                                     "line": 1,
-                                    "sources": [use.model_dump(mode="json")],
-                                    "ports": {"imports": {}, "exports": {}},
                                     "evolve": {"cost": {"pp": 1}},
                                 }
                             ],
@@ -133,6 +116,7 @@ def current_lowering_inputs(root: Path) -> JsonValue:
         else:
             raise AssertionError("synthetic prototype overlap was accepted")
         prototype.unlink()
+        write_current_anchors(authored, current, expander, number)
         accepted = current.validate(authored, expander)[0]
         assert isinstance(accepted, CardAccepted)
         switch["after"] = current.selection_input(authored, expander)
@@ -164,10 +148,14 @@ def missing_selection(
     file: Path, authored: Path, current: CurrentAuthorSources, expander: AuthorExpander
 ) -> JsonValue:
     original = file.read_bytes()
-    tree = object_value(expander.schemas.author_tree(original))
+    anchor = authored / "rules/effect-anchors/BP01.yaml"
+    original_anchor = anchor.read_bytes()
+    tree = object_value(parse_document(original).value)
     object_value(object_value(tree["cards"])["BP01-009"])["abilities"] = []
     file.write_bytes(canonical(tree))
     try:
+        write_current_anchors(authored, current, expander, "BP01-009")
         return current.selection_input(authored, expander)
     finally:
         file.write_bytes(original)
+        anchor.write_bytes(original_anchor)

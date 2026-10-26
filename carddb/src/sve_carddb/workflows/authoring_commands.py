@@ -99,7 +99,7 @@ def write_command(  # ruff: ignore[too-many-arguments] -- keep the complete orde
     inputs: InputOption,
     main: Annotated[Path, typer.Option("--main")],
     output_root: Annotated[Path, typer.Option("--output-root")],
-    storage: Annotated[Literal["legacy"], typer.Option("--storage")],
+    storage: Annotated[Literal["anchors"], typer.Option("--storage")],
     bodies: Annotated[Path | None, typer.Option("--bodies")] = None,
     card: Annotated[list[str] | None, typer.Option("--card")] = None,
     all_cards: Annotated[bool, typer.Option("--all")] = False,
@@ -107,9 +107,9 @@ def write_command(  # ruff: ignore[too-many-arguments] -- keep the complete orde
     base: Annotated[str | None, typer.Option("--base")] = None,
     baseline_root: Annotated[Path | None, typer.Option("--baseline-root")] = None,
 ) -> None:
-    """Write the existing storage format from the new handwritten format."""
+    """Write handwritten shards and explicitly refresh selected anchors."""
     if bool(card) == all_cards:
-        raise typer.BadParameter("Specify --card or --all and --storage legacy")
+        raise typer.BadParameter("Specify --card or --all and --storage anchors")
 
     def action() -> JsonValue:
         configured = _inputs(inputs)
@@ -123,12 +123,13 @@ def write_command(  # ruff: ignore[too-many-arguments] -- keep the complete orde
                 output_root=output_root,
                 cards=frozenset(card or ()),
                 all_cards=all_cards,
+                storage=storage,
                 remove_prototype=remove_prototype,
                 base=base,
                 baseline_root=baseline_root,
             )
 
-    assert storage == "legacy"
+    assert storage == "anchors"
     _run(action)
 
 

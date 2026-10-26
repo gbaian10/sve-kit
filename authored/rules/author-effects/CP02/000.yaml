@@ -1,44 +1,15 @@
-format: 1
-kind: author_effect_set
-scope: shared
 cards:
   CP02-068:
-    meta:
-      dsl: "1.0"
-      source: effect-source-v1:sha256:d71bf8b7be859329f0e3fd5f6ddf554b352cf89d6ddaac14600ca98eb15aa48f
-      written_by:
-        - actor:
-            who: Codex
-            model: gpt-6.1-sol
-          date: "2026-10-25"
-      reviewed_by: []
-      status: draft
-      verified_by_exam: []
-      rulings: []
     abilities:
       - line: 1
-        sources:
-          - binding_id: bind:1f0354a06915d64c69578255864b9ebebec35165573f88ef873c01166e951376
-            occurrence:
-              owner:
-                kind: face_revision
-                revision_id: rev:v1:0e2fadbf601f23de02e996d0130fafa29ced55761dcad34ea5cf002b651a5cc2
-              field: effect
-              ordinal:
-              source_hash: 43c6e64ac2131edc00347517e27a9e4a294c87caf49ce2055db12be7b3a32c28
-              line_ordinal: 0
-              role: body
-              segments:
-                - start: 0
-                  end: 5
-            ability_scope: ability_0
-        generated_by:
-          macro:
-            frame_id: frame:afb3cbfd3a7ee62702db9ace4555fbdc76fa4029ae76c67568f6623aedace221
-            ability_scope: ability_0
-            applicability_scope: jp
-          version: effect-body-v1:sha256:96de5a4264ebc234dfe4e2280338a3cbb3f317b5367fe659ad43f7880eeaf4a1
-          params:
-            n:
-              type: Nat
-              value: 3
+        params:
+          n: 3
+        use: draw_exact_spell.v1
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-25"
+format: 2
+kind: author_effect_set

@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sve-kit:effect-body-storage:2",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "format": {
+      "type": "integer",
+      "const": 2
+    },
+    "kind": {
+      "const": "effect_body_shard"
+    },
+    "scope": {
+      "const": "shared"
+    },
+    "dsl": {
+      "const": "1.0"
+    },
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "edition": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "ability_scope": {
+            "type": "string",
+            "pattern": "^ability_[0-9]+$"
+          },
+          "params": {
+            "type": "object",
+            "propertyNames": {
+              "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+            },
+            "additionalProperties": {
+              "oneOf": [
+                {
+                  "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/ParamDecl/properties/type"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/ParamDecl/properties/type"
+                    },
+                    "source": {
+                      "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/ParamDecl/properties/source"
+                    }
+                  },
+                  "required": [
+                    "type"
+                  ]
+                }
+              ]
+            }
+          },
+          "body": {
+            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.companion-head"
+          },
+          "ports": {
+            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Ports"
+          },
+          "written_by": {
+            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Companion/properties/written_by"
+          },
+          "registrations": {
+            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Companion/properties/registrations"
+          },
+          "note": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "id",
+          "body",
+          "written_by"
+        ]
+      }
+    }
+  },
+  "required": [
+    "format",
+    "kind",
+    "records"
+  ]
+}

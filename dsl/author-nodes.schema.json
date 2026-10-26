@@ -20458,6 +20458,10 @@
         },
         "rekey": {
           "$ref": "#/$defs/UseRekey"
+        },
+        "anchor": {
+          "type": "string",
+          "pattern": "^effect-anchor-v1:sha256:[0-9a-f]{64}$(?![\\s\\S])"
         }
       },
       "required": [
@@ -20630,6 +20634,10 @@
         },
         "rekey": {
           "$ref": "#/$defs/BodyRekey"
+        },
+        "anchor": {
+          "type": "string",
+          "pattern": "^effect-anchor-v1:sha256:[0-9a-f]{64}$(?![\\s\\S])"
         }
       },
       "required": [

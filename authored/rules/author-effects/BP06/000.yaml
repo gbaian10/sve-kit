@@ -1,46 +1,15 @@
-format: 1
-kind: author_effect_set
-scope: shared
 cards:
   BP06-048:
+    abilities:
+      - line: 1
+        params:
+          n: 1
+        use: search_lastword_self_deck_named_hand.v1
     meta:
-      dsl: "1.0"
-      source: effect-source-v1:sha256:eee886bcb552aaa39b3046a6f587167f594b03707d75418f782fa7728aba18a2
       written_by:
         - actor:
-            who: Codex
             model: gpt-6-luna
+            who: Codex
           date: "2026-10-26"
-      reviewed_by: []
-      status: draft
-      verified_by_exam: []
-      rulings: []
-    faces:
-      f:e9d8deca215953a99d12bd07acd566fa:
-        abilities:
-          - line: 1
-            sources:
-              - binding_id: bind:8f521f9cc72e4719ce40369247f5d32403f14c6d75b71355371f3bf36631cd6e
-                occurrence:
-                  owner:
-                    kind: face_revision
-                    revision_id: rev:v1:c9946bbf979f8a4a81e8f3eb38e58e90ea2ededbc37d8d8a826ab11f91dcaf82
-                  field: effect
-                  ordinal: null
-                  source_hash: 62ca4b845559caf7a1d5bd5ccea373699fba53df4dde2f43b046c977389be855
-                  line_ordinal: 0
-                  role: body
-                  segments:
-                    - start: 0
-                      end: 36
-                ability_scope: ability_0
-            generated_by:
-              macro:
-                frame_id: frame:6a55cf6e98ec1adde395ab302424932112d12a49bd3fbb17b410a117b9ea8e2a
-                ability_scope: ability_0
-                applicability_scope: jp
-              version: effect-body-v1:sha256:e0d4c6ac8426c31ec9a2d2050838c9e2ffcef0544b0d80509c3fbcd8930fdc9a
-              params:
-                n:
-                  type: Nat
-                  value: 1
+format: 2
+kind: author_effect_set

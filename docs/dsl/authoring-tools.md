@@ -2,9 +2,10 @@
 
 `sve-carddb author inspect/write/check` 共用
 `sve_carddb.workflows.authoring` 的來源準備與整卡驗證。手寫輸入使用下列
-format 2 簡寫；目前寫入的仍是 [DSL 1.0 承載格式](author-contract-1.0.md)
-的 format 1 作者檔、本體與 index。簡寫輸入留在作者的工作目錄，不提交到
-`authored/`。工具不產生錨點檔，也不改既有審核資料。
+format 2 儲存格式；主檔與本體直接提交到 `authored/rules/author-effects/` 與
+`effect-bodies/`。`author write --storage anchors` 產生每包一份
+`effect-anchors/<owner>.yaml`；這些機器檔提交、不手改。普通建置與 check 只重算比對，
+不刷新精確引用，也不續用舊審核。
 
 ## 輸入 profile
 
@@ -65,7 +66,7 @@ cards:
   BP10-122:
     meta:
       written_by:
-        - actor: {who: Author}
+        - actor: {who: Author, model: null}
           date: "2026-10-26"
     abilities:
       - line: 1
@@ -85,7 +86,7 @@ records:
       attack_time:
         do: [{draw: {who: self, n: {param: n}}}]
     written_by:
-      - actor: {who: Author}
+      - actor: {who: Author, model: null}
         date: "2026-10-26"
 ```
 
@@ -116,17 +117,18 @@ note、deck_rule 保留原 DSL 邊界，來源尚未支援的結構仍拒絕。
 ```bash
 cp -a /absolute/project/authored /absolute/work/author-output
 uv --directory /absolute/project/carddb run sve-carddb author write \
-  --inputs /absolute/work/public.json --storage legacy \
+  --inputs /absolute/work/public.json --storage anchors \
   --main /absolute/work/main.yaml --bodies /absolute/work/bodies.yaml \
   --card BP10-122 --output-root /absolute/work/author-output
 ```
 
 main/bodies 各可指定單檔或 `<owner>/<序號>.yaml` 的目錄；main 的 owner 必須與卡包
 一致。同一 id/edition 不可重複定義。`--card` 只更新指定卡；`--all` 才選全部手寫卡。
-重用已提交本體也必須提供完整簡寫定義，工具算回原 frame/root/body_version 並逐欄
+重用已提交本體可透過完整本體目錄提供定義，工具算回原 frame/root/body_version 並逐欄
 比對；作者、status、registration、review 或 note 衝突會拒絕，不合併或覆寫事實。
 新增不同本體版本須明寫新 edition；原本體保留。既有作者的 card/faces 容器原樣保留，
-其他卡與未引用本體不重排。
+其他卡與未引用本體不重排。同名／edition 的本體版本不能原地覆寫；共享本體的變動若影響
+未選卡，write 拒絕並要求把所有用途納入同次更新。
 
 write 在記憶體完成整份候選 inventory、schema、參數、來源、索引及整卡閉包驗證後，
 才直接寫指定檔案。語意失敗不寫檔；I/O 中斷會列出已寫檔案，可能留下部分工作樹，
@@ -142,7 +144,16 @@ uv --directory /absolute/project/carddb run sve-carddb author check \
   --output /absolute/work/equivalence.json
 ```
 
-check 永遠檢查全部索引作者卡，回傳完整 selection。正式／公開比較各自 prepare，
+check 永遠檢查全部索引作者卡，回傳完整 selection 與 review freshness 診斷。
+缺／多錨點、摘要手改、精確引用不符或來源失效均拒絕。錯誤包含卡號、卡文 line 與
+source／binding／frame／body／params／recipe／dependency／anchor 階段；只有 basis 不符時，
+anchor 階段表示其餘摘要依賴有變動，不能猜成只有配方變更。
+先 inspect、看主檔／本體與錨點的 git diff，再決定是否明示 write。新增 adapter 或 Schema
+會使全域資源 pin 變動；在同一個 PR 對完整手寫目錄 `write --all` 並驗全量 check，
+不能先留下整批 stale 的 main。review 的 anchor 是當時摘要的 literal；缺少或不同標 stale，
+disputed 保留。report 的 recorded 只表示 literal 相符，不授予尚未實作的資格。
+
+正式／公開比較各自 prepare，
 比對 accepted/rejected、原因、展開樹、來源 inventory 與 provenance 的完整內容，
 不複製同一份 selection 冒充兩個 profile。repository integration pytest 與 Rust
 測試輸入 adapter 也呼叫這個公開 check，不需要私人 checkout 或新 CI job。

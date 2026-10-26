@@ -55,6 +55,22 @@ paths, credentials, card images or audio. A data PR must show its file count, by
 sizes, included fields and representative records for maintainer review. Runtime
 consumers continue to use versioned snapshots.
 
+## Effect author storage
+
+Edit the format 2 main shards under `authored/rules/author-effects/` and the named
+body shards under `authored/rules/effect-bodies/`. Per-owner files under
+`authored/rules/effect-anchors/` are generated, committed exceptions to the usual
+human-maintained data rule: regenerate them with explicit `author write --storage anchors`,
+never edit their references or hashes by hand. Build and `author check` only compare
+committed anchors; a mismatch rejects the whole card. See the
+[authoring commands](docs/dsl/authoring-tools.md) for source profiles, selection and validation.
+A change to the shared adapter or schema resources can stale many owners; update the
+inputs and all affected anchors in the same PR using `write --all`, then run the full check.
+Pinned resources include `author-nodes.schema.json` and the raw bytes of
+`author-storage.schema.json`, `effect-body-storage.schema.json` and `effect-anchors.schema.json`;
+even formatting the three storage schemas can stale every owner's anchors.
+Keep existing review literals and disputed verdicts; refreshing anchors does not renew a review.
+
 ## Languages
 
 | What                               | Language                                    |

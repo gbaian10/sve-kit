@@ -1,0 +1,138 @@
+bodies:
+  damage_uniform_lastword_all_leaders.v1/1:
+    ability_scope: ability_0
+    basis: effect-anchor-v1:sha256:73f4506abea60457c7be8a90c098fe2dc8dfe7ad23386248fce47a795f1f5f37
+    body_version: effect-body-v1:sha256:010b429c27cbed927cdeb53969e03a387d5eee23692bd27967c901f1e017b887
+    frame_id: frame:40c2ea2338dd3fd85116c967fd193c7d9d3b96ff2ddb0633de44bed2b62f7f5d
+    params:
+      n:
+        source:
+          component: value
+          slot: leaf_1
+        type: Nat
+    ports:
+      exports: {}
+      imports: {}
+    registrations:
+      - domain:
+          regions:
+            - jp
+        id: jp
+cards:
+  BP01-110:
+    basis: effect-anchor-v1:sha256:2beb121030f563767169cb1a857152deae7c7bf9e2fac77692e2286121940d59
+    card_id: c:9c467cdec10851c3958323fe461496dd
+    legacy_shape:
+      container: faces
+    source: effect-source-v1:sha256:2038897ac387535ef58ce669a4cf9b0ff70b229e73876e9e5eed4cd9edcbdab0
+    uses:
+      - ability_scope: ability_0
+        binding_id: bind:8b2440b281c76332cbc9c6a96a85d3a6d369f61e8103749c81c2c5edda1e162b
+        face_id: f:3e38b54244a5545bb20e58bf9e35913f
+        frame_id: frame:f03820b9048f0bd911c528162f930b0e47d128493a84b4fe097f4c8a48608756
+        line: 1
+        occurrence:
+          field: effect
+          line_ordinal: 0
+          ordinal: null
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:ccd9041330bdd75cb98a14c5188e1ca5ac3366b13e42c45a05eca02e4714e2f1
+          role: body
+          segments:
+            - end: 19
+              start: 0
+          source_hash: a8887965f53a99dde02284d7deb217df4a20c000490c5fdc42330865aee829a3
+        ports:
+          exports: {}
+          imports: {}
+  BP01-171:
+    basis: effect-anchor-v1:sha256:689c7015a785ce6d4ed47843a2497c2dd174b6c048dc4b0b43864be34863399f
+    card_id: c:9c30875ac83f5fcab8dacb83c89ccf0d
+    legacy_shape:
+      container: faces
+    source: effect-source-v1:sha256:c0f075a54a1d17c1243ee36be0164f388e3ab3d766cc1cd6d1687d7bee75042b
+    uses:
+      - ability_scope: ability_0
+        binding_id: bind:b4bcbe80951f0a9d81c6474857f81a0dfd44fadadd8021bedc2f286823b12c3b
+        face_id: f:1a954dc4b5535c2d8e8e1ffff3a50e20
+        frame_id: frame:f03820b9048f0bd911c528162f930b0e47d128493a84b4fe097f4c8a48608756
+        line: 1
+        occurrence:
+          field: effect
+          line_ordinal: 0
+          ordinal: null
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:40efcaf3cff234ac42fbc2a1f07c1000d1f09b2b0e5e69a4df59372bfdb3e758
+          role: body
+          segments:
+            - end: 19
+              start: 0
+          source_hash: 5ccec4bda6df827320ba015dab8d76a814e6d62048ade7962c1d52c086e75700
+        ports:
+          exports: {}
+          imports: {}
+  BP01-174:
+    basis: effect-anchor-v1:sha256:b0b9244bbbd5a0f4a04d221ec53b024f02bed61f6d39c353c8cef862ce8e80dd
+    card_id: c:e533dca82a8d567d88b85ed20fee561a
+    legacy_shape:
+      container: faces
+    source: effect-source-v1:sha256:7be4128dfd0a94115ce9079a2559af99d7f88504fc64c260a1b8806892a513b7
+    uses:
+      - ability_scope: ability_0
+        binding_id: bind:ed0aeab776d816af2e6b7f2edf0e1ae0486851ab0581ea98e7dba1a330ccbfcb
+        face_id: f:adb2bd92a4b75ca1bcdadb0660bf80da
+        frame_id: frame:f03820b9048f0bd911c528162f930b0e47d128493a84b4fe097f4c8a48608756
+        line: 1
+        occurrence:
+          field: effect
+          line_ordinal: 0
+          ordinal: null
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:52275548596dff0e64c78803db851956e3dbfe0641b180b0432954ef1a020d62
+          role: body
+          segments:
+            - end: 19
+              start: 0
+          source_hash: 86914ad53ab5adaa76c687ce4caf0685686cb5061c8c9e9d6f1ba5ced789656f
+        ports:
+          exports: {}
+          imports: {}
+  BP01-P25:
+    basis: effect-anchor-v1:sha256:7a4fc620267e5e66fa15314a316270a1ef78483b84fa4d8cbe6cecfd88862004
+    card_id: c:efb62b3ef53e576797625688d75164d9
+    legacy_shape:
+      container: card
+    source: effect-source-v1:sha256:807b96543ba53c88c4d2051a75dbd9d010f44221efbdea1d6bd8776f60428536
+    uses:
+      - ability_scope: ability_0
+        binding_id: bind:bfa76b74ee5cdd771fbd206b5e6ef0a73a0ecd4da0b69208d9ca05ca78a5b253
+        body: damage_uniform_lastword_all_leaders.v1
+        body_version: effect-body-v1:sha256:010b429c27cbed927cdeb53969e03a387d5eee23692bd27967c901f1e017b887
+        edition: 1
+        face_id: f:90c74424f2435907a035f70ce37463d4
+        frame_id: frame:40c2ea2338dd3fd85116c967fd193c7d9d3b96ff2ddb0633de44bed2b62f7f5d
+        line: 1
+        occurrence:
+          field: effect
+          line_ordinal: 0
+          ordinal: null
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:b80f1859d443f62a5ae9affe8b22d26a9711d6e4e27a48d0b16a5c2d148cd25d
+          role: body
+          segments:
+            - end: 22
+              start: 0
+          source_hash: 3aeefc3819be4412d9e8891136fd813bbb27ce55011343f51d38289d4ee1d196
+        params:
+          n:
+            type: Nat
+            value: 2
+        registration: jp
+format: 1
+kind: effect_anchor_set
+owner: BP01
+recipe: effect-anchor-v1

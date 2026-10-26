@@ -28,6 +28,7 @@ from ...support.author_current_fixtures import (
     current_source_fixture,
     entry_snapshot,
 )
+from ...support.author_semantic_inputs import load_semantic_inputs
 from ...support.semantic_definition_fixtures import with_definitions
 from .author_current_goldens import FACTS
 from .author_current_synthetic import back_face, effect, token_section
@@ -433,7 +434,9 @@ def test_selection_keeps_keyword_failures_without_fallback(
             },
         )
         write_inputs(tmp_path, inputs)
-        selected = object_value(source.selection_input(tmp_path, expander))
+        selected = object_value(
+            source.selection_inputs(load_semantic_inputs(tmp_path, expander), expander)
+        )
     authors = [object_value(item) for item in array(selected["authors"])]
     assert [item["status"] for item in authors] == ["accepted", "rejected"]
     assert len(array(object_value(authors[0]["input"])["declaration_sidecar"])) == 1

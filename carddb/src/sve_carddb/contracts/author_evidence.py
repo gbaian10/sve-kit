@@ -182,14 +182,21 @@ class ReviewFields(TypedDict):
     reason: Text | None
 
 
+AnchorVersion = Annotated[
+    str, Field(pattern=r"^effect-anchor-v1:sha256:[0-9a-f]{64}$(?![\s\S])")
+]
+
+
 class BodyReview(ReviewFields):
     kind: Literal["body"]
+    anchor: NotRequired[AnchorVersion]
     dependencies: BodyDependencies
     rekey: NotRequired[BodyRekey]
 
 
 class UseReview(ReviewFields):
     kind: Literal["use"]
+    anchor: NotRequired[AnchorVersion]
     dependencies: UseDependencies
     rekey: NotRequired[UseRekey]
 

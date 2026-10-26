@@ -119,3 +119,9 @@ def test_output_symlink_is_rejected_before_inputs_are_opened(tmp_path: Path) -> 
     assert result.exit_code == 2
     assert "--output rejects symlinks" in result.output
     assert target.read_text() == "keep"
+
+
+def test_yaml_formatter_preserves_long_fingerprints_without_trailing_spaces() -> None:
+    raw = authoring.format_yaml({"basis": "effect-anchor-v1:sha256:" + "a" * 64})
+    assert all(line == line.rstrip() for line in raw.splitlines())
+    assert b"effect-anchor-v1:sha256:" + b"a" * 64 in raw

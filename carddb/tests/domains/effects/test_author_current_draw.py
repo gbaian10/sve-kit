@@ -18,6 +18,7 @@ from sve_carddb.domains.effects.author_set import AuthorInputSet
 from sve_carddb.domains.effects.author_source_hash import source_version
 
 from ...support.author_current_fixtures import current_source_fixture
+from ...support.author_semantic_inputs import load_semantic_inputs
 from .author_current_synthetic import effect, token_section
 from .author_draw_cases import draw_ability, head
 from .author_entry_cases import meta
@@ -188,7 +189,7 @@ def check_mutation(
                 "revision_id": "revision:stale",
             }
     (root / inputs.author_files[0].path).write_bytes(canonical(tree))
-    rejected = source.validate(root, expander)[0]
+    rejected = source.validate_inputs(load_semantic_inputs(root, expander), expander)[0]
     assert isinstance(rejected, CardRejected)
     assert rejected.diagnostic.reason == reason
 
@@ -209,7 +210,9 @@ def check_unknown_attributes(
         )[0].values[attribute]
         with source.db.transaction():
             source.db.update("face_revision", {"id": revision}, {attribute: None})
-        rejected = source.validate(root, AuthorExpander(SCHEMAS))[0]
+        rejected = source.validate_inputs(
+            load_semantic_inputs(root, AuthorExpander(SCHEMAS)), AuthorExpander(SCHEMAS)
+        )[0]
         assert isinstance(rejected, CardRejected)
         assert rejected.diagnostic.reason == "source_unknown"
         with source.db.transaction():
@@ -230,8 +233,15 @@ def test_real_current_draw(tmp_path: Path, draw_card: DrawCard) -> None:
             root = tmp_path / str(companion)
             inputs = collection(source, draw_card, companion=companion)
             write_inputs(root, inputs)
-            check_accepted(source.validate(root, expander)[0], draw_card)
-            selection = object_value(source.selection_input(root, expander))
+            check_accepted(
+                source.validate_inputs(load_semantic_inputs(root, expander), expander)[
+                    0
+                ],
+                draw_card,
+            )
+            selection = object_value(
+                source.selection_inputs(load_semantic_inputs(root, expander), expander)
+            )
             selected = object_value(array(selection["authors"])[0])
             assert selected["status"] == "accepted"
             for change, reason in (
@@ -275,7 +285,9 @@ def check_evolve_kind_evidence(
                 {"revision_id": revision, "special_kind_code": "evolve"},
                 {"special_kind_code": other_kind},
             )
-        rejected = source.validate(root, AuthorExpander(SCHEMAS))[0]
+        rejected = source.validate_inputs(
+            load_semantic_inputs(root, AuthorExpander(SCHEMAS)), AuthorExpander(SCHEMAS)
+        )[0]
         assert isinstance(rejected, CardRejected)
         assert rejected.diagnostic.reason == "source_pending"
         with source.db.transaction():
@@ -302,7 +314,9 @@ def check_other_kinds_keep_unknown_cost(
                 },
             )
         # The attack source still resolves, so rejection exercises unknown cost.
-        rejected = source.validate(root, AuthorExpander(SCHEMAS))[0]
+        rejected = source.validate_inputs(
+            load_semantic_inputs(root, AuthorExpander(SCHEMAS)), AuthorExpander(SCHEMAS)
+        )[0]
         assert isinstance(rejected, CardRejected)
         assert rejected.diagnostic.reason == "source_unknown"
         with source.db.transaction():
@@ -334,10 +348,14 @@ def check_unregistered_sibling(
         # A new sibling needs registry admission even when its draw shape is supported.
         write_inputs(root, collection(source, card, companion=companion))
         expander = AuthorExpander(SCHEMAS)
-        rejected = source.validate(root, expander)[0]
+        rejected = source.validate_inputs(
+            load_semantic_inputs(root, expander), expander
+        )[0]
         assert isinstance(rejected, CardRejected)
         assert rejected.diagnostic.reason == "source_registry_mismatch"
-        selection = object_value(source.selection_input(root, expander))
+        selection = object_value(
+            source.selection_inputs(load_semantic_inputs(root, expander), expander)
+        )
         assert object_value(array(selection["authors"])[0])["status"] == "rejected"
     with source.db.transaction():
         source.db.update(
@@ -375,7 +393,9 @@ def check_unadmitted_current_sources(
                 + text,
                 revision=revision,
             )
-            rejected = source.validate(root, expander)[0]
+            rejected = source.validate_inputs(
+                load_semantic_inputs(root, expander), expander
+            )[0]
             assert isinstance(rejected, CardRejected)
             assert rejected.diagnostic.reason in {
                 "source_pending",
@@ -393,7 +413,9 @@ def check_unadmitted_current_sources(
         ):
             with pytest.MonkeyPatch.context() as patch:
                 effect(source, patch, text, revision=revision)
-                rejected = source.validate(root, expander)[0]
+                rejected = source.validate_inputs(
+                    load_semantic_inputs(root, expander), expander
+                )[0]
                 assert isinstance(rejected, CardRejected)
                 assert rejected.diagnostic.reason in {
                     "source_pending",
@@ -417,6 +439,8 @@ def check_unadmitted_current_sources(
             + "3枚引く。",
             kind="unknown",
         )
-        rejected = source.validate(root, expander)[0]
+        rejected = source.validate_inputs(
+            load_semantic_inputs(root, expander), expander
+        )[0]
         assert isinstance(rejected, CardRejected)
         assert rejected.diagnostic.reason == "token_source_contract_unavailable"
