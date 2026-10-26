@@ -201,6 +201,95 @@ def test_migrated_lastword_preserves_the_frozen_ast_and_position() -> None:
     assert frozen["unclassified_positions"] == []
 
 
+def assert_migrated_named_search_position(
+    frozen: dict[str, JsonValue],
+) -> None:
+    rows = array(frozen["positions"])
+    assert len(rows) == 1
+    position = object_value(rows[0])
+    assert (
+        position["face"],
+        position["field"],
+        position["section"],
+        position["line"],
+    ) == (
+        0,
+        "effect",
+        None,
+        1,
+    )
+    assert position["ability_indices"] == [0]
+    fragments = array(position["fragments"])
+    assert len(fragments) == 1
+    fragment = object_value(fragments[0])
+    author = object_value(
+        object_value(
+            read_yaml(ROOT / "authored/rules/author-effects/BP06/000.yaml")["cards"]
+        )["BP06-048"]
+    )
+    face = object_value(
+        object_value(author["faces"])["f:e9d8deca215953a99d12bd07acd566fa"]
+    )
+    ability = object_value(array(face["abilities"])[0])
+    assert ability["line"] == position["line"] == 1
+    assert len(array(face["abilities"])) == 1
+    use = object_value(array(ability["sources"])[0])
+    occurrence = object_value(use["occurrence"])
+    assert use["ability_scope"] == "ability_0"
+    assert use["binding_id"] == fragment["id"]
+    assert occurrence["field"] == position["field"] == "effect"
+    assert occurrence["ordinal"] == position["section"] is None
+    assert occurrence["line_ordinal"] == 0
+    assert occurrence["source_hash"] == fragment["source_sha256"]
+    assert occurrence["segments"] == object_value(fragment["span"])["segments"]
+    assert position["ability_indices"] == [0]
+    assert frozen["unclassified_positions"] == []
+
+
+def assert_migrated_named_search_body() -> None:
+    expander = AuthorExpander(ROOT / "dsl")
+    inputs = load_author_set(ROOT / "authored", expander.schemas)
+    author_file = next(
+        file
+        for file in inputs.author_files
+        if file.path == "rules/author-effects/BP06/000.yaml"
+    )
+    expanded = expander.expand(
+        author_file.raw, [file.raw for file in inputs.body_files]
+    )
+    expanded_card = object_value(
+        object_value(object_value(expanded.tree)["cards"])["BP06-048"]
+    )
+    expanded_face = object_value(
+        object_value(expanded_card["faces"])["f:e9d8deca215953a99d12bd07acd566fa"]
+    )
+    expanded_ability = object_value(array(expanded_face["abilities"])[0])
+    assert expanded_ability["lastword"] == {
+        "do": [
+            {
+                "search": {
+                    "sel": {"who": "self", "zone": "deck", "name": "式神の使役"},
+                    "n": 1,
+                    "to": "hand",
+                }
+            }
+        ]
+    }
+
+
+def test_migrated_named_search_preserves_the_frozen_ast_and_position() -> None:
+    number = "BP06-048"
+    original = OBJECT.validate_json(
+        (BASELINE / "migrated" / f"{number}.json").read_bytes()
+    )
+    frozen = object_value(
+        OBJECT.validate_json((BASELINE / "BP06.json").read_bytes())[number]
+    )
+    assert fingerprint(original) == frozen["ast_sha256"]
+    assert_migrated_named_search_position(frozen)
+    assert_migrated_named_search_body()
+
+
 @pytest.fixture(scope="module")
 def classifications() -> Catalog:
     return load(ROOT / "authored")
