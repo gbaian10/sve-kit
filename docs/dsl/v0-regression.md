@@ -156,8 +156,9 @@ Python 基線測試驗證 AST、位置、分類版本與跨行 pointer；Rust �
 ### 已遷移到 DSL 1.0 的卡
 
 整卡切換到DSL 1.0 後，原型條目離開 `authored/rules/effects/`，其原 AST 原樣保存在
-`carddb/tests/fixtures/effect_baseline/migrated/<卡號>.json`，作為 before fixture；
-基線測試把它與現存原型合併後，仍對全部卡檢查原 AST 指紋與位置。
+`carddb/tests/fixtures/effect_baseline/migrated/<卡號>.json`。這 14 個 fixture 目前仍供
+Rust 共用情境測試還原已遷移卡的原型 AST。Python 不再斷言遷移前後等價；基線測試以作者索引
+與 fixture 中的卡號排除已遷移卡，再檢查仍在原型目錄中的卡片 AST 指紋與位置。
 
 舊 Rust 執行器的共享場景（`shared`、`cards`）只驗**歷史回歸**：測試 catalog 以明確命名的
 輔助函式，在已通過 `Catalog::from_current_selection()` 的原型文件上還原這些保存的原 AST，
