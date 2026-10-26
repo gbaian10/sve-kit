@@ -61,7 +61,7 @@ const chips = () =>
 describe("rarity chips", () => {
   it("orders the chips low to high and draws the edition's badge on each", async () => {
     const { unmount } = await renderInRouter(<Harness />)
-    expect(chips()).toEqual(["BR", "SP", "SSP", "PR", "無分類", "碎閃"])
+    expect(chips()).toEqual(["BR", "SP", "SSP", "PR", "無分類"])
     const bronze = screen.getByRole("button", { name: "BR" })
     expect(bronze).toHaveAttribute("title", "BR（9）")
     expect(bronze.querySelector("img")).toHaveAttribute("src", br)
@@ -70,8 +70,7 @@ describe("rarity chips", () => {
       pr,
     )
     expect(screen.getByRole("button", { name: "無分類" })).toHaveTextContent("無分類")
-    expect(screen.getByRole("button", { name: "碎閃" })).toHaveTextContent("碎閃")
-    expect(screen.getByRole("button", { name: "碎閃" }).querySelector("img")).toBeNull()
+    expect(screen.getByText("碎閃", { exact: true })).toBeInTheDocument()
     unmount()
     await renderInRouter(<Harness edition="en" />)
     expect(screen.getByRole("button", { name: "BR" }).querySelector("img")).toHaveAttribute(
@@ -82,34 +81,52 @@ describe("rarity chips", () => {
 
   it("shows premium after SSP even when the vocabulary has no PR option", async () => {
     await renderInRouter(<Harness omitPr />)
-    expect(chips()).toEqual(["BR", "SP", "SSP", "無分類", "碎閃"])
+    expect(chips()).toEqual(["BR", "SP", "SSP", "無分類"])
   })
 
-  it("puts premium on its own row after the ordinary rarity filters", async () => {
+  it("renders premium as a switch after the ordinary rarity filters", async () => {
     await renderInRouter(<Harness />)
-    const group = screen.getByRole("group", { name: "稀有度" })
-    const premium = screen.getByRole("button", { name: "碎閃" })
-    const isolatedRow = group.querySelector('[data-filter-chip-row="isolated"]')
-    expect(isolatedRow).toContainElement(premium)
-    expect(isolatedRow).toHaveClass("basis-full")
-    expect(isolatedRow?.querySelectorAll("button")).toHaveLength(1)
-    expect(chips()).toEqual(["BR", "SP", "SSP", "PR", "無分類", "碎閃"])
+    const premium = screen.getByRole("switch", { name: "碎閃" })
+    const unrated = screen.getByRole("button", { name: "無分類" })
+    expect(premium).toHaveAccessibleDescription("只有 BR、SR、GR 與無分類有碎閃；PR 的碎閃尚未收錄")
+    expect(unrated.compareDocumentPosition(premium) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(chips()).toEqual(["BR", "SP", "SSP", "PR", "無分類"])
   })
 
   it.each([
-    ["zh-TW", "碎閃"],
-    ["ja", "プレミアム"],
-    ["en", "Premium"],
-  ] as const)("shows a text-only premium chip in %s", async (language, label) => {
+    ["zh-TW", "碎閃", "只有 BR、SR、GR 與無分類有碎閃；PR 的碎閃尚未收錄"],
+    [
+      "ja",
+      "プレミアム",
+      "プレミアムはBR・SR・GR・分類なしにのみ存在し、PRのプレミアムは未収録です",
+    ],
+    [
+      "en",
+      "Premium",
+      "Premium variants exist only for BR, SR, GR, and Unrated; PR Premium is not included yet",
+    ],
+  ] as const)("shows a premium switch and hint in %s", async (language, label, hint) => {
     await renderInRouter(<Harness />, { language })
-    const premium = screen.getByRole("button", { name: label })
-    expect(premium).toHaveTextContent(label)
-    expect(premium.querySelector("img")).toBeNull()
+    const premium = screen.getByRole("switch", { name: label })
+    expect(screen.getByText(label, { exact: true })).toBeInTheDocument()
+    expect(premium).toHaveAccessibleDescription(hint)
   })
 
-  it("selects the premium token and clears it with the rarity section", async () => {
+  it("toggles the premium condition without changing other rarity selections", async () => {
+    await renderInRouter(<Harness initial={["sr"]} />)
+    const premium = screen.getByRole("switch", { name: "碎閃" })
+    expect(premium).not.toBeChecked()
+    await userEvent.click(premium)
+    expect(premium).toBeChecked()
+    expect(screen.getByLabelText("selection")).toHaveTextContent("sr,premium")
+    await userEvent.click(premium)
+    expect(premium).not.toBeChecked()
+    expect(screen.getByLabelText("selection")).toHaveTextContent("sr")
+  })
+
+  it("clears the premium condition with the rarity section", async () => {
     await renderInRouter(<Harness />)
-    await userEvent.click(screen.getByRole("button", { name: "碎閃" }))
+    await userEvent.click(screen.getByRole("switch", { name: "碎閃" }))
     expect(screen.getByLabelText("selection")).toHaveTextContent("premium")
     await userEvent.click(screen.getByRole("button", { name: "清除稀有度" }))
     expect(screen.getByLabelText("selection")).toBeEmptyDOMElement()

@@ -407,7 +407,7 @@ export function FilterPanel({
         collapsible={collapsible}
         desktopClassName="md:row-start-5 md:col-span-2 md:col-start-2 md:rounded-br-block md:border-t md:border-border md:bg-surface-2 md:p-4"
       >
-        <p className="mb-2 hidden text-12 font-semibold text-text-2 md:block">
+        <p className="mb-4 hidden text-12 font-semibold text-text-2 md:block">
           {t("filters.display")}
         </p>
         {displayBlock}

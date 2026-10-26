@@ -19,8 +19,6 @@ export interface FacetChipOption {
 export interface FacetChip extends FacetChipOption {
   /** Sub-values behind a popover; the chip itself selects or clears all of them at once. */
   readonly children?: readonly FacetChipOption[]
-  /** Give an independent facet dimension its own visual row. */
-  readonly ownRow?: boolean
 }
 
 /** A row of multi-select chips; a chip with sub-values gets an arrow that opens them in a popover. */
@@ -93,10 +91,8 @@ export function FacetChips({
           <span
             key={item.code}
             data-filter-chip=""
-            data-filter-chip-row={item.ownRow ? "isolated" : undefined}
             className={cn(
               "inline-flex min-w-0",
-              item.ownRow && "basis-full",
               locationGrid && item.code === "main" && "col-span-3 justify-self-start",
             )}
           >
