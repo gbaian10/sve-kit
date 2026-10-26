@@ -11,6 +11,9 @@ use alloc::{collections::BTreeSet, sync::Arc};
 use serde_json::{Value, json};
 use std::{env::var_os, fs::read_to_string};
 
+#[path = "current_keywords/runtime.rs"]
+mod runtime;
+
 fn input() -> Value {
     current_inputs()["keywords"]["authors"][0]["input"].clone()
 }

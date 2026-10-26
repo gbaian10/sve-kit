@@ -82,6 +82,9 @@ impl Game {
                 "full field after payment".into(),
             ));
         }
+        if self.internal_ward_entry_choice(execution, &holder)? {
+            return Ok(());
+        }
         let played = execution.reference(self, &holder)?;
         execution.facts.push(super::Fact::CardPlayed {
             execution: execution.id,
@@ -97,6 +100,7 @@ impl Game {
         );
         frame.cause = json!({"event":event});
         self.internal_play_move(&holder, "field", &frame)?;
+        self.internal_ward_entry_posture(execution, played)?;
         self.internal_numeric_end_resolution(execution.id)?;
         let resolve_group = self.group();
         self.emit(

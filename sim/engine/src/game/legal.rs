@@ -763,14 +763,18 @@ impl Game {
             .collect()
     }
 
-    fn targetable(&self, id: &str, frame: &Frame) -> Result<bool> {
+    pub(super) fn targetable_by(&self, id: &str, controller: &str) -> Result<bool> {
         if let Some(object) = self.state.objects.get(id)
-            && object.controller != frame.controller
+            && object.controller != controller
             && object.zone == "field"
         {
             return self.keywords(id).map(|keywords| !keywords.contains("aura"));
         }
         Ok(true)
+    }
+
+    fn targetable(&self, id: &str, frame: &Frame) -> Result<bool> {
+        self.targetable_by(id, &frame.controller)
     }
 
     pub(super) fn ability_zone(&self, id: &str, code: &Value) -> Result<bool> {

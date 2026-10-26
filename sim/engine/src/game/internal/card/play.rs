@@ -592,6 +592,7 @@ impl Game {
             field_entry: false,
             card_payment: None,
             play_counts: self.internal_play_counts()?,
+            ward_entries: Vec::new(),
         })
     }
 

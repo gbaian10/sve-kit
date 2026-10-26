@@ -124,8 +124,7 @@ impl Game {
     pub fn internal_rule_action(&mut self, decision: &Value) -> Result<Step> {
         if !matches!(
             string(&decision["do"]),
-            // Guard followers carry a prototype keyword, which loaded internal cards reject.
-            "evolve" | "attack" | "end-phase" | "end-discard" | "mulligan"
+            "evolve" | "attack" | "end-phase" | "guard-act" | "end-discard" | "mulligan"
         ) || self.typed.is_some()
             || self.card_runtime.checkpoint.is_some()
             || self.card_runtime.has_pending()

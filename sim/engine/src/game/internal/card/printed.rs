@@ -110,7 +110,8 @@ impl Game {
                 printed_origin(&ability.node.source.origin).is_ok_and(|(printed, _)| {
                     self.printed_face_ordinal(&card, printed)
                         .is_ok_and(|ordinal| ordinal == face)
-                })
+                }) && (super::printed_keywords::card_declaration(&ability.node).is_none()
+                    || object.zone == "field")
             })
             .cloned()
             .collect())

@@ -1,8 +1,114 @@
-//! Admission of complete current printed declarations, without executing their rules.
+//! Current printed keyword authority and the CR 12.8.2 optional entry procedure.
+use super::super::{DecisionId, Execution, InputDomain, ObjectRef, Wait};
 use super::{Ability, Game, KeywordId, Located, Result, invalid, unsupported};
 use crate::ir::lowering::PrintedKeyword;
+use crate::ir::{Posture, PostureEvent, printed_keywords};
 use alloc::collections::BTreeSet;
+use core::slice::from_ref;
 use serde_json::Value;
+use serde_json::json;
+
+#[expect(
+    clippy::multiple_inherent_impl,
+    reason = "Keyword availability and entry choices share the admitted printed definitions."
+)]
+impl Game {
+    pub(in crate::game) fn internal_keywords(
+        &self,
+        holder: &str,
+    ) -> Result<Option<BTreeSet<String>>> {
+        let object = self.information_source(holder)?;
+        if !self.card_runtime.is_loaded(&object.card) {
+            return Ok(None);
+        }
+        let mut keywords = BTreeSet::new();
+        for ability in self.internal_printed_abilities(holder)? {
+            match printed_keywords::card_declaration(&ability.node) {
+                Some(KeywordId::Ward) => {
+                    keywords.insert("guard".into());
+                }
+                Some(KeywordId::Aura) => {
+                    keywords.insert("aura".into());
+                }
+                _ => {}
+            }
+        }
+        Ok(Some(keywords))
+    }
+
+    pub(in crate::game::internal) fn internal_ward_entry_choice(
+        &mut self,
+        execution: &mut Execution,
+        holder: &str,
+    ) -> Result<bool> {
+        let reference = execution.reference(self, holder)?;
+        if execution
+            .ward_entries
+            .iter()
+            .any(|(object, _)| *object == reference)
+        {
+            return Ok(false);
+        }
+        let previous = self.object(holder)?;
+        let face = Self::movement_face(previous)?;
+        let printed = self.catalog.face(&previous.card, face)?;
+        let state = Self::moved_attributes(previous, printed, "field");
+        // CR 12.8.2 uses the arriving information, including a reset of old-zone ability loss.
+        let mut prospective = self.clone();
+        let arrived = prospective.object_mut(holder)?;
+        arrived.zone = "field".into();
+        arrived.state = state;
+        if prospective.object(holder)?.state["acted"] == true
+            || !prospective.keywords(holder)?.contains("guard")
+        {
+            return Ok(false);
+        }
+        let position = self
+            .object_position(holder)?
+            .and_then(|position| position.checked_add(1))
+            .ok_or_else(|| invalid("Ward entry has no source zone position"))?;
+        self.internal_wait(
+            execution,
+            DecisionId(0),
+            execution.context.controller,
+            InputDomain::WardEntry {
+                card: previous.card.clone(),
+                name: prospective.card_name(holder)?,
+                zone: previous.zone.clone(),
+                position,
+            },
+            Wait::WardEntry(reference),
+        )?;
+        Ok(true)
+    }
+
+    pub(in crate::game::internal) fn internal_ward_entry_posture(
+        &mut self,
+        execution: &mut Execution,
+        before: ObjectRef,
+    ) -> Result<()> {
+        if let Some(index) = execution
+            .ward_entries
+            .iter()
+            .position(|(object, _)| *object == before)
+        {
+            let (_, acted) = execution.ward_entries.remove(index);
+            if acted {
+                let id = execution.object_id(before)?.to_owned();
+                if !self.keywords(&id)?.contains("guard") {
+                    return Err(invalid("Ward is unavailable after entry"));
+                }
+                self.change_posture(from_ref(&id), true, &json!({"rule":"12.8.2"}))?;
+                execution.facts.push(super::Fact::Posture(PostureEvent {
+                    object: execution.reference(self, &id)?,
+                    before: Posture::Standing,
+                    after: Posture::Acted,
+                }));
+            }
+        }
+        Ok(())
+    }
+}
 
 pub(super) fn check_coordinate(
     origins: &mut BTreeSet<(usize, u64, Option<KeywordId>)>,

@@ -41,6 +41,25 @@ fn next(game: &mut Game, handle: u64) -> Activation {
     )
 }
 
+fn assert_guard_skipped_without_ward(game: &mut Game) {
+    // No Ward is present, so the end procedure has already advanced to Quick.
+    let before = game.projection(View::Referee).unwrap();
+    let guard = game
+        .internal_rule_action(&json!({"do":"guard-act","select":[]}))
+        .unwrap();
+    assert_eq!(guard.outcome, "cannot-play", "Ward stage must be skipped");
+    let no_events: [Value; 0] = [];
+    assert_eq!(
+        guard.events, no_events,
+        "rejected action must emit no events"
+    );
+    assert_eq!(
+        before,
+        game.projection(View::Referee).unwrap(),
+        "rejected action must leave the position unchanged"
+    );
+}
+
 #[test]
 fn bp10_122_attack_pending_precedes_quick_and_keeps_later_departure_information() {
     let lowered = ExpandedLowerer::new()
@@ -199,11 +218,7 @@ fn bp09_p17_end_begin_occurs_once_before_guard_quick_and_expiry() {
         assert!(game.internal_pending_choice().unwrap().is_none());
         game.answer_internal_card(q.actor, q.token, Answer::Pending(1))
             .unwrap_err();
-        // No guard follower can be loaded, so the rule subset has no guard-act entry.
-        let before = exact_authority(&game);
-        game.internal_rule_action(&json!({"do":"guard-act","select":[]}))
-            .unwrap_err();
-        assert_eq!(before, exact_authority(&game));
+        assert_guard_skipped_without_ward(&mut game);
         let question = game.internal_quick_choice().unwrap().unwrap();
         assert!(
             matches!(&question.domain, InputDomain::Quick { options, .. } if options.is_empty())
