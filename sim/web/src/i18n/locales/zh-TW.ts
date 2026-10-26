@@ -306,8 +306,10 @@ const zhTW = {
     unknown: "待確認",
   },
   rarityBadge: {
+    premium: "碎閃",
+    premiumHint: "只有 BR、SR、GR 與無分類有碎閃；PR 的碎閃尚未收錄",
     unrated: "無分類",
-    unratedHint: "官方沒有登記稀有度的卡，例如 PR 系列的 EP、SEP 與主戰者",
+    unratedHint: "官方沒有登記稀有度的卡，例如 Token、主戰者，以及 PR 系列的 EP、SEP",
     selected: "已選 {{count}} 項",
     none: "無標籤",
     unknown: "待確認",

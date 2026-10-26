@@ -46,6 +46,23 @@ const chips = () =>
 const url = () => decodeURIComponent(screen.getByLabelText("url").textContent)
 
 describe("condition chips for grouped values", () => {
+  it("round trips premium in the URL and removes its applied condition chip", async () => {
+    await renderInRouter(<Harness initial="rarity=sr,premium" />)
+    expect(chips()).toEqual(["SR", "碎閃"])
+    expect(url()).toBe("rarity=premium,sr")
+    await userEvent.click(screen.getByRole("button", { name: "移除條件：碎閃" }))
+    expect(chips()).toEqual(["SR"])
+    expect(url()).toBe("rarity=sr")
+  })
+
+  it("clears premium when clearing all applied conditions", async () => {
+    await renderInRouter(<Harness initial="rarity=premium" />)
+    expect(chips()).toEqual(["碎閃"])
+    await userEvent.click(screen.getByRole("button", { name: "清除" }))
+    expect(url()).toBe("")
+    expect(screen.queryByRole("group", { name: "目前條件" })).not.toBeInTheDocument()
+  })
+
   it("shows one chip for a complete set of sub-values and clears the whole group from it", async () => {
     await renderInRouter(
       <Harness initial="type=leader:gold,leader:white&rarity=pr:br,pr:gr,pr:unknown" />,

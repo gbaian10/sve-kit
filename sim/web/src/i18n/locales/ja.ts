@@ -322,8 +322,10 @@ export default {
     unknown: "未確認",
   },
   rarityBadge: {
+    premium: "プレミアム",
+    premiumHint: "プレミアムはBR・SR・GR・分類なしにのみ存在し、PRのプレミアムは未収録です",
     unrated: "分類なし",
-    unratedHint: "公式のレアリティ表記がないカード（PRのEP・SEP・リーダーなど）",
+    unratedHint: "公式のレアリティ表記がないカード（トークン、リーダー、PRのEP・SEPなど）",
     selected: "{{count}} 件選択",
     none: "ラベルなし",
     unknown: "未確認",

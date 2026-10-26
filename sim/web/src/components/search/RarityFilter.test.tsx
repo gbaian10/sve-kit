@@ -14,9 +14,11 @@ import { RarityFilter } from "./RarityFilter"
 function Harness({
   initial = [],
   edition = "jp",
+  omitPr = false,
 }: {
   readonly initial?: string[]
   readonly edition?: Region
+  readonly omitPr?: boolean
 }) {
   const [selected, onChange] = useState(initial)
   return (
@@ -24,12 +26,23 @@ function Harness({
       <RarityFilter
         rarities={[
           { code: "sp", label: "SP" },
+          { code: "ssp", label: "SSP" },
           { code: "pr", label: "PR" },
           { code: "br", label: "BR" },
-        ]}
+        ].filter((rarity) => !omitPr || rarity.code !== "pr")}
         options={{
           styles: ["br", "none", "unknown"],
-          counts: { sp: 1, pr: 6, "pr:br": 3, "pr:none": 2, "pr:unknown": 1, unrated: 4, br: 9 },
+          counts: {
+            sp: 1,
+            ssp: 2,
+            premium: 35,
+            pr: 6,
+            "pr:br": 3,
+            "pr:none": 2,
+            "pr:unknown": 1,
+            unrated: 4,
+            br: 9,
+          },
         }}
         edition={edition}
         selected={selected}
@@ -48,7 +61,7 @@ const chips = () =>
 describe("rarity chips", () => {
   it("orders the chips low to high and draws the edition's badge on each", async () => {
     const { unmount } = await renderInRouter(<Harness />)
-    expect(chips()).toEqual(["BR", "SP", "PR", "無分類"])
+    expect(chips()).toEqual(["BR", "SP", "SSP", "PR", "無分類"])
     const bronze = screen.getByRole("button", { name: "BR" })
     expect(bronze).toHaveAttribute("title", "BR（9）")
     expect(bronze.querySelector("img")).toHaveAttribute("src", br)
@@ -57,6 +70,7 @@ describe("rarity chips", () => {
       pr,
     )
     expect(screen.getByRole("button", { name: "無分類" })).toHaveTextContent("無分類")
+    expect(screen.getByText("碎閃", { exact: true })).toBeInTheDocument()
     unmount()
     await renderInRouter(<Harness edition="en" />)
     expect(screen.getByRole("button", { name: "BR" }).querySelector("img")).toHaveAttribute(
@@ -65,14 +79,88 @@ describe("rarity chips", () => {
     )
   })
 
-  it("explains the unrated chip to hover and assistive technology only", async () => {
-    await renderInRouter(<Harness />)
-    const hint = "官方沒有登記稀有度的卡，例如 PR 系列的 EP、SEP 與主戰者"
-    const unrated = screen.getByRole("button", { name: "無分類" })
-    expect(unrated).toHaveAccessibleDescription(hint)
-    expect(unrated).toHaveAttribute("title", `無分類（4）\n${hint}`)
-    expect(screen.getByRole("button", { name: "SP" })).not.toHaveAttribute("aria-describedby")
+  it("shows premium after SSP even when the vocabulary has no PR option", async () => {
+    await renderInRouter(<Harness omitPr />)
+    expect(chips()).toEqual(["BR", "SP", "SSP", "無分類"])
   })
+
+  it("renders premium as a switch after the ordinary rarity filters", async () => {
+    await renderInRouter(<Harness />)
+    const premium = screen.getByRole("switch", { name: "碎閃" })
+    const unrated = screen.getByRole("button", { name: "無分類" })
+    expect(premium).toHaveAccessibleDescription("只有 BR、SR、GR 與無分類有碎閃；PR 的碎閃尚未收錄")
+    expect(unrated.compareDocumentPosition(premium) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(chips()).toEqual(["BR", "SP", "SSP", "PR", "無分類"])
+  })
+
+  it.each([
+    ["zh-TW", "碎閃", "只有 BR、SR、GR 與無分類有碎閃；PR 的碎閃尚未收錄"],
+    [
+      "ja",
+      "プレミアム",
+      "プレミアムはBR・SR・GR・分類なしにのみ存在し、PRのプレミアムは未収録です",
+    ],
+    [
+      "en",
+      "Premium",
+      "Premium variants exist only for BR, SR, GR, and Unrated; PR Premium is not included yet",
+    ],
+  ] as const)("shows a premium switch and hint in %s", async (language, label, hint) => {
+    await renderInRouter(<Harness />, { language })
+    const premium = screen.getByRole("switch", { name: label })
+    expect(screen.getByText(label, { exact: true })).toBeInTheDocument()
+    expect(premium).toHaveAccessibleDescription(hint)
+  })
+
+  it("toggles the premium condition without changing other rarity selections", async () => {
+    await renderInRouter(<Harness initial={["sr"]} />)
+    const premium = screen.getByRole("switch", { name: "碎閃" })
+    expect(premium).not.toBeChecked()
+    await userEvent.click(premium)
+    expect(premium).toBeChecked()
+    expect(screen.getByLabelText("selection")).toHaveTextContent("sr,premium")
+    await userEvent.click(premium)
+    expect(premium).not.toBeChecked()
+    expect(screen.getByLabelText("selection")).toHaveTextContent("sr")
+  })
+
+  it("clears the premium condition with the rarity section", async () => {
+    await renderInRouter(<Harness />)
+    await userEvent.click(screen.getByRole("switch", { name: "碎閃" }))
+    expect(screen.getByLabelText("selection")).toHaveTextContent("premium")
+    await userEvent.click(screen.getByRole("button", { name: "清除稀有度" }))
+    expect(screen.getByLabelText("selection")).toBeEmptyDOMElement()
+  })
+
+  it.each([
+    [
+      "zh-TW",
+      "無分類",
+      "官方沒有登記稀有度的卡，例如 Token、主戰者，以及 PR 系列的 EP、SEP",
+      "無分類（4）",
+    ],
+    [
+      "ja",
+      "分類なし",
+      "公式のレアリティ表記がないカード（トークン、リーダー、PRのEP・SEPなど）",
+      "分類なし（4）",
+    ],
+    [
+      "en",
+      "Unrated",
+      "Cards with no official rarity, such as Tokens, leaders, and PR-series EP and SEP cards",
+      "Unrated (4)",
+    ],
+  ] as const)(
+    "explains the unrated chip in %s to hover and assistive technology only",
+    async (language, label, hint, chipTitle) => {
+      await renderInRouter(<Harness />, { language })
+      const unrated = screen.getByRole("button", { name: label })
+      expect(unrated).toHaveAccessibleDescription(hint)
+      expect(unrated).toHaveAttribute("title", `${chipTitle}\n${hint}`)
+      expect(screen.getByRole("button", { name: "SP" })).not.toHaveAttribute("aria-describedby")
+    },
+  )
 
   it("selects or clears every PR appearance from the chip and shows a partial selection", async () => {
     await renderInRouter(<Harness />)

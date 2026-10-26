@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next"
 import { orderArtistTokens } from "../../domain/artistFilter"
 import { orderLocationTokens } from "../../domain/deckLocation"
 import { COST_CAP, type QueryState, STAT_CAP, toggleClass } from "../../domain/query/model"
-import { orderRarityTokens, UNRATED_RARITY } from "../../domain/rarityFilter"
+import { orderRarityTokens, PREMIUM_RARITY, UNRATED_RARITY } from "../../domain/rarityFilter"
 import type { Region } from "../../domain/search"
 import { orderTypeTokens } from "../../domain/typeFilter"
 import { Chip } from "../ui/Chip"
@@ -95,6 +95,7 @@ export function ConditionChips({
   }
   const rarityChip = (token: string): Pick<Condition, "label" | "content"> => {
     if (token === UNRATED_RARITY) return { label: t("rarityBadge.unrated") }
+    if (token === PREMIUM_RARITY) return { label: t("rarityBadge.premium") }
     if (token === "pr") {
       const label = rarityLabel(token)
       return { label, content: prBadgeVisual(label) }

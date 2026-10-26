@@ -34,9 +34,13 @@ it("toggles errata independently before the display controls and round trips thr
   const user = userEvent.setup()
   const errata = screen.getByRole("switch", { name: "只顯示勘誤卡" })
   const grouping = screen.getByRole("combobox", { name: "顯示方式" })
+  const displayHeading = screen.getByText("顯示方式", { selector: "p" })
   expect(screen.getByRole("switch", { name: "只顯示禁限卡" })).toBeDisabled()
   expect(errata).toHaveAccessibleDescription("官方發過勘誤公告的卡")
   expect(errata.compareDocumentPosition(grouping) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  expect(
+    displayHeading.compareDocumentPosition(grouping) & Node.DOCUMENT_POSITION_FOLLOWING,
+  ).toBeTruthy()
   await user.click(errata)
   expect(errata).toBeChecked()
   expect(grouping).toHaveValue("printing")

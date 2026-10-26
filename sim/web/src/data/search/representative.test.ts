@@ -183,8 +183,10 @@ it.each(indexes.map((index, stage) => [stage, index] as const))(
     expect(representatives(index, mage, { unit: "card", rarities: ["ur"] })).toEqual([
       "p:bp01-021-ur",
     ])
+    // BP01-SL01 is the fixture's signed premium printing. A tier-only selection excludes it, so
+    // the non-premium UR printing is the only candidate left for representative selection.
     expect(representatives(index, mage, { unit: "card", rarities: ["sl", "ur"] })).toEqual([
-      "p:bp01-021-sp",
+      "p:bp01-021-ur",
     ])
     // Without its PR in the result, "prefer PR" falls back to the rarity choice.
     expect(representatives(index, mage, { unit: "card", sets: ["bp01"], prFirst: true })).toEqual([
@@ -192,7 +194,7 @@ it.each(indexes.map((index, stage) => [stage, index] as const))(
     ])
     expect(representatives(index, mage, { unit: "card", sets: ["pr"] })).toEqual(["p:bp01-021-pr"])
     expect(cells(index, mage, { unit: "art", rarities: ["sl", "pr"] })).toEqual([
-      ["art:rose:a", "p:bp01-021-sp"],
+      ["art:rose:a", "p:bp01-021-pr"],
     ])
     // Text: an exact number keeps that printing; a name hits every printing, so the rule applies.
     expect(
