@@ -50,6 +50,7 @@ CARDS = {
     "BP01-092": "c:8c4b83cfcb625c0490eb8c66968f29dc",
 }
 REAL_AUTHOR_CARDS = {
+    "BP01-037",
     "BP06-048",
     "BP01-046",
     "BP01-144",
@@ -488,6 +489,7 @@ def test_real_current_author_set(
         "rules/author-effects/BP01/002.yaml",
         "rules/author-effects/BP01/003.yaml",
         "rules/author-effects/BP01/004.yaml",
+        "rules/author-effects/BP01/005.yaml",
         "rules/author-effects/BP03/001.yaml",
         "rules/author-effects/BP04/000.yaml",
         "rules/author-effects/BP04/001.yaml",
@@ -502,6 +504,7 @@ def test_real_current_author_set(
     }
     assert {file.path for file in real.body_files} == {
         "rules/effect-bodies/BP01/000.yaml",
+        "rules/effect-bodies/BP01/001.yaml",
         "rules/effect-bodies/BP06/000.yaml",
         "rules/effect-bodies/BP10/000.yaml",
         "rules/effect-bodies/CP02/000.yaml",
