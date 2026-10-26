@@ -26,6 +26,10 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from sve_carddb.core.models import RecordData
+    from sve_carddb.core.provenance import SourceUse
+    from sve_carddb.domains.registry.transitions.files import (
+        LoadedShard as TransitionShard,
+    )
 
 
 @dataclass(frozen=True)
@@ -46,6 +50,8 @@ class RegistryRecord:
 class RegistrySnapshot:
     files: RegistryFiles
     records: Mapping[str, RegistryRecord]
+    transitions: tuple[TransitionShard, ...] = ()
+    transition_uses: tuple[SourceUse, ...] = ()
 
 
 def load_registry(root: Path) -> RegistrySnapshot:
@@ -56,12 +62,20 @@ def load_registry(root: Path) -> RegistrySnapshot:
     """
     if not (root / "ids" / "index.yaml").is_file():
         raise ValueError("Build input requires an existing registry index")
-    files = read_registry_files(root)
+    return from_files(read_registry_files(root))
+
+
+def from_files(
+    files: RegistryFiles,
+    *,
+    replacements: tuple[tuple[Entry, str], ...] = (),
+    transitions: tuple[TransitionShard, ...] = (),
+    transition_uses: tuple[SourceUse, ...] = (),
+) -> RegistrySnapshot:
+    """Validate a complete original registry or explicitly verified review projection."""
     records: dict[str, RegistryRecord] = {}
-    entries: list[Entry] = []
     for loaded in files.shards:
         shard = loaded.envelope()
-        entries.extend(shard.records)
         for entry in shard.records:
             records[entry.record_key] = RegistryRecord(
                 record_key=entry.record_key,
@@ -71,10 +85,27 @@ def load_registry(root: Path) -> RegistrySnapshot:
                 shard_path=loaded.path,
                 content=canonical(entry.model_dump(mode="json", round_trip=True)),
             )
+    for entry, path in replacements:
+        if entry.record_key not in records or entry.kind not in {
+            "region_mapping_review",
+            "art",
+        }:
+            raise ValueError("Only existing reviews or art uses can be replaced")
+        records[entry.record_key] = RegistryRecord(
+            entry.record_key,
+            entry.kind,
+            entry.owner,
+            _data(entry),
+            path,
+            canonical(entry.model_dump(mode="json", round_trip=True)),
+        )
+    entries = [record.entry() for record in records.values()]
     validate(entries)
     check_cursors(files.index().next_int_id, entries)
     _evidence(records)
-    return RegistrySnapshot(files, MappingProxyType(records))
+    return RegistrySnapshot(
+        files, MappingProxyType(records), transitions, transition_uses
+    )
 
 
 def _data(entry: Entry) -> RecordData:

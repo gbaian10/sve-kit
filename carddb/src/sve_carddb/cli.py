@@ -23,6 +23,7 @@ from sve_carddb.domains.digital.name_policies.commands import (
     app as digital_name_policies_app,
 )
 from sve_carddb.domains.parsed_cards.commands import app as parsed_cards_app
+from sve_carddb.domains.registry.renew_commands import app as registry_app
 from sve_carddb.domains.rulings.commands import app as rulings_app
 from sve_carddb.domains.translations.qa_commands import app as qa_translations_app
 from sve_carddb.ingest.archive.manifest import (
@@ -109,6 +110,7 @@ app = typer.Typer(no_args_is_help=True, help="Crawl and build the SVE card datab
 app.add_typer(digital_links_app, name="digital-links")
 app.add_typer(digital_name_policies_app, name="digital-name-policies")
 app.add_typer(parsed_cards_app, name="parsed-cards")
+app.add_typer(registry_app, name="registry")
 app.add_typer(author_app, name="author")
 app.add_typer(rulings_app, name="rulings")
 app.add_typer(qa_translations_app, name="qa-translations")

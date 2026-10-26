@@ -28,6 +28,10 @@ if TYPE_CHECKING:
     from sve_carddb.build.database import Database
     from sve_carddb.domains.registry.preview.plan import PreviewPlan
     from sve_carddb.domains.registry.snapshot import RegistryRecord
+    from sve_carddb.domains.registry.storage import LoadedShard as RegistryShard
+    from sve_carddb.domains.registry.transitions.files import (
+        LoadedShard as TransitionShard,
+    )
 
 
 def import_preview(
@@ -146,7 +150,11 @@ def _artists(
 
 def _authored(db: Database, plan: PreviewPlan, revision: str) -> dict[str, str]:
     sources: dict[str, str] = {}
-    for shard in plan.snapshot.files.shards:
+    shards: tuple[RegistryShard | TransitionShard, ...] = (
+        *plan.snapshot.files.shards,
+        *plan.snapshot.transitions,
+    )
+    for shard in shards:
         source_id = "authored:v1:" + digest(
             canonical(
                 {
@@ -165,21 +173,18 @@ def _authored(db: Database, plan: PreviewPlan, revision: str) -> dict[str, str]:
                 "sha256": shard.content_hash,
                 "authored_path": "authored/" + shard.path,
                 "authored_revision": revision,
-                "parser_version": "registry-envelope-v3",
+                "parser_version": (
+                    "identity-transition-v1"
+                    if shard.path.startswith("identity-transitions/")
+                    else "registry-envelope-v3"
+                ),
             },
         )
     return sources
 
 
 def _evidence(db: Database, plan: PreviewPlan) -> tuple[SourceUse, ...]:
-    uses = tuple(
-        SourceUse(
-            source=item.source,
-            usage="registry_observation",
-            locator=canonical({"region": region, "card_no": number}).decode(),
-        )
-        for (region, number), item in sorted(plan.evidence.items())
-    )
+    uses = plan.source_uses()
     insert_raw_sources(db, (use.source for use in uses))
     return uses
 
