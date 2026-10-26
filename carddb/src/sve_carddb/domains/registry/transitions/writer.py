@@ -369,6 +369,7 @@ def write(root: Path, planned: Plan) -> None:
         stream.flush()
         os.fsync(stream.fileno())
     try:
+        temporary.chmod(0o644)
         temporary.replace(destination)
         directory = os.open(destination.parent, os.O_RDONLY | os.O_DIRECTORY)
         try:

@@ -144,6 +144,8 @@ def test_complete_art_extension_preserves_original_bytes_and_projects_both_uses(
     before = {p: p.read_bytes() for p in root.rglob("*.yaml")}
     planned = plan(art_case.recipe, art_case.decisions)
     write(root, planned)
+    assert planned.shard is not None
+    assert (root / planned.shard.path).stat().st_mode & 0o777 == 0o644
     assert all(path.read_bytes() == raw for path, raw in before.items())
     snapshot = load_renewed_registry(root, art_case.recipe.evidence())
     updated = snapshot.records["art:" + art_case.original.id].data
