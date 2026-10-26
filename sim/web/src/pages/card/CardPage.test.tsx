@@ -61,6 +61,9 @@ const state = vi.hoisted(() => ({
   current: false,
   crossRegion: false,
   comparisonReady: false,
+  catalogFailure: false,
+  catalogReads: 0,
+  printingsFailure: false,
   doubleFace: false,
   order: null as { key: string; printingId: string }[] | null,
   suggestions: [] as { cardId: string; printingId: string; cardNo: string }[],
@@ -108,6 +111,11 @@ vi.mock("../../data", async (importOriginal) => ({
               : [],
           ),
         ),
+  // The synthetic snapshot cannot build a real catalog; the printings read returns the page's own.
+  cardPrintings: async () => {
+    if (state.printingsFailure) throw new Error("synthetic printings failure")
+    return (await import("../../app/snapshot")).useCardSnapshot().catalog
+  },
 }))
 vi.mock("../../app/printing-detail", () => ({
   loadPrintedTextState: () => Promise.resolve(state.printedTextState ?? undefined),
@@ -291,6 +299,12 @@ vi.mock("../../app/snapshot", () => {
           state.credits
             ? { manifestHash: "synthetic", manifest: { data_as_of: "2026-10-24" } }
             : null,
+        catalog: () => {
+          state.catalogReads += 1
+          return state.catalogFailure
+            ? Promise.reject(new Error("synthetic catalog failure"))
+            : undefined
+        },
       },
       catalog: {
         // Previous/next walk this order; the synthetic card is first, so only "next" is enabled.
@@ -444,6 +458,9 @@ beforeEach(() => {
   state.current = false
   state.crossRegion = false
   state.comparisonReady = false
+  state.catalogFailure = false
+  state.catalogReads = 0
+  state.printingsFailure = false
   state.doubleFace = false
   state.order = null
   state.suggestions = []
@@ -1379,5 +1396,25 @@ describe("the external links block", () => {
     await open("zh-TW")
     await screen.findAllByRole("heading", { level: 2, name: "Synthetic original name" })
     expect(screen.queryByRole("region", { name: "外部連結" })).not.toBeInTheDocument()
+  })
+
+  it("does not show an other-edition error when that setting is off and the other region fails", async () => {
+    prefsStore.set({ showOtherEdition: { jp: false, en: false } })
+    state.credits = "found"
+    state.catalogFailure = true
+    await open("zh-TW")
+    await waitFor(() => {
+      expect(state.catalogReads).toBeGreaterThan(0)
+    })
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    expect(screen.queryByText("另一版本資料載入失敗。")).not.toBeInTheDocument()
+  })
+
+  it("still shows the other-edition error when this edition's printings fail", async () => {
+    prefsStore.set({ showOtherEdition: { jp: false, en: false } })
+    state.credits = "found"
+    state.printingsFailure = true
+    await open("zh-TW")
+    expect(await screen.findByText("另一版本資料載入失敗。")).toBeInTheDocument()
   })
 })

@@ -30,8 +30,36 @@ const config = {
 const catalog = {
   index: {
     card: (id: string) => (["c:one", "c:two"].includes(id) ? { home_set_id: "BP01" } : undefined),
+    printing: () => undefined,
+    printingsOf: () => [],
   },
 } as unknown as Catalog
+
+function catalogWithPrintings(printings: readonly Record<string, unknown>[]): Catalog {
+  return {
+    index: {
+      card: () => ({
+        home_set_id: "BP01",
+        regions: [{ region: "en", default_printing_id: "p:en" }],
+      }),
+      printing: (id: string) => printings.find((printing) => printing["id"] === id),
+      printingsOf: () => printings,
+    },
+  } as unknown as Catalog
+}
+
+const jpPrinting = (url = "https://shadowverse-evolve.com/cards/1/") => ({
+  id: "p:jp",
+  region: "jp",
+  card_no: "BP01-001",
+  faces: [{ observations: [{ source_url: url }] }],
+})
+const enPrinting = (url = "https://en.shadowverse-evolve.com/cards/1/") => ({
+  id: "p:en",
+  region: "en",
+  card_no: "BP01-001",
+  faces: [{ observations: [{ source_url: url }] }],
+})
 
 const linkRow = (digital: string, relation = "same_card") => ({
   id: `l:${digital}`,
@@ -73,12 +101,25 @@ function makeClient(links: ReturnType<typeof linkRow>[], failures = { count: 0 }
   }
 }
 
-const show = async (client: SnapshotClient, language: UiLanguage = "zh-TW", cardId = "c:one") => {
+const show = async (
+  client: SnapshotClient,
+  language: UiLanguage = "zh-TW",
+  cardId = "c:one",
+  testCatalog = catalog,
+  printingId = "p:jp",
+  region: "jp" | "en" = "jp",
+) => {
   prefsStore.set({ uiLanguage: language })
   const i18n = await createI18n(language)
   const element = (currentCard: string) => (
     <I18nextProvider i18n={i18n}>
-      <CardExternalLinks client={client} catalog={catalog} cardId={currentCard} />
+      <CardExternalLinks
+        client={client}
+        catalog={testCatalog}
+        cardId={currentCard}
+        printingId={printingId}
+        region={region}
+      />
     </I18nextProvider>
   )
   const view = render(element(cardId))
@@ -96,6 +137,96 @@ afterEach(() => {
 })
 
 describe("CardExternalLinks", () => {
+  it("shows the selected region first, then the other official card page", async () => {
+    const { client } = makeClient([linkRow("d:1")])
+    await show(
+      client,
+      "en",
+      "c:one",
+      catalogWithPrintings([jpPrinting(), enPrinting()]),
+      "p:en",
+      "en",
+    )
+    await waitFor(() => {
+      expect(screen.getAllByRole("link")).toHaveLength(3)
+    })
+    const links = screen.getAllByRole("link")
+    expect(links.map((link) => link.getAttribute("href"))).toEqual([
+      "https://en.shadowverse-evolve.com/cards/1/",
+      "https://shadowverse-evolve.com/cards/1/",
+      "https://portal.example/card/900211010?lang=en",
+    ])
+    expect(links.slice(0, 2).map((link) => link.textContent)).toEqual([
+      "Official card page (English edition)(opens in a new tab)",
+      "Official card page (Japanese edition)(opens in a new tab)",
+    ])
+    const firstOfficialLink = links.at(0)
+    if (!firstOfficialLink) throw new Error("expected an official card page link")
+    expect(firstOfficialLink).toHaveAttribute("target", "_blank")
+    expect(firstOfficialLink.getAttribute("rel")).toBe("noopener noreferrer")
+  })
+
+  it("puts the Japanese region first when the selected printing is Japanese", async () => {
+    const { client } = makeClient([])
+    await show(client, "zh-TW", "c:one", catalogWithPrintings([enPrinting(), jpPrinting()]), "p:jp")
+    expect(hrefs()).toEqual([
+      "https://shadowverse-evolve.com/cards/1/",
+      "https://en.shadowverse-evolve.com/cards/1/",
+    ])
+  })
+
+  it.each([
+    ["zh-TW", "官方卡片頁（日文版）"],
+    ["ja", "公式カードページ（日本語版）"],
+    ["en", "Official card page (Japanese edition)"],
+  ] as const)("labels the official page in the %s interface", async (language, label) => {
+    const { client } = makeClient([])
+    await show(client, language, "c:one", catalogWithPrintings([jpPrinting()]))
+    expect(screen.getByRole("link").textContent).toContain(label)
+  })
+
+  it("does not borrow another printing's official URL when the selected printing has none", async () => {
+    const { client } = makeClient([])
+    const sibling = { ...jpPrinting(), id: "p:jp-2", card_no: "BP01-002" }
+    await show(
+      client,
+      "zh-TW",
+      "c:one",
+      catalogWithPrintings([{ ...jpPrinting(), faces: [] }, sibling]),
+    )
+    expect(screen.queryByRole("link")).toBeNull()
+  })
+
+  it("shows only the Japanese official page when only a Japanese printing exists", async () => {
+    const { client } = makeClient([])
+    await show(client, "zh-TW", "c:one", catalogWithPrintings([jpPrinting()]))
+    expect(hrefs()).toEqual(["https://shadowverse-evolve.com/cards/1/"])
+  })
+
+  it("shows no official link when the printing has no source URL", async () => {
+    const { client } = makeClient([])
+    await show(client, "zh-TW", "c:one", catalogWithPrintings([{ ...jpPrinting(), faces: [] }]))
+    expect(screen.queryByRole("link")).toBeNull()
+  })
+
+  it.each([
+    "https://shadowverse-evolve.com.evil.example/cards/1/",
+    "http://shadowverse-evolve.com/cards/1/",
+    "https://unofficial.example/cards/1/",
+  ])("ignores non-official source URLs: %s", async (url) => {
+    const { client } = makeClient([])
+    await show(client, "zh-TW", "c:one", catalogWithPrintings([jpPrinting(url)]))
+    expect(screen.queryByRole("link")).toBeNull()
+  })
+
+  it("keeps the official page visible when digital links are disabled", async () => {
+    prefsStore.set({ showDigitalLinks: false })
+    const { client, fragments } = makeClient([])
+    await show(client, "zh-TW", "c:one", catalogWithPrintings([jpPrinting()]))
+    expect(hrefs()).toEqual(["https://shadowverse-evolve.com/cards/1/"])
+    expect(fragments).not.toHaveBeenCalled()
+  })
+
   it.each([
     ["zh-TW", ["lang=zh-tw", "/cht/"]],
     ["ja", ["lang=ja", "/ja/"]],

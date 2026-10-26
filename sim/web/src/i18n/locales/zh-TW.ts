@@ -162,7 +162,7 @@ const zhTW = {
     symbolLabelsHint: "只有關鍵字類會顯示名稱",
     showDigitalLinks: "顯示數位版卡片連結",
     showDigitalLinksHint:
-      "單卡頁的「外部連結」會列出對應的 Shadowverse、Worlds Beyond 卡片；關閉後整個區塊都不顯示",
+      "單卡頁的「外部連結」會列出對應的 Shadowverse、Worlds Beyond 卡片；關閉後隱藏數位版連結，若有官方卡片頁連結仍會顯示區塊",
     cardEditionHint: "禁限、Q&A 等資料都跟著卡片版本",
     cardOpenMode: "卡片開啟",
     cardOpenModeHint: "自動：電腦從側邊推開抽屜，手機從中間彈出。選整頁則一律跳到單卡頁。",
@@ -473,6 +473,8 @@ const zhTW = {
   },
   digital: {
     sectionTitle: "外部連結",
+    officialHeading: "官方卡片頁",
+    official: { jp: "官方卡片頁（日文版）", en: "官方卡片頁（英文版）" },
     heading: "數位版",
     generation: { sv1: "SV 一代", svwb: "Worlds Beyond" },
     game: { sv1: "Shadowverse", svwb: "Worlds Beyond" },

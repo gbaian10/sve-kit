@@ -171,7 +171,7 @@ export default {
     symbolLabelsHint: "キーワード系のみ名称を表示します",
     showDigitalLinks: "デジタル版カードのリンクを表示",
     showDigitalLinksHint:
-      "カードページの「外部リンク」に、対応する Shadowverse・Worlds Beyond のカードへのリンクを表示します。オフにするとセクションごと非表示になります",
+      "カードページの「外部リンク」に、対応する Shadowverse・Worlds Beyond のカードへのリンクを表示します。オフにするとデジタル版リンクは非表示になりますが、公式カードページへのリンクがあればセクションは表示されます",
     cardEditionHint: "禁止・制限や Q&A などのデータもカードの版に従います",
     cardOpenMode: "カードの開き方",
     cardOpenModeHint:
@@ -490,6 +490,8 @@ export default {
   },
   digital: {
     sectionTitle: "外部リンク",
+    officialHeading: "公式カードページ",
+    official: { jp: "公式カードページ（日本語版）", en: "公式カードページ（英語版）" },
     heading: "デジタル版",
     generation: { sv1: "Shadowverse（初代）", svwb: "Worlds Beyond" },
     game: { sv1: "Shadowverse", svwb: "Worlds Beyond" },

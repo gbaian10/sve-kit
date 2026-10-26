@@ -179,7 +179,7 @@ export default {
     symbolLabelsHint: "Only keyword symbols get a label",
     showDigitalLinks: "Show digital card links",
     showDigitalLinksHint:
-      "Lists the matching Shadowverse and Worlds Beyond cards under External links on a card page. Turning this off hides the whole section",
+      "Lists the matching Shadowverse and Worlds Beyond cards under External links on a card page. Turning this off hides digital links; the section stays visible when official card pages are available",
     cardEditionHint: "Ban lists, Q&A and other data follow the card edition",
     cardOpenMode: "Open cards",
     cardOpenModeHint:
@@ -498,6 +498,11 @@ export default {
   },
   digital: {
     sectionTitle: "External links",
+    officialHeading: "Official card pages",
+    official: {
+      jp: "Official card page (Japanese edition)",
+      en: "Official card page (English edition)",
+    },
     heading: "Digital",
     generation: { sv1: "Shadowverse (original)", svwb: "Worlds Beyond" },
     game: { sv1: "Shadowverse", svwb: "Worlds Beyond" },

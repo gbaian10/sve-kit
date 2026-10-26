@@ -9,6 +9,8 @@ import {
   type DigitalLink,
   digitalLinkUrl,
   loadCardDigitalLinks,
+  type OfficialCardLink,
+  officialCardLinks,
   type SnapshotClient,
 } from "../../data"
 import { currentUiLanguage } from "../../i18n"
@@ -106,6 +108,28 @@ function LinkRows({
   )
 }
 
+function OfficialLinkRows({ links }: { readonly links: readonly OfficialCardLink[] }) {
+  const { t } = useTranslation()
+  return (
+    <ul className="space-y-1.5">
+      {links.map((link) => (
+        <li key={link.region} className="flex flex-wrap items-center gap-x-2 gap-y-1 text-14">
+          <a
+            href={link.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-accent-text underline-offset-2 hover:underline"
+          >
+            {t(`digital.official.${link.region}`)}
+            <ExternalLink className="size-3.5" aria-hidden="true" />
+            <span className="sr-only">{t("digital.newTab")}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
 function DigitalLinks({
   client,
   catalog,
@@ -144,20 +168,35 @@ export function CardExternalLinks({
   client,
   catalog,
   cardId,
+  printingId,
+  region,
 }: {
   readonly client: SnapshotClient
   readonly catalog: Catalog
   readonly cardId: string
+  readonly printingId: string
+  readonly region: "jp" | "en"
 }) {
   const { t } = useTranslation()
   const { showDigitalLinks } = usePrefs()
-  if (!showDigitalLinks) return null
+  const officialLinks = officialCardLinks(catalog, cardId, printingId, region)
+  if (!showDigitalLinks && officialLinks.length === 0) return null
   return (
     <section className="mt-6" aria-label={t("digital.sectionTitle")}>
       <h3 className="text-13 font-semibold text-text-3">{t("digital.sectionTitle")}</h3>
       <div className="mt-1.5 rounded-control border border-border p-2.5">
-        <h4 className="mb-1.5 text-12 text-text-3">{t("digital.heading")}</h4>
-        <DigitalLinks client={client} catalog={catalog} cardId={cardId} />
+        {officialLinks.length > 0 && (
+          <div className={showDigitalLinks ? "mb-2.5" : undefined}>
+            <h4 className="mb-1.5 text-12 text-text-3">{t("digital.officialHeading")}</h4>
+            <OfficialLinkRows links={officialLinks} />
+          </div>
+        )}
+        {showDigitalLinks && (
+          <>
+            <h4 className="mb-1.5 text-12 text-text-3">{t("digital.heading")}</h4>
+            <DigitalLinks client={client} catalog={catalog} cardId={cardId} />
+          </>
+        )}
       </div>
     </section>
   )
