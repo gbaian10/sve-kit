@@ -74,8 +74,10 @@ def from_files(
 ) -> RegistrySnapshot:
     """Validate a complete original registry or explicitly verified review projection."""
     records: dict[str, RegistryRecord] = {}
+    entries: list[Entry] = []
     for loaded in files.shards:
         shard = loaded.envelope()
+        entries.extend(shard.records)
         for entry in shard.records:
             records[entry.record_key] = RegistryRecord(
                 record_key=entry.record_key,
@@ -99,7 +101,8 @@ def from_files(
             path,
             canonical(entry.model_dump(mode="json", round_trip=True)),
         )
-    entries = [record.entry() for record in records.values()]
+    replacement_entries = {entry.record_key: entry for entry, _ in replacements}
+    entries = [replacement_entries.get(entry.record_key, entry) for entry in entries]
     validate(entries)
     check_cursors(files.index().next_int_id, entries)
     _evidence(records)
