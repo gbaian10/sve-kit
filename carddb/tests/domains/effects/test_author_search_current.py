@@ -21,6 +21,7 @@ from ...support.author_current_fixtures import (
     current_source_fixture,
 )
 from ...support.author_semantic_inputs import load_semantic_inputs
+from ...support.time_budget import slow_fixture
 from ..translations.test_four_layer_fixed_actions import SEARCH_RAW
 from .author_current_synthetic import effect, token_section
 from .author_entry_cases import meta
@@ -39,6 +40,9 @@ FACE = "f:e9d8deca215953a99d12bd07acd566fa"
 
 
 @pytest.fixture(scope="module")
+@slow_fixture(
+    reason="Build the search real-current database template once per worker from fixed public inputs; each test uses an independent database copy."
+)
 def fixture(
     tmp_path_factory: pytest.TempPathFactory, author_source_preparation: bytes
 ) -> CurrentSourceFixture:
