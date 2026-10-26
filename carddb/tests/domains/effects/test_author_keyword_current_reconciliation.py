@@ -258,7 +258,7 @@ def test_whole_card_rejects_keyword_mismatch(
             "replace": ["aura"],
             "extra": ["ward", "aura"],
             "order": ["aura", "ward"],
-            "unsupported": ["storm"],
+            "unsupported": ["drain"],
         }
         if change in {"missing", "missing-body"}:
             array(authored["abilities"]).pop(0 if change == "missing" else -1)
@@ -587,7 +587,7 @@ def test_body_only_token_face_is_outside_first_batch(
 @pytest.mark.parametrize(
     ("raw", "reason"),
     [
-        ("【守護】【疾走】", "unsupported_source_keyword"),
+        ("【守護】【ドレイン】", "unsupported_source_keyword"),
         ("【守護】\n【守護】", "unsupported_duplicate_source_keyword"),
         ("【守護】\n不明な能力。", "source_pending"),
     ],

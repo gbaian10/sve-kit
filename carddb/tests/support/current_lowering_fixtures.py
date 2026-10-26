@@ -15,7 +15,10 @@ from sve_carddb.domains.effects.author_inputs import AuthorInputError, parse_doc
 
 from .author_current_fixtures import REPOSITORY, current_source_fixture
 from .current_author_storage import write_current_anchors
-from .current_keyword_fixtures import current_keyword_inputs
+from .current_keyword_fixtures import (
+    current_combat_keyword_inputs,
+    current_keyword_inputs,
+)
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -135,6 +138,7 @@ def current_lowering_inputs(root: Path) -> JsonValue:
         return {
             "accepted": accepted.lowering_input(),
             "keywords": current_keyword_inputs(root / "keywords"),
+            "combat_keywords": current_combat_keyword_inputs(root / "combat-keywords"),
             "keyword_fanfare": {
                 number: current_keyword_inputs(root / number, number)
                 for number in ("BP19-P32", "BP19-114")

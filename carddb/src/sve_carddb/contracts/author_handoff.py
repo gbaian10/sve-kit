@@ -15,14 +15,16 @@ from sve_carddb.contracts.author_evidence import (
 from sve_carddb.contracts.four_layer import FrameId, Hash, Id, OccurrenceKey
 from sve_carddb.core.models import RecordData
 
-type PrintedKeyword = Literal["ward", "aura"]
+type PrintedKeyword = Literal[
+    "ward", "aura", "storm", "rush", "bane", "intimidate", "assail"
+]
 type MetadataKey = Literal[
     "metadata.name.v1", "metadata.label.v1", "metadata.layout.v1", "pure_reminder.v1"
 ]
 
 
 class KeywordDeclarationPayload(RecordData):
-    keywords: Annotated[tuple[PrintedKeyword, ...], Field(min_length=1, max_length=2)]
+    keywords: Annotated[tuple[PrintedKeyword, ...], Field(min_length=1, max_length=7)]
     ports: EmptyPorts
 
     @model_validator(mode="after")

@@ -102,7 +102,19 @@ def entry_snapshot(
             "translations/templates/definitions/056.yaml",
             *(
                 f"translations/templates/definitions/{number}.yaml"
-                for number in ("068", "072", "084", "109", "110")
+                for number in (
+                    "018",
+                    "038",
+                    "049",
+                    "068",
+                    "070",
+                    "072",
+                    "084",
+                    "103",
+                    "106",
+                    "109",
+                    "110",
+                )
                 if include_keywords
             ),
         )
@@ -146,7 +158,15 @@ def entry_snapshot(
                 "translations/glossary/concepts/004.yaml",
                 {"term:keyword.storm"}
                 | (
-                    {"term:keyword.ward", "term:keyword.aura"}
+                    {
+                        "term:keyword.ward",
+                        "term:keyword.aura",
+                        "term:keyword.rush",
+                        "term:keyword.bane",
+                        "term:keyword.intimidate",
+                        "term:keyword.assail",
+                        "term:keyword.drain",
+                    }
                     if include_keywords
                     else set()
                 ),

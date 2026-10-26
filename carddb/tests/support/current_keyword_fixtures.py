@@ -8,9 +8,14 @@ from sve_carddb.contracts.author_evidence import SourceUse
 from sve_carddb.core.json import canonical, object_value
 from sve_carddb.domains.effects.author_current import CurrentAuthorSources
 from sve_carddb.domains.effects.author_expansion import AuthorExpander
-from sve_carddb.domains.effects.author_sources import entry_payload
+from sve_carddb.domains.effects.author_sources import SourceError, entry_payload
 
-from .author_current_fixtures import REPOSITORY, current_source_fixture, entry_snapshot
+from .author_current_fixtures import (
+    REPOSITORY,
+    CurrentSourceFixture,
+    current_source_fixture,
+    entry_snapshot,
+)
 from .author_destroy_fixtures import destroy_fixture
 from .current_author_storage import write_current_anchors
 
@@ -18,9 +23,48 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 
-def current_keyword_inputs(root: Path, number: str = "BP01-138") -> JsonValue:
+COMBAT_CARDS = (
+    "BP01-096",
+    "BP01-158",
+    "BP01-163",
+    "BP01-P10",
+    "BP03-033",
+    "BP04-P07",
+    "BP14-032",
+    "DSD01b-004",
+    "DSD01b-005",
+    "SD07-006",
+    "BP09-114",
+)
+
+
+def current_combat_keyword_inputs(root: Path) -> dict[str, JsonValue]:
+    """Use real printings with current evidence, retaining every sibling and declaration."""
+    fixture = current_source_fixture(
+        root / "sources",
+        card_numbers=frozenset(COMBAT_CARDS),
+        snapshot=entry_snapshot(include_keywords=True),
+    )
+    inputs: dict[str, JsonValue] = {}
+    failures: list[str] = []
+    for number in COMBAT_CARDS:
+        try:
+            inputs[number] = current_keyword_inputs(
+                root / number, number, fixture=fixture
+            )
+        except SourceError as error:
+            failures.append(f"{number}: {error}")
+    if failures:
+        # Report every card at once; the message carries only numbers and reason codes.
+        raise SourceError("; ".join(failures))
+    return inputs
+
+
+def current_keyword_inputs(
+    root: Path, number: str = "BP01-138", *, fixture: CurrentSourceFixture | None = None
+) -> JsonValue:
     """Rebuild a complete real declaration and all siblings from public current inputs."""
-    fixture = (
+    fixture = fixture or (
         destroy_fixture(root / "sources")
         if number.startswith("BP19-")
         else current_source_fixture(
