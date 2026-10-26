@@ -13,6 +13,8 @@ from sve_carddb.ingest.archive.manifest import Manifest
 from .support.database_fixtures import t0_database_template as t0_database_template  # ruff: ignore[useless-import-alias] -- register shared immutable database template
 from .support.database_fixtures import t1_database_template as t1_database_template  # ruff: ignore[useless-import-alias] -- register shared immutable database template
 from .support.database_fixtures import t1b_database_template as t1b_database_template  # ruff: ignore[useless-import-alias] -- register shared immutable database template
+from .support.deferred_slow import REASON as DEFERRED_REASON
+from .support.deferred_slow import is_deferred
 from .support.image_archive_fixtures import (
     image_archive_template as image_archive_template,  # ruff: ignore[useless-import-alias] -- register shared synthetic archive template
 )
@@ -32,6 +34,13 @@ if TYPE_CHECKING:
 
     from sve_carddb.domains.registry.snapshot import RegistrySnapshot
     from sve_carddb.domains.registry.storage import Entry
+
+
+def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
+    skip = pytest.mark.skip(reason=DEFERRED_REASON)
+    for item in items:
+        if is_deferred(item.nodeid):
+            item.add_marker(skip)
 
 
 @pytest.fixture(scope="session", autouse=True)  # ruff: ignore[pytest-fixture-autouse] -- safety must cover every test and session fixture
