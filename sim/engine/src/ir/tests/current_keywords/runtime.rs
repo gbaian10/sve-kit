@@ -9,6 +9,9 @@ use std::{fs::read_to_string, path::Path};
 
 const NUMBER: &str = "BP01-138";
 
+#[path = "runtime/unloaded.rs"]
+mod unloaded;
+
 fn opponent(seat: &str) -> &str {
     if seat == "P1" { "P2" } else { "P1" }
 }

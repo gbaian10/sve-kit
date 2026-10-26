@@ -17,6 +17,10 @@ impl Game {
         &self,
         holder: &str,
     ) -> Result<Option<BTreeSet<String>>> {
+        if !self.card_runtime.is_empty() {
+            self.require_internal_abilities(holder, "keyword availability")?;
+            self.require_ability_sources("keyword availability")?;
+        }
         let object = self.information_source(holder)?;
         if !self.card_runtime.is_loaded(&object.card) {
             return Ok(None);
