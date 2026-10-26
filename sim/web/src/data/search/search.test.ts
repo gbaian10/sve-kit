@@ -2386,6 +2386,7 @@ it("filters official PR by each printing's appearance, independently of printed 
               return {
                 ...row,
                 rarity_code: official,
+                premium: false,
                 rarity_badge:
                   style === "unknown" ? null : style === "none" ? { style } : { style, text: "BR" },
               }
@@ -2606,6 +2607,7 @@ it("unions unrated printings with official rarities without confusing absent PR 
                     ? {
                         ...row,
                         rarity_code: "-",
+                        premium: false,
                       }
                     : row,
             ),
@@ -2627,6 +2629,51 @@ it("unions unrated printings with official rarities without confusing absent PR 
     expect(ids(["pr:none"])).toContain("p:bp01-001")
     expect(ids(["pr:none", "unrated"]).sort()).toEqual([...ids(["pr:none"]), ...unrated].sort())
     expect(index.options.rarityCounts["unrated"]).toBe(unrated.length)
+  }
+})
+
+it("filters premium independently and intersects it with rated and unrated rarities", async () => {
+  const client = createSnapshotClient(base, { fetch: origin().fetcher })
+  await client.load()
+  await client.prefetchPrintings?.()
+  const snapshot = client.snapshot()
+  if (!snapshot) throw new Error("missing snapshot")
+  const overrides: Record<string, { rarity_code: string | null; premium: boolean }> = {
+    "p:bp01-001": { rarity_code: "sr", premium: false },
+    "p:bp01-020": { rarity_code: "sr", premium: true },
+    "p:bp01-021-sp": { rarity_code: null, premium: true },
+    "p:bp01-003": { rarity_code: "pr", premium: true },
+  }
+  const columns = new BootstrapColumns()
+  columns.ingest(
+    snapshot.bootstrap.map((fragment) =>
+      fragment.table === "printing"
+        ? {
+            ...fragment,
+            rows: fragment.rows.map((row) => ({
+              ...row,
+              premium: false,
+              ...(overrides[stringValue(row["id"])] ?? {}),
+            })),
+          }
+        : fragment,
+    ),
+  )
+  columns.seal()
+  const created = new SearchIndex(columns, "jp")
+  for (const index of [created, new SearchIndex(created.encode(), "jp")]) {
+    const ids = (rarities: readonly string[]) =>
+      index
+        .search({ ...query, limit: 1000, state: { ...DEFAULT_QUERY, unit: "printing", rarities } })
+        .items.map((item) => item.printingId)
+    expect(ids(["sr"])).toContain("p:bp01-001")
+    expect(ids(["sr"])).not.toContain("p:bp01-020")
+    expect(ids(["premium"])).toEqual(
+      expect.arrayContaining(["p:bp01-020", "p:bp01-021-sp", "p:bp01-003"]),
+    )
+    expect(ids(["sr", "premium"])).toEqual(["p:bp01-020"])
+    expect(ids(["unrated", "premium"])).toEqual(["p:bp01-021-sp"])
+    expect(ids(["pr", "premium"])).toEqual(["p:bp01-003"])
   }
 })
 

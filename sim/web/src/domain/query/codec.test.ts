@@ -137,6 +137,13 @@ describe("query codec", () => {
     expect(parseQuery(formatQuery(state))).toEqual(state)
   })
 
+  it("round-trips the premium rarity URL token and counts it as one active facet", () => {
+    const state = { ...DEFAULT_QUERY, rarities: ["premium", "sr"] }
+    expect(formatQuery(state).toString()).toBe("rarity=premium%2Csr")
+    expect(parseQuery(formatQuery(state))).toEqual(state)
+    expect(activeFilterCount(state)).toBe(1)
+  })
+
   it("counts active facets for the filter badge", () => {
     expect(activeFilterCount(DEFAULT_QUERY)).toBe(0)
     expect(

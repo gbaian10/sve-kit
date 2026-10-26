@@ -322,6 +322,7 @@ export default {
     unknown: "未確認",
   },
   rarityBadge: {
+    premium: "プレミアム",
     unrated: "分類なし",
     unratedHint: "公式のレアリティ表記がないカード（PRのEP・SEP・リーダーなど）",
     selected: "{{count}} 件選択",

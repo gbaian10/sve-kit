@@ -306,6 +306,7 @@ const zhTW = {
     unknown: "待確認",
   },
   rarityBadge: {
+    premium: "碎閃",
     unrated: "無分類",
     unratedHint: "官方沒有登記稀有度的卡，例如 PR 系列的 EP、SEP 與主戰者",
     selected: "已選 {{count}} 項",

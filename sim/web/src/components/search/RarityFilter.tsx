@@ -1,6 +1,11 @@
 import { useTranslation } from "react-i18next"
 
-import { orderRarities, prStyleTokens, UNRATED_RARITY } from "../../domain/rarityFilter"
+import {
+  orderRarities,
+  PREMIUM_RARITY,
+  prStyleTokens,
+  UNRATED_RARITY,
+} from "../../domain/rarityFilter"
 import type { Region } from "../../domain/search"
 import { type FacetChip, type FacetChipOption, FacetChips } from "./FacetChips"
 import { prBadgeVisual, prStyleLabel, prStyleVisual, rarityBadgeVisual } from "./rarityVisuals"
@@ -29,14 +34,21 @@ export function RarityFilter({
     const style = code.slice("pr:".length)
     return { code, label: prStyleLabel(t, style), ...visual(prStyleVisual(style, edition)) }
   })
-  const items: FacetChip[] = [
-    ...orderRarities(rarities).map((rarity) =>
-      rarity.code === "pr"
-        ? { ...rarity, content: prBadgeVisual(), children }
+  const items: FacetChip[] = orderRarities([
+    ...rarities,
+    { code: PREMIUM_RARITY, label: t("rarityBadge.premium") },
+  ]).map((rarity) =>
+    rarity.code === "pr"
+      ? { ...rarity, content: prBadgeVisual(), children }
+      : rarity.code === PREMIUM_RARITY
+        ? rarity
         : { ...rarity, ...visual(rarityBadgeVisual({ rarityCode: rarity.code, region: edition })) },
-    ),
-    { code: UNRATED_RARITY, label: t("rarityBadge.unrated"), hint: t("rarityBadge.unratedHint") },
-  ]
+  )
+  items.push({
+    code: UNRATED_RARITY,
+    label: t("rarityBadge.unrated"),
+    hint: t("rarityBadge.unratedHint"),
+  })
   return (
     <FacetChips
       title={t("rarityBadge.label")}

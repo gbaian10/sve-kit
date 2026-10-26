@@ -2,9 +2,30 @@ import { BADGE_STYLES } from "./rarityBadges"
 import { PROMO_RARITY, RARITY_LADDER } from "./representative"
 
 export const UNRATED_RARITY = "unrated"
+export const PREMIUM_RARITY = "premium"
 
-// The maintainer's chip order: the rarity ladder low to high, PR after the printed rarities.
-const RARITY_ORDER: readonly string[] = [...RARITY_LADDER, PROMO_RARITY]
+// The rarity ladder runs low to high, then Premium and PR.
+const RARITY_ORDER: readonly string[] = [...RARITY_LADDER, PREMIUM_RARITY, PROMO_RARITY]
+
+/** Applies official rarity tokens and the shared premium dimension to one printing. */
+export function matchesRaritySelection(
+  rarityCode: string | null,
+  premium: boolean,
+  selected: readonly string[],
+  badgeStyle?: string,
+): boolean {
+  if (selected.length === 0) return true
+  const premiumOnly = selected.includes(PREMIUM_RARITY)
+  if (premium !== premiumOnly) return false
+  const raritySelections = selected.filter((token) => token !== PREMIUM_RARITY)
+  if (raritySelections.length === 0) return true
+  const rarity = rarityCode ?? ""
+  return raritySelections.some((token) => {
+    if (token === UNRATED_RARITY) return rarity === "" || rarity === "-"
+    if (token.startsWith("pr:")) return rarity === "pr" && token === `pr:${badgeStyle ?? "unknown"}`
+    return token === rarity
+  })
+}
 
 /** Vocabulary rarities in chip order; codes the order does not know keep their own order after it. */
 export function orderRarities<T extends { readonly code: string }>(rarities: readonly T[]): T[] {

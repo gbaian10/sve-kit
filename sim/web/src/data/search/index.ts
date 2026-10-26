@@ -15,7 +15,7 @@ import {
   STAT_CAP,
   statSelected,
 } from "../../domain/query/model"
-import { UNRATED_RARITY } from "../../domain/rarityFilter"
+import { matchesRaritySelection, PREMIUM_RARITY, UNRATED_RARITY } from "../../domain/rarityFilter"
 import { pickRepresentative, UNKNOWN_RARITY } from "../../domain/representative"
 import type { MatchedField, Region, TextLang } from "../../domain/search"
 import { datedSets, type PackCounts, recentSets } from "../../domain/sets"
@@ -174,6 +174,7 @@ const PRINTING_COLUMNS = [
   "summary",
   "type",
   "token",
+  "premium",
   "rarity",
   "badge",
   "leaderFrame",
@@ -191,7 +192,7 @@ const seal = <T extends string>(columns: Record<T, number[]>): Record<T, Uint32A
   ) as Record<T, Uint32Array>
 
 /** Bump when the stored layout or derived data changes, so older images are rebuilt. */
-export const INDEX_IMAGE_FORMAT = 26
+export const INDEX_IMAGE_FORMAT = 27
 
 // Card-level special kinds, packed into the `kinds` column; Token stays per printing.
 const KIND_EVOLVE = 1
@@ -321,9 +322,11 @@ function optionsOf(
     // Locator-only rows do not yet carry an official classification.
     if (row["region"] !== edition || !Object.hasOwn(row, "rarity_code")) continue
     const official = typeof row["rarity_code"] === "string" ? row["rarity_code"] : ""
+    const premium = row["premium"] === true
     const token = !official || official === "-" ? UNRATED_RARITY : official
-    rarityCounts[token] = (rarityCounts[token] ?? 0) + 1
-    if (official === "pr") {
+    const countToken = premium ? PREMIUM_RARITY : token
+    rarityCounts[countToken] = (rarityCounts[countToken] ?? 0) + 1
+    if (official === "pr" && !premium) {
       const child = `pr:${badgeOf(row)?.style ?? "unknown"}`
       rarityCounts[child] = (rarityCounts[child] ?? 0) + 1
     }
@@ -397,7 +400,10 @@ function optionsOf(
     prBadgeStyles: [
       ...new Set(
         printingRows
-          .filter((row) => row["region"] === edition && row["rarity_code"] === "pr")
+          .filter(
+            (row) =>
+              row["region"] === edition && row["rarity_code"] === "pr" && row["premium"] !== true,
+          )
           .map((row) => badgeOf(row)?.style ?? "unknown"),
       ),
     ],
@@ -619,6 +625,7 @@ function build(
       const defaultArt = artOf(index.printing(entry.defaultPrinting[edition] ?? ""))
       printings.type.push(intern(type))
       printings.token.push(Number(token))
+      printings.premium.push(Number(fullPrinting?.["premium"] === true))
       const leaderFrame =
         typeof fullPrinting?.["leader_name_frame"] === "string"
           ? fullPrinting["leader_name_frame"]
@@ -961,6 +968,7 @@ export class SearchIndex {
           code = familyCodes.get(owner)
         const intern = (value: string | undefined | null) => this.pool.intern(value ?? "")
         printings.lookup[ordinal] = intern(cardNoLookupKey(cardNo, this.sets))
+        printings.premium[ordinal] = Number(row["premium"] === true)
         printings.flat[ordinal] = intern(normalizeText(cardNo))
         printings.set[ordinal] = intern(key?.set)
         printings.number[ordinal] = intern(key?.number)
@@ -1179,16 +1187,12 @@ export class SearchIndex {
           state.traits.includes(trait),
         )) &&
       (!state.artists.length || this.artistAllowed(state.artists, printing)) &&
-      (!state.rarities.length ||
-        state.rarities.some((rarity) => {
-          const official = this.pool.get(this.printings.rarity[printing] ?? 0)
-          return rarity === UNRATED_RARITY
-            ? !official || official === "-"
-            : rarity.startsWith("pr:")
-              ? official === "pr" &&
-                rarity === `pr:${this.pool.get(this.printings.badge[printing] ?? 0)}`
-              : rarity === official
-        })) &&
+      matchesRaritySelection(
+        this.pool.get(this.printings.rarity[printing] ?? 0),
+        this.printings.premium[printing] === 1,
+        state.rarities,
+        this.pool.get(this.printings.badge[printing] ?? 0),
+      ) &&
       (!state.altArtOnly || this.printings.alt[printing] === 1) &&
       // A merged-by-card cell stands for every printing, so hiding reprints cannot apply there.
       (state.reprints === "all" ||

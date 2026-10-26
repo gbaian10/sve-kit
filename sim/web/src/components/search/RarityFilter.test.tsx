@@ -14,9 +14,11 @@ import { RarityFilter } from "./RarityFilter"
 function Harness({
   initial = [],
   edition = "jp",
+  omitPr = false,
 }: {
   readonly initial?: string[]
   readonly edition?: Region
+  readonly omitPr?: boolean
 }) {
   const [selected, onChange] = useState(initial)
   return (
@@ -24,12 +26,23 @@ function Harness({
       <RarityFilter
         rarities={[
           { code: "sp", label: "SP" },
+          { code: "ssp", label: "SSP" },
           { code: "pr", label: "PR" },
           { code: "br", label: "BR" },
-        ]}
+        ].filter((rarity) => !omitPr || rarity.code !== "pr")}
         options={{
           styles: ["br", "none", "unknown"],
-          counts: { sp: 1, pr: 6, "pr:br": 3, "pr:none": 2, "pr:unknown": 1, unrated: 4, br: 9 },
+          counts: {
+            sp: 1,
+            ssp: 2,
+            premium: 35,
+            pr: 6,
+            "pr:br": 3,
+            "pr:none": 2,
+            "pr:unknown": 1,
+            unrated: 4,
+            br: 9,
+          },
         }}
         edition={edition}
         selected={selected}
@@ -48,7 +61,7 @@ const chips = () =>
 describe("rarity chips", () => {
   it("orders the chips low to high and draws the edition's badge on each", async () => {
     const { unmount } = await renderInRouter(<Harness />)
-    expect(chips()).toEqual(["BR", "SP", "PR", "無分類"])
+    expect(chips()).toEqual(["BR", "SP", "SSP", "碎閃", "PR", "無分類"])
     const bronze = screen.getByRole("button", { name: "BR" })
     expect(bronze).toHaveAttribute("title", "BR（9）")
     expect(bronze.querySelector("img")).toHaveAttribute("src", br)
@@ -57,12 +70,38 @@ describe("rarity chips", () => {
       pr,
     )
     expect(screen.getByRole("button", { name: "無分類" })).toHaveTextContent("無分類")
+    expect(screen.getByRole("button", { name: "碎閃" })).toHaveTextContent("碎閃")
+    expect(screen.getByRole("button", { name: "碎閃" }).querySelector("img")).toBeNull()
     unmount()
     await renderInRouter(<Harness edition="en" />)
     expect(screen.getByRole("button", { name: "BR" }).querySelector("img")).toHaveAttribute(
       "src",
       brEn,
     )
+  })
+
+  it("shows premium after SSP even when the vocabulary has no PR option", async () => {
+    await renderInRouter(<Harness omitPr />)
+    expect(chips()).toEqual(["BR", "SP", "SSP", "碎閃", "無分類"])
+  })
+
+  it.each([
+    ["zh-TW", "碎閃"],
+    ["ja", "プレミアム"],
+    ["en", "Premium"],
+  ] as const)("shows a text-only premium chip in %s", async (language, label) => {
+    await renderInRouter(<Harness />, { language })
+    const premium = screen.getByRole("button", { name: label })
+    expect(premium).toHaveTextContent(label)
+    expect(premium.querySelector("img")).toBeNull()
+  })
+
+  it("selects the premium token and clears it with the rarity section", async () => {
+    await renderInRouter(<Harness />)
+    await userEvent.click(screen.getByRole("button", { name: "碎閃" }))
+    expect(screen.getByLabelText("selection")).toHaveTextContent("premium")
+    await userEvent.click(screen.getByRole("button", { name: "清除稀有度" }))
+    expect(screen.getByLabelText("selection")).toBeEmptyDOMElement()
   })
 
   it("explains the unrated chip to hover and assistive technology only", async () => {
