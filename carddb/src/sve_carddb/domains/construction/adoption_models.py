@@ -6,7 +6,13 @@ from pydantic import Field, field_validator, model_validator
 
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.core.models import Date, Hash, Instant, RecordData, Text, UInt
-from sve_carddb.core.provenance import BuildContext, DateSourceUse, FilePin, Revision
+from sve_carddb.core.provenance import (
+    BuildContext,
+    DateSourceUse,
+    FilePin,
+    Revision,
+    SourceUse,
+)
 from sve_carddb.core.regions import Region
 from sve_carddb.domains.construction.models import Member
 from sve_carddb.domains.products.models import LocalizedText
@@ -110,7 +116,7 @@ class SourceSet(RecordData):
 
 
 class CurrentListReconciliation(RecordData):
-    mode: Literal["current-list-day-v1"]
+    mode: Literal["current-list-day-v1", "observed-list-day-v1"]
     observed_on: Date
     observed_timezone: Text
     projection_hash: Hash
@@ -143,7 +149,7 @@ class CoverageData(Data):
 class Evidence(RecordData):
     role: Literal["profile", "restriction", "coverage", "reconciliation"]
     primary: bool
-    use: DateSourceUse
+    use: SourceUse | DateSourceUse
 
 
 class ModelReview(RecordData):
@@ -283,7 +289,7 @@ class ReviewReport(RecordData):
     reviewed_at: Instant
     basis_hash: Hash
     outcome: Literal["agreed", "disputed"]
-    source_uses: tuple[DateSourceUse, ...]
+    source_uses: tuple[SourceUse | DateSourceUse, ...]
     program_revision: Revision
     dependencies: tuple[FilePin, ...]
     note: Text

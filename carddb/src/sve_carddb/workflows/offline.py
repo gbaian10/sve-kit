@@ -771,6 +771,11 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                     *link_uses,
                     *name_uses,
                     *name_sources.uses,
+                    *(
+                        ()
+                        if construction_result is None
+                        else construction_result.record.uses
+                    ),
                 ),
                 date_uses=(
                     ()

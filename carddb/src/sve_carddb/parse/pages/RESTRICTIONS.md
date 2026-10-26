@@ -3,6 +3,9 @@
 `parse_restriction_list` reads the JP and EN current-list HTML layouts. It returns
 Standard entries with the displayed name, linked card number (if present), raw
 link, copy limit, effective dates and source heading. Lift dates are exclusive.
+EN lift dates may appear beside one card link as `(to be lifted on Month D, YYYY)`.
+They apply only to that card; unsupported annotations, conflicting heading dates
+and ambiguous multi-card paragraphs fail closed.
 It reports the intentionally excluded history/Cross Craft/Gloryfinder sections.
 It never follows links, downloads images or treats another format as Standard.
 
@@ -27,3 +30,8 @@ Every result is `semantic_state="unreviewed"`. Matching names to regional
 adopting date coverage require explicit review. The parser supplies no approval,
 authored writer, UTC knowledge cutoff or public snapshot. Existing construction
 adoption gates remain closed; successful parsing does not authorize adoption.
+
+`parse_jp_restriction_lifts` separately observes the explicit Standard lift block
+in the supported JP notice layout. It preserves the linked card identity and
+exclusive end date, without interpreting ban additions, evolution exceptions or
+other formats. Human adoption reconciles each lift with its original list entry.

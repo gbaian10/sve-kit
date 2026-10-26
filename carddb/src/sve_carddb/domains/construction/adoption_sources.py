@@ -1,19 +1,28 @@
 """Replay approved date-only list evidence without widening generic source readers."""
 
 from dataclasses import asdict
+from datetime import datetime
 from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING
+from zoneinfo import ZoneInfo
 
 from pydantic import JsonValue
 
 from sve_carddb.core.json import canonical, digest, object_value, parse
-from sve_carddb.core.provenance import ArchivePin, DateSource, DateSourceUse
+from sve_carddb.core.provenance import (
+    ArchivePin,
+    DateSource,
+    DateSourceUse,
+    Source,
+    SourceUse,
+)
 from sve_carddb.core.regions import SourceRegion
 from sve_carddb.ingest.archive.frozen_sources import FrozenSources
 from sve_carddb.ingest.archive.manifest import Manifest
 from sve_carddb.ingest.archive.source_archive import Receipt
 from sve_carddb.ingest.archive.source_import.models import load_index
 from sve_carddb.ingest.archive.store import resolve_within
+from sve_carddb.parse.pages.restriction_lifts import parse_jp_restriction_lifts
 from sve_carddb.parse.pages.restriction_list import parse_restriction_list
 
 if TYPE_CHECKING:
@@ -27,11 +36,11 @@ class Lists:
         self.batches = tuple(
             FrozenSources.configured(stores, batch_id) for batch_id in batch_ids
         )
-        self.uses: set[DateSourceUse] = set()
-        self._sources: dict[tuple[str, str], DateSource] = {}
+        self.uses: set[SourceUse | DateSourceUse] = set()
+        self._sources: dict[tuple[str, str], Source | DateSource] = {}
         self._results: dict[tuple[str, str], dict[str, JsonValue]] = {}
 
-    def source(self, batch_id: str, version: str) -> DateSource:
+    def source(self, batch_id: str, version: str) -> Source | DateSource:
         """Recover the original approved observation without synthesizing an instant."""
         key = batch_id, version
         if key in self._sources:
@@ -50,6 +59,10 @@ class Lists:
         if digest(raw_receipt) != descriptor.first_receipt_id:
             raise ValueError("Construction observation receipt hash mismatch")
         receipt = Receipt.model_validate_json(raw_receipt)
+        if "T" in receipt.resource.last_changed_at:
+            source, _ = batch.metadata(version, parser_version=PARSER_VERSION)
+            self._sources[key] = source
+            return source
         manifest = Manifest.open_snapshot(
             resolve_within(
                 batch.root / "batches" / batch_id[7:],
@@ -83,7 +96,7 @@ class Lists:
                 )
             assert observation.observed_timezone is not None
             assert observation.observed_basis is not None
-            source = DateSource(
+            dated = DateSource(
                 id=descriptor.id,
                 kind="official_page",
                 url=descriptor.url,
@@ -106,8 +119,8 @@ class Lists:
             )
         finally:
             manifest.close()
-        self._sources[key] = source
-        return source
+        self._sources[key] = dated
+        return dated
 
     def projection(
         self, batch_id: str, version: str, region: Region
@@ -118,7 +131,10 @@ class Lists:
         if key not in self._results:
             batch = next(batch for batch in self.batches if batch.batch_id == batch_id)
             descriptor = batch.descriptor(version)
-            if descriptor.provider != region or descriptor.kind != "limit":
+            if descriptor.provider != region or descriptor.kind not in {
+                "limit",
+                "news",
+            }:
                 raise ValueError(
                     "Current list evidence must have its regional limit classification"
                 )
@@ -127,6 +143,25 @@ class Lists:
             ).read_bytes()
             if digest(raw) != source.sha256:
                 raise ValueError("Construction raw bytes hash mismatch")
+            if descriptor.kind == "news":
+                if region != "jp":
+                    raise ValueError(
+                        "Only explicit JP Standard lift notices are supported"
+                    )
+                self._results[key] = object_value(
+                    parse(
+                        canonical(
+                            {
+                                "region": region,
+                                "lifts": [
+                                    dict[str, JsonValue](item)
+                                    for item in parse_jp_restriction_lifts(raw)
+                                ],
+                            }
+                        )
+                    )
+                )
+                return self._results[key]
             parsed = parse_restriction_list(raw, SourceRegion(region))
             entries: list[JsonValue] = [
                 asdict(item)
@@ -153,7 +188,9 @@ class Lists:
             raise ValueError("Construction list cannot cross regions")
         return self._results[key]
 
-    def verify(self, use: DateSourceUse, region: Region, record_key: str) -> JsonValue:  # ruff: ignore[complex-structure] -- Keep the complete admission boundary visible.
+    def verify(  # ruff: ignore[complex-structure] -- Keep the complete admission boundary visible.
+        self, use: SourceUse | DateSourceUse, region: Region, record_key: str
+    ) -> JsonValue:
         """Check the actual pointer result and record the consumed source use."""
         source = self.source(use.source.archive.batch_id, use.source.id)
         if source != use.source:
@@ -213,12 +250,27 @@ class Lists:
         self.uses.add(use)
         return value
 
-    def regional_versions(self, region: Region) -> frozenset[str]:
+    def regional_versions(self, region: Region, batch_id: str) -> frozenset[str]:
         """Rebuild the regional source denominator independently of authored choices."""
         return frozenset(
             version
             for batch in self.batches
+            if batch.batch_id == batch_id
             for version in batch.version_ids
             if (descriptor := batch.descriptor(version)).provider == region
             and descriptor.kind in {"limit", "news"}
         )
+
+
+def observed_day(source: Source | DateSource, timezone: str) -> str:
+    """Compare an instant in the declared observation zone without losing its precision."""
+    if isinstance(source, DateSource):
+        if source.observed_timezone != timezone:
+            raise ValueError("Observation timezone differs from its date source")
+        return source.observed_on
+    return (
+        datetime.fromisoformat(source.fetched_at)
+        .astimezone(ZoneInfo(timezone))
+        .date()
+        .isoformat()
+    )

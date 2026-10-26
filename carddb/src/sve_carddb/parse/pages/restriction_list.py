@@ -1,7 +1,7 @@
 """Observe current Standard list entries without adopting their rule identities."""
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import date
 from typing import TYPE_CHECKING, Literal
 from urllib.parse import parse_qs, urlsplit
@@ -17,6 +17,7 @@ _EN_DATE = re.compile(
     r"Effective as of ([A-Za-z]+) ([0-9]{1,2}), "
     r"(?:to be lifted on ([A-Za-z]+) ([0-9]{1,2}), )?([0-9]{4})"
 )
+_EN_LIFT = re.compile(r"\(to be lifted on ([A-Za-z]+) ([0-9]{1,2}), ([0-9]{4})\)")
 _MONTHS = (
     "January",
     "February",
@@ -91,7 +92,8 @@ def _dates(heading: str, region: SourceRegion) -> tuple[date, date | None]:
     return start, end
 
 
-def _card_no(href: str, region: SourceRegion) -> str | None:
+def linked_card_number(href: str, region: SourceRegion) -> str | None:
+    """Validate a regional official link without deriving a number from its name."""
     parts = urlsplit(href)
     host = (
         "shadowverse-evolve.com"
@@ -109,6 +111,28 @@ def _card_no(href: str, region: SourceRegion) -> str | None:
     if parts.path != path or len(values) != 1 or not values[0].strip():
         raise ValueError("Restriction entry lacks a unique linked card number")
     return values[0].strip()
+
+
+def _inline_lift(node: LexborNode, entry: ListRestriction) -> ListRestriction:
+    container = node.parent
+    name = node.text(separator="", strip=True).strip()
+    end = entry.effective_until
+    while container is not None and container.tag in {"strong", "span", "em", "b", "p"}:
+        text = container.text(separator="", strip=True).strip()
+        if text != name:
+            suffix = text.removeprefix(name).strip()
+            match = _EN_LIFT.fullmatch(suffix) if text.startswith(name) else None
+            if match is None or len(select_all(container, "a[href]")) != 1:
+                raise ValueError("Unsupported EN restriction inline annotation")
+            month, day, year = match.groups()
+            lifted = date(int(year), _month(month), int(day))
+            if lifted <= entry.effective_from:
+                raise ValueError("Restriction effective-date interval must be nonempty")
+            if end is not None and end != lifted:
+                raise ValueError("Restriction has conflicting lift dates")
+            end = lifted
+        container = container.parent
+    return replace(entry, effective_until=end)
 
 
 @dataclass(slots=True)
@@ -165,7 +189,7 @@ class _Cursor:
             raise ValueError("Restriction entry name must not be blank")
         result = ListRestriction(
             text,
-            _card_no(href, region),
+            linked_card_number(href, region),
             href,
             self.max_copies,
             *self.dates,
@@ -181,6 +205,13 @@ class _Cursor:
         text = node.text(separator="", strip=True).strip()
         if region is SourceRegion.EN and node.tag == "p" and text in _EN_CATEGORIES:
             self.category(_EN_CATEGORIES[text])
+        if (
+            region is SourceRegion.EN
+            and node.tag == "p"
+            and "lifted" in text.lower()
+            and not select_all(node, "a[href]")
+        ):
+            raise ValueError("Unattributed EN restriction lift annotation")
         if node.tag == "h4":
             self.effective(text, region)
         if node.tag == "a":
@@ -188,7 +219,8 @@ class _Cursor:
                 raise ValueError("Restriction name contains unsupported nested markup")
             href = attribute(node, "href")
             assert href is not None
-            return self.entry(text, href, region, ordinal)
+            entry = self.entry(text, href, region, ordinal)
+            return _inline_lift(node, entry) if region is SourceRegion.EN else entry
         return None
 
 

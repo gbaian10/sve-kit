@@ -8,8 +8,12 @@ from pydantic import field_validator
 from sve_carddb.core.authored import check_path
 from sve_carddb.core.json import canonical, digest, object_value, parse
 from sve_carddb.core.models import Hash, RecordData, Text
-from sve_carddb.core.provenance import FilePin
-from sve_carddb.domains.construction.adoption_models import ReviewReport, ordered
+from sve_carddb.core.provenance import FilePin, SourceUse
+from sve_carddb.domains.construction.adoption_models import (
+    CoverageRecord,
+    ReviewReport,
+    ordered,
+)
 
 if TYPE_CHECKING:
     from sve_carddb.domains.construction.adoption_loader import Snapshot
@@ -25,11 +29,19 @@ REQUIRED_DEPENDENCIES = (
     "carddb/src/sve_carddb/parse/pages/restriction_list.py",
     "carddb/uv.lock",
 )
+OBSERVED_LIST_DEPENDENCIES = tuple(
+    sorted(
+        (
+            *REQUIRED_DEPENDENCIES,
+            "carddb/src/sve_carddb/parse/pages/restriction_lifts.py",
+        )
+    )
+)
 
 
 class ToolConfiguration(RecordData):
     recipe: Literal["construction-two-models-v1"]
-    scope: Literal["current-list-day-v1"]
+    scope: Literal["current-list-day-v1", "observed-list-day-v1"]
     dependencies: tuple[FilePin, ...]
     construction_review_stores: tuple[Text, ...]
 
@@ -86,7 +98,7 @@ def report_path(checksum: str) -> str:
     return "reports/sha256/" + checksum[7:9] + "/" + checksum[7:] + ".json"
 
 
-def verify_reports(  # ruff: ignore[complex-structure, too-many-branches, too-many-locals] -- Verify the complete report and backup closure before any adoption.
+def verify_reports(  # ruff: ignore[complex-structure, too-many-branches, too-many-locals, too-many-statements] -- Verify the complete report and backup closure before any adoption.
     snapshot: Snapshot, stores: tuple[StorePin, ...]
 ) -> list[dict[str, str]]:
     """Require matching final-basis reports and their backed-up tool pins."""
@@ -131,9 +143,10 @@ def verify_reports(  # ruff: ignore[complex-structure, too-many-branches, too-ma
     for loaded in snapshot.shards:
         context = loaded.shard.review_context.context
         configuration = ToolConfiguration.model_validate_json(context.configuration)
-        if (
-            tuple(pin.name for pin in configuration.dependencies)
-            != REQUIRED_DEPENDENCIES
+        if tuple(pin.name for pin in configuration.dependencies) != (
+            REQUIRED_DEPENDENCIES
+            if configuration.scope == "current-list-day-v1"
+            else OBSERVED_LIST_DEPENDENCIES
         ):
             raise ValueError(
                 "Construction review must pin the complete supported tool dependencies"
@@ -146,6 +159,20 @@ def verify_reports(  # ruff: ignore[complex-structure, too-many-branches, too-ma
             raise ValueError("Construction review context needs named, sorted stores")
         configured.update(configuration.construction_review_stores)
         for record in loaded.shard.records:
+            legacy_scope = configuration.scope == "current-list-day-v1"
+            if legacy_scope and any(
+                item.role == "reconciliation" or isinstance(item.use, SourceUse)
+                for item in record.evidence
+            ):
+                raise ValueError(
+                    "Instant or reconciled evidence needs the observed-list review scope"
+                )
+            if (
+                isinstance(record, CoverageRecord)
+                and record.data.value is not None
+                and record.data.value.reconciliation.mode != configuration.scope
+            ):
+                raise ValueError("Coverage mode differs from its review scope")
             expected_uses = sorted(
                 (item.use.model_dump(mode="json") for item in record.evidence),
                 key=canonical,

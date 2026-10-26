@@ -83,6 +83,58 @@ def test_en_nested_entry_and_exclusive_lift_date() -> None:
     )
 
 
+def test_en_inline_lift_applies_only_to_its_linked_card() -> None:
+    body = EN.replace(
+        "Synthetic Ban</a>",
+        "Synthetic Ban</a> (to be lifted on November 2, 2026)",
+    )
+    parsed = parse_restriction_list(body.encode(), SourceRegion.EN)
+    lifted = parsed.entries[1]
+    assert lifted.name == "Synthetic Ban"
+    assert lifted.effective_until == date(2026, 11, 2)
+    assert lifted.active_on(date(2026, 11, 1))
+    assert not lifted.active_on(date(2026, 11, 2))
+    assert parsed.entries[2].effective_until is None
+
+
+@pytest.mark.parametrize(
+    "suffix",
+    [
+        " (to be lifted on Unknown 2, 2026)",
+        " (to be lifted on November 31, 2026)",
+        " (to be lifted on August 21, 2026)",
+        " (to be lifted on November 2)",
+        " (to be lifted on November ２, 2026)",
+        " (to be banned on November 2, 2026)",
+        " (to be lifted on November 2, 2026) (to be lifted on December 2, 2026)",
+        ' (to be lifted on November 2, 2026)<a href="https://en.shadowverse-evolve.com/cards/?cardno=OTHER">Other</a>',
+    ],
+)
+def test_en_inline_lift_changes_fail_closed(suffix: str) -> None:
+    body = EN.replace("Synthetic Ban</a>", "Synthetic Ban</a>" + suffix)
+    with pytest.raises(ValueError, match=r"(restriction|Restriction|month|range|day)"):
+        parse_restriction_list(body.encode(), SourceRegion.EN)
+
+
+def test_en_detached_lift_annotation_is_rejected() -> None:
+    body = EN.replace(
+        "Synthetic Ban</a></p>",
+        "Synthetic Ban</a></p><p>(to be lifted on November 2, 2026)</p>",
+    )
+    assert "<p>(to be lifted" in body
+    with pytest.raises(ValueError, match="Unattributed"):
+        parse_restriction_list(body.encode(), SourceRegion.EN)
+
+
+def test_en_inline_lift_cannot_override_a_conflicting_heading() -> None:
+    body = EN.replace(
+        "Synthetic Reborn</a></strong>",
+        "Synthetic Reborn</a> (to be lifted on November 2, 2026)</strong>",
+    )
+    with pytest.raises(ValueError, match="conflicting"):
+        parse_restriction_list(body.encode(), SourceRegion.EN)
+
+
 @pytest.mark.parametrize(
     ("old", "new"),
     [

@@ -10,7 +10,7 @@ from sve_carddb.build import Json
 from sve_carddb.build.source_rows import insert_raw_sources, source_values
 from sve_carddb.core.json import canonical, digest, object_value, parse
 from sve_carddb.core.models import RecordData
-from sve_carddb.core.provenance import input_record
+from sve_carddb.core.provenance import DateSourceUse, SourceUse, input_record
 from sve_carddb.domains.construction.adoption_loader import Snapshot, load
 from sve_carddb.domains.construction.adoption_models import (
     CoverageRecord,
@@ -156,18 +156,20 @@ class Prepared:
                     },
                     ("profile_id", "from_date"),
                 )
+        dated = tuple(use for use in expected if isinstance(use, DateSourceUse))
+        instant = tuple(use for use in expected if isinstance(use, SourceUse))
         raw = {
             row.values["id"]: dict(row.values)
             for row in db.rows("source_record")
             if row.values["observed_on"] is not None
         }
-        if raw != {use.source.id: source_values(use.source) for use in expected}:
+        if raw != {use.source.id: source_values(use.source) for use in dated}:
             raise ValueError(
                 "Construction F1 date evidence differs from the DB raw source set"
             )
         db.verify()
         return Adopted(
-            self.snapshot.current, input_record(build, (), date_uses=expected)
+            self.snapshot.current, input_record(build, instant, date_uses=dated)
         )
 
 
