@@ -12,11 +12,7 @@ pub(super) fn lower(
     keywords: &[String],
 ) -> Result<Vec<Located<Ability>>, LoweringError> {
     // Validate the whole ordered list before allocating or producing any definition.
-    if keywords.is_empty()
-        || keywords
-            .iter()
-            .any(|keyword| !matches!(keyword.as_str(), "ward" | "aura"))
-    {
+    if keywords.is_empty() || keywords.iter().any(|keyword| keyword_id(keyword).is_none()) {
         return Err(unsupported(&format!("{path}/keywords")));
     }
     keywords
@@ -26,11 +22,7 @@ pub(super) fn lower(
             let mut source = source_span(key, path, entry)?;
             source.author_path = format!("{path}/keywords/{index}");
             let scope = allocator.scope(path)?;
-            let keyword = if keyword == "ward" {
-                KeywordId::Ward
-            } else {
-                KeywordId::Aura
-            };
+            let keyword = keyword_id(keyword).ok_or_else(|| unsupported(path))?;
             let node = printed_keywords::definition(
                 keyword,
                 FaceId(source.face.clone()),
@@ -42,4 +34,17 @@ pub(super) fn lower(
             Ok(Located { node, source })
         })
         .collect()
+}
+
+fn keyword_id(keyword: &str) -> Option<KeywordId> {
+    match keyword {
+        "ward" => Some(KeywordId::Ward),
+        "aura" => Some(KeywordId::Aura),
+        "storm" => Some(KeywordId::Storm),
+        "rush" => Some(KeywordId::Rush),
+        "bane" => Some(KeywordId::Bane),
+        "intimidate" => Some(KeywordId::Intimidate),
+        "assail" => Some(KeywordId::Assail),
+        _ => None,
+    }
 }

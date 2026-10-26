@@ -34,6 +34,21 @@ impl Game {
                 Some(KeywordId::Aura) => {
                     keywords.insert("aura".into());
                 }
+                Some(KeywordId::Storm) => {
+                    keywords.insert("storm".into());
+                }
+                Some(KeywordId::Rush) => {
+                    keywords.insert("rush".into());
+                }
+                Some(KeywordId::Bane) => {
+                    keywords.insert("bane".into());
+                }
+                Some(KeywordId::Intimidate) => {
+                    keywords.insert("intimidate".into());
+                }
+                Some(KeywordId::Assail) => {
+                    keywords.insert("assail".into());
+                }
                 _ => {}
             }
         }
@@ -163,7 +178,13 @@ pub(super) fn check(
         .position(|item| {
             matches!(
                 (item, keyword),
-                (PrintedKeyword::Ward, KeywordId::Ward) | (PrintedKeyword::Aura, KeywordId::Aura)
+                (PrintedKeyword::Ward, KeywordId::Ward)
+                    | (PrintedKeyword::Aura, KeywordId::Aura)
+                    | (PrintedKeyword::Storm, KeywordId::Storm)
+                    | (PrintedKeyword::Rush, KeywordId::Rush)
+                    | (PrintedKeyword::Bane, KeywordId::Bane)
+                    | (PrintedKeyword::Intimidate, KeywordId::Intimidate)
+                    | (PrintedKeyword::Assail, KeywordId::Assail)
             )
         })
         .ok_or_else(|| invalid("foreign printed keyword"))?;

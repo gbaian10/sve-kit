@@ -12,6 +12,9 @@ const NUMBER: &str = "BP01-138";
 #[path = "runtime/unloaded.rs"]
 mod unloaded;
 
+#[path = "runtime/combat.rs"]
+mod combat;
+
 fn opponent(seat: &str) -> &str {
     if seat == "P1" { "P2" } else { "P1" }
 }
@@ -237,26 +240,16 @@ fn selected_game(
 
 fn synthetic_reverse() -> (Value, String) {
     // BP01-138 itself is not a double-faced card.
-    use sha2::{Digest as _, Sha256};
-    const HEX: &[u8] = b"0123456789abcdef";
-    let digest = |text: &str| {
-        Sha256::digest(text.as_bytes())
-            .iter()
-            .flat_map(|byte| {
-                [
-                    char::from(HEX[usize::from(byte >> 4_u8)]),
-                    char::from(HEX[usize::from(byte & 15)]),
-                ]
-            })
-            .collect::<String>()
-    };
-    let mut selection = current_inputs()["keywords"].clone();
+    synthetic_reverse_for(NUMBER, current_inputs()["keywords"].clone())
+}
+
+fn synthetic_reverse_for(number: &str, mut selection: Value) -> (Value, String) {
     let input = &mut selection["authors"][0]["input"];
     let mut back = input["source_payload"]["faces"][0].clone();
     back["face_id"] = json!(format!("f:{}", "e".repeat(32)));
     back["revision_id"] = json!("synthetic-keyword-free-back");
-    back["texts"][0]["source_hash"] = json!(digest("Synthetic keyword-free reverse"));
-    back["texts"][1]["source_hash"] = json!(digest(""));
+    back["texts"][0]["source_hash"] = json!(text_hash("Synthetic keyword-free reverse"));
+    back["texts"][1]["source_hash"] = json!(text_hash(""));
     input["source_payload"]["faces"]
         .as_array_mut()
         .unwrap()
@@ -267,7 +260,7 @@ fn synthetic_reverse() -> (Value, String) {
         .collect::<Vec<_>>();
     let record = records
         .iter_mut()
-        .find(|record| record["number"] == NUMBER)
+        .find(|record| record["number"] == number)
         .unwrap();
     let mut reverse = record["faces"][0].clone();
     reverse["name"] = json!("Synthetic keyword-free reverse");
@@ -279,6 +272,20 @@ fn synthetic_reverse() -> (Value, String) {
         .collect::<Vec<_>>()
         .join("\n");
     (selection, snapshot)
+}
+
+fn text_hash(text: &str) -> String {
+    use sha2::{Digest as _, Sha256};
+    const HEX: &[u8] = b"0123456789abcdef";
+    Sha256::digest(text.as_bytes())
+        .iter()
+        .flat_map(|byte| {
+            [
+                char::from(HEX[usize::from(byte >> 4_u8)]),
+                char::from(HEX[usize::from(byte & 15)]),
+            ]
+        })
+        .collect()
 }
 
 #[test]

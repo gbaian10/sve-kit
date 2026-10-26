@@ -264,7 +264,7 @@ fn current_internal_keyword_wire_is_closed_and_required() {
         ("/source_inventory/non_body/0/kind", json!("unknown")),
         (
             "/source_inventory/non_body/0/declaration/keywords",
-            json!(["storm"]),
+            json!(["drain"]),
         ),
         (
             "/source_inventory/non_body/0/declaration/keywords",
@@ -592,8 +592,12 @@ fn raw_keyword_coordinates(card: &CardProgram) -> CardProgram {
 }
 
 fn raw_keyword_game() -> Game {
+    raw_keyword_game_for("BP01-138")
+}
+
+fn raw_keyword_game_for(number: &str) -> Game {
     let document = json!({"format":1_u8,"kind":"effect_set","cards":{
-        "BP01-138":{"status":"complete","abilities":[]}
+        number:{"status":"complete","abilities":[]}
     }})
     .to_string();
     let catalog = Catalog::from_documents(
