@@ -332,6 +332,10 @@ def test_inspect_lists_pending_faces_and_exact_body_definitions(
     draw = authoring.inspect(workspace, "BP10-122")
     assert draw["bodies"]
     assert draw["existing"]
+    assert draw["handwritten"]
+    assert draw["stored_anchors"]
+    assert draw["body_definitions"]
+    assert draw["anchor_diagnostic"] is None
     candidate = object_value(array(draw["candidates"])[0])
     assert candidate["slots"]
     assert candidate["supported"] is True
@@ -709,4 +713,25 @@ def test_strict_handwritten_yaml_rejects_without_writes(
         authoring.write(
             workspace, main=path, bodies=None, output_root=output_root, all_cards=True
         )
+    assert fingerprint(output_root) == before
+
+
+def test_inspect_retains_stored_anchor_and_reports_the_current_difference(
+    workspace: authoring.Workspace, output_root: Path
+) -> None:
+    path = output_root / "rules/effect-anchors/BP10.yaml"
+    anchor = tree(path)
+    card = object_value(object_value(anchor["cards"])["BP10-122"])
+    current_basis = card["basis"]
+    card["basis"] = "effect-anchor-v1:sha256:" + "0" * 64
+    path.write_bytes(authoring.format_yaml(anchor))
+    before = fingerprint(output_root)
+    report = authoring.inspect(replace(workspace, authored=output_root), "BP10-122")
+    stored = object_value(array(report["stored_anchors"])[0])
+    assert object_value(stored["card"])["basis"] == card["basis"]
+    failure = object_value(report["anchor_diagnostic"])
+    assert failure["stage"] == "anchor"
+    assert failure["expected"] == card["basis"]
+    assert failure["actual"] == current_basis
+    assert failure["card_line"] == 1
     assert fingerprint(output_root) == before

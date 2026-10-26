@@ -42,6 +42,8 @@ def format_yaml(tree: JsonValue) -> bytes:
     formatter = YAML(typ="safe")
     formatter.default_flow_style = False
     formatter.allow_unicode = True
+    # Keep fingerprints on one line; wrapping can leave trailing spaces.
+    formatter.width = MAX_BYTES
     stream = StringIO()
     formatter.dump(tree, stream)
     return stream.getvalue().encode("utf-8")

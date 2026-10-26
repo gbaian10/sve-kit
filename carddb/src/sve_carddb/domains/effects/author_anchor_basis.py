@@ -114,7 +114,13 @@ def compare_card(
                     card_line=b["line"] if type(b["line"]) is int else None,
                 )
     if old != new:
-        return Diagnostic("anchor", "stale_anchor", card_no=number)
+        return Diagnostic(
+            "anchor",
+            "stale_anchor",
+            card_no=number,
+            expected=string(old["basis"]),
+            actual=string(new["basis"]),
+        )
     return None
 
 
