@@ -318,3 +318,24 @@ mod evolution;
 
 #[path = "current_repository/advance.rs"]
 mod advance;
+
+#[test]
+fn repository_selection_rejects_stale_anchors_without_prototype_fallback() {
+    let (snapshot, keywords, mut input) = inputs();
+    let author = input["authors"]
+        .as_array_mut()
+        .unwrap()
+        .iter_mut()
+        .find(|author| author["input"]["card_no"] == "BP10-122")
+        .unwrap();
+    *author = json!({
+        "status": "rejected",
+        "card_no": "BP10-122",
+        "reason": "stale_anchor"
+    });
+    let failure = Catalog::from_current_selection(&snapshot, &keywords, &input)
+        .err()
+        .unwrap();
+    assert!(matches!(&failure, EngineFailure::Unsupported(reason)
+        if reason == "current card rejected: BP10-122: stale_anchor"));
+}
