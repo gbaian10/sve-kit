@@ -1,0 +1,104 @@
+format: 3
+kind: translation_shard
+records:
+  - origin: machine
+    kind: template_translation
+    data:
+      template_id: frame:35673680bee8dec4b1e221832bf5aa2c87464c47697e488612400357e434be18
+      lang: zh-Hant
+      target:
+        format: 1
+        nodes:
+          - kind: Literal
+            text: 【攻擊時】給予敵方的全部主戰者與敵方戰場上的全部從者
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: 點傷害。
+      expression_targets: {}
+    note: 依完整凍結日文與既有句型起草；保留原 semantic_variant/pending 與來源 scope，不宣稱完成規則實作。
+  - origin: machine
+    kind: template_translation
+    data:
+      template_id: frame:7a6df56d60b6adc3605c99cea607180ebcd15c780a7f7b94e42fde9d6eb08b03
+      lang: zh-Hant
+      target:
+        format: 1
+        nodes:
+          - kind: Literal
+            text: 只要這張卡片處於橫置狀態，這張卡片就不會受到能力傷害。這張卡片無法被能力破壞。
+      expression_targets: {}
+    note: 依完整凍結日文與既有句型起草；保留原 semantic_variant/pending 與來源 scope，不宣稱完成規則實作。
+  - origin: machine
+    kind: template_translation
+    data:
+      template_id: frame:84532bf517b293a44ced7d35bb538542b72e251a26b1b3ee1aa8c2131c597ff0
+      lang: zh-Hant
+      target:
+        format: 1
+        nodes:
+          - kind: Literal
+            text: "{"
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: "}給予敵方的全部主戰者與敵方戰場上的全部從者"
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: 點傷害。【
+          - kind: LeafRef
+            slot: leaf_2
+          - kind: Literal
+            text: " "
+          - kind: LeafRef
+            slot: leaf_3
+          - kind: Literal
+            text: 】這張卡片具有【
+          - kind: LeafRef
+            slot: leaf_4
+          - kind: Literal
+            text: 】。
+      expression_targets: {}
+    note: 依完整凍結日文與既有句型起草；保留原 semantic_variant/pending 與來源 scope，不宣稱完成規則實作。
+  - origin: machine
+    kind: template_translation
+    data:
+      template_id: frame:be75c82cafe38c0054dbc423e51853eda51ac5d0f87987b4859413668f566c37
+      lang: zh-Hant
+      target:
+        format: 1
+        nodes:
+          - kind: Literal
+            text: 【進化時】選擇
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: 上的
+          - kind: Form
+            form_id: quantity.selection_count.value
+            args:
+              quantity:
+                slot: leaf_3
+          - kind: Literal
+            text: 個
+          - kind: LeafRef
+            slot: leaf_2
+          - kind: Literal
+            text: 。給予其
+          - kind: LeafRef
+            slot: leaf_4
+          - kind: Literal
+            text: 點傷害。自己的主戰者{
+          - kind: LeafRef
+            slot: leaf_5
+          - kind: Literal
+            text: "}+"
+          - kind: LeafRef
+            slot: leaf_6
+          - kind: Literal
+            text: 。
+      expression_targets: {}
+    note: 依完整凍結日文與既有句型起草；保留原 semantic_variant/pending 與來源 scope，不宣稱完成規則實作。
