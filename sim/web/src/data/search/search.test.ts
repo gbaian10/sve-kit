@@ -3194,23 +3194,40 @@ it("loads keyword projections through the Worker and preserves them in a restore
   }
 })
 
-it("keeps a keyword query pending until its projection and coverage closure completes", async () => {
-  const engineFile = (built.manifest["files"] as JsonObject[]).find((file) =>
-    arrayValue(file["row_counts"]).some((count) => arrayValue(count)[0] === "mechanic_projection"),
-  )
-  if (!engineFile) throw new Error("missing mechanic fixture")
-  const h = harness()
-  const release = h.served.hold(stringValue(engineFile["path"]))
-  h.session.load(base, "jp", "preview")
-  await expect.poll(() => h.status().phase, POLL).toBe("ready")
-  h.channel.search({ ...query, state: { ...DEFAULT_QUERY, mechanics: { "kw:ward": "has" } } })
-  await h.queried()
-  expect(h.status().result.phase).toBe("pending")
-  release()
-  await h.settled()
-  expect(h.status().result).toMatchObject({ phase: "complete", page: { total: 3 } })
-  h.session.dispose()
-})
+it.each(["keyword", "ability"] as const)(
+  "keeps a %s query pending until its independent closure completes",
+  async (kind) => {
+    const engineFile = (built.manifest["files"] as JsonObject[]).find((file) =>
+      arrayValue(file["row_counts"]).some(
+        (count) => arrayValue(count)[0] === "mechanic_projection",
+      ),
+    )
+    if (!engineFile) throw new Error("missing mechanic fixture")
+    const h = harness()
+    const release = h.served.hold(stringValue(engineFile["path"]))
+    h.session.load(base, "jp", "preview")
+    await expect.poll(() => h.status().phase, POLL).toBe("ready")
+    h.channel.search({
+      ...query,
+      state: {
+        ...DEFAULT_QUERY,
+        ...(kind === "keyword"
+          ? { mechanics: { "kw:ward": "has" as const } }
+          : { abilityTypes: ["fanfare" as const] }),
+      },
+    })
+    await h.queried()
+    expect(h.status().result.phase).toBe("pending")
+    release()
+    await h.settled()
+    const result = h.status().result
+    expect(result.phase).toBe("complete")
+    if (result.phase !== "complete") throw new Error("header closure did not finish")
+    if (kind === "keyword") expect(result.page.total).toBe(3)
+    else expect(result.page.items.some((item) => item.summary?.cardId === "c:bp01-021")).toBe(true)
+    h.session.dispose()
+  },
+)
 
 it("finishes printing facets and merged units while mechanic payloads are pending", async () => {
   const engineFile = (built.manifest["files"] as JsonObject[]).find((file) =>

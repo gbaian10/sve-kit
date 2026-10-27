@@ -83,7 +83,10 @@ interface QueryState {
   types: TypeCode[]; // 印刷類型（從者／法術／護符）
   locations: string[]; // 牌組位置：main、evolve、advance、leader、leader:<框>、token、token:<類型>、ep、sep
   traits: TraitCode[]; // 特性 vocabulary code，選到任一即符合
-  mechanics: Record<KeywordId, "has" | "not">; // 沒列＝不管；has 取聯集，not 要全部 absent
+  mechanicsMatch: "any" | "all"; // 預設 any
+  abilityTypes: AbilityType[]; // 九種原生能力種類；不含一般進化費用
+  abilityTypesMatch: "any" | "all"; // 預設 any
+  mechanics: Record<KeywordId, "has" | "not">; // 沒列＝不管；has 依 mechanicsMatch，not 要全部 absent
   sets: SetCode[];
   rarities: RarityCode[];
   altArtOnly: boolean;
@@ -95,7 +98,7 @@ interface QueryState {
 }
 ```
 
-`domain/query/codec.ts` 在 `QueryState` 與 URL 參數（`q class cost atk def type loc trait mech set rarity alt reprint unit rep prfirst sort order view`）之間互轉：
+`domain/query/codec.ts` 在 `QueryState` 與 URL 參數（`q class cost atk def type loc trait mech mechmatch ability abilitymatch set rarity alt reprint unit rep prfirst sort order view`）之間互轉：
 牌組位置原本放在 `type`，`type` 裡出現的位置 token（`token`、`token:spell`、`leader:gold`、`ep`、`sep`）仍會讀成 `loc`，寫回時只寫 `loc`；
 `set` 值用歸檔類別的 `product_family.code`（`SetCode`）；vocabulary 篩選值用其英文 code；`cost`、`atk`、`def` 是逗號分隔的數值清單，
 同一統計值內取聯集、不同統計值之間取交集。順序固定，篩選、排序、單位的預設值不寫進 URL，所以同一狀態只有一種網址。
@@ -211,7 +214,7 @@ interface QueryState {
 2. 沒有這張卡該 scope 的 `card_mechanic_coverage` 列 → `unknown`（尚未檢查）。
 3. 有列：先在 keyword universe U 依 `complete_mode` 解出 complete（include＝列表本身；exclude＝U 減列表；`complete_all=true` 時 complete＝U），
    再在 U∖complete 依 `partial_mode` 解出 partial。
-4. keyword ∈ complete → `absent`；∈ partial → `unknown`；其餘 → `unknown`。
+4. keyword ∈ has_complete_keyword_ids 或 complete → `absent`；∈ partial → `unknown`；其餘 → `unknown`。
 5. 卡面地區是 EN 且 `card_engine_support.region_blocks` 有 EN block 時，shared scope 的結果降為 `unknown`。
 
 另一個 keyword 是 present 不能推本項 absent。
@@ -323,3 +326,13 @@ interface QueryState {
 新圖未完成／失敗用 placeholder；離線舊 active 明示時效，不宣稱圖片最新。
 只在 current／previous 或本機已驗完整 active 選相容者，無相容者更新 reader；落後多版、舊片回收則重取 current。
 本機 pin 不延長伺服器保留。query 分離已實測，瀏覽器／SW 的暖快取與故障整合仍須實作驗收。
+
+### 能力種類與符合條件
+
+查卡面板在關鍵字下方另列「能力種類」，以三語介面名稱標示九種能力頭。
+同一群組可選 any（符合任一）或 all（全部符合）；關鍵字與能力種類兩組之間仍取交集。
+URL `mechmatch`／`abilitymatch` 為 all 時明示寫入，預設 any 不寫；`ability` 是排序去重的 code 清單。
+條件 chip 可逐項移除，清除全部會回到預設查詢。
+
+SearchIndex 在能力種類或關鍵字條件存在時，都先等同一 engine payload 閉包完成，
+再用各地區自己的標籤回完整結果；未知不能當成已確認的否定。衍生索引及 view 快取格式隨查詢與欄位變更更新。

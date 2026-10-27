@@ -1,3 +1,4 @@
+import { isAbilityType } from "../abilityTypes"
 import { isLocationToken } from "../deckLocation"
 import { compareCodePoints } from "../normalize"
 import { REPRESENTATIVE_RARITIES } from "../representative"
@@ -25,6 +26,7 @@ const LIST_PARAMS = {
   locations: "loc",
   traits: "trait",
   artists: "artist",
+  abilityTypes: "ability",
   sets: "set",
   rarities: "rarity",
 } as const
@@ -87,6 +89,9 @@ export function parseQuery(params: URLSearchParams): QueryState {
     traits: list(params, LIST_PARAMS.traits),
     artists: list(params, LIST_PARAMS.artists),
     mechanics: parseMechanics(params.get("mech")),
+    mechanicsMatch: params.get("mechmatch") === "all" ? "all" : "any",
+    abilityTypes: list(params, LIST_PARAMS.abilityTypes).filter(isAbilityType),
+    abilityTypesMatch: params.get("abilitymatch") === "all" ? "all" : "any",
     sets: list(params, LIST_PARAMS.sets),
     rarities: list(params, LIST_PARAMS.rarities),
     altArtOnly: params.get("alt") === "1",
@@ -127,6 +132,8 @@ export function formatQuery(state: QueryState): URLSearchParams {
     .sort(([a], [b]) => compareCodePoints(a, b))
     .map(([id, state]) => (state === "not" ? `-${id}` : id))
   if (mechanics.length > 0) params.set("mech", mechanics.join(","))
+  if (state.mechanicsMatch === "all") params.set("mechmatch", "all")
+  if (state.abilityTypesMatch === "all") params.set("abilitymatch", "all")
   if (state.altArtOnly) params.set("alt", "1")
   if (state.unit !== DEFAULT_QUERY.unit) params.set("unit", state.unit)
   if (state.representative !== DEFAULT_QUERY.representative) params.set("rep", state.representative)

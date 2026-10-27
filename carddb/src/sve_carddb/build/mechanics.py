@@ -187,6 +187,10 @@ TABLES = (
                 nullable=True,
                 json_schema="MechanicIDs",
             ),
+            Column(
+                "ability_types", Kind.JSON, nullable=True, json_schema="AbilityTypes"
+            ),
+            Column("ability_types_complete", Kind.BOOL, nullable=True),
         ),
         ("card_id", "scope"),
         foreign_keys=(_fk("card_id", "card"),),
@@ -237,6 +241,20 @@ def schemas() -> dict[str, dict[str, JsonValue]]:
                 "whole_field": {"type": "boolean"},
             },
         },
+    }
+    items["AbilityTypes"] = {
+        "type": "string",
+        "enum": [
+            "quick",
+            "fanfare",
+            "last_words",
+            "on_evolve",
+            "on_attack",
+            "advanced_act",
+            "on_super_evolve",
+            "act",
+            "fusion",
+        ],
     }
     return {
         name: {"type": "array", "items": item, "uniqueItems": True}

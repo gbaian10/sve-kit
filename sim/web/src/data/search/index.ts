@@ -58,6 +58,8 @@ export interface SearchOptions {
   readonly restrictions?: RestrictionStatus
   readonly restrictionDetails?: Readonly<Record<string, readonly CardRestriction[]>>
   readonly keywords: readonly SearchOption[]
+  readonly abilityCoverage?: "pending" | "unknown" | "partial" | "complete" | undefined
+  readonly abilityUnknownCards?: number | undefined
   readonly keywordUnknownCards?: number | undefined
   readonly keywordCoverage: "pending" | "unknown" | "partial" | "complete"
   readonly types: readonly SearchOption[]
@@ -117,7 +119,8 @@ export interface SearchPage {
     readonly summary: CardSummary | undefined
   }[]
 }
-type UnsupportedFacet = "types" | "rarities" | "altArtOnly" | "mechanics" | "unit" | "sort"
+type UnsupportedFacet =
+  "types" | "rarities" | "altArtOnly" | "mechanics" | "abilityTypes" | "unit" | "sort"
 export interface QueryFailure {
   readonly kind: "unsupported-query" | "edition-not-ready" | "query-failed" | "load-unavailable"
   readonly message: string
@@ -143,6 +146,7 @@ const CARD_COLUMNS = [
   "kinds",
   "present",
   "absent",
+  "abilities",
   "errata",
   "restricted",
 ] as const
@@ -507,7 +511,17 @@ function mechanicMembership(bootstrap: BootstrapColumns, edition: Region) {
         !blocked ||
         projected.some((row) => row.scope === "en_override") ||
         covered.some((row) => row.scope === "en_override"))
-    return { present, absent, annotated, unknown: present.length + absent.length < keywords.length }
+    const own = (coverage.get(cardId) ?? []).find(
+      (row) => row["scope"] === (edition === "jp" ? "shared" : "en_override"),
+    )
+    return {
+      present,
+      absent,
+      annotated,
+      unknown: present.length + absent.length < keywords.length,
+      abilities: strings(own?.["ability_types"]),
+      abilitiesComplete: own?.["ability_types_complete"] === true,
+    }
   }
 }
 
@@ -579,6 +593,7 @@ function build(
   )) {
     cards.present.push(pool.encode([]))
     cards.absent.push(pool.encode([]))
+    cards.abilities.push(pool.encode([]))
     const card = cards.id.length
     cards.id.push(intern(entry.cardId))
     cards.errata.push(Number(errataCards.has(entry.cardId)))
@@ -1061,6 +1076,8 @@ export class SearchIndex {
         ...artistOptions(artistCounts, artistNames),
         keywordCoverage: this.optionsValue.keywordCoverage,
         keywordUnknownCards: this.optionsValue.keywordUnknownCards,
+        abilityCoverage: this.optionsValue.abilityCoverage,
+        abilityUnknownCards: this.optionsValue.abilityUnknownCards,
         ...(this.optionsValue.restrictions
           ? {
               restrictions: this.optionsValue.restrictions,
@@ -1082,17 +1099,24 @@ export class SearchIndex {
       const membership = mechanicMembership(bootstrap, this.edition)
       let known = false
       let unknown = 0
+      let abilityUnknown = 0
+      let abilityKnown = false
       for (let card = 0; card < this.cards.id.length; card++) {
         const states = membership(this.pool.get(this.cards.id[card] ?? 0))
         this.cards.present[card] = this.pool.encode(states.present)
         this.cards.absent[card] = this.pool.encode(states.absent)
         known ||= states.annotated
         unknown += Number(states.unknown)
+        this.cards.abilities[card] = this.pool.encode(states.abilities)
+        abilityUnknown += Number(!states.abilitiesComplete)
+        abilityKnown ||= states.abilitiesComplete || states.abilities.length > 0
       }
       this.optionsValue = {
         ...this.optionsValue,
         keywordCoverage: known ? (unknown ? "partial" : "complete") : "unknown",
         keywordUnknownCards: unknown,
+        abilityUnknownCards: abilityUnknown,
+        abilityCoverage: abilityKnown ? (abilityUnknown ? "partial" : "complete") : "unknown",
       }
     } finally {
       this.pool.seal()
@@ -1155,6 +1179,14 @@ export class SearchIndex {
         ))
     )
       facets.push("mechanics")
+
+    if (
+      state.abilityTypes.length > 0 &&
+      (!this.options.abilityCoverage ||
+        this.options.abilityCoverage === "pending" ||
+        this.options.abilityCoverage === "unknown")
+    )
+      facets.push("abilityTypes")
 
     if (facets.length)
       throw new SearchQueryError({
@@ -1224,11 +1256,20 @@ export class SearchIndex {
     for (let card = 0; card < this.cards.id.length; card += 1) {
       if (state.errataOnly && this.cards.errata[card] !== 1) continue
       if (state.restrictionsOnly && this.cards.restricted[card] !== 1) continue
+      const heldKeywords = arrayValue(this.pool.decode(this.cards.present[card] ?? 0))
       if (
         positive.length &&
-        !arrayValue(this.pool.decode(this.cards.present[card] ?? 0)).some((id) =>
-          positive.includes(stringValue(id)),
-        )
+        !(state.mechanicsMatch === "all"
+          ? positive.every((id) => heldKeywords.includes(id))
+          : positive.some((id) => heldKeywords.includes(id)))
+      )
+        continue
+      const heldAbilities = arrayValue(this.pool.decode(this.cards.abilities[card] ?? 0))
+      if (
+        state.abilityTypes.length &&
+        !(state.abilityTypesMatch === "all"
+          ? state.abilityTypes.every((id) => heldAbilities.includes(id))
+          : state.abilityTypes.some((id) => heldAbilities.includes(id)))
       )
         continue
       if (

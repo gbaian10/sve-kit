@@ -367,3 +367,87 @@ it("completes English self coverage independently of shared engine eligibility a
     expect(find("not")).toContain("c:bp01-051")
   }
 })
+
+it("filters region-owned ability headers with any/all and preserves both matching modes in cached indexes", () => {
+  const { basic, printing } = stages("en")
+  const fragments = [...basic, ...printing]
+  const source = columns(fragments)
+  const coverage = fragments.find((fragment) => fragment.table === "card_mechanic_coverage")
+  const projection = fragments.find((fragment) => fragment.table === "mechanic_projection")
+  if (!coverage || !projection) throw new Error("synthetic mechanics missing")
+  source.ingest([
+    {
+      ...coverage,
+      rows: source.rows("card").map((row) => ({
+        card_id: row["id"] ?? null,
+        scope: "en_override",
+        complete_all: false,
+        complete_mode: "include",
+        complete_keyword_ids: [],
+        partial_mode: "include",
+        partial_keyword_ids: [],
+        has_complete_keyword_ids: [],
+        ability_types:
+          row["id"] === "c:bp01-031"
+            ? ["act", "fanfare"]
+            : row["id"] === "c:bp01-051"
+              ? ["fanfare"]
+              : [],
+        ability_types_complete: row["id"] !== "c:bp01-051",
+      })),
+    },
+    {
+      ...projection,
+      rows: [
+        {
+          card_id: "c:bp01-031",
+          keyword_id: "kw:ward",
+          scope: "en_override",
+          relations: ["has"],
+          actions: [],
+        },
+        {
+          card_id: "c:bp01-031",
+          keyword_id: "kw:evolve",
+          scope: "en_override",
+          relations: ["has"],
+          actions: [],
+        },
+        {
+          card_id: "c:bp01-051",
+          keyword_id: "kw:ward",
+          scope: "en_override",
+          relations: ["has"],
+          actions: [],
+        },
+      ],
+    },
+  ])
+  source.seal()
+  const created = new SearchIndex(source, "en")
+  created.completeMechanics(source)
+  for (const index of [created, new SearchIndex(created.encode(), "en")]) {
+    expect(index.options.abilityCoverage).toBe("partial")
+    expect(index.options.abilityUnknownCards).toBe(1)
+    const find = (changes: Partial<typeof DEFAULT_QUERY>) =>
+      index
+        .search({
+          edition: "en",
+          state: { ...DEFAULT_QUERY, unit: "card", ...changes },
+          limit: 100,
+        })
+        .items.map((item) => item.key)
+    expect(find({ abilityTypes: ["act", "fanfare"] })).toEqual(["c:bp01-031", "c:bp01-051"])
+    expect(find({ abilityTypes: ["act", "fanfare"], abilityTypesMatch: "all" })).toEqual([
+      "c:bp01-031",
+    ])
+    expect(find({ mechanics: { "kw:ward": "has", "kw:evolve": "has" } })).toEqual([
+      "c:bp01-031",
+      "c:bp01-051",
+    ])
+    expect(
+      find({ mechanics: { "kw:ward": "has", "kw:evolve": "has" }, mechanicsMatch: "all" }),
+    ).toEqual(["c:bp01-031"])
+    expect(find({ abilityTypes: ["quick"] })).toEqual([])
+  }
+})

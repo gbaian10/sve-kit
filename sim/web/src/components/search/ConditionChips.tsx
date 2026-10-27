@@ -169,6 +169,11 @@ export function ConditionChips({
         ),
       },
     })),
+    ...query.abilityTypes.map((code) => ({
+      key: `ability:${code}`,
+      label: t("filters.abilityTypeHas", { label: t(`filters.abilityTypeNames.${code}`) }),
+      without: { ...query, abilityTypes: query.abilityTypes.filter((other) => other !== code) },
+    })),
     ...query.sets
       .filter((code) => code !== impliedSet)
       .map((code) => ({

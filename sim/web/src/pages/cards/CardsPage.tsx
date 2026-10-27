@@ -52,6 +52,7 @@ import { ListColumnPicker } from "../../components/results/ListColumnPicker"
 import { PaginationTail } from "../../components/results/PaginationTail"
 import type { OpenOutcome } from "../../components/results/plain-click"
 import { SkeletonGrid } from "../../components/results/SkeletonGrid"
+import { AbilityTypeFilter } from "../../components/search/AbilityTypeFilter"
 import { ArtistFilter } from "../../components/search/ArtistFilter"
 import {
   ClassQuickBar,
@@ -839,12 +840,29 @@ export function CardsPage() {
             }}
           />
         ),
+        abilityTypes: (
+          <AbilityTypeFilter
+            options={printingOptions?.abilityTypes}
+            selected={query.abilityTypes}
+            matchMode={query.abilityTypesMatch}
+            onChange={(abilityTypes) => {
+              commit({ ...query, abilityTypes })
+            }}
+            onMatchChange={(abilityTypesMatch) => {
+              commit({ ...query, abilityTypesMatch })
+            }}
+          />
+        ),
         keywords: (
           <KeywordFilter
             options={printingOptions?.keyword}
             textLang={textLang}
             edition={edition}
             selected={query.mechanics}
+            matchMode={query.mechanicsMatch}
+            onMatchChange={(mechanicsMatch) => {
+              commit({ ...query, mechanicsMatch })
+            }}
             onChange={(mechanics) => {
               commit({ ...query, mechanics })
             }}

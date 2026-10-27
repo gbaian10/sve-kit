@@ -8,6 +8,7 @@ from pydantic import JsonValue
 
 from sve_carddb.build import Json
 from sve_carddb.core.json import array
+from sve_carddb.core.wording import quote_after
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -66,11 +67,7 @@ def classify(
     for raw in text.splitlines():
         line = raw.strip()
         in_quote = quoted or any(mark in line for mark in ("「", "」", '"', "“", "”"))
-        quoted ^= bool(line.count('"') % 2)
-        opened = max(line.rfind("「"), line.rfind("“"))
-        closed = max(line.rfind("」"), line.rfind("”"))
-        if opened != closed:
-            quoted = opened > closed
+        quoted = quote_after(quoted, line)
         declaration = (
             _JP_DECLARATION.fullmatch(line)
             if region == "jp"
@@ -101,13 +98,14 @@ def classify(
 
 
 @dataclass
-class _Fields:
+class CurrentFields:
     main: list[str]
     sections: list[str]
     missing: bool = False
 
 
-def _fields(db: Database) -> dict[tuple[str, str], _Fields]:
+def current_fields(db: Database) -> dict[tuple[str, str], CurrentFields]:
+    """Keep each region and missing face explicit when inspecting native card wording."""
     units = {
         str(row.values["id"]): str(row.values["text"]) for row in db.rows("text_unit")
     }
@@ -135,9 +133,9 @@ def _fields(db: Database) -> dict[tuple[str, str], _Fields]:
         sections.setdefault(str(row.values["revision_id"]), []).append(
             units[str(row.values["text_unit_id"])]
         )
-    result: dict[tuple[str, str], _Fields] = {}
+    result: dict[tuple[str, str], CurrentFields] = {}
     for cid, region in sorted(regions):
-        fields = _Fields([], [], states[cid] != "confirmed" or not faces.get(cid))
+        fields = CurrentFields([], [], states[cid] != "confirmed" or not faces.get(cid))
         for face in faces.get(cid, []):
             revision_id = current.get((face, region))
             if revision_id is None:
@@ -215,10 +213,14 @@ def _project(
     return positive | present
 
 
-def apply(db: Database, inputs: Inputs, settings: Settings) -> dict[str, JsonValue]:
+def apply(
+    db: Database,
+    inputs: Inputs,
+    settings: Settings,
+    fields: Mapping[tuple[str, str], CurrentFields],
+) -> dict[str, JsonValue]:
     """Inspect every regional current face; missing faces and ambiguous uses stay unknown."""
     universe = {record.id for record in inputs.registry.records}
-    fields = _fields(db)
     counts: dict[str, JsonValue] = {}
     for region in ("jp", "en"):
         spellings = {

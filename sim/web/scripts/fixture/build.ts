@@ -11,6 +11,7 @@ import {
 } from "../../src/data/format-v3/json"
 import { columns, definition, primaryKey, rowType } from "../../src/data/format-v3/schema"
 import { bucket, digest } from "../../src/data/format-v3/sha256"
+import { ABILITY_TYPES } from "../../src/domain/abilityTypes"
 
 function tables(): string[] {
   return arrayValue(definition("Container")["x-tables"] ?? null).map((item) => stringValue(item))
@@ -1055,6 +1056,14 @@ async function addCard(ctx: CardContext): Promise<void> {
       partial_mode: "include",
       partial_keyword_ids: [],
       has_complete_keyword_ids: [],
+      ability_types: (card.keywords ?? [])
+        .filter(
+          (keyword) =>
+            keyword.relation === "has" && ABILITY_TYPES.some((code) => code === keyword.code),
+        )
+        .map((keyword) => keyword.code)
+        .sort(compareCodePoints),
+      ability_types_complete: complete,
     })
   }
   for (const related of card.related ?? []) {
