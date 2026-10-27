@@ -134,6 +134,9 @@ export function ConditionChips({
       ...rarityChip(token),
       without: { ...query, rarities: without(query.rarities, token) },
     })),
+    ...(query.stampOnly
+      ? [{ key: "stamp", label: t("filters.stampOnly"), without: { ...query, stampOnly: false } }]
+      : []),
     ...orderTypeTokens(query.types).map((code) => ({
       key: `type:${code}`,
       label: typeLabel(code),
@@ -179,6 +182,15 @@ export function ConditionChips({
             key: "restricted",
             label: t("filters.restrictionsOnly"),
             without: { ...query, restrictionsOnly: false },
+          },
+        ]
+      : []),
+    ...(query.serialOnly
+      ? [
+          {
+            key: "serial",
+            label: t("filters.serialOnly"),
+            without: { ...query, serialOnly: false },
           },
         ]
       : []),

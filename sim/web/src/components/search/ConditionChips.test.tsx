@@ -114,3 +114,14 @@ describe("condition chips for grouped values", () => {
     expect(url()).toBe("trait=pixie&artist=y:b")
   })
 })
+
+it("removes each printing mark independently and clears both with all conditions", async () => {
+  await renderInRouter(<Harness initial="stamp=1&serial=1&errata=1" />)
+  expect(chips()).toEqual(["標誌卡", "編號卡", "只顯示勘誤卡"])
+  await userEvent.click(screen.getByRole("button", { name: "移除條件：標誌卡" }))
+  expect(url()).toBe("serial=1&errata=1")
+  await userEvent.click(screen.getByRole("button", { name: "移除條件：編號卡" }))
+  expect(url()).toBe("errata=1")
+  await userEvent.click(screen.getByRole("button", { name: "清除" }))
+  expect(url()).toBe("")
+})

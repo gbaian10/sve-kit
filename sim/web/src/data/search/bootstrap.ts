@@ -50,6 +50,8 @@ const FIELDS: Readonly<Record<string, readonly string[]>> = {
     "rarity_badge",
     "leader_name_frame",
     "reprint",
+    "stamp",
+    "serial",
     "faces",
     "variant_key",
   ],

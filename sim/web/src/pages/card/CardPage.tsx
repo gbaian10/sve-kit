@@ -20,6 +20,7 @@ import { CardNameHeading, PlainNameHeading } from "../../components/card/CardNam
 import { CardTypeBadge } from "../../components/card/CardTypeBadge"
 import { CLASS_ICON } from "../../components/card/classIcons"
 import { DeckLocationBadges } from "../../components/card/DeckLocationBadges"
+import { PrintingMarks } from "../../components/card/PrintingMarks"
 import { RarityBadges } from "../../components/card/RarityBadges"
 import { StatCells } from "../../components/card/StatCells"
 import { type VocabularyKind, vocabularyLabel } from "../../components/card/vocabulary"
@@ -943,6 +944,13 @@ export function CardView({
                             </span>
                           ))}
                         </p>
+                      )}
+                      {ordinal === 0 && (
+                        <PrintingMarks
+                          printing={(completePrintings?.value ?? catalog)?.index.printing(
+                            printingId ?? "",
+                          )}
+                        />
                       )}
                       <StatCells className="mt-1" cost={cost} attack={attack} defense={defense} />
                       {!frame && ordinal === 0 && navigation && (

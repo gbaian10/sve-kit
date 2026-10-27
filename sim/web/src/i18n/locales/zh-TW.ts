@@ -252,6 +252,9 @@ const zhTW = {
     restrictionsDate: "Standard · 以 {{date}} 官方一覽為準",
     restrictionsUnknown: "禁限資料未確認，無法篩選",
     restrictionsPartial: "只列已知限制；來源尚有缺口",
+    stampOnly: "標誌卡",
+    stampOnlyHint: "只有 PR 卡有",
+    serialOnly: "編號卡",
     errataOnly: "只顯示勘誤卡",
     errataOnlyHint: "官方發過勘誤公告的卡",
     keywords: "關鍵字",
@@ -483,6 +486,8 @@ const zhTW = {
     newTab: "（另開分頁）",
   },
   cardPage: {
+    anniversaryStamp: "週年標誌",
+    unknownStamp: "標誌種類未確認",
     switchingCard: "切換卡片中…",
     switchingEdition: "正在載入另一版本資料…",
     otherEditionFailed: "另一版本資料載入失敗。",

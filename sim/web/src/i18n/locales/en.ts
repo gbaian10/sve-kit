@@ -272,6 +272,9 @@ export default {
     restrictionsDate: "Standard · Official list as of {{date}}",
     restrictionsUnknown: "Restriction data is unconfirmed; filtering unavailable",
     restrictionsPartial: "Known restrictions only; source coverage is incomplete",
+    stampOnly: "Stamped cards",
+    stampOnlyHint: "Only PR cards have stamps.",
+    serialOnly: "Numbered cards",
     errataOnly: "Only show cards with errata",
     errataOnlyHint: "Cards with an official errata announcement",
     keywords: "Keywords",
@@ -513,6 +516,8 @@ export default {
     newTab: "(opens in a new tab)",
   },
   cardPage: {
+    anniversaryStamp: "Anniversary stamp",
+    unknownStamp: "Unconfirmed stamp kind",
     switchingCard: "Switching card…",
     switchingEdition: "Loading the other edition…",
     otherEditionFailed: "Couldn't load the other edition.",

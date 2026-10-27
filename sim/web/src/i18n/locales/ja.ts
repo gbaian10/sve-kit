@@ -264,6 +264,9 @@ export default {
     restrictionsDate: "Standard · {{date}} 時点の公式一覧",
     restrictionsUnknown: "禁止・制限データが未確認のため絞り込めません",
     restrictionsPartial: "既知の制限のみ。情報に欠落があります",
+    stampOnly: "ロゴ入りカード",
+    stampOnlyHint: "PRカードのみ",
+    serialOnly: "シリアルナンバー入りカード",
     errataOnly: "エラッタのあるカードのみ",
     errataOnlyHint: "公式のエラッタ告知があるカード",
     keywords: "キーワード",
@@ -500,6 +503,8 @@ export default {
     newTab: "（新しいタブで開く）",
   },
   cardPage: {
+    anniversaryStamp: "周年ロゴ",
+    unknownStamp: "ロゴの種類未確認",
     switchingCard: "カードを切り替え中…",
     switchingEdition: "別のバージョンを読み込み中…",
     otherEditionFailed: "別のバージョンを読み込めませんでした。",
