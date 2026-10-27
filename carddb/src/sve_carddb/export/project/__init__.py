@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from sve_carddb.contracts.snapshot import definition, tables
-from sve_carddb.core.json import array, object_value, string
+from sve_carddb.core.json import array, canonical, object_value, string
 from sve_carddb.domains.routes.defaults import select_defaults
 from sve_carddb.export.project.annotations import annotations
 from sve_carddb.export.project.closure import (
@@ -93,6 +93,14 @@ def _nested_sort(row: Record) -> None:
                     _nested_sort(item)
         elif isinstance(value, dict):
             _nested_sort(value)
+
+
+def _public_keys(view: dict[str, list[Record]]) -> None:
+    # Build IDs finish evidence joins before public relations become value sets.
+    for table in ("card_related", "digital_link"):
+        for row in view[table]:
+            del row["id"]
+        view[table] = list({canonical(row): row for row in view[table]}.values())
 
 
 def _validate(view: dict[str, list[Record]]) -> None:
@@ -197,6 +205,7 @@ def project(
     support(source, view, decisions)
     annotations(source, view, decisions)
     prune(view)
+    _public_keys(view)
     _sort(view)
     _validate(view)
     config = configuration(source, settings)

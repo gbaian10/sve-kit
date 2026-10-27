@@ -7769,14 +7769,6 @@
     },
     "card_related": {
       "fields": {
-        "id": {
-          "schema": {
-            "$ref": "#/$defs/ID"
-          },
-          "descriptor": {
-            "scalar": "ID"
-          }
-        },
         "from_card_id": {
           "schema": {
             "$ref": "#/$defs/ID"
@@ -7859,13 +7851,16 @@
       },
       "constraints": {
         "x-primary-key": [
-          "id"
+          "from_card_id",
+          "to_card_id",
+          "relation",
+          "suggested_count",
+          "applicable_regions"
         ],
         "allOf": [
           {
             "if": {
               "prefixItems": [
-                {},
                 {},
                 {},
                 {
@@ -7877,7 +7872,6 @@
             },
             "then": {
               "prefixItems": [
-                {},
                 {},
                 {},
                 {},
@@ -7896,7 +7890,6 @@
             },
             "else": {
               "prefixItems": [
-                {},
                 {},
                 {},
                 {},
@@ -8033,14 +8026,6 @@
     },
     "digital_link": {
       "fields": {
-        "id": {
-          "schema": {
-            "$ref": "#/$defs/ID"
-          },
-          "descriptor": {
-            "scalar": "ID"
-          }
-        },
         "card_id": {
           "schema": {
             "$ref": "#/$defs/ID"
@@ -8163,7 +8148,13 @@
       },
       "constraints": {
         "x-primary-key": [
-          "id"
+          "card_id",
+          "face_id",
+          "digital_card_id",
+          "digital_phase",
+          "relation",
+          "effect_similarity",
+          "review_level"
         ]
       }
     },
@@ -10509,9 +10500,6 @@
     },
     "card_related_detail": {
       "fields": {
-        "id": {
-          "from": "card_related"
-        },
         "from_card_id": {
           "from": "card_related"
         },
@@ -10535,7 +10523,6 @@
               "prefixItems": [
                 {},
                 {},
-                {},
                 {
                   "const": "same_rules_reskin"
                 },
@@ -10545,7 +10532,6 @@
             },
             "then": {
               "prefixItems": [
-                {},
                 {},
                 {},
                 {},
@@ -10564,7 +10550,6 @@
             },
             "else": {
               "prefixItems": [
-                {},
                 {},
                 {},
                 {},
@@ -10645,9 +10630,6 @@
     },
     "digital_link_detail": {
       "fields": {
-        "id": {
-          "from": "digital_link"
-        },
         "card_id": {
           "from": "digital_link"
         },

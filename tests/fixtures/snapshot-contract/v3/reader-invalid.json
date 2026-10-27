@@ -315,8 +315,8 @@
       "digital_link",
       0,
       4,
-      0,
-      2
+      1,
+      1
     ],
     "value": "f:a",
     "rehash": true,
@@ -331,7 +331,7 @@
       0,
       4,
       0,
-      4
+      3
     ],
     "value": "normal",
     "rehash": true,
@@ -346,7 +346,7 @@
       0,
       4,
       0,
-      6
+      5
     ],
     "value": "reworked",
     "rehash": true,
@@ -361,7 +361,7 @@
       0,
       4,
       0,
-      7
+      6
     ],
     "value": "confirmed",
     "rehash": true,
@@ -376,7 +376,7 @@
       0,
       4,
       0,
-      7
+      6
     ],
     "value": "sampled",
     "rehash": true,
@@ -393,7 +393,6 @@
     ],
     "value": [
       [
-        "dl:sv1",
         "c:a",
         null,
         "d:sv1",
@@ -403,7 +402,6 @@
         "unreviewed"
       ],
       [
-        "dl:sv1:duplicate",
         "c:a",
         null,
         "d:sv1",
@@ -413,7 +411,6 @@
         "unreviewed"
       ],
       [
-        "dl:svwb",
         "c:a",
         null,
         "d:svwb",
@@ -424,7 +421,7 @@
       ]
     ],
     "rehash": true,
-    "error": "Duplicate or human-shadowed same-name card pair"
+    "error": "Rows must be sorted with unique keys"
   },
   {
     "name": "same-name-human-shadow",
@@ -437,17 +434,6 @@
     ],
     "value": [
       [
-        "dl:sv1",
-        "c:a",
-        null,
-        "d:sv1",
-        null,
-        "same_name",
-        null,
-        "unreviewed"
-      ],
-      [
-        "dl:sv1:duplicate",
         "c:a",
         null,
         "d:sv1",
@@ -457,7 +443,15 @@
         "confirmed"
       ],
       [
-        "dl:svwb",
+        "c:a",
+        null,
+        "d:sv1",
+        null,
+        "same_name",
+        null,
+        "unreviewed"
+      ],
+      [
         "c:a",
         null,
         "d:svwb",

@@ -1139,6 +1139,34 @@ def test_independent_ancillary_oracle_matches_complete_rows(db: Database) -> Non
         assert result.tables[table] == rows, table
 
 
+def test_related_projection_collapses_occurrences_and_keeps_distinct_counts(
+    db: Database,
+) -> None:
+    with db.transaction():
+        original = dict(db.rows("card_related")[0].values)
+        db.delete("card_related", {"id": original["id"]})
+        for identifier, count in (("first", 1), ("duplicate", 1), ("different", 2)):
+            db.insert(
+                "card_related",
+                original
+                | {
+                    "id": identifier,
+                    "relation": "produces_token",
+                    "suggested_count": count,
+                },
+            )
+    assert projected(db).tables["card_related"] == [
+        {
+            "from_card_id": original["from_card_id"],
+            "to_card_id": original["to_card_id"],
+            "relation": "produces_token",
+            "suggested_count": count,
+            "applicable_regions": None,
+        }
+        for count in (1, 2)
+    ]
+
+
 EN_TEXT = "t:en:" + digest(b"Synthetic official")[7:23]
 
 
