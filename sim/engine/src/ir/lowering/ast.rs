@@ -173,6 +173,7 @@ pub(super) enum Step {
     Draw(Draw),
     Pp(Pp),
     Discard(Discard),
+    PpMax(Pp),
     Damage(Damage),
     Life(Life),
     SetLife(SetLife),
