@@ -192,8 +192,24 @@ def _load(root: Path) -> Export:
     path, raw, manifest = _manifest(root)
     members = list(_encoded(root, path, raw, br=(root / (path + ".br")).exists()))
     blobs: dict[str, bytes] = {}
+    changes_ref = (
+        object_value(manifest["changes_ref"])
+        if manifest["changes_ref"] is not None
+        else None
+    )
+    file_paths = {
+        string(object_value(file)["path"]) for file in array(manifest["files"])
+    }
     for row in _descriptions(manifest):
-        blobs[string(row["path"])], encoded = _blob(root, row)
+        # changes_ref is not passed to read_snapshot, so it needs its own integrity check.
+        is_changes_ref = (
+            changes_ref is not None
+            and string(row["path"]) == string(changes_ref["path"])
+            and string(row["path"]) not in file_paths
+        )
+        blobs[string(row["path"])], encoded = _blob(
+            root, row, verify_integrity=is_changes_ref
+        )
         members += encoded
     payloads = {
         string(f["key"]): blobs[string(f["path"])]
@@ -232,10 +248,12 @@ def _manifest(root: Path) -> tuple[str, bytes, dict[str, JsonValue]]:
     return path, raw, manifest
 
 
-def _blob(root: Path, row: dict[str, JsonValue]) -> tuple[bytes, tuple[Member, ...]]:
+def _blob(
+    root: Path, row: dict[str, JsonValue], *, verify_integrity: bool
+) -> tuple[bytes, tuple[Member, ...]]:
     path = string(row["path"])
     raw = read_member(root, path)
-    if digest(raw) != row["sha256"] or len(raw) != row["bytes"]:
+    if verify_integrity and (digest(raw) != row["sha256"] or len(raw) != row["bytes"]):
         raise ExportError("Export payload differs from its manifest")
     lengths = object_value(row["compressed_bytes"])
     encoded = _encoded(root, path, raw, br=lengths["br"] is not None)

@@ -11,7 +11,6 @@ from sve_carddb.export.read_api import (
     array,
     closure,
     current_image_keys,
-    digest,
     object_value,
     retained_manifest,
     string,
@@ -32,7 +31,7 @@ if TYPE_CHECKING:
 def _manifest(store: R2Store, entry: dict[str, JsonValue]) -> dict[str, JsonValue]:
     path = string(entry["manifest_path"])
     remote = store.get(path)
-    if remote is None or digest(remote.raw) != entry["manifest_sha256"]:
+    if remote is None:
         raise ExportError("GC requires intact retained manifests")
     return retained_manifest(remote.raw, entry)
 
@@ -43,7 +42,7 @@ def _current_images(store: R2Store, manifest: dict[str, JsonValue]) -> set[str]:
     for raw in array(manifest["files"]):
         row = object_value(raw)
         remote = store.get(string(row["path"]))
-        if remote is None or digest(remote.raw) != row["sha256"]:
+        if remote is None:
             raise ExportError("GC requires intact retained payloads")
         payloads[string(row["key"])] = remote.raw
     return current_image_keys(manifest, payloads)
