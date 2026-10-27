@@ -36,7 +36,7 @@ def test_expensive_files_get_separate_initial_workers(
         ("tests/test_other_a.py", 50),
         ("tests/test_other_b.py", 40),
         ("tests/test_other_c.py", 30),
-        ("tests/architecture/test_module_imports.py", 1),
+        ("tests/architecture/test_module_imports.py", 16),
         ("tests/workflows/test_authoring.py", 1),
         ("tests/workflows/test_authoring_cli.py", 1),
     ):
@@ -54,9 +54,16 @@ def test_expensive_files_get_separate_initial_workers(
         else []
     )
     result = pytester.runpytest_subprocess(
-        "-p", "xdist.plugin", "-n", "4", "--dist=loadfile", "-q", *options, *files
+        "-p",
+        "xdist.plugin",
+        "-n",
+        "4",
+        "--dist=loadgroup" if prioritize else "--dist=loadfile",
+        "-q",
+        *options,
+        *files,
     )
-    result.assert_outcomes(passed=223)
+    result.assert_outcomes(passed=238)
     workers: dict[str, set[str]] = defaultdict(set)
     first_files: dict[str, str] = {}
     for line in events.read_bytes().splitlines():
@@ -65,10 +72,14 @@ def test_expensive_files_get_separate_initial_workers(
         worker = string(event["worker"])
         workers[name].add(worker)
         first_files.setdefault(worker, name)
-    assert all(len(assigned) == 1 for assigned in workers.values())
+    imports = "tests/architecture/test_module_imports.py"
+    assert all(
+        len(assigned) == 1 for name, assigned in workers.items() if name != imports
+    )
+    assert len(workers[imports]) >= 2 if prioritize else len(workers[imports]) == 1
     assert set(first_files.values()) == (
         {
-            "tests/architecture/test_module_imports.py",
+            "tests/test_other_a.py",
             "tests/workflows/test_authoring.py",
             "tests/workflows/test_authoring_cli.py",
             "tests/test_bulk.py",

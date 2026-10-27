@@ -1,4 +1,4 @@
-"""Start the known expensive integration files before the small cheap cases."""
+"""Keep fixture-heavy files together while spreading independent fresh imports."""
 
 from __future__ import annotations
 
@@ -16,22 +16,31 @@ class WorkerNode(Protocol):
 @pytest.hookimpl(optionalhook=True)
 def pytest_configure_node(node: WorkerNode) -> None:
     # xdist resets workers' distribution options before they collect tests.
-    node.workerinput["sve_prioritize_files"] = (
-        node.config.getoption("dist", default="no") == "loadfile"
+    node.workerinput["sve_file_groups"] = (
+        node.config.getoption("dist", default="no") == "loadgroup"
     )
 
 
+@pytest.hookimpl(tryfirst=True)
 def pytest_collection_modifyitems(
     config: pytest.Config, items: list[pytest.Item]
 ) -> None:
-    if getattr(config, "workerinput", {}).get("sve_prioritize_files") is not True:
+    if getattr(config, "workerinput", {}).get("sve_file_groups") is not True:
         return
-    # Case counts understate real-repository setup and fresh-process import costs.
+    imports = config.rootpath / "tests/architecture/test_module_imports.py"
+    # xdist must see these public marks before it constructs its group node IDs.
+    for item in items:
+        if item.path != imports:
+            item.add_marker(
+                pytest.mark.xdist_group(
+                    item.path.relative_to(config.rootpath).as_posix()
+                )
+            )
+    # Case counts understate real-repository setup costs.
     priority = {
         config.rootpath / name: index
         for index, name in enumerate(
             (
-                "tests/architecture/test_module_imports.py",
                 "tests/workflows/test_authoring.py",
                 "tests/workflows/test_authoring_cli.py",
             )

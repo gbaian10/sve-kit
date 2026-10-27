@@ -79,6 +79,16 @@ class PublicJunitTests(unittest.TestCase):
         assert public_name(PRIVATE).startswith("case_")
         assert PRIVATE not in public_name(PRIVATE)
 
+    def test_file_groups_keep_public_identity_and_parameter_privacy(self) -> None:
+        """Scheduling groups cannot replace names or alter parameter hashes."""
+        group = "@tests/workflows/test_authoring.py"
+        assert public_name("test_plain" + group) == "test_plain"
+        raw = f"test_a[{PRIVATE}@example]"
+        assert public_name(raw + group) == public_name(raw)
+        assert PRIVATE not in public_name(raw + group)
+        assert public_name("test_a@" + PRIVATE).startswith("case_")
+        assert public_name(PRIVATE + group) == public_name(PRIVATE)
+
     def test_dtds_are_rejected(self) -> None:
         """Local reports never need entities, so a DTD is an error."""
         self.source.write_text("<!DOCTYPE x><testsuites/>", encoding="utf-8")
