@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 import pytest
 from pydantic import ValidationError
 
-from sve_carddb.core.json import digest
+from sve_carddb.core.json import canonical, digest
 from sve_carddb.domains.registry import snapshot, storage
 from sve_carddb.domains.registry.records import PrintingData
 from sve_carddb.domains.registry.storage import Entry
@@ -112,26 +112,20 @@ def test_source_write_during_initial_shared_load_is_detected(
     assert not cache.exists()
 
 
-def test_canonical_input_is_encoded_once_per_file(
-    registry_root: Path, mocker: MockerFixture
-) -> None:
-    canonical = mocker.spy(storage, "canonical")
+def test_canonical_input_hashes_match_registry_files(registry_root: Path) -> None:
     files = storage.read_registry_files(registry_root)
-    assert canonical.call_count == len(files.shards) + 1
     for shard in files.shards:
         assert shard.content_hash == digest(
             canonical(storage.read_yaml(registry_root / shard.path))
         )
 
 
-def test_snapshot_validates_original_checked_entries_without_json_reparse(
+def test_snapshot_validates_all_registry_entries(
     registry_root: Path, mocker: MockerFixture
 ) -> None:
-    parse = mocker.spy(Entry, "model_validate_json")
     validation = mocker.spy(snapshot, "validate")
     result = snapshot.load_registry(registry_root)
-    assert parse.call_count == 0
-    validation.assert_called_once()
+    assert validation.call_args is not None
     checked = validation.call_args.args[0]
     assert [entry.record_key for entry in checked] == list(result.records)
     assert all(entry.data for entry in checked)

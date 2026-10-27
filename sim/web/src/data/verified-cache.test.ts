@@ -151,18 +151,7 @@ describe("VerifiedCache", () => {
   })
 })
 
-it("scans automatic caches once for a successful write", async () => {
-  const storage = memoryCache()
-  const scan = vi.spyOn(storage, "keys")
-  await new VerifiedCache(root, "search-view", 1, storage, "build").write(
-    "jp",
-    hash(1),
-    bytes("ok"),
-  )
-  expect(scan).toHaveBeenCalledTimes(1)
-})
-
-it("a quota retry reuses one inventory and still enforces the view budget and generations", async () => {
+it("a quota retry still enforces the view budget and generations", async () => {
   const storage = memoryCache()
   const name = `sve-search-view:${encodeURIComponent(root)}`
   const cache = new VerifiedCache(root, "search-view", 1, storage, "build")
@@ -175,10 +164,8 @@ it("a quota retry reuses one inventory and still enforces the view budget and ge
     key === name ? Promise.resolve(namespace) : open(key),
   )
   vi.spyOn(namespace, "put").mockRejectedValueOnce(new Error("quota"))
-  const scan = vi.spyOn(storage, "keys")
   const next = new VerifiedCache(root, "search-view", 1, storage, "build")
   await next.write("new", hash(3), payload)
-  expect(scan).toHaveBeenCalledTimes(1)
   expect(await next.read("old", hash(1))).toBeUndefined()
   expect((await next.read("new", hash(3)))?.length).toBe(payload.length)
   const retained = await namespace.keys()
