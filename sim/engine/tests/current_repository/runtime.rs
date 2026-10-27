@@ -710,3 +710,6 @@ mod pp_recover;
 
 #[path = "runtime/max_pp.rs"]
 mod max_pp;
+
+#[path = "runtime/ep_increase.rs"]
+mod ep_increase;

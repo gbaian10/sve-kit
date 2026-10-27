@@ -1,7 +1,7 @@
 use super::super::{
     CharacteristicPatch, ContinuousLayer, Duration, DurationEnd, Effect, EffectDefinitionId,
     EffectReference, EffectTarget, ExecutionRef, InstallationSubjects, InstallationTime, Interval,
-    NumericChange, ObjectRef, Stat, TimeAnchor, TimestampBasis,
+    NumericChange, ObjectRef, Resource, ResourceOperation, Stat, TimeAnchor, TimestampBasis,
 };
 use super::{
     AbilitySource, Action, BTreeSet, Binding, BodyContext, Cardinality, Expr, Int, LoweringError,
@@ -13,6 +13,25 @@ pub(super) fn holder() -> Selector {
     Selector::Objects {
         objects: vec![ObjectOperand::SourceHolder {}],
     }
+}
+
+pub(super) fn resource_increase(
+    value: &ast::ResourceIncrease,
+    resource: Resource,
+    path: &str,
+) -> Result<Action, LoweringError> {
+    let ast::SelfPlayer::Controller = value.who;
+    if value.delta == 0 {
+        return Err(unsupported(path));
+    }
+    Ok(Action::Resource {
+        player: PlayerRef::Controller {},
+        resource,
+        operation: ResourceOperation::Add,
+        amount: Expr::Literal(Int(
+            i64::try_from(value.delta).map_err(|_private| unsupported(path))?
+        )),
+    })
 }
 
 pub(super) fn duration(until: Option<&ast::Until>) -> Duration {
