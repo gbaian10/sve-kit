@@ -14,7 +14,7 @@ from sve_carddb.contracts.four_layer import (
     Source,
     hash_payload,
 )
-from sve_carddb.contracts.rulings import RulingRef, Scope
+from sve_carddb.contracts.rulings import Scope
 from sve_carddb.contracts.source_binding import SourceBinding
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.domains.rulings.mapping import (
@@ -211,14 +211,6 @@ def test_split_merge_and_repeated_references_preserve_every_exact_old_use() -> N
     assert report.payload()["template_references"] == 3
     assert report.payload()["occurrence_resolved"] == 5
     assert report.payload()["retained_non_template"] == 1
-    assert report.applicable(extra.target().occurrence) == ()
-    assert (
-        report.require(
-            RulingRef(id="R-0001", revision=1, reference_ordinal=0),
-            a.target().occurrence,
-        ).target
-        == a.target()
-    )
     groups = report.payload()["frame_families"]
     assert isinstance(groups, list)
     merged = next(
@@ -267,9 +259,6 @@ def test_known_domain_pending_never_enters_executable_applicability(
     assert selected.reason == reason
     assert selected.level == "occurrence"
     assert selected.target is None
-    assert report.applicable(old.target().occurrence) == ()
-    with pytest.raises(ValueError, match="executable closure"):
-        report.require(selected.ruling_ref, old.target().occurrence)
     assert len(selected.candidates) == {"ambiguous": 2, "pending": 1}.get(case, 0)
 
 

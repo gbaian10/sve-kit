@@ -107,23 +107,6 @@ class Application:
             else None,
         }
 
-    def section_marker(self, source_url: str | None) -> dict[str, JsonValue] | None:
-        """Describe supplementary source text through the existing public other field."""
-        sections = self.data.sections
-        if (
-            self.status != "applied"
-            or sections is None
-            or sections.expected_raw_value == sections.corrected_value
-        ):
-            return None
-        return {
-            "field": "other",
-            "corrected_from": "\n\n".join(sections.expected_raw_value),
-            "is_corrected": True,
-            "reason": self.data.reason,
-            "source_url": source_url,
-        }
-
 
 def _status(data: CorrectionData, item: FaceObservation) -> Status | None:
     if data.state != "active":

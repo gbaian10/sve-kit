@@ -38,7 +38,7 @@ UseDependencies.imports 值恰為 binding_id／ability_scope／port／dependency
 
 ## 診斷與驗證範圍
 
-`AuthorSchemas.author_effect_set`／`effect_body_shard` 讀取兩種完整容器，`document` 共用已解析文件依 kind 分派；不開啟索引指定檔案。`author_tree`／`body_tree` 完成相同驗證後回傳嚴格 loader 的原 JSON 樹，保留合法選填欄位與順序，不由 model dump 重建 hash 輸入。`author_effect_set`／`document` 可帶已解碼的 `AuthorIndexRecord` 作為 context；YAML／JSON 解析失敗仍保留其 card_id、record_key 與 scope。若錯誤位於另一張卡，不借所選卡的 card_id。
+`AuthorSchemas.document` 依 kind 分派並讀取兩種完整容器；不開啟索引指定檔案。`author_tree`／`body_tree` 完成相同驗證後回傳嚴格 loader 的原 JSON 樹，保留合法選填欄位與順序，不由 model dump 重建 hash 輸入。`document` 可帶已解碼的 `AuthorIndexRecord` 作為 context；YAML／JSON 解析失敗仍保留其 card_id、record_key 與 scope。若錯誤位於另一張卡，不借所選卡的 card_id。
 
 診斷帶 stage／reason／DSL 結構 path／可得 YAML line、column。source line 與 YAML line 不混用；來源定位僅取已驗型別。錯型別只帶 expected/actual 類別，不附 input_value 或卡文；parser 失敗只帶安全類別。未知 key、版本、非字串鍵、重複鍵、非 JSON 純量、unsafe int 與浮點皆拒絕。合法 alias／merge 展開，無直接 cursor 時取最近父容器。
 
@@ -80,7 +80,7 @@ Rust 對照 current 面與快照時，只有 effect 的 absent 加上精確空�
 
 表列各族皆只配空 imports／exports ports，能力 imports 必須省略。去掉 line／section／sources 後完整 canonical 能力必須相等；多加 into、usable_if、times、其他費用或 expression 都不符來源。N 可為 0，須取該構造的 operand，不能借相同數值。非空 ports 與其他執行 scope 保持明示 unsupported；不把跨 owner 或DSL 陣列較晚定為永久非法。真卡整卡正例為 BP01-009／034／092 的純進化入口；feed／ride 與雙入口的有限機制測試不宣稱已有真卡整卡准入。
 
-spell、attack_time 與 evolve_time 抽牌同樣只配空 ports、不得有能力 imports。spell 來源重建要求既有 normalizer 的完整 current normal spell effect、無 sections、單行 exact self 抽牌；attack_time 要求 current follower effect 的完整獨立 `【攻撃時】N枚引く。` body 行，自身攻擊事件固定在頭內；evolve_time 要求 current evolved follower effect 的完整獨立 `【進化時】N枚引く。` body 行，固定自身進化事件，與 evolve 費用入口分開。只對照來源 Nat/count/value 到 draw.n，不參數化 actor、能力頭或控制圖。`expand_sources` 與 current 入口都比對完整展開能力的 canonical bytes；省略 who、改張數、增加條件／費用／步驟或換頭皆拒絕。真卡正例分別為 CP02-068、BP10-122 與 ECP01-002；up_to、對手／雙方、動態量、Quick、token 位置仍拒絕。同卡有其他 sibling 時必須逐一接通並驗證，不能只截出抽牌就准入整卡。來源准入不等於 reviewed、compiled、executed 或 qualified。
+spell、attack_time 與 evolve_time 抽牌同樣只配空 ports、不得有能力 imports。spell 來源重建要求既有 normalizer 的完整 current normal spell effect、無 sections、單行 exact self 抽牌；attack_time 要求 current follower effect 的完整獨立 `【攻撃時】N枚引く。` body 行，自身攻擊事件固定在頭內；evolve_time 要求 current evolved follower effect 的完整獨立 `【進化時】N枚引く。` body 行，固定自身進化事件，與 evolve 費用入口分開。只對照來源 Nat/count/value 到 draw.n，不參數化 actor、能力頭或控制圖。`expand_contexts` 與 current 入口都比對完整展開能力的 canonical bytes；省略 who、改張數、增加條件／費用／步驟或換頭皆拒絕。真卡正例分別為 CP02-068、BP10-122 與 ECP01-002；up_to、對手／雙方、動態量、Quick、token 位置仍拒絕。同卡有其他 sibling 時必須逐一接通並驗證，不能只截出抽牌就准入整卡。來源准入不等於 reviewed、compiled、executed 或 qualified。
 
 `destroy_fanfare_opponent_all_field_followers.v1` 只接已採納來源規則的完整 Advance 面：current JP follower、special_kinds 恰為 advance，effect 第一行守護／光紋、第二行完整入場曲，無 sections。固定 Concept/ability 葉、canonical occurrence、body 來源位置與空 ports 全部核對；inline 與 companion 都比較完整能力 bytes，不參數化 selector、能力頭、條件或費用。Fanfare 保留來源持有者由場外新進場的事件語義，不限普通打出，也不因卡型補造 AdvanceActivate。對手以能力 master 為準，destroy 的移動目的地依各卡 owner；不改成 banish／move，也不宣稱忽略破壞禁止、Advance／token 後續規則。
 
@@ -118,7 +118,7 @@ inline／companion 都須完整 canonical head/body 相等；換頭、對象、�
 | 介面／證據 | 已驗範圍 | 不代表 |
 | --- | --- | --- |
 | `expand` → `ExpansionCandidate` | 完整 expanded JSON `tree` 與分離的 `sidecar`；source_proof 為 none | 來源角色真實、現行來源採納或可執行 |
-| `expand_sources` | 自 raw／descriptor／classifier／context 重建來源，核對用途及支援的參數角色／operand；成功後 source_proof 為 derived_self_consistent | current registry／索引閉包或 qualification 已通過 |
+| `expand_contexts` | 核對呼叫端提供的 context 與支援的參數角色／operand；source_proof 保持 none | 來源重建、current registry／索引閉包或 qualification 已通過 |
 | `CurrentAuthorSources.validate` | 有限支援族通過 current／registry／index／完整來源 hash 與能力映射；成功 sidecar 為 current_source_checked | review／exam 資格有效或可執行 |
 | `AuthorSchemas.expanded` | 共用 `$defs/expanded` 全樹驗證，加 decoded 型別圖獨立排除 ParamRef／GeneratedBy | IR lowering 或引擎語義正確 |
 
@@ -128,4 +128,4 @@ inline／companion 都須完整 canonical head/body 相等；換頭、對象、�
 
 D0 只消費通過 expanded profile 的 JSON 樹；C0 sidecar 留在樹外，不是新增公開 wire。候選 golden 可用於 lowering 與漂移測試，第一版以來源綁定、良構檢查及引擎實作的支援範圍作為接線邊界，不執行用途依賴與資格機制；current_source_checked 本身不足以執行。D0 必須沿 SourceUse.owner 決定能力持有面，不能將卡級容器解讀為全卡常駐。Rust 應以鎖定的 `jsonschema` 0.58.1 驗同一 profile 的 dynamic scope 正反例，目前尚未完成該 Rust 驗證。
 
-BP08-038／CP04-060 的固定 canonical golden 只驗純展開，source_proof 為 none。在既有來源 fixture 下，BP08 仍為 unresolved_whole_line_semantics，CP04 仍有 signed_numeric_requires_review；兩者均是來源重建路徑的負例。合成 resolved 相容性案例與這些真卡內容分開，不宣稱來源已採納。
+BP08-038／CP04-060 的固定 canonical golden 只驗純展開，source_proof 為 none。在既有來源 fixture 下，BP08 仍為 unresolved_whole_line_semantics，CP04 仍有 signed_numeric_requires_review；兩者均不得取得現行來源資格。合成 context 案例與這些真卡內容分開，不宣稱來源已採納。

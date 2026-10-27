@@ -159,7 +159,8 @@ def test_same_profile_produces_equal_bytes(
         brotli=CODEC,
         format_version=MEDIA,
     )
-    sharded.assert_identical(again)
+    assert sharded.payloads == again.payloads
+    assert sharded.compression_recipe == again.compression_recipe
     sharded.verify(expanded[0])
     assert object_value(sharded.manifest["partitioning"])["bucket_count"] == 64
     assert sharded.manifest["required_capabilities"] == [

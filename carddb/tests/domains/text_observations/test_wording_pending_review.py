@@ -37,12 +37,13 @@ def test_older_correction_does_not_hide_a_complete_latest_display(
     with create_database(compile_build(("en", "related", "correction"))) as db:
         with db.transaction():
             case.stage(db)
-        case.compose(case.plan.identity).import_into(
-            db,
-            build=case.context(),
-            vocabulary=case.vocabulary,
-            published=(),
-        )
+        with db.transaction():
+            case.compose(case.plan.identity).populate(
+                db,
+                build=case.context(),
+                vocabulary=case.vocabulary,
+                published=(),
+            )
         for item in group.observations:
             product(
                 db,
@@ -97,12 +98,13 @@ def test_candidate_revision_must_belong_to_its_face_and_region(
     with create_database(compile_build(("en",))) as db:
         with db.transaction():
             case.stage(db)
-        case.compose(case.plan.identity).import_into(
-            db,
-            build=case.context(),
-            vocabulary=case.vocabulary,
-            published=(),
-        )
+        with db.transaction():
+            case.compose(case.plan.identity).populate(
+                db,
+                build=case.context(),
+                vocabulary=case.vocabulary,
+                published=(),
+            )
         target = db.rows("face_revision")[0].values
         with db.transaction():
             if boundary == "face":
@@ -176,12 +178,13 @@ def test_importer_marks_only_the_region_without_a_current(
                         "reason_codes": Json(["existing_manual_reason"]),
                     },
                 )
-        case.compose(case.plan.identity).import_into(
-            db,
-            build=case.context(),
-            vocabulary=case.vocabulary,
-            published=(),
-        )
+        with db.transaction():
+            case.compose(case.plan.identity).populate(
+                db,
+                build=case.context(),
+                vocabulary=case.vocabulary,
+                published=(),
+            )
         support = {
             row.values["region"]: row.values for row in db.rows("card_engine_support")
         }

@@ -69,18 +69,12 @@ def test_en_nested_entry_and_exclusive_lift_date() -> None:
     ]
     lifted = parsed.entries[0]
     assert lifted.card_no is None
-    assert not lifted.active_on(date(2026, 9, 3))
-    assert lifted.active_on(date(2026, 9, 4))
-    assert lifted.active_on(date(2026, 9, 24))
-    assert not lifted.active_on(date(2026, 9, 25))
+    assert lifted.effective_from == date(2026, 9, 4)
+    assert lifted.effective_until == date(2026, 9, 25)
     assert parsed.entries[2].card_no == "TEST-aEN"
     assert parsed.entries[2].card_link.endswith("cardno= TEST-aEN")
     assert parsed.entries[2].max_copies == 1
     assert parsed.excluded_sections == ("Cross Craft", "Gloryfinder")
-    assert (
-        len([entry for entry in parsed.entries if entry.active_on(date(2026, 9, 25))])
-        == 2
-    )
 
 
 def test_en_inline_lift_applies_only_to_its_linked_card() -> None:
@@ -92,8 +86,6 @@ def test_en_inline_lift_applies_only_to_its_linked_card() -> None:
     lifted = parsed.entries[1]
     assert lifted.name == "Synthetic Ban"
     assert lifted.effective_until == date(2026, 11, 2)
-    assert lifted.active_on(date(2026, 11, 1))
-    assert not lifted.active_on(date(2026, 11, 2))
     assert parsed.entries[2].effective_until is None
 
 

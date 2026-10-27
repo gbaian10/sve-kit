@@ -390,11 +390,6 @@ def test_split_allocates_new_cards_and_faces_without_reusing_printing(
     inputs = write_scenario(tmp_path, jp_base, [record])
     assert all(f.region == "jp" for facts in inputs.frames.values() for f in facts)
     result = replay(tmp_path, inputs)
-    hint = result.resolve_int_id(20001)
-    assert hint is not None
-    assert hint.status == "choice_required"
-    assert hint.printing_id == P
-    assert hint.choices == tuple(sorted((allocated("c", "d"), allocated("c", "e"))))
     assert required(result, "printing:" + P).data["card_id"] == allocated("c", "d")
     assert required(result, "printing:" + Q).data["card_id"] == allocated("c", "e")
     assert required(result, "face:" + allocated("f", "d-face")).data[

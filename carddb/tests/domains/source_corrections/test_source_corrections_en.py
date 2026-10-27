@@ -11,7 +11,6 @@ from sve_carddb.domains.registry.records import CorrectionData
 from sve_carddb.domains.registry.review import Correction
 from sve_carddb.domains.source_corrections import FrozenImages
 from sve_carddb.domains.source_corrections.images import evidence_url
-from sve_carddb.domains.source_corrections.projection import correction_references
 from sve_carddb.domains.text_observations import (
     Binding,
     Vocabulary,
@@ -95,12 +94,13 @@ def test_four_synthetic_english_corrections_have_distinct_evidence_and_rule_resu
     with create_database(compile_build(("en", "related", "correction"))) as db:
         with db.transaction():
             case.stage(db)
-        case.compose(case.plan.identity).import_into(
-            db,
-            build=case.context(),
-            vocabulary=case.vocabulary,
-            published=(),
-        )
+        with db.transaction():
+            case.compose(case.plan.identity).populate(
+                db,
+                build=case.context(),
+                vocabulary=case.vocabulary,
+                published=(),
+            )
         assert len(db.rows("source_correction")) == 4
         assert len(db.rows("correction_evidence")) == 4
         assert len(db.rows("correction_application")) == 4
@@ -113,4 +113,3 @@ def test_four_synthetic_english_corrections_have_distinct_evidence_and_rule_resu
             assert row.values["result_unit_id"] is None
             assert revisions[row.values["face_revision_id"]]["type_code"] == "follower"
             assert revisions[row.values["face_revision_id"]]["region"] == "en"
-        assert len(correction_references(db, case.plan, case.vocabulary)) == 4

@@ -1,32 +1,19 @@
 """Reconstruction cannot borrow synthetic resolved claims or equal-valued operands."""
 
-import json
-import re
 from dataclasses import replace
-from hashlib import sha256
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
 
 from sve_carddb.contracts.author_evidence import SourceUse
 from sve_carddb.contracts.author_leaves import ParamDecl, ParamSource
-from sve_carddb.contracts.four_layer import Domain, LeafSchema, LeafSlot, Port
-from sve_carddb.domains.effects.author_sources import (
-    SourceCandidate,
-    SourceError,
-    parameter_expected,
-    resolve_source,
-)
-from sve_carddb.domains.translations.four_layer_classification import Term
+from sve_carddb.contracts.four_layer import Domain, LeafSchema, LeafSlot
+from sve_carddb.domains.effects.author_sources import SourceError, parameter_expected
 from sve_carddb.domains.translations.four_layer_derivation import derive_source
 from sve_carddb.domains.translations.four_layer_semantics import CardContext
+from tests.support.author_source_fixtures import SourceCandidate
 
-from ..translations.test_four_layer_classification import (
-    classifier,
-    source,
-    type_vocabulary,
-)
+from ..translations.test_four_layer_classification import classifier, source
 from .author_source_cases import synthetic_offset
 
 if TYPE_CHECKING:
@@ -52,8 +39,6 @@ def test_synthetic_compatibility_does_not_grant_source_proof() -> None:
         )
         == 5
     )
-    with pytest.raises(SourceError, match="source_pending"):
-        resolve_source(sample.candidate, sample.use())
 
 
 @pytest.mark.parametrize(
@@ -163,28 +148,6 @@ def test_equal_value_slot_is_not_expression_operand() -> None:
         )
 
 
-@pytest.mark.parametrize("direction", ["imports", "exports"])
-def test_nonempty_projection_ports_fail_closed(direction: str) -> None:
-    sample = synthetic_offset()
-    projection = sample.frame.projection.model_copy(
-        update={
-            direction: (
-                Port(
-                    name="objects",
-                    type="ObjectSet",
-                    source_role="selection",
-                    scope="ability_0",
-                ),
-            )
-        }
-    )
-    sample = replace(
-        sample, frame=sample.frame.model_copy(update={"projection": projection})
-    )
-    with pytest.raises(SourceError, match="unsupported_source_ports"):
-        sample.compatible()
-
-
 def entry_case() -> tuple[SourceCandidate, SourceUse]:
     raw = "{進化}{コスト９９}:これは進化する。"
     descriptor = source(raw)
@@ -201,73 +164,3 @@ def entry_case() -> tuple[SourceCandidate, SourceUse]:
         ability_scope="ability_0",
     )
     return candidate, use
-
-
-@pytest.mark.parametrize(
-    ("card_no", "pack", "line", "checksum", "reason"),
-    [
-        (
-            "BP08-038",
-            "BP08",
-            1,
-            "7a884eac36c1801277243b0bd7489062e396130b52be10bf3ab09ea4869904cb",
-            "source_pending",
-        ),
-        (
-            "CP04-060",
-            "CP04",
-            0,
-            "86fa086090511c9105cfc1d9210f2102f69ef7351e6930dcd9dd89a8f53f3350",
-            "source_unresolved_issue",
-        ),
-    ],
-)
-def test_frozen_real_cards_do_not_become_resolved(
-    card_no: str, pack: str, line: int, checksum: str, reason: str
-) -> None:
-    path = (
-        Path(__file__).resolve().parents[4] / "card-data" / "jp" / pack / "000-099.json"
-    )
-    data = json.loads(path.read_bytes())
-    card = next(c for c in data["cards"] if c["card_no"] == card_no)
-    texts = {
-        document["record"]["faces"][0]["text"].split("\n")[line]
-        for document in card["documents"].values()
-    }
-    # Bind intermediates so assertion rewriting never prints official wording.
-    count = len(texts)
-    assert count == 1
-    raw = texts.pop()
-    actual = sha256(raw.encode()).hexdigest()
-    assert actual == checksum
-    terms = tuple(
-        Term("term:name.synthetic" + str(i), "card_name", name)
-        for i, name in enumerate(dict.fromkeys(re.findall(r"『([^』]+)』", raw)))
-    )
-    engine = classifier(terms, vocabulary=type_vocabulary())
-    candidate = SourceCandidate(raw, source(raw), engine)
-    derived = derive_source(raw, candidate.descriptor, engine)
-    part = derived.field.parts[0]
-    use = SourceUse.model_validate(
-        {
-            "binding_id": "bind:" + "0" * 64,
-            "ability_scope": "ability_0",
-            "occurrence": {
-                "owner": candidate.descriptor.owner,
-                "field": candidate.descriptor.field,
-                "ordinal": candidate.descriptor.ordinal,
-                "source_hash": candidate.descriptor.source_hash,
-                "line_ordinal": part.line_ordinal,
-                "role": part.source_span.role,
-                "segments": part.source_span.segments,
-            },
-        }
-    )
-    with pytest.raises(SourceError, match=reason):
-        resolve_source(candidate, use)
-
-
-def test_replacing_source_evidence_drops_reconstruction_proof() -> None:
-    candidate, use = entry_case()
-    resolved = resolve_source(candidate, use)
-    assert replace(resolved, canonical_source="synthetic").source_proof == "none"

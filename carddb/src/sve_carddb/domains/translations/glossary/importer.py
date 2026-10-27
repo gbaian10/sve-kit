@@ -25,18 +25,3 @@ def populate_glossary(
     return populate(
         db, inputs, inputs.load(), build=build, stores=stores, sources=sources
     )
-
-
-def import_glossary(
-    db: Database,
-    inputs: Inputs,
-    *,
-    build: BuildContext,
-    stores: dict[str, Path],
-    sources: Sources | None = None,
-) -> InputRecord:
-    """Own an atomic transaction for glossary rows and their entire provenance."""
-    with db.transaction():
-        return populate_glossary(
-            db, inputs, build=build, stores=stores, sources=sources
-        )

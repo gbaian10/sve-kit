@@ -9,14 +9,10 @@ from sve_carddb.core.json import array, canonical, object_value
 from sve_carddb.domains.effects.author_current import CardRejected
 from sve_carddb.domains.effects.author_set import AuthorInputSet
 from sve_carddb.domains.effects.author_source_hash import source_version
-from sve_carddb.domains.effects.author_sources import (
-    SourceCandidate,
-    entry_heads,
-    entry_payload,
-    resolve_source,
-)
+from sve_carddb.domains.effects.author_sources import entry_heads, entry_payload
 from sve_carddb.domains.translations.four_layer_destroy import KEY
 from sve_carddb.domains.translations.four_layer_sources import semantic_context
+from tests.support.author_source_fixtures import SourceCandidate, source_context
 
 from ...support.author_semantic_inputs import load_semantic_inputs
 from .author_entry_cases import meta
@@ -73,7 +69,7 @@ def test_real_advance_body_requires_complete_keyword_declaration(
         candidate = SourceCandidate(
             field.source.text, field.source.descriptor, source.classifier, context
         )
-        resolved = resolve_source(candidate, use)
+        resolved = source_context(candidate, use)
         assert resolved.frame.id == matched.frame.id
         assert entry_payload(resolved, "ability_0") == {
             **head(),
@@ -98,7 +94,7 @@ def check_current_requires_keyword_declaration(
     card_id: str,
     tmp_path: Path,
 ) -> None:
-    record = companion(resolve_source(candidate, use))
+    record = companion(source_context(candidate, use))
     metadata = meta()
     metadata["source"] = source_version(source.card_payload(card_id).payload)
     for number in ("BP19-P32", "BP19-114"):
@@ -152,7 +148,9 @@ def check_current_requires_keyword_declaration(
                 == "source_keyword_closure_mismatch"
             )
             path = ("cards", number, "abilities", 0)
-            expanded = expander.expand_sources(
-                file.raw, [canonical(shard(record))], {path: candidate}
+            expanded = expander.expand_contexts(
+                file.raw,
+                [canonical(shard(record))],
+                {path: source_context(candidate, use)},
             )
-            assert expanded.sidecar[0].source_proof == "derived_self_consistent"
+            assert expanded.sidecar[0].source_proof == "none"

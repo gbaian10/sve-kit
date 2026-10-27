@@ -17,7 +17,7 @@ from sve_carddb.build import (
     create_database,
 )
 from sve_carddb.build.t0 import TABLES as T0_TABLES
-from sve_carddb.build.t1 import REGISTRY, compile_build
+from sve_carddb.build.t1 import compile_build
 from sve_carddb.build.t1_cr import TABLES as CR_TABLES
 from tests.support.schema_helpers import compile_t0
 
@@ -105,29 +105,17 @@ def test_query_dependencies_close_and_require_pipeline_readiness() -> None:
         ),
     )
     assert {table.name for table in registry.resolve(("alpha",))} == {"alpha", "beta"}
-    with pytest.raises(ValueError, match="Importer/validator unavailable: beta"):
-        registry.require_usable(("alpha",))
     with create_database(compile_schema(registry, ("alpha",))) as db:
         with pytest.raises(sqlite3.IntegrityError, match="no_beta"), db.transaction():
             db.insert("beta", {"id": "x"})
         assert not db.rows("beta")
-    ready = replace(registry.capabilities[1], importer_ready=True, validator_ready=True)
-    replace(registry, capabilities=(registry.capabilities[0], ready)).require_usable(
-        ("alpha",)
-    )
-    for importer, validator in ((False, False), (True, False), (False, True)):
-        with pytest.raises(ValueError, match="Importer/validator"):
-            replace(
-                registry,
-                capabilities=(
-                    registry.capabilities[0],
-                    replace(ready, importer_ready=importer, validator_ready=validator),
-                ),
-            ).require_usable(("alpha",))
     reserved = replace(
         registry,
         tables=(alpha,),
-        capabilities=(registry.capabilities[0], replace(ready, implemented=False)),
+        capabilities=(
+            registry.capabilities[0],
+            replace(registry.capabilities[1], implemented=False),
+        ),
     )
     with pytest.raises(ValueError, match="Unknown or unimplemented"):
         reserved.resolve(("alpha",))
@@ -135,14 +123,6 @@ def test_query_dependencies_close_and_require_pipeline_readiness() -> None:
         replace(
             registry, tables=(alpha,), capabilities=(registry.capabilities[0],)
         ).validate()
-
-
-@pytest.mark.parametrize("requested", [("t0",), ("cr",)])
-def test_ddl_does_not_claim_usable_preview_or_release(
-    requested: tuple[str, ...],
-) -> None:
-    with pytest.raises(ValueError, match="Importer/validator unavailable"):
-        REGISTRY.require_usable(requested)
 
 
 class TestConnectedGraphConstraints:

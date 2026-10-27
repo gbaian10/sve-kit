@@ -34,19 +34,13 @@ def document(raw: bytes, sources: tuple[SourceShard, ...] = ()) -> Shard:
     return _resolve(stored, sources)
 
 
-def source_document(raw: bytes) -> SourceShard:
-    """Invalid text versions report no source wording."""
-    return _source_validated(_content(raw, source=True))
-
-
-def _content(raw: bytes, *, source: bool = False) -> bytes:
-    kind = "classification source shard" if source else "classification shard"
+def _content(raw: bytes) -> bytes:
     if len(raw) >= MAX_BYTES:
-        raise ValueError("Oversized " + kind)
+        raise ValueError("Oversized classification shard")
     try:
         return canonical(JSON_VALUE.validate_python(parse_yaml(raw), strict=True))
     except ValueError, TypeError:
-        raise ValueError("Invalid " + kind) from None
+        raise ValueError("Invalid classification shard") from None
 
 
 def _validated(content: bytes) -> StoredShard:

@@ -35,7 +35,7 @@ def test_en_inventory_only_exposes_keys_without_authorizing_values(
     }
     raw = canonical(value)
     assert schemas.author_inventory_tree(raw) == value
-    for read in (schemas.author_tree, schemas.author_effect_set, schemas.document):
+    for read in (schemas.author_tree, schemas.document):
         with pytest.raises(AuthorInputError) as caught:
             read(raw)
         assert caught.value.diagnostic.reason == "en_source_contract_unavailable"

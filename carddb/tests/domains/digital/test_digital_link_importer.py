@@ -14,7 +14,7 @@ from sve_carddb.domains.digital.links.evidence import (
     batch_refs,
     inventory,
 )
-from sve_carddb.domains.digital.links.importer import import_links, review_context
+from sve_carddb.domains.digital.links.importer import populate_links, review_context
 from sve_carddb.domains.digital.links.loader import decision_id, link_id
 from sve_carddb.domains.digital.links.models import Record, SveName
 from sve_carddb.domains.products.models import LocalizedText
@@ -56,12 +56,13 @@ def test_real_entry_proves_relation_name_and_no_coverage(
 ) -> None:
     with database.copy() as db:
         baseline.publish(db)
-        result = import_links(
-            db,
-            baseline.inputs(),
-            build=baseline.build,
-            stores={"test-store": baseline.store},
-        )
+        with db.transaction():
+            result = populate_links(
+                db,
+                baseline.inputs(),
+                build=baseline.build,
+                stores={"test-store": baseline.store},
+            )
         assert len(result.fresh) == 1
         assert result.stale == ()
         links = [
@@ -196,12 +197,13 @@ def test_source_refusals_rollback(
             )
         }
         with pytest.raises(ValueError, match="^" + re.escape(message) + "$"):
-            import_links(
-                db,
-                fixture.inputs(),
-                build=fixture.build,
-                stores={"test-store": fixture.store},
-            )
+            with db.transaction():
+                populate_links(
+                    db,
+                    fixture.inputs(),
+                    build=fixture.build,
+                    stores={"test-store": fixture.store},
+                )
         assert {t: db.rows(t) for t in before} == before
 
 
@@ -210,12 +212,13 @@ def test_owner_source_must_replay_its_printing(
 ) -> None:
     with database.copy() as db:
         baseline.publish(db)
-        result = import_links(
-            db,
-            baseline.inputs(),
-            build=baseline.build,
-            stores={"test-store": baseline.store},
-        )
+        with db.transaction():
+            result = populate_links(
+                db,
+                baseline.inputs(),
+                build=baseline.build,
+                stores={"test-store": baseline.store},
+            )
         with db.transaction():
             source = next(
                 r.values
@@ -260,12 +263,13 @@ def test_current_catalogue_marks_changed_names_stale(
     fixture = current_api(copied(baseline, tmp_path / "repo"), transform)
     with database.copy() as db:
         baseline.publish(db)
-        result = import_links(
-            db,
-            fixture.inputs(),
-            build=fixture.build,
-            stores={"test-store": fixture.store},
-        )
+        with db.transaction():
+            result = populate_links(
+                db,
+                fixture.inputs(),
+                build=fixture.build,
+                stores={"test-store": fixture.store},
+            )
         assert bool(result.stale) is stale
         assert len(result.fresh) == (0 if stale else 1)
         assert db.rows("digital_link_coverage") == ()
@@ -293,12 +297,13 @@ def test_current_api_selected_subset_is_not_complete_evidence(
         with pytest.raises(
             ValueError, match=r"^Digital-link current API name closure is incomplete$"
         ):
-            import_links(
-                db,
-                baseline.inputs(),
-                build=baseline.changed(config),
-                stores={"test-store": baseline.store},
-            )
+            with db.transaction():
+                populate_links(
+                    db,
+                    baseline.inputs(),
+                    build=baseline.changed(config),
+                    stores={"test-store": baseline.store},
+                )
 
 
 @pytest.fixture(scope="module")
@@ -311,9 +316,10 @@ def test_owner_rechecks_materialized_target_against_adoption(
 ) -> None:
     with database.copy() as db:
         dual.publish(db)
-        result = import_links(
-            db, dual.inputs(), build=dual.build, stores={"test-store": dual.store}
-        )
+        with db.transaction():
+            result = populate_links(
+                db, dual.inputs(), build=dual.build, stores={"test-store": dual.store}
+            )
         link = next(
             r.values
             for r in db.rows("digital_link")
@@ -345,12 +351,13 @@ def test_sampled_link_keeps_its_review_level(
     fixture = with_records(copied(baseline, tmp_path / "repo"), [record])
     with database.copy() as db:
         fixture.publish(db)
-        import_links(
-            db,
-            fixture.inputs(),
-            build=fixture.build,
-            stores={"test-store": fixture.store},
-        )
+        with db.transaction():
+            populate_links(
+                db,
+                fixture.inputs(),
+                build=fixture.build,
+                stores={"test-store": fixture.store},
+            )
         link = next(
             r.values
             for r in db.rows("digital_link")
@@ -374,12 +381,13 @@ def test_evolved_phase_is_explicit_and_not_inferred_from_sve_front(
     fixture = with_records(copied(baseline, tmp_path / "repo"), [record])
     with database.copy() as db:
         fixture.publish(db)
-        result = import_links(
-            db,
-            fixture.inputs(),
-            build=fixture.build,
-            stores={"test-store": fixture.store},
-        )
+        with db.transaction():
+            result = populate_links(
+                db,
+                fixture.inputs(),
+                build=fixture.build,
+                stores={"test-store": fixture.store},
+            )
         link = next(
             r.values
             for r in db.rows("digital_link")
@@ -396,12 +404,13 @@ def test_jp_owner_does_not_probe_same_number_english_printing(
 ) -> None:
     with database.copy() as db:
         baseline.publish(db)
-        result = import_links(
-            db,
-            baseline.inputs(),
-            build=baseline.build,
-            stores={"test-store": baseline.store},
-        )
+        with db.transaction():
+            result = populate_links(
+                db,
+                baseline.inputs(),
+                build=baseline.build,
+                stores={"test-store": baseline.store},
+            )
         sources = baseline.sources()
         index = Evidence(sources).index(review_context(sources))
         # A valid typed registry boundary may put an EN printing ahead of JP.
@@ -451,12 +460,13 @@ def test_composer_requires_exact_authored_configuration(
             ValueError,
             match=r"^Build configuration does not pin digital-link authored bytes$",
         ):
-            import_links(
-                db,
-                baseline.inputs(),
-                build=baseline.changed(config),
-                stores={"test-store": baseline.store},
-            )
+            with db.transaction():
+                populate_links(
+                    db,
+                    baseline.inputs(),
+                    build=baseline.changed(config),
+                    stores={"test-store": baseline.store},
+                )
         assert db.rows("digital_link") == before
 
 
@@ -478,12 +488,13 @@ def test_owner_requires_same_build_context(
 ) -> None:
     with database.copy() as db:
         baseline.publish(db)
-        result = import_links(
-            db,
-            baseline.inputs(),
-            build=baseline.build,
-            stores={"test-store": baseline.store},
-        )
+        with db.transaction():
+            result = populate_links(
+                db,
+                baseline.inputs(),
+                build=baseline.build,
+                stores={"test-store": baseline.store},
+            )
         config = object_value(parse(baseline.build.configuration.encode()))
         config["synthetic_changed_background"] = True
         sources = Sources(
@@ -503,12 +514,13 @@ def test_owner_requires_japanese_name(
 ) -> None:
     with database.copy() as db:
         baseline.publish(db)
-        result = import_links(
-            db,
-            baseline.inputs(),
-            build=baseline.build,
-            stores={"test-store": baseline.store},
-        )
+        with db.transaction():
+            result = populate_links(
+                db,
+                baseline.inputs(),
+                build=baseline.build,
+                stores={"test-store": baseline.store},
+            )
         with db.transaction():
             unit = TextInterner(db).intern(
                 LocalizedText(lang="en", text="Synthetic card")
@@ -610,12 +622,13 @@ def test_current_registry_cannot_omit_adopted_card(
         with pytest.raises(
             ValueError, match=r"^Digital-link current registry card is unknown$"
         ):
-            import_links(
-                db,
-                baseline.inputs(),
-                build=baseline.build,
-                stores={"test-store": baseline.store},
-            )
+            with db.transaction():
+                populate_links(
+                    db,
+                    baseline.inputs(),
+                    build=baseline.build,
+                    stores={"test-store": baseline.store},
+                )
         assert db.rows("digital_link") == before
 
 
@@ -655,12 +668,13 @@ def test_model_links_are_browse_only_even_with_exact_name_faces(
     with database.copy() as db:
         fixture.publish(db)
         translations = db.rows("translation")
-        result = import_links(
-            db,
-            fixture.inputs(),
-            build=fixture.build,
-            stores={"test-store": fixture.store},
-        )
+        with db.transaction():
+            result = populate_links(
+                db,
+                fixture.inputs(),
+                build=fixture.build,
+                stores={"test-store": fixture.store},
+            )
         assert len(result.fresh) == 1
         assert not result.stale
         assert db.rows("digital_text")
@@ -703,12 +717,13 @@ def test_reviewed_alias_can_materialize_without_equal_japanese_names(
     fixture = with_records(fixture, [record])
     with database.copy() as db:
         fixture.publish(db)
-        result = import_links(
-            db,
-            fixture.inputs(),
-            build=fixture.build,
-            stores={"test-store": fixture.store},
-        )
+        with db.transaction():
+            result = populate_links(
+                db,
+                fixture.inputs(),
+                build=fixture.build,
+                stores={"test-store": fixture.store},
+            )
         assert len(result.fresh) == 1
         assert result.stale == ()
         assert any(r.values["relation"] == "same_card" for r in db.rows("digital_link"))
@@ -727,12 +742,13 @@ def test_mixed_reviews_grant_only_the_human_link_for_the_same_owner(
     fixture = with_records(copied(dual, tmp_path / "repo"), [human, model])
     with database.copy() as db:
         fixture.publish(db)
-        result = import_links(
-            db,
-            fixture.inputs(),
-            build=fixture.build,
-            stores={"test-store": fixture.store},
-        )
+        with db.transaction():
+            result = populate_links(
+                db,
+                fixture.inputs(),
+                build=fixture.build,
+                stores={"test-store": fixture.store},
+            )
         assert len(result.fresh) == 2
         assert result.eligible_owner(
             db, fixture.sources(), NameOwner("face_revision", "link-revision")

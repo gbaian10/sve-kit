@@ -42,12 +42,13 @@ def test_initial_current_basis_never_claims_authored_adoption(
     with create_database(compile_build()) as db:
         with db.transaction():
             case.stage(db)
-        case.compose(case.plan.identity).import_into(
-            db,
-            build=case.context(),
-            vocabulary=case.vocabulary,
-            published=(),
-        )
+        with db.transaction():
+            case.compose(case.plan.identity).populate(
+                db,
+                build=case.context(),
+                vocabulary=case.vocabulary,
+                published=(),
+            )
         currents = db.rows("face_current")
         assert len(currents) == 1
         assert currents[0].values["basis"] == "latest_observed_no_errata"
@@ -259,12 +260,13 @@ class TestDefaultTextInputs:
         with create_database(schema) as db:
             with db.transaction():
                 case.stage(db)
-            case.compose(case.plan.identity).import_into(
-                db,
-                build=case.context(),
-                vocabulary=case.vocabulary,
-                published=(),
-            )
+            with db.transaction():
+                case.compose(case.plan.identity).populate(
+                    db,
+                    build=case.context(),
+                    vocabulary=case.vocabulary,
+                    published=(),
+                )
             before = {table.name: db.rows(table.name) for table in schema.tables}
 
             def forbidden(*_args: object, **_kwargs: object) -> None:
@@ -274,12 +276,13 @@ class TestDefaultTextInputs:
 
             monkeypatch.setattr(importer, "insert_raw_sources", forbidden)
             with pytest.raises(ValueError, match="fresh text staging graph"):
-                case.compose(case.plan.identity).import_into(
-                    db,
-                    build=case.context(),
-                    vocabulary=case.vocabulary,
-                    published=(),
-                )
+                with db.transaction():
+                    case.compose(case.plan.identity).populate(
+                        db,
+                        build=case.context(),
+                        vocabulary=case.vocabulary,
+                        published=(),
+                    )
             assert before == {
                 table.name: db.rows(table.name) for table in schema.tables
             }

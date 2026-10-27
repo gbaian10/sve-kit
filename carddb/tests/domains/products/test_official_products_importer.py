@@ -11,6 +11,7 @@ import pytest
 from sve_carddb.build import create_database
 from sve_carddb.build.source_rows import source_values
 from sve_carddb.build.t1 import compile_build
+from sve_carddb.core.json import canonical
 from sve_carddb.domains.products import (
     import_product_preview,
     load_products,
@@ -28,8 +29,12 @@ from sve_carddb.domains.registry.preview import (
     plan_preview,
 )
 from sve_carddb.domains.registry.preview.evidence import CardEvidence, FaceEvidence
-from sve_carddb.domains.registry.records import AllocationData, PrintingData
-from sve_carddb.domains.registry.review import InitDecisions, Inputs
+from sve_carddb.domains.registry.records import (
+    AllocationData,
+    Observation,
+    PrintingData,
+)
+from sve_carddb.domains.registry.review import InitDecisions, Inputs, observation
 from sve_carddb.domains.registry.storage import plan_files, write_files
 from sve_carddb.parse.pages.extract_en import extract_card as extract_en
 from sve_carddb.parse.pages.extract_jp import extract_card
@@ -62,10 +67,9 @@ def changed_page(fixture: IdentityFixture, raw: bytes) -> ProductPage:
 
     page = add_page(fixture, raw, number="TEST-001")
     card = parsed_card(extract_card(raw, number="TEST-001"))
-    evidence = CardEvidence.from_card(
+    evidence = CardEvidence(
         page.source.model_copy(update={"parser_version": "synthetic-jp-identity-v1"}),
-        "jp",
-        card,
+        Observation.model_validate_json(canonical(observation(card, "jp"))),
         (FaceEvidence("LG", None),),
     )
     fixture.preview = plan_preview(
@@ -424,8 +428,10 @@ def test_english_inclusions_obey_existing_identity_gate(
     for directory in ("ids", "registry"):
         shutil.rmtree(fixture.root / directory)
     write_files(plan_files(fixture.root, build(inputs, {})))
-    jp_evidence = CardEvidence.from_card(
-        fixture.pages[0].source, "jp", jp_card, (FaceEvidence("LG", None),)
+    jp_evidence = CardEvidence(
+        fixture.pages[0].source,
+        Observation.model_validate_json(canonical(observation(jp_card, "jp"))),
+        (FaceEvidence("LG", None),),
     )
     cards: dict[tuple[Region, str], CardEvidence] = {
         ("jp", jp_card.number): jp_evidence
@@ -435,8 +441,10 @@ def test_english_inclusions_obey_existing_identity_gate(
             changed_raw = raw.replace(b"Synthetic rule.", b"Different synthetic rule.")
             en_card = parsed_card(extract_en(changed_raw, number="TEST-001EN"))
             page = add_page(fixture, changed_raw, region="en", number="TEST-001EN")
-        cards["en", en_card.number] = CardEvidence.from_card(
-            page.source, "en", en_card, (FaceEvidence("LG", None),)
+        cards["en", en_card.number] = CardEvidence(
+            page.source,
+            Observation.model_validate_json(canonical(observation(en_card, "en"))),
+            (FaceEvidence("LG", None),),
         )
     if state == "frozen_regions":
         assert page.source.archive is not None

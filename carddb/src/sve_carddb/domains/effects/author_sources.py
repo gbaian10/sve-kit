@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from operator import itemgetter
 from typing import TYPE_CHECKING, Literal
 
-from sve_carddb.contracts.author_evidence import CardKeywordSourceUse, SourceUse
+from sve_carddb.contracts.author_evidence import CardKeywordSourceUse
 from sve_carddb.contracts.author_leaves import ParamDecl
 from sve_carddb.contracts.four_layer import (
     CardNameReference,
@@ -23,7 +23,6 @@ from sve_carddb.contracts.n0 import SAFE_INTEGER
 from sve_carddb.contracts.source_binding import SourceBinding
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.domains.translations.four_layer_damage import KEY as DAMAGE_KEY
-from sve_carddb.domains.translations.four_layer_derivation import derive_source
 from sve_carddb.domains.translations.four_layer_destroy import KEY as DESTROY_KEY
 from sve_carddb.domains.translations.four_layer_expressions import definition
 from sve_carddb.domains.translations.four_layer_fixed_actions import (
@@ -33,15 +32,11 @@ from sve_carddb.domains.translations.four_layer_fixed_actions import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
-
     from pydantic import JsonValue
 
     from sve_carddb.contracts.author_handoff import PrintedKeyword
     from sve_carddb.contracts.four_layer import LeafType
-    from sve_carddb.contracts.source_binding import ClosedDomain, SourceDescriptor
     from sve_carddb.domains.translations.four_layer_classification import Classifier
-    from sve_carddb.domains.translations.four_layer_semantics import CardContext
 
 
 PLAYER_VALUES = {"self": "self", "opponent": "opp"}
@@ -198,14 +193,6 @@ class SourceError(ValueError):
     def __init__(self, reason: str) -> None:
         self.reason = reason
         super().__init__(reason)
-
-
-@dataclass(frozen=True)
-class SourceCandidate:
-    raw: str = field(repr=False)
-    descriptor: SourceDescriptor
-    classifier: Classifier = field(repr=False)
-    context: CardContext | None = None
 
 
 @dataclass(frozen=True)
@@ -772,95 +759,9 @@ def _draw_count(source: SourceContext) -> int:
     return value
 
 
-def _structure(frame: Frame, binding: SourceBinding) -> None:
-    if frame.semantic_variant.state != "resolved":
-        raise SourceError("source_pending")
-    if frame.role != "body" or frame.projection.projection_kind != "ability_body":
-        raise SourceError("source_not_ability_body")
-    if not any(
-        scope.kind == "ability" and scope.parent is None
-        for scope in frame.projection.scopes
-    ):
-        raise SourceError("source_ability_scope_missing")
-    if binding.frame_id != frame.id:
-        raise SourceError("source_frame_mismatch")
-    _ports(frame)
-
-
 def _ports(frame: Frame) -> None:
     if frame.projection.imports or frame.projection.exports:
         raise SourceError("unsupported_source_ports")
-
-
-def check_source_compatibility(
-    frame: Frame,
-    binding: SourceBinding,
-    canonical_source: str,
-    domains: Mapping[str, ClosedDomain],
-    *,
-    classifier: Classifier | None = None,
-) -> SourceContext:
-    """Self-consistent synthetic contracts never acquire reconstructed-source proof."""
-    try:
-        frame = Frame.model_validate(frame.model_dump(mode="python"))
-        binding = SourceBinding.model_validate(binding.model_dump(mode="python"))
-        frame.verify(canonical_source)
-        binding.verify(frame, domains)
-    except ValueError:
-        raise SourceError("source_compatibility_mismatch") from None
-    _structure(frame, binding)
-    return SourceContext(frame, binding, canonical_source, classifier)
-
-
-def resolve_source(candidate: SourceCandidate, use: SourceUse) -> SourceContext:
-    """Rebuild candidate evidence; registry currentness remains a separate boundary."""
-    try:
-        use = SourceUse.model_validate(use.model_dump(mode="python"))
-        derived = derive_source(
-            candidate.raw,
-            candidate.descriptor,
-            candidate.classifier,
-            context=candidate.context,
-        )
-    except ValueError:
-        raise SourceError("source_reconstruction_failed") from None
-    indices = [
-        index
-        for index, part in enumerate(derived.field.parts)
-        if part.line_ordinal == use.occurrence.line_ordinal
-        and part.source_span.role == use.occurrence.role
-        and part.source_span.segments == use.occurrence.segments
-    ]
-    if len(indices) != 1:
-        raise SourceError("source_occurrence_mismatch")
-    index = indices[0]
-    if derived.recognized[index].issues:
-        raise SourceError("source_unresolved_issue")
-    if derived.pending_causes[index]:
-        raise SourceError("source_pending")
-    try:
-        frame, binding = derived.bind(index)
-        derived.verify_binding(candidate.raw, candidate.classifier, frame, binding)
-    except ValueError:
-        raise SourceError("source_reconstruction_failed") from None
-    _structure(frame, binding)
-    if binding.id != use.binding_id or binding.occurrence_key() != use.occurrence:
-        raise SourceError("source_occurrence_mismatch")
-    if not any(
-        scope.id == use.ability_scope
-        and scope.kind == "ability"
-        and scope.parent is None
-        for scope in frame.projection.scopes
-    ):
-        raise SourceError("source_ability_scope_mismatch")
-    result = SourceContext(
-        frame,
-        binding,
-        derived.field.parts[index].canonical_source,
-        candidate.classifier,
-    )
-    object.__setattr__(result, "source_proof", "derived_self_consistent")  # ruff: ignore[unnecessary-dunder-call] -- only reconstruction sets frozen proof; dataclass replacement must reset it
-    return result
 
 
 def _slot(source: SourceContext, declaration: ParamDecl) -> LeafSlot:

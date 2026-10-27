@@ -10,10 +10,7 @@ from sve_carddb.build import create_database
 from sve_carddb.build.t1 import compile_build
 from sve_carddb.core.json import array, canonical, object_value, parse
 from sve_carddb.core.provenance import BuildContext, SourceUse
-from sve_carddb.domains.translations.glossary.importer import (
-    import_glossary,
-    populate_glossary,
-)
+from sve_carddb.domains.translations.glossary.importer import populate_glossary
 from sve_carddb.domains.translations.inputs import Inputs, load_glossary
 
 from ...support.adoption_fixtures import commit
@@ -81,15 +78,17 @@ def test_current_import_rechecks_source_without_creating_decision(
             with pytest.raises(
                 ValueError, match=r"^Evidence must locate exact hash-verified text$"
             ):
-                import_glossary(
-                    db, inputs, build=build, stores={"test-store": frozen.store}
-                )
+                with db.transaction():
+                    populate_glossary(
+                        db, inputs, build=build, stores={"test-store": frozen.store}
+                    )
             assert not db.rows("glossary_term")
         else:
             before = db.rows("decision")
-            result = import_glossary(
-                db, inputs, build=build, stores={"test-store": frozen.store}
-            )
+            with db.transaction():
+                result = populate_glossary(
+                    db, inputs, build=build, stores={"test-store": frozen.store}
+                )
             assert db.rows("decision") == before
             row = db.rows("glossary_translation")[0].values
             assert row["text"] == "合成乙"

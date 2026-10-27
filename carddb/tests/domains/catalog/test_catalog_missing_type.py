@@ -7,8 +7,6 @@ import pytest
 
 from sve_carddb.build import Json, create_database
 from sve_carddb.build.t1 import compile_build
-from sve_carddb.core.json import array, object_value
-from sve_carddb.domains.source_corrections.projection import correction_references
 from sve_carddb.domains.text_observations import Binding, Vocabulary
 from sve_carddb.domains.text_observations.importer import revision_id
 from sve_carddb.domains.text_observations.type_binding import type_binding
@@ -65,12 +63,13 @@ def test_missing_type_uses_exact_confirmed_correction_and_preserves_both_revisio
     with create_database(compile_build(("en", "related", "correction"))) as db:
         with db.transaction():
             case.stage(db)
-        record = case.compose(case.plan.identity).import_into(
-            db,
-            build=case.context(),
-            vocabulary=case.vocabulary,
-            published=(),
-        )
+        with db.transaction():
+            record = case.compose(case.plan.identity).populate(
+                db,
+                build=case.context(),
+                vocabulary=case.vocabulary,
+                published=(),
+            )
         revisions = {row.values["id"]: row.values for row in db.rows("face_revision")}
         initial, corrected = (
             revisions[revision_id(raw)],
@@ -94,9 +93,6 @@ def test_missing_type_uses_exact_confirmed_correction_and_preserves_both_revisio
         assert db.rows("correction_application")[0].values[
             "face_revision_id"
         ] == revision_id(candidate)
-        references = correction_references(db, case.plan, case.vocabulary)
-        marker = object_value(array(references[0]["corrections"])[0])
-        assert marker["corrected_from"] == "-"
         assert any(use.usage == "source_correction_evidence" for use in record.uses)
 
 

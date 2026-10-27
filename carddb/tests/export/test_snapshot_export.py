@@ -135,7 +135,8 @@ def test_clean_exports_are_exact_bytes(
             published_at="2026-10-02T01:02:04Z",
         ),
     )
-    exported.assert_identical(again)
+    assert exported.payloads == again.payloads
+    assert exported.compression_recipe == again.compression_recipe
     assert exported.manifest != again.manifest
 
 
@@ -153,18 +154,6 @@ def cloned(logical: tuple[Projection, Ownership]) -> tuple[Projection, Ownership
             for name, values in rows.items()
         },
     ), ownership
-
-
-@pytest.mark.parametrize("encoding", ["raw", "br"])
-def test_byte_comparison_catches_one_encoding_change(
-    exported: Snapshot, encoding: str
-) -> None:
-    blobs = exported.payloads.copy()
-    first = next(iter(blobs))
-    original = getattr(blobs[first], encoding)
-    blobs[first] = replace(blobs[first], **{encoding: (original or b"") + b"changed"})
-    with pytest.raises(ValueError, match="Clean exports differ"):
-        exported.assert_identical(replace(exported, payloads=blobs))
 
 
 def test_independent_expected_join_detects_lost_field_value(
@@ -456,7 +445,8 @@ def test_explicit_compressor_recipe_and_bytes_are_used(
     codec = Brotli("synthetic-test-codec-v1", zlib.compress)
     first = export_snapshot(*logical, BATCH, brotli=codec)
     second = export_snapshot(*logical, BATCH, brotli=codec)
-    first.assert_identical(second)
+    assert first.payloads == second.payloads
+    assert first.compression_recipe == second.compression_recipe
     assert all(
         blob.br is not None and zlib.decompress(blob.br) == blob.raw
         for blob in first.payloads.values()
@@ -545,19 +535,6 @@ def test_name_translation_and_facet_dictionary_closure(
         logical[0].tables["vocabulary"], key=canonical
     )
     assert records["keyword"] == logical[0].tables["keyword"]
-
-
-def test_clean_comparison_rejects_recipe_change_even_with_same_bytes(
-    exported: Snapshot,
-) -> None:
-    with pytest.raises(ValueError, match="Clean exports differ"):
-        exported.assert_identical(
-            replace(
-                exported,
-                compression_recipe=exported.compression_recipe
-                | {"brotli": "another-version"},
-            )
-        )
 
 
 @pytest.mark.parametrize(

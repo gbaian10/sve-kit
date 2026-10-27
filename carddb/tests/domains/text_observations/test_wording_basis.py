@@ -83,9 +83,10 @@ def test_current_wording_preferences_precede_release_dates(
     with create_database(compile_build(("t0", "en", "related"))) as db:
         with db.transaction():
             case.stage(db)
-        case.compose().import_into(
-            db, build=case.context(), vocabulary=case.vocabulary, published=()
-        )
+        with db.transaction():
+            case.compose().populate(
+                db, build=case.context(), vocabulary=case.vocabulary, published=()
+            )
         for item in group.observations:
             product(
                 db,
@@ -196,9 +197,10 @@ def test_current_selection_keeps_classification_and_breaks_release_ties(
     with create_database(compile_build()) as db:
         with db.transaction():
             case.stage(db)
-        case.compose().import_into(
-            db, build=case.context(), vocabulary=case.vocabulary, published=()
-        )
+        with db.transaction():
+            case.compose().populate(
+                db, build=case.context(), vocabulary=case.vocabulary, published=()
+            )
         for i, item in enumerate(group.observations):
             if (
                 mode in {"undated", "ai_undated_pending", "manual_reject_auto"}
@@ -304,9 +306,10 @@ def test_adopted_current_wins_unless_a_manual_basis_is_locatable(
     with create_database(compile_build()) as db:
         with db.transaction():
             case.stage(db)
-        case.compose().import_into(
-            db, build=case.context(), vocabulary=case.vocabulary, published=()
-        )
+        with db.transaction():
+            case.compose().populate(
+                db, build=case.context(), vocabulary=case.vocabulary, published=()
+            )
         for item in group.observations:
             product(
                 db, item.printing_id, "2020-01-01" if item is older else "2026-01-01"
@@ -381,9 +384,10 @@ def test_undated_unreviewed_correction_does_not_block_a_dated_basis(
     with create_database(compile_build(("en", "related", "correction"))) as db:
         with db.transaction():
             case.stage(db)
-        case.compose().import_into(
-            db, build=case.context(), vocabulary=case.vocabulary, published=()
-        )
+        with db.transaction():
+            case.compose().populate(
+                db, build=case.context(), vocabulary=case.vocabulary, published=()
+            )
         product(db, known.printing_id, "2026-01-01")
         with db.transaction():
             for row in db.rows("face_wording"):
@@ -455,9 +459,10 @@ def test_shared_basis_uses_rules_text_instead_of_an_empty_printing(
     with create_database(compile_build()) as db:
         with db.transaction():
             case.stage(db)
-        case.compose().import_into(
-            db, build=case.context(), vocabulary=case.vocabulary, published=()
-        )
+        with db.transaction():
+            case.compose().populate(
+                db, build=case.context(), vocabulary=case.vocabulary, published=()
+            )
         product(db, empty.printing_id, empty_day)
         product(
             db, full.printing_id, full_day, "unknown" if full_day is None else "day"
@@ -547,9 +552,10 @@ def test_corrected_missing_rule_is_not_reported_as_a_reminder(
     with create_database(compile_build(("en", "related", "correction"))) as db:
         with db.transaction():
             case.stage(db)
-        case.compose().import_into(
-            db, build=case.context(), vocabulary=case.vocabulary, published=()
-        )
+        with db.transaction():
+            case.compose().populate(
+                db, build=case.context(), vocabulary=case.vocabulary, published=()
+            )
         for item in group.observations:
             product(db, item.printing_id, "2026-01-01")
         with db.transaction():

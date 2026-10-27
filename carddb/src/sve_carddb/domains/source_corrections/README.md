@@ -42,18 +42,12 @@ candidate/configuration; this API does not consume or reuse wording `checked`
 receipts. `verify_corrections` checks table inventories, exact values, observation
 links and result content beyond the SQLite adoption/FK checks.
 
-`correction_references(db, plan, vocabulary)` returns the affected
-printing/face/source/revision uses and public `Correction` values for the snapshot
-projector. Its outer source ID is an internal join key, not a public snapshot FK.
-Only `applied` references get a marker. Shared text units and unaffected uses get
-none. `source_url` is always present and comes from the official page; an unavailable
-URL stays null and never becomes an image URL.
-
 `plan.publication_identity()` closes correction conflicts over regional
 identity references. An active correction whose parent printing was already
 excluded by identity validation also blocks its regional card, so sibling
-printings cannot bypass the unresolved correction. `correction_exclusions(db, schema, plan)` also closes these
-seeds over every enabled FK, including routes, aliases and default overrides.
+printings cannot bypass the unresolved correction.
+`text_observations.exclusions.reference_exclusions` closes these seeds over every
+enabled FK, including routes, aliases and default overrides.
 These methods do not use `plan.diagnostic_exclusions`: pending wording remains visible under
 authored-layout §9.1. The DB retains blocked rows as diagnostic/source history;
 the eventual snapshot projector uses the blocked keys to preserve a closed output.

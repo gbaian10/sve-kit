@@ -87,8 +87,7 @@ printing 與 display revision 的詳情片一對一提供每個 base row，保�
 未知 descriptor、缺 required、重複 PK、錯誤 base/dependency、循環、未閉合的公開引用、
 錯誤列位置與非法 pending 呈現都會失敗。
 
-`Snapshot.assert_identical` 比較兩次輸出的 raw/br 與 recipe；批次時間
-及版號只影響快照清單，未變 payload bytes 可跨版重用。
+批次時間及版號只影響快照清單；未變 payload bytes 可跨版重用。
 
 `export.transport.measure.measure` 依 [size-budget](size-budget.md) 回報
 `startup_by_region`、`complete_text_by_region`、`text_total`、`manifest` 與逐檔容量。

@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Literal, get_args
 import yamlrocks
 from jsonschema import Draft202012Validator
 from jsonschema.exceptions import best_match
-from pydantic import ConfigDict, JsonValue, TypeAdapter, ValidationError
+from pydantic import JsonValue, TypeAdapter, ValidationError
 from referencing import Registry, Resource
 from referencing.exceptions import Unresolvable
 
@@ -21,15 +21,7 @@ from sve_carddb.contracts.author_evidence import (
     DirectSourceUse,
     SourceUse,
 )
-from sve_carddb.contracts.author_leaves import (
-    AuthorIndexRecord,
-    EffectsIndex,
-    ParamDecl,
-    ParamDeclarations,
-    ParamRef,
-    ParamValue,
-    ParamValues,
-)
+from sve_carddb.contracts.author_leaves import AuthorIndexRecord, EffectsIndex
 from sve_carddb.core.json import canonical, object_value, parse
 from sve_carddb.core.yaml import JSON_VALUE, MAX_BYTES, YamlSyntaxError, parse_yaml
 from sve_carddb.domains.effects.author_validation import (
@@ -60,15 +52,6 @@ _RESOURCES = {
     "author-storage.schema.json": "urn:sve-kit:author-storage:2",
     "effect-body-storage.schema.json": "urn:sve-kit:effect-body-storage:2",
 }
-_PARAM_REF = TypeAdapter(ParamRef)
-_PARAM_DECL = TypeAdapter(ParamDecl)
-_PARAM_VALUE: TypeAdapter[ParamValue] = TypeAdapter(ParamValue)
-_PARAM_DECLS: TypeAdapter[ParamDeclarations] = TypeAdapter(
-    ParamDeclarations, config=ConfigDict(regex_engine="python-re")
-)
-_PARAM_VALUES: TypeAdapter[ParamValues] = TypeAdapter(
-    ParamValues, config=ConfigDict(regex_engine="python-re")
-)
 _INDEX_VALUE = TypeAdapter(EffectsIndex)
 _AUTHOR_VALUE = TypeAdapter(AuthorEffectSet)
 _BODIES_VALUE = TypeAdapter(EffectBodyShard)
@@ -702,13 +685,6 @@ class AuthorSchemas:
         self._validate(document, references[kind])
         return document.value
 
-    def author_effect_set(
-        self, raw: bytes, *, context: AuthorIndexRecord | None = None
-    ) -> AuthorEffectSet:
-        """Read complete authored structure, without expansion or source admission."""
-        document = _document(raw, context)
-        return self._author(document)
-
     def _author(
         self, document: ParsedDocument, *, expanded: bool = False
     ) -> AuthorEffectSet:
@@ -766,11 +742,6 @@ class AuthorSchemas:
         """Read a fully expanded tree; this does not establish source admission."""
         return self._author(_document(raw, context), expanded=True)
 
-    def effect_body_shard(self, raw: bytes) -> EffectBodyShard:
-        """Read companion shapes; this does not verify body versions or domains."""
-        document = _document(raw)
-        return self._bodies(document)
-
     def _bodies(self, document: ParsedDocument) -> EffectBodyShard:
         _entry_preflight(document, "effect_body_shard")
         self._validate(document, _BODIES)
@@ -810,18 +781,6 @@ class AuthorSchemas:
         document = _document(raw)
         self._validate(document, _NODES + "#/$defs/" + definition)
         return document.value
-
-    def parameter_reference(self, raw: bytes) -> ParamRef:
-        """Decode a reference without substituting it into any author node."""
-        return _decode(_PARAM_REF, self.leaf(raw, "A.param"))
-
-    def parameter_value(self, raw: bytes) -> ParamValue:
-        """Decode exactly one of the eight typed leaf variants."""
-        return _decode(_PARAM_VALUE, self.leaf(raw, "ParamValue"))
-
-    def parameter_values(self, raw: bytes) -> ParamValues:
-        """Validate a complete value map without assuming a matching declaration."""
-        return _decode(_PARAM_VALUES, self.leaf(raw, "ParamValues"))
 
     def effects_index(self, raw: bytes) -> EffectsIndex:
         """Validate index syntax and uniqueness without opening candidate files."""

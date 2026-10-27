@@ -3,11 +3,14 @@
 from dataclasses import replace
 from typing import TYPE_CHECKING
 
+from sve_carddb.core.json import canonical
 from sve_carddb.core.regions import SourceRegion
 from sve_carddb.domains.products.evidence import resolve_evidence
 from sve_carddb.domains.products.importer import product_source_uses
 from sve_carddb.domains.registry.inputs import Card
 from sve_carddb.domains.registry.preview.evidence import CardEvidence, FaceEvidence
+from sve_carddb.domains.registry.records import Observation
+from sve_carddb.domains.registry.review import observation
 from sve_carddb.domains.registry.storage import read_yaml
 from sve_carddb.ingest.archive.frozen_sources import FrozenSources
 from sve_carddb.ingest.archive.manifest import Kind
@@ -55,10 +58,11 @@ def frozen_provider(inputs: Inputs, temporary: Path) -> tuple[MemoryEvidence, Pa
         )
         card = Card.model_validate_json(raw[len(b"<html>") : -len(b"</html>")])
         observed_region: CardRegion = "jp" if descriptor.provider == "jp" else "en"
-        found[observed_region, card.number] = CardEvidence.from_card(
+        found[observed_region, card.number] = CardEvidence(
             source,
-            observed_region,
-            card,
+            Observation.model_validate_json(
+                canonical(observation(card, observed_region))
+            ),
             tuple(FaceEvidence("LG", None) for _ in card.faces),
         )
     return MemoryEvidence(found, frozenset({inputs.jp_hash})), store.root

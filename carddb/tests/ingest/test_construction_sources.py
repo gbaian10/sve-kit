@@ -1,5 +1,4 @@
 import hashlib
-import json
 from itertools import pairwise
 from typing import TYPE_CHECKING
 
@@ -13,7 +12,6 @@ from sve_carddb.ingest.crawl.construction_sources import (
     ConstructionSourceError,
     SourceResult,
     fetch_new,
-    load_sources,
     select_sources,
 )
 from sve_carddb.ingest.http.client import StopCrawlError
@@ -21,6 +19,7 @@ from sve_carddb.ingest.http.throttle import CircuitOpenError, Throttle
 from sve_carddb.ingest.http.writer import PathConflictError, Writer
 from sve_carddb.parse.html import MissingElementError
 from sve_carddb.parse.pages.construction_outline import parse_construction_outline
+from tests.support.manifest_history import request_outcomes
 
 from ..conftest import FakeClock
 
@@ -37,7 +36,7 @@ BODY = b"""<html><head><title>Synthetic restrictions</title></head><body>
 </main></body></html>"""
 
 
-def test_explicit_source_classification_and_safe_paths(tmp_path: Path) -> None:
+def test_explicit_source_classification_and_safe_paths() -> None:
     urls = [
         JP,
         EN,
@@ -48,9 +47,7 @@ def test_explicit_source_classification_and_safe_paths(tmp_path: Path) -> None:
         "https://en.shadowverse-evolve.com/rules/",
         JP,
     ]
-    path = tmp_path / "urls.json"
-    path.write_text(json.dumps(urls))
-    selected = load_sources(path)
+    selected = select_sources(urls)
     assert [(source.region, source.kind, source.page_type) for source in selected] == [
         (SourceRegion.JP, Kind.LIMIT, "limit"),
         (SourceRegion.EN, Kind.NEWS, "notice"),
@@ -85,14 +82,6 @@ def test_explicit_source_classification_and_safe_paths(tmp_path: Path) -> None:
 def test_rejects_unsafe_or_unclassified_selection(url: str) -> None:
     with pytest.raises(ConstructionSourceError):
         select_sources([JP, url])
-
-
-@pytest.mark.parametrize("value", [[], {}, [True], [1], [JP, {}]])
-def test_rejects_non_url_arrays(tmp_path: Path, value: object) -> None:
-    path = tmp_path / "urls.json"
-    path.write_text(json.dumps(value))
-    with pytest.raises(ConstructionSourceError):
-        load_sources(path)
 
 
 def test_outline_keeps_all_content_hrefs_without_semantic_claims() -> None:
@@ -181,7 +170,7 @@ async def test_mock_batch_records_metadata_spaces_requests_and_skips_existing(
             assert resource.etag == '"synthetic"'
             assert resource.first_fetched_at is not None
             assert decompress((tmp_path / "data" / resource.path).read_bytes()) == BODY
-            assert manifest.requests.outcomes(resource.url) == [Outcome.CHANGED]
+            assert request_outcomes(manifest, resource.url) == [Outcome.CHANGED]
         assert not manifest.requests.has_started()
     assert [report.outcome for report in reports] == [
         "fetched",
@@ -232,7 +221,7 @@ async def test_invalid_response_is_not_stored_or_retried(
                 == 1
             )
         assert manifest.resources.get(JP) is None
-        assert manifest.requests.outcomes(JP) == [Outcome.FAILED]
+        assert request_outcomes(manifest, JP) == [Outcome.FAILED]
         assert not manifest.requests.has_started()
     assert len(calls) == 1
 
@@ -264,7 +253,7 @@ async def test_error_status_never_retries(tmp_path: Path, status: int) -> None:
             else:
                 assert await fetch() == 1
         assert manifest.resources.get(JP) is None
-        assert manifest.requests.outcomes(JP) == [Outcome.FAILED]
+        assert request_outcomes(manifest, JP) == [Outcome.FAILED]
         assert not manifest.requests.has_started()
     assert len(calls) == 1
 
@@ -315,7 +304,7 @@ async def test_refuses_redirect_even_to_another_selected_url(tmp_path: Path) -> 
                     run_id="redirect",
                     report=lambda _: None,
                 )
-        assert manifest.requests.outcomes(JP) == [Outcome.REDIRECTED]
+        assert request_outcomes(manifest, JP) == [Outcome.REDIRECTED]
         assert list(manifest.resources.all()) == []
     assert [str(request.url) for request in calls] == [JP]
 
@@ -411,7 +400,7 @@ async def test_non_html_mime_is_not_admitted(tmp_path: Path) -> None:
                 == 1
             )
         assert manifest.resources.get(JP) is None
-        assert manifest.requests.outcomes(JP) == [Outcome.FAILED]
+        assert request_outcomes(manifest, JP) == [Outcome.FAILED]
         assert not manifest.requests.has_started()
 
 

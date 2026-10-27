@@ -435,13 +435,6 @@ class RequestLog(_Store):
         self._conn.commit()
         return cursor.rowcount
 
-    def outcomes(self, url: str) -> list[Outcome]:
-        """Return the outcomes of all requests for `url`, oldest first."""
-        rows = self._conn.execute(
-            "SELECT outcome FROM fetch_log WHERE url = ? ORDER BY id", (url,)
-        ).fetchall()
-        return [Outcome(_str(row[0])) for row in rows]
-
 
 class LinkStore(_Store):
     """Current links of single-page sources, with history."""

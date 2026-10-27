@@ -20,10 +20,9 @@ from sve_carddb.domains.effects.author_sources import (
     entry_heads,
     entry_payload,
     parameter_expected,
-    resolve_source,
 )
+from tests.support.author_source_fixtures import source_context
 
-from ..translations.test_four_layer_fixed_actions import MOVE_RAW
 from .author_move_cases import PATH, head, move_ability, move_source
 from .test_author_entries import SCHEMAS, document, shard
 from .test_author_expansion import generated, registered
@@ -39,7 +38,7 @@ def expander() -> AuthorExpander:
 
 def context() -> SourceContext:
     candidate, use, _ = move_source()
-    return resolve_source(candidate, use)
+    return source_context(candidate, use)
 
 
 @pytest.mark.parametrize("companion", [False, True])
@@ -48,14 +47,14 @@ def test_fixed_self_move_expansion(
 ) -> None:
     candidate, use, frame = move_source()
     entry, bodies = move_ability(frame, use, companion=companion)
-    result = expander.expand_sources(
-        canonical(document(entry)), bodies, {PATH: candidate}
+    result = expander.expand_contexts(
+        canonical(document(entry)), bodies, {PATH: source_context(candidate, use)}
     )
     assert entry_heads(frame) == ("activate",)
     assert equivalent_ability(next(ability_nodes(result.tree))[1]) == canonical(
         head() | {"ports": {"imports": {}, "exports": {}}}
     )
-    assert result.sidecar[0].source_proof == "derived_self_consistent"
+    assert result.sidecar[0].source_proof == "none"
     assert result.sidecar[0].frame_id == frame.id
 
 
@@ -133,66 +132,7 @@ def test_complete_payload_is_fixed(
     raw = canonical(document(entry))
     expander.expand(raw, bodies)
     with pytest.raises(ExpansionError, match="source_head_payload_mismatch"):
-        expander.expand_sources(raw, bodies, {PATH: candidate})
-
-
-@pytest.mark.parametrize(
-    "raw",
-    [
-        MOVE_RAW.replace("{起動}", "{ファンファーレ}"),
-        MOVE_RAW.replace("これを墓場", "自分のフォロワーすべてを墓場"),
-        MOVE_RAW.replace("墓場", "手札"),
-        MOVE_RAW.replace("コスト1", "コスト2"),
-        MOVE_RAW.replace("コスト1", "コストX"),
-        MOVE_RAW.replace("：", "これを{アクト}："),
-        MOVE_RAW.replace("：これを墓場に置く。", "これを墓場に置く：1枚引く。"),
-        MOVE_RAW.replace("：これ", "：自分の手札が1枚なら、これ"),
-        MOVE_RAW.split("\n")[1],
-        MOVE_RAW.replace("1枚引く", "2枚引く"),
-        MOVE_RAW + "1枚引く。",
-    ],
-    ids=[
-        "head",
-        "scope",
-        "zone",
-        "pp",
-        "dynamic",
-        "extra-cost",
-        "payment",
-        "condition",
-        "missing-sibling",
-        "changed-sibling",
-        "extra-step",
-    ],
-)
-def test_related_sources_stay_rejected(expander: AuthorExpander, raw: str) -> None:
-    candidate, use, frame = move_source(raw)
-    entry, bodies = move_ability(frame, use, companion=False)
-    with pytest.raises(SourceError, match=r"source_pending|source_unresolved_issue"):
-        expander.expand_sources(canonical(document(entry)), bodies, {PATH: candidate})
-
-
-@pytest.mark.parametrize("change", ["owner", "binding", "scope", "line", "segments"])
-def test_source_use_is_exact(expander: AuthorExpander, change: str) -> None:
-    candidate, use, frame = move_source()
-    tree = use.model_dump(mode="json")
-    occurrence = object_value(tree["occurrence"])
-    if change == "owner":
-        occurrence["owner"] = {"kind": "face_revision", "revision_id": "revision:wrong"}
-    elif change == "binding":
-        tree["binding_id"] = "bind:" + "f" * 64
-    elif change == "scope":
-        tree["ability_scope"] = "ability_1"
-    elif change == "line":
-        occurrence["line_ordinal"] = 0
-    else:
-        occurrence["segments"] = [{"start": 29, "end": 48}]
-    entry, bodies = move_ability(frame, use, companion=False)
-    entry["sources"] = [tree]
-    with pytest.raises(
-        SourceError, match=r"source_occurrence_mismatch|source_ability_scope_mismatch"
-    ):
-        expander.expand_sources(canonical(document(entry)), bodies, {PATH: candidate})
+        expander.expand_contexts(raw, bodies, {PATH: source_context(candidate, use)})
 
 
 @pytest.mark.parametrize("slot", [0, 1, 2])
@@ -266,6 +206,8 @@ def test_companion_cannot_parameterize_destination(expander: AuthorExpander) -> 
     entry = generated(record, {"zone": {"type": "Zone", "value": "cemetery"}})
     entry["sources"] = [use.model_dump(mode="json")]
     with pytest.raises(SourceError, match="unsupported_source_construct"):
-        expander.expand_sources(
-            canonical(document(entry)), [canonical(shard(record))], {PATH: candidate}
+        expander.expand_contexts(
+            canonical(document(entry)),
+            [canonical(shard(record))],
+            {PATH: source_context(candidate, use)},
         )

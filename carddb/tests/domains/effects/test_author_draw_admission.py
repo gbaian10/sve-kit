@@ -8,14 +8,10 @@ import pytest
 
 from sve_carddb.contracts.author_evidence import SourceUse
 from sve_carddb.contracts.author_leaves import ParamDecl, ParamSource
-from sve_carddb.domains.effects.author_sources import (
-    SourceCandidate,
-    entry_payload,
-    parameter_expected,
-    resolve_source,
-)
+from sve_carddb.domains.effects.author_sources import entry_payload, parameter_expected
 from sve_carddb.domains.translations.four_layer_derivation import derive_source
 from sve_carddb.domains.translations.four_layer_semantics import CardContext
+from tests.support.author_source_fixtures import SourceCandidate, source_context
 
 from ..translations.test_four_layer_classification import classifier, source
 
@@ -206,9 +202,9 @@ def test_frozen_draw_sources_admit_their_complete_ability(
         occurrence=binding.occurrence_key(),
         ability_scope="ability_0",
     )
-    checked = resolve_source(candidate, use)
-    # Reconstructed wording with synthetic identities is not a current registry proof.
-    assert checked.source_proof == "derived_self_consistent"
+    checked = source_context(candidate, use)
+    # Fixture contexts carry no source admission proof.
+    assert checked.source_proof == "none"
     declaration = ParamDecl(
         type="Nat", source=ParamSource(slot="leaf_0", component="value")
     )

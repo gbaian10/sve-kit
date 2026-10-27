@@ -12,7 +12,7 @@ from sve_carddb.contracts.profiles import MEDIA
 from sve_carddb.contracts.snapshot import validate
 from sve_carddb.core.json import array, canonical, object_value, parse, string
 from sve_carddb.export.media_urls import image_url
-from sve_carddb.export.reader import read_index, read_snapshot, select_index_entry
+from sve_carddb.export.reader import read_index, read_snapshot
 
 from ..support.snapshot_contract_fixtures import _replace, _reseal
 from ..support.snapshot_contract_fixtures import wire as wire  # ruff: ignore[useless-import-alias] -- share one immutable golden input per module
@@ -100,10 +100,6 @@ def test_shared_v3_index_cases(case: JsonValue) -> None:
             read_index(index, manifests)
     else:
         assert read_index(index, manifests) == index
-        selected = select_index_entry(index)
-        assert (None if selected is None else selected["data_version"]) == item[
-            "selected_data_version"
-        ]
 
 
 @pytest.mark.parametrize(

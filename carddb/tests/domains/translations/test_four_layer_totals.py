@@ -34,7 +34,6 @@ from sve_carddb.domains.translations.four_layer_render import (
     Renderer,
     SelectedTarget,
 )
-from sve_carddb.domains.translations.four_layer_totals import lowering
 from tests.support.aggregate_probes import disjoint_pair_count
 
 from .expression_fixtures import expression_plan
@@ -123,7 +122,7 @@ def test_attack_sum_keeps_original_cost_filter_separate_from_bound() -> None:
         "自分の墓場の『架空甲』『架空乙』の合計+3",
     ],
 )
-def test_totals_keep_two_count_operands_and_explicit_lowering_gap(
+def test_totals_keep_two_count_operands(
     selector: str,
 ) -> None:
     result, frame, binding = prepared(
@@ -139,11 +138,6 @@ def test_totals_keep_two_count_operands_and_explicit_lowering_gap(
     assert isinstance(left, ContextExpression)
     assert isinstance(right, ContextExpression)
     assert left.leaves != right.leaves
-    skeleton = lowering(total.expression_id, total.leaves)
-    assert skeleton.operands == total.leaves
-    assert not skeleton.executable
-    if "や" in selector:
-        assert skeleton.unresolved == ("overlapping_total",)
     verify_quantities(frame, binding, scopes={}, registry=result.registry)
 
 
@@ -163,9 +157,6 @@ def test_pair_signatures_preserve_independent_selectors(noun: str) -> None:
     assert tuple(p.name for p in rule.parameters if p.type == "ZoneSet") == (
         "zone_left",
         "zone_right",
-    )
-    assert "min(left_count,right_count)" in (
-        lowering(pair.expression_id, pair.leaves).pair_policy or ""
     )
 
 

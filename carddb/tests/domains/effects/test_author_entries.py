@@ -80,7 +80,7 @@ def test_all_inline_variants(
     schemas: AuthorSchemas, key: str, payload: JsonValue
 ) -> None:
     value = document(ability({key: payload}))
-    decoded = schemas.author_effect_set(canonical(value))
+    decoded = schemas.document(canonical(value))
     assert decoded.model_dump(mode="json") == value
 
 
@@ -91,14 +91,14 @@ def test_inline_rejects_missing_source_and_unknown_fields(
         bad = ability({"spell": {"do": []}})
         del bad[field]
         with pytest.raises(AuthorInputError):
-            schemas.author_effect_set(canonical(document(bad)))
+            schemas.document(canonical(document(bad)))
     bad = ability({"spell": {"do": []}}) | {"typo": True}
     with pytest.raises(AuthorInputError):
-        schemas.author_effect_set(canonical(document(bad)))
+        schemas.document(canonical(document(bad)))
 
 
 def test_fixed_goldens_preserve_content_and_order(schemas: AuthorSchemas) -> None:
-    value = schemas.author_effect_set(GOLDEN.read_bytes()).model_dump(mode="json")
+    value = schemas.document(GOLDEN.read_bytes()).model_dump(mode="json")
     cards = value["cards"]
     bp = cards["BP08-038"]["abilities"][0]["fanfare"]
     expected_bp = b'{"fanfare":{"define":{"X":{"minus":[{"count":{"who":"self","zone":"deck"}},5]}},"do":[{"draw":{"n":"X"}}]}}'
@@ -127,9 +127,7 @@ def test_fixed_goldens_preserve_content_and_order(schemas: AuthorSchemas) -> Non
     reversed_value = deepcopy(value)
     reversed_value["cards"]["CP04-060"]["abilities"][0]["evolve_time"]["do"].reverse()
     assert canonical(
-        schemas.author_effect_set(json.dumps(reversed_value).encode()).model_dump(
-            mode="json"
-        )
+        schemas.document(json.dumps(reversed_value).encode()).model_dump(mode="json")
     ) != canonical(value)
 
 
@@ -175,7 +173,7 @@ def test_inline_param_is_local_error_at_wire_path(
         card["faces"] = {"f:" + "1" * 32: {"abilities": [entry]}}
         prefix = ("cards", "FIX-001", "faces", "f:" + "1" * 32, "abilities", 0)
     with pytest.raises(AuthorInputError) as caught:
-        schemas.author_effect_set(json.dumps(value, indent=2).encode())
+        schemas.document(json.dumps(value, indent=2).encode())
     diagnostic = caught.value.diagnostic
     assert diagnostic.reason == "inline_param_reference"
     assert diagnostic.path == (*prefix, *path)
@@ -184,8 +182,10 @@ def test_inline_param_is_local_error_at_wire_path(
     assert diagnostic.card_no == "FIX-001"
     assert diagnostic.scope == "shared"
     assert diagnostic.source is not None
-    accepted = schemas.effect_body_shard(canonical(shard(companion(head))))
-    assert accepted.records[0]["body"]
+    accepted = schemas.document(canonical(shard(companion(head)))).model_dump(
+        mode="json"
+    )
+    assert accepted["records"][0]["body"]
 
 
 @pytest.mark.parametrize(
@@ -203,7 +203,7 @@ def test_selected_index_context_survives_boundary_errors(
         kind="author_effect_set",
         record_key="FIX-001",
     )
-    for read in (schemas.document, schemas.author_effect_set):
+    for read in (schemas.document, schemas.author_tree):
         with pytest.raises(AuthorInputError) as caught:
             read(raw, context=context)
         diagnostic = caught.value.diagnostic

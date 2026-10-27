@@ -15,12 +15,9 @@ from sve_carddb.domains.effects.author_expansion import (
     equivalent_ability,
 )
 from sve_carddb.domains.effects.author_set import AuthorInputSet
-from sve_carddb.domains.effects.author_sources import (
-    SourceCandidate,
-    entry_payload,
-    resolve_source,
-)
+from sve_carddb.domains.effects.author_sources import entry_payload
 from sve_carddb.domains.translations.four_layer_semantics import CardContext
+from tests.support.author_source_fixtures import SourceCandidate, source_context
 
 from ...support.author_move_fixtures import FRAME, NUMBERS
 from ...support.author_semantic_inputs import load_semantic_inputs
@@ -167,22 +164,22 @@ def test_real_permanent_token_sources_and_whole_card_rejection(
         check_amulet_stats_stay_unknown(source, use)
         expected = canonical(head() | {"ports": {"imports": {}, "exports": {}}})
         assert (
-            canonical(entry_payload(resolve_source(candidate, use), "ability_0"))
+            canonical(entry_payload(source_context(candidate, use), "ability_0"))
             == expected
         )
         for number in NUMBERS:
             for companion in (False, True):
                 entry, bodies = move_ability(frame, use, companion=companion)
                 inputs = collection(number, source.printing_card(number), entry, bodies)
-                result = expander.expand_sources(
+                result = expander.expand_contexts(
                     inputs.author_files[0].raw,
                     bodies,
-                    {("cards", number, "abilities", 0): candidate},
+                    {("cards", number, "abilities", 0): source_context(candidate, use)},
                 )
                 assert (
                     equivalent_ability(next(ability_nodes(result.tree))[1]) == expected
                 )
-                assert result.sidecar[0].source_proof == "derived_self_consistent"
+                assert result.sidecar[0].source_proof == "none"
                 root = tmp_path / number / str(companion)
                 write_inputs(root, inputs)
                 rejected = source.validate_inputs(

@@ -22,6 +22,7 @@ from sve_carddb.ingest.http.validate import ValidationError
 from sve_carddb.ingest.http.writer import LocalState, Writer
 from sve_carddb.parse.html import MissingElementError
 from sve_carddb.parse.pages import official_sv1 as sv1
+from tests.support.manifest_history import request_outcomes
 
 from ..support.fakeportal import ETAG, FakePortal, card_id
 from ..support.fakesite import page
@@ -194,7 +195,7 @@ async def test_api_is_rechecked_with_its_etag(
     await make_sv1(manifest, root, clock, portal).cards("ja")
     await make_sv1(manifest, root, clock, portal).cards("ja")
     assert portal.conditional == [None, ETAG]
-    assert manifest.requests.outcomes(sv1.api_url("ja")) == [
+    assert request_outcomes(manifest, sv1.api_url("ja")) == [
         Outcome.CHANGED,
         Outcome.NOT_MODIFIED,
     ]
@@ -251,7 +252,7 @@ async def test_missing_template_falls_back_to_the_card_page(
         sv1.card_url(SPELL),
         actual,
     ]
-    assert manifest.requests.outcomes(template) == [Outcome.REDIRECTED, Outcome.FAILED]
+    assert request_outcomes(manifest, template) == [Outcome.REDIRECTED, Outcome.FAILED]
     assert manifest.resources.get(template) is None
     assert manifest.links.current(sv1.card_url(SPELL)) == [
         Link(actual, Kind.IMAGE, 0, f"{actual}?123")

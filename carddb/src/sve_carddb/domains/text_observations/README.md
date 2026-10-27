@@ -47,8 +47,8 @@ sections, an ordinary follower type and three numeric stats. It never fills text
 
 `populate_text_preview(db, catalog, observations, ...)` composes identity/product
 and the owned text staging in a caller-owned transaction.
-`observations.populate` uses an existing transaction; `observations.import_into`
-owns a transaction and rolls back dependency failures. External hand-built
+`observations.populate` uses an existing transaction; the caller owns rollback
+on dependency failures. External hand-built
 `TextPlan` values are no longer importer inputs. `observations.configuration`
 pins the explicit vocabulary and published text history; these external inputs
 and all DB parent/revision dependencies are still checked during import.

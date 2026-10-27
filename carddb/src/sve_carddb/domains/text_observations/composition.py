@@ -135,20 +135,6 @@ class TextObservations:
             db, self, build=build, vocabulary=vocabulary, published=published
         )
 
-    def import_into(
-        self,
-        db: Database,
-        *,
-        build: BuildContext,
-        vocabulary: Vocabulary,
-        published: tuple[LocalizedText, ...],
-    ) -> InputRecord:
-        """Roll back all staging writes if external configuration or DB parents disagree."""
-        with db.transaction():
-            return self.populate(
-                db, build=build, vocabulary=vocabulary, published=published
-            )
-
     def views(self, db: Database) -> TextViews:
         """Project both views from the same processed inputs and current DB rows."""
         return TextViews(

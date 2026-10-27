@@ -4,9 +4,9 @@ import re
 from dataclasses import dataclass
 from datetime import date
 from typing import TYPE_CHECKING
-from urllib.parse import parse_qsl, urljoin, urlsplit
+from urllib.parse import urljoin
 
-from sve_carddb.core.json import canonical, digest
+from sve_carddb.core.json import canonical
 from sve_carddb.domains.products.identity_models import (
     ExpansionLink,
     ProductLink,
@@ -14,9 +14,7 @@ from sve_carddb.domains.products.identity_models import (
     expansion,
     official_url,
 )
-from sve_carddb.ingest.http.validate import decode_html
-from sve_carddb.parse.html import Queryable, attribute, parse, select_all
-from sve_carddb.parse.pages import official_en, official_jp
+from sve_carddb.parse.html import Queryable, attribute, select_all
 
 if TYPE_CHECKING:
     from selectolax.lexbor import LexborNode
@@ -71,28 +69,6 @@ class ProductPage:
     region: Region
     card_no: str
     blocks: tuple[ProductBlock, ...]
-
-
-def parse_products(raw: bytes, source: Source, region: Region) -> ProductPage:
-    """Verify page identity and enumerate only recognized product section blocks."""
-    if source.sha256 != digest(raw):
-        raise ValueError("Official product raw hash mismatch")
-    if source.parser_version != PARSER:
-        raise ValueError("Official product parser pin mismatch")
-    adapter = official_jp if region == "jp" else official_en
-    query = parse_qsl(urlsplit(source.url).query, keep_blank_values=True)
-    numbers = [value for key, value in query if key == "cardno"]
-    if (
-        len(numbers) != 1
-        or not numbers[0]
-        or source.url != adapter.card_url(numbers[0])
-    ):
-        raise ValueError("Official product page URL/region mismatch")
-    if source.kind != "official_page":
-        raise ValueError("Official product page requires HTML")
-    tree = parse(decode_html(raw, min_bytes=official_jp.MIN_PAGE_BYTES))
-    official_jp.card_tree(tree, expected_number=numbers[0], page_dir=adapter.CARD_DIR)
-    return products_tree(tree, source, region, numbers[0])
 
 
 def products_tree(

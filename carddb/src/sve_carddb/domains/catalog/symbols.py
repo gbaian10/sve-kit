@@ -8,7 +8,7 @@ from pydantic import JsonValue, model_validator
 
 from sve_carddb.build.t0_json import schemas, symbol_valid
 from sve_carddb.build.validation import Rules
-from sve_carddb.core.json import array, canonical, integer, object_value, string
+from sve_carddb.core.json import array, canonical, object_value, string
 from sve_carddb.core.models import RecordData, Text
 from sve_carddb.domains.products.models import Code, Lang
 
@@ -88,59 +88,3 @@ def _references(pattern: str, parameters: Mapping[str, object]) -> None:
     remainder = re.sub(r"\{[^{}]*\}", "", pattern)
     if "{" in remainder or "}" in remainder:
         raise ValueError("Invalid localization placeholder")
-
-
-class SymbolMatch(RecordData):
-    symbol_id: str | None
-    raw: str
-    parameters: dict[str, int | str]
-
-
-def _parse(symbol: Symbol, spelling: Spelling, raw: str) -> dict[str, int | str] | None:  # ruff: ignore[too-many-return-statements] -- finite spelling domains fail closed independently
-    prefix, suffix = spelling.literal_prefix, spelling.literal_suffix
-    if not raw.startswith(prefix) or not raw.endswith(suffix):
-        return None
-    end = len(raw) - len(suffix) if suffix else len(raw)
-    if end < len(prefix):
-        return None
-    value = raw[len(prefix) : end]
-    if spelling.parse_kind == "literal":
-        return {} if not value else None
-    assert spelling.parameter_name is not None
-    param = _parameters(symbol)[spelling.parameter_name]
-    if spelling.parse_kind == "variable":
-        return (
-            {spelling.parameter_name: value}
-            if value in array(param["variables"])
-            else None
-        )
-    bounds = object_value(param["uint"])
-    if not value or not value.isascii() or not value.isdecimal():
-        return None
-    # Compare decimal strings first so hostile input never triggers Python's int digit limit.
-    digits = value.lstrip("0") or "0"
-    maximum = str(integer(bounds["maximum"]))
-    if (len(digits), digits) > (len(maximum), maximum):
-        return None
-    parsed = int(digits)
-    return (
-        {spelling.parameter_name: parsed}
-        if parsed >= integer(bounds["minimum"])
-        else None
-    )
-
-
-def parse_symbol(symbols: tuple[Symbol, ...], lang: str, raw: str) -> SymbolMatch:
-    """Return literal source even when unknown, ambiguous, or leading zeros were parsed."""
-    found = {
-        (symbol.id, tuple(sorted(params.items())))
-        for symbol in symbols
-        for spelling in symbol.spellings
-        if spelling.lang == lang
-        and (params := _parse(symbol, spelling, raw)) is not None
-        and params.keys() == _parameters(symbol).keys()
-    }
-    if len(found) != 1:
-        return SymbolMatch(symbol_id=None, raw=raw, parameters={})
-    symbol_id, items = found.pop()
-    return SymbolMatch(symbol_id=symbol_id, raw=raw, parameters=dict(items))

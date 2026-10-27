@@ -29,12 +29,13 @@ def test_raw_history_remains_eligible_after_effect_correction(
     with create_database(compile_build(("en", "related", "correction"))) as db:
         with db.transaction():
             case.stage(db)
-        case.compose(case.plan.identity).import_into(
-            db,
-            build=case.context(),
-            vocabulary=case.vocabulary,
-            published=(),
-        )
+        with db.transaction():
+            case.compose(case.plan.identity).populate(
+                db,
+                build=case.context(),
+                vocabulary=case.vocabulary,
+                published=(),
+            )
         owners = dict(publication_owners(db, case.plan))
         revisions = {
             owner.identifier: evidence

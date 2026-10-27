@@ -16,6 +16,7 @@ from sve_carddb.ingest.http.client import (
     retry_after_seconds,
 )
 from sve_carddb.ingest.http.throttle import Throttle
+from tests.support.manifest_history import request_outcomes
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
@@ -89,7 +90,7 @@ async def test_success_returns_body_and_leaves_the_log_open(
     assert response.status == 200
     assert response.body == b"<html>card</html>"
     assert response.etag == '"abc"'
-    assert manifest.requests.outcomes(URL) == [Outcome.STARTED]
+    assert request_outcomes(manifest, URL) == [Outcome.STARTED]
 
 
 async def test_retries_503_and_every_attempt_is_throttled(
@@ -99,7 +100,7 @@ async def test_retries_503_and_every_attempt_is_throttled(
     response = await client.get(request())
     assert response.status == 200
     assert all(gap >= INTERVAL for gap in gaps(server))
-    assert manifest.requests.outcomes(URL) == [
+    assert request_outcomes(manifest, URL) == [
         Outcome.FAILED,
         Outcome.FAILED,
         Outcome.STARTED,
@@ -181,7 +182,7 @@ async def test_follows_allowed_redirects_hop_by_hop(
     response = await client.get(request())
     assert response.url == f"{HOST}/cardlist/?cardno=BP01-001&moved=1"
     assert all(gap >= INTERVAL for gap in gaps(server))
-    assert manifest.requests.outcomes(URL) == [Outcome.REDIRECTED, Outcome.STARTED]
+    assert request_outcomes(manifest, URL) == [Outcome.REDIRECTED, Outcome.STARTED]
 
 
 async def test_disallowed_redirect_is_never_sent(

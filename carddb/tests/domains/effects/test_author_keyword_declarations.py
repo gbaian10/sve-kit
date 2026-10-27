@@ -10,16 +10,16 @@ from sve_carddb.contracts.author_entries import KeywordsAbility
 from sve_carddb.contracts.author_evidence import CardKeywordSourceUse, SourceUse
 from sve_carddb.core.json import array, canonical, object_value
 from sve_carddb.domains.effects.author_current import CardRejected
-from sve_carddb.domains.effects.author_expansion import AuthorExpander, ExpansionError
 from sve_carddb.domains.effects.author_inputs import AuthorInputError, AuthorSchemas
 
 from .author_entry_cases import source_use
-from .author_source_cases import synthetic_offset
 from .test_author_current import author, current, inputs, validate_files
 from .test_author_entries import ability, companion, document, shard
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
+
+    from sve_carddb.domains.effects.author_expansion import AuthorExpander
 
     from ...support.author_current_fixtures import CurrentSourceFixture
 
@@ -153,22 +153,6 @@ def test_body_review_cannot_qualify_a_card_with_keyword_declarations(
         with pytest.raises(AuthorInputError) as caught:
             reader(canonical(value))
         assert caught.value.diagnostic.reason == "unsupported_keyword_review_evidence"
-
-
-def test_keyword_structure_does_not_grant_source_mapping(
-    expander: AuthorExpander,
-) -> None:
-    raw = canonical(document(ability({"keywords": ["ward", "aura"]})))
-    with pytest.raises(ExpansionError, match="unsupported_keyword_source_mapping"):
-        expander.expand_sources(raw, (), {})
-    with pytest.raises(ExpansionError, match="source_declaration_candidates_mismatch"):
-        expander.expand_contexts(raw, (), {})
-    with pytest.raises(ExpansionError, match="source_candidates_mismatch"):
-        expander.expand_contexts(
-            raw,
-            (),
-            {("cards", "FIX-001", "abilities", 0): synthetic_offset().compatible()},
-        )
 
 
 def test_keyword_inline_parameter_diagnostic_keeps_its_source(

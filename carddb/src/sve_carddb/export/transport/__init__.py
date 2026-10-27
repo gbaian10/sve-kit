@@ -52,14 +52,6 @@ class Snapshot:
         if joined != projection.tables:
             raise ValueError("Export join differs from public logical projection")
 
-    def assert_identical(self, other: Snapshot) -> None:
-        """Compare exact raw and compressed payload bytes."""
-        if (
-            self.payloads != other.payloads
-            or self.compression_recipe != other.compression_recipe
-        ):
-            raise ValueError("Clean exports differ in payload or compression bytes")
-
 
 def _description(raw: bytes) -> Record:
     hashed = digest(raw)

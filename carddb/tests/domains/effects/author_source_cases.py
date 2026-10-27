@@ -12,14 +12,10 @@ from sve_carddb.contracts.four_layer import (
     SemanticVariant,
     hash_payload,
 )
-from sve_carddb.domains.effects.author_sources import (
-    SourceCandidate,
-    SourceContext,
-    check_source_compatibility,
-)
+from sve_carddb.domains.effects.author_sources import SourceContext
 from sve_carddb.domains.translations.four_layer_classification import Term
 from sve_carddb.domains.translations.four_layer_derivation import derive_source
-from sve_carddb.domains.translations.four_layer_expressions import DOMAIN, DOMAIN_CODE
+from tests.support.author_source_fixtures import SourceCandidate
 
 from ..translations.test_four_layer_classification import classifier, source
 
@@ -35,12 +31,8 @@ class SyntheticOffset:
     canonical_source: str
 
     def compatible(self) -> SourceContext:
-        return check_source_compatibility(
-            self.frame,
-            self.binding,
-            self.canonical_source,
-            {**self.candidate.classifier.domains, DOMAIN_CODE: DOMAIN},
-            classifier=self.candidate.classifier,
+        return SourceContext(
+            self.frame, self.binding, self.canonical_source, self.candidate.classifier
         )
 
     def use(self) -> SourceUse:

@@ -8,7 +8,7 @@ import pytest
 
 from sve_carddb.build import Database, Json, create_database
 from sve_carddb.build.t0 import TABLES as T0_TABLES
-from sve_carddb.build.t1 import MINIMUM_CAPABILITIES, REGISTRY, compile_build
+from sve_carddb.build.t1 import REGISTRY, compile_build
 from tests.support.schema_helpers import compile_minimum
 
 from ..support.build_db_t1b_fixtures import populate, rows
@@ -75,8 +75,6 @@ def test_exact_minimum_inventory_and_real_rows(include_en: bool) -> None:
             "SELECT count(*) FROM sqlite_schema WHERE type = 'table'"
         ) == ((len(expected),),)
         database.verify()
-    with pytest.raises(ValueError, match="Importer/validator unavailable"):
-        REGISTRY.require_usable(MINIMUM_CAPABILITIES + (("en",) if include_en else ()))
 
 
 @pytest.mark.parametrize(

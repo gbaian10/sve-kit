@@ -19,7 +19,6 @@ from sve_carddb.core.json import canonical
 from sve_carddb.domains.rulings.mapping import source_scope
 
 if TYPE_CHECKING:
-    from sve_carddb.contracts.four_layer import OccurrenceKey
     from sve_carddb.domains.rulings.mapping import LegacyUse, Namespace, Rebuild
     from sve_carddb.domains.rulings.reader import Document
 
@@ -65,27 +64,6 @@ class Report:
                 )
             ),
         )
-
-    def applicable(self, occurrence: OccurrenceKey) -> tuple[Resolution, ...]:
-        """A shared frame never grants a ruling to its other source uses."""
-        return tuple(
-            r
-            for r in self.resolutions
-            if r.status == "resolved"
-            and r.target is not None
-            and r.target.occurrence == occurrence
-        )
-
-    def require(self, reference: RulingRef, occurrence: OccurrenceKey) -> Resolution:
-        """An executable consumer must reject pending instead of treating it as a no-op."""
-        selected = tuple(
-            r for r in self.applicable(occurrence) if r.ruling_ref == reference
-        )
-        if len(selected) != 1:
-            raise ValueError(
-                "Ruling use is absent or pending in the executable closure"
-            )
-        return selected[0]
 
     def payload(self) -> dict[str, JsonValue]:
         """Readable pending records are kept separate from active applicability counts."""

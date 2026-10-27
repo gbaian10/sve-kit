@@ -29,7 +29,6 @@ from sve_carddb.domains.effects.author_sources import (
     card_keyword_values,
     entry_payload,
     parameter_expected,
-    resolve_source,
 )
 from sve_carddb.domains.translations.four_layer_damage import KEY as DAMAGE_KEY
 from sve_carddb.domains.translations.four_layer_destroy import KEY as DESTROY_KEY
@@ -41,7 +40,6 @@ if TYPE_CHECKING:
 
     from sve_carddb.domains.effects.author_sources import (
         PrintedKeywordObligation,
-        SourceCandidate,
         SourceContext,
     )
     from sve_carddb.domains.effects.author_validation import PathParts
@@ -476,39 +474,6 @@ class AuthorExpander:
         for path, ability in ability_nodes(tree):
             _local_bindings(ability, self.sites, path)
         return ExpansionCandidate(tree, tuple(sidecar), tuple(declarations))
-
-    def expand_sources(
-        self,
-        raw: bytes,
-        shards: Iterable[bytes],
-        candidates: Mapping[PathParts, SourceCandidate],
-    ) -> ExpansionCandidate:
-        """Reconstruct supplied sources; this still does not prove current admission."""
-        originals = dict(ability_nodes(self.schemas.author_tree(raw)))
-        for path, ability in originals.items():
-            if "keywords" in ability:
-                raise ExpansionError("unsupported_keyword_source_mapping", path)
-        if candidates.keys() != originals.keys():
-            raise ExpansionError("source_candidates_mismatch")
-        contexts = {
-            path: resolve_source(
-                candidates[path],
-                SourceUse.model_validate_json(
-                    canonical(array(ability["sources"])[0]), strict=True
-                ),
-            )
-            for path, ability in originals.items()
-        }
-        result = self.expand_contexts(raw, shards, contexts)
-        sidecar = []
-        for evidence in result.sidecar:
-            checked = replace(
-                evidence,
-                source_input_hash=digest(candidates[evidence.path].raw.encode("utf-8")),
-            )
-            object.__setattr__(checked, "source_proof", "derived_self_consistent")  # ruff: ignore[unnecessary-dunder-call] -- replacing evidence resets proof; only this reconstruction path grants it
-            sidecar.append(checked)
-        return ExpansionCandidate(result.tree, tuple(sidecar))
 
     def expand_contexts(
         self,

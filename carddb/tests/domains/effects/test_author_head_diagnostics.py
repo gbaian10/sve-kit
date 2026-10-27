@@ -31,7 +31,7 @@ def test_registered_heads_conflict_before_unknown_keys(
     other = "spell" if head == "keywords" else "keywords"
     entry = ability({head: payload, other: HEADS[other], "unknown": "private_value"})
     with pytest.raises(AuthorInputError) as caught:
-        schemas.author_effect_set(canonical(document(entry)))
+        schemas.document(canonical(document(entry)))
     diagnostic = caught.value.diagnostic
     assert diagnostic.reason == "ability_head_conflict"
     assert diagnostic.path == ABILITY_PATH
@@ -94,7 +94,7 @@ def test_nested_granted_head_conflict_is_not_reported_as_an_outer_typo(
         }
     }
     with pytest.raises(AuthorInputError) as caught:
-        schemas.author_effect_set(canonical(document(ability(head))))
+        schemas.document(canonical(document(ability(head))))
     assert caught.value.diagnostic.reason == "ability_head_conflict"
     assert caught.value.diagnostic.path == (
         *ABILITY_PATH,

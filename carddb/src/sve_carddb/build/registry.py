@@ -155,12 +155,3 @@ class Registry:
                     if not any(table.column(col).nullable for col in fk.columns)
                 )
         return tuple(tables[name] for name in sorted(tables) if owners[name] in enabled)
-
-    def require_usable(self, requested: tuple[str, ...]) -> None:
-        """Reject DDL-only capabilities, including those introduced by closure."""
-        tables = {table.name for table in self.resolve(requested)}
-        for cap in self.capabilities:
-            if tables.intersection(cap.tables) and not (
-                cap.importer_ready and cap.validator_ready
-            ):
-                raise ValueError(f"Importer/validator unavailable: {cap.name}")

@@ -1,7 +1,7 @@
 """Pinned official link grammar, block boundaries and date precision."""
 
 from typing import TYPE_CHECKING
-from urllib.parse import urlsplit
+from urllib.parse import parse_qs, urlsplit
 
 import pytest
 
@@ -12,11 +12,9 @@ from sve_carddb.domains.products.identity_models import (
     SourceBlock,
     expansion,
 )
-from sve_carddb.domains.products.official import date_fields
-from sve_carddb.domains.products.official import (
-    parse_products as parse_verified_products,
-)
-from sve_carddb.parse.pages import official_en, official_jp
+from sve_carddb.domains.products.official import date_fields, products_tree
+from sve_carddb.parse.html import parse
+from sve_carddb.parse.pages import official_en
 
 from ...support.product_identity_fixtures import IdentityFixture, html
 from ...support.product_identity_fixtures import identity_fixture as identity_fixture  # ruff: ignore[useless-import-alias] -- shared fixture
@@ -29,8 +27,11 @@ if TYPE_CHECKING:
 
 
 def parse_products(raw: bytes, source: Source, region: Region) -> ProductPage:
-    return parse_verified_products(
-        raw, source.model_copy(update={"sha256": digest(raw)}), region
+    return products_tree(
+        parse(raw.decode()),
+        source.model_copy(update={"sha256": digest(raw)}),
+        region,
+        parse_qs(urlsplit(source.url).query)["cardno"][0],
     )
 
 
@@ -261,10 +262,6 @@ def test_english_search_uses_exact_expansion_parameter(
 @pytest.mark.parametrize(
     "problem",
     [
-        "wrong_number",
-        "wrong_region",
-        "wrong_kind",
-        "extra_query",
         "outside_layout",
         "two_names",
         "two_dates",
@@ -276,15 +273,7 @@ def test_page_and_layout_boundaries_fail(
 ) -> None:
     raw = html()
     source = identity_fixture.pages[0].source
-    if problem == "wrong_number":
-        source = source.model_copy(update={"url": official_jp.card_url("WRONG")})
-    elif problem == "wrong_region":
-        source = source.model_copy(update={"url": official_en.card_url("TEST-001")})
-    elif problem == "wrong_kind":
-        source = source.model_copy(update={"kind": "official_api"})
-    elif problem == "extra_query":
-        source = source.model_copy(update={"url": source.url + "&extra=1"})
-    elif problem == "outside_layout":
+    if problem == "outside_layout":
         raw = raw.replace(b'class="cardlist-Under"', b'class="unknown-layout"')
     elif problem == "two_names":
         raw = raw.replace(
@@ -297,17 +286,6 @@ def test_page_and_layout_boundaries_fail(
         raw = html(name="")
     with pytest.raises(ValueError, match=r"mismatch|HTML|layout|name|asked for"):
         parse_products(raw, source, "jp")
-
-
-@pytest.mark.parametrize("field", ["sha256", "parser_version"])
-def test_parser_rejects_incorrect_raw_binding_and_parser_pin(
-    identity_fixture: IdentityFixture, field: str
-) -> None:
-    source = identity_fixture.pages[0].source.model_copy(
-        update={field: "sha256:" + "0" * 64 if field == "sha256" else "not-the-parser"}
-    )
-    with pytest.raises(ValueError, match="mismatch"):
-        parse_verified_products(html(), source, "jp")
 
 
 def test_formal_product_url_never_also_yields_expansion_link(

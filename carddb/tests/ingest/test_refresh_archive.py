@@ -54,6 +54,7 @@ from sve_carddb.ingest.http.writer import (
     Writer,
     sha256,
 )
+from tests.support.manifest_history import request_outcomes
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -273,7 +274,7 @@ def test_crash_recovers_committed_hash_only(  # ruff: ignore[complex-structure] 
     }
     assert writer.recover() == 1
     assert writer.read(URL) == (b"synthetic-B" if after_commit else b"synthetic-A")
-    assert writer._manifest.requests.outcomes(URL)[-1] is (
+    assert request_outcomes(writer._manifest, URL)[-1] is (
         Outcome.CHANGED if after_commit else Outcome.STARTED
     )
     assert len(list((store.root / "versions").glob("*.json"))) == (
@@ -623,7 +624,7 @@ def test_recovery_rejects_unverifiable_old_blob(
     with pytest.raises(ArchiveError):
         writer.recover()
     assert decompress((store.data_root / PATH).read_bytes()) == b"synthetic-B"
-    assert writer._manifest.requests.outcomes(URL)[-1] is Outcome.STARTED
+    assert request_outcomes(writer._manifest, URL)[-1] is Outcome.STARTED
 
 
 def test_new_source_crash_does_not_promote_candidate(
