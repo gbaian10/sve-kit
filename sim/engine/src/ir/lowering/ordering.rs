@@ -33,11 +33,11 @@ impl BodyContext<'_> {
                             ast::Destination::Deck => MovementReceipt::Order {
                                 receipt: ReceiptReference::new(receipt),
                             },
-                            ast::Destination::Ex | ast::Destination::Hand => {
-                                MovementReceipt::Move {
-                                    receipt: ReceiptReference::new(receipt),
-                                }
-                            }
+                            ast::Destination::Ex
+                            | ast::Destination::Hand
+                            | ast::Destination::Cemetery => MovementReceipt::Move {
+                                receipt: ReceiptReference::new(receipt),
+                            },
                         },
                     },
                 )
@@ -117,11 +117,14 @@ impl BodyContext<'_> {
         value: &ast::Move,
         path: &str,
     ) -> Result<Action, LoweringError> {
+        if let Some(top) = &value.top {
+            return top_to_cemetery(value, top, path);
+        }
         if matches!(value.to, ast::Destination::Hand) {
             if value.position.is_some() || value.order.is_some() || value.result.is_some() {
                 return Err(unsupported(path));
             }
-            let ast::MoveObjects::Field(objects) = &value.r#ref else {
+            let Some(ast::MoveObjects::Field(objects)) = &value.r#ref else {
                 return Err(unsupported(path));
             };
             return Ok(Action::Move {
@@ -138,7 +141,7 @@ impl BodyContext<'_> {
                 reason: MoveReason::Put,
             });
         }
-        let ast::MoveObjects::Observed(observed) = &value.r#ref else {
+        let Some(ast::MoveObjects::Observed(observed)) = &value.r#ref else {
             return Err(unsupported(path));
         };
         let cards = self.observed(observed, matches!(value.to, ast::Destination::Ex), path)?;
@@ -191,9 +194,48 @@ impl BodyContext<'_> {
                     },
                 })
             }
-            ast::Destination::Deck | ast::Destination::Ex | ast::Destination::Hand => {
-                Err(unsupported(path))
-            }
+            ast::Destination::Deck
+            | ast::Destination::Ex
+            | ast::Destination::Hand
+            | ast::Destination::Cemetery => Err(unsupported(path)),
         }
     }
+}
+
+fn top_to_cemetery(
+    value: &ast::Move,
+    top: &ast::DeckTop,
+    path: &str,
+) -> Result<Action, LoweringError> {
+    if value.r#ref.is_some()
+        || top.n == 0
+        || !matches!(top.who, ast::SelfPlayer::Controller)
+        || !matches!(value.to, ast::Destination::Cemetery)
+        || value.position.is_some()
+        || value.order.is_some()
+        || value.result.is_some()
+    {
+        return Err(unsupported(path));
+    }
+    Ok(Action::Move {
+        objects: Selector::Ordered {
+            zone: super::super::ZoneRef {
+                player: PlayerRef::Controller {},
+                kind: super::ZoneKind::Deck,
+            },
+            start: Position::Top {},
+            count: super::Expr::Literal(Nat(top.n)),
+            direction: super::super::SliceDirection::Forward,
+        },
+        movement: MoveSpec {
+            to: MoveDestination::Owners {
+                zone: OwnerZone::Cemetery,
+            },
+            initial_posture: None,
+            entry_effects: vec![],
+            position: None,
+            order: None,
+        },
+        reason: MoveReason::Put,
+    })
 }

@@ -522,3 +522,6 @@ fn silenced_or_nonfield_card_holder_is_not_activated() {
         }
     }
 }
+
+#[path = "card/deck_top.rs"]
+mod deck_top;

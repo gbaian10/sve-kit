@@ -219,7 +219,8 @@ pub(super) struct DeckTop {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct Move {
-    pub r#ref: MoveObjects,
+    pub r#ref: Option<MoveObjects>,
+    pub top: Option<DeckTop>,
     pub to: Destination,
     pub position: Option<Placement>,
     pub order: Option<Chooser>,
@@ -261,6 +262,7 @@ pub(super) enum Destination {
     Deck,
     Ex,
     Hand,
+    Cemetery,
 }
 
 #[derive(Deserialize)]
