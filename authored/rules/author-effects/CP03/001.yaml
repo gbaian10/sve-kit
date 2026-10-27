@@ -1,0 +1,19 @@
+cards:
+  CP03-015:
+    abilities:
+      - keywords:
+          - storm
+        line: 1
+    admission: light
+    ignored:
+      - line: 1
+        reason: reminder
+        section: 1
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-luna
+            who: Codex
+          date: "2026-10-28"
+format: 2
+kind: author_effect_set
