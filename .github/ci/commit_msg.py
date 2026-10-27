@@ -6,13 +6,10 @@ GitHub shortcode such as `:arrow_up:` counts as its gitmoji: Dependabot writes c
 
 Usage (run through the carddb dev environment, which has commitizen):
   uv run --project carddb --no-default-groups --group dev python .github/ci/commit_msg.py --message TEXT
-  uv run --project carddb --no-default-groups --group dev python .github/ci/commit_msg.py --rev-range A..B
 """
 
 import argparse
 import re
-import shutil
-import subprocess  # ruff: ignore[suspicious-subprocess-import] -- reads git log only
 import sys
 
 from commitizen.config import read_cfg
@@ -43,47 +40,21 @@ def allowed_prefixes() -> tuple[str, ...]:
     return tuple(str(prefix) for prefix in prefixes)
 
 
-def messages_in(rev_range: str) -> list[tuple[str, str]]:
-    """Return (sha, full message) for every commit in the range, oldest first."""
-    git = shutil.which("git") or "git"
-    log = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed argv, no shell
-        [git, "log", "--reverse", "--format=%H%x00%B%x1e", rev_range],
-        check=True,
-        capture_output=True,
-        text=True,
-    ).stdout
-    result: list[tuple[str, str]] = []
-    for entry in log.split("\x1e"):
-        if entry.strip():
-            sha, _, message = entry.strip("\n").partition("\x00")
-            result.append((sha, message))
-    return result
-
-
 def main(argv: list[str]) -> int:
-    """Check the given message or commit range and return the exit status."""
+    """Check the given message and return the exit status."""
     parser = argparse.ArgumentParser(description=__doc__)
-    group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("--message")
-    group.add_argument("--rev-range")
+    parser.add_argument("--message", required=True)
     args = parser.parse_args(argv)
 
     pattern, prefixes = strict_pattern(), allowed_prefixes()
-    items = (
-        [("message", args.message)]
-        if args.message is not None
-        else messages_in(args.rev_range)
+    message = args.message
+    if message.startswith(prefixes) or pattern.fullmatch(with_icon(message)):
+        return 0
+    first_line = message.splitlines()[0] if message else ""
+    sys.stderr.write(
+        f"message: needs '<gitmoji> <type>(<scope>): <description>': {first_line}\n"
     )
-    failures = [
-        (ref, text.splitlines()[0] if text else "")
-        for ref, text in items
-        if not text.startswith(prefixes) and not pattern.fullmatch(with_icon(text))
-    ]
-    for ref, first_line in failures:
-        sys.stderr.write(
-            f"{ref}: needs '<gitmoji> <type>(<scope>): <description>': {first_line}\n"
-        )
-    return 1 if failures else 0
+    return 1
 
 
 if __name__ == "__main__":

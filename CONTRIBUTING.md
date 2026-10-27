@@ -80,10 +80,10 @@ runtime support checks remain mandatory. See the
 
 ## Commit messages
 
-The format is checked by commitizen on every commit, and again in CI for every commit in a pull
-request and for the pull request title (a squash merge uses it as the commit title). CI requires the
-gitmoji; locally the gitmojify hook adds it for you. Messages that start with `Merge`, `Revert`,
-`Pull request`, `fixup!`, `squash!` or `amend!` are let through unchecked. The scope is optional:
+The format is checked locally by the commitizen commit-msg hook and in CI for the pull request title
+(a squash merge uses it as the commit title). CI requires the gitmoji; locally the gitmojify hook
+adds it for you. Messages that start with `Merge`, `Revert`, `Pull request`, `fixup!`, `squash!` or
+`amend!` are let through unchecked. The scope is optional:
 
 ```text
 <gitmoji> <type>(<scope>): <description>
@@ -430,8 +430,8 @@ can hold card wording. The Web results come from `sim/web/scripts/ci/public-juni
 a case by a hash of its title and records each Vitest retry as a failed attempt, so tests that pass only on
 retry show up as flaky (`--retry=2` hides them from the built-in reports).
 
-Draft pull requests run only the quick checks (repository hooks, commit messages and the
-title). The Python, Rust, Web and card-data jobs are skipped and `ci-ok` fails with a note that tests
+Draft pull requests run only the quick checks (repository hooks and the title). The Python, Rust,
+Web and card-data jobs are skipped and `ci-ok` fails with a note that tests
 were not run. Marking the PR ready for review starts the full run, which decides `ci-ok`.
 
 In pull requests the repository-wide hooks check only the files the PR changes, as the local

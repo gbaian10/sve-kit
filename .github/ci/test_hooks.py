@@ -29,11 +29,7 @@ class WorkflowGateTests(unittest.TestCase):
         self.gate = str(steps[0]["run"])
         self.outputs = dict.fromkeys(("python", "rust", "web", "card_data"), "false")
         self.needs: dict[str, object] = {
-            job: {
-                "result": "success"
-                if job in {"changes", "repo", "commit"}
-                else "skipped"
-            }
+            job: {"result": "success" if job in {"changes", "repo"} else "skipped"}
             for job in self.jobs
             if job != "ci-ok"
         }
@@ -73,7 +69,7 @@ class WorkflowGateTests(unittest.TestCase):
 
     def test_required_and_unknown_jobs(self) -> None:
         """Unmapped jobs never gain permission to skip."""
-        for job in ("repo", "commit", "new-job"):
+        for job in ("repo", "new-job"):
             with self.subTest(job=job):
                 self.setUp()
                 self.needs[job] = {"result": "skipped"}
