@@ -944,6 +944,8 @@ async function addPrintings(ctx: CardContext, faces: FaceRevisions): Promise<voi
       rarity_badge: null,
       leader_name_frame: null,
       reprint: printing.reprint === true ? true : null,
+      stamp: null,
+      serial: null,
       rarity_raw:
         printing.rarity === null
           ? ""

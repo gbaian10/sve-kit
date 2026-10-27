@@ -144,6 +144,17 @@ def load_renewed_registry(
     return _replay(root, sources.history, sources=sources, candidate=candidate)
 
 
+def load_candidate_registry(
+    root: Path, *, repository: Path | None = None
+) -> RegistrySnapshot:
+    """Expose replayed art groups for local candidates, without publication approval.
+
+    Transition history and immutable identities are checked as for the identity
+    view; archived review evidence is deliberately not a candidate-tool input.
+    """
+    return _replay(root, History(repository or root.parent))
+
+
 def load_identity_registry(
     root: Path, *, repository: Path | None = None
 ) -> RegistrySnapshot:
@@ -153,7 +164,7 @@ def load_identity_registry(
     Their history and unchanged identity are checked, but frozen evidence is not
     replayed. Both kinds are omitted, so this is not a publication registry.
     """
-    checked = _replay(root, History(repository or root.parent))
+    checked = load_candidate_registry(root, repository=repository)
     return RegistrySnapshot(
         checked.files,
         MappingProxyType(

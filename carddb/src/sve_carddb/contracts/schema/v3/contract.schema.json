@@ -3407,11 +3407,31 @@
               "type": "null"
             }
           ]
+        },
+        {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StampMark"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Bool"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       ],
       "items": false,
-      "minItems": 23,
-      "maxItems": 23,
+      "minItems": 25,
+      "maxItems": 25,
       "x-columns": [
         "id",
         "card_id",
@@ -3435,7 +3455,9 @@
         "decklog_checked_on",
         "faces",
         "leader_name_frame",
-        "reprint"
+        "reprint",
+        "stamp",
+        "serial"
       ],
       "x-types": [
         {
@@ -3543,6 +3565,16 @@
               "gold",
               "white"
             ]
+          }
+        },
+        {
+          "nullable": {
+            "scalar": "Bool"
+          }
+        },
+        {
+          "nullable": {
+            "json": "StampMark"
           }
         },
         {
@@ -8592,11 +8624,31 @@
               "type": "null"
             }
           ]
+        },
+        {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StampMark"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Bool"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       ],
       "items": false,
-      "minItems": 23,
-      "maxItems": 23,
+      "minItems": 25,
+      "maxItems": 25,
       "x-columns": [
         "id",
         "card_id",
@@ -8620,7 +8672,9 @@
         "decklog_checked_on",
         "faces",
         "leader_name_frame",
-        "reprint"
+        "reprint",
+        "stamp",
+        "serial"
       ],
       "x-types": [
         {
@@ -8728,6 +8782,16 @@
               "gold",
               "white"
             ]
+          }
+        },
+        {
+          "nullable": {
+            "scalar": "Bool"
+          }
+        },
+        {
+          "nullable": {
+            "json": "StampMark"
           }
         },
         {
@@ -17796,7 +17860,9 @@
                         "decklog_checked_on",
                         "faces",
                         "leader_name_frame",
-                        "reprint"
+                        "reprint",
+                        "stamp",
+                        "serial"
                       ]
                     },
                     "maxItems": 0
@@ -20124,7 +20190,9 @@
                         "decklog_checked_on",
                         "faces",
                         "leader_name_frame",
-                        "reprint"
+                        "reprint",
+                        "stamp",
+                        "serial"
                       ]
                     },
                     "minItems": 1,
@@ -22495,7 +22563,9 @@
                         "decklog_checked_on",
                         "faces",
                         "leader_name_frame",
-                        "reprint"
+                        "reprint",
+                        "stamp",
+                        "serial"
                       ]
                     },
                     "maxItems": 0
@@ -25203,6 +25273,38 @@
         "manifest_path",
         "manifest_sha256",
         "engine_support_target"
+      ],
+      "additionalProperties": false
+    },
+    "StampMark": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "year": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "year"
       ],
       "additionalProperties": false
     }
