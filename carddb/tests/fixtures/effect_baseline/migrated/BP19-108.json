@@ -1,0 +1,16 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "trigger",
+      "body": {
+        "op": "modify",
+        "subjects": "self.leader",
+        "hp": 1
+      },
+      "event": "field_to_cemetery",
+      "subject": "self"
+    }
+  ]
+}

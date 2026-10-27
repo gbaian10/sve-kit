@@ -81,8 +81,9 @@ impl ExpandedLowerer {
     ///
     /// Intrinsic evolution, evolve-time, fanfare, lastword, attack-time, End Begin,
     /// field activation with ordered constant PP/Act/self-to-cemetery costs,
-    /// draw, uniform damage to all leaders, destroy, numeric modifications,
-    /// constant continuous installations, Search, successful EX discounts and
+    /// draw, uniform damage to all leaders, destroy, controller leader life Add/Set,
+    /// numeric modifications, constant continuous installations, Search,
+    /// successful EX discounts and
     /// observed deck ordering have closed supported subsets. D1 separately checks
     /// whole-card runtime support; this is not source or qualification admission.
     /// Unfiltered field targets, same-play Distribution and a sole top-level
@@ -835,6 +836,24 @@ impl BodyContext<'_> {
                 mode: StepwiseMode::Exact,
             }),
             ast::Step::Damage(damage) => self.damage(damage, path),
+            ast::Step::Life(life) => {
+                let ast::SelfPlayer::Controller = life.who;
+                Ok(Action::Life {
+                    player: PlayerRef::Controller {},
+                    change: super::NumericChange::Add {
+                        amount: self.number(&life.delta, path, &mut BTreeSet::new())?,
+                    },
+                })
+            }
+            ast::Step::SetLife(life) => {
+                let ast::SelfPlayer::Controller = life.who;
+                Ok(Action::Life {
+                    player: PlayerRef::Controller {},
+                    change: super::NumericChange::Set {
+                        amount: self.number(&life.n, path, &mut BTreeSet::new())?,
+                    },
+                })
+            }
         }
     }
 

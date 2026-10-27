@@ -24,6 +24,8 @@ mod card;
 mod cost;
 #[path = "internal_ir/damage.rs"]
 mod damage;
+#[path = "internal_ir/life.rs"]
+mod life;
 #[path = "internal_ir/numeric.rs"]
 mod numeric;
 #[path = "internal_ir/ordering.rs"]

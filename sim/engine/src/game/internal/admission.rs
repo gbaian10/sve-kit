@@ -353,6 +353,8 @@ fn supported(code: &str) -> bool {
             | "action.move"
             | "shape.Action.Destroy"
             | "action.destroy"
+            | "shape.Action.Life"
+            | "action.life"
             | "shape.Action.Modify"
             | "action.modify"
             | "effect.continuous"

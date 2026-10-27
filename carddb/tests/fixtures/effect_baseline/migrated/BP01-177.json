@@ -1,0 +1,30 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "evolve",
+      "body": {
+        "op": "evolve",
+        "subjects": "self"
+      },
+      "costs": [
+        {
+          "op": "pp",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "line": 2,
+      "kind": "trigger",
+      "body": {
+        "op": "modify",
+        "subjects": "self.leader",
+        "hp": 1
+      },
+      "event": "enter",
+      "subject": "self"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "evolve",
+      "body": {
+        "op": "evolve",
+        "subjects": "self"
+      },
+      "costs": [
+        {
+          "op": "pp",
+          "amount": 0
+        }
+      ]
+    },
+    {
+      "line": 2,
+      "kind": "static",
+      "body": {
+        "op": "macro",
+        "name": "guard"
+      }
+    },
+    {
+      "line": 3,
+      "kind": "trigger",
+      "body": {
+        "op": "modify",
+        "subjects": "self.leader",
+        "hp": 4
+      },
+      "event": "end"
+    }
+  ]
+}

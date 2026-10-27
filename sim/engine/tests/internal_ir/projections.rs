@@ -135,6 +135,7 @@ fn success_projections_preserve_old_and_new_generations_without_chasing_later_mo
                 | Fact::AbilityResolved { .. }
                 | Fact::Shuffled { .. }
                 | Fact::Draw(_)
+                | Fact::LifeChange(_)
                 | Fact::Damage(_)
                 | Fact::Posture(_)
                 | Fact::StatChange(_) => None,

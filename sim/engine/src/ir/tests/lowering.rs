@@ -565,6 +565,30 @@ fn unsupported_step_rejects_the_entire_candidate() {
 }
 
 #[test]
+fn leader_life_lowering_accepts_signed_delta_and_set_but_rejects_unhandled_metadata() {
+    let lowerer = ExpandedLowerer::new().unwrap();
+    let mut tree = expanded::tree().clone();
+    tree["cards"]["BP08-038"]["abilities"][0]["fanfare"]["do"] = json!([
+        {"life":{"who":"self","delta":-3_i64}},
+        {"life":{"who":"self","delta":0_i64}},
+        {"set_life":{"who":"self","n":1_u64}}
+    ]);
+    lowerer.lower(&tree).unwrap();
+    for metadata in [
+        json!({"result":"healed"}),
+        json!({"precondition":{"true":true}}),
+        json!({"instead":[{}]}),
+    ] {
+        let mut changed = tree.clone();
+        changed["cards"]["BP08-038"]["abilities"][0]["fanfare"]["do"][0]["life"]
+            .as_object_mut()
+            .unwrap()
+            .extend(metadata.as_object().unwrap().clone());
+        lowerer.lower(&changed).unwrap_err();
+    }
+}
+
+#[test]
 fn bp01_118_is_one_uniform_instruction_for_all_leaders() {
     let cards = ExpandedLowerer::new()
         .unwrap()
