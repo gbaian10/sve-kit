@@ -474,11 +474,11 @@ def apply(  # ruff: ignore[complex-structure,too-many-locals] -- one owner-check
             }
         ),
     )
-    current = current_fields(db)
+    native_fields = current_fields(db)
     return {
         "adapter": ADAPTER,
-        "self": apply_self(db, inputs, settings, current),
-        "ability_types": apply_abilities(db, current),
+        "self": apply_self(db, inputs, settings, native_fields),
+        "ability_types": apply_abilities(db, native_fields),
         "description": "Self keyword declarations: body parts containing only keywords.",
         "producer_version": version,
         "grants": grants,
