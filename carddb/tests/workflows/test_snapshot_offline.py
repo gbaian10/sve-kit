@@ -178,6 +178,9 @@ def prepared(
         offline, "plan_preview", lambda *_args, **_kwargs: case.identity
     )
     monkeypatch.setattr(
+        offline, "registry_snapshot", lambda *_args, **_kwargs: case.identity.snapshot
+    )
+    monkeypatch.setattr(
         offline, "TextObservations", lambda *_args, **_kwargs: case.compose()
     )
     monkeypatch.setattr(

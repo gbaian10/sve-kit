@@ -79,7 +79,11 @@ def load_shared_registry(root: Path, cache: Path) -> RegistrySnapshot:
             original = Path(directory) / "authored"
             for area in ("ids", "registry"):
                 shutil.copytree(root / area, original / area)
+            copied = source_hashes(original)
             snapshot = load_registry(original)
+            assert copied == source_hashes(original), (
+                "Registry load changed authored files"
+            )
         assert before == source_hashes(root), "Registry load changed authored files"
         cached = CachedRegistry(
             files=snapshot.files,
