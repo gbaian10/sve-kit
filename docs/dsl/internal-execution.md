@@ -530,6 +530,23 @@ BP02-089 只驗能力破壞禁止述詞，測試的 EndResolution 為合成期�
 selector、牌底、非固定張數與其他目的地不因此准入。作者入口不接受 result、
 placement 或額外進場效果，精確零張亦未開放。
 
+## 自己選定手牌棄牌
+
+本文 `discard: {who: self, n: N}` 接受固定正整數 N；降低為自己目前 Hand、
+無篩選、單組與精確印刷張數的 Discard(Chosen)。結算才列出當前手牌候選，
+不足時降低最低量以盡可能執行；空域與唯一候選仍詢問。
+
+沿用 actor 專屬的物件問句與 token-local handle，沒有新增 wire 欄位。
+對手不取得手牌候選，Referee 仍可檢視權威；actor／token／張數／重複／外來 handle／目前
+手牌世代與持有者均在提交前檢查，無效回答保留已完成的抽牌及付款。
+通用物件 selector 不因此取得 Hand 讀取能力，既有無篩選張數讀值仍可用。
+
+提交沿真正 discard 原語記錄棄牌計數、DiscardEvent、DiscardOutcome 與
+MoveMethod::Discard 的移動事實；只有實際離手的卡成為公開資訊，未棄牌仍秘密。
+棄牌前的從者特徵快照沿卡面讀取攻防；手牌數值修正未准入，一般場上數值讀取仍不接受 Hand。
+本片不准入他方手牌、隨機、帶篩選、任意張數、零張、作者 result 或 after
+投影；一般棄牌事件 consumer 與完成量接續由各自能力另行准入。
+
 ## 私有看牌與同區排列
 
 Look 先准入 Exact、viewer 自己的 Deck，取頂端至多 count 張；不移區、不換世代。
