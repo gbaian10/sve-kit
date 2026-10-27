@@ -106,7 +106,7 @@ lgwin 22；報告的私人壓縮 recipe 記錄套件版本，不放本機執行�
 圖片 CLI stdout 另記 `image_execution` 的快取命中、新轉檔數與 `written_images`，不混入快照清單。
 
 這些檔案與輸出都不進 git、Actions cache／artifact 或測試 fixture。
-容量設計依 [size-budget](size-budget.md)：兩區全部文字分片＋manifest 的 raw 每次報告、明顯成長時檢討；單一版本完整文字閉包 Brotli ≤8 MiB，含完整來源、counterpart、共享字典、卡號索引與必要跨區檔。
+容量設計依 [size-budget](size-budget.md)：兩區全部文字分片＋manifest 的 raw 每次報告、明顯成長時檢討；單一版本完整文字閉包 Brotli ≤10 MiB，含完整來源、counterpart、共享字典、卡號索引與必要跨區檔。
 卡圖另計。
 基本目錄冷載依所選日版／英版各計完整 manifest＋config＋實際必載片及依賴，共用／混區 File 整檔計、不按語言比例分攤。
 Brotli 2 MiB 為分界，略超報精確差額、明顯超出才交維護者；raw 另報，不另設硬門檻。

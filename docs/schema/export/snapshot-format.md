@@ -291,7 +291,7 @@ undated_printing_ids 保存無完整日精度日期的候選身分。兩者皆�
 
 需要完整文字的工具依快照清單逐片讀取 files 中的文字檔及其依賴閉包，再重接同一份快照。依[傳輸契約 §4.2](snapshot-transport.md#42-文字分片閉包)，全部文字檔及其依賴的 hash 皆驗過才標「文字離線備妥」；首訪部分可讀狀態不等於 active 完整離線版。
 
-容量與量法依 [size-budget](size-budget.md)：兩區全部文字分片＋manifest 的 raw 每次報告、明顯成長時檢討；單一版本完整文字閉包（含共享、完整 JP source、counterpart、必要跨區檔、卡號索引、字典及實體重複裝檔）Brotli ≤8 MiB。基本目錄冷載 Brotli 2 MiB 為分界；基本目錄容器整檔 raw ≤2 MiB，詳情與其他資料檔 ≤512 KiB。手機目標是 main＋Worker 穩態合計 ≤48 MiB、更新峰值 ≤80 MiB、主線程單段 ≤50 ms、所選整區基本目錄完整解析累計 ≤1 秒；對象與量法以容量文件為準。這些是設計／發布效能驗收要求，Python reader 依實際 bytes、hash、欄序及閉包驗證，瀏覽器依 bytes、hash 與版本能力判准入，不用預算數字拒收合法快照。
+容量與量法依 [size-budget](size-budget.md)：兩區全部文字分片＋manifest 的 raw 每次報告、明顯成長時檢討；單一版本完整文字閉包（含共享、完整 JP source、counterpart、必要跨區檔、卡號索引、字典及實體重複裝檔）Brotli ≤10 MiB。基本目錄冷載 Brotli 2 MiB 為分界；基本目錄容器整檔 raw ≤2 MiB，詳情與其他資料檔 ≤512 KiB。手機目標是 main＋Worker 穩態合計 ≤48 MiB、更新峰值 ≤80 MiB、主線程單段 ≤50 ms、所選整區基本目錄完整解析累計 ≤1 秒；對象與量法以容量文件為準。這些是設計／發布效能驗收要求，Python reader 依實際 bytes、hash、欄序及閉包驗證，瀏覽器依 bytes、hash 與版本能力判准入，不用預算數字拒收合法快照。
 
 ### 3.1 欄位主儲存與載入用途
 
