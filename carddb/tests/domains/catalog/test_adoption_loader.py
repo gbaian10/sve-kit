@@ -191,7 +191,6 @@ def test_current_withdrawal_and_edit(case: Case) -> None:
             {
                 "printing_id": "printing",
                 "candidates": ["printing"],
-                "candidates_hash": "sha256:" + "a" * 64,
             },
         ),
     ],

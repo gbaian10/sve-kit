@@ -156,8 +156,8 @@ name_basis_hash=H(全部 observations 重建的 `{lang,text_hash}` 排序唯一�
 
 | kind | subject | 非 null value 的完整欄位 |
 | --- | --- | --- |
-| route_override_adoption | `{region,route_key}` | `{printing_id,candidates,candidates_hash}` |
-| default_printing_adoption | `{card_id,region}` | `{printing_id,candidates,candidates_hash}` |
+| route_override_adoption | `{region,route_key}` | `{printing_id,candidates}` |
+| default_printing_adoption | `{card_id,region}` | `{printing_id,candidates}` |
 
 route_key 為原始 official 卡號，不是 URL encoded 字串；route 只解決**同區同 exact 卡號**的多個 variant。
 candidates 必完整列同區該 exact 卡號的全部 official printing，至少兩個；選中 printing_id 必為成員。
@@ -168,11 +168,10 @@ candidates 必完整列同區該 exact 卡號的全部 official printing，至�
 
 route 的 candidates 是按 printing_id 排序唯一的
 `{printing_id,card_id,region,card_no,card_no_state,variant_key}`；由本次 registry 驗 printing 身分。
-candidates_hash=H(完整 candidates)，H 為 [authored-layout](authored-layout.md#2-分片與來源) 的 canonical SHA-256。
-候選範圍由完整 registry 與凍結來源重建，不接受 caller 自選清單；新增 variant 須更新完整候選集合。
+候選範圍由完整 registry 與凍結來源重建，必須與 authored 的完整集合一致；選中 printing 必須仍屬該集合並符合路由身分。
 
 預設覆寫的 candidates 是本次展示範圍內**同卡同區全部 printing_id** 的排序唯一陣列，
-candidates_hash=H(candidates)。每次重建完整集合並驗各成員的當前歸屬；選中者必仍同卡、同區、可展示。
+每次重建完整集合並與 authored 集合比較；選中者必仍同卡、同區、可展示。
 集合增減、目標被移到別卡／別區或不再可展示才需重新採納；不能省略競爭者或以 caller 自選清單驗過。
 Decklog 不可用不等於不可展示；同一版次的無關來源修訂不改候選集合，也不使覆寫失效。
 
@@ -262,7 +261,7 @@ variant_key=standard 或本次選中的 default 推論普通加工。
 | P0 | 採獨立 current 入口，依 §2–§3；穩定鍵與實際來源引用保留，直接修改當前值 |
 | P3 | rarity 與 premium 分開篩選；前端本次不顯示 premium 記號，不另立複合稀有度真值 |
 | P5 | NFKC 後 casefold；不 trim／合併空白、不折假名、不去標點，版本化且多義不任選 |
-| P6 | 使用既有投影允許的完整同區展示集合；人工 default 只比同卡同區 candidates_hash 與目標有效性 |
+| P6 | 使用既有投影允許的完整同區展示集合；人工 default 直接比對同卡同區候選集合與目標有效性 |
 | P7 | 記號三語不必齊全，缺譯回原記號；建置自動選有效 choice，不二次簽核記號 |
 | P8 | 首批只做查卡需要的固定 enum 對照，其餘未啟用；不得由 caller 新增任意 kind 或 enum 值 |
 
