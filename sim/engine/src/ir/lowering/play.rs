@@ -135,6 +135,9 @@ impl BodyContext<'_> {
         path: &str,
     ) -> Result<Action, LoweringError> {
         let recipients = match &damage.to {
+            ast::Recipients::Field(query) => RecipientSet::Objects {
+                objects: self.objects(&ast::Objects::Zone(query.clone()), path)?,
+            },
             ast::Recipients::Leader { leader } => RecipientSet::Explicit {
                 recipients: vec![DamageRecipient::Leader {
                     player: match leader {
