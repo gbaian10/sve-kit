@@ -1,0 +1,51 @@
+cards:
+  BP08-028:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - damage:
+                distribute: true
+                distribute_at: play
+                instead:
+                  - if:
+                      cmp:
+                        left:
+                          count:
+                            who: opp
+                            zone: cemetery
+                        op: ge
+                        right: 10
+                    n: 8
+                n: 4
+                to: enemies
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: opp
+                        zone: cemetery
+                    op: ge
+                    right: 20
+                then:
+                  - damage:
+                      n: 8
+                      to:
+                        leader: opp
+          targets:
+            - bind: enemies
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              upto: 5
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-sol
+            who: Codex
+          date: "2026-10-28"
+format: 2
+kind: author_effect_set

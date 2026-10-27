@@ -1,0 +1,31 @@
+cards:
+  BP01-099:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - damage:
+                instead:
+                  - if:
+                      cmp:
+                        left:
+                          resource:
+                            kind: pp_max
+                            who: self
+                        op: ge
+                        right: 7
+                    n: 3
+                n: 2
+                to:
+                  kind: follower
+                  who: all
+                  zone: field
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-sol
+            who: Codex
+          date: "2026-10-28"
+format: 2
+kind: author_effect_set
