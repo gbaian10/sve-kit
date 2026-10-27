@@ -23,6 +23,7 @@ from sve_carddb.export.image_index import (
     ImageIndex,
     ImagePin,
 )
+from sve_carddb.export.image_scope import select_printings
 from sve_carddb.export.image_upload import upload_description
 from sve_carddb.export.media import prepare_media
 from sve_carddb.export.media_urls import image_path
@@ -32,6 +33,7 @@ from sve_carddb.export.project import Projection
 from sve_carddb.export.read_api import POINTER
 from sve_carddb.images.assets import (
     MAX_WORKERS,
+    EncodedImage,
     ImageBuild,
     PreviewRoots,
     build_regional_assets,
@@ -43,6 +45,14 @@ from sve_carddb.images.variants import DEFAULT_RECIPE
 from sve_carddb.ingest.archive.frozen_sources import FrozenSources
 from sve_carddb.parse.pages.official_jp import image_url
 from sve_carddb.workflows.art_matching import art_candidates
+from sve_carddb.workflows.image_reuse import (
+    ImageReuse,
+    PreviousImages,
+    ReuseEvidence,
+    image_requests,
+    printing_membership,
+    scope_manifest,
+)
 from sve_carddb.workflows.offline import Inputs, registry_plan, source_batches
 
 if TYPE_CHECKING:
@@ -249,12 +259,24 @@ def write_images(
 
 
 @app.command("build-index")
-def build_index_command(  # ruff: ignore[too-many-arguments, too-many-positional-arguments, too-many-locals] -- the CLI owns explicit isolated roots, source readers and the complete image commit boundary
+def build_index_command(  # ruff: ignore[too-many-arguments, too-many-positional-arguments, too-many-locals, complex-structure, too-many-statements] -- the CLI owns explicit isolated roots, source readers and the complete image commit boundary
     inputs: Annotated[Path, typer.Option(exists=True, dir_okay=False)],
     image_assets_dir: Annotated[Path, typer.Option()],
     image_cache_dir: Annotated[Path, typer.Option()],
     image_output_dir: Annotated[Path, typer.Option()],
     private_dir: Annotated[Path, typer.Option()],
+    scope: Annotated[
+        list[str] | None,
+        typer.Option(help="Select registered home_set_id values; repeat for a union."),
+    ] = None,
+    printing_id: Annotated[
+        list[str] | None,
+        typer.Option(help="Select registered printing IDs; repeat for a union."),
+    ] = None,
+    previous_index: Annotated[Path | None, typer.Option()] = None,
+    previous_image_upload: Annotated[Path | None, typer.Option()] = None,
+    previous_image_dir: Annotated[Path | None, typer.Option()] = None,
+    previous_reuse_evidence: Annotated[Path | None, typer.Option()] = None,
     workers: Annotated[int, typer.Option(min=1, max=MAX_WORKERS)] = 2,
     verify_all: Annotated[bool, typer.Option()] = False,
     initial: Annotated[
@@ -262,11 +284,34 @@ def build_index_command(  # ruff: ignore[too-many-arguments, too-many-positional
     ] = False,
 ) -> None:
     """Convert images and reserve event versions independently of text export."""
+    scoped = bool(scope or printing_id)
+    previous_paths = (
+        previous_index,
+        previous_image_upload,
+        previous_image_dir,
+        previous_reuse_evidence,
+    )
+    if scoped and (initial or any(path is None for path in previous_paths)):
+        raise ValueError(
+            "Scoped image builds require all four --previous-* inputs and an existing media state"
+        )
+    if not scoped and any(path is not None for path in previous_paths):
+        raise ValueError("Previous image inputs require --scope or --printing-id")
+    if any(path is not None and not path.is_absolute() for path in previous_paths):
+        raise ValueError("Previous image inputs must use absolute paths")
     recipe = Inputs.model_validate_json(inputs.read_bytes())
     library = PreviewRoots(image_assets_dir, image_cache_dir)
     roots = Roots(image_output_dir, private_dir)
     roots.verify()
-    library.validate((*recipe.protected_inputs(), inputs, roots.preview, roots.private))
+    library.validate(
+        (
+            *recipe.protected_inputs(),
+            inputs,
+            roots.preview,
+            roots.private,
+            *(path for path in previous_paths if path is not None),
+        )
+    )
     for output in (roots.preview, roots.private):
         for protected in (*recipe.protected_inputs(), inputs):
             if output.resolve().is_relative_to(
@@ -289,21 +334,6 @@ def build_index_command(  # ruff: ignore[too-many-arguments, too-many-positional
         for pin in recipe.sources
     }
     crops = load_image_crops(authored_root(recipe.repo))
-    parts = tuple(
-        build_regional_assets(
-            batches[pin.region],
-            library,
-            region=pin.region,
-            crops=crops,
-            workers=workers,
-            checks=checks,
-        )
-        for pin in recipe.sources
-    )
-    images = ImageBuild(
-        tuple(item for part in parts for item in part.images),
-        sum(part.elapsed_seconds for part in parts),
-    )
     identity = registry_plan(recipe, text_batches)
     texts = TextObservations(
         identity,
@@ -324,16 +354,72 @@ def build_index_command(  # ruff: ignore[too-many-arguments, too-many-positional
         ),
         images=RegionalImages(recipe, batches, verify_all=verify_all),
     ).plan
+    reuse = None
+    reused: tuple[EncodedImage, ...] = ()
+    selected_urls = None
+    if scoped:
+        assert previous_index is not None
+        assert previous_image_upload is not None
+        assert previous_image_dir is not None
+        assert previous_reuse_evidence is not None
+        reuse = ImageReuse(
+            PreviousImages(
+                previous_index,
+                previous_image_upload,
+                previous_reuse_evidence,
+                previous_image_dir,
+            ),
+            recipe.archive,
+            recipe.store_id,
+            select_printings(
+                printing_membership(texts), tuple(scope or ()), tuple(printing_id or ())
+            ),
+        )
+        requests = image_requests(texts)
+        reused = reuse.images(requests, batches, crops)
+        selected_urls = {
+            pin.region: frozenset(
+                request.url
+                for request in requests
+                if request.region == pin.region
+                and request.printing_id in reuse.selected
+            )
+            for pin in recipe.sources
+        }
+    parts = tuple(
+        build_regional_assets(
+            batches[pin.region],
+            library,
+            region=pin.region,
+            crops=crops,
+            workers=workers,
+            checks=checks,
+            urls=None if selected_urls is None else selected_urls[pin.region],
+        )
+        for pin in recipe.sources
+    )
+    images = ImageBuild(
+        tuple(item for part in parts for item in part.images)
+        + tuple(
+            item
+            for item in reused
+            if selected_urls is None
+            or item.source.url not in selected_urls[item.region]
+        ),
+        sum(part.elapsed_seconds for part in parts),
+    )
     projection, bindings, crop_bindings = media_projection(texts, images)
     diagnostics = crop_report(crops, images, crop_bindings)
     revision, previous = reserve(roots)
+    if reuse is not None:
+        reuse.validate_state(previous)
     plan = prepare_media(
         projection,
         library.preview,
         revision=revision,
         previous=previous,
         checks=checks,
-        verify_blobs=verify_all,
+        verify_blobs=verify_all and reuse is None,
     )
     evidence = {
         (source.archive.batch_id, source.id): ImageEvidence(
@@ -359,6 +445,9 @@ def build_index_command(  # ruff: ignore[too-many-arguments, too-many-positional
         tables={key: plan.projection.tables[key] for key in MEDIA_TABLES},
     )
     index.validate_tables()
+    if reuse is not None:
+        reuse.validate(index)
+        reuse.copy_images(roots)
     written = write_images(plan, roots, library.preview, previous)
     content = index.content()
     path = "image-index/" + digest(content)[7:] + ".json"
@@ -370,13 +459,28 @@ def build_index_command(  # ruff: ignore[too-many-arguments, too-many-positional
         immutable=False,
         private=True,
     )
-    commit(roots, plan.state)
-    upload = upload_description(plan, digest(content)).content()
+    reuse_content = ReuseEvidence(
+        image_index_sha256=digest(content),
+        recipe=DEFAULT_RECIPE.definition(),
+        crops=tuple(record for _, record in sorted(crops.records.items())),
+    ).content()
+    reuse_path = "image-reuse/" + digest(reuse_content)[7:] + ".json"
+    preview.write_artifact(
+        roots, reuse_path, reuse_content, immutable=True, private=True
+    )
+    description = upload_description(plan, digest(content))
+    upload = description.content()
     upload_path = "image-upload/" + digest(upload)[7:] + ".json"
     preview.write_artifact(roots, upload_path, upload, immutable=True)
+    membership_content = scope_manifest(texts, index, description).content()
+    scope_path = "image-scope/" + digest(membership_content)[7:] + ".json"
+    preview.write_artifact(roots, scope_path, membership_content, immutable=True)
+    commit(roots, plan.state)
     typer.echo(
         canonical(
             {
+                "image_reuse": str(roots.destination(reuse_path, private=True)),
+                "image_scope": str(roots.destination(scope_path)),
                 "image_index": str(roots.destination(path, private=True)),
                 "written_images": written,
                 "image_upload": str(roots.destination(upload_path)),
