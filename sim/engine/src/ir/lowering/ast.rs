@@ -172,7 +172,10 @@ pub(super) enum Step {
     Damage(Damage),
     Life(Life),
     SetLife(SetLife),
-    Destroy(Destroy),
+    Destroy(ObjectAction),
+    Banish(ObjectAction),
+    Act(ObjectAction),
+    Stand(ObjectAction),
     Buff(Modify),
     SetStat(Modify),
     Apply(Apply),
@@ -265,8 +268,8 @@ pub(super) enum Chooser {
 
 #[derive(Deserialize)]
 #[serde(untagged, deny_unknown_fields)]
-pub(super) enum Destroy {
-    Short(This),
+pub(super) enum ObjectAction {
+    Short(Objects),
     Long { r#ref: Objects },
 }
 
@@ -292,6 +295,7 @@ pub(super) enum Until {
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum Objects {
     This(This),
+    Bound(String),
     Zone(ObjectQuery),
     Follow { follow: String },
 }

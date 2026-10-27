@@ -808,9 +808,17 @@ impl BodyContext<'_> {
         match step {
             ast::Step::Choice(_) | ast::Step::If(_) => Err(unsupported(path)),
             ast::Step::Destroy(value) => Ok(Action::Destroy {
-                objects: match value {
-                    ast::Destroy::Short(ast::This::This) => numeric::holder(),
-                    ast::Destroy::Long { r#ref } => self.objects(r#ref, path)?,
+                objects: self.action_objects(value, path)?,
+            }),
+            ast::Step::Banish(value) => Ok(Action::Banish {
+                objects: self.action_objects(value, path)?,
+            }),
+            ast::Step::Act(value) | ast::Step::Stand(value) => Ok(Action::Posture {
+                objects: self.action_objects(value, path)?,
+                posture: if matches!(step, ast::Step::Act(_)) {
+                    super::Posture::Acted
+                } else {
+                    super::Posture::Standing
                 },
             }),
             ast::Step::Buff(value) => self.modify(value, false, path),

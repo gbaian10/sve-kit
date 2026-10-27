@@ -558,7 +558,7 @@ fn unsupported_step_rejects_the_entire_candidate() {
     tree["cards"]["BP08-038"]["abilities"][0]["fanfare"]["do"]
         .as_array_mut()
         .unwrap()
-        .push(json!({"banish":"this"}));
+        .push(json!({"reveal":"this"}));
     let failure = ExpandedLowerer::new().unwrap().lower(&tree).unwrap_err();
     assert_eq!(failure.code, "unsupported_construct");
     assert_eq!(failure.path, "/cards/BP08-038/abilities/0");
@@ -585,6 +585,23 @@ fn leader_life_lowering_accepts_signed_delta_and_set_but_rejects_unhandled_metad
             .unwrap()
             .extend(metadata.as_object().unwrap().clone());
         lowerer.lower(&changed).unwrap_err();
+    }
+}
+
+#[test]
+fn basic_object_actions_lower_only_known_references_and_handled_metadata() {
+    let lowerer = ExpandedLowerer::new().unwrap();
+    let mut tree = expanded::tree().clone();
+    for action in ["banish", "act", "stand"] {
+        tree["cards"]["BP08-038"]["abilities"][0]["fanfare"]["do"] = json!([{(action):"this"}]);
+        lowerer.lower(&tree).unwrap();
+        for value in [
+            json!("undefined"),
+            json!({"ref":"this","result":"unhandled"}),
+        ] {
+            tree["cards"]["BP08-038"]["abilities"][0]["fanfare"]["do"] = json!([{(action):value}]);
+            lowerer.lower(&tree).unwrap_err();
+        }
     }
 }
 
