@@ -8,8 +8,7 @@ import pytest
 from pydantic import JsonValue
 
 from sve_carddb.core.json import digest, object_value
-from sve_carddb.core.yaml import MAX_BYTES
-from sve_carddb.domains.digital.name_policies.loader import decoded, load, model
+from sve_carddb.domains.digital.name_policies.loader import load, model
 from sve_carddb.domains.digital.name_policies.records import LinkPolicy
 
 from ...support.adoption_fixtures import commit
@@ -48,54 +47,6 @@ def test_complete_entry_reads_names_and_links(baseline: tuple[Path, str]) -> Non
     assert snapshot.links.content.excluded_names == ()
     assert snapshot.links.content.excluded_targets == ()
     assert snapshot.configuration()["authored_revision"] == revision
-
-
-@pytest.mark.parametrize(
-    "raw",
-    [
-        b"x: &a [*a]",
-        b"x: *a",
-        b"x: !custom hi",
-        b"x: 1\nx: 2",
-        b"x: .nan",
-        b"\xff",
-        b"x: 1\n---\nx: 2",
-        b"? [a, b]\n: value",
-    ],
-    ids=[
-        "cycle",
-        "alias",
-        "custom-tag",
-        "duplicate",
-        "nan",
-        "utf8",
-        "documents",
-        "complex-key",
-    ],
-)
-def test_yaml_boundary(raw: bytes) -> None:
-    with pytest.raises(ValueError, match=r"^Invalid digital-name policy YAML$"):
-        decoded(raw)
-
-
-@pytest.mark.parametrize(
-    ("raw", "expected"),
-    [
-        (b"x: &a hi\ny: *a", {"x": "hi", "y": "hi"}),
-        (b"x: !!str hi", {"x": "hi"}),
-        (b"x: {<<: {k: hi}}", {"x": {"k": "hi"}}),
-    ],
-    ids=["alias", "standard-tag", "merge"],
-)
-def test_yaml_expansion_is_allowed(raw: bytes, expected: JsonValue) -> None:
-    assert decoded(raw) == expected
-
-
-def test_size_boundary() -> None:
-    with pytest.raises(
-        ValueError, match=r"^Digital-name policy file exceeds size limit$"
-    ):
-        decoded(b" " * MAX_BYTES)
 
 
 def test_bool_is_not_a_format(baseline: tuple[Path, str]) -> None:

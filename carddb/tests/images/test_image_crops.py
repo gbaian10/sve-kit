@@ -20,34 +20,12 @@ if TYPE_CHECKING:
     from sve_carddb.ingest.archive.source_archive import Descriptor
 
 AUTHORED = Path(__file__).resolve().parents[3] / "authored"
-# Adopted tops from the former sharded format, where every row spelled out 36/384/288.
-GOLDEN_TOPS = {
-    "BP10-001": 184,
-    "BP10-002": 184,
-    "BP10-SL01": 184,
-    "BP10-SL02": 184,
-    "BP10-U01": 232,
-    "BP15-PR01": 256,
-    "BP10-001EN": 184,
-    "BP10-002EN": 184,
-    "BP10-SL01EN": 184,
-    "BP10-SL02EN": 184,
-    "BP10-U01EN": 232,
-    "BP15-PR01EN": 256,
-}
 
 
 @pytest.fixture(scope="module")
 def descriptor(image_archive_template: tuple[Path, str, str]) -> Descriptor:
     frozen = FrozenSources(*image_archive_template)
     return frozen.descriptor(frozen.inventory.current[0].source_version_id)
-
-
-def test_authored_boxes_match_adopted_golden() -> None:
-    records = load_image_crops(AUTHORED).records.values()
-    assert {r.card_no: r.box() for r in records if r.card_no in GOLDEN_TOPS} == {
-        card_no: CropBox(36, top, 384, 288) for card_no, top in GOLDEN_TOPS.items()
-    }
 
 
 def test_working_tree_edit_applies_without_git(

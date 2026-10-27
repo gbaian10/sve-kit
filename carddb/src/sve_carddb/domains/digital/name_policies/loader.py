@@ -1,17 +1,21 @@
 """Validate an entire immutable authored entry before returning current policies."""
 
-import re
+from __future__ import annotations
+
 from dataclasses import dataclass
-from pathlib import Path, PurePosixPath
+from typing import TYPE_CHECKING
 
 from pydantic import JsonValue, ValidationError
 
 from sve_carddb.core.authored import read, require_directory
 from sve_carddb.core.json import canonical, object_value
 from sve_carddb.core.models import RecordData
-from sve_carddb.core.yaml import JSON_VALUE, MAX_BYTES, parse_yaml
+from sve_carddb.core.yaml import JSON_VALUE
 from sve_carddb.domains.digital.name_policies.records import LinkPolicy
 from sve_carddb.domains.digital.name_policies.records import Policy as CurrentPolicy
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def model[T: RecordData](kind: type[T], raw: JsonValue) -> T:
@@ -24,32 +28,6 @@ def model[T: RecordData](kind: type[T], raw: JsonValue) -> T:
         return kind.model_validate_json(canonical(raw))
     except ValidationError:
         raise ValueError("Invalid digital-name policy fields") from None
-
-
-def decoded(raw: bytes) -> JsonValue:
-    """Reuse strict YAML 1.2 without consulting mutable disk copies."""
-    if len(raw) >= MAX_BYTES:
-        raise ValueError("Digital-name policy file exceeds size limit")
-    try:
-        value = JSON_VALUE.validate_python(parse_yaml(raw), strict=True)
-        canonical(value)
-    except ValueError, TypeError, UnicodeError:
-        raise ValueError("Invalid digital-name policy YAML") from None
-    else:
-        return value
-
-
-def _portable(name: str) -> bool:
-    path = PurePosixPath(name)
-    return (
-        bool(name)
-        and not path.is_absolute()
-        and path.as_posix() == name
-        and all(
-            part not in {".", ".."} and re.fullmatch(r"[A-Za-z0-9_.-]+", part)
-            for part in path.parts
-        )
-    )
 
 
 @dataclass(frozen=True)
