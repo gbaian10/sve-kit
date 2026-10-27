@@ -87,6 +87,13 @@ pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
     mask_resolution_domain(&mut inspected)?;
 
     if let Node::Instruction { instruction } = &mut inspected
+        && super::movement::deck_top(&instruction.action).is_some()
+        && let Action::Move { objects, .. } = &mut instruction.action
+    {
+        // Only this checked slice is authorized; instruction metadata keeps its private-read guard.
+        *objects = Selector::Objects { objects: vec![] };
+    }
+    if let Node::Instruction { instruction } = &mut inspected
         && let Action::Destroy { objects: selector }
         | Action::Banish { objects: selector }
         | Action::Move {

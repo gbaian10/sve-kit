@@ -5,9 +5,9 @@ use crate::ir::{
     Action, ActionPattern, BanishOutcome, Bool, Cause, CausePattern, DestroyOutcome, DurationEnd,
     Effect, EffectSource, Expr, Generation, Instruction, MoveDestination, MoveMethod, MoveOutcome,
     MoveReason, MoveResult, MoveSpec, MovementReceipt, Nat, Node, ObjectReceipt, ObjectRef,
-    OwnerZone, PlayerId, PlayerRef, PlayerRelation, Polarity, ReceiptId, ReceiptLocation,
+    OwnerZone, PlayerId, PlayerRef, PlayerRelation, Polarity, Position, ReceiptId, ReceiptLocation,
     ResultMember, ResultMemberId, RuntimeObjectView, RuntimeZoneRef, SelectionView, Selector,
-    SnapshotId, TimeAnchor, ZoneKind,
+    SliceDirection, SnapshotId, TimeAnchor, ZoneKind,
 };
 use serde_json::json;
 
@@ -28,6 +28,12 @@ pub struct MovementFact {
 
 pub(super) fn check_action(action: &Action) -> Result<()> {
     match action {
+        Action::Move {
+            objects: Selector::Ordered { .. },
+            ..
+        } if deck_top(action).is_none() => {
+            Err(unsupported("fixed own-deck top movement to cemetery"))
+        }
         Action::Move {
             objects,
             movement,
@@ -104,6 +110,36 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
             Ok(())
         }
         _ => Ok(()),
+    }
+}
+
+pub(super) fn deck_top(action: &Action) -> Option<u64> {
+    match action {
+        Action::Move {
+            objects:
+                Selector::Ordered {
+                    zone,
+                    start: Position::Top {},
+                    count: Expr::Literal(Nat(count)),
+                    direction: SliceDirection::Forward,
+                },
+            movement,
+            reason: MoveReason::Put,
+        } if *count > 0
+            && zone.kind == ZoneKind::Deck
+            && zone.player == (PlayerRef::Controller {})
+            && movement.to
+                == (MoveDestination::Owners {
+                    zone: OwnerZone::Cemetery,
+                })
+            && movement.position.is_none()
+            && movement.order.is_none()
+            && movement.initial_posture.is_none()
+            && movement.entry_effects.is_empty() =>
+        {
+            Some(*count)
+        }
+        _ => None,
     }
 }
 
@@ -247,14 +283,25 @@ impl Game {
                 (zone, kind, MoveMethod::Put)
             }
         };
-        let members = execution.objects(self, objects)?;
+        let top_count = deck_top(&instruction.action);
+        let members = if let Some(count) = top_count {
+            self.zone_ids(super::seat_name(execution.context.controller)?, "deck")
+                .iter()
+                .take(usize::try_from(count).map_err(invalid)?)
+                .map(|id| execution.reference(self, id))
+                .collect::<Result<Vec<_>>>()?
+        } else {
+            execution.objects(self, objects)?
+        };
         for &member in &members {
             let object = self.object(execution.object_id(member)?)?;
             if object.generation == member.generation.0 {
                 if kind == ZoneKind::Hand && object.zone != "field" {
                     return Err(unsupported("only public field departures to hand"));
                 }
-                public_zone(&object.zone)?;
+                if top_count.is_none() {
+                    public_zone(&object.zone)?;
+                }
             }
         }
         let (moves, successful) =

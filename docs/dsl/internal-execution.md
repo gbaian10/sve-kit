@@ -508,6 +508,18 @@ BP02-116 的測試只驗一個已給定對象的破壞片段，不包含 Quick�
 BP02-089 只驗能力破壞禁止述詞，測試的 EndResolution 為合成期限；原卡的 static、Aura、
 進化與其他能力沒有遷移。兩者印刷資料均來自公開輸入生成器，片段不算整卡准入。
 
+## 牌組頂固定張數送墓
+
+本文 `move: {top: {who: self, n: N}, to: cemetery}` 接受正整數常值 N，
+降低為自己 Deck 的 Top／Forward Ordered selector 與 Put 至 Owners(Cemetery)。
+結算時直接取當前牌組頂端至多 N 張，沿既有移動原語產生 MoveOutcome 與 MovementFact；
+不先 Look、不詢問、不抽牌，牌組不足或為空仍盡可能執行，不造成抽牌失敗。
+移入墓場的卡成為公開資訊，剩餘牌序與未移動牌的秘密性維持。
+
+此權限僅屬於已驗證的送墓 selector；其他動作、指示 metadata、任意秘密區域
+selector、牌底、非固定張數與其他目的地不因此准入。作者入口不接受 result、
+placement 或額外進場效果，精確零張亦未開放。
+
 ## 私有看牌與同區排列
 
 Look 先准入 Exact、viewer 自己的 Deck，取頂端至多 count 張；不移區、不換世代。
