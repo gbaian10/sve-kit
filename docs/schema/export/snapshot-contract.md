@@ -136,6 +136,8 @@ canonical 與 SHA-256 bucket 向量仍供 fixture 產製及按需定位驗收；
 
 共用 schema／樣本變動仍須觸發 Python 契約測試與 Web 解碼／顯示測試。
 
+候選格式的 `card_related`／`digital_link` tuple 不含建置列 ID，以全部公開欄位作複合主鍵。Python／TS accessor 從同一 Schema 取得欄序與主鍵，publish 的獨立合成投影亦須使用此形狀；不得補造 hash 或以列位置還原 ID。建置端先完成審核／來源／數位面 join，再省略 ID 並按完整公開值去重。
+
 ## 數位名字政策的准入邊界
 
 名字依獨立規則取詞仍走既有translation／FieldTranslation；same_name瀏覽是另一個需明示能力與reader升級的路徑。

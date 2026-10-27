@@ -764,7 +764,6 @@ def test_nonempty_same_name_requires_endpoints_and_excludes_extra_authority(
     projection.tables["card_voice"] = []
     if failure in {"duplicate", "human_shadow"}:
         other = deepcopy(rule)
-        other["id"] = "digital-link:second"
         if failure == "human_shadow":
             other.update(relation="same_character", review_level="confirmed")
         projection.tables["digital_link"].append(other)
@@ -773,7 +772,7 @@ def test_nonempty_same_name_requires_endpoints_and_excludes_extra_authority(
         array(plan.projection.config["digital_endpoints"]).pop()
     message = {
         "endpoint": "Media config requires both sorted game endpoints",
-        "duplicate": "Duplicate or human-shadowed same-name card pair",
+        "duplicate": "Duplicate public primary key",
         "human_shadow": "Duplicate or human-shadowed same-name card pair",
     }[failure]
     with pytest.raises(ValueError, match="^" + message + "$"):

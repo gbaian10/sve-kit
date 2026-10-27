@@ -88,6 +88,8 @@ annotation_concept 的 category／card_ids／explanations、translation 第八�
 容量報告列實際非空集合／用途列數、空集合省略量與整名推導省略量；producer 只省略可由 name_concept_id 完全推導的整名集合，其餘非空 occurrence 逐用途保留。
 容量以實際輸出計，不以推定可省略的集合量代替實測。
 
+公開關聯列省略 `card_related.id`／`digital_link.id` 並將完整相同的公開列去重；容量驗收比較同一組已驗證輸入的匯出結果，逐表核對其餘內容相同。不能省略仍被翻譯、標註、版次、構築或 changes 引用的 ID，也不能把所有 hash 欄位的獨立壓縮量相加當成可省流量。
+
 基本目錄可先達基本文字就緒而日文依據／標註未備妥；完整文字帳不因此縮減。
 首次來源對照、printed／history、概念說明另報按需增量；若實際成基本目錄必載依賴，就回基本目錄帳。
 文字、只改 bold、概念說明等更新，各自報重建檔數及下載 bytes，base／字典變更的重抓亦計入。

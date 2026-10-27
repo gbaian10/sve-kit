@@ -5710,9 +5710,6 @@
           "$ref": "#/$defs/ID"
         },
         {
-          "$ref": "#/$defs/ID"
-        },
-        {
           "enum": [
             "official_unspecified",
             "evolves_to",
@@ -5748,10 +5745,9 @@
         }
       ],
       "items": false,
-      "minItems": 6,
-      "maxItems": 6,
+      "minItems": 5,
+      "maxItems": 5,
       "x-columns": [
-        "id",
         "from_card_id",
         "to_card_id",
         "relation",
@@ -5759,9 +5755,6 @@
         "applicable_regions"
       ],
       "x-types": [
-        {
-          "scalar": "ID"
-        },
         {
           "scalar": "ID"
         },
@@ -5793,13 +5786,16 @@
         }
       ],
       "x-primary-key": [
-        "id"
+        "from_card_id",
+        "to_card_id",
+        "relation",
+        "suggested_count",
+        "applicable_regions"
       ],
       "allOf": [
         {
           "if": {
             "prefixItems": [
-              {},
               {},
               {},
               {
@@ -5811,7 +5807,6 @@
           },
           "then": {
             "prefixItems": [
-              {},
               {},
               {},
               {},
@@ -5830,7 +5825,6 @@
           },
           "else": {
             "prefixItems": [
-              {},
               {},
               {},
               {},
@@ -6014,9 +6008,6 @@
           "$ref": "#/$defs/ID"
         },
         {
-          "$ref": "#/$defs/ID"
-        },
-        {
           "anyOf": [
             {
               "$ref": "#/$defs/ID"
@@ -6075,10 +6066,9 @@
         }
       ],
       "items": false,
-      "minItems": 8,
-      "maxItems": 8,
+      "minItems": 7,
+      "maxItems": 7,
       "x-columns": [
-        "id",
         "card_id",
         "face_id",
         "digital_card_id",
@@ -6088,9 +6078,6 @@
         "review_level"
       ],
       "x-types": [
-        {
-          "scalar": "ID"
-        },
         {
           "scalar": "ID"
         },
@@ -6138,7 +6125,13 @@
         }
       ],
       "x-primary-key": [
-        "id"
+        "card_id",
+        "face_id",
+        "digital_card_id",
+        "digital_phase",
+        "relation",
+        "effect_similarity",
+        "review_level"
       ]
     },
     "digital_art_link": {
@@ -11990,9 +11983,6 @@
           "$ref": "#/$defs/ID"
         },
         {
-          "$ref": "#/$defs/ID"
-        },
-        {
           "enum": [
             "official_unspecified",
             "evolves_to",
@@ -12028,10 +12018,9 @@
         }
       ],
       "items": false,
-      "minItems": 6,
-      "maxItems": 6,
+      "minItems": 5,
+      "maxItems": 5,
       "x-columns": [
-        "id",
         "from_card_id",
         "to_card_id",
         "relation",
@@ -12039,9 +12028,6 @@
         "applicable_regions"
       ],
       "x-types": [
-        {
-          "scalar": "ID"
-        },
         {
           "scalar": "ID"
         },
@@ -12078,7 +12064,6 @@
             "prefixItems": [
               {},
               {},
-              {},
               {
                 "const": "same_rules_reskin"
               },
@@ -12088,7 +12073,6 @@
           },
           "then": {
             "prefixItems": [
-              {},
               {},
               {},
               {},
@@ -12107,7 +12091,6 @@
           },
           "else": {
             "prefixItems": [
-              {},
               {},
               {},
               {},
@@ -12384,9 +12367,6 @@
           "$ref": "#/$defs/ID"
         },
         {
-          "$ref": "#/$defs/ID"
-        },
-        {
           "anyOf": [
             {
               "$ref": "#/$defs/ID"
@@ -12445,10 +12425,9 @@
         }
       ],
       "items": false,
-      "minItems": 8,
-      "maxItems": 8,
+      "minItems": 7,
+      "maxItems": 7,
       "x-columns": [
-        "id",
         "card_id",
         "face_id",
         "digital_card_id",
@@ -12458,9 +12437,6 @@
         "review_level"
       ],
       "x-types": [
-        {
-          "scalar": "ID"
-        },
         {
           "scalar": "ID"
         },
@@ -18774,12 +18750,53 @@
                   "key": {
                     "type": "object",
                     "properties": {
-                      "id": {
+                      "from_card_id": {
                         "$ref": "#/$defs/ID"
+                      },
+                      "to_card_id": {
+                        "$ref": "#/$defs/ID"
+                      },
+                      "relation": {
+                        "enum": [
+                          "official_unspecified",
+                          "evolves_to",
+                          "advances_to",
+                          "produces_token",
+                          "mentions",
+                          "extra_aid",
+                          "same_rules_reskin"
+                        ]
+                      },
+                      "suggested_count": {
+                        "anyOf": [
+                          {
+                            "$ref": "#/$defs/Positive"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "applicable_regions": {
+                        "anyOf": [
+                          {
+                            "type": "array",
+                            "items": {
+                              "$ref": "#/$defs/Region"
+                            }
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
                       }
                     },
                     "required": [
-                      "id"
+                      "from_card_id",
+                      "to_card_id",
+                      "relation",
+                      "suggested_count",
+                      "applicable_regions"
                     ],
                     "additionalProperties": false
                   },
@@ -18787,7 +18804,6 @@
                     "type": "array",
                     "items": {
                       "enum": [
-                        "id",
                         "from_card_id",
                         "to_card_id",
                         "relation",
@@ -18901,12 +18917,75 @@
                   "key": {
                     "type": "object",
                     "properties": {
-                      "id": {
+                      "card_id": {
                         "$ref": "#/$defs/ID"
+                      },
+                      "face_id": {
+                        "anyOf": [
+                          {
+                            "$ref": "#/$defs/ID"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "digital_card_id": {
+                        "$ref": "#/$defs/ID"
+                      },
+                      "digital_phase": {
+                        "anyOf": [
+                          {
+                            "enum": [
+                              "normal",
+                              "evolved",
+                              "super_evolved"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "relation": {
+                        "enum": [
+                          "same_card",
+                          "same_character",
+                          "name_only",
+                          "same_name"
+                        ]
+                      },
+                      "effect_similarity": {
+                        "anyOf": [
+                          {
+                            "enum": [
+                              "near_identical",
+                              "core_kept",
+                              "reworked"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "review_level": {
+                        "enum": [
+                          "unreviewed",
+                          "model_reviewed",
+                          "sampled",
+                          "confirmed"
+                        ]
                       }
                     },
                     "required": [
-                      "id"
+                      "card_id",
+                      "face_id",
+                      "digital_card_id",
+                      "digital_phase",
+                      "relation",
+                      "effect_similarity",
+                      "review_level"
                     ],
                     "additionalProperties": false
                   },
@@ -18914,7 +18993,6 @@
                     "type": "array",
                     "items": {
                       "enum": [
-                        "id",
                         "card_id",
                         "face_id",
                         "digital_card_id",
@@ -21021,12 +21099,53 @@
                   "key": {
                     "type": "object",
                     "properties": {
-                      "id": {
+                      "from_card_id": {
                         "$ref": "#/$defs/ID"
+                      },
+                      "to_card_id": {
+                        "$ref": "#/$defs/ID"
+                      },
+                      "relation": {
+                        "enum": [
+                          "official_unspecified",
+                          "evolves_to",
+                          "advances_to",
+                          "produces_token",
+                          "mentions",
+                          "extra_aid",
+                          "same_rules_reskin"
+                        ]
+                      },
+                      "suggested_count": {
+                        "anyOf": [
+                          {
+                            "$ref": "#/$defs/Positive"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "applicable_regions": {
+                        "anyOf": [
+                          {
+                            "type": "array",
+                            "items": {
+                              "$ref": "#/$defs/Region"
+                            }
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
                       }
                     },
                     "required": [
-                      "id"
+                      "from_card_id",
+                      "to_card_id",
+                      "relation",
+                      "suggested_count",
+                      "applicable_regions"
                     ],
                     "additionalProperties": false
                   },
@@ -21034,7 +21153,6 @@
                     "type": "array",
                     "items": {
                       "enum": [
-                        "id",
                         "from_card_id",
                         "to_card_id",
                         "relation",
@@ -21151,12 +21269,75 @@
                   "key": {
                     "type": "object",
                     "properties": {
-                      "id": {
+                      "card_id": {
                         "$ref": "#/$defs/ID"
+                      },
+                      "face_id": {
+                        "anyOf": [
+                          {
+                            "$ref": "#/$defs/ID"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "digital_card_id": {
+                        "$ref": "#/$defs/ID"
+                      },
+                      "digital_phase": {
+                        "anyOf": [
+                          {
+                            "enum": [
+                              "normal",
+                              "evolved",
+                              "super_evolved"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "relation": {
+                        "enum": [
+                          "same_card",
+                          "same_character",
+                          "name_only",
+                          "same_name"
+                        ]
+                      },
+                      "effect_similarity": {
+                        "anyOf": [
+                          {
+                            "enum": [
+                              "near_identical",
+                              "core_kept",
+                              "reworked"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "review_level": {
+                        "enum": [
+                          "unreviewed",
+                          "model_reviewed",
+                          "sampled",
+                          "confirmed"
+                        ]
                       }
                     },
                     "required": [
-                      "id"
+                      "card_id",
+                      "face_id",
+                      "digital_card_id",
+                      "digital_phase",
+                      "relation",
+                      "effect_similarity",
+                      "review_level"
                     ],
                     "additionalProperties": false
                   },
@@ -21164,7 +21345,6 @@
                     "type": "array",
                     "items": {
                       "enum": [
-                        "id",
                         "card_id",
                         "face_id",
                         "digital_card_id",
@@ -23269,12 +23449,53 @@
                   "key": {
                     "type": "object",
                     "properties": {
-                      "id": {
+                      "from_card_id": {
                         "$ref": "#/$defs/ID"
+                      },
+                      "to_card_id": {
+                        "$ref": "#/$defs/ID"
+                      },
+                      "relation": {
+                        "enum": [
+                          "official_unspecified",
+                          "evolves_to",
+                          "advances_to",
+                          "produces_token",
+                          "mentions",
+                          "extra_aid",
+                          "same_rules_reskin"
+                        ]
+                      },
+                      "suggested_count": {
+                        "anyOf": [
+                          {
+                            "$ref": "#/$defs/Positive"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "applicable_regions": {
+                        "anyOf": [
+                          {
+                            "type": "array",
+                            "items": {
+                              "$ref": "#/$defs/Region"
+                            }
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
                       }
                     },
                     "required": [
-                      "id"
+                      "from_card_id",
+                      "to_card_id",
+                      "relation",
+                      "suggested_count",
+                      "applicable_regions"
                     ],
                     "additionalProperties": false
                   },
@@ -23282,7 +23503,6 @@
                     "type": "array",
                     "items": {
                       "enum": [
-                        "id",
                         "from_card_id",
                         "to_card_id",
                         "relation",
@@ -23396,12 +23616,75 @@
                   "key": {
                     "type": "object",
                     "properties": {
-                      "id": {
+                      "card_id": {
                         "$ref": "#/$defs/ID"
+                      },
+                      "face_id": {
+                        "anyOf": [
+                          {
+                            "$ref": "#/$defs/ID"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "digital_card_id": {
+                        "$ref": "#/$defs/ID"
+                      },
+                      "digital_phase": {
+                        "anyOf": [
+                          {
+                            "enum": [
+                              "normal",
+                              "evolved",
+                              "super_evolved"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "relation": {
+                        "enum": [
+                          "same_card",
+                          "same_character",
+                          "name_only",
+                          "same_name"
+                        ]
+                      },
+                      "effect_similarity": {
+                        "anyOf": [
+                          {
+                            "enum": [
+                              "near_identical",
+                              "core_kept",
+                              "reworked"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "review_level": {
+                        "enum": [
+                          "unreviewed",
+                          "model_reviewed",
+                          "sampled",
+                          "confirmed"
+                        ]
                       }
                     },
                     "required": [
-                      "id"
+                      "card_id",
+                      "face_id",
+                      "digital_card_id",
+                      "digital_phase",
+                      "relation",
+                      "effect_similarity",
+                      "review_level"
                     ],
                     "additionalProperties": false
                   },
@@ -23409,7 +23692,6 @@
                     "type": "array",
                     "items": {
                       "enum": [
-                        "id",
                         "card_id",
                         "face_id",
                         "digital_card_id",

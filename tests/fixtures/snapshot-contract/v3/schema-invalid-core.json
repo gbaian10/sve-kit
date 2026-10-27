@@ -376,5 +376,31 @@
       null,
       null
     ]
+  },
+  {
+    "name": "card-related-build-id-is-not-public",
+    "schema": "card_related",
+    "value": [
+      "related:build",
+      "c:a",
+      "c:b",
+      "mentions",
+      null,
+      null
+    ]
+  },
+  {
+    "name": "digital-link-build-id-is-not-public",
+    "schema": "digital_link",
+    "value": [
+      "dl:build",
+      "c:a",
+      null,
+      "d:a",
+      null,
+      "same_card",
+      null,
+      "confirmed"
+    ]
   }
 ]

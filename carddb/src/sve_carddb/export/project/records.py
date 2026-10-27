@@ -326,7 +326,11 @@ def art_records(source: Source, view: dict[str, list[Record]]) -> None:
     view["artist"] = [row for row in view["artist"] if row["id"] in artists]
     for table in ("stamp", "digital_link", "digital_art_link"):
         fields = SCALARS[table] + ",decision_id"
-        keys = [string(key) for key in array(definition(table)["x-primary-key"])]
+        keys = (
+            ["id"]
+            if table == "digital_link"
+            else [string(key) for key in array(definition(table)["x-primary-key"])]
+        )
         decisions_by_key = {
             tuple(raw[key] for key in keys): raw for raw in source.rows(table, fields)
         }

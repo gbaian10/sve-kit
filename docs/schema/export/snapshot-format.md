@@ -63,11 +63,11 @@ reader 編譯具型別 accessor，詳情分片保留 tuples＋ID→row 索引；
 | `face_rules_name` | `face_id, region, rules_name_id, role` | 複合 `PK(全部欄)`；同名/合作名/`treated_as` 構築 |
 | `rules_profile` | `id, region, format_code, name_unit_id, revisions:[{id,effective_from,effective_until?,cr_version_id?,default_copy_limit?,construction_rules_ref?}]` | 各區各賽制/日期規則 |
 | `restriction` | `id, profile_id, announced_on?, effective_from, effective_until?, kind, state, max_copies?, max_selected_groups?, members:[{rules_name_id,choice_option,deck_scope}]` | 禁止、限張、二擇一/多選項；不以 `card_id` 漏限 |
-| `card_related` | `id, from_card_id, to_card_id, relation, suggested_count?, applicable_regions?:[Region]` | 進化/相關卡與牌組追加區建議；`same_rules_reskin` 為換皮卡指向原卡的「規則相同」提示：`applicable_regions` 必填（非空、去重、排序），由建置逐地區驗證結果填入，reader 只在目前卡面地區包含於其中時顯示，結果為空則不投影；其他 relation 為 null。不合併構築張數，reader 不得據此推導 DSL 共用或跨區等義 |
+| `card_related` | `from_card_id, to_card_id, relation, suggested_count?, applicable_regions?:[Region]` | 複合 `PK(全部欄)`；進化/相關卡與牌組追加區建議；`same_rules_reskin` 為換皮卡指向原卡的「規則相同」提示：`applicable_regions` 必填（非空、去重、排序），由建置逐地區驗證結果填入，reader 只在目前卡面地區包含於其中時顯示，結果為空則不投影；其他 relation 為 null。不合併構築張數，reader 不得據此推導 DSL 共用或跨區等義 |
 | `card_mentioned_by` | `card_id, region, from_card_id` | 卡名標註與官方單向關聯的反查；`card_id` 是被提到者，`from_card_id` 是提到者。複合 `PK(card_id,region,from_card_id)`，依序排序；同地區同一對卡只出一列，不含自我提及。採現行版本效果與段落的卡名標註，聯集官方 `official_unspecified` 單向相關卡的反向列；單向判定與地區選擇見[反查投影](public-projection.md#卡名反查投影) |
 | `digital_card` | `id, game, official_id` | 官方數位頁連結，僅 SVE 所需閉包 |
 | `digital_art` | `id, digital_card_id, phase, style_key` | 數位進化面/styles/異畫對照 |
-| `digital_link` | `id, card_id, face_id?, digital_card_id, digital_phase?, relation, effect_similarity?, review_level` | 區分 `same_card/same_character/name_only/same_name`；`same_name` 待能力實作，本批不產生；`model_reviewed` 只供瀏覽、不供名 |
+| `digital_link` | `card_id, face_id?, digital_card_id, digital_phase?, relation, effect_similarity?, review_level` | 複合 `PK(全部欄)`；區分 `same_card/same_character/name_only/same_name`；`same_name` 待能力實作，本批不產生；`model_reviewed` 只供瀏覽、不供名 |
 | `digital_art_link` | `art_id, digital_art_id, relation, review_level` | 複合 `PK(art_id,digital_art_id)`；實體圖對數位圖 |
 | `digital_link_coverage` | `card_id, game, state, as_of` | 複合 `PK(card_id,game)`；尚未核對與核對無結果分開 |
 | `voice` | `id, digital_card_id, digital_phase?, lang, kind_code, variant?, interaction_target_id?, label_raw?, source_url, asset_path?, mime?, bytes?, duration_ms?, availability` | 語音瀏覽與來源切換；不預載音檔 |
@@ -81,6 +81,8 @@ reader 編譯具型別 accessor，詳情分片保留 tuples＋ID→row 索引；
 | `text_symbol` | `id, code, parameter_schema, keyword_id?, spellings:[Spelling], localizations:[Localization]` | 自製圖示、aria、tooltip、複製文字 |
 | `card_route_alias` | `namespace, old_key, target_namespace, target_key, reason` | PK(`namespace`,`old_key`)；改卡號永久轉址；official 路由由已確認 `card_no` 推導；provisional 用 `int_id` 保留命名空間 |
 | `route_override` | `route_key, printing_id` | PK(`route_key`)；僅多 variant 的穩定入口例外，正常卡不重複 route 列 |
+
+`card_related` 與 `digital_link` 不公開建置端的內容雜湊列 ID；建置 schema 仍保留 ID 供來源、審核與採納核對，投影完成後才移除。兩集合以全部公開欄位為值集合主鍵，僅完整相同的列去重；`suggested_count`、`applicable_regions`、數位面／關係／相似度／審核層級任一不同都保留。沒有其他公開集合引用這兩種列 ID；路由與牌組仍使用既有卡片／印刷身分。變更任一公開值視為舊列移除與新列加入，changes 的 key 不含建置 ID。
 
 數位瀏覽採用既有 `model_reviewed` 值；不改欄序、公開 enum、格式版號或必要能力。真人 `sampled`／`confirmed` 的語義不變。模型連結的逐筆或抽樣查核方法保存在 authored reason，不作官方名稱證據。離線匯出只公開 fresh `same_card`／`same_character` 連結與其 `digital_card` 引用閉包，不公開數位卡文、面、圖或語音。本入口不採納 `name_only`；coverage 未實作時維持 `[]`，無候選仍是「尚未核對」，不能推導 `reviewed_none`。入口與來源重驗見[數位對應採納](../domains/digital-link-adoption.md)。
 
@@ -493,9 +495,9 @@ face_id／digital_phase 皆 null、effect_similarity=null、review_level=unrevie
 不增加 policy_checked、政策／收據欄位或新的公開 review_level。
 
 所有符合政策的數位 ID 兩代全列，每個 `(card_id,game,official_id)` 的規則連結最多一筆，
-wire 依既有 link.id 排序；UI 先 sv1 再 svwb，各代按原始 ASCII official_id 排序。
-id 仍為 `dl:`＋H(`["digital-link-v1",subject]`)，subject 依 digital-link-adoption 的完整卡層鍵；
-relation、時間、政策／排除清單 hash 不參與。政策卡層升真人且 subject 完全相同時沿 ID，
+wire 依全部公開欄位的複合主鍵排序；UI 先 sv1 再 svwb，各代按原始 ASCII official_id 排序。
+建置端 id 為 `dl:`＋H(`["digital-link-v1",subject]`)，只供來源／採納 join，不公開；subject 依 digital-link-adoption 的完整卡層鍵；
+relation、時間、政策／排除清單 hash 不參與。政策卡層升真人且 subject 完全相同時沿建置 ID，
 精確面的人審 subject 是另一 ID。有效真人同 card/game/ID 的任何合法關係優先，規則不得另出重複列；
 刪除真人關係不會自動停用規則連結；要停用某卡對須在 links 政策的 excluded_targets 列出。
 
