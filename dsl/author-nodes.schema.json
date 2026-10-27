@@ -21093,50 +21093,58 @@
       "maxProperties": 1
     },
     "DirectSourceUse": {
-      "type": "object",
       "additionalProperties": false,
       "properties": {
         "admission": {
           "enum": [
             "light",
             "shared"
-          ]
+          ],
+          "type": "string"
         },
         "owner": {
           "$ref": "#/$defs/FaceRevisionOwner"
         },
         "face_id": {
-          "type": "string",
-          "pattern": "^f:[0-9a-f]{32}$"
+          "pattern": "^f:[0-9a-f]{32}$(?![\\s\\S])",
+          "type": "string"
         },
         "field": {
           "enum": [
             "effect",
             "section"
-          ]
+          ],
+          "type": "string"
         },
         "ordinal": {
-          "type": [
-            "integer",
-            "null"
-          ],
-          "minimum": 0
+          "anyOf": [
+            {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "line": {
-          "type": "integer",
-          "minimum": 1
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
         },
         "scope": {
-          "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "type": "string"
         },
         "covers": {
-          "type": "array",
           "items": {
-            "type": "integer",
-            "minimum": 1
+            "maximum": 9007199254740991,
+            "minimum": 1,
+            "type": "integer"
           },
           "minItems": 1,
+          "type": "array",
           "uniqueItems": true
         }
       },
@@ -21149,7 +21157,8 @@
         "line",
         "scope",
         "covers"
-      ]
+      ],
+      "type": "object"
     },
     "DirectMeta": {
       "additionalProperties": false,
@@ -21159,7 +21168,8 @@
           "type": "string"
         },
         "source": {
-          "const": "direct"
+          "const": "direct",
+          "type": "string"
         },
         "written_by": {
           "items": {
@@ -21206,7 +21216,8 @@
           "enum": [
             "light",
             "shared"
-          ]
+          ],
+          "type": "string"
         }
       },
       "required": [

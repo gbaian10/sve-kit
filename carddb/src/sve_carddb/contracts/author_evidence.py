@@ -2,7 +2,7 @@
 
 from typing import Annotated, Literal, NotRequired, TypedDict
 
-from pydantic import ConfigDict, Field, with_config
+from pydantic import AfterValidator, ConfigDict, Field, with_config
 
 from sve_carddb.contracts.author_leaves import ParamName, ParamValue, ParamValues
 from sve_carddb.contracts.author_references import BindingName
@@ -39,6 +39,12 @@ class CardKeywordSourceUse(RecordData):
     occurrence: OccurrenceKey
 
 
+def _unique_lines(lines: tuple[int, ...]) -> tuple[int, ...]:
+    if len(lines) != len(set(lines)):
+        raise ValueError("covered lines must be unique")
+    return lines
+
+
 class DirectSourceUse(RecordData):
     admission: Literal["light", "shared"]
     owner: FaceRevisionOwner
@@ -47,7 +53,11 @@ class DirectSourceUse(RecordData):
     ordinal: UInt | None
     line: Positive
     scope: Text
-    covers: Annotated[tuple[Positive, ...], Field(min_length=1)]
+    covers: Annotated[
+        tuple[Positive, ...],
+        Field(min_length=1, json_schema_extra={"uniqueItems": True}),
+        AfterValidator(_unique_lines),
+    ]
 
 
 Sources = Annotated[
@@ -131,7 +141,7 @@ class ResolvedVariant(RecordData):
 
 
 class UseDependencyFields(RecordData):
-    sources: Sources
+    sources: Annotated[tuple[SourceUse, ...], Field(min_length=1, max_length=1)]
     frame_id: FrameId
     ability_scope: Code
     semantic_variant: ResolvedVariant

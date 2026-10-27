@@ -7,7 +7,6 @@ from pydantic import (
     BeforeValidator,
     ConfigDict,
     Field,
-    JsonValue,
     RootModel,
     with_config,
 )
@@ -17,6 +16,7 @@ from sve_carddb.contracts.author_evidence import (
     BodyVersion,
     CardKeywordSources,
     DirectMeta,
+    DirectSourceUse,
     EmptyPorts,
     FaceId,
     ImportMap,
@@ -256,7 +256,7 @@ class AuthorCardFields(TypedDict):
     note: NotRequired[Text]
     abilities: NotRequired[tuple[Ability, ...]]
     faces: NotRequired[dict[FaceId, AuthorFace]]
-    ignored: NotRequired[tuple[JsonValue, ...]]
+    ignored: NotRequired[tuple[DirectSourceUse, ...]]
     deck_rule: NotRequired[DeckRule]
 
 

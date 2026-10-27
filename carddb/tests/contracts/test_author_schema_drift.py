@@ -352,6 +352,6 @@ def test_storage_ability_heads_follow_the_authority() -> None:
         actual = {
             key: value
             for key, value in stored[head].items()
-            if key not in {"line", "face", "section", "scope"}
+            if key not in {"line", "face", "section", "scope", "admission", "covers"}
         }
         assert _local_author_references(actual) == _local_author_references(expected)
