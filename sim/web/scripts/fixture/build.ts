@@ -1038,7 +1038,6 @@ async function addCard(ctx: CardContext): Promise<void> {
   }
   for (const related of card.related ?? []) {
     builder.push("card_related", owner, "detail", {
-      id: `rel:${card.id.slice(2)}:${related.to.slice(2)}`,
       from_card_id: card.id,
       to_card_id: related.to,
       relation: related.relation,
