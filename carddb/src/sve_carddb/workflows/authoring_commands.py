@@ -104,7 +104,7 @@ def write_command(  # ruff: ignore[too-many-arguments] -- keep the complete orde
     all_cards: Annotated[bool, typer.Option("--all")] = False,
     remove_prototype: Annotated[bool, typer.Option("--remove-prototype")] = False,
 ) -> None:
-    """Write handwritten shards and explicitly refresh selected anchors."""
+    """Write validated author shards and optionally replace their prototypes."""
     if bool(card) == all_cards:
         raise typer.BadParameter("Specify --card or --all")
 

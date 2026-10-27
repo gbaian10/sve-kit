@@ -693,7 +693,7 @@ class AuthorSchemas:
             )
 
     def storage_tree(self, raw: bytes, kind: str) -> JsonValue:
-        """Validate persisted handwritten data or generated anchors, retaining defaults absent."""
+        """Validate persisted handwritten data, retaining defaults absent."""
         references = {
             "author_effect_set": "urn:sve-kit:author-storage:2",
             "effect_body_shard": "urn:sve-kit:effect-body-storage:2",

@@ -359,7 +359,7 @@ class CurrentAuthorSources:
     def resolve_inputs(
         self, inputs: AuthorInputSet, expander: AuthorExpander
     ) -> tuple[AuthorInputSet, dict[str, Diagnostic]]:
-        """Materialize storage with committed pins; this never refreshes an anchor."""
+        """Resolve authored coordinates without persisted machine anchors."""
         from sve_carddb.domains.effects.author_resolution import (  # ruff: ignore[import-outside-top-level] -- materialization consumes this current-source boundary
             is_handwritten,
             materialize_inputs,

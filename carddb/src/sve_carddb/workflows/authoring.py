@@ -73,7 +73,7 @@ __all__ = [
 
 
 class Inputs(RecordData):
-    """Every profile pins its own sources; no live manifest is consulted."""
+    """Read reviewed source context without consulting a live manifest."""
 
     profile: Literal["public", "database"]
     repo: Path
