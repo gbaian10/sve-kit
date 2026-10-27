@@ -40,6 +40,7 @@ _EN_HEADS = {
     "On Super-Evolve": "on_super_evolve",
     "On Evolve": "on_evolve",
     "On Attack": "on_attack",
+    "Strike": "on_attack",
     "Fanfare": "fanfare",
     "Last Words": "last_words",
     "Quick": "quick",
