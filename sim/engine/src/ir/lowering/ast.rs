@@ -118,6 +118,7 @@ impl SourceUse {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct Activate {
+    pub quick: Option<bool>,
     pub cost: Cost,
     #[serde(flatten)]
     pub body: Body,
@@ -513,10 +514,18 @@ pub(super) enum SelfPlayer {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct Damage {
+    pub instead: Option<Vec<DamageInstead>>,
     pub to: Recipients,
     pub n: Number,
     pub distribute: Option<bool>,
     pub distribute_at: Option<AtPlay>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct DamageInstead {
+    pub r#if: Condition,
+    pub n: Number,
 }
 
 #[derive(Deserialize)]
@@ -586,14 +595,37 @@ pub(super) enum Number {
     Literal(i64),
     Alias(String),
     Minus { minus: Box<[Self; 2]> },
-    Count { count: Deck },
+    Count { count: CountQuery },
+    Resource { resource: ResourceQuery },
 }
 
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
-pub(super) struct Deck {
-    pub who: SelfPlayer,
-    pub zone: DeckZone,
+pub(super) struct CountQuery {
+    pub who: LeaderSide,
+    pub zone: CountZone,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum CountZone {
+    Deck,
+    Hand,
+    Cemetery,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct ResourceQuery {
+    pub who: LeaderSide,
+    pub kind: PpResource,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum PpResource {
+    Pp,
+    PpMax,
 }
 
 #[derive(Deserialize)]
@@ -813,14 +845,25 @@ pub(super) struct Material {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct Conditional {
-    pub cond: PaidCondition,
+    pub cond: Condition,
     pub then: Vec<Step>,
     pub r#else: Option<Vec<Step>>,
 }
 #[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum Condition {
+    Paid(PaidReceipt),
+    Cmp(BodyComparison),
+    All(Vec<Self>),
+    Any(Vec<Self>),
+    Not(Box<Self>),
+}
+#[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
-pub(super) struct PaidCondition {
-    pub paid: PaidReceipt,
+pub(super) struct BodyComparison {
+    pub left: Number,
+    pub op: Comparison,
+    pub right: Number,
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]

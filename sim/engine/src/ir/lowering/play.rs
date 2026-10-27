@@ -132,6 +132,7 @@ impl BodyContext<'_> {
     pub(super) fn damage(
         &mut self,
         damage: &ast::Damage,
+        source: &SourceSpan,
         path: &str,
     ) -> Result<Action, LoweringError> {
         let recipients = match &damage.to {
@@ -166,7 +167,17 @@ impl BodyContext<'_> {
                 },
             },
         };
-        let value = self.number(&damage.n, path, &mut BTreeSet::new())?;
+        let mut value = self.number(&damage.n, path, &mut BTreeSet::new())?;
+        if let Some(replacements) = &damage.instead {
+            let [replacement] = replacements.as_slice() else {
+                return Err(unsupported(path));
+            };
+            value = Expr::Compute(Box::new(super::IntOperation::Conditional {
+                condition: self.condition(&replacement.r#if, source, path)?,
+                then_value: self.number(&replacement.n, path, &mut BTreeSet::new())?,
+                else_value: value,
+            }));
+        }
         let amount = if damage.distribute == Some(true) {
             if !self.formal_play
                 || self.targets.len() != 1
@@ -175,17 +186,20 @@ impl BodyContext<'_> {
             {
                 return Err(unsupported(path));
             }
-            let Expr::Literal(Int(total)) = value else {
-                return Err(unsupported(path));
+            let total = if let Expr::Literal(Int(total)) = value {
+                Expr::Literal(Nat(
+                    u64::try_from(total).map_err(|_private| unsupported(path))?
+                ))
+            } else {
+                Expr::Compute(Box::new(NatOperation::CheckedInt { value }))
             };
-            let total = u64::try_from(total).map_err(|_private| unsupported(path))?;
             let binding = Binding::new(self.allocator.id(path)?, self.scope);
             self.parameters.push(parameter(
                 self.card_allocator.id(path)?,
                 PlaySlot::Distribution,
                 ChoiceDomain::Distribution {
                     recipients: recipients.clone(),
-                    total: Expr::Literal(Nat(total)),
+                    total,
                     minimum: Nat(1),
                     binding,
                 },

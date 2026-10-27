@@ -144,9 +144,11 @@ pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
     for requirement in &requirements.required {
         let code = requirement.capability.code;
         if (!private_spine && code == "shape.ObjectReceipt.Look")
-            || code == "internal.ZoneKind.Deck"
+            || (code == "internal.ZoneKind.Deck"
+                && !super::source::count_zone(&requirements, requirement))
             || (super::search::private_requirement(code)
-                && !super::source::source_original(&requirements, requirement))
+                && !super::source::source_original(&requirements, requirement)
+                && !super::source::count_zone(&requirements, requirement))
         {
             return Err(unsupported(
                 "private observation outside an authorized selector spine",

@@ -153,6 +153,7 @@ fn check_requirements(
         .filter(|requirement| {
             requirement.capability.version != NonZeroU32::MIN
                 || !(supported(requirement.capability.code)
+                    || super::source::count_zone(&requirements, requirement)
                     || (card && play_requirement(requirement.capability.code))
                     || (matches!(
                         requirement.capability.code,
