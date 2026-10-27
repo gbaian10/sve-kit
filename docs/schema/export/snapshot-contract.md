@@ -56,7 +56,7 @@ uv --directory carddb run python -m sve_carddb.contracts.generate_schema
 uv --directory carddb run pytest tests/contracts/test_snapshot_contract.py
 ```
 
-`test_schema_regeneration_matches_committed_bytes` 從來源重新產生並逐位元組比對提交版；另以未啟用 format checker 的 Draft 2020-12 驗證器拒絕共用形狀反例。產生器只產生 Schema，不生成 golden 或預期 logical view。欄位變更仍須對照 snapshot-format／snapshot-transport 審核，並依傳輸契約判定版本變動。
+`test_schema_regeneration_matches_committed_structure` 從來源重新產生並比較提交版的解析結構；另以未啟用 format checker 的 Draft 2020-12 驗證器拒絕共用形狀反例。產生器只產生 Schema，不生成 golden 或預期 logical view。欄位變更仍須對照 snapshot-format／snapshot-transport 審核，並依傳輸契約判定版本變動。
 
 ## 格式指紋鎖定
 

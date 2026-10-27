@@ -240,8 +240,10 @@ def test_missing_duplicate_and_unlisted_members(tmp_path: Path) -> None:
     raw = encode(catalog.index)
     with pytest.raises(ValueError, match=r"Duplicate|duplicate"):
         decode(Index, raw.replace(b'"format": 1,', b'"format": 1, "format": 1,'))
-    with pytest.raises(ValueError, match="canonical"):
+    assert (
         decode(CardFile, encode(separate(catalog.files[0])[0]) + b"\n")
+        == (separate(catalog.files[0])[0])
+    )
     root = tmp_path / "inputs"
     write(root, catalog)
     extra = root / "unlisted.json"

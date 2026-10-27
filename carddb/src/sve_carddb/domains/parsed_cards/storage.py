@@ -145,9 +145,6 @@ def _read_pair(root: Path, pin: FilePin) -> FilePair:
     ):
         raise ValueError("Parsed evidence size/hash mismatch")
     pair = combine(decode(CardFile, raw), decode(EvidenceFile, evidence_raw))
-    cards, evidence = separate(pair)
-    if encode(cards) != raw or encode(evidence) != evidence_raw:
-        raise ValueError("Parsed file pair has noncanonical map order")
     if (len(pair.cards), sum(len(c.observations) for c in pair.cards)) != (
         pin.cards,
         pin.observations,

@@ -54,12 +54,9 @@ def _validator(name: str) -> Draft202012Validator:
 
 
 def decode[T: RecordData](model: type[T], raw: bytes) -> T:
-    """Reject duplicate keys, unknown fields, incompatible recipes and changed bytes."""
+    """Reject duplicate keys, unknown fields and incompatible recipes."""
     value = parse(raw)
     # Plain extractor dataclasses also reject unknown keys at the wire boundary.
     if not _validator(model.__name__).is_valid(value):
         raise ValueError("Parsed data does not match its schema")
-    result = model.model_validate_json(raw)
-    if encode(result) != raw:
-        raise ValueError("Parsed data is not in its canonical readable format")
-    return result
+    return model.model_validate_json(raw)

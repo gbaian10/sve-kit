@@ -36,7 +36,7 @@
 
 可還原的身分不重存：presence 與 `source_block` 商品 match 的來源 ID 取所屬觀測；descriptor 的地區、種類、URL、來源鍵由卡片來源參照依原歸檔演算法還原。
 其餘 raw hash／bytes、最初 receipt hash、descriptor hash、ETag、Last-Modified、whitespace、presence result hash 與 `content_hash` 都保存在證據檔。
-寫入端驗證器合併後重驗所有語義 hash，再重新拆分比較**兩檔完整 canonical bytes**；懸空參照、未使用項目、不正確去重、多餘證據及 map 排序不同均拒絕。
+寫入端驗證器合併後重驗所有語義 hash，再重新拆分檢查兩檔的結構與閉包；懸空參照、未使用項目、不正確去重及多餘證據均拒絕。索引仍以 hash 與 bytes 釘選檔案內容。
 重排儲存格式不改變語義觀測 `content_hash`，也不改寫既有 `producer_revision`。
 
 ## 批次選取與歷史保護
@@ -92,7 +92,7 @@ en/PR/000-099.json
 
 ## 序列化與讀取
 
-UTF-8、無 BOM、LF、檔尾一個 LF、兩空格縮排、不轉義非 ASCII；物件欄位依模型宣告順序，map 依 key 排序。
+寫入端輸出 UTF-8、無 BOM、LF、檔尾一個 LF、兩空格縮排、不轉義非 ASCII；物件欄位依模型宣告順序，map 依 key 排序。讀取端依 JSON 與模型結構驗證，不要求輸入維持相同空白、欄位次序或 map 次序。
 卡片依原樣卡號排序，觀測依來源 ID（hash）排序，**不是時間順序**；觀測時間須看 `fetched_at`。
 面、段落、商品、Q&A 與相關連結保留來源順序。
 不可重複 JSON key、不可未知欄位、不可符號連結或穿越根目錄，不接受缺檔、多出的 JSON 或錯誤 hash／bytes／數量。
@@ -100,8 +100,8 @@ UTF-8、無 BOM、LF、檔尾一個 LF、兩空格縮排、不轉義非 ASCII；
 hash 是變更偵測與鎖定工具，不能代替來源核對、權利確認或 PR 審查。
 
 機器 Schema：[索引](parsed-cards/index.schema.json)、[卡片](parsed-cards/cards.schema.json)、[證據](parsed-cards/evidence.schema.json)、[批次選取](parsed-cards/batch.schema.json)。
-`codec.schema` 產生封閉的 Draft 2020-12 JSON Schema；測試逐 byte 比對提交的四份 Schema，避免漂移。
-`sve-carddb parsed-cards schema <全新絕對目錄>` 輸出上述四份檔案；驗證器同時驗 schema、身分關係與 canonical bytes。
+`codec.schema` 產生封閉的 Draft 2020-12 JSON Schema；測試比較提交 Schema 的解析結構，避免語義漂移。
+`sve-carddb parsed-cards schema <全新絕對目錄>` 輸出上述四份檔案；驗證器同時驗 schema、身分關係與結構閉包。
 卡片檔可單獨閱讀，寫入端須驗證配對證據、批次選取與索引，建置端只讀取。
 
 ## 產生與驗收
