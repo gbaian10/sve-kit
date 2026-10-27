@@ -26,18 +26,8 @@ pub(super) fn setup(seat: &str, owner: &str, life: [u8; 2]) -> Value {
 }
 
 pub(super) fn game(initial: &Value) -> Game {
-    let (snapshot, keywords, input) = runtime_inputs();
+    let (snapshot, keywords, input) = inputs();
     game_from_selection(initial, &snapshot, &keywords, &input)
-}
-
-pub(super) fn runtime_inputs() -> (String, String, Value) {
-    let (snapshot, keywords, mut input) = inputs();
-    input["authors"].as_array_mut().unwrap().retain(|author| {
-        // SD07-006's authored effect omits reminder text present in the snapshot.
-        // Remove this filter after the authored source matches the snapshot text.
-        author["input"]["card_no"] != "SD07-006"
-    });
-    (snapshot, keywords, input)
 }
 
 pub(super) fn game_from_selection(

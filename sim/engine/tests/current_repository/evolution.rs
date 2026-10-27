@@ -1,14 +1,10 @@
-use super::runtime::{game_from_selection, runtime_inputs, setup};
+use super::runtime::{game_from_selection, setup};
 use super::*;
 use sve_engine::game::{Game, Step, View};
 use sve_engine::ir::{AbilityId, PlayerId};
 
-fn evolution_inputs() -> (String, String, Value) {
-    runtime_inputs()
-}
-
 fn game(initial: &Value) -> Game {
-    let (snapshot, keywords, input) = evolution_inputs();
+    let (snapshot, keywords, input) = inputs();
     game_from_selection(initial, &snapshot, &keywords, &input)
 }
 
@@ -31,7 +27,7 @@ fn evolve(game: &mut Game, pay: &Value) -> Step {
 }
 
 fn selected_game(initial: &Value, card: &str) -> Game {
-    let (snapshot, keywords, input) = evolution_inputs();
+    let (snapshot, keywords, input) = inputs();
     let selected = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
     assert!(
         selected.current.contains_key(card),
@@ -407,7 +403,7 @@ fn bp18_058_keeps_the_permanent_card_id_shared_with_the_bp18_sl13_printing() {
 #[test]
 fn each_b7_evolution_rejects_a_missing_current_ability() {
     for (base, resource, cost) in B7_CARDS {
-        let (snapshot, keywords, mut input) = evolution_inputs();
+        let (snapshot, keywords, mut input) = inputs();
         input["authors"]
             .as_array_mut()
             .unwrap()
@@ -588,7 +584,7 @@ fn an_admitted_resource_role_does_not_prove_an_empty_printed_ability_set() {
 
 /// Synthetic resource faces (a copy of BP01-111 under a new number) probe the ability-free rule.
 fn synthetic_game(text: &Value, sections: &Value) -> Game {
-    let (snapshot, keywords, input) = evolution_inputs();
+    let (snapshot, keywords, input) = inputs();
     let mut lines = snapshot.lines().map(str::to_owned).collect::<Vec<_>>();
     let mut card = lines
         .iter()

@@ -90,34 +90,6 @@ cards:
         ports:
           exports: {}
           imports: {}
-  BP01-096:
-    basis: effect-anchor-v1:sha256:85661bff1d4bda6d4f32bd275843adcde90e696712bf5e60d012134f656844a9
-    card_id: c:1bbaf3eb38135292b7300ac8729b28b2
-    legacy_shape:
-      container: faces
-    source: effect-source-v1:sha256:46441121879663ee280e24385a3a1615758b58904706eb7c76d5a9db7e2a39b5
-    uses:
-      - binding_id: bind:d6d34a4b993b88b0443ee5d5df8106032f7ae9b02f2d9c44c8a76a54b1f9c781
-        face_id: f:46ef2e044f3455e993cc1593fcf28747
-        frame_id: frame:3f8bd41482739f5f21dafe4f7ddf19f49fcc2baac22744f9f28de6876eeed422
-        keywords:
-          - intimidate
-        line: 1
-        occurrence:
-          field: effect
-          line_ordinal: 0
-          ordinal: null
-          owner:
-            kind: face_revision
-            revision_id: rev:v1:e321afd456e6a54f3573d2d05170513ac50e928a85e9b5be07dc9bcba2bb76ad
-          role: body
-          segments:
-            - end: 4
-              start: 0
-          source_hash: 22bbe604ce4667ca084d21e16b6244de3d49c2e4eaa22cc350466815cf712981
-        ports:
-          exports: {}
-          imports: {}
   BP01-110:
     basis: effect-anchor-v1:sha256:86c75e656cf3d2b488db1cfd70830b4f2fb3b97e0287331551e43dcb655f4018
     card_id: c:9c467cdec10851c3958323fe461496dd
@@ -190,62 +162,6 @@ cards:
             - end: 25
               start: 20
           source_hash: 576ad8ee2e900fe83482a95873ffb720cf6bdc46ce21ec517434c704b9addebe
-        ports:
-          exports: {}
-          imports: {}
-  BP01-158:
-    basis: effect-anchor-v1:sha256:e25cb41ec03326b91fb88183284b2a223421b74ee47a004cc806460616e2fec3
-    card_id: c:ca16c339b8a355ad9ef00fd28c713ac0
-    legacy_shape:
-      container: faces
-    source: effect-source-v1:sha256:83c025624b38bca21070795f69a4bec37664a4efeac9dd5812b6c19853c85cb9
-    uses:
-      - binding_id: bind:906ca0e5034c5a5af41dee726549bf55d8be9ea90fe28787c9aa2a91739747a8
-        face_id: f:83768c2f1a2458f8b7ad54476e8d821b
-        frame_id: frame:c607b47b43d308b73ecd8e822bc0bdb01542350e094f2f80fa6959276c88ca52
-        keywords:
-          - storm
-        line: 1
-        occurrence:
-          field: effect
-          line_ordinal: 0
-          ordinal: null
-          owner:
-            kind: face_revision
-            revision_id: rev:v1:a2f1eb9ea8d39aa913fc29560bb35ab74dd5c60ddbe61e41c41adaeb5596b684
-          role: body
-          segments:
-            - end: 4
-              start: 0
-          source_hash: 3f4ec6dc23a7f623a3c9bc990e89c7095a8a714b71179ea38610f6c9df3ea23c
-        ports:
-          exports: {}
-          imports: {}
-  BP01-163:
-    basis: effect-anchor-v1:sha256:4e98988a0ecb192009aa4fecf084db79217c4461e1ce0aae8931e706c8787629
-    card_id: c:7aaa997e803b5c8d90afc1048d28d784
-    legacy_shape:
-      container: faces
-    source: effect-source-v1:sha256:c003b76ace17dfb4b7083f21fc1f432e76875d3086dde888b46f24d12e7a7286
-    uses:
-      - binding_id: bind:46a38646b3b73e89a3566477a39839e4f5351ba11439ee1c69ce6b37d81fa1e2
-        face_id: f:02890f271b8b5745a5ddaa6e42d0fe20
-        frame_id: frame:a397e05e4cb2d335bd75096262ab041e6b63bdf2bb59b01206c2775deb732a78
-        keywords:
-          - assail
-        line: 1
-        occurrence:
-          field: effect
-          line_ordinal: 0
-          ordinal: null
-          owner:
-            kind: face_revision
-            revision_id: rev:v1:00afed84721bd5ab6b7e663b62cc25b29245a078d286e20a0869eb0ed4f1e65b
-          role: body
-          segments:
-            - end: 6
-              start: 0
-          source_hash: 8854fba743bc40582c5c83d82667cc197753a9264a02fb67215c59a8f8ad40a4
         ports:
           exports: {}
           imports: {}
@@ -328,34 +244,6 @@ cards:
             - end: 4
               start: 0
           source_hash: 921ff9f9b9bc3d5ec6eb30c1a903f03858202059cbd4e98a8c7c43d4d96fa0df
-        ports:
-          exports: {}
-          imports: {}
-  BP01-P10:
-    basis: effect-anchor-v1:sha256:f42a89bda19d2e1e50fe60285b05ee9d591236e7776715328af3626ba57f661f
-    card_id: c:af95727a18d75a1d83c330894d0f1111
-    legacy_shape:
-      container: faces
-    source: effect-source-v1:sha256:2dfa2d8154e1dd5b4fe5c3520562695233c0f485f01c29323efd55d6005becfe
-    uses:
-      - binding_id: bind:3e71a2cb1acf0c0cc7cc4b815a91ad802b8569d329e338d1324f39098ab4598d
-        face_id: f:49bcfd638d465b37aebe7320fa70415c
-        frame_id: frame:c607b47b43d308b73ecd8e822bc0bdb01542350e094f2f80fa6959276c88ca52
-        keywords:
-          - storm
-        line: 1
-        occurrence:
-          field: effect
-          line_ordinal: 0
-          ordinal: null
-          owner:
-            kind: face_revision
-            revision_id: rev:v1:cb7c9b91061e320f92da6206df8403fdf586cd7d7801d83b8a4b6c1bdf4b5a79
-          role: body
-          segments:
-            - end: 4
-              start: 0
-          source_hash: 3f4ec6dc23a7f623a3c9bc990e89c7095a8a714b71179ea38610f6c9df3ea23c
         ports:
           exports: {}
           imports: {}

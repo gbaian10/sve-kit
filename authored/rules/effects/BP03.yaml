@@ -75,6 +75,14 @@ cards:
               zone: field
             min: 1
             max: 1
+  BP03-033:
+    status: complete
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: bane
   BP03-078:
     status: complete
     abilities:

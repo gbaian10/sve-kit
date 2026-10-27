@@ -1,6 +1,22 @@
 format: 1
 kind: effect_set
 cards:
+  SD07-006:
+    status: complete
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 3
+      - line: 2
+        kind: static
+        body:
+          op: macro
+          name: storm
   SD07-011:
     status: complete
     abilities:

@@ -261,6 +261,14 @@ cards:
                 subjects: self
         event: enter
         subject: self
+  BP14-032:
+    status: complete
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: storm
   BP14-034:
     status: complete
     abilities:
