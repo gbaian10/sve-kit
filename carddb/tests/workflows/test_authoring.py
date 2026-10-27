@@ -1,7 +1,6 @@
 """Repository integration through the same public authoring entry as the CLI."""
 
 import shutil
-import subprocess  # ruff: ignore[suspicious-subprocess-import] -- create a private fixed Git tree for regression tests
 from copy import deepcopy
 from dataclasses import replace
 from pathlib import Path
@@ -9,7 +8,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.core.json import array, canonical, digest, object_value, parse, string
+from sve_carddb.core.json import array, digest, object_value, string
 from sve_carddb.core.yaml import JSON_VALUE, parse_yaml
 from sve_carddb.workflows import authoring
 
@@ -161,14 +160,7 @@ def test_write_preserves_handwritten_storage_and_reuses_companions(
     card = object_value(object_value(document["cards"])["BP10-122"])
     assert card == object_value(object_value(hand["cards"])["BP10-122"])
     assert "source" not in object_value(card["meta"])
-    anchor = tree(output_root / "rules/effect-anchors/BP10.yaml")
-    pinned = object_value(object_value(anchor["cards"])["BP10-122"])
-    use = object_value(array(pinned["uses"])[0])
-    assert use["params"] == {"n": {"type": "Nat", "value": 1}}
-    assert string(pinned["basis"]).startswith("effect-anchor-v1:sha256:")
-    assert "body" not in object_value(
-        object_value(anchor["bodies"])["draw_exact_attack_time.v1/1"]
-    )
+    assert not tuple((output_root / "rules/effect-anchors").glob("*.yaml"))
     second = authoring.write(
         workspace, main=main, bodies=bodies, output_root=output_root, all_cards=True
     )
@@ -333,9 +325,8 @@ def test_inspect_lists_pending_faces_and_exact_body_definitions(
     assert draw["bodies"]
     assert draw["existing"]
     assert draw["handwritten"]
-    assert draw["stored_anchors"]
+    assert draw["resolution_diagnostic"] is None
     assert draw["body_definitions"]
-    assert draw["anchor_diagnostic"] is None
     candidate = object_value(array(draw["candidates"])[0])
     assert candidate["slots"]
     assert candidate["supported"] is True
@@ -405,13 +396,10 @@ def test_io_failure_reports_completed_and_possibly_partial_files(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     main, bodies, _, _ = handwriting(tmp_path, handwritten)
-    for owner, number in (("BP06", "BP06-048"), ("BP10", "BP10-122")):
-        path = output_root / f"rules/effect-anchors/{owner}.yaml"
-        pin = tree(path)
-        object_value(object_value(pin["cards"])[number])["basis"] = (
-            "effect-anchor-v1:sha256:" + "0" * 64
-        )
-        path.write_bytes(authoring.format_yaml(pin))
+    main_tree = tree(main)
+    for number in ("BP06-048", "BP10-122"):
+        object_value(object_value(main_tree["cards"])[number])["note"] = "I/O fixture"
+    main.write_bytes(authoring.format_yaml(main_tree))
     original_write = Path.write_bytes
     completed: list[str] = []
 
@@ -447,15 +435,6 @@ def test_explicit_new_edition_retains_old_body_and_reuses_the_new_version(
     ability, definition = rename_draw_parameter(main_tree, body_tree)
     main.write_bytes(authoring.format_yaml(main_tree))
     bodies.write_bytes(authoring.format_yaml(body_tree))
-    with pytest.raises(authoring.AuthorInputError) as error:
-        authoring.write(
-            workspace,
-            main=main,
-            bodies=bodies,
-            output_root=output_root,
-            cards=frozenset({"BP10-122"}),
-        )
-    assert error.value.diagnostic.reason == "new_body_requires_explicit_edition"
     ability["edition"] = 2
     definition["edition"] = 2
     main.write_bytes(authoring.format_yaml(main_tree))
@@ -576,126 +555,6 @@ def test_wrong_owner_and_symlink_inputs_are_rejected(
     assert fingerprint(output_root) == before
 
 
-def git_tree(repo: Path) -> str:
-    executable = shutil.which("git")
-    assert executable is not None
-
-    def run(*args: str) -> bytes:
-        return subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed Git argv in a temporary repository
-            [executable, "-C", str(repo), *args], check=True, capture_output=True
-        ).stdout
-
-    run("init", "--quiet")
-    run("add", ".")
-    tree_id = run("write-tree").decode().strip()
-    commit = run(
-        "-c",
-        "user.name=Synthetic author",
-        "-c",
-        "user.email=synthetic@example.invalid",
-        "commit-tree",
-        tree_id,
-        "-m",
-        "Frozen regression fixture",
-    )
-    return commit.decode().strip()
-
-
-@pytest.mark.slow(
-    reason="Verify prototype removal and three regression rejection paths against frozen real AST positions in a private Git tree"
-)
-def test_prototype_removal_checks_fixed_ast_positions_and_unchanged_baselines(
-    workspace: authoring.Workspace,
-    tmp_path: Path,
-    handwritten: tuple[dict[str, JsonValue], dict[str, JsonValue]],
-) -> None:
-    repo = tmp_path / "repository"
-    authored = Path(shutil.copytree(workspace.authored, repo / "authored"))
-    shutil.copytree(REPO / "dsl", repo / "dsl")
-    baseline = repo / "carddb/tests/fixtures/effect_baseline"
-    baseline.mkdir(parents=True)
-    prototype_path = authored / "rules/effects/BP10.yaml"
-    prototype = tree(prototype_path)
-    object_value(prototype["cards"])["BP10-122"] = deepcopy(
-        next(iter(object_value(prototype["cards"]).values()))
-    )
-    frozen = object_value(
-        parse((REPO / "carddb/tests/fixtures/effect_baseline/BP10.json").read_bytes())
-    )
-    frozen = {"BP10-122": object_value(frozen["BP10-122"])}
-    object_value(frozen["BP10-122"])["ast_sha256"] = digest(
-        canonical(object_value(prototype["cards"])["BP10-122"])
-    ).removeprefix("sha256:")
-    (baseline / "BP10.json").write_bytes(canonical(frozen))
-    prototype_path.write_bytes(authoring.format_yaml(prototype))
-    index_path = authored / "rules/effects-index.yaml"
-    index = tree(index_path)
-    index["records"] = [
-        item
-        for item in array(index["records"])
-        if object_value(item)["record_key"] != "BP10-122"
-    ]
-    index_path.write_bytes(authoring.format_yaml(index))
-    (authored / "rules/author-effects/BP10/000.yaml").unlink()
-    index = tree(authored / "rules/effect-anchors/BP10.yaml")
-    object_value(index["cards"]).pop("BP10-122")
-    (authored / "rules/effect-anchors/BP10.yaml").write_bytes(
-        authoring.format_yaml(index)
-    )
-    base = git_tree(repo)
-    main, bodies, _, _ = handwriting(tmp_path, handwritten)
-    configured = replace(
-        workspace,
-        inputs=workspace.inputs.model_copy(update={"repo": repo}),
-        authored=authored,
-    )
-    before_baseline = fingerprint(baseline)
-    prototype = object_value(parse((baseline / "BP10.json").read_bytes()))
-    object_value(array(object_value(prototype["BP10-122"])["positions"])[0])["face"] = (
-        99
-    )
-    (baseline / "BP10.json").write_bytes(canonical(prototype))
-    base = git_tree(repo)
-    with pytest.raises(authoring.AuthorInputError) as error:
-        authoring.write(
-            configured,
-            main=main,
-            bodies=bodies,
-            output_root=authored,
-            cards=frozenset({"BP10-122"}),
-            remove_prototype=True,
-            base=base,
-            baseline_root=baseline,
-        )
-    assert error.value.diagnostic.reason == "prototype_position_mismatch"
-    (baseline / "BP10.json").write_bytes(canonical(frozen))
-    base = git_tree(repo)
-    authoring.write(
-        configured,
-        main=main,
-        bodies=bodies,
-        output_root=authored,
-        cards=frozenset({"BP10-122"}),
-        remove_prototype=True,
-        base=base,
-        baseline_root=baseline,
-    )
-    report = authoring.check(configured, base=base, baseline_root=baseline)
-    assert object_value(report["regression"])["removed"] == ["BP10-122"]
-    assert fingerprint(baseline) == before_baseline
-    prototype_path = authored / "rules/effects/BP01.yaml"
-    prototype = tree(prototype_path)
-    object_value(prototype["cards"]).pop(next(iter(object_value(prototype["cards"]))))
-    prototype_path.write_bytes(authoring.format_yaml(prototype))
-    with pytest.raises(authoring.AuthorInputError) as error:
-        authoring.check(configured, base=base, baseline_root=baseline)
-    assert error.value.diagnostic.reason == "prototype_replacement_not_current"
-    (baseline / "BP10.json").write_bytes((baseline / "BP10.json").read_bytes() + b"\n")
-    with pytest.raises(authoring.AuthorInputError) as error:
-        authoring.check(configured, base=base, baseline_root=baseline)
-    assert error.value.diagnostic.reason == "prototype_baseline_bytes_changed"
-
-
 @pytest.mark.parametrize(
     "raw",
     [
@@ -720,77 +579,6 @@ def test_strict_handwritten_yaml_rejects_without_writes(
             workspace, main=path, bodies=None, output_root=output_root, all_cards=True
         )
     assert fingerprint(output_root) == before
-
-
-def test_inspect_retains_stored_anchor_and_reports_the_current_difference(
-    workspace: authoring.Workspace, output_root: Path
-) -> None:
-    path = output_root / "rules/effect-anchors/BP10.yaml"
-    anchor = tree(path)
-    card = object_value(object_value(anchor["cards"])["BP10-122"])
-    current_basis = card["basis"]
-    card["basis"] = "effect-anchor-v1:sha256:" + "0" * 64
-    path.write_bytes(authoring.format_yaml(anchor))
-    before = fingerprint(output_root)
-    report = authoring.inspect(replace(workspace, authored=output_root), "BP10-122")
-    stored = object_value(array(report["stored_anchors"])[0])
-    assert object_value(stored["card"])["basis"] == card["basis"]
-    failure = object_value(report["anchor_diagnostic"])
-    assert failure["stage"] == "anchor"
-    assert failure["expected"] == card["basis"]
-    assert failure["actual"] == current_basis
-    assert failure["card_line"] == 1
-    assert fingerprint(output_root) == before
-
-
-@pytest.mark.slow(
-    reason="Write a second real body edition, reject a selected refresh with an unused stale pin, then refresh and check the inventory"
-)
-def test_selected_write_never_rebinds_an_unused_stale_body_pin(
-    workspace: authoring.Workspace,
-    output_root: Path,
-    tmp_path: Path,
-    handwritten: tuple[dict[str, JsonValue], dict[str, JsonValue]],
-) -> None:
-    main, bodies, main_tree, body_tree = handwriting(tmp_path, handwritten)
-    ability, definition = rename_draw_parameter(main_tree, body_tree)
-    ability["edition"] = 2
-    definition["edition"] = 2
-    main.write_bytes(authoring.format_yaml(main_tree))
-    bodies.write_bytes(authoring.format_yaml(body_tree))
-    authoring.write(
-        workspace,
-        main=main,
-        bodies=bodies,
-        output_root=output_root,
-        cards=frozenset({"BP10-122"}),
-    )
-    anchor_path = output_root / "rules/effect-anchors/BP10.yaml"
-    anchors = tree(anchor_path)
-    pins = object_value(anchors["bodies"])
-    pin = object_value(pins["draw_exact_attack_time.v1/1"])
-    pin["basis"] = "effect-anchor-v1:sha256:" + "0" * 64
-    anchor_path.write_bytes(authoring.format_yaml(anchors))
-    before = fingerprint(output_root)
-    with pytest.raises(authoring.AuthorInputError) as error:
-        authoring.write(
-            workspace,
-            main=main,
-            bodies=bodies,
-            output_root=output_root,
-            cards=frozenset({"BP01-110"}),
-        )
-    assert error.value.diagnostic.reason == "stale_body_anchor"
-    assert fingerprint(output_root) == before
-    refreshed = authoring.write(
-        workspace,
-        main=output_root / "rules/author-effects",
-        bodies=output_root / "rules/effect-bodies",
-        output_root=output_root,
-        all_cards=True,
-    )
-    assert refreshed["written"] == ["rules/effect-anchors/BP10.yaml"]
-    assert authoring.check(replace(workspace, authored=output_root))["status"] == "ok"
 
 
 def test_shared_body_cannot_bind_to_two_different_source_frames(

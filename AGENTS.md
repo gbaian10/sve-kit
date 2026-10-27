@@ -68,7 +68,7 @@ HTML、PDF、API JSON 與卡圖 PNG 均屬凍結來源；WebP 已發布不代表
 
 原則：**能用程式重新產生的不進 git；專案共用的人寫資料與正式文件進 git。**
 官方 SVE 日文與英文卡文可以進 git，並記錄來源與版本；卡圖與語音仍不進 git。
-`authored/rules/effect-anchors/<owner>.yaml` 是另一項明示例外：由 `author write --storage anchors` 產生、提交、不手改；修改主檔／本體後明示選卡重算，建置與 `author check` 只比對、不重新綁定。操作見 [效果作者工具](docs/dsl/authoring-tools.md)。
+效果作者使用主檔與具名本體，准入、共用及測試規則見[效果作者工具](docs/dsl/authoring-tools.md)；來源分類 pending 不阻擋輕量准入。
 `card-data/` 是可由程式產生但須保留審查歷史的明示例外；原始歸檔與備份仍須保存。
 產生、驗證或更新解析輸入時，依[解析卡片輸入契約](docs/schema/ingest/parsed-card-inputs.md)檢查完整閉包與前一版歷史；只保存新解析結果，不覆寫舊來源觀測。
 此決定不涵蓋 SV1、Worlds Beyond 等其他遊戲的原檔。

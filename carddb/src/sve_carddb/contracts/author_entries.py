@@ -15,6 +15,8 @@ from sve_carddb.contracts import author_programs as programs  # ruff: ignore[typ
 from sve_carddb.contracts.author_evidence import (
     BodyVersion,
     CardKeywordSources,
+    DirectMeta,
+    DirectSourceUse,
     EmptyPorts,
     FaceId,
     ImportMap,
@@ -250,10 +252,11 @@ class AuthorFace(RecordData):
 
 @with_config(CONFIG)
 class AuthorCardFields(TypedDict):
-    meta: Meta
+    meta: Meta | DirectMeta
     note: NotRequired[Text]
     abilities: NotRequired[tuple[Ability, ...]]
     faces: NotRequired[dict[FaceId, AuthorFace]]
+    ignored: NotRequired[tuple[DirectSourceUse, ...]]
     deck_rule: NotRequired[DeckRule]
 
 

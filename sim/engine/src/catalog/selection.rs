@@ -63,7 +63,7 @@ enum Author {
 pub(super) fn select(snapshot: &str, keywords: &str, handoff: &Value) -> Result<SelectedEffects> {
     let selection: Selection = serde_json::from_value(handoff.clone())
         .map_err(|_private| invalid("invalid current selection"))?;
-    let prototypes = Catalog::from_documents(snapshot, keywords, &selection.documents)?;
+    let mut prototypes = Catalog::from_documents(snapshot, keywords, &selection.documents)?;
     let lowerer = ExpandedLowerer::new().map_err(invalid)?;
     let mut current = BTreeMap::new();
     let mut identities = BTreeSet::new();
@@ -71,6 +71,15 @@ pub(super) fn select(snapshot: &str, keywords: &str, handoff: &Value) -> Result<
         let candidate = match author {
             Author::Accepted { input } => input,
             Author::Rejected { card_no, reason } => {
+                if reason == "source_unresolved_issue" {
+                    if !prototypes.cards.contains_key(&card_no)
+                        || prototypes.programs.contains_key(&card_no)
+                        || prototypes.rejected.insert(card_no, vec![reason]).is_some()
+                    {
+                        return Err(invalid("unresolved current card overlaps a prototype"));
+                    }
+                    continue;
+                }
                 return Err(EngineFailure::Unsupported(format!(
                     "current card rejected: {card_no}: {reason}"
                 )));

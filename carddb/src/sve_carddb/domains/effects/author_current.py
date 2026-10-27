@@ -73,6 +73,14 @@ class CardAccepted:
 
     def lowering_input(self) -> JsonValue:
         """Hand current identities to D0 separately from the expanded author tree."""
+        if self.source_version == "direct":
+            return {
+                "admission": "direct",
+                "tree": self.candidate.tree,
+                "card_id": self.record.card_id,
+                "card_no": self.record.record_key,
+                "source_payload": parse(self.source_payload),
+            }
         return {
             "tree": self.candidate.tree,
             "card_id": self.record.card_id,
@@ -351,8 +359,8 @@ class CurrentAuthorSources:
     def resolve_inputs(
         self, inputs: AuthorInputSet, expander: AuthorExpander
     ) -> tuple[AuthorInputSet, dict[str, Diagnostic]]:
-        """Materialize storage with committed pins; this never refreshes an anchor."""
-        from sve_carddb.domains.effects.author_anchors import (  # ruff: ignore[import-outside-top-level] -- materialization consumes this current-source boundary
+        """Resolve authored coordinates without persisted machine anchors."""
+        from sve_carddb.domains.effects.author_resolution import (  # ruff: ignore[import-outside-top-level] -- materialization consumes this current-source boundary
             is_handwritten,
             materialize_inputs,
         )
@@ -380,6 +388,25 @@ class CurrentAuthorSources:
                 tree = object_value(expander.schemas.author_tree(file.raw))
                 card = object_value(tree["cards"])[record.record_key]
                 selected: JsonValue = {**tree, "cards": {record.record_key: card}}
+                if object_value(object_value(card)["meta"]).get("source") == "direct":
+                    from sve_carddb.domains.effects.author_direct import (  # ruff: ignore[import-outside-top-level] -- direct admission consumes the resolved name table
+                        candidate,
+                        inventory,
+                    )
+
+                    payload = inventory(
+                        self, record.record_key, card_id=supported.card_id
+                    )
+                    results.append(
+                        CardAccepted(
+                            supported,
+                            candidate(selected, expander),
+                            canonical(payload),
+                            "direct",
+                            b"{}",
+                        )
+                    )
+                    continue
                 results.append(
                     self._validate_card(
                         supported, selected, file.input_hash, inputs, expander

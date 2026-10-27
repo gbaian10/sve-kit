@@ -18697,7 +18697,14 @@
         },
         "sources": {
           "items": {
-            "$ref": "#/$defs/SourceUse"
+            "anyOf": [
+              {
+                "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/SourceUse"
+              },
+              {
+                "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/DirectSourceUse"
+              }
+            ]
           },
           "maxItems": 1,
           "minItems": 1,
@@ -18766,7 +18773,14 @@
         },
         "sources": {
           "items": {
-            "$ref": "#/$defs/SourceUse"
+            "anyOf": [
+              {
+                "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/SourceUse"
+              },
+              {
+                "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/DirectSourceUse"
+              }
+            ]
           },
           "maxItems": 1,
           "minItems": 1,
@@ -18801,7 +18815,14 @@
       "additionalProperties": false,
       "properties": {
         "meta": {
-          "$ref": "#/$defs/Meta"
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Meta"
+            },
+            {
+              "$ref": "#/$defs/DirectMeta"
+            }
+          ]
         },
         "note": {
           "minLength": 1,
@@ -18825,6 +18846,12 @@
         },
         "deck_rule": {
           "$ref": "#/$defs/DeckRule"
+        },
+        "ignored": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DirectSourceUse"
+          }
         }
       },
       "required": [
@@ -18860,7 +18887,14 @@
         },
         "sources": {
           "items": {
-            "$ref": "#/$defs/SourceUse"
+            "anyOf": [
+              {
+                "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/SourceUse"
+              },
+              {
+                "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/DirectSourceUse"
+              }
+            ]
           },
           "maxItems": 1,
           "minItems": 1,
@@ -18968,7 +19002,14 @@
         },
         "sources": {
           "items": {
-            "$ref": "#/$defs/SourceUse"
+            "anyOf": [
+              {
+                "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/SourceUse"
+              },
+              {
+                "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/DirectSourceUse"
+              }
+            ]
           },
           "maxItems": 1,
           "minItems": 1,
@@ -19012,7 +19053,14 @@
         },
         "sources": {
           "items": {
-            "$ref": "#/$defs/SourceUse"
+            "anyOf": [
+              {
+                "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/SourceUse"
+              },
+              {
+                "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/DirectSourceUse"
+              }
+            ]
           },
           "maxItems": 1,
           "minItems": 1,
@@ -19056,7 +19104,14 @@
         },
         "sources": {
           "items": {
-            "$ref": "#/$defs/SourceUse"
+            "anyOf": [
+              {
+                "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/SourceUse"
+              },
+              {
+                "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/DirectSourceUse"
+              }
+            ]
           },
           "maxItems": 1,
           "minItems": 1,
@@ -19136,7 +19191,14 @@
         },
         "sources": {
           "items": {
-            "$ref": "#/$defs/SourceUse"
+            "anyOf": [
+              {
+                "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/SourceUse"
+              },
+              {
+                "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/DirectSourceUse"
+              }
+            ]
           },
           "maxItems": 1,
           "minItems": 1,
@@ -19180,7 +19242,14 @@
         },
         "sources": {
           "items": {
-            "$ref": "#/$defs/SourceUse"
+            "anyOf": [
+              {
+                "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/SourceUse"
+              },
+              {
+                "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/DirectSourceUse"
+              }
+            ]
           },
           "maxItems": 1,
           "minItems": 1,
@@ -19224,7 +19293,14 @@
         },
         "sources": {
           "items": {
-            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/SourceUse"
+            "anyOf": [
+              {
+                "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/SourceUse"
+              },
+              {
+                "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/DirectSourceUse"
+              }
+            ]
           },
           "maxItems": 1,
           "minItems": 1,
@@ -19532,7 +19608,14 @@
         },
         "sources": {
           "items": {
-            "$ref": "#/$defs/CardKeywordSourceUse"
+            "anyOf": [
+              {
+                "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/CardKeywordSourceUse"
+              },
+              {
+                "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/DirectSourceUse"
+              }
+            ]
           },
           "maxItems": 1,
           "minItems": 1,
@@ -19578,7 +19661,14 @@
         },
         "sources": {
           "items": {
-            "$ref": "#/$defs/SourceUse"
+            "anyOf": [
+              {
+                "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/SourceUse"
+              },
+              {
+                "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/DirectSourceUse"
+              }
+            ]
           },
           "maxItems": 1,
           "minItems": 1,
@@ -19941,7 +20031,14 @@
         },
         "sources": {
           "items": {
-            "$ref": "#/$defs/SourceUse"
+            "anyOf": [
+              {
+                "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/SourceUse"
+              },
+              {
+                "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/DirectSourceUse"
+              }
+            ]
           },
           "maxItems": 1,
           "minItems": 1,
@@ -20072,7 +20169,14 @@
         },
         "sources": {
           "items": {
-            "$ref": "#/$defs/SourceUse"
+            "anyOf": [
+              {
+                "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/SourceUse"
+              },
+              {
+                "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/DirectSourceUse"
+              }
+            ]
           },
           "maxItems": 1,
           "minItems": 1,
@@ -20154,7 +20258,14 @@
         },
         "sources": {
           "items": {
-            "$ref": "#/$defs/SourceUse"
+            "anyOf": [
+              {
+                "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/SourceUse"
+              },
+              {
+                "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/DirectSourceUse"
+              }
+            ]
           },
           "maxItems": 1,
           "minItems": 1,
@@ -20254,7 +20365,14 @@
         },
         "sources": {
           "items": {
-            "$ref": "#/$defs/SourceUse"
+            "anyOf": [
+              {
+                "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/SourceUse"
+              },
+              {
+                "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/DirectSourceUse"
+              }
+            ]
           },
           "maxItems": 1,
           "minItems": 1,
@@ -20298,7 +20416,14 @@
         },
         "sources": {
           "items": {
-            "$ref": "#/$defs/SourceUse"
+            "anyOf": [
+              {
+                "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/SourceUse"
+              },
+              {
+                "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/DirectSourceUse"
+              }
+            ]
           },
           "maxItems": 1,
           "minItems": 1,
@@ -20355,7 +20480,14 @@
         },
         "sources": {
           "items": {
-            "$ref": "#/$defs/SourceUse"
+            "anyOf": [
+              {
+                "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/SourceUse"
+              },
+              {
+                "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/DirectSourceUse"
+              }
+            ]
           },
           "maxItems": 1,
           "minItems": 1,
@@ -20959,6 +21091,146 @@
       "additionalProperties": false,
       "minProperties": 1,
       "maxProperties": 1
+    },
+    "DirectSourceUse": {
+      "additionalProperties": false,
+      "properties": {
+        "admission": {
+          "enum": [
+            "light",
+            "shared"
+          ],
+          "type": "string"
+        },
+        "owner": {
+          "$ref": "#/$defs/FaceRevisionOwner"
+        },
+        "face_id": {
+          "pattern": "^f:[0-9a-f]{32}$(?![\\s\\S])",
+          "type": "string"
+        },
+        "field": {
+          "enum": [
+            "effect",
+            "section"
+          ],
+          "type": "string"
+        },
+        "ordinal": {
+          "anyOf": [
+            {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "line": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "scope": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "covers": {
+          "items": {
+            "maximum": 9007199254740991,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "admission",
+        "owner",
+        "face_id",
+        "field",
+        "ordinal",
+        "line",
+        "scope",
+        "covers"
+      ],
+      "type": "object"
+    },
+    "DirectMeta": {
+      "additionalProperties": false,
+      "properties": {
+        "dsl": {
+          "const": "1.0",
+          "type": "string"
+        },
+        "source": {
+          "const": "direct",
+          "type": "string"
+        },
+        "written_by": {
+          "items": {
+            "$ref": "#/$defs/WrittenBy"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "reviewed_by": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/UseReview"
+              },
+              {
+                "$ref": "#/$defs/MacroMechanical"
+              }
+            ]
+          },
+          "type": "array"
+        },
+        "status": {
+          "enum": [
+            "draft",
+            "reviewed",
+            "verified",
+            "disputed"
+          ],
+          "type": "string"
+        },
+        "verified_by_exam": {
+          "maxItems": 0,
+          "minItems": 0,
+          "type": "array"
+        },
+        "rulings": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "admission": {
+          "enum": [
+            "light",
+            "shared"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "dsl",
+        "source",
+        "written_by",
+        "reviewed_by",
+        "status",
+        "verified_by_exam",
+        "rulings",
+        "admission"
+      ],
+      "type": "object"
     }
   },
   "description": "Closed shared author graph and authored containers. Expansion and source/execution admission are separate; the root rejects standalone documents."

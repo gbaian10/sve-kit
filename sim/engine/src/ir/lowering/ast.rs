@@ -25,6 +25,8 @@ pub(super) struct Card {
     pub abilities: Vec<Value>,
     #[serde(default)]
     pub faces: BTreeMap<String, Face>,
+    #[serde(default)]
+    pub ignored: Vec<DirectSourceUse>,
 }
 
 #[derive(Deserialize)]
@@ -58,8 +60,22 @@ pub(super) struct Ability {
 #[derive(Deserialize)]
 #[serde(untagged)]
 pub(super) enum SourceUse {
+    Direct(DirectSourceUse),
     Ability(AbilitySourceUse),
     CardKeyword(CardKeywordSourceUse),
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct DirectSourceUse {
+    pub admission: String,
+    pub owner: Value,
+    pub face_id: String,
+    pub field: String,
+    pub ordinal: Option<u64>,
+    pub line: u32,
+    pub scope: String,
+    pub covers: Vec<u32>,
 }
 
 #[derive(Deserialize)]
@@ -80,6 +96,12 @@ pub(super) struct CardKeywordSourceUse {
 impl SourceUse {
     pub(super) fn json(&self) -> Value {
         match self {
+            Self::Direct(source) => serde_json::json!({
+                "admission": source.admission, "owner": source.owner,
+                "face_id": source.face_id, "field": source.field,
+                "ordinal": source.ordinal, "line": source.line,
+                "scope": source.scope, "covers": source.covers,
+            }),
             Self::Ability(source) => serde_json::json!({
                 "binding_id": source.binding_id,
                 "occurrence": source.occurrence,

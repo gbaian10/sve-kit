@@ -17,7 +17,6 @@ from .author_current_fixtures import (
     entry_snapshot,
 )
 from .author_destroy_fixtures import destroy_fixture
-from .current_author_storage import write_current_anchors
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -166,7 +165,6 @@ def current_keyword_inputs(
             )
         )
         expander = expander or AuthorExpander(REPOSITORY / "dsl")
-        write_current_anchors(authored, source, expander, number)
         selection = source.selection_input(authored, expander)
         author = object_value(selection)["authors"]
         assert isinstance(author, list)

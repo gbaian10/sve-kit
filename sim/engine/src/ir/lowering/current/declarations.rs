@@ -197,7 +197,9 @@ pub struct CurrentKeywordEvidence {
     /// Permanent owner and original author location, with a local declaration scope.
     pub source: SourceSpan,
     /// Independent exact source obligation; it contains no compiler scope.
-    pub reference: PrintedKeywordsObligation,
+    pub reference: Option<PrintedKeywordsObligation>,
+    /// Direct author declarations carry keywords without translation qualification.
+    pub direct_keywords: Vec<PrintedKeyword>,
     /// Hash of original complete author-file bytes, not selected expanded-tree bytes.
     pub input_hash: String,
     /// Hash of the full current owner field, not just this line.
@@ -212,7 +214,11 @@ impl CurrentKeywordEvidence {
     /// Ordered keywords retained without granting runtime support.
     #[must_use]
     pub fn keywords(&self) -> &[PrintedKeyword] {
-        &self.reference.declaration.keywords
+        self.reference
+            .as_ref()
+            .map_or(&self.direct_keywords, |reference| {
+                &reference.declaration.keywords
+            })
     }
 }
 
@@ -272,7 +278,6 @@ impl PrintedKeywordsObligation {
             && permanent(&self.face_id, "f:", 32)
             && permanent(&self.frame_id, "frame:", 64)
             && permanent(&self.interface_key, "", 64)
-            && self.source_adapter_recipe == super::recipes::SOURCE_ADAPTER
             && !self.declaration.keywords.is_empty()
             && self.declaration.keywords.len() <= 7
             && self
@@ -366,8 +371,6 @@ fn checked_one(
         || !permanent(&evidence.input_hash, "sha256:", 64)
         || input_hash != evidence.input_hash
         || evidence.source_input_hash != format!("sha256:{}", occurrence.source_hash)
-        || evidence.expansion_recipe != super::recipes::EXPANSION
-        || evidence.adapter_recipe != super::recipes::AUTHOR_ADAPTER
         || u64::from(ability.line).checked_sub(1) != Some(occurrence.line_ordinal)
         || ability.section != occurrence.ordinal
         || json(&reference.declaration, path)?
@@ -386,7 +389,8 @@ fn checked_one(
     }
     Ok(CurrentKeywordEvidence {
         source: span,
-        reference,
+        reference: Some(reference),
+        direct_keywords: Vec::new(),
         input_hash: evidence.input_hash.clone(),
         source_input_hash: evidence.source_input_hash.clone(),
         expansion_recipe: evidence.expansion_recipe.clone(),
@@ -432,9 +436,10 @@ pub(super) fn checked(
         // The complete original input bytes stay in C0; D0 checks their shared pin.
         let expected_hash = *input_hash.get_or_insert(&evidence.input_hash);
         let checked = checked_one(input, identity, path, ability, evidence, expected_hash)?;
-        let key = json(&checked.reference.source_use, path)?.to_string();
+        let reference = checked.reference.as_ref().ok_or_else(|| closure(path))?;
+        let key = json(&reference.source_use, path)?.to_string();
         let expected = required.remove(&key).ok_or_else(|| closure(path))?;
-        if checked.reference != *expected {
+        if reference != expected {
             return Err(closure(path));
         }
         result.insert(path.clone(), checked);

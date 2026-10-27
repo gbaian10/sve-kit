@@ -32,3 +32,4 @@
 | [ADR-0018](0018-review-parsed-card-inputs.md) | 已審查的解析卡片輸入以純文字進版控 |
 | [ADR-0019](0019-publish-typed-ir.md) | 公開程式包承載已展開的有型別 IR |
 | [ADR-0020](0020-effect-anchors.md) | 手寫效果與精確來源錨點分開保存 |
+| [ADR-0021](0021-direct-effect-admission.md) | 以直接作者准入取代機器錨點與巨集資格 |

@@ -16,7 +16,11 @@ from sve_carddb.contracts.author_entries import (
     AuthorEffectSet,
     EffectBodyShard,
 )
-from sve_carddb.contracts.author_evidence import CardKeywordSourceUse, SourceUse
+from sve_carddb.contracts.author_evidence import (
+    CardKeywordSourceUse,
+    DirectSourceUse,
+    SourceUse,
+)
 from sve_carddb.contracts.author_leaves import (
     AuthorIndexRecord,
     EffectsIndex,
@@ -55,7 +59,6 @@ _RESOURCES = {
     "effects.schema.json": _PROTOTYPE,
     "author-storage.schema.json": "urn:sve-kit:author-storage:2",
     "effect-body-storage.schema.json": "urn:sve-kit:effect-body-storage:2",
-    "effect-anchors.schema.json": "urn:sve-kit:effect-anchors:1",
 }
 _PARAM_REF = TypeAdapter(ParamRef)
 _PARAM_DECL = TypeAdapter(ParamDecl)
@@ -100,7 +103,7 @@ class Diagnostic:
     card_id: str | None = None
     card_no: str | None = None
     scope: str | None = None
-    source: SourceUse | CardKeywordSourceUse | None = None
+    source: SourceUse | CardKeywordSourceUse | DirectSourceUse | None = None
     card_line: int | None = None
 
 
@@ -690,21 +693,12 @@ class AuthorSchemas:
             )
 
     def storage_tree(self, raw: bytes, kind: str) -> JsonValue:
-        """Validate persisted handwritten data or generated anchors, retaining defaults absent."""
+        """Validate persisted handwritten data, retaining defaults absent."""
         references = {
             "author_effect_set": "urn:sve-kit:author-storage:2",
             "effect_body_shard": "urn:sve-kit:effect-body-storage:2",
-            "effect_anchor_set": "urn:sve-kit:effect-anchors:1",
         }
         document = _document(raw)
-        if (
-            kind == "effect_anchor_set"
-            and isinstance(document.value, dict)
-            and document.value.get("recipe") != "effect-anchor-v1"
-        ):
-            raise AuthorInputError(
-                document.diagnostic("recipe", "unsupported_anchor_recipe", ("recipe",))
-            )
         self._validate(document, references[kind])
         return document.value
 

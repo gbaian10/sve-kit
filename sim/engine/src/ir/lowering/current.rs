@@ -9,7 +9,7 @@ use serde::Deserialize;
 use serde_json::Value;
 
 mod declarations;
-mod recipes;
+pub(super) mod direct;
 pub use declarations::{
     CardKeywordSourceUse, CurrentKeywordEvidence, KeywordDeclarationPayload, MetadataObligation,
     NonBodySource, PrintedKeyword, PrintedKeywordsObligation,
@@ -42,6 +42,8 @@ impl CurrentSourceCheck {
 /// Current source facts and their lowered candidate, without use qualification.
 #[derive(Debug)]
 pub struct CurrentCardProgram {
+    /// Explicit face ordinals from the identity registry, used by direct admission.
+    pub face_ordinals: BTreeMap<String, usize>,
     /// Permanent owner selected by the current reader's JP printing lookup.
     pub card_id: String,
     /// Unmodified JP printing coordinate.
@@ -286,6 +288,7 @@ impl CurrentIdentity {
     ) -> Result<Option<Nat>, LoweringError> {
         let revision = source
             .pointer("/occurrence/owner/revision_id")
+            .or_else(|| source.pointer("/owner/revision_id"))
             .and_then(Value::as_str)
             .ok_or_else(|| invalid(path))?;
         self.faces
@@ -427,6 +430,9 @@ pub(super) fn lower(
     compiler: &ExpandedLowerer,
     input: &Value,
 ) -> Result<CurrentCardProgram, LoweringError> {
+    if input.get("admission").and_then(Value::as_str) == Some("direct") {
+        return direct::lower(compiler, input);
+    }
     let (input, identity) = read(input)?;
     let checked = check_input(compiler, &input, &identity)?;
     let mut lowered = compiler.lower_coordinates(&input.tree, &BTreeMap::new(), Some(&identity))?;
@@ -434,6 +440,7 @@ pub(super) fn lower(
         .remove(&input.card_no)
         .ok_or_else(|| invalid("/cards"))?;
     Ok(CurrentCardProgram {
+        face_ordinals: BTreeMap::new(),
         card_id: input.card_id,
         card_no: input.card_no,
         source_version: input.source_version,

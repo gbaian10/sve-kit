@@ -48,7 +48,7 @@ cards:
 
 各頻次框架都可存放及重用有版本的 DSL 本體；版本、精確 frame／語義變體、適用域與所有來源用途須可追蹤，不能只記巨集名稱。來源綁定與投影接口依[四層契約 §6／§7](../schema/domains/four-layer-translation.md#6-sourcebindingtrace-與逐-occurrence-位置)，仍組裝既有 A.card／A.ability，不另建每卡語法。body version 不入 frame 身分；呈現、來源語義與本體的版本／失效責任依[四層契約 §8](../schema/domains/four-layer-translation.md#8-建置-dbrender-projection-與依賴)。
 
-每個使用 frame 的 DSL 依賴必納入[四層契約 §7](../schema/domains/four-layer-translation.md#7-規則投影接口)的 `interface_key`。建置重算不符即使相依 DSL 的接口連接、用途審查與實跑資格失效並重驗；來源語義及既有引用仍有效的接口描述調整，不重鍵翻譯。存放承載、依賴快照與 stale 比較依[承載契約 §2–5](author-contract-1.0.md#4-本體版本與新鮮度)。
+來源重建路徑使用 frame 的 DSL 依賴納入[四層契約 §7](../schema/domains/four-layer-translation.md#7-規則投影接口)的 `interface_key`。建置重算不符即使相依 DSL 的接口連接、用途審查與實跑資格失效並重驗；來源語義及既有引用仍有效的接口描述調整，不重鍵翻譯。存放承載、依賴快照與 stale 比較依[承載契約 §2–5](author-contract-1.0.md#4-本體版本與新鮮度)。
 
 DSL 用主版.次版：次版只容許舊資料不必修改且降低語義不變的相容新增；不相容 IR 或既有語義變更升主版，不以 bugfix 名義繞過。
 卡表快照、CR／裁定與引擎版本獨立保存。meta 必有 `dsl/source/written_by/reviewed_by/status`，另保存 `verified_by_exam/rulings`；巨集產物須有 `generated_by`。
@@ -274,33 +274,17 @@ Until 保留 turn、next_opp_turn、this_and_next_opp_turn、game；明確長形
 
 ## 10. 巨集規範
 
-保留 v0 dig（look→choose→move→餘牌排列）、discount（install cost_mod）、search_to（search）與誘發頭巨集。模式數／目標／費用參數由明示構造收集，不由巨集在文字中的位置猜測。以下區分框架本體存放、合格巨集資格及逐用途驗收，不批次授予既有候選資格。
+具名本體依[共用作者流程](common-family-authoring.md)重用：1～2 張不同遊戲卡可走 light，達三張提示集中整理為 shared。新用途核對參數、能力頭與上下文；等價句子可以共用，不要求精確 FrameId 相同。
+
+本體展開不得改變輸入點、費用、時點或 scope。保留型別與行為測試，不建立兩模型、反譯等價、固定邊界數或結果 DB 資格。第三張只觸發整理，不追溯擋住既有用途。
 
 ### 10.1 存放與資格
 
-各頻次框架都可存放及重用有版本的 DSL 本體；版本、精確 frame／語義變體、適用域與所有來源用途須可追蹤。只有 1～2 張不同卡的本體及每個用途，仍依逐卡標準接受與寫檔者不同模型的獨立語義審核；引用同一框架不能自動取得 reviewed。
-
-同一 resolved 語義變體達至少 3 張不同卡（卡名概念＋是否進化；重印／異圖不累計），且完成兩個不同模型各自獨立審核、適用邊界測試及版本／適用域登錄，才取得合格巨集資格；寫的人不得自審。進化前後分開計；不同變體不得合計，中文文字相同也不證明相同語義。
-
-本體保存DSL 寫入者、審核者、版本與適用域；人寫證據在 authored、版本化案例在 tests、已驗執行結果與計算資格在建置 DB，封閉輸入及失效依[承載契約 §5](author-contract-1.0.md#5-審核測試證據與-meta)。邊界測試須含 0 張、無合法目標、大數值、時點／資訊邊界。頻次滿足只是 `threshold_eligible`，不是 `qualified`。2→3 張時升級同一版本本體的資格，不搬移本體；只採計對該版本、該適用域仍有效的審核與測試。
-
-已分類的 ability_flag、card_field、none 行不納入可執行本體／巨集資格計數；pending 另列，不能當確定的 none。語義變體仍 pending 的來源可用保守精確框架翻譯，但須保留自身來源 scope，不得跨來源累計資格或自動生成可執行本體；確認後再依實際變體重鍵並審用途。
-
-純術語、文法形式與顯示 NP 不是此處的巨集。若 NP 開始付款、選目標、移動物件或產生 receipt，就已是 DSL 構造，須遵守本節的審核責任，不能以命名繞過。
+本體保存具名 id／edition 與真實作者／審查紀錄；長尾相關測試通過即可合併，之後抽查。共用本體集中審一輪，不以頻次自動授予 reviewed 或 verified。
 
 ### 10.2 逐用途驗收與失效
 
-合格巨集的每個用途須通過三項機械檢查，才可取得 reviewed：
-
-1. 精確 frame 與 semantic_variant 相符，且用途在已審適用域內。
-2. 完整 typed 參數及來源角色相符，包含數字、卡名、術語、區域、卡種等實際使用的葉值及其合法域；不能只核對數字／卡名。
-3. 從實際 DSL 構造產生的反向日文與來源一致；回放儲存的原文不能冒充反向翻譯。
-
-檢查不通過、用途超出已審範圍或仍有未解語義者，退回逐用途的獨立語義審核；引擎實跑前不標 verified。巨集資格不代替每個用途的責任，也不代替載入時的型別、scope 與 capability 檢查。
-
-巨集本體、來源語義或適用域改動後，按反向用途索引重驗；舊版本審核及實跑證據保留，不能直接作新版資格。中文形式、譯名字串或 NP 覆蓋改動不自動改 DSL 語義。依[四層契約 §7／§8](../schema/domains/four-layer-translation.md#7-規則投影接口)，每個 DSL 用途依賴必包含 `interface_key`；建置重算不符即使相依接口連接、用途審查與實跑資格失效。有效引用與來源語義未變時，不重鍵翻譯；承載與比較位置依[承載契約 §4](author-contract-1.0.md#4-本體版本與新鮮度)。
-
-固定輸入及預期 `count`、`threshold_eligible`、`qualified` 見[資格案例規格](macro-qualification-cases.md)與其 JSON。這些是後續 carddb consumer 的驗收資料，不是已執行的資格測試或授予紀錄。
+本體改動時跑受影響行為測試，完整回歸交 CI。省略來源等價證明不放寬參數型別、binding／receipt 良構、整卡行覆蓋或 runtime 能力准入。真正未決裁定只擋受影響卡；來源分類 pending 本身不擋直接作者入口。
 
 ## 11. 載入與錯誤
 
@@ -312,11 +296,11 @@ Until 保留 turn、next_opp_turn、this_and_next_opp_turn、game；明確長形
 
 Python YAML 載入器必過金絲雀：含 on、n、yes／no 值的最小卡片保留字串與數字；true 值仍為布林；布林鍵、字串 true 鍵、重複 on、未知鍵、cannot.draw.n、stat_changed 歷史中的 subject／property 舊別名均拒絕。Rust D0 接入時另驗 JSON 型別化解碼、未知節點／錯型別／scope／版本與能力拒絕，並比較同一份 canonical 展開樹；不以 Python 結果宣稱 Rust 已驗收。
 
-完整DSL 採納依序做上述 YAML 版本／純量與 JSON 型別／鍵型別／重複鍵／構造鍵名檢查、format／kind 選定資源及 DSL 支援集、卡表／source hash、欄位／registry 型別、binding scope、捕捉時點、receipt 可用性、目標／費用時點、效果安裝型別、引擎 capability；任一失敗都不能進入自動結算。各項執行邊界依[承載契約 §8](author-contract-1.0.md#8-驗證時點與拒絕診斷)分工；普通建置只讀並比對依賴，瀏覽器不重跑完整 Schema。正向 YAML 語法檢查不能替代此流程。禁止一般字串 selector、缺值回 0、未支援欄位默默忽略。詳 [ADR-0002](../adr/0002-author-ir.md)、[DSL 驗收規格](validation.md)。
+完整DSL 採納依序做上述 YAML 版本／純量與 JSON 型別／鍵型別／重複鍵／構造鍵名檢查、format／kind 選定資源及 DSL 支援集、卡／面身分、欄位型別、binding scope、捕捉時點、receipt 可用性、目標／費用時點、效果安裝型別、引擎 capability；任一失敗都不能進入自動結算。各項執行邊界依[承載契約 §8](author-contract-1.0.md#8-驗證時點與拒絕診斷)分工；普通建置只讀並比對依賴，瀏覽器不重跑完整 Schema。正向 YAML 語法檢查不能替代此流程。禁止一般字串 selector、缺值回 0、未支援欄位默默忽略。詳 [ADR-0002](../adr/0002-author-ir.md)、[DSL 驗收規格](validation.md)。
 
 ## 12. 狀態與證據
 
-meta.status／reviewed_by 由寫入工具依真實證據產生；建置重算後比對，不一致即拒絕該卡自動執行及程式出貨，保留其他文字建置；資料變更 CI 失敗，普通建置不回寫DSL 資料。全卡彙總、disputed 保留與審核／已驗結果承載依[承載契約 §5](author-contract-1.0.md#5-審核測試證據與-meta)。
+meta.status／reviewed_by 保留真實作者與審查紀錄，不以 hash freshness 作准入證明；disputed 保留且只阻擋受影響卡。輕量／共用路徑與來源重建路徑依[承載契約](author-contract-1.0.md)執行。
 
 R-0001～R-0009 的效力、strength、取代關係以裁定登錄為準，完整對照在 IR §0。第 9～17 族本文件補語法；第 18、19 族統一 capture，第 20 族因 R-0009 不再需要兩次條件求值而結案，第 21 族以遷移稽核處理。沒有改寫 v0 標註。每族是否能提升「兩層通過」須聯合檢查該句型所有缺口，不可加總重疊族行數。
 

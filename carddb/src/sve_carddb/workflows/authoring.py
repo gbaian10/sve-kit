@@ -1,9 +1,10 @@
 """Public workspace for inspecting, writing and checking exact author sources."""
 
+import subprocess  # ruff: ignore[suspicious-subprocess-import] -- fixed local Git argv records provenance without author pins
 from contextlib import contextmanager
 from dataclasses import dataclass
-from hashlib import file_digest
 from pathlib import Path
+from shutil import which
 from typing import TYPE_CHECKING, Literal
 
 from pydantic import JsonValue
@@ -17,11 +18,11 @@ from sve_carddb.core.models import RecordData
 from sve_carddb.core.provenance import BuildContext, Revision
 from sve_carddb.domains.catalog.adoption_loader import load_adoptions
 from sve_carddb.domains.catalog.rules_names import populate_rules_names
-from sve_carddb.domains.effects.author_anchors import review_states
 from sve_carddb.domains.effects.author_current import CardRejected, CurrentAuthorSources
 from sve_carddb.domains.effects.author_expansion import AuthorExpander
 from sve_carddb.domains.effects.author_handwritten import ConfigurationError, positions
 from sve_carddb.domains.effects.author_inputs import AuthorInputError, Diagnostic
+from sve_carddb.domains.effects.author_resolution import body_usage, review_states
 from sve_carddb.domains.effects.author_set import load_author_set
 from sve_carddb.domains.effects.author_source_hash import source_version
 from sve_carddb.domains.effects.author_sources import SourceError
@@ -72,16 +73,15 @@ __all__ = [
 
 
 class Inputs(RecordData):
-    """Every profile pins its own sources; no live manifest is consulted."""
+    """Read reviewed source context without consulting a live manifest."""
 
     profile: Literal["public", "database"]
     repo: Path
     jp_batch_id: str
-    revision: Revision
+    revision: Revision | None = None
     authored: Path | None = None
     card_data: Path | None = None
     database: Path | None = None
-    database_sha256: str | None = None
     recipe: Path | None = None
     frozen_inputs: Path | None = None
 
@@ -109,7 +109,6 @@ def _configuration(inputs: Inputs) -> None:
             )
     database = (
         inputs.database,
-        inputs.database_sha256,
         inputs.recipe,
         inputs.frozen_inputs,
     )
@@ -117,7 +116,7 @@ def _configuration(inputs: Inputs) -> None:
         inputs.profile == "public" and any(value is not None for value in database)
     ):
         raise ConfigurationError(
-            "Database profile requires database, SHA-256, recipe and frozen_inputs"
+            "Database profile requires database, recipe and frozen_inputs"
         )
 
 
@@ -184,6 +183,7 @@ def _public_products(
     batches: ParsedBatches,
     store: Path,
 ) -> OfficialProducts:
+    assert inputs.revision is not None
     identities = load_product_identities(
         authored,
         authored_revision=inputs.revision,
@@ -212,6 +212,21 @@ def prepare(  # ruff: ignore[too-many-locals, too-many-statements] -- keep the c
     from sve_carddb.domains.catalog.loader import prepare as prepare_catalog  # ruff: ignore[import-outside-top-level] -- initialize the production text interner before catalog imports
 
     _configuration(inputs)
+    if inputs.revision is None:
+        executable = which("git")
+        if executable is None:
+            raise ConfigurationError("Git is required to record repository revision")
+        try:
+            revision = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed Git argv reports provenance, not an admission pin
+                [executable, "-C", str(inputs.repo), "rev-parse", "HEAD"],
+                check=True,
+                capture_output=True,
+                text=True,
+            ).stdout.strip()
+        except OSError, subprocess.CalledProcessError:
+            raise ConfigurationError("Cannot read repository revision") from None
+        inputs = inputs.model_copy(update={"revision": revision})
+    assert inputs.revision is not None
     authored = inputs.authored or inputs.repo / "authored"
     expander = AuthorExpander(inputs.repo / "dsl")
     batches = ParsedBatches(read_parsed(inputs.card_data or inputs.repo / "card-data"))
@@ -222,19 +237,10 @@ def prepare(  # ruff: ignore[too-many-locals, too-many-statements] -- keep the c
         assert inputs.database is not None
         assert inputs.recipe is not None
         assert inputs.frozen_inputs is not None
-        with inputs.database.open("rb") as stream:
-            actual = file_digest(stream, "sha256").hexdigest()
-        if actual != inputs.database_sha256:
-            raise ConfigurationError("Authoring database SHA-256 mismatch")
         recipe = object_value(parse(inputs.recipe.read_bytes()))
         context = BuildContext.model_validate_json(
             canonical(object_value(parse(inputs.frozen_inputs.read_bytes()))["context"])
         )
-        if (
-            context.program_revision != inputs.revision
-            or recipe["revision"] != inputs.revision
-        ):
-            raise ConfigurationError("Authoring frozen revision mismatch")
         if [
             pin["card_batch"]
             for value in array(recipe["sources"])
@@ -447,18 +453,7 @@ def _stored_inspection(
     record_keys: set[str],
     failures: dict[str, Diagnostic],
 ) -> dict[str, JsonValue]:
-    stored_anchors: list[JsonValue] = []
     handwritten: list[JsonValue] = []
-    for file in inputs.anchor_files:
-        tree = object_value(schemas.storage_tree(file.raw, "effect_anchor_set"))
-        stored_anchors.extend(
-            {
-                "file": file.path,
-                "record_key": key,
-                "card": object_value(tree["cards"])[key],
-            }
-            for key in object_value(tree["cards"]).keys() & record_keys
-        )
     for file in inputs.author_files:
         tree = object_value(schemas.storage_tree(file.raw, "author_effect_set"))
         handwritten.extend(
@@ -472,7 +467,7 @@ def _stored_inspection(
     failure = next(
         (failure for number, failure in failures.items() if number in record_keys), None
     )
-    anchor_diagnostic: JsonValue = (
+    resolution_diagnostic: JsonValue = (
         None
         if failure is None
         else {
@@ -487,8 +482,7 @@ def _stored_inspection(
     )
     return {
         "handwritten": handwritten,
-        "stored_anchors": stored_anchors,
-        "anchor_diagnostic": anchor_diagnostic,
+        "resolution_diagnostic": resolution_diagnostic,
         "body_definitions": [
             schemas.storage_tree(file.raw, "effect_body_shard")
             for file in inputs.body_files
@@ -500,8 +494,6 @@ def check(
     workspace: Workspace,
     *,
     compare_public: Inputs | None = None,
-    base: str | None = None,
-    baseline_root: Path | None = None,
 ) -> dict[str, JsonValue]:
     """Check every authored card and full inventory, independently of display filters."""
     results = workspace.current.validate(workspace.authored, workspace.expander)
@@ -513,21 +505,6 @@ def check(
     ]
     if rejected:
         raise AuthorInputError(rejected[0].diagnostic)
-    regression: JsonValue = None
-    if (base is None) != (baseline_root is None):
-        raise ConfigurationError(
-            "Prototype regression requires base and baseline_root together"
-        )
-    if base is not None and baseline_root is not None:
-        from sve_carddb.workflows.authoring_regression import check_regression  # ruff: ignore[import-outside-top-level] -- optional fixed-tree prototype regression
-
-        regression = check_regression(
-            workspace,
-            base,
-            baseline_root,
-            load_author_set(workspace.authored, workspace.expander.schemas),
-            results,
-        )
     selection = workspace.current.selection_input(
         workspace.authored, workspace.expander
     )
@@ -544,8 +521,11 @@ def check(
         "status": "ok",
         "selection": selection,
         "compared_public": compare_public is not None,
-        "regression": regression,
+        "regression": None,
         "reviews": review_states(
+            load_author_set(workspace.authored, workspace.expander.schemas)
+        ),
+        "body_usage": body_usage(
             load_author_set(workspace.authored, workspace.expander.schemas)
         ),
     }

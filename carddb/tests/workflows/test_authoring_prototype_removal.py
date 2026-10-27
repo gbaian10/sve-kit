@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.core.json import canonical, digest, object_value
+from sve_carddb.core.json import canonical, object_value
 from sve_carddb.domains.effects.author_current import CardRejected
 from sve_carddb.domains.effects.author_expansion import AuthorExpander
 from sve_carddb.domains.effects.author_inputs import AuthorInputError, parse_document
@@ -14,7 +14,6 @@ from sve_carddb.workflows import authoring
 
 from ..domains.effects.author_entry_cases import meta
 from ..domains.effects.test_author_current_absent import CARD, synthetic_current
-from .test_authoring import git_tree
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
@@ -57,21 +56,6 @@ def test_prototype_removal_deletes_only_exhausted_shards(
             }
         )
     )
-    baseline = repo / "carddb/tests/fixtures/effect_baseline"
-    baseline.mkdir(parents=True)
-    (baseline / "SYN.json").write_bytes(
-        canonical(
-            {
-                number: {
-                    "ast_sha256": digest(canonical(prototype)).removeprefix("sha256:"),
-                    "positions": [],
-                    "unclassified_positions": [],
-                }
-                for number in cards
-            }
-        )
-    )
-    base = git_tree(repo)
     hand = tmp_path / "main.yaml"
     hand.write_bytes(
         canonical(
@@ -119,24 +103,6 @@ def test_prototype_removal_deletes_only_exhausted_shards(
             index.write_bytes(
                 canonical({"format": 1, "kind": "effects_index", "records": []})
             )
-        with pytest.raises(FileNotFoundError, match="Git base"):
-            authoring.write(
-                workspace,
-                main=hand,
-                bodies=None,
-                output_root=authored,
-                cards=frozenset({"SYN-01"}),
-                remove_prototype=True,
-                base="f" * 40,
-                baseline_root=baseline,
-            )
-        assert prototype_path.exists()
-        assert all(
-            record.kind == "effect_set"
-            for record in load_author_set(
-                authored, workspace.expander.schemas
-            ).index.records
-        )
         report = authoring.write(
             workspace,
             main=hand,
@@ -144,8 +110,6 @@ def test_prototype_removal_deletes_only_exhausted_shards(
             output_root=authored,
             cards=frozenset({"SYN-01"}),
             remove_prototype=True,
-            base=base,
-            baseline_root=baseline,
         )
         assert report["status"] == "ok"
         assert prototype_path.exists() == (sibling and not alias)
@@ -171,22 +135,4 @@ def test_prototype_removal_deletes_only_exhausted_shards(
                 output_root=authored,
                 cards=frozenset({"SYN-01"}),
                 remove_prototype=True,
-                base=base,
-                baseline_root=baseline,
             )
-        if sibling and not alias:
-            prototype_path.unlink()
-            with pytest.raises(
-                AuthorInputError, match="prototype_replacement_not_current"
-            ):
-                authoring.check(workspace, base=base, baseline_root=baseline)
-        elif not sibling:
-            (authored / "rules/effects/NEW.yaml").write_bytes(
-                canonical(
-                    {"format": 1, "kind": "effect_set", "cards": {"NEW-01": prototype}}
-                )
-            )
-            with pytest.raises(
-                AuthorInputError, match="prototype_file_inventory_changed"
-            ):
-                authoring.check(workspace, base=base, baseline_root=baseline)
