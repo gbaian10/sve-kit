@@ -55,7 +55,7 @@
 原始 inventory 的建立時間、manifest 指紋與逐批 receipt 對照僅留在私有來源歸檔，不複製到公開樹；公開資料不足以重建只差 store 名稱的 inventory。
 此格式不驗證執行時 store 名稱是否為原始名稱；store 對應仍由私有建置設定與來源歸檔驗證。也不宣稱讀取 JSON 等於重驗原始 raw bytes。
 
-更新保留舊觀測、完整舊批次選取與舊分檔位置。同一來源重跑若改變解析結果即失敗。
+更新保留舊觀測的語義 `content_hash`、完整舊批次選取與舊分檔位置。同一來源重跑若改變解析結果即失敗。檔案 `sha256`／`bytes` pin 用來驗證目前檔案完整性，不保證排版相同的歷史檔案沿用相同 pin；合法的格式重排可更新 pin，而歷史檢查仍比較語義觀測與批次。
 `load` 只保證目前資料自洽，無法偵測連同 hash、索引一起改寫的歷史。
 每個修改 `card-data/**` 的 PR，CI **必須**以 PR base commit 的完整 `card-data/` 執行
 `parsed-cards validate <候選根> --previous <PR base 資料根>`；不以同一棵候選樹充當前版。
