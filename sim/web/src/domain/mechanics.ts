@@ -7,6 +7,7 @@ export interface MechanicProjection {
 }
 export interface MechanicCoverage {
   readonly scope: string
+  readonly hasCompleteKeywordIds?: readonly string[]
   readonly completeAll: boolean
   readonly completeMode: string
   readonly completeKeywordIds: readonly string[]
@@ -34,6 +35,7 @@ export function mechanicState(
     return "present"
   const complete = coverage.find((row) => row.scope === scope)
   if (!complete) return "unknown"
+  if (complete.hasCompleteKeywordIds?.includes(keywordId)) return "absent"
   const listed = complete.completeKeywordIds.includes(keywordId)
   return complete.completeAll || (complete.completeMode === "exclude" ? !listed : listed)
     ? "absent"

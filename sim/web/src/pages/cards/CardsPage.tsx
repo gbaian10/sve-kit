@@ -652,7 +652,11 @@ export function CardsPage() {
         </p>
         {Object.keys(query.mechanics).length > 0 &&
           printingOptions?.keyword.coverage === "partial" && (
-            <p className="text-11">{t("filters.keywordIncomplete")}</p>
+            <p className="text-11">
+              {printingOptions.keyword.unknownCards !== undefined
+                ? t("filters.keywordUnknownCount", { count: printingOptions.keyword.unknownCards })
+                : t("filters.keywordIncomplete")}
+            </p>
           )}
       </div>
     ) : null

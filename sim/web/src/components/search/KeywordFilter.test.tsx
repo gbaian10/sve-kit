@@ -187,3 +187,36 @@ it("keeps keyword chips in place and disabled until tagging finishes", async () 
   await userEvent.click(ward)
   expect(onChange).toHaveBeenCalledWith({ "kw:ward": "has" })
 })
+
+it("shows a concrete unknown-card count and removes it when self coverage is complete", async () => {
+  function CountHarness() {
+    const [unknownCards, setUnknown] = useState(12)
+    return (
+      <>
+        <KeywordFilter
+          options={{ keywords, coverage: unknownCards ? "partial" : "complete", unknownCards }}
+          edition="en"
+          textLang="en"
+          selected={{}}
+          onChange={() => undefined}
+        />
+        <button
+          type="button"
+          onClick={() => {
+            setUnknown(0)
+          }}
+        >
+          resolve
+        </button>
+      </>
+    )
+  }
+  await renderInRouter(<CountHarness />, { language: "en" })
+  await userEvent.click(screen.getByRole("button", { name: /^Keywords/u }))
+  expect(screen.getByRole("status")).toHaveTextContent("undetermined for 12 cards")
+  expect(screen.getByRole("button", { name: "守護" })).toBeEnabled()
+  await userEvent.click(screen.getByRole("button", { name: "resolve" }))
+  await userEvent.click(screen.getByRole("button", { name: /^Keywords/u }))
+  expect(screen.getByRole("status")).toHaveTextContent("Matches any selected keyword")
+  expect(screen.getByRole("status")).not.toHaveTextContent("undetermined")
+})

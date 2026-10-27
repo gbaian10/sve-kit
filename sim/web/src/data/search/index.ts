@@ -58,6 +58,7 @@ export interface SearchOptions {
   readonly restrictions?: RestrictionStatus
   readonly restrictionDetails?: Readonly<Record<string, readonly CardRestriction[]>>
   readonly keywords: readonly SearchOption[]
+  readonly keywordUnknownCards?: number | undefined
   readonly keywordCoverage: "pending" | "unknown" | "partial" | "complete"
   readonly types: readonly SearchOption[]
   /** Printings per printed type code in this edition. */
@@ -483,6 +484,7 @@ function mechanicMembership(bootstrap: BootstrapColumns, edition: Region) {
     }))
     const covered: MechanicCoverage[] = (coverage.get(cardId) ?? []).map((row) => ({
       scope: stringValue(row["scope"]),
+      hasCompleteKeywordIds: strings(row["has_complete_keyword_ids"]),
       completeAll: row["complete_all"] === true,
       completeMode: stringValue(row["complete_mode"]),
       completeKeywordIds: strings(row["complete_keyword_ids"]),
@@ -1058,6 +1060,7 @@ export class SearchIndex {
         ...options,
         ...artistOptions(artistCounts, artistNames),
         keywordCoverage: this.optionsValue.keywordCoverage,
+        keywordUnknownCards: this.optionsValue.keywordUnknownCards,
         ...(this.optionsValue.restrictions
           ? {
               restrictions: this.optionsValue.restrictions,
@@ -1078,17 +1081,18 @@ export class SearchIndex {
     try {
       const membership = mechanicMembership(bootstrap, this.edition)
       let known = false
-      let unknown = false
+      let unknown = 0
       for (let card = 0; card < this.cards.id.length; card++) {
         const states = membership(this.pool.get(this.cards.id[card] ?? 0))
         this.cards.present[card] = this.pool.encode(states.present)
         this.cards.absent[card] = this.pool.encode(states.absent)
         known ||= states.annotated
-        unknown ||= states.unknown
+        unknown += Number(states.unknown)
       }
       this.optionsValue = {
         ...this.optionsValue,
         keywordCoverage: known ? (unknown ? "partial" : "complete") : "unknown",
+        keywordUnknownCards: unknown,
       }
     } finally {
       this.pool.seal()

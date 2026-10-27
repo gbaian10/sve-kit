@@ -631,7 +631,11 @@ export function usePrintingOptions() {
         location: { types: view.options.types, counts: view.options.locationCounts },
         trait: { traits: view.options.traits, counts: view.options.traitCounts },
         artist: { artists: view.options.artists, counts: view.options.artistCounts },
-        keyword: { keywords: view.options.keywords, coverage: view.options.keywordCoverage },
+        keyword: {
+          keywords: view.options.keywords,
+          coverage: view.options.keywordCoverage,
+          unknownCards: view.options.keywordUnknownCards,
+        },
       }
     : undefined
 }
