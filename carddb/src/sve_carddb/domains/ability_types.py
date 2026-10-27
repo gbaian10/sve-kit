@@ -48,6 +48,12 @@ _EN_HEADS = {
     "Activate": "act",
     "Fusion": "fusion",
 }
+_EN_NAMES = "|".join(
+    re.escape(name) for name in sorted(_EN_HEADS, key=len, reverse=True)
+)
+_EN_HEAD = re.compile(
+    rf"(?P<names>(?:{_EN_NAMES})(?:/(?:{_EN_NAMES}))*)(?:\s*[-–—:.]|\s*\()"
+)
 
 
 def parse(text: str, region: str) -> tuple[set[str], bool]:
@@ -71,10 +77,8 @@ def parse(text: str, region: str) -> tuple[set[str], bool]:
                 line_types.add(code)
             rest = rest[match.end() :]
         if region == "en":
-            for name, code in _EN_HEADS.items():
-                if re.match(re.escape(name) + r"(?:\s*[-–—:.]|\s*\()", rest):
-                    line_types.add(code)
-                    break
+            if head := _EN_HEAD.match(rest):
+                line_types.update(_EN_HEADS[name] for name in head["names"].split("/"))
             if "act" in line_types and re.match(r"Fuse\s+[^:]+:", rest):
                 line_types.add("fusion")
         result.update(line_types)

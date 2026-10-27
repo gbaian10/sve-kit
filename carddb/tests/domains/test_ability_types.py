@@ -51,6 +51,7 @@ if TYPE_CHECKING:
             "{icon_act|[act]} Fuse a synthetic card: Place a fusion counter.",
             {"act", "fusion"},
         ),
+        ("en", "On Evolve/Strike - Synthetic.", {"on_evolve", "on_attack"}),
         ("en", "Whenever you fuse a card, synthetic.", set()),
         ("en", 'Give another follower "\nOn Attack - Synthetic.\n".', set()),
         (
