@@ -405,6 +405,16 @@ authority 的 `DamageQuantityOutcome` 依[執行語義 §1.3](runtime-semantics.
 selected play targets 的最低 1 點限制依
 [執行語義 §1](runtime-semantics.md#1-分配最低量與打出-snapshot)，不能外推為所有結算分配的預設。
 
+## 本文固定 PP 回復
+
+本文 `pp: {who: self, delta: N}` 接受正整數常值 N，降低為控制者目前 PP
+的 Resource(Add)。實際回復量為 `min(N, 最大 PP − 目前 PP)`，最大 PP 不變；
+已滿時仍產生零實際回復的完成收據，不視為付款，也不產生回復事件。
+
+`InstructionOutcome::Resource` 為 authority-only，保存玩家、資源、請求量、
+前後值與實際增加量；沿既有公開回復事件，不新增玩家協定。本文不接受 Pay、
+Set、RecoverToMax、其他資源、其他玩家或動態數量；打出費用仍走原付款路徑。
+
 ## 觀察與測試種子
 
 `internal_decision(view)` 只向 actor 或 Referee 提供目前 token／actor／輸入形狀，
