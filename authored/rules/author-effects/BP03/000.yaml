@@ -1,0 +1,32 @@
+cards:
+  BP03-067:
+    abilities:
+      - fanfare:
+          do:
+            - ep:
+                delta: 1
+                who: self
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      resource:
+                        kind: pp_max
+                        who: self
+                    op: ge
+                    right: 7
+                then:
+                  - buff:
+                      hp: 2
+                      on: this
+                      power: 2
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-sol
+            who: Codex
+          date: "2026-10-28"
+format: 2
+kind: author_effect_set
