@@ -164,6 +164,20 @@ impl Game {
         &mut self,
         holder: &str,
     ) -> Result<Characteristics> {
+        self.event_characteristics(holder, false)
+    }
+
+    pub(in crate::game::internal) fn internal_hand_characteristics(
+        &mut self,
+        holder: &str,
+    ) -> Result<Characteristics> {
+        if self.object(holder)?.zone != "hand" {
+            return Err(invalid("discard characteristics require a hand card"));
+        }
+        self.event_characteristics(holder, true)
+    }
+
+    fn event_characteristics(&mut self, holder: &str, hand: bool) -> Result<Characteristics> {
         self.require_internal_abilities(holder, "event characteristics and LKI abilities")?;
         let object = self.object(holder)?.clone();
         let (card, face) = self.internal_effective_print(holder)?;
@@ -199,7 +213,13 @@ impl Game {
                 definition: source.definition,
             });
         }
-        let (attack, life) = if kind == CardKind::Follower {
+        let (attack, life) = if kind == CardKind::Follower && hand {
+            // Hand stat patches are not admitted; event snapshots retain the printed values.
+            (
+                Info::Present(Int(text(&printed["power"])?.parse().map_err(invalid)?)),
+                Info::Present(Int(text(&printed["hp"])?.parse().map_err(invalid)?)),
+            )
+        } else if kind == CardKind::Follower {
             (
                 Info::Present(Int(self.internal_numeric_stat(holder, Stat::Attack)?)),
                 Info::Present(Int(self.internal_numeric_stat(holder, Stat::Life)?)),

@@ -4,6 +4,7 @@ mod ast;
 mod conditions;
 mod costs;
 mod current;
+mod discard;
 mod evolution;
 mod exchange;
 mod keywords;
@@ -851,6 +852,7 @@ impl BodyContext<'_> {
                     )),
                 })
             }
+            ast::Step::Discard(value) => self.discard(value, path),
             ast::Step::Draw(draw) => Ok(Action::Draw {
                 player: PlayerRef::Controller {},
                 count: self.number(&draw.n, path, &mut BTreeSet::new())?,

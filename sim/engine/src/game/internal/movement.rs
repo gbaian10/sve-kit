@@ -490,14 +490,7 @@ impl Game {
             if method == MoveMethod::Destroy && previous.zone != "field" {
                 return Err(unsupported("off-field destruction"));
             }
-            let from_kind =
-                if method == MoveMethod::Put && previous.zone == "evolve_deck" && zone == "field" {
-                    ZoneKind::Evolve
-                } else if previous.zone == "deck" && method == MoveMethod::Put {
-                    ZoneKind::Deck
-                } else {
-                    public_zone(&previous.zone)?
-                };
+            let from_kind = movement_origin(&previous.zone, method, zone)?;
             if previous.zone == zone
                 || (method == MoveMethod::Destroy && execution.destroy_guards.contains(&before))
             {
@@ -569,17 +562,21 @@ impl Game {
                 .values
                 .insert("banish_instruction".into(), json!(true));
         }
-        self.move_objects(
-            &ids,
-            zone,
-            if zone == "field" {
-                Some(super::seat_name(execution.context.controller)?)
-            } else {
-                None
-            },
-            None,
-            &frame,
-        )?;
+        if method == MoveMethod::Discard {
+            self.discard(&ids, &frame)?;
+        } else {
+            self.move_objects(
+                &ids,
+                zone,
+                if zone == "field" {
+                    Some(super::seat_name(execution.context.controller)?)
+                } else {
+                    None
+                },
+                None,
+                &frame,
+            )?;
+        }
         if kind == ZoneKind::Hand {
             // As with draws, the public card stays known but its new hand slot is not located.
             for (_, id, previous, _, _) in &plans {
@@ -635,7 +632,10 @@ impl Game {
                 },
                 controller_before,
             })));
-            if matches!(method, MoveMethod::Destroy | MoveMethod::Banish) {
+            if matches!(
+                method,
+                MoveMethod::Destroy | MoveMethod::Banish | MoveMethod::Discard
+            ) {
                 successful.push(ResultMember {
                     id: ResultMemberId(u64::try_from(index).map_err(invalid)?),
                     before: Some(RuntimeObjectView {
@@ -669,5 +669,14 @@ fn public_zone(zone: &str) -> Result<ZoneKind> {
         "cemetery" => Ok(ZoneKind::Cemetery),
         "banish" => Ok(ZoneKind::Banish),
         _ => Err(unsupported("non-public movement origin")),
+    }
+}
+
+fn movement_origin(zone: &str, method: MoveMethod, destination: &str) -> Result<ZoneKind> {
+    match (zone, method, destination) {
+        ("evolve_deck", MoveMethod::Put, "field") => Ok(ZoneKind::Evolve),
+        ("hand", MoveMethod::Discard, "cemetery") => Ok(ZoneKind::Hand),
+        ("deck", MoveMethod::Put, _) => Ok(ZoneKind::Deck),
+        (zone, _, _) => public_zone(zone),
     }
 }

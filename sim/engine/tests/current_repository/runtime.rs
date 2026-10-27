@@ -704,3 +704,5 @@ mod deck_top;
 
 #[path = "runtime/pp_recover.rs"]
 mod pp_recover;
+#[path = "runtime/hand_discard.rs"]
+mod hand_discard;

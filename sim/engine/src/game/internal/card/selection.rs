@@ -9,12 +9,12 @@ use crate::ir::{Bool, Expr, SelectionView, ZoneKind};
 use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
 use serde_json::{Value, json};
 
-/// A public target candidate, addressed only within the current question.
+/// Object candidates visible only to the current chooser, addressed within that question.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct TargetDomain {
-    /// Token-scoped field objects with public printed identities.
+    /// Token-scoped objects; a discard may show the chooser's own hand cards.
     pub members: Vec<super::super::DistributionMember>,
-    /// Printed bounds; only resolution choices reduce an impossible minimum.
+    /// Bounds for this question; play-time targets retain their strict printed minimum.
     pub cardinality: Cardinality,
 }
 

@@ -19,7 +19,7 @@ use crate::ir::{
     RuntimeAbilitySource, RuntimeDamageRecipient, ScopeId, SearchOutcome, SearchReplacementAnswer,
     Selector, SourceSpan, StepwiseAnswer, StepwiseMode, Visibility, WellFormedProgram, ZoneKind,
 };
-use crate::ir::{BanishOutcome, FaceId, PaymentResult, QuickWindow};
+use crate::ir::{BanishOutcome, DiscardEvent, DiscardOutcome, FaceId, PaymentResult, QuickWindow};
 use crate::{EngineFailure, Result, invalid};
 use alloc::collections::{BTreeMap, VecDeque};
 use alloc::sync::Arc;
@@ -32,6 +32,7 @@ mod admission;
 mod allocation;
 mod card;
 mod cost;
+mod discard;
 mod duration;
 mod life;
 mod movement;
@@ -105,7 +106,7 @@ pub struct DecisionView {
     pub token: DecisionToken,
     /// Authorized actor.
     pub actor: PlayerId,
-    /// Input shape; no hidden card identities.
+    /// Input shape with identities authorized for this actor, never hidden object IDs.
     pub domain: InputDomain,
 }
 
@@ -205,6 +206,8 @@ pub enum Answer {
 pub enum InstructionOutcome {
     /// Actual body resource recovery, independent of cost payment.
     Resource(ResourceOutcome),
+    /// Successful discards and their physical movements, independent of destruction.
+    Discard(DiscardOutcome),
     /// Requested life operation's actual before/after values, including no change.
     Life(LifeChangeEvent),
     /// Successful body posture changes, empty when every subject already has that posture.
@@ -259,6 +262,8 @@ pub struct Progress {
 /// First-slice physical facts, sharing the prototype mutation and causal pipeline.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Fact {
+    /// A card actually discarded from the actor's hand.
+    Discard(Box<DiscardEvent>),
     /// A direct nonzero leader life change, independent of damage.
     LifeChange(LifeChangeEvent),
     /// A card has completed intrinsic costs and, for field cards, the capacity check.
@@ -324,6 +329,7 @@ enum Slot {
 
 #[derive(Clone, Debug)]
 enum Wait {
+    Discard(discard::HandWait),
     WardEntry(ObjectRef),
     OptionalCost,
     CostMaterials(card::exchange::MaterialWait),
@@ -603,6 +609,11 @@ impl Game {
                 return Err(invalid("wrong actor or stale internal answer"));
             }
             match (wait, answer) {
+                (Wait::Discard(wait), Answer::Targets(handles)) => {
+                    let members = wait.validate(self, &execution, &handles)?;
+                    rollback = execution.origin.take();
+                    self.internal_discard_answer(&mut execution, &wait, &members)?;
+                }
                 (Wait::WardEntry(object), Answer::WardEntry(acted)) => {
                     rollback = execution.origin.take();
                     execution.ward_entries.push((object, acted));
@@ -1085,6 +1096,7 @@ impl Game {
             .ok_or_else(|| invalid("IR epoch exhausted"))?;
         match &instruction.action {
             Action::Resource { .. } => self.internal_resource(execution, &instruction)?,
+            Action::Discard { .. } => self.internal_discard_wait(execution, instruction)?,
             Action::Life { .. } => self.internal_life(execution, &instruction)?,
             Action::Modify { .. } => self.internal_modify(execution, &instruction)?,
             Action::Look { .. } => self.internal_look(execution, &instruction)?,

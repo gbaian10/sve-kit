@@ -8,16 +8,16 @@ use crate::ir::{
 };
 use serde_json::{Value, json};
 
-/// One public recipient represented by a handle scoped to the question token.
+/// One chooser-visible candidate represented by a handle scoped to the question token.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct DistributionMember {
     /// Opaque coordinate, never a physical object ID or generation.
     pub handle: u64,
-    /// Leader player or current controller of the public follower.
+    /// Leader player or current controller of the candidate card.
     pub player: PlayerId,
-    /// Printed identity for a follower; absent for a leader.
+    /// Printed card identity authorized for this chooser; absent for a leader.
     pub card: Option<String>,
-    /// Printed rules name for a follower; absent for a leader.
+    /// Printed card name authorized for this chooser; absent for a leader.
     pub name: Option<String>,
 }
 
