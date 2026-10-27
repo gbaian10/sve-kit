@@ -558,7 +558,7 @@ fn unsupported_step_rejects_the_entire_candidate() {
     tree["cards"]["BP08-038"]["abilities"][0]["fanfare"]["do"]
         .as_array_mut()
         .unwrap()
-        .push(json!({"reveal":"this"}));
+        .push(json!({"dice":{"bind":"roll"}}));
     let failure = ExpandedLowerer::new().unwrap().lower(&tree).unwrap_err();
     assert_eq!(failure.code, "unsupported_construct");
     assert_eq!(failure.path, "/cards/BP08-038/abilities/0");
