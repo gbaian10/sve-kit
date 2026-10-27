@@ -195,6 +195,18 @@ impl Game {
             current.insert(number, Arc::new(catalog.resolve_current(candidate)?));
         }
         let mut game = Self::new(catalog, setup, facts, random, seed)?;
+        if game.state.objects.values().any(|object| {
+            game.catalog
+                .rejected
+                .get(&object.card)
+                .is_some_and(|reasons| {
+                    reasons
+                        .iter()
+                        .any(|reason| reason == "source_unresolved_issue")
+                })
+        }) {
+            return Err(unsupported("a selected card has an unresolved ruling"));
+        }
         game.card_runtime.selected = true;
         game.card_runtime.current = current;
         game.admit_evolution_resources()?;

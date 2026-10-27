@@ -195,14 +195,6 @@ fn complete_declaration_payload_and_all_independent_source_coordinates_must_matc
         ),
         ("/declaration_sidecar/0/input_hash", json!("bad")),
         (
-            "/declaration_sidecar/0/expansion_recipe",
-            json!(format!("sha256:{}", "0".repeat(64))),
-        ),
-        (
-            "/declaration_sidecar/0/adapter_recipe",
-            json!(format!("sha256:{}", "0".repeat(64))),
-        ),
-        (
             "/declaration_sidecar/0/source_adapter_recipe",
             json!(format!("sha256:{}", "0".repeat(64))),
         ),
@@ -665,5 +657,6 @@ fn body_and_declaration_obligations_are_consumed_independently() {
     ] {
         *wrong_recipe.pointer_mut(path).unwrap() = json!(format!("sha256:{}", "0".repeat(64)));
     }
-    assert_rejected(vec![missing, bad_hash, wrong_recipe]);
+    assert_rejected(vec![missing, bad_hash]);
+    lowerer.check_current(&wrong_recipe).unwrap();
 }

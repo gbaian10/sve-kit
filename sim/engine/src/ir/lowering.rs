@@ -326,7 +326,9 @@ fn ability_entries(
             let ability: ast::Ability = decode(value, &entry_path)?;
             if !matches!(
                 (&ability.sources[0], ability.keywords.is_some()),
-                (ast::SourceUse::CardKeyword(_), true) | (ast::SourceUse::Ability(_), false)
+                (ast::SourceUse::CardKeyword(_), true)
+                    | (ast::SourceUse::Ability(_), false)
+                    | (ast::SourceUse::Direct(_), _)
             ) {
                 return Err(unsupported(&entry_path));
             }
@@ -903,6 +905,9 @@ fn source_span(
     path: &str,
     entry: &ast::Ability,
 ) -> Result<SourceSpan, LoweringError> {
+    if let ast::SourceUse::Direct(source) = &entry.sources[0] {
+        return current::direct::source_span(key, path, entry, source);
+    }
     let source = entry.sources[0].json();
     let text = |pointer| {
         source
@@ -929,6 +934,7 @@ fn source_span(
         card_id,
         card_no: key.key.to_owned(),
         scope: match &entry.sources[0] {
+            ast::SourceUse::Direct(direct_source) => direct_source.scope.clone(),
             ast::SourceUse::Ability(scoped) => scoped.ability_scope.clone(),
             ast::SourceUse::CardKeyword(_) => format!("keyword_declaration:{path}"),
         },
