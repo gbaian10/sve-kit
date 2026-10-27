@@ -25,7 +25,6 @@ from snapshot_format import (
     check_lock,
     current_fingerprints,
     fingerprint,
-    golden_hashes,
     main,
     profile_contract,
     update_lock,
@@ -141,7 +140,7 @@ class FormatLockTests(unittest.TestCase):
     ) -> None:
         """Frozen history survives updates, hand edits, thawing and removal."""
         old = fingerprint(schema(), {})
-        new = fingerprint(schema(), {}, {"expected-logical.json": "changed"})
+        new = fingerprint({"type": "string"})
         locked = pin(old, frozen=True)
         with self.assertRaisesRegex(ValueError, "Bump format_version"):
             check_lock(locked, {"4.0.0": new}, locked)
@@ -237,14 +236,14 @@ class FormatLockTests(unittest.TestCase):
             (package / "export").mkdir()
             reader = package / "export/reader.py"
             reader.write_text("def read(value):\n payload = value\n return payload\n")
-            current = current_fingerprints(repository, package)
+            current = current_fingerprints(package)
             locked = pin(current["4.0.0"], frozen=frozen)
             path = repository / LOCK_PATH
             path.write_text(json.dumps(locked))
             git(repository, "add", LOCK_PATH)
             git(repository, "commit", "-qm", "Pin synthetic format")
             reader.write_text("def read(value):\n body = value\n return body\n")
-            assert current_fingerprints(repository, package) == current
+            assert current_fingerprints(package) == current
             assert (
                 main(["--base-ref", "HEAD"], repository=repository, package=package)
                 == 0
@@ -265,10 +264,8 @@ class FormatLockTests(unittest.TestCase):
                 == 0
             )
             locked = object_value(parse(path.read_bytes()))
-            check_lock(locked, current_fingerprints(repository, package), {})
-            frozen = pin(
-                current_fingerprints(repository, package)["4.0.0"], frozen=True
-            )
+            check_lock(locked, current_fingerprints(package), {})
+            frozen = pin(current_fingerprints(package)["4.0.0"], frozen=True)
             path.write_text(json.dumps(frozen))
             git(repository, "add", LOCK_PATH)
             git(repository, "commit", "-qm", "Freeze synthetic format")
@@ -300,54 +297,30 @@ class FormatLockTests(unittest.TestCase):
             assert "generate_schema" in output.getvalue()
             assert not (repository / LOCK_PATH).exists()
 
-    def test_golden_data_version_changes_are_contract_changes(self) -> None:
-        """The shared synthetic data version is pinned even though live versions are not."""
+    def test_golden_data_version_changes_do_not_change_format_lock(self) -> None:
+        """Shared sample content remains behavior-test input, not a format version."""
         with checkout() as (repository, package):
-            current = current_fingerprints(repository, package)
+            current = current_fingerprints(package)
             locked = pin(current["4.0.0"])
             path = repository / "tests/fixtures/snapshot-contract/v3/manifest.json"
             path.write_text(path.read_text().replace("0001", "0002"))
-            changed = current_fingerprints(repository, package)
-            with self.assertRaisesRegex(ValueError, "--update"):
-                check_lock(locked, changed, {})
-            check_lock(update_lock(locked, changed, {}), changed, {})
-            with self.assertRaisesRegex(ValueError, "Bump format_version"):
-                check_lock(pin(current["4.0.0"], frozen=True), changed, {})
+            changed = current_fingerprints(package)
+            assert changed == current
+            check_lock(locked, changed, {})
 
     def test_live_data_version_and_payload_contents_are_not_contract_inputs(
         self,
     ) -> None:
         """Editing ordinary snapshot payloads never changes the contract pin."""
         with checkout() as (repository, package):
-            current = current_fingerprints(repository, package)
+            current = current_fingerprints(package)
             path = repository / "live-snapshot.json"
             for value in (
                 '{"data_version":"20261018T000000Z-0001","rows":["first"]}',
                 '{"data_version":"20261018T000000Z-0002","rows":["second"]}',
             ):
                 path.write_text(value)
-                assert current_fingerprints(repository, package) == current
-
-    def test_golden_nested_file_additions_removals_and_content_are_pinned(self) -> None:
-        """Hash the complete shared directory, including nested and non-JSON files."""
-        with tempfile.TemporaryDirectory() as temp:
-            directory = Path(temp)
-            with self.assertRaisesRegex(ValueError, "golden files are missing"):
-                golden_hashes(directory)
-            path = directory / "payloads/vector.json"
-            path.parent.mkdir()
-            path.write_text("[]")
-            old = golden_hashes(directory)
-            path.write_text("[1]")
-            assert golden_hashes(directory) != old
-            path.write_text("[]")
-            other = directory / "README.md"
-            other.write_text("Synthetic contract")
-            assert golden_hashes(directory) != old
-            other.unlink()
-            assert golden_hashes(directory) == old
-            path.rename(path.with_name("renamed.json"))
-            assert golden_hashes(directory) != old
+                assert current_fingerprints(package) == current
 
     def test_malformed_frozen_flag_cannot_be_silently_rewritten(self) -> None:
         """Malformed lock records fail before the update path can overwrite them."""
