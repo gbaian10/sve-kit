@@ -38,6 +38,7 @@ mod movement;
 mod numeric;
 mod ordering;
 mod posture;
+mod resource;
 mod search;
 mod terminal;
 pub use terminal::Terminal;
@@ -57,6 +58,7 @@ pub use movement::MovementFact;
 pub(super) use numeric::NumericState;
 pub use numeric::StatChangeFact;
 pub use ordering::OrderCard;
+pub use resource::ResourceOutcome;
 pub use search::{SearchAnswer, SearchDomain, SearchGroup, SearchPartitionDomain};
 
 /// Internal context pinned to the game's immutable catalogue and one source generation.
@@ -201,6 +203,8 @@ pub enum Answer {
 /// Typed instruction outcomes retained only by the authority.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum InstructionOutcome {
+    /// Actual body resource recovery, independent of cost payment.
+    Resource(ResourceOutcome),
     /// Requested life operation's actual before/after values, including no change.
     Life(LifeChangeEvent),
     /// Successful body posture changes, empty when every subject already has that posture.
@@ -1080,6 +1084,7 @@ impl Game {
             .checked_add(1)
             .ok_or_else(|| invalid("IR epoch exhausted"))?;
         match &instruction.action {
+            Action::Resource { .. } => self.internal_resource(execution, &instruction)?,
             Action::Life { .. } => self.internal_life(execution, &instruction)?,
             Action::Modify { .. } => self.internal_modify(execution, &instruction)?,
             Action::Look { .. } => self.internal_look(execution, &instruction)?,

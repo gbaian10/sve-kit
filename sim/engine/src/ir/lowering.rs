@@ -837,6 +837,20 @@ impl BodyContext<'_> {
                 })
             }
             ast::Step::Move(value) => self.observed_move(value, path),
+            ast::Step::Pp(value) => {
+                let ast::SelfPlayer::Controller = value.who;
+                if value.delta == 0 {
+                    return Err(unsupported(path));
+                }
+                Ok(Action::Resource {
+                    player: PlayerRef::Controller {},
+                    resource: super::Resource::PpCurrent,
+                    operation: super::ResourceOperation::Add,
+                    amount: Expr::Literal(Int(
+                        i64::try_from(value.delta).map_err(|_private| unsupported(path))?
+                    )),
+                })
+            }
             ast::Step::Draw(draw) => Ok(Action::Draw {
                 player: PlayerRef::Controller {},
                 count: self.number(&draw.n, path, &mut BTreeSet::new())?,

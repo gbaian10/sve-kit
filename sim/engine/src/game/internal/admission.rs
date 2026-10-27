@@ -240,6 +240,7 @@ fn check_program(program: &Program, source: &SourceSpan, card: bool) -> Result<(
             Node::Instruction { instruction } => {
                 super::search::check_action(&instruction.action)?;
                 super::movement::check_action(&instruction.action)?;
+                super::resource::check_action(&instruction.action)?;
                 super::numeric::check_action(&instruction.action)?;
                 if instruction.precondition.is_some()
                     || instruction.context != InstructionContext::Effect
@@ -331,6 +332,10 @@ fn supported(code: &str) -> bool {
             | "player.require-one"
             | "internal.InstructionContext.Effect"
             | "shape.Action.Draw"
+            | "shape.Action.Resource"
+            | "action.resource"
+            | "internal.Resource.PpCurrent"
+            | "internal.ResourceOperation.Add"
             | "shape.Action.Look"
             | "action.look"
             | "shape.Action.Order"

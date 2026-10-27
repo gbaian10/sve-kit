@@ -800,7 +800,8 @@ fn check_nodes(
                     } | Action::Damage {
                         amount: DamageAmount::Uniform { .. } | DamageAmount::Allocation { .. },
                         ..
-                    } | Action::Move { .. }
+                    } | Action::Resource { .. }
+                        | Action::Move { .. }
                         | Action::Destroy { .. }
                         | Action::Life { .. }
                         | Action::Banish { .. }
