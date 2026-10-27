@@ -1,0 +1,26 @@
+cards:
+  BP14-098:
+    abilities:
+      - keywords:
+          - quick
+        line: 1
+      - line: 2
+        spell:
+          do:
+            - banish: chosen
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-sol
+            who: Codex
+          date: "2026-10-27"
+format: 2
+kind: author_effect_set

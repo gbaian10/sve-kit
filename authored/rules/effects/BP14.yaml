@@ -601,27 +601,6 @@ cards:
           to: ex
         event: enter
         subject: self
-  BP14-098:
-    status: complete
-    abilities:
-      - line: 1
-        kind: static
-        body:
-          op: macro
-          name: quick
-      - line: 2
-        kind: spell
-        body:
-          op: banish
-          subjects: target.1
-        targets:
-          - key: "1"
-            select:
-              side: opponent
-              zone: field
-              type: follower
-            min: 1
-            max: 1
   BP14-P20:
     status: complete
     abilities:
