@@ -169,6 +169,7 @@ pub(super) struct Body {
 pub(super) enum Step {
     If(Conditional),
     Choice(Choice),
+    Choose(Choose),
     Draw(Draw),
     Damage(Damage),
     Life(Life),
@@ -551,6 +552,17 @@ pub(super) struct Target {
     pub from: TargetQuery,
     pub n: Option<u64>,
     pub upto: Option<u64>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Choose {
+    pub bind: String,
+    pub from: TargetQuery,
+    pub n: Option<u64>,
+    pub upto: Option<u64>,
+    #[serde(rename = "by")]
+    pub _by: Option<SelfPlayer>,
 }
 
 #[derive(Clone, Deserialize)]

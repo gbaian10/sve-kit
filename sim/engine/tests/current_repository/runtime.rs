@@ -8,6 +8,8 @@ use sve_engine::ir::*;
 
 #[path = "runtime/conditions_quick.rs"]
 mod conditions_quick;
+#[path = "runtime/resolution_choice.rs"]
+mod resolution_choice;
 
 const NUMBER: &str = "BP01-P25";
 

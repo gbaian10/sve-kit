@@ -9,15 +9,15 @@ use super::{Frame, Game, View, int, string};
 use crate::ir::{
     Action, Arithmetic, Binding, Bool, Capture, CaptureRef, CardQuantityOutcome, Cardinality,
     ChoiceDomain, Comparison, Control, DamageEvent, DamageFlags, DamageQuantityOutcome,
-    DamageRecipient, DecisionId, DecisionKind, Declinable, DestroyOutcome, DrawEvent, Effect,
-    EffectId, ExecutionId, Expr, Generation, InstallationSubjects, Instruction, InstructionContext,
-    Int, IntFrozen, IntOperation, IntRead, LifeChangeEvent, Located, LookOutcome, MeasuredReceipt,
-    ModeId, MoveOutcome, Nat, NatFrozen, NatOperation, NatRead, Node, ObjectFrozen, ObjectId,
-    ObjectOperand, ObjectRef, OrderOutcome, PlayerId, PlayerRef, PlayerRelation, PlayerResource,
-    PlayerSet, PositiveInt, PostureEvent, Predicate, Program, Quantity, ReceiptId, ReceiptLocation,
-    RecipientSet, Requirements, ResolvedRecipients, RuntimeAbilitySource, RuntimeDamageRecipient,
-    ScopeId, SearchOutcome, SearchReplacementAnswer, Selector, SourceSpan, StepwiseAnswer,
-    StepwiseMode, Visibility, WellFormedProgram, ZoneKind,
+    DamageRecipient, Decision, DecisionId, DecisionKind, Declinable, DestroyOutcome, DrawEvent,
+    Effect, EffectId, ExecutionId, Expr, Generation, InstallationSubjects, Instruction,
+    InstructionContext, Int, IntFrozen, IntOperation, IntRead, LifeChangeEvent, Located,
+    LookOutcome, MeasuredReceipt, ModeId, MoveOutcome, Nat, NatFrozen, NatOperation, NatRead, Node,
+    ObjectFrozen, ObjectId, ObjectOperand, ObjectRef, OrderOutcome, PlayerId, PlayerRef,
+    PlayerRelation, PlayerResource, PlayerSet, PositiveInt, PostureEvent, Predicate, Program,
+    Quantity, ReceiptId, ReceiptLocation, RecipientSet, Requirements, ResolvedRecipients,
+    RuntimeAbilitySource, RuntimeDamageRecipient, ScopeId, SearchOutcome, SearchReplacementAnswer,
+    Selector, SourceSpan, StepwiseAnswer, StepwiseMode, Visibility, WellFormedProgram, ZoneKind,
 };
 use crate::ir::{BanishOutcome, FaceId, PaymentResult, QuickWindow};
 use crate::{EngineFailure, Result, invalid};
@@ -327,6 +327,7 @@ enum Wait {
         count: usize,
     },
     Targets(card::selection::TargetWait),
+    ResolutionTargets(card::selection::TargetWait),
     Modes(card::play::ModeWait),
     Distribution(allocation::DistributionWait),
     Order(ordering::OrderWait),
@@ -622,6 +623,11 @@ impl Game {
                     let objects = wait.validate(&handles)?;
                     rollback = execution.origin.take();
                     Self::internal_target_answer(&mut execution, &wait, objects)?;
+                }
+                (Wait::ResolutionTargets(wait), Answer::Targets(handles)) => {
+                    let objects = wait.validate(&handles)?;
+                    rollback = execution.origin.take();
+                    execution.bind_targets(&wait, objects);
                 }
                 (Wait::Modes(wait), Answer::Modes(modes)) => {
                     if !wait.chosen.accepts_answer(wait.count, &modes) {
@@ -957,30 +963,7 @@ impl Game {
                     }
                 }
                 Node::Capture { capture } => execution.capture(self, &capture)?,
-                Node::Decision { decision } => {
-                    if matches!(decision.domain, ChoiceDomain::Distribution { .. }) {
-                        self.internal_distribution(execution, &decision)?;
-                        continue;
-                    }
-                    let ChoiceDomain::Integer {
-                        cardinality,
-                        binding,
-                    } = decision.domain
-                    else {
-                        return Err(unsupported("decision domain"));
-                    };
-                    let actor = execution.player(self, &decision.actor)?;
-                    self.internal_wait(
-                        execution,
-                        decision.id,
-                        actor,
-                        InputDomain::Integer(cardinality),
-                        Wait::Integer {
-                            binding,
-                            bounds: cardinality,
-                        },
-                    )?;
-                }
+                Node::Decision { decision } => self.internal_decision_step(execution, &decision)?,
                 Node::Instruction { instruction } => {
                     let previous = self.card_runtime.active_source;
                     self.card_runtime.active_source = execution.ability;
@@ -992,6 +975,34 @@ impl Game {
             }
         }
         Ok(())
+    }
+
+    fn internal_decision_step(
+        &mut self,
+        execution: &mut Execution,
+        decision: &Decision,
+    ) -> Result<()> {
+        match &decision.domain {
+            ChoiceDomain::Distribution { .. } => self.internal_distribution(execution, decision),
+            ChoiceDomain::Objects { .. } => self.internal_resolution_target(execution, decision),
+            ChoiceDomain::Integer {
+                cardinality,
+                binding,
+            } => {
+                let actor = execution.player(self, &decision.actor)?;
+                self.internal_wait(
+                    execution,
+                    decision.id,
+                    actor,
+                    InputDomain::Integer(*cardinality),
+                    Wait::Integer {
+                        binding: *binding,
+                        bounds: *cardinality,
+                    },
+                )
+            }
+            _ => Err(unsupported("decision domain")),
+        }
     }
 
     fn internal_wait(

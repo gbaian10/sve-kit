@@ -14,7 +14,7 @@ use serde_json::{Value, json};
 pub struct TargetDomain {
     /// Token-scoped field objects with public printed identities.
     pub members: Vec<super::super::DistributionMember>,
-    /// Strict play-time bounds; never clamped down to available targets.
+    /// Printed bounds; only resolution choices reduce an impossible minimum.
     pub cardinality: Cardinality,
 }
 
@@ -113,6 +113,34 @@ pub(super) fn check(constraint: &SelectionConstraint) -> Result<()> {
         return Err(unsupported("target properties or aggregate constraints"));
     }
     field_selector(&group.selector)
+}
+
+pub(in crate::game::internal) fn check_resolution(decision: &Decision) -> Result<()> {
+    let ChoiceDomain::Objects {
+        constraint,
+        target_roles: None,
+        ..
+    } = &decision.domain
+    else {
+        return Err(unsupported("resolution field choice domain"));
+    };
+    check(constraint)?;
+    let [group] = constraint.groups.as_slice() else {
+        return Err(unsupported("resolution field choice groups"));
+    };
+    if decision.actor != (PlayerRef::Controller {})
+        || constraint.cardinality.maximum.is_none()
+        || !matches!(
+            group.selector,
+            Selector::Zone {
+                zone: ZoneKind::Field,
+                ..
+            }
+        )
+    {
+        return Err(unsupported("resolution field choice actor or selector"));
+    }
+    Ok(())
 }
 
 pub(in crate::game::internal) fn field_selector(selector: &Selector) -> Result<()> {
@@ -244,6 +272,28 @@ impl Game {
         Ok(())
     }
 
+    pub(in crate::game::internal) fn internal_resolution_target(
+        &mut self,
+        execution: &mut Execution,
+        decision: &Decision,
+    ) -> Result<()> {
+        check_resolution(decision)?;
+        let (mut wait, mut domain) = self.target_domain(execution, decision)?;
+        let available = u64::try_from(wait.members.len()).map_err(invalid)?;
+        // CR 1.3.2: a resolving instruction does as much as possible; play stays strict.
+        wait.bounds.minimum = Nat(wait.bounds.minimum.0.min(available));
+        domain.cardinality = wait.bounds;
+        let actor = execution.player(self, &decision.actor)?;
+        // Even an empty or singleton resolution domain remains a player's decision.
+        self.internal_wait(
+            execution,
+            decision.id,
+            actor,
+            InputDomain::Targets(domain),
+            Wait::ResolutionTargets(wait),
+        )
+    }
+
     fn target_domain(
         &self,
         execution: &Execution,
@@ -288,11 +338,14 @@ impl Game {
             .map(|(index, reference)| {
                 let id = execution.object_id(*reference)?;
                 let object = self.object(id)?;
+                let kind = self.object_type(id)?;
                 if object.zone != "field"
                     || object.generation != reference.generation.0
-                    || !self.object_type(id)?.contains("フォロワー")
+                    || !(kind.contains("フォロワー") || kind.contains("アミュレット"))
                 {
-                    return Err(unsupported("target is not a current public field follower"));
+                    return Err(unsupported(
+                        "target is not a current public field follower or amulet",
+                    ));
                 }
                 if self.restricted(id, "choose")? {
                     return Err(unsupported("target permission"));

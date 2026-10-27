@@ -26,6 +26,8 @@ mod field_actions;
 mod conditions;
 #[path = "card/leader_damage.rs"]
 mod leader_damage;
+#[path = "card/resolution_choice.rs"]
+mod resolution_choice;
 
 #[path = "card/source.rs"]
 mod source_information;
