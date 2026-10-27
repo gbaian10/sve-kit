@@ -1,7 +1,7 @@
 use super::super::{
-    ChoiceDomain, Comparison, Control, Decision, DecisionId, DecisionKind, Disjointness,
-    ExecutionRef, InputMode, Mode, ModeChoiceKind, ModeDecision, ModeDecisionKind, ModeId,
-    NatFrozen, NatOperation, PlaySlot, Predicate, SelectionConstraint, SelectionGroup,
+    ChoiceDomain, Comparison, Control, DamageRecipient, Decision, DecisionId, DecisionKind,
+    Disjointness, ExecutionRef, InputMode, Mode, ModeChoiceKind, ModeDecision, ModeDecisionKind,
+    ModeId, NatFrozen, NatOperation, PlaySlot, Predicate, SelectionConstraint, SelectionGroup,
     SelectionSnapshot, SpellCountTime, Visibility,
 };
 use super::{
@@ -135,11 +135,20 @@ impl BodyContext<'_> {
         path: &str,
     ) -> Result<Action, LoweringError> {
         let recipients = match &damage.to {
-            ast::Recipients::Leaders {
-                leaders: ast::AllPlayers::All,
-            } => RecipientSet::Leaders {
+            ast::Recipients::Leader { leader } => RecipientSet::Explicit {
+                recipients: vec![DamageRecipient::Leader {
+                    player: match leader {
+                        ast::LeaderSide::Controller => PlayerRef::Controller {},
+                        ast::LeaderSide::Opponent => super::super::events::timing::opponent(),
+                    },
+                }],
+            },
+            ast::Recipients::Leaders { leaders } => RecipientSet::Leaders {
                 players: PlayerSet {
-                    relation: PlayerRelation::All,
+                    relation: match leaders {
+                        ast::LeaderGroup::All => PlayerRelation::All,
+                        ast::LeaderGroup::Opponents => PlayerRelation::Opponents,
+                    },
                     relative_to: PlayerRef::Controller {},
                     cardinality: Cardinality {
                         minimum: Nat(0),

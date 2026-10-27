@@ -514,7 +514,8 @@ pub(super) struct Damage {
 #[derive(Deserialize)]
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum Recipients {
-    Leaders { leaders: AllPlayers },
+    Leader { leader: LeaderSide },
+    Leaders { leaders: LeaderGroup },
     Target(String),
 }
 
@@ -557,8 +558,17 @@ pub(super) struct Choice {
 
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub(super) enum AllPlayers {
+pub(super) enum LeaderGroup {
     All,
+    Opponents,
+}
+
+#[derive(Deserialize)]
+pub(super) enum LeaderSide {
+    #[serde(rename = "self")]
+    Controller,
+    #[serde(rename = "opp")]
+    Opponent,
 }
 
 #[derive(Deserialize)]

@@ -1,0 +1,32 @@
+cards:
+  BP15-064:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - damage:
+                n: 1
+                to: ally
+            - damage:
+                n: 1
+                to:
+                  leaders: opponents
+            - draw:
+                n: 1
+                who: self
+          targets:
+            - bind: ally
+              from:
+                kind: follower
+                who: self
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-sol
+            who: Codex
+          date: "2026-10-27"
+format: 2
+kind: author_effect_set
