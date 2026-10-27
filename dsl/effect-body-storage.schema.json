@@ -79,6 +79,12 @@
           "note": {
             "type": "string",
             "minLength": 1
+          },
+          "admission": {
+            "enum": [
+              "light",
+              "shared"
+            ]
           }
         },
         "required": [

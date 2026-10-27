@@ -117,6 +117,21 @@
                           "integer"
                         ]
                       }
+                    },
+                    "admission": {
+                      "enum": [
+                        "light",
+                        "shared"
+                      ]
+                    },
+                    "covers": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "minItems": 1,
+                      "uniqueItems": true
                     }
                   },
                   "required": [
@@ -180,6 +195,21 @@
                     },
                     "fanfare": {
                       "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.head.trigger"
+                    },
+                    "admission": {
+                      "enum": [
+                        "light",
+                        "shared"
+                      ]
+                    },
+                    "covers": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "minItems": 1,
+                      "uniqueItems": true
                     }
                   },
                   "required": [
@@ -243,6 +273,21 @@
                     },
                     "lastword": {
                       "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.head.lastword"
+                    },
+                    "admission": {
+                      "enum": [
+                        "light",
+                        "shared"
+                      ]
+                    },
+                    "covers": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "minItems": 1,
+                      "uniqueItems": true
                     }
                   },
                   "required": [
@@ -306,6 +351,21 @@
                     },
                     "evolve_time": {
                       "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.head.trigger"
+                    },
+                    "admission": {
+                      "enum": [
+                        "light",
+                        "shared"
+                      ]
+                    },
+                    "covers": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "minItems": 1,
+                      "uniqueItems": true
                     }
                   },
                   "required": [
@@ -369,6 +429,21 @@
                     },
                     "super_evolve_time": {
                       "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.head.trigger"
+                    },
+                    "admission": {
+                      "enum": [
+                        "light",
+                        "shared"
+                      ]
+                    },
+                    "covers": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "minItems": 1,
+                      "uniqueItems": true
                     }
                   },
                   "required": [
@@ -432,6 +507,21 @@
                     },
                     "attack_time": {
                       "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.head.trigger"
+                    },
+                    "admission": {
+                      "enum": [
+                        "light",
+                        "shared"
+                      ]
+                    },
+                    "covers": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "minItems": 1,
+                      "uniqueItems": true
                     }
                   },
                   "required": [
@@ -495,6 +585,21 @@
                     },
                     "race_time": {
                       "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.head.trigger"
+                    },
+                    "admission": {
+                      "enum": [
+                        "light",
+                        "shared"
+                      ]
+                    },
+                    "covers": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "minItems": 1,
+                      "uniqueItems": true
                     }
                   },
                   "required": [
@@ -558,6 +663,21 @@
                     },
                     "drive_time": {
                       "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.head.trigger"
+                    },
+                    "admission": {
+                      "enum": [
+                        "light",
+                        "shared"
+                      ]
+                    },
+                    "covers": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "minItems": 1,
+                      "uniqueItems": true
                     }
                   },
                   "required": [
@@ -621,6 +741,21 @@
                     },
                     "auto": {
                       "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.head.auto"
+                    },
+                    "admission": {
+                      "enum": [
+                        "light",
+                        "shared"
+                      ]
+                    },
+                    "covers": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "minItems": 1,
+                      "uniqueItems": true
                     }
                   },
                   "required": [
@@ -684,6 +819,21 @@
                     },
                     "activate": {
                       "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.head.activate"
+                    },
+                    "admission": {
+                      "enum": [
+                        "light",
+                        "shared"
+                      ]
+                    },
+                    "covers": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "minItems": 1,
+                      "uniqueItems": true
                     }
                   },
                   "required": [
@@ -747,6 +897,21 @@
                     },
                     "static": {
                       "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.head.static"
+                    },
+                    "admission": {
+                      "enum": [
+                        "light",
+                        "shared"
+                      ]
+                    },
+                    "covers": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "minItems": 1,
+                      "uniqueItems": true
                     }
                   },
                   "required": [
@@ -810,6 +975,21 @@
                     },
                     "play": {
                       "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.head.play"
+                    },
+                    "admission": {
+                      "enum": [
+                        "light",
+                        "shared"
+                      ]
+                    },
+                    "covers": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "minItems": 1,
+                      "uniqueItems": true
                     }
                   },
                   "required": [
@@ -872,6 +1052,21 @@
                             "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
                           }
                         ]
+                      },
+                      "minItems": 1,
+                      "uniqueItems": true
+                    },
+                    "admission": {
+                      "enum": [
+                        "light",
+                        "shared"
+                      ]
+                    },
+                    "covers": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer",
+                        "minimum": 1
                       },
                       "minItems": 1,
                       "uniqueItems": true
@@ -938,6 +1133,21 @@
                     },
                     "evolve": {
                       "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.head.evolve"
+                    },
+                    "admission": {
+                      "enum": [
+                        "light",
+                        "shared"
+                      ]
+                    },
+                    "covers": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "minItems": 1,
+                      "uniqueItems": true
                     }
                   },
                   "required": [
@@ -1001,6 +1211,21 @@
                     },
                     "ride": {
                       "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.head.ride"
+                    },
+                    "admission": {
+                      "enum": [
+                        "light",
+                        "shared"
+                      ]
+                    },
+                    "covers": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "minItems": 1,
+                      "uniqueItems": true
                     }
                   },
                   "required": [
@@ -1064,6 +1289,21 @@
                     },
                     "feed": {
                       "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.head.feed"
+                    },
+                    "admission": {
+                      "enum": [
+                        "light",
+                        "shared"
+                      ]
+                    },
+                    "covers": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "minItems": 1,
+                      "uniqueItems": true
                     }
                   },
                   "required": [
@@ -1127,6 +1367,21 @@
                     },
                     "spell": {
                       "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.head.spell"
+                    },
+                    "admission": {
+                      "enum": [
+                        "light",
+                        "shared"
+                      ]
+                    },
+                    "covers": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "minItems": 1,
+                      "uniqueItems": true
                     }
                   },
                   "required": [
@@ -1143,6 +1398,69 @@
           },
           "deck_rule": {
             "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.card/properties/deck_rule"
+          },
+          "admission": {
+            "enum": [
+              "light",
+              "shared"
+            ]
+          },
+          "ignored": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "line": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "face": {
+                  "oneOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "enum": [
+                        "front",
+                        "back"
+                      ]
+                    }
+                  ]
+                },
+                "section": {
+                  "oneOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "const": "main"
+                    }
+                  ]
+                },
+                "reason": {
+                  "enum": [
+                    "reminder",
+                    "layout"
+                  ]
+                }
+              },
+              "required": [
+                "line",
+                "reason"
+              ]
+            }
+          },
+          "container": {
+            "enum": [
+              "card",
+              "faces"
+            ]
           }
         },
         "required": [
