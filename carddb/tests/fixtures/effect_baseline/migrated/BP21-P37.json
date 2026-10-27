@@ -1,0 +1,32 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "static",
+      "body": {
+        "op": "macro",
+        "name": "assail"
+      }
+    },
+    {
+      "line": 1,
+      "kind": "static",
+      "body": {
+        "op": "macro",
+        "name": "bane"
+      }
+    },
+    {
+      "line": 2,
+      "kind": "trigger",
+      "body": {
+        "op": "damage",
+        "subjects": "opponent.leader",
+        "amount": 2
+      },
+      "event": "attack",
+      "subject": "self"
+    }
+  ]
+}
