@@ -668,6 +668,9 @@ mod leader_damage;
 #[path = "runtime/leader_life.rs"]
 mod leader_life;
 
+#[path = "runtime/field_actions.rs"]
+mod field_actions;
+
 #[path = "runtime/bp19_p32.rs"]
 mod bp19_p32;
 

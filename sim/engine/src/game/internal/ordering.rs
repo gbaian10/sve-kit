@@ -7,8 +7,8 @@ use crate::ir::{
     Action, Binding, Capture, CaptureRef, CaptureTime, Control, Expr, Instruction, Int, Located,
     LookOutcome, MemberProjection, MoveDestination, Node, ObjectOperand, ObjectReceipt, ObjectRef,
     OrderAnswer, OrderOutcome, OwnerZone, PlayerId, PlayerRelation, Position, Program,
-    ReceiptLocation, Requirements, ResultMember, ResultMemberId, RuntimeObjectView, ScopeId,
-    Selector, SnapshotId, SourceSpan, StepwiseMode, Visibility, ZoneKind,
+    ReceiptLocation, RecipientSet, Requirements, ResultMember, ResultMemberId, RuntimeObjectView,
+    ScopeId, Selector, SnapshotId, SourceSpan, StepwiseMode, Visibility, ZoneKind,
 };
 use alloc::collections::BTreeSet;
 
@@ -86,6 +86,13 @@ pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
     if let Node::Instruction { instruction } = &mut inspected
         && let Action::Destroy { objects: selector }
         | Action::Banish { objects: selector }
+        | Action::Move {
+            objects: selector, ..
+        }
+        | Action::Damage {
+            recipients: RecipientSet::Objects { objects: selector },
+            ..
+        }
         | Action::Posture {
             objects: selector, ..
         }

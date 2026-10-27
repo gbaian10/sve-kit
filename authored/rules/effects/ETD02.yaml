@@ -44,20 +44,3 @@ cards:
             max: 1
             modes:
               - 1
-  ETD02-019:
-    status: complete
-    abilities:
-      - line: 1
-        kind: static
-        body:
-          op: macro
-          name: quick
-      - line: 2
-        kind: spell
-        body:
-          op: damage
-          subjects:
-            side: opponent
-            zone: field
-            type: follower
-          amount: 1

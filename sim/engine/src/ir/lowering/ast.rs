@@ -217,13 +217,20 @@ pub(super) struct DeckTop {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct Move {
-    pub r#ref: Observed,
-    pub to: ObservedDestination,
+    pub r#ref: MoveObjects,
+    pub to: Destination,
     pub position: Option<Placement>,
     pub order: Option<Chooser>,
     pub result: Option<String>,
     #[serde(rename = "by")]
     pub _by: Option<SelfPlayer>,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum MoveObjects {
+    Observed(Observed),
+    Field(Objects),
 }
 
 #[derive(Deserialize)]
@@ -248,9 +255,10 @@ pub(super) enum Before {
 
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub(super) enum ObservedDestination {
+pub(super) enum Destination {
     Deck,
     Ex,
+    Hand,
 }
 
 #[derive(Deserialize)]
@@ -514,6 +522,7 @@ pub(super) struct Damage {
 #[derive(Deserialize)]
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum Recipients {
+    Field(ObjectQuery),
     Leader { leader: LeaderSide },
     Leaders { leaders: LeaderGroup },
     Target(String),

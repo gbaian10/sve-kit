@@ -50,6 +50,10 @@ CARDS = {
     "BP01-092": "c:8c4b83cfcb625c0490eb8c66968f29dc",
 }
 REAL_AUTHOR_CARDS = {
+    "BP01-015",
+    "BP01-169",
+    "BP01-180",
+    "BP06-072",
     "BP01-037",
     "BP06-048",
     "BP01-046",
@@ -501,6 +505,9 @@ def test_real_current_author_set(
         "rules/author-effects/BP01/005.yaml",
         "rules/author-effects/BP01/006.yaml",
         "rules/author-effects/BP01/007.yaml",
+        "rules/author-effects/BP01/008.yaml",
+        "rules/author-effects/BP01/009.yaml",
+        "rules/author-effects/BP01/010.yaml",
         "rules/author-effects/BP03/001.yaml",
         "rules/author-effects/BP04/000.yaml",
         "rules/author-effects/BP04/001.yaml",
@@ -516,6 +523,7 @@ def test_real_current_author_set(
         "rules/author-effects/BP19/003.yaml",
         "rules/author-effects/BP21/000.yaml",
         "rules/author-effects/BP06/000.yaml",
+        "rules/author-effects/BP06/001.yaml",
         "rules/author-effects/BP10/000.yaml",
         "rules/author-effects/CP02/000.yaml",
         "rules/author-effects/CP03/000.yaml",

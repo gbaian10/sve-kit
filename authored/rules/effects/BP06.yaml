@@ -119,23 +119,6 @@ cards:
               then:
                 op: draw
                 count: 1
-  BP06-072:
-    status: complete
-    abilities:
-      - line: 1
-        kind: spell
-        body:
-          op: modify
-          subjects: target.1
-          power: 2
-        targets:
-          - key: "1"
-            select:
-              side: self
-              zone: field
-              type: follower
-            min: 1
-            max: 1
   BP06-073:
     status: complete
     abilities:

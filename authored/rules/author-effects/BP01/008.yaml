@@ -1,0 +1,27 @@
+cards:
+  BP01-015:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - move:
+                ref: ally
+                to: hand
+            - draw:
+                n: 1
+                who: self
+          targets:
+            - bind: ally
+              from:
+                who: self
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-sol
+            who: Codex
+          date: "2026-10-27"
+format: 2
+kind: author_effect_set

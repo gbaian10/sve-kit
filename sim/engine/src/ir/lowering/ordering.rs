@@ -30,12 +30,14 @@ impl BodyContext<'_> {
                     name,
                     ObjectReceipt::Movement {
                         receipt: match value.to {
-                            ast::ObservedDestination::Deck => MovementReceipt::Order {
+                            ast::Destination::Deck => MovementReceipt::Order {
                                 receipt: ReceiptReference::new(receipt),
                             },
-                            ast::ObservedDestination::Ex => MovementReceipt::Move {
-                                receipt: ReceiptReference::new(receipt),
-                            },
+                            ast::Destination::Ex | ast::Destination::Hand => {
+                                MovementReceipt::Move {
+                                    receipt: ReceiptReference::new(receipt),
+                                }
+                            }
                         },
                     },
                 )
@@ -114,13 +116,33 @@ impl BodyContext<'_> {
         value: &ast::Move,
         path: &str,
     ) -> Result<Action, LoweringError> {
-        let cards = self.observed(
-            &value.r#ref,
-            matches!(value.to, ast::ObservedDestination::Ex),
-            path,
-        )?;
+        if matches!(value.to, ast::Destination::Hand) {
+            if value.position.is_some() || value.order.is_some() || value.result.is_some() {
+                return Err(unsupported(path));
+            }
+            let ast::MoveObjects::Field(objects) = &value.r#ref else {
+                return Err(unsupported(path));
+            };
+            return Ok(Action::Move {
+                objects: self.objects(objects, path)?,
+                movement: MoveSpec {
+                    to: MoveDestination::Owners {
+                        zone: OwnerZone::Hand,
+                    },
+                    initial_posture: None,
+                    entry_effects: vec![],
+                    position: None,
+                    order: None,
+                },
+                reason: MoveReason::Put,
+            });
+        }
+        let ast::MoveObjects::Observed(observed) = &value.r#ref else {
+            return Err(unsupported(path));
+        };
+        let cards = self.observed(observed, matches!(value.to, ast::Destination::Ex), path)?;
         match value.to {
-            ast::ObservedDestination::Ex if value.position.is_none() && value.order.is_none() => {
+            ast::Destination::Ex if value.position.is_none() && value.order.is_none() => {
                 Ok(Action::Move {
                     objects: cards,
                     movement: MoveSpec {
@@ -138,7 +160,7 @@ impl BodyContext<'_> {
                     reason: MoveReason::Put,
                 })
             }
-            ast::ObservedDestination::Deck if value.order.is_some() => {
+            ast::Destination::Deck if value.order.is_some() => {
                 let position = match value.position {
                     Some(ast::Placement::Top) => Position::Top {},
                     Some(ast::Placement::Bottom) => Position::Bottom {},
@@ -168,7 +190,9 @@ impl BodyContext<'_> {
                     },
                 })
             }
-            ast::ObservedDestination::Deck | ast::ObservedDestination::Ex => Err(unsupported(path)),
+            ast::Destination::Deck | ast::Destination::Ex | ast::Destination::Hand => {
+                Err(unsupported(path))
+            }
         }
     }
 }
