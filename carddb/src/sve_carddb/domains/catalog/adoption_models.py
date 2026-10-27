@@ -179,7 +179,6 @@ class RouteCandidate(RecordData):
 class RouteValue(RecordData):
     printing_id: Text
     candidates: Annotated[tuple[RouteCandidate, ...], Field(min_length=2)]
-    candidates_hash: Hash
 
 
 class DefaultSubject(RecordData):
@@ -190,4 +189,3 @@ class DefaultSubject(RecordData):
 class DefaultValue(RecordData):
     printing_id: Text
     candidates: Annotated[tuple[Text, ...], Field(min_length=1)]
-    candidates_hash: Hash
