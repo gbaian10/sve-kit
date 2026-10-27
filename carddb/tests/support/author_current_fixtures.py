@@ -22,6 +22,7 @@ from sve_carddb.domains.products import (
 )
 from sve_carddb.domains.registry.preview import FrozenJP, plan_preview
 from sve_carddb.domains.registry.records import PrintingData
+from sve_carddb.domains.registry.transitions.renewal import load_identity_registry
 from sve_carddb.domains.text_observations import (
     FrozenTexts,
     TextObservations,
@@ -258,6 +259,7 @@ def current_source_inputs(
             sources=frozen,
         ),
         regions=("jp",),
+        snapshot=load_identity_registry(authored),
     )
     prepared = prepare(
         (load_adoptions(authored, entry="catalog/adoptions"),),

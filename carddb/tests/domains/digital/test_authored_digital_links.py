@@ -6,12 +6,12 @@ import pytest
 
 from sve_carddb.domains.digital.links.loader import load_links
 from sve_carddb.domains.registry.records import PrintingData
-from sve_carddb.domains.registry.snapshot import load_registry
 
 from ...support.adoption_fixtures import REPO
 
 if TYPE_CHECKING:
     from sve_carddb.domains.digital.links.models import Record
+    from sve_carddb.domains.registry.snapshot import RegistrySnapshot
 
 
 @pytest.fixture(scope="module")
@@ -20,10 +20,10 @@ def adopted() -> tuple[Record, ...]:
 
 
 @pytest.fixture(scope="module")
-def card_numbers() -> dict[str, str]:
+def card_numbers(official_snapshot: RegistrySnapshot) -> dict[str, str]:
     return {
         record.data.card_no: record.data.card_id
-        for record in load_registry(REPO / "authored").records.values()
+        for record in official_snapshot.records.values()
         if isinstance(record.data, PrintingData) and record.data.region == "jp"
     }
 

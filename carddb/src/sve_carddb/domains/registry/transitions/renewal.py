@@ -1,5 +1,6 @@
 """Effective confirmed-none review renewal, without enabling identity repairs."""
 
+from types import MappingProxyType
 from typing import TYPE_CHECKING
 
 from sve_carddb.core.json import canonical, digest
@@ -7,7 +8,7 @@ from sve_carddb.core.provenance import SourceUse, uses_sorted
 from sve_carddb.domains.registry.records import ArtData, MappingReviewData
 from sve_carddb.domains.registry.snapshot import RegistrySnapshot, from_files
 from sve_carddb.domains.registry.storage import Entry, RegistryFiles, read_base_files
-from sve_carddb.domains.registry.transitions.history import check_append
+from sve_carddb.domains.registry.transitions.history import History, check_append
 from sve_carddb.domains.registry.transitions.loader import load_transitions
 from sve_carddb.domains.registry.transitions.models import (
     After,
@@ -15,6 +16,7 @@ from sve_carddb.domains.registry.transitions.models import (
     Reference,
     Transition,
 )
+from sve_carddb.domains.registry.transitions.review_sources import configuration
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -139,6 +141,38 @@ def load_renewed_registry(
     Callers hold the global registry lock or supply a stable authored checkout.
     Unsupported transitions still fail closed; this never changes permanent IDs.
     """
+    return _replay(root, sources.history, sources=sources, candidate=candidate)
+
+
+def load_identity_registry(
+    root: Path, *, repository: Path | None = None
+) -> RegistrySnapshot:
+    """Read immutable identities for authoring and candidates, without approving reviews.
+
+    Only review renewals and append-only art uses may coexist with this view.
+    Their history and unchanged identity are checked, but frozen evidence is not
+    replayed. Both kinds are omitted, so this is not a publication registry.
+    """
+    checked = _replay(root, History(repository or root.parent))
+    return RegistrySnapshot(
+        checked.files,
+        MappingProxyType(
+            {
+                key: record
+                for key, record in checked.records.items()
+                if record.kind not in {"art", "region_mapping_review"}
+            }
+        ),
+    )
+
+
+def _replay(
+    root: Path,
+    history: History,
+    *,
+    sources: ReviewSources | None = None,
+    candidate: LoadedShard | None = None,
+) -> RegistrySnapshot:
     shards = load_transitions(root).shards + (() if candidate is None else (candidate,))
     current = read_base_files(root)
     state: dict[str, tuple[Entry, str, Before]] = {}
@@ -151,11 +185,25 @@ def load_renewed_registry(
             raise ValueError(
                 "Renewal must extend the exact contiguous transition chain"
             )
-        basis = sources.history.registry(record.registry_basis)
+        basis = history.registry(record.registry_basis)
         _append(previous, basis, state)
         reviews = _apply(record, shard.path, state)
-        verified = sources.transition(record, basis, reviews)
-        uses.extend(verified.uses)
+        if sources is None:
+            config = configuration(record)
+            if config.dependencies != (
+                history.dependency(record.review_context.context.program_revision),
+            ):
+                raise ValueError("Identity view dependency pin differs from Git bytes")
+            expected = (
+                ArtData
+                if config.profile == "registry-art-extension-v1"
+                else MappingReviewData
+            )
+            if any(not isinstance(data, expected) for data in reviews):
+                raise ValueError("Identity view context disagrees with update kinds")
+        else:
+            verified = sources.transition(record, basis, reviews)
+            uses.extend(verified.uses)
         _unique_art_uses(state)
         from_files(
             basis,

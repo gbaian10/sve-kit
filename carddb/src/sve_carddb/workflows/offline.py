@@ -65,6 +65,7 @@ from sve_carddb.domains.registry.preview.review_inputs import (
 from sve_carddb.domains.registry.rarity import populate as populate_rarities
 from sve_carddb.domains.registry.records import PrintingData
 from sve_carddb.domains.registry.reprints import load_reprints, populate_reprints
+from sve_carddb.domains.registry.snapshot import load_registry
 from sve_carddb.domains.registry.transitions.files import read_transition_files
 from sve_carddb.domains.registry.transitions.renewal import load_renewed_registry
 from sve_carddb.domains.registry.transitions.review_sources import ReviewSources
@@ -219,11 +220,11 @@ def registry_provider(inputs: Inputs, batches: FrozenBatches) -> FrozenRegions:
     )
 
 
-def registry_plan(inputs: Inputs, batches: FrozenBatches) -> PreviewPlan:
-    """Share verified review renewal between text and image publication paths."""
-    root = authored_root(inputs.repo)
-    provider = registry_provider(inputs, batches)
-    snapshot = None
+def registry_snapshot(
+    inputs: Inputs, *, authored: Path | None = None
+) -> RegistrySnapshot:
+    """Fully verify the publication registry, including historical frozen evidence."""
+    root = authored if authored is not None else authored_root(inputs.repo)
     if read_transition_files(root).shards:
         if inputs.registry_review_inputs is None:
             raise ValueError(
@@ -235,8 +236,19 @@ def registry_plan(inputs: Inputs, batches: FrozenBatches) -> PreviewPlan:
             inputs.store_id,
             inputs.registry_review_inputs.root,
         )
-        snapshot = load_renewed_registry(root, sources)
-    return plan_preview(root, provider, regions=("en", "jp"), snapshot=snapshot)
+        return load_renewed_registry(root, sources)
+    return load_registry(root)
+
+
+def registry_plan(inputs: Inputs, batches: FrozenBatches) -> PreviewPlan:
+    """Share verified review renewal between text and image publication paths."""
+    provider = registry_provider(inputs, batches)
+    return plan_preview(
+        authored_root(inputs.repo),
+        provider,
+        regions=("en", "jp"),
+        snapshot=registry_snapshot(inputs),
+    )
 
 
 @dataclass(frozen=True)
