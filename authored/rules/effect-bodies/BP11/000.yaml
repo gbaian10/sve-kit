@@ -1,0 +1,17 @@
+format: 2
+kind: effect_body_shard
+records:
+  - admission: shared
+    body:
+      attack_time:
+        do:
+          - pp:
+              delta: 3
+              who: self
+    id: recover_3_pp_attack_time.v1
+    params: {}
+    written_by:
+      - actor:
+          model: Codex gpt-6-sol
+          who: Codex
+        date: "2026-10-28"
