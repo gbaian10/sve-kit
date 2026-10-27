@@ -24,6 +24,8 @@ describe("query codec", () => {
       sets: ["set:bp01"],
       rarities: ["gold"],
       altArtOnly: true,
+      stampOnly: false,
+      serialOnly: false,
       errataOnly: false,
       restrictionsOnly: false,
       reprints: "only",
@@ -189,4 +191,12 @@ describe("query codec", () => {
     expect(two.classes).toEqual(["elf", "witch"])
     expect(toggleClass(two, "witch").classes).toEqual(["elf"])
   })
+})
+
+it("round trips independent stamp and serial filters and rejects other flag values", () => {
+  const state = { ...DEFAULT_QUERY, stampOnly: true, serialOnly: true }
+  expect(querySearch(state)).toBe("?stamp=1&serial=1")
+  expect(parseQuery(formatQuery(state))).toEqual(state)
+  expect(activeFilterCount(state)).toBe(2)
+  expect(parseQuery(new URLSearchParams("stamp=true&serial=0"))).toEqual(DEFAULT_QUERY)
 })

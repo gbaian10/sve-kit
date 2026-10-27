@@ -3379,3 +3379,64 @@ it("search lists and the full client reuse startup, comparison and detail raw by
   expect(served.requests.filter((path) => blobs.has(path) && searched.has(path))).toEqual([])
   expect(await storage.keys()).not.toContain("sve-search-blobs:" + encodeURIComponent(base))
 })
+
+it("filters printing marks before grouping and preserves them in completed and restored indexes", async () => {
+  const client = createSnapshotClient(base, { fetch: origin().fetcher })
+  await client.load()
+  const initial = client.snapshot()
+  if (!initial) throw new Error("missing initial snapshot")
+  const locators = new BootstrapColumns()
+  locators.ingest(initial.bootstrap)
+  locators.seal()
+  await client.prefetchPrintings?.()
+  const snapshot = client.snapshot()
+  if (!snapshot) throw new Error("missing snapshot")
+  const stamps: string[] = []
+  const serials: string[] = []
+  let ordinal = 0
+  const columns = new BootstrapColumns()
+  columns.ingest(
+    snapshot.bootstrap.map((fragment) => ({
+      ...fragment,
+      rows: fragment.rows.map((row) => {
+        if (fragment.table !== "printing" || row["region"] !== "jp") return row
+        const stamp = ordinal % 2 === 0 ? { kind: null, year: null } : null
+        const serial = ordinal % 3 === 0 ? true : ordinal % 3 === 1 ? false : null
+        ordinal++
+        if (stamp) stamps.push(stringValue(row["id"]))
+        if (serial) serials.push(stringValue(row["id"]))
+        return { ...row, stamp, serial }
+      }),
+    })),
+  )
+  columns.seal()
+  const created = new SearchIndex(columns, "jp")
+  const completed = new SearchIndex(locators, "jp")
+  completed.completePrintings(columns)
+  expect(stamps.length).toBeGreaterThan(0)
+  expect(serials.length).toBeGreaterThan(0)
+  for (const index of [
+    created,
+    new SearchIndex(created.encode(), "jp"),
+    completed,
+    new SearchIndex(completed.encode(), "jp"),
+  ]) {
+    const ids = (state: Partial<typeof DEFAULT_QUERY>) =>
+      index
+        .search({
+          ...query,
+          limit: 1000,
+          state: { ...DEFAULT_QUERY, ...state },
+        })
+        .items.map((item) => item.printingId)
+    expect(ids({ stampOnly: true }).sort()).toEqual([...stamps].sort())
+    expect(ids({ serialOnly: true }).sort()).toEqual([...serials].sort())
+    const both = stamps.filter((id) => serials.includes(id))
+    expect(ids({ stampOnly: true, serialOnly: true }).sort()).toEqual([...both].sort())
+    for (const unit of ["art", "card"] as const) {
+      const merged = ids({ stampOnly: true, serialOnly: true, unit })
+      expect(merged.length).toBeGreaterThan(0)
+      for (const id of merged) expect(both).toContain(id)
+    }
+  }
+})

@@ -198,6 +198,8 @@ export class SearchEngine {
               request.query.state.altArtOnly ||
               request.query.state.artists.length ||
               request.query.state.reprints !== "all" ||
+              request.query.state.stampOnly ||
+              request.query.state.serialOnly ||
               // A merged cell's representative needs every printing's rarity and art (#781).
               request.query.state.unit !== "printing")
           )

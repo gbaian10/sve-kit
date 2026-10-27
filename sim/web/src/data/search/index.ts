@@ -161,6 +161,8 @@ const PRINTING_COLUMNS = [
   "badge",
   "leaderFrame",
   "reprint",
+  "stamp",
+  "serial",
   "art",
   "alt",
   "releaseDate",
@@ -174,7 +176,7 @@ const seal = <T extends string>(columns: Record<T, number[]>): Record<T, Uint32A
   ) as Record<T, Uint32Array>
 
 /** Bump when the stored layout or derived data changes, so older images are rebuilt. */
-export const INDEX_IMAGE_FORMAT = 27
+export const INDEX_IMAGE_FORMAT = 28
 
 // Card-level special kinds, packed into the `kinds` column; Token stays per printing.
 const KIND_EVOLVE = 1
@@ -614,6 +616,8 @@ function build(
           : "unknown"
       printings.leaderFrame.push(intern(leaderFrame))
       printings.reprint.push(Number(fullPrinting?.["reprint"] === true))
+      printings.stamp.push(Number(fullPrinting?.["stamp"] != null))
+      printings.serial.push(Number(fullPrinting?.["serial"] === true))
       // A locator row has no classification yet; a full row without a code has none at all.
       printings.rarity.push(
         intern(
@@ -958,6 +962,8 @@ export class SearchIndex {
         printings.releaseDate[ordinal] = intern(dates.get(id))
         printings.leaderFrame[ordinal] = intern(frame)
         printings.reprint[ordinal] = Number(row["reprint"] === true)
+        printings.stamp[ordinal] = Number(row["stamp"] != null)
+        printings.serial[ordinal] = Number(row["serial"] === true)
         printings.rarity[ordinal] = intern(official)
         printings.badge[ordinal] = intern(badgeOf(row)?.style ?? "unknown")
         printings.art[ordinal] = intern(art || id)
@@ -1176,6 +1182,8 @@ export class SearchIndex {
         this.pool.get(this.printings.badge[printing] ?? 0),
       ) &&
       (!state.altArtOnly || this.printings.alt[printing] === 1) &&
+      (!state.stampOnly || this.printings.stamp[printing] === 1) &&
+      (!state.serialOnly || this.printings.serial[printing] === 1) &&
       // A merged-by-card cell stands for every printing, so hiding reprints cannot apply there.
       (state.reprints === "all" ||
         state.unit === "card" ||

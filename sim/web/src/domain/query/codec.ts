@@ -14,7 +14,7 @@ import {
 } from "./model"
 
 // URL parameters: q class cost atk def type loc trait artist mech set rarity alt reprint unit rep prfirst
-// sort order view. Lists
+// stamp serial errata restricted sort order view. Lists
 // are comma separated, de-duplicated and sorted so equal states always give equal URLs; unknown
 // values are dropped rather than failing, because URLs arrive from anywhere. `cost`, `atk` and `def`
 // list the selected values; the cap (7 for cost, 10 for attack and defense) means that value or more.
@@ -94,6 +94,8 @@ export function parseQuery(params: URLSearchParams): QueryState {
     representative:
       oneOf(params.get("rep"), REPRESENTATIVE_RARITIES) ?? DEFAULT_QUERY.representative,
     prFirst: params.get("prfirst") === "1",
+    stampOnly: params.get("stamp") === "1",
+    serialOnly: params.get("serial") === "1",
     errataOnly: params.get("errata") === "1",
     restrictionsOnly: params.get("restricted") === "1",
     reprints: oneOf(params.get("reprint"), REPRINT_MODES) ?? DEFAULT_QUERY.reprints,
@@ -129,6 +131,8 @@ export function formatQuery(state: QueryState): URLSearchParams {
   if (state.unit !== DEFAULT_QUERY.unit) params.set("unit", state.unit)
   if (state.representative !== DEFAULT_QUERY.representative) params.set("rep", state.representative)
   if (state.prFirst) params.set("prfirst", "1")
+  if (state.stampOnly) params.set("stamp", "1")
+  if (state.serialOnly) params.set("serial", "1")
   if (state.errataOnly) params.set("errata", "1")
   if (state.restrictionsOnly) params.set("restricted", "1")
   if (state.reprints !== DEFAULT_QUERY.reprints) params.set("reprint", state.reprints)
