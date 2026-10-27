@@ -300,7 +300,7 @@ export default {
       fanfare: "Fanfare",
       last_words: "Last Words",
       on_evolve: "On Evolve",
-      on_attack: "On Attack",
+      on_attack: "Strike",
       advanced_act: "Advanced Activate",
       on_super_evolve: "On Super-Evolve",
       act: "Activate",
