@@ -446,6 +446,7 @@ fn multiple_supported_abilities_keep_distinct_instances_and_effect_producers() {
                     | Fact::AbilityResolved { .. }
                     | Fact::Shuffled { .. }
                     | Fact::Draw(_)
+                    | Fact::LifeChange(_)
                     | Fact::Damage(_)
                     | Fact::Movement(_)
                     | Fact::Posture(_) => None,

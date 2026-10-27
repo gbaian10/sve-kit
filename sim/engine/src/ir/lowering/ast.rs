@@ -170,6 +170,8 @@ pub(super) enum Step {
     Choice(Choice),
     Draw(Draw),
     Damage(Damage),
+    Life(Life),
+    SetLife(SetLife),
     Destroy(Destroy),
     Buff(Modify),
     SetStat(Modify),
@@ -177,6 +179,20 @@ pub(super) enum Step {
     Search(Search),
     Look(Look),
     Move(Move),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Life {
+    pub who: SelfPlayer,
+    pub delta: Number,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct SetLife {
+    pub who: SelfPlayer,
+    pub n: Number,
 }
 
 #[derive(Deserialize)]

@@ -11,8 +11,8 @@ use crate::ir::{
     ChoiceDomain, Comparison, Control, DamageEvent, DamageFlags, DamageQuantityOutcome,
     DamageRecipient, DecisionId, DecisionKind, Declinable, DestroyOutcome, DrawEvent, Effect,
     EffectId, ExecutionId, Expr, Generation, InstallationSubjects, Instruction, InstructionContext,
-    Int, IntFrozen, IntOperation, IntRead, Located, LookOutcome, MeasuredReceipt, ModeId,
-    MoveOutcome, Nat, NatFrozen, NatOperation, NatRead, Node, ObjectFrozen, ObjectId,
+    Int, IntFrozen, IntOperation, IntRead, LifeChangeEvent, Located, LookOutcome, MeasuredReceipt,
+    ModeId, MoveOutcome, Nat, NatFrozen, NatOperation, NatRead, Node, ObjectFrozen, ObjectId,
     ObjectOperand, ObjectRef, OrderOutcome, PlayerId, PlayerRef, PlayerRelation, PlayerResource,
     PlayerSet, PositiveInt, PostureEvent, Predicate, Program, Quantity, ReceiptId, ReceiptLocation,
     RecipientSet, Requirements, ResolvedRecipients, RuntimeAbilitySource, RuntimeDamageRecipient,
@@ -33,6 +33,7 @@ mod allocation;
 mod card;
 mod cost;
 mod duration;
+mod life;
 mod movement;
 mod numeric;
 mod ordering;
@@ -199,6 +200,8 @@ pub enum Answer {
 /// Typed instruction outcomes retained only by the authority.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum InstructionOutcome {
+    /// Requested life operation's actual before/after values, including no change.
+    Life(LifeChangeEvent),
     /// The whole exchange, available only after the complete card payment.
     ExchangePayment(PaymentResult),
     /// One complete banishment with its original and resulting generations.
@@ -249,6 +252,8 @@ pub struct Progress {
 /// First-slice physical facts, sharing the prototype mutation and causal pipeline.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Fact {
+    /// A direct nonzero leader life change, independent of damage.
+    LifeChange(LifeChangeEvent),
     /// A card has completed intrinsic costs and, for field cards, the capacity check.
     CardPlayed {
         /// Authority producer for this card play.
@@ -1061,6 +1066,7 @@ impl Game {
             .checked_add(1)
             .ok_or_else(|| invalid("IR epoch exhausted"))?;
         match &instruction.action {
+            Action::Life { .. } => self.internal_life(execution, &instruction)?,
             Action::Modify { .. } => self.internal_modify(execution, &instruction)?,
             Action::Look { .. } => self.internal_look(execution, &instruction)?,
             Action::Order { .. } => self.internal_order(execution, instruction)?,

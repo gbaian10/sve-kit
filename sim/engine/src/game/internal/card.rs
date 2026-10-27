@@ -801,6 +801,7 @@ fn check_nodes(
                         ..
                     } | Action::Move { .. }
                         | Action::Destroy { .. }
+                        | Action::Life { .. }
                         | Action::Modify { .. }
                         | Action::InstallEffect { .. }
                         | Action::Search { .. }
