@@ -414,7 +414,7 @@ function* catalogCursor(snapshot: LoadedSnapshot, lazy = false): Generator<void,
 const catalogs = new WeakMap<LoadedSnapshot, Catalog>()
 const prepared = new WeakSet<LoadedSnapshot>()
 
-export function createCatalog(snapshot: LoadedSnapshot): Catalog {
+function createCatalog(snapshot: LoadedSnapshot): Catalog {
   return drain(catalogCursor(snapshot))
 }
 

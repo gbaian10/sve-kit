@@ -629,7 +629,7 @@ export function sharedAnnotatedTextResolver(
   return resolver
 }
 
-export function createAnnotatedTextResolver(
+function createAnnotatedTextResolver(
   client: SnapshotClient,
   cardId?: string,
 ): AnnotatedTextResolver {

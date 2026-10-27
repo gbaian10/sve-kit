@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest"
 
 import { buildSnapshot } from "../../scripts/fixture/build"
 import { DEFAULT_QUERY } from "../domain/query/model"
-import { catalogOf, createCatalog, prepareCatalog } from "./catalog"
+import { catalogOf, prepareCatalog } from "./catalog"
 import type { Fetcher } from "./cdn"
 import { createSnapshotClient } from "./client"
 import { faceBasics } from "./face-basics"
@@ -32,14 +32,14 @@ await client.selectRegion?.("jp")
 await client.prefetchPrintings?.()
 const snapshot = client.snapshot()
 if (!snapshot) throw new Error("fixture did not load")
-const catalog = createCatalog(snapshot)
+const catalog = catalogOf(snapshot)
 
 describe("catalog", () => {
   it("keeps prepared summaries and search results equal regardless of which is read first", async () => {
     const candidate = { ...snapshot }
     await prepareCatalog(candidate, () => undefined)
     const prepared = catalogOf(candidate)
-    const eager = createCatalog(candidate)
+    const eager = catalogOf(candidate)
     const summaries = new Map(
       eager.index.cards.flatMap((card) =>
         eager.index.printingsOf(stringValue(card["id"])).map((printing) => {
@@ -138,7 +138,7 @@ describe("catalog", () => {
         ),
       })),
     }
-    const changed = createCatalog(modified)
+    const changed = catalogOf(modified)
     expect(changed.summary("p:bp01-001")?.deckLocations).toEqual(["evolve"])
     expect(changed.summary("p:bp01-001-en")?.deckLocations).toEqual([])
     const columns = new BootstrapColumns()
@@ -166,7 +166,7 @@ describe("catalog", () => {
         ),
       })),
     }
-    expect(createCatalog(modified).summary("p:bp01-001")).toMatchObject({
+    expect(catalogOf(modified).summary("p:bp01-001")).toMatchObject({
       rarityCode: "sp",
       premium: true,
       rarityBadge: { style: "sp", text: "PR" },
@@ -176,7 +176,7 @@ describe("catalog", () => {
 
   it("keeps null appearances and official dashes distinct from explicit no-label appearances", () => {
     const changed = (badge: null | { style: string }) =>
-      createCatalog({
+      catalogOf({
         ...snapshot,
         bootstrap: snapshot.bootstrap.map((fragment) => ({
           ...fragment,
@@ -261,7 +261,7 @@ describe("pending display in the list", () => {
         ),
       })),
     }
-    const pending = createCatalog(revised)
+    const pending = catalogOf(revised)
     expect(pending.index.currentRevision("f:bp01-001", "jp")).toBeUndefined()
     expect(pending.index.wording("f:bp01-001", "jp")?.["undated_printing_ids"]).toEqual([
       "p:bp01-001",
@@ -314,7 +314,7 @@ describe("pending display in the list", () => {
         ),
       })),
     }
-    const own = createCatalog(revised).summary("p:bp01-001")
+    const own = catalogOf(revised).summary("p:bp01-001")
     expect(own?.name.original.text).toBe("試作の見習い兵")
     expect(own?.cost).toBe(1)
   })
@@ -341,7 +341,7 @@ describe("pending display in the list", () => {
         ),
       })),
     }
-    expect(createCatalog(revised).summary("p:bp01-001-en")?.name.original).toEqual({
+    expect(catalogOf(revised).summary("p:bp01-001-en")?.name.original).toEqual({
       lang: "en",
       text: "BP01EN-001",
     })
@@ -369,7 +369,7 @@ describe("current name translations", () => {
         }),
       })),
     }
-    const current = createCatalog(revised)
+    const current = catalogOf(revised)
     const name = current.summary("p:bp01-001")?.name
     expect(name?.translations["zh-Hant"]).toBe(
       catalog.summary("p:bp01-001")?.name.translations["zh-Hant"],
@@ -388,7 +388,7 @@ describe("pending card basic fields", () => {
   const original = catalog.index.currentRevision("f:bp01-001", "jp")
   if (!original) throw new Error("missing synthetic revision")
   const candidates = (rows: Row[], refs: Row[], selected?: string) => {
-    return createCatalog({
+    return catalogOf({
       ...snapshot,
       bootstrap: snapshot.bootstrap.map((fragment) => ({
         ...fragment,

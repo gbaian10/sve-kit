@@ -11,7 +11,7 @@ import {
   parseJson,
   utf8,
 } from "./json"
-import { hex } from "./sha256"
+import { digest } from "./sha256"
 
 const vectors = parseJson(vectorsText) as JsonObject
 
@@ -37,7 +37,7 @@ describe("canonical", () => {
       expect(canonicalText(raw["value"] ?? null)).toBe(raw["text"])
     }
     const vector = vectors["bucket"] as JsonObject
-    expect(hex(canonical(vector["key"] ?? null))).toBe(vector["bytes_hex"])
+    expect(digest(canonical(vector["key"] ?? null))).toBe(vector["sha256"] as string)
   })
 
   it("escapes only control characters, quotes and backslashes", () => {

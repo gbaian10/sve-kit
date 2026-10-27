@@ -385,13 +385,18 @@ neutral colour and an initial.
 
 ## Dead code
 
-`bun run knip` (part of `bun run check:all`) reports files, exports, types and dependencies that
-nothing uses. Delete what it reports together with the UI that stopped needing it; do not keep
-components or helpers "for later" — they come back from git history when their consumer lands.
-The only configured exceptions are in `knip.jsonc`: the lint rule fixtures (input data, never
-imported) and the font package, which only CSS `@font-face` rules reference. The dependency-only
-PR that added Playwright listed it there too; the screenshot script now imports it, so that entry
-is gone.
+`bun run knip` (part of `bun run check:all`, pre-push and CI) runs both `knip:dev` and `knip:prod`.
+The dev run includes tests and development dependencies; the production run excludes tests so it
+finds production exports used only by tests. Delete confirmed dead code with its tests. Keep a
+production export only when its consumer is genuinely pending or uncertain, and document that
+decision on the export with a `@public 待接：<reason>` JSDoc note for maintainer review.
+`knip.jsonc` marks test helpers and development tools as non-production entries. Its file ignores
+cover lint-rule fixture data, the Vitest setup file, and the `catalog`, `drawer-check`, `fixture`,
+and `screenshots` CLI entry files; each exists only for development and has a reason beside its
+pattern in `knip.jsonc`. Knip may report these as redundant in dev mode because it discovers their
+development entry points there; production needs the ignores because it excludes those entry
+points. The font package is listed under `ignoreDependencies` because only CSS `@font-face` rules
+reference it.
 `src/i18n/usage.test.ts` does the same for locale keys: every key must appear in a source file,
 either as a string literal or under a template-literal prefix such as ``t(`nav.${key}`)``.
 

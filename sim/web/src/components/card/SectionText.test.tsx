@@ -2,7 +2,7 @@ import { act, screen, waitFor, within } from "@testing-library/react"
 import { afterEach, describe, expect, it } from "vitest"
 
 import english from "../../../../../tests/fixtures/snapshot-contract/v3/source-native.json"
-import { createAnnotatedTextResolver, objectValue, type Row } from "../../data"
+import { objectValue, type Row, sharedAnnotatedTextResolver } from "../../data"
 import { DEFAULT_PREFS, prefsStore } from "../../settings"
 import { renderInRouter } from "../../test-utils"
 import { annotatedOrigin } from "../../test-utils/annotated-snapshot"
@@ -123,7 +123,7 @@ const settledRegion = async (name: string) => {
 describe("sections under the effect in the Traditional Chinese interface", () => {
   it("prints the labelled section after a rule in both boxes with one shared source line", async () => {
     const client = await sectionOrigin({ effect: true, section: "same", label: true })
-    const section = await createAnnotatedTextResolver(client).resolve(
+    const section = await sharedAnnotatedTextResolver(client).resolve(
       { owner, field: "section", ordinal: 0 },
       "zh-Hant",
     )
@@ -222,7 +222,7 @@ describe("sections under the effect in the Traditional Chinese interface", () =>
           ),
         })),
     }
-    const value = await createAnnotatedTextResolver(patched).resolve(
+    const value = await sharedAnnotatedTextResolver(patched).resolve(
       { owner: receiver, field: "section", ordinal: 0 },
       "zh-Hant",
     )

@@ -2,7 +2,7 @@ import { act, screen, within } from "@testing-library/react"
 import { afterEach, describe, expect, it } from "vitest"
 
 import fixture from "../../../../../tests/fixtures/snapshot-contract/v3/english-native.json"
-import { createAnnotatedTextResolver, objectValue, type Row } from "../../data"
+import { objectValue, type Row, sharedAnnotatedTextResolver } from "../../data"
 import { DEFAULT_PREFS, prefsStore } from "../../settings"
 import { renderInRouter } from "../../test-utils"
 import { annotatedOrigin } from "../../test-utils/annotated-snapshot"
@@ -22,7 +22,7 @@ describe("English whole-field display exceptions", () => {
   it("reads a translated and an untranslated field of one English owner from the Python-produced snapshot", async () => {
     const { client, owner } = await englishOrigin()
     await client.load()
-    const resolver = createAnnotatedTextResolver(client)
+    const resolver = sharedAnnotatedTextResolver(client)
     const translated = await resolver.resolve(
       { owner: owner, field: "effect", ordinal: null },
       "zh-Hant",

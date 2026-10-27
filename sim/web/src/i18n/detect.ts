@@ -1,3 +1,4 @@
+import { detectUiLanguage } from "./language-detect"
 import type { UiLanguage } from "./languages"
 
 /** Tolerates browsers or embedded webviews that lack `navigator.languages` or `navigator.language`. */
@@ -15,22 +16,4 @@ export function currentUiLanguage(
   nav: Parameters<typeof preferredLanguages>[0] = globalThis.navigator,
 ): UiLanguage {
   return stored ?? detectUiLanguage(preferredLanguages(nav))
-}
-
-// First-visit default only (a stored choice wins); any Chinese -> zh-TW, unsupported -> ja.
-export function detectUiLanguage(preferred: readonly string[]): UiLanguage {
-  for (const tag of preferred) {
-    const primary = tag.trim().toLowerCase().split(/[-_]/, 1)[0]
-    switch (primary) {
-      case "zh":
-        return "zh-TW"
-      case "ja":
-        return "ja"
-      case "en":
-        return "en"
-      default:
-        break
-    }
-  }
-  return "ja"
 }

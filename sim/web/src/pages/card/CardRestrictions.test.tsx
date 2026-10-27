@@ -3,6 +3,7 @@ import { afterEach, expect, it, vi } from "vitest"
 
 import { buildSnapshot } from "../../../scripts/fixture/build"
 import * as data from "../../data"
+import { createSnapshotClient } from "../../data/client"
 import { renderInRouter } from "../../test-utils"
 import { CardRestrictions } from "./CardRestrictions"
 
@@ -52,7 +53,7 @@ async function createClient(restrictionState?: "partial") {
   const files = built.files
 
   let failDetailRequests = false
-  const client = data.createSnapshotClient("https://fixture.invalid", {
+  const client = createSnapshotClient("https://fixture.invalid", {
     fetch: (url) => {
       if (failDetailRequests && url.includes("snapshots/blobs/"))
         return Promise.resolve(new Response(null, { status: 404 }))

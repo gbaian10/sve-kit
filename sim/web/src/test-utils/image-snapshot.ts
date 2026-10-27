@@ -75,9 +75,6 @@ export function imageSnapshot(count: number) {
     load: () => Promise.resolve(),
     retry: () => Promise.resolve(),
     reload: () => Promise.resolve(),
-    metadataStatus: () => ({ state: "idle", done: 0, total: 1, persistent: false }),
-    prefetchImages: () => Promise.resolve(),
-    cancelImagePrefetch: () => undefined,
   }
   return { client, snapshot, faces, media }
 }

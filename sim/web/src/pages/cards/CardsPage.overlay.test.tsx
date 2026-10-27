@@ -10,9 +10,9 @@ import {
   type CardsLayout,
   DEFAULT_PREFS,
   prefsStore,
-  readPrefs,
   recentStore,
 } from "../../settings"
+import { readPrefs } from "../../settings/prefs-read-write"
 import { renderRoutes } from "../../test-utils"
 import { TestAppWorker } from "../../test-utils/app-workers"
 

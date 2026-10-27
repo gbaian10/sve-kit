@@ -17,7 +17,6 @@ export {
   FIELD_DISPLAYS,
   type FieldDisplay,
   prefsStore,
-  readPrefs,
   showsOtherEdition,
   TEXT_DISPLAYS,
   usePrefs,

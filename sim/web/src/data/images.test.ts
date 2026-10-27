@@ -82,12 +82,6 @@ describe("page image metadata", () => {
     expect(served.paths.slice(before)).toHaveLength(1)
     expect(new Set(served.paths.slice(before)).size).toBe(1)
     expect(served.paths.some((path) => path.startsWith("images/"))).toBe(false)
-    await client.prefetchImages()
-    const done = served.paths.length
-    await loadImagePage(client, [{ printingId: "p:b", faceId: "f:b" }])
-    await loadImagePage(client, [face])
-    expect(served.paths).toHaveLength(done)
-    expect(client.metadataStatus()).toMatchObject({ state: "complete", persistent: true })
   })
   it("reuses decoded faces on overlapping pages and ignores undeclared identities", async () => {
     const served = serve()
@@ -143,20 +137,12 @@ describe("page image metadata", () => {
     await loadImagePage(client, faces)
     expect(read).toHaveBeenCalledOnce()
   })
-  it("does not background-download anything without persistent storage", async () => {
+  it("reads metadata on demand without persistent storage", async () => {
     let requests = 0
-    const bytes = new MetadataBytes(
-      "/cdn",
-      metadataFiles(70),
-      () => {
-        requests += 1
-        return Promise.resolve(new Response(canonical({ synthetic: 0 }).slice().buffer))
-      },
-      () => undefined,
-    )
-    await bytes.prefetch()
-    expect(requests).toBe(0)
-    expect(bytes.status()).toMatchObject({ persistent: false, done: 0, state: "idle" })
+    const bytes = new MetadataBytes("/cdn", metadataFiles(70), () => {
+      requests += 1
+      return Promise.resolve(new Response(canonical({ synthetic: 0 }).slice().buffer))
+    })
     await bytes.read("file0")
     expect(requests).toBe(1)
   })
@@ -168,29 +154,15 @@ describe("page image metadata", () => {
     await cache.open("sve-images-%2Fcdn:-b")
     const fetcher: Fetcher = () =>
       Promise.resolve(new Response(canonical({ synthetic: 0 }).slice().buffer))
-    const first = new MetadataBytes("/cdn", metadataFiles(1), fetcher, () => undefined, cache)
-    await first.prefetch()
-    const second = new MetadataBytes(
-      "/cdn",
-      metadataFiles(1),
-      fetcher,
-      () => undefined,
-      cache,
-      fetcher,
-    )
-    await second.prefetch()
+    const first = new MetadataBytes("/cdn", metadataFiles(1), fetcher, cache)
+    await first.read("file0")
+    const second = new MetadataBytes("/cdn", metadataFiles(1), fetcher, cache, fetcher)
+    await second.read("file0")
     expect((await cache.keys()).sort()).toEqual(
       ["sve-raw:%2Fcdn", "sve-images-%2Fcdn-preview:-preview", "unrelated-app"].sort(),
     )
-    const third = new MetadataBytes(
-      "/cdn",
-      metadataFiles(1),
-      fetcher,
-      () => undefined,
-      cache,
-      fetcher,
-    )
-    await third.prefetch()
+    const third = new MetadataBytes("/cdn", metadataFiles(1), fetcher, cache, fetcher)
+    await third.read("file0")
     expect((await cache.keys()).sort()).toEqual(
       ["sve-raw:%2Fcdn", "sve-images-%2Fcdn-preview:-preview", "unrelated-app"].sort(),
     )
@@ -211,7 +183,6 @@ describe("page image metadata", () => {
         requests += 1
         return Promise.resolve(new Response(canonical({ synthetic: 0 }).slice().buffer))
       },
-      () => undefined,
       cache,
     )
     expect(await bytes.read("file0")).toEqual(canonical({ synthetic: 0 }))
@@ -246,7 +217,7 @@ describe("page image metadata", () => {
     })
     await client.load()
     block = true
-    const prefetch = client.prefetchImages()
+    const request = loadImagePage(client, [face]).catch(() => undefined)
     await new Promise((resolve) => setTimeout(resolve, 0))
     // Publish a new manifest; a reload that finds the same one keeps the snapshot instead.
     const next = canonical({ ...manifest, data_version: "preview-20991231T000000Z-0001" })
@@ -257,7 +228,7 @@ describe("page image metadata", () => {
       canonical({ manifest_path: nextPath, manifest_sha256: digest(next) }),
     )
     await client.reload()
-    await prefetch
+    await request
     expect(aborted).toBeGreaterThan(0)
   })
   it("reopens persistent bytes across sessions and manifests without retaining a raw memory LRU", async () => {
@@ -269,25 +240,20 @@ describe("page image metadata", () => {
       return Promise.resolve(new Response(canonical({ synthetic: i }).slice().buffer))
     }
     const sharedCache = storage()
-    const bytes = new MetadataBytes("/cdn", files, fetcher, () => undefined, sharedCache)
-    await bytes.prefetch()
-    expect(requests).toHaveLength(70)
+    const bytes = new MetadataBytes("/cdn", files, fetcher, sharedCache)
     await bytes.read("file0")
-    expect(requests).toHaveLength(70)
-    const reopened = new MetadataBytes("/cdn", files, fetcher, () => undefined, sharedCache)
+    expect(requests).toHaveLength(1)
+    const reopened = new MetadataBytes("/cdn", files, fetcher, sharedCache)
     await reopened.read("file0")
-    expect(requests).toHaveLength(70)
-    const separate = new MetadataBytes("/cdn", files, fetcher, () => undefined, sharedCache)
+    expect(requests).toHaveLength(1)
+    const separate = new MetadataBytes("/cdn", files, fetcher, sharedCache)
     await separate.read("file0")
-    expect(requests).toHaveLength(70)
-    expect(bytes.status()).toMatchObject({ state: "complete", done: 70 })
+    expect(requests).toHaveLength(1)
     await sharedCache.delete("sve-raw:%2Fcdn")
     await bytes.read("file0")
-    expect(requests).toHaveLength(71)
-    // One restored file cannot vouch for the other 69 that the clear took away.
-    expect(bytes.status()).toMatchObject({ persistent: true, state: "cancelled", done: 1 })
+    expect(requests).toHaveLength(2)
   })
-  it("reports quota degradation and retries after eviction rather than claiming persistent offline readiness", async () => {
+  it("retries a metadata read after quota prevents persistent caching", async () => {
     const files = metadataFiles(70)
     let requests = 0
     const served: Fetcher = (url) => {
@@ -296,15 +262,11 @@ describe("page image metadata", () => {
         new Response(canonical({ synthetic: Number(url.split("data")[1]) }).slice().buffer),
       )
     }
-    const bytes = new MetadataBytes("/cdn", files, served, () => undefined, storage(true))
-    await bytes.prefetch()
-    expect(bytes.status()).toMatchObject({ persistent: false, state: "cancelled" })
-    expect(requests).toBeLessThanOrEqual(3)
+    const bytes = new MetadataBytes("/cdn", files, served, storage(true))
     expect(await bytes.read("file0")).toEqual(canonical({ synthetic: 0 }))
     const after = requests
     expect(await bytes.read("file0")).toEqual(canonical({ synthetic: 0 }))
     expect(requests).toBe(after + 1)
-    expect(bytes.status()).toMatchObject({ persistent: false, state: "cancelled", done: 0 })
   })
   it("rejects a replaced snapshot even when its transport ignores abort", async () => {
     let finish: ((response: Response) => void) | undefined
@@ -315,7 +277,6 @@ describe("page image metadata", () => {
         new Promise<Response>((resolve) => {
           finish = resolve
         }),
-      () => undefined,
       storage(),
     )
     const reading = bytes.read("file0")
@@ -325,7 +286,6 @@ describe("page image metadata", () => {
     if (!finish) throw new Error("transport did not start")
     finish(new Response(canonical({ synthetic: 0 }).slice().buffer))
     await rejected
-    expect(bytes.status().done).toBe(0)
     await expect(bytes.read("file0")).rejects.toThrow("snapshot replaced")
   })
   it("a cancelled page cannot return an index or contaminate another snapshot", async () => {
@@ -349,12 +309,10 @@ describe("page image metadata", () => {
         requests += 1
         return Promise.resolve(new Response("bad"))
       },
-      () => undefined,
       storage(),
     )
     await expect(bytes.read("file0")).rejects.toThrow("blob-integrity")
     expect(requests).toBe(2)
-    expect(bytes.status().done).toBe(0)
   })
 })
 
@@ -386,62 +344,5 @@ describe("network scheduling", () => {
       await new Promise((resolve) => setTimeout(resolve, 0))
     }
     await Promise.all([...background, visible])
-  })
-  it("promotes visible metadata ahead of queued background jobs in its own queue", async () => {
-    const starts: string[] = []
-    const release: Array<() => void> = []
-    const bytes = new MetadataBytes(
-      "/cdn",
-      metadataFiles(10),
-      async (url) => {
-        starts.push(url)
-        await new Promise<void>((resolve) => {
-          release.push(resolve)
-        })
-        return new Response(canonical({ synthetic: Number(url.split("data")[1]) }).slice().buffer)
-      },
-      () => undefined,
-      storage(),
-    )
-    const background = bytes.prefetch()
-    await new Promise((resolve) => setTimeout(resolve, 0))
-    expect(starts).toHaveLength(3)
-    const visible = bytes.read("file9")
-    await new Promise((resolve) => setTimeout(resolve, 0))
-    expect(starts).toEqual(["/cdn/data0", "/cdn/data1", "/cdn/data2", "/cdn/data9"])
-    bytes.cancel()
-    release.splice(0).forEach((resolve) => {
-      resolve()
-    })
-    await Promise.all([background, visible])
-  })
-  it("cancels pending background work, preserves verified files, and permits a bounded retry", async () => {
-    const files = metadataFiles(7)
-    let release: () => void = () => undefined
-    const blocked = new Promise<void>((resolve) => {
-      release = resolve
-    })
-    let calls = 0
-    const bytes = new MetadataBytes(
-      "/cdn",
-      files,
-      async (url) => {
-        calls += 1
-        await blocked
-        return new Response(canonical({ synthetic: Number(url.split("data")[1]) }).slice().buffer)
-      },
-      () => undefined,
-      storage(),
-    )
-    const first = bytes.prefetch()
-    await new Promise((resolve) => setTimeout(resolve, 0))
-    expect(calls).toBe(3)
-    bytes.cancel()
-    release()
-    await first
-    expect(bytes.status().state).toBe("cancelled")
-    await bytes.prefetch()
-    expect(bytes.status()).toMatchObject({ state: "complete", done: 7 })
-    expect(calls).toBe(7)
   })
 })

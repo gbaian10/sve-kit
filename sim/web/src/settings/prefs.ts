@@ -12,9 +12,10 @@ import {
   sanitizeListOrder,
   sanitizeListVisibility,
 } from "./list-columns"
+import { createPrefsStore, type PrefsStore } from "./prefs-storage"
 
 export const PREFS_KEY = "sve-kit:prefs"
-const PREFS_VERSION = 1
+export const PREFS_VERSION = 1
 
 export const CARD_EDITIONS = ["jp", "en"] as const
 type CardEdition = (typeof CARD_EDITIONS)[number]
@@ -160,16 +161,7 @@ const sanitizers: Sanitizers = {
   listOrder: sanitizeListOrder,
 }
 
-type StorageSource = Storage | (() => Storage) | undefined
-
-// Even reading `localStorage` can throw (opaque origins, blocked site data), so resolve it inside try.
-function resolveStorage(source: StorageSource): Storage {
-  if (source === undefined) return localStorage
-  return typeof source === "function" ? source() : source
-}
-
-// Trust only this build's version, as theme-boot.js does; DEFAULT_PREFS excludes removed fields.
-function sanitize(raw: unknown): Prefs {
+export function sanitize(raw: unknown): Prefs {
   if (typeof raw !== "object" || raw === null || Array.isArray(raw)) return DEFAULT_PREFS
   const record = raw as Record<string, unknown>
   if (record["v"] !== PREFS_VERSION) return DEFAULT_PREFS
@@ -185,59 +177,6 @@ function sanitize(raw: unknown): Prefs {
     prefs[key] = sanitizers[key](carried[key])
   }
   return prefs as unknown as Prefs
-}
-
-/** Never throws; every field falls back to its default on its own. */
-export function readPrefs(source?: StorageSource): Prefs {
-  try {
-    const storage = resolveStorage(source)
-    const raw = storage.getItem(PREFS_KEY)
-    if (raw !== null) return sanitize(JSON.parse(raw))
-    return DEFAULT_PREFS
-  } catch {
-    return DEFAULT_PREFS
-  }
-}
-
-export function writePrefs(prefs: Prefs, source?: StorageSource): boolean {
-  try {
-    resolveStorage(source).setItem(PREFS_KEY, JSON.stringify({ v: PREFS_VERSION, ...prefs }))
-    return true
-  } catch {
-    return false
-  }
-}
-
-export interface PrefsStore {
-  readonly get: () => Prefs
-  /** Applies the patch in memory first, so the UI follows even when persisting fails. */
-  readonly set: (patch: Partial<Prefs>) => boolean
-  readonly subscribe: (listener: () => void) => () => void
-  /** Re-reads storage (another tab wrote it, or a test cleared it) and notifies subscribers. */
-  readonly reload: () => void
-}
-
-export function createPrefsStore(source?: StorageSource): PrefsStore {
-  let current = readPrefs(source)
-  const listeners = new Set<() => void>()
-  return {
-    get: () => current,
-    set: (patch) => {
-      current = { ...current, ...patch }
-      for (const listener of listeners) listener()
-      return writePrefs(current, source)
-    },
-    subscribe: (listener) => {
-      listeners.add(listener)
-      return () => {
-        listeners.delete(listener)
-      }
-    },
-    reload: () => {
-      current = readPrefs(source)
-      for (const listener of listeners) listener()
-    },
-  }
 }
 
 export const prefsStore: PrefsStore = createPrefsStore()

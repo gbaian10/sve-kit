@@ -22,7 +22,7 @@ import {
 } from "./format-v3/reader"
 import { checkEntry, indexEntries } from "./index-entry"
 import { transferDigest } from "./integrity"
-import { MetadataBytes, type MetadataProgress } from "./metadata"
+import { MetadataBytes } from "./metadata"
 import { rawBlobDescriptor, RawBlobStore } from "./raw-blobs"
 import { appRequests, requestQueue } from "./request-queue"
 import { VerifiedCache } from "./verified-cache"
@@ -98,10 +98,7 @@ export interface SnapshotClient {
     fileKey: string,
     backgroundSignal?: AbortSignal,
   ) => Promise<readonly Fragment[]>
-  readonly metadataStatus: () => MetadataProgress
   readonly prefetchPrintings?: () => Promise<void>
-  readonly prefetchImages: () => Promise<void>
-  readonly cancelImagePrefetch: () => void
 }
 
 const INDEX_PATH = "snapshots/versions/index.json"
@@ -506,9 +503,6 @@ function snapshotClient(
         ),
       ),
       fetcher,
-      () => {
-        for (const listener of listeners) listener()
-      },
       options.cacheStorage ?? globalThis.caches,
       requests.background,
     )
@@ -952,10 +946,6 @@ function snapshotClient(
     snapshot: () => loaded,
     catalog,
     fragments,
-    metadataStatus: () =>
-      metadata?.status() ?? { state: "idle", done: 0, total: 0, persistent: false },
     prefetchPrintings,
-    prefetchImages: () => metadata?.prefetch() ?? Promise.resolve(),
-    cancelImagePrefetch: () => metadata?.cancel(),
   }
 }

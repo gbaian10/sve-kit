@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest"
 
-import { createAnnotatedTextResolver } from "../annotated-text"
+import { sharedAnnotatedTextResolver } from "../annotated-text"
 import { createSnapshotClient, type SnapshotClient } from "../client"
 import { homeSetOwner } from "../locator"
 import { v3Fixture } from "../v3-fixture"
@@ -16,6 +16,29 @@ import {
 import { wholeName } from "./name-annotations"
 import { type Fragment, readContainer } from "./reader"
 import { digest } from "./sha256"
+
+function isolatedAnnotatedTextResolver(
+  client: Parameters<typeof sharedAnnotatedTextResolver>[0],
+  cardId?: string,
+) {
+  const snapshots = new WeakMap<object, object>()
+  return sharedAnnotatedTextResolver(
+    {
+      ...client,
+      snapshot: () => {
+        const current = client.snapshot()
+        if (!current) return null
+        let isolated = snapshots.get(current)
+        if (!isolated) {
+          isolated = { ...current }
+          snapshots.set(current, isolated)
+        }
+        return isolated as typeof current
+      },
+    },
+    cardId,
+  )
+}
 
 const fixture = () => objectValue(v3Fixture("whole-name-native.json"))
 function origin() {
@@ -150,7 +173,7 @@ describe("whole names on exact source owners", () => {
     const { data, client } = origin()
     await client.load()
     expect(client.status().state).toBe("ready")
-    const view = await createAnnotatedTextResolver(client).resolve(
+    const view = await isolatedAnnotatedTextResolver(client).resolve(
       { owner: { kind: "face_revision", id: "revision" }, field: "name", ordinal: null },
       "zh-Hant",
     )
@@ -182,7 +205,7 @@ describe("whole names on exact source owners", () => {
       },
     )
     const witnessed = { ...snapshot, bootstrap: [...snapshot.bootstrap, ...sources] }
-    const resolver = createAnnotatedTextResolver({
+    const resolver = isolatedAnnotatedTextResolver({
       ...client,
       snapshot: () => witnessed,
       fragments: () => Promise.reject(new Error("source body should stay unloaded")),
@@ -201,7 +224,7 @@ describe("whole names on exact source owners", () => {
     const detail = await client.fragments(detailKey)
     for (let delay = 0; delay < 8; delay++)
       for (const nameFirst of [true, false]) {
-        const racing = createAnnotatedTextResolver({
+        const racing = isolatedAnnotatedTextResolver({
           ...client,
           snapshot: () => witnessed,
           fragments: async (key) => {
@@ -223,7 +246,7 @@ describe("whole names on exact source owners", () => {
     const requests: string[] = []
     const gate = Promise.withResolvers<undefined>()
     const entered = Promise.withResolvers<undefined>()
-    const resolver = createAnnotatedTextResolver({
+    const resolver = isolatedAnnotatedTextResolver({
       ...client,
       fragments: async (file) => {
         requests.push(file)
@@ -266,7 +289,7 @@ describe("whole names on exact source owners", () => {
         return Promise.resolve([fragment])
       },
     }
-    const result = await createAnnotatedTextResolver(scopedClient).resolve(
+    const result = await isolatedAnnotatedTextResolver(scopedClient).resolve(
       { owner: { kind: "face_revision", id: "revision" }, field: "name", ordinal: null },
       "zh-Hant",
     )
@@ -278,7 +301,7 @@ describe("whole names on exact source owners", () => {
   it("reports a missing source directly when its card has no candidate partition", async () => {
     const { client, snapshot, historyKey } = await sourceHistory()
     snapshot.files.delete(historyKey)
-    const resolver = createAnnotatedTextResolver({
+    const resolver = isolatedAnnotatedTextResolver({
       ...client,
       fragments: () => {
         throw new Error("unrelated source candidate fetched")
@@ -296,7 +319,7 @@ describe("whole names on exact source owners", () => {
     await client.load()
     const snapshot = client.snapshot()
     if (!snapshot) throw new Error("missing loaded snapshot")
-    const resolver = createAnnotatedTextResolver({
+    const resolver = isolatedAnnotatedTextResolver({
       ...client,
       fragments: () => {
         throw new Error("virtual name set fetched from a detail file")

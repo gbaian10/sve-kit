@@ -1,11 +1,6 @@
 import fixtureJson from "../../../../tests/fixtures/snapshot-contract/v3/annotated-native.json"
-import {
-  canonicalText,
-  createSnapshotClient,
-  type JsonObject,
-  objectValue,
-  stringValue,
-} from "../data"
+import { canonicalText, type JsonObject, objectValue, stringValue } from "../data"
+import { createSnapshotClient } from "../data/client"
 
 const canonical = (value: Parameters<typeof canonicalText>[0]) =>
   new TextEncoder().encode(canonicalText(value))

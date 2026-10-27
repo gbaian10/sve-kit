@@ -50,25 +50,8 @@ export function cardNoKey(text: string, sets?: ReadonlySet<string>): CardNoKey |
   }
 }
 
-/** Whether a typed card number matches a printed one under the loose rules. */
-export function cardNoMatches(typed: string, printed: string, sets?: ReadonlySet<string>): boolean {
-  const a = cardNoKey(typed, sets)
-  const b = cardNoKey(printed, sets)
-  return (
-    a !== null && b !== null && a.set === b.set && a.number === b.number && a.suffix === b.suffix
-  )
-}
-
 /** A stable lookup key (`bp01|51|en`) so many printings can be indexed once. */
 export function cardNoLookupKey(text: string, sets?: ReadonlySet<string>): string | null {
   const key = cardNoKey(text, sets)
   return key === null ? null : `${key.set}|${key.number}|${key.suffix}`
-}
-
-/** True when `typed` is a prefix of the printed number's key (set or set + leading digits). */
-export function cardNoPrefixMatches(typed: string, printed: string): boolean {
-  const flat = normalizeText(typed)
-  if (flat === "") return false
-  const printedFlat = normalizeText(printed)
-  return printedFlat.startsWith(flat)
 }

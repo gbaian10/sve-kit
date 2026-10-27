@@ -320,7 +320,7 @@ export default defineConfig({
   },
   test: {
     environment: "jsdom",
-    setupFiles: ["./src/test-setup.ts"],
+    setupFiles: ["./tests/setup.ts"],
     include: ["src/**/*.test.{ts,tsx}", "tests/**/*.test.ts", "scripts/**/*.test.ts"],
     // v8 coverage makes the UI tests about 1.7x slower; several CardsPage cases sit near the 5 s default.
     testTimeout: 15_000,

@@ -7,7 +7,7 @@ import {
   parseJson,
   stringValue,
 } from "../../src/data/format-v3/json"
-import { hex } from "../../src/data/format-v3/sha256"
+import { digest } from "../../src/data/format-v3/sha256"
 import { buildSnapshot, canonicalSize } from "./build"
 import { CARDS } from "./cards"
 import { snapshotView } from "./view"
@@ -74,7 +74,7 @@ describe("fixture snapshot", async () => {
     const again = await buildSnapshot({ encodeImage: stubImage })
     expect([...again.files.keys()].sort()).toEqual([...snapshot.files.keys()].sort())
     for (const [path, bytes] of snapshot.files)
-      expect(hex(again.files.get(path) ?? new Uint8Array())).toBe(hex(bytes))
+      expect(digest(again.files.get(path) ?? new Uint8Array())).toBe(digest(bytes))
   })
 
   it("selects the exact current JP owner for EN names and effects across errata", () => {

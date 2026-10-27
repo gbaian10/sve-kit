@@ -502,7 +502,7 @@ jobs:
           path: ~/.bun/install/cache
           key: bun-${{ runner.os }}-${{ hashFiles('sim/web/bun.lock') }}
       - run: bun install --frozen-lockfile
-      - name: Web formatting, lint, types and unused dependencies
+      - name: Web formatting, lint, types and both Knip modes
         run: bun run format:check && bun run lint:all && bun run typecheck && bun run knip
       - name: Vitest
         id: tests

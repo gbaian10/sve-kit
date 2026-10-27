@@ -391,16 +391,6 @@ export default {
     loadFailed: "読み込みに失敗しました",
     retry: "再試行",
   },
-  metadata: {
-    idle: "画像情報は未取得（{{done}}/{{total}}）",
-    running: "画像情報を取得中（{{done}}/{{total}}）",
-    cancelled: "画像情報の取得を中断（{{done}}/{{total}}）",
-    error: "画像情報の取得に失敗（{{done}}/{{total}}）",
-    complete: "画像情報を取得済み（{{done}}/{{total}}）",
-    degraded: "永続キャッシュが使えません。ページに戻ると再取得する場合があります。",
-    cancel: "取得を中断",
-    retry: "画像情報を取得",
-  },
   card: {
     originalText: "原文",
     sourcePending: "日本語の根拠を読み込み中",

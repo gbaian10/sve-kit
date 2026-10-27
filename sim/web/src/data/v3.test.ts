@@ -13,7 +13,8 @@ import {
   objectValue,
   stringValue,
 } from "./format-v3/json"
-import { imageUrl, mediaImageSource } from "./image-url"
+import { mediaImageSource } from "./image-url"
+import { imageUrl } from "./image-url-format"
 import { loadImagePage } from "./images"
 import { v3Fixture, v3Version } from "./v3-fixture"
 
@@ -107,15 +108,6 @@ describe("4.0 display projection", () => {
       (await loadImagePage(client, [{ printingId: "p:b", faceId: "f:b" }])).cardImage("p:b", "f:b")
         ?.src,
     ).toBeUndefined()
-    const global = [...(client.snapshot()?.files.values() ?? [])]
-      .filter((f) =>
-        (f["row_counts"] as JsonValue[][]).some(
-          (c) => c[0] === "image_asset" || c[0] === "image_variant",
-        ),
-      )
-      .map((f) => stringValue(f["path"]))
-    await client.prefetchImages()
-    expect(served.requests.some((p) => global.includes(p))).toBe(false)
   })
   it("loads optional global source details only on explicit demand", async () => {
     const served = origin()

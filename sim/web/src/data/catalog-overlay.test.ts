@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest"
 
 import { buildSnapshot } from "../../scripts/fixture/build"
 import { memoryCache } from "../test-utils/cache"
-import { catalogOf, createCatalog, preparePrintingOverlay } from "./catalog"
+import { catalogOf, preparePrintingOverlay } from "./catalog"
 import { createSnapshotClient, type LoadedSnapshot } from "./client"
 import type { Row } from "./format-v3/decode"
 import { canonicalText, stringValue } from "./format-v3/json"
@@ -68,7 +68,7 @@ describe("printing catalog overlays", () => {
     const { snapshot, parts } = await fixture()
     const base = catalogOf(snapshot)
     const { snapshot: next, catalog } = overlay(snapshot, parts)
-    const rebuilt = createCatalog(next)
+    const rebuilt = catalogOf(next)
     for (let pass = 0; pass < 2; pass++) {
       for (const card of rebuilt.index.cards) {
         const cardId = stringValue(card["id"])
@@ -182,7 +182,7 @@ describe("printing catalog overlays", () => {
     const first = overlay(snapshot, firstParts)
     const second = overlay(first.snapshot, secondParts)
     const third = overlay(second.snapshot, [])
-    const rebuilt = createCatalog(second.snapshot)
+    const rebuilt = catalogOf(second.snapshot)
     for (const card of rebuilt.index.cards)
       for (const row of rebuilt.index.printingsOf(stringValue(card["id"]))) {
         const id = stringValue(row["id"])

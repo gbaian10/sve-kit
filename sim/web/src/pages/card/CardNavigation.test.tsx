@@ -6,13 +6,8 @@ import { buildSnapshot } from "../../../scripts/fixture/build"
 import { prepareCardContent } from "../../app/card-content"
 import { routeState } from "../../app/listEntryState"
 import { ToastProvider } from "../../components/ui/Toast"
-import {
-  type CardSummary,
-  catalogOf,
-  createSnapshotClient,
-  locateCard,
-  type SnapshotClient,
-} from "../../data"
+import { type CardSummary, catalogOf, locateCard, type SnapshotClient } from "../../data"
+import { createSnapshotClient } from "../../data/client"
 import { DEFAULT_PREFS, prefsStore } from "../../settings"
 import { renderRoutes } from "../../test-utils"
 import { memoryCache } from "../../test-utils/cache"

@@ -1,5 +1,6 @@
-import { createSnapshotClient, SearchSession } from "../src/data"
+import { SearchSession } from "../src/data"
 import { BUILD_ID } from "../src/data/build-id"
+import { createSnapshotClient } from "../src/data/client"
 import type { Region } from "../src/domain/search"
 
 const entry = new URL(location.href).searchParams.get("entry") === "preview" ? "preview" : "index"

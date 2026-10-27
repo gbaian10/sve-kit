@@ -1,4 +1,5 @@
-import { decodeMessage, type DecodeRequest, SnapshotError } from "../data"
+import { decodeMessage, type DecodeRequest } from "../data/format-v3/decode-message"
+import { SnapshotError } from "../data/format-v3/errors"
 import { TestSearchWorker } from "./search-worker"
 
 /** The decode worker's protocol, run on the jsdom thread as separate tasks. */

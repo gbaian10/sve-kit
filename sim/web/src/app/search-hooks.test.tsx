@@ -10,7 +10,8 @@ import { MemoryRouter } from "react-router"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { ClassQuickBar } from "../components/search/ClassQuickBar"
-import type { SearchEvent, SearchQuery, SearchRequest } from "../data"
+import type { SearchQuery } from "../data"
+import type { SearchEvent, SearchRequest } from "../data/search/messages"
 import { DEFAULT_QUERY } from "../domain/query/model"
 import { prefsStore } from "../settings"
 import {

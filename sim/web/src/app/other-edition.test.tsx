@@ -6,18 +6,16 @@ import { afterEach, expect, it, vi } from "vitest"
 
 import { buildSnapshot } from "../../scripts/fixture/build"
 import { CARDS } from "../../scripts/fixture/cards"
-import { AccountMenuPanel } from "../components/nav/AccountMenu"
+import { AccountMenuPanel } from "../components/nav/AccountMenuPanel"
 import {
   arrayValue,
-  cardPrintings,
   catalogOf,
-  createSnapshotClient,
-  editionPrinting,
   locateCard,
   objectValue,
   type SnapshotClient,
   stringValue,
 } from "../data"
+import { createSnapshotClient } from "../data/client"
 import { DEFAULT_QUERY } from "../domain/query/model"
 import { DEFAULT_PREFS, prefsStore, showsOtherEdition, usePrefs } from "../settings"
 import { renderInRouter } from "../test-utils"
@@ -169,29 +167,6 @@ it("ignores a late comparison after disabling and retries a failed download", as
   await waitFor(() => {
     expect(result.current.catalog).toBeDefined()
   })
-})
-
-it("selects a shared art by identity, otherwise the region default, and detects a missing region", async () => {
-  const h = harness()
-  const source = await locateCard(h.client, { namespace: "official", key: "BP01EN-002" })
-  assert(h.client.catalog)
-  const snapshot = await h.client.catalog("jp", new AbortController().signal)
-  const target = await cardPrintings(h.client, snapshot, source.printing.cardId)
-  const row = source.catalog.index.printing(source.printing.id)
-  assert(row)
-  const candidates = target.index
-    .printingsOf(source.printing.cardId)
-    .filter((row) => row["region"] === "jp")
-  expect(candidates.length).toBeGreaterThan(1)
-  const alternate = candidates.find((row) => row["id"] === "p:bp01-002-alt")
-  assert(alternate?.["faces"])
-  const shared = { ...row, faces: alternate["faces"] }
-  expect(editionPrinting(shared, target, "jp")?.["id"]).toBe(alternate["id"])
-  const defaultId = arrayValue(target.index.card(source.printing.cardId)?.["regions"])
-    .map((raw) => objectValue(raw))
-    .find((view) => view["region"] === "jp")?.["default_printing_id"]
-  expect(editionPrinting(row, target, "jp")?.["id"]).toBe(defaultId)
-  expect(editionPrinting({ ...row, card_id: "c:uncollected" }, target, "en")).toBeUndefined()
 })
 
 it("keeps the card when switching with comparison off, shows loading, and recovers from failure", async () => {

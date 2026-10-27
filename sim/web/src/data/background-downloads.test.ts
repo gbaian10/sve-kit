@@ -5,7 +5,7 @@ import { afterEach, expect, it, vi } from "vitest"
 
 import { buildSnapshot } from "../../scripts/fixture/build"
 import { memoryCache } from "../test-utils/cache"
-import { BackgroundDownloads } from "./background-downloads"
+import { BackgroundDownloads } from "./background-downloads-core"
 import { bodyHeaders, dataCacheBytes } from "./cache-budget"
 import type { Fetcher } from "./cdn"
 import type { FetchSelection } from "./fetch-plan"

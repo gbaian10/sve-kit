@@ -2,7 +2,7 @@
 import { describe, expect, it, vi } from "vitest"
 
 import type { Catalog, LoadedSnapshot, SnapshotClient } from "../data"
-import { pinPrintings } from "./printing-snapshot"
+import { pinPrintings } from "./printing-snapshot-pin"
 
 const file = (key: string, purpose: string, region: string, counts: readonly unknown[][]) =>
   [key, { key, purpose, role: "text", region, row_counts: counts }] as const

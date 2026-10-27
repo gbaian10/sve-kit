@@ -22,11 +22,6 @@ export function columns(name: string, version = "4.0.0"): string[] {
   return strings(definition(name, version)["x-columns"] ?? null)
 }
 
-/** The complete public collection whitelist, in schema order. */
-export function tables(): string[] {
-  return strings(definition("Container")["x-tables"] ?? null)
-}
-
 /** A fragment's fixed row type, e.g. printing + detail -> printing_detail. */
 export function rowType(table: string, partition: string, version = "4.0.0"): string {
   const mapping = objectValue(definition("Container", version)["x-fragments"] ?? null)
@@ -51,7 +46,7 @@ function references(kind: JsonObject, into: Set<string>, version: string): void 
 }
 
 /** Every nested descriptor a row type needs, from the fixed acyclic schema. */
-export function requiredTypes(name: string, version = "4.0.0"): Set<string> {
+function requiredTypes(name: string, version = "4.0.0"): Set<string> {
   const result = new Set<string>()
   for (const item of arrayValue(definition(name, version)["x-types"] ?? null))
     references(objectValue(item), result, version)

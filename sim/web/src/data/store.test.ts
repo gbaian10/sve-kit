@@ -2,7 +2,7 @@
 import { describe, expect, it } from "vitest"
 
 import { buildSnapshot } from "../../scripts/fixture/build"
-import { createAnnotatedTextResolver } from "./annotated-text"
+import { sharedAnnotatedTextResolver } from "./annotated-text"
 import { type Fetcher } from "./cdn"
 import { createSnapshotClient } from "./client"
 import { type JsonObject, type JsonValue, stringValue } from "./format-v3/json"
@@ -154,7 +154,7 @@ describe("card index", () => {
 describe("file-local text", () => {
   it("resolves an effect through its exact owner without a global dictionary lookup", async () => {
     const revision = index.currentRevision("f:bp01-001", "jp")
-    const result = await createAnnotatedTextResolver(client).resolve(
+    const result = await sharedAnnotatedTextResolver(client).resolve(
       {
         owner: { kind: "face_revision", id: revision?.["id"] ?? null },
         field: "effect",

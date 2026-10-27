@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest"
 import { buildSnapshot } from "../../scripts/fixture/build"
 import { memoryCache } from "../test-utils/cache"
 import { locateCard } from "./card-route"
-import { catalogOf, createCatalog } from "./catalog"
+import { catalogOf } from "./catalog"
 import { createSnapshotClient } from "./client"
 import { arrayValue, canonical, objectValue, parseJson, stringValue } from "./format-v3/json"
 import { columns, rowType } from "./format-v3/schema"
@@ -205,7 +205,7 @@ describe("catalog-based cold card routes", () => {
     expect(catalogOf(first.snapshot)).toBe(first.catalog)
     expect(second.catalog.summary("p:bp01-002-alt")?.intId).toBeUndefined()
     expect(first.catalog.summary(first.printing.id)?.intId).toBe(1102)
-    const rebuilt = createCatalog(first.snapshot)
+    const rebuilt = catalogOf(first.snapshot)
     for (const card of rebuilt.index.cards)
       for (const row of rebuilt.index.printingsOf(stringValue(card["id"]))) {
         const id = stringValue(row["id"])

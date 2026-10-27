@@ -1,12 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 
 import { memoryCache } from "../test-utils/cache"
-import {
-  clearLocalData,
-  getCacheClearResult,
-  requestColdStart,
-  runRequestedColdStart,
-} from "./clear-local"
+import { getCacheClearResult, requestColdStart, runRequestedColdStart } from "./clear-local"
+import { clearLocalData } from "./clear-local-core"
 
 afterEach(() => {
   vi.unstubAllGlobals()

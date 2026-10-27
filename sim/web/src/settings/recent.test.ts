@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 
-import { createRecentStore, readRecent, RECENT_KEY } from "./recent"
+import { readRecent, RECENT_KEY } from "./recent-read"
+import { createRecentStore } from "./recent-storage"
 
 class MemoryStorage implements Storage {
   private readonly map = new Map<string, string>()

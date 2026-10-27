@@ -19,22 +19,14 @@ it("shares metadata raw bytes with search and detail readers across manifests an
   const file = files.get("file0")
   if (!file) throw new Error("fixture missing")
   const renamed = { ...file, key: "new-key", path: "new-path" }
-  await bytes.prefetch()
-  expect(bytes.status()).toMatchObject({ state: "complete", done: 1, persistent: true })
+  await bytes.read("file0")
   const search = new SearchBlobs("/cdn", fetcher, storage)
   await search.read(renamed, new AbortController().signal)
   const detail = new RawBlobStore("/cdn", fetcher, storage)
   await detail.read(rawBlobDescriptor(renamed))
   bytes.dispose()
-  const next = new MetadataBytes(
-    "/cdn",
-    new Map([["new-key", renamed]]),
-    fetcher,
-    () => undefined,
-    storage,
-  )
-  await next.prefetch()
-  expect(next.status()).toMatchObject({ state: "complete", done: 1, persistent: true })
+  const next = new MetadataBytes("/cdn", new Map([["new-key", renamed]]), fetcher, storage)
+  await next.read("new-key")
   expect(fetcher).toHaveBeenCalledTimes(1)
   expect(await dataCacheBytes(storage)).toBe(3)
   const raw = await storage.open("sve-raw:%2Fcdn")
@@ -71,7 +63,7 @@ async function fixture(sizes: readonly number[], storage?: CacheStorage) {
     return new Response(body.slice().buffer)
   }
   const fetcher = vi.fn<Fetcher>((url) => Promise.resolve(response(url)))
-  const bytes = new MetadataBytes("/cdn", files, fetcher, () => undefined, storage)
+  const bytes = new MetadataBytes("/cdn", files, fetcher, storage)
   return { files, response, fetcher, bytes }
 }
 
@@ -82,7 +74,6 @@ describe("metadata library boundaries", () => {
     await bytes.read("file0")
     await bytes.read("file64")
     await bytes.read("file0")
-    expect(bytes.status()).toMatchObject({ state: "idle", done: 0, persistent: false })
     expect(fetcher).toHaveBeenCalledTimes(67)
     await bytes.read("file1")
     expect(fetcher).toHaveBeenCalledTimes(68)
@@ -119,7 +110,7 @@ describe("metadata library boundaries", () => {
     const { files, response } = await fixture([1, 1])
     const gate = Promise.withResolvers<Response>()
     const fetcher = vi.fn<Fetcher>(() => gate.promise)
-    const bytes = new MetadataBytes("/cdn", files, fetcher, () => undefined)
+    const bytes = new MetadataBytes("/cdn", files, fetcher)
     const first = bytes.read("file0")
     expect(bytes.read("file0")).toBe(first)
     const rejected = expect(first).rejects.toThrow("failed")
@@ -132,39 +123,6 @@ describe("metadata library boundaries", () => {
     bytes.dispose()
   })
 
-  it("promotes an admitted background job waiting behind four foreground requests", async () => {
-    const { files, response } = await fixture(Array.from({ length: 10 }, () => 1))
-    const starts: string[] = []
-    const gates = new Map<string, ReturnType<typeof Promise.withResolvers<Response>>>()
-    const fetcher: Fetcher = (url) => {
-      starts.push(url)
-      const gate = Promise.withResolvers<Response>()
-      gates.set(url, gate)
-      return gate.promise
-    }
-    const bytes = new MetadataBytes("/cdn", files, fetcher, () => undefined, memoryCache())
-    const foreground = [0, 1, 2, 3].map((i) => bytes.read(`file${String(i)}`))
-    await tick()
-    const prefetch = bytes.prefetch()
-    await tick()
-    expect(starts).toHaveLength(4)
-    const promoted = bytes.read("file6")
-    expect(bytes.read("file6")).toBe(promoted)
-    gates.get("/cdn/data0")?.resolve(response("/cdn/data0"))
-    await foreground[0]
-    await vi.waitFor(
-      () => {
-        expect(starts[4]).toBe("/cdn/data6")
-      },
-      { interval: 1 },
-    )
-    bytes.cancel()
-    for (const [url, gate] of gates) gate.resolve(response(url))
-    await Promise.all([...foreground, promoted, prefetch])
-    expect(starts).toHaveLength(5)
-    bytes.dispose()
-  })
-
   it("does not let cancelled cleanup erase a replacement request for the same key", async () => {
     const { files, response } = await fixture([1, 1, 1, 1])
     const gate = Promise.withResolvers<undefined>()
@@ -172,8 +130,9 @@ describe("metadata library boundaries", () => {
       await gate.promise
       return response(url)
     })
-    const bytes = new MetadataBytes("/cdn", files, fetcher, () => undefined, memoryCache())
-    const prefetch = bytes.prefetch()
+    const bytes = new MetadataBytes("/cdn", files, fetcher, memoryCache())
+    const background = [0, 1, 2, 3].map((i) => bytes.read(`file${String(i)}`, false))
+    const backgroundSettled = Promise.allSettled(background)
     await tick()
     expect(fetcher).toHaveBeenCalledTimes(3)
     bytes.cancel()
@@ -181,7 +140,7 @@ describe("metadata library boundaries", () => {
     await tick()
     expect(bytes.read("file3")).toBe(promoted)
     gate.resolve(undefined)
-    await Promise.all([prefetch, promoted])
+    await Promise.all([backgroundSettled, promoted])
     expect(fetcher).toHaveBeenCalledTimes(4)
     bytes.dispose()
   })
@@ -198,7 +157,7 @@ describe("metadata library boundaries", () => {
           })
         }),
     )
-    const bytes = new MetadataBytes("/cdn", files, fetcher, () => undefined)
+    const bytes = new MetadataBytes("/cdn", files, fetcher)
     const reads = [0, 1, 2, 3, 4].map((i) => bytes.read(`file${String(i)}`))
     const results = Promise.allSettled(reads)
     await tick()
@@ -207,7 +166,6 @@ describe("metadata library boundaries", () => {
     expect((await results).every((result) => result.status === "rejected")).toBe(true)
     expect(fetcher).toHaveBeenCalledTimes(4)
     expect(aborted).toBe(4)
-    expect(bytes.status().done).toBe(0)
   })
 })
 
@@ -220,7 +178,6 @@ it("rejects a cancelled scoped image read and ignores bytes arriving after cance
     "/cdn",
     files,
     (url) => Promise.resolve(response(url)),
-    () => undefined,
     storage,
     background,
   )

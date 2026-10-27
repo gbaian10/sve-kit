@@ -240,6 +240,10 @@ export default defineConfig(
       ],
     },
   },
+  {
+    files: ["src/**/*.test.ts", "src/**/*.test.tsx", "src/test-utils/**"],
+    rules: { "no-restricted-imports": "off" },
+  },
   { files: ["src/data/**"], rules: apiBans(storageBan) },
   { files: ["src/settings/**"], rules: apiBans(fetchBan) },
   {

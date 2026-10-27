@@ -1,3 +1,5 @@
+import { defaultAccent } from "./theme-default"
+
 export const THEME_PREFS = ["system", "light", "dark"] as const
 export type ThemePref = (typeof THEME_PREFS)[number]
 
@@ -22,11 +24,6 @@ export function isThemePref(value: unknown): value is ThemePref {
 
 export function isAccent(value: unknown): value is Accent {
   return typeof value === "string" && (ACCENTS as readonly string[]).includes(value)
-}
-
-// The design pairs each theme with its own default; a chosen accent applies to both themes.
-export function defaultAccent(theme: ResolvedTheme): Accent {
-  return theme === "dark" ? "amber" : "teal"
 }
 
 // Same rule as public/theme-boot.js; the boot file cannot import this, so a test compares both.

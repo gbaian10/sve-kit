@@ -1,7 +1,8 @@
 import { afterEach, beforeEach, expect, it, vi } from "vitest"
 
 import { buildSnapshot } from "../../scripts/fixture/build"
-import { catalogOf, createSnapshotClient, peekAnnotatedTextResolver, stringValue } from "../data"
+import { catalogOf, peekAnnotatedTextResolver, stringValue } from "../data"
+import { createSnapshotClient } from "../data/client"
 import { memoryCache } from "../test-utils/cache"
 import type { CardContent } from "./card-content"
 import { prefetchCards } from "./card-prefetch"
