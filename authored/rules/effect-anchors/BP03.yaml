@@ -1,5 +1,33 @@
 bodies: {}
 cards:
+  BP03-033:
+    basis: effect-anchor-v1:sha256:400eba3e43ba26da6bba7ffc73457e5c1b0134bd4bc1ba62da6a31b79571b436
+    card_id: c:8f0e1dffafb451e588ec3545965958db
+    legacy_shape:
+      container: faces
+    source: effect-source-v1:sha256:712c6509a4002ac0682f456f8a49ab3086eddf06b9bff4f46fc9317e8eebb42f
+    uses:
+      - binding_id: bind:15332e7063afa280c05f1e68eb228a1555ccc944b34c64ba0a4f6abfa4abb82b
+        face_id: f:48c01a8fb9c852a4abb732024728b3c6
+        frame_id: frame:a24d26307e1052fd0e27ec31e40d9a2e483e2984527304490dbd8a876e43fa28
+        keywords:
+          - bane
+        line: 1
+        occurrence:
+          field: effect
+          line_ordinal: 0
+          ordinal: null
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:4f4306caca94af7aad7ec908e11753950b39c2702da540e401018ea0c7344af9
+          role: body
+          segments:
+            - end: 4
+              start: 0
+          source_hash: 58b65ad3b825b8afe69dfd71e3fc47474e391129756ef0ade35237682872a11a
+        ports:
+          exports: {}
+          imports: {}
   BP03-115:
     basis: effect-anchor-v1:sha256:8564a5ff24cad19d7d6d9b199629253eb5e17ea9933342265fd71a38bfd8eb6b
     card_id: c:91c75753f00c53beacd94342dbcd5f17

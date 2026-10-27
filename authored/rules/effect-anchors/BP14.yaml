@@ -1,0 +1,34 @@
+bodies: {}
+cards:
+  BP14-032:
+    basis: effect-anchor-v1:sha256:4497014a19a4855971d6df8ae6ab8c5b61a013406a9f88086c73d1519589c691
+    card_id: c:ede6a0af390e54f5bf362142be53a959
+    legacy_shape:
+      container: faces
+    source: effect-source-v1:sha256:05da475ac477bc49ee64ae389f4304754bb2699914e0a40190ee5381cb461515
+    uses:
+      - binding_id: bind:910c971db5ff591727730b03b26298bfdec89e11a6b88ddafaaebdf237d822ec
+        face_id: f:8445e41bbb985f83b1b42781f137ee91
+        frame_id: frame:c607b47b43d308b73ecd8e822bc0bdb01542350e094f2f80fa6959276c88ca52
+        keywords:
+          - storm
+        line: 1
+        occurrence:
+          field: effect
+          line_ordinal: 0
+          ordinal: null
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:bf631360ab8465cfd678ea9d08bd85c72277467ab11363a39644a86cdb5b176b
+          role: body
+          segments:
+            - end: 4
+              start: 0
+          source_hash: 3f4ec6dc23a7f623a3c9bc990e89c7095a8a714b71179ea38610f6c9df3ea23c
+        ports:
+          exports: {}
+          imports: {}
+format: 1
+kind: effect_anchor_set
+owner: BP14
+recipe: effect-anchor-v1

@@ -278,22 +278,6 @@ cards:
           other: true
         limit: 1
         limit_at: trigger
-  BP04-P07:
-    status: complete
-    abilities:
-      - line: 1
-        kind: evolve
-        body:
-          op: evolve
-          subjects: self
-        costs:
-          - op: pp
-            amount: 2
-      - line: 2
-        kind: static
-        body:
-          op: macro
-          name: bane
   BP04-SL16:
     status: complete
     abilities:

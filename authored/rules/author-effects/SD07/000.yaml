@@ -1,0 +1,18 @@
+cards:
+  SD07-006:
+    abilities:
+      - evolve:
+          cost:
+            pp: 3
+        line: 1
+      - keywords:
+          - storm
+        line: 2
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-luna
+            who: Codex
+          date: "2026-10-27"
+format: 2
+kind: author_effect_set
