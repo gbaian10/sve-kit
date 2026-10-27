@@ -13,9 +13,42 @@ import { KeywordFilter } from "./KeywordFilter"
 
 const keywords = [
   {
+    id: "kw:assail",
+    code: "assail",
+    name: {
+      original: { lang: "ja" as const, text: "指定攻擊" },
+      translations: { "zh-Hant": "指定攻擊" },
+    },
+  },
+  {
+    id: "kw:intimidate",
+    code: "intimidate",
+    name: { original: { lang: "ja" as const, text: "威懾" }, translations: { "zh-Hant": "威懾" } },
+  },
+  {
+    id: "kw:aura",
+    code: "aura",
+    name: { original: { lang: "ja" as const, text: "光紋" }, translations: { "zh-Hant": "光紋" } },
+  },
+  {
     id: "kw:ward",
     code: "ward",
     name: { original: { lang: "ja" as const, text: "守護" }, translations: { "zh-Hant": "守護" } },
+  },
+  {
+    id: "kw:bane",
+    code: "bane",
+    name: { original: { lang: "ja" as const, text: "必殺" }, translations: { "zh-Hant": "必殺" } },
+  },
+  {
+    id: "kw:drain",
+    code: "drain",
+    name: { original: { lang: "ja" as const, text: "吸血" }, translations: { "zh-Hant": "吸血" } },
+  },
+  {
+    id: "kw:rush",
+    code: "rush",
+    name: { original: { lang: "ja" as const, text: "突進" }, translations: { "zh-Hant": "突進" } },
   },
   {
     id: "kw:storm",
@@ -78,6 +111,17 @@ it("toggles multiple has chips, round trips the URL and removes conditions indep
   expect(decodeURIComponent(screen.getByLabelText("url").textContent)).toBe("mech=kw:storm")
   await userEvent.click(screen.getByRole("button", { name: "清除關鍵字" }))
   expect(screen.getByLabelText("url")).toBeEmptyDOMElement()
+})
+it("shows the eight keyword chips in the requested order with their icons", async () => {
+  await renderInRouter(<Harness />)
+  await userEvent.click(screen.getByRole("button", { name: /^關鍵字/u }))
+  const group = screen.getByRole("group", { name: "關鍵字" })
+  expect(
+    within(group)
+      .getAllByRole("button")
+      .map((button) => button.textContent),
+  ).toEqual(["指定攻擊", "威懾", "光紋", "守護", "必殺", "吸血", "突進", "疾馳"])
+  expect(group.querySelectorAll("img")).toHaveLength(6)
 })
 it.each([
   ["ja", "ja", "疾走"],

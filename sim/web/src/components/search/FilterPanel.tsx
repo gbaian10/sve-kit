@@ -33,7 +33,6 @@ export interface FilterPanelProps {
   readonly locations?: ReactNode
   readonly facets: {
     readonly rarity: ReactNode
-    readonly sets: ReactNode
     readonly traits: ReactNode
     readonly artists: ReactNode
     readonly keywords: ReactNode
@@ -254,17 +253,6 @@ export function FilterPanel({
       <div className="flex items-center gap-2">
         <Switch
           size="sm"
-          checked={query.serialOnly}
-          label={t("filters.serialOnly")}
-          onChange={(checked) => {
-            onChange({ ...query, serialOnly: checked })
-          }}
-        />
-        <span className="text-13 text-text-1">{t("filters.serialOnly")}</span>
-      </div>
-      <div className="flex items-center gap-2">
-        <Switch
-          size="sm"
           checked={query.errataOnly}
           label={t("filters.errataOnly")}
           describedBy={`${id}-errata-hint`}
@@ -306,6 +294,17 @@ export function FilterPanel({
           </p>
         </div>
       </div>
+      <div className="flex items-center gap-2">
+        <Switch
+          size="sm"
+          checked={query.serialOnly}
+          label={t("filters.serialOnly")}
+          onChange={(checked) => {
+            onChange({ ...query, serialOnly: checked })
+          }}
+        />
+        <span className="text-13 text-text-1">{t("filters.serialOnly")}</span>
+      </div>
     </>
   )
   const group = (title: string, children: ReactNode) => (
@@ -346,12 +345,10 @@ export function FilterPanel({
           </>,
         )}
         {group(
-          t("filters.groups.collection"),
+          t("filters.groups.printing"),
           <>
             {facets?.rarity}
             {stampBlock}
-            {facets?.sets}
-            {facets?.artists}
           </>,
         )}
         {group(
@@ -361,8 +358,14 @@ export function FilterPanel({
             {facets?.keywords}
           </>,
         )}
-        {group(t("filters.groups.more"), errataBlock)}
         {group(t("filters.display"), displayBlock)}
+        {group(
+          t("filters.groups.more"),
+          <div className="space-y-4">
+            {errataBlock}
+            {facets?.artists}
+          </div>,
+        )}
       </section>
     )
   }
@@ -410,17 +413,13 @@ export function FilterPanel({
         </div>
       </FilterGroup>
       <FilterGroup
-        title={t("filters.groups.collection")}
+        title={t("filters.groups.printing")}
         collapsible={collapsible}
         desktopClassName="md:contents"
       >
         <div className="md:col-span-3 md:row-start-3 md:border-b md:border-border md:p-4">
           {facets?.rarity}
           <div className="mt-3">{stampBlock}</div>
-        </div>
-        <div className="space-y-4 md:col-start-2 md:row-start-4 md:p-4">
-          {facets?.sets}
-          {facets?.artists}
         </div>
       </FilterGroup>
       <FilterGroup
@@ -429,26 +428,30 @@ export function FilterPanel({
         desktopClassName="md:contents"
       >
         <div className="md:col-start-1 md:row-start-4 md:p-4">{facets?.traits}</div>
-        <div className="md:col-start-3 md:row-start-4 md:p-4">{facets?.keywords}</div>
-      </FilterGroup>
-      <FilterGroup
-        title={t("filters.groups.more")}
-        collapsible={collapsible}
-        desktopClassName="md:contents"
-      >
-        <div className="space-y-3 md:col-start-1 md:row-start-5 md:rounded-bl-block md:border-t md:border-border md:bg-surface-2 md:p-4">
-          {errataBlock}
-        </div>
+        <div className="md:col-span-2 md:col-start-2 md:row-start-4 md:p-4">{facets?.keywords}</div>
       </FilterGroup>
       <FilterGroup
         title={t("filters.display")}
         collapsible={collapsible}
-        desktopClassName="md:row-start-5 md:col-span-2 md:col-start-2 md:rounded-br-block md:border-t md:border-border md:bg-surface-2 md:p-4"
+        desktopClassName="md:row-start-5 md:col-span-3 md:col-start-1 md:border-t md:border-border md:bg-surface-2 md:p-4"
       >
         <p className="mb-4 hidden text-12 font-semibold text-text-2 md:block">
           {t("filters.display")}
         </p>
         {displayBlock}
+      </FilterGroup>
+      <FilterGroup
+        title={t("filters.groups.more")}
+        collapsible={collapsible}
+        desktopClassName="md:row-start-6 md:col-span-3 md:col-start-1 md:border-t md:border-border md:p-4"
+      >
+        <p className="mb-4 hidden text-12 font-semibold text-text-2 md:block">
+          {t("filters.groups.more")}
+        </p>
+        <div className="space-y-4">
+          {errataBlock}
+          {facets?.artists}
+        </div>
       </FilterGroup>
       <div className="sticky bottom-21 z-50 -mx-3 -mb-3 rounded-b-block border-t border-border bg-surface-1 p-3 md:hidden phone-landscape:bottom-0">
         <Button

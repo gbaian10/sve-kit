@@ -751,6 +751,18 @@ export function CardsPage() {
       )}
     </>
   )
+  const setsBar = !code && (
+    <SetFilter
+      sets={sets}
+      quickSets={quickSets}
+      counts={setCounts}
+      textLang={textLang}
+      selected={query.sets}
+      onChange={(selected) => {
+        commit({ ...query, sets: selected })
+      }}
+    />
+  )
   const panelEl = (
     <FilterPanel
       sidebar={sidebar}
@@ -802,23 +814,6 @@ export function CardsPage() {
               commit({ ...query, rarities })
             }}
           />
-        ),
-        sets: (
-          <>
-            {/* A set page's set comes from its path, so the dropdown would only show one choice. */}
-            {!code && (
-              <SetFilter
-                sets={sets}
-                quickSets={quickSets}
-                counts={setCounts}
-                textLang={textLang}
-                selected={query.sets}
-                onChange={(sets) => {
-                  commit({ ...query, sets })
-                }}
-              />
-            )}
-          </>
         ),
         traits: (
           <TraitFilter
@@ -1006,6 +1001,7 @@ export function CardsPage() {
             filterCount={filterCount}
           >
             {classBar}
+            {setsBar}
             {panelEl}
           </FilterSidebar>
         )}
@@ -1123,6 +1119,7 @@ export function CardsPage() {
               }}
             >
               {classBar}
+              {setsBar}
               {panelEl}
             </FilterSheet>
           )}

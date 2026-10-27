@@ -238,7 +238,7 @@ const zhTW = {
     groups: {
       basic: "基本",
       stats: "數值",
-      collection: "收錄",
+      printing: "版次",
       effects: "效果",
       more: "其他",
     },

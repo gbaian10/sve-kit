@@ -593,6 +593,22 @@ describe("CardsPage", () => {
   })
 
   describe("filter panel", () => {
+    it("places the set filter immediately after the class row in the sheet", async () => {
+      await open()
+      const dialog = screen.getByRole("dialog", { name: "篩選條件" })
+      const classRow = screen.getByRole("group", { name: "職業" })
+      const setFilter = screen.getByRole("button", { name: /^卡包/u })
+      expect(classRow.nextElementSibling).toContainElement(setFilter)
+      expect(Array.from(dialog.querySelectorAll("h3"), (heading) => heading.textContent)).toEqual([
+        "基本",
+        "數值",
+        "版次",
+        "效果",
+        "顯示方式",
+        "其他",
+      ])
+    })
+
     it("opens as a sheet from the search bar button, without a place of its own while closed, and remembers the choice", async () => {
       await open("/cards?class=bishop", { panel: false })
       const button = screen.getByRole("button", { name: "篩選" })

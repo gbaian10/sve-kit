@@ -250,7 +250,7 @@ export default {
     groups: {
       basic: "基本",
       stats: "数値",
-      collection: "収録",
+      printing: "版",
       effects: "効果",
       more: "その他",
     },
