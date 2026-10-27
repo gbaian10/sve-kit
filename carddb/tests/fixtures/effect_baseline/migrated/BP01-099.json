@@ -1,0 +1,30 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "spell",
+      "body": {
+        "op": "damage",
+        "subjects": {
+          "side": "both",
+          "zone": "field",
+          "type": "follower"
+        },
+        "amount": {
+          "if": {
+            "fn": "ge",
+            "args": [
+              {
+                "read": "self.pp.max"
+              },
+              7
+            ]
+          },
+          "then": 3,
+          "else": 2
+        }
+      }
+    }
+  ]
+}
