@@ -141,6 +141,8 @@ env_files = [
 env_override_existing_values = false
 addopts = [
     "--import-mode=importlib",
+    # Keep each file's expensive session fixtures on one worker.
+    "--dist=loadfile",
     "--strict-markers",
     "--maxfail=3",
     # "--durations=5",
