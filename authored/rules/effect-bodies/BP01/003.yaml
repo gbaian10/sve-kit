@@ -1,0 +1,17 @@
+format: 2
+kind: effect_body_shard
+records:
+  - admission: shared
+    body:
+      lastword:
+        do:
+          - pp_max:
+              delta: 1
+              who: self
+    id: increase_1_max_pp_lastword.v1
+    params: {}
+    written_by:
+      - actor:
+          model: Codex gpt-6-sol
+          who: Codex
+        date: "2026-10-28"
