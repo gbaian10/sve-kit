@@ -40,6 +40,27 @@ pub(super) fn source_original(requirements: &Requirements, requirement: &Require
         })
 }
 
+// A scalar count does not grant authority to select hidden objects in other contexts.
+pub(super) fn count_zone(requirements: &Requirements, requirement: &Requirement) -> bool {
+    matches!(
+        requirement.capability.code,
+        "internal.ZoneKind.Hand" | "internal.ZoneKind.Deck"
+    ) && requirement.locations.iter().all(|location| {
+        location
+            .ir_path
+            .strip_suffix("/selector/zone")
+            .is_some_and(|read| {
+                requirements.required.iter().any(|other| {
+                    other.capability.code == "read.zone-count"
+                        && other
+                            .locations
+                            .iter()
+                            .any(|count_location| count_location.ir_path == read)
+                })
+            })
+    })
+}
+
 #[expect(
     clippy::multiple_inherent_impl,
     reason = "Source reads share the execution's private authority proof."

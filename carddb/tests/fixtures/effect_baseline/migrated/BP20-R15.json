@@ -1,0 +1,81 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "evolve",
+      "body": {
+        "op": "evolve",
+        "subjects": "self"
+      },
+      "costs": [
+        {
+          "op": "pp",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "line": 2,
+      "kind": "static",
+      "body": {
+        "op": "macro",
+        "name": "rush"
+      }
+    },
+    {
+      "line": 3,
+      "kind": "trigger",
+      "body": {
+        "op": "if",
+        "condition": {
+          "fn": "le",
+          "args": [
+            {
+              "count": {
+                "side": "self",
+                "zone": "hand"
+              }
+            },
+            2
+          ]
+        },
+        "then": {
+          "op": "seq",
+          "steps": [
+            {
+              "op": "damage",
+              "subjects": "opponent.leader",
+              "amount": 3
+            },
+            {
+              "op": "if",
+              "condition": {
+                "fn": "eq",
+                "args": [
+                  {
+                    "count": {
+                      "side": "self",
+                      "zone": "hand"
+                    }
+                  },
+                  0
+                ]
+              },
+              "then": {
+                "op": "damage",
+                "subjects": {
+                  "side": "opponent",
+                  "zone": "field",
+                  "type": "follower"
+                },
+                "amount": 3
+              }
+            }
+          ]
+        }
+      },
+      "event": "end"
+    }
+  ]
+}

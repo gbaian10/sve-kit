@@ -173,25 +173,6 @@ cards:
         body:
           op: macro
           name: intimidate
-  BP01-099:
-    status: complete
-    abilities:
-      - line: 1
-        kind: spell
-        body:
-          op: damage
-          subjects:
-            side: both
-            zone: field
-            type: follower
-          amount:
-            if:
-              fn: ge
-              args:
-                - read: self.pp.max
-                - 7
-            then: 3
-            else: 2
   BP01-105:
     status: complete
     abilities:

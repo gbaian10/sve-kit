@@ -61,24 +61,3 @@ cards:
             costs:
               - op: pp
                 amount: 2
-  SD07-016:
-    status: complete
-    abilities:
-      - line: 1
-        kind: activated
-        body:
-          op: damage
-          subjects: target.1
-          amount: 1
-        quick: true
-        targets:
-          - key: "1"
-            select:
-              side: opponent
-              zone: field
-              type: follower
-            min: 1
-            max: 1
-        costs:
-          - op: act
-            subjects: self

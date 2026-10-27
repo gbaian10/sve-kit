@@ -6,6 +6,9 @@ use sve_engine::game::internal::{Activation, Answer, CardPlay, Fact, InputDomain
 use sve_engine::game::{Game, View};
 use sve_engine::ir::*;
 
+#[path = "runtime/conditions_quick.rs"]
+mod conditions_quick;
+
 const NUMBER: &str = "BP01-P25";
 
 pub(super) fn setup(seat: &str, owner: &str, life: [u8; 2]) -> Value {

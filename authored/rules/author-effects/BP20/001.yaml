@@ -1,0 +1,56 @@
+cards:
+  BP20-R15:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - keywords:
+          - rush
+        line: 2
+      - auto:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: hand
+                    op: le
+                    right: 2
+                then:
+                  - damage:
+                      n: 3
+                      to:
+                        leaders: opponents
+                  - if:
+                      cond:
+                        cmp:
+                          left:
+                            count:
+                              who: self
+                              zone: hand
+                          op: eq
+                          right: 0
+                      then:
+                        - damage:
+                            n: 3
+                            to:
+                              kind: follower
+                              who: opp
+                              zone: field
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-sol
+            who: Codex
+          date: "2026-10-28"
+format: 2
+kind: author_effect_set

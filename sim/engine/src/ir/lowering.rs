@@ -1,6 +1,7 @@
 //! Candidate-only lowering of C0's expanded tree, without source or runtime admission.
 
 mod ast;
+mod conditions;
 mod costs;
 mod current;
 mod evolution;
@@ -533,9 +534,11 @@ fn ability_body<'entry>(
             (None, None, None, None, Some(body), None, None) => {
                 (body, "evolve_time", Some(KeywordId::OnEvolve))
             }
-            (None, None, None, None, None, Some(activated), None) => {
-                (&activated.body, "activate", None)
-            }
+            (None, None, None, None, None, Some(activated), None) => (
+                &activated.body,
+                "activate",
+                (activated.quick == Some(true)).then_some(KeywordId::Quick),
+            ),
             (None, None, None, None, None, None, Some(body)) => (body, "spell", None),
             _ => return Err(unsupported(path)),
         },
@@ -721,19 +724,7 @@ impl BodyContext<'_> {
         for (index, step) in author_steps.iter().enumerate() {
             let step_path = format!("{path}/{index}");
             if let ast::Step::If(conditional) = step {
-                let (name, receipt) = self
-                    .payment_result
-                    .as_ref()
-                    .ok_or_else(|| unsupported(&step_path))?;
-                if name != &conditional.cond.paid.receipt {
-                    return Err(unsupported(&step_path));
-                }
-                let condition = Expr::Frozen(Box::new(super::BoolFrozen::PaymentComplete {
-                    receipt: super::PaymentReference::CardPlay {
-                        face: FaceId(source.face.clone()),
-                        receipt: *receipt,
-                    },
-                }));
+                let condition = self.condition(&conditional.cond, source, &step_path)?;
                 let parent = self.scope;
                 self.scope = self.card_allocator.scope(&step_path)?;
                 let then_body = self.steps(
@@ -774,7 +765,7 @@ impl BodyContext<'_> {
                 continue;
             }
             let instruction_id = self.card_allocator.id(&step_path)?;
-            let action = self.action(step, &step_path, ability_source)?;
+            let action = self.action(step, &step_path, ability_source, source)?;
             self.remember(step, ReceiptId(instruction_id), &step_path)?;
             let mut step_source = source.clone();
             step_source.author_path = step_path;
@@ -804,6 +795,7 @@ impl BodyContext<'_> {
         step: &ast::Step,
         path: &str,
         source: &AbilitySource,
+        span: &SourceSpan,
     ) -> Result<Action, LoweringError> {
         match step {
             ast::Step::Choice(_) | ast::Step::If(_) => Err(unsupported(path)),
@@ -843,7 +835,7 @@ impl BodyContext<'_> {
                 count: self.number(&draw.n, path, &mut BTreeSet::new())?,
                 mode: StepwiseMode::Exact,
             }),
-            ast::Step::Damage(damage) => self.damage(damage, path),
+            ast::Step::Damage(damage) => self.damage(damage, span, path),
             ast::Step::Life(life) => {
                 let ast::SelfPlayer::Controller = life.who;
                 Ok(Action::Life {
@@ -861,62 +853,6 @@ impl BodyContext<'_> {
                         amount: self.number(&life.n, path, &mut BTreeSet::new())?,
                     },
                 })
-            }
-        }
-    }
-
-    fn number(
-        &mut self,
-        value: &ast::Number,
-        path: &str,
-        active: &mut BTreeSet<String>,
-    ) -> Result<Expr<Int>, LoweringError> {
-        match value {
-            ast::Number::Literal(value) => Ok(Expr::Literal(Int(*value))),
-            ast::Number::Alias(name) => {
-                if !active.insert(name.clone()) {
-                    return Err(unsupported(path));
-                }
-                let definition = self
-                    .definitions
-                    .get(name)
-                    .ok_or_else(|| unsupported(path))?;
-                let result = self.number(definition, path, active);
-                active.remove(name);
-                result
-            }
-            ast::Number::Minus { minus } => {
-                let [left, right] = minus.as_ref();
-                Ok(Expr::Compute(Box::new(IntOperation::Arithmetic {
-                    operation: Arithmetic::Subtract,
-                    arguments: vec![
-                        self.number(left, path, active)?,
-                        self.number(right, path, active)?,
-                    ],
-                })))
-            }
-            ast::Number::Count { count } => {
-                let ast::SelfPlayer::Controller = count.who;
-                let ast::DeckZone::Deck = count.zone;
-                Ok(Expr::Compute(Box::new(IntOperation::FromNat {
-                    value: Expr::Live(Box::new(NatRead::ZoneCount {
-                        selector: Selector::Zone {
-                            players: PlayerSet {
-                                relation: PlayerRelation::SelfPlayer,
-                                relative_to: PlayerRef::Controller {},
-                                cardinality: Cardinality {
-                                    minimum: Nat(1),
-                                    maximum: Some(Nat(1)),
-                                },
-                                text_quantifier: TextQuantifier::Implicit,
-                            },
-                            zone: ZoneKind::Deck,
-                            view: SelectionView::Current {},
-                            binding: Binding::new(self.allocator.id(path)?, self.scope),
-                            predicate: Box::new(Expr::Literal(Bool(true))),
-                        },
-                    })),
-                })))
             }
         }
     }

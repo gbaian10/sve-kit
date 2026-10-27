@@ -21,6 +21,9 @@ mod fanfare;
 
 #[path = "card/field_actions.rs"]
 mod field_actions;
+
+#[path = "card/conditions.rs"]
+mod conditions;
 #[path = "card/leader_damage.rs"]
 mod leader_damage;
 
