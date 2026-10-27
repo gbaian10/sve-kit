@@ -192,8 +192,7 @@ archived regional version, preserving replaced and withdrawn observations.
 Listing sources are stored as `list`, details as `qa`, card pages as `card`;
 pin the applicable archive scopes when sealing. `coverage(root)` independently
 checks the latest attempt's raw hashes, frozen sources, exact edges, metadata and
-closure even if its manifest flag says validated. `generation_pages(root)` gives
-that attempt's verified observations. `report(root)` combines identifier-only
+closure even if its manifest flag says validated. `report(root)` combines identifier-only
 coverage and cross-page conflicts; it contains no official wording. None of
 these methods writes a temporal QA `source_coverage` window or confirms semantic
 absence from a card-list generation.

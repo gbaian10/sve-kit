@@ -17,9 +17,9 @@ from sve_carddb.build import (
     create_database,
 )
 from sve_carddb.build.t0 import TABLES as T0_TABLES
-from sve_carddb.build.t0 import compile_t0
 from sve_carddb.build.t1 import REGISTRY, compile_build
 from sve_carddb.build.t1_cr import TABLES as CR_TABLES
+from tests.support.schema_helpers import compile_t0
 
 from ..support.build_db_fixtures import seed
 from ..support.build_db_t1_fixtures import populate, rows

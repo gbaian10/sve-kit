@@ -104,8 +104,3 @@ def compile_build(requested: tuple[str, ...] = ("t0",)) -> CompiledSchema:
         | {"TranslationTokens": {"type": "null"}},
         version=SCHEMA_VERSION,
     )
-
-
-def compile_minimum(*, include_en: bool = False) -> CompiledSchema:
-    """Compile the minimum DDL inventory, without asserting pipeline readiness."""
-    return compile_build(MINIMUM_CAPABILITIES + (("en",) if include_en else ()))

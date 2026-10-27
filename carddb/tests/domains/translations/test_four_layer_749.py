@@ -36,10 +36,7 @@ from sve_carddb.domains.translations.four_layer_expressions import (
     verify_target_shape,
 )
 from sve_carddb.domains.translations.four_layer_n3_events import HOLDER_REVISIONS
-from sve_carddb.domains.translations.four_layer_n3_ports import (
-    verify_counter_witness,
-    verify_pool_allocation,
-)
+from sve_carddb.domains.translations.four_layer_n3_ports import verify_pool_allocation
 from sve_carddb.domains.translations.four_layer_n3_shapes import CHOICE_DOMAIN
 from sve_carddb.domains.translations.four_layer_render import (
     BoundTarget,
@@ -47,6 +44,7 @@ from sve_carddb.domains.translations.four_layer_render import (
     Renderer,
     SelectedTarget,
 )
+from tests.support.aggregate_probes import verify_counter_witness
 
 from .expression_fixtures import expression_plan
 from .test_four_layer_classification import classifier, source

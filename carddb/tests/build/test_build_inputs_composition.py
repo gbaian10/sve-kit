@@ -29,24 +29,9 @@ from ..support.registry_preview_fixtures import BUILD, REVISION
 from ..support.registry_snapshot_fixtures import registry_root as registry_root  # ruff: ignore[useless-import-alias] -- fixture dependency
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable
     from pathlib import Path
 
-    from sve_carddb.core.provenance import BuildContext, InputRecord
     from sve_carddb.domains.registry.review import Inputs
-
-    from ..support.identity_evidence_fixtures import MemoryEvidence
-
-
-def _omit_first_use(build: BuildContext, uses: Iterable[SourceUse]) -> InputRecord:
-    return input_record(build, tuple(uses)[1:])
-
-
-def _jp_only(provider: MemoryEvidence) -> MemoryEvidence:
-    return replace(
-        provider,
-        cards={key: value for key, value in provider.cards.items() if key[0] == "jp"},
-    )
 
 
 @pytest.mark.parametrize("preexisting", [False, True])

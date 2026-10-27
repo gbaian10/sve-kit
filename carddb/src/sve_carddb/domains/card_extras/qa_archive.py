@@ -79,10 +79,6 @@ class FrozenOfficialExtras:
             )
             yield parse_card_page(raw, source, region=self.region)
 
-    def generation_pages(self, root: str) -> tuple[QAPage, ...]:
-        """Scope reconciliation to the latest attempt's verified frozen members."""
-        return self._pages(self.coverage(root).source_ids)
-
     def _pages(self, ids: tuple[str, ...]) -> tuple[QAPage, ...]:
         pages = []
         for version in ids:

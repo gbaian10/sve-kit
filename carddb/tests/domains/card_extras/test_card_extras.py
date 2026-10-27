@@ -10,7 +10,6 @@ from sve_carddb.build import create_database
 from sve_carddb.build.source_rows import source_values
 from sve_carddb.build.t1 import compile_build
 from sve_carddb.core.json import canonical
-from sve_carddb.core.provenance import input_record
 from sve_carddb.domains.card_extras import (
     ErrataChange,
     ErrataPage,
@@ -29,7 +28,6 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
 
     from sve_carddb.build import CompiledSchema, Database
-    from sve_carddb.core.provenance import BuildContext, InputRecord, SourceUse
 
 
 @pytest.fixture(scope="module")
@@ -499,10 +497,6 @@ def test_planned_extras_keep_the_configuration_boundary(db: Database) -> None:
         record = populate_planned_card_extras(db, plan, build=context(plan))
     assert len(db.rows("qa_version")) == len(plan.questions)
     assert record.uses == plan.source_uses()
-
-
-def _omit_use(build: BuildContext, uses: tuple[SourceUse, ...]) -> InputRecord:
-    return input_record(build, uses[1:])
 
 
 def test_cardlist_complete_does_not_imply_qa_or_errata_coverage(db: Database) -> None:

@@ -11,9 +11,7 @@ from sve_carddb.contracts.four_layer import (
 from sve_carddb.domains.translations.four_layer_context import Descriptor, Parameter
 
 if TYPE_CHECKING:
-    from collections.abc import Collection
-
-    from sve_carddb.contracts.four_layer import LeafType, ObjectGeneration
+    from sve_carddb.contracts.four_layer import LeafType
     from sve_carddb.contracts.source_binding import TypedValue
 
 
@@ -306,16 +304,3 @@ def lowering(descriptor: str, operands: tuple[str, ...]) -> Lowering:
         if descriptor.startswith("aggregate.pair.")
         else None,
     )
-
-
-def disjoint_pair_count(
-    left: Collection[ObjectGeneration],
-    right: Collection[ObjectGeneration],
-) -> int:
-    """A finite contract probe; this does not evaluate a DSL selector or pair event."""
-    a, b = set(left), set(right)
-    if len(a) != len(left) or len(b) != len(right) or a & b:
-        raise ValueError(
-            "Pair operands must be disjoint with each card used at most once"
-        )
-    return min(len(a), len(b))

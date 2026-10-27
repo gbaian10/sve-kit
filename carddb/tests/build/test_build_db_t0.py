@@ -11,13 +11,14 @@ from pydantic import JsonValue
 from sve_carddb.build import CompiledSchema, Database, Json, Value
 from sve_carddb.build.database import install_functions, open_database
 from sve_carddb.build.model import identifier
-from sve_carddb.build.t0 import TABLES, compile_t0
+from sve_carddb.build.t0 import TABLES
 from sve_carddb.build.t0_json import symbol_valid
 from sve_carddb.build.validation import Rules, shared_rules
 from sve_carddb.contracts.snapshot import validate
 from sve_carddb.core.dates import DATE as DATE_PATTERN
 from sve_carddb.core.dates import INSTANT as INSTANT_PATTERN
 from sve_carddb.core.json import canonical
+from tests.support.schema_helpers import compile_t0
 
 from ..support.build_db_fixtures import DATE, HASH, INSTANT, seed
 

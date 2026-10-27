@@ -96,7 +96,7 @@ Card merging by itself does not create a route alias.
 ### Remaining gates
 
 Legacy `load`/`read_registry_files`/`load_registry`, append planner (including its
-preloaded input) and relayout calls still reject nonempty transitions. The explicit
+preloaded input) still reject nonempty transitions. The explicit
 reviewed append path below accepts a fully verified renewal snapshot.
 `storage.read_base_files` reads only original envelopes for the replay boundary;
 it is not a replacement builder/reader and does not apply transitions. An empty

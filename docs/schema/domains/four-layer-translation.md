@@ -1150,7 +1150,7 @@ expression 依賴經 transform 一起重映射，binding 與 `LeafSlot.expressio
 
 `aggregate.pair.named.v1` 固定兩個已核卡名概念；`aggregate.pair.kind.v1` 固定 mage 類型、
 follower／spell 兩個互斥種類。兩者都限制自己的墓場，不能以總張數除二。
-`disjoint_pair_count` 僅供有限契約驗證，拒絕同組重複及兩組交集，不負責解析或求值 DSL selector。
+`tests.support.aggregate_probes.disjoint_pair_count` 僅供有限契約驗證，拒絕同組重複及兩組交集，不負責解析或求值 DSL selector。
 
 `four_layer_totals.lowering` 另列來源 descriptor、operand 槽、具體 unresolved 原因及配對規則，
 `executable` 固定為 false。執行證據與去重策略不放進來源 frame；
@@ -1468,7 +1468,7 @@ H01 的 EX 指示物兩段比較使用同一張卡、同一物件世代、live �
 見證必須讓已達最高門檻成立：4／10 只可選 10；4／9 可選任一；10／12 可選任一，
 但兩次讀值必同世代；3／2 或空集合為 false／false，不捏造 holder；0／10 只可選 10。
 錯種類、換世代、換能力、換分枝都不可借用。這些 K5 見證條件是 lowering／runtime 的約束；
-`verify_counter_witness` 提供參考檢查，供後續 lowering 使用，本階段來源驗證不執行。
+`tests.support.aggregate_probes.verify_counter_witness` 僅供測試的有限參考檢查，本階段來源驗證不執行。
 前段五個 4 隨 typed read 使用 `comparison_threshold`；沒有 typed read 的舊 `threshold` 不改。
 
 H02 的 `counter_amount` 是 up_to 常數 QuantitySpec，與目前量、移除量分開。

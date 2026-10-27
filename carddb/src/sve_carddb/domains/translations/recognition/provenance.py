@@ -49,8 +49,3 @@ def nfkc(text: str, positions: tuple[int, ...]) -> tuple[Unit, ...]:
     if "".join(unit.text for unit in units) != unicodedata.normalize("NFKC", text):
         raise ValueError("NFKC provenance differs from whole-string normalization")
     return tuple(units)
-
-
-def raw_value(text: str, unit: Unit) -> str:
-    """Reconstruct exact source spellings in memory; candidate outputs use their hashes."""
-    return "".join(text[s.start : s.end] for s in unit.origins)

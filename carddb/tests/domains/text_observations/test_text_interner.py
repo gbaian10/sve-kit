@@ -6,9 +6,9 @@ from typing import TYPE_CHECKING
 import pytest
 
 from sve_carddb.build import Json, create_database
-from sve_carddb.build.t0 import compile_t0
 from sve_carddb.domains.products.models import LocalizedText
 from sve_carddb.domains.text_observations.intern import TextInterner
+from tests.support.schema_helpers import compile_t0
 
 if TYPE_CHECKING:
     from sve_carddb.build import Database

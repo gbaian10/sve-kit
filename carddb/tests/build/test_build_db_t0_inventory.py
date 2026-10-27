@@ -2,6 +2,7 @@
 
 import operator
 import re
+from collections.abc import MutableMapping
 from pathlib import Path
 from types import MappingProxyType
 from typing import TYPE_CHECKING, cast
@@ -15,7 +16,7 @@ from sve_carddb.build.t1 import TABLES as T1_TABLES
 from sve_carddb.core.dates import DATE, INSTANT
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping, MutableMapping
+    from collections.abc import Mapping
 
 DOCS = Path(__file__).resolve().parents[3] / "docs" / "schema" / "build"
 
@@ -216,5 +217,7 @@ class TestDocumentedInventory:
     ) -> None:
         with pytest.raises(TypeError):
             operator.setitem(
-                cast("MutableMapping[str, str]", documented_rows), "card", "changed"
+                cast(MutableMapping[str, str], documented_rows),  # ruff: ignore[runtime-cast-value] -- expose the actual type reference to dead-code checks
+                "card",
+                "changed",
             )

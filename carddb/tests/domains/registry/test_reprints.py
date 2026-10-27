@@ -5,8 +5,8 @@ from typing import TYPE_CHECKING
 import pytest
 
 from sve_carddb.build import create_database
-from sve_carddb.build.t0 import compile_t0
 from sve_carddb.domains.registry.reprints import FILE, load_reprints, populate_reprints
+from tests.support.schema_helpers import compile_t0
 
 from ...support.build_db_fixtures import seed
 

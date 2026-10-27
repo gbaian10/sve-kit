@@ -1,12 +1,13 @@
 """Current name associations recheck their own immutable physical identity."""
 
 import re
+import shutil
 from typing import TYPE_CHECKING
 
 import pytest
 
 from sve_carddb.core.json import digest, object_value
-from sve_carddb.domains.registry.storage import load, relayout, write_files
+from sve_carddb.domains.registry.storage import load, plan_files, write_files
 from sve_carddb.domains.translations.names.identity import IdentityEvidence
 
 from ...support.adoption_fixtures import commit
@@ -82,7 +83,10 @@ def test_current_physical_observation_and_identity(
             object_value(entry.data["observation"])["observation_hash"] = digest(
                 b"wrong"
             )
-    write_files(relayout(root, list(entries.values())))
+    # Replace only this synthetic fixture; production append correctly rejects changed records.
+    for directory in ("ids", "registry"):
+        shutil.rmtree(root / directory)
+    write_files(plan_files(root, list(entries.values())))
     revision = commit(fixture.root)
     with pytest.raises(ValueError, match="^" + re.escape(message) + "$"):
         IdentityEvidence(fixture.sources(), revision).association(
