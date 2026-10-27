@@ -235,7 +235,14 @@ def test_reverse_positions_preserve_concrete_cross_line_coverage() -> None:
             seen.add(key)
             assert row["frame_ids"] == expected[key], key
             assert row["category"] in categories, key
-            abilities = array(object_value(cards[number])["abilities"])
+            # Review positions describe the frozen prototype, including migrated cards.
+            frozen = BASELINE / "migrated" / f"{number}.json"
+            card = (
+                OBJECT.validate_json(frozen.read_bytes())
+                if frozen.exists()
+                else object_value(cards[number])
+            )
+            abilities = array(card["abilities"])
             reverse_location = json.dumps(
                 [row[k] for k in ("face", "field", "section", "line")]
             )
