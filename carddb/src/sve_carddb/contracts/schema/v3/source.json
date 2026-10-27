@@ -266,7 +266,8 @@
     "Changes",
     "Index",
     "ImageDisplayVariant",
-    "IndexEntry"
+    "IndexEntry",
+    "StampMark"
   ],
   "definitions": {
     "ID": {
@@ -2922,6 +2923,38 @@
           "additionalProperties": false
         }
       ]
+    },
+    "StampMark": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "year": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "year"
+      ],
+      "additionalProperties": false
     }
   },
   "tuples": {
@@ -5572,6 +5605,40 @@
           }
         },
         "reprint": {
+          "schema": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Bool"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "descriptor": {
+            "nullable": {
+              "scalar": "Bool"
+            }
+          }
+        },
+        "stamp": {
+          "schema": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/StampMark"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "descriptor": {
+            "nullable": {
+              "json": "StampMark"
+            }
+          }
+        },
+        "serial": {
           "schema": {
             "anyOf": [
               {
@@ -9553,6 +9620,12 @@
           "from": "printing"
         },
         "reprint": {
+          "from": "printing"
+        },
+        "stamp": {
+          "from": "printing"
+        },
+        "serial": {
           "from": "printing"
         }
       },

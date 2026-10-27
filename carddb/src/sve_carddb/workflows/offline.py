@@ -52,6 +52,7 @@ from sve_carddb.domains.registry.leader_frames import (
     load_leader_frames,
     populate_leader_frames,
 )
+from sve_carddb.domains.registry.marks import load_marks, populate_marks
 from sve_carddb.domains.registry.preview import (
     FrozenEN,
     FrozenJP,
@@ -650,6 +651,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
     badges = load_badges(authored_root(inputs.repo))
     leader_frames = load_leader_frames(authored_root(inputs.repo))
     reprints = load_reprints(authored_root(inputs.repo))
+    marks = load_marks(authored_root(inputs.repo))
     flavor = load_flavor(authored_root(inputs.repo))
     qa_translations = load_qa(authored_root(inputs.repo))
     configuration["qa_translations"] = digest(
@@ -717,6 +719,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             missing_badges = populate_badges(db, badges)
             populate_leader_frames(db, leader_frames)
             populate_reprints(db, reprints)
+            populate_marks(db, marks)
             if names is not None and names.inputs is not None:
                 replay = _current_names(adoptions, context, stores, db, name_sources)
                 assert replay is not None

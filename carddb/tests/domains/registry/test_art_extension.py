@@ -13,7 +13,11 @@ from sve_carddb.domains.registry.preview import import_preview, plan_preview
 from sve_carddb.domains.registry.records import ArtData, ArtUse, PrintingData
 from sve_carddb.domains.registry.snapshot import load_registry
 from sve_carddb.domains.registry.storage import Entry, Shard
-from sve_carddb.domains.registry.transitions.renewal import load_renewed_registry
+from sve_carddb.domains.registry.transitions.renewal import (
+    load_candidate_registry,
+    load_identity_registry,
+    load_renewed_registry,
+)
 from sve_carddb.domains.registry.transitions.writer import (
     ArtDecisions,
     Recipe,
@@ -152,6 +156,10 @@ def test_complete_art_extension_preserves_original_bytes_and_projects_both_uses(
     assert isinstance(updated, ArtData)
     assert len(updated.uses) == 2
     assert updated.observation == art_case.original.observation
+    candidates = load_candidate_registry(root)
+    assert candidates.records["art:" + art_case.original.id].data == updated
+    identities = load_identity_registry(root)
+    assert "art:" + art_case.original.id not in identities.records
     assert {use.usage for use in snapshot.transition_uses} == {
         "identity_transition_art",
         "identity_transition_art_image",

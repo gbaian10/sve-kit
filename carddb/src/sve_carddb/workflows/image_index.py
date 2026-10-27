@@ -54,6 +54,7 @@ from sve_carddb.workflows.image_reuse import (
     scope_manifest,
 )
 from sve_carddb.workflows.offline import Inputs, registry_plan, source_batches
+from sve_carddb.workflows.stamps import detect_stamps
 
 if TYPE_CHECKING:
     from sve_carddb.core.provenance import Source
@@ -66,6 +67,7 @@ if TYPE_CHECKING:
 app = typer.Typer(
     no_args_is_help=True, help="Build image assets and pinned image metadata."
 )
+app.command("detect-stamps")(detect_stamps)
 app.command("art-candidates")(art_candidates)
 
 

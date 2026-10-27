@@ -42,6 +42,7 @@ def schemas() -> dict[str, JsonValue]:
         }
     ]
     return {
+        "printing_stamp": definition("StampMark"),
         "decision_sample_ids": _array({"type": "string", "minLength": 1}, unique=True),
         "language_fallback_order": _array(lang, unique=True),
         "card_engine_support_reason_codes": _array(code, unique=True),
