@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.core.json import array, digest, object_value, string
+from sve_carddb.core.json import array, digest, object_value, parse, string
 from sve_carddb.core.yaml import JSON_VALUE, parse_yaml
 from sve_carddb.workflows import authoring
 
