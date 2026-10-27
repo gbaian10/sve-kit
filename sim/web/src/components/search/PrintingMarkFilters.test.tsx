@@ -33,7 +33,6 @@ function Harness({ sidebar }: { readonly sidebar: boolean }) {
               }}
             />
           ),
-          sets: null,
           traits: null,
           artists: null,
           keywords: null,
