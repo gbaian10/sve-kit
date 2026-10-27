@@ -40,6 +40,7 @@ mod numeric;
 mod ordering;
 mod posture;
 mod resource;
+mod reveal;
 mod search;
 mod terminal;
 pub use terminal::Terminal;
@@ -233,6 +234,8 @@ pub enum InstructionOutcome {
     Destroy(DestroyOutcome),
     /// Fixed generations protected until this resolution ends.
     Installed(Vec<ObjectRef>),
+    /// Publicly revealed generations; no subsequent private selector authority.
+    Revealed(Vec<ObjectRef>),
     /// Objects observed without movement or a generation change.
     Look(LookOutcome),
     /// Successful same-deck ordering; never a cross-zone movement.
@@ -370,6 +373,7 @@ pub(super) struct Execution {
     waiting: Option<(DecisionView, Wait)>,
     destroy_guards: Vec<ObjectRef>,
     look_viewers: BTreeMap<ReceiptId, PlayerId>,
+    reveals: Vec<reveal::PublicHand>,
     allocations: BTreeMap<(ScopeId, u64), allocation::Allocation>,
     origin: Option<Box<Game>>,
     ability: Option<RuntimeAbilitySource>,
@@ -537,6 +541,7 @@ impl Game {
                 waiting: None,
                 destroy_guards: Vec::new(),
                 look_viewers: BTreeMap::new(),
+                reveals: Vec::new(),
                 allocations: BTreeMap::new(),
                 origin: Some(Box::new(before.clone())),
                 ability: None,
@@ -919,10 +924,12 @@ impl Game {
             self.internal_play_parameters(execution)?;
         }
         while execution.waiting.is_none() {
+            self.internal_reveal_expiry(execution, false);
             if self.internal_quota_wait(execution)? {
                 break;
             }
             let Some(node) = execution.todo.pop_front() else {
+                self.internal_reveal_expiry(execution, true);
                 if execution.field_entry {
                     return self.internal_field_card_finish(execution);
                 }
@@ -989,6 +996,7 @@ impl Game {
                 Node::Control { .. } => return Err(unsupported("control")),
             }
         }
+        self.internal_reveal_expiry(execution, false);
         Ok(())
     }
 
@@ -1099,6 +1107,9 @@ impl Game {
             Action::Discard { .. } => self.internal_discard_wait(execution, instruction)?,
             Action::Life { .. } => self.internal_life(execution, &instruction)?,
             Action::Modify { .. } => self.internal_modify(execution, &instruction)?,
+            Action::Reveal { objects } => {
+                self.internal_reveal(execution, &instruction, objects)?;
+            }
             Action::Look { .. } => self.internal_look(execution, &instruction)?,
             Action::Order { .. } => self.internal_order(execution, instruction)?,
             Action::Draw {

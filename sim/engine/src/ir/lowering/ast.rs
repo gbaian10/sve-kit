@@ -187,6 +187,7 @@ pub(super) enum Step {
     Apply(Apply),
     Search(Search),
     Look(Look),
+    Reveal(Reveal),
     Move(Move),
 }
 
@@ -928,4 +929,25 @@ pub(super) enum AbilityDamage {
 #[serde(deny_unknown_fields)]
 pub(super) struct DamageDuring {
     pub turn: EntryPlayer,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Reveal {
+    pub r#ref: WholeHand,
+    #[serde(rename = "bind")]
+    pub _bind: String,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct WholeHand {
+    pub who: Side,
+    pub zone: HandZone,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum HandZone {
+    Hand,
 }

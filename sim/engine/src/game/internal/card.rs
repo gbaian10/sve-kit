@@ -802,6 +802,7 @@ fn check_nodes(
                         ..
                     } | Action::Resource { .. }
                         | Action::Discard { .. }
+                        | Action::Reveal { .. }
                         | Action::Move { .. }
                         | Action::Destroy { .. }
                         | Action::Life { .. }

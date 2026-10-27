@@ -85,6 +85,17 @@ pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
     }
     let mut inspected = node.clone();
     mask_discard(&mut inspected)?;
+    if let Node::Instruction { instruction } = &mut inspected
+        && let Action::Reveal { objects } = &instruction.action
+    {
+        super::reveal::check_objects(objects)?;
+        // Only the reveal operand has authority to read this private whole hand.
+        instruction.action = Action::Draw {
+            player: PlayerRef::Controller {},
+            count: Expr::Literal(Int(0)),
+            mode: StepwiseMode::Exact,
+        };
+    }
     mask_resolution_domain(&mut inspected)?;
 
     if let Node::Instruction { instruction } = &mut inspected
