@@ -54,7 +54,11 @@ UseDependencies.imports 值恰為 binding_id／ability_scope／port／dependency
 
 current 邊界重建真實 registry 的 Frame／Binding，核對全部 JP current 面、exact owner／field／section／line／root scope 及完整來源根集合，並驗所有 companion 的 resolved ability_body／root scope／ports，包括未引用本體。能力屬於哪一面，由 SourceUse.owner 的 revision 對應 face 決定；DSL 檔級／面級容器只表示位置，多面卡的卡級容器不表示全卡常駐。面容器另驗精確 FaceId，跨容器重複同來源 scope 拒絕。
 
-`effect-source-v1` 依 P1 完整 payload 計算；純 hash 函式不授予來源准入。DB 的非 null 數值／代碼與建置保證完整的種族、稱號、特殊類型集合可判 known；type_code 為 spell 時，null attack／defense 依 P1 的規則確定不存在判為 known-null。type_code 為 follower 且同一 revision 已採納的 special_kinds 含 evolve 時，null cost 也依 P1 §4.2 記錄印刷費用確定不存在；advance 或普通 follower 不適用，其他 null 仍是 unknown。無確定 absent 證據的空 effect 同樣保留 unknown，拒絕准入。token 依賴未閉合時不產完整來源 hash，也不把缺少 token 選用結果當空集合。
+`effect-source-v1` 依 P1 完整 payload 計算；純 hash 函式不授予來源准入。DB 的非 null 數值／代碼與建置保證完整的種族、稱號、特殊類型集合可判 known；type_code 為 spell 時，null attack／defense 依 P1 的規則確定不存在判為 known-null。type_code 為 follower 且同一 revision 已採納的 special_kinds 含 evolve 時，null cost 也依 P1 §4.2 記錄印刷費用確定不存在；advance 或普通 follower 不適用。leader 只有 DB cost／attack／defense 全為 null，且同一來源 descriptor 的凍結 document 明示 cost／power／hp 三項皆為 `-`，才把三項標為 known-null；其他 null 仍是 unknown，不推成 0。
+
+精確空字串 effect 只有原 `translation-jp-v1` 投影、同 batch／version／face 的已驗 presence 為 absent 時，才記為 absent 與空字串 hash；缺證據、未驗證或不符的來源不得借用其他面的證據，空 effect 仍不能取得准入。非空 effect／section 不改來源、FrameId 或 BindingId。沒有任何 effect／section 編譯欄位且完整來源已知的空白 token 可以使用空 abilities；有文字的 token 仍須閉合其來源義務。token 依賴未閉合時不產完整來源 hash，也不把缺少 token 選用結果當空集合。
+
+Rust 對照 current 面與快照時，只有 effect 的 absent 加上精確空字串 hash，才能匹配快照中缺少、null 或精確空字串的效果文；非空文字、錯誤 hash 或把 absent 用於 name 仍拒絕。面對應仍須唯一且雙向閉合，不藉此採納其他版卡文。
 
 進化面的費用證據以已審 [ECP01-002 解析輸入](../../card-data/jp/ECP01/000-099.json)為例：document `documents-4a1197c7caf47383` 的 card_type 是 `フォロワー・エボルヴ`、cost 是 `-`；正式建置映成 follower／evolve 與 null cost。[日文 CR 1.28.0（2026-09-28）](https://shadowverse-evolve.com/wordpress/wp-content/uploads/2026/09/28121513/ShadowverseEVOLVE_cr_1.28.0_260928.pdf) §2.3.3.1 區別 EVOLVE 特殊類型，§5.16.1.2 規定場上進化後的費用仍沿用原卡。這裡記錄的是進化面印刷值的缺席，不把 null 改成 0、不推算場上費用，也不授予普通打出資格。
 
