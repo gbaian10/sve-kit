@@ -41,6 +41,8 @@ if TYPE_CHECKING:
         ("en", "{icon_lastword|[lastwords]} Synthetic.", {"last_words"}),
         ("en", "On Super-Evolve - Synthetic.", {"on_super_evolve"}),
         ("en", "Strike: Draw a card, then discard a card.", {"on_attack"}),
+        ("en", "On Evolve, discard a spell: Synthetic.", {"on_evolve"}),
+        ("en", "Strike, banish a card in your EX area: Synthetic.", {"on_attack"}),
         (
             "en",
             "On Evolve - Synthetic.\nOn Attack - Other.",

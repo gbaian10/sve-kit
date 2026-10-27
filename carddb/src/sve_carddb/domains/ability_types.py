@@ -52,7 +52,7 @@ _EN_NAMES = "|".join(
     re.escape(name) for name in sorted(_EN_HEADS, key=len, reverse=True)
 )
 _EN_HEAD = re.compile(
-    rf"(?P<names>(?:{_EN_NAMES})(?:/(?:{_EN_NAMES}))*)(?:\s*[-–—:.]|\s*\()"
+    rf"(?P<names>(?:{_EN_NAMES})(?:/(?:{_EN_NAMES}))*)(?:\s*[-–—:.,]|\s*\()"
 )
 
 
