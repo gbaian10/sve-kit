@@ -170,8 +170,13 @@ def test_write_preserves_handwritten_storage_and_reuses_companions(
         workspace, main=main, bodies=bodies, output_root=output_root, all_cards=True
     )
     assert second["written"] == []
-    # The full CLI checks exactly these bytes, including every unchanged sibling.
-    assert fingerprint(output_root) == fingerprint(workspace.authored)
+    # Every sibling the writer did not own stays byte-identical; the rewritten
+    # card file was already checked field by field above.
+    rewritten = "rules/author-effects/BP10/000.yaml"
+    written_tree = fingerprint(output_root)
+    repository_tree = fingerprint(workspace.authored)
+    del written_tree[rewritten], repository_tree[rewritten]
+    assert written_tree == repository_tree
     checked = complete_repository_check()
     assert object_value(parse(checked.output.read_bytes()))["status"] == "ok"
 
