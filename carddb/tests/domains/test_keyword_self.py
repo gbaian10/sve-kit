@@ -37,6 +37,8 @@ if TYPE_CHECKING:
         ("en", "Give another follower Ward.", "Ward", False, True),
         ("jp", "それは「\n【守護】\n」を持つ。", "守護", False, True),
         ("en", 'Give another follower "\nWard.\n".', "Ward", False, True),
+        ("jp", "「A」を持つ「B\n【守護】\n」", "守護", False, True),
+        ("en", "While active, this card has Ward.", "Ward", True, False),
         ("en", "Synthetic Warden.", "Ward", False, False),
         ("en", "", "Ward", False, False),
     ],

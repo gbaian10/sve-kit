@@ -43,7 +43,7 @@ def _acquired(line: str, region: str, spellings: Mapping[str, str]) -> set[str]:
             re.IGNORECASE,
         )
         matches = re.finditer(
-            r"(?:give this (?:follower|card|amulet)|this(?: follower|card|amulet)? (?:has|gains)) ([^.!?\n]+)",
+            r"(?:give this (?:follower|card|amulet)|this(?: follower| card| amulet)? (?:has|gains)) ([^.!?\n]+)",
             line,
             re.IGNORECASE,
         )
@@ -67,10 +67,10 @@ def classify(
         line = raw.strip()
         in_quote = quoted or any(mark in line for mark in ("「", "」", '"', "“", "”"))
         quoted ^= bool(line.count('"') % 2)
-        if "「" in line or "“" in line:
-            quoted = True
-        if "」" in line or "”" in line:
-            quoted = False
+        opened = max(line.rfind("「"), line.rfind("“"))
+        closed = max(line.rfind("」"), line.rfind("”"))
+        if opened != closed:
+            quoted = opened > closed
         declaration = (
             _JP_DECLARATION.fullmatch(line)
             if region == "jp"
