@@ -1,4 +1,22 @@
+format: 2
+kind: author_effect_set
 cards:
+  SD07-006:
+    abilities:
+      - evolve:
+          cost:
+            pp: 3
+        line: 1
+      - keywords:
+          - storm
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-luna
+            who: Codex
+          date: "2026-10-28"
   SD07-016:
     abilities:
       - activate:
@@ -24,5 +42,3 @@ cards:
             model: Codex gpt-6-sol
             who: Codex
           date: "2026-10-28"
-format: 2
-kind: author_effect_set

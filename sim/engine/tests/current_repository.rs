@@ -137,17 +137,8 @@ fn repository_keyword_migrations_lower_as_complete_current_candidates() {
     }
 
     for card_no in [
-        "BP01-096",
-        "BP01-158",
-        "BP01-163",
-        "BP01-P10",
-        "BP04-P07",
-        "BP03-033",
-        "BP08-T09",
-        "BP14-032",
-        "BP15-T06",
-        "DSD01b-005",
-        "SD07-006",
+        "BP01-096", "BP01-158", "BP01-163", "BP01-P10", "BP04-P07", "BP03-033", "BP08-T09",
+        "BP14-032", "BP15-T06", "BP17-T13",
     ] {
         assert!(!selected.current.contains_key(card_no));
         assert!(prototypes["programs"].get(card_no).is_some());
