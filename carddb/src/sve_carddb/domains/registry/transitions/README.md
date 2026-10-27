@@ -69,16 +69,8 @@ an unknown art cannot be made known by the move itself. Independent fresh art
 adoption, including any such promotion, remains a later adapter responsibility.
 
 `EffectiveRegistry.entries()` retains build-side tombstones, faces and unused art.
-`browse(kind)` filters retired cards/their faces and art
-without an included current use. It does not expose artists, baselines, current
-revisions or automated capabilities. Wording/errata state is independent of this
-identity view: consumers of the text pipeline still use `publication_identity()`
-to preserve known identity when wording is pending. `resolve_int_id(value)` keeps
-the original printing and supplies repair hints; a split returns `choice_required`
-and the destination choices instead of silently selecting or replacing a printing.
-After a split, a later explicit reassign conservatively keeps `choice_required`;
-retired destinations are removed from the remaining choices.
-It is a consumer hint, not a deck rewrite operation.
+Consumers of the text pipeline use `publication_identity()` to preserve known
+identity when wording is pending.
 
 Route facts explicitly distinguish official, provisional and unknown numbers;
 unknown cannot prove an official number. Provisional entries use the unchanged

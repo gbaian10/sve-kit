@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING
 import pytest
 from pydantic import JsonValue
 
-from sve_carddb.contracts.author_evidence import SourceUse
 from sve_carddb.contracts.author_leaves import ParamDecl
 from sve_carddb.contracts.four_layer import (
     CardNameReference,
@@ -23,18 +22,16 @@ from sve_carddb.domains.effects.author_expansion import (
     equivalent_ability,
 )
 from sve_carddb.domains.effects.author_sources import (
-    SourceCandidate,
     SourceError,
     entry_payload,
     parameter_expected,
-    resolve_source,
 )
 from sve_carddb.domains.translations.four_layer_classification import Term
 from sve_carddb.domains.translations.four_layer_derivation import derive_source
-from sve_carddb.domains.translations.four_layer_fixed_actions import SEARCH
+from tests.support.author_source_fixtures import source_context
 
 from ..translations.test_four_layer_classification import classifier
-from ..translations.test_four_layer_fixed_actions import EXTRA, SEARCH_RAW, TERMS, facts
+from ..translations.test_four_layer_fixed_actions import EXTRA, SEARCH_RAW, TERMS
 from .author_search_cases import PATH, head, search_ability, search_source
 from .test_author_entries import SCHEMAS, ability, document, shard
 from .test_author_expansion import generated, registered
@@ -57,10 +54,10 @@ def test_search_inline_and_companion_are_source_equivalent(
     results = []
     for companion in (False, True):
         entry, bodies = search_ability(frame, use, companion=companion, count=count)
-        result = expander.expand_sources(
-            canonical(document(entry)), bodies, {PATH: candidate}
+        result = expander.expand_contexts(
+            canonical(document(entry)), bodies, {PATH: source_context(candidate, use)}
         )
-        assert result.sidecar[0].source_proof == "derived_self_consistent"
+        assert result.sidecar[0].source_proof == "none"
         assert result.sidecar[0].frame_id == frame.id
         assert equivalent_ability(next(ability_nodes(result.tree))[1]) == canonical(
             head(count) | {"ports": {"imports": {}, "exports": {}}}
@@ -141,7 +138,7 @@ def test_search_rejects_complete_payload_drift(
     raw = canonical(document(entry))
     expander.expand(raw, bodies)
     with pytest.raises(ExpansionError, match="source_head_payload_mismatch"):
-        expander.expand_sources(raw, bodies, {PATH: candidate})
+        expander.expand_contexts(raw, bodies, {PATH: source_context(candidate, use)})
 
 
 @pytest.mark.parametrize(
@@ -195,14 +192,16 @@ def test_search_parameters_only_bind_the_exact_search_count(
     entry = generated(record, {"n": {"type": declaration["type"], "value": value}})
     entry["sources"] = [use.model_dump(mode="json")]
     with pytest.raises((SourceError, ExpansionError), match=reason):
-        expander.expand_sources(
-            canonical(document(entry)), [canonical(shard(record))], {PATH: candidate}
+        expander.expand_contexts(
+            canonical(document(entry)),
+            [canonical(shard(record))],
+            {PATH: source_context(candidate, use)},
         )
 
 
 def context() -> SourceContext:
     candidate, use, _ = search_source()
-    return resolve_source(candidate, use)
+    return source_context(candidate, use)
 
 
 @pytest.mark.parametrize(
@@ -345,73 +344,6 @@ def test_search_count_cannot_be_borrowed_by_other_selection(
         parameter_expected(
             context(), declaration, owner, path, {path[0]: {"param": "n"}}
         )
-
-
-@pytest.mark.parametrize(
-    ("old", "new"),
-    [
-        ("ラストワード", "ファンファーレ"),
-        ("自分のデッキ", "相手のデッキ"),
-        ("デッキ", "墓場"),
-        ("式神の使役", "聖杖の司祭"),
-        ("手札に加える", "EXエリアに置く"),
-        ("1枚", "1枚まで"),
-        ("1枚", "X枚"),
-        ("1枚", "01枚"),
-        ("1枚", "9007199254740992枚"),
-        ("自分のデッキ", "自分の手札が3枚以下なら、自分のデッキ"),
-        ("自分のデッキ", "{コスト1}：自分のデッキ"),
-        ("。", "。1枚引く。"),
-        ("。", "。\n1枚引く。"),
-        ("。", "。\n{守護}"),
-    ],
-    ids=[
-        "head",
-        "opponent",
-        "source-zone",
-        "name",
-        "destination",
-        "up-to",
-        "dynamic",
-        "leading-zero",
-        "unsafe",
-        "condition",
-        "cost",
-        "extra-action",
-        "sibling",
-        "keyword-sibling",
-    ],
-)
-def test_unadmitted_search_source_fails_closed(
-    expander: AuthorExpander, old: str, new: str
-) -> None:
-    raw = SEARCH_RAW.replace(old, new)
-    context = facts(raw, SEARCH)
-    engine = classifier(TERMS, EXTRA)
-    candidate = SourceCandidate(raw, context.source, engine, context)
-    derived = derive_source(raw, context.source, engine, context=context)
-    part = derived.field.parts[0]
-    use = SourceUse.model_validate(
-        {
-            "binding_id": "bind:" + "0" * 64,
-            "ability_scope": "ability_0",
-            "occurrence": {
-                "owner": context.source.owner,
-                "field": context.source.field,
-                "ordinal": context.source.ordinal,
-                "source_hash": context.source.source_hash,
-                "line_ordinal": part.line_ordinal,
-                "role": part.source_span.role,
-                "segments": part.source_span.segments,
-            },
-        }
-    )
-    entry = ability(head()) | {"sources": [use.model_dump(mode="json")]}
-    with pytest.raises(
-        SourceError,
-        match=r"source_pending|source_unresolved_issue|source_not_ability_body",
-    ):
-        expander.expand_sources(canonical(document(entry)), [], {PATH: candidate})
 
 
 @pytest.mark.parametrize(

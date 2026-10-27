@@ -140,13 +140,8 @@ minimum 55-table DDL inventory.
 
 `Capability.implemented` means that DDL declarations exist. The separate
 `importer_ready` and `validator_ready` flags default to false.
-`Registry.require_usable(requested)` checks both flags for the complete resolved
-graph, including required FK and query dependencies. All production capabilities
-currently fail that gate: complete capability importers and domain validators are
-still missing.
 These flags are code-maintained registration claims, not evidence generated from
-successful SQL compilation. A future preview pipeline must call this gate for its
-actual supported subset; a release pipeline must additionally require the full
+successful SQL compilation. A release pipeline must additionally require the full
 minimum table set and conditional groups. Creating empty tables does not enable a
 preview capability or turn unknown coverage into complete coverage.
 
@@ -247,8 +242,8 @@ provenance from the confirmed registry. Other relation kinds are not assigned th
 Checks do not calculate bundle freshness or prove semantic equivalence, exact
 before/after/result content, complete errata scope,
 reskin source evidence for all faces/regions, or adopted art baseline/alternate
-classification. Those domain validators and importers are still required before
-these DDL groups can pass `require_usable`. Source hashes and historic versions
+classification. Those domain validators and importers are still required for
+complete build validation. Source hashes and historic versions
 must come from pinned inputs; schema validation never invents missing evidence.
 
 Art rows come only from confirmed registry records; they carry no separate

@@ -26,7 +26,7 @@ requires, linked to its authored shard.
 
 The composer in `workflows/offline_names.py` passes the result as `links=result` to
 `domains.digital.name_policies.application.prepare()` and `populate()`, which delegate to
-`domains.digital.name_policies.projection`. Standalone `import_links()` owns its transaction. The
+`domains.digital.name_policies.projection`. `populate_links()` uses the caller-owned transaction. The
 application consumes each owner's link proof through
 `DigitalLinkResult.eligible_owner(db, sources, owner, name_ref=...)`, independently
 revalidating its Japanese name, card, face, printing source and exact linked

@@ -15,13 +15,9 @@ from sve_carddb.domains.effects.author_expansion import (
     ExpansionError,
     body_version,
 )
-from sve_carddb.domains.effects.author_sources import (
-    SourceCandidate,
-    SourceError,
-    entry_payload,
-    resolve_source,
-)
+from sve_carddb.domains.effects.author_sources import SourceError, entry_payload
 from sve_carddb.domains.translations.four_layer_derivation import derive_source
+from tests.support.author_source_fixtures import SourceCandidate, source_context
 
 from ..translations.test_four_layer_classification import classifier
 from ..translations.test_four_layer_destroy import EXTRA, RAW, TERMS, facts
@@ -75,7 +71,7 @@ def test_inline_and_companion_preserve_complete_fanfare(
     expander: AuthorExpander,
 ) -> None:
     candidate, use = source_case()
-    context = resolve_source(candidate, use)
+    context = source_context(candidate, use)
     record = companion(context)
     inline = ability(head())
     reference = generated(record)
@@ -84,12 +80,14 @@ def test_inline_and_companion_preserve_complete_fanfare(
         node["line"] = 2
         node["sources"] = [use.model_dump(mode="json")]
         results.append(
-            expander.expand_sources(
-                canonical(document(node)), shards, {ABILITY_PATH: candidate}
+            expander.expand_contexts(
+                canonical(document(node)),
+                shards,
+                {ABILITY_PATH: source_context(candidate, use)},
             )
         )
     assert results[0].tree == results[1].tree
-    assert all(r.sidecar[0].source_proof == "derived_self_consistent" for r in results)
+    assert all(r.sidecar[0].source_proof == "none" for r in results)
     assert entry_payload(context, "ability_0") == {
         **head(),
         "ports": {"imports": {}, "exports": {}},
@@ -248,17 +246,17 @@ def test_similar_payload_is_not_the_source(
     expander: AuthorExpander, body: dict[str, JsonValue], reference: bool
 ) -> None:
     candidate, use = source_case()
-    record = companion(resolve_source(candidate, use))
+    record = companion(source_context(candidate, use))
     record["body"] = deepcopy(body)
     record["body_version"] = body_version(record)
     node = generated(record) if reference else ability(deepcopy(body))
     node["line"] = 2
     node["sources"] = [use.model_dump(mode="json")]
     with pytest.raises(ExpansionError, match="source_head_payload_mismatch"):
-        expander.expand_sources(
+        expander.expand_contexts(
             canonical(document(node)),
             [canonical(shard(record))] if reference else [],
-            {ABILITY_PATH: candidate},
+            {ABILITY_PATH: source_context(candidate, use)},
         )
 
 
@@ -282,7 +280,7 @@ def test_similar_payload_is_not_the_source(
 )
 def test_complete_fixed_leaf_and_location_contract(change: str) -> None:
     candidate, use = source_case()
-    source = resolve_source(candidate, use)
+    source = source_context(candidate, use)
     binding = source.binding
     if change == "concept":
         binding = binding.model_copy(
@@ -348,65 +346,18 @@ def test_complete_fixed_leaf_and_location_contract(change: str) -> None:
         entry_payload(source, "ability_0")
 
 
-@pytest.mark.parametrize(
-    "raw",
-    [
-        RAW.replace("ファンファーレ", "ラストワード"),
-        RAW.replace("ファンファーレ", "攻撃時"),
-        RAW.replace("相手", "自分"),
-        RAW.replace("相手の場", "場"),
-        RAW.replace("すべてを破壊する。", "1体を選ぶ。それを破壊する。"),
-        RAW.replace("すべてを破壊する。", "1体まで選ぶ。それを破壊する。"),
-        RAW.replace("相手", "【覚醒】状態なら、相手"),
-        RAW.replace("相手", "{コスト1}：相手"),
-        RAW.replace("【オーラ】", ""),
-        RAW.replace("【守護】", ""),
-        RAW + "\n1枚引く。",
-    ],
-)
-def test_changed_complete_source_is_rejected(raw: str) -> None:
-    candidate, use = source_case()
-    candidate = replace(
-        candidate, raw=raw, context=facts(raw), descriptor=facts(raw).source
-    )
-    with pytest.raises(SourceError):
-        resolve_source(candidate, use)
-
-
-@pytest.mark.parametrize(
-    "change", ["normal", "evolved", "missing", "sections", "history"]
-)
-def test_other_holder_context_is_rejected(change: str) -> None:
-    candidate, use = source_case()
-    context = facts()
-    if change in {"normal", "evolved"}:
-        context = replace(
-            context,
-            phase=change,
-            special_kinds=frozenset() if change == "normal" else frozenset({"evolve"}),
-        )
-    elif change == "sections":
-        context = replace(context, section_count=1)
-    elif change == "history":
-        context = replace(context, current=False)
-    with pytest.raises(SourceError, match="source_pending"):
-        resolve_source(
-            replace(candidate, context=None if change == "missing" else context), use
-        )
-
-
 @pytest.mark.parametrize("name", ["n", "who", "zone", "kind", "head"])
 def test_companion_has_no_dynamic_parameters(
     expander: AuthorExpander, name: str
 ) -> None:
     candidate, use = source_case()
-    record = companion(resolve_source(candidate, use))
+    record = companion(source_context(candidate, use))
     node = generated(record, {name: {"type": "Nat", "value": 1}})
     node["line"] = 2
     node["sources"] = [use.model_dump(mode="json")]
     with pytest.raises(ExpansionError, match="param_names_mismatch"):
-        expander.expand_sources(
+        expander.expand_contexts(
             canonical(document(node)),
             [canonical(shard(record))],
-            {ABILITY_PATH: candidate},
+            {ABILITY_PATH: source_context(candidate, use)},
         )

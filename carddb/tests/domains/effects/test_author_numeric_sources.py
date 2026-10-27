@@ -17,14 +17,13 @@ from sve_carddb.domains.effects.author_expansion import (
 )
 from sve_carddb.domains.effects.author_inputs import AuthorInputError
 from sve_carddb.domains.effects.author_sources import (
-    SourceCandidate,
     SourceError,
     entry_payload,
     parameter_expected,
-    resolve_source,
 )
 from sve_carddb.domains.translations.four_layer_derivation import derive_source
 from sve_carddb.domains.translations.four_layer_fixed_actions import NUMERIC
+from tests.support.author_source_fixtures import SourceCandidate, source_context
 
 from ..translations.test_four_layer_classification import classifier
 from ..translations.test_four_layer_fixed_actions import EXTRA, TERMS, facts
@@ -35,7 +34,6 @@ from .test_author_source_expansion import ABILITY_PATH
 
 if TYPE_CHECKING:
     from sve_carddb.domains.effects.author_sources import SourceContext
-    from sve_carddb.domains.translations.four_layer_semantics import CardContext
 
 
 def source_case() -> tuple[SourceCandidate, SourceUse]:
@@ -80,19 +78,21 @@ def companion(source: SourceContext) -> dict[str, JsonValue]:
 
 def test_inline_and_companion_exact_source_expansion(expander: AuthorExpander) -> None:
     candidate, use = source_case()
-    source = resolve_source(candidate, use)
+    source = source_context(candidate, use)
     record = companion(source)
     inline, reference = ability(head()), generated(record, {})
     for node in (inline, reference):
         node["sources"] = [use.model_dump(mode="json")]
     results = [
-        expander.expand_sources(
-            canonical(document(node)), shards, {ABILITY_PATH: candidate}
+        expander.expand_contexts(
+            canonical(document(node)),
+            shards,
+            {ABILITY_PATH: source_context(candidate, use)},
         )
         for node, shards in ((inline, []), (reference, [canonical(shard(record))]))
     ]
     assert results[0].tree == results[1].tree
-    assert all(r.sidecar[0].source_proof == "derived_self_consistent" for r in results)
+    assert all(r.sidecar[0].source_proof == "none" for r in results)
     assert entry_payload(source, "ability_0") == {
         **head(),
         "ports": {"imports": {}, "exports": {}},
@@ -176,10 +176,10 @@ def test_complete_payload_cannot_change(
     candidate, use = source_case()
     body = changed_head(change)
     # Establish structural validity before testing the stricter source boundary.
-    expander.schemas.author_effect_set(canonical(document(ability(body))))
+    expander.schemas.document(canonical(document(ability(body))))
     shards = []
     if macro:
-        record = companion(resolve_source(candidate, use))
+        record = companion(source_context(candidate, use))
         record["body"] = body
         record["body_version"] = body_version(record)
         node = generated(record, {})
@@ -188,8 +188,10 @@ def test_complete_payload_cannot_change(
         node = ability(body)
     node["sources"] = [use.model_dump(mode="json")]
     with pytest.raises(ExpansionError, match="source_head_payload_mismatch"):
-        expander.expand_sources(
-            canonical(document(node)), shards, {ABILITY_PATH: candidate}
+        expander.expand_contexts(
+            canonical(document(node)),
+            shards,
+            {ABILITY_PATH: source_context(candidate, use)},
         )
 
 
@@ -211,7 +213,7 @@ def test_complete_payload_cannot_change(
 )
 def test_all_fixed_source_operands_are_checked(change: str) -> None:
     candidate, use = source_case()
-    source = resolve_source(candidate, use)
+    source = source_context(candidate, use)
     if change in {"concept", "value", "bool"}:
         values = dict(source.binding.values)
         values["leaf_0" if change == "concept" else "leaf_2"] = (
@@ -275,7 +277,7 @@ def test_numeric_constants_are_not_parameters(
     candidate, use = source_case()
     with pytest.raises(SourceError, match="unsupported_source_construct"):
         parameter_expected(
-            resolve_source(candidate, use),
+            source_context(candidate, use),
             ParamDecl(type="Int", source=ParamSource(slot=slot, component="value")),
             owner,
             path,
@@ -283,90 +285,12 @@ def test_numeric_constants_are_not_parameters(
         )
 
 
-@pytest.mark.parametrize(
-    "raw",
-    [
-        RAW.replace("ファンファーレ", "ラストワード"),
-        RAW.replace("他の", ""),
-        RAW.replace("自分", "相手"),
-        RAW.replace("すべて", "1体"),
-        RAW.replace("+1", "+X"),
-        RAW.replace("+1", "+2"),
-        RAW.replace("自分", "【覚醒】状態なら、自分"),
-        "{コスト1}：" + RAW,
-        RAW + "1枚引く。",
-        RAW + "\n1枚引く。",
-    ],
-    ids=[
-        "head",
-        "self",
-        "opponent",
-        "target",
-        "dynamic",
-        "magnitude",
-        "condition",
-        "cost",
-        "extra-step",
-        "sibling",
-    ],
-)
-def test_other_sources_remain_rejected(expander: AuthorExpander, raw: str) -> None:
-    candidate, use = source_case()
-    context = facts(raw, NUMERIC)
-    candidate = replace(candidate, raw=raw, descriptor=context.source, context=context)
-    derived = derive_source(raw, context.source, candidate.classifier, context=context)
-    part = derived.field.parts[0]
-    use = use.model_copy(
-        update={
-            "occurrence": use.occurrence.model_copy(
-                update={
-                    "line_ordinal": part.line_ordinal,
-                    "role": part.source_span.role,
-                    "segments": part.source_span.segments,
-                }
-            )
-        }
-    )
-    node = ability(head())
-    node["sources"] = [use.model_dump(mode="json")]
-    with pytest.raises(SourceError, match=r"source_pending|source_unresolved_issue"):
-        expander.expand_sources(
-            canonical(document(node)), [], {ABILITY_PATH: candidate}
-        )
-
-
-@pytest.mark.parametrize(
-    "change", ["historical", "evolved", "special", "sections", "kind", "missing"]
-)
-def test_exact_context_is_required(change: str) -> None:
-    candidate, use = source_case()
-    base = candidate.context
-    assert base is not None
-    if change == "missing":
-        candidate = replace(candidate, context=None)
-    else:
-        context: CardContext = base
-        if change == "historical":
-            context = replace(context, current=False)
-        elif change == "evolved":
-            context = replace(context, phase="evolved")
-        elif change == "special":
-            context = replace(context, special_kinds=frozenset({"advance"}))
-        elif change == "sections":
-            context = replace(context, section_count=1)
-        else:
-            context = replace(context, card_kind="spell")
-        candidate = replace(candidate, context=context)
-    with pytest.raises(SourceError, match="source_pending"):
-        resolve_source(candidate, use)
-
-
 @pytest.mark.parametrize("stat", ["power", "hp"])
 def test_companion_cannot_parameterize_stat_constants(
     expander: AuthorExpander, stat: str
 ) -> None:
     candidate, use = source_case()
-    record = companion(resolve_source(candidate, use))
+    record = companion(source_context(candidate, use))
     buff = object_value(
         object_value(
             array(object_value(object_value(record["body"])["fanfare"])["do"])[0]
@@ -388,17 +312,17 @@ def test_companion_cannot_parameterize_stat_constants(
     # The buff stat fields take numeric expressions only, so the schema rejects
     # a ParamRef before any parameter-site check can run.
     with pytest.raises(AuthorInputError, match="schema"):
-        expander.expand_sources(
+        expander.expand_contexts(
             canonical(document(node)),
             [canonical(shard(record))],
-            {ABILITY_PATH: candidate},
+            {ABILITY_PATH: source_context(candidate, use)},
         )
 
 
 @pytest.mark.parametrize("slot", ["leaf_1", "leaf_2", "leaf_3", "leaf_4"])
 def test_each_stat_operand_retains_its_own_meaning(slot: str) -> None:
     candidate, use = source_case()
-    source = resolve_source(candidate, use)
+    source = source_context(candidate, use)
     values = dict(source.binding.values)
     values[slot] = (
         2
@@ -416,7 +340,7 @@ def test_companion_cannot_borrow_a_numeric_leaf_for_draw(
     expander: AuthorExpander,
 ) -> None:
     candidate, use = source_case()
-    record = companion(resolve_source(candidate, use))
+    record = companion(source_context(candidate, use))
     record["body"] = {
         "fanfare": {"do": [{"draw": {"who": "self", "n": {"param": "n"}}}]}
     }
@@ -427,8 +351,8 @@ def test_companion_cannot_borrow_a_numeric_leaf_for_draw(
     node = generated(record, {"n": {"type": "Nat", "value": 1}})
     node["sources"] = [use.model_dump(mode="json")]
     with pytest.raises(SourceError, match="unsupported_source_construct"):
-        expander.expand_sources(
+        expander.expand_contexts(
             canonical(document(node)),
             [canonical(shard(record))],
-            {ABILITY_PATH: candidate},
+            {ABILITY_PATH: source_context(candidate, use)},
         )

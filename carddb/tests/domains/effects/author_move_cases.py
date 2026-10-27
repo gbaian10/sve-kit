@@ -6,9 +6,9 @@ from pydantic import JsonValue
 
 from sve_carddb.contracts.author_evidence import SourceUse
 from sve_carddb.core.json import canonical
-from sve_carddb.domains.effects.author_sources import SourceCandidate
 from sve_carddb.domains.translations.four_layer_derivation import derive_source
 from sve_carddb.domains.translations.four_layer_fixed_actions import MOVE
+from tests.support.author_source_fixtures import SourceCandidate
 
 from ..translations.test_four_layer_classification import classifier
 from ..translations.test_four_layer_fixed_actions import EXTRA, MOVE_RAW, TERMS, facts

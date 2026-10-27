@@ -24,6 +24,7 @@ from sve_carddb.ingest.http.writer import (
     WriteResult,
     remove_temp_files,
 )
+from tests.support.manifest_history import request_outcomes
 
 URL = "https://shadowverse-evolve.com/cardlist/?cardno=BP01-001"
 PATH = PurePosixPath("raw/jp/card/BP01-001.html.zst")
@@ -78,7 +79,7 @@ def test_new_page_is_compressed_and_recorded(
     assert write(writer, manifest, fetched()).changed
     assert decompress((root / PATH).read_bytes()) == b"<html>v1</html>"
     assert writer.local_state(URL) is LocalState.TRUSTED
-    assert manifest.requests.outcomes(URL) == [Outcome.CHANGED]
+    assert request_outcomes(manifest, URL) == [Outcome.CHANGED]
 
 
 def test_same_content_leaves_the_file_alone(
@@ -96,7 +97,7 @@ def test_same_content_leaves_the_file_alone(
     assert after is not None
     assert after.last_changed_at == first.last_changed_at
     assert after.last_checked_at >= first.last_checked_at
-    assert manifest.requests.outcomes(URL) == [Outcome.CHANGED, Outcome.UNCHANGED]
+    assert request_outcomes(manifest, URL) == [Outcome.CHANGED, Outcome.UNCHANGED]
 
 
 def test_changed_content_is_rewritten(
@@ -246,7 +247,7 @@ def test_not_modified_needs_a_trusted_copy(
 ) -> None:
     write(writer, manifest, fetched())
     writer.mark_not_modified(URL, request_id=start(manifest))
-    assert manifest.requests.outcomes(URL)[-1] is Outcome.NOT_MODIFIED
+    assert request_outcomes(manifest, URL)[-1] is Outcome.NOT_MODIFIED
     (root / PATH).unlink()
     with pytest.raises(RuntimeError, match="trusted"):
         writer.mark_not_modified(URL, request_id=start(manifest))

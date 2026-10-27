@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING
 import pytest
 from pydantic import JsonValue
 
-from sve_carddb.contracts.author_evidence import SourceUse
 from sve_carddb.contracts.author_leaves import ParamDecl
 from sve_carddb.core.json import canonical
 from sve_carddb.domains.effects.author_expansion import (
@@ -17,16 +16,12 @@ from sve_carddb.domains.effects.author_expansion import (
     equivalent_ability,
 )
 from sve_carddb.domains.effects.author_sources import (
-    SourceCandidate,
     SourceError,
     entry_payload,
     parameter_expected,
-    resolve_source,
 )
-from sve_carddb.domains.translations.four_layer_derivation import derive_source
-from sve_carddb.domains.translations.four_layer_semantics import CardContext
+from tests.support.author_source_fixtures import source_context
 
-from ..translations.test_four_layer_classification import classifier, source
 from .author_draw_cases import PATH, draw_ability, draw_source, head
 from .test_author_entries import ability, document, shard
 from .test_author_expansion import generated, registered
@@ -51,14 +46,14 @@ def test_draw_source_expansion(
     entry, bodies = draw_ability(
         frame, use, companion=companion, count=count, name=draw_head
     )
-    result = expander.expand_sources(
-        canonical(document(entry)), bodies, {PATH: candidate}
+    result = expander.expand_contexts(
+        canonical(document(entry)), bodies, {PATH: source_context(candidate, use)}
     )
     expected = canonical(
         head(count, name=draw_head) | {"ports": {"imports": {}, "exports": {}}}
     )
     assert equivalent_ability(next(ability_nodes(result.tree))[1]) == expected
-    assert result.sidecar[0].source_proof == "derived_self_consistent"
+    assert result.sidecar[0].source_proof == "none"
     assert result.sidecar[0].frame_id == frame.id
 
 
@@ -82,35 +77,7 @@ def test_draw_heads_are_not_interchangeable(
     raw = canonical(document(entry))
     expander.expand(raw, bodies)
     with pytest.raises(ExpansionError, match="source_head_payload_mismatch"):
-        expander.expand_sources(raw, bodies, {PATH: candidate})
-
-
-@pytest.mark.parametrize(
-    ("raw", "phase", "kind"),
-    [
-        ("【進化時】3枚引く。", "normal", "follower"),
-        ("【進化時】3枚引く。", "advance", "follower"),
-        ("【進化時】3枚引く。", "evolved", "spell"),
-        ("【超進化時】3枚引く。", "evolved", "follower"),
-    ],
-)
-def test_evolve_time_requires_an_evolved_follower(
-    raw: str, phase: str, kind: str
-) -> None:
-    descriptor = source(raw)
-    engine = classifier()
-    context = CardContext(
-        descriptor, "c:synthetic", "f:synthetic", phase, kind, True, 0
-    )
-    derived = derive_source(raw, descriptor, engine, context=context)
-    _, binding = derived.bind(0)
-    use = SourceUse(
-        binding_id=binding.id,
-        occurrence=binding.occurrence_key(),
-        ability_scope="ability_0",
-    )
-    with pytest.raises(SourceError, match="source_pending"):
-        resolve_source(SourceCandidate(raw, descriptor, engine, context), use)
+        expander.expand_contexts(raw, bodies, {PATH: source_context(candidate, use)})
 
 
 BAD_HEADS: list[dict[str, JsonValue]] = [
@@ -183,83 +150,12 @@ def test_draw_rejects_complete_payload_drift(
     raw = canonical(document(entry))
     expander.expand(raw, bodies)
     with pytest.raises(ExpansionError, match="source_head_payload_mismatch"):
-        expander.expand_sources(raw, bodies, {PATH: candidate})
-
-
-@pytest.mark.parametrize(
-    "raw",
-    [
-        "3枚まで引く。",
-        "相手は3枚引く。",
-        "お互いに3枚引く。",
-        "自分の場のフォロワーの数と同じ枚数を引く。",
-        "自分の手札が3枚以下なら、3枚引く。",
-        "手札1枚を捨てる：3枚引く。",
-        "{クイック}\n3枚引く。",
-        "3枚引いてよい。",
-        "03枚引く。",
-        "9007199254740992枚引く。",
-        "『ナイト』トークン\n3枚引く。",
-    ],
-    ids=[
-        "up-to",
-        "opponent",
-        "both",
-        "dynamic",
-        "condition",
-        "cost",
-        "quick",
-        "optional",
-        "leading-zero",
-        "unsafe",
-        "token",
-    ],
-)
-def test_unadmitted_source_constructions_fail_closed(
-    expander: AuthorExpander, raw: str, draw_head: str
-) -> None:
-    if draw_head != "spell":
-        raw = ("【攻撃時】" if draw_head == "attack_time" else "【進化時】") + raw
-    descriptor = source(raw)
-    engine = classifier()
-    context = CardContext(
-        descriptor,
-        "c:synthetic",
-        "f:synthetic",
-        "evolved" if draw_head == "evolve_time" else "normal",
-        "spell" if draw_head == "spell" else "follower",
-        True,
-        0,
-    )
-    candidate = SourceCandidate(raw, descriptor, engine, context)
-    derived = derive_source(raw, descriptor, engine, context=context)
-    part = derived.field.parts[0]
-    use = SourceUse.model_validate(
-        {
-            "binding_id": "bind:" + "0" * 64,
-            "ability_scope": "ability_0",
-            "occurrence": {
-                "owner": descriptor.owner,
-                "field": descriptor.field,
-                "ordinal": descriptor.ordinal,
-                "source_hash": descriptor.source_hash,
-                "line_ordinal": part.line_ordinal,
-                "role": part.source_span.role,
-                "segments": part.source_span.segments,
-            },
-        }
-    )
-    entry = ability(head(name=draw_head)) | {"sources": [use.model_dump(mode="json")]}
-    with pytest.raises(
-        SourceError,
-        match=r"source_pending|source_unresolved_issue|source_not_ability_body",
-    ):
-        expander.expand_sources(canonical(document(entry)), [], {PATH: candidate})
+        expander.expand_contexts(raw, bodies, {PATH: source_context(candidate, use)})
 
 
 def context(draw_head: str) -> SourceContext:
     candidate, use, _ = draw_source(name=draw_head)
-    return resolve_source(candidate, use)
+    return source_context(candidate, use)
 
 
 @pytest.mark.parametrize(
@@ -335,7 +231,9 @@ def test_draw_source_parameter_value_is_checked(
     candidate, use, frame = draw_source(name=draw_head)
     entry, bodies = draw_ability(frame, use, companion=True, count=2, name=draw_head)
     with pytest.raises(ExpansionError, match="source_param_value_mismatch"):
-        expander.expand_sources(canonical(document(entry)), bodies, {PATH: candidate})
+        expander.expand_contexts(
+            canonical(document(entry)), bodies, {PATH: source_context(candidate, use)}
+        )
 
 
 def test_draw_does_not_parameterize_actor(
@@ -353,8 +251,10 @@ def test_draw_does_not_parameterize_actor(
     entry = generated(record, {"who": {"type": "Player", "value": "self"}})
     entry["sources"] = [use.model_dump(mode="json")]
     with pytest.raises(SourceError, match="parameter_source_role_mismatch"):
-        expander.expand_sources(
-            canonical(document(entry)), [canonical(shard(record))], {PATH: candidate}
+        expander.expand_contexts(
+            canonical(document(entry)),
+            [canonical(shard(record))],
+            {PATH: source_context(candidate, use)},
         )
 
 
@@ -376,4 +276,4 @@ def test_draw_cannot_add_a_receipt_port(
     raw = canonical(document(entry))
     expander.expand(raw, bodies)
     with pytest.raises(ExpansionError, match="unsupported_port_source_mapping"):
-        expander.expand_sources(raw, bodies, {PATH: candidate})
+        expander.expand_contexts(raw, bodies, {PATH: source_context(candidate, use)})

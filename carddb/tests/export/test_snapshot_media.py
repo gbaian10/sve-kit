@@ -699,7 +699,6 @@ def test_group_version_selector_and_disabled_urls(images: PublicImages) -> None:
 def test_index_future_current_is_not_corruption_and_compatible_previous_is_readable(
     incompatible: str,
 ) -> None:
-    from sve_carddb.export.reader import select_index_entry  # ruff: ignore[import-outside-top-level] -- neutral index negotiation boundary
 
     manifest = object_value(parse((GOLDEN / "manifest.json").read_bytes()))
     manifest["data_version"] = string(manifest["data_version"]).removeprefix("preview-")
@@ -742,10 +741,8 @@ def test_index_future_current_is_not_corruption_and_compatible_previous_is_reada
         "previous": previous,
     }
     assert read_index(index, {hashed: raw}) == index
-    assert select_index_entry(index) == previous
     no_compatible = index | {"previous": None}
     assert read_index(no_compatible, {}) == no_compatible
-    assert select_index_entry(no_compatible) is None
 
 
 @pytest.mark.parametrize("failure", ["endpoint", "duplicate", "human_shadow"])

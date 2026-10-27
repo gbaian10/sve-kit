@@ -9,8 +9,10 @@ from sve_carddb.domains.registry.preview.review_inputs import JP_REVIEW_SCOPE
 from sve_carddb.domains.registry.records import (
     CardData,
     MappingReviewData,
+    Observation,
     PrintingData,
 )
+from sve_carddb.domains.registry.review import observation
 
 from .build_db_fixtures import rows
 from .identity_evidence_fixtures import MemoryEvidence
@@ -46,10 +48,9 @@ def observed(card: Card, region: Region) -> CardEvidence:
             first_receipt_id="sha256:" + "5" * 64,
         ),
     )
-    return CardEvidence.from_card(
+    return CardEvidence(
         source,
-        region,
-        card,
+        Observation.model_validate_json(canonical(observation(card, region))),
         tuple(
             FaceEvidence("LG", f"Synthetic artist {n}") for n in range(len(card.faces))
         ),

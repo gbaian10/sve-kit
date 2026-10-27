@@ -319,14 +319,6 @@ def populate_links(  # ruff: ignore[complex-structure,too-many-locals] -- every 
     )
 
 
-def import_links(
-    db: Database, inputs: Inputs, *, build: BuildContext, stores: dict[str, Path]
-) -> Result:
-    """Own one transaction only for a standalone relation import."""
-    with db.transaction():
-        return populate_links(db, inputs, build=build, stores=stores)
-
-
 def _audit(
     db: Database, snapshot: Snapshot, inputs: Inputs, fresh: list[Record]
 ) -> None:

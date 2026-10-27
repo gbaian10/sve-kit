@@ -295,25 +295,6 @@ class Database:
             for row in raw
         )
 
-    def alias_target_codes(self, kind: str) -> tuple[str, ...]:
-        """Resolve only the fixed polymorphic target map inside the SQL boundary."""
-        targets = {
-            "keyword": ("keyword", "id"),
-            "product_family": ("product_family", "code"),
-            "stamp": ("stamp", "code"),
-            "card": ("card", "id"),
-        }
-        if kind in targets:
-            table, column = targets[kind]
-            if table not in self._tables:
-                return ()
-            return tuple(str(row.values[column]) for row in self.rows(table))
-        return tuple(
-            str(row.values["code"])
-            for row in self.rows("vocabulary")
-            if row.values["kind"] == kind
-        )
-
     def verify_alias_targets(self) -> None:
         """Verify polymorphic references with a whitelisted SQL union, including absent targets."""
         reserved = "('keyword','product_family','stamp','card')"

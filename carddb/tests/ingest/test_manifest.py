@@ -18,6 +18,7 @@ from sve_carddb.ingest.archive.manifest import (
     RequestStart,
     Resource,
 )
+from tests.support.manifest_history import request_outcomes
 
 T0 = datetime(2026, 9, 24, 12, 0, tzinfo=UTC)
 CARD_URL = "https://shadowverse-evolve.com/cardlist/?cardno=BP01-001"
@@ -108,12 +109,12 @@ def test_transaction_rolls_back_on_error(manifest: Manifest) -> None:
 
 def test_request_lifecycle(manifest: Manifest) -> None:
     request_id = manifest.requests.start(make_start())
-    assert manifest.requests.outcomes(CARD_URL) == [Outcome.STARTED]
+    assert request_outcomes(manifest, CARD_URL) == [Outcome.STARTED]
     with manifest.transaction():
         manifest.requests.finish(
             request_id, RequestResult(outcome=Outcome.CHANGED, status=200)
         )
-    assert manifest.requests.outcomes(CARD_URL) == [Outcome.CHANGED]
+    assert request_outcomes(manifest, CARD_URL) == [Outcome.CHANGED]
 
 
 def test_interrupted_requests_become_unknown(tmp_path: Path) -> None:
@@ -122,7 +123,7 @@ def test_interrupted_requests_become_unknown(tmp_path: Path) -> None:
         first.requests.start(make_start())
     with Manifest.open(path) as second:
         assert second.requests.mark_interrupted() == 1
-        assert second.requests.outcomes(CARD_URL) == [Outcome.UNKNOWN]
+        assert request_outcomes(second, CARD_URL) == [Outcome.UNKNOWN]
 
 
 def test_finish_request_rejects_unknown_id(manifest: Manifest) -> None:

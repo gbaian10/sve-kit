@@ -12,14 +12,13 @@ from sve_carddb.domains.products import load_products
 from sve_carddb.domains.registry.preview import plan_preview
 from sve_carddb.domains.registry.records import PrintingData
 from sve_carddb.domains.registry.snapshot import load_registry
-from sve_carddb.domains.source_corrections.closure import correction_exclusions
 from sve_carddb.domains.source_corrections.importer import verify_corrections
 from sve_carddb.domains.source_corrections.plan import (
     plan_applications,
     verify_applications,
 )
-from sve_carddb.domains.source_corrections.projection import correction_references
 from sve_carddb.domains.text_observations import plan_text_observations
+from sve_carddb.domains.text_observations.exclusions import reference_exclusions
 from sve_carddb.domains.text_observations.importer import revision_id
 
 from ...support.identity_evidence_fixtures import MemoryEvidence
@@ -67,12 +66,13 @@ def test_conflict_is_the_only_pending_reason_and_prevents_mechanical_current(
     with create_database(compile_build(("en", "related", "correction"))) as db:
         with db.transaction():
             case.stage(db)
-        case.compose(case.plan.identity).import_into(
-            db,
-            build=case.context(),
-            vocabulary=case.vocabulary,
-            published=(),
-        )
+        with db.transaction():
+            case.compose(case.plan.identity).populate(
+                db,
+                build=case.context(),
+                vocabulary=case.vocabulary,
+                published=(),
+            )
         assert not any(row.values["region"] == "jp" for row in db.rows("face_current"))
 
 
@@ -127,12 +127,13 @@ def test_application_keeps_raw_revision_and_only_marks_affected_uses(  # ruff: i
     with create_database(schema) as db:
         with db.transaction():
             case.stage(db)
-        record = case.compose(case.plan.identity).import_into(
-            db,
-            build=case.context(),
-            vocabulary=case.vocabulary,
-            published=(),
-        )
+        with db.transaction():
+            record = case.compose(case.plan.identity).populate(
+                db,
+                build=case.context(),
+                vocabulary=case.vocabulary,
+                published=(),
+            )
         assert len(db.rows("source_correction")) == 1
         correction = db.rows("source_correction")[0].values
         assert correction["expected_raw_value"] == Json(
@@ -172,24 +173,6 @@ def test_application_keeps_raw_revision_and_only_marks_affected_uses(  # ruff: i
             assert result["result_unit_id"] is None
             assert revisions[revision_id(raw)]["type_code"] == "spell"
             assert revisions[revision_id(candidate)]["type_code"] == "follower"
-        references = correction_references(db, case.plan, case.vocabulary)
-        assert references == (
-            {
-                "printing_id": raw.printing_id,
-                "face_id": raw.face_id,
-                "source_id": raw.card.source.id,
-                "revision_id": revision_id(candidate),
-                "corrections": [
-                    {
-                        "field": field,
-                        "corrected_from": "Rule." if field == "effect" else "Spell",
-                        "is_corrected": True,
-                        "reason": "Synthetic source\ntranscription correction",
-                        "source_url": raw.card.source.url,
-                    }
-                ],
-            },
-        )
         assert all("corrections" not in row.values for row in db.rows("text_unit"))
         assert all(
             row.values["printed_text_state"] == "unknown"
@@ -220,16 +203,16 @@ def test_proposed_correction_is_retained_but_never_applied_or_marked(
     with create_database(compile_build(("en", "related", "correction"))) as db:
         with db.transaction():
             case.stage(db)
-        case.compose(case.plan.identity).import_into(
-            db,
-            build=case.context(),
-            vocabulary=case.vocabulary,
-            published=(),
-        )
+        with db.transaction():
+            case.compose(case.plan.identity).populate(
+                db,
+                build=case.context(),
+                vocabulary=case.vocabulary,
+                published=(),
+            )
         assert db.rows("source_correction")[0].values["state"] == "needs_review"
         assert len(db.rows("correction_evidence")) == 1
         assert not db.rows("correction_application")
-        assert correction_references(db, case.plan, case.vocabulary) == ()
 
 
 def test_already_fixed_is_not_reapplied_even_when_old_hash_differs(
@@ -258,19 +241,19 @@ def test_already_fixed_is_not_reapplied_even_when_old_hash_differs(
     with create_database(compile_build(("en", "related", "correction"))) as db:
         with db.transaction():
             case.stage(db)
-        case.compose(case.plan.identity).import_into(
-            db,
-            build=case.context(),
-            vocabulary=case.vocabulary,
-            published=(),
-        )
+        with db.transaction():
+            case.compose(case.plan.identity).populate(
+                db,
+                build=case.context(),
+                vocabulary=case.vocabulary,
+                published=(),
+            )
         assert db.rows("source_correction")[0].values["state"] == "upstream_fixed"
         assert db.rows("correction_application")[0].values["status"] == "already_fixed"
         assert not any(
             row.values["change_kind"] == "source_correction"
             for row in db.rows("face_revision")
         )
-        assert correction_references(db, case.plan, case.vocabulary) == ()
 
 
 def test_changed_source_excludes_correction_parent_without_allowing_sibling_output(
@@ -397,13 +380,16 @@ def test_conflict_closure_removes_routes_aliases_and_defaults_but_keeps_pending_
                     "namespace": "official",
                 },
             )
-        case.compose(case.plan.identity).import_into(
-            db,
-            build=case.context(),
-            vocabulary=case.vocabulary,
-            published=(),
+        with db.transaction():
+            case.compose(case.plan.identity).populate(
+                db,
+                build=case.context(),
+                vocabulary=case.vocabulary,
+                published=(),
+            )
+        report = reference_exclusions(
+            db, schema, case.plan.identity, case.plan.publication_identity()
         )
-        report = correction_exclusions(db, schema, case.plan)
         counts = report["excluded_row_counts"]
         assert isinstance(counts, dict)
         for table in (
@@ -473,12 +459,13 @@ class TestDefaultCorrectionInputs:
         with create_database(compile_build(("en", "related", "correction"))) as db:
             with db.transaction():
                 case.stage(db)
-            case.compose(case.plan.identity).import_into(
-                db,
-                build=case.context(),
-                vocabulary=case.vocabulary,
-                published=(),
-            )
+            with db.transaction():
+                case.compose(case.plan.identity).populate(
+                    db,
+                    build=case.context(),
+                    vocabulary=case.vocabulary,
+                    published=(),
+                )
             with db.transaction():
                 db.update(
                     "printing_face_observation",
@@ -570,18 +557,18 @@ class TestDefaultCorrectionInputs:
         with create_database(compile_build(("en", "related", "correction"))) as db:
             with db.transaction():
                 case.stage(db)
-            case.compose(case.plan.identity).import_into(
-                db,
-                build=case.context(),
-                vocabulary=case.vocabulary,
-                published=(),
-            )
+            with db.transaction():
+                case.compose(case.plan.identity).populate(
+                    db,
+                    build=case.context(),
+                    vocabulary=case.vocabulary,
+                    published=(),
+                )
             row = db.rows("correction_application")[0].values
             assert row["status"] == "conflict"
             assert row["result_unit_id"] is None
             assert row["face_revision_id"] is None
             assert db.rows("source_correction")[0].values["state"] == "needs_review"
-            assert correction_references(db, case.plan, case.vocabulary) == ()
 
     @pytest.mark.parametrize(
         "problem",
@@ -678,12 +665,13 @@ class TestDefaultCorrectionInputs:
             with db.transaction():
                 case.stage(db)
             with pytest.raises(ValueError, match="configuration"):
-                case.compose(case.plan.identity).import_into(
-                    db,
-                    build=old_configuration,
-                    vocabulary=case.vocabulary,
-                    published=(),
-                )
+                with db.transaction():
+                    case.compose(case.plan.identity).populate(
+                        db,
+                        build=old_configuration,
+                        vocabulary=case.vocabulary,
+                        published=(),
+                    )
             assert not db.rows("source_correction")
 
     @pytest.mark.parametrize(
@@ -708,12 +696,13 @@ class TestDefaultCorrectionInputs:
         with create_database(compile_build(("en", "related", "correction"))) as db:
             with db.transaction():
                 case.stage(db)
-            case.compose(case.plan.identity).import_into(
-                db,
-                build=case.context(),
-                vocabulary=case.vocabulary,
-                published=(),
-            )
+            with db.transaction():
+                case.compose(case.plan.identity).populate(
+                    db,
+                    build=case.context(),
+                    vocabulary=case.vocabulary,
+                    published=(),
+                )
             row = db.rows("correction_application")[0].values
             assert case.plan.corrections is not None
             raw_id = revision_id(case.plan.corrections[0].observation)
@@ -776,12 +765,13 @@ class TestDefaultCorrectionInputs:
             with db.transaction():
                 case.stage(db)
             with pytest.raises(ValueError, match="pinned image"):
-                case.compose(plan.identity).import_into(
-                    db,
-                    build=case.context(),
-                    vocabulary=case.vocabulary,
-                    published=(),
-                )
+                with db.transaction():
+                    case.compose(plan.identity).populate(
+                        db,
+                        build=case.context(),
+                        vocabulary=case.vocabulary,
+                        published=(),
+                    )
             assert not db.rows("face_revision")
 
     def test_public_source_url_null_is_present_and_never_substitutes_image_url(

@@ -16,6 +16,7 @@ from sve_carddb.ingest.http.throttle import CircuitBreaker, Throttle
 from sve_carddb.ingest.http.writer import LocalState, Writer
 from sve_carddb.ingest.queries import SETS_ROOT, list_root
 from sve_carddb.parse.pages import official_jp as jp
+from tests.support.manifest_history import request_outcomes
 
 from ..support.fakesite import IMG, FakeSite
 
@@ -154,7 +155,7 @@ async def test_refresh_rechecks_trusted_cards(
     calls = len(site.calls)
     await make_crawler(manifest, root, clock, site, mode=Mode.REFRESH).card("BP01-001")
     assert len(site.calls) == calls + 1
-    assert manifest.requests.outcomes(jp.card_url("BP01-001"))[-1] is Outcome.UNCHANGED
+    assert request_outcomes(manifest, jp.card_url("BP01-001"))[-1] is Outcome.UNCHANGED
 
 
 async def test_repair_fetches_only_damaged_copies(
@@ -183,7 +184,7 @@ async def test_wrong_card_page_is_rejected_and_not_stored(
         await crawler.card("BP02-070")
     url = jp.card_url("BP02-070")
     assert manifest.resources.get(url) is None
-    assert manifest.requests.outcomes(url) == [Outcome.FAILED]
+    assert request_outcomes(manifest, url) == [Outcome.FAILED]
 
 
 async def test_limit_counts_fetched_urls(

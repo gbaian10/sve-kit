@@ -46,6 +46,7 @@ from sve_carddb.ingest.http.client import (
 from sve_carddb.ingest.http.throttle import CircuitBreaker, Throttle
 from sve_carddb.ingest.http.validate import ValidationError
 from sve_carddb.ingest.http.writer import PathConflictError, Writer, sha256
+from tests.support.manifest_history import request_outcomes
 
 from ..conftest import FakeClock
 
@@ -328,7 +329,7 @@ def test_shared_layout_and_generic_containers_cannot_pass_as_a_notice(
     assert body.decode() not in result.output
     with case.manifest() as manifest:
         assert manifest.resources.get(url) is None
-        assert manifest.requests.outcomes(url) == [Outcome.FAILED]
+        assert request_outcomes(manifest, url) == [Outcome.FAILED]
 
 
 def test_mixed_selection_keeps_exact_urls_and_region_specific_raw(case: Case) -> None:
@@ -350,7 +351,7 @@ def test_mixed_selection_keeps_exact_urls_and_region_specific_raw(case: Case) ->
             assert resource.sha256 == sha256(notice_body(region))
             assert resource.etag == '"synthetic"'
             assert manifest.links.current(url) == []
-            assert manifest.requests.outcomes(url) == [Outcome.CHANGED]
+            assert request_outcomes(manifest, url) == [Outcome.CHANGED]
     before = {u: (case.root / raw_path(u)).stat() for u in (URL, EN_URL)}
     assert case.invoke((URL, EN_URL)).exit_code == 0
     assert len(case.server.calls) == 2
@@ -447,7 +448,7 @@ def test_success_has_exact_raw_metadata_no_discovery_and_trusted_skip(
             == resource.last_changed_at
         )
         assert resource.archived_at is None
-        assert manifest.requests.outcomes(URL) == [Outcome.CHANGED]
+        assert request_outcomes(manifest, URL) == [Outcome.CHANGED]
         assert manifest.links.current(URL) == []
     path = case.root / raw_path(URL)
     assert decompress(path.read_bytes()) == BODY
@@ -459,7 +460,7 @@ def test_success_has_exact_raw_metadata_no_discovery_and_trusted_skip(
     assert path.stat() == before
     with case.manifest() as manifest:
         assert manifest.resources.get(URL) == resource
-        assert manifest.requests.outcomes(URL) == [Outcome.CHANGED]
+        assert request_outcomes(manifest, URL) == [Outcome.CHANGED]
 
 
 @pytest.mark.parametrize(
@@ -484,7 +485,7 @@ def test_all_redirects_stop_without_contacting_target_or_next_source(
     assert not (case.root / raw_path(source)).exists()
     with case.manifest() as manifest:
         assert list(manifest.resources.all()) == []
-        assert manifest.requests.outcomes(source) == [Outcome.REDIRECTED]
+        assert request_outcomes(manifest, source) == [Outcome.REDIRECTED]
 
 
 @pytest.mark.parametrize(
@@ -513,7 +514,7 @@ def test_only_three_attempts_then_continue_next_url(
     with case.manifest() as manifest:
         assert manifest.resources.get(url) is None
         assert manifest.resources.get(other) is not None
-        assert manifest.requests.outcomes(url) == [Outcome.FAILED] * 3
+        assert request_outcomes(manifest, url) == [Outcome.FAILED] * 3
 
 
 def test_success_on_third_attempt(case: Case) -> None:
@@ -555,7 +556,7 @@ def test_cli_total_budget_stops_an_adapter_before_a_fourth_request(
     assert len(case.server.calls) == 3
     assert all(str(request.url) == source for _, request in case.server.calls)
     with case.manifest() as manifest:
-        assert manifest.requests.outcomes(source) == [Outcome.FAILED] * 3
+        assert request_outcomes(manifest, source) == [Outcome.FAILED] * 3
         assert manifest.resources.get(source) is None
 
 
@@ -587,7 +588,7 @@ def test_invalid_response_records_failure_without_saving_body(
     assert "Missing notice" not in result.output
     with case.manifest() as manifest:
         assert manifest.resources.get(URL) is None
-        assert manifest.requests.outcomes(URL) == [Outcome.FAILED]
+        assert request_outcomes(manifest, URL) == [Outcome.FAILED]
 
 
 @pytest.mark.parametrize(
@@ -611,7 +612,7 @@ def test_notice_requires_a_nonempty_title(case: Case, title: bytes) -> None:
     assert not (case.root / raw_path(URL)).exists()
     with case.manifest() as manifest:
         assert manifest.resources.get(URL) is None
-        assert manifest.requests.outcomes(URL) == [Outcome.FAILED]
+        assert request_outcomes(manifest, URL) == [Outcome.FAILED]
 
 
 @pytest.mark.parametrize("state", ["file", "directory", "symlink", "dangling"])
@@ -732,7 +733,7 @@ def test_interruption_before_publish_leaves_no_partial_raw_or_own_temp(
     assert list(case.root.rglob("*.tmp-*")) == []
     with case.manifest() as manifest:
         assert manifest.resources.get(source) is None
-        assert manifest.requests.outcomes(source) == [Outcome.STARTED]
+        assert request_outcomes(manifest, source) == [Outcome.STARTED]
     again = case.invoke((source,))
     assert again.exit_code == 1
     assert len(case.server.calls) == 1
@@ -765,7 +766,7 @@ def test_unrelated_interrupted_requests_are_not_recovered(case: Case) -> None:
     assert result.exit_code == 1
     assert case.server.calls == []
     with case.manifest() as manifest:
-        assert manifest.requests.outcomes(OTHER) == [Outcome.STARTED]
+        assert request_outcomes(manifest, OTHER) == [Outcome.STARTED]
 
 
 def test_unrelated_temporary_file_is_not_removed(case: Case) -> None:
@@ -832,7 +833,7 @@ async def test_fetch_new_rejects_an_ordinary_writer_before_requests(
                     reports.append,
                 )
             assert client.requests_sent == 0
-            assert manifest.requests.outcomes(source) == []
+            assert request_outcomes(manifest, source) == []
             assert manifest.resources.get(source) is None
     assert case.server.calls == []
     assert reports == []
@@ -1079,7 +1080,7 @@ def test_localhost_http_server_obeys_publication_redirect_and_retry_rules(
         for request in calls
     )
     with case.manifest() as manifest:
-        assert manifest.requests.outcomes(url) == [outcome] * requests
+        assert request_outcomes(manifest, url) == [outcome] * requests
         resource = manifest.resources.get(url)
     if exit_code == 0:
         assert resource is not None

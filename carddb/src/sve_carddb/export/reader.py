@@ -636,16 +636,6 @@ def compatible(entry: Row) -> bool:
     ) <= set(selected.capabilities)
 
 
-def select_index_entry(value: JsonValue) -> Row | None:
-    """Negotiate current, then previous; unknown capability is not corruption."""
-    index = object_value(value)
-    validate("Index", index, MEDIA)
-    for raw in (index["current"], index["previous"]):
-        if raw is not None and compatible(object_value(raw)):
-            return object_value(raw)
-    return None
-
-
 def read_index(value: JsonValue, manifests: Mapping[str, bytes]) -> Row:
     """Verify the readable retained window, without loading incompatible manifests."""
     index = object_value(value)

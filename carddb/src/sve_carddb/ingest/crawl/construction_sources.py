@@ -1,6 +1,5 @@
 """Explicit, create-only construction source batches; no discovery or live CLI."""
 
-import json
 import re
 from dataclasses import dataclass
 from pathlib import PurePosixPath
@@ -26,7 +25,6 @@ from sve_carddb.parse.pages.construction_outline import parse_construction_outli
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Sequence
-    from pathlib import Path
 
     import httpx
 
@@ -102,14 +100,6 @@ def select_sources(urls: Sequence[str]) -> tuple[ConstructionSource, ...]:
             canonical, region, kind, page_type, path
         )
     return tuple(selected.values())
-
-
-def load_sources(path: Path) -> tuple[ConstructionSource, ...]:
-    """Read a URL array, never an executable discovery recipe."""
-    value: object = json.loads(path.read_bytes())
-    if not isinstance(value, list) or not all(isinstance(url, str) for url in value):
-        raise ConstructionSourceError("selection must be a JSON array of URL strings")
-    return select_sources(value)
 
 
 @dataclass(frozen=True, slots=True)

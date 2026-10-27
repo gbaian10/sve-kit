@@ -9,17 +9,11 @@ from sve_carddb.build import create_database
 from sve_carddb.build.t1 import compile_build
 from sve_carddb.domains.registry.build import build
 from sve_carddb.domains.registry.preview import import_preview, plan_preview
-from sve_carddb.domains.registry.preview.evidence import CardEvidence, FaceEvidence
+from sve_carddb.domains.registry.preview.evidence import FaceEvidence
 from sve_carddb.domains.registry.records import PrintingData
 from sve_carddb.domains.registry.storage import plan_files, write_files
 
-from ...support.registry_preview_fixtures import (
-    BUILD,
-    REVISION,
-    evidence,
-    observed,
-    parents,
-)
+from ...support.registry_preview_fixtures import BUILD, REVISION, evidence, parents
 from ...support.registry_snapshot_fixtures import edit_record
 from .test_registry import inputs as inputs  # ruff: ignore[useless-import-alias] -- expose shared fixture dependency
 
@@ -185,12 +179,6 @@ def test_reskin_requires_every_endpoint_variant_not_just_one(
     assert len(plan.included("card")) == 2
     assert len(plan.included("printing")) == 2
     assert not plan.included("card_related")
-
-
-def test_extraction_factory_rejects_missing_face_metadata(inputs: Inputs) -> None:
-    original = observed(inputs.jp["BP02-071"], "jp")
-    with pytest.raises(ValueError, match="metadata count"):
-        CardEvidence.from_card(original.source, "jp", inputs.jp["BP02-071"], ())
 
 
 def test_premium_labels_keep_a_base_tier_only_when_one_is_printed(

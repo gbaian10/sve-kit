@@ -17,13 +17,12 @@ from sve_carddb.domains.effects.author_expansion import (
     body_version,
 )
 from sve_carddb.domains.effects.author_sources import (
-    SourceCandidate,
     SourceError,
     entry_payload,
     parameter_expected,
-    resolve_source,
 )
 from sve_carddb.domains.translations.four_layer_derivation import derive_source
+from tests.support.author_source_fixtures import SourceCandidate, source_context
 
 from ..translations.test_four_layer_classification import classifier
 from ..translations.test_four_layer_damage import EXTRA, RAW, TERM, facts
@@ -71,21 +70,23 @@ def test_inline_and_companion_exact_source_expansion(
     expander: AuthorExpander, amount: int
 ) -> None:
     candidate, use = source_case(RAW.replace("2", str(amount)))
-    context = resolve_source(candidate, use)
+    context = source_context(candidate, use)
     record = companion(context)
     inline = ability(head(amount))
     reference = generated(record, {"n": {"type": "Nat", "value": amount}})
     for node in (inline, reference):
         node["sources"] = [use.model_dump(mode="json")]
     results = [
-        expander.expand_sources(
-            canonical(document(node)), shards, {ABILITY_PATH: candidate}
+        expander.expand_contexts(
+            canonical(document(node)),
+            shards,
+            {ABILITY_PATH: source_context(candidate, use)},
         )
         for node, shards in ((inline, []), (reference, [canonical(shard(record))]))
     ]
     assert results[0].tree == results[1].tree
     for result in results:
-        assert result.sidecar[0].source_proof == "derived_self_consistent"
+        assert result.sidecar[0].source_proof == "none"
     assert entry_payload(context, "ability_0") == {
         **head(amount),
         "ports": {"imports": {}, "exports": {}},
@@ -172,15 +173,17 @@ def test_expansion_rejects_a_similar_author_payload(
     node = ability(deepcopy(body))
     node["sources"] = [use.model_dump(mode="json")]
     with pytest.raises(ExpansionError, match="source_head_payload_mismatch"):
-        expander.expand_sources(
-            canonical(document(node)), [], {ABILITY_PATH: candidate}
+        expander.expand_contexts(
+            canonical(document(node)),
+            [],
+            {ABILITY_PATH: source_context(candidate, use)},
         )
 
 
 @pytest.mark.parametrize("change", ["concept", "role", "extra-slot", "occurrence"])
 def test_fixed_head_and_complete_source_slots(change: str) -> None:
     candidate, use = source_case()
-    source = resolve_source(candidate, use)
+    source = source_context(candidate, use)
     if change == "concept":
         source = replace(
             source,
@@ -230,7 +233,7 @@ def test_equal_values_cannot_cross_source_roles(
     slot: str, owner: str, path: tuple[str, ...], reason: str
 ) -> None:
     candidate, use = source_case()
-    source = resolve_source(candidate, use)
+    source = source_context(candidate, use)
     with pytest.raises(SourceError, match=reason):
         parameter_expected(
             source,
@@ -253,7 +256,7 @@ def test_companion_does_not_bypass_source_checks(
     expander: AuthorExpander, change: str, reason: str
 ) -> None:
     candidate, use = source_case()
-    record = companion(resolve_source(candidate, use))
+    record = companion(source_context(candidate, use))
     if change == "payload":
         damage = object_value(
             object_value(
@@ -274,65 +277,8 @@ def test_companion_does_not_bypass_source_checks(
         (ExpansionError, SourceError),
         match=reason,
     ):
-        expander.expand_sources(
+        expander.expand_contexts(
             canonical(document(node)),
             [canonical(shard(record))],
-            {ABILITY_PATH: candidate},
-        )
-
-
-@pytest.mark.parametrize(
-    ("raw", "reason"),
-    [
-        (RAW.replace("リーダーすべて", "相手のリーダーすべて"), "source_pending"),
-        (
-            RAW.replace("リーダーすべてに", "リーダー1人を選ぶ。それに"),
-            "source_unresolved_issue",
-        ),
-        (RAW.replace("ダメージ。", "ダメージを割りふる。"), "source_pending"),
-        (RAW.replace("2", "X"), "source_pending"),
-        (RAW.replace("リーダー", "【覚醒】状態なら、リーダー"), "source_pending"),
-        ("{コスト1}：" + RAW, "source_pending"),
-        (RAW.replace("{ラストワード}", "【進化時】"), "source_pending"),
-        ("『仮token』\n" + RAW, "source_unresolved_issue"),
-    ],
-    ids=[
-        "one-side",
-        "target",
-        "allocation",
-        "dynamic",
-        "condition",
-        "cost",
-        "timing",
-        "token-location",
-    ],
-)
-def test_other_source_constructions_remain_rejected(
-    expander: AuthorExpander, raw: str, reason: str
-) -> None:
-    _, use = source_case()
-    context = facts(raw)
-    engine = classifier((TERM,), EXTRA)
-    candidate = SourceCandidate(raw, context.source, engine, context)
-    derived = derive_source(raw, context.source, engine, context=context)
-    part = derived.field.parts[0]
-    use = use.model_copy(
-        update={
-            "occurrence": use.occurrence.model_copy(
-                update={
-                    "line_ordinal": part.line_ordinal,
-                    "role": part.source_span.role,
-                    "segments": part.source_span.segments,
-                }
-            )
-        }
-    )
-    node = ability(head())
-    node["sources"] = [use.model_dump(mode="json")]
-    with pytest.raises(
-        SourceError,
-        match=reason,
-    ):
-        expander.expand_sources(
-            canonical(document(node)), [], {ABILITY_PATH: candidate}
+            {ABILITY_PATH: source_context(candidate, use)},
         )

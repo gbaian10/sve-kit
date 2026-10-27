@@ -121,33 +121,5 @@ v0 擷取索引使用 **2026-09-26 凍結、於 2026-09-27 分類流程使用**�
 這批資料保存原 v0 分類及其已分類範圍，由 AI 標註與審查，未經維護者逐筆確認。frame 對照屬可重算產物，不放 authored；
 一次性轉換程式也不進 repo。每次重算必須另外保存使用的凍結 DB／建置 recipe 與程式版本。
 
-## 精確來源對照
-
-`sve_carddb.domains.effects.reader.load(authored_root)` 載入完整候選 catalog。
-`matching.FrameOccurrence` 接受 adapter 已解析的 card ID、face ID、JP 卡號、revision owner、
-欄位位置、binding ID、frame ID、normalizer、SourceDescriptor、SourceSpan 與完整 raw field。
-建構時重新核對 field hash、body role、span 邊界及每個 segment 的 line；raw bytes 不保存在結果物件。
-adapter 必須從凍結來源的 card／printing／face／revision／current 與 binding 關係解析身份，
-不可只憑同卡號文字猜 card ID。此 API 不代替 DB 的外鍵與 frame 定義驗證。
-
-`Matcher` 先限定完整 position，再比 body bytes hash。不搜尋其他 face、field、section ordinal 或 line，
-不去空白、不作 NFKC。body match 只證明原索引 body 與新 binding 拼接 bytes 一致，
-**不宣稱舊整個 field、提醒文或 token owner 語義相同**；新 field 的完整 hash／source ref／span 始終保留。
-
-`current` 指該 JP face 的依據版本（`face_current`）；`historical` 指其餘卡文版本，
-不代表時間先後，也不表示版本編號較小。
-
-| status | 判斷 |
-| --- | --- |
-| `current` | 同位置唯一 current exact 候選 |
-| `historical` | 沒有 current exact，但有唯一 historical exact 候選 |
-| `source_changed` | 同位置有候選，但沒有 exact body bytes |
-| `no_candidate` | 沒有該完整位置的候選 |
-| `ambiguous` | 優先層有多個 exact 候選，或同位置對應多個 card／face 身份；不任選其一 |
-
-每筆結果保留 `candidates`（同位置全部證據）、`exact`（含所有歷史 exact）、`selected`
-（current exact 優先，否則所有 historical exact）。selected 是待審候選集合，並非已選定語義；
-歧義仍保留所有候選。相同 binding 的重複輸入可去重，矛盾 binding 證據則拒絕。
-歷史候選不會因 current 存在而被刪除；多個歷史 frame 不可縮成唯一對照。
-
-此入口沒有連到公開快照、查卡 family 選項、裁定採納或執行 capability；後續採納須另走各自契約。
+`sve_carddb.domains.effects.reader.load(authored_root)` 載入完整候選 catalog，
+不授予公開快照、裁定採納或執行 capability。

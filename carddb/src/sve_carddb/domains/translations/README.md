@@ -12,8 +12,7 @@ index or Git-byte gate. Selection keys and concept IDs stay stable when wording
 or notes change.
 
 Use `build.t1.compile_build()` for current imports.
-`import_glossary()` owns an atomic transaction; `populate_glossary()` composes
-inside a caller's transaction. Exact frozen sources, language, code-point spans,
+`populate_glossary()` composes inside a caller-owned transaction. Exact frozen sources, language, code-point spans,
 owner applicability and official same-concept evidence are checked before
 projection. Imported rows retain authored-source provenance without creating
 review decisions. Research drafts, latest cache and network are never inputs.

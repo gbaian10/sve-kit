@@ -136,28 +136,3 @@ def populate_catalog(
         _adopted(db, binding.decision_id)
         register_name(db, binding)
     db.verify_alias_targets()
-
-
-def resolve_alias(
-    db: Database,
-    kind: str,
-    lang: str,
-    text: str,
-    *,
-    normalized: str,
-    normalizer_version: str,
-) -> tuple[str, ...]:
-    """Prefer exact canonical codes; return every matching alias rather than choosing."""
-    canonical_codes = db.alias_target_codes(kind)
-    if text in canonical_codes:
-        return (text,)
-    aliases = [
-        row.values
-        for row in db.rows("search_alias")
-        if row.values["kind"] == kind and row.values["lang"] == lang
-    ]
-    if any(row["normalizer_version"] != normalizer_version for row in aliases):
-        raise ValueError("Unsupported alias normalizer version")
-    return tuple(
-        sorted({str(row["code"]) for row in aliases if row["normalized"] == normalized})
-    )

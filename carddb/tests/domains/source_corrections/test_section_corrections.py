@@ -14,7 +14,6 @@ from sve_carddb.domains.registry.corrections import SectionComparison, correctio
 from sve_carddb.domains.registry.records import SectionCorrection
 from sve_carddb.domains.registry.snapshot import load_registry
 from sve_carddb.domains.source_corrections.importer import verify_corrections
-from sve_carddb.domains.source_corrections.projection import correction_references
 from sve_carddb.domains.text_observations import plan_text_observations
 from sve_carddb.domains.text_observations.importer import revision_id
 from sve_carddb.domains.translations.corrected_sources import Corrections
@@ -80,12 +79,13 @@ def test_section_correction_preserves_raw_and_imports_only_the_verified_result(
     with create_database(compile_build(("en", "related", "correction"))) as db:
         with db.transaction():
             case.stage(db)
-        case.compose(case.plan.identity).import_into(
-            db,
-            build=case.context(),
-            vocabulary=case.vocabulary,
-            published=(),
-        )
+        with db.transaction():
+            case.compose(case.plan.identity).populate(
+                db,
+                build=case.context(),
+                vocabulary=case.vocabulary,
+                published=(),
+            )
         units = {row.values["id"]: row.values["text"] for row in db.rows("text_unit")}
         sections = {
             row.values["revision_id"]: units[row.values["text_unit_id"]]
@@ -97,14 +97,6 @@ def test_section_correction_preserves_raw_and_imports_only_the_verified_result(
         else:
             assert revision_id(candidate) not in sections
         verify_corrections(db, case.plan, case.vocabulary)
-        markers = correction_references(db, case.plan, case.vocabulary)[0][
-            "corrections"
-        ]
-        assert isinstance(markers, list)
-        assert [marker["field"] for marker in markers if isinstance(marker, dict)] == [
-            "effect",
-            "other",
-        ]
         if corrected:
             section = next(
                 row.values
@@ -245,4 +237,3 @@ def test_correction_marks_only_the_changed_text_field(
     application = case.plan.corrections[0]
     assert application.status == "applied"
     assert (application.marker(None) is None) == (unchanged == "effect")
-    assert (application.section_marker(None) is None) == (unchanged == "sections")

@@ -32,9 +32,10 @@ def test_composition_imports_and_projects_its_original_source_inputs(
             case.stage(db)
         with pytest.raises(ValueError, match="revision is missing"):
             observations.views(db)
-        record = observations.import_into(
-            db, build=context, vocabulary=case.vocabulary, published=()
-        )
+        with db.transaction():
+            record = observations.populate(
+                db, build=context, vocabulary=case.vocabulary, published=()
+            )
         views = observations.views(db)
         assert len(views.observed) == 4
         assert any(

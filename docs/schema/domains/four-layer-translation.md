@@ -1579,8 +1579,8 @@ reminder、token／crest／section 或額外 sibling 都不由此規則接受。
 P／M／E 必須另驗完整接線。原型效果與中文呈現不因分類 resolved 自動改寫。
 
 normalizer release 是來源 metadata；只有本規則改變的封閉語義 payload 會換 FrameId。
-未引用此規則的 frame 保號。共用定義表透過 pack(existing=...) 追加，既有 storage ID
-及內容不變；review、裁定、作者與呈現依賴仍須全庫重驗，保號不等於沿用核可。
+未引用此規則的 frame 保號。共用定義表的既有 storage ID
+及內容保持不變；review、裁定、作者與呈現依賴仍須全庫重驗，保號不等於沿用核可。
 
 ## 13. Advance Fanfare 對手場全部從者破壞
 

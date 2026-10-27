@@ -6,6 +6,7 @@ import re
 import shutil
 from pathlib import Path
 from typing import TYPE_CHECKING
+from urllib.parse import parse_qs, urlsplit
 
 import pytest
 from pydantic import JsonValue, ValidationError
@@ -19,11 +20,10 @@ from sve_carddb.domains.products.identities import (
     load_product_identities,
 )
 from sve_carddb.domains.products.identity_models import IdentityShard, ProductLink
-from sve_carddb.domains.products.official import (
-    parse_products as parse_verified_products,
-)
+from sve_carddb.domains.products.official import products_tree
 from sve_carddb.domains.registry.storage import read_yaml
 from sve_carddb.ingest.archive.source_archive import ArchiveError
+from sve_carddb.parse.html import parse
 
 from ...support.product_fixtures import first_record, items, obj, write_yaml
 from ...support.product_identity_fixtures import (
@@ -44,8 +44,11 @@ if TYPE_CHECKING:
 
 
 def parse_products(raw: bytes, source: Source, region: Region) -> ProductPage:
-    return parse_verified_products(
-        raw, source.model_copy(update={"sha256": digest(raw)}), region
+    return products_tree(
+        parse(raw.decode()),
+        source.model_copy(update={"sha256": digest(raw)}),
+        region,
+        parse_qs(urlsplit(source.url).query)["cardno"][0],
     )
 
 

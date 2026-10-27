@@ -9,11 +9,7 @@ import pytest
 from sve_carddb.build import Json, create_database
 from sve_carddb.build.t1 import compile_build
 from sve_carddb.core.provenance import BuildContext
-from sve_carddb.domains.catalog.importer import (
-    catalog_configuration,
-    populate_catalog,
-    resolve_alias,
-)
+from sve_carddb.domains.catalog.importer import catalog_configuration, populate_catalog
 from sve_carddb.domains.catalog.languages import register_languages
 from sve_carddb.domains.catalog.models import Alias, Catalog, NameBinding, Term
 from sve_carddb.domains.products.models import Language, LocalizedText
@@ -82,37 +78,21 @@ def context(value: Catalog) -> BuildContext:
     return BuildContext.from_inputs("a" * 40, catalog_configuration(value))
 
 
-def test_catalog_aliases_are_multivalued_and_canonical_codes_win(db: Database) -> None:
+def test_catalog_import_preserves_multivalued_aliases(db: Database) -> None:
     value = catalog()
     with db.transaction():
         populate_catalog(db, value, build=context(value), published=())
         populate_catalog(db, value, build=context(value), published=())
-    assert resolve_alias(
-        db,
-        "trait",
-        "ja",
-        "Shared",
-        normalized="shared",
-        normalizer_version=value.normalizer_version,
-    ) == ("first", "second")
-    assert resolve_alias(
-        db,
-        "trait",
-        "ja",
-        "first",
-        normalized="first",
-        normalizer_version=value.normalizer_version,
-    ) == ("first",)
-    with pytest.raises(ValueError, match="normalizer"):
-        resolve_alias(
-            db,
-            "trait",
-            "ja",
-            "Shared",
-            normalized="shared",
-            normalizer_version="unknown",
-        )
     assert len(db.rows("text_symbol")) == 1
+    assert {
+        (row.values["code"], row.values["text"], row.values["normalized"])
+        for row in db.rows("search_alias")
+        if row.values["kind"] == "trait"
+    } == {
+        ("first", "Shared", "shared"),
+        ("second", "shared", "shared"),
+        ("second", "first", "first"),
+    }
 
 
 @pytest.mark.parametrize(
@@ -422,44 +402,6 @@ def test_missing_decision_source_is_reported_before_contract_gate(db: Database) 
             {"decision_id": "decision", "source_id": "source", "role": "synthetic"},
         )
         populate_catalog(db, value, build=context(value), published=())
-
-
-def test_alias_resolution_is_scoped_to_requested_language(db: Database) -> None:
-    value = catalog()
-    value = value.model_copy(
-        update={
-            "aliases": (
-                Alias(
-                    kind="trait",
-                    code="first",
-                    lang="ja",
-                    text="Shared",
-                    normalized="shared",
-                ),
-                Alias(
-                    kind="trait",
-                    code="second",
-                    lang="en",
-                    text="Shared",
-                    normalized="shared",
-                ),
-            )
-        }
-    )
-    with db.transaction():
-        populate_catalog(db, value, build=context(value), published=())
-    for lang, expected in (("ja", ("first",)), ("en", ("second",)), ("zh-Hant", ())):
-        assert (
-            resolve_alias(
-                db,
-                "trait",
-                lang,
-                "Shared",
-                normalized="shared",
-                normalizer_version=value.normalizer_version,
-            )
-            == expected
-        )
 
 
 @pytest.mark.parametrize("column", ["display_name", "fallback_order"])

@@ -63,7 +63,7 @@ def scenario(
 
 
 @pytest.mark.parametrize("kind", ["merge", "split", "reassign_printing"])
-def test_effective_replay_and_browsing(
+def test_effective_replay_preserves_identity_history(
     scenario: tuple[Path, RegistryFiles, dict[str, Any]],
     merge_record: dict[str, Any],
     kind: str,
@@ -76,35 +76,21 @@ def test_effective_replay_and_browsing(
     repeated = replay(root, inputs)
     assert result == repeated
     assert before == {p: p.read_bytes() for p in root.rglob("*.yaml")}
-    printings = {e.data["id"]: e.data for e in result.browse("printing")}
+    printings = {e.data["id"]: e.data for e in result.entries() if e.kind == "printing"}
     assert printings[P]["card_id"] == B
     assert printings[Q]["card_id"] == (
         A if kind == "reassign_printing" else C if kind == "split" else B
     )
     assert printings[P]["source_face_map"] == [{"source_index": 0, "face_id": FB}]
-    hint = result.resolve_int_id(60001)
-    assert hint is not None
-    assert hint.printing_id == P
-    assert hint.card_id == B
-    assert hint.status == ("choice_required" if kind == "split" else "repaired")
-    assert hint.choices == ((B, C) if kind == "split" else ())
-    assert result.resolve_int_id(98765) is None
     assert {
-        e.data["int_id"]: e.data["printing_id"] for e in result.browse("card_int_id")
+        e.data["int_id"]: e.data["printing_id"]
+        for e in result.entries()
+        if e.kind == "card_int_id"
     } == {60001: P, 60002: Q, 60003: "p:" + "3" * 32, 60004: "p:" + "4" * 32}
     old = result.records["card:" + A].entry()
     assert old is not None
     assert old.data["identity_state"] == (
         "confirmed" if kind == "reassign_printing" else "retired"
-    )
-    assert (A in {e.data["id"] for e in result.browse("card")}) == (
-        kind == "reassign_printing"
-    )
-    assert (FA in {e.data["id"] for e in result.browse("face")}) == (
-        kind == "reassign_printing"
-    )
-    assert (X in {e.data["id"] for e in result.browse("art")}) == (
-        kind == "reassign_printing"
     )
     assert "face:" + FA in result.records
     assert "art:" + X in result.records
@@ -123,10 +109,7 @@ def test_empty_events_keep_identity_and_routes(
     root, files, _ = scenario
     result = replay(root, write_scenario(root, files, []))
     assert not result.repairs
-    assert len(result.browse("printing")) == 4
-    hint = result.resolve_int_id(60001)
-    assert hint is not None
-    assert hint.status == "unchanged"
+    assert len(tuple(e for e in result.entries() if e.kind == "printing")) == 4
     route = result.routes.resolve("official", "TEST-01EN")
     assert route is not None
     assert route.printing_id == P
@@ -386,9 +369,6 @@ def test_two_renumbers_flatten_all_old_entries(
     assert len(result.routes.states[P].aliases) == 2
     assert result.routes.resolve("official", "missing") is None
     assert not result.repairs
-    hint = result.resolve_int_id(60001)
-    assert hint is not None
-    assert hint.printing_id == P
     assert required(result, "printing:" + P).data["card_no"] == "TEST-01EN"
 
 

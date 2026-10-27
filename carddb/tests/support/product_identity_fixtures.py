@@ -6,25 +6,29 @@ import subprocess  # ruff: ignore[suspicious-subprocess-import] -- isolated test
 from dataclasses import dataclass, replace
 from datetime import date
 from typing import TYPE_CHECKING
+from urllib.parse import parse_qs, urlsplit
 
 import pytest
 from pydantic import JsonValue
 
+from sve_carddb.core.json import canonical
 from sve_carddb.core.provenance import BuildContext
 from sve_carddb.domains.products import Language, load_products
 from sve_carddb.domains.products.identities import load_product_identities
-from sve_carddb.domains.products.official import PARSER, parse_products
+from sve_carddb.domains.products.official import PARSER, products_tree
 from sve_carddb.domains.products.plan import plan_official_products
 from sve_carddb.domains.registry.build import build
 from sve_carddb.domains.registry.inputs import Mapping as CardMapping
 from sve_carddb.domains.registry.preview import plan_preview
 from sve_carddb.domains.registry.preview.evidence import CardEvidence, FaceEvidence
-from sve_carddb.domains.registry.review import InitDecisions, Inputs
+from sve_carddb.domains.registry.records import Observation
+from sve_carddb.domains.registry.review import InitDecisions, Inputs, observation
 from sve_carddb.domains.registry.snapshot import load_registry
 from sve_carddb.domains.registry.storage import plan_files, write_files
 from sve_carddb.ingest.archive.frozen_sources import FrozenSources
 from sve_carddb.ingest.archive.manifest import Kind
 from sve_carddb.ingest.archive.source_archive import seal_batch
+from sve_carddb.parse.html import parse
 from sve_carddb.parse.pages.extract_jp import extract_card
 from sve_carddb.parse.pages.official_jp import card_url
 
@@ -228,7 +232,12 @@ def identity_template(tmp_path_factory: pytest.TempPathFactory) -> IdentityTempl
     source, verified, _ = FrozenSources(
         store.root, store.store_id, sealed.batch_id
     ).read(sealed.inventory.current[0].source_version_id, parser_version=PARSER)
-    page = parse_products(verified, source, "jp")
+    page = products_tree(
+        parse(verified.decode()),
+        source,
+        "jp",
+        parse_qs(urlsplit(source.url).query)["cardno"][0],
+    )
     card = parsed_card(extract_card(verified, number="TEST-001"))
     inputs = Inputs(
         jp={card.number: card},
@@ -242,10 +251,9 @@ def identity_template(tmp_path_factory: pytest.TempPathFactory) -> IdentityTempl
     family_record = family("TEST")
     obj(family_record["data"])["public_code"] = "Test-A"
     install(root, "products/family/TEST/001.yaml", envelope([family_record]))
-    observed = CardEvidence.from_card(
+    observed = CardEvidence(
         source.model_copy(update={"parser_version": "synthetic-identity-parser-v1"}),
-        "jp",
-        card,
+        Observation.model_validate_json(canonical(observation(card, "jp"))),
         (FaceEvidence("LG", None),),
     )
     preview = plan_preview(
@@ -292,4 +300,9 @@ def add_page(
     source, content, _ = FrozenSources(store.root, "test-store", sealed.batch_id).read(
         version, parser_version=PARSER
     )
-    return parse_products(content, source, "jp" if region == "jp" else "en")
+    return products_tree(
+        parse(content.decode()),
+        source,
+        "jp" if region == "jp" else "en",
+        parse_qs(urlsplit(source.url).query)["cardno"][0],
+    )

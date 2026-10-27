@@ -136,9 +136,8 @@ selected output region; same-ID aliases do not warn.
 
 `FrozenProducts(store, store_id, batch_id, region=...).pages()` verifies a sealed
 batch and reads every current card source. It never opens live manifests or
-latest cache. `parse_products` checks raw bytes against their hash, the actual
-parser pin, region, exact page URL/card number, HTML media classification and
-recognized block layout. `official-product-block-v1` enumerates
+latest cache. The frozen reader verifies source metadata and passes the verified
+card tree to `products_tree` for recognized product blocks. `official-product-block-v1` enumerates
 `.cardlist-Under .cardlist-Detail_Products_Inner` in document order. It preserves
 name/date text, original parsed href attributes, resolved URLs and exact ordinal
 locators; HTML entities are decoded before resolving relative links. Raw lexical

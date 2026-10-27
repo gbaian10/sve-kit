@@ -17,7 +17,6 @@ from sve_carddb.domains.translations.four_layer_definitions import (
     INDEX,
     Definitions,
     Entry,
-    pack,
 )
 from sve_carddb.domains.translations.four_layer_definitions import (
     from_files as definition_files,
@@ -67,25 +66,6 @@ def test_shared_authored_round_trip_preserves_frame_payload_and_binding(
     assert "bind:" + hash_payload(binding.payload()) == binding.id
     with pytest.raises(ValueError, match="requires a semantic definition reference"):
         from_files((("translations/templates/definitions/001.yaml", content, content),))
-
-
-def test_repeated_content_escapes_literals_and_appends_without_renumbering() -> None:
-    shared: JsonValue = {
-        "a_long_semantic_name": ["@literal", "@@literal", 1, True, None]
-    }
-    first: JsonValue = {"@key": shared, "other": shared}
-    refs, entries = pack([first, first])
-    assert refs[0] == refs[1]
-    loaded = Definitions(entries)
-    assert canonical(loaded.get(refs[0])) == canonical(first)
-    later, extended = pack([shared, first], existing=entries)
-    assert later[1] == refs[0]
-    assert extended[: len(entries)] == entries
-    assert canonical(Definitions(extended).get(later[0])) == canonical(shared)
-    detached = loaded.get(refs[0])
-    assert isinstance(detached, dict)
-    detached.clear()
-    assert canonical(loaded.get(refs[0])) == canonical(first)
 
 
 @pytest.mark.parametrize("value", ["@2", "@1", "@01", {"@2": 1}])

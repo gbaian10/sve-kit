@@ -31,19 +31,6 @@ Terms and aliases without decisions remain staging projections only. Discovery
 results are candidates and must not be fed back as adopted inputs. Automatic
 exact regional names derived from official observations do not use this gate.
 
-`resolve_alias` prefers exact canonical codes and returns every normalized alias
-target, sorted. Multiple results require a choice; they are never selected by
-row order. Unknown normalizer versions fail explicitly. Keyword aliases use
-keyword IDs, family/stamp aliases use their codes, card aliases use card IDs,
-and other registered kinds refer to vocabulary `(kind, code)`.
-
-`parse_symbol` accepts only literal, ASCII unsigned integer, or exact declared
-variable spellings. The existing public parameter contract permits only `X`
-as a variable. `Q` can remain literal text; it does not extend that whitelist.
-The match retains `raw` exactly, including leading zeros. Unknown or ambiguous
-spellings return the original text with no symbol ID. Symbol occurrence alone
-does not infer a card's own mechanics or engine support.
-
 Construction names use `(region, exact official name)`. Adopted current names
 take precedence; when effects are pending but every observed name is identical,
 that name can still form the construction group. Conflicting observed names

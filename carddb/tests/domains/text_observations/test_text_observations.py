@@ -42,12 +42,13 @@ def test_exact_initial_keeps_every_physical_source_and_one_revision_per_face_reg
     with create_database(schema) as db:
         with db.transaction():
             case.stage(db)
-        case.compose(case.plan.identity).import_into(
-            db,
-            build=case.context(),
-            vocabulary=case.vocabulary,
-            published=(),
-        )
+        with db.transaction():
+            case.compose(case.plan.identity).populate(
+                db,
+                build=case.context(),
+                vocabulary=case.vocabulary,
+                published=(),
+            )
         assert len(db.rows("printing_face_observation")) == 4
         assert len(db.rows("face_revision")) == 3
         assert len(db.rows("face_current")) == 3
@@ -88,12 +89,13 @@ def test_missing_effect_stays_distinct_from_present_empty(
     with create_database(compile_build()) as db:
         with db.transaction():
             case.stage(db)
-        result = case.compose(case.plan.identity).import_into(
-            db,
-            build=case.context(),
-            vocabulary=case.vocabulary,
-            published=(),
-        )
+        with db.transaction():
+            result = case.compose(case.plan.identity).populate(
+                db,
+                build=case.context(),
+                vocabulary=case.vocabulary,
+                published=(),
+            )
         assert len(result.uses) == 4
         assert len(db.rows("printing_face_observation")) == (
             0 if missing is None else 2
@@ -121,12 +123,13 @@ def test_sections_are_ordered_unknown_and_not_removed_from_diffs(
     with create_database(compile_build()) as db:
         with db.transaction():
             case.stage(db)
-        case.compose(case.plan.identity).import_into(
-            db,
-            build=case.context(),
-            vocabulary=case.vocabulary,
-            published=(),
-        )
+        with db.transaction():
+            case.compose(case.plan.identity).populate(
+                db,
+                build=case.context(),
+                vocabulary=case.vocabulary,
+                published=(),
+            )
         assert len(db.rows("face_revision")) == 2
         assert len(db.rows("face_text_section")) == 6
         assert {row.values["kind"] for row in db.rows("face_text_section")} == {
@@ -163,12 +166,13 @@ def test_partial_double_face_quarantines_entire_card_region_and_all_ids(
     with create_database(schema) as db:
         with db.transaction():
             case.stage(db)
-        case.compose(case.plan.identity).import_into(
-            db,
-            build=case.context(),
-            vocabulary=case.vocabulary,
-            published=(),
-        )
+        with db.transaction():
+            case.compose(case.plan.identity).populate(
+                db,
+                build=case.context(),
+                vocabulary=case.vocabulary,
+                published=(),
+            )
         report = diagnostic_exclusion_report(db, schema, case.plan)
         counts = report["excluded_row_counts"]
         assert isinstance(counts, dict)
@@ -271,12 +275,13 @@ def test_flavor_is_physical_and_does_not_choose_a_different_current(
     with create_database(compile_build(("en", "related"))) as db:
         with db.transaction():
             case.stage(db)
-        case.compose(case.plan.identity).import_into(
-            db,
-            build=case.context(),
-            vocabulary=case.vocabulary,
-            published=(),
-        )
+        with db.transaction():
+            case.compose(case.plan.identity).populate(
+                db,
+                build=case.context(),
+                vocabulary=case.vocabulary,
+                published=(),
+            )
         flavors = {
             row.values["flavor_unit_id"]
             for row in db.rows("printing_face")
@@ -391,12 +396,13 @@ def test_explicit_special_kinds_traits_and_titles_are_all_materialized(
     with create_database(compile_build()) as db:
         with db.transaction():
             case.stage(db)
-        case.compose(case.plan.identity).import_into(
-            db,
-            build=case.context(),
-            vocabulary=case.vocabulary,
-            published=(),
-        )
+        with db.transaction():
+            case.compose(case.plan.identity).populate(
+                db,
+                build=case.context(),
+                vocabulary=case.vocabulary,
+                published=(),
+            )
         assert len(db.rows("face_title")) == 2
         assert len(db.rows("face_trait")) == 2
         assert {
@@ -520,12 +526,13 @@ class TestDefaultTextInputs:
                         "namespace": "official",
                     },
                 )
-            case.compose(case.plan.identity).import_into(
-                db,
-                build=case.context(),
-                vocabulary=case.vocabulary,
-                published=(),
-            )
+            with db.transaction():
+                case.compose(case.plan.identity).populate(
+                    db,
+                    build=case.context(),
+                    vocabulary=case.vocabulary,
+                    published=(),
+                )
             counts = diagnostic_exclusion_report(db, schema, case.plan)[
                 "excluded_row_counts"
             ]
@@ -560,12 +567,13 @@ class TestDefaultTextInputs:
                 db.update("printing", {"id": item.printing_id}, {field: replacement})
             before = {table.name: db.rows(table.name) for table in schema.tables}
             with pytest.raises(ValueError, match="identity parent"):
-                case.compose(case.plan.identity).import_into(
-                    db,
-                    build=case.context(),
-                    vocabulary=case.vocabulary,
-                    published=(),
-                )
+                with db.transaction():
+                    case.compose(case.plan.identity).populate(
+                        db,
+                        build=case.context(),
+                        vocabulary=case.vocabulary,
+                        published=(),
+                    )
             assert before == {
                 table.name: db.rows(table.name) for table in schema.tables
             }
@@ -608,12 +616,13 @@ class TestDefaultTextInputs:
                     )
             before = {table.name: db.rows(table.name) for table in schema.tables}
             with pytest.raises(ValueError, match="vocabulary"):
-                case.compose(case.plan.identity).import_into(
-                    db,
-                    build=case.context(),
-                    vocabulary=case.vocabulary,
-                    published=(),
-                )
+                with db.transaction():
+                    case.compose(case.plan.identity).populate(
+                        db,
+                        build=case.context(),
+                        vocabulary=case.vocabulary,
+                        published=(),
+                    )
             assert before == {
                 table.name: db.rows(table.name) for table in schema.tables
             }

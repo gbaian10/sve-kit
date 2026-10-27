@@ -95,12 +95,13 @@ def test_latest_complete_product_day_is_a_display_and_never_a_current(
     with create_database(compile_build()) as db:
         with db.transaction():
             case.stage(db)
-        case.compose(case.plan.identity).import_into(
-            db,
-            build=case.context(),
-            vocabulary=case.vocabulary,
-            published=(),
-        )
+        with db.transaction():
+            case.compose(case.plan.identity).populate(
+                db,
+                build=case.context(),
+                vocabulary=case.vocabulary,
+                published=(),
+            )
         observations = case.plan.groups[0].observations
         for item, day in zip(observations, dates, strict=True):
             product(db, item.printing_id, day)
@@ -151,12 +152,13 @@ def test_unavailable_or_undated_latest_is_not_silently_skipped(
     with create_database(compile_build()) as db:
         with db.transaction():
             case.stage(db)
-        case.compose(case.plan.identity).import_into(
-            db,
-            build=case.context(),
-            vocabulary=case.vocabulary,
-            published=(),
-        )
+        with db.transaction():
+            case.compose(case.plan.identity).populate(
+                db,
+                build=case.context(),
+                vocabulary=case.vocabulary,
+                published=(),
+            )
         printings = {}
         for row in db.rows("printing"):
             number, identifier = row.values["card_no"], row.values["id"]
@@ -202,12 +204,13 @@ def test_multicollection_uses_first_available_day_and_unknown_overrides_block_it
     with create_database(compile_build()) as db:
         with db.transaction():
             case.stage(db)
-        case.compose(case.plan.identity).import_into(
-            db,
-            build=case.context(),
-            vocabulary=case.vocabulary,
-            published=(),
-        )
+        with db.transaction():
+            case.compose(case.plan.identity).populate(
+                db,
+                build=case.context(),
+                vocabulary=case.vocabulary,
+                published=(),
+            )
         first, second = case.plan.groups[0].observations
         product(db, first.printing_id, "2020-01-01")
         product(db, first.printing_id, "2099-01-01")
@@ -231,12 +234,13 @@ def test_valid_old_current_wins_and_pending_does_not_imply_settled(
     with create_database(compile_build()) as db:
         with db.transaction():
             case.stage(db)
-        case.compose(case.plan.identity).import_into(
-            db,
-            build=case.context(),
-            vocabulary=case.vocabulary,
-            published=(),
-        )
+        with db.transaction():
+            case.compose(case.plan.identity).populate(
+                db,
+                build=case.context(),
+                vocabulary=case.vocabulary,
+                published=(),
+            )
         item = case.plan.groups[0].observations[0]
         revision = printing_observed_texts(db, case.plan)[
             item.printing_id, item.face_id
@@ -274,12 +278,13 @@ def test_unknown_printing_does_not_hide_known_latest_and_block_is_in_support(
         }
         with db.transaction():
             db.insert("card_engine_support", support)
-        case.compose(case.plan.identity).import_into(
-            db,
-            build=case.context(),
-            vocabulary=case.vocabulary,
-            published=(),
-        )
+        with db.transaction():
+            case.compose(case.plan.identity).populate(
+                db,
+                build=case.context(),
+                vocabulary=case.vocabulary,
+                published=(),
+            )
         product(db, item.printing_id, "2026-01-01")
         view = pending(db, case.plan)
         assert view.display.basis == "latest_known_release"
@@ -298,12 +303,13 @@ def test_identical_latest_is_deduplicated_and_settled_omits_wording(
     with create_database(compile_build()) as db:
         with db.transaction():
             case.stage(db)
-        case.compose(case.plan.identity).import_into(
-            db,
-            build=case.context(),
-            vocabulary=case.vocabulary,
-            published=(),
-        )
+        with db.transaction():
+            case.compose(case.plan.identity).populate(
+                db,
+                build=case.context(),
+                vocabulary=case.vocabulary,
+                published=(),
+            )
         assert not wording_views(db, case.plan)
         group = case.plan.groups[0]
         with db.transaction():
@@ -329,12 +335,13 @@ def test_double_face_keeps_settled_front_and_unknown_back_visible(
     with create_database(compile_build()) as db:
         with db.transaction():
             case.stage(db)
-        case.compose(case.plan.identity).import_into(
-            db,
-            build=case.context(),
-            vocabulary=case.vocabulary,
-            published=(),
-        )
+        with db.transaction():
+            case.compose(case.plan.identity).populate(
+                db,
+                build=case.context(),
+                vocabulary=case.vocabulary,
+                published=(),
+            )
         front = next(g for g in case.plan.groups if g.current() is not None)
         back = next(g for g in case.plan.groups if "missing_effect" in g.reasons)
         for item in back.observations:
@@ -369,12 +376,13 @@ def test_all_sources_unavailable_keep_pending_positions_and_source_urls(
     with create_database(compile_build()) as db:
         with db.transaction():
             case.stage(db)
-        case.compose(case.plan.identity).import_into(
-            db,
-            build=case.context(),
-            vocabulary=case.vocabulary,
-            published=(),
-        )
+        with db.transaction():
+            case.compose(case.plan.identity).populate(
+                db,
+                build=case.context(),
+                vocabulary=case.vocabulary,
+                published=(),
+            )
         view = pending(db, case.plan)
         assert view.display.basis == "candidates"
         assert all(c.revision_id is None for c in view.candidates)
@@ -399,12 +407,13 @@ def test_correction_revision_ids_with_exact_same_content_can_share_display(
     with create_database(compile_build(("en", "related", "correction"))) as db:
         with db.transaction():
             case.stage(db)
-        case.compose(case.plan.identity).import_into(
-            db,
-            build=case.context(),
-            vocabulary=case.vocabulary,
-            published=(),
-        )
+        with db.transaction():
+            case.compose(case.plan.identity).populate(
+                db,
+                build=case.context(),
+                vocabulary=case.vocabulary,
+                published=(),
+            )
         with db.transaction():
             db.delete("face_current", {"face_id": group.face_id, "region": "jp"})
         for item in group.observations:
@@ -442,12 +451,13 @@ def test_conflicting_correction_retains_its_publication_integrity_gate(
     with create_database(compile_build(("en", "related", "correction"))) as db:
         with db.transaction():
             case.stage(db)
-        case.compose(case.plan.identity).import_into(
-            db,
-            build=case.context(),
-            vocabulary=case.vocabulary,
-            published=(),
-        )
+        with db.transaction():
+            case.compose(case.plan.identity).populate(
+                db,
+                build=case.context(),
+                vocabulary=case.vocabulary,
+                published=(),
+            )
         assert not any(
             v.region == "jp"
             for views in wording_views(db, case.plan).values()

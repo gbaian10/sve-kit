@@ -51,12 +51,6 @@ class ListRestriction:
     heading: str
     locator: str
 
-    def active_on(self, day: date) -> bool:
-        """A restriction lifted on a date is already inactive on that date."""
-        return self.effective_from <= day and (
-            self.effective_until is None or day < self.effective_until
-        )
-
 
 @dataclass(frozen=True, slots=True)
 class RestrictionList:

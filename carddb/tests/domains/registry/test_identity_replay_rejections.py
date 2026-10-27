@@ -33,17 +33,12 @@ from sve_carddb.domains.registry.transitions.replay import (
     replay,
 )
 from sve_carddb.domains.registry.transitions.routing import derive, project
-from sve_carddb.domains.registry.transitions.state import (
-    EffectiveRegistry,
-    Entity,
-    entity,
-)
+from sve_carddb.domains.registry.transitions.state import Entity, entity
 
 from ...support.identity_replay_fixtures import (
     basis,
     frames,
     seed,
-    subsequent,
     transaction,
     write_scenario,
 )
@@ -65,7 +60,6 @@ from ...support.identity_transition_fixtures import merge_record as merge_record
 from .test_identity_replay import copy_base, renewal_record
 from .test_identity_replay import replay_base as replay_base  # ruff: ignore[useless-import-alias] -- share immutable synthetic base
 from .test_identity_replay_history import double_base as double_base  # ruff: ignore[useless-import-alias] -- share complete double-face synthetic base
-from .test_identity_replay_history import effective_state, fix_root_refs
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -378,46 +372,6 @@ def test_public_replay_reports_incomplete_dependencies(
         ValueError, match=r"^Incomplete effective identity dependency closure$"
     ):
         replay(tmp_path, inputs)
-
-
-def test_browse_hides_descendants_of_retired_card(
-    move_state: tuple[dict[str, Entity], dict[str, Entity], Transition],
-) -> None:
-    before, _, _ = move_state
-    records = change(before, "card:" + A, identity_state="retired")
-    result = EffectiveRegistry(records, (), project({}, None))
-    for kind, key in (("card", A), ("face", FA), ("printing", P), ("art", X)):
-        assert key not in {e.data["id"] for e in result.browse(kind)}
-    assert 60001 not in {e.data["int_id"] for e in result.browse("card_int_id")}
-
-
-def test_split_hint_removes_a_later_retired_choice(
-    tmp_path: Path,
-    replay_base: RegistryFiles,
-    merge_record: dict[str, Any],
-) -> None:
-    copy_base(replay_base, tmp_path)
-    first = transaction(merge_record, replay_base, kind="split")
-    state = effective_state(replay_base, first)
-    second = subsequent(first, state, P, B, C)
-    fix_root_refs(second, replay_base)
-    state = effective_state(replay_base, first)
-    for update in second["updates"]:
-        if update["after"] is None:
-            state.pop(update["target_key"], None)
-        else:
-            state[update["target_key"]] = update["after"]
-    third = subsequent(first, state, "p:" + "3" * 32, B, C)
-    fix_root_refs(third, replay_base)
-    third["repairs"][0]["id"] = "synthetic-repair-3"
-    result = replay(
-        tmp_path, write_scenario(tmp_path, replay_base, [first, second, third])
-    )
-    hint = result.resolve_int_id(60001)
-    assert hint is not None
-    assert hint.status == "choice_required"
-    assert hint.card_id == C
-    assert hint.choices == (C,)
 
 
 def test_post_review_append_needs_new_route_evidence(

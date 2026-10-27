@@ -22,7 +22,7 @@ from sve_carddb.domains.translations.glossary.evidence import (
     _digital_location,
     validate_choice,
 )
-from sve_carddb.domains.translations.glossary.importer import import_glossary
+from sve_carddb.domains.translations.glossary.importer import populate_glossary
 from sve_carddb.domains.translations.glossary.records import ChoiceRecord, DigitalName
 from sve_carddb.domains.translations.inputs import Inputs
 from sve_carddb.domains.translations.sources import Sources
@@ -189,12 +189,13 @@ def test_frozen_glossary_import_and_f1(
     frozen: Fixture, importer_template: DatabaseTemplate
 ) -> None:
     with importer_template.copy() as db:
-        result = import_glossary(
-            db,
-            Inputs(frozen.root / "authored", frozen.root, frozen.authored),
-            build=frozen.build,
-            stores={"test-store": frozen.store},
-        )
+        with db.transaction():
+            result = populate_glossary(
+                db,
+                Inputs(frozen.root / "authored", frozen.root, frozen.authored),
+                build=frozen.build,
+                stores={"test-store": frozen.store},
+            )
         assert db.rows("glossary_term")[0].values["source_ja"] == "合成甲"
         assert db.rows("glossary_translation")[0].values["origin"] == "official"
         assert db.rows("glossary_translation")[0].values["text"] == "合成乙"
@@ -233,7 +234,10 @@ def test_human_review_preserves_machine_origin(
         config,
     )
     with importer_template.copy() as db:
-        import_glossary(db, inputs, build=build, stores={"test-store": frozen.store})
+        with db.transaction():
+            populate_glossary(
+                db, inputs, build=build, stores={"test-store": frozen.store}
+            )
         assert db.rows("glossary_translation")[0].values["origin"] == "machine"
 
 
@@ -529,12 +533,13 @@ def test_immutable_authored_and_atomic_projection(
     with importer_template.copy() as db:
         before = {name: db.rows(name) for name in db._tables}
         with pytest.raises(ValueError, match="^" + message + "$"):
-            import_glossary(
-                db,
-                inputs,
-                build=changed_build(frozen, config),
-                stores={"test-store": frozen.store},
-            )
+            with db.transaction():
+                populate_glossary(
+                    db,
+                    inputs,
+                    build=changed_build(frozen, config),
+                    stores={"test-store": frozen.store},
+                )
         assert {name: db.rows(name) for name in db._tables} == before
 
 
@@ -830,9 +835,10 @@ def test_project_receipt_and_rawless_concept_import_atomically(
     config = object_value(parse(frozen.build.configuration.encode()))
     config.update(inputs.configuration())
     with importer_template.copy() as db:
-        imported = import_glossary(
-            db, inputs, build=changed_build(frozen, config), stores={}
-        )
+        with db.transaction():
+            imported = populate_glossary(
+                db, inputs, build=changed_build(frozen, config), stores={}
+            )
         assert imported is not None
         assert db.rows("glossary_term")[0].values["source_ja"] == "合成名"
         assert db.rows("glossary_translation")[0].values["origin"] == "project"

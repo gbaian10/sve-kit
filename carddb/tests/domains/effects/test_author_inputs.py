@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from sve_carddb.core.json import object_value
 from sve_carddb.domains.effects.author_inputs import AuthorInputError, AuthorSchemas
 
 if TYPE_CHECKING:
@@ -21,9 +22,14 @@ def schemas() -> AuthorSchemas:
 
 @pytest.mark.parametrize("name", ["on", "off", "n", "yes", "no", "X", "offset_2"])
 def test_yaml_canary_strings(schemas: AuthorSchemas, name: str) -> None:
-    assert schemas.parameter_reference(f"param: {name}\n".encode()).param == name
-    result = schemas.parameter_value(f"type: CardName\nvalue: {name}\n".encode())
-    assert result.value == name
+    assert (
+        object_value(schemas.leaf(f"param: {name}\n".encode(), "A.param"))["param"]
+        == name
+    )
+    result = object_value(
+        schemas.leaf(f"type: CardName\nvalue: {name}\n".encode(), "ParamValue")
+    )
+    assert result["value"] == name
 
 
 @pytest.mark.parametrize(
@@ -112,7 +118,7 @@ def test_index_duplicate_diagnostic(schemas: AuthorSchemas) -> None:
 
 def test_duplicate_key_diagnostic_does_not_expose_input(schemas: AuthorSchemas) -> None:
     with pytest.raises(AuthorInputError) as caught:
-        schemas.parameter_reference(b"param: x\nparam: private_value")
+        schemas.leaf(b"param: x\nparam: private_value", "A.param")
     diagnostic = caught.value.diagnostic
     assert diagnostic.reason == "duplicate_key"
     assert (diagnostic.line, diagnostic.column) == (2, 1)
@@ -150,7 +156,7 @@ def test_json_diagnostic_uses_structural_paths(
     column: int,
 ) -> None:
     with pytest.raises(AuthorInputError) as caught:
-        schemas.parameter_values(raw)
+        schemas.leaf(raw, "ParamValues")
     diagnostic = caught.value.diagnostic
     assert (diagnostic.stage, diagnostic.reason) == ("json", reason)
     assert diagnostic.path == path
@@ -187,7 +193,7 @@ def test_schema_diagnostic_identifies_bad_key(
     column: int,
 ) -> None:
     with pytest.raises(AuthorInputError) as caught:
-        schemas.parameter_values(raw)
+        schemas.leaf(raw, "ParamValues")
     diagnostic = caught.value.diagnostic
     assert (diagnostic.stage, diagnostic.reason) == ("schema", reason)
     assert diagnostic.path == path
@@ -197,4 +203,4 @@ def test_schema_diagnostic_identifies_bad_key(
 
 def test_authored_size_bound(schemas: AuthorSchemas) -> None:
     with pytest.raises(AuthorInputError, match="size_limit"):
-        schemas.parameter_reference(b"#" * (1024 * 1024 + 1))
+        schemas.leaf(b"#" * (1024 * 1024 + 1), "A.param")

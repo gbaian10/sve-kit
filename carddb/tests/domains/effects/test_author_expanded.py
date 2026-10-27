@@ -59,7 +59,7 @@ def test_generated_branch_is_only_available_before_expansion(
     if face:
         card = object_value(object_value(value["cards"])["FIX-001"])
         card["faces"] = {"f:" + "1" * 32: {"abilities": card.pop("abilities")}}
-    schemas.author_effect_set(canonical(value))
+    schemas.document(canonical(value))
     with pytest.raises(AuthorInputError) as error:
         schemas.expanded(canonical(value))
     assert error.value.diagnostic.stage == "schema"

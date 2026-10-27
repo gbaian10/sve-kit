@@ -9,8 +9,8 @@ from pydantic import JsonValue, ValidationError
 
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.domains.effects.classifications import Shard
-from sve_carddb.domains.effects.reader import catalog, document, load, source_document
-from sve_carddb.domains.effects.storage import StoredClassification
+from sve_carddb.domains.effects.reader import catalog, document, load
+from sve_carddb.domains.effects.storage import SourceShard, StoredClassification
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -160,7 +160,7 @@ def test_unicode_body_can_differ_noncontiguously_from_raw() -> None:
         (
             document(
                 encoded([label_record(), member]),
-                (source_document(canonical(sources)),),
+                (SourceShard.model_validate_json(canonical(sources)),),
             ),
         )
     )
@@ -171,18 +171,6 @@ def test_unicode_body_can_differ_noncontiguously_from_raw() -> None:
     assert result.members[0].token_header_hash == digest(b"header")
 
 
-@pytest.mark.parametrize("field", ["raw", "body", "id"])
-def test_changed_text_without_matching_version_hash_is_rejected(field: str) -> None:
-    text = text_record()
-    text[field] = digest(b"wrong") if field == "id" else "must-not-echo-this-text"
-    sources = source_payload()
-    sources["records"] = [text]
-    with pytest.raises(
-        ValueError, match=r"^Classification text version hash mismatch$"
-    ):
-        source_document(canonical(sources))
-
-
 @pytest.mark.parametrize("change", ["missing", "wrong-version", "wrong-owner"])
 def test_text_reference_must_exist_in_the_member_owner(change: str) -> None:
     sources = source_payload()
@@ -191,7 +179,11 @@ def test_text_reference_must_exist_in_the_member_owner(change: str) -> None:
         sources["owner"] = "OTHER"
     elif change == "wrong-version":
         member["source"] = digest(b"missing")
-    parsed = () if change == "missing" else (source_document(canonical(sources)),)
+    parsed = (
+        ()
+        if change == "missing"
+        else (SourceShard.model_validate_json(canonical(sources)),)
+    )
     with pytest.raises(ValueError, match="Missing classification text version"):
         document(encoded([member]), parsed)
 
@@ -241,7 +233,10 @@ def test_stored_lengths_and_spans_are_checked_against_exact_text(change: str) ->
         else "Invalid resolved classification record"
     )
     with pytest.raises(ValueError, match="^" + message + "$"):
-        document(encoded([member]), (source_document(canonical(source_payload())),))
+        document(
+            encoded([member]),
+            (SourceShard.model_validate_json(canonical(source_payload())),),
+        )
 
 
 @pytest.mark.parametrize("field", ["namespace", "basis"])
@@ -253,11 +248,11 @@ def test_text_versions_cannot_cross_input_bases(field: str) -> None:
         else {"recipe": "other", "inputs_hash": digest(b"other")}
     )
     with pytest.raises(ValueError, match="namespace or input basis differs"):
-        document(encoded(), (source_document(canonical(sources)),))
+        document(encoded(), (SourceShard.model_validate_json(canonical(sources)),))
 
 
 def test_duplicate_text_version_in_one_owner_is_rejected() -> None:
-    source = source_document(canonical(source_payload()))
+    source = SourceShard.model_validate_json(canonical(source_payload()))
     with pytest.raises(ValueError, match="Duplicate classification text version"):
         document(encoded(), (source, source))
 
@@ -265,26 +260,37 @@ def test_duplicate_text_version_in_one_owner_is_rejected() -> None:
 @pytest.mark.parametrize("source", [True, False], ids=["text", "classification"])
 @pytest.mark.parametrize("replacement", [True, 1.0, "1", 3])
 def test_formats_require_their_exact_integer(
-    source: bool, replacement: JsonValue
+    tmp_path: Path, source: bool, replacement: JsonValue
 ) -> None:
     raw = canonical(source_payload()) if source else encoded()
     version = b'"format":1' if source else b'"format":2'
     raw = raw.replace(version, b'"format":' + json.dumps(replacement).encode())
     if source:
-        with pytest.raises(ValueError, match=r"^Invalid classification source shard$"):
-            source_document(raw)
+        _, sources_path = write_catalog(tmp_path)
+        sources_path.write_bytes(raw)
+        message = (
+            "Invalid authored YAML input: authored/rules/classification-sources/TEST/001.yaml"
+            if type(replacement) is float
+            else "Invalid classification source shard"
+        )
+        with pytest.raises(ValueError, match="^" + re.escape(message) + "$"):
+            load(tmp_path)
     else:
-        sources = (source_document(canonical(source_payload())),)
+        sources = (SourceShard.model_validate_json(canonical(source_payload())),)
         with pytest.raises(ValueError, match=r"^Invalid classification shard$"):
             document(raw, sources)
 
 
 @pytest.mark.parametrize("source", [True, False], ids=["text", "classification"])
-def test_in_memory_documents_reject_oversized_input(source: bool) -> None:
-    read = source_document if source else document
-    kind = "classification source shard" if source else "classification shard"
-    with pytest.raises(ValueError, match="^Oversized " + kind + "$"):
-        read(b"x" * 1048576)
+def test_documents_reject_oversized_input(tmp_path: Path, source: bool) -> None:
+    if source:
+        _, sources_path = write_catalog(tmp_path)
+        sources_path.write_bytes(b"x" * 1048576)
+        with pytest.raises(ValueError, match="smaller than one MiB"):
+            load(tmp_path)
+    else:
+        with pytest.raises(ValueError, match=r"^Oversized classification shard$"):
+            document(b"x" * 1048576)
 
 
 @pytest.mark.parametrize(

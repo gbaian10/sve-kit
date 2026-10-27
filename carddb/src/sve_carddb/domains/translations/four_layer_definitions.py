@@ -1,7 +1,6 @@
 """Content-checked shared storage expands before the frame identity boundary."""
 
 import re
-from collections import Counter
 from copy import deepcopy
 from typing import TYPE_CHECKING, Literal
 
@@ -13,14 +12,13 @@ from sve_carddb.core.json import canonical, object_value, parse
 from sve_carddb.core.models import RecordData, UInt
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Sequence
+    from collections.abc import Sequence
     from pathlib import Path
 
 AREA = "translations/semantic-definitions/"
 INDEX = AREA + "index.yaml"
 _SEQUENCE = re.compile(r"[0-9]{3,}\.yaml\Z")
 _REFERENCE = re.compile(r"@([1-9][0-9]*)\Z")
-_SHARE_BYTES = 16
 _MAX_DEPTH = 64
 type Files = tuple[tuple[str, bytes, bytes], ...]
 
@@ -175,73 +173,3 @@ def read_files(root: Path) -> Files:
         raw, content = read(path, root=root)
         result.append((path.relative_to(root).as_posix(), raw, content))
     return tuple(result)
-
-
-def _count(value: JsonValue, counts: Counter[bytes]) -> None:
-    if isinstance(value, (dict, list, str)):
-        counts[canonical(value)] += 1
-        if isinstance(value, dict):
-            for key, item in value.items():
-                _count(key, counts)
-                _count(item, counts)
-        elif isinstance(value, list):
-            for item in value:
-                _count(item, counts)
-
-
-def _encode(value: JsonValue, child: Callable[[JsonValue], JsonValue]) -> JsonValue:
-    if isinstance(value, dict):
-        result: dict[str, JsonValue] = {}
-        for key, item in value.items():
-            name = child(key)
-            assert isinstance(name, str)
-            result[name] = child(item)
-        return result
-    if isinstance(value, list):
-        return [child(item) for item in value]
-    if isinstance(value, str) and value.startswith("@"):
-        return "@" + value
-    return value
-
-
-def pack(
-    values: Sequence[JsonValue], *, existing: Sequence[Entry] = ()
-) -> tuple[tuple[int, ...], tuple[Entry, ...]]:
-    """Append storage handles without renumbering any previously admitted content."""
-    previous = Definitions(existing)
-    counts: Counter[bytes] = Counter()
-
-    unique = {canonical(value): value for value in values}
-    for value in unique.values():
-        _count(value, counts)
-    entries = {entry.hash: entry for entry in existing}
-    handles = {entry.hash: entry.id for entry in existing}
-    originals = {entry.hash: canonical(previous.get(entry.id)) for entry in existing}
-    next_id = max(handles.values(), default=0)
-
-    def intern(value: JsonValue) -> int:
-        nonlocal next_id
-        checksum = hash_payload(value)
-        raw = canonical(value)
-        if checksum in originals and originals[checksum] != raw:
-            raise ValueError("Same definition hash has different canonical bytes")
-        if checksum not in handles:
-            originals[checksum] = raw
-            next_id += 1
-            handles[checksum] = next_id
-            entries[checksum] = Entry(
-                id=next_id, hash=checksum, value=_encode(value, child)
-            )
-        return handles[checksum]
-
-    def child(value: JsonValue) -> JsonValue:
-        raw = canonical(value)
-        if len(raw) >= _SHARE_BYTES and counts[raw] > 1:
-            return "@" + str(intern(value))
-        return _encode(value, child)
-
-    for _, value in sorted(unique.items()):
-        intern(value)
-    return tuple(handles[hash_payload(v)] for v in values), tuple(
-        sorted(entries.values(), key=lambda entry: entry.id)
-    )

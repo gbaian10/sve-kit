@@ -1,6 +1,6 @@
 """Finite aggregate source contracts, isolated from B11 and executable DSL rules."""
 
-from dataclasses import dataclass, replace
+from dataclasses import replace
 from typing import TYPE_CHECKING, cast
 
 from sve_carddb.contracts.four_layer import (
@@ -274,33 +274,3 @@ _PAIR = tuple(
     for shape in ("named", "kind")
 )
 DESCRIPTORS = (*_COUNT, *_SUM, *_COMPOSED_SUM, *_TOTAL, *_BOUND, *_PAIR)
-
-
-@dataclass(frozen=True)
-class Lowering:
-    descriptor: str
-    operands: tuple[str, ...]
-    unresolved: tuple[str, ...]
-    pair_policy: str | None = None
-    executable: bool = False
-
-
-def lowering(descriptor: str, operands: tuple[str, ...]) -> Lowering:
-    """Source identity stays fixed when future execution evidence settles deduplication."""
-    if descriptor not in {d.id for d in DESCRIPTORS}:
-        raise ValueError("Unknown aggregate source descriptor")
-    reasons: tuple[str, ...] = ("typed_aggregate_lowering",)
-    if descriptor == "aggregate.total.ya.v1":
-        reasons = ("overlapping_total",)
-    elif ".exclude_name." in descriptor:
-        reasons = ("same_name_selector", "typed_aggregate_lowering")
-    elif ".distinct_names." in descriptor:
-        reasons = ("distinct_name_selector", "typed_aggregate_lowering")
-    return Lowering(
-        descriptor,
-        operands,
-        reasons,
-        "min(left_count,right_count);each_card_at_most_once;disjoint"
-        if descriptor.startswith("aggregate.pair.")
-        else None,
-    )

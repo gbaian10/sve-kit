@@ -5,13 +5,10 @@ from dataclasses import replace
 import pytest
 
 from sve_carddb.contracts.author_evidence import SourceUse
-from sve_carddb.domains.effects.author_sources import (
-    SourceCandidate,
-    entry_payload,
-    resolve_source,
-)
+from sve_carddb.domains.effects.author_sources import entry_payload
 from sve_carddb.domains.translations.four_layer_derivation import derive_source
 from sve_carddb.domains.translations.four_layer_destroy import KEY
+from tests.support.author_source_fixtures import SourceCandidate, source_context
 
 from ..translations.test_four_layer_classification import classifier
 from ..translations.test_four_layer_destroy import EXTRA, TERMS
@@ -42,8 +39,8 @@ def test_real_advance_fanfare_resolves_to_fixed_payload(card_no: str) -> None:
         occurrence=binding.occurrence_key(),
         ability_scope="ability_0",
     )
-    checked = resolve_source(SourceCandidate(raw, context.source, engine, context), use)
-    assert checked.source_proof == "derived_self_consistent"
+    checked = source_context(SourceCandidate(raw, context.source, engine, context), use)
+    assert checked.source_proof == "none"
     assert entry_payload(checked, "ability_0") == {
         "fanfare": {
             "do": [
