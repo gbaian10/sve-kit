@@ -12,7 +12,7 @@
 圖示沿用日版 `{alt}`、英版 `{filename_stem|alt}` 表記。配對後面若還有說明文字，必須先核對邊界，
 不能把修正理由、換卡說明或 Q&A 當成修正後卡文。
 
-`blocks` 由 `errata_parser.parse_notice` 產生；`changes` 是人工採納的已審查輸入，
+`blocks` 是解析結果（`parser_version` 記錄產生版本）；`changes` 是人工採納的已審查輸入，
 將已核對的配對或其具名子段落連到同區 card_no／face_id，不宣稱解析器自動完成此對應。
 卡名整欄值不含引用符號『』；`blocks` 仍保留公告原樣。
 `scope=fragment` 表示公告只提供變更片段；`scope=field` 表示該具名欄位本身的完整內容。

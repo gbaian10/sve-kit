@@ -1,10 +1,8 @@
 # Frozen Q&A, errata and related cards
 
 `card_extras` supplies immutable `CardPage` / `ErrataPage` input records for the
-initial sealed-source import and incremental adapters. Its parsing/planning and
-frozen readers do not fetch pages, open a live manifest or read latest cache.
-Protected fetching is a separate explicit adapter described below; none writes
-authored data.
+initial sealed-source import. Its parsing/planning and frozen readers do not
+fetch pages, open a live manifest or read latest cache, and none writes authored data.
 
 `FrozenCardExtras(store_root, store_id, batch_id).pages()` streams only current
 JP card pages in the pinned batch. Descriptor, receipt and consumed raw hashes
@@ -37,15 +35,14 @@ This order records observed versions, not a claimed official effective date.
 All page/block uses survive in `InputRecord`, including
 sources of deduplicated versions and pages with unknown adopted identities.
 
-Incremental adapters must retain each numbered Q&A's page/block observations:
+Any future incremental adapter must retain each numbered Q&A's page/block observations:
 the same Q number on different pages can have different wording during one
 crawl. Observation order then produces separate observed versions, even within
 one crawl; it does not prove an official revision or select authoritative current
 wording. Compare cross-page wording and inspect all retained source uses before
 consuming a version as current. Do not collapse a crawl to the last page, infer
 official chronology from fetch time, or discard conflicting pages.
-`changes.conflicts(pages)` reports conflicting observations from the supplied scope;
-it does not supply an authoritative-current-wording policy.
+No authoritative-current-wording policy is supplied.
 
 `plan_card_extras(db, pages, errata=...)` resolves related targets solely by exact
 `(region, raw card_no)` in the already adopted printing graph. A resolved link

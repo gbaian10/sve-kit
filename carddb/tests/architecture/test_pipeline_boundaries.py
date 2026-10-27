@@ -183,7 +183,7 @@ def test_boundary_allows_shared_helpers(module_name: str, source: str) -> None:
 def test_parse_cannot_reach_crawl_through_urls() -> None:
     assert not forbidden_imports(
         "from sve_carddb.ingest import urls",
-        "sve_carddb.parse.pages.official_qa",
+        "sve_carddb.parse.pages.official_jp",
         package="sve_carddb.parse.pages",
     )
     assert forbidden_imports(
