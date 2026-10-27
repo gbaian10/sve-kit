@@ -244,7 +244,7 @@ fn repository_lastword_rejects_missing_sources_and_unknown_or_unsupported_steps(
     unsupported["tree"]["cards"]["BP01-P25"]["abilities"][0]["lastword"]["do"]
         .as_array_mut()
         .unwrap()
-        .push(json!({"banish":"this"}));
+        .push(json!({"dice":{"bind":"roll"}}));
     // Mutated handoffs are rejection probes, never accepted source evidence.
     for (candidate, code, path) in [
         (missing, "invalid_current_source", "/cards/BP01-P25"),
