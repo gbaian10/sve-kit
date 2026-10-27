@@ -24,6 +24,12 @@ if TYPE_CHECKING:
 
 _LOCATION = frozenset({"line", "face", "section", "scope", "covers", "admission"})
 _USE = frozenset({"use", "edition", "params", "registration"})
+_CARD_KEYS = frozenset(
+    {"admission", "meta", "abilities", "ignored", "note", "deck_rule", "container"}
+)
+_META_KEYS = frozenset(
+    {"written_by", "reviewed_by", "status", "verified_by_exam", "rulings"}
+)
 _EMPTY_PORTS: dict[str, JsonValue] = {"imports": {}, "exports": {}}
 
 
@@ -239,7 +245,11 @@ def materialize(
 ) -> dict[str, JsonValue]:
     """Keep source coordinates explicit while allowing equivalent wording to share a body."""
     card = handwritten.cards[number]
+    if card.keys() - _CARD_KEYS or not {"meta", "abilities"} <= card.keys():
+        raise SourceError("invalid_card_keys")
     meta = object_value(card["meta"])
+    if meta.keys() - _META_KEYS or not meta.get("written_by"):
+        raise SourceError("invalid_card_metadata")
     if meta.get("status") == "disputed" or any(
         object_value(r).get("verdict") in {"disputed", "revise"}
         for r in array(meta.get("reviewed_by", []))

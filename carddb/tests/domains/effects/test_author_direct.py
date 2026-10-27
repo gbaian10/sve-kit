@@ -32,7 +32,8 @@ def test_direct_writer_selects_pending_text_without_machine_anchors(
 
 
 @pytest.mark.parametrize(
-    "mutation", ["missing", "duplicate", "wrong_face", "bad_param", "disputed"]
+    "mutation",
+    ["missing", "duplicate", "wrong_face", "bad_param", "disputed", "unknown_key"],
 )
 def test_direct_rejects_incomplete_or_invalid_cards(
     tmp_path: Path, mutation: str
@@ -70,6 +71,9 @@ def test_direct_rejects_incomplete_or_invalid_cards(
             body={"spell": {"do": [{"draw": {"who": "self", "n": {"param": "n"}}}]}},
         )
         expected = "param_type_mismatch"
+    elif mutation == "unknown_key":
+        card["deck_rules"] = []
+        expected = "invalid_card_keys"
     else:
         object_value(card["meta"])["status"] = "disputed"
         expected = "source_unresolved_issue"
