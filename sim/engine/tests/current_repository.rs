@@ -123,6 +123,38 @@ fn repository_draw_cards_lower_as_complete_current_candidates() {
 }
 
 #[test]
+fn repository_keyword_migrations_lower_as_complete_current_candidates() {
+    let (snapshot, keywords, input) = inputs();
+    let selected = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
+    let prototypes = serde_json::to_value(&selected.prototypes).unwrap();
+    let cases = [("DSD01b-004", "c:31103e7d8c6b5a2d9e3838cac19b1c07", 2)];
+
+    for (card_no, card_id, abilities) in cases {
+        assert!(prototypes["programs"].get(card_no).is_none());
+        let card = &selected.current[card_no];
+        assert_eq!(card.card_id, card_id);
+        assert_eq!(card.program.card().abilities.len(), abilities);
+    }
+
+    for card_no in [
+        "BP01-096",
+        "BP01-158",
+        "BP01-163",
+        "BP01-P10",
+        "BP04-P07",
+        "BP03-033",
+        "BP08-T09",
+        "BP14-032",
+        "BP15-T06",
+        "DSD01b-005",
+        "SD07-006",
+    ] {
+        assert!(!selected.current.contains_key(card_no));
+        assert!(prototypes["programs"].get(card_no).is_some());
+    }
+}
+
+#[test]
 fn repository_named_search_lowers_as_a_complete_current_candidate() {
     let (snapshot, keywords, input) = inputs();
     let selected = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();

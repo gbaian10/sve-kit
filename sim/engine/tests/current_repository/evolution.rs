@@ -1,7 +1,12 @@
-use super::runtime::{game, setup};
+use super::runtime::{game_from_selection, setup};
 use super::*;
 use sve_engine::game::{Game, Step, View};
 use sve_engine::ir::{AbilityId, PlayerId};
+
+fn game(initial: &Value) -> Game {
+    let (snapshot, keywords, input) = inputs();
+    game_from_selection(initial, &snapshot, &keywords, &input)
+}
 
 fn initial(card: &str, resource: &str, seat: &str) -> Value {
     let mut initial = setup(seat, seat, [20, 20]);
