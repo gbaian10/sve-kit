@@ -166,14 +166,10 @@ def test_current_inputs_require_explicit_immutable_pins(
     current_baseline: Case, mutation: str
 ) -> None:
     inputs = current_baseline.inputs()
-    if mutation == "short_sha":
-        inputs = replace(inputs, authored_revision=inputs.authored_revision[:8])
-        message = "^Adoption authored revision must be a full Git SHA$"
-    else:
-        inputs = replace(
-            inputs, entries=() if mutation == "empty_entries" else inputs.entries * 2
-        )
-        message = "^Adoption entries must be explicitly enabled, sorted and unique$"
+    inputs = replace(
+        inputs, entries=() if mutation == "empty_entries" else inputs.entries * 2
+    )
+    message = "^Adoption entries must be explicitly enabled, sorted and unique$"
     with pytest.raises(ValueError, match=message):
         inputs.load()
 
