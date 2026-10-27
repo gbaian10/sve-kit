@@ -7,11 +7,12 @@ import drainIcon from "../../assets/keywords/drain.svg"
 import guardIcon from "../../assets/keywords/guard.svg"
 import intimidateIcon from "../../assets/keywords/intimidate.svg"
 import type { SearchOptions } from "../../data"
-import type { MechanicState } from "../../domain/query/model"
+import type { MatchMode, MechanicState } from "../../domain/query/model"
 import type { Region, TextLang } from "../../domain/search"
 import { vocabularyOptionLabel } from "./facet-labels"
 import { Toggle } from "./FilterControls"
 import { FilterDropdown } from "./FilterDropdown"
+import { MatchModeControl } from "./MatchModeControl"
 
 const KEYWORD_ORDER = [
   "kw:assail",
@@ -39,6 +40,8 @@ export function KeywordFilter({
   edition,
   selected,
   onChange,
+  matchMode = "any",
+  onMatchChange,
 }: {
   readonly options:
     | {
@@ -47,6 +50,8 @@ export function KeywordFilter({
         readonly coverage: SearchOptions["keywordCoverage"]
       }
     | undefined
+  readonly matchMode?: MatchMode
+  readonly onMatchChange?: (value: MatchMode) => void
   readonly textLang: TextLang
   readonly edition: Region
   readonly selected: Readonly<Record<string, MechanicState>>
@@ -81,6 +86,14 @@ export function KeywordFilter({
           : undefined
       }
     >
+      {onMatchChange && (
+        <MatchModeControl
+          label={t("filters.keywordMatch")}
+          value={matchMode}
+          disabled={disabled}
+          onChange={onMatchChange}
+        />
+      )}
       <div className="grid grid-cols-4 gap-2">
         {KEYWORD_ORDER.flatMap((id) => {
           const keyword = options?.keywords.find((item) => item.id === id)
@@ -119,7 +132,7 @@ export function KeywordFilter({
                 : t("filters.keywordUnknown")
               : options.coverage === "partial"
                 ? t("filters.keywordPartial")
-                : t("filters.keywordAny")}
+                : t(matchMode === "all" ? "filters.keywordAll" : "filters.keywordAny")}
       </p>
     </FilterDropdown>
   )

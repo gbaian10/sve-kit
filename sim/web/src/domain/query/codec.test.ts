@@ -21,6 +21,9 @@ describe("query codec", () => {
       traits: ["pixie"],
       artists: ["y:aa", "y:bb"],
       mechanics: { "kw:a": "not", "kw:b": "has" },
+      mechanicsMatch: "any",
+      abilityTypes: [],
+      abilityTypesMatch: "any",
       sets: ["set:bp01"],
       rarities: ["gold"],
       altArtOnly: true,
@@ -199,4 +202,17 @@ it("round trips independent stamp and serial filters and rejects other flag valu
   expect(parseQuery(formatQuery(state))).toEqual(state)
   expect(activeFilterCount(state)).toBe(2)
   expect(parseQuery(new URLSearchParams("stamp=true&serial=0"))).toEqual(DEFAULT_QUERY)
+})
+
+it("round trips independent ability and keyword matching modes and drops unknown ability names", () => {
+  const state = parseQuery(
+    new URLSearchParams(
+      "ability=fanfare,act,fanfare,invalid&abilitymatch=all&mech=kw:ward,kw:storm&mechmatch=all",
+    ),
+  )
+  expect(state.abilityTypes).toEqual(["act", "fanfare"])
+  expect(state.abilityTypesMatch).toBe("all")
+  expect(state.mechanicsMatch).toBe("all")
+  expect(parseQuery(formatQuery(state))).toEqual(state)
+  expect(formatQuery(DEFAULT_QUERY).has("ability")).toBe(false)
 })

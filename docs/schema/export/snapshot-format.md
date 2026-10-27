@@ -74,7 +74,7 @@ reader 編譯具型別 accessor，詳情分片保留 tuples＋ID→row 索引；
 | `card_voice` | `card_id, voice_id, usage` | 複合 `PK(card_id,voice_id,usage)`；可播放的已採納對照/場景 |
 | `keyword` | `id, code, kind, name_unit_id, definition_unit_id?, actions:[{action,label_unit_id}], translations:[FieldTranslation]` | 關鍵字/資源及產生消耗篩選 |
 | `mechanic_projection` | `card_id, keyword_id, scope, relations:[code], actions:[code]` | 複合 `PK(前三欄)`；has/grants/refers/counts 與三態搜尋 |
-| `card_mechanic_coverage` | `card_id, scope, complete_all, complete_mode:include/exclude, complete_keyword_ids:[id], partial_mode:include/exclude, partial_keyword_ids:[id], has_complete_keyword_ids:[id]` | 複合 `PK(前兩欄)`；稀疏三態搜尋的完整性，不展開 absent 列 |
+| `card_mechanic_coverage` | `card_id, scope, complete_all, complete_mode:include/exclude, complete_keyword_ids:[id], partial_mode:include/exclude, partial_keyword_ids:[id], has_complete_keyword_ids:[id], ability_types:[AbilityType], ability_types_complete:Bool` | 複合 `PK(前兩欄)`；稀疏三態搜尋的完整性，不展開 absent 列 |
 | `card_engine_support` | `card_id, shared:Support, overrides:[{region,support:Support}], region_blocks:[{region,reasons:[code]}]` | PK(`card_id`)；未實作頁/單卡徽章/建牌數量/手動回退 |
 | `vocabulary` | `kind, code, label_unit_id, active, translations:[FieldTranslation]` | 複合 `PK(kind,code)`；穩定英文 filter code，多語 label 經 translation |
 | `search_alias` | `kind, code, lang, text, normalized` | 複合 `PK(kind,code,lang,text)`；三語輸入/Discord 暱稱 |
@@ -534,3 +534,9 @@ consumer 先讀同地區的 has 正標籤；沒有正標籤時，只有此集合
 它不改變 `complete_all`、`complete_keyword_ids`、`partial_keyword_ids` 與 manifest 四關係 coverage 的語意。
 EN 自己的 current 卡文產生 `en_override`，不依 JP 對應或引擎支援資格取得 has 完整性；
 未知／缺面／待定來源不授予否定結果。來源與解析邊界見[關鍵字機制](../domains/keyword-mechanics.md#本身有的日英全卡表檢查)。
+
+`card_mechanic_coverage.ability_types` 是同地區卡文任一面明印的能力種類 code 陣列，按 code 排序且不重複；
+固定 code 為 quick、fanfare、last_words、on_evolve、on_attack、advanced_act、on_super_evolve、act、fusion。
+`ability_types_complete=true` 表示所有必要 current 面均可檢查，且沒有未閉合引述造成的後續能力頭缺口；
+false 時仍可使用已辨認的正標籤，不能把其餘種類當已確認沒有。JP 使用 shared、EN 使用自己的 en_override，
+不從日文對照或 engine support 資格繼承。它們不屬於 keyword universe，不改四關係完整性的原義。

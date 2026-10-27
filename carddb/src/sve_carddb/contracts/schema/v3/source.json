@@ -8906,6 +8906,48 @@
               "scalar": "ID"
             }
           }
+        },
+        "ability_types": {
+          "schema": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "quick",
+                "fanfare",
+                "last_words",
+                "on_evolve",
+                "on_attack",
+                "advanced_act",
+                "on_super_evolve",
+                "act",
+                "fusion"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "descriptor": {
+            "array": {
+              "enum": [
+                "quick",
+                "fanfare",
+                "last_words",
+                "on_evolve",
+                "on_attack",
+                "advanced_act",
+                "on_super_evolve",
+                "act",
+                "fusion"
+              ]
+            }
+          }
+        },
+        "ability_types_complete": {
+          "schema": {
+            "$ref": "#/$defs/Bool"
+          },
+          "descriptor": {
+            "scalar": "Bool"
+          }
         }
       },
       "constraints": {
@@ -10954,6 +10996,12 @@
           "from": "card_mechanic_coverage"
         },
         "has_complete_keyword_ids": {
+          "from": "card_mechanic_coverage"
+        },
+        "ability_types": {
+          "from": "card_mechanic_coverage"
+        },
+        "ability_types_complete": {
           "from": "card_mechanic_coverage"
         }
       },

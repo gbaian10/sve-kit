@@ -2,6 +2,7 @@
 // every field has one URL parameter, defaults are never written, and results are a pure function of
 // it. Vocabulary codes (classes, types, sets, rarities) come from the snapshot; `neutral` stands for
 // cards without a class.
+import type { AbilityType } from "../abilityTypes"
 import type { RepresentativeRarity } from "../representative"
 
 /** One cell per printing, per art (same card and front-face art) or per card. */
@@ -17,6 +18,8 @@ type QuerySort = (typeof QUERY_SORTS)[number]
 
 export const VIEW_MODES = ["grid", "table", "list"] as const
 type ViewMode = (typeof VIEW_MODES)[number]
+
+export type MatchMode = "any" | "all"
 
 export type MechanicState = "has" | "not"
 
@@ -43,7 +46,10 @@ export interface QueryState {
   readonly traits: readonly string[]
   /** Artist ids of the edition; a printing whose front art credits any selected artist passes. */
   readonly artists: readonly string[]
-  /** Unlisted keyword ids are "either"; has selections form a union, not selections all require absence. */
+  /** Unlisted keyword ids are "either"; has selections use mechanicsMatch; not selections all require absence. */
+  readonly mechanicsMatch: MatchMode
+  readonly abilityTypes: readonly AbilityType[]
+  readonly abilityTypesMatch: MatchMode
   readonly mechanics: Readonly<Record<string, MechanicState>>
   readonly sets: readonly string[]
   readonly rarities: readonly string[]
@@ -75,6 +81,9 @@ export const DEFAULT_QUERY: QueryState = {
   traits: [],
   artists: [],
   mechanics: {},
+  mechanicsMatch: "any",
+  abilityTypes: [],
+  abilityTypesMatch: "any",
   sets: [],
   rarities: [],
   altArtOnly: false,
@@ -101,6 +110,7 @@ export function activeFilterCount(state: QueryState): number {
     (state.traits.length > 0 ? 1 : 0) +
     (state.artists.length > 0 ? 1 : 0) +
     (Object.keys(state.mechanics).length > 0 ? 1 : 0) +
+    (state.abilityTypes.length > 0 ? 1 : 0) +
     (state.sets.length > 0 ? 1 : 0) +
     (state.rarities.length > 0 ? 1 : 0) +
     (state.altArtOnly ? 1 : 0) +

@@ -457,3 +457,18 @@ Intimidate、Bane、Drain、Aura）。JP 寫 shared，EN 只寫 en_override，�
 既有四關係 complete 與 manifest coverage 維持原義；「本身有」完整不能令它們變完整。
 前端按地區的非 retired card 去重計數；所有 keyword 均為 present／absent 才算該卡已確認。
 有未知卡時顯示確切張數，為零才移除不完整提示；unknown 不能命中否定搜尋。
+
+## 能力種類
+
+`ability-heads-v1` 與自身關鍵字檢查共用同地區 current 主文、缺面狀態及跨行引述判定，
+辨識 Quick、入場曲、謝幕曲、進化時、攻擊時、進階起動、超進化時、起動、融合九種能力頭。
+一般進化費用（12.2）不列入。任一面有標記就授予 card 層正標籤，含進化面與 token 卡自己的主文。
+
+日文讀開頭連續的 `{…}`、`【…】` 或 `《…》` 標記；英文讀官方 icon token，
+以及 On Evolve／On Attack／On Super-Evolve 等行首能力頭。融合只在日文能力頭或英文
+起動費用開頭的 `Fuse …:` 辨識；本文的 fusion counter、生成 token 定義及引述內能力頭不授予母卡能力種類。
+開頭能力頭後即使有引述本文，該能力頭仍屬母卡；跨行引述內的後續能力頭屬被引述的能力。
+
+結果放同 scope coverage 列的 ability_types／ability_types_complete，不從 DSL 判斷，
+不改 engine support。這些 code 與八種持有性質的 keyword 分開；後續 DSL 可做交叉核對，
+但本入口不以 DSL 補上未辨認的能力頭。

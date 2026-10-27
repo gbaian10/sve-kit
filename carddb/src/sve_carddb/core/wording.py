@@ -115,3 +115,11 @@ def preferred_wordings(
         else "other_wording"
     )
     return preferred, difference
+
+
+def quote_after(quoted: bool, line: str) -> bool:
+    """Carry quoted ability text across lines without borrowing its headers for the owner."""
+    quoted ^= bool(line.count('"') % 2)
+    opened = max(line.rfind("「"), line.rfind("“"))
+    closed = max(line.rfind("」"), line.rfind("”"))
+    return opened > closed if opened != closed else quoted

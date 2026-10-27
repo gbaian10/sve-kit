@@ -6792,11 +6792,31 @@
           "items": {
             "$ref": "#/$defs/ID"
           }
+        },
+        {
+          "type": "array",
+          "items": {
+            "enum": [
+              "quick",
+              "fanfare",
+              "last_words",
+              "on_evolve",
+              "on_attack",
+              "advanced_act",
+              "on_super_evolve",
+              "act",
+              "fusion"
+            ]
+          },
+          "uniqueItems": true
+        },
+        {
+          "$ref": "#/$defs/Bool"
         }
       ],
       "items": false,
-      "minItems": 8,
-      "maxItems": 8,
+      "minItems": 10,
+      "maxItems": 10,
       "x-columns": [
         "card_id",
         "scope",
@@ -6805,7 +6825,9 @@
         "complete_keyword_ids",
         "partial_mode",
         "partial_keyword_ids",
-        "has_complete_keyword_ids"
+        "has_complete_keyword_ids",
+        "ability_types",
+        "ability_types_complete"
       ],
       "x-types": [
         {
@@ -6846,6 +6868,24 @@
           "array": {
             "scalar": "ID"
           }
+        },
+        {
+          "array": {
+            "enum": [
+              "quick",
+              "fanfare",
+              "last_words",
+              "on_evolve",
+              "on_attack",
+              "advanced_act",
+              "on_super_evolve",
+              "act",
+              "fusion"
+            ]
+          }
+        },
+        {
+          "scalar": "Bool"
         }
       ],
       "x-primary-key": [
@@ -13344,11 +13384,31 @@
           "items": {
             "$ref": "#/$defs/ID"
           }
+        },
+        {
+          "type": "array",
+          "items": {
+            "enum": [
+              "quick",
+              "fanfare",
+              "last_words",
+              "on_evolve",
+              "on_attack",
+              "advanced_act",
+              "on_super_evolve",
+              "act",
+              "fusion"
+            ]
+          },
+          "uniqueItems": true
+        },
+        {
+          "$ref": "#/$defs/Bool"
         }
       ],
       "items": false,
-      "minItems": 8,
-      "maxItems": 8,
+      "minItems": 10,
+      "maxItems": 10,
       "x-columns": [
         "card_id",
         "scope",
@@ -13357,7 +13417,9 @@
         "complete_keyword_ids",
         "partial_mode",
         "partial_keyword_ids",
-        "has_complete_keyword_ids"
+        "has_complete_keyword_ids",
+        "ability_types",
+        "ability_types_complete"
       ],
       "x-types": [
         {
@@ -13398,6 +13460,24 @@
           "array": {
             "scalar": "ID"
           }
+        },
+        {
+          "array": {
+            "enum": [
+              "quick",
+              "fanfare",
+              "last_words",
+              "on_evolve",
+              "on_attack",
+              "advanced_act",
+              "on_super_evolve",
+              "act",
+              "fusion"
+            ]
+          }
+        },
+        {
+          "scalar": "Bool"
         }
       ]
     },
@@ -19440,7 +19520,9 @@
                         "complete_keyword_ids",
                         "partial_mode",
                         "partial_keyword_ids",
-                        "has_complete_keyword_ids"
+                        "has_complete_keyword_ids",
+                        "ability_types",
+                        "ability_types_complete"
                       ]
                     },
                     "maxItems": 0
@@ -21802,7 +21884,9 @@
                         "complete_keyword_ids",
                         "partial_mode",
                         "partial_keyword_ids",
-                        "has_complete_keyword_ids"
+                        "has_complete_keyword_ids",
+                        "ability_types",
+                        "ability_types_complete"
                       ]
                     },
                     "minItems": 1,
@@ -24145,7 +24229,9 @@
                         "complete_keyword_ids",
                         "partial_mode",
                         "partial_keyword_ids",
-                        "has_complete_keyword_ids"
+                        "has_complete_keyword_ids",
+                        "ability_types",
+                        "ability_types_complete"
                       ]
                     },
                     "maxItems": 0

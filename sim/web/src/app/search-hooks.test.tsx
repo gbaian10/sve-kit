@@ -632,6 +632,7 @@ it("keeps rarity and type lists pending independently of the basic set and class
   expect(result.current.options?.keyword).toEqual({ keywords, coverage: "pending" })
   answer(rarity, ["br", "unknown"])
   expect(result.current.options).toEqual({
+    abilityTypes: { coverage: "pending" },
     rarity: { styles: ["br", "unknown"], counts: { pr: 2 } },
     type: { types: [], typeCounts: { leader: 2 } },
     location: { types: [], counts: { leader: 2, "leader:gold": 2 } },

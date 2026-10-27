@@ -51,7 +51,7 @@ def test_declarations_keep_ambiguous_uses_unknown(
     assert ("kw:ward" in uncertain) is unknown
 
 
-def _printing(db: Database, cid: str, region: str) -> None:
+def printing(db: Database, cid: str, region: str) -> None:
     card = db.select("card", db.columns("card"), where={"id": cid})[0].values
     db.insert(
         "printing",
@@ -82,8 +82,8 @@ def test_all_faces_and_region_owned_english_are_inspected(
         cid,
     ):
         with db.transaction():
-            _printing(db, cid, "jp")
-            _printing(db, cid, "en")
+            printing(db, cid, "jp")
+            printing(db, cid, "en")
             for row in db.rows("face_current"):
                 if row.values["region"] != "jp":
                     continue
@@ -142,7 +142,7 @@ def test_token_definition_does_not_label_its_owner(
         first_batch="synthetic",
     ) as (db, inputs, settings, cid):
         with db.transaction():
-            _printing(db, cid, "jp")
+            printing(db, cid, "jp")
             mechanics.apply(db, inputs, settings)
         assert not db.rows("mechanic_projection")
         covered = db.rows("card_mechanic_coverage")[0].values[

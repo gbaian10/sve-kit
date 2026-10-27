@@ -274,6 +274,8 @@ def test_first_batch_declarations_and_empty_back_prove_all_keywords(
             "partial_mode": "include",
             "partial_keyword_ids": Json([]),
             "has_complete_keyword_ids": None,
+            "ability_types": None,
+            "ability_types_complete": None,
         }
         assert {row.values["keyword_id"] for row in db.rows("mechanic_projection")} == {
             "kw:ward",

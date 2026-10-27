@@ -16,8 +16,11 @@ from sve_carddb.contracts.four_layer import (
 from sve_carddb.core.authored import read
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.core.models import Hash, RecordData, Text
+from sve_carddb.domains.ability_types import ADAPTER as ABILITY_ADAPTER
+from sve_carddb.domains.ability_types import apply as apply_abilities
 from sve_carddb.domains.keyword_self import ADAPTER as SELF_ADAPTER
 from sve_carddb.domains.keyword_self import apply as apply_self
+from sve_carddb.domains.keyword_self import current_fields
 from sve_carddb.domains.mechanic_batch import FIRST_BATCH_CARDS
 from sve_carddb.domains.mechanic_coverage import (
     FieldCheck,
@@ -126,6 +129,7 @@ class Inputs:
             "references_adapter": REFERENCES_ADAPTER,
             "fields_adapter": FIELDS_ADAPTER,
             "self_adapter": SELF_ADAPTER,
+            "ability_adapter": ABILITY_ADAPTER,
             "grants_batch_sha256": digest(
                 canonical(list[JsonValue](sorted(FIRST_BATCH_CARDS)))
             ),
@@ -470,10 +474,11 @@ def apply(  # ruff: ignore[complex-structure,too-many-locals] -- one owner-check
             }
         ),
     )
-    self_report = apply_self(db, inputs, settings)
+    native_fields = current_fields(db)
     return {
         "adapter": ADAPTER,
-        "self": self_report,
+        "self": apply_self(db, inputs, settings, native_fields),
+        "ability_types": apply_abilities(db, native_fields),
         "description": "Self keyword declarations: body parts containing only keywords.",
         "producer_version": version,
         "grants": grants,
