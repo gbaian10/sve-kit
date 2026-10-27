@@ -437,25 +437,6 @@ cards:
         costs:
           - op: act
             subjects: self
-  BP19-081:
-    status: complete
-    abilities:
-      - line: 1
-        kind: trigger
-        body:
-          op: seq
-          steps:
-            - op: modify
-              subjects:
-                side: opponent
-                zone: field
-                type: follower
-              power: -3
-              hp: -3
-            - op: damage
-              subjects: opponent.leader
-              amount: 3
-        event: end
   BP19-082:
     status: complete
     abilities:

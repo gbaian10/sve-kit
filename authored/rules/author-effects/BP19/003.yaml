@@ -1,0 +1,30 @@
+cards:
+  BP19-081:
+    abilities:
+      - auto:
+          do:
+            - buff:
+                hp: -3
+                on:
+                  kind: follower
+                  who: opp
+                  zone: field
+                power: -3
+            - damage:
+                n: 3
+                to:
+                  leaders: opponents
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-sol
+            who: Codex
+          date: "2026-10-27"
+format: 2
+kind: author_effect_set

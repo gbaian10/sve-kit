@@ -252,30 +252,6 @@ cards:
           to: ex
         event: enter
         subject: self
-  BP15-064:
-    status: complete
-    abilities:
-      - line: 1
-        kind: spell
-        body:
-          op: seq
-          steps:
-            - op: damage
-              subjects: target.1
-              amount: 1
-            - op: damage
-              subjects: opponent.leader
-              amount: 1
-            - op: draw
-              count: 1
-        targets:
-          - key: "1"
-            select:
-              side: self
-              zone: field
-              type: follower
-            min: 1
-            max: 1
   BP15-066:
     status: complete
     abilities:
