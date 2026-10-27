@@ -278,16 +278,6 @@ cards:
         body:
           op: macro
           name: storm
-  CP03-016:
-    status: complete
-    abilities:
-      - line: 1
-        kind: trigger
-        body:
-          op: draw
-          count: 1
-        event: enter
-        subject: self
   CP03-017:
     status: complete
     abilities:

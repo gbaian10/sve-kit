@@ -44,17 +44,6 @@ cards:
             to: ex
         event: enter
         subject: self
-  EBD04-011:
-    status: complete
-    abilities:
-      - line: 1
-        kind: spell
-        body:
-          op: destroy
-          subjects:
-            side: both
-            zone: field
-            type: follower
   EBD04-012:
     status: complete
     abilities:

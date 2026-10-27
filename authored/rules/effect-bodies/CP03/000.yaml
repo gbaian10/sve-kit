@@ -1,0 +1,19 @@
+format: 2
+kind: effect_body_shard
+records:
+  - admission: shared
+    body:
+      fanfare:
+        do:
+          - draw:
+              n:
+                param: n
+              who: self
+    id: draw_exact_fanfare.v1
+    params:
+      n: Nat
+    written_by:
+      - actor:
+          model: gpt-6-sol
+          who: Codex
+        date: "2026-10-27"

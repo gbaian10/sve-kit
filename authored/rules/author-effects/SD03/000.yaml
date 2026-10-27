@@ -1,0 +1,19 @@
+cards:
+  SD03-005:
+    abilities:
+      - keywords:
+          - quick
+        line: 1
+      - line: 2
+        params:
+          n: 1
+        use: draw_exact_spell.v1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-10-27"
+format: 2
+kind: author_effect_set

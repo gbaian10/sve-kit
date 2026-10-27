@@ -1,0 +1,20 @@
+cards:
+  CP03-016:
+    abilities:
+      - line: 1
+        params:
+          n: 1
+        use: draw_exact_fanfare.v1
+    admission: shared
+    ignored:
+      - line: 1
+        reason: reminder
+        section: 1
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-10-27"
+format: 2
+kind: author_effect_set
