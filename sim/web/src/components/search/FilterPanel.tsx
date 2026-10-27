@@ -48,7 +48,7 @@ export interface FilterPanelProps {
 const EDITIONS = ["jp", "en"] as const
 const range = (cap: number) => Array.from({ length: cap + 1 }, (_, value) => value)
 const SELECT =
-  "h-9 min-w-0 max-w-full rounded-control border border-border bg-surface-1 px-2 text-13 text-text-1 disabled:cursor-not-allowed disabled:text-text-3"
+  "h-9 min-w-0 max-w-full rounded-control border border-border bg-surface-1 px-2 text-13 text-text-1 focus-visible:outline-offset-[-2px] disabled:cursor-not-allowed disabled:text-text-3"
 
 function FilterGroup({
   title,
@@ -201,7 +201,7 @@ export function FilterPanel({
             onChange={(event) => {
               onChange({ ...query, prFirst: event.target.checked })
             }}
-            className="size-4 shrink-0 accent-accent"
+            className="size-4 shrink-0 accent-accent focus-visible:outline-offset-[-2px]"
           />
           {t("filters.prFirst")}
         </label>
