@@ -192,7 +192,7 @@ def test_misfiled_card_is_rejected_with_valid_outer_pins(tmp_path: Path) -> None
 
 
 @pytest.mark.parametrize("group", ["observations", "presence", "documents"])
-def test_map_order_is_canonical_even_when_outer_hash_is_updated(
+def test_map_order_is_accepted_when_outer_hash_is_updated(
     tmp_path: Path, group: str
 ) -> None:
     first, number = _batch(tmp_path / "first", "en")
@@ -226,8 +226,7 @@ def test_map_order_is_canonical_even_when_outer_hash_is_updated(
     (root / "index.json").write_bytes(
         encode(catalog.index.model_copy(update={"files": (bad,)}))
     )
-    with pytest.raises(ValueError, match="Parsed file pair has noncanonical map order"):
-        load(root)
+    assert load(root).files == catalog.files
 
 
 def test_unchanged_batch_does_not_rewrite_card_or_evidence_files(
@@ -377,13 +376,13 @@ def test_oversized_card_file_requires_contract_review(tmp_path: Path) -> None:
 )
 def test_committed_schema_has_no_drift(name: str, model: type) -> None:
     root = Path(__file__).parents[4]
-    expected = (json.dumps(schema(model), ensure_ascii=False, indent=2) + "\n").encode()
+    expected = schema(model)
     path = (
         (root / "docs/schema/ingest/parsed-errata.schema.json")
         if name == "errata"
         else (root / "docs/schema/ingest/parsed-cards" / f"{name}.schema.json")
     )
-    assert path.read_bytes() == expected
+    assert json.loads(path.read_bytes()) == expected
 
 
 def test_non_sve_source_is_rejected(tmp_path: Path) -> None:

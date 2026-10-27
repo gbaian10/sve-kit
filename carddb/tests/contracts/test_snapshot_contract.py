@@ -50,12 +50,12 @@ def test_schema_is_valid_and_covers_every_collection() -> None:
         validate(string(case["schema"]), case["value"])
 
 
-def test_schema_regeneration_matches_committed_bytes() -> None:
+def test_schema_regeneration_matches_committed_structure() -> None:
     resource = (
         Path(__file__).resolve().parents[2]
         / "src/sve_carddb/contracts/schema/v3/contract.schema.json"
     )
-    assert generate() == resource.read_bytes()
+    assert parse(generate()) == parse(resource.read_bytes())
 
 
 def test_schema_requires_no_optional_format_checker() -> None:

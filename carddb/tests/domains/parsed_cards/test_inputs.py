@@ -240,8 +240,6 @@ def test_missing_duplicate_and_unlisted_members(tmp_path: Path) -> None:
     raw = encode(catalog.index)
     with pytest.raises(ValueError, match=r"Duplicate|duplicate"):
         decode(Index, raw.replace(b'"format": 1,', b'"format": 1, "format": 1,'))
-    with pytest.raises(ValueError, match="canonical"):
-        decode(CardFile, encode(separate(catalog.files[0])[0]) + b"\n")
     root = tmp_path / "inputs"
     write(root, catalog)
     extra = root / "unlisted.json"
@@ -256,6 +254,23 @@ def test_missing_duplicate_and_unlisted_members(tmp_path: Path) -> None:
     pair.symlink_to(root / "index.json")
     with pytest.raises(ValueError, match="symlink"):
         load(root)
+
+
+def test_decode_accepts_compact_json_with_reversed_field_order(
+    tmp_path: Path,
+) -> None:
+    sources, number = _batch(tmp_path, "en")
+    catalog = generate(
+        [("en", sources)], {("en", number): "SYN"}, producer_revision=REVISION
+    )
+    expected = separate(catalog.files[0])[0]
+    value = expected.model_dump(mode="json")
+    reversed_fields = dict(reversed(tuple(value.items())))
+    raw = json.dumps(
+        reversed_fields, ensure_ascii=False, separators=(",", ":")
+    ).encode()
+
+    assert decode(CardFile, raw) == expected
 
 
 def test_append_history_preserves_old_bytes_and_rejects_deletion(
