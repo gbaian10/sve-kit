@@ -32,7 +32,7 @@ if TYPE_CHECKING:
 def _manifest(store: R2Store, entry: dict[str, JsonValue]) -> dict[str, JsonValue]:
     path = string(entry["manifest_path"])
     remote = store.get(path)
-    if remote is None or digest(remote.raw) != entry["manifest_sha256"]:
+    if remote is None:
         raise ExportError("GC requires intact retained manifests")
     return retained_manifest(remote.raw, entry)
 

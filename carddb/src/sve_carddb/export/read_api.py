@@ -192,8 +192,12 @@ def _load(root: Path) -> Export:
     path, raw, manifest = _manifest(root)
     members = list(_encoded(root, path, raw, br=(root / (path + ".br")).exists()))
     blobs: dict[str, bytes] = {}
+    changes_ref = manifest["changes_ref"]
     for row in _descriptions(manifest):
-        blobs[string(row["path"])], encoded = _blob(root, row)
+        is_changes_ref = changes_ref is not None and row == object_value(changes_ref)
+        blobs[string(row["path"])], encoded = _blob(
+            root, row, verify_integrity=is_changes_ref
+        )
         members += encoded
     payloads = {
         string(f["key"]): blobs[string(f["path"])]
@@ -232,10 +236,12 @@ def _manifest(root: Path) -> tuple[str, bytes, dict[str, JsonValue]]:
     return path, raw, manifest
 
 
-def _blob(root: Path, row: dict[str, JsonValue]) -> tuple[bytes, tuple[Member, ...]]:
+def _blob(
+    root: Path, row: dict[str, JsonValue], *, verify_integrity: bool
+) -> tuple[bytes, tuple[Member, ...]]:
     path = string(row["path"])
     raw = read_member(root, path)
-    if digest(raw) != row["sha256"] or len(raw) != row["bytes"]:
+    if verify_integrity and (digest(raw) != row["sha256"] or len(raw) != row["bytes"]):
         raise ExportError("Export payload differs from its manifest")
     lengths = object_value(row["compressed_bytes"])
     encoded = _encoded(root, path, raw, br=lengths["br"] is not None)

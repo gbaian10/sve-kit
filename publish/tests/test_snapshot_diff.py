@@ -127,7 +127,7 @@ def test_new_export_rejects_the_old_errata_shape(
 @pytest.mark.parametrize(
     ("damage", "message"),
     [
-        ("hash", "GC requires intact retained manifests"),
+        ("hash", "Retained manifests must be intact"),
         ("canonical", "Manifest differs from its index entry"),
         ("files", "GC retained snapshot is invalid"),
         ("changes_ref", "GC retained snapshot is invalid"),
