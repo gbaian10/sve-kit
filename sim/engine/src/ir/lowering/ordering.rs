@@ -55,6 +55,7 @@ impl BodyContext<'_> {
             | ast::Step::Choice(_)
             | ast::Step::Draw(_)
             | ast::Step::Pp(_)
+            | ast::Step::Discard(_)
             | ast::Step::Damage(_)
             | ast::Step::Life(_)
             | ast::Step::SetLife(_)

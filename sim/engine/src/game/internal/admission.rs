@@ -241,6 +241,7 @@ fn check_program(program: &Program, source: &SourceSpan, card: bool) -> Result<(
                 super::search::check_action(&instruction.action)?;
                 super::movement::check_action(&instruction.action)?;
                 super::resource::check_action(&instruction.action)?;
+                super::discard::check_action(&instruction.action)?;
                 super::numeric::check_action(&instruction.action)?;
                 if instruction.precondition.is_some()
                     || instruction.context != InstructionContext::Effect
@@ -336,6 +337,11 @@ fn supported(code: &str) -> bool {
             | "action.resource"
             | "internal.Resource.PpCurrent"
             | "internal.ResourceOperation.Add"
+            | "shape.Action.Discard"
+            | "action.discard"
+            | "shape.DiscardMode.Chosen"
+            | "discard.chosen"
+            | "internal.ZoneKind.Hand"
             | "shape.Action.Look"
             | "action.look"
             | "shape.Action.Order"

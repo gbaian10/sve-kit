@@ -58,6 +58,7 @@ fn changes(progress: &Progress) -> Vec<&StatChangeFact> {
         .filter_map(|fact| match fact {
             Fact::StatChange(fact) => Some(fact),
             Fact::Draw(_)
+            | Fact::Discard(_)
             | Fact::LifeChange(_)
             | Fact::Damage(_)
             | Fact::Movement(_)

@@ -1,0 +1,24 @@
+format: 2
+kind: effect_body_shard
+records:
+  - admission: shared
+    body:
+      attack_time:
+        do:
+          - draw:
+              n:
+                param: draw
+              who: self
+          - discard:
+              n:
+                param: discard
+              who: self
+    id: draw_discard_attack_time.v1
+    params:
+      discard: Nat
+      draw: Nat
+    written_by:
+      - actor:
+          model: Codex gpt-6-sol
+          who: Codex
+        date: "2026-10-28"

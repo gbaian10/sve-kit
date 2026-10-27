@@ -456,6 +456,7 @@ fn multiple_supported_abilities_keep_distinct_instances_and_effect_producers() {
                     | Fact::AbilityResolved { .. }
                     | Fact::Shuffled { .. }
                     | Fact::Draw(_)
+                    | Fact::Discard(_)
                     | Fact::LifeChange(_)
                     | Fact::Damage(_)
                     | Fact::Movement(_)
@@ -526,5 +527,7 @@ fn silenced_or_nonfield_card_holder_is_not_activated() {
 #[path = "card/deck_top.rs"]
 mod deck_top;
 
+#[path = "card/hand_discard.rs"]
+mod hand_discard;
 #[path = "card/resource.rs"]
 mod resource;

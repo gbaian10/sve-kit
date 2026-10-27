@@ -172,6 +172,7 @@ pub(super) enum Step {
     Choose(Choose),
     Draw(Draw),
     Pp(Pp),
+    Discard(Discard),
     Damage(Damage),
     Life(Life),
     SetLife(SetLife),
@@ -199,6 +200,15 @@ pub(super) struct Life {
 pub(super) struct Pp {
     pub who: SelfPlayer,
     pub delta: u64,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Discard {
+    pub n: u64,
+    #[serde(rename = "who")]
+    pub _who: Option<SelfPlayer>,
+    pub random: Option<bool>,
 }
 
 #[derive(Deserialize)]

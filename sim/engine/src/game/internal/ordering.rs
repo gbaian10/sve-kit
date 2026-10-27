@@ -7,9 +7,9 @@ use crate::ir::{
     Action, Binding, Capture, CaptureRef, CaptureTime, Cardinality, ChoiceDomain, Control, Expr,
     Instruction, Int, Located, LookOutcome, MemberProjection, MoveDestination, Nat, Node,
     ObjectOperand, ObjectReceipt, ObjectRef, OrderAnswer, OrderOutcome, OwnerZone, PlayerId,
-    PlayerRelation, Position, Program, ReceiptLocation, RecipientSet, Requirements, ResultMember,
-    ResultMemberId, RuntimeObjectView, ScopeId, Selector, SnapshotId, SourceSpan, StepwiseMode,
-    Visibility, ZoneKind,
+    PlayerRef, PlayerRelation, Position, Program, ReceiptLocation, RecipientSet, Requirements,
+    ResultMember, ResultMemberId, RuntimeObjectView, ScopeId, Selector, SnapshotId, SourceSpan,
+    StepwiseMode, Visibility, ZoneKind,
 };
 use alloc::collections::BTreeSet;
 
@@ -84,6 +84,7 @@ pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
         }
     }
     let mut inspected = node.clone();
+    mask_discard(&mut inspected)?;
     mask_resolution_domain(&mut inspected)?;
 
     if let Node::Instruction { instruction } = &mut inspected
@@ -151,20 +152,7 @@ pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
         },
         source: source.clone(),
     });
-    for requirement in &requirements.required {
-        let code = requirement.capability.code;
-        if (!private_spine && code == "shape.ObjectReceipt.Look")
-            || (code == "internal.ZoneKind.Deck"
-                && !super::source::count_zone(&requirements, requirement))
-            || (super::search::private_requirement(code)
-                && !super::source::source_original(&requirements, requirement)
-                && !super::source::count_zone(&requirements, requirement))
-        {
-            return Err(unsupported(
-                "private observation outside an authorized selector spine",
-            ));
-        }
-    }
+    check_private_requirements(&requirements, private_spine)?;
     if let Node::Instruction { instruction } = node {
         match &instruction.action {
             // Only an audience of exactly the chooser has an admitted projection contract.
@@ -187,6 +175,24 @@ pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
                 return Err(unsupported("order placement"));
             }
             _ => {}
+        }
+    }
+    Ok(())
+}
+
+fn check_private_requirements(requirements: &Requirements, private_spine: bool) -> Result<()> {
+    for requirement in &requirements.required {
+        let code = requirement.capability.code;
+        if (!private_spine && code == "shape.ObjectReceipt.Look")
+            || (matches!(code, "internal.ZoneKind.Deck" | "internal.ZoneKind.Hand")
+                && !super::source::count_zone(requirements, requirement))
+            || (super::search::private_requirement(code)
+                && !super::source::source_original(requirements, requirement)
+                && !super::source::count_zone(requirements, requirement))
+        {
+            return Err(unsupported(
+                "private observation outside an authorized selector spine",
+            ));
         }
     }
     Ok(())
@@ -547,4 +553,19 @@ impl OrderWait {
         }
         Ok(ordered)
     }
+}
+
+fn mask_discard(inspected: &mut Node) -> Result<()> {
+    if let Node::Instruction { instruction } = inspected
+        && matches!(instruction.action, Action::Discard { .. })
+    {
+        super::discard::check_action(&instruction.action)?;
+        // The complete private discard is checked; its instruction metadata is still inspected.
+        instruction.action = Action::Draw {
+            player: PlayerRef::Controller {},
+            count: Expr::Literal(Int(0)),
+            mode: StepwiseMode::Exact,
+        };
+    }
+    Ok(())
 }
