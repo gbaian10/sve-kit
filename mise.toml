@@ -5,3 +5,15 @@ node = "24.19.0"
 
 # Shared environment variables are documented in CONTRIBUTING.md; none has a repo default.
 # Put machine-specific values in private parent configuration or mise.local.toml.
+
+[tasks."vulture:dev"]
+description = "Find dead test callables and imports"
+run = "uv run --directory carddb python ../.github/ci/vulture.py dev"
+
+[tasks."vulture:prod"]
+description = "Find production code kept alive only by tests"
+run = "uv run --directory carddb python ../.github/ci/vulture.py prod"
+
+[tasks.vulture]
+description = "Check Python dead code in tests and production"
+depends = ["vulture:dev", "vulture:prod"]

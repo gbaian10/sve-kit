@@ -505,6 +505,18 @@ is a bug the tests would not notice; add a test, or explain why it cannot change
 pre-commit run --hook-stage manual cargo-mutants
 ```
 
+Run `mise run vulture` for Python dead-code checks, or `mise run vulture:dev`
+(tests only) and `mise run vulture:prod` (production only) separately. The pre-push
+hook and Python CI job run the combined task. Vulture is a carddb dev dependency managed by its lockfile and Dependabot;
+scan settings and whitelist paths live in `carddb/pyproject.toml` under
+`[tool.vulture]`. Production scans deliberately exclude
+tests so tests cannot keep unused production code alive. Only callables, classes
+and imports are reported; data model fields are excluded. Retained candidates live
+in `carddb/vulture_whitelist.py`, each with a reason. Vulture matches whitelist
+names across modules, so a retained name also hides unrelated definitions with
+the same name. Calls from other projects or languages need a whitelist entry
+that identifies the caller.
+
 ## Keeping tools up to date
 
 | What                                                                | How it is updated                                                                                   |

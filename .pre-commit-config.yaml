@@ -255,6 +255,13 @@ repos:
         pass_filenames: false
         always_run: true
         stages: [manual]
+      - id: vulture
+        name: vulture (carddb dev + prod)
+        stages: [pre-push]
+        language: system
+        entry: mise run vulture
+        pass_filenames: false
+        files: ^(carddb/|mise\.toml$|\.github/ci/vulture\.py$|\.pre-commit-config\.yaml$)
       - id: mypy
         name: mypy_check
         stages: [pre-push]
