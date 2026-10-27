@@ -1,9 +1,9 @@
-"""Write handwritten author shards and explicitly refresh generated anchors."""
+"""Write validated author shards and switch prototypes in the same operation."""
 
 from dataclasses import replace
 from io import StringIO
 from pathlib import Path
-from typing import TYPE_CHECKING, Literal, override
+from typing import TYPE_CHECKING, override
 
 from pydantic import JsonValue
 from ruamel.yaml import YAML
@@ -15,7 +15,6 @@ from sve_carddb.contracts.author_leaves import AuthorIndexRecord
 from sve_carddb.core.authored import check_path
 from sve_carddb.core.json import array, canonical, digest, object_value, parse
 from sve_carddb.core.yaml import MAX_BYTES
-from sve_carddb.domains.effects.author_anchors import handwriting, materialize_inputs
 from sve_carddb.domains.effects.author_current import CardRejected
 from sve_carddb.domains.effects.author_handwritten import (
     Body,
@@ -30,6 +29,7 @@ from sve_carddb.domains.effects.author_inputs import (
     Diagnostic,
     parse_document,
 )
+from sve_carddb.domains.effects.author_resolution import handwriting, materialize_inputs
 from sve_carddb.domains.effects.author_set import (
     AuthorInputSet,
     InputFile,
@@ -159,7 +159,6 @@ def _located_error(
             selected_index = path[offset]
             assert type(selected_index) is int
             ability_index = selected_index
-    ability_index = _face_ability_index(inputs, number, path, ability_index)
     if ability_index >= len(values):
         return AuthorInputError(diagnostic)
     ability = object_value(values[ability_index])
@@ -178,26 +177,6 @@ def _located_error(
     )
 
 
-def _face_ability_index(
-    inputs: AuthorInputSet, number: str, path: tuple[str | int, ...], ability_index: int
-) -> int:
-    if "faces" in path:
-        face = path[path.index("faces") + 1]
-        for file in inputs.anchor_files:
-            cards = object_value(object_value(parse_document(file.raw).value)["cards"])
-            if number in cards:
-                uses = array(object_value(cards[number])["uses"])
-                matching = [
-                    index
-                    for index, use in enumerate(uses)
-                    if object_value(use)["face_id"] == face
-                ]
-                if ability_index < len(matching):
-                    return matching[ability_index]
-                break
-    return ability_index
-
-
 def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branches, too-many-statements, too-many-locals] -- validate the complete candidate before performing any write
     workspace: Workspace,
     *,
@@ -206,14 +185,11 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
     output_root: Path,
     cards: frozenset[str] = frozenset(),
     all_cards: bool = False,
-    storage: Literal["anchors"] = "anchors",
     remove_prototype: bool = False,
-    base: str | None = None,
-    baseline_root: Path | None = None,
 ) -> dict[str, JsonValue]:
     """Refresh only explicitly selected cards, retaining every recorded review literal."""
-    if bool(cards) == all_cards or storage != "anchors":
-        raise ConfigurationError("Specify cards or --all and storage anchors")
+    if bool(cards) == all_cards:
+        raise ConfigurationError("Specify cards or --all")
     for configured in (main, bodies, output_root):
         if configured is not None and (
             not configured.is_absolute() or ".." in configured.parts
@@ -221,8 +197,6 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
             raise ConfigurationError(
                 "Author write requires absolute paths without traversal"
             )
-    if remove_prototype and (base is None or baseline_root is None):
-        raise ConfigurationError("Prototype removal requires base and baseline_root")
     supplied = read(main, bodies)
     selected = frozenset(supplied.cards) if all_cards else cards
     if selected - supplied.cards.keys():
@@ -237,7 +211,6 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
                 *reference.author_files,
                 *reference.body_files,
                 *reference.prototype_files,
-                *reference.anchor_files,
             )
         }
         actual = {
@@ -246,7 +219,6 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
                 *original.author_files,
                 *original.body_files,
                 *original.prototype_files,
-                *original.anchor_files,
             )
         }
         if expected - actual or {
@@ -403,7 +375,6 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
         tuple(authors.values()),
         tuple(companions.values()),
         tuple(prototypes.values()),
-        original.anchor_files,
     )
     from sve_carddb.domains.effects.author_set import validate_author_set  # ruff: ignore[import-outside-top-level] -- candidate inventory validation follows complete construction
 
@@ -415,41 +386,11 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
         candidate,
         workspace.current,
         workspace.expander,
-        refresh=selected,
-        refresh_unused=all_cards,
     )
-    old_pins = {
-        key: object_value(pin)
-        for file in original.anchor_files
-        for key, pin in object_value(
-            object_value(parse_document(file.raw).value)["bodies"]
-        ).items()
-    }
-    for anchor in materialized.anchors.values():
-        for pin_key, value in object_value(anchor["bodies"]).items():
-            if pin_key in old_pins and any(
-                old_pins[pin_key][field] != object_value(value)[field]
-                for field in ("frame_id", "ability_scope", "body_version")
-            ):
-                raise AuthorInputError(
-                    Diagnostic("body", "new_body_requires_explicit_edition")
-                )
     if materialized.failures:
         raise _located_error(
             candidate, supplied, next(iter(materialized.failures.values()))
         )
-    anchors = tuple(
-        _file(f"rules/effect-anchors/{owner}.yaml", tree)
-        for owner, tree in sorted(materialized.anchors.items())
-    )
-    candidate = AuthorInputSet(
-        index,
-        index_file,
-        candidate.author_files,
-        candidate.body_files,
-        candidate.prototype_files,
-        anchors,
-    )
     results = workspace.current.validate_inputs(candidate, workspace.expander)
     rejected = [
         r
@@ -458,27 +399,12 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
     ]
     if rejected:
         raise _located_error(candidate, supplied, rejected[0].diagnostic)
-    if remove_prototype:
-        from sve_carddb.workflows.authoring_regression import check_regression  # ruff: ignore[import-outside-top-level] -- regression is optional for explicit prototype removal
-
-        assert base is not None
-        assert baseline_root is not None
-        check_regression(
-            workspace,
-            base,
-            baseline_root,
-            materialized.inputs,
-            results,
-            expected_removed=frozenset(removed_prototypes),
-        )
     outputs = {
         **authors,
         **companions,
         **prototypes,
         index_file.path: index_file,
-        **{f.path: f for f in anchors},
     }
-    changed.update(f.path for f in anchors)
     changed.add(index_file.path)
     for path in sorted(changed):
         check_path(Path(output_root.anchor), output_root / path)
@@ -501,7 +427,7 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
         "status": "ok",
         "cards": list[JsonValue](sorted(selected)),
         "written": list(written),
-        "storage": storage,
+        "storage": "authored",
     }
 
 

@@ -2,7 +2,7 @@
 
 from dataclasses import asdict
 from pathlib import Path
-from typing import TYPE_CHECKING, Annotated, Literal
+from typing import TYPE_CHECKING, Annotated
 
 import typer
 from pydantic import JsonValue, ValidationError
@@ -99,17 +99,14 @@ def write_command(  # ruff: ignore[too-many-arguments] -- keep the complete orde
     inputs: InputOption,
     main: Annotated[Path, typer.Option("--main")],
     output_root: Annotated[Path, typer.Option("--output-root")],
-    storage: Annotated[Literal["anchors"], typer.Option("--storage")],
     bodies: Annotated[Path | None, typer.Option("--bodies")] = None,
     card: Annotated[list[str] | None, typer.Option("--card")] = None,
     all_cards: Annotated[bool, typer.Option("--all")] = False,
     remove_prototype: Annotated[bool, typer.Option("--remove-prototype")] = False,
-    base: Annotated[str | None, typer.Option("--base")] = None,
-    baseline_root: Annotated[Path | None, typer.Option("--baseline-root")] = None,
 ) -> None:
     """Write handwritten shards and explicitly refresh selected anchors."""
     if bool(card) == all_cards:
-        raise typer.BadParameter("Specify --card or --all and --storage anchors")
+        raise typer.BadParameter("Specify --card or --all")
 
     def action() -> JsonValue:
         configured = _inputs(inputs)
@@ -123,13 +120,9 @@ def write_command(  # ruff: ignore[too-many-arguments] -- keep the complete orde
                 output_root=output_root,
                 cards=frozenset(card or ()),
                 all_cards=all_cards,
-                storage=storage,
                 remove_prototype=remove_prototype,
-                base=base,
-                baseline_root=baseline_root,
             )
 
-    assert storage == "anchors"
     _run(action)
 
 
@@ -138,16 +131,12 @@ def check_command(
     inputs: InputOption,
     output: OutputOption,
     compare_public: Annotated[Path | None, typer.Option("--compare-public")] = None,
-    base: Annotated[str | None, typer.Option("--base")] = None,
-    baseline_root: Annotated[Path | None, typer.Option("--baseline-root")] = None,
 ) -> None:
     """Check the entire indexed set and optionally compare independently prepared profiles."""
 
     def action() -> JsonValue:
         public = None if compare_public is None else _inputs(compare_public)
         with authoring.prepare(_inputs(inputs)) as workspace:
-            return authoring.check(
-                workspace, compare_public=public, base=base, baseline_root=baseline_root
-            )
+            return authoring.check(workspace, compare_public=public)
 
     _run(action, output)

@@ -55,6 +55,7 @@ class Parameter(RecordData):
 
 class Body(RecordData):
     id: Text
+    admission: Literal["light", "shared"] | None = None
     body: dict[str, JsonValue]
     written_by: Annotated[list[JsonValue], Field(min_length=1)]
     params: dict[str, ParamType | Parameter] = Field(default_factory=dict)

@@ -7,6 +7,7 @@ from pydantic import (
     BeforeValidator,
     ConfigDict,
     Field,
+    JsonValue,
     RootModel,
     with_config,
 )
@@ -15,6 +16,7 @@ from sve_carddb.contracts import author_programs as programs  # ruff: ignore[typ
 from sve_carddb.contracts.author_evidence import (
     BodyVersion,
     CardKeywordSources,
+    DirectMeta,
     EmptyPorts,
     FaceId,
     ImportMap,
@@ -250,10 +252,11 @@ class AuthorFace(RecordData):
 
 @with_config(CONFIG)
 class AuthorCardFields(TypedDict):
-    meta: Meta
+    meta: Meta | DirectMeta
     note: NotRequired[Text]
     abilities: NotRequired[tuple[Ability, ...]]
     faces: NotRequired[dict[FaceId, AuthorFace]]
+    ignored: NotRequired[tuple[JsonValue, ...]]
     deck_rule: NotRequired[DeckRule]
 
 

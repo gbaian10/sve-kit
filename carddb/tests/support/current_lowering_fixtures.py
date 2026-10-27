@@ -14,7 +14,6 @@ from sve_carddb.domains.effects.author_expansion import AuthorExpander
 from sve_carddb.domains.effects.author_inputs import AuthorInputError, parse_document
 
 from .author_current_fixtures import REPOSITORY, current_source_fixture
-from .current_author_storage import write_current_anchors
 from .current_keyword_fixtures import (
     current_combat_keyword_inputs,
     current_keyword_inputs,
@@ -119,7 +118,6 @@ def current_lowering_inputs(root: Path) -> JsonValue:
         else:
             raise AssertionError("synthetic prototype overlap was accepted")
         prototype.unlink()
-        write_current_anchors(authored, current, expander, number)
         accepted = current.validate(authored, expander)[0]
         assert isinstance(accepted, CardAccepted)
         switch["after"] = current.selection_input(authored, expander)
@@ -152,14 +150,10 @@ def missing_selection(
     file: Path, authored: Path, current: CurrentAuthorSources, expander: AuthorExpander
 ) -> JsonValue:
     original = file.read_bytes()
-    anchor = authored / "rules/effect-anchors/BP01.yaml"
-    original_anchor = anchor.read_bytes()
     tree = object_value(parse_document(original).value)
     object_value(object_value(tree["cards"])["BP01-009"])["abilities"] = []
     file.write_bytes(canonical(tree))
     try:
-        write_current_anchors(authored, current, expander, "BP01-009")
         return current.selection_input(authored, expander)
     finally:
         file.write_bytes(original)
-        anchor.write_bytes(original_anchor)

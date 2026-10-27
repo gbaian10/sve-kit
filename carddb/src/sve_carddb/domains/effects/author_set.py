@@ -31,7 +31,6 @@ _INDEX = "rules/effects-index.yaml"
 _AUTHOR = "rules/author-effects"
 _BODIES = "rules/effect-bodies"
 _PROTOTYPE = "rules/effects"
-_ANCHORS = "rules/effect-anchors"
 _OWNER = r"[A-Za-z0-9_-]+"
 _SHARD = r"[0-9]{3,}\.yaml"
 
@@ -50,7 +49,6 @@ class AuthorInputSet:
     author_files: tuple[InputFile, ...]
     body_files: tuple[InputFile, ...]
     prototype_files: tuple[InputFile, ...]
-    anchor_files: tuple[InputFile, ...] = ()
 
 
 def _reject(reason: str, path: str, record: IndexRecord | None = None) -> Never:
@@ -117,9 +115,7 @@ def _files(root: Path, area: str, *, sharded: bool) -> tuple[InputFile, ...]:
 
 
 def _path_matches(path: str, area: str) -> bool:
-    suffix = (
-        _OWNER + r"\.yaml" if area in {_PROTOTYPE, _ANCHORS} else _OWNER + "/" + _SHARD
-    )
+    suffix = _OWNER + r"\.yaml" if area == _PROTOTYPE else _OWNER + "/" + _SHARD
     return re.fullmatch(re.escape(area) + "/" + suffix, path) is not None
 
 
@@ -228,12 +224,9 @@ def _validate_storage(inputs: AuthorInputSet, schemas: AuthorSchemas) -> None:
     }
     if len(formats) > 1:
         _reject("mixed_storage_formats", _AUTHOR)
-    anchors = _inventory(inputs.anchor_files, _ANCHORS)
     if formats == {STORAGE_FORMAT}:
-        _handwritten_inventory(inputs, schemas, anchors)
+        _handwritten_inventory(inputs, schemas)
     else:
-        if anchors:
-            _reject("mixed_storage_formats", _ANCHORS)
         BodyLibrary(schemas, (item.raw for item in inputs.body_files))
 
 
@@ -263,7 +256,6 @@ def load_author_set(authored_root: Path, schemas: AuthorSchemas) -> AuthorInputS
         _files(authored_root, _AUTHOR, sharded=True),
         _files(authored_root, _BODIES, sharded=True),
         _files(authored_root, _PROTOTYPE, sharded=False),
-        _files(authored_root, _ANCHORS, sharded=False),
     )
     for item in (*result.author_files, *result.body_files):
         if object_value(parse_document(item.raw).value).get("format") != STORAGE_FORMAT:
@@ -272,9 +264,7 @@ def load_author_set(authored_root: Path, schemas: AuthorSchemas) -> AuthorInputS
     return result
 
 
-def _handwritten_inventory(
-    inputs: AuthorInputSet, schemas: AuthorSchemas, anchors: dict[str, InputFile]
-) -> None:
+def _handwritten_inventory(inputs: AuthorInputSet, schemas: AuthorSchemas) -> None:
     names: set[tuple[str, int]] = set()
     for item in inputs.author_files:
         decode(parse_document(item.raw), MainFile)
@@ -295,7 +285,3 @@ def _handwritten_inventory(
             if key in names:
                 _reject("duplicate_body_id", item.path)
             names.add(key)
-    for item in anchors.values():
-        tree = object_value(schemas.storage_tree(item.raw, "effect_anchor_set"))
-        if item.path != f"{_ANCHORS}/{tree['owner']}.yaml":
-            _reject("wrong_anchor_owner", item.path)

@@ -6,7 +6,14 @@ from pydantic import ConfigDict, Field, with_config
 
 from sve_carddb.contracts.author_leaves import ParamName, ParamValue, ParamValues
 from sve_carddb.contracts.author_references import BindingName
-from sve_carddb.contracts.four_layer import Code, FrameId, Hash, Id, OccurrenceKey
+from sve_carddb.contracts.four_layer import (
+    Code,
+    FaceRevisionOwner,
+    FrameId,
+    Hash,
+    Id,
+    OccurrenceKey,
+)
 from sve_carddb.core.models import Date, RecordData, Text, UInt
 
 FaceId = Annotated[str, Field(pattern=r"^f:[0-9a-f]{32}$(?![\s\S])")]
@@ -32,9 +39,23 @@ class CardKeywordSourceUse(RecordData):
     occurrence: OccurrenceKey
 
 
-Sources = Annotated[tuple[SourceUse, ...], Field(min_length=1, max_length=1)]
+class DirectSourceUse(RecordData):
+    admission: Literal["light", "shared"]
+    owner: FaceRevisionOwner
+    face_id: FaceId
+    field: Literal["effect", "section"]
+    ordinal: UInt | None
+    line: Positive
+    scope: Text
+    covers: Annotated[tuple[Positive, ...], Field(min_length=1)]
+
+
+Sources = Annotated[
+    tuple[SourceUse | DirectSourceUse, ...], Field(min_length=1, max_length=1)
+]
 CardKeywordSources = Annotated[
-    tuple[CardKeywordSourceUse, ...], Field(min_length=1, max_length=1)
+    tuple[CardKeywordSourceUse | DirectSourceUse, ...],
+    Field(min_length=1, max_length=1),
 ]
 
 
@@ -229,3 +250,8 @@ class Meta(RecordData):
     status: Literal["draft", "reviewed", "verified", "disputed"]
     verified_by_exam: tuple[()]
     rulings: tuple[Text, ...]
+
+
+class DirectMeta(Meta):
+    source: Literal["direct"]
+    admission: Literal["light", "shared"]

@@ -85,20 +85,6 @@ def authoring_inventory(tmp_path_factory: pytest.TempPathFactory) -> Path:
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes(authoring.format_yaml(tree))
     for owner in ("BP01", "BP06", "BP10", "ECP01"):
-        anchor = read_tree(REPO / f"authored/rules/effect-anchors/{owner}.yaml")
-        anchor["cards"] = {
-            number: card
-            for number, card in object_value(anchor["cards"]).items()
-            if number in numbers
-        }
-        anchor["bodies"] = {
-            key: body
-            for key, body in object_value(anchor["bodies"]).items()
-            if key.rsplit("/", 1)[0] in bodies
-        }
-        target = root / f"rules/effect-anchors/{owner}.yaml"
-        target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_bytes(authoring.format_yaml(anchor))
         if owner != "BP01":
             source = REPO / f"authored/rules/effect-bodies/{owner}/000.yaml"
             target = root / source.relative_to(REPO / "authored")
