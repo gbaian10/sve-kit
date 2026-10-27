@@ -1,8 +1,37 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "ignore": ["tests/lint-fixtures/**"],
+  "ignore": [
+    "tests/lint-fixtures/**",
+    // Vitest loads setup through its config in dev; it has no production entry.
+    "tests/setup.ts",
+    // `catalog` is a development-only CLI invoked by package scripts.
+    "scripts/catalog/main.ts",
+    // `drawer-check` is a development-only CLI invoked by package scripts.
+    "scripts/drawer-check/main.ts",
+    // `fixture` builds test snapshots and is not shipped.
+    "scripts/fixture/main.ts",
+    // `screenshots` is a development-only CLI invoked by package scripts.
+    "scripts/screenshots/main.ts",
+  ],
   "ignoreDependencies": ["@fontsource/ibm-plex-sans"],
-  "entry": ["bench/driver.ts", "scripts/ci/public-junit-reporter.ts"],
+  "entry": [
+    "bench/driver.ts",
+    "scripts/ci/public-junit-reporter.ts",
+    // Wrangler deploys this Worker for the preview host, so keep it in production analysis.
+    "src/cloudflare/worker.ts!",
+    // Dev-only accessibility helper for manually checking overflow across locales.
+    "src/app/overflow-audit.ts",
+    // Test setup and fixtures are dev entries: analyze them in knip:dev, exclude them in knip:prod.
+    "src/test-utils.tsx",
+    "src/test-utils/**",
+    "src/data/v3-fixture.ts",
+    "src/data/search/test-utils/**",
+    "scripts/catalog/monitor.ts",
+    "scripts/catalog/report.ts",
+    "scripts/fixture/build.ts",
+    "scripts/fixture/cards.ts",
+    "scripts/fixture/view.ts",
+  ],
   // knip 6.38 does not know Bun's newer `bun check` and `bun fmt` commands and reads them as binaries.
-  "ignoreBinaries": ["systemd-run", "check", "fmt"],
+  "ignoreBinaries": ["check", "fmt"],
 }

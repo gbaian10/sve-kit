@@ -2,15 +2,8 @@
 import { describe, expect, it } from "vitest"
 
 import type { CardSummary, SelectedText } from "../../data"
-import {
-  type CardKind,
-  evolveDirection,
-  fallbackBase,
-  isEvolvePair,
-  mentionedCards,
-  relatedGroups,
-  representatives,
-} from "./related-cards"
+import { evolveDirection, fallbackBase, isEvolvePair } from "./related-card-logic"
+import { type CardKind, mentionedCards, relatedGroups, representatives } from "./related-cards"
 
 const summary = (cardId: string, cardNo: string, region: "jp" | "en" = "jp"): CardSummary => ({
   cardId,

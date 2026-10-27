@@ -1,13 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 
-import {
-  createPrefsStore,
-  DEFAULT_PREFS,
-  PREFS_KEY,
-  readPrefs,
-  showsOtherEdition,
-  writePrefs,
-} from "./prefs"
+import { DEFAULT_PREFS, PREFS_KEY, showsOtherEdition } from "./prefs"
+import { readPrefs, writePrefs } from "./prefs-read-write"
+import { createPrefsStore } from "./prefs-storage"
 
 afterEach(() => {
   vi.restoreAllMocks()

@@ -3,14 +3,8 @@ import { describe, expect, it } from "vitest"
 import { cardNoKey, cardNoLookupKey } from "./cardNo"
 import { normalizeText } from "./normalize"
 import { DEFAULT_QUERY } from "./query/model"
-import {
-  apply,
-  matchEntry,
-  type SearchEntry,
-  type SearchName,
-  type SearchPrinting,
-  suggest,
-} from "./search"
+import { apply, type SearchEntry, type SearchName, type SearchPrinting, suggest } from "./search"
+import { matchEntry } from "./search-match"
 
 const SETS = new Set(["bp01", "sd01", "pr"])
 const name = (lang: SearchName["lang"], text: string): SearchName => ({

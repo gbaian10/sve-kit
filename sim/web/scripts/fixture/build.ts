@@ -1,4 +1,5 @@
 import {
+  arrayValue,
   canonical,
   canonicalText,
   compareCodePoints,
@@ -8,15 +9,32 @@ import {
   stringValue,
   utf8,
 } from "../../src/data/format-v3/json"
-import {
-  columns,
-  definition,
-  primaryKey,
-  requiredTypes,
-  rowType,
-  tables,
-} from "../../src/data/format-v3/schema"
-import { bucket, digest, hex, sha256 } from "../../src/data/format-v3/sha256"
+import { columns, definition, primaryKey, rowType } from "../../src/data/format-v3/schema"
+import { bucket, digest } from "../../src/data/format-v3/sha256"
+
+function tables(): string[] {
+  return arrayValue(definition("Container")["x-tables"] ?? null).map((item) => stringValue(item))
+}
+
+function requiredTypes(name: string, version = "4.0.0"): Set<string> {
+  const result = new Set<string>()
+  const visit = (kind: JsonObject) => {
+    const ref = kind["ref"]
+    if (typeof ref === "string") {
+      result.add(ref)
+      for (const item of arrayValue(definition(ref, version)["x-types"] ?? null))
+        visit(objectValue(item))
+      return
+    }
+    for (const key of ["array", "nullable"]) {
+      const inner = kind[key]
+      if (inner !== undefined) visit(objectValue(inner))
+    }
+  }
+  for (const item of arrayValue(definition(name, version)["x-types"] ?? null))
+    visit(objectValue(item))
+  return result
+}
 import {
   type Card,
   CARDS,
@@ -77,7 +95,7 @@ const GLOBAL: Owner = { kind: "global", id: null }
 const home = (id: string): Owner => ({ kind: "home_set", id })
 
 function textId(lang: string, text: string): string {
-  return `t:${lang}:${hex(sha256(utf8(text))).slice(0, 16)}`
+  return `t:${lang}:${digest(utf8(text)).slice(7, 23)}`
 }
 
 // null < string < integer, then by value: the order the reader requires between rows.

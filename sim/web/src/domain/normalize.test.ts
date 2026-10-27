@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { compareCodePoints, normalizeLoose, normalizeText } from "./normalize"
+import { compareCodePoints, normalizeText } from "./normalize"
 
 describe("normalizeText", () => {
   it("folds width, case and separators so typed variants match", () => {
@@ -8,9 +8,6 @@ describe("normalizeText", () => {
     expect(normalizeText("Synthetic  Lantern")).toBe("syntheticlantern")
     expect(normalizeText("ﾌｧｹﾞ")).toBe("ファゲ".normalize("NFKC"))
     expect(normalizeText("  ")).toBe("")
-  })
-  it("loose form keeps single spaces between words", () => {
-    expect(normalizeLoose("  Synthetic\u3000Lantern - EX ")).toBe("synthetic lantern ex")
   })
 })
 

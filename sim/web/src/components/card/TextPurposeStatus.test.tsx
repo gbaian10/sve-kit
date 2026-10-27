@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import fixture from "../../../../../tests/fixtures/snapshot-contract/v3/whole-name-native.json"
 import type { AnnotatedTextState } from "../../app/snapshot"
-import { createAnnotatedTextResolver } from "../../data"
+import { sharedAnnotatedTextResolver } from "../../data"
 import { DEFAULT_PREFS, prefsStore } from "../../settings"
 import { renderInRouter } from "../../test-utils"
 import { annotatedOrigin } from "../../test-utils/annotated-snapshot"
@@ -18,7 +18,7 @@ vi.mock("../../app/snapshot", () => ({
 const owner = { kind: "face_revision", id: "revision" }
 const { client } = await annotatedOrigin(fixture)
 await client.load()
-const value = await createAnnotatedTextResolver(client).resolve(
+const value = await sharedAnnotatedTextResolver(client).resolve(
   { owner, field: "name", ordinal: null },
   "zh-Hant",
 )

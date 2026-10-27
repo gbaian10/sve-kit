@@ -5,11 +5,11 @@ import { buildSnapshot } from "../../../scripts/fixture/build"
 import {
   cardPrintings,
   catalogOf,
-  createSnapshotClient,
   type LoadedSnapshot,
   type SnapshotClient,
   stringValue,
 } from "../../data"
+import { createSnapshotClient } from "../../data/client"
 import { DEFAULT_PREFS, prefsStore } from "../../settings"
 import { renderInRouter } from "../../test-utils"
 import { memoryCache } from "../../test-utils/cache"

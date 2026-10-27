@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest"
 
 import { buildSnapshot } from "../../scripts/fixture/build"
 import { memoryCache } from "../test-utils/cache"
-import { createCatalog } from "./catalog"
+import { catalogOf } from "./catalog"
 import { type Fetcher } from "./cdn"
 import { createSnapshotClient, type SnapshotStatus } from "./client"
 import {
@@ -108,14 +108,14 @@ describe("createSnapshotClient", () => {
     const locator = snapshot.bootstrap.find((fragment) => fragment.table === "card_locator")
       ?.rows[0]
     if (!locator) throw new Error("missing nondefault printing locator")
-    const index = createCatalog(snapshot).index
+    const index = catalogOf(snapshot).index
     expect(index.printingByCardNo("jp", stringValue(locator["card_no"]))?.["id"]).toBe(
       locator["id"],
     )
     await client.prefetchPrintings?.()
     expect(client.snapshot()?.printingReady).toBe(true)
     expect(
-      createCatalog(client.snapshot() ?? snapshot).index.printing(stringValue(locator["id"]))?.[
+      catalogOf(client.snapshot() ?? snapshot).index.printing(stringValue(locator["id"]))?.[
         "int_id"
       ],
     ).toBeTypeOf("number")
@@ -162,7 +162,7 @@ describe("createSnapshotClient", () => {
     await client.prefetchPrintings?.()
     const snapshot = client.snapshot()
     if (!snapshot) throw new Error("missing switched snapshot")
-    const index = createCatalog(snapshot).index
+    const index = catalogOf(snapshot).index
     expect(index.cards.some((card) => (card["regions"] as JsonObject[]).length === 2)).toBe(true)
     const printings = index.cards.flatMap((card) => index.printingsOf(stringValue(card["id"])))
     expect(new Set(printings.map((row) => row["id"])).size).toBe(printings.length)

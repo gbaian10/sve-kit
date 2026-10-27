@@ -8,7 +8,7 @@ import {
   languageCases,
   languageSnapshot,
 } from "../test-utils/language-matrix"
-import { createAnnotatedTextResolver } from "./annotated-text"
+import { sharedAnnotatedTextResolver } from "./annotated-text"
 import { catalogOf } from "./catalog"
 import { stringValue } from "./format-v3/json"
 
@@ -17,7 +17,7 @@ describe("the eighteen language choices through the native reader", () => {
     const { client } = await annotatedOrigin(languageSnapshot, row.region)
     await client.load()
     expect(client.status().state).toBe("ready")
-    const result = await createAnnotatedTextResolver(client).resolve(
+    const result = await sharedAnnotatedTextResolver(client).resolve(
       row.receiver,
       row.text_language,
     )
@@ -28,7 +28,7 @@ describe("the eighteen language choices through the native reader", () => {
     const cardId = index.face(stringValue(revision?.["face_id"]))?.["card_id"]
     expect(typeof cardId).toBe("string")
     expect(
-      await createAnnotatedTextResolver(client, stringValue(cardId)).resolve(
+      await sharedAnnotatedTextResolver(client, stringValue(cardId)).resolve(
         row.receiver,
         row.text_language,
       ),
@@ -54,7 +54,7 @@ describe("the eighteen language choices through the native reader", () => {
     await client.load()
     expect(client.status().state).toBe("ready")
     await expect(
-      createAnnotatedTextResolver(client).resolve(row.receiver, row.text_language),
+      sharedAnnotatedTextResolver(client).resolve(row.receiver, row.text_language),
     ).rejects.toThrow("public-annotation/reference")
   })
 })

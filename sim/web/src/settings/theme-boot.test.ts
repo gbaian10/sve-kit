@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 
 import bootSource from "../../public/theme-boot.js?raw"
-import { applyThemeAttributes } from "../app/theme-attributes"
+import { applyThemeAttributes } from "../app/theme-apply"
 import { ACCENTS, THEME_PREFS } from "../domain/theme"
 import { PREFS_KEY } from "./prefs"
 

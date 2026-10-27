@@ -1,4 +1,5 @@
-import { SearchEngine, type SearchEvent, type SearchRequest } from "../data"
+import { SearchEngine } from "../data/search/engine"
+import type { SearchEvent, SearchRequest } from "../data/search/messages"
 
 /** The jsdom boundary schedules the real engine messages as separate tasks. */
 export class TestSearchWorker {

@@ -145,7 +145,6 @@ it("shares raw identity across worker, metadata and detail subscribers with inde
     base,
     new Map([[file.key, renamed]]),
     appRequests.foreground,
-    () => undefined,
     storage,
     appRequests.background,
   )

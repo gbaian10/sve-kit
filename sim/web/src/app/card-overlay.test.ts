@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest"
 import {
   cardParamOf,
   clampDrawerWidth,
-  drawerFits,
   effectiveDrawerWidth,
   parseCardParam,
   withoutCardParam,
@@ -22,11 +21,6 @@ describe("drawer width", () => {
     expect(effectiveDrawerWidth(1200, 1000)).toBe(600)
     expect(clampDrawerWidth(10, 1440)).toBe(600)
     expect(clampDrawerWidth(5000, 1440)).toBe(1040)
-  })
-
-  it("needs room for the smallest drawer and usable results", () => {
-    expect(drawerFits(1000)).toBe(true)
-    expect(drawerFits(999)).toBe(false)
   })
 })
 

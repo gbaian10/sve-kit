@@ -375,16 +375,6 @@ const zhTW = {
     loadFailed: "載入失敗",
     retry: "重試",
   },
-  metadata: {
-    idle: "尚未下載卡圖資訊（{{done}}/{{total}}）",
-    running: "下載卡圖資訊中（{{done}}/{{total}}）",
-    cancelled: "已暫停下載卡圖資訊（{{done}}/{{total}}）",
-    error: "卡圖資訊下載失敗（{{done}}/{{total}}）",
-    complete: "卡圖資訊已下載（{{done}}/{{total}}）",
-    degraded: "無法使用持久快取；返回頁面時可能需要重新下載。",
-    cancel: "暫停下載",
-    retry: "下載卡圖資訊",
-  },
   card: {
     originalText: "原文",
     sourcePending: "日文依據載入中",

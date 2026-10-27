@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest"
 
 import fixture from "../../../../tests/fixtures/snapshot-contract/v3/source-native.json"
 import { annotatedOrigin } from "../test-utils/annotated-snapshot"
-import { createAnnotatedTextResolver } from "./annotated-text"
+import { sharedAnnotatedTextResolver } from "./annotated-text"
 import { catalogOf } from "./catalog"
 import {
   arrayValue,
@@ -22,7 +22,7 @@ async function origin(region: "jp" | "en" = "en", input: JsonObject = fixture) {
 
 describe.each([false, true])("one-hop source presentation (scoped %s)", (scoped) => {
   const createResolver = (
-    client: Parameters<typeof createAnnotatedTextResolver>[0],
+    client: Parameters<typeof sharedAnnotatedTextResolver>[0],
     pointer = fixture.receiver,
   ) => {
     const snapshot = client.snapshot()
@@ -30,7 +30,7 @@ describe.each([false, true])("one-hop source presentation (scoped %s)", (scoped)
     const index = catalogOf(snapshot).index
     const revision = index.revision(pointer.owner.id)
     const cardId = index.face(stringValue(revision?.["face_id"]))?.["card_id"]
-    return createAnnotatedTextResolver(client, scoped ? stringValue(cardId) : undefined)
+    return sharedAnnotatedTextResolver(client, scoped ? stringValue(cardId) : undefined)
   }
   it("loads the exact Japanese owner, body, sections and separate annotations on demand", async () => {
     const { client, requests, manifest } = await origin()

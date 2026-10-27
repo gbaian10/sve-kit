@@ -47,11 +47,7 @@ export async function cardPrintings(
 }
 
 /** Art identities are authored across regions; card numbers do not establish that relationship. */
-export function editionPrinting(
-  source: Row,
-  target: Catalog,
-  region: "jp" | "en",
-): Row | undefined {
+function editionPrinting(source: Row, target: Catalog, region: "jp" | "en"): Row | undefined {
   const cardId = stringValue(source["card_id"])
   const candidates = target.index.printingsOf(cardId).filter((row) => row["region"] === region)
   const card = target.index.card(cardId)

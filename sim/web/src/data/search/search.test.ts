@@ -9,7 +9,7 @@ import { DEFAULT_QUERY } from "../../domain/query/model"
 import { apply } from "../../domain/search"
 import { memoryCache } from "../../test-utils/cache"
 import { sharedAnnotatedTextResolver } from "../annotated-text"
-import { createCatalog } from "../catalog"
+import { catalogOf } from "../catalog"
 import type { Fetcher } from "../cdn"
 import { createSnapshotClient } from "../client"
 import {
@@ -33,7 +33,7 @@ import {
 } from "../index"
 const numeric = new Intl.Collator("en", { numeric: true, sensitivity: "base" })
 function orderExpected(
-  catalog: ReturnType<typeof createCatalog>,
+  catalog: ReturnType<typeof catalogOf>,
   items: { key: string; printingId: string }[],
 ) {
   return items.sort((a, b) => {
@@ -54,9 +54,10 @@ import { SearchBlobs } from "./blobs"
 import { BootstrapColumns } from "./bootstrap"
 import { Columns, StringPool } from "./columns"
 import { SearchEngine } from "./engine"
-import { SearchIndex, uniquePromoLeader } from "./index"
+import { SearchIndex } from "./index"
 import type { BootstrapPlan, SearchEvent, SearchRequest } from "./messages"
 import { PreviewReader } from "./preview"
+import { uniquePromoLeader } from "./promo-leader"
 import type { SearchTransportFactory } from "./session"
 import { ViewCache } from "./view"
 
@@ -345,7 +346,7 @@ describe("complete Worker catalog generations", () => {
     await baseline.load()
     const snapshot = baseline.snapshot()
     if (!snapshot) throw new Error("missing baseline")
-    const catalog = createCatalog(snapshot)
+    const catalog = catalogOf(snapshot)
     const storage = memoryCache()
     for (let warm = 0; warm < 2; warm += 1) {
       const h = harness(served, storage)
@@ -377,7 +378,7 @@ describe("complete Worker catalog generations", () => {
     await baseline.load()
     const snapshot = baseline.snapshot()
     if (!snapshot) throw new Error("missing baseline")
-    const catalog = createCatalog(snapshot)
+    const catalog = catalogOf(snapshot)
     const all = catalog
       .results(CARD_QUERY, "jp")
       .map((item) => catalog.summary(item.printingId))
@@ -675,7 +676,7 @@ it("rarity queries use the completed printing closure", async () => {
   await client.prefetchPrintings?.()
   const snapshot = client.snapshot()
   if (!snapshot) throw new Error("missing oracle")
-  const catalog = createCatalog(snapshot)
+  const catalog = catalogOf(snapshot)
   expect(result.page.total).toBeGreaterThan(0)
   expect(
     result.page.items.every(
@@ -915,7 +916,7 @@ it("orders text results by the selected sort and number suggestions by card numb
   columns.ingest(snapshot.bootstrap)
   columns.seal()
   const created = new SearchIndex(columns, "jp")
-  const catalog = createCatalog(snapshot)
+  const catalog = catalogOf(snapshot)
   for (const index of [created, new SearchIndex(created.encode(), "jp")]) {
     const state = { ...CARD_QUERY, text: "bp01-0" }
     const page = index.search({ ...query, state })
@@ -1004,7 +1005,7 @@ it("typed matching preserves catalog ranking, canonical pagination and summaries
   await client.prefetchPrintings?.()
   const snapshot = client.snapshot()
   if (!snapshot) throw new Error("missing snapshot")
-  const catalog = createCatalog(snapshot)
+  const catalog = catalogOf(snapshot)
   const texts = new Set([
     "",
     "bp",
@@ -1032,7 +1033,7 @@ it("typed matching preserves catalog ranking, canonical pagination and summaries
     await client.prefetchPrintings?.()
     const selectedSnapshot = client.snapshot()
     if (!selectedSnapshot) throw new Error("missing regional snapshot")
-    const catalog = createCatalog(selectedSnapshot)
+    const catalog = catalogOf(selectedSnapshot)
     const h = harness(served)
     h.session.load(base, edition, "preview")
     await h.settled()
@@ -1239,7 +1240,7 @@ it("a stored index image answers every query like the index it was encoded from"
   await client.prefetchPrintings?.()
   const snapshot = client.snapshot()
   if (!snapshot) throw new Error("missing snapshot")
-  const catalog = createCatalog(snapshot)
+  const catalog = catalogOf(snapshot)
   const states = [
     CARD_QUERY,
     { ...CARD_QUERY, errataOnly: true },
@@ -1749,7 +1750,7 @@ it("printing pages preserve every edition printing, numbering, filters and cache
     await client.prefetchPrintings?.()
     const selectedSnapshot = client.snapshot()
     if (!selectedSnapshot) throw new Error("missing regional snapshot")
-    const catalog = createCatalog(selectedSnapshot)
+    const catalog = catalogOf(selectedSnapshot)
     const storage = memoryCache()
     const h = harness(served, storage)
     h.session.load(base, edition, "preview")
@@ -1914,7 +1915,7 @@ it.each(["jp", "en"] as const)(
     await client.selectRegion?.(edition)
     const snapshot = client.snapshot()
     if (!snapshot) throw new Error("oracle missing")
-    const catalog = createCatalog(snapshot)
+    const catalog = catalogOf(snapshot)
     const resolver = sharedAnnotatedTextResolver(client)
     const h = harness(served)
     h.session.load(base, edition, "preview")
@@ -1994,7 +1995,7 @@ it("loads a cross-set reprint's effect from its card owner and keeps its image o
     stringValue(snapshot.manifest["format_version"]),
     new SearchBlobs(base, served.fetcher),
   )
-  const revision = createCatalog(snapshot).index.displayRevision(summary.faceId, "jp")
+  const revision = catalogOf(snapshot).index.displayRevision(summary.faceId, "jp")
   if (!revision) throw new Error("missing reprint revision")
   const resolver = sharedAnnotatedTextResolver(client)
   for (const language of ["ja", "en", "zh-Hant"]) {
@@ -2170,7 +2171,7 @@ describe("set releases and counts", () => {
     await baseline.load()
     const snapshot = baseline.snapshot()
     if (!snapshot) throw new Error("missing baseline")
-    const catalog = createCatalog(snapshot)
+    const catalog = catalogOf(snapshot)
     const family = catalog.index.families.find((row) => row["code"] === "bp01")?.["id"]
     // A printing's set is the owner of the fragment that ships it.
     const owners = new Map(

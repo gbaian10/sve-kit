@@ -11,11 +11,6 @@ export function normalizeText(text: string): string {
   return text.normalize("NFKC").toLowerCase().replace(SEPARATORS, "")
 }
 
-/** Like `normalizeText` but keeps single spaces between words, for display of what matched. */
-export function normalizeLoose(text: string): string {
-  return text.normalize("NFKC").toLowerCase().replace(SEPARATORS, " ").trim()
-}
-
 /** Orders strings by Unicode code point, matching the snapshot's canonical sort (build-db §14). */
 export function compareCodePoints(a: string, b: string): number {
   const left = Array.from(a)

@@ -397,16 +397,6 @@ export default {
     loadFailed: "Loading failed",
     retry: "Retry",
   },
-  metadata: {
-    idle: "Image metadata not downloaded ({{done}}/{{total}})",
-    running: "Downloading image metadata ({{done}}/{{total}})",
-    cancelled: "Image metadata download paused ({{done}}/{{total}})",
-    error: "Image metadata download failed ({{done}}/{{total}})",
-    complete: "Image metadata downloaded ({{done}}/{{total}})",
-    degraded: "Persistent cache unavailable; returning to a page may download again.",
-    cancel: "Pause download",
-    retry: "Download metadata",
-  },
   card: {
     originalText: "Original text",
     sourcePending: "Loading Japanese source",

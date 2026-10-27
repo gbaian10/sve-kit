@@ -5,13 +5,6 @@ import { SnapshotError } from "./format-v3/errors"
 import type { JsonObject } from "./format-v3/json"
 import { rawBlobDescriptor, RawBlobStore } from "./raw-blobs"
 
-export interface MetadataProgress {
-  readonly state: "idle" | "running" | "cancelled" | "error" | "complete"
-  readonly done: number
-  readonly total: number
-  readonly persistent: boolean
-  readonly checking?: boolean
-}
 interface Job {
   readonly key: string
   readonly file: JsonObject
@@ -34,34 +27,22 @@ export class MetadataBytes {
   private readonly verified = new Set<string>()
   private readonly abort = new AbortController()
   private disposed = false
-  private epoch = 0
-  private progress: MetadataProgress
   private readonly initialized: Promise<void>
   private readonly raw: RawBlobStore
 
   private readonly files: ReadonlyMap<string, JsonObject>
-  private readonly changed: () => void
 
   constructor(
     base: string,
     files: ReadonlyMap<string, JsonObject>,
     fetcher: Fetcher,
-    changed: () => void,
     storage?: CacheStorage,
     backgroundFetch: Fetcher = fetcher,
   ) {
     this.files = files
-    this.changed = changed
     this.raw = new RawBlobStore(base, fetcher, storage, backgroundFetch, (file) => {
       this.rawMissed(file.sha256)
     })
-    this.progress = {
-      state: "idle",
-      done: 0,
-      total: files.size,
-      persistent: false,
-      checking: storage !== undefined,
-    }
     if (storage) {
       const scope = `${encodeURIComponent(base)}:`
       const initialized = (cacheInitializers.get(storage) ?? Promise.resolve())
@@ -74,23 +55,12 @@ export class MetadataBytes {
           // A later session retries legacy cleanup if storage refuses it.
         })
       cacheInitializers.set(storage, initialized)
-      this.initialized = Promise.all([initialized, this.raw.ready]).then(() => {
-        if (this.active()) this.update({ persistent: this.raw.persistent, checking: false })
-      })
+      this.initialized = Promise.all([initialized, this.raw.ready]).then(() => undefined)
     } else this.initialized = this.raw.ready
   }
 
   private active(): boolean {
     return !this.disposed
-  }
-
-  status(): MetadataProgress {
-    return this.progress
-  }
-
-  private update(patch: Partial<MetadataProgress>): void {
-    this.progress = { ...this.progress, ...patch }
-    this.changed()
   }
 
   read(key: string, priority = true, signal?: AbortSignal): Promise<Uint8Array> {
@@ -190,15 +160,10 @@ export class MetadataBytes {
     activeSignal.throwIfAborted()
     if (!this.raw.persistent) {
       // Without usable storage there is nothing verified to lose; only a real downgrade signals it.
-      if (this.progress.persistent) this.losePersistence()
+      if (this.verified.size > 0) this.losePersistence()
       return bytes
     }
     this.verified.add(key)
-    this.update({
-      done: this.verified.size,
-      persistent: true,
-      ...(this.verified.size === this.files.size ? { state: "complete" as const } : {}),
-    })
     return bytes
   }
 
@@ -208,7 +173,6 @@ export class MetadataBytes {
     for (const key of this.verified) {
       if (this.files.get(key)?.["sha256"] !== sha256) continue
       this.verified.clear()
-      this.update({ done: 0 })
       // Stop background refill; a foreground read re-adds only the file it actually restores.
       this.cancel()
       return
@@ -217,42 +181,17 @@ export class MetadataBytes {
 
   private losePersistence(): void {
     this.verified.clear()
-    this.update({ persistent: false, done: 0 })
     this.cancel()
   }
 
-  async prefetch(): Promise<void> {
-    await this.initialized
-    if (this.disposed || !this.raw.persistent) return
-    this.background.start()
-    const epoch = ++this.epoch
-    this.update({ state: "running" })
-    try {
-      // Queue all keys for priority promotion, but never more than three background requests run.
-      await Promise.all(
-        [...this.files.keys()].map((key) => this.read(key, false).then(() => undefined)),
-      )
-      if (this.isCurrent(epoch)) this.update({ state: "complete" })
-    } catch {
-      if (this.isCurrent(epoch)) this.update({ state: "error" })
-    }
-  }
-
-  private isCurrent(epoch: number): boolean {
-    return !this.disposed && epoch === this.epoch
-  }
-
   cancel(): void {
-    this.background.pause()
-    this.epoch += 1
     for (const job of this.pending.values()) {
       if (job.priority || job.started) continue
-      const error = new Error("prefetch cancelled")
+      const error = new Error("background metadata read cancelled")
       job.gateAbort.abort(error)
       job.queueAbort.abort(error)
       this.rejectQueued(job, error)
     }
-    this.update({ state: this.verified.size === this.files.size ? "complete" : "cancelled" })
   }
 
   dispose(): void {

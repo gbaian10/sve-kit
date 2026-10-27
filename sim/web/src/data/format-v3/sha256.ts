@@ -21,8 +21,9 @@ function rotr(x: number, n: number): number {
   return (x >>> n) | (x << (32 - n))
 }
 
-/** Synchronous SHA-256, so the pure reader needs no async plumbing; tests check it against WebCrypto. */
-export function sha256(data: Uint8Array): Uint8Array {
+/** Synchronous SHA-256, so the pure reader needs no async plumbing; tests check it against WebCrypto.
+ */
+function sha256(data: Uint8Array): Uint8Array {
   const bitLength = data.length * 8
   const paddedLength = Math.ceil((data.length + 9) / 64) * 64
   const padded = new Uint8Array(paddedLength)
@@ -84,7 +85,7 @@ export function sha256(data: Uint8Array): Uint8Array {
   return out
 }
 
-export function hex(bytes: Uint8Array): string {
+function hex(bytes: Uint8Array): string {
   let result = ""
   for (const byte of bytes) result += byte.toString(16).padStart(2, "0")
   return result

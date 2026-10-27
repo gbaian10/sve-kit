@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 
-import { pickRepresentative, rarityRank } from "./representative"
+import { rarityRank } from "./rarity-rank"
+import { pickRepresentative } from "./representative"
 
 interface Printing {
   readonly id: string

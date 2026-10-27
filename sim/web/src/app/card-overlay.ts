@@ -50,8 +50,9 @@ const DRAWER_DEFAULT_MAX_PX = 720
 /** What the results keep beside the drawer; below that the card opens as a modal instead. */
 const RESULTS_MIN_PX = 400
 
-/** Whether a drawer of the minimum width still leaves usable results beside it. */
-export function drawerFits(viewportWidth: number): boolean {
+/** Whether a drawer of the minimum width still leaves usable results beside it.
+ */
+function drawerFits(viewportWidth: number): boolean {
   return viewportWidth >= DRAWER_MIN_PX + RESULTS_MIN_PX
 }
 

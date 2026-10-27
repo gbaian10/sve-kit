@@ -2,23 +2,35 @@ import { act, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterEach, describe, expect, it } from "vitest"
 
-import {
-  createAnnotatedTextResolver,
-  type Row,
-  sharedAnnotatedTextResolver,
-  stringValue,
-} from "../../data"
+import { type Row, sharedAnnotatedTextResolver, stringValue } from "../../data"
 import { DEFAULT_PREFS, prefsStore } from "../../settings"
 import { renderInRouter } from "../../test-utils"
 import { annotatedOrigin } from "../../test-utils/annotated-snapshot"
 import { CardTextPanel } from "./CardTextPanel"
+
+function isolateSnapshotClient(client: Parameters<typeof sharedAnnotatedTextResolver>[0]) {
+  const snapshots = new WeakMap<object, object>()
+  return {
+    ...client,
+    snapshot: () => {
+      const current = client.snapshot()
+      if (!current) return null
+      let isolated = snapshots.get(current)
+      if (!isolated) {
+        isolated = { ...current }
+        snapshots.set(current, isolated)
+      }
+      return isolated as typeof current
+    },
+  }
+}
 
 afterEach(() => prefsStore.set(DEFAULT_PREFS))
 
 async function originWithPrintedText(available: boolean, flavor = false) {
   const { client } = await annotatedOrigin()
   await client.load()
-  const resolver = createAnnotatedTextResolver(client)
+  const resolver = sharedAnnotatedTextResolver(client)
   const effect = await resolver.resolve(
     { owner: { kind: "face_revision", id: "revision" }, field: "effect", ordinal: null },
     "ja",
@@ -32,7 +44,7 @@ async function originWithPrintedText(available: boolean, flavor = false) {
   return {
     printingId: stringValue(printing["id"]),
     faceId: stringValue(face["face_id"]),
-    client: {
+    client: isolateSnapshotClient({
       ...client,
       fragments: async (key: string) =>
         (await client.fragments(key)).map((fragment) =>
@@ -53,7 +65,7 @@ async function originWithPrintedText(available: boolean, flavor = false) {
               }
             : fragment,
         ),
-    },
+    }),
   }
 }
 

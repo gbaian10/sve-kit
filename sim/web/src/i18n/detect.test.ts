@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 
-import { detectUiLanguage, preferredLanguages } from "./detect"
+import { preferredLanguages } from "./detect"
+import { detectUiLanguage } from "./language-detect"
 
 describe("detectUiLanguage", () => {
   it.each([

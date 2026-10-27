@@ -2,7 +2,7 @@
 import { describe, expect, it } from "vitest"
 
 import { annotatedOrigin } from "../test-utils/annotated-snapshot"
-import { createAnnotatedTextResolver, sharedAnnotatedTextResolver } from "./annotated-text"
+import { sharedAnnotatedTextResolver } from "./annotated-text"
 import {
   arrayValue,
   canonicalText,
@@ -10,6 +10,29 @@ import {
   objectValue,
   stringValue,
 } from "./format-v3/json"
+
+function isolatedAnnotatedTextResolver(
+  client: Parameters<typeof sharedAnnotatedTextResolver>[0],
+  cardId?: string,
+) {
+  const snapshots = new WeakMap<object, object>()
+  return sharedAnnotatedTextResolver(
+    {
+      ...client,
+      snapshot: () => {
+        const current = client.snapshot()
+        if (!current) return null
+        let isolated = snapshots.get(current)
+        if (!isolated) {
+          isolated = { ...current }
+          snapshots.set(current, isolated)
+        }
+        return isolated as typeof current
+      },
+    },
+    cardId,
+  )
+}
 
 async function historicalCandidateOrigin() {
   const { client } = await annotatedOrigin()
@@ -101,8 +124,10 @@ async function historicalCandidateOrigin() {
 }
 
 describe.each([undefined, "card"])("the native C → P → R annotation slice (%s)", (cardId) => {
-  const createResolver = (client: Parameters<typeof createAnnotatedTextResolver>[0]) =>
-    createAnnotatedTextResolver(client, cardId)
+  const createResolver = (
+    client: Parameters<typeof sharedAnnotatedTextResolver>[0],
+    scope = cardId,
+  ) => isolatedAnnotatedTextResolver(client, scope)
   it("discovers and resolves a candidate's source sections with their original ordinals", async () => {
     const { client, historyKey, revision } = await historicalCandidateOrigin()
     const unitId = stringValue(revision["effect_unit_id"])
@@ -129,7 +154,7 @@ describe.each([undefined, "card"])("the native C → P → R annotation slice (%
     const owner = { kind: "face_revision", id: "historical" }
     const effect = await resolver.resolve({ owner, field: "effect", ordinal: null }, "ja")
     expect(effect).toEqual(
-      await createAnnotatedTextResolver(source).resolve(
+      await isolatedAnnotatedTextResolver(source).resolve(
         { owner, field: "effect", ordinal: null },
         "ja",
       ),
@@ -181,7 +206,7 @@ describe.each([undefined, "card"])("the native C → P → R annotation slice (%
     expect(value?.selection?.["basis"]).toBe("own_source")
     expect(value?.translation?.["low_confidence"]).toBe(false)
     expect(value?.explanations[0]?.reference).toEqual({ kind: "keyword", id: "keyword" })
-    const full = createAnnotatedTextResolver(client)
+    const full = isolatedAnnotatedTextResolver(client)
     for (const field of ["label", "effect"])
       for (const language of ["ja", "en", "zh-Hant"]) {
         const pointer = { owner: { kind: "keyword", id: "keyword" }, field, ordinal: null }
@@ -389,7 +414,7 @@ describe.each([undefined, "card"])("the native C → P → R annotation slice (%
       field: "effect",
       ordinal: null,
     }
-    const effect = await createAnnotatedTextResolver(client).resolve(effectPointer, "ja")
+    const effect = await isolatedAnnotatedTextResolver(client).resolve(effectPointer, "ja")
     if (!effect) throw new Error("synthetic effect missing")
     const unitId = stringValue(effect.original.unit["id"])
     const patched = {
@@ -416,7 +441,7 @@ describe.each([undefined, "card"])("the native C → P → R annotation slice (%
         ),
     }
     const actual = createResolver(patched)
-    const full = createAnnotatedTextResolver(patched)
+    const full = isolatedAnnotatedTextResolver(patched)
     await actual.resolve(effectPointer, "ja")
     await full.resolve(effectPointer, "ja")
     for (const field of ["name", "effect", "flavor", "section"])

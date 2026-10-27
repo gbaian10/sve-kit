@@ -34,6 +34,7 @@ import type { BootstrapColumns } from "./bootstrap"
 import { cardNumberOrder } from "./card-number-order"
 import { type ColumnEdit, Columns, StringPool } from "./columns"
 import { pack, unpack } from "./image"
+import { uniquePromoLeader } from "./promo-leader"
 
 export interface SearchQuery {
   readonly state: QueryState
@@ -41,7 +42,7 @@ export interface SearchQuery {
   readonly offset?: number
   readonly limit?: number
 }
-interface SearchOption {
+export interface SearchOption {
   readonly id: string
   readonly code: string
   readonly kind?: string
@@ -81,25 +82,6 @@ export interface SearchOptions {
   }
   /** Printings per home-set family code in this edition, for the set filter's counts. */
   readonly setCounts: Readonly<Record<string, number>>
-}
-export function uniquePromoLeader(
-  promoSets: readonly SearchOption[],
-  counts: Readonly<Record<string, number>>,
-): SearchOption | undefined {
-  let leader: SearchOption | undefined
-  let highest = -1
-  let tied = false
-  for (const set of promoSets) {
-    const count = counts[set.code] ?? 0
-    if (count > highest) {
-      leader = set
-      highest = count
-      tied = false
-    } else if (count === highest) {
-      tied = true
-    }
-  }
-  return tied ? undefined : leader
 }
 /** A set with its first day-precision release in the index's edition. */
 export interface SetRelease extends SearchOption {

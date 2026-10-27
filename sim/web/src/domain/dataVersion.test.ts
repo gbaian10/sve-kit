@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 
-import { formatDataVersion, parseDataVersion } from "./dataVersion"
+import { formatDataVersion } from "./dataVersion"
+import { parseDataVersion } from "./parseDataVersion"
 
 describe("data version display", () => {
   it("shows the date, and the serial only for a second batch on the same day", () => {

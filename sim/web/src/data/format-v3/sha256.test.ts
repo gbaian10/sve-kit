@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest"
 
 import vectorsText from "../../../fixtures/canonical-vectors.json?raw"
 import { type JsonObject, parseJson, utf8 } from "./json"
-import { bucket, digest, hex, sha256 } from "./sha256"
+import { bucket, digest } from "./sha256"
 
 const vectors = parseJson(vectorsText) as JsonObject
 
@@ -16,17 +16,19 @@ describe("sha256", () => {
       "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1",
     ],
   ])("hashes %j like FIPS 180-4", (input, expected) => {
-    expect(hex(sha256(utf8(input)))).toBe(expected)
+    expect(digest(utf8(input))).toBe(`sha256:${expected}`)
   })
 
   it("agrees with WebCrypto across block boundaries", async () => {
     for (let length = 0; length < 200; length += 7) {
       const data = new Uint8Array(length).map((_, i) => (i * 31 + length) & 0xff)
       const expected = new Uint8Array(await crypto.subtle.digest("SHA-256", data))
-      expect(hex(sha256(data))).toBe(hex(expected))
+      expect(digest(data)).toBe(`sha256:${hexForTest(expected)}`)
     }
     const big = new Uint8Array(70000).map((_, i) => i & 0xff)
-    expect(hex(sha256(big))).toBe(hex(new Uint8Array(await crypto.subtle.digest("SHA-256", big))))
+    expect(digest(big)).toBe(
+      `sha256:${hexForTest(new Uint8Array(await crypto.subtle.digest("SHA-256", big)))}`,
+    )
   })
 
   it("prefixes digests and computes the shared bucket vector", () => {
@@ -38,3 +40,7 @@ describe("sha256", () => {
     expect(() => bucket(key, 0)).toThrow(RangeError)
   })
 })
+
+function hexForTest(bytes: Uint8Array): string {
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("")
+}

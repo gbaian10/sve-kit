@@ -5,8 +5,8 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 
 import {
   type CardSummary,
-  createAnnotatedTextResolver,
   type SelectedText,
+  sharedAnnotatedTextResolver,
   SnapshotError,
   textRuns,
 } from "../../data"
@@ -686,7 +686,7 @@ describe("annotation presentation", () => {
       expect(container.querySelector("strong")).toBeNull()
     })
     expect(screen.getByText("Synthetic")).toBeVisible()
-    const value = await createAnnotatedTextResolver(client).resolve(
+    const value = await sharedAnnotatedTextResolver(client).resolve(
       { owner: { kind: "face_revision", id: "revision" }, field: "name", ordinal: null },
       "zh-Hant",
     )

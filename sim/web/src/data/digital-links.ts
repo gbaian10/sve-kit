@@ -3,7 +3,7 @@ import type { LoadedSnapshot, SnapshotClient } from "./client"
 import type { Row } from "./format-v3/decode"
 import { arrayValue, type JsonObject, objectValue, stringValue } from "./format-v3/json"
 
-export type DigitalGame = "sv1" | "svwb"
+type DigitalGame = "sv1" | "svwb"
 type DigitalRelation = "same_card" | "same_character" | "name_only" | "same_name"
 
 export interface DigitalLink {
@@ -35,7 +35,7 @@ const isRelation = (value: unknown): value is DigitalRelation =>
 const byOfficialId = (a: string, b: string) => a.length - b.length || (a < b ? -1 : a > b ? 1 : 0)
 
 // A card-level row says nothing about a specific face or digital phase.
-export function selectDigitalLinks(
+function selectDigitalLinks(
   cardId: string,
   links: readonly Row[],
   digitalCards: ReadonlyMap<string, { readonly game: DigitalGame; readonly officialId: string }>,

@@ -2,7 +2,7 @@ import { screen } from "@testing-library/react"
 import { afterEach, describe, expect, it } from "vitest"
 
 import fixture from "../../../../../tests/fixtures/snapshot-contract/v3/whole-name-native.json"
-import { createAnnotatedTextResolver } from "../../data"
+import { sharedAnnotatedTextResolver } from "../../data"
 import { DEFAULT_PREFS, prefsStore } from "../../settings"
 import { renderInRouter } from "../../test-utils"
 import { annotatedOrigin } from "../../test-utils/annotated-snapshot"
@@ -27,7 +27,7 @@ describe("CardNameHeading", () => {
       <CardNameHeading
         edition="jp"
         client={client}
-        resolver={createAnnotatedTextResolver(client)}
+        resolver={sharedAnnotatedTextResolver(client)}
         owner={owner}
         fallback={fallback}
       />,
@@ -50,7 +50,7 @@ describe("CardNameHeading", () => {
       <CardNameHeading
         edition="jp"
         client={client}
-        resolver={createAnnotatedTextResolver(client)}
+        resolver={sharedAnnotatedTextResolver(client)}
         owner={owner}
         fallback={fallback}
       />,
@@ -66,7 +66,7 @@ describe("CardNameHeading", () => {
       <CardNameHeading
         edition="jp"
         client={client}
-        resolver={createAnnotatedTextResolver(client)}
+        resolver={sharedAnnotatedTextResolver(client)}
         owner={owner}
         fallback={fallback}
       />,

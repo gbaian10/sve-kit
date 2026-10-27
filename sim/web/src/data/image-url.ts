@@ -1,17 +1,7 @@
 import type { Row } from "./format-v3/decode"
 import { arrayValue, integerValue, objectValue, stringValue } from "./format-v3/json"
+import { imageUrl } from "./image-url-format"
 import type { ImageSource } from "./images"
-
-/** Permanent IDs are decimal values, never parsed from card numbers or array positions. */
-export function imageUrl(
-  base: string,
-  intId: number,
-  ordinal: number,
-  size: string,
-  version: number,
-): string {
-  return `${base}/images/${size}/${String(intId)}${ordinal === 0 ? "" : `-f${String(ordinal)}`}.webp?v=${String(version)}`
-}
 
 export function mediaImageSource(
   base: string,

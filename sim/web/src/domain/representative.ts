@@ -1,6 +1,7 @@
 // Which printing stands for a merged cell (one per card or one per art): the maintainer's rule
 // from #781. The rarity ladder is the one place this order is written; PR sits off the ladder.
-export const RARITY_LADDER = ["br", "sr", "gr", "lg", "sl", "ur", "sp", "ssp"] as const
+import { rarityRank } from "./rarity-rank"
+export { RARITY_LADDER } from "./rarity-rank"
 export const PROMO_RARITY = "pr"
 /** A printing whose metadata has not arrived yet (a catalog locator), as opposed to one with none. */
 export const UNKNOWN_RARITY = "?"
@@ -13,11 +14,6 @@ export interface RepresentativeChoice {
   readonly rarity: RepresentativeRarity
   /** A PR printing wins whenever the group has one. */
   readonly prFirst: boolean
-}
-
-/** Ladder position of a rarity code; anything off the ladder (no rarity, "-", PR) sits below BR. */
-export function rarityRank(code: string | null | undefined): number {
-  return (RARITY_LADDER as readonly string[]).indexOf(code ?? "")
 }
 
 /**

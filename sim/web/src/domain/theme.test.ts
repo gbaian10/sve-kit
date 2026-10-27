@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { ACCENTS, defaultAccent, isAccent, isThemePref, resolveTheme, THEME_PREFS } from "./theme"
+import { ACCENTS, isAccent, isThemePref, resolveTheme, THEME_PREFS } from "./theme"
 
 describe("resolveTheme", () => {
   it.each([
@@ -34,11 +34,6 @@ describe("resolveTheme", () => {
 })
 
 describe("defaults and guards", () => {
-  it("defaults dark to amber and light to teal", () => {
-    expect(defaultAccent("dark")).toBe("amber")
-    expect(defaultAccent("light")).toBe("teal")
-  })
-
   it("guards accept only the known values", () => {
     expect(isThemePref("system")).toBe(true)
     expect(isThemePref("auto")).toBe(false)

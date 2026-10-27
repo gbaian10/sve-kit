@@ -2,9 +2,11 @@ import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterEach, describe, expect, it } from "vitest"
 
-import { DEFAULT_PREFS, prefsStore, readPrefs } from "../../settings"
+import { DEFAULT_PREFS, prefsStore } from "../../settings"
+import { readPrefs } from "../../settings/prefs-read-write"
 import { renderInRouter } from "../../test-utils"
-import { AccountMenuButton, AccountMenuPanel } from "./AccountMenu"
+import { AccountMenuButton } from "./AccountMenu"
+import { AccountMenuPanel } from "./AccountMenuPanel"
 
 afterEach(() => {
   prefsStore.set(DEFAULT_PREFS)

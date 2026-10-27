@@ -1,7 +1,7 @@
 import { screen, within } from "@testing-library/react"
 import { afterEach, describe, expect, it } from "vitest"
 
-import { createAnnotatedTextResolver } from "../../data"
+import { sharedAnnotatedTextResolver } from "../../data"
 import { DEFAULT_PREFS, prefsStore } from "../../settings"
 import { renderRoutes } from "../../test-utils"
 import { annotatedOrigin } from "../../test-utils/annotated-snapshot"
@@ -25,7 +25,7 @@ describe("original plus available translation in every language matrix cell", ()
     const { client } = await annotatedOrigin(languageSnapshot, row.region)
     await client.load()
     expect(client.status().state).toBe("ready")
-    const resolver = createAnnotatedTextResolver(client)
+    const resolver = sharedAnnotatedTextResolver(client)
     prefsStore.set({ effectLanguage: "both" })
     const { i18n } = await renderRoutes(
       [
