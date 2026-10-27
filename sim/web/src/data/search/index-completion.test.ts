@@ -312,3 +312,58 @@ it("rejects mechanic queries when every EN shared annotation is blocked", () => 
     }
   }
 })
+
+it("completes English self coverage independently of shared engine eligibility and caches its count", () => {
+  const { basic, printing } = stages("en")
+  const fragments = [...basic, ...printing]
+  const source = columns(fragments)
+  const coverage = fragments.find((fragment) => fragment.table === "card_mechanic_coverage")
+  const projection = fragments.find((fragment) => fragment.table === "mechanic_projection")
+  if (!coverage || !projection) throw new Error("synthetic mechanics missing")
+  const keywords = source.rows("keyword").map((row) => stringValue(row["id"]))
+  source.ingest([
+    {
+      ...coverage,
+      rows: source.rows("card").map((row) => ({
+        card_id: row["id"] ?? null,
+        scope: "en_override",
+        complete_all: false,
+        complete_mode: "include",
+        complete_keyword_ids: [],
+        partial_mode: "include",
+        partial_keyword_ids: [],
+        has_complete_keyword_ids: keywords,
+      })),
+    },
+    {
+      ...projection,
+      rows: [
+        {
+          card_id: "c:bp01-031",
+          keyword_id: "kw:ward",
+          scope: "en_override",
+          relations: ["has"],
+          actions: [],
+        },
+      ],
+    },
+  ])
+  source.seal()
+  const created = new SearchIndex(source, "en")
+  created.completeMechanics(source)
+  for (const index of [created, new SearchIndex(created.encode(), "en")]) {
+    expect(index.options.keywordCoverage).toBe("complete")
+    expect(index.options.keywordUnknownCards).toBe(0)
+    const find = (state: "has" | "not") =>
+      index
+        .search({
+          edition: "en",
+          state: { ...DEFAULT_QUERY, unit: "card", mechanics: { "kw:ward": state } },
+          limit: 100,
+        })
+        .items.map((item) => item.key)
+    expect(find("has")).toContain("c:bp01-031")
+    expect(find("not")).not.toContain("c:bp01-031")
+    expect(find("not")).toContain("c:bp01-051")
+  }
+})

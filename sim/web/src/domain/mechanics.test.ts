@@ -60,6 +60,19 @@ it("uses relation-specific has coverage without claiming four-relation completen
   expect(mechanicState("kw:ward", "jp", [], coverage, false)).toBe("absent")
   expect(mechanicState("kw:storm", "jp", [], coverage, false)).toBe("unknown")
   expect(
-    mechanicState("kw:ward", "en", [], [{ ...coverage[0]!, scope: "en_override" }], true),
+    mechanicState(
+      "kw:ward",
+      "en",
+      [],
+      [
+        complete({
+          completeAll: false,
+          completeKeywordIds: [],
+          hasCompleteKeywordIds: ["kw:ward"],
+          scope: "en_override",
+        }),
+      ],
+      true,
+    ),
   ).toBe("absent")
 })
