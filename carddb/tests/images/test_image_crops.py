@@ -1,8 +1,9 @@
 """Every crop rejection uses a small counterexample and an anchored error match."""
 
+from __future__ import annotations
+
 import json
 import re
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
@@ -15,11 +16,11 @@ from sve_carddb.ingest.archive.frozen_sources import FrozenSources
 from ..support.image_crop_fixtures import install, record
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from pydantic import JsonValue
 
     from sve_carddb.ingest.archive.source_archive import Descriptor
-
-AUTHORED = Path(__file__).resolve().parents[3] / "authored"
 
 
 @pytest.fixture(scope="module")

@@ -161,11 +161,14 @@ def test_current_fallback_is_still_checked(
             )
 
 
+@pytest.mark.parametrize("mutation", ["empty_entries", "duplicate_entries"])
 def test_current_inputs_require_explicit_immutable_pins(
-    current_baseline: Case,
+    current_baseline: Case, mutation: str
 ) -> None:
     inputs = current_baseline.inputs()
-    inputs = replace(inputs, entries=())
+    inputs = replace(
+        inputs, entries=() if mutation == "empty_entries" else inputs.entries * 2
+    )
     message = "^Adoption entries must be explicitly enabled, sorted and unique$"
     with pytest.raises(ValueError, match=message):
         inputs.load()
