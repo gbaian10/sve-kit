@@ -248,6 +248,12 @@ fn check_program(program: &Program, source: &SourceSpan, card: bool) -> Result<(
                 }
             }
             Node::Decision { decision } => {
+                if matches!(decision.domain, ChoiceDomain::Objects { .. }) {
+                    if !card {
+                        return Err(unsupported("resolution field choice outside a whole card"));
+                    }
+                    super::card::selection::check_resolution(decision)?;
+                }
                 if matches!(decision.domain, ChoiceDomain::Distribution { .. })
                     && source.card_no != "synthetic"
                 {
@@ -264,6 +270,7 @@ fn check_program(program: &Program, source: &SourceSpan, card: bool) -> Result<(
                         },
                         ..
                     } | ChoiceDomain::Distribution { .. }
+                        | ChoiceDomain::Objects { .. }
                 ) || !decision.captures.is_empty()
                     || !matches!(decision.visibility, Visibility::Public {})
                     || !matches!(

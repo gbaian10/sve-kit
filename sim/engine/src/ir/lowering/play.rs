@@ -60,6 +60,20 @@ impl BodyContext<'_> {
     }
 
     fn target(&mut self, target: &ast::Target, path: &str) -> Result<(), LoweringError> {
+        let (domain, _) = self.object_choice(target, path)?;
+        self.parameters.push(parameter(
+            self.card_allocator.id(path)?,
+            PlaySlot::Targets,
+            domain,
+        ));
+        Ok(())
+    }
+
+    pub(super) fn object_choice(
+        &mut self,
+        target: &ast::Target,
+        path: &str,
+    ) -> Result<(ChoiceDomain, Cardinality), LoweringError> {
         let cardinality = match (target.n, target.upto) {
             (Some(n), None) => Cardinality {
                 minimum: Nat(n),
@@ -73,6 +87,8 @@ impl BodyContext<'_> {
         };
         let binding = Binding::new(self.allocator.id(path)?, self.scope);
         if self.definitions.contains_key(&target.bind)
+            || self.searches.contains_key(&target.bind)
+            || self.observations.contains_key(&target.bind)
             || self.targets.insert(target.bind.clone(), binding).is_some()
         {
             return Err(unsupported(path));
@@ -108,9 +124,7 @@ impl BodyContext<'_> {
                 candidate,
             )),
         };
-        self.parameters.push(parameter(
-            self.card_allocator.id(path)?,
-            PlaySlot::Targets,
+        Ok((
             ChoiceDomain::Objects {
                 constraint: SelectionConstraint {
                     groups: vec![SelectionGroup {
@@ -125,8 +139,8 @@ impl BodyContext<'_> {
                 binding,
                 target_roles: None,
             },
-        ));
-        Ok(())
+            cardinality,
+        ))
     }
 
     pub(super) fn damage(

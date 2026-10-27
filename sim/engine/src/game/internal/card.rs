@@ -5,6 +5,7 @@ use super::{
 };
 use crate::catalog::SelectedEffects;
 use crate::catalog::current::CurrentCard;
+use crate::ir::ChoiceDomain;
 use crate::ir::quick::{card_permission, is_printed_quick};
 use crate::ir::{
     Ability, AbilityId, AbilityInstanceId, AbilityKind, AbilityOrigin, AbilitySource, Action,
@@ -838,6 +839,11 @@ fn check_nodes(
                 }
             }
             Node::Capture { .. } => {}
+            Node::Decision { decision }
+                if matches!(decision.domain, ChoiceDomain::Objects { .. }) =>
+            {
+                selection::check_resolution(decision)?;
+            }
             Node::Control { .. } | Node::Decision { .. } => {
                 return Err(unsupported("whole-card synchronous node"));
             }

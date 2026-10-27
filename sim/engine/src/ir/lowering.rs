@@ -13,6 +13,7 @@ mod payment;
 mod play;
 mod quick;
 mod search;
+mod selection;
 
 use super::{
     Ability, AbilityId, AbilityKind, AbilityOrigin, AbilityQualification, AbilitySource, Action,
@@ -764,6 +765,10 @@ impl BodyContext<'_> {
                 steps.push(self.choice(choice, &step_path, source, ability_source)?);
                 continue;
             }
+            if let ast::Step::Choose(choose) = step {
+                steps.push(self.choose(choose, &step_path, source)?);
+                continue;
+            }
             let instruction_id = self.card_allocator.id(&step_path)?;
             let action = self.action(step, &step_path, ability_source, source)?;
             self.remember(step, ReceiptId(instruction_id), &step_path)?;
@@ -798,7 +803,9 @@ impl BodyContext<'_> {
         span: &SourceSpan,
     ) -> Result<Action, LoweringError> {
         match step {
-            ast::Step::Choice(_) | ast::Step::If(_) => Err(unsupported(path)),
+            ast::Step::Choice(_) | ast::Step::Choose(_) | ast::Step::If(_) => {
+                Err(unsupported(path))
+            }
             ast::Step::Destroy(value) => Ok(Action::Destroy {
                 objects: self.action_objects(value, path)?,
             }),

@@ -4,11 +4,12 @@ use super::{
     Execution, Game, InputDomain, InstructionOutcome, Result, Wait, invalid, seat_name, unsupported,
 };
 use crate::ir::{
-    Action, Binding, Capture, CaptureRef, CaptureTime, Control, Expr, Instruction, Int, Located,
-    LookOutcome, MemberProjection, MoveDestination, Node, ObjectOperand, ObjectReceipt, ObjectRef,
-    OrderAnswer, OrderOutcome, OwnerZone, PlayerId, PlayerRelation, Position, Program,
-    ReceiptLocation, RecipientSet, Requirements, ResultMember, ResultMemberId, RuntimeObjectView,
-    ScopeId, Selector, SnapshotId, SourceSpan, StepwiseMode, Visibility, ZoneKind,
+    Action, Binding, Capture, CaptureRef, CaptureTime, Cardinality, ChoiceDomain, Control, Expr,
+    Instruction, Int, Located, LookOutcome, MemberProjection, MoveDestination, Nat, Node,
+    ObjectOperand, ObjectReceipt, ObjectRef, OrderAnswer, OrderOutcome, OwnerZone, PlayerId,
+    PlayerRelation, Position, Program, ReceiptLocation, RecipientSet, Requirements, ResultMember,
+    ResultMemberId, RuntimeObjectView, ScopeId, Selector, SnapshotId, SourceSpan, StepwiseMode,
+    Visibility, ZoneKind,
 };
 use alloc::collections::BTreeSet;
 
@@ -83,6 +84,8 @@ pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
         }
     }
     let mut inspected = node.clone();
+    mask_resolution_domain(&mut inspected)?;
+
     if let Node::Instruction { instruction } = &mut inspected
         && let Action::Destroy { objects: selector }
         | Action::Banish { objects: selector }
@@ -178,6 +181,23 @@ pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
             }
             _ => {}
         }
+    }
+    Ok(())
+}
+
+fn mask_resolution_domain(inspected: &mut Node) -> Result<()> {
+    if let Node::Decision { decision } = inspected
+        && matches!(decision.domain, ChoiceDomain::Objects { .. })
+    {
+        super::card::selection::check_resolution(decision)?;
+        // This checked public domain does not authorize private reads in decision metadata.
+        decision.domain = ChoiceDomain::Integer {
+            cardinality: Cardinality {
+                minimum: Nat(0),
+                maximum: Some(Nat(0)),
+            },
+            binding: Binding::new(0, ScopeId(0)),
+        };
     }
     Ok(())
 }
