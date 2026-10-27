@@ -1,4 +1,4 @@
-"""Lock the snapshot schema, profile values and shared synthetic reader contract."""
+"""Lock the snapshot schema and producer profile values."""
 
 import argparse
 import json
@@ -68,32 +68,16 @@ def profile_contract(selected: Profile) -> dict[str, JsonValue]:
     return object_value(parse(json.dumps(asdict(selected)).encode("utf-8")))
 
 
-def golden_hashes(directory: Path) -> dict[str, str]:
-    """Hash every shared contract file, retaining relative names and exact bytes."""
-    hashes = {
-        path.relative_to(directory).as_posix(): digest(path.read_bytes())
-        for path in sorted(directory.rglob("*"))
-        if path.is_file()
-    }
-    if not hashes:
-        raise ValueError(
-            f"Shared snapshot contract golden files are missing: {directory}"
-        )
-    return hashes
-
-
 def fingerprint(
     schema: JsonValue,
     profile_values: JsonValue = None,
-    golden: dict[str, str] | None = None,
 ) -> str:
-    """Hash formal schema, profile constants and shared golden content only."""
+    """Hash only the formal schema and producer profile values."""
     return digest(
         canonical(
             {
                 "schema": schema_contract(schema),
                 "profile": profile_values,
-                "golden": dict(golden or {}),
             }
         )
     )
@@ -194,7 +178,6 @@ def baseline_lock(ref: str, repository: Path = ROOT) -> dict[str, JsonValue]:
 
 
 def current_fingerprints(
-    repository: Path = ROOT,
     package: Path = PACKAGE,
 ) -> dict[str, str]:
     """Require generated and packaged schemas to define the same current contracts."""
@@ -209,12 +192,7 @@ def current_fingerprints(
                 "Committed Schema differs from its source. Regenerate it with "
                 "uv --directory carddb run python -m sve_carddb.contracts.generate_schema"
             )
-        golden = golden_hashes(
-            repository / "tests/fixtures/snapshot-contract" / selected.resource
-        )
-        current[selected.version] = fingerprint(
-            generated, profile_contract(selected), golden
-        )
+        current[selected.version] = fingerprint(generated, profile_contract(selected))
     return current
 
 
@@ -232,7 +210,7 @@ def main(
     )
     args = parser.parse_args(argv)
     try:
-        current = current_fingerprints(repository, package)
+        current = current_fingerprints(package)
         path = repository / LOCK_PATH
         locked = object_value(parse(path.read_bytes())) if path.exists() else {}
         baseline = baseline_lock(args.base_ref, repository)

@@ -135,7 +135,7 @@ repos:
         language: system
         entry: uv --directory carddb run python ../.github/ci/snapshot_format.py
         pass_filenames: false
-        always_run: true
+        files: ^(\.github/ci/(snapshot_format\.py|snapshot-format\.lock)|carddb/src/sve_carddb/(contracts/|core/json\.py$))
         stages: [pre-commit, pre-push, manual]
       - id: cargo-fmt
         name: cargo fmt

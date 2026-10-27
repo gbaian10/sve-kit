@@ -34,7 +34,7 @@
 未知格式拒收；更新失敗可保留相容 current／previous 或本機已驗 active。
 `preview-20260929T010203Z-0001` 即使格式相容，也不能交給正式發布器。
 
-本機 hook 與 CI 會從正規化 Schema、profile 常數與共用合成 golden 的內容 hash 重算[格式指紋](snapshot-contract.md#格式指紋鎖定)。未凍結版本變動須在同一個 PR 明示更新鎖定檔，讓契約變更進入審查；實際快照的資料修字或只換 `data_version` 不更新格式指紋。golden 是正式 reader 契約樣本，其內容即使只改合成 `data_version` 字串也會觸發指紋變動；凍結前須更新鎖定，凍結後須依本節判定契約升版。reader 純重構不改這三項來源，不須更新鎖定或升版。已凍結版本的指紋不符時必須升版，不能以更新鎖定檔通過檢查。
+本機 hook 與 CI 會從正規化 Schema 與 profile 常數重算[格式指紋](snapshot-contract.md#格式指紋鎖定)。未凍結版本變動須在同一個 PR 明示更新鎖定檔，讓契約變更進入審查；實際快照或共用 golden 的資料修字、排版及 `data_version` 變動都不改變格式指紋。golden 是正式 reader 契約樣本，由消費端行為測試驗證；canonical／join 等語義變動須同步正式契約、golden 與契約測試，不以格式鎖取代測試。已凍結版本的指紋不符時必須升版，不能以更新鎖定檔通過檢查。
 
 ## 2. 快照清單與檔案描述
 
