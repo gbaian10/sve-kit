@@ -413,13 +413,21 @@ selected play targets 的最低 1 點限制依
 
 `InstructionOutcome::Resource` 為 authority-only，保存玩家、資源、請求量、
 前後值與實際增加量；沿既有公開回復事件，不新增玩家協定。本文不接受 Pay、
-Set、RecoverToMax、EP／SEP、其他玩家或動態數量；打出費用仍走原付款路徑。
+Set、RecoverToMax、SEP、其他玩家或動態數量；打出費用仍走原付款路徑。
 
 本文 `pp_max: {who: self, delta: N}` 同樣只接受正整數常值 N，降低為控制者
 最大 PP 的 Resource(Add)。最大 PP 上限為 10，實際增加量為 `min(N, 10 − 原最大 PP)`，
 目前 PP 保持原值，不因提高上限而回復。達上限時仍記錄零實際量的 Resource 收據；
 有增加時沿既有公開「PP最大値変化」事件，保留來源與前後值。減少、Set、付款與
 動態數量未准入，也不開放一般資源事件 consumer 或完成量接續。
+
+## 本文固定 EP 增加
+
+本文 `ep: {who: self, delta: N}` 只接受正整數常值 N，降低為控制者 EP 的
+Resource(Add)。EP 不套用 PP 的上限，PP、最大 PP 與 SEP 保持原值；超出整數表示
+時拒絕並沿既有執行交易回復。Resource 收據保存請求量、前後值與實際增加量，
+沿既有公開「EP変化」事件保留來源；不新增一般資源事件 consumer、result 或 after。
+EP 付款及進化程序仍由原付款邊界處理，不因本文增加而重設進化次數。
 
 ## 觀察與測試種子
 
