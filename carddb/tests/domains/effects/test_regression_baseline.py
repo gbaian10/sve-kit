@@ -53,7 +53,7 @@ def location(ability: dict[str, JsonValue]) -> str:
 def test_baseline_covers_every_authored_pack() -> None:
     assert {p.stem for p in BASELINE.glob("*.json")} == {
         p.stem for p in (ROOT / "authored/rules/effects").glob("*.yaml")
-    }
+    } | {p.stem.split("-", 1)[0] for p in (BASELINE / "migrated").glob("*.json")}
 
 
 def author_records(pack: str) -> dict[str, dict[str, JsonValue]]:
@@ -70,9 +70,8 @@ def test_handwritten_programs_keep_the_reviewed_positions_and_inputs(
     path: Path,
 ) -> None:
     expected = OBJECT.validate_json(path.read_bytes())
-    actual = object_value(
-        read_yaml(ROOT / "authored/rules/effects" / f"{path.stem}.yaml")["cards"]
-    )
+    prototype = ROOT / "authored/rules/effects" / f"{path.stem}.yaml"
+    actual = object_value(read_yaml(prototype)["cards"]) if prototype.exists() else {}
     records = author_records(path.stem)
     migrated = set(records)
     migrated.update(

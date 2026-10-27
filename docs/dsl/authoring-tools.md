@@ -69,6 +69,8 @@ ignored:
 
 `reason` 只有 `reminder | layout`；不可與能力覆蓋重疊。token 定義不能標成母卡能力；尚未支援的 token 接線仍明確拒絕。參數實值為整數或字串，型別必須符合本體宣告；布林不算整數。多個 edition 時必須選版，不自動取最新版。
 
+來源尚未分類的 section 只有在每個非空行都明示 `ignored: reminder` 時才可略過；未覆蓋、僅標 layout 或已分類為 token 定義的區段仍拒絕。這不授予提醒文字所述共通規則的執行能力。
+
 ## 寫入與驗證
 
 ```bash
