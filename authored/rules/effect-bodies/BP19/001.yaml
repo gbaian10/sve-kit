@@ -1,0 +1,19 @@
+format: 2
+kind: effect_body_shard
+records:
+  - admission: shared
+    body:
+      lastword:
+        do:
+          - life:
+              delta:
+                param: n
+              who: self
+    id: lastword.leader-life-add
+    params:
+      n: Nat
+    written_by:
+      - actor:
+          model: Codex gpt-6-sol
+          who: Codex
+        date: "2026-10-27"

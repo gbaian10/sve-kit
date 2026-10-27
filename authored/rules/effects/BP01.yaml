@@ -368,29 +368,6 @@ cards:
           - op: move
             subjects: self
             to: cemetery
-  BP01-152:
-    status: complete
-    abilities:
-      - line: 1
-        kind: evolve
-        body:
-          op: evolve
-          subjects: self
-        costs:
-          - op: pp
-            amount: 0
-      - line: 2
-        kind: static
-        body:
-          op: macro
-          name: guard
-      - line: 3
-        kind: trigger
-        body:
-          op: modify
-          subjects: self.leader
-          hp: 4
-        event: end
   BP01-158:
     status: complete
     abilities:
@@ -473,25 +450,6 @@ cards:
   BP01-175:
     status: complete
     abilities: []
-  BP01-177:
-    status: complete
-    abilities:
-      - line: 1
-        kind: evolve
-        body:
-          op: evolve
-          subjects: self
-        costs:
-          - op: pp
-            amount: 1
-      - line: 2
-        kind: trigger
-        body:
-          op: modify
-          subjects: self.leader
-          hp: 1
-        event: enter
-        subject: self
   BP01-179:
     status: complete
     abilities:

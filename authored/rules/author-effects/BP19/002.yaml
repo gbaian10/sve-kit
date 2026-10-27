@@ -1,0 +1,16 @@
+cards:
+  BP19-108:
+    abilities:
+      - line: 1
+        params:
+          n: 1
+        use: lastword.leader-life-add
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-sol
+            who: Codex
+          date: "2026-10-27"
+format: 2
+kind: author_effect_set
