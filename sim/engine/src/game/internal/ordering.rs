@@ -152,20 +152,7 @@ pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
         },
         source: source.clone(),
     });
-    for requirement in &requirements.required {
-        let code = requirement.capability.code;
-        if (!private_spine && code == "shape.ObjectReceipt.Look")
-            || (matches!(code, "internal.ZoneKind.Deck" | "internal.ZoneKind.Hand")
-                && !super::source::count_zone(&requirements, requirement))
-            || (super::search::private_requirement(code)
-                && !super::source::source_original(&requirements, requirement)
-                && !super::source::count_zone(&requirements, requirement))
-        {
-            return Err(unsupported(
-                "private observation outside an authorized selector spine",
-            ));
-        }
-    }
+    check_private_requirements(&requirements, private_spine)?;
     if let Node::Instruction { instruction } = node {
         match &instruction.action {
             // Only an audience of exactly the chooser has an admitted projection contract.
@@ -188,6 +175,24 @@ pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
                 return Err(unsupported("order placement"));
             }
             _ => {}
+        }
+    }
+    Ok(())
+}
+
+fn check_private_requirements(requirements: &Requirements, private_spine: bool) -> Result<()> {
+    for requirement in &requirements.required {
+        let code = requirement.capability.code;
+        if (!private_spine && code == "shape.ObjectReceipt.Look")
+            || (matches!(code, "internal.ZoneKind.Deck" | "internal.ZoneKind.Hand")
+                && !super::source::count_zone(requirements, requirement))
+            || (super::search::private_requirement(code)
+                && !super::source::source_original(requirements, requirement)
+                && !super::source::count_zone(requirements, requirement))
+        {
+            return Err(unsupported(
+                "private observation outside an authorized selector spine",
+            ));
         }
     }
     Ok(())

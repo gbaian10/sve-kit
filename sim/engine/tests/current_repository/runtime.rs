@@ -702,7 +702,7 @@ mod c2_01;
 #[path = "runtime/deck_top.rs"]
 mod deck_top;
 
-#[path = "runtime/pp_recover.rs"]
-mod pp_recover;
 #[path = "runtime/hand_discard.rs"]
 mod hand_discard;
+#[path = "runtime/pp_recover.rs"]
+mod pp_recover;
