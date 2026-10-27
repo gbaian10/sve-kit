@@ -304,7 +304,9 @@ F1 configuration 與診斷只記實際已驗的 pin（含固定 filename、targe
 
 來源頁`→identity/face→art_group` 採納`→printing_face.art_id→digital_art_link`。svwb-art 的 printing+face 候選原樣保留 staging；art 沒採納前不 materialize 正式 link，也不配假 art。批次原樣高 confidence 不自動 sampled。
 
-每個 face 的 base art 明示；alternate 需有 base 和不同圖證據。signed 留面級 Bool?；序號在 `printing.serial_total`；stamp 留原字與顯示年，不生造 event、日期或名次。`credit_raw` 由版次頁保存於建置資料庫的 `printing_face`，不併到 `art_artist`。
+每個 face 的 base art 明示；alternate 需有 base 和不同圖證據。signed 留面級 Bool?；序號分母在 `printing.serial_total`。
+標誌種類／顯示年份與編號屬性由 [printing marks 分片](printing-marks.md) 保存，投影為 `printing.stamp`、`printing.serial`，
+不生造 event、日期或名次。`credit_raw` 由版次頁保存於建置資料庫的 `printing_face`，不併到 `art_artist`。
 
 ## 6. 模板、翻譯與語義例外
 
