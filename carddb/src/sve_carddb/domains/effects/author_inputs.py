@@ -815,17 +815,9 @@ class AuthorSchemas:
         """Decode a reference without substituting it into any author node."""
         return _decode(_PARAM_REF, self.leaf(raw, "A.param"))
 
-    def parameter_declaration(self, raw: bytes) -> ParamDecl:
-        """Decode a declaration; source-slot compatibility is a separate check."""
-        return _decode(_PARAM_DECL, self.leaf(raw, "ParamDecl"))
-
     def parameter_value(self, raw: bytes) -> ParamValue:
         """Decode exactly one of the eight typed leaf variants."""
         return _decode(_PARAM_VALUE, self.leaf(raw, "ParamValue"))
-
-    def parameter_declarations(self, raw: bytes) -> ParamDeclarations:
-        """Validate dynamic parameter names as well as their declarations."""
-        return _decode(_PARAM_DECLS, self.leaf(raw, "ParamDeclarations"))
 
     def parameter_values(self, raw: bytes) -> ParamValues:
         """Validate a complete value map without assuming a matching declaration."""

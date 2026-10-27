@@ -47,6 +47,7 @@ dev = [
     "types-pyyaml>=6.0.12",
     "brotli-stubs>=1.2.0",
     "types-psutil>=7.2.2.20260906",
+    "vulture>=2.16",
 ]
 
 # Optional local check, run by hand (see CONTRIBUTING); kept out of the default groups because it bundles ~200 MB of Node.js.
@@ -111,6 +112,20 @@ packages = ["src/sve_carddb"]
 
 [tool.hatch.build.targets.sdist]
 only-include = ["src"]
+
+
+## Dead code
+[tool.vulture]
+min_confidence = 60
+paths = ["vulture_whitelist.py"]
+ignore_decorators = [
+    "@*.command",
+    "@model_validator",
+    "@field_validator",
+    "@property",
+    "@cached_property",
+]
+ignore_names = ["pytest_*", "handle_*", "do_GET", "log_message"]
 
 
 ## pytest

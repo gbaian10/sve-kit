@@ -14,7 +14,6 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from sve_carddb.contracts.author_evidence import Ports
-    from sve_carddb.contracts.four_layer import Projection
     from sve_carddb.domains.effects.author_sites import NodeSites
 
 _HEAD = TypeAdapter(
@@ -488,34 +487,4 @@ def validate_author_ports(
             failures.append(Violation("missing_or_ambiguous_local_export", path))
         elif matches[0].scope or matches[0].execution:
             failures.append(Violation("unsupported_local_export_scope", path))
-    return tuple(failures)
-
-
-def validate_local_ports(
-    analysis: BindingAnalysis,
-    ports: Ports,
-    projection: Projection,
-) -> tuple[Violation, ...]:
-    """Compare local port types only; callers must separately reject unproven sources."""
-    failures = list(validate_author_ports(analysis, ports))
-    for direction in ("imports", "exports"):
-        bindings = getattr(ports, direction)
-        signatures = getattr(projection, direction)
-        if set(bindings) != {port.name for port in signatures}:
-            failures.append(Violation("port_names_mismatch", ("ports", direction)))
-        for port in signatures:
-            local = bindings.get(port.name)
-            if local is None:
-                continue
-            matches = [
-                item
-                for item in analysis.declarations
-                if item.path == local.path and item.name == local.bind
-            ]
-            if len(matches) != 1 or matches[0].type != port.type:
-                failures.append(
-                    Violation(
-                        "local_port_type_mismatch", ("ports", direction, port.name)
-                    )
-                )
     return tuple(failures)

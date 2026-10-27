@@ -403,23 +403,6 @@ def plan_files(
     return _finish(root, index, entries, files)
 
 
-def relayout(root: Path, entries: list[Entry]) -> dict[Path, bytes]:
-    """Lay out a complete registry from scratch, grouped by (area, owner).
-
-    Only for the one-time pre-publication reshard; normal runs append via plan_files.
-    """
-    require_empty_transitions(root)
-    groups: dict[tuple[str, str], list[Entry]] = defaultdict(list)
-    for entry in entries:
-        groups[_area(entry), entry.owner].append(entry)
-    order = record_order(entries)
-    files: dict[Path, bytes] = {}
-    for group, records in sorted(groups.items()):
-        directory = _directory(root, *group)
-        _split(directory, sorted(records, key=order), 1, files)
-    return _finish(root, Index(), entries, files)
-
-
 def _finish(
     root: Path, index: Index, entries: list[Entry], files: dict[Path, bytes]
 ) -> dict[Path, bytes]:

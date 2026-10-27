@@ -5,8 +5,6 @@ from typing import TYPE_CHECKING, Protocol
 
 from pydantic import JsonValue
 
-from sve_carddb.core.json import digest
-
 if TYPE_CHECKING:
     from sve_carddb.core.provenance import Source
     from sve_carddb.domains.catalog.adoption_models import SourceRef
@@ -86,17 +84,3 @@ class References:
     def unclassified_header() -> Resolution:
         """Do not infer a trait from a malformed or unknown header prefix."""
         return Resolution(None, ("unrecognized_header_trait_layout",))
-
-    def term_mentions(self, raw: str) -> tuple[dict[str, JsonValue], ...]:
-        """Substring hits remain diagnostics; they do not establish a semantic slot role."""
-        return tuple(
-            {
-                "source_name_hash": digest(name.encode()),
-                "id": identifier,
-                "category": category,
-                "reason": "term_mention_requires_semantic_role_review",
-            }
-            for name in sorted(self.terms)
-            if name in raw
-            for identifier, category in self.terms[name]
-        )

@@ -27,8 +27,6 @@ from sve_carddb.domains.translations.four_layer_n3_forms import POOL_FIRST, POOL
 from sve_carddb.domains.translations.four_layer_n3_shapes import ABILITY_REPLAY
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
-
     from sve_carddb.contracts.four_layer import Frame, Port
     from sve_carddb.contracts.source_binding import SourceBinding
     from sve_carddb.domains.translations.four_layer_n3_sources import Builder
@@ -185,36 +183,6 @@ def stack_interface(builder: Builder) -> None:
             span,
             span.start,
         )
-
-
-def verify_counter_witness(
-    candidates: Mapping[ObjectGeneration, int],
-    first: ObjectGeneration | None,
-    second: ObjectGeneration | None,
-    thresholds: tuple[int, int] = (4, 10),
-) -> tuple[bool, bool]:
-    """K5 records a common witness for the highest satisfied sealed threshold."""
-    if thresholds != (4, 10) or any(
-        type(n) is not int or n < 0 for n in candidates.values()
-    ):
-        raise ValueError("Invalid sealed counter snapshot")
-    outcomes = tuple(any(n >= t for n in candidates.values()) for t in thresholds)
-    if first != second:
-        raise ValueError("Counter reads require the same holder generation")
-    if not outcomes[0]:
-        if first is not None:
-            raise ValueError("No holder witnesses an unmet threshold")
-        return False, False
-    if (
-        first is None
-        or first not in candidates
-        or any(
-            (candidates[first] >= t) != result
-            for t, result in zip(thresholds, outcomes, strict=True)
-        )
-    ):
-        raise ValueError("Holder does not witness the highest satisfied threshold")
-    return outcomes[0], outcomes[1]
 
 
 def _pool_source(

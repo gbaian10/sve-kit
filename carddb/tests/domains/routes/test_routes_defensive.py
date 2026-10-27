@@ -5,9 +5,9 @@ from typing import TYPE_CHECKING
 import pytest
 
 from sve_carddb.build import Row, create_database
-from sve_carddb.build.t0 import compile_t0
 from sve_carddb.domains.routes import build_index, derive_routes, populate_routes
 from sve_carddb.domains.routes.defaults import select_defaults
+from tests.support.schema_helpers import compile_t0
 
 from ...support.routes_fixtures import base, printing
 

@@ -8,10 +8,11 @@ from sve_carddb.build import Capability, Column, Json, Kind, Table, compile_sche
 from sve_carddb.build.four_layer import TABLES as FOUR_LAYER_TABLES
 from sve_carddb.build.four_layer import schemas as four_layer_schemas
 from sve_carddb.build.registry import Registry
-from sve_carddb.build.t1 import REGISTRY, compile_minimum
+from sve_carddb.build.t1 import REGISTRY
 from sve_carddb.build.t2_translation import TABLES as NAME_TABLES
 from sve_carddb.core.json import digest, parse
 from sve_carddb.export.project import Decisions, Settings
+from tests.support.schema_helpers import compile_minimum
 
 from .build_db_fixtures import rows as core_rows
 from .build_db_t1_fixtures import rows as cr_rows

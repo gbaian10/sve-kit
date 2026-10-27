@@ -1301,12 +1301,6 @@ class ReadSources:
         )
         return name
 
-    def _sentence(self, position: int) -> str:
-        region = self._region(position)
-        start = self._text.rfind("。", region.start, position) + 1
-        end = self._text.find("。", position, region.end)
-        return self._text[max(start, region.start) : end if end >= 0 else region.end]
-
     def _supported_x(self, position: int) -> bool:
         before, after = self._text[:position], self._text[position + 1 :]
         return (

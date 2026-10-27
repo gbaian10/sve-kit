@@ -15,8 +15,9 @@ from sve_carddb.build import (
     rebuild_database,
 )
 from sve_carddb.build.t0_json import schemas as t0_schemas
-from sve_carddb.build.t1 import MINIMUM_CAPABILITIES, REGISTRY, compile_minimum
+from sve_carddb.build.t1 import MINIMUM_CAPABILITIES, REGISTRY
 from sve_carddb.build.t1_json import schemas as t1_schemas
+from tests.support.schema_helpers import compile_minimum
 
 from ..support.build_db_t1_fixtures import populate as populate_a
 from ..support.build_db_t1b_fixtures import populate, rows

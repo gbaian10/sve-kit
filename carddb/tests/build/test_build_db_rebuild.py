@@ -8,8 +8,9 @@ import pytest
 
 from sve_carddb.build import create_database, rebuild_database
 from sve_carddb.build.compiler import compile_schema
-from sve_carddb.build.t0 import REGISTRY, compile_t0
+from sve_carddb.build.t0 import REGISTRY
 from sve_carddb.build.t1 import compile_build
+from tests.support.schema_helpers import compile_t0
 
 from ..support.build_db_fixtures import rows, seed
 from ..support.build_db_t1_fixtures import populate

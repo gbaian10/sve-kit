@@ -3,7 +3,7 @@
 This package compiles code-authored declarations into SQLite DDL and owns the
 SQLite boundary. The [product family staging importer](../domains/products/README.md)
 can supply verified family parents and compose with identity staging in one
-transaction. `t0.compile_t0()` supplies the 41 production T0 tables from
+transaction. `tests.support.schema_helpers.compile_t0()` supplies the 41 production T0 tables from
 `docs/schema/build/build-db.md`. The regional identity staging importer is described in
 [registry/preview](../domains/registry/preview/README.md); there is no complete build CLI.
 
@@ -185,7 +185,7 @@ run complete domain validation before publication.
 
 Compiled schemas carry a positive signed 32-bit `version`, stored in SQLite's
 `PRAGMA user_version` during creation and checked before every commit. Legacy
-`compile_t0()` uses version 1; the optional T1 registry uses version 10, including
+The test helper `compile_t0()` uses version 1; the optional T1 registry uses version 10, including
 its T0-only selection. Version 9 removes the obsolete image tables; image
 metadata and size configuration belong to the image index and public contract.
 Version 10 adds `face_wording` for wording classifications and shared bases.
@@ -213,7 +213,7 @@ concurrently. Source archives and frozen inputs are never replacement targets.
 
 ## Minimum T1 and optional EN groups
 
-`t1.compile_minimum()` selects T0 plus CR, errata, correction, QA and
+`tests.support.schema_helpers.compile_minimum()` selects T0 plus CR, errata, correction, QA and
 related: exactly 56 tables. `compile_minimum(include_en=True)` adds `art`, `artist`,
 `art_artist` and the three region review/divergence tables: exactly 62. The `en`
 group explicitly requires `art`; selecting `art` alone is also supported. The `art` group also

@@ -143,3 +143,6 @@ job = "python"
 [hooks.pytest-publish]
 job = "python"
 direct = true
+
+[hooks.vulture]
+job = "python"

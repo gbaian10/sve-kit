@@ -43,7 +43,6 @@ from sve_carddb.domains.registry.storage import (
     load,
     plan_files,
     read_yaml,
-    relayout,
     write_files,
 )
 from sve_carddb.domains.registry.validate import check_cursors, validate
@@ -907,10 +906,3 @@ def test_single_oversized_record_fails_clearly(
     monkeypatch.setattr(storage, "MAX_BYTES", 1000)
     with pytest.raises(ValueError, match="Single registry record exceeds 1 MiB"):
         plan_files(tmp_path, build(inputs, {}))
-
-
-def test_full_relayout_reproduces_first_write(inputs: Inputs, tmp_path: Path) -> None:
-    first = plan_files(tmp_path, build(inputs, {}))
-    write_files(first)
-    _, entries = load(tmp_path)
-    assert relayout(tmp_path, list(entries.values())) == first

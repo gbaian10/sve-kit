@@ -977,6 +977,7 @@ dev = [
     { name = "types-jsonschema", specifier = ">=4.26.0.20260518" },
     { name = "types-psutil", specifier = ">=7.2.2.20260906" },
     { name = "types-pyyaml", specifier = ">=6.0.12" },
+    { name = "vulture", specifier = ">=2.16" },
 ]
 pyright = [{ name = "pyright", extras = ["nodejs"], specifier = ">=1.1.414" }]
 test = [

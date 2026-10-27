@@ -1,24 +1,13 @@
 """Deserialize already validated repository data without running model validators."""
 
 import dataclasses
+from collections.abc import Hashable
 from functools import cache
 from types import UnionType
-from typing import (
-    TYPE_CHECKING,
-    Annotated,
-    Literal,
-    Union,
-    cast,
-    get_args,
-    get_origin,
-    get_type_hints,
-)
+from typing import Annotated, Literal, Union, cast, get_args, get_origin, get_type_hints
 
 import orjson
 from pydantic import BaseModel
-
-if TYPE_CHECKING:
-    from collections.abc import Hashable
 
 
 @cache
@@ -117,7 +106,7 @@ def _value(annotation: object, value: object) -> object:  # ruff: ignore[too-man
 
 def construct[T](model: type[T], data: object) -> T:
     """Restore nested Python types; schema and semantic checks belong to admission."""
-    _supported(cast("Hashable", model))
+    _supported(cast(Hashable, model))  # ruff: ignore[runtime-cast-value] -- expose the cache key type to dead-code checks
     return cast("T", _value(model, data))
 
 

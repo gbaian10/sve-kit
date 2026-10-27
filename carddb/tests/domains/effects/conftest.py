@@ -268,8 +268,3 @@ def combat_keyword_handoffs(
             expander=expander,
         )
     )
-
-
-@pytest.fixture(scope="session")
-def draw_registry_without_attack() -> Snapshot:
-    return entry_snapshot(exclude_semantics=frozenset({"draw_exact_attack_time.v1"}))

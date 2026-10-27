@@ -8,12 +8,8 @@ import pytest
 
 from sve_carddb.build import Database, Json, create_database
 from sve_carddb.build.t0 import TABLES as T0_TABLES
-from sve_carddb.build.t1 import (
-    MINIMUM_CAPABILITIES,
-    REGISTRY,
-    compile_build,
-    compile_minimum,
-)
+from sve_carddb.build.t1 import MINIMUM_CAPABILITIES, REGISTRY, compile_build
+from tests.support.schema_helpers import compile_minimum
 
 from ..support.build_db_t1b_fixtures import populate, rows
 

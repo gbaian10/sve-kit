@@ -2427,7 +2427,7 @@ type HistoryDriveTriggerCondition = Annotated[
 
 
 _EventMovedFieldsKeys = TypedDict(
-    "_EventMovedFieldsKeys", {"from": "NotRequired[Zone | MoveOrigin]"}
+    "_EventMovedFieldsKeys", {"from": NotRequired[Zone | MoveOrigin]}
 )
 
 
@@ -2458,7 +2458,7 @@ type MovedHistoryWhere = Annotated[MovedHistoryWhereFields, AfterValidator(_none
 
 
 _HistoryMovedFieldsKeys = TypedDict(
-    "_HistoryMovedFieldsKeys", {"from": "NotRequired[Zone | MoveOrigin]"}
+    "_HistoryMovedFieldsKeys", {"from": NotRequired[Zone | MoveOrigin]}
 )
 
 

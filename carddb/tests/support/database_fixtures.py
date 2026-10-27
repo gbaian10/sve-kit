@@ -3,8 +3,7 @@
 import pytest
 
 from sve_carddb.build import create_database
-from sve_carddb.build.t0 import compile_t0
-from sve_carddb.build.t1 import compile_minimum
+from tests.support.schema_helpers import compile_minimum, compile_t0
 
 from .build_db_fixtures import seed
 from .build_db_t1_fixtures import populate as populate_t1

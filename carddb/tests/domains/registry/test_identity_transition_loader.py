@@ -9,12 +9,7 @@ from pydantic import field_validator
 
 from sve_carddb.core.models import RecordData
 from sve_carddb.domains.registry.storage import Index as RegistryIndex
-from sve_carddb.domains.registry.storage import (
-    load,
-    plan_files,
-    read_registry_files,
-    relayout,
-)
+from sve_carddb.domains.registry.storage import load, plan_files, read_registry_files
 from sve_carddb.domains.registry.transitions.files import (
     _inventory,
     checked_model,
@@ -889,19 +884,13 @@ def test_exact_yaml_bytes_are_preserved_separately(
     assert files.shards[0].content_hash == checksum(pack(merge_record))
 
 
-@pytest.mark.parametrize("planner", ["append", "relayout"])
 def test_legacy_planners_cannot_bypass_guard_with_loaded_inputs(
     tmp_path: Path,
     merge_record: dict[str, Any],
-    planner: str,
 ) -> None:
     write_chain(tmp_path, [pack(copy.deepcopy(merge_record))])
-    if planner == "append":
-        with pytest.raises(ValueError, match="effective projection support"):
-            plan_files(tmp_path, [], loaded=(RegistryIndex(), {}))
-    else:
-        with pytest.raises(ValueError, match="effective projection support"):
-            relayout(tmp_path, [])
+    with pytest.raises(ValueError, match="effective projection support"):
+        plan_files(tmp_path, [], loaded=(RegistryIndex(), {}))
 
 
 def test_before_can_reference_deactivated_record_hash(

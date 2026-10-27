@@ -13,7 +13,7 @@ class _BoundedDecoder(Protocol):
 
 def verify_brotli(encoded: bytes, raw: bytes) -> None:
     """Accept any complete Brotli stream of these exact bytes without recompression."""
-    decoder = cast("_BoundedDecoder", library.Decompressor())
+    decoder = cast(_BoundedDecoder, library.Decompressor())  # ruff: ignore[runtime-cast-value] -- keep the protocol reference visible to static dead-code checks
     offset = 0
     pending = encoded
     try:

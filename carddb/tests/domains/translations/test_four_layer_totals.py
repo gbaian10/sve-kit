@@ -34,10 +34,8 @@ from sve_carddb.domains.translations.four_layer_render import (
     Renderer,
     SelectedTarget,
 )
-from sve_carddb.domains.translations.four_layer_totals import (
-    disjoint_pair_count,
-    lowering,
-)
+from sve_carddb.domains.translations.four_layer_totals import lowering
+from tests.support.aggregate_probes import disjoint_pair_count
 
 from .expression_fixtures import expression_plan
 

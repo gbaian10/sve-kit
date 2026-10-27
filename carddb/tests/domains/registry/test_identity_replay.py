@@ -7,12 +7,7 @@ from typing import TYPE_CHECKING, Any
 
 import pytest
 
-from sve_carddb.domains.registry.storage import (
-    load,
-    plan_files,
-    read_registry_files,
-    relayout,
-)
+from sve_carddb.domains.registry.storage import load, plan_files, read_registry_files
 from sve_carddb.domains.registry.transitions.replay import replay
 
 from ...support.identity_replay_fixtures import (
@@ -308,11 +303,6 @@ def test_legacy_entry_points_still_refuse_nonempty(
         match=r"^Nonempty identity transitions require effective projection support$",
     ):
         plan_files(root, [], loaded=(files.index(), {}))
-    with pytest.raises(
-        ValueError,
-        match=r"^Nonempty identity transitions require effective projection support$",
-    ):
-        relayout(root, [])
 
 
 def renewal_record(record: dict[str, Any], files: RegistryFiles) -> dict[str, Any]:

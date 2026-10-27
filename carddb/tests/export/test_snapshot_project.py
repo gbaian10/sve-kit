@@ -12,7 +12,6 @@ from pydantic import JsonValue, RootModel
 import sve_carddb.export.project as project_module
 from sve_carddb.build import Json, create_database
 from sve_carddb.build.database import open_database
-from sve_carddb.build.t0 import compile_t0
 from sve_carddb.contracts.snapshot import tables
 from sve_carddb.core.json import array, canonical, digest, object_value, parse, string
 from sve_carddb.domains.routes.defaults import select_defaults
@@ -30,6 +29,7 @@ from sve_carddb.export.project.closure import validate_closure
 from sve_carddb.export.project.records import initial
 from sve_carddb.export.project.shape import tuple_value
 from sve_carddb.export.transport import Batch, Ownership, export_snapshot
+from tests.support.schema_helpers import compile_t0
 
 from ..support.build_db_fixtures import DATE
 from ..support.snapshot_project_fixtures import (
