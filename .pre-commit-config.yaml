@@ -223,7 +223,7 @@ repos:
         files: ^(sim/web/|mise\.toml$|\.pre-commit-config\.yaml$)
         stages: [pre-push]
       - id: web-knip
-        name: knip (sim/web)
+        name: knip dev + prod (sim/web)
         language: system
         entry: mise exec -- bun run --cwd sim/web knip
         pass_filenames: false
