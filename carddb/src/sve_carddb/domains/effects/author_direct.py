@@ -91,10 +91,7 @@ def inventory(  # ruff: ignore[complex-structure] -- keep permanent identity and
         sections = db.select(
             "face_text_section", ("ordinal", "kind"), where={"revision_id": revision_id}
         )
-        if any(
-            section.values["kind"] in {"token_definition", "unknown"}
-            for section in sections
-        ):
+        if any(section.values["kind"] == "token_definition" for section in sections):
             raise SourceError("token_source_contract_unavailable")
         ordinals = [s.values["ordinal"] for s in sections]
         if ordinals != list(range(len(sections))):
@@ -181,6 +178,34 @@ def _position(
         "scope": f"ability_{(locator.scope or 1) - 1}",
         "covers": value.get("covers", [locator.line]),
     }
+
+
+def _check_unknown_sections(
+    current: CurrentAuthorSources,
+    payload: dict[str, JsonValue],
+    reminders: list[dict[str, JsonValue]],
+) -> None:
+    ignored = {
+        (source["face_id"], source["ordinal"], source["line"]) for source in reminders
+    }
+    for raw in array(payload["faces"]):
+        face = object_value(raw)
+        unknown = {
+            row.values["ordinal"]
+            for row in current.db.select(
+                "face_text_section",
+                ("ordinal", "kind"),
+                where={"revision_id": string(face["revision_id"])},
+            )
+            if row.values["kind"] == "unknown"
+        }
+        for raw_field in array(face["fields"]):
+            field = object_value(raw_field)
+            if field["ordinal"] in unknown and any(
+                (face["face_id"], field["ordinal"], line) not in ignored
+                for line in array(field["lines"])
+            ):
+                raise SourceError("token_source_contract_unavailable")
 
 
 def _substitute(
@@ -279,6 +304,15 @@ def materialize(
     ignored = [
         _position(payload, object_value(v)) for v in array(card.get("ignored", []))
     ]
+    _check_unknown_sections(
+        current,
+        payload,
+        [
+            source
+            for raw, source in zip(array(card.get("ignored", [])), ignored, strict=True)
+            if object_value(raw)["reason"] == "reminder"
+        ],
+    )
     result: dict[str, JsonValue] = {
         "meta": {
             "dsl": "1.0",

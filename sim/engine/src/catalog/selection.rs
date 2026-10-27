@@ -1,6 +1,6 @@
 //! Internal batch selection; current programs remain candidates pending runtime admission.
 
-use super::{Catalog, EngineFailure, Result, invalid};
+use super::{Catalog, EngineFailure, EngineIdentityInput, Result, invalid};
 use crate::ir::lowering::{CurrentCardProgram, ExpandedLowerer};
 use alloc::collections::{BTreeMap, BTreeSet};
 use alloc::sync::Arc;
@@ -60,10 +60,24 @@ enum Author {
 /// # Errors
 /// Rejects the entire selection on any rejected card, overlap or D0 failure;
 /// callers never receive a partial selection or an implicit prototype fallback.
-pub(super) fn select(snapshot: &str, keywords: &str, handoff: &Value) -> Result<SelectedEffects> {
+pub(super) fn select(
+    snapshot: &str,
+    keywords: &str,
+    handoff: &Value,
+    rules: Option<(&str, &EngineIdentityInput)>,
+) -> Result<SelectedEffects> {
     let selection: Selection = serde_json::from_value(handoff.clone())
         .map_err(|_private| invalid("invalid current selection"))?;
-    let mut prototypes = Catalog::from_documents(snapshot, keywords, &selection.documents)?;
+    let mut prototypes = match rules {
+        Some((document, identity)) => Catalog::from_documents_with_rules(
+            snapshot,
+            keywords,
+            &selection.documents,
+            document,
+            identity,
+        )?,
+        None => Catalog::from_documents(snapshot, keywords, &selection.documents)?,
+    };
     let lowerer = ExpandedLowerer::new().map_err(invalid)?;
     let mut current = BTreeMap::new();
     let mut identities = BTreeSet::new();

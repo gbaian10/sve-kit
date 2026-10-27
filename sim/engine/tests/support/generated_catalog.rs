@@ -19,7 +19,7 @@ use sve_engine::catalog::{Catalog, EngineIdentityInput};
     clippy::expect_used,
     reason = "Missing generated input must fail every test scope."
 )]
-fn restore_frozen_programs(documents: &mut [(String, String)], root: &Path) {
+fn restore_frozen_programs(documents: &mut Vec<(String, String)>, root: &Path) {
     let migrated = root.join("carddb/tests/fixtures/effect_baseline/migrated");
     for entry in read_dir(migrated).expect("migrated baseline directory") {
         let path = entry.expect("migrated baseline entry").path();
@@ -30,6 +30,16 @@ fn restore_frozen_programs(documents: &mut [(String, String)], root: &Path) {
         let pack = number.split('-').next().expect("pack prefix");
         let program: Value = serde_json::from_str(&read_to_string(&path).expect("frozen program"))
             .expect("frozen program JSON");
+        // The last live prototype can migrate out of a pack too.
+        if !documents
+            .iter()
+            .any(|(name, _)| Path::new(name).file_stem().is_some_and(|stem| stem == pack))
+        {
+            documents.push((
+                format!("historical/{pack}.yaml"),
+                serde_json::json!({"format":1_u8, "kind":"effect_set", "cards":{}}).to_string(),
+            ));
+        }
         let (_, text) = documents
             .iter_mut()
             .find(|(name, _)| Path::new(name).file_stem().is_some_and(|stem| stem == pack))

@@ -9,6 +9,8 @@ from sve_carddb.domains.effects.author_direct import materialize
 from sve_carddb.domains.effects.author_handwritten import Body, Handwritten
 from sve_carddb.domains.effects.author_inputs import parse_document
 from sve_carddb.domains.effects.author_sources import SourceError
+from sve_carddb.domains.products.models import LocalizedText
+from sve_carddb.domains.text_observations.intern import TextInterner
 
 from ...support.direct_author_fixture import direct_author_input
 from ..text_observations.test_effect_presence import page
@@ -88,3 +90,51 @@ def test_direct_rejects_incomplete_or_invalid_cards(
         pytest.raises(SourceError, match=expected),
     ):
         materialize(current, "SYN-01", handwritten)
+
+
+@pytest.mark.parametrize(
+    ("kind", "text", "ignore", "accepted"),
+    [
+        ("unknown", "Synthetic reminder.", True, True),
+        ("unknown", "Synthetic reminder.", False, False),
+        ("unknown", "First line.\nSecond line.", True, False),
+        ("token_definition", "Synthetic token.", True, False),
+    ],
+)
+def test_unknown_section_requires_complete_explicit_reminder_coverage(
+    tmp_path: Path, kind: str, text: str, *, ignore: bool, accepted: bool
+) -> None:
+    card: dict[str, JsonValue] = {
+        "admission": "shared",
+        "meta": {
+            "written_by": [
+                {"actor": {"who": "test", "model": None}, "date": "2026-10-27"}
+            ]
+        },
+        "abilities": [{"line": 1, "fanfare": {"do": [{"draw": {"n": 1}}]}}],
+        "ignored": [{"section": 1, "line": 1, "reason": "reminder"}] if ignore else [],
+    }
+    handwritten = Handwritten(
+        {"SYN-01": card}, {}, {"SYN-01": parse_document(canonical(card))}
+    )
+    with synthetic_current(
+        tmp_path, page("jp", '<div class="detail">Synthetic rule.</div>')
+    ) as current:
+        with current.db.transaction():
+            unit = TextInterner(current.db).intern(LocalizedText(lang="ja", text=text))
+            current.db.insert(
+                "face_text_section",
+                {
+                    "revision_id": "revision",
+                    "ordinal": 0,
+                    "text_unit_id": unit,
+                    "kind": kind,
+                    "decision_id": None,
+                },
+            )
+        if accepted:
+            result = materialize(current, "SYN-01", handwritten)
+            assert len(array(result["ignored"])) == 1
+        else:
+            with pytest.raises(SourceError, match="token_source_contract_unavailable"):
+                materialize(current, "SYN-01", handwritten)

@@ -1,4 +1,21 @@
 cards:
+  BP01-131:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - destroy:
+                ref:
+                  kind: follower
+                  who: all
+                  zone: field
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-10-27"
   BP01-152:
     abilities:
       - evolve:
