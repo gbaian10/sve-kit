@@ -838,14 +838,18 @@ impl BodyContext<'_> {
                 })
             }
             ast::Step::Move(value) => self.observed_move(value, path),
-            ast::Step::Pp(value) => {
+            ast::Step::Pp(value) | ast::Step::PpMax(value) => {
                 let ast::SelfPlayer::Controller = value.who;
                 if value.delta == 0 {
                     return Err(unsupported(path));
                 }
                 Ok(Action::Resource {
                     player: PlayerRef::Controller {},
-                    resource: super::Resource::PpCurrent,
+                    resource: if matches!(step, ast::Step::PpMax(_)) {
+                        super::Resource::PpMaximum
+                    } else {
+                        super::Resource::PpCurrent
+                    },
                     operation: super::ResourceOperation::Add,
                     amount: Expr::Literal(Int(
                         i64::try_from(value.delta).map_err(|_private| unsupported(path))?

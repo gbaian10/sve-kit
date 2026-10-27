@@ -707,3 +707,6 @@ mod deck_top;
 mod hand_discard;
 #[path = "runtime/pp_recover.rs"]
 mod pp_recover;
+
+#[path = "runtime/max_pp.rs"]
+mod max_pp;

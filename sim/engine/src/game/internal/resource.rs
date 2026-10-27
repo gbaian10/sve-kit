@@ -1,4 +1,4 @@
-//! Body PP recovery records actual changes independently of payment completion.
+//! Body PP increases record actual changes independently of payment completion.
 
 #![expect(
     clippy::indexing_slicing,
@@ -16,11 +16,11 @@ pub struct ResourceOutcome {
     pub player: PlayerId,
     /// Explicitly requested resource.
     pub resource: Resource,
-    /// Requested positive recovery, distinct from the actual delta.
+    /// Requested positive increase, distinct from the actual delta.
     pub requested: Int,
-    /// Value before recovery.
+    /// Value before the increase.
     pub before: Int,
-    /// Value after the maximum PP cap applies.
+    /// Value after the resource cap applies.
     pub after: Int,
     /// Actual increase, including zero when already full.
     pub actual: Int,
@@ -30,19 +30,19 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
     if let Action::Resource { .. } = action
         && !matches!(action, Action::Resource {
             player: PlayerRef::Controller {},
-            resource: Resource::PpCurrent,
+            resource: Resource::PpCurrent | Resource::PpMaximum,
             operation: ResourceOperation::Add,
             amount: Expr::Literal(Int(amount)),
         } if *amount > 0)
     {
-        return Err(unsupported("fixed positive own PP recovery"));
+        return Err(unsupported("fixed positive own PP increase"));
     }
     Ok(())
 }
 
 #[expect(
     clippy::multiple_inherent_impl,
-    reason = "Body recovery mutates the authoritative player resource."
+    reason = "Body resource increases mutate the authoritative player resource."
 )]
 impl Game {
     pub(super) fn internal_resource(
@@ -52,6 +52,7 @@ impl Game {
     ) -> Result<()> {
         check_action(&instruction.action)?;
         let Action::Resource {
+            resource,
             amount: Expr::Literal(requested),
             ..
         } = instruction.action
@@ -66,29 +67,36 @@ impl Game {
                 .and_then(serde_json::Value::as_i64)
                 .ok_or_else(|| invalid("invalid PP value"))
         };
-        let before = read("current")?;
+        let current = read("current")?;
         let maximum = read("max")?;
-        if !(0..=10).contains(&maximum) || !(0..=maximum).contains(&before) {
+        if !(0..=10).contains(&maximum) || !(0..=maximum).contains(&current) {
             return Err(invalid("invalid PP bounds"));
         }
-        let actual = requested.0.min(maximum.saturating_sub(before));
+        let (key, before, cap) = if resource == Resource::PpMaximum {
+            ("max", maximum, 10)
+        } else {
+            ("current", current, maximum)
+        };
+        let actual = requested.0.min(cap.saturating_sub(before));
         let after = before
             .checked_add(actual)
             .ok_or_else(|| invalid("PP recovery overflow"))?;
-        self.player_mut(seat)?.pp["current"] = json!(after);
+        self.player_mut(seat)?.pp[key] = json!(after);
         if actual > 0 {
             let group = self.group();
-            self.emit(
-                json!({"kind":"回復","player":seat,"amount":actual}),
-                &execution.frame().cause,
-                group,
-            );
+            let event = if resource == Resource::PpCurrent {
+                json!({"kind":"回復","player":seat,"amount":actual})
+            } else {
+                json!({"kind":"PP最大値変化","player":seat,"source":execution.frame().source,
+                    "delta":actual,"before":before,"after":after})
+            };
+            self.emit(event, &execution.frame().cause, group);
         }
         execution.receipts.insert(
             instruction.receipt,
             InstructionOutcome::Resource(ResourceOutcome {
                 player,
-                resource: Resource::PpCurrent,
+                resource,
                 requested,
                 before: Int(before),
                 after: Int(after),

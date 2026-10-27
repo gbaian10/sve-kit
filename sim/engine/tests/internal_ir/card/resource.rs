@@ -98,7 +98,7 @@ fn body_resource_admission_rejects_payment_other_resources_and_other_players_ato
             1,
             PlayerRef::Controller {},
             Resource::PpMaximum,
-            ResourceOperation::Add,
+            ResourceOperation::Set,
             1,
         ),
         recovery(
@@ -150,8 +150,68 @@ fn pp_author_lowering_rejects_dynamic_negative_zero_and_to_max() {
         json!({"who":"self","delta":{"resource":{"who":"self","kind":"pp"}}}),
         json!({"who":"self","to_max":true}),
     ] {
-        let mut tree = fanfare::expanded::tree().clone();
-        tree["cards"]["BP08-038"]["abilities"][0]["fanfare"]["do"] = json!([{"pp":pp}]);
-        ExpandedLowerer::new().unwrap().lower(&tree).unwrap_err();
+        for kind in ["pp", "pp_max"] {
+            let mut tree = fanfare::expanded::tree().clone();
+            tree["cards"]["BP08-038"]["abilities"][0]["fanfare"]["do"] = json!([{kind:pp}]);
+            ExpandedLowerer::new().unwrap().lower(&tree).unwrap_err();
+        }
+    }
+}
+
+#[test]
+fn maximum_pp_increases_only_the_cap_and_records_actual_zero_at_ten() {
+    for seat in [1, 2] {
+        let actor = if seat == 1 { "P1" } else { "P2" };
+        let opponent = if seat == 1 { "P2" } else { "P1" };
+        for maximum in [3_i64, 9, 10] {
+            for current in [0, maximum] {
+                for requested in [2_i64, i64::MAX] {
+                    let mut initial = setup(seat, json!([]));
+                    initial["players"][actor]["pp"] = json!({"current":current,"max":maximum});
+                    let mut game = Game::new(
+                        catalog(),
+                        &initial,
+                        &Value::Null,
+                        &Value::Null,
+                        "maximum-pp",
+                    )
+                    .unwrap();
+                    let result = game
+                        .execute_internal(
+                            &checked(vec![recovery(
+                                1,
+                                PlayerRef::Controller {},
+                                Resource::PpMaximum,
+                                ResourceOperation::Add,
+                                requested,
+                            )]),
+                            &source("synthetic"),
+                            context(seat),
+                        )
+                        .unwrap();
+                    let actual = requested.min(10_i64.saturating_sub(maximum));
+                    let after = maximum.saturating_add(actual);
+                    assert_eq!(result.receipts.len(), 1);
+                    assert_eq!(
+                        result.receipts[&ReceiptId(1)],
+                        InstructionOutcome::Resource(ResourceOutcome {
+                            player: PlayerId { seat },
+                            resource: Resource::PpMaximum,
+                            requested: Int(requested),
+                            before: Int(maximum),
+                            after: Int(after),
+                            actual: Int(actual),
+                        })
+                    );
+                    assert!(
+                        result.facts.is_empty(),
+                        "resource increases do not create payment facts"
+                    );
+                    let state = game.projection(View::Referee).unwrap();
+                    assert_eq!(state[actor]["pp"], json!({"current":current,"max":after}));
+                    assert_eq!(state[opponent]["pp"], json!({"current":2,"max":2}));
+                }
+            }
+        }
     }
 }
