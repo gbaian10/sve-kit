@@ -872,7 +872,9 @@ describe("CardsPage", () => {
     it("keeps incomplete annotation visible beside results with the panel collapsed", async () => {
       await open("/cards?mech=kw%3Award", { panel: false })
       await expectCount(3)
-      expect(screen.getByText(/\d+ 張卡的「本身有」尚無法判定/u)).toBeVisible()
+      expect(
+        screen.getByText(/\d+ 張卡的「本身有」尚無法判定/u, { selector: "p:not([role])" }),
+      ).toBeVisible()
     })
 
     it("shares keyword conditions between the panel, URL, chips and result units", async () => {
