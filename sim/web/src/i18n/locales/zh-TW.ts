@@ -263,6 +263,7 @@ const zhTW = {
     keywordUnknown: "尚未開始標註",
     keywordIncomplete: "標註尚未完整",
     keywordPartial: "符合任一關鍵字；標註尚未完整，可能有遺漏",
+    keywordUnknownCount: "符合任一關鍵字；仍有 {{count}} 張卡的「本身有」尚無法判定",
     keywordAny: "符合任一關鍵字",
     keywordHas: "關鍵字：{{label}}",
     keywordNot: "沒有關鍵字：{{label}}",

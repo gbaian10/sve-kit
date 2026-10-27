@@ -872,7 +872,9 @@ describe("CardsPage", () => {
     it("keeps incomplete annotation visible beside results with the panel collapsed", async () => {
       await open("/cards?mech=kw%3Award", { panel: false })
       await expectCount(3)
-      expect(screen.getByText("標註尚未完整")).toBeVisible()
+      expect(
+        screen.getByText(/\d+ 張卡的「本身有」尚無法判定/u, { selector: "p:not([role])" }),
+      ).toBeVisible()
     })
 
     it("shares keyword conditions between the panel, URL, chips and result units", async () => {
@@ -885,8 +887,8 @@ describe("CardsPage", () => {
       await expectCount(3)
       expect(router.state.location.search).toBe("?mech=kw%3Award")
       expect(screen.getByRole("button", { name: "移除條件：關鍵字：守護" })).toBeVisible()
-      expect(within(group).getByText(/標註尚未完整/u)).toBeVisible()
-      expect(screen.getByText("標註尚未完整")).toBeVisible()
+      expect(within(group).getByRole("status")).toHaveTextContent(/\d+ 張卡的「本身有」尚無法判定/u)
+      expect(screen.getAllByText(/\d+ 張卡的「本身有」尚無法判定/u)).toHaveLength(2)
       await userEvent.selectOptions(screen.getByRole("combobox", { name: "顯示方式" }), "card")
       await waitFor(() => expect(resultCount("張卡片")).toHaveTextContent("3 張卡片"))
       expect(router.state.location.search).toBe("?mech=kw%3Award&unit=card")

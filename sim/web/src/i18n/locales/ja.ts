@@ -275,6 +275,7 @@ export default {
     keywordUnknown: "タグ付けは未着手です",
     keywordIncomplete: "タグ付けは未完了",
     keywordPartial: "いずれかに一致。未完了・漏れの可能性あり",
+    keywordUnknownCount: "いずれかのキーワードに一致。自身の能力が未判定のカード：{{count}}枚",
     keywordAny: "いずれかのキーワードに一致",
     keywordHas: "キーワード：{{label}}",
     keywordNot: "キーワードなし：{{label}}",

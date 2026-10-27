@@ -43,6 +43,7 @@ export function KeywordFilter({
   readonly options:
     | {
         readonly keywords: SearchOptions["keywords"]
+        readonly unknownCards?: number | undefined
         readonly coverage: SearchOptions["keywordCoverage"]
       }
     | undefined
@@ -110,13 +111,15 @@ export function KeywordFilter({
       <p className="mt-3 text-12 text-text-3" role="status">
         {!options || options.coverage === "pending"
           ? t("filters.keywordLoading")
-          : disabled
-            ? edition === "en"
-              ? t("filters.keywordEnglishUnknown")
-              : t("filters.keywordUnknown")
-            : options.coverage === "partial"
-              ? t("filters.keywordPartial")
-              : t("filters.keywordAny")}
+          : options.unknownCards !== undefined && options.unknownCards > 0
+            ? t("filters.keywordUnknownCount", { count: options.unknownCards })
+            : disabled
+              ? edition === "en"
+                ? t("filters.keywordEnglishUnknown")
+                : t("filters.keywordUnknown")
+              : options.coverage === "partial"
+                ? t("filters.keywordPartial")
+                : t("filters.keywordAny")}
       </p>
     </FilterDropdown>
   )

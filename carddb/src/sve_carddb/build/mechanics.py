@@ -181,6 +181,12 @@ TABLES = (
             _json("complete_keyword_ids", "MechanicIDs"),
             Column("partial_mode", Kind.TEXT, choices=("include", "exclude")),
             _json("partial_keyword_ids", "MechanicIDs"),
+            Column(
+                "has_complete_keyword_ids",
+                Kind.JSON,
+                nullable=True,
+                json_schema="MechanicIDs",
+            ),
         ),
         ("card_id", "scope"),
         foreign_keys=(_fk("card_id", "card"),),
@@ -192,7 +198,11 @@ TABLES = (
         ),
         query_checks=tuple(
             _keyword_references("card_mechanic_coverage", column)
-            for column in ("complete_keyword_ids", "partial_keyword_ids")
+            for column in (
+                "complete_keyword_ids",
+                "partial_keyword_ids",
+                "has_complete_keyword_ids",
+            )
         ),
     ),
 )

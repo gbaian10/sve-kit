@@ -283,6 +283,8 @@ export default {
     keywordUnknown: "Tagging has not started",
     keywordIncomplete: "Keyword tags are incomplete",
     keywordPartial: "Any keyword; incomplete tags may miss cards",
+    keywordUnknownCount:
+      "Matches any selected keyword; self keywords are still undetermined for {{count}} cards",
     keywordAny: "Matches any selected keyword",
     keywordHas: "Keyword: {{label}}",
     keywordNot: "Without keyword: {{label}}",

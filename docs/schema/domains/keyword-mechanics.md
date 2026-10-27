@@ -436,3 +436,24 @@ reducer 重驗內部 state 與 checked_ranges 一致，不能用手填 complete 
 前者在共用 catalog，後兩者在 card 原有 engine 檔案。不改格式、capabilities、band width，
 不新增邏輯分片。report.mechanics 保存 adapter／producer、證據／投影／coverage 列數及
 拒絕原因，不含官方句子。建置 keyword 子能力包含七張機制表，DSL 仍未啟用。
+
+## 本身有的日英全卡表檢查
+
+`printed-self-keywords-v1` 在原有四關係 reducer 之後檢查所有非 retired 卡的各地區
+current 主文，包含進化面與 token 卡自己的主文，不依賴 DSL。沿 registry 的永久概念，
+JP 用已採納的日文拼寫，EN 用同一 code 的英文能力名（Ward、Storm、Rush、Assail、
+Intimidate、Bane、Drain、Aura）。JP 寫 shared，EN 只寫 en_override，兩區獨立檢查。
+
+整行的能力宣告（可接括號 reminder，可含其他能力名），以及明示自身取得能力的有限句型
+（JP「これは…【K】を持つ」、EN「Give this follower … K」／「this has K」，可含指定格式的攻防增幅）產生 has 正標籤。
+不從引述內的相同句子產生正標籤；未識別的自身取得句型仍保守保留未知。
+主文未提到某 keyword 時，可確認沒有明印該 keyword；出現在授予、條件、選擇、數量、
+引號能力或未識別句型中的 keyword 保持未知，既有已採納 has 正標籤仍有效。
+補充段落不產母卡的 has；不明用途保留未知。跨行引述中的宣告也不能掛到母卡。
+缺 current 面、未確認 identity 不授全卡否定完整性；任一已確認面有宣告即為 present。
+
+結果合併到 `mechanic_projection`，完整性另放 `card_mechanic_coverage.has_complete_keyword_ids`。
+此集合每次建置從 current 重新計算，不重用另一地區、印刷版或歷史 revision。
+既有四關係 complete 與 manifest coverage 維持原義；「本身有」完整不能令它們變完整。
+前端按地區的非 retired card 去重計數；所有 keyword 均為 present／absent 才算該卡已確認。
+有未知卡時顯示確切張數，為零才移除不完整提示；unknown 不能命中否定搜尋。

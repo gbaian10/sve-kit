@@ -8893,6 +8893,19 @@
               "scalar": "ID"
             }
           }
+        },
+        "has_complete_keyword_ids": {
+          "schema": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/ID"
+            }
+          },
+          "descriptor": {
+            "array": {
+              "scalar": "ID"
+            }
+          }
         }
       },
       "constraints": {
@@ -10938,6 +10951,9 @@
           "from": "card_mechanic_coverage"
         },
         "partial_keyword_ids": {
+          "from": "card_mechanic_coverage"
+        },
+        "has_complete_keyword_ids": {
           "from": "card_mechanic_coverage"
         }
       },

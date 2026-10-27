@@ -74,7 +74,7 @@ reader 編譯具型別 accessor，詳情分片保留 tuples＋ID→row 索引；
 | `card_voice` | `card_id, voice_id, usage` | 複合 `PK(card_id,voice_id,usage)`；可播放的已採納對照/場景 |
 | `keyword` | `id, code, kind, name_unit_id, definition_unit_id?, actions:[{action,label_unit_id}], translations:[FieldTranslation]` | 關鍵字/資源及產生消耗篩選 |
 | `mechanic_projection` | `card_id, keyword_id, scope, relations:[code], actions:[code]` | 複合 `PK(前三欄)`；has/grants/refers/counts 與三態搜尋 |
-| `card_mechanic_coverage` | `card_id, scope, complete_all, complete_mode:include/exclude, complete_keyword_ids:[id], partial_mode:include/exclude, partial_keyword_ids:[id]` | 複合 `PK(前兩欄)`；稀疏三態搜尋的完整性，不展開 absent 列 |
+| `card_mechanic_coverage` | `card_id, scope, complete_all, complete_mode:include/exclude, complete_keyword_ids:[id], partial_mode:include/exclude, partial_keyword_ids:[id], has_complete_keyword_ids:[id]` | 複合 `PK(前兩欄)`；稀疏三態搜尋的完整性，不展開 absent 列 |
 | `card_engine_support` | `card_id, shared:Support, overrides:[{region,support:Support}], region_blocks:[{region,reasons:[code]}]` | PK(`card_id`)；未實作頁/單卡徽章/建牌數量/手動回退 |
 | `vocabulary` | `kind, code, label_unit_id, active, translations:[FieldTranslation]` | 複合 `PK(kind,code)`；穩定英文 filter code，多語 label 經 translation |
 | `search_alias` | `kind, code, lang, text, normalized` | 複合 `PK(kind,code,lang,text)`；三語輸入/Discord 暱稱 |
@@ -527,3 +527,10 @@ digital_face／digital_text 留建置端，沒有資產採納就不出 digital a
 整名 wire 省略與 logical 還原依[公開 annotation §2.6](public-annotation.md#26-整名集合的省略與還原)。`face_revision`（含 bootstrap／history）及 `PrintingFace`／`PrintingFaceDetail` 的末欄為 `name_concept_id?`，translation 第九欄為 `annotation_kind`；八項 capability 不變。
 
 版次的 `stamp` 為 `{kind:Text?,year:Text?}` 或 null，`serial` 為是否印有序號牌的 Bool?；未審查為 null，已確認沒有序號牌為 false。種類／年份由 [printing marks 作者輸入](../domains/printing-marks.md) 保存，年份不由卡片發行日推定，序號牌不等於賽季數字，也不保存個人序號。兩欄隨 printing bootstrap 匯出。
+
+`card_mechanic_coverage.has_complete_keyword_ids` 是只針對「本身有」的已確認集合，
+按 ID 排序且不得重複，ID 必須屬於本快照 keyword universe。
+consumer 先讀同地區的 has 正標籤；沒有正標籤時，只有此集合或原有四關係 complete 集合中的 keyword 才可視為 absent。
+它不改變 `complete_all`、`complete_keyword_ids`、`partial_keyword_ids` 與 manifest 四關係 coverage 的語意。
+EN 自己的 current 卡文產生 `en_override`，不依 JP 對應或引擎支援資格取得 has 完整性；
+未知／缺面／待定來源不授予否定結果。來源與解析邊界見[關鍵字機制](../domains/keyword-mechanics.md#本身有的日英全卡表檢查)。

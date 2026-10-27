@@ -1054,6 +1054,7 @@ async function addCard(ctx: CardContext): Promise<void> {
           ),
       partial_mode: "include",
       partial_keyword_ids: [],
+      has_complete_keyword_ids: [],
     })
   }
   for (const related of card.related ?? []) {

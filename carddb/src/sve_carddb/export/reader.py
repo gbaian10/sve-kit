@@ -415,6 +415,7 @@ _ARRAY_REFERENCES = {
     "ruling_revision_ids": "ruling_revision",
     "complete_keyword_ids": "keyword",
     "partial_keyword_ids": "keyword",
+    "has_complete_keyword_ids": "keyword",
     "undated_printing_ids": "printing",
 }
 
