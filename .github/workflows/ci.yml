@@ -200,6 +200,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          fetch-depth: 0 # identity-only authoring verifies committed transition bases
           persist-credentials: false
           clean: true
       # Hooks pin language_version python3.14 (.pre-commit-config.yaml).
@@ -375,6 +376,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          fetch-depth: 0 # the public authoring selection verifies transition bases
           persist-credentials: false
           clean: true
       - name: Install the pinned Rust toolchain
