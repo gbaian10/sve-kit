@@ -19,6 +19,9 @@ mod play;
 #[path = "card/fanfare.rs"]
 mod fanfare;
 
+#[path = "card/leader_damage.rs"]
+mod leader_damage;
+
 #[path = "card/source.rs"]
 mod source_information;
 
