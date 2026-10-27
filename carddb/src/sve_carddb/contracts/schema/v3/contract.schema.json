@@ -6786,11 +6786,17 @@
           "items": {
             "$ref": "#/$defs/ID"
           }
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ID"
+          }
         }
       ],
       "items": false,
-      "minItems": 7,
-      "maxItems": 7,
+      "minItems": 8,
+      "maxItems": 8,
       "x-columns": [
         "card_id",
         "scope",
@@ -6798,7 +6804,8 @@
         "complete_mode",
         "complete_keyword_ids",
         "partial_mode",
-        "partial_keyword_ids"
+        "partial_keyword_ids",
+        "has_complete_keyword_ids"
       ],
       "x-types": [
         {
@@ -6829,6 +6836,11 @@
             "include",
             "exclude"
           ]
+        },
+        {
+          "array": {
+            "scalar": "ID"
+          }
         },
         {
           "array": {
@@ -13326,11 +13338,17 @@
           "items": {
             "$ref": "#/$defs/ID"
           }
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ID"
+          }
         }
       ],
       "items": false,
-      "minItems": 7,
-      "maxItems": 7,
+      "minItems": 8,
+      "maxItems": 8,
       "x-columns": [
         "card_id",
         "scope",
@@ -13338,7 +13356,8 @@
         "complete_mode",
         "complete_keyword_ids",
         "partial_mode",
-        "partial_keyword_ids"
+        "partial_keyword_ids",
+        "has_complete_keyword_ids"
       ],
       "x-types": [
         {
@@ -13369,6 +13388,11 @@
             "include",
             "exclude"
           ]
+        },
+        {
+          "array": {
+            "scalar": "ID"
+          }
         },
         {
           "array": {
@@ -19415,7 +19439,8 @@
                         "complete_mode",
                         "complete_keyword_ids",
                         "partial_mode",
-                        "partial_keyword_ids"
+                        "partial_keyword_ids",
+                        "has_complete_keyword_ids"
                       ]
                     },
                     "maxItems": 0
@@ -21776,7 +21801,8 @@
                         "complete_mode",
                         "complete_keyword_ids",
                         "partial_mode",
-                        "partial_keyword_ids"
+                        "partial_keyword_ids",
+                        "has_complete_keyword_ids"
                       ]
                     },
                     "minItems": 1,
@@ -24118,7 +24144,8 @@
                         "complete_mode",
                         "complete_keyword_ids",
                         "partial_mode",
-                        "partial_keyword_ids"
+                        "partial_keyword_ids",
+                        "has_complete_keyword_ids"
                       ]
                     },
                     "maxItems": 0

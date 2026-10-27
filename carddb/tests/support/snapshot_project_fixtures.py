@@ -159,6 +159,7 @@ def extras() -> dict[str, dict[str, Value]]:
             "complete_keyword_ids": Json([]),
             "partial_mode": "exclude",
             "partial_keyword_ids": Json([]),
+            "has_complete_keyword_ids": Json([]),
         },
         "ruling_revision": {
             "id": "ruling-rev",

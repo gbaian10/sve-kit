@@ -45,7 +45,7 @@ SCALARS = {
     "card_voice": "card_id,voice_id,usage",
     "keyword": "id,code,kind,definition_unit_id",
     "mechanic_projection": "card_id,keyword_id,scope,relations,actions",
-    "card_mechanic_coverage": "card_id,scope,complete_all,complete_mode,complete_keyword_ids,partial_mode,partial_keyword_ids",
+    "card_mechanic_coverage": "card_id,scope,complete_all,complete_mode,complete_keyword_ids,partial_mode,partial_keyword_ids,has_complete_keyword_ids",
     "vocabulary": "kind,code,label_unit_id,active",
     "search_alias": "kind,code,lang,text,normalized",
     "text_symbol": "id,code,parameter_schema,keyword_id,spellings,localizations",
@@ -63,6 +63,9 @@ def initial(source: Source) -> dict[str, list[Record]]:
         name: [dict(row) for row in source.rows(name, fields)]
         for name, fields in SCALARS.items()
     }
+    for row in view["card_mechanic_coverage"]:
+        if row["has_complete_keyword_ids"] is None:
+            row["has_complete_keyword_ids"] = []
     for name in (
         *MEDIA_TABLES,
         "card_mentioned_by",
