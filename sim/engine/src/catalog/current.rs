@@ -105,6 +105,11 @@ fn same_texts(source: &Value, printed: &Value) -> bool {
                 text.get("source_hash").and_then(Value::as_str)
                     == Some(super::rule_bindings::digest(value.as_bytes()).as_str())
             }
+            (Some("absent"), None | Some("")) => {
+                text.get("field").and_then(Value::as_str) == Some("effect")
+                    && text.get("source_hash").and_then(Value::as_str)
+                        == Some(super::rule_bindings::digest(b"").as_str())
+            }
             (Some("unknown"), None | Some("")) => true,
             _ => false,
         }

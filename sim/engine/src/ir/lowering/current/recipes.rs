@@ -1,7 +1,7 @@
-// These existing C0 recipe pins are checked by the cross-language current fixture.
+// Source recipe changes also change Python's author adapter fingerprint.
 pub(super) const SOURCE_ADAPTER: &str =
-    "sha256:a8b7ce79fe97acc04324c53fc32cb3a05ef062a0ed13db59130ce4d2b9fea969";
+    "sha256:3cfaecbf5dccb23a6c44d73cd2a8f66b5e027e844ff9ea2cf3682ac596a0de57";
 pub(super) const EXPANSION: &str =
     "sha256:cc68416676bf11dc1003bf35141f27de0c09273e40d9cdaebb984c17c0cc711a";
 pub(super) const AUTHOR_ADAPTER: &str =
-    "sha256:7a1320979479e61e2f1a21a495bd69d839cb7aeb7b4a162146e1d0ef594a5f6a";
+    "sha256:3c3314a78fadddd679bf34458b91363e46bb71eb34fb6015167fa835c7e82226";
