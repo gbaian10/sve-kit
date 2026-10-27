@@ -55,12 +55,18 @@ impl BodyContext<'_> {
         value: &ast::Objects,
         path: &str,
     ) -> Result<Selector, LoweringError> {
-        let ast::Objects::Zone(query) = value else {
-            return if matches!(value, ast::Objects::This(_)) {
-                Ok(holder())
-            } else {
-                Err(unsupported(path))
-            };
+        let query = match value {
+            ast::Objects::This(_) => return Ok(holder()),
+            ast::Objects::Bound(name) => {
+                return self
+                    .targets
+                    .get(name)
+                    .copied()
+                    .map(|reference| Selector::Bound { reference })
+                    .ok_or_else(|| unsupported(path));
+            }
+            ast::Objects::Follow { .. } => return Err(unsupported(path)),
+            ast::Objects::Zone(query) => query,
         };
         let binding: Binding<ObjectRef> = Binding::new(self.allocator.id(path)?, self.scope);
         let kind = query.kind.as_ref().map(|_| ast::SearchKind::Follower);
@@ -102,6 +108,18 @@ impl BodyContext<'_> {
         } else {
             objects
         })
+    }
+
+    pub(super) fn action_objects(
+        &mut self,
+        action: &ast::ObjectAction,
+        path: &str,
+    ) -> Result<Selector, LoweringError> {
+        match action {
+            ast::ObjectAction::Short(objects) | ast::ObjectAction::Long { r#ref: objects } => {
+                self.objects(objects, path)
+            }
+        }
     }
 
     pub(super) fn modify(

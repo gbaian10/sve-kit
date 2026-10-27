@@ -37,6 +37,7 @@ mod life;
 mod movement;
 mod numeric;
 mod ordering;
+mod posture;
 mod search;
 mod terminal;
 pub use terminal::Terminal;
@@ -202,6 +203,8 @@ pub enum Answer {
 pub enum InstructionOutcome {
     /// Requested life operation's actual before/after values, including no change.
     Life(LifeChangeEvent),
+    /// Successful body posture changes, empty when every subject already has that posture.
+    Posture(Vec<PostureEvent>),
     /// The whole exchange, available only after the complete card payment.
     ExchangePayment(PaymentResult),
     /// One complete banishment with its original and resulting generations.
@@ -286,7 +289,7 @@ pub enum Fact {
         /// The same producer as the play fact.
         source: RuntimeAbilitySource,
     },
-    /// A successful posture cost or a rule-owned Ward entry posture change.
+    /// A successful posture cost, body instruction or rule-owned Ward entry change.
     Posture(PostureEvent),
     /// A performed full-source shuffle, even when the deck has zero or one member.
     Shuffled {
@@ -1183,6 +1186,10 @@ impl Game {
             Action::Search { .. } => return self.internal_search(execution, instruction),
             Action::Destroy { objects } => {
                 self.internal_move(execution, &instruction, objects, None)?;
+            }
+            Action::Banish { objects } => self.internal_banish(execution, &instruction, objects)?,
+            Action::Posture { objects, posture } => {
+                self.internal_posture(execution, &instruction, objects, *posture)?;
             }
             Action::InstallEffect { effect, .. }
                 if matches!(effect.as_ref(), Effect::Continuous { .. }) =>

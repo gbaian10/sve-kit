@@ -85,6 +85,10 @@ pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
     let mut inspected = node.clone();
     if let Node::Instruction { instruction } = &mut inspected
         && let Action::Destroy { objects: selector }
+        | Action::Banish { objects: selector }
+        | Action::Posture {
+            objects: selector, ..
+        }
         | Action::Modify {
             subjects: selector, ..
         } = &mut instruction.action

@@ -802,6 +802,8 @@ fn check_nodes(
                     } | Action::Move { .. }
                         | Action::Destroy { .. }
                         | Action::Life { .. }
+                        | Action::Banish { .. }
+                        | Action::Posture { .. }
                         | Action::Modify { .. }
                         | Action::InstallEffect { .. }
                         | Action::Search { .. }

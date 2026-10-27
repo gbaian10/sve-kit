@@ -659,6 +659,8 @@ mod bp06_048;
 #[path = "runtime/bp01_037.rs"]
 mod bp01_037;
 
+#[path = "runtime/bp14_098.rs"]
+mod bp14_098;
 #[path = "runtime/leader_life.rs"]
 mod leader_life;
 

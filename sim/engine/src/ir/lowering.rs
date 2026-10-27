@@ -81,9 +81,9 @@ impl ExpandedLowerer {
     ///
     /// Intrinsic evolution, evolve-time, fanfare, lastword, attack-time, End Begin,
     /// field activation with ordered constant PP/Act/self-to-cemetery costs,
-    /// draw, uniform damage to all leaders, destroy, controller leader life Add/Set,
-    /// numeric modifications, constant continuous installations, Search,
-    /// successful EX discounts and
+    /// draw, uniform damage to all leaders, destroy, banish, Act/Stand,
+    /// controller leader life Add/Set, numeric modifications, constant continuous
+    /// installations, Search, successful EX discounts and
     /// observed deck ordering have closed supported subsets. D1 separately checks
     /// whole-card runtime support; this is not source or qualification admission.
     /// Unfiltered field targets, same-play Distribution and a sole top-level
@@ -808,9 +808,17 @@ impl BodyContext<'_> {
         match step {
             ast::Step::Choice(_) | ast::Step::If(_) => Err(unsupported(path)),
             ast::Step::Destroy(value) => Ok(Action::Destroy {
-                objects: match value {
-                    ast::Destroy::Short(ast::This::This) => numeric::holder(),
-                    ast::Destroy::Long { r#ref } => self.objects(r#ref, path)?,
+                objects: self.action_objects(value, path)?,
+            }),
+            ast::Step::Banish(value) => Ok(Action::Banish {
+                objects: self.action_objects(value, path)?,
+            }),
+            ast::Step::Act(value) | ast::Step::Stand(value) => Ok(Action::Posture {
+                objects: self.action_objects(value, path)?,
+                posture: if matches!(step, ast::Step::Act(_)) {
+                    super::Posture::Acted
+                } else {
+                    super::Posture::Standing
                 },
             }),
             ast::Step::Buff(value) => self.modify(value, false, path),

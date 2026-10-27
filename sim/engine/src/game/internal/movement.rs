@@ -2,8 +2,8 @@
 
 use super::{Execution, Fact, Game, InstructionOutcome, Result, invalid, player_id, unsupported};
 use crate::ir::{
-    Action, ActionPattern, Bool, Cause, CausePattern, DestroyOutcome, DurationEnd, Effect,
-    EffectSource, Expr, Generation, Instruction, MoveDestination, MoveMethod, MoveOutcome,
+    Action, ActionPattern, BanishOutcome, Bool, Cause, CausePattern, DestroyOutcome, DurationEnd,
+    Effect, EffectSource, Expr, Generation, Instruction, MoveDestination, MoveMethod, MoveOutcome,
     MoveReason, MoveResult, MoveSpec, MovementReceipt, Nat, Node, ObjectReceipt, ObjectRef,
     OwnerZone, PlayerId, PlayerRef, PlayerRelation, Polarity, ReceiptId, ReceiptLocation,
     ResultMember, ResultMemberId, RuntimeObjectView, RuntimeZoneRef, SelectionView, Selector,
@@ -167,6 +167,12 @@ impl Execution {
                     _ => return Err(invalid("missing destroy receipt")),
                 }
             }
+            MovementReceipt::Banish { receipt } => {
+                match self.receipts.get(local_id(receipt.location())?) {
+                    Some(InstructionOutcome::Banish(outcome)) => &outcome.moves,
+                    _ => return Err(invalid("missing banish receipt")),
+                }
+            }
             _ => return Err(unsupported("movement receipt projection")),
         };
         Ok(moves.iter().filter(|movement| {
@@ -189,6 +195,27 @@ fn local_id<T>(location: &ReceiptLocation<T>) -> Result<&ReceiptId> {
     reason = "Movement shares the authoritative Game and its mutation primitive."
 )]
 impl Game {
+    pub(super) fn internal_banish(
+        &mut self,
+        execution: &mut Execution,
+        instruction: &Instruction,
+        objects: &Selector,
+    ) -> Result<()> {
+        let members = execution.objects(self, objects)?;
+        let (moves, successful) = self.internal_move_members(
+            execution,
+            &members,
+            "banish",
+            ZoneKind::Banish,
+            MoveMethod::Banish,
+        )?;
+        execution.receipts.insert(
+            instruction.receipt,
+            InstructionOutcome::Banish(BanishOutcome { successful, moves }),
+        );
+        Ok(())
+    }
+
     pub(super) fn internal_move(
         &mut self,
         execution: &mut Execution,

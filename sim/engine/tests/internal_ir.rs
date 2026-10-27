@@ -18,6 +18,8 @@ use sve_engine::ir::*;
 
 #[path = "internal_ir/allocation.rs"]
 mod allocation;
+#[path = "internal_ir/basic_actions.rs"]
+mod basic_actions;
 #[path = "internal_ir/card.rs"]
 mod card;
 #[path = "internal_ir/cost.rs"]
