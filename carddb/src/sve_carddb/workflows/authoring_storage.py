@@ -259,6 +259,9 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
     prototypes = {f.path: f for f in original.prototype_files}
     records = list(original.index.records)
     changed = set()
+    removed_prototypes: set[str] = set()
+    prototype_ids: dict[str, str] = {}
+    removed_cards: set[str] = set()
     for number in sorted(selected):
         card_id = workspace.current.printing_card(number)
         old = next(
@@ -317,10 +320,31 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
             for path, file in tuple(prototypes.items()):
                 tree = object_value(schemas.prototype_tree(file.raw))
                 mapping = object_value(tree["cards"])
-                if number in mapping:
-                    del mapping[number]
-                    prototypes[path] = _file(path, tree)
+                for alias in mapping:
+                    if alias not in prototype_ids:
+                        prototype_ids[alias] = workspace.current.printing_card(
+                            alias, prototype=True
+                        )
+                aliases = {
+                    alias for alias in mapping if prototype_ids[alias] == card_id
+                }
+                if aliases:
+                    for alias in aliases:
+                        del mapping[alias]
+                    removed_prototypes.update(aliases)
+                    removed_cards.add(card_id)
+                    if mapping:
+                        prototypes[path] = _file(path, tree)
+                    else:
+                        del prototypes[path]
                     changed.add(path)
+            if card_id not in removed_cards:
+                # A requested removal must find a prototype for its own card.
+                raise AuthorInputError(
+                    Diagnostic(
+                        "source", "prototype_removal_set_mismatch", card_no=number
+                    )
+                )
     for key, definition in supplied.bodies.items():
         used = [
             number
@@ -445,7 +469,7 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
             baseline_root,
             materialized.inputs,
             results,
-            expected_removed=selected,
+            expected_removed=frozenset(removed_prototypes),
         )
     outputs = {
         **authors,
@@ -462,6 +486,10 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
     try:
         for path in sorted(changed):
             destination = output_root / path
+            if path not in outputs:
+                destination.unlink()
+                written.append(path)
+                continue
             if destination.exists() and destination.read_bytes() == outputs[path].raw:
                 continue
             destination.parent.mkdir(parents=True, exist_ok=True)

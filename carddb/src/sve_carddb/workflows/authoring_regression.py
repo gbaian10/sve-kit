@@ -19,6 +19,8 @@ from sve_carddb.domains.effects.author_inputs import (
 )
 
 if TYPE_CHECKING:
+    from typing import Never
+
     from sve_carddb.domains.effects.author_current import CardResult, CurrentCard
     from sve_carddb.domains.effects.author_set import AuthorInputSet
     from sve_carddb.workflows.authoring import Workspace
@@ -38,7 +40,7 @@ def _git(repo: Path, *args: str) -> bytes:
         ) from None
 
 
-def _reject(reason: str, number: str | None = None) -> None:
+def _reject(reason: str, number: str | None = None) -> Never:
     raise AuthorInputError(Diagnostic("source", reason, card_no=number))
 
 
@@ -155,7 +157,7 @@ def check_regression(  # ruff: ignore[complex-structure, too-many-branches, too-
         file.path: object_value(parse_document(file.raw).value)
         for file in inputs.prototype_files
     }
-    if before_files.keys() != after_files.keys():
+    if after_files.keys() - before_files.keys():
         _reject("prototype_file_inventory_changed")
     for prototype_path, tree in after_files.items():
         before = before_files[prototype_path]
@@ -178,8 +180,14 @@ def check_regression(  # ruff: ignore[complex-structure, too-many-branches, too-
         for result in results
         if isinstance(result, CardAccepted)
     }
+    by_card = {result.record.card_id: result for result in accepted.values()}
     for number in sorted(removed):
-        if number not in accepted:
+        result = accepted.get(number)
+        if result is None:
+            result = by_card.get(
+                workspace.current.printing_card(number, prototype=True)
+            )
+        if result is None:
             _reject("prototype_replacement_not_current", number)
         pack = baseline_root / f"{number.split('-', 1)[0]}.json"
         baseline = object_value(object_value(parse(pack.read_bytes()))[number])
@@ -187,7 +195,6 @@ def check_regression(  # ruff: ignore[complex-structure, too-many-branches, too-
             baseline["ast_sha256"]
         ):
             _reject("prototype_ast_mismatch", number)
-        result = accepted[number]
         _positions(
             number,
             baseline,

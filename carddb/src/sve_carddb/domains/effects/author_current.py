@@ -35,6 +35,8 @@ from sve_carddb.domains.effects.author_sources import (
     entry_heads,
     entry_payload,
 )
+from sve_carddb.domains.physical_sources import page
+from sve_carddb.domains.text_observations.archive import verify_card
 from sve_carddb.domains.translations.four_layer_authored import FrameRecord
 from sve_carddb.domains.translations.four_layer_matching import Frames
 from sve_carddb.domains.translations.four_layer_normalizer import VERSION
@@ -51,6 +53,7 @@ if TYPE_CHECKING:
 
     from sve_carddb.build import Database, Value
     from sve_carddb.contracts.author_leaves import IndexRecord
+    from sve_carddb.contracts.source_binding import SourceDescriptor
     from sve_carddb.domains.effects.author_expansion import AuthorExpander
     from sve_carddb.domains.effects.author_set import AuthorInputSet
     from sve_carddb.domains.effects.author_validation import PathParts
@@ -198,7 +201,7 @@ class CurrentAuthorSources:
         self, card: CurrentCard, sources: tuple[SourceContext, ...]
     ) -> tuple[PrintedKeywordObligation, ...]:
         self._require_known(card)
-        if any(
+        if card.fields and any(
             "token" in (face.attributes.special_kinds.value or ())
             for face in card.payload.faces
         ):
@@ -439,7 +442,62 @@ class CurrentAuthorSources:
                 and revision["cost"] is None
             ):
                 result["cost"] = {"state": "known", "value": None}
+        if revision["type_code"] == "leader" and all(
+            revision[key] is None for key in ("cost", "attack", "defense")
+        ):
+            location = OwnerField(
+                owner=FaceRevisionOwner(
+                    kind="face_revision", revision_id=_text(revision["id"])
+                ),
+                field="name",
+                ordinal=None,
+            )
+            try:
+                selected = card_field(self.db, location)
+                source = descriptor(self.db, self.sources, location, self.jp_batch_id)
+                face = object_value(
+                    pointer(self._document(source), f"/faces/{selected.face_ordinal}")
+                )
+            except ValueError, TypeError:
+                raise SourceError("source_reconstruction_failed") from None
+            # Printed absence is separate from a leader's life during play.
+            if all(face.get(key) == "-" for key in ("cost", "power", "hp")):
+                for key in ("cost", "attack", "defense"):
+                    result[key] = {"state": "known", "value": None}
         return result
+
+    def _document(self, source: SourceDescriptor) -> JsonValue:
+        ref = source.source_ref
+        return self.sources.document(
+            SourceRef(
+                batch_id=ref.batch_id,
+                source_version_id=ref.source_version_id,
+                parser=ref.parser,
+                locator=ref.locator,
+                text_hash="sha256:" + ref.text_hash,
+            )
+        )[1]
+
+    def _absent_effect(self, source: SourceDescriptor, ordinal: int) -> bool:
+        ref = source.source_ref
+        if ref.parser != "translation-jp-v1":
+            return False
+        card = page(
+            self.sources.batch(ref.batch_id),
+            ref.source_version_id,
+            region="jp",
+            parser_version=ref.parser,
+        ).text.get()
+        verify_card(card)
+        if not card.effect_presence:
+            return False
+        if card.source.id != ref.source_version_id or ordinal >= len(card.faces):
+            raise SourceError("source_current_mismatch")
+        proof = card.effect_presence[ordinal].result
+        if proof.source_version_id != card.source.id or proof.source_index != ordinal:
+            raise SourceError("source_current_mismatch")
+        projected = card.projected(ordinal).effect
+        return proof.state == "absent" and projected is not None and not projected
 
     def _rules_names(self, face: str) -> list[JsonValue]:
         result: list[tuple[str, str]] = []
@@ -540,27 +598,21 @@ class CurrentAuthorSources:
         fields: list[CompiledField] = []
         for location in locations:
             section_count: int | None = None
+            absent = False
             try:
                 selected = card_field(self.db, location)
                 source = descriptor(self.db, self.sources, location, self.jp_batch_id)
                 if location.field == "name":
-                    ref = source.source_ref
-                    _, document, _ = self.sources.document(
-                        SourceRef(
-                            batch_id=ref.batch_id,
-                            source_version_id=ref.source_version_id,
-                            parser=ref.parser,
-                            locator=ref.locator,
-                            text_hash="sha256:" + ref.text_hash,
-                        )
-                    )
                     section_count = len(
                         array(
                             pointer(
-                                document, f"/faces/{selected.face_ordinal}/sections"
+                                self._document(source),
+                                f"/faces/{selected.face_ordinal}/sections",
                             )
                         )
                     )
+                elif location.field == "effect" and not selected.text:
+                    absent = self._absent_effect(source, selected.face_ordinal)
                 if location.field != "name" and selected.text:
                     fields.append(
                         compile_card_field(
@@ -579,9 +631,13 @@ class CurrentAuthorSources:
                 {
                     "field": location.field,
                     "ordinal": location.ordinal,
-                    "state": "present" if selected.text else "unknown",
-                    "source_hash": digest(selected.text.encode())[7:]
+                    "state": "present"
                     if selected.text
+                    else "absent"
+                    if absent
+                    else "unknown",
+                    "source_hash": digest(selected.text.encode())[7:]
+                    if selected.text or absent
                     else None,
                 }
             )

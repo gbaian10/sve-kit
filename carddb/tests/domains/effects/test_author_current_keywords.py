@@ -117,7 +117,8 @@ def test_unknown_sibling_text_cannot_hide_a_keyword_obligation(
         _, revision = back_face(sources, monkeypatch)
         effect(sources, monkeypatch, "【守護】")
         effect(sources, monkeypatch, "", revision=revision, face_ordinal=1)
-        with pytest.raises(SourceError, match="source_unknown"):
+        # The invented back face has no corresponding frozen physical face.
+        with pytest.raises(SourceError, match="source_current_mismatch"):
             sources.keyword_obligations(CARDS["BP01-009"])
 
 
