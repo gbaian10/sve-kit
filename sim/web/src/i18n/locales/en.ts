@@ -258,7 +258,7 @@ export default {
     groups: {
       basic: "Basics",
       stats: "Stats",
-      collection: "Collection",
+      printing: "Printing",
       effects: "Effects",
       more: "More",
     },

@@ -1,11 +1,37 @@
 import { useTranslation } from "react-i18next"
 
+import assailIcon from "../../assets/keywords/assail.svg"
+import auraIcon from "../../assets/keywords/aura.svg"
+import baneIcon from "../../assets/keywords/bane.svg"
+import drainIcon from "../../assets/keywords/drain.svg"
+import guardIcon from "../../assets/keywords/guard.svg"
+import intimidateIcon from "../../assets/keywords/intimidate.svg"
 import type { SearchOptions } from "../../data"
 import type { MechanicState } from "../../domain/query/model"
 import type { Region, TextLang } from "../../domain/search"
 import { vocabularyOptionLabel } from "./facet-labels"
 import { Toggle } from "./FilterControls"
 import { FilterDropdown } from "./FilterDropdown"
+
+const KEYWORD_ORDER = [
+  "kw:assail",
+  "kw:intimidate",
+  "kw:aura",
+  "kw:ward",
+  "kw:bane",
+  "kw:drain",
+  "kw:rush",
+  "kw:storm",
+] as const
+
+const KEYWORD_ICONS: Readonly<Record<string, string | undefined>> = {
+  "kw:assail": assailIcon,
+  "kw:intimidate": intimidateIcon,
+  "kw:aura": auraIcon,
+  "kw:ward": guardIcon,
+  "kw:bane": baneIcon,
+  "kw:drain": drainIcon,
+}
 
 export function KeywordFilter({
   options,
@@ -54,23 +80,32 @@ export function KeywordFilter({
           : undefined
       }
     >
-      <div className="flex flex-wrap gap-2">
-        {(options?.keywords ?? []).map((keyword) => (
-          <Toggle
-            key={keyword.id}
-            pressed={selected[keyword.id] === "has"}
-            disabled={disabled}
-            onClick={() => {
-              onChange(
-                selected[keyword.id] === "has"
-                  ? Object.fromEntries(Object.entries(selected).filter(([id]) => id !== keyword.id))
-                  : { ...selected, [keyword.id]: "has" },
-              )
-            }}
-          >
-            {vocabularyOptionLabel(keyword.name, textLang)}
-          </Toggle>
-        ))}
+      <div className="grid grid-cols-4 gap-2">
+        {KEYWORD_ORDER.flatMap((id) => {
+          const keyword = options?.keywords.find((item) => item.id === id)
+          if (!keyword) return []
+          const icon = KEYWORD_ICONS[id]
+          return (
+            <Toggle
+              key={keyword.id}
+              pressed={selected[keyword.id] === "has"}
+              className="h-10 min-w-0 gap-0.5 px-0.5 text-11"
+              disabled={disabled}
+              onClick={() => {
+                onChange(
+                  selected[keyword.id] === "has"
+                    ? Object.fromEntries(
+                        Object.entries(selected).filter(([id]) => id !== keyword.id),
+                      )
+                    : { ...selected, [keyword.id]: "has" },
+                )
+              }}
+            >
+              {icon && <img src={icon} alt="" className="size-3.5 shrink-0 object-contain" />}
+              {vocabularyOptionLabel(keyword.name, textLang)}
+            </Toggle>
+          )
+        })}
       </div>
       <p className="mt-3 text-12 text-text-3" role="status">
         {!options || options.coverage === "pending"
