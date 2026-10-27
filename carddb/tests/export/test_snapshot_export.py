@@ -337,7 +337,7 @@ def test_capacity_counts_metadata_and_text_shards_once(
         for key, blob in exported.payloads.items()
         if key != "programs" and not key.startswith("images/")
     ) + len(canonical(exported.manifest))
-    assert object_value(report["gates"])["br_8_mib"] is False
+    assert object_value(report["gates"])["br_10_mib"] is False
     assert object_value(report["gates"])["shards_512_kib"] is True
 
 

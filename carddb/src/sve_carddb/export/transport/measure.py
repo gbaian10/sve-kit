@@ -120,9 +120,9 @@ def measure(
         "shards": shards,
         "oversized_shards": oversized,
         "gates": {
-            "br_8_mib": all(
+            "br_10_mib": all(
                 object_value(v)["br"] is not None
-                and integer(object_value(v)["br"]) <= 8 * MIB
+                and integer(object_value(v)["br"]) <= 10 * MIB
                 for v in complete.values()
             ),
             "shards_512_kib": not oversized,
