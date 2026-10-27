@@ -127,10 +127,12 @@ job = "web"
 job = "web"
 
 [hooks.commitizen]
-job = "commit"
+job = "none"
+reason = "Runs as a local commit-msg hook; CI checks the pull request title."
 
 [hooks.conventional-gitmoji]
-job = "commit"
+job = "none"
+reason = "Runs as a local commit-msg hook; CI checks the pull request title."
 
 [hooks.uv-lock-publish]
 job = "repo"

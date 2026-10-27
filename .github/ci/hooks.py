@@ -19,7 +19,7 @@ from typing import cast
 import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
-JOBS = frozenset({"repo", "python", "rust", "web", "commit", "none"})
+JOBS = frozenset({"repo", "python", "rust", "web", "none"})
 # Stages each CI job passes to `pre-commit run --hook-stage`; a job's hooks must run at one of them.
 # `manual` also picks up every hook left on default_stages.
 JOB_STAGES: dict[str, tuple[str, ...]] = {

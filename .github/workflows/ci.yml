@@ -580,37 +580,9 @@ jobs:
           path: ~/.bun/install/cache
           key: ${{ steps.hook-cache.outputs.cache-primary-key }}
 
-  # Every commit that reaches the base branch must follow the commitizen format (.cz.toml), gitmoji included.
-  # PRs and main run this regardless of paths; the PR title has its own workflow.
-  commit:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-          clean: true
-      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
-        with:
-          enable-cache: true
-          save-cache: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-          cache-suffix: ${{ github.job }}
-          cache-dependency-glob: |
-            carddb/uv.lock
-            publish/uv.lock
-      - name: cz check (pushed commit range)
-        env:
-          BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
-          HEAD: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.event.after }}
-        run: |
-          git cat-file -e "${BASE}^{commit}"
-          git cat-file -e "${HEAD}^{commit}"
-          uv run --project carddb --locked --no-default-groups --group dev python .github/ci/commit_msg.py --rev-range "${BASE}..${HEAD}"
-
   ci-ok:
     if: always()
-    needs: [changes, repo, card-data, python, rust, web, commit]
+    needs: [changes, repo, card-data, python, rust, web]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
