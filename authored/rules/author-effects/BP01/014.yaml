@@ -1,0 +1,20 @@
+cards:
+  BP01-085:
+    abilities:
+      - keywords:
+          - intimidate
+        line: 1
+      - line: 2
+        params:
+          discard: 1
+          draw: 1
+        use: draw_discard_attack_time.v1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-sol
+            who: Codex
+          date: "2026-10-28"
+format: 2
+kind: author_effect_set
