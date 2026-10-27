@@ -109,7 +109,21 @@ impl Catalog {
         keywords: &str,
         input: &Value,
     ) -> Result<SelectedEffects> {
-        selection::select(snapshot, keywords, input)
+        selection::select(snapshot, keywords, input, None)
+    }
+
+    /// Load current effects together with the snapshot's existing title and resource rules.
+    ///
+    /// # Errors
+    /// Rejects invalid selections and unknown or inconsistent rule identities.
+    pub fn from_current_selection_with_rules(
+        snapshot: &str,
+        keywords: &str,
+        input: &Value,
+        rules: &str,
+        identity: &EngineIdentityInput,
+    ) -> Result<SelectedEffects> {
+        selection::select(snapshot, keywords, input, Some((rules, identity)))
     }
 
     /// Resolves settings against caller-supplied bytes without filesystem access.

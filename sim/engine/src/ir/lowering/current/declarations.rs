@@ -108,6 +108,8 @@ pub struct KeywordDeclarationPayload {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum PrintedKeyword {
+    /// Quick declaration; the existing permission shape still controls runtime admission.
+    Quick,
     /// Ward declaration, without claiming its rules are executable.
     Ward,
     /// Aura declaration, without claiming its rules are executable.
