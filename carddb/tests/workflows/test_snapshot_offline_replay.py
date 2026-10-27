@@ -341,11 +341,26 @@ def test_native_export_offline_current_catalog_without_adapters(  # ruff: ignore
     assert joined["keyword"][0]["id"] == "kw:synthetic"
     assert joined["keyword"][0]["translations"]
     assert not joined["mechanic_projection"]
-    assert not joined["card_mechanic_coverage"]
+    coverage = {str(row["scope"]): row for row in joined["card_mechanic_coverage"]}
+    assert set(coverage) == {"shared", "en_override"}
+    assert {row["card_id"] for row in coverage.values()} == {
+        row["card_id"] for row in joined["printing"]
+    }
+    # The English code occurs in prose, so only the Japanese wording rules it out.
+    assert coverage["shared"]["has_complete_keyword_ids"] == ["kw:synthetic"]
+    assert coverage["en_override"]["has_complete_keyword_ids"] == []
+    for row in coverage.values():
+        assert row["complete_all"] is False
+        assert row["complete_keyword_ids"] == row["partial_keyword_ids"] == []
     report = object_value(parse((tmp_path / "bundle/report.json").read_bytes()))
     mechanism = object_value(report["mechanics"])
     assert mechanism["keywords"] == 1
-    assert mechanism["projection_rows"] == mechanism["coverage_rows"] == 0
+    assert mechanism["projection_rows"] == 0
+    assert mechanism["coverage_rows"] == 2
+    assert object_value(mechanism["self"])["regions"] == {
+        "jp": {"total_cards": 1, "known_cards": 1, "unknown_cards": 0},
+        "en": {"total_cards": 1, "known_cards": 0, "unknown_cards": 1},
+    }
     assert (
         mechanism["description"]
         == "Self keyword declarations: body parts containing only keywords."
