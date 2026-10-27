@@ -6,7 +6,7 @@ import sys
 import xml.etree.ElementTree as ET  # ruff: ignore[suspicious-xml-etree-import] -- local reports; DTDs rejected before parsing
 from pathlib import Path
 
-from test_summary import number
+from test_summary import number, without_file_group
 
 EXPECTED_ARGS = 3
 MODULE = re.compile(
@@ -22,6 +22,7 @@ def short_hash(text: str) -> str:
 
 def public_name(raw: str) -> str:
     """Keep the function name; parameters (which may hold card wording) become a hash."""
+    raw = without_file_group(raw)
     function, bracket, parameters = raw.partition("[")
     if not FUNCTION.fullmatch(function):
         return f"case_{short_hash(raw)}"

@@ -42,6 +42,14 @@ def safe_file(value: str) -> str:
     return match[1] if match and ".." not in match[1] else "unknown test file"
 
 
+def without_file_group(raw: str) -> str:
+    """Drop only xdist's file group, keeping parameters available to privacy filters."""
+    name, separator, group = raw.rpartition("@")
+    if separator and re.fullmatch(r"tests/[A-Za-z0-9_./-]+\.py", group):
+        return name
+    return raw
+
+
 def junit(path: Path, *, python: bool) -> tuple[list[Case], float]:
     """Read pytest/Vitest JUnit while dropping all messages and captured output."""
     source = path.read_text(encoding="utf-8")
@@ -59,7 +67,7 @@ def junit(path: Path, *, python: bool) -> tuple[list[Case], float]:
                 classname,
             )
             filename = module[1].replace(".", "/") + ".py" if module else filename
-        name = node.get("name", "").split("[", 1)[0]
+        name = without_file_group(node.get("name", "")).split("[", 1)[0]
         label = (
             name
             if python and re.fullmatch(r"test_[A-Za-z0-9_]+", name)

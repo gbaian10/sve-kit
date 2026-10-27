@@ -13,7 +13,11 @@ from sve_carddb.core.yaml import JSON_VALUE, parse_yaml
 from sve_carddb.workflows import authoring
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from pydantic import JsonValue
+
+    from ..support.authoring_cli_fixtures import RepositoryCheck
 
 REPO = Path(__file__).resolve().parents[3]
 
@@ -141,11 +145,12 @@ def test_public_inspect_reconstructs_multi_printing_sources(
 
 
 @pytest.mark.slow(
-    reason="Write and replay against the complete real authored inventory, then verify every current author"
+    reason="Write and replay against the complete real authored inventory, then reuse its complete CLI validation"
 )
 def test_write_preserves_handwritten_storage_and_reuses_companions(
     repository_workspace: authoring.Workspace,
     tmp_path: Path,
+    complete_repository_check: Callable[[], RepositoryCheck],
     handwritten: tuple[dict[str, JsonValue], dict[str, JsonValue]],
 ) -> None:
     workspace = repository_workspace
@@ -165,7 +170,10 @@ def test_write_preserves_handwritten_storage_and_reuses_companions(
         workspace, main=main, bodies=bodies, output_root=output_root, all_cards=True
     )
     assert second["written"] == []
-    assert authoring.check(replace(workspace, authored=output_root))["status"] == "ok"
+    # The full CLI checks exactly these bytes, including every unchanged sibling.
+    assert fingerprint(output_root) == fingerprint(workspace.authored)
+    checked = complete_repository_check()
+    assert object_value(parse(checked.output.read_bytes()))["status"] == "ok"
 
 
 @pytest.mark.parametrize(

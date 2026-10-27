@@ -141,6 +141,10 @@ env_files = [
 env_override_existing_values = false
 addopts = [
     "--import-mode=importlib",
+    # Keep fixture-heavy files together; independent fresh imports can use idle workers.
+    "--dist=loadgroup",
+    # Preserve the cost ordering supplied by tests.support.scheduling.
+    "--no-loadscope-reorder",
     "--strict-markers",
     "--maxfail=3",
     # "--durations=5",

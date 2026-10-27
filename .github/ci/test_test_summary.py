@@ -61,6 +61,16 @@ class SummaryTests(unittest.TestCase):
         assert PRIVATE not in summary
         assert "[" not in summary
 
+    def test_file_groups_preserve_slowest_case_names(self) -> None:
+        """The same real report stays comparable after xdist grouping."""
+        self.write_junit()
+        path = self.folder / "junit.xml"
+        before = junit_summary("python", self.folder)
+        path.write_text(
+            path.read_text().replace('" time=', '@tests/test_alpha.py" time=')
+        )
+        assert junit_summary("python", self.folder) == before
+
     def test_publish_keeps_its_independent_gate(self) -> None:
         """Publisher coverage retains its separate synthetic-test gate."""
         self.write_junit()

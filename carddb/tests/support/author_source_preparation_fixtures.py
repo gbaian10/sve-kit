@@ -2,8 +2,12 @@
 
 import pytest
 
-from .author_current_fixtures import REPOSITORY, current_source_inputs
-from .prepared_values import freeze, shared_preparation
+from .author_current_fixtures import (
+    REPOSITORY,
+    CurrentSourceInputs,
+    current_source_inputs,
+)
+from .prepared_values import freeze, restore, shared_preparation
 from .time_budget import slow_fixture
 
 
@@ -26,3 +30,11 @@ def author_source_preparation(
             catalog_root=REPOSITORY / "card-data",
         ),
     )
+
+
+@pytest.fixture(scope="session")
+@slow_fixture(
+    reason="Restore the fixed public source graph once per worker; selected database templates share read-only inputs and retain private page caches."
+)
+def current_source_preparation(author_source_preparation: bytes) -> CurrentSourceInputs:
+    return restore(author_source_preparation, CurrentSourceInputs)

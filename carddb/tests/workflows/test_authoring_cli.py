@@ -2,6 +2,7 @@
 
 import shutil
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
 from typer.testing import CliRunner
@@ -10,7 +11,12 @@ from sve_carddb.cli import app
 from sve_carddb.core.json import array, object_value, parse
 from sve_carddb.workflows import authoring
 
-REPO = Path(__file__).resolve().parents[3]
+from ..support.authoring_cli_fixtures import synthetic_card_inputs
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from ..support.authoring_cli_fixtures import RepositoryCheck
 
 
 @pytest.mark.parametrize(
@@ -44,14 +50,10 @@ def test_configuration_exit_codes(tmp_path: Path, case: str, expected: int) -> N
     reason="Keep one CLI end-to-end check that prepares the real public profile and validates the complete authored repository"
 )
 def test_cli_public_check_writes_the_complete_report(
-    tmp_path: Path, authoring_inputs: authoring.Inputs
+    complete_repository_check: Callable[[], RepositoryCheck],
 ) -> None:
-    path = tmp_path / "inputs.json"
-    path.write_text(authoring_inputs.model_dump_json())
-    output = tmp_path / "report.json"
-    result = CliRunner().invoke(
-        app, ["author", "check", "--inputs", str(path), "--output", str(output)]
-    )
+    result = complete_repository_check()
+    output = result.output
     assert result.exit_code == 0
     report = object_value(parse(output.read_bytes()))
     assert report["status"] == "ok"
@@ -66,16 +68,17 @@ def test_write_requires_explicit_selection_and_storage() -> None:
     assert result.exit_code == 2
 
 
-@pytest.mark.slow(
-    reason="Verify real CLI index diagnostics after public-profile identity and glossary preparation, without mocking prepare"
-)
 def test_check_reports_index_location_and_card_without_wording(
-    tmp_path: Path, authoring_inputs: authoring.Inputs
+    tmp_path: Path, authoring_inputs: authoring.Inputs, authoring_inventory: Path
 ) -> None:
-    authored = Path(shutil.copytree(REPO / "authored", tmp_path / "authored"))
+    authored = Path(shutil.copytree(authoring_inventory, tmp_path / "authored"))
+    (authored / "translations/glossary").mkdir(parents=True)
+    parsed, batch = synthetic_card_inputs(tmp_path / "card-inputs")
     missing = "rules/author-effects/BP06/000.yaml"
     (authored / missing).unlink()
-    inputs = authoring_inputs.model_copy(update={"authored": authored})
+    inputs = authoring_inputs.model_copy(
+        update={"authored": authored, "card_data": parsed, "jp_batch_id": batch}
+    )
     path = tmp_path / "inputs.json"
     path.write_text(inputs.model_dump_json())
     output = tmp_path / "report.json"

@@ -1,5 +1,6 @@
 """Prepared inputs may be shared only when every consumer gets isolated state."""
 
+import mmap
 from types import MappingProxyType
 from typing import TYPE_CHECKING
 
@@ -8,11 +9,13 @@ import pytest
 from sve_carddb.domains.parsed_cards.sources import ParsedBatches
 from sve_carddb.domains.physical_sources import page
 
-from ..support.author_current_fixtures import CurrentSourceInputs
+from ..support.database_template import DatabaseTemplate
 from ..support.prepared_values import freeze, restore, shared_preparation
 
 if TYPE_CHECKING:
     from pathlib import Path
+
+    from ..support.author_current_fixtures import CurrentSourceInputs
 
 
 def test_restored_graphs_keep_aliases_without_sharing_nested_mutations() -> None:
@@ -65,10 +68,10 @@ def test_interrupted_write_does_not_publish_a_partial_preparation(
 
 
 def test_fixed_catalog_reuse_keeps_physical_page_caches_private(
-    author_source_preparation: bytes, tmp_path: Path
+    current_source_preparation: CurrentSourceInputs, tmp_path: Path
 ) -> None:
+    inputs = current_source_preparation
     for parser in ("first-v1", "second-v2"):
-        inputs = restore(author_source_preparation, CurrentSourceInputs)
         batches = ParsedBatches(inputs.catalog)
         frozen = batches.batch(tmp_path / "sources", "public-fixture", inputs.batch_id)
         physical = page(
@@ -78,3 +81,25 @@ def test_fixed_catalog_reuse_keeps_physical_page_caches_private(
             parser_version=parser,
         )
         assert physical.text.get().source.parser_version == parser
+
+
+def test_mapped_templates_keep_connections_and_stored_bytes_independent(
+    t0_database_template: DatabaseTemplate, tmp_path: Path
+) -> None:
+    path = tmp_path / "template.sqlite"
+    path.write_bytes(t0_database_template.content)
+    before = path.read_bytes()
+    with (
+        path.open("rb") as stream,
+        mmap.mmap(stream.fileno(), 0, access=mmap.ACCESS_READ) as content,
+    ):
+        template = DatabaseTemplate(t0_database_template.schema, content)
+        with template.copy() as first, template.copy() as second:
+            original = second.select("language", ("code", "display_name"))
+            with first.transaction():
+                first.update("language", {"code": "ja"}, {"display_name": "Changed"})
+            assert first.select("language", ("code", "display_name")) != original
+            assert second.select("language", ("code", "display_name")) == original
+        with template.copy() as third:
+            assert third.select("language", ("code", "display_name")) == original
+    assert path.read_bytes() == before

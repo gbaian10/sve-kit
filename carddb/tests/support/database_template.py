@@ -9,6 +9,7 @@ from sve_carddb.build import Database
 from sve_carddb.build.database import install_functions
 
 if TYPE_CHECKING:
+    import mmap
     from collections.abc import Generator
 
     from sve_carddb.build import CompiledSchema
@@ -17,11 +18,11 @@ if TYPE_CHECKING:
 @dataclass(frozen=True)
 class DatabaseTemplate:
     schema: CompiledSchema
-    content: bytes
+    content: bytes | mmap.mmap
 
     @contextmanager
     def copy(self) -> Generator[Database]:
-        # The verified graph is shared as bytes; connection state and Rules never are.
+        # The verified buffer is read-only; connection state and Rules never are shared.
         connection = sqlite3.connect(":memory:", isolation_level=None)
         try:
             connection.deserialize(self.content)

@@ -11,10 +11,11 @@ from sve_carddb.core.json import array, object_value, parse, string
 from sve_carddb.core.yaml import JSON_VALUE, parse_yaml
 from sve_carddb.workflows import authoring
 
+from ..support.authoring_cli_fixtures import RepositoryCheck, repository_check
 from ..support.time_budget import slow_fixture
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Callable, Iterator
 
     from pydantic import JsonValue
 
@@ -116,3 +117,17 @@ def workspace(
 @pytest.fixture
 def output_root(tmp_path: Path, authoring_inventory: Path) -> Path:
     return Path(shutil.copytree(authoring_inventory, tmp_path / "authored"))
+
+
+@pytest.fixture(scope="session")
+def complete_repository_check(
+    authoring_inputs: authoring.Inputs,
+    tmp_path_factory: pytest.TempPathFactory,
+    worker_id: str,
+) -> Callable[[], RepositoryCheck]:
+    root = tmp_path_factory.getbasetemp()
+    if worker_id != "master":
+        root = root.parent
+    root /= "complete-authoring-check"
+    # The writer proves byte equality before reusing the CLI validation of these inputs.
+    return lambda: repository_check(root, authoring_inputs)

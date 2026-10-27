@@ -26,11 +26,14 @@ from ...support.current_keyword_fixtures import (
     current_combat_keyword_inputs,
     current_keyword_inputs,
 )
-from ...support.prepared_values import restore
+from ...support.shared_current_fixtures import (
+    CurrentFixtureCache,
+    current_fixture_cache,
+)
 from ...support.time_budget import slow_fixture
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
+    from collections.abc import Iterator, Mapping
 
     from sve_carddb.domains.effects.author_inputs import AuthorSchemas
     from sve_carddb.domains.translations.inputs import Snapshot
@@ -47,117 +50,137 @@ def schemas(expander: AuthorExpander) -> AuthorSchemas:
 
 
 @pytest.fixture(scope="session")
+def current_templates(
+    tmp_path_factory: pytest.TempPathFactory,
+    worker_id: str,
+    current_source_preparation: CurrentSourceInputs,
+) -> Iterator[CurrentFixtureCache]:
+    root = tmp_path_factory.getbasetemp()
+    if worker_id != "master":
+        root = root.parent
+    cache = root / "current-templates"
+    cache.mkdir(exist_ok=True)
+    with current_fixture_cache(cache, current_source_preparation) as templates:
+        yield templates
+
+
+@pytest.fixture(scope="session")
 @slow_fixture(
-    reason="Build the damage real-current database template once per worker from fixed public inputs; each test uses an independent database copy."
+    reason="Build the damage real-current database template once across xdist workers from fixed public inputs; each test uses an independent database copy."
 )
 def damage_current_fixture(
-    tmp_path_factory: pytest.TempPathFactory,
-    current_source_preparation: CurrentSourceInputs,
+    current_templates: CurrentFixtureCache,
 ) -> CurrentSourceFixture:
-    return damage_fixture(
-        tmp_path_factory.mktemp("damage-current"),
-        preparation=current_source_preparation,
+    return current_templates.get(
+        "damage",
+        lambda store: damage_fixture(store, preparation=current_templates.inputs),
     )
 
 
 @pytest.fixture(scope="session")
 @slow_fixture(
-    reason="Build the numeric real-current database template once per worker from fixed public inputs; each test uses an independent database copy."
+    reason="Build the numeric real-current database template once across xdist workers from fixed public inputs; each test uses an independent database copy."
 )
 def numeric_current_fixture(
-    tmp_path_factory: pytest.TempPathFactory,
-    current_source_preparation: CurrentSourceInputs,
+    current_templates: CurrentFixtureCache,
 ) -> CurrentSourceFixture:
-    return numeric_fixture(
-        tmp_path_factory.mktemp("numeric-current"),
-        preparation=current_source_preparation,
+    return current_templates.get(
+        "numeric",
+        lambda store: numeric_fixture(store, preparation=current_templates.inputs),
     )
 
 
 @pytest.fixture(scope="session")
 @slow_fixture(
-    reason="Build the move real-current database template once per worker from fixed public inputs; each test uses an independent database copy."
+    reason="Build the move real-current database template once across xdist workers from fixed public inputs; each test uses an independent database copy."
 )
 def move_current_fixture(
-    tmp_path_factory: pytest.TempPathFactory,
-    current_source_preparation: CurrentSourceInputs,
+    current_templates: CurrentFixtureCache,
 ) -> CurrentSourceFixture:
-    return move_fixture(
-        tmp_path_factory.mktemp("move-current"), preparation=current_source_preparation
+    return current_templates.get(
+        "move",
+        lambda store: move_fixture(store, preparation=current_templates.inputs),
     )
 
 
 @pytest.fixture(scope="session")
 @slow_fixture(
-    reason="Build the destroy real-current database template once per worker from fixed public inputs; each test uses an independent database copy."
+    reason="Build the destroy real-current database template once across xdist workers from fixed public inputs; each test uses an independent database copy."
 )
 def destroy_current_fixture(
-    tmp_path_factory: pytest.TempPathFactory,
-    current_source_preparation: CurrentSourceInputs,
+    current_templates: CurrentFixtureCache,
 ) -> CurrentSourceFixture:
-    return destroy_fixture(
-        tmp_path_factory.mktemp("destroy-current"),
-        preparation=current_source_preparation,
+    return current_templates.get(
+        "destroy",
+        lambda store: destroy_fixture(store, preparation=current_templates.inputs),
     )
 
 
 @pytest.fixture(scope="session")
 @slow_fixture(
-    reason="Build the base real-current database template once per worker from fixed public inputs; each test uses an independent database copy."
+    reason="Build the base real-current database template once across xdist workers from fixed public inputs; each test uses an independent database copy."
 )
 def base_current_fixture(
-    tmp_path_factory: pytest.TempPathFactory,
-    current_source_preparation: CurrentSourceInputs,
+    current_templates: CurrentFixtureCache,
 ) -> CurrentSourceFixture:
-    return current_source_fixture(
-        tmp_path_factory.mktemp("base-current"), preparation=current_source_preparation
+    return current_templates.get(
+        "base",
+        lambda store: current_source_fixture(
+            store, preparation=current_templates.inputs
+        ),
     )
 
 
 @pytest.fixture(scope="session")
 @slow_fixture(
-    reason="Build the keyword real-current database template once per worker from fixed public inputs; each test uses an independent database copy."
+    reason="Build the keyword real-current database template once across xdist workers from fixed public inputs; each test uses an independent database copy."
 )
 def keyword_current_fixture(
-    tmp_path_factory: pytest.TempPathFactory,
-    current_source_preparation: CurrentSourceInputs,
+    current_templates: CurrentFixtureCache,
     keyword_registry_snapshots: Mapping[str, Snapshot],
 ) -> CurrentSourceFixture:
-    return current_source_fixture(
-        tmp_path_factory.mktemp("keyword-current"),
-        card_numbers=CARD_NUMBERS | {"BP01-138"},
-        snapshot=keyword_registry_snapshots["complete"],
-        preparation=current_source_preparation,
+    return current_templates.get(
+        "keyword",
+        lambda store: current_source_fixture(
+            store,
+            card_numbers=CARD_NUMBERS | {"BP01-138"},
+            snapshot=keyword_registry_snapshots["complete"],
+            preparation=current_templates.inputs,
+        ),
     )
 
 
 @pytest.fixture(scope="session")
 @slow_fixture(
-    reason="Build the draw real-current database template once per worker from fixed public inputs; each test uses an independent database copy."
+    reason="Build the draw real-current database template once across xdist workers from fixed public inputs; each test uses an independent database copy."
 )
 def draw_current_fixture(
-    tmp_path_factory: pytest.TempPathFactory,
-    current_source_preparation: CurrentSourceInputs,
+    current_templates: CurrentFixtureCache,
 ) -> CurrentSourceFixture:
-    return current_source_fixture(
-        tmp_path_factory.mktemp("draw-current"),
-        card_numbers=frozenset({"CP02-068", "BP10-122", "ECP01-002"}),
-        preparation=current_source_preparation,
+    return current_templates.get(
+        "draw",
+        lambda store: current_source_fixture(
+            store,
+            card_numbers=frozenset({"CP02-068", "BP10-122", "ECP01-002"}),
+            preparation=current_templates.inputs,
+        ),
     )
 
 
 @pytest.fixture(scope="session")
 @slow_fixture(
-    reason="Build the search real-current database template once per worker from fixed public inputs; each test uses an independent database copy."
+    reason="Build the search real-current database template once across xdist workers from fixed public inputs; each test uses an independent database copy."
 )
 def search_current_fixture(
-    tmp_path_factory: pytest.TempPathFactory,
-    current_source_preparation: CurrentSourceInputs,
+    current_templates: CurrentFixtureCache,
 ) -> CurrentSourceFixture:
-    return current_source_fixture(
-        tmp_path_factory.mktemp("search-current"),
-        card_numbers=frozenset({"BP06-048", "BP06-P15"}),
-        preparation=current_source_preparation,
+    return current_templates.get(
+        "search",
+        lambda store: current_source_fixture(
+            store,
+            card_numbers=frozenset({"BP06-048", "BP06-P15"}),
+            preparation=current_templates.inputs,
+        ),
     )
 
 
@@ -212,18 +235,20 @@ def keyword_registry_snapshots() -> Mapping[str, Snapshot]:
 
 @pytest.fixture(scope="session")
 @slow_fixture(
-    reason="Build the combat real-current database template once per worker from fixed public inputs; each test uses an independent database copy."
+    reason="Build the combat real-current database template once across xdist workers from fixed public inputs; each test uses an independent database copy."
 )
 def combat_current_fixture(
-    tmp_path_factory: pytest.TempPathFactory,
-    current_source_preparation: CurrentSourceInputs,
+    current_templates: CurrentFixtureCache,
     keyword_registry_snapshots: Mapping[str, Snapshot],
 ) -> CurrentSourceFixture:
-    return current_source_fixture(
-        tmp_path_factory.mktemp("combat-current"),
-        card_numbers=frozenset(COMBAT_CARDS),
-        snapshot=keyword_registry_snapshots["complete"],
-        preparation=current_source_preparation,
+    return current_templates.get(
+        "combat",
+        lambda store: current_source_fixture(
+            store,
+            card_numbers=frozenset(COMBAT_CARDS),
+            snapshot=keyword_registry_snapshots["complete"],
+            preparation=current_templates.inputs,
+        ),
     )
 
 
@@ -248,11 +273,3 @@ def combat_keyword_handoffs(
 @pytest.fixture(scope="session")
 def draw_registry_without_attack() -> Snapshot:
     return entry_snapshot(exclude_semantics=frozenset({"draw_exact_attack_time.v1"}))
-
-
-@pytest.fixture(scope="session")
-@slow_fixture(
-    reason="Restore the fixed public source graph once per worker; selected database templates share read-only inputs and retain private page caches."
-)
-def current_source_preparation(author_source_preparation: bytes) -> CurrentSourceInputs:
-    return restore(author_source_preparation, CurrentSourceInputs)
