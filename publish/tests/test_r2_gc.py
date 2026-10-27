@@ -9,6 +9,7 @@ import pytest
 from sve_carddb.export.read_api import (
     INDEX,
     ExportError,
+    array,
     canonical,
     closure,
     digest,
@@ -150,6 +151,35 @@ def test_missing_retained_member_stops_before_deletion(
     with pytest.raises(ExportError, match=r"^GC retained closure is incomplete$"):
         gc.collect(store, SNAPSHOT_PREFIXES, execute=True)
     assert STRAY in state.objects
+
+
+def test_corrupt_retained_payload_stops_image_gc_before_deletion(
+    images: PublicImages,
+    roots: Roots,
+    remote: tuple[R2Store, ServerState, Loopback],
+) -> None:
+    store, state, _ = remote
+    export(images, roots, step=0)
+    loaded = load_export(roots.preview)
+    upload(store, loaded)
+    manifest_raw = next(
+        member.raw
+        for member in loaded.members
+        if member.key == loaded.entry["manifest_path"]
+    )
+    manifest = object_value(parse(manifest_raw))
+    row = object_value(array(manifest["files"])[0])
+    key = string(row["path"])
+    original = state.objects[key]
+    state.objects[key] = Stored(original.raw + b" ", '"damaged"', JSON_HEADERS)
+    start = len(state.operations)
+
+    with pytest.raises(ExportError, match=r"^GC retained snapshot is invalid$"):
+        gc.collect_images(store, IMAGE_PREFIXES, execute=True)
+
+    assert not any(
+        operation == "DELETE" for operation, _key, _headers in state.operations[start:]
+    )
 
 
 @pytest.mark.parametrize("kind", ["snapshot", "images"])

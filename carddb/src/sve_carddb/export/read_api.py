@@ -192,9 +192,21 @@ def _load(root: Path) -> Export:
     path, raw, manifest = _manifest(root)
     members = list(_encoded(root, path, raw, br=(root / (path + ".br")).exists()))
     blobs: dict[str, bytes] = {}
-    changes_ref = manifest["changes_ref"]
+    changes_ref = (
+        object_value(manifest["changes_ref"])
+        if manifest["changes_ref"] is not None
+        else None
+    )
+    file_paths = {
+        string(object_value(file)["path"]) for file in array(manifest["files"])
+    }
     for row in _descriptions(manifest):
-        is_changes_ref = changes_ref is not None and row == object_value(changes_ref)
+        # changes_ref is not passed to read_snapshot, so it needs its own integrity check.
+        is_changes_ref = (
+            changes_ref is not None
+            and string(row["path"]) == string(changes_ref["path"])
+            and string(row["path"]) not in file_paths
+        )
         blobs[string(row["path"])], encoded = _blob(
             root, row, verify_integrity=is_changes_ref
         )
