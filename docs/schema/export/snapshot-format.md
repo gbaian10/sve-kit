@@ -495,9 +495,9 @@ face_id／digital_phase 皆 null、effect_similarity=null、review_level=unrevie
 不增加 policy_checked、政策／收據欄位或新的公開 review_level。
 
 所有符合政策的數位 ID 兩代全列，每個 `(card_id,game,official_id)` 的規則連結最多一筆，
-wire 依既有 link.id 排序；UI 先 sv1 再 svwb，各代按原始 ASCII official_id 排序。
-id 仍為 `dl:`＋H(`["digital-link-v1",subject]`)，subject 依 digital-link-adoption 的完整卡層鍵；
-relation、時間、政策／排除清單 hash 不參與。政策卡層升真人且 subject 完全相同時沿 ID，
+wire 依全部公開欄位的複合主鍵排序；UI 先 sv1 再 svwb，各代按原始 ASCII official_id 排序。
+建置端 id 為 `dl:`＋H(`["digital-link-v1",subject]`)，只供來源／採納 join，不公開；subject 依 digital-link-adoption 的完整卡層鍵；
+relation、時間、政策／排除清單 hash 不參與。政策卡層升真人且 subject 完全相同時沿建置 ID，
 精確面的人審 subject 是另一 ID。有效真人同 card/game/ID 的任何合法關係優先，規則不得另出重複列；
 刪除真人關係不會自動停用規則連結；要停用某卡對須在 links 政策的 excluded_targets 列出。
 
