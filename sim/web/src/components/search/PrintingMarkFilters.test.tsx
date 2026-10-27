@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react"
+import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { useState } from "react"
 import { expect, it } from "vitest"
@@ -52,6 +52,7 @@ it.each(
       serial: "編號卡",
       premium: "碎閃",
       hint: "只有 PR 卡有",
+      more: "其他",
     },
     {
       language: "ja" as const,
@@ -59,6 +60,7 @@ it.each(
       serial: "シリアルナンバー入りカード",
       premium: "プレミアム",
       hint: "PRカードのみ",
+      more: "その他",
     },
     {
       language: "en" as const,
@@ -66,6 +68,7 @@ it.each(
       serial: "Numbered cards",
       premium: "Premium",
       hint: "Only PR cards have stamps.",
+      more: "More",
     },
   ].flatMap((copy) => [true, false].map((sidebar) => ({ ...copy, sidebar }))),
 )("filters printing marks in $language (sidebar=$sidebar)", async (copy) => {
@@ -77,6 +80,9 @@ it.each(
   const premium = screen.getByRole("switch", { name: copy.premium })
   expect(switches.indexOf(stamp)).toBe(switches.indexOf(premium) + 1)
   expect(stamp).toHaveAccessibleDescription(copy.hint)
+  const more = screen.getByRole("heading", { name: copy.more }).closest("section")
+  if (!more) throw new Error("missing other filters section")
+  expect(within(more).getByRole("switch", { name: copy.serial })).toBe(serial)
   await user.click(stamp)
   await user.click(serial)
   expect(parseQuery(new URLSearchParams(screen.getByLabelText("URL").textContent))).toMatchObject({

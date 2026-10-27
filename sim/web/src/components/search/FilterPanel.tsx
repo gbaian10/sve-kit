@@ -422,9 +422,6 @@ export function FilterPanel({
           {facets?.sets}
           {facets?.artists}
         </div>
-        <div className="md:col-start-1 md:row-start-5 md:rounded-bl-block md:border-t md:border-border md:bg-surface-2 md:p-4">
-          {errataBlock}
-        </div>
       </FilterGroup>
       <FilterGroup
         title={t("filters.groups.effects")}
@@ -433,6 +430,15 @@ export function FilterPanel({
       >
         <div className="md:col-start-1 md:row-start-4 md:p-4">{facets?.traits}</div>
         <div className="md:col-start-3 md:row-start-4 md:p-4">{facets?.keywords}</div>
+      </FilterGroup>
+      <FilterGroup
+        title={t("filters.groups.more")}
+        collapsible={collapsible}
+        desktopClassName="md:contents"
+      >
+        <div className="space-y-3 md:col-start-1 md:row-start-5 md:rounded-bl-block md:border-t md:border-border md:bg-surface-2 md:p-4">
+          {errataBlock}
+        </div>
       </FilterGroup>
       <FilterGroup
         title={t("filters.display")}
