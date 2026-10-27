@@ -1,7 +1,9 @@
 """Synthetic marks exercise alignment, edge logos and faint mid-art serial text."""
 
 import io
+import json
 import random
+from typing import TYPE_CHECKING
 
 import pytest
 from PIL import Image, ImageDraw
@@ -15,6 +17,10 @@ from sve_carddb.images.stamps import (
     mark_pattern,
     match_patterns,
 )
+from sve_carddb.workflows.stamps import write_candidates
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def raw(image: Image.Image) -> bytes:
@@ -128,3 +134,12 @@ def test_uninformative_and_outside_patterns_are_rejected() -> None:
         mark_pattern(image, MarkBox(-1, 0, 10, 10), label="serial")
     with pytest.raises(ValueError, match="visible"):
         mark_pattern(image, MarkBox(10, 10, 30, 30), label="serial")
+
+
+def test_candidate_json_keeps_float_similarity(tmp_path: Path) -> None:
+    write_candidates(
+        tmp_path, "pr", [{"pattern_matches": [{"label": "serial", "score": 0.71}]}]
+    )
+    saved = json.loads((tmp_path / "candidates.json").read_text(encoding="utf-8"))
+    assert saved["review_required"] is True
+    assert saved["cards"][0]["pattern_matches"][0]["score"] == pytest.approx(0.71)

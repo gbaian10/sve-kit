@@ -1,5 +1,6 @@
 """Read local source images for stamp candidates without opening a crawl manifest."""
 
+import json
 from collections import defaultdict
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -9,7 +10,6 @@ import typer
 from PIL import Image
 from pydantic import JsonValue, TypeAdapter
 
-from sve_carddb.core.json import canonical
 from sve_carddb.core.models import RecordData, Text
 from sve_carddb.core.regions import SourceRegion
 from sve_carddb.domains.parsed_cards.reader import read
@@ -121,6 +121,19 @@ def stamp_inputs(  # ruff: ignore[complex-structure] -- one join owns registered
                 )
             )
     return tuple(result)
+
+
+def write_candidates(output: Path, scope: str, rows: list[JsonValue]) -> None:
+    """Write private review JSON; similarity scores are floats, unlike snapshot canonical JSON."""
+    (output / "candidates.json").write_text(
+        json.dumps(
+            {"scope": scope, "review_required": True, "cards": rows},
+            ensure_ascii=False,
+            indent=1,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
 
 
 def detect_stamps(  # ruff: ignore[complex-structure, too-many-arguments, too-many-positional-arguments] -- the command owns explicit source/output paths, optional examples and reviewed-scope selection
@@ -258,9 +271,7 @@ def detect_stamps(  # ruff: ignore[complex-structure, too-many-arguments, too-ma
         )
         if (index + 1) % 50 == 0:
             typer.echo(f"Scanned {index + 1}/{len(inputs)}")
-    (output / "candidates.json").write_bytes(
-        canonical({"scope": scope, "review_required": True, "cards": rows})
-    )
+    write_candidates(output, scope, rows)
     typer.echo(
         f"Scanned {len(inputs)} PR faces; review candidates before editing authored data"
     )
