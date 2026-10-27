@@ -170,6 +170,10 @@ disputed 保留。report 的 recorded 只表示 literal 相符，不授予尚未
 後兩個參數。工具檢查 base 的原型 AST 摘要、完整來源位置與 current replacement，
 確認只少指定卡、其他原型不變、全部 baseline 檔 byte 不變，再允許寫入。
 base 或 baseline 缺少時失敗，不自動建立或更新期望值。
+同一個已確認 JP 永久卡身分的原型別名會一起移除，每個別名仍各自核對固定基準的
+AST 與來源位置；不依卡號字串猜配。已有索引時選原 record_key 作作者入口，
+不為別名新增第二筆作者。移除最後一筆時刪除整份原型分片，驗證通過後才寫入或刪檔；
+選取卡沒有任何可移除原型時拒絕。
 
 退出碼：0 成功；2 參數／profile 配置錯；3 schema、唯一定位、來源、閉包、基線或
 selection 等價失敗；4 I/O 或缺少 Git base／baseline。錯誤只包含分類、卡號、DSL/YAML
