@@ -2,7 +2,10 @@
 
 import fcntl
 import hashlib
+import shutil
+import tempfile
 from copy import deepcopy
+from pathlib import Path
 from types import MappingProxyType
 from typing import TYPE_CHECKING
 
@@ -18,7 +21,6 @@ from sve_carddb.domains.registry.storage import Entry, RegistryFiles
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
-    from pathlib import Path
 
 
 def detached_entries(entries: tuple[Entry, ...]) -> list[Entry]:
@@ -71,7 +73,13 @@ def load_shared_registry(root: Path, cache: Path) -> RegistrySnapshot:
         if cache.exists():
             return CachedRegistry.model_validate_json(cache.read_bytes()).snapshot()
         before = source_hashes(root)
-        snapshot = load_registry(root)
+        # These legacy-record tests validate the original append-only registry,
+        # including art and approvals, rather than an effective publication view.
+        with tempfile.TemporaryDirectory(dir=cache.parent) as directory:
+            original = Path(directory) / "authored"
+            for area in ("ids", "registry"):
+                shutil.copytree(root / area, original / area)
+            snapshot = load_registry(original)
         assert before == source_hashes(root), "Registry load changed authored files"
         cached = CachedRegistry(
             files=snapshot.files,

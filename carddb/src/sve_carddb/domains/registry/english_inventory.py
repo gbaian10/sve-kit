@@ -17,6 +17,8 @@ from sve_carddb.domains.registry.projection import en_card, jp_card
 from sve_carddb.domains.registry.records import MappingReviewData, PrintingData
 from sve_carddb.domains.registry.review import observation
 from sve_carddb.domains.registry.snapshot import RegistrySnapshot, load_registry
+from sve_carddb.domains.registry.transitions.renewal import load_renewed_registry
+from sve_carddb.domains.registry.transitions.writer import Recipe
 from sve_carddb.ingest.archive.frozen_sources import FrozenSources
 from sve_carddb.parse.pages import extract_en, extract_jp, official_en, official_jp
 
@@ -414,10 +416,11 @@ def main() -> None:
     parser.add_argument("--authored", type=Path, required=True)
     parser.add_argument("--conclusions", type=Path)
     parser.add_argument("--jp-baseline", type=Path)
+    parser.add_argument("--renewal-inputs", type=Path)
     parser.add_argument("--program-revision", required=True)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    for supplied in (args.jp_baseline, args.conclusions):
+    for supplied in (args.jp_baseline, args.conclusions, args.renewal_inputs):
         if supplied is not None and args.output.resolve() == supplied.resolve():
             raise ValueError("Report output must not overwrite review inputs")
     for protected in (args.archive, args.authored):
@@ -434,8 +437,26 @@ def main() -> None:
     )
     jp = scan(FrozenSources(args.archive, args.store_id, args.jp_batch), "jp")
     en = scan(FrozenSources(args.archive, args.store_id, args.en_batch), "en")
+    if args.renewal_inputs is None:
+        registry = load_registry(args.authored)
+    else:
+        recipe = Recipe.model_validate_json(args.renewal_inputs.read_bytes())
+        if args.output.resolve().is_relative_to(
+            recipe.registry_review_inputs.root.resolve()
+        ):
+            raise ValueError("Report output must be outside permanent review inputs")
+        if (
+            (recipe.repo / "authored").resolve() != args.authored.resolve()
+            or recipe.archive.resolve() != args.archive.resolve()
+            or recipe.store_id != args.store_id
+            or tuple(source.card_batch for source in recipe.sources)
+            != (args.en_batch, args.jp_batch)
+            or recipe.program_revision != args.program_revision
+        ):
+            raise ValueError("EN inventory renewal recipe differs from selected inputs")
+        registry = load_renewed_registry(args.authored, recipe.evidence())
     report = inventory(
-        load_registry(args.authored),
+        registry,
         jp,
         en,
         conclusions,

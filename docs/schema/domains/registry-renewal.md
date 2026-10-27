@@ -116,3 +116,15 @@ uv --directory /absolute/checkout/carddb run sve-carddb registry extend-art \
   這不延伸舊 absence 批准，也不覆寫有效 after 或放寬 EN-only／reskin 的完整觀測檢查。
 
 純查核續版與 art 擴組均不需要公開身分修復事件；其他 transition kind 仍等待完整修復能力。
+
+## 作者工具與候選的有限身分入口
+
+公開作者工具與 `images art-candidates` 使用 `load_identity_registry`：重建 Git 基準、
+前件及追加歷史，只容許上述兩種不改卡片身分的轉換。repair、route、revert、停用、
+未知種類及實際 Card／Face／Printing 身分改動仍拒絕。這個入口不重播私人凍結證據，
+回傳值排除 art 與 region_mapping_review，不提供同圖或無對應批准，也不供正式匯出使用。
+
+database 作者工具仍由離線配方完整驗證歷史來源；非空 transitions 缺少
+registry_review_inputs 時拒絕。EN inventory 可明示 `--renewal-inputs`，配方的 repo、
+archive、store_id、日英卡頁批次與 program_revision 必須吻合本次參數，再完整驗證有效登錄。
+沒有明示配方的舊 reader 仍拒絕非空 transitions。上述入口不改 transition 或快照格式。

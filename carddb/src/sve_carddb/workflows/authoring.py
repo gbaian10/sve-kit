@@ -36,6 +36,8 @@ from sve_carddb.domains.products import (
 )
 from sve_carddb.domains.registry.preview import FrozenJP, plan_preview
 from sve_carddb.domains.registry.records import PrintingData
+from sve_carddb.domains.registry.transitions.files import read_transition_files
+from sve_carddb.domains.registry.transitions.renewal import load_identity_registry
 from sve_carddb.domains.text_observations import FrozenTexts, TextObservations
 from sve_carddb.domains.text_observations.closure import close_preview
 from sve_carddb.domains.translations.four_layer_authored import FrameRecord
@@ -43,6 +45,7 @@ from sve_carddb.domains.translations.glossary.records import TermRecord
 from sve_carddb.domains.translations.inputs import Snapshot, load_glossary
 from sve_carddb.domains.translations.recognition.rules import load as load_rules
 from sve_carddb.domains.translations.sources import Sources
+from sve_carddb.workflows import offline
 from sve_carddb.workflows.authoring_storage import WriteError, format_yaml, write
 
 if TYPE_CHECKING:
@@ -239,14 +242,21 @@ def prepare(  # ruff: ignore[too-many-locals, too-many-statements] -- keep the c
         ] != [inputs.jp_batch_id]:
             raise ConfigurationError("Authoring JP batch mismatch")
         stores = {string(recipe["store_id"]): Path(string(recipe["archive"]))}
+        registry = None
+        if read_transition_files(authored).shards:
+            pinned = offline.Inputs.model_validate_json(inputs.recipe.read_bytes())
+            if pinned.repo.resolve() != inputs.repo.resolve():
+                raise ConfigurationError("Authoring recipe repository mismatch")
+            registry = offline.registry_snapshot(pinned, authored=authored)
         prepared = prepare_catalog(
             (load_adoptions(authored, entry="catalog/adoptions"),),
             inputs.repo,
             context,
             stores,
+            registry,
             batches=batches,
         )
-        sources = Sources(stores, inputs.repo, context, batches=batches)
+        sources = Sources(stores, inputs.repo, context, registry, batches=batches)
         schema = compile_build(
             (
                 *capabilities,
@@ -284,6 +294,7 @@ def prepare(  # ruff: ignore[too-many-locals, too-many-statements] -- keep the c
             sources=frozen,
         ),
         regions=("jp",),
+        snapshot=load_identity_registry(authored, repository=inputs.repo),
     )
     from sve_carddb.domains.effects.author_handwritten import read as read_handwritten  # ruff: ignore[import-outside-top-level] -- only public profile needs to discover shorthand card identities
 

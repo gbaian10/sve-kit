@@ -9,7 +9,7 @@ from pydantic import ValidationError
 
 from sve_carddb.core.json import digest, integer, string
 from sve_carddb.domains.registry.records import AllocationData, FaceData, PrintingData
-from sve_carddb.domains.registry.snapshot import load_registry
+from sve_carddb.domains.registry.transitions.renewal import load_identity_registry
 from sve_carddb.export.image_index import ImageIndex
 from sve_carddb.export.media_urls import image_path
 from sve_carddb.images.art_matching import (
@@ -25,7 +25,7 @@ def art_inputs(
 ) -> tuple[tuple[ArtInput, ...], tuple[str, ...]]:
     """Use permanent image bindings, never guessed card-number filenames."""
     index.validate_tables()
-    registry = load_registry(authored)
+    registry = load_identity_registry(authored)
     printing = {
         item.data.id: item.data
         for item in registry.records.values()

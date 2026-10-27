@@ -24,6 +24,9 @@ format 2 儲存格式；主檔與本體直接提交到 `authored/rules/author-ef
 `authored`、`card_data` 可明示其他絕對根目錄，預設為 repo 下的同名目錄。
 公開 profile 的分類詞彙只包含這個 JP batch 或作者明寫來源的概念；其他來源的概念
 不冒充已驗證資料。所有作者卡仍須通過整卡來源閉包，不能以缺少概念放寬准入。
+身分讀取容許已登錄的純 confirmed_none 續版與 art uses 擴組共存，檢查歷史及身分不變；
+此有限入口排除這兩類批准，不要求私人歸檔，也不取代正式匯出的完整證據驗證。
+其餘 transition 仍拒絕，詳見[查核續版工具](../schema/domains/registry-renewal.md#作者工具與候選的有限身分入口)。
 
 正式 DB profile 使用相同 repo、JP batch 與額外四個必填欄位：
 
@@ -43,6 +46,8 @@ format 2 儲存格式；主檔與本體直接提交到 `authored/rules/author-ef
 DB 以 SQLite readonly/immutable 開啟，先檢查 SHA-256、recipe 與 inputs 的版次及
 JP batch。recipe 提供凍結來源 store；工具不讀取 live manifest。所有路徑均由呼叫端
 提供，不把本機位置寫進作者資料。
+登錄有非空 transitions 時，DB profile 使用 recipe 的 registry_review_inputs 與凍結來源
+完整驗證有效登錄；缺 pin 或歷史證據即拒絕，不使用公開 profile 的有限身分入口。
 
 ## 查詢與手寫
 
