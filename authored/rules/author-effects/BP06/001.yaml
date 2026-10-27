@@ -1,0 +1,25 @@
+cards:
+  BP06-072:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - buff:
+                on: ally
+                power: 2
+          targets:
+            - bind: ally
+              from:
+                kind: follower
+                who: self
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-sol
+            who: Codex
+          date: "2026-10-27"
+format: 2
+kind: author_effect_set
