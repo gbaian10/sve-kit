@@ -81,8 +81,9 @@ impl ExpandedLowerer {
     ///
     /// Intrinsic evolution, evolve-time, fanfare, lastword, attack-time, End Begin,
     /// field activation with ordered constant PP/Act/self-to-cemetery costs,
-    /// draw, uniform damage to all leaders, destroy, controller leader life Add/Set, numeric modifications,
-    /// constant continuous installations, Search, successful EX discounts and
+    /// draw, uniform damage to all leaders, destroy, controller leader life Add/Set,
+    /// numeric modifications, constant continuous installations, Search,
+    /// successful EX discounts and
     /// observed deck ordering have closed supported subsets. D1 separately checks
     /// whole-card runtime support; this is not source or qualification admission.
     /// Unfiltered field targets, same-play Distribution and a sole top-level
