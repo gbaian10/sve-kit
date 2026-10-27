@@ -19,6 +19,7 @@ from sve_carddb.core.json import (
     parse,
     string,
 )
+from sve_carddb.export.image_scope import ImageScope
 from sve_carddb.export.image_upload import (
     IMAGE_KEY,
     ImageInventory,
@@ -47,6 +48,7 @@ __all__ = [
     "ImageFile",
     "ImageInventory",
     "ImageObject",
+    "ImageScope",
     "ImageUpload",
     "Member",
     "array",
@@ -58,6 +60,7 @@ __all__ = [
     "image_files",
     "integer",
     "load_export",
+    "load_image_scope",
     "load_image_upload",
     "object_value",
     "parse",
@@ -340,4 +343,18 @@ def read_image_inventory(raw: bytes) -> ImageInventory:
         raise ExportError("Invalid image upload inventory") from None
     if raw != result.content():
         raise ExportError("Invalid image upload inventory")
+    return result
+
+
+def load_image_scope(path: Path, description: ImageUpload) -> ImageScope:
+    """Validate exact upload membership through the public producer boundary."""
+    try:
+        directory(path.parent)
+        raw = read_member(path.parent, path.name)
+        result = ImageScope.model_validate_json(raw)
+        if raw != result.content() or path.name != digest(raw)[7:] + ".json":
+            raise ValueError("Image scope is not content addressed")  # ruff: ignore[raise-within-try] -- wrap all untrusted scope failures in the public error type
+        result.require_upload(description)
+    except ValueError, OSError:
+        raise ExportError("Invalid image scope manifest") from None
     return result

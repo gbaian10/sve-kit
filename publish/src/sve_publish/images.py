@@ -48,6 +48,41 @@ def _changes(
     return changed, transfers
 
 
+def plan_images(
+    description: ImageUpload,
+    old: dict[str, ImageObject],
+    selected: frozenset[str] | None = None,
+) -> dict[str, object]:
+    """Report all differences while limiting transfer candidates to the selected keys."""
+    objects = tuple(
+        item for item in description.objects if selected is None or item.key in selected
+    )
+    changed, transfers = _changes(objects, old)
+    result: dict[str, object] = {
+        "mode": "dry_run",
+        "remote": "checked",
+        "image_files": len(objects),
+        "image_bytes": sum(item.bytes for item in objects),
+        "changed_keys": [item.key for item in changed],
+        "transfer_keys": [item.key for item in transfers],
+    }
+    if selected is not None:
+        expected = {item.key: item for item in description.objects}
+        result["outside_scope_differences"] = [
+            {
+                "key": key,
+                "reason": "remote_only"
+                if key not in expected
+                else "missing"
+                if key not in old
+                else "metadata_changed",
+            }
+            for key in sorted(expected.keys() | old.keys())
+            if key not in selected and expected.get(key) != old.get(key)
+        ]
+    return result
+
+
 def upload_images(
     store: R2Store,
     description: ImageUpload,
@@ -55,6 +90,7 @@ def upload_images(
     *,
     jobs: int = 16,
     progress: Callable[[str], None] | None = None,
+    selected: frozenset[str] | None = None,
 ) -> dict[str, object]:
     """Failure leaves missing claims; recovery must use this same description and root."""
     directory(root)
@@ -62,7 +98,11 @@ def upload_images(
         raise ExportError("Upload jobs must be at least 1")
     remote = store.get(INVENTORY)
     old = {item.key: item for item in read_inventory(remote).objects}
-    changed, transfers = _changes(description.objects, old)
+    report = plan_images(description, old, selected)
+    objects = tuple(
+        item for item in description.objects if selected is None or item.key in selected
+    )
+    changed, transfers = _changes(objects, old)
     affected = {item.key for item in changed}
     remaining = {key: item for key, item in old.items() if key not in affected}
     if old.keys() & affected:
@@ -88,10 +128,13 @@ def upload_images(
         raise ExportError(
             f"{error}; rerun the same image description and unchanged image root"
         ) from None
-    return {
+    result: dict[str, object] = {
         "mode": "execute",
         "written_images": pool.written,
-        "unchanged_images": len(description.objects) - len(changed),
+        "unchanged_images": len(objects) - len(changed),
         "version_only_images": len(changed) - len(transfers),
         "cdn_verification": "not_checked",
     }
+    if selected is not None:
+        result["outside_scope_differences"] = report["outside_scope_differences"]
+    return result

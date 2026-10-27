@@ -40,12 +40,52 @@ uv --directory publish run sve-publish snapshot upload \
   --export-dir /explicit/text-output --dry-run
 ```
 
-Dry-run is the default. Both commands open no HTTP client, read no credentials,
+Dry-run is the default. Without an image scope, both commands open no HTTP client, read no credentials,
 write nothing and never open bitmaps. Image dry-run checks the description;
 snapshot dry-run checks the pointer, manifest hash/schema, JSON hashes/lengths,
 Brotli decoding, reader join and reference closure, then reports image requirements.
 Remote differences and readiness are unknown offline. `--export-dir` takes
 precedence over `SVE_EXPORT_DIR`; a non-empty absolute root is required.
+
+### Scoped image upload
+
+Image production and upload both accept repeated `--scope BP22 --scope PR` and
+`--printing-id p:…` selectors, taking their union. Scope names are exact registry
+`home_set_id` values. Unknown scopes or unregistered printing IDs stop preparation.
+The producer prints `image_scope`, a canonical `image-scope/<sha256>.json` public
+membership file. It pins the exact image-upload description and maps printing IDs
+and home sets to fixed keys; the reader requires complete, unique key coverage.
+
+```bash
+uv --directory publish run sve-publish images upload \
+  --image-upload '/explicit/image-output/image-upload/<sha256>.json' \
+  --image-dir /explicit/image-output \
+  --scope-manifest '/explicit/image-output/image-scope/<sha256>.json' \
+  --scope BP22 --scope PR --dry-run \
+  --remote-inventory /explicit/downloaded-images.json
+```
+
+A scoped dry-run compares against `_publish/images.json`. With
+`--remote-inventory`, it reads a downloaded inventory without credentials or HTTP;
+otherwise it needs the account, bucket and credentials and performs a read-only
+inventory GET. It never opens bitmaps or writes remote objects. `changed_keys`
+lists selected metadata changes, `transfer_keys` lists selected new/changed bytes,
+and `outside_scope_differences` reports every excluded missing, changed or
+remote-only key. A downloaded inventory describes the bucket at download time.
+
+For execution, omit `--remote-inventory` and use `--execute` with the same selectors
+and scope manifest. Only selected keys and claims can change. Excluded differences
+are reported and their remote bytes and inventory rows are preserved, including
+excluded newer versions. Version rollback and changed bytes without a new version
+remain errors for selected keys. Snapshot readiness still requires the complete
+inventory to match, so excluded differences may require widening the scope before
+snapshot upload. Without selectors, existing upload and offline dry-run behavior
+remain unchanged. For scoped production and previous-index inputs, see the
+[image-index contract](../docs/schema/images/image-index.md#指定產圖範圍).
+
+For the bucket's first baseline, omit selectors to populate the complete inventory.
+A scoped upload against a missing inventory records only selected keys and reports
+all excluded keys as missing; it does not establish complete snapshot readiness.
 
 ## Execute
 

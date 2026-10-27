@@ -61,6 +61,7 @@ class EncodedImage:
     result: VariantSet
     region: Region
     elapsed_seconds: float
+    reused: bool = False
 
 
 @dataclass(frozen=True)
@@ -70,8 +71,14 @@ class ImageBuild:
 
     def execution(self) -> dict[str, int]:
         """Measure this run only; per-image times overlap when workers run in parallel."""
-        hits = [item for item in self.images if item.result.cache_hit]
-        encoded = [item for item in self.images if not item.result.cache_hit]
+        hits = [
+            item for item in self.images if item.result.cache_hit and not item.reused
+        ]
+        encoded = [
+            item
+            for item in self.images
+            if not item.result.cache_hit and not item.reused
+        ]
         return {
             "wall_milliseconds": round(self.elapsed_seconds * 1000),
             "cache_hits": len(hits),
@@ -80,10 +87,14 @@ class ImageBuild:
             "new_encoding_milliseconds": round(
                 sum(i.elapsed_seconds for i in encoded) * 1000
             ),
-        }
+        } | (
+            {"reused_images": sum(item.reused for item in self.images)}
+            if any(item.reused for item in self.images)
+            else {}
+        )
 
 
-def build_regional_assets(
+def build_regional_assets(  # ruff: ignore[too-many-arguments] -- callers explicitly own roots, concurrency and optional source selection
     images: FrozenSources,
     roots: PreviewRoots,
     *,
@@ -91,6 +102,7 @@ def build_regional_assets(
     crops: ImageCrops,
     workers: int = 1,
     checks: ImageChecks | None = None,
+    urls: frozenset[str] | None = None,
 ) -> ImageBuild:
     """Convert one pinned regional image batch, reusing every verified cache hit."""
     if region not in {"jp", "en"}:
@@ -149,7 +161,11 @@ def build_regional_assets(
         )
 
     versions = tuple(
-        sorted(item.source_version_id for item in images.inventory.current)
+        sorted(
+            item.source_version_id
+            for item in images.inventory.current
+            if urls is None or item.url in urls
+        )
     )
     if workers == 1:
         results = tuple(map(convert, versions))

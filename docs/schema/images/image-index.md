@@ -51,7 +51,7 @@ uv --directory carddb run sve-carddb images build-index --inputs /private/inputs
 並核對公開狀態、三尺寸及版本 metadata；校正核對精確的區域／URL／hash／來源 pin，不重驗圖本體。
 索引與校正來源 pins 只留在私人建置環境，不放公開根、git 或測試 artifact。
 
-`sve-publish images upload` 使用成功圖片描述與 `--image-dir` 的固定 key 圖片根，只比對清單並驗讀變動候選。
+`sve-publish images upload` 使用卡圖上傳描述與 `--image-dir` 的固定 key 圖片根，只比對清單並驗讀變動候選。
 `sve-publish snapshot upload --export-dir` 只讀公開 JSON 根與遠端清單；文字匯出與圖片根須使用相符的成功圖片索引。
 
 ## 公開上傳交接
@@ -63,3 +63,44 @@ uv --directory carddb run sve-carddb images build-index --inputs /private/inputs
 只有成功建置的描述與未變動圖片根可交給 `sve-publish images upload`；
 公開 reader `load_image_upload` 驗內容定址與欄位，publisher 不讀私有索引或版本狀態。
 遠端清單與失敗恢復見 [publish](../../../publish/README.md)。
+
+## 指定產圖範圍
+
+`images build-index` 可重複帶 `--scope BP22 --scope PR`，或用可重複的
+`--printing-id p:…` 指定版次，兩者取聯集。卡包按登錄的 `home_set_id` 精確比對；
+未知卡包與未登錄版次都失敗，不從卡號或來源 URL 推測歸屬。未帶範圍維持全量處理。
+
+指定範圍必須沿用既有 `private-dir` 的版本狀態，不能帶 `--initial`，並提供：
+
+| 參數 | 輸入 |
+| --- | --- |
+| `--previous-index` | 上一版內容定址的私有圖片索引 |
+| `--previous-image-upload` | 釘住該索引的公開卡圖上傳描述 |
+| `--previous-image-dir` | 上一版固定 key 的完整 WebP 根 |
+| `--previous-reuse-evidence` | 釘住同一索引的私有圖片沿用證據 |
+
+成功建置另產出私有 `image-reuse/<sha256>.json`，stdout 的 `image_reuse` 指向該檔。
+格式 `sve-image-reuse-v1` 保存 `image_index_sha256`、完整 `recipe` 定義與 `crops`
+輸入記錄；沒有命中記錄表示沒有覆寫。它不重複維護圖片 hash，WebP 的 hash 與 bytes
+仍取自卡圖上傳描述。缺少此證據的舊建置須先完整重建基準，不能假定目前裁切就是歷史裁切。
+不回填或重建轉檔快取。
+
+範圍外每個繫結都核對兩次凍結批次的區域、URL、來源 sha256 與身分，及新舊裁切覆寫座標。
+上一版 recipe hash 與完整 recipe 定義必須等於目前定義，含尺寸、品質、裁切演算法與
+Pillow、libwebp、LittleCMS 版本；不同就要求全量重轉。每個範圍外 WebP 都讀取並核對
+sha256、bytes，再複製到輸出，不解碼或編碼範圍外來源、不使用其轉檔快取。
+來源或裁切變更、檔案缺失或內容不同時失敗並指出需擴大範圍的版次。
+
+新索引仍包含全部繫結與三種公開表。範圍外的繫結、圖片列、尺寸及事件版本須與舊索引逐列相同；
+版本狀態不符、範圍外版次被移除或改綁定，都拒絕完成。多個版次共享來源時，只要其中一個在
+範圍內就可能轉檔，但仍須通過範圍外每個繫結的完整檢查。
+
+範圍建置的裁切診斷只涵蓋目前版次引用的來源；全量建置則涵蓋整個凍結圖片批次。
+因此未被版次引用的來源若有裁切覆寫，在範圍建置中會列為 `unused`，不影響完整索引或圖片沿用驗證。
+所有索引、沿用證據及公開交接檔寫完後才提交版本狀態；中斷時沿用相同輸入與命令重跑。
+
+成功建置也產出公開 `image-scope/<sha256>.json`，stdout 的 `image_scope` 指向該檔。
+格式 `sve-image-scope-v1` 的 `image_upload_sha256` 釘卡圖上傳描述；`bindings` 列出
+`printing_id`、`home_set_id` 與固定 `keys`，全部 key 必須恰好覆蓋該描述，且版次及 key 不重複。
+這份清單只保存公開範圍歸屬，不含來源 URL、來源證據或本機路徑。上傳同一範圍時帶
+`--scope-manifest` 使用此清單；既有圖片索引與卡圖上傳描述的格式不變。
