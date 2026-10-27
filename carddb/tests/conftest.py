@@ -13,6 +13,9 @@ from sve_carddb.ingest.archive.manifest import Manifest
 from .support.author_source_preparation_fixtures import (
     author_source_preparation as author_source_preparation,  # ruff: ignore[useless-import-alias] -- register shared fixed source inputs
 )
+from .support.author_source_preparation_fixtures import (
+    current_source_preparation as current_source_preparation,  # ruff: ignore[useless-import-alias] -- restore fixed inputs once per worker across test layers
+)
 from .support.database_fixtures import t0_database_template as t0_database_template  # ruff: ignore[useless-import-alias] -- register shared immutable database template
 from .support.database_fixtures import t1_database_template as t1_database_template  # ruff: ignore[useless-import-alias] -- register shared immutable database template
 from .support.database_fixtures import t1b_database_template as t1b_database_template  # ruff: ignore[useless-import-alias] -- register shared immutable database template
@@ -30,7 +33,7 @@ from .support.shared_case_fixtures import (
 )
 from .support.shared_case_fixtures import default_text_case as default_text_case  # ruff: ignore[useless-import-alias] -- register session fixture dependency
 
-pytest_plugins = ("tests.support.time_budget",)
+pytest_plugins = ("tests.support.time_budget", "tests.support.scheduling")
 
 if TYPE_CHECKING:
     from collections.abc import Iterator

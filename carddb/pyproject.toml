@@ -143,6 +143,8 @@ addopts = [
     "--import-mode=importlib",
     # Keep each file's expensive session fixtures on one worker.
     "--dist=loadfile",
+    # Preserve the cost ordering supplied by tests.support.scheduling.
+    "--no-loadscope-reorder",
     "--strict-markers",
     "--maxfail=3",
     # "--durations=5",
