@@ -1,0 +1,23 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP14-110:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-29"
+    abilities:
+      - keywords:
+          - quick
+        line: 1
+      - spell:
+          do:
+            - life:
+                who: self
+                delta: 2
+            - draw:
+                n: 2
+        line: 2

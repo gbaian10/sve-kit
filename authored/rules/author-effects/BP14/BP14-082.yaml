@@ -1,0 +1,31 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP14-082:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-29"
+    abilities:
+      - evolve:
+          cost:
+            pp: 5
+        line: 1
+      - fanfare:
+          do:
+            - choose:
+                bind: enemy
+                from:
+                  who: opp
+                  zone: field
+                  kind: follower
+                n: 1
+            - damage:
+                n: 2
+                to: enemy
+            - discard:
+                n: 1
+        line: 2
