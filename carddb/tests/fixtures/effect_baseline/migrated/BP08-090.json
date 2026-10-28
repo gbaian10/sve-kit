@@ -1,0 +1,38 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "trigger",
+      "body": {
+        "op": "banish",
+        "subjects": "target.1"
+      },
+      "event": "evolve",
+      "subject": "self",
+      "targets": [
+        {
+          "key": "1",
+          "select": {
+            "side": "opponent",
+            "zone": "field",
+            "type": "follower"
+          },
+          "min": 1,
+          "max": 1
+        }
+      ]
+    },
+    {
+      "line": 2,
+      "kind": "trigger",
+      "body": {
+        "op": "damage",
+        "subjects": "opponent.leader",
+        "amount": 3
+      },
+      "event": "field_to_cemetery",
+      "subject": "self"
+    }
+  ]
+}
