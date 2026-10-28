@@ -282,7 +282,7 @@ impl Game {
         check_printed_face(base_print)?;
         if matches!(
             base_print["card_type"].as_str(),
-            Some("フォロワー" | "スペル" | "アミュレット")
+            Some("フォロワー" | "スペル" | "アミュレット" | "アミュレット・トークン")
         ) {
             super::cost::printed_play_cost(&base_print["cost"])?;
         }
@@ -604,7 +604,10 @@ fn check_printed_face(printed: &serde_json::Value) -> Result<()> {
     if printed["cost"].is_null() {
         return Err(unsupported("missing printed card cost"));
     }
-    if printed["card_type"] == "アミュレット" && (printed["power"] != "-" || printed["hp"] != "-")
+    if matches!(
+        printed["card_type"].as_str(),
+        Some("アミュレット" | "アミュレット・トークン")
+    ) && (printed["power"] != "-" || printed["hp"] != "-")
     {
         return Err(unsupported("amulet with printed combat statistics"));
     }
@@ -614,7 +617,10 @@ fn check_printed_face(printed: &serde_json::Value) -> Result<()> {
 // Evolved forms carry their own printed definitions.
 fn activation_type(kind: &str, zones: &[ZoneKind]) -> bool {
     match zones {
-        [ZoneKind::Field] => matches!(kind, "フォロワー" | "フォロワー・エボルヴ" | "アミュレット"),
+        [ZoneKind::Field] => matches!(
+            kind,
+            "フォロワー" | "フォロワー・エボルヴ" | "アミュレット" | "アミュレット・トークン"
+        ),
         [ZoneKind::Ex] => matches!(
             kind,
             "クレスト・トークン" | "スペル・トークン" | "アミュレット・トークン" | "アミュレット"

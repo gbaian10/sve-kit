@@ -421,36 +421,3 @@ cards:
               position: bottom
         event: enter
         subject: self
-  BP07-T03:
-    token_template: true
-    status: complete
-    abilities:
-      - line: 1
-        kind: trigger
-        body:
-          op: seq
-          steps:
-            - op: draw
-              count: 1
-            - op: seq
-              steps:
-                - op: select
-                  select:
-                    zone: hand
-                    side: self
-                  min: 1
-                  max: 1
-                  bind: discarded
-                - op: discard
-                  subjects: discarded
-        event: leave
-        subject: self
-      - line: 2
-        kind: activated
-        body:
-          op: move
-          subjects: self
-          to: cemetery
-        costs:
-          - op: pp
-            amount: 1

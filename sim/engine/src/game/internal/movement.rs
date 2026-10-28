@@ -508,7 +508,10 @@ impl Game {
                 self.check_internal_resources()?;
             }
             if ((card_type.contains("トークン") || card_type.contains("アドバンス"))
-                && !matches!(card_type, "フォロワー・アドバンス" | "フォロワー・トークン"))
+                && !matches!(
+                    card_type,
+                    "フォロワー・アドバンス" | "フォロワー・トークン" | "アミュレット・トークン"
+                ))
                 || previous
                     .state
                     .get("evolved_with")
@@ -531,7 +534,7 @@ impl Game {
                 && !matches!(zone, "field" | "ex" | "resolution" | "evolve_deck")
             {
                 Some("evolve_deck")
-            } else if card_type == "フォロワー・トークン"
+            } else if matches!(card_type, "フォロワー・トークン" | "アミュレット・トークン")
                 && !matches!(zone, "field" | "ex" | "resolution")
             {
                 Some("void")

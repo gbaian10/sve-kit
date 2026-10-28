@@ -59,18 +59,18 @@ fn bp01_156_evolution_chooses_only_opposing_ex_and_banishes() {
     .unwrap();
     // The synthetic base extends the input; the existing fixture rebinds only its envelope.
     rules["input"] = rule_fixtures::rules(&snapshot, json!([]), json!([]))["input"].clone();
+    let selected = Catalog::from_current_selection_with_rules(
+        &snapshot,
+        &keywords,
+        &input,
+        &rules.to_string(),
+        &EngineIdentityInput::LegacyJp,
+    )
+    .unwrap();
     for available in [false, true] {
         let initial = ex_position(available);
-        let selected = Catalog::from_current_selection_with_rules(
-            &snapshot,
-            &keywords,
-            &input,
-            &rules.to_string(),
-            &EngineIdentityInput::LegacyJp,
-        )
-        .unwrap();
         let mut game = Game::from_selected_effects(
-            selected,
+            selected.clone(),
             &initial,
             &Value::Null,
             &Value::Null,

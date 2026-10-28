@@ -5,6 +5,7 @@
 //! prototype AST for those scenarios only; it is never a current-selection result and
 //! grants no runtime qualification (see `current_repository.rs` for the real selection).
 
+use alloc::collections::{BTreeMap, BTreeSet};
 use alloc::sync::Arc;
 use std::ffi::OsStr;
 use std::fs::{read_dir, read_to_string};
@@ -104,6 +105,120 @@ fn build(snapshot: &str, keywords: &str, documents: &[(String, String)], root: &
     .expect("selected prototypes with rule bindings")
 }
 
+#[expect(
+    clippy::expect_used,
+    reason = "Historical passive token fixtures use the checked current author identity."
+)]
+fn include_passive_current_amulets(
+    documents: &mut Vec<(String, String)>,
+    input: &Value,
+    root: &Path,
+    snapshot: &str,
+) {
+    let available: BTreeSet<String> = snapshot
+        .lines()
+        .filter_map(|line| {
+            let card: Value = serde_json::from_str(line).expect("snapshot card");
+            if card.pointer("/faces/0/card_type").and_then(Value::as_str)
+                != Some("アミュレット・トークン")
+            {
+                return None;
+            }
+            Some(
+                card.get("number")
+                    .and_then(Value::as_str)
+                    .expect("snapshot printing")
+                    .to_owned(),
+            )
+        })
+        .collect();
+    let mut tokens = BTreeMap::new();
+    for author in input["authors"].as_array().expect("current authors") {
+        if author["status"] != "accepted" {
+            continue;
+        }
+        let candidate = &author["input"];
+        let number = candidate["card_no"].as_str().expect("current card number");
+        let token = candidate
+            .get("tree")
+            .and_then(|tree| tree.get("cards"))
+            .and_then(|cards| cards.get(number))
+            .and_then(|card| card.get("token"));
+        if let Some(token) = token.filter(|token| token.is_object()) {
+            tokens.insert(
+                candidate["card_id"]
+                    .as_str()
+                    .expect("current card identity"),
+                (number, token),
+            );
+        }
+    }
+    let existing: BTreeSet<String> = documents
+        .iter()
+        .flat_map(|(_, text)| {
+            let document: Value = serde_saphyr::from_str(text).expect("historical document");
+            document
+                .get("cards")
+                .and_then(Value::as_object)
+                .expect("historical cards")
+                .keys()
+                .cloned()
+                .collect::<Vec<_>>()
+        })
+        .collect();
+    let mut by_identity: BTreeMap<String, serde_json::Map<String, Value>> = BTreeMap::new();
+    let mut historical = BTreeSet::new();
+    for pack in read_dir(root.join("authored/registry/printing")).expect("printing registry") {
+        for entry in read_dir(pack.expect("printing pack").path()).expect("printing pack files") {
+            let path = entry.expect("printing registry file").path();
+            let registry: Value =
+                serde_saphyr::from_str(&read_to_string(path).expect("printing registry input"))
+                    .expect("printing registry YAML");
+            for record in registry
+                .get("records")
+                .and_then(Value::as_array)
+                .expect("printing records")
+            {
+                let data = &record["data"];
+                if record["kind"] != "printing" || data["region"] != "jp" {
+                    continue;
+                }
+                let Some((canonical, token)) =
+                    data["card_id"].as_str().and_then(|id| tokens.get(id))
+                else {
+                    continue;
+                };
+                let number = data["card_no"].as_str().expect("JP printing coordinate");
+                let identity = data["card_id"].as_str().expect("printing identity");
+                if existing.contains(number) {
+                    historical.insert(identity.to_owned());
+                }
+                if !available.contains(number) {
+                    continue;
+                }
+                // Shared legacy scenarios only use these amulets as passive payment material.
+                // Full current abilities are exercised by current_repository, never this fixture.
+                by_identity.entry(identity.to_owned()).or_default().insert(
+                    number.to_owned(),
+                    serde_json::json!({
+                        "status": "complete", "abilities": [], "rules_name": token["name"],
+                        "token_template": number == *canonical && token["template"] == true,
+                    }),
+                );
+            }
+        }
+    }
+    let cards: serde_json::Map<String, Value> = by_identity
+        .into_iter()
+        .filter(|(identity, _)| !historical.contains(identity))
+        .flat_map(|(_, cards)| cards)
+        .collect();
+    documents.push((
+        "historical/passive-current-tokens.yaml".to_owned(),
+        serde_json::json!({"format":1_u8, "kind":"effect_set", "cards":cards}).to_string(),
+    ));
+}
+
 /// Raw current prototype documents (no frozen restore), so load-time rejection findings
 /// keep the original YAML line numbers.
 #[allow(
@@ -120,6 +235,8 @@ pub(crate) fn historical_regression_catalog() -> Arc<Catalog> {
     Arc::clone(CATALOG.get_or_init(|| {
         let (snapshot, keywords, mut documents, root) = selected_prototypes();
         restore_frozen_programs(&mut documents, &root);
+        let (_, _, input) = repository::inputs();
+        include_passive_current_amulets(&mut documents, input, &root, snapshot);
         Arc::new(build(snapshot, keywords, &documents, &root))
     }))
 }
