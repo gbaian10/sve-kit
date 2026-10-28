@@ -74,7 +74,7 @@ impl Catalog {
         identity: &EngineIdentityInput,
     ) -> Result<Self> {
         for area in [
-            "rules/effects-index.yaml",
+            "rules/effects-index",
             "rules/author-effects",
             "rules/effect-bodies",
         ] {
