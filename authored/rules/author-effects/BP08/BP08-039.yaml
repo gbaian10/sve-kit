@@ -1,0 +1,21 @@
+cards:
+  BP08-039:
+    abilities:
+      - evolve_time:
+          do:
+            - move:
+                ref:
+                  other: true
+                  who: all
+                  zone: field
+                to: cemetery
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-29"
+format: 2
+kind: author_effect_set
