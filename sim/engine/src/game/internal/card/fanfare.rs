@@ -57,8 +57,13 @@ impl Game {
             controller: actor,
         };
         self.check_card_play_holder(holder, actor)?;
-        if !matches!(self.object_type(holder)?, "フォロワー" | "アミュレット") {
-            return Err(unsupported("ordinary field card play holder"));
+        let kind = self.object_type(holder)?;
+        if !matches!(
+            kind,
+            "フォロワー" | "アミュレット" | "アミュレット・トークン"
+        ) || (kind == "アミュレット・トークン" && object.zone != "ex")
+        {
+            return Err(unsupported("supported field card play holder"));
         }
         let mut execution = self.new_card_execution(context)?;
         let decision = json!({"do":"play","card":holder,"by":seat,"at":"main"});

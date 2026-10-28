@@ -282,7 +282,7 @@ impl Game {
         check_printed_face(base_print)?;
         if matches!(
             base_print["card_type"].as_str(),
-            Some("フォロワー" | "スペル" | "アミュレット")
+            Some("フォロワー" | "スペル" | "アミュレット" | "アミュレット・トークン")
         ) {
             super::cost::printed_play_cost(&base_print["cost"])?;
         }

@@ -433,7 +433,19 @@ fn printing_aliases_share_a_candidate_without_selecting_unrelated_numbers() {
 fn amulet_token_movement_keeps_other_special_card_kinds_closed() {
     for kind in ["アミュレット・トークン", "クレスト・トークン"] {
         let (snapshot, keywords, mut input) = selection(1);
-        let snapshot = snapshot.replace("フォロワー・トークン", kind);
+        let snapshot = snapshot
+            .lines()
+            .map(|line| {
+                let mut card: Value = serde_json::from_str(line).unwrap();
+                if card["number"] == "token" {
+                    card["faces"][0]["card_type"] = json!(kind);
+                    card["faces"][0]["power"] = json!("-");
+                    card["faces"][0]["hp"] = json!("-");
+                }
+                card.to_string()
+            })
+            .collect::<Vec<_>>()
+            .join("\n");
         input["authors"][0]["input"]["tree"]["cards"]["creator"]["faces"]
             ["f:11111111111111111111111111111111"]["abilities"][0]["spell"]["do"]
             .as_array_mut()
@@ -466,6 +478,61 @@ fn amulet_token_movement_keeps_other_special_card_kinds_closed() {
                     .values()
                     .all(|v| v["card"] != "token")
             );
+        }
+    }
+}
+
+#[test]
+fn amulet_token_play_and_activation_use_ex_and_reject_a_hand_origin() {
+    let (mut token, input) = author(
+        "token",
+        "22222222222222222222222222222222",
+        "アミュレット・トークン",
+        vec![
+            json!({"activate":{"cost":{"pp":1_u8},"do":[{"move":{"ref":"this","to":"cemetery"}}]}}),
+        ],
+    );
+    token["faces"][0]["power"] = json!("-");
+    token["faces"][0]["hp"] = json!("-");
+    let snapshot = token.to_string();
+    let keywords = json!({"format":1_u8,"kind":"keyword_registry","keywords":{}}).to_string();
+    let input = json!({"documents":[],"authors":[input]});
+    for zone in ["ex", "hand"] {
+        let selected = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
+        let ability = selected.current["token"].program.card().abilities[0]
+            .node
+            .id;
+        let mut position = initial(0);
+        position["players"]["P1"]["zones"]["hand"] = json!([]);
+        position["players"]["P1"]["zones"][zone] = json!([{"id":"token","card":"token"}]);
+        let mut game = Game::from_selected_effects(
+            selected,
+            &position,
+            &Value::Null,
+            &Value::Null,
+            "amulet-token-play",
+        )
+        .unwrap();
+        let before = format!("{game:?}");
+        let play = game.play_internal_card("token", PlayerId { seat: 1 });
+        if zone == "hand" {
+            assert!(play.is_err());
+            assert!(
+                format!("{game:?}") == before,
+                "invalid token play must not pay or move"
+            );
+        } else {
+            assert!(matches!(play.unwrap(), CardPlay::Entered(_)));
+            game.resume_internal_card().unwrap();
+            assert!(matches!(
+                game.activate_internal_card("token", ability, PlayerId { seat: 1 })
+                    .unwrap(),
+                CardPlay::Resolved(_)
+            ));
+            let view = game.projection(View::Referee).unwrap();
+            assert_eq!(view["P1"]["pp"]["current"], 8_u8);
+            assert_eq!(view["P1"]["field"], json!([]));
+            assert_eq!(view["P1"]["cemetery"], json!([]));
         }
     }
 }
