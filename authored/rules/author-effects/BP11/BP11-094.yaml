@@ -1,0 +1,23 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP11-094:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-28"
+    abilities:
+      - keywords:
+          - ward
+          - bane
+          - aura
+        line: 1
+      - evolve_time:
+          do:
+            - life:
+                who: self
+                delta: 4
+        line: 2
