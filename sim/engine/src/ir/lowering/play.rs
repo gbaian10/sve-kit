@@ -120,6 +120,7 @@ impl BodyContext<'_> {
             },
             zone: match target.from.zone.as_ref().ok_or_else(|| unsupported(path))? {
                 ast::Zone::Field => ZoneKind::Field,
+                ast::Zone::Ex => ZoneKind::Ex,
             },
             view: SelectionView::Current {},
             binding: candidate,

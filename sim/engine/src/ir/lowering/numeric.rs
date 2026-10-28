@@ -109,6 +109,7 @@ impl BodyContext<'_> {
             },
             zone: match query.zone {
                 ast::Zone::Field => ZoneKind::Field,
+                ast::Zone::Ex => return Err(unsupported(path)),
             },
             view: SelectionView::Current {},
             binding,
