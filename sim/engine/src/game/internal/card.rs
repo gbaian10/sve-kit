@@ -36,6 +36,7 @@ mod resources;
 pub(in crate::game::internal) mod triggers;
 pub use triggers::{PendingOption, QuotaDomain, QuotaSelection};
 pub(super) mod play;
+pub(super) mod recipient_targets;
 pub(super) mod selection;
 
 pub use play::{CardEntry, CardPlay};

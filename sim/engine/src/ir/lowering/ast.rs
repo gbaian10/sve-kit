@@ -620,8 +620,12 @@ pub(super) struct Choose {
 #[derive(Clone, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct TargetQuery {
-    pub who: Side,
-    pub zone: Zone,
+    pub who: Option<Side>,
+    pub zone: Option<Zone>,
+    pub leader: Option<LeaderSide>,
+    pub leaders: Option<LeaderGroup>,
+    #[serde(default)]
+    pub leader_or: bool,
     pub kind: Option<SearchKind>,
     pub r#trait: Option<String>,
 }
@@ -638,7 +642,7 @@ pub(super) struct Choice {
     pub _who: Option<SelfPlayer>,
 }
 
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum LeaderGroup {
     All,

@@ -140,6 +140,7 @@ tags!(QuickWindow { Attack, EndPhase });
 variants!(ChoiceDomain {
     EndPhaseGuardAct { binding: Binding<Selector> } => [],
     Objects { constraint: SelectionConstraint, binding: Binding<Selector>, target_roles: Option<TargetRoleSpec> } => [],
+    Recipients { candidates: RecipientSet, cardinality: Cardinality, binding: Binding<Vec<DamageRecipient>> } => [],
     Modes { modes: Vec<ModeId>, cardinality: Cardinality, binding: Binding<Vec<ModeId>>, exclude_used: Option<ModeExclusion> } => [],
     Order { objects: Selector, binding: Binding<Selector> } => [],
     Distribution { recipients: RecipientSet, total: Expr<Nat>, minimum: Nat, binding: Binding<Vec<DamageAllocation>> } => [],

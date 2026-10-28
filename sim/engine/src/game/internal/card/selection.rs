@@ -28,13 +28,16 @@ pub(in crate::game::internal) struct TargetWait {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-struct TargetCharacteristics {
+pub(in crate::game::internal) struct TargetCharacteristics {
     controller: String,
     kind: String,
     traits: Vec<String>,
 }
 
-fn characteristics(game: &Game, id: &str) -> Result<TargetCharacteristics> {
+pub(in crate::game::internal) fn characteristics(
+    game: &Game,
+    id: &str,
+) -> Result<TargetCharacteristics> {
     // The admitted closure has no trait patches, static effects or base replacement during play.
     let traits = game.face(id)?["traits"]
         .as_array()
@@ -427,6 +430,27 @@ impl Game {
                 &candidate.slots,
                 &parameters.iter().skip(1).cloned().collect(),
             );
+        }
+        if matches!(first.domain, ChoiceDomain::Recipients { .. }) {
+            let (wait, _) = self.recipient_target_domain(&candidate, first)?;
+            for members in wait.selections()? {
+                let mut next = candidate.clone();
+                next.slots.insert(
+                    wait.binding.key(),
+                    Slot::Recipients {
+                        members,
+                        characteristics: wait.characteristics.clone(),
+                    },
+                );
+                if self.internal_feasible_targets(
+                    &next,
+                    &next.slots,
+                    &parameters.iter().skip(1).cloned().collect(),
+                )? {
+                    return Ok(true);
+                }
+            }
+            return Ok(false);
         }
         let (wait, _) = self.target_domain(&candidate, first)?;
         // Both public fields have a rules-defined capacity of five, so this proof is finite.

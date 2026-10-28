@@ -258,7 +258,35 @@ impl Execution {
                     _ => Err(unsupported("damage recipient")),
                 })
                 .collect::<Result<Vec<_>>>()?,
-            RecipientSet::Bound { .. } => return Err(unsupported("recipient binding")),
+            RecipientSet::Bound { recipients } => match self.slots.get(&recipients.key()) {
+                Some(Slot::Recipients {
+                    members,
+                    characteristics,
+                }) => {
+                    for member in members {
+                        if let RuntimeDamageRecipient::Object { object } = member {
+                            let id = self.object_id(*object)?;
+                            let current = game.object(id)?;
+                            if current.generation != object.generation.0 {
+                                continue;
+                            }
+                            let saved = characteristics
+                                .iter()
+                                .find(|(reference, _)| reference == object)
+                                .ok_or_else(|| invalid("missing recipient target producer"))?;
+                            if current.zone != "field"
+                                || super::card::selection::characteristics(game, id)? != saved.1
+                            {
+                                return Err(unsupported(
+                                    "selected recipient target characteristics changed",
+                                ));
+                            }
+                        }
+                    }
+                    members.clone()
+                }
+                _ => return Err(invalid("missing typed recipient binding")),
+            },
         };
         Ok(ResolvedRecipients::new(values))
     }

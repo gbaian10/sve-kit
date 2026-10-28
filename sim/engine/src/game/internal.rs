@@ -325,6 +325,10 @@ pub enum Fact {
 #[derive(Clone, Debug, PartialEq, Eq)]
 enum Slot {
     Created(Vec<ObjectRef>),
+    Recipients {
+        members: Vec<RuntimeDamageRecipient>,
+        characteristics: Vec<(ObjectRef, card::selection::TargetCharacteristics)>,
+    },
     Integer(Int),
     Natural(Nat),
     Boolean(Bool),
@@ -345,6 +349,7 @@ enum Wait {
         count: usize,
     },
     Targets(card::selection::TargetWait),
+    RecipientTargets(card::recipient_targets::RecipientWait),
     ResolutionTargets(card::selection::TargetWait),
     Modes(card::play::ModeWait),
     Distribution(allocation::DistributionWait),
@@ -645,6 +650,17 @@ impl Game {
                 {
                     rollback = execution.origin.take();
                     self.internal_quota_answer(handle)?;
+                }
+                (Wait::RecipientTargets(wait), Answer::Targets(handles)) => {
+                    let members = wait.validate(&handles)?;
+                    rollback = execution.origin.take();
+                    execution.slots.insert(
+                        wait.binding.key(),
+                        Slot::Recipients {
+                            members,
+                            characteristics: wait.characteristics,
+                        },
+                    );
                 }
                 (Wait::Targets(wait), Answer::Targets(handles)) => {
                     let objects = wait.validate(&handles)?;
