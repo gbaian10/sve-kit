@@ -1,0 +1,19 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP08-044:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-28"
+    abilities:
+      - fanfare:
+          do:
+            - draw:
+                n: 1
+            - discard:
+                n: 1
+        line: 1

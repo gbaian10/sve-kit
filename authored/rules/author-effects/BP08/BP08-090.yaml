@@ -1,0 +1,31 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP08-090:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-28"
+    abilities:
+      - evolve_time:
+          do:
+            - choose:
+                bind: enemy
+                from:
+                  who: opp
+                  zone: field
+                  kind: follower
+                n: 1
+            - banish:
+                ref: enemy
+        line: 1
+      - lastword:
+          do:
+            - damage:
+                n: 3
+                to:
+                  leaders: opponents
+        line: 2

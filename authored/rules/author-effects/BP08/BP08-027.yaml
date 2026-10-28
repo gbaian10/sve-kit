@@ -1,0 +1,28 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP08-027:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-28"
+    abilities:
+      - keywords:
+          - rush
+        line: 1
+      - attack_time:
+          do:
+            - choose:
+                bind: enemy
+                from:
+                  who: opp
+                  zone: field
+                  kind: follower
+                n: 1
+            - damage:
+                n: 4
+                to: enemy
+        line: 2
