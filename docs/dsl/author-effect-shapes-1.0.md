@@ -180,3 +180,14 @@ cost_mod.when_playing 是獨立的打出篩選，不從這張表補範圍。
 事件角色與本文件的安裝角色不可互借；兩者的正反例都不取代全卡與執行驗收。
 
 動作 grant 的 on 必填且可含領袖；EffectSpec.grant 的 on 選填但 static 上下文須明寫。動作 keyword 葉可參數化，EffectSpec keyword 葉不可；其餘授予形狀見[能力矩陣](author-ability-shapes-1.0.md)。
+
+## 正式執行的固定關鍵字授予
+
+動作 `grant: {on: ref, keywords: [...]}` 支援既有場上固定物件，關鍵字限
+`ward`、`aura`、`storm`、`rush`、`bane`、`intimidate`、`assail`。
+省略 `until` 或 `until: game` 時沒有時間到期；`until: turn` 在實際回合結束時移除。
+物件離開場上再返回時不保留舊世代的授予；授予來源離場不取消已完成的無時間限制授予。
+BP01-047 在入場能力解算時選自己的另一名從者，令其獲得 `assail`；
+BP04-113 在進化時授予 `aura`（BP04-112 的進化能力同時准入），
+BP05-078 的選項本文授予 `rush`。選項本文保留原能力的文字來源，不把局部 scope 當作能力定義。
+目前不執行一般能力本體的授予、領袖授予、其他關鍵字或其他期間；語法接受的完整形狀仍依能力矩陣。
