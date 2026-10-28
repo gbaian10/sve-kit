@@ -408,6 +408,18 @@ def test_selection_keeps_keyword_failures_without_fallback(
 ) -> None:
     with current(keyword_current_fixture) as source:
         effect(source, monkeypatch, "【守護】")
+        # An official JP printing of the same permanent card must share the rejection.
+        printing = next(
+            row.values
+            for row in source.db.rows("printing")
+            if row.values["card_no"] == "BP01-009"
+        )
+        with source.db.transaction():
+            source.db.insert(
+                "printing",
+                dict(printing)
+                | {"id": "SYN-KEYWORD-ALIAS", "card_no": "SYN-KEYWORD-ALIAS"},
+            )
         inputs = collection(
             source,
             {
@@ -420,9 +432,15 @@ def test_selection_keeps_keyword_failures_without_fallback(
             source.selection_inputs(load_semantic_inputs(tmp_path, expander), expander)
         )
     authors = [object_value(item) for item in array(selected["authors"])]
-    assert [item["status"] for item in authors] == ["rejected", "accepted"]
-    assert len(array(object_value(authors[1]["input"])["declaration_sidecar"])) == 1
-    assert authors[0]["reason"] == "source_keyword_payload_mismatch"
+    accepted = [item for item in authors if item["status"] == "accepted"]
+    rejected = [item for item in authors if item["status"] == "rejected"]
+    assert len(accepted) == 1
+    assert len(array(object_value(accepted[0]["input"])["declaration_sidecar"])) == 1
+    assert {item["card_no"] for item in rejected} >= {
+        "BP01-009",
+        "SYN-KEYWORD-ALIAS",
+    }
+    assert {item["reason"] for item in rejected} == {"source_keyword_payload_mismatch"}
     assert selected["documents"] == []
 
 
