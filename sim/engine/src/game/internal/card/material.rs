@@ -310,8 +310,15 @@ impl Game {
             if ids.iter().any(|id| {
                 self.object(id)
                     .is_ok_and(|object| object.state["acted"] != false)
-            }) || self.change_posture(&ids, true, &execution.frame().cause)? != ids
-            {
+            }) {
+                let reason = if matches!(objects, Selector::Objects { .. }) {
+                    "whole-card posture cost requires a standing source"
+                } else {
+                    "material posture cost requires standing materials"
+                };
+                return Err(crate::EngineFailure::IllegalPlay(reason.into()));
+            }
+            if self.change_posture(&ids, true, &execution.frame().cause)? != ids {
                 return Err(crate::EngineFailure::IllegalPlay(
                     "incomplete material posture cost".into(),
                 ));
