@@ -946,13 +946,16 @@ export function CardsPage() {
     page !== null && page.total > 0 ? (
       <div
         className={cn(
-          "flex gap-x-3 gap-y-2",
-          headerMenus ? "flex-col items-stretch" : "items-center",
-          !compact && "flex-wrap",
+          "flex flex-col items-stretch gap-x-3 gap-y-2 md:flex-row md:items-center",
+          !compact && "md:flex-wrap",
         )}
       >
-        {view === "list" && <ListColumnPicker inline={headerMenus} />}
-        <div className={cn("flex items-center gap-2", !headerMenus && "ml-auto", "flex-wrap")}>
+        <div
+          className={cn(
+            "flex w-full flex-col items-start gap-2 md:w-auto md:flex-row md:items-center",
+            !headerMenus && "md:flex-wrap",
+          )}
+        >
           <SortControls query={query} onChange={commit} />
           <Segmented
             size="sm"
@@ -974,6 +977,7 @@ export function CardsPage() {
             }}
           />
         </div>
+        {view === "list" && <ListColumnPicker inline={headerMenus} />}
       </div>
     ) : null
   return (
