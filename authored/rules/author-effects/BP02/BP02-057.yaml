@@ -1,0 +1,23 @@
+cards:
+  BP02-057:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - pp_max:
+                delta: 1
+                who: self
+            - life:
+                delta: 3
+                who: self
+            - draw:
+                n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-luna
+            who: Codex
+          date: "2026-10-28"
+format: 2
+kind: author_effect_set
