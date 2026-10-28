@@ -1,0 +1,33 @@
+cards:
+  BP02-094:
+    abilities:
+      - fanfare:
+          do:
+            - choose:
+                bind: chosen
+                from:
+                  kind: follower
+                  who: opp
+                  zone: field
+                n: 1
+            - destroy:
+                ref: chosen
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - self_to_cemetery: true
+          do:
+            - draw:
+                n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-luna
+            who: Codex
+          date: "2026-10-28"
+format: 2
+kind: author_effect_set
