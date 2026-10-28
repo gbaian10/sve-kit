@@ -1,0 +1,50 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP04-032:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-28"
+    abilities:
+      - line: 1
+        play:
+          cost_delta:
+            if:
+              exists:
+                who: self
+                zone: field
+                kind: follower
+                name: ロードジェネラル・ロミオ
+            delta: -2
+      - line: 2
+        keywords:
+          - storm
+      - line: 3
+        auto:
+          on:
+            phase:
+              which: end
+              whose: self
+          do:
+            - if:
+                cond:
+                  exists:
+                    who: self
+                    zone: field
+                    kind: follower
+                    name: ロードジェネラル・ロミオ
+                then:
+                  - choose:
+                      bind: victim
+                      from:
+                        who: opp
+                        zone: field
+                        kind: follower
+                      n: 1
+                  - damage:
+                      to: victim
+                      n: 2
