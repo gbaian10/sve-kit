@@ -65,7 +65,8 @@ const built = await buildSnapshot({
   encodeImage: ({ seed }) => Promise.resolve(new TextEncoder().encode(String(seed))),
 })
 // Legacy catalog comparisons exercise explicit card grouping alongside the printing default.
-const CARD_QUERY = { ...DEFAULT_QUERY, unit: "card" as const }
+const { order: _defaultOrder, ...ascendingQuery } = DEFAULT_QUERY
+const CARD_QUERY = { ...ascendingQuery, sort: "no" as const, unit: "card" as const }
 const query: SearchQuery = { state: CARD_QUERY, edition: "jp", limit: 100 }
 
 it("chooses the uniquely largest promo family and hides ties", () => {
@@ -2281,53 +2282,6 @@ it("a failed background printing closure is downloaded again by the next check",
   await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
 }, 30_000)
 
-it.each(["jp", "en"] as const)(
-  "sorts names using the %s edition even on a Swedish host",
-  async (edition) => {
-    const client = createSnapshotClient(base, { fetch: origin().fetcher, region: edition })
-    await client.load()
-    const snapshot = client.snapshot()
-    if (!snapshot) throw new Error("missing snapshot")
-    const names = edition === "jp" ? ["安", "悪"] : ["z", "ä"]
-    const columns = new BootstrapColumns()
-    const replacements = new Map<string, string>()
-    const replace = (row: JsonObject) => {
-      const id = stringValue(row["id"])
-      if (!replacements.has(id)) replacements.set(id, names[replacements.size % 2] ?? "")
-      return { ...row, text: replacements.get(id) ?? "" }
-    }
-    columns.ingest(
-      snapshot.bootstrap.map((fragment) =>
-        fragment.table === "text_unit"
-          ? {
-              ...fragment,
-              rows: fragment.rows.map(replace),
-            }
-          : fragment,
-      ),
-    )
-    columns.seal()
-    const index = new SearchIndex(columns, edition)
-    const host = vi.spyOn(String.prototype, "localeCompare").mockImplementation(function (
-      this: string,
-      other,
-      locales,
-      options,
-    ) {
-      return new Intl.Collator(locales ?? "sv", options).compare(this, other)
-    })
-    try {
-      const page = index.search({ ...query, edition, state: { ...CARD_QUERY, sort: "name" } })
-      const actual = page.items.map((item) => item.summary?.name.original.text)
-      expect(actual).toContain(names[0])
-      expect(actual).toContain(names[1])
-      expect(actual.indexOf(names[1])).toBeLessThan(actual.indexOf(names[0]))
-    } finally {
-      host.mockRestore()
-    }
-  },
-)
-
 it("sorts descending before pagination, preserves tie order and leaves missing stats last", async () => {
   const client = createSnapshotClient(base, { fetch: origin().fetcher })
   await client.load()
@@ -2337,7 +2291,7 @@ it("sorts descending before pagination, preserves tie order and leaves missing s
   columns.ingest(snapshot.bootstrap)
   columns.seal()
   const index = new SearchIndex(columns, "jp")
-  for (const sort of ["no", "cost", "atk", "def", "name"] as const) {
+  for (const sort of ["no", "cost", "atk", "def"] as const) {
     const state = { ...CARD_QUERY, sort, order: "desc" as const }
     const full = index.search({ ...query, state, limit: 100 })
     const page = index.search({ ...query, state, offset: 2, limit: 3 })
@@ -2348,7 +2302,7 @@ it("sorts descending before pagination, preserves tie order and leaves missing s
       expect(full.items.map((item) => item.key)).toEqual(
         ascending.items.map((item) => item.key).reverse(),
       )
-    } else if (sort !== "name") {
+    } else {
       const field = sort === "atk" ? "attack" : sort === "def" ? "defense" : "cost"
       const values = full.items.map((item) => item.summary?.[field] ?? null)
       for (let i = 1; i < values.length; i++) {
@@ -2477,7 +2431,7 @@ it("refreshes a locator-only view after printing metadata arrives and persists t
   )
   if (!print) throw new Error("print fixture missing")
   const release = served.hold(stringValue(print["path"]))
-  const page = { ...query, state: { ...DEFAULT_QUERY, text: "BP01-021S" } }
+  const page = { ...query, state: { ...CARD_QUERY, unit: "printing" as const, text: "BP01-021S" } }
   h.channel.view(page, true)
   h.session.load(base, "jp", "preview")
   try {
@@ -3266,70 +3220,7 @@ it("finishes printing facets and merged units while mechanic payloads are pendin
   h.session.dispose()
 })
 
-it("sorts release dates from inclusions, keeps unknown dates last and restores the index", async () => {
-  const client = createSnapshotClient(base, { fetch: origin().fetcher })
-  await client.load()
-  await client.prefetchPrintings?.()
-  const snapshot = client.snapshot()
-  if (!snapshot) throw new Error("missing fixture")
-  const source = new BootstrapColumns()
-  source.ingest(snapshot.bootstrap)
-  source.seal()
-  const state = { ...DEFAULT_QUERY, unit: "printing" as const }
-  const initial = new SearchIndex(source, "jp").search({
-    ...query,
-    state: { ...state, unit: "card" },
-  })
-  const ids = initial.items.slice(0, 5).map((item) => item.printingId)
-  expect(ids).toHaveLength(5)
-  const product = snapshot.bootstrap.find((fragment) => fragment.table === "product")
-  const inclusion = snapshot.bootstrap.find((fragment) => fragment.table === "printing_product")
-  if (!product || !inclusion) throw new Error("missing product fixture")
-  const staged = new BootstrapColumns()
-  staged.ingest(snapshot.bootstrap.filter((fragment) => fragment.table !== "printing_product"))
-  staged.ingest([
-    {
-      ...product,
-      rows: [
-        {
-          id: "release-test",
-          region: "jp",
-          family_ids: [],
-          released_on: "2020-01-01",
-          date_precision: "day",
-        },
-      ],
-    },
-    {
-      ...inclusion,
-      rows: ids.slice(0, 4).map((id, index) => ({
-        printing_id: id,
-        product_id: "release-test",
-        available_on: index === 0 ? "2023-01-01" : null,
-        date_precision: index === 0 ? "day" : index === 3 ? "month" : null,
-        date_raw: index === 3 ? "2020-01" : null,
-      })),
-    },
-  ])
-  staged.seal()
-  const created = new SearchIndex(staged, "jp")
-  for (const index of [created, new SearchIndex(created.encode(), "jp")]) {
-    for (const unit of ["printing", "card"] as const) {
-      const selected = (order?: "desc") =>
-        index
-          .search({
-            ...query,
-            state: { ...state, unit, sort: "date", ...(order ? { order } : {}) },
-          })
-          .items.filter((item) => ids.includes(item.printingId))
-          .map((item) => item.printingId)
-      expect(selected()).toEqual([ids[1], ids[2], ids[0], ids[3], ids[4]])
-      expect(selected("desc")).toEqual([ids[0], ids[1], ids[2], ids[3], ids[4]])
-    }
-  }
-})
-
-it("waits for printing dates before returning a release-date-sorted printing query", async () => {
+it("waits for printing home sets before returning a set-sorted printing query", async () => {
   const served = origin()
   const h = harness(served)
   const print = (built.manifest["files"] as JsonObject[]).find(
@@ -3338,7 +3229,7 @@ it("waits for printing dates before returning a release-date-sorted printing que
   if (!print) throw new Error("missing printing fixture")
   const release = served.hold(stringValue(print["path"]))
   h.session.load(base, "jp", "preview")
-  h.channel.search({ ...query, state: { ...DEFAULT_QUERY, sort: "date" } })
+  h.channel.search({ ...query, state: DEFAULT_QUERY })
   try {
     await expect.poll(() => h.status().phase, POLL).toBe("ready")
     for (let i = 0; i < 5; i += 1) await h.queried()
@@ -3460,6 +3351,116 @@ it("filters printing marks before grouping and preserves them in completed and r
       const merged = ids({ stampOnly: true, serialOnly: true, unit })
       expect(merged.length).toBeGreaterThan(0)
       for (const id of merged) expect(both).toContain(id)
+    }
+  }
+})
+
+it("sorts home sets by regional release, groups undated products and PR, and applies independent secondary directions", async () => {
+  const client = createSnapshotClient(base, { fetch: origin().fetcher })
+  await client.load()
+  await client.prefetchPrintings?.()
+  const snapshot = client.snapshot()
+  if (!snapshot) throw new Error("missing fixture")
+  const source = new BootstrapColumns()
+  source.ingest(snapshot.bootstrap)
+  source.seal()
+  const ids = new SearchIndex(source, "jp")
+    .search(query)
+    .items.slice(0, 12)
+    .map((item) => item.printingId)
+  expect(ids).toHaveLength(12)
+  const cases = [
+    ["bp21", "BP21-001"],
+    ["bp22", "BP22-002"],
+    ["bp22", "BP22-001"],
+    ["pr", "PR-010"],
+    ["pr", "PR-002"],
+    ["gfe01", "GFE01-001"],
+    ["ny2024", "NY2024-001"],
+    ["zz22", "ZZ22-001"],
+    ["bp21", "BP22-001"],
+    ["bsf2024", "BSF2024-001"],
+    ["bsf2025", "BSF2025-001"],
+    ["bp21", "BP99-001"],
+  ] as const
+  const family = snapshot.bootstrap.find((fragment) => fragment.table === "product_family")
+  const product = snapshot.bootstrap.find((fragment) => fragment.table === "product")
+  if (!family || !product || !family.rows[0]) throw new Error("missing product fixture")
+  const codes = [...new Set(cases.map(([set]) => set))]
+  const columns = new BootstrapColumns()
+  columns.ingest(
+    snapshot.bootstrap
+      .filter((fragment) => !["product", "product_family"].includes(fragment.table))
+      .flatMap((fragment) =>
+        fragment.table !== "printing"
+          ? [fragment]
+          : fragment.rows.map((row) => {
+              const entry = cases[ids.indexOf(stringValue(row["id"]))]
+              return {
+                ...fragment,
+                value: entry
+                  ? { ...fragment.value, owner: { kind: "home_set", id: `sort:${entry[0]}` } }
+                  : fragment.value,
+                rows: [entry ? { ...row, card_no: entry[1] } : row],
+              }
+            }),
+      ),
+  )
+  columns.ingest([
+    {
+      ...family,
+      rows: codes.map((code) => ({
+        ...family.rows[0],
+        id: `sort:${code}`,
+        code,
+        public_code: code.toUpperCase(),
+      })),
+    },
+    {
+      ...product,
+      rows: ["bp21", "bp22", "zz22"].flatMap((code) => [
+        {
+          id: `sort:${code}:jp`,
+          family_ids: [`sort:${code}`],
+          region: "jp",
+          released_on: code === "bp21" ? "2026-01-01" : "2026-02-01",
+          date_precision: "day",
+        },
+        {
+          id: `sort:${code}:en`,
+          family_ids: [`sort:${code}`],
+          region: "en",
+          released_on: "2027-01-01",
+          date_precision: "day",
+        },
+      ]),
+    },
+  ])
+  columns.seal()
+  const builtIndex = new SearchIndex(columns, "jp")
+  for (const index of [builtIndex, new SearchIndex(builtIndex.encode(), "jp")]) {
+    for (const unit of ["printing", "art", "card"] as const) {
+      const selected = (state: SearchQuery["state"]) =>
+        index
+          .search({ ...query, state: { ...state, unit } })
+          .items.filter((item) => ids.includes(item.printingId))
+          .map((item) => ids.indexOf(item.printingId))
+      expect(selected(DEFAULT_QUERY)).toEqual([7, 2, 1, 0, 8, 11, 4, 3, 6, 5, 10, 9])
+      const { order: _order, ...ascending } = DEFAULT_QUERY
+      expect(selected(ascending)).toEqual([9, 10, 5, 6, 4, 3, 0, 8, 11, 2, 1, 7])
+      expect(selected({ ...DEFAULT_QUERY, secondaryOrder: "desc" })).toEqual([
+        7, 1, 2, 11, 8, 0, 3, 4, 6, 5, 10, 9,
+      ])
+      expect(selected({ ...DEFAULT_QUERY, secondarySort: null })).toEqual(selected(DEFAULT_QUERY))
+      const numberFirst = selected({
+        ...ascending,
+        sort: "no",
+        secondarySort: "set",
+        secondaryOrder: "desc",
+      })
+      expect(numberFirst.indexOf(2)).toBeLessThan(numberFirst.indexOf(8))
+      const numberFirstReverse = selected({ ...ascending, sort: "no", secondarySort: "set" })
+      expect(numberFirstReverse.indexOf(8)).toBeLessThan(numberFirstReverse.indexOf(2))
     }
   }
 })

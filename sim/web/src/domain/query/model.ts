@@ -14,7 +14,7 @@ type QueryUnit = (typeof QUERY_UNITS)[number]
 export const REPRINT_MODES = ["all", "hide", "only"] as const
 type ReprintMode = (typeof REPRINT_MODES)[number]
 
-export const QUERY_SORTS = ["no", "cost", "name", "date", "atk", "def"] as const
+export const QUERY_SORTS = ["set", "no", "cost", "atk", "def"] as const
 type QuerySort = (typeof QUERY_SORTS)[number]
 
 export const VIEW_MODES = ["grid", "table", "list"] as const
@@ -71,6 +71,8 @@ export interface QueryState {
   readonly prFirst: boolean
   readonly order?: "desc"
   readonly sort: QuerySort
+  readonly secondarySort: QuerySort | null
+  readonly secondaryOrder?: "desc"
   /** Absent means "use the preference"; only an explicit choice goes into the URL. */
   readonly view?: ViewMode
 }
@@ -104,7 +106,9 @@ export const DEFAULT_QUERY: QueryState = {
   unit: "printing",
   representative: "low",
   prFirst: false,
-  sort: "no",
+  sort: "set",
+  order: "desc",
+  secondarySort: "no",
 }
 
 /** Number of filter facets set beyond the text, for the filter button's badge. */

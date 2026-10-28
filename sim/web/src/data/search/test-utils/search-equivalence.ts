@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto"
 
+import { parseQuery } from "../../../domain/query/codec"
 import { DEFAULT_QUERY, type QueryState } from "../../../domain/query/model"
 import type { Region } from "../../../domain/search"
 import { canonicalText, type JsonValue } from "../../format-v3/json"
@@ -84,8 +85,11 @@ export function compareSearchIndexes(actual: SearchApi, expected: SearchApi, edi
   ]
   for (const stat of ["cost", "attack", "defense"] as const)
     for (const values of [[0], [1], [9], [10], [0, 10]]) changes.push({ [stat]: values })
-  for (const sort of ["no", "name", "cost", "atk", "def", "date"] as const)
-    changes.push({ sort }, { sort, order: "desc" })
+  for (const sort of ["set", "no", "cost", "atk", "def"] as const)
+    changes.push(parseQuery(new URLSearchParams({ sort: `${sort}:asc,no:asc` })), {
+      sort,
+      order: "desc",
+    })
   for (const set of expected.options.sets.slice(0, 3))
     for (const rarity of Object.keys(expected.options.rarityCounts))
       changes.push({ sets: [set.code], rarities: [rarity], altArtOnly: true })

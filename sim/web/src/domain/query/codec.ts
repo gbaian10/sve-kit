@@ -16,7 +16,7 @@ import {
 } from "./model"
 
 // URL parameters: q class cost atk def type loc trait artist mech set rarity alt reprint unit rep prfirst
-// stamp serial errata restricted sort order view. Lists
+// stamp serial errata restricted sort view. Sort clauses carry their own direction. Lists
 // are comma separated, de-duplicated and sorted so equal states always give equal URLs; unknown
 // values are dropped rather than failing, because URLs arrive from anywhere. `cost`, `atk` and `def`
 // list the selected values; the cap (7 for cost, 10 for attack and defense) means that value or more.
@@ -76,6 +76,44 @@ function parseMechanics(text: string | null): Record<string, MechanicState> {
   return out
 }
 
+function parseSort(
+  params: URLSearchParams,
+): Pick<QueryState, "sort" | "order" | "secondarySort" | "secondaryOrder"> {
+  const raw = params.get("sort")
+  const fallback = {
+    sort: DEFAULT_QUERY.sort,
+    ...(DEFAULT_QUERY.order === "desc" ? { order: "desc" as const } : {}),
+    secondarySort: DEFAULT_QUERY.secondarySort,
+  }
+  if (!raw) return fallback
+  // Older shared links have one bare sort key and a separate direction.
+  const legacy = oneOf(raw, QUERY_SORTS)
+  if (legacy)
+    return {
+      sort: legacy,
+      secondarySort: "no",
+      ...(params.get("order") === "desc" ? { order: "desc" } : {}),
+    }
+  const clauses = raw.split(",")
+  if (clauses.length > 2) return fallback
+  const read = (clause: string | undefined) => {
+    const [key, direction, extra] = clause?.split(":") ?? []
+    const sort = oneOf(key ?? null, QUERY_SORTS)
+    return sort && (direction === "asc" || direction === "desc") && extra === undefined
+      ? { sort, direction }
+      : undefined
+  }
+  const first = read(clauses[0])
+  const second = read(clauses[1])
+  if (!first || (clauses.length === 2 && !second)) return fallback
+  return {
+    sort: first.sort,
+    ...(first.direction === "desc" ? { order: "desc" } : {}),
+    secondarySort: second?.sort ?? null,
+    ...(second?.direction === "desc" ? { secondaryOrder: "desc" } : {}),
+  }
+}
+
 export function parseQuery(params: URLSearchParams): QueryState {
   const view = oneOf(params.get("view"), VIEW_MODES)
   const typed = list(params, LIST_PARAMS.types)
@@ -111,8 +149,7 @@ export function parseQuery(params: URLSearchParams): QueryState {
     errataOnly: params.get("errata") === "1",
     restrictionsOnly: params.get("restricted") === "1",
     reprints: oneOf(params.get("reprint"), REPRINT_MODES) ?? DEFAULT_QUERY.reprints,
-    sort: oneOf(params.get("sort"), QUERY_SORTS) ?? DEFAULT_QUERY.sort,
-    ...(params.get("order") === "desc" ? { order: "desc" as const } : {}),
+    ...parseSort(params),
     ...(view === undefined ? {} : { view }),
   }
 }
@@ -152,8 +189,17 @@ export function formatQuery(state: QueryState): URLSearchParams {
   if (state.errataOnly) params.set("errata", "1")
   if (state.restrictionsOnly) params.set("restricted", "1")
   if (state.reprints !== DEFAULT_QUERY.reprints) params.set("reprint", state.reprints)
-  if (state.sort !== DEFAULT_QUERY.sort) params.set("sort", state.sort)
-  if (state.order === "desc") params.set("order", "desc")
+  if (
+    state.sort !== DEFAULT_QUERY.sort ||
+    state.order !== DEFAULT_QUERY.order ||
+    state.secondarySort !== DEFAULT_QUERY.secondarySort ||
+    state.secondaryOrder === "desc"
+  ) {
+    const clauses = [`${state.sort}:${state.order === "desc" ? "desc" : "asc"}`]
+    if (state.secondarySort !== null)
+      clauses.push(`${state.secondarySort}:${state.secondaryOrder === "desc" ? "desc" : "asc"}`)
+    params.set("sort", clauses.join(","))
+  }
   if (state.view !== undefined) params.set("view", state.view)
   return params
 }

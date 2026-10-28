@@ -6,7 +6,7 @@ import {
   type MechanicProjection,
   mechanicState,
 } from "../../domain/mechanics"
-import { normalizeText } from "../../domain/normalize"
+import { compareCodePoints, normalizeText } from "../../domain/normalize"
 import {
   CLASS_MECHANISMS,
   COLLAB_MECHANISMS,
@@ -186,7 +186,6 @@ const PRINTING_COLUMNS = [
   "serial",
   "art",
   "alt",
-  "releaseDate",
   "artists",
 ] as const
 const uintColumns = <T extends string>(names: readonly T[]) =>
@@ -197,7 +196,7 @@ const seal = <T extends string>(columns: Record<T, number[]>): Record<T, Uint32A
   ) as Record<T, Uint32Array>
 
 /** Bump when the stored layout or derived data changes, so older images are rebuilt. */
-export const INDEX_IMAGE_FORMAT = 31
+export const INDEX_IMAGE_FORMAT = 32
 
 // Card-level special kinds, packed into the `kinds` column; Token stays per printing.
 const KIND_EVOLVE = 1
@@ -545,35 +544,12 @@ function mechanicMembership(bootstrap: BootstrapColumns, edition: Region) {
   }
 }
 
-function releaseDates(bootstrap: BootstrapColumns): Map<string, string | null> {
-  const products = new Map(bootstrap.rows("product").map((row) => [row["id"], row]))
-  const result = new Map<string, string | null>()
-  for (const row of bootstrap.rows("printing_product")) {
-    const product = products.get(row["product_id"])
-    const precision = row["date_precision"] ?? product?.["date_precision"]
-    const value = row["date_precision"] == null ? product?.["released_on"] : row["available_on"]
-    const date = precision === "day" && typeof value === "string" ? value : null
-    const id = stringValue(row["printing_id"])
-    const previous = result.get(id)
-    result.set(
-      id,
-      previous === null || date === null
-        ? null
-        : previous === undefined || date < previous
-          ? date
-          : previous,
-    )
-  }
-  return result
-}
-
 function build(
   bootstrap: BootstrapColumns,
   edition: Region,
   errataCards: ReadonlySet<string>,
   restrictions?: RestrictionSelection,
 ): Parts {
-  const dates = releaseDates(bootstrap)
   const pool = new StringPool()
   const summaryColumns = new Columns(pool)
   const index = bootstrap.index()
@@ -677,7 +653,6 @@ function build(
       tally(artistCounts, credited.length ? [...credited, CREDITED_ARTIST] : [UNCREDITED_ARTIST])
       printings.alt.push(Number(!!art && !!defaultArt && art !== defaultArt))
       printings.id.push(intern(printing.id))
-      printings.releaseDate.push(intern(dates.get(printing.id)))
       printings.lookup.push(intern(printing.lookupKey))
       printings.flat.push(intern(printing.flat))
       printings.set.push(intern(printing.key?.set))
@@ -925,7 +900,6 @@ export class SearchIndex {
 
   /** Locators already enumerate the printing IDs; completion replaces their metadata only. */
   completePrintings(bootstrap: BootstrapColumns): void {
-    const dates = releaseDates(bootstrap)
     const index = bootstrap.index()
     const slots = new Map(
       Array.from(this.printings.id, (id, ordinal) => [this.pool.get(id), ordinal]),
@@ -997,7 +971,6 @@ export class SearchIndex {
         printings.set[ordinal] = intern(key?.set)
         printings.number[ordinal] = intern(key?.number)
         printings.owner[ordinal] = intern(code)
-        printings.releaseDate[ordinal] = intern(dates.get(id))
         printings.leaderFrame[ordinal] = intern(frame)
         printings.reprint[ordinal] = Number(row["reprint"] === true)
         printings.stamp[ordinal] = Number(row["stamp"] != null)
@@ -1410,38 +1383,56 @@ export class SearchIndex {
     const matches = ranked
       ? buckets.flatMap((bucket) => bucket.sort(byNumber))
       : buckets.flat().sort(byNumber)
-    const direction = state.order === "desc" ? -1 : 1
-    if (state.sort === "no" && direction === -1)
-      matches.sort((a, b) => (this.order[b] ?? 0) - (this.order[a] ?? 0))
-    if (state.sort !== "no") {
-      const summary = (p: number) =>
-        this.summaries.row((this.printings.summary[p] ?? 1) - 1) as unknown as CardSummary
-      const value = (p: number): number | string | null => {
-        if (state.sort === "date") return this.pool.get(this.printings.releaseDate[p] ?? 0) || null
-        const row = summary(p)
-        if (state.sort === "name") return row.name.original.text
-        if (state.sort === "cost") return row.cost
-        if (state.sort === "atk") return row.attack
-        if (state.sort === "def") return row.defense
-        return null
-      }
-      matches.sort((a, b) => {
-        const first = value(a),
-          second = value(b)
+    if (ranked) return matches
+    const numberKey = (p: number) =>
+      this.pool.get(this.printings.lookup[p] ?? 0).replace(/en$/u, "") ||
+      this.pool.get(this.printings.flat[p] ?? 0)
+    const compareNumber = (a: number, b: number) =>
+      numberKey(a) === numberKey(b) ? 0 : byNumber(a, b)
+    const releases = new Map(this.releases.map((set) => [set.code, set.releasedOn]))
+    const summary = (p: number) =>
+      this.summaries.row((this.printings.summary[p] ?? 1) - 1) as unknown as CardSummary
+    const compare = (
+      a: number,
+      b: number,
+      sort: SearchQuery["state"]["sort"],
+      descending: boolean,
+    ): number => {
+      const direction = descending ? -1 : 1
+      if (sort === "no") return direction * compareNumber(a, b)
+      if (sort === "set") {
+        const first = this.pool.get(this.printings.owner[a] ?? 0)
+        const second = this.pool.get(this.printings.owner[b] ?? 0)
+        // The empty date sorts before every dated set ascending, so reversing also reverses unknowns.
         return (
-          (first === null && second === null
-            ? 0
-            : first === null
-              ? 1
-              : second === null
-                ? -1
-                : typeof first === "string" && typeof second === "string"
-                  ? direction * first.localeCompare(second, this.edition === "jp" ? "ja" : "en")
-                  : direction * (Number(first) - Number(second))) ||
-          (this.order[a] ?? 0) - (this.order[b] ?? 0)
+          direction *
+          (compareCodePoints(releases.get(first) ?? "", releases.get(second) ?? "") ||
+            first.localeCompare(second, "en", { numeric: true }))
         )
-      })
+      }
+      const field = sort === "cost" ? "cost" : sort === "atk" ? "attack" : "defense"
+      const first = summary(a)[field],
+        second = summary(b)[field]
+      return first == null
+        ? second == null
+          ? 0
+          : 1
+        : second == null
+          ? -1
+          : direction * (first - second)
     }
+    matches.sort(
+      (a, b) =>
+        compare(a, b, state.sort, state.order === "desc") ||
+        (state.secondarySort === null
+          ? 0
+          : compare(a, b, state.secondarySort, state.secondaryOrder === "desc")) ||
+        compareNumber(a, b) ||
+        compareCodePoints(
+          this.pool.get(this.printings.id[a] ?? 0),
+          this.pool.get(this.printings.id[b] ?? 0),
+        ),
+    )
     return matches
   }
 
@@ -1559,7 +1550,8 @@ export class SearchIndex {
     const flat = normalizeText(text)
     const numberQuery =
       this.sets.has(flat) || cardNoKey(text, this.sets) !== null || /^\d+$/u.test(flat)
-    const state = { ...DEFAULT_QUERY, unit: "card" as const, text }
+    const { order: _order, ...defaults } = DEFAULT_QUERY
+    const state = { ...defaults, unit: "card" as const, text, sort: "no" as const }
     const matches = this.matches({ state, edition: this.edition }, undefined, !numberQuery)
     const page = {
       total: matches.length,

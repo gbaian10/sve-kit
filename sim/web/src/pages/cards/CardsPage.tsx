@@ -88,7 +88,6 @@ import {
   activeFilterCount,
   DEFAULT_QUERY,
   NEUTRAL_CLASS,
-  QUERY_SORTS,
   type QueryState,
   toggleClass,
   VIEW_MODES,
@@ -104,6 +103,7 @@ import { CompactHeaderMenu } from "./CompactHeaderMenu"
 import { FilterSheet } from "./FilterSheet"
 import { FilterSidebar } from "./FilterSidebar"
 import { sidebarGridClass } from "./sidebar-layout"
+import { SortControls } from "./SortControls"
 import { useCompactHeader } from "./useCompactHeader"
 
 const DEBOUNCE_MS = 150
@@ -952,43 +952,8 @@ export function CardsPage() {
         )}
       >
         {view === "list" && <ListColumnPicker inline={headerMenus} />}
-        <div
-          className={cn(
-            "flex items-center gap-2",
-            !headerMenus && "ml-auto",
-            (!compact || headerMenus) && "flex-wrap",
-          )}
-        >
-          <label className="flex items-center gap-1 text-13">
-            <span className={cn(compact && "@max-[640px]:hidden")}>{t("results.sort")}</span>
-            <select
-              aria-label={t("results.sort")}
-              value={query.sort}
-              className="h-8 rounded-control border border-border bg-surface-1 px-2 text-text-1"
-              onChange={(event) => {
-                const sort = QUERY_SORTS.find((sort) => sort === event.target.value)
-                if (sort) commit({ ...query, sort })
-              }}
-            >
-              {QUERY_SORTS.map((sort) => (
-                <option key={sort} value={sort}>
-                  {t(`results.sortBy.${sort}`)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <button
-            type="button"
-            aria-label={t("results.descending")}
-            aria-pressed={query.order === "desc"}
-            className="h-8 rounded-control border border-border bg-surface-1 px-2 text-13"
-            onClick={() => {
-              const { order, ...rest } = query
-              commit(order === "desc" ? rest : { ...rest, order: "desc" })
-            }}
-          >
-            {query.order === "desc" ? "↓" : "↑"}
-          </button>
+        <div className={cn("flex items-center gap-2", !headerMenus && "ml-auto", "flex-wrap")}>
+          <SortControls query={query} onChange={commit} />
           <Segmented
             size="sm"
             tone="accent"

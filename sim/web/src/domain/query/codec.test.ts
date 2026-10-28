@@ -40,6 +40,7 @@ describe("query codec", () => {
       representative: "high",
       prFirst: true,
       sort: "cost",
+      secondarySort: "no",
       view: "table",
     })
     expect(
@@ -93,8 +94,13 @@ describe("query codec", () => {
     )
   })
 
-  it("defaults to printing rows in card-number order and preserves explicit card URLs", () => {
-    expect(parseQuery(new URLSearchParams())).toMatchObject({ unit: "printing", sort: "no" })
+  it("defaults to printing rows by newest set then ascending card number and preserves explicit card URLs", () => {
+    expect(parseQuery(new URLSearchParams())).toMatchObject({
+      unit: "printing",
+      sort: "set",
+      order: "desc",
+      secondarySort: "no",
+    })
     expect(formatQuery(parseQuery(new URLSearchParams("unit=printing"))).toString()).toBe("")
     expect(formatQuery(parseQuery(new URLSearchParams("unit=card"))).toString()).toBe("unit=card")
   })
@@ -138,11 +144,13 @@ describe("query codec", () => {
   it("round-trips through the URL", () => {
     const state = parseQuery(
       new URLSearchParams(
-        "q=x&class=royal&cost=2,7&atk=0&def=10&view=list&unit=printing&sort=name&order=desc",
+        "q=x&class=royal&cost=2,7&atk=0&def=10&view=list&unit=printing&sort=cost:asc,atk:desc",
       ),
     )
-    expect(state.order).toBe("desc")
-    expect(formatQuery(state).get("order")).toBe("desc")
+    expect(state.sort).toBe("cost")
+    expect(state.order).toBeUndefined()
+    expect(state.secondarySort).toBe("atk")
+    expect(state.secondaryOrder).toBe("desc")
     expect(parseQuery(formatQuery(state))).toEqual(state)
   })
 
@@ -232,4 +240,23 @@ it("round-trips independent printed mechanism groups and drops unknown or mispla
   expect(parseQuery(formatQuery(query))).toEqual(query)
   expect(query.classMechanismsMatch).toBe("all")
   expect(query.collabMechanismsMatch).toBe("all")
+})
+
+it.each(["name", "date", "bogus", "set:wrong", "cost:asc,name:desc", "set:desc,no:asc,cost:asc"])(
+  "safely defaults obsolete or malformed sort %s",
+  (sort) => {
+    expect(parseQuery(new URLSearchParams({ sort, order: "desc" }))).toEqual(DEFAULT_QUERY)
+  },
+)
+it("omits explicit defaults, reads legacy directions and round-trips a disabled secondary sort", () => {
+  expect(querySearch(parseQuery(new URLSearchParams("sort=set:desc,no:asc")))).toBe("")
+  expect(parseQuery(new URLSearchParams("sort=cost&order=desc"))).toMatchObject({
+    sort: "cost",
+    order: "desc",
+    secondarySort: "no",
+  })
+  const single = parseQuery(new URLSearchParams("sort=atk:asc"))
+  expect(single.secondarySort).toBeNull()
+  expect(formatQuery(single).get("sort")).toBe("atk:asc")
+  expect(parseQuery(formatQuery(single))).toEqual(single)
 })

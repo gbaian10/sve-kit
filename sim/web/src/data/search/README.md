@@ -11,8 +11,7 @@ and defense value selections (the last button collects every value at or above i
 deck locations (`main`, `evolve`, `advance`, `leader[:frame]`, `token[:type]`, `ep`, `sep`; special
 kinds and traits come from the front face's revision shown in the edition, the leader frame from the
 printing; every printing has exactly one parent location, combined special kinds resolving as Token,
-leader, EP, SEP, evolve, advance, then main) and traits. Values within one row union; rows intersect. Mechanics and release-date sorting
-return `unsupported-query`.
+leader, EP, SEP, evolve, advance, then main) and traits. Values within one row union; rows intersect. Sort keys are set, card number, cost, attack and defense, each with an independent direction.
 The list shows only cards released in the selected edition. Names remain multilingual, and
 UI language is independent of card edition. Card detail retains its on-demand compatibility
 path; only the card page starts the full snapshot client.
@@ -25,20 +24,18 @@ set and one is present, else the lowest or highest rarity on the fixed ladder BR
 only when the group has nothing else), ties going to the earliest card number. A locator whose
 printing metadata has not arrived stands aside while the group has a completed printing, and
 every merged-unit query waits for printing completion so the first answer is the final one.
-With no search text, card pages order the representative printing's card number;
-printing pages order each printing's own card number, without choosing a representative.
+Sorting uses the representative printing's values for merged cells and each printing's own values for printing cells.
 Its width/case-folded key compares set-code digit runs numerically, then the letter prefix
 (empty first), integer number, and suffix (empty first, edition marker ignored). Leading
-zeros do not affect comparison. Ties use permanent card ID, then printing ID. Unknown
-number forms follow recognized keys and compare folded literal text. Text queries retain
-the existing relevance ranking. This does not change representative-printing selection.
+zeros do not affect comparison. Final ties use printing ID. Unknown
+number forms follow recognized keys and compare folded literal text. Text rank selects eligible representatives; the selected sorts order the results. This does not change representative-printing selection.
 A persisted scalar rank avoids decoding summaries or re-sorting all printings per query.
 Prefixes sort empty, LD, P, PR, SL in ASCII order within the same set. For a set view, pass
-`state: { ...DEFAULT_QUERY, unit: "printing", sort: "no", sets: [familyCode] }` to
+`state: { ...DEFAULT_QUERY, unit: "printing", sort: "no", order: "desc", sets: [familyCode] }` to
 `channel.view` or `useListView`. Each item key is its printing ID; `summary.cardId`
 remains the card identity, and every face/image source belongs to that printing.
 Totals and paging count printings, and query/cache identity distinguishes units.
-The cards page defaults to printing units and card-number sorting in all three views.
+The cards page defaults to printing units, newest home set first, then ascending card number in all three views. Set order uses the first day-precision product date in the edition, then natural family code. PR and other undated families follow dated sets descending; ascending reverses the entire family order. Every sort ends with ascending card number and printing ID. A secondary sort may be disabled.
 Home random-card queries and suggestions explicitly retain card units; their totals count cards.
 No new index layout or full catalog on the main thread is needed.
 
@@ -68,8 +65,7 @@ Switching to another edition takes the same stored path. A later check that find
 active version unchanged carries the index over to the new generation without rebuilding;
 completed channel answers stay until the manifest, root or edition they came from changes.
 
-The initial search index uses bootstrap locators, so initial results do not wait for background
-printing downloads. Completion keeps the same index and its name, alias and card columns.
+The initial search index uses bootstrap locators. Set sorting waits for printing completion to obtain home-set owners and regional product dates. Completion keeps the same index and its name, alias and card columns.
 It permutes packed summary/image-target cells into the completed printing order and updates
 printing metadata, scalar filters, representative printings, ranks, options and releases.
 Completion checks printing counts and locator ownership for cards already in the index.

@@ -575,7 +575,7 @@ export function CardList({
     defense: labels.stats.defense,
     effect: labels.t("results.columns.effect"),
   }
-  const sorts = { number: "no", name: "name", cost: "cost", attack: "atk", defense: "def" } as const
+  const sorts = { number: "no", cost: "cost", attack: "atk", defense: "def" } as const
   const style = {
     "--class-column-min-width": `${String(LIST_MIN_WIDTHS.class)}px`,
     "--rarity-column-min-width": `${String(RARITY_COLUMN_MIN_WIDTH)}px`,
@@ -636,6 +636,7 @@ export function CardList({
                 column === "location" ||
                 column === "type" ||
                 column === "effect" ||
+                column === "name" ||
                 column === "class"
                   ? null
                   : sorts[column]
