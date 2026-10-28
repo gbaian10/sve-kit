@@ -1,7 +1,6 @@
 # ruff: file-ignore[no-self-use, magic-value-comparison] -- standalone unittest with synthetic exit statuses
 """Exercise the public-input wrapper without compiling or reading official data."""
 
-import json
 import os
 import subprocess  # ruff: ignore[suspicious-subprocess-import] -- synthetic process results
 import tempfile
@@ -17,10 +16,6 @@ class RustTests(unittest.TestCase):
         """An inherited snapshot path cannot skip generation or cleanup."""
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
-            (root / "tests/engine").mkdir(parents=True)
-            (root / "tests/engine/card-input.json").write_text(
-                json.dumps({"batch_id": "synthetic"})
-            )
             for arguments in (
                 [],
                 ["mutants", "--workspace", "-j", "4", "--timeout", "120"],
@@ -34,10 +29,12 @@ class RustTests(unittest.TestCase):
                     **kwargs: object,
                 ) -> subprocess.CompletedProcess[str]:
                     if argv[0] == "uv":
-                        output = Path(argv[-1])
-                        assert not output.exists()
-                        output.write_text("synthetic", encoding="utf-8")
-                        generated.append(output)
+                        for filename in argv[-2:]:
+                            output = Path(filename)
+                            assert output.is_absolute()
+                            assert not output.exists()
+                            output.write_text("synthetic", encoding="utf-8")
+                            generated.append(output)
                         return subprocess.CompletedProcess(argv, 0)
                     environment = kwargs["env"]
                     assert isinstance(environment, dict)
