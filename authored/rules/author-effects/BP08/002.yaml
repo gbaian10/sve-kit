@@ -1,0 +1,28 @@
+cards:
+  BP08-084:
+    abilities:
+      - activate:
+          cost:
+            leader_life: 1
+          do:
+            - damage:
+                n: 1
+                to: enemy
+          per_turn: 2
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-sol
+            who: Codex
+          date: "2026-10-28"
+format: 2
+kind: author_effect_set
