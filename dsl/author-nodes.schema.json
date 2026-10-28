@@ -2552,7 +2552,7 @@
           "$ref": "#/$defs/BindingName"
         },
         "from": {
-          "$ref": "#/$defs/A.sel.object-core"
+          "$ref": "#/$defs/A.sel.recipient"
         },
         "n": {
           "$ref": "#/$defs/A.selection-quantity"
@@ -2601,7 +2601,7 @@
           "$ref": "#/$defs/BindingName"
         },
         "from": {
-          "$ref": "#/$defs/A.sel.object-core"
+          "$ref": "#/$defs/A.sel.recipient"
         },
         "upto": {
           "$ref": "#/$defs/A.selection-quantity"
