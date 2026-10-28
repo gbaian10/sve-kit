@@ -111,7 +111,7 @@ def check_current_requires_keyword_declaration(
                 },
             )
             index = input_file(
-                "rules/effects-index.yaml",
+                "rules/effects-index/BP19.yaml",
                 {
                     "format": 1,
                     "kind": "effects_index",
@@ -128,7 +128,7 @@ def check_current_requires_keyword_declaration(
             )
             inputs = AuthorInputSet(
                 EffectsIndex.model_validate_json(index.raw),
-                index,
+                (index,),
                 (file,),
                 (input_file("rules/effect-bodies/BP19/000.yaml", shard(record)),),
                 (),

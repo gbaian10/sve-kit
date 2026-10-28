@@ -129,7 +129,7 @@ def collection(
         },
     )
     index = input_file(
-        "rules/effects-index.yaml",
+        f"rules/effects-index/{number.split('-', 1)[0]}.yaml",
         {
             "format": 1,
             "kind": "effects_index",
@@ -146,7 +146,7 @@ def collection(
     )
     return AuthorInputSet(
         EffectsIndex.model_validate_json(index.raw),
-        index,
+        (index,),
         (file,),
         tuple(
             input_file("rules/effect-bodies/BP07/000.yaml", parse(raw))

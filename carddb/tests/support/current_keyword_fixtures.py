@@ -147,7 +147,8 @@ def current_keyword_inputs(
                 }
             )
         )
-        (authored / "rules/effects-index.yaml").write_bytes(
+        (authored / "rules/effects-index").mkdir(exist_ok=True)
+        (authored / f"rules/effects-index/{number.split('-', 1)[0]}.yaml").write_bytes(
             canonical(
                 {
                     "format": 1,

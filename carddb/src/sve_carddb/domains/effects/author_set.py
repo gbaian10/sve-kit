@@ -27,12 +27,13 @@ if TYPE_CHECKING:
 
 STORAGE_FORMAT = 2
 
-_INDEX = "rules/effects-index.yaml"
+_INDEX = "rules/effects-index"
 _AUTHOR = "rules/author-effects"
 _BODIES = "rules/effect-bodies"
 _PROTOTYPE = "rules/effects"
 _OWNER = r"[A-Za-z0-9_-]+"
 _SHARD = r"[0-9]{3,}\.yaml"
+_AUTHOR_SHARD = r"(?:[0-9]{3,}|[A-Za-z0-9_]+-[^/\\\x00-\x1f\x7f]+)\.yaml"
 
 
 @dataclass(frozen=True)
@@ -45,7 +46,7 @@ class InputFile:
 @dataclass(frozen=True)
 class AuthorInputSet:
     index: EffectsIndex
-    index_file: InputFile | None
+    index_files: tuple[InputFile, ...]
     author_files: tuple[InputFile, ...]
     body_files: tuple[InputFile, ...]
     prototype_files: tuple[InputFile, ...]
@@ -104,7 +105,12 @@ def _files(root: Path, area: str, *, sharded: bool) -> tuple[InputFile, ...]:
                 _reject("invalid_input_path", entry.relative_to(root).as_posix())
             _directory(root, entry)
             for shard in sorted(entry.iterdir()):
-                if re.fullmatch(_SHARD, shard.name) is None:
+                if (
+                    re.fullmatch(
+                        _AUTHOR_SHARD if area == _AUTHOR else _SHARD, shard.name
+                    )
+                    is None
+                ):
                     _reject("invalid_input_path", shard.relative_to(root).as_posix())
                 result.append(_read(root, shard))
         else:
@@ -115,7 +121,11 @@ def _files(root: Path, area: str, *, sharded: bool) -> tuple[InputFile, ...]:
 
 
 def _path_matches(path: str, area: str) -> bool:
-    suffix = _OWNER + r"\.yaml" if area == _PROTOTYPE else _OWNER + "/" + _SHARD
+    suffix = (
+        _OWNER + r"\.yaml"
+        if area in {_PROTOTYPE, _INDEX}
+        else _OWNER + "/" + (_AUTHOR_SHARD if area == _AUTHOR else _SHARD)
+    )
     return re.fullmatch(re.escape(area) + "/" + suffix, path) is not None
 
 
@@ -166,21 +176,35 @@ def _selections(
     return selections
 
 
+def merge_index_files(
+    files: tuple[InputFile, ...], schemas: AuthorSchemas
+) -> EffectsIndex:
+    """Validate pack ownership and retain global identity/scope uniqueness."""
+    records: list[IndexRecord] = []
+    for path, item in _inventory(files, _INDEX).items():
+        index = schemas.effects_index(item.raw)
+        owner = path.rsplit("/", 1)[-1].removesuffix(".yaml")
+        for record in index.records:
+            if record.record_key.split("-", 1)[0] != owner:
+                _reject("wrong_index_owner", path, record)
+        records.extend(index.records)
+    records.sort(key=lambda record: (record.record_key, record.scope))
+    return schemas.effects_index(
+        canonical(
+            EffectsIndex(
+                format=1, kind="effects_index", records=tuple(records)
+            ).model_dump(mode="json")
+        )
+    )
+
+
 def _validate_index(inputs: AuthorInputSet, schemas: AuthorSchemas) -> None:
-    try:
-        raw = canonical(inputs.index.model_dump(mode="json"))
-    except ValueError, TypeError:
+    if not inputs.index_files and (
+        inputs.index.records or inputs.author_files or inputs.body_files
+    ):
+        _reject("index_missing", _INDEX)
+    if merge_index_files(inputs.index_files, schemas) != inputs.index:
         _reject("index_input_mismatch", _INDEX)
-    schemas.effects_index(raw)
-    if inputs.index_file is None:
-        if inputs.index.records or inputs.author_files or inputs.body_files:
-            _reject("index_missing", _INDEX)
-    else:
-        item = inputs.index_file
-        if item.path != _INDEX or item.input_hash != digest(item.raw):
-            _reject("index_input_mismatch", _INDEX)
-        if schemas.effects_index(item.raw) != inputs.index:
-            _reject("index_input_mismatch", _INDEX)
 
 
 def validate_author_set(inputs: AuthorInputSet, schemas: AuthorSchemas) -> None:
@@ -234,25 +258,15 @@ def load_author_set(authored_root: Path, schemas: AuthorSchemas) -> AuthorInputS
     """Read every entry in the three fixed areas, with the index parsed first."""
     _directory(authored_root, authored_root)
     _directory(authored_root, authored_root / "rules", optional=True)
-    index_path = authored_root / _INDEX
-    try:
-        check_path(authored_root, index_path)
-    except ValueError:
-        _reject("unsafe_or_missing_input", _INDEX)
-    if index_path.exists():
-        index_file = _read(authored_root, index_path)
-        index = schemas.effects_index(index_file.raw)
-    else:
-        index_file = None
-        if any(
-            _directory(authored_root, authored_root / area, optional=True)
-            for area in (_AUTHOR, _BODIES)
-        ):
-            _reject("index_missing", _INDEX)
-        index = EffectsIndex(format=1, kind="effects_index", records=())
+    index_files = _files(authored_root, _INDEX, sharded=False)
+    if not index_files and any(
+        _directory(authored_root, authored_root / area, optional=True)
+        for area in (_AUTHOR, _BODIES)
+    ):
+        _reject("index_missing", _INDEX)
     result = AuthorInputSet(
-        index,
-        index_file,
+        merge_index_files(index_files, schemas),
+        index_files,
         _files(authored_root, _AUTHOR, sharded=True),
         _files(authored_root, _BODIES, sharded=True),
         _files(authored_root, _PROTOTYPE, sharded=False),

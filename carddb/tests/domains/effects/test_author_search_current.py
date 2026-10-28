@@ -59,7 +59,7 @@ def collection(
         },
     )
     index = input_file(
-        "rules/effects-index.yaml",
+        "rules/effects-index/BP06.yaml",
         {
             "format": 1,
             "kind": "effects_index",
@@ -78,7 +78,7 @@ def collection(
         input_file("rules/effect-bodies/search/000.yaml", parse(raw)) for raw in shards
     )
     return AuthorInputSet(
-        EffectsIndex.model_validate_json(index.raw), index, (file,), bodies, ()
+        EffectsIndex.model_validate_json(index.raw), (index,), (file,), bodies, ()
     )
 
 

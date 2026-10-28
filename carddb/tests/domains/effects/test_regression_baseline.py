@@ -14,7 +14,7 @@ from sve_carddb.domains.translations.four_layer_normalizer import VERSION
 
 ROOT = Path(__file__).resolve().parents[4]
 BASELINE = ROOT / "carddb/tests/fixtures/effect_baseline"
-AUTHOR_INDEX = ROOT / "authored/rules/effects-index.yaml"
+AUTHOR_INDEX = ROOT / "authored/rules/effects-index"
 OBJECT = TypeAdapter(dict[str, JsonValue])
 
 
@@ -60,7 +60,12 @@ def author_records(pack: str) -> dict[str, dict[str, JsonValue]]:
     """Index rows from every author shard in ``pack``, keyed by CardNumber."""
     return {
         str(row["record_key"]): row
-        for row in map(object_value, array(read_yaml(AUTHOR_INDEX)["records"]))
+        for row in map(
+            object_value,
+            array(read_yaml(AUTHOR_INDEX / f"{pack}.yaml")["records"])
+            if (AUTHOR_INDEX / f"{pack}.yaml").exists()
+            else [],
+        )
         if str(row["file"]).startswith(f"rules/author-effects/{pack}/")
     }
 

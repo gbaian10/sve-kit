@@ -38,7 +38,8 @@ def test_prototype_removal_deletes_only_exhausted_shards(
     prototype_path.write_bytes(
         canonical({"format": 1, "kind": "effect_set", "cards": cards})
     )
-    index = authored / "rules/effects-index.yaml"
+    index = authored / "rules/effects-index/SYN.yaml"
+    index.parent.mkdir(parents=True, exist_ok=True)
     index.write_bytes(
         canonical(
             {
@@ -56,6 +57,11 @@ def test_prototype_removal_deletes_only_exhausted_shards(
             }
         )
     )
+    untouched = index.with_name("OTHER.yaml")
+    untouched_raw = b"# Preserve an unrelated pack exactly.\n" + canonical(
+        {"format": 1, "kind": "effects_index", "records": []}
+    )
+    untouched.write_bytes(untouched_raw)
     hand = tmp_path / "main.yaml"
     hand.write_bytes(
         canonical(
@@ -112,6 +118,7 @@ def test_prototype_removal_deletes_only_exhausted_shards(
             remove_prototype=True,
         )
         assert report["status"] == "ok"
+        assert untouched.read_bytes() == untouched_raw
         assert prototype_path.exists() == (sibling and not alias)
         if sibling and not alias:
             assert object_value(parse_document(prototype_path.read_bytes()).value)[
@@ -119,7 +126,7 @@ def test_prototype_removal_deletes_only_exhausted_shards(
             ] == {"SYN-02": prototype}
         inputs = load_author_set(authored, workspace.expander.schemas)
         assert len(inputs.index.records) == 1
-        assert inputs.index.records[0].file.startswith("rules/author-effects/")
+        assert inputs.index.records[0].file == "rules/author-effects/SYN/SYN-01.yaml"
         assert all(
             file.path != "rules/effects/SYN.yaml" for file in inputs.prototype_files
         ) == (not sibling or alias)

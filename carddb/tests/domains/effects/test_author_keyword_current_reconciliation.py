@@ -122,11 +122,11 @@ def collection(
             }
         )
     index = input_file(
-        "rules/effects-index.yaml",
+        "rules/effects-index/BP01.yaml",
         {"format": 1, "kind": "effects_index", "records": records},
     )
     return AuthorInputSet(
-        EffectsIndex.model_validate_json(index.raw), index, (document,), (), ()
+        EffectsIndex.model_validate_json(index.raw), (index,), (document,), (), ()
     )
 
 

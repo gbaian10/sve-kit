@@ -84,7 +84,7 @@ def inputs(
         {"format": 1, "kind": "author_effect_set", "scope": scope, "cards": cards},
     )
     index = input_file(
-        "rules/effects-index.yaml",
+        "rules/effects-index/BP01.yaml",
         {
             "format": 1,
             "kind": "effects_index",
@@ -101,7 +101,7 @@ def inputs(
         },
     )
     return AuthorInputSet(
-        EffectsIndex.model_validate_json(index.raw), index, (file,), bodies, ()
+        EffectsIndex.model_validate_json(index.raw), (index,), (file,), bodies, ()
     )
 
 
@@ -111,8 +111,7 @@ def write_inputs(root: Path, collection: AuthorInputSet) -> None:
         *collection.body_files,
         *collection.prototype_files,
     ]
-    if collection.index_file is not None:
-        files.append(collection.index_file)
+    files.extend(collection.index_files)
     for file in files:
         path = root / file.path
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -451,7 +450,7 @@ def test_real_current_author_set(
     real_author_inputs: AuthorInputSet,
 ) -> None:
     real = real_author_inputs
-    assert real.index_file is not None
+    assert real.index_files
     assert real.index.records
     assert all(record.scope == "shared" for record in real.index.records)
     assert all(record.kind == "author_effect_set" for record in real.index.records)
