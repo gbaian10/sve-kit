@@ -64,7 +64,7 @@ fn leader_hits(result: &Activation, seat: &str, amount: u64) {
 
 #[test]
 fn bp15_064_hits_its_own_target_then_only_opposing_leaders_and_draws() {
-    for seat in ["P1", "P2"] {
+    for (seat, hp) in [("P1", 1_u8), ("P2", 1), ("P1", 5), ("P2", 5)] {
         let opponent = opposite(seat);
         let mut initial = draw_position();
         initial["turn"]["active"] = json!(seat);
@@ -84,7 +84,8 @@ fn bp15_064_hits_its_own_target_then_only_opposing_leaders_and_draws() {
             format!("{no_target:?}") == before,
             "no legal ally rejects before payment"
         );
-        initial["players"][seat]["zones"]["field"] = json!([{"id":"ally","card":"BP01-037"}]);
+        initial["players"][seat]["zones"]["field"] =
+            json!([{"id":"ally","card":"BP01-037","state":{"hp":hp}}]);
         let mut game = game(&initial);
         let CardPlay::Awaiting(question) = game
             .play_internal_card(
@@ -111,7 +112,15 @@ fn bp15_064_hits_its_own_target_then_only_opposing_leaders_and_draws() {
             2,
             "the two damage instructions each happen once"
         );
+        game.resume_internal_card().unwrap();
         let state = game.projection(View::Referee).unwrap();
+        assert_eq!(
+            state[seat]["cemetery"]
+                .as_array()
+                .unwrap()
+                .contains(&json!("ally")),
+            hp == 1
+        );
         assert_eq!(
             state[seat]["leader"]["life"], 20_u8,
             "the controller's leader is not an opponent"
