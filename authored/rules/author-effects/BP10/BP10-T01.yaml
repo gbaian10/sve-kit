@@ -1,0 +1,36 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP10-T01:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-28"
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - fanfare:
+          do:
+            - choose:
+                bind: enemy
+                from:
+                  who: opp
+                  zone: field
+                n: 1
+            - destroy:
+                ref: enemy
+        line: 2
+      - lastword:
+          do:
+            - damage:
+                n: 4
+                to:
+                  leaders: opponents
+        line: 3
+    token:
+      name: ターミナルウェポン
+      template: true
