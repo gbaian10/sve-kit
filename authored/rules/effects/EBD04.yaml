@@ -80,19 +80,3 @@ cards:
           - op: move
             subjects: self
             to: cemetery
-  EBD04-T01:
-    status: complete
-    abilities:
-      - line: 1
-        kind: spell
-        body:
-          op: banish
-          subjects: target.1
-        targets:
-          - key: "1"
-            select:
-              zone: field
-              side: opponent
-              type: follower
-            min: 1
-            max: 1

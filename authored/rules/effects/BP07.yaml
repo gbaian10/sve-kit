@@ -52,26 +52,6 @@ cards:
             subjects: self
           - op: act
             subjects: cost.1
-  BP07-035:
-    status: complete
-    abilities:
-      - line: 1
-        kind: evolve
-        body:
-          op: evolve
-          subjects: self
-        costs:
-          - op: pp
-            amount: 1
-      - line: 2
-        kind: trigger
-        body:
-          op: create
-          name: リペアモード
-          count: 1
-          to: ex
-        event: enter
-        subject: self
   BP07-072:
     status: complete
     abilities:

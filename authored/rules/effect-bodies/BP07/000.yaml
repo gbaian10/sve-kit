@@ -1,0 +1,18 @@
+format: 2
+kind: effect_body_shard
+records:
+  - admission: shared
+    body:
+      fanfare:
+        do:
+          - create:
+              n: 1
+              to: ex
+              token: リペアモード
+    id: fanfare.create-repair-mode-ex
+    params: {}
+    written_by:
+      - actor:
+          model: Codex gpt-6.1-sol
+          who: Codex
+        date: "2026-10-29"

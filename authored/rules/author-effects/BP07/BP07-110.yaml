@@ -1,0 +1,23 @@
+cards:
+  BP07-110:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - line: 2
+        params: {}
+        use: lastword.create-repair-mode-ex
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-10-29"
+    token_sources:
+      - card: BP07-T02
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

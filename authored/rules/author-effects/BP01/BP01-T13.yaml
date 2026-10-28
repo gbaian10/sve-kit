@@ -1,0 +1,28 @@
+cards:
+  BP01-T13:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - buff:
+                on: friend
+                power: 2
+          targets:
+            - bind: friend
+              from:
+                kind: follower
+                who: self
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-10-29"
+    token:
+      name: 冥焔の左腕・ココ
+      template: true
+format: 2
+kind: author_effect_set
