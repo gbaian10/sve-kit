@@ -20,7 +20,7 @@ export const LIST_MIN_WIDTHS: Readonly<Record<ListColumn, number>> = {
   number: 84,
   rarity: RARITY_COLUMN_MIN_WIDTH,
   location: 72,
-  type: 64,
+  type: 104,
   name: 100,
   class: 48,
   cost: 40,

@@ -401,9 +401,25 @@ describe("CardsPage", () => {
     await user.click(await screen.findByRole("button", { name: "降冪" }))
     expect(new URLSearchParams(router.state.location.search).get("sort")).toBe("set:asc,cost:desc")
     await user.selectOptions(await screen.findByRole("combobox", { name: "再依" }), "")
-    expect(await screen.findByRole("button", { name: "再依：降冪" })).toBeDisabled()
+    expect(screen.queryByRole("button", { name: "再依：降冪" })).not.toBeInTheDocument()
     expect(new URLSearchParams(router.state.location.search).get("sort")).toBe("set:asc")
     expect(new URLSearchParams(router.state.location.search).get("class")).toBe("bishop")
+  })
+
+  it("keeps primary and secondary sorting distinct", async () => {
+    const { router } = await open("/cards?sort=no%3Aasc%2Ccost%3Adesc")
+    const user = userEvent.setup()
+    const sort = await screen.findByRole("combobox", { name: "排序" })
+    const secondary = screen.getByRole("combobox", { name: "再依" })
+
+    expect(secondary).toHaveValue("cost")
+    expect(secondary.querySelector('option[value="no"]')).toBeDisabled()
+
+    await user.selectOptions(sort, "cost")
+    await waitFor(() => {
+      expect(screen.getByRole("combobox", { name: "再依" })).toHaveValue("")
+      expect(new URLSearchParams(router.state.location.search).get("sort")).toBe("cost:asc")
+    })
   })
 
   it("holds the class row's place with a skeleton until the options load", async () => {

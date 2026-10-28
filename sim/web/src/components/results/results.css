@@ -369,12 +369,12 @@ html:has([data-card-list]) {
       var(--list-mobile-user-location, 0px),
       var(--location-column-min-width)
     );
-    --list-size-name: var(--list-mobile-user-name, 124px);
+    --list-size-name: var(--list-mobile-user-name, 100px);
     --list-size-class: max(var(--list-mobile-user-class, 0px), var(--class-column-min-width));
     --list-size-cost: var(--list-mobile-user-cost, 44px);
     --list-size-attack: var(--list-mobile-user-attack, 44px);
     --list-size-defense: var(--list-mobile-user-defense, 44px);
-    --list-size-effect: var(--list-mobile-user-effect, 200px);
+    --list-size-effect: var(--list-mobile-user-effect, 120px);
   }
 
   :where([data-column-resize]) {
