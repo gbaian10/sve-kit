@@ -209,7 +209,7 @@ impl Game {
 
     pub(super) fn card_name(&self, id: &str) -> Result<String> {
         let object = self.information_source(id)?;
-        let face = Self::movement_face(object)?;
+        let face = usize::try_from(int(&object.state["face"])).map_err(invalid)?;
         self.catalog.rules_label(&object.card, face)
     }
 
