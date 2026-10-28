@@ -223,3 +223,36 @@ fn named_existence_admission_keeps_hidden_names_private() {
         assert_eq!(accepted, zone_kind == ZoneKind::Field);
     }
 }
+
+#[test]
+fn name_contains_outside_a_candidate_selector_is_not_admitted() {
+    let condition = Expr::Compute(Box::new(Predicate::NameContains {
+        object: ObjectView::Current {
+            object: Box::new(ObjectOperand::SourceHolder {}),
+        },
+        name: Expr::Literal(CardName("unit".into())),
+    }));
+    let program = card(vec![ability(
+        1,
+        vec![node(Node::Control {
+            control: Control::If {
+                condition,
+                then_body: Program {
+                    scope: ScopeId(3),
+                    steps: vec![draw(1, 1)],
+                },
+                else_body: None,
+            },
+        })],
+    )]);
+    let mut game = Game::new(
+        catalog(),
+        &setup(1, json!([])),
+        &Value::Null,
+        &Value::Null,
+        "unsupported-name-location",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &program)
+        .unwrap_err();
+}

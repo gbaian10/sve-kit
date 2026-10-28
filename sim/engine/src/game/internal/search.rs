@@ -256,7 +256,7 @@ fn check_movement(movement: &MoveSpec) -> Result<()> {
     Ok(())
 }
 
-/// Search-only requirement codes must never authorize private reads elsewhere in a program.
+/// These capabilities still require an authorized selector spine at their use site.
 pub(super) fn private_requirement(code: &str) -> bool {
     matches!(
         code,
@@ -266,6 +266,8 @@ pub(super) fn private_requirement(code: &str) -> bool {
             | "shape.SearchDestination.Partition"
             | "shape.SearchDestination.OptionalSelfReplacement"
             | "shape.Predicate.SearchFoundAny"
+            | "shape.Predicate.NameContains"
+            | "predicate.name-contains"
             | "shape.Predicate.NamesIntersect"
             | "predicate.names-intersect"
             | "shape.NamesRead.Names"

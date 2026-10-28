@@ -545,20 +545,21 @@ impl Game {
             .checked_shl(u32::try_from(wait.members.len()).map_err(invalid)?)
             .ok_or_else(|| invalid("target plan overflow"))?;
         for mask in 0..end {
-            let handles = (0..wait.members.len())
-                .filter(|index| mask & (1_u64 << index) != 0)
-                .map(|index| u64::try_from(index).map_err(invalid))
-                .collect::<Result<Vec<_>>>()?;
+            let members = wait
+                .members
+                .iter()
+                .enumerate()
+                .filter(|(index, _)| mask & (1_u64 << index) != 0)
+                .map(|(_, member)| *member)
+                .collect::<Vec<_>>();
             if !contains(
                 wait.bounds,
-                Nat(u64::try_from(handles.len()).map_err(invalid)?),
-            ) {
+                Nat(u64::try_from(members.len()).map_err(invalid)?),
+            ) || !wait.compatible(&members)?
+            {
                 continue;
             }
             let mut candidate = candidate.clone();
-            let Ok(members) = wait.validate(&handles) else {
-                continue;
-            };
             candidate.bind_targets(&wait, members);
             candidate.captures(self, &first.captures)?;
             if self.internal_feasible_targets(

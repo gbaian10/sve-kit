@@ -272,3 +272,41 @@ fn exact_distinct_name_resolution_uses_the_largest_compatible_selection() {
             .unwrap(),
     );
 }
+
+#[test]
+fn named_field_collection_buffs_only_matching_objects() {
+    let action =
+        json!({"buff":{"on":{"who":"opp","zone":"field","name_contains":"follower"},"power":1}});
+    let mut input = tree(
+        &json!({"bind":"unused","from":{"who":"opp","zone":"field"},"n":1}),
+        &action,
+    );
+    input["cards"]["unit-follower"]["abilities"][0]["activate"]["do"] = json!([action]);
+    let programs = ExpandedLowerer::new().unwrap().lower(&input).unwrap();
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
+    initial["players"]["P2"]["zones"]["field"] =
+        json!([{"id":"enemy","card":"unit-follower"},{"id":"amulet","card":"unit-amulet"}]);
+    let mut game = Game::new(
+        catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "named-collection",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &programs["unit-follower"])
+        .unwrap();
+    game.load_internal_card("unit-amulet", &card(vec![]))
+        .unwrap();
+    let before = game.projection(View::Referee).unwrap()["objects"]["amulet"].clone();
+    resolved(
+        game.activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
+            .unwrap(),
+    );
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["objects"]["enemy"]["power"], 3);
+    assert_eq!(state["objects"]["s"]["power"], 2);
+    assert_eq!(state["objects"]["amulet"], before);
+}
