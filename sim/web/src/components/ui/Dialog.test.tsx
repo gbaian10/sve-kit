@@ -12,7 +12,13 @@ beforeAll(async () => {
   i18n = await createI18n("zh-TW")
 })
 
-function Harness({ onClose = () => undefined }: { readonly onClose?: () => void }) {
+function Harness({
+  onClose = () => undefined,
+  variant = "sheet",
+}: {
+  readonly onClose?: () => void
+  readonly variant?: "sheet" | "bottom"
+}) {
   const [open, setOpen] = useState(false)
   return (
     <I18nextProvider i18n={i18n}>
@@ -31,6 +37,7 @@ function Harness({ onClose = () => undefined }: { readonly onClose?: () => void 
           setOpen(false)
         }}
         title="篩選"
+        variant={variant}
       >
         <p>body</p>
       </Dialog>
@@ -72,5 +79,21 @@ describe("Dialog", () => {
     expect(onClose).not.toHaveBeenCalled()
     fireEvent.click(screen.getByRole("dialog"))
     expect(onClose).toHaveBeenCalledTimes(1)
+  })
+
+  it("keeps a bottom sheet anchored and contains scroll, with downward handle drag to close", async () => {
+    render(<Harness variant="bottom" />)
+    await userEvent.click(screen.getByRole("button", { name: "open" }))
+    const dialog = screen.getByRole("dialog")
+    expect(dialog).toHaveClass("fixed", "bottom-0", "overflow-hidden", "overscroll-contain")
+    const scrollArea = dialog.querySelector(".overflow-y-auto")
+    expect(scrollArea).toHaveClass("overscroll-contain")
+    const handle = dialog.querySelector('[aria-hidden="true"]')
+    if (!handle) throw new Error("Missing sheet handle")
+
+    fireEvent.pointerDown(handle, { clientY: 40 })
+    fireEvent.pointerUp(handle, { clientY: 120 })
+
+    expect(dialog).not.toHaveAttribute("open")
   })
 })

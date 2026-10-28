@@ -36,20 +36,20 @@ it.each([
   [
     "zh-TW",
     "能力種類",
-    ["快速", "入場曲", "謝幕曲", "進階起動", "起動"],
-    ["進化時", "攻擊時", "超進化時", "融合"],
+    ["Quick", "入場曲", "謝幕曲", "起動", "進階起動"],
+    ["融合", "攻擊時", "進化時", "超進化時"],
   ],
   [
     "ja",
     "能力の種類",
-    ["クイック", "ファンファーレ", "ラストワード", "アドバンス起動", "起動"],
-    ["進化時", "攻撃時", "超進化時", "融合"],
+    ["クイック", "ファンファーレ", "ラストワード", "起動", "アドバンス起動"],
+    ["融合", "攻撃時", "進化時", "超進化時"],
   ],
   [
     "en",
     "Ability types",
-    ["Quick", "Fanfare", "Last Words", "Advanced Activate", "Activate"],
-    ["On Evolve", "Strike", "On Super-Evolve", "Fusion"],
+    ["Quick", "Fanfare", "Last Words", "Activate", "Advanced Activate"],
+    ["Fusion", "Strike", "On Evolve", "On Super-Evolve"],
   ],
 ] as const)(
   "shows official ability icons and text-only types in %s",
@@ -66,12 +66,17 @@ it.each([
     )
     await userEvent.click(screen.getByRole("button", { name: new RegExp(`^${label}`, "u") }))
     const group = screen.getByRole("group", { name: label })
+    expect(
+      within(group)
+        .getAllByRole("button")
+        .map((button) => button.textContent),
+    ).toEqual([...iconLabels, ...textLabels])
     const iconNames = [
       "icon_quick.png",
       "icon_fanfare.png",
       "icon_lastword.png",
-      "icon_advancestand.png",
       "icon_stand.png",
+      "icon_advancestand.png",
     ]
     iconLabels.forEach((iconLabel, index) => {
       const iconName = iconNames[index]
@@ -85,6 +90,23 @@ it.each([
     }
   },
 )
+
+it("uses Quick only for the zh-TW chip and keeps the selected summary unchanged", async () => {
+  await renderInRouter(
+    <AbilityTypeFilter
+      options={{ coverage: "complete", unknownCards: 0 }}
+      selected={["quick"]}
+      matchMode="any"
+      onChange={vi.fn()}
+      onMatchChange={vi.fn()}
+    />,
+    { language: "zh-TW" },
+  )
+  const trigger = screen.getByRole("button", { name: /^能力種類/u })
+  expect(trigger).toHaveTextContent("快速")
+  await userEvent.click(trigger)
+  expect(screen.getByRole("button", { name: "Quick" })).toBeInTheDocument()
+})
 
 it("keeps controls disabled while data loads and shows concrete missing coverage", async () => {
   const props = {

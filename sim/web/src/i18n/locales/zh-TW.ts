@@ -295,6 +295,7 @@ const zhTW = {
     abilityUnknown: "能力種類資料尚未確認",
     abilityUnknownCount: "仍有 {{count}} 張卡的能力種類尚無法判定",
     abilityTypeHas: "能力種類：{{label}}",
+    abilityTypeChipQuick: "Quick",
     keywordAll: "符合全部選取的關鍵字",
     abilityTypeNames: {
       quick: "快速",

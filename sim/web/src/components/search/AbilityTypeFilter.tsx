@@ -18,6 +18,20 @@ const ABILITY_TYPE_ICONS: Readonly<Partial<Record<AbilityType, string>>> = {
   advanced_act: advancedStandIcon,
   act: standIcon,
 }
+const ABILITY_TYPE_DISPLAY_RANK: Readonly<Record<AbilityType, number>> = {
+  quick: 0,
+  fanfare: 1,
+  last_words: 2,
+  act: 3,
+  advanced_act: 4,
+  fusion: 5,
+  on_attack: 6,
+  on_evolve: 7,
+  on_super_evolve: 8,
+}
+const ABILITY_TYPE_DISPLAY_ORDER = [...ABILITY_TYPES].sort(
+  (left, right) => ABILITY_TYPE_DISPLAY_RANK[left] - ABILITY_TYPE_DISPLAY_RANK[right],
+)
 
 export function AbilityTypeFilter({
   options,
@@ -62,12 +76,12 @@ export function AbilityTypeFilter({
         disabled={disabled}
         onChange={onMatchChange}
       />
-      <div className="flex flex-wrap gap-2">
-        {ABILITY_TYPES.map((code) => (
+      <div className="grid grid-cols-3 gap-2">
+        {ABILITY_TYPE_DISPLAY_ORDER.map((code) => (
           <Toggle
             key={code}
             pressed={selected.includes(code)}
-            className="h-10 min-w-0 gap-0.5 px-0.5 text-11"
+            className="h-auto min-h-10 w-full min-w-0 gap-1 px-1 text-11 leading-tight whitespace-normal"
             disabled={disabled}
             onClick={() => {
               onChange(
@@ -84,7 +98,11 @@ export function AbilityTypeFilter({
                 className="size-3.5 shrink-0 object-contain"
               />
             )}
-            {t(`filters.abilityTypeNames.${code}`)}
+            {t(
+              code === "quick"
+                ? "filters.abilityTypeChipQuick"
+                : `filters.abilityTypeNames.${code}`,
+            )}
           </Toggle>
         ))}
       </div>

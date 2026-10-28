@@ -36,6 +36,17 @@ export function CompactHeaderMenu({
   )
   useEffect(() => {
     if (!open) return
+    const closeOnScroll = (event: Event) => {
+      if (event.target instanceof Node && panel.current?.contains(event.target)) return
+      panel.current?.hidePopover()
+    }
+    const observer =
+      typeof IntersectionObserver === "undefined"
+        ? undefined
+        : new IntersectionObserver(([entry]) => {
+            if (entry && !entry.isIntersecting) panel.current?.hidePopover()
+          })
+    if (button.current) observer?.observe(button.current)
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== "Escape" || !panel.current?.matches(":popover-open")) return
       // The card drawer must stay open when Escape dismisses its header menu.
@@ -45,8 +56,13 @@ export function CompactHeaderMenu({
       button.current?.focus()
     }
     window.addEventListener("keydown", onKeyDown, true)
+    window.addEventListener("scroll", closeOnScroll, true)
+    window.visualViewport?.addEventListener("scroll", closeOnScroll)
     return () => {
+      observer?.disconnect()
       window.removeEventListener("keydown", onKeyDown, true)
+      window.removeEventListener("scroll", closeOnScroll, true)
+      window.visualViewport?.removeEventListener("scroll", closeOnScroll)
     }
   }, [open])
   return (

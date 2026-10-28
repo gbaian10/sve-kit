@@ -73,9 +73,9 @@ export function LocationFilter({
               code: token,
               label: kindLabel,
               content: plate ? (
-                <span className="inline-flex items-center gap-2">
+                <span className="inline-flex flex-wrap items-center gap-2">
                   <img src={plate} alt="" aria-hidden className="h-5 w-auto shrink-0" />
-                  <span>{kindLabel}</span>
+                  <span className="whitespace-nowrap">{kindLabel}</span>
                 </span>
               ) : undefined,
             }

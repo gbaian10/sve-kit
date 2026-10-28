@@ -632,6 +632,9 @@ describe("CardsPage", () => {
       expect(panel).toBeVisible()
       const dialog = screen.getByRole("dialog", { name: "篩選條件" })
       expect(screen.getByRole("button", { name: "關閉" })).toHaveFocus()
+      const resultDock = dialog.querySelector(".sticky")
+      expect(resultDock).toHaveClass("bottom-0")
+      expect(panel?.lastElementChild).toBe(resultDock)
       expect(classRow).toBeVisible()
       expect(within(classRow).getByRole("button", { name: "主教" })).toHaveAttribute(
         "aria-pressed",

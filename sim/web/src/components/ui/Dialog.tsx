@@ -46,6 +46,7 @@ export function Dialog({
   const closeRef = useRef<HTMLButtonElement>(null)
   const bodyRef = useRef<HTMLDivElement>(null)
   const openerRef = useRef<HTMLElement | null>(null)
+  const dragStartY = useRef<number | null>(null)
   const titleId = useId()
 
   useEffect(() => {
@@ -91,8 +92,9 @@ export function Dialog({
       className={cn(
         "m-0 max-h-dvh w-full bg-transparent p-0 text-text-1 backdrop:bg-scrim",
         variant === "sheet" &&
-          "top-auto bottom-0 max-w-none md:top-1/2 md:bottom-auto md:left-1/2 md:max-w-lg md:-translate-x-1/2 md:-translate-y-1/2",
-        variant === "bottom" && "inset-x-0 top-auto bottom-0 max-w-none",
+          "fixed top-auto bottom-0 max-w-none md:top-1/2 md:bottom-auto md:left-1/2 md:max-w-lg md:-translate-x-1/2 md:-translate-y-1/2",
+        variant === "bottom" &&
+          "fixed inset-x-0 top-auto bottom-0 max-w-none overflow-hidden overscroll-contain bg-surface-1",
         variant === "center" && "top-1/2 left-1/2 max-w-lg -translate-x-1/2 -translate-y-1/2",
         variant === "card" &&
           "inset-0 h-dvh max-w-none md:inset-auto md:top-1/2 md:left-1/2 md:h-auto md:max-w-[min(100%-2rem,58rem)] md:-translate-x-1/2 md:-translate-y-1/2",
@@ -104,16 +106,28 @@ export function Dialog({
         className={cn(
           "flex flex-col bg-surface-1 outline-none",
           variant === "sheet" && "max-h-[92dvh] rounded-t-sheet md:rounded-dialog",
-          variant === "bottom" && "max-h-[88dvh] rounded-t-sheet",
+          variant === "bottom" &&
+            "max-h-[88dvh] overflow-hidden overscroll-contain rounded-t-sheet",
           variant === "center" && "max-h-[92dvh] rounded-dialog",
           variant === "card" && "h-dvh max-h-dvh md:h-auto md:max-h-[92dvh] md:rounded-dialog",
           className,
         )}
       >
-        {variant === "sheet" && (
+        {(variant === "sheet" || variant === "bottom") && (
           <div
             aria-hidden="true"
-            className="mx-auto mt-2 h-1 w-9 rounded-pill bg-border-strong md:hidden"
+            onPointerDown={(event) => {
+              dragStartY.current = event.clientY
+            }}
+            onPointerUp={(event) => {
+              const startY = dragStartY.current
+              dragStartY.current = null
+              if (startY !== null && event.clientY - startY > 64) onClose()
+            }}
+            onPointerCancel={() => {
+              dragStartY.current = null
+            }}
+            className="mx-auto mt-2 h-1 w-9 shrink-0 touch-none rounded-pill bg-border-strong md:hidden"
           />
         )}
         {!bare && (
@@ -132,7 +146,12 @@ export function Dialog({
             </button>
           </header>
         )}
-        <div className={cn("min-h-0 flex-1 overflow-y-auto", bare ? "p-0" : "px-4 pb-4")}>
+        <div
+          className={cn(
+            "min-h-0 flex-1 overflow-y-auto overscroll-contain",
+            bare ? "p-0" : variant === "bottom" ? "px-4 pb-0" : "px-4 pb-4",
+          )}
+        >
           {children}
         </div>
         {footer !== undefined && (
