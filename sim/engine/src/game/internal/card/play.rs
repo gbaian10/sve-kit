@@ -169,7 +169,7 @@ pub(super) fn check_spell(ability: &Ability, printed: &Value) -> Result<()> {
     };
     if !matches!(
         printed["card_type"].as_str(),
-        Some("スペル" | "スペル・トークン")
+        Some("スペル" | "スペル・トークン" | "スペル・アドバンス")
     ) || *amount != super::super::cost::printed_play_cost(&printed["cost"])?
     {
         return Err(unsupported(
@@ -553,8 +553,10 @@ impl Game {
             return Err(invalid("Quick requires its authority question"));
         }
         let before = self.clone();
-        let result = if matches!(self.object_type(holder)?, "スペル" | "スペル・トークン")
-        {
+        let result = if matches!(
+            self.object_type(holder)?,
+            "スペル" | "スペル・トークン" | "スペル・アドバンス"
+        ) {
             self.play_internal_spell(holder, actor)
         } else {
             self.play_internal_field_card(holder, actor)
@@ -1190,9 +1192,15 @@ impl Game {
             let current = self.object(holder)?;
             if current.zone == "resolution" && current.generation == execution.context.generation.0
             {
+                // The mandatory Advance return cannot reuse an exhausted physical generation.
+                let moves = if self.object_type(holder)? == "スペル・アドバンス" {
+                    2
+                } else {
+                    1
+                };
                 current
                     .generation
-                    .checked_add(1)
+                    .checked_add(moves)
                     .ok_or_else(|| invalid("Spell cleanup generation exhausted"))?;
                 let departing_source = execution.source_before_move(self, from_ref(holder))?;
                 self.move_objects(from_ref(holder), "cemetery", None, None, &execution.frame())?;

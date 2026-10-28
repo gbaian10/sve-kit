@@ -52,7 +52,7 @@ pub(super) fn check_spell_face(
     if ordinal != 0
         || !matches!(
             printed["card_type"].as_str(),
-            Some("スペル" | "スペル・トークン")
+            Some("スペル" | "スペル・トークン" | "スペル・アドバンス")
         )
         || !card.abilities.iter().any(|a| {
             a.node.kind == AbilityKind::Spell
@@ -214,7 +214,10 @@ impl Game {
                 let spell = ability.kind == AbilityKind::Spell;
                 let eligible = if spell {
                     object.owner == seat_name(actor)?
-                        && matches!(self.object_type(holder)?, "スペル" | "スペル・トークン")
+                        && matches!(
+                            self.object_type(holder)?,
+                            "スペル" | "スペル・トークン" | "スペル・アドバンス"
+                        )
                         && matches!(object.zone.as_str(), "hand" | "ex")
                         && self.internal_quick_spell(holder)?
                         && !self.restricted(holder, "play")?
