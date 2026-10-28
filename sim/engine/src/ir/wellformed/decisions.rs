@@ -164,6 +164,18 @@ impl Checker {
                 }
                 Ok(())
             }
+            ChoiceDomain::Recipients {
+                candidates,
+                cardinality: bounds,
+                binding,
+            } => {
+                self.cardinality(*bounds)?;
+                if cardinality.is_some_and(|value| value != *bounds) {
+                    return Err(self.error(WellFormedReason::DecisionCardinality));
+                }
+                self.recipients(candidates)?;
+                self.define(*binding, BindingKind::Value)
+            }
             ChoiceDomain::Integer {
                 cardinality: bounds,
                 binding,
@@ -242,7 +254,7 @@ impl Checker {
             return self.reject();
         }
         match (slot, &decision.domain) {
-            (PlaySlot::Targets, ChoiceDomain::Objects { .. })
+            (PlaySlot::Targets, ChoiceDomain::Objects { .. } | ChoiceDomain::Recipients { .. })
             | (PlaySlot::X, ChoiceDomain::Integer { .. })
             | (PlaySlot::Distribution, ChoiceDomain::Distribution { .. }) => {}
             _ => return self.reject(),
@@ -606,7 +618,8 @@ fn has_roles(domain: &ChoiceDomain) -> bool {
     match domain {
         ChoiceDomain::Objects { target_roles, .. } => target_roles.is_some(),
         ChoiceDomain::Compound { domains } => domains.iter().any(has_roles),
-        ChoiceDomain::EndPhaseGuardAct { .. }
+        ChoiceDomain::Recipients { .. }
+        | ChoiceDomain::EndPhaseGuardAct { .. }
         | ChoiceDomain::Modes { .. }
         | ChoiceDomain::Order { .. }
         | ChoiceDomain::Distribution { .. }

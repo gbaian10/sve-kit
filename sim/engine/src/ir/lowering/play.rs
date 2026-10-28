@@ -85,6 +85,12 @@ impl BodyContext<'_> {
             },
             _ => return Err(unsupported(path)),
         };
+        if target.from.leader.is_some() || target.from.leaders.is_some() || target.from.leader_or {
+            return self.recipient_choice(target, cardinality, path);
+        }
+        if self.recipient_targets.contains_key(&target.bind) {
+            return Err(unsupported(path));
+        }
         let binding = Binding::new(self.allocator.id(path)?, self.scope);
         if self.definitions.contains_key(&target.bind)
             || self.searches.contains_key(&target.bind)
@@ -96,7 +102,7 @@ impl BodyContext<'_> {
         let candidate = Binding::new(1, self.card_allocator.scope(path)?);
         let selector = Selector::Zone {
             players: PlayerSet {
-                relation: match target.from.who {
+                relation: match target.from.who.as_ref().ok_or_else(|| unsupported(path))? {
                     ast::Side::Controller => PlayerRelation::SelfPlayer,
                     ast::Side::Opponent => PlayerRelation::Opponents,
                     ast::Side::All => PlayerRelation::All,
@@ -106,13 +112,13 @@ impl BodyContext<'_> {
                     minimum: Nat(0),
                     maximum: None,
                 },
-                text_quantifier: if matches!(target.from.who, ast::Side::All) {
+                text_quantifier: if matches!(target.from.who, Some(ast::Side::All)) {
                     TextQuantifier::All
                 } else {
                     TextQuantifier::Implicit
                 },
             },
-            zone: match target.from.zone {
+            zone: match target.from.zone.as_ref().ok_or_else(|| unsupported(path))? {
                 ast::Zone::Field => ZoneKind::Field,
             },
             view: SelectionView::Current {},
@@ -138,6 +144,61 @@ impl BodyContext<'_> {
                 },
                 binding,
                 target_roles: None,
+            },
+            cardinality,
+        ))
+    }
+
+    fn recipient_choice(
+        &mut self,
+        target: &ast::Target,
+        cardinality: Cardinality,
+        path: &str,
+    ) -> Result<(ChoiceDomain, Cardinality), LoweringError> {
+        if target.from.r#trait.is_some()
+            || self.recipient_targets.contains_key(&target.bind)
+            || self.targets.contains_key(&target.bind)
+            || self.definitions.contains_key(&target.bind)
+            || self.searches.contains_key(&target.bind)
+            || self.observations.contains_key(&target.bind)
+        {
+            return Err(unsupported(path));
+        }
+        let players = recipient_players(&target.from, path)?;
+        let leaders = RecipientSet::Leaders {
+            players: players.clone(),
+        };
+        let candidates = if target.from.leader_or {
+            let candidate = Binding::new(1, self.card_allocator.scope(path)?);
+            RecipientSet::Union {
+                sets: vec![
+                    leaders,
+                    RecipientSet::Objects {
+                        objects: Selector::Zone {
+                            players,
+                            zone: ZoneKind::Field,
+                            view: SelectionView::Current {},
+                            binding: candidate,
+                            predicate: Box::new(super::search::object_filter(
+                                target.from.kind.as_ref(),
+                                None,
+                                None,
+                                candidate,
+                            )),
+                        },
+                    },
+                ],
+            }
+        } else {
+            leaders
+        };
+        let binding = Binding::new(self.allocator.id(path)?, self.scope);
+        self.recipient_targets.insert(target.bind.clone(), binding);
+        Ok((
+            ChoiceDomain::Recipients {
+                candidates,
+                cardinality,
+                binding,
             },
             cardinality,
         ))
@@ -175,6 +236,14 @@ impl BodyContext<'_> {
                     text_quantifier: TextQuantifier::All,
                 },
             },
+            ast::Recipients::Target(name) if self.recipient_targets.contains_key(name) => {
+                RecipientSet::Bound {
+                    recipients: *self
+                        .recipient_targets
+                        .get(name)
+                        .ok_or_else(|| unsupported(path))?,
+                }
+            }
             ast::Recipients::Target(name) => RecipientSet::Objects {
                 objects: Selector::Bound {
                     reference: *self.targets.get(name).ok_or_else(|| unsupported(path))?,
@@ -270,6 +339,7 @@ impl BodyContext<'_> {
                 searches: BTreeMap::new(),
                 observations: BTreeMap::new(),
                 targets: BTreeMap::new(),
+                recipient_targets: BTreeMap::new(),
                 parameters: vec![],
                 formal_play: false,
                 mode_targets: BTreeMap::new(),
@@ -407,4 +477,59 @@ pub(super) fn choice_body(body: &ast::Body, path: &str) -> Result<bool, Lowering
         1 => Ok(true),
         _ => Err(unsupported(path)),
     }
+}
+
+const fn target_players(side: &ast::Side) -> PlayerSet {
+    PlayerSet {
+        relative_to: PlayerRef::Controller {},
+        relation: match side {
+            ast::Side::Controller => PlayerRelation::SelfPlayer,
+            ast::Side::Opponent => PlayerRelation::Opponents,
+            ast::Side::All => PlayerRelation::All,
+        },
+        cardinality: Cardinality {
+            minimum: Nat(0),
+            maximum: None,
+        },
+        text_quantifier: TextQuantifier::Implicit,
+    }
+}
+
+fn recipient_players(query: &ast::TargetQuery, path: &str) -> Result<PlayerSet, LoweringError> {
+    let players = if let Some(leader) = query.leader {
+        if query.who.is_some()
+            || query.zone.is_some()
+            || query.kind.is_some()
+            || query.leader_or
+            || query.leaders.is_some()
+        {
+            return Err(unsupported(path));
+        }
+        PlayerSet {
+            relative_to: PlayerRef::Controller {},
+            relation: match leader {
+                ast::LeaderSide::Controller => PlayerRelation::SelfPlayer,
+                ast::LeaderSide::Opponent => PlayerRelation::Opponents,
+            },
+            cardinality: Cardinality {
+                minimum: Nat(0),
+                maximum: None,
+            },
+            text_quantifier: TextQuantifier::Implicit,
+        }
+    } else if let Some(leaders) = &query.leaders {
+        if query.who.is_some() || query.zone.is_some() || query.kind.is_some() || query.leader_or {
+            return Err(unsupported(path));
+        }
+        target_players(match leaders {
+            ast::LeaderGroup::All => &ast::Side::All,
+            ast::LeaderGroup::Opponents => &ast::Side::Opponent,
+        })
+    } else {
+        if !matches!(query.kind, Some(ast::SearchKind::Follower)) {
+            return Err(unsupported(path));
+        }
+        target_players(query.who.as_ref().ok_or_else(|| unsupported(path))?)
+    };
+    Ok(players)
 }

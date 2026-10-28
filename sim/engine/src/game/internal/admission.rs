@@ -201,6 +201,8 @@ fn play_requirement(code: &str) -> bool {
             | "shape.CaptureTime.AtSelection"
             | "shape.ExecutionRef.Current"
             | "shape.ChoiceDomain.Objects"
+            | "shape.ChoiceDomain.Recipients"
+            | "shape.RecipientSet.Bound"
             | "internal.Disjointness.Disjoint"
             | "shape.DecisionKind.PlayParameter"
             | "decision.play-parameter"

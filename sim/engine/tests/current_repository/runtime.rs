@@ -730,3 +730,6 @@ mod reveal_hand;
 mod life_cost;
 #[path = "runtime/live_conditions.rs"]
 mod live_conditions;
+
+#[path = "runtime/recipient_targets.rs"]
+mod recipient_targets;

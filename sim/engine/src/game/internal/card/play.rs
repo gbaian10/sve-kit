@@ -202,10 +202,34 @@ pub(super) fn check(ability: &Ability, source: &SourceSpan) -> Result<()> {
     for group in &groups {
         parameters.extend(group.parameters()?);
     }
+    check_parameters(&parameters)?;
+    let mut steps = play
+        .captures
+        .iter()
+        .cloned()
+        .map(|capture| Located {
+            node: Node::Capture { capture },
+            source: source.clone(),
+        })
+        .collect::<Vec<_>>();
+    steps.extend(parameters.into_iter().map(|decision| Located {
+        node: Node::Decision { decision },
+        source: source.clone(),
+    }));
+    admission::check_play(
+        &Program {
+            scope: ability.scope,
+            steps,
+        },
+        source,
+    )
+}
+
+fn check_parameters(parameters: &[Decision]) -> Result<()> {
     let mut distribution = false;
     let mut target = None;
     let mut target_count = 0_usize;
-    for decision in &parameters {
+    for decision in parameters {
         match (&decision.kind, &decision.domain) {
             (
                 DecisionKind::PlayParameter {
@@ -242,6 +266,26 @@ pub(super) fn check(ability: &Ability, source: &SourceSpan) -> Result<()> {
             ) if Some(*reference) == target => {
                 distribution = true;
             }
+            (
+                DecisionKind::PlayParameter {
+                    slot: PlaySlot::Targets,
+                    selection_snapshot: SelectionSnapshot::AtDecision,
+                    play_scope: ExecutionRef::Current {},
+                    input: InputMode::Inline,
+                },
+                ChoiceDomain::Recipients {
+                    candidates,
+                    cardinality,
+                    ..
+                },
+            ) if !distribution => {
+                super::recipient_targets::check(candidates, *cardinality)?;
+                target = None;
+                target_count = target_count.saturating_add(1);
+                if !decision.captures.is_empty() {
+                    return Err(unsupported("recipient target captures"));
+                }
+            }
             _ => return Err(unsupported("play parameter order, dependencies or domain")),
         }
         if decision.actor != (PlayerRef::Controller {})
@@ -253,26 +297,7 @@ pub(super) fn check(ability: &Ability, source: &SourceSpan) -> Result<()> {
     if distribution && target_count != 1 {
         return Err(unsupported("distribution needs exactly one target group"));
     }
-    let mut steps = play
-        .captures
-        .iter()
-        .cloned()
-        .map(|capture| Located {
-            node: Node::Capture { capture },
-            source: source.clone(),
-        })
-        .collect::<Vec<_>>();
-    steps.extend(parameters.into_iter().map(|decision| Located {
-        node: Node::Decision { decision },
-        source: source.clone(),
-    }));
-    admission::check_play(
-        &Program {
-            scope: ability.scope,
-            steps,
-        },
-        source,
-    )
+    Ok(())
 }
 
 fn collect_modes(program: &Program) -> Result<Vec<PlayMode>> {
@@ -738,6 +763,17 @@ impl Game {
                 .as_ref()
                 .ok_or_else(|| invalid("missing selection snapshot"))?;
             match &decision.domain {
+                ChoiceDomain::Recipients { .. } => {
+                    snapshot.internal_recipient_target(execution, &decision)?;
+                    if let Some((view, _)) = execution.waiting.as_mut() {
+                        self.state.ir_epoch = self
+                            .state
+                            .ir_epoch
+                            .checked_add(1)
+                            .ok_or_else(|| invalid("IR epoch exhausted"))?;
+                        view.token.epoch = self.state.ir_epoch;
+                    }
+                }
                 ChoiceDomain::Objects { .. } => {
                     snapshot.internal_target(execution, &decision)?;
                     // Target construction is pure; the live authority alone allocates the token.

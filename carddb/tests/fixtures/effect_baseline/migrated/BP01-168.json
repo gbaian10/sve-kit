@@ -1,0 +1,31 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "spell",
+      "body": {
+        "op": "damage",
+        "subjects": "target.1",
+        "amount": 3
+      },
+      "targets": [
+        {
+          "key": "1",
+          "select": {
+            "union": [
+              {
+                "side": "opponent",
+                "zone": "field",
+                "type": "follower"
+              },
+              "opponent.leader"
+            ]
+          },
+          "min": 1,
+          "max": 1
+        }
+      ]
+    }
+  ]
+}

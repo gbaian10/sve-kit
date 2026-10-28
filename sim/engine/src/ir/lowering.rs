@@ -399,17 +399,14 @@ impl Allocator {
         let ability_source = ability_source(&source, keyword);
         let mut context = BodyContext {
             scope,
-            payment_result: if entry.spell.is_some() {
-                payment_result
-            } else {
-                None
-            },
+            payment_result: entry.spell.as_ref().and(payment_result),
             allocator: Self::default(),
             card_allocator: self,
             definitions: &body.define,
             searches: BTreeMap::new(),
             observations: BTreeMap::new(),
             targets: BTreeMap::new(),
+            recipient_targets: BTreeMap::new(),
             parameters: vec![],
             mode_targets: BTreeMap::new(),
             formal_play: entry.activate.is_some() || entry.spell.is_some(),
@@ -688,6 +685,7 @@ struct BodyContext<'definitions> {
     searches: BTreeMap<String, (ReceiptId, bool)>,
     observations: BTreeMap<String, super::ObjectReceipt>,
     targets: BTreeMap<String, Binding<Selector>>,
+    recipient_targets: BTreeMap<String, Binding<Vec<super::DamageRecipient>>>,
     parameters: Vec<super::Decision>,
     formal_play: bool,
     mode_targets: BTreeMap<u64, Vec<ast::Target>>,

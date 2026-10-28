@@ -125,6 +125,9 @@ impl Checker {
                     }
                 }
             }
+            ChoiceDomain::Recipients { binding, .. } => {
+                self.env.access.insert(binding.key(), visibility.clone());
+            }
             ChoiceDomain::Integer { binding, .. } => {
                 self.env.access.insert(binding.key(), visibility.clone());
             }

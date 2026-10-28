@@ -1,0 +1,25 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP01-168:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-28"
+    abilities:
+      - line: 1
+        spell:
+          targets:
+            - bind: victim
+              from:
+                who: opp
+                kind: follower
+                leader_or: true
+              n: 1
+          do:
+            - damage:
+                to: victim
+                n: 3

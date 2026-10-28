@@ -1222,3 +1222,34 @@ fn assert_target_characteristics(filtered: &WellFormedCardProgram) {
         "/cards/SD03-005/abilities/0"
     );
 }
+
+#[test]
+fn leader_targets_and_leader_follower_targets_keep_recipient_bindings() {
+    let lowerer = ExpandedLowerer::new().unwrap();
+    let costs = BTreeMap::from([("SD03-005".to_owned(), Nat(1))]);
+    for from in [
+        json!({"leader":"opp"}),
+        json!({"leader":"self"}),
+        json!({"leaders":"all"}),
+        json!({"who":"opp","kind":"follower","leader_or":true}),
+    ] {
+        let mut tree = expanded::spell_tree().clone();
+        *tree
+            .pointer_mut("/cards/SD03-005/abilities/0/spell")
+            .unwrap() = json!({
+            "targets":[{"bind":"victim","from":from,"n":1_u64}],
+            "do":[{"damage":{"to":"victim","n":3_u64}}]
+        });
+        let cards = lowerer.lower_with_printed_costs(&tree, &costs).unwrap();
+        let ability = &cards["SD03-005"].card().abilities[0].node;
+        assert!(matches!(
+            ability.play.as_ref().unwrap().parameters[0].domain,
+            ChoiceDomain::Recipients { .. }
+        ));
+        tree["cards"]["SD03-005"]["abilities"][0]["spell"]["do"] = json!([{"destroy":"victim"}]);
+        assert!(
+            lowerer.lower_with_printed_costs(&tree, &costs).is_err(),
+            "recipient bindings cannot become object selectors"
+        );
+    }
+}
