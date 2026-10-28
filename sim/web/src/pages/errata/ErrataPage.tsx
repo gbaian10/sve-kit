@@ -8,7 +8,7 @@ import {
   useRouteEdition,
   useSearchReadiness,
 } from "../../app/snapshot"
-import { arrayValue, objectValue, stringValue } from "../../data"
+import { loadCardErrata, stringValue } from "../../data"
 import { printingPath } from "../../domain/cardRoute"
 import { displayName } from "../../domain/nameDisplay"
 import { DEFAULT_QUERY } from "../../domain/query/model"
@@ -42,34 +42,34 @@ export function ErrataPage() {
   const snapshot = client.snapshot()
   const [notices, setNotices] = useState<ReadonlyMap<string, NoticeInfo>>(new Map())
   useEffect(() => {
-    if (!snapshot) return
+    if (!snapshot || !listView) return
     let active = true
-    const keys = [...snapshot.files]
-      .filter(([, file]) =>
-        arrayValue(file["row_counts"]).some((count) => arrayValue(count)[0] === "errata"),
-      )
-      .map(([key]) => key)
-    void Promise.all(keys.map((key) => client.fragments(key)))
-      .then((groups) => {
+    void Promise.all(
+      listView.page.items.flatMap((item) =>
+        item.summary
+          ? [
+              loadCardErrata(
+                client,
+                snapshot,
+                item.summary.cardId,
+                item.summary.printingId,
+                item.summary.faceId,
+                edition,
+              ).then((errata) => [item.summary?.printingId ?? "", errata] as const),
+            ]
+          : [],
+      ),
+    )
+      .then((entries) => {
         const byPrinting = new Map<string, NoticeInfo>()
-        for (const notice of groups
-          .flat()
-          .filter((fragment) => fragment.table === "errata")
-          .flatMap((fragment) => fragment.rows)) {
-          if (notice["region"] !== edition) continue
-          const info = {
-            url: stringValue(notice["official_url"]),
-            date: stringValue(
-              arrayValue(notice["versions"]).map((v) => objectValue(v))[0]?.["announced_on"],
-            ),
-            title: stringValue(notice["title"]),
-          }
-          for (const version of arrayValue(notice["versions"]).map((v) => objectValue(v))) {
-            for (const printing of arrayValue(version["printings"]).map((v) => objectValue(v))) {
-              const id = stringValue(printing["printing_id"])
-              if (id) byPrinting.set(id, info)
-            }
-          }
+        for (const [printingId, errata] of entries) {
+          const notice = errata[0]
+          if (!notice) continue
+          byPrinting.set(printingId, {
+            url: notice.url,
+            date: stringValue(notice.version["announced_on"]),
+            title: stringValue(notice.version["title"]),
+          })
         }
         if (active) setNotices(byPrinting)
       })
@@ -79,7 +79,7 @@ export function ErrataPage() {
     return () => {
       active = false
     }
-  }, [client, edition, snapshot])
+  }, [client, edition, listView, snapshot])
   const rows = useMemo(
     () => listView?.page.items.flatMap((item) => (item.summary ? [item.summary] : [])) ?? [],
     [listView],
@@ -120,6 +120,7 @@ export function ErrataPage() {
                     )}
                     <div className="min-w-0 flex-1">
                       <Link
+                        data-image-printing={card.printingId}
                         to={printingPath(card)}
                         className="group block rounded-button focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                       >
