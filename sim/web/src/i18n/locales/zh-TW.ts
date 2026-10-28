@@ -1,5 +1,10 @@
 const zhTW = {
   errata: {
+    listTitle: "官方勘誤卡一覽",
+    listDescription: "查看曾發布官方勘誤公告的卡片，並前往卡片頁閱讀勘誤內容。",
+    listLoading: "正在載入勘誤卡…",
+    listEmpty: "目前快照沒有勘誤卡。",
+    noticeDetailsUnavailable: "官方公告資訊",
     diffHint: "刪除線表示勘誤前的舊文；底線表示修正後新增或替換的文字。",
     heading: "勘誤",
     fragmentHint: "以下為官方公告列出的變更片段，不代表此版次的完整印刷卡文。",
@@ -48,6 +53,7 @@ const zhTW = {
     home: "首頁",
     cards: "查卡",
     decks: "牌組",
+    errata: "勘誤",
     account: "帳號與設定",
     primary: "主要導覽",
     skipToContent: "跳到主內容",

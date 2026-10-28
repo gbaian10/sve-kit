@@ -2,6 +2,12 @@ import type { Messages } from "./zh-TW"
 
 export default {
   errata: {
+    listTitle: "公式エラッタ一覧",
+    listDescription:
+      "公式エラッタ告知があるカードを一覧表示します。カードを開くと訂正内容を確認できます。",
+    listLoading: "エラッタカードを読み込み中…",
+    listEmpty: "このスナップショットにエラッタカードはありません。",
+    noticeDetailsUnavailable: "公式告知",
     diffHint: "取り消し線は訂正前の文章、下線は訂正後に追加・置換された文字を示します。",
     heading: "エラッタ",
     fragmentHint: "公式告知の変更箇所です。この版の印刷テキスト全文ではありません。",
@@ -48,6 +54,7 @@ export default {
     title: "sve-kit",
   },
   nav: {
+    errata: "エラッタ",
     home: "ホーム",
     cards: "カード検索",
     decks: "デッキ",

@@ -2,6 +2,12 @@ import type { Messages } from "./zh-TW"
 
 export default {
   errata: {
+    listTitle: "Official errata",
+    listDescription:
+      "Browse cards with official errata notices and open a card to read its correction details.",
+    listLoading: "Loading cards with errata…",
+    listEmpty: "There are no errata cards in this snapshot.",
+    noticeDetailsUnavailable: "Official notice",
     diffHint:
       "Strikethrough marks the old text; underlining marks added or replacement text in the correction.",
     heading: "Errata",
@@ -57,6 +63,7 @@ export default {
     title: "sve-kit",
   },
   nav: {
+    errata: "Errata",
     home: "Home",
     cards: "Cards",
     decks: "Decks",
