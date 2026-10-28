@@ -20,7 +20,10 @@ fn angel_snipe_quick_targets_only_an_enemy_follower_and_deals_two_once() {
         no_target
             .play_internal_card("spell", actor(seat))
             .unwrap_err();
-        assert_eq!(format!("{no_target:?}"), before_no_target);
+        assert!(
+            format!("{no_target:?}") == before_no_target,
+            "rejected input must preserve authority state"
+        );
         initial["players"][opponent]["zones"]["field"] = json!([
             {"id":"amulet","card":"BP19-108"}, {"id":"enemy","card":"CP03-016"}
         ]);
@@ -33,7 +36,10 @@ fn angel_snipe_quick_targets_only_an_enemy_follower_and_deals_two_once() {
             let play = if quick {
                 let before_window = format!("{game:?}");
                 game.play_internal_card("spell", actor(seat)).unwrap_err();
-                assert_eq!(format!("{game:?}"), before_window);
+                assert!(
+                    format!("{game:?}") == before_window,
+                    "rejected input must preserve authority state"
+                );
                 game.internal_rule_action(&json!({"do":"end-phase"}))
                     .unwrap();
                 let question = game.internal_quick_choice().unwrap().unwrap();
@@ -68,7 +74,10 @@ fn angel_snipe_quick_targets_only_an_enemy_follower_and_deals_two_once() {
             .unwrap_err();
             game.answer_internal_card(question.actor, question.token, Answer::Targets(vec![99]))
                 .unwrap_err();
-            assert_eq!(format!("{game:?}"), before);
+            assert!(
+                format!("{game:?}") == before,
+                "rejected input must preserve authority state"
+            );
             let result = resolved(
                 game.answer_internal_card(
                     question.actor,
@@ -110,5 +119,8 @@ fn unmapped_reprint_keeps_the_current_runtime_guard() {
             .to_string()
             .contains("current ability definitions unavailable")
     );
-    assert_eq!(format!("{game:?}"), before);
+    assert!(
+        format!("{game:?}") == before,
+        "rejected input must preserve authority state"
+    );
 }
