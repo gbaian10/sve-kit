@@ -848,7 +848,12 @@ def _execute_crawl(
         else:
             source = Manifest.open(settings.manifest_path)
         with source as manifest:
-            writer = Writer(settings.data_dir, manifest, protect_history=True)
+            writer = Writer(
+                settings.data_dir,
+                manifest,
+                read_roots=settings.extra_roots,
+                protect_history=True,
+            )
             if job.dry_run:
                 _dry_run(job, writer, manifest)
                 return 0, None

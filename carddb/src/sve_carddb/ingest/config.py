@@ -31,7 +31,7 @@ class Settings(BaseSettings):
     archive_restore_root: Path | None = None
     extra_roots: Annotated[tuple[Path, ...], NoDecode] = ()
     """`SVE_EXTRA_ROOTS`: absolute paths, joined by `os.pathsep`, that symlinks
-    under the data root may point into. Only `manifest check` reads through them."""
+    under the data root may point into for reads and ordinary crawler writes."""
 
     @field_validator("extra_roots", mode="before")
     @classmethod

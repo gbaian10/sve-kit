@@ -427,18 +427,58 @@ def test_archive_collision_and_symlink_are_refused(
     assert writer.read(URL) == b"synthetic-A"
 
 
-def test_allow_root_does_not_authorize_latest_writes(
-    writer: RefreshWriter, store: ArchiveStore, tmp_path: Path
+@pytest.mark.parametrize("compressed", [False, True])
+def test_allowed_symlink_supports_new_write_replacement_and_recovery(
+    writer: RefreshWriter, store: ArchiveStore, tmp_path: Path, *, compressed: bool
 ) -> None:
-    write(writer, fetched())
     outside = tmp_path / "outside"
-    (store.data_root / "raw").rename(outside)
+    outside.mkdir()
     (store.data_root / "raw").symlink_to(outside)
     writer.store = replace(store, read_roots=(outside,))
     writer._read_roots = (outside,)
+    item = fetched(compressed=compressed)
+    if not compressed:
+        item = replace(item, path=PATH.with_suffix(""))
+    write(writer, item)
+    write(writer, replace(item, body=b"synthetic-B"))
+    assert writer.read(URL) == b"synthetic-B"
+
+    def crash(_resource: Resource) -> None:
+        raise KeyboardInterrupt
+
+    with pytest.raises(KeyboardInterrupt):
+        writer.write(
+            replace(item, body=b"synthetic-C"),
+            request_id=start(writer.manifest),
+            in_transaction=crash,
+        )
+    assert writer.recover() >= 1
+    assert writer.read(URL) == b"synthetic-B"
+    writer.checkpoint()
+    assert {p.read_bytes() for p in (store.root / "raw").rglob("*.raw")} == {
+        b"synthetic-A",
+        b"synthetic-B",
+        b"synthetic-C",
+    }
+
+
+@pytest.mark.parametrize("escape", [False, True])
+def test_protected_writer_rejects_unlisted_symlink_and_parent_escape(
+    writer: RefreshWriter, store: ArchiveStore, tmp_path: Path, *, escape: bool
+) -> None:
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    (store.data_root / "raw").symlink_to(outside)
+    if escape:
+        writer.store = replace(store, read_roots=(outside,))
+        writer._read_roots = (outside,)
+    item = fetched()
+    if escape:
+        item = replace(item, path=PurePosixPath("../outside/escape.html.zst"))
     with pytest.raises(UnsafePathError):
-        write(writer, fetched(b"synthetic-B"))
-    assert decompress((outside / "jp/qa/one.html.zst").read_bytes()) == b"synthetic-A"
+        write(writer, item)
+    assert not list(outside.iterdir())
+    assert writer.manifest.resources.get(URL) is None
 
 
 def test_new_uncompressed_image_uses_new_inode(
@@ -1352,10 +1392,16 @@ def test_final_destination_recheck(
     original = resolve_within
     calls = 0
 
-    def resolve(root: Path, path: PurePosixPath) -> Path:
+    def resolve(
+        root: Path, path: PurePosixPath, *, also_allowed: tuple[Path, ...] = ()
+    ) -> Path:
         nonlocal calls
         calls += 1
-        return original(root, path) if calls == 1 else tmp_path / "unexpected.html.zst"
+        return (
+            original(root, path, also_allowed=also_allowed)
+            if calls == 1
+            else tmp_path / "unexpected.html.zst"
+        )
 
     monkeypatch.setattr(refresh, "resolve_within", resolve)
     with pytest.raises(ArchiveRaceError, match="destination changed"):

@@ -835,3 +835,22 @@ def test_svwb_images_after_cards(wb: FakeWb, data_dir: Path) -> None:
         assert (data_dir / resource.path).read_bytes().startswith(b"\x89PNG")
     dry = invoke("crawl", "svwb-images", "--dry-run")
     assert "806 of 809 URLs would be requested" in dry.output
+
+
+def test_svwb_images_write_through_configured_symlink(
+    wb: FakeWb, data_dir: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    assert invoke("crawl", "svwb-cards").exit_code == 0
+    disk = tmp_path / "image-disk"
+    disk.mkdir()
+    (data_dir / "media/images").mkdir(parents=True)
+    (data_dir / "media/images/svwb").symlink_to(disk)
+    monkeypatch.setenv("SVE_EXTRA_ROOTS", str(disk))
+    result = invoke("crawl", "svwb-images", "--limit", "1")
+    assert result.exit_code == 0, result.output
+    url = next(u for u, _ in wb.calls if "/uploads/" in u)
+    path = svwb.image_path(url)
+    assert (data_dir / path).is_file()
+    assert (data_dir / path).resolve().is_relative_to(disk)
+    dry = invoke("crawl", "svwb-images", "--dry-run")
+    assert "808 of 809 URLs would be requested" in dry.output

@@ -104,7 +104,8 @@ class Writer:
     ) -> None:
         """Write under `root`, recording into `manifest`.
 
-        Reads may also follow symlinks into `read_roots`; writes never do.
+        Reads and ordinary writes may follow symlinks into `read_roots`.
+        New-only writes still reject every symlink.
         """
         self._root = root
         self._manifest = manifest
@@ -283,7 +284,7 @@ class Writer:
         target = (
             self._new_target(fetched.path)
             if self._create_only
-            else resolve_within(self._root, fetched.path)
+            else resolve_within(self._root, fetched.path, also_allowed=self._read_roots)
         )
         data = compress(fetched.body) if fetched.compressed else fetched.body
         if fetched.compressed and decompress(data) != fetched.body:

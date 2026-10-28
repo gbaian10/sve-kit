@@ -172,7 +172,7 @@ def test_path_outside_the_root_is_refused(writer: Writer, manifest: Manifest) ->
         write(writer, manifest, escaping)
 
 
-def test_read_roots_allow_reads_but_not_writes_through_a_symlink(
+def test_allowed_symlink_can_be_read_and_replaced(
     writer: Writer, manifest: Manifest, root: Path, tmp_path: Path
 ) -> None:
     write(writer, manifest, fetched())
@@ -185,8 +185,14 @@ def test_read_roots_allow_reads_but_not_writes_through_a_symlink(
     assert reader.read(URL) == b"<html>v1</html>"
     with pytest.raises(UnsafePathError):
         writer.local_state(URL)
+    assert write(reader, manifest, fetched(b"<html>v2</html>")).changed
+    assert reader.read(URL) == b"<html>v2</html>"
+    assert (
+        decompress((disk / "raw/jp/card/BP01-001.html.zst").read_bytes())
+        == b"<html>v2</html>"
+    )
     with pytest.raises(UnsafePathError):
-        write(reader, manifest, fetched(), rewrite=True)
+        write(writer, manifest, fetched(b"<html>v3</html>"))
 
 
 def test_disk_full_is_fatal_and_leaves_no_temp_file(
@@ -271,3 +277,33 @@ def test_read_returns_the_trusted_local_copy(
     (root / PATH).write_bytes(b"damaged")
     with pytest.raises(RuntimeError, match="trusted"):
         writer.read(URL)
+
+
+@pytest.mark.parametrize("allowed", [False, True])
+def test_new_file_through_symlink_requires_allowed_root(
+    root: Path, manifest: Manifest, tmp_path: Path, *, allowed: bool
+) -> None:
+    root.mkdir()
+    disk = tmp_path / "disk"
+    disk.mkdir()
+    (root / "raw").symlink_to(disk)
+    writer = Writer(root, manifest, read_roots=[disk] if allowed else [])
+    item = fetched()
+    if allowed:
+        write(writer, manifest, item)
+        assert writer.read(URL) == item.body
+    else:
+        with pytest.raises(UnsafePathError):
+            write(writer, manifest, item)
+        assert not (disk / "jp/card/BP01-001.html.zst").exists()
+
+
+def test_allowed_root_does_not_allow_parent_path_escape(
+    root: Path, manifest: Manifest, tmp_path: Path
+) -> None:
+    disk = tmp_path / "disk"
+    disk.mkdir()
+    writer = Writer(root, manifest, read_roots=[disk])
+    with pytest.raises(UnsafePathError):
+        write(writer, manifest, fetched(path=PurePosixPath("../disk/escape.html.zst")))
+    assert not (disk / "escape.html.zst").exists()
