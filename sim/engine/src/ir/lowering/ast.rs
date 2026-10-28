@@ -17,6 +17,8 @@ pub(super) struct Document {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct Card {
+    #[serde(rename = "token")]
+    pub _token: Option<IgnoredAny>,
     #[serde(rename = "meta")]
     pub _meta: IgnoredAny,
     #[serde(rename = "note")]

@@ -10,6 +10,8 @@ use sve_engine::ir::*;
 mod conditions_quick;
 #[path = "runtime/resolution_choice.rs"]
 mod resolution_choice;
+#[path = "runtime/token_trio.rs"]
+mod token_trio;
 
 const NUMBER: &str = "BP01-P25";
 

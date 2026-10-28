@@ -33,12 +33,21 @@ pub struct Card {
     pub faces: Vec<Value>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub(crate) struct TokenDefinition {
+    pub(crate) name: String,
+    pub(crate) name_override: bool,
+    pub(crate) template: bool,
+    pub(crate) complete: bool,
+}
+
 /// Shared immutable catalogue, serializable into a self-contained server save.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Catalog {
     pub(crate) cards: BTreeMap<String, Card>,
     pub(crate) programs: BTreeMap<String, Value>,
     pub(crate) keywords: BTreeMap<String, Value>,
+    pub(crate) token_definitions: BTreeMap<String, TokenDefinition>,
     pub(crate) rule_bindings: rule_bindings::RuleBindings,
     /// Schema-valid programs that failed the load-time semantic checks, with every
     /// finding as `file:line: message`. They are never executed.
@@ -138,15 +147,27 @@ impl Catalog {
         identity: &EngineIdentityInput,
     ) -> Result<Self> {
         let mut catalog = Self::from_documents(snapshot, keywords, documents)?;
+        catalog.bind_rules(snapshot, keywords, documents, rules, identity)?;
+        Ok(catalog)
+    }
+
+    fn bind_rules(
+        &mut self,
+        snapshot: &str,
+        keywords: &str,
+        documents: &[(String, String)],
+        rules: &str,
+        identity: &EngineIdentityInput,
+    ) -> Result<()> {
         let authored = serde_json::to_vec(&json!({"keywords":keywords,"documents":documents.iter().map(|(_, text)| text).collect::<Vec<_>>()})).map_err(invalid)?;
-        catalog.rule_bindings = rule_bindings::RuleBindings::resolve(
-            &catalog,
+        self.rule_bindings = rule_bindings::RuleBindings::resolve(
+            self,
             snapshot,
             &rule_bindings::digest(&authored),
             rules,
             identity,
         )?;
-        Ok(catalog)
+        Ok(())
     }
 
     /// Portable loader for caller-supplied snapshot and YAML bytes, including browser hosts.
@@ -154,6 +175,16 @@ impl Catalog {
     /// # Errors
     /// The same validation failures as the filesystem loader.
     pub fn from_documents(
+        snapshot: &str,
+        keywords: &str,
+        documents: &[(String, String)],
+    ) -> Result<Self> {
+        let catalog = Self::read_documents(snapshot, keywords, documents)?;
+        catalog.validate_token_templates()?;
+        Ok(catalog)
+    }
+
+    fn read_documents(
         snapshot: &str,
         keywords: &str,
         documents: &[(String, String)],
@@ -228,15 +259,44 @@ impl Catalog {
                 }
             }
         }
-        catalog.validate_token_templates()?;
+        for (number, program) in &catalog.programs {
+            let face = catalog.face(number, 0)?;
+            let token = face["card_type"]
+                .as_str()
+                .is_some_and(|kind| kind.contains("トークン"));
+            if program["token_template"] == true && (!token || program["status"] != "complete") {
+                return Err(invalid("token template requires a complete token program"));
+            }
+            if token {
+                let name = program["rules_name"]
+                    .as_str()
+                    .or_else(|| face["name"].as_str())
+                    .ok_or_else(|| invalid("token requires a rules name"))?
+                    .to_owned();
+                catalog.token_definitions.insert(
+                    number.clone(),
+                    TokenDefinition {
+                        name,
+                        name_override: program["rules_name"].is_string(),
+                        template: program["token_template"] == true,
+                        complete: program["status"] == "complete",
+                    },
+                );
+            }
+        }
         Ok(catalog)
     }
 
     pub(super) fn rules_label(&self, card: &str, ordinal: usize) -> Result<String> {
         let face = self.face(card, ordinal)?;
-        self.programs
+        self.token_definitions
             .get(card)
-            .and_then(|program| program["rules_name"].as_str())
+            .filter(|definition| definition.name_override)
+            .map(|definition| definition.name.as_str())
+            .or_else(|| {
+                let program = self.programs.get(card)?;
+                program["rules_name"].as_str()
+            })
             .or_else(|| face["name"].as_str())
             .map(str::to_owned)
             .ok_or_else(|| invalid("referenced face has no rules name"))
@@ -288,28 +348,15 @@ impl Catalog {
     }
 
     fn validate_token_templates(&self) -> Result<()> {
-        let mut names: BTreeMap<String, Vec<&Value>> = BTreeMap::new();
-        for (number, program) in &self.programs {
-            let face = self.face(number, 0)?;
-            let token = face["card_type"]
-                .as_str()
-                .is_some_and(|kind| kind.contains("トークン"));
-            if program["token_template"] == true && (!token || program["status"] != "complete") {
-                return Err(invalid("token template requires a complete token program"));
-            }
-            if token {
-                let name = program["rules_name"]
-                    .as_str()
-                    .or_else(|| face["name"].as_str())
-                    .ok_or_else(|| invalid("token requires a rules name"))?;
-                names.entry(name.into()).or_default().push(program);
-            }
+        let mut names: BTreeMap<&str, Vec<&TokenDefinition>> = BTreeMap::new();
+        for definition in self.token_definitions.values() {
+            names.entry(&definition.name).or_default().push(definition);
         }
-        for (name, programs) in names {
-            if programs.len() > 1
-                && programs
+        for (name, definitions) in names {
+            if definitions.len() > 1
+                && definitions
                     .iter()
-                    .filter(|program| program["token_template"] == true)
+                    .filter(|definition| definition.template)
                     .count()
                     != 1
             {
@@ -323,14 +370,9 @@ impl Catalog {
 
     pub(crate) fn token_print(&self, name: &str) -> Result<String> {
         let mut candidates = Vec::new();
-        for (number, program) in &self.programs {
-            let face = self.face(number, 0)?;
-            if face["card_type"]
-                .as_str()
-                .is_some_and(|kind| kind.contains("トークン"))
-                && (face["name"] == name || program["rules_name"] == name)
-            {
-                candidates.push((number, program));
+        for (number, definition) in &self.token_definitions {
+            if definition.name == name || self.face(number, 0)?["name"] == name {
+                candidates.push((number, definition));
             }
         }
         let selected = if candidates.len() == 1 {
@@ -338,10 +380,15 @@ impl Catalog {
         } else {
             candidates
                 .iter()
-                .find(|(_, program)| program["token_template"] == true)
+                .find(|(_, definition)| definition.template)
         }
         .ok_or_else(|| EngineFailure::Unsupported(format!("no authored token template: {name}")))?;
-        self.program(selected.0)?;
+        if !selected.1.complete {
+            return Err(EngineFailure::Unsupported(format!(
+                "partial card program: {}",
+                selected.0
+            )));
+        }
         Ok(selected.0.clone())
     }
 

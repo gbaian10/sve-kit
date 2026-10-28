@@ -251,6 +251,12 @@ class AuthorFace(RecordData):
 
 
 @with_config(CONFIG)
+class TokenIdentity(TypedDict):
+    name: Text
+    template: NotRequired[bool]
+
+
+@with_config(CONFIG)
 class AuthorCardFields(TypedDict):
     meta: Meta | DirectMeta
     note: NotRequired[Text]
@@ -258,6 +264,7 @@ class AuthorCardFields(TypedDict):
     faces: NotRequired[dict[FaceId, AuthorFace]]
     ignored: NotRequired[tuple[DirectSourceUse, ...]]
     deck_rule: NotRequired[DeckRule]
+    token: NotRequired[TokenIdentity]
 
 
 type AuthorCard = AuthorCardFields
