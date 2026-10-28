@@ -42,8 +42,8 @@ export function FacetCheckbox({
         onChange={onChange}
         className="size-4 shrink-0 accent-accent"
       />
-      <span className="flex items-center">{content ?? label}</span>
-      <span id={countId} className="ml-auto text-text-3 tabular-nums">
+      <span className="flex min-w-0 flex-1 items-center">{content ?? label}</span>
+      <span id={countId} className="ml-auto shrink-0 text-text-3 tabular-nums">
         {count}
       </span>
     </label>

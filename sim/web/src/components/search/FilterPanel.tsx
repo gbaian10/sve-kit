@@ -464,7 +464,7 @@ export function FilterPanel({
           {facets?.artists}
         </div>
       </FilterGroup>
-      <div className="sticky bottom-21 z-50 -mx-3 -mb-3 rounded-b-block border-t border-border bg-surface-1 p-3 md:hidden phone-landscape:bottom-0">
+      <div className="sticky bottom-0 z-50 -mx-3 -mb-3 rounded-b-block border-t border-border bg-surface-1 p-3 md:hidden">
         <Button
           variant="primary"
           size="lg"

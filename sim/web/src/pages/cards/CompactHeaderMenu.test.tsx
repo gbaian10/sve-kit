@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react"
+import { fireEvent, render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { createRef, useRef, useState } from "react"
 import { expect, it, vi } from "vitest"
@@ -61,4 +61,19 @@ it("returns focus to search when removing the last condition removes the menu", 
   await user.click(screen.getByRole("button", { name: "Current conditions" }))
   await user.click(screen.getByRole("button", { name: "Remove last condition" }))
   expect(screen.getByRole("textbox", { name: "Search" })).toHaveFocus()
+})
+
+it("closes when the page scrolls away from its trigger", async () => {
+  render(
+    <CompactHeaderMenu label="Current conditions" icon={null} fallbackFocusRef={createRef()}>
+      <button type="button">Clear conditions</button>
+    </CompactHeaderMenu>,
+  )
+  const trigger = screen.getByRole("button", { name: "Current conditions" })
+  await userEvent.click(trigger)
+  expect(trigger).toHaveAttribute("aria-expanded", "true")
+
+  fireEvent.scroll(window)
+
+  expect(trigger).toHaveAttribute("aria-expanded", "false")
 })

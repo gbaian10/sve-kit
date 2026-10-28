@@ -307,6 +307,7 @@ export default {
     abilityUnknown: "能力の種類は未確認です",
     abilityUnknownCount: "能力の種類が未判定のカード：{{count}}枚",
     abilityTypeHas: "能力の種類：{{label}}",
+    abilityTypeChipQuick: "クイック",
     keywordAll: "選択したすべてのキーワードに一致",
     abilityTypeNames: {
       quick: "クイック",

@@ -316,6 +316,7 @@ export default {
     abilityUnknown: "Ability types are not confirmed yet",
     abilityUnknownCount: "Ability types are still undetermined for {{count}} cards",
     abilityTypeHas: "Ability type: {{label}}",
+    abilityTypeChipQuick: "Quick",
     keywordAll: "Matches all selected keywords",
     abilityTypeNames: {
       quick: "Quick",
