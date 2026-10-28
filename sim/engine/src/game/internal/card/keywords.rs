@@ -2,7 +2,7 @@
 use super::super::{DecisionId, Execution, InputDomain, ObjectRef, Wait, grant};
 use super::{Ability, Game, KeywordId, Located, Result, invalid, unsupported};
 use crate::ir::lowering::PrintedKeyword;
-use crate::ir::{Posture, PostureEvent, printed_keywords};
+use crate::ir::{Posture, PostureEvent, SourceSpan, printed_keywords};
 use alloc::collections::BTreeSet;
 use core::slice::from_ref;
 use serde_json::Value;
@@ -113,19 +113,22 @@ impl Game {
     }
 }
 
-pub(super) fn check_coordinate(
-    origins: &mut BTreeSet<(usize, u64, Option<KeywordId>)>,
+pub(super) fn check_coordinate<'source>(
+    origins: &mut BTreeSet<(usize, u64, &'source str, Option<KeywordId>)>,
     ordinal: usize,
-    line: u64,
+    source: &'source SourceSpan,
     keyword: Option<KeywordId>,
 ) -> Result<()> {
+    let line = u64::from(source.line);
+    let scope = source.scope.as_str();
     if line == 0
-        || !origins.insert((ordinal, line, keyword))
+        || !origins.insert((ordinal, line, scope, keyword))
         || origins
             .iter()
-            .any(|(other_face, other_line, other_keyword)| {
+            .any(|(other_face, other_line, other_scope, other_keyword)| {
                 *other_face == ordinal
                     && *other_line == line
+                    && *other_scope == scope
                     && (keyword.is_none() != other_keyword.is_none())
             })
     {

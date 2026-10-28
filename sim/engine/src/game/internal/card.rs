@@ -314,7 +314,7 @@ impl Game {
                 return Err(unsupported("one base Printed Spell per card"));
             }
             let declaration = printed_keywords::card_declaration(ability);
-            keywords::check_coordinate(&mut origins, ordinal, line.0, declaration)?;
+            keywords::check_coordinate(&mut origins, ordinal, &located.source, declaration)?;
             let printed = self.catalog.face(card_no, ordinal)?;
             check_printed_face(printed)?;
             if is_printed_quick(ability)
