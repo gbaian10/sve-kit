@@ -1,0 +1,33 @@
+cards:
+  BP18-115:
+    abilities:
+      - fanfare:
+          do:
+            - draw:
+                n: 1
+        line: 1
+      - lastword:
+          do:
+            - life:
+                delta: 1
+                who: self
+        line: 2
+      - activate:
+          cost:
+            steps:
+              - pp: 2
+              - act_self: true
+          do:
+            - move:
+                ref: this
+                to: cemetery
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-sol
+            who: Codex
+          date: "2026-10-28"
+format: 2
+kind: author_effect_set

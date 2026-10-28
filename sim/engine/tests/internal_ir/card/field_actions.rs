@@ -118,3 +118,20 @@ fn field_damage_keeps_amulets_outside_the_follower_domain() {
         assert_eq!(state[opponent]["field"], json!(["f", "a"]));
     }
 }
+
+#[test]
+fn public_cemetery_moves_reject_hidden_sources_and_unimplemented_receipts() {
+    for movement in [
+        json!({"ref":{"who":"self","zone":"hand"},"to":"cemetery"}),
+        json!({"ref":"t","to":"cemetery","result":"moved"}),
+        json!({"ref":"t","to":"cemetery","position":"top"}),
+    ] {
+        ExpandedLowerer::new()
+            .unwrap()
+            .lower_with_printed_costs(
+                &tree(&json!([{"move":movement}])),
+                &BTreeMap::from([("SD03-005".to_owned(), Nat(1))]),
+            )
+            .unwrap_err();
+    }
+}
