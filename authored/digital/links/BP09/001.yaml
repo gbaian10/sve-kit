@@ -227,6 +227,51 @@ records:
     review_level: model_reviewed
     reason: 同一改編卡片概念；單一模型判斷；另一模型以固定種子 5% 抽樣校準（0／97 錯）與 token 型態全量機械掃描接受的未抽中成員。只供瀏覽，不供名。
   - subject:
+      card_id: c:0cfe08bc7dd654c4a78d182c58aed402
+      face_id:
+      game: svwb
+      official_id: "11044120"
+      digital_phase:
+    value:
+      relation: same_character
+      effect_similarity:
+      sve_names:
+        - printing_id: p:398cdf1956b759e78123e07b66b8f554
+          face_id: f:26ee78ef45d9570ab51d707628b84e1f
+          name_ref:
+            batch_id: sha256:139be07a281797f06baeb00b6aa8da56265ccd22ba4b42246630ba3d283e9ac3
+            source_version_id: src:v1:5615ce24876041bb481b625ca41e3278a205918802a273b94b3889a0abb83aa2
+            parser: translation-jp-v1
+            locator: /faces/0/name
+            text_hash: sha256:efa7ae1ed8087a5aeb68c0808268cbadaaac0565995815300970983ecd00fa60
+      digital_names:
+        - phase: normal
+          lang: en
+          name_ref:
+            batch_id: sha256:11b55c334bbe4ef6211f56350bfe41cc83334bf2c4eafc07ada8ce6c2aac3676
+            source_version_id: src:v1:149c0229a10849171156ec7717d1dd1e947c92702e68800614943cd02cfe2b15
+            parser: translation-svwb-v1
+            locator: /data/card_details/11044120/common/name
+            text_hash: sha256:7aaa073ee3a7b205dd2ee18c43327d7e4f3e2f0949a3a4c3a101ac566d16afa9
+        - phase: normal
+          lang: ja
+          name_ref:
+            batch_id: sha256:11b55c334bbe4ef6211f56350bfe41cc83334bf2c4eafc07ada8ce6c2aac3676
+            source_version_id: src:v1:e7d618194651885bd8be4f6cd489be72c572aba537afdfa0a6e85138f334f80f
+            parser: translation-svwb-v1
+            locator: /data/card_details/11044120/common/name
+            text_hash: sha256:7f1c10176bb478d63e2a0563780ca9fdb46d7dedda1363e507870364461df63f
+        - phase: normal
+          lang: zh-Hant
+          name_ref:
+            batch_id: sha256:11b55c334bbe4ef6211f56350bfe41cc83334bf2c4eafc07ada8ce6c2aac3676
+            source_version_id: src:v1:efb24031d7b27f4e9ce222e49ba02fb4f917f9fe4dbf8ade7f61ccdf7f5815df
+            parser: translation-svwb-v1
+            locator: /data/card_details/11044120/common/name
+            text_hash: sha256:7d4b344124886febe3d1d11cbe844e700ed6277c8e07e81a0289498841683188
+    review_level: model_reviewed
+    reason: 模型逐組核對卡名、卡文及插畫。同一龍甲男子，數位新版為另一稱號與插畫；與實體兩種稱號的普通、進化卡皆為同角色，未確認同一改編卡片概念。只供瀏覽，不供名。
+  - subject:
       card_id: c:0e7d728ba3e45d7d87d874ffa2ac337f
       face_id:
       game: sv1
@@ -1846,6 +1891,51 @@ records:
             text_hash: sha256:c930a5a736996f56616994f083093a77bf3d5aed5a67469a13f9b84ae9aef5e3
     review_level: model_reviewed
     reason: 同一改編卡片概念；單一模型判斷；另一模型以固定種子 5% 抽樣校準（0／97 錯）與 token 型態全量機械掃描接受的未抽中成員。只供瀏覽，不供名。
+  - subject:
+      card_id: c:55192180512d55d7baa4b421d012a4bb
+      face_id:
+      game: svwb
+      official_id: "11044120"
+      digital_phase:
+    value:
+      relation: same_character
+      effect_similarity:
+      sve_names:
+        - printing_id: p:d47d88e7ff245743a0e0d5cd0125a140
+          face_id: f:368b15e5b5545c789bf093c0ce729751
+          name_ref:
+            batch_id: sha256:139be07a281797f06baeb00b6aa8da56265ccd22ba4b42246630ba3d283e9ac3
+            source_version_id: src:v1:e60ce5173f5b33e3de5fac36b8af1a02a1841d4dc4a7aeb12dbb229f5af1735b
+            parser: translation-jp-v1
+            locator: /faces/0/name
+            text_hash: sha256:efa7ae1ed8087a5aeb68c0808268cbadaaac0565995815300970983ecd00fa60
+      digital_names:
+        - phase: normal
+          lang: en
+          name_ref:
+            batch_id: sha256:11b55c334bbe4ef6211f56350bfe41cc83334bf2c4eafc07ada8ce6c2aac3676
+            source_version_id: src:v1:149c0229a10849171156ec7717d1dd1e947c92702e68800614943cd02cfe2b15
+            parser: translation-svwb-v1
+            locator: /data/card_details/11044120/common/name
+            text_hash: sha256:7aaa073ee3a7b205dd2ee18c43327d7e4f3e2f0949a3a4c3a101ac566d16afa9
+        - phase: normal
+          lang: ja
+          name_ref:
+            batch_id: sha256:11b55c334bbe4ef6211f56350bfe41cc83334bf2c4eafc07ada8ce6c2aac3676
+            source_version_id: src:v1:e7d618194651885bd8be4f6cd489be72c572aba537afdfa0a6e85138f334f80f
+            parser: translation-svwb-v1
+            locator: /data/card_details/11044120/common/name
+            text_hash: sha256:7f1c10176bb478d63e2a0563780ca9fdb46d7dedda1363e507870364461df63f
+        - phase: normal
+          lang: zh-Hant
+          name_ref:
+            batch_id: sha256:11b55c334bbe4ef6211f56350bfe41cc83334bf2c4eafc07ada8ce6c2aac3676
+            source_version_id: src:v1:efb24031d7b27f4e9ce222e49ba02fb4f917f9fe4dbf8ade7f61ccdf7f5815df
+            parser: translation-svwb-v1
+            locator: /data/card_details/11044120/common/name
+            text_hash: sha256:7d4b344124886febe3d1d11cbe844e700ed6277c8e07e81a0289498841683188
+    review_level: model_reviewed
+    reason: 模型逐組核對卡名、卡文及插畫。同一龍甲男子，數位新版為另一稱號與插畫；與實體兩種稱號的普通、進化卡皆為同角色，未確認同一改編卡片概念。只供瀏覽，不供名。
   - subject:
       card_id: c:57514ec70a495ab39df29a941ecbba37
       face_id:
@@ -3533,24 +3623,24 @@ records:
         - phase: normal
           lang: en
           name_ref:
-            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
-            source_version_id: src:v1:02019ae2396e989f955d30ed019e24f39a2a8c9be0d24f768bdb450db28fe7e4
+            batch_id: sha256:11b55c334bbe4ef6211f56350bfe41cc83334bf2c4eafc07ada8ce6c2aac3676
+            source_version_id: src:v1:37998fcd2b588b5da9d49a4d1542a6123c922f7e0aa2c621eda24857d3b109e7
             parser: translation-svwb-v1
             locator: /data/card_details/90023110/common/name
             text_hash: sha256:ef169040079ef53728b670a24b7a58d1b09ec9d79886f526aeae3242da2ee92b
         - phase: normal
           lang: ja
           name_ref:
-            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
-            source_version_id: src:v1:fca8a0b107936e2aa884163f344819cce2d1cb0e7d6160b641f9a1a006496390
+            batch_id: sha256:11b55c334bbe4ef6211f56350bfe41cc83334bf2c4eafc07ada8ce6c2aac3676
+            source_version_id: src:v1:d8f6158ec9f505909810e54e319a12f794051df1ebd9120f008455363592df48
             parser: translation-svwb-v1
             locator: /data/card_details/90023110/common/name
             text_hash: sha256:275fc59b3c858b4fb4e4ed6ebce71d5cd97f5e9afb9c3c26cebb19961efa66ee
         - phase: normal
           lang: zh-Hant
           name_ref:
-            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
-            source_version_id: src:v1:7218f05f3f295ee1323cf62078dc94e3aebe4809672d506b1fb5bfd391f3cea2
+            batch_id: sha256:11b55c334bbe4ef6211f56350bfe41cc83334bf2c4eafc07ada8ce6c2aac3676
+            source_version_id: src:v1:1b79e01fae6a0f22ad04d2744d65578607269def8196f860dcfe34b5c395373a
             parser: translation-svwb-v1
             locator: /data/card_details/90023110/common/name
             text_hash: sha256:6fea74e97644001379fe976f1f5819f62859cb8ae3568a2a80d790ad3e1104ae
@@ -5963,24 +6053,24 @@ records:
         - phase: normal
           lang: en
           name_ref:
-            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
-            source_version_id: src:v1:0d920df6a0bb61163e0764df459043703b77218db9279c8d32b703dec391345e
+            batch_id: sha256:11b55c334bbe4ef6211f56350bfe41cc83334bf2c4eafc07ada8ce6c2aac3676
+            source_version_id: src:v1:26f210986cfd1e3a120ef0811c96ac20e4252fabeb87d25a97c2692867edddc8
             parser: translation-svwb-v1
             locator: /data/card_details/90032110/common/name
             text_hash: sha256:3f4975639a916f7b7e5451e5daf261139e32e7e44086c4d581143c1b62199ac3
         - phase: normal
           lang: ja
           name_ref:
-            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
-            source_version_id: src:v1:a08a097ddf9fc09f59d51341141d8bbe61aa39f99f0fee7f0d563cd76dee10f1
+            batch_id: sha256:11b55c334bbe4ef6211f56350bfe41cc83334bf2c4eafc07ada8ce6c2aac3676
+            source_version_id: src:v1:283439bfb2036fab5bbbc705002e52a89165f0ca3f3700b3771ada62601ba04d
             parser: translation-svwb-v1
             locator: /data/card_details/90032110/common/name
             text_hash: sha256:dc7e063d1d7f16e6951bc9639840837eeaa4402ce22929d0a41ab7273d5213bb
         - phase: normal
           lang: zh-Hant
           name_ref:
-            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
-            source_version_id: src:v1:4e78d2c1e395cf3256fa9539d988e942e57ef2365595c71ac154958f8c205eb0
+            batch_id: sha256:11b55c334bbe4ef6211f56350bfe41cc83334bf2c4eafc07ada8ce6c2aac3676
+            source_version_id: src:v1:6ccd18bd96e4537d63b81e78e0f1eea6f6f42384b3e20d2f32fb3d2012dc23ae
             parser: translation-svwb-v1
             locator: /data/card_details/90032110/common/name
             text_hash: sha256:fc4b24ea09fea5398785ab281af70921ff990520e3f3756e62f437d7a9790fdf

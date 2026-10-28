@@ -16,22 +16,21 @@ records:
         source_urls:
           - https://shadowverse-portal.com/card/122531010?lang=zh-tw
         claimed_source: sv1 官方風味文字署名（去掉姓名間空格，比照既有「風祭蓮」）
-  - origin: machine
-    low_confidence: true
-    note: 稱號沿用一代官方「武裝千金的大參謀」；アルメリゼ數位版與既有資料都查無，自行音譯
+  - note: 專案組合選詞；稱號取自 SV1 126241020，角色名取自 SVWB 第 10 彈 11024120。實體與數位完整日文名不同，不視為完整官方實體卡名。
     kind: glossary_choice
     data:
       term_id: term:name.armerize_golden_strategist
       lang: zh-Hant
       value:
         kind: authored
-        text: 武裝千金的大參謀‧阿爾梅莉潔
+        text: 武裝千金的大參謀‧愛梅莉婕
       concept_evidence: []
       source_claim:
-        source_work: Shadowverse
+        source_work: "Shadowverse / Shadowverse: Worlds Beyond"
         source_urls:
           - https://shadowverse-portal.com/card/126241020?lang=zh-tw
-        claimed_source: 稱號取自數位版官方卡名；新增人名為機器音譯。
+          - https://shadowverse-wb.com/web/CardList/cardList?include_token=1&lang=cht&offset=360
+        claimed_source: 稱號採一代官方譯詞，角色名採二代官方譯詞；完整名稱為專案組合選詞，不宣稱 digital_official 或 official。
   - origin: machine
     note: sv1 フェイクウィング・エリーナ官方風味
     kind: glossary_choice

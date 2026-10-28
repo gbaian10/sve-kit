@@ -947,6 +947,96 @@ records:
     review_level: model_reviewed
     reason: 兩個不同廠商模型各自逐組核對卡名、卡文與本體插畫，判斷一致。赤金巨龍咆哮同圖；大型龍與穿透傷害主題改編。只供瀏覽，不供名。
   - subject:
+      card_id: c:2cbc59d8df74506ca293a2d0478e5cc9
+      face_id:
+      game: sv1
+      official_id: "126241020"
+      digital_phase:
+    value:
+      relation: same_card
+      effect_similarity:
+      sve_names:
+        - printing_id: p:f35e7c44e495567c9749542cc74a9419
+          face_id: f:83495193b79c51cab29f8d34a2b15e6b
+          name_ref:
+            batch_id: sha256:139be07a281797f06baeb00b6aa8da56265ccd22ba4b42246630ba3d283e9ac3
+            source_version_id: src:v1:8cae79bc049f9662ede4eaf86dd1f8882e4c4c33d96365286e1402862630b25a
+            parser: translation-jp-v1
+            locator: /faces/0/name
+            text_hash: sha256:b8482b6d0864631af75b451290bc25b0d8c7175374266500ab1feb0e30a9eb7c
+      digital_names:
+        - phase: normal
+          lang: en
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:4c183f0e6c27155d37d8aef43e7a743b0b291f7a2aec8387f484ebad7ca9cdd8
+            parser: translation-sv1-v1
+            locator: /data/cards/2754/card_name
+            text_hash: sha256:12ef57834a7cc8e3287d9799b71c64cc0a1b21cf905af073c71bbc4e9bc0ffae
+        - phase: normal
+          lang: ja
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:86de774acfcbb1869f83c75fff58d85841f98d8a531064ecc230e8abb1470529
+            parser: translation-sv1-v1
+            locator: /data/cards/2754/card_name
+            text_hash: sha256:aac6c10f2f7c59146f10ad0d4609b8c775fed7ff9ef959dc399f7b0cd7340daf
+        - phase: normal
+          lang: zh-Hant
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
+            parser: translation-sv1-v1
+            locator: /data/cards/2754/card_name
+            text_hash: sha256:20ad462d1832ff765693d11ad2647a05e407d96c55846cdab14cf280e35917dd
+    review_level: model_reviewed
+    reason: 模型逐組核對卡名、卡文及插畫。實體普通與進化版分別沿用數位前後兩面插畫；實體補上角色姓名，保留法術資源與回復主題並重寫金幣機制。只供瀏覽，不供名。
+  - subject:
+      card_id: c:2cbc59d8df74506ca293a2d0478e5cc9
+      face_id:
+      game: svwb
+      official_id: "11024120"
+      digital_phase:
+    value:
+      relation: same_character
+      effect_similarity:
+      sve_names:
+        - printing_id: p:f35e7c44e495567c9749542cc74a9419
+          face_id: f:83495193b79c51cab29f8d34a2b15e6b
+          name_ref:
+            batch_id: sha256:139be07a281797f06baeb00b6aa8da56265ccd22ba4b42246630ba3d283e9ac3
+            source_version_id: src:v1:8cae79bc049f9662ede4eaf86dd1f8882e4c4c33d96365286e1402862630b25a
+            parser: translation-jp-v1
+            locator: /faces/0/name
+            text_hash: sha256:b8482b6d0864631af75b451290bc25b0d8c7175374266500ab1feb0e30a9eb7c
+      digital_names:
+        - phase: normal
+          lang: en
+          name_ref:
+            batch_id: sha256:11b55c334bbe4ef6211f56350bfe41cc83334bf2c4eafc07ada8ce6c2aac3676
+            source_version_id: src:v1:dfecdd612ad096c3e4573aeab35a2613f267f798b46399a8570a364d31de3ece
+            parser: translation-svwb-v1
+            locator: /data/card_details/11024120/common/name
+            text_hash: sha256:b0ed1c768b25c30b75d751dd6f117e7af9a54021d026c34f9c4a2c006d70c4cd
+        - phase: normal
+          lang: ja
+          name_ref:
+            batch_id: sha256:11b55c334bbe4ef6211f56350bfe41cc83334bf2c4eafc07ada8ce6c2aac3676
+            source_version_id: src:v1:40328017d5220bd894cab5576938bac356b467fd149904d6f440aabed181081f
+            parser: translation-svwb-v1
+            locator: /data/card_details/11024120/common/name
+            text_hash: sha256:061baa18528dc97ca544c000051c38297e0d68658738aa46d1a5a444528728cf
+        - phase: normal
+          lang: zh-Hant
+          name_ref:
+            batch_id: sha256:11b55c334bbe4ef6211f56350bfe41cc83334bf2c4eafc07ada8ce6c2aac3676
+            source_version_id: src:v1:31f4ee12b96131d0a8c64ac5c2194b88b45de07a9b7c63f94ec7a2ed6b9001f7
+            parser: translation-svwb-v1
+            locator: /data/card_details/11024120/common/name
+            text_hash: sha256:01d20acd3e0fdab2a96bcc545ad3bcf69578e277237feca5ee7720b5ee44bbca
+    review_level: model_reviewed
+    reason: 模型逐組核對卡名、卡文及插畫。同一金髮軍服女子及貓，數位新版另有稱號與插畫；共同金幣題材不足以確認同一改編卡片概念，記同角色。只供瀏覽，不供名。
+  - subject:
       card_id: c:2e2dc3cd382e5f84bad99b432845f7e4
       face_id:
       game: sv1
@@ -4187,6 +4277,96 @@ records:
     review_level: model_reviewed
     reason: 兩個不同廠商模型各自逐組核對卡名、卡文與本體插畫，判斷一致。紅髮盜賊同圖；入場金幣供給相同。只供瀏覽，不供名。
   - subject:
+      card_id: c:9f09ef720b0f5ab4ba2b3295d441df1b
+      face_id:
+      game: sv1
+      official_id: "126241020"
+      digital_phase:
+    value:
+      relation: same_card
+      effect_similarity:
+      sve_names:
+        - printing_id: p:7ec904782ebe52e2aaa98b2e398e71b3
+          face_id: f:0924f5eddbc45109854eeb1be24946d8
+          name_ref:
+            batch_id: sha256:139be07a281797f06baeb00b6aa8da56265ccd22ba4b42246630ba3d283e9ac3
+            source_version_id: src:v1:4cfa767d4028e79a423f4ae359fbe252e342db1dc69f56e0653d662f5004acec
+            parser: translation-jp-v1
+            locator: /faces/0/name
+            text_hash: sha256:b8482b6d0864631af75b451290bc25b0d8c7175374266500ab1feb0e30a9eb7c
+      digital_names:
+        - phase: normal
+          lang: en
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:4c183f0e6c27155d37d8aef43e7a743b0b291f7a2aec8387f484ebad7ca9cdd8
+            parser: translation-sv1-v1
+            locator: /data/cards/2754/card_name
+            text_hash: sha256:12ef57834a7cc8e3287d9799b71c64cc0a1b21cf905af073c71bbc4e9bc0ffae
+        - phase: normal
+          lang: ja
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:86de774acfcbb1869f83c75fff58d85841f98d8a531064ecc230e8abb1470529
+            parser: translation-sv1-v1
+            locator: /data/cards/2754/card_name
+            text_hash: sha256:aac6c10f2f7c59146f10ad0d4609b8c775fed7ff9ef959dc399f7b0cd7340daf
+        - phase: normal
+          lang: zh-Hant
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
+            parser: translation-sv1-v1
+            locator: /data/cards/2754/card_name
+            text_hash: sha256:20ad462d1832ff765693d11ad2647a05e407d96c55846cdab14cf280e35917dd
+    review_level: model_reviewed
+    reason: 模型逐組核對卡名、卡文及插畫。實體普通與進化版分別沿用數位前後兩面插畫；實體補上角色姓名，保留法術資源與回復主題並重寫金幣機制。只供瀏覽，不供名。
+  - subject:
+      card_id: c:9f09ef720b0f5ab4ba2b3295d441df1b
+      face_id:
+      game: svwb
+      official_id: "11024120"
+      digital_phase:
+    value:
+      relation: same_character
+      effect_similarity:
+      sve_names:
+        - printing_id: p:7ec904782ebe52e2aaa98b2e398e71b3
+          face_id: f:0924f5eddbc45109854eeb1be24946d8
+          name_ref:
+            batch_id: sha256:139be07a281797f06baeb00b6aa8da56265ccd22ba4b42246630ba3d283e9ac3
+            source_version_id: src:v1:4cfa767d4028e79a423f4ae359fbe252e342db1dc69f56e0653d662f5004acec
+            parser: translation-jp-v1
+            locator: /faces/0/name
+            text_hash: sha256:b8482b6d0864631af75b451290bc25b0d8c7175374266500ab1feb0e30a9eb7c
+      digital_names:
+        - phase: normal
+          lang: en
+          name_ref:
+            batch_id: sha256:11b55c334bbe4ef6211f56350bfe41cc83334bf2c4eafc07ada8ce6c2aac3676
+            source_version_id: src:v1:dfecdd612ad096c3e4573aeab35a2613f267f798b46399a8570a364d31de3ece
+            parser: translation-svwb-v1
+            locator: /data/card_details/11024120/common/name
+            text_hash: sha256:b0ed1c768b25c30b75d751dd6f117e7af9a54021d026c34f9c4a2c006d70c4cd
+        - phase: normal
+          lang: ja
+          name_ref:
+            batch_id: sha256:11b55c334bbe4ef6211f56350bfe41cc83334bf2c4eafc07ada8ce6c2aac3676
+            source_version_id: src:v1:40328017d5220bd894cab5576938bac356b467fd149904d6f440aabed181081f
+            parser: translation-svwb-v1
+            locator: /data/card_details/11024120/common/name
+            text_hash: sha256:061baa18528dc97ca544c000051c38297e0d68658738aa46d1a5a444528728cf
+        - phase: normal
+          lang: zh-Hant
+          name_ref:
+            batch_id: sha256:11b55c334bbe4ef6211f56350bfe41cc83334bf2c4eafc07ada8ce6c2aac3676
+            source_version_id: src:v1:31f4ee12b96131d0a8c64ac5c2194b88b45de07a9b7c63f94ec7a2ed6b9001f7
+            parser: translation-svwb-v1
+            locator: /data/card_details/11024120/common/name
+            text_hash: sha256:01d20acd3e0fdab2a96bcc545ad3bcf69578e277237feca5ee7720b5ee44bbca
+    review_level: model_reviewed
+    reason: 模型逐組核對卡名、卡文及插畫。同一金髮軍服女子及貓，數位新版另有稱號與插畫；共同金幣題材不足以確認同一改編卡片概念，記同角色。只供瀏覽，不供名。
+  - subject:
       card_id: c:9fc8683e6ab355e4bff11243bd588292
       face_id:
       game: sv1
@@ -5672,6 +5852,51 @@ records:
     review_level: model_reviewed
     reason: 兩個不同廠商模型各自逐組核對卡名、卡文與本體插畫，判斷一致。暗色龍人同圖；四費疾走與 PP 回復相同。只供瀏覽，不供名。
   - subject:
+      card_id: c:b685f554929857c59a4939ae617d8c72
+      face_id:
+      game: sv1
+      official_id: "102723020"
+      digital_phase:
+    value:
+      relation: same_card
+      effect_similarity:
+      sve_names:
+        - printing_id: p:3052d3ed05df54b5b82d4da8aa34c5e8
+          face_id: f:766bbb40d28d5625bc2cc2ed1c30adc3
+          name_ref:
+            batch_id: sha256:139be07a281797f06baeb00b6aa8da56265ccd22ba4b42246630ba3d283e9ac3
+            source_version_id: src:v1:6b5d7aee478adda20e94e014082c93bc5a651bbc1a4e2df0e8dd70abf3074f1b
+            parser: translation-jp-v1
+            locator: /faces/0/name
+            text_hash: sha256:4fb8a6ac4230a1a42136437edc0f339c0f58c3b26087b8e8ebd176c1665e5dea
+      digital_names:
+        - phase: normal
+          lang: en
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:4c183f0e6c27155d37d8aef43e7a743b0b291f7a2aec8387f484ebad7ca9cdd8
+            parser: translation-sv1-v1
+            locator: /data/cards/3340/card_name
+            text_hash: sha256:8fe4c0a1ba50b5a4b51a787ed61d88205ab85ab589e20f63efa7318fcb2e3a7a
+        - phase: normal
+          lang: ja
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:86de774acfcbb1869f83c75fff58d85841f98d8a531064ecc230e8abb1470529
+            parser: translation-sv1-v1
+            locator: /data/cards/3340/card_name
+            text_hash: sha256:92787fedf0e20c0f695259c171fdef11c177e5cbd9178504d6197adadda5a191
+        - phase: normal
+          lang: zh-Hant
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
+            parser: translation-sv1-v1
+            locator: /data/cards/3340/card_name
+            text_hash: sha256:24a0851d5a10535f8bfcba857a56ea9965e86b7c82b0e8827cebfd4aeeb5e999
+    review_level: model_reviewed
+    reason: 模型逐組核對卡名、卡文及插畫。同一法陣儀式插畫與護符概念，實體移除詠唱前綴；倒數遺言群體消滅改寫為登場單體破壞及回合自傷。只供瀏覽，不供名。
+  - subject:
       card_id: c:b7723287f173526ebf185bae2d3e9641
       face_id:
       game: sv1
@@ -7133,24 +7358,24 @@ records:
         - phase: normal
           lang: en
           name_ref:
-            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
-            source_version_id: src:v1:46cecac3bcb45f793a3ac078b4275d8d13bde845044d5315c9fb494f1f583084
+            batch_id: sha256:11b55c334bbe4ef6211f56350bfe41cc83334bf2c4eafc07ada8ce6c2aac3676
+            source_version_id: src:v1:7fc1db1d8478c6146d01eadee29400effdcfb5ca52bb9310ddcfc6b80d93191a
             parser: translation-svwb-v1
             locator: /data/card_details/90071160/common/name
             text_hash: sha256:99decb23d72a0836e081e2b2a6aed177f08c8e37de107a45597c2be6eb7556d2
         - phase: normal
           lang: ja
           name_ref:
-            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
-            source_version_id: src:v1:36ba8e3a0b7e6bf24147c0f8bf6f0fa21e86938886e090af47480fcf9e60cc86
+            batch_id: sha256:11b55c334bbe4ef6211f56350bfe41cc83334bf2c4eafc07ada8ce6c2aac3676
+            source_version_id: src:v1:94e7a0c9f43a04829a961af8e760815e4d444764733200787edb8b12ff54567d
             parser: translation-svwb-v1
             locator: /data/card_details/90071160/common/name
             text_hash: sha256:18914195e2d38ab9ab772b0b9d89d2015323f404edf9f8fe215f71826fa4c1cc
         - phase: normal
           lang: zh-Hant
           name_ref:
-            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
-            source_version_id: src:v1:328a17d71dae0fa222fb5ce4e3e71d7cd67d2d9b59b21d25fa98c972e01e707f
+            batch_id: sha256:11b55c334bbe4ef6211f56350bfe41cc83334bf2c4eafc07ada8ce6c2aac3676
+            source_version_id: src:v1:b7dc7051ef9967c51a524a2694a0765bb2e3b5a76b27de159a05c4e63f621f66
             parser: translation-svwb-v1
             locator: /data/card_details/90071160/common/name
             text_hash: sha256:641702962ff90d058edaf7f3f6d3813e3f60dd46b94526c284f75b075b5635a1

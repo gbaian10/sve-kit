@@ -497,6 +497,51 @@ records:
     review_level: model_reviewed
     reason: 同一改編卡片概念；單一模型判斷；另一模型以固定種子 5% 抽樣校準（0／97 錯）與 token 型態全量機械掃描接受的未抽中成員。只供瀏覽，不供名。
   - subject:
+      card_id: c:0ab2e5eebb02566991e037b43eb50161
+      face_id:
+      game: sv1
+      official_id: "124241010"
+      digital_phase:
+    value:
+      relation: same_character
+      effect_similarity:
+      sve_names:
+        - printing_id: p:3fb44be3c61d5c178b056bf31b022aa2
+          face_id: f:32082c4c029155329d3117e0974046fc
+          name_ref:
+            batch_id: sha256:139be07a281797f06baeb00b6aa8da56265ccd22ba4b42246630ba3d283e9ac3
+            source_version_id: src:v1:94a85f4b49bb28ccb059369384438c3f9b103de29a25306dba4e9dce91c4f8b2
+            parser: translation-jp-v1
+            locator: /faces/0/name
+            text_hash: sha256:a3264074eef1c21d3d0f3a79768cd439443fe223fc5cd8615d493280385775ef
+      digital_names:
+        - phase: normal
+          lang: en
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:4c183f0e6c27155d37d8aef43e7a743b0b291f7a2aec8387f484ebad7ca9cdd8
+            parser: translation-sv1-v1
+            locator: /data/cards/1384/card_name
+            text_hash: sha256:b50159fc1ab606ef365396315ae6a33b6c30746abd03ae2214279e0b526476d8
+        - phase: normal
+          lang: ja
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:86de774acfcbb1869f83c75fff58d85841f98d8a531064ecc230e8abb1470529
+            parser: translation-sv1-v1
+            locator: /data/cards/1384/card_name
+            text_hash: sha256:69b6c67dc6cb18420bfed172f46bb7ac2e422b36c0f9ef01b4351e432f094b68
+        - phase: normal
+          lang: zh-Hant
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
+            parser: translation-sv1-v1
+            locator: /data/cards/1384/card_name
+            text_hash: sha256:08e39e3e8772d799a726a671f16fde0b8b3a3ec6ee70890e3ab5454fd3ce5bcb
+    review_level: model_reviewed
+    reason: 模型逐組核對卡名、卡文及插畫。黑髮武者角色、衣裝與武器一致；稱號、插畫及召喚與傷害能力不同，屬同角色的不同卡片概念。只供瀏覽，不供名。
+  - subject:
       card_id: c:0e955c01e986524fbc1e85654e937a4b
       face_id:
       game: sv1
@@ -2588,24 +2633,24 @@ records:
         - phase: normal
           lang: en
           name_ref:
-            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
-            source_version_id: src:v1:05077ea6262ce28b32a46303abbab7c32f4a4b9e7abf770d1660416d35d36210
+            batch_id: sha256:11b55c334bbe4ef6211f56350bfe41cc83334bf2c4eafc07ada8ce6c2aac3676
+            source_version_id: src:v1:71eec46c6af266ef97d96b397da2a95e2aefa1771cd979c531460fe839d46b80
             parser: translation-svwb-v1
             locator: /data/card_details/90021350/common/name
             text_hash: sha256:4f5b1f43685eb9478a4db06ba4020b6b87e8c0b6714bba9e4eda021a4fedb142
         - phase: normal
           lang: ja
           name_ref:
-            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
-            source_version_id: src:v1:0ffe4788df220823155e6ca68e9e8a13caa454a3770f7bb78cc52c89d568c172
+            batch_id: sha256:11b55c334bbe4ef6211f56350bfe41cc83334bf2c4eafc07ada8ce6c2aac3676
+            source_version_id: src:v1:40328017d5220bd894cab5576938bac356b467fd149904d6f440aabed181081f
             parser: translation-svwb-v1
             locator: /data/card_details/90021350/common/name
             text_hash: sha256:d5225d9e94a28185625dc15ba435c4b295562d18af38759b59c2349a95b674e3
         - phase: normal
           lang: zh-Hant
           name_ref:
-            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
-            source_version_id: src:v1:52149a88e0abe2a5391956a8866da71e005a49822d8cf27248d6cac2e3db2fc7
+            batch_id: sha256:11b55c334bbe4ef6211f56350bfe41cc83334bf2c4eafc07ada8ce6c2aac3676
+            source_version_id: src:v1:2b0f8e527c5517cb91a394a2d61227e582fb7973a4ab6a0f9731b0888e85b77b
             parser: translation-svwb-v1
             locator: /data/card_details/90021350/common/name
             text_hash: sha256:c4be9db7250dfc054057ed6dafd6f48b9b8d5212a7a998236b923c47975bc29c
