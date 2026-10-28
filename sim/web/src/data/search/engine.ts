@@ -208,7 +208,11 @@ export class SearchEngine {
             "query" in request &&
             (("mechanics" in request.query.state &&
               Object.keys(request.query.state.mechanics).length) ||
-              ("abilityTypes" in request.query.state && request.query.state.abilityTypes.length))
+              ("abilityTypes" in request.query.state && request.query.state.abilityTypes.length) ||
+              ("classMechanisms" in request.query.state &&
+                request.query.state.classMechanisms.length) ||
+              ("collabMechanisms" in request.query.state &&
+                request.query.state.collabMechanisms.length))
           )
             await active.mechanics
           const index = active.index

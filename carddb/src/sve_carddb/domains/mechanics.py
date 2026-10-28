@@ -34,6 +34,8 @@ from sve_carddb.domains.mechanic_grants import ADAPTER as GRANTS_ADAPTER
 from sve_carddb.domains.mechanic_grants import apply as apply_grants
 from sve_carddb.domains.mechanic_references import ADAPTER as REFERENCES_ADAPTER
 from sve_carddb.domains.mechanic_references import apply as apply_references
+from sve_carddb.domains.printed_mechanisms import ADAPTER as PRINTED_ADAPTER
+from sve_carddb.domains.printed_mechanisms import apply as apply_printed
 from sve_carddb.domains.products.models import LocalizedText
 from sve_carddb.domains.text_observations.intern import TextInterner
 from sve_carddb.domains.translations.direct import write
@@ -130,6 +132,7 @@ class Inputs:
             "fields_adapter": FIELDS_ADAPTER,
             "self_adapter": SELF_ADAPTER,
             "ability_adapter": ABILITY_ADAPTER,
+            "printed_adapter": PRINTED_ADAPTER,
             "grants_batch_sha256": digest(
                 canonical(list[JsonValue](sorted(FIRST_BATCH_CARDS)))
             ),
@@ -479,6 +482,7 @@ def apply(  # ruff: ignore[complex-structure,too-many-locals] -- one owner-check
         "adapter": ADAPTER,
         "self": apply_self(db, inputs, settings, native_fields),
         "ability_types": apply_abilities(db, native_fields),
+        "printed_mechanisms": apply_printed(db, native_fields),
         "description": "Self keyword declarations: body parts containing only keywords.",
         "producer_version": version,
         "grants": grants,

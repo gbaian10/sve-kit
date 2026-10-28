@@ -12,6 +12,7 @@ import {
 import { columns, definition, primaryKey, rowType } from "../../src/data/format-v3/schema"
 import { bucket, digest } from "../../src/data/format-v3/sha256"
 import { ABILITY_TYPES } from "../../src/domain/abilityTypes"
+import { CLASS_MECHANISMS, COLLAB_MECHANISMS } from "../../src/domain/printedMechanisms"
 
 function tables(): string[] {
   return arrayValue(definition("Container")["x-tables"] ?? null).map((item) => stringValue(item))
@@ -1064,6 +1065,8 @@ async function addCard(ctx: CardContext): Promise<void> {
         .map((keyword) => keyword.code)
         .sort(compareCodePoints),
       ability_types_complete: complete,
+      printed_mechanisms: [],
+      checked_mechanisms: complete ? [...CLASS_MECHANISMS, ...COLLAB_MECHANISMS].sort() : [],
     })
   }
   for (const related of card.related ?? []) {

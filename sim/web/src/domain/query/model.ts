@@ -3,6 +3,7 @@
 // it. Vocabulary codes (classes, types, sets, rarities) come from the snapshot; `neutral` stands for
 // cards without a class.
 import type { AbilityType } from "../abilityTypes"
+import type { PrintedMechanism } from "../printedMechanisms"
 import type { RepresentativeRarity } from "../representative"
 
 /** One cell per printing, per art (same card and front-face art) or per card. */
@@ -50,6 +51,10 @@ export interface QueryState {
   readonly mechanicsMatch: MatchMode
   readonly abilityTypes: readonly AbilityType[]
   readonly abilityTypesMatch: MatchMode
+  readonly classMechanisms: readonly PrintedMechanism[]
+  readonly classMechanismsMatch: MatchMode
+  readonly collabMechanisms: readonly PrintedMechanism[]
+  readonly collabMechanismsMatch: MatchMode
   readonly mechanics: Readonly<Record<string, MechanicState>>
   readonly sets: readonly string[]
   readonly rarities: readonly string[]
@@ -84,6 +89,10 @@ export const DEFAULT_QUERY: QueryState = {
   mechanicsMatch: "any",
   abilityTypes: [],
   abilityTypesMatch: "any",
+  classMechanisms: [],
+  classMechanismsMatch: "any",
+  collabMechanisms: [],
+  collabMechanismsMatch: "any",
   sets: [],
   rarities: [],
   altArtOnly: false,
@@ -111,6 +120,8 @@ export function activeFilterCount(state: QueryState): number {
     (state.artists.length > 0 ? 1 : 0) +
     (Object.keys(state.mechanics).length > 0 ? 1 : 0) +
     (state.abilityTypes.length > 0 ? 1 : 0) +
+    (state.classMechanisms.length > 0 ? 1 : 0) +
+    (state.collabMechanisms.length > 0 ? 1 : 0) +
     (state.sets.length > 0 ? 1 : 0) +
     (state.rarities.length > 0 ? 1 : 0) +
     (state.altArtOnly ? 1 : 0) +

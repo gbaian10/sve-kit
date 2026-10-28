@@ -276,6 +276,8 @@ def test_first_batch_declarations_and_empty_back_prove_all_keywords(
             "has_complete_keyword_ids": None,
             "ability_types": None,
             "ability_types_complete": None,
+            "printed_mechanisms": None,
+            "checked_mechanisms": None,
         }
         assert {row.values["keyword_id"] for row in db.rows("mechanic_projection")} == {
             "kw:ward",

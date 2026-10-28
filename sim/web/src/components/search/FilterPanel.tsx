@@ -37,6 +37,8 @@ export interface FilterPanelProps {
     readonly artists: ReactNode
     readonly keywords: ReactNode
     readonly abilityTypes?: ReactNode
+    readonly classMechanisms?: ReactNode
+    readonly collabMechanisms?: ReactNode
   } | null
   readonly restrictions?: RestrictionStatus | undefined
   readonly resultTotal?: number | undefined
@@ -358,6 +360,8 @@ export function FilterPanel({
             {facets?.traits}
             {facets?.keywords}
             {facets?.abilityTypes}
+            {facets?.classMechanisms}
+            {facets?.collabMechanisms}
           </>,
         )}
         {group(t("filters.display"), displayBlock)}
@@ -433,6 +437,8 @@ export function FilterPanel({
         <div className="space-y-4 md:col-span-2 md:col-start-2 md:row-start-4 md:p-4">
           {facets?.keywords}
           {facets?.abilityTypes}
+          {facets?.classMechanisms}
+          {facets?.collabMechanisms}
         </div>
       </FilterGroup>
       <FilterGroup

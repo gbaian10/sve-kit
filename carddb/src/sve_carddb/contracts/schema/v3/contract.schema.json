@@ -6748,6 +6748,40 @@
         "scope"
       ]
     },
+    "PrintedMechanism": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "enum": [
+            "combo",
+            "spellchain",
+            "stack",
+            "earth_rite",
+            "overflow",
+            "necrocharge",
+            "sanguine",
+            "serve",
+            "lesson",
+            "starting_amulet",
+            "single_drive",
+            "twin_drive"
+          ]
+        },
+        "thresholds": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "code",
+        "thresholds"
+      ],
+      "additionalProperties": false
+    },
     "card_mechanic_coverage": {
       "type": "array",
       "prefixItems": [
@@ -6812,11 +6846,37 @@
         },
         {
           "$ref": "#/$defs/Bool"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PrintedMechanism"
+          }
+        },
+        {
+          "type": "array",
+          "items": {
+            "enum": [
+              "combo",
+              "spellchain",
+              "stack",
+              "earth_rite",
+              "overflow",
+              "necrocharge",
+              "sanguine",
+              "serve",
+              "lesson",
+              "starting_amulet",
+              "single_drive",
+              "twin_drive"
+            ]
+          },
+          "uniqueItems": true
         }
       ],
       "items": false,
-      "minItems": 10,
-      "maxItems": 10,
+      "minItems": 12,
+      "maxItems": 12,
       "x-columns": [
         "card_id",
         "scope",
@@ -6827,7 +6887,9 @@
         "partial_keyword_ids",
         "has_complete_keyword_ids",
         "ability_types",
-        "ability_types_complete"
+        "ability_types_complete",
+        "printed_mechanisms",
+        "checked_mechanisms"
       ],
       "x-types": [
         {
@@ -6886,6 +6948,29 @@
         },
         {
           "scalar": "Bool"
+        },
+        {
+          "array": {
+            "json": "PrintedMechanism"
+          }
+        },
+        {
+          "array": {
+            "enum": [
+              "combo",
+              "spellchain",
+              "stack",
+              "earth_rite",
+              "overflow",
+              "necrocharge",
+              "sanguine",
+              "serve",
+              "lesson",
+              "starting_amulet",
+              "single_drive",
+              "twin_drive"
+            ]
+          }
         }
       ],
       "x-primary-key": [
@@ -13404,11 +13489,37 @@
         },
         {
           "$ref": "#/$defs/Bool"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PrintedMechanism"
+          }
+        },
+        {
+          "type": "array",
+          "items": {
+            "enum": [
+              "combo",
+              "spellchain",
+              "stack",
+              "earth_rite",
+              "overflow",
+              "necrocharge",
+              "sanguine",
+              "serve",
+              "lesson",
+              "starting_amulet",
+              "single_drive",
+              "twin_drive"
+            ]
+          },
+          "uniqueItems": true
         }
       ],
       "items": false,
-      "minItems": 10,
-      "maxItems": 10,
+      "minItems": 12,
+      "maxItems": 12,
       "x-columns": [
         "card_id",
         "scope",
@@ -13419,7 +13530,9 @@
         "partial_keyword_ids",
         "has_complete_keyword_ids",
         "ability_types",
-        "ability_types_complete"
+        "ability_types_complete",
+        "printed_mechanisms",
+        "checked_mechanisms"
       ],
       "x-types": [
         {
@@ -13478,6 +13591,29 @@
         },
         {
           "scalar": "Bool"
+        },
+        {
+          "array": {
+            "json": "PrintedMechanism"
+          }
+        },
+        {
+          "array": {
+            "enum": [
+              "combo",
+              "spellchain",
+              "stack",
+              "earth_rite",
+              "overflow",
+              "necrocharge",
+              "sanguine",
+              "serve",
+              "lesson",
+              "starting_amulet",
+              "single_drive",
+              "twin_drive"
+            ]
+          }
         }
       ]
     },
@@ -19522,7 +19658,9 @@
                         "partial_keyword_ids",
                         "has_complete_keyword_ids",
                         "ability_types",
-                        "ability_types_complete"
+                        "ability_types_complete",
+                        "printed_mechanisms",
+                        "checked_mechanisms"
                       ]
                     },
                     "maxItems": 0
@@ -21886,7 +22024,9 @@
                         "partial_keyword_ids",
                         "has_complete_keyword_ids",
                         "ability_types",
-                        "ability_types_complete"
+                        "ability_types_complete",
+                        "printed_mechanisms",
+                        "checked_mechanisms"
                       ]
                     },
                     "minItems": 1,
@@ -24231,7 +24371,9 @@
                         "partial_keyword_ids",
                         "has_complete_keyword_ids",
                         "ability_types",
-                        "ability_types_complete"
+                        "ability_types_complete",
+                        "printed_mechanisms",
+                        "checked_mechanisms"
                       ]
                     },
                     "maxItems": 0

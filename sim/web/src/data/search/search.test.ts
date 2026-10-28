@@ -3194,7 +3194,7 @@ it("loads keyword projections through the Worker and preserves them in a restore
   }
 })
 
-it.each(["keyword", "ability"] as const)(
+it.each(["keyword", "ability", "class", "collab"] as const)(
   "keeps a %s query pending until its independent closure completes",
   async (kind) => {
     const engineFile = (built.manifest["files"] as JsonObject[]).find((file) =>
@@ -3213,7 +3213,11 @@ it.each(["keyword", "ability"] as const)(
         ...DEFAULT_QUERY,
         ...(kind === "keyword"
           ? { mechanics: { "kw:ward": "has" as const } }
-          : { abilityTypes: ["fanfare" as const] }),
+          : kind === "ability"
+            ? { abilityTypes: ["fanfare" as const] }
+            : kind === "class"
+              ? { classMechanisms: ["combo" as const] }
+              : { collabMechanisms: ["serve" as const] }),
       },
     })
     await h.queried()
@@ -3224,7 +3228,9 @@ it.each(["keyword", "ability"] as const)(
     expect(result.phase).toBe("complete")
     if (result.phase !== "complete") throw new Error("header closure did not finish")
     if (kind === "keyword") expect(result.page.total).toBe(3)
-    else expect(result.page.items.some((item) => item.summary?.cardId === "c:bp01-021")).toBe(true)
+    else if (kind === "ability")
+      expect(result.page.items.some((item) => item.summary?.cardId === "c:bp01-021")).toBe(true)
+    else expect(result.page.total).toBe(0)
     h.session.dispose()
   },
 )

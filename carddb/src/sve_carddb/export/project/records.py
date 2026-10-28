@@ -45,7 +45,7 @@ SCALARS = {
     "card_voice": "card_id,voice_id,usage",
     "keyword": "id,code,kind,definition_unit_id",
     "mechanic_projection": "card_id,keyword_id,scope,relations,actions",
-    "card_mechanic_coverage": "card_id,scope,complete_all,complete_mode,complete_keyword_ids,partial_mode,partial_keyword_ids,has_complete_keyword_ids,ability_types,ability_types_complete",
+    "card_mechanic_coverage": "card_id,scope,complete_all,complete_mode,complete_keyword_ids,partial_mode,partial_keyword_ids,has_complete_keyword_ids,ability_types,ability_types_complete,printed_mechanisms,checked_mechanisms",
     "vocabulary": "kind,code,label_unit_id,active",
     "search_alias": "kind,code,lang,text,normalized",
     "text_symbol": "id,code,parameter_schema,keyword_id,spellings,localizations",
@@ -78,6 +78,10 @@ def initial(source: Source) -> dict[str, list[Record]]:
         "field_annotation",
     ):
         view[name] = []
+    for row in view["card_mechanic_coverage"]:
+        for field in ("printed_mechanisms", "checked_mechanisms"):
+            if row[field] is None:
+                row[field] = []
     for product in view["product"]:
         identifier = product.pop("family_id")
         members = source.matching(
