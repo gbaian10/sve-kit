@@ -454,27 +454,3 @@ cards:
             max: 1
             modes:
               - 1
-  BP17-T02:
-    status: complete
-    abilities:
-      - line: 1
-        kind: spell
-        body:
-          op: if
-          condition:
-            fn: ge
-            args:
-              - read: self.combo
-              - 3
-          then:
-            op: damage
-            subjects: target.1
-            amount: 2
-        targets:
-          - key: "1"
-            select:
-              side: opponent
-              zone: field
-              type: follower
-            min: 1
-            max: 1
