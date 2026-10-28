@@ -42,8 +42,26 @@ def test_expensive_files_get_separate_initial_workers(
     ):
         path = pytester.path / name
         path.parent.mkdir(parents=True, exist_ok=True)
+        overlap = ""
+        if prioritize and name == "tests/architecture/test_module_imports.py":
+            # Keep independent units in flight instead of racing through no-op cases.
+            overlap = f"""
+from pathlib import Path
+from time import monotonic, sleep
+
+@pytest.fixture(scope="module", autouse=True)
+def overlapping_imports(worker_id):
+    arrivals = Path({str(pytester.path / "import-workers")!r})
+    arrivals.mkdir(exist_ok=True)
+    (arrivals / worker_id).touch()
+    deadline = monotonic() + 5
+    while len(list(arrivals.iterdir())) < 2 and monotonic() < deadline:
+        sleep(0.01)
+    assert len(list(arrivals.iterdir())) >= 2
+
+"""
         path.write_text(
-            "import pytest\n"
+            f"import pytest\n{overlap}"
             f"@pytest.mark.parametrize('case', range({count}))\n"
             "def test_case(case): pass\n"
         )
