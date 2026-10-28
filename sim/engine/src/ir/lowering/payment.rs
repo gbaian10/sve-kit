@@ -34,17 +34,7 @@ pub(super) fn lower(
             | ast::CostOperation::ReturnToHand(value)
             | ast::CostOperation::Banish(value)
             | ast::CostOperation::Act(value) => {
-                let operation = match operation {
-                    ast::CostOperation::ToCemetery(_) => super::material::Operation::Put,
-                    ast::CostOperation::ReturnToHand(_) => super::material::Operation::Hand,
-                    ast::CostOperation::Banish(_) => super::material::Operation::Banish,
-                    ast::CostOperation::Act(_) => super::material::Operation::Act,
-                    ast::CostOperation::Pp(_)
-                    | ast::CostOperation::LeaderLife(_)
-                    | ast::CostOperation::Discard(_)
-                    | ast::CostOperation::ActSelf(_)
-                    | ast::CostOperation::SelfToCemetery(_) => return Err(unsupported(path)),
-                };
+                let operation = material_operation(operation, path)?;
                 let (action, decision) = super::material::lower(
                     context.card_allocator,
                     &mut context.allocator,
@@ -120,4 +110,21 @@ pub(super) fn lower(
         parameters,
         costs: CostSpec::Ordered { steps },
     })
+}
+
+fn material_operation(
+    operation: &ast::CostOperation,
+    path: &str,
+) -> Result<super::material::Operation, LoweringError> {
+    match operation {
+        ast::CostOperation::ToCemetery(_) => Ok(super::material::Operation::Put),
+        ast::CostOperation::ReturnToHand(_) => Ok(super::material::Operation::Hand),
+        ast::CostOperation::Banish(_) => Ok(super::material::Operation::Banish),
+        ast::CostOperation::Act(_) => Ok(super::material::Operation::Act),
+        ast::CostOperation::Pp(_)
+        | ast::CostOperation::LeaderLife(_)
+        | ast::CostOperation::Discard(_)
+        | ast::CostOperation::ActSelf(_)
+        | ast::CostOperation::SelfToCemetery(_) => Err(unsupported(path)),
+    }
 }
