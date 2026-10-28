@@ -110,6 +110,7 @@ pub(super) fn select(
                 number.clone(),
                 super::TokenDefinition {
                     name,
+                    name_override: token.is_some(),
                     template: token.is_some_and(|token| token["template"] == true),
                     complete: true,
                 },

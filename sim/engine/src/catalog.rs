@@ -36,6 +36,7 @@ pub struct Card {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub(crate) struct TokenDefinition {
     pub(crate) name: String,
+    pub(crate) name_override: bool,
     pub(crate) template: bool,
     pub(crate) complete: bool,
 }
@@ -276,6 +277,7 @@ impl Catalog {
                     number.clone(),
                     TokenDefinition {
                         name,
+                        name_override: program["rules_name"].is_string(),
                         template: program["token_template"] == true,
                         complete: program["status"] == "complete",
                     },
@@ -289,6 +291,7 @@ impl Catalog {
         let face = self.face(card, ordinal)?;
         self.token_definitions
             .get(card)
+            .filter(|definition| definition.name_override)
             .map(|definition| definition.name.as_str())
             .or_else(|| {
                 let program = self.programs.get(card)?;
