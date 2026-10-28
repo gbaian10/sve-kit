@@ -1,0 +1,26 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP05-075:
+    abilities:
+      - attack_time:
+          do:
+            - damage:
+                n: 1
+                to:
+                  leaders: all
+        line: 1
+      - fanfare:
+          do:
+            - damage:
+                n: 1
+                to:
+                  leaders: all
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-luna
+          date: "2026-10-28"
