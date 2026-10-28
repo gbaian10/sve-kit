@@ -629,6 +629,7 @@ impl Game {
             todo: VecDeque::new(),
             slots: BTreeMap::new(),
             receipts: BTreeMap::new(),
+            cost_discards: BTreeMap::new(),
             facts: Vec::new(),
             waiting: None,
             destroy_guards: Vec::new(),
@@ -843,6 +844,10 @@ impl Game {
             }
         }
         if self.internal_exchange_materials(execution, &mut play)? {
+            execution.play = Some(play);
+            return Ok(());
+        }
+        if self.internal_hand_cost_materials(execution, &play.costs)? {
             execution.play = Some(play);
             return Ok(());
         }

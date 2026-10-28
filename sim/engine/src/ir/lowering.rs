@@ -8,6 +8,7 @@ mod current;
 mod discard;
 mod evolution;
 mod exchange;
+mod hand_payment;
 mod keywords;
 mod material;
 mod numeric;

@@ -29,6 +29,7 @@ mod costs;
 mod evolution;
 pub(super) mod exchange;
 mod fanfare;
+pub(super) mod hand_payment;
 mod keywords;
 pub(super) mod material;
 pub(super) mod optional;
@@ -521,6 +522,9 @@ impl Game {
         };
         for step in steps {
             let (quantity, subjects) = match &step.instruction.action {
+                Action::Discard { .. } => {
+                    self.internal_hand_cost_payment(execution, &step.instruction)?
+                }
                 Action::Resource {
                     amount: Expr::Literal(amount),
                     ..
@@ -669,6 +673,13 @@ fn check_costs(ability: &Ability) -> Result<()> {
     {
         return Err(unsupported("Quick source movement must finish payment"));
     }
+    let discards = steps
+        .iter()
+        .filter(|step| matches!(step.instruction.action, Action::Discard { .. }))
+        .count();
+    if discards > 1 || (discards > 0 && is_printed_quick(ability)) {
+        return Err(unsupported("one non-Quick hand cost group"));
+    }
     for step in steps {
         let instruction = &step.instruction;
         if step.materials.is_some()
@@ -712,6 +723,7 @@ fn check_costs(ability: &Ability) -> Result<()> {
                     && movement.initial_posture.is_none()
                     && movement.entry_effects.is_empty()
             }
+            Action::Discard { .. } => hand_payment::check_cost(&instruction.action),
             action => material::check_cost(action, play),
         };
         if !supported {

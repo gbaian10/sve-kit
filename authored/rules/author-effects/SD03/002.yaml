@@ -1,0 +1,30 @@
+cards:
+  SD03-009:
+    abilities:
+      - evolve_time:
+          do:
+            - stand: this
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - discard:
+                  n: 1
+                  sel:
+                    kind: spell
+                    who: self
+                    zone: hand
+          do:
+            - draw:
+                n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-sol
+            who: Codex
+          date: "2026-10-28"
+format: 2
+kind: author_effect_set

@@ -6,8 +6,8 @@ use super::{
 };
 use crate::ir::{
     Action, Bool, Cardinality, DecisionId, DiscardEvent, DiscardMode, DiscardOutcome, Disjointness,
-    Expr, Instruction, MoveMethod, Nat, ObjectRef, PlayerRef, PlayerRelation, SelectionView,
-    Selector, ZoneKind,
+    Expr, Instruction, MoveMethod, Nat, ObjectRef, PlayerRef, PlayerRelation, ReceiptId,
+    SelectionView, Selector, ZoneKind,
 };
 use alloc::collections::BTreeSet;
 
@@ -68,6 +68,21 @@ fn bounds(action: &Action) -> Result<Cardinality> {
 }
 
 impl HandWait {
+    pub(super) const fn strict(
+        instruction: Box<Instruction>,
+        members: Vec<ObjectRef>,
+        bounds: Cardinality,
+    ) -> Self {
+        Self {
+            instruction,
+            members,
+            bounds,
+        }
+    }
+    pub(super) const fn receipt(&self) -> ReceiptId {
+        self.instruction.receipt
+    }
+
     pub(super) fn validate(
         &self,
         game: &Game,
@@ -161,6 +176,19 @@ impl Game {
         wait: &HandWait,
         members: &[ObjectRef],
     ) -> Result<()> {
+        let outcome = self.internal_discard_members(execution, members)?;
+        execution.receipts.insert(
+            wait.instruction.receipt,
+            InstructionOutcome::Discard(outcome),
+        );
+        Ok(())
+    }
+
+    pub(super) fn internal_discard_members(
+        &mut self,
+        execution: &mut Execution,
+        members: &[ObjectRef],
+    ) -> Result<DiscardOutcome> {
         let mut snapshots = Vec::new();
         for &member in members {
             let id = execution.object_id(member)?.to_owned();
@@ -189,10 +217,6 @@ impl Game {
                     })));
             }
         }
-        execution.receipts.insert(
-            wait.instruction.receipt,
-            InstructionOutcome::Discard(DiscardOutcome { successful, moves }),
-        );
-        Ok(())
+        Ok(DiscardOutcome { successful, moves })
     }
 }

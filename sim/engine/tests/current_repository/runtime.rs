@@ -62,6 +62,9 @@ mod ex_activation;
 #[path = "runtime/field_actions.rs"]
 mod field_actions;
 
+#[path = "runtime/hand_cost.rs"]
+mod hand_cost;
+
 #[path = "runtime/hand_discard.rs"]
 mod hand_discard;
 
