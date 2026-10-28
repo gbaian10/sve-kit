@@ -4,6 +4,7 @@ import { SettingsPage } from "../pages/account/SettingsPage"
 import { CardPage } from "../pages/card/CardPage"
 import { CardsPage } from "../pages/cards/CardsPage"
 import { DecksStubPage } from "../pages/decks/DecksStubPage"
+import { ErrataPage } from "../pages/errata/ErrataPage"
 import { HomePage } from "../pages/home/HomePage"
 import { NotFoundPage } from "../pages/not-found/NotFoundPage"
 import { SetPage } from "../pages/sets/SetPage"
@@ -26,6 +27,7 @@ export const routes: RouteObject[] = [
       { path: "sets/:code", Component: SetPage },
       { path: "settings", Component: SettingsPage },
       { path: "decks", Component: DecksStubPage },
+      { path: "errata", Component: ErrataPage },
       { path: "*", Component: NotFoundPage },
     ],
   },
