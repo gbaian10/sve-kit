@@ -77,6 +77,9 @@ mod max_pp;
 #[path = "runtime/pp_recover.rs"]
 mod pp_recover;
 
+#[path = "runtime/public_cemetery.rs"]
+mod public_cemetery;
+
 #[path = "runtime/recipient_targets.rs"]
 mod recipient_targets;
 

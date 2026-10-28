@@ -126,7 +126,10 @@ impl BodyContext<'_> {
         if let Some(top) = &value.top {
             return top_to_cemetery(value, top, path);
         }
-        if matches!(value.to, ast::Destination::Hand) {
+        if matches!(
+            value.to,
+            ast::Destination::Hand | ast::Destination::Cemetery
+        ) {
             if value.position.is_some() || value.order.is_some() || value.result.is_some() {
                 return Err(unsupported(path));
             }
@@ -137,7 +140,11 @@ impl BodyContext<'_> {
                 objects: self.objects(objects, path)?,
                 movement: MoveSpec {
                     to: MoveDestination::Owners {
-                        zone: OwnerZone::Hand,
+                        zone: if matches!(value.to, ast::Destination::Hand) {
+                            OwnerZone::Hand
+                        } else {
+                            OwnerZone::Cemetery
+                        },
                     },
                     initial_posture: None,
                     entry_effects: vec![],
