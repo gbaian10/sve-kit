@@ -1,0 +1,31 @@
+cards:
+  BP12-P27:
+    abilities:
+      - keywords:
+          - storm
+        line: 1
+      - lastword:
+          do:
+            - choose:
+                bind: enemy
+                from:
+                  kind: follower
+                  who: opp
+                  zone: field
+                n: 1
+            - damage:
+                n: 4
+                to: enemy
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-sol
+            who: Codex
+          date: "2026-10-29"
+    token:
+      name: 蹂躙の触手
+      template: true
+format: 2
+kind: author_effect_set
