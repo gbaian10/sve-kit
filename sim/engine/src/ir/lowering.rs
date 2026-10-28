@@ -1,6 +1,7 @@
 //! Candidate-only lowering of C0's expanded tree, without source or runtime admission.
 
 mod ast;
+mod capture;
 mod conditions;
 mod costs;
 mod current;
@@ -709,6 +710,8 @@ struct BodyContext<'definitions> {
     targets: BTreeMap<String, Binding<Selector>>,
     recipient_targets: BTreeMap<String, Binding<Vec<super::DamageRecipient>>>,
     parameters: Vec<super::Decision>,
+    resolution_scope: ScopeId,
+    resolution_captures: Vec<super::Capture>,
     formal_play: bool,
     mode_targets: BTreeMap<u64, Vec<ast::Target>>,
 }
@@ -735,6 +738,8 @@ impl<'definitions> BodyContext<'definitions> {
             targets: BTreeMap::new(),
             recipient_targets: BTreeMap::new(),
             parameters: vec![],
+            resolution_scope: scope,
+            resolution_captures: vec![],
             mode_targets: BTreeMap::new(),
             formal_play: entry.activate.is_some()
                 || entry.spell.is_some()
@@ -747,6 +752,7 @@ impl<'definitions> BodyContext<'definitions> {
         for value in body.define.values() {
             self.number(value, path, &mut BTreeSet::new())?;
         }
+        self.resolution_captures.clear();
         self.allocator = Allocator::default();
         let choice = play::choice_body(body, path)?;
         self.targets(&body.targets, choice, path)
@@ -759,7 +765,15 @@ impl<'definitions> BodyContext<'definitions> {
         source: &SourceSpan,
         ability_source: &AbilitySource,
     ) -> Result<Program, LoweringError> {
-        self.steps(&body.steps, &format!("{path}/do"), source, ability_source)
+        let mut program = self.steps(&body.steps, &format!("{path}/do"), source, ability_source)?;
+        program.steps.splice(
+            0..0,
+            self.resolution_captures.drain(..).map(|capture| Located {
+                source: source.clone(),
+                node: Node::Capture { capture },
+            }),
+        );
+        Ok(program)
     }
 
     fn steps(

@@ -52,11 +52,14 @@ impl Execution {
             Expr::Literal(player) => self.player(game, player),
             Expr::Captured(reference) => self.player_slot(reference.binding),
             Expr::Live(read) => match read.as_ref() {
-                PlayerRead::Role {
-                    object: ObjectView::Current { object: operand },
-                    role,
-                } => {
-                    let reference = self.object(game, operand)?;
+                PlayerRead::Role { object: view, role } => {
+                    let reference = match view {
+                        ObjectView::Current { object } => self.object(game, object)?,
+                        ObjectView::Selected { selection } => {
+                            self.selected_object(game, *selection)?
+                        }
+                        _ => return Err(unsupported("player role view")),
+                    };
                     let id = self.object_id(reference)?;
                     let object = game.object(id)?;
                     if object.generation != reference.generation.0 {
@@ -67,7 +70,7 @@ impl Execution {
                         Role::Owner => &object.owner,
                     })
                 }
-                _ => Err(unsupported("player role view")),
+                PlayerRead::Active {} => Err(unsupported("player role view")),
             },
             _ => Err(unsupported("player value")),
         }
@@ -90,6 +93,23 @@ impl Execution {
             return Err(invalid("player set cardinality does not match this game"));
         }
         Ok(values)
+    }
+
+    pub(super) fn selected_object(
+        &self,
+        game: &Game,
+        selection: Binding<Selector>,
+    ) -> Result<ObjectRef> {
+        let members = self.objects(
+            game,
+            &Selector::Bound {
+                reference: selection,
+            },
+        )?;
+        match members.as_slice() {
+            [object] => Ok(*object),
+            _ => Err(invalid("selected information requires one object")),
+        }
     }
 
     pub(super) fn object(&self, game: &Game, object: &ObjectOperand) -> Result<ObjectRef> {

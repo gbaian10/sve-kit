@@ -52,5 +52,45 @@ cards:
             model: Codex gpt-6-sol
             who: Codex
           date: "2026-10-28"
+  BP20-073:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-28"
+    abilities:
+      - line: 1
+        keywords:
+          - quick
+      - line: 2
+        spell:
+          targets:
+            - bind: victim
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: victim
+                n: 6
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      at: selection
+                      selection: victim
+                      value:
+                        hp_of: victim
+                    op: le
+                    right: 3
+                then:
+                  - damage:
+                      to:
+                        leader_of: victim
+                      n: 3
 format: 2
 kind: author_effect_set

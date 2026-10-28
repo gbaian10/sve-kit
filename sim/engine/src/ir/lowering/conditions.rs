@@ -121,6 +121,18 @@ impl BodyContext<'_> {
     ) -> Result<Expr<Int>, LoweringError> {
         match value {
             ast::Number::Literal(value) => Ok(Expr::Literal(Int(*value))),
+            ast::Number::Resolution { at, value } => {
+                let ast::ResolutionTime::Resolution = at;
+                self.resolution_count(value, path, active)
+            }
+            ast::Number::Selection {
+                at,
+                selection,
+                value,
+            } => {
+                let ast::SelectionTime::Selection = at;
+                self.selected_stat(selection, value, path)
+            }
             ast::Number::LeaderLife { leader_life } => {
                 Ok(Expr::Live(Box::new(IntRead::PlayerResource {
                     player: match leader_life {

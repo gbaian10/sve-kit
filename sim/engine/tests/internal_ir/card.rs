@@ -537,3 +537,6 @@ mod reveal_hand;
 
 #[path = "card/optional.rs"]
 mod optional;
+
+#[path = "card/selection_captures.rs"]
+mod selection_captures;
