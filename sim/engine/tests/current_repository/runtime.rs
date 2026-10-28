@@ -83,6 +83,9 @@ mod material_cost;
 #[path = "runtime/max_pp.rs"]
 mod max_pp;
 
+#[path = "runtime/name_filter.rs"]
+mod name_filter;
+
 #[path = "runtime/optional_payment.rs"]
 mod optional_payment;
 

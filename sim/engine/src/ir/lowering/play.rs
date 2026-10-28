@@ -123,10 +123,11 @@ impl BodyContext<'_> {
             },
             view: SelectionView::Current {},
             binding: candidate,
-            predicate: Box::new(super::search::object_filter(
+            predicate: Box::new(super::selection::field_filter(
                 target.from.kind.as_ref(),
                 target.from.r#trait.as_deref(),
-                None,
+                target.from.name.as_deref(),
+                target.from.name_contains.as_deref(),
                 candidate,
             )),
         };
@@ -138,7 +139,10 @@ impl BodyContext<'_> {
                         cardinality,
                     }],
                     cardinality,
-                    distinct_by: None,
+                    distinct_by: target
+                        .distinct_by
+                        .as_ref()
+                        .map(|_| super::super::ObjectProperty::Names),
                     disjoint: Disjointness::Disjoint,
                     aggregate_bounds: vec![],
                 },
@@ -155,7 +159,8 @@ impl BodyContext<'_> {
         cardinality: Cardinality,
         path: &str,
     ) -> Result<(ChoiceDomain, Cardinality), LoweringError> {
-        if target.from.r#trait.is_some()
+        if target.distinct_by.is_some()
+            || target.from.r#trait.is_some()
             || self.recipient_targets.contains_key(&target.bind)
             || self.targets.contains_key(&target.bind)
             || self.definitions.contains_key(&target.bind)

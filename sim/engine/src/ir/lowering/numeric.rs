@@ -112,10 +112,11 @@ impl BodyContext<'_> {
             },
             view: SelectionView::Current {},
             binding,
-            predicate: Box::new(super::search::object_filter(
+            predicate: Box::new(super::selection::field_filter(
                 kind.as_ref(),
                 None,
-                None,
+                query.name.as_deref(),
+                query.name_contains.as_deref(),
                 binding,
             )),
         };

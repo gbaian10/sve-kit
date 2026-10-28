@@ -4,12 +4,12 @@ use super::{
     Execution, Game, InputDomain, InstructionOutcome, Result, Wait, invalid, seat_name, unsupported,
 };
 use crate::ir::{
-    Action, Binding, Capture, CaptureRef, CaptureTime, Cardinality, ChoiceDomain, Control, Expr,
-    Instruction, Int, Located, LookOutcome, MemberProjection, MoveDestination, Nat, Node,
+    Action, Binding, Bool, Capture, CaptureRef, CaptureTime, Cardinality, ChoiceDomain, Control,
+    Expr, Instruction, Int, Located, LookOutcome, MemberProjection, MoveDestination, Nat, Node,
     ObjectOperand, ObjectReceipt, ObjectRef, OrderAnswer, OrderOutcome, OwnerZone, PlayerId,
-    PlayerRef, PlayerRelation, Position, Program, ReceiptLocation, RecipientSet, Requirements,
-    ResultMember, ResultMemberId, RuntimeObjectView, ScopeId, Selector, SnapshotId, SourceSpan,
-    StepwiseMode, Visibility, ZoneKind,
+    PlayerRef, PlayerRelation, Position, Predicate, Program, ReceiptLocation, RecipientSet,
+    Requirements, ResultMember, ResultMemberId, RuntimeObjectView, ScopeId, Selector, SnapshotId,
+    SourceSpan, StepwiseMode, Visibility, ZoneKind,
 };
 use alloc::collections::BTreeSet;
 
@@ -96,7 +96,7 @@ pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
             mode: StepwiseMode::Exact,
         };
     }
-    mask_resolution_domain(&mut inspected)?;
+    mask_public_selectors(&mut inspected)?;
 
     if let Node::Instruction { instruction } = &mut inspected
         && super::movement::deck_top(&instruction.action).is_some()
@@ -209,7 +209,13 @@ fn check_private_requirements(requirements: &Requirements, private_spine: bool) 
     Ok(())
 }
 
-fn mask_resolution_domain(inspected: &mut Node) -> Result<()> {
+fn mask_public_selectors(inspected: &mut Node) -> Result<()> {
+    if let Node::Capture {
+        capture: Capture::Boolean { value, .. },
+    } = inspected
+    {
+        mask_public_field_condition(value);
+    }
     if let Node::Decision { decision } = inspected
         && matches!(decision.domain, ChoiceDomain::Objects { .. })
     {
@@ -224,6 +230,21 @@ fn mask_resolution_domain(inspected: &mut Node) -> Result<()> {
         };
     }
     Ok(())
+}
+
+fn mask_public_field_condition(condition: &mut Expr<Bool>) {
+    if let Expr::Compute(operation) = condition {
+        match operation.as_mut() {
+            Predicate::Exists { objects } => mask_public_field_predicate(objects),
+            Predicate::And { predicates } | Predicate::Or { predicates } => {
+                for predicate in predicates {
+                    mask_public_field_condition(predicate);
+                }
+            }
+            Predicate::Not { predicate } => mask_public_field_condition(predicate),
+            _ => {}
+        }
+    }
 }
 
 fn mask_public_field_predicate(selector: &mut Selector) {
@@ -245,7 +266,7 @@ fn mask_public_field_predicate(selector: &mut Selector) {
         {
             // Only this public candidate grammar is evaluated per object by the field authority.
             if let Selector::Zone { predicate, .. } = selector {
-                **predicate = Expr::Literal(super::Bool(true));
+                **predicate = Expr::Literal(Bool(true));
             }
         }
         _ => {}

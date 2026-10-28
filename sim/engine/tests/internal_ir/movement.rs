@@ -145,14 +145,11 @@ fn synthetic_public_field_destroy_filters_each_candidate_and_keeps_amulets() {
 fn public_field_destroy_does_not_authorize_hidden_or_other_candidate_reads() {
     let mut hidden = field_followers(ZoneKind::Deck);
     let mut name = field_followers(ZoneKind::Field);
-    if let Selector::Zone {
-        predicate, binding, ..
-    } = &mut name
-    {
+    if let Selector::Zone { predicate, .. } = &mut name {
         **predicate = Expr::Compute(Box::new(Predicate::NamesIntersect {
             left: Expr::Live(Box::new(NamesRead::Names {
                 object: ObjectView::Current {
-                    object: Box::new(ObjectOperand::Bound { binding: *binding }),
+                    object: Box::new(ObjectOperand::SourceHolder {}),
                 },
             })),
             right: Expr::Literal(vec![CardName("unit-follower".into())]),
@@ -189,14 +186,11 @@ fn public_field_buff_does_not_authorize_hidden_or_other_candidate_reads() {
         **predicate = Expr::Literal(Bool(true));
     }
     let mut name = field_followers(ZoneKind::Field);
-    if let Selector::Zone {
-        predicate, binding, ..
-    } = &mut name
-    {
+    if let Selector::Zone { predicate, .. } = &mut name {
         **predicate = Expr::Compute(Box::new(Predicate::NamesIntersect {
             left: Expr::Live(Box::new(NamesRead::Names {
                 object: ObjectView::Current {
-                    object: Box::new(ObjectOperand::Bound { binding: *binding }),
+                    object: Box::new(ObjectOperand::SourceHolder {}),
                 },
             })),
             right: Expr::Literal(vec![CardName("unit-follower".into())]),
@@ -692,4 +686,46 @@ fn token_advance_and_linked_objects_reject_the_whole_movement_atomically() {
             assert_eq!(exact_authority(&game), before, "{holder}.{field}");
         }
     }
+}
+
+#[test]
+fn public_field_destroy_accepts_its_candidate_name_and_preserves_nonmatches() {
+    let mut selector = field_followers(ZoneKind::Field);
+    if let Selector::Zone {
+        predicate, binding, ..
+    } = &mut selector
+    {
+        **predicate = Expr::Compute(Box::new(Predicate::NamesIntersect {
+            left: Expr::Live(Box::new(NamesRead::Names {
+                object: ObjectView::Current {
+                    object: Box::new(ObjectOperand::Bound { binding: *binding }),
+                },
+            })),
+            right: Expr::Literal(vec![CardName("unit-follower".into())]),
+        }));
+    }
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P2"]["zones"]["field"] = json!([
+        {"id":"enemy","card":"unit-follower"},
+        {"id":"amulet","card":"unit-amulet"}
+    ]);
+    let mut game = Game::new(
+        catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "named-destroy",
+    )
+    .unwrap();
+    let result = game
+        .execute_internal(
+            &checked(vec![destroy(1, selector)]),
+            &source("synthetic"),
+            context(1),
+        )
+        .unwrap();
+    assert_eq!(destroy_outcome(&result, 1).successful.len(), 1);
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P2"]["field"], json!(["amulet"]));
+    assert_eq!(state["P2"]["cemetery"], json!(["enemy"]));
 }

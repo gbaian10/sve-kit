@@ -218,6 +218,8 @@ fn play_requirement(code: &str) -> bool {
             | "shape.CaptureTime.AtPlay"
             | "shape.CaptureTime.AtSelection"
             | "shape.ExecutionRef.Current"
+            | "shape.Predicate.NameContains"
+            | "predicate.name-contains"
             | "shape.ChoiceDomain.Objects"
             | "shape.ChoiceDomain.Recipients"
             | "shape.RecipientSet.Bound"

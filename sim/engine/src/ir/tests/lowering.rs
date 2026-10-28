@@ -1246,6 +1246,13 @@ fn leader_targets_and_leader_follower_targets_keep_recipient_bindings() {
             ability.play.as_ref().unwrap().parameters[0].domain,
             ChoiceDomain::Recipients { .. }
         ));
+        let mut distinct = tree.clone();
+        distinct["cards"]["SD03-005"]["abilities"][0]["spell"]["targets"][0]["distinct_by"] =
+            json!("name");
+        assert!(
+            lowerer.lower_with_printed_costs(&distinct, &costs).is_err(),
+            "leaders have no card-name distinctness contract"
+        );
         tree["cards"]["SD03-005"]["abilities"][0]["spell"]["do"] = json!([{"destroy":"victim"}]);
         assert!(
             lowerer.lower_with_printed_costs(&tree, &costs).is_err(),
@@ -1281,4 +1288,22 @@ fn activated_zones_preserve_ex_and_reject_unimplemented_combinations() {
         tree["cards"]["BP01-041"]["abilities"][0]["activate"]["zone"] = zone;
         lowerer.lower(&tree).unwrap_err();
     }
+}
+
+#[test]
+fn repeated_named_existence_queries_keep_independent_candidate_scopes() {
+    let mut tree = expanded::spell_tree().clone();
+    let condition = json!({"exists":{"who":"self","zone":"field","name":"unit-follower"}});
+    *tree
+        .pointer_mut("/cards/SD03-005/abilities/0/spell")
+        .unwrap() = json!({
+        "do":[
+            {"if":{"cond":condition,"then":[{"draw":{"who":"self","n":1_u8}}]}},
+            {"if":{"cond":condition,"then":[{"draw":{"who":"self","n":1_u8}}]}}
+        ]
+    });
+    ExpandedLowerer::new()
+        .unwrap()
+        .lower_with_printed_costs(&tree, &BTreeMap::from([("SD03-005".to_owned(), Nat(1))]))
+        .unwrap();
 }

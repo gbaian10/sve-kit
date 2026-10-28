@@ -3,7 +3,7 @@ use super::{
     NatRead, PlayerRef, PlayerRelation, PlayerSet, Predicate, ScopeId, SelectionView, Selector,
     TextQuantifier, ZoneKind, ast, decode, source_span, unsupported,
 };
-use crate::ir::{Comparison, CostChange, PlayCostModifier};
+use crate::ir::{Comparison, CostChange, ObjectRef, PlayCostModifier};
 
 pub(super) fn lower(
     key: &super::CardCoordinates<'_>,
@@ -118,11 +118,17 @@ pub(super) fn query(
     allocator: &mut Allocator,
     path: &str,
 ) -> Result<Selector, LoweringError> {
-    if value.other {
+    if value.other || matches!(value.zone, ast::PublicZone::Ex) {
         return Err(unsupported(path));
     }
-    let binding = Binding::new(allocator.id(path)?, ScopeId(0));
-    Ok(Selector::Zone {
+    Ok(public_query(
+        value,
+        Binding::new(allocator.id(path)?, ScopeId(0)),
+    ))
+}
+
+pub(super) fn public_query(value: &ast::PublicQuery, binding: Binding<ObjectRef>) -> Selector {
+    Selector::Zone {
         players: PlayerSet {
             relation: match value.who {
                 ast::Side::Controller => PlayerRelation::SelfPlayer,
@@ -138,7 +144,7 @@ pub(super) fn query(
         },
         zone: match value.zone {
             ast::PublicZone::Field => ZoneKind::Field,
-            ast::PublicZone::Ex => return Err(unsupported(path)),
+            ast::PublicZone::Ex => ZoneKind::Ex,
             ast::PublicZone::Cemetery => ZoneKind::Cemetery,
         },
         view: SelectionView::Current {},
@@ -149,5 +155,5 @@ pub(super) fn query(
             value.name.as_deref(),
             binding,
         )),
-    })
+    }
 }

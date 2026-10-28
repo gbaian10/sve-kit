@@ -158,6 +158,7 @@ impl Game {
             TargetDomain {
                 members: public,
                 cardinality: *cardinality,
+                distinct_names: false,
             },
         ))
     }
