@@ -1,0 +1,47 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "activated",
+      "body": {
+        "op": "draw",
+        "count": 1
+      },
+      "costs": [
+        {
+          "op": "act",
+          "subjects": "self"
+        },
+        {
+          "op": "move",
+          "subjects": "self",
+          "to": "cemetery"
+        }
+      ]
+    },
+    {
+      "line": 2,
+      "kind": "activated",
+      "body": {
+        "op": "draw",
+        "count": 2
+      },
+      "costs": [
+        {
+          "op": "pp",
+          "amount": 2
+        },
+        {
+          "op": "act",
+          "subjects": "self"
+        },
+        {
+          "op": "move",
+          "subjects": "self",
+          "to": "cemetery"
+        }
+      ]
+    }
+  ]
+}

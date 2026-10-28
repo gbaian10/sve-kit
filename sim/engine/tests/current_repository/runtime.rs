@@ -13,6 +13,9 @@ mod resolution_choice;
 #[path = "runtime/token_trio.rs"]
 mod token_trio;
 
+#[path = "runtime/c2_04.rs"]
+mod c2_04;
+
 const NUMBER: &str = "BP01-P25";
 
 pub(super) fn setup(seat: &str, owner: &str, life: [u8; 2]) -> Value {
