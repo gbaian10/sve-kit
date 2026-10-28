@@ -101,6 +101,9 @@ mod resolution_choice;
 #[path = "runtime/reveal_hand.rs"]
 mod reveal_hand;
 
+#[path = "runtime/selection_captures.rs"]
+mod selection_captures;
+
 #[path = "runtime/token_trio.rs"]
 mod token_trio;
 

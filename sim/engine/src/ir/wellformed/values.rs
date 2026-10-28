@@ -437,6 +437,14 @@ impl Checker {
 
     pub(super) fn view(&self, view: &ObjectView) -> Checked {
         match view {
+            ObjectView::Selected { selection }
+                if matches!(self.capture_time, Some(CaptureTime::AtSelection { .. })) =>
+            {
+                self.reference(*selection, BindingKind::Value)?;
+                self.selection_visibility(&Selector::Bound {
+                    reference: *selection,
+                })
+            }
             ObjectView::Snapshot { value } => self.projection(value),
             ObjectView::Current { object } if !self.event_capture() => self.object(object),
             ObjectView::EventSnapshot {
@@ -452,6 +460,7 @@ impl Checker {
                 self.object(object)
             }
             ObjectView::SourceInformation {}
+            | ObjectView::Selected { .. }
             | ObjectView::Current { .. }
             | ObjectView::LastKnown { .. }
             | ObjectView::EventSnapshot { .. } => self.reject(),

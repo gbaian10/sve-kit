@@ -120,12 +120,16 @@ impl Execution {
                 },
             ),
         };
-        if let ObjectView::Current { object } = object {
+        let current = match object {
+            ObjectView::Current { object } => Some(self.object(game, object)?),
+            ObjectView::Selected { selection } => Some(self.selected_object(game, *selection)?),
+            _ => None,
+        };
+        if let Some(reference) = current {
             // Current keeps its pre-existing Effective-only meaning.
             if *view != CharacteristicView::Effective {
                 return Err(unsupported("number characteristic view"));
             }
-            let reference = self.object(game, object)?;
             let id = self.object_id(reference)?;
             if game.object(id)?.generation != reference.generation.0 {
                 return Err(invalid("stale Current information read"));

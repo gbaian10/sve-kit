@@ -5,10 +5,10 @@ use super::super::{
     SelectionSnapshot, SpellCountTime, Visibility,
 };
 use super::{
-    AbilitySource, Action, Allocator, BTreeMap, BTreeSet, BatchPolicy, Binding, BodyContext,
-    Cardinality, DamageAmount, DamageFlags, Expr, Int, Located, LoweringError, Nat, Node,
-    ObjectView, PlayerRef, PlayerRelation, PlayerSet, RecipientSet, SelectionView, Selector,
-    SourceSpan, TextQuantifier, ZoneKind, ast, unsupported,
+    AbilitySource, Action, BTreeSet, BatchPolicy, Binding, BodyContext, Cardinality, DamageAmount,
+    DamageFlags, Expr, Int, Located, LoweringError, Nat, Node, ObjectView, PlayerRef,
+    PlayerRelation, PlayerSet, RecipientSet, SelectionView, Selector, SourceSpan, TextQuantifier,
+    ZoneKind, ast, unsupported,
 };
 
 const fn parameter(id: u64, slot: PlaySlot, domain: ChoiceDomain) -> Decision {
@@ -244,6 +244,11 @@ impl BodyContext<'_> {
                         .ok_or_else(|| unsupported(path))?,
                 }
             }
+            ast::Recipients::LeaderOf { leader_of } => RecipientSet::Explicit {
+                recipients: vec![DamageRecipient::Leader {
+                    player: self.selected_controller(leader_of, path)?,
+                }],
+            },
             ast::Recipients::Target(name) => RecipientSet::Objects {
                 objects: Selector::Bound {
                     reference: *self.targets.get(name).ok_or_else(|| unsupported(path))?,
@@ -342,6 +347,8 @@ impl BodyContext<'_> {
                 targets: BTreeMap::new(),
                 recipient_targets: BTreeMap::new(),
                 parameters: vec![],
+                resolution_scope: scope,
+                resolution_captures: vec![],
                 formal_play: false,
                 mode_targets: BTreeMap::new(),
             };

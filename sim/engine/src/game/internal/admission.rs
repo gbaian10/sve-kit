@@ -372,6 +372,8 @@ fn supported(code: &str) -> bool {
             | "shape.PlayerRef.FromExpression"
             | "shape.Capture.Player"
             | "shape.PlayerRead.Role"
+            | "shape.ObjectView.Selected"
+            | "reference.selected"
             | "read.roles"
             | "internal.Role.Owner"
             | "internal.Role.Controller"

@@ -612,6 +612,7 @@ pub(super) struct DamageInstead {
 pub(super) enum Recipients {
     Field(ObjectQuery),
     Leader { leader: LeaderSide },
+    LeaderOf { leader_of: String },
     Leaders { leaders: LeaderGroup },
     Target(String),
 }
@@ -688,10 +689,46 @@ pub(super) enum LeaderSide {
 pub(super) enum Number {
     Literal(i64),
     Alias(String),
-    LeaderLife { leader_life: LeaderSide },
-    Minus { minus: Box<[Self; 2]> },
-    Count { count: CountQuery },
-    Resource { resource: ResourceQuery },
+    LeaderLife {
+        leader_life: LeaderSide,
+    },
+    Minus {
+        minus: Box<[Self; 2]>,
+    },
+    Count {
+        count: CountQuery,
+    },
+    Resource {
+        resource: ResourceQuery,
+    },
+    Resolution {
+        at: ResolutionTime,
+        value: Box<Self>,
+    },
+    Selection {
+        at: SelectionTime,
+        selection: String,
+        value: SelectedStat,
+    },
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum ResolutionTime {
+    Resolution,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum SelectionTime {
+    Selection,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum SelectedStat {
+    HpOf(String),
+    PowerOf(String),
 }
 
 #[derive(Deserialize)]
