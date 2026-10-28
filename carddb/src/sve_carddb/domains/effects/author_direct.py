@@ -34,6 +34,7 @@ _CARD_KEYS = frozenset(
         "deck_rule",
         "container",
         "token",
+        "token_sources",
     }
 )
 _META_KEYS = frozenset(
@@ -100,8 +101,6 @@ def inventory(  # ruff: ignore[complex-structure] -- keep permanent identity and
         sections = db.select(
             "face_text_section", ("ordinal", "kind"), where={"revision_id": revision_id}
         )
-        if any(section.values["kind"] == "token_definition" for section in sections):
-            raise SourceError("token_source_contract_unavailable")
         ordinals = [s.values["ordinal"] for s in sections]
         if ordinals != list(range(len(sections))):
             raise SourceError("source_sections_incomplete")
@@ -118,17 +117,18 @@ def inventory(  # ruff: ignore[complex-structure] -- keep permanent identity and
                     ordinal=ordinal,
                 ),
             )
-            fields.append(
-                {
-                    "field": field,
-                    "ordinal": ordinal,
-                    "lines": [
-                        i + 1
-                        for i, line in enumerate(selected_field.text.splitlines())
-                        if line.strip()
-                    ],
-                }
-            )
+            entry: dict[str, JsonValue] = {
+                "field": field,
+                "ordinal": ordinal,
+                "lines": [
+                    i + 1
+                    for i, line in enumerate(selected_field.text.splitlines())
+                    if line.strip()
+                ],
+            }
+            if ordinal is not None:
+                entry["section_kind"] = _scalar(sections[ordinal].values["kind"])
+            fields.append(entry)
         faces.append(
             {
                 "face_id": _scalar(face["id"]),
@@ -193,28 +193,72 @@ def _check_unknown_sections(
     current: CurrentAuthorSources,
     payload: dict[str, JsonValue],
     reminders: list[dict[str, JsonValue]],
+    tokens: list[dict[str, JsonValue]],
 ) -> None:
     ignored = {
         (source["face_id"], source["ordinal"], source["line"]) for source in reminders
     }
+    linked = {
+        (source["face_id"], source["ordinal"], line)
+        for token in tokens
+        for source in [object_value(token["source"])]
+        for line in array(source["covers"])
+    }
     for raw in array(payload["faces"]):
         face = object_value(raw)
-        unknown = {
-            row.values["ordinal"]
+        sections = {
+            row.values["ordinal"]: row.values["kind"]
             for row in current.db.select(
                 "face_text_section",
                 ("ordinal", "kind"),
                 where={"revision_id": string(face["revision_id"])},
             )
-            if row.values["kind"] == "unknown"
         }
         for raw_field in array(face["fields"]):
             field = object_value(raw_field)
-            if field["ordinal"] in unknown and any(
-                (face["face_id"], field["ordinal"], line) not in ignored
+            kind = next(
+                (
+                    kind
+                    for ordinal, kind in sections.items()
+                    if ordinal == field["ordinal"]
+                ),
+                None,
+            )
+            if kind in {"unknown", "token_definition"} and any(
+                (key := (face["face_id"], field["ordinal"], line)) not in linked
+                and (kind != "unknown" or key not in ignored)
                 for line in array(field["lines"])
             ):
                 raise SourceError("token_source_contract_unavailable")
+
+
+def _token_sources(
+    payload: dict[str, JsonValue], card: dict[str, JsonValue]
+) -> list[dict[str, JsonValue]]:
+    tokens: list[dict[str, JsonValue]] = []
+    for raw in array(card.get("token_sources", [])):
+        value = object_value(raw)
+        if value.keys() - {"card", "line", "section", "face", "covers"} or not (
+            isinstance(value.get("card"), str) and value["card"]
+        ):
+            raise SourceError("invalid_token_source")
+        source = _position(payload, value)
+        matching = [
+            object_value(field)
+            for face in array(payload["faces"])
+            if object_value(face)["face_id"] == source["face_id"]
+            for field in array(object_value(face)["fields"])
+            if object_value(field)["ordinal"] == source["ordinal"]
+        ]
+        if source["field"] != "section" or matching[0].get("section_kind") not in {
+            "unknown",
+            "token_definition",
+        }:
+            raise SourceError("invalid_token_source")
+        tokens.append(
+            {"source": {**source, "admission": "light"}, "card_no": value["card"]}
+        )
+    return tokens
 
 
 def _substitute(
@@ -313,6 +357,7 @@ def materialize(
     ignored = [
         _position(payload, object_value(v)) for v in array(card.get("ignored", []))
     ]
+    tokens = _token_sources(payload, card)
     _check_unknown_sections(
         current,
         payload,
@@ -321,6 +366,7 @@ def materialize(
             for raw, source in zip(array(card.get("ignored", [])), ignored, strict=True)
             if object_value(raw)["reason"] == "reminder"
         ],
+        tokens,
     )
     result: dict[str, JsonValue] = {
         "meta": {
@@ -341,6 +387,8 @@ def materialize(
         result["deck_rule"] = card["deck_rule"]
     if "token" in card:
         result["token"] = card["token"]
+    if tokens:
+        result["token_sources"] = list[JsonValue](tokens)
     result["ignored"] = [{**source, "admission": "light"} for source in ignored]
     check_coverage(payload, result, ignored)
     return result
@@ -377,6 +425,15 @@ def check_coverage(
         if ignored_key in covered:
             raise SourceError("duplicate_source_ability")
         covered.add(ignored_key)
+    for token in array(object_value(card).get("token_sources", [])):
+        source = object_value(object_value(token)["source"])
+        keys = {
+            (string(source["face_id"]), source["ordinal"], line)
+            for line in array(source["covers"])
+        }
+        if covered & keys:
+            raise SourceError("duplicate_source_ability")
+        covered.update(keys)
     if covered != expected:
         raise SourceError("source_line_closure_mismatch")
 
