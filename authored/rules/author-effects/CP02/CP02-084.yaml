@@ -1,0 +1,30 @@
+cards:
+  CP02-084:
+    abilities:
+      - auto:
+          do:
+            - damage:
+                n: 1
+                to:
+                  leaders: opponents
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 1
+      - lastword:
+          do:
+            - damage:
+                n: 1
+                to:
+                  leaders: opponents
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-luna
+            who: Codex
+          date: "2026-10-29"
+format: 2
+kind: author_effect_set
