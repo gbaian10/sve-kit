@@ -119,14 +119,12 @@ impl Execution {
             ObjectOperand::FollowEventMove {
                 event: MovementEvent::LeaveField { event },
             } => {
-                let (_, _, movement) = self
+                let (_, after) = self
                     .leave_move
                     .as_ref()
-                    .filter(|(binding, _, _)| *binding == event.key())
+                    .filter(|(binding, _)| *binding == event.key())
                     .ok_or_else(|| unsupported("missing triggering movement authority"))?;
-                movement
-                    .after
-                    .ok_or_else(|| unsupported("triggering move has no after member"))
+                Ok(*after)
             }
             ObjectOperand::SourceHolder {} => {
                 let mut reference = self.reference(game, &self.context.source)?;

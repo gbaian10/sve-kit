@@ -12,9 +12,9 @@ use super::{
 use crate::game::{Frame, Object};
 use crate::ir::{
     BatchId, Cause, DecisionId, EventHeader, EventId, EventPattern, EventPayload,
-    EventSnapshotPolicy, ExecutionId, GameTime, KeywordId, LeaveFieldEvent, MoveResult,
-    OriginFactId, Phase, ReceiptId, RuleId, RuntimeReceiptId, RuntimeVisibility, RuntimeZoneRef,
-    SnapshotId, Timestamp, TriggerAggregation, TriggerCondition, TriggerSpec, TurnId,
+    EventSnapshotPolicy, ExecutionId, GameTime, KeywordId, LeaveFieldEvent, ObjectRef,
+    OriginFactId, Phase, RuleId, RuntimeVisibility, RuntimeZoneRef, SnapshotId, Timestamp,
+    TriggerAggregation, TriggerCondition, TriggerSpec, TurnId,
 };
 use alloc::collections::BTreeMap;
 
@@ -48,7 +48,7 @@ pub(super) struct PendingOccurrence {
     information: SourceInformation,
     header: EventHeader,
     leave: Option<LeaveFieldEvent>,
-    movement: Option<MoveResult>,
+    leave_after: Option<ObjectRef>,
     card: String,
     timing: Option<EventPayload>,
     field_position: u64,
@@ -177,7 +177,7 @@ impl Game {
             information,
             header,
             leave,
-            movement: None,
+            leave_after: None,
             card,
             timing: None,
             field_position: u64::try_from(
@@ -388,22 +388,8 @@ impl Game {
                 return Err(invalid("departure did not commit"));
             }
             pending.header.after = after;
-            if let Some(leave) = pending.leave {
-                let member = self.internal_current_reference(&previous.id)?;
-                // The physical commit owns its receipt independently of the causing effect.
-                pending.header.receipt = Some(RuntimeReceiptId {
-                    execution: ExecutionId(pending.header.id.0),
-                    slot: ReceiptId(0),
-                });
-                pending.movement = Some(MoveResult {
-                    before: leave.object_before,
-                    after: Some(member),
-                    requested_to: leave.to,
-                    requested_position: None,
-                    actual_to: Some(leave.to),
-                    actual_position: None,
-                    replacements: vec![],
-                });
+            if pending.leave.is_some() {
+                pending.leave_after = Some(self.internal_current_reference(&previous.id)?);
             }
             admitted.push(pending);
         }
@@ -609,23 +595,15 @@ impl Game {
 
 impl PendingOccurrence {
     fn bind_leave_move(&self, execution: &mut Execution) -> Result<()> {
-        if let (Some(leave), Some(trigger)) = (self.leave, &self.ability.node.trigger)
+        if let Some(trigger) = &self.ability.node.trigger
             && let TriggerCondition::Event {
                 pattern: EventPattern::LeaveField { binding, .. },
             } = &trigger.on
         {
-            let receipt = self
-                .header
-                .receipt
-                .ok_or_else(|| invalid("missing departure movement receipt"))?;
-            let movement = self
-                .movement
-                .clone()
-                .filter(|movement| {
-                    movement.before == leave.object_before && movement.actual_to == Some(leave.to)
-                })
-                .ok_or_else(|| invalid("departure receipt and event disagree"))?;
-            execution.leave_move = Some((binding.key(), receipt, movement));
+            let after = self
+                .leave_after
+                .ok_or_else(|| invalid("missing committed departure"))?;
+            execution.leave_move = Some((binding.key(), after));
         }
         Ok(())
     }
