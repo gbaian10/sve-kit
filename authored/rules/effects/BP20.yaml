@@ -1,246 +1,217 @@
-format: 1
-kind: effect_set
 cards:
   BP20-020:
-    status: complete
     abilities:
-      - line: 1
-        kind: evolve
-        body:
+      - body:
           op: evolve
           subjects: self
         costs:
-          - op: pp
-            amount: 1
-      - line: 2
-        kind: trigger
-        body:
-          op: if
+          - amount: 1
+            op: pp
+        kind: evolve
+        line: 1
+      - body:
           condition:
-            fn: gt
             args:
               - read: self.counters.fusion_counter
               - 0
-          then:
-            op: draw
-            count: 1
+            fn: gt
           else:
-            op: create
-            name: 黄金の小剣
             count: 1
+            name: 黄金の小剣
+            op: create
             to: ex
+          op: if
+          then:
+            count: 1
+            op: draw
         event: enter
+        kind: trigger
+        line: 2
         subject: self
-      - line: 3
-        kind: activated
+      - active_zones:
+          - hand
         body:
-          op: counter
-          subjects: self
-          name: fusion_counter
           amount:
             read: x
-        active_zones:
-          - hand
-        keyword: fusion
-        variables:
-          x:
-            min: 0
-            max: 2
+          name: fusion_counter
+          op: counter
+          subjects: self
         cost_selections:
           - key: "1"
-            select:
-              union:
-                - zone: hand
-                  side: self
-                  other: true
-                  trait: 財宝
-                  where:
-                    fn: ge
-                    args:
-                      - read: item.cost
-                      - 1
-                - zone: ex
-                  side: self
-                  other: true
-                  trait: 財宝
-                  where:
-                    fn: ge
-                    args:
-                      - read: item.cost
-                      - 1
-            min:
-              read: x
             max:
               read: x
+            min:
+              read: x
+            select:
+              union:
+                - other: true
+                  side: self
+                  trait: 財宝
+                  where:
+                    args:
+                      - read: item.cost
+                      - 1
+                    fn: ge
+                  zone: hand
+                - other: true
+                  side: self
+                  trait: 財宝
+                  where:
+                    args:
+                      - read: item.cost
+                      - 1
+                    fn: ge
+                  zone: ex
         costs:
-          - op: for_each
-            select: cost.1
-            bind: material
+          - bind: material
             body:
-              op: if
               condition:
-                fn: eq
                 args:
                   - read: material.zone
                   - hand
-              then:
-                op: discard
-                subjects: material
+                fn: eq
               else:
                 op: move
                 subjects: material
                 to: cemetery
+              op: if
+              then:
+                op: discard
+                subjects: material
+            op: for_each
+            select: cost.1
           - op: move
             subjects: self
             to: ex
-  BP20-036:
+        keyword: fusion
+        kind: activated
+        line: 3
+        variables:
+          x:
+            max: 2
+            min: 0
     status: complete
+  BP20-036:
     abilities:
-      - line: 1
-        kind: spell
-        body:
+      - body:
           op: seq
           steps:
-            - op: modify
-              subjects: target.1
-              keywords:
+            - keywords:
                 - assail
-            - op: replace_damage
+              op: modify
               subjects: target.1
+            - kind: any
+              op: replace_damage
               prevent: true
-              kind: any
+              subjects: target.1
               until: end-of-turn
+        kind: spell
+        line: 1
         targets:
           - key: "1"
+            max: 1
+            min: 1
             select:
               side: self
-              zone: field
               type: follower
-            min: 1
-            max: 1
+              zone: field
+    status: complete
   BP20-099:
-    status: complete
     abilities:
-      - line: 1
-        kind: trigger
-        body:
-          op: replace_damage
-          subjects: self.leader
-          prevent: true
+      - body:
           kind: any
-          uses: 1
+          op: replace_damage
+          prevent: true
+          subjects: self.leader
           until: end-of-turn
+          uses: 1
         event: main_start
+        kind: trigger
+        line: 1
         side: opponent
-  BP20-111:
     status: complete
+  BP20-111:
     abilities:
-      - line: 1
-        kind: evolve
-        body:
+      - body:
           op: evolve
           subjects: self
         costs:
-          - op: pp
-            amount: 1
-      - line: 2
-        kind: trigger
-        body:
+          - amount: 1
+            op: pp
+        kind: evolve
+        line: 1
+      - body:
           op: discard
           subjects:
             side: self
             zone: hand
         event: enter
-        subject: self
-  BP20-P11:
-    status: complete
-    abilities:
-      - line: 1
-        kind: static
-        body:
-          op: macro
-          name: storm
-      - line: 2
         kind: trigger
-        body:
-          op: damage
-          subjects: target.1
-          amount: 4
-        event: attack
+        line: 2
         subject: self
-        targets:
-          - key: "1"
-            select:
-              side: opponent
-              zone: field
-              type: follower
-            min: 1
-            max: 1
-  BP20-P12:
     status: complete
+  BP20-P12:
     abilities:
-      - line: 2
-        kind: spell
-        body:
-          op: if
-          condition:
-            read: paid.beast
-          then:
-            op: seq
-            steps:
-              - op: damage
-                subjects: target.1
-                amount: 5
-              - op: draw
-                count: 1
-          else:
-            op: damage
-            subjects: target.1
-            amount: 3
-        targets:
-          - key: "1"
-            select:
-              side: opponent
-              zone: field
-              type: follower
-            min: 1
-            max: 1
-        additional_costs:
-          - key: beast
-            cost_selections:
+      - additional_costs:
+          - cost_selections:
               - key: "1"
+                max: 1
+                min: 1
                 select:
                   side: self
-                  zone: hand
                   trait: 獣
-                min: 1
-                max: 1
+                  zone: hand
             costs:
               - op: discard
                 subjects: cost.1
-  BP20-P28:
-    status: complete
-    abilities:
-      - line: 1
-        kind: trigger
+            key: beast
         body:
+          condition:
+            read: paid.beast
+          else:
+            amount: 3
+            op: damage
+            subjects: target.1
+          op: if
+          then:
+            op: seq
+            steps:
+              - amount: 5
+                op: damage
+                subjects: target.1
+              - count: 1
+                op: draw
+        kind: spell
+        line: 2
+        targets:
+          - key: "1"
+            max: 1
+            min: 1
+            select:
+              side: opponent
+              type: follower
+              zone: field
+    status: complete
+  BP20-P28:
+    abilities:
+      - body:
           op: seq
           steps:
-            - op: look
+            - bind: seen
               count: 3
-              bind: seen
+              op: look
             - op: optional
               selection:
+                bind: chosen
+                max: 1
+                min: 1
                 select:
                   union:
                     - from: seen
-                      type: follower
                       trait: 陰陽師
+                      type: follower
                     - from: seen
                       type: spell
-                min: 1
-                max: 1
-                bind: chosen
               then:
                 op: seq
                 steps:
@@ -252,155 +223,156 @@ cards:
                     to: hand
             - op: seq
               steps:
-                - op: select
-                  select:
-                    difference:
-                      - seen
-                      - chosen
-                  min:
-                    count:
-                      difference:
-                        - seen
-                        - chosen
+                - bind: ordered
                   max:
                     count:
                       difference:
                         - seen
                         - chosen
-                  bind: ordered
+                  min:
+                    count:
+                      difference:
+                        - seen
+                        - chosen
+                  op: select
                   order: true
+                  select:
+                    difference:
+                      - seen
+                      - chosen
                 - op: move
+                  position: bottom
                   subjects: ordered
                   to: deck
-                  position: bottom
-        event: enter
-        subject: self
         cost_selections:
           - key: "1"
+            max: 1
+            min: 1
             select:
               side: self
               zone: hand
-            min: 1
-            max: 1
         costs:
           - op: discard
             subjects: cost.1
-      - line: 2
-        kind: activated
-        body:
-          op: create
-          name: 形代
+        event: enter
+        kind: trigger
+        line: 1
+        subject: self
+      - body:
           count: 1
+          name: 形代
+          op: create
           to: field
+        costs:
+          - op: act
+            subjects: self
+        kind: activated
+        line: 2
         play_if:
-          fn: ge
           args:
             - count:
                 union:
                   - side: self
-                    zone: cemetery
                     trait: 陰陽師
-                  - side: self
                     zone: cemetery
+                  - side: self
                     type: spell
+                    zone: cemetery
             - 7
-        costs:
-          - op: act
-            subjects: self
-  BP20-P32:
+          fn: ge
     status: complete
+  BP20-P32:
     abilities:
-      - line: 1
-        kind: trigger
-        body:
-          op: max_pp
+      - body:
           amount: 1
+          op: max_pp
         event: damage
+        kind: trigger
+        limit: 1
+        limit_at: trigger
+        line: 1
         subject: self
         trigger_if:
-          fn: and
           args:
             - read: self.is_active
             - read: event.effect_damage
-        limit: 1
-        limit_at: trigger
-      - line: 2
-        kind: trigger
-        body:
-          op: if
+          fn: and
+      - body:
           condition:
-            fn: ge
             args:
               - read: self.pp.max
               - 7
+            fn: ge
+          op: if
           then:
+            amount: 1
             op: damage
             subjects:
               side: both
-              zone: field
               type: follower
-            amount: 1
+              zone: field
         event: enter
+        kind: trigger
+        line: 2
         subject: self
-  BP20-P44:
     status: complete
+  BP20-P44:
     abilities:
-      - line: 1
-        kind: evolve
-        body:
+      - body:
           op: evolve
           subjects: self
         costs:
-          - op: pp
-            amount: 1
-      - line: 2
-        kind: trigger
-        body:
+          - amount: 1
+            op: pp
+        kind: evolve
+        line: 1
+      - body:
           op: move
           subjects:
             side: self
-            zone: deck
             top: 3
+            zone: deck
           to: cemetery
         event: enter
+        kind: trigger
+        line: 2
         subject: self
-  BP20-P47:
     status: complete
+  BP20-P47:
     abilities:
-      - line: 1
-        kind: evolve
-        body:
+      - body:
           op: evolve
           subjects: self
         costs:
-          - op: pp
-            amount: 1
-      - line: 2
-        kind: trigger
-        body:
-          op: create
-          name: クレスト 安息の団結者
+          - amount: 1
+            op: pp
+        kind: evolve
+        line: 1
+      - body:
           count: 1
+          name: クレスト 安息の団結者
+          op: create
           to: ex
         event: enter
-        subject: self
-  BP20-P59:
-    status: complete
-    review: 依 Q2702／Q2685：捨牌即誘發，場上マゼルベイン的存在於結算時判定。
-    abilities:
-      - line: 1
         kind: trigger
+        line: 2
+        subject: self
+    status: complete
+  BP20-P59:
+    abilities:
+      - active_zones:
+          - hand
         body:
-          op: if
           condition:
-            fn: gt
             args:
               - count:
-                  side: self
-                  zone: field
-                  type: follower
                   name_contains: マゼルベイン
+                  side: self
+                  type: follower
+                  zone: field
               - 0
+            fn: gt
+          op: if
           then:
             op: optional
             then:
@@ -408,392 +380,396 @@ cards:
               subjects: self
               to: ex
         event: discard
+        kind: trigger
+        line: 1
         subject: self
-        active_zones:
-          - hand
-      - line: 1
-        kind: static
-        body:
-          op: adjust_cost
-          subjects: self
+      - body:
           amount: -2
           condition:
-            fn: eq
             args:
               - read: self.zone
               - ex
+            fn: eq
+          op: adjust_cost
+          subjects: self
+        kind: static
+        line: 1
         section: 0
-      - line: 2
-        kind: spell
-        body:
-          op: draw
+      - body:
           count: 2
+          op: draw
+        kind: spell
+        line: 2
         section: 0
-  BP20-P61:
+    review: 依 Q2702／Q2685：捨牌即誘發，場上マゼルベイン的存在於結算時判定。
     status: complete
+  BP20-P61:
     abilities:
-      - line: 1
-        kind: trigger
+      - active_zones:
+          - ex
         body:
           op: seq
           steps:
-            - op: counter
-              subjects: self
+            - amount: 1
               name: refund_counter
-              amount: 1
-            - op: if
-              condition:
-                fn: ge
+              op: counter
+              subjects: self
+            - condition:
                 args:
                   - read: self.counters.refund_counter
                   - 8
+                fn: ge
+              op: if
               then:
                 op: seq
                 steps:
                   - op: banish
                     subjects: self
-                  - op: search
+                  - max: 1
+                    min: 0
+                    op: search
                     select:
                       side: self
-                      zone: deck
                       trait: 盗賊
-                    min: 0
-                    max: 1
+                      zone: deck
                     to: hand
         event: main_start
-        active_zones:
-          - ex
-      - line: 1
         kind: trigger
+        line: 1
+      - active_zones:
+          - ex
         body:
           op: seq
           steps:
-            - op: counter
-              subjects: self
+            - amount: 1
               name: refund_counter
-              amount: 1
-            - op: if
-              condition:
-                fn: ge
+              op: counter
+              subjects: self
+            - condition:
                 args:
                   - read: self.counters.refund_counter
                   - 8
+                fn: ge
+              op: if
               then:
                 op: seq
                 steps:
                   - op: banish
                     subjects: self
-                  - op: search
+                  - max: 1
+                    min: 0
+                    op: search
                     select:
                       side: self
-                      zone: deck
                       trait: 盗賊
-                    min: 0
-                    max: 1
+                      zone: deck
                     to: hand
         event: fusion
+        kind: trigger
+        line: 1
         subject:
           side: self
           zone: any
-        active_zones:
-          - ex
         trigger_if:
           read: event.fused_trait.財宝
-      - line: 1
-        kind: trigger
+      - active_zones:
+          - ex
         body:
           op: seq
           steps:
-            - op: counter
-              subjects: self
+            - amount: 1
               name: refund_counter
-              amount: 1
-            - op: if
-              condition:
-                fn: ge
+              op: counter
+              subjects: self
+            - condition:
                 args:
                   - read: self.counters.refund_counter
                   - 8
+                fn: ge
+              op: if
               then:
                 op: seq
                 steps:
                   - op: banish
                     subjects: self
-                  - op: search
+                  - max: 1
+                    min: 0
+                    op: search
                     select:
                       side: self
-                      zone: deck
                       trait: 盗賊
-                    min: 0
-                    max: 1
+                      zone: deck
                     to: hand
         event: card_play
-        active_zones:
-          - ex
+        kind: trigger
+        line: 1
         subject:
           side: self
-          zone: any
           trait: 財宝
-  BP20-P64:
+          zone: any
     status: complete
+  BP20-P64:
     abilities:
-      - line: 1
-        kind: activated
+      - active_zones:
+          - ex
         body:
+          amount: 1
           op: damage
           subjects: target.1
-          amount: 1
-        active_zones:
-          - ex
+        costs:
+          - amount: 0
+            op: pp
+        kind: activated
+        limit: 1
+        line: 1
         targets:
           - key: "1"
+            max: 1
+            min: 1
             select:
               side: self
-              zone: field
-              type: follower
               trait: 絶傑
-            min: 1
-            max: 1
-        costs:
-          - op: pp
-            amount: 0
-        limit: 1
-  BP20-P65:
+              type: follower
+              zone: field
     status: complete
+  BP20-P65:
     abilities:
-      - line: 1
-        kind: static
+      - active_zones:
+          - ex
         body:
-          op: replace_choice
-          side: self
-          min: 0
-          max:
-            read: choice.mode_count
           condition:
-            fn: ge
             args:
               - read: choice.min
               - 1
-        active_zones:
-          - ex
-  BP20-P66:
+            fn: ge
+          max:
+            read: choice.mode_count
+          min: 0
+          op: replace_choice
+          side: self
+        kind: static
+        line: 1
     status: complete
+  BP20-P66:
     abilities:
-      - line: 1
-        kind: trigger
+      - active_zones:
+          - ex
         body:
-          op: damage
-          subjects: target.1
           amount:
-            if:
-              fn: eq
-              args:
-                - count:
-                    side: self
-                    zone: ex
-                    type: crest
-                - 5
-            then: 4
             else:
+              else: 1
               if:
-                fn: ge
                 args:
                   - count:
                       side: self
-                      zone: ex
                       type: crest
+                      zone: ex
                   - 3
+                fn: ge
               then: 2
-              else: 1
+            if:
+              args:
+                - count:
+                    side: self
+                    type: crest
+                    zone: ex
+                - 5
+              fn: eq
+            then: 4
+          op: damage
+          subjects: target.1
         event: end
-        active_zones:
-          - ex
+        kind: trigger
+        line: 1
         targets:
           - key: "1"
+            max: 1
+            min: 1
             select:
               union:
                 - side: opponent
-                  zone: field
                   type: follower
+                  zone: field
                 - opponent.leader
-            min: 1
-            max: 1
-  BP20-P68:
     status: complete
+  BP20-P68:
     abilities:
-      - line: 1
-        kind: trigger
+      - active_zones:
+          - ex
         body:
-          op: if
           condition:
-            fn: ge
             args:
               - count:
                   side: self
-                  zone: ex
                   type: crest
+                  zone: ex
               - 3
+            fn: ge
+          op: if
           then:
-            op: modify
-            subjects: target.1
-            power: 1
             hp: 1
+            op: modify
+            power: 1
+            subjects: target.1
         event: end
-        active_zones:
-          - ex
+        kind: trigger
+        line: 1
         targets:
           - key: "1"
+            max: 1
+            min: 1
             select:
               side: self
-              zone: field
-              type: follower
               trait: 絶傑
-            min: 1
-            max: 1
-  BP20-P70:
+              type: follower
+              zone: field
     status: complete
-    review: E24 結束階段先誘發，手牌張數條件在 body.if 結算時重讀。
+  BP20-P70:
     abilities:
-      - line: 1
-        kind: trigger
+      - active_zones:
+          - ex
         body:
-          op: if
           condition:
-            fn: le
             args:
               - count:
                   side: self
                   zone: hand
               - 1
+            fn: le
+          op: if
           then:
+            count: 1
             op: draw
-            count: 1
         event: end
-        active_zones:
-          - ex
-  BP20-R13:
-    status: complete
-    abilities:
-      - line: 1
-        kind: evolve
-        body:
-          op: evolve
-          subjects: self
-        costs:
-          - op: pp
-            amount: 4
-      - line: 2
-        kind: evolve
-        body:
-          op: evolve
-          subjects: self
-        costs:
-          - op: skip_turn
-            side: self
-            count: 1
-  BP20-R14:
-    status: complete
-    abilities:
-      - line: 1
-        kind: static
-        body:
-          op: macro
-          name: guard
-      - line: 1
-        kind: static
-        body:
-          op: macro
-          name: aura
-      - line: 2
         kind: trigger
-        body:
+        line: 1
+    review: E24 結束階段先誘發，手牌張數條件在 body.if 結算時重讀。
+    status: complete
+  BP20-R13:
+    abilities:
+      - body:
+          op: evolve
+          subjects: self
+        costs:
+          - amount: 4
+            op: pp
+        kind: evolve
+        line: 1
+      - body:
+          op: evolve
+          subjects: self
+        costs:
+          - count: 1
+            op: skip_turn
+            side: self
+        kind: evolve
+        line: 2
+    status: complete
+  BP20-R14:
+    abilities:
+      - body:
+          name: guard
+          op: macro
+        kind: static
+        line: 1
+      - body:
+          name: aura
+          op: macro
+        kind: static
+        line: 1
+      - body:
           op: seq
           steps:
-            - op: max_pp
-              amount: 1
-            - op: modify
+            - amount: 1
+              op: max_pp
+            - hp: 3
+              op: modify
               subjects: self.leader
-              hp: 3
-            - op: draw
-              count: 1
+            - count: 1
+              op: draw
         event: evolve
+        kind: trigger
+        line: 2
         subject: self
-  BP20-SL17:
     status: complete
+  BP20-SL17:
     abilities:
-      - line: 1
-        kind: evolve
-        body:
+      - body:
           op: evolve
           subjects: self
         costs:
-          - op: pp
-            amount: 1
-      - line: 2
-        kind: static
-        body:
-          op: macro
+          - amount: 1
+            op: pp
+        kind: evolve
+        line: 1
+      - body:
           name: guard
-      - line: 3
-        kind: trigger
-        body:
+          op: macro
+        kind: static
+        line: 2
+      - body:
+          amount: 1
           op: damage
           subjects:
             side: opponent
-            zone: field
             type: follower
-          amount: 1
+            zone: field
         event: damage
+        kind: trigger
+        line: 3
         subject: self
         trigger_if:
-          fn: and
           args:
             - read: self.is_active
             - read: event.effect_damage
-      - line: 4
-        kind: trigger
-        body:
-          op: if
+          fn: and
+      - body:
           condition:
-            fn: gt
             args:
               - count:
                   union:
-                    - side: self
+                    - other: true
+                      side: self
+                      trait: 絶傑
                       zone: field
+                    - other: true
+                      side: self
                       trait: 絶傑
-                      other: true
-                    - side: self
                       zone: ex
-                      trait: 絶傑
-                      other: true
               - 0
+            fn: gt
+          op: if
           then:
+            amount: 1
             op: damage
             subjects:
               side: both
-              zone: field
               type: follower
-            amount: 1
+              zone: field
         event: enter
+        kind: trigger
+        line: 4
         subject: self
-  BP20-SL29:
     status: complete
+  BP20-SL29:
     abilities:
-      - line: 1
-        kind: evolve
-        body:
+      - body:
           op: evolve
           subjects: self
         costs:
-          - op: pp
-            amount: 1
-      - line: 2
-        kind: trigger
-        body:
+          - amount: 1
+            op: pp
+        kind: evolve
+        line: 1
+      - body:
           op: discard
           subjects:
             side: self
             zone: hand
         event: enter
+        kind: trigger
+        line: 2
         subject: self
+    status: complete
+format: 1
+kind: effect_set
