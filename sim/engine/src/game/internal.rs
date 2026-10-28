@@ -637,7 +637,9 @@ impl Game {
                 }
                 (Wait::OptionalCost, Answer::OptionalCost(accepted)) => {
                     rollback = execution.origin.take();
-                    card::exchange::accept(&mut execution, accepted)?;
+                    if !card::optional::accept(&mut execution, accepted)? {
+                        card::exchange::accept(&mut execution, accepted)?;
+                    }
                 }
                 (Wait::CostMaterials(wait), Answer::CostMaterials(handles)) => {
                     let members = wait.validate(&handles)?;

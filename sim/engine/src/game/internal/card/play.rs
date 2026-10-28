@@ -97,6 +97,7 @@ pub(in crate::game::internal) struct PlayState {
     pub(in crate::game::internal) chosen: BTreeMap<DecisionId, Vec<ModeId>>,
     parameters: VecDeque<Decision>,
     pub(super) exchange: Option<super::exchange::ExchangeState>,
+    pub(super) optional: Option<super::optional::OptionalState>,
     pub(super) costs: CostSpec,
     limit: Option<LimitSpec>,
     body: Program,
@@ -643,7 +644,8 @@ impl Game {
         mut execution: Execution,
         ability: Ability,
     ) -> Result<CardPlay> {
-        let body = ability.body.ok_or_else(|| invalid("missing body"))?;
+        let mut body = ability.body.ok_or_else(|| invalid("missing body"))?;
+        let optional = super::optional::take(&mut body);
         let groups = collect_modes(&body)?;
         let play = ability.play.unwrap_or(PlaySpec {
             limit: None,
@@ -663,6 +665,7 @@ impl Game {
             } else {
                 None
             },
+            optional,
             costs: play.costs,
             limit: play.limit,
             body,
@@ -750,7 +753,8 @@ impl Game {
         let Some(mut play) = execution.play.take() else {
             return Ok(());
         };
-        if self.internal_exchange_decision(execution, &play)?
+        if self.internal_optional_decision(execution, &play)?
+            || self.internal_exchange_decision(execution, &play)?
             || self.internal_play_modes(execution, &mut play)?
         {
             execution.play = Some(play);
@@ -833,6 +837,7 @@ impl Game {
         } else {
             self.internal_card_payment(execution, &play.costs, execution.spell)
         };
+        let payment = payment.and_then(|()| self.internal_optional_payment(execution, &play));
         self.card_runtime.active_source = previous;
         payment?;
         if execution.field_entry {
@@ -1155,6 +1160,7 @@ impl Game {
             chosen: BTreeMap::new(),
             parameters: VecDeque::new(),
             exchange: self.internal_exchange(&execution)?,
+            optional: None,
             costs: CostSpec::Ordered { steps: vec![] },
             limit: None,
             body: Program {

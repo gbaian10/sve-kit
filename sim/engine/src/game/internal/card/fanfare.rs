@@ -4,6 +4,7 @@ use super::{
     take, unsupported,
 };
 use crate::ir::LimitSpec;
+use crate::ir::optional_payment;
 use crate::ir::{
     EventPattern, EventSnapshotPolicy, KeywordId, ObjectFrozen, Predicate, TriggerAggregation,
     TriggerCondition,
@@ -24,7 +25,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
         right: Expr::Frozen(Box::new(ObjectFrozen::SourceHolder {})),
     }));
     if !matches!(&ability.source.origin, AbilityOrigin::Keyword { keyword: KeywordId::Fanfare, origin } if matches!(origin.as_ref(), AbilityOrigin::Printed { .. }))
-        || ability.play.is_some()
+        || !optional_payment::trigger_play(ability)
         || trigger.active_zones != [ZoneKind::Field]
         || trigger.view != EventSnapshotPolicy::AfterEntry
         || trigger

@@ -30,6 +30,7 @@ mod evolution;
 pub(super) mod exchange;
 mod fanfare;
 mod keywords;
+pub(super) mod optional;
 mod printed;
 pub(super) mod quick;
 mod resources;
@@ -353,6 +354,7 @@ impl Game {
                 .body
                 .as_ref()
                 .ok_or_else(|| invalid("missing body"))?;
+            optional::check_body(body, true)?;
             check_nodes(self, &body.steps, &located.source, &ability.source)?;
             admission::check_card(
                 body,
@@ -839,6 +841,12 @@ fn check_nodes(
                 ) {
                     return Err(unsupported("whole-card synchronous action"));
                 }
+            }
+            Node::Control {
+                control: Control::Pay { costs, on_paid, .. },
+            } => {
+                optional::check_costs(costs, ability_source)?;
+                check_nodes(game, &on_paid.steps, source, ability_source)?;
             }
             Node::Control {
                 control: Control::Sequence { body },

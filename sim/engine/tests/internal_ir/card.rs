@@ -534,3 +534,6 @@ mod resource;
 
 #[path = "card/reveal_hand.rs"]
 mod reveal_hand;
+
+#[path = "card/optional.rs"]
+mod optional;

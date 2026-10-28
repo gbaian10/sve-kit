@@ -1,6 +1,7 @@
 use super::{BindingKind, CaptureTime, Checked, Checker, WellFormedError, WellFormedReason};
 use crate::ir::OncePerEvent;
 use crate::ir::events::timing::second_header;
+use crate::ir::optional_payment;
 use crate::ir::{
     Ability, AbilityKind, AbilityQualification, Capture, CardProgram, Cardinality,
     CharacteristicPatch, ChoiceDomain, ContinuousLayer, DecisionKind, Duration, DurationEnd,
@@ -394,7 +395,7 @@ impl Checker {
             }
         ) && (second_header(ability) != Some(true)
             || ability.kind != AbilityKind::Triggered
-            || ability.play.is_some()
+            || !optional_payment::trigger_play(ability)
             || ability.active_zones != [ZoneKind::Field]
             || ability.source.holder != (ObjectOperand::SourceHolder {})
             || ability
@@ -420,7 +421,7 @@ impl Checker {
             return self.reject();
         };
         if ability.kind != AbilityKind::Triggered
-            || ability.play.is_some()
+            || !optional_payment::trigger_play(ability)
             || ability.source.holder != (ObjectOperand::SourceHolder {})
             || ability.active_zones != [ZoneKind::Field]
             || *active_zones != [ZoneKind::Field]

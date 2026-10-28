@@ -74,6 +74,9 @@ mod live_conditions;
 #[path = "runtime/max_pp.rs"]
 mod max_pp;
 
+#[path = "runtime/optional_payment.rs"]
+mod optional_payment;
+
 #[path = "runtime/pp_recover.rs"]
 mod pp_recover;
 

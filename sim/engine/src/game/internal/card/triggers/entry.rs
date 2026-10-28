@@ -6,6 +6,7 @@ use super::{
 };
 use crate::game::{Frame, Object};
 use crate::ir::events::entry::EntryFilter;
+use crate::ir::optional_payment;
 use crate::ir::{CardKind, Characteristics, LimitSpec};
 use crate::ir::{EnterFieldEvent, EntryMethod, EntryOrigin, ExecutionId};
 
@@ -23,7 +24,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
         return Ok(false);
     }
     if ability.kind != AbilityKind::Triggered
-        || ability.play.is_some()
+        || !optional_payment::trigger_play(ability)
         || trigger.active_zones != [ZoneKind::Field]
         || trigger.view != EventSnapshotPolicy::AfterEntry
         || trigger.aggregation != (TriggerAggregation::PerFact {})
