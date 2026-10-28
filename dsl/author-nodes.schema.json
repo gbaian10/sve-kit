@@ -18855,6 +18855,13 @@
         },
         "token": {
           "$ref": "#/$defs/TokenIdentity"
+        },
+        "token_sources": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/TokenSource"
+          },
+          "minItems": 1
         }
       },
       "required": [
@@ -21249,6 +21256,23 @@
       },
       "required": [
         "name"
+      ]
+    },
+    "TokenSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "$ref": "#/$defs/DirectSourceUse"
+        },
+        "card_no": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "source",
+        "card_no"
       ]
     }
   },
