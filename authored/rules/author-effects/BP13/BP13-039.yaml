@@ -1,0 +1,19 @@
+cards:
+  BP13-039:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - damage:
+                n: 8
+                to:
+                  leaders: opponents
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-sol
+            who: Codex
+          date: "2026-10-29"
+format: 2
+kind: author_effect_set
