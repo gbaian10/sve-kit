@@ -1,0 +1,33 @@
+cards:
+  BP03-042:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - fanfare:
+          do:
+            - create:
+                n: 1
+                result: made
+                to: field
+                token: マジカルポーン
+            - create:
+                n: 1
+                result: made_ex
+                to: ex
+                token: マジカルポーン
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-luna
+            who: Codex
+          date: "2026-10-28"
+    token_sources:
+      - card: BP03-T03
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set
