@@ -118,7 +118,7 @@ pub(super) fn query(
     allocator: &mut Allocator,
     path: &str,
 ) -> Result<Selector, LoweringError> {
-    if value.other {
+    if value.other || matches!(value.zone, ast::PublicZone::Ex) {
         return Err(unsupported(path));
     }
     Ok(public_query(
@@ -144,7 +144,7 @@ pub(super) fn public_query(value: &ast::PublicQuery, binding: Binding<ObjectRef>
         },
         zone: match value.zone {
             ast::PublicZone::Field => ZoneKind::Field,
-            ast::PublicZone::Ex => return Err(unsupported(path)),
+            ast::PublicZone::Ex => ZoneKind::Ex,
             ast::PublicZone::Cemetery => ZoneKind::Cemetery,
         },
         view: SelectionView::Current {},

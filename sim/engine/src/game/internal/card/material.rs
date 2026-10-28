@@ -256,6 +256,7 @@ impl Game {
                 domain: InputDomain::CostMaterials(super::TargetDomain {
                     members: public,
                     cardinality: constraint.cardinality,
+                    distinct_names: false,
                 }),
             },
             Wait::MaterialParameter(MaterialWait {
