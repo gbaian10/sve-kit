@@ -354,7 +354,9 @@ class RefreshWriter(Writer):
                 resource.raw_bytes,
             )
             archive._install_link(raw_path, blob)
-        target = resolve_within(self.store.data_root, fetched.path)
+        target = resolve_within(
+            self.store.data_root, fetched.path, also_allowed=self.store.read_roots
+        )
         target.parent.mkdir(parents=True, exist_ok=True)
         temporary = target.with_name(f"{target.name}.tmp-{uuid.uuid4().hex}")
         archive._write_new(temporary, stored)
@@ -386,7 +388,11 @@ class RefreshWriter(Writer):
                 self._check_unchanged(snapshot, stage, pin, fetched, previous)
                 if archive._file_identity(temporary.stat()) != candidate_stat:
                     raise archive.ArchiveRaceError("prepared latest changed")
-                target = resolve_within(self.store.data_root, fetched.path)
+                target = resolve_within(
+                    self.store.data_root,
+                    fetched.path,
+                    also_allowed=self.store.read_roots,
+                )
                 if target != temporary.parent / fetched.path.name:
                     raise archive.ArchiveRaceError(
                         "latest destination changed during preparation"
@@ -821,7 +827,11 @@ class RefreshWriter(Writer):
             raw_hash,
             intent.proposed.raw_bytes,
         )
-        resolve_within(self.store.data_root, PurePosixPath(intent.proposed.path))
+        resolve_within(
+            self.store.data_root,
+            PurePosixPath(intent.proposed.path),
+            also_allowed=self.store.read_roots,
+        )
 
     def _recover_current(
         self, current: Resource, stage: Path, index: int, intent: Replacement
@@ -830,7 +840,9 @@ class RefreshWriter(Writer):
         if intent.previous is not None:
             allowed.add(intent.previous.sha256)
         snapshot = self._snapshot(stage, f"recovery-{index}.sqlite")
-        target = resolve_within(self.store.data_root, current.path)
+        target = resolve_within(
+            self.store.data_root, current.path, also_allowed=self.store.read_roots
+        )
         before = archive._identity(target, target.stat()) if target.exists() else None
         with self._lock.suspended():
             if current.sha256 not in allowed and not self._existing(current):
@@ -854,7 +866,9 @@ class RefreshWriter(Writer):
         with Manifest.open_live(self.store.manifest_path) as live:
             if live.resources.get(current.url) != current:
                 raise archive.ArchiveRaceError("manifest changed during recovery")
-        resolved = resolve_within(self.store.data_root, current.path)
+        resolved = resolve_within(
+            self.store.data_root, current.path, also_allowed=self.store.read_roots
+        )
         actual = (
             archive._identity(resolved, resolved.stat()) if resolved.exists() else None
         )
@@ -920,7 +934,9 @@ class RefreshWriter(Writer):
             raise archive.ArchiveError(
                 "recovery encoding differs from committed resource"
             )
-        target = resolve_within(self.store.data_root, current.path)
+        target = resolve_within(
+            self.store.data_root, current.path, also_allowed=self.store.read_roots
+        )
         target.parent.mkdir(parents=True, exist_ok=True)
         temporary = target.with_name(f"{target.name}.tmp-{uuid.uuid4().hex}")
         archive._write_new(temporary, stored)
