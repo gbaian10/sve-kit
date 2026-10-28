@@ -1,0 +1,32 @@
+cards:
+  BP12-012:
+    abilities:
+      - evolve:
+          cost:
+            pp: 4
+        line: 1
+      - keywords:
+          - rush
+        line: 2
+      - attack_time:
+          do:
+            - choose:
+                bind: enemy
+                from:
+                  kind: follower
+                  who: opp
+                  zone: field
+                n: 1
+            - damage:
+                n: 2
+                to: enemy
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-sol
+            who: Codex
+          date: "2026-10-29"
+format: 2
+kind: author_effect_set
