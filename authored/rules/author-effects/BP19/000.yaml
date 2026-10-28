@@ -7,11 +7,16 @@ cards:
         line: 1
       - line: 2
         use: destroy_fanfare_opponent_all_field_followers.v1
+    admission: shared
     meta:
       written_by:
         - actor:
             model: gpt-6-luna
             who: Codex
           date: "2026-10-26"
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-29"
 format: 2
 kind: author_effect_set
