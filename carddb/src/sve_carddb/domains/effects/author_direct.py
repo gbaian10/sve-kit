@@ -25,7 +25,16 @@ if TYPE_CHECKING:
 _LOCATION = frozenset({"line", "face", "section", "scope", "covers", "admission"})
 _USE = frozenset({"use", "edition", "params", "registration"})
 _CARD_KEYS = frozenset(
-    {"admission", "meta", "abilities", "ignored", "note", "deck_rule", "container"}
+    {
+        "admission",
+        "meta",
+        "abilities",
+        "ignored",
+        "note",
+        "deck_rule",
+        "container",
+        "token",
+    }
 )
 _META_KEYS = frozenset(
     {"written_by", "reviewed_by", "status", "verified_by_exam", "rulings"}
@@ -330,6 +339,8 @@ def materialize(
     result["note"] = card.get("note", "Direct author admission")
     if "deck_rule" in card:
         result["deck_rule"] = card["deck_rule"]
+    if "token" in card:
+        result["token"] = card["token"]
     result["ignored"] = [{**source, "admission": "light"} for source in ignored]
     check_coverage(payload, result, ignored)
     return result
