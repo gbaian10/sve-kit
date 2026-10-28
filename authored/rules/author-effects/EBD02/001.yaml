@@ -1,0 +1,26 @@
+cards:
+  EBD02-004:
+    abilities:
+      - evolve:
+          cost:
+            pp: 2
+        line: 1
+      - fanfare:
+          do:
+            - search:
+                n: 1
+                sel:
+                  kind: spell
+                  who: self
+                  zone: deck
+                to: hand
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-sol
+            who: Codex
+          date: "2026-10-28"
+format: 2
+kind: author_effect_set
