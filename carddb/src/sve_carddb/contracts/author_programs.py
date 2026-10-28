@@ -717,7 +717,7 @@ type Position = Placement | PositionChoice | PositionChosen
 type MoveOrder = Literal["chooser", "shuffle"]
 
 
-_ChooseExactKeys = TypedDict("_ChooseExactKeys", {"from": ObjectSel})
+_ChooseExactKeys = TypedDict("_ChooseExactKeys", {"from": RecipientSel})
 
 
 @with_config(CONFIG)
@@ -746,7 +746,7 @@ class ChooseExactFields(_ChooseExactKeys):
 type ChooseExact = ChooseExactFields
 
 
-_ChooseUpToKeys = TypedDict("_ChooseUpToKeys", {"from": ObjectSel})
+_ChooseUpToKeys = TypedDict("_ChooseUpToKeys", {"from": RecipientSel})
 
 
 @with_config(CONFIG)
