@@ -1,9 +1,9 @@
 use super::super::{DecisionToken, DecisionView, InputDomain, Slot, Wait, contains};
 use super::{Execution, Game, Nat, ObjectRef, Result, invalid, player_id, unsupported};
 use crate::ir::{
-    Binding, CardKind, Cardinality, CharacteristicView, ChoiceDomain, Decision, Disjointness,
-    KindRead, NamesRead, ObjectOperand, ObjectProperty, ObjectView, PlayerRef, Predicate, ScopeId,
-    SelectionConstraint, Selector, TraitsRead,
+    Binding, CardKind, Cardinality, CharacteristicView, ChoiceDomain, Decision, DecisionKind,
+    Disjointness, KindRead, NamesRead, ObjectOperand, ObjectProperty, ObjectView, PlayerRef,
+    Predicate, ScopeId, SelectionConstraint, SelectionGroup, Selector, TraitsRead,
 };
 use crate::ir::{Bool, Expr, SelectionView, ZoneKind};
 use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
@@ -28,11 +28,13 @@ pub(in crate::game::internal) struct TargetWait {
     bounds: Cardinality,
     characteristics: Vec<(ObjectRef, TargetCharacteristics)>,
     distinct_names: bool,
+    on_field_at_capture: bool,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(in crate::game::internal) struct TargetCharacteristics {
     controller: String,
+    zone: String,
     kind: String,
     traits: Vec<String>,
     names: Vec<String>,
@@ -57,6 +59,7 @@ pub(in crate::game::internal) fn characteristics(
     Ok(TargetCharacteristics {
         names: game.card_names(id)?,
         controller: game.object(id)?.controller.clone(),
+        zone: game.object(id)?.zone.clone(),
         kind: game.object_type(id)?.into(),
         traits,
     })
@@ -80,7 +83,7 @@ impl TargetWait {
                 .iter()
                 .find(|(reference, _)| reference == member)
                 .ok_or_else(|| invalid("missing target selection producer"))?;
-            if current.zone != "field" || characteristics(game, id)? != saved.1 {
+            if characteristics(game, id)? != saved.1 {
                 return Err(unsupported("selected target characteristics changed"));
             }
         }
@@ -160,7 +163,7 @@ impl TargetWait {
     }
 }
 
-pub(super) fn check(constraint: &SelectionConstraint) -> Result<()> {
+fn target_group(constraint: &SelectionConstraint) -> Result<&SelectionGroup> {
     let [group] = constraint.groups.as_slice() else {
         return Err(unsupported("one selector group per target decision"));
     };
@@ -170,7 +173,11 @@ pub(super) fn check(constraint: &SelectionConstraint) -> Result<()> {
     {
         return Err(unsupported("target properties or aggregate constraints"));
     }
-    field_selector(&group.selector)
+    Ok(group)
+}
+
+pub(super) fn check(constraint: &SelectionConstraint) -> Result<()> {
+    field_selector(&target_group(constraint)?.selector)
 }
 
 pub(in crate::game::internal) fn check_resolution(decision: &Decision) -> Result<()> {
@@ -191,23 +198,32 @@ pub(in crate::game::internal) fn check_resolution(decision: &Decision) -> Result
         ..
     } = &decision.domain
     else {
-        return Err(unsupported("resolution field choice domain"));
+        return Err(unsupported("resolution public choice domain"));
     };
-    check(constraint)?;
-    let [group] = constraint.groups.as_slice() else {
-        return Err(unsupported("resolution field choice groups"));
-    };
+    let group = target_group(constraint)?;
+    match &group.selector {
+        Selector::Zone {
+            zone: ZoneKind::Ex,
+            view: SelectionView::Current {},
+            players,
+            binding,
+            predicate,
+        } if players.relative_to == (PlayerRef::Controller {}) => {
+            check_predicate(predicate, *binding)?;
+        }
+        selector => field_selector(selector)?,
+    }
     if decision.actor != (PlayerRef::Controller {})
         || constraint.cardinality.maximum.is_none()
         || !matches!(
             group.selector,
             Selector::Zone {
-                zone: ZoneKind::Field,
+                zone: ZoneKind::Field | ZoneKind::Ex,
                 ..
             }
         )
     {
-        return Err(unsupported("resolution field choice actor or selector"));
+        return Err(unsupported("resolution public choice actor or selector"));
     }
     Ok(())
 }
@@ -406,8 +422,9 @@ impl Game {
         let [group] = constraint.groups.as_slice() else {
             return Err(unsupported("target groups"));
         };
+        let allow_ex = matches!(decision.kind, DecisionKind::ResolutionChoice { .. });
         let mut members = Vec::new();
-        for member in execution.public_field_objects(self, &group.selector)? {
+        for member in execution.public_target_objects(self, &group.selector, allow_ex)? {
             if self.targetable_by(
                 execution.object_id(member)?,
                 super::seat_name(execution.context.controller)?,
@@ -435,12 +452,13 @@ impl Game {
                 let id = execution.object_id(*reference)?;
                 let object = self.object(id)?;
                 let kind = self.object_type(id)?;
-                if object.zone != "field"
+                if !(object.zone == "field" || (allow_ex && object.zone == "ex"))
                     || object.generation != reference.generation.0
-                    || !(kind.contains("フォロワー") || kind.contains("アミュレット"))
+                    || (object.zone == "field"
+                        && !(kind.contains("フォロワー") || kind.contains("アミュレット")))
                 {
                     return Err(unsupported(
-                        "target is not a current public field follower or amulet",
+                        "target is not a current public field object or EX card",
                     ));
                 }
                 if self.restricted(id, "choose")? {
@@ -463,6 +481,9 @@ impl Game {
                 ))
             })
             .collect::<Result<Vec<_>>>()?;
+        let on_field_at_capture = characteristics
+            .iter()
+            .all(|(_, saved)| saved.zone == "field");
         Ok((
             TargetWait {
                 decision: decision.clone(),
@@ -471,6 +492,7 @@ impl Game {
                 bounds,
                 characteristics,
                 distinct_names: constraint.distinct_by == Some(ObjectProperty::Names),
+                on_field_at_capture,
             },
             TargetDomain {
                 members: public,
@@ -595,17 +617,32 @@ impl Execution {
         game: &Game,
         selector: &Selector,
     ) -> Result<Vec<ObjectRef>> {
+        self.public_target_objects(game, selector, false)
+    }
+
+    fn public_target_objects(
+        &self,
+        game: &Game,
+        selector: &Selector,
+        allow_ex: bool,
+    ) -> Result<Vec<ObjectRef>> {
         let members = match selector {
             Selector::Zone {
                 players,
                 binding,
                 predicate,
+                zone,
                 ..
             } => {
+                let zone = match zone {
+                    ZoneKind::Field => "field",
+                    ZoneKind::Ex if allow_ex => "ex",
+                    _ => return Err(unsupported("public target zone")),
+                };
                 check_predicate(predicate, *binding)?;
                 let mut members = Vec::new();
                 for player in self.players(game, players)? {
-                    for id in game.zone_ids(super::super::seat_name(player)?, "field") {
+                    for id in game.zone_ids(super::super::seat_name(player)?, zone) {
                         if matches_candidate(game, &id, predicate)? {
                             members.push(self.reference(game, &id)?);
                         }
@@ -615,7 +652,7 @@ impl Execution {
             }
             Selector::Union { sets } => sets
                 .iter()
-                .map(|set| self.public_field_objects(game, set))
+                .map(|set| self.public_target_objects(game, set, allow_ex))
                 .collect::<Result<Vec<_>>>()?
                 .into_iter()
                 .flatten()
@@ -639,7 +676,7 @@ impl Execution {
             wait.binding.key(),
             Slot::Objects {
                 members,
-                on_field_at_capture: true,
+                on_field_at_capture: wait.on_field_at_capture,
             },
         );
     }

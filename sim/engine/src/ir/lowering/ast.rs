@@ -419,6 +419,7 @@ pub(super) enum Side {
 #[serde(rename_all = "snake_case")]
 pub(super) enum Zone {
     Field,
+    Ex,
 }
 
 #[derive(Deserialize)]

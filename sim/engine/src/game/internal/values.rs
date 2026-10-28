@@ -313,11 +313,14 @@ impl Execution {
 
     fn check_damage_capture(&self, selector: &Selector) -> Result<()> {
         match selector {
-            Selector::Captured { reference } => {
+            Selector::Captured {
+                reference: CaptureRef { binding: reference },
+            }
+            | Selector::Bound { reference } => {
                 if let Some(Slot::Objects {
                     on_field_at_capture: false,
                     ..
-                }) = self.slots.get(&reference.binding.key())
+                }) = self.slots.get(&reference.key())
                 {
                     return Err(unsupported("non-field damage capture"));
                 }
