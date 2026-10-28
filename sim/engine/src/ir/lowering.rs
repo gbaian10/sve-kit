@@ -409,6 +409,9 @@ impl Allocator {
         let triggered_play = play::trigger_play_spec(entry, body, keyword, trigger_choice, path)?;
         let optional =
             context.optional_payment(body, &source, &ability_source, &format!("{path}/{head}"))?;
+        if entry.lastword.is_some() {
+            context.leave_event = Some(Binding::new(context.allocator.id(path)?, scope));
+        }
         let mut program =
             context.body(body, &format!("{path}/{head}"), &source, &ability_source)?;
         if let Some(payment) = optional {
@@ -448,12 +451,7 @@ impl Allocator {
                 None,
             )
         } else {
-            let event_id = context.allocator.id(path)?;
-            let mut trigger = lowered_trigger(entry, keyword, event_id, scope, path)?;
-            if body.per_turn.is_some_and(|maximum| maximum != 1) {
-                return Err(unsupported(path));
-            }
-            trigger.limit = body.per_turn.map(|_| super::LimitSpec::once_per_turn());
+            let trigger = context.trigger(entry, keyword, body, path)?;
             (AbilityKind::Triggered, triggered_play, Some(trigger))
         };
         if let Some(play) = &mut play {
@@ -696,6 +694,7 @@ fn lowered_subscription(
 }
 
 struct BodyContext<'definitions> {
+    leave_event: Option<Binding<super::LeaveFieldEvent>>,
     scope: ScopeId,
     local_payment: Option<(String, ReceiptId)>,
     definition: AbilityId,
@@ -722,6 +721,7 @@ impl<'definitions> BodyContext<'definitions> {
         card_allocator: &'definitions mut Allocator,
     ) -> Self {
         Self {
+            leave_event: None,
             scope,
             definition: AbilityId(scope.0),
             payment_result: if entry.spell.is_some() {
@@ -746,6 +746,25 @@ impl<'definitions> BodyContext<'definitions> {
                 || body.head_cost.is_some(),
             local_payment: None,
         }
+    }
+
+    fn trigger(
+        &mut self,
+        entry: &ast::Ability,
+        keyword: Option<KeywordId>,
+        body: &ast::Body,
+        path: &str,
+    ) -> Result<TriggerSpec, LoweringError> {
+        let event_id = match self.leave_event {
+            Some(event) => event.key().1,
+            None => self.allocator.id(path)?,
+        };
+        let mut trigger = lowered_trigger(entry, keyword, event_id, self.scope, path)?;
+        if body.per_turn.is_some_and(|maximum| maximum != 1) {
+            return Err(unsupported(path));
+        }
+        trigger.limit = body.per_turn.map(|_| super::LimitSpec::once_per_turn());
+        Ok(trigger)
     }
 
     fn prepare_parameters(

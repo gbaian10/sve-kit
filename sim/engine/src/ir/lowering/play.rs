@@ -391,6 +391,7 @@ impl BodyContext<'_> {
                 .ok_or_else(|| unsupported(path))?;
             let scope = self.card_allocator.scope(path)?;
             let mut context = BodyContext {
+                leave_event: self.leave_event,
                 scope,
                 definition: self.definition,
                 payment_result: None,

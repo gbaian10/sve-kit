@@ -949,7 +949,7 @@ impl Game {
             }
         }
         let (moved, _) =
-            self.internal_move_members(execution, found, zone, kind, MoveMethod::Put)?;
+            self.internal_move_members(execution, found, zone, kind, MoveMethod::Put, false)?;
         if kind == ZoneKind::Hand {
             for movement in &moved {
                 let id = execution.object_id(movement.before)?;

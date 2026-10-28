@@ -702,6 +702,7 @@ impl Game {
             source_information: None,
             entry_object: None,
             damage_event: None,
+            leave_move: None,
             targets: BTreeMap::new(),
             play: None,
             spell: false,

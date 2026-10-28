@@ -1,6 +1,9 @@
 use super::*;
 use second::lowerer;
 
+#[path = "card/evolution_linked_movement.rs"]
+mod evolution_linked_movement;
+
 #[path = "card/trigger_targets.rs"]
 mod trigger_targets;
 

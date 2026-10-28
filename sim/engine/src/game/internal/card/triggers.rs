@@ -6,15 +6,15 @@ use crate::ir::optional_payment;
 use super::super::source::{SourceInformation, SourceSnapshot};
 use super::super::{Answer, DecisionToken, DecisionView, InputDomain, player_id};
 use super::{
-    Ability, AbilityKind, AbilityOrigin, CardPlay, Context, Game, Located, PlayerId, Result,
-    RuntimeAbilitySource, ZoneKind, invalid, printed_origin, unsupported,
+    Ability, AbilityKind, AbilityOrigin, CardPlay, Context, Execution, Game, Located, PlayerId,
+    Result, RuntimeAbilitySource, ZoneKind, invalid, printed_origin, unsupported,
 };
 use crate::game::{Frame, Object};
 use crate::ir::{
     BatchId, Cause, DecisionId, EventHeader, EventId, EventPattern, EventPayload,
-    EventSnapshotPolicy, ExecutionId, GameTime, KeywordId, LeaveFieldEvent, OriginFactId, Phase,
-    RuleId, RuntimeVisibility, RuntimeZoneRef, SnapshotId, Timestamp, TriggerAggregation,
-    TriggerCondition, TriggerSpec, TurnId,
+    EventSnapshotPolicy, ExecutionId, GameTime, KeywordId, LeaveFieldEvent, MoveResult,
+    OriginFactId, Phase, ReceiptId, RuleId, RuntimeReceiptId, RuntimeVisibility, RuntimeZoneRef,
+    SnapshotId, Timestamp, TriggerAggregation, TriggerCondition, TriggerSpec, TurnId,
 };
 use alloc::collections::BTreeMap;
 
@@ -48,6 +48,7 @@ pub(super) struct PendingOccurrence {
     information: SourceInformation,
     header: EventHeader,
     leave: Option<LeaveFieldEvent>,
+    movement: Option<MoveResult>,
     card: String,
     timing: Option<EventPayload>,
     field_position: u64,
@@ -176,6 +177,7 @@ impl Game {
             information,
             header,
             leave,
+            movement: None,
             card,
             timing: None,
             field_position: u64::try_from(
@@ -386,6 +388,23 @@ impl Game {
                 return Err(invalid("departure did not commit"));
             }
             pending.header.after = after;
+            if let Some(leave) = pending.leave {
+                let member = self.internal_current_reference(&previous.id)?;
+                // The physical commit owns its receipt independently of the causing effect.
+                pending.header.receipt = Some(RuntimeReceiptId {
+                    execution: ExecutionId(pending.header.id.0),
+                    slot: ReceiptId(0),
+                });
+                pending.movement = Some(MoveResult {
+                    before: leave.object_before,
+                    after: Some(member),
+                    requested_to: leave.to,
+                    requested_position: None,
+                    actual_to: Some(leave.to),
+                    actual_position: None,
+                    replacements: vec![],
+                });
+            }
             admitted.push(pending);
         }
         self.internal_admit_pending(admitted)
@@ -537,11 +556,12 @@ impl Game {
             }
             pending.information.snapshot(self, pending.source)?;
             let context = Context {
-                source: pending.holder,
+                source: pending.holder.clone(),
                 generation: pending.source.holder.generation,
                 controller: pending.source.controller,
             };
             let mut execution = self.new_card_execution(context)?;
+            pending.bind_leave_move(&mut execution)?;
             if let (Some(EventPayload::EnterField { event }), Some(trigger)) =
                 (&pending.timing, &pending.ability.node.trigger)
                 && let TriggerCondition::Event {
@@ -588,6 +608,28 @@ impl Game {
 }
 
 impl PendingOccurrence {
+    fn bind_leave_move(&self, execution: &mut Execution) -> Result<()> {
+        if let (Some(leave), Some(trigger)) = (self.leave, &self.ability.node.trigger)
+            && let TriggerCondition::Event {
+                pattern: EventPattern::LeaveField { binding, .. },
+            } = &trigger.on
+        {
+            let receipt = self
+                .header
+                .receipt
+                .ok_or_else(|| invalid("missing departure movement receipt"))?;
+            let movement = self
+                .movement
+                .clone()
+                .filter(|movement| {
+                    movement.before == leave.object_before && movement.actual_to == Some(leave.to)
+                })
+                .ok_or_else(|| invalid("departure receipt and event disagree"))?;
+            execution.leave_move = Some((binding.key(), receipt, movement));
+        }
+        Ok(())
+    }
+
     fn public_option(&self, handle: u64) -> Result<PendingOption> {
         Ok(PendingOption {
             handle,

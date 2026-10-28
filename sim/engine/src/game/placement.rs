@@ -73,7 +73,9 @@ impl Game {
         if !matches!(destination, "field" | "ex") {
             return Ok(object.owner.clone());
         }
-        let controller = if let Some(side) = side {
+        let controller = if frame.values.get("owner_destination") == Some(&json!(true)) {
+            object.owner.clone()
+        } else if let Some(side) = side {
             let seats = self.seats(side, frame);
             if seats.len() != 1 {
                 return Err(EngineFailure::Unsupported(
