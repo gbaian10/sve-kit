@@ -1,0 +1,41 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP19-069:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-29"
+    abilities:
+      - keywords:
+          - intimidate
+        line: 1
+      - attack_time:
+          do:
+            - choose:
+                bind: enemy
+                from:
+                  who: opp
+                  zone: field
+                  kind: follower
+                n: 1
+            - buff:
+                "on": enemy
+                power: -1
+                hp: -1
+        line: 2
+      - evolve_time:
+          do:
+            - choose:
+                bind: enemy
+                from:
+                  who: opp
+                  zone: field
+                  kind: follower
+                n: 1
+            - act:
+                ref: enemy
+        line: 3

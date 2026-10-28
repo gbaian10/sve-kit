@@ -1,0 +1,29 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP19-033:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-29"
+    abilities:
+      - keywords:
+          - storm
+        line: 1
+      - attack_time:
+          do:
+            - draw:
+                n: 1
+        line: 2
+      - evolve_time:
+          do:
+            - damage:
+                n: 1
+                to:
+                  who: opp
+                  zone: field
+                  kind: follower
+        line: 3
