@@ -1,0 +1,26 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP14-016:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-29"
+    abilities:
+      - keywords:
+          - assail
+        line: 1
+      - attack_time:
+          do:
+            - damage:
+                n: 3
+                to:
+                  leaders: opponents
+            - buff:
+                "on": this
+                power: 1
+                hp: 1
+        line: 2
