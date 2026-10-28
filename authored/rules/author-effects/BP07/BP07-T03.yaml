@@ -1,0 +1,35 @@
+cards:
+  BP07-T03:
+    abilities:
+      - auto:
+          do:
+            - draw:
+                n: 1
+                who: self
+            - discard:
+                n: 1
+                who: self
+          on:
+            left_field:
+              ref: this
+        line: 1
+      - activate:
+          cost:
+            pp: 1
+          do:
+            - move:
+                ref: this
+                to: cemetery
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-sol
+            who: Codex
+          date: "2026-10-28"
+    token:
+      name: ナテラの大樹
+      template: true
+format: 2
+kind: author_effect_set
