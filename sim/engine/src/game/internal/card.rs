@@ -158,6 +158,10 @@ impl CardRuntime {
     pub(in crate::game) fn is_loaded(&self, card: &str) -> bool {
         self.cards.contains_key(card)
     }
+
+    pub(super) fn has_definition(&self, card: &str) -> bool {
+        self.cards.contains_key(card) || self.current.contains_key(card)
+    }
 }
 
 pub(in crate::game) fn serialize_cards<S>(_: &CardRuntime, _: S) -> result::Result<S::Ok, S::Error>
@@ -786,6 +790,7 @@ fn check_nodes(
         )?;
         match &located.node {
             Node::Instruction { instruction } => {
+                super::tokens::check_catalog(game, &instruction.action)?;
                 if instruction.source != *ability_source {
                     return Err(invalid("instruction has a foreign ability source"));
                 }
@@ -811,6 +816,7 @@ fn check_nodes(
                         | Action::Modify { .. }
                         | Action::InstallEffect { .. }
                         | Action::Search { .. }
+                        | Action::Token { .. }
                         | Action::Order { .. }
                 ) {
                     return Err(unsupported("whole-card synchronous action"));

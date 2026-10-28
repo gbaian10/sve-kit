@@ -239,6 +239,7 @@ fn check_program(program: &Program, source: &SourceSpan, card: bool) -> Result<(
             }
             Node::Instruction { instruction } => {
                 super::search::check_action(&instruction.action)?;
+                super::tokens::check_action(&instruction.action)?;
                 super::movement::check_action(&instruction.action)?;
                 super::resource::check_action(&instruction.action)?;
                 super::discard::check_action(&instruction.action)?;
@@ -333,6 +334,9 @@ fn supported(code: &str) -> bool {
             | "player.require-one"
             | "internal.InstructionContext.Effect"
             | "shape.Action.Draw"
+            | "shape.Action.Token"
+            | "action.token"
+            | "shape.TokenDestination.Single"
             | "shape.Action.Resource"
             | "action.resource"
             | "internal.Resource.PpCurrent"

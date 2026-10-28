@@ -138,3 +138,51 @@ def test_unknown_section_requires_complete_explicit_reminder_coverage(
         else:
             with pytest.raises(SourceError, match="token_source_contract_unavailable"):
                 materialize(current, "SYN-01", handwritten)
+
+
+@pytest.mark.parametrize("kind", ["token_definition", "unknown"])
+def test_token_section_links_a_shared_card_without_creating_a_mother_ability(
+    tmp_path: Path, kind: str
+) -> None:
+    card: dict[str, JsonValue] = {
+        "admission": "light",
+        "meta": {
+            "written_by": [
+                {"actor": {"who": "test", "model": None}, "date": "2026-10-28"}
+            ]
+        },
+        "abilities": [{"line": 1, "fanfare": {"do": [{"draw": {"n": 1}}]}}],
+        "token_sources": [{"section": 1, "line": 1, "card": "TOKEN-01"}],
+    }
+    handwritten = Handwritten(
+        {"SYN-01": card}, {}, {"SYN-01": parse_document(canonical(card))}
+    )
+    with synthetic_current(
+        tmp_path, page("jp", '<div class="detail">Synthetic rule.</div>')
+    ) as current:
+        with current.db.transaction():
+            unit = TextInterner(current.db).intern(
+                LocalizedText(lang="ja", text="Synthetic token definition.")
+            )
+            current.db.insert(
+                "face_text_section",
+                {
+                    "revision_id": "revision",
+                    "ordinal": 0,
+                    "text_unit_id": unit,
+                    "kind": kind,
+                    "decision_id": None,
+                },
+            )
+        result = materialize(current, "SYN-01", handwritten)
+        faces = object_value(result["faces"])
+        assert (
+            sum(len(array(object_value(face)["abilities"])) for face in faces.values())
+            == 1
+        )
+        assert len(array(result["token_sources"])) == 1
+        array(card["abilities"]).append(
+            {"section": 1, "line": 1, "fanfare": {"do": [{"draw": {"n": 1}}]}}
+        )
+        with pytest.raises(SourceError, match="duplicate_source_ability"):
+            materialize(current, "SYN-01", handwritten)

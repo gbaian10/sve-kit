@@ -51,6 +51,7 @@ struct FieldLines {
     field: String,
     ordinal: Option<u64>,
     lines: Vec<u32>,
+    section_kind: Option<String>,
 }
 
 fn invalid(path: &str) -> LoweringError {
@@ -210,6 +211,23 @@ pub(super) fn lower(
         &card_path,
     )?;
     let ignored = card.ignored.clone();
+    let tokens = card.token_sources.clone();
+    let token_lines = input
+        .source_payload
+        .faces
+        .iter()
+        .flat_map(|face| {
+            face.fields
+                .iter()
+                .filter(|field| field.section_kind.as_deref() == Some("token_definition"))
+                .flat_map(|field| {
+                    field
+                        .lines
+                        .iter()
+                        .map(|line| (face.face_id.clone(), field.ordinal, *line))
+                })
+        })
+        .collect::<BTreeSet<_>>();
     let entries = ability_entries(card, &card_path)?;
     let coordinates = CardCoordinates {
         key: &input.card_no,
@@ -224,6 +242,13 @@ pub(super) fn lower(
             return Err(invalid(path));
         };
         coverage(source, &expected, &mut covered)?;
+        if source
+            .covers
+            .iter()
+            .any(|line| token_lines.contains(&(source.face_id.clone(), source.ordinal, *line)))
+        {
+            return Err(invalid(path));
+        }
         if !uses.insert((
             source.face_id.clone(),
             source.ordinal,
@@ -272,12 +297,42 @@ pub(super) fn lower(
             .faces
             .get(revision)
             .is_none_or(|(face, _)| face != &source.face_id)
+            || source.covers.iter().any(|line| {
+                covered.contains(&(source.face_id.clone(), source.ordinal, *line))
+                    || token_lines.contains(&(source.face_id.clone(), source.ordinal, *line))
+            })
+        {
+            return Err(invalid("/ignored"));
+        }
+        coverage(source, &expected, &mut covered)?;
+    }
+    for token in &tokens {
+        let source = &token.source;
+        let revision = source
+            .owner
+            .get("revision_id")
+            .and_then(Value::as_str)
+            .ok_or_else(|| invalid("/token_sources"))?;
+        let valid = input.source_payload.faces.iter().any(|face| {
+            face.face_id == source.face_id
+                && face.revision_id == revision
+                && face.fields.iter().any(|field| {
+                    field.ordinal == source.ordinal
+                        && matches!(
+                            field.section_kind.as_deref(),
+                            Some("unknown" | "token_definition")
+                        )
+                })
+        });
+        if !valid
+            || source.field != "section"
+            || source.owner.get("kind").and_then(Value::as_str) != Some("face_revision")
             || source
                 .covers
                 .iter()
                 .any(|line| covered.contains(&(source.face_id.clone(), source.ordinal, *line)))
         {
-            return Err(invalid("/ignored"));
+            return Err(invalid("/token_sources"));
         }
         coverage(source, &expected, &mut covered)?;
     }

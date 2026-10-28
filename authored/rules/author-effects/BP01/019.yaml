@@ -1,0 +1,24 @@
+cards:
+  BP01-010:
+    abilities:
+      - evolve_time:
+          do:
+            - create:
+                n: 2
+                result: created
+                to: ex
+                token: フェアリーウィスプ
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-sol
+            who: Codex
+          date: "2026-10-28"
+    token_sources:
+      - card: BP01-T02
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

@@ -15,6 +15,7 @@ mod play;
 mod quick;
 mod search;
 mod selection;
+mod tokens;
 
 use super::{
     Ability, AbilityId, AbilityKind, AbilityOrigin, AbilityQualification, AbilitySource, Action,
@@ -826,6 +827,7 @@ impl BodyContext<'_> {
             ast::Step::Apply(value) => self.continuous(value, source, path),
             ast::Step::Search(value) => self.search(value, path),
             ast::Step::Reveal(value) => self.reveal(value, path),
+            ast::Step::Create(value) => self.create(value, path),
             ast::Step::Look(value) => {
                 let ast::SelfPlayer::Controller = value.top.who;
                 Ok(Action::Look {
