@@ -1,0 +1,22 @@
+cards:
+  BP16-106:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - evolve_time:
+          do:
+            - damage:
+                n: 4
+                to:
+                  leaders: opponents
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-10-29"
+format: 2
+kind: author_effect_set
