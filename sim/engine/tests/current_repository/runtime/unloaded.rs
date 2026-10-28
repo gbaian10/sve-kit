@@ -238,7 +238,7 @@ fn loaded_spell_payment_stops_before_charging_for_unknown_off_field_abilities() 
 
 #[test]
 fn empty_current_selection_does_not_leak_hidden_card_diagnostics_to_players() {
-    let (snapshot, keywords, mut input) = inputs();
+    let (snapshot, keywords, mut input) = inputs().clone();
     input["authors"] = json!([]);
     let selected = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
     let mut initial = draw_position();

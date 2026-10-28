@@ -1,6 +1,5 @@
 use super::*;
 use alloc::collections::BTreeMap;
-use sve_engine::ir::lowering::ExpandedLowerer;
 
 fn tree() -> Value {
     let mut tree = fanfare::expanded::spell_tree().clone();
@@ -19,8 +18,7 @@ fn tree() -> Value {
 
 #[test]
 fn selection_captures_survive_stat_changes_and_departure_without_using_owner_or_opponent() {
-    let cards = ExpandedLowerer::new()
-        .unwrap()
+    let cards = lowerer()
         .lower_with_printed_costs(&tree(), &BTreeMap::from([("SD03-005".to_owned(), Nat(1))]))
         .unwrap();
     let (catalog, mut initial) =
@@ -61,7 +59,7 @@ fn selection_captures_survive_stat_changes_and_departure_without_using_owner_or_
 
 #[test]
 fn selection_captures_reject_unknown_groups_wrong_anchors_and_multiple_targets() {
-    let lowerer = ExpandedLowerer::new().unwrap();
+    let lowerer = lowerer();
     let costs = BTreeMap::from([("SD03-005".to_owned(), Nat(1))]);
     for (key, value) in [
         ("selection", json!("missing")),

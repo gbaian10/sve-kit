@@ -5,7 +5,6 @@ use alloc::collections::BTreeMap;
 use std::env::var_os;
 use std::fs::read_to_string;
 use sve_engine::EngineFailure;
-use sve_engine::ir::lowering::ExpandedLowerer;
 
 fn report_candidates(candidate: &Value, snapshot: &str) -> BTreeMap<String, Value> {
     let tree = &candidate["tree"];
@@ -24,7 +23,7 @@ fn report_candidates(candidate: &Value, snapshot: &str) -> BTreeMap<String, Valu
                 .map(|cost| (key.clone(), Nat(cost)))
         })
         .collect();
-    let lowerer = ExpandedLowerer::new().unwrap();
+    let lowerer = lowerer();
     tree["cards"]
         .as_object()
         .unwrap()

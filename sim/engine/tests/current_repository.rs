@@ -8,22 +8,16 @@
 )]
 
 use serde_json::{Value, json};
-use std::{env::var_os, fs::read_to_string, path::PathBuf};
+use std::sync::OnceLock;
 use sve_engine::game::Game;
-use sve_engine::{EngineFailure, catalog::Catalog, ir::lowering::ExpandedLowerer};
+use sve_engine::{EngineFailure, catalog::Catalog};
 
 const BP06_048_FACE: &str = "f:e9d8deca215953a99d12bd07acd566fa";
 
-fn inputs() -> (String, String, Value) {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
-    let snapshot = read_to_string(var_os("SVE_TEST_SNAPSHOT").unwrap()).unwrap();
-    let input: Value = serde_json::from_str(
-        &read_to_string(var_os("SVE_TEST_CURRENT_SELECTION").unwrap()).unwrap(),
-    )
-    .unwrap();
-    let keywords = read_to_string(root.join("authored/rules/keywords.yaml")).unwrap();
-    (snapshot, keywords, input)
-}
+#[path = "support/repository.rs"]
+mod repository;
+
+use repository::{inputs, lowerer, selection, selection_with_rules};
 
 fn p25(input: &Value) -> &Value {
     &input["authors"]
@@ -45,17 +39,13 @@ fn b4(input: &Value) -> &Value {
 
 #[test]
 fn repository_lastword_keeps_its_permanent_source_and_complete_damage_body() {
-    let (snapshot, keywords, input) = inputs();
-    let selected = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
+    let selected = selection().clone();
     let prototypes = serde_json::to_value(&*selected.prototypes).unwrap();
     assert!(prototypes["programs"].get("BP01-P25").is_none());
     let card = &selected.current["BP01-P25"];
     assert_eq!(card.card_id, "c:efb62b3ef53e576797625688d75164d9");
     assert_eq!(card.program.card().abilities.len(), 1);
-    let direct = ExpandedLowerer::new()
-        .unwrap()
-        .lower_current(p25(&input))
-        .unwrap();
+    let direct = lowerer().lower_current(p25(&inputs().2)).unwrap();
     assert_eq!(card.source_version, direct.source_version);
     assert_eq!(card.source_payload["token_links"], serde_json::json!([]));
     let ability = &card.expanded["cards"]["BP01-P25"]["abilities"][0];
@@ -77,8 +67,7 @@ mod runtime;
 
 #[test]
 fn repository_draw_cards_lower_as_complete_current_candidates() {
-    let (snapshot, keywords, input) = inputs();
-    let selected = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
+    let selected = selection().clone();
     let prototypes = serde_json::to_value(&selected.prototypes).unwrap();
     let cases = [
         (
@@ -124,8 +113,7 @@ fn repository_draw_cards_lower_as_complete_current_candidates() {
 
 #[test]
 fn repository_keyword_migrations_lower_as_complete_current_candidates() {
-    let (snapshot, keywords, input) = inputs();
-    let selected = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
+    let selected = selection().clone();
     let prototypes = serde_json::to_value(&selected.prototypes).unwrap();
     let cases = [("DSD01b-004", "c:31103e7d8c6b5a2d9e3838cac19b1c07", 2)];
 
@@ -146,8 +134,7 @@ fn repository_keyword_migrations_lower_as_complete_current_candidates() {
 
 #[test]
 fn repository_named_search_lowers_as_a_complete_current_candidate() {
-    let (snapshot, keywords, input) = inputs();
-    let selected = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
+    let selected = selection().clone();
     let prototypes = serde_json::to_value(&selected.prototypes).unwrap();
     let card_no = "BP06-048";
     let card_id = "c:e7b93196e1175515a42771a72c7b12da";
@@ -161,10 +148,7 @@ fn repository_named_search_lowers_as_a_complete_current_candidate() {
         card.expanded["cards"][card_no]["faces"][face_id]["abilities"][0]["lastword"]["do"][0]["search"],
         json!({"sel":{"who":"self","zone":"deck","name":"式神の使役"},"n":1_i32,"to":"hand"})
     );
-    let direct = ExpandedLowerer::new()
-        .unwrap()
-        .lower_current(b4(&input))
-        .unwrap();
+    let direct = lowerer().lower_current(b4(&inputs().2)).unwrap();
     assert_eq!(card.source_version, direct.source_version);
     let source = card
         .source_at(&format!(
@@ -182,10 +166,10 @@ fn repository_named_search_lowers_as_a_complete_current_candidate() {
 
 #[test]
 fn repository_named_search_rejects_wrong_owner_missing_source_and_incomplete_closure() {
-    let (snapshot, keywords, input) = inputs();
-    let lowerer = ExpandedLowerer::new().unwrap();
+    let input = &inputs().2;
+    let lowerer = lowerer();
 
-    let mut wrong_owner = b4(&input).clone();
+    let mut wrong_owner = b4(input).clone();
     wrong_owner["tree"]["cards"]["BP06-048"]["faces"][BP06_048_FACE]["abilities"][0]["lastword"]
         ["do"][0]["search"]["sel"]["who"] = json!("opponent");
     let owner_failure = lowerer.lower_current(&wrong_owner).err().unwrap();
@@ -195,13 +179,13 @@ fn repository_named_search_rejects_wrong_owner_missing_source_and_incomplete_clo
         format!("/cards/BP06-048/faces/{BP06_048_FACE}/abilities/0")
     );
 
-    let mut missing_source = b4(&input).clone();
+    let mut missing_source = b4(input).clone();
     missing_source["sidecar"] = json!([]);
     let source_failure = lowerer.lower_current(&missing_source).err().unwrap();
     assert_eq!(source_failure.code, "invalid_current_source");
     assert_eq!(source_failure.path, "/cards/BP06-048");
 
-    let mut incomplete = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
+    let mut incomplete = selection().clone();
     incomplete.current.remove("BP06-048");
     let error = Game::from_selected_effects(
         incomplete,
@@ -222,15 +206,15 @@ fn repository_named_search_rejects_wrong_owner_missing_source_and_incomplete_clo
 #[test]
 fn repository_lastword_rejects_missing_sources_and_unknown_or_unsupported_steps() {
     let (snapshot, keywords, input) = inputs();
-    let lowerer = ExpandedLowerer::new().unwrap();
-    let mut missing = p25(&input).clone();
+    let lowerer = lowerer();
+    let mut missing = p25(input).clone();
     missing["sidecar"] = json!([]);
-    let mut unknown = p25(&input).clone();
+    let mut unknown = p25(input).clone();
     unknown["tree"]["cards"]["BP01-P25"]["abilities"][0]["lastword"]["do"]
         .as_array_mut()
         .unwrap()
         .push(json!({"unknown_step":{}}));
-    let mut unsupported = p25(&input).clone();
+    let mut unsupported = p25(input).clone();
     unsupported["tree"]["cards"]["BP01-P25"]["abilities"][0]["lastword"]["do"]
         .as_array_mut()
         .unwrap()
@@ -260,7 +244,7 @@ fn repository_lastword_rejects_missing_sources_and_unknown_or_unsupported_steps(
             .find(|author| author["input"]["card_no"] == "BP01-P25")
             .unwrap();
         author["input"] = candidate;
-        let selection = Catalog::from_current_selection(&snapshot, &keywords, &rejected)
+        let selection = Catalog::from_current_selection(snapshot, keywords, &rejected)
             .err()
             .unwrap();
         assert!(matches!(&selection, EngineFailure::Invalid(reason)
@@ -287,17 +271,17 @@ fn repository_selection_rejects_mixed_formats_and_never_falls_back() {
             }
         }
     });
-    let mut mixed = input;
+    let mut mixed = input.clone();
     mixed["documents"].as_array_mut().unwrap().push(json!([
         "probe.yaml",
         serde_json::to_string(&prototype).unwrap()
     ]));
     let prototype_only = json!({"documents": mixed["documents"], "authors": []});
-    let available = Catalog::from_current_selection(&snapshot, &keywords, &prototype_only).unwrap();
+    let available = Catalog::from_current_selection(snapshot, keywords, &prototype_only).unwrap();
     let programs = serde_json::to_value(&available.prototypes).unwrap();
     assert!(programs["programs"].get("BP01-P25").is_some());
 
-    let overlap = Catalog::from_current_selection(&snapshot, &keywords, &mixed)
+    let overlap = Catalog::from_current_selection(snapshot, keywords, &mixed)
         .err()
         .unwrap();
     assert!(matches!(&overlap, EngineFailure::Invalid(reason)
@@ -311,7 +295,7 @@ fn repository_selection_rejects_mixed_formats_and_never_falls_back() {
         .find(|author| author["input"]["card_no"] == "BP01-P25")
         .unwrap();
     invalid_author["input"]["sidecar"] = json!([]);
-    let failure = Catalog::from_current_selection(&snapshot, &keywords, &invalid)
+    let failure = Catalog::from_current_selection(snapshot, keywords, &invalid)
         .err()
         .unwrap();
     assert!(matches!(&failure, EngineFailure::Invalid(reason)
@@ -328,7 +312,7 @@ fn repository_selection_rejects_mixed_formats_and_never_falls_back() {
         "card_no": "BP01-P25",
         "reason": "source_pending"
     });
-    let rejection = Catalog::from_current_selection(&snapshot, &keywords, &mixed)
+    let rejection = Catalog::from_current_selection(snapshot, keywords, &mixed)
         .err()
         .unwrap();
     assert!(matches!(&rejection, EngineFailure::Unsupported(reason)
@@ -343,7 +327,7 @@ mod advance;
 
 #[test]
 fn repository_selection_rejects_stale_anchors_without_prototype_fallback() {
-    let (snapshot, keywords, mut input) = inputs();
+    let (snapshot, keywords, mut input) = inputs().clone();
     let author = input["authors"]
         .as_array_mut()
         .unwrap()

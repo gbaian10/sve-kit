@@ -18,6 +18,11 @@ use std::{
     sync::OnceLock,
 };
 
+fn lowerer() -> &'static ExpandedLowerer {
+    static LOWERER: OnceLock<ExpandedLowerer> = OnceLock::new();
+    LOWERER.get_or_init(|| ExpandedLowerer::new().unwrap())
+}
+
 const CURRENT_FACE: &str = "f:8708790ca2995a0f9f9e5ffd1af52668";
 
 fn current_inputs() -> &'static Value {
@@ -149,7 +154,7 @@ fn assert_current_sources(admitted: &CurrentCardProgram, input: &Value, face: &s
 #[test]
 fn current_reader_hands_permanent_owner_and_token_selection_to_lowering() {
     let input = &current_inputs()["accepted"];
-    let lowerer = ExpandedLowerer::new().unwrap();
+    let lowerer = lowerer();
     let admitted = lowerer.lower_current(input).unwrap();
     let face = "f:8708790ca2995a0f9f9e5ffd1af52668";
     let revision = "rev:v1:c9b82c4e4e8df5c8ab2b4975c3058c7e0ffdd179e76429d4e47f4c557cac7304";
@@ -199,7 +204,7 @@ fn current_reader_hands_permanent_owner_and_token_selection_to_lowering() {
 fn provisional_current_printing_and_unresolved_handoffs_cannot_lower() {
     let inputs = current_inputs();
     assert_eq!(inputs["rejected"]["reason"], "provisional_record_key");
-    let lowerer = ExpandedLowerer::new().unwrap();
+    let lowerer = lowerer();
     assert_eq!(
         lowerer.lower_current(&inputs["rejected"]).unwrap_err().code,
         "invalid_current_identity"
@@ -329,10 +334,7 @@ fn synthetic_current_closure() -> Value {
 #[test]
 fn complete_current_inventory_covers_faces_sections_siblings_and_all_modes() {
     let input = synthetic_current_closure();
-    let admitted = ExpandedLowerer::new()
-        .unwrap()
-        .lower_current(&input)
-        .unwrap();
+    let admitted = lowerer().lower_current(&input).unwrap();
     assert_eq!(admitted.program.card().abilities.len(), 3);
     assert_eq!(admitted.source_sidecar.len(), 3);
     assert_eq!(admitted.non_body_sources, Vec::<NonBodySource>::new());
@@ -362,7 +364,7 @@ fn complete_current_inventory_covers_faces_sections_siblings_and_all_modes() {
 #[test]
 fn current_inventory_rejects_joint_omissions_extras_and_changed_mode_bodies() {
     let input = synthetic_current_closure();
-    let lowerer = ExpandedLowerer::new().unwrap();
+    let lowerer = lowerer();
     let face_path = format!("/tree/cards/BP01-009/faces/f:{}/abilities", "e".repeat(32));
     let mut missing = input.clone();
     missing
@@ -423,7 +425,7 @@ fn keyword_sources_are_scope_free_and_keep_their_own_coordinate() {
     let expanded = validator("expanded").unwrap();
     assert!(authored.is_valid(&tree));
     assert!(expanded.is_valid(&tree));
-    let lowerer = ExpandedLowerer::new().unwrap();
+    let lowerer = lowerer();
     let programs = lowerer.lower(&tree).unwrap();
     let source = &programs["synthetic"].card().abilities[0].source;
     assert_eq!(
@@ -500,7 +502,7 @@ fn a_keyword_cannot_borrow_a_current_body_obligation() {
         .unwrap()
         .remove("ability_scope");
     ability["keywords"] = json!(["quick"]);
-    let lowerer = ExpandedLowerer::new().unwrap();
+    let lowerer = lowerer();
     for failure in [
         lowerer.check_current(&input).unwrap_err(),
         lowerer.lower_current(&input).unwrap_err(),
@@ -511,10 +513,7 @@ fn a_keyword_cannot_borrow_a_current_body_obligation() {
 
 #[test]
 fn bp08_candidate_matches_the_handwritten_card_program() {
-    let cards = ExpandedLowerer::new()
-        .unwrap()
-        .lower(expanded::tree())
-        .unwrap();
+    let cards = lowerer().lower(expanded::tree()).unwrap();
     let mut actual = cards["BP08-038"].card().clone();
     let expected = bp08().node;
     let [ability] = actual.abilities.as_mut_slice() else {
@@ -559,14 +558,14 @@ fn unsupported_step_rejects_the_entire_candidate() {
         .as_array_mut()
         .unwrap()
         .push(json!({"dice":{"bind":"roll"}}));
-    let failure = ExpandedLowerer::new().unwrap().lower(&tree).unwrap_err();
+    let failure = lowerer().lower(&tree).unwrap_err();
     assert_eq!(failure.code, "unsupported_construct");
     assert_eq!(failure.path, "/cards/BP08-038/abilities/0");
 }
 
 #[test]
 fn leader_life_lowering_accepts_signed_delta_and_set_but_rejects_unhandled_metadata() {
-    let lowerer = ExpandedLowerer::new().unwrap();
+    let lowerer = lowerer();
     let mut tree = expanded::tree().clone();
     tree["cards"]["BP08-038"]["abilities"][0]["fanfare"]["do"] = json!([
         {"life":{"who":"self","delta":-3_i64}},
@@ -590,7 +589,7 @@ fn leader_life_lowering_accepts_signed_delta_and_set_but_rejects_unhandled_metad
 
 #[test]
 fn basic_object_actions_lower_only_known_references_and_handled_metadata() {
-    let lowerer = ExpandedLowerer::new().unwrap();
+    let lowerer = lowerer();
     let mut tree = expanded::tree().clone();
     for action in ["banish", "act", "stand"] {
         tree["cards"]["BP08-038"]["abilities"][0]["fanfare"]["do"] = json!([{(action):"this"}]);
@@ -607,10 +606,7 @@ fn basic_object_actions_lower_only_known_references_and_handled_metadata() {
 
 #[test]
 fn bp01_118_is_one_uniform_instruction_for_all_leaders() {
-    let cards = ExpandedLowerer::new()
-        .unwrap()
-        .lower(expanded::tree())
-        .unwrap();
+    let cards = lowerer().lower(expanded::tree()).unwrap();
     let [ability] = cards["BP01-118"].card().abilities.as_slice() else {
         panic!("one fanfare");
     };
@@ -655,7 +651,7 @@ fn bp01_037_fanfare_buffs_own_field_followers_except_its_source() {
         "power":1_i64,"hp":1_i64
     }}]});
     tree["cards"] = json!({"BP01-037":card});
-    let lowerer = ExpandedLowerer::new().unwrap();
+    let lowerer = lowerer();
     let cards = lowerer.lower(&tree).unwrap();
     let ability = &cards["BP01-037"].card().abilities[0].node;
     assert!(matches!(
@@ -753,7 +749,7 @@ fn numeric_duration_and_continuous_preserve_distinct_semantics() {
         .as_array_mut()
         .unwrap()
         .push(second);
-    let cards = ExpandedLowerer::new().unwrap().lower(&tree).unwrap();
+    let cards = lowerer().lower(&tree).unwrap();
     let body = cards["BP08-038"].card().abilities[0]
         .node
         .body
@@ -791,11 +787,7 @@ fn numeric_duration_and_continuous_preserve_distinct_semantics() {
     );
     tree["cards"]["BP08-038"]["abilities"][0]["fanfare"]["do"][0]["set_stat"]["hp"] = json!("X");
     assert_eq!(
-        ExpandedLowerer::new()
-            .unwrap()
-            .lower(&tree)
-            .unwrap_err()
-            .code,
+        lowerer().lower(&tree).unwrap_err().code,
         "unsupported_construct"
     );
 }
@@ -814,7 +806,7 @@ fn search_groups_partition_and_successful_ex_discount_are_scoped() {
         {"move":{"ref":{"in":"seen"},"to":"ex","result":"moved"}},
         {"move":{"ref":{"in":"seen","except":{"in":{"objects_of":"moved","view":"before"}}},"to":"deck","position":"bottom","order":"chooser"}}
     ]);
-    let lowerer = ExpandedLowerer::new().unwrap();
+    let lowerer = lowerer();
     let cards = lowerer.lower(&tree).unwrap();
     let body = cards["BP03-002"].card().abilities[0]
         .node
@@ -879,7 +871,7 @@ fn activated_payment_order_and_trigger_limit_remain_separate() {
         .as_array_mut()
         .unwrap()
         .push(json!({"self_to_cemetery":true}));
-    let lowerer = ExpandedLowerer::new().unwrap();
+    let lowerer = lowerer();
     let cards = lowerer.lower(&tree).unwrap();
     let ability = &cards["BP01-041"].card().abilities[0].node;
     assert_eq!(ability.kind, AbilityKind::Activated);
@@ -935,7 +927,7 @@ fn activated_payment_order_and_trigger_limit_remain_separate() {
 
 #[test]
 fn printed_spell_cost_targets_distribution_and_choice_preserve_play_scopes() {
-    let lowerer = ExpandedLowerer::new().unwrap();
+    let lowerer = lowerer();
     let mut tree = expanded::spell_tree().clone();
     let costs = BTreeMap::from([("SD03-005".to_owned(), Nat(1))]);
     assert_eq!(
@@ -1009,7 +1001,7 @@ fn printed_spell_cost_targets_distribution_and_choice_preserve_play_scopes() {
             .code,
         "unsupported_construct"
     );
-    assert_choice_extensions(&lowerer, tree, &costs, body);
+    assert_choice_extensions(lowerer, tree, &costs, body);
 }
 
 fn assert_choice_extensions(
@@ -1171,7 +1163,7 @@ fn own_play_costs_preserve_explicit_intervals_and_reject_payment_shapes() {
         {"if":{"all":[threshold("ge",5),threshold("lt",10)]},"delta":-3},-1,-1],"cost_set":7});
     let meta = tree["cards"]["BP08-038"]["meta"].clone();
     tree["cards"] = json!({"synthetic":{"meta":meta,"abilities":[entry]}});
-    let lowerer = ExpandedLowerer::new().unwrap();
+    let lowerer = lowerer();
     let cards = lowerer.lower(&tree).unwrap();
     let card = cards["synthetic"].card();
     assert_eq!(card.abilities, []);
@@ -1225,7 +1217,7 @@ fn assert_target_characteristics(filtered: &WellFormedCardProgram) {
 
 #[test]
 fn leader_targets_and_leader_follower_targets_keep_recipient_bindings() {
-    let lowerer = ExpandedLowerer::new().unwrap();
+    let lowerer = lowerer();
     let costs = BTreeMap::from([("SD03-005".to_owned(), Nat(1))]);
     for from in [
         json!({"leader":"opp"}),
@@ -1263,7 +1255,7 @@ fn leader_targets_and_leader_follower_targets_keep_recipient_bindings() {
 
 #[test]
 fn activated_zones_preserve_ex_and_reject_unimplemented_combinations() {
-    let lowerer = ExpandedLowerer::new().unwrap();
+    let lowerer = lowerer();
     for zone in [json!("field"), json!(["field"]), json!("ex"), json!(["ex"])] {
         let mut tree = expanded::tree().clone();
         tree["cards"]["BP01-041"]["abilities"][0]["activate"]["zone"] = zone.clone();
@@ -1302,15 +1294,14 @@ fn repeated_named_existence_queries_keep_independent_candidate_scopes() {
             {"if":{"cond":condition,"then":[{"draw":{"who":"self","n":1_u8}}]}}
         ]
     });
-    ExpandedLowerer::new()
-        .unwrap()
+    lowerer()
         .lower_with_printed_costs(&tree, &BTreeMap::from([("SD03-005".to_owned(), Nat(1))]))
         .unwrap();
 }
 
 #[test]
 fn resolution_leader_choices_keep_recipient_bindings() {
-    let lowerer = ExpandedLowerer::new().unwrap();
+    let lowerer = lowerer();
     for from in [
         json!({"leader":"opp"}),
         json!({"who":"opp","kind":"follower","leader_or":true}),

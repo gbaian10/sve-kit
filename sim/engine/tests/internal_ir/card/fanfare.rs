@@ -3,7 +3,6 @@ use alloc::collections::BTreeMap;
 use std::env::var_os;
 use std::fs::read_to_string;
 use sve_engine::game::internal::{InputDomain, SearchAnswer};
-use sve_engine::ir::lowering::ExpandedLowerer;
 
 #[path = "../../support/expanded.rs"]
 pub(super) mod expanded;
@@ -73,10 +72,7 @@ pub(super) fn fragment_setup(
 
 #[test]
 fn bp03_002_lowered_search_runs_through_whole_card_pending() {
-    let cards = ExpandedLowerer::new()
-        .unwrap()
-        .lower(expanded::tree())
-        .unwrap();
+    let cards = lowerer().lower(expanded::tree()).unwrap();
     let mut game = fragment_position(1, "BP03-002", 5, json!([{"id":"d0","card":"BP03-009"}]));
     game.load_internal_card("BP03-002", &cards["BP03-002"])
         .unwrap();
@@ -138,7 +134,7 @@ fn whole_card_observed_order_preserves_keyword_and_pending_authority() {
         {"move":{"ref":{"in":"take"},"to":"ex","result":"moved"}},
         {"move":{"ref":{"in":"seen","except":{"in":{"objects_of":"moved","view":"before"}}},"to":"deck","position":"bottom","order":"chooser"}}
     ]);
-    let cards = ExpandedLowerer::new().unwrap().lower(&tree).unwrap();
+    let cards = lowerer().lower(&tree).unwrap();
     let program = &cards["BP03-002"];
     let mut game = fragment_position(
         1,
@@ -199,10 +195,7 @@ fn whole_card_observed_order_preserves_keyword_and_pending_authority() {
 
 #[test]
 fn bp11_099_author_activation_pays_before_modifying_the_holder() {
-    let cards = ExpandedLowerer::new()
-        .unwrap()
-        .lower(expanded::tree())
-        .unwrap();
+    let cards = lowerer().lower(expanded::tree()).unwrap();
     let program = &cards["BP11-099"];
     let mut game = position_for_card(1, program, "BP11-099", 8);
     game.play_internal_card("s", PlayerId { seat: 1 }).unwrap();
@@ -233,10 +226,7 @@ fn bp11_099_author_activation_pays_before_modifying_the_holder() {
 
 #[test]
 fn bp01_118_author_yaml_reaches_authority_fanfare_once_after_entry() {
-    let cards = ExpandedLowerer::new()
-        .unwrap()
-        .lower(expanded::tree())
-        .unwrap();
+    let cards = lowerer().lower(expanded::tree()).unwrap();
     let program = &cards["BP01-118"];
     for seat in [1, 2] {
         let actor = if seat == 1 { "P1" } else { "P2" };
@@ -289,10 +279,7 @@ fn bp01_118_author_yaml_reaches_authority_fanfare_once_after_entry() {
 
 #[test]
 fn failed_fanfare_keeps_paid_card_and_pending_producer_without_partial_damage() {
-    let cards = ExpandedLowerer::new()
-        .unwrap()
-        .lower(expanded::tree())
-        .unwrap();
+    let cards = lowerer().lower(expanded::tree()).unwrap();
     let mut program = cards["BP01-118"].card().clone();
     let ability = &mut program.abilities[0];
     let Node::Instruction { instruction } = &mut ability.node.body.as_mut().unwrap().steps[0].node
@@ -328,10 +315,7 @@ fn failed_fanfare_keeps_paid_card_and_pending_producer_without_partial_damage() 
 
 #[test]
 fn bp08_067_author_fragment_destroys_itself_at_own_end_phase() {
-    let cards = ExpandedLowerer::new()
-        .unwrap()
-        .lower(expanded::tree())
-        .unwrap();
+    let cards = lowerer().lower(expanded::tree()).unwrap();
     let mut game = position_for_card(1, &cards["BP08-067"], "BP08-067", 10);
     game.play_internal_card("s", PlayerId { seat: 1 }).unwrap();
     game.resume_internal_card().unwrap();
@@ -354,8 +338,7 @@ fn bp08_067_author_fragment_destroys_itself_at_own_end_phase() {
 #[test]
 fn sd03_005_author_spell_pays_printed_cost_then_draws_and_resolves() {
     let costs = BTreeMap::from([("SD03-005".to_owned(), Nat(1))]);
-    let cards = ExpandedLowerer::new()
-        .unwrap()
+    let cards = lowerer()
         .lower_with_printed_costs(expanded::spell_tree(), &costs)
         .unwrap();
     let mut game = fragment_position(1, "SD03-005", 1, json!([{"id":"d0","card":"BP03-009"}]));
@@ -379,10 +362,7 @@ fn lowered_choice_only_requires_the_selected_modes_targets() {
         "do":[{"choice":{"n":1,"options":[[{"damage":{"to":"t","n":2}}],[{"draw":{"n":1}}]]}}]
     });
     let costs = BTreeMap::from([("SD03-005".to_owned(), Nat(1))]);
-    let cards = ExpandedLowerer::new()
-        .unwrap()
-        .lower_with_printed_costs(&tree, &costs)
-        .unwrap();
+    let cards = lowerer().lower_with_printed_costs(&tree, &costs).unwrap();
     let mut game = fragment_position(1, "SD03-005", 1, json!([{"id":"d0","card":"BP03-009"}]));
     game.load_internal_card("SD03-005", &cards["SD03-005"])
         .unwrap();

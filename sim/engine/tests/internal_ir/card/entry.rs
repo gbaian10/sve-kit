@@ -1,6 +1,5 @@
 use super::*;
 use sve_engine::game::internal::{Answer, InputDomain};
-use sve_engine::ir::lowering::ExpandedLowerer;
 
 pub(super) fn own_zone(kind: ZoneKind, scope: u64) -> Selector {
     let mut selector = zone(kind, scope);
@@ -34,10 +33,7 @@ pub(super) fn enter(id: u64, objects: Selector) -> Located<Node> {
     )
 }
 fn seed() -> Located<Ability> {
-    let lowered = ExpandedLowerer::new()
-        .unwrap()
-        .lower(fanfare::expanded::tree())
-        .unwrap();
+    let lowered = lowerer().lower(fanfare::expanded::tree()).unwrap();
     let original = &lowered["BP20-028"].card().abilities[0].node;
     let mut seed = ability(1, original.body.as_ref().unwrap().steps.clone());
     seed.node.kind = AbilityKind::Triggered;

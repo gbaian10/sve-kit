@@ -1,5 +1,4 @@
 use super::*;
-use sve_engine::catalog::EngineIdentityInput;
 use sve_engine::game::Step;
 use sve_engine::ir::{
     AbilityOrigin, Action, CostSpec, Expr, Int, KeywordId, Resource, ResourceOperation,
@@ -98,25 +97,12 @@ fn bp17_t12_blank_steelclad_knight_fights_as_its_printed_vanilla_body() {
 }
 
 fn game_with_engine_rules(initial: &Value) -> Game {
-    let (snapshot, keywords, input) = inputs();
-    let rules = read_to_string(
-        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../authored/rules/engine/index.yaml"),
-    )
-    .unwrap();
-    let selected = Catalog::from_current_selection_with_rules(
-        &snapshot,
-        &keywords,
-        &input,
-        &rules,
-        &EngineIdentityInput::LegacyJp,
-    )
-    .unwrap();
+    let selected = selection_with_rules().clone();
     Game::from_selected_effects(selected, initial, &Value::Null, &Value::Null, "c2-05").unwrap()
 }
 
 fn assert_evolve_pp_cost(card: &str) {
-    let (snapshot, keywords, input) = inputs();
-    let selected = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
+    let selected = selection().clone();
     let abilities = &selected.current[card].program.card().abilities;
     assert!(
         abilities.iter().any(|ability| {
@@ -170,8 +156,7 @@ fn cp03_015_storm_can_attack_the_opponent_leader_on_the_turn_it_enters() {
 
 #[test]
 fn csd01_t01_remains_selected_without_a_card_ability() {
-    let (snapshot, keywords, input) = inputs();
-    let selected = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
+    let selected = selection().clone();
     assert!(
         selected.current.contains_key("CSD01-T01"),
         "the EP card remains in the current selection"
@@ -185,8 +170,7 @@ fn csd01_t01_remains_selected_without_a_card_ability() {
 
 #[test]
 fn dsd01b_005_keeps_aura_and_storm_and_can_attack_the_opponent_leader() {
-    let (snapshot, keywords, input) = inputs();
-    let selected = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
+    let selected = selection().clone();
     assert_eq!(
         selected.current["DSD01b-005"]
             .program

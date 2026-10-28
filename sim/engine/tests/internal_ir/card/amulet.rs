@@ -1,13 +1,9 @@
 use super::*;
 use sve_engine::game::internal::InputDomain;
-use sve_engine::ir::lowering::ExpandedLowerer;
 
 #[test]
 fn bp01_041_candidate_amulet_pays_pp_and_act_after_card_entry() {
-    let cards = ExpandedLowerer::new()
-        .unwrap()
-        .lower(fanfare::expanded::tree())
-        .unwrap();
+    let cards = lowerer().lower(fanfare::expanded::tree()).unwrap();
     let program = &cards["BP01-041"];
     let mut game =
         fanfare::fragment_position(1, "BP01-041", 9, json!([{"id":"d0","card":"BP03-009"}]));
@@ -60,7 +56,7 @@ fn bp20_100_fragments_select_before_act_sacrifice_and_damage() {
     });
     tree["cards"]["BP20-100"] = template;
     tree["cards"]["BP20-100"]["abilities"] = json!([entry, activation]);
-    let lowerer = ExpandedLowerer::new().unwrap();
+    let lowerer = lowerer();
     let cards = lowerer.lower(&tree).unwrap();
     let program = &cards["BP20-100"];
     let (catalog, mut initial) =

@@ -1,8 +1,8 @@
-use super::{CURRENT_FACE, current_inputs};
+use super::{CURRENT_FACE, current_inputs, lowerer};
 use crate::EngineFailure;
 use crate::catalog::Catalog;
 use crate::game::Game;
-use crate::ir::lowering::{ExpandedLowerer, PrintedKeyword};
+use crate::ir::lowering::PrintedKeyword;
 use crate::ir::{
     AbilityOrigin, Binding, CardProgram, Effect, KeywordId, ObjectOperand, PlayerRef, Polarity,
     WellFormedCardProgram, ZoneKind,
@@ -23,7 +23,7 @@ fn input() -> Value {
 #[test]
 fn real_current_keyword_selection_checks_complete_declarations_before_lowering() {
     let input = input();
-    let lowerer = ExpandedLowerer::new().unwrap();
+    let lowerer = lowerer();
     let checked = lowerer.check_current(&input).unwrap();
     assert!(checked.source_sidecar.is_empty());
     assert_eq!(checked.declaration_sidecar.len(), 1);
@@ -99,10 +99,7 @@ fn declaration_containers_and_each_list_element_keep_the_checked_source() {
         .unwrap();
     input["tree"]["cards"]["BP01-138"]["abilities"] = abilities[&face]["abilities"].clone();
     input["declaration_sidecar"][0]["path"] = json!(["cards", "BP01-138", "abilities", 0_u64]);
-    let checked = ExpandedLowerer::new()
-        .unwrap()
-        .check_current(&input)
-        .unwrap();
+    let checked = lowerer().check_current(&input).unwrap();
     let path = "/cards/BP01-138/abilities/0";
     let evidence = &checked.declaration_sidecar[path];
     assert_eq!(evidence.source.face, face);
@@ -122,7 +119,7 @@ fn declaration_containers_and_each_list_element_keep_the_checked_source() {
 }
 
 fn assert_rejected(candidates: Vec<Value>) {
-    let lowerer = ExpandedLowerer::new().unwrap();
+    let lowerer = lowerer();
     for candidate in candidates {
         lowerer.check_current(&candidate).unwrap_err();
         lowerer.lower_current(&candidate).unwrap_err();
@@ -321,7 +318,7 @@ fn metadata_is_inert_and_must_use_the_closed_metadata_variant() {
     let source = body["sidecar"][0]["source_use"].clone();
     let metadata = json!({"kind":"metadata", "binding_id":source["binding_id"], "occurrence":source["occurrence"], "semantic_key":"metadata.layout.v1"});
     body["source_inventory"]["non_body"] = json!([metadata]);
-    let lowerer = ExpandedLowerer::new().unwrap();
+    let lowerer = lowerer();
     let checked = lowerer.check_current(&body).unwrap();
     assert!(checked.declaration_sidecar.is_empty());
     lowerer.lower_current(&body).unwrap();
@@ -376,7 +373,7 @@ fn synthetic_two_faces() -> Value {
 #[test]
 fn same_keywords_on_two_faces_consume_separate_obligations() {
     let input = synthetic_two_faces();
-    let lowerer = ExpandedLowerer::new().unwrap();
+    let lowerer = lowerer();
     let checked = lowerer.check_current(&input).unwrap();
     let faces: BTreeSet<_> = checked
         .declaration_sidecar
@@ -444,7 +441,7 @@ fn admission(selection: &Value) -> crate::Result<Game> {
 
 #[test]
 fn real_advance_printings_lower_both_keywords_and_the_complete_fanfare() {
-    let lowerer = ExpandedLowerer::new().unwrap();
+    let lowerer = lowerer();
     for number in ["BP19-P32", "BP19-114"] {
         let selection = &current_inputs()["keyword_fanfare"][number];
         let input = &selection["authors"][0]["input"];
@@ -501,7 +498,7 @@ fn real_advance_printings_lower_both_keywords_and_the_complete_fanfare() {
 #[test]
 fn runtime_rejects_changed_permission_headers_expansions_and_source_chains() {
     let input = input();
-    let lowerer = ExpandedLowerer::new().unwrap();
+    let lowerer = lowerer();
     let card = lowerer.lower_current(&input).unwrap();
     let original = raw_keyword_coordinates(card.program.card());
     let baseline = WellFormedCardProgram::check(original.clone()).unwrap();
@@ -638,7 +635,7 @@ fn body_and_declaration_obligations_are_consumed_independently() {
         .push(entry);
     input["sidecar"] = json!([evidence]);
     input["source_inventory"]["abilities"] = json!([obligation]);
-    let lowerer = ExpandedLowerer::new().unwrap();
+    let lowerer = lowerer();
     let checked = lowerer.check_current(&input).unwrap();
     assert_eq!(checked.source_sidecar.len(), 1);
     assert_eq!(checked.declaration_sidecar.len(), 1);

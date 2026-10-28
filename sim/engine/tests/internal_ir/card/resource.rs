@@ -1,6 +1,5 @@
 use super::*;
 use sve_engine::game::internal::ResourceOutcome;
-use sve_engine::ir::lowering::ExpandedLowerer;
 
 fn recovery(
     id: u64,
@@ -153,7 +152,7 @@ fn pp_author_lowering_rejects_dynamic_negative_zero_and_to_max() {
         for kind in ["pp", "pp_max", "ep"] {
             let mut tree = fanfare::expanded::tree().clone();
             tree["cards"]["BP08-038"]["abilities"][0]["fanfare"]["do"] = json!([{kind:pp}]);
-            ExpandedLowerer::new().unwrap().lower(&tree).unwrap_err();
+            lowerer().lower(&tree).unwrap_err();
         }
     }
 }

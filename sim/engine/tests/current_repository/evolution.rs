@@ -1,11 +1,10 @@
-use super::runtime::{game_from_selection, setup};
+use super::runtime::setup;
 use super::*;
 use sve_engine::game::{Game, Step, View};
 use sve_engine::ir::{AbilityId, PlayerId};
 
 fn game(initial: &Value) -> Game {
-    let (snapshot, keywords, input) = inputs();
-    game_from_selection(initial, &snapshot, &keywords, &input)
+    runtime::game(initial)
 }
 
 fn initial(card: &str, resource: &str, seat: &str) -> Value {
@@ -27,8 +26,7 @@ fn evolve(game: &mut Game, pay: &Value) -> Step {
 }
 
 fn selected_game(initial: &Value, card: &str) -> Game {
-    let (snapshot, keywords, input) = inputs();
-    let selected = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
+    let selected = selection().clone();
     assert!(
         selected.current.contains_key(card),
         "{card} is formally selected"
@@ -392,8 +390,7 @@ fn e_b7_004_current_evolution_uses_the_accepted_resource_path() {
 #[test]
 fn bp18_058_keeps_the_permanent_card_id_shared_with_the_bp18_sl13_printing() {
     // The authored registry maps both printings to this one permanent card; it counts once.
-    let (snapshot, keywords, input) = inputs();
-    let selected = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
+    let selected = selection().clone();
     assert_eq!(
         selected.current["BP18-058"].card_id, "c:03ce0722b7b05b2a9b3077d274b0c621",
         "BP18-058 remains the permanent card shared with the BP18-SL13 printing"
@@ -403,7 +400,7 @@ fn bp18_058_keeps_the_permanent_card_id_shared_with_the_bp18_sl13_printing() {
 #[test]
 fn each_b7_evolution_rejects_a_missing_current_ability() {
     for (base, resource, cost) in B7_CARDS {
-        let (snapshot, keywords, mut input) = inputs();
+        let (snapshot, keywords, mut input) = inputs().clone();
         input["authors"]
             .as_array_mut()
             .unwrap()
@@ -595,7 +592,7 @@ fn synthetic_game(text: &Value, sections: &Value) -> Game {
     card["faces"][0]["text"] = text.clone();
     card["faces"][0]["sections"] = sections.clone();
     lines.push(card.to_string());
-    let selected = Catalog::from_current_selection(&lines.join("\n"), &keywords, &input).unwrap();
+    let selected = Catalog::from_current_selection(&lines.join("\n"), keywords, input).unwrap();
     Game::from_selected_effects(
         selected,
         &initial("BP01-110", "ZZ00-111", "P1"),

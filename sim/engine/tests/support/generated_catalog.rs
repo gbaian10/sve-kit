@@ -6,7 +6,6 @@
 //! grants no runtime qualification (see `current_repository.rs` for the real selection).
 
 use alloc::sync::Arc;
-use std::env::var_os;
 use std::ffi::OsStr;
 use std::fs::{read_dir, read_to_string};
 use std::path::{Path, PathBuf};
@@ -14,6 +13,9 @@ use std::sync::OnceLock;
 
 use serde_json::Value;
 use sve_engine::catalog::{Catalog, EngineIdentityInput};
+
+#[path = "repository.rs"]
+mod repository;
 
 #[expect(
     clippy::expect_used,
@@ -60,20 +62,11 @@ fn restore_frozen_programs(documents: &mut Vec<(String, String)>, root: &Path) {
     clippy::expect_used,
     reason = "Missing generated input must fail every test scope."
 )]
-fn selected_prototypes() -> (String, String, Vec<(String, String)>, PathBuf) {
-    let snapshot = var_os("SVE_TEST_SNAPSHOT")
-        .expect("generate test input first: python3 .github/ci/rust_tests.py");
-    let selection = var_os("SVE_TEST_CURRENT_SELECTION")
-        .expect("generate current selection first: python3 .github/ci/rust_tests.py");
+fn selected_prototypes() -> (&'static str, &'static str, Vec<(String, String)>, PathBuf) {
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
-    let input: Value = serde_json::from_str(&read_to_string(selection).expect("current selection"))
-        .expect("current selection JSON");
-    let snapshot = read_to_string(snapshot).expect("public card test input");
-    let keywords =
-        read_to_string(root.join("authored/rules/keywords.yaml")).expect("keyword registry");
-    // The real selection must still be accepted before any historical program is restored.
-    Catalog::from_current_selection(&snapshot, &keywords, &input)
-        .expect("complete generated public current selection");
+    let (snapshot, keywords, input) = repository::inputs();
+    // Accept the real selection before restoring any historical program.
+    repository::selection();
     let documents: Vec<(String, String)> = input
         .get("documents")
         .and_then(Value::as_array)
@@ -119,7 +112,7 @@ fn build(snapshot: &str, keywords: &str, documents: &[(String, String)], root: &
 )]
 pub(crate) fn current_prototype_catalog() -> Catalog {
     let (snapshot, keywords, documents, root) = selected_prototypes();
-    build(&snapshot, &keywords, &documents, &root)
+    build(snapshot, keywords, &documents, &root)
 }
 
 pub(crate) fn historical_regression_catalog() -> Arc<Catalog> {
@@ -127,6 +120,6 @@ pub(crate) fn historical_regression_catalog() -> Arc<Catalog> {
     Arc::clone(CATALOG.get_or_init(|| {
         let (snapshot, keywords, mut documents, root) = selected_prototypes();
         restore_frozen_programs(&mut documents, &root);
-        Arc::new(build(&snapshot, &keywords, &documents, &root))
+        Arc::new(build(snapshot, keywords, &documents, &root))
     }))
 }

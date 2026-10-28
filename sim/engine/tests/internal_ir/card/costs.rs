@@ -80,10 +80,7 @@ fn explicit_cemetery_intervals_use_payment_state_and_keep_independent_deltas() {
     let mut seed = tree["cards"]["BP08-038"].clone();
     seed["abilities"] = json!([entry]);
     tree["cards"] = json!({"unit-follower":seed});
-    let cards = lowering::ExpandedLowerer::new()
-        .unwrap()
-        .lower(&tree)
-        .unwrap();
+    let cards = lowerer().lower(&tree).unwrap();
     let mut initial = setup(1, json!([]));
     initial["players"]["P1"]["pp"] = json!({"current":10,"max":10});
     initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"s","card":"unit-follower"}]);

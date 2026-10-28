@@ -1,5 +1,4 @@
 use super::*;
-use sve_engine::ir::lowering::ExpandedLowerer;
 
 fn tree(recipient: &Value) -> Value {
     let mut tree = fanfare::expanded::tree().clone();
@@ -13,7 +12,7 @@ fn tree(recipient: &Value) -> Value {
 
 #[test]
 fn synthetic_author_single_leader_recipients_damage_exactly_the_named_side() {
-    let lowerer = ExpandedLowerer::new().unwrap();
+    let lowerer = lowerer();
     for seat in [1, 2] {
         for own in [true, false] {
             let program = lowerer
@@ -58,7 +57,7 @@ fn synthetic_author_single_leader_recipients_damage_exactly_the_named_side() {
 
 #[test]
 fn leader_lowering_rejects_player_names_in_the_wrong_recipient_domain() {
-    let lowerer = ExpandedLowerer::new().unwrap();
+    let lowerer = lowerer();
     for recipient in [json!({"leader":"current"}), json!({"leaders":"self"})] {
         lowerer.lower(&tree(&recipient)).unwrap_err();
     }

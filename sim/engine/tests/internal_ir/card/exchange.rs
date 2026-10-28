@@ -1,7 +1,6 @@
 use super::*;
 use alloc::collections::BTreeMap;
 use sve_engine::game::internal::{DecisionView, InputDomain};
-use sve_engine::ir::lowering::ExpandedLowerer;
 
 fn candidate(card_no: &str, play: Value, spell: bool) -> Value {
     let mut tree = fanfare::expanded::tree().clone();
@@ -19,8 +18,7 @@ fn candidate(card_no: &str, play: Value, spell: bool) -> Value {
     tree
 }
 fn lower(tree: &Value, cost: u64) -> WellFormedCardProgram {
-    ExpandedLowerer::new()
-        .unwrap()
+    lowerer()
         .lower_with_printed_costs(tree, &BTreeMap::from([("unit-spell".into(), Nat(cost))]))
         .unwrap()
         .into_values()

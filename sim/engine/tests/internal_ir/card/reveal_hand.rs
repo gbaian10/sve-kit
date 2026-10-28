@@ -1,6 +1,5 @@
 use super::*;
 use sve_engine::game::internal::InputDomain;
-use sve_engine::ir::lowering::ExpandedLowerer;
 
 fn tree(steps: &Value) -> Value {
     let mut tree = fanfare::expanded::tree().clone();
@@ -14,8 +13,7 @@ fn tree(steps: &Value) -> Value {
 
 #[test]
 fn reveal_is_public_during_resolution_and_expiry_preserves_public_movement_and_owner_knowledge() {
-    let programs = ExpandedLowerer::new()
-        .unwrap()
+    let programs = lowerer()
         .lower(&tree(&json!([
             {"reveal":{"ref":{"who":"self","zone":"hand"},"bind":"shown"}},
             {"discard":{"who":"self","n":1}},
@@ -101,9 +99,6 @@ fn reveal_does_not_admit_filtered_hands_or_turn_the_binding_into_arbitrary_priva
         json!([{"reveal":{"ref":{"who":"opp","zone":"hand"},"bind":"shown"}},{"destroy":{"ref":{"who":"opp","zone":"hand"}}}]),
         json!([{"reveal":{"ref":{"who":"opp","zone":"hand"},"bind":"shown"}},{"destroy":{"ref":"shown"}}]),
     ] {
-        ExpandedLowerer::new()
-            .unwrap()
-            .lower(&tree(&steps))
-            .unwrap_err();
+        lowerer().lower(&tree(&steps)).unwrap_err();
     }
 }

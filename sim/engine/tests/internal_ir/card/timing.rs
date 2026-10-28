@@ -1,6 +1,5 @@
 use super::*;
 use sve_engine::game::internal::{Answer, InputDomain};
-use sve_engine::ir::lowering::ExpandedLowerer;
 
 pub(super) fn on_attack(mut ability: Located<Ability>) -> Located<Ability> {
     ability.node.kind = AbilityKind::Triggered;
@@ -62,10 +61,7 @@ fn assert_guard_skipped_without_ward(game: &mut Game) {
 
 #[test]
 fn bp10_122_attack_pending_precedes_quick_and_keeps_later_departure_information() {
-    let lowered = ExpandedLowerer::new()
-        .unwrap()
-        .lower(fanfare::expanded::tree())
-        .unwrap();
+    let lowered = lowerer().lower(fanfare::expanded::tree()).unwrap();
     let mut draw = lowered["BP10-122"].card().abilities[0].clone();
     draw.source = source("unit-follower");
     draw.source.fragment = None;
@@ -153,10 +149,7 @@ fn bp10_122_attack_pending_precedes_quick_and_keeps_later_departure_information(
 
 #[test]
 fn bp09_p17_end_begin_occurs_once_before_guard_quick_and_expiry() {
-    let lowered = ExpandedLowerer::new()
-        .unwrap()
-        .lower(fanfare::expanded::tree())
-        .unwrap();
+    let lowered = lowerer().lower(fanfare::expanded::tree()).unwrap();
     let mut end = lowered["BP09-P17"].card().abilities[0].clone();
     end.source = source("unit-follower");
     end.source.fragment = None;
