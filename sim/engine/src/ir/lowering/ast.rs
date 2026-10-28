@@ -398,6 +398,8 @@ pub(super) struct ObjectQuery {
     pub who: Side,
     pub zone: Zone,
     pub kind: Option<Follower>,
+    pub name: Option<String>,
+    pub name_contains: Option<String>,
     #[serde(default)]
     pub other: bool,
 }
@@ -465,7 +467,7 @@ pub(super) struct Search {
     pub distinct_by: Option<Names>,
 }
 
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 pub(super) enum Names {
     #[serde(rename = "name")]
     Name,
@@ -633,6 +635,7 @@ pub(super) struct Target {
     pub option: Option<u64>,
     pub bind: String,
     pub from: TargetQuery,
+    pub distinct_by: Option<Names>,
     pub n: Option<u64>,
     pub upto: Option<u64>,
 }
@@ -642,6 +645,7 @@ pub(super) struct Target {
 pub(super) struct Choose {
     pub bind: String,
     pub from: TargetQuery,
+    pub distinct_by: Option<Names>,
     pub n: Option<u64>,
     pub upto: Option<u64>,
     #[serde(rename = "by")]
@@ -659,6 +663,8 @@ pub(super) struct TargetQuery {
     pub leader_or: bool,
     pub kind: Option<SearchKind>,
     pub r#trait: Option<String>,
+    pub name: Option<String>,
+    pub name_contains: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -991,6 +997,7 @@ pub(super) struct Conditional {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum Condition {
+    Exists(PublicQuery),
     Awakened(bool),
     LeaderLife(PlayerThreshold),
 

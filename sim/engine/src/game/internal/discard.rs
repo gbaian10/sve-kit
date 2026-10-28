@@ -145,6 +145,7 @@ impl Game {
             InputDomain::Targets(super::TargetDomain {
                 members: candidates,
                 cardinality: count,
+                distinct_names: false,
             }),
             Wait::Discard(HandWait {
                 instruction,

@@ -178,3 +178,97 @@ fn resolution_choice_cannot_replace_an_existing_observation_binding() {
         .unwrap_err();
     assert_eq!(error.code, "unsupported_construct");
 }
+
+#[test]
+fn named_field_choices_reject_shared_names_and_accept_distinct_names() {
+    for (substring, expected_count, handles, remaining) in [
+        ("unit-", 3, vec![0, 2], json!(["duplicate"])),
+        ("follower", 2, vec![0], json!(["duplicate", "different"])),
+    ] {
+        let programs = ExpandedLowerer::new().unwrap().lower(&tree(
+        &json!({"bind":"t","from":{"who":"opp","zone":"field","name_contains":substring},"upto":2,"distinct_by":"name"}),
+        &json!({"destroy":"t"}),
+    )).unwrap();
+        let mut initial = setup(1, json!([]));
+        initial["players"]["P1"]["zones"]["hand"] = json!([]);
+        initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
+        initial["players"]["P2"]["zones"]["field"] = json!([
+            {"id":"first","card":"unit-follower"}, {"id":"duplicate","card":"unit-follower"}, {"id":"different","card":"unit-amulet"}
+        ]);
+        let mut game = Game::new(
+            catalog(),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "distinct-names",
+        )
+        .unwrap();
+        game.load_internal_card("unit-follower", &programs["unit-follower"])
+            .unwrap();
+        game.load_internal_card("unit-amulet", &card(vec![]))
+            .unwrap();
+        let question = awaiting(
+            game.activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
+                .unwrap(),
+        );
+        let InputDomain::Targets(domain) = &question.domain else {
+            panic!("named targets");
+        };
+        assert_eq!(domain.members.len(), expected_count);
+        assert!(domain.distinct_names);
+        let before = format!("{game:?}");
+        game.answer_internal_card(question.actor, question.token, Answer::Targets(vec![0, 1]))
+            .unwrap_err();
+        assert!(
+            format!("{game:?}") == before,
+            "invalid named selection is atomic"
+        );
+        resolved(
+            game.answer_internal_card(question.actor, question.token, Answer::Targets(handles))
+                .unwrap(),
+        );
+        let state = game.projection(View::Referee).unwrap();
+        assert_eq!(state["P2"]["field"], remaining);
+    }
+}
+
+#[test]
+fn exact_distinct_name_resolution_uses_the_largest_compatible_selection() {
+    let programs = ExpandedLowerer::new().unwrap().lower(&tree(
+        &json!({"bind":"t","from":{"who":"opp","zone":"field","name":"unit-follower"},"n":2,"distinct_by":"name"}),
+        &json!({"damage":{"to":"t","n":1}}),
+    )).unwrap();
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
+    initial["players"]["P2"]["zones"]["field"] = json!([{"id":"first","card":"unit-follower"},{"id":"second","card":"unit-follower"},{"id":"unrelated","card":"unit-amulet"}]);
+    let mut game = Game::new(
+        catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "distinct-shortage",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &programs["unit-follower"])
+        .unwrap();
+    game.load_internal_card("unit-amulet", &card(vec![]))
+        .unwrap();
+    let question = awaiting(
+        game.activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
+            .unwrap(),
+    );
+    let InputDomain::Targets(domain) = &question.domain else {
+        panic!("named targets");
+    };
+    assert_eq!(
+        domain.members.len(),
+        2,
+        "exact names exclude the unrelated amulet"
+    );
+    assert_eq!(domain.cardinality.minimum, Nat(1));
+    resolved(
+        game.answer_internal_card(question.actor, question.token, Answer::Targets(vec![0]))
+            .unwrap(),
+    );
+}

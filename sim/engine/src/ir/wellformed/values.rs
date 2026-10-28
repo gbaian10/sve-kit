@@ -291,6 +291,10 @@ impl Checker {
                     self.reject()
                 }
             },
+            Predicate::NameContains {
+                object,
+                name: Expr::Literal(_),
+            } => self.view(object),
             Predicate::NamesIntersect { left, right } => {
                 self.names(left)?;
                 self.names(right)

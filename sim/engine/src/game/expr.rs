@@ -304,7 +304,7 @@ impl Game {
     }
 
     /// The rules name plus every alias (Q1145: an alias is an additional card name).
-    fn card_names(&self, id: &str) -> Result<Vec<String>> {
+    pub(super) fn card_names(&self, id: &str) -> Result<Vec<String>> {
         let mut names = vec![self.card_name(id)?];
         names.extend(self.name_aliases(id)?);
         Ok(names)

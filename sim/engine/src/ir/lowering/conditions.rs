@@ -17,6 +17,14 @@ impl BodyContext<'_> {
         path: &str,
     ) -> Result<Expr<Bool>, LoweringError> {
         Ok(Expr::Compute(Box::new(match value {
+            ast::Condition::Exists(query) => {
+                if !matches!(query.zone, ast::PublicZone::Field) {
+                    return Err(unsupported(path));
+                }
+                Predicate::Exists {
+                    objects: super::costs::query(query, &mut self.allocator, path)?,
+                }
+            }
             ast::Condition::Awakened(true) => Predicate::CompareInt {
                 left: Expr::Live(Box::new(IntRead::PlayerResource {
                     player: PlayerRef::Controller {},

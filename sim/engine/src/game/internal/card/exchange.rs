@@ -331,6 +331,7 @@ impl Game {
             exchange.definition.materials.id,
             execution.context.controller,
             InputDomain::CostMaterials(super::TargetDomain {
+                distinct_names: false,
                 members: public,
                 cardinality: constraint.cardinality,
             }),

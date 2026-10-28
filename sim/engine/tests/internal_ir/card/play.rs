@@ -1161,3 +1161,29 @@ fn excluded_modes_commit_only_on_play_and_are_scoped_to_instance_and_turn() {
             .unwrap(),
     );
 }
+
+#[test]
+fn distinct_name_play_rejects_an_impossible_selection_before_payment() {
+    let mut ability = spell(vec![]);
+    let mut decision = target(1, 1, 2, 2);
+    let ChoiceDomain::Objects { constraint, .. } = &mut decision.domain else {
+        panic!("object target");
+    };
+    constraint.distinct_by = Some(ObjectProperty::Names);
+    ability
+        .node
+        .play
+        .as_mut()
+        .unwrap()
+        .parameters
+        .push(decision);
+    let program = card(vec![ability]);
+    let mut game = position(&program, "hand", 2);
+    let before = format!("{game:?}");
+    game.play_internal_card("s", PlayerId { seat: 1 })
+        .unwrap_err();
+    assert!(
+        format!("{game:?}") == before,
+        "an impossible target group cannot consume payment"
+    );
+}

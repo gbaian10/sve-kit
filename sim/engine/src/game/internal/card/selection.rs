@@ -2,8 +2,8 @@ use super::super::{DecisionToken, DecisionView, InputDomain, Slot, Wait, contain
 use super::{Execution, Game, Nat, ObjectRef, Result, invalid, player_id, unsupported};
 use crate::ir::{
     Binding, CardKind, Cardinality, CharacteristicView, ChoiceDomain, Decision, Disjointness,
-    KindRead, ObjectOperand, ObjectView, PlayerRef, Predicate, ScopeId, SelectionConstraint,
-    Selector, TraitsRead,
+    KindRead, NamesRead, ObjectOperand, ObjectProperty, ObjectView, PlayerRef, Predicate, ScopeId,
+    SelectionConstraint, Selector, TraitsRead,
 };
 use crate::ir::{Bool, Expr, SelectionView, ZoneKind};
 use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
@@ -16,6 +16,8 @@ pub struct TargetDomain {
     pub members: Vec<super::super::DistributionMember>,
     /// Bounds for this question; play-time targets retain their strict printed minimum.
     pub cardinality: Cardinality,
+    /// Selected objects must not share a rules name.
+    pub distinct_names: bool,
 }
 
 #[derive(Clone, Debug)]
@@ -25,6 +27,7 @@ pub(in crate::game::internal) struct TargetWait {
     members: Vec<ObjectRef>,
     bounds: Cardinality,
     characteristics: Vec<(ObjectRef, TargetCharacteristics)>,
+    distinct_names: bool,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -32,6 +35,7 @@ pub(in crate::game::internal) struct TargetCharacteristics {
     controller: String,
     kind: String,
     traits: Vec<String>,
+    names: Vec<String>,
 }
 
 pub(in crate::game::internal) fn characteristics(
@@ -51,6 +55,7 @@ pub(in crate::game::internal) fn characteristics(
         })
         .collect::<Result<Vec<_>>>()?;
     Ok(TargetCharacteristics {
+        names: game.card_names(id)?,
         controller: game.object(id)?.controller.clone(),
         kind: game.object_type(id)?.into(),
         traits,
@@ -90,7 +95,7 @@ impl TargetWait {
             return Err(invalid("target cardinality"));
         }
         let mut unique = BTreeSet::new();
-        handles
+        let members = handles
             .iter()
             .map(|handle| {
                 if !unique.insert(*handle) {
@@ -101,7 +106,57 @@ impl TargetWait {
                     .copied()
                     .ok_or_else(|| invalid("foreign target handle"))
             })
-            .collect()
+            .collect::<Result<Vec<_>>>()?;
+        if !self.compatible(&members)? {
+            return Err(invalid("target names must differ"));
+        }
+        Ok(members)
+    }
+
+    fn compatible(&self, members: &[ObjectRef]) -> Result<bool> {
+        if !self.distinct_names {
+            return Ok(true);
+        }
+        let mut names = BTreeSet::new();
+        for member in members {
+            let saved = self
+                .characteristics
+                .iter()
+                .find(|(reference, _)| reference == member)
+                .ok_or_else(|| invalid("missing target names"))?;
+            let own: BTreeSet<_> = saved.1.names.iter().collect();
+            if own.iter().any(|name| names.contains(name)) {
+                return Ok(false);
+            }
+            names.extend(own);
+        }
+        Ok(true)
+    }
+
+    fn capacity(&self) -> Result<u64> {
+        if !self.distinct_names {
+            return u64::try_from(self.members.len()).map_err(invalid);
+        }
+        if self.members.len() > 10 {
+            return Err(unsupported("name selection exceeds both fields"));
+        }
+        let end = 1_u64
+            .checked_shl(u32::try_from(self.members.len()).map_err(invalid)?)
+            .ok_or_else(|| invalid("target plan overflow"))?;
+        let mut maximum = 0;
+        for mask in 0..end {
+            let members = self
+                .members
+                .iter()
+                .enumerate()
+                .filter(|(index, _)| mask & (1_u64 << index) != 0)
+                .map(|(_, member)| *member)
+                .collect::<Vec<_>>();
+            if self.compatible(&members)? {
+                maximum = maximum.max(u64::try_from(members.len()).map_err(invalid)?);
+            }
+        }
+        Ok(maximum)
     }
 }
 
@@ -109,7 +164,7 @@ pub(super) fn check(constraint: &SelectionConstraint) -> Result<()> {
     let [group] = constraint.groups.as_slice() else {
         return Err(unsupported("one selector group per target decision"));
     };
-    if constraint.distinct_by.is_some()
+    if !matches!(constraint.distinct_by, None | Some(ObjectProperty::Names))
         || !constraint.aggregate_bounds.is_empty()
         || constraint.disjoint != Disjointness::Disjoint
     {
@@ -182,6 +237,19 @@ fn check_predicate(value: &Expr<Bool>, candidate: Binding<ObjectRef>) -> Result<
             } if matches!(read.as_ref(), KindRead::Kind { object, view: CharacteristicView::Effective } if candidate_view(object, candidate)) => {
                 Ok(())
             }
+            Predicate::NamesIntersect {
+                left: Expr::Live(read),
+                right: Expr::Literal(names),
+            } if !names.is_empty()
+                && names.iter().all(|name| !name.0.is_empty())
+                && matches!(read.as_ref(), NamesRead::Names { object } if candidate_view(object, candidate)) =>
+            {
+                Ok(())
+            }
+            Predicate::NameContains {
+                object,
+                name: Expr::Literal(name),
+            } if !name.0.is_empty() && candidate_view(object, candidate) => Ok(()),
             Predicate::HasTrait {
                 traits: Expr::Live(read),
                 trait_id,
@@ -219,6 +287,20 @@ fn matches_candidate(game: &Game, id: &str, value: &Expr<Bool>) -> Result<bool> 
                 CardKind::Spell => "スペル",
                 CardKind::Amulet => "アミュレット",
             })),
+            Predicate::NamesIntersect {
+                right: Expr::Literal(names),
+                ..
+            } => Ok(game
+                .card_names(id)?
+                .iter()
+                .any(|actual| names.iter().any(|name| &name.0 == actual))),
+            Predicate::NameContains {
+                name: Expr::Literal(name),
+                ..
+            } => Ok(game
+                .card_names(id)?
+                .iter()
+                .any(|actual| actual.contains(&name.0))),
             Predicate::HasTrait { trait_id, .. } => {
                 Ok(characteristics(game, id)?.traits.contains(&trait_id.0))
             }
@@ -241,7 +323,7 @@ fn matches_candidate(game: &Game, id: &str, value: &Expr<Bool>) -> Result<bool> 
 }
 
 pub(in crate::game::internal) fn packet(domain: &TargetDomain) -> Value {
-    json!({"kind":"targets","minimum":domain.cardinality.minimum.0,"maximum":domain.cardinality.maximum.map(|n| n.0),"members":domain.members.iter().map(|member| json!({"handle":member.handle,"player":member.player.seat,"card":member.card,"name":member.name})).collect::<Vec<_>>()})
+    json!({"kind":"targets","distinct_names":domain.distinct_names,"minimum":domain.cardinality.minimum.0,"maximum":domain.cardinality.maximum.map(|n| n.0),"members":domain.members.iter().map(|member| json!({"handle":member.handle,"player":member.player.seat,"card":member.card,"name":member.name})).collect::<Vec<_>>()})
 }
 
 #[expect(
@@ -255,7 +337,7 @@ impl Game {
         decision: &Decision,
     ) -> Result<()> {
         let (wait, domain) = self.target_domain(execution, decision)?;
-        if wait.bounds.minimum.0 > u64::try_from(wait.members.len()).map_err(invalid)? {
+        if wait.bounds.minimum.0 > wait.capacity()? {
             return Err(crate::EngineFailure::IllegalPlay(
                 "no legal play targets".into(),
             ));
@@ -282,7 +364,7 @@ impl Game {
     ) -> Result<()> {
         check_resolution(decision)?;
         let (mut wait, mut domain) = self.target_domain(execution, decision)?;
-        let available = u64::try_from(wait.members.len()).map_err(invalid)?;
+        let available = wait.capacity()?;
         // CR 1.3.2: a resolving instruction does as much as possible; play stays strict.
         wait.bounds.minimum = Nat(wait.bounds.minimum.0.min(available));
         domain.cardinality = wait.bounds;
@@ -377,10 +459,12 @@ impl Game {
                 members,
                 bounds,
                 characteristics,
+                distinct_names: constraint.distinct_by == Some(ObjectProperty::Names),
             },
             TargetDomain {
                 members: public,
                 cardinality: bounds,
+                distinct_names: constraint.distinct_by == Some(ObjectProperty::Names),
             },
         ))
     }
@@ -392,7 +476,7 @@ impl Game {
     ) -> Result<bool> {
         for decision in parameters {
             let (wait, _) = self.target_domain(execution, decision)?;
-            if wait.bounds.minimum.0 > u64::try_from(wait.members.len()).map_err(invalid)? {
+            if wait.bounds.minimum.0 > wait.capacity()? {
                 return Ok(false);
             }
         }
@@ -472,7 +556,10 @@ impl Game {
                 continue;
             }
             let mut candidate = candidate.clone();
-            candidate.bind_targets(&wait, wait.validate(&handles)?);
+            let Ok(members) = wait.validate(&handles) else {
+                continue;
+            };
+            candidate.bind_targets(&wait, members);
             candidate.captures(self, &first.captures)?;
             if self.internal_feasible_targets(
                 &candidate,
