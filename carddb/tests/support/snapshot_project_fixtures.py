@@ -162,6 +162,8 @@ def extras() -> dict[str, dict[str, Value]]:
             "has_complete_keyword_ids": Json([]),
             "ability_types": Json([]),
             "ability_types_complete": False,
+            "printed_mechanisms": Json([]),
+            "checked_mechanisms": Json([]),
         },
         "ruling_revision": {
             "id": "ruling-rev",

@@ -117,6 +117,7 @@
     "card_voice",
     "keyword",
     "mechanic_projection",
+    "PrintedMechanism",
     "card_mechanic_coverage",
     "card_engine_support",
     "vocabulary",
@@ -2953,6 +2954,40 @@
       "required": [
         "kind",
         "year"
+      ],
+      "additionalProperties": false
+    },
+    "PrintedMechanism": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "enum": [
+            "combo",
+            "spellchain",
+            "stack",
+            "earth_rite",
+            "overflow",
+            "necrocharge",
+            "sanguine",
+            "serve",
+            "lesson",
+            "starting_amulet",
+            "single_drive",
+            "twin_drive"
+          ]
+        },
+        "thresholds": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "code",
+        "thresholds"
       ],
       "additionalProperties": false
     }
@@ -8948,6 +8983,59 @@
           "descriptor": {
             "scalar": "Bool"
           }
+        },
+        "printed_mechanisms": {
+          "schema": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/PrintedMechanism"
+            }
+          },
+          "descriptor": {
+            "array": {
+              "json": "PrintedMechanism"
+            }
+          }
+        },
+        "checked_mechanisms": {
+          "schema": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "combo",
+                "spellchain",
+                "stack",
+                "earth_rite",
+                "overflow",
+                "necrocharge",
+                "sanguine",
+                "serve",
+                "lesson",
+                "starting_amulet",
+                "single_drive",
+                "twin_drive"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "descriptor": {
+            "array": {
+              "enum": [
+                "combo",
+                "spellchain",
+                "stack",
+                "earth_rite",
+                "overflow",
+                "necrocharge",
+                "sanguine",
+                "serve",
+                "lesson",
+                "starting_amulet",
+                "single_drive",
+                "twin_drive"
+              ]
+            }
+          }
         }
       },
       "constraints": {
@@ -11002,6 +11090,12 @@
           "from": "card_mechanic_coverage"
         },
         "ability_types_complete": {
+          "from": "card_mechanic_coverage"
+        },
+        "printed_mechanisms": {
+          "from": "card_mechanic_coverage"
+        },
+        "checked_mechanisms": {
           "from": "card_mechanic_coverage"
         }
       },

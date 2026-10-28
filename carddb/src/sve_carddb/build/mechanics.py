@@ -191,6 +191,18 @@ TABLES = (
                 "ability_types", Kind.JSON, nullable=True, json_schema="AbilityTypes"
             ),
             Column("ability_types_complete", Kind.BOOL, nullable=True),
+            Column(
+                "printed_mechanisms",
+                Kind.JSON,
+                nullable=True,
+                json_schema="PrintedMechanisms",
+            ),
+            Column(
+                "checked_mechanisms",
+                Kind.JSON,
+                nullable=True,
+                json_schema="CheckedMechanisms",
+            ),
         ),
         ("card_id", "scope"),
         foreign_keys=(_fk("card_id", "card"),),
@@ -255,6 +267,50 @@ def schemas() -> dict[str, dict[str, JsonValue]]:
             "act",
             "fusion",
         ],
+    }
+    items["PrintedMechanisms"] = {
+        "type": "object",
+        "properties": {
+            "code": {
+                "enum": [
+                    "combo",
+                    "spellchain",
+                    "stack",
+                    "earth_rite",
+                    "overflow",
+                    "necrocharge",
+                    "sanguine",
+                    "serve",
+                    "lesson",
+                    "starting_amulet",
+                    "single_drive",
+                    "twin_drive",
+                ]
+            },
+            "thresholds": {
+                "type": "array",
+                "items": {"type": "integer", "minimum": 0},
+                "uniqueItems": True,
+            },
+        },
+        "required": ["code", "thresholds"],
+        "additionalProperties": False,
+    }
+    items["CheckedMechanisms"] = {
+        "enum": [
+            "combo",
+            "spellchain",
+            "stack",
+            "earth_rite",
+            "overflow",
+            "necrocharge",
+            "sanguine",
+            "serve",
+            "lesson",
+            "starting_amulet",
+            "single_drive",
+            "twin_drive",
+        ]
     }
     return {
         name: {"type": "array", "items": item, "uniqueItems": True}
