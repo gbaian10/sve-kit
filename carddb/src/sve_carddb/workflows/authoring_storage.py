@@ -239,7 +239,7 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
         old = next(
             (r for r in records if r.card_id == card_id and r.scope == "shared"), None
         )
-        if old is not None and old.record_key != number:
+        if isinstance(old, AuthorIndexRecord) and old.record_key != number:
             raise AuthorInputError(
                 Diagnostic(
                     "index",

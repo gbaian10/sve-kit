@@ -22,17 +22,23 @@ SCHEMAS = Path(__file__).resolve().parents[3] / "dsl"
 
 
 @pytest.mark.parametrize(
-    ("sibling", "alias"), [(False, False), (True, False), (True, True)]
+    ("sibling", "alias", "alias_only"),
+    [
+        (False, False, False),
+        (True, False, False),
+        (True, True, False),
+        (True, True, True),
+    ],
 )
 def test_prototype_removal_deletes_only_exhausted_shards(
-    tmp_path: Path, sibling: bool, alias: bool
+    tmp_path: Path, sibling: bool, alias: bool, alias_only: bool
 ) -> None:
     repo = tmp_path / "repo"
     authored = repo / "authored"
     prototype_path = authored / "rules/effects/SYN.yaml"
     prototype_path.parent.mkdir(parents=True)
     prototype: dict[str, JsonValue] = {"status": "unsupported", "abilities": []}
-    cards: dict[str, JsonValue] = {"SYN-01": prototype}
+    cards: dict[str, JsonValue] = {} if alias_only else {"SYN-01": prototype}
     if sibling:
         cards["SYN-02"] = prototype
     prototype_path.write_bytes(
@@ -51,7 +57,7 @@ def test_prototype_removal_deletes_only_exhausted_shards(
                         "scope": "shared",
                         "file": "rules/effects/SYN.yaml",
                         "kind": "effect_set",
-                        "record_key": "SYN-01",
+                        "record_key": "SYN-02" if alias_only else "SYN-01",
                     }
                 ],
             }
@@ -105,7 +111,7 @@ def test_prototype_removal_deletes_only_exhausted_shards(
             authored,
         )
         # An indexed prototype shard must select exactly its members.
-        if sibling:
+        if sibling and not alias_only:
             index.write_bytes(
                 canonical({"format": 1, "kind": "effects_index", "records": []})
             )
