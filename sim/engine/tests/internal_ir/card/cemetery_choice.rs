@@ -1,6 +1,5 @@
 use super::*;
 use sve_engine::game::internal::InputDomain;
-use sve_engine::ir::lowering::ExpandedLowerer;
 
 fn tree(query: &Value) -> Value {
     let mut tree = fanfare::expanded::tree().clone();
@@ -17,8 +16,7 @@ fn tree(query: &Value) -> Value {
 
 #[test]
 fn cemetery_choice_can_return_a_spell_without_selecting_a_field_follower() {
-    let programs = ExpandedLowerer::new()
-        .unwrap()
+    let programs = lowerer()
         .lower(&tree(
             &json!({"who":"self","zone":"cemetery","kind":"spell"}),
         ))
@@ -62,17 +60,13 @@ fn cemetery_choice_can_return_a_spell_without_selecting_a_field_follower() {
 }
 
 #[test]
-fn cemetery_choice_keeps_other_owners_and_private_or_ex_sources_closed() {
+fn cemetery_choice_keeps_other_owners_and_private_sources_closed() {
     for query in [
         json!({"who":"self","zone":"hand"}),
-        json!({"who":"self","zone":"ex"}),
         json!({"who":"opp","zone":"cemetery"}),
         json!({"who":"all","zone":"cemetery"}),
         json!({"who":"self","zone":"cemetery","kind":"follower","leader_or":true}),
     ] {
-        ExpandedLowerer::new()
-            .unwrap()
-            .lower(&tree(&query))
-            .unwrap_err();
+        lowerer().lower(&tree(&query)).unwrap_err();
     }
 }

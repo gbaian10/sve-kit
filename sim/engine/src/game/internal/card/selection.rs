@@ -480,7 +480,7 @@ impl Game {
                         && !(kind.contains("フォロワー") || kind.contains("アミュレット")))
                 {
                     return Err(unsupported(
-                        "target is not a current public field object, EX card or cemetery card",
+                        "target is not a current public field object or EX card or cemetery card",
                     ));
                 }
                 if object.zone != "cemetery" && self.restricted(id, "choose")? {
