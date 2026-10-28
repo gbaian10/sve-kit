@@ -1,0 +1,22 @@
+format: 2
+kind: author_effect_set
+cards:
+  SD04-009:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-29"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 0
+      - line: 2
+        attack_time:
+          do:
+            - buff:
+                "on": this
+                power: 1
