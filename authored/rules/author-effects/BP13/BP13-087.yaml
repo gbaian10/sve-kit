@@ -1,0 +1,25 @@
+cards:
+  BP13-087:
+    abilities:
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - self_to_cemetery: true
+          do:
+            - damage:
+                n: 1
+                to:
+                  leader: self
+            - draw:
+                n: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-sol
+            who: Codex
+          date: "2026-10-29"
+format: 2
+kind: author_effect_set
