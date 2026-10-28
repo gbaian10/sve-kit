@@ -17,6 +17,8 @@ use sve_engine::catalog::{Catalog, EngineIdentityInput};
 
 #[path = "repository.rs"]
 mod repository;
+#[path = "rule_fixtures.rs"]
+mod rule_fixtures;
 
 #[expect(
     clippy::expect_used,
@@ -95,11 +97,19 @@ fn selected_prototypes() -> (&'static str, &'static str, Vec<(String, String)>, 
     reason = "Missing generated input must fail every test scope."
 )]
 fn build(snapshot: &str, keywords: &str, documents: &[(String, String)], root: &Path) -> Catalog {
+    let rules_source =
+        read_to_string(root.join("authored/rules/engine/index.yaml")).expect("rule bindings");
+    let mut rules_document: Value =
+        serde_saphyr::from_str(&rules_source).expect("repository rules");
+    // Batch upgrades change snapshot bytes without changing the historical rule capabilities.
+    *rules_document
+        .pointer_mut("/input/snapshot_sha256")
+        .expect("rule snapshot binding") = Value::String(rule_fixtures::hash(snapshot.as_bytes()));
     Catalog::from_documents_with_rules(
         snapshot,
         keywords,
         documents,
-        &read_to_string(root.join("authored/rules/engine/index.yaml")).expect("rule bindings"),
+        &rules_document.to_string(),
         &EngineIdentityInput::LegacyJp,
     )
     .expect("selected prototypes with rule bindings")

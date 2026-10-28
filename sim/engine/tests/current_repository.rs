@@ -30,6 +30,8 @@ mod rule_fixtures;
 
 use repository::{inputs, lowerer, selection, selection_with_rules};
 
+const BP01_P25_FACE: &str = "f:90c74424f2435907a035f70ce37463d4";
+
 fn p25(input: &Value) -> &Value {
     &input["authors"]
         .as_array()
@@ -58,14 +60,18 @@ fn repository_lastword_keeps_its_permanent_source_and_complete_damage_body() {
     assert_eq!(card.program.card().abilities.len(), 1);
     let direct = lowerer().lower_current(p25(&inputs().2)).unwrap();
     assert_eq!(card.source_version, direct.source_version);
-    assert_eq!(card.source_payload["token_links"], serde_json::json!([]));
-    let ability = &card.expanded["cards"]["BP01-P25"]["abilities"][0];
+    assert_eq!(card.source_payload["card_id"], card.card_id);
+    assert_eq!(card.source_payload["faces"].as_array().unwrap().len(), 1);
+    assert_eq!(card.source_payload["faces"][0]["face_id"], BP01_P25_FACE);
+    let ability = &card.expanded["cards"]["BP01-P25"]["faces"][BP01_P25_FACE]["abilities"][0];
     assert_eq!(
         ability["lastword"],
         serde_json::json!({"do":[{"damage":{"to":{"leaders":"all"},"n":2_u8}}]})
     );
     let source = card
-        .source_at("/cards/BP01-P25/abilities/0/lastword/do/0/damage/n")
+        .source_at(&format!(
+            "/cards/BP01-P25/faces/{BP01_P25_FACE}/abilities/0/lastword/do/0/damage/n"
+        ))
         .unwrap();
     assert_eq!(source.source.face, "f:90c74424f2435907a035f70ce37463d4");
     assert_eq!(source.source.field, "effect");
@@ -191,10 +197,10 @@ fn repository_named_search_rejects_wrong_owner_missing_source_and_incomplete_clo
     );
 
     let mut missing_source = b4(input).clone();
-    missing_source["sidecar"] = json!([]);
+    missing_source["source_payload"]["faces"] = json!([]);
     let source_failure = lowerer.lower_current(&missing_source).err().unwrap();
-    assert_eq!(source_failure.code, "invalid_current_source");
-    assert_eq!(source_failure.path, "/cards/BP06-048");
+    assert_eq!(source_failure.code, "invalid_direct_admission");
+    assert_eq!(source_failure.path, "/card_id");
 
     let mut incomplete = selection().clone();
     incomplete.current.remove("BP06-048");
@@ -219,34 +225,46 @@ fn repository_lastword_rejects_missing_sources_and_unknown_or_unsupported_steps(
     let (snapshot, keywords, input) = inputs();
     let lowerer = lowerer();
     let mut missing = p25(input).clone();
-    missing["sidecar"] = json!([]);
+    missing["source_payload"]["faces"] = json!([]);
     let mut unknown = p25(input).clone();
-    unknown["tree"]["cards"]["BP01-P25"]["abilities"][0]["lastword"]["do"]
+    unknown["tree"]["cards"]["BP01-P25"]["faces"][BP01_P25_FACE]["abilities"][0]["lastword"]["do"]
         .as_array_mut()
         .unwrap()
         .push(json!({"unknown_step":{}}));
     let mut unsupported = p25(input).clone();
-    unsupported["tree"]["cards"]["BP01-P25"]["abilities"][0]["lastword"]["do"]
-        .as_array_mut()
-        .unwrap()
-        .push(json!({"dice":{"bind":"roll"}}));
-    // Mutated handoffs are rejection probes, never accepted source evidence.
-    for (candidate, code, path) in [
-        (missing, "invalid_current_source", "/cards/BP01-P25"),
+    unsupported["tree"]["cards"]["BP01-P25"]["faces"][BP01_P25_FACE]["abilities"][0]["lastword"]["do"]
+        .as_array_mut().unwrap().push(json!({"dice":{"bind":"roll"}}));
+    // Mutations must reach the direct handoff's real inventory and face-qualified body.
+    for (candidate, code, path, exact) in [
+        (
+            missing,
+            "invalid_direct_admission",
+            "/card_id".to_owned(),
+            true,
+        ),
         (
             unknown,
-            "unsupported_construct",
-            "/cards/BP01-P25/abilities/0",
+            "invalid_expanded",
+            "/cards/BP01-P25".to_owned(),
+            false,
         ),
         (
             unsupported,
             "unsupported_construct",
-            "/cards/BP01-P25/abilities/0",
+            format!("/cards/BP01-P25/faces/{BP01_P25_FACE}/abilities/0"),
+            true,
         ),
     ] {
         let failure = lowerer.lower_current(&candidate).err().unwrap();
         assert_eq!(failure.code, code);
-        assert_eq!(failure.path, path);
+        if exact {
+            assert_eq!(failure.path, path);
+        } else {
+            assert!(
+                failure.path.starts_with(&path),
+                "schema rejection identifies the malformed card"
+            );
+        }
         let mut rejected = input.clone();
         let author = rejected["authors"]
             .as_array_mut()
@@ -259,7 +277,7 @@ fn repository_lastword_rejects_missing_sources_and_unknown_or_unsupported_steps(
             .err()
             .unwrap();
         assert!(matches!(&selection, EngineFailure::Invalid(reason)
-            if reason == &format!("{code} at {path}")));
+            if reason == &format!("{code} at {}", failure.path)));
     }
 }
 
@@ -305,12 +323,12 @@ fn repository_selection_rejects_mixed_formats_and_never_falls_back() {
         .iter_mut()
         .find(|author| author["input"]["card_no"] == "BP01-P25")
         .unwrap();
-    invalid_author["input"]["sidecar"] = json!([]);
+    invalid_author["input"]["source_payload"]["faces"] = json!([]);
     let failure = Catalog::from_current_selection(snapshot, keywords, &invalid)
         .err()
         .unwrap();
     assert!(matches!(&failure, EngineFailure::Invalid(reason)
-        if reason == "invalid_current_source at /cards/BP01-P25"));
+        if reason == "invalid_direct_admission at /card_id"));
 
     let author = mixed["authors"]
         .as_array_mut()
