@@ -1,0 +1,32 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP18-030:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-29"
+    abilities:
+      - line: 1
+        fanfare:
+          optional_cost:
+            pp: 3
+            result: extra
+          do:
+            - if:
+                cond:
+                  paid:
+                    receipt: extra
+                then:
+                  - choose:
+                      bind: enemy
+                      from:
+                        who: opp
+                        zone: field
+                        kind: follower
+                      n: 1
+                  - destroy:
+                      ref: enemy

@@ -1,0 +1,19 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP18-018:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-29"
+    abilities:
+      - attack_time:
+          do:
+            - buff:
+                "on": this
+                power: 3
+                hp: 3
+        line: 1

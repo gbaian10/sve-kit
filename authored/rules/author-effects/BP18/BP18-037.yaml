@@ -1,0 +1,32 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP18-037:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-29"
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - line: 2
+        fanfare:
+          optional_cost:
+            pp: 2
+            result: extra
+          do:
+            - if:
+                cond:
+                  paid:
+                    receipt: extra
+                then:
+                  - buff:
+                      "on": this
+                      power: 2
+                      hp: 2
+                  - draw:
+                      n: 1
