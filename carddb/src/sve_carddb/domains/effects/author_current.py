@@ -349,8 +349,16 @@ class CurrentAuthorSources:
         validate_author_set(inputs, expander.schemas)
         inputs, failures = self.resolve_inputs(inputs, expander)
         self._prepare(inputs, expander)
+        return self.selection_from_results(
+            inputs, self._validate(inputs, expander, failures)
+        )
+
+    def selection_from_results(
+        self, inputs: AuthorInputSet, results: tuple[CardResult, ...]
+    ) -> JsonValue:
+        """Serialize one completed current-source check without repeating admission."""
         authors: list[JsonValue] = []
-        for result in self._validate(inputs, expander, failures):
+        for result in results:
             if not isinstance(result.record, AuthorIndexRecord):
                 continue
             numbers = self.printing_numbers(result.record.card_id)

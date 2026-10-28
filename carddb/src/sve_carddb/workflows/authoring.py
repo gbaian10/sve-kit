@@ -54,6 +54,7 @@ if TYPE_CHECKING:
 
     from sve_carddb.domains.effects.author_inputs import AuthorSchemas
     from sve_carddb.domains.effects.author_set import AuthorInputSet
+    from sve_carddb.domains.parsed_cards.storage import Catalog
     from sve_carddb.domains.products import OfficialProducts
     from sve_carddb.domains.registry.preview import PreviewPlan
 
@@ -206,7 +207,11 @@ def _public_products(
 
 @contextmanager
 def prepare(  # ruff: ignore[too-many-locals, too-many-statements] -- keep the complete ordered boundary in one operation
-    inputs: Inputs, *, cards: frozenset[str] = frozenset(), main: Path | None = None
+    inputs: Inputs,
+    *,
+    cards: frozenset[str] = frozenset(),
+    main: Path | None = None,
+    parsed: Catalog | None = None,
 ) -> Generator[Workspace]:
     """Prepare production identity, vocabulary, sources and the immutable JP reader."""
     from sve_carddb.domains.catalog.loader import prepare as prepare_catalog  # ruff: ignore[import-outside-top-level] -- initialize the production text interner before catalog imports
@@ -229,7 +234,11 @@ def prepare(  # ruff: ignore[too-many-locals, too-many-statements] -- keep the c
     assert inputs.revision is not None
     authored = inputs.authored or inputs.repo / "authored"
     expander = AuthorExpander(inputs.repo / "dsl")
-    batches = ParsedBatches(read_parsed(inputs.card_data or inputs.repo / "card-data"))
+    batches = ParsedBatches(
+        parsed
+        if parsed is not None
+        else read_parsed(inputs.card_data or inputs.repo / "card-data")
+    )
     snapshot = load_glossary(authored)
     rules = load_rules(inputs.repo)
     capabilities = (*MINIMUM_CAPABILITIES, "en", "translation_evidence")
@@ -496,7 +505,8 @@ def check(
     compare_public: Inputs | None = None,
 ) -> dict[str, JsonValue]:
     """Check every authored card and full inventory, independently of display filters."""
-    results = workspace.current.validate(workspace.authored, workspace.expander)
+    inputs = load_author_set(workspace.authored, workspace.expander.schemas)
+    results = workspace.current.validate_inputs(inputs, workspace.expander)
     rejected = [
         result
         for result in results
@@ -505,9 +515,7 @@ def check(
     ]
     if rejected:
         raise AuthorInputError(rejected[0].diagnostic)
-    selection = workspace.current.selection_input(
-        workspace.authored, workspace.expander
-    )
+    selection = workspace.current.selection_from_results(inputs, results)
     if compare_public is not None:
         if workspace.inputs.profile != "database" or compare_public.profile != "public":
             raise ConfigurationError(
@@ -522,10 +530,6 @@ def check(
         "selection": selection,
         "compared_public": compare_public is not None,
         "regression": None,
-        "reviews": review_states(
-            load_author_set(workspace.authored, workspace.expander.schemas)
-        ),
-        "body_usage": body_usage(
-            load_author_set(workspace.authored, workspace.expander.schemas)
-        ),
+        "reviews": review_states(inputs),
+        "body_usage": body_usage(inputs),
     }

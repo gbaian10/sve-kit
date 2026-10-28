@@ -4,6 +4,7 @@ import re
 from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING, Literal, get_args
 
+import jsonschema_rs
 import yamlrocks
 from jsonschema import Draft202012Validator
 from jsonschema.exceptions import best_match
@@ -631,6 +632,8 @@ class AuthorSchemas:
                 except Unresolvable:
                     raise ValueError("Unresolved author schema reference") from None
         self._registry = registry
+        self._compiled_registry = jsonschema_rs.Registry(list(schemas.items()))
+        self._compiled: dict[bytes, jsonschema_rs.Draft202012Validator] = {}
         self._heads = _head_shapes(registry)
         envelope = object_value(
             JSON_VALUE.validate_python(
@@ -652,7 +655,27 @@ class AuthorSchemas:
     def _validate(self, document: ParsedDocument, reference: str) -> None:
         self._validate_schema(document, {"$ref": reference})
 
-    def _validate_schema(self, document: ParsedDocument, schema: Schema) -> None:
+    def _compiled_validator(
+        self, schema: dict[str, JsonValue]
+    ) -> jsonschema_rs.Draft202012Validator:
+        key = canonical(schema)
+        compiled = self._compiled.get(key)
+        if compiled is None:
+            compiled = jsonschema_rs.Draft202012Validator(
+                schema,
+                registry=self._compiled_registry,
+                validate_formats=False,
+                offline=True,
+            )
+            self._compiled[key] = compiled
+        return compiled
+
+    def _validate_schema(
+        self, document: ParsedDocument, schema: dict[str, JsonValue]
+    ) -> None:
+        if self._compiled_validator(schema).is_valid(document.value):
+            return
+        # Keep located diagnostics on the failure path without traversing valid trees twice.
         validator = Draft202012Validator(schema, registry=self._registry)
         error = best_match(validator.iter_errors(document.value))
         if error is not None:

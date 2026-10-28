@@ -9,6 +9,7 @@ from sve_carddb.domains.parsed_cards.commands import app
 from sve_carddb.domains.parsed_cards.engine_fixture import project
 from sve_carddb.domains.parsed_cards.generate import generate
 from sve_carddb.domains.parsed_cards.storage import write
+from tests.support import repository_current
 
 from .test_inputs import REVISION, _batch
 
@@ -101,3 +102,51 @@ def test_engine_cli_works_without_html_and_never_overwrites(tmp_path: Path) -> N
     assert output.read_bytes() == before
     assert runner.invoke(app, [*args[:-1], str(root / "new.jsonl")]).exit_code == 1
     assert runner.invoke(app, [args[0], "relative", *args[2:]]).exit_code == 1
+
+
+@pytest.mark.parametrize("missing", ["cards", "evidence", "batch"])
+def test_combined_inputs_fail_before_writing_when_data_is_missing(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, missing: str
+) -> None:
+    source, number = _batch(tmp_path / "archive", "jp")
+    catalog = generate(
+        [("jp", source)], {("jp", number): "SYN"}, producer_revision=REVISION
+    )
+    repository = tmp_path / "repository"
+    root = repository / "card-data"
+    write(root, catalog)
+    pin = repository / "tests/engine/card-input.json"
+    pin.parent.mkdir(parents=True)
+    pin.write_text(json.dumps({"batch_id": source.batch_id}))
+    member = {
+        "cards": catalog.index.files[0].path,
+        "evidence": catalog.index.files[0].evidence_path,
+        "batch": catalog.index.batches[0].path(0),
+    }[missing]
+    (root / member).unlink()
+    monkeypatch.setattr(repository_current, "REPOSITORY", repository)
+    cards, selection = tmp_path / "cards.jsonl", tmp_path / "selection.json"
+    with pytest.raises(FileNotFoundError):
+        repository_current.generate(cards, selection)
+    assert not cards.exists()
+    assert not selection.exists()
+
+
+def test_combined_inputs_reject_an_unavailable_pin_before_writing(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    source, number = _batch(tmp_path / "archive", "jp")
+    catalog = generate(
+        [("jp", source)], {("jp", number): "SYN"}, producer_revision=REVISION
+    )
+    repository = tmp_path / "repository"
+    write(repository / "card-data", catalog)
+    pin = repository / "tests/engine/card-input.json"
+    pin.parent.mkdir(parents=True)
+    pin.write_text(json.dumps({"batch_id": "sha256:" + "f" * 64}))
+    monkeypatch.setattr(repository_current, "REPOSITORY", repository)
+    cards, selection = tmp_path / "cards.jsonl", tmp_path / "selection.json"
+    with pytest.raises(ValueError, match="requested batch"):
+        repository_current.generate(cards, selection)
+    assert not cards.exists()
+    assert not selection.exists()
