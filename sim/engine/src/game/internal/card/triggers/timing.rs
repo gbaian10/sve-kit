@@ -84,11 +84,12 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
 pub(super) fn public_event(event: &Event, position: u64) -> Result<String> {
     match event {
         Event::EnterField { event } => {
-            let EntryOrigin::Zone { zone } = event.from else {
-                return Err(invalid("missing public entry origin"));
+            let origin = match event.from {
+                EntryOrigin::Zone { zone } => format!("from {zone:?}"),
+                EntryOrigin::Other {} => "by creation".into(),
             };
             Ok(format!(
-                "EnterField {:?} from {zone:?} at field slot {position}",
+                "EnterField {:?} {origin} at field slot {position}",
                 event.characters.names
             ))
         }

@@ -82,10 +82,13 @@ impl Game {
         {
             return Ok(false);
         }
-        let position = self
-            .object_position(holder)?
-            .and_then(|position| position.checked_add(1))
-            .ok_or_else(|| invalid("Ward entry has no source zone position"))?;
+        let position = if previous.zone == "void" && previous.generation == 0 {
+            1
+        } else {
+            self.object_position(holder)?
+                .and_then(|position| position.checked_add(1))
+                .ok_or_else(|| invalid("Ward entry has no source zone position"))?
+        };
         self.internal_wait(
             execution,
             DecisionId(0),

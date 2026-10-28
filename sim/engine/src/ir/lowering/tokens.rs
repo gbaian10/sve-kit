@@ -13,7 +13,10 @@ impl BodyContext<'_> {
         value: &ast::Create,
         path: &str,
     ) -> Result<Action, LoweringError> {
-        let ast::CreateZone::Ex = value.to;
+        let kind = match value.to {
+            ast::CreateZone::Ex => ZoneKind::Ex,
+            ast::CreateZone::Field => ZoneKind::Field,
+        };
         if value.result.is_some() && value.bind.is_some() {
             return Err(unsupported(path));
         }
@@ -34,7 +37,7 @@ impl BodyContext<'_> {
             destination: TokenDestination::Single {
                 zone: Expr::Literal(ZoneRef {
                     player: PlayerRef::Controller {},
-                    kind: ZoneKind::Ex,
+                    kind,
                 }),
             },
             output,

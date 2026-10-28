@@ -7,7 +7,7 @@
 
 use serde_json::{Value, json};
 use sve_engine::catalog::Catalog;
-use sve_engine::game::internal::{CardPlay, InstructionOutcome};
+use sve_engine::game::internal::{Answer, CardPlay, InputDomain, InstructionOutcome};
 use sve_engine::game::{Game, View};
 use sve_engine::ir::PlayerId;
 
@@ -156,4 +156,226 @@ fn token_definition_links_require_a_complete_token_and_cannot_execute_as_mother_
     ability["section"] = json!(0_u8);
     ability["sources"][0] = source;
     Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap_err();
+}
+
+#[test]
+fn field_creation_caps_before_allocating_and_result_can_change_the_arrivals() {
+    for (occupied, expected) in [(0_usize, 2_usize), (4, 1), (5, 0)] {
+        let (snapshot, keywords, mut input) = selection(2);
+        let steps = &mut input["authors"][0]["input"]["tree"]["cards"]["creator"]["faces"]["f:11111111111111111111111111111111"]
+            ["abilities"][0]["spell"]["do"];
+        steps[0]["create"]["to"] = json!("field");
+        steps
+            .as_array_mut()
+            .unwrap()
+            .push(json!({"act":{"ref":"made"}}));
+        let selected = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
+        let mut initial = initial(occupied);
+        initial["players"]["P1"]["zones"]["field"] = initial["players"]["P1"]["zones"]["ex"].take();
+        initial["players"]["P1"]["zones"]["ex"] = json!([]);
+        let mut game = Game::from_selected_effects(
+            selected,
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "field-capacity",
+        )
+        .unwrap();
+        let CardPlay::Resolved(result) = game
+            .play_internal_card("creator", PlayerId { seat: 1 })
+            .unwrap()
+        else {
+            panic!("blank token has no choice")
+        };
+        let created = result
+            .progress
+            .receipts
+            .values()
+            .find_map(|outcome| {
+                if let InstructionOutcome::Token(value) = outcome {
+                    Some(value.created.len())
+                } else {
+                    None
+                }
+            })
+            .unwrap();
+        assert_eq!(created, expected);
+        let view = game.projection(View::Referee).unwrap();
+        assert_eq!(
+            view["P1"]["field"].as_array().unwrap().len(),
+            occupied + expected
+        );
+        assert_eq!(view["P1"]["ex"], json!([]));
+        assert_eq!(view["P2"]["field"], json!([]));
+        let arrivals = view["objects"]
+            .as_object()
+            .unwrap()
+            .iter()
+            .filter(|(id, _)| id.starts_with("new-"))
+            .collect::<Vec<_>>();
+        assert_eq!(arrivals.len(), expected);
+        for (_, arrival) in arrivals {
+            assert_eq!(arrival["acted"], true);
+            assert_eq!(arrival["entered_this_turn"], true);
+        }
+    }
+}
+
+#[test]
+fn field_creation_ward_choices_resume_the_same_objects_once() {
+    let (snapshot, _, mut input) = selection(2);
+    let (_, ward) = author(
+        "token",
+        "22222222222222222222222222222222",
+        "フォロワー・トークン",
+        vec![json!({"keywords":["ward"]})],
+    );
+    input["authors"][1] = ward;
+    input["authors"][0]["input"]["tree"]["cards"]["creator"]["faces"]["f:11111111111111111111111111111111"]
+        ["abilities"][0]["spell"]["do"][0]["create"]["to"] = json!("field");
+    let keywords = include_str!("../../../authored/rules/keywords.yaml");
+    let selected = Catalog::from_current_selection(&snapshot, keywords, &input).unwrap();
+    let mut game = Game::from_selected_effects(
+        selected,
+        &initial(0),
+        &Value::Null,
+        &Value::Null,
+        "created-ward",
+    )
+    .unwrap();
+    let mut play = game
+        .play_internal_card("creator", PlayerId { seat: 1 })
+        .unwrap();
+    for acted in [true, false] {
+        let CardPlay::Awaiting(question) = play else {
+            panic!("Ward entry choice")
+        };
+        assert!(matches!(question.domain, InputDomain::WardEntry { .. }));
+        play = game
+            .answer_internal_card(question.actor, question.token, Answer::WardEntry(acted))
+            .unwrap();
+    }
+    let CardPlay::Resolved(result) = play else {
+        panic!("two choices complete the creation")
+    };
+    assert_eq!(
+        result.progress.receipts.values().find_map(|outcome| {
+            if let InstructionOutcome::Token(value) = outcome {
+                Some(value.created.len())
+            } else {
+                None
+            }
+        }),
+        Some(2)
+    );
+    let view = game.projection(View::Referee).unwrap();
+    let ids = view["P1"]["field"].as_array().unwrap();
+    assert_eq!(ids.len(), 2);
+    let acted = ids
+        .iter()
+        .filter(|id| view["objects"][id.as_str().unwrap()]["acted"] == true)
+        .count();
+    assert_eq!(acted, 1);
+}
+
+#[test]
+fn only_successful_field_creations_emit_per_token_entry_triggers() {
+    for (occupied, expected) in [(1_usize, 2_usize), (4, 1), (5, 0)] {
+        let (mut snapshot, keywords, mut input) = selection(2);
+        input["authors"][0]["input"]["tree"]["cards"]["creator"]["faces"]["f:11111111111111111111111111111111"]
+            ["abilities"][0]["spell"]["do"][0]["create"]["to"] = json!("field");
+        let (observer, source) = author(
+            "observer",
+            "33333333333333333333333333333333",
+            "フォロワー",
+            vec![
+                json!({"auto":{"on":{"enter_field":{"who":"self","sel":{"kind":"follower"}}},"do":[{"draw":{"n":1_u8}}]}}),
+            ],
+        );
+        snapshot.push_str(&observer.to_string());
+        snapshot.push('\n');
+        input["authors"].as_array_mut().unwrap().push(source);
+        let selected = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
+        let mut initial = initial(occupied - 1);
+        let mut field = initial["players"]["P1"]["zones"]["ex"].take();
+        field
+            .as_array_mut()
+            .unwrap()
+            .push(json!({"id":"observer","card":"observer"}));
+        initial["players"]["P1"]["zones"]["field"] = field;
+        initial["players"]["P1"]["zones"]["ex"] = json!([]);
+        initial["players"]["P1"]["zones"]["deck"] = json!([
+            {"id":"draw-1","card":"creator"},{"id":"draw-2","card":"creator"},{"id":"draw-3","card":"creator"}
+        ]);
+        let mut game = Game::from_selected_effects(
+            selected,
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "token-entry",
+        )
+        .unwrap();
+        assert!(matches!(
+            game.play_internal_card("creator", PlayerId { seat: 1 })
+                .unwrap(),
+            CardPlay::Resolved(_)
+        ));
+        game.resume_internal_card().unwrap();
+        let mut triggers = 0;
+        while let Some(question) = game.internal_pending_choice().unwrap() {
+            let InputDomain::Pending(options) = &question.domain else {
+                panic!("entry pending choice")
+            };
+            assert!(options.iter().all(|option| option.card == "observer"));
+            let play = game
+                .answer_internal_card(
+                    question.actor,
+                    question.token,
+                    Answer::Pending(options[0].handle),
+                )
+                .unwrap();
+            assert!(matches!(play, CardPlay::Resolved(_)));
+            triggers += 1;
+            game.resume_internal_card().unwrap();
+        }
+        assert_eq!(triggers, expected);
+        let view = game.projection(View::Referee).unwrap();
+        assert_eq!(view["P1"]["hand"].as_array().unwrap().len(), expected);
+        assert_eq!(
+            view["P1"]["field"].as_array().unwrap().len(),
+            occupied + expected
+        );
+    }
+}
+
+#[test]
+fn created_result_does_not_mutate_a_token_after_it_changes_generation() {
+    let (snapshot, keywords, mut input) = selection(1);
+    let steps = &mut input["authors"][0]["input"]["tree"]["cards"]["creator"]["faces"]["f:11111111111111111111111111111111"]
+        ["abilities"][0]["spell"]["do"];
+    steps[0]["create"]["to"] = json!("field");
+    steps.as_array_mut().unwrap().extend([
+        json!({"banish":{"ref":"made"}}),
+        json!({"act":{"ref":"made"}}),
+    ]);
+    let selected = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
+    let mut game = Game::from_selected_effects(
+        selected,
+        &initial(0),
+        &Value::Null,
+        &Value::Null,
+        "stale-created",
+    )
+    .unwrap();
+    let CardPlay::Resolved(result) = game
+        .play_internal_card("creator", PlayerId { seat: 1 })
+        .unwrap()
+    else {
+        panic!("no choice")
+    };
+    assert!(result.progress.receipts.values().any(
+        |outcome| matches!(outcome, InstructionOutcome::Posture(changes) if changes.is_empty())
+    ));
+    let view = game.projection(View::Referee).unwrap();
+    assert_eq!(view["P1"]["field"], json!([]));
 }

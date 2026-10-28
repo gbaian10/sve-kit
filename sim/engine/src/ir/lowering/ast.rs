@@ -220,6 +220,7 @@ pub(super) struct Create {
 #[serde(rename_all = "snake_case")]
 pub(super) enum CreateZone {
     Ex,
+    Field,
 }
 
 #[derive(Deserialize)]
