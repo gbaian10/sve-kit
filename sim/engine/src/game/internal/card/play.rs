@@ -165,8 +165,10 @@ pub(super) fn check_spell(ability: &Ability, printed: &Value) -> Result<()> {
     else {
         return Err(unsupported("Spell intrinsic cost"));
     };
-    if printed["card_type"] != "スペル"
-        || *amount != super::super::cost::printed_play_cost(&printed["cost"])?
+    if !matches!(
+        printed["card_type"].as_str(),
+        Some("スペル" | "スペル・トークン")
+    ) || *amount != super::super::cost::printed_play_cost(&printed["cost"])?
     {
         return Err(unsupported(
             "Spell catalogue kind or intrinsic cost mismatch",
@@ -483,7 +485,7 @@ impl Game {
         Ok(false)
     }
 
-    /// Play an admitted ordinary Spell, follower or amulet.
+    /// Play an admitted Spell, follower or amulet.
     ///
     /// # Errors
     /// Rejects unsupported cards, timing, carry, payment and body failures atomically.
@@ -493,7 +495,8 @@ impl Game {
             return Err(invalid("Quick requires its authority question"));
         }
         let before = self.clone();
-        let result = if self.object_type(holder)? == "スペル" {
+        let result = if matches!(self.object_type(holder)?, "スペル" | "スペル・トークン")
+        {
             self.play_internal_spell(holder, actor)
         } else {
             self.play_internal_field_card(holder, actor)
