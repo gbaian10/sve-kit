@@ -213,10 +213,14 @@ pub(in crate::game::internal) fn check_resolution(decision: &Decision) -> Result
         }
         selector => field_selector(selector)?,
     }
+    let selector = match &group.selector {
+        Selector::Difference { input, .. } => input.as_ref(),
+        selector => selector,
+    };
     if decision.actor != (PlayerRef::Controller {})
         || constraint.cardinality.maximum.is_none()
         || !matches!(
-            group.selector,
+            selector,
             Selector::Zone {
                 zone: ZoneKind::Field | ZoneKind::Ex,
                 ..

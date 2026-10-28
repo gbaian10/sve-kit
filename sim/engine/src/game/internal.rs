@@ -34,9 +34,8 @@ mod allocation;
 mod card;
 mod cost;
 mod discard;
-mod grant;
-pub(super) use grant::KeywordState;
 mod duration;
+mod grant;
 mod life;
 mod movement;
 mod numeric;
@@ -60,6 +59,7 @@ pub use card::{
 };
 pub(super) use card::{CardRuntime, serialize_cards};
 pub(super) use cost::CostState;
+pub(super) use grant::KeywordState;
 pub use movement::MovementFact;
 pub(super) use numeric::NumericState;
 pub use numeric::StatChangeFact;
