@@ -201,6 +201,27 @@ impl Game {
         Ok(())
     }
 
+    pub(in crate::game::internal) fn internal_resolution_recipient(
+        &mut self,
+        execution: &mut Execution,
+        decision: &Decision,
+    ) -> Result<()> {
+        super::selection::check_resolution(decision)?;
+        let (mut wait, mut domain) = self.recipient_target_domain(execution, decision)?;
+        let available = u64::try_from(wait.members.len()).map_err(invalid)?;
+        // Resolving choices do as much as possible, while formal play stays strict.
+        wait.bounds.minimum = Nat(wait.bounds.minimum.0.min(available));
+        domain.cardinality = wait.bounds;
+        let actor = execution.context.controller;
+        self.internal_wait(
+            execution,
+            decision.id,
+            actor,
+            InputDomain::Targets(domain),
+            Wait::RecipientTargets(wait),
+        )
+    }
+
     pub(in crate::game::internal) fn internal_recipient_target(
         &self,
         execution: &mut Execution,

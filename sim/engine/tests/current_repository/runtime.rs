@@ -71,6 +71,9 @@ mod leader_damage;
 #[path = "runtime/leader_life.rs"]
 mod leader_life;
 
+#[path = "runtime/leader_select.rs"]
+mod leader_select;
+
 #[path = "runtime/life_cost.rs"]
 mod life_cost;
 

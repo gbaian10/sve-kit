@@ -867,7 +867,10 @@ fn check_nodes(
             }
             Node::Capture { .. } => {}
             Node::Decision { decision }
-                if matches!(decision.domain, ChoiceDomain::Objects { .. }) =>
+                if matches!(
+                    decision.domain,
+                    ChoiceDomain::Objects { .. } | ChoiceDomain::Recipients { .. }
+                ) =>
             {
                 selection::check_resolution(decision)?;
             }

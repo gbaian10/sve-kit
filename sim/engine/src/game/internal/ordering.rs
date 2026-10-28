@@ -217,7 +217,10 @@ fn mask_public_selectors(inspected: &mut Node) -> Result<()> {
         mask_public_field_condition(value);
     }
     if let Node::Decision { decision } = inspected
-        && matches!(decision.domain, ChoiceDomain::Objects { .. })
+        && matches!(
+            decision.domain,
+            ChoiceDomain::Objects { .. } | ChoiceDomain::Recipients { .. }
+        )
     {
         super::card::selection::check_resolution(decision)?;
         // This checked public domain does not authorize private reads in decision metadata.

@@ -1307,3 +1307,30 @@ fn repeated_named_existence_queries_keep_independent_candidate_scopes() {
         .lower_with_printed_costs(&tree, &BTreeMap::from([("SD03-005".to_owned(), Nat(1))]))
         .unwrap();
 }
+
+#[test]
+fn resolution_leader_choices_keep_recipient_bindings() {
+    let lowerer = ExpandedLowerer::new().unwrap();
+    for from in [
+        json!({"leader":"opp"}),
+        json!({"who":"opp","kind":"follower","leader_or":true}),
+    ] {
+        let mut tree = expanded::tree().clone();
+        tree["cards"]["BP08-038"]["abilities"][0]["fanfare"]["do"] = json!([
+            {"choose":{"bind":"victim","from":from,"n":1_u64}},
+            {"damage":{"to":"victim","n":1_u64}}
+        ]);
+        let cards = lowerer.lower(&tree).unwrap();
+        let steps = &cards["BP08-038"].card().abilities[0]
+            .node
+            .body
+            .as_ref()
+            .unwrap()
+            .steps;
+        assert!(matches!(&steps[0].node, Node::Decision { decision }
+            if matches!(decision.domain, ChoiceDomain::Recipients { .. })
+            && matches!(decision.kind, DecisionKind::ResolutionChoice { .. })));
+        tree["cards"]["BP08-038"]["abilities"][0]["fanfare"]["do"][1] = json!({"destroy":"victim"});
+        lowerer.lower(&tree).unwrap_err();
+    }
+}
