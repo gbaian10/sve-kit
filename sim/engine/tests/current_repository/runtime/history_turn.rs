@@ -3,7 +3,7 @@ use std::sync::LazyLock;
 
 fn history_game(initial: &Value) -> Game {
     static SELECTED: LazyLock<SelectedEffects> = LazyLock::new(|| {
-        let (mut snapshot, keywords, mut input) = inputs();
+        let (mut snapshot, keywords, mut input) = inputs().clone();
         let mut face = snapshot
             .lines()
             .map(|line| serde_json::from_str::<Value>(line).unwrap())
