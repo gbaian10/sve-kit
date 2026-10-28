@@ -69,9 +69,11 @@ ignored:
     reason: reminder
 ```
 
-`reason` 只有 `reminder | layout`；不可與能力覆蓋重疊。token 定義不能標成母卡能力；尚未支援的 token 接線仍明確拒絕。參數實值為整數或字串，型別必須符合本體宣告；布林不算整數。多個 edition 時必須選版，不自動取最新版。
+`reason` 只有 `reminder | layout`；不可與能力覆蓋重疊。token 定義不能標成母卡能力；使用卡片層的 `token_sources: [{section: 1, line: 1, card: BP01-T02}]` 明示連到共用 token 卡，跨行定義可用 `covers` 完整覆蓋。引用須指向選用中的完整 token 卡；區段與母卡能力不能重複覆蓋。參數實值為整數或字串，型別必須符合本體宣告；布林不算整數。多個 edition 時必須選版，不自動取最新版。
 
-來源尚未分類的 section 只有在每個非空行都明示 `ignored: reminder` 時才可略過；未覆蓋、僅標 layout 或已分類為 token 定義的區段仍拒絕。這不授予提醒文字所述共通規則的執行能力。
+來源尚未分類的 section 可用上述 token 引用，或在每個非空行都明示 `ignored: reminder` 時略過；已分類為 token 定義的區段必須使用 token 引用。未覆蓋或僅標 layout 仍拒絕。這不授予提醒文字所述共通規則的執行能力。
+
+目前 `create: {token: フェアリーウィスプ, n: 2, to: ex, result: made}` 支援固定數量、單一規則名稱、自己 EX。省略 `n` 為 1；EX 最多五張，只建立並放入仍有容量的數量。`result` 或 `bind` 擇一，綁定實際放入的 token，滿區時為空；authority receipt 同樣只列出成功放入者。token 的整卡 runtime 程式仍須准入。
 
 ## 寫入與驗證
 
