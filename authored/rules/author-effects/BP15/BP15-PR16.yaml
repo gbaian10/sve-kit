@@ -1,0 +1,26 @@
+cards:
+  BP15-PR16:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - banish: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-10-29"
+    token:
+      name: 絶望の奔流
+      template: true
+format: 2
+kind: author_effect_set
