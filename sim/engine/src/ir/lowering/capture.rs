@@ -89,6 +89,7 @@ impl BodyContext<'_> {
         });
         Ok(Expr::Captured(into))
     }
+
     pub(super) fn resolution_count(
         &mut self,
         value: &ast::Number,
