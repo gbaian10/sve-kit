@@ -3445,11 +3445,11 @@ it("sorts home sets by regional release, groups undated products and PR, and app
           .search({ ...query, state: { ...state, unit } })
           .items.filter((item) => ids.includes(item.printingId))
           .map((item) => ids.indexOf(item.printingId))
-      expect(selected(DEFAULT_QUERY)).toEqual([7, 2, 1, 0, 8, 11, 4, 3, 6, 5, 10, 9])
+      expect(selected(DEFAULT_QUERY)).toEqual([7, 2, 1, 0, 8, 11, 6, 5, 10, 9, 4, 3])
       const { order: _order, ...ascending } = DEFAULT_QUERY
-      expect(selected(ascending)).toEqual([9, 10, 5, 6, 4, 3, 0, 8, 11, 2, 1, 7])
+      expect(selected(ascending)).toEqual([0, 8, 11, 2, 1, 7, 9, 10, 5, 6, 4, 3])
       expect(selected({ ...DEFAULT_QUERY, secondaryOrder: "desc" })).toEqual([
-        7, 1, 2, 11, 8, 0, 3, 4, 6, 5, 10, 9,
+        7, 1, 2, 11, 8, 0, 6, 5, 10, 9, 3, 4,
       ])
       expect(selected({ ...DEFAULT_QUERY, secondarySort: null })).toEqual(selected(DEFAULT_QUERY))
       const numberFirst = selected({
@@ -3461,6 +3461,13 @@ it("sorts home sets by regional release, groups undated products and PR, and app
       expect(numberFirst.indexOf(2)).toBeLessThan(numberFirst.indexOf(8))
       const numberFirstReverse = selected({ ...ascending, sort: "no", secondarySort: "set" })
       expect(numberFirstReverse.indexOf(8)).toBeLessThan(numberFirstReverse.indexOf(2))
+      for (const order of ["asc", "desc"] as const) {
+        const bySet = selected({
+          ...(order === "desc" ? DEFAULT_QUERY : ascending),
+          secondarySort: null,
+        })
+        expect(bySet.slice(-2).sort()).toEqual([3, 4])
+      }
     }
   }
 })

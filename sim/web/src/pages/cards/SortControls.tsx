@@ -1,6 +1,5 @@
 import { useTranslation } from "react-i18next"
 
-import { cn } from "../../components/ui/cn"
 import { QUERY_SORTS, type QueryState } from "../../domain/query/model"
 
 export function SortControls({
@@ -28,12 +27,7 @@ export function SortControls({
         return (
           <div
             key={String(secondary)}
-            className={cn(
-              "grid items-center gap-1 text-13 md:flex",
-              secondary && sort === null
-                ? "grid-cols-[3rem_minmax(0,1fr)]"
-                : "grid-cols-[3rem_minmax(0,1fr)_minmax(0,1fr)]",
-            )}
+            className="grid grid-cols-[3rem_minmax(0,1fr)_minmax(0,1fr)] items-center gap-1 text-13 md:flex"
           >
             <label className="contents md:flex md:items-center md:gap-1">
               <span className="w-12 shrink-0">{label}</span>
@@ -67,7 +61,7 @@ export function SortControls({
                 ))}
               </select>
             </label>
-            {sort !== null && (
+            {sort !== null ? (
               <button
                 type="button"
                 aria-label={
@@ -87,6 +81,13 @@ export function SortControls({
               >
                 {direction} {descending ? "↓" : "↑"}
               </button>
+            ) : (
+              <button
+                type="button"
+                aria-label={label}
+                disabled
+                className="h-7 w-full min-w-0 rounded-control border border-border bg-surface-1 px-1 text-13 text-text-3 opacity-50 md:h-8 md:min-w-24 md:px-2"
+              />
             )}
           </div>
         )

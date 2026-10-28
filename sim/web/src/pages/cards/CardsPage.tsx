@@ -952,7 +952,7 @@ export function CardsPage() {
       >
         <div
           className={cn(
-            "flex w-full flex-col items-start gap-2 md:w-auto md:flex-row md:items-center",
+            "flex w-full flex-col items-start gap-2 md:w-auto md:flex-1 md:flex-row md:items-center",
             !headerMenus && "md:flex-wrap",
           )}
         >
@@ -960,6 +960,7 @@ export function CardsPage() {
           <Segmented
             size="sm"
             tone="accent"
+            className="self-end md:ml-auto"
             label={t("results.view")}
             options={VIEW_MODES.map((value) => ({
               value,
