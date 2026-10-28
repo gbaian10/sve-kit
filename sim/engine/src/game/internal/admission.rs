@@ -288,7 +288,10 @@ fn check_program(program: &Program, source: &SourceSpan, card: bool) -> Result<(
                 }
             }
             Node::Decision { decision } => {
-                if matches!(decision.domain, ChoiceDomain::Objects { .. }) {
+                if matches!(
+                    decision.domain,
+                    ChoiceDomain::Objects { .. } | ChoiceDomain::Recipients { .. }
+                ) {
                     if !card {
                         return Err(unsupported("resolution field choice outside a whole card"));
                     }
@@ -311,6 +314,7 @@ fn check_program(program: &Program, source: &SourceSpan, card: bool) -> Result<(
                         ..
                     } | ChoiceDomain::Distribution { .. }
                         | ChoiceDomain::Objects { .. }
+                        | ChoiceDomain::Recipients { .. }
                 ) || !decision.captures.is_empty()
                     || !matches!(decision.visibility, Visibility::Public {})
                     || !matches!(

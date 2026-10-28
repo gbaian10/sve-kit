@@ -1039,6 +1039,9 @@ impl Game {
         match &decision.domain {
             ChoiceDomain::Distribution { .. } => self.internal_distribution(execution, decision),
             ChoiceDomain::Objects { .. } => self.internal_resolution_target(execution, decision),
+            ChoiceDomain::Recipients { .. } => {
+                self.internal_resolution_recipient(execution, decision)
+            }
             ChoiceDomain::Integer {
                 cardinality,
                 binding,

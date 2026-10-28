@@ -174,6 +174,17 @@ pub(super) fn check(constraint: &SelectionConstraint) -> Result<()> {
 }
 
 pub(in crate::game::internal) fn check_resolution(decision: &Decision) -> Result<()> {
+    if let ChoiceDomain::Recipients {
+        candidates,
+        cardinality,
+        ..
+    } = &decision.domain
+    {
+        if decision.actor != (PlayerRef::Controller {}) {
+            return Err(unsupported("resolution recipient actor"));
+        }
+        return super::recipient_targets::check(candidates, *cardinality);
+    }
     let ChoiceDomain::Objects {
         constraint,
         target_roles: None,

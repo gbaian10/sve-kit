@@ -44,6 +44,14 @@ CARD_STEPS: list[tuple[str, str, list[JsonValue]]] = [
 
 # Synthetic examples exercise documented variants without inventing card evidence.
 SYNTHETIC_ACTIONS: list[dict[str, JsonValue]] = [
+    {"choose": {"bind": "picked", "from": {"leader": "opp"}, "n": 1}},
+    {
+        "choose": {
+            "bind": "picked",
+            "from": {"who": "opp", "kind": "follower", "leader_or": True},
+            "upto": 1,
+        }
+    },
     {
         "choose": {
             "bind": "picked",
