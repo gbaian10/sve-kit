@@ -358,7 +358,7 @@ class CurrentAuthorSources:
                 authors.append(
                     {
                         "status": "accepted",
-                        "printings": numbers,
+                        "printings": list[JsonValue](numbers),
                         "input": result.lowering_input(),
                     }
                 )
