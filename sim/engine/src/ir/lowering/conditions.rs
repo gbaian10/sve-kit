@@ -22,7 +22,10 @@ impl BodyContext<'_> {
                     return Err(unsupported(path));
                 }
                 Predicate::Exists {
-                    objects: super::costs::query(query, &mut self.allocator, path)?,
+                    objects: super::costs::public_query(
+                        query,
+                        Binding::new(self.allocator.id(path)?, self.card_allocator.scope(path)?),
+                    ),
                 }
             }
             ast::Condition::Awakened(true) => Predicate::CompareInt {

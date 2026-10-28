@@ -1282,3 +1282,21 @@ fn activated_zones_preserve_ex_and_reject_unimplemented_combinations() {
         lowerer.lower(&tree).unwrap_err();
     }
 }
+
+#[test]
+fn repeated_named_existence_queries_keep_independent_candidate_scopes() {
+    let mut tree = expanded::spell_tree().clone();
+    let condition = json!({"exists":{"who":"self","zone":"field","name":"unit-follower"}});
+    *tree
+        .pointer_mut("/cards/SD03-005/abilities/0/spell")
+        .unwrap() = json!({
+        "do":[
+            {"if":{"cond":condition,"then":[{"draw":{"who":"self","n":1_u8}}]}},
+            {"if":{"cond":condition,"then":[{"draw":{"who":"self","n":1_u8}}]}}
+        ]
+    });
+    ExpandedLowerer::new()
+        .unwrap()
+        .lower_with_printed_costs(&tree, &BTreeMap::from([("SD03-005".to_owned(), Nat(1))]))
+        .unwrap();
+}
