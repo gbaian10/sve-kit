@@ -8,6 +8,7 @@ mod current;
 mod discard;
 mod evolution;
 mod exchange;
+mod grant;
 mod hand_payment;
 mod keywords;
 mod material;
@@ -704,6 +705,7 @@ fn lowered_subscription(
 struct BodyContext<'definitions> {
     scope: ScopeId,
     local_payment: Option<(String, ReceiptId)>,
+    definition: AbilityId,
     payment_result: Option<(String, ReceiptId)>,
     allocator: Allocator,
     card_allocator: &'definitions mut Allocator,
@@ -728,6 +730,7 @@ impl<'definitions> BodyContext<'definitions> {
     ) -> Self {
         Self {
             scope,
+            definition: AbilityId(scope.0),
             payment_result: if entry.spell.is_some() {
                 payment_result
             } else {
@@ -886,6 +889,7 @@ impl<'definitions> BodyContext<'definitions> {
                 },
             }),
             ast::Step::Buff(value) => self.modify(value, false, path),
+            ast::Step::Grant(value) => self.grant(value, span, path),
             ast::Step::SetStat(value) => self.modify(value, true, path),
             ast::Step::Apply(value) => self.continuous(value, source, path),
             ast::Step::Search(value) => self.search(value, path),

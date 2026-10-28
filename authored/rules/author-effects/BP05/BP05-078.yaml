@@ -1,0 +1,57 @@
+cards:
+  BP05-078:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - choice:
+                options:
+                  - - grant:
+                        keywords:
+                          - rush
+                        on: ally
+                    - damage:
+                        n: 1
+                        to:
+                          leader: self
+                  - - damage:
+                        n: 2
+                        to: enemy
+                    - damage:
+                        n: 1
+                        to:
+                          leader: self
+                  - - damage:
+                        n: 1
+                        to:
+                          leader: self
+                    - draw:
+                        n: 1
+                    - discard:
+                        n: 1
+                        who: self
+                upto: 2
+          targets:
+            - bind: ally
+              from:
+                kind: follower
+                who: self
+                zone: field
+              n: 1
+              option: 1
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+              option: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-sol
+            who: Codex
+          date: "2026-10-28"
+format: 2
+kind: author_effect_set

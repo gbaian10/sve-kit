@@ -1,0 +1,27 @@
+cards:
+  BP04-113:
+    abilities:
+      - evolve_time:
+          do:
+            - choose:
+                bind: ally
+                from:
+                  kind: follower
+                  other: true
+                  who: self
+                  zone: field
+                n: 1
+            - grant:
+                keywords:
+                  - aura
+                on: ally
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-sol
+            who: Codex
+          date: "2026-10-28"
+format: 2
+kind: author_effect_set

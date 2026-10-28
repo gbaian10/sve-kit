@@ -1,4 +1,5 @@
 use super::*;
+use std::{fs::read_to_string, path::PathBuf};
 use sve_engine::catalog::EngineIdentityInput;
 
 #[expect(
@@ -27,7 +28,7 @@ fn evolution_companion(snapshot: &str, input: &mut Value) -> (String, WellFormed
     }).to_string()]));
     let mut tree = expanded::tree().clone();
     tree["cards"] = json!({"synthetic-evolution":tree["cards"]["synthetic-evolution"]});
-    let mut programs = ExpandedLowerer::new().unwrap().lower(&tree).unwrap();
+    let mut programs = lowerer().lower(&tree).unwrap();
     (snapshot, programs.remove("synthetic-evolution").unwrap())
 }
 
@@ -49,7 +50,7 @@ fn ex_position(available: bool) -> Value {
 
 #[test]
 fn bp01_156_evolution_chooses_only_opposing_ex_and_banishes() {
-    let (snapshot, keywords, mut input) = inputs();
+    let (snapshot, keywords, mut input) = inputs().clone();
     let (snapshot, companion) = evolution_companion(&snapshot, &mut input);
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
     let mut rules: Value = serde_saphyr::from_str(

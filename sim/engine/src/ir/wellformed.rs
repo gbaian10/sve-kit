@@ -22,6 +22,7 @@ mod entries;
 mod events;
 mod evolution;
 mod exchange;
+mod grant;
 mod installation;
 mod modes;
 mod movement;
@@ -623,6 +624,12 @@ impl Checker {
                 self.declaration(declaration)
             }
             Action::Discard { player, mode } => self.discard(player, mode),
+            Action::Grant {
+                subjects,
+                abilities,
+                duration,
+                provider,
+            } => self.grant(subjects, abilities, duration, provider),
             Action::Damage {
                 recipients,
                 amount,

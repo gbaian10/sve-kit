@@ -35,6 +35,7 @@ mod card;
 mod cost;
 mod discard;
 mod duration;
+mod grant;
 mod life;
 mod movement;
 mod numeric;
@@ -58,6 +59,7 @@ pub use card::{
 };
 pub(super) use card::{CardRuntime, serialize_cards};
 pub(super) use cost::CostState;
+pub(super) use grant::KeywordState;
 pub use movement::MovementFact;
 pub(super) use numeric::NumericState;
 pub use numeric::StatChangeFact;
@@ -238,6 +240,8 @@ pub enum InstructionOutcome {
     Destroy(DestroyOutcome),
     /// Fixed generations protected until this resolution ends.
     Installed(Vec<ObjectRef>),
+    /// Fixed generations receiving basic printed keywords.
+    Granted(Vec<ObjectRef>),
     /// Publicly revealed generations; no subsequent private selector authority.
     Revealed(Vec<ObjectRef>),
     /// Objects observed without movement or a generation change.
@@ -1150,6 +1154,7 @@ impl Game {
             Action::Discard { .. } => self.internal_discard_wait(execution, instruction)?,
             Action::Life { .. } => self.internal_life(execution, &instruction)?,
             Action::Modify { .. } => self.internal_modify(execution, &instruction)?,
+            Action::Grant { .. } => self.internal_grant(execution, &instruction)?,
             Action::Reveal { objects } => {
                 self.internal_reveal(execution, &instruction, objects)?;
             }

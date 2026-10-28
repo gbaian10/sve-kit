@@ -828,6 +828,7 @@ impl Game {
     fn next_turn(&mut self) -> Result<()> {
         let turn = self.state.schedule.close()?;
         self.internal_numeric_end_turn(turn)?;
+        self.internal_keywords_end_turn(turn);
         self.expire_effects()?;
         let seat = self.next_scheduled_player()?;
         self.state.turn["active"] = json!(seat);

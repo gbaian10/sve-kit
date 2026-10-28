@@ -337,7 +337,7 @@ fn named_field_collection_buffs_only_matching_objects() {
 #[test]
 fn ex_choice_accepts_public_cards_and_rejects_nonfield_damage() {
     let choice = json!({"bind":"t","from":{"who":"opp","zone":"ex"},"n":1});
-    let lowerer = ExpandedLowerer::new().unwrap();
+    let lowerer = lowerer();
     for damage in [false, true] {
         let action = if damage {
             json!({"damage":{"to":"t","n":1}})

@@ -815,6 +815,12 @@ fn check_nodes(
         match &located.node {
             Node::Instruction { instruction } => {
                 super::tokens::check_catalog(game, &instruction.action)?;
+                super::grant::check_action(&instruction.action)?;
+                if let Action::Grant { provider, .. } = &instruction.action
+                    && &provider.face != printed_origin(&instruction.source.origin)?.0
+                {
+                    return Err(unsupported("grant provider face"));
+                }
                 if instruction.source != *ability_source {
                     return Err(invalid("instruction has a foreign ability source"));
                 }
@@ -838,6 +844,7 @@ fn check_nodes(
                         | Action::Banish { .. }
                         | Action::Posture { .. }
                         | Action::Modify { .. }
+                        | Action::Grant { .. }
                         | Action::InstallEffect { .. }
                         | Action::Search { .. }
                         | Action::Token { .. }

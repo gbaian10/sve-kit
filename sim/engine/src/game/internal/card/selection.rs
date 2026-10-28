@@ -213,10 +213,14 @@ pub(in crate::game::internal) fn check_resolution(decision: &Decision) -> Result
         }
         selector => field_selector(selector)?,
     }
+    let selector = match &group.selector {
+        Selector::Difference { input, .. } => input.as_ref(),
+        selector => selector,
+    };
     if decision.actor != (PlayerRef::Controller {})
         || constraint.cardinality.maximum.is_none()
         || !matches!(
-            group.selector,
+            selector,
             Selector::Zone {
                 zone: ZoneKind::Field | ZoneKind::Ex,
                 ..
@@ -238,6 +242,9 @@ pub(in crate::game::internal) fn field_selector(selector: &Selector) -> Result<(
             players,
         } if players.relative_to == (PlayerRef::Controller {}) => {
             check_predicate(predicate, *binding)
+        }
+        Selector::Difference { input, except } if matches!(except.as_ref(), Selector::Objects { objects } if objects == &[ObjectOperand::SourceHolder {}]) => {
+            field_selector(input)
         }
         Selector::Captured { .. } | Selector::Bound { .. } | Selector::Objects { .. } => Ok(()),
         Selector::Union { sets } => {
