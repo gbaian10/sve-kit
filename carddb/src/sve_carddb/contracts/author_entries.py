@@ -270,7 +270,7 @@ class AuthorCardFields(TypedDict):
     ignored: NotRequired[tuple[DirectSourceUse, ...]]
     deck_rule: NotRequired[DeckRule]
     token: NotRequired[TokenIdentity]
-    token_sources: NotRequired[tuple[TokenSource, ...]]
+    token_sources: NotRequired[Annotated[tuple[TokenSource, ...], Field(min_length=1)]]
 
 
 type AuthorCard = AuthorCardFields
