@@ -437,3 +437,39 @@ fn bp16_105_real_evolution_triggers_the_admitted_106_form() {
     assert_eq!(state["P2"]["leader"]["life"], 16_u8);
     assert_eq!(state["P1"]["pp"]["current"], 0_u8);
 }
+
+#[test]
+fn bp16_p29_spell_token_targets_draws_discards_and_ceases_to_exist() {
+    let mut initial = position("BP16-P29");
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P1"]["zones"]["ex"] = json!([{"id":"source","card":"BP16-P29"}]);
+    initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"BP01-037"}]);
+    let mut game = game(&initial);
+    let play = game.play_internal_card("source", actor()).unwrap();
+    let CardPlay::Awaiting(question) = play else {
+        panic!("expected Spell token target");
+    };
+    let InputDomain::Targets(domain) = &question.domain else {
+        panic!("expected opposing follower choices");
+    };
+    assert_eq!(domain.members.len(), 1);
+    let before = game.projection(View::Referee).unwrap();
+    let _denied = game
+        .answer_internal_card(
+            PlayerId { seat: 2 },
+            question.token,
+            Answer::Targets(vec![domain.members[0].handle]),
+        )
+        .err()
+        .unwrap();
+    assert_eq!(game.projection(View::Referee).unwrap(), before);
+    finish(&mut game, CardPlay::Awaiting(question), true);
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["objects"]["enemy"]["damage"], 2_u8);
+    assert_eq!(state["P1"]["pp"]["current"], 10_u8);
+    assert_eq!(state["P1"]["hand"], json!([]));
+    assert_eq!(state["P1"]["deck"], json!(["P1-second", "P1-third"]));
+    assert_eq!(state["P1"]["cemetery"], json!(["P1-first"]));
+    assert_eq!(state["P1"]["ex"], json!([]));
+    assert!(state["objects"]["source"].is_null());
+}
