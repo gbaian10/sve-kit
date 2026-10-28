@@ -504,7 +504,9 @@ Combo、SC、NC 與 Lesson 必須有完整數字門檻頭；同概念的長短�
 續段開頭為具名物件加卡片 metadata 時視為 Token 定義；以自身能力頭、關鍵字宣告、
 自身條件或直接產生 Token 的動作開頭時可辨識為本卡續文。因此英文 ECP01 食事、
 CP03 的 Twin Drive 續段仍可產生正標籤。其餘續段如出現候選機制而無法確認 owner，
-該機制保留 unknown。缺 current 面、身分未確認或引述未閉合，也不授予完整否定判定。
+該機制保留 unknown。主文內出現標記但未辨識為原生用途的提及，也保留 unknown；
+例如 EP 費用說明、選擇有 Earth Rite 的卡與操作 Stack，第一波不為這些關係另作否定分類。
+缺 current 面、身分未確認或引述未閉合，也不授予完整否定判定。
 
 結果保存於同地區 coverage 列的 `printed_mechanisms` 與 `checked_mechanisms`。
 前者是 `{code, thresholds}` 陣列，後者是已檢查的 code 集合；無正標籤且不在已檢查集合內

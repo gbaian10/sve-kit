@@ -114,7 +114,9 @@ def _native(
         declaration = (
             r"(?:【[^【】]+】\s*)+" if region == "jp" else r"(?:[A-Z][A-Za-z ]*\.\s*)+"
         )
-        found = re.fullmatch(declaration, line) is not None
+        found = re.fullmatch(declaration, line) is not None and (
+            region == "jp" or name in {part.strip() for part in line.split(".")}
+        )
     elif code == "serve":
         found = (
             re.match(

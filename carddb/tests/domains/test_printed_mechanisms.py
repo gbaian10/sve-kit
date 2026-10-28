@@ -55,6 +55,8 @@ if TYPE_CHECKING:
         ),
         ("jp", "自分の場の【スタック】を+2する。", set()),
         ("en", "Add 2 to a Stack on your field.", set()),
+        ("en", "Add a Stack.", set()),
+        ("en", "Give another follower Twin Drive.", set()),
         ("en", 'Give another follower "\nTwin Drive.\n".', set()),
         ("jp", "それは「\n【ツインドライブ】\n」を持つ。", set()),
         ("en", "(Followers with Drive have Rush and Single Drive.)", set()),
