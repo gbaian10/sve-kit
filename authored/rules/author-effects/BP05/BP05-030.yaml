@@ -1,0 +1,27 @@
+cards:
+  BP05-030:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - fanfare:
+          do:
+            - damage:
+                n: 4
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                leader: opp
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-29"
+format: 2
+kind: author_effect_set
