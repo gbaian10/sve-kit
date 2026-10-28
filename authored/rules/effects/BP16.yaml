@@ -341,22 +341,6 @@ cards:
             max: 1
             modes:
               - 1
-  BP16-T01:
-    status: complete
-    abilities:
-      - line: 1
-        kind: static
-        body:
-          op: macro
-          name: guard
-      - line: 2
-        kind: trigger
-        body:
-          op: modify
-          subjects: self.leader
-          hp: 2
-        event: field_to_cemetery
-        subject: self
   BP16-T15:
     status: complete
     abilities:

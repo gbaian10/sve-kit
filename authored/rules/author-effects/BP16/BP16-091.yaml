@@ -1,0 +1,25 @@
+cards:
+  BP16-091:
+    abilities:
+      - attack_time:
+          do:
+            - life:
+                delta: 5
+                who: self
+        line: 1
+      - fanfare:
+          do:
+            - damage:
+                n: 3
+                to:
+                  leader: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-10-29"
+format: 2
+kind: author_effect_set
