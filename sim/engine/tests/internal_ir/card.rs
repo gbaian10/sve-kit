@@ -1,6 +1,9 @@
 use super::*;
 use second::lowerer;
 
+#[path = "card/trigger_targets.rs"]
+mod trigger_targets;
+
 #[path = "card/admission.rs"]
 mod admission;
 use sve_engine::game::internal::{Activation, CardPlay, ResumeStage};

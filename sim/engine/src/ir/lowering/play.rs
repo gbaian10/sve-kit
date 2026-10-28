@@ -1,8 +1,8 @@
 use super::super::{
-    ChoiceDomain, Comparison, Control, DamageRecipient, Decision, DecisionId, DecisionKind,
-    Disjointness, ExecutionRef, InputMode, Mode, ModeChoiceKind, ModeDecision, ModeDecisionKind,
-    ModeId, NatFrozen, NatOperation, PlaySlot, Predicate, SelectionConstraint, SelectionGroup,
-    SelectionSnapshot, SpellCountTime, Visibility,
+    ChoiceDomain, Comparison, Control, CostSpec, DamageRecipient, Decision, DecisionId,
+    DecisionKind, Disjointness, ExecutionRef, InputMode, Mode, ModeChoiceKind, ModeDecision,
+    ModeDecisionKind, ModeId, NatFrozen, NatOperation, PlaySlot, PlaySpec, Predicate,
+    SelectionConstraint, SelectionGroup, SelectionSnapshot, SpellCountTime, Visibility,
 };
 use super::{
     AbilitySource, Action, Allocator, BTreeMap, BTreeSet, BatchPolicy, Binding, BodyContext,
@@ -27,6 +27,36 @@ const fn parameter(id: u64, slot: PlaySlot, domain: ChoiceDomain) -> Decision {
     }
 }
 
+pub(super) fn trigger_play_spec(
+    entry: &ast::Ability,
+    body: &ast::Body,
+    keyword: Option<super::KeywordId>,
+    path: &str,
+) -> Result<Option<PlaySpec>, LoweringError> {
+    let triggered = entry.activate.is_none() && entry.spell.is_none();
+    if !body.targets.is_empty()
+        && triggered
+        && body.optional_cost.is_none()
+        && body.head_cost.is_none()
+        && !matches!(
+            keyword,
+            Some(
+                super::KeywordId::Fanfare | super::KeywordId::OnEvolve | super::KeywordId::OnAttack
+            )
+        )
+    {
+        return Err(unsupported(path));
+    }
+    Ok((triggered
+        && (body.optional_cost.is_some() || body.head_cost.is_some() || !body.targets.is_empty()))
+    .then(|| PlaySpec {
+        limit: None,
+        captures: vec![],
+        parameters: vec![],
+        costs: CostSpec::Ordered { steps: vec![] },
+    }))
+}
+
 #[expect(
     clippy::multiple_inherent_impl,
     reason = "Formal play shares the ability's binding environment."
@@ -38,9 +68,6 @@ impl BodyContext<'_> {
         choice: bool,
         path: &str,
     ) -> Result<(), LoweringError> {
-        if !targets.is_empty() && !self.formal_play {
-            return Err(unsupported(path));
-        }
         let mut names = BTreeSet::new();
         for target in targets {
             if self.definitions.contains_key(&target.bind) || !names.insert(&target.bind) {

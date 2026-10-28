@@ -19,6 +19,15 @@ const BP06_048_FACE: &str = "f:e9d8deca215953a99d12bd07acd566fa";
 #[path = "support/repository.rs"]
 mod repository;
 
+#[expect(
+    dead_code,
+    reason = "Runtime tests use only the evolution expansion fixture."
+)]
+#[path = "support/expanded.rs"]
+mod expanded;
+#[path = "support/rule_fixtures.rs"]
+mod rule_fixtures;
+
 use repository::{inputs, lowerer, selection, selection_with_rules};
 
 fn p25(input: &Value) -> &Value {
