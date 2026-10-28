@@ -1,0 +1,25 @@
+cards:
+  BP01-124:
+    abilities:
+      - fanfare:
+          do:
+            - choose:
+                bind: returned
+                from:
+                  kind: follower
+                  who: self
+                  zone: cemetery
+                upto: 2
+            - move:
+                ref: returned
+                to: hand
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-sol
+            who: Codex
+          date: "2026-10-28"
+format: 2
+kind: author_effect_set
