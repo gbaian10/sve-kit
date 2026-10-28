@@ -1,6 +1,5 @@
 """Generate ephemeral public card inputs before every complete Rust test scope."""
 
-import json
 import os
 import shutil
 import subprocess  # ruff: ignore[suspicious-subprocess-import] -- fixed tool argv; no shell
@@ -29,27 +28,9 @@ def executable(name: str) -> str:
 
 def main(arguments: list[str]) -> int:
     """Never reuse a caller's private snapshot or a stale generated JSONL."""
-    pin = json.loads((ROOT / "tests/engine/card-input.json").read_bytes())
     with tempfile.TemporaryDirectory(prefix="sve-engine-input-") as temporary:
         output = Path(temporary) / "cards.jsonl"
         selection = Path(temporary) / "selection.json"
-        subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed local CLI
-            [
-                executable("uv"),
-                "run",
-                "--directory",
-                str(ROOT / "carddb"),
-                "--locked",
-                "--no-default-groups",
-                "sve-carddb",
-                "parsed-cards",
-                "engine-fixture",
-                str(ROOT / "card-data"),
-                pin["batch_id"],
-                str(output),
-            ],
-            check=True,
-        )
         subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed local test adapter
             [
                 executable("uv"),
@@ -61,6 +42,7 @@ def main(arguments: list[str]) -> int:
                 "python",
                 "-m",
                 "tests.support.repository_current",
+                str(output),
                 str(selection),
             ],
             check=True,
