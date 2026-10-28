@@ -123,3 +123,25 @@ fn ordinary_fanfare_commits_only_after_its_target_is_chosen() {
         1
     );
 }
+
+#[test]
+fn required_head_cost_targets_keep_the_existing_trigger_scope() {
+    let body = json!({
+        "cost":{"pp":1},
+        "targets":[{"bind":"enemy","from":{"who":"opp","zone":"field","kind":"follower"},"n":1}],
+        "do":[{"damage":{"to":"enemy","n":2}}]
+    });
+    for head in ["fanfare", "evolve_time", "super_evolve_time", "attack_time"] {
+        lowerer().lower(&tree(head, body.clone())).unwrap();
+    }
+    lowerer()
+        .lower(&tree("lastword", body.clone()))
+        .err()
+        .unwrap();
+    let mut unpaid = body;
+    unpaid.as_object_mut().unwrap().remove("cost");
+    lowerer()
+        .lower(&tree("super_evolve_time", unpaid))
+        .err()
+        .unwrap();
+}

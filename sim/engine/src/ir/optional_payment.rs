@@ -39,18 +39,19 @@ pub(crate) fn trigger_play(ability: &Ability) -> bool {
             if captures.is_empty() && steps.is_empty())
             && ability.body.as_ref().is_some_and(|body| {
                 if required(body) {
-                    matches!(
-                        ability.source.origin,
-                        AbilityOrigin::Keyword {
-                            keyword: KeywordId::Fanfare
-                                | KeywordId::OnEvolve
-                                | KeywordId::OnSuperEvolve
-                                | KeywordId::OnAttack
-                                | KeywordId::OnRace
-                                | KeywordId::OnDriveGain,
-                            ..
-                        }
-                    )
+                    declaration(body).is_some()
+                        && matches!(
+                            ability.source.origin,
+                            AbilityOrigin::Keyword {
+                                keyword: KeywordId::Fanfare
+                                    | KeywordId::OnEvolve
+                                    | KeywordId::OnSuperEvolve
+                                    | KeywordId::OnAttack
+                                    | KeywordId::OnRace
+                                    | KeywordId::OnDriveGain,
+                                ..
+                            }
+                        )
                 } else {
                     match declaration(body) {
                         Some(_) => matches!(

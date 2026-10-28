@@ -1,8 +1,8 @@
 use super::super::{
-    ChoiceDomain, Comparison, Control, DamageRecipient, Decision, DecisionId, DecisionKind,
-    Disjointness, ExecutionRef, InputMode, Mode, ModeChoiceKind, ModeDecision, ModeDecisionKind,
-    ModeId, NatFrozen, NatOperation, PlaySlot, Predicate, SelectionConstraint, SelectionGroup,
-    SelectionSnapshot, SpellCountTime, Visibility,
+    ChoiceDomain, Comparison, Control, CostSpec, DamageRecipient, Decision, DecisionId,
+    DecisionKind, Disjointness, ExecutionRef, InputMode, Mode, ModeChoiceKind, ModeDecision,
+    ModeDecisionKind, ModeId, NatFrozen, NatOperation, PlaySlot, PlaySpec, Predicate,
+    SelectionConstraint, SelectionGroup, SelectionSnapshot, SpellCountTime, Visibility,
 };
 use super::{
     AbilitySource, Action, Allocator, BTreeMap, BTreeSet, BatchPolicy, Binding, BodyContext,
@@ -27,15 +27,15 @@ const fn parameter(id: u64, slot: PlaySlot, domain: ChoiceDomain) -> Decision {
     }
 }
 
-pub(super) fn check_trigger_targets(
+pub(super) fn trigger_play_spec(
     entry: &ast::Ability,
     body: &ast::Body,
     keyword: Option<super::KeywordId>,
     path: &str,
-) -> Result<(), LoweringError> {
+) -> Result<Option<PlaySpec>, LoweringError> {
+    let triggered = entry.activate.is_none() && entry.spell.is_none();
     if !body.targets.is_empty()
-        && entry.activate.is_none()
-        && entry.spell.is_none()
+        && triggered
         && body.optional_cost.is_none()
         && body.head_cost.is_none()
         && !matches!(
@@ -47,7 +47,14 @@ pub(super) fn check_trigger_targets(
     {
         return Err(unsupported(path));
     }
-    Ok(())
+    Ok((triggered
+        && (body.optional_cost.is_some() || body.head_cost.is_some() || !body.targets.is_empty()))
+    .then(|| PlaySpec {
+        limit: None,
+        captures: vec![],
+        parameters: vec![],
+        costs: CostSpec::Ordered { steps: vec![] },
+    }))
 }
 
 #[expect(
