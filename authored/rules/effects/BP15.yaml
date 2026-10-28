@@ -897,19 +897,6 @@ cards:
                 - 10
             then: 2
             else: 1
-  BP15-T06:
-    status: complete
-    abilities:
-      - line: 1
-        kind: static
-        body:
-          op: macro
-          name: rush
-      - line: 1
-        kind: static
-        body:
-          op: macro
-          name: guard
   BP15-U05:
     status: complete
     abilities:
