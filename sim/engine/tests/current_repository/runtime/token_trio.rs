@@ -16,11 +16,13 @@ fn token_trio_printed_rush_and_ward_control_real_combat() {
     assert_eq!(view["objects"]["both"]["keywords"], json!(["守護", "突進"]));
     assert_eq!(view["objects"]["ward"]["keywords"], json!(["守護"]));
     for attacker in ["rush", "both", "attacker"] {
-        assert!(
+        assert_eq!(
             game.internal_rule_action(&json!({
                 "do":"attack","attacker":attacker,"target":"P2.leader"
             }))
-            .is_err(),
+            .unwrap()
+            .outcome,
+            "cannot-attack",
             "Rush cannot attack a leader on entry; rested Ward also protects it"
         );
     }
