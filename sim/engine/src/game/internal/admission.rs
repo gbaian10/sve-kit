@@ -80,6 +80,13 @@ fn source_paths(
         let path = format!("{path}/steps/{index}");
         match &step.node {
             Node::Instruction { instruction } if instruction.source == *origin => {
+                if let Action::Grant { abilities, .. } = &instruction.action {
+                    for (keyword_index, _) in abilities.iter().enumerate() {
+                        paths.insert(format!(
+                            "{path}/instruction/action/abilities/{keyword_index}/keyword"
+                        ));
+                    }
+                }
                 if super::movement::advance_entry(&instruction.action) {
                     paths.insert(format!("{path}/instruction/action/objects/zone"));
                 }
@@ -188,6 +195,13 @@ fn check_requirements(
                             | "internal.KeywordId.OnEvolve"
                             | "internal.KeywordId.OnSuperEvolve"
                             | "internal.KeywordId.Quick"
+                            | "internal.KeywordId.Ward"
+                            | "internal.KeywordId.Aura"
+                            | "internal.KeywordId.Storm"
+                            | "internal.KeywordId.Rush"
+                            | "internal.KeywordId.Bane"
+                            | "internal.KeywordId.Intimidate"
+                            | "internal.KeywordId.Assail"
                     ) && requirement
                         .locations
                         .iter()
@@ -281,6 +295,7 @@ fn check_program(program: &Program, source: &SourceSpan, card: bool) -> Result<(
                 super::resource::check_action(&instruction.action)?;
                 super::discard::check_action(&instruction.action)?;
                 super::numeric::check_action(&instruction.action)?;
+                super::grant::check_action(&instruction.action)?;
                 if instruction.precondition.is_some()
                     || instruction.context != InstructionContext::Effect
                 {
@@ -442,6 +457,9 @@ fn supported(code: &str) -> bool {
             | "action.posture"
             | "internal.Posture.Acted"
             | "internal.Posture.Standing"
+            | "shape.Action.Grant"
+            | "action.grant"
+            | "shape.GrantedAbility.Keyword"
             | "shape.Action.Modify"
             | "action.modify"
             | "effect.continuous"

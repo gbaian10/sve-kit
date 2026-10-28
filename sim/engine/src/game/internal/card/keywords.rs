@@ -1,5 +1,5 @@
 //! Current printed keyword authority and the CR 12.8.2 optional entry procedure.
-use super::super::{DecisionId, Execution, InputDomain, ObjectRef, Wait};
+use super::super::{DecisionId, Execution, InputDomain, ObjectRef, Wait, grant};
 use super::{Ability, Game, KeywordId, Located, Result, invalid, unsupported};
 use crate::ir::lowering::PrintedKeyword;
 use crate::ir::{Posture, PostureEvent, printed_keywords};
@@ -27,29 +27,10 @@ impl Game {
         }
         let mut keywords = BTreeSet::new();
         for ability in self.internal_printed_abilities(holder)? {
-            match printed_keywords::card_declaration(&ability.node) {
-                Some(KeywordId::Ward) => {
-                    keywords.insert("guard".into());
-                }
-                Some(KeywordId::Aura) => {
-                    keywords.insert("aura".into());
-                }
-                Some(KeywordId::Storm) => {
-                    keywords.insert("storm".into());
-                }
-                Some(KeywordId::Rush) => {
-                    keywords.insert("rush".into());
-                }
-                Some(KeywordId::Bane) => {
-                    keywords.insert("bane".into());
-                }
-                Some(KeywordId::Intimidate) => {
-                    keywords.insert("intimidate".into());
-                }
-                Some(KeywordId::Assail) => {
-                    keywords.insert("assail".into());
-                }
-                _ => {}
+            if let Some(keyword) =
+                printed_keywords::card_declaration(&ability.node).and_then(grant::keyword)
+            {
+                keywords.insert(keyword.into());
             }
         }
         Ok(Some(keywords))

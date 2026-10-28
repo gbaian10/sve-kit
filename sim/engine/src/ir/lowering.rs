@@ -8,6 +8,7 @@ mod current;
 mod discard;
 mod evolution;
 mod exchange;
+mod grant;
 mod hand_payment;
 mod keywords;
 mod material;
@@ -886,6 +887,7 @@ impl<'definitions> BodyContext<'definitions> {
                 },
             }),
             ast::Step::Buff(value) => self.modify(value, false, path),
+            ast::Step::Grant(value) => self.grant(value, span, path),
             ast::Step::SetStat(value) => self.modify(value, true, path),
             ast::Step::Apply(value) => self.continuous(value, source, path),
             ast::Step::Search(value) => self.search(value, path),

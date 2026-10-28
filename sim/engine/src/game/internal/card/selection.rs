@@ -239,6 +239,9 @@ pub(in crate::game::internal) fn field_selector(selector: &Selector) -> Result<(
         } if players.relative_to == (PlayerRef::Controller {}) => {
             check_predicate(predicate, *binding)
         }
+        Selector::Difference { input, except } if matches!(except.as_ref(), Selector::Objects { objects } if objects == &[ObjectOperand::SourceHolder {}]) => {
+            field_selector(input)
+        }
         Selector::Captured { .. } | Selector::Bound { .. } | Selector::Objects { .. } => Ok(()),
         Selector::Union { sets } => {
             for set in sets {

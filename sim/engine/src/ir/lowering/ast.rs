@@ -223,6 +223,7 @@ pub(super) enum Step {
     Act(ObjectAction),
     Stand(ObjectAction),
     Buff(Modify),
+    Grant(Grant),
     SetStat(Modify),
     Apply(Apply),
     Search(Search),
@@ -667,6 +668,8 @@ pub(super) struct TargetQuery {
     pub r#trait: Option<String>,
     pub name: Option<String>,
     pub name_contains: Option<String>,
+    #[serde(default)]
+    pub other: bool,
 }
 
 #[derive(Deserialize)]
@@ -1100,4 +1103,12 @@ pub(super) struct HandQuery {
     pub kind: Option<SearchKind>,
     pub r#trait: Option<String>,
     pub name: Option<String>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Grant {
+    pub on: Objects,
+    pub keywords: Vec<String>,
+    pub until: Option<Until>,
 }

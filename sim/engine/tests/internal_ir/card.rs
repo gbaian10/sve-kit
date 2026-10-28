@@ -539,6 +539,9 @@ mod reveal_hand;
 #[path = "card/hand_cost.rs"]
 mod hand_cost;
 
+#[path = "card/keyword_grant.rs"]
+mod keyword_grant;
+
 #[path = "card/material.rs"]
 mod material;
 

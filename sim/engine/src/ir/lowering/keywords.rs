@@ -36,7 +36,7 @@ pub(super) fn lower(
         .collect()
 }
 
-fn keyword_id(keyword: &str) -> Option<KeywordId> {
+pub(super) fn keyword_id(keyword: &str) -> Option<KeywordId> {
     match keyword {
         "ward" => Some(KeywordId::Ward),
         "aura" => Some(KeywordId::Aura),

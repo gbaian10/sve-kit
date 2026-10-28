@@ -34,6 +34,8 @@ mod allocation;
 mod card;
 mod cost;
 mod discard;
+mod grant;
+pub(super) use grant::KeywordState;
 mod duration;
 mod life;
 mod movement;
@@ -238,6 +240,8 @@ pub enum InstructionOutcome {
     Destroy(DestroyOutcome),
     /// Fixed generations protected until this resolution ends.
     Installed(Vec<ObjectRef>),
+    /// Fixed generations receiving basic printed keywords.
+    Granted(Vec<ObjectRef>),
     /// Publicly revealed generations; no subsequent private selector authority.
     Revealed(Vec<ObjectRef>),
     /// Objects observed without movement or a generation change.
@@ -1150,6 +1154,7 @@ impl Game {
             Action::Discard { .. } => self.internal_discard_wait(execution, instruction)?,
             Action::Life { .. } => self.internal_life(execution, &instruction)?,
             Action::Modify { .. } => self.internal_modify(execution, &instruction)?,
+            Action::Grant { .. } => self.internal_grant(execution, &instruction)?,
             Action::Reveal { objects } => {
                 self.internal_reveal(execution, &instruction, objects)?;
             }

@@ -86,6 +86,9 @@ impl BodyContext<'_> {
             _ => return Err(unsupported(path)),
         };
         if target.from.leader.is_some() || target.from.leaders.is_some() || target.from.leader_or {
+            if target.from.other {
+                return Err(unsupported(path));
+            }
             return self.recipient_choice(target, cardinality, path);
         }
         if self.recipient_targets.contains_key(&target.bind) {
@@ -100,7 +103,7 @@ impl BodyContext<'_> {
             return Err(unsupported(path));
         }
         let candidate = Binding::new(1, self.card_allocator.scope(path)?);
-        let selector = Selector::Zone {
+        let mut selector = Selector::Zone {
             players: PlayerSet {
                 relation: match target.from.who.as_ref().ok_or_else(|| unsupported(path))? {
                     ast::Side::Controller => PlayerRelation::SelfPlayer,
@@ -132,6 +135,12 @@ impl BodyContext<'_> {
                 candidate,
             )),
         };
+        if target.from.other {
+            selector = Selector::Difference {
+                input: Box::new(selector),
+                except: Box::new(super::numeric::holder()),
+            };
+        }
         Ok((
             ChoiceDomain::Objects {
                 constraint: SelectionConstraint {
