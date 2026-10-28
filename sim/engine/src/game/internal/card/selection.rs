@@ -1,9 +1,9 @@
 use super::super::{DecisionToken, DecisionView, InputDomain, Slot, Wait, contains};
 use super::{Execution, Game, Nat, ObjectRef, Result, invalid, player_id, unsupported};
 use crate::ir::{
-    Binding, CardKind, Cardinality, CharacteristicView, ChoiceDomain, Decision, Disjointness,
-    KindRead, NamesRead, ObjectOperand, ObjectProperty, ObjectView, PlayerRef, Predicate, ScopeId,
-    SelectionConstraint, SelectionGroup, Selector, TraitsRead,
+    Binding, CardKind, Cardinality, CharacteristicView, ChoiceDomain, Decision, DecisionKind,
+    Disjointness, KindRead, NamesRead, ObjectOperand, ObjectProperty, ObjectView, PlayerRef,
+    Predicate, ScopeId, SelectionConstraint, SelectionGroup, Selector, TraitsRead,
 };
 use crate::ir::{Bool, Expr, SelectionView, ZoneKind};
 use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
@@ -422,8 +422,9 @@ impl Game {
         let [group] = constraint.groups.as_slice() else {
             return Err(unsupported("target groups"));
         };
+        let allow_ex = matches!(decision.kind, DecisionKind::ResolutionChoice { .. });
         let mut members = Vec::new();
-        for member in execution.public_target_objects(self, &group.selector, true)? {
+        for member in execution.public_target_objects(self, &group.selector, allow_ex)? {
             if self.targetable_by(
                 execution.object_id(member)?,
                 super::seat_name(execution.context.controller)?,
@@ -451,7 +452,7 @@ impl Game {
                 let id = execution.object_id(*reference)?;
                 let object = self.object(id)?;
                 let kind = self.object_type(id)?;
-                if !matches!(object.zone.as_str(), "field" | "ex")
+                if !(object.zone == "field" || (allow_ex && object.zone == "ex"))
                     || object.generation != reference.generation.0
                     || (object.zone == "field"
                         && !(kind.contains("フォロワー") || kind.contains("アミュレット")))
