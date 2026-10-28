@@ -1,0 +1,15 @@
+format: 2
+kind: effect_body_shard
+records:
+  - admission: shared
+    body:
+      evolve:
+        cost:
+          pp: 1
+    id: evolve.one-pp
+    params: {}
+    written_by:
+      - actor:
+          model: Codex gpt-6.1-sol
+          who: Codex
+        date: "2026-10-29"
