@@ -63,6 +63,13 @@ fn hand_cost_selection_is_private_strict_and_payment_rolls_back_as_a_whole() {
         );
         assert!(game.internal_decision(View::P2).is_none());
         let pending = game.projection(View::Referee).unwrap();
+        game.answer_internal_card(
+            PlayerId { seat: 2 },
+            question.token,
+            Answer::CostMaterials(vec![0]),
+        )
+        .unwrap_err();
+        assert_eq!(game.projection(View::Referee).unwrap(), pending);
         for handles in [vec![], vec![0, 0], vec![99]] {
             game.answer_internal_card(
                 question.actor,

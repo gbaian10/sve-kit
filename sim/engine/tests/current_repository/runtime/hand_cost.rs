@@ -5,7 +5,7 @@ fn sd03_008_discards_one_selected_spell_as_cost_before_drawing() {
     let mut initial = draw_position();
     initial["players"]["P1"]["zones"]["field"] = json!([{"id":"payer","card":"SD03-008"}]);
     initial["players"]["P1"]["zones"]["hand"] =
-        json!([{"id":"spell","card":"BP04-066"},{"id":"other","card":"BP01-037"}]);
+        json!([{"id":"spell","card":"BP01-168"},{"id":"other","card":"BP01-037"}]);
     initial["players"]["P1"]["zones"]["deck"] = json!([{"id":"drawn","card":"BP01-037"}]);
     let mut game = game(&initial);
     let CardPlay::Awaiting(question) = game
