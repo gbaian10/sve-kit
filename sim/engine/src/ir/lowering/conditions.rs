@@ -25,7 +25,6 @@ impl BodyContext<'_> {
                 comparison: Comparison::GreaterEqual,
                 right: Expr::Literal(Int(7)),
             },
-            ast::Condition::Awakened(false) => return Err(unsupported(path)),
             ast::Condition::LeaderLife(threshold) => {
                 let (comparison, amount) = match (threshold.eq, threshold.le, threshold.ge) {
                     (Some(amount), None, None) => (Comparison::Equal, amount),
@@ -53,7 +52,9 @@ impl BodyContext<'_> {
                     player: PlayerRef::Controller {},
                 })));
             }
-            ast::Condition::Crimson(false) => return Err(unsupported(path)),
+            ast::Condition::Awakened(false) | ast::Condition::Crimson(false) => {
+                return Err(unsupported(path));
+            }
             ast::Condition::All(items) | ast::Condition::Any(items) => {
                 let predicates = items
                     .iter()
