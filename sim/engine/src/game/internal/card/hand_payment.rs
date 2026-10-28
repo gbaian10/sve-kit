@@ -116,6 +116,7 @@ impl Game {
                 InputDomain::CostMaterials(super::TargetDomain {
                     members: candidates,
                     cardinality: constraint.cardinality,
+                    distinct_names: false,
                 }),
                 Wait::CostDiscard(HandWait::strict(
                     instruction.clone(),
