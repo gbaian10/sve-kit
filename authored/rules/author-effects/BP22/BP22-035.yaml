@@ -1,0 +1,25 @@
+cards:
+  BP22-035:
+    abilities:
+      - fanfare:
+          cost:
+            banish:
+              n: 1
+              sel:
+                kind: follower
+                trait: 兵士
+                who: self
+                zone: ex
+          do:
+            - draw:
+                n: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-10-29"
+format: 2
+kind: author_effect_set
