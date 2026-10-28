@@ -115,8 +115,10 @@ Add 跨進化的還原，也不把食事／憑依當作 Evolve。
 
 事件資訊凍結不代表可以永久操作該物件。以 EnterField.object 指向「それ」時，
 之後只操作原入場世代；其已離場則依該指示的合法性處理，不找同 physical ID 新世代。
-這不需要泛用 TriggerEvent receipt 或 FollowEventMove。本片兩者仍拒絕，
-一般 MoveAfter／RuleCarry 權限也不擴張。
+這不需要泛用 TriggerEvent receipt。一般 Move 事件的 FollowEventMove、一般 MoveAfter／RuleCarry
+權限不擴張。Lastword 自身移至 EX 則只沿當前 LeaveField 的確切成功移動成員，
+由共同物理提交保存 before／after 及目的地，在待機能力的獨立 execution 綁定；
+不得以 physical ID 重新查找最新世代。進化卡回進化牌組不改變此基底 after，來源資訊仍讀離場前 LKI。
 
 以上場上資訊及送公開墓地的事件可公開；source／target 的 server ObjectRef、
 SnapshotId、內部 receipt 不因事件名稱而成為 wire 欄位。給玩家的待機選項只投影已知
