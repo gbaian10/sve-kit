@@ -93,15 +93,20 @@ interface QueryState {
   unit: "printing" | "art" | "card"; // 每格單位，預設 printing；art＝同一張卡且正面 art_id 相同的版次合成一格，card＝同卡合成一格
   representative: "low" | "high"; // 合併格的代表版次取非 PR 版次中的最低／最高稀有度，預設 low；unit=printing 時不生效但保留
   prFirst: boolean; // 合併格有 PR 版次時優先顯示 PR；預設 false
-  sort: "no" | "cost" | "name" | "date" | "atk" | "def"; // 預設 no
+  sort: "set" | "no" | "cost" | "atk" | "def"; // 主排序，預設 set
+  order?: "desc"; // 主排序方向，預設 desc；省略為 asc
+  secondarySort: "set" | "no" | "cost" | "atk" | "def" | null; // 次排序，預設 no；null＝無
+  secondaryOrder?: "desc"; // 次排序方向，省略為 asc
   view?: "grid" | "table" | "list"; // 沒帶＝用偏好
 }
 ```
 
-`domain/query/codec.ts` 在 `QueryState` 與 URL 參數（`q class cost atk def type loc trait mech mechmatch ability abilitymatch set rarity alt reprint unit rep prfirst sort order view`）之間互轉：
+`domain/query/codec.ts` 在 `QueryState` 與 URL 參數（`q class cost atk def type loc trait mech mechmatch ability abilitymatch set rarity alt reprint unit rep prfirst sort view`）之間互轉：
 牌組位置原本放在 `type`，`type` 裡出現的位置 token（`token`、`token:spell`、`leader:gold`、`ep`、`sep`）仍會讀成 `loc`，寫回時只寫 `loc`；
 `set` 值用歸檔類別的 `product_family.code`（`SetCode`）；vocabulary 篩選值用其英文 code；`cost`、`atk`、`def` 是逗號分隔的數值清單，
 同一統計值內取聯集、不同統計值之間取交集。順序固定，篩選、排序、單位的預設值不寫進 URL，所以同一狀態只有一種網址。
+排序格式為 `sort=set:desc,no:asc`，依序記錄主、次排序與方向；只帶一項表示無次排序。預設為「卡包 新→舊，再依卡號 小→大」，預設組合不寫入 URL。舊的單項 `sort=cost&order=desc` 仍可讀取；已移除的 `sort=name`／`sort=date` 與無效值退回預設。
+卡包排序依代表版次的 `home_set_id`，採該地區連結商品最早的日精度發售日，同日再依卡包代號自然排序。PR 視為整包，與其他無日期商品一起排在所有有日期卡包之後（新→舊）；反向時整體順序反轉，包內仍依次排序。最後固定依卡號、printing id 穩定排序；數值欄位的缺值在兩個方向都置後。合併格的代表版次選法不變。
 `view` 是例外：URL 有帶就照 URL；沒帶就用偏好 `viewMode`；使用者切換檢視時同時寫 URL 與偏好。
 `reprint=hide`（不含再錄）與 `reprint=only`（只看再錄）篩選 `printing.reprint=true` 的版次，沒帶參數是全部；只在 `unit` 為 `printing` 或 `art` 時作用，`unit=card` 時整組切換停用、說明不適用，網址仍保留。卡頁列出全部版次，不受影響。
 

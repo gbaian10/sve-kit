@@ -624,16 +624,19 @@ it("keeps short header clicks sortable and commits a header drag only on release
       right: (index + 1) * 100,
     } as DOMRect)
   })
-  const button = screen.getByRole("button", { name: "名稱" })
-  Object.defineProperty(button, "setPointerCapture", { value: vi.fn() })
-  Object.defineProperty(button, "releasePointerCapture", { value: vi.fn() })
+  const sortable = screen.getByRole("button", { name: "卡號" })
+  const button = screen.getByRole("columnheader", { name: "名稱" })
+  for (const target of [button, sortable]) {
+    Object.defineProperty(target, "setPointerCapture", { value: vi.fn() })
+    Object.defineProperty(target, "releasePointerCapture", { value: vi.fn() })
+  }
   const writes = vi.spyOn(Storage.prototype, "setItem")
   try {
-    fireEvent.pointerDown(button, { pointerId: 1, isPrimary: true, button: 0, clientX: 120 })
-    fireEvent.pointerMove(button, { pointerId: 1, clientX: 122 })
-    fireEvent.pointerUp(button, { pointerId: 1 })
-    fireEvent.click(button, { detail: 1 })
-    expect(onSort).toHaveBeenCalledWith("name")
+    fireEvent.pointerDown(sortable, { pointerId: 1, isPrimary: true, button: 0, clientX: 120 })
+    fireEvent.pointerMove(sortable, { pointerId: 1, clientX: 122 })
+    fireEvent.pointerUp(sortable, { pointerId: 1 })
+    fireEvent.click(sortable, { detail: 1 })
+    expect(onSort).toHaveBeenCalledWith("no")
     onSort.mockClear()
     fireEvent.pointerDown(button, { pointerId: 2, isPrimary: true, button: 0, clientX: 120 })
     for (let x = 130; x < 700; x += 10) fireEvent.pointerMove(button, { pointerId: 2, clientX: x })

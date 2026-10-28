@@ -2,6 +2,7 @@
 import { expect, it } from "vitest"
 
 import { buildSnapshot } from "../../../scripts/fixture/build"
+import { parseQuery } from "../../domain/query/codec"
 import { DEFAULT_QUERY, type QueryState } from "../../domain/query/model"
 import type { Fetcher } from "../cdn"
 import { createSnapshotClient } from "../client"
@@ -228,11 +229,21 @@ it.each(indexes.map((index, stage) => [stage, index] as const))(
       ["art:twin:front", "p:bp01-030"],
       ["art:twin:front-2", "p:bp01-030-alt"],
     ])
-    // Cells follow their representative's number: the SD01 reprint now sorts after BP01-SL30.
+    // Equal release dates put SD01 before BP01 under the default descending set sort.
     expect(representatives(index, twin, { unit: "art", representative: "high" })).toEqual([
-      "p:bp01-030-alt",
       "p:bp01-030-reprint",
+      "p:bp01-030-alt",
     ])
+    expect(
+      index
+        .search({
+          edition: "jp",
+          limit: 1000,
+          state: parseQuery(new URLSearchParams("unit=art&rep=high&sort=no:asc")),
+        })
+        .items.filter((item) => item.summary?.cardId === twin)
+        .map((item) => item.printingId),
+    ).toEqual(["p:bp01-030-alt", "p:bp01-030-reprint"])
     expect(representatives(index, twin, { unit: "card", representative: "high" })).toEqual([
       "p:bp01-030-alt",
     ])

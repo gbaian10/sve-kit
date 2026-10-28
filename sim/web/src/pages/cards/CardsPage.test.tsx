@@ -93,7 +93,7 @@ describe("CardsPage", () => {
     await waitFor(() => expect(list).toHaveAttribute("aria-busy", "false"))
     await user.keyboard("{Enter}")
     expect(router.state.location.pathname).toBe("/cards")
-    expect(router.state.location.search).toBe("?q=bp01&sort=cost")
+    expect(router.state.location.search).toBe("?q=bp01&sort=cost%3Aasc%2Cno%3Aasc")
     expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
   }, 15_000)
 
@@ -370,9 +370,9 @@ describe("CardsPage", () => {
     const user = userEvent.setup()
     await user.click(await screen.findByRole("button", { name: "消費" }))
     expect(await screen.findByRole("combobox", { name: "排序" })).toHaveValue("cost")
-    expect(new URLSearchParams(router.state.location.search).get("sort")).toBe("cost")
+    expect(new URLSearchParams(router.state.location.search).get("sort")).toBe("cost:asc,no:asc")
     await user.click(await screen.findByRole("button", { name: "消費" }))
-    expect(new URLSearchParams(router.state.location.search).get("order")).toBe("desc")
+    expect(new URLSearchParams(router.state.location.search).get("sort")).toBe("cost:desc,no:asc")
     expect(await screen.findByRole("columnheader", { name: "消費" })).toHaveAttribute(
       "aria-sort",
       "descending",
@@ -385,13 +385,24 @@ describe("CardsPage", () => {
     expect(new URLSearchParams(router.state.location.search).get("class")).toBe("bishop")
   })
 
-  it("enables release-date sorting and writes it to the URL", async () => {
+  it("defaults to newest sets and remembers two independent sort directions and no secondary", async () => {
     const { router } = await open("/cards?class=bishop")
     const user = userEvent.setup()
     const sort = await screen.findByRole("combobox", { name: "排序" })
-    expect(screen.getByRole("option", { name: "發售日" })).toBeEnabled()
-    await user.selectOptions(sort, "date")
-    expect(new URLSearchParams(router.state.location.search).get("sort")).toBe("date")
+    const secondary = screen.getByRole("combobox", { name: "再依" })
+    expect(sort).toHaveValue("set")
+    expect(secondary).toHaveValue("no")
+    expect(screen.getByRole("button", { name: "降冪" })).toHaveTextContent("新→舊 ↓")
+    expect(screen.queryByRole("option", { name: "發售日" })).not.toBeInTheDocument()
+    expect(screen.queryByRole("option", { name: "名稱" })).not.toBeInTheDocument()
+    await user.selectOptions(secondary, "cost")
+    await user.click(screen.getByRole("button", { name: "再依：降冪" }))
+    expect(new URLSearchParams(router.state.location.search).get("sort")).toBe("set:desc,cost:desc")
+    await user.click(await screen.findByRole("button", { name: "降冪" }))
+    expect(new URLSearchParams(router.state.location.search).get("sort")).toBe("set:asc,cost:desc")
+    await user.selectOptions(await screen.findByRole("combobox", { name: "再依" }), "")
+    expect(await screen.findByRole("button", { name: "再依：降冪" })).toBeDisabled()
+    expect(new URLSearchParams(router.state.location.search).get("sort")).toBe("set:asc")
     expect(new URLSearchParams(router.state.location.search).get("class")).toBe("bishop")
   })
 
