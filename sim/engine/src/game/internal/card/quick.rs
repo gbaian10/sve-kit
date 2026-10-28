@@ -50,7 +50,10 @@ pub(super) fn check_spell_face(
     printed: &Value,
 ) -> Result<()> {
     if ordinal != 0
-        || printed["card_type"] != "スペル"
+        || !matches!(
+            printed["card_type"].as_str(),
+            Some("スペル" | "スペル・トークン")
+        )
         || !card.abilities.iter().any(|a| {
             a.node.kind == AbilityKind::Spell
                 && printed_origin(&a.node.source.origin).is_ok_and(|(face, _)| {
@@ -66,7 +69,7 @@ pub(super) fn check_spell_face(
             != 1
     {
         return Err(unsupported(
-            "Quick requires one ordinary Spell on the same base face",
+            "Quick requires one Spell on the same base face",
         ));
     }
     Ok(())
@@ -211,7 +214,7 @@ impl Game {
                 let spell = ability.kind == AbilityKind::Spell;
                 let eligible = if spell {
                     object.owner == seat_name(actor)?
-                        && self.object_type(holder)? == "スペル"
+                        && matches!(self.object_type(holder)?, "スペル" | "スペル・トークン")
                         && matches!(object.zone.as_str(), "hand" | "ex")
                         && self.internal_quick_spell(holder)?
                         && !self.restricted(holder, "play")?

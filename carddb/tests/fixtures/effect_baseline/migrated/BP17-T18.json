@@ -1,0 +1,22 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "name": "quick",
+        "op": "macro"
+      },
+      "kind": "static",
+      "line": 1
+    },
+    {
+      "body": {
+        "hp": 1,
+        "op": "modify",
+        "subjects": "self.leader"
+      },
+      "kind": "spell",
+      "line": 2
+    }
+  ],
+  "status": "complete"
+}

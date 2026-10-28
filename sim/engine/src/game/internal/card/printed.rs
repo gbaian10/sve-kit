@@ -184,7 +184,7 @@ impl Game {
         let printed = self.face(holder)?.clone();
         let kind = match self.object_type(holder)? {
             kind if kind.contains("フォロワー") => CardKind::Follower,
-            "スペル" => CardKind::Spell,
+            "スペル" | "スペル・トークン" => CardKind::Spell,
             "アミュレット" | "アミュレット・トークン" => CardKind::Amulet,
             _ => return Err(EngineFailure::Unsupported("event card kind".into())),
         };

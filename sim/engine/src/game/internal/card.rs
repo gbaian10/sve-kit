@@ -279,13 +279,7 @@ impl Game {
         card: &WellFormedCardProgram,
     ) -> Result<()> {
         let base_print = self.catalog.face(card_no, 0)?;
-        check_printed_face(base_print)?;
-        if matches!(
-            base_print["card_type"].as_str(),
-            Some("フォロワー" | "スペル" | "アミュレット" | "アミュレット・トークン")
-        ) {
-            super::cost::printed_play_cost(&base_print["cost"])?;
-        }
+        check_base_face(base_print)?;
         costs::check(self, card_no, card)?;
         optional::check_card(card)?;
         material::check_card(card)?;
@@ -598,6 +592,23 @@ impl Game {
         }
         Ok(())
     }
+}
+
+fn check_base_face(printed: &serde_json::Value) -> Result<()> {
+    check_printed_face(printed)?;
+    if matches!(
+        printed["card_type"].as_str(),
+        Some(
+            "フォロワー"
+                | "スペル"
+                | "スペル・トークン"
+                | "アミュレット"
+                | "アミュレット・トークン"
+        )
+    ) {
+        super::cost::printed_play_cost(&printed["cost"])?;
+    }
+    Ok(())
 }
 
 fn check_printed_face(printed: &serde_json::Value) -> Result<()> {
