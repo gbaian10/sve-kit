@@ -5,10 +5,11 @@ use super::{
     SourceSpan, Step, admission, int, invalid, printed_origin, seat_name, unsupported,
 };
 use crate::game::legal::subsets;
+use crate::ir::optional_payment;
 use crate::ir::quick::is_printed_quick;
 use crate::ir::{
-    Action, Cardinality, LimitSpec, ModeUse, ObjectRef, PlaySpec, PlayerRef, RecipientSet,
-    SelectionSnapshot, Selector, TurnId,
+    AbilityOrigin, Action, Bool, Cardinality, KeywordId, LimitSpec, ModeUse, ObjectRef, PlaySpec,
+    PlayerRef, RecipientSet, SelectionSnapshot, Selector, TurnId,
 };
 use crate::ir::{
     ChoiceDomain, Control, CostSpec, Decision, DecisionId, DecisionKind, ExecutionRef, InputMode,
@@ -58,6 +59,7 @@ struct PlayMode {
     modes: Vec<Mode>,
     count: Expr<Nat>,
     chosen: ModeDecision,
+    condition: Option<Expr<Bool>>,
 }
 
 impl PlayMode {
@@ -185,7 +187,7 @@ pub(super) fn check(ability: &Ability, source: &SourceSpan) -> Result<()> {
         .body
         .as_ref()
         .ok_or_else(|| invalid("missing body"))?;
-    let groups = collect_modes(body)?;
+    let groups = collect_modes(body, conditional_fanfare(ability))?;
     if is_printed_quick(ability)
         && groups.iter().any(|group| {
             matches!(
@@ -315,13 +317,45 @@ fn check_parameters(parameters: &[Decision]) -> Result<()> {
     Ok(())
 }
 
-fn collect_modes(program: &Program) -> Result<Vec<PlayMode>> {
+fn conditional_fanfare(ability: &Ability) -> bool {
+    matches!(
+        ability.source.origin,
+        AbilityOrigin::Keyword {
+            keyword: KeywordId::Fanfare,
+            ..
+        }
+    ) && ability.play.as_ref().is_some_and(|play| {
+        matches!(play,
+            PlaySpec { limit: None, captures, parameters, costs: CostSpec::Ordered { steps } }
+            if captures.is_empty() && parameters.is_empty() && steps.is_empty())
+    }) && ability
+        .body
+        .as_ref()
+        .is_some_and(|body| optional_payment::declaration(body).is_none())
+}
+
+fn collect_modes(program: &Program, conditional: bool) -> Result<Vec<PlayMode>> {
     let mut groups = Vec::new();
     for node in &program.steps {
         match &node.node {
             Node::Control {
                 control: Control::Sequence { body },
-            } => groups.extend(collect_modes(body)?),
+            } => groups.extend(collect_modes(body, conditional)?),
+            Node::Control {
+                control:
+                    Control::If {
+                        condition,
+                        then_body,
+                        else_body,
+                    },
+            } => {
+                groups.extend(conditional_modes(
+                    condition,
+                    then_body,
+                    else_body.as_ref(),
+                    conditional,
+                )?);
+            }
             Node::Control {
                 control:
                     Control::Mode {
@@ -342,6 +376,7 @@ fn collect_modes(program: &Program) -> Result<Vec<PlayMode>> {
                     modes: modes.clone(),
                     count: count.clone(),
                     chosen: chosen.clone(),
+                    condition: None,
                 });
             }
             Node::Control {
@@ -349,6 +384,27 @@ fn collect_modes(program: &Program) -> Result<Vec<PlayMode>> {
             } => return Err(unsupported("play mode timing")),
             _ => {}
         }
+    }
+    Ok(groups)
+}
+
+fn conditional_modes(
+    condition: &Expr<Bool>,
+    then_body: &Program,
+    else_body: Option<&Program>,
+    allowed: bool,
+) -> Result<Vec<PlayMode>> {
+    let mut groups = collect_modes(then_body, false)?;
+    let other = else_body.map_or_else(|| Ok(Vec::new()), |body| collect_modes(body, false))?;
+    if groups.is_empty() && other.is_empty() {
+        return Ok(groups);
+    }
+    let public_condition = optional_payment::public_mode_guard(condition);
+    if !allowed || groups.len() != 1 || !other.is_empty() || !public_condition {
+        return Err(unsupported("conditional Fanfare mode"));
+    }
+    for group in &mut groups {
+        group.condition = Some(condition.clone());
     }
     Ok(groups)
 }
@@ -431,6 +487,7 @@ impl Game {
                 .body
                 .as_ref()
                 .ok_or_else(|| invalid("missing Quick body"))?,
+            false,
         )?;
         self.quick_mode_plan(&execution, &groups, play.parameters.clone().into())
     }
@@ -662,9 +719,10 @@ impl Game {
         mut execution: Execution,
         ability: Ability,
     ) -> Result<CardPlay> {
+        let conditional = conditional_fanfare(&ability);
         let mut body = ability.body.ok_or_else(|| invalid("missing body"))?;
         let optional = super::optional::take(&mut body);
-        let groups = collect_modes(&body)?;
+        let groups = collect_modes(&body, conditional)?;
         let play = ability.play.unwrap_or(PlaySpec {
             limit: None,
             captures: Vec::new(),
@@ -974,6 +1032,12 @@ impl Game {
         play: &mut PlayState,
     ) -> Result<bool> {
         while let Some(group) = play.modes.pop_front() {
+            if let Some(condition) = &group.condition
+                && !execution.boolean(self, condition)?.0
+            {
+                play.chosen.insert(group.chosen.id, Vec::new());
+                continue;
+            }
             let count = execution.natural(self, &group.count)?;
             let ChoiceDomain::Modes {
                 modes,
@@ -1188,6 +1252,25 @@ fn selected_body(
                 located.node = Node::Control {
                     control: Control::Sequence {
                         body: selected_body(body, choices)?,
+                    },
+                };
+                steps.push(located);
+            }
+            Node::Control {
+                control:
+                    Control::If {
+                        condition,
+                        then_body,
+                        else_body,
+                    },
+            } => {
+                located.node = Node::Control {
+                    control: Control::If {
+                        condition,
+                        then_body: selected_body(then_body, choices)?,
+                        else_body: else_body
+                            .map(|body| selected_body(body, choices))
+                            .transpose()?,
                     },
                 };
                 steps.push(located);

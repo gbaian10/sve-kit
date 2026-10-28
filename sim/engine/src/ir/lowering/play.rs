@@ -31,6 +31,7 @@ pub(super) fn trigger_play_spec(
     entry: &ast::Ability,
     body: &ast::Body,
     keyword: Option<super::KeywordId>,
+    trigger_choice: bool,
     path: &str,
 ) -> Result<Option<PlaySpec>, LoweringError> {
     let triggered = entry.activate.is_none() && entry.spell.is_none();
@@ -48,13 +49,16 @@ pub(super) fn trigger_play_spec(
         return Err(unsupported(path));
     }
     Ok((triggered
-        && (body.optional_cost.is_some() || body.head_cost.is_some() || !body.targets.is_empty()))
-    .then(|| PlaySpec {
-        limit: None,
-        captures: vec![],
-        parameters: vec![],
-        costs: CostSpec::Ordered { steps: vec![] },
-    }))
+        && (body.optional_cost.is_some()
+            || body.head_cost.is_some()
+            || !body.targets.is_empty()
+            || trigger_choice))
+        .then(|| PlaySpec {
+            limit: None,
+            captures: vec![],
+            parameters: vec![],
+            costs: CostSpec::Ordered { steps: vec![] },
+        }))
 }
 
 #[expect(
@@ -527,6 +531,10 @@ fn quantity(
 
 /// Only one top-level mode group is admitted; other instructions stay in the body.
 pub(super) fn choice_body(body: &ast::Body, path: &str) -> Result<bool, LoweringError> {
+    if body.steps.iter().any(|step| matches!(step, ast::Step::If(branch)
+        if contains_choice(&branch.then) || branch.r#else.as_ref().is_some_and(|steps| contains_choice(steps)))) {
+        return Err(unsupported(path));
+    }
     match body
         .steps
         .iter()
@@ -535,6 +543,58 @@ pub(super) fn choice_body(body: &ast::Body, path: &str) -> Result<bool, Lowering
     {
         0 => Ok(false),
         1 => Ok(true),
+        _ => Err(unsupported(path)),
+    }
+}
+
+fn contains_choice(steps: &[ast::Step]) -> bool {
+    steps.iter().any(|step| match step {
+        ast::Step::Choice(_) => true,
+        ast::Step::If(branch) => {
+            contains_choice(&branch.then)
+                || branch
+                    .r#else
+                    .as_ref()
+                    .is_some_and(|else_steps| contains_choice(else_steps))
+        }
+        ast::Step::Choose(_)
+        | ast::Step::Draw(_)
+        | ast::Step::Pp(_)
+        | ast::Step::Discard(_)
+        | ast::Step::PpMax(_)
+        | ast::Step::Ep(_)
+        | ast::Step::Damage(_)
+        | ast::Step::Life(_)
+        | ast::Step::SetLife(_)
+        | ast::Step::Destroy(_)
+        | ast::Step::Banish(_)
+        | ast::Step::Act(_)
+        | ast::Step::Stand(_)
+        | ast::Step::Buff(_)
+        | ast::Step::Grant(_)
+        | ast::Step::SetStat(_)
+        | ast::Step::Apply(_)
+        | ast::Step::Search(_)
+        | ast::Step::Look(_)
+        | ast::Step::Reveal(_)
+        | ast::Step::Move(_)
+        | ast::Step::Create(_) => false,
+    })
+}
+
+pub(super) fn fanfare_choice(body: &ast::Body, path: &str) -> Result<bool, LoweringError> {
+    if !contains_choice(&body.steps) {
+        return Ok(false);
+    }
+    match body.steps.as_slice() {
+        [ast::Step::Choice(_)] => Ok(true),
+        [ast::Step::If(branch)]
+            if matches!(branch.cond, ast::Condition::Awakened(true))
+                && branch.r#else.is_none()
+                && matches!(branch.then.as_slice(), [ast::Step::Choice(_)]) =>
+        {
+            Ok(true)
+        }
         _ => Err(unsupported(path)),
     }
 }

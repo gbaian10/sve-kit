@@ -1,0 +1,39 @@
+cards:
+  BP08-064:
+    abilities:
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  awakened: true
+                then:
+                  - choice:
+                      n: 1
+                      options:
+                        - - damage:
+                              n: 4
+                              to: enemy
+                        - - damage:
+                              n: 2
+                              to:
+                                kind: follower
+                                who: opp
+                                zone: field
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+              option: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-sol
+            who: Codex
+          date: "2026-10-29"
+format: 2
+kind: author_effect_set
