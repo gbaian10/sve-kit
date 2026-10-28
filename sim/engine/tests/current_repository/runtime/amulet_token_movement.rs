@@ -1,8 +1,7 @@
 use super::*;
 
 fn tree_game(initial: &Value) -> (Game, AbilityId) {
-    let (snapshot, keywords, input) = inputs();
-    let selected = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
+    let selected = selection();
     let ability = selected.current["BP07-T03"]
         .program
         .card()
@@ -13,7 +12,7 @@ fn tree_game(initial: &Value) -> (Game, AbilityId) {
         .node
         .id;
     let game = Game::from_selected_effects(
-        selected,
+        selected.clone(),
         initial,
         &Value::Null,
         &Value::Null,
