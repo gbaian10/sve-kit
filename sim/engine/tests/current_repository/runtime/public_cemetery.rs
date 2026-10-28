@@ -1,5 +1,28 @@
 use super::*;
 
+fn bell_game(initial: &Value) -> (Game, AbilityId) {
+    let (snapshot, keywords, input) = inputs();
+    let selected = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
+    let ability = selected.current["BP18-115"]
+        .program
+        .card()
+        .abilities
+        .iter()
+        .find(|entry| entry.node.kind == AbilityKind::Activated)
+        .unwrap()
+        .node
+        .id;
+    let game = Game::from_selected_effects(
+        selected,
+        initial,
+        &Value::Null,
+        &Value::Null,
+        "public-cemetery",
+    )
+    .unwrap();
+    (game, ability)
+}
+
 #[expect(
     clippy::panic,
     reason = "An unexpected pending domain fails the scenario."
@@ -29,7 +52,7 @@ fn bp18_115_puts_itself_in_cemetery_as_an_effect_and_triggers_lastword() {
         initial["turn"]["active"] = json!(seat);
         initial["players"][seat]["zones"]["hand"] = json!([{"id":"bell","card":"BP18-115"}]);
         initial["players"][seat]["zones"]["deck"] = json!([{"id":"drawn","card":"BP01-037"}]);
-        let mut game = game(&initial);
+        let (mut game, ability) = bell_game(&initial);
         assert!(matches!(
             game.play_internal_card(
                 "bell",
@@ -45,7 +68,7 @@ fn bp18_115_puts_itself_in_cemetery_as_an_effect_and_triggers_lastword() {
         let before = format!("{game:?}");
         game.activate_internal_card(
             "bell",
-            AbilityId(3),
+            ability,
             PlayerId {
                 seat: if seat == "P1" { 2 } else { 1 },
             },
@@ -58,7 +81,7 @@ fn bp18_115_puts_itself_in_cemetery_as_an_effect_and_triggers_lastword() {
         let result = resolved(
             game.activate_internal_card(
                 "bell",
-                AbilityId(3),
+                ability,
                 PlayerId {
                     seat: seat_number(seat),
                 },
