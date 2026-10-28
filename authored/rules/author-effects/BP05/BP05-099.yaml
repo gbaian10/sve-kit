@@ -1,0 +1,22 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP05-099:
+    abilities:
+      - keywords:
+          - bane
+        line: 1
+      - lastword:
+          do:
+            - damage:
+                n: 2
+                to:
+                  leaders: opponents
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-luna
+          date: "2026-10-28"

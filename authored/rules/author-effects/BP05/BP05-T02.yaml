@@ -1,0 +1,23 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP05-T02:
+    abilities:
+      - auto:
+          on:
+            phase:
+              which: main
+              whose: self
+          do:
+            - damage:
+                n: 2
+                to:
+                  leaders: opponents
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-luna
+          date: "2026-10-28"

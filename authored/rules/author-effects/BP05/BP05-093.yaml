@@ -1,0 +1,29 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP05-093:
+    abilities:
+      - auto:
+          on:
+            phase:
+              which: main
+              whose: opp
+          do:
+            - choose:
+                bind: chosen
+                from:
+                  kind: follower
+                  who: opp
+                  zone: field
+                n: 1
+            - damage:
+                n: 1
+                to: chosen
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-luna
+          date: "2026-10-28"
