@@ -27,7 +27,7 @@ fn selection_captures_survive_stat_changes_and_departure_without_using_owner_or_
         fanfare::fragment_setup(1, "SD03-005", 10, json!([{"id":"f","card":"BP01-037"}]));
     initial["players"]["P1"]["zones"]["deck"] = json!([]);
     initial["players"]["P1"]["zones"]["field"] =
-        json!([{"id":"f","card":"BP01-037","owner":"P2","state":{"damage":2}}]);
+        json!([{"id":"f","card":"BP01-037","owner":"P2","state":{"power":4,"damage":2}}]);
     let mut board = Game::new(
         catalog,
         &initial,
@@ -40,6 +40,10 @@ fn selection_captures_survive_stat_changes_and_departure_without_using_owner_or_
         .load_internal_card("SD03-005", &cards["SD03-005"])
         .unwrap();
     board.load_internal_card("BP01-037", &card(vec![])).unwrap();
+    let before = board.projection(View::Referee).unwrap();
+    assert_eq!(before["objects"]["f"]["power"], 4_u8);
+    assert_eq!(before["objects"]["f"]["hp"], 3_u8);
+    assert_eq!(before["P2"]["cemetery"], json!([]));
     let CardPlay::Awaiting(question) = board.play_internal_card("s", PlayerId { seat: 1 }).unwrap()
     else {
         panic!("target");
