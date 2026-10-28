@@ -1,0 +1,28 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP06-078:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-28"
+    abilities:
+      - keywords:
+          - rush
+        line: 1
+      - attack_time:
+          do:
+            - damage:
+                n: 1
+                to:
+                  leaders: all
+        line: 2
+      - lastword:
+          do:
+            - life:
+                who: self
+                delta: 4
+        line: 3

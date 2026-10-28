@@ -1,0 +1,23 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP06-086:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-28"
+    abilities:
+      - auto:
+          "on":
+            phase:
+              which: main
+              whose: self
+          do:
+            - damage:
+                n: 1
+                to:
+                  leader: self
+        line: 1

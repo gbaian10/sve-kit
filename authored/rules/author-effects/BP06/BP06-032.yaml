@@ -1,0 +1,26 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP06-032:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-28"
+    abilities:
+      - fanfare:
+          do:
+            - choose:
+                bind: enemy
+                from:
+                  who: opp
+                  zone: field
+                  kind: follower
+                n: 1
+            - destroy:
+                ref: enemy
+            - draw:
+                n: 1
+        line: 1
