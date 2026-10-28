@@ -1,0 +1,23 @@
+cards:
+  BP05-115:
+    abilities:
+      - evolve_time:
+          do:
+            - create:
+                n: 1
+                to: field
+                token: エンシェントアーティファクト
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-luna
+            who: Codex
+          date: "2026-10-29"
+    token_sources:
+      - card: BP05-T04
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

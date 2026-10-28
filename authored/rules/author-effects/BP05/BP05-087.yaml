@@ -1,0 +1,28 @@
+cards:
+  BP05-087:
+    abilities:
+      - keywords:
+          - ward
+          - aura
+        line: 1
+      - evolve_time:
+          do:
+            - pp_max:
+                delta: 1
+                who: self
+            - life:
+                delta: 3
+                who: self
+            - draw:
+                n: 1
+                who: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-luna
+            who: Codex
+          date: "2026-10-29"
+format: 2
+kind: author_effect_set

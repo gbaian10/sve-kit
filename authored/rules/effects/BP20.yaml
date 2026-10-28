@@ -665,33 +665,6 @@ cards:
         kind: evolve
         line: 2
     status: complete
-  BP20-R14:
-    abilities:
-      - body:
-          name: guard
-          op: macro
-        kind: static
-        line: 1
-      - body:
-          name: aura
-          op: macro
-        kind: static
-        line: 1
-      - body:
-          op: seq
-          steps:
-            - amount: 1
-              op: max_pp
-            - hp: 3
-              op: modify
-              subjects: self.leader
-            - count: 1
-              op: draw
-        event: evolve
-        kind: trigger
-        line: 2
-        subject: self
-    status: complete
   BP20-SL17:
     abilities:
       - body:
