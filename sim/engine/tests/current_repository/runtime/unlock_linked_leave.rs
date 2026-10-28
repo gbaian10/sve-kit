@@ -122,7 +122,7 @@ fn machine_evolution(game: &mut Game, seat: &str, target: bool) {
     let state = game.projection(View::Referee).unwrap();
     assert_eq!(
         state["objects"]["source"]["evolved_with"], "form",
-        "target availability does not cancel the evolution itself"
+        "the source remains linked to its real evolved card"
     );
     assert_eq!(
         state[seat]["evolution"],
@@ -325,7 +325,7 @@ fn bp08_038_draws_deck_minus_five_then_039_puts_all_other_field_cards_in_cemeter
         assert_eq!(state["objects"]["opposing-form"]["face_up"], true);
         assert_eq!(
             state["objects"]["source"]["evolved_with"], "form",
-            "target availability does not cancel the evolution itself"
+            "the source remains linked to its real evolved card"
         );
         assert_eq!(state["P1"]["ex"], json!(["keep-ex"]));
         resolved(trigger(&mut game, "BP18-115"));
@@ -335,7 +335,11 @@ fn bp08_038_draws_deck_minus_five_then_039_puts_all_other_field_cards_in_cemeter
         let after = game.projection(View::Referee).unwrap();
         assert_eq!(after["P1"]["leader"]["life"], 21_u8);
         assert_eq!(after["P1"]["ex"], json!(["keep-ex"]));
-        assert_eq!(after["P2"]["ex"].as_array().unwrap().len(), 1);
+        assert_eq!(
+            after["P2"]["ex"].as_array().unwrap().len(),
+            1,
+            "the opposing evolved 050 Lastword creates one Repair Mode"
+        );
         assert!(
             game.internal_pending_choice().unwrap().is_none(),
             "the single departure trigger finishes without duplication"
