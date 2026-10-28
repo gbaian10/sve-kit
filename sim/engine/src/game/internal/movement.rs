@@ -1,6 +1,7 @@
 //! Physical movement and successful receipt projections; full replacement chains remain closed.
 
 use super::{Execution, Fact, Game, InstructionOutcome, Result, invalid, player_id, unsupported};
+use crate::game::Object;
 use crate::ir::{
     Action, ActionPattern, BanishOutcome, Bool, Cause, CausePattern, DestroyOutcome, DurationEnd,
     Effect, EffectSource, Expr, Generation, Instruction, MoveDestination, MoveMethod, MoveOutcome,
@@ -9,6 +10,7 @@ use crate::ir::{
     ResultMember, ResultMemberId, RuntimeObjectView, RuntimeZoneRef, SelectionView, Selector,
     SliceDirection, SnapshotId, TimeAnchor, ZoneKind,
 };
+use alloc::collections::BTreeMap;
 use serde_json::json;
 
 /// One authority-only fact. No hidden destination reference is delivered to a player.
@@ -66,7 +68,7 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
             if !matches!(
                 movement.to,
                 MoveDestination::Owners {
-                    zone: OwnerZone::Cemetery | OwnerZone::Banish | OwnerZone::Hand
+                    zone: OwnerZone::Cemetery | OwnerZone::Banish | OwnerZone::Hand | OwnerZone::Ex
                 }
             ) || movement.position.is_some()
                 || movement.order.is_some()
@@ -231,6 +233,132 @@ fn local_id<T>(location: &ReceiptLocation<T>) -> Result<&ReceiptId> {
     reason = "Movement shares the authoritative Game and its mutation primitive."
 )]
 impl Game {
+    fn departing_evolution(&self, object: &Object) -> Result<Option<(String, u64)>> {
+        let Some(link) = object
+            .state
+            .get("evolved_with")
+            .filter(|value| !value.is_null())
+        else {
+            return Ok(None);
+        };
+        let form = self.object(
+            link.as_str()
+                .ok_or_else(|| invalid("invalid evolution link"))?,
+        )?;
+        let base_print = self.catalog.face(&object.card, 0)?;
+        let form_print = self.catalog.face(&form.card, 0)?;
+        if object.zone != "field"
+            || form.zone != "evolution"
+            || form.owner != object.owner
+            || base_print["card_type"] != "フォロワー"
+            || form_print["card_type"] != "フォロワー・エボルヴ"
+            || base_print["name"] != form_print["name"]
+            || form.state["face"] != 0_u8
+            || form
+                .state
+                .get("evolved_with")
+                .is_some_and(|value| !value.is_null())
+            || form
+                .state
+                .get("links")
+                .is_some_and(|value| !value.is_null())
+            || self
+                .state
+                .objects
+                .values()
+                .filter(|base| base.state["evolved_with"] == form.id)
+                .count()
+                != 1
+        {
+            return Err(unsupported(
+                "ordinary single evolution departure association",
+            ));
+        }
+        form.generation
+            .checked_add(1)
+            .ok_or_else(|| invalid("evolution generation exhausted"))?;
+        Ok(Some((form.id.clone(), form.generation)))
+    }
+
+    fn check_evolution_return(&self, departure: Option<&(String, u64)>) -> Result<()> {
+        if let Some((form, generation)) = departure {
+            let returned = self.object(form)?;
+            if returned.zone != "evolve_deck"
+                || returned.generation != generation.saturating_add(1)
+                || returned.state["face_up"] != true
+            {
+                return Err(invalid(
+                    "evolution rule return diverged from departure plan",
+                ));
+            }
+        }
+        Ok(())
+    }
+
+    fn owner_ex_has_room(&self, owner: &str, count: usize) -> Result<bool> {
+        let available = usize::try_from(5_i64.saturating_sub(self.zone_count(owner, "ex")).max(0))
+            .map_err(invalid)?;
+        if available != 0 && count > available {
+            return Err(unsupported("public EX movement needs capacity selection"));
+        }
+        Ok(available != 0)
+    }
+
+    fn departure_followup(
+        &self,
+        execution: &Execution,
+        previous: &Object,
+        zone: &str,
+        has_evolution: bool,
+    ) -> Result<Option<&'static str>> {
+        let card_type = self.object_type(&previous.id)?;
+        let special =
+            card_type.contains("トークン") || card_type.contains("アドバンス") || has_evolution;
+        if special {
+            if execution.ability.is_none() {
+                return Err(unsupported(
+                    "special-card movement requires whole-card authority",
+                ));
+            }
+            self.check_internal_resources()?;
+        }
+        if ((card_type.contains("トークン") || card_type.contains("アドバンス"))
+            && !matches!(
+                card_type,
+                "フォロワー・アドバンス" | "フォロワー・トークン" | "アミュレット・トークン"
+            ))
+            || previous
+                .state
+                .get("links")
+                .is_some_and(|value| !value.is_null())
+            || self
+                .state
+                .objects
+                .values()
+                .any(|item| item.state["equipped_to"] == previous.id)
+        {
+            return Err(unsupported(
+                "movement requires linked or special-card rules",
+            ));
+        }
+        let followup = if card_type == "フォロワー・アドバンス"
+            && !matches!(zone, "field" | "ex" | "resolution" | "evolve_deck")
+        {
+            Some("evolve_deck")
+        } else if matches!(card_type, "フォロワー・トークン" | "アミュレット・トークン")
+            && !matches!(zone, "field" | "ex" | "resolution")
+        {
+            Some("void")
+        } else {
+            None
+        };
+        previous
+            .generation
+            .checked_add(if followup.is_some() { 2 } else { 1 })
+            .ok_or_else(|| invalid("movement generation exhausted"))?;
+        Ok(followup)
+    }
+
     pub(super) fn internal_banish(
         &mut self,
         execution: &mut Execution,
@@ -244,6 +372,7 @@ impl Game {
             "banish",
             ZoneKind::Banish,
             MoveMethod::Banish,
+            false,
         )?;
         execution.receipts.insert(
             instruction.receipt,
@@ -275,6 +404,7 @@ impl Game {
                     OwnerZone::Cemetery => ("cemetery", ZoneKind::Cemetery),
                     OwnerZone::Banish => ("banish", ZoneKind::Banish),
                     OwnerZone::Hand => ("hand", ZoneKind::Hand),
+                    OwnerZone::Ex => ("ex", ZoneKind::Ex),
                     OwnerZone::Deck => return Err(unsupported("private movement destination")),
                 };
                 if reason != MoveReason::Put {
@@ -301,13 +431,24 @@ impl Game {
                         "only public field or cemetery departures to hand",
                     ));
                 }
+                if kind == ZoneKind::Ex
+                    && !matches!(object.zone.as_str(), "field" | "cemetery" | "ex")
+                {
+                    return Err(unsupported("public field or cemetery movement to EX"));
+                }
                 if top_count.is_none() {
                     public_zone(&object.zone)?;
                 }
             }
         }
-        let (moves, successful) =
-            self.internal_move_members(execution, &members, zone, kind, method)?;
+        let (moves, successful) = self.internal_move_members(
+            execution,
+            &members,
+            zone,
+            kind,
+            method,
+            kind == ZoneKind::Ex,
+        )?;
         let outcome = if method == MoveMethod::Destroy {
             InstructionOutcome::Destroy(DestroyOutcome { successful, moves })
         } else {
@@ -393,6 +534,7 @@ impl Game {
             "field",
             ZoneKind::Field,
             MoveMethod::Put,
+            false,
         )?;
         for member in &moved {
             if member.after.is_some() {
@@ -460,6 +602,7 @@ impl Game {
         zone: &str,
         kind: ZoneKind,
         method: MoveMethod,
+        owner_ex: bool,
     ) -> Result<(Vec<MoveResult>, Vec<ResultMember>)> {
         let snapshot = SnapshotId(self.state.ir_epoch);
         let mut moves = Vec::new();
@@ -469,7 +612,7 @@ impl Game {
             let id = execution.object_id(before)?.to_owned();
             let previous = self.object(&id)?.clone();
             let requested_to = RuntimeZoneRef {
-                player: if shared_destination(zone) {
+                player: if shared_destination(zone) && !owner_ex {
                     execution.context.controller
                 } else {
                     player_id(&previous.owner)?
@@ -498,69 +641,40 @@ impl Game {
             {
                 continue;
             }
-            // Linked departures still need their own typed rule receipts.
-            let card_type = self.object_type(&id)?;
-            let special = card_type.contains("トークン") || card_type.contains("アドバンス");
-            if special {
-                if execution.ability.is_none() {
-                    return Err(unsupported(
-                        "special-card movement requires whole-card authority",
-                    ));
-                }
-                self.check_internal_resources()?;
-            }
-            if ((card_type.contains("トークン") || card_type.contains("アドバンス"))
-                && !matches!(
-                    card_type,
-                    "フォロワー・アドバンス" | "フォロワー・トークン" | "アミュレット・トークン"
-                ))
-                || previous
-                    .state
-                    .get("evolved_with")
-                    .is_some_and(|value| !value.is_null())
-                || previous
-                    .state
-                    .get("links")
-                    .is_some_and(|value| !value.is_null())
-                || self
-                    .state
-                    .objects
-                    .values()
-                    .any(|item| item.state["equipped_to"] == id)
-            {
-                return Err(unsupported(
-                    "movement requires linked or special-card rules",
-                ));
-            }
-            let followup = if card_type == "フォロワー・アドバンス"
-                && !matches!(zone, "field" | "ex" | "resolution" | "evolve_deck")
-            {
-                Some("evolve_deck")
-            } else if matches!(card_type, "フォロワー・トークン" | "アミュレット・トークン")
-                && !matches!(zone, "field" | "ex" | "resolution")
-            {
-                Some("void")
-            } else {
-                None
-            };
-            previous
-                .generation
-                .checked_add(if followup.is_some() { 2 } else { 1 })
-                .ok_or_else(|| invalid("movement generation exhausted"))?;
+            let evolution = self.departing_evolution(&previous)?;
+            let followup =
+                self.departure_followup(execution, &previous, zone, evolution.is_some())?;
+
             plans.push((
                 moves.len().saturating_sub(1),
                 id,
                 previous,
                 from_kind,
                 followup,
+                evolution,
             ));
+        }
+        if owner_ex {
+            let mut arrivals = BTreeMap::<String, usize>::new();
+            for (_, _, previous, _, _, _) in &plans {
+                let count = arrivals.entry(previous.owner.clone()).or_default();
+                *count = count.saturating_add(1);
+            }
+            for (owner, count) in arrivals {
+                if !self.owner_ex_has_room(&owner, count)? {
+                    plans.retain(|(_, _, previous, _, _, _)| previous.owner != owner);
+                }
+            }
         }
         let ids = plans
             .iter()
-            .map(|(_, id, _, _, _)| id.clone())
+            .map(|(_, id, _, _, _, _)| id.clone())
             .collect::<Vec<_>>();
         let departing_source = execution.source_before_move(self, &ids)?;
         let mut frame = execution.frame();
+        if owner_ex {
+            frame.values.insert("owner_destination".into(), json!(true));
+        }
         if method == MoveMethod::Banish {
             // The ordinary banish event is emitted only for a banish instruction frame.
             frame
@@ -573,7 +687,7 @@ impl Game {
             self.move_objects(
                 &ids,
                 zone,
-                if shared_destination(zone) {
+                if shared_destination(zone) && !owner_ex {
                     Some(super::seat_name(execution.context.controller)?)
                 } else {
                     None
@@ -584,7 +698,7 @@ impl Game {
         }
         if kind == ZoneKind::Hand {
             // As with draws, the public card stays known but its new hand slot is not located.
-            for (_, id, previous, _, _) in &plans {
+            for (_, id, previous, _, _, _) in &plans {
                 for (viewer, knowledge) in &mut self.state.knowledge {
                     if *viewer != previous.owner {
                         knowledge.located.remove(id);
@@ -599,7 +713,8 @@ impl Game {
             .ok_or_else(|| invalid("IR epoch exhausted"))?;
         let after_snapshot = SnapshotId(self.state.ir_epoch);
         let group = self.group();
-        for (index, id, previous, from_kind, followup) in plans {
+        for (index, id, previous, from_kind, followup, evolution) in plans {
+            self.check_evolution_return(evolution.as_ref())?;
             let current = self.object(&id)?;
             let mut after = execution.reference(self, &id)?;
             after.generation = Generation(previous.generation.saturating_add(1));

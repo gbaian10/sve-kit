@@ -358,7 +358,7 @@ record!(
     }
 );
 variants!(ObjectOperand {
-    // This follows only the triggering subject's before member through its header receipt.
+    // This follows only the triggering subject's saved successful movement member.
     // Lowering must prove explicit card-text permission; payload after fields alone grant none.
     FollowEventMove { event: MovementEvent } => ["reference.trigger-follow", "reference.follow-generation", "read.event-header.move-receipt"],
     FromExpression { value: Box<Expr<ObjectRef>> } => ["reference.expression"],

@@ -462,6 +462,7 @@ impl Game {
                     } else {
                         MoveMethod::Put
                     },
+                    false,
                 )?;
                 if moved.len() != members.len() || moved.iter().any(|result| result.after.is_none())
                 {

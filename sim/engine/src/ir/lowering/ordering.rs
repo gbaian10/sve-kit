@@ -1,6 +1,7 @@
 use super::super::{
-    DecisionId, MemberProjection, MoveDestination, MoveReason, MoveSpec, MovementReceipt,
-    ObjectReceipt, OwnerZone, Placement, Position, ReceiptReference, Visibility,
+    DecisionId, MemberProjection, MoveDestination, MoveReason, MoveSpec, MovementEvent,
+    MovementReceipt, ObjectOperand, ObjectReceipt, OwnerZone, Placement, Position,
+    ReceiptReference, Visibility,
 };
 use super::{
     Action, BodyContext, Cardinality, LoweringError, Nat, PlayerRef, PlayerRelation, PlayerSet,
@@ -127,26 +128,28 @@ impl BodyContext<'_> {
         if let Some(top) = &value.top {
             return top_to_cemetery(value, top, path);
         }
-        if matches!(
-            value.to,
-            ast::Destination::Hand | ast::Destination::Cemetery
-        ) {
+        if let Some(ast::MoveObjects::Field(objects)) = &value.r#ref {
             if value.position.is_some() || value.order.is_some() || value.result.is_some() {
                 return Err(unsupported(path));
             }
-            let Some(ast::MoveObjects::Field(objects)) = &value.r#ref else {
-                return Err(unsupported(path));
+            let zone = match value.to {
+                ast::Destination::Hand => OwnerZone::Hand,
+                ast::Destination::Cemetery => OwnerZone::Cemetery,
+                ast::Destination::Ex => OwnerZone::Ex,
+                ast::Destination::Deck => return Err(unsupported(path)),
+            };
+            let objects = match (objects, self.leave_event, zone) {
+                (ast::Objects::This(_), Some(event), OwnerZone::Ex) => Selector::Objects {
+                    objects: vec![ObjectOperand::FollowEventMove {
+                        event: MovementEvent::LeaveField { event },
+                    }],
+                },
+                _ => self.objects(objects, path)?,
             };
             return Ok(Action::Move {
-                objects: self.objects(objects, path)?,
+                objects,
                 movement: MoveSpec {
-                    to: MoveDestination::Owners {
-                        zone: if matches!(value.to, ast::Destination::Hand) {
-                            OwnerZone::Hand
-                        } else {
-                            OwnerZone::Cemetery
-                        },
-                    },
+                    to: MoveDestination::Owners { zone },
                     initial_posture: None,
                     entry_effects: vec![],
                     position: None,

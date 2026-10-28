@@ -1,0 +1,31 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP19-061:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-29"
+    abilities:
+      - line: 1
+        evolve_time:
+          do:
+            - choose:
+                bind: victim
+                from:
+                  who: opp
+                  zone: field
+                  kind: follower
+                n: 1
+            - damage:
+                to: victim
+                n: 4
+      - line: 2
+        lastword:
+          do:
+            - move:
+                ref: this
+                to: ex

@@ -200,6 +200,7 @@ impl Game {
             "cemetery",
             ZoneKind::Cemetery,
             MoveMethod::Discard,
+            false,
         )?;
         for (before, characters) in snapshots {
             if let Some(actual_to) = moves

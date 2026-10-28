@@ -6,15 +6,15 @@ use crate::ir::optional_payment;
 use super::super::source::{SourceInformation, SourceSnapshot};
 use super::super::{Answer, DecisionToken, DecisionView, InputDomain, player_id};
 use super::{
-    Ability, AbilityKind, AbilityOrigin, CardPlay, Context, Game, Located, PlayerId, Result,
-    RuntimeAbilitySource, ZoneKind, invalid, printed_origin, unsupported,
+    Ability, AbilityKind, AbilityOrigin, CardPlay, Context, Execution, Game, Located, PlayerId,
+    Result, RuntimeAbilitySource, ZoneKind, invalid, printed_origin, unsupported,
 };
 use crate::game::{Frame, Object};
 use crate::ir::{
     BatchId, Cause, DecisionId, EventHeader, EventId, EventPattern, EventPayload,
-    EventSnapshotPolicy, ExecutionId, GameTime, KeywordId, LeaveFieldEvent, OriginFactId, Phase,
-    RuleId, RuntimeVisibility, RuntimeZoneRef, SnapshotId, Timestamp, TriggerAggregation,
-    TriggerCondition, TriggerSpec, TurnId,
+    EventSnapshotPolicy, ExecutionId, GameTime, KeywordId, LeaveFieldEvent, ObjectRef,
+    OriginFactId, Phase, RuleId, RuntimeVisibility, RuntimeZoneRef, SnapshotId, Timestamp,
+    TriggerAggregation, TriggerCondition, TriggerSpec, TurnId,
 };
 use alloc::collections::BTreeMap;
 
@@ -48,6 +48,7 @@ pub(super) struct PendingOccurrence {
     information: SourceInformation,
     header: EventHeader,
     leave: Option<LeaveFieldEvent>,
+    leave_after: Option<ObjectRef>,
     card: String,
     timing: Option<EventPayload>,
     field_position: u64,
@@ -176,6 +177,7 @@ impl Game {
             information,
             header,
             leave,
+            leave_after: None,
             card,
             timing: None,
             field_position: u64::try_from(
@@ -386,6 +388,9 @@ impl Game {
                 return Err(invalid("departure did not commit"));
             }
             pending.header.after = after;
+            if pending.leave.is_some() {
+                pending.leave_after = Some(self.internal_current_reference(&previous.id)?);
+            }
             admitted.push(pending);
         }
         self.internal_admit_pending(admitted)
@@ -537,11 +542,12 @@ impl Game {
             }
             pending.information.snapshot(self, pending.source)?;
             let context = Context {
-                source: pending.holder,
+                source: pending.holder.clone(),
                 generation: pending.source.holder.generation,
                 controller: pending.source.controller,
             };
             let mut execution = self.new_card_execution(context)?;
+            pending.bind_leave_move(&mut execution)?;
             if let (Some(EventPayload::EnterField { event }), Some(trigger)) =
                 (&pending.timing, &pending.ability.node.trigger)
                 && let TriggerCondition::Event {
@@ -588,6 +594,20 @@ impl Game {
 }
 
 impl PendingOccurrence {
+    fn bind_leave_move(&self, execution: &mut Execution) -> Result<()> {
+        if let Some(trigger) = &self.ability.node.trigger
+            && let TriggerCondition::Event {
+                pattern: EventPattern::LeaveField { binding, .. },
+            } = &trigger.on
+        {
+            let after = self
+                .leave_after
+                .ok_or_else(|| invalid("missing committed departure"))?;
+            execution.leave_move = Some((binding.key(), after));
+        }
+        Ok(())
+    }
+
     fn public_option(&self, handle: u64) -> Result<PendingOption> {
         Ok(PendingOption {
             handle,

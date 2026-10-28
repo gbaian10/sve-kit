@@ -62,7 +62,8 @@ tags!(OwnerZone {
     Hand,
     Deck,
     Cemetery,
-    Banish
+    Banish,
+    Ex
 });
 tags!(MoveReason { Put, Return, Mill });
 /// Exact quantity or an explicit per-card continue/stop decision.

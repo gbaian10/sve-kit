@@ -10,8 +10,8 @@ use crate::ir::{
     BoolFrozen, BoolRead, ExecutionRef, HistoryCount, PaymentReference, SpellCountTime,
 };
 use crate::ir::{
-    FollowPermission, MemberProjection, MovementReceipt, ObjectReceipt, ObjectView, PlayerRead,
-    ReceiptId, Role, SelectionView,
+    FollowPermission, MemberProjection, MovementEvent, MovementReceipt, ObjectReceipt, ObjectView,
+    PlayerRead, ReceiptId, Role, SelectionView,
 };
 use alloc::collections::BTreeSet;
 use core::convert::identity;
@@ -116,6 +116,16 @@ impl Execution {
 
     pub(super) fn object(&self, game: &Game, object: &ObjectOperand) -> Result<ObjectRef> {
         match object {
+            ObjectOperand::FollowEventMove {
+                event: MovementEvent::LeaveField { event },
+            } => {
+                let (_, after) = self
+                    .leave_move
+                    .as_ref()
+                    .filter(|(binding, _)| *binding == event.key())
+                    .ok_or_else(|| unsupported("missing triggering movement authority"))?;
+                Ok(*after)
+            }
             ObjectOperand::SourceHolder {} => {
                 let mut reference = self.reference(game, &self.context.source)?;
                 reference.generation = self.context.generation;

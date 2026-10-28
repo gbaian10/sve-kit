@@ -170,6 +170,17 @@ before／after、直接 cause；規則移區的 source=None，不冒充造成先
 若指向實際回手成員，求值時拒絕並回復整次嘗試；這是執行期拒絕，不是載入期靜態拒絕。
 其他一般回手及未准入的跨世代跟隨仍拒絕。
 
+公開 Field／Cemetery 的 Put 至 `Owners(Ex)` 按每張卡的 owner 分派目的地，
+不沿效果控制者或離場前控制者。每位 owner 的 EX 已滿時該張保留原區且無 after；
+同批只有部分容量、需要另選卡時仍拒絕。牌庫觀察的 `Shared(Ex)` 維持原本的自方目的地。
+普通從者帶有單一受驗進化關聯時可以公開離場；共同移區原語清除基底狀態，
+依 CR 11.6.1 將進化卡正面放回 owner 進化牌組。食事／憑依／裝備等其他連結仍拒絕。
+
+Lastword 的 `move this to ex` 使用當前 LeaveField 單一成員的 `FollowEventMove`，
+保存原成功移動的 after 世代後再把基底從墓地移至 EX；不改綁來源 holder 或封存 LKI。
+若該世代在能力結算前再次移區，移動依舊世代成為無成功成員，不追蹤最新世代。
+進化卡本身不是此 after，且回手／消滅／移 EX 不觸發 Lastword。
+
 Fanfare、長寫 EnterField、Lastword、OnEvolve、OnSuperEvolve、OnAttack、Main／End Begin、
 自身 LeaveField 與 Damage 共用一個私有待機集合。`internal_pending_choice()` 在穩定檢查時點建立題目，
 回合玩家有待機就由該玩家選一個，否則由對手選。`answer_internal_card` 接 `Answer::Pending(handle)`；
@@ -519,8 +530,9 @@ Move／Search／Destroy 的 local receipt。只取具有 after、actual_to 與�
 不以 found、revealed、選中集合或 requested_to 代替成功移動。Before 保留舊世代，After
 只指向該次移動的新世代，再次移區後不自動追蹤。一般 Difference 依物件 ID 及世代扣除，
 不依卡號或卡名。這些集合不代表 Destroy 事件或完整付款。
-MovedRef、RuleCarry、FollowEventMove、其他 receipt 家族與事件 payload read
-仍在完整 requirement 預檢時拒絕，包含未執行分支。receipt 與 after 世代不進玩家 packet。
+MovedRef、RuleCarry、其他 receipt 家族與未准入事件 payload read
+仍在完整 requirement 預檢時拒絕，包含未執行分支。FollowEventMove 僅開放上述當前 LeaveField
+單一成功成員；一般 Move 事件跟隨仍拒絕。receipt 與 after 世代不進玩家 packet。
 
 InstallEffect 的有限子集為 InstructionStart 固定物件集合、Permission Forbid Destroy、
 Effect(Any) cause、常值 true condition，以及 Installation anchor 的 EndResolution。
