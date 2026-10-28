@@ -56,34 +56,37 @@ def test_baseline_covers_every_authored_pack() -> None:
     } | {p.stem.split("-", 1)[0] for p in (BASELINE / "migrated").glob("*.json")}
 
 
-def author_records(pack: str) -> dict[str, dict[str, JsonValue]]:
-    """Index rows from every author shard in ``pack``, keyed by CardNumber."""
-    return {
-        str(row["record_key"]): row
-        for row in map(
-            object_value,
-            array(read_yaml(AUTHOR_INDEX / f"{pack}.yaml")["records"])
-            if (AUTHOR_INDEX / f"{pack}.yaml").exists()
-            else [],
-        )
-        if str(row["file"]).startswith(f"rules/author-effects/{pack}/")
+@pytest.fixture(scope="session")
+def migrated_printings() -> frozenset[str]:
+    """Include reprints whose permanent identity already has an author program."""
+    card_ids = {
+        str(row["card_id"])
+        for index in sorted(AUTHOR_INDEX.glob("*.yaml"))
+        for row in map(object_value, array(read_yaml(index)["records"]))
+        if row["kind"] == "author_effect_set"
     }
+    return frozenset(
+        str(data["card_no"])
+        for path in sorted((ROOT / "authored/registry/printing").glob("*/*.yaml"))
+        for row in map(object_value, array(read_yaml(path)["records"]))
+        if row["kind"] == "printing"
+        and (data := object_value(row["data"]))["region"] == "jp"
+        and data["card_id"] in card_ids
+    )
 
 
 @pytest.mark.parametrize("path", sorted(BASELINE.glob("*.json")), ids=lambda p: p.stem)
 def test_handwritten_programs_keep_the_reviewed_positions_and_inputs(
     path: Path,
+    migrated_printings: frozenset[str],
 ) -> None:
     expected = OBJECT.validate_json(path.read_bytes())
     prototype = ROOT / "authored/rules/effects" / f"{path.stem}.yaml"
     actual = object_value(read_yaml(prototype)["cards"]) if prototype.exists() else {}
-    records = author_records(path.stem)
-    migrated = set(records)
+    migrated = set(migrated_printings)
     migrated.update(
         file.stem for file in (BASELINE / "migrated").glob(f"{path.stem}-*.json")
     )
-    if "BP18-058" in migrated and "BP18-SL13" in expected:
-        migrated.add("BP18-SL13")
     assert set(actual) == set(expected) - migrated
     for number, value in actual.items():
         baseline = object_value(expected[number])
