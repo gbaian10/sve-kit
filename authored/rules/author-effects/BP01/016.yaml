@@ -1,0 +1,28 @@
+cards:
+  BP01-179:
+    abilities:
+      - keywords:
+          - quick
+        line: 1
+      - line: 2
+        spell:
+          do:
+            - damage:
+                n: 2
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-sol
+            who: Codex
+          date: "2026-10-28"
+format: 2
+kind: author_effect_set
