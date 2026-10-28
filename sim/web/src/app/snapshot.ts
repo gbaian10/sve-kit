@@ -631,6 +631,8 @@ export function usePrintingOptions() {
         location: { types: view.options.types, counts: view.options.locationCounts },
         trait: { traits: view.options.traits, counts: view.options.traitCounts },
         artist: { artists: view.options.artists, counts: view.options.artistCounts },
+        classMechanisms: view.options.classMechanisms,
+        collabMechanisms: view.options.collabMechanisms,
         abilityTypes: {
           coverage: view.options.abilityCoverage ?? "pending",
           unknownCards: view.options.abilityUnknownCards,

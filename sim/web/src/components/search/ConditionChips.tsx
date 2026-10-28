@@ -174,6 +174,15 @@ export function ConditionChips({
       label: t("filters.abilityTypeHas", { label: t(`filters.abilityTypeNames.${code}`) }),
       without: { ...query, abilityTypes: query.abilityTypes.filter((other) => other !== code) },
     })),
+    ...(["classMechanisms", "collabMechanisms"] as const).flatMap((field) =>
+      query[field].map((code) => ({
+        key: `${field}:${code}`,
+        label: t("filters.printedMechanismHas", {
+          label: t(`filters.printedMechanismNames.${code}`),
+        }),
+        without: { ...query, [field]: query[field].filter((other) => other !== code) },
+      })),
+    ),
     ...query.sets
       .filter((code) => code !== impliedSet)
       .map((code) => ({

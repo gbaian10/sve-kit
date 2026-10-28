@@ -64,6 +64,7 @@ import { vocabularyOptionLabel } from "../../components/search/facet-labels"
 import { FilterPanel } from "../../components/search/FilterPanel"
 import { KeywordFilter } from "../../components/search/KeywordFilter"
 import { LocationFilter } from "../../components/search/LocationFilter"
+import { PrintedMechanismFilter } from "../../components/search/PrintedMechanismFilter"
 import { RarityFilter } from "../../components/search/RarityFilter"
 import { SearchBar } from "../../components/search/SearchBar"
 import { SetFilter } from "../../components/search/SetFilter"
@@ -850,6 +851,34 @@ export function CardsPage() {
             }}
             onMatchChange={(abilityTypesMatch) => {
               commit({ ...query, abilityTypesMatch })
+            }}
+          />
+        ),
+        classMechanisms: (
+          <PrintedMechanismFilter
+            group="classMechanisms"
+            options={printingOptions?.classMechanisms}
+            selected={query.classMechanisms}
+            matchMode={query.classMechanismsMatch}
+            onChange={(classMechanisms) => {
+              commit({ ...query, classMechanisms })
+            }}
+            onMatchChange={(classMechanismsMatch) => {
+              commit({ ...query, classMechanismsMatch })
+            }}
+          />
+        ),
+        collabMechanisms: (
+          <PrintedMechanismFilter
+            group="collabMechanisms"
+            options={printingOptions?.collabMechanisms}
+            selected={query.collabMechanisms}
+            matchMode={query.collabMechanismsMatch}
+            onChange={(collabMechanisms) => {
+              commit({ ...query, collabMechanisms })
+            }}
+            onMatchChange={(collabMechanismsMatch) => {
+              commit({ ...query, collabMechanismsMatch })
             }}
           />
         ),

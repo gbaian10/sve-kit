@@ -1,6 +1,7 @@
 import { isAbilityType } from "../abilityTypes"
 import { isLocationToken } from "../deckLocation"
 import { compareCodePoints } from "../normalize"
+import { isClassMechanism, isCollabMechanism } from "../printedMechanisms"
 import { REPRESENTATIVE_RARITIES } from "../representative"
 import {
   COST_CAP,
@@ -27,6 +28,8 @@ const LIST_PARAMS = {
   traits: "trait",
   artists: "artist",
   abilityTypes: "ability",
+  classMechanisms: "classmech",
+  collabMechanisms: "collabmech",
   sets: "set",
   rarities: "rarity",
 } as const
@@ -92,6 +95,10 @@ export function parseQuery(params: URLSearchParams): QueryState {
     mechanicsMatch: params.get("mechmatch") === "all" ? "all" : "any",
     abilityTypes: list(params, LIST_PARAMS.abilityTypes).filter(isAbilityType),
     abilityTypesMatch: params.get("abilitymatch") === "all" ? "all" : "any",
+    classMechanisms: list(params, LIST_PARAMS.classMechanisms).filter(isClassMechanism),
+    classMechanismsMatch: params.get("classmechmatch") === "all" ? "all" : "any",
+    collabMechanisms: list(params, LIST_PARAMS.collabMechanisms).filter(isCollabMechanism),
+    collabMechanismsMatch: params.get("collabmechmatch") === "all" ? "all" : "any",
     sets: list(params, LIST_PARAMS.sets),
     rarities: list(params, LIST_PARAMS.rarities),
     altArtOnly: params.get("alt") === "1",
@@ -134,6 +141,8 @@ export function formatQuery(state: QueryState): URLSearchParams {
   if (mechanics.length > 0) params.set("mech", mechanics.join(","))
   if (state.mechanicsMatch === "all") params.set("mechmatch", "all")
   if (state.abilityTypesMatch === "all") params.set("abilitymatch", "all")
+  if (state.classMechanismsMatch === "all") params.set("classmechmatch", "all")
+  if (state.collabMechanismsMatch === "all") params.set("collabmechmatch", "all")
   if (state.altArtOnly) params.set("alt", "1")
   if (state.unit !== DEFAULT_QUERY.unit) params.set("unit", state.unit)
   if (state.representative !== DEFAULT_QUERY.representative) params.set("rep", state.representative)

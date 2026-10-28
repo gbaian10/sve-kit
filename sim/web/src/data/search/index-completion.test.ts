@@ -451,3 +451,84 @@ it("filters region-owned ability headers with any/all and preserves both matchin
     expect(find({ abilityTypes: ["quick"] })).toEqual([])
   }
 })
+
+it("keeps printed mechanism groups independent, regional, and available after cache restoration", () => {
+  const { basic, printing } = stages("en")
+  const fragments = [...basic, ...printing]
+  const source = columns(fragments)
+  const coverage = fragments.find((fragment) => fragment.table === "card_mechanic_coverage")
+  if (!coverage) throw new Error("synthetic mechanics missing")
+  source.ingest([
+    {
+      ...coverage,
+      rows: [
+        {
+          card_id: "c:bp01-031",
+          scope: "en_override",
+          printed_mechanisms: [
+            { code: "combo", thresholds: [2] },
+            { code: "overflow", thresholds: [] },
+            { code: "serve", thresholds: [] },
+          ],
+          checked_mechanisms: [],
+        },
+        {
+          card_id: "c:bp01-051",
+          scope: "en_override",
+          printed_mechanisms: [
+            { code: "combo", thresholds: [3] },
+            { code: "lesson", thresholds: [1] },
+          ],
+          checked_mechanisms: [],
+        },
+        {
+          card_id: "c:bp01-011",
+          scope: "shared",
+          printed_mechanisms: [
+            { code: "combo", thresholds: [4] },
+            { code: "serve", thresholds: [] },
+          ],
+          checked_mechanisms: [],
+        },
+      ].map((row) => ({
+        complete_all: false,
+        complete_mode: "include",
+        complete_keyword_ids: [],
+        partial_mode: "include",
+        partial_keyword_ids: [],
+        has_complete_keyword_ids: [],
+        ...row,
+      })),
+    },
+  ])
+  source.seal()
+  const created = new SearchIndex(source, "en")
+  expect(() =>
+    created.search({ edition: "en", state: { ...DEFAULT_QUERY, classMechanisms: ["combo"] } }),
+  ).toThrow(SearchQueryError)
+  created.completeMechanics(source)
+  for (const index of [created, new SearchIndex(created.encode(), "en")]) {
+    expect(index.options.classMechanisms?.coverage).toBe("partial")
+    expect(index.options.classMechanisms?.counts["combo"]).toBe(2)
+    expect(index.options.collabMechanisms?.counts["serve"]).toBe(1)
+    const find = (changes: Partial<typeof DEFAULT_QUERY>) =>
+      index
+        .search({
+          edition: "en",
+          state: { ...DEFAULT_QUERY, unit: "card", ...changes },
+          limit: 100,
+        })
+        .items.map((item) => item.key)
+    expect(find({ classMechanisms: ["combo", "overflow"] })).toEqual(["c:bp01-031", "c:bp01-051"])
+    expect(find({ classMechanisms: ["combo", "overflow"], classMechanismsMatch: "all" })).toEqual([
+      "c:bp01-031",
+    ])
+    expect(find({ classMechanisms: ["combo"], collabMechanisms: ["serve"] })).toEqual([
+      "c:bp01-031",
+    ])
+    expect(find({ collabMechanisms: ["serve", "lesson"], collabMechanismsMatch: "all" })).toEqual(
+      [],
+    )
+    expect(find({ classMechanisms: ["sanguine"] })).toEqual([])
+  }
+})

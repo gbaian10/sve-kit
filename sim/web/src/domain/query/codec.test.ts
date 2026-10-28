@@ -24,6 +24,10 @@ describe("query codec", () => {
       mechanicsMatch: "any",
       abilityTypes: [],
       abilityTypesMatch: "any",
+      classMechanisms: [],
+      classMechanismsMatch: "any",
+      collabMechanisms: [],
+      collabMechanismsMatch: "any",
       sets: ["set:bp01"],
       rarities: ["gold"],
       altArtOnly: true,
@@ -215,4 +219,17 @@ it("round trips independent ability and keyword matching modes and drops unknown
   expect(state.mechanicsMatch).toBe("all")
   expect(parseQuery(formatQuery(state))).toEqual(state)
   expect(formatQuery(DEFAULT_QUERY).has("ability")).toBe(false)
+})
+
+it("round-trips independent printed mechanism groups and drops unknown or misplaced codes", () => {
+  const query = parseQuery(
+    new URLSearchParams(
+      "classmech=combo,spellchain,serve,unknown&classmechmatch=all&collabmech=serve,twin_drive,combo&collabmechmatch=all",
+    ),
+  )
+  expect(query.classMechanisms).toEqual(["combo", "spellchain"])
+  expect(query.collabMechanisms).toEqual(["serve", "twin_drive"])
+  expect(parseQuery(formatQuery(query))).toEqual(query)
+  expect(query.classMechanismsMatch).toBe("all")
+  expect(query.collabMechanismsMatch).toBe("all")
 })

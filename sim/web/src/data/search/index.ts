@@ -8,6 +8,11 @@ import {
 } from "../../domain/mechanics"
 import { normalizeText } from "../../domain/normalize"
 import {
+  CLASS_MECHANISMS,
+  COLLAB_MECHANISMS,
+  type MechanismOptions,
+} from "../../domain/printedMechanisms"
+import {
   COST_CAP,
   DEFAULT_QUERY,
   NEUTRAL_CLASS,
@@ -58,6 +63,8 @@ export interface SearchOptions {
   readonly restrictions?: RestrictionStatus
   readonly restrictionDetails?: Readonly<Record<string, readonly CardRestriction[]>>
   readonly keywords: readonly SearchOption[]
+  readonly classMechanisms?: MechanismOptions | undefined
+  readonly collabMechanisms?: MechanismOptions | undefined
   readonly abilityCoverage?: "pending" | "unknown" | "partial" | "complete" | undefined
   readonly abilityUnknownCards?: number | undefined
   readonly keywordUnknownCards?: number | undefined
@@ -120,7 +127,15 @@ export interface SearchPage {
   }[]
 }
 type UnsupportedFacet =
-  "types" | "rarities" | "altArtOnly" | "mechanics" | "abilityTypes" | "unit" | "sort"
+  | "types"
+  | "rarities"
+  | "altArtOnly"
+  | "mechanics"
+  | "abilityTypes"
+  | "classMechanisms"
+  | "collabMechanisms"
+  | "unit"
+  | "sort"
 export interface QueryFailure {
   readonly kind: "unsupported-query" | "edition-not-ready" | "query-failed" | "load-unavailable"
   readonly message: string
@@ -147,6 +162,7 @@ const CARD_COLUMNS = [
   "present",
   "absent",
   "abilities",
+  "printedMechanisms",
   "errata",
   "restricted",
 ] as const
@@ -181,7 +197,7 @@ const seal = <T extends string>(columns: Record<T, number[]>): Record<T, Uint32A
   ) as Record<T, Uint32Array>
 
 /** Bump when the stored layout or derived data changes, so older images are rebuilt. */
-export const INDEX_IMAGE_FORMAT = 30
+export const INDEX_IMAGE_FORMAT = 31
 
 // Card-level special kinds, packed into the `kinds` column; Token stays per printing.
 const KIND_EVOLVE = 1
@@ -521,6 +537,10 @@ function mechanicMembership(bootstrap: BootstrapColumns, edition: Region) {
       unknown: present.length + absent.length < keywords.length,
       abilities: strings(own?.["ability_types"]),
       abilitiesComplete: own?.["ability_types_complete"] === true,
+      printedMechanisms: arrayValue(own?.["printed_mechanisms"] ?? []).map((value) =>
+        stringValue(objectValue(value)["code"]),
+      ),
+      checkedMechanisms: strings(own?.["checked_mechanisms"]),
     }
   }
 }
@@ -594,6 +614,7 @@ function build(
     cards.present.push(pool.encode([]))
     cards.absent.push(pool.encode([]))
     cards.abilities.push(pool.encode([]))
+    cards.printedMechanisms.push(pool.encode([]))
     const card = cards.id.length
     cards.id.push(intern(entry.cardId))
     cards.errata.push(Number(errataCards.has(entry.cardId)))
@@ -1077,6 +1098,8 @@ export class SearchIndex {
         keywordCoverage: this.optionsValue.keywordCoverage,
         keywordUnknownCards: this.optionsValue.keywordUnknownCards,
         abilityCoverage: this.optionsValue.abilityCoverage,
+        classMechanisms: this.optionsValue.classMechanisms,
+        collabMechanisms: this.optionsValue.collabMechanisms,
         abilityUnknownCards: this.optionsValue.abilityUnknownCards,
         ...(this.optionsValue.restrictions
           ? {
@@ -1101,6 +1124,22 @@ export class SearchIndex {
       let unknown = 0
       let abilityUnknown = 0
       let abilityKnown = false
+      const groups = [
+        {
+          field: "classMechanisms",
+          codes: CLASS_MECHANISMS,
+          unknown: 0,
+          known: false,
+          counts: {} as Record<string, number>,
+        },
+        {
+          field: "collabMechanisms",
+          codes: COLLAB_MECHANISMS,
+          unknown: 0,
+          known: false,
+          counts: {} as Record<string, number>,
+        },
+      ]
       for (let card = 0; card < this.cards.id.length; card++) {
         const states = membership(this.pool.get(this.cards.id[card] ?? 0))
         this.cards.present[card] = this.pool.encode(states.present)
@@ -1108,11 +1147,34 @@ export class SearchIndex {
         known ||= states.annotated
         unknown += Number(states.unknown)
         this.cards.abilities[card] = this.pool.encode(states.abilities)
+        this.cards.printedMechanisms[card] = this.pool.encode(states.printedMechanisms)
+        for (const group of groups) {
+          const complete = group.codes.every(
+            (code) =>
+              states.checkedMechanisms.includes(code) || states.printedMechanisms.includes(code),
+          )
+          group.unknown += Number(!complete)
+          group.known ||=
+            complete || group.codes.some((code) => states.printedMechanisms.includes(code))
+          for (const code of group.codes)
+            if (states.printedMechanisms.includes(code))
+              group.counts[code] = (group.counts[code] ?? 0) + 1
+        }
         abilityUnknown += Number(!states.abilitiesComplete)
         abilityKnown ||= states.abilitiesComplete || states.abilities.length > 0
       }
       this.optionsValue = {
         ...this.optionsValue,
+        ...Object.fromEntries(
+          groups.map((group) => [
+            group.field,
+            {
+              coverage: group.known ? (group.unknown ? "partial" : "complete") : "unknown",
+              unknownCards: group.unknown,
+              counts: group.counts,
+            },
+          ]),
+        ),
         keywordCoverage: known ? (unknown ? "partial" : "complete") : "unknown",
         keywordUnknownCards: unknown,
         abilityUnknownCards: abilityUnknown,
@@ -1188,6 +1250,11 @@ export class SearchIndex {
     )
       facets.push("abilityTypes")
 
+    for (const field of ["classMechanisms", "collabMechanisms"] as const) {
+      const coverage = this.options[field]?.coverage
+      if (state[field].length && (!coverage || coverage === "pending" || coverage === "unknown"))
+        facets.push(field)
+    }
     if (facets.length)
       throw new SearchQueryError({
         kind: "unsupported-query",
@@ -1277,6 +1344,19 @@ export class SearchIndex {
         !negative.every((id) =>
           arrayValue(this.pool.decode(this.cards.absent[card] ?? 0)).includes(id),
         )
+      )
+        continue
+      const printed = arrayValue(this.pool.decode(this.cards.printedMechanisms[card] ?? 0))
+      if (
+        ["classMechanisms", "collabMechanisms"].some((field) => {
+          const key = field as "classMechanisms" | "collabMechanisms"
+          return (
+            state[key].length > 0 &&
+            !(state[`${key}Match`] === "all"
+              ? state[key].every((code) => printed.includes(code))
+              : state[key].some((code) => printed.includes(code)))
+          )
+        })
       )
         continue
       if (eligible && !eligible.has(this.pool.get(this.cards.id[card] ?? 0))) continue
