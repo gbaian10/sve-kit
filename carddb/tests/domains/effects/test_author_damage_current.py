@@ -46,7 +46,7 @@ def inputs(number: str, card: JsonValue) -> AuthorInputSet:
         },
     )
     index = input_file(
-        "rules/effects-index.yaml",
+        "rules/effects-index/BP01.yaml",
         {
             "format": 1,
             "kind": "effects_index",
@@ -62,7 +62,7 @@ def inputs(number: str, card: JsonValue) -> AuthorInputSet:
         },
     )
     return AuthorInputSet(
-        EffectsIndex.model_validate_json(index.raw), index, (file,), (), ()
+        EffectsIndex.model_validate_json(index.raw), (index,), (file,), (), ()
     )
 
 

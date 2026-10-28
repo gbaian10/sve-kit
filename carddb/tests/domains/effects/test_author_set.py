@@ -1,5 +1,6 @@
 """File inventories reject omitted records without changing prototype inputs."""
 
+from dataclasses import replace
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -27,7 +28,7 @@ REPO = Path(__file__).resolve().parents[4]
 AUTHOR = "rules/author-effects/FIX/001.yaml"
 BODY = "rules/effect-bodies/FIX/001.yaml"
 PROTOTYPE = "rules/effects/FIX.yaml"
-INDEX = "rules/effects-index.yaml"
+INDEX = "rules/effects-index/FIX.yaml"
 
 
 @pytest.fixture(scope="module")
@@ -248,6 +249,8 @@ def test_duplicate_selection_cannot_claim_another_identity(
         "rules/author-effects/.hidden",
         "rules/effects/FIX/001.yaml",
         "rules/effects/FIX.json",
+        "rules/effects-index/FIX.json",
+        "rules/effects-index/FIX/001.yaml",
         "rules/effect-bodies/FIX/extra/001.yaml",
     ],
 )
@@ -260,7 +263,7 @@ def test_unlisted_bad_paths_are_not_skipped(
         load_author_set(tmp_path, schemas)
 
 
-@pytest.mark.parametrize("component", ["rules", "rules/effects"])
+@pytest.mark.parametrize("component", ["rules", "rules/effects", "rules/effects-index"])
 def test_symlinks_are_rejected_before_reading(
     tmp_path: Path, schemas: AuthorSchemas, component: str
 ) -> None:
@@ -273,3 +276,80 @@ def test_symlinks_are_rejected_before_reading(
     target.symlink_to(external, target_is_directory=True)
     with pytest.raises(AuthorInputError, match="unsafe_or_missing"):
         load_author_set(root, schemas)
+
+
+def test_pack_indexes_merge_and_retain_exact_bytes(
+    tmp_path: Path, schemas: AuthorSchemas
+) -> None:
+    prototype(tmp_path, "FIX-001", "OLD-001")
+    index(tmp_path, selection(path=PROTOTYPE))
+    other = selection("OLD-001", path=PROTOTYPE, identity="2")
+    write(
+        tmp_path,
+        "rules/effects-index/OLD.yaml",
+        {
+            "format": 1,
+            "kind": "effects_index",
+            "records": [other],
+        },
+    )
+    inputs = load_author_set(tmp_path, schemas)
+    assert [record.record_key for record in inputs.index.records] == [
+        "FIX-001",
+        "OLD-001",
+    ]
+    assert len(inputs.index_files) == 2
+    assert all(
+        item.raw == (tmp_path / item.path).read_bytes() for item in inputs.index_files
+    )
+    with pytest.raises(AuthorInputError, match="index_input_mismatch"):
+        validate_author_set(
+            replace(inputs, index_files=inputs.index_files[:1]), schemas
+        )
+    forged = replace(inputs.index_files[0], raw=b"{}")
+    with pytest.raises(AuthorInputError, match="input_hash_mismatch"):
+        validate_author_set(
+            replace(inputs, index_files=(forged, *inputs.index_files[1:])), schemas
+        )
+
+
+@pytest.mark.parametrize("failure", ["owner", "identity", "order"])
+def test_pack_indexes_reject_wrong_owner_global_duplicates_and_unsorted_rows(
+    tmp_path: Path, schemas: AuthorSchemas, failure: str
+) -> None:
+    prototype(tmp_path, "FIX-001", "OLD-001")
+    index(tmp_path, selection(path=PROTOTYPE))
+    rows = [selection("OLD-001", path=PROTOTYPE, identity="2")]
+    if failure == "owner":
+        rows[0]["record_key"] = "OTHER-001"
+    elif failure == "identity":
+        rows[0]["card_id"] = selection()["card_id"]
+    else:
+        rows.insert(0, selection("OLD-002", path=PROTOTYPE, identity="3"))
+    write(
+        tmp_path,
+        "rules/effects-index/OLD.yaml",
+        {
+            "format": 1,
+            "kind": "effects_index",
+            "records": [*rows],
+        },
+    )
+    reason = {
+        "owner": "wrong_index_owner",
+        "identity": "duplicate_card_scope",
+        "order": "records_not_sorted",
+    }[failure]
+    with pytest.raises(AuthorInputError, match=reason):
+        load_author_set(tmp_path, schemas)
+
+
+@pytest.mark.parametrize("number", ["FIX-001", "FIX-001Ⓢ"])
+def test_content_named_author_shard_is_admitted(
+    tmp_path: Path, schemas: AuthorSchemas, number: str
+) -> None:
+    author(tmp_path, number)
+    path = f"rules/author-effects/FIX/{number}.yaml"
+    (tmp_path / AUTHOR).rename(tmp_path / path)
+    index(tmp_path, selection(number, path=path))
+    assert load_author_set(tmp_path, schemas).author_files[0].path == path

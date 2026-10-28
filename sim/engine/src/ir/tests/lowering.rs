@@ -12,7 +12,7 @@ mod current_keywords;
 use crate::catalog::{Catalog, SelectedEffects};
 use std::{
     env::temp_dir,
-    fs::{create_dir_all, remove_dir_all, write},
+    fs::{create_dir_all, remove_dir_all},
     path::PathBuf,
     process::{Command, id},
     sync::OnceLock,
@@ -99,7 +99,7 @@ fn batch_switch_rejects_missing_abilities_and_overlapping_versions() {
 fn assert_legacy_loader_refuses_current_inventory() {
     let root = temp_dir().join(format!("sve-current-selection-{}", id()));
     create_dir_all(root.join("rules")).unwrap();
-    write(root.join("rules/effects-index.yaml"), "{}").unwrap();
+    create_dir_all(root.join("rules/effects-index")).unwrap();
     let rejected = Catalog::load(&root.join("absent.jsonl"), &root).unwrap_err();
     assert!(rejected.to_string().contains("from_current_selection"));
     remove_dir_all(root).unwrap();

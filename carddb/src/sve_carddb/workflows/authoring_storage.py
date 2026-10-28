@@ -267,7 +267,7 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
         path = (
             old.file
             if isinstance(old, AuthorIndexRecord)
-            else _new_path(authors, "author-effects", number.split("-", 1)[0])
+            else f"rules/author-effects/{number.split('-', 1)[0]}/{number}.yaml"
         )
         tree: dict[str, JsonValue] = (
             object_value(parse_document(authors[path].raw).value)
@@ -377,10 +377,26 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
         companions[path] = _file(path, tree)
         changed.add(path)
     index = original.index.model_copy(update={"records": tuple(records)})
-    index_file = _file("rules/effects-index.yaml", index.model_dump(mode="json"))
+    indexes = {file.path: file for file in original.index_files}
+    for owner in sorted({number.split("-", 1)[0] for number in selected}):
+        path = f"rules/effects-index/{owner}.yaml"
+        indexes[path] = _file(
+            path,
+            index.model_copy(
+                update={
+                    "records": tuple(
+                        record
+                        for record in records
+                        if record.record_key.split("-", 1)[0] == owner
+                    )
+                }
+            ).model_dump(mode="json"),
+        )
+        changed.add(path)
+    index_files = tuple(indexes[path] for path in sorted(indexes))
     candidate = AuthorInputSet(
         index,
-        index_file,
+        index_files,
         tuple(authors.values()),
         tuple(companions.values()),
         tuple(prototypes.values()),
@@ -412,9 +428,8 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
         **authors,
         **companions,
         **prototypes,
-        index_file.path: index_file,
+        **{file.path: file for file in index_files},
     }
-    changed.add(index_file.path)
     for path in sorted(changed):
         check_path(Path(output_root.anchor), output_root / path)
     written: list[str] = []

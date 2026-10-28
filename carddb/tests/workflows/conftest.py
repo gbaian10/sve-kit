@@ -62,7 +62,15 @@ def repository_workspace(
 @pytest.fixture(scope="session")
 def authoring_inventory(tmp_path_factory: pytest.TempPathFactory) -> Path:
     root = tmp_path_factory.mktemp("authoring-inventory") / "authored"
-    index = read_tree(REPO / "authored/rules/effects-index.yaml")
+    index: dict[str, JsonValue] = {
+        "format": 1,
+        "kind": "effects_index",
+        "records": [
+            row
+            for path in sorted((REPO / "authored/rules/effects-index").glob("*.yaml"))
+            for row in array(read_tree(path)["records"])
+        ],
+    }
     numbers = {"BP01-110", "BP06-048", "BP10-122", "ECP01-002"}
     records = [
         item
@@ -103,7 +111,19 @@ def authoring_inventory(tmp_path_factory: pytest.TempPathFactory) -> Path:
         target = root / f"rules/effects/{owner}.yaml"
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes(authoring.format_yaml(prototype))
-    (root / "rules/effects-index.yaml").write_bytes(authoring.format_yaml(index))
+    (root / "rules/effects-index").mkdir(parents=True, exist_ok=True)
+    for owner in ("BP01", "BP06", "BP10", "ECP01"):
+        pack_index: dict[str, JsonValue] = dict(
+            index,
+            records=[
+                row
+                for row in records
+                if str(object_value(row)["record_key"]).split("-", 1)[0] == owner
+            ],
+        )
+        (root / f"rules/effects-index/{owner}.yaml").write_bytes(
+            authoring.format_yaml(pack_index)
+        )
     return root
 
 

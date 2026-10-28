@@ -46,7 +46,7 @@ UseDependencies.imports 值恰為 binding_id／ability_scope／port／dependency
 
 ## 檔案集合與 current 來源
 
-`load_author_set(authored_root, schemas)` 先讀 `rules/effects-index.yaml`，再嚴格遍歷作者、本體與原型區；拒絕符號連結、非一般檔案、非法路徑與達 1 MiB 的檔案。DSL 檔與本體路徑為 `<owner>/<3位以上序號>.yaml`，原型為 `<owner>.yaml`。所有 DSL 檔及被索引的原型檔，其 cards 與 index 必須雙向閉合；未索引原型仍全部驗 astra/1，不要求既有原型先遷移。全部 companion 核對版本與跨分片唯一鍵，無須已被引用。
+`load_author_set(authored_root, schemas)` 先讀 `rules/effects-index/<卡包>.yaml`，再嚴格遍歷作者、本體與原型區；拒絕符號連結、非一般檔案、非法路徑與達 1 MiB 的檔案。DSL 新分片路徑為 `<卡包>/<record_key>.yaml`，既有數字分片不改名；本體路徑仍為 `<owner>/<3位以上序號>.yaml`，原型為 `<owner>.yaml`。所有 DSL 檔及被索引的原型檔，其 cards 與 index 必須雙向閉合；未索引原型仍全部驗 astra/1，不要求既有原型先遷移。全部 companion 核對版本與跨分片唯一鍵，無須已被引用。
 
 只有DSL 與本體目錄都不存在時，缺 index 才表示空DSL 集合。`author_inventory_tree` 對 shared 做完整結構驗證；對 en_override 只讀封閉 envelope 與 cards 鍵供索引閉包，內容不取得 typed DSL 樹，之後逐卡回 `en_source_contract_unavailable`。`prototype_tree` 是獨立入口；`document` 不會自動改用原型 reader。
 

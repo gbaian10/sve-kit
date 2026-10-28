@@ -94,7 +94,8 @@ def current_lowering_inputs(root: Path) -> JsonValue:
                 }
             )
         )
-        (authored / "rules/effects-index.yaml").write_bytes(
+        (authored / "rules/effects-index").mkdir(exist_ok=True)
+        (authored / "rules/effects-index/BP01.yaml").write_bytes(
             canonical(
                 {
                     "format": 1,
