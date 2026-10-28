@@ -402,6 +402,7 @@ impl Allocator {
         }
         let active_zones = active_zones(entry, path)?;
         let (body, head, keyword) = ability_body(entry, path)?;
+        play::check_trigger_targets(entry, body, keyword, path)?;
         let source = source_span(key, path, entry)?;
         let ability_source = ability_source(&source, keyword);
         let mut context = BodyContext::new(entry, scope, body, payment_result, self);
@@ -455,13 +456,14 @@ impl Allocator {
             trigger.limit = body.per_turn.map(|_| super::LimitSpec::once_per_turn());
             (
                 AbilityKind::Triggered,
-                (body.optional_cost.is_some() || body.head_cost.is_some()).then(|| {
-                    super::PlaySpec {
-                        limit: None,
-                        captures: vec![],
-                        parameters: vec![],
-                        costs: super::CostSpec::Ordered { steps: vec![] },
-                    }
+                (body.optional_cost.is_some()
+                    || body.head_cost.is_some()
+                    || !body.targets.is_empty())
+                .then(|| super::PlaySpec {
+                    limit: None,
+                    captures: vec![],
+                    parameters: vec![],
+                    costs: super::CostSpec::Ordered { steps: vec![] },
                 }),
                 Some(trigger),
             )

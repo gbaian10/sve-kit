@@ -34,31 +34,46 @@ pub(crate) fn required(body: &Program) -> bool {
 }
 
 pub(crate) fn trigger_play(ability: &Ability) -> bool {
-    ability.play.as_ref().is_none_or(|_| {
-        matches!(
-            ability.source.origin,
-            AbilityOrigin::Keyword {
-                keyword: KeywordId::Fanfare,
-                ..
-            }
-        ) || (ability.body.as_ref().is_some_and(required)
-            && matches!(
-                ability.source.origin,
-                AbilityOrigin::Keyword {
-                    keyword: KeywordId::OnEvolve
-                        | KeywordId::OnSuperEvolve
-                        | KeywordId::OnAttack
-                        | KeywordId::OnRace
-                        | KeywordId::OnDriveGain,
-                    ..
-                }
-            ))
-    }) && ability.play.as_ref().is_none_or(|play| {
+    ability.play.as_ref().is_none_or(|play| {
         matches!(play, PlaySpec { limit: None, captures, costs: CostSpec::Ordered { steps }, .. }
             if captures.is_empty() && steps.is_empty())
-            && ability
-                .body
-                .as_ref()
-                .is_some_and(|body| declaration(body).is_some())
+            && ability.body.as_ref().is_some_and(|body| {
+                if required(body) {
+                    matches!(
+                        ability.source.origin,
+                        AbilityOrigin::Keyword {
+                            keyword: KeywordId::Fanfare
+                                | KeywordId::OnEvolve
+                                | KeywordId::OnSuperEvolve
+                                | KeywordId::OnAttack
+                                | KeywordId::OnRace
+                                | KeywordId::OnDriveGain,
+                            ..
+                        }
+                    )
+                } else {
+                    match declaration(body) {
+                        Some(_) => matches!(
+                            ability.source.origin,
+                            AbilityOrigin::Keyword {
+                                keyword: KeywordId::Fanfare,
+                                ..
+                            }
+                        ),
+                        None => {
+                            !play.parameters.is_empty()
+                                && matches!(
+                                    ability.source.origin,
+                                    AbilityOrigin::Keyword {
+                                        keyword: KeywordId::Fanfare
+                                            | KeywordId::OnEvolve
+                                            | KeywordId::OnAttack,
+                                        ..
+                                    }
+                                )
+                        }
+                    }
+                }
+            })
     })
 }

@@ -2,14 +2,7 @@ use super::*;
 use std::{fs::read_to_string, path::PathBuf};
 use sve_engine::catalog::EngineIdentityInput;
 
-#[expect(
-    dead_code,
-    reason = "Only the evolution branch of the shared expansion fixture is used."
-)]
-#[path = "../../support/expanded.rs"]
-pub(super) mod expanded;
-#[path = "../../support/rule_fixtures.rs"]
-pub(super) mod rule_fixtures;
+pub(super) use crate::{expanded, rule_fixtures};
 
 fn evolution_companion(snapshot: &str, input: &mut Value) -> (String, WellFormedCardProgram) {
     let form: Value = snapshot

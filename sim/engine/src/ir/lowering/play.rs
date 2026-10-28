@@ -27,6 +27,29 @@ const fn parameter(id: u64, slot: PlaySlot, domain: ChoiceDomain) -> Decision {
     }
 }
 
+pub(super) fn check_trigger_targets(
+    entry: &ast::Ability,
+    body: &ast::Body,
+    keyword: Option<super::KeywordId>,
+    path: &str,
+) -> Result<(), LoweringError> {
+    if !body.targets.is_empty()
+        && entry.activate.is_none()
+        && entry.spell.is_none()
+        && body.optional_cost.is_none()
+        && body.head_cost.is_none()
+        && !matches!(
+            keyword,
+            Some(
+                super::KeywordId::Fanfare | super::KeywordId::OnEvolve | super::KeywordId::OnAttack
+            )
+        )
+    {
+        return Err(unsupported(path));
+    }
+    Ok(())
+}
+
 #[expect(
     clippy::multiple_inherent_impl,
     reason = "Formal play shares the ability's binding environment."
@@ -38,9 +61,6 @@ impl BodyContext<'_> {
         choice: bool,
         path: &str,
     ) -> Result<(), LoweringError> {
-        if !targets.is_empty() && !self.formal_play {
-            return Err(unsupported(path));
-        }
         let mut names = BTreeSet::new();
         for target in targets {
             if self.definitions.contains_key(&target.bind) || !names.insert(&target.bind) {
