@@ -825,6 +825,7 @@ impl BodyContext<'_> {
             ast::Step::SetStat(value) => self.modify(value, true, path),
             ast::Step::Apply(value) => self.continuous(value, source, path),
             ast::Step::Search(value) => self.search(value, path),
+            ast::Step::Reveal(value) => self.reveal(value, path),
             ast::Step::Look(value) => {
                 let ast::SelfPlayer::Controller = value.top.who;
                 Ok(Action::Look {

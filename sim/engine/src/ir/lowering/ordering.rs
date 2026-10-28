@@ -4,7 +4,7 @@ use super::super::{
 };
 use super::{
     Action, BodyContext, Cardinality, LoweringError, Nat, PlayerRef, PlayerRelation, PlayerSet,
-    ReceiptId, Selector, TextQuantifier, ast, unsupported,
+    ReceiptId, Selector, TextQuantifier, ZoneKind, ast, unsupported,
 };
 
 #[expect(
@@ -50,7 +50,8 @@ impl BodyContext<'_> {
                 }
                 return self.search_result(step, receipt, path);
             }
-            ast::Step::If(_)
+            ast::Step::Reveal(_)
+            | ast::Step::If(_)
             | ast::Step::Choose(_)
             | ast::Step::Choice(_)
             | ast::Step::Draw(_)
@@ -157,7 +158,7 @@ impl BodyContext<'_> {
                         to: MoveDestination::Shared {
                             zone: super::super::ZoneRef {
                                 player: PlayerRef::Controller {},
-                                kind: super::ZoneKind::Ex,
+                                kind: ZoneKind::Ex,
                             },
                         },
                         initial_posture: None,
@@ -204,6 +205,35 @@ impl BodyContext<'_> {
             | ast::Destination::Cemetery => Err(unsupported(path)),
         }
     }
+    pub(super) fn reveal(
+        &mut self,
+        value: &ast::Reveal,
+        path: &str,
+    ) -> Result<Action, LoweringError> {
+        let ast::HandZone::Hand = value.r#ref.zone;
+        let relation = match value.r#ref.who {
+            ast::Side::Controller => PlayerRelation::SelfPlayer,
+            ast::Side::Opponent => PlayerRelation::Opponents,
+            ast::Side::All => return Err(unsupported(path)),
+        };
+        Ok(Action::Reveal {
+            objects: Selector::Zone {
+                players: PlayerSet {
+                    relation,
+                    relative_to: PlayerRef::Controller {},
+                    cardinality: Cardinality {
+                        minimum: Nat(1),
+                        maximum: Some(Nat(1)),
+                    },
+                    text_quantifier: TextQuantifier::Implicit,
+                },
+                zone: ZoneKind::Hand,
+                view: super::SelectionView::Current {},
+                binding: super::Binding::new(self.allocator.id(path)?, self.scope),
+                predicate: Box::new(super::Expr::Literal(super::super::Bool(true))),
+            },
+        })
+    }
 }
 
 fn top_to_cemetery(
@@ -225,7 +255,7 @@ fn top_to_cemetery(
         objects: Selector::Ordered {
             zone: super::super::ZoneRef {
                 player: PlayerRef::Controller {},
-                kind: super::ZoneKind::Deck,
+                kind: ZoneKind::Deck,
             },
             start: Position::Top {},
             count: super::Expr::Literal(Nat(top.n)),

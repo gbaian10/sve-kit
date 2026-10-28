@@ -767,3 +767,19 @@ CurrentTurnEnd 的主區間與 DuringNextTurn 附加區間採聯集。主區間�
 目標換世代仍清除整個舊實例，後面的附加區間不能讓舊目標復活。
 本子集不接受 interval-only、EndResolution＋非空 interval 或 phase 區間；缺少 phase occurrence
 時保持拒絕。Set 及帶附加區間 Add 的進化限制仍維持；純固定限期 Add 僅開放上節所列子集。
+
+## 整副手牌的公開
+
+封閉 `Action::Reveal` 接受自己或唯一對手的整副目前手牌：Controller 為相對玩家，
+玩家基數 1..1、Current 視圖、無篩選。作者 `reveal.ref` 的 `who: self / opp`、
+`zone: hand` 與必填 `bind` 降到此形狀；本片不提供 bind 的後續讀取。
+BP06-118 的單一入場能力使用對手整副手牌，整卡為 light。
+
+執行不移動卡、不改世代，沿既有「公開」事件對全體公開；authority-only `Revealed`
+保留本次物件世代。結算期間暫時增加位置可見性，結算結束或離開原隱藏位置後撤銷
+此次增加的權限；公開後移到墓場仍可見，自己的手牌仍可見。已公開的印刷卡記憶可以保留，
+不因此定位對手之後的隱藏手牌。手牌集合無順序，移走其中一張不算其他手牌改變位置。
+這遵守詞彙表 `I.reveal` 的 CR5.21 期限，不新增公開協定或一般事件 consumer。
+
+隱藏手牌讀取只存在於已驗證的整副 Reveal 動作內；通用 selector、capture、metadata、
+篩選／牌庫／隨機公開、RevealUntil 及後續新世代追蹤仍不准入。

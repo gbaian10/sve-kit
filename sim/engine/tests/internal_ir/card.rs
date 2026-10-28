@@ -531,3 +531,6 @@ mod deck_top;
 mod hand_discard;
 #[path = "card/resource.rs"]
 mod resource;
+
+#[path = "card/reveal_hand.rs"]
+mod reveal_hand;

@@ -713,3 +713,5 @@ mod max_pp;
 
 #[path = "runtime/ep_increase.rs"]
 mod ep_increase;
+#[path = "runtime/reveal_hand.rs"]
+mod reveal_hand;
