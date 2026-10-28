@@ -1,0 +1,26 @@
+format: 2
+kind: author_effect_set
+cards:
+  PR-031:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-29"
+    abilities:
+      - line: 1
+        evolve_time:
+          do:
+            - create:
+                token: フェアリー
+                n: 1
+                to: field
+      - line: 2
+        lastword:
+          do:
+            - create:
+                token: フェアリー
+                n: 1
+                to: ex
