@@ -11,9 +11,9 @@ use crate::ir::{
     Ability, AbilityId, AbilityInstanceId, AbilityKind, AbilityOrigin, AbilitySource, Action,
     AssociationId, Control, CostSpec, DamageAmount, ExecutionId, Expr, FaceId, Generation,
     InstructionContext, Int, KeywordId, Located, MoveDestination, MoveReason, Nat, Node,
-    ObjectOperand, ObjectRef, OwnerZone, PlayerId, PlayerRef, Posture, PostureEvent, Quantity,
-    QuantityUnit, Resource, ResourceOperation, RuleId, RuntimeAbilitySource, Selector, SourceSpan,
-    StepwiseMode, WellFormedCardProgram, ZoneKind,
+    NumericChange, ObjectOperand, ObjectRef, OwnerZone, PlayerId, PlayerRef, Posture, PostureEvent,
+    Quantity, QuantityUnit, Resource, ResourceOperation, RuleId, RuntimeAbilitySource, Selector,
+    SourceSpan, StepwiseMode, WellFormedCardProgram, ZoneKind,
 };
 use crate::ir::{ConsumptionPoint, LimitSpec, ModeUse};
 use crate::ir::{TurnId, printed_keywords};
@@ -584,6 +584,16 @@ impl Game {
                         vec![object],
                     )
                 }
+                Action::Life {
+                    player: PlayerRef::Controller {},
+                    change:
+                        NumericChange::Add {
+                            amount: Expr::Literal(Int(delta)),
+                        },
+                } if *delta <= 0 => (
+                    self.internal_pay_life(execution, &step.instruction, *delta)?,
+                    Vec::new(),
+                ),
                 _ => return Err(unsupported("whole-card cost step")),
             };
             execution.receipts.insert(
@@ -675,6 +685,13 @@ fn check_costs(ability: &Ability) -> Result<()> {
             return Err(unsupported("whole-card cost metadata or source"));
         }
         let supported = match &instruction.action {
+            Action::Life {
+                player: PlayerRef::Controller {},
+                change:
+                    NumericChange::Add {
+                        amount: Expr::Literal(Int(amount)),
+                    },
+            } => *amount <= 0 && amount.checked_neg().is_some(),
             Action::Resource {
                 player: PlayerRef::Controller {},
                 resource: Resource::PpCurrent,

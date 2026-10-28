@@ -728,3 +728,5 @@ mod reveal_hand;
 
 #[path = "runtime/live_conditions.rs"]
 mod live_conditions;
+#[path = "runtime/life_cost.rs"]
+mod life_cost;

@@ -1,6 +1,6 @@
 use super::super::{
-    CostSpec, CostStep, MoveDestination, MoveReason, MoveSpec, OwnerZone, PlaySpec, Posture,
-    Resource, ResourceOperation,
+    CostSpec, CostStep, MoveDestination, MoveReason, MoveSpec, NumericChange, OwnerZone, PlaySpec,
+    Posture, Resource, ResourceOperation,
 };
 use super::{
     AbilitySource, Action, Allocator, Expr, Instruction, InstructionContext, InstructionId, Int,
@@ -28,6 +28,15 @@ pub(super) fn lower(
                 amount: Expr::Literal(Int(
                     i64::try_from(*amount).map_err(|_private| unsupported(path))?
                 )),
+            },
+            ast::CostOperation::LeaderLife(amount) => Action::Life {
+                player: PlayerRef::Controller {},
+                change: NumericChange::Add {
+                    amount: Expr::Literal(Int(i64::try_from(*amount)
+                        .map_err(|_private| unsupported(path))?
+                        .checked_neg()
+                        .ok_or_else(|| unsupported(path))?)),
+                },
             },
             ast::CostOperation::ActSelf(true) => Action::Posture {
                 objects: numeric::holder(),

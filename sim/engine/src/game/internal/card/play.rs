@@ -12,8 +12,8 @@ use crate::ir::{
 };
 use crate::ir::{
     ChoiceDomain, Control, CostSpec, Decision, DecisionId, DecisionKind, ExecutionRef, InputMode,
-    Mode, ModeChoiceKind, ModeDecision, ModeDecisionKind, ModeId, PlaySlot, Program, ScopeId,
-    SnapshotId, Visibility,
+    Mode, ModeChoiceKind, ModeDecision, ModeDecisionKind, ModeId, NumericChange, PlaySlot, Program,
+    ScopeId, SnapshotId, Visibility,
 };
 use alloc::collections::{BTreeMap, VecDeque};
 use core::slice::from_ref;
@@ -341,6 +341,7 @@ impl Game {
             return Err(unsupported("Quick costs"));
         };
         let mut pp = int(&self.player(seat_name(actor)?)?.pp["current"]);
+        let mut life = int(&self.player(seat_name(actor)?)?.leader["life"]);
         let mut standing = self.object(holder)?.state["acted"] == false;
         for step in steps {
             match &step.instruction.action {
@@ -365,6 +366,20 @@ impl Game {
                         return Ok(false);
                     }
                     standing = false;
+                }
+                Action::Life {
+                    change:
+                        NumericChange::Add {
+                            amount: Expr::Literal(Int(delta)),
+                        },
+                    ..
+                } => {
+                    life = life
+                        .checked_add(*delta)
+                        .ok_or_else(|| invalid("life quote overflow"))?;
+                    if life < 0 {
+                        return Ok(false);
+                    }
                 }
                 Action::Move { .. } => {}
                 _ => return Err(unsupported("Quick cost proof")),
