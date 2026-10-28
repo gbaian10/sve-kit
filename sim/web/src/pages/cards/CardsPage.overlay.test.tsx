@@ -109,6 +109,7 @@ async function cells(): Promise<HTMLElement[]> {
   })
 }
 
+// Panel and history cases pin card-number order instead of depending on the set-sort default.
 const panel = () => screen.getByRole("complementary", { name: "單卡面板" })
 const noPanel = () => screen.queryByRole("complementary", { name: "單卡面板" })
 
@@ -122,7 +123,7 @@ describe("the layout setting", () => {
       sidebarWidth = true
       prefsStore.set({ uiLanguage: "zh-TW", cardsLayout })
       vi.stubGlobal("innerWidth", 1440)
-      await renderRoutes(routes, { initialEntries: ["/cards?q=bp01&card=BP01-001"] })
+      await renderRoutes(routes, { initialEntries: ["/cards?q=bp01&sort=no%3Aasc&card=BP01-001"] })
       await screen.findByRole("complementary", { name: "單卡面板" })
       expect(panel()).toHaveAttribute("data-side", drawerSide)
       expect(screen.getByRole("complementary", { name: "篩選條件" })).toHaveAttribute(
@@ -133,7 +134,7 @@ describe("the layout setting", () => {
   )
 
   it("below sidebar width there is no sidebar, but the drawer still follows the setting", async () => {
-    await open("/cards?q=bp01&card=BP01-001", "panel", "cardLeft")
+    await open("/cards?q=bp01&sort=no%3Aasc&card=BP01-001", "panel", "cardLeft")
     expect(panel()).toHaveAttribute("data-side", "left")
     expect(screen.queryByRole("complementary", { name: "篩選條件" })).not.toBeInTheDocument()
   })
@@ -143,7 +144,7 @@ describe("opening a card beside the results", () => {
   it.each(["grid", "table", "list"])(
     "opens the clicked %s cell in the side panel, replaces it with the next click and marks the cell",
     async (view) => {
-      const { router } = await open(`/cards?q=bp01&view=${view}`, "panel")
+      const { router } = await open(`/cards?q=bp01&sort=no%3Aasc&view=${view}`, "panel")
       const user = userEvent.setup()
       const [first, second] = await cells()
       if (!first || !second) throw new Error("missing cells")
@@ -186,7 +187,7 @@ describe("opening a card beside the results", () => {
   })
 
   it("closes with Escape and gives focus back to the cell, popping the entry it pushed", async () => {
-    const { router } = await open("/cards?q=bp01", "panel")
+    const { router } = await open("/cards?q=bp01&sort=no%3Aasc", "panel")
     const user = userEvent.setup()
     const [first] = await cells()
     if (!first) throw new Error("missing cell")
@@ -197,13 +198,13 @@ describe("opening a card beside the results", () => {
     await waitFor(() => {
       expect(noPanel()).toBeNull()
     })
-    expect(router.state.location.search).toBe("?q=bp01")
+    expect(router.state.location.search).toBe("?q=bp01&sort=no%3Aasc")
     expect(router.state.historyAction).toBe("POP")
     expect(cellLink(key)).toHaveFocus()
   })
 
   it("closes when the browser goes back, and the close button replaces a shared link's URL", async () => {
-    const { router } = await open("/cards?q=bp01&card=BP01-002", "panel")
+    const { router } = await open("/cards?q=bp01&sort=no%3Aasc&card=BP01-002", "panel")
     const user = userEvent.setup()
     await within(panel()).findByRole("heading", { name: "試作隊長" }, { timeout: 5000 })
     // No entry was pushed for a URL that arrived open: closing rewrites it in place.
@@ -211,7 +212,7 @@ describe("opening a card beside the results", () => {
     await waitFor(() => {
       expect(noPanel()).toBeNull()
     })
-    expect(router.state.location.search).toBe("?q=bp01")
+    expect(router.state.location.search).toBe("?q=bp01&sort=no%3Aasc")
     expect(router.state.historyAction).toBe("REPLACE")
 
     const [first] = await cells()
@@ -222,11 +223,11 @@ describe("opening a card beside the results", () => {
     await waitFor(() => {
       expect(noPanel()).toBeNull()
     })
-    expect(router.state.location.search).toBe("?q=bp01")
+    expect(router.state.location.search).toBe("?q=bp01&sort=no%3Aasc")
   })
 
   it("copies the card page's own address and opens that page in full", async () => {
-    const { router } = await open("/cards?q=bp01", "panel")
+    const { router } = await open("/cards?q=bp01&sort=no%3Aasc", "panel")
     // user-event installs a clipboard stub the test reads back.
     const user = userEvent.setup()
     const [first] = await cells()
@@ -247,7 +248,7 @@ describe("opening a card beside the results", () => {
       )
     })
     expect(router.state.location.state).toMatchObject({
-      background: "?q=bp01",
+      background: "?q=bp01&sort=no%3Aasc",
       source: "results",
       resultKey: "p:bp01-001",
     })
@@ -261,7 +262,7 @@ describe("opening a card beside the results", () => {
   // `bun run check:drawer`. Here: the preference the keyboard writes, and the frame that a saved
   // width no longer fits.
   it("saves the width the keyboard sets and falls back to the modal when the window is too narrow", async () => {
-    await open("/cards?q=bp01", "panel")
+    await open("/cards?q=bp01&sort=no%3Aasc", "panel")
     const user = userEvent.setup()
     const [first] = await cells()
     if (!first) throw new Error("missing cell")
@@ -376,7 +377,10 @@ describe("opening a card beside the results", () => {
   ] as const)(
     "follows the open card to its %s → %s cell when the row unit changes",
     async (from, to, before, after) => {
-      const { router } = await open(`/cards?q=bp01${from === "card" ? "&unit=card" : ""}`, "panel")
+      const { router } = await open(
+        `/cards?q=bp01${from === "card" ? "&unit=card" : ""}&sort=no%3Aasc`,
+        "panel",
+      )
       const user = userEvent.setup()
       const [first] = await cells()
       if (!first) throw new Error("missing cell")
@@ -417,7 +421,10 @@ describe("opening a card beside the results", () => {
   ] as const)(
     "returns to the opening cell, not the card moved to, after a %s → %s unit change",
     async (from, to, opened, openerAfter, shownAfter) => {
-      const { router } = await open(`/cards?q=bp01${from === "card" ? "&unit=card" : ""}`, "panel")
+      const { router } = await open(
+        `/cards?q=bp01${from === "card" ? "&unit=card" : ""}&sort=no%3Aasc`,
+        "panel",
+      )
       const user = userEvent.setup()
       const [first] = await cells()
       if (!first) throw new Error("missing cell")
@@ -454,12 +461,12 @@ describe("opening a card beside the results", () => {
   )
 
   it.each([
-    ["sort", "sort=cost"],
-    ["view", "view=table"],
+    ["sort", "sort=cost%3Aasc"],
+    ["view", "sort=no%3Aasc&view=table"],
   ] as const)(
     "keeps the card through a %s change, yet back closes it and back again is the old list",
     async (change, expected) => {
-      const { router } = await open("/cards?q=bp01", "panel")
+      const { router } = await open("/cards?q=bp01&sort=no%3Aasc", "panel")
       const user = userEvent.setup()
       const [first] = await cells()
       if (!first) throw new Error("missing cell")
@@ -480,13 +487,13 @@ describe("opening a card beside the results", () => {
       })
       expect(router.state.location.search).toBe(`?q=bp01&${expected}`)
       await act(() => router.navigate(-1))
-      expect(router.state.location.search).toBe("?q=bp01")
+      expect(router.state.location.search).toBe("?q=bp01&sort=no%3Aasc")
       expect(noPanel()).toBeNull()
     },
   )
 
   it("names the English edition in a copied link", async () => {
-    await open("/cards?q=bp01&ed=en", "panel")
+    await open("/cards?q=bp01&sort=no%3Aasc&ed=en", "panel")
     const user = userEvent.setup()
     const [first] = await cells()
     if (!first) throw new Error("missing cell")
@@ -501,7 +508,7 @@ describe("opening a card beside the results", () => {
   })
 
   it("walks the results with previous and next inside the panel", async () => {
-    const { router } = await open("/cards?q=bp01", "panel")
+    const { router } = await open("/cards?q=bp01&sort=no%3Aasc", "panel")
     const user = userEvent.setup()
     const [first] = await cells()
     if (!first) throw new Error("missing cell")
@@ -519,7 +526,7 @@ describe("opening a card beside the results", () => {
   })
 
   it("keeps loaded pages with their own entry when history skips another view", async () => {
-    const { router } = await open("/cards?q=bp01", "panel")
+    const { router } = await open("/cards?q=bp01&sort=no%3Aasc", "panel")
     const user = userEvent.setup()
     const [first] = await cells()
     if (!first) throw new Error("missing cell")
@@ -539,12 +546,12 @@ describe("opening a card beside the results", () => {
     )
     await act(() => router.navigate(-2))
     await waitFor(() => {
-      expect(router.state.location.search).toBe("?q=bp01")
+      expect(router.state.location.search).toBe("?q=bp01&sort=no%3Aasc")
     })
     const older = router.state.location.state as ListEntryState
     await act(() => router.navigate(1))
     await waitFor(() => {
-      expect(router.state.location.search).toBe("?q=bp01&view=table")
+      expect(router.state.location.search).toBe("?q=bp01&sort=no%3Aasc&view=table")
       const current = router.state.location.state as ListEntryState
       expect({ olderPages: older.pages, currentPages: current.pages }).toEqual({
         olderPages: 1,
@@ -560,7 +567,7 @@ describe("opening a card beside the results", () => {
   ])(
     "keeps pages loaded beside the card when $leave",
     async ({ how }) => {
-      const { router } = await open("/cards?q=bp01", "panel")
+      const { router } = await open("/cards?q=bp01&sort=no%3Aasc", "panel")
       const user = userEvent.setup()
       const [first] = await cells()
       if (!first) throw new Error("missing cell")
@@ -578,7 +585,7 @@ describe("opening a card beside the results", () => {
           router.navigate(pathname + search, { replace: true, state: { ...state, pages } }),
         )
       }
-      const list = how === "view" ? "?q=bp01&view=table" : "?q=bp01"
+      const list = how === "view" ? "?q=bp01&sort=no%3Aasc&view=table" : "?q=bp01&sort=no%3Aasc"
       await loadBeside(2)
       if (how === "page") {
         act(() => {
@@ -633,7 +640,7 @@ describe("opening a card beside the results", () => {
 
 describe("opening a card over the results", () => {
   it("opens a modal that Escape closes", async () => {
-    const { router } = await open("/cards?q=bp01", "modal")
+    const { router } = await open("/cards?q=bp01&sort=no%3Aasc", "modal")
     const user = userEvent.setup()
     const [first] = await cells()
     if (!first) throw new Error("missing cell")
@@ -647,12 +654,12 @@ describe("opening a card over the results", () => {
     await waitFor(() => {
       expect(dialog).not.toHaveAttribute("open")
     })
-    expect(router.state.location.search).toBe("?q=bp01")
+    expect(router.state.location.search).toBe("?q=bp01&sort=no%3Aasc")
   })
 
   it("falls back to the modal on a narrow screen, even when the panel is chosen", async () => {
     desktop = false
-    await open("/cards?q=bp01", "panel")
+    await open("/cards?q=bp01&sort=no%3Aasc", "panel")
     const user = userEvent.setup()
     const [first] = await cells()
     if (!first) throw new Error("missing cell")
@@ -668,7 +675,7 @@ describe("opening a card over the results", () => {
     "picks the frame by screen width when the preference is auto (desktop: %s)",
     async (wide, role) => {
       desktop = wide
-      await open("/cards?q=bp01", "auto")
+      await open("/cards?q=bp01&sort=no%3Aasc", "auto")
       const user = userEvent.setup()
       const [first] = await cells()
       if (!first) throw new Error("missing cell")
@@ -743,7 +750,7 @@ describe("opening a suggested card", () => {
 
 describe("opening a card as its page", () => {
   it("navigates to the card page when the preference says so", async () => {
-    const { router } = await open("/cards?q=bp01", "page")
+    const { router } = await open("/cards?q=bp01&sort=no%3Aasc", "page")
     const user = userEvent.setup()
     const [first] = await cells()
     if (!first) throw new Error("missing cell")
