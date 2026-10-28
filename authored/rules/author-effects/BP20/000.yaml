@@ -24,5 +24,31 @@ cards:
             model: gpt-6-sol
             who: Codex
           date: "2026-10-27"
+  BP20-P60:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-28"
+    abilities:
+      - line: 1
+        activate:
+          zone: ex
+          cost:
+            pp: 0
+          per_turn: 1
+          targets:
+            - bind: t
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - set_stat:
+                on: t
+                hp: 1
 format: 2
 kind: author_effect_set

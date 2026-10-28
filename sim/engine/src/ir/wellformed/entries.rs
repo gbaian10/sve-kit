@@ -364,7 +364,10 @@ impl Checker {
             .is_some_and(|limit| {
                 ability.kind != AbilityKind::Activated
                     || !matches!(ability.source.origin, AbilityOrigin::Printed { .. })
-                    || ability.active_zones != [ZoneKind::Field]
+                    || !matches!(
+                        ability.active_zones.as_slice(),
+                        [ZoneKind::Field | ZoneKind::Ex]
+                    )
                     || !limit.is_activated()
             })
         {

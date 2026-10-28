@@ -1,3 +1,4 @@
+use crate::ir::ZoneKind;
 use alloc::collections::BTreeMap;
 use serde::Deserialize;
 use serde::de::IgnoredAny;
@@ -131,9 +132,33 @@ impl SourceUse {
 #[serde(deny_unknown_fields)]
 pub(super) struct Activate {
     pub quick: Option<bool>,
+    pub zone: Option<ActivationZones>,
     pub cost: Cost,
     #[serde(flatten)]
     pub body: Body,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged)]
+pub(super) enum ActivationZones {
+    One(ActivationZone),
+    Many(Vec<ActivationZone>),
+}
+
+#[derive(Clone, Copy, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum ActivationZone {
+    Field,
+    Ex,
+}
+
+impl ActivationZone {
+    pub(super) const fn kind(self) -> ZoneKind {
+        match self {
+            Self::Field => ZoneKind::Field,
+            Self::Ex => ZoneKind::Ex,
+        }
+    }
 }
 
 #[derive(Deserialize)]

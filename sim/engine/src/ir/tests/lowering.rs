@@ -1253,3 +1253,32 @@ fn leader_targets_and_leader_follower_targets_keep_recipient_bindings() {
         );
     }
 }
+
+#[test]
+fn activated_zones_preserve_ex_and_reject_unimplemented_combinations() {
+    let lowerer = ExpandedLowerer::new().unwrap();
+    for zone in [json!("field"), json!(["field"]), json!("ex"), json!(["ex"])] {
+        let mut tree = expanded::tree().clone();
+        tree["cards"]["BP01-041"]["abilities"][0]["activate"]["zone"] = zone.clone();
+        let cards = lowerer.lower(&tree).unwrap();
+        let expected = if zone == json!("ex") || zone == json!(["ex"]) {
+            ZoneKind::Ex
+        } else {
+            ZoneKind::Field
+        };
+        assert_eq!(
+            cards["BP01-041"].card().abilities[0].node.active_zones,
+            [expected]
+        );
+    }
+    for zone in [
+        json!("hand"),
+        json!(["field", "ex"]),
+        json!([]),
+        json!(["ex", "ex"]),
+    ] {
+        let mut tree = expanded::tree().clone();
+        tree["cards"]["BP01-041"]["abilities"][0]["activate"]["zone"] = zone;
+        lowerer.lower(&tree).unwrap_err();
+    }
+}

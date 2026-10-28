@@ -463,29 +463,6 @@ cards:
           op: draw
           count: 2
         section: 0
-  BP20-P60:
-    status: complete
-    abilities:
-      - line: 1
-        kind: activated
-        body:
-          op: modify
-          subjects: target.1
-          set_hp: 1
-        active_zones:
-          - ex
-        targets:
-          - key: "1"
-            select:
-              side: opponent
-              zone: field
-              type: follower
-            min: 1
-            max: 1
-        costs:
-          - op: pp
-            amount: 0
-        limit: 1
   BP20-P61:
     status: complete
     abilities:

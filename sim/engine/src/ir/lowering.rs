@@ -394,6 +394,7 @@ impl Allocator {
         if let Some(keywords) = &entry.keywords {
             return quick::lower(key, path, entry, scope, keywords);
         }
+        let active_zones = active_zones(entry, path)?;
         let (body, head, keyword) = ability_body(entry, path)?;
         let source = source_span(key, path, entry)?;
         let ability_source = ability_source(&source, keyword);
@@ -470,11 +471,7 @@ impl Allocator {
                 source: ability_source,
                 kind,
                 qualification: AbilityQualification::Ordinary,
-                active_zones: vec![if entry.spell.is_some() {
-                    ZoneKind::Resolution
-                } else {
-                    ZoneKind::Field
-                }],
+                active_zones,
                 event_captures: vec![],
                 play,
                 trigger,
@@ -483,6 +480,26 @@ impl Allocator {
             },
         })
     }
+}
+
+fn active_zones(entry: &ast::Ability, path: &str) -> Result<Vec<ZoneKind>, LoweringError> {
+    let zones = match entry.activate.as_ref().and_then(|head| head.zone.as_ref()) {
+        Some(ast::ActivationZones::One(zone)) => vec![zone.kind()],
+        Some(ast::ActivationZones::Many(zones)) => zones.iter().map(|zone| zone.kind()).collect(),
+        None if entry.spell.is_some() => vec![ZoneKind::Resolution],
+        None => vec![ZoneKind::Field],
+    };
+    if entry.activate.is_some()
+        && (!matches!(zones.as_slice(), [ZoneKind::Field | ZoneKind::Ex])
+            || (zones == [ZoneKind::Ex]
+                && entry
+                    .activate
+                    .as_ref()
+                    .is_some_and(|head| head.quick == Some(true))))
+    {
+        return Err(unsupported(path));
+    }
+    Ok(zones)
 }
 
 fn ability_source(source: &SourceSpan, keyword: Option<KeywordId>) -> AbilitySource {
