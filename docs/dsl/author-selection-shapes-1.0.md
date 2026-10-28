@@ -124,10 +124,10 @@ canonical JSON 不重寫上述結構；執行成員去重不表示DSL bytes 去�
 
 ### 消費位置與接線邊界
 
-物件來源位置只能使用 ObjectSel，例如 move／search／choose 的物件來源與費用材料；
+物件來源位置只能使用 ObjectSel，例如 move／search 的物件來源、choose any 與費用材料；
 count 使用獨立 CountSource，in 使用 Ref／SnapshotRead。
 接受領袖的 Target、damage.to、cannot.attack.target 等位置的選擇器分支才使用 RecipientSel，
-不得再另加同形領袖支線。單組 Target.from 已使用 RecipientSel，
-choose.from／search.sel 只使用 ObjectSel；其他父動作的接入仍是後續實作義務。
+不得再另加同形領袖支線。單組 Target.from 與 choose exact／up-to 的 from 使用 RecipientSel；
+choose any 的 from 與 search.sel 仍使用 ObjectSel。其他父動作的接入仍是後續實作義務。
 來源角色、binding 基數、Live／快照可用性、世代、去重與批次仍由接線與 lowering 驗證；
 形狀驗證不授予操作能力，也不等於完整 Sel 或執行准入。

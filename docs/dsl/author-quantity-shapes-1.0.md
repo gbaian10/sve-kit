@@ -44,8 +44,8 @@ Q 表 Quantity，T 表 SelectionQuantity；各 exact／up-to／any 是獨立分�
 | A.target.exact | bind、from:RecipientSel、n:T | Target 欄 |
 | A.target.up-to | bind、from:RecipientSel、upto:T | Target 欄 |
 | A.target.any | bind、from:RecipientSel、any:嚴格 true | Target 欄 |
-| A.act.choose.exact | bind、from:ObjectSel、n:T | choose 欄 |
-| A.act.choose.up-to | bind、from:ObjectSel、upto:T | choose 欄 |
+| A.act.choose.exact | bind、from:RecipientSel、n:T | choose 欄 |
+| A.act.choose.up-to | bind、from:RecipientSel、upto:T | choose 欄 |
 | A.act.choose.any | bind、from:ObjectSel、any:嚴格 true | choose 欄 |
 | A.act.search.exact | sel:ObjectSel、to:SearchDestination、n:T | search 欄 |
 | A.act.search.up-to | sel:ObjectSel、to:SearchDestination、upto:T | search 欄 |
