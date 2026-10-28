@@ -11,7 +11,7 @@ describe("BottomNav", () => {
     await renderRoutes(routes, { initialEntries: ["/cards/BP01-001"] })
     const nav = screen.getByRole("navigation")
     const links = within(nav).getAllByRole("link")
-    expect(links.map((link) => link.textContent)).toEqual(["首頁", "查卡", "牌組"])
+    expect(links.map((link) => link.textContent)).toEqual(["首頁", "查卡", "牌組", "勘誤"])
     expect(within(nav).getByRole("link", { name: "查卡" })).toHaveAttribute("aria-current", "page")
     expect(within(nav).getByRole("link", { name: "首頁" })).not.toHaveAttribute("aria-current")
   })
