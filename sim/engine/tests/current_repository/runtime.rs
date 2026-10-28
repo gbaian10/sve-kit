@@ -611,11 +611,13 @@ fn current_admission_rejects_foreign_snapshot_and_program() {
             .contains("no authored program"),
         "a plain catalogue has no program to admit the current card against"
     );
+    let strict_number = "BP10-122";
+    assert_ne!(accepted.current[strict_number].source_version, "direct");
     let changed = snapshot
         .lines()
         .map(|line| {
             let mut card: Value = serde_json::from_str(line).unwrap();
-            if card["number"] == NUMBER {
+            if card["number"] == strict_number {
                 card["faces"][0]["name"] = json!("foreign");
             }
             card.to_string()
@@ -625,7 +627,25 @@ fn current_admission_rejects_foreign_snapshot_and_program() {
     let foreign = Catalog::from_current_selection(&changed, keywords, input).unwrap();
     assert!(
         construct(foreign, "foreign").contains("no unique snapshot source"),
-        "a snapshot whose face text differs from the accepted source is rejected"
+        "source-rebuilt candidates still reject different snapshot face text"
+    );
+    let changed_faces = snapshot
+        .lines()
+        .map(|line| {
+            let mut card: Value = serde_json::from_str(line).unwrap();
+            if card["number"] == NUMBER {
+                let face = card["faces"][0].clone();
+                card["faces"].as_array_mut().unwrap().push(face);
+            }
+            card.to_string()
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
+    let direct_foreign = Catalog::from_current_selection(&changed_faces, keywords, input).unwrap();
+    assert!(
+        construct(direct_foreign, "foreign-direct")
+            .contains("current snapshot closure or prototype overlap"),
+        "direct candidates still reject a snapshot with an extra face"
     );
 }
 

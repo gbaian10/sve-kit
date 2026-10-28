@@ -68,6 +68,8 @@ def handwritten() -> tuple[dict[str, JsonValue], dict[str, JsonValue]]:
             "meta": {"written_by": meta["written_by"]},
             "abilities": [ability],
         }
+        if "admission" in previous:
+            object_value(cards[number])["admission"] = previous["admission"]
     main_tree: dict[str, JsonValue] = {
         "format": 2,
         "kind": "author_effect_set",
