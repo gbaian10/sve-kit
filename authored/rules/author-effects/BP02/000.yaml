@@ -1,0 +1,24 @@
+cards:
+  BP02-050:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - create:
+                n: 1
+                result: created
+                to: field
+                token: マジカルポーン
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-sol
+            who: Codex
+          date: "2026-10-28"
+    token_sources:
+      - card: BP02-T04
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set
