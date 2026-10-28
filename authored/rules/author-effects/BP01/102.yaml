@@ -1,0 +1,218 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP01-178:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-28"
+    abilities:
+      - evolve_time:
+          do:
+            - life:
+                who: self
+                delta: 2
+        line: 1
+  BP01-116:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-28"
+    abilities:
+      - keywords:
+          - quick
+        line: 1
+      - spell:
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                who: self
+                zone: field
+              n: 1
+          do:
+            - destroy:
+                ref: chosen
+            - draw:
+                n: 2
+        line: 2
+  BP01-049:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-28"
+    abilities:
+      - keywords:
+          - quick
+        line: 1
+      - spell:
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                who: self
+                zone: field
+              n: 1
+          do:
+            - buff:
+                "on": chosen
+                power: 1
+                hp: 1
+            - draw:
+                n: 1
+        line: 2
+  BP01-157:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-28"
+    abilities:
+      - auto:
+          "on":
+            phase:
+              which: end
+              whose: self
+          do:
+            - buff:
+                "on":
+                  kind: follower
+                  who: self
+                  zone: field
+                power: 1
+        line: 1
+      - fanfare:
+          do:
+            - choose:
+                bind: chosen
+                from:
+                  kind: follower
+                  who: self
+                  zone: field
+                n: 1
+            - buff:
+                "on": chosen
+                power: 1
+        line: 2
+  BP01-029:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-28"
+    abilities:
+      - evolve:
+          cost:
+            pp: 2
+        line: 1
+      - fanfare:
+          do:
+            - choose:
+                bind: chosen
+                from:
+                  kind: follower
+                  who: opp
+                  zone: field
+                n: 1
+            - act:
+                ref: chosen
+        line: 2
+  BP01-038:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-28"
+    abilities:
+      - fanfare:
+          do:
+            - choose:
+                bind: chosen
+                from:
+                  kind: follower
+                  who: opp
+                  zone: field
+                n: 1
+            - act:
+                ref: chosen
+        line: 1
+      - activate:
+          cost:
+            act_self: true
+          do:
+            - choose:
+                bind: chosen
+                from:
+                  kind: follower
+                  who: opp
+                  zone: field
+                n: 1
+            - act:
+                ref: chosen
+        line: 2
+  BP01-034:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-28"
+    abilities:
+      - evolve:
+          cost:
+            pp: 2
+        line: 1
+  BP01-080:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-28"
+    abilities:
+      - keywords:
+          - storm
+        line: 1
+  BP01-082:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-28"
+    abilities:
+      - keywords:
+          - assail
+          - bane
+        line: 1
+  BP01-092:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-28"
+    abilities:
+      - evolve:
+          cost:
+            pp: 0
+        line: 1
