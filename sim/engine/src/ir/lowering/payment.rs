@@ -3,13 +3,13 @@ use super::super::{
     Posture, Resource, ResourceOperation,
 };
 use super::{
-    AbilitySource, Action, Allocator, Expr, Instruction, InstructionContext, InstructionId, Int,
+    AbilitySource, Action, BodyContext, Expr, Instruction, InstructionContext, InstructionId, Int,
     LoweringError, PlayerRef, ReceiptId, ast, numeric, unsupported,
 };
 use core::slice::from_ref;
 
 pub(super) fn lower(
-    allocator: &mut Allocator,
+    context: &mut BodyContext<'_>,
     cost: &ast::Cost,
     source: &AbilitySource,
     path: &str,
@@ -19,8 +19,34 @@ pub(super) fn lower(
         ast::Cost::Ordered { steps } => steps.as_slice(),
     };
     let mut steps = Vec::new();
+    let mut parameters = Vec::new();
     for operation in operations {
         let action = match operation {
+            ast::CostOperation::ToCemetery(value)
+            | ast::CostOperation::ReturnToHand(value)
+            | ast::CostOperation::Banish(value)
+            | ast::CostOperation::Act(value) => {
+                let operation = match operation {
+                    ast::CostOperation::ToCemetery(_) => super::material::Operation::Put,
+                    ast::CostOperation::ReturnToHand(_) => super::material::Operation::Hand,
+                    ast::CostOperation::Banish(_) => super::material::Operation::Banish,
+                    ast::CostOperation::Act(_) => super::material::Operation::Act,
+                    ast::CostOperation::Pp(_)
+                    | ast::CostOperation::LeaderLife(_)
+                    | ast::CostOperation::ActSelf(_)
+                    | ast::CostOperation::SelfToCemetery(_) => return Err(unsupported(path)),
+                };
+                let (action, decision) = super::material::lower(
+                    context.card_allocator,
+                    &mut context.allocator,
+                    context.scope,
+                    value,
+                    operation,
+                    path,
+                )?;
+                parameters.push(decision);
+                action
+            }
             ast::CostOperation::Pp(amount) => Action::Resource {
                 player: PlayerRef::Controller {},
                 resource: Resource::PpCurrent,
@@ -59,7 +85,7 @@ pub(super) fn lower(
                 return Err(unsupported(path));
             }
         };
-        let id = allocator.id(path)?;
+        let id = context.card_allocator.id(path)?;
         steps.push(CostStep {
             materials: None,
             instruction: Box::new(Instruction {
@@ -73,10 +99,13 @@ pub(super) fn lower(
             }),
         });
     }
+    if parameters.len() > 1 {
+        return Err(unsupported(path));
+    }
     Ok(PlaySpec {
         limit: None,
         captures: vec![],
-        parameters: vec![],
+        parameters,
         costs: CostSpec::Ordered { steps },
     })
 }

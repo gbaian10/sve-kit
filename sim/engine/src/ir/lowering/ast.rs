@@ -173,6 +173,10 @@ pub(super) enum Cost {
 pub(super) enum CostOperation {
     Pp(u64),
     LeaderLife(u64),
+    ToCemetery(Material),
+    ReturnToHand(Material),
+    Banish(Material),
+    Act(Material),
     ActSelf(bool),
     SelfToCemetery(bool),
 }
@@ -917,6 +921,8 @@ pub(super) enum PublicNumber {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct PublicQuery {
+    #[serde(default)]
+    pub other: bool,
     pub who: Side,
     pub zone: PublicZone,
     pub kind: Option<SearchKind>,
@@ -928,6 +934,7 @@ pub(super) struct PublicQuery {
 #[serde(rename_all = "snake_case")]
 pub(super) enum PublicZone {
     Field,
+    Ex,
     Cemetery,
 }
 

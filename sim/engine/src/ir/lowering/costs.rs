@@ -118,6 +118,9 @@ pub(super) fn query(
     allocator: &mut Allocator,
     path: &str,
 ) -> Result<Selector, LoweringError> {
+    if value.other {
+        return Err(unsupported(path));
+    }
     let binding = Binding::new(allocator.id(path)?, ScopeId(0));
     Ok(Selector::Zone {
         players: PlayerSet {
@@ -135,6 +138,7 @@ pub(super) fn query(
         },
         zone: match value.zone {
             ast::PublicZone::Field => ZoneKind::Field,
+            ast::PublicZone::Ex => return Err(unsupported(path)),
             ast::PublicZone::Cemetery => ZoneKind::Cemetery,
         },
         view: SelectionView::Current {},

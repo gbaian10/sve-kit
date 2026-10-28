@@ -16,6 +16,9 @@ use sve_engine::game::internal::{Answer, Context, Fact, InstructionOutcome, Prog
 use sve_engine::game::{Game, View};
 use sve_engine::ir::*;
 
+#[path = "support/rule_fixtures.rs"]
+mod rule_fixtures;
+
 #[path = "internal_ir/allocation.rs"]
 mod allocation;
 #[path = "internal_ir/basic_actions.rs"]
@@ -200,7 +203,7 @@ fn setup(seat: u32, deck: Value) -> Value {
 fn catalog() -> Arc<Catalog> {
     catalog_with_cost(&json!("1"))
 }
-fn catalog_with_cost(cost: &Value) -> Arc<Catalog> {
+fn catalog_documents(cost: &Value) -> (String, String, String) {
     let snapshot = [("unit-spell", "スペル"), ("unit-follower", "フォロワー"), ("unit-amulet", "アミュレット")].iter().map(|(number, kind)| {
         json!({"number":number,"faces":[{"name":number,"card_class":"ニュートラル","card_type":kind,"cost":cost,"power":if *kind=="アミュレット" {"-"}else{"2"},"hp":if *kind=="アミュレット" {"-"}else{"3"},"traits":[],"text":null,"sections":[]}]}).to_string()
     }).collect::<Vec<_>>().join("\n");
@@ -211,6 +214,10 @@ fn catalog_with_cost(cost: &Value) -> Arc<Catalog> {
         "unit-amulet":{"status":"complete","review":"synthetic","abilities":[]}
     }})
     .to_string();
+    (snapshot, registry, document)
+}
+fn catalog_with_cost(cost: &Value) -> Arc<Catalog> {
+    let (snapshot, registry, document) = catalog_documents(cost);
     Arc::new(
         Catalog::from_documents(&snapshot, &registry, &[("unit.yaml".into(), document)]).unwrap(),
     )

@@ -254,7 +254,8 @@ impl Checker {
             return self.reject();
         }
         match (slot, &decision.domain) {
-            (PlaySlot::Targets, ChoiceDomain::Objects { .. } | ChoiceDomain::Recipients { .. })
+            (PlaySlot::CostMaterials, ChoiceDomain::Objects { .. })
+            | (PlaySlot::Targets, ChoiceDomain::Objects { .. } | ChoiceDomain::Recipients { .. })
             | (PlaySlot::X, ChoiceDomain::Integer { .. })
             | (PlaySlot::Distribution, ChoiceDomain::Distribution { .. }) => {}
             _ => return self.reject(),
@@ -588,7 +589,13 @@ impl Checker {
                                 && movement.to == (MoveDestination::Owners { zone: OwnerZone::Cemetery })
                                 && movement.position.is_none() && movement.order.is_none()
                                 && movement.initial_posture.is_none() && movement.entry_effects.is_empty());
-                        if !valid && !source_move {
+                        let selected_move = matches!(&step.instruction.action,
+                            Action::Move { objects: Selector::Bound { .. }, movement, reason: MoveReason::Put }
+                                if matches!(movement.to, MoveDestination::Owners { zone: OwnerZone::Cemetery | OwnerZone::Hand })
+                                    && movement.position.is_none() && movement.order.is_none()
+                                    && movement.initial_posture.is_none() && movement.entry_effects.is_empty())
+                            || matches!(&step.instruction.action, Action::Banish { objects: Selector::Bound { .. } });
+                        if !valid && !source_move && !selected_move {
                             return checker.reject();
                         }
                         checker.instruction_in(

@@ -1,7 +1,6 @@
 use super::*;
 
-#[path = "../support/rule_fixtures.rs"]
-mod rule_fixtures;
+use super::rule_fixtures;
 use sve_engine::catalog::EngineIdentityInput;
 
 fn banish(id: u64, objects: Selector) -> Located<Node> {

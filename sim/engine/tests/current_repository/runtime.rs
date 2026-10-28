@@ -77,6 +77,9 @@ mod life_cost;
 #[path = "runtime/live_conditions.rs"]
 mod live_conditions;
 
+#[path = "runtime/material_cost.rs"]
+mod material_cost;
+
 #[path = "runtime/max_pp.rs"]
 mod max_pp;
 

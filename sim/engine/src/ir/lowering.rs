@@ -9,6 +9,7 @@ mod discard;
 mod evolution;
 mod exchange;
 mod keywords;
+mod material;
 mod numeric;
 mod optional_payment;
 mod ordering;
@@ -418,7 +419,7 @@ impl Allocator {
             (
                 AbilityKind::Spell,
                 Some(payment::lower(
-                    context.card_allocator,
+                    &mut context,
                     &ast::Cost::Short(ast::CostOperation::Pp(cost.0)),
                     &ability_source,
                     path,
@@ -435,7 +436,7 @@ impl Allocator {
             (
                 AbilityKind::Activated,
                 Some(payment::lower(
-                    context.card_allocator,
+                    &mut context,
                     &activated.cost,
                     &ability_source,
                     path,
@@ -461,6 +462,7 @@ impl Allocator {
             )
         };
         if let Some(play) = &mut play {
+            context.parameters.append(&mut play.parameters);
             play.parameters = context.parameters;
             if entry.activate.is_some() {
                 play.limit = body

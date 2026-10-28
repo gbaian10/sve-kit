@@ -225,6 +225,7 @@ fn play_requirement(code: &str) -> bool {
             | "shape.DecisionKind.PlayParameter"
             | "decision.play-parameter"
             | "internal.PlaySlot.Targets"
+            | "internal.PlaySlot.CostMaterials"
             | "internal.PlaySlot.Distribution"
             | "internal.SelectionSnapshot.AtDecision"
             | "internal.InputMode.Inline"
