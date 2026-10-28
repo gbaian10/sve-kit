@@ -422,6 +422,20 @@ describe("CardsPage", () => {
     })
   })
 
+  it("clears the default card-number secondary sort when card number becomes primary", async () => {
+    const { router } = await open("/cards")
+    const user = userEvent.setup()
+    const sort = await screen.findByRole("combobox", { name: "排序" })
+
+    expect(screen.getByRole("combobox", { name: "再依" })).toHaveValue("no")
+    await user.selectOptions(sort, "no")
+
+    await waitFor(() => {
+      expect(screen.getByRole("combobox", { name: "再依" })).toHaveValue("")
+      expect(new URLSearchParams(router.state.location.search).get("sort")).toBe("no:desc")
+    })
+  })
+
   it("holds the class row's place with a skeleton until the options load", async () => {
     prefsStore.set({ uiLanguage: "zh-TW", filterPanelOpen: true, cardOpenMode: "page" })
     await renderRoutes(routes, { initialEntries: ["/cards"] })

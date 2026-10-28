@@ -250,6 +250,9 @@ it.each(["name", "date", "bogus", "set:wrong", "cost:asc,name:desc", "set:desc,n
 )
 it("omits explicit defaults, reads legacy directions and round-trips a disabled secondary sort", () => {
   expect(querySearch(parseQuery(new URLSearchParams("sort=set:desc,no:asc")))).toBe("")
+  const noSecondary = { ...DEFAULT_QUERY, secondarySort: null }
+  expect(querySearch(noSecondary)).toBe("?sort=set%3Adesc")
+  expect(parseQuery(new URLSearchParams(querySearch(noSecondary)))).toEqual(noSecondary)
   expect(parseQuery(new URLSearchParams("sort=cost&order=desc"))).toMatchObject({
     sort: "cost",
     order: "desc",
