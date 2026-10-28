@@ -662,7 +662,7 @@ pub(super) struct Choose {
 #[serde(deny_unknown_fields)]
 pub(super) struct TargetQuery {
     pub who: Option<Side>,
-    pub zone: Option<Zone>,
+    pub zone: Option<TargetZone>,
     pub leader: Option<LeaderSide>,
     pub leaders: Option<LeaderGroup>,
     #[serde(default)]
@@ -673,6 +673,14 @@ pub(super) struct TargetQuery {
     pub name_contains: Option<String>,
     #[serde(default)]
     pub other: bool,
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum TargetZone {
+    Field,
+    Ex,
+    Cemetery,
 }
 
 #[derive(Deserialize)]

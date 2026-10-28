@@ -3,7 +3,7 @@ use super::{Execution, Game, Nat, ObjectRef, Result, invalid, player_id, unsuppo
 use crate::ir::{
     Binding, CardKind, Cardinality, CharacteristicView, ChoiceDomain, Decision, DecisionKind,
     Disjointness, KindRead, NamesRead, ObjectOperand, ObjectProperty, ObjectView, PlayerRef,
-    Predicate, ScopeId, SelectionConstraint, SelectionGroup, Selector, TraitsRead,
+    PlayerRelation, Predicate, ScopeId, SelectionConstraint, SelectionGroup, Selector, TraitsRead,
 };
 use crate::ir::{Bool, Expr, SelectionView, ZoneKind};
 use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
@@ -211,6 +211,17 @@ pub(in crate::game::internal) fn check_resolution(decision: &Decision) -> Result
         } if players.relative_to == (PlayerRef::Controller {}) => {
             check_predicate(predicate, *binding)?;
         }
+        Selector::Zone {
+            zone: ZoneKind::Cemetery,
+            view: SelectionView::Current {},
+            players,
+            binding,
+            predicate,
+        } if players.relative_to == (PlayerRef::Controller {})
+            && players.relation == PlayerRelation::SelfPlayer =>
+        {
+            check_predicate(predicate, *binding)?;
+        }
         selector => field_selector(selector)?,
     }
     let selector = match &group.selector {
@@ -222,7 +233,7 @@ pub(in crate::game::internal) fn check_resolution(decision: &Decision) -> Result
         || !matches!(
             selector,
             Selector::Zone {
-                zone: ZoneKind::Field | ZoneKind::Ex,
+                zone: ZoneKind::Field | ZoneKind::Ex | ZoneKind::Cemetery,
                 ..
             }
         )
@@ -429,9 +440,11 @@ impl Game {
         let [group] = constraint.groups.as_slice() else {
             return Err(unsupported("target groups"));
         };
-        let allow_ex = matches!(decision.kind, DecisionKind::ResolutionChoice { .. });
+        let allow_resolution_zones = matches!(decision.kind, DecisionKind::ResolutionChoice { .. });
         let mut members = Vec::new();
-        for member in execution.public_target_objects(self, &group.selector, allow_ex)? {
+        for member in
+            execution.public_target_objects(self, &group.selector, allow_resolution_zones)?
+        {
             if self.targetable_by(
                 execution.object_id(member)?,
                 super::seat_name(execution.context.controller)?,
@@ -459,16 +472,18 @@ impl Game {
                 let id = execution.object_id(*reference)?;
                 let object = self.object(id)?;
                 let kind = self.object_type(id)?;
-                if !(object.zone == "field" || (allow_ex && object.zone == "ex"))
+                if !(object.zone == "field"
+                    || (allow_resolution_zones
+                        && matches!(object.zone.as_str(), "ex" | "cemetery")))
                     || object.generation != reference.generation.0
                     || (object.zone == "field"
                         && !(kind.contains("フォロワー") || kind.contains("アミュレット")))
                 {
                     return Err(unsupported(
-                        "target is not a current public field object or EX card",
+                        "target is not a current public field object, EX card or cemetery card",
                     ));
                 }
-                if self.restricted(id, "choose")? {
+                if object.zone != "cemetery" && self.restricted(id, "choose")? {
                     return Err(unsupported("target permission"));
                 }
                 Ok(super::super::DistributionMember {
@@ -631,7 +646,7 @@ impl Execution {
         &self,
         game: &Game,
         selector: &Selector,
-        allow_ex: bool,
+        allow_resolution_zones: bool,
     ) -> Result<Vec<ObjectRef>> {
         let members = match selector {
             Selector::Zone {
@@ -643,7 +658,8 @@ impl Execution {
             } => {
                 let zone = match zone {
                     ZoneKind::Field => "field",
-                    ZoneKind::Ex if allow_ex => "ex",
+                    ZoneKind::Ex if allow_resolution_zones => "ex",
+                    ZoneKind::Cemetery if allow_resolution_zones => "cemetery",
                     _ => return Err(unsupported("public target zone")),
                 };
                 check_predicate(predicate, *binding)?;
@@ -659,7 +675,7 @@ impl Execution {
             }
             Selector::Union { sets } => sets
                 .iter()
-                .map(|set| self.public_target_objects(game, set, allow_ex))
+                .map(|set| self.public_target_objects(game, set, allow_resolution_zones))
                 .collect::<Result<Vec<_>>>()?
                 .into_iter()
                 .flatten()

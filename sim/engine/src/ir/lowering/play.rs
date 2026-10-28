@@ -87,7 +87,7 @@ impl BodyContext<'_> {
     }
 
     fn target(&mut self, target: &ast::Target, path: &str) -> Result<(), LoweringError> {
-        let (domain, _) = self.object_choice(target, path)?;
+        let (domain, _) = self.object_choice(target, path, false)?;
         self.parameters.push(parameter(
             self.card_allocator.id(path)?,
             PlaySlot::Targets,
@@ -100,7 +100,15 @@ impl BodyContext<'_> {
         &mut self,
         target: &ast::Target,
         path: &str,
+        resolution: bool,
     ) -> Result<(ChoiceDomain, Cardinality), LoweringError> {
+        if matches!(target.from.zone, Some(ast::TargetZone::Cemetery))
+            && (!resolution
+                || target.from.leader_or
+                || !matches!(target.from.who, Some(ast::Side::Controller)))
+        {
+            return Err(unsupported(path));
+        }
         let cardinality = match (target.n, target.upto) {
             (Some(n), None) => Cardinality {
                 minimum: Nat(n),
@@ -149,8 +157,9 @@ impl BodyContext<'_> {
                 },
             },
             zone: match target.from.zone.as_ref().ok_or_else(|| unsupported(path))? {
-                ast::Zone::Field => ZoneKind::Field,
-                ast::Zone::Ex => ZoneKind::Ex,
+                ast::TargetZone::Field => ZoneKind::Field,
+                ast::TargetZone::Ex => ZoneKind::Ex,
+                ast::TargetZone::Cemetery => ZoneKind::Cemetery,
             },
             view: SelectionView::Current {},
             binding: candidate,
