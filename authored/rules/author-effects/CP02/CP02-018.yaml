@@ -1,0 +1,27 @@
+cards:
+  CP02-018:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - keywords:
+          - ward
+        line: 2
+      - fanfare:
+          do:
+            - life:
+                delta: 3
+                who: self
+            - draw:
+                n: 2
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-29"
+format: 2
+kind: author_effect_set
