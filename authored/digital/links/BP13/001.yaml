@@ -3038,24 +3038,24 @@ records:
         - phase: normal
           lang: en
           name_ref:
-            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
-            source_version_id: src:v1:6b98ea56109db2453561ee5efa689d5cb53b1a1ac4ee5ddb0dd1344daeb50033
+            batch_id: sha256:11b55c334bbe4ef6211f56350bfe41cc83334bf2c4eafc07ada8ce6c2aac3676
+            source_version_id: src:v1:26f210986cfd1e3a120ef0811c96ac20e4252fabeb87d25a97c2692867edddc8
             parser: translation-svwb-v1
             locator: /data/card_details/90034130/common/name
             text_hash: sha256:ea797f60a8dcfd78072f538f16405d3f433fd9359950d87f43dffab69390a1da
         - phase: normal
           lang: ja
           name_ref:
-            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
-            source_version_id: src:v1:77cf3584cca4c8f7810d98ae989d84fc132aa0a66c895ef4c0312cf567b0d40f
+            batch_id: sha256:11b55c334bbe4ef6211f56350bfe41cc83334bf2c4eafc07ada8ce6c2aac3676
+            source_version_id: src:v1:283439bfb2036fab5bbbc705002e52a89165f0ca3f3700b3771ada62601ba04d
             parser: translation-svwb-v1
             locator: /data/card_details/90034130/common/name
             text_hash: sha256:81f7fe9f7f02871d493a7227aa209c250d7598d07b369c4ae94db9ab9ec1f944
         - phase: normal
           lang: zh-Hant
           name_ref:
-            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
-            source_version_id: src:v1:05774cf1a374bac040beec915d98395cea93dc27bfdc9d6ed25da6f350f132fb
+            batch_id: sha256:11b55c334bbe4ef6211f56350bfe41cc83334bf2c4eafc07ada8ce6c2aac3676
+            source_version_id: src:v1:e008a7468021e51ae0ed99e5dba30e730a6c188eea7440bf1808721d934d7455
             parser: translation-svwb-v1
             locator: /data/card_details/90034130/common/name
             text_hash: sha256:b856a5b589664ead187d9779cf59823f15f717387f2a496618a0cd582630b5b2
@@ -6661,6 +6661,141 @@ records:
             text_hash: sha256:ac4ce2075a441748f79797fdfd9bfa82e1d92b120539637a8b3029ed451fd086
     review_level: model_reviewed
     reason: 同一改編卡片概念；單一模型判斷；另一模型以固定種子 5% 抽樣校準（0／97 錯）與 token 型態全量機械掃描接受的未抽中成員。只供瀏覽，不供名。
+  - subject:
+      card_id: c:f262cab527f550fa86d96b57669ed2fb
+      face_id:
+      game: sv1
+      official_id: "120141020"
+      digital_phase:
+    value:
+      relation: same_character
+      effect_similarity:
+      sve_names:
+        - printing_id: p:e1c6c896227359b0af46922798081b2b
+          face_id: f:5aa5d10f9fee519f8d3c6e3cdc8bf8a1
+          name_ref:
+            batch_id: sha256:139be07a281797f06baeb00b6aa8da56265ccd22ba4b42246630ba3d283e9ac3
+            source_version_id: src:v1:e51089319d75f9ed3017f34c5d99135477c1e1b81e39c555e02e00ae5f46f25e
+            parser: translation-jp-v1
+            locator: /faces/0/name
+            text_hash: sha256:93eb0c7ea78c02691bffbcc06724098cdc38216fdcbca6e128650c5269f82119
+      digital_names:
+        - phase: normal
+          lang: en
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:4c183f0e6c27155d37d8aef43e7a743b0b291f7a2aec8387f484ebad7ca9cdd8
+            parser: translation-sv1-v1
+            locator: /data/cards/236/card_name
+            text_hash: sha256:8fd173913876b7e1ab38672b4bbfb1b43f7beacd6ced7f502960179fa7feb57f
+        - phase: normal
+          lang: ja
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:86de774acfcbb1869f83c75fff58d85841f98d8a531064ecc230e8abb1470529
+            parser: translation-sv1-v1
+            locator: /data/cards/236/card_name
+            text_hash: sha256:4f409760e9b8d9babc5f78160ea49a951bb5ff3d2e1ae6e20b1ff59e1c0c0950
+        - phase: normal
+          lang: zh-Hant
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
+            parser: translation-sv1-v1
+            locator: /data/cards/236/card_name
+            text_hash: sha256:cca64cbe788f28ed66ac70b3104f621ac0d6eddf93f4017ec6da85b8c342085e
+    review_level: model_reviewed
+    reason: 模型逐組核對卡名、卡文及插畫。狐耳少女角色一致；實體進階卡與數位原版、異畫的稱號和能力不同，保留同角色瀏覽關係，不由重用插畫推成同卡。只供瀏覽，不供名。
+  - subject:
+      card_id: c:f262cab527f550fa86d96b57669ed2fb
+      face_id:
+      game: sv1
+      official_id: "132141040"
+      digital_phase:
+    value:
+      relation: same_character
+      effect_similarity:
+      sve_names:
+        - printing_id: p:e1c6c896227359b0af46922798081b2b
+          face_id: f:5aa5d10f9fee519f8d3c6e3cdc8bf8a1
+          name_ref:
+            batch_id: sha256:139be07a281797f06baeb00b6aa8da56265ccd22ba4b42246630ba3d283e9ac3
+            source_version_id: src:v1:e51089319d75f9ed3017f34c5d99135477c1e1b81e39c555e02e00ae5f46f25e
+            parser: translation-jp-v1
+            locator: /faces/0/name
+            text_hash: sha256:93eb0c7ea78c02691bffbcc06724098cdc38216fdcbca6e128650c5269f82119
+      digital_names:
+        - phase: normal
+          lang: en
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:4c183f0e6c27155d37d8aef43e7a743b0b291f7a2aec8387f484ebad7ca9cdd8
+            parser: translation-sv1-v1
+            locator: /data/cards/263/card_name
+            text_hash: sha256:70fdfaef20ddffb0389634507ad3a1e80a005c94ff3adb160ce0628a33814df5
+        - phase: normal
+          lang: ja
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:86de774acfcbb1869f83c75fff58d85841f98d8a531064ecc230e8abb1470529
+            parser: translation-sv1-v1
+            locator: /data/cards/263/card_name
+            text_hash: sha256:f224b13d3112849c6bf1884398096bb070e5404e9bf4c7614dfc19b4466aeb40
+        - phase: normal
+          lang: zh-Hant
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
+            parser: translation-sv1-v1
+            locator: /data/cards/263/card_name
+            text_hash: sha256:dd5434aee46dc19bc1c26a12bc37abd40982f78ffc372d91a4beb2d608a93fde
+    review_level: model_reviewed
+    reason: 模型逐組核對卡名、卡文及插畫。同一狐耳角色且重用插畫；實體為具獨立稱號的進階卡，數位為另一技能版本，不由同圖推成同卡。只供瀏覽，不供名。
+  - subject:
+      card_id: c:f262cab527f550fa86d96b57669ed2fb
+      face_id:
+      game: sv1
+      official_id: "716141010"
+      digital_phase:
+    value:
+      relation: same_character
+      effect_similarity:
+      sve_names:
+        - printing_id: p:e1c6c896227359b0af46922798081b2b
+          face_id: f:5aa5d10f9fee519f8d3c6e3cdc8bf8a1
+          name_ref:
+            batch_id: sha256:139be07a281797f06baeb00b6aa8da56265ccd22ba4b42246630ba3d283e9ac3
+            source_version_id: src:v1:e51089319d75f9ed3017f34c5d99135477c1e1b81e39c555e02e00ae5f46f25e
+            parser: translation-jp-v1
+            locator: /faces/0/name
+            text_hash: sha256:93eb0c7ea78c02691bffbcc06724098cdc38216fdcbca6e128650c5269f82119
+      digital_names:
+        - phase: normal
+          lang: en
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:4c183f0e6c27155d37d8aef43e7a743b0b291f7a2aec8387f484ebad7ca9cdd8
+            parser: translation-sv1-v1
+            locator: /data/cards/237/card_name
+            text_hash: sha256:8fd173913876b7e1ab38672b4bbfb1b43f7beacd6ced7f502960179fa7feb57f
+        - phase: normal
+          lang: ja
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:86de774acfcbb1869f83c75fff58d85841f98d8a531064ecc230e8abb1470529
+            parser: translation-sv1-v1
+            locator: /data/cards/237/card_name
+            text_hash: sha256:4f409760e9b8d9babc5f78160ea49a951bb5ff3d2e1ae6e20b1ff59e1c0c0950
+        - phase: normal
+          lang: zh-Hant
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
+            parser: translation-sv1-v1
+            locator: /data/cards/237/card_name
+            text_hash: sha256:cca64cbe788f28ed66ac70b3104f621ac0d6eddf93f4017ec6da85b8c342085e
+    review_level: model_reviewed
+    reason: 模型逐組核對卡名、卡文及插畫。狐耳少女角色一致；實體進階卡與數位原版、異畫的稱號和能力不同，保留同角色瀏覽關係，不由重用插畫推成同卡。只供瀏覽，不供名。
   - subject:
       card_id: c:f571a148c0f15c8990effd06952c0801
       face_id:

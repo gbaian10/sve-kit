@@ -4007,6 +4007,51 @@ records:
     review_level: model_reviewed
     reason: 同一改編卡片概念；單一模型判斷；另一模型以固定種子 5% 抽樣校準（0／97 錯）與 token 型態全量機械掃描接受的未抽中成員。只供瀏覽，不供名。
   - subject:
+      card_id: c:abedd7d44a375f40beaae282a7dddf90
+      face_id:
+      game: svwb
+      official_id: "11044120"
+      digital_phase:
+    value:
+      relation: same_character
+      effect_similarity:
+      sve_names:
+        - printing_id: p:e26d727d0d1c50088ab4ac6afbefd43f
+          face_id: f:c3777102c1fa580c9ba049cfa95dd472
+          name_ref:
+            batch_id: sha256:139be07a281797f06baeb00b6aa8da56265ccd22ba4b42246630ba3d283e9ac3
+            source_version_id: src:v1:0667731e3f377f3f05d3dac97f5411506f81000e6a6bc159345cf79143a0cedf
+            parser: translation-jp-v1
+            locator: /faces/0/name
+            text_hash: sha256:810b368b81706be1fa3688e08a372af08f9185f68f9dcac16754e315a9caf921
+      digital_names:
+        - phase: normal
+          lang: en
+          name_ref:
+            batch_id: sha256:11b55c334bbe4ef6211f56350bfe41cc83334bf2c4eafc07ada8ce6c2aac3676
+            source_version_id: src:v1:149c0229a10849171156ec7717d1dd1e947c92702e68800614943cd02cfe2b15
+            parser: translation-svwb-v1
+            locator: /data/card_details/11044120/common/name
+            text_hash: sha256:7aaa073ee3a7b205dd2ee18c43327d7e4f3e2f0949a3a4c3a101ac566d16afa9
+        - phase: normal
+          lang: ja
+          name_ref:
+            batch_id: sha256:11b55c334bbe4ef6211f56350bfe41cc83334bf2c4eafc07ada8ce6c2aac3676
+            source_version_id: src:v1:e7d618194651885bd8be4f6cd489be72c572aba537afdfa0a6e85138f334f80f
+            parser: translation-svwb-v1
+            locator: /data/card_details/11044120/common/name
+            text_hash: sha256:7f1c10176bb478d63e2a0563780ca9fdb46d7dedda1363e507870364461df63f
+        - phase: normal
+          lang: zh-Hant
+          name_ref:
+            batch_id: sha256:11b55c334bbe4ef6211f56350bfe41cc83334bf2c4eafc07ada8ce6c2aac3676
+            source_version_id: src:v1:efb24031d7b27f4e9ce222e49ba02fb4f917f9fe4dbf8ade7f61ccdf7f5815df
+            parser: translation-svwb-v1
+            locator: /data/card_details/11044120/common/name
+            text_hash: sha256:7d4b344124886febe3d1d11cbe844e700ed6277c8e07e81a0289498841683188
+    review_level: model_reviewed
+    reason: 模型逐組核對卡名、卡文及插畫。同一龍甲男子，數位新版為另一稱號與插畫；與實體兩種稱號的普通、進化卡皆為同角色，未確認同一改編卡片概念。只供瀏覽，不供名。
+  - subject:
       card_id: c:ac955eafd3815708bbdbd8bcb56f6030
       face_id:
       game: sv1
@@ -4501,6 +4546,51 @@ records:
             text_hash: sha256:45ece5c63f85a46a2ff1fe5b67993069be813badd3f54498033a461b0f146efd
     review_level: model_reviewed
     reason: 同一改編卡片概念；單一模型判斷；另一模型以固定種子 5% 抽樣校準（0／97 錯）與 token 型態全量機械掃描接受的未抽中成員。只供瀏覽，不供名。
+  - subject:
+      card_id: c:b878064cc68d5937bb7b6896e09aa1eb
+      face_id:
+      game: svwb
+      official_id: "11054120"
+      digital_phase:
+    value:
+      relation: same_character
+      effect_similarity:
+      sve_names:
+        - printing_id: p:1efe4929f98f5a048688d2ec5f8c2940
+          face_id: f:dfbbf16c2e4658189aad79b4647c50d5
+          name_ref:
+            batch_id: sha256:139be07a281797f06baeb00b6aa8da56265ccd22ba4b42246630ba3d283e9ac3
+            source_version_id: src:v1:564b6886efa99fe1958acd3bac3061cc6f6c8e358a3d8dfe3a9bf883f5bd28e4
+            parser: translation-jp-v1
+            locator: /faces/0/name
+            text_hash: sha256:77097d7e946e3fb6db664ac1f5e8553a7f0bc55f937bc48fabb34d48387d5227
+      digital_names:
+        - phase: normal
+          lang: en
+          name_ref:
+            batch_id: sha256:11b55c334bbe4ef6211f56350bfe41cc83334bf2c4eafc07ada8ce6c2aac3676
+            source_version_id: src:v1:94427ad33b70a60709e5f50a8c518e186193d4851a3d95ce68153c13efdf6f9d
+            parser: translation-svwb-v1
+            locator: /data/card_details/11054120/common/name
+            text_hash: sha256:ba421b141cfeb8dbbd738a5cb1cdfcfd058cde8eae92b0e73176f58cce5d1b00
+        - phase: normal
+          lang: ja
+          name_ref:
+            batch_id: sha256:11b55c334bbe4ef6211f56350bfe41cc83334bf2c4eafc07ada8ce6c2aac3676
+            source_version_id: src:v1:6ea9b764f3bad185409981d5d244e109fc19b22a00b487cf053f4052f079ac57
+            parser: translation-svwb-v1
+            locator: /data/card_details/11054120/common/name
+            text_hash: sha256:0580ba958884239fe58cf04f2978d95ba69147dbb1f1388b0e40e5491e20d99c
+        - phase: normal
+          lang: zh-Hant
+          name_ref:
+            batch_id: sha256:11b55c334bbe4ef6211f56350bfe41cc83334bf2c4eafc07ada8ce6c2aac3676
+            source_version_id: src:v1:0c20870c72a2f2d7a4f1a2e039e67e2ae5f627fd90adf6451d68f6a07fff52f6
+            parser: translation-svwb-v1
+            locator: /data/card_details/11054120/common/name
+            text_hash: sha256:340a3293489e1d88c73655bbe38b5547cba0e73026908bf4ee8f44b82853c1a4
+    review_level: model_reviewed
+    reason: 模型逐組核對卡名、卡文及插畫。同一金髮角飾少女及魔物同伴；稱號、插畫與墓場復活／紋章設計不同，屬同角色的不同卡片概念。只供瀏覽，不供名。
   - subject:
       card_id: c:ba16df2c45695b73bd45e666d3c18682
       face_id:
