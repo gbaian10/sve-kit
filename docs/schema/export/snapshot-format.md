@@ -74,7 +74,7 @@ reader 編譯具型別 accessor，詳情分片保留 tuples＋ID→row 索引；
 | `card_voice` | `card_id, voice_id, usage` | 複合 `PK(card_id,voice_id,usage)`；可播放的已採納對照/場景 |
 | `keyword` | `id, code, kind, name_unit_id, definition_unit_id?, actions:[{action,label_unit_id}], translations:[FieldTranslation]` | 關鍵字/資源及產生消耗篩選 |
 | `mechanic_projection` | `card_id, keyword_id, scope, relations:[code], actions:[code]` | 複合 `PK(前三欄)`；has/grants/refers/counts 與三態搜尋 |
-| `card_mechanic_coverage` | `card_id, scope, complete_all, complete_mode:include/exclude, complete_keyword_ids:[id], partial_mode:include/exclude, partial_keyword_ids:[id], has_complete_keyword_ids:[id], ability_types:[AbilityType], ability_types_complete:Bool` | 複合 `PK(前兩欄)`；稀疏三態搜尋的完整性，不展開 absent 列 |
+| `card_mechanic_coverage` | `card_id, scope, complete_all, complete_mode:include/exclude, complete_keyword_ids:[id], partial_mode:include/exclude, partial_keyword_ids:[id], has_complete_keyword_ids:[id], ability_types:[AbilityType], ability_types_complete:Bool, printed_mechanisms:[PrintedMechanism], checked_mechanisms:[MechanismCode]` | 複合 `PK(前兩欄)`；稀疏三態搜尋的完整性，不展開 absent 列 |
 | `card_engine_support` | `card_id, shared:Support, overrides:[{region,support:Support}], region_blocks:[{region,reasons:[code]}]` | PK(`card_id`)；未實作頁/單卡徽章/建牌數量/手動回退 |
 | `vocabulary` | `kind, code, label_unit_id, active, translations:[FieldTranslation]` | 複合 `PK(kind,code)`；穩定英文 filter code，多語 label 經 translation |
 | `search_alias` | `kind, code, lang, text, normalized` | 複合 `PK(kind,code,lang,text)`；三語輸入/Discord 暱稱 |
@@ -540,3 +540,10 @@ EN 自己的 current 卡文產生 `en_override`，不依 JP 對應或引擎支�
 `ability_types_complete=true` 表示所有必要 current 面均可檢查，且沒有未閉合引述造成的後續能力頭缺口；
 false 時仍可使用已辨認的正標籤，不能把其餘種類當已確認沒有。JP 使用 shared、EN 使用自己的 en_override，
 不從日文對照或 engine support 資格繼承。它們不屬於 keyword universe，不改四關係完整性的原義。
+
+`card_mechanic_coverage.printed_mechanisms` 為依 code 排序且每個 code 唯一的
+`{code, thresholds:[UInt]}` 陣列。code 與原生解析規則見[印刷機制](../domains/keyword-mechanics.md#職業與合作作品的印刷機制)；
+Combo、Spellchain、Necrocharge、Lesson 的 thresholds 保留去重排序的印刷數字，其餘為空陣列。
+`checked_mechanisms` 是已檢查的 code 集合，排序且無重複。正標籤優先；只有無正標籤且在
+checked 集合內才能判為 absent，其他情況是 unknown。兩欄不屬 keyword universe，
+不改變既有能力種類或四關係完整性。建置未執行此 adapter 時公開輸出補空陣列，代表未知。

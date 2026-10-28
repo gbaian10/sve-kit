@@ -472,3 +472,41 @@ Intimidate、Bane、Drain、Aura）。JP 寫 shared，EN 只寫 en_override，�
 結果放同 scope coverage 列的 ability_types／ability_types_complete，不從 DSL 判斷，
 不改 engine support。這些 code 與八種持有性質的 keyword 分開；後續 DSL 可做交叉核對，
 但本入口不以 DSL 補上未辨認的能力頭。
+
+## 職業與合作作品的印刷機制
+
+`printed-mechanisms-v1` 讀各地區 current 主文與可辨識為本卡續文的 sections，
+不依賴 DSL、職業或卡包推算；任一面使用即在 card 層級產生正標籤。
+這裡的「使用」限自身印刷能力的條件、費用與原生宣告，不包含授予他人、引述、
+Token 定義、reminder 或單純提及。能力種類與既有八種關鍵字仍各自獨立。
+
+| 組別 | code | 日文／英文表記 |
+| --- | --- | --- |
+| 職業機制 | combo | コンボ／Combo |
+| 職業機制 | spellchain | スペルチェイン、SC／Spellchain、SC |
+| 職業機制 | stack | スタック／Stack（自身宣告） |
+| 職業機制 | earth_rite | 土の秘術／Earth Rite |
+| 職業機制 | overflow | 覚醒／Overflow |
+| 職業機制 | necrocharge | ネクロチャージ、NC／Necrocharge、NC |
+| 職業機制 | sanguine | 真紅／Sanguine |
+| 合作作品機制 | serve | 食事／Serve（carrot 圖示 alt 為 feed） |
+| 合作作品機制 | lesson | レッスン／Lesson |
+| 合作作品機制 | starting_amulet | スタートアミュレット／Starting Amulet |
+| 合作作品機制 | single_drive | シングルドライブ／Single Drive |
+| 合作作品機制 | twin_drive | ツインドライブ／Twin Drive |
+
+Combo、SC、NC 與 Lesson 必須有完整數字門檻頭；同概念的長短名稱歸一，
+數字保存在 `thresholds`。Lesson 費用後可接逗號及其他費用。Earth Rite 讀支付表記，
+不將選擇「有 Earth Rite 的卡」當作本卡使用。Stack 與兩種 Drive 必須是獨立宣告行，
+可與其他關鍵字並列；加減其他卡的 Stack counter 不算自身宣告。真紅只讀 Sanguine，
+不匹配 Crimson。食事只讀行首圖示與 PP 費用入口；EP 的費用替代說明不產生 Serve 標籤。
+
+續段開頭為具名物件加卡片 metadata 時視為 Token 定義；以自身能力頭、關鍵字宣告、
+自身條件或直接產生 Token 的動作開頭時可辨識為本卡續文。因此英文 ECP01 食事、
+CP03 的 Twin Drive 續段仍可產生正標籤。其餘續段如出現候選機制而無法確認 owner，
+該機制保留 unknown。缺 current 面、身分未確認或引述未閉合，也不授予完整否定判定。
+
+結果保存於同地區 coverage 列的 `printed_mechanisms` 與 `checked_mechanisms`。
+前者是 `{code, thresholds}` 陣列，後者是已檢查的 code 集合；無正標籤且不在已檢查集合內
+表示 unknown，不能顯示為沒有。JP 使用 shared，EN 必須使用自己的 en_override。
+兩組各自支援任一／全部，組間取交集；前端列出未知卡數與已確認的正標籤結果。
