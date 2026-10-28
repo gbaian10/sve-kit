@@ -1,0 +1,31 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP03-076:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-29"
+    abilities:
+      - keywords:
+          - rush
+          - assail
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  awakened: true
+                then:
+                  - damage:
+                      n: 2
+                      to:
+                        leaders: opponents
+        line: 2
+    ignored:
+      - section: 1
+        line: 1
+        reason: reminder
