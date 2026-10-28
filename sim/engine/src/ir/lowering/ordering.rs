@@ -57,6 +57,7 @@ impl BodyContext<'_> {
             | ast::Step::Pp(_)
             | ast::Step::Discard(_)
             | ast::Step::PpMax(_)
+            | ast::Step::Ep(_)
             | ast::Step::Damage(_)
             | ast::Step::Life(_)
             | ast::Step::SetLife(_)

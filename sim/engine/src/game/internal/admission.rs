@@ -337,6 +337,7 @@ fn supported(code: &str) -> bool {
             | "action.resource"
             | "internal.Resource.PpCurrent"
             | "internal.Resource.PpMaximum"
+            | "internal.Resource.Ep"
             | "internal.ResourceOperation.Add"
             | "shape.Action.Discard"
             | "action.discard"

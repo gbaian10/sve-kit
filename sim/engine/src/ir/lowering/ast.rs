@@ -171,9 +171,10 @@ pub(super) enum Step {
     Choice(Choice),
     Choose(Choose),
     Draw(Draw),
-    Pp(Pp),
+    Pp(ResourceIncrease),
     Discard(Discard),
-    PpMax(Pp),
+    PpMax(ResourceIncrease),
+    Ep(ResourceIncrease),
     Damage(Damage),
     Life(Life),
     SetLife(SetLife),
@@ -198,7 +199,7 @@ pub(super) struct Life {
 
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
-pub(super) struct Pp {
+pub(super) struct ResourceIncrease {
     pub who: SelfPlayer,
     pub delta: u64,
 }

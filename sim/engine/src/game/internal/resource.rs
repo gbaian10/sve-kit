@@ -1,4 +1,4 @@
-//! Body PP increases record actual changes independently of payment completion.
+//! Body resource increases record actual changes independently of payment completion.
 
 #![expect(
     clippy::indexing_slicing,
@@ -20,9 +20,9 @@ pub struct ResourceOutcome {
     pub requested: Int,
     /// Value before the increase.
     pub before: Int,
-    /// Value after the resource cap applies.
+    /// Value after checked arithmetic and any PP cap apply.
     pub after: Int,
-    /// Actual increase, including zero when already full.
+    /// Actual increase, including zero when a PP resource is already full.
     pub actual: Int,
 }
 
@@ -30,12 +30,12 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
     if let Action::Resource { .. } = action
         && !matches!(action, Action::Resource {
             player: PlayerRef::Controller {},
-            resource: Resource::PpCurrent | Resource::PpMaximum,
+            resource: Resource::PpCurrent | Resource::PpMaximum | Resource::Ep,
             operation: ResourceOperation::Add,
             amount: Expr::Literal(Int(amount)),
         } if *amount > 0)
     {
-        return Err(unsupported("fixed positive own PP increase"));
+        return Err(unsupported("fixed positive own resource increase"));
     }
     Ok(())
 }
@@ -59,6 +59,9 @@ impl Game {
         else {
             return Err(unsupported("resource recovery amount"));
         };
+        if resource == Resource::Ep {
+            return self.internal_ep_increase(execution, instruction, requested);
+        }
         let player = execution.context.controller;
         let seat = seat_name(player)?;
         let pp = &self.player(seat)?.pp;
@@ -101,6 +104,43 @@ impl Game {
                 before: Int(before),
                 after: Int(after),
                 actual: Int(actual),
+            }),
+        );
+        Ok(())
+    }
+
+    fn internal_ep_increase(
+        &mut self,
+        execution: &mut Execution,
+        instruction: &Instruction,
+        requested: Int,
+    ) -> Result<()> {
+        let player = execution.context.controller;
+        let seat = seat_name(player)?;
+        let before = self.player(seat)?.ep;
+        if before < 0 {
+            return Err(invalid("negative EP value"));
+        }
+        let after = before
+            .checked_add(requested.0)
+            .ok_or_else(|| unsupported("EP increase exceeds the integer representation"))?;
+        self.player_mut(seat)?.ep = after;
+        let group = self.group();
+        self.emit(
+            json!({"kind":"EP変化","player":seat,"source":execution.frame().source,
+                "delta":requested.0,"before":before,"after":after}),
+            &execution.frame().cause,
+            group,
+        );
+        execution.receipts.insert(
+            instruction.receipt,
+            InstructionOutcome::Resource(ResourceOutcome {
+                player,
+                resource: Resource::Ep,
+                requested,
+                before: Int(before),
+                after: Int(after),
+                actual: requested,
             }),
         );
         Ok(())

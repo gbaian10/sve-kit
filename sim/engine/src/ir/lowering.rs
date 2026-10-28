@@ -838,25 +838,14 @@ impl BodyContext<'_> {
                 })
             }
             ast::Step::Move(value) => self.observed_move(value, path),
-            ast::Step::Pp(value) | ast::Step::PpMax(value) => {
-                let ast::SelfPlayer::Controller = value.who;
-                if value.delta == 0 {
-                    return Err(unsupported(path));
-                }
-                Ok(Action::Resource {
-                    player: PlayerRef::Controller {},
-                    resource: if matches!(step, ast::Step::PpMax(_)) {
-                        super::Resource::PpMaximum
-                    } else {
-                        super::Resource::PpCurrent
-                    },
-                    operation: super::ResourceOperation::Add,
-                    amount: Expr::Literal(Int(
-                        i64::try_from(value.delta).map_err(|_private| unsupported(path))?
-                    )),
-                })
+            ast::Step::Pp(value) => {
+                numeric::resource_increase(value, super::Resource::PpCurrent, path)
             }
             ast::Step::Discard(value) => self.discard(value, path),
+            ast::Step::PpMax(value) => {
+                numeric::resource_increase(value, super::Resource::PpMaximum, path)
+            }
+            ast::Step::Ep(value) => numeric::resource_increase(value, super::Resource::Ep, path),
             ast::Step::Draw(draw) => Ok(Action::Draw {
                 player: PlayerRef::Controller {},
                 count: self.number(&draw.n, path, &mut BTreeSet::new())?,

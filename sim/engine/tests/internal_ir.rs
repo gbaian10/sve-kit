@@ -449,7 +449,7 @@ fn dead_arms_costs_hidden_reads_and_unsupported_requirements_reject_whole_body()
         2,
         Action::Resource {
             player: PlayerRef::Controller {},
-            resource: Resource::Ep,
+            resource: Resource::Sep,
             operation: ResourceOperation::Add,
             amount: Expr::Literal(Int(1)),
         },
