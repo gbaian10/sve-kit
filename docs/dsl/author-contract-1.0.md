@@ -36,6 +36,8 @@
 
 ### 2.4 effects-index
 
+索引位於 `authored/rules/effects-index/<卡包>.yaml`，卡包是 `record_key` 第一個 `-` 前的前綴（如 BP06、CP02、PR）。每檔沿用 format 1／effects_index 封套，只收該卡包且依 `record_key`、`scope` 排序；讀取整個目錄合併後仍驗證跨檔 CardId／scope 唯一。新增卡片只更新對應卡包索引，不使用舊單檔路徑。
+
 索引每個永久 CardId／scope 唯一，檔案與紀錄雙向閉合。同卡原型與 current 互斥；切換時主檔、索引與原型移除在同次寫入完成，拒絕卡不回退原型。
 
 ### 2.5 每包機器錨點
