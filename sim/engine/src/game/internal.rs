@@ -6,7 +6,6 @@
 )]
 
 use super::{Frame, Game, View, int, string};
-use crate::ir::TokenOutcome;
 use crate::ir::{
     Action, Arithmetic, Binding, Bool, Capture, CaptureRef, CardQuantityOutcome, Cardinality,
     ChoiceDomain, Comparison, Control, DamageEvent, DamageFlags, DamageQuantityOutcome,
@@ -18,7 +17,8 @@ use crate::ir::{
     PlayerRelation, PlayerResource, PlayerSet, PositiveInt, PostureEvent, Predicate, Program,
     Quantity, ReceiptId, ReceiptLocation, RecipientSet, Requirements, ResolvedRecipients,
     RuntimeAbilitySource, RuntimeDamageRecipient, ScopeId, SearchOutcome, SearchReplacementAnswer,
-    Selector, SourceSpan, StepwiseAnswer, StepwiseMode, Visibility, WellFormedProgram, ZoneKind,
+    Selector, SourceSpan, StepwiseAnswer, StepwiseMode, TokenOutcome, Visibility,
+    WellFormedProgram, ZoneKind,
 };
 use crate::ir::{BanishOutcome, DiscardEvent, DiscardOutcome, FaceId, PaymentResult, QuickWindow};
 use crate::{EngineFailure, Result, invalid};
@@ -392,6 +392,7 @@ pub(super) struct Execution {
     card_payment: Option<(FaceId, ReceiptId)>,
     play_counts: BTreeMap<u32, (Nat, Nat)>,
     ward_entries: Vec<(ObjectRef, bool)>,
+    creating: Option<tokens::Creation>,
 }
 
 #[expect(
@@ -560,6 +561,7 @@ impl Game {
                 card_payment: None,
                 play_counts: BTreeMap::new(),
                 ward_entries: Vec::new(),
+                creating: None,
             };
             self.internal_run(&mut execution)?;
             let progress = execution.progress();

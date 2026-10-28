@@ -47,7 +47,13 @@ fn filter(ability: &Ability) -> Option<EntryFilter> {
     EntryFilter::parse(*binding, predicate)
 }
 
-fn entry_origin(previous: &Object) -> Result<ZoneKind> {
+fn entry_origin(game: &Game, previous: &Object) -> Result<EntryOrigin> {
+    if previous.zone == "void"
+        && previous.generation == 0
+        && game.catalog.face(&previous.card, 0)?["card_type"] == "フォロワー・トークン"
+    {
+        return Ok(EntryOrigin::Other {});
+    }
     let from = if previous.zone == "resolution" {
         previous.state["entered_from"]
             .as_str()
@@ -55,14 +61,15 @@ fn entry_origin(previous: &Object) -> Result<ZoneKind> {
     } else {
         &previous.zone
     };
-    match from {
+    let zone = match from {
         "hand" => Ok(ZoneKind::Hand),
         "ex" => Ok(ZoneKind::Ex),
         "cemetery" => Ok(ZoneKind::Cemetery),
         "banish" => Ok(ZoneKind::Banish),
         "evolve_deck" => Ok(ZoneKind::Evolve),
         _ => Err(unsupported("unadmitted entry origin")),
-    }
+    }?;
+    Ok(EntryOrigin::Zone { zone })
 }
 
 fn matches(
@@ -183,9 +190,7 @@ impl Game {
             // Only a matching occurrence publishes the origin; unadmitted zones still reject it.
             let event = EnterFieldEvent {
                 object,
-                from: EntryOrigin::Zone {
-                    zone: entry_origin(old)?,
-                },
+                from: entry_origin(self, old)?,
                 controller: entry_controller,
                 characters,
                 method,
