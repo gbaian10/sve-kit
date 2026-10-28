@@ -228,9 +228,21 @@ pub(super) fn check(ability: &Ability, source: &SourceSpan) -> Result<()> {
 
 fn check_parameters(parameters: &[Decision]) -> Result<()> {
     let mut distribution = false;
+    let mut material = false;
     let mut target = None;
     let mut target_count = 0_usize;
     for decision in parameters {
+        if super::material::is_parameter(decision) {
+            super::material::check_parameter(decision)?;
+            if material {
+                return Err(unsupported("one material group"));
+            }
+            material = true;
+            continue;
+        }
+        if material {
+            return Err(unsupported("targets must precede materials"));
+        }
         match (&decision.kind, &decision.domain) {
             (
                 DecisionKind::PlayParameter {
@@ -779,7 +791,15 @@ impl Game {
                     }
                 }
                 ChoiceDomain::Objects { .. } => {
-                    snapshot.internal_target(execution, &decision)?;
+                    if super::material::is_parameter(&decision) {
+                        snapshot.internal_material_parameter(
+                            execution,
+                            &decision,
+                            super::material::posture_parameter(&play.costs, &decision),
+                        )?;
+                    } else {
+                        snapshot.internal_target(execution, &decision)?;
+                    }
                     // Target construction is pure; the live authority alone allocates the token.
                     if let Some((view, _)) = execution.waiting.as_mut() {
                         self.state.ir_epoch = self

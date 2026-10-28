@@ -345,6 +345,7 @@ enum Wait {
     WardEntry(ObjectRef),
     OptionalCost,
     CostMaterials(card::exchange::MaterialWait),
+    MaterialParameter(card::material::MaterialWait),
     TriggerQuota {
         count: usize,
     },
@@ -640,6 +641,11 @@ impl Game {
                     if !card::optional::accept(&mut execution, accepted)? {
                         card::exchange::accept(&mut execution, accepted)?;
                     }
+                }
+                (Wait::MaterialParameter(wait), Answer::CostMaterials(handles)) => {
+                    let members = wait.validate(&handles)?;
+                    rollback = execution.origin.take();
+                    wait.bind(&mut execution, members);
                 }
                 (Wait::CostMaterials(wait), Answer::CostMaterials(handles)) => {
                     let members = wait.validate(&handles)?;

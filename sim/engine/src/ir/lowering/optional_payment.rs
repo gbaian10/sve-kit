@@ -20,7 +20,7 @@ impl BodyContext<'_> {
         };
         let path = format!("{path}/optional_cost");
         let costs = payment::lower(
-            self.card_allocator,
+            self,
             &ast::Cost::Short(ast::CostOperation::Pp(cost.pp)),
             origin,
             &path,

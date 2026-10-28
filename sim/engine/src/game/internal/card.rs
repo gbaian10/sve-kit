@@ -11,16 +11,16 @@ use crate::ir::{
     Ability, AbilityId, AbilityInstanceId, AbilityKind, AbilityOrigin, AbilitySource, Action,
     AssociationId, Control, CostSpec, DamageAmount, ExecutionId, Expr, FaceId, Generation,
     InstructionContext, Int, KeywordId, Located, MoveDestination, MoveReason, Nat, Node,
-    NumericChange, ObjectOperand, ObjectRef, OwnerZone, PlayerId, PlayerRef, Posture, PostureEvent,
-    Quantity, QuantityUnit, Resource, ResourceOperation, RuleId, RuntimeAbilitySource, Selector,
-    SourceSpan, StepwiseMode, WellFormedCardProgram, ZoneKind,
+    NumericChange, ObjectOperand, ObjectRef, OwnerZone, PlayerId, PlayerRef, Posture, Quantity,
+    QuantityUnit, Resource, ResourceOperation, RuleId, RuntimeAbilitySource, Selector, SourceSpan,
+    StepwiseMode, WellFormedCardProgram, ZoneKind,
 };
 use crate::ir::{ConsumptionPoint, LimitSpec, ModeUse};
 use crate::ir::{TurnId, printed_keywords};
 use crate::{Result, invalid};
 use alloc::collections::{BTreeMap, BTreeSet};
 use alloc::sync::Arc;
-use core::{mem::take, result, slice};
+use core::{mem::take, result};
 use serde::Serializer;
 use serde::ser::Error as _;
 use serde_json::json;
@@ -30,6 +30,7 @@ mod evolution;
 pub(super) mod exchange;
 mod fanfare;
 mod keywords;
+pub(super) mod material;
 pub(super) mod optional;
 mod printed;
 pub(super) mod quick;
@@ -280,6 +281,7 @@ impl Game {
         }
         costs::check(self, card_no, card)?;
         optional::check_card(card)?;
+        material::check_card(card)?;
         if self.card_runtime.cards.contains_key(card_no)
             || self.typed.is_some()
             || !self.prepared.is_empty()
@@ -533,6 +535,12 @@ impl Game {
                         Vec::new(),
                     )
                 }
+                Action::Posture { objects, .. }
+                | Action::Banish { objects }
+                | Action::Move {
+                    objects: objects @ Selector::Bound { .. },
+                    ..
+                } => self.internal_material_payment(execution, &step.instruction, objects)?,
                 Action::Move {
                     objects,
                     movement,
@@ -559,37 +567,6 @@ impl Game {
                             unit: QuantityUnit::Cards,
                         },
                         vec![original],
-                    )
-                }
-                Action::Posture { .. } => {
-                    let holder = execution.context.source.clone();
-                    if self.object(&holder)?.state["acted"] != false {
-                        return Err(crate::EngineFailure::IllegalPlay(
-                            "whole-card posture cost requires a standing source".into(),
-                        ));
-                    }
-                    let object = execution.object(self, &ObjectOperand::SourceHolder {})?;
-                    let changed = self.change_posture(
-                        slice::from_ref(&holder),
-                        true,
-                        &execution.frame().cause,
-                    )?;
-                    if changed != [holder] {
-                        return Err(crate::EngineFailure::IllegalPlay(
-                            "incomplete posture payment".into(),
-                        ));
-                    }
-                    execution.facts.push(Fact::Posture(PostureEvent {
-                        object,
-                        before: Posture::Standing,
-                        after: Posture::Acted,
-                    }));
-                    (
-                        Quantity {
-                            amount: Int(1),
-                            unit: QuantityUnit::Cards,
-                        },
-                        vec![object],
                     )
                 }
                 Action::Life {
@@ -735,7 +712,7 @@ fn check_costs(ability: &Ability) -> Result<()> {
                     && movement.initial_posture.is_none()
                     && movement.entry_effects.is_empty()
             }
-            _ => false,
+            action => material::check_cost(action, play),
         };
         if !supported {
             return Err(unsupported("whole-card cost step"));
