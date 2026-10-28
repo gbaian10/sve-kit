@@ -1,0 +1,24 @@
+cards:
+  BP07-T02:
+    abilities:
+      - keywords:
+          - quick
+        line: 1
+      - line: 2
+        spell:
+          do:
+            - life:
+                delta: 1
+                who: self
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-sol
+            who: Codex
+          date: "2026-10-28"
+    token:
+      name: リペアモード
+      template: true
+format: 2
+kind: author_effect_set
