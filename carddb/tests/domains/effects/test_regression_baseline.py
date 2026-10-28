@@ -234,7 +234,9 @@ def test_reverse_positions_preserve_concrete_cross_line_coverage(
                 expected[key] = row["frame_ids"]
     for path in sorted((ROOT / "authored/rules/effect-reviews").glob("*.yaml")):
         cards_path = ROOT / "authored/rules/effects" / path.name
-        cards = object_value(read_yaml(cards_path)["cards"])
+        cards = (
+            object_value(read_yaml(cards_path)["cards"]) if cards_path.exists() else {}
+        )
         for value in array(read_yaml(path)["reverse_positions"]):
             row = object_value(value)
             number = str(row["card_no"])
