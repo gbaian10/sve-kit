@@ -159,7 +159,8 @@ impl BodyContext<'_> {
         cardinality: Cardinality,
         path: &str,
     ) -> Result<(ChoiceDomain, Cardinality), LoweringError> {
-        if target.from.r#trait.is_some()
+        if target.distinct_by.is_some()
+            || target.from.r#trait.is_some()
             || self.recipient_targets.contains_key(&target.bind)
             || self.targets.contains_key(&target.bind)
             || self.definitions.contains_key(&target.bind)

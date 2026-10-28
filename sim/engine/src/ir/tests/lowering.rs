@@ -1246,6 +1246,13 @@ fn leader_targets_and_leader_follower_targets_keep_recipient_bindings() {
             ability.play.as_ref().unwrap().parameters[0].domain,
             ChoiceDomain::Recipients { .. }
         ));
+        let mut distinct = tree.clone();
+        distinct["cards"]["SD03-005"]["abilities"][0]["spell"]["targets"][0]["distinct_by"] =
+            json!("name");
+        assert!(
+            lowerer.lower_with_printed_costs(&distinct, &costs).is_err(),
+            "leaders have no card-name distinctness contract"
+        );
         tree["cards"]["SD03-005"]["abilities"][0]["spell"]["do"] = json!([{"destroy":"victim"}]);
         assert!(
             lowerer.lower_with_printed_costs(&tree, &costs).is_err(),
