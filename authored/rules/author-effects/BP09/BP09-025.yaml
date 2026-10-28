@@ -1,0 +1,19 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP09-025:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-28"
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - keywords:
+          - assail
+        line: 2

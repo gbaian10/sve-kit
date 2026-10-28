@@ -1,0 +1,23 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP09-085:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-28"
+    abilities:
+      - keywords:
+          - quick
+        line: 1
+      - spell:
+          do:
+            - move:
+                top:
+                  who: self
+                  n: 2
+                to: cemetery
+        line: 2

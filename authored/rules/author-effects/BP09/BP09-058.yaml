@@ -1,0 +1,32 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP09-058:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-28"
+    abilities:
+      - keywords:
+          - quick
+        line: 1
+      - spell:
+          do:
+            - choose:
+                bind: enemy
+                from:
+                  who: opp
+                  zone: field
+                  kind: follower
+                n: 1
+            - damage:
+                n: 3
+                to: enemy
+            - draw:
+                n: 1
+            - discard:
+                n: 1
+        line: 2
