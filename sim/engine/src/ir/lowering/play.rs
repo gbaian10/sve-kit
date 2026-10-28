@@ -352,6 +352,7 @@ impl BodyContext<'_> {
             let scope = self.card_allocator.scope(path)?;
             let mut context = BodyContext {
                 scope,
+                definition: self.definition,
                 payment_result: None,
                 local_payment: self.local_payment.clone(),
                 allocator: Allocator::default(),

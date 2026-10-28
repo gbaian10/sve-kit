@@ -1,7 +1,5 @@
 use super::{BodyContext, LoweringError, SourceSpan, ast, keywords, numeric, unsupported};
-use crate::ir::{
-    AbilityId, Action, FaceId, GrantedAbility, ObjectOperand, ObjectView, TextProvider,
-};
+use crate::ir::{Action, FaceId, GrantedAbility, ObjectOperand, ObjectView, TextProvider};
 #[expect(
     clippy::multiple_inherent_impl,
     reason = "Keyword grants use the body's object bindings."
@@ -39,7 +37,7 @@ impl BodyContext<'_> {
                     object: Box::new(ObjectOperand::SourceHolder {}),
                 },
                 face: FaceId(source.face.clone()),
-                ability: AbilityId(self.scope.0),
+                ability: self.definition,
             },
         })
     }
