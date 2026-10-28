@@ -1,4 +1,5 @@
 use super::{BindingKind, Checked, Checker, WellFormedReason};
+use crate::ir::optional_payment;
 use crate::ir::{
     Bool, Cardinality, ChoiceDomain, Control, Expr, Mode, ModeChoiceKind, ModeDecision,
     ModeDecisionKind, Nat, NatFrozen, NatOperation, Node, PlayerRef, Predicate, Program,
@@ -11,6 +12,34 @@ use alloc::collections::BTreeSet;
     reason = "Mode input regions share the structural checker state."
 )]
 impl Checker {
+    pub(super) fn guarded_play_mode(control: &Control) -> bool {
+        let Control::If {
+            condition,
+            then_body,
+            else_body: None,
+        } = control
+        else {
+            return false;
+        };
+        let [
+            super::super::Located {
+                node:
+                    Node::Control {
+                        control:
+                            Control::Mode {
+                                choice_kind: ModeChoiceKind::ChoiceKeyword,
+                                ..
+                            },
+                    },
+                ..
+            },
+        ] = then_body.steps.as_slice()
+        else {
+            return false;
+        };
+        optional_payment::public_mode_guard(condition)
+    }
+
     pub(super) fn modes(
         &mut self,
         modes: &[Mode],

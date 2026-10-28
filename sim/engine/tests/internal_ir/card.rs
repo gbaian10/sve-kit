@@ -4,6 +4,9 @@ use second::lowerer;
 #[path = "card/trigger_targets.rs"]
 mod trigger_targets;
 
+#[path = "card/trigger_choice.rs"]
+mod trigger_choice;
+
 #[path = "card/admission.rs"]
 mod admission;
 use sve_engine::game::internal::{Activation, CardPlay, ResumeStage};

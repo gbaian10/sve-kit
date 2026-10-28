@@ -402,11 +402,11 @@ impl Allocator {
         }
         let active_zones = active_zones(entry, path)?;
         let (body, head, keyword) = ability_body(entry, path)?;
-        let triggered_play = play::trigger_play_spec(entry, body, keyword, path)?;
         let source = source_span(key, path, entry)?;
         let ability_source = ability_source(&source, keyword);
         let mut context = BodyContext::new(entry, scope, body, payment_result, self);
-        context.prepare_parameters(body, path)?;
+        let trigger_choice = context.prepare_parameters(body, path, entry.fanfare.is_some())?;
+        let triggered_play = play::trigger_play_spec(entry, body, keyword, trigger_choice, path)?;
         let optional =
             context.optional_payment(body, &source, &ability_source, &format!("{path}/{head}"))?;
         let mut program =
@@ -748,14 +748,29 @@ impl<'definitions> BodyContext<'definitions> {
         }
     }
 
-    fn prepare_parameters(&mut self, body: &ast::Body, path: &str) -> Result<(), LoweringError> {
+    fn prepare_parameters(
+        &mut self,
+        body: &ast::Body,
+        path: &str,
+        fanfare: bool,
+    ) -> Result<bool, LoweringError> {
         for value in body.define.values() {
             self.number(value, path, &mut BTreeSet::new())?;
         }
         self.resolution_captures.clear();
         self.allocator = Allocator::default();
-        let choice = play::choice_body(body, path)?;
-        self.targets(&body.targets, choice, path)
+        let trigger_choice = fanfare
+            && body.optional_cost.is_none()
+            && body.head_cost.is_none()
+            && play::fanfare_choice(body, path)?;
+        self.formal_play |= trigger_choice;
+        let choice = if trigger_choice {
+            true
+        } else {
+            play::choice_body(body, path)?
+        };
+        self.targets(&body.targets, choice, path)?;
+        Ok(trigger_choice)
     }
 
     fn body(

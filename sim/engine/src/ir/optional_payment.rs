@@ -1,11 +1,12 @@
 //! One optional payment declared before targets and committed before play.
 use super::{
-    Ability, AbilityOrigin, Control, CostSpec, KeywordId, PaymentOptionality, PaymentTime,
-    PlaySpec, Program, ReceiptId,
+    Ability, AbilityOrigin, Bool, Comparison, Control, CostSpec, Expr, Int, IntRead, KeywordId,
+    Located, Node, PaymentOptionality, PaymentTime, PlaySpec, PlayerRef, PlayerResource, Predicate,
+    Program, ReceiptId,
 };
 
 pub(crate) fn declaration(body: &Program) -> Option<(&CostSpec, ReceiptId)> {
-    let super::Node::Control {
+    let Node::Control {
         control:
             Control::Pay {
                 at: PaymentTime::PlayParameter,
@@ -24,7 +25,7 @@ pub(crate) fn declaration(body: &Program) -> Option<(&CostSpec, ReceiptId)> {
 pub(crate) fn required(body: &Program) -> bool {
     matches!(
         body.steps.first().map(|step| &step.node),
-        Some(super::Node::Control {
+        Some(Node::Control {
             control: Control::Pay {
                 optional: PaymentOptionality::Required,
                 ..
@@ -35,46 +36,72 @@ pub(crate) fn required(body: &Program) -> bool {
 
 pub(crate) fn trigger_play(ability: &Ability) -> bool {
     ability.play.as_ref().is_none_or(|play| {
+        let AbilityOrigin::Keyword { keyword, .. } = &ability.source.origin else {
+            return false;
+        };
         matches!(play, PlaySpec { limit: None, captures, costs: CostSpec::Ordered { steps }, .. }
             if captures.is_empty() && steps.is_empty())
             && ability.body.as_ref().is_some_and(|body| {
                 if required(body) {
                     declaration(body).is_some()
                         && matches!(
-                            ability.source.origin,
-                            AbilityOrigin::Keyword {
-                                keyword: KeywordId::Fanfare
-                                    | KeywordId::OnEvolve
-                                    | KeywordId::OnSuperEvolve
-                                    | KeywordId::OnAttack
-                                    | KeywordId::OnRace
-                                    | KeywordId::OnDriveGain,
-                                ..
-                            }
+                            keyword,
+                            KeywordId::Fanfare
+                                | KeywordId::OnEvolve
+                                | KeywordId::OnSuperEvolve
+                                | KeywordId::OnAttack
+                                | KeywordId::OnRace
+                                | KeywordId::OnDriveGain
                         )
                 } else {
                     match declaration(body) {
-                        Some(_) => matches!(
-                            ability.source.origin,
-                            AbilityOrigin::Keyword {
-                                keyword: KeywordId::Fanfare,
-                                ..
-                            }
+                        Some(_) => matches!(keyword, KeywordId::Fanfare),
+                        None if !play.parameters.is_empty() => matches!(
+                            keyword,
+                            KeywordId::Fanfare | KeywordId::OnEvolve | KeywordId::OnAttack
                         ),
-                        None => {
-                            !play.parameters.is_empty()
-                                && matches!(
-                                    ability.source.origin,
-                                    AbilityOrigin::Keyword {
-                                        keyword: KeywordId::Fanfare
-                                            | KeywordId::OnEvolve
-                                            | KeywordId::OnAttack,
-                                        ..
-                                    }
-                                )
-                        }
+                        None => matches!(keyword, KeywordId::Fanfare) && declared_choice(body),
                     }
                 }
             })
     })
+}
+
+fn declared_choice(body: &Program) -> bool {
+    match body.steps.as_slice() {
+        [
+            Located {
+                node:
+                    Node::Control {
+                        control: Control::Mode { .. },
+                    },
+                ..
+            },
+        ] => true,
+        [
+            Located {
+                node:
+                    Node::Control {
+                        control:
+                            Control::If {
+                                then_body,
+                                else_body: None,
+                                ..
+                            },
+                    },
+                ..
+            },
+        ] => declared_choice(then_body),
+        _ => false,
+    }
+}
+
+pub(crate) fn public_mode_guard(condition: &Expr<Bool>) -> bool {
+    matches!(condition, Expr::Compute(predicate)
+    if matches!(predicate.as_ref(), Predicate::CompareInt {
+        left: Expr::Live(read), comparison: Comparison::GreaterEqual,
+        right: Expr::Literal(Int(minimum)),
+    } if *minimum >= 0 && matches!(read.as_ref(), IntRead::PlayerResource {
+        player: PlayerRef::Controller {}, property: PlayerResource::PpMaximum,
+    })))
 }

@@ -12,7 +12,9 @@ use alloc::collections::BTreeMap;
 impl Checker {
     pub(super) fn control(&mut self, control: &Control) -> Checked {
         let modes = self.env.play_modes;
-        if !matches!(control, Control::Sequence { .. } | Control::Mode { .. }) {
+        if !matches!(control, Control::Sequence { .. } | Control::Mode { .. })
+            && !Self::guarded_play_mode(control)
+        {
             self.env.play_modes = false;
         }
         let result = self.control_inner(control);
