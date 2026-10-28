@@ -646,6 +646,7 @@ impl Game {
             spell: false,
             field_entry: false,
             card_payment: None,
+            trigger_occurrence: None,
             play_counts: self.internal_play_counts()?,
             ward_entries: Vec::new(),
             creating: None,
@@ -744,8 +745,29 @@ impl Game {
         {
             return Err(invalid("no pending formal play"));
         }
+        if self.decline_internal_head_payment(actor, token, &answer)? {
+            return Ok(CardPlay::Cancelled);
+        }
+        let occurrence = self
+            .typed
+            .as_ref()
+            .filter(|execution| {
+                execution
+                    .play
+                    .as_ref()
+                    .and_then(|play| play.optional.as_ref())
+                    .is_some_and(|payment| payment.required)
+            })
+            .and_then(|execution| execution.trigger_occurrence.map(|id| (id, execution.id)));
         let source = self.typed.as_ref().and_then(|execution| execution.ability);
-        let progress = self.answer_internal_step(actor, token, answer)?;
+        let progress = match self.answer_internal_step(actor, token, answer) {
+            Err(crate::EngineFailure::IllegalPlay(_)) if occurrence.is_some() => {
+                let (id, checkpoint) = occurrence.ok_or_else(|| invalid("missing occurrence"))?;
+                self.internal_cancel_occurrence(id, checkpoint);
+                return Ok(CardPlay::Cancelled);
+            }
+            result => result?,
+        };
         if let Some((view, _)) = self
             .typed
             .as_ref()
@@ -793,10 +815,21 @@ impl Game {
                 }
                 ChoiceDomain::Objects { .. } => {
                     if super::material::is_parameter(&decision) {
+                        if play
+                            .optional
+                            .as_ref()
+                            .is_some_and(|payment| payment.accepted == Some(false))
+                        {
+                            continue;
+                        }
+                        let costs = play
+                            .optional
+                            .as_ref()
+                            .map_or(&play.costs, |payment| &payment.costs);
                         snapshot.internal_material_parameter(
                             execution,
                             &decision,
-                            super::material::posture_parameter(&play.costs, &decision),
+                            super::material::posture_parameter(costs, &decision),
                         )?;
                     } else {
                         snapshot.internal_target(execution, &decision)?;

@@ -18,6 +18,24 @@ pub(super) fn lower(
         ast::Cost::Short(operation) => from_ref(operation),
         ast::Cost::Ordered { steps } => steps.as_slice(),
     };
+    lower_operations(context, operations, source, path)
+}
+
+pub(super) fn lower_one(
+    context: &mut BodyContext<'_>,
+    operation: &ast::CostOperation,
+    source: &AbilitySource,
+    path: &str,
+) -> Result<PlaySpec, LoweringError> {
+    lower_operations(context, from_ref(operation), source, path)
+}
+
+fn lower_operations(
+    context: &mut BodyContext<'_>,
+    operations: &[ast::CostOperation],
+    source: &AbilitySource,
+    path: &str,
+) -> Result<PlaySpec, LoweringError> {
     if operations
         .iter()
         .filter(|op| matches!(op, ast::CostOperation::Discard(_)))
@@ -33,7 +51,8 @@ pub(super) fn lower(
             ast::CostOperation::ToCemetery(value)
             | ast::CostOperation::ReturnToHand(value)
             | ast::CostOperation::Banish(value)
-            | ast::CostOperation::Act(value) => {
+            | ast::CostOperation::Act(value)
+            | ast::CostOperation::ToEx(value) => {
                 let operation = material_operation(operation, path)?;
                 let (action, decision) = super::material::lower(
                     context.card_allocator,
@@ -121,6 +140,7 @@ fn material_operation(
         ast::CostOperation::ReturnToHand(_) => Ok(super::material::Operation::Hand),
         ast::CostOperation::Banish(_) => Ok(super::material::Operation::Banish),
         ast::CostOperation::Act(_) => Ok(super::material::Operation::Act),
+        ast::CostOperation::ToEx(_) => Ok(super::material::Operation::Ex),
         ast::CostOperation::Pp(_)
         | ast::CostOperation::LeaderLife(_)
         | ast::CostOperation::Discard(_)

@@ -1,0 +1,28 @@
+cards:
+  BP20-051:
+    abilities:
+      - keywords:
+          - assail
+        line: 1
+      - evolve_time:
+          cost:
+            to_cemetery:
+              n: 1
+              sel:
+                other: true
+                trait: アイドル
+                who: self
+                zone: field
+          do:
+            - draw:
+                n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-sol
+            who: Codex
+          date: "2026-10-28"
+format: 2
+kind: author_effect_set

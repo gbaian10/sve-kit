@@ -1,18 +1,20 @@
 //! Optional declaration is separate from its all-or-nothing payment.
 use super::play::PlayState;
 use super::{AbilitySource, Execution, Game, Result, invalid, unsupported};
-use crate::game::internal::{InputDomain, InstructionOutcome, Wait};
+use crate::game::internal::{Answer, DecisionToken, InputDomain, InstructionOutcome, Wait};
 use crate::ir::{
     AbilityKind, Action, Bool, Control, CostSpec, DecisionId, Expr, InstructionContext, Int, Node,
-    PaymentOptionality, PaymentResult, PaymentTime, PlayerRef, Program, ReceiptId, Resource,
-    ResourceOperation, RuntimeReceiptId, WellFormedCardProgram, optional_payment,
+    PaymentOptionality, PaymentResult, PaymentTime, PlayerId, PlayerRef, Program, ReceiptId,
+    Resource, ResourceOperation, RuntimeReceiptId, Selector, WellFormedCardProgram,
+    optional_payment,
 };
 
 #[derive(Clone, Debug)]
 pub(super) struct OptionalState {
-    costs: CostSpec,
+    pub(super) costs: CostSpec,
+    pub(super) required: bool,
     receipt: ReceiptId,
-    accepted: Option<bool>,
+    pub(super) accepted: Option<bool>,
 }
 
 pub(super) fn check_costs(costs: &CostSpec, origin: &AbilitySource) -> Result<()> {
@@ -28,9 +30,11 @@ pub(super) fn check_costs(costs: &CostSpec, origin: &AbilitySource) -> Result<()
         || instruction.source != *origin
         || instruction.actor != (PlayerRef::Controller {})
         || instruction.context != InstructionContext::Cost
-        || !matches!(&instruction.action, Action::Resource { player: PlayerRef::Controller {},
+        || !(matches!(&instruction.action, Action::Resource { player: PlayerRef::Controller {},
             resource: Resource::PpCurrent, operation: ResourceOperation::Pay,
             amount: Expr::Literal(Int(amount)) } if *amount >= 0)
+            || super::material::cost_objects(&instruction.action)
+                .is_some_and(|objects| matches!(objects, Selector::Bound { .. })))
     {
         return Err(unsupported("optional payment source or cost"));
     }
@@ -45,6 +49,26 @@ pub(super) fn check_card(card: &WellFormedCardProgram) -> Result<()> {
         .any(|cost| cost.node.exchange.is_some());
     for ability in &card.card().abilities {
         if let Some(body) = &ability.node.body {
+            if let Some((costs, _)) = optional_payment::declaration(body) {
+                let play = ability
+                    .node
+                    .play
+                    .as_ref()
+                    .ok_or_else(|| unsupported("payment without play parameters"))?;
+                let CostSpec::Ordered { steps } = costs else {
+                    return Err(unsupported("payment alternatives"));
+                };
+                for step in steps {
+                    if !matches!(step.instruction.action, Action::Resource { .. })
+                        && !super::material::check_cost(&step.instruction.action, play)
+                    {
+                        return Err(unsupported("payment material parameter"));
+                    }
+                }
+                if optional_payment::required(body) && ability.node.kind != AbilityKind::Triggered {
+                    return Err(unsupported("required head payment outside a trigger"));
+                }
+            }
             if optional_payment::declaration(body).is_some()
                 && (exchange || ability.node.kind == AbilityKind::Activated)
             {
@@ -101,6 +125,7 @@ pub(super) fn check_body(program: &Program, root: bool) -> Result<()> {
 pub(super) fn take(body: &mut Program) -> Option<OptionalState> {
     let (costs, receipt) = optional_payment::declaration(body)?;
     let state = OptionalState {
+        required: optional_payment::required(body),
         costs: costs.clone(),
         receipt,
         accepted: None,
@@ -125,7 +150,7 @@ pub(in crate::game::internal) fn accept(execution: &mut Execution, accepted: boo
 
 pub(in crate::game::internal) fn check_control(control: &Control) -> Result<()> {
     if !matches!(control, Control::Pay { at: PaymentTime::PlayParameter,
-        optional: PaymentOptionality::Optional, on_paid, .. } if on_paid.steps.is_empty())
+        optional: PaymentOptionality::Optional | PaymentOptionality::Required, on_paid, .. } if on_paid.steps.is_empty())
     {
         return Err(unsupported("optional payment timing or continuation"));
     }
@@ -137,6 +162,37 @@ pub(in crate::game::internal) fn check_control(control: &Control) -> Result<()> 
     reason = "Declaration and payment share the play transaction."
 )]
 impl Game {
+    pub(super) fn decline_internal_head_payment(
+        &mut self,
+        actor: PlayerId,
+        token: DecisionToken,
+        answer: &Answer,
+    ) -> Result<bool> {
+        let Some(execution) = self.typed.as_ref() else {
+            return Ok(false);
+        };
+        let Some((view, Wait::OptionalCost)) = &execution.waiting else {
+            return Ok(false);
+        };
+        if !matches!(answer, Answer::OptionalCost(false))
+            || !execution
+                .play
+                .as_ref()
+                .and_then(|play| play.optional.as_ref())
+                .is_some_and(|payment| payment.required)
+        {
+            return Ok(false);
+        }
+        if view.actor != actor || view.token != token {
+            return Err(invalid("wrong actor or stale head payment answer"));
+        }
+        let id = execution
+            .trigger_occurrence
+            .ok_or_else(|| invalid("head payment without occurrence"))?;
+        self.internal_cancel_occurrence(id, execution.id);
+        Ok(true)
+    }
+
     pub(super) fn internal_optional_decision(
         &mut self,
         execution: &mut Execution,

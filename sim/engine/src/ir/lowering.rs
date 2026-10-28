@@ -405,13 +405,14 @@ impl Allocator {
         let source = source_span(key, path, entry)?;
         let ability_source = ability_source(&source, keyword);
         let mut context = BodyContext::new(entry, scope, body, payment_result, self);
+        context.prepare_parameters(body, path)?;
         let optional =
             context.optional_payment(body, &source, &ability_source, &format!("{path}/{head}"))?;
-        context.prepare_parameters(body, path)?;
         let mut program =
             context.body(body, &format!("{path}/{head}"), &source, &ability_source)?;
-        if let Some(optional) = optional {
-            program.steps.insert(0, optional);
+        if let Some(payment) = optional {
+            program.steps.insert(0, payment.node);
+            context.parameters.extend(payment.parameters);
         }
         let (kind, mut play, trigger) = if entry.spell.is_some() {
             if body.per_turn.is_some() {
@@ -454,11 +455,13 @@ impl Allocator {
             trigger.limit = body.per_turn.map(|_| super::LimitSpec::once_per_turn());
             (
                 AbilityKind::Triggered,
-                body.optional_cost.as_ref().map(|_| super::PlaySpec {
-                    limit: None,
-                    captures: vec![],
-                    parameters: vec![],
-                    costs: super::CostSpec::Ordered { steps: vec![] },
+                (body.optional_cost.is_some() || body.head_cost.is_some()).then(|| {
+                    super::PlaySpec {
+                        limit: None,
+                        captures: vec![],
+                        parameters: vec![],
+                        costs: super::CostSpec::Ordered { steps: vec![] },
+                    }
                 }),
                 Some(trigger),
             )
@@ -749,7 +752,8 @@ impl<'definitions> BodyContext<'definitions> {
             mode_targets: BTreeMap::new(),
             formal_play: entry.activate.is_some()
                 || entry.spell.is_some()
-                || body.optional_cost.is_some(),
+                || body.optional_cost.is_some()
+                || body.head_cost.is_some(),
             local_payment: None,
         }
     }

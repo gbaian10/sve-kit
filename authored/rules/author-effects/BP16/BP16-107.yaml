@@ -1,0 +1,32 @@
+cards:
+  BP16-107:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - fanfare:
+          cost:
+            to_cemetery:
+              n: 1
+              sel:
+                kind: amulet
+                who: self
+                zone: field
+          do:
+            - buff:
+                hp: 1
+                on: this
+                power: 1
+            - life:
+                delta: 3
+                who: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-sol
+            who: Codex
+          date: "2026-10-28"
+format: 2
+kind: author_effect_set

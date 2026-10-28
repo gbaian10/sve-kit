@@ -1,10 +1,20 @@
 format: 1
 kind: effects_index
 records:
+  - card_id: c:0ed78cc3a44d50d9a8ca87bbf820db7b
+    file: rules/author-effects/BP17/BP17-017.yaml
+    kind: author_effect_set
+    record_key: BP17-017
+    scope: shared
   - card_id: c:6de602441ae25fefb77ced4620f395f7
     file: rules/author-effects/BP17/001.yaml
     kind: author_effect_set
     record_key: BP17-077
+    scope: shared
+  - card_id: c:9dff6a41a8975541a0050d9b8de5bd62
+    file: rules/author-effects/BP17/BP17-081.yaml
+    kind: author_effect_set
+    record_key: BP17-081
     scope: shared
   - card_id: c:82d42f86b30051be8c7ff26f75eecffa
     file: rules/author-effects/BP17/000.yaml

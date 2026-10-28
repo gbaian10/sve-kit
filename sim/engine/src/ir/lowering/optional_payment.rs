@@ -1,7 +1,12 @@
 use super::{
     AbilitySource, BodyContext, KeywordId, Located, LoweringError, Node, SourceSpan, ast, payment,
 };
-use crate::ir::{Control, PaymentOptionality, PaymentTime, Program, ReceiptId};
+use crate::ir::{Control, Decision, PaymentOptionality, PaymentTime, Program, ReceiptId};
+
+pub(super) struct PaymentDeclaration {
+    pub node: Located<Node>,
+    pub parameters: Vec<Decision>,
+}
 
 #[expect(
     clippy::multiple_inherent_impl,
@@ -14,36 +19,54 @@ impl BodyContext<'_> {
         source: &SourceSpan,
         origin: &AbilitySource,
         path: &str,
-    ) -> Result<Option<Located<Node>>, LoweringError> {
-        let Some(cost) = &body.optional_cost else {
+    ) -> Result<Option<PaymentDeclaration>, LoweringError> {
+        if body.head_cost.is_some() && body.optional_cost.is_some() {
+            return Err(super::unsupported(path));
+        }
+        let field = if body.optional_cost.is_some() {
+            "optional_cost"
+        } else {
+            "cost"
+        };
+        let path = format!("{path}/{field}");
+        let (play, optional, result) = if let Some(cost) = &body.optional_cost {
+            (
+                payment::lower_one(self, &cost.operation, origin, &path)?,
+                PaymentOptionality::Optional,
+                Some(&cost.result),
+            )
+        } else if let Some(cost) = &body.head_cost {
+            (
+                payment::lower(self, cost, origin, &path)?,
+                PaymentOptionality::Required,
+                None,
+            )
+        } else {
             return Ok(None);
         };
-        let path = format!("{path}/optional_cost");
-        let costs = payment::lower(
-            self,
-            &ast::Cost::Short(ast::CostOperation::Pp(cost.pp)),
-            origin,
-            &path,
-        )?
-        .costs;
         let receipt = ReceiptId(self.card_allocator.id(&path)?);
-        self.local_payment = Some((cost.result.clone(), receipt));
+        if let Some(result) = result {
+            self.local_payment = Some((result.clone(), receipt));
+        }
         let mut located = source.clone();
         located.author_path.clone_from(&path);
-        Ok(Some(Located {
-            source: located,
-            node: Node::Control {
-                control: Control::Pay {
-                    at: PaymentTime::PlayParameter,
-                    costs,
-                    optional: PaymentOptionality::Optional,
-                    on_paid: Program {
-                        scope: self.card_allocator.scope(&path)?,
-                        steps: vec![],
+        Ok(Some(PaymentDeclaration {
+            node: Located {
+                source: located,
+                node: Node::Control {
+                    control: Control::Pay {
+                        at: PaymentTime::PlayParameter,
+                        costs: play.costs,
+                        optional,
+                        on_paid: Program {
+                            scope: self.card_allocator.scope(&path)?,
+                            steps: vec![],
+                        },
+                        receipt,
                     },
-                    receipt,
                 },
             },
+            parameters: play.parameters,
         }))
     }
 }
@@ -57,6 +80,24 @@ pub(super) fn check_entry(
         return Ok(());
     }
     let (body, _, keyword) = super::ability_body(entry, path)?;
+    if body.head_cost.is_some()
+        && (exchange
+            || entry.activate.is_some()
+            || entry.spell.is_some()
+            || !matches!(
+                keyword,
+                Some(
+                    KeywordId::Fanfare
+                        | KeywordId::OnEvolve
+                        | KeywordId::OnSuperEvolve
+                        | KeywordId::OnAttack
+                        | KeywordId::OnRace
+                        | KeywordId::OnDriveGain
+                )
+            ))
+    {
+        return Err(super::unsupported(path));
+    }
     if body.optional_cost.is_some()
         && (exchange
             || entry.activate.is_some()

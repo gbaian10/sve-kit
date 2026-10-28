@@ -1,0 +1,39 @@
+cards:
+  BP17-017:
+    abilities:
+      - activate:
+          cost:
+            act_self: true
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: 操り人形
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - banish:
+                  n: 1
+                  sel:
+                    name: 操り人形
+                    who: self
+                    zone: ex
+          do:
+            - draw:
+                n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-sol
+            who: Codex
+          date: "2026-10-28"
+    token_sources:
+      - card: BP08-T09
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

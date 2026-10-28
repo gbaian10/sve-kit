@@ -1,0 +1,29 @@
+cards:
+  BP12-084:
+    abilities:
+      - fanfare:
+          cost:
+            to_cemetery:
+              n: 1
+              sel:
+                kind: follower
+                other: true
+                trait: 死者
+                who: self
+                zone: field
+          do:
+            - draw:
+                n: 2
+            - discard:
+                n: 1
+                who: self
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-sol
+            who: Codex
+          date: "2026-10-28"
+format: 2
+kind: author_effect_set
