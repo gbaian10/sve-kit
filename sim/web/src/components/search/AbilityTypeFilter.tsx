@@ -1,10 +1,23 @@
 import { useTranslation } from "react-i18next"
 
+import advancedStandIcon from "../../assets/official/texticon/icon_advancestand.png"
+import fanfareIcon from "../../assets/official/texticon/icon_fanfare.png"
+import lastWordIcon from "../../assets/official/texticon/icon_lastword.png"
+import quickIcon from "../../assets/official/texticon/icon_quick.png"
+import standIcon from "../../assets/official/texticon/icon_stand.png"
 import { ABILITY_TYPES, type AbilityType } from "../../domain/abilityTypes"
 import type { MatchMode } from "../../domain/query/model"
 import { Toggle } from "./FilterControls"
 import { FilterDropdown } from "./FilterDropdown"
 import { MatchModeControl } from "./MatchModeControl"
+
+const ABILITY_TYPE_ICONS: Readonly<Partial<Record<AbilityType, string>>> = {
+  quick: quickIcon,
+  fanfare: fanfareIcon,
+  last_words: lastWordIcon,
+  advanced_act: advancedStandIcon,
+  act: standIcon,
+}
 
 export function AbilityTypeFilter({
   options,
@@ -54,6 +67,7 @@ export function AbilityTypeFilter({
           <Toggle
             key={code}
             pressed={selected.includes(code)}
+            className="h-10 min-w-0 gap-0.5 px-0.5 text-11"
             disabled={disabled}
             onClick={() => {
               onChange(
@@ -63,6 +77,13 @@ export function AbilityTypeFilter({
               )
             }}
           >
+            {ABILITY_TYPE_ICONS[code] && (
+              <img
+                src={ABILITY_TYPE_ICONS[code]}
+                alt=""
+                className="size-3.5 shrink-0 object-contain"
+              />
+            )}
             {t(`filters.abilityTypeNames.${code}`)}
           </Toggle>
         ))}
