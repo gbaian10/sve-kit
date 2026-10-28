@@ -15,11 +15,15 @@ export function SortControls({
       {([false, true] as const).map((secondary) => {
         const sort = secondary ? query.secondarySort : query.sort
         const descending = (secondary ? query.secondaryOrder : query.order) === "desc"
-        const label = t(secondary ? "results.thenBy" : "results.sort")
+        const label = secondary ? t("results.thenBy") : t("results.sort")
         const direction =
           sort === "set"
-            ? t(descending ? "results.newestFirst" : "results.oldestFirst")
-            : t(descending ? "results.largestFirst" : "results.smallestFirst")
+            ? descending
+              ? t("results.newestFirst")
+              : t("results.oldestFirst")
+            : descending
+              ? t("results.largestFirst")
+              : t("results.smallestFirst")
         return (
           <div key={String(secondary)} className="flex items-center gap-1 text-13">
             <label className="flex items-center gap-1">
