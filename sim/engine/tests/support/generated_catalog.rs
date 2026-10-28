@@ -109,7 +109,7 @@ fn build(snapshot: &str, keywords: &str, documents: &[(String, String)], root: &
     clippy::expect_used,
     reason = "Historical passive token fixtures use the checked current author identity."
 )]
-fn include_passive_current_tokens(
+fn include_passive_current_amulets(
     documents: &mut Vec<(String, String)>,
     input: &Value,
     root: &Path,
@@ -117,12 +117,19 @@ fn include_passive_current_tokens(
 ) {
     let available: BTreeSet<String> = snapshot
         .lines()
-        .map(|line| {
+        .filter_map(|line| {
             let card: Value = serde_json::from_str(line).expect("snapshot card");
-            card.get("number")
-                .and_then(Value::as_str)
-                .expect("snapshot printing")
-                .to_owned()
+            if card.pointer("/faces/0/card_type").and_then(Value::as_str)
+                != Some("アミュレット・トークン")
+            {
+                return None;
+            }
+            Some(
+                card.get("number")
+                    .and_then(Value::as_str)
+                    .expect("snapshot printing")
+                    .to_owned(),
+            )
         })
         .collect();
     let mut tokens = BTreeMap::new();
@@ -189,7 +196,7 @@ fn include_passive_current_tokens(
                 if !available.contains(number) {
                     continue;
                 }
-                // Shared legacy scenarios only use these tokens as passive payment material.
+                // Shared legacy scenarios only use these amulets as passive payment material.
                 // Full current abilities are exercised by current_repository, never this fixture.
                 by_identity.entry(identity.to_owned()).or_default().insert(
                     number.to_owned(),
@@ -229,7 +236,7 @@ pub(crate) fn historical_regression_catalog() -> Arc<Catalog> {
         let (snapshot, keywords, mut documents, root) = selected_prototypes();
         restore_frozen_programs(&mut documents, &root);
         let (_, _, input) = repository::inputs();
-        include_passive_current_tokens(&mut documents, input, &root, snapshot);
+        include_passive_current_amulets(&mut documents, input, &root, snapshot);
         Arc::new(build(snapshot, keywords, &documents, &root))
     }))
 }
