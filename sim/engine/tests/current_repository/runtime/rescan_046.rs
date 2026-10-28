@@ -360,3 +360,22 @@ fn pr_092_real_fanfare_creates_one_bat_in_ex_for_both_printings() {
         assert_eq!(state["P2"]["ex"], json!([]));
     }
 }
+
+#[test]
+fn pr_155_and_156_carry_the_official_magic_item_battle_name_only() {
+    for card in ["PR-155", "PR-156"] {
+        let mut initial = position(card, "ex", 4);
+        initial["players"]["P1"]["zones"]["ex"] =
+            json!([{"id":"source","card":card},{"id":"repair","card":"BP07-T02"}]);
+        let game = game(&initial);
+        let state = game.projection(View::Referee).unwrap();
+        assert_eq!(
+            state["objects"]["source"]["name"], "魔法のアイテム",
+            "the battle name comes from the official ruling, not the printed name"
+        );
+        assert_eq!(
+            state["objects"]["repair"]["name"], "リペアモード",
+            "a different real token keeps its own battle name"
+        );
+    }
+}
