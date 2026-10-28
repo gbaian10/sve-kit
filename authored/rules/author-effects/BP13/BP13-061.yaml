@@ -1,0 +1,33 @@
+cards:
+  BP13-061:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - fanfare:
+          do:
+            - choose:
+                bind: enemy
+                from:
+                  kind: follower
+                  who: opp
+                  zone: field
+                n: 1
+            - if:
+                cond:
+                  awakened: true
+                then:
+                  - damage:
+                      n: 4
+                      to: enemy
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-sol
+            who: Codex
+          date: "2026-10-29"
+format: 2
+kind: author_effect_set
