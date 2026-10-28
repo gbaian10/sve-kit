@@ -428,3 +428,44 @@ fn printing_aliases_share_a_candidate_without_selecting_unrelated_numbers() {
     ]]);
     Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap_err();
 }
+
+#[test]
+fn amulet_token_movement_keeps_other_special_card_kinds_closed() {
+    for kind in ["アミュレット・トークン", "クレスト・トークン"] {
+        let (snapshot, keywords, mut input) = selection(1);
+        let snapshot = snapshot.replace("フォロワー・トークン", kind);
+        input["authors"][0]["input"]["tree"]["cards"]["creator"]["faces"]
+            ["f:11111111111111111111111111111111"]["abilities"][0]["spell"]["do"]
+            .as_array_mut()
+            .unwrap()
+            .push(json!({"move":{"ref":"made","to":"cemetery"}}));
+        let selected = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
+        let mut game = Game::from_selected_effects(
+            selected,
+            &initial(0),
+            &Value::Null,
+            &Value::Null,
+            "amulet-token-movement",
+        )
+        .unwrap();
+        let result = game.play_internal_card("creator", PlayerId { seat: 1 });
+        if kind == "クレスト・トークン" {
+            assert!(
+                result.is_err(),
+                "other special-card movement remains closed"
+            );
+        } else {
+            assert!(matches!(result.unwrap(), CardPlay::Resolved(_)));
+            let view = game.projection(View::Referee).unwrap();
+            assert_eq!(view["P1"]["ex"], json!([]));
+            assert_eq!(view["P1"]["cemetery"], json!(["creator"]));
+            assert!(
+                view["objects"]
+                    .as_object()
+                    .unwrap()
+                    .values()
+                    .all(|v| v["card"] != "token")
+            );
+        }
+    }
+}
