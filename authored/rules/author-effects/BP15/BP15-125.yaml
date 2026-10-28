@@ -1,0 +1,29 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP15-125:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-29"
+    abilities:
+      - keywords:
+          - rush
+          - ward
+        line: 1
+      - fanfare:
+          do:
+            - choose:
+                bind: enemy
+                from:
+                  who: opp
+                  zone: field
+                  kind: follower
+                n: 1
+            - damage:
+                n: 7
+                to: enemy
+        line: 2

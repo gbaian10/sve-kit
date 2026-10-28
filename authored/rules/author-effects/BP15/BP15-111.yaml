@@ -1,0 +1,31 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP15-111:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-29"
+    abilities:
+      - fanfare:
+          do:
+            - choose:
+                bind: enemy
+                from:
+                  who: opp
+                  zone: field
+                  kind: follower
+                n: 1
+            - damage:
+                n: 3
+                to: enemy
+        line: 1
+      - lastword:
+          do:
+            - life:
+                who: self
+                delta: 1
+        line: 2
