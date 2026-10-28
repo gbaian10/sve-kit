@@ -1,0 +1,39 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP01-045:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-29"
+    abilities:
+      - fanfare:
+          do:
+            - choose:
+                bind: ally
+                from:
+                  who: self
+                  zone: field
+                  kind: follower
+                  other: true
+                n: 1
+            - buff:
+                "on": ally
+                power: 1
+        line: 1
+      - lastword:
+          do:
+            - choose:
+                bind: ally
+                from:
+                  who: self
+                  zone: field
+                  kind: follower
+                n: 1
+            - buff:
+                "on": ally
+                power: 1
+        line: 2
