@@ -95,11 +95,16 @@ fn bp01_169_destroys_selected_opposing_field_card() {
 
 #[test]
 fn bp01_015_returns_to_owner_then_draws_without_exposing_hidden_generation() {
-    for seat in ["P1", "P2"] {
+    for (seat, target_card) in [
+        ("P1", "BP01-037"),
+        ("P2", "BP01-037"),
+        ("P1", "BP19-108"),
+        ("P2", "BP19-108"),
+    ] {
         let opponent = opposite(seat);
         let mut initial = position(seat, "BP01-015");
         initial["players"][seat]["zones"]["field"] =
-            json!([{"id":"borrowed","card":"BP01-037","owner":opponent}]);
+            json!([{"id":"borrowed","card":target_card,"owner":opponent}]);
         initial["players"][seat]["zones"]["deck"] = json!([{"id":"drawn","card":"CP02-068"}]);
         let mut game = game(&initial);
         target(&mut game, seat);
