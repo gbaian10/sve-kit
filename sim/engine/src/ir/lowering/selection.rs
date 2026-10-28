@@ -24,7 +24,7 @@ impl BodyContext<'_> {
             upto: choice.upto,
             option: None,
         };
-        let (domain, cardinality) = self.object_choice(&target, path)?;
+        let (domain, cardinality) = self.object_choice(&target, path, true)?;
         let mut located = source.clone();
         path.clone_into(&mut located.author_path);
         Ok(Located {

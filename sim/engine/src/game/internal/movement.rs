@@ -296,8 +296,10 @@ impl Game {
         for &member in &members {
             let object = self.object(execution.object_id(member)?)?;
             if object.generation == member.generation.0 {
-                if kind == ZoneKind::Hand && object.zone != "field" {
-                    return Err(unsupported("only public field departures to hand"));
+                if kind == ZoneKind::Hand && !matches!(object.zone.as_str(), "field" | "cemetery") {
+                    return Err(unsupported(
+                        "only public field or cemetery departures to hand",
+                    ));
                 }
                 if top_count.is_none() {
                     public_zone(&object.zone)?;

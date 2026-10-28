@@ -1,0 +1,25 @@
+cards:
+  BP07-015:
+    abilities:
+      - evolve_time:
+          do:
+            - choose:
+                bind: returned
+                from:
+                  trait: 自然
+                  who: self
+                  zone: cemetery
+                n: 1
+            - move:
+                ref: returned
+                to: hand
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-sol
+            who: Codex
+          date: "2026-10-28"
+format: 2
+kind: author_effect_set
