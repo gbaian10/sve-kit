@@ -180,15 +180,22 @@ def check_selection_input(
     changed = deepcopy(card)
     changed["abilities"] = []
     write_inputs(root, inputs("BP01-P09", changed))
-    assert object_value(
-        source.selection_inputs(load_semantic_inputs(root, expander), expander)
-    )["authors"] == [
-        {
-            "status": "rejected",
-            "card_no": "BP01-P09",
-            "reason": "source_ability_closure_mismatch",
-        }
+    rejected = [
+        object_value(item)
+        for item in array(
+            object_value(
+                source.selection_inputs(load_semantic_inputs(root, expander), expander)
+            )["authors"]
+        )
     ]
+    # The whole printing family must fail together, not just the representative.
+    assert {item["card_no"] for item in rejected} == set(array(accepted["printings"]))
+    assert len(rejected) == len(array(accepted["printings"]))
+    assert all(
+        item["status"] == "rejected"
+        and item["reason"] == "source_ability_closure_mismatch"
+        for item in rejected
+    )
 
 
 def check_unsupported_source_siblings(
