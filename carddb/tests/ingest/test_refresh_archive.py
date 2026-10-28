@@ -436,8 +436,11 @@ def test_allowed_symlink_supports_new_write_replacement_and_recovery(
     (store.data_root / "raw").symlink_to(outside)
     writer.store = replace(store, read_roots=(outside,))
     writer._read_roots = (outside,)
-    write(writer, fetched(compressed=compressed))
-    write(writer, fetched(b"synthetic-B", compressed=compressed))
+    item = fetched(compressed=compressed)
+    if not compressed:
+        item = replace(item, path=PATH.with_suffix(""))
+    write(writer, item)
+    write(writer, replace(item, body=b"synthetic-B"))
     assert writer.read(URL) == b"synthetic-B"
 
     def crash(_resource: Resource) -> None:
@@ -445,7 +448,7 @@ def test_allowed_symlink_supports_new_write_replacement_and_recovery(
 
     with pytest.raises(KeyboardInterrupt):
         writer.write(
-            fetched(b"synthetic-C", compressed=compressed),
+            replace(item, body=b"synthetic-C"),
             request_id=start(writer.manifest),
             in_transaction=crash,
         )
