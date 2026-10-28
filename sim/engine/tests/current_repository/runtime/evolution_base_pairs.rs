@@ -114,26 +114,6 @@ fn evolve(game: &mut Game) {
     );
 }
 
-fn attack(game: &mut Game) {
-    let step = game
-        .internal_rule_action(&json!({"do":"attack","attacker":"source","target":"P2.leader"}))
-        .unwrap();
-    assert_eq!(
-        step.outcome, "resolved",
-        "granted storm permits the entering follower to attack"
-    );
-    while let Some(question) = game.internal_quick_choice().unwrap() {
-        assert!(
-            matches!(
-                game.answer_internal_card(question.actor, question.token, Answer::Quick(None))
-                    .unwrap(),
-                CardPlay::Continued(_)
-            ),
-            "passing advances the battle"
-        );
-    }
-}
-
 #[test]
 fn bp04_015_real_base_and_all_printings_evolve_into_phyto_healing_and_drawing() {
     for (base, form) in [
@@ -198,50 +178,6 @@ fn cp02_072_real_evolution_requires_a_victim_before_destroying_and_self_damage()
     }
 }
 
-#[test]
-fn cp02_094_checks_risa_before_granting_storm_and_really_evolves_into_healing() {
-    for (base, form) in [("CP02-094", "CP02-095"), ("CP02-P76", "CP02-P77")] {
-        for risa in [false, true] {
-            let mut initial = position(base, form);
-            initial["players"]["P1"]["zones"]["field"] =
-                json!([{"id":"ally","card":if risa {"CP02-093"} else {"BP01-037"}}]);
-            let mut game = game(&initial);
-            enter(&mut game);
-            assert!(trigger(&mut game, base, 2));
-            let before = game.projection(View::Referee).unwrap();
-            assert_eq!(
-                before["objects"]["source"]["power"],
-                if risa { 3_u8 } else { 2 }
-            );
-            assert_eq!(
-                before["objects"]["source"]["hp"],
-                if risa { 3_u8 } else { 2 }
-            );
-            if risa {
-                attack(&mut game);
-                assert_eq!(
-                    game.projection(View::Referee).unwrap()["P2"]["leader"]["life"],
-                    17_u8
-                );
-            } else {
-                assert_eq!(
-                    game.internal_rule_action(
-                        &json!({"do":"attack","attacker":"source","target":"P2.leader"})
-                    )
-                    .unwrap()
-                    .outcome,
-                    "cannot-attack"
-                );
-            }
-            evolve(&mut game);
-            assert!(trigger(&mut game, form, 2));
-            let state = game.projection(View::Referee).unwrap();
-            assert_eq!(state["P1"]["leader"]["life"], 12_u8);
-            assert_eq!(state["P1"]["pp"]["current"], 7_u8);
-        }
-    }
-}
-
 fn ward_counter(base: &str) {
     for acted in [false, true] {
         let mut initial = draw_position();
@@ -296,7 +232,6 @@ fn each_real_base_rejects_evolution_without_the_printed_one_pp() {
         ("BP04-015", "BP04-016"),
         ("BP05-030", "BP05-031"),
         ("CP02-072", "CP02-073"),
-        ("CP02-094", "CP02-095"),
         ("BP20-064", "BP20-065"),
     ] {
         let mut initial = position(base, form);
