@@ -102,6 +102,7 @@ fn bp18_115_puts_itself_in_cemetery_as_an_effect_and_triggers_lastword() {
                 .iter()
                 .any(|fact| matches!(fact, Fact::Movement(m) if m.method == MoveMethod::Destroy))
         );
+        game.resume_internal_card().unwrap();
         resolve_bell(&mut game);
         let state = game.projection(View::Referee).unwrap();
         assert_eq!(state[seat]["field"], json!([]));
