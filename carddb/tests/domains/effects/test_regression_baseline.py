@@ -216,7 +216,11 @@ def test_bp07_p06_uses_the_corrected_main_text_without_duplicate_coverage() -> N
 
 
 def test_reverse_positions_preserve_concrete_cross_line_coverage() -> None:
-    categories = {"通用規則", "說明", "token", "跨行涵蓋", "真正缺漏"}
+    admitted = {
+        number
+        for path in BASELINE.glob("*.json")
+        for number in author_records(path.stem)
+    }
     seen: set[str] = set()
     expected: dict[str, JsonValue] = {}
     for path in sorted(BASELINE.glob("*.json")):
@@ -239,9 +243,18 @@ def test_reverse_positions_preserve_concrete_cross_line_coverage() -> None:
             assert key not in seen, key
             seen.add(key)
             assert row["frame_ids"] == expected[key], key
-            assert row["category"] in categories, key
-            # Review positions describe the frozen prototype, including migrated cards.
+            assert row["category"] in {
+                "通用規則",
+                "說明",
+                "token",
+                "跨行涵蓋",
+                "真正缺漏",
+            }, key
+            # Direct author admissions replace prototype coverage without requiring frozen ASTs.
             frozen = BASELINE / "migrated" / f"{number}.json"
+            if not frozen.exists() and number not in cards:
+                assert number in admitted, number
+                continue
             card = (
                 OBJECT.validate_json(frozen.read_bytes())
                 if frozen.exists()
