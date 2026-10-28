@@ -1,0 +1,36 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "static",
+      "body": {
+        "op": "macro",
+        "name": "quick"
+      }
+    },
+    {
+      "line": 2,
+      "kind": "spell",
+      "body": {
+        "op": "damage",
+        "subjects": "target.1",
+        "amount": 3,
+        "split": "1"
+      },
+      "targets": [
+        {
+          "key": "1",
+          "select": {
+            "side": "opponent",
+            "zone": "field",
+            "type": "follower"
+          },
+          "min": 0,
+          "max": 2,
+          "distribute": 3
+        }
+      ]
+    }
+  ]
+}
