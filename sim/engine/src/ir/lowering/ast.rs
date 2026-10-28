@@ -648,7 +648,7 @@ pub(super) enum LeaderGroup {
     Opponents,
 }
 
-#[derive(Deserialize)]
+#[derive(Clone, Copy, Deserialize)]
 pub(super) enum LeaderSide {
     #[serde(rename = "self")]
     Controller,
@@ -661,6 +661,7 @@ pub(super) enum LeaderSide {
 pub(super) enum Number {
     Literal(i64),
     Alias(String),
+    LeaderLife { leader_life: LeaderSide },
     Minus { minus: Box<[Self; 2]> },
     Count { count: CountQuery },
     Resource { resource: ResourceQuery },
@@ -919,11 +920,21 @@ pub(super) struct Conditional {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum Condition {
+    Awakened(bool),
+    LeaderLife(PlayerThreshold),
     Paid(PaidReceipt),
     Cmp(BodyComparison),
     All(Vec<Self>),
     Any(Vec<Self>),
     Not(Box<Self>),
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct PlayerThreshold {
+    pub who: LeaderSide,
+    pub eq: Option<u64>,
+    pub le: Option<u64>,
+    pub ge: Option<u64>,
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]

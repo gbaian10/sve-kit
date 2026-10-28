@@ -17,6 +17,36 @@ impl BodyContext<'_> {
         path: &str,
     ) -> Result<Expr<Bool>, LoweringError> {
         Ok(Expr::Compute(Box::new(match value {
+            ast::Condition::Awakened(true) => Predicate::CompareInt {
+                left: Expr::Live(Box::new(IntRead::PlayerResource {
+                    player: PlayerRef::Controller {},
+                    property: PlayerResource::PpMaximum,
+                })),
+                comparison: Comparison::GreaterEqual,
+                right: Expr::Literal(Int(7)),
+            },
+            ast::Condition::Awakened(false) => return Err(unsupported(path)),
+            ast::Condition::LeaderLife(threshold) => {
+                let (comparison, amount) = match (threshold.eq, threshold.le, threshold.ge) {
+                    (Some(amount), None, None) => (Comparison::Equal, amount),
+                    (None, Some(amount), None) => (Comparison::LessEqual, amount),
+                    (None, None, Some(amount)) => (Comparison::GreaterEqual, amount),
+                    _ => return Err(unsupported(path)),
+                };
+                Predicate::CompareInt {
+                    left: self.number(
+                        &ast::Number::LeaderLife {
+                            leader_life: threshold.who,
+                        },
+                        path,
+                        &mut BTreeSet::new(),
+                    )?,
+                    comparison,
+                    right: Expr::Literal(Int(
+                        i64::try_from(amount).map_err(|_private| unsupported(path))?
+                    )),
+                }
+            }
             ast::Condition::All(items) | ast::Condition::Any(items) => {
                 let predicates = items
                     .iter()
@@ -71,6 +101,15 @@ impl BodyContext<'_> {
     ) -> Result<Expr<Int>, LoweringError> {
         match value {
             ast::Number::Literal(value) => Ok(Expr::Literal(Int(*value))),
+            ast::Number::LeaderLife { leader_life } => {
+                Ok(Expr::Live(Box::new(IntRead::PlayerResource {
+                    player: match leader_life {
+                        ast::LeaderSide::Controller => PlayerRef::Controller {},
+                        ast::LeaderSide::Opponent => super::super::events::timing::opponent(),
+                    },
+                    property: PlayerResource::Life,
+                })))
+            }
             ast::Number::Alias(name) => {
                 if !active.insert(name.clone()) {
                     return Err(unsupported(path));

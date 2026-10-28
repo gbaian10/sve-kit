@@ -108,3 +108,53 @@ fn count_admission_does_not_authorize_hand_objects_as_effect_targets() {
     game.load_internal_card("unit-follower", &program)
         .unwrap_err();
 }
+
+#[test]
+fn leader_life_threshold_and_expression_read_after_the_preceding_life_change() {
+    for (who, life) in [("self", 9_i64), ("opp", 20_i64)] {
+        let programs = ExpandedLowerer::new()
+            .unwrap()
+            .lower_with_printed_costs(
+                &tree(&json!([
+                    {"life":{"who":"self","delta":-11}},
+                    {"if":{"cond":{"all":[
+                        {"leader_life":{"who":who,"eq":life}},
+                        {"leader_life":{"who":who,"le":life}},
+                        {"leader_life":{"who":who,"ge":life}},
+                        {"cmp":{"left":{"leader_life":who},"op":"eq","right":life}}
+                    ]},"then":[{"draw":{"n":1}}]}}
+                ])),
+                &BTreeMap::from([("SD03-005".to_owned(), Nat(1))]),
+            )
+            .unwrap();
+        let (catalog, initial) =
+            fanfare::fragment_setup(1, "SD03-005", 3, json!([{"id":"drawn","card":"BP01-037"}]));
+        let mut game =
+            Game::new(catalog, &initial, &Value::Null, &Value::Null, "live-life").unwrap();
+        game.load_internal_card("SD03-005", &programs["SD03-005"])
+            .unwrap();
+        game.load_internal_card("BP01-037", &card(vec![])).unwrap();
+        resolved(game.play_internal_card("s", PlayerId { seat: 1 }).unwrap());
+        let state = game.projection(View::Referee).unwrap();
+        assert_eq!(state["P1"]["leader"]["life"], 9_i64);
+        assert_eq!(state["P1"]["hand"], json!(["drawn"]));
+    }
+}
+
+#[test]
+fn live_condition_syntax_rejects_false_awakening_and_ambiguous_thresholds() {
+    for condition in [
+        json!({"awakened":false}),
+        json!({"leader_life":{"who":"self"}}),
+        json!({"leader_life":{"who":"self","le":10,"ge":5}}),
+        json!({"leader_life":{"who":"all","eq":10}}),
+    ] {
+        ExpandedLowerer::new()
+            .unwrap()
+            .lower_with_printed_costs(
+                &tree(&json!([{"if":{"cond":condition,"then":[{"draw":{"n":1}}]}}])),
+                &BTreeMap::from([("SD03-005".to_owned(), Nat(1))]),
+            )
+            .unwrap_err();
+    }
+}
