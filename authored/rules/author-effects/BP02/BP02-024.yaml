@@ -1,0 +1,30 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP02-024:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-29"
+    abilities:
+      - line: 1
+        keywords:
+          - ward
+      - line: 2
+        activate:
+          cost:
+            steps:
+              - pp: 2
+              - act_self: true
+          do:
+            - create:
+                token: シールドガーディアン
+                n: 2
+                to: field
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP17-T13

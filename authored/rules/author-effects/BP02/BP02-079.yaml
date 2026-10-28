@@ -1,0 +1,26 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP02-079:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-29"
+    abilities:
+      - line: 1
+        attack_time:
+          do:
+            - create:
+                token: フォレストバット
+                n: 1
+                to: field
+      - line: 2
+        evolve_time:
+          do:
+            - create:
+                token: フォレストバット
+                n: 1
+                to: ex

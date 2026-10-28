@@ -36,6 +36,11 @@ records:
     kind: author_effect_set
     record_key: BP01-016
     scope: shared
+  - card_id: c:5a26f30fff6c59c4ba36ffe785afbe17
+    file: rules/author-effects/BP01/BP01-020.yaml
+    kind: author_effect_set
+    record_key: BP01-020
+    scope: shared
   - card_id: c:b195275b18fc54529e70f0460d35cdc3
     file: rules/author-effects/BP01/BP01-023.yaml
     kind: author_effect_set
@@ -345,4 +350,14 @@ records:
     file: rules/author-effects/BP01/103.yaml
     kind: author_effect_set
     record_key: BP01-T06
+    scope: shared
+  - card_id: c:349e442b28c450309812b90ff8ff4b04
+    file: rules/author-effects/BP01/BP01-T11.yaml
+    kind: author_effect_set
+    record_key: BP01-T11
+    scope: shared
+  - card_id: c:0e8e5cf6e0395304a5adcf249ced500d
+    file: rules/author-effects/BP01/BP01-T15.yaml
+    kind: author_effect_set
+    record_key: BP01-T15
     scope: shared
