@@ -5,10 +5,10 @@ use super::super::{
     SelectionSnapshot, SpellCountTime, Visibility,
 };
 use super::{
-    AbilitySource, Action, BTreeSet, BatchPolicy, Binding, BodyContext, Cardinality, DamageAmount,
-    DamageFlags, Expr, Int, Located, LoweringError, Nat, Node, ObjectView, PlayerRef,
-    PlayerRelation, PlayerSet, RecipientSet, SelectionView, Selector, SourceSpan, TextQuantifier,
-    ZoneKind, ast, unsupported,
+    AbilitySource, Action, Allocator, BTreeMap, BTreeSet, BatchPolicy, Binding, BodyContext,
+    Cardinality, DamageAmount, DamageFlags, Expr, Int, Located, LoweringError, Nat, Node,
+    ObjectView, PlayerRef, PlayerRelation, PlayerSet, RecipientSet, SelectionView, Selector,
+    SourceSpan, TextQuantifier, ZoneKind, ast, unsupported,
 };
 
 const fn parameter(id: u64, slot: PlaySlot, domain: ChoiceDomain) -> Decision {
