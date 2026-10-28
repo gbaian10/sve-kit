@@ -47,6 +47,13 @@ impl BodyContext<'_> {
                     )),
                 }
             }
+
+            ast::Condition::Crimson(true) => {
+                return Ok(Expr::Live(Box::new(super::super::BoolRead::Crimson {
+                    player: PlayerRef::Controller {},
+                })));
+            }
+            ast::Condition::Crimson(false) => return Err(unsupported(path)),
             ast::Condition::All(items) | ast::Condition::Any(items) => {
                 let predicates = items
                     .iter()

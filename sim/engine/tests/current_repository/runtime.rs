@@ -44,6 +44,9 @@ mod conditions_quick;
 #[path = "runtime/cp02_068.rs"]
 mod cp02_068;
 
+#[path = "runtime/crimson.rs"]
+mod crimson;
+
 #[path = "runtime/deck_top.rs"]
 mod deck_top;
 

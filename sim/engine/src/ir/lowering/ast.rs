@@ -923,6 +923,8 @@ pub(super) struct Conditional {
 pub(super) enum Condition {
     Awakened(bool),
     LeaderLife(PlayerThreshold),
+
+    Crimson(bool),
     Paid(PaidReceipt),
     Cmp(BodyComparison),
     All(Vec<Self>),

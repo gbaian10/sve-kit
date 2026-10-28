@@ -501,6 +501,8 @@ fn supported(code: &str) -> bool {
             | "shape.Capture.Boolean"
             | "shape.Capture.Objects"
             | "shape.IntRead.PlayerResource"
+            | "shape.BoolRead.Crimson"
+            | "read.crimson"
             | "read.player-resource"
             | "internal.PlayerResource.Life"
             | "internal.PlayerResource.PpCurrent"
