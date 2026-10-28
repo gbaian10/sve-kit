@@ -26,6 +26,9 @@ mod fanfare;
 #[path = "card/field_actions.rs"]
 mod field_actions;
 
+#[path = "card/history_turn.rs"]
+mod history_turn;
+
 #[path = "card/conditions.rs"]
 mod conditions;
 #[path = "card/leader_damage.rs"]

@@ -36,6 +36,7 @@ mod cost;
 mod discard;
 mod duration;
 mod grant;
+mod history_turn;
 mod life;
 mod movement;
 mod numeric;

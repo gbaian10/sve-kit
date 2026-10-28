@@ -12,6 +12,13 @@ Schema 根拒絕 standalone 文件。節點檢查不提供完整 authored／expa
 
 逐事件必填、選填、enum、history 頂層與 where 的對照見[事件欄位矩陣](author-event-matrix-1.0.md)。
 
+引擎目前接通的回合出牌計數為 `history_count: {event: played, window: this_turn}`，
+可用 `who: self|opp` 限定打出者，省略時合計雙方；`distinct` 只支援 `facts`。
+這條接線不含主體篩選、排除執行、其他歷史視窗或能力起動計數。
+計數只在適正出牌完成後增加，換回合歸零；失敗出牌與能力起動不增加。
+`combo: N` 依 CR13.2，在檢查本卡正式出牌時包含正在打出的本張，
+該暫時投影不寫入歷史；完成後與其他結算讀值都只計同一張一次。
+
 ## 事件角色與欄位
 
 `A.event-subject-filter` 是非空屬性 filter：

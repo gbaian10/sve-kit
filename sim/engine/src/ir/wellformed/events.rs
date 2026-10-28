@@ -1,4 +1,5 @@
 use crate::ir::DamageRecipient;
+use crate::ir::history_turn::played_by;
 use crate::ir::{ZoneFrozen, ZoneKind, ZoneOperation, ZoneRef};
 macro_rules! projected_equality {
     ($checker:expr, $equality:expr; $($variant:ident),+ $(,)?) => {
@@ -484,6 +485,11 @@ impl Checker {
     }
 
     pub(super) fn history(&mut self, query: &HistoryQuery) -> Checked {
+        if played_by(query).is_some()
+            && let EventPattern::Play { binding, predicate } = &query.pattern
+        {
+            return self.local_value(*binding, predicate);
+        }
         self.history_window(&query.window, query.include_execution)?;
         self.isolated(|checker| checker.event_pattern(&query.pattern, None, false))
     }

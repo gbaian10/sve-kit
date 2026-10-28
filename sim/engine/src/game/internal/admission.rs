@@ -179,6 +179,7 @@ fn check_requirements(
             requirement.capability.version != NonZeroU32::MIN
                 || !(supported(requirement.capability.code)
                     || super::source::count_zone(&requirements, requirement)
+                    || super::history_turn::public_requirement(&requirements, requirement)
                     || (card && play_requirement(requirement.capability.code))
                     || (matches!(
                         requirement.capability.code,
@@ -577,6 +578,16 @@ fn supported(code: &str) -> bool {
             | "shape.IntRead.PlayerResource"
             | "shape.BoolRead.Crimson"
             | "read.crimson"
+            | "shape.NatRead.Combo"
+            | "read.combo"
+            | "shape.NatRead.HistoryCount"
+            | "read.history.count"
+            | "shape.EventPattern.Play"
+            | "event.match.Play"
+            | "shape.HistoryRange.CurrentTurn"
+            | "shape.HistoryCutoff.CurrentPoint"
+            | "shape.InclusionPolicy.IncludeAll"
+            | "internal.HistoryCount.Facts"
             | "read.player-resource"
             | "internal.PlayerResource.Life"
             | "internal.PlayerResource.PpCurrent"

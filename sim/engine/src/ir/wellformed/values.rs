@@ -153,7 +153,12 @@ impl Checker {
                     self.player(player)
                 }
                 NatRead::HistoryCount { query, .. } => self.history(query),
-                NatRead::Combo { .. } => self.reject(),
+                NatRead::Combo { player, execution } => {
+                    if *execution != (ExecutionRef::Current {}) {
+                        return self.reject();
+                    }
+                    self.player(player)
+                }
             },
             Expr::Compute(operation) => match operation.as_ref() {
                 NatOperation::ReceiptActualSum { receipts } => match receipts {
