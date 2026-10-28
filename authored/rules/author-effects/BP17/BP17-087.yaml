@@ -1,0 +1,32 @@
+cards:
+  BP17-087:
+    abilities:
+      - fanfare:
+          do:
+            - damage:
+                n: 1
+                to:
+                  leader: self
+            - draw:
+                n: 1
+        line: 1
+      - lastword:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: フォレストバット
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-10-29"
+    token_sources:
+      - card: BP01-T15
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set
