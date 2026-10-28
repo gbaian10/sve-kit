@@ -12,7 +12,17 @@ fn named_game(initial: &Value, name: &str) -> Game {
     snapshot.push_str(&json!({"number":"companion","faces":[face]}).to_string());
     snapshot.push('\n');
     input["documents"].as_array_mut().unwrap().push(json!(["companion.yaml", "format: 1\nkind: effect_set\ncards:\n  companion:\n    status: complete\n    abilities: []\n"]));
-    game_from_selection(initial, &snapshot, &keywords, &input)
+    let mut game = game_from_selection(initial, &snapshot, &keywords, &input);
+    game.load_internal_card(
+        "companion",
+        &WellFormedCardProgram::check(CardProgram {
+            abilities: vec![],
+            card_play_costs: vec![],
+        })
+        .unwrap(),
+    )
+    .unwrap();
+    game
 }
 
 #[test]
