@@ -17,17 +17,7 @@ impl BodyContext<'_> {
         path: &str,
     ) -> Result<Expr<Bool>, LoweringError> {
         Ok(Expr::Compute(Box::new(match value {
-            ast::Condition::Exists(query) => {
-                if !matches!(query.zone, ast::PublicZone::Field) {
-                    return Err(unsupported(path));
-                }
-                Predicate::Exists {
-                    objects: super::costs::public_query(
-                        query,
-                        Binding::new(self.allocator.id(path)?, self.card_allocator.scope(path)?),
-                    ),
-                }
-            }
+            ast::Condition::Exists(query) => return self.field_exists(query, path),
             ast::Condition::Awakened(true) => Predicate::CompareInt {
                 left: Expr::Live(Box::new(IntRead::PlayerResource {
                     player: PlayerRef::Controller {},
@@ -121,6 +111,20 @@ impl BodyContext<'_> {
                     },
                 )));
             }
+        })))
+    }
+
+    fn field_exists(
+        &mut self,
+        query: &ast::PublicQuery,
+        path: &str,
+    ) -> Result<Expr<Bool>, LoweringError> {
+        if !matches!(query.zone, ast::PublicZone::Field) {
+            return Err(unsupported(path));
+        }
+        let binding = Binding::new(self.allocator.id(path)?, self.card_allocator.scope(path)?);
+        Ok(Expr::Compute(Box::new(Predicate::Exists {
+            objects: super::costs::public_query(query, binding),
         })))
     }
 
