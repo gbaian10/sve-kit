@@ -2,8 +2,8 @@
     clippy::panic,
     reason = "Unexpected decisions invalidate the real card scenarios."
 )]
-use super::ex_select::{expanded, rule_fixtures};
 use super::*;
+use crate::{expanded, rule_fixtures};
 use alloc::collections::BTreeMap;
 use serde_json::Map;
 use std::{fs::read_to_string, path::PathBuf, sync::OnceLock};
@@ -136,6 +136,7 @@ fn evolution_fixture() -> &'static EvolutionFixture {
         for (base, form) in [
             ("rescan043-hinako", "ECP02-009"),
             ("rescan043-kotoka", "ECP02-068"),
+            ("rescan043-chitose", "ECP02-054"),
         ] {
             let record = snapshot
                 .lines()
@@ -388,4 +389,65 @@ fn magic_item_with_insufficient_pp_preserves_ex_life_and_deck() {
     assert_eq!(state["P1"]["ex"], json!(["source"]));
     assert_eq!(state["P1"]["deck"], json!(["first", "second"]));
     assert_eq!(state["P1"]["hand"], json!([]));
+}
+
+#[test]
+fn ecp02_054_and_alias_require_an_opposing_target_before_damage_and_milling() {
+    for card in ["ECP02-054", "ECP02-P27"] {
+        for available in [false, true] {
+            let mut game = form_game("rescan043-chitose", card, available);
+            let pending = game.internal_pending_choice().unwrap().unwrap();
+            let InputDomain::Pending(options) = pending.domain else {
+                panic!("real evolution trigger");
+            };
+            assert_eq!(options.len(), 1);
+            assert_eq!(options[0].card, card);
+            let play = game
+                .answer_internal_card(
+                    pending.actor,
+                    pending.token,
+                    Answer::Pending(options[0].handle),
+                )
+                .unwrap();
+            if available {
+                let CardPlay::Awaiting(question) = play else {
+                    panic!("the mandatory target is selected before resolving either instruction");
+                };
+                let InputDomain::Targets(domain) = question.domain else {
+                    panic!("opposing follower target");
+                };
+                assert_eq!(domain.members.len(), 1);
+                let before = game.projection(View::Referee).unwrap();
+                assert_eq!(before["P1"]["deck"], json!(["first", "second"]));
+                assert_eq!(before["P1"]["cemetery"], json!([]));
+                resolved(
+                    game.answer_internal_card(
+                        question.actor,
+                        question.token,
+                        Answer::Targets(vec![domain.members[0].handle]),
+                    )
+                    .unwrap(),
+                );
+                game.resume_internal_card().unwrap();
+                let after = game.projection(View::Referee).unwrap();
+                assert_eq!(after["P2"]["field"], json!([]));
+                assert_eq!(after["P2"]["cemetery"], json!(["enemy"]));
+                assert_eq!(after["P2"]["ex"], json!(["off-zone"]));
+                assert_eq!(after["P1"]["field"], json!(["source", "ally"]));
+                assert_eq!(after["P1"]["deck"], json!([]));
+                assert_eq!(after["P1"]["cemetery"], json!(["first", "second"]));
+            } else {
+                assert_eq!(play, CardPlay::Cancelled);
+                game.resume_internal_card().unwrap();
+                let after = game.projection(View::Referee).unwrap();
+                assert_eq!(after["P1"]["deck"], json!(["first", "second"]));
+                assert_eq!(after["P1"]["cemetery"], json!([]));
+                assert!(game.internal_pending_choice().unwrap().is_none());
+            }
+            assert_eq!(
+                game.projection(View::Referee).unwrap()["P1"]["pp"]["current"],
+                9_u8
+            );
+        }
+    }
 }
