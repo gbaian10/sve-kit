@@ -175,6 +175,7 @@ pub(super) enum CostOperation {
     LeaderLife(u64),
     ToCemetery(Material),
     ReturnToHand(Material),
+    ToEx(Material),
     Banish(Material),
     Act(Material),
     Discard(HandMaterial),
@@ -194,6 +195,8 @@ pub(super) struct Ports {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct Body {
+    #[serde(rename = "cost")]
+    pub head_cost: Option<Cost>,
     pub optional_cost: Option<BodyOptionalCost>,
     pub per_turn: Option<u64>,
     #[serde(default)]
@@ -939,6 +942,8 @@ pub(super) struct PublicQuery {
     pub kind: Option<SearchKind>,
     pub r#trait: Option<String>,
     pub name: Option<String>,
+    pub class: Option<String>,
+    pub token: Option<bool>,
 }
 
 #[derive(Deserialize)]
@@ -1083,7 +1088,8 @@ pub(super) enum HandZone {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct BodyOptionalCost {
-    pub pp: u64,
+    #[serde(flatten)]
+    pub operation: CostOperation,
     pub result: String,
 }
 

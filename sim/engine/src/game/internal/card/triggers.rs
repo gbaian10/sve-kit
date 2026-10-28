@@ -559,6 +559,7 @@ impl Game {
                 execution.damage_event = Some((binding.key(), *event));
             }
             execution.ability = Some(pending.source);
+            execution.trigger_occurrence = Some(pending.id);
             execution.source_information = Some(pending.information);
             self.run_card_play(execution, pending.ability.node)
         })();
@@ -574,6 +575,15 @@ impl Game {
             return Ok(CardPlay::Cancelled);
         }
         self.finish_card_attempt(before, result)
+    }
+
+    pub(super) fn internal_cancel_occurrence(&mut self, id: u64, checkpoint: ExecutionId) {
+        self.typed = None;
+        self.card_runtime
+            .pending
+            .retain(|candidate| candidate.id != id);
+        self.card_runtime.question = None;
+        self.card_runtime.checkpoint = Some(checkpoint);
     }
 }
 

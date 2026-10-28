@@ -1,0 +1,24 @@
+cards:
+  BP08-066:
+    abilities:
+      - attack_time:
+          cost:
+            banish:
+              n: 5
+              sel:
+                who: self
+                zone: cemetery
+          do:
+            - buff:
+                on: this
+                power: 2
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-sol
+            who: Codex
+          date: "2026-10-28"
+format: 2
+kind: author_effect_set

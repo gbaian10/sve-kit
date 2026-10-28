@@ -467,7 +467,7 @@ impl Game {
             let id = execution.object_id(before)?.to_owned();
             let previous = self.object(&id)?.clone();
             let requested_to = RuntimeZoneRef {
-                player: if zone == "field" {
+                player: if shared_destination(zone) {
                     execution.context.controller
                 } else {
                     player_id(&previous.owner)?
@@ -568,7 +568,7 @@ impl Game {
             self.move_objects(
                 &ids,
                 zone,
-                if zone == "field" {
+                if shared_destination(zone) {
                     Some(super::seat_name(execution.context.controller)?)
                 } else {
                     None
@@ -679,4 +679,8 @@ fn movement_origin(zone: &str, method: MoveMethod, destination: &str) -> Result<
         ("deck", MoveMethod::Put, _) => Ok(ZoneKind::Deck),
         (zone, _, _) => public_zone(zone),
     }
+}
+
+fn shared_destination(zone: &str) -> bool {
+    matches!(zone, "field" | "ex")
 }

@@ -1,0 +1,30 @@
+cards:
+  BP01-123:
+    abilities:
+      - evolve_time:
+          cost:
+            to_cemetery:
+              n: 1
+              sel:
+                kind: follower
+                who: self
+                zone: field
+          do:
+            - destroy: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-sol
+            who: Codex
+          date: "2026-10-28"
+format: 2
+kind: author_effect_set

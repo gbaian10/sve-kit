@@ -42,6 +42,9 @@ mod timing;
 #[path = "card/quick.rs"]
 mod quick;
 
+#[path = "card/public_material.rs"]
+mod public_material;
+
 #[path = "card/evolution.rs"]
 mod evolution;
 

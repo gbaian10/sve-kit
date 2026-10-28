@@ -6,7 +6,7 @@ use crate::ir::{
     InstructionContext, MemberProjection, MoveDestination, MoveReason, Nat, Node, ObjectOperand,
     OwnerZone, PaymentOptionality, PaymentResult, PaymentTime, PlaySlot, PlayerRef, PlayerRelation,
     Posture, Program, ReceiptId, RoleCardinality, RuleProcedure, SelectionConstraint,
-    SelectionView, Selector, TargetRoleSpec, Visibility, ZoneKind,
+    SelectionView, Selector, TargetRoleSpec, Visibility, ZoneKind, ZoneRef,
 };
 use crate::ir::{Expr, Int, NumericChange, ObjectReceipt, ObjectReceiptList, ResourceOperation};
 use alloc::collections::BTreeSet;
@@ -591,7 +591,8 @@ impl Checker {
                                 && movement.initial_posture.is_none() && movement.entry_effects.is_empty());
                         let selected_move = matches!(&step.instruction.action,
                             Action::Move { objects: Selector::Bound { .. }, movement, reason: MoveReason::Put }
-                                if matches!(movement.to, MoveDestination::Owners { zone: OwnerZone::Cemetery | OwnerZone::Hand })
+                                if (matches!(movement.to, MoveDestination::Owners { zone: OwnerZone::Cemetery | OwnerZone::Hand })
+                                    || matches!(movement.to, MoveDestination::Shared { zone: ZoneRef { player: PlayerRef::Controller {}, kind: ZoneKind::Ex } }))
                                     && movement.position.is_none() && movement.order.is_none()
                                     && movement.initial_posture.is_none() && movement.entry_effects.is_empty())
                             || matches!(&step.instruction.action, Action::Banish { objects: Selector::Bound { .. } });

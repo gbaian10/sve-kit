@@ -8,8 +8,8 @@ use crate::ir::{
     BoolFrozen, CaptureTime, CharacteristicView, ExecutionRef, NumberRead, PaymentReference,
 };
 use crate::ir::{
-    CardKind, CardName, EventSnapshotPolicy, KindRead, MemberProjection, NamesRead, ObjectFrozen,
-    TraitsRead,
+    CardKind, CardName, ClassRead, EventSnapshotPolicy, Info, KindRead, MemberProjection,
+    NamesRead, ObjectFrozen, TraitsRead,
 };
 
 #[expect(
@@ -237,6 +237,19 @@ impl Checker {
     )]
     fn predicate(&mut self, expression: &Predicate) -> Checked {
         match expression {
+            Predicate::ClassEquals {
+                left: Expr::Live(read),
+                right: Expr::Literal(Info::Present(_)),
+            } if !self.event_capture() => {
+                let ClassRead::Class { object, view } = read.as_ref();
+                if !matches!(
+                    view,
+                    CharacteristicView::Original | CharacteristicView::Effective
+                ) {
+                    return self.reject();
+                }
+                self.view(object)
+            }
             Predicate::And { predicates } | Predicate::Or { predicates } => {
                 for predicate in predicates {
                     self.boolean(predicate)?;

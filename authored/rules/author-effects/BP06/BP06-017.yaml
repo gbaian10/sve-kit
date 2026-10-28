@@ -1,0 +1,39 @@
+cards:
+  BP06-017:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - if:
+                cond:
+                  paid:
+                    receipt: materials
+                then:
+                  - damage:
+                      n: 4
+                      to: enemy
+          optional_cost:
+            act:
+              n: 2
+              sel:
+                kind: follower
+                trait: 狩人
+                who: self
+                zone: field
+            result: materials
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-sol
+            who: Codex
+          date: "2026-10-28"
+format: 2
+kind: author_effect_set

@@ -8,7 +8,7 @@ use crate::ir::{
     Disjointness, ExecutionRef, InputMode, Instruction, Int, KeywordId, MoveDestination,
     MoveMethod, MoveReason, Nat, ObjectOperand, ObjectRef, OwnerZone, PlaySlot, PlaySpec,
     PlayerRef, PlayerRelation, Posture, PostureEvent, Quantity, QuantityUnit, SelectionSnapshot,
-    SelectionView, Selector, Visibility, WellFormedCardProgram, ZoneKind,
+    SelectionView, Selector, Visibility, WellFormedCardProgram, ZoneKind, ZoneRef,
 };
 use alloc::collections::BTreeSet;
 
@@ -67,7 +67,7 @@ fn zone(selector: &Selector) -> Result<ZoneKind> {
     match selector {
         Selector::Zone {
             players,
-            zone: zone @ (ZoneKind::Field | ZoneKind::Ex),
+            zone: zone @ (ZoneKind::Field | ZoneKind::Ex | ZoneKind::Cemetery),
             view: SelectionView::Current {},
             predicate,
             binding,
@@ -127,38 +127,66 @@ pub(super) fn check_parameter(decision: &Decision) -> Result<()> {
     Ok(())
 }
 
-pub(super) fn check_cost(action: &Action, play: &PlaySpec) -> bool {
-    let objects = match action {
+pub(super) const fn cost_objects(action: &Action) -> Option<&Selector> {
+    match action {
         Action::Banish { objects }
         | Action::Posture {
             objects,
             posture: Posture::Acted,
-        } => objects,
+        } => Some(objects),
         Action::Move {
             objects,
             movement,
             reason: MoveReason::Put,
-        } if matches!(
+        } if (matches!(
             movement.to,
             MoveDestination::Owners {
                 zone: OwnerZone::Cemetery | OwnerZone::Hand
             }
-        ) && movement.position.is_none()
+        ) || matches!(
+            movement.to,
+            MoveDestination::Shared {
+                zone: ZoneRef {
+                    player: PlayerRef::Controller {},
+                    kind: ZoneKind::Ex
+                }
+            }
+        )) && movement.position.is_none()
             && movement.order.is_none()
             && movement.initial_posture.is_none()
             && movement.entry_effects.is_empty() =>
         {
-            objects
+            Some(objects)
         }
-        _ => return false,
+        _ => None,
+    }
+}
+
+pub(super) fn check_cost(action: &Action, play: &PlaySpec) -> bool {
+    let Some(objects) = cost_objects(action) else {
+        return false;
     };
     let Selector::Bound { reference } = objects else {
         return false;
     };
-    play.parameters.iter().any(|decision| check_parameter(decision).is_ok()
-        && matches!(&decision.domain, ChoiceDomain::Objects { binding, constraint, .. }
-            if binding == reference && (!matches!(action, Action::Posture { .. })
-                || constraint.groups.first().is_some_and(|group| zone(&group.selector).is_ok_and(|zone| zone == ZoneKind::Field)))))
+    play.parameters.iter().any(|decision| {
+        check_parameter(decision).is_ok()
+            && matches!(&decision.domain, ChoiceDomain::Objects { binding, constraint, .. }
+            if binding == reference && constraint.groups.first().is_some_and(|group|
+                zone(&group.selector).is_ok_and(|zone| cost_zone(action, zone))))
+    })
+}
+
+fn cost_zone(action: &Action, zone: ZoneKind) -> bool {
+    match action {
+        Action::Banish { .. } => true,
+        Action::Posture { .. } => zone == ZoneKind::Field,
+        Action::Move { movement, .. } if matches!(movement.to, MoveDestination::Shared { .. }) => {
+            zone == ZoneKind::Field
+        }
+        Action::Move { .. } => zone != ZoneKind::Cemetery,
+        _ => false,
+    }
 }
 
 #[expect(
@@ -191,8 +219,10 @@ impl Game {
             seat_name(execution.context.controller)?,
             if *zone == ZoneKind::Field {
                 "field"
-            } else {
+            } else if *zone == ZoneKind::Ex {
                 "ex"
+            } else {
+                "cemetery"
             },
         ) {
             if standing && self.object(&id)?.state["acted"] != false {
@@ -292,7 +322,7 @@ impl Game {
             let id = execution.object_id(*member)?;
             let object = self.object(id)?;
             if object.generation != member.generation.0
-                || !matches!(object.zone.as_str(), "field" | "ex")
+                || !matches!(object.zone.as_str(), "field" | "ex" | "cemetery")
                 || object.controller != seat_name(execution.context.controller)?
                 || (matches!(instruction.action, Action::Posture { .. })
                     && matches!(objects, Selector::Bound { .. })
@@ -332,19 +362,17 @@ impl Game {
                 }));
             }
         } else {
-            let (destination, kind, method) = match &instruction.action {
-                Action::Banish { .. } => ("banish", ZoneKind::Banish, MoveMethod::Banish),
-                Action::Move { movement, .. }
-                    if movement.to
-                        == (MoveDestination::Owners {
-                            zone: OwnerZone::Hand,
-                        }) =>
-                {
-                    ("hand", ZoneKind::Hand, MoveMethod::Put)
+            let (destination, kind, method) = cost_destination(&instruction.action)?;
+            if kind == ZoneKind::Ex {
+                let available = 5_i64
+                    .saturating_sub(self.zone_count(seat_name(execution.context.controller)?, "ex"))
+                    .max(0);
+                if i64::try_from(members.len()).map_err(invalid)? > available {
+                    return Err(crate::EngineFailure::IllegalPlay(
+                        "insufficient EX capacity for cost".into(),
+                    ));
                 }
-                Action::Move { .. } => ("cemetery", ZoneKind::Cemetery, MoveMethod::Put),
-                _ => return Err(unsupported("material payment action")),
-            };
+            }
             let (moved, _) =
                 self.internal_move_members(execution, &members, destination, kind, method)?;
             if moved.len() != members.len() || moved.iter().any(|result| result.after.is_none()) {
@@ -409,4 +437,33 @@ pub(super) fn check_card(card: &WellFormedCardProgram) -> Result<()> {
         }
     }
     Ok(())
+}
+
+fn cost_destination(action: &Action) -> Result<(&'static str, ZoneKind, MoveMethod)> {
+    match action {
+        Action::Banish { .. } => Ok(("banish", ZoneKind::Banish, MoveMethod::Banish)),
+        Action::Move { movement, .. }
+            if movement.to
+                == (MoveDestination::Owners {
+                    zone: OwnerZone::Hand,
+                }) =>
+        {
+            Ok(("hand", ZoneKind::Hand, MoveMethod::Put))
+        }
+        Action::Move { movement, .. }
+            if matches!(
+                movement.to,
+                MoveDestination::Shared {
+                    zone: ZoneRef {
+                        player: PlayerRef::Controller {},
+                        kind: ZoneKind::Ex
+                    }
+                }
+            ) =>
+        {
+            Ok(("ex", ZoneKind::Ex, MoveMethod::Put))
+        }
+        Action::Move { .. } => Ok(("cemetery", ZoneKind::Cemetery, MoveMethod::Put)),
+        _ => Err(unsupported("material payment action")),
+    }
 }

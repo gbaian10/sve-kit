@@ -374,6 +374,7 @@ fn supported(code: &str) -> bool {
             | "control.pay"
             | "internal.PaymentTime.PlayParameter"
             | "internal.PaymentOptionality.Optional"
+            | "internal.PaymentOptionality.Required"
             | "shape.CostSpec.Ordered"
             | "shape.CostStep"
             | "internal.InstructionContext.Cost"

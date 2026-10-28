@@ -5,12 +5,12 @@ use super::{
     invalid, seat_name, unsupported,
 };
 use crate::ir::{
-    Action, Binding, Bool, CardKind, Cardinality, CharacteristicView, Expr, Instruction, KindRead,
-    MoveDestination, MoveMethod, MoveResult, MoveSpec, NamesRead, Nat, ObjectOperand,
-    ObjectProperty, ObjectRef, ObjectView, OwnerZone, PlayerId, PlayerRelation, Predicate,
-    RuntimeObjectView, RuntimeZoneRef, SearchDestination, SearchOutcome, SearchPartition,
-    SearchPartitionAnswer, SearchSelectionAnswer, SelectionView, Selector, SnapshotId, TraitsRead,
-    ZoneKind, ZoneRef,
+    Action, Binding, Bool, BoolRead, BooleanState, CardKind, Cardinality, CharacteristicView,
+    ClassRead, Expr, Info, Instruction, KindRead, MoveDestination, MoveMethod, MoveResult,
+    MoveSpec, NamesRead, Nat, ObjectOperand, ObjectProperty, ObjectRef, ObjectView, OwnerZone,
+    PlayerId, PlayerRelation, Predicate, RuntimeObjectView, RuntimeZoneRef, SearchDestination,
+    SearchOutcome, SearchPartition, SearchPartitionAnswer, SearchSelectionAnswer, SelectionView,
+    Selector, SnapshotId, TraitsRead, ZoneKind, ZoneRef,
 };
 use alloc::collections::{BTreeSet, VecDeque};
 use serde_json::{Value, json};
@@ -98,7 +98,18 @@ pub(super) fn packet(domain: &SearchDomain) -> Value {
 pub(super) fn check_predicate(value: &Expr<Bool>, candidate: Binding<ObjectRef>) -> Result<bool> {
     match value {
         Expr::Literal(Bool(true)) => Ok(false),
+        Expr::Live(read) if matches!(read.as_ref(), BoolRead::State { object, property: BooleanState::TokenStatus } if candidate_view(object, candidate)) => {
+            Ok(true)
+        }
         Expr::Compute(operation) => match operation.as_ref() {
+            Predicate::ClassEquals {
+                left: Expr::Live(read),
+                right: Expr::Literal(Info::Present(class)),
+            } if !class.0.is_empty()
+                && matches!(read.as_ref(), ClassRead::Class { object, view: CharacteristicView::Effective } if candidate_view(object, candidate)) =>
+            {
+                Ok(true)
+            }
             Predicate::NamesIntersect {
                 left: Expr::Live(read),
                 right: Expr::Literal(names),
@@ -279,6 +290,14 @@ pub(super) fn private_requirement(code: &str) -> bool {
             | "read.traits"
             | "shape.Predicate.KindEquals"
             | "predicate.kind-equals"
+            | "shape.Predicate.ClassEquals"
+            | "predicate.class-equals"
+            | "shape.ClassRead.Class"
+            | "read.affiliation.class"
+            | "shape.Info.Present"
+            | "shape.BoolRead.State"
+            | "read.state"
+            | "internal.BooleanState.TokenStatus"
             | "shape.KindRead.Kind"
             | "read.kind"
             | "internal.CharacteristicView.Original"
@@ -309,62 +328,84 @@ fn bounds(printed: Cardinality, available: usize, conditional: bool) -> Result<C
 pub(super) fn matches_candidate(game: &Game, id: &str, expression: &Expr<Bool>) -> Result<bool> {
     match expression {
         Expr::Literal(Bool(true)) => Ok(true),
-        Expr::Compute(operation) => match operation.as_ref() {
-            Predicate::NamesIntersect {
-                right: Expr::Literal(names),
-                ..
-            } => {
-                let own = game.card_name(id)?;
-                Ok(names.iter().any(|name| own == name.0))
-            }
-            Predicate::HasTrait { trait_id, .. } => Ok(game
+        Expr::Live(read)
+            if matches!(
+                read.as_ref(),
+                BoolRead::State {
+                    property: BooleanState::TokenStatus,
+                    ..
+                }
+            ) =>
+        {
+            Ok(game
                 .face(id)?
-                .get("traits")
-                .and_then(Value::as_array)
-                .is_some_and(|traits| {
-                    traits
-                        .iter()
-                        .any(|value| value.as_str() == Some(trait_id.0.as_str()))
-                })),
-            Predicate::KindEquals {
-                left: Expr::Live(read),
-                right: Expr::Literal(kind),
-            } => {
-                let KindRead::Kind { view, .. } = read.as_ref();
-                let kind_name = match view {
-                    CharacteristicView::Original => game
-                        .face(id)?
-                        .get("card_type")
-                        .and_then(Value::as_str)
-                        .ok_or_else(|| invalid("missing printed kind"))?,
-                    CharacteristicView::Effective => game.object_type(id)?,
-                    _ => return Err(unsupported("search kind view")),
-                };
-                Ok(kind_name.contains(match kind {
-                    CardKind::Follower => "フォロワー",
-                    CardKind::Spell => "スペル",
-                    CardKind::Amulet => "アミュレット",
-                }))
-            }
-            Predicate::Not { predicate } => Ok(!matches_candidate(game, id, predicate)?),
-            Predicate::And { predicates } => {
-                for predicate in predicates {
-                    if !matches_candidate(game, id, predicate)? {
-                        return Ok(false);
-                    }
+                .get("card_type")
+                .and_then(Value::as_str)
+                .is_some_and(|kind| kind.contains("トークン")))
+        }
+        Expr::Compute(operation) => {
+            match operation.as_ref() {
+                Predicate::ClassEquals {
+                    right: Expr::Literal(Info::Present(class)),
+                    ..
+                } => Ok(game.face(id)?.get("card_class").and_then(Value::as_str)
+                    == Some(class.0.as_str())),
+                Predicate::NamesIntersect {
+                    right: Expr::Literal(names),
+                    ..
+                } => {
+                    let own = game.card_name(id)?;
+                    Ok(names.iter().any(|name| own == name.0))
                 }
-                Ok(true)
-            }
-            Predicate::Or { predicates } => {
-                for predicate in predicates {
-                    if matches_candidate(game, id, predicate)? {
-                        return Ok(true);
-                    }
+                Predicate::HasTrait { trait_id, .. } => Ok(game
+                    .face(id)?
+                    .get("traits")
+                    .and_then(Value::as_array)
+                    .is_some_and(|traits| {
+                        traits
+                            .iter()
+                            .any(|value| value.as_str() == Some(trait_id.0.as_str()))
+                    })),
+                Predicate::KindEquals {
+                    left: Expr::Live(read),
+                    right: Expr::Literal(kind),
+                } => {
+                    let KindRead::Kind { view, .. } = read.as_ref();
+                    let kind_name = match view {
+                        CharacteristicView::Original => game
+                            .face(id)?
+                            .get("card_type")
+                            .and_then(Value::as_str)
+                            .ok_or_else(|| invalid("missing printed kind"))?,
+                        CharacteristicView::Effective => game.object_type(id)?,
+                        _ => return Err(unsupported("search kind view")),
+                    };
+                    Ok(kind_name.contains(match kind {
+                        CardKind::Follower => "フォロワー",
+                        CardKind::Spell => "スペル",
+                        CardKind::Amulet => "アミュレット",
+                    }))
                 }
-                Ok(false)
+                Predicate::Not { predicate } => Ok(!matches_candidate(game, id, predicate)?),
+                Predicate::And { predicates } => {
+                    for predicate in predicates {
+                        if !matches_candidate(game, id, predicate)? {
+                            return Ok(false);
+                        }
+                    }
+                    Ok(true)
+                }
+                Predicate::Or { predicates } => {
+                    for predicate in predicates {
+                        if matches_candidate(game, id, predicate)? {
+                            return Ok(true);
+                        }
+                    }
+                    Ok(false)
+                }
+                _ => Err(unsupported("search predicate evaluation")),
             }
-            _ => Err(unsupported("search predicate evaluation")),
-        },
+        }
         _ => Err(unsupported("search predicate evaluation")),
     }
 }

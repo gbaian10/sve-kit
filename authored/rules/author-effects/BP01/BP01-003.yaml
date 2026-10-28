@@ -1,0 +1,29 @@
+cards:
+  BP01-003:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - evolve_time:
+          cost:
+            return_to_hand:
+              n: 1
+              sel:
+                other: true
+                who: self
+                zone: field
+          do:
+            - buff:
+                hp: 1
+                on: this
+                power: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-sol
+            who: Codex
+          date: "2026-10-28"
+format: 2
+kind: author_effect_set
