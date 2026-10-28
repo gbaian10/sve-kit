@@ -86,6 +86,9 @@ mod rescan_001;
 #[path = "runtime/rescan_002.rs"]
 mod rescan_002;
 
+#[path = "runtime/rescan_003.rs"]
+mod rescan_003;
+
 #[path = "runtime/resolution_choice.rs"]
 mod resolution_choice;
 
