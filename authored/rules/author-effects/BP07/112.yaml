@@ -1,0 +1,182 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP07-082:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-28"
+    abilities:
+      - evolve:
+          cost:
+            pp: 3
+        line: 1
+      - fanfare:
+          do:
+            - damage:
+                n: 3
+                to:
+                  leader: self
+        line: 2
+  BP07-115:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-28"
+    abilities:
+      - lastword:
+          do:
+            - damage:
+                n: 3
+                to:
+                  leaders: opponents
+        line: 1
+  BP07-065:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-28"
+    abilities:
+      - evolve:
+          cost:
+            pp: 2
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  awakened: true
+                then:
+                  - choose:
+                      bind: enemy
+                      from:
+                        who: opp
+                        zone: field
+                        kind: follower
+                      n: 1
+                  - damage:
+                      n: 2
+                      to: enemy
+        line: 2
+  BP07-105:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-28"
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - lastword:
+          do:
+            - life:
+                who: self
+                delta: 2
+        line: 2
+  BP07-114:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-28"
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - fanfare:
+          do:
+            - life:
+                who: self
+                delta: 3
+        line: 2
+  BP07-025:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-28"
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - keywords:
+          - bane
+        line: 2
+  BP07-031:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-28"
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+  BP07-048:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-28"
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+  BP07-098:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-28"
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+  BP07-073:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-28"
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - fanfare:
+          do:
+            - move:
+                top:
+                  who: self
+                  n: 1
+                to: cemetery
+        line: 2
