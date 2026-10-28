@@ -1,0 +1,27 @@
+format: 2
+kind: author_effect_set
+cards:
+  PR-156:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-29"
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - life:
+                who: self
+                delta: 1
+            - draw:
+                n: 1
+    token:
+      name: 魔法のアイテム
+      template: false
+    ignored:
+      - section: 1
+        line: 1
+        reason: reminder

@@ -1,0 +1,27 @@
+cards:
+  PR-155:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - life:
+                delta: 1
+                who: self
+            - draw:
+                n: 1
+    admission: light
+    ignored:
+      - line: 1
+        reason: reminder
+        section: 1
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-29"
+    token:
+      name: 魔法のアイテム
+      template: false
+format: 2
+kind: author_effect_set
