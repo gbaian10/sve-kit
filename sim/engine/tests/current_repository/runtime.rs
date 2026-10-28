@@ -706,6 +706,8 @@ mod c2_01;
 
 #[path = "runtime/c2_02.rs"]
 mod c2_02;
+#[path = "runtime/c2_03.rs"]
+mod c2_03;
 
 #[path = "runtime/c2_05.rs"]
 mod c2_05;
