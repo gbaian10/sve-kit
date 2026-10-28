@@ -321,10 +321,12 @@ impl Game {
                 ));
             }
             if ability.kind == AbilityKind::Activated
-                && !printed["card_type"].as_str().is_some_and(activation_type)
+                && !printed["card_type"]
+                    .as_str()
+                    .is_some_and(|kind| activation_type(kind, &ability.active_zones))
             {
                 return Err(unsupported(
-                    "activated printed face is not an ordinary field card",
+                    "activated printed face is not supported in its active zone",
                 ));
             }
             if ability.kind == AbilityKind::Spell {
@@ -439,11 +441,14 @@ impl Game {
             .ok_or_else(|| invalid("ability is not effective for this holder"))?;
         let seat = seat_name(actor)?;
         if ability.node.kind != AbilityKind::Activated
-            || object.zone != "field"
+            || !matches!(
+                (object.zone.as_str(), ability.node.active_zones.as_slice()),
+                ("field", [ZoneKind::Field]) | ("ex", [ZoneKind::Ex])
+            )
             || object.controller != seat
             || !self.internal_play_timing(actor, is_printed_quick(&ability.node))
             || object.state["silenced"] == true
-            || !activation_type(self.object_type(holder)?)
+            || !activation_type(self.object_type(holder)?, &ability.node.active_zones)
             || (is_printed_quick(&ability.node) && self.object_type(holder)? != "フォロワー")
             || !self.prepared.is_empty()
         {
@@ -617,9 +622,16 @@ fn check_printed_face(printed: &serde_json::Value) -> Result<()> {
     Ok(())
 }
 
-// Evolved forms carry their own printed definitions; token and advance rules are not represented.
-fn activation_type(kind: &str) -> bool {
-    matches!(kind, "フォロワー" | "フォロワー・エボルヴ" | "アミュレット")
+// Evolved forms carry their own printed definitions.
+fn activation_type(kind: &str, zones: &[ZoneKind]) -> bool {
+    match zones {
+        [ZoneKind::Field] => matches!(kind, "フォロワー" | "フォロワー・エボルヴ" | "アミュレット"),
+        [ZoneKind::Ex] => matches!(
+            kind,
+            "クレスト・トークン" | "スペル・トークン" | "アミュレット・トークン" | "アミュレット"
+        ),
+        _ => false,
+    }
 }
 
 fn check_header(ability: &Ability) -> Result<()> {
@@ -631,7 +643,10 @@ fn check_header(ability: &Ability) -> Result<()> {
     } else {
         ZoneKind::Field
     };
-    if ability.active_zones != [zones]
+    let ex_activation = ability.kind == AbilityKind::Activated
+        && ability.active_zones == [ZoneKind::Ex]
+        && matches!(ability.source.origin, AbilityOrigin::Printed { .. });
+    if (ability.active_zones != [zones] && !ex_activation)
         || ability.source.holder != (ObjectOperand::SourceHolder {})
         || ability.source.controller != (PlayerRef::Controller {})
         || !ability.event_captures.is_empty()

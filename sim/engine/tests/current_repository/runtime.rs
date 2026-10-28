@@ -53,6 +53,9 @@ mod ecp01_002;
 #[path = "runtime/ep_increase.rs"]
 mod ep_increase;
 
+#[path = "runtime/ex_activation.rs"]
+mod ex_activation;
+
 #[path = "runtime/field_actions.rs"]
 mod field_actions;
 
