@@ -123,8 +123,8 @@ live manifest 與 latest cache 的所有受控入口共用 `Settings.lock_path`�
 - hardlink 僅同裝置可用；建立的是 regular file 的另一個名稱，不能 hardlink symlink 本身。latest 後續必須寫新 inode、fsync、atomic replace，禁止 truncate／原地寫入；chmod hardlink 會影響同 inode 的 latest，不能以此「保護」而破壞 writer。
 - reflink 需確認檔案系統支援及獨立 copy-on-write 語意，完成後仍驗 raw hash；跨裝置不能假設 reflink 可行。無法 link／clone 時，從已釘 FD 在鎖外 stream copy 到 archive staging、驗 hash、fsync；禁止把跨裝置 rename 當原子操作。若也無法保持來源穩定或空間不足，停止封存及不安全的 refresh。
 - 同裝置 hardlink 是去重手段，不是第二份備份。首輪 PNG 應優先重用已驗 blob／link／clone；也可在 refresh 前只封存將被替換的圖，未替換圖則先釘成不可變 blob 才納入 sealed 批次，不能讓 inventory 指向可替換 latest。
-- `--allow-root`／`SVE_EXTRA_ROOTS` 是讀取 symlink 目的地的白名單，不是任意寫入許可；既有 manifest check 支援它，凍結入口須明示接入相同規則，不能假定其他命令已接入。逐次 resolve 必落在資料根或指定根，拒絕絕對 resource.path、`..` 逃逸、越界連結及 dangling link；用開啟 FD 與目錄身分重驗防止檢查後換連結。
-- archive store 是明示配置的獨立寫入根，其內新建目錄／檔案不得經未核准 symlink；外部讀取根不自動成為 archive store。inventory 只記 store_id＋相對 path；備份須複製實體閉包，不能只備份指向外接磁碟的 symlink。
+- `--allow-root` 是讀取 symlink 目的地的白名單；`SVE_EXTRA_ROOTS` 也允許一般及受保護 crawler 經資料根內的 symlink 寫入明列的根，只新增入口仍拒絕 symlink。逐次 resolve 必落在資料根或指定根，拒絕絕對 resource.path、`..` 逃逸、越界連結及 dangling link；用開啟 FD 與目錄身分重驗防止檢查後換連結。
+- archive store 是明示配置的獨立寫入根，其內新建目錄／檔案不得經未核准 symlink；允許的 symlink 根不自動成為 archive store。inventory 只記 store_id＋相對 path；備份須複製實體閉包，不能只備份指向外接磁碟的 symlink。
 
 ## 4. refresh 與中斷恢復
 

@@ -320,7 +320,7 @@ workflow steps and does not depend on local mise configuration.
 | `SVE_ARCHIVE_STORE_ID` | Archive store identity | carddb archive operations | Required by configured archive operations; no default |
 | `SVE_ARCHIVE_BACKUP_ROOT` | Immutable source backup | carddb seal/backup operations | Required as applicable; no default |
 | `SVE_ARCHIVE_RESTORE_ROOT` | Restore-check destination | carddb restore-check | Required as applicable; no default |
-| `SVE_EXTRA_ROOTS` | Read-only symlink target allowlist (`os.pathsep` separated) | carddb manifest check | Optional; Settings defaults to no extra roots |
+| `SVE_EXTRA_ROOTS` | Symlink target allowlist for crawler reads/writes (`os.pathsep` separated; new-only writes reject symlinks) | carddb crawl and manifest check | Optional; Settings defaults to no extra roots |
 | `SVE_INTERVAL` | HTTP request interval | carddb `ingest.config.Settings` | Optional; 2.5 seconds, minimum 2 |
 | `SVE_JITTER` | HTTP request jitter | carddb `ingest.config.Settings` | Optional; 0.5 seconds, non-negative |
 | `SVE_TIMEOUT` | HTTP timeout | carddb `ingest.config.Settings` | Optional; 30 seconds, positive |
