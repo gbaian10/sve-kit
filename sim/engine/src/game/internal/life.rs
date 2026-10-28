@@ -1,13 +1,41 @@
 //! Direct leader life changes share the ordinary life mutation and trigger producer.
 
 use super::{Execution, Fact, Game, InstructionOutcome, Result, invalid, seat_name, unsupported};
-use crate::ir::{Action, Instruction, Int, LifeChangeEvent, NumericChange};
+use crate::EngineFailure;
+use crate::ir::{Action, Instruction, Int, LifeChangeEvent, NumericChange, Quantity, QuantityUnit};
 
 #[expect(
     clippy::multiple_inherent_impl,
     reason = "Leader life changes use the same authoritative Game mutation boundary."
 )]
 impl Game {
+    pub(super) fn internal_pay_life(
+        &mut self,
+        execution: &mut Execution,
+        instruction: &Instruction,
+        delta: i64,
+    ) -> Result<Quantity> {
+        let amount = delta
+            .checked_neg()
+            .ok_or_else(|| invalid("life cost overflow"))?;
+        let life = self
+            .player(seat_name(execution.context.controller)?)?
+            .leader
+            .get("life")
+            .and_then(serde_json::Value::as_i64)
+            .ok_or_else(|| invalid("invalid leader life"))?;
+        if life < amount {
+            return Err(EngineFailure::IllegalPlay(
+                "insufficient leader life".into(),
+            ));
+        }
+        self.internal_life(execution, instruction)?;
+        Ok(Quantity {
+            amount: Int(amount),
+            unit: QuantityUnit::Life,
+        })
+    }
+
     pub(super) fn internal_life(
         &mut self,
         execution: &mut Execution,

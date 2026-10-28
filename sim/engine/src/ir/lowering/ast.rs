@@ -145,12 +145,9 @@ pub(super) enum Cost {
 
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
-#[expect(
-    variant_size_differences,
-    reason = "Author cost operations have distinct scalar payloads."
-)]
 pub(super) enum CostOperation {
     Pp(u64),
+    LeaderLife(u64),
     ActSelf(bool),
     SelfToCemetery(bool),
 }

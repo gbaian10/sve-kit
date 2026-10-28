@@ -726,5 +726,7 @@ mod ep_increase;
 #[path = "runtime/reveal_hand.rs"]
 mod reveal_hand;
 
+#[path = "runtime/life_cost.rs"]
+mod life_cost;
 #[path = "runtime/live_conditions.rs"]
 mod live_conditions;

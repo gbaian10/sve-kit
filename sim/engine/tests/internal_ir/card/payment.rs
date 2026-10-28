@@ -255,3 +255,39 @@ fn failed_interactive_execution_preserves_preexisting_paid_ability_authority() {
         );
     }
 }
+
+#[test]
+fn life_cost_insufficiency_rolls_back_prior_payments_and_exact_life_can_reach_zero() {
+    for seat in [1, 2] {
+        let actor = if seat == 1 { "P1" } else { "P2" };
+        for amount in [20_i64, 21] {
+            let life = Action::Life {
+                player: PlayerRef::Controller {},
+                change: NumericChange::Add {
+                    amount: Expr::Literal(Int(-amount)),
+                },
+            };
+            let a = paid_ability(vec![pp(1), life], vec![draw(1, 0)]);
+            let mut game = position_with_card(seat, &card(vec![a]));
+            if amount == 21 {
+                let before = exact_authority(&game);
+                game.activate_internal_card("s", AbilityId(1), PlayerId { seat })
+                    .unwrap_err();
+                assert_eq!(exact_authority(&game), before);
+            } else {
+                let result = activate(&mut game, seat);
+                assert!(
+                    matches!(result.progress.facts.first(), Some(Fact::LifeChange(event)) if event.after == Int(0))
+                );
+                let state = game.projection(View::Referee).unwrap();
+                assert_eq!(state[actor]["leader"]["life"], 0);
+                assert_ne!(state["game"]["ended"], true);
+                game.resume_internal_card().unwrap();
+                assert_eq!(
+                    game.projection(View::Referee).unwrap()["game"]["ended"],
+                    true
+                );
+            }
+        }
+    }
+}
