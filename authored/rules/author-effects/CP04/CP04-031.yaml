@@ -1,0 +1,18 @@
+cards:
+  CP04-031:
+    abilities:
+      - line: 1
+        params: {}
+        use: evolve.one-pp
+      - keywords:
+          - storm
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-10-29"
+format: 2
+kind: author_effect_set
