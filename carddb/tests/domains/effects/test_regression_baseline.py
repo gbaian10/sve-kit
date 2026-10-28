@@ -218,12 +218,10 @@ def test_bp07_p06_uses_the_corrected_main_text_without_duplicate_coverage() -> N
         assert span["segments"] == [{"start": start, "end": len(text)}]
 
 
-def test_reverse_positions_preserve_concrete_cross_line_coverage() -> None:
-    admitted = {
-        number
-        for path in BASELINE.glob("*.json")
-        for number in author_records(path.stem)
-    }
+def test_reverse_positions_preserve_concrete_cross_line_coverage(
+    migrated_printings: frozenset[str],
+) -> None:
+    admitted = migrated_printings
     seen: set[str] = set()
     expected: dict[str, JsonValue] = {}
     for path in sorted(BASELINE.glob("*.json")):
