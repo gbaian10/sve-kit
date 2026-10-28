@@ -107,6 +107,9 @@ mod rescan_002;
 #[path = "runtime/rescan_003.rs"]
 mod rescan_003;
 
+#[path = "runtime/rescan_004.rs"]
+mod rescan_004;
+
 #[path = "runtime/rescan_012.rs"]
 mod rescan_012;
 

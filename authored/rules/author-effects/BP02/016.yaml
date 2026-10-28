@@ -1,0 +1,18 @@
+cards:
+  BP02-013:
+    abilities:
+      - fanfare:
+          do:
+            - life:
+                delta: 3
+                who: self
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-luna
+            who: Codex
+          date: "2026-10-28"
+format: 2
+kind: author_effect_set
