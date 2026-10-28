@@ -11,6 +11,9 @@ mod conditions_quick;
 #[path = "runtime/resolution_choice.rs"]
 mod resolution_choice;
 
+#[path = "runtime/c2_04.rs"]
+mod c2_04;
+
 const NUMBER: &str = "BP01-P25";
 
 pub(super) fn setup(seat: &str, owner: &str, life: [u8; 2]) -> Value {
