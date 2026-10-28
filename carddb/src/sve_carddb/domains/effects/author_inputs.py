@@ -791,7 +791,19 @@ class AuthorSchemas:
         self._validate(document, _INDEX)
         index = _decode(_INDEX_VALUE, document.value)
         seen: set[tuple[str, str]] = set()
+        previous: tuple[str, str] | None = None
         for offset, record in enumerate(index.records):
+            sort_key = (record.record_key, record.scope)
+            if previous is not None and sort_key < previous:
+                raise AuthorInputError(
+                    document.diagnostic(
+                        "index",
+                        "records_not_sorted_by_record_key_then_scope",
+                        ("records", offset),
+                        expected="record_key, then scope",
+                    )
+                )
+            previous = sort_key
             key = (record.card_id, record.scope)
             if key in seen:
                 raise AuthorInputError(

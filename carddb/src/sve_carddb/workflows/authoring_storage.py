@@ -285,7 +285,16 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
             record_key=number,
         )
         if old is None:
-            records.append(replacement)
+            replacement_key = (replacement.record_key, replacement.scope)
+            offset = next(
+                (
+                    index
+                    for index, record in enumerate(records)
+                    if (record.record_key, record.scope) > replacement_key
+                ),
+                len(records),
+            )
+            records.insert(offset, replacement)
         else:
             records[records.index(old)] = replacement
         if remove_prototype:

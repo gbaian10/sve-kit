@@ -6,15 +6,97 @@ use sve_engine::game::internal::{Activation, Answer, CardPlay, Fact, InputDomain
 use sve_engine::game::{Game, View};
 use sve_engine::ir::*;
 
-#[path = "runtime/conditions_quick.rs"]
-mod conditions_quick;
-#[path = "runtime/resolution_choice.rs"]
-mod resolution_choice;
-#[path = "runtime/token_trio.rs"]
-mod token_trio;
+// Keep sorted; add new modules in order.
+
+#[path = "runtime/bp01_037.rs"]
+mod bp01_037;
+
+#[path = "runtime/bp06_048.rs"]
+mod bp06_048;
+
+#[path = "runtime/bp10_122.rs"]
+mod bp10_122;
+
+#[path = "runtime/bp14_098.rs"]
+mod bp14_098;
+
+#[path = "runtime/bp19_p32.rs"]
+mod bp19_p32;
+
+#[path = "runtime/c2_01.rs"]
+mod c2_01;
+
+#[path = "runtime/c2_02.rs"]
+mod c2_02;
+
+#[path = "runtime/c2_03.rs"]
+mod c2_03;
 
 #[path = "runtime/c2_04.rs"]
 mod c2_04;
+
+#[path = "runtime/c2_05.rs"]
+mod c2_05;
+
+#[path = "runtime/conditions_quick.rs"]
+mod conditions_quick;
+
+#[path = "runtime/cp02_068.rs"]
+mod cp02_068;
+
+#[path = "runtime/deck_top.rs"]
+mod deck_top;
+
+#[path = "runtime/ecp01_002.rs"]
+mod ecp01_002;
+
+#[path = "runtime/ep_increase.rs"]
+mod ep_increase;
+
+#[path = "runtime/field_actions.rs"]
+mod field_actions;
+
+#[path = "runtime/hand_discard.rs"]
+mod hand_discard;
+
+#[path = "runtime/leader_damage.rs"]
+mod leader_damage;
+
+#[path = "runtime/leader_life.rs"]
+mod leader_life;
+
+#[path = "runtime/life_cost.rs"]
+mod life_cost;
+
+#[path = "runtime/live_conditions.rs"]
+mod live_conditions;
+
+#[path = "runtime/max_pp.rs"]
+mod max_pp;
+
+#[path = "runtime/pp_recover.rs"]
+mod pp_recover;
+
+#[path = "runtime/recipient_targets.rs"]
+mod recipient_targets;
+
+#[path = "runtime/rescan_001.rs"]
+mod rescan_001;
+
+#[path = "runtime/rescan_002.rs"]
+mod rescan_002;
+
+#[path = "runtime/resolution_choice.rs"]
+mod resolution_choice;
+
+#[path = "runtime/reveal_hand.rs"]
+mod reveal_hand;
+
+#[path = "runtime/token_trio.rs"]
+mod token_trio;
+
+#[path = "runtime/unloaded.rs"]
+mod unloaded;
 
 const NUMBER: &str = "BP01-P25";
 
@@ -660,39 +742,6 @@ fn draw_position() -> Value {
     })
 }
 
-#[path = "runtime/bp10_122.rs"]
-mod bp10_122;
-
-#[path = "runtime/bp06_048.rs"]
-mod bp06_048;
-
-#[path = "runtime/bp01_037.rs"]
-mod bp01_037;
-
-#[path = "runtime/bp14_098.rs"]
-mod bp14_098;
-
-#[path = "runtime/leader_damage.rs"]
-mod leader_damage;
-
-#[path = "runtime/leader_life.rs"]
-mod leader_life;
-
-#[path = "runtime/field_actions.rs"]
-mod field_actions;
-
-#[path = "runtime/bp19_p32.rs"]
-mod bp19_p32;
-
-#[path = "runtime/unloaded.rs"]
-mod unloaded;
-
-#[path = "runtime/cp02_068.rs"]
-mod cp02_068;
-
-#[path = "runtime/ecp01_002.rs"]
-mod ecp01_002;
-
 fn projected_zone_count(zone: &Value) -> u64 {
     zone.as_array()
         .unwrap()
@@ -700,41 +749,3 @@ fn projected_zone_count(zone: &Value) -> u64 {
         .map(|card| card.get("filler").and_then(Value::as_u64).unwrap_or(1))
         .sum()
 }
-
-#[path = "runtime/c2_01.rs"]
-mod c2_01;
-
-#[path = "runtime/c2_02.rs"]
-mod c2_02;
-#[path = "runtime/c2_03.rs"]
-mod c2_03;
-
-#[path = "runtime/c2_05.rs"]
-mod c2_05;
-#[path = "runtime/deck_top.rs"]
-mod deck_top;
-#[path = "runtime/hand_discard.rs"]
-mod hand_discard;
-#[path = "runtime/pp_recover.rs"]
-mod pp_recover;
-
-#[path = "runtime/max_pp.rs"]
-mod max_pp;
-
-#[path = "runtime/ep_increase.rs"]
-mod ep_increase;
-#[path = "runtime/reveal_hand.rs"]
-mod reveal_hand;
-
-#[path = "runtime/life_cost.rs"]
-mod life_cost;
-#[path = "runtime/live_conditions.rs"]
-mod live_conditions;
-
-#[path = "runtime/recipient_targets.rs"]
-mod recipient_targets;
-#[path = "runtime/rescan_001.rs"]
-mod rescan_001;
-
-#[path = "runtime/rescan_002.rs"]
-mod rescan_002;
