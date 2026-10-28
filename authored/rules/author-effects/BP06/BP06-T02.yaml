@@ -1,0 +1,23 @@
+cards:
+  BP06-T02:
+    abilities:
+      - lastword:
+          do:
+            - draw:
+                n: 1
+            - discard:
+                n: 1
+                who: self
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-sol
+            who: Codex
+          date: "2026-10-29"
+    token:
+      name: 形代
+      template: true
+format: 2
+kind: author_effect_set

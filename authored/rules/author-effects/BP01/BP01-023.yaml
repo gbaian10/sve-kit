@@ -1,0 +1,23 @@
+cards:
+  BP01-023:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - create:
+                n: 3
+                to: ex
+                token: フェアリー
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-sol
+            who: Codex
+          date: "2026-10-29"
+    token_sources:
+      - card: BP01-T03
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set
