@@ -220,13 +220,13 @@ def apply(
                 if owner in {"token", "reminder"}:
                     continue
                 parsed = parse(text, region)
+                if not parsed.balanced:
+                    uncertain.update(CODES)
                 if owner == "unknown":
                     uncertain.update(parsed.present | parsed.uncertain)
                     continue
                 present.update(parsed.present)
                 uncertain.update(parsed.uncertain)
-                if not parsed.balanced:
-                    uncertain.update(CODES)
                 for code, values in parsed.thresholds.items():
                     thresholds.setdefault(code, set()).update(values)
             checked = set(CODES) - uncertain
