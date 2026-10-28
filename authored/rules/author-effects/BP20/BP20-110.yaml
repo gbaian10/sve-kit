@@ -1,0 +1,26 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP20-110:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-29"
+    abilities:
+      - spell:
+          do:
+            - damage:
+                n: 4
+                to:
+                  who: opp
+                  zone: field
+                  kind: follower
+            - life:
+                who: self
+                delta: 2
+            - draw:
+                n: 1
+        line: 1

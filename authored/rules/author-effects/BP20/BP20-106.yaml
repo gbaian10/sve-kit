@@ -1,0 +1,23 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP20-106:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-29"
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - evolve_time:
+          do:
+            - life:
+                who: self
+                delta: 1
+            - draw:
+                n: 1
+        line: 2
