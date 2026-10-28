@@ -18852,6 +18852,9 @@
           "items": {
             "$ref": "#/$defs/DirectSourceUse"
           }
+        },
+        "token": {
+          "$ref": "#/$defs/TokenIdentity"
         }
       },
       "required": [
@@ -21231,6 +21234,22 @@
         "admission"
       ],
       "type": "object"
+    },
+    "TokenIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "template": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "name"
+      ]
     }
   },
   "description": "Closed shared author graph and authored containers. Expansion and source/execution admission are separate; the root rejects standalone documents."
