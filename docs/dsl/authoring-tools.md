@@ -69,6 +69,24 @@ records:
 
 `line` 從 1 起；`face` 為 1 起面序或唯一 `front/back`；`section: main` 表示主文，數字 N 表示第 N 個 section。多面未消歧即拒絕。`scope` 區分同一行的能力，跨行能力用 `covers: [1, 2]` 明示覆蓋；每行都須有能力或 `ignored` 宣告。
 
+同一印刷行若有多個能力，各自指定不同的 `scope`（從 1 起）。例如 BP04-123 同行的 Fanfare 與 Lastword：
+
+```yaml
+abilities:
+  - line: 1
+    scope: 1
+    fanfare:
+      do:
+        - draw: { n: 1 }
+  - line: 1
+    scope: 2
+    lastword:
+      do:
+        - draw: { n: 1 }
+```
+
+兩個能力保留同一來源行，載入時以各自的來源 scope 區分；同一座標的重複能力仍拒絕。
+
 ```yaml
 ignored:
   - line: 2

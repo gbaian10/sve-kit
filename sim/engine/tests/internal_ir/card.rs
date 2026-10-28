@@ -45,6 +45,9 @@ mod source_information;
 #[path = "card/triggers.rs"]
 mod triggers;
 
+#[path = "card/printed_coordinates.rs"]
+mod printed_coordinates;
+
 #[path = "card/timing.rs"]
 mod timing;
 
