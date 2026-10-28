@@ -1,0 +1,34 @@
+cards:
+  BP16-062:
+    abilities:
+      - evolve_time:
+          do:
+            - damage:
+                n: 3
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - line: 2
+        super_evolve_time:
+          do:
+            - pp_max:
+                delta: 1
+                who: self
+            - life:
+                delta: 2
+                who: self
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-10-29"
+format: 2
+kind: author_effect_set

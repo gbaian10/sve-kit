@@ -1,0 +1,37 @@
+cards:
+  BP16-112:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - evolve_time:
+          do:
+            - damage:
+                n: 5
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+      - line: 3
+        super_evolve_time:
+          do:
+            - life:
+                delta: 3
+                who: self
+            - pp:
+                delta: 3
+                who: self
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-10-29"
+format: 2
+kind: author_effect_set

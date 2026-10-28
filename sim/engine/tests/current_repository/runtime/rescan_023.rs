@@ -473,3 +473,112 @@ fn bp16_p29_spell_token_targets_draws_discards_and_ceases_to_exist() {
     assert_eq!(state["P1"]["ex"], json!([]));
     assert!(state["objects"]["source"].is_null());
 }
+
+fn targeted_evolution(base: &str, form: &str, damage: u8, after_super: [u8; 3]) {
+    for (super_evolved, expected) in [(false, [15, 7, 1]), (true, after_super)] {
+        let mut initial = field_position(base);
+        initial["turn"]["elapsed_turns"] = json!({"P1":7_u8,"P2":6_u8});
+        initial["players"]["P1"]["pp"] = json!({"current":2_u8,"max":7_u8});
+        initial["players"]["P1"]["leader"]["life"] = json!(15_u8);
+        initial["players"]["P1"]["sep"] = json!(1_u8);
+        initial["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"form","card":form}]);
+        initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"BP01-037"}]);
+        let mut pay = json!({"pp":1_u8});
+        if super_evolved {
+            pay["sep"] = json!(1_u8);
+        }
+        let mut game = game(&initial);
+        let step = game
+            .internal_rule_action(
+                &json!({"do":"evolve","source":"source","evolve_card":"form","pay":pay}),
+            )
+            .unwrap();
+        assert_eq!(
+            step.outcome, "resolved",
+            "the printed cost evolves the real base"
+        );
+        for remaining in (1..=if super_evolved { 2 } else { 1 }).rev() {
+            let question = game.internal_pending_choice().unwrap().unwrap();
+            let InputDomain::Pending(options) = &question.domain else {
+                panic!("expected an evolution trigger");
+            };
+            assert_eq!(
+                options.len(),
+                remaining,
+                "super evolution triggers both printed heads"
+            );
+            let result = game
+                .answer_internal_card(
+                    question.actor,
+                    question.token,
+                    Answer::Pending(options[0].handle),
+                )
+                .unwrap();
+            finish(&mut game, result, true);
+            game.resume_internal_card().unwrap();
+        }
+        assert!(
+            game.internal_pending_choice().unwrap().is_none(),
+            "all evolution triggers have resolved"
+        );
+        let state = game.projection(View::Referee).unwrap();
+        let resources = json!([
+            state["P1"]["leader"]["life"],
+            state["P1"]["pp"]["max"],
+            state["P1"]["pp"]["current"]
+        ]);
+        assert_eq!(
+            resources,
+            json!(expected),
+            "printed life and PP after payment"
+        );
+        assert_eq!(
+            state["P1"]["sep"],
+            u8::from(!super_evolved),
+            "only super evolution spends SEP"
+        );
+        assert_eq!(
+            state["objects"]["source"]["evolved_with"], "form",
+            "the real base retains its resource"
+        );
+        assert_eq!(
+            state["P1"]["evolution"],
+            json!(["form"]),
+            "the resource enters the evolution zone"
+        );
+        if damage == 5 {
+            assert_eq!(
+                state["P2"]["field"],
+                json!([]),
+                "lethal damage destroys the selected follower"
+            );
+            assert_eq!(
+                state["P2"]["cemetery"],
+                json!(["enemy"]),
+                "the defeated follower enters its cemetery"
+            );
+        } else {
+            assert_eq!(
+                state["P2"]["field"],
+                json!(["enemy"]),
+                "three damage leaves the five-life follower alive"
+            );
+            assert_eq!(
+                state["objects"]["enemy"]["damage"], damage,
+                "the formal target receives printed damage"
+            );
+        }
+    }
+}
+
+#[test]
+fn bp16_062_real_evolution_targets_and_super_evolution_increases_maximum_pp() {
+    targeted_evolution("BP16-061", "BP16-062", 3, [17, 8, 1]);
+    targeted_evolution("BP16-061", "SD08-008", 3, [17, 8, 1]);
+}
+
+#[test]
+fn bp16_112_real_evolution_targets_and_super_evolution_heals_and_recovers_pp() {
+    targeted_evolution("BP16-111", "BP16-112", 5, [18, 7, 4]);
+    ward("BP16-112");
+}
