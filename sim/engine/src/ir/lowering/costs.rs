@@ -138,7 +138,7 @@ pub(super) fn query(
         },
         zone: match value.zone {
             ast::PublicZone::Field => ZoneKind::Field,
-            ast::PublicZone::Ex => ZoneKind::Ex,
+            ast::PublicZone::Ex => return Err(unsupported(path)),
             ast::PublicZone::Cemetery => ZoneKind::Cemetery,
         },
         view: SelectionView::Current {},

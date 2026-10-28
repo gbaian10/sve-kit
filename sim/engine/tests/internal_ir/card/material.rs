@@ -1,4 +1,6 @@
 use super::*;
+use crate::rule_fixtures;
+use sve_engine::catalog::EngineIdentityInput;
 use sve_engine::game::internal::InputDomain;
 
 fn program(action: Action, count: u64, zone: ZoneKind) -> WellFormedCardProgram {
@@ -110,17 +112,15 @@ fn material_costs_move_the_exact_selected_field_or_ex_object_to_its_owner() {
                 },
             );
         }
-        if zone == ZoneKind::Field {
-            move_material(
-                Action::Banish {
-                    objects: Selector::Bound {
-                        reference: Binding::new(51, ScopeId(1)),
-                    },
+        move_material(
+            Action::Banish {
+                objects: Selector::Bound {
+                    reference: Binding::new(51, ScopeId(1)),
                 },
-                zone,
-                "banish",
-            );
-        }
+            },
+            zone,
+            "banish",
+        );
     }
 }
 
@@ -143,7 +143,29 @@ fn move_material(action: Action, zone: ZoneKind, destination: &str) {
         initial["players"]["P1"]["zones"]["ex"] =
             json!([{"id":"m","card":"unit-follower","owner":"P2"}]);
     }
-    let mut game = Game::new(catalog(), &initial, &Value::Null, &Value::Null, "materials").unwrap();
+    let (snapshot, registry, document) = catalog_documents(&json!("1"));
+    let snapshot = snapshot.replace("スペル", "スペル・トークン");
+    let rules = rule_fixtures::rules(
+        &snapshot,
+        json!([]),
+        json!([rule_fixtures::resource(
+            "lesson_item",
+            "unit-spell",
+            "printed",
+            true
+        )]),
+    );
+    let catalog = Arc::new(
+        Catalog::from_documents_with_rules(
+            &snapshot,
+            &registry,
+            &[("unit.yaml".into(), document)],
+            &rules.to_string(),
+            &EngineIdentityInput::LegacyJp,
+        )
+        .unwrap(),
+    );
+    let mut game = Game::new(catalog, &initial, &Value::Null, &Value::Null, "materials").unwrap();
     game.load_internal_card("unit-follower", &program(action, 1, zone))
         .unwrap();
     let CardPlay::Awaiting(question) = game

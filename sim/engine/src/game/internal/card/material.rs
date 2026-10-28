@@ -293,7 +293,9 @@ impl Game {
             if object.generation != member.generation.0
                 || !matches!(object.zone.as_str(), "field" | "ex")
                 || object.controller != seat_name(execution.context.controller)?
-                || (matches!(instruction.action, Action::Posture { .. }) && object.zone != "field")
+                || (matches!(instruction.action, Action::Posture { .. })
+                    && matches!(objects, Selector::Bound { .. })
+                    && object.zone != "field")
             {
                 return Err(crate::EngineFailure::IllegalPlay(
                     "materials changed".into(),
