@@ -1,0 +1,21 @@
+cards:
+  ECP02-SL35:
+    abilities:
+      - admission: light
+        line: 1
+        params:
+          draw: 1
+          life: 1
+        use: spell.leader-life-add-draw
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-29"
+    token:
+      name: 魔法のアイテム
+      template: false
+format: 2
+kind: author_effect_set

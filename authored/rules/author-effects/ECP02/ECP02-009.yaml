@@ -1,0 +1,21 @@
+cards:
+  ECP02-009:
+    abilities:
+      - evolve_time:
+          do:
+            - draw:
+                n: 1
+                who: self
+            - life:
+                delta: 2
+                who: self
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-29"
+format: 2
+kind: author_effect_set
