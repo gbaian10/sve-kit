@@ -1,0 +1,191 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP01-087:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-28"
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - evolve_time:
+          do:
+            - life:
+                who: self
+                delta: 5
+        line: 2
+  BP01-122:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-28"
+    abilities:
+      - evolve:
+          cost:
+            pp: 0
+        line: 1
+  BP01-135:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-28"
+    abilities:
+      - evolve:
+          cost:
+            pp: 2
+        line: 1
+  BP01-138:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-28"
+    abilities:
+      - keywords:
+          - ward
+          - aura
+        line: 1
+  BP01-145:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-28"
+    abilities:
+      - keywords:
+          - aura
+        line: 1
+  BP01-165:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-28"
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+  BP01-T04:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-28"
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+    token:
+      name: 乙姫お守り隊
+      template: true
+  BP01-T06:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-28"
+    abilities:
+      - keywords:
+          - storm
+        line: 1
+    token:
+      name: ヴァイキング
+      template: true
+  BP01-086:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-28"
+    abilities:
+      - evolve:
+          cost:
+            pp: 2
+        line: 1
+      - keywords:
+          - ward
+        line: 2
+      - fanfare:
+          do:
+            - draw:
+                n: 2
+            - discard:
+                n: 1
+        line: 3
+  BP01-026:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-28"
+    abilities:
+      - evolve:
+          cost:
+            pp: 2
+        line: 1
+      - fanfare:
+          do:
+            - create:
+                token: 乙姫お守り隊
+                to: field
+                n: 1
+        line: 2
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP01-T04
+  BP01-050:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-28"
+    abilities:
+      - spell:
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+          do:
+            - damage:
+                n: 5
+                to: chosen
+            - create:
+                token: ナイト
+                to: ex
+                n: 1
+        line: 1
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP17-T11
