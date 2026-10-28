@@ -707,6 +707,9 @@ pub(super) enum LeaderSide {
 pub(super) enum Number {
     Literal(i64),
     Alias(String),
+    HistoryCount {
+        history_count: PlayedHistory,
+    },
     LeaderLife {
         leader_life: LeaderSide,
     },
@@ -728,6 +731,28 @@ pub(super) enum Number {
         selection: String,
         value: SelectedStat,
     },
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct PlayedHistory {
+    #[serde(rename = "event")]
+    pub _event: PlayedEvent,
+    #[serde(rename = "window")]
+    pub _window: ThisTurn,
+    pub who: Option<LeaderSide>,
+    #[serde(rename = "distinct")]
+    pub _distinct: Option<FactCount>,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum PlayedEvent {
+    Played,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum FactCount {
+    Facts,
 }
 
 #[derive(Deserialize)]
@@ -1012,6 +1037,7 @@ pub(super) enum Condition {
     LeaderLife(PlayerThreshold),
 
     Crimson(bool),
+    Combo(u64),
     Paid(PaidReceipt),
     Cmp(BodyComparison),
     All(Vec<Self>),

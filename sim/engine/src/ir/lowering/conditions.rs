@@ -17,6 +17,7 @@ impl BodyContext<'_> {
         path: &str,
     ) -> Result<Expr<Bool>, LoweringError> {
         Ok(Expr::Compute(Box::new(match value {
+            ast::Condition::Combo(threshold) => return Self::combo(*threshold, path),
             ast::Condition::Exists(query) => return self.field_exists(query, path),
             ast::Condition::Awakened(true) => Predicate::CompareInt {
                 left: Expr::Live(Box::new(IntRead::PlayerResource {
@@ -114,6 +115,42 @@ impl BodyContext<'_> {
         })))
     }
 
+    fn combo(threshold: u64, path: &str) -> Result<Expr<Bool>, LoweringError> {
+        if threshold == 0 {
+            return Err(unsupported(path));
+        }
+        Ok(Expr::Compute(Box::new(Predicate::CompareInt {
+            left: Expr::Compute(Box::new(IntOperation::FromNat {
+                value: Expr::Live(Box::new(NatRead::Combo {
+                    player: PlayerRef::Controller {},
+                    execution: super::super::ExecutionRef::Current {},
+                })),
+            })),
+            comparison: Comparison::GreaterEqual,
+            right: Expr::Literal(Int(
+                i64::try_from(threshold).map_err(|_private| unsupported(path))?
+            )),
+        })))
+    }
+
+    fn played_count(
+        &mut self,
+        history: &ast::PlayedHistory,
+        path: &str,
+    ) -> Result<Expr<Int>, LoweringError> {
+        let player = history.who.as_ref().map(|side| match side {
+            ast::LeaderSide::Controller => PlayerRef::Controller {},
+            ast::LeaderSide::Opponent => super::super::events::timing::opponent(),
+        });
+        let event = Binding::new(self.allocator.id(path)?, self.scope);
+        Ok(Expr::Compute(Box::new(IntOperation::FromNat {
+            value: Expr::Live(Box::new(NatRead::HistoryCount {
+                query: super::super::history_turn::played_query(event, player),
+                count: super::super::HistoryCount::Facts,
+            })),
+        })))
+    }
+
     fn field_exists(
         &mut self,
         query: &ast::PublicQuery,
@@ -139,6 +176,7 @@ impl BodyContext<'_> {
         active: &mut BTreeSet<String>,
     ) -> Result<Expr<Int>, LoweringError> {
         match value {
+            ast::Number::HistoryCount { history_count } => self.played_count(history_count, path),
             ast::Number::Literal(value) => Ok(Expr::Literal(Int(*value))),
             ast::Number::Resolution { at, value } => {
                 let ast::ResolutionTime::Resolution = at;

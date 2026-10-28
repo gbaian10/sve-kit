@@ -376,6 +376,7 @@ impl Game {
             .play
             .as_ref()
             .ok_or_else(|| invalid("missing Quick PlaySpec"))?;
+        execution.spell = spell;
         execution.captures(&probe, &play.captures)?;
         let CostSpec::Ordered { steps } = &play.costs else {
             return Err(unsupported("Quick costs"));
@@ -540,6 +541,7 @@ impl Game {
             .play
             .as_ref()
             .ok_or_else(|| invalid("missing Spell play"))?;
+        execution.spell = true;
         execution.captures(self, &play.captures)?;
         self.internal_play_move(holder, "resolution", &execution.frame())?;
         self.object_mut(holder)?.state["entered_from"] = json!(object.zone);
@@ -547,7 +549,6 @@ impl Game {
         let source = self.internal_card_source(holder, ability.id, actor)?;
         // The Spell's source is its Resolution generation, never the Hand/EX play-time object.
         execution.bind_source(self, source)?;
-        execution.spell = true;
         self.run_card_play(execution, ability)
     }
 
@@ -582,10 +583,10 @@ impl Game {
     ) -> Result<CardPlay> {
         let mut execution = self.new_card_execution(context)?;
         execution.bind_source(self, source)?;
+        execution.spell = spell;
         if let Some(play) = &ability.play {
             execution.captures(self, &play.captures)?;
         }
-        execution.spell = spell;
         self.run_card_play(execution, ability)
     }
 

@@ -6,7 +6,9 @@ use super::{
     ResolvedRecipients, Result, RuntimeDamageRecipient, Selector, Slot, ZoneKind, contains, int,
     invalid, player_id, seat_name, unsupported,
 };
-use crate::ir::{BoolFrozen, BoolRead, ExecutionRef, PaymentReference, SpellCountTime};
+use crate::ir::{
+    BoolFrozen, BoolRead, ExecutionRef, HistoryCount, PaymentReference, SpellCountTime,
+};
 use crate::ir::{
     FollowPermission, MemberProjection, MovementReceipt, ObjectReceipt, ObjectView, PlayerRead,
     ReceiptId, Role, SelectionView,
@@ -467,6 +469,53 @@ impl Execution {
         }
     }
 
+    fn live_natural(&self, game: &Game, read: &NatRead) -> Result<Nat> {
+        match read {
+            NatRead::Combo { player, execution } => {
+                super::history_turn::combo(self, game, player, *execution)
+            }
+            NatRead::HistoryCount {
+                query,
+                count: HistoryCount::Facts,
+            } => super::history_turn::played(self, game, query),
+            NatRead::ZoneCount {
+                selector:
+                    Selector::Zone {
+                        players,
+                        zone: zone @ (ZoneKind::Hand | ZoneKind::Deck),
+                        view: SelectionView::Current {},
+                        predicate,
+                        ..
+                    },
+            } => {
+                if **predicate != Expr::Literal(Bool(true)) {
+                    return Err(unsupported("filtered hidden zone count"));
+                }
+                let zone = if *zone == ZoneKind::Hand {
+                    "hand"
+                } else {
+                    "deck"
+                };
+                let count =
+                    self.players(game, players)?
+                        .into_iter()
+                        .try_fold(0_u64, |count, player| {
+                            let length = u64::try_from(game.zone(seat_name(player)?, zone).len())
+                                .map_err(invalid)?;
+                            count
+                                .checked_add(length)
+                                .ok_or_else(|| invalid("zone count overflow"))
+                        })?;
+                Ok(Nat(count))
+            }
+            NatRead::ZoneCount { selector } => Ok(Nat(u64::try_from(
+                self.objects(game, selector)?.len(),
+            )
+            .map_err(invalid)?)),
+            _ => Err(unsupported("natural read")),
+        }
+    }
+
     pub(super) fn natural(&self, game: &Game, expr: &Expr<Nat>) -> Result<Nat> {
         match expr {
             Expr::Literal(value) => Ok(*value),
@@ -505,43 +554,7 @@ impl Execution {
                 }
                 _ => Err(unsupported("natural projection")),
             },
-            Expr::Live(read) => match read.as_ref() {
-                NatRead::ZoneCount {
-                    selector:
-                        Selector::Zone {
-                            players,
-                            zone: zone @ (ZoneKind::Hand | ZoneKind::Deck),
-                            view: SelectionView::Current {},
-                            predicate,
-                            ..
-                        },
-                } => {
-                    if **predicate != Expr::Literal(Bool(true)) {
-                        return Err(unsupported("filtered hidden zone count"));
-                    }
-                    let zone = if *zone == ZoneKind::Hand {
-                        "hand"
-                    } else {
-                        "deck"
-                    };
-                    let count = self.players(game, players)?.into_iter().try_fold(
-                        0_u64,
-                        |count, player| {
-                            let length = u64::try_from(game.zone(seat_name(player)?, zone).len())
-                                .map_err(invalid)?;
-                            count
-                                .checked_add(length)
-                                .ok_or_else(|| invalid("zone count overflow"))
-                        },
-                    )?;
-                    Ok(Nat(count))
-                }
-                NatRead::ZoneCount { selector } => Ok(Nat(u64::try_from(
-                    self.objects(game, selector)?.len(),
-                )
-                .map_err(invalid)?)),
-                _ => Err(unsupported("natural read")),
-            },
+            Expr::Live(read) => self.live_natural(game, read),
             Expr::Compute(operation) => match operation.as_ref() {
                 NatOperation::Count { objects } => Ok(Nat(u64::try_from(
                     self.objects(game, objects)?.len(),
