@@ -143,8 +143,7 @@ fn holy_wish_chooses_one_printed_activation_and_pays_before_drawing() {
             initial["players"][seat]["zones"]["deck"] = json!([
                 {"id":"draw1","card":"CP03-016"},{"id":"draw2","card":"CP03-016"},{"id":"draw3","card":"CP03-016"}
             ]);
-            let (snapshot, keywords, input) = inputs();
-            let selected = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
+            let selected = selection().clone();
             let [first, second] = [1_u32, 2].map(|printed_line| {
                 selected.current["EBD04-014"]
                     .program

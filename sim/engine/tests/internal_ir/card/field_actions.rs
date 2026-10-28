@@ -1,7 +1,6 @@
 use super::*;
 use alloc::collections::BTreeMap;
 use sve_engine::game::internal::InputDomain;
-use sve_engine::ir::lowering::ExpandedLowerer;
 
 fn tree(steps: &Value) -> Value {
     let mut tree = fanfare::expanded::spell_tree().clone();
@@ -14,8 +13,7 @@ fn tree(steps: &Value) -> Value {
 
 #[test]
 fn target_set_changes_current_life_without_erasing_prior_damage() {
-    let cards = ExpandedLowerer::new()
-        .unwrap()
+    let cards = lowerer()
         .lower_with_printed_costs(
             &tree(&json!([
                 {"damage":{"to":"t","n":2}},
@@ -62,8 +60,7 @@ fn bounce_rejects_hidden_follow_and_wrong_zones_before_execution() {
         json!({"ref":"t","to":"hand","position":"top"}),
         json!({"ref":{"in":"looked"},"to":"hand"}),
     ] {
-        ExpandedLowerer::new()
-            .unwrap()
+        lowerer()
             .lower_with_printed_costs(
                 &tree(&json!([{"move":movement}])),
                 &BTreeMap::from([("SD03-005".to_owned(), Nat(1))]),
@@ -80,7 +77,7 @@ fn field_damage_keeps_amulets_outside_the_follower_domain() {
     entry["activate"] = json!({"cost":{"pp":0},"do":[{"damage":{"to":{"who":"opp","zone":"field","kind":"follower"},"n":1}}]});
     let meta = tree["cards"]["BP08-038"]["meta"].clone();
     tree["cards"] = json!({"unit-follower":{"meta":meta,"abilities":[entry]}});
-    let programs = ExpandedLowerer::new().unwrap().lower(&tree).unwrap();
+    let programs = lowerer().lower(&tree).unwrap();
     for seat in [1, 2] {
         let actor = if seat == 1 { "P1" } else { "P2" };
         let opponent = if seat == 1 { "P2" } else { "P1" };
@@ -126,8 +123,7 @@ fn public_cemetery_moves_reject_hidden_sources_and_unimplemented_receipts() {
         json!({"ref":"t","to":"cemetery","result":"moved"}),
         json!({"ref":"t","to":"cemetery","position":"top"}),
     ] {
-        ExpandedLowerer::new()
-            .unwrap()
+        lowerer()
             .lower_with_printed_costs(
                 &tree(&json!([{"move":movement}])),
                 &BTreeMap::from([("SD03-005".to_owned(), Nat(1))]),

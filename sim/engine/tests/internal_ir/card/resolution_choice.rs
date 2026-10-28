@@ -7,7 +7,6 @@ use super::*;
 use crate::rule_fixtures;
 use sve_engine::catalog::EngineIdentityInput;
 use sve_engine::game::internal::{DecisionView, InputDomain};
-use sve_engine::ir::lowering::ExpandedLowerer;
 
 fn ex_catalog() -> Arc<Catalog> {
     let snapshot=[("unit-spell","スペル"),("unit-follower","フォロワー"),("lesson","スペル・トークン")].iter().map(|(number,kind)|json!({"number":number,"faces":[{"name":number,"card_class":"ニュートラル","card_type":kind,"cost":"1","power":"2","hp":"3","traits":[],"text":null,"sections":[]}]}).to_string()).collect::<Vec<_>>().join("\n");
@@ -56,8 +55,7 @@ fn awaiting(play: CardPlay) -> DecisionView {
 
 #[test]
 fn resolution_exact_choice_uses_available_field_objects_and_keeps_payment() {
-    let programs = ExpandedLowerer::new()
-        .unwrap()
+    let programs = lowerer()
         .lower(&tree(
             &json!({"bind":"t","from":{"who":"opp","zone":"field","kind":"follower"},"n":2}),
             &json!({"damage":{"to":"t","n":1}}),
@@ -133,8 +131,7 @@ fn resolution_exact_choice_uses_available_field_objects_and_keeps_payment() {
 
 #[test]
 fn resolution_amulet_choice_reuses_public_handles_and_destroy() {
-    let programs = ExpandedLowerer::new()
-        .unwrap()
+    let programs = lowerer()
         .lower(&tree(
             &json!({"bind":"t","from":{"who":"opp","zone":"field","kind":"amulet"},"n":1}),
             &json!({"destroy":"t"}),
@@ -186,8 +183,7 @@ fn resolution_choice_rejects_hidden_sources_foreign_actors_and_optional_instruct
         json!({"bind":"t","from":{"who":"opp","zone":"field"},"n":1,"may":true}),
         json!({"bind":"t","from":{"who":"opp","zone":"field"},"n":0}),
     ] {
-        ExpandedLowerer::new()
-            .unwrap()
+        lowerer()
             .lower(&tree(&choice, &json!({"destroy":"t"})))
             .unwrap_err();
     }
@@ -202,10 +198,7 @@ fn resolution_choice_cannot_replace_an_existing_observation_binding() {
         {"choose":choice},
         {"destroy":"t"}
     ]);
-    let error = ExpandedLowerer::new()
-        .unwrap()
-        .lower(&duplicate)
-        .unwrap_err();
+    let error = lowerer().lower(&duplicate).unwrap_err();
     assert_eq!(error.code, "unsupported_construct");
 }
 
@@ -215,7 +208,7 @@ fn named_field_choices_reject_shared_names_and_accept_distinct_names() {
         ("unit-", 3, vec![0, 2], json!(["duplicate"])),
         ("follower", 2, vec![0], json!(["duplicate", "different"])),
     ] {
-        let programs = ExpandedLowerer::new().unwrap().lower(&tree(
+        let programs = lowerer().lower(&tree(
         &json!({"bind":"t","from":{"who":"opp","zone":"field","name_contains":substring},"upto":2,"distinct_by":"name"}),
         &json!({"destroy":"t"}),
     )).unwrap();
@@ -264,7 +257,7 @@ fn named_field_choices_reject_shared_names_and_accept_distinct_names() {
 
 #[test]
 fn exact_distinct_name_resolution_uses_the_largest_compatible_selection() {
-    let programs = ExpandedLowerer::new().unwrap().lower(&tree(
+    let programs = lowerer().lower(&tree(
         &json!({"bind":"t","from":{"who":"opp","zone":"field","name":"unit-follower"},"n":2,"distinct_by":"name"}),
         &json!({"damage":{"to":"t","n":1}}),
     )).unwrap();
@@ -312,7 +305,7 @@ fn named_field_collection_buffs_only_matching_objects() {
         &action,
     );
     input["cards"]["unit-follower"]["abilities"][0]["activate"]["do"] = json!([action]);
-    let programs = ExpandedLowerer::new().unwrap().lower(&input).unwrap();
+    let programs = lowerer().lower(&input).unwrap();
     let mut initial = setup(1, json!([]));
     initial["players"]["P1"]["zones"]["hand"] = json!([]);
     initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);

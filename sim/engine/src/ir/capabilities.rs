@@ -2,6 +2,7 @@ use super::{CardProgram, Located, SourceSpan, Walk};
 use alloc::collections::{BTreeMap, BTreeSet};
 use core::num::NonZeroU32;
 use sha2::{Digest as _, Sha256};
+use std::sync::OnceLock;
 
 /// An exact semantic capability version, separate from transport capabilities.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
@@ -228,33 +229,43 @@ impl Registry {
 }
 
 fn schema_identity() -> Identity {
-    let mut digest = Sha256::new();
-    for source in [
-        include_str!("../ir.rs"),
-        include_str!("values.rs"),
-        include_str!("actions.rs"),
-        include_str!("flow.rs"),
-        include_str!("effects.rs"),
-        include_str!("events.rs"),
-        include_str!("runtime.rs"),
-        include_str!("projections.rs"),
-        include_str!("values/sealed.rs"),
-    ] {
-        digest.update(source.as_bytes());
-    }
-    Identity {
-        id: "internal:d0-types:1",
-        hash: hex_digest(digest.finalize().as_slice()),
-    }
+    static IDENTITY: OnceLock<Identity> = OnceLock::new();
+    IDENTITY
+        .get_or_init(|| {
+            let mut digest = Sha256::new();
+            for source in [
+                include_str!("../ir.rs"),
+                include_str!("values.rs"),
+                include_str!("actions.rs"),
+                include_str!("flow.rs"),
+                include_str!("effects.rs"),
+                include_str!("events.rs"),
+                include_str!("runtime.rs"),
+                include_str!("projections.rs"),
+                include_str!("values/sealed.rs"),
+            ] {
+                digest.update(source.as_bytes());
+            }
+            Identity {
+                id: "internal:d0-types:1",
+                hash: hex_digest(digest.finalize().as_slice()),
+            }
+        })
+        .clone()
 }
 fn derivation_identity() -> Identity {
-    let mut digest = Sha256::new();
-    digest.update(schema_identity().hash.as_bytes());
-    digest.update(include_bytes!("capabilities.rs"));
-    Identity {
-        id: "internal:d0-derivation:1",
-        hash: hex_digest(digest.finalize().as_slice()),
-    }
+    static IDENTITY: OnceLock<Identity> = OnceLock::new();
+    IDENTITY
+        .get_or_init(|| {
+            let mut digest = Sha256::new();
+            digest.update(schema_identity().hash.as_bytes());
+            digest.update(include_bytes!("capabilities.rs"));
+            Identity {
+                id: "internal:d0-derivation:1",
+                hash: hex_digest(digest.finalize().as_slice()),
+            }
+        })
+        .clone()
 }
 
 fn hex_digest(bytes: &[u8]) -> String {

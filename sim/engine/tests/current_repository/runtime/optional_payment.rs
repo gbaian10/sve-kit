@@ -14,8 +14,7 @@ fn awaiting(play: CardPlay) -> DecisionView {
 
 #[test]
 fn bp04_066_declares_extra_pp_before_choosing_target_and_only_then_pays() {
-    let (snapshot, keywords, input) = inputs();
-    let selection = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
+    let selection = selection();
     for (accepted, pp, quick) in [
         (false, 10_u8, false),
         (true, 10, false),

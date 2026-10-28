@@ -6,7 +6,6 @@
 use super::*;
 use sve_engine::game::Step;
 use sve_engine::game::internal::{Answer, DecisionView, InputDomain};
-use sve_engine::ir::lowering::ExpandedLowerer;
 
 fn permit() -> Located<Ability> {
     let mut tree = fanfare::expanded::tree().clone();
@@ -21,7 +20,7 @@ fn permit() -> Located<Ability> {
         .remove("ability_scope");
     seed["abilities"] = json!([header]);
     tree["cards"] = json!({"unit-spell": seed});
-    let lowered = ExpandedLowerer::new().unwrap().lower(&tree).unwrap();
+    let lowered = lowerer().lower(&tree).unwrap();
     let mut a = lowered["unit-spell"].card().abilities[0].clone();
     a.node.id = AbilityId(2);
     a.node.scope = ScopeId(2);

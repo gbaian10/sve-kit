@@ -1,8 +1,7 @@
 use super::*;
 
 fn bell_game(initial: &Value) -> (Game, AbilityId) {
-    let (snapshot, keywords, input) = inputs();
-    let selected = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
+    let selected = selection().clone();
     let ability = selected.current["BP18-115"]
         .program
         .card()

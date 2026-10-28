@@ -147,7 +147,7 @@ fn source_mutations_cannot_change_attack_head_actor_count_or_provenance() {
         }
         assert!(
             failure(Catalog::from_current_selection(
-                &snapshot, &keywords, &selection
+                snapshot, keywords, &selection
             ))
             .contains(*rejection),
             "mutated input {probe} must be rejected for its own reason"

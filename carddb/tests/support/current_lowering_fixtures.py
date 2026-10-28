@@ -13,8 +13,15 @@ from sve_carddb.domains.effects.author_current import (
 from sve_carddb.domains.effects.author_expansion import AuthorExpander
 from sve_carddb.domains.effects.author_inputs import AuthorInputError, parse_document
 
-from .author_current_fixtures import REPOSITORY, current_source_fixture
+from .author_current_fixtures import (
+    REPOSITORY,
+    current_source_fixture,
+    current_source_inputs,
+    entry_snapshot,
+)
+from .author_destroy_fixtures import destroy_fixture
 from .current_keyword_fixtures import (
+    COMBAT_CARDS,
     current_combat_keyword_inputs,
     current_keyword_inputs,
 )
@@ -22,10 +29,13 @@ from .current_keyword_fixtures import (
 if TYPE_CHECKING:
     from pathlib import Path
 
+    from .author_current_fixtures import CurrentSourceInputs
+
 
 def current_lowering_inputs(root: Path) -> JsonValue:
     """Exercise accepted and provisional JP printings through the same current reader."""
-    fixture = current_source_fixture(root / "sources")
+    preparation = current_source_inputs(root / "preparation")
+    fixture = current_source_fixture(root / "sources", preparation=preparation)
     number = "BP01-009"
     card_id = "c:9c5459446e0254818099800b4208cd96"
     authored = root / "authored"
@@ -136,15 +146,44 @@ def current_lowering_inputs(root: Path) -> JsonValue:
         assert isinstance(rejected, CardRejected)
         return {
             "accepted": accepted.lowering_input(),
-            "keywords": current_keyword_inputs(root / "keywords"),
-            "combat_keywords": current_combat_keyword_inputs(root / "combat-keywords"),
-            "keyword_fanfare": {
-                number: current_keyword_inputs(root / number, number)
-                for number in ("BP19-P32", "BP19-114")
-            },
+            **keyword_lowering_inputs(root, preparation, expander),
             "rejected": {"reason": rejected.diagnostic.reason},
             "switch": switch,
         }
+
+
+def keyword_lowering_inputs(
+    root: Path, preparation: CurrentSourceInputs, expander: AuthorExpander
+) -> dict[str, JsonValue]:
+    """Share immutable sources across independent keyword database variants."""
+    keyword_snapshot = entry_snapshot(include_keywords=True)
+    keywords = current_source_fixture(
+        root / "keyword-sources",
+        card_numbers=frozenset({"BP01-138"}),
+        snapshot=keyword_snapshot,
+        preparation=preparation,
+    )
+    combat = current_source_fixture(
+        root / "combat-sources",
+        card_numbers=frozenset(COMBAT_CARDS),
+        snapshot=keyword_snapshot,
+        preparation=preparation,
+    )
+    fanfare = destroy_fixture(root / "fanfare-sources", preparation=preparation)
+    return {
+        "keywords": current_keyword_inputs(
+            root / "keywords", fixture=keywords, expander=expander
+        ),
+        "combat_keywords": current_combat_keyword_inputs(
+            root / "combat-keywords", fixture=combat, expander=expander
+        ),
+        "keyword_fanfare": {
+            number: current_keyword_inputs(
+                root / number, number, fixture=fanfare, expander=expander
+            )
+            for number in ("BP19-P32", "BP19-114")
+        },
+    }
 
 
 def missing_selection(

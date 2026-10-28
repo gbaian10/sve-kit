@@ -29,28 +29,13 @@ fn position(controller: &str, owner: &str, deck: Value) -> Value {
 }
 
 fn game_with_external_movement(initial: &Value, action: Action) -> Game {
-    let (mut snapshot, keywords, mut input) = inputs();
-    let face = serde_json::from_str::<Value>(
-        snapshot
-            .lines()
-            .find(|line| serde_json::from_str::<Value>(line).unwrap()["number"] == NUMBER)
-            .unwrap(),
-    )
-    .unwrap()["faces"][0]
-        .clone();
-    snapshot.push_str(&json!({"number":"producer","faces":[face]}).to_string());
-    snapshot.push('\n');
-    input["documents"].as_array_mut().unwrap().push(json!([
-        "producer.yaml",
-        "format: 1\nkind: effect_set\ncards:\n  producer:\n    status: complete\n    abilities: []\n"
-    ]));
     let mut initial = initial.clone();
     let controller = initial["turn"]["active"].as_str().unwrap().to_owned();
     initial["players"][&controller]["zones"]["field"]
         .as_array_mut()
         .unwrap()
         .push(json!({"id":"producer","card":"producer"}));
-    let selected = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
+    let selected = producer_selection().clone();
     let mut game = Game::from_selected_effects(
         selected,
         &initial,

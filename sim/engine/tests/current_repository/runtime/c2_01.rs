@@ -4,22 +4,9 @@
 )]
 
 use super::*;
-use sve_engine::catalog::EngineIdentityInput;
 
 fn trial_game(initial: &Value) -> Game {
-    let (snapshot, keywords, input) = inputs();
-    let rules = read_to_string(
-        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../authored/rules/engine/index.yaml"),
-    )
-    .unwrap();
-    let selected = Catalog::from_current_selection_with_rules(
-        &snapshot,
-        &keywords,
-        &input,
-        &rules,
-        &EngineIdentityInput::LegacyJp,
-    )
-    .unwrap();
+    let selected = selection_with_rules().clone();
     for card in ["CP03-016", "BP01-131", "SD03-005", "BP20-P38"] {
         assert!(
             selected.current.contains_key(card),

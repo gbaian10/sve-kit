@@ -120,7 +120,7 @@ fn programs() -> &'static (WellFormedCardProgram, WellFormedCardProgram) {
 }
 
 fn lowered_programs() -> (WellFormedCardProgram, WellFormedCardProgram) {
-    let lowered = second::lowerer().lower(fanfare::expanded::tree()).unwrap();
+    let lowered = lowerer().lower(fanfare::expanded::tree()).unwrap();
     let intrinsic = relabel(
         lowered["synthetic-evolution"].card().abilities[0].clone(),
         "unit-follower",

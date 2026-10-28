@@ -1,6 +1,5 @@
 use super::*;
 use sve_engine::game::internal::InputDomain;
-use sve_engine::ir::lowering::ExpandedLowerer;
 
 fn tree() -> Value {
     let mut tree = fanfare::expanded::tree().clone();
@@ -15,7 +14,7 @@ fn tree() -> Value {
 
 #[test]
 fn optional_trigger_declaration_precedes_targets_and_payment_is_atomic() {
-    let programs = ExpandedLowerer::new().unwrap().lower(&tree()).unwrap();
+    let programs = lowerer().lower(&tree()).unwrap();
     for (accept, pp) in [(false, 3_i64), (true, 3), (true, 2)] {
         let mut initial = setup(1, json!([]));
         initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"s","card":"unit-follower"}]);
@@ -90,7 +89,7 @@ fn optional_declaration_rejects_activation_other_triggers_and_exchange_coexisten
         if kind == "activate" {
             entry[kind]["cost"] = json!({"pp":0});
         }
-        ExpandedLowerer::new().unwrap().lower(&tree).unwrap_err();
+        lowerer().lower(&tree).unwrap_err();
     }
     let mut tree = tree();
     let mut exchange = tree["cards"]["unit-follower"]["abilities"][0].clone();
@@ -100,5 +99,5 @@ fn optional_declaration_rejects_activation_other_triggers_and_exchange_coexisten
         .as_array_mut()
         .unwrap()
         .push(exchange);
-    ExpandedLowerer::new().unwrap().lower(&tree).unwrap_err();
+    lowerer().lower(&tree).unwrap_err();
 }

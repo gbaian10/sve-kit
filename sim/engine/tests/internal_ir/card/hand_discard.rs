@@ -1,6 +1,5 @@
 use super::*;
 use sve_engine::game::internal::{DecisionToken, DecisionView, InputDomain};
-use sve_engine::ir::lowering::ExpandedLowerer;
 
 fn tree(discard: &Value) -> Value {
     let mut tree = fanfare::expanded::tree().clone();
@@ -14,8 +13,7 @@ fn tree(discard: &Value) -> Value {
 
 #[test]
 fn hand_discard_uses_private_handles_and_discards_as_many_as_available() {
-    let programs = ExpandedLowerer::new()
-        .unwrap()
+    let programs = lowerer()
         .lower(&tree(&json!({"who":"self","n":2})))
         .unwrap();
     for seat in [1_u32, 2] {
@@ -128,10 +126,7 @@ fn discard_author_lowering_rejects_opponent_random_filtered_and_zero() {
         json!({"who":"self","n":0}),
         json!({"who":"self","n":1,"sel":{"who":"self","zone":"hand","kind":"spell"}}),
     ] {
-        ExpandedLowerer::new()
-            .unwrap()
-            .lower(&tree(&discard))
-            .unwrap_err();
+        lowerer().lower(&tree(&discard)).unwrap_err();
     }
 }
 

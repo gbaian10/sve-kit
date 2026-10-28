@@ -1,6 +1,5 @@
 use super::*;
 use alloc::collections::BTreeMap;
-use sve_engine::ir::lowering::ExpandedLowerer;
 
 fn tree(steps: &Value) -> Value {
     let mut tree = fanfare::expanded::spell_tree().clone();
@@ -10,7 +9,7 @@ fn tree(steps: &Value) -> Value {
 
 #[test]
 fn boolean_conditions_use_current_pp_and_unfiltered_hidden_counts_without_exposing_cards() {
-    let programs = ExpandedLowerer::new().unwrap().lower_with_printed_costs(
+    let programs = lowerer().lower_with_printed_costs(
         &tree(&json!([{"if":{
             "cond":{"all":[
                 {"cmp":{"left":{"resource":{"who":"self","kind":"pp"}},"op":"eq","right":2}},
@@ -66,8 +65,7 @@ fn conditions_reject_filtered_hidden_counts_and_non_numeric_damage_replacements(
             {"if":{"cmp":{"left":1,"op":"eq","right":1}},"n":3}
         ]}}]),
     ] {
-        ExpandedLowerer::new()
-            .unwrap()
+        lowerer()
             .lower_with_printed_costs(
                 &tree(&steps),
                 &BTreeMap::from([("SD03-005".to_owned(), Nat(1))]),
@@ -112,8 +110,7 @@ fn count_admission_does_not_authorize_hand_objects_as_effect_targets() {
 #[test]
 fn leader_life_threshold_and_expression_read_after_the_preceding_life_change() {
     for (who, life) in [("self", 9_i64), ("opp", 20_i64)] {
-        let programs = ExpandedLowerer::new()
-            .unwrap()
+        let programs = lowerer()
             .lower_with_printed_costs(
                 &tree(&json!([
                     {"life":{"who":"self","delta":-11}},
@@ -149,8 +146,7 @@ fn live_condition_syntax_rejects_false_awakening_and_ambiguous_thresholds() {
         json!({"leader_life":{"who":"self","le":10,"ge":5}}),
         json!({"leader_life":{"who":"all","eq":10}}),
     ] {
-        ExpandedLowerer::new()
-            .unwrap()
+        lowerer()
             .lower_with_printed_costs(
                 &tree(&json!([{"if":{"cond":condition,"then":[{"draw":{"n":1}}]}}])),
                 &BTreeMap::from([("SD03-005".to_owned(), Nat(1))]),
@@ -161,8 +157,7 @@ fn live_condition_syntax_rejects_false_awakening_and_ambiguous_thresholds() {
 
 #[test]
 fn crimson_false_is_rejected_instead_of_becoming_a_negated_history_condition() {
-    ExpandedLowerer::new()
-        .unwrap()
+    lowerer()
         .lower_with_printed_costs(
             &tree(&json!([{"if":{"cond":{"crimson":false},"then":[{"draw":{"n":1}}]}}])),
             &BTreeMap::from([("SD03-005".to_owned(), Nat(1))]),

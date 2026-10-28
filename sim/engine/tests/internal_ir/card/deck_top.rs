@@ -1,5 +1,4 @@
 use super::*;
-use sve_engine::ir::lowering::ExpandedLowerer;
 
 fn tree(movement: &Value) -> Value {
     let mut tree = fanfare::expanded::tree().clone();
@@ -15,10 +14,7 @@ fn deck_top_lowering_rejects_unadmitted_source_destination_and_followup() {
         json!({"top":{"who":"self","n":0},"to":"cemetery"}),
         json!({"top":{"who":"self","n":2},"to":"cemetery","result":"m"}),
     ] {
-        let error = ExpandedLowerer::new()
-            .unwrap()
-            .lower(&tree(&movement))
-            .unwrap_err();
+        let error = lowerer().lower(&tree(&movement)).unwrap_err();
         assert_eq!(error.code, "unsupported_construct");
     }
 }

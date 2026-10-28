@@ -28,8 +28,14 @@ pub(super) fn setup(seat: &str, owner: &str, life: [u8; 2]) -> Value {
 }
 
 pub(super) fn game(initial: &Value) -> Game {
-    let (snapshot, keywords, input) = inputs();
-    game_from_selection(initial, &snapshot, &keywords, &input)
+    Game::from_selected_effects(
+        selection().clone(),
+        initial,
+        &Value::Null,
+        &Value::Null,
+        "current-runtime",
+    )
+    .unwrap()
 }
 
 pub(super) fn game_from_selection(
@@ -203,8 +209,10 @@ fn movement(zone: OwnerZone) -> Action {
     }
 }
 
-fn with_producer(initial: &Value, action: Action) -> Game {
-    let (mut snapshot, keywords, mut input) = inputs();
+fn producer_selection() -> &'static SelectedEffects {
+    static SELECTED: OnceLock<SelectedEffects> = OnceLock::new();
+    SELECTED.get_or_init(|| {
+    let (mut snapshot, keywords, mut input) = inputs().clone();
     let face = serde_json::from_str::<Value>(
         snapshot
             .lines()
@@ -218,16 +226,25 @@ fn with_producer(initial: &Value, action: Action) -> Game {
     input["documents"].as_array_mut().unwrap().push(json!([
         "producer.yaml", "format: 1\nkind: effect_set\ncards:\n  producer:\n    status: complete\n    abilities: []\n"
     ]));
+        Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap()
+    })
+}
+
+fn with_producer(initial: &Value, action: Action) -> Game {
     let mut initial = initial.clone();
     let seat = initial["turn"]["active"].as_str().unwrap().to_owned();
     initial["players"][&seat]["zones"]["field"]
         .as_array_mut()
         .unwrap()
         .push(json!({"id":"producer","card":"producer"}));
-    let selected = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
-    let mut game =
-        Game::from_selected_effects(selected, &initial, &Value::Null, &Value::Null, "producer")
-            .unwrap();
+    let mut game = Game::from_selected_effects(
+        producer_selection().clone(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "producer",
+    )
+    .unwrap();
     game.load_internal_card("producer", &producer(action))
         .unwrap();
     game
@@ -564,15 +581,15 @@ fn construct(selected: SelectedEffects, seed: &str) -> String {
 #[test]
 fn current_admission_rejects_foreign_snapshot_and_program() {
     let (snapshot, keywords, input) = inputs();
-    let mut cleared = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
+    let mut cleared = Catalog::from_current_selection(snapshot, keywords, input).unwrap();
     cleared.current.clear();
     assert!(
         construct(cleared, "changed").contains("current selection changed after acceptance"),
         "removing an accepted candidate rejects the whole construction"
     );
     // The prototype closure is part of the accepted selection, even when its content is equal.
-    let mut replaced = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
-    replaced.prototypes = Catalog::from_current_selection(&snapshot, &keywords, &input)
+    let mut replaced = Catalog::from_current_selection(snapshot, keywords, input).unwrap();
+    replaced.prototypes = Catalog::from_current_selection(snapshot, keywords, input)
         .unwrap()
         .prototypes;
     assert!(
@@ -580,7 +597,7 @@ fn current_admission_rejects_foreign_snapshot_and_program() {
         "replacing the prototype catalogue rejects the whole construction"
     );
     // A current candidate cannot gain admission through an unrelated prototype catalogue.
-    let accepted = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
+    let accepted = Catalog::from_current_selection(snapshot, keywords, input).unwrap();
     let mut plain = Game::new(
         accepted.prototypes,
         &setup("P1", "P1", [20, 20]),
@@ -605,7 +622,7 @@ fn current_admission_rejects_foreign_snapshot_and_program() {
         })
         .collect::<Vec<_>>()
         .join("\n");
-    let foreign = Catalog::from_current_selection(&changed, &keywords, &input).unwrap();
+    let foreign = Catalog::from_current_selection(&changed, keywords, input).unwrap();
     assert!(
         construct(foreign, "foreign").contains("no unique snapshot source"),
         "a snapshot whose face text differs from the accepted source is rejected"

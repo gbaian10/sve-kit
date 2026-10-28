@@ -1,6 +1,5 @@
 use super::*;
 use sve_engine::game::internal::{Answer, DecisionView, InputDomain};
-use sve_engine::ir::lowering::ExpandedLowerer;
 
 pub(super) fn lastword(mut ability: Located<Ability>) -> Located<Ability> {
     ability.node.kind = AbilityKind::Triggered;
@@ -78,10 +77,7 @@ fn activated(initial: &Value, program: &WellFormedCardProgram, seat: u32) -> Gam
 
 #[test]
 fn bp01_p25_lowered_lastword_survives_non_destroy_source_cost() {
-    let cards = ExpandedLowerer::new()
-        .unwrap()
-        .lower(fanfare::expanded::tree())
-        .unwrap();
+    let cards = lowerer().lower(fanfare::expanded::tree()).unwrap();
     let mut program = cards["BP01-P25"].card().clone();
     let mut sacrifice = payment::paid_ability(vec![], vec![]);
     sacrifice.node.id = AbilityId(2);

@@ -1,4 +1,5 @@
 //! Real printings reach combat through C0 selection and normal rule decisions.
+use super::super::lowerer;
 use super::*;
 
 const STORM: &str = "BP01-158";
@@ -36,7 +37,7 @@ fn battle(game: &mut Game) {
 
 #[test]
 fn real_combat_printings_preserve_every_source_and_sibling_before_admission() {
-    let lowerer = lowering::ExpandedLowerer::new().unwrap();
+    let lowerer = lowerer();
     for (number, entry) in current_inputs()["combat_keywords"].as_object().unwrap() {
         let input = &entry["authors"][0]["input"];
         let candidate = lowerer.lower_current(input).unwrap();
@@ -330,7 +331,7 @@ fn every_combat_keyword_requires_its_effective_face_field_and_abilities() {
 #[test]
 fn combat_names_do_not_admit_unproven_partial_or_nested_definitions() {
     use super::super::{raw_keyword_coordinates, raw_keyword_game_for};
-    let lowerer = lowering::ExpandedLowerer::new().unwrap();
+    let lowerer = lowerer();
     for number in [STORM, RUSH, ASSAIL, INTIMIDATE, BANE] {
         let input = &current_inputs()["combat_keywords"][number]["authors"][0]["input"];
         let candidate = lowerer.lower_current(input).unwrap();
@@ -487,7 +488,7 @@ fn the_complete_seven_keyword_handoff_is_closed_and_consumed_in_order() {
         "【守護】【オーラ】【疾走】【突進】【必殺】【威圧】【指定攻撃】",
     );
     let input = &selection["authors"][0]["input"];
-    let lowerer = lowering::ExpandedLowerer::new().unwrap();
+    let lowerer = lowerer();
     let candidate = lowerer.lower_current(input).unwrap();
     assert_eq!(candidate.program.card().abilities.len(), 7);
     for (ability, keyword) in candidate.program.card().abilities.iter().zip([
