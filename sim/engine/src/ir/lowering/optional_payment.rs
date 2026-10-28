@@ -1,4 +1,6 @@
-use super::{AbilitySource, BodyContext, Located, LoweringError, Node, SourceSpan, ast, payment};
+use super::{
+    AbilitySource, BodyContext, KeywordId, Located, LoweringError, Node, SourceSpan, ast, payment,
+};
 use crate::ir::{Control, PaymentOptionality, PaymentTime, Program, ReceiptId};
 
 #[expect(
@@ -44,4 +46,23 @@ impl BodyContext<'_> {
             },
         }))
     }
+}
+
+pub(super) fn check_entry(
+    entry: &ast::Ability,
+    exchange: bool,
+    path: &str,
+) -> Result<(), LoweringError> {
+    if entry.evolve.is_some() || entry.keywords.is_some() {
+        return Ok(());
+    }
+    let (body, _, keyword) = super::ability_body(entry, path)?;
+    if body.optional_cost.is_some()
+        && (exchange
+            || entry.activate.is_some()
+            || (entry.spell.is_none() && keyword != Some(KeywordId::Fanfare)))
+    {
+        return Err(super::unsupported(path));
+    }
+    Ok(())
 }

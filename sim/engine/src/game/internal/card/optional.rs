@@ -3,9 +3,9 @@ use super::play::PlayState;
 use super::{AbilitySource, Execution, Game, Result, invalid, unsupported};
 use crate::game::internal::{InputDomain, InstructionOutcome, Wait};
 use crate::ir::{
-    Action, Bool, Control, CostSpec, DecisionId, Expr, InstructionContext, Int, Node,
+    AbilityKind, Action, Bool, Control, CostSpec, DecisionId, Expr, InstructionContext, Int, Node,
     PaymentOptionality, PaymentResult, PaymentTime, PlayerRef, Program, ReceiptId, Resource,
-    ResourceOperation, RuntimeReceiptId, optional_payment,
+    ResourceOperation, RuntimeReceiptId, WellFormedCardProgram, optional_payment,
 };
 
 #[derive(Clone, Debug)]
@@ -33,6 +33,27 @@ pub(super) fn check_costs(costs: &CostSpec, origin: &AbilitySource) -> Result<()
             amount: Expr::Literal(Int(amount)) } if *amount >= 0)
     {
         return Err(unsupported("optional payment source or cost"));
+    }
+    Ok(())
+}
+
+pub(super) fn check_card(card: &WellFormedCardProgram) -> Result<()> {
+    let exchange = card
+        .card()
+        .card_play_costs
+        .iter()
+        .any(|cost| cost.node.exchange.is_some());
+    for ability in &card.card().abilities {
+        if let Some(body) = &ability.node.body {
+            if optional_payment::declaration(body).is_some()
+                && (exchange || ability.node.kind == AbilityKind::Activated)
+            {
+                return Err(unsupported(
+                    "optional declaration with exchange or activation",
+                ));
+            }
+            check_body(body, true)?;
+        }
     }
     Ok(())
 }

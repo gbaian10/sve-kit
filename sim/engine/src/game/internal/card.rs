@@ -279,6 +279,7 @@ impl Game {
             super::cost::printed_play_cost(&base_print["cost"])?;
         }
         costs::check(self, card_no, card)?;
+        optional::check_card(card)?;
         if self.card_runtime.cards.contains_key(card_no)
             || self.typed.is_some()
             || !self.prepared.is_empty()
@@ -354,7 +355,6 @@ impl Game {
                 .body
                 .as_ref()
                 .ok_or_else(|| invalid("missing body"))?;
-            optional::check_body(body, true)?;
             check_nodes(self, &body.steps, &located.source, &ability.source)?;
             admission::check_card(
                 body,

@@ -1,6 +1,7 @@
 //! One optional payment declared before targets and committed before play.
 use super::{
-    Ability, Control, CostSpec, PaymentOptionality, PaymentTime, PlaySpec, Program, ReceiptId,
+    Ability, AbilityOrigin, Control, CostSpec, KeywordId, PaymentOptionality, PaymentTime,
+    PlaySpec, Program, ReceiptId,
 };
 
 pub(crate) fn declaration(body: &Program) -> Option<(&CostSpec, ReceiptId)> {
@@ -22,7 +23,8 @@ pub(crate) fn declaration(body: &Program) -> Option<(&CostSpec, ReceiptId)> {
 
 pub(crate) fn trigger_play(ability: &Ability) -> bool {
     ability.play.as_ref().is_none_or(|play| {
-        matches!(play, PlaySpec { limit: None, captures, costs: CostSpec::Ordered { steps }, .. }
+        matches!(ability.source.origin, AbilityOrigin::Keyword { keyword: KeywordId::Fanfare, .. })
+        && matches!(play, PlaySpec { limit: None, captures, costs: CostSpec::Ordered { steps }, .. }
             if captures.is_empty() && steps.is_empty())
             && ability
                 .body

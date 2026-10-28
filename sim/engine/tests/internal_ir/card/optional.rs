@@ -79,3 +79,26 @@ fn optional_trigger_declaration_precedes_targets_and_payment_is_atomic() {
         }
     }
 }
+
+#[test]
+fn optional_declaration_rejects_activation_other_triggers_and_exchange_coexistence() {
+    for kind in ["activate", "lastword"] {
+        let mut tree = tree();
+        let entry = &mut tree["cards"]["unit-follower"]["abilities"][0];
+        let body = entry.as_object_mut().unwrap().remove("fanfare").unwrap();
+        entry[kind] = body;
+        if kind == "activate" {
+            entry[kind]["cost"] = json!({"pp":0});
+        }
+        ExpandedLowerer::new().unwrap().lower(&tree).unwrap_err();
+    }
+    let mut tree = tree();
+    let mut exchange = tree["cards"]["unit-follower"]["abilities"][0].clone();
+    exchange.as_object_mut().unwrap().remove("fanfare");
+    exchange["play"] = json!({"optional_cost":{"to_cemetery":{"sel":{"who":"self","zone":"field","kind":"follower"},"n":1}},"optional_cost_delta":-1});
+    tree["cards"]["unit-follower"]["abilities"]
+        .as_array_mut()
+        .unwrap()
+        .push(exchange);
+    ExpandedLowerer::new().unwrap().lower(&tree).unwrap_err();
+}

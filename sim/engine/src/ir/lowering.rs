@@ -224,6 +224,7 @@ impl ExpandedLowerer {
                     )?);
                     continue;
                 }
+                optional_payment::check_entry(&ability, exchange.is_some(), &entry_path)?;
                 abilities.push(allocator.ability(
                     &coordinates,
                     &entry_path,
