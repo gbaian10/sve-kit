@@ -119,26 +119,6 @@ cards:
               then:
                 op: draw
                 count: 1
-  BP06-073:
-    status: complete
-    abilities:
-      - line: 1
-        kind: evolve
-        body:
-          op: evolve
-          subjects: self
-        costs:
-          - op: pp
-            amount: 1
-      - line: 2
-        kind: trigger
-        body:
-          op: create
-          name: 一ツ尾狐
-          count: 5
-          to: ex
-        event: enter
-        subject: self
   BP06-074:
     status: complete
     abilities:
