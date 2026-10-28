@@ -201,11 +201,7 @@ impl Game {
     }
 
     fn token_name(&self, card: &str) -> Result<String> {
-        let face = self.catalog.face(card, 0)?;
-        Ok(self.catalog.program(card)?["rules_name"]
-            .as_str()
-            .unwrap_or_else(|| string(&face["name"]))
-            .into())
+        self.catalog.rules_label(card, 0)
     }
 
     fn unique_crest_creations(
@@ -226,10 +222,8 @@ impl Game {
         let mut allowed = Vec::new();
         for print in prints {
             let face = self.catalog.face(print, 0)?;
-            let name = self.catalog.program(print)?["rules_name"]
-                .as_str()
-                .unwrap_or_else(|| string(&face["name"]));
-            if !string(&face["card_type"]).contains("クレスト") || names.insert(name.into()) {
+            let name = self.catalog.rules_label(print, 0)?;
+            if !string(&face["card_type"]).contains("クレスト") || names.insert(name) {
                 allowed.push(print.clone());
             }
         }

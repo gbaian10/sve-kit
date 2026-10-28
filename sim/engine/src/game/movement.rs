@@ -209,13 +209,8 @@ impl Game {
 
     pub(super) fn card_name(&self, id: &str) -> Result<String> {
         let object = self.information_source(id)?;
-        Ok(self
-            .catalog
-            .programs
-            .get(&object.card)
-            .and_then(|program| program["rules_name"].as_str())
-            .unwrap_or_else(|| self.face(id).ok().map_or("", |face| string(&face["name"])))
-            .into())
+        let face = Self::movement_face(object)?;
+        self.catalog.rules_label(&object.card, face)
     }
 
     pub(super) fn movement_destinations(

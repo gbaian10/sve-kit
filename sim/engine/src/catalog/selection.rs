@@ -68,16 +68,7 @@ pub(super) fn select(
 ) -> Result<SelectedEffects> {
     let selection: Selection = serde_json::from_value(handoff.clone())
         .map_err(|_private| invalid("invalid current selection"))?;
-    let mut prototypes = match rules {
-        Some((document, identity)) => Catalog::from_documents_with_rules(
-            snapshot,
-            keywords,
-            &selection.documents,
-            document,
-            identity,
-        )?,
-        None => Catalog::from_documents(snapshot, keywords, &selection.documents)?,
-    };
+    let mut prototypes = Catalog::read_documents(snapshot, keywords, &selection.documents)?;
     let lowerer = ExpandedLowerer::new().map_err(invalid)?;
     let mut current = BTreeMap::new();
     let mut identities = BTreeSet::new();
@@ -101,6 +92,29 @@ pub(super) fn select(
         };
         let program = lowerer.lower_current(&candidate).map_err(invalid)?;
         let number = program.card_no.clone();
+        let token = program.expanded.pointer(&format!("/cards/{number}/token"));
+        let face = prototypes.face(&number, 0)?;
+        let is_token = face["card_type"]
+            .as_str()
+            .is_some_and(|kind| kind.contains("トークン"));
+        if token.is_some() && (!is_token || program.face_ordinals.len() != 1) {
+            return Err(invalid("token identity requires one token face"));
+        }
+        if is_token {
+            let name = token
+                .and_then(|token| token["name"].as_str())
+                .or_else(|| face["name"].as_str())
+                .ok_or_else(|| invalid("token requires a rules name"))?
+                .to_owned();
+            prototypes.token_definitions.insert(
+                number.clone(),
+                super::TokenDefinition {
+                    name,
+                    template: token.is_some_and(|token| token["template"] == true),
+                    complete: true,
+                },
+            );
+        }
         if !prototypes.cards.contains_key(&number)
             || prototypes.programs.contains_key(&number)
             || prototypes.rejected.contains_key(&number)
@@ -109,6 +123,10 @@ pub(super) fn select(
         {
             return Err(invalid("current selection identity or prototype overlap"));
         }
+    }
+    prototypes.validate_token_templates()?;
+    if let Some((document, identity)) = rules {
+        prototypes.bind_rules(snapshot, keywords, &selection.documents, document, identity)?;
     }
     let prototypes = Arc::new(prototypes);
     Ok(SelectedEffects {

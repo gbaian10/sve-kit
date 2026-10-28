@@ -4160,6 +4160,74 @@ fn token_templates_require_one_complete_representative_for_ambiguous_names() {
 }
 
 #[test]
+fn current_token_identity_completes_the_shared_template_selection() {
+    let (mut facts, mut docs) = token_fixture(&json!({"op":"draw","count":0_i64}));
+    docs["cards"]["token-z"]["token_template"] = json!(false);
+    facts.push('\n');
+    facts.push_str(
+        &json!({"number":"token-current","faces":[{
+            "name":"printed-label","card_class":"ニュートラル","card_type":"フォロワー・トークン",
+            "cost":"1","power":"1","hp":"2","traits":[],"text":"","sections":[]
+        }]})
+        .to_string(),
+    );
+    let card = "c:11111111111111111111111111111111";
+    let face = "f:11111111111111111111111111111111";
+    let mut input = json!({"documents":[["tokens",docs.to_string()]],"authors":[{
+        "status":"accepted","input":{
+            "admission":"direct","card_id":card,"card_no":"token-current",
+            "source_payload":{"card_id":card,"faces":[{
+                "face_id":face,"revision_id":"synthetic-revision","ordinal":0_u8,"side":"front","cost":1_u8,
+                "fields":[{"field":"effect","ordinal":null,"lines":[]}]
+            }]},
+            "tree":{"format":1_u8,"kind":"author_effect_set","scope":"shared","cards":{
+                "token-current":{
+                    "meta":{"dsl":"1.0","source":"direct","admission":"light",
+                        "written_by":[{"actor":{"who":"test","model":null},"date":"2026-10-28"}],
+                        "reviewed_by":[],"status":"draft","verified_by_exam":[],"rulings":[]},
+                    "token":{"name":"shared-token","template":true},
+                    "faces":{face:{"abilities":[]}}
+                }
+            }}
+        }
+    }]});
+    let selected = Catalog::from_current_selection(&facts, &registry(), &input).unwrap();
+    let mut initial = setup();
+    initial["players"]["P1"]["zones"] = json!({"field":[{"id":"token","card":"token-current"}]});
+    initial["players"]["P2"]["zones"] = json!({});
+    let game = Game::from_selected_effects(
+        selected,
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "token-identity",
+    )
+    .unwrap();
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["objects"]["token"]["name"],
+        json!("shared-token")
+    );
+
+    input["authors"][0]["input"]["tree"]["cards"]["token-current"]["token"]["template"] =
+        json!(false);
+    Catalog::from_current_selection(&facts, &registry(), &input).unwrap_err();
+    input["authors"][0]["input"]["tree"]["cards"]["token-current"]["token"]["template"] =
+        json!(true);
+    let non_token = facts
+        .lines()
+        .map(|line| {
+            let mut value: Value = serde_json::from_str(line).unwrap();
+            if value["number"] == "token-current" {
+                value["faces"][0]["card_type"] = json!("フォロワー");
+            }
+            value.to_string()
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
+    Catalog::from_current_selection(&non_token, &registry(), &input).unwrap_err();
+}
+
+#[test]
 fn token_capacity_selects_name_multisets_before_allocating_and_restores_text_order() {
     let body = json!({"op":"seq","steps":[{"op":"create","tokens":[{"name":"shared-token","count":1_i64},{"name":"other-token","count":1_i64},{"name":"shared-token","count":1_i64}],"to":"field","bind":"made"},{"op":"modify","subjects":"made","power":1_i64}]});
     let (facts, docs) = token_fixture(&body);

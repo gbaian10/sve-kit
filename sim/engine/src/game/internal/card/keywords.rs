@@ -159,7 +159,12 @@ pub(super) fn check(
 ) -> Result<()> {
     if !matches!(
         printed["card_type"].as_str(),
-        Some("フォロワー" | "フォロワー・エボルヴ" | "フォロワー・アドバンス")
+        Some(
+            "フォロワー"
+                | "フォロワー・エボルヴ"
+                | "フォロワー・アドバンス"
+                | "フォロワー・トークン"
+        )
     ) {
         return Err(unsupported("printed keyword requires a follower face"));
     }
