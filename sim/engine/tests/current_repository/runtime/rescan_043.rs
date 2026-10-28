@@ -430,8 +430,10 @@ fn ecp02_054_and_alias_require_an_opposing_target_before_damage_and_milling() {
                 );
                 game.resume_internal_card().unwrap();
                 let after = game.projection(View::Referee).unwrap();
-                assert_eq!(after["P2"]["field"], json!([]));
-                assert_eq!(after["P2"]["cemetery"], json!(["enemy"]));
+                assert_eq!(after["P2"]["field"], json!(["enemy"]));
+                assert_eq!(after["objects"]["enemy"]["damage"], 3_u8);
+                assert_eq!(after["objects"]["ally"]["damage"], 0_u8);
+                assert_eq!(after["P2"]["cemetery"], json!([]));
                 assert_eq!(after["P2"]["ex"], json!(["off-zone"]));
                 assert_eq!(after["P1"]["field"], json!(["source", "ally"]));
                 assert_eq!(after["P1"]["deck"], json!([]));
