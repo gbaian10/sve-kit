@@ -1,0 +1,27 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP09-021:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-28"
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - fanfare:
+          do:
+            - create:
+                token: ナイト
+                n: 1
+                to: field
+        line: 2
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP17-T11

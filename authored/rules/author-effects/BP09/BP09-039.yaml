@@ -1,0 +1,35 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP09-039:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-28"
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+        face: 1
+      - evolve_time:
+          do:
+            - life:
+                who: self
+                delta: 3
+        line: 2
+        face: 1
+      - keywords:
+          - assail
+        line: 1
+        face: 2
+      - evolve_time:
+          do:
+            - damage:
+                n: 3
+                to:
+                  leaders: opponents
+        line: 2
+        face: 2
