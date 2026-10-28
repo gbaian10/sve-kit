@@ -1,6 +1,6 @@
 use super::*;
 use crate::ir::lowering::{CurrentCardProgram, ExpandedLowerer, NonBodySource, validator};
-use alloc::collections::BTreeMap;
+use alloc::collections::{BTreeMap, BTreeSet};
 use serde_json::{Value, json};
 
 #[path = "../../../tests/support/expanded.rs"]
@@ -59,8 +59,26 @@ with TemporaryDirectory() as temporary:
 }
 
 fn selected_catalog(input: &Value) -> crate::Result<SelectedEffects> {
+    // Every selected printing needs a snapshot row; the facts stay one synthetic face.
+    let mut numbers = BTreeSet::from(["BP01-009".to_owned()]);
+    for author in input["authors"].as_array().into_iter().flatten() {
+        let printings = author["printings"].as_array().into_iter().flatten();
+        numbers.extend(
+            printings
+                .chain(author.get("card_no"))
+                .filter_map(|n| n.as_str().map(str::to_owned)),
+        );
+    }
+    let snapshot = numbers
+        .iter()
+        .map(|number| {
+            json!({"number": number, "faces": [{"card_type": "フォロワー", "name": "synthetic switch"}]})
+                .to_string()
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
     Catalog::from_current_selection(
-        r#"{"number":"BP01-009","faces":[{"card_type":"フォロワー","name":"synthetic switch"}]}"#,
+        &snapshot,
         "format: 1\nkind: keyword_registry\nkeywords: {}\n",
         input,
     )

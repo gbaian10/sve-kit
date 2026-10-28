@@ -5,6 +5,9 @@
     reason = "Synthetic fixture failures must stop the test."
 )]
 
+extern crate alloc;
+
+use alloc::sync::Arc;
 use serde_json::{Value, json};
 use sve_engine::catalog::Catalog;
 use sve_engine::game::internal::{Answer, CardPlay, InputDomain, InstructionOutcome};
@@ -32,7 +35,7 @@ fn author(number: &str, id: &str, kind: &str, mut abilities: Vec<Value>) -> (Val
     }
     let face_fact = json!({"name":number,"card_class":"ニュートラル","card_type":kind,
         "cost":"1","power":"1","hp":"2","traits":[],"text":"","sections":[]});
-    let input = json!({"status":"accepted","input":{
+    let input = json!({"status":"accepted","printings":[number],"input":{
         "admission":"direct","card_id":card,"card_no":number,
         "source_payload":{"card_id":card,"faces":[{
             "face_id":face,"revision_id":revision,"ordinal":0_u8,"side":"front","cost":1_u8,
@@ -378,4 +381,50 @@ fn created_result_does_not_mutate_a_token_after_it_changes_generation() {
     ));
     let view = game.projection(View::Referee).unwrap();
     assert_eq!(view["P1"]["field"], json!([]));
+}
+
+#[test]
+fn printing_aliases_share_a_candidate_without_selecting_unrelated_numbers() {
+    let (snapshot, keywords, mut input) = selection(1);
+    let mut alias: Value = serde_json::from_str(snapshot.lines().next().unwrap()).unwrap();
+    alias["number"] = json!("creator-alt");
+    alias["faces"][0]["name"] = json!("alternate printed name");
+    let mut unrelated = alias.clone();
+    unrelated["number"] = json!("creator-lookalike");
+    let mut token_alias: Value = serde_json::from_str(snapshot.lines().nth(1).unwrap()).unwrap();
+    token_alias["number"] = json!("token-alt");
+    let snapshot = format!("{snapshot}{alias}\n{unrelated}\n{token_alias}\n");
+    input["authors"][1]["printings"] = json!(["token", "token-alt"]);
+    input["authors"][0]["printings"] = json!(["creator", "creator-alt"]);
+    let selected = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
+    assert!(Arc::ptr_eq(
+        &selected.current["creator"],
+        &selected.current["creator-alt"]
+    ));
+    assert!(!selected.current.contains_key("creator-lookalike"));
+    let mut game =
+        Game::from_selected_effects(selected, &initial(0), &Value::Null, &Value::Null, "aliases")
+            .unwrap();
+    assert!(matches!(
+        game.play_internal_card("creator", PlayerId { seat: 1 })
+            .unwrap(),
+        CardPlay::Resolved(_)
+    ));
+    let state = game.projection(View::Referee).unwrap();
+    let token = state["P1"]["ex"][0].as_str().unwrap();
+    assert_eq!(state["objects"][token]["card"], "token");
+    for printings in [
+        json!(["creator-alt"]),
+        json!(["creator", "creator"]),
+        json!(["creator", "missing"]),
+    ] {
+        input["authors"][0]["printings"] = printings;
+        Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap_err();
+    }
+    input["authors"][0]["printings"] = json!(["creator", "creator-alt"]);
+    input["documents"] = json!([[
+        "prototype.yaml",
+        "format: 1\nkind: effect_set\ncards:\n  creator-alt:\n    status: complete\n    abilities: []\n"
+    ]]);
+    Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap_err();
 }

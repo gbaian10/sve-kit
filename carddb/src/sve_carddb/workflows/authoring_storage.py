@@ -234,12 +234,14 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
     removed_prototypes: set[str] = set()
     prototype_ids: dict[str, str] = {}
     removed_cards: set[str] = set()
+    # A replaced record may live in another pack's index shard than its replacement.
+    affected_owners = {number.split("-", 1)[0] for number in selected}
     for number in sorted(selected):
         card_id = workspace.current.printing_card(number)
         old = next(
             (r for r in records if r.card_id == card_id and r.scope == "shared"), None
         )
-        if old is not None and old.record_key != number:
+        if isinstance(old, AuthorIndexRecord) and old.record_key != number:
             raise AuthorInputError(
                 Diagnostic(
                     "index",
@@ -296,6 +298,7 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
             )
             records.insert(offset, replacement)
         else:
+            affected_owners.add(old.record_key.split("-", 1)[0])
             records[records.index(old)] = replacement
         if remove_prototype:
             for path, file in tuple(prototypes.items()):
@@ -376,9 +379,10 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
                     definitions[body_index] = raw_definition
         companions[path] = _file(path, tree)
         changed.add(path)
+    records.sort(key=lambda record: (record.record_key, record.scope))
     index = original.index.model_copy(update={"records": tuple(records)})
     indexes = {file.path: file for file in original.index_files}
-    for owner in sorted({number.split("-", 1)[0] for number in selected}):
+    for owner in sorted(affected_owners):
         path = f"rules/effects-index/{owner}.yaml"
         indexes[path] = _file(
             path,

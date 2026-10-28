@@ -39,6 +39,7 @@ pub(crate) struct TokenDefinition {
     pub(crate) name_override: bool,
     pub(crate) template: bool,
     pub(crate) complete: bool,
+    pub(crate) alias_of: Option<String>,
 }
 
 /// Shared immutable catalogue, serializable into a self-contained server save.
@@ -279,6 +280,7 @@ impl Catalog {
                         name,
                         name_override: program["rules_name"].is_string(),
                         template: program["token_template"] == true,
+                        alias_of: None,
                         complete: program["status"] == "complete",
                     },
                 );
@@ -349,7 +351,11 @@ impl Catalog {
 
     fn validate_token_templates(&self) -> Result<()> {
         let mut names: BTreeMap<&str, Vec<&TokenDefinition>> = BTreeMap::new();
-        for definition in self.token_definitions.values() {
+        for definition in self
+            .token_definitions
+            .values()
+            .filter(|definition| definition.alias_of.is_none())
+        {
             names.entry(&definition.name).or_default().push(definition);
         }
         for (name, definitions) in names {
@@ -371,7 +377,9 @@ impl Catalog {
     pub(crate) fn token_print(&self, name: &str) -> Result<String> {
         let mut candidates = Vec::new();
         for (number, definition) in &self.token_definitions {
-            if definition.name == name || self.face(number, 0)?["name"] == name {
+            if definition.alias_of.is_none()
+                && (definition.name == name || self.face(number, 0)?["name"] == name)
+            {
                 candidates.push((number, definition));
             }
         }

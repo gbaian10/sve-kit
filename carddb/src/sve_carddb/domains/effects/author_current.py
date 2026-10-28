@@ -200,6 +200,19 @@ class CurrentAuthorSources:
             )
         return identities.pop()
 
+    def printing_numbers(self, card_id: str) -> list[str]:
+        """Resolve official JP aliases through permanent identity, never number spelling."""
+        rows = self.db.select(
+            "printing",
+            self.db.columns("printing"),
+            where={"region": "jp", "card_id": card_id, "card_no_state": "official"},
+        )
+        numbers = sorted({_text(row.values["card_no"]) for row in rows})
+        for number in numbers:
+            if self.printing_card(number) != card_id:
+                raise SourceError("record_key_identity_mismatch")
+        return numbers
+
     def keyword_obligations(self, card_id: str) -> tuple[PrintedKeywordObligation, ...]:
         """Reconstruct complete current sources; this grants no author or D0 admission."""
         card = self.card_payload(card_id)
@@ -340,15 +353,24 @@ class CurrentAuthorSources:
         for result in self._validate(inputs, expander, failures):
             if not isinstance(result.record, AuthorIndexRecord):
                 continue
-            authors.append(
-                {"status": "accepted", "input": result.lowering_input()}
-                if isinstance(result, CardAccepted)
-                else {
-                    "status": "rejected",
-                    "card_no": result.record.record_key,
-                    "reason": result.diagnostic.reason,
-                }
-            )
+            numbers = self.printing_numbers(result.record.card_id)
+            if isinstance(result, CardAccepted):
+                authors.append(
+                    {
+                        "status": "accepted",
+                        "printings": list[JsonValue](numbers),
+                        "input": result.lowering_input(),
+                    }
+                )
+            else:
+                authors.extend(
+                    {
+                        "status": "rejected",
+                        "card_no": number,
+                        "reason": result.diagnostic.reason,
+                    }
+                    for number in numbers or [result.record.record_key]
+                )
         return {
             "documents": [
                 [file.path, file.raw.decode("utf-8")] for file in inputs.prototype_files

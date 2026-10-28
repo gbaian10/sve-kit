@@ -33,6 +33,15 @@ def test_direct_writer_selects_pending_text_without_machine_anchors(
     assert not (tmp_path / "authored/rules/effect-anchors").exists()
 
 
+def test_single_author_selects_all_official_printings(tmp_path: Path) -> None:
+    selection = object_value(direct_author_input(tmp_path, aliases=True))
+    authors = array(selection["authors"])
+    assert len(authors) == 1
+    author = object_value(authors[0])
+    assert author["printings"] == ["SYN-01", "SYN-02"]
+    assert object_value(author["input"])["card_no"] == "SYN-01"
+
+
 @pytest.mark.parametrize(
     "mutation",
     ["missing", "duplicate", "wrong_face", "bad_param", "disputed", "unknown_key"],

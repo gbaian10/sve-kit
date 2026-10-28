@@ -1,4 +1,5 @@
 use super::*;
+use alloc::sync::Arc;
 
 #[test]
 fn normally_played_spell_draws_three_from_its_owners_deck() {
@@ -157,4 +158,40 @@ fn source_mutations_cannot_change_spell_head_actor_count_or_provenance() {
             "mutated input {probe} must be rejected for its own reason"
         );
     }
+}
+
+#[test]
+fn alternate_printing_uses_the_representatives_whole_card_program() {
+    let fixtures = inputs();
+    let (snapshot, keywords, input) = &fixtures;
+    let selected = Catalog::from_current_selection(snapshot, keywords, input).unwrap();
+    assert!(Arc::ptr_eq(
+        &selected.current["CP02-068"],
+        &selected.current["CP02-P56"]
+    ));
+    let mut initial = draw_position();
+    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"spell","card":"CP02-P56"}]);
+    initial["players"]["P1"]["zones"]["deck"] = json!([
+        {"id":"d1","card":"BP10-122"},
+        {"id":"d2","card":"BP10-122"},
+        {"id":"d3","card":"BP10-122"},
+        {"id":"d4","card":"BP10-122"}
+    ]);
+    let mut game = Game::from_selected_effects(
+        selected,
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "alias-runtime",
+    )
+    .unwrap();
+    resolved(
+        game.play_internal_card("spell", PlayerId { seat: 1 })
+            .unwrap(),
+    );
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["hand"], json!(["d1", "d2", "d3"]));
+    assert_eq!(state["P1"]["deck"], json!(["d4"]));
+    assert_eq!(state["P1"]["cemetery"], json!(["spell"]));
+    assert_eq!(state["P1"]["pp"]["current"], 6_u8);
 }

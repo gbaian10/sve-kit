@@ -192,8 +192,9 @@ def test_real_permanent_token_sources_and_whole_card_rejection(
                         load_semantic_inputs(root, expander), expander
                     )
                 )
-                assert object_value(array(selected["authors"])[0]) == {
-                    "status": "rejected",
-                    "card_no": number,
-                    "reason": "source_pending",
-                }
+                rejections = [object_value(item) for item in array(selected["authors"])]
+                assert number in {item["card_no"] for item in rejections}
+                assert all(
+                    item["status"] == "rejected" and item["reason"] == "source_pending"
+                    for item in rejections
+                )

@@ -48,8 +48,14 @@ struct Selection {
 #[derive(Deserialize)]
 #[serde(tag = "status", rename_all = "snake_case", deny_unknown_fields)]
 enum Author {
-    Accepted { input: Value },
-    Rejected { card_no: String, reason: String },
+    Accepted {
+        input: Value,
+        printings: Vec<String>,
+    },
+    Rejected {
+        card_no: String,
+        reason: String,
+    },
 }
 
 /// Consume `CurrentAuthorSources.selection_input()` from the trusted Python reader.
@@ -73,8 +79,8 @@ pub(super) fn select(
     let mut current = BTreeMap::new();
     let mut identities = BTreeSet::new();
     for author in selection.authors {
-        let candidate = match author {
-            Author::Accepted { input } => input,
+        let (candidate, printings) = match author {
+            Author::Accepted { input, printings } => (input, printings),
             Author::Rejected { card_no, reason } => {
                 if reason == "source_unresolved_issue" {
                     if !prototypes.cards.contains_key(&card_no)
@@ -91,38 +97,17 @@ pub(super) fn select(
             }
         };
         let program = lowerer.lower_current(&candidate).map_err(invalid)?;
-        let number = program.card_no.clone();
-        let token = program.expanded.pointer(&format!("/cards/{number}/token"));
-        let face = prototypes.face(&number, 0)?;
-        let is_token = face["card_type"]
-            .as_str()
-            .is_some_and(|kind| kind.contains("トークン"));
-        if token.is_some() && (!is_token || program.face_ordinals.len() != 1) {
-            return Err(invalid("token identity requires one token face"));
+        if !identities.insert(program.card_id.clone()) || !printings.contains(&program.card_no) {
+            return Err(invalid(
+                "current selection identity or representative missing",
+            ));
         }
-        if is_token {
-            let name = token
-                .and_then(|token| token["name"].as_str())
-                .or_else(|| face["name"].as_str())
-                .ok_or_else(|| invalid("token requires a rules name"))?
-                .to_owned();
-            prototypes.token_definitions.insert(
-                number.clone(),
-                super::TokenDefinition {
-                    name,
-                    name_override: token.is_some(),
-                    template: token.is_some_and(|token| token["template"] == true),
-                    complete: true,
-                },
-            );
-        }
-        if !prototypes.cards.contains_key(&number)
-            || prototypes.programs.contains_key(&number)
-            || prototypes.rejected.contains_key(&number)
-            || !identities.insert(program.card_id.clone())
-            || current.insert(number, Arc::new(program)).is_some()
-        {
-            return Err(invalid("current selection identity or prototype overlap"));
+        let program = Arc::new(program);
+        for number in printings {
+            register_printing(&mut prototypes, &number, &program)?;
+            if current.insert(number, Arc::clone(&program)).is_some() {
+                return Err(invalid("duplicate current printing"));
+            }
         }
     }
     prototypes.validate_token_templates()?;
@@ -151,4 +136,42 @@ pub(super) fn select(
         accepted: current.clone(),
         current,
     })
+}
+
+fn register_printing(
+    prototypes: &mut Catalog,
+    number: &str,
+    program: &CurrentCardProgram,
+) -> Result<()> {
+    if prototypes.programs.contains_key(number) || prototypes.rejected.contains_key(number) {
+        return Err(invalid("current selection identity or prototype overlap"));
+    }
+    let token = program
+        .expanded
+        .pointer(&format!("/cards/{}/token", program.card_no));
+    let face = prototypes.face(number, 0)?;
+    let is_token = face["card_type"]
+        .as_str()
+        .is_some_and(|kind| kind.contains("トークン"));
+    if token.is_some() && (!is_token || program.face_ordinals.len() != 1) {
+        return Err(invalid("token identity requires one token face"));
+    }
+    if is_token {
+        let name = token
+            .and_then(|token| token["name"].as_str())
+            .or_else(|| prototypes.cards.get(&program.card_no)?.faces.first()?["name"].as_str())
+            .ok_or_else(|| invalid("token requires a rules name"))?
+            .to_owned();
+        prototypes.token_definitions.insert(
+            number.into(),
+            super::TokenDefinition {
+                name,
+                name_override: token.is_some(),
+                template: token.is_some_and(|token| token["template"] == true),
+                alias_of: (number != program.card_no).then(|| program.card_no.clone()),
+                complete: true,
+            },
+        );
+    }
+    Ok(())
 }

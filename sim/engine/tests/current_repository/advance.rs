@@ -140,7 +140,7 @@ fn game_steps(initial: &Value, actions: Vec<Action>, kind: &str) -> Game {
     .join("\n");
     let selection = json!({"documents":[["synthetic.yaml",
         "format: 1\nkind: effect_set\ncards:\n  producer:\n    status: complete\n    abilities: []\n  synthetic-token:\n    status: complete\n    abilities: []\n"]],
-        "authors":[{"status":"accepted","input":input}]});
+        "authors":[{"status":"accepted","printings":[ADVANCE],"input":input}]});
     let keywords = "format: 1\nkind: keyword_registry\nkeywords: {}\n";
     let selected = Catalog::from_current_selection(&snapshot, keywords, &selection).unwrap();
     assert_eq!(

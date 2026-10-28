@@ -12,7 +12,7 @@ from ..domains.effects.test_author_current_absent import synthetic_current
 from ..domains.text_observations.test_effect_presence import page
 
 
-def direct_author_input(root: Path) -> JsonValue:
+def direct_author_input(root: Path, *, aliases: bool = False) -> JsonValue:
     """Exercise writer, closure, named substitution and current handoff without anchors."""
     authored = root / "authored"
     (authored / "rules").mkdir(parents=True)
@@ -72,6 +72,18 @@ def direct_author_input(root: Path) -> JsonValue:
         page("jp", '<div class="detail">A sentence outside the classifier.</div>'),
         kind="spell",
     ) as current:
+        if aliases:
+            printing = dict(current.db.rows("printing")[0].values)
+            with current.db.transaction():
+                for number, state in (
+                    ("SYN-02", "official"),
+                    ("SYN-03", "provisional"),
+                ):
+                    current.db.insert(
+                        "printing",
+                        printing
+                        | {"id": number, "card_no": number, "card_no_state": state},
+                    )
         workspace = authoring.Workspace(
             authoring.Inputs(
                 profile="public", repo=repo, jp_batch_id=current.jp_batch_id

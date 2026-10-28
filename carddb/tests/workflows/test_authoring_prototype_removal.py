@@ -22,23 +22,33 @@ SCHEMAS = Path(__file__).resolve().parents[3] / "dsl"
 
 
 @pytest.mark.parametrize(
-    ("sibling", "alias"), [(False, False), (True, False), (True, True)]
+    ("sibling", "alias", "alias_only", "cross_pack"),
+    [
+        (False, False, False, False),
+        (True, False, False, False),
+        (True, True, False, False),
+        (True, True, True, False),
+        (True, True, True, True),
+    ],
 )
 def test_prototype_removal_deletes_only_exhausted_shards(
-    tmp_path: Path, sibling: bool, alias: bool
+    tmp_path: Path, sibling: bool, alias: bool, alias_only: bool, cross_pack: bool
 ) -> None:
+    # A cross-pack alias lives in another pack's prototype shard and index shard.
+    alias_no = "OTH-02" if cross_pack else "SYN-02"
+    old_pack = "OTH" if cross_pack else "SYN"
     repo = tmp_path / "repo"
     authored = repo / "authored"
-    prototype_path = authored / "rules/effects/SYN.yaml"
+    prototype_path = authored / f"rules/effects/{old_pack}.yaml"
     prototype_path.parent.mkdir(parents=True)
     prototype: dict[str, JsonValue] = {"status": "unsupported", "abilities": []}
-    cards: dict[str, JsonValue] = {"SYN-01": prototype}
+    cards: dict[str, JsonValue] = {} if alias_only else {"SYN-01": prototype}
     if sibling:
-        cards["SYN-02"] = prototype
+        cards[alias_no] = prototype
     prototype_path.write_bytes(
         canonical({"format": 1, "kind": "effect_set", "cards": cards})
     )
-    index = authored / "rules/effects-index/SYN.yaml"
+    index = authored / f"rules/effects-index/{old_pack}.yaml"
     index.parent.mkdir(parents=True, exist_ok=True)
     index.write_bytes(
         canonical(
@@ -49,9 +59,9 @@ def test_prototype_removal_deletes_only_exhausted_shards(
                     {
                         "card_id": CARD,
                         "scope": "shared",
-                        "file": "rules/effects/SYN.yaml",
+                        "file": f"rules/effects/{old_pack}.yaml",
                         "kind": "effect_set",
-                        "record_key": "SYN-01",
+                        "record_key": alias_no if alias_only else "SYN-01",
                     }
                 ],
             }
@@ -89,7 +99,7 @@ def test_prototype_removal_deletes_only_exhausted_shards(
                 dict(current.db.rows("printing")[0].values)
                 | {
                     "id": "sibling",
-                    "card_no": "SYN-02" if sibling else "NEW-01",
+                    "card_no": alias_no if sibling else "NEW-01",
                     "card_id": sibling_id,
                 },
             )
@@ -105,7 +115,7 @@ def test_prototype_removal_deletes_only_exhausted_shards(
             authored,
         )
         # An indexed prototype shard must select exactly its members.
-        if sibling:
+        if sibling and not alias_only:
             index.write_bytes(
                 canonical({"format": 1, "kind": "effects_index", "records": []})
             )
@@ -126,9 +136,29 @@ def test_prototype_removal_deletes_only_exhausted_shards(
             ] == {"SYN-02": prototype}
         inputs = load_author_set(authored, workspace.expander.schemas)
         assert len(inputs.index.records) == 1
+        assert set(
+            object_value(
+                object_value(
+                    parse_document(
+                        (authored / "rules/author-effects/SYN/SYN-01.yaml").read_bytes()
+                    ).value
+                )["cards"]
+            )
+        ) == {"SYN-01"}
+        if cross_pack:
+            assert (
+                object_value(
+                    parse_document(
+                        (authored / "rules/effects-index/OTH.yaml").read_bytes()
+                    ).value
+                )["records"]
+                == []
+            )
+            assert not (authored / "rules/effects/OTH.yaml").exists()
         assert inputs.index.records[0].file == "rules/author-effects/SYN/SYN-01.yaml"
         assert all(
-            file.path != "rules/effects/SYN.yaml" for file in inputs.prototype_files
+            file.path != f"rules/effects/{old_pack}.yaml"
+            for file in inputs.prototype_files
         ) == (not sibling or alias)
         assert not any(
             isinstance(result, CardRejected)
