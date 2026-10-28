@@ -254,6 +254,16 @@ fn play_requirement(code: &str) -> bool {
     )
 }
 
+fn check_action(action: &Action) -> Result<()> {
+    super::search::check_action(action)?;
+    super::tokens::check_action(action)?;
+    super::movement::check_action(action)?;
+    super::resource::check_action(action)?;
+    super::discard::check_action(action)?;
+    super::numeric::check_action(action)?;
+    super::grant::check_action(action)
+}
+
 fn check_program(program: &Program, source: &SourceSpan, card: bool) -> Result<()> {
     for step in &program.steps {
         super::ordering::check_node(&step.node, source)?;
@@ -289,13 +299,7 @@ fn check_program(program: &Program, source: &SourceSpan, card: bool) -> Result<(
                 }
             }
             Node::Instruction { instruction } => {
-                super::search::check_action(&instruction.action)?;
-                super::tokens::check_action(&instruction.action)?;
-                super::movement::check_action(&instruction.action)?;
-                super::resource::check_action(&instruction.action)?;
-                super::discard::check_action(&instruction.action)?;
-                super::numeric::check_action(&instruction.action)?;
-                super::grant::check_action(&instruction.action)?;
+                check_action(&instruction.action)?;
                 if instruction.precondition.is_some()
                     || instruction.context != InstructionContext::Effect
                 {
