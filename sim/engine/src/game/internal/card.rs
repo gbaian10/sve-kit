@@ -197,11 +197,17 @@ impl Game {
         selected.check_runtime()?;
         let catalog = selected.prototypes;
         let mut current = BTreeMap::new();
+        let mut representatives = BTreeMap::new();
         for (number, candidate) in selected.current {
-            if number != candidate.card_no {
-                return Err(invalid("current selection card key mismatch"));
-            }
-            current.insert(number, Arc::new(catalog.resolve_current(candidate)?));
+            let card = if let Some(card) = representatives.get(&candidate.card_id) {
+                Arc::clone(card)
+            } else {
+                let card = Arc::new(catalog.resolve_current(Arc::clone(&candidate))?);
+                representatives.insert(candidate.card_id.clone(), Arc::clone(&card));
+                card
+            };
+            catalog.check_current_printing(&number, &card)?;
+            current.insert(number, card);
         }
         let mut game = Self::new(catalog, setup, facts, random, seed)?;
         if game.state.objects.values().any(|object| {
@@ -222,11 +228,11 @@ impl Game {
         let cards = game
             .card_runtime
             .current
-            .values()
-            .cloned()
+            .iter()
+            .map(|(number, card)| (number.clone(), Arc::clone(card)))
             .collect::<Vec<_>>();
-        for card in cards {
-            game.load_internal_card(&card.candidate.card_no, &card.candidate.program)?;
+        for (number, card) in cards {
+            game.load_internal_card(&number, &card.candidate.program)?;
         }
         Ok(game)
     }

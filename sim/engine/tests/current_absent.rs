@@ -56,7 +56,7 @@ fn load(source: &Value, printed: &Value) -> Result<Game> {
         "effect-source-v1:sha256:{}",
         digest(source.to_string().as_bytes())
     );
-    let handoff = json!({"documents":[],"authors":[{"status":"accepted","input":{
+    let handoff = json!({"documents":[],"authors":[{"status":"accepted","printings":["SYN-001"],"input":{
         "card_id":"c:11111111111111111111111111111111","card_no":"SYN-001",
         "source_version":version,"source_payload":source,
         "source_inventory":{"abilities":[],"non_body":[]},

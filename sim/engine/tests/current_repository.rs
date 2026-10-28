@@ -7,6 +7,8 @@
     reason = "Shared fixture readers fail immediately on a missing or malformed input."
 )]
 
+extern crate alloc;
+
 use serde_json::{Value, json};
 use std::sync::OnceLock;
 use sve_engine::game::Game;

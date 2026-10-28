@@ -18,6 +18,20 @@ pub(crate) struct CurrentCard {
     reason = "Current-source resolution stays beside the snapshot hash check it owns."
 )]
 impl Catalog {
+    pub(crate) fn check_current_printing(&self, number: &str, current: &CurrentCard) -> Result<()> {
+        let card = self
+            .cards
+            .get(number)
+            .ok_or_else(|| invalid("current printing missing"))?;
+        if card.faces.len() != current.faces.len()
+            || self.programs.contains_key(number)
+            || self.rejected.contains_key(number)
+        {
+            return Err(invalid("current snapshot closure or prototype overlap"));
+        }
+        Ok(())
+    }
+
     pub(crate) fn resolve_current(
         &self,
         candidate: Arc<CurrentCardProgram>,

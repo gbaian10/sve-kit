@@ -4174,7 +4174,7 @@ fn current_token_identity_completes_the_shared_template_selection() {
     let card = "c:11111111111111111111111111111111";
     let face = "f:11111111111111111111111111111111";
     let mut input = json!({"documents":[["tokens",docs.to_string()]],"authors":[{
-        "status":"accepted","input":{
+        "status":"accepted","printings":["token-current"],"input":{
             "admission":"direct","card_id":card,"card_no":"token-current",
             "source_payload":{"card_id":card,"faces":[{
                 "face_id":face,"revision_id":"synthetic-revision","ordinal":0_u8,"side":"front","cost":1_u8,

@@ -167,7 +167,7 @@ impl Game {
             .next_pending
             .checked_add(1)
             .ok_or_else(|| invalid("pending identities exhausted"))?;
-        let card = ability.source.card_no.clone();
+        let card = self.object(holder)?.card.clone();
         Ok(PendingOccurrence {
             id: self.card_runtime.next_pending,
             holder: holder.into(),
