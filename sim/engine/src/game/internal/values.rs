@@ -165,6 +165,10 @@ impl Execution {
                     .check_current(game, self, &members)?;
                 members
             }
+            Selector::Bound { reference } => match self.slots.get(&reference.key()) {
+                Some(Slot::Created(members)) => members.clone(),
+                _ => return Err(invalid("missing token creation producer")),
+            },
             Selector::ReceiptMembers {
                 receipt: ObjectReceipt::Movement { receipt },
                 projection: MemberProjection::Before,

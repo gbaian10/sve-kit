@@ -126,6 +126,21 @@ pub(super) fn select(
         }
     }
     prototypes.validate_token_templates()?;
+    for program in current.values() {
+        let card = &program.expanded["cards"][&program.card_no];
+        for link in card["token_sources"].as_array().into_iter().flatten() {
+            let number = link["card_no"]
+                .as_str()
+                .ok_or_else(|| invalid("invalid token source"))?;
+            if prototypes
+                .token_definitions
+                .get(number)
+                .is_none_or(|token| !token.complete)
+            {
+                return Err(invalid("token source requires a complete token card"));
+            }
+        }
+    }
     if let Some((document, identity)) = rules {
         prototypes.bind_rules(snapshot, keywords, &selection.documents, document, identity)?;
     }

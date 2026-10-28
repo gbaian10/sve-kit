@@ -1,4 +1,5 @@
 use super::*;
+use sve_engine::game::internal::InstructionOutcome;
 
 #[test]
 fn token_trio_printed_rush_and_ward_control_real_combat() {
@@ -35,4 +36,56 @@ fn token_trio_printed_rush_and_ward_control_real_combat() {
         "resolved",
         "Rush can attack the rested Ward immediately"
     );
+}
+
+#[test]
+fn bp01_010_evolution_creates_two_fairy_wisps_in_own_ex() {
+    let mut initial = setup("P1", "P1", [20, 20]);
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"base","card":"BP01-009"}]);
+    initial["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"form","card":"BP01-010"}]);
+    let mut game = game(&initial);
+    assert_eq!(
+        game.internal_rule_action(&json!({
+            "do":"evolve","source":"base","evolve_card":"form","pay":{"pp":1_u8}
+        }))
+        .unwrap()
+        .outcome,
+        "resolved"
+    );
+    let question = game.internal_pending_choice().unwrap().unwrap();
+    let InputDomain::Pending(options) = &question.domain else {
+        panic!("evolution trigger");
+    };
+    assert_eq!(options.len(), 1);
+    assert_eq!(options[0].card, "BP01-010");
+    let result = resolved(
+        game.answer_internal_card(
+            question.actor,
+            question.token,
+            Answer::Pending(options[0].handle),
+        )
+        .unwrap(),
+    );
+    let created = result
+        .progress
+        .receipts
+        .values()
+        .find_map(|outcome| {
+            if let InstructionOutcome::Token(outcome) = outcome {
+                Some(outcome.created.len())
+            } else {
+                None
+            }
+        })
+        .unwrap();
+    assert_eq!(created, 2);
+    let view = game.projection(View::Referee).unwrap();
+    let ex = view["P1"]["ex"].as_array().unwrap();
+    assert_eq!(ex.len(), 2);
+    for id in ex {
+        let object = &view["objects"][id.as_str().unwrap()];
+        assert_eq!(object["card"], "BP01-T02");
+        assert_eq!(object["name"], "フェアリーウィスプ");
+    }
+    assert_eq!(view["P2"]["ex"], json!([]));
 }

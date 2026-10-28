@@ -6,6 +6,7 @@
 )]
 
 use super::{Frame, Game, View, int, string};
+use crate::ir::TokenOutcome;
 use crate::ir::{
     Action, Arithmetic, Binding, Bool, Capture, CaptureRef, CardQuantityOutcome, Cardinality,
     ChoiceDomain, Comparison, Control, DamageEvent, DamageFlags, DamageQuantityOutcome,
@@ -43,6 +44,7 @@ mod resource;
 mod reveal;
 mod search;
 mod terminal;
+mod tokens;
 pub use terminal::Terminal;
 
 mod source;
@@ -205,6 +207,8 @@ pub enum Answer {
 /// Typed instruction outcomes retained only by the authority.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum InstructionOutcome {
+    /// Tokens successfully created and placed, after applying destination capacity.
+    Token(TokenOutcome),
     /// Actual body resource recovery, independent of cost payment.
     Resource(ResourceOutcome),
     /// Successful discards and their physical movements, independent of destruction.
@@ -320,6 +324,7 @@ pub enum Fact {
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 enum Slot {
+    Created(Vec<ObjectRef>),
     Integer(Int),
     Natural(Nat),
     Boolean(Bool),
@@ -1103,6 +1108,7 @@ impl Game {
             .checked_add(1)
             .ok_or_else(|| invalid("IR epoch exhausted"))?;
         match &instruction.action {
+            Action::Token { .. } => self.internal_tokens(execution, &instruction)?,
             Action::Resource { .. } => self.internal_resource(execution, &instruction)?,
             Action::Discard { .. } => self.internal_discard_wait(execution, instruction)?,
             Action::Life { .. } => self.internal_life(execution, &instruction)?,

@@ -204,7 +204,7 @@ impl Game {
         self.catalog.rules_label(card, 0)
     }
 
-    fn unique_crest_creations(
+    pub(super) fn unique_crest_creations(
         &self,
         prints: &[String],
         zone: &str,

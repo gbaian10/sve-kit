@@ -29,6 +29,16 @@ pub(super) struct Card {
     pub faces: BTreeMap<String, Face>,
     #[serde(default)]
     pub ignored: Vec<DirectSourceUse>,
+    #[serde(default)]
+    pub token_sources: Vec<TokenSource>,
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct TokenSource {
+    pub source: DirectSourceUse,
+    #[serde(rename = "card_no")]
+    pub _card_no: String,
 }
 
 #[derive(Deserialize)]
@@ -191,6 +201,25 @@ pub(super) enum Step {
     Look(Look),
     Reveal(Reveal),
     Move(Move),
+    Create(Create),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Create {
+    pub token: String,
+    pub to: CreateZone,
+    pub n: Option<u64>,
+    pub result: Option<String>,
+    pub bind: Option<String>,
+    #[serde(rename = "by")]
+    pub _by: Option<SelfPlayer>,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum CreateZone {
+    Ex,
 }
 
 #[derive(Deserialize)]
