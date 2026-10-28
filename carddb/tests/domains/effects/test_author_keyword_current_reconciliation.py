@@ -107,7 +107,7 @@ def collection(
         {"format": 1, "kind": "author_effect_set", "scope": "shared", "cards": cards},
     )
     records: list[JsonValue] = []
-    for number in cards:
+    for number in sorted(cards):
         identity = source.db.select(
             "printing", ("card_id",), where={"region": "jp", "card_no": number}
         )[0].values["card_id"]
@@ -420,9 +420,9 @@ def test_selection_keeps_keyword_failures_without_fallback(
             source.selection_inputs(load_semantic_inputs(tmp_path, expander), expander)
         )
     authors = [object_value(item) for item in array(selected["authors"])]
-    assert [item["status"] for item in authors] == ["accepted", "rejected"]
-    assert len(array(object_value(authors[0]["input"])["declaration_sidecar"])) == 1
-    assert authors[1]["reason"] == "source_keyword_payload_mismatch"
+    assert [item["status"] for item in authors] == ["rejected", "accepted"]
+    assert len(array(object_value(authors[1]["input"])["declaration_sidecar"])) == 1
+    assert authors[0]["reason"] == "source_keyword_payload_mismatch"
     assert selected["documents"] == []
 
 
