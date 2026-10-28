@@ -1,0 +1,26 @@
+cards:
+  BP16-P31:
+    abilities:
+      - lastword:
+          do:
+            - life:
+                delta: 2
+                who: self
+            - move:
+                to: cemetery
+                top:
+                  n: 1
+                  who: self
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-10-29"
+    token:
+      name: 番犬の左腕・ココ
+      template: true
+format: 2
+kind: author_effect_set
