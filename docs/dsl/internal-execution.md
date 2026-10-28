@@ -25,12 +25,12 @@ base face 的普通打出費用必須是非負數字；缺欄、null、「-」�
 非打出用的進化 face 不套用此數字限制；能力引用 face 的原有缺欄檢查仍適用。
 Printed Activated 的印刷面限普通從者、官方進化從者（フォロワー・エボルヴ）或護符；卡種由同一 Catalog face 驗證。
 
-准入接受普通 Printed Spell 的 `[Resolution]`、Printed Activated 的 `[Field]`，以及下節的
+准入接受已支援卡型的 Printed Spell `[Resolution]`、Printed Activated 的 `[Field]`，以及下節的
 Printed Fanfare／Lastword／OnAttack 及 End Begin。Spell 的唯一固有 Ordered PP Pay 必須等於同 Catalog face 的印刷費用；
 只在這個已驗位置按 Resolution 的有效成本實付一次。Activated 沿用 controller 的非負常值 PP
 與恰好 SourceHolder 的 Acted Posture／Put 送往 owner 墓地，不能套用卡片減費；成本沒有 materials、precondition 或替代。
 前置 X、追加／替代成本、一般 trigger、通用 Static 與任意對象 LKI 仍整棵拒絕。
-Quick 僅接受 [Quick 契約 §1、§5](quick-semantics.md) 的普通 Spell 獨立 Static 許可與
+Quick 僅接受 [Quick 契約 §1、§5](quick-semantics.md) 的已准入 Spell 獨立 Static 許可與
 普通場上從者的指定 Activated；共用精確形狀檢查，不開放一般 PlayCard Permission。
 目前只由內部 typed 輸入承載；DSL 入口與正式來源 lowering 尚未完成。
 
@@ -42,7 +42,7 @@ Move／Destroy 沿用已驗公開區來源與 owner 墓地／消滅目的地；S
 觀察 Move 只收〈私有看牌與同區排列〉及 Search 各節的同一受限形狀，整卡不另放寬。
 這只是執行支援，不代表正式來源或 qualified 已驗；未受驗連結、特殊卡片、入場效果與其他互動本文保持拒絕。
 
-`play_internal_card(holder, actor)` 接主動玩家 main、自己的 Hand／EX、base 普通 Spell 或已准入的
+`play_internal_card(holder, actor)` 接主動玩家 main、自己的 Hand／EX、base 已准入 Spell 或已准入的
 普通從者／護符；`activate_internal_card(holder, AbilityId, actor)` 接已載入的當前場上從者／護符能力。
 來源、世代、instance 與 execution 都由 authority 建立；起動讀目前有效的印刷定義，`base` 比對 face 0。
 Printed、Field 起動可帶 `PlaySpec.limit` 的每回合 1／2 次額度；以 AbilityInstanceId 與實際 TurnId
@@ -71,6 +71,18 @@ authority 保留完整錯誤，玩家 projection 的 unsupported 錯誤不包含
 事件與下一階段）。`answer_internal_card(actor, token, payload)` 不收 caller 的 source、snapshot
 或環境；合成 `answer_internal` 不能回答正式 play。待答期間不發布部分完整 Activation。
 從者／護符規則付款以該次 execution 的 `ReceiptId(0)` 保存，Fanfare 另有 execution 與 receipts。
+
+### 法術變體的整卡准入
+
+整卡 Spell 接受印刷卡型 `スペル`、`スペル・トークン` 與 `スペル・アドバンス`，
+三者共用上述固定印刷 PP 費用、Resolution 世代、事件特徵與正式打出／回復程序。
+Quick 仍須有同一 base face 的獨立印刷許可，卡型本身不授予 Quick。
+`スペル・エボルヴ` 不由這個整卡 Spell 入口准入。
+
+Spell Advance 的合法 EX 打出沿既有清理移往 owner 墓地，再由 CR9.2.2 立即回 owner
+的 evolve deck 表面；保留卡片物件，不消去，也不留在墓地。清理前須能配置這兩次移區的
+世代，否則撤銷整次打出，包括付款、本文及事件。回到 evolve deck 不授予再次直接打出的
+玩家動作；一般特殊卡 Move 與從 evolve deck 進入 EX 的能力仍沿各自准入範圍。
 
 ### 普通護符的執行子集
 
