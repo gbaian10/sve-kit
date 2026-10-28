@@ -111,7 +111,9 @@ fn unselected_reprint_keeps_the_current_runtime_guard() {
     let mut initial = draw_position();
     initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"spell","card":"ETD03-019"}]);
     initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"CP03-016"}]);
-    let (snapshot, keywords, mut input) = inputs();
+    let fixtures = inputs();
+    let (snapshot, keywords, input) = &fixtures;
+    let mut input = input.clone();
     let authors = input["authors"].as_array_mut().unwrap();
     let before_count = authors.len();
     authors.retain(|author| {
@@ -120,7 +122,7 @@ fn unselected_reprint_keeps_the_current_runtime_guard() {
             .is_some_and(|printings| printings.iter().any(|number| number == "ETD03-019"))
     });
     assert_eq!(authors.len() + 1, before_count);
-    let mut game = game_from_selection(&initial, &snapshot, &keywords, &input);
+    let mut game = game_from_selection(&initial, snapshot, keywords, &input);
     let before = format!("{game:?}");
     let error = game.play_internal_card("spell", actor("P1")).unwrap_err();
     assert!(
