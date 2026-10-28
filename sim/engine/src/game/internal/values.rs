@@ -6,7 +6,7 @@ use super::{
     ResolvedRecipients, Result, RuntimeDamageRecipient, Selector, Slot, ZoneKind, contains, int,
     invalid, player_id, seat_name, unsupported,
 };
-use crate::ir::{BoolFrozen, ExecutionRef, PaymentReference, SpellCountTime};
+use crate::ir::{BoolFrozen, BoolRead, ExecutionRef, PaymentReference, SpellCountTime};
 use crate::ir::{
     FollowPermission, MemberProjection, MovementReceipt, ObjectReceipt, ObjectView, PlayerRead,
     ReceiptId, Role, SelectionView,
@@ -619,7 +619,20 @@ impl Execution {
                 Predicate::Exists { objects } => !self.objects(game, objects)?.is_empty(),
                 _ => return Err(unsupported("predicate")),
             })),
-            Expr::Live(_) => Err(unsupported("boolean expression")),
+            Expr::Live(read) => match read.as_ref() {
+                BoolRead::Crimson { player } => {
+                    let seat = seat_name(self.player(game, player)?)?;
+                    Ok(Bool(
+                        game.active() == seat
+                            && game
+                                .state
+                                .counters
+                                .get(&format!("{seat}.leader_hp_decreased"))
+                                .is_some_and(|count| *count > 0),
+                    ))
+                }
+                _ => Err(unsupported("boolean expression")),
+            },
         }
     }
 

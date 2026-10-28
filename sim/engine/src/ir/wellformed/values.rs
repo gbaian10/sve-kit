@@ -196,9 +196,9 @@ impl Checker {
                 self.visible(self.env.access.get(&reference.binding.key()))
             }
             Expr::Live(read) => match read.as_ref() {
-                BoolRead::Awakening { player } | BoolRead::OwnTurn { player } => {
-                    self.player(player)
-                }
+                BoolRead::Awakening { player }
+                | BoolRead::Crimson { player }
+                | BoolRead::OwnTurn { player } => self.player(player),
                 BoolRead::State { object, .. } => self.view(object),
                 BoolRead::HistoryExists { query } => self.history(query),
                 BoolRead::LegalAttack { .. } => self.reject(),

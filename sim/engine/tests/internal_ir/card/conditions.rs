@@ -158,3 +158,14 @@ fn live_condition_syntax_rejects_false_awakening_and_ambiguous_thresholds() {
             .unwrap_err();
     }
 }
+
+#[test]
+fn crimson_false_is_rejected_instead_of_becoming_a_negated_history_condition() {
+    ExpandedLowerer::new()
+        .unwrap()
+        .lower_with_printed_costs(
+            &tree(&json!([{"if":{"cond":{"crimson":false},"then":[{"draw":{"n":1}}]}}])),
+            &BTreeMap::from([("SD03-005".to_owned(), Nat(1))]),
+        )
+        .unwrap_err();
+}

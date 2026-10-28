@@ -506,6 +506,7 @@ tags!(SpellCountTime {
 });
 variants!(BoolRead {
     Awakening { player: PlayerRef } => ["read.awakening"],
+    Crimson { player: PlayerRef } => ["read.crimson"],
     State { object: ObjectView, property: BooleanState } => ["read.state"],
     HistoryExists { query: HistoryQuery } => ["read.history.exists"],
     OwnTurn { player: PlayerRef } => ["read.turn.own"],
