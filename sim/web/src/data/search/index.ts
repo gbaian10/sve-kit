@@ -1403,10 +1403,18 @@ export class SearchIndex {
       if (sort === "set") {
         const first = this.pool.get(this.printings.owner[a] ?? 0)
         const second = this.pool.get(this.printings.owner[b] ?? 0)
-        // The empty date sorts before every dated set ascending, so reversing also reverses unknowns.
+        const firstRelease = releases.get(first)
+        const secondRelease = releases.get(second)
+        // Missing release dates stay last in either direction, and PR stays last within that group.
+        if (firstRelease === undefined || secondRelease === undefined) {
+          if (firstRelease === undefined && secondRelease !== undefined) return 1
+          if (firstRelease !== undefined && secondRelease === undefined) return -1
+          if (first === "pr" && second !== "pr") return 1
+          if (first !== "pr" && second === "pr") return -1
+        }
         return (
           direction *
-          (compareCodePoints(releases.get(first) ?? "", releases.get(second) ?? "") ||
+          (compareCodePoints(firstRelease ?? "", secondRelease ?? "") ||
             first.localeCompare(second, "en", { numeric: true }))
         )
       }
