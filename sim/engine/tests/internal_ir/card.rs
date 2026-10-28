@@ -535,6 +535,9 @@ mod resource;
 #[path = "card/reveal_hand.rs"]
 mod reveal_hand;
 
+#[path = "card/hand_cost.rs"]
+mod hand_cost;
+
 #[path = "card/material.rs"]
 mod material;
 

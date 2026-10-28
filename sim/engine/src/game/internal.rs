@@ -342,6 +342,7 @@ enum Slot {
 #[derive(Clone, Debug)]
 enum Wait {
     Discard(discard::HandWait),
+    CostDiscard(discard::HandWait),
     WardEntry(ObjectRef),
     OptionalCost,
     CostMaterials(card::exchange::MaterialWait),
@@ -380,6 +381,7 @@ pub(super) struct Execution {
     todo: VecDeque<Node>,
     slots: BTreeMap<(ScopeId, u64), Slot>,
     receipts: BTreeMap<ReceiptId, InstructionOutcome>,
+    cost_discards: BTreeMap<ReceiptId, Vec<ObjectRef>>,
     facts: Vec<Fact>,
     waiting: Option<(DecisionView, Wait)>,
     destroy_guards: Vec<ObjectRef>,
@@ -549,6 +551,7 @@ impl Game {
                     .collect(),
                 slots: BTreeMap::new(),
                 receipts: BTreeMap::new(),
+                cost_discards: BTreeMap::new(),
                 facts: Vec::new(),
                 waiting: None,
                 destroy_guards: Vec::new(),
@@ -627,6 +630,11 @@ impl Game {
                 return Err(invalid("wrong actor or stale internal answer"));
             }
             match (wait, answer) {
+                (Wait::CostDiscard(wait), Answer::CostMaterials(handles)) => {
+                    let members = wait.validate(self, &execution, &handles)?;
+                    rollback = execution.origin.take();
+                    execution.cost_discards.insert(wait.receipt(), members);
+                }
                 (Wait::Discard(wait), Answer::Targets(handles)) => {
                     let members = wait.validate(self, &execution, &handles)?;
                     rollback = execution.origin.take();

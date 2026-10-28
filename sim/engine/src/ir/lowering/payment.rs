@@ -18,6 +18,14 @@ pub(super) fn lower(
         ast::Cost::Short(operation) => from_ref(operation),
         ast::Cost::Ordered { steps } => steps.as_slice(),
     };
+    if operations
+        .iter()
+        .filter(|op| matches!(op, ast::CostOperation::Discard(_)))
+        .count()
+        > 1
+    {
+        return Err(unsupported(path));
+    }
     let mut steps = Vec::new();
     let mut parameters = Vec::new();
     for operation in operations {
@@ -33,6 +41,7 @@ pub(super) fn lower(
                     ast::CostOperation::Act(_) => super::material::Operation::Act,
                     ast::CostOperation::Pp(_)
                     | ast::CostOperation::LeaderLife(_)
+                    | ast::CostOperation::Discard(_)
                     | ast::CostOperation::ActSelf(_)
                     | ast::CostOperation::SelfToCemetery(_) => return Err(unsupported(path)),
                 };
@@ -46,6 +55,9 @@ pub(super) fn lower(
                 )?;
                 parameters.push(decision);
                 action
+            }
+            ast::CostOperation::Discard(material) => {
+                super::hand_payment::lower(context.card_allocator, material, path)?
             }
             ast::CostOperation::Pp(amount) => Action::Resource {
                 player: PlayerRef::Controller {},

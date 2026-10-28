@@ -177,6 +177,7 @@ pub(super) enum CostOperation {
     ReturnToHand(Material),
     Banish(Material),
     Act(Material),
+    Discard(HandMaterial),
     ActSelf(bool),
     SelfToCemetery(bool),
 }
@@ -1080,4 +1081,22 @@ pub(super) enum HandZone {
 pub(super) struct BodyOptionalCost {
     pub pp: u64,
     pub result: String,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct HandMaterial {
+    pub sel: HandQuery,
+    pub n: u64,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct HandQuery {
+    #[serde(rename = "who")]
+    pub _who: SelfPlayer,
+    #[serde(rename = "zone")]
+    pub _zone: HandZone,
+    pub kind: Option<SearchKind>,
+    pub r#trait: Option<String>,
+    pub name: Option<String>,
 }
