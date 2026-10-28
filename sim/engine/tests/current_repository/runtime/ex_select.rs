@@ -7,9 +7,9 @@ use sve_engine::catalog::EngineIdentityInput;
     reason = "Only the evolution branch of the shared expansion fixture is used."
 )]
 #[path = "../../support/expanded.rs"]
-mod expanded;
+pub(super) mod expanded;
 #[path = "../../support/rule_fixtures.rs"]
-mod rule_fixtures;
+pub(super) mod rule_fixtures;
 
 fn evolution_companion(snapshot: &str, input: &mut Value) -> (String, WellFormedCardProgram) {
     let form: Value = snapshot
