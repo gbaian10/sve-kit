@@ -9,6 +9,7 @@ mod evolution;
 mod exchange;
 mod keywords;
 mod numeric;
+mod optional_payment;
 mod ordering;
 mod payment;
 mod play;
@@ -223,6 +224,7 @@ impl ExpandedLowerer {
                     )?);
                     continue;
                 }
+                optional_payment::check_entry(&ability, exchange.is_some(), &entry_path)?;
                 abilities.push(allocator.ability(
                     &coordinates,
                     &entry_path,
@@ -398,22 +400,15 @@ impl Allocator {
         let (body, head, keyword) = ability_body(entry, path)?;
         let source = source_span(key, path, entry)?;
         let ability_source = ability_source(&source, keyword);
-        let mut context = BodyContext {
-            scope,
-            payment_result: entry.spell.as_ref().and(payment_result),
-            allocator: Self::default(),
-            card_allocator: self,
-            definitions: &body.define,
-            searches: BTreeMap::new(),
-            observations: BTreeMap::new(),
-            targets: BTreeMap::new(),
-            recipient_targets: BTreeMap::new(),
-            parameters: vec![],
-            mode_targets: BTreeMap::new(),
-            formal_play: entry.activate.is_some() || entry.spell.is_some(),
-        };
+        let mut context = BodyContext::new(entry, scope, body, payment_result, self);
+        let optional =
+            context.optional_payment(body, &source, &ability_source, &format!("{path}/{head}"))?;
         context.prepare_parameters(body, path)?;
-        let program = context.body(body, &format!("{path}/{head}"), &source, &ability_source)?;
+        let mut program =
+            context.body(body, &format!("{path}/{head}"), &source, &ability_source)?;
+        if let Some(optional) = optional {
+            program.steps.insert(0, optional);
+        }
         let (kind, mut play, trigger) = if entry.spell.is_some() {
             if body.per_turn.is_some() {
                 return Err(unsupported(path));
@@ -453,7 +448,16 @@ impl Allocator {
                 return Err(unsupported(path));
             }
             trigger.limit = body.per_turn.map(|_| super::LimitSpec::once_per_turn());
-            (AbilityKind::Triggered, None, Some(trigger))
+            (
+                AbilityKind::Triggered,
+                body.optional_cost.as_ref().map(|_| super::PlaySpec {
+                    limit: None,
+                    captures: vec![],
+                    parameters: vec![],
+                    costs: super::CostSpec::Ordered { steps: vec![] },
+                }),
+                Some(trigger),
+            )
         };
         if let Some(play) = &mut play {
             play.parameters = context.parameters;
@@ -695,6 +699,7 @@ fn lowered_subscription(
 
 struct BodyContext<'definitions> {
     scope: ScopeId,
+    local_payment: Option<(String, ReceiptId)>,
     payment_result: Option<(String, ReceiptId)>,
     allocator: Allocator,
     card_allocator: &'definitions mut Allocator,
@@ -707,11 +712,37 @@ struct BodyContext<'definitions> {
     formal_play: bool,
     mode_targets: BTreeMap<u64, Vec<ast::Target>>,
 }
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Action families share the ability binding allocator."
-)]
-impl BodyContext<'_> {
+impl<'definitions> BodyContext<'definitions> {
+    fn new(
+        entry: &ast::Ability,
+        scope: ScopeId,
+        body: &'definitions ast::Body,
+        payment_result: Option<(String, ReceiptId)>,
+        card_allocator: &'definitions mut Allocator,
+    ) -> Self {
+        Self {
+            scope,
+            payment_result: if entry.spell.is_some() {
+                payment_result
+            } else {
+                None
+            },
+            allocator: Allocator::default(),
+            card_allocator,
+            definitions: &body.define,
+            searches: BTreeMap::new(),
+            observations: BTreeMap::new(),
+            targets: BTreeMap::new(),
+            recipient_targets: BTreeMap::new(),
+            parameters: vec![],
+            mode_targets: BTreeMap::new(),
+            formal_play: entry.activate.is_some()
+                || entry.spell.is_some()
+                || body.optional_cost.is_some(),
+            local_payment: None,
+        }
+    }
+
     fn prepare_parameters(&mut self, body: &ast::Body, path: &str) -> Result<(), LoweringError> {
         for value in body.define.values() {
             self.number(value, path, &mut BTreeSet::new())?;

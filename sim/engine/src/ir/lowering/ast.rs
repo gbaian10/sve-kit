@@ -189,6 +189,7 @@ pub(super) struct Ports {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct Body {
+    pub optional_cost: Option<BodyOptionalCost>,
     pub per_turn: Option<u64>,
     #[serde(default)]
     pub targets: Vec<Target>,
@@ -1019,4 +1020,11 @@ pub(super) struct WholeHand {
 #[serde(rename_all = "snake_case")]
 pub(super) enum HandZone {
     Hand,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct BodyOptionalCost {
+    pub pp: u64,
+    pub result: String,
 }

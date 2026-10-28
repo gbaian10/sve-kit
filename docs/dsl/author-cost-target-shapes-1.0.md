@@ -218,3 +218,16 @@ C1／D0 不得讓前一欄任意讀另一欄的 receipt。one_of 分支內 resul
 以真正 Cost／Targets 節點解碼再 canonical：payload mapping 換鍵序 bytes 相同，
 steps／targets 對調 bytes 不同，重複步驟不能去重，單元素 steps 形狀拒絕。
 不改 body recipe、不在 hash 前語義正規化，也不聲稱完整DSL reader 已整合此驗收。
+
+## 正式選擇支付窄片
+
+Spell 與入場（Fanfare）觸發能力的能力頭可寫單一固定 PP 費用，例如
+`optional_cost: {pp: 2, result: extra}`，以 `paid: {receipt: extra}` 控制付款成功才適用的本文。
+此宣告先詢問是否支付，再依原順序決定目標，最後與原費用在同一交易內完整付款；
+付不起取消整次打出，拒付則得到未完成的付款結果。即使拒付或付款後改為集合效果，
+卡文原本要求的目標仍須選擇。BP04-066 驗證追加 5 PP 與單體／集合消滅；
+Fanfare 使用相同宣告入口，在其待機項被選中後詢問，不改變一般入場與本文 choose 的時點。
+
+IR 使用根本文開頭單一 `K.pay(at=PlayParameter)`，空的 on_paid 與本地付款結果；
+runtime 在付款前剝離宣告，付款完成後才開始執行本文。此窄片不含多組、選項費用、替代費用、
+材料或手牌付款，也不接受巢狀宣告、起動能力宣告或與卡片 exchange 並存。

@@ -30,6 +30,7 @@ mod evolution;
 pub(super) mod exchange;
 mod fanfare;
 mod keywords;
+pub(super) mod optional;
 mod printed;
 pub(super) mod quick;
 mod resources;
@@ -278,6 +279,7 @@ impl Game {
             super::cost::printed_play_cost(&base_print["cost"])?;
         }
         costs::check(self, card_no, card)?;
+        optional::check_card(card)?;
         if self.card_runtime.cards.contains_key(card_no)
             || self.typed.is_some()
             || !self.prepared.is_empty()
@@ -854,6 +856,12 @@ fn check_nodes(
                 ) {
                     return Err(unsupported("whole-card synchronous action"));
                 }
+            }
+            Node::Control {
+                control: Control::Pay { costs, on_paid, .. },
+            } => {
+                optional::check_costs(costs, ability_source)?;
+                check_nodes(game, &on_paid.steps, source, ability_source)?;
             }
             Node::Control {
                 control: Control::Sequence { body },

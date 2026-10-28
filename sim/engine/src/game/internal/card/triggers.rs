@@ -1,6 +1,7 @@
 //! Authority occurrences share one queue and return to state-based checks after each play.
 use crate::ir::LimitSpec;
 use crate::ir::events::timing::leave_filter;
+use crate::ir::optional_payment;
 
 use super::super::source::{SourceInformation, SourceSnapshot};
 use super::super::{Answer, DecisionToken, DecisionView, InputDomain, player_id};
@@ -82,7 +83,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
     if !matches!(&ability.source.origin, AbilityOrigin::Keyword { keyword: KeywordId::Lastword, origin }
         if matches!(origin.as_ref(), AbilityOrigin::Printed { .. }))
         || ability.kind != AbilityKind::Triggered
-        || ability.play.is_some()
+        || !optional_payment::trigger_play(ability)
         || trigger.active_zones != [ZoneKind::Field]
         || trigger.view != EventSnapshotPolicy::BeforeExit
         || trigger

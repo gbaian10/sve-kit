@@ -9,6 +9,7 @@ use crate::game::{Step, int, string};
 use crate::ir::EntryOrigin;
 use crate::ir::ExecutionId;
 use crate::ir::LimitSpec;
+use crate::ir::optional_payment;
 use crate::ir::{
     AttackEvent, Edge, EventPayload as Event, Generation, Nat, ObjectRef, PhaseEvent, PlayerRef,
     RuntimeDamageRecipient,
@@ -58,7 +59,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
     };
     if !admitted
         || ability.kind != AbilityKind::Triggered
-        || ability.play.is_some()
+        || !optional_payment::trigger_play(ability)
         || trigger.active_zones != [ZoneKind::Field]
         || trigger.view
             != if matches!(

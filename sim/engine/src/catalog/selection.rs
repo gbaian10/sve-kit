@@ -8,7 +8,7 @@ use serde::Deserialize;
 use serde_json::Value;
 
 /// Disjoint prototype programs and complete, current-source checked D0 candidates.
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 #[expect(
     clippy::partial_pub_fields,
     reason = "The public candidates are checked against private accepted copies before use."

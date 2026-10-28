@@ -74,6 +74,18 @@ impl BodyContext<'_> {
                 right: self.number(&value.right, path, &mut BTreeSet::new())?,
             },
             ast::Condition::Paid(paid) => {
+                if let Some((name, receipt)) = &self.local_payment {
+                    if name != &paid.receipt {
+                        return Err(unsupported(path));
+                    }
+                    return Ok(Expr::Frozen(Box::new(
+                        super::super::BoolFrozen::PaymentComplete {
+                            receipt: super::super::PaymentReference::Local {
+                                receipt: super::super::ReceiptReference::new(*receipt),
+                            },
+                        },
+                    )));
+                }
                 let (name, receipt) = self
                     .payment_result
                     .as_ref()

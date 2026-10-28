@@ -557,6 +557,17 @@ impl Execution {
             }
             Expr::Frozen(read) => match read.as_ref() {
                 BoolFrozen::PaymentComplete {
+                    receipt: PaymentReference::Local { receipt },
+                } => {
+                    let ReceiptLocation::Local { id } = receipt.location() else {
+                        return Err(unsupported("iterated optional payment"));
+                    };
+                    match self.receipts.get(id) {
+                        Some(InstructionOutcome::ExchangePayment(payment)) => Ok(payment.complete),
+                        _ => Err(invalid("missing optional payment result")),
+                    }
+                }
+                BoolFrozen::PaymentComplete {
                     receipt: PaymentReference::CardPlay { face, receipt },
                 } => match &self.card_payment {
                     Some((paid_face, paid_receipt))

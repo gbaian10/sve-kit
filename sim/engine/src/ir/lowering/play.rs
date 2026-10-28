@@ -333,6 +333,7 @@ impl BodyContext<'_> {
             let mut context = BodyContext {
                 scope,
                 payment_result: None,
+                local_payment: self.local_payment.clone(),
                 allocator: Allocator::default(),
                 card_allocator: self.card_allocator,
                 definitions: self.definitions,

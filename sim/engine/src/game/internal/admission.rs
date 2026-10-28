@@ -2,6 +2,7 @@ use super::{
     Cardinality, ChoiceDomain, Control, DecisionKind, Declinable, InstructionContext, Located,
     Node, Program, Requirements, Result, SourceSpan, Visibility, WellFormedProgram, unsupported,
 };
+use crate::ir::CostSpec;
 use crate::ir::{AbilityOrigin, AbilitySource, Binding, EnterFieldEvent, KeywordId};
 use crate::ir::{Action, DamageAmount, IntFrozen, IntOperation, Predicate};
 use crate::ir::{Bool, DamageEvent, Expr, Int};
@@ -96,6 +97,23 @@ fn source_paths(
                 ) {
                     paths.insert(format!("{path}/instruction/source/origin"));
                     paths.insert(format!("{path}/instruction/source/origin/keyword"));
+                }
+            }
+            Node::Control {
+                control:
+                    Control::Pay {
+                        costs: CostSpec::Ordered { steps },
+                        ..
+                    },
+            } => {
+                for (cost_index, cost_step) in steps.iter().enumerate() {
+                    if cost_step.instruction.source == *origin {
+                        let prefix = format!(
+                            "{path}/control/costs/steps/{cost_index}/instruction/source/origin"
+                        );
+                        paths.insert(prefix.clone());
+                        paths.insert(format!("{prefix}/keyword"));
+                    }
                 }
             }
             Node::Control {
@@ -224,6 +242,20 @@ fn check_program(program: &Program, source: &SourceSpan, card: bool) -> Result<(
         super::ordering::check_node(&step.node, source)?;
         match &step.node {
             Node::Control {
+                control: control @ Control::Pay { costs, on_paid, .. },
+            } if card => {
+                super::card::optional::check_control(control)?;
+                if !on_paid.steps.is_empty() {
+                    return Err(unsupported("optional continuation"));
+                }
+                let CostSpec::Ordered { steps } = costs else {
+                    return Err(unsupported("optional alternatives"));
+                };
+                if steps.len() != 1 {
+                    return Err(unsupported("one optional cost"));
+                }
+            }
+            Node::Control {
                 control: Control::Sequence { body },
             } => check_program(body, source, card)?,
             Node::Control {
@@ -312,7 +344,17 @@ fn check_program(program: &Program, source: &SourceSpan, card: bool) -> Result<(
 fn supported(code: &str) -> bool {
     matches!(
         code,
-        "shape.Node.Instruction"
+        "shape.Control.Pay"
+            | "control.pay"
+            | "internal.PaymentTime.PlayParameter"
+            | "internal.PaymentOptionality.Optional"
+            | "shape.CostSpec.Ordered"
+            | "shape.CostStep"
+            | "internal.InstructionContext.Cost"
+            | "internal.ResourceOperation.Pay"
+            | "shape.PaymentReference.Local"
+            | "read.receipt.payment-complete"
+            | "shape.Node.Instruction"
             | "shape.Node.Control"
             | "shape.Node.Capture"
             | "shape.Node.Decision"
