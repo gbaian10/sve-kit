@@ -1,0 +1,36 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP14-108:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-30"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        keywords:
+          - ward
+      - line: 3
+        fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: cemetery
+                        trait: 天使
+                    op: ge
+                    right: 5
+                then:
+                  - life:
+                      who: self
+                      delta: 2

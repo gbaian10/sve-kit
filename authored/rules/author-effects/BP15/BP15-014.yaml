@@ -1,0 +1,40 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP15-014:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-30"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: cemetery
+                        trait: 狩人
+                    op: ge
+                    right: 3
+                then:
+                  - set_stat:
+                      "on": enemy
+                      hp: 1
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
