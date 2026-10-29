@@ -43,6 +43,14 @@ def card_numbers(official_snapshot: RegistrySnapshot) -> dict[str, str]:
         ("svwb", "90051120", "BP16-T19", "same_card"),
         ("svwb", "90061120", "BP16-T20", "same_card"),
         ("svwb", "90041120", "BP16-T17", "same_card"),
+        ("sv1", "900544010", "PR-073", "same_card"),
+        ("sv1", "900544020", "PR-074", "same_card"),
+        ("svwb", "10001120", "BP01-160", "same_character"),
+        ("svwb", "10112110", "BP22-003", "same_character"),
+        ("sv1", "900842040", "BP05-045", "same_character"),
+        ("svwb", "90074220", "BP05-045", "same_character"),
+        ("sv1", "900842030", "BP05-045", "same_character"),
+        ("svwb", "90074210", "BP05-045", "same_character"),
     ],
 )
 def test_reviewed_reclassifications_and_aliases(
@@ -71,9 +79,5 @@ def test_adoption_never_claims_human_or_exact_face_review(
     assert {record.review_level for record in adopted} == {"model_reviewed"}
     assert all(
         record.subject.face_id is None and record.subject.digital_phase is None
-        for record in adopted
-    )
-    assert not any(
-        record.subject.game == "sv1" and record.subject.official_id == "900544010"
         for record in adopted
     )
