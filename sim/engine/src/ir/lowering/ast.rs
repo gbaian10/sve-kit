@@ -954,6 +954,8 @@ pub(super) struct CountQuery {
     pub zone: CountZone,
     pub kind: Option<SearchKind>,
     pub r#trait: Option<String>,
+    pub name: Option<String>,
+    pub name_contains: Option<String>,
     pub orig_cost_eq: Option<u64>,
 }
 

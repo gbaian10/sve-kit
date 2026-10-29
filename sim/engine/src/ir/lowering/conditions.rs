@@ -322,47 +322,7 @@ impl BodyContext<'_> {
                     ],
                 })))
             }
-            ast::Number::Count { count } if count.orig_cost_eq.is_none() => {
-                if !matches!(count.zone, ast::CountZone::Field)
-                    && (count.kind.is_some() || count.r#trait.is_some())
-                {
-                    return Err(unsupported(path));
-                }
-                let binding = Binding::new(self.allocator.id(path)?, self.scope);
-                Ok(Expr::Compute(Box::new(IntOperation::FromNat {
-                    value: Expr::Live(Box::new(NatRead::ZoneCount {
-                        selector: Selector::Zone {
-                            players: PlayerSet {
-                                relation: match count.who {
-                                    ast::LeaderSide::Controller => PlayerRelation::SelfPlayer,
-                                    ast::LeaderSide::Opponent => PlayerRelation::Opponents,
-                                },
-                                relative_to: PlayerRef::Controller {},
-                                cardinality: Cardinality {
-                                    minimum: Nat(1),
-                                    maximum: Some(Nat(1)),
-                                },
-                                text_quantifier: TextQuantifier::Implicit,
-                            },
-                            zone: match count.zone {
-                                ast::CountZone::Field => ZoneKind::Field,
-                                ast::CountZone::Deck => ZoneKind::Deck,
-                                ast::CountZone::Hand => ZoneKind::Hand,
-                                ast::CountZone::Cemetery => ZoneKind::Cemetery,
-                            },
-                            view: SelectionView::Current {},
-                            binding,
-                            predicate: Box::new(super::search::object_filter(
-                                count.kind.as_ref(),
-                                count.r#trait.as_deref(),
-                                None,
-                                binding,
-                            )),
-                        },
-                    })),
-                })))
-            }
-            ast::Number::Count { .. } => Err(unsupported(path)),
+            ast::Number::Count { count } => self.zone_count(count, path),
             ast::Number::Resource { resource } => {
                 Ok(Expr::Live(Box::new(IntRead::PlayerResource {
                     player: match resource.who {
@@ -376,5 +336,82 @@ impl BodyContext<'_> {
                 })))
             }
         }
+    }
+
+    fn zone_count(
+        &mut self,
+        count: &ast::CountQuery,
+        path: &str,
+    ) -> Result<Expr<Int>, LoweringError> {
+        let filtered = count.kind.is_some()
+            || count.r#trait.is_some()
+            || count.name.is_some()
+            || count.name_contains.is_some()
+            || count.orig_cost_eq.is_some();
+        if matches!(count.zone, ast::CountZone::Hand | ast::CountZone::Deck) && filtered {
+            return Err(unsupported(path));
+        }
+        let binding = Binding::new(self.allocator.id(path)?, self.scope);
+        let mut predicates = vec![super::search::object_filter(
+            count.kind.as_ref(),
+            count.r#trait.as_deref(),
+            count.name.as_deref(),
+            binding,
+        )];
+        let object = super::super::ObjectView::Current {
+            object: Box::new(super::super::ObjectOperand::Bound { binding }),
+        };
+        if let Some(name) = &count.name_contains {
+            predicates.push(Expr::Compute(Box::new(Predicate::NameContains {
+                object: object.clone(),
+                name: Expr::Literal(super::super::CardName(name.clone())),
+            })));
+        }
+        if let Some(cost) = count.orig_cost_eq {
+            predicates.push(Expr::Compute(Box::new(Predicate::CompareInt {
+                left: Expr::Compute(Box::new(IntOperation::InformationOrZero {
+                    information: super::super::NumberRead::Cost {
+                        object,
+                        view: super::super::CharacteristicView::Original,
+                    },
+                })),
+                comparison: Comparison::Equal,
+                right: Expr::Literal(Int(
+                    i64::try_from(cost).map_err(|_private| unsupported(path))?
+                )),
+            })));
+        }
+        let predicate = if predicates.len() == 1 {
+            predicates.remove(0)
+        } else {
+            Expr::Compute(Box::new(Predicate::And { predicates }))
+        };
+        Ok(Expr::Compute(Box::new(IntOperation::FromNat {
+            value: Expr::Live(Box::new(NatRead::ZoneCount {
+                selector: Selector::Zone {
+                    players: PlayerSet {
+                        relation: match count.who {
+                            ast::LeaderSide::Controller => PlayerRelation::SelfPlayer,
+                            ast::LeaderSide::Opponent => PlayerRelation::Opponents,
+                        },
+                        relative_to: PlayerRef::Controller {},
+                        cardinality: Cardinality {
+                            minimum: Nat(1),
+                            maximum: Some(Nat(1)),
+                        },
+                        text_quantifier: TextQuantifier::Implicit,
+                    },
+                    zone: match count.zone {
+                        ast::CountZone::Field => ZoneKind::Field,
+                        ast::CountZone::Deck => ZoneKind::Deck,
+                        ast::CountZone::Hand => ZoneKind::Hand,
+                        ast::CountZone::Cemetery => ZoneKind::Cemetery,
+                    },
+                    view: SelectionView::Current {},
+                    binding,
+                    predicate: Box::new(predicate),
+                },
+            })),
+        })))
     }
 }

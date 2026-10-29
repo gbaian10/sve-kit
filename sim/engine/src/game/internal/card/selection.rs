@@ -470,6 +470,21 @@ pub(in crate::game::internal) fn field_selector(selector: &Selector) -> Result<(
     }
 }
 
+pub(in crate::game::internal) fn public_zone_selector(selector: &Selector) -> Result<()> {
+    match selector {
+        Selector::Zone {
+            zone: ZoneKind::Field | ZoneKind::Cemetery,
+            view: SelectionView::Current {},
+            predicate,
+            binding,
+            players,
+        } if players.relative_to == (PlayerRef::Controller {}) => {
+            check_predicate(predicate, *binding)
+        }
+        _ => Err(unsupported("public count selector")),
+    }
+}
+
 fn candidate_view(view: &ObjectView, candidate: Binding<ObjectRef>) -> bool {
     matches!(view, ObjectView::Current { object } if matches!(object.as_ref(), ObjectOperand::Bound { binding } if *binding == candidate))
 }
@@ -526,7 +541,7 @@ fn check_predicate(value: &Expr<Bool>, candidate: Binding<ObjectRef>) -> Result<
             }
             Predicate::CompareInt {
                 left: Expr::Compute(left),
-                comparison: Comparison::LessEqual,
+                comparison: Comparison::LessEqual | Comparison::Equal,
                 right: Expr::Literal(Int(_)),
             } if matches!(left.as_ref(), IntOperation::InformationOrZero { information: NumberRead::Cost { object, view: CharacteristicView::Original } } if candidate_view(object, candidate)) => {
                 Ok(())
@@ -579,7 +594,7 @@ pub(super) fn matches_candidate(game: &Game, id: &str, value: &Expr<Bool>) -> Re
             }
             Predicate::CompareInt {
                 left: Expr::Compute(left),
-                comparison: Comparison::LessEqual,
+                comparison,
                 right: Expr::Literal(Int(limit)),
             } if matches!(
                 left.as_ref(),
@@ -595,7 +610,11 @@ pub(super) fn matches_candidate(game: &Game, id: &str, value: &Expr<Bool>) -> Re
                     .as_str()
                     .and_then(|text| text.parse::<i64>().ok())
                     .ok_or_else(|| invalid("missing original cost"))?;
-                Ok(cost <= *limit)
+                match comparison {
+                    Comparison::LessEqual => Ok(cost <= *limit),
+                    Comparison::Equal => Ok(cost == *limit),
+                    _ => Err(unsupported("original cost comparison")),
+                }
             }
             Predicate::And { predicates } | Predicate::Or { predicates } => {
                 let values = predicates
@@ -965,6 +984,14 @@ impl Execution {
         selector: &Selector,
     ) -> Result<Vec<ObjectRef>> {
         self.public_target_objects(game, selector, false)
+    }
+
+    pub(in crate::game::internal) fn public_zone_objects(
+        &self,
+        game: &Game,
+        selector: &Selector,
+    ) -> Result<Vec<ObjectRef>> {
+        self.public_target_objects(game, selector, true)
     }
 
     fn public_target_objects(
