@@ -1,5 +1,6 @@
 //! Intrinsic evolution is a fixed play projection, not a general Evolve body permission.
 use super::{Allocator, LoweringError, ast, source_span, unsupported};
+use crate::ir::effect_evolution;
 use crate::ir::{
     Ability, AbilityId, AbilityKind, AbilityOrigin, AbilityQualification, AbilitySource, Action,
     Binding, CardName, Cardinality, ChoiceDomain, Control, CostSpec, CostStep, Decision,
@@ -11,6 +12,37 @@ use crate::ir::{
     TextQuantifier, Visibility, ZoneKind,
 };
 use crate::ir::{Precondition, PreconditionKind, PreconditionReason};
+
+#[expect(
+    clippy::multiple_inherent_impl,
+    reason = "Effect evolution uses the same authority-scoped evolution projection."
+)]
+impl super::BodyContext<'_> {
+    pub(super) fn effect_evolution(
+        &mut self,
+        path: &str,
+        source: &super::SourceSpan,
+        origin: &AbilitySource,
+    ) -> Result<Located<Node>, LoweringError> {
+        let mut source = source.clone();
+        source.author_path = path.into();
+        let id = self.card_allocator.id(path)?;
+        let keys = effect_evolution::Keys {
+            scope: self.card_allocator.scope(path)?,
+            candidate: self.card_allocator.scope(path)?,
+            body: self.card_allocator.scope(path)?,
+            decision: DecisionId(self.card_allocator.id(path)?),
+            instruction: InstructionId(id),
+            receipt: ReceiptId(id),
+        };
+        Ok(Located {
+            node: Node::Control {
+                control: effect_evolution::build(&keys, &source, origin),
+            },
+            source,
+        })
+    }
+}
 
 const fn one() -> Cardinality {
     Cardinality {

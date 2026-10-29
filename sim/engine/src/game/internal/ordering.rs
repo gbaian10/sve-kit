@@ -96,6 +96,7 @@ pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
             mode: StepwiseMode::Exact,
         };
     }
+    mask_entry_origin(&mut inspected);
     mask_public_selectors(&mut inspected)?;
 
     if let Node::Instruction { instruction } = &mut inspected
@@ -603,4 +604,13 @@ fn mask_discard(inspected: &mut Node) -> Result<()> {
         };
     }
     Ok(())
+}
+
+fn mask_entry_origin(inspected: &mut Node) {
+    if let Node::Capture {
+        capture: Capture::Boolean { value, .. },
+    } = inspected
+    {
+        super::card::triggers::entry_operand::mask_condition(value, None);
+    }
 }

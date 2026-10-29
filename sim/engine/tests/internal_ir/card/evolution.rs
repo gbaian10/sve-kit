@@ -57,7 +57,11 @@ fn relabel(mut ability: Located<Ability>, card: &str, line: u64) -> Located<Abil
     ability
 }
 
-fn position(seat: u32, base: &WellFormedCardProgram, form: &WellFormedCardProgram) -> Game {
+pub(super) fn position(
+    seat: u32,
+    base: &WellFormedCardProgram,
+    form: &WellFormedCardProgram,
+) -> Game {
     position_with_decks(seat, base, form, false)
 }
 

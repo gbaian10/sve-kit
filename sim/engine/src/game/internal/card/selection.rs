@@ -1,5 +1,6 @@
 use super::super::{DecisionToken, DecisionView, InputDomain, Slot, Wait, contains};
 use super::{Execution, Game, Nat, ObjectRef, Result, invalid, player_id, unsupported};
+use crate::ir::effect_evolution;
 use crate::ir::{
     Binding, CardKind, Cardinality, CharacteristicView, ChoiceDomain, Decision, DecisionKind,
     Disjointness, KindRead, NamesRead, ObjectOperand, ObjectProperty, ObjectView, PlayerRef,
@@ -181,6 +182,9 @@ pub(super) fn check(constraint: &SelectionConstraint) -> Result<()> {
 }
 
 pub(in crate::game::internal) fn check_resolution(decision: &Decision) -> Result<()> {
+    if effect_evolution::is_choice(decision) {
+        return Ok(());
+    }
     if let ChoiceDomain::Recipients {
         candidates,
         cardinality,
@@ -441,14 +445,20 @@ impl Game {
             return Err(unsupported("target groups"));
         };
         let allow_resolution_zones = matches!(decision.kind, DecisionKind::ResolutionChoice { .. });
+        let evolution = effect_evolution::is_choice(decision);
         let mut members = Vec::new();
-        for member in
+        let candidates = if evolution {
+            self.effect_evolution_members(execution)?
+        } else {
             execution.public_target_objects(self, &group.selector, allow_resolution_zones)?
-        {
-            if self.targetable_by(
-                execution.object_id(member)?,
-                super::seat_name(execution.context.controller)?,
-            )? {
+        };
+        for member in candidates {
+            if evolution
+                || self.targetable_by(
+                    execution.object_id(member)?,
+                    super::seat_name(execution.context.controller)?,
+                )?
+            {
                 members.push(member);
             }
         }
@@ -473,6 +483,7 @@ impl Game {
                 let object = self.object(id)?;
                 let kind = self.object_type(id)?;
                 if !(object.zone == "field"
+                    || (evolution && object.zone == "evolve_deck")
                     || (allow_resolution_zones
                         && matches!(object.zone.as_str(), "ex" | "cemetery")))
                     || object.generation != reference.generation.0
@@ -483,7 +494,7 @@ impl Game {
                         "target is not a current public field object or EX card or cemetery card",
                     ));
                 }
-                if object.zone != "cemetery" && self.restricted(id, "choose")? {
+                if !evolution && object.zone != "cemetery" && self.restricted(id, "choose")? {
                     return Err(unsupported("target permission"));
                 }
                 Ok(super::super::DistributionMember {

@@ -20,7 +20,10 @@ use crate::ir::{
     Selector, SourceSpan, StepwiseAnswer, StepwiseMode, TokenOutcome, Visibility,
     WellFormedProgram, ZoneKind,
 };
-use crate::ir::{BanishOutcome, DiscardEvent, DiscardOutcome, FaceId, PaymentResult, QuickWindow};
+use crate::ir::{
+    AssociationId, BanishOutcome, DiscardEvent, DiscardOutcome, EntryOrigin, EvolveEvent, FaceId,
+    PaymentResult, QuickWindow,
+};
 use crate::{EngineFailure, Result, invalid};
 use alloc::collections::{BTreeMap, VecDeque};
 use alloc::sync::Arc;
@@ -210,6 +213,13 @@ pub enum Answer {
 /// Typed instruction outcomes retained only by the authority.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum InstructionOutcome {
+    /// One effect-driven ordinary evolution and its live physical association.
+    Evolution {
+        /// The public before/after evolution fact.
+        event: Box<EvolveEvent>,
+        /// The same live base/form association used by printed ability sources.
+        association: AssociationId,
+    },
     /// Tokens successfully created and placed, after applying destination capacity.
     Token(TokenOutcome),
     /// Actual body resource recovery, independent of cost payment.
@@ -274,6 +284,8 @@ pub struct Progress {
 /// First-slice physical facts, sharing the prototype mutation and causal pipeline.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Fact {
+    /// Effect-driven evolution; it does not count as playing an evolution ability.
+    Evolved(Box<EvolveEvent>),
     /// A card actually discarded from the actor's hand.
     Discard(Box<DiscardEvent>),
     /// A direct nonzero leader life change, independent of damage.
@@ -399,6 +411,7 @@ pub(super) struct Execution {
     trigger_occurrence: Option<u64>,
     entry_object: Option<((ScopeId, u64), ObjectRef)>,
     entry_method: Option<((ScopeId, u64), EntryMethod)>,
+    entry_origin: Option<((ScopeId, u64), EntryOrigin)>,
     damage_event: Option<((ScopeId, u64), DamageEvent)>,
     leave_move: Option<((ScopeId, u64), ObjectRef)>,
     targets: BTreeMap<(ScopeId, u64), card::selection::TargetWait>,
@@ -572,6 +585,7 @@ impl Game {
                 trigger_occurrence: None,
                 entry_object: None,
                 entry_method: None,
+                entry_origin: None,
                 damage_event: None,
                 leave_move: None,
                 targets: BTreeMap::new(),
@@ -1034,6 +1048,11 @@ impl Game {
                         execution.prepend(body);
                     }
                 }
+                Node::Control {
+                    control: control @ Control::EachObject { .. },
+                } => {
+                    self.internal_effect_evolution_iteration(execution, control)?;
+                }
                 Node::Capture { capture } => execution.capture(self, &capture)?,
                 Node::Decision { decision } => self.internal_decision_step(execution, &decision)?,
                 Node::Instruction { instruction } => {
@@ -1156,6 +1175,7 @@ impl Game {
             .checked_add(1)
             .ok_or_else(|| invalid("IR epoch exhausted"))?;
         match &instruction.action {
+            Action::Evolve { .. } => self.internal_effect_evolve(execution, &instruction)?,
             Action::Token { .. } => self.internal_tokens(execution, &instruction)?,
             Action::Resource { .. } => self.internal_resource(execution, &instruction)?,
             Action::Discard { .. } => self.internal_discard_wait(execution, instruction)?,

@@ -6,6 +6,7 @@ use super::{
 use crate::catalog::SelectedEffects;
 use crate::catalog::current::CurrentCard;
 use crate::ir::ChoiceDomain;
+use crate::ir::effect_evolution::projection;
 use crate::ir::quick::{card_permission, is_printed_quick};
 use crate::ir::{
     Ability, AbilityId, AbilityInstanceId, AbilityKind, AbilityOrigin, AbilitySource, Action,
@@ -26,6 +27,7 @@ use serde::ser::Error as _;
 use serde_json::json;
 
 mod costs;
+mod effect_evolution;
 mod evolution;
 pub(super) mod exchange;
 mod fanfare;
@@ -824,18 +826,7 @@ fn check_nodes(
     ability_source: &AbilitySource,
 ) -> Result<()> {
     for located in nodes {
-        if located.source.owner != source.owner
-            || located.source.field != source.field
-            || located.source.fragment != source.fragment
-        {
-            return Err(invalid("instruction source evidence mapping mismatch"));
-        }
-        game.check_card_source(
-            &located.source,
-            &source.card_no,
-            &source.face,
-            u64::from(source.line),
-        )?;
+        check_node_source(game, &located.source, source)?;
         match &located.node {
             Node::Instruction { instruction } => {
                 super::tokens::check_catalog(game, &instruction.action)?;
@@ -883,6 +874,14 @@ fn check_nodes(
                 optional::check_costs(costs, ability_source)?;
                 check_nodes(game, &on_paid.steps, source, ability_source)?;
             }
+            Node::Control { control } if projection(control).is_some() => {
+                let projection =
+                    projection(control).ok_or_else(|| invalid("missing evolution projection"))?;
+                if projection.instruction.source != *ability_source {
+                    return Err(invalid("foreign effect evolution source"));
+                }
+                check_nodes(game, &projection.body.steps[..1], source, ability_source)?;
+            }
             Node::Control {
                 control: Control::Sequence { body },
             } => {
@@ -922,5 +921,14 @@ fn check_nodes(
             }
         }
     }
+    Ok(())
+}
+
+fn check_node_source(game: &Game, span: &SourceSpan, source: &SourceSpan) -> Result<()> {
+    if span.owner != source.owner || span.field != source.field || span.fragment != source.fragment
+    {
+        return Err(invalid("instruction source evidence mapping mismatch"));
+    }
+    game.check_card_source(span, &source.card_no, &source.face, u64::from(source.line))?;
     Ok(())
 }

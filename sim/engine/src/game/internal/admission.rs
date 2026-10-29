@@ -4,6 +4,7 @@ use super::{
 };
 use crate::ir::CostSpec;
 use crate::ir::Requirement;
+use crate::ir::effect_evolution;
 use crate::ir::{AbilityOrigin, AbilitySource, Binding, EnterFieldEvent, KeywordId};
 use crate::ir::{Action, DamageAmount, IntFrozen, IntOperation, Predicate};
 use crate::ir::{Bool, DamageEvent, Expr, Int};
@@ -66,7 +67,14 @@ fn check_body(
     if let Some(event) = damage {
         damage_paths(program, "", event, &mut paths);
     }
-    check_requirements(program, source, origin.is_some(), &paths)?;
+    let mut inspected = program.clone();
+    if let Some(origin) = origin {
+        effect_evolution::mask(&mut inspected, origin);
+    }
+    if let Some(event) = entry {
+        super::card::triggers::entry_operand::mask_origin(&mut inspected, event);
+    }
+    check_requirements(&inspected, source, origin.is_some(), &paths)?;
     super::numeric::check_program(program)?;
     check_program(program, source, origin.is_some())
 }
@@ -276,6 +284,8 @@ fn check_program(program: &Program, source: &SourceSpan, card: bool) -> Result<(
     for step in &program.steps {
         super::ordering::check_node(&step.node, source)?;
         match &step.node {
+            Node::Control { control }
+                if card && effect_evolution::projection(control).is_some() => {}
             Node::Control {
                 control: control @ Control::Pay { costs, on_paid, .. },
             } if card => {

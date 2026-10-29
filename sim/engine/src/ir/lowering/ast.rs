@@ -210,6 +210,7 @@ pub(super) struct Body {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum Step {
+    Evolve(EffectEvolution),
     If(Conditional),
     Choice(Choice),
     Choose(Choose),
@@ -234,6 +235,13 @@ pub(super) enum Step {
     Reveal(Reveal),
     Move(Move),
     Create(Create),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct EffectEvolution {
+    #[serde(rename = "ref")]
+    pub _reference: This,
 }
 
 #[derive(Deserialize)]
@@ -793,6 +801,7 @@ pub(super) struct CountQuery {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum CountZone {
+    Field,
     Deck,
     Hand,
     Cemetery,
@@ -1042,6 +1051,7 @@ pub(super) struct Conditional {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum Condition {
+    EnteredFrom(EntryOriginCondition),
     EnteredBy(EntryCondition),
     Exists(PublicQuery),
     Awakened(bool),
@@ -1054,6 +1064,19 @@ pub(super) enum Condition {
     All(Vec<Self>),
     Any(Vec<Self>),
     Not(Box<Self>),
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct EntryOriginCondition {
+    #[serde(rename = "ref")]
+    pub _reference: This,
+    #[serde(rename = "from")]
+    pub zone: EntryOriginZone,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum EntryOriginZone {
+    Hand,
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]

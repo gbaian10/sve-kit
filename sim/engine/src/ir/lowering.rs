@@ -829,6 +829,10 @@ impl<'definitions> BodyContext<'definitions> {
         let mut steps = Vec::new();
         for (index, step) in author_steps.iter().enumerate() {
             let step_path = format!("{path}/{index}");
+            if matches!(step, ast::Step::Evolve(_)) {
+                steps.push(self.effect_evolution(&step_path, source, ability_source)?);
+                continue;
+            }
             if let ast::Step::If(conditional) = step {
                 let condition = self.condition(&conditional.cond, source, &step_path)?;
                 let parent = self.scope;
@@ -908,9 +912,10 @@ impl<'definitions> BodyContext<'definitions> {
         span: &SourceSpan,
     ) -> Result<Action, LoweringError> {
         match step {
-            ast::Step::Choice(_) | ast::Step::Choose(_) | ast::Step::If(_) => {
-                Err(unsupported(path))
-            }
+            ast::Step::Choice(_)
+            | ast::Step::Choose(_)
+            | ast::Step::If(_)
+            | ast::Step::Evolve(_) => Err(unsupported(path)),
             ast::Step::Destroy(value) => Ok(Action::Destroy {
                 objects: self.action_objects(value, path)?,
             }),
