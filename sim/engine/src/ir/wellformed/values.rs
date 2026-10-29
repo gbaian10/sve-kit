@@ -9,7 +9,7 @@ use crate::ir::{
 };
 use crate::ir::{
     CardKind, CardName, ClassRead, EventSnapshotPolicy, Info, KindRead, MemberProjection,
-    NamesRead, ObjectFrozen, TraitsRead,
+    MovementReceipt, NamesRead, ObjectFrozen, TraitsRead,
 };
 
 #[expect(
@@ -522,10 +522,7 @@ impl Checker {
                 input,
                 binding,
                 predicate,
-            } => {
-                self.selector(input)?;
-                self.candidate(*binding, predicate)
-            }
+            } => self.filtered_candidate(input, *binding, predicate),
             Selector::Union { sets } | Selector::Intersection { sets } => {
                 if sets.is_empty() {
                     return self.reject();
@@ -601,6 +598,29 @@ impl Checker {
 
     pub(super) const fn event_capture(&self) -> bool {
         matches!(self.capture_time, Some(CaptureTime::AtEvent { .. }))
+    }
+
+    fn filtered_candidate(
+        &mut self,
+        input: &Selector,
+        binding: Binding<ObjectRef>,
+        predicate: &Expr<Bool>,
+    ) -> Checked {
+        self.selector(input)?;
+        self.isolated(|checker| {
+            if matches!(
+                input,
+                Selector::ReceiptMembers {
+                    receipt: ObjectReceipt::Movement {
+                        receipt: MovementReceipt::Destroy { .. }
+                    },
+                    projection: MemberProjection::Before,
+                }
+            ) {
+                checker.env.destroyed_before.insert(binding.key());
+            }
+            checker.candidate(binding, predicate)
+        })
     }
 
     pub(super) fn candidate(

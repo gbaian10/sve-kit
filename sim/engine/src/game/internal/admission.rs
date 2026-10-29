@@ -2,10 +2,10 @@ use super::{
     Cardinality, ChoiceDomain, Control, DecisionKind, Declinable, InstructionContext, Located,
     Node, Program, Requirements, Result, SourceSpan, Visibility, WellFormedProgram, unsupported,
 };
-use crate::ir::CostSpec;
 use crate::ir::{AbilityOrigin, AbilitySource, Binding, EnterFieldEvent, KeywordId};
 use crate::ir::{Action, DamageAmount, IntFrozen, IntOperation, Predicate};
 use crate::ir::{Bool, DamageEvent, Expr, Int};
+use crate::ir::{CostSpec, PlayerStage};
 use crate::ir::{EventPattern, TriggerCondition, TriggerSpec};
 use alloc::collections::BTreeSet;
 use core::num::NonZeroU32;
@@ -124,6 +124,18 @@ fn source_paths(
                 }
             }
             Node::Control {
+                control: Control::EachPlayer { stages, .. },
+            } => {
+                for (stage_index, stage) in stages.iter().enumerate() {
+                    source_paths(
+                        &stage.body,
+                        &format!("{path}/control/stages/{stage_index}/body"),
+                        origin,
+                        paths,
+                    );
+                }
+            }
+            Node::Control {
                 control: Control::Sequence { body },
             } => source_paths(body, &format!("{path}/control/body"), origin, paths),
             Node::Control {
@@ -172,12 +184,14 @@ fn check_requirements(
         source: source.clone(),
     };
     let requirements = Requirements::derive_program(&located);
+    let token_paths = super::tokens::paths(program);
     let missing = requirements
         .required
         .iter()
         .filter(|requirement| {
             requirement.capability.version != NonZeroU32::MIN
                 || !(supported(requirement.capability.code)
+                    || super::tokens::requirement(requirement, &token_paths)
                     || super::source::count_zone(&requirements, requirement)
                     || super::history_turn::public_requirement(&requirements, requirement)
                     || (card && play_requirement(requirement.capability.code))
@@ -270,6 +284,19 @@ fn check_action(action: &Action) -> Result<()> {
     super::grant::check_action(action)
 }
 
+fn check_player_stage(
+    control: &Control,
+    stages: &[PlayerStage],
+    source: &SourceSpan,
+    card: bool,
+) -> Result<()> {
+    super::tokens::check_each(control)?;
+    for stage in stages {
+        check_program(&stage.body, source, card)?;
+    }
+    Ok(())
+}
+
 fn check_program(program: &Program, source: &SourceSpan, card: bool) -> Result<()> {
     for step in &program.steps {
         super::ordering::check_node(&step.node, source)?;
@@ -288,6 +315,9 @@ fn check_program(program: &Program, source: &SourceSpan, card: bool) -> Result<(
                     return Err(unsupported("one optional cost"));
                 }
             }
+            Node::Control {
+                control: control @ Control::EachPlayer { stages, .. },
+            } => check_player_stage(control, stages, source, card)?,
             Node::Control {
                 control: Control::Sequence { body },
             } => check_program(body, source, card)?,

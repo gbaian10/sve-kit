@@ -211,6 +211,7 @@ pub(super) struct Body {
 #[serde(rename_all = "snake_case")]
 pub(super) enum Step {
     If(Conditional),
+    EachPlayer(EachPlayer),
     Choice(Choice),
     Choose(Choose),
     Draw(Draw),
@@ -241,11 +242,86 @@ pub(super) enum Step {
 pub(super) struct Create {
     pub token: String,
     pub to: CreateZone,
-    pub n: Option<u64>,
+    pub n: Option<TokenCount>,
     pub result: Option<String>,
     pub bind: Option<String>,
-    #[serde(rename = "by")]
-    pub _by: Option<SelfPlayer>,
+    pub by: Option<String>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct EachPlayer {
+    #[serde(rename = "as")]
+    pub binding: String,
+    pub stages: Vec<Vec<Step>>,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum TokenCount {
+    Fixed(u64),
+    Receipt { count: TokenCollection },
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct TokenCollection {
+    pub r#in: TokenBefore,
+    #[serde(rename = "as")]
+    pub binding: String,
+    pub r#where: TokenPredicate,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct TokenBefore {
+    pub objects_of: String,
+    pub view: BeforeOnly,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum BeforeOnly {
+    Before,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct TokenPredicate {
+    #[serde(rename = "cmp")]
+    pub player_cmp: TokenPlayerComparison,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct TokenPlayerComparison {
+    pub left: TokenMaster,
+    pub op: EqualOnly,
+    pub right: TokenPlayer,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum EqualOnly {
+    Eq,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct TokenMaster {
+    pub player: TokenMasterOf,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct TokenMasterOf {
+    pub master_of: String,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct TokenPlayer {
+    pub player: String,
 }
 
 #[derive(Deserialize)]
@@ -367,7 +443,10 @@ pub(super) enum Chooser {
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum ObjectAction {
     Short(Objects),
-    Long { r#ref: Objects },
+    Long {
+        r#ref: Objects,
+        result: Option<String>,
+    },
 }
 
 #[derive(Deserialize)]

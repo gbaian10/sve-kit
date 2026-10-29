@@ -391,6 +391,7 @@ impl BodyContext<'_> {
                 .ok_or_else(|| unsupported(path))?;
             let scope = self.card_allocator.scope(path)?;
             let mut context = BodyContext {
+                players: self.players.clone(),
                 leave_event: self.leave_event,
                 scope,
                 definition: self.definition,
@@ -551,6 +552,7 @@ pub(super) fn choice_body(body: &ast::Body, path: &str) -> Result<bool, Lowering
 fn contains_choice(steps: &[ast::Step]) -> bool {
     steps.iter().any(|step| match step {
         ast::Step::Choice(_) => true,
+        ast::Step::EachPlayer(each) => each.stages.iter().any(|stage| contains_choice(stage)),
         ast::Step::If(branch) => {
             contains_choice(&branch.then)
                 || branch

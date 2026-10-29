@@ -97,6 +97,7 @@ pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
         };
     }
     mask_public_selectors(&mut inspected)?;
+    super::tokens::mask_count(&mut inspected);
 
     if let Node::Instruction { instruction } = &mut inspected
         && super::movement::deck_top(&instruction.action).is_some()

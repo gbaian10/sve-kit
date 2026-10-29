@@ -24,7 +24,7 @@ impl Execution {
     pub(super) fn player(&self, game: &Game, player: &PlayerRef) -> Result<PlayerId> {
         match player {
             PlayerRef::FromExpression { value } => self.player_value(game, value),
-            PlayerRef::Bound { .. } => Err(unsupported("bound player value")),
+            PlayerRef::Bound { binding } => self.player_slot(*binding),
             PlayerRef::Controller {} => Ok(self.context.controller),
             PlayerRef::Owner {} => player_id(&game.object(&self.context.source)?.owner),
             PlayerRef::Active {} => player_id(game.active()),

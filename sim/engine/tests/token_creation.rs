@@ -596,3 +596,6 @@ fn amulet_token_play_and_activation_use_ex_and_reject_a_hand_origin() {
         }
     }
 }
+
+#[path = "token_creation/dynamic.rs"]
+mod dynamic;

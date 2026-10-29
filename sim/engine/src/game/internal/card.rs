@@ -817,6 +817,35 @@ fn face_ordinal(face: &FaceId) -> Result<usize> {
     Ok(ordinal)
 }
 
+fn check_nested_nodes(
+    game: &Game,
+    control: &Control,
+    source: &SourceSpan,
+    origin: &AbilitySource,
+) -> Result<()> {
+    match control {
+        Control::EachPlayer { stages, .. } => {
+            super::tokens::check_each(control)?;
+            for stage in stages {
+                check_nodes(game, &stage.body.steps, source, origin)?;
+            }
+        }
+        Control::Sequence { body } => check_nodes(game, &body.steps, source, origin)?,
+        Control::If {
+            then_body,
+            else_body,
+            ..
+        } => {
+            check_nodes(game, &then_body.steps, source, origin)?;
+            if let Some(body) = else_body {
+                check_nodes(game, &body.steps, source, origin)?;
+            }
+        }
+        _ => return Err(unsupported("nested whole-card control")),
+    }
+    Ok(())
+}
+
 fn check_nodes(
     game: &Game,
     nodes: &[Located<Node>],
@@ -884,23 +913,11 @@ fn check_nodes(
                 check_nodes(game, &on_paid.steps, source, ability_source)?;
             }
             Node::Control {
-                control: Control::Sequence { body },
-            } => {
-                check_nodes(game, &body.steps, source, ability_source)?;
-            }
-            Node::Control {
                 control:
-                    Control::If {
-                        then_body,
-                        else_body,
-                        ..
-                    },
-            } => {
-                check_nodes(game, &then_body.steps, source, ability_source)?;
-                if let Some(body) = else_body {
-                    check_nodes(game, &body.steps, source, ability_source)?;
-                }
-            }
+                    control @ (Control::EachPlayer { .. }
+                    | Control::Sequence { .. }
+                    | Control::If { .. }),
+            } => check_nested_nodes(game, control, source, ability_source)?,
             Node::Control {
                 control: Control::Mode { modes, .. },
             } => {

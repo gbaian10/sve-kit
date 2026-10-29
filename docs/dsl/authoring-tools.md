@@ -101,6 +101,10 @@ ignored:
 
 目前 `create: {token: フェアリーウィスプ, n: 2, to: ex, result: made}` 支援固定數量、單一規則名稱、自己 EX；`to: field` 支援從者 token 至自己場上。省略 `n` 為 1；EX 與場上各最多五張，只建立並放入仍有容量的數量。`result` 或 `bind` 擇一，綁定實際放入的 token，滿區時為空；authority receipt 同樣只列出成功放入者。token 的整卡 runtime 程式仍須准入。場上建立共用進場事件與守護的選擇橫置程序；沒有先前區域的建立以 `EntryOrigin::Other` 表示，成功建立的每個 token 各發生一次進場。
 
+動態數量另接受本次 `destroy: {ref: ..., result: broken}` 的成功回條：`n: {count: {in: {objects_of: broken, view: before}, as: victim, where: {cmp: {left: {player: {master_of: victim}}, op: eq, right: {player: p}}}}}`。只計本次實際從場上被破壞者，按離場前控制者區分，包含隨後消去的 token；破壞失敗不計數，不按目前區域或擁有者重新計算。
+
+`each_player: {as: p, stages: [[{create: {token: ..., n: ..., to: field, by: p}}]]}` 支援單一、無選擇的 token 建立階段，雙方在同一批次建立並進場；守護進場選擇按回合玩家優先處理，在所有選擇完成後一次提交。建立與計數須指向同一玩家；各目的區沿用容量上限與守護進場流程，守護由該 token 的控制者選擇。此入口不接受其他回條、after 計數、owner 比較、其它階段動作或結果匯出。整個能力完成後才進入衍生觸發能力的處理。
+
 ## 寫入與驗證
 
 ```bash

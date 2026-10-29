@@ -1013,6 +1013,9 @@ impl Game {
             };
             match node {
                 Node::Control {
+                    control: control @ Control::EachPlayer { .. },
+                } => self.internal_player_tokens(execution, &control)?,
+                Node::Control {
                     control: Control::Sequence { body },
                 } => execution.prepend(body),
                 Node::Control {

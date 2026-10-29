@@ -136,8 +136,17 @@ impl BodyContext<'_> {
         action: &ast::ObjectAction,
         path: &str,
     ) -> Result<Selector, LoweringError> {
+        if matches!(
+            action,
+            ast::ObjectAction::Long {
+                result: Some(_),
+                ..
+            }
+        ) {
+            return Err(unsupported(path));
+        }
         match action {
-            ast::ObjectAction::Short(objects) | ast::ObjectAction::Long { r#ref: objects } => {
+            ast::ObjectAction::Short(objects) | ast::ObjectAction::Long { r#ref: objects, .. } => {
                 self.objects(objects, path)
             }
         }
