@@ -1,0 +1,33 @@
+cards:
+  BP03-036:
+    abilities:
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        trait: ヒーロー
+                        who: self
+                        zone: cemetery
+                    op: ge
+                    right: 2
+                then:
+                  - buff:
+                      hp: 1
+                      "on": this
+                  - grant:
+                      keywords:
+                        - ward
+                      "on": this
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

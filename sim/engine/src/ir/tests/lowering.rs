@@ -1381,3 +1381,30 @@ fn resolution_leader_choices_keep_recipient_bindings() {
         lowerer.lower(&tree).unwrap_err();
     }
 }
+
+#[test]
+fn filtered_counts_reject_hidden_card_characteristics() {
+    for zone in ["hand", "deck"] {
+        for filter in [
+            json!({"kind":"spell"}),
+            json!({"trait":"学院"}),
+            json!({"name":"example"}),
+            json!({"name_contains":"example"}),
+            json!({"orig_cost_eq":2_u8}),
+        ] {
+            let mut query = json!({"who":"self","zone":zone});
+            query
+                .as_object_mut()
+                .unwrap()
+                .extend(filter.as_object().unwrap().clone());
+            let mut tree = expanded::tree().clone();
+            tree["cards"]["BP08-038"]["abilities"][0]["fanfare"]["do"] = json!([
+                {"draw":{"n":{"count":query}}}
+            ]);
+            assert_eq!(
+                lowerer().lower(&tree).unwrap_err().code,
+                "unsupported_construct"
+            );
+        }
+    }
+}

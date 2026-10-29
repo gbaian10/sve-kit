@@ -11,6 +11,7 @@ use crate::ir::{
     RecipientSet, Requirements, ResultMember, ResultMemberId, RuntimeObjectView, ScopeId, Selector,
     SnapshotId, SourceSpan, StepwiseMode, Visibility, ZoneKind,
 };
+use crate::ir::{CharacteristicPatch, DamageAmount, NumericChange};
 use alloc::collections::BTreeSet;
 
 /// Printed information attached to a handle valid only with its decision token.
@@ -212,11 +213,24 @@ fn check_private_requirements(requirements: &Requirements, private_spine: bool) 
 }
 
 fn mask_public_selectors(inspected: &mut Node) -> Result<()> {
-    if let Node::Capture {
-        capture: Capture::Boolean { value, .. },
-    } = inspected
-    {
-        mask_public_field_condition(value);
+    match inspected {
+        Node::Capture {
+            capture: Capture::Boolean { value, .. },
+        } => mask_public_field_condition(value),
+        Node::Capture {
+            capture: Capture::Integer { value, .. },
+        } => mask_public_field_number(value),
+        Node::Instruction { instruction } => match &mut instruction.action {
+            Action::Draw { count: amount, .. }
+            | Action::Damage {
+                amount: DamageAmount::Uniform { amount },
+                ..
+            } => mask_public_field_number(amount),
+            Action::Life { change, .. } => mask_public_number_change(change),
+            Action::Modify { patch, .. } => mask_public_number_patch(patch),
+            _ => {}
+        },
+        _ => {}
     }
     if let Node::Decision { decision } = inspected
         && matches!(
@@ -235,6 +249,23 @@ fn mask_public_selectors(inspected: &mut Node) -> Result<()> {
         };
     }
     Ok(())
+}
+
+fn mask_public_number_change(change: &mut NumericChange) {
+    let (NumericChange::Add { amount } | NumericChange::Set { amount }) = change;
+    mask_public_field_number(amount);
+}
+
+fn mask_public_number_patch(patch: &mut CharacteristicPatch) {
+    match patch {
+        CharacteristicPatch::Numeric { change, .. } => mask_public_number_change(change),
+        CharacteristicPatch::Combined { patches } => {
+            for component in patches {
+                mask_public_number_patch(component);
+            }
+        }
+        _ => {}
+    }
 }
 
 fn mask_public_field_condition(condition: &mut Expr<Bool>) {
@@ -262,8 +293,10 @@ fn mask_public_field_number(number: &mut Expr<Int>) {
             IntOperation::FromNat { value } => {
                 if let Expr::Live(read) = value
                     && let NatRead::ZoneCount { selector } = read.as_mut()
+                    && super::card::selection::public_zone_selector(selector).is_ok()
+                    && let Selector::Zone { predicate, .. } = selector
                 {
-                    mask_public_field_predicate(selector);
+                    **predicate = Expr::Literal(Bool(true));
                 }
             }
             IntOperation::Arithmetic { arguments, .. } => {

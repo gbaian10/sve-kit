@@ -161,6 +161,13 @@ impl Execution {
             } if super::card::selection::field_selector(selector).is_ok() => {
                 self.public_field_objects(game, selector)?
             }
+            Selector::Zone {
+                zone: ZoneKind::Cemetery,
+                view: SelectionView::Current {},
+                ..
+            } if super::card::selection::public_zone_selector(selector).is_ok() => {
+                self.public_zone_objects(game, selector)?
+            }
             Selector::Objects { objects } => objects
                 .iter()
                 .map(|object| self.object(game, object))

@@ -462,3 +462,53 @@ fn other_trait_field_condition_rejects_nonfield_queries_and_unsupported_filters(
             .unwrap_err();
     }
 }
+
+#[test]
+fn filtered_cemetery_count_numbers_drive_draw_life_damage_and_stats() {
+    let count =
+        json!({"count":{"who":"self","zone":"cemetery","kind":"follower","name_contains":"unit-"}});
+    let mut candidate = move_success_tree(&json!([
+        {"life":{"who":"self","delta":count}},
+        {"draw":{"n":count}},
+        {"damage":{"to":{"leader":"opp"},"n":count}},
+        {"buff":{"on":{"who":"opp","zone":"field","kind":"follower"},"power":count}}
+    ]));
+    candidate["cards"]["unit-spell"]["abilities"][0]["spell"]
+        .as_object_mut()
+        .unwrap()
+        .remove("targets");
+    let programs = lowerer()
+        .lower_with_printed_costs(
+            &candidate,
+            &BTreeMap::from([("unit-spell".to_owned(), Nat(1))]),
+        )
+        .unwrap();
+    let mut initial = setup(
+        1,
+        json!([{"id":"d1","card":"unit-follower"},{"id":"d2","card":"unit-follower"},{"id":"d3","card":"unit-follower"}]),
+    );
+    initial["players"]["P1"]["leader"]["life"] = json!(10_u8);
+    initial["players"]["P1"]["zones"]["cemetery"] = json!([
+        {"id":"g1","card":"unit-follower"},{"id":"g2","card":"unit-follower"},{"id":"nonmatch","card":"unit-amulet"}
+    ]);
+    let mut game = Game::new(
+        catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "filtered-numbers",
+    )
+    .unwrap();
+    game.load_internal_card("unit-spell", &programs["unit-spell"])
+        .unwrap();
+    game.load_internal_card("unit-follower", &card(vec![]))
+        .unwrap();
+    game.load_internal_card("unit-amulet", &card(vec![]))
+        .unwrap();
+    resolved(game.play_internal_card("s", PlayerId { seat: 1 }).unwrap());
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["leader"]["life"], 12_u8);
+    assert_eq!(state["P2"]["leader"]["life"], 18_u8);
+    assert_eq!(state["P1"]["hand"], json!(["d1", "d2"]));
+    assert_eq!(state["objects"]["f"]["power"], 4_u8);
+}
