@@ -1,0 +1,67 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "static",
+      "body": {
+        "op": "macro",
+        "name": "storm"
+      }
+    },
+    {
+      "line": 2,
+      "kind": "trigger",
+      "body": {
+        "op": "if",
+        "condition": {
+          "fn": "ge",
+          "args": [
+            {
+              "read": "self.combo"
+            },
+            3
+          ]
+        },
+        "then": {
+          "op": "damage",
+          "subjects": "target.1",
+          "amount": 4
+        }
+      },
+      "event": "evolve",
+      "subject": "self",
+      "targets": [
+        {
+          "key": "1",
+          "select": {
+            "side": "opponent",
+            "zone": "field",
+            "type": "follower"
+          },
+          "min": 1,
+          "max": 1
+        }
+      ]
+    },
+    {
+      "line": 3,
+      "kind": "trigger",
+      "body": {
+        "op": "modify",
+        "subjects": {
+          "side": "self",
+          "zone": "field",
+          "type": "follower",
+          "trait": "八獄",
+          "other": true
+        },
+        "keywords": [
+          "storm"
+        ]
+      },
+      "event": "super_evolve",
+      "subject": "self"
+    }
+  ]
+}
