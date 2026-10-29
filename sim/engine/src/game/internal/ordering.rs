@@ -123,6 +123,9 @@ pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
         }
         | Action::Modify {
             subjects: selector, ..
+        }
+        | Action::Grant {
+            subjects: selector, ..
         } = &mut instruction.action
     {
         mask_public_field_predicate(selector);

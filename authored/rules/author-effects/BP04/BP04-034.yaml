@@ -1,0 +1,31 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP04-034:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-30"
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - if:
+                cond:
+                  exists:
+                    who: self
+                    zone: field
+                    kind: follower
+                    not_class: ロイヤル
+                then:
+                  - buff:
+                      "on": this
+                      power: 1
+                      hp: 1
+                  - grant:
+                      "on": this
+                      keywords:
+                        - rush

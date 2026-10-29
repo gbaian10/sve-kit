@@ -81,7 +81,7 @@ fn keyword_grant_expires_at_the_actual_turn_boundary() {
     assert_eq!(state["objects"]["s"]["keywords"], json!([]));
 }
 
-fn grant_position(steps: Vec<Located<Node>>) -> Game {
+fn grant_game() -> Game {
     let (snapshot, _, document) = catalog_documents(&json!("1"));
     let registry = read_to_string(
         PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../authored/rules/keywords.yaml"),
@@ -93,14 +93,18 @@ fn grant_position(steps: Vec<Located<Node>>) -> Game {
     let mut initial = setup(1, json!([{"id":"d","card":"unit-spell"}]));
     initial["players"]["P1"]["zones"]["hand"] = json!([]);
     initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
-    let mut game = Game::new(
+    Game::new(
         catalog,
         &initial,
         &Value::Null,
         &Value::Null,
         "keyword-grant",
     )
-    .unwrap();
+    .unwrap()
+}
+
+fn grant_position(steps: Vec<Located<Node>>) -> Game {
+    let mut game = grant_game();
     game.load_internal_card("unit-follower", &card(vec![ability(1, steps)]))
         .unwrap();
     game.load_internal_card("unit-spell", &card(vec![]))
@@ -137,4 +141,59 @@ fn keyword_grant_does_not_follow_a_recipient_into_a_new_field_generation() {
         game.projection(View::Referee).unwrap()["objects"]["s"]["keywords"],
         json!([])
     );
+}
+
+#[test]
+fn public_filter_grant_does_not_authorize_hidden_subjects() {
+    for hidden_zone in [ZoneKind::Hand, ZoneKind::Deck] {
+        let mut step = granted(KeywordId::Rush, DurationEnd::NoTemporalExpiry {});
+        if let Node::Instruction { instruction } = &mut step.node
+            && let Action::Grant { subjects, .. } = &mut instruction.action
+        {
+            *subjects = zone(hidden_zone, 1);
+        }
+        let program = card(vec![ability(1, vec![step])]);
+        let mut game = grant_game();
+        let before = game.projection(View::Referee).unwrap();
+        let error = game
+            .load_internal_card("unit-follower", &program)
+            .unwrap_err();
+        assert!(
+            matches!(error, sve_engine::EngineFailure::Unsupported(reason)
+            if reason.contains("private observation outside an authorized selector spine"))
+        );
+        assert_eq!(game.projection(View::Referee).unwrap(), before);
+    }
+}
+
+#[test]
+fn public_filter_grant_does_not_authorize_a_different_object_read() {
+    let mut step = granted(KeywordId::Rush, DurationEnd::NoTemporalExpiry {});
+    if let Node::Instruction { instruction } = &mut step.node
+        && let Action::Grant { subjects, .. } = &mut instruction.action
+    {
+        *subjects = zone(ZoneKind::Field, 1);
+        if let Selector::Zone { predicate, .. } = subjects {
+            **predicate = Expr::Compute(Box::new(Predicate::ClassEquals {
+                left: Expr::Live(Box::new(ClassRead::Class {
+                    object: ObjectView::Current {
+                        object: Box::new(ObjectOperand::SourceHolder {}),
+                    },
+                    view: CharacteristicView::Effective,
+                })),
+                right: Expr::Literal(Info::Present(ClassId("ニュートラル".into()))),
+            }));
+        }
+    }
+    let program = card(vec![ability(1, vec![step])]);
+    let mut game = grant_game();
+    let before = game.projection(View::Referee).unwrap();
+    let error = game
+        .load_internal_card("unit-follower", &program)
+        .unwrap_err();
+    assert!(
+        matches!(error, sve_engine::EngineFailure::Unsupported(reason)
+        if reason.contains("private observation outside an authorized selector spine"))
+    );
+    assert_eq!(game.projection(View::Referee).unwrap(), before);
 }

@@ -206,6 +206,8 @@ impl BodyContext<'_> {
             || target.from.other
             || target.from.r#trait.is_none()
             || target.from.has_numeric_filter()
+            || target.from.class.is_some()
+            || target.from.not_class.is_some()
             || target.distinct_by.is_some()
             || self.recipient_targets.contains_key(&target.bind)
             || self.targets.contains_key(&target.bind)
@@ -278,6 +280,8 @@ impl BodyContext<'_> {
         if target.distinct_by.is_some()
             || target.from.r#trait.is_some()
             || target.from.has_numeric_filter()
+            || target.from.class.is_some()
+            || target.from.not_class.is_some()
             || self.recipient_targets.contains_key(&target.bind)
             || self.targets.contains_key(&target.bind)
             || self.definitions.contains_key(&target.bind)
