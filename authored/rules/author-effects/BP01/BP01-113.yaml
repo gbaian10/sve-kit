@@ -1,0 +1,23 @@
+cards:
+  BP01-113:
+    abilities:
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  crimson: true
+                then:
+                  - grant:
+                      keywords:
+                        - storm
+                      on: this
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set
