@@ -16,6 +16,9 @@ pub(super) struct PublicHand {
 }
 
 pub(super) fn check_objects(objects: &Selector) -> Result<()> {
+    if matches!(objects, Selector::Bound { .. }) {
+        return Ok(());
+    }
     let Selector::Zone {
         players,
         zone: ZoneKind::Hand,
@@ -52,22 +55,34 @@ impl Game {
         objects: &Selector,
     ) -> Result<()> {
         check_objects(objects)?;
-        let Selector::Zone { players, .. } = objects else {
-            return Err(unsupported("whole hand reveal"));
-        };
-        let mut members = Vec::new();
-        for player in execution.players(self, players)? {
-            for id in self.zone_ids(seat_name(player)?, "hand") {
-                members.push(execution.reference(self, &id)?);
+        let (members, selected) = match objects {
+            Selector::Zone { players, .. } => {
+                let mut members = Vec::new();
+                for player in execution.players(self, players)? {
+                    for id in self.zone_ids(seat_name(player)?, "hand") {
+                        members.push(execution.reference(self, &id)?);
+                    }
+                }
+                (members, false)
             }
+            Selector::Bound { .. } => (execution.objects(self, objects)?, true),
+            _ => return Err(unsupported("whole hand reveal")),
+        };
+        if selected && members.len() > 1 {
+            return Err(unsupported("single selected card reveal"));
         }
         let mut ids = Vec::new();
+        let mut current_members = Vec::with_capacity(members.len());
         for member in &members {
             let id = execution.object_id(*member)?.to_owned();
             let object = self.object(&id)?;
-            if object.zone != "hand" || object.controller != object.owner {
+            if object.zone != "hand"
+                || object.controller != object.owner
+                || (selected && object.controller != seat_name(execution.context.controller)?)
+            {
                 return Err(invalid("foreign hand reveal member"));
             }
+            let current_reference = execution.reference(self, &id)?;
             let controller = object.controller.clone();
             let viewers = ["P1", "P2"]
                 .into_iter()
@@ -80,17 +95,19 @@ impl Game {
                 .map(str::to_owned)
                 .collect();
             execution.reveals.push(PublicHand {
-                object: *member,
+                object: current_reference,
                 id: id.clone(),
                 controller,
                 viewers,
             });
             ids.push(id);
+            current_members.push(current_reference);
         }
         self.reveal(&ids, "all", &execution.frame(), true);
-        execution
-            .receipts
-            .insert(instruction.receipt, InstructionOutcome::Revealed(members));
+        execution.receipts.insert(
+            instruction.receipt,
+            InstructionOutcome::Revealed(current_members),
+        );
         Ok(())
     }
 

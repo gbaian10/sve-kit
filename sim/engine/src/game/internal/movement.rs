@@ -426,7 +426,21 @@ impl Game {
         for &member in &members {
             let object = self.object(execution.object_id(member)?)?;
             if object.generation == member.generation.0 {
-                if kind == ZoneKind::Hand && !matches!(object.zone.as_str(), "field" | "cemetery") {
+                let actor = super::seat_name(execution.context.controller)?;
+                let private_observed_hand = kind == ZoneKind::Hand
+                    && object.zone == "deck"
+                    && object.owner == actor
+                    && object.controller == actor
+                    && self
+                        .state
+                        .knowledge
+                        .get(actor)
+                        .is_some_and(|knowledge| knowledge.located.contains(&object.id))
+                    && execution.is_private_look_target(objects, member);
+                if kind == ZoneKind::Hand
+                    && !matches!(object.zone.as_str(), "field" | "cemetery")
+                    && !private_observed_hand
+                {
                     return Err(unsupported(
                         "only public field or cemetery departures to hand",
                     ));
@@ -443,7 +457,7 @@ impl Game {
                 {
                     return Err(unsupported("public field or cemetery movement to EX"));
                 }
-                if top_count.is_none() && !resolving_source {
+                if top_count.is_none() && !resolving_source && !private_observed_hand {
                     public_zone(&object.zone)?;
                 }
             }

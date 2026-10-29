@@ -530,6 +530,25 @@ fn a_keyword_cannot_borrow_a_current_body_obligation() {
 }
 
 #[test]
+fn observed_optional_trait_choice_lowers_and_rejects_non_observation_sources() {
+    let lowerer = lowerer();
+    let tree = expanded::tree().clone();
+    lowerer.lower(&tree).unwrap();
+
+    let mut whole_deck = tree.clone();
+    *whole_deck
+        .pointer_mut("/cards/BP08-055/abilities/0/fanfare/do/1/choose/from")
+        .unwrap() = json!({"who":"self","zone":"deck","trait":"ドラゴニュート"});
+    lowerer.lower(&whole_deck).unwrap_err();
+
+    let mut missing_observation = tree;
+    *missing_observation
+        .pointer_mut("/cards/BP08-055/abilities/0/fanfare/do/1/choose/from/in")
+        .unwrap() = json!("not_seen");
+    lowerer.lower(&missing_observation).unwrap_err();
+}
+
+#[test]
 fn bp08_candidate_matches_the_handwritten_card_program() {
     let cards = lowerer().lower(expanded::tree()).unwrap();
     let mut actual = cards["BP08-038"].card().clone();

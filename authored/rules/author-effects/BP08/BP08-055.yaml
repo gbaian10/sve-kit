@@ -1,0 +1,52 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP08-055:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-luna
+          date: "2026-10-29"
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  awakened: true
+                then:
+                  - look:
+                      bind: seen
+                      top:
+                        n: 3
+                        who: self
+                  - choose:
+                      bind: picked
+                      from:
+                        in: seen
+                        trait: ドラゴニュート
+                      n: 1
+                      may: true
+                  - move:
+                      ref: picked
+                      to: hand
+                      result: picked_to_hand
+                  - reveal:
+                      bind: revealed
+                      ref: picked
+                  - move:
+                      ref:
+                        in: seen
+                        except:
+                          in:
+                            objects_of: picked_to_hand
+                            view: before
+                      to: deck
+                      position: bottom
+                      order: chooser
+        line: 2

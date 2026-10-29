@@ -1,8 +1,9 @@
 use super::super::{
     ChoiceDomain, Comparison, Control, CostSpec, DamageRecipient, Decision, DecisionId,
-    DecisionKind, Disjointness, ExecutionRef, InputMode, Mode, ModeChoiceKind, ModeDecision,
-    ModeDecisionKind, ModeId, NatFrozen, NatOperation, PlaySlot, PlaySpec, Predicate,
-    SelectionConstraint, SelectionGroup, SelectionSnapshot, SpellCountTime, Visibility,
+    DecisionKind, Disjointness, ExecutionRef, InputMode, MemberProjection, Mode, ModeChoiceKind,
+    ModeDecision, ModeDecisionKind, ModeId, NatFrozen, NatOperation, ObjectProperty, ObjectReceipt,
+    PlaySlot, PlaySpec, Predicate, SelectionConstraint, SelectionGroup, SelectionSnapshot,
+    SpellCountTime, Visibility,
 };
 use super::{
     AbilitySource, Action, Allocator, BTreeMap, BTreeSet, BatchPolicy, Binding, BodyContext,
@@ -111,6 +112,9 @@ impl BodyContext<'_> {
         path: &str,
         resolution: bool,
     ) -> Result<(ChoiceDomain, Cardinality), LoweringError> {
+        if target.from.observation.is_some() {
+            return self.observed_object_choice(target, path, resolution);
+        }
         if matches!(target.from.zone, Some(ast::TargetZone::Cemetery))
             && (!resolution
                 || target.from.leader_or
@@ -194,10 +198,90 @@ impl BodyContext<'_> {
                         cardinality,
                     }],
                     cardinality,
-                    distinct_by: target
-                        .distinct_by
-                        .as_ref()
-                        .map(|_| super::super::ObjectProperty::Names),
+                    distinct_by: target.distinct_by.as_ref().map(|_| ObjectProperty::Names),
+                    disjoint: Disjointness::Disjoint,
+                    aggregate_bounds: vec![],
+                },
+                binding,
+                target_roles: None,
+            },
+            cardinality,
+        ))
+    }
+
+    fn observed_object_choice(
+        &mut self,
+        target: &ast::Target,
+        path: &str,
+        resolution: bool,
+    ) -> Result<(ChoiceDomain, Cardinality), LoweringError> {
+        let observation = target
+            .from
+            .observation
+            .as_ref()
+            .ok_or_else(|| unsupported(path))?;
+        if !resolution
+            || target.from.who.is_some()
+            || target.from.zone.is_some()
+            || target.from.leader.is_some()
+            || target.from.leaders.is_some()
+            || target.from.leader_or
+            || target.from.other
+            || target.from.r#trait.is_none()
+            || target.distinct_by.is_some()
+            || self.recipient_targets.contains_key(&target.bind)
+            || self.targets.contains_key(&target.bind)
+            || self.definitions.contains_key(&target.bind)
+            || self.searches.contains_key(&target.bind)
+        {
+            return Err(unsupported(path));
+        }
+        let receipt = self
+            .observations
+            .get(observation)
+            .filter(|receipt| matches!(receipt, ObjectReceipt::Look { .. }))
+            .ok_or_else(|| unsupported(path))?
+            .clone();
+        let cardinality = match (target.n, target.upto) {
+            (Some(count), None) => Cardinality {
+                minimum: Nat(count),
+                maximum: Some(Nat(count)),
+            },
+            (None, Some(count)) => Cardinality {
+                minimum: Nat(0),
+                maximum: Some(Nat(count)),
+            },
+            _ => return Err(unsupported(path)),
+        };
+        let binding = Binding::new(self.allocator.id(path)?, self.scope);
+        if self.observations.contains_key(&target.bind)
+            || self.targets.insert(target.bind.clone(), binding).is_some()
+        {
+            return Err(unsupported(path));
+        }
+        let candidate = Binding::new(1, self.card_allocator.scope(path)?);
+        Ok((
+            ChoiceDomain::Objects {
+                constraint: SelectionConstraint {
+                    groups: vec![SelectionGroup {
+                        selector: Selector::Filter {
+                            input: Box::new(Selector::ReceiptMembers {
+                                receipt,
+                                projection: MemberProjection::Before,
+                            }),
+                            binding: candidate,
+                            predicate: Box::new(super::selection::field_filter(
+                                target.from.kind.as_ref(),
+                                target.from.r#trait.as_deref(),
+                                target.from.name.as_deref(),
+                                target.from.name_contains.as_deref(),
+                                candidate,
+                            )),
+                        },
+                        cardinality,
+                    }],
+                    cardinality,
+                    distinct_by: None::<ObjectProperty>,
                     disjoint: Disjointness::Disjoint,
                     aggregate_bounds: vec![],
                 },

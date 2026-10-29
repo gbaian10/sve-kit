@@ -161,7 +161,12 @@ impl BodyContext<'_> {
             return top_to_cemetery(value, top, path);
         }
         if let Some(ast::MoveObjects::Field(objects)) = &value.r#ref {
-            if value.position.is_some() || value.order.is_some() || value.result.is_some() {
+            let captures_hand_move = matches!(objects, ast::Objects::Bound(name)
+                if self.targets.contains_key(name) && matches!(value.to, ast::Destination::Hand));
+            if value.position.is_some()
+                || value.order.is_some()
+                || (value.result.is_some() && !captures_hand_move)
+            {
                 return Err(unsupported(path));
             }
             if matches!(value.to, ast::Destination::Field) {
@@ -258,29 +263,38 @@ impl BodyContext<'_> {
         value: &ast::Reveal,
         path: &str,
     ) -> Result<Action, LoweringError> {
-        let ast::HandZone::Hand = value.r#ref.zone;
-        let relation = match value.r#ref.who {
-            ast::Side::Controller => PlayerRelation::SelfPlayer,
-            ast::Side::Opponent => PlayerRelation::Opponents,
-            ast::Side::All => return Err(unsupported(path)),
-        };
-        Ok(Action::Reveal {
-            objects: Selector::Zone {
-                players: PlayerSet {
-                    relation,
-                    relative_to: PlayerRef::Controller {},
-                    cardinality: Cardinality {
-                        minimum: Nat(1),
-                        maximum: Some(Nat(1)),
-                    },
-                    text_quantifier: TextQuantifier::Implicit,
+        match &value.r#ref {
+            ast::RevealRef::Bound(name) => Ok(Action::Reveal {
+                objects: Selector::Bound {
+                    reference: *self.targets.get(name).ok_or_else(|| unsupported(path))?,
                 },
-                zone: ZoneKind::Hand,
-                view: super::SelectionView::Current {},
-                binding: super::Binding::new(self.allocator.id(path)?, self.scope),
-                predicate: Box::new(super::Expr::Literal(super::super::Bool(true))),
-            },
-        })
+            }),
+            ast::RevealRef::WholeHand(hand) => {
+                let ast::HandZone::Hand = hand.zone;
+                let relation = match hand.who {
+                    ast::Side::Controller => PlayerRelation::SelfPlayer,
+                    ast::Side::Opponent => PlayerRelation::Opponents,
+                    ast::Side::All => return Err(unsupported(path)),
+                };
+                Ok(Action::Reveal {
+                    objects: Selector::Zone {
+                        players: PlayerSet {
+                            relation,
+                            relative_to: PlayerRef::Controller {},
+                            cardinality: Cardinality {
+                                minimum: Nat(1),
+                                maximum: Some(Nat(1)),
+                            },
+                            text_quantifier: TextQuantifier::Implicit,
+                        },
+                        zone: ZoneKind::Hand,
+                        view: super::SelectionView::Current {},
+                        binding: super::Binding::new(self.allocator.id(path)?, self.scope),
+                        predicate: Box::new(super::Expr::Literal(super::super::Bool(true))),
+                    },
+                })
+            }
+        }
     }
 }
 
