@@ -1,0 +1,51 @@
+format: 2
+kind: author_effect_set
+cards:
+  ECP01-027:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-30"
+    abilities:
+      - line: 1
+        keywords:
+          - quick
+      - line: 2
+        spell:
+          do:
+            - look:
+                top:
+                  who: self
+                  n: 1
+                bind: seen
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  trait: ウマ娘
+                n: 1
+                may: true
+            - move:
+                ref: picked
+                to: hand
+            - reveal:
+                ref: picked
+                bind: shown
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: cemetery
+                        kind: spell
+                        trait: ウマ娘
+                    op: ge
+                    right: 5
+                then:
+                  - life:
+                      who: self
+                      delta: 2
