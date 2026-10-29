@@ -18051,6 +18051,9 @@
         "ub": {
           "type": "boolean",
           "const": true
+        },
+        "cost": {
+          "$ref": "#/$defs/A.cost"
         }
       },
       "additionalProperties": false,

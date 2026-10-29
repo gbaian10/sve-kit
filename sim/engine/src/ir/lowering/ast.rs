@@ -344,6 +344,7 @@ pub(super) enum Before {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum Destination {
+    Field,
     Deck,
     Ex,
     Hand,

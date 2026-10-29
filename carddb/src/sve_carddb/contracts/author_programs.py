@@ -3015,6 +3015,8 @@ class LastwordHeadFields(TypedDict):
 
     ub: NotRequired[TrueFlag]
 
+    cost: NotRequired[Cost]
+
 
 type LastwordHead = LastwordHeadFields
 

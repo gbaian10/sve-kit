@@ -1,0 +1,20 @@
+cards:
+  BP04-093:
+    abilities:
+      - lastword:
+          cost:
+            pp: 2
+          do:
+            - move:
+                ref: this
+                to: field
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-29"
+format: 2
+kind: author_effect_set

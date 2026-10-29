@@ -34,7 +34,8 @@ impl BodyContext<'_> {
                             ast::Destination::Deck => MovementReceipt::Order {
                                 receipt: ReceiptReference::new(receipt),
                             },
-                            ast::Destination::Ex
+                            ast::Destination::Field
+                            | ast::Destination::Ex
                             | ast::Destination::Hand
                             | ast::Destination::Cemetery => MovementReceipt::Move {
                                 receipt: ReceiptReference::new(receipt),
@@ -120,6 +121,32 @@ impl BodyContext<'_> {
         }
     }
 
+    fn lastword_return(&self, objects: &ast::Objects, path: &str) -> Result<Action, LoweringError> {
+        let (ast::Objects::This(_), Some(event)) = (objects, self.leave_event) else {
+            return Err(unsupported(path));
+        };
+        Ok(Action::Move {
+            objects: Selector::Objects {
+                objects: vec![ObjectOperand::FollowEventMove {
+                    event: MovementEvent::LeaveField { event },
+                }],
+            },
+            movement: MoveSpec {
+                to: MoveDestination::Shared {
+                    zone: super::super::ZoneRef {
+                        player: PlayerRef::Controller {},
+                        kind: ZoneKind::Field,
+                    },
+                },
+                initial_posture: None,
+                entry_effects: vec![],
+                position: None,
+                order: None,
+            },
+            reason: MoveReason::Put,
+        })
+    }
+
     pub(super) fn observed_move(
         &mut self,
         value: &ast::Move,
@@ -132,11 +159,14 @@ impl BodyContext<'_> {
             if value.position.is_some() || value.order.is_some() || value.result.is_some() {
                 return Err(unsupported(path));
             }
+            if matches!(value.to, ast::Destination::Field) {
+                return self.lastword_return(objects, path);
+            }
             let zone = match value.to {
                 ast::Destination::Hand => OwnerZone::Hand,
                 ast::Destination::Cemetery => OwnerZone::Cemetery,
                 ast::Destination::Ex => OwnerZone::Ex,
-                ast::Destination::Deck => return Err(unsupported(path)),
+                ast::Destination::Field | ast::Destination::Deck => return Err(unsupported(path)),
             };
             let objects = match (objects, self.leave_event, zone) {
                 (ast::Objects::This(_), Some(event), OwnerZone::Ex) => Selector::Objects {
@@ -211,7 +241,8 @@ impl BodyContext<'_> {
                     },
                 })
             }
-            ast::Destination::Deck
+            ast::Destination::Field
+            | ast::Destination::Deck
             | ast::Destination::Ex
             | ast::Destination::Hand
             | ast::Destination::Cemetery => Err(unsupported(path)),

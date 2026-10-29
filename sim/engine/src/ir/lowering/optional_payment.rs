@@ -88,6 +88,7 @@ pub(super) fn check_entry(
                 keyword,
                 Some(
                     KeywordId::Fanfare
+                        | KeywordId::Lastword
                         | KeywordId::OnEvolve
                         | KeywordId::OnSuperEvolve
                         | KeywordId::OnAttack

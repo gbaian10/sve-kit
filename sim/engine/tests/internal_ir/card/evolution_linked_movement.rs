@@ -1,7 +1,7 @@
 use super::*;
 use sve_engine::game::internal::{Fact, InputDomain};
 
-fn tree(heads: &[(&str, Value)]) -> Value {
+pub(super) fn tree(heads: &[(&str, Value)]) -> Value {
     let mut tree = fanfare::expanded::tree().clone();
     let template = tree["cards"]["BP08-038"]["abilities"][0].clone();
     let abilities = heads
@@ -20,7 +20,7 @@ fn tree(heads: &[(&str, Value)]) -> Value {
     tree
 }
 
-fn loaded(initial: &Value, program: &WellFormedCardProgram) -> Game {
+pub(super) fn loaded(initial: &Value, program: &WellFormedCardProgram) -> Game {
     let mut game = Game::new(
         catalog(),
         initial,
