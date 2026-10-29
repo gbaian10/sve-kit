@@ -55,9 +55,14 @@ pub(super) fn check_catalog(game: &Game, action: &Action) -> Result<()> {
     if let Some((token, zone)) = specification(action) {
         let card = game.catalog.token_print(&token.template.0)?;
         if zone == ZoneKind::Field
-            && game.catalog.face(&card, 0)?["card_type"] != "フォロワー・トークン"
+            && !matches!(
+                game.catalog.face(&card, 0)?["card_type"].as_str(),
+                Some("フォロワー・トークン" | "アミュレット・トークン")
+            )
         {
-            return Err(unsupported("field creation requires a follower token"));
+            return Err(unsupported(
+                "field creation requires a follower or amulet token",
+            ));
         }
         if !game.card_runtime.has_definition(&card) {
             return Err(unsupported("created token requires an admitted whole card"));

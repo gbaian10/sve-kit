@@ -9,7 +9,7 @@ extern crate alloc;
 
 use alloc::sync::Arc;
 use serde_json::{Value, json};
-use sve_engine::catalog::Catalog;
+use sve_engine::catalog::{Catalog, SelectedEffects};
 use sve_engine::game::internal::{Answer, CardPlay, InputDomain, InstructionOutcome};
 use sve_engine::game::{Game, View};
 use sve_engine::ir::PlayerId;
@@ -83,6 +83,57 @@ fn initial(occupied: usize) -> Value {
             "zones":{"hand":[{"id":"creator","card":"creator"}],"ex":existing}},
         "P2":{"leader":{"class":"ニュートラル","life":20_u8},"pp":{"current":10_u8,"max":10_u8},"ep":0_u8,"sep":0_u8,"zones":{}}
     }})
+}
+
+fn token_kind(snapshot: &str, kind: &str) -> String {
+    let mut result = snapshot
+        .lines()
+        .map(|line| {
+            let mut card: Value = serde_json::from_str(line).unwrap();
+            if card.get("number").and_then(Value::as_str) == Some("token") {
+                let face = card
+                    .get_mut("faces")
+                    .and_then(Value::as_array_mut)
+                    .and_then(|faces| faces.first_mut())
+                    .and_then(Value::as_object_mut)
+                    .unwrap();
+                face.insert("card_type".into(), json!(kind));
+                if kind != "フォロワー・トークン" {
+                    face.insert("power".into(), json!("-"));
+                    face.insert("hp".into(), json!("-"));
+                }
+            }
+            card.to_string()
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
+    result.push('\n');
+    result
+}
+
+#[test]
+fn field_creation_keeps_spell_and_crest_tokens_closed() {
+    for kind in ["スペル・トークン", "クレスト・トークン"] {
+        let (snapshot, keywords, mut input) = selection(1);
+        let snapshot = token_kind(&snapshot, kind);
+        input["authors"][0]["input"]["tree"]["cards"]["creator"]["faces"]["f:11111111111111111111111111111111"]
+            ["abilities"][0]["spell"]["do"][0]["create"]["to"] = json!("field");
+        let selected = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
+        let failure = Game::from_selected_effects(
+            selected,
+            &initial(0),
+            &Value::Null,
+            &Value::Null,
+            "field-token-kind",
+        )
+        .unwrap_err();
+        assert!(
+            failure
+                .to_string()
+                .contains("field creation requires a follower or amulet token"),
+            "the new Amulet path must not grant field creation to other special cards"
+        );
+    }
 }
 
 #[test]
@@ -223,8 +274,16 @@ fn token_definition_links_require_a_complete_token_and_cannot_execute_as_mother_
 
 #[test]
 fn field_creation_caps_before_allocating_and_result_can_change_the_arrivals() {
-    for (occupied, expected) in [(0_usize, 2_usize), (4, 1), (5, 0)] {
+    for (kind, occupied, expected) in [
+        ("フォロワー・トークン", 0_usize, 2_usize),
+        ("フォロワー・トークン", 4, 1),
+        ("フォロワー・トークン", 5, 0),
+        ("アミュレット・トークン", 0, 2),
+        ("アミュレット・トークン", 4, 1),
+        ("アミュレット・トークン", 5, 0),
+    ] {
         let (snapshot, keywords, mut input) = selection(2);
+        let snapshot = token_kind(&snapshot, kind);
         let steps = &mut input["authors"][0]["input"]["tree"]["cards"]["creator"]["faces"]["f:11111111111111111111111111111111"]
             ["abilities"][0]["spell"]["do"];
         steps[0]["create"]["to"] = json!("field");
@@ -341,24 +400,55 @@ fn field_creation_ward_choices_resume_the_same_objects_once() {
     assert_eq!(acted, 1);
 }
 
+fn entry_selection(kind: &str, self_entry: bool) -> SelectedEffects {
+    let (snapshot, keywords, mut input) = selection(2);
+    let mut snapshot = token_kind(&snapshot, kind);
+    *input.pointer_mut("/authors/0/input/tree/cards/creator/faces/f:11111111111111111111111111111111/abilities/0/spell/do/0/create/to").unwrap() = json!("field");
+    let (observer, observer_source) = author(
+        "observer",
+        "33333333333333333333333333333333",
+        "フォロワー",
+        vec![
+            json!({"auto":{"on":{"enter_field":{"who":"self","sel":{"kind":"follower"}}},"do":[{"draw":{"n":1_u8}}]}}),
+        ],
+    );
+    snapshot.push_str(&observer.to_string());
+    snapshot.push('\n');
+    let authors = input
+        .get_mut("authors")
+        .and_then(Value::as_array_mut)
+        .unwrap();
+    authors.push(observer_source);
+    if self_entry {
+        let (_, token_source) = author(
+            "token",
+            "22222222222222222222222222222222",
+            kind,
+            vec![json!({"auto":{"on":{"enter_field":{"ref":"this"}},"do":[{"draw":{"n":1_u8}}]}})],
+        );
+        let token_author = authors
+            .iter_mut()
+            .find(|candidate| {
+                candidate.pointer("/input/card_no").and_then(Value::as_str) == Some("token")
+            })
+            .unwrap();
+        *token_author = token_source;
+    }
+    Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap()
+}
+
 #[test]
 fn only_successful_field_creations_emit_per_token_entry_triggers() {
-    for (occupied, expected) in [(1_usize, 2_usize), (4, 1), (5, 0)] {
-        let (mut snapshot, keywords, mut input) = selection(2);
-        input["authors"][0]["input"]["tree"]["cards"]["creator"]["faces"]["f:11111111111111111111111111111111"]
-            ["abilities"][0]["spell"]["do"][0]["create"]["to"] = json!("field");
-        let (observer, source) = author(
-            "observer",
-            "33333333333333333333333333333333",
-            "フォロワー",
-            vec![
-                json!({"auto":{"on":{"enter_field":{"who":"self","sel":{"kind":"follower"}}},"do":[{"draw":{"n":1_u8}}]}}),
-            ],
-        );
-        snapshot.push_str(&observer.to_string());
-        snapshot.push('\n');
-        input["authors"].as_array_mut().unwrap().push(source);
-        let selected = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
+    for (kind, self_entry, occupied, created, expected) in [
+        ("フォロワー・トークン", false, 1_usize, 2_usize, 2_usize),
+        ("フォロワー・トークン", false, 4, 1, 1),
+        ("フォロワー・トークン", false, 5, 0, 0),
+        ("アミュレット・トークン", true, 1, 2, 2),
+        ("アミュレット・トークン", true, 4, 1, 1),
+        ("アミュレット・トークン", true, 5, 0, 0),
+        ("アミュレット・トークン", false, 1, 2, 0),
+    ] {
+        let selected = entry_selection(kind, self_entry);
         let mut initial = initial(occupied - 1);
         let mut field = initial["players"]["P1"]["zones"]["ex"].take();
         field
@@ -389,7 +479,11 @@ fn only_successful_field_creations_emit_per_token_entry_triggers() {
             let InputDomain::Pending(options) = &question.domain else {
                 panic!("entry pending choice")
             };
-            assert!(options.iter().all(|option| option.card == "observer"));
+            assert!(
+                options
+                    .iter()
+                    .all(|option| option.card == if self_entry { "token" } else { "observer" })
+            );
             let play = game
                 .answer_internal_card(
                     question.actor,
@@ -401,12 +495,15 @@ fn only_successful_field_creations_emit_per_token_entry_triggers() {
             triggers += 1;
             game.resume_internal_card().unwrap();
         }
-        assert_eq!(triggers, expected);
+        assert_eq!(
+            triggers, expected,
+            "successful Amulet entries trigger themselves, but never follower-only observers"
+        );
         let view = game.projection(View::Referee).unwrap();
         assert_eq!(view["P1"]["hand"].as_array().unwrap().len(), expected);
         assert_eq!(
             view["P1"]["field"].as_array().unwrap().len(),
-            occupied + expected
+            occupied + created
         );
     }
 }
