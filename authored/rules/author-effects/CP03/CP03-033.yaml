@@ -1,0 +1,33 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP03-033:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-30"
+    abilities:
+      - line: 1
+        fanfare:
+          targets:
+            - bind: chosen
+              from:
+                who: self
+                zone: field
+                kind: follower
+                trait: ヴァンガード
+                orig_cost_ge: 4
+              n: 1
+          do:
+            - buff:
+                "on": chosen
+                power: 2
+                hp: 2
+            - grant:
+                "on": chosen
+                keywords:
+                  - rush
+                  - assail

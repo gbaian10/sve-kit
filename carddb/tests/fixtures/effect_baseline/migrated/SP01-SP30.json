@@ -1,0 +1,59 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "trigger",
+      "body": {
+        "op": "draw",
+        "count": 1
+      },
+      "event": "enter",
+      "subject": "self"
+    },
+    {
+      "line": 2,
+      "kind": "trigger",
+      "body": {
+        "op": "if",
+        "condition": {
+          "fn": "ne",
+          "args": [
+            {
+              "read": "self.entered_from"
+            },
+            "hand"
+          ]
+        },
+        "then": {
+          "op": "move",
+          "subjects": "target.1",
+          "to": "ex"
+        }
+      },
+      "event": "enter",
+      "subject": "self",
+      "targets": [
+        {
+          "key": "1",
+          "select": {
+            "side": "opponent",
+            "zone": "field",
+            "type": "follower",
+            "where": {
+              "fn": "le",
+              "args": [
+                {
+                  "read": "item.cost"
+                },
+                4
+              ]
+            }
+          },
+          "min": 1,
+          "max": 1
+        }
+      ]
+    }
+  ]
+}
