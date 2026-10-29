@@ -242,32 +242,46 @@ impl BodyContext<'_> {
                     ],
                 })))
             }
-            ast::Number::Count { count } => Ok(Expr::Compute(Box::new(IntOperation::FromNat {
-                value: Expr::Live(Box::new(NatRead::ZoneCount {
-                    selector: Selector::Zone {
-                        players: PlayerSet {
-                            relation: match count.who {
-                                ast::LeaderSide::Controller => PlayerRelation::SelfPlayer,
-                                ast::LeaderSide::Opponent => PlayerRelation::Opponents,
+            ast::Number::Count { count } => {
+                if !matches!(count.zone, ast::CountZone::Field)
+                    && (count.kind.is_some() || count.r#trait.is_some())
+                {
+                    return Err(unsupported(path));
+                }
+                let binding = Binding::new(self.allocator.id(path)?, self.scope);
+                Ok(Expr::Compute(Box::new(IntOperation::FromNat {
+                    value: Expr::Live(Box::new(NatRead::ZoneCount {
+                        selector: Selector::Zone {
+                            players: PlayerSet {
+                                relation: match count.who {
+                                    ast::LeaderSide::Controller => PlayerRelation::SelfPlayer,
+                                    ast::LeaderSide::Opponent => PlayerRelation::Opponents,
+                                },
+                                relative_to: PlayerRef::Controller {},
+                                cardinality: Cardinality {
+                                    minimum: Nat(1),
+                                    maximum: Some(Nat(1)),
+                                },
+                                text_quantifier: TextQuantifier::Implicit,
                             },
-                            relative_to: PlayerRef::Controller {},
-                            cardinality: Cardinality {
-                                minimum: Nat(1),
-                                maximum: Some(Nat(1)),
+                            zone: match count.zone {
+                                ast::CountZone::Field => ZoneKind::Field,
+                                ast::CountZone::Deck => ZoneKind::Deck,
+                                ast::CountZone::Hand => ZoneKind::Hand,
+                                ast::CountZone::Cemetery => ZoneKind::Cemetery,
                             },
-                            text_quantifier: TextQuantifier::Implicit,
+                            view: SelectionView::Current {},
+                            binding,
+                            predicate: Box::new(super::search::object_filter(
+                                count.kind.as_ref(),
+                                count.r#trait.as_deref(),
+                                None,
+                                binding,
+                            )),
                         },
-                        zone: match count.zone {
-                            ast::CountZone::Deck => ZoneKind::Deck,
-                            ast::CountZone::Hand => ZoneKind::Hand,
-                            ast::CountZone::Cemetery => ZoneKind::Cemetery,
-                        },
-                        view: SelectionView::Current {},
-                        binding: Binding::new(self.allocator.id(path)?, self.scope),
-                        predicate: Box::new(Expr::Literal(Bool(true))),
-                    },
-                })),
-            }))),
+                    })),
+                })))
+            }
             ast::Number::Resource { resource } => {
                 Ok(Expr::Live(Box::new(IntRead::PlayerResource {
                     player: match resource.who {

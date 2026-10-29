@@ -391,3 +391,244 @@ pub(super) fn evolve_triggers() -> Vec<Located<Ability>> {
         ),
     ])
 }
+
+#[test]
+fn ex_phase_auto_only_observes_its_declared_public_zone_and_controller_turn() {
+    for (declared, actual, active, expected) in [
+        ("ex", "ex", "P1", 2_usize),
+        ("ex", "field", "P1", 0),
+        ("ex", "hand", "P1", 0),
+        ("ex", "ex", "P2", 0),
+        ("field", "ex", "P1", 0),
+    ] {
+        let number = if actual == "field" {
+            "unit-follower"
+        } else {
+            "unit-spell"
+        };
+        let mut ability = lowered(
+            "auto",
+            json!({
+                "zone":declared,"on":{"phase":{"whose":"self","which":"end"}},
+                "do":[{"life":{"who":"self","delta":1}}]
+            }),
+        );
+        ability.source = source(number);
+        locate_steps(
+            &mut ability.node.body.as_mut().unwrap().steps,
+            &ability.source,
+            &ability.node.source,
+        );
+        let program = card(vec![ability]);
+        let mut initial = setup(1, json!([]));
+        initial["turn"]["active"] = json!(active);
+        for seat in ["P1", "P2"] {
+            initial["players"][seat]["zones"]["field"] = json!([]);
+        }
+        initial["players"]["P1"]["zones"][actual] = json!([
+            {"id":"first","card":number},
+            {"id":"second","card":number}
+        ]);
+        let mut game =
+            Game::new(catalog(), &initial, &Value::Null, &Value::Null, "ex-phase").unwrap();
+        game.load_internal_card(number, &program).unwrap();
+        let companion = if number == "unit-spell" {
+            "unit-follower"
+        } else {
+            "unit-spell"
+        };
+        game.load_internal_card(companion, &card(vec![])).unwrap();
+        game.internal_rule_action(&json!({"do":"end-phase"}))
+            .unwrap();
+        for remaining in (1..=expected).rev() {
+            let question = game.internal_pending_choice().unwrap().unwrap();
+            let InputDomain::Pending(options) = &question.domain else {
+                panic!("phase pending");
+            };
+            assert_eq!(options.len(), remaining);
+            resolved(
+                game.answer_internal_card(
+                    question.actor,
+                    question.token,
+                    Answer::Pending(options[0].handle),
+                )
+                .unwrap(),
+            );
+            game.resume_internal_card().unwrap();
+        }
+        assert!(game.internal_pending_choice().unwrap().is_none());
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["P1"]["leader"]["life"],
+            20 + expected
+        );
+    }
+}
+
+#[test]
+fn ex_phase_rejects_mismatched_ability_and_subscription_zones() {
+    let mut ability = lowered(
+        "auto",
+        json!({
+            "zone":"ex","on":{"phase":{"whose":"self","which":"end"}},"do":[]
+        }),
+    );
+    ability.node.trigger.as_mut().unwrap().active_zones = vec![ZoneKind::Field];
+    let mut game = Game::new(
+        catalog(),
+        &setup(1, json!([])),
+        &Value::Null,
+        &Value::Null,
+        "mismatch",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &card(vec![ability]))
+        .unwrap_err();
+}
+
+#[expect(
+    clippy::panic,
+    reason = "A malformed synthetic cost must fail its fixture immediately."
+)]
+fn counted_ability() -> Located<Ability> {
+    let mut ability = lowered(
+        "activate",
+        json!({
+            "cost":{"pp":0},"do":[{"if":{
+                "cond":{"cmp":{"left":{"count":{"who":"self","zone":"field","kind":"follower","trait":"mage"}},"op":"ge","right":2}},
+                "then":[{"life":{"who":"self","delta":1}}]
+            }}]
+        }),
+    );
+    let CostSpec::Ordered { steps } = &mut ability.node.play.as_mut().unwrap().costs else {
+        panic!("ordered synthetic costs");
+    };
+    for step in steps {
+        step.instruction.source = ability.node.source.clone();
+    }
+    ability
+}
+
+#[test]
+fn filtered_field_count_ignores_opponent_nonfollowers_and_other_zones() {
+    let program = card(vec![counted_ability()]);
+    let (snapshot, keywords, effects) = catalog_documents(&json!(0));
+    let snapshot = snapshot.replace("\"traits\":[]", "\"traits\":[\"mage\"]");
+    let catalog = Arc::new(
+        Catalog::from_documents(&snapshot, &keywords, &[("unit.yaml".into(), effects)]).unwrap(),
+    );
+    for count in [1_usize, 2] {
+        let mut initial = setup(1, json!([]));
+        initial["players"]["P1"]["zones"]["field"] = json!([
+            {"id":"source","card":"unit-follower"},
+            {"id":"amulet","card":"unit-amulet"}
+        ]);
+        if count == 2 {
+            initial["players"]["P1"]["zones"]["field"]
+                .as_array_mut()
+                .unwrap()
+                .push(json!({"id":"other","card":"unit-follower"}));
+        }
+        initial["players"]["P1"]["zones"]["ex"] = json!([{"id":"ex","card":"unit-follower"}]);
+        let mut game = Game::new(
+            Arc::clone(&catalog),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "filtered-count",
+        )
+        .unwrap();
+        game.load_internal_card("unit-follower", &program).unwrap();
+        game.load_internal_card("unit-amulet", &card(vec![]))
+            .unwrap();
+        game.load_internal_card("unit-spell", &card(vec![]))
+            .unwrap();
+        resolved(
+            game.activate_internal_card("source", AbilityId(1), PlayerId { seat: 1 })
+                .unwrap(),
+        );
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["P1"]["leader"]["life"],
+            if count == 2 { 21 } else { 20 }
+        );
+    }
+}
+
+#[test]
+fn ex_phase_lowering_keeps_nonphase_multizone_and_private_filters_closed() {
+    let supported = card(vec![lowered(
+        "auto",
+        json!({"on":{"damaged":{"recipient":"this"}},"do":[]}),
+    )]);
+    let mut game = Game::new(
+        catalog(),
+        &setup(1, json!([])),
+        &Value::Null,
+        &Value::Null,
+        "field-damage",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &supported)
+        .unwrap();
+    for payload in [
+        json!({"zone":["field","ex"],"on":{"phase":{"whose":"self","which":"end"}},"do":[]}),
+        json!({"zone":"ex","on":{"damaged":{"recipient":"this"}},"do":[]}),
+        json!({"on":{"phase":{"whose":"self","which":"end"}},"do":[{"life":{"who":"self","delta":{"count":{"who":"self","zone":"hand","kind":"follower"}}}}]}),
+    ] {
+        let mut tree = fanfare::expanded::tree().clone();
+        let mut candidate = tree["cards"]["BP08-038"].take();
+        let mut entry = candidate["abilities"][0].take();
+        entry.as_object_mut().unwrap().remove("fanfare");
+        entry["auto"] = payload;
+        candidate["abilities"] = json!([entry]);
+        tree["cards"] = json!({"BP08-038":candidate});
+        lowerer().lower(&tree).unwrap_err();
+    }
+}
+
+#[test]
+fn filtered_field_count_cannot_authorize_private_card_filters() {
+    for zone in [ZoneKind::Hand, ZoneKind::Deck] {
+        let mut ability = counted_ability();
+        let Node::Control {
+            control: Control::If { condition, .. },
+        } = &mut ability.node.body.as_mut().unwrap().steps[0].node
+        else {
+            panic!("count guard");
+        };
+        let Expr::Compute(predicate) = condition else {
+            panic!("integer comparison");
+        };
+        let Predicate::CompareInt {
+            left: Expr::Compute(number),
+            ..
+        } = predicate.as_mut()
+        else {
+            panic!("count number");
+        };
+        let IntOperation::FromNat {
+            value: Expr::Live(read),
+        } = number.as_mut()
+        else {
+            panic!("zone count");
+        };
+        let NatRead::ZoneCount {
+            selector: Selector::Zone { zone: actual, .. },
+        } = read.as_mut()
+        else {
+            panic!("count selector");
+        };
+        *actual = zone;
+        let mut game = Game::new(
+            catalog(),
+            &setup(1, json!([])),
+            &Value::Null,
+            &Value::Null,
+            "private-filter",
+        )
+        .unwrap();
+        let before = format!("{game:?}");
+        game.load_internal_card("unit-follower", &card(vec![ability]))
+            .unwrap_err();
+        assert_eq!(format!("{game:?}"), before);
+    }
+}

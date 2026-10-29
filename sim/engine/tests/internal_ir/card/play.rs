@@ -1187,3 +1187,67 @@ fn distinct_name_play_rejects_an_impossible_selection_before_payment() {
         "an impossible target group cannot consume payment"
     );
 }
+
+#[test]
+fn resolving_spell_returns_only_itself_to_ex_or_cleans_up_when_ex_is_full() {
+    let program = card(vec![spell(vec![
+        draw(1, 1),
+        movement::put(
+            2,
+            Selector::Objects {
+                objects: vec![ObjectOperand::SourceHolder {}],
+            },
+            OwnerZone::Ex,
+        ),
+    ])]);
+    for (origin, fillers, returned) in
+        [("hand", 0_usize, true), ("hand", 5, false), ("ex", 4, true)]
+    {
+        let mut initial = setup(1, json!([{"id":"drawn","card":"unit-follower"}]));
+        initial["players"]["P1"]["pp"] = json!({"current":4,"max":4});
+        initial["players"]["P1"]["zones"]["hand"] = json!([]);
+        initial["players"]["P1"]["zones"]["ex"] = json!(
+            (0..fillers)
+                .map(|n| json!({"id":format!("fill{n}"),"card":"unit-follower"}))
+                .collect::<Vec<_>>()
+        );
+        let source = json!({"id":"source","card":"unit-spell"});
+        if origin == "ex" {
+            initial["players"]["P1"]["zones"][origin]
+                .as_array_mut()
+                .unwrap()
+                .push(source);
+        } else {
+            initial["players"]["P1"]["zones"][origin] = json!([source]);
+        }
+        let mut game =
+            Game::new(catalog(), &initial, &Value::Null, &Value::Null, "self-ex").unwrap();
+        game.load_internal_card("unit-spell", &program).unwrap();
+        game.load_internal_card("unit-follower", &card(vec![]))
+            .unwrap();
+        resolved(
+            game.play_internal_card("source", PlayerId { seat: 1 })
+                .unwrap(),
+        );
+        let state = game.projection(View::Referee).unwrap();
+        assert_eq!(state["P1"]["pp"]["current"], 3);
+        assert_eq!(state["P1"]["hand"], json!(["drawn"]));
+        assert_eq!(state["P1"]["resolution"], json!([]));
+        assert_eq!(
+            state["P1"]["ex"]
+                .as_array()
+                .unwrap()
+                .contains(&json!("source")),
+            returned
+        );
+        assert_eq!(
+            state["P1"]["cemetery"],
+            if returned {
+                json!([])
+            } else {
+                json!(["source"])
+            }
+        );
+        assert_eq!(state["objects"]["source"]["generation"], 2);
+    }
+}

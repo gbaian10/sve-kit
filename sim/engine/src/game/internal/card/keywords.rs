@@ -113,8 +113,17 @@ impl Game {
     }
 }
 
+pub(super) type PrintedCoordinate<'source> = (
+    usize,
+    &'source str,
+    Option<&'source str>,
+    u64,
+    &'source str,
+    Option<KeywordId>,
+);
+
 pub(super) fn check_coordinate<'source>(
-    origins: &mut BTreeSet<(usize, u64, &'source str, Option<KeywordId>)>,
+    origins: &mut BTreeSet<PrintedCoordinate<'source>>,
     ordinal: usize,
     source: &'source SourceSpan,
     keyword: Option<KeywordId>,
@@ -122,15 +131,24 @@ pub(super) fn check_coordinate<'source>(
     let line = u64::from(source.line);
     let scope = source.scope.as_str();
     if line == 0
-        || !origins.insert((ordinal, line, scope, keyword))
-        || origins
-            .iter()
-            .any(|(other_face, other_line, other_scope, other_keyword)| {
+        || !origins.insert((
+            ordinal,
+            source.field.as_str(),
+            source.section.as_deref(),
+            line,
+            scope,
+            keyword,
+        ))
+        || origins.iter().any(
+            |(other_face, other_field, other_section, other_line, other_scope, other_keyword)| {
                 *other_face == ordinal
+                    && *other_field == source.field
+                    && *other_section == source.section.as_deref()
                     && *other_line == line
                     && *other_scope == scope
                     && (keyword.is_none() != other_keyword.is_none())
-            })
+            },
+        )
     {
         return Err(invalid("invalid or duplicate printed ability coordinate"));
     }

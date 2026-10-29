@@ -486,7 +486,12 @@ impl Allocator {
 }
 
 fn active_zones(entry: &ast::Ability, path: &str) -> Result<Vec<ZoneKind>, LoweringError> {
-    let zones = match entry.activate.as_ref().and_then(|head| head.zone.as_ref()) {
+    let requested = entry
+        .activate
+        .as_ref()
+        .and_then(|head| head.zone.as_ref())
+        .or_else(|| entry.auto.as_ref()?.zone.as_ref());
+    let zones = match requested {
         Some(ast::ActivationZones::One(zone)) => vec![zone.kind()],
         Some(ast::ActivationZones::Many(zones)) => zones.iter().map(|zone| zone.kind()).collect(),
         None if entry.spell.is_some() => vec![ZoneKind::Resolution],
@@ -499,6 +504,16 @@ fn active_zones(entry: &ast::Ability, path: &str) -> Result<Vec<ZoneKind>, Lower
                     .activate
                     .as_ref()
                     .is_some_and(|head| head.quick == Some(true))))
+    {
+        return Err(unsupported(path));
+    }
+    if entry.auto.is_some()
+        && (!matches!(zones.as_slice(), [ZoneKind::Field | ZoneKind::Ex])
+            || (zones == [ZoneKind::Ex]
+                && !matches!(
+                    entry.auto.as_ref().map(|head| &head.on),
+                    Some(ast::PhaseSubscription::Phase(_))
+                )))
     {
         return Err(unsupported(path));
     }
@@ -607,7 +622,7 @@ fn lowered_trigger(
             }
         };
         TriggerSpec {
-            active_zones: vec![ZoneKind::Field],
+            active_zones: active_zones(entry, path)?,
             view: if matches!(pattern, EventPattern::LeaveField { .. }) {
                 EventSnapshotPolicy::BeforeExit
             } else {

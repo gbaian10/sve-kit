@@ -51,12 +51,27 @@ pub(super) struct PendingOccurrence {
     leave_after: Option<ObjectRef>,
     card: String,
     timing: Option<EventPayload>,
-    field_position: u64,
+    source_position: u64,
 }
 
 pub(in crate::game) struct DeparturePlan {
     updates: Vec<(u64, SourceSnapshot)>,
     departures: Vec<(PendingOccurrence, Object)>,
+}
+
+pub(super) fn ex_phase(ability: &Ability) -> bool {
+    ability.kind == AbilityKind::Triggered
+        && matches!(ability.source.origin, AbilityOrigin::Printed { .. })
+        && ability.active_zones == [ZoneKind::Ex]
+        && ability.trigger.as_ref().is_some_and(|trigger| {
+            trigger.active_zones == [ZoneKind::Ex]
+                && matches!(
+                    trigger.on,
+                    TriggerCondition::Event {
+                        pattern: EventPattern::Phase { .. }
+                    }
+                )
+        })
 }
 
 pub(super) fn check_header(ability: &Ability) -> Result<()> {
@@ -180,15 +195,18 @@ impl Game {
             leave_after: None,
             card,
             timing: None,
-            field_position: u64::try_from(
-                self.zone_ids(super::seat_name(source.controller)?, "field")
-                    .iter()
-                    .position(|id| id == holder)
-                    .ok_or_else(|| invalid("trigger source has no public field position"))?,
+            source_position: u64::try_from(
+                self.zone_ids(
+                    super::seat_name(source.controller)?,
+                    &self.object(holder)?.zone,
+                )
+                .iter()
+                .position(|id| id == holder)
+                .ok_or_else(|| invalid("trigger source has no public position"))?,
             )
             .map_err(invalid)?
             .checked_add(1)
-            .ok_or_else(|| invalid("field position overflow"))?,
+            .ok_or_else(|| invalid("source position overflow"))?,
         })
     }
 
@@ -615,9 +633,9 @@ impl PendingOccurrence {
             card: self.card.clone(),
             line: printed_origin(&self.ability.node.source.origin)?.1.0,
             event: if let Some(event) = &self.timing {
-                timing::public_event(event, self.field_position)?
+                timing::public_event(event, self.source_position)?
             } else if self.leave.is_some() {
-                format!("LeaveField from field slot {}", self.field_position)
+                format!("LeaveField from field slot {}", self.source_position)
             } else {
                 // Every producer, including Fanfare, now stores its public event payload.
                 return Err(invalid("pending occurrence without a public event"));

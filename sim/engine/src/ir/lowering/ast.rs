@@ -789,11 +789,14 @@ pub(super) enum SelectedStat {
 pub(super) struct CountQuery {
     pub who: LeaderSide,
     pub zone: CountZone,
+    pub kind: Option<SearchKind>,
+    pub r#trait: Option<String>,
 }
 
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum CountZone {
+    Field,
     Deck,
     Hand,
     Cemetery,
@@ -831,6 +834,7 @@ pub(super) struct Empty {}
 #[serde(deny_unknown_fields)]
 pub(super) struct Auto {
     pub on: PhaseSubscription,
+    pub zone: Option<ActivationZones>,
     #[serde(flatten)]
     pub body: Body,
 }

@@ -431,12 +431,19 @@ impl Game {
                         "only public field or cemetery departures to hand",
                     ));
                 }
+                let resolving_source = kind == ZoneKind::Ex
+                    && object.zone == "resolution"
+                    && object.id == execution.context.source
+                    && member.generation == execution.context.generation
+                    && execution.ability.is_some()
+                    && self.object_type(&object.id)? == "スペル";
                 if kind == ZoneKind::Ex
+                    && !resolving_source
                     && !matches!(object.zone.as_str(), "field" | "cemetery" | "ex")
                 {
                     return Err(unsupported("public field or cemetery movement to EX"));
                 }
-                if top_count.is_none() {
+                if top_count.is_none() && !resolving_source {
                     public_zone(&object.zone)?;
                 }
             }
@@ -836,6 +843,7 @@ fn public_zone(zone: &str) -> Result<ZoneKind> {
 fn movement_origin(zone: &str, method: MoveMethod, destination: &str) -> Result<ZoneKind> {
     match (zone, method, destination) {
         ("evolve_deck", MoveMethod::Put, "field") => Ok(ZoneKind::Evolve),
+        ("resolution", MoveMethod::Put, "ex") => Ok(ZoneKind::Resolution),
         ("hand", MoveMethod::Discard, "cemetery") => Ok(ZoneKind::Hand),
         ("deck", MoveMethod::Put, _) => Ok(ZoneKind::Deck),
         (zone, _, _) => public_zone(zone),

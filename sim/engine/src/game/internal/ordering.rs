@@ -5,11 +5,11 @@ use super::{
 };
 use crate::ir::{
     Action, Binding, Bool, Capture, CaptureRef, CaptureTime, Cardinality, ChoiceDomain, Control,
-    Expr, Instruction, Int, Located, LookOutcome, MemberProjection, MoveDestination, Nat, Node,
-    ObjectOperand, ObjectReceipt, ObjectRef, OrderAnswer, OrderOutcome, OwnerZone, PlayerId,
-    PlayerRef, PlayerRelation, Position, Predicate, Program, ReceiptLocation, RecipientSet,
-    Requirements, ResultMember, ResultMemberId, RuntimeObjectView, ScopeId, Selector, SnapshotId,
-    SourceSpan, StepwiseMode, Visibility, ZoneKind,
+    Expr, Instruction, Int, IntOperation, Located, LookOutcome, MemberProjection, MoveDestination,
+    Nat, NatRead, Node, ObjectOperand, ObjectReceipt, ObjectRef, OrderAnswer, OrderOutcome,
+    OwnerZone, PlayerId, PlayerRef, PlayerRelation, Position, Predicate, Program, ReceiptLocation,
+    RecipientSet, Requirements, ResultMember, ResultMemberId, RuntimeObjectView, ScopeId, Selector,
+    SnapshotId, SourceSpan, StepwiseMode, Visibility, ZoneKind,
 };
 use alloc::collections::BTreeSet;
 
@@ -239,12 +239,36 @@ fn mask_public_field_condition(condition: &mut Expr<Bool>) {
     if let Expr::Compute(operation) = condition {
         match operation.as_mut() {
             Predicate::Exists { objects } => mask_public_field_predicate(objects),
+            Predicate::CompareInt { left, right, .. } => {
+                mask_public_field_number(left);
+                mask_public_field_number(right);
+            }
             Predicate::And { predicates } | Predicate::Or { predicates } => {
                 for predicate in predicates {
                     mask_public_field_condition(predicate);
                 }
             }
             Predicate::Not { predicate } => mask_public_field_condition(predicate),
+            _ => {}
+        }
+    }
+}
+
+fn mask_public_field_number(number: &mut Expr<Int>) {
+    if let Expr::Compute(operation) = number {
+        match operation.as_mut() {
+            IntOperation::FromNat { value } => {
+                if let Expr::Live(read) = value
+                    && let NatRead::ZoneCount { selector } = read.as_mut()
+                {
+                    mask_public_field_predicate(selector);
+                }
+            }
+            IntOperation::Arithmetic { arguments, .. } => {
+                for argument in arguments {
+                    mask_public_field_number(argument);
+                }
+            }
             _ => {}
         }
     }
