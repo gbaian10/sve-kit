@@ -1,0 +1,41 @@
+cards:
+  BP17-095:
+    abilities:
+      - keywords:
+          - storm
+        line: 1
+      - attack_time:
+          cost:
+            pp: 1
+          do:
+            - damage:
+                n: 2
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  entered_by:
+                    by: ability
+                    ref: this
+                then:
+                  - draw:
+                      n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-29"
+format: 2
+kind: author_effect_set
