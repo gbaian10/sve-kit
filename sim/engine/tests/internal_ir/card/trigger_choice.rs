@@ -74,14 +74,14 @@ fn on_evolve_choice_lowers_up_to_three_modes_with_mode_targets() {
 }
 
 #[test]
-fn on_evolve_choice_does_not_enable_conditional_or_other_trigger_modes() {
-    lowerer().lower(&tree("evolve_time", body())).err().unwrap();
+fn trigger_choice_rejects_extra_steps() {
+    lowerer().lower(&tree("evolve_time", body())).unwrap();
     let mut direct = body();
     direct["do"] = direct["do"][0]["if"]["then"].clone();
     direct.as_object_mut().unwrap().remove("targets");
     direct["do"][0]["choice"]["options"][0] = json!([{"life":{"who":"self","delta":1}}]);
     for head in ["lastword", "attack_time", "super_evolve_time"] {
-        lowerer().lower(&tree(head, direct.clone())).err().unwrap();
+        lowerer().lower(&tree(head, direct.clone())).unwrap();
     }
     direct["do"]
         .as_array_mut()
@@ -91,56 +91,9 @@ fn on_evolve_choice_does_not_enable_conditional_or_other_trigger_modes() {
 }
 
 #[test]
-fn raw_on_evolve_modes_cannot_enable_a_conditional_fanfare_guard() {
-    let guarded_fanfare = lowerer()
-        .lower(&tree("fanfare", body()))
-        .unwrap()
-        .remove("unit-follower")
-        .unwrap();
-    let Node::Control {
-        control: Control::If { condition, .. },
-    } = &guarded_fanfare.card().abilities[0]
-        .node
-        .body
-        .as_ref()
-        .unwrap()
-        .steps[0]
-        .node
-    else {
-        panic!("public Fanfare guard");
-    };
-    let mut direct = body();
-    direct["do"] = direct["do"][0]["if"]["then"].clone();
-    let typed = lowerer()
-        .lower(&tree("evolve_time", direct))
-        .unwrap()
-        .remove("unit-follower")
-        .unwrap();
-    let mut candidate = typed.card().clone();
-    let ability = &mut candidate.abilities[0].node;
-    let direct_body = ability.body.take().unwrap();
-    let source = direct_body.steps[0].source.clone();
-    ability.body = Some(Program {
-        scope: ScopeId(900),
-        steps: vec![Located {
-            source,
-            node: Node::Control {
-                control: Control::If {
-                    condition: condition.clone(),
-                    then_body: direct_body,
-                    else_body: None,
-                },
-            },
-        }],
-    });
-    let error = WellFormedCardProgram::check(candidate).unwrap_err();
-    assert_eq!(error.reason, WellFormedReason::InvalidEntry);
-}
-
-#[test]
-fn conditional_choice_rejects_other_heads_conditions_and_else_branches() {
+fn conditional_choice_rejects_nonpublic_conditions_and_else_branches() {
     lowerer().lower(&tree("fanfare", body())).unwrap();
-    lowerer().lower(&tree("attack_time", body())).err().unwrap();
+    lowerer().lower(&tree("attack_time", body())).unwrap();
     let mut other = body();
     other["do"][0]["if"]["cond"] = json!({"leader_life":{"who":"self","le":10}});
     lowerer().lower(&tree("fanfare", other)).err().unwrap();
@@ -262,6 +215,54 @@ fn inactive_fanfare_skips_modes_and_active_second_mode_skips_first_targets() {
                 .filter(|fact| matches!(fact, Fact::AbilityPlayed { .. }))
                 .count(),
             1
+        );
+    }
+}
+
+#[test]
+fn phase_choice_checks_the_public_guard_when_the_occurrence_is_played() {
+    let mut body = body();
+    body["on"] = json!({"phase":{"whose":"self","which":"end"}});
+    let typed = lowerer()
+        .lower(&tree("auto", body))
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap();
+    for maximum in [6_u8, 7] {
+        let mut initial = setup(1, json!([]));
+        initial["players"]["P1"]["pp"] = json!({"current":maximum,"max":maximum});
+        initial["players"]["P1"]["zones"]["hand"] = json!([]);
+        initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
+        let mut game = Game::new(
+            catalog(),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "phase-modes",
+        )
+        .unwrap();
+        game.load_internal_card("unit-follower", &typed).unwrap();
+        game.internal_rule_action(&json!({"do":"end-phase"}))
+            .unwrap();
+        let pending = game.internal_pending_choice().unwrap().unwrap();
+        let result = game
+            .answer_internal_card(pending.actor, pending.token, Answer::Pending(1))
+            .unwrap();
+        if maximum == 7 {
+            let CardPlay::Awaiting(mode) = result else {
+                panic!("active mode")
+            };
+            assert!(matches!(mode.domain, InputDomain::Modes { .. }));
+            resolved(
+                game.answer_internal_card(mode.actor, mode.token, Answer::Modes(vec![ModeId(2)]))
+                    .unwrap(),
+            );
+        } else {
+            resolved(result);
+        }
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["objects"]["f"]["damage"],
+            if maximum == 7 { 2_u8 } else { 0 }
         );
     }
 }

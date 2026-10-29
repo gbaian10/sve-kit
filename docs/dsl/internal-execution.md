@@ -112,8 +112,8 @@ BP01-041 的候選起動片段由 C0 展開、lowering、良構與整卡執行�
 `play.captures` 的 AtPlay 在自身移區前求值；同批 captures 先各自從入口求值再一起公開，
 值域沿用良構 checker 與 executor 的交集。卡片先移入 Resolution；Spell 從這個新世代建立
 RuntimeAbilitySource。ChoiceKeyword 在普通參數前選定，本文只按印刷順序執行保存的模式。
-無付款的普通 OnEvolve 也接受單一頂層直接 choice，沿用相同基數與選項目標；
-其條件包 choice、其他觸發頭及額外頂層步驟仍拒絕。Fanfare 的既有覺醒條件入口不變。
+所有觸發能力都接受單一頂層 choice，或公開最大 PP 條件包住的單一 choice，沿用相同基數與選項目標；
+條件在打出時判定，非公開條件、else 分支及額外頂層步驟仍拒絕。
 count 支援常值 exact／upto 與良構的 SC／NC 條件樹；在 AtPlay 固定計數，SC 數墓地 Spell、NC 數墓地全部牌。
 常值按印刷模式數截斷，upto 正數至少選一個，零則保存空模式結果並繼續成本與其他本文。
 先證明模式的必要公開目標與共同成本可行，再出題；不可選模式不縮減 exact 必選數。

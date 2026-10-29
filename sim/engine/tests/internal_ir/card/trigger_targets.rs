@@ -1,5 +1,5 @@
 use super::*;
-use sve_engine::game::internal::InputDomain;
+use sve_engine::game::internal::{DamageShare, InputDomain};
 
 fn tree(head: &str, body: Value) -> Value {
     let mut tree = fanfare::expanded::tree().clone();
@@ -41,7 +41,7 @@ fn every_trigger_head_lowers_targets_and_payments() {
 }
 
 #[test]
-fn ordinary_target_support_keeps_unrelated_play_constructs_closed() {
+fn formal_play_constructs_load_for_triggers_and_activations() {
     let target =
         json!({"bind":"enemy","from":{"who":"opp","zone":"field","kind":"follower"},"n":1});
     let mut modal_target = target.clone();
@@ -53,9 +53,22 @@ fn ordinary_target_support_keeps_unrelated_play_constructs_closed() {
     ] {
         let mut activated = body.clone();
         activated["cost"] = json!({"pp":1});
-        lowerer().lower(&tree("activate", activated)).unwrap();
-        for head in ["attack_time", "super_evolve_time", "lastword"] {
-            lowerer().lower(&tree(head, body.clone())).err().unwrap();
+        for (head, body) in [
+            ("activate", activated),
+            ("attack_time", body.clone()),
+            ("super_evolve_time", body.clone()),
+            ("lastword", body),
+        ] {
+            let program = program(head, body);
+            let mut game = Game::new(
+                catalog(),
+                &setup(1, json!([])),
+                &Value::Null,
+                &Value::Null,
+                "formal-trigger",
+            )
+            .unwrap();
+            game.load_internal_card("unit-follower", &program).unwrap();
         }
     }
 }
@@ -283,4 +296,66 @@ fn ex_follower_phase_is_rejected_before_play() {
     .unwrap();
     game.load_internal_card("unit-follower", &program)
         .unwrap_err();
+}
+
+#[test]
+fn fanfare_distributes_damage_after_declaring_its_targets() {
+    let program = program(
+        "fanfare",
+        json!({
+            "targets":[{"bind":"enemy","from":{"who":"opp","zone":"field","kind":"follower"},"n":2}],
+            "do":[{"damage":{"to":"enemy","n":3,"distribute":true}}]
+        }),
+    );
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"s","card":"unit-follower"}]);
+    initial["players"]["P2"]["zones"]["field"] =
+        json!([{"id":"a","card":"unit-follower"},{"id":"b","card":"unit-follower"}]);
+    let mut game = Game::new(
+        catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "trigger-distribution",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &program).unwrap();
+    assert!(matches!(
+        game.play_internal_card("s", PlayerId { seat: 1 }).unwrap(),
+        CardPlay::Entered(_)
+    ));
+    let pending = game.internal_pending_choice().unwrap().unwrap();
+    let CardPlay::Awaiting(targets) = game
+        .answer_internal_card(pending.actor, pending.token, Answer::Pending(1))
+        .unwrap()
+    else {
+        panic!("targets")
+    };
+    let CardPlay::Awaiting(distribution) = game
+        .answer_internal_card(targets.actor, targets.token, Answer::Targets(vec![0, 1]))
+        .unwrap()
+    else {
+        panic!("distribution")
+    };
+    assert!(matches!(distribution.domain, InputDomain::Distribution(_)));
+    resolved(
+        game.answer_internal_card(
+            distribution.actor,
+            distribution.token,
+            Answer::Distribution(vec![
+                DamageShare {
+                    handle: 0,
+                    amount: Nat(1),
+                },
+                DamageShare {
+                    handle: 1,
+                    amount: Nat(2),
+                },
+            ]),
+        )
+        .unwrap(),
+    );
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["objects"]["a"]["damage"], 1);
+    assert_eq!(state["objects"]["b"]["damage"], 2);
 }

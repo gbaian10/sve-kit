@@ -431,7 +431,11 @@ impl Allocator {
         let source = source_span(key, path, entry)?;
         let ability_source = ability_source(&source, keyword);
         let mut context = BodyContext::new(entry, scope, body, payment_result, self);
-        let trigger_choice = context.prepare_parameters(body, path, keyword)?;
+        let trigger_choice = context.prepare_parameters(
+            body,
+            path,
+            entry.activate.is_none() && entry.spell.is_none(),
+        )?;
         let triggered_play = play::trigger_play_spec(entry, body, trigger_choice);
         let optional =
             context.optional_payment(body, &source, &ability_source, &format!("{path}/{head}"))?;
@@ -819,7 +823,8 @@ impl<'definitions> BodyContext<'definitions> {
             formal_play: entry.activate.is_some()
                 || entry.spell.is_some()
                 || body.optional_cost.is_some()
-                || body.head_cost.is_some(),
+                || body.head_cost.is_some()
+                || (entry.activate.is_none() && entry.spell.is_none() && !body.targets.is_empty()),
             local_payment: None,
         }
     }
@@ -852,7 +857,7 @@ impl<'definitions> BodyContext<'definitions> {
         &mut self,
         body: &ast::Body,
         path: &str,
-        keyword: Option<KeywordId>,
+        triggered: bool,
     ) -> Result<bool, LoweringError> {
         for value in body.define.values() {
             self.number(value, path, &mut BTreeSet::new())?;
@@ -861,7 +866,7 @@ impl<'definitions> BodyContext<'definitions> {
         self.allocator = Allocator::default();
         let trigger_choice = body.optional_cost.is_none()
             && body.head_cost.is_none()
-            && play::trigger_choice(body, keyword, path)?;
+            && play::trigger_choice(body, triggered, path)?;
         self.formal_play |= trigger_choice;
         let choice = if trigger_choice {
             true
