@@ -653,7 +653,8 @@ fn check_header(ability: &Ability) -> Result<()> {
     let ex_activation = ability.kind == AbilityKind::Activated
         && ability.active_zones == [ZoneKind::Ex]
         && matches!(ability.source.origin, AbilityOrigin::Printed { .. });
-    if (ability.active_zones != [zones] && !ex_activation)
+    let ex_trigger = triggers::ex_phase(ability);
+    if (ability.active_zones != [zones] && !ex_activation && !ex_trigger)
         || ability.source.holder != (ObjectOperand::SourceHolder {})
         || ability.source.controller != (PlayerRef::Controller {})
         || !ability.event_captures.is_empty()

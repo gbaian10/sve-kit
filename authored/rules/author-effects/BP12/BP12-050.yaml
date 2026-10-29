@@ -1,0 +1,48 @@
+cards:
+  BP12-050:
+    abilities:
+      - auto:
+          do:
+            - move:
+                ref: this
+                to: cemetery
+          on:
+            phase:
+              which: end
+              whose: self
+          zone: ex
+        line: 1
+      - line: 1
+        section: 1
+        spell:
+          do:
+            - damage:
+                n: 4
+                to:
+                  leaders: opponents
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        kind: follower
+                        trait: 魔法使い
+                        who: self
+                        zone: field
+                    op: ge
+                    right: 2
+                then:
+                  - move:
+                      ref: this
+                      to: ex
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-10-29"
+    rule_sections:
+      - section: 1
+format: 2
+kind: author_effect_set

@@ -60,7 +60,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
     if !admitted
         || ability.kind != AbilityKind::Triggered
         || !optional_payment::trigger_play(ability)
-        || trigger.active_zones != [ZoneKind::Field]
+        || (trigger.active_zones != [ZoneKind::Field] && !super::ex_phase(ability))
         || trigger.view
             != if matches!(
                 trigger.on,
@@ -382,11 +382,23 @@ impl Game {
         let actor = player_id(self.active())?;
         let mut candidates = Vec::new();
         for seat in ["P1", "P2"] {
-            for holder in self.zone_ids(seat, "field") {
+            for holder in self
+                .zone_ids(seat, "field")
+                .into_iter()
+                .chain(self.zone_ids(seat, "ex"))
+            {
                 for ability in self.timing_abilities(&holder)? {
                     let Some(trigger) = &ability.node.trigger else {
                         continue;
                     };
+                    let zone = if self.object(&holder)?.zone == "ex" {
+                        ZoneKind::Ex
+                    } else {
+                        ZoneKind::Field
+                    };
+                    if !trigger.active_zones.contains(&zone) {
+                        continue;
+                    }
                     if let TriggerCondition::Event {
                         pattern: EventPattern::Phase { binding, predicate },
                     } = &trigger.on

@@ -208,7 +208,7 @@ impl Game {
                     header.clone(),
                     None,
                 )?;
-                pending.field_position = u64::try_from(
+                pending.source_position = u64::try_from(
                     self.zone_ids(super::super::seat_name(event.controller)?, "field")
                         .iter()
                         .position(|id| *id == old.id)
