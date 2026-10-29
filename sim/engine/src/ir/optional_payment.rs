@@ -1,8 +1,8 @@
 //! One optional payment declared before targets and committed before play.
 use super::{
-    Ability, AbilityOrigin, Bool, Comparison, Control, CostSpec, Expr, Int, IntRead, KeywordId,
-    Located, Node, PaymentOptionality, PaymentTime, PlaySpec, PlayerRef, PlayerResource, Predicate,
-    Program, ReceiptId,
+    Ability, Bool, Comparison, Control, CostSpec, Expr, Int, IntRead, Located, Node,
+    PaymentOptionality, PaymentTime, PlaySpec, PlayerRef, PlayerResource, Predicate, Program,
+    ReceiptId,
 };
 
 pub(crate) fn declaration(body: &Program) -> Option<(&CostSpec, ReceiptId)> {
@@ -35,53 +35,28 @@ pub(crate) fn required(body: &Program) -> bool {
 }
 
 pub(crate) fn trigger_play(ability: &Ability) -> bool {
-    ability.play.as_ref().is_none_or(|play| {
-        if super::events::played::filter(ability).is_some() {
-            return matches!(play, PlaySpec { limit: None, captures, parameters, costs: CostSpec::Ordered { steps } }
-                if captures.is_empty() && parameters.is_empty() && steps.is_empty())
-                && ability.body.as_ref().is_some_and(|body| required(body) && declaration(body).is_some());
-        }
-        let AbilityOrigin::Keyword { keyword, .. } = &ability.source.origin else {
-            return false;
-        };
-        matches!(play, PlaySpec { limit: None, captures, costs: CostSpec::Ordered { steps }, .. }
-            if captures.is_empty() && steps.is_empty())
-            && ability.body.as_ref().is_some_and(|body| {
-                if required(body) {
-                    declaration(body).is_some()
-                        && matches!(
-                            keyword,
-                            KeywordId::Fanfare
-                                | KeywordId::Lastword
-                                | KeywordId::OnEvolve
-                                | KeywordId::OnSuperEvolve
-                                | KeywordId::OnAttack
-                                | KeywordId::OnRace
-                                | KeywordId::OnDriveGain
-                        )
-                        && (*keyword != KeywordId::Lastword || play.parameters.is_empty())
-                } else {
-                    match declaration(body) {
-                        Some(_) => matches!(keyword, KeywordId::Fanfare),
-                        None if !play.parameters.is_empty() => matches!(
-                            keyword,
-                            KeywordId::Fanfare
-                                | KeywordId::Lastword
-                                | KeywordId::OnEvolve
-                                | KeywordId::OnSuperEvolve
-                                | KeywordId::OnAttack
-                        ),
-                        None => {
-                            matches!(keyword, KeywordId::Fanfare | KeywordId::OnEvolve)
-                                && declared_choice(body, matches!(keyword, KeywordId::Fanfare))
-                        }
-                    }
-                }
-            })
-    })
+    let Some(play) = &ability.play else {
+        return true;
+    };
+    let PlaySpec {
+        limit: None,
+        captures,
+        parameters,
+        costs: CostSpec::Ordered { steps },
+    } = play
+    else {
+        return false;
+    };
+    let Some(body) = &ability.body else {
+        return false;
+    };
+    captures.is_empty()
+        && steps.is_empty()
+        && (!required(body) || declaration(body).is_some())
+        && (declaration(body).is_some() || !parameters.is_empty() || declared_choice(body))
 }
 
-fn declared_choice(body: &Program, conditional: bool) -> bool {
+fn declared_choice(body: &Program) -> bool {
     match body.steps.as_slice() {
         [
             Located {
@@ -98,14 +73,14 @@ fn declared_choice(body: &Program, conditional: bool) -> bool {
                     Node::Control {
                         control:
                             Control::If {
+                                condition,
                                 then_body,
                                 else_body: None,
-                                ..
                             },
                     },
                 ..
             },
-        ] if conditional => declared_choice(then_body, conditional),
+        ] => public_mode_guard(condition) && declared_choice(then_body),
         _ => false,
     }
 }

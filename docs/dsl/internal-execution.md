@@ -165,7 +165,7 @@ Spell 本文完成後，僅把仍在 Resolution 的同世代卡移去 owner 墓�
 
 Fanfare 保留 `Keyword(Fanfare, Printed)`，限定 AfterEntry、Field、PerFact，EnterFieldObject 恰等於
 SourceHolder。Lastword 保留 `Keyword(Lastword, Printed)`，限定 BeforeExit、Field、PerFact，
-LeaveFieldObjectBefore 恰等於 SourceHolder 且實際目的區為 owner 墓地。兩者都不接受 event captures 或 PlaySpec；限次只收下述共同正規形。其他 trigger 與整棵本文仍各自准入。Fanfare 的 Continuous 來源形狀仍拒絕。
+LeaveFieldObjectBefore 恰等於 SourceHolder 且實際目的區為 owner 墓地。兩者都不接受 event captures；PlaySpec 依共同目標、付款與模式形狀准入；限次只收下述共同正規形。其他 trigger 與整棵本文仍各自准入。Fanfare 的 Continuous 來源形狀仍拒絕。
 
 普通從者／護符先入 Resolution，承接受驗 EX 費用後才決定並支付固有 PP，付款後驗場位。
 EX→Resolution 與 Resolution→Field 只承接既有 CostModifier 的完整實例與目標新世代；其他效果／counter
@@ -205,7 +205,7 @@ Fanfare、長寫 EnterField、Lastword、OnEvolve、OnSuperEvolve、OnAttack、M
 已待機能力不因來源離場或換世代而消失；來源資訊讀取已封存 LKI，controller 仍固定為觸發當下。
 內部錯誤回該次能力嘗試前，保留原 pending、題目及已成功的前次 card play，epoch 高水位不退。
 正常敗北在 CheckTiming 成立時停止其餘待機並使舊題目失效；已完成本文的 resolved 事實仍保留。
-一般 trigger play 目標／成本及 PerBatch 尚未准入。
+所有已准入觸發型樣都可宣告 play 目標及成本；PerBatch 尚未准入。
 
 BP01-118 與 BP01-P25 的測試由 C0 展開、lowering、整卡載入及 authority 程序驗證相應傷害片段；
 P25 的送墓成本來自明示的合成測試輔助能力。來源座標為候選 fixture，不宣稱永久來源驗證或公開 capability。
@@ -213,7 +213,7 @@ P25 的送墓成本來自明示的合成測試輔助能力。來源座標為候�
 `internal_rule_action` 僅接受 evolve、attack、end-phase、end-discard 與開局 mulligan 的既有規則動作，
 沿原有時機、目標與支付／姿勢驗證；忙碌、待機及未完成 CheckTiming 時拒絕，不接原型 play／activate。
 守護屬原型 keyword，載入整卡的局面整體拒絕，所以不開 guard-act。時機不符的動作回 `cannot-play` 等拒絕結果，不視為成功。
-OnAttack 限 Printed 關鍵字、自身 Attack、AfterEntry、PerFact、無 PlaySpec；事件在合法目標與 act
+OnAttack 限 Printed 關鍵字、自身 Attack、AfterEntry、PerFact，PlaySpec 沿用共同准入；事件在合法目標與 act
 完成後、Quick 與傷害前保存精確 attacker、target、controller 與當回合 ordinal。
 End Begin 限 Printed、Phase(End, Begin)、自己的／對手的／每個 end phase，依事件回合玩家匹配；
 只在 start_end 發一次，先待機再進守護 act、Quick、棄牌及到期，不因重入檢查重發。
@@ -276,7 +276,7 @@ Pass 回傳 `CardPlay::Continued(Step)`，才續接原攻擊或 end 棄牌程序
 未載入的原型持有者照舊使用原型進化。來源及資源只收 face 0，
 沿既有時機、每回合次數、PP／EP／SEP 規則驗證；一般與合法超進化的 evolve facet 由實際付款決定，
 不信任輸入的 kind。全部程序完成後才從進化卡有效印刷面取得 Printed OnEvolve，自身、AfterEntry、PerFact、
-無 PlaySpec。進化相當能力仍拒絕；OnSuperEvolve 見〈第二批自動能力入口〉。
+PlaySpec 沿用共同准入。進化相當能力仍拒絕；OnSuperEvolve 見〈第二批自動能力入口〉。
 
 進化保持場上持有者世代；進化卡另有物件世代與受驗關聯。事件保存完整 before／after characteristics，
 新印刷定義依卡號、face、局部 AbilityId 配發新 instance，不與進化前同號能力相撞。

@@ -331,17 +331,14 @@ fn cemetery_play_insufficient_pp_cancels_and_full_field_records_no_success() {
 }
 
 #[test]
-fn cemetery_play_keeps_other_zones_targets_and_auto_headers_closed() {
-    for change in 0_u8..5 {
+fn cemetery_play_keeps_other_zones_and_auto_headers_closed() {
+    for change in 0_u8..4 {
         let mut tree = tree();
         let auto = &mut tree["cards"]["unit-follower"]["abilities"][0]["auto"];
         match change {
             0 => auto["zone"] = json!("ex"),
             1 => auto["on"]["played"]["during"]["turn"] = json!("opp"),
             2 => auto["on"]["played"]["sel"]["kind"] = json!("follower"),
-            3 => {
-                auto["targets"] = json!([{"bind":"other","from":{"who":"self","zone":"field","kind":"follower"},"n":1}]);
-            }
             _ => {
                 auto["do"][0]["move"]["ref"] =
                     json!({"who":"self","zone":"field","kind":"follower"});

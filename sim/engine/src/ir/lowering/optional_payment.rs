@@ -1,6 +1,4 @@
-use super::{
-    AbilitySource, BodyContext, KeywordId, Located, LoweringError, Node, SourceSpan, ast, payment,
-};
+use super::{AbilitySource, BodyContext, Located, LoweringError, Node, SourceSpan, ast, payment};
 use crate::ir::{Control, Decision, PaymentOptionality, PaymentTime, Program, ReceiptId};
 
 pub(super) struct PaymentDeclaration {
@@ -79,32 +77,11 @@ pub(super) fn check_entry(
     if entry.evolve.is_some() || entry.keywords.is_some() {
         return Ok(());
     }
-    let (body, _, keyword) = super::ability_body(entry, path)?;
-    if body.head_cost.is_some()
-        && (exchange
-            || entry.activate.is_some()
-            || entry.spell.is_some()
-            || (!entry.auto.as_ref().is_some_and(ast::Auto::cemetery_play)
-                && !matches!(
-                    keyword,
-                    Some(
-                        KeywordId::Fanfare
-                            | KeywordId::Lastword
-                            | KeywordId::OnEvolve
-                            | KeywordId::OnSuperEvolve
-                            | KeywordId::OnAttack
-                            | KeywordId::OnRace
-                            | KeywordId::OnDriveGain
-                    )
-                )))
-    {
+    let (body, _, _) = super::ability_body(entry, path)?;
+    if body.head_cost.is_some() && (exchange || entry.activate.is_some() || entry.spell.is_some()) {
         return Err(super::unsupported(path));
     }
-    if body.optional_cost.is_some()
-        && (exchange
-            || entry.activate.is_some()
-            || (entry.spell.is_none() && keyword != Some(KeywordId::Fanfare)))
-    {
+    if body.optional_cost.is_some() && (exchange || entry.activate.is_some()) {
         return Err(super::unsupported(path));
     }
     Ok(())

@@ -432,7 +432,7 @@ impl Allocator {
         let ability_source = ability_source(&source, keyword);
         let mut context = BodyContext::new(entry, scope, body, payment_result, self);
         let trigger_choice = context.prepare_parameters(body, path, keyword)?;
-        let triggered_play = play::trigger_play_spec(entry, body, keyword, trigger_choice, path)?;
+        let triggered_play = play::trigger_play_spec(entry, body, trigger_choice);
         let optional =
             context.optional_payment(body, &source, &ability_source, &format!("{path}/{head}"))?;
         if entry.fanfare.is_some() {

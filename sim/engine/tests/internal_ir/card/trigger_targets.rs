@@ -11,48 +11,33 @@ fn tree(head: &str, body: Value) -> Value {
 }
 
 #[test]
-fn resolution_choices_already_support_signed_stat_modification() {
-    lowerer()
-        .lower(&tree(
-            "attack_time",
-            json!({"do":[
-                {"choose":{"bind":"enemy","from":{"who":"opp","zone":"field","kind":"follower"},"n":1}},
-                {"buff":{"on":"enemy","power":-1}}
-            ]}),
-        ))
-        .unwrap();
-}
-
-#[test]
-fn ordinary_trigger_targets_admit_signed_modification_and_banish() {
-    for (head, action) in [
-        ("attack_time", json!({"buff":{"on":"enemy","power":-1}})),
-        ("evolve_time", json!({"banish":"enemy"})),
-        ("lastword", json!({"destroy":"enemy"})),
+fn every_trigger_head_lowers_targets_and_payments() {
+    let target =
+        json!({"bind":"enemy","from":{"who":"opp","zone":"field","kind":"follower"},"n":1});
+    for (head, subscription) in [
+        ("fanfare", Value::Null),
+        ("lastword", Value::Null),
+        ("evolve_time", Value::Null),
+        ("super_evolve_time", Value::Null),
+        ("attack_time", Value::Null),
+        ("auto", json!({"phase":{"whose":"self","which":"end"}})),
+        ("auto", json!({"damaged":{"recipient":"this"}})),
+        ("auto", json!({"left_field":{"ref":"this"}})),
+        ("auto", json!({"enter_field":{"ref":"this"}})),
     ] {
-        lowerer()
-            .lower(&tree(
-                head,
-                json!({
-                    "targets":[{"bind":"enemy","from":{"who":"opp","zone":"field","kind":"follower"},"n":1}],
-                    "do":[action]
-                }),
-            ))
-            .unwrap();
+        for mut body in [
+            json!({"targets":[target],"do":[{"buff":{"on":"enemy","power":-1}}]}),
+            json!({"cost":{"pp":1},"do":[{"life":{"who":"self","delta":1}}]}),
+            json!({"cost":{"pp":1},"targets":[target],"do":[{"banish":"enemy"}]}),
+            json!({"optional_cost":{"pp":1,"result":"paid"},"targets":[target],"do":[{"if":{"cond":{"paid":{"receipt":"paid"}},"then":[{"destroy":"enemy"}]}}]}),
+            json!({"do":[{"choose":{"bind":"enemy","from":{"who":"opp","zone":"field","kind":"follower"},"n":1}},{"buff":{"on":"enemy","power":-1}}]}),
+        ] {
+            if !subscription.is_null() {
+                body["on"] = subscription.clone();
+            }
+            lowerer().lower(&tree(head, body)).unwrap();
+        }
     }
-}
-
-#[test]
-fn ordinary_super_evolve_targets_lower_without_a_payment() {
-    lowerer()
-        .lower(&tree(
-            "super_evolve_time",
-            json!({
-                "targets":[{"bind":"enemy","from":{"who":"opp","zone":"field"},"n":1_u8}],
-                "do":[{"destroy":{"ref":"enemy"}}]
-            }),
-        ))
-        .unwrap();
 }
 
 #[test]
@@ -138,15 +123,164 @@ fn ordinary_fanfare_commits_only_after_its_target_is_chosen() {
     );
 }
 
+fn program(head: &str, body: Value) -> WellFormedCardProgram {
+    let mut expanded = tree(head, body);
+    expanded["cards"] = json!({"unit-follower":expanded["cards"]["BP08-038"]});
+    lowerer()
+        .lower(&expanded)
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap()
+}
+
 #[test]
-fn required_head_cost_targets_keep_the_existing_trigger_scope() {
-    let body = json!({
-        "cost":{"pp":1},
-        "targets":[{"bind":"enemy","from":{"who":"opp","zone":"field","kind":"follower"},"n":1}],
-        "do":[{"damage":{"to":"enemy","n":2}}]
-    });
-    for head in ["fanfare", "evolve_time", "super_evolve_time", "attack_time"] {
-        lowerer().lower(&tree(head, body.clone())).unwrap();
+fn phase_targets_precede_head_payment_and_failed_declarations_cancel() {
+    let program = program(
+        "auto",
+        json!({
+            "on":{"phase":{"whose":"self","which":"end"}},
+            "cost":{"pp":1},
+            "targets":[{"bind":"enemy","from":{"who":"opp","zone":"field","kind":"follower"},"n":1}],
+            "do":[{"damage":{"to":"enemy","n":1}}]
+        }),
+    );
+    for (accept, has_target) in [(true, true), (false, true), (true, false)] {
+        let mut initial = setup(1, json!([]));
+        initial["players"]["P1"]["pp"] = json!({"current":3,"max":3});
+        initial["players"]["P1"]["zones"]["hand"] = json!([]);
+        initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
+        if !has_target {
+            initial["players"]["P2"]["zones"]["field"] = json!([]);
+        }
+        let mut game = Game::new(
+            catalog(),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "phase-targets",
+        )
+        .unwrap();
+        game.load_internal_card("unit-follower", &program).unwrap();
+        game.internal_rule_action(&json!({"do":"end-phase"}))
+            .unwrap();
+        let pending = game.internal_pending_choice().unwrap().unwrap();
+        let result = game
+            .answer_internal_card(pending.actor, pending.token, Answer::Pending(1))
+            .unwrap();
+        let CardPlay::Awaiting(payment) = result else {
+            panic!("head declaration")
+        };
+        assert_eq!(payment.domain, InputDomain::OptionalCost);
+        let result = game
+            .answer_internal_card(payment.actor, payment.token, Answer::OptionalCost(accept))
+            .unwrap();
+        if accept && has_target {
+            let CardPlay::Awaiting(targets) = result else {
+                panic!("targets before payment")
+            };
+            assert!(matches!(targets.domain, InputDomain::Targets(_)));
+            assert_eq!(
+                game.projection(View::Referee).unwrap()["P1"]["pp"]["current"],
+                3
+            );
+            resolved(
+                game.answer_internal_card(targets.actor, targets.token, Answer::Targets(vec![0]))
+                    .unwrap(),
+            );
+        } else {
+            assert!(matches!(result, CardPlay::Cancelled));
+        }
+        if has_target {
+            assert_eq!(
+                game.projection(View::Referee).unwrap()["objects"]["f"]["damage"],
+                u8::from(accept)
+            );
+        }
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["P1"]["pp"]["current"],
+            3 - u8::from(accept && has_target)
+        );
     }
-    lowerer().lower(&tree("lastword", body)).err().unwrap();
+}
+
+#[test]
+fn damaged_targets_are_declared_by_the_controller_on_the_opponents_turn() {
+    let program = program(
+        "auto",
+        json!({
+            "on":{"damaged":{"recipient":"this"}},
+            "targets":[{"bind":"enemy","from":{"who":"opp","zone":"field","kind":"follower"},"n":1}],
+            "do":[{"buff":{"on":"enemy","power":-1}}]
+        }),
+    );
+    let mut initial = setup(1, json!([]));
+    initial["turn"]["active"] = json!("P2");
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P1"]["zones"]["field"] =
+        json!([{"id":"s","card":"unit-follower","state":{"acted":true}}]);
+    initial["players"]["P2"]["zones"]["field"] =
+        json!([{"id":"f","card":"unit-follower","state":{"entered_this_turn":false}}]);
+    let mut game = Game::new(
+        catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "opponent-damage",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &program).unwrap();
+    game.internal_rule_action(&json!({"do":"attack","attacker":"f","target":"s"}))
+        .unwrap();
+    quick::pass(&mut game);
+    let pending = game.internal_pending_choice().unwrap().unwrap();
+    assert_eq!(pending.actor, PlayerId { seat: 2 });
+    let CardPlay::Awaiting(active_targets) = game
+        .answer_internal_card(pending.actor, pending.token, Answer::Pending(1))
+        .unwrap()
+    else {
+        panic!("active player targets")
+    };
+    resolved(
+        game.answer_internal_card(
+            active_targets.actor,
+            active_targets.token,
+            Answer::Targets(vec![0]),
+        )
+        .unwrap(),
+    );
+    game.resume_internal_card().unwrap();
+    let pending = game.internal_pending_choice().unwrap().unwrap();
+    let CardPlay::Awaiting(targets) = game
+        .answer_internal_card(pending.actor, pending.token, Answer::Pending(1))
+        .unwrap()
+    else {
+        panic!("opponent turn targets")
+    };
+    assert_eq!(targets.actor, PlayerId { seat: 1 });
+    resolved(
+        game.answer_internal_card(targets.actor, targets.token, Answer::Targets(vec![0]))
+            .unwrap(),
+    );
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["objects"]["f"]["power"],
+        1
+    );
+}
+
+#[test]
+fn ex_follower_phase_is_rejected_before_play() {
+    let program = program(
+        "auto",
+        json!({"zone":"ex", "on":{"phase":{"whose":"self","which":"end"}}, "do":[]}),
+    );
+    let mut game = Game::new(
+        catalog(),
+        &setup(1, json!([])),
+        &Value::Null,
+        &Value::Null,
+        "ex-follower",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &program)
+        .unwrap_err();
 }
