@@ -223,6 +223,8 @@ struct State {
     #[serde(default)]
     ir_cost: BTreeMap<String, internal::CostState>,
     #[serde(default)]
+    ir_no_stand: Vec<internal::StandLock>,
+    #[serde(default)]
     next_ir_effect: u64,
     #[serde(default)]
     ir_play_clock: u64,
@@ -446,6 +448,7 @@ impl Game {
             ir_numeric: BTreeMap::new(),
             ir_keywords: BTreeMap::new(),
             ir_cost: BTreeMap::new(),
+            ir_no_stand: Vec::new(),
             next_ir_effect: 0,
             ir_play_clock: 0,
         };

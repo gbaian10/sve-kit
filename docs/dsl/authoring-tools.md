@@ -105,6 +105,22 @@ ignored:
 
 目前 `create: {token: フェアリーウィスプ, n: 2, to: ex, result: made}` 支援固定數量、單一規則名稱、自己 EX；`to: field` 支援從者 token 至自己場上。省略 `n` 為 1；EX 與場上各最多五張，只建立並放入仍有容量的數量。`result` 或 `bind` 擇一，綁定實際放入的 token，滿區時為空；authority receipt 同樣只列出成功放入者。token 的整卡 runtime 程式仍須准入。場上建立共用進場事件與守護的選擇橫置程序；沒有先前區域的建立以 `EntryOrigin::Other` 表示，成功建立的每個 token 各發生一次進場。
 
+手牌作費用的 `discard.sel` 支援 `class` 與 `orig_cost_eq/ge/le`，可與種類、特徵、名稱交集。篩選讀取印刷職業與原始費用，不受目前費用修正影響。觸發能力的頭費用沿用宣告、正式目標、私有材料選擇、付款的順序；拒付不執行本文，材料不足不提交付款。
+
+BP22-068 的下一次規則起身限制使用下列 `apply`；`who` 的目前支援子集為 `self/opp`，兩處須一致，期限只接受下一個 start 的 end。安裝綁定所選物件世代與指定玩家，經實際回合排程等到該玩家下次開始階段的規則起身，隨後失效。效果造成的 `stand` 不受阻止，來源離場也不提早終止；目標離場後的新世代不沿用限制。
+
+```yaml
+apply:
+  on: enemy
+  effect:
+    cannot:
+      what: stand
+      on: affected
+      during: { phase: start, who: opp, cause: rule }
+  until:
+    next_phase: { who: opp, phase: start, edge: end }
+```
+
 ## 寫入與驗證
 
 ```bash

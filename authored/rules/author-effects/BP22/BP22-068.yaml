@@ -1,0 +1,51 @@
+cards:
+  BP22-068:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - fanfare:
+          cost:
+            discard:
+              n: 1
+              sel:
+                class: ドラゴン
+                orig_cost_ge: 7
+                who: self
+                zone: hand
+          do:
+            - act:
+                ref: enemy
+            - apply:
+                effect:
+                  cannot:
+                    during:
+                      cause: rule
+                      phase: start
+                      who: opp
+                    on: affected
+                    what: stand
+                on: enemy
+                until:
+                  next_phase:
+                    edge: end
+                    phase: start
+                    who: opp
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              upto: 2
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-10-29"
+format: 2
+kind: author_effect_set

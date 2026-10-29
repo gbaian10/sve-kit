@@ -6,11 +6,11 @@ use super::{
 };
 use crate::ir::{
     Action, Binding, Bool, BoolRead, BooleanState, CardKind, Cardinality, CharacteristicView,
-    ClassRead, Expr, Info, Instruction, KindRead, MoveDestination, MoveMethod, MoveResult,
-    MoveSpec, NamesRead, Nat, ObjectOperand, ObjectProperty, ObjectRef, ObjectView, OwnerZone,
-    PlayerId, PlayerRelation, Predicate, RuntimeObjectView, RuntimeZoneRef, SearchDestination,
-    SearchOutcome, SearchPartition, SearchPartitionAnswer, SearchSelectionAnswer, SelectionView,
-    Selector, SnapshotId, TraitsRead, ZoneKind, ZoneRef,
+    ClassRead, Expr, Info, Instruction, Int, IntOperation, KindRead, MoveDestination, MoveMethod,
+    MoveResult, MoveSpec, NamesRead, Nat, NumberRead, ObjectOperand, ObjectProperty, ObjectRef,
+    ObjectView, OwnerZone, PlayerId, PlayerRelation, Predicate, RuntimeObjectView, RuntimeZoneRef,
+    SearchDestination, SearchOutcome, SearchPartition, SearchPartitionAnswer,
+    SearchSelectionAnswer, SelectionView, Selector, SnapshotId, TraitsRead, ZoneKind, ZoneRef,
 };
 use alloc::collections::{BTreeSet, VecDeque};
 use serde_json::{Value, json};
@@ -106,7 +106,16 @@ pub(super) fn check_predicate(value: &Expr<Bool>, candidate: Binding<ObjectRef>)
                 left: Expr::Live(read),
                 right: Expr::Literal(Info::Present(class)),
             } if !class.0.is_empty()
-                && matches!(read.as_ref(), ClassRead::Class { object, view: CharacteristicView::Effective } if candidate_view(object, candidate)) =>
+                && matches!(read.as_ref(), ClassRead::Class { object, view: CharacteristicView::Original | CharacteristicView::Effective } if candidate_view(object, candidate)) =>
+            {
+                Ok(true)
+            }
+            Predicate::CompareInt {
+                left: Expr::Compute(read),
+                right: Expr::Literal(Int(amount)),
+                ..
+            } if *amount >= 0
+                && matches!(read.as_ref(), IntOperation::InformationOrZero { information: NumberRead::Cost { object, view: CharacteristicView::Original } } if candidate_view(object, candidate)) =>
             {
                 Ok(true)
             }
@@ -350,6 +359,14 @@ pub(super) fn matches_candidate(game: &Game, id: &str, expression: &Expr<Bool>) 
                     ..
                 } => Ok(game.face(id)?.get("card_class").and_then(Value::as_str)
                     == Some(class.0.as_str())),
+                Predicate::CompareInt {
+                    right: Expr::Literal(Int(amount)),
+                    comparison,
+                    ..
+                } => {
+                    let cost = super::cost::printed_cost(&game.internal_cost_print(id)?["cost"])?;
+                    Ok(super::values::compare(cost, *comparison, *amount))
+                }
                 Predicate::NamesIntersect {
                     right: Expr::Literal(names),
                     ..

@@ -946,7 +946,7 @@ impl Game {
             execution.play = Some(play);
             return Ok(());
         }
-        if self.internal_hand_cost_materials(execution, &play.costs)? {
+        if self.internal_play_hand_materials(execution, &play)? {
             execution.play = Some(play);
             return Ok(());
         }

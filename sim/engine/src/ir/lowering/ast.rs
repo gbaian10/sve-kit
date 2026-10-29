@@ -387,6 +387,38 @@ pub(super) enum Until {
     NextOppTurn,
     ThisAndNextOppTurn,
     Game,
+    #[serde(untagged)]
+    NextPhase {
+        next_phase: PhaseEdge,
+    },
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct PhaseEdge {
+    pub who: StandPlayer,
+    pub phase: StartPhase,
+    pub edge: EndEdge,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum StartPhase {
+    Start,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum EndEdge {
+    End,
+}
+
+#[derive(Clone, Copy, Deserialize, PartialEq, Eq)]
+pub(super) enum StandPlayer {
+    #[serde(rename = "self")]
+    Controller,
+    #[serde(rename = "opp")]
+    Opponent,
 }
 
 #[derive(Deserialize)]
@@ -440,6 +472,35 @@ pub(super) struct Apply {
 pub(super) enum InstalledEffect {
     Stat(ConstantStats),
     CostMod(CostModifier),
+    Cannot(CannotStand),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct CannotStand {
+    pub what: StandAction,
+    pub on: Affected,
+    pub during: StandDuring,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum StandAction {
+    Stand,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct StandDuring {
+    pub phase: StartPhase,
+    pub who: StandPlayer,
+    pub cause: RuleCause,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum RuleCause {
+    Rule,
 }
 
 #[derive(Deserialize)]
@@ -1159,6 +1220,10 @@ pub(super) struct HandQuery {
     pub kind: Option<SearchKind>,
     pub r#trait: Option<String>,
     pub name: Option<String>,
+    pub class: Option<String>,
+    pub orig_cost_eq: Option<u64>,
+    pub orig_cost_ge: Option<u64>,
+    pub orig_cost_le: Option<u64>,
 }
 
 #[derive(Deserialize)]

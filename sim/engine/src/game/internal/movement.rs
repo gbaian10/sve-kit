@@ -82,6 +82,15 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
         Action::InstallEffect {
             effect, duration, ..
         } => {
+            if matches!(
+                effect.as_ref(),
+                Effect::Permission {
+                    action: ActionPattern::Stand { .. },
+                    ..
+                }
+            ) {
+                return super::posture::check_install(action);
+            }
             if matches!(effect.as_ref(), Effect::Continuous { .. }) {
                 return Ok(());
             }

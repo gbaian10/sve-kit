@@ -17,6 +17,7 @@ mod optional_payment;
 mod ordering;
 mod payment;
 mod play;
+mod posture;
 mod quick;
 mod search;
 mod selection;

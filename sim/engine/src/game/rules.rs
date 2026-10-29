@@ -857,12 +857,13 @@ impl Game {
         player.pp = json!({"current":max,"max":max});
         let mut standing = Vec::new();
         for id in self.zone_ids(&seat, "field") {
-            if !self.restricted(&id, "normal_stand")? {
+            if !self.restricted(&id, "normal_stand")? && !self.internal_rule_stand_blocked(&id)? {
                 standing.push(id.clone());
             }
             self.object_mut(&id)?.state["entered_this_turn"] = json!(false);
         }
         self.change_posture(&standing, false, &json!({"rule":"7.2.3"}))?;
+        self.internal_finish_rule_stand()?;
         let frame = Frame {
             controller: seat.clone(),
             cause: json!({"rule":"7.2.4"}),
