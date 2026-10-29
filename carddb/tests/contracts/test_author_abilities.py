@@ -108,7 +108,14 @@ def test_trigger_wrappers_and_zone_boundary(key: str) -> None:
         "ub": True,
     }
     check({key: payload})
-    check({key: {**payload, "cost": {"pp": 1}}}, valid=key != "lastword")
+    paid_head: dict[str, JsonValue] = {key: {**payload, "cost": {"pp": 1}}}
+    check(paid_head)
+    schema = {
+        "$id": NODES["$id"],
+        "$defs": NODES["$defs"],
+        "$ref": "#/$defs/A.ability-head",
+    }
+    assert Draft202012Validator(schema).is_valid(paid_head)
     check({key: {**payload, "zone": "field"}}, valid=False)
     check({key: {**payload, "targets": []}}, valid=False)
     check({key: {**payload, "define": {"this": 1}}}, valid=False)
