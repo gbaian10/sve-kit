@@ -3027,6 +3027,8 @@ class AutoHeadFields(TypedDict):
 
     do: Steps
 
+    cost: NotRequired[Cost]
+
     targets: NotRequired[Targets]
 
     optional_cost: NotRequired[OptionalCosts]
