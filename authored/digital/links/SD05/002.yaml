@@ -1,0 +1,48 @@
+format: 2
+kind: digital_link_shard
+records:
+  - reason: 名稱差一段，看圖判讀同角色不同版本
+    review_level: model_reviewed
+    subject:
+      card_id: c:c8a865d115b75c07b9c2567a12e1e6cd
+      digital_phase: null
+      face_id: null
+      game: svwb
+      official_id: "10151110"
+    value:
+      digital_names:
+        - lang: en
+          name_ref:
+            batch_id: sha256:11b55c334bbe4ef6211f56350bfe41cc83334bf2c4eafc07ada8ce6c2aac3676
+            locator: /data/card_details/10151110/common/name
+            parser: translation-svwb-v1
+            source_version_id: src:v1:397fb7898b6a1f9a2395bf39e6a523cb2244fa4155ed2bc11815fb0d75e638dd
+            text_hash: sha256:57fb270ed4e23940d73ecb0a923f9ebeda8a8a348d09abae846e5602af1e569d
+          phase: normal
+        - lang: ja
+          name_ref:
+            batch_id: sha256:11b55c334bbe4ef6211f56350bfe41cc83334bf2c4eafc07ada8ce6c2aac3676
+            locator: /data/card_details/10151110/common/name
+            parser: translation-svwb-v1
+            source_version_id: src:v1:42a5f98df940ec417db68472cf9ebdf7a4d079bb4fc3e6aa1d3cf5674b8ac3cb
+            text_hash: sha256:b08a3a675b264743e79c43df445b93efa3b7787136b2cc8bce06aca05364497b
+          phase: normal
+        - lang: zh-Hant
+          name_ref:
+            batch_id: sha256:11b55c334bbe4ef6211f56350bfe41cc83334bf2c4eafc07ada8ce6c2aac3676
+            locator: /data/card_details/10151110/common/name
+            parser: translation-svwb-v1
+            source_version_id: src:v1:c3f63469199760cce46c94d40db5ea340dc190cf2d918fba32e697c1c0e68e70
+            text_hash: sha256:d053aa9460e5e830e01b2f65d9e48ba3ff1920f6c62005e71a2065c43b1ac881
+          phase: normal
+      effect_similarity: null
+      relation: same_character
+      sve_names:
+        - face_id: f:b375c3357222530ca709fcf924757b2e
+          name_ref:
+            batch_id: sha256:139be07a281797f06baeb00b6aa8da56265ccd22ba4b42246630ba3d283e9ac3
+            locator: /faces/0/name
+            parser: translation-jp-v1
+            source_version_id: src:v1:38f39ea9cb5e4638670bc93a33b1ead108c5537c9eaa2ca2bd882ccee107dace
+            text_hash: sha256:e2210fd2b519f55a3755f2b5d3edf90d1717eb9339fd5fdd5d4036f491de42ec
+          printing_id: p:e838312e70d255299542a2116330a77c

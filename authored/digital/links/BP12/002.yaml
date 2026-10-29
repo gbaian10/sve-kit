@@ -1,0 +1,101 @@
+format: 2
+kind: digital_link_shard
+records:
+  - reason: 名稱差一段，看圖判讀同角色不同版本
+    review_level: model_reviewed
+    subject:
+      card_id: c:4e7afeeb3ae2507b98ffd67859aca5b6
+      digital_phase: null
+      face_id: null
+      game: svwb
+      official_id: "10154120"
+    value:
+      digital_names:
+        - lang: en
+          name_ref:
+            batch_id: sha256:11b55c334bbe4ef6211f56350bfe41cc83334bf2c4eafc07ada8ce6c2aac3676
+            locator: /data/card_details/10154120/common/name
+            parser: translation-svwb-v1
+            source_version_id: src:v1:71eec46c6af266ef97d96b397da2a95e2aefa1771cd979c531460fe839d46b80
+            text_hash: sha256:b9963df27e9dc33617683e1c2850f7ea67eac866e8d48b72a6345f95f89fffdc
+          phase: normal
+        - lang: ja
+          name_ref:
+            batch_id: sha256:11b55c334bbe4ef6211f56350bfe41cc83334bf2c4eafc07ada8ce6c2aac3676
+            locator: /data/card_details/10154120/common/name
+            parser: translation-svwb-v1
+            source_version_id: src:v1:93d500aab7cc7c953221119f96039884294c332193aaa81a690852c101951136
+            text_hash: sha256:7a73b7afadc527b4083108d547f784a2a16de38d29dfd98f454041e22d264827
+          phase: normal
+        - lang: zh-Hant
+          name_ref:
+            batch_id: sha256:11b55c334bbe4ef6211f56350bfe41cc83334bf2c4eafc07ada8ce6c2aac3676
+            locator: /data/card_details/10154120/common/name
+            parser: translation-svwb-v1
+            source_version_id: src:v1:74c845d23bb5aea459b9acc1cee76946e72990014a7c2bae191a8d85c32f7846
+            text_hash: sha256:73762ace3aca7c31ab89cfe296d3e81588415841bdb519065fe8d8ab00852622
+          phase: normal
+      effect_similarity: null
+      relation: same_character
+      sve_names:
+        - face_id: f:99e7e7f49b7652079bab13a50747c8b1
+          name_ref:
+            batch_id: sha256:139be07a281797f06baeb00b6aa8da56265ccd22ba4b42246630ba3d283e9ac3
+            locator: /faces/0/name
+            parser: translation-jp-v1
+            source_version_id: src:v1:577367de1268beb39bff6100b8f94f79147c867ee65deba938591b5bdeabafc1
+            text_hash: sha256:f0c3db57ceb0b9650bdb909d80c67cf820cab476b380153b3c9b19b5481db5bd
+          printing_id: p:34cc616a360254b48ebd35ccf2be317e
+  - reason: 名稱差一段，看圖判讀同角色不同版本
+    review_level: model_reviewed
+    subject:
+      card_id: c:cf0d7eaddb3f578b8f9880b4f2c0f728
+      digital_phase: null
+      face_id: null
+      game: svwb
+      official_id: "10231110"
+    value:
+      digital_names:
+        - lang: en
+          name_ref:
+            batch_id: sha256:11b55c334bbe4ef6211f56350bfe41cc83334bf2c4eafc07ada8ce6c2aac3676
+            locator: /data/card_details/10231110/common/name
+            parser: translation-svwb-v1
+            source_version_id: src:v1:37998fcd2b588b5da9d49a4d1542a6123c922f7e0aa2c621eda24857d3b109e7
+            text_hash: sha256:09d3e3f5192d91e7a52149ae18527093100ba3651738bdbfbe02f1ad613913e1
+          phase: normal
+        - lang: ja
+          name_ref:
+            batch_id: sha256:11b55c334bbe4ef6211f56350bfe41cc83334bf2c4eafc07ada8ce6c2aac3676
+            locator: /data/card_details/10231110/common/name
+            parser: translation-svwb-v1
+            source_version_id: src:v1:d8f6158ec9f505909810e54e319a12f794051df1ebd9120f008455363592df48
+            text_hash: sha256:bf9a66cb273aa9094c2fc3482afc12b261a3b80235c4fb19418de91aa018f72f
+          phase: normal
+        - lang: zh-Hant
+          name_ref:
+            batch_id: sha256:11b55c334bbe4ef6211f56350bfe41cc83334bf2c4eafc07ada8ce6c2aac3676
+            locator: /data/card_details/10231110/common/name
+            parser: translation-svwb-v1
+            source_version_id: src:v1:1b79e01fae6a0f22ad04d2744d65578607269def8196f860dcfe34b5c395373a
+            text_hash: sha256:dd886fb1c341cee548ce34267faaee2e933bd435422e3af9ab3aa7cc50420aae
+          phase: normal
+      effect_similarity: null
+      relation: same_character
+      sve_names:
+        - face_id: f:c897ea4ff63b50f6af58653476b47141
+          name_ref:
+            batch_id: sha256:139be07a281797f06baeb00b6aa8da56265ccd22ba4b42246630ba3d283e9ac3
+            locator: /faces/0/name
+            parser: translation-jp-v1
+            source_version_id: src:v1:c70f929fe13a9d19d171f5344ef934dafaf9dedb10726bebafdfd01382db7a76
+            text_hash: sha256:64756c4de741226b1ef2ba4811a97aa73fa00cdde0d11d36b9fb146149ebcad9
+          printing_id: p:b41a7d17abce59c683ef02ed2017e75f
+        - face_id: f:c897ea4ff63b50f6af58653476b47141
+          name_ref:
+            batch_id: sha256:139be07a281797f06baeb00b6aa8da56265ccd22ba4b42246630ba3d283e9ac3
+            locator: /faces/0/name
+            parser: translation-jp-v1
+            source_version_id: src:v1:4709125d73787aee634b4273c2d41d8cca1e37d4303ac33d8667c39bf312e346
+            text_hash: sha256:64756c4de741226b1ef2ba4811a97aa73fa00cdde0d11d36b9fb146149ebcad9
+          printing_id: p:cdef6828f19755269d1588e4e48c6ef1
