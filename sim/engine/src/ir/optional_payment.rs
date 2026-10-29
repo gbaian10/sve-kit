@@ -47,12 +47,14 @@ pub(crate) fn trigger_play(ability: &Ability) -> bool {
                         && matches!(
                             keyword,
                             KeywordId::Fanfare
+                                | KeywordId::Lastword
                                 | KeywordId::OnEvolve
                                 | KeywordId::OnSuperEvolve
                                 | KeywordId::OnAttack
                                 | KeywordId::OnRace
                                 | KeywordId::OnDriveGain
                         )
+                        && (*keyword != KeywordId::Lastword || play.parameters.is_empty())
                 } else {
                     match declaration(body) {
                         Some(_) => matches!(keyword, KeywordId::Fanfare),

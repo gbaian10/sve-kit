@@ -38,7 +38,7 @@ pub(super) fn trigger_play_spec(
     if !body.targets.is_empty()
         && triggered
         && body.optional_cost.is_none()
-        && body.head_cost.is_none()
+        && (body.head_cost.is_none() || keyword == Some(super::KeywordId::Lastword))
         && !matches!(
             keyword,
             Some(

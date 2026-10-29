@@ -5,10 +5,10 @@ use crate::game::Object;
 use crate::ir::{
     Action, ActionPattern, BanishOutcome, Bool, Cause, CausePattern, DestroyOutcome, DurationEnd,
     Effect, EffectSource, Expr, Generation, Instruction, MoveDestination, MoveMethod, MoveOutcome,
-    MoveReason, MoveResult, MoveSpec, MovementReceipt, Nat, Node, ObjectReceipt, ObjectRef,
-    OwnerZone, PlayerId, PlayerRef, PlayerRelation, Polarity, Position, ReceiptId, ReceiptLocation,
-    ResultMember, ResultMemberId, RuntimeObjectView, RuntimeZoneRef, SelectionView, Selector,
-    SliceDirection, SnapshotId, TimeAnchor, ZoneKind,
+    MoveReason, MoveResult, MoveSpec, MovementReceipt, Nat, Node, ObjectOperand, ObjectReceipt,
+    ObjectRef, OwnerZone, PlayerId, PlayerRef, PlayerRelation, Polarity, Position, ReceiptId,
+    ReceiptLocation, ResultMember, ResultMemberId, RuntimeObjectView, RuntimeZoneRef,
+    SelectionView, Selector, SliceDirection, SnapshotId, TimeAnchor, ZoneKind,
 };
 use alloc::collections::BTreeMap;
 use serde_json::json;
@@ -458,6 +458,52 @@ impl Game {
         Ok(())
     }
 
+    fn field_entry_has_room(
+        &self,
+        execution: &Execution,
+        members: &[ObjectRef],
+        objects: &Selector,
+        seat: &str,
+    ) -> Result<bool> {
+        let mut incoming = 0_i64;
+        for &member in members {
+            let object = self.object(execution.object_id(member)?)?;
+            if object.generation != member.generation.0 {
+                continue;
+            }
+            let ordinary = self.object_type(&object.id)? == "フォロワー"
+                && matches!(object.zone.as_str(), "cemetery" | "ex");
+            let advance = self.object_type(&object.id)? == "フォロワー・アドバンス"
+                && matches!(object.zone.as_str(), "evolve_deck" | "ex");
+            if !(ordinary || advance)
+                || object.owner != seat
+                || object.controller != seat
+                || object.state["face"] != 0_i64
+            {
+                return Err(unsupported("admitted controller field entry"));
+            }
+            incoming = incoming
+                .checked_add(1)
+                .ok_or_else(|| invalid("entry count overflow"))?;
+        }
+        if self
+            .zone_count(seat, "field")
+            .checked_add(incoming)
+            .is_none_or(|count| count > 5)
+        {
+            if members.len() == 1
+                && incoming == 1
+                && matches!(objects,
+                Selector::Objects { objects } if matches!(objects.as_slice(),
+                    [ObjectOperand::FollowEventMove { .. }]))
+            {
+                return Ok(false);
+            }
+            return Err(unsupported("field entry needs capacity selection"));
+        }
+        Ok(true)
+    }
+
     fn internal_field_entry(
         &mut self,
         execution: &mut Execution,
@@ -489,33 +535,28 @@ impl Game {
             execution.objects(self, objects)?
         };
         let seat = super::seat_name(execution.context.controller)?;
-        let mut incoming = 0_i64;
-        for &member in &members {
-            let object = self.object(execution.object_id(member)?)?;
-            if object.generation != member.generation.0 {
-                continue;
-            }
-            let ordinary = self.object_type(&object.id)? == "フォロワー"
-                && matches!(object.zone.as_str(), "cemetery" | "ex");
-            let advance = self.object_type(&object.id)? == "フォロワー・アドバンス"
-                && matches!(object.zone.as_str(), "evolve_deck" | "ex");
-            if !(ordinary || advance)
-                || object.owner != seat
-                || object.controller != seat
-                || object.state["face"] != 0_i64
-            {
-                return Err(unsupported("admitted controller field entry"));
-            }
-            incoming = incoming
-                .checked_add(1)
-                .ok_or_else(|| invalid("entry count overflow"))?;
-        }
-        if self
-            .zone_count(seat, "field")
-            .checked_add(incoming)
-            .is_none_or(|count| count > 5)
-        {
-            return Err(unsupported("field entry needs capacity selection"));
+        if !self.field_entry_has_room(execution, &members, objects, seat)? {
+            let before = *members
+                .first()
+                .ok_or_else(|| invalid("missing returning object"))?;
+            execution.receipts.insert(
+                instruction.receipt,
+                InstructionOutcome::Move(MoveOutcome {
+                    moved: vec![MoveResult {
+                        before,
+                        after: None,
+                        requested_to: RuntimeZoneRef {
+                            player: execution.context.controller,
+                            kind: ZoneKind::Field,
+                        },
+                        requested_position: None,
+                        actual_to: None,
+                        actual_position: None,
+                        replacements: vec![],
+                    }],
+                }),
+            );
+            return Ok(());
         }
         for &member in &members {
             let id = execution.object_id(member)?.to_owned();
