@@ -73,6 +73,8 @@ records:
 
 `line` 從 1 起；`face` 為 1 起面序或唯一 `front/back`；`section: main` 表示主文，數字 N 表示第 N 個 section。多面未消歧即拒絕。`scope` 區分同一行的能力，跨行能力用 `covers: [1, 2]` 明示覆蓋；每行都須有能力或 `ignored` 宣告。
 
+進化頭可用 `usable_if: {cmp: {left: {count: {who: self, zone: cemetery, orig_cost_eq: 2}}, op: ge, right: 10}}` 表達自己的墓場中原始費用 2 的卡至少 10 張。費用與門檻目前只接受非負整數常量；每次宣告進化時先依當前墓場與印刷費用檢查，再沿用一般進化的公開、付款與連結程序。不足時不公開進化卡、不付款、不消耗進化次數，達標的墓場卡也不會被移動。這個入口不增加其他能力本體讀取原始費用或選取隱藏區域的權限。
+
 同一印刷行若有多個能力，各自指定不同的 `scope`（從 1 起）。例如 BP04-123 同行的 Fanfare 與 Lastword：
 
 ```yaml
