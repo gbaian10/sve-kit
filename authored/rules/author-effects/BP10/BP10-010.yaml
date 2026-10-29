@@ -1,0 +1,29 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP10-010:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-30"
+    abilities:
+      - line: 1
+        keywords:
+          - storm
+      - line: 2
+        evolve_time:
+          targets:
+            - bind: chosen
+              from:
+                who: opp
+                zone: field
+                kind: follower
+                orig_cost_le: 3
+              n: 1
+          do:
+            - move:
+                ref: chosen
+                to: hand

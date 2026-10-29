@@ -1,0 +1,38 @@
+format: 2
+kind: author_effect_set
+cards:
+  SP01-045:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-30"
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - draw:
+                n: 1
+      - line: 2
+        fanfare:
+          targets:
+            - bind: chosen
+              from:
+                who: opp
+                zone: field
+                kind: follower
+                orig_cost_le: 4
+              n: 1
+          do:
+            - if:
+                cond:
+                  not:
+                    entered_from:
+                      ref: this
+                      from: hand
+                then:
+                  - move:
+                      ref: chosen
+                      to: ex
