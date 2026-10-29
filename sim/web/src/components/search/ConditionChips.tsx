@@ -22,8 +22,6 @@ export interface ConditionChipsProps {
   readonly traitLabel: (code: string) => string
   readonly artistLabel: (id: string) => string
   readonly setLabel: (code: string) => string
-  /** A set implied by the page's path (`/sets/:code`): kept in the query, shown as no chip. */
-  readonly impliedSet?: string | undefined
   /** The sub-values the panel offers under each parent (`pr`, `token`, `leader`), as tokens. */
   readonly groups: Readonly<Record<string, readonly string[]>>
   readonly onChange: (next: QueryState) => void
@@ -57,7 +55,6 @@ export function ConditionChips({
   artistLabel,
   keywordLabel,
   setLabel,
-  impliedSet,
   groups,
   onChange,
   onClear,
@@ -183,13 +180,11 @@ export function ConditionChips({
         without: { ...query, [field]: query[field].filter((other) => other !== code) },
       })),
     ),
-    ...query.sets
-      .filter((code) => code !== impliedSet)
-      .map((code) => ({
-        key: `set:${code}`,
-        label: setLabel(code),
-        without: { ...query, sets: query.sets.filter((other) => other !== code) },
-      })),
+    ...query.sets.map((code) => ({
+      key: `set:${code}`,
+      label: setLabel(code),
+      without: { ...query, sets: query.sets.filter((other) => other !== code) },
+    })),
     ...(query.restrictionsOnly
       ? [
           {

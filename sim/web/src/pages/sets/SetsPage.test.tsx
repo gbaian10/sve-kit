@@ -40,7 +40,7 @@ describe("SetsPage", () => {
     await open("/sets")
     const boosters = section("補充包")
     const booster = boosters.getByRole("link", { name: /BP01/u })
-    expect(booster).toHaveAttribute("href", "/sets/BP01")
+    expect(booster).toHaveAttribute("href", "/cards?set=bp01")
     expect(booster).toHaveTextContent("試作補充包第1彈")
     expect(booster.querySelector("[lang]")).toHaveAttribute("lang", "zh-Hant")
     await waitFor(() => {
@@ -63,7 +63,7 @@ describe("SetsPage", () => {
   it("lists only the English edition's families under ?ed=en and keeps the edition on each link", async () => {
     await open("/sets?ed=en")
     const booster = screen.getByRole("link", { name: /BP01/u })
-    expect(booster).toHaveAttribute("href", "/sets/BP01?ed=en")
+    expect(booster).toHaveAttribute("href", "/cards?set=bp01&ed=en")
     await waitFor(() => {
       expect(booster).toHaveTextContent("2026-04-01 發售")
     })

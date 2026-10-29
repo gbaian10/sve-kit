@@ -39,16 +39,17 @@ sim/web/
 
 路由用 `react-router` v7（`createBrowserRouter`）。
 
-| 路徑                         | 頁面 | 備註                                                 |
-| ---------------------------- | ---- | ---------------------------------------------------- |
-| `/`                          | 主頁 | 搜尋為主                                             |
-| `/cards`                     | 查卡 | 條件全部在 URL（§2.1）                               |
-| `/cards/:cardNo/:slug?`      | 單卡 | 疊層或整頁，由 `location.state` 能否重建決定（§2.2） |
-| `/cards/_provisional/:intId` | 單卡 | 暫定號碼版次（快照格式 §8）                          |
-| `/sets`、`/sets/:code`       | 卡包 | 預設 `set=`＋歸檔類別標頭（見 §2.1）                 |
-| `/settings`                  | 設定 | 顯示設定；R1 沒有登入                                |
-| `/decks`                     | 佔位 | 建牌器的入口，佔位頁                                 |
-| `*`                          | 404  | 含搜尋框                                             |
+| 路徑                         | 頁面 | 備註                                                      |
+| ---------------------------- | ---- | ----------------------------------------------------      |
+| `/`                          | 主頁 | 搜尋為主                                                  |
+| `/cards`                     | 查卡 | 條件全部在 URL（§2.1）                                    |
+| `/cards/:cardNo/:slug?`      | 單卡 | 疊層或整頁，由 `location.state` 能否重建決定（§2.2）      |
+| `/cards/_provisional/:intId` | 單卡 | 暫定號碼版次（快照格式 §8）                               |
+| `/sets`                      | 卡包 | 卡包清單；點擊後前往 `/cards?set=…`                       |
+| `/sets/:code`                | 轉址 | 舊連結轉到對應的 `/cards?set=…`，保留 `ed` 與其他查詢條件 |
+| `/settings`                  | 設定 | 顯示設定；R1 沒有登入                                     |
+| `/decks`                     | 佔位 | 建牌器的入口，佔位頁                                      |
+| `*`                          | 404  | 含搜尋框                                                  |
 
 保留、不實作：`/cards/unimplemented`、`/decks/*`、`/play`。
 
@@ -110,7 +111,7 @@ interface QueryState {
 `view` 是例外：URL 有帶就照 URL；沒帶就用偏好 `viewMode`；使用者切換檢視時同時寫 URL 與偏好。
 `reprint=hide`（不含再錄）與 `reprint=only`（只看再錄）篩選 `printing.reprint=true` 的版次，沒帶參數是全部；只在 `unit` 為 `printing` 或 `art` 時作用，`unit=card` 時整組切換停用、說明不適用，網址仍保留。卡頁列出全部版次，不受影響。
 
-依使用者 2026-09-30 的規格變更（build-db §15），`/sets/:code` 的路徑代號是 `product_family.public_code`，解析到同一歸檔類別後，以其 `code` 預設 `set=`，標頭顯示歸檔類別名稱。卡包瀏覽與搜尋依已登錄的 `printing.home_set_id` 篩選，且只納入 `printing.region` 符合目前 `cardEdition`（`jp`／`en`，§3）的版次，兩區結果不混；合併卡片顯示也只使用命中的版次。商品名稱、發售日與收錄供單卡頁補充資訊及連結，不驅動 `set=` 篩選；獨立的初收錄 facet 依 build-db §15 的協調者決定，資料缺少或未知時標示 coverage，不因此隱藏卡片。
+首頁、卡包清單與單卡頁的卡包入口直接前往 `/cards?set=<product_family.code>`，英文版附帶 `ed=en`。舊連結 `/sets/:code` 將公開代號轉成小寫的 `set=` 後轉址到查卡頁；保留其餘查詢條件，路徑代號優先於既有的 `set=`。卡包條件與其他條件一樣顯示可移除的 chip，沒有獨立卡包標頭。卡包瀏覽與搜尋依已登錄的 `printing.home_set_id` 篩選，且只納入 `printing.region` 符合目前 `cardEdition`（`jp`／`en`，§3）的版次，兩區結果不混；合併卡片顯示也只使用命中的版次。商品名稱、發售日與收錄供單卡頁補充資訊及連結，不驅動 `set=` 篩選；獨立的初收錄 facet 依 build-db §15 的協調者決定，資料缺少或未知時標示 coverage，不因此隱藏卡片。
 
 進階查詢語法由快照格式的 `config.search.grammar_version` 定義；本文的 URL 參數是結構化篩選，語法到位時只是 codec 的另一種輸入。
 

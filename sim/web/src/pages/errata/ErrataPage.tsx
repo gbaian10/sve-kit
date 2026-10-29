@@ -31,7 +31,7 @@ export function ErrataPage() {
   const ready = readiness.phase === "ready" && readiness.edition === edition
   const query = {
     edition,
-    state: { ...DEFAULT_QUERY, errataOnly: true },
+    state: { ...DEFAULT_QUERY, errataOnly: true, unit: "card" as const },
   }
   const {
     view: listView,

@@ -1,4 +1,4 @@
-import type { RouteObject } from "react-router"
+import { redirect, type RouteObject } from "react-router"
 
 import { SettingsPage } from "../pages/account/SettingsPage"
 import { CardPage } from "../pages/card/CardPage"
@@ -7,7 +7,6 @@ import { DecksStubPage } from "../pages/decks/DecksStubPage"
 import { ErrataPage } from "../pages/errata/ErrataPage"
 import { HomePage } from "../pages/home/HomePage"
 import { NotFoundPage } from "../pages/not-found/NotFoundPage"
-import { SetPage } from "../pages/sets/SetPage"
 import { SetsPage } from "../pages/sets/SetsPage"
 import { AppShell } from "./AppShell"
 
@@ -24,7 +23,14 @@ export const routes: RouteObject[] = [
       { path: "cards/unimplemented", Component: NotFoundPage },
       { path: "cards/:cardNo/:slug?", Component: CardPage },
       { path: "sets", Component: SetsPage },
-      { path: "sets/:code", Component: SetPage },
+      {
+        path: "sets/:code",
+        loader: ({ params, request }) => {
+          const url = new URL(request.url)
+          url.searchParams.set("set", (params["code"] ?? "").toLowerCase())
+          return redirect(`/cards${url.search}${url.hash}`)
+        },
+      },
       { path: "settings", Component: SettingsPage },
       { path: "decks", Component: DecksStubPage },
       { path: "errata", Component: ErrataPage },

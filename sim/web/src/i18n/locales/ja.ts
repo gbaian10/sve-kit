@@ -526,7 +526,6 @@ export default {
     retry: "再試行",
   },
   sets: {
-    notFound: "このカードパックが見つかりません",
     kind: {
       booster: "ブースター",
       collaboration: "コラボパック",
@@ -536,11 +535,7 @@ export default {
       special: "特別商品",
       other: "その他の商品",
     },
-    cards: "収録 {{value}} 種",
-    countsPending: "収録数を計算中",
-    countsUnavailable: "収録数をまだ計算できません",
     specialProducts: "構築済みデッキ・特別商品",
-    switchEdition: "{{edition}}を見る",
     empty: "この版にはまだ表示できるカードパックがありません。",
   },
   digital: {

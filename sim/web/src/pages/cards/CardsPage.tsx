@@ -12,12 +12,10 @@ import {
 } from "react"
 import { useTranslation } from "react-i18next"
 import {
-  Link as RouterLink,
   NavigationType,
   useLocation,
   useNavigate,
   useNavigationType,
-  useParams,
   useSearchParams,
 } from "react-router"
 
@@ -74,7 +72,6 @@ import { TraitFilter } from "../../components/search/TraitFilter"
 import { TypeFilter } from "../../components/search/TypeFilter"
 import { Button } from "../../components/ui/Button"
 import { cn } from "../../components/ui/cn"
-import { Link } from "../../components/ui/Link"
 import { Notice } from "../../components/ui/Notice"
 import { Segmented } from "../../components/ui/Segmented"
 import { type CardSummary, type ImageSource, type SearchPage, type SearchQuery } from "../../data"
@@ -83,7 +80,7 @@ import { printingPath } from "../../domain/cardRoute"
 import { quickBarClasses } from "../../domain/classes"
 import { leaderFrameTokens, tokenKindTokens } from "../../domain/deckLocation"
 import { displayName, UI_TEXT_LANG } from "../../domain/nameDisplay"
-import { editionUrl, formatQuery, parseQuery, querySearch } from "../../domain/query/codec"
+import { formatQuery, parseQuery, querySearch } from "../../domain/query/codec"
 import {
   activeFilterCount,
   DEFAULT_QUERY,
@@ -97,7 +94,6 @@ import type { Region } from "../../domain/search"
 import { setCaption } from "../../domain/sets"
 import { currentUiLanguage } from "../../i18n"
 import { prefsStore, recentStore, usePrefs, useRecent } from "../../settings"
-import { SetHeader } from "../sets/SetHeader"
 import { useCardOverlay } from "./CardOverlay"
 import { CompactHeaderMenu } from "./CompactHeaderMenu"
 import { FilterSheet } from "./FilterSheet"
@@ -151,18 +147,11 @@ export function CardsPage() {
   const edition = useRouteEdition()
   const readiness = useSearchReadiness(edition)
   const [params, setParams] = useSearchParams()
-  const { code } = useParams()
   const { sets, quickSets, setCounts, rarities } = useSetOptions()
   const printingOptions = usePrintingOptions()
-  const set = code ? sets?.find((set) => set.publicCode === code) : undefined
-  const query = useMemo(() => {
-    const parsed = parseQuery(params)
-    return code && !params.has("set") ? { ...parsed, sets: set ? [set.code] : [] } : parsed
-  }, [params, set, code])
+  const query = useMemo(() => parseQuery(params), [params])
   const urlParams = (next: QueryState, nextEdition: Region = edition) => {
     const result = formatQuery(next)
-    // A set page's own set is implied by its path, so each state keeps one URL.
-    if (set && next.sets.length === 1 && next.sets[0] === set.code) result.delete("set")
     if (nextEdition === "en") result.set("ed", "en")
     return result
   }
@@ -427,7 +416,7 @@ export function CardsPage() {
       }) ?? [],
     [page, cellOf],
   )
-  const background = code ? querySearch(searchState) : withoutCardParam(location.search)
+  const background = withoutCardParam(location.search)
   const cardOverlay = useCardOverlay({
     entry,
     background: querySearch(searchState),
@@ -605,13 +594,8 @@ export function CardsPage() {
     const option = printingOptions?.type.types.find((item) => item.code === code)
     return option ? vocabularyOptionLabel(option.name, textLang) : code
   }
-  // A set page's own set is the page, not a condition: no chip, no badge count. The chips still
-  // edit the full query, so removing another chip never drops the implied set from a multi-select.
-  const countedConditions = set
-    ? { ...query, sets: query.sets.filter((item) => item !== set.code) }
-    : query
-  const filterCount = activeFilterCount(countedConditions)
-  const hasConditions = countedConditions.text !== "" || filterCount > 0
+  const filterCount = activeFilterCount(query)
+  const hasConditions = query.text !== "" || filterCount > 0
   const panelOpen = prefs.filterPanelOpen
   const wideEnoughForBoth = useMediaQuery(`(min-width: ${String(BOTH_PANES_MIN_PX)}px)`)
   const sidebar = useSidebarLayout()
@@ -704,44 +688,6 @@ export function CardsPage() {
       />
     ) : null
 
-  if (code && !set) {
-    // The set list only holds this edition's families, so the code may well exist in the other
-    // edition (an EN-only product opened under JP): offer that switch instead of a dead end.
-    const otherEdition: Region = edition === "jp" ? "en" : "jp"
-    return (
-      <div ref={imageRoot} className="flex flex-col gap-3 pt-2 pb-6">
-        <h1 className="text-20 font-semibold">{code}</h1>
-        <StatusStrip readiness={readiness} />
-        {sets ? (
-          <Notice
-            tone="info"
-            role="status"
-            actions={
-              <>
-                <RouterLink
-                  to={editionUrl(location.pathname, otherEdition)}
-                  className="text-13 text-accent-text underline-offset-2 hover:underline"
-                  onClick={() => {
-                    prefsStore.set({ cardEdition: otherEdition })
-                  }}
-                >
-                  {t("sets.switchEdition", { edition: t(`options.edition.${otherEdition}`) })}
-                </RouterLink>
-                <Link to={editionUrl("/sets", edition)} className="text-13">
-                  {t("home.sets.all")}
-                </Link>
-              </>
-            }
-          >
-            {t("sets.notFound")}
-          </Notice>
-        ) : (
-          <SkeletonGrid />
-        )}
-      </div>
-    )
-  }
-
   const classBar = (
     <>
       {classes === undefined && <ClassQuickBarSkeleton />}
@@ -757,7 +703,7 @@ export function CardsPage() {
       )}
     </>
   )
-  const setsBar = !code && (
+  const setsBar = (
     <SetFilter
       sets={sets}
       quickSets={quickSets}
@@ -903,7 +849,6 @@ export function CardsPage() {
   const conditionChips = (
     <ConditionChips
       query={query}
-      impliedSet={set?.code}
       edition={edition}
       classLabel={classLabel}
       rarityLabel={(code) => {
@@ -983,11 +928,7 @@ export function CardsPage() {
     ) : null
   return (
     <div ref={imageRoot} className="flex flex-col gap-3 pt-2 pb-6">
-      {set ? (
-        <SetHeader set={set} edition={edition} textLang={textLang} locale={uiLanguage} />
-      ) : (
-        <h1 className="sr-only">{t("pages.cards")}</h1>
-      )}
+      <h1 className="sr-only">{t("pages.cards")}</h1>
       <StatusStrip readiness={readiness} />
       {query.restrictionsOnly && (
         <Notice tone="info" role="status">

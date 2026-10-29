@@ -13,7 +13,7 @@ import { Segmented } from "../../components/ui/Segmented"
 import { UI_TEXT_LANG } from "../../domain/nameDisplay"
 import { editionUrl } from "../../domain/query/codec"
 import type { Region } from "../../domain/search"
-import { groupSets, setCaption } from "../../domain/sets"
+import { groupSets, setCaption, setCardsPath } from "../../domain/sets"
 import { currentUiLanguage } from "../../i18n"
 import { prefsStore, usePrefs } from "../../settings"
 import { PageTitle } from "../PageTitle"
@@ -57,7 +57,7 @@ export function SetsPage() {
         return (
           <li key={set.id} className="min-w-0">
             <RouterLink
-              to={editionUrl(`/sets/${encodeURIComponent(set.publicCode ?? set.code)}`, edition)}
+              to={setCardsPath(set.code, edition)}
               className="flex min-h-14 min-w-0 items-center gap-3 rounded-button border border-border bg-surface-1 px-3 py-1.5 text-text-1 hover:bg-surface-2"
             >
               {code !== null && (

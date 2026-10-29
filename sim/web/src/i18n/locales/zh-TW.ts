@@ -508,7 +508,6 @@ const zhTW = {
     retry: "重試",
   },
   sets: {
-    notFound: "找不到這個卡包",
     kind: {
       booster: "補充包",
       collaboration: "合作包",
@@ -518,11 +517,7 @@ const zhTW = {
       special: "特別商品",
       other: "其他商品",
     },
-    cards: "已收錄 {{value}} 種",
-    countsPending: "收錄數計算中",
-    countsUnavailable: "收錄數暫時無法計算",
     specialProducts: "牌組與特別商品",
-    switchEdition: "改看{{edition}}",
     empty: "這個版本還沒有可列出的卡包。",
   },
   digital: {
