@@ -1,0 +1,41 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP09-086:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-30"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        fanfare:
+          do:
+            - draw:
+                n: 1
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: cemetery
+                        kind: follower
+                        name_contains: ジャンヌ
+                    op: ge
+                    right: 2
+                then:
+                  - buff:
+                      "on": this
+                      power: 1
+                      hp: 1
+                  - grant:
+                      "on": this
+                      keywords:
+                        - storm

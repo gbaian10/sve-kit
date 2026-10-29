@@ -1,0 +1,38 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP22-089:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-30"
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - draw:
+                n: 1
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: cemetery
+                        trait: ゴブリン
+                    op: ge
+                    right: 3
+                then:
+                  - buff:
+                      "on": this
+                      power: 1
+          cost:
+            discard:
+              sel:
+                who: self
+                zone: hand
+                trait: ゴブリン
+              n: 1
