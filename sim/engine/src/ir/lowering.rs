@@ -531,15 +531,16 @@ fn active_zones(entry: &ast::Ability, path: &str) -> Result<Vec<ZoneKind>, Lower
     {
         return Err(unsupported(path));
     }
-    if entry.auto.is_some()
-        && (!matches!(zones.as_slice(), [ZoneKind::Field | ZoneKind::Ex])
-            || (zones == [ZoneKind::Ex]
-                && !matches!(
-                    entry.auto.as_ref().map(|head| &head.on),
-                    Some(ast::PhaseSubscription::Phase(_))
-                )))
-    {
-        return Err(unsupported(path));
+    if let Some(auto) = &entry.auto {
+        let cemetery = auto.cemetery_play();
+        if matches!(auto.on, ast::PhaseSubscription::Played(_)) != cemetery
+            || (!cemetery
+                && (!matches!(zones.as_slice(), [ZoneKind::Field | ZoneKind::Ex])
+                    || (zones == [ZoneKind::Ex]
+                        && !matches!(auto.on, ast::PhaseSubscription::Phase(_)))))
+        {
+            return Err(unsupported(path));
+        }
     }
     Ok(zones)
 }
@@ -608,6 +609,7 @@ fn lowered_trigger(
     entry: &ast::Ability,
     keyword: Option<KeywordId>,
     event_id: u64,
+    subject_id: u64,
     scope: ScopeId,
     path: &str,
 ) -> Result<TriggerSpec, LoweringError> {
@@ -634,7 +636,7 @@ fn lowered_trigger(
                 },
             }
         } else if let Some(auto) = &entry.auto {
-            lowered_subscription(&auto.on, event_id, scope, path)?
+            lowered_subscription(&auto.on, event_id, subject_id, scope, path)?
         } else {
             let event = Binding::new(event_id, scope);
             EventPattern::EnterField {
@@ -647,7 +649,9 @@ fn lowered_trigger(
         };
         TriggerSpec {
             active_zones: active_zones(entry, path)?,
-            view: if matches!(pattern, EventPattern::LeaveField { .. }) {
+            view: if matches!(pattern, EventPattern::Play { .. }) {
+                EventSnapshotPolicy::AtReveal
+            } else if matches!(pattern, EventPattern::LeaveField { .. }) {
                 EventSnapshotPolicy::BeforeExit
             } else {
                 EventSnapshotPolicy::AfterEntry
@@ -662,10 +666,30 @@ fn lowered_trigger(
 fn lowered_subscription(
     on: &ast::PhaseSubscription,
     event_id: u64,
+    subject_id: u64,
     scope: ScopeId,
     path: &str,
 ) -> Result<EventPattern, LoweringError> {
     match on {
+        ast::PhaseSubscription::Played(played) => {
+            if played.sel.class.is_empty()
+                || !matches!(played.who, ast::SelfPlayer::Controller)
+                || !matches!(played.sel.kind, ast::PlayedSpell::Spell)
+                || !matches!(played.during.turn, ast::SelfPlayer::Controller)
+            {
+                return Err(unsupported(path));
+            }
+            let event = Binding::new(event_id, scope);
+            let card = Binding::new(subject_id, scope);
+            Ok(EventPattern::Play {
+                binding: event,
+                predicate: super::events::played::PlayedFilter {
+                    class: super::ClassId(played.sel.class.clone()),
+                    card,
+                }
+                .predicate(event),
+            })
+        }
         ast::PhaseSubscription::Phase(phase) => {
             let player = match phase.whose {
                 ast::PhasePlayer::Controller => Some(PlayerRef::Controller {}),
@@ -737,6 +761,7 @@ fn lowered_subscription(
 
 struct BodyContext<'definitions> {
     entry_event: Option<Binding<super::EnterFieldEvent>>,
+    cemetery_return: bool,
     leave_event: Option<Binding<super::LeaveFieldEvent>>,
     scope: ScopeId,
     local_payment: Option<(String, ReceiptId)>,
@@ -766,6 +791,7 @@ impl<'definitions> BodyContext<'definitions> {
         Self {
             leave_event: None,
             entry_event: None,
+            cemetery_return: entry.auto.as_ref().is_some_and(ast::Auto::cemetery_play),
             scope,
             definition: AbilityId(scope.0),
             payment_result: if entry.spell.is_some() {
@@ -807,7 +833,8 @@ impl<'definitions> BodyContext<'definitions> {
             Some((_, id)) => id,
             None => self.allocator.id(path)?,
         };
-        let mut trigger = lowered_trigger(entry, keyword, event_id, self.scope, path)?;
+        let subject_id = self.allocator.id(&format!("{path}/played-card"))?;
+        let mut trigger = lowered_trigger(entry, keyword, event_id, subject_id, self.scope, path)?;
         if body.per_turn.is_some_and(|maximum| maximum != 1) {
             return Err(unsupported(path));
         }

@@ -6,6 +6,7 @@ use super::{
 use crate::catalog::SelectedEffects;
 use crate::catalog::current::CurrentCard;
 use crate::ir::ChoiceDomain;
+use crate::ir::events::played::filter;
 use crate::ir::play_restrictions::card_restriction;
 use crate::ir::quick::{card_permission, is_printed_quick};
 use crate::ir::{
@@ -665,7 +666,8 @@ fn check_header(ability: &Ability) -> Result<()> {
         && ability.active_zones == [ZoneKind::Ex]
         && matches!(ability.source.origin, AbilityOrigin::Printed { .. });
     let ex_trigger = triggers::ex_phase(ability);
-    if (ability.active_zones != [zones] && !ex_activation && !ex_trigger)
+    let cemetery_trigger = filter(ability).is_some();
+    if (ability.active_zones != [zones] && !ex_activation && !ex_trigger && !cemetery_trigger)
         || ability.source.holder != (ObjectOperand::SourceHolder {})
         || ability.source.controller != (PlayerRef::Controller {})
         || !ability.event_captures.is_empty()

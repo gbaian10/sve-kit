@@ -121,15 +121,20 @@ impl BodyContext<'_> {
         }
     }
 
-    fn lastword_return(&self, objects: &ast::Objects, path: &str) -> Result<Action, LoweringError> {
-        let (ast::Objects::This(_), Some(event)) = (objects, self.leave_event) else {
+    fn self_return(&self, objects: &ast::Objects, path: &str) -> Result<Action, LoweringError> {
+        if !matches!(objects, ast::Objects::This(_)) {
             return Err(unsupported(path));
+        }
+        let object = match self.leave_event {
+            Some(event) => ObjectOperand::FollowEventMove {
+                event: MovementEvent::LeaveField { event },
+            },
+            None if self.cemetery_return => ObjectOperand::SourceHolder {},
+            None => return Err(unsupported(path)),
         };
         Ok(Action::Move {
             objects: Selector::Objects {
-                objects: vec![ObjectOperand::FollowEventMove {
-                    event: MovementEvent::LeaveField { event },
-                }],
+                objects: vec![object],
             },
             movement: MoveSpec {
                 to: MoveDestination::Shared {
@@ -160,7 +165,7 @@ impl BodyContext<'_> {
                 return Err(unsupported(path));
             }
             if matches!(value.to, ast::Destination::Field) {
-                return self.lastword_return(objects, path);
+                return self.self_return(objects, path);
             }
             let zone = match value.to {
                 ast::Destination::Hand => OwnerZone::Hand,

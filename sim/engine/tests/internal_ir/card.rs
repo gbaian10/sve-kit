@@ -17,6 +17,9 @@ mod trigger_choice;
 mod admission;
 use sve_engine::game::internal::{Activation, CardPlay, ResumeStage};
 
+#[path = "card/cemetery_play.rs"]
+mod cemetery_play;
+
 #[path = "card/cemetery_choice.rs"]
 mod cemetery_choice;
 

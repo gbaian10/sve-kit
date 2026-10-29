@@ -84,18 +84,19 @@ pub(super) fn check_entry(
         && (exchange
             || entry.activate.is_some()
             || entry.spell.is_some()
-            || !matches!(
-                keyword,
-                Some(
-                    KeywordId::Fanfare
-                        | KeywordId::Lastword
-                        | KeywordId::OnEvolve
-                        | KeywordId::OnSuperEvolve
-                        | KeywordId::OnAttack
-                        | KeywordId::OnRace
-                        | KeywordId::OnDriveGain
-                )
-            ))
+            || (!entry.auto.as_ref().is_some_and(ast::Auto::cemetery_play)
+                && !matches!(
+                    keyword,
+                    Some(
+                        KeywordId::Fanfare
+                            | KeywordId::Lastword
+                            | KeywordId::OnEvolve
+                            | KeywordId::OnSuperEvolve
+                            | KeywordId::OnAttack
+                            | KeywordId::OnRace
+                            | KeywordId::OnDriveGain
+                    )
+                )))
     {
         return Err(super::unsupported(path));
     }

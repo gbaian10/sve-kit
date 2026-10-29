@@ -38,7 +38,9 @@ pub(super) fn trigger_play_spec(
     if !body.targets.is_empty()
         && triggered
         && body.optional_cost.is_none()
-        && (body.head_cost.is_none() || keyword == Some(super::KeywordId::Lastword))
+        && (body.head_cost.is_none()
+            || keyword == Some(super::KeywordId::Lastword)
+            || entry.auto.as_ref().is_some_and(ast::Auto::cemetery_play))
         && !matches!(
             keyword,
             Some(
@@ -396,6 +398,7 @@ impl BodyContext<'_> {
             let mut context = BodyContext {
                 leave_event: self.leave_event,
                 entry_event: self.entry_event,
+                cemetery_return: self.cemetery_return,
                 scope,
                 definition: self.definition,
                 payment_result: None,
