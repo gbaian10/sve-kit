@@ -177,17 +177,23 @@ impl BodyContext<'_> {
         query: &ast::PublicQuery,
         path: &str,
     ) -> Result<Expr<Bool>, LoweringError> {
-        if query.other
-            || query.class.is_some()
+        if query.class.is_some()
             || query.token.is_some()
             || !matches!(query.zone, ast::PublicZone::Field)
         {
             return Err(unsupported(path));
         }
         let binding = Binding::new(self.allocator.id(path)?, self.card_allocator.scope(path)?);
-        Ok(Expr::Compute(Box::new(Predicate::Exists {
-            objects: super::costs::public_query(query, binding),
-        })))
+        let mut objects = super::costs::public_query(query, binding);
+        if query.other {
+            objects = Selector::Difference {
+                input: Box::new(objects),
+                except: Box::new(Selector::Objects {
+                    objects: vec![super::super::ObjectOperand::SourceHolder {}],
+                }),
+            };
+        }
+        Ok(Expr::Compute(Box::new(Predicate::Exists { objects })))
     }
 
     pub(super) fn number(
