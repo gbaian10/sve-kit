@@ -1,0 +1,72 @@
+cards:
+  BP01-027:
+    abilities:
+      - evolve_time:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: field
+                    op: ge
+                    right: 5
+                else:
+                  - if:
+                      cond:
+                        cmp:
+                          left:
+                            count:
+                              who: self
+                              zone: field
+                          op: eq
+                          right: 4
+                      else:
+                        - if:
+                            cond:
+                              cmp:
+                                left:
+                                  count:
+                                    who: self
+                                    zone: field
+                                op: eq
+                                right: 3
+                            else:
+                              - create:
+                                  n: 3
+                                  to: field
+                                  token: 乙姫お守り隊
+                            then:
+                              - create:
+                                  n: 2
+                                  to: field
+                                  token: 乙姫お守り隊
+                              - create:
+                                  n: 1
+                                  to: ex
+                                  token: 乙姫お守り隊
+                      then:
+                        - create:
+                            n: 1
+                            to: field
+                            token: 乙姫お守り隊
+                        - create:
+                            n: 2
+                            to: ex
+                            token: 乙姫お守り隊
+                then:
+                  - create:
+                      n: 3
+                      to: ex
+                      token: 乙姫お守り隊
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set
