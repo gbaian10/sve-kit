@@ -1,0 +1,33 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP03-007:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-30"
+    abilities:
+      - line: 1
+        keywords:
+          - quick
+      - line: 2
+        spell:
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              upto: 2
+          do:
+            - damage:
+                to: enemy
+                n:
+                  count:
+                    who: self
+                    zone: ex
+                distribute: true
+                distribute_at: play
