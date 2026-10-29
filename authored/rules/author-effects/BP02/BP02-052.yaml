@@ -1,0 +1,38 @@
+cards:
+  BP02-052:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - fanfare:
+          do:
+            - damage:
+                n:
+                  count:
+                    who: self
+                    zone: hand
+                to:
+                  leaders: opponents
+            - damage:
+                n:
+                  count:
+                    who: self
+                    zone: hand
+                to:
+                  who: opp
+                  zone: field
+                  kind: follower
+            - discard:
+                all: true
+                who: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-luna
+            who: Codex
+          date: "2026-10-29"
+format: 2
+kind: author_effect_set
