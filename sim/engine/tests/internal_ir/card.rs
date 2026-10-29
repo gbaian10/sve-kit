@@ -45,6 +45,9 @@ mod leader_damage;
 #[path = "card/resolution_choice.rs"]
 mod resolution_choice;
 
+#[path = "card/spell_advance.rs"]
+mod spell_advance;
+
 #[path = "card/spell_token.rs"]
 mod spell_token;
 

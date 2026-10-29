@@ -602,6 +602,7 @@ fn check_base_face(printed: &serde_json::Value) -> Result<()> {
             "フォロワー"
                 | "スペル"
                 | "スペル・トークン"
+                | "スペル・アドバンス"
                 | "アミュレット"
                 | "アミュレット・トークン"
         )

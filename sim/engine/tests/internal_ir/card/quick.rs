@@ -7,7 +7,7 @@ use super::*;
 use sve_engine::game::Step;
 use sve_engine::game::internal::{Answer, DecisionView, InputDomain};
 
-fn permit() -> Located<Ability> {
+pub(super) fn permit() -> Located<Ability> {
     let mut tree = fanfare::expanded::tree().clone();
     let mut seed = tree["cards"]["BP01-041"].clone();
     let mut header = seed["abilities"][0].clone();
