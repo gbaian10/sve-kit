@@ -5,8 +5,8 @@ use crate::ir::{
     Binding, CardKind, Cardinality, CharacteristicView, ChoiceDomain, Comparison, Decision,
     DecisionKind, Declinable, Disjointness, Int, IntOperation, KindRead, MemberProjection,
     NamesRead, NumberRead, ObjectOperand, ObjectProperty, ObjectReceipt, ObjectView, PlayerRef,
-    PlayerRelation, Predicate, ScopeId, SelectionConstraint, SelectionGroup, Selector, TraitsRead,
-    Visibility,
+    PlayerRelation, Predicate, ScopeId, SelectionConstraint, SelectionGroup, Selector, Stat,
+    TraitsRead, Visibility,
 };
 use crate::ir::{Bool, Expr, SelectionView, ZoneKind};
 use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
@@ -489,6 +489,21 @@ fn candidate_view(view: &ObjectView, candidate: Binding<ObjectRef>) -> bool {
     matches!(view, ObjectView::Current { object } if matches!(object.as_ref(), ObjectOperand::Bound { binding } if *binding == candidate))
 }
 
+fn candidate_number(read: &NumberRead, candidate: Binding<ObjectRef>) -> bool {
+    match read {
+        NumberRead::Cost {
+            object,
+            view: CharacteristicView::Original | CharacteristicView::Effective,
+        }
+        | NumberRead::Stats {
+            object,
+            view: CharacteristicView::Effective,
+            property: Stat::Life,
+        } => candidate_view(object, candidate),
+        _ => false,
+    }
+}
+
 fn private_look_filter(selector: &Selector) -> Option<(Binding<ObjectRef>, &Expr<Bool>)> {
     let Selector::Filter {
         input,
@@ -541,9 +556,9 @@ fn check_predicate(value: &Expr<Bool>, candidate: Binding<ObjectRef>) -> Result<
             }
             Predicate::CompareInt {
                 left: Expr::Compute(left),
-                comparison: Comparison::LessEqual | Comparison::Equal,
+                comparison: Comparison::Equal | Comparison::LessEqual | Comparison::GreaterEqual,
                 right: Expr::Literal(Int(_)),
-            } if matches!(left.as_ref(), IntOperation::InformationOrZero { information: NumberRead::Cost { object, view: CharacteristicView::Original } } if candidate_view(object, candidate)) => {
+            } if matches!(left.as_ref(), IntOperation::InformationOrZero { information } if candidate_number(information, candidate)) => {
                 Ok(())
             }
             Predicate::And { predicates } | Predicate::Or { predicates }
@@ -596,25 +611,34 @@ pub(super) fn matches_candidate(game: &Game, id: &str, value: &Expr<Bool>) -> Re
                 left: Expr::Compute(left),
                 comparison,
                 right: Expr::Literal(Int(limit)),
-            } if matches!(
-                left.as_ref(),
-                IntOperation::InformationOrZero {
-                    information: NumberRead::Cost {
+            } => {
+                let IntOperation::InformationOrZero { information } = left.as_ref() else {
+                    return Err(unsupported("field target number"));
+                };
+                let actual = match information {
+                    NumberRead::Cost {
                         view: CharacteristicView::Original,
                         ..
+                    } => super::super::cost::printed_cost(&game.internal_cost_print(id)?["cost"])?,
+                    NumberRead::Cost {
+                        view: CharacteristicView::Effective,
+                        ..
+                    } => game.internal_effective_cost(id)?,
+                    NumberRead::Stats {
+                        view: CharacteristicView::Effective,
+                        property,
+                        ..
+                    } => {
+                        if game.object(id)?.zone != "field"
+                            || !game.object_type(id)?.contains("フォロワー")
+                        {
+                            return Ok(false);
+                        }
+                        game.internal_numeric_stat(id, *property)?
                     }
-                }
-            ) =>
-            {
-                let cost = game.face(id)?["cost"]
-                    .as_str()
-                    .and_then(|text| text.parse::<i64>().ok())
-                    .ok_or_else(|| invalid("missing original cost"))?;
-                match comparison {
-                    Comparison::LessEqual => Ok(cost <= *limit),
-                    Comparison::Equal => Ok(cost == *limit),
-                    _ => Err(unsupported("original cost comparison")),
-                }
+                    _ => return Err(unsupported("field target characteristic")),
+                };
+                Ok(super::super::values::compare(actual, *comparison, *limit))
             }
             Predicate::And { predicates } | Predicate::Or { predicates } => {
                 let values = predicates

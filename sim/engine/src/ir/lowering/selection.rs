@@ -103,11 +103,11 @@ impl BodyContext<'_> {
                     }),
                     binding,
                     predicate: Box::new(field_filter(
-                        group.kind.as_ref(),
-                        None,
-                        None,
-                        None,
-                        group.orig_cost_le,
+                        &ObjectFilter {
+                            kind: group.kind.as_ref(),
+                            original_cost: [None, group.orig_cost_le, None],
+                            ..ObjectFilter::default()
+                        },
                         binding,
                     )),
                 },
@@ -146,6 +146,7 @@ impl BodyContext<'_> {
             || choice.from.name.is_some()
             || choice.from.name_contains.is_some()
             || choice.from.other
+            || choice.from.has_numeric_filter()
             || self.targets.contains_key(&choice.bind)
             || self.searches.contains_key(&choice.bind)
             || self.observations.contains_key(&choice.bind)
@@ -210,49 +211,101 @@ impl BodyContext<'_> {
     }
 }
 
+#[derive(Default)]
+pub(super) struct ObjectFilter<'query> {
+    pub kind: Option<&'query ast::SearchKind>,
+    pub trait_id: Option<&'query str>,
+    pub name: Option<&'query str>,
+    pub contains: Option<&'query str>,
+    pub cost: [Option<u64>; 3],
+    pub original_cost: [Option<u64>; 3],
+    pub hp_at_most: Option<u64>,
+}
+
+impl<'query> From<&'query ast::TargetQuery> for ObjectFilter<'query> {
+    fn from(query: &'query ast::TargetQuery) -> Self {
+        Self {
+            kind: query.kind.as_ref(),
+            trait_id: query.r#trait.as_deref(),
+            name: query.name.as_deref(),
+            contains: query.name_contains.as_deref(),
+            cost: [query.cost_eq, query.cost_le, query.cost_ge],
+            original_cost: [query.orig_cost_eq, query.orig_cost_le, query.orig_cost_ge],
+            hp_at_most: query.hp_le,
+        }
+    }
+}
+
 pub(super) fn field_filter(
-    kind: Option<&ast::SearchKind>,
-    trait_id: Option<&str>,
-    name: Option<&str>,
-    contains: Option<&str>,
-    cost_at_most: Option<u64>,
+    filter: &ObjectFilter<'_>,
     candidate: super::Binding<super::super::ObjectRef>,
 ) -> super::Expr<super::Bool> {
-    let base = super::search::object_filter(kind, trait_id, name, candidate);
+    use super::super::{CharacteristicView, Comparison, NumberRead};
+    let object = super::ObjectView::Current {
+        object: Box::new(super::ObjectOperand::Bound { binding: candidate }),
+    };
+    let base = super::search::object_filter(filter.kind, filter.trait_id, filter.name, candidate);
     let mut predicates = Vec::new();
     if !matches!(base, super::Expr::Literal(super::Bool(true))) {
         predicates.push(base);
     }
-    if let Some(contains) = contains {
+    if let Some(contains) = filter.contains {
         predicates.push(super::Expr::Compute(Box::new(
             super::Predicate::NameContains {
-                object: super::ObjectView::Current {
-                    object: Box::new(super::ObjectOperand::Bound { binding: candidate }),
-                },
+                object: object.clone(),
                 name: super::Expr::Literal(super::super::CardName(contains.to_owned())),
             },
         )));
     }
-    if let Some(limit) = cost_at_most {
-        let limit = i64::try_from(limit).unwrap_or(i64::MAX);
-        predicates.push(super::Expr::Compute(Box::new(
-            super::Predicate::CompareInt {
-                left: super::Expr::Compute(Box::new(super::IntOperation::InformationOrZero {
-                    information: super::super::NumberRead::Cost {
-                        object: super::ObjectView::Current {
-                            object: Box::new(super::ObjectOperand::Bound { binding: candidate }),
-                        },
-                        view: super::super::CharacteristicView::Original,
+    for (view, limits) in [
+        (CharacteristicView::Effective, filter.cost),
+        (CharacteristicView::Original, filter.original_cost),
+    ] {
+        for (limit, comparison) in limits.into_iter().zip([
+            Comparison::Equal,
+            Comparison::LessEqual,
+            Comparison::GreaterEqual,
+        ]) {
+            if let Some(limit) = limit {
+                predicates.push(number_limit(
+                    NumberRead::Cost {
+                        object: object.clone(),
+                        view,
                     },
-                })),
-                comparison: super::super::Comparison::LessEqual,
-                right: super::Expr::Literal(super::Int(limit)),
+                    comparison,
+                    limit,
+                ));
+            }
+        }
+    }
+    if let Some(limit) = filter.hp_at_most {
+        predicates.push(number_limit(
+            NumberRead::Stats {
+                object,
+                view: CharacteristicView::Effective,
+                property: super::super::Stat::Life,
             },
-        )));
+            Comparison::LessEqual,
+            limit,
+        ));
     }
     match predicates.as_mut_slice() {
         [] => super::Expr::Literal(super::Bool(true)),
         [_] => predicates.swap_remove(0),
         _ => super::Expr::Compute(Box::new(super::Predicate::And { predicates })),
     }
+}
+
+fn number_limit(
+    information: super::super::NumberRead,
+    comparison: super::super::Comparison,
+    limit: u64,
+) -> super::Expr<super::Bool> {
+    super::Expr::Compute(Box::new(super::Predicate::CompareInt {
+        left: super::Expr::Compute(Box::new(super::IntOperation::InformationOrZero {
+            information,
+        })),
+        comparison,
+        right: super::Expr::Literal(super::Int(i64::try_from(limit).unwrap_or(i64::MAX))),
+    }))
 }

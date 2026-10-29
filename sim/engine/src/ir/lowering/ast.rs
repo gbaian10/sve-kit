@@ -838,6 +838,29 @@ pub(super) struct TargetQuery {
     pub name_contains: Option<String>,
     #[serde(default)]
     pub other: bool,
+    pub cost_eq: Option<u64>,
+    pub cost_le: Option<u64>,
+    pub cost_ge: Option<u64>,
+    pub orig_cost_eq: Option<u64>,
+    pub orig_cost_le: Option<u64>,
+    pub orig_cost_ge: Option<u64>,
+    pub hp_le: Option<u64>,
+}
+
+impl TargetQuery {
+    pub(super) fn has_numeric_filter(&self) -> bool {
+        [
+            self.cost_eq,
+            self.cost_le,
+            self.cost_ge,
+            self.orig_cost_eq,
+            self.orig_cost_le,
+            self.orig_cost_ge,
+            self.hp_le,
+        ]
+        .into_iter()
+        .any(|limit| limit.is_some())
+    }
 }
 
 #[derive(Clone, Deserialize)]
