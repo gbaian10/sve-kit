@@ -143,24 +143,50 @@ fn qualification(
     let Some(condition) = &head.usable_if else {
         return Ok(None);
     };
-    let ast::Condition::Exists(query) = condition else {
-        return Err(unsupported(path));
+    let predicate = match condition {
+        ast::Condition::Exists(query) => {
+            if !matches!(query.who, ast::Side::Controller)
+                || !matches!(query.zone, ast::PublicZone::Field)
+                || query.other
+                || query.class.is_some()
+                || query.token.is_some()
+            {
+                return Err(unsupported(path));
+            }
+            Expr::Compute(Box::new(Predicate::Exists {
+                objects: super::costs::public_query(query, Binding::new(4, scope)),
+            }))
+        }
+        ast::Condition::Cmp(ast::BodyComparison {
+            left: ast::Number::Count { count },
+            op: ast::Comparison::Ge,
+            right: ast::Number::Literal(minimum),
+        }) if matches!(count.who, ast::LeaderSide::Controller)
+            && matches!(count.zone, ast::CountZone::Cemetery)
+            && *minimum >= 0 =>
+        {
+            let cost = count
+                .orig_cost_eq
+                .and_then(|n| i64::try_from(n).ok())
+                .ok_or_else(|| unsupported(path))?;
+            super::super::evolution_cemetery::predicate(cost, *minimum, Binding::new(4, scope))
+        }
+        ast::Condition::EnteredBy(_)
+        | ast::Condition::Awakened(_)
+        | ast::Condition::LeaderLife(_)
+        | ast::Condition::Crimson(_)
+        | ast::Condition::Combo(_)
+        | ast::Condition::Paid(_)
+        | ast::Condition::Cmp(_)
+        | ast::Condition::All(_)
+        | ast::Condition::Any(_)
+        | ast::Condition::Not(_) => return Err(unsupported(path)),
     };
-    if !matches!(query.who, ast::Side::Controller)
-        || !matches!(query.zone, ast::PublicZone::Field)
-        || query.other
-        || query.class.is_some()
-        || query.token.is_some()
-    {
-        return Err(unsupported(path));
-    }
     Ok(Some(Precondition {
         kind: PreconditionKind::CardTextPrerequisite,
         protects,
         reason: PreconditionReason::CardText {},
-        predicate: Expr::Compute(Box::new(Predicate::Exists {
-            objects: super::costs::public_query(query, Binding::new(4, scope)),
-        })),
+        predicate,
     }))
 }
 

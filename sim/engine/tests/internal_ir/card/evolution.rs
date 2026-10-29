@@ -67,11 +67,21 @@ fn position_with_decks(
     form: &WellFormedCardProgram,
     turn_decks: bool,
 ) -> Game {
-    let snapshot = [("unit-follower","フォロワー","1","2","3"),("unit-form","フォロワー・エボルヴ","-","4","5"),("unit-spell","スペル","1","-","-")]
+    position_with_zones(seat, base, form, turn_decks, &Value::Null)
+}
+
+fn position_with_zones(
+    seat: u32,
+    base: &WellFormedCardProgram,
+    form: &WellFormedCardProgram,
+    turn_decks: bool,
+    zones: &Value,
+) -> Game {
+    let snapshot = [("unit-follower","フォロワー","1","2","3"),("unit-form","フォロワー・エボルヴ","-","4","5"),("unit-spell","スペル","1","-","-"),("unit-amulet","アミュレット","1","-","-"),("unit-other","スペル","2","-","-")]
         .iter().map(|(number,kind,cost,power,hp)| json!({"number":number,"faces":[{"name":if *number=="unit-form" {"unit-follower"} else {number},"card_class":"ニュートラル","card_type":kind,"cost":cost,"power":power,"hp":hp,"traits":[],"text":null,"sections":[]}]}).to_string()).collect::<Vec<_>>().join("\n");
     let registry = json!({"format":1,"kind":"keyword_registry","keywords":{}}).to_string();
     let document=json!({"format":1,"kind":"effect_set","cards":{
-        "unit-follower":{"status":"complete","abilities":[]},"unit-form":{"status":"complete","abilities":[]},"unit-spell":{"status":"complete","abilities":[]}
+        "unit-follower":{"status":"complete","abilities":[]},"unit-form":{"status":"complete","abilities":[]},"unit-spell":{"status":"complete","abilities":[]},"unit-amulet":{"status":"complete","abilities":[]},"unit-other":{"status":"complete","abilities":[]}
     }}).to_string();
     let catalog = Arc::new(
         Catalog::from_documents(&snapshot, &registry, &[("evolution.yaml".into(), document)])
@@ -98,6 +108,14 @@ fn position_with_decks(
             );
         }
     }
+    for player in ["P1", "P2"] {
+        if let Some(zones) = zones[player].as_object() {
+            initial["players"][player]["zones"]
+                .as_object_mut()
+                .unwrap()
+                .extend(zones.clone());
+        }
+    }
     let mut game = Game::new(
         catalog,
         &initial,
@@ -109,6 +127,10 @@ fn position_with_decks(
     game.load_internal_card("unit-follower", base).unwrap();
     game.load_internal_card("unit-form", form).unwrap();
     game.load_internal_card("unit-spell", &card(vec![]))
+        .unwrap();
+    game.load_internal_card("unit-amulet", &card(vec![]))
+        .unwrap();
+    game.load_internal_card("unit-other", &card(vec![]))
         .unwrap();
     game
 }
@@ -456,6 +478,272 @@ fn commander_evolution_condition_lowers_public_field_qualification() {
     tree["cards"]["synthetic-evolution"]["abilities"][0]["evolve"]["usable_if"] =
         json!({"exists":{"who":"self","zone":"field","trait":"指揮官"}});
     lowerer().lower(&tree).unwrap();
+}
+
+#[test]
+fn cemetery_evolution_condition_lowers_original_cost_count() {
+    let mut tree = fanfare::expanded::tree().clone();
+    tree["cards"]["synthetic-evolution"]["abilities"][0]["evolve"]["usable_if"] = json!({"cmp":{"left":{"count":{"who":"self","zone":"cemetery","orig_cost_eq":2}},"op":"ge","right":10}});
+    lowerer().lower(&tree).unwrap();
+}
+
+fn cemetery_condition() -> Value {
+    json!({"cmp":{"left":{"count":{"who":"self","zone":"cemetery","orig_cost_eq":1}},"op":"ge","right":10}})
+}
+
+fn cemetery_program(condition: &Value) -> WellFormedCardProgram {
+    let mut tree = fanfare::expanded::tree().clone();
+    let abilities = &mut tree["cards"]["synthetic-evolution"]["abilities"];
+    abilities[0]["evolve"] = json!({"cost":{"pp":1},"usable_if":condition});
+    let mut ordinary = abilities[0].clone();
+    ordinary["line"] = json!(2);
+    ordinary["evolve"] = json!({"cost":{"pp":1}});
+    abilities.as_array_mut().unwrap().push(ordinary);
+    let lowered = lowerer().lower(&tree).unwrap();
+    card(
+        lowered["synthetic-evolution"]
+            .card()
+            .abilities
+            .iter()
+            .zip(1_u64..)
+            .map(|(ability, line)| relabel(ability.clone(), "unit-follower", line))
+            .collect(),
+    )
+}
+
+#[test]
+fn cemetery_evolution_counts_all_card_types_by_original_cost_and_controller() {
+    let base = cemetery_program(&cemetery_condition());
+    for seat in [1, 2] {
+        let actor = if seat == 1 { "P1" } else { "P2" };
+        let opponent = if seat == 1 { "P2" } else { "P1" };
+        for (owner, zone, count, expected) in [
+            (actor, "cemetery", 9, false),
+            (actor, "cemetery", 10, true),
+            (actor, "cemetery", 11, true),
+            (opponent, "cemetery", 10, false),
+            (actor, "hand", 10, false),
+            (actor, "ex", 10, false),
+        ] {
+            let mut zones = json!({});
+            zones[owner][zone] = json!((0..count).map(|i| json!({"id":format!("c{i}"),"card":(["unit-follower","unit-spell","unit-amulet"][i%3]),"state":{"cost":8}})).collect::<Vec<_>>());
+            // A modified effective cost does not turn this original cost 2 card into cost 1.
+            if let Some(cards) = zones
+                .get_mut(actor)
+                .and_then(|zones| zones.get_mut("cemetery"))
+                .and_then(Value::as_array_mut)
+            {
+                cards.push(json!({"id":"wrong-cost","card":"unit-other","state":{"cost":1}}));
+            }
+            let mut game = position_with_zones(seat, &base, &card(vec![]), false, &zones);
+            let before = game.projection(View::Referee).unwrap();
+            let result = game
+                .internal_rule_action(
+                    &json!({"do":"evolve","source":"s","evolve_card":"e","definition":base.card().abilities[0].node.id.0,"pay":{"pp":1}}),
+                )
+                .unwrap();
+            if expected {
+                assert_eq!(
+                    result.outcome, "resolved",
+                    "the live original-cost threshold is met"
+                );
+                let state = game.projection(View::Referee).unwrap();
+                assert_eq!(
+                    state[actor]["pp"]["current"],
+                    before[actor]["pp"]["current"].as_i64().unwrap() - 1,
+                    "only the printed evolution cost is paid"
+                );
+                assert_eq!(
+                    state["objects"]["s"]["power"], 4,
+                    "the real form is installed"
+                );
+                assert_eq!(
+                    state[actor]["cemetery"], before[actor]["cemetery"],
+                    "the qualification does not pay or move cemetery materials"
+                );
+            } else {
+                assert_eq!(
+                    result.outcome, "cannot-evolve",
+                    "wrong ownership, zone or count does not qualify"
+                );
+                assert!(
+                    result.events.is_empty(),
+                    "a failed prerequisite reveals nothing"
+                );
+                assert_eq!(
+                    game.projection(View::Referee).unwrap(),
+                    before,
+                    "failure spends no PP, form or evolution allowance"
+                );
+                game.internal_rule_action(
+                    &json!({"do":"evolve","source":"s","evolve_card":"e","definition":base.card().abilities[1].node.id.0,"pay":{"pp":1}}),
+                )
+                .unwrap();
+                assert_eq!(
+                    game.projection(View::Referee).unwrap()["objects"]["s"]["power"],
+                    4,
+                    "a rejected conditional attempt leaves ordinary evolution available"
+                );
+            }
+        }
+    }
+}
+
+#[test]
+fn cemetery_evolution_lowering_rejects_wider_counts_and_nonliteral_bounds() {
+    let mut cases = vec![];
+    for (key, value) in [
+        ("who", json!("opp")),
+        ("zone", json!("hand")),
+        ("zone", json!("deck")),
+        (
+            "orig_cost_eq",
+            json!({"resource":{"who":"self","kind":"pp"}}),
+        ),
+        ("cost_eq", json!(1)),
+    ] {
+        let mut condition = cemetery_condition();
+        if key == "cost_eq" {
+            condition["cmp"]["left"]["count"]
+                .as_object_mut()
+                .unwrap()
+                .remove("orig_cost_eq");
+        }
+        condition["cmp"]["left"]["count"][key] = value;
+        cases.push(condition);
+    }
+    let mut nonliteral = cemetery_condition();
+    nonliteral["cmp"]["right"] = json!({"resource":{"who":"self","kind":"pp"}});
+    cases.push(nonliteral);
+    for condition in cases {
+        let mut tree = fanfare::expanded::tree().clone();
+        tree["cards"]["synthetic-evolution"]["abilities"][0]["evolve"]["usable_if"] = condition;
+        assert!(
+            lowerer().lower(&tree).is_err(),
+            "unimplemented queries must fail closed"
+        );
+    }
+}
+
+fn qualification_game() -> Game {
+    Game::new(
+        catalog(),
+        &setup(1, json!([])),
+        &Value::Null,
+        &Value::Null,
+        "qualification-admission",
+    )
+    .unwrap()
+}
+
+#[test]
+fn cemetery_evolution_admission_rejects_other_views_owners_and_read_shapes() {
+    let base = cemetery_program(&cemetery_condition());
+    qualification_game()
+        .load_internal_card("unit-follower", &base)
+        .unwrap();
+    for change in 0..8 {
+        let mut candidate = base.card().clone();
+        let CostSpec::Ordered { steps } =
+            &mut candidate.abilities[0].node.play.as_mut().unwrap().costs
+        else {
+            panic!("fixed costs")
+        };
+        let Expr::Compute(operation) = &mut steps[0]
+            .instruction
+            .precondition
+            .as_mut()
+            .unwrap()
+            .predicate
+        else {
+            panic!("comparison")
+        };
+        let Predicate::CompareInt {
+            left: Expr::Compute(count),
+            comparison,
+            right,
+        } = operation.as_mut()
+        else {
+            panic!("count comparison")
+        };
+        if change == 0 {
+            *comparison = Comparison::LessEqual;
+        }
+        if change == 1 {
+            *right = Expr::Literal(Int(-1));
+        }
+        let IntOperation::FromNat {
+            value: Expr::Live(read),
+        } = count.as_mut()
+        else {
+            panic!("count conversion")
+        };
+        let NatRead::ZoneCount {
+            selector:
+                Selector::Zone {
+                    players,
+                    zone,
+                    predicate,
+                    ..
+                },
+        } = read.as_mut()
+        else {
+            panic!("cemetery selector")
+        };
+        if change == 2 {
+            players.relation = PlayerRelation::Opponents;
+        }
+        if change == 3 {
+            *zone = ZoneKind::Hand;
+        }
+        if change == 4 {
+            players.cardinality.minimum = Nat(0);
+        }
+        let Expr::Compute(filter) = predicate.as_mut() else {
+            panic!("cost filter")
+        };
+        let Predicate::CompareInt {
+            left: Expr::Compute(information),
+            comparison,
+            ..
+        } = filter.as_mut()
+        else {
+            panic!("cost comparison")
+        };
+        if change == 5 {
+            *comparison = Comparison::GreaterEqual;
+        }
+        let IntOperation::InformationOrZero {
+            information: NumberRead::Cost { object, view },
+        } = information.as_mut()
+        else {
+            panic!("original cost")
+        };
+        if change == 6 {
+            *view = CharacteristicView::Effective;
+        }
+        if change == 7 {
+            *object = ObjectView::Current {
+                object: Box::new(ObjectOperand::SourceHolder {}),
+            };
+        }
+        assert_cemetery_qualification_rejected(candidate);
+    }
+}
+
+fn assert_cemetery_qualification_rejected(candidate: CardProgram) {
+    let checked = WellFormedCardProgram::check(candidate).unwrap();
+    let mut game = qualification_game();
+    let before = game.projection(View::Referee).unwrap();
+    assert!(
+        game.load_internal_card("unit-follower", &checked).is_err(),
+        "only the exact public original-cost prerequisite is admitted"
+    );
+    assert_eq!(
+        game.projection(View::Referee).unwrap(),
+        before,
+        "rejected admission does not alter the game"
+    );
 }
 
 fn conditional_evolution(query: &Value) -> WellFormedCardProgram {

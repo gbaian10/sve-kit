@@ -788,6 +788,7 @@ pub(super) enum SelectedStat {
 pub(super) struct CountQuery {
     pub who: LeaderSide,
     pub zone: CountZone,
+    pub orig_cost_eq: Option<u64>,
 }
 
 #[derive(Deserialize)]

@@ -242,32 +242,35 @@ impl BodyContext<'_> {
                     ],
                 })))
             }
-            ast::Number::Count { count } => Ok(Expr::Compute(Box::new(IntOperation::FromNat {
-                value: Expr::Live(Box::new(NatRead::ZoneCount {
-                    selector: Selector::Zone {
-                        players: PlayerSet {
-                            relation: match count.who {
-                                ast::LeaderSide::Controller => PlayerRelation::SelfPlayer,
-                                ast::LeaderSide::Opponent => PlayerRelation::Opponents,
+            ast::Number::Count { count } if count.orig_cost_eq.is_none() => {
+                Ok(Expr::Compute(Box::new(IntOperation::FromNat {
+                    value: Expr::Live(Box::new(NatRead::ZoneCount {
+                        selector: Selector::Zone {
+                            players: PlayerSet {
+                                relation: match count.who {
+                                    ast::LeaderSide::Controller => PlayerRelation::SelfPlayer,
+                                    ast::LeaderSide::Opponent => PlayerRelation::Opponents,
+                                },
+                                relative_to: PlayerRef::Controller {},
+                                cardinality: Cardinality {
+                                    minimum: Nat(1),
+                                    maximum: Some(Nat(1)),
+                                },
+                                text_quantifier: TextQuantifier::Implicit,
                             },
-                            relative_to: PlayerRef::Controller {},
-                            cardinality: Cardinality {
-                                minimum: Nat(1),
-                                maximum: Some(Nat(1)),
+                            zone: match count.zone {
+                                ast::CountZone::Deck => ZoneKind::Deck,
+                                ast::CountZone::Hand => ZoneKind::Hand,
+                                ast::CountZone::Cemetery => ZoneKind::Cemetery,
                             },
-                            text_quantifier: TextQuantifier::Implicit,
+                            view: SelectionView::Current {},
+                            binding: Binding::new(self.allocator.id(path)?, self.scope),
+                            predicate: Box::new(Expr::Literal(Bool(true))),
                         },
-                        zone: match count.zone {
-                            ast::CountZone::Deck => ZoneKind::Deck,
-                            ast::CountZone::Hand => ZoneKind::Hand,
-                            ast::CountZone::Cemetery => ZoneKind::Cemetery,
-                        },
-                        view: SelectionView::Current {},
-                        binding: Binding::new(self.allocator.id(path)?, self.scope),
-                        predicate: Box::new(Expr::Literal(Bool(true))),
-                    },
-                })),
-            }))),
+                    })),
+                })))
+            }
+            ast::Number::Count { .. } => Err(unsupported(path)),
             ast::Number::Resource { resource } => {
                 Ok(Expr::Live(Box::new(IntRead::PlayerResource {
                     player: match resource.who {
