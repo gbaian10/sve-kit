@@ -20,7 +20,7 @@ impl BodyContext<'_> {
         if value.result.is_some() && value.bind.is_some() {
             return Err(unsupported(path));
         }
-        let output = Binding::new(self.card_allocator.id(path)?, self.scope);
+        let output = Binding::new(self.allocator.id(path)?, self.scope);
         if let Some(name) = value.result.as_ref().or(value.bind.as_ref())
             && (self.searches.contains_key(name)
                 || self.observations.contains_key(name)
