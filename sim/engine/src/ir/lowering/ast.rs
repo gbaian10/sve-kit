@@ -929,11 +929,26 @@ pub(super) enum Follower {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct PlayCosts {
+    pub cannot_if: Option<PlayRestriction>,
     pub cost_delta: Option<Value>,
     pub cost_set: Option<Value>,
     pub optional_cost: Option<OptionalCost>,
     pub optional_cost_delta: Option<i64>,
     pub optional_cost_set: Option<i64>,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum PlayRestriction {
+    MyTurn(bool),
+    InZone(PlayRestrictionZone),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct PlayRestrictionZone {
+    pub r#ref: String,
+    pub zone: String,
 }
 
 #[derive(Deserialize)]

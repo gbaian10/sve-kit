@@ -627,6 +627,7 @@ impl Game {
             || !self.prepared.is_empty()
             || object.state["evolved_with"].is_string()
             || self.restricted(holder, "play")?
+            || self.internal_card_play_forbidden(holder, actor)?
         {
             return Err(unsupported("card play holder, permission or timing"));
         }

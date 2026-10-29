@@ -1,0 +1,34 @@
+cards:
+  BP08-092:
+    abilities:
+      - keywords:
+          - quick
+        line: 1
+      - line: 2
+        play:
+          cannot_if:
+            my_turn: true
+      - line: 3
+        spell:
+          do:
+            - damage:
+                distribute: true
+                distribute_at: play
+                n: 4
+                to: enemies
+          targets:
+            - bind: enemies
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              upto: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-10-29"
+format: 2
+kind: author_effect_set

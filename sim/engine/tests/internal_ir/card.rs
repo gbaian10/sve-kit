@@ -583,3 +583,6 @@ mod optional;
 
 #[path = "card/selection_captures.rs"]
 mod selection_captures;
+
+#[path = "card/play_restrictions.rs"]
+mod play_restrictions;

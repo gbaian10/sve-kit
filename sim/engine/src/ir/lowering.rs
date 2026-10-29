@@ -17,6 +17,7 @@ mod optional_payment;
 mod ordering;
 mod payment;
 mod play;
+mod play_restrictions;
 mod quick;
 mod search;
 mod selection;
@@ -213,19 +214,13 @@ impl ExpandedLowerer {
             let play_faces =
                 play_faces(&modifiers, exchange.as_ref()).ok_or_else(|| unsupported(&path))?;
             for (index, (entry_path, ability)) in entries.into_iter().enumerate() {
-                if ability.play.is_some() {
-                    continue;
-                }
-                if let Some(keywords) = &ability.keywords
-                    && !matches!(keywords.as_slice(), [keyword] if keyword == "quick")
-                {
-                    abilities.extend(keywords::lower(
-                        &mut allocator,
-                        &coordinates,
-                        &entry_path,
-                        &ability,
-                        keywords,
-                    )?);
+                if allocator.declarations(
+                    &coordinates,
+                    &entry_path,
+                    &ability,
+                    index,
+                    &mut abilities,
+                )? {
                     continue;
                 }
                 optional_payment::check_entry(&ability, exchange.is_some(), &entry_path)?;
@@ -368,6 +363,35 @@ struct Allocator {
     next_scope: u64,
 }
 impl Allocator {
+    fn declarations(
+        &mut self,
+        key: &CardCoordinates<'_>,
+        path: &str,
+        entry: &ast::Ability,
+        index: usize,
+        abilities: &mut Vec<Located<Ability>>,
+    ) -> Result<bool, LoweringError> {
+        if let Some(play) = &entry.play {
+            if let Some(condition) = &play.cannot_if {
+                abilities.push(play_restrictions::lower(
+                    key,
+                    path,
+                    entry,
+                    condition,
+                    entry_scope(index, path)?,
+                )?);
+            }
+            return Ok(true);
+        }
+        if let Some(keywords) = &entry.keywords
+            && !matches!(keywords.as_slice(), [keyword] if keyword == "quick")
+        {
+            abilities.extend(keywords::lower(self, key, path, entry, keywords)?);
+            return Ok(true);
+        }
+        Ok(false)
+    }
+
     fn id(&mut self, path: &str) -> Result<u64, LoweringError> {
         self.next = self.next.checked_add(1).ok_or_else(|| unsupported(path))?;
         Ok(self.next)

@@ -6,6 +6,7 @@ use super::{
 use crate::catalog::SelectedEffects;
 use crate::catalog::current::CurrentCard;
 use crate::ir::ChoiceDomain;
+use crate::ir::play_restrictions::card_restriction;
 use crate::ir::quick::{card_permission, is_printed_quick};
 use crate::ir::{
     Ability, AbilityId, AbilityInstanceId, AbilityKind, AbilityOrigin, AbilitySource, Action,
@@ -33,6 +34,7 @@ pub(super) mod hand_payment;
 mod keywords;
 pub(super) mod material;
 pub(super) mod optional;
+mod play_restrictions;
 mod printed;
 pub(super) mod quick;
 mod resources;
@@ -145,7 +147,7 @@ impl CardRuntime {
                     .card()
                     .abilities
                     .iter()
-                    .any(|a| is_printed_quick(&a.node))
+                    .any(|a| is_printed_quick(&a.node) || card_restriction(&a.node).is_some())
                 || card.card().abilities.iter().any(|ability| {
                     evolution::intrinsic(&ability.node)
                         || matches!(
@@ -344,6 +346,12 @@ impl Game {
             }
             if card_permission(ability) {
                 quick::check_spell_face(self, card_no, card.card(), ordinal, base_print)?;
+                continue;
+            }
+            if card_restriction(ability).is_some() {
+                if ordinal != 0 {
+                    return Err(unsupported("play restriction requires base face"));
+                }
                 continue;
             }
             if is_printed_quick(ability) && ordinal != 0 {
@@ -642,7 +650,10 @@ fn activation_type(kind: &str, zones: &[ZoneKind]) -> bool {
 }
 
 fn check_header(ability: &Ability) -> Result<()> {
-    if card_permission(ability) || printed_keywords::card_declaration(ability).is_some() {
+    if card_permission(ability)
+        || printed_keywords::card_declaration(ability).is_some()
+        || card_restriction(ability).is_some()
+    {
         return Ok(());
     }
     let zones = if ability.kind == AbilityKind::Spell {

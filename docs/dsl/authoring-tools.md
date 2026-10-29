@@ -123,3 +123,5 @@ uv --directory /absolute/project/carddb run sve-carddb author check \
 `check` 檢查全部索引作者卡；`body_usage` 依永久 CardId 去重，達三張提示整理共用本體，無額外資格 consumer。review 紀錄只報實際 verdict，不以 SHA freshness 授予核可或阻擋。source pending 不擋直接入口，真正 disputed／revise 只擋受影響卡。
 
 check 成功代表來源定位、行覆蓋與 DSL 結構通過；Rust lowering／runtime 能力准入及對局行為測試仍須通過。錯誤回傳位置及分類，不印整行卡文。完整回歸交 CI，無需額外證據 JSON 或結果 DB。
+
+打出限制可用 `play.cannot_if` 的 `in_zone: {ref: this, zone: ex}` 或 `my_turn: true`。目前只准入這兩個封閉形狀，分別禁止從 EX 打出及自己回合打出；一般打出與 Quick 候選會在扣費、移區或選擇前檢查，拒絕時不更動狀態。這些限制不阻止能力直接移動或將卡置入場。其他條件與額外打出區域仍須另行准入。
