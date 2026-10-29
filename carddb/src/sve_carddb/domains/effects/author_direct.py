@@ -11,7 +11,7 @@ from sve_carddb.domains.effects.author_expansion import (
     ExpansionCandidate,
     ability_nodes,
 )
-from sve_carddb.domains.effects.author_handwritten import Locator, decode
+from sve_carddb.domains.effects.author_handwritten import Locator, RuleSection, decode
 from sve_carddb.domains.effects.author_inputs import parse_document
 from sve_carddb.domains.effects.author_sources import SourceError
 from sve_carddb.domains.translations.four_layer_sources import card_field
@@ -35,6 +35,7 @@ _CARD_KEYS = frozenset(
         "container",
         "token",
         "token_sources",
+        "rule_sections",
     }
 )
 _META_KEYS = frozenset(
@@ -159,6 +160,23 @@ def _position(
         ),
         Locator,
     )
+    face, field = _field(payload, locator)
+    if locator.line not in array(field["lines"]):
+        raise SourceError("source_location_mismatch")
+    return {
+        "owner": {"kind": "face_revision", "revision_id": face["revision_id"]},
+        "face_id": face["face_id"],
+        "field": field["field"],
+        "ordinal": field["ordinal"],
+        "line": locator.line,
+        "scope": f"ability_{(locator.scope or 1) - 1}",
+        "covers": value.get("covers", [locator.line]),
+    }
+
+
+def _field(
+    payload: dict[str, JsonValue], locator: Locator | RuleSection
+) -> tuple[dict[str, JsonValue], dict[str, JsonValue]]:
     faces = [object_value(f) for f in array(payload["faces"])]
     if locator.face is not None:
         faces = [
@@ -176,17 +194,39 @@ def _position(
         for f in array(face["fields"])
         if object_value(f)["ordinal"] == ordinal
     ]
-    if len(fields) != 1 or locator.line not in array(fields[0]["lines"]):
+    if len(fields) != 1:
         raise SourceError("source_location_mismatch")
-    return {
-        "owner": {"kind": "face_revision", "revision_id": face["revision_id"]},
-        "face_id": face["face_id"],
-        "field": fields[0]["field"],
-        "ordinal": ordinal,
-        "line": locator.line,
-        "scope": f"ability_{(locator.scope or 1) - 1}",
-        "covers": value.get("covers", [locator.line]),
+    return face, fields[0]
+
+
+def _rule_sections(
+    payload: dict[str, JsonValue],
+    card: dict[str, JsonValue],
+    faces: dict[str, JsonValue],
+) -> set[tuple[str, int]]:
+    declarations = array(card.get("rule_sections", []))
+    if not declarations:
+        return set()
+    covered = {
+        (string(source["face_id"]), source["ordinal"], line)
+        for _, ability in ability_nodes({"cards": {"card": {"faces": faces}}})
+        for source in [object_value(array(ability["sources"])[0])]
+        for line in array(source["covers"])
     }
+    declared: set[tuple[str, int]] = set()
+    for raw in declarations:
+        locator = decode(parse_document(canonical(raw)), RuleSection)
+        face, field = _field(payload, locator)
+        key = (string(face["face_id"]), locator.section - 1)
+        if key in declared:
+            raise SourceError("duplicate_rule_section")
+        if field.get("section_kind") not in {"unknown", "rule"}:
+            raise SourceError("rule_section_kind_mismatch")
+        lines = array(field["lines"])
+        if not lines or any((*key, line) not in covered for line in lines):
+            raise SourceError("source_line_closure_mismatch")
+        declared.add(key)
+    return declared
 
 
 def _check_unknown_sections(
@@ -194,6 +234,7 @@ def _check_unknown_sections(
     payload: dict[str, JsonValue],
     reminders: list[dict[str, JsonValue]],
     tokens: list[dict[str, JsonValue]],
+    rule_sections: set[tuple[str, int]],
 ) -> None:
     ignored = {
         (source["face_id"], source["ordinal"], source["line"]) for source in reminders
@@ -224,6 +265,11 @@ def _check_unknown_sections(
                 ),
                 None,
             )
+            if (
+                kind == "unknown"
+                and (face["face_id"], field["ordinal"]) in rule_sections
+            ):
+                continue
             if kind in {"unknown", "token_definition"} and any(
                 (key := (face["face_id"], field["ordinal"], line)) not in linked
                 and (kind != "unknown" or key not in ignored)
@@ -367,6 +413,7 @@ def materialize(
             if object_value(raw)["reason"] == "reminder"
         ],
         tokens,
+        _rule_sections(payload, card, faces),
     )
     result: dict[str, JsonValue] = {
         "meta": {
