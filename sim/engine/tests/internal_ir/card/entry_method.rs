@@ -21,8 +21,15 @@ fn ability_entry_condition_lowers_both_registered_methods() {
     }
 }
 
-fn program(by: &str, origin: ZoneKind) -> WellFormedCardProgram {
-    let cards = lowerer().lower(&candidate(by)).unwrap();
+fn program(by: &str, origin: ZoneKind, automatic: bool) -> WellFormedCardProgram {
+    let mut candidate = candidate(by);
+    if automatic {
+        let entry = &mut candidate["cards"]["unit-follower"]["abilities"][0];
+        let mut body = entry.as_object_mut().unwrap().remove("fanfare").unwrap();
+        body["on"] = json!({"enter_field":{"ref":"this"}});
+        entry["auto"] = body;
+    }
+    let cards = lowerer().lower(&candidate).unwrap();
     let mut trigger = cards["unit-follower"].card().abilities[0].clone();
     trigger.source = source("unit-follower");
     trigger.source.fragment = None;
@@ -30,8 +37,11 @@ fn program(by: &str, origin: ZoneKind) -> WellFormedCardProgram {
         face: FaceId("0".into()),
         line: Nat(1),
     };
-    if let AbilityOrigin::Keyword { origin, .. } = &mut trigger.node.source.origin {
-        **origin = printed;
+    match &mut trigger.node.source.origin {
+        AbilityOrigin::Keyword { origin, .. } => **origin = printed,
+        origin @ (AbilityOrigin::Printed { .. } | AbilityOrigin::Granted { .. }) => {
+            *origin = printed;
+        }
     }
     locate_steps(
         &mut trigger.node.body.as_mut().unwrap().steps,
@@ -46,7 +56,12 @@ fn program(by: &str, origin: ZoneKind) -> WellFormedCardProgram {
 
 #[test]
 fn entry_method_condition_distinguishes_play_from_ability_put_in_the_same_zone() {
-    for by in ["ability", "play"] {
+    for (by, automatic) in [
+        ("ability", false),
+        ("play", false),
+        ("ability", true),
+        ("play", true),
+    ] {
         for (from, method) in [
             ("hand", true),
             ("ex", true),
@@ -70,7 +85,7 @@ fn entry_method_condition_distinguishes_play_from_ability_put_in_the_same_zone()
                 "entry-method",
             )
             .unwrap();
-            game.load_internal_card("unit-follower", &program(by, zone))
+            game.load_internal_card("unit-follower", &program(by, zone, automatic))
                 .unwrap();
             game.load_internal_card("unit-spell", &card(vec![]))
                 .unwrap();
@@ -217,7 +232,7 @@ fn entry_method_condition_keeps_the_entry_fact_after_its_source_leaves() {
 
 #[test]
 fn entry_method_equality_admission_does_not_open_other_equality_domains() {
-    let mut candidate = program("ability", ZoneKind::Ex).card().clone();
+    let mut candidate = program("ability", ZoneKind::Ex, false).card().clone();
     let Node::Control {
         control: Control::If { condition, .. },
     } = &mut candidate.abilities[0].node.body.as_mut().unwrap().steps[0].node
@@ -246,4 +261,14 @@ fn entry_method_equality_admission_does_not_open_other_equality_domains() {
         format!("{error:?}").contains("shape.ValueEquality.Bool"),
         "EntryMethod equality admission stays closed to other typed equality domains"
     );
+}
+
+#[test]
+fn watching_another_entry_does_not_supply_the_holders_entry_method() {
+    let mut candidate = candidate("ability");
+    let entry = &mut candidate["cards"]["unit-follower"]["abilities"][0];
+    let mut body = entry.as_object_mut().unwrap().remove("fanfare").unwrap();
+    body["on"] = json!({"enter_field":{"who":"self","sel":{"kind":"follower"}}});
+    entry["auto"] = body;
+    lowerer().lower(&candidate).unwrap_err();
 }

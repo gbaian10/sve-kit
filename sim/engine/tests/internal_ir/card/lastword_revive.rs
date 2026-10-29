@@ -339,3 +339,18 @@ fn lastword_declares_targets_after_departure_and_rejects_foreign_answers() {
         assert!(game.internal_pending_choice().unwrap().is_none());
     }
 }
+
+#[test]
+fn unrestricted_departures_cannot_return_the_holder_to_field_or_ex() {
+    for destination in ["field", "ex"] {
+        lowerer()
+            .lower(&tree(&[(
+                "auto",
+                json!({
+                    "on":{"left_field":{"ref":"this"}},
+                    "do":[{"move":{"ref":"this","to":destination}}]
+                }),
+            )]))
+            .unwrap_err();
+    }
+}

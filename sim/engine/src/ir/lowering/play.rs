@@ -468,6 +468,7 @@ impl BodyContext<'_> {
                 leave_event: self.leave_event,
                 entry_event: self.entry_event,
                 cemetery_return: self.cemetery_return,
+                departure_to_cemetery: self.departure_to_cemetery,
                 scope,
                 definition: self.definition,
                 payment_result: None,

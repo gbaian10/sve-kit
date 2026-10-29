@@ -71,6 +71,8 @@ records:
 
 謝幕中的 `move: {ref: this, to: field}` 可將該次離場後仍在墓場的普通從者放回控制者自己的場上；沿用入場事件及守護姿態選擇，不重新打出卡片或支付印刷打出費用，但會照常觸發入場曲（[官方玩法說明](https://shadowverse-evolve.com/rules/ver_0324/)）。它只追蹤該次離場產生的世代，卡片後續再移區後不會追取新世代；場上已滿五張時不移動。其他能力頭或任意選擇物件的回場、復活入場附帶效果與其他連結家族仍不由此入口准入。
 
+`entered_from`、`entered_by`、`played_from` 讀取自身入場事件；入場曲與 `auto.on.enter_field: {ref: this}` 都可使用，監看他者入場或其他事件的能力不提供這些欄位。自身回場及離場後移 EX 需要該次離場確定落在墓場，目前只有謝幕符合；一般 `left_field` 不開放這兩種動作。
+
 法術 token 使用一般 `spell` 本體與印刷 PP 費用，從手牌或 EX 區正式打出；印刷 Quick 同樣經由權威產生的 Quick 問題選用。結算沿用法術流程，離開結算區進入墓場後依 token 規則消去，不留在墓場。
 
 `line` 從 1 起；`face` 為 1 起面序或唯一 `front/back`；`section: main` 表示主文，數字 N 表示第 N 個 section。多面未消歧即拒絕。`scope` 區分同一行的能力，跨行能力用 `covers: [1, 2]` 明示覆蓋；每行都須有能力或 `ignored` 宣告。
