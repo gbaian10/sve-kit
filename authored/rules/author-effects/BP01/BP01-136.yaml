@@ -1,0 +1,22 @@
+cards:
+  BP01-136:
+    abilities:
+      - evolve_time:
+          do:
+            - search:
+                n: 1
+                sel:
+                  kind: amulet
+                  who: self
+                  zone: deck
+                to: hand
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

@@ -1,0 +1,57 @@
+cards:
+  BP01-041:
+    abilities:
+      - activate:
+          cost:
+            steps:
+              - pp: 1
+              - act_self: true
+          do:
+            - create:
+                n: 1
+                result: made
+                to: field
+                token: ナイト
+            - grant:
+                keywords:
+                  - storm
+                on: made
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - pp: 2
+              - act_self: true
+          do:
+            - act:
+                ref: victim
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+      - activate:
+          cost:
+            steps:
+              - pp: 3
+              - act_self: true
+          do:
+            - draw:
+                n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+    token_sources:
+      - card: BP17-T11
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set
