@@ -1,0 +1,46 @@
+cards:
+  BP03-052:
+    abilities:
+      - auto:
+          do:
+            - if:
+                cond:
+                  exists:
+                    kind: follower
+                    other: true
+                    trait: チェス
+                    who: self
+                    zone: field
+                then:
+                  - damage:
+                      n: 1
+                      to:
+                        leaders: opponents
+                  - life:
+                      delta: 1
+                      who: self
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 1
+      - fanfare:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: マジカルポーン
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-29"
+    token_sources:
+      - card: BP03-T03
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set
