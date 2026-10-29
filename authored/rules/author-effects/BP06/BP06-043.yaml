@@ -1,0 +1,43 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP06-043:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-30"
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - create:
+                token: 形代
+                n: 1
+                to: field
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      minus:
+                        - count:
+                            who: self
+                            zone: cemetery
+                            trait: 陰陽師
+                        - minus:
+                            - count:
+                                who: self
+                                zone: cemetery
+                                kind: spell
+                                trait: 陰陽師
+                            - count:
+                                who: self
+                                zone: cemetery
+                                kind: spell
+                    op: ge
+                    right: 7
+                then:
+                  - draw:
+                      n: 1

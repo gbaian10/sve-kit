@@ -1,0 +1,53 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP13-P30:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-30"
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - damage:
+                        to: one
+                        n: 4
+                  - - if:
+                        cond:
+                          cmp:
+                            left:
+                              count:
+                                who: self
+                                zone: cemetery
+                                trait: 学院
+                            op: ge
+                            right: 15
+                        then:
+                          - damage:
+                              to: two
+                              n: 4
+          targets:
+            - bind: one
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+              option: 1
+            - bind: two
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 2
+              option: 2
+    token:
+      name: フェイタルバーン
+      template: true

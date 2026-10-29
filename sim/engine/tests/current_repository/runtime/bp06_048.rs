@@ -10,6 +10,11 @@ use sve_engine::ir::SearchOutcome;
 const CARD: &str = "BP06-048";
 const SPELL: &str = "BP06-042";
 
+fn search_selection() -> &'static SelectedEffects {
+    static SELECTED: OnceLock<SelectedEffects> = OnceLock::new();
+    SELECTED.get_or_init(|| selection_without_abilities(producer_inputs(), &[SPELL]))
+}
+
 fn position(controller: &str, owner: &str, deck: Value) -> Value {
     let mut initial = json!({
         "history":"explicit",
@@ -35,7 +40,7 @@ fn game_with_external_movement(initial: &Value, action: Action) -> Game {
         .as_array_mut()
         .unwrap()
         .push(json!({"id":"producer","card":"producer"}));
-    let selected = producer_selection().clone();
+    let selected = search_selection().clone();
     let mut game = Game::from_selected_effects(
         selected,
         &initial,
@@ -165,7 +170,7 @@ fn shuffled_for(result: &Activation, seat: &str) -> usize {
 
 #[test]
 fn bp06_048_reports_the_missing_ability_source_evidence_for_a_real_search_match() {
-    // The unselected official spell is a real BP06-048 search candidate, not a synthetic substitute.
+    // The real search candidate is deliberately unselected even after its author migration.
     for (controller, owner) in [("P1", "P2"), ("P2", "P1")] {
         let initial = position(controller, owner, json!([{"id":"spell","card":SPELL}]));
         let mut game = game_with_destroyer(&initial);

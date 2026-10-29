@@ -1,0 +1,49 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "spell",
+      "body": {
+        "op": "seq",
+        "steps": [
+          {
+            "op": "create",
+            "name": "形代",
+            "count": 1,
+            "to": "field"
+          },
+          {
+            "op": "if",
+            "condition": {
+              "fn": "ge",
+              "args": [
+                {
+                  "count": {
+                    "union": [
+                      {
+                        "side": "self",
+                        "zone": "cemetery",
+                        "trait": "陰陽師"
+                      },
+                      {
+                        "side": "self",
+                        "zone": "cemetery",
+                        "type": "spell"
+                      }
+                    ]
+                  }
+                },
+                7
+              ]
+            },
+            "then": {
+              "op": "draw",
+              "count": 1
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
