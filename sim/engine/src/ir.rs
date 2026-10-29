@@ -126,6 +126,7 @@ mod flow;
 pub(crate) mod history_turn;
 pub mod lowering;
 pub(crate) mod optional_payment;
+pub(crate) mod play_restrictions;
 pub(crate) mod printed_keywords;
 mod projections;
 pub(crate) mod quick;

@@ -221,6 +221,7 @@ impl Game {
                         && matches!(object.zone.as_str(), "hand" | "ex")
                         && self.internal_quick_spell(holder)?
                         && !self.restricted(holder, "play")?
+                        && !self.internal_card_play_forbidden(holder, actor)?
                 } else {
                     ability.kind == AbilityKind::Activated
                         && is_printed_quick(ability)

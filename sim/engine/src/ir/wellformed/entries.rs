@@ -328,8 +328,9 @@ impl Checker {
         }
         self.card_payment_body = previous_payment;
         for (index, effect) in ability.declarations.iter().enumerate() {
-            // Only complete named keyword shapes bypass the generic permission gate.
+            // Only complete named printed declarations bypass the generic permission gate.
             if super::super::quick::card_permission(ability)
+                || super::super::play_restrictions::card_restriction(ability).is_some()
                 || super::super::printed_keywords::card_declaration(ability).is_some()
             {
                 continue;
