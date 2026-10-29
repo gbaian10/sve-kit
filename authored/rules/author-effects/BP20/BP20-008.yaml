@@ -27,14 +27,14 @@ cards:
                   - damage:
                       to: enemy
                       n: 3
+                  - damage:
+                      to:
+                        leaders: opponents
+                      n: 2
                 else:
                   - damage:
                       to: enemy
                       n: 2
-            - damage:
-                to:
-                  leaders: opponents
-                n: 2
           targets:
             - bind: enemy
               from:
