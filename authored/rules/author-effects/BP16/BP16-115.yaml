@@ -1,0 +1,39 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP16-115:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-29"
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - evolve_time:
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                n: 3
+                to: enemy
+        line: 2
+      - super_evolve_time:
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+              n: 1
+          do:
+            - destroy:
+                ref: enemy
+        line: 3
