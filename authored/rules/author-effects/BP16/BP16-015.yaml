@@ -1,0 +1,32 @@
+cards:
+  BP16-015:
+    abilities:
+      - fanfare:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: フェアリー
+        line: 1
+        scope: 1
+      - lastword:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: フェアリー
+        line: 1
+        scope: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-10-29"
+    token_sources:
+      - card: BP01-T03
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set
