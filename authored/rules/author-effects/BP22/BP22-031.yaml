@@ -1,0 +1,49 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP22-031:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-29"
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - keywords:
+          - ward
+        line: 2
+      - fanfare:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 4
+                  who: self
+            - choose:
+                bind: chosen
+                from: { in: seen, kind: follower }
+                groups:
+                  - kind: follower
+                    orig_cost_le: 2
+                  - kind: follower
+                    orig_cost_le: 3
+                upto: 2
+                may: true
+            - move:
+                ref: chosen
+                to: field
+                result: placed
+            - move:
+                ref:
+                  in: seen
+                  except:
+                    in: { objects_of: placed, view: before }
+                to: deck
+                position: bottom
+                order: chooser
+        line: 3

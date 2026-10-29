@@ -631,30 +631,36 @@ fn private_optional_look(decision: &Decision, cardinality: Cardinality) -> bool 
     else {
         return false;
     };
-    let [group] = constraint.groups.as_slice() else {
+    if constraint.groups.is_empty() || constraint.groups.len() > 2 {
         return false;
+    }
+    let expected = Cardinality {
+        minimum: Nat(0),
+        maximum: u64::try_from(constraint.groups.len()).ok().map(Nat),
     };
-    cardinality
-        == (Cardinality {
-            minimum: Nat(0),
-            maximum: Some(Nat(1)),
+    cardinality == expected
+        && constraint.cardinality == expected
+        && constraint.groups.iter().all(|group| {
+            group.cardinality
+                == (Cardinality {
+                    minimum: Nat(0),
+                    maximum: Some(Nat(1)),
+                })
+                && matches!(
+                    &group.selector,
+                    Selector::Filter { input, .. }
+                        if matches!(input.as_ref(), Selector::ReceiptMembers {
+                            receipt: ObjectReceipt::Look { .. },
+                            projection: MemberProjection::Before,
+                        })
+                )
         })
-        && constraint.cardinality == cardinality
-        && group.cardinality == cardinality
         && decision.actor == (PlayerRef::Controller {})
         && matches!(
             &decision.visibility,
             Visibility::Only { players }
                 if players.relation == PlayerRelation::SelfPlayer
                     && players.relative_to == decision.actor
-        )
-        && matches!(
-            &group.selector,
-            Selector::Filter { input, .. }
-                if matches!(input.as_ref(), Selector::ReceiptMembers {
-                    receipt: ObjectReceipt::Look { .. },
-                    projection: MemberProjection::Before,
-                })
         )
 }
 

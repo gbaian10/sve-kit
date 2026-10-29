@@ -655,6 +655,7 @@ pub(super) struct Target {
 pub(super) struct Choose {
     pub bind: String,
     pub from: TargetQuery,
+    pub groups: Option<Vec<ChooseGroup>>,
     pub distinct_by: Option<Names>,
     pub n: Option<u64>,
     pub upto: Option<u64>,
@@ -663,6 +664,13 @@ pub(super) struct Choose {
     pub order: Option<bool>,
     #[serde(rename = "by")]
     pub _by: Option<SelfPlayer>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct ChooseGroup {
+    pub kind: Option<SearchKind>,
+    pub orig_cost_le: Option<u64>,
 }
 
 #[derive(Clone, Deserialize)]

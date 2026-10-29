@@ -181,6 +181,7 @@ impl BodyContext<'_> {
                 target.from.r#trait.as_deref(),
                 target.from.name.as_deref(),
                 target.from.name_contains.as_deref(),
+                None,
                 candidate,
             )),
         };
@@ -261,24 +262,26 @@ impl BodyContext<'_> {
         }
         self.observed_targets.insert(target.bind.clone());
         let candidate = Binding::new(1, self.card_allocator.scope(path)?);
+        let selector = Selector::Filter {
+            input: Box::new(Selector::ReceiptMembers {
+                receipt,
+                projection: MemberProjection::Before,
+            }),
+            binding: candidate,
+            predicate: Box::new(super::selection::field_filter(
+                target.from.kind.as_ref(),
+                target.from.r#trait.as_deref(),
+                target.from.name.as_deref(),
+                target.from.name_contains.as_deref(),
+                None,
+                candidate,
+            )),
+        };
         Ok((
             ChoiceDomain::Objects {
                 constraint: SelectionConstraint {
                     groups: vec![SelectionGroup {
-                        selector: Selector::Filter {
-                            input: Box::new(Selector::ReceiptMembers {
-                                receipt,
-                                projection: MemberProjection::Before,
-                            }),
-                            binding: candidate,
-                            predicate: Box::new(super::selection::field_filter(
-                                target.from.kind.as_ref(),
-                                target.from.r#trait.as_deref(),
-                                target.from.name.as_deref(),
-                                target.from.name_contains.as_deref(),
-                                candidate,
-                            )),
-                        },
+                        selector,
                         cardinality,
                     }],
                     cardinality,
