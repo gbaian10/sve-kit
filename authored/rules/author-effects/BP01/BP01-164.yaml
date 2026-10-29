@@ -1,0 +1,29 @@
+cards:
+  BP01-164:
+    abilities:
+      - evolve:
+          cost:
+            pp: 0
+        line: 1
+      - keywords:
+          - ward
+        line: 2
+      - fanfare:
+          do:
+            - damage:
+                n: 2
+                to:
+                  kind: follower
+                  other: true
+                  who: self
+                  zone: field
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

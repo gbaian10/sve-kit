@@ -1,0 +1,34 @@
+cards:
+  BP01-007:
+    abilities:
+      - keywords:
+          - quick
+        line: 1
+      - line: 2
+        spell:
+          do:
+            - draw:
+                n: 1
+            - damage:
+                n:
+                  count:
+                    who: self
+                    zone: hand
+                to: victim
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                leader_or: true
+                who: opp
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set
