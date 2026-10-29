@@ -503,6 +503,8 @@ fn filtered_cemetery_count_numbers_drive_draw_life_damage_and_stats() {
         .unwrap();
     game.load_internal_card("unit-follower", &card(vec![]))
         .unwrap();
+    game.load_internal_card("unit-amulet", &card(vec![]))
+        .unwrap();
     resolved(game.play_internal_card("s", PlayerId { seat: 1 }).unwrap());
     let state = game.projection(View::Referee).unwrap();
     assert_eq!(state["P1"]["leader"]["life"], 12_u8);
