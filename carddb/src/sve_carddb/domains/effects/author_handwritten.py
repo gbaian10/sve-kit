@@ -80,6 +80,11 @@ class BodyFile(RecordData):
     records: list[Body]
 
 
+class RuleSection(RecordData):
+    section: Positive
+    face: Positive | Literal["front", "back"] | None = None
+
+
 class Locator(RecordData):
     line: Positive
     face: Positive | Literal["front", "back"] | None = None
