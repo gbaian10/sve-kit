@@ -2,8 +2,9 @@ use super::super::{DecisionToken, DecisionView, InputDomain, Slot, Wait, contain
 use super::{Execution, Game, Nat, ObjectRef, Result, invalid, player_id, unsupported};
 use crate::ir::{
     Binding, CardKind, Cardinality, CharacteristicView, ChoiceDomain, Decision, DecisionKind,
-    Disjointness, KindRead, NamesRead, ObjectOperand, ObjectProperty, ObjectView, PlayerRef,
-    PlayerRelation, Predicate, ScopeId, SelectionConstraint, SelectionGroup, Selector, TraitsRead,
+    Declinable, Disjointness, KindRead, MemberProjection, NamesRead, ObjectOperand, ObjectProperty,
+    ObjectReceipt, ObjectView, PlayerRef, PlayerRelation, Predicate, ScopeId, SelectionConstraint,
+    SelectionGroup, Selector, TraitsRead, Visibility,
 };
 use crate::ir::{Bool, Expr, SelectionView, ZoneKind};
 use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
@@ -66,6 +67,40 @@ pub(in crate::game::internal) fn characteristics(
 }
 
 impl TargetWait {
+    fn is_private_look_member(&self, member: ObjectRef) -> bool {
+        let ChoiceDomain::Objects {
+            constraint,
+            target_roles: None,
+            ..
+        } = &self.decision.domain
+        else {
+            return false;
+        };
+        let [group] = constraint.groups.as_slice() else {
+            return false;
+        };
+        self.members.contains(&member)
+            && look_filtered_selector(&group.selector)
+            && self.decision.actor == (PlayerRef::Controller {})
+            && matches!(
+                &self.decision.visibility,
+                Visibility::Only { players }
+                    if players.relation == PlayerRelation::SelfPlayer
+                        && players.relative_to == self.decision.actor
+            )
+            && matches!(
+                self.decision.kind,
+                DecisionKind::ResolutionChoice {
+                    may: Declinable::MayDecline,
+                    cardinality: Cardinality {
+                        minimum: Nat(0),
+                        maximum: Some(Nat(1)),
+                    },
+                    precondition: None,
+                }
+            )
+    }
+
     pub(in crate::game::internal) fn check_current(
         &self,
         game: &Game,
@@ -176,6 +211,22 @@ fn target_group(constraint: &SelectionConstraint) -> Result<&SelectionGroup> {
     Ok(group)
 }
 
+fn target_bounds(constraint: &SelectionConstraint, group: &SelectionGroup) -> Cardinality {
+    Cardinality {
+        minimum: Nat(constraint
+            .cardinality
+            .minimum
+            .0
+            .max(group.cardinality.minimum.0)),
+        maximum: constraint
+            .cardinality
+            .maximum
+            .into_iter()
+            .chain(group.cardinality.maximum)
+            .min_by_key(|n| n.0),
+    }
+}
+
 pub(super) fn check(constraint: &SelectionConstraint) -> Result<()> {
     field_selector(&target_group(constraint)?.selector)
 }
@@ -201,6 +252,26 @@ pub(in crate::game::internal) fn check_resolution(decision: &Decision) -> Result
         return Err(unsupported("resolution public choice domain"));
     };
     let group = target_group(constraint)?;
+    if let Selector::Filter {
+        input,
+        binding,
+        predicate,
+    } = &group.selector
+        && matches!(
+            input.as_ref(),
+            Selector::ReceiptMembers {
+                receipt: ObjectReceipt::Look { .. },
+                projection: MemberProjection::Before,
+            }
+        )
+    {
+        check_predicate(predicate, *binding)?;
+        if decision.actor != (PlayerRef::Controller {}) || constraint.cardinality.maximum.is_none()
+        {
+            return Err(unsupported("private observed choice actor or bounds"));
+        }
+        return Ok(());
+    }
     match &group.selector {
         Selector::Zone {
             zone: ZoneKind::Ex,
@@ -371,6 +442,18 @@ pub(in crate::game::internal) fn packet(domain: &TargetDomain) -> Value {
     json!({"kind":"targets","distinct_names":domain.distinct_names,"minimum":domain.cardinality.minimum.0,"maximum":domain.cardinality.maximum.map(|n| n.0),"members":domain.members.iter().map(|member| json!({"handle":member.handle,"player":member.player.seat,"card":member.card,"name":member.name})).collect::<Vec<_>>()})
 }
 
+fn private_observed_deck(game: &Game, id: &str, actor_seat: &str, enabled: bool) -> bool {
+    enabled
+        && game.object(id).is_ok_and(|object| {
+            object.zone == "deck" && object.owner == actor_seat && object.controller == actor_seat
+        })
+        && game
+            .state
+            .knowledge
+            .get(actor_seat)
+            .is_some_and(|knowledge| knowledge.located.contains(id))
+}
+
 #[expect(
     clippy::multiple_inherent_impl,
     reason = "Target evaluation uses the play's frozen authority view."
@@ -441,30 +524,24 @@ impl Game {
             return Err(unsupported("target groups"));
         };
         let allow_resolution_zones = matches!(decision.kind, DecisionKind::ResolutionChoice { .. });
-        let mut members = Vec::new();
-        for member in
-            execution.public_target_objects(self, &group.selector, allow_resolution_zones)?
-        {
-            if self.targetable_by(
-                execution.object_id(member)?,
-                super::seat_name(execution.context.controller)?,
-            )? {
-                members.push(member);
-            }
-        }
-        let bounds = Cardinality {
-            minimum: Nat(constraint
-                .cardinality
-                .minimum
-                .0
-                .max(group.cardinality.minimum.0)),
-            maximum: constraint
-                .cardinality
-                .maximum
-                .into_iter()
-                .chain(group.cardinality.maximum)
-                .min_by_key(|n| n.0),
-        };
+        let observed_deck = allow_resolution_zones
+            && matches!(
+                &decision.visibility,
+                Visibility::Only { players }
+                    if players.relation == PlayerRelation::SelfPlayer
+                        && players.relative_to == decision.actor
+            )
+            && look_filtered_selector(&group.selector);
+        let actor = execution.player(self, &decision.actor)?;
+        let actor_seat = super::seat_name(actor)?;
+        let members = self.target_domain_members(
+            execution,
+            &group.selector,
+            allow_resolution_zones,
+            observed_deck,
+            actor_seat,
+        )?;
+        let bounds = target_bounds(constraint, group);
         let public = members
             .iter()
             .enumerate()
@@ -472,7 +549,10 @@ impl Game {
                 let id = execution.object_id(*reference)?;
                 let object = self.object(id)?;
                 let kind = self.object_type(id)?;
-                if !(object.zone == "field"
+                let private_observation =
+                    private_observed_deck(self, id, actor_seat, observed_deck);
+                if !(private_observation
+                    || object.zone == "field"
                     || (allow_resolution_zones
                         && matches!(object.zone.as_str(), "ex" | "cemetery")))
                     || object.generation != reference.generation.0
@@ -483,7 +563,9 @@ impl Game {
                         "target is not a current public field object or EX card or cemetery card",
                     ));
                 }
-                if object.zone != "cemetery" && self.restricted(id, "choose")? {
+                if matches!(object.zone.as_str(), "field" | "ex")
+                    && self.restricted(id, "choose")?
+                {
                     return Err(unsupported("target permission"));
                 }
                 Ok(super::super::DistributionMember {
@@ -522,6 +604,28 @@ impl Game {
                 distinct_names: constraint.distinct_by == Some(ObjectProperty::Names),
             },
         ))
+    }
+
+    fn target_domain_members(
+        &self,
+        execution: &Execution,
+        selector: &Selector,
+        allow_resolution_zones: bool,
+        observed_deck: bool,
+        actor_seat: &str,
+    ) -> Result<Vec<ObjectRef>> {
+        let mut members = Vec::new();
+        for member in execution.public_target_objects(self, selector, allow_resolution_zones)? {
+            let id = execution.object_id(member)?;
+            let object = self.object(id)?;
+            if private_observed_deck(self, id, actor_seat, observed_deck)
+                || (object.zone != "deck"
+                    && self.targetable_by(id, super::seat_name(execution.context.controller)?)?)
+            {
+                members.push(member);
+            }
+        }
+        Ok(members)
     }
 
     pub(super) fn internal_mode_targets_feasible(
@@ -634,6 +738,19 @@ impl Game {
     reason = "Selected targets retain a checked producer separate from installation locals."
 )]
 impl Execution {
+    pub(in crate::game::internal) fn is_private_look_target(
+        &self,
+        selector: &Selector,
+        member: ObjectRef,
+    ) -> bool {
+        let Selector::Bound { reference } = selector else {
+            return false;
+        };
+        self.targets
+            .get(&reference.key())
+            .is_some_and(|wait| wait.is_private_look_member(member))
+    }
+
     pub(in crate::game::internal) fn public_field_objects(
         &self,
         game: &Game,
@@ -680,6 +797,29 @@ impl Execution {
                 .into_iter()
                 .flatten()
                 .collect(),
+            Selector::Filter {
+                input,
+                binding,
+                predicate,
+            } => {
+                check_predicate(predicate, *binding)?;
+                let mut filtered = Vec::new();
+                for member in self.public_target_objects(game, input, allow_resolution_zones)? {
+                    if matches_candidate(game, self.object_id(member)?, predicate)? {
+                        filtered.push(member);
+                    }
+                }
+                filtered
+            }
+            Selector::ReceiptMembers {
+                receipt: ObjectReceipt::Look { .. },
+                ..
+            } => {
+                if !allow_resolution_zones {
+                    return Err(unsupported("look choice outside resolution"));
+                }
+                self.observed_objects(game, selector, self.context.controller)?
+            }
             _ => self.objects(game, selector)?,
         };
         let mut seen = BTreeSet::new();
@@ -703,4 +843,14 @@ impl Execution {
             },
         );
     }
+}
+
+fn look_filtered_selector(selector: &Selector) -> bool {
+    matches!(selector,
+        Selector::Filter { input, .. }
+            if matches!(input.as_ref(), Selector::ReceiptMembers {
+                receipt: ObjectReceipt::Look { .. },
+                projection: MemberProjection::Before,
+            })
+    )
 }

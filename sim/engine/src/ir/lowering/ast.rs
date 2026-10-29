@@ -658,6 +658,9 @@ pub(super) struct Choose {
     pub distinct_by: Option<Names>,
     pub n: Option<u64>,
     pub upto: Option<u64>,
+    pub may: Option<bool>,
+    pub reveal: Option<bool>,
+    pub order: Option<bool>,
     #[serde(rename = "by")]
     pub _by: Option<SelfPlayer>,
 }
@@ -665,6 +668,8 @@ pub(super) struct Choose {
 #[derive(Clone, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct TargetQuery {
+    #[serde(rename = "in")]
+    pub observation: Option<String>,
     pub who: Option<Side>,
     pub zone: Option<TargetZone>,
     pub leader: Option<LeaderSide>,
@@ -1153,9 +1158,16 @@ pub(super) struct DamageDuring {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct Reveal {
-    pub r#ref: WholeHand,
+    pub r#ref: RevealRef,
     #[serde(rename = "bind")]
     pub _bind: String,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum RevealRef {
+    WholeHand(WholeHand),
+    Bound(String),
 }
 
 #[derive(Deserialize)]

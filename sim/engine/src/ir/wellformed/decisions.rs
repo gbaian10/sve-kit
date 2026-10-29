@@ -80,7 +80,7 @@ impl Checker {
         else {
             return Err(self.error(WellFormedReason::DecisionTiming));
         };
-        if *may != Declinable::Required {
+        if *may != Declinable::Required && !private_optional_look(decision, *cardinality) {
             return self.reject();
         }
         if let Some(guard) = precondition {
@@ -620,6 +620,42 @@ impl Checker {
         }
         Ok(())
     }
+}
+
+fn private_optional_look(decision: &Decision, cardinality: Cardinality) -> bool {
+    let ChoiceDomain::Objects {
+        constraint,
+        target_roles: None,
+        ..
+    } = &decision.domain
+    else {
+        return false;
+    };
+    let [group] = constraint.groups.as_slice() else {
+        return false;
+    };
+    cardinality
+        == (Cardinality {
+            minimum: Nat(0),
+            maximum: Some(Nat(1)),
+        })
+        && constraint.cardinality == cardinality
+        && group.cardinality == cardinality
+        && decision.actor == (PlayerRef::Controller {})
+        && matches!(
+            &decision.visibility,
+            Visibility::Only { players }
+                if players.relation == PlayerRelation::SelfPlayer
+                    && players.relative_to == decision.actor
+        )
+        && matches!(
+            &group.selector,
+            Selector::Filter { input, .. }
+                if matches!(input.as_ref(), Selector::ReceiptMembers {
+                    receipt: ObjectReceipt::Look { .. },
+                    projection: MemberProjection::Before,
+                })
+        )
 }
 
 fn has_roles(domain: &ChoiceDomain) -> bool {

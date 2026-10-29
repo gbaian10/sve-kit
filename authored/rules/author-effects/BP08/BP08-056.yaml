@@ -1,0 +1,25 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP08-056:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-luna
+          date: "2026-10-29"
+    abilities:
+      - evolve_time:
+          do:
+            - choose:
+                bind: target
+                from:
+                  kind: follower
+                  who: opp
+                  zone: field
+                n: 1
+            - damage:
+                n: 2
+                to: target
+        line: 1

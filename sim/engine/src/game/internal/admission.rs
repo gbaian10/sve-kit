@@ -2,9 +2,10 @@ use super::{
     Cardinality, ChoiceDomain, Control, DecisionKind, Declinable, InstructionContext, Located,
     Node, Program, Requirements, Result, SourceSpan, Visibility, WellFormedProgram, unsupported,
 };
-use crate::ir::CostSpec;
-use crate::ir::Requirement;
-use crate::ir::{AbilityOrigin, AbilitySource, Binding, EnterFieldEvent, KeywordId};
+use crate::ir::{
+    AbilityOrigin, AbilitySource, Binding, CostSpec, Decision, EnterFieldEvent, KeywordId,
+    MemberProjection, Nat, ObjectReceipt, PlayerRef, PlayerRelation, Requirement, Selector,
+};
 use crate::ir::{Action, DamageAmount, IntFrozen, IntOperation, Predicate};
 use crate::ir::{Bool, DamageEvent, Expr, Int};
 use crate::ir::{EventPattern, TriggerCondition, TriggerSpec};
@@ -331,6 +332,16 @@ fn check_program(program: &Program, source: &SourceSpan, card: bool) -> Result<(
                         "resolution distribution without reviewed timing/minimum evidence",
                     ));
                 }
+                let public_required = matches!(decision.visibility, Visibility::Public {})
+                    && matches!(
+                        decision.kind,
+                        DecisionKind::ResolutionChoice {
+                            may: Declinable::Required,
+                            precondition: None,
+                            ..
+                        }
+                    );
+                let optional_private_look = private_look_choice(decision);
                 if !matches!(
                     decision.domain,
                     ChoiceDomain::Integer {
@@ -343,15 +354,7 @@ fn check_program(program: &Program, source: &SourceSpan, card: bool) -> Result<(
                         | ChoiceDomain::Objects { .. }
                         | ChoiceDomain::Recipients { .. }
                 ) || !decision.captures.is_empty()
-                    || !matches!(decision.visibility, Visibility::Public {})
-                    || !matches!(
-                        decision.kind,
-                        DecisionKind::ResolutionChoice {
-                            may: Declinable::Required,
-                            precondition: None,
-                            ..
-                        }
-                    )
+                    || !(public_required || optional_private_look)
                 {
                     return Err(unsupported("decision metadata"));
                 }
@@ -384,6 +387,49 @@ fn entry_field_requirement(requirements: &Requirements, requirement: &Requiremen
                     .any(|at| at.ir_path == location.ir_path)
             })
         })
+}
+
+fn private_look_choice(decision: &Decision) -> bool {
+    let ChoiceDomain::Objects {
+        constraint,
+        target_roles: None,
+        ..
+    } = &decision.domain
+    else {
+        return false;
+    };
+    let [group] = constraint.groups.as_slice() else {
+        return false;
+    };
+    matches!(
+        &group.selector,
+        Selector::Filter { input, .. }
+            if matches!(input.as_ref(), Selector::ReceiptMembers {
+                receipt: ObjectReceipt::Look { .. },
+                projection: MemberProjection::Before,
+            })
+    ) && matches!(
+        &decision.visibility,
+        Visibility::Only { players }
+            if players.relation == PlayerRelation::SelfPlayer
+                && players.relative_to == decision.actor
+                && decision.actor == PlayerRef::Controller {}
+    ) && matches!(
+        decision.kind,
+        DecisionKind::ResolutionChoice {
+            may: Declinable::MayDecline,
+            cardinality: Cardinality {
+                minimum: Nat(0),
+                maximum: Some(Nat(1))
+            },
+            precondition: None,
+        }
+    ) && constraint.cardinality
+        == (Cardinality {
+            minimum: Nat(0),
+            maximum: Some(Nat(1)),
+        })
+        && group.cardinality == constraint.cardinality
 }
 
 // Every enum arm, internal tag and nested requirement is opt-in, including dead branches.
@@ -470,6 +516,8 @@ fn supported(code: &str) -> bool {
             | "internal.MemberProjection.After"
             | "shape.Selector.Difference"
             | "selector.difference"
+            | "shape.Selector.Filter"
+            | "selector.filter"
             | "internal.OwnerZone.Deck"
             | "internal.ZoneKind.Deck"
             | "action.draw"
@@ -683,6 +731,7 @@ fn supported(code: &str) -> bool {
             | "shape.DecisionKind.ResolutionChoice"
             | "decision.resolution-choice"
             | "internal.Declinable.Required"
+            | "internal.Declinable.MayDecline"
             | "shape.Visibility.Public"
             | "shape.Visibility.Only"
     )
