@@ -1,0 +1,29 @@
+cards:
+  BP20-081:
+    abilities:
+      - fanfare:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - damage:
+                        n: 4
+                        to:
+                          kind: follower
+                          who: opp
+                          zone: field
+                  - - life:
+                        delta: 4
+                        who: self
+                    - draw:
+                        n: 2
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-10-29"
+format: 2
+kind: author_effect_set

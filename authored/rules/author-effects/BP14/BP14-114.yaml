@@ -1,0 +1,35 @@
+cards:
+  BP14-114:
+    abilities:
+      - fanfare:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - damage:
+                        n: 6
+                        to: enemy
+                  - - damage:
+                        n: 3
+                        to:
+                          kind: follower
+                          who: opp
+                          zone: field
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+              option: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-10-29"
+format: 2
+kind: author_effect_set
