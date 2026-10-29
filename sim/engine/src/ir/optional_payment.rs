@@ -60,7 +60,10 @@ pub(crate) fn trigger_play(ability: &Ability) -> bool {
                         Some(_) => matches!(keyword, KeywordId::Fanfare),
                         None if !play.parameters.is_empty() => matches!(
                             keyword,
-                            KeywordId::Fanfare | KeywordId::OnEvolve | KeywordId::OnAttack
+                            KeywordId::Fanfare
+                                | KeywordId::Lastword
+                                | KeywordId::OnEvolve
+                                | KeywordId::OnAttack
                         ),
                         None => matches!(keyword, KeywordId::Fanfare) && declared_choice(body),
                     }

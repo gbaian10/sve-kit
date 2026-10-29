@@ -28,6 +28,7 @@ fn ordinary_trigger_targets_admit_signed_modification_and_banish() {
     for (head, action) in [
         ("attack_time", json!({"buff":{"on":"enemy","power":-1}})),
         ("evolve_time", json!({"banish":"enemy"})),
+        ("lastword", json!({"destroy":"enemy"})),
     ] {
         lowerer()
             .lower(&tree(
@@ -55,10 +56,10 @@ fn ordinary_target_support_keeps_unrelated_play_constructs_closed() {
         let mut activated = body.clone();
         activated["cost"] = json!({"pp":1});
         lowerer().lower(&tree("activate", activated)).unwrap();
-        lowerer().lower(&tree("attack_time", body)).err().unwrap();
+        for head in ["attack_time", "lastword"] {
+            lowerer().lower(&tree(head, body.clone())).err().unwrap();
+        }
     }
-    let body = json!({"targets":[target],"do":[{"buff":{"on":"enemy","power":-1}}]});
-    lowerer().lower(&tree("lastword", body)).err().unwrap();
 }
 
 #[test]

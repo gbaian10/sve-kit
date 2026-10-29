@@ -39,12 +39,12 @@ pub(super) fn trigger_play_spec(
         && triggered
         && body.optional_cost.is_none()
         && (body.head_cost.is_none() || keyword == Some(super::KeywordId::Lastword))
-        && !matches!(
+        && !(matches!(
             keyword,
             Some(
                 super::KeywordId::Fanfare | super::KeywordId::OnEvolve | super::KeywordId::OnAttack
             )
-        )
+        ) || (keyword == Some(super::KeywordId::Lastword) && body.head_cost.is_none()))
     {
         return Err(unsupported(path));
     }
