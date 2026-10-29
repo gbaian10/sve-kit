@@ -1,0 +1,44 @@
+cards:
+  BP15-069:
+    abilities:
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  played_from:
+                    from: ex
+                    ref: this
+                else:
+                  - buff:
+                      hp: 1
+                      on: ally
+                      power: 1
+                then:
+                  - buff:
+                      hp: 2
+                      on: ally
+                      power: 2
+                  - grant:
+                      keywords:
+                        - rush
+                        - assail
+                      on: ally
+          targets:
+            - bind: ally
+              from:
+                kind: follower
+                other: true
+                trait: 海洋
+                who: self
+                zone: field
+              n: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-29"
+format: 2
+kind: author_effect_set
