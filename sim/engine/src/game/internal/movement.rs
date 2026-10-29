@@ -494,9 +494,19 @@ impl Game {
             }
             let ordinary = self.object_type(&object.id)? == "フォロワー"
                 && matches!(object.zone.as_str(), "cemetery" | "ex");
+            let private_look = object.zone == "deck"
+                && object.owner == seat
+                && object.controller == seat
+                && self
+                    .state
+                    .knowledge
+                    .get(seat)
+                    .is_some_and(|knowledge| knowledge.located.contains(&object.id))
+                && execution.is_private_look_target(objects, member)
+                && self.object_type(&object.id)? == "フォロワー";
             let advance = self.object_type(&object.id)? == "フォロワー・アドバンス"
                 && matches!(object.zone.as_str(), "evolve_deck" | "ex");
-            if !(ordinary || advance)
+            if !(ordinary || advance || private_look)
                 || object.owner != seat
                 || object.controller != seat
                 || object.state["face"] != 0_i64

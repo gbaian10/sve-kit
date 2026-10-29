@@ -549,6 +549,25 @@ fn observed_optional_trait_choice_lowers_and_rejects_non_observation_sources() {
 }
 
 #[test]
+fn private_look_can_make_disjoint_cost_choices_move_them_to_field_and_order_the_remainder() {
+    let mut tree = expanded::tree().clone();
+    tree["cards"]["BP08-055"]["abilities"][0]["fanfare"]["do"] = json!([
+        {"look": {"bind": "seen", "top": {"n": 4_u8, "who": "self"}}},
+            {"choose": {"bind": "chosen", "from": {"in": "seen", "kind": "follower"}, "groups": [{"kind": "follower", "orig_cost_le": 2_u8}, {"kind": "follower", "orig_cost_le": 3_u8}], "upto": 2_u8, "may": true}},
+        {"move": {"ref": "chosen", "to": "field", "result": "placed"}},
+            {"move": {"ref": {"in": "seen", "except": {"in": {"objects_of": "placed", "view": "before"}}}, "to": "deck", "position": "bottom", "order": "chooser"}}
+    ]);
+    let lowerer = lowerer();
+    lowerer.lower(&tree).unwrap();
+
+    let mut whole_deck = tree;
+    *whole_deck
+        .pointer_mut("/cards/BP08-055/abilities/0/fanfare/do/1/choose/from")
+        .unwrap() = json!({"who": "self", "zone": "deck", "kind": "follower"});
+    lowerer.lower(&whole_deck).unwrap_err();
+}
+
+#[test]
 fn bp08_candidate_matches_the_handwritten_card_program() {
     let cards = lowerer().lower(expanded::tree()).unwrap();
     let mut actual = cards["BP08-038"].card().clone();

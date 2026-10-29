@@ -152,11 +152,34 @@ impl BodyContext<'_> {
         })
     }
 
+    /// Only a chosen target may enter the field, so the movement stays tied to its decision.
+    fn field_entry_move(&mut self, value: &ast::Move, path: &str) -> Result<Action, LoweringError> {
+        let Some(ast::MoveObjects::Field(objects @ ast::Objects::Bound(name))) = &value.r#ref
+        else {
+            return Err(unsupported(path));
+        };
+        if !self.targets.contains_key(name)
+            || value.top.is_some()
+            || value.position.is_some()
+            || value.order.is_some()
+            || value.result.is_none()
+        {
+            return Err(unsupported(path));
+        }
+        Ok(shared_put(self.objects(objects, path)?, ZoneKind::Field))
+    }
+
     pub(super) fn observed_move(
         &mut self,
         value: &ast::Move,
         path: &str,
     ) -> Result<Action, LoweringError> {
+        if matches!(value.to, ast::Destination::Field) {
+            if let Some(ast::MoveObjects::Field(objects @ ast::Objects::This(_))) = &value.r#ref {
+                return self.self_return(objects, path);
+            }
+            return self.field_entry_move(value, path);
+        }
         if let Some(top) = &value.top {
             return top_to_cemetery(value, top, path);
         }
@@ -167,14 +190,13 @@ impl BodyContext<'_> {
             {
                 return Err(unsupported(path));
             }
-            if matches!(value.to, ast::Destination::Field) {
-                return self.self_return(objects, path);
-            }
             let zone = match value.to {
                 ast::Destination::Hand => OwnerZone::Hand,
                 ast::Destination::Cemetery => OwnerZone::Cemetery,
                 ast::Destination::Ex => OwnerZone::Ex,
-                ast::Destination::Field | ast::Destination::Deck => return Err(unsupported(path)),
+                ast::Destination::Deck | ast::Destination::Field => {
+                    return Err(unsupported(path));
+                }
             };
             let objects = match (objects, self.leave_event, zone) {
                 (ast::Objects::This(_), Some(event), OwnerZone::Ex) => Selector::Objects {
@@ -202,22 +224,7 @@ impl BodyContext<'_> {
         let cards = self.observed(observed, matches!(value.to, ast::Destination::Ex), path)?;
         match value.to {
             ast::Destination::Ex if value.position.is_none() && value.order.is_none() => {
-                Ok(Action::Move {
-                    objects: cards,
-                    movement: MoveSpec {
-                        to: MoveDestination::Shared {
-                            zone: super::super::ZoneRef {
-                                player: PlayerRef::Controller {},
-                                kind: ZoneKind::Ex,
-                            },
-                        },
-                        initial_posture: None,
-                        entry_effects: vec![],
-                        position: None,
-                        order: None,
-                    },
-                    reason: MoveReason::Put,
-                })
+                Ok(shared_put(cards, ZoneKind::Ex))
             }
             ast::Destination::Deck if value.order.is_some() => {
                 let position = match value.position {
@@ -339,4 +346,23 @@ fn top_to_cemetery(
         },
         reason: MoveReason::Put,
     })
+}
+
+const fn shared_put(objects: Selector, kind: ZoneKind) -> Action {
+    Action::Move {
+        objects,
+        movement: MoveSpec {
+            to: MoveDestination::Shared {
+                zone: super::super::ZoneRef {
+                    player: PlayerRef::Controller {},
+                    kind,
+                },
+            },
+            initial_posture: None,
+            entry_effects: vec![],
+            position: None,
+            order: None,
+        },
+        reason: MoveReason::Put,
+    }
 }

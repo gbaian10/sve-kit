@@ -1,10 +1,11 @@
 use super::super::{DecisionToken, DecisionView, InputDomain, Slot, Wait, contains};
 use super::{Execution, Game, Nat, ObjectRef, Result, invalid, player_id, unsupported};
 use crate::ir::{
-    Binding, CardKind, Cardinality, CharacteristicView, ChoiceDomain, Decision, DecisionKind,
-    Declinable, Disjointness, KindRead, MemberProjection, NamesRead, ObjectOperand, ObjectProperty,
-    ObjectReceipt, ObjectView, PlayerRef, PlayerRelation, Predicate, ScopeId, SelectionConstraint,
-    SelectionGroup, Selector, TraitsRead, Visibility,
+    Binding, CardKind, Cardinality, CharacteristicView, ChoiceDomain, Comparison, Decision,
+    DecisionKind, Declinable, Disjointness, Int, IntOperation, KindRead, MemberProjection,
+    NamesRead, NumberRead, ObjectOperand, ObjectProperty, ObjectReceipt, ObjectView, PlayerRef,
+    PlayerRelation, Predicate, ScopeId, SelectionConstraint, SelectionGroup, Selector, TraitsRead,
+    Visibility,
 };
 use crate::ir::{Bool, Expr, SelectionView, ZoneKind};
 use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
@@ -27,6 +28,8 @@ pub(in crate::game::internal) struct TargetWait {
     binding: Binding<Selector>,
     members: Vec<ObjectRef>,
     bounds: Cardinality,
+    group_members: Vec<Vec<ObjectRef>>,
+    group_bounds: Vec<Cardinality>,
     characteristics: Vec<(ObjectRef, TargetCharacteristics)>,
     distinct_names: bool,
     on_field_at_capture: bool,
@@ -76,11 +79,22 @@ impl TargetWait {
         else {
             return false;
         };
-        let [group] = constraint.groups.as_slice() else {
+        if constraint.groups.is_empty() || constraint.groups.len() > 2 {
             return false;
+        }
+        let expected_bounds = Cardinality {
+            minimum: Nat(0),
+            maximum: u64::try_from(constraint.groups.len()).ok().map(Nat),
         };
         self.members.contains(&member)
-            && look_filtered_selector(&group.selector)
+            && constraint
+                .groups
+                .iter()
+                .all(|group| look_filtered_selector(&group.selector))
+            && constraint.groups.iter().all(|group| {
+                group.cardinality.minimum == Nat(0) && group.cardinality.maximum == Some(Nat(1))
+            })
+            && constraint.cardinality == expected_bounds
             && self.decision.actor == (PlayerRef::Controller {})
             && matches!(
                 &self.decision.visibility,
@@ -92,12 +106,9 @@ impl TargetWait {
                 self.decision.kind,
                 DecisionKind::ResolutionChoice {
                     may: Declinable::MayDecline,
-                    cardinality: Cardinality {
-                        minimum: Nat(0),
-                        maximum: Some(Nat(1)),
-                    },
+                    cardinality,
                     precondition: None,
-                }
+                } if cardinality == expected_bounds
             )
     }
 
@@ -146,33 +157,43 @@ impl TargetWait {
             })
             .collect::<Result<Vec<_>>>()?;
         if !self.compatible(&members)? {
-            return Err(invalid("target names must differ"));
+            return Err(invalid("target selection constraints"));
         }
         Ok(members)
     }
 
     fn compatible(&self, members: &[ObjectRef]) -> Result<bool> {
-        if !self.distinct_names {
+        if self.distinct_names {
+            let mut names = BTreeSet::new();
+            for member in members {
+                let saved = self
+                    .characteristics
+                    .iter()
+                    .find(|(reference, _)| reference == member)
+                    .ok_or_else(|| invalid("missing target names"))?;
+                let own: BTreeSet<_> = saved.1.names.iter().collect();
+                if own.iter().any(|name| names.contains(name)) {
+                    return Ok(false);
+                }
+                names.extend(own);
+            }
+        }
+        // A single group is already bounded by `TargetWait::bounds`, whose minimum may be
+        // lowered when a resolution has fewer available candidates than requested.
+        if self.group_members.len() == 1 {
             return Ok(true);
         }
-        let mut names = BTreeSet::new();
-        for member in members {
-            let saved = self
-                .characteristics
-                .iter()
-                .find(|(reference, _)| reference == member)
-                .ok_or_else(|| invalid("missing target names"))?;
-            let own: BTreeSet<_> = saved.1.names.iter().collect();
-            if own.iter().any(|name| names.contains(name)) {
-                return Ok(false);
-            }
-            names.extend(own);
-        }
-        Ok(true)
+        Ok(assign_groups(
+            members,
+            0,
+            &self.group_members,
+            &self.group_bounds,
+            &mut vec![0; self.group_members.len()],
+        ))
     }
 
     fn capacity(&self) -> Result<u64> {
-        if !self.distinct_names {
+        if !self.distinct_names && self.group_members.len() <= 1 {
             return u64::try_from(self.members.len()).map_err(invalid);
         }
         if self.members.len() > 10 {
@@ -196,6 +217,103 @@ impl TargetWait {
         }
         Ok(maximum)
     }
+}
+
+fn assign_groups(
+    members: &[ObjectRef],
+    index: usize,
+    group_members: &[Vec<ObjectRef>],
+    bounds: &[Cardinality],
+    counts: &mut [u64],
+) -> bool {
+    if index == members.len() {
+        return bounds.iter().enumerate().all(|(group, bound)| {
+            bound.minimum.0 <= counts[group]
+                && bound
+                    .maximum
+                    .is_none_or(|maximum| counts[group] <= maximum.0)
+        });
+    }
+    for group in 0..group_members.len() {
+        if !group_members[group].contains(&members[index])
+            || bounds[group]
+                .maximum
+                .is_some_and(|maximum| counts[group] >= maximum.0)
+        {
+            continue;
+        }
+        counts[group] = counts[group].saturating_add(1);
+        if assign_groups(
+            members,
+            index.saturating_add(1),
+            group_members,
+            bounds,
+            counts,
+        ) {
+            return true;
+        }
+        counts[group] = counts[group].saturating_sub(1);
+    }
+    false
+}
+
+fn private_look_decision(decision: &Decision, constraint: &SelectionConstraint) -> bool {
+    matches!(
+        &decision.visibility,
+        Visibility::Only { players }
+            if players.relation == PlayerRelation::SelfPlayer
+                && players.relative_to == decision.actor
+    ) && constraint
+        .groups
+        .iter()
+        .all(|group| look_filtered_selector(&group.selector))
+}
+
+/// Candidates are the union of the groups; one candidate may belong to several groups.
+fn group_layout(
+    constraint: &SelectionConstraint,
+    group_members: &[Vec<ObjectRef>],
+) -> (Vec<ObjectRef>, Vec<Cardinality>, Cardinality) {
+    let mut seen_members = BTreeSet::new();
+    let members = group_members
+        .iter()
+        .flatten()
+        .copied()
+        .filter(|member| seen_members.insert((member.id, member.generation)))
+        .collect();
+    match constraint.groups.as_slice() {
+        [group] => (
+            members,
+            vec![target_bounds(constraint, group)],
+            target_bounds(constraint, group),
+        ),
+        groups => (
+            members,
+            groups.iter().map(|group| group.cardinality).collect(),
+            constraint.cardinality,
+        ),
+    }
+}
+
+fn grouped_look_field_bounds(
+    game: &Game,
+    actor_seat: &str,
+    observed_deck: bool,
+    group_count: usize,
+    mut bounds: Cardinality,
+) -> Result<Cardinality> {
+    if observed_deck && group_count > 1 {
+        let free_field_slots = u64::try_from(
+            5_i64
+                .saturating_sub(game.zone_count(actor_seat, "field"))
+                .max(0),
+        )
+        .map_err(invalid)?;
+        bounds.maximum = Some(Nat(bounds
+            .maximum
+            .map_or(free_field_slots, |maximum| maximum.0.min(free_field_slots))));
+    }
+    Ok(bounds)
 }
 
 fn target_group(constraint: &SelectionConstraint) -> Result<&SelectionGroup> {
@@ -251,27 +369,36 @@ pub(in crate::game::internal) fn check_resolution(decision: &Decision) -> Result
     else {
         return Err(unsupported("resolution public choice domain"));
     };
-    let group = target_group(constraint)?;
-    if let Selector::Filter {
-        input,
-        binding,
-        predicate,
-    } = &group.selector
-        && matches!(
-            input.as_ref(),
-            Selector::ReceiptMembers {
-                receipt: ObjectReceipt::Look { .. },
-                projection: MemberProjection::Before,
-            }
-        )
-    {
-        check_predicate(predicate, *binding)?;
-        if decision.actor != (PlayerRef::Controller {}) || constraint.cardinality.maximum.is_none()
+    let private_look_groups = !constraint.groups.is_empty()
+        && constraint
+            .groups
+            .iter()
+            .all(|group| private_look_filter(&group.selector).is_some());
+    if private_look_groups {
+        if decision.actor != (PlayerRef::Controller {})
+            || constraint.groups.len() > 2
+            || constraint.cardinality.minimum != Nat(0)
+            || constraint
+                .cardinality
+                .maximum
+                .is_none_or(|maximum| maximum.0 > 2)
+            || constraint.distinct_by.is_some()
+            || !constraint.aggregate_bounds.is_empty()
+            || constraint.disjoint != Disjointness::Disjoint
         {
             return Err(unsupported("private observed choice actor or bounds"));
         }
+        for group in &constraint.groups {
+            if group.cardinality.minimum != Nat(0) || group.cardinality.maximum != Some(Nat(1)) {
+                return Err(unsupported("private observed group bounds"));
+            }
+            let (binding, predicate) = private_look_filter(&group.selector)
+                .ok_or_else(|| unsupported("private observed group selector"))?;
+            check_predicate(predicate, binding)?;
+        }
         return Ok(());
     }
+    let group = target_group(constraint)?;
     match &group.selector {
         Selector::Zone {
             zone: ZoneKind::Ex,
@@ -343,6 +470,25 @@ fn candidate_view(view: &ObjectView, candidate: Binding<ObjectRef>) -> bool {
     matches!(view, ObjectView::Current { object } if matches!(object.as_ref(), ObjectOperand::Bound { binding } if *binding == candidate))
 }
 
+fn private_look_filter(selector: &Selector) -> Option<(Binding<ObjectRef>, &Expr<Bool>)> {
+    let Selector::Filter {
+        input,
+        binding,
+        predicate,
+    } = selector
+    else {
+        return None;
+    };
+    matches!(
+        input.as_ref(),
+        Selector::ReceiptMembers {
+            receipt: ObjectReceipt::Look { .. },
+            projection: MemberProjection::Before,
+        }
+    )
+    .then_some((*binding, predicate))
+}
+
 fn check_predicate(value: &Expr<Bool>, candidate: Binding<ObjectRef>) -> Result<()> {
     match value {
         Expr::Literal(Bool(true)) => Ok(()),
@@ -372,6 +518,13 @@ fn check_predicate(value: &Expr<Bool>, candidate: Binding<ObjectRef>) -> Result<
             } if !trait_id.0.is_empty()
                 && matches!(read.as_ref(), TraitsRead::Traits { object, view: CharacteristicView::Effective } if candidate_view(object, candidate)) =>
             {
+                Ok(())
+            }
+            Predicate::CompareInt {
+                left: Expr::Compute(left),
+                comparison: Comparison::LessEqual,
+                right: Expr::Literal(Int(_)),
+            } if matches!(left.as_ref(), IntOperation::InformationOrZero { information: NumberRead::Cost { object, view: CharacteristicView::Original } } if candidate_view(object, candidate)) => {
                 Ok(())
             }
             Predicate::And { predicates } | Predicate::Or { predicates }
@@ -419,6 +572,26 @@ pub(super) fn matches_candidate(game: &Game, id: &str, value: &Expr<Bool>) -> Re
                 .any(|actual| actual.contains(&name.0))),
             Predicate::HasTrait { trait_id, .. } => {
                 Ok(characteristics(game, id)?.traits.contains(&trait_id.0))
+            }
+            Predicate::CompareInt {
+                left: Expr::Compute(left),
+                comparison: Comparison::LessEqual,
+                right: Expr::Literal(Int(limit)),
+            } if matches!(
+                left.as_ref(),
+                IntOperation::InformationOrZero {
+                    information: NumberRead::Cost {
+                        view: CharacteristicView::Original,
+                        ..
+                    }
+                }
+            ) =>
+            {
+                let cost = game.face(id)?["cost"]
+                    .as_str()
+                    .and_then(|text| text.parse::<i64>().ok())
+                    .ok_or_else(|| invalid("missing original cost"))?;
+                Ok(cost <= *limit)
             }
             Predicate::And { predicates } | Predicate::Or { predicates } => {
                 let values = predicates
@@ -520,28 +693,34 @@ impl Game {
         else {
             return Err(unsupported("target domain"));
         };
-        let [group] = constraint.groups.as_slice() else {
+        if constraint.groups.is_empty() || constraint.groups.len() > 2 {
             return Err(unsupported("target groups"));
-        };
+        }
         let allow_resolution_zones = matches!(decision.kind, DecisionKind::ResolutionChoice { .. });
-        let observed_deck = allow_resolution_zones
-            && matches!(
-                &decision.visibility,
-                Visibility::Only { players }
-                    if players.relation == PlayerRelation::SelfPlayer
-                        && players.relative_to == decision.actor
-            )
-            && look_filtered_selector(&group.selector);
+        let observed_deck = allow_resolution_zones && private_look_decision(decision, constraint);
         let actor = execution.player(self, &decision.actor)?;
         let actor_seat = super::seat_name(actor)?;
-        let members = self.target_domain_members(
-            execution,
-            &group.selector,
-            allow_resolution_zones,
-            observed_deck,
+        let group_members = constraint
+            .groups
+            .iter()
+            .map(|group| {
+                self.target_domain_members(
+                    execution,
+                    &group.selector,
+                    allow_resolution_zones,
+                    observed_deck,
+                    actor_seat,
+                )
+            })
+            .collect::<Result<Vec<_>>>()?;
+        let (members, group_bounds, bounds) = group_layout(constraint, &group_members);
+        let bounds = grouped_look_field_bounds(
+            self,
             actor_seat,
+            observed_deck,
+            constraint.groups.len(),
+            bounds,
         )?;
-        let bounds = target_bounds(constraint, group);
         let public = members
             .iter()
             .enumerate()
@@ -594,6 +773,8 @@ impl Game {
                 binding: *binding,
                 members,
                 bounds,
+                group_members,
+                group_bounds,
                 characteristics,
                 distinct_names: constraint.distinct_by == Some(ObjectProperty::Names),
                 on_field_at_capture,
@@ -743,12 +924,13 @@ impl Execution {
         selector: &Selector,
         member: ObjectRef,
     ) -> bool {
-        let Selector::Bound { reference } = selector else {
-            return false;
-        };
-        self.targets
-            .get(&reference.key())
-            .is_some_and(|wait| wait.is_private_look_member(member))
+        match selector {
+            Selector::Bound { reference } => self
+                .targets
+                .get(&reference.key())
+                .is_some_and(|wait| wait.is_private_look_member(member)),
+            _ => false,
+        }
     }
 
     pub(in crate::game::internal) fn public_field_objects(
