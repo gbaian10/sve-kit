@@ -1,0 +1,32 @@
+cards:
+  BP01-004:
+    abilities:
+      - evolve:
+          cost:
+            pp: 0
+        line: 1
+      - keywords:
+          - rush
+        line: 2
+      - fanfare:
+          do:
+            - buff:
+                hp: 0
+                on: this
+                power:
+                  minus:
+                    - history_count:
+                        event: played
+                        who: self
+                        window: this_turn
+                    - 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

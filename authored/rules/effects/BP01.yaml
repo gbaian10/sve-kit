@@ -165,14 +165,6 @@ cards:
               type: follower
             min: 1
             max: 1
-  BP01-096:
-    status: complete
-    abilities:
-      - line: 1
-        kind: static
-        body:
-          op: macro
-          name: intimidate
   BP01-105:
     status: complete
     abilities:
@@ -263,22 +255,6 @@ cards:
           - op: move
             subjects: self
             to: cemetery
-  BP01-158:
-    status: complete
-    abilities:
-      - line: 1
-        kind: static
-        body:
-          op: macro
-          name: storm
-  BP01-163:
-    status: complete
-    abilities:
-      - line: 1
-        kind: static
-        body:
-          op: macro
-          name: assail
   BP01-170:
     status: complete
     abilities:
@@ -306,14 +282,6 @@ cards:
   BP01-175:
     status: complete
     abilities: []
-  BP01-P10:
-    status: complete
-    abilities:
-      - line: 1
-        kind: static
-        body:
-          op: macro
-          name: storm
   BP01-P23:
     status: complete
     abilities:

@@ -1,0 +1,34 @@
+cards:
+  BP01-151:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - fanfare:
+          do:
+            - buff:
+                hp: 3
+                on: ally
+                power: 4
+            - grant:
+                keywords:
+                  - assail
+                on: ally
+          targets:
+            - bind: ally
+              from:
+                kind: follower
+                other: true
+                who: self
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set
