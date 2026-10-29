@@ -1,5 +1,6 @@
 use super::super::{DecisionToken, DecisionView, InputDomain, Slot, Wait, contains};
 use super::{Execution, Game, Nat, ObjectRef, Result, invalid, player_id, unsupported};
+use crate::ir::effect_evolution;
 use crate::ir::{
     Binding, CardKind, Cardinality, CharacteristicView, ChoiceDomain, Comparison, Decision,
     DecisionKind, Declinable, Disjointness, Int, IntOperation, KindRead, MemberProjection,
@@ -350,6 +351,9 @@ pub(super) fn check(constraint: &SelectionConstraint) -> Result<()> {
 }
 
 pub(in crate::game::internal) fn check_resolution(decision: &Decision) -> Result<()> {
+    if effect_evolution::is_choice(decision) {
+        return Ok(());
+    }
     if let ChoiceDomain::Recipients {
         candidates,
         cardinality,
@@ -696,23 +700,12 @@ impl Game {
         if constraint.groups.is_empty() || constraint.groups.len() > 2 {
             return Err(unsupported("target groups"));
         }
+        let evolution = effect_evolution::is_choice(decision);
         let allow_resolution_zones = matches!(decision.kind, DecisionKind::ResolutionChoice { .. });
         let observed_deck = allow_resolution_zones && private_look_decision(decision, constraint);
         let actor = execution.player(self, &decision.actor)?;
         let actor_seat = super::seat_name(actor)?;
-        let group_members = constraint
-            .groups
-            .iter()
-            .map(|group| {
-                self.target_domain_members(
-                    execution,
-                    &group.selector,
-                    allow_resolution_zones,
-                    observed_deck,
-                    actor_seat,
-                )
-            })
-            .collect::<Result<Vec<_>>>()?;
+        let group_members = self.target_group_members(execution, decision, constraint)?;
         let (members, group_bounds, bounds) = group_layout(constraint, &group_members);
         let bounds = grouped_look_field_bounds(
             self,
@@ -732,6 +725,7 @@ impl Game {
                     private_observed_deck(self, id, actor_seat, observed_deck);
                 if !(private_observation
                     || object.zone == "field"
+                    || (evolution && object.zone == "evolve_deck")
                     || (allow_resolution_zones
                         && matches!(object.zone.as_str(), "ex" | "cemetery")))
                     || object.generation != reference.generation.0
@@ -742,7 +736,8 @@ impl Game {
                         "target is not a current public field object or EX card or cemetery card",
                     ));
                 }
-                if matches!(object.zone.as_str(), "field" | "ex")
+                if !evolution
+                    && matches!(object.zone.as_str(), "field" | "ex")
                     && self.restricted(id, "choose")?
                 {
                     return Err(unsupported("target permission"));
@@ -785,6 +780,37 @@ impl Game {
                 distinct_names: constraint.distinct_by == Some(ObjectProperty::Names),
             },
         ))
+    }
+
+    fn target_group_members(
+        &self,
+        execution: &Execution,
+        decision: &Decision,
+        constraint: &SelectionConstraint,
+    ) -> Result<Vec<Vec<ObjectRef>>> {
+        if effect_evolution::is_choice(decision) {
+            if constraint.groups.len() != 1 {
+                return Err(unsupported("one effect evolution selector group"));
+            }
+            return Ok(vec![self.effect_evolution_members(execution)?]);
+        }
+        let allow_resolution_zones = matches!(decision.kind, DecisionKind::ResolutionChoice { .. });
+        let observed_deck = allow_resolution_zones && private_look_decision(decision, constraint);
+        let actor = execution.player(self, &decision.actor)?;
+        let actor_seat = super::seat_name(actor)?;
+        constraint
+            .groups
+            .iter()
+            .map(|group| {
+                self.target_domain_members(
+                    execution,
+                    &group.selector,
+                    allow_resolution_zones,
+                    observed_deck,
+                    actor_seat,
+                )
+            })
+            .collect()
     }
 
     fn target_domain_members(

@@ -255,3 +255,87 @@ fn field_return_lowering_does_not_admit_arbitrary_targets_or_other_ability_heads
         .err()
         .unwrap();
 }
+
+#[test]
+fn lastword_declares_targets_after_departure_and_rejects_foreign_answers() {
+    let programs = lowerer()
+        .lower(&tree(&[
+            ("activate", json!({"cost":{"pp":0},"do":[{"destroy":"this"}]})),
+            ("lastword", json!({
+                "targets":[{"bind":"enemy","from":{"who":"opp","zone":"field","kind":"follower"},"n":1}],
+                "do":[{"damage":{"to":"enemy","n":2}},{"life":{"who":"self","delta":1}}]
+            })),
+        ]))
+        .unwrap();
+    let program = &programs["unit-follower"];
+    for available in [false, true] {
+        let mut initial = board(3);
+        initial["players"]["P2"]["zones"]["field"] = if available {
+            json!([{"id":"enemy","card":"unit-follower"}])
+        } else {
+            json!([])
+        };
+        let mut game = loaded(&initial, program);
+        depart(&mut game, program.card().abilities[0].node.id);
+        let before = game.projection(View::Referee).unwrap();
+        assert_eq!(before["P1"]["field"], json!([]));
+        assert_eq!(before["P1"]["cemetery"], json!(["s"]));
+        let play = fire(&mut game, 2);
+        if !available {
+            assert_eq!(play, CardPlay::Cancelled);
+            assert_eq!(game.projection(View::Referee).unwrap(), before);
+            game.resume_internal_card().unwrap();
+            assert!(game.internal_pending_choice().unwrap().is_none());
+            continue;
+        }
+        let CardPlay::Awaiting(question) = play else {
+            panic!("Lastword target declaration");
+        };
+        let InputDomain::Targets(domain) = &question.domain else {
+            panic!("formal targets");
+        };
+        assert_eq!(question.actor, PlayerId { seat: 1 });
+        assert_eq!(domain.members.len(), 1);
+        assert_eq!(domain.cardinality.minimum, Nat(1));
+        let declaring = game.projection(View::Referee).unwrap();
+        for part in ["P1", "P2", "objects"] {
+            assert_eq!(declaring[part], before[part]);
+        }
+        let pending = format!("{game:?}");
+        for (actor, handles) in [
+            (PlayerId { seat: 2 }, vec![domain.members[0].handle]),
+            (question.actor, vec![]),
+            (question.actor, vec![99]),
+        ] {
+            game.answer_internal_card(actor, question.token, Answer::Targets(handles))
+                .unwrap_err();
+            assert!(
+                format!("{game:?}") == pending,
+                "invalid answers preserve authority"
+            );
+        }
+        let played = resolved(
+            game.answer_internal_card(
+                question.actor,
+                question.token,
+                Answer::Targets(vec![domain.members[0].handle]),
+            )
+            .unwrap(),
+        );
+        assert_eq!(
+            played
+                .progress
+                .facts
+                .iter()
+                .filter(|fact| matches!(fact, Fact::AbilityPlayed { .. }))
+                .count(),
+            1
+        );
+        game.resume_internal_card().unwrap();
+        let after = game.projection(View::Referee).unwrap();
+        assert_eq!(after["objects"]["enemy"]["damage"], 2);
+        assert_eq!(after["P1"]["leader"]["life"], 21);
+        assert_eq!(after["P1"]["cemetery"], json!(["s"]));
+        assert!(game.internal_pending_choice().unwrap().is_none());
+    }
+}

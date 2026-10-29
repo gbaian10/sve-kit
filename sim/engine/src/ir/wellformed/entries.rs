@@ -6,9 +6,9 @@ use crate::ir::{
     Ability, AbilityKind, AbilityQualification, Capture, CardProgram, Cardinality,
     CharacteristicPatch, ChoiceDomain, ContinuousLayer, DecisionKind, Duration, DurationEnd,
     Effect, EffectTarget, EventContext, EventPattern, ExecutionRef, GrantedAbility, Nat,
-    NumericChange, PlayerRef, PlayerRelation, PlayerSet, Procedure, ScopeId, TextQuantifier,
-    TimeAnchor, TimestampBasis, TriggerAggregation, TriggerCondition, TriggerSpec, Visibility,
-    ZoneKind,
+    NumericChange, PlayerRef, PlayerRelation, PlayerSet, Procedure, ScopeId, StandScope,
+    TextQuantifier, TimeAnchor, TimestampBasis, TriggerAggregation, TriggerCondition, TriggerSpec,
+    Visibility, ZoneKind,
 };
 use crate::ir::{
     AbilityOrigin, Binding, Bool, EnterFieldEvent, Expr, KeywordId, ObjectFrozen, ObjectOperand,
@@ -586,12 +586,22 @@ impl Checker {
                 self.selector(objects)?;
                 self.cause_pattern(cause)
             }
+            ActionPattern::Stand {
+                objects,
+                scope: StandScope::RuleStart { player },
+            } => {
+                self.selector(objects)?;
+                self.player(player)
+            }
             ActionPattern::PlayCard { .. }
             | ActionPattern::PlayAbility { .. }
             | ActionPattern::Attack { .. }
             | ActionPattern::ChooseTarget { .. }
             | ActionPattern::Draw { .. }
-            | ActionPattern::Stand { .. }
+            | ActionPattern::Stand {
+                scope: StandScope::Any {},
+                ..
+            }
             | ActionPattern::IncreasePpMaximum { .. }
             | ActionPattern::IgnoreWard { .. }
             | ActionPattern::Reroll { .. }

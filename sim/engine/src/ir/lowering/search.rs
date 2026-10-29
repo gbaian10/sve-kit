@@ -336,7 +336,7 @@ impl BodyContext<'_> {
             permission: FollowPermission::SameEffectExplicitReference {},
         };
         let affected = Binding::new(1, self.card_allocator.scope(path)?);
-        let duration = numeric::duration(installation.until.as_ref());
+        let duration = numeric::duration(installation.until.as_ref(), path)?;
         Ok(Action::InstallEffect {
             subjects: InstallationSubjects::Objects { objects, affected },
             capture: InstallationTime::InstructionStart,

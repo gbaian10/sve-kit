@@ -25,7 +25,7 @@ impl Execution {
     pub(super) fn player(&self, game: &Game, player: &PlayerRef) -> Result<PlayerId> {
         match player {
             PlayerRef::FromExpression { value } => self.player_value(game, value),
-            PlayerRef::Bound { .. } => Err(unsupported("bound player value")),
+            PlayerRef::Bound { binding } => self.player_slot(*binding),
             PlayerRef::Controller {} => Ok(self.context.controller),
             PlayerRef::Owner {} => player_id(&game.object(&self.context.source)?.owner),
             PlayerRef::Active {} => player_id(game.active()),
@@ -592,6 +592,23 @@ impl Execution {
         }
     }
 
+    fn entered_origin(&self, value: &Expr<EntryOrigin>) -> Result<EntryOrigin> {
+        match value {
+            Expr::Literal(origin) => Ok(*origin),
+            Expr::Frozen(field) => match field.as_ref() {
+                EntryOriginFields::EnterFieldFrom { event } => self
+                    .entry_origin
+                    .filter(|(binding, _)| *binding == event.key())
+                    .map(|(_, origin)| origin)
+                    .ok_or_else(|| invalid("missing entry origin authority")),
+                EntryOriginFields::EnterExFrom { .. } => {
+                    Err(unsupported("entry origin event family"))
+                }
+            },
+            _ => Err(unsupported("entry origin expression")),
+        }
+    }
+
     fn entered_method(&self, value: &Expr<EntryMethod>) -> Result<EntryMethod> {
         match value {
             Expr::Literal(method) => Ok(*method),
@@ -603,21 +620,6 @@ impl Execution {
                     .ok_or_else(|| invalid("missing entry method authority")),
             },
             _ => Err(unsupported("entry method expression")),
-        }
-    }
-
-    fn entered_origin(&self, value: &Expr<EntryOrigin>) -> Result<EntryOrigin> {
-        match value {
-            Expr::Literal(origin) => Ok(*origin),
-            Expr::Frozen(field) => match field.as_ref() {
-                EntryOriginFields::EnterFieldFrom { event } => self
-                    .entry_origin
-                    .filter(|(binding, _)| *binding == event.key())
-                    .map(|(_, origin)| origin)
-                    .ok_or_else(|| invalid("missing entry origin authority")),
-                EntryOriginFields::EnterExFrom { .. } => Err(unsupported("entry origin field")),
-            },
-            _ => Err(unsupported("entry origin expression")),
         }
     }
 

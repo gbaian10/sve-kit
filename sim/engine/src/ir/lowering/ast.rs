@@ -212,7 +212,9 @@ pub(super) struct Body {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum Step {
+    Evolve(EffectEvolution),
     If(Conditional),
+    EachPlayer(EachPlayer),
     Choice(Choice),
     Choose(Choose),
     Draw(Draw),
@@ -240,14 +242,96 @@ pub(super) enum Step {
 
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
+pub(super) struct EffectEvolution {
+    #[serde(rename = "ref")]
+    pub _reference: This,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
 pub(super) struct Create {
     pub token: String,
     pub to: CreateZone,
-    pub n: Option<u64>,
+    pub n: Option<TokenCount>,
     pub result: Option<String>,
     pub bind: Option<String>,
-    #[serde(rename = "by")]
-    pub _by: Option<SelfPlayer>,
+    pub by: Option<String>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct EachPlayer {
+    #[serde(rename = "as")]
+    pub binding: String,
+    pub stages: Vec<Vec<Step>>,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum TokenCount {
+    Fixed(u64),
+    Receipt { count: TokenCollection },
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct TokenCollection {
+    pub r#in: TokenBefore,
+    #[serde(rename = "as")]
+    pub binding: String,
+    pub r#where: TokenPredicate,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct TokenBefore {
+    pub objects_of: String,
+    pub view: BeforeOnly,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum BeforeOnly {
+    Before,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct TokenPredicate {
+    #[serde(rename = "cmp")]
+    pub player_cmp: TokenPlayerComparison,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct TokenPlayerComparison {
+    pub left: TokenMaster,
+    pub op: EqualOnly,
+    pub right: TokenPlayer,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum EqualOnly {
+    Eq,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct TokenMaster {
+    pub player: TokenMasterOf,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct TokenMasterOf {
+    pub master_of: String,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct TokenPlayer {
+    pub player: String,
 }
 
 #[derive(Deserialize)]
@@ -371,7 +455,10 @@ pub(super) enum Chooser {
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum ObjectAction {
     Short(Objects),
-    Long { r#ref: Objects },
+    Long {
+        r#ref: Objects,
+        result: Option<String>,
+    },
 }
 
 #[derive(Deserialize)]
@@ -390,6 +477,38 @@ pub(super) enum Until {
     NextOppTurn,
     ThisAndNextOppTurn,
     Game,
+    #[serde(untagged)]
+    NextPhase {
+        next_phase: PhaseEdge,
+    },
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct PhaseEdge {
+    pub who: StandPlayer,
+    pub phase: StartPhase,
+    pub edge: EndEdge,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum StartPhase {
+    Start,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum EndEdge {
+    End,
+}
+
+#[derive(Clone, Copy, Deserialize, PartialEq, Eq)]
+pub(super) enum StandPlayer {
+    #[serde(rename = "self")]
+    Controller,
+    #[serde(rename = "opp")]
+    Opponent,
 }
 
 #[derive(Deserialize)]
@@ -443,6 +562,35 @@ pub(super) struct Apply {
 pub(super) enum InstalledEffect {
     Stat(ConstantStats),
     CostMod(CostModifier),
+    Cannot(CannotStand),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct CannotStand {
+    pub what: StandAction,
+    pub on: Affected,
+    pub during: StandDuring,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum StandAction {
+    Stand,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct StandDuring {
+    pub phase: StartPhase,
+    pub who: StandPlayer,
+    pub cause: RuleCause,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum RuleCause {
+    Rule,
 }
 
 #[derive(Deserialize)]
@@ -806,6 +954,7 @@ pub(super) struct CountQuery {
     pub zone: CountZone,
     pub kind: Option<SearchKind>,
     pub r#trait: Option<String>,
+    pub orig_cost_eq: Option<u64>,
 }
 
 #[derive(Deserialize)]
@@ -1078,6 +1227,7 @@ pub(super) struct Conditional {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum Condition {
+    EnteredFrom(EntryOriginCondition),
     EnteredBy(EntryCondition),
     PlayedFrom(PlayedFromCondition),
     Exists(PublicQuery),
@@ -1086,11 +1236,25 @@ pub(super) enum Condition {
 
     Crimson(bool),
     Combo(u64),
+    Did(String),
     Paid(PaidReceipt),
     Cmp(BodyComparison),
     All(Vec<Self>),
     Any(Vec<Self>),
     Not(Box<Self>),
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct EntryOriginCondition {
+    #[serde(rename = "ref")]
+    pub _reference: This,
+    #[serde(rename = "from")]
+    pub zone: EntryOriginZone,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum EntryOriginZone {
+    Hand,
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -1215,6 +1379,10 @@ pub(super) struct HandQuery {
     pub kind: Option<SearchKind>,
     pub r#trait: Option<String>,
     pub name: Option<String>,
+    pub class: Option<String>,
+    pub orig_cost_eq: Option<u64>,
+    pub orig_cost_ge: Option<u64>,
+    pub orig_cost_le: Option<u64>,
 }
 
 #[derive(Deserialize)]

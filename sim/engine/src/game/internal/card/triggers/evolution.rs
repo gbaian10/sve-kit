@@ -43,6 +43,7 @@ impl Game {
         form: &str,
         super_evolved: bool,
         plan: Option<EvolutionPlan>,
+        original_cause: &serde_json::Value,
         frame: &Frame,
     ) -> Result<()> {
         let Some(plan) = plan else { return Ok(()) };
@@ -50,7 +51,7 @@ impl Game {
             matches!(&a.node.trigger, Some(trigger) if matches!(&trigger.on, TriggerCondition::Event {pattern:EventPattern::Evolve {..}}))
         }).collect::<Vec<_>>();
         let actor = player_id(&self.object(holder)?.controller)?;
-        let cause = if let Some(execution) = frame.cause["effect"]["execution"].as_u64() {
+        let cause = if let Some(execution) = original_cause["effect"]["execution"].as_u64() {
             Cause::Effect {
                 execution: ExecutionId(execution),
             }

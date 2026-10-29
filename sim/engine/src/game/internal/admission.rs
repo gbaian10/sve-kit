@@ -2,6 +2,8 @@ use super::{
     Cardinality, ChoiceDomain, Control, DecisionKind, Declinable, InstructionContext, Located,
     Node, Program, Requirements, Result, SourceSpan, Visibility, WellFormedProgram, unsupported,
 };
+use crate::ir::PlayerStage;
+use crate::ir::effect_evolution;
 use crate::ir::{
     AbilityOrigin, AbilitySource, Binding, CostSpec, Decision, Disjointness, EnterFieldEvent,
     KeywordId, MemberProjection, Nat, ObjectReceipt, PlayerRef, PlayerRelation, Requirement,
@@ -68,7 +70,14 @@ fn check_body(
     if let Some(event) = damage {
         damage_paths(program, "", event, &mut paths);
     }
-    check_requirements(program, source, origin.is_some(), &paths)?;
+    let mut inspected = program.clone();
+    if let Some(origin) = origin {
+        effect_evolution::mask(&mut inspected, origin);
+    }
+    if let Some(event) = entry {
+        super::card::triggers::entry_operand::mask_origin(&mut inspected, event);
+    }
+    check_requirements(&inspected, source, origin.is_some(), &paths)?;
     super::numeric::check_program(program)?;
     check_program(program, source, origin.is_some())
 }
@@ -127,6 +136,18 @@ fn source_paths(
                 }
             }
             Node::Control {
+                control: Control::EachPlayer { stages, .. },
+            } => {
+                for (stage_index, stage) in stages.iter().enumerate() {
+                    source_paths(
+                        &stage.body,
+                        &format!("{path}/control/stages/{stage_index}/body"),
+                        origin,
+                        paths,
+                    );
+                }
+            }
+            Node::Control {
                 control: Control::Sequence { body },
             } => source_paths(body, &format!("{path}/control/body"), origin, paths),
             Node::Control {
@@ -175,12 +196,14 @@ fn check_requirements(
         source: source.clone(),
     };
     let requirements = Requirements::derive_program(&located);
+    let token_paths = super::tokens::paths(program);
     let missing = requirements
         .required
         .iter()
         .filter(|requirement| {
             requirement.capability.version != NonZeroU32::MIN
                 || !(supported(requirement.capability.code)
+                    || super::tokens::requirement(requirement, &token_paths)
                     || super::source::count_zone(&requirements, requirement)
                     || super::history_turn::public_requirement(&requirements, requirement)
                     || entry_field_requirement(&requirements, requirement)
@@ -274,10 +297,25 @@ fn check_action(action: &Action) -> Result<()> {
     super::grant::check_action(action)
 }
 
+fn check_player_stage(
+    control: &Control,
+    stages: &[PlayerStage],
+    source: &SourceSpan,
+    card: bool,
+) -> Result<()> {
+    super::tokens::check_each(control)?;
+    for stage in stages {
+        check_program(&stage.body, source, card)?;
+    }
+    Ok(())
+}
+
 fn check_program(program: &Program, source: &SourceSpan, card: bool) -> Result<()> {
     for step in &program.steps {
         super::ordering::check_node(&step.node, source)?;
         match &step.node {
+            Node::Control { control }
+                if card && effect_evolution::projection(control).is_some() => {}
             Node::Control {
                 control: control @ Control::Pay { costs, on_paid, .. },
             } if card => {
@@ -292,6 +330,9 @@ fn check_program(program: &Program, source: &SourceSpan, card: bool) -> Result<(
                     return Err(unsupported("one optional cost"));
                 }
             }
+            Node::Control {
+                control: control @ Control::EachPlayer { stages, .. },
+            } => check_player_stage(control, stages, source, card)?,
             Node::Control {
                 control: Control::Sequence { body },
             } => check_program(body, source, card)?,
@@ -316,50 +357,7 @@ fn check_program(program: &Program, source: &SourceSpan, card: bool) -> Result<(
                     return Err(unsupported("instruction prerequisite or cost"));
                 }
             }
-            Node::Decision { decision } => {
-                if matches!(
-                    decision.domain,
-                    ChoiceDomain::Objects { .. } | ChoiceDomain::Recipients { .. }
-                ) {
-                    if !card {
-                        return Err(unsupported("resolution field choice outside a whole card"));
-                    }
-                    super::card::selection::check_resolution(decision)?;
-                }
-                if matches!(decision.domain, ChoiceDomain::Distribution { .. })
-                    && source.card_no != "synthetic"
-                {
-                    return Err(unsupported(
-                        "resolution distribution without reviewed timing/minimum evidence",
-                    ));
-                }
-                let public_required = matches!(decision.visibility, Visibility::Public {})
-                    && matches!(
-                        decision.kind,
-                        DecisionKind::ResolutionChoice {
-                            may: Declinable::Required,
-                            precondition: None,
-                            ..
-                        }
-                    );
-                let optional_private_look = private_look_choice(decision);
-                if !matches!(
-                    decision.domain,
-                    ChoiceDomain::Integer {
-                        cardinality: Cardinality {
-                            maximum: Some(_),
-                            ..
-                        },
-                        ..
-                    } | ChoiceDomain::Distribution { .. }
-                        | ChoiceDomain::Objects { .. }
-                        | ChoiceDomain::Recipients { .. }
-                ) || !decision.captures.is_empty()
-                    || !(public_required || optional_private_look)
-                {
-                    return Err(unsupported("decision metadata"));
-                }
-            }
+            Node::Decision { decision } => check_decision(decision, source, card)?,
             Node::Control {
                 control: Control::Mode { modes, .. },
             } if card => {
@@ -370,6 +368,51 @@ fn check_program(program: &Program, source: &SourceSpan, card: bool) -> Result<(
             Node::Capture { .. } => {}
             Node::Control { .. } => return Err(unsupported("control")),
         }
+    }
+    Ok(())
+}
+
+fn check_decision(decision: &Decision, source: &SourceSpan, card: bool) -> Result<()> {
+    if matches!(
+        decision.domain,
+        ChoiceDomain::Objects { .. } | ChoiceDomain::Recipients { .. }
+    ) {
+        if !card {
+            return Err(unsupported("resolution field choice outside a whole card"));
+        }
+        super::card::selection::check_resolution(decision)?;
+    }
+    if matches!(decision.domain, ChoiceDomain::Distribution { .. }) && source.card_no != "synthetic"
+    {
+        return Err(unsupported(
+            "resolution distribution without reviewed timing/minimum evidence",
+        ));
+    }
+    let public_required = matches!(decision.visibility, Visibility::Public {})
+        && matches!(
+            decision.kind,
+            DecisionKind::ResolutionChoice {
+                may: Declinable::Required,
+                precondition: None,
+                ..
+            }
+        );
+    let optional_private_look = private_look_choice(decision);
+    if !matches!(
+        decision.domain,
+        ChoiceDomain::Integer {
+            cardinality: Cardinality {
+                maximum: Some(_),
+                ..
+            },
+            ..
+        } | ChoiceDomain::Distribution { .. }
+            | ChoiceDomain::Objects { .. }
+            | ChoiceDomain::Recipients { .. }
+    ) || !decision.captures.is_empty()
+        || !(public_required || optional_private_look)
+    {
+        return Err(unsupported("decision metadata"));
     }
     Ok(())
 }
@@ -595,6 +638,12 @@ fn supported(code: &str) -> bool {
             | "read.cost"
             | "effect.permission"
             | "shape.PermissionSubject.Objects"
+            | "shape.ActionPattern.Stand"
+            | "shape.StandScope.RuleStart"
+            | "shape.DurationEnd.NextPhaseEdge"
+            | "duration.next-phase-edge"
+            | "internal.Phase.Start"
+            | "internal.Edge.End"
             | "shape.ActionPattern.Destroy"
             | "shape.CausePattern.Effect"
             | "shape.EffectSource.Any"

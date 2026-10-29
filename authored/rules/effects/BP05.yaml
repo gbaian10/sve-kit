@@ -1,128 +1,91 @@
-format: 1
-kind: effect_set
 cards:
   BP05-006:
-    status: complete
     abilities:
-      - line: 1
-        kind: trigger
-        body:
-          op: choice
+      - body:
           by: opponent
-          timing: resolve
-          min: 1
           max: 1
+          min: 1
           modes:
-            - op: restrict
-              subjects: opponent.leader
-              action: normal_draw
+            - action: normal_draw
               during: next-opponent-start
-            - op: restrict
+              op: restrict
               subjects: opponent.leader
-              action: normal_max_pp_gain
+            - action: normal_max_pp_gain
               during: next-opponent-start
-            - op: restrict
+              op: restrict
               subjects: opponent.leader
-              action: play_follower
+            - action: play_follower
               during: next-opponent-main
+              op: restrict
+              subjects: opponent.leader
+          op: choice
+          timing: resolve
         event: end
-  BP05-007:
+        kind: trigger
+        line: 1
     status: complete
-    abilities:
-      - line: 1
-        kind: static
-        body:
-          op: macro
-          name: quick
-      - line: 2
-        kind: spell
-        body:
-          op: if_done
-          attempt:
-            op: move
-            subjects: target.1
-            to: ex
-          then:
-            op: modify
-            subjects: self.leader
-            hp: 2
-        targets:
-          - key: "1"
-            select:
-              side: self
-              zone: field
-              type: follower
-              trait: 妖精
-            min: 0
-            max: 2
   BP05-057:
-    status: complete
     abilities:
-      - line: 1
-        kind: static
-        body:
+      - body:
+          action: attack_leader
           op: restrict
           subjects: self
-          action: attack_leader
-      - line: 2
-        kind: activated
-        body:
-          op: damage
-          subjects: target.1
+        kind: static
+        line: 1
+      - body:
           amount:
             read: cost.1.power
-        targets:
-          - key: "1"
-            select:
-              union:
-                - side: opponent
-                  zone: field
-                  type: follower
-                - opponent.leader
-            min: 1
-            max: 1
+          op: damage
+          subjects: target.1
         cost_selections:
           - key: "1"
-            select:
-              side: self
-              zone: field
-              type: follower
-              other: true
-            min: 1
             max: 1
+            min: 1
+            select:
+              other: true
+              side: self
+              type: follower
+              zone: field
         costs:
           - op: act
             subjects: self
           - op: move
             subjects: cost.1
             to: cemetery
-  BP05-070:
+        kind: activated
+        line: 2
+        targets:
+          - key: "1"
+            max: 1
+            min: 1
+            select:
+              union:
+                - side: opponent
+                  type: follower
+                  zone: field
+                - opponent.leader
     status: complete
-    review: NC 不足時仍在打出時選擇目標，解決時不執行破壞；此選擇時點的解讀仍待確認。
+  BP05-070:
     abilities:
-      - line: 1
-        kind: evolve
-        body:
+      - body:
           op: evolve
           subjects: self
         costs:
-          - op: pp
-            amount: 1
-      - line: 2
-        kind: static
-        body:
+          - amount: 1
+            op: pp
+        kind: evolve
+        line: 1
+      - body:
+          amount: 1
           op: adjust_cost
           subjects:
             side: opponent
-            zone: any
             type: spell
-          amount: 1
-      - line: 3
-        kind: trigger
-        body:
-          op: if
+            zone: any
+        kind: static
+        line: 2
+      - body:
           condition:
-            fn: ge
             args:
               - at: resolution-start
                 value:
@@ -130,147 +93,150 @@ cards:
                     side: self
                     zone: cemetery
               - 10
+            fn: ge
+          op: if
           then:
             op: destroy
             subjects: target.1
         event: enter
+        kind: trigger
+        line: 3
         subject: self
         targets:
           - key: "1"
+            max: 1
+            min: 1
             select:
               side: opponent
-              zone: field
               type: follower
               where:
-                fn: le
                 args:
                   - read: item.cost
                   - 3
-            min: 1
-            max: 1
-  BP05-071:
+                fn: le
+              zone: field
+    review: NC 不足時仍在打出時選擇目標，解決時不執行破壞；此選擇時點的解讀仍待確認。
     status: complete
+  BP05-071:
     abilities:
-      - line: 1
-        kind: static
-        body:
+      - body:
+          amount: 1
           op: adjust_cost
           subjects:
             side: opponent
-            zone: any
             type: spell
-          amount: 1
-      - line: 2
-        kind: trigger
-        body:
+            zone: any
+        kind: static
+        line: 1
+      - body:
           op: seq
           steps:
-            - op: random
+            - bind: random-discard
+              count: 1
+              op: random
               select:
                 side: opponent
                 zone: hand
-              count: 1
-              bind: random-discard
             - op: discard
               subjects: random-discard
         event: evolve
+        kind: trigger
+        line: 2
         subject: self
-  BP05-092:
     status: complete
+  BP05-092:
     abilities:
-      - line: 1
-        kind: static
-        body:
+      - body:
+          action: lose
           op: restrict
           subjects: self.leader
-          action: lose
-      - line: 1
         kind: static
-        body:
+        line: 1
+      - body:
+          action: win
           op: restrict
           subjects: opponent.leader
-          action: win
-      - line: 2
-        kind: trigger
-        body:
+        kind: static
+        line: 1
+      - body:
           op: seq
           steps:
             - op: move
               subjects: self
               to: cemetery
             - op: modify
-              subjects: self.leader
               set_hp: 1
+              subjects: self.leader
         event: leader_life_change
+        kind: trigger
+        line: 2
         subject: self.leader
         trigger_if:
-          fn: and
           args:
-            - fn: gt
-              args:
+            - args:
                 - read: event.before_life
                 - 0
-            - fn: le
-              args:
+              fn: gt
+            - args:
                 - read: event.after_life
                 - 0
-  BP05-108:
+              fn: le
+          fn: and
     status: complete
+  BP05-108:
     abilities:
-      - line: 1
-        kind: static
-        body:
-          op: replace_damage
-          subjects: self.leader
-          prevent: true
+      - body:
           kind: effect
-      - line: 2
-        kind: activated
-        body:
+          op: replace_damage
+          prevent: true
+          subjects: self.leader
+        kind: static
+        line: 1
+      - body:
+          amount: 2
           op: damage
           subjects: opponent.leader
-          amount: 2
-        quick: true
         costs:
           - op: act
             subjects: self
-  BP05-SL12:
+        kind: activated
+        line: 2
+        quick: true
     status: complete
+  BP05-SL12:
     abilities:
-      - line: 1
-        kind: static
-        body:
-          op: macro
+      - body:
           name: storm
-      - line: 2
-        kind: trigger
-        body:
-          op: repeat
+          op: macro
+        kind: static
+        line: 1
+      - body:
           body:
             op: seq
             steps:
               - op: modify
-                subjects: self
                 power: 3
-              - op: move
+                subjects: self
+              - bind: milled
+                op: move
                 subjects:
                   side: self
-                  zone: deck
                   top: 4
+                  zone: deck
                 to: cemetery
-                bind: milled
+          op: repeat
           until:
-            fn: eq
             args:
               - count:
                   from: milled
                   name: 魔導電磁サイ
               - 0
+            fn: eq
         event: enter
-        subject: self
-      - line: 3
         kind: trigger
-        body:
+        line: 2
+        subject: self
+      - body:
           op: seq
           steps:
             - op: move
@@ -281,85 +247,83 @@ cards:
                 side: self
                 zone: deck
         event: field_to_cemetery
+        kind: trigger
+        line: 3
         subject: self
         targets:
           - key: "1"
-            select:
-              side: self
-              zone: cemetery
-              name: 魔導電磁サイ
-            min: 0
             max:
               count:
+                name: 魔導電磁サイ
                 side: self
                 zone: cemetery
-                name: 魔導電磁サイ
-  BP05-SL13:
+            min: 0
+            select:
+              name: 魔導電磁サイ
+              side: self
+              zone: cemetery
     status: complete
+  BP05-SL13:
     abilities:
-      - line: 1
-        kind: static
-        body:
-          op: aura
-          subjects: self
-          keywords:
-            - storm
+      - body:
           condition:
-            fn: and
             args:
               - read: self.is_active
-              - fn: gt
-                args:
+              - args:
                   - read: self.turn.leader_hp_decreased
                   - 0
-      - line: 2
-        kind: trigger
-        body:
+                fn: gt
+            fn: and
+          keywords:
+            - storm
+          op: aura
+          subjects: self
+        kind: static
+        line: 1
+      - body:
           op: seq
           steps:
-            - op: damage
-              subjects: opponent.leader
-              amount:
+            - amount:
                 read: self.turn.leader_hp_decreased
-            - op: if
-              condition:
-                fn: eq
+              op: damage
+              subjects: opponent.leader
+            - condition:
                 args:
                   - read: self.leader.life
                   - 7
+                fn: eq
+              op: if
               then:
-                op: modify
-                subjects: self
-                power: 2
                 hp: 2
+                op: modify
+                power: 2
+                subjects: self
         event: attack
+        kind: trigger
+        line: 2
         subject: self
-  BP05-SL14:
     status: complete
+  BP05-SL14:
     abilities:
-      - line: 1
-        kind: evolve
-        body:
+      - body:
           op: evolve
           subjects: self
         costs:
-          - op: pp
-            amount: 1
-      - line: 2
-        kind: static
-        body:
+          - amount: 1
+            op: pp
+        kind: evolve
+        line: 1
+      - body:
+          amount: 1
           op: adjust_cost
           subjects:
             side: opponent
-            zone: any
             type: spell
-          amount: 1
-      - line: 3
-        kind: trigger
-        body:
-          op: if
+            zone: any
+        kind: static
+        line: 2
+      - body:
           condition:
-            fn: ge
             args:
               - at: resolution-start
                 value:
@@ -367,48 +331,55 @@ cards:
                     side: self
                     zone: cemetery
               - 10
+            fn: ge
+          op: if
           then:
             op: destroy
             subjects: target.1
         event: enter
+        kind: trigger
+        line: 3
         subject: self
         targets:
           - key: "1"
+            max: 1
+            min: 1
             select:
               side: opponent
-              zone: field
               type: follower
               where:
-                fn: le
                 args:
                   - read: item.cost
                   - 3
-            min: 1
-            max: 1
-  BP05-SL15:
+                fn: le
+              zone: field
     status: complete
+  BP05-SL15:
     abilities:
-      - line: 1
-        kind: static
-        body:
+      - body:
+          amount: 1
           op: adjust_cost
           subjects:
             side: opponent
-            zone: any
             type: spell
-          amount: 1
-      - line: 2
-        kind: trigger
-        body:
+            zone: any
+        kind: static
+        line: 1
+      - body:
           op: seq
           steps:
-            - op: random
+            - bind: random-discard
+              count: 1
+              op: random
               select:
                 side: opponent
                 zone: hand
-              count: 1
-              bind: random-discard
             - op: discard
               subjects: random-discard
         event: evolve
+        kind: trigger
+        line: 2
         subject: self
+    status: complete
+format: 1
+kind: effect_set

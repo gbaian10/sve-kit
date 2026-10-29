@@ -33,6 +33,7 @@ pub(super) fn check_costs(costs: &CostSpec, origin: &AbilitySource) -> Result<()
         || !(matches!(&instruction.action, Action::Resource { player: PlayerRef::Controller {},
             resource: Resource::PpCurrent, operation: ResourceOperation::Pay,
             amount: Expr::Literal(Int(amount)) } if *amount >= 0)
+            || super::hand_payment::check_cost(&instruction.action)
             || super::material::cost_objects(&instruction.action)
                 .is_some_and(|objects| matches!(objects, Selector::Bound { .. })))
     {
@@ -60,6 +61,7 @@ pub(super) fn check_card(card: &WellFormedCardProgram) -> Result<()> {
                 };
                 for step in steps {
                     if !matches!(step.instruction.action, Action::Resource { .. })
+                        && !super::hand_payment::check_cost(&step.instruction.action)
                         && !super::material::check_cost(&step.instruction.action, play)
                     {
                         return Err(unsupported("payment material parameter"));

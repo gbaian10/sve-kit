@@ -2,8 +2,8 @@ use super::{BindingKind, Checked, Checker, WellFormedReason};
 use crate::ir::{
     ActionPattern, Binding, CharacteristicPatch, ContinuousLayer, CostChange, Duration,
     DurationEnd, Effect, EffectReference, EffectTarget, ExecutionRef, Expr, InstallationSubjects,
-    InstallationTime, Interval, PermissionSubject, Polarity, Selector, TimeAnchor, TimestampBasis,
-    UsageScope,
+    InstallationTime, Interval, PermissionSubject, Polarity, Selector, StandScope, TimeAnchor,
+    TimestampBasis, UsageScope,
 };
 
 #[expect(
@@ -145,6 +145,10 @@ impl Checker {
                 | ActionPattern::Banish {
                     objects: action_objects,
                     ..
+                }
+                | ActionPattern::Stand {
+                    objects: action_objects,
+                    scope: StandScope::RuleStart { .. },
                 }) = action
                 else {
                     return self.reject();

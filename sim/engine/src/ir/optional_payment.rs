@@ -66,6 +66,7 @@ pub(crate) fn trigger_play(ability: &Ability) -> bool {
                         None if !play.parameters.is_empty() => matches!(
                             keyword,
                             KeywordId::Fanfare
+                                | KeywordId::Lastword
                                 | KeywordId::OnEvolve
                                 | KeywordId::OnSuperEvolve
                                 | KeywordId::OnAttack

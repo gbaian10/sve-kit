@@ -1,0 +1,47 @@
+cards:
+  BP17-006:
+    abilities:
+      - evolve_time:
+          do:
+            - destroy:
+                ref:
+                  kind: follower
+                  other: true
+                  who: all
+                  zone: field
+                result: broken
+            - each_player:
+                as: p
+                stages:
+                  - - create:
+                        by: p
+                        n:
+                          count:
+                            as: victim
+                            in:
+                              objects_of: broken
+                              view: before
+                            where:
+                              cmp:
+                                left:
+                                  player:
+                                    master_of: victim
+                                op: eq
+                                right:
+                                  player: p
+                        to: field
+                        token: ロココのテディベア
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-10-29"
+    token_sources:
+      - card: BP17-T01
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

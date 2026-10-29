@@ -1,4 +1,5 @@
 //! Hand cost choices are collected before any cost is committed.
+use super::play::PlayState;
 use super::{Execution, Game, Result, invalid, seat_name, unsupported};
 use crate::game::internal::{
     DecisionId, DistributionMember, InputDomain, Wait, discard::HandWait, search,
@@ -63,6 +64,22 @@ pub(super) fn check_cost(action: &Action) -> bool {
     reason = "Hand cost choice and commit share the play transaction."
 )]
 impl Game {
+    pub(super) fn internal_play_hand_materials(
+        &mut self,
+        execution: &mut Execution,
+        play: &PlayState,
+    ) -> Result<bool> {
+        if self.internal_hand_cost_materials(execution, &play.costs)? {
+            return Ok(true);
+        }
+        if let Some(payment) = &play.optional
+            && payment.accepted == Some(true)
+        {
+            return self.internal_hand_cost_materials(execution, &payment.costs);
+        }
+        Ok(false)
+    }
+
     pub(super) fn internal_hand_cost_materials(
         &mut self,
         execution: &mut Execution,

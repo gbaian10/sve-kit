@@ -34,9 +34,10 @@ pub(super) fn resource_increase(
     })
 }
 
-pub(super) fn duration(until: Option<&ast::Until>) -> Duration {
-    Duration {
+pub(super) fn duration(until: Option<&ast::Until>, path: &str) -> Result<Duration, LoweringError> {
+    Ok(Duration {
         end: match until {
+            Some(ast::Until::NextPhase { .. }) => return Err(unsupported(path)),
             None | Some(ast::Until::Game) => DurationEnd::NoTemporalExpiry {},
             Some(ast::Until::Turn | ast::Until::ThisAndNextOppTurn) => {
                 DurationEnd::CurrentTurnEnd {}
@@ -54,7 +55,7 @@ pub(super) fn duration(until: Option<&ast::Until>) -> Duration {
         } else {
             vec![]
         },
-    }
+    })
 }
 
 fn combined(
@@ -137,8 +138,17 @@ impl BodyContext<'_> {
         action: &ast::ObjectAction,
         path: &str,
     ) -> Result<Selector, LoweringError> {
+        if matches!(
+            action,
+            ast::ObjectAction::Long {
+                result: Some(_),
+                ..
+            }
+        ) {
+            return Err(unsupported(path));
+        }
         match action {
-            ast::ObjectAction::Short(objects) | ast::ObjectAction::Long { r#ref: objects } => {
+            ast::ObjectAction::Short(objects) | ast::ObjectAction::Long { r#ref: objects, .. } => {
                 self.objects(objects, path)
             }
         }
@@ -173,7 +183,7 @@ impl BodyContext<'_> {
         Ok(Action::Modify {
             subjects: self.objects(&modification.on, path)?,
             patch: combined(patches, path)?,
-            expires: duration(modification.until.as_ref()),
+            expires: duration(modification.until.as_ref(), path)?,
             source: EffectReference::CurrentInstallation {},
         })
     }
@@ -184,6 +194,9 @@ impl BodyContext<'_> {
         source: &AbilitySource,
         path: &str,
     ) -> Result<Action, LoweringError> {
+        if matches!(installation.effect, ast::InstalledEffect::Cannot(_)) {
+            return self.no_stand(installation, path);
+        }
         let ast::InstalledEffect::Stat(statistics) = &installation.effect else {
             return self.discount(installation, path);
         };
@@ -203,7 +216,7 @@ impl BodyContext<'_> {
         }
         let objects = self.objects(&installation.on, path)?;
         let affected = Binding::new(1, self.card_allocator.scope(path)?);
-        let duration = duration(installation.until.as_ref());
+        let duration = duration(installation.until.as_ref(), path)?;
         Ok(Action::InstallEffect {
             subjects: InstallationSubjects::Objects { objects, affected },
             capture: InstallationTime::InstructionStart,

@@ -51,7 +51,10 @@ fn filter(ability: &Ability) -> Option<EntryFilter> {
 fn entry_origin(game: &Game, previous: &Object) -> Result<EntryOrigin> {
     if previous.zone == "void"
         && previous.generation == 0
-        && game.catalog.face(&previous.card, 0)?["card_type"] == "フォロワー・トークン"
+        && matches!(
+            game.catalog.face(&previous.card, 0)?["card_type"].as_str(),
+            Some("フォロワー・トークン" | "アミュレット・トークン")
+        )
     {
         return Ok(EntryOrigin::Other {});
     }

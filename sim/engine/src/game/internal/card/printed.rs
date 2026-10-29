@@ -133,7 +133,10 @@ impl Game {
         })
     }
 
-    fn internal_evolution_link(&mut self, holder: &str) -> Result<Vec<AssociationId>> {
+    pub(in crate::game::internal) fn internal_evolution_link(
+        &mut self,
+        holder: &str,
+    ) -> Result<Vec<AssociationId>> {
         let object = self.object(holder)?.clone();
         let Some(form) = object.state["evolved_with"].as_str() else {
             return Ok(Vec::new());

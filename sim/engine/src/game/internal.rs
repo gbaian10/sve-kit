@@ -7,20 +7,23 @@
 
 use super::{Frame, Game, View, int, string};
 use crate::ir::{
-    Action, Arithmetic, Binding, Bool, Capture, CaptureRef, CardQuantityOutcome, Cardinality,
-    ChoiceDomain, Comparison, Control, DamageEvent, DamageFlags, DamageQuantityOutcome,
-    DamageRecipient, Decision, DecisionId, DecisionKind, Declinable, DestroyOutcome, DrawEvent,
-    Effect, EffectId, EntryMethod, EntryOrigin, ExecutionId, Expr, Generation,
-    InstallationSubjects, Instruction, InstructionContext, Int, IntFrozen, IntOperation, IntRead,
-    LifeChangeEvent, Located, LookOutcome, MeasuredReceipt, ModeId, MoveOutcome, Nat, NatFrozen,
-    NatOperation, NatRead, Node, ObjectFrozen, ObjectId, ObjectOperand, ObjectRef, OrderOutcome,
-    PlayerId, PlayerRef, PlayerRelation, PlayerResource, PlayerSet, PositiveInt, PostureEvent,
-    Predicate, Program, Quantity, ReceiptId, ReceiptLocation, RecipientSet, Requirements,
-    ResolvedRecipients, RuntimeAbilitySource, RuntimeDamageRecipient, ScopeId, SearchOutcome,
-    SearchReplacementAnswer, Selector, SourceSpan, StepwiseAnswer, StepwiseMode, TokenOutcome,
-    Visibility, WellFormedProgram, ZoneKind,
+    Action, ActionPattern, Arithmetic, Binding, Bool, Capture, CaptureRef, CardQuantityOutcome,
+    Cardinality, ChoiceDomain, Comparison, Control, DamageEvent, DamageFlags,
+    DamageQuantityOutcome, DamageRecipient, Decision, DecisionId, DecisionKind, Declinable,
+    DestroyOutcome, DrawEvent, Effect, EffectId, EntryMethod, EntryOrigin, ExecutionId, Expr,
+    Generation, InstallationSubjects, Instruction, InstructionContext, Int, IntFrozen,
+    IntOperation, IntRead, LifeChangeEvent, Located, LookOutcome, MeasuredReceipt, ModeId,
+    MoveOutcome, Nat, NatFrozen, NatOperation, NatRead, Node, ObjectFrozen, ObjectId,
+    ObjectOperand, ObjectRef, OrderOutcome, PlayerId, PlayerRef, PlayerRelation, PlayerResource,
+    PlayerSet, PositiveInt, PostureEvent, Predicate, Program, Quantity, ReceiptId, ReceiptLocation,
+    RecipientSet, Requirements, ResolvedRecipients, RuntimeAbilitySource, RuntimeDamageRecipient,
+    ScopeId, SearchOutcome, SearchReplacementAnswer, Selector, SourceSpan, StepwiseAnswer,
+    StepwiseMode, TokenOutcome, Visibility, WellFormedProgram, ZoneKind,
 };
-use crate::ir::{BanishOutcome, DiscardEvent, DiscardOutcome, FaceId, PaymentResult, QuickWindow};
+use crate::ir::{
+    AssociationId, BanishOutcome, DiscardEvent, DiscardOutcome, EvolveEvent, FaceId, PaymentResult,
+    QuickWindow,
+};
 use crate::{EngineFailure, Result, invalid};
 use alloc::collections::{BTreeMap, VecDeque};
 use alloc::sync::Arc;
@@ -65,6 +68,7 @@ pub use movement::MovementFact;
 pub(super) use numeric::NumericState;
 pub use numeric::StatChangeFact;
 pub use ordering::OrderCard;
+pub(super) use posture::StandLock;
 pub use resource::ResourceOutcome;
 pub use search::{SearchAnswer, SearchDomain, SearchGroup, SearchPartitionDomain};
 
@@ -210,6 +214,13 @@ pub enum Answer {
 /// Typed instruction outcomes retained only by the authority.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum InstructionOutcome {
+    /// One effect-driven ordinary evolution and its live physical association.
+    Evolution {
+        /// The public before/after evolution fact.
+        event: Box<EvolveEvent>,
+        /// The same live base/form association used by printed ability sources.
+        association: AssociationId,
+    },
     /// Tokens successfully created and placed, after applying destination capacity.
     Token(TokenOutcome),
     /// Actual body resource recovery, independent of cost payment.
@@ -274,6 +285,8 @@ pub struct Progress {
 /// First-slice physical facts, sharing the prototype mutation and causal pipeline.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Fact {
+    /// Effect-driven evolution; it does not count as playing an evolution ability.
+    Evolved(Box<EvolveEvent>),
     /// A card actually discarded from the actor's hand.
     Discard(Box<DiscardEvent>),
     /// A direct nonzero leader life change, independent of damage.
@@ -1017,6 +1030,9 @@ impl Game {
             };
             match node {
                 Node::Control {
+                    control: control @ Control::EachPlayer { .. },
+                } => self.internal_player_tokens(execution, &control)?,
+                Node::Control {
                     control: Control::Sequence { body },
                 } => execution.prepend(body),
                 Node::Control {
@@ -1035,6 +1051,11 @@ impl Game {
                     if let Some(body) = selected {
                         execution.prepend(body);
                     }
+                }
+                Node::Control {
+                    control: control @ Control::EachObject { .. },
+                } => {
+                    self.internal_effect_evolution_iteration(execution, control)?;
                 }
                 Node::Capture { capture } => execution.capture(self, &capture)?,
                 Node::Decision { decision } => self.internal_decision_step(execution, &decision)?,
@@ -1158,6 +1179,7 @@ impl Game {
             .checked_add(1)
             .ok_or_else(|| invalid("IR epoch exhausted"))?;
         match &instruction.action {
+            Action::Evolve { .. } => self.internal_effect_evolve(execution, &instruction)?,
             Action::Token { .. } => self.internal_tokens(execution, &instruction)?,
             Action::Resource { .. } => self.internal_resource(execution, &instruction)?,
             Action::Discard { .. } => self.internal_discard_wait(execution, instruction)?,
@@ -1296,6 +1318,17 @@ impl Game {
                 if matches!(effect.as_ref(), Effect::CostModifier { .. }) =>
             {
                 self.internal_install_cost(execution, &instruction)?;
+            }
+            Action::InstallEffect { effect, .. }
+                if matches!(
+                    effect.as_ref(),
+                    Effect::Permission {
+                        action: ActionPattern::Stand { .. },
+                        ..
+                    }
+                ) =>
+            {
+                self.internal_install_no_stand(execution, &instruction)?;
             }
             Action::InstallEffect { subjects, .. } => {
                 let InstallationSubjects::Objects { objects, .. } = subjects else {

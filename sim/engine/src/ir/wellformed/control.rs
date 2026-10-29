@@ -3,6 +3,7 @@ use super::{
     IterationCheck, Program, ReceiptExport, ReceiptList, ReceiptLocation, ReceiptReference,
     RepeatBody, ScopeId, Termination, TypeId, WellFormedReason,
 };
+use crate::ir::effect_evolution;
 use crate::ir::{
     Decision, DecisionKind, Declinable, IterationOrder, PlayerRef, PlayerStage, ReceiptId,
     StageMode,
@@ -23,6 +24,11 @@ impl Checker {
     }
 
     fn control_inner(&mut self, control: &Control) -> Checked {
+        if let Some(projection) = effect_evolution::projection(control) {
+            return self.isolated(|checker| {
+                checker.effect_evolution(projection.body, projection.decision, projection.form)
+            });
+        }
         match control {
             Control::Sequence { body } => self.isolated(|checker| checker.program(body)),
             Control::If {

@@ -6,6 +6,7 @@ use super::{
 use crate::catalog::SelectedEffects;
 use crate::catalog::current::CurrentCard;
 use crate::ir::ChoiceDomain;
+use crate::ir::effect_evolution::projection;
 use crate::ir::events::played::filter;
 use crate::ir::play_restrictions::card_restriction;
 use crate::ir::quick::{card_permission, is_printed_quick};
@@ -28,6 +29,7 @@ use serde::ser::Error as _;
 use serde_json::json;
 
 mod costs;
+mod effect_evolution;
 mod evolution;
 pub(super) mod exchange;
 mod fanfare;
@@ -831,6 +833,35 @@ fn face_ordinal(face: &FaceId) -> Result<usize> {
     Ok(ordinal)
 }
 
+fn check_nested_nodes(
+    game: &Game,
+    control: &Control,
+    source: &SourceSpan,
+    origin: &AbilitySource,
+) -> Result<()> {
+    match control {
+        Control::EachPlayer { stages, .. } => {
+            super::tokens::check_each(control)?;
+            for stage in stages {
+                check_nodes(game, &stage.body.steps, source, origin)?;
+            }
+        }
+        Control::Sequence { body } => check_nodes(game, &body.steps, source, origin)?,
+        Control::If {
+            then_body,
+            else_body,
+            ..
+        } => {
+            check_nodes(game, &then_body.steps, source, origin)?;
+            if let Some(body) = else_body {
+                check_nodes(game, &body.steps, source, origin)?;
+            }
+        }
+        _ => return Err(unsupported("nested whole-card control")),
+    }
+    Ok(())
+}
+
 fn check_nodes(
     game: &Game,
     nodes: &[Located<Node>],
@@ -838,18 +869,7 @@ fn check_nodes(
     ability_source: &AbilitySource,
 ) -> Result<()> {
     for located in nodes {
-        if located.source.owner != source.owner
-            || located.source.field != source.field
-            || located.source.fragment != source.fragment
-        {
-            return Err(invalid("instruction source evidence mapping mismatch"));
-        }
-        game.check_card_source(
-            &located.source,
-            &source.card_no,
-            &source.face,
-            u64::from(source.line),
-        )?;
+        check_node_source(game, &located.source, source)?;
         match &located.node {
             Node::Instruction { instruction } => {
                 super::tokens::check_catalog(game, &instruction.action)?;
@@ -897,24 +917,20 @@ fn check_nodes(
                 optional::check_costs(costs, ability_source)?;
                 check_nodes(game, &on_paid.steps, source, ability_source)?;
             }
-            Node::Control {
-                control: Control::Sequence { body },
-            } => {
-                check_nodes(game, &body.steps, source, ability_source)?;
+            Node::Control { control } if projection(control).is_some() => {
+                let projection =
+                    projection(control).ok_or_else(|| invalid("missing evolution projection"))?;
+                if projection.instruction.source != *ability_source {
+                    return Err(invalid("foreign effect evolution source"));
+                }
+                check_nodes(game, &projection.body.steps[..1], source, ability_source)?;
             }
             Node::Control {
                 control:
-                    Control::If {
-                        then_body,
-                        else_body,
-                        ..
-                    },
-            } => {
-                check_nodes(game, &then_body.steps, source, ability_source)?;
-                if let Some(body) = else_body {
-                    check_nodes(game, &body.steps, source, ability_source)?;
-                }
-            }
+                    control @ (Control::EachPlayer { .. }
+                    | Control::Sequence { .. }
+                    | Control::If { .. }),
+            } => check_nested_nodes(game, control, source, ability_source)?,
             Node::Control {
                 control: Control::Mode { modes, .. },
             } => {
@@ -936,5 +952,14 @@ fn check_nodes(
             }
         }
     }
+    Ok(())
+}
+
+fn check_node_source(game: &Game, span: &SourceSpan, source: &SourceSpan) -> Result<()> {
+    if span.owner != source.owner || span.field != source.field || span.fragment != source.fragment
+    {
+        return Err(invalid("instruction source evidence mapping mismatch"));
+    }
+    game.check_card_source(span, &source.card_no, &source.face, u64::from(source.line))?;
     Ok(())
 }

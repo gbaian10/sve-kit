@@ -31,7 +31,7 @@ impl BodyContext<'_> {
         Ok(Action::Grant {
             subjects: self.objects(&value.on, path)?,
             abilities,
-            duration: numeric::duration(value.until.as_ref()),
+            duration: numeric::duration(value.until.as_ref(), path)?,
             provider: TextProvider {
                 provider: ObjectView::Current {
                     object: Box::new(ObjectOperand::SourceHolder {}),

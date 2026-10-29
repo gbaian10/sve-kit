@@ -4,6 +4,7 @@ use super::{
     SourceSpan, invalid, unsupported,
 };
 use crate::game::string;
+use crate::ir::evolution_cemetery;
 use crate::ir::{
     Bool, Control, Int, PlayerRef, PlayerRelation, Predicate, Resource, ResourceOperation,
     SelectionView, Selector, TextQuantifier, ZoneKind,
@@ -44,7 +45,12 @@ pub(super) fn cost(ability: &Ability) -> Result<i64> {
     Ok(*value)
 }
 
-fn qualification(ability: &Ability) -> Result<Option<&Expr<Bool>>> {
+enum Qualification<'ability> {
+    Field(&'ability Expr<Bool>),
+    Cemetery { cost: i64, minimum: i64 },
+}
+
+fn qualification(ability: &Ability) -> Result<Option<Qualification<'_>>> {
     let CostSpec::Ordered { steps } = &ability
         .play
         .as_ref()
@@ -67,6 +73,9 @@ fn qualification(ability: &Ability) -> Result<Option<&Expr<Bool>>> {
         || condition.reason != (PreconditionReason::CardText {})
     {
         return Err(unsupported("evolution qualification guard"));
+    }
+    if let Some((cost, minimum)) = evolution_cemetery::parameters(&condition.predicate) {
+        return Ok(Some(Qualification::Cemetery { cost, minimum }));
     }
     let Expr::Compute(operation) = &condition.predicate else {
         return Err(unsupported("evolution qualification"));
@@ -93,19 +102,37 @@ fn qualification(ability: &Ability) -> Result<Option<&Expr<Bool>>> {
         return Err(unsupported("evolution qualification controller"));
     }
     super::selection::field_selector(selector)?;
-    Ok(Some(predicate))
+    Ok(Some(Qualification::Field(predicate)))
 }
 
 fn usable(game: &Game, holder: &str, ability: &Ability) -> Result<bool> {
-    let Some(predicate) = qualification(ability)? else {
+    let Some(qualification) = qualification(ability)? else {
         return Ok(true);
     };
-    for id in game.zone_ids(&game.object(holder)?.controller, "field") {
-        if super::selection::matches_candidate(game, &id, predicate)? {
-            return Ok(true);
+    let controller = &game.object(holder)?.controller;
+    match qualification {
+        Qualification::Field(predicate) => {
+            for id in game.zone_ids(controller, "field") {
+                if super::selection::matches_candidate(game, &id, predicate)? {
+                    return Ok(true);
+                }
+            }
+            Ok(false)
+        }
+        Qualification::Cemetery { cost, minimum } => {
+            let mut count = 0_i64;
+            for id in game.zone_ids(controller, "cemetery") {
+                if super::super::cost::printed_cost(&game.internal_cost_print(&id)?["cost"])?
+                    == cost
+                {
+                    count = count
+                        .checked_add(1)
+                        .ok_or_else(|| invalid("cemetery count overflow"))?;
+                }
+            }
+            Ok(count >= minimum)
         }
     }
-    Ok(false)
 }
 
 fn span(game: &Game, source: &SourceSpan, expected: &SourceSpan) -> Result<()> {

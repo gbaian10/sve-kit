@@ -1,0 +1,21 @@
+cards:
+  BP22-101:
+    abilities:
+      - evolve_time:
+          do:
+            - draw:
+                n: 2
+                who: self
+            - discard:
+                n: 1
+                who: self
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-10-29"
+format: 2
+kind: author_effect_set
