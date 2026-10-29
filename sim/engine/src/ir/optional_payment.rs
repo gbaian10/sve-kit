@@ -65,14 +65,17 @@ pub(crate) fn trigger_play(ability: &Ability) -> bool {
                                 | KeywordId::OnSuperEvolve
                                 | KeywordId::OnAttack
                         ),
-                        None => matches!(keyword, KeywordId::Fanfare) && declared_choice(body),
+                        None => {
+                            matches!(keyword, KeywordId::Fanfare | KeywordId::OnEvolve)
+                                && declared_choice(body, matches!(keyword, KeywordId::Fanfare))
+                        }
                     }
                 }
             })
     })
 }
 
-fn declared_choice(body: &Program) -> bool {
+fn declared_choice(body: &Program, conditional: bool) -> bool {
     match body.steps.as_slice() {
         [
             Located {
@@ -96,7 +99,7 @@ fn declared_choice(body: &Program) -> bool {
                     },
                 ..
             },
-        ] => declared_choice(then_body),
+        ] if conditional => declared_choice(then_body, conditional),
         _ => false,
     }
 }

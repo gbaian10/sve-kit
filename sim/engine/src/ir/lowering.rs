@@ -405,7 +405,7 @@ impl Allocator {
         let source = source_span(key, path, entry)?;
         let ability_source = ability_source(&source, keyword);
         let mut context = BodyContext::new(entry, scope, body, payment_result, self);
-        let trigger_choice = context.prepare_parameters(body, path, entry.fanfare.is_some())?;
+        let trigger_choice = context.prepare_parameters(body, path, keyword)?;
         let triggered_play = play::trigger_play_spec(entry, body, keyword, trigger_choice, path)?;
         let optional =
             context.optional_payment(body, &source, &ability_source, &format!("{path}/{head}"))?;
@@ -780,17 +780,16 @@ impl<'definitions> BodyContext<'definitions> {
         &mut self,
         body: &ast::Body,
         path: &str,
-        fanfare: bool,
+        keyword: Option<KeywordId>,
     ) -> Result<bool, LoweringError> {
         for value in body.define.values() {
             self.number(value, path, &mut BTreeSet::new())?;
         }
         self.resolution_captures.clear();
         self.allocator = Allocator::default();
-        let trigger_choice = fanfare
-            && body.optional_cost.is_none()
+        let trigger_choice = body.optional_cost.is_none()
             && body.head_cost.is_none()
-            && play::fanfare_choice(body, path)?;
+            && play::trigger_choice(body, keyword, path)?;
         self.formal_play |= trigger_choice;
         let choice = if trigger_choice {
             true

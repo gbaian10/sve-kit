@@ -55,6 +55,89 @@ fn fanfare_choice_lowers_both_unconditional_and_awakened_modes() {
 }
 
 #[test]
+fn on_evolve_choice_lowers_up_to_three_modes_with_mode_targets() {
+    let mut direct = body();
+    direct["do"] = direct["do"][0]["if"]["then"].clone();
+    let choice = &mut direct["do"][0]["choice"];
+    choice.as_object_mut().unwrap().remove("n");
+    choice["upto"] = json!(3_u64);
+    choice["options"].as_array_mut().unwrap().push(json!([
+        {"life":{"who":"self","delta":1}}
+    ]));
+    let programs = lowerer().lower(&tree("evolve_time", direct)).unwrap();
+    assert!(
+        programs["unit-follower"].card().abilities[0]
+            .node
+            .play
+            .is_some()
+    );
+}
+
+#[test]
+fn on_evolve_choice_does_not_enable_conditional_or_other_trigger_modes() {
+    lowerer().lower(&tree("evolve_time", body())).err().unwrap();
+    let mut direct = body();
+    direct["do"] = direct["do"][0]["if"]["then"].clone();
+    direct.as_object_mut().unwrap().remove("targets");
+    direct["do"][0]["choice"]["options"][0] = json!([{"life":{"who":"self","delta":1}}]);
+    for head in ["lastword", "attack_time", "super_evolve_time"] {
+        lowerer().lower(&tree(head, direct.clone())).err().unwrap();
+    }
+    direct["do"]
+        .as_array_mut()
+        .unwrap()
+        .push(json!({"draw":{"n":1_u64}}));
+    lowerer().lower(&tree("evolve_time", direct)).err().unwrap();
+}
+
+#[test]
+fn raw_on_evolve_modes_cannot_enable_a_conditional_fanfare_guard() {
+    let guarded_fanfare = lowerer()
+        .lower(&tree("fanfare", body()))
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap();
+    let Node::Control {
+        control: Control::If { condition, .. },
+    } = &guarded_fanfare.card().abilities[0]
+        .node
+        .body
+        .as_ref()
+        .unwrap()
+        .steps[0]
+        .node
+    else {
+        panic!("public Fanfare guard");
+    };
+    let mut direct = body();
+    direct["do"] = direct["do"][0]["if"]["then"].clone();
+    let typed = lowerer()
+        .lower(&tree("evolve_time", direct))
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap();
+    let mut candidate = typed.card().clone();
+    let ability = &mut candidate.abilities[0].node;
+    let direct_body = ability.body.take().unwrap();
+    let source = direct_body.steps[0].source.clone();
+    ability.body = Some(Program {
+        scope: ScopeId(900),
+        steps: vec![Located {
+            source,
+            node: Node::Control {
+                control: Control::If {
+                    condition: condition.clone(),
+                    then_body: direct_body,
+                    else_body: None,
+                },
+            },
+        }],
+    });
+    let error = WellFormedCardProgram::check(candidate).unwrap_err();
+    assert_eq!(error.reason, WellFormedReason::InvalidEntry);
+}
+
+#[test]
 fn conditional_choice_rejects_other_heads_conditions_and_else_branches() {
     lowerer().lower(&tree("fanfare", body())).unwrap();
     lowerer().lower(&tree("attack_time", body())).err().unwrap();
