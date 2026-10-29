@@ -1,4 +1,5 @@
 pub(crate) mod entry;
+pub(crate) mod played;
 pub(crate) mod timing;
 use super::{
     AttackEvent, BanishEvent, BatchPolicy, Binding, Bool, CounterChangeEvent, DamageEvent,

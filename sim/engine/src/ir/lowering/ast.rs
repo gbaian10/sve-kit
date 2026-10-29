@@ -148,6 +148,7 @@ pub(super) enum ActivationZones {
 #[derive(Clone, Copy, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum ActivationZone {
+    Cemetery,
     Field,
     Ex,
 }
@@ -155,6 +156,7 @@ pub(super) enum ActivationZone {
 impl ActivationZone {
     pub(super) const fn kind(self) -> ZoneKind {
         match self {
+            Self::Cemetery => ZoneKind::Cemetery,
             Self::Field => ZoneKind::Field,
             Self::Ex => ZoneKind::Ex,
         }
@@ -841,6 +843,8 @@ pub(super) struct Auto {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) enum PhaseSubscription {
+    #[serde(rename = "played")]
+    Played(PlayedSubscription),
     #[serde(rename = "phase")]
     Phase(PhaseSubscriptionPayload),
     #[serde(rename = "enter_field")]
@@ -909,8 +913,7 @@ pub(super) enum EntryPlayer {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct During {
-    #[serde(rename = "turn")]
-    pub _turn: SelfPlayer,
+    pub turn: SelfPlayer,
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -1200,4 +1203,35 @@ pub(super) struct Grant {
     pub on: Objects,
     pub keywords: Vec<String>,
     pub until: Option<Until>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct PlayedSubscription {
+    pub who: SelfPlayer,
+    pub sel: PlayedSubject,
+    pub during: During,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct PlayedSubject {
+    pub kind: PlayedSpell,
+    pub class: String,
+}
+#[derive(Deserialize)]
+pub(super) enum PlayedSpell {
+    #[serde(rename = "spell")]
+    Spell,
+}
+impl Auto {
+    pub(super) const fn cemetery_play(&self) -> bool {
+        matches!(self.on, PhaseSubscription::Played(_))
+            && match &self.zone {
+                Some(ActivationZones::One(ActivationZone::Cemetery)) => true,
+                Some(ActivationZones::Many(zones)) => {
+                    matches!(zones.as_slice(), [ActivationZone::Cemetery])
+                }
+                _ => false,
+            }
+    }
 }

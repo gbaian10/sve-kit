@@ -1,5 +1,6 @@
-use crate::ir::DamageRecipient;
+use crate::ir::events::played::PlayedFilter;
 use crate::ir::history_turn::played_by;
+use crate::ir::{DamageRecipient, PlayEvent};
 use crate::ir::{ZoneFrozen, ZoneKind, ZoneOperation, ZoneRef};
 macro_rules! projected_equality {
     ($checker:expr, $equality:expr; $($variant:ident),+ $(,)?) => {
@@ -336,6 +337,26 @@ impl Checker {
         })
     }
 
+    fn played_pattern(
+        &mut self,
+        binding: Binding<PlayEvent>,
+        predicate: &Expr<Bool>,
+        view: Option<EventSnapshotPolicy>,
+        triggering: bool,
+    ) -> Checked {
+        if view != Some(EventSnapshotPolicy::AtReveal) {
+            return self.reject();
+        }
+        let Some(plan) = PlayedFilter::parse(binding, predicate) else {
+            return self.reject();
+        };
+        self.define(binding, BindingKind::Value)?;
+        if triggering {
+            self.env.trigger_events.insert(binding.key());
+        }
+        self.local_value(plan.card, &Expr::Literal(Bool(true)))
+    }
+
     pub(super) fn event_pattern(
         &mut self,
         pattern: &EventPattern,
@@ -424,8 +445,10 @@ impl Checker {
             EventPattern::Fused { binding, predicate } => {
                 event!(binding, predicate, EventSnapshotPolicy::BeforeExit)
             }
-            EventPattern::Play { .. }
-            | EventPattern::Targeted { .. }
+            EventPattern::Play { binding, predicate } => {
+                self.played_pattern(*binding, predicate, view, triggering)
+            }
+            EventPattern::Targeted { .. }
             | EventPattern::Resolve { .. }
             | EventPattern::Draw { .. }
             | EventPattern::Banish { .. }

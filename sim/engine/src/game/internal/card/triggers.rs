@@ -21,6 +21,7 @@ use alloc::collections::BTreeMap;
 mod entry;
 pub(in crate::game::internal) mod entry_operand;
 mod evolution;
+mod played;
 mod quota;
 mod timing;
 pub(in crate::game::internal) use quota::Admission;
@@ -84,7 +85,10 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
     ) {
         return super::fanfare::check_header(ability);
     }
-    if entry::check_header(ability)? || timing::check_header(ability)? {
+    if entry::check_header(ability)?
+        || timing::check_header(ability)?
+        || played::check_header(ability)?
+    {
         return Ok(());
     }
     let Some(trigger) = &ability.trigger else {

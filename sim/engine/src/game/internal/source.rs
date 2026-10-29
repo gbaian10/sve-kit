@@ -267,15 +267,20 @@ impl Game {
         // A non-follower has no attack/life; only a valid view can yield rules-absent zero.
         let (original_attack, original_life, attack, life) =
             if self.object_type(id)?.contains("フォロワー") {
-                if current.zone != "field" {
-                    return Err(unsupported("off-field follower source information"));
+                let power = super::cost::printed_cost(&printed["power"])?;
+                let life = super::cost::printed_cost(&printed["hp"])?;
+                match current.zone.as_str() {
+                    "field" => (
+                        power,
+                        life,
+                        self.internal_numeric_stat(id, Stat::Attack)?,
+                        self.internal_numeric_stat(id, Stat::Life)?,
+                    ),
+                    "cemetery" if self.object_type(id)? == "フォロワー" => {
+                        (power, life, power, life)
+                    }
+                    _ => return Err(unsupported("off-field follower source information")),
                 }
-                (
-                    super::cost::printed_cost(&printed["power"])?,
-                    super::cost::printed_cost(&printed["hp"])?,
-                    self.internal_numeric_stat(id, Stat::Attack)?,
-                    self.internal_numeric_stat(id, Stat::Life)?,
-                )
             } else {
                 (0, 0, 0, 0)
             };

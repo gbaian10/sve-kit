@@ -502,7 +502,7 @@ impl Game {
                 && incoming == 1
                 && matches!(objects,
                 Selector::Objects { objects } if matches!(objects.as_slice(),
-                    [ObjectOperand::FollowEventMove { .. }]))
+                    [ObjectOperand::FollowEventMove { .. } | ObjectOperand::SourceHolder {}]))
             {
                 return Ok(false);
             }

@@ -1028,6 +1028,9 @@ impl Game {
                 source,
             }
         });
+        if execution.spell {
+            self.internal_played_card_events(execution, &play.costs)?;
+        }
         execution.prepend(selected_body(play.body, &play.chosen)?);
         Ok(())
     }

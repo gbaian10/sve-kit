@@ -18073,6 +18073,9 @@
         "targets": {
           "$ref": "#/$defs/A.targets"
         },
+        "cost": {
+          "$ref": "#/$defs/A.cost"
+        },
         "optional_cost": {
           "$ref": "#/$defs/A.cost.optionals"
         },
