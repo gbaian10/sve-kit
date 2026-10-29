@@ -18,6 +18,7 @@ impl BodyContext<'_> {
     ) -> Result<Expr<Bool>, LoweringError> {
         Ok(Expr::Compute(Box::new(match value {
             ast::Condition::EnteredBy(condition) => self.entered_by(condition, path)?,
+            ast::Condition::PlayedFrom(condition) => self.played_from(condition, path)?,
             ast::Condition::Combo(threshold) => return Self::combo(*threshold, path),
             ast::Condition::Exists(query) => return self.field_exists(query, path),
             ast::Condition::Awakened(true) => Predicate::CompareInt {
@@ -133,6 +134,37 @@ impl BodyContext<'_> {
                     ast::EntryMethod::Play => super::super::EntryMethod::Play,
                 }),
             }),
+        })
+    }
+
+    fn played_from(
+        &self,
+        condition: &ast::PlayedFromCondition,
+        path: &str,
+    ) -> Result<Predicate, LoweringError> {
+        let event = self.entry_event.ok_or_else(|| unsupported(path))?;
+        let ast::PlayedZone::Ex = condition.from;
+        let method = Predicate::Equal {
+            operands: Box::new(super::super::ValueEquality::EntryMethod {
+                left: Expr::Frozen(Box::new(
+                    super::super::EntryMethodFields::EnterFieldMethod { event },
+                )),
+                right: Expr::Literal(super::super::EntryMethod::Play),
+            }),
+        };
+        let origin = Predicate::Equal {
+            operands: Box::new(super::super::ValueEquality::EntryOrigin {
+                left: Expr::Frozen(Box::new(super::super::EntryOriginFields::EnterFieldFrom {
+                    event,
+                })),
+                right: Expr::Literal(super::super::EntryOrigin::Zone { zone: ZoneKind::Ex }),
+            }),
+        };
+        Ok(Predicate::And {
+            predicates: vec![
+                Expr::Compute(Box::new(method)),
+                Expr::Compute(Box::new(origin)),
+            ],
         })
     }
 

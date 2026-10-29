@@ -32,6 +32,9 @@ mod payment;
 #[path = "card/play.rs"]
 mod play;
 
+#[path = "card/play_origin.rs"]
+mod play_origin;
+
 #[path = "card/fanfare.rs"]
 mod fanfare;
 

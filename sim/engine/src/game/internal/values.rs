@@ -7,8 +7,8 @@ use super::{
     invalid, player_id, seat_name, unsupported,
 };
 use crate::ir::{
-    BoolFrozen, BoolRead, EntryMethod, EntryMethodFields, ExecutionRef, HistoryCount,
-    PaymentReference, SpellCountTime, ValueEquality,
+    BoolFrozen, BoolRead, EntryMethod, EntryMethodFields, EntryOrigin, EntryOriginFields,
+    ExecutionRef, HistoryCount, PaymentReference, SpellCountTime, ValueEquality,
 };
 use crate::ir::{
     FollowPermission, MemberProjection, MovementEvent, MovementReceipt, ObjectReceipt, ObjectView,
@@ -606,6 +606,21 @@ impl Execution {
         }
     }
 
+    fn entered_origin(&self, value: &Expr<EntryOrigin>) -> Result<EntryOrigin> {
+        match value {
+            Expr::Literal(origin) => Ok(*origin),
+            Expr::Frozen(field) => match field.as_ref() {
+                EntryOriginFields::EnterFieldFrom { event } => self
+                    .entry_origin
+                    .filter(|(binding, _)| *binding == event.key())
+                    .map(|(_, origin)| origin)
+                    .ok_or_else(|| invalid("missing entry origin authority")),
+                EntryOriginFields::EnterExFrom { .. } => Err(unsupported("entry origin field")),
+            },
+            _ => Err(unsupported("entry origin expression")),
+        }
+    }
+
     pub(super) fn boolean(&self, game: &Game, expr: &Expr<Bool>) -> Result<Bool> {
         match expr {
             Expr::Literal(value) => Ok(*value),
@@ -681,6 +696,9 @@ impl Execution {
                 Predicate::Equal { operands } => match operands.as_ref() {
                     ValueEquality::EntryMethod { left, right } => {
                         self.entered_method(left)? == self.entered_method(right)?
+                    }
+                    ValueEquality::EntryOrigin { left, right } => {
+                        self.entered_origin(left)? == self.entered_origin(right)?
                     }
                     _ => return Err(unsupported("equality domain")),
                 },

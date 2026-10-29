@@ -1044,6 +1044,7 @@ pub(super) struct Conditional {
 #[serde(rename_all = "snake_case")]
 pub(super) enum Condition {
     EnteredBy(EntryCondition),
+    PlayedFrom(PlayedFromCondition),
     Exists(PublicQuery),
     Awakened(bool),
     LeaderLife(PlayerThreshold),
@@ -1068,6 +1069,18 @@ pub(super) struct EntryCondition {
 pub(super) enum EntryMethod {
     Ability,
     Play,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct PlayedFromCondition {
+    #[serde(rename = "ref")]
+    pub _reference: This,
+    pub from: PlayedZone,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum PlayedZone {
+    Ex,
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
