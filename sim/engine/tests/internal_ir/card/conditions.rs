@@ -449,8 +449,8 @@ fn other_trait_field_condition_rejects_nonfield_queries_and_unsupported_filters(
         json!({"who":"self","zone":"ex","kind":"follower","trait":"魔法使い","other":true}),
         json!({"who":"opp","zone":"cemetery","kind":"follower","other":true}),
         json!({"who":"self","zone":"hand","kind":"follower","other":true}),
-        json!({"who":"self","zone":"field","class":"Witch","other":true}),
-        json!({"who":"self","zone":"field","token":true,"other":true}),
+        json!({"who":"self","zone":"field","not_trait":"魔法使い","other":true}),
+        json!({"who":"self","zone":"field","hp_le":3,"other":true}),
     ] {
         lowerer()
             .lower_with_printed_costs(
@@ -460,6 +460,24 @@ fn other_trait_field_condition_rejects_nonfield_queries_and_unsupported_filters(
                 &BTreeMap::from([("SD03-005".to_owned(), Nat(1))]),
             )
             .unwrap_err();
+    }
+}
+
+#[test]
+fn other_field_condition_accepts_admitted_class_and_token_filters() {
+    for query in [
+        json!({"who":"self","zone":"field","class":"ウィッチ","other":true}),
+        json!({"who":"self","zone":"field","not_class":"ウィッチ","other":true}),
+        json!({"who":"self","zone":"field","trait":"魔法使い","token":true,"other":true}),
+    ] {
+        lowerer()
+            .lower_with_printed_costs(
+                &tree(&json!([{"if":{
+                    "cond":{"exists":query},"then":[{"draw":{"n":1}}]
+                }}])),
+                &BTreeMap::from([("SD03-005".to_owned(), Nat(1))]),
+            )
+            .unwrap();
     }
 }
 
