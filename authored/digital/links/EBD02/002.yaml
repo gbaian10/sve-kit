@@ -1,0 +1,88 @@
+format: 2
+kind: digital_link_shard
+records:
+  - reason: 名稱差一段，看圖判讀同角色不同版本
+    review_level: model_reviewed
+    subject:
+      card_id: c:ec051d4a9c9c5d43a93eb6d502f854d4
+      digital_phase: null
+      face_id: null
+      game: sv1
+      official_id: "105331010"
+    value:
+      digital_names:
+        - lang: en
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            locator: /data/cards/4360/card_name
+            parser: translation-sv1-v1
+            source_version_id: src:v1:4c183f0e6c27155d37d8aef43e7a743b0b291f7a2aec8387f484ebad7ca9cdd8
+            text_hash: sha256:de30e0f67c0a5fad2ba5a50bd019b114f2900d2cb2f3446b77283b032428569a
+          phase: normal
+        - lang: ja
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            locator: /data/cards/4360/card_name
+            parser: translation-sv1-v1
+            source_version_id: src:v1:86de774acfcbb1869f83c75fff58d85841f98d8a531064ecc230e8abb1470529
+            text_hash: sha256:c6efdb4731135b8445716672546ec20460ffbae8c29546479c85b5648e24018e
+          phase: normal
+        - lang: zh-Hant
+          name_ref:
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            locator: /data/cards/4360/card_name
+            parser: translation-sv1-v1
+            source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
+            text_hash: sha256:4ba23ff85cfdabcdbefa84e25a21640d56364452cfeed97ddacf9289dbaad1f5
+          phase: normal
+      effect_similarity: null
+      relation: same_character
+      sve_names:
+        - face_id: f:37cd49d398bd5565af618d745a22816d
+          name_ref:
+            batch_id: sha256:139be07a281797f06baeb00b6aa8da56265ccd22ba4b42246630ba3d283e9ac3
+            locator: /faces/0/name
+            parser: translation-jp-v1
+            source_version_id: src:v1:e9087855085515412ef8d73258fe202c40d741369bf52bfdfce3fb21b2682197
+            text_hash: sha256:b923500f6b1d6060573e3542d1c750a49db44664d81fc3c6616d05a07715b6de
+          printing_id: p:1af283401b695d8ba5aff9e49857aa30
+        - face_id: f:37cd49d398bd5565af618d745a22816d
+          name_ref:
+            batch_id: sha256:139be07a281797f06baeb00b6aa8da56265ccd22ba4b42246630ba3d283e9ac3
+            locator: /faces/0/name
+            parser: translation-jp-v1
+            source_version_id: src:v1:904383aa7aa14aa8e50caf7ccd1850608f6a5616ef010f8dcdd60b67d4b607a8
+            text_hash: sha256:b923500f6b1d6060573e3542d1c750a49db44664d81fc3c6616d05a07715b6de
+          printing_id: p:3223837dffb95804bfae53d063d9b643
+        - face_id: f:37cd49d398bd5565af618d745a22816d
+          name_ref:
+            batch_id: sha256:139be07a281797f06baeb00b6aa8da56265ccd22ba4b42246630ba3d283e9ac3
+            locator: /faces/0/name
+            parser: translation-jp-v1
+            source_version_id: src:v1:0130ad1b610f89c7581c2f41719e64980c1f2c473b461529ceeb9988e7206901
+            text_hash: sha256:b923500f6b1d6060573e3542d1c750a49db44664d81fc3c6616d05a07715b6de
+          printing_id: p:3ce2d1150b6050e7a14918be2e33e6ee
+        - face_id: f:37cd49d398bd5565af618d745a22816d
+          name_ref:
+            batch_id: sha256:139be07a281797f06baeb00b6aa8da56265ccd22ba4b42246630ba3d283e9ac3
+            locator: /faces/0/name
+            parser: translation-jp-v1
+            source_version_id: src:v1:ce9c87abece9dd2cb3b1a64769f2b01b1607b8f688706e40eae0a7b3a14ca996
+            text_hash: sha256:b923500f6b1d6060573e3542d1c750a49db44664d81fc3c6616d05a07715b6de
+          printing_id: p:609d3deb020a59c7a96422ea66c285e6
+        - face_id: f:37cd49d398bd5565af618d745a22816d
+          name_ref:
+            batch_id: sha256:139be07a281797f06baeb00b6aa8da56265ccd22ba4b42246630ba3d283e9ac3
+            locator: /faces/0/name
+            parser: translation-jp-v1
+            source_version_id: src:v1:c016afc0a8070c0684bc919450e2c95290d2cb32e0d4f00b171f7a50919a08bb
+            text_hash: sha256:b923500f6b1d6060573e3542d1c750a49db44664d81fc3c6616d05a07715b6de
+          printing_id: p:bba60360a30a59eb8ebeab92b623b03d
+        - face_id: f:37cd49d398bd5565af618d745a22816d
+          name_ref:
+            batch_id: sha256:139be07a281797f06baeb00b6aa8da56265ccd22ba4b42246630ba3d283e9ac3
+            locator: /faces/0/name
+            parser: translation-jp-v1
+            source_version_id: src:v1:e9d3dfb1d79553719355a3ae5449d8f437242eca1cda4d9c1bc525f4f21c767c
+            text_hash: sha256:b923500f6b1d6060573e3542d1c750a49db44664d81fc3c6616d05a07715b6de
+          printing_id: p:e29932e8d0b05f4ea884d8d7a2414c02
