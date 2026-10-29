@@ -1,0 +1,26 @@
+cards:
+  BP03-032:
+    abilities:
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  exists:
+                    kind: follower
+                    other: true
+                    trait: 童話
+                    who: self
+                    zone: field
+                then:
+                  - draw:
+                      n: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-29"
+format: 2
+kind: author_effect_set

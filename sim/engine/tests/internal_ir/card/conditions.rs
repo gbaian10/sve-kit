@@ -251,3 +251,41 @@ fn name_contains_outside_a_candidate_selector_is_not_admitted() {
     game.load_internal_card("unit-follower", &program)
         .unwrap_err();
 }
+
+#[test]
+fn other_trait_field_condition_accepts_other_followers() {
+    for query in [
+        json!({"who":"self","zone":"field","kind":"follower","trait":"魔法使い"}),
+        json!({"who":"self","zone":"field","kind":"follower","trait":"魔法使い","other":true}),
+    ] {
+        lowerer()
+            .lower_with_printed_costs(
+                &tree(&json!([{"if":{
+                    "cond":{"exists":query},
+                    "then":[{"draw":{"n":1}}]
+                }}])),
+                &BTreeMap::from([("SD03-005".to_owned(), Nat(1))]),
+            )
+            .unwrap();
+    }
+}
+
+#[test]
+fn other_trait_field_condition_rejects_nonfield_queries_and_unsupported_filters() {
+    for query in [
+        json!({"who":"self","zone":"ex","kind":"follower","trait":"魔法使い","other":true}),
+        json!({"who":"opp","zone":"cemetery","kind":"follower","other":true}),
+        json!({"who":"self","zone":"hand","kind":"follower","other":true}),
+        json!({"who":"self","zone":"field","class":"Witch","other":true}),
+        json!({"who":"self","zone":"field","token":true,"other":true}),
+    ] {
+        lowerer()
+            .lower_with_printed_costs(
+                &tree(&json!([{"if":{
+                    "cond":{"exists":query},"then":[{"draw":{"n":1}}]
+                }}])),
+                &BTreeMap::from([("SD03-005".to_owned(), Nat(1))]),
+            )
+            .unwrap_err();
+    }
+}
