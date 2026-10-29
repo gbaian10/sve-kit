@@ -1,0 +1,35 @@
+cards:
+  BP02-086:
+    abilities:
+      - attack_time:
+          do:
+            - damage:
+                n: 1
+                to:
+                  leaders: all
+        line: 1
+      - auto:
+          do:
+            - if:
+                cond:
+                  crimson: true
+                then:
+                  - draw:
+                      n: 1
+                  - discard:
+                      n: 1
+                      who: self
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

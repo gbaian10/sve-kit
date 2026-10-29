@@ -1,0 +1,27 @@
+cards:
+  BP02-104:
+    abilities:
+      - fanfare:
+          cost:
+            pp: 2
+          do:
+            - damage:
+                n: 4
+                to: victim
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

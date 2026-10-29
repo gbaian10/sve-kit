@@ -1,0 +1,33 @@
+cards:
+  BP02-011:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - if:
+                cond:
+                  combo: 3
+                else:
+                  - damage:
+                      n: 1
+                      to: victim
+                then:
+                  - damage:
+                      n: 2
+                      to: victim
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              upto: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set
