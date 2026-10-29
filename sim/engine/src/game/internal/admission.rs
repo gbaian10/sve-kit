@@ -3,6 +3,7 @@ use super::{
     Node, Program, Requirements, Result, SourceSpan, Visibility, WellFormedProgram, unsupported,
 };
 use crate::ir::CostSpec;
+use crate::ir::Requirement;
 use crate::ir::{AbilityOrigin, AbilitySource, Binding, EnterFieldEvent, KeywordId};
 use crate::ir::{Action, DamageAmount, IntFrozen, IntOperation, Predicate};
 use crate::ir::{Bool, DamageEvent, Expr, Int};
@@ -180,6 +181,7 @@ fn check_requirements(
                 || !(supported(requirement.capability.code)
                     || super::source::count_zone(&requirements, requirement)
                     || super::history_turn::public_requirement(&requirements, requirement)
+                    || entry_method_requirement(&requirements, requirement)
                     || (card && play_requirement(requirement.capability.code))
                     || (matches!(
                         requirement.capability.code,
@@ -366,6 +368,19 @@ fn check_program(program: &Program, source: &SourceSpan, card: bool) -> Result<(
         }
     }
     Ok(())
+}
+
+fn entry_method_requirement(requirements: &Requirements, requirement: &Requirement) -> bool {
+    requirement.capability.code == "read.event-field"
+        && requirement.locations.iter().all(|location| {
+            requirements.required.iter().any(|other| {
+                other.capability.code == "shape.EntryMethodFields.EnterFieldMethod"
+                    && other
+                        .locations
+                        .iter()
+                        .any(|at| at.ir_path == location.ir_path)
+            })
+        })
 }
 
 // Every enum arm, internal tag and nested requirement is opt-in, including dead branches.
@@ -632,6 +647,13 @@ fn supported(code: &str) -> bool {
             | "predicate.compare-int"
             | "shape.Predicate.CompareNat"
             | "predicate.compare-nat"
+            | "shape.Predicate.Equal"
+            | "predicate.equal"
+            | "shape.ValueEquality.EntryMethod"
+            | "shape.EntryMethodFields.EnterFieldMethod"
+            | "internal.EntryMethod.Play"
+            | "internal.EntryMethod.AbilityPut"
+            | "internal.EntryMethod.RulePut"
             | "shape.Predicate.Exists"
             | "predicate.exists"
             | "internal.Comparison.Equal"

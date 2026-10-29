@@ -7,7 +7,8 @@ use super::{
     invalid, player_id, seat_name, unsupported,
 };
 use crate::ir::{
-    BoolFrozen, BoolRead, ExecutionRef, HistoryCount, PaymentReference, SpellCountTime,
+    BoolFrozen, BoolRead, EntryMethod, EntryMethodFields, ExecutionRef, HistoryCount,
+    PaymentReference, SpellCountTime, ValueEquality,
 };
 use crate::ir::{
     FollowPermission, MemberProjection, MovementEvent, MovementReceipt, ObjectReceipt, ObjectView,
@@ -591,6 +592,20 @@ impl Execution {
         }
     }
 
+    fn entered_method(&self, value: &Expr<EntryMethod>) -> Result<EntryMethod> {
+        match value {
+            Expr::Literal(method) => Ok(*method),
+            Expr::Frozen(field) => match field.as_ref() {
+                EntryMethodFields::EnterFieldMethod { event } => self
+                    .entry_method
+                    .filter(|(binding, _)| *binding == event.key())
+                    .map(|(_, method)| method)
+                    .ok_or_else(|| invalid("missing entry method authority")),
+            },
+            _ => Err(unsupported("entry method expression")),
+        }
+    }
+
     pub(super) fn boolean(&self, game: &Game, expr: &Expr<Bool>) -> Result<Bool> {
         match expr {
             Expr::Literal(value) => Ok(*value),
@@ -663,6 +678,12 @@ impl Execution {
                     self.natural(game, right)?.0,
                 ),
                 Predicate::Exists { objects } => !self.objects(game, objects)?.is_empty(),
+                Predicate::Equal { operands } => match operands.as_ref() {
+                    ValueEquality::EntryMethod { left, right } => {
+                        self.entered_method(left)? == self.entered_method(right)?
+                    }
+                    _ => return Err(unsupported("equality domain")),
+                },
                 _ => return Err(unsupported("predicate")),
             })),
             Expr::Live(read) => match read.as_ref() {

@@ -555,6 +555,7 @@ impl Game {
                 } = &trigger.on
             {
                 execution.entry_object = Some((binding.key(), event.object));
+                execution.entry_method = Some((binding.key(), event.method));
             }
             if let (Some(EventPayload::Damage { event }), Some(trigger)) =
                 (&pending.timing, &pending.ability.node.trigger)

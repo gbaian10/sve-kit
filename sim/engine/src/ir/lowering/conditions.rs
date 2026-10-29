@@ -17,6 +17,7 @@ impl BodyContext<'_> {
         path: &str,
     ) -> Result<Expr<Bool>, LoweringError> {
         Ok(Expr::Compute(Box::new(match value {
+            ast::Condition::EnteredBy(condition) => self.entered_by(condition, path)?,
             ast::Condition::Combo(threshold) => return Self::combo(*threshold, path),
             ast::Condition::Exists(query) => return self.field_exists(query, path),
             ast::Condition::Awakened(true) => Predicate::CompareInt {
@@ -113,6 +114,26 @@ impl BodyContext<'_> {
                 )));
             }
         })))
+    }
+
+    fn entered_by(
+        &self,
+        condition: &ast::EntryCondition,
+        path: &str,
+    ) -> Result<Predicate, LoweringError> {
+        Ok(Predicate::Equal {
+            operands: Box::new(super::super::ValueEquality::EntryMethod {
+                left: Expr::Frozen(Box::new(
+                    super::super::EntryMethodFields::EnterFieldMethod {
+                        event: self.entry_event.ok_or_else(|| unsupported(path))?,
+                    },
+                )),
+                right: Expr::Literal(match condition.by {
+                    ast::EntryMethod::Ability => super::super::EntryMethod::AbilityPut,
+                    ast::EntryMethod::Play => super::super::EntryMethod::Play,
+                }),
+            }),
+        })
     }
 
     fn combo(threshold: u64, path: &str) -> Result<Expr<Bool>, LoweringError> {
