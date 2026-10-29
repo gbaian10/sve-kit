@@ -1,0 +1,32 @@
+cards:
+  BP17-P29:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - if:
+                cond:
+                  combo: 3
+                then:
+                  - damage:
+                      n: 2
+                      to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-29"
+    token:
+      name: ゲイルアロー
+      template: true
+format: 2
+kind: author_effect_set

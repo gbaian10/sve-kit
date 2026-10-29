@@ -1,0 +1,43 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP11-003:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-29"
+    abilities:
+      - line: 1
+        keywords:
+          - storm
+      - line: 2
+        attack_time:
+          do:
+            - if:
+                cond:
+                  combo: 3
+                then:
+                  - buff:
+                      "on": this
+                      power: 1
+                      hp: 1
+      - line: 3
+        fanfare:
+          do:
+            - if:
+                cond:
+                  combo: 5
+                then:
+                  - damage:
+                      n: 3
+                      to: enemy
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
