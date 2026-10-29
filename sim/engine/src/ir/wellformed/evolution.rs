@@ -7,6 +7,7 @@ use crate::ir::{
     Predicate, Resource, ResourceOperation, SelectionSnapshot, SelectionView, Selector,
     TextQuantifier, Visibility, ZoneKind,
 };
+use crate::ir::{ObjectRef, Program, effect_evolution};
 
 #[expect(
     clippy::multiple_inherent_impl,
@@ -33,7 +34,9 @@ impl Checker {
             return self.reject();
         };
         self.play_entry = Some(self.env.clone());
-        let selection = self.at("play/parameters/0", |checker| checker.evolution_face(face))?;
+        let selection = self.at("play/parameters/0", |checker| {
+            checker.evolution_face(face, false)
+        })?;
         self.at("play/costs", |checker| {
             checker.evolution_costs(&play.costs, selection)
         })?;
@@ -89,14 +92,17 @@ impl Checker {
     fn evolution_face(
         &mut self,
         decision: &Decision,
+        resolution: bool,
     ) -> Result<Binding<Selector>, WellFormedError> {
-        if decision.kind
-            != (DecisionKind::PlayParameter {
-                slot: PlaySlot::Face,
-                selection_snapshot: SelectionSnapshot::AtDecision,
-                play_scope: ExecutionRef::Current {},
-                input: InputMode::Inline,
-            })
+        if (!resolution
+            && decision.kind
+                != (DecisionKind::PlayParameter {
+                    slot: PlaySlot::Face,
+                    selection_snapshot: SelectionSnapshot::AtDecision,
+                    play_scope: ExecutionRef::Current {},
+                    input: InputMode::Inline,
+                }))
+            || (resolution && !effect_evolution::is_choice(decision))
             || decision.actor != (PlayerRef::Controller {})
             || decision.visibility
                 != (Visibility::Only {
@@ -130,6 +136,25 @@ impl Checker {
         self.define(*binding, BindingKind::Value)?;
         self.answer_access(&decision.domain, &decision.visibility);
         Ok(*binding)
+    }
+
+    pub(super) fn effect_evolution(
+        &mut self,
+        body: &Program,
+        decision: &Decision,
+        form: Binding<ObjectRef>,
+    ) -> Checked {
+        if !self.scopes.insert(body.scope) {
+            return Err(self.error(WellFormedReason::DuplicateScope));
+        }
+        self.env.scope = body.scope;
+        self.evolution_face(decision, true)?;
+        self.env.evolution_form = Some(form);
+        let iteration = body
+            .steps
+            .get(1)
+            .ok_or_else(|| self.error(WellFormedReason::InvalidEntry))?;
+        self.located(iteration, Self::node)
     }
 
     fn evolution_candidates(&mut self, selector: &Selector) -> Checked {

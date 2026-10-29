@@ -102,14 +102,14 @@ impl Game {
             .map_or(Ok(true), |condition| self.truth(condition, &frame))
     }
 
-    fn can_receive_evolution(&self, source: &str) -> Result<bool> {
+    pub(in crate::game) fn can_receive_evolution(&self, source: &str) -> Result<bool> {
         let object = self.object(source)?;
         Ok(object.zone == "field"
             && object.state["evolved"] != true
             && !string(&self.face(source)?["card_type"]).contains("エボルヴ"))
     }
 
-    fn evolution_resource_matches(
+    pub(in crate::game) fn evolution_resource_matches(
         &self,
         source: &str,
         evolve: &str,
@@ -320,7 +320,7 @@ impl Game {
         Ok(true)
     }
 
-    fn apply_evolution(
+    pub(in crate::game) fn apply_evolution(
         &mut self,
         source: &str,
         evolve: &str,
@@ -330,6 +330,7 @@ impl Game {
     ) -> Result<()> {
         self.numeric_evolution_allowed(source, true)?;
         let typed_evolution = self.internal_before_evolution(source, evolve, face)?;
+        let evolution_cause = frame.cause.clone();
         let old = self.face(source)?.clone();
         let new = self.catalog.face(&self.object(evolve)?.card, face)?.clone();
         self.move_objects(&[evolve.into()], "evolution", None, None, frame)?;
@@ -380,7 +381,14 @@ impl Game {
         if !self.card_runtime.is_empty() {
             self.object_mut(source)?.state["super_evolved"] = json!(sep > 0);
         }
-        self.internal_evolve_event(source, evolve, sep > 0, typed_evolution, frame)?;
+        self.internal_evolve_event(
+            source,
+            evolve,
+            sep > 0,
+            typed_evolution,
+            &evolution_cause,
+            frame,
+        )?;
         self.stop_unadmitted_resource(evolve, face)?;
         Ok(())
     }

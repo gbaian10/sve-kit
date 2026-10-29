@@ -17,6 +17,7 @@ impl BodyContext<'_> {
         path: &str,
     ) -> Result<Expr<Bool>, LoweringError> {
         Ok(Expr::Compute(Box::new(match value {
+            ast::Condition::EnteredFrom(condition) => self.entered_from(condition, path)?,
             ast::Condition::EnteredBy(condition) => self.entered_by(condition, path)?,
             ast::Condition::PlayedFrom(condition) => self.played_from(condition, path)?,
             ast::Condition::Combo(threshold) => return Self::combo(*threshold, path),
@@ -85,6 +86,7 @@ impl BodyContext<'_> {
                 },
                 right: self.number(&value.right, path, &mut BTreeSet::new())?,
             },
+            ast::Condition::Did(name) => return self.move_success(name, path),
             ast::Condition::Paid(paid) => {
                 if let Some((name, receipt)) = &self.local_payment {
                     if name != &paid.receipt {
@@ -115,6 +117,25 @@ impl BodyContext<'_> {
                 )));
             }
         })))
+    }
+
+    fn entered_from(
+        &self,
+        condition: &ast::EntryOriginCondition,
+        path: &str,
+    ) -> Result<Predicate, LoweringError> {
+        Ok(Predicate::Equal {
+            operands: Box::new(super::super::ValueEquality::EntryOrigin {
+                left: Expr::Frozen(Box::new(super::super::EntryOriginFields::EnterFieldFrom {
+                    event: self.entry_event.ok_or_else(|| unsupported(path))?,
+                })),
+                right: Expr::Literal(super::super::EntryOrigin::Zone {
+                    zone: match condition.zone {
+                        ast::EntryOriginZone::Hand => ZoneKind::Hand,
+                    },
+                }),
+            }),
+        })
     }
 
     fn entered_by(
@@ -166,6 +187,27 @@ impl BodyContext<'_> {
                 Expr::Compute(Box::new(origin)),
             ],
         })
+    }
+
+    fn move_success(&self, name: &str, path: &str) -> Result<Expr<Bool>, LoweringError> {
+        let receipt = self
+            .observations
+            .get(name)
+            .ok_or_else(|| unsupported(path))?;
+        if !matches!(
+            receipt,
+            super::super::ObjectReceipt::Movement {
+                receipt: super::super::MovementReceipt::Move { .. }
+            }
+        ) {
+            return Err(unsupported(path));
+        }
+        Ok(Expr::Compute(Box::new(Predicate::Exists {
+            objects: Selector::ReceiptMembers {
+                receipt: receipt.clone(),
+                projection: super::super::MemberProjection::Before,
+            },
+        })))
     }
 
     fn combo(threshold: u64, path: &str) -> Result<Expr<Bool>, LoweringError> {
@@ -280,7 +322,7 @@ impl BodyContext<'_> {
                     ],
                 })))
             }
-            ast::Number::Count { count } => {
+            ast::Number::Count { count } if count.orig_cost_eq.is_none() => {
                 if !matches!(count.zone, ast::CountZone::Field)
                     && (count.kind.is_some() || count.r#trait.is_some())
                 {
@@ -320,6 +362,7 @@ impl BodyContext<'_> {
                     })),
                 })))
             }
+            ast::Number::Count { .. } => Err(unsupported(path)),
             ast::Number::Resource { resource } => {
                 Ok(Expr::Live(Box::new(IntRead::PlayerResource {
                     player: match resource.who {

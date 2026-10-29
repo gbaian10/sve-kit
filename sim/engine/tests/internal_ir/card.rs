@@ -490,7 +490,8 @@ fn multiple_supported_abilities_keep_distinct_instances_and_effect_producers() {
                         assert_eq!(fact.execution, activation.execution);
                         Some(fact.effect)
                     }
-                    Fact::CardPlayed { .. }
+                    Fact::Evolved(_)
+                    | Fact::CardPlayed { .. }
                     | Fact::CardResolved { .. }
                     | Fact::AbilityPlayed { .. }
                     | Fact::AbilityResolved { .. }
@@ -590,5 +591,7 @@ mod optional;
 #[path = "card/selection_captures.rs"]
 mod selection_captures;
 
+#[path = "card/effect_evolution.rs"]
+mod effect_evolution;
 #[path = "card/play_restrictions.rs"]
 mod play_restrictions;

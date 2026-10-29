@@ -38,8 +38,8 @@ use crate::ir::{
 use crate::ir::{
     Binding, Bool, CausePattern, EffectSource, EventContext, EventPattern, EventSnapshotPolicy,
     ExecutionRef, Expr, HistoryAnchor, HistoryCutoff, HistoryQuery, HistoryRange, HistoryWindow,
-    InclusionPolicy, MovementEvent, ObjectFrozen, ObjectOperand, ObjectRef, PlayerFrozen,
-    PlayerRead, PlayerRef, Predicate, Value,
+    InclusionPolicy, LkiReason, MovementEvent, ObjectFrozen, ObjectOperand, ObjectRef, ObjectView,
+    PlayerFrozen, PlayerRead, PlayerRef, Predicate, Role, Value,
 };
 
 // Each typed payload binding denotes a payload together with its original envelope.
@@ -571,6 +571,16 @@ impl Checker {
             Expr::Literal(player) => self.player(player),
             Expr::Live(read) if !self.event_capture() => match read.as_ref() {
                 PlayerRead::Active {} => Ok(()),
+                PlayerRead::Role {
+                    object:
+                        ObjectView::LastKnown {
+                            object,
+                            reason: LkiReason::ZoneExit,
+                        },
+                    role: Role::Controller,
+                } if matches!(object.as_ref(), ObjectOperand::Bound { binding } if self.env.destroyed_before.contains(&binding.key())) => {
+                    self.object(object)
+                }
                 PlayerRead::Role { object, .. } => self.view(object),
             },
             Expr::Frozen(_)

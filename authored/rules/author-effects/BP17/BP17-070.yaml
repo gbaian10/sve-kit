@@ -1,0 +1,46 @@
+cards:
+  BP17-070:
+    abilities:
+      - fanfare:
+          do:
+            - create:
+                n: 1
+                to: field
+                token: ナテラの大樹
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - pp: 1
+              - banish:
+                  n: 1
+                  sel:
+                    name: ナテラの大樹
+                    who: self
+                    zone: field
+          do:
+            - damage:
+                n: 2
+                to: enemy
+          per_turn: 2
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-29"
+    token_sources:
+      - card: BP07-T03
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

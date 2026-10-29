@@ -1,0 +1,28 @@
+cards:
+  BP22-042:
+    abilities:
+      - evolve:
+          cost:
+            pp: 2
+        line: 1
+      - fanfare:
+          cost:
+            banish:
+              n: 2
+              sel:
+                class: ウィッチ
+                who: self
+                zone: cemetery
+          do:
+            - evolve:
+                ref: this
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-10-29"
+format: 2
+kind: author_effect_set

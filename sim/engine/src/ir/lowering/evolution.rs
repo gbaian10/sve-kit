@@ -1,5 +1,6 @@
 //! Intrinsic evolution is a fixed play projection, not a general Evolve body permission.
 use super::{Allocator, LoweringError, ast, source_span, unsupported};
+use crate::ir::effect_evolution;
 use crate::ir::{
     Ability, AbilityId, AbilityKind, AbilityOrigin, AbilityQualification, AbilitySource, Action,
     Binding, CardName, Cardinality, ChoiceDomain, Control, CostSpec, CostStep, Decision,
@@ -11,6 +12,37 @@ use crate::ir::{
     TextQuantifier, Visibility, ZoneKind,
 };
 use crate::ir::{Precondition, PreconditionKind, PreconditionReason};
+
+#[expect(
+    clippy::multiple_inherent_impl,
+    reason = "Effect evolution uses the same authority-scoped evolution projection."
+)]
+impl super::BodyContext<'_> {
+    pub(super) fn effect_evolution(
+        &mut self,
+        path: &str,
+        source: &super::SourceSpan,
+        origin: &AbilitySource,
+    ) -> Result<Located<Node>, LoweringError> {
+        let mut source = source.clone();
+        source.author_path = path.into();
+        let id = self.card_allocator.id(path)?;
+        let keys = effect_evolution::Keys {
+            scope: self.card_allocator.scope(path)?,
+            candidate: self.card_allocator.scope(path)?,
+            body: self.card_allocator.scope(path)?,
+            decision: DecisionId(self.card_allocator.id(path)?),
+            instruction: InstructionId(id),
+            receipt: ReceiptId(id),
+        };
+        Ok(Located {
+            node: Node::Control {
+                control: effect_evolution::build(&keys, &source, origin),
+            },
+            source,
+        })
+    }
+}
 
 const fn one() -> Cardinality {
     Cardinality {
@@ -143,24 +175,55 @@ fn qualification(
     let Some(condition) = &head.usable_if else {
         return Ok(None);
     };
-    let ast::Condition::Exists(query) = condition else {
-        return Err(unsupported(path));
+    let predicate = match condition {
+        ast::Condition::Exists(query) => {
+            if !matches!(query.who, ast::Side::Controller)
+                || !matches!(query.zone, ast::PublicZone::Field)
+                || query.other
+                || query.class.is_some()
+                || query.token.is_some()
+            {
+                return Err(unsupported(path));
+            }
+            Expr::Compute(Box::new(Predicate::Exists {
+                objects: super::costs::public_query(query, Binding::new(4, scope)),
+            }))
+        }
+        ast::Condition::Cmp(ast::BodyComparison {
+            left: ast::Number::Count { count },
+            op: ast::Comparison::Ge,
+            right: ast::Number::Literal(minimum),
+        }) if matches!(count.who, ast::LeaderSide::Controller)
+            && matches!(count.zone, ast::CountZone::Cemetery)
+            && count.kind.is_none()
+            && count.r#trait.is_none()
+            && *minimum >= 0 =>
+        {
+            let cost = count
+                .orig_cost_eq
+                .and_then(|n| i64::try_from(n).ok())
+                .ok_or_else(|| unsupported(path))?;
+            super::super::evolution_cemetery::predicate(cost, *minimum, Binding::new(4, scope))
+        }
+        ast::Condition::EnteredFrom(_)
+        | ast::Condition::Did(_)
+        | ast::Condition::PlayedFrom(_)
+        | ast::Condition::EnteredBy(_)
+        | ast::Condition::Awakened(_)
+        | ast::Condition::LeaderLife(_)
+        | ast::Condition::Crimson(_)
+        | ast::Condition::Combo(_)
+        | ast::Condition::Paid(_)
+        | ast::Condition::Cmp(_)
+        | ast::Condition::All(_)
+        | ast::Condition::Any(_)
+        | ast::Condition::Not(_) => return Err(unsupported(path)),
     };
-    if !matches!(query.who, ast::Side::Controller)
-        || !matches!(query.zone, ast::PublicZone::Field)
-        || query.other
-        || query.class.is_some()
-        || query.token.is_some()
-    {
-        return Err(unsupported(path));
-    }
     Ok(Some(Precondition {
         kind: PreconditionKind::CardTextPrerequisite,
         protects,
         reason: PreconditionReason::CardText {},
-        predicate: Expr::Compute(Box::new(Predicate::Exists {
-            objects: super::costs::public_query(query, Binding::new(4, scope)),
-        })),
+        predicate,
     }))
 }
 

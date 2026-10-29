@@ -1,7 +1,61 @@
 //! Body posture changes share the ordinary mutation and emit facts only for changed members.
 
 use super::{Execution, Fact, Game, InstructionOutcome, Result, invalid, unsupported};
-use crate::ir::{Instruction, Posture, PostureEvent, Selector};
+use crate::ir::{
+    Action, ActionPattern, Bool, DurationEnd, Edge, Effect, Expr, InstallationSubjects,
+    InstallationTime, Instruction, PermissionSubject, Phase, Polarity, Posture, PostureEvent,
+    Selector, StandScope, TimeAnchor,
+};
+use serde::{Deserialize, Serialize};
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub(in crate::game) struct StandLock {
+    object: u64,
+    generation: u64,
+    player: u32,
+    after: u64,
+}
+
+pub(super) fn check_install(action: &Action) -> Result<()> {
+    let Action::InstallEffect {
+        subjects: InstallationSubjects::Objects { affected, .. },
+        capture: InstallationTime::InstructionStart,
+        effect,
+        duration,
+    } = action
+    else {
+        return Err(unsupported("no-stand installation"));
+    };
+    let Effect::Permission {
+        subject: PermissionSubject::Objects { objects },
+        action:
+            ActionPattern::Stand {
+                objects: action_objects,
+                scope: StandScope::RuleStart { player },
+            },
+        polarity: Polarity::Forbid,
+        condition: Expr::Literal(Bool(true)),
+        duration: inner,
+        ..
+    } = effect.as_ref()
+    else {
+        return Err(unsupported("rule-start permission"));
+    };
+    if *objects
+        != (Selector::Bound {
+            reference: *affected,
+        })
+        || objects != action_objects
+        || inner != duration
+        || !matches!(&duration.end, DurationEnd::NextPhaseEdge { player: end_player, phase: Phase::Start, edge: Edge::End } if end_player == player)
+        || duration.anchor != (TimeAnchor::Installation {})
+        || duration.usage.is_some()
+        || !duration.intervals.is_empty()
+    {
+        return Err(unsupported("next start permission lifetime"));
+    }
+    Ok(())
+}
 
 #[expect(
     clippy::multiple_inherent_impl,
@@ -59,6 +113,76 @@ impl Game {
         execution
             .receipts
             .insert(instruction.receipt, InstructionOutcome::Posture(changes));
+        Ok(())
+    }
+}
+
+#[expect(
+    clippy::multiple_inherent_impl,
+    reason = "Rule stand restrictions are separate from effect posture changes."
+)]
+impl Game {
+    pub(super) fn internal_install_no_stand(
+        &mut self,
+        execution: &mut Execution,
+        instruction: &Instruction,
+    ) -> Result<()> {
+        check_install(&instruction.action)?;
+        let Action::InstallEffect {
+            subjects: InstallationSubjects::Objects { objects, .. },
+            duration,
+            ..
+        } = &instruction.action
+        else {
+            return Err(unsupported("no-stand subjects"));
+        };
+        let DurationEnd::NextPhaseEdge { player, .. } = &duration.end else {
+            return Err(unsupported("no-stand expiry"));
+        };
+        let player = execution.player(self, player)?.seat;
+        let after = self.state.schedule.current()?;
+        let mut installed = Vec::new();
+        for member in execution.objects(self, objects)? {
+            let object = self.object(execution.object_id(member)?)?;
+            if object.generation != member.generation.0 || object.zone != "field" {
+                continue;
+            }
+            self.state.ir_no_stand.push(StandLock {
+                object: member.id.0,
+                generation: member.generation.0,
+                player,
+                after,
+            });
+            installed.push(member);
+        }
+        execution.receipts.insert(
+            instruction.receipt,
+            InstructionOutcome::Installed(installed),
+        );
+        Ok(())
+    }
+
+    pub(in crate::game) fn internal_rule_stand_blocked(&self, id: &str) -> Result<bool> {
+        let object = self.object(id)?;
+        let Some(number) = self.state.ir_objects.get(id) else {
+            return Ok(false);
+        };
+        let player = super::player_id(self.active())?.seat;
+        let turn = self.state.schedule.current()?;
+        Ok(self.state.ir_no_stand.iter().any(|lock| {
+            lock.object == *number
+                && lock.generation == object.generation
+                && lock.player == player
+                && turn > lock.after
+        }))
+    }
+
+    pub(in crate::game) fn internal_finish_rule_stand(&mut self) -> Result<()> {
+        let player = super::player_id(self.active())?.seat;
+        let turn = self.state.schedule.current()?;
+        self.state
+            .ir_no_stand
+            .retain(|lock| lock.player != player || turn <= lock.after);
         Ok(())
     }
 }

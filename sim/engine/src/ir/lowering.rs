@@ -18,6 +18,8 @@ mod ordering;
 mod payment;
 mod play;
 mod play_restrictions;
+
+mod posture;
 mod quick;
 mod search;
 mod selection;
@@ -770,6 +772,7 @@ struct BodyContext<'definitions> {
     allocator: Allocator,
     card_allocator: &'definitions mut Allocator,
     definitions: &'definitions BTreeMap<String, ast::Number>,
+    players: BTreeMap<String, Binding<PlayerRef>>,
     searches: BTreeMap<String, (ReceiptId, bool)>,
     observations: BTreeMap<String, super::ObjectReceipt>,
     observed_targets: BTreeSet<String>,
@@ -803,6 +806,7 @@ impl<'definitions> BodyContext<'definitions> {
             allocator: Allocator::default(),
             card_allocator,
             definitions: &body.define,
+            players: BTreeMap::new(),
             searches: BTreeMap::new(),
             observations: BTreeMap::new(),
             observed_targets: BTreeSet::new(),
@@ -896,6 +900,20 @@ impl<'definitions> BodyContext<'definitions> {
         let mut steps = Vec::new();
         for (index, step) in author_steps.iter().enumerate() {
             let step_path = format!("{path}/{index}");
+            if let ast::Step::EachPlayer(each) = step {
+                let node = self.each_player(each, &step_path, source, ability_source)?;
+                let mut located = source.clone();
+                located.author_path = step_path;
+                steps.push(Located {
+                    source: located,
+                    node,
+                });
+                continue;
+            }
+            if matches!(step, ast::Step::Evolve(_)) {
+                steps.push(self.effect_evolution(&step_path, source, ability_source)?);
+                continue;
+            }
             if let ast::Step::If(conditional) = step {
                 let condition = self.condition(&conditional.cond, source, &step_path)?;
                 let parent = self.scope;
@@ -975,11 +993,18 @@ impl<'definitions> BodyContext<'definitions> {
         span: &SourceSpan,
     ) -> Result<Action, LoweringError> {
         match step {
-            ast::Step::Choice(_) | ast::Step::Choose(_) | ast::Step::If(_) => {
-                Err(unsupported(path))
-            }
+            ast::Step::Choice(_)
+            | ast::Step::Choose(_)
+            | ast::Step::If(_)
+            | ast::Step::EachPlayer(_)
+            | ast::Step::Evolve(_) => Err(unsupported(path)),
             ast::Step::Destroy(value) => Ok(Action::Destroy {
-                objects: self.action_objects(value, path)?,
+                objects: match value {
+                    ast::ObjectAction::Short(objects)
+                    | ast::ObjectAction::Long { r#ref: objects, .. } => {
+                        self.objects(objects, path)?
+                    }
+                },
             }),
             ast::Step::Banish(value) => Ok(Action::Banish {
                 objects: self.action_objects(value, path)?,

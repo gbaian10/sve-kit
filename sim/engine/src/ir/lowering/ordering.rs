@@ -20,6 +20,16 @@ impl BodyContext<'_> {
         path: &str,
     ) -> Result<(), LoweringError> {
         let saved = match step {
+            ast::Step::Destroy(ast::ObjectAction::Long {
+                result: Some(name), ..
+            }) => Some((
+                name,
+                ObjectReceipt::Movement {
+                    receipt: MovementReceipt::Destroy {
+                        receipt: ReceiptReference::new(receipt),
+                    },
+                },
+            )),
             ast::Step::Look(value) => Some((
                 &value.bind,
                 ObjectReceipt::Look {
@@ -53,6 +63,8 @@ impl BodyContext<'_> {
                 return self.search_result(step, receipt, path);
             }
             ast::Step::Reveal(_)
+            | ast::Step::EachPlayer(_)
+            | ast::Step::Evolve(_)
             | ast::Step::If(_)
             | ast::Step::Choose(_)
             | ast::Step::Choice(_)
@@ -304,6 +316,7 @@ impl BodyContext<'_> {
 
     fn supports_move_result(&self, value: &ast::Move, objects: &ast::Objects) -> bool {
         value.result.is_none()
+            || matches!(value.to, ast::Destination::Ex)
             || matches!(objects, ast::Objects::Bound(name)
                 if self.observed_targets.contains(name)
                     && matches!(value.to, ast::Destination::Hand))

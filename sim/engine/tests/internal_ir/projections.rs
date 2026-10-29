@@ -129,7 +129,8 @@ fn success_projections_preserve_old_and_new_generations_without_chasing_later_mo
             .iter()
             .filter_map(|fact| match fact {
                 Fact::Movement(fact) => Some(fact),
-                Fact::CardPlayed { .. }
+                Fact::Evolved(_)
+                | Fact::CardPlayed { .. }
                 | Fact::CardResolved { .. }
                 | Fact::AbilityPlayed { .. }
                 | Fact::AbilityResolved { .. }

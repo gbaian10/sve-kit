@@ -1,330 +1,283 @@
-format: 1
-kind: effect_set
 cards:
   BP08-011:
-    status: complete
     abilities:
-      - line: 1
-        kind: spell
-        body:
-          op: transform
-          subjects: target.1
+      - body:
           names:
             - ロイド
             - ヴィクトリア
+          op: transform
+          subjects: target.1
+        kind: spell
+        line: 1
         targets:
           - key: "1"
+            max: 2
+            min: 2
+            order: true
             select:
+              name: 操り人形
               side: self
               zone: ex
-              name: 操り人形
-            min: 2
-            max: 2
-            order: true
-  BP08-034:
     status: complete
+  BP08-034:
     abilities:
-      - line: 1
-        kind: spell
-        body:
-          op: modify
-          subjects: target.1
-          power: 3
+      - body:
           hp: 2
           keywords:
             - rush
+          op: modify
+          power: 3
+          subjects: target.1
+        kind: spell
+        line: 1
         targets:
           - key: "1"
+            max: 1
+            min: 1
             select:
               side: self
-              zone: field
               type: follower
-            min: 1
-            max: 1
-  BP08-078:
+              zone: field
     status: complete
-    abilities:
-      - line: 1
-        kind: trigger
-        body:
-          op: seq
-          steps:
-            - op: damage
-              subjects: target.1
-              amount: 2
-            - op: modify
-              subjects: self.leader
-              hp: 1
-        event: enter
-        subject: self
-        targets:
-          - key: "1"
-            select:
-              side: opponent
-              zone: field
-              type: follower
-            min: 1
-            max: 1
-        keyword: fanfare
-      - line: 1
-        kind: trigger
-        body:
-          op: seq
-          steps:
-            - op: damage
-              subjects: target.1
-              amount: 2
-            - op: modify
-              subjects: self.leader
-              hp: 1
-        event: field_to_cemetery
-        subject: self
-        targets:
-          - key: "1"
-            select:
-              side: opponent
-              zone: field
-              type: follower
-            min: 1
-            max: 1
-        keyword: last_words
   BP08-080:
-    status: complete
     abilities:
-      - line: 1
-        kind: static
-        body:
-          op: macro
+      - body:
           name: rush
-      - line: 2
-        kind: trigger
-        body:
+          op: macro
+        kind: static
+        line: 1
+      - body:
           op: move
           subjects: target.1
           to: field
         event: field_to_cemetery
+        kind: trigger
+        line: 2
         subject: self
         targets:
           - key: "1"
+            max: 1
+            min: 1
             select:
               side: self
-              zone: cemetery
               type: follower
               where:
-                fn: and
                 args:
-                  - fn: eq
-                    args:
+                  - args:
                       - read: item.class
                       - ナイトメア
-                  - fn: le
-                    args:
+                    fn: eq
+                  - args:
                       - read: item.cost
                       - 5
-            min: 1
-            max: 1
-  BP08-089:
+                    fn: le
+                fn: and
+              zone: cemetery
     status: complete
+  BP08-089:
     abilities:
-      - line: 1
-        kind: evolve
-        body:
+      - body:
           op: evolve
           subjects: self
         costs:
-          - op: pp
-            amount: 2
-      - line: 2
-        kind: trigger
-        body:
-          op: if
+          - amount: 2
+            op: pp
+        kind: evolve
+        line: 1
+      - body:
           condition:
-            fn: ge
             args:
               - count:
                   side: self
-                  zone: field
                   type: amulet
+                  zone: field
               - 3
+            fn: ge
+          op: if
           then:
-            op: adjust_cost
-            subjects: self
             kind: evolve
+            op: adjust_cost
             set: 0
+            subjects: self
             until: end-of-turn
         event: enter
-        subject: self
-  BP08-SL15:
-    status: complete
-    abilities:
-      - line: 1
         kind: trigger
-        body:
+        line: 2
+        subject: self
+    status: complete
+  BP08-SL15:
+    abilities:
+      - body:
           op: seq
           steps:
-            - op: look
+            - bind: seen
               count: 7
-              bind: seen
-            - op: select
+              op: look
+            - bind: chosen
+              distinct_by: name
+              max: 4
+              min: 0
+              op: select
               select:
                 from: seen
                 type: follower
                 where:
-                  fn: and
                   args:
-                    - fn: eq
-                      args:
+                    - args:
                         - read: item.class
                         - ナイトメア
-                    - fn: le
-                      args:
+                      fn: eq
+                    - args:
                         - read: item.cost
                         - 6
-              min: 0
-              max: 4
-              bind: chosen
-              distinct_by: name
-            - op: move
+                      fn: le
+                  fn: and
+            - bind: entered
+              op: move
               subjects: chosen
               to: field
-              bind: entered
             - op: seq
               steps:
-                - op: select
-                  select:
-                    difference:
-                      - seen
-                      - entered
-                  min:
-                    count:
-                      difference:
-                        - seen
-                        - entered
+                - bind: ordered
                   max:
                     count:
                       difference:
                         - seen
                         - entered
-                  bind: ordered
+                  min:
+                    count:
+                      difference:
+                        - seen
+                        - entered
+                  op: select
                   order: true
+                  select:
+                    difference:
+                      - seen
+                      - entered
                 - op: move
+                  position: bottom
                   subjects: ordered
                   to: deck
-                  position: bottom
             - op: destroy
               subjects: entered
         event: enter
+        kind: trigger
+        line: 1
         subject: self
-  BP08-SL19:
     status: complete
+  BP08-SL19:
     abilities:
-      - line: 1
-        kind: evolve
-        body:
+      - body:
           op: evolve
           subjects: self
         costs:
-          - op: pp
-            amount: 2
-      - line: 2
-        kind: trigger
-        body:
+          - amount: 2
+            op: pp
+        kind: evolve
+        line: 1
+      - body:
           op: seq
           steps:
-            - op: declare_number
-              bind: declared
-            - op: move
+            - bind: declared
+              op: declare_number
+            - bind: milled
+              op: move
               subjects:
-                zone: deck
                 side: self
                 top: 5
+                zone: deck
               to: cemetery
-              bind: milled
-            - op: damage
-              subjects:
-                zone: field
-                side: opponent
-                type: follower
-              amount:
+            - amount:
                 count:
                   from: milled
                   where:
-                    fn: eq
                     args:
                       - read: item.cost
                       - read: declared
+                    fn: eq
+              op: damage
+              subjects:
+                side: opponent
+                type: follower
+                zone: field
         event: enter
+        kind: trigger
+        line: 2
         subject: self
-  BP08-T01:
     status: complete
+  BP08-T01:
     abilities:
-      - line: 1
-        kind: static
-        body:
+      - body:
+          name: 操り人形
           op: name_alias
           subjects: self
-          name: 操り人形
           while_zone: field
-      - line: 2
         kind: static
-        body:
-          op: macro
+        line: 1
+      - body:
           name: guard
-      - line: 3
-        kind: trigger
-        body:
+          op: macro
+        kind: static
+        line: 2
+      - body:
+          hp: 2
           op: modify
           subjects: self.leader
-          hp: 2
         event: enter
+        kind: trigger
+        line: 3
         subject: self
-  BP08-T02:
     status: complete
+  BP08-T02:
     abilities:
-      - line: 1
-        kind: static
-        body:
+      - body:
+          name: 操り人形
           op: name_alias
           subjects: self
-          name: 操り人形
           while_zone: field
-      - line: 2
         kind: static
-        body:
-          op: macro
+        line: 1
+      - body:
           name: rush
-      - line: 2
-        kind: static
-        body:
           op: macro
+        kind: static
+        line: 2
+      - body:
           name: assail
-      - line: 3
-        kind: trigger
-        body:
-          op: draw
+          op: macro
+        kind: static
+        line: 2
+      - body:
           count: 1
+          op: draw
         event: enter
+        kind: trigger
+        line: 3
         subject: self
-  BP08-T04:
     status: complete
+  BP08-T04:
     abilities:
-      - line: 1
-        kind: spell
-        body:
+      - body:
           op: seq
           steps:
-            - op: damage
+            - amount: 3
+              op: damage
               subjects: target.1
-              amount: 3
-            - op: draw
-              count: 1
+            - count: 1
+              op: draw
+        kind: spell
+        line: 1
         targets:
           - key: "1"
+            max: 1
+            min: 1
             select:
               union:
                 - side: opponent
-                  zone: field
                   type: follower
+                  zone: field
                 - opponent.leader
-            min: 1
-            max: 1
+    status: complete
+format: 1
+kind: effect_set

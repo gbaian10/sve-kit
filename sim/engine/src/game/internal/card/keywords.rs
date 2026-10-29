@@ -1,5 +1,5 @@
 //! Current printed keyword authority and the CR 12.8.2 optional entry procedure.
-use super::super::{DecisionId, Execution, InputDomain, ObjectRef, Wait, grant};
+use super::super::{DecisionId, Execution, InputDomain, ObjectRef, Wait, grant, player_id};
 use super::{Ability, Game, KeywordId, Located, Result, invalid, unsupported};
 use crate::ir::lowering::PrintedKeyword;
 use crate::ir::{Posture, PostureEvent, SourceSpan, printed_keywords};
@@ -73,7 +73,7 @@ impl Game {
         self.internal_wait(
             execution,
             DecisionId(0),
-            execution.context.controller,
+            player_id(&previous.controller)?,
             InputDomain::WardEntry {
                 card: previous.card.clone(),
                 name: prospective.card_name(holder)?,
