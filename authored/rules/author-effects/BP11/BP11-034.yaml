@@ -1,0 +1,32 @@
+cards:
+  BP11-034:
+    abilities:
+      - keywords:
+          - quick
+        line: 1
+      - line: 2
+        play:
+          cannot_if:
+            my_turn: true
+      - line: 3
+        spell:
+          targets:
+            - bind: ally
+              from:
+                kind: follower
+                who: self
+                zone: field
+              n: 1
+          do:
+            - move:
+                ref: ally
+                to: ex
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-10-29"
+format: 2
+kind: author_effect_set

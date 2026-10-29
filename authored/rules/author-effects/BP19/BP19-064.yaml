@@ -1,0 +1,28 @@
+cards:
+  BP19-064:
+    abilities:
+      - line: 1
+        play:
+          cannot_if:
+            in_zone:
+              ref: this
+              zone: ex
+      - evolve:
+          cost:
+            pp: 1
+        line: 2
+      - lastword:
+          do:
+            - move:
+                ref: this
+                to: ex
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-10-29"
+format: 2
+kind: author_effect_set

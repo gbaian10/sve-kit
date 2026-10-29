@@ -1,0 +1,38 @@
+cards:
+  BP06-106:
+    abilities:
+      - keywords:
+          - quick
+        line: 1
+      - line: 2
+        play:
+          cannot_if:
+            my_turn: true
+      - line: 3
+        spell:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      resource:
+                        kind: pp
+                        who: self
+                    op: ge
+                    right: 2
+                then:
+                  - life:
+                      delta: 1
+                      who: self
+                  - draw:
+                      n: 1
+                      who: self
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-10-29"
+format: 2
+kind: author_effect_set
