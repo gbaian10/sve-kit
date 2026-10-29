@@ -1,0 +1,40 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP19-012:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-30"
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - create:
+                token: 操り人形
+                n: 2
+                to: field
+            - buff:
+                "on":
+                  who: self
+                  zone: field
+                  kind: follower
+                  trait: 人形
+                  token: true
+                power: 2
+            - grant:
+                "on":
+                  who: self
+                  zone: field
+                  kind: follower
+                  trait: 人形
+                  token: true
+                keywords:
+                  - assail
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP08-T09
