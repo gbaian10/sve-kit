@@ -60,12 +60,11 @@ fn bounce_rejects_hidden_follow_and_wrong_zones_before_execution() {
         json!({"ref":"t","to":"hand","position":"top"}),
         json!({"ref":{"in":"looked"},"to":"hand"}),
     ] {
-        lowerer()
-            .lower_with_printed_costs(
-                &tree(&json!([{"move":movement}])),
-                &BTreeMap::from([("SD03-005".to_owned(), Nat(1))]),
-            )
-            .unwrap_err();
+        let result = lowerer().lower_with_printed_costs(
+            &tree(&json!([{"move":movement.clone()}])),
+            &BTreeMap::from([("SD03-005".to_owned(), Nat(1))]),
+        );
+        assert!(result.is_err(), "accepted unsupported move: {movement}");
     }
 }
 

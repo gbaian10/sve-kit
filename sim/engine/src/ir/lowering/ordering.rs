@@ -161,11 +161,9 @@ impl BodyContext<'_> {
             return top_to_cemetery(value, top, path);
         }
         if let Some(ast::MoveObjects::Field(objects)) = &value.r#ref {
-            let captures_hand_move = matches!(objects, ast::Objects::Bound(name)
-                if self.targets.contains_key(name) && matches!(value.to, ast::Destination::Hand));
             if value.position.is_some()
                 || value.order.is_some()
-                || (value.result.is_some() && !captures_hand_move)
+                || !self.supports_move_result(value, objects)
             {
                 return Err(unsupported(path));
             }
@@ -295,6 +293,13 @@ impl BodyContext<'_> {
                 })
             }
         }
+    }
+
+    fn supports_move_result(&self, value: &ast::Move, objects: &ast::Objects) -> bool {
+        value.result.is_none()
+            || matches!(objects, ast::Objects::Bound(name)
+                if self.observed_targets.contains(name)
+                    && matches!(value.to, ast::Destination::Hand))
     }
 }
 

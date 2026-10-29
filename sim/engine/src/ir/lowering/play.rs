@@ -259,6 +259,7 @@ impl BodyContext<'_> {
         {
             return Err(unsupported(path));
         }
+        self.observed_targets.insert(target.bind.clone());
         let candidate = Binding::new(1, self.card_allocator.scope(path)?);
         Ok((
             ChoiceDomain::Objects {
@@ -492,6 +493,7 @@ impl BodyContext<'_> {
                 definitions: self.definitions,
                 searches: BTreeMap::new(),
                 observations: BTreeMap::new(),
+                observed_targets: BTreeSet::new(),
                 targets: BTreeMap::new(),
                 recipient_targets: BTreeMap::new(),
                 parameters: vec![],
