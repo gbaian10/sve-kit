@@ -606,7 +606,9 @@ cards:
         subject: self
   BP19-P21:
     status: complete
-    review: E22 依契約 10.6，同一選ぶ的多組對象使用單一平坦列表，以集合條件驗證各組人數。 E24 入場均先誘發，解決時依事件保存的入場來源判斷；ファンファーレ費用依契約 36（10.1.1.2.2、10.6.2.5、Q1982）在打出時支付。
+    review:
+      E22 依契約 10.6，同一選ぶ的多組對象使用單一平坦列表，以集合條件驗證各組人數。 E24 入場均先誘發，解決時依事件保存的入場來源判斷；ファンファーレ費用依契約
+      36（10.1.1.2.2、10.6.2.5、Q1982）在打出時支付。
     abilities:
       - line: 1
         kind: trigger
@@ -1063,53 +1065,3 @@ cards:
           name_contains: カットスロート
           otherwise: 1
         section: 0
-  BP19-T02:
-    status: complete
-    abilities:
-      - line: 1
-        kind: trigger
-        body:
-          op: if
-          condition:
-            fn: ge
-            args:
-              - count:
-                  side: self
-                  zone: cemetery
-                  type: follower
-                  trait: 八獄
-              - 5
-          then:
-            op: seq
-            steps:
-              - op: modify
-                subjects: self
-                power: 2
-                hp: 2
-                keywords:
-                  - rush
-              - op: if
-                condition:
-                  fn: ge
-                  args:
-                    - count:
-                        side: self
-                        zone: cemetery
-                        type: follower
-                        trait: 八獄
-                    - 10
-                then:
-                  op: modify
-                  subjects: self
-                  keywords:
-                    - assail
-                    - bane
-        event: enter
-        subject: self
-      - line: 2
-        kind: trigger
-        body:
-          op: draw
-          count: 1
-        event: field_to_cemetery
-        subject: self

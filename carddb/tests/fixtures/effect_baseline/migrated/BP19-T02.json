@@ -1,0 +1,77 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "trigger",
+      "body": {
+        "op": "if",
+        "condition": {
+          "fn": "ge",
+          "args": [
+            {
+              "count": {
+                "side": "self",
+                "zone": "cemetery",
+                "type": "follower",
+                "trait": "八獄"
+              }
+            },
+            5
+          ]
+        },
+        "then": {
+          "op": "seq",
+          "steps": [
+            {
+              "op": "modify",
+              "subjects": "self",
+              "power": 2,
+              "hp": 2,
+              "keywords": [
+                "rush"
+              ]
+            },
+            {
+              "op": "if",
+              "condition": {
+                "fn": "ge",
+                "args": [
+                  {
+                    "count": {
+                      "side": "self",
+                      "zone": "cemetery",
+                      "type": "follower",
+                      "trait": "八獄"
+                    }
+                  },
+                  10
+                ]
+              },
+              "then": {
+                "op": "modify",
+                "subjects": "self",
+                "keywords": [
+                  "assail",
+                  "bane"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "event": "enter",
+      "subject": "self"
+    },
+    {
+      "line": 2,
+      "kind": "trigger",
+      "body": {
+        "op": "draw",
+        "count": 1
+      },
+      "event": "field_to_cemetery",
+      "subject": "self"
+    }
+  ]
+}

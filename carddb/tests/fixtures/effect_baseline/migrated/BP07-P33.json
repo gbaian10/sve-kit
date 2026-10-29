@@ -1,0 +1,45 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "spell",
+      "body": {
+        "op": "seq",
+        "steps": [
+          {
+            "op": "destroy",
+            "subjects": "target.1"
+          },
+          {
+            "op": "modify",
+            "subjects": {
+              "side": "self",
+              "zone": "field",
+              "name": "粛清の英雄・メイシア"
+            },
+            "power": {
+              "count": {
+                "side": "self",
+                "zone": "cemetery",
+                "type": "follower"
+              }
+            }
+          }
+        ]
+      },
+      "targets": [
+        {
+          "key": "1",
+          "select": {
+            "side": "opponent",
+            "zone": "field",
+            "type": "follower"
+          },
+          "min": 1,
+          "max": 1
+        }
+      ]
+    }
+  ]
+}

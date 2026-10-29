@@ -1,0 +1,39 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP01-060:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-30"
+    abilities:
+      - line: 1
+        keywords:
+          - quick
+      - line: 2
+        play:
+          cost_delta:
+            if:
+              cmp:
+                left:
+                  count:
+                    who: self
+                    zone: cemetery
+                    trait: ウマ娘
+                op: ge
+                right: 10
+            delta: -2
+      - line: 3
+        spell:
+          do:
+            - destroy: enemy
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1

@@ -1,0 +1,39 @@
+format: 2
+kind: author_effect_set
+cards:
+  CSD02c-004:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-30"
+    abilities:
+      - line: 1
+        activate:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: cemetery
+                        trait: パッション
+                    op: ge
+                    right: 5
+                then:
+                  - choose:
+                      bind: grave
+                      from:
+                        who: self
+                        zone: cemetery
+                        kind: follower
+                      n: 1
+                  - move:
+                      ref: grave
+                      to: hand
+          cost:
+            pp: 2
+          per_turn: 1
