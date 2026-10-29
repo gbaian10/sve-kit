@@ -1,0 +1,39 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP22-013:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-29"
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - fanfare:
+          do:
+            - damage:
+                n: 5
+                to: enemy
+            - draw:
+                n: 1
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          cost:
+            banish:
+              n: 2
+              sel:
+                who: self
+                zone: ex
+                trait: 妖精
+                token: true
+        line: 2
