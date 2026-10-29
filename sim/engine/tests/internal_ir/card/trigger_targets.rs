@@ -42,6 +42,19 @@ fn ordinary_trigger_targets_admit_signed_modification_and_banish() {
 }
 
 #[test]
+fn ordinary_super_evolve_targets_lower_without_a_payment() {
+    lowerer()
+        .lower(&tree(
+            "super_evolve_time",
+            json!({
+                "targets":[{"bind":"enemy","from":{"who":"opp","zone":"field"},"n":1_u8}],
+                "do":[{"destroy":{"ref":"enemy"}}]
+            }),
+        ))
+        .unwrap();
+}
+
+#[test]
 fn ordinary_target_support_keeps_unrelated_play_constructs_closed() {
     let target =
         json!({"bind":"enemy","from":{"who":"opp","zone":"field","kind":"follower"},"n":1});
@@ -55,7 +68,9 @@ fn ordinary_target_support_keeps_unrelated_play_constructs_closed() {
         let mut activated = body.clone();
         activated["cost"] = json!({"pp":1});
         lowerer().lower(&tree("activate", activated)).unwrap();
-        lowerer().lower(&tree("attack_time", body)).err().unwrap();
+        for head in ["attack_time", "super_evolve_time"] {
+            lowerer().lower(&tree(head, body.clone())).err().unwrap();
+        }
     }
     let body = json!({"targets":[target],"do":[{"buff":{"on":"enemy","power":-1}}]});
     lowerer().lower(&tree("lastword", body)).err().unwrap();
@@ -134,14 +149,5 @@ fn required_head_cost_targets_keep_the_existing_trigger_scope() {
     for head in ["fanfare", "evolve_time", "super_evolve_time", "attack_time"] {
         lowerer().lower(&tree(head, body.clone())).unwrap();
     }
-    lowerer()
-        .lower(&tree("lastword", body.clone()))
-        .err()
-        .unwrap();
-    let mut unpaid = body;
-    unpaid.as_object_mut().unwrap().remove("cost");
-    lowerer()
-        .lower(&tree("super_evolve_time", unpaid))
-        .err()
-        .unwrap();
+    lowerer().lower(&tree("lastword", body)).err().unwrap();
 }

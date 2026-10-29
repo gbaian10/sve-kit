@@ -42,7 +42,10 @@ pub(super) fn trigger_play_spec(
         && !matches!(
             keyword,
             Some(
-                super::KeywordId::Fanfare | super::KeywordId::OnEvolve | super::KeywordId::OnAttack
+                super::KeywordId::Fanfare
+                    | super::KeywordId::OnEvolve
+                    | super::KeywordId::OnSuperEvolve
+                    | super::KeywordId::OnAttack
             )
         )
     {
