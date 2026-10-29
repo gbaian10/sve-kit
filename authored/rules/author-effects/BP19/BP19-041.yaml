@@ -1,0 +1,37 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP19-041:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-30"
+    abilities:
+      - line: 1
+        keywords:
+          - storm
+      - line: 2
+        attack_time:
+          do:
+            - buff:
+                "on":
+                  who: self
+                  zone: field
+                  kind: follower
+                  trait: 機械
+                  other: true
+                power: 1
+                hp: 1
+      - line: 3
+        fanfare:
+          do:
+            - search:
+                sel:
+                  who: self
+                  zone: deck
+                  name: 撃針の看守
+                n: 1
+                to: field

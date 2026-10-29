@@ -1,0 +1,38 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP20-075:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-30"
+    abilities:
+      - line: 1
+        evolve_time:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - create:
+                        token: 絶叫の残響・ルルナイ
+                        n: 2
+                        to: field
+                  - - grant:
+                        "on": this
+                        keywords:
+                          - storm
+                    - buff:
+                        "on":
+                          who: self
+                          zone: field
+                          kind: follower
+                          trait: 絶傑
+                          class: ナイトメア
+                        power: 1
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP15-P32

@@ -1,0 +1,32 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP02-085:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-30"
+    abilities:
+      - line: 1
+        spell:
+          targets:
+            - bind: chosen
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: chosen
+                n: 3
+            - buff:
+                "on":
+                  who: self
+                  zone: field
+                  kind: follower
+                  orig_cost_le: 1
+                power: 1
