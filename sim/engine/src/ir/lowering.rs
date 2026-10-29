@@ -431,16 +431,23 @@ impl Allocator {
         let source = source_span(key, path, entry)?;
         let ability_source = ability_source(&source, keyword);
         let mut context = BodyContext::new(entry, scope, body, payment_result, self);
-        let trigger_choice = context.prepare_parameters(body, path, keyword)?;
-        let triggered_play = play::trigger_play_spec(entry, body, keyword, trigger_choice, path)?;
+        let trigger_choice = context.prepare_parameters(
+            body,
+            path,
+            entry.activate.is_none() && entry.spell.is_none(),
+        )?;
+        let triggered_play = play::trigger_play_spec(entry, body, trigger_choice);
         let optional =
             context.optional_payment(body, &source, &ability_source, &format!("{path}/{head}"))?;
-        if entry.fanfare.is_some() {
+        let events = head_events(entry);
+        if events.self_entry {
             context.entry_event = Some(Binding::new(context.allocator.id(path)?, scope));
         }
-        if entry.lastword.is_some() {
+        if events.self_departure {
             context.leave_event = Some(Binding::new(context.allocator.id(path)?, scope));
         }
+        context.departure_to_cemetery = events.departure_to_cemetery;
+        context.cemetery_return = active_zones == [ZoneKind::Cemetery];
         let mut program =
             context.body(body, &format!("{path}/{head}"), &source, &ability_source)?;
         if let Some(payment) = optional {
@@ -508,6 +515,23 @@ impl Allocator {
                 declarations: vec![],
             },
         })
+    }
+}
+
+struct HeadEvents {
+    self_entry: bool,
+    self_departure: bool,
+    departure_to_cemetery: bool,
+}
+
+fn head_events(entry: &ast::Ability) -> HeadEvents {
+    let on = entry.auto.as_ref().map(|auto| &auto.on);
+    HeadEvents {
+        self_entry: entry.fanfare.is_some()
+            || matches!(on, Some(ast::PhaseSubscription::EnterField(event)) if event.reference.is_some()),
+        self_departure: entry.lastword.is_some()
+            || matches!(on, Some(ast::PhaseSubscription::LeaveField(_))),
+        departure_to_cemetery: entry.lastword.is_some(),
     }
 }
 
@@ -764,6 +788,7 @@ fn lowered_subscription(
 struct BodyContext<'definitions> {
     entry_event: Option<Binding<super::EnterFieldEvent>>,
     cemetery_return: bool,
+    departure_to_cemetery: bool,
     leave_event: Option<Binding<super::LeaveFieldEvent>>,
     scope: ScopeId,
     local_payment: Option<(String, ReceiptId)>,
@@ -795,7 +820,8 @@ impl<'definitions> BodyContext<'definitions> {
         Self {
             leave_event: None,
             entry_event: None,
-            cemetery_return: entry.auto.as_ref().is_some_and(ast::Auto::cemetery_play),
+            cemetery_return: false,
+            departure_to_cemetery: false,
             scope,
             definition: AbilityId(scope.0),
             payment_result: if entry.spell.is_some() {
@@ -819,7 +845,8 @@ impl<'definitions> BodyContext<'definitions> {
             formal_play: entry.activate.is_some()
                 || entry.spell.is_some()
                 || body.optional_cost.is_some()
-                || body.head_cost.is_some(),
+                || body.head_cost.is_some()
+                || (entry.activate.is_none() && entry.spell.is_none() && !body.targets.is_empty()),
             local_payment: None,
         }
     }
@@ -852,7 +879,7 @@ impl<'definitions> BodyContext<'definitions> {
         &mut self,
         body: &ast::Body,
         path: &str,
-        keyword: Option<KeywordId>,
+        triggered: bool,
     ) -> Result<bool, LoweringError> {
         for value in body.define.values() {
             self.number(value, path, &mut BTreeSet::new())?;
@@ -861,7 +888,7 @@ impl<'definitions> BodyContext<'definitions> {
         self.allocator = Allocator::default();
         let trigger_choice = body.optional_cost.is_none()
             && body.head_cost.is_none()
-            && play::trigger_choice(body, keyword, path)?;
+            && play::trigger_choice(body, triggered, path)?;
         self.formal_play |= trigger_choice;
         let choice = if trigger_choice {
             true

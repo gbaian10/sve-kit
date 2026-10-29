@@ -134,7 +134,9 @@ impl BodyContext<'_> {
     }
 
     fn self_return(&self, objects: &ast::Objects, path: &str) -> Result<Action, LoweringError> {
-        if !matches!(objects, ast::Objects::This(_)) {
+        if !matches!(objects, ast::Objects::This(_))
+            || (self.leave_event.is_some() && !self.departure_to_cemetery)
+        {
             return Err(unsupported(path));
         }
         let object = match self.leave_event {
@@ -210,6 +212,13 @@ impl BodyContext<'_> {
                     return Err(unsupported(path));
                 }
             };
+            if matches!(objects, ast::Objects::This(_))
+                && zone == OwnerZone::Ex
+                && self.leave_event.is_some()
+                && !self.departure_to_cemetery
+            {
+                return Err(unsupported(path));
+            }
             let objects = match (objects, self.leave_event, zone) {
                 (ast::Objects::This(_), Some(event), OwnerZone::Ex) => Selector::Objects {
                     objects: vec![ObjectOperand::FollowEventMove {

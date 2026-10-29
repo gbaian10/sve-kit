@@ -31,30 +31,10 @@ const fn parameter(id: u64, slot: PlaySlot, domain: ChoiceDomain) -> Decision {
 pub(super) fn trigger_play_spec(
     entry: &ast::Ability,
     body: &ast::Body,
-    keyword: Option<super::KeywordId>,
     trigger_choice: bool,
-    path: &str,
-) -> Result<Option<PlaySpec>, LoweringError> {
+) -> Option<PlaySpec> {
     let triggered = entry.activate.is_none() && entry.spell.is_none();
-    if !body.targets.is_empty()
-        && triggered
-        && body.optional_cost.is_none()
-        && (body.head_cost.is_none()
-            || keyword == Some(super::KeywordId::Lastword)
-            || entry.auto.as_ref().is_some_and(ast::Auto::cemetery_play))
-        && !(matches!(
-            keyword,
-            Some(
-                super::KeywordId::Fanfare
-                    | super::KeywordId::OnEvolve
-                    | super::KeywordId::OnSuperEvolve
-                    | super::KeywordId::OnAttack
-            )
-        ) || (keyword == Some(super::KeywordId::Lastword) && body.head_cost.is_none()))
-    {
-        return Err(unsupported(path));
-    }
-    Ok((triggered
+    (triggered
         && (body.optional_cost.is_some()
             || body.head_cost.is_some()
             || !body.targets.is_empty()
@@ -64,7 +44,7 @@ pub(super) fn trigger_play_spec(
             captures: vec![],
             parameters: vec![],
             costs: CostSpec::Ordered { steps: vec![] },
-        }))
+        })
 }
 
 #[expect(
@@ -488,6 +468,7 @@ impl BodyContext<'_> {
                 leave_event: self.leave_event,
                 entry_event: self.entry_event,
                 cemetery_return: self.cemetery_return,
+                departure_to_cemetery: self.departure_to_cemetery,
                 scope,
                 definition: self.definition,
                 payment_result: None,
@@ -684,21 +665,16 @@ fn contains_choice(steps: &[ast::Step]) -> bool {
 
 pub(super) fn trigger_choice(
     body: &ast::Body,
-    keyword: Option<super::KeywordId>,
+    triggered: bool,
     path: &str,
 ) -> Result<bool, LoweringError> {
-    if !matches!(
-        keyword,
-        Some(super::KeywordId::Fanfare | super::KeywordId::OnEvolve)
-    ) || !contains_choice(&body.steps)
-    {
+    if !triggered || !contains_choice(&body.steps) {
         return Ok(false);
     }
     match body.steps.as_slice() {
         [ast::Step::Choice(_)] => Ok(true),
         [ast::Step::If(branch)]
-            if keyword == Some(super::KeywordId::Fanfare)
-                && matches!(branch.cond, ast::Condition::Awakened(true))
+            if matches!(branch.cond, ast::Condition::Awakened(true))
                 && branch.r#else.is_none()
                 && matches!(branch.then.as_slice(), [ast::Step::Choice(_)]) =>
         {

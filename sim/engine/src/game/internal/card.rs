@@ -321,24 +321,7 @@ impl Game {
             let declaration = printed_keywords::card_declaration(ability);
             keywords::check_coordinate(&mut origins, ordinal, &located.source, declaration)?;
             let printed = self.catalog.face(card_no, ordinal)?;
-            check_printed_face(printed)?;
-            if is_printed_quick(ability)
-                && ability.kind == AbilityKind::Activated
-                && printed["card_type"] != "フォロワー"
-            {
-                return Err(unsupported(
-                    "Quick activation requires an ordinary follower",
-                ));
-            }
-            if ability.kind == AbilityKind::Activated
-                && !printed["card_type"]
-                    .as_str()
-                    .is_some_and(|kind| activation_type(kind, &ability.active_zones))
-            {
-                return Err(unsupported(
-                    "activated printed face is not supported in its active zone",
-                ));
-            }
+            check_ability_face(ability, printed)?;
             if ability.kind == AbilityKind::Spell {
                 play::check_spell(ability, printed)?;
             }
@@ -619,6 +602,31 @@ fn check_base_face(printed: &serde_json::Value) -> Result<()> {
         )
     ) {
         super::cost::printed_play_cost(&printed["cost"])?;
+    }
+    Ok(())
+}
+
+fn check_ability_face(ability: &Ability, printed: &serde_json::Value) -> Result<()> {
+    check_printed_face(printed)?;
+    if triggers::ex_phase(ability) && printed["card_type"] == "フォロワー" {
+        return Err(unsupported("EX follower source information"));
+    }
+    if is_printed_quick(ability)
+        && ability.kind == AbilityKind::Activated
+        && printed["card_type"] != "フォロワー"
+    {
+        return Err(unsupported(
+            "Quick activation requires an ordinary follower",
+        ));
+    }
+    if ability.kind == AbilityKind::Activated
+        && !printed["card_type"]
+            .as_str()
+            .is_some_and(|kind| activation_type(kind, &ability.active_zones))
+    {
+        return Err(unsupported(
+            "activated printed face is not supported in its active zone",
+        ));
     }
     Ok(())
 }

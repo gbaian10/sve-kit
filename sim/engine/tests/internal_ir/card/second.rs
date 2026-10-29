@@ -402,7 +402,7 @@ fn ex_phase_auto_only_observes_its_declared_public_zone_and_controller_turn() {
         ("field", "ex", "P1", 0),
     ] {
         let number = if actual == "field" {
-            "unit-follower"
+            "unit-amulet"
         } else {
             "unit-spell"
         };

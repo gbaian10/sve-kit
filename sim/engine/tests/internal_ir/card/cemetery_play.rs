@@ -331,17 +331,14 @@ fn cemetery_play_insufficient_pp_cancels_and_full_field_records_no_success() {
 }
 
 #[test]
-fn cemetery_play_keeps_other_zones_targets_and_auto_headers_closed() {
-    for change in 0_u8..5 {
+fn cemetery_play_keeps_other_zones_and_auto_headers_closed() {
+    for change in 0_u8..4 {
         let mut tree = tree();
         let auto = &mut tree["cards"]["unit-follower"]["abilities"][0]["auto"];
         match change {
             0 => auto["zone"] = json!("ex"),
             1 => auto["on"]["played"]["during"]["turn"] = json!("opp"),
             2 => auto["on"]["played"]["sel"]["kind"] = json!("follower"),
-            3 => {
-                auto["targets"] = json!([{"bind":"other","from":{"who":"self","zone":"field","kind":"follower"},"n":1}]);
-            }
             _ => {
                 auto["do"][0]["move"]["ref"] =
                     json!({"who":"self","zone":"field","kind":"follower"});
@@ -382,8 +379,7 @@ fn cemetery_play_keeps_other_zones_targets_and_auto_headers_closed() {
         "closed-cemetery-play",
     )
     .unwrap();
-    game.load_internal_card("unit-follower", &program)
-        .unwrap_err();
+    game.load_internal_card("unit-follower", &program).unwrap();
 }
 
 #[test]
@@ -468,4 +464,88 @@ fn cemetery_play_failed_spell_payment_never_enqueues_an_occurrence() {
         .unwrap_err();
     assert!(game.internal_pending_choice().unwrap().is_none());
     assert_eq!(game.projection(View::Referee).unwrap(), before);
+}
+
+#[test]
+fn cemetery_trigger_declares_targets_before_paying_and_combines_return_with_other_actions() {
+    let mut tree = tree();
+    let auto = &mut tree["cards"]["unit-follower"]["abilities"][0]["auto"];
+    auto["targets"] =
+        json!([{"bind":"enemy","from":{"who":"opp","zone":"field","kind":"follower"},"n":1}]);
+    auto["do"] = json!([
+        {"damage":{"to":"enemy","n":1}},
+        {"move":{"ref":"this","to":"field"}},
+        {"life":{"who":"self","delta":1}}
+    ]);
+    let mut initial = initial(2);
+    initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"unit-follower"}]);
+    let mut game = game(&initial, &tree, vec![]);
+    play(&mut game);
+    let payment = fire(&mut game);
+    let CardPlay::Awaiting(targets) = pay(&mut game, payment, true) else {
+        panic!("targets")
+    };
+    assert!(matches!(targets.domain, InputDomain::Targets(_)));
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["pp"]["current"],
+        1
+    );
+    resolved(
+        game.answer_internal_card(targets.actor, targets.token, Answer::Targets(vec![0]))
+            .unwrap(),
+    );
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["objects"]["enemy"]["damage"], 1);
+    assert_eq!(state["P1"]["pp"]["current"], 0);
+    assert_eq!(state["P1"]["field"], json!(["phoenix"]));
+    assert_eq!(state["P1"]["leader"]["life"], 21);
+}
+
+#[test]
+fn cemetery_body_admits_independent_effects_but_rejects_live_holder_operations() {
+    for body in [
+        json!({"do":[]}),
+        json!({"do":[{"life":{"who":"self","delta":1}}]}),
+        json!({"optional_cost":{"pp":1,"result":"paid"},"do":[{"if":{"cond":{"paid":{"receipt":"paid"}},"then":[{"life":{"who":"self","delta":1}}]}}]}),
+        json!({"do":[{"choice":{"n":1,"options":[[{"life":{"who":"self","delta":1}}],[{"move":{"ref":"this","to":"field"}}]]}}]}),
+        json!({"do":[{"if":{"cond":{"awakened":true},"then":[{"move":{"ref":"this","to":"field"}}]}}]}),
+    ] {
+        let mut tree = tree();
+        let auto = &mut tree["cards"]["unit-follower"]["abilities"][0]["auto"];
+        let subscription = auto["on"].clone();
+        *auto = body;
+        auto["on"] = subscription;
+        auto["zone"] = json!("cemetery");
+        let program = lowerer().lower(&tree).unwrap();
+        let mut game = Game::new(
+            catalog(),
+            &initial(2),
+            &Value::Null,
+            &Value::Null,
+            "cemetery-independent",
+        )
+        .unwrap();
+        game.load_internal_card("unit-follower", &program["unit-follower"])
+            .unwrap();
+    }
+    for action in [
+        json!({"buff":{"on":"this","power":1}}),
+        json!({"destroy":"this"}),
+        json!({"move":{"ref":"this","to":"ex"}}),
+        json!({"if":{"cond":{"awakened":true},"then":[{"move":{"ref":"this","to":"hand"}}]}}),
+    ] {
+        let mut tree = tree();
+        tree["cards"]["unit-follower"]["abilities"][0]["auto"]["do"] = json!([action]);
+        let program = lowerer().lower(&tree).unwrap();
+        let mut game = Game::new(
+            catalog(),
+            &initial(2),
+            &Value::Null,
+            &Value::Null,
+            "cemetery-holder",
+        )
+        .unwrap();
+        game.load_internal_card("unit-follower", &program["unit-follower"])
+            .unwrap_err();
+    }
 }

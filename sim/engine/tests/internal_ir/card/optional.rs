@@ -80,17 +80,13 @@ fn optional_trigger_declaration_precedes_targets_and_payment_is_atomic() {
 }
 
 #[test]
-fn optional_declaration_rejects_activation_other_triggers_and_exchange_coexistence() {
-    for kind in ["activate", "lastword"] {
-        let mut tree = tree();
-        let entry = &mut tree["cards"]["unit-follower"]["abilities"][0];
-        let body = entry.as_object_mut().unwrap().remove("fanfare").unwrap();
-        entry[kind] = body;
-        if kind == "activate" {
-            entry[kind]["cost"] = json!({"pp":0});
-        }
-        lowerer().lower(&tree).unwrap_err();
-    }
+fn optional_declaration_rejects_activation_and_exchange() {
+    let mut activation = tree();
+    let entry = &mut activation["cards"]["unit-follower"]["abilities"][0];
+    let body = entry.as_object_mut().unwrap().remove("fanfare").unwrap();
+    entry["activate"] = body;
+    entry["activate"]["cost"] = json!({"pp":0});
+    lowerer().lower(&activation).unwrap_err();
     let mut tree = tree();
     let mut exchange = tree["cards"]["unit-follower"]["abilities"][0].clone();
     exchange.as_object_mut().unwrap().remove("fanfare");

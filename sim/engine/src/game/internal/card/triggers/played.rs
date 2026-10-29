@@ -7,9 +7,12 @@ use crate::game::internal::Execution;
 use crate::ir::events::played::filter;
 use crate::ir::optional_payment;
 use crate::ir::{
-    Action, CostSpec, MoveDestination, MoveReason, Node, ObjectOperand, PlayEvent, PlaySubject,
-    PlayerRef, RuntimeReceiptId, RuntimeZoneRef, Selector,
+    Action, Control, CostSpec, Located, MoveDestination, MoveReason, Node, ObjectOperand,
+    PlayEvent, PlaySubject, PlayerRef, Program, Requirements, RuntimeReceiptId, RuntimeZoneRef,
+    Selector,
 };
+
+use alloc::collections::BTreeSet;
 
 pub(super) fn check_header(ability: &Ability) -> Result<bool> {
     if filter(ability).is_none() {
@@ -22,7 +25,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
     if ability.kind != AbilityKind::Triggered
         || !optional_payment::trigger_play(ability)
         || trigger.view != EventSnapshotPolicy::AtReveal
-        || !return_body(ability)
+        || !cemetery_body(ability)
         || trigger.limit.is_some()
         || trigger.aggregation != (TriggerAggregation::PerFact {})
     {
@@ -31,20 +34,89 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
     Ok(true)
 }
 
-fn return_body(ability: &Ability) -> bool {
+fn cemetery_body(ability: &Ability) -> bool {
     let Some(body) = &ability.body else {
         return false;
     };
-    if !optional_payment::required(body) || optional_payment::declaration(body).is_none() {
-        return false;
+    let Some(first) = body.steps.first() else {
+        return true;
+    };
+    let mut returns = BTreeSet::new();
+    field_return_paths(body, "", &mut returns);
+    Requirements::derive_program(&Located {
+        node: body.clone(),
+        source: first.source.clone(),
+    })
+    .required
+    .iter()
+    .filter(|requirement| requirement.capability.code == "shape.ObjectOperand.SourceHolder")
+    .all(|requirement| {
+        requirement.locations.iter().all(|location| {
+            location.ir_path.ends_with("/instruction/source/holder")
+                || returns.contains(&location.ir_path)
+        })
+    })
+}
+
+fn returns_holder(action: &Action) -> bool {
+    matches!(action,
+        Action::Move { objects: Selector::Objects { objects }, movement, reason: MoveReason::Put }
+            if matches!(objects.as_slice(), [ObjectOperand::SourceHolder {}])
+                && matches!(&movement.to, MoveDestination::Shared { zone } if zone.player == (PlayerRef::Controller {}) && zone.kind == ZoneKind::Field)
+                && movement.initial_posture.is_none() && movement.entry_effects.is_empty()
+                && movement.position.is_none() && movement.order.is_none())
+}
+
+fn field_return_paths(program: &Program, prefix: &str, paths: &mut BTreeSet<String>) {
+    for (index, step) in program.steps.iter().enumerate() {
+        let path = format!("{prefix}/steps/{index}");
+        match &step.node {
+            Node::Instruction { instruction } if returns_holder(&instruction.action) => {
+                paths.insert(format!("{path}/instruction/action/objects/objects/0"));
+            }
+            Node::Control {
+                control: Control::Sequence { body },
+            } => {
+                field_return_paths(body, &format!("{path}/control/body"), paths);
+            }
+            Node::Control {
+                control:
+                    Control::If {
+                        then_body,
+                        else_body,
+                        ..
+                    },
+            } => {
+                field_return_paths(then_body, &format!("{path}/control/then_body"), paths);
+                if let Some(body) = else_body {
+                    field_return_paths(body, &format!("{path}/control/else_body"), paths);
+                }
+            }
+            Node::Control {
+                control: Control::Mode { modes, .. },
+            } => {
+                for (mode_index, mode) in modes.iter().enumerate() {
+                    field_return_paths(
+                        &mode.body,
+                        &format!("{path}/control/modes/{mode_index}/body"),
+                        paths,
+                    );
+                }
+            }
+            Node::Control {
+                control: Control::EachPlayer { stages, .. },
+            } => {
+                for (stage_index, stage) in stages.iter().enumerate() {
+                    field_return_paths(
+                        &stage.body,
+                        &format!("{path}/control/stages/{stage_index}/body"),
+                        paths,
+                    );
+                }
+            }
+            _ => {}
+        }
     }
-    matches!(body.steps.as_slice(), [_, step] if matches!(&step.node,
-        Node::Instruction { instruction } if matches!(&instruction.action,
-            Action::Move { objects: Selector::Objects { objects }, movement, reason: MoveReason::Put }
-                if matches!(objects.as_slice(), [ObjectOperand::SourceHolder {}])
-                    && matches!(&movement.to, MoveDestination::Shared { zone } if zone.player == (PlayerRef::Controller {}) && zone.kind == ZoneKind::Field)
-                    && movement.initial_posture.is_none() && movement.entry_effects.is_empty()
-                    && movement.position.is_none() && movement.order.is_none())))
 }
 
 #[expect(
