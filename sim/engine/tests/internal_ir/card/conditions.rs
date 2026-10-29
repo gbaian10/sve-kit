@@ -1,10 +1,183 @@
 use super::*;
 use alloc::collections::BTreeMap;
+use sve_engine::game::internal::InputDomain;
 
 fn tree(steps: &Value) -> Value {
     let mut tree = fanfare::expanded::spell_tree().clone();
     tree["cards"]["SD03-005"]["abilities"][0]["spell"] = json!({"do":steps});
     tree
+}
+
+fn move_success_tree(steps: &Value) -> Value {
+    let mut tree = tree(steps);
+    let mut candidate = tree["cards"]["SD03-005"].take();
+    candidate["abilities"][0]["spell"]["targets"] = json!([
+        {"bind":"t","from":{"who":"self","zone":"field","kind":"follower"},"upto":2}
+    ]);
+    tree["cards"] = json!({"unit-spell":candidate});
+    tree
+}
+
+fn move_success_steps() -> Value {
+    json!([
+        {"move":{"ref":"t","to":"ex","result":"moved"}},
+        {"if":{"cond":{"did":"moved"},"then":[{"life":{"who":"self","delta":2}}]}}
+    ])
+}
+
+#[test]
+fn move_success_condition_uses_successful_members_instead_of_selected_targets() {
+    let programs = lowerer()
+        .lower_with_printed_costs(
+            &move_success_tree(&move_success_steps()),
+            &BTreeMap::from([("unit-spell".to_owned(), Nat(1))]),
+        )
+        .unwrap();
+    for seat in [1, 2] {
+        let actor = if seat == 1 { "P1" } else { "P2" };
+        for (selected, occupied, healed) in
+            [(0, 0, false), (1, 0, true), (2, 0, true), (1, 5, false)]
+        {
+            let mut initial = setup(seat, json!([]));
+            initial["turn"]["active"] = json!(actor);
+            initial["players"][actor]["leader"]["life"] = json!(10);
+            initial["players"][actor]["zones"]["field"] = json!([
+                {"id":"one","card":"unit-follower"},{"id":"two","card":"unit-follower"}
+            ]);
+            initial["players"][actor]["zones"]["ex"] = json!(
+                (0..occupied)
+                    .map(|n| json!({"id":format!("ex{n}"),"card":"unit-follower"}))
+                    .collect::<Vec<_>>()
+            );
+            let mut game = Game::new(
+                catalog(),
+                &initial,
+                &Value::Null,
+                &Value::Null,
+                "move-success",
+            )
+            .unwrap();
+            game.load_internal_card("unit-spell", &programs["unit-spell"])
+                .unwrap();
+            game.load_internal_card("unit-follower", &card(vec![]))
+                .unwrap();
+            let CardPlay::Awaiting(question) =
+                game.play_internal_card("s", PlayerId { seat }).unwrap()
+            else {
+                panic!("the target group is declared before movement");
+            };
+            let InputDomain::Targets(domain) = &question.domain else {
+                panic!("targets");
+            };
+            let handles = domain
+                .members
+                .iter()
+                .take(selected)
+                .map(|m| m.handle)
+                .collect();
+            let result = resolved(
+                game.answer_internal_card(question.actor, question.token, Answer::Targets(handles))
+                    .unwrap(),
+            );
+            let after = game.projection(View::Referee).unwrap();
+            assert_eq!(after[actor]["leader"]["life"], if healed { 12 } else { 10 });
+            assert_eq!(
+                after[actor]["ex"].as_array().unwrap().len(),
+                occupied + if healed { selected } else { 0 }
+            );
+            assert_eq!(
+                after[actor]["field"].as_array().unwrap().len(),
+                2 - if healed { selected } else { 0 }
+            );
+            assert_eq!(
+                result
+                    .progress
+                    .facts
+                    .iter()
+                    .filter(|f| matches!(f, Fact::Movement(_)))
+                    .count(),
+                if healed { selected } else { 0 }
+            );
+        }
+    }
+}
+
+#[test]
+fn move_success_condition_rejects_missing_wrong_kind_filtered_and_forward_receipts() {
+    for steps in [
+        json!([{"if":{"cond":{"did":"missing"},"then":[{"life":{"delta":2}}]}}]),
+        json!([{"if":{"cond":{"did":"moved"},"then":[{"life":{"delta":2}}]}},{"move":{"ref":"t","to":"ex","result":"moved"}}]),
+        json!([{"move":{"ref":"t","to":"ex","result":"moved"}},{"if":{"cond":{"did":{"result":"moved","where":{"kind":"follower"}}},"then":[{"life":{"delta":2}}]}}]),
+        json!([{"move":{"ref":"t","to":"ex","result":"t"}},{"if":{"cond":{"did":"t"},"then":[{"life":{"delta":2}}]}}]),
+        json!([{"if":{"cond":{"awakened":true},"then":[{"move":{"ref":"t","to":"ex","result":"moved"}}]}},{"if":{"cond":{"did":"moved"},"then":[{"life":{"delta":2}}]}}]),
+    ] {
+        lowerer()
+            .lower_with_printed_costs(
+                &move_success_tree(&steps),
+                &BTreeMap::from([("unit-spell".to_owned(), Nat(1))]),
+            )
+            .unwrap_err();
+    }
+    let mut observed = move_success_tree(&json!([
+        {"look":{"top":{"who":"self","n":1},"bind":"looked"}},
+        {"if":{"cond":{"did":"looked"},"then":[{"life":{"delta":2}}]}}
+    ]));
+    observed["cards"]["unit-spell"]["abilities"][0]["spell"]
+        .as_object_mut()
+        .unwrap()
+        .remove("targets");
+    lowerer()
+        .lower_with_printed_costs(
+            &observed,
+            &BTreeMap::from([("unit-spell".to_owned(), Nat(1))]),
+        )
+        .unwrap_err();
+}
+
+#[test]
+fn move_success_condition_accepts_one_success_in_a_mixed_owner_batch() {
+    let programs = lowerer()
+        .lower_with_printed_costs(
+            &move_success_tree(&move_success_steps()),
+            &BTreeMap::from([("unit-spell".to_owned(), Nat(1))]),
+        )
+        .unwrap();
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["leader"]["life"] = json!(10);
+    initial["players"]["P1"]["zones"]["field"] = json!([
+        {"id":"blocked","card":"unit-follower"},
+        {"id":"moved","card":"unit-follower","owner":"P2"}
+    ]);
+    initial["players"]["P1"]["zones"]["ex"] = json!(
+        (0..5)
+            .map(|n| json!({"id":format!("ex{n}"),"card":"unit-follower"}))
+            .collect::<Vec<_>>()
+    );
+    let mut game = Game::new(
+        catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "partial-move-success",
+    )
+    .unwrap();
+    game.load_internal_card("unit-spell", &programs["unit-spell"])
+        .unwrap();
+    game.load_internal_card("unit-follower", &card(vec![]))
+        .unwrap();
+    let CardPlay::Awaiting(question) = game.play_internal_card("s", PlayerId { seat: 1 }).unwrap()
+    else {
+        panic!("targets")
+    };
+    resolved(
+        game.answer_internal_card(question.actor, question.token, Answer::Targets(vec![0, 1]))
+            .unwrap(),
+    );
+    let after = game.projection(View::Referee).unwrap();
+    assert_eq!(after["P1"]["leader"]["life"], 12);
+    assert_eq!(after["P1"]["field"], json!(["blocked"]));
+    assert_eq!(after["P1"]["ex"].as_array().unwrap().len(), 5);
+    assert_eq!(after["P2"]["ex"], json!(["moved"]));
 }
 
 #[test]

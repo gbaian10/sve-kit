@@ -83,6 +83,7 @@ impl BodyContext<'_> {
                 },
                 right: self.number(&value.right, path, &mut BTreeSet::new())?,
             },
+            ast::Condition::Did(name) => return self.move_success(name, path),
             ast::Condition::Paid(paid) => {
                 if let Some((name, receipt)) = &self.local_payment {
                     if name != &paid.receipt {
@@ -112,6 +113,27 @@ impl BodyContext<'_> {
                     },
                 )));
             }
+        })))
+    }
+
+    fn move_success(&self, name: &str, path: &str) -> Result<Expr<Bool>, LoweringError> {
+        let receipt = self
+            .observations
+            .get(name)
+            .ok_or_else(|| unsupported(path))?;
+        if !matches!(
+            receipt,
+            super::super::ObjectReceipt::Movement {
+                receipt: super::super::MovementReceipt::Move { .. }
+            }
+        ) {
+            return Err(unsupported(path));
+        }
+        Ok(Expr::Compute(Box::new(Predicate::Exists {
+            objects: Selector::ReceiptMembers {
+                receipt: receipt.clone(),
+                projection: super::super::MemberProjection::Before,
+            },
         })))
     }
 

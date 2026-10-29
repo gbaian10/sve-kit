@@ -156,7 +156,10 @@ impl BodyContext<'_> {
             return top_to_cemetery(value, top, path);
         }
         if let Some(ast::MoveObjects::Field(objects)) = &value.r#ref {
-            if value.position.is_some() || value.order.is_some() || value.result.is_some() {
+            if value.position.is_some()
+                || value.order.is_some()
+                || (value.result.is_some() && !matches!(value.to, ast::Destination::Ex))
+            {
                 return Err(unsupported(path));
             }
             if matches!(value.to, ast::Destination::Field) {

@@ -1047,6 +1047,7 @@ pub(super) enum Condition {
 
     Crimson(bool),
     Combo(u64),
+    Did(String),
     Paid(PaidReceipt),
     Cmp(BodyComparison),
     All(Vec<Self>),
