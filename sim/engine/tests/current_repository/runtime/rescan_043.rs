@@ -138,6 +138,7 @@ fn evolution_fixture() -> &'static EvolutionFixture {
             ("rescan043-kotoka", "ECP02-068"),
             ("rescan043-chitose", "ECP02-054"),
             ("play-targets-base", "BP20-047"),
+            ("evolve-choice-base", "BP17-075"),
         ] {
             let record = snapshot
                 .lines()

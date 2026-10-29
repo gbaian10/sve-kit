@@ -587,14 +587,23 @@ fn contains_choice(steps: &[ast::Step]) -> bool {
     })
 }
 
-pub(super) fn fanfare_choice(body: &ast::Body, path: &str) -> Result<bool, LoweringError> {
-    if !contains_choice(&body.steps) {
+pub(super) fn trigger_choice(
+    body: &ast::Body,
+    keyword: Option<super::KeywordId>,
+    path: &str,
+) -> Result<bool, LoweringError> {
+    if !matches!(
+        keyword,
+        Some(super::KeywordId::Fanfare | super::KeywordId::OnEvolve)
+    ) || !contains_choice(&body.steps)
+    {
         return Ok(false);
     }
     match body.steps.as_slice() {
         [ast::Step::Choice(_)] => Ok(true),
         [ast::Step::If(branch)]
-            if matches!(branch.cond, ast::Condition::Awakened(true))
+            if keyword == Some(super::KeywordId::Fanfare)
+                && matches!(branch.cond, ast::Condition::Awakened(true))
                 && branch.r#else.is_none()
                 && matches!(branch.then.as_slice(), [ast::Step::Choice(_)]) =>
         {
