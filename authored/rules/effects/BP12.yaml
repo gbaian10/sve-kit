@@ -1,250 +1,217 @@
-format: 1
-kind: effect_set
 cards:
   BP12-038:
-    status: complete
     abilities:
-      - line: 1
-        kind: static
-        body:
-          op: adjust_cost
-          subjects: self
+      - body:
           amount:
-            fn: sub
             args:
               - 0
-              - fn: distinct
-                args:
+              - args:
                   - read: self.cemetery.cost
-      - line: 2
-        kind: evolve
-        body:
+                fn: distinct
+            fn: sub
+          op: adjust_cost
+          subjects: self
+        kind: static
+        line: 1
+      - body:
           op: evolve
           subjects: self
         costs:
-          - op: pp
-            amount: 1
-      - line: 3
-        kind: static
-        body:
-          op: macro
+          - amount: 1
+            op: pp
+        kind: evolve
+        line: 2
+      - body:
           name: guard
-  BP12-072:
+          op: macro
+        kind: static
+        line: 3
     status: complete
+  BP12-072:
     abilities:
-      - line: 1
-        kind: evolve
-        body:
+      - body:
           op: evolve
           subjects: self
         costs:
-          - op: pp
-            amount: 1
-      - line: 2
-        kind: static
-        body:
-          op: macro
+          - amount: 1
+            op: pp
+        kind: evolve
+        line: 1
+      - body:
           name: bane
-      - line: 3
-        kind: trigger
-        body:
-          op: if
+          op: macro
+        kind: static
+        line: 2
+      - body:
           condition:
             read: self.entered_by_effect
+          op: if
           then:
             op: evolve
             subjects: self
         event: enter
-        subject: self
-  BP12-073:
-    status: complete
-    abilities:
-      - line: 1
-        kind: static
-        body:
-          op: macro
-          name: bane
-      - line: 2
         kind: trigger
-        body:
+        line: 3
+        subject: self
+    status: complete
+  BP12-073:
+    abilities:
+      - body:
+          name: bane
+          op: macro
+        kind: static
+        line: 1
+      - body:
           op: seq
           steps:
-            - op: create
+            - count: 1
               name: プロダクトマシーン
-              count: 1
+              op: create
               to: field
             - op: move
               subjects:
                 side: self
-                zone: deck
                 top: 1
+                zone: deck
               to: cemetery
         event: evolve
+        kind: trigger
+        line: 2
         subject: self
-  BP12-079:
     status: complete
+  BP12-079:
     abilities:
-      - line: 1
-        kind: spell
-        body:
-          op: choice
-          min: 1
+      - body:
           max: 1
+          min: 1
           modes:
             - op: seq
               steps:
-                - op: damage
+                - amount: 2
+                  op: damage
                   subjects: opponent.leader
-                  amount: 2
-                - op: damage
+                - amount: 1
+                  op: damage
                   subjects: self.leader
-                  amount: 1
             - op: seq
               steps:
-                - op: create
+                - count: 1
                   name: プロダクトマシーン
-                  count: 1
+                  op: create
                   to: field
-                - op: if
-                  condition:
-                    fn: gt
+                - condition:
                     args:
                       - count:
+                          name: 真紅の抗戦者・モノ
                           side: self
                           zone: field
-                          name: 真紅の抗戦者・モノ
                       - 0
-                  then:
-                    op: create
-                    name: プロダクトマシーン
-                    count: 1
-                    to: field
+                    fn: gt
                   else:
-                    op: create
-                    name: プロダクトマシーン
                     count: 1
+                    name: プロダクトマシーン
+                    op: create
                     to: ex
-  BP12-083:
-    status: complete
-    abilities:
-      - line: 1
-        kind: trigger
-        body:
-          op: destroy
-          subjects: target.1
-        event: field_to_cemetery
-        subject: self
-        targets:
-          - key: "1"
-            select:
-              zone: field
-              side: opponent
-              type: follower
-            min: 1
-            max: 1
-      - line: 2
-        kind: activated
-        body:
-          op: move
-          subjects:
-            zone: deck
-            side: self
-            top: 2
-          to: cemetery
-        costs:
-          - op: pp
-            amount: 1
-          - op: move
-            subjects: self
-            to: cemetery
-  BP12-SL08:
-    status: complete
-    abilities:
-      - line: 2
+                  op: if
+                  then:
+                    count: 1
+                    name: プロダクトマシーン
+                    op: create
+                    to: field
+          op: choice
         kind: spell
-        body:
+        line: 1
+    status: complete
+  BP12-SL08:
+    abilities:
+      - body:
           op: seq
           steps:
-            - op: for_each
-              select:
-                from: target.1
-                side: opponent
-              bind: enemy
+            - bind: enemy
               body:
                 op: seq
                 steps:
-                  - op: damage
+                  - amount: 5
+                    op: damage
                     subjects: enemy
-                    amount: 5
-                  - op: damage
+                  - amount: 2
+                    op: damage
                     subjects: enemy.leader
-                    amount: 2
-            - op: modify
+              op: for_each
+              select:
+                from: target.1
+                side: opponent
+            - hp: 1
+              op: modify
+              power: 1
               subjects:
                 from: target.1
                 side: self
-              power: 1
-              hp: 1
-        targets:
+        cost_selections:
           - key: "1"
-            select:
-              union:
-                - side: opponent
-                  zone: field
-                  type: follower
-                - side: self
-                  zone: field
-                  type: follower
-                  trait: 自然
-            min: 1
             max: 2
-            constraint:
-              fn: eq
+            min: 2
+            select:
+              name: ナテラの大樹
+              side: self
+              zone: field
+        costs:
+          - op: act
+            subjects: cost.1
+        kind: spell
+        line: 2
+        targets:
+          - constraint:
               args:
                 - count:
                     from: target.1
                     side: opponent
                 - 1
-        cost_selections:
-          - key: "1"
-            select:
-              side: self
-              zone: field
-              name: ナテラの大樹
-            min: 2
+              fn: eq
+            key: "1"
             max: 2
-        costs:
-          - op: act
-            subjects: cost.1
-  BP12-T10:
+            min: 1
+            select:
+              union:
+                - side: opponent
+                  type: follower
+                  zone: field
+                - side: self
+                  trait: 自然
+                  type: follower
+                  zone: field
     status: complete
+  BP12-T10:
     abilities:
-      - line: 1
-        kind: activated
-        body:
+      - body:
+          amount: 5
           op: damage
           subjects: target.1
-          amount: 5
-        targets:
-          - key: "1"
-            select:
-              side: opponent
-              zone: field
-              type: follower
-            min: 1
-            max: 1
         cost_selections:
           - key: "1"
+            max: 3
+            min: 3
             select:
               side: self
-              zone: field
-              type: follower
               trait: 機械
-            min: 3
-            max: 3
+              type: follower
+              zone: field
         costs:
           - op: act
             subjects: self
           - op: move
             subjects: cost.1
             to: cemetery
+        kind: activated
+        line: 1
+        targets:
+          - key: "1"
+            max: 1
+            min: 1
+            select:
+              side: opponent
+              type: follower
+              zone: field
+    status: complete
+format: 1
+kind: effect_set

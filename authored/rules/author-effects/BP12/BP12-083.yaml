@@ -1,0 +1,35 @@
+cards:
+  BP12-083:
+    abilities:
+      - lastword:
+          do:
+            - destroy: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - pp: 1
+              - self_to_cemetery: true
+          do:
+            - move:
+                to: cemetery
+                top:
+                  n: 2
+                  who: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-29"
+format: 2
+kind: author_effect_set
