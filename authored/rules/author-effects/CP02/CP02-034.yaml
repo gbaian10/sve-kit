@@ -1,0 +1,32 @@
+cards:
+  CP02-034:
+    abilities:
+      - keywords:
+          - quick
+        line: 1
+      - line: 2
+        spell:
+          do:
+            - buff:
+                hp: 3
+                on: ally
+                power: 1
+            - life:
+                delta: 3
+                who: self
+          targets:
+            - bind: ally
+              from:
+                kind: follower
+                who: self
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-luna
+            who: Codex
+          date: "2026-10-29"
+format: 2
+kind: author_effect_set

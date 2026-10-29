@@ -1,0 +1,27 @@
+cards:
+  CP02-T06:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - life:
+                delta: 1
+                who: self
+            - draw:
+                n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-luna
+            who: Codex
+          date: "2026-10-29"
+    token:
+      name: 魔法のアイテム
+      template: false
+    token_sources:
+      - card: CP02-T01
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set
