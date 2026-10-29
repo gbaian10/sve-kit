@@ -1,0 +1,31 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP22-015:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-29"
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - fanfare:
+          do:
+            - create:
+                token: フェアリー
+                n: 2
+                to: ex
+            - draw:
+                n: 1
+            - discard:
+                who: self
+                n: 1
+        line: 2
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP01-T03
