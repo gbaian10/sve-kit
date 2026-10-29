@@ -121,3 +121,5 @@ uv --directory /absolute/project/carddb run sve-carddb author check \
 `check` 檢查全部索引作者卡；`body_usage` 依永久 CardId 去重，達三張提示整理共用本體，無額外資格 consumer。review 紀錄只報實際 verdict，不以 SHA freshness 授予核可或阻擋。source pending 不擋直接入口，真正 disputed／revise 只擋受影響卡。
 
 check 成功代表來源定位、行覆蓋與 DSL 結構通過；Rust lowering／runtime 能力准入及對局行為測試仍須通過。錯誤回傳位置及分類，不印整行卡文。完整回歸交 CI，無需額外證據 JSON 或結果 DB。
+
+效果本文的 `evolve: {ref: this}` 可在結算時從控制者未公開的進化牌堆選一張同名普通進化卡，沿既有進化程序處理，並產生真正的進化時事件；不另扣 PP／EP／SEP，也不占用一般進化次數。只准入自身普通進化，其他對象、指定名稱及超進化仍須另行准入。沒有合法進化卡時照既有結算選擇契約回答空集合，已支付成本不回退。`entered_from: {ref: this, from: hand}` 讀取這次入場事件原有區域，可用 `not` 表示非手牌；不等同能力入場。場上 `count` 目前可作不帶卡片篩選的數量判斷。
