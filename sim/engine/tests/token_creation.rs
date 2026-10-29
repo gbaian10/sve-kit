@@ -86,6 +86,66 @@ fn initial(occupied: usize) -> Value {
 }
 
 #[test]
+fn token_creation_composes_with_private_discard_bindings() {
+    let (snapshot, keywords, mut input) = selection(2);
+    let steps = &mut input["authors"][0]["input"]["tree"]["cards"]["creator"]["faces"]["f:11111111111111111111111111111111"]
+        ["abilities"][0]["spell"]["do"];
+    steps.as_array_mut().unwrap().extend([
+        json!({"draw":{"n":1_u8}}),
+        json!({"discard":{"who":"self","n":1_u8}}),
+    ]);
+    Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
+}
+
+#[test]
+fn keyword_before_token_creation_and_discard_keeps_bindings_unique() {
+    let (_, _, mut input) = selection(2);
+    let (creator, source) = author(
+        "creator",
+        "11111111111111111111111111111111",
+        "フォロワー",
+        vec![
+            json!({"keywords":["ward"]}),
+            json!({"fanfare":{"do":[
+                {"create":{"token":"token","to":"ex","n":2_u8}},
+                {"draw":{"n":1_u8}},
+                {"discard":{"who":"self","n":1_u8}}
+            ]}}),
+        ],
+    );
+    let (token, _) = author(
+        "token",
+        "22222222222222222222222222222222",
+        "フォロワー・トークン",
+        vec![],
+    );
+    input["authors"][0] = source;
+    Catalog::from_current_selection(
+        &format!("{creator}\n{token}\n"),
+        include_str!("../../../authored/rules/keywords.yaml"),
+        &input,
+    )
+    .unwrap();
+}
+
+#[test]
+fn token_creation_rejects_ambiguous_and_reused_result_bindings() {
+    for second in [
+        json!({"create":{"token":"token","to":"ex","result":"made"}}),
+        json!({"create":{"token":"token","to":"ex","bind":"made"}}),
+        json!({"create":{"token":"token","to":"ex","result":"other","bind":"also"}}),
+    ] {
+        let (snapshot, keywords, mut input) = selection(2);
+        input["authors"][0]["input"]["tree"]["cards"]["creator"]["faces"]
+            ["f:11111111111111111111111111111111"]["abilities"][0]["spell"]["do"]
+            .as_array_mut()
+            .unwrap()
+            .push(second);
+        Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap_err();
+    }
+}
+
+#[test]
 fn fixed_token_creation_reports_only_tokens_that_fit_in_own_ex() {
     for (kind, occupied, expected) in [
         ("フォロワー・トークン", 0_usize, 2_usize),
