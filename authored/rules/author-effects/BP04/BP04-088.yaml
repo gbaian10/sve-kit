@@ -1,0 +1,30 @@
+cards:
+  BP04-088:
+    abilities:
+      - auto:
+          do:
+            - damage:
+                n: 3
+                to: enemy
+          on:
+            damaged:
+              during:
+                turn: self
+              recipient: this
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-29"
+format: 2
+kind: author_effect_set
