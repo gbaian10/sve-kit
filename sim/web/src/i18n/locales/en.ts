@@ -537,7 +537,6 @@ export default {
     retry: "Retry",
   },
   sets: {
-    notFound: "Card set not found",
     kind: {
       booster: "Boosters",
       collaboration: "Collaborations",
@@ -547,11 +546,7 @@ export default {
       special: "Special products",
       other: "Other products",
     },
-    cards: "Cards listed: {{value}}",
-    countsPending: "Counting cards",
-    countsUnavailable: "Card count unavailable for now",
     specialProducts: "Decks and special products",
-    switchEdition: "Show the {{edition}} edition",
     empty: "This edition has no sets to list yet.",
   },
   digital: {

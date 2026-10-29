@@ -213,17 +213,6 @@ describe("CardsPage", () => {
     },
   )
 
-  it.each(["/sets/UNKNOWN", "/sets/UNKNOWN?set=bp01"])(
-    "reports a missing set at %s",
-    async (path) => {
-      prefsStore.set({ uiLanguage: "zh-TW" })
-      await renderRoutes(routes, { initialEntries: [path] })
-      expect(await screen.findByText("找不到這個卡包", {}, { timeout: 4000 })).toBeVisible()
-      expect(screen.queryByText("沒有符合的卡")).not.toBeInTheDocument()
-      expect(document.querySelector("[data-result-key]")).toBeNull()
-    },
-  )
-
   it("loads table illustration crops from the independent visible-image channel", async () => {
     await open("/cards?view=table")
     await waitFor(
@@ -236,10 +225,10 @@ describe("CardsPage", () => {
     )
   })
 
-  it("keeps a set page's own set out of its URL but in the sequence a card walks", async () => {
+  it("keeps the set filter in the URL and the sequence a card walks", async () => {
     // Cards open as pages here; the in-place panel and modal have their own tests.
     prefsStore.set({ cardOpenMode: "page" })
-    const { router } = await open("/sets/BP01")
+    const { router } = await open("/cards?set=bp01")
     const user = userEvent.setup()
     const openFirst = async () => {
       const cell = await waitFor(() => {
@@ -255,8 +244,8 @@ describe("CardsPage", () => {
     expect(await openFirst()).toEqual({ set: "bp01" })
     await act(() => router.navigate(-1))
     await user.click(await screen.findByRole("button", { name: "主教" }))
-    expect(router.state.location.pathname).toBe("/sets/BP01")
-    expect(router.state.location.search).toBe("?class=bishop")
+    expect(router.state.location.pathname).toBe("/cards")
+    expect(router.state.location.search).toBe("?class=bishop&set=bp01")
     expect(await openFirst()).toEqual({ class: "bishop", set: "bp01" })
   })
 

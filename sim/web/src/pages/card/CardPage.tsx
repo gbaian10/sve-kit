@@ -54,6 +54,7 @@ import { displayName, UI_TEXT_LANG } from "../../domain/nameDisplay"
 import { editionUrl, querySearch } from "../../domain/query/codec"
 import { DEFAULT_QUERY } from "../../domain/query/model"
 import type { Region } from "../../domain/search"
+import { setCardsPath } from "../../domain/sets"
 import { currentUiLanguage } from "../../i18n"
 import { showsOtherEdition, usePrefs } from "../../settings"
 import { PageTitle } from "../PageTitle"
@@ -731,7 +732,7 @@ export function CardView({
           )}
           {setCode !== undefined && (
             <RouterLink
-              to={`/sets/${encodeURIComponent(setCode)}${region === "en" ? "?ed=en" : ""}`}
+              to={setCardsPath(setCode, region)}
               aria-label={t("cardPage.set", { code: setCode })}
               className="flex h-7 shrink-0 items-center rounded-sm bg-surface-2 px-2 text-12 font-semibold text-text-2 hover:bg-surface-3"
             >

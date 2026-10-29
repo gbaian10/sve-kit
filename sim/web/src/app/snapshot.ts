@@ -653,15 +653,6 @@ export function useSetReleases(edition: Region) {
   }, [channel, edition])
   return useSyncExternalStore(channel.subscribe, channel.getStatus, channel.getStatus)
 }
-/** One set's cards counted once each in the Worker; only the counts return. */
-export function useSetCounts(code: string | undefined, edition: Region) {
-  const { channel } = useWorkerChannel()
-  useEffect(() => {
-    if (code !== undefined) channel.count({ state: { ...DEFAULT_QUERY, sets: [code] }, edition })
-  }, [channel, code, edition])
-  return useSyncExternalStore(channel.subscribe, channel.getStatus, channel.getStatus)
-}
-
 /** The catalog of the loaded snapshot, or null while nothing is loaded yet. */
 export function useCardSnapshot(): {
   readonly client: SnapshotClient

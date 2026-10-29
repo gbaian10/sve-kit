@@ -287,7 +287,7 @@ describe("sets and official news", () => {
     const sets = within(screen.getByRole("region", { name: "依卡包・最近三彈" }))
     expect(sets.getByRole("link", { name: "全部卡包" })).toHaveAttribute("href", "/sets")
     const entry = sets.getByRole("link", { name: /BP01/u })
-    expect(entry).toHaveAttribute("href", "/sets/BP01")
+    expect(entry).toHaveAttribute("href", "/cards?set=bp01")
     expect(entry).toHaveTextContent("2026-02-01 發售")
     // The one dated booster set leaves room for two more, so the undated rule is spelled out.
     expect(sets.getByText(/發售日未知的不列入/u)).toBeVisible()

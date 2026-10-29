@@ -175,14 +175,14 @@ describe("opening a card beside the results", () => {
     },
   )
 
-  it("also opens the panel on a set page", async () => {
-    const { router } = await open("/sets/BP01", "panel")
+  it("also opens the panel with a set filter", async () => {
+    const { router } = await open("/cards?set=bp01", "panel")
     const user = userEvent.setup()
     const [first] = await cells()
     if (!first) throw new Error("missing cell")
     await user.click(first)
-    expect(router.state.location.pathname).toBe("/sets/BP01")
-    expect(router.state.location.search).toBe("?card=BP01-001")
+    expect(router.state.location.pathname).toBe("/cards")
+    expect(router.state.location.search).toBe("?set=bp01&card=BP01-001")
     await within(panel()).findByRole("heading", { name: "試作見習兵" }, { timeout: 5000 })
   })
 

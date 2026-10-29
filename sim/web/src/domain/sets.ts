@@ -1,5 +1,6 @@
 import type { DisplayedText, NameSource } from "./nameDisplay"
 import { compareCodePoints } from "./normalize"
+import { editionUrl } from "./query/codec"
 import type { Region, TextLang } from "./search"
 
 /** A set name in the interface's text language, else the original. */
@@ -31,7 +32,7 @@ export function setCaption(
 // The kinds with a section of their own on `/sets` (architecture §2.1); every other kind, known or
 // not, lands in "decks and special products" so a new kind in the snapshot is never dropped.
 const MAIN_SET_KINDS = ["booster", "collaboration", "special_pack", "promo"] as const
-export type MainSetKind = (typeof MAIN_SET_KINDS)[number]
+type MainSetKind = (typeof MAIN_SET_KINDS)[number]
 
 export interface GroupedSets<T> {
   readonly main: ReadonlyMap<MainSetKind, readonly T[]>
@@ -40,12 +41,6 @@ export interface GroupedSets<T> {
 
 function isMainSetKind(kind: string | undefined): kind is MainSetKind {
   return (MAIN_SET_KINDS as readonly string[]).includes(kind ?? "")
-}
-
-/** The `sets.kind` copy key for a family kind; kinds the copy does not know fall to "other". */
-export function setKindKey(kind: string | undefined): MainSetKind | "deck" | "special" | "other" {
-  if (isMainSetKind(kind) || kind === "deck" || kind === "special") return kind
-  return "other"
 }
 
 /** Splits sets into the main sections (in `MAIN_SET_KINDS` order, present kinds only) and the rest. */
@@ -127,4 +122,8 @@ export function recentSets<T extends SetFacts & { readonly releasedOn: string }>
 export interface PackCounts {
   /** Distinct cards among the matching printings. */
   readonly cards: number
+}
+
+export function setCardsPath(code: string, edition: Region = "jp"): string {
+  return editionUrl(`/cards?set=${encodeURIComponent(code.toLowerCase())}`, edition)
 }

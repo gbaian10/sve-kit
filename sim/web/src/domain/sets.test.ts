@@ -1,13 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import {
-  datedSets,
-  groupSets,
-  type ProductFacts,
-  recentSets,
-  type SetFacts,
-  setKindKey,
-} from "./sets"
+import { datedSets, groupSets, type ProductFacts, recentSets, type SetFacts } from "./sets"
 
 const set = (id: string, kind = "booster"): SetFacts => ({ id, publicCode: id.toUpperCase(), kind })
 const product = (
@@ -135,13 +128,4 @@ describe("groupSets", () => {
     expect(grouped.main.get("special_pack")).toBeUndefined()
     expect(grouped.other.map((item) => item.id)).toEqual(["deck", "mystery", "special", "untyped"])
   })
-})
-
-it("maps every family kind to a copy key, unknown kinds to other", () => {
-  expect(
-    ["booster", "collaboration", "special_pack", "promo", "deck", "special"].map(setKindKey),
-  ).toEqual(["booster", "collaboration", "special_pack", "promo", "deck", "special"])
-  expect(setKindKey("other")).toBe("other")
-  expect(setKindKey("limited_run")).toBe("other")
-  expect(setKindKey(undefined)).toBe("other")
 })

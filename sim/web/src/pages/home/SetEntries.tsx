@@ -7,7 +7,8 @@ import { useRouteEdition } from "../../app/snapshot"
 import { Button } from "../../components/ui/Button"
 import { Link } from "../../components/ui/Link"
 import { editionUrl } from "../../domain/query/codec"
-import { RECENT_SET_LIMIT, type SetEntry, setPath } from "./home-model"
+import { setCardsPath } from "../../domain/sets"
+import { RECENT_SET_LIMIT, type SetEntry } from "./home-model"
 
 // Only known release dates decide which booster and collaboration sets are newest.
 export function SetEntries({
@@ -57,7 +58,7 @@ export function SetEntries({
             {sets.map((set) => (
               <li key={set.publicCode}>
                 <RouterLink
-                  to={setPath(set.publicCode, edition)}
+                  to={setCardsPath(set.code, edition)}
                   className="flex min-h-14 items-center gap-3 rounded-button border border-border bg-surface-1 px-3 py-1.5 text-text-1 hover:bg-surface-2"
                 >
                   <span className="w-14 shrink-0 font-sans text-14 font-bold tabular-nums">
