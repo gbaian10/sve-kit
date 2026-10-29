@@ -209,9 +209,7 @@ fn movement(zone: OwnerZone) -> Action {
     }
 }
 
-fn producer_selection() -> &'static SelectedEffects {
-    static SELECTED: OnceLock<SelectedEffects> = OnceLock::new();
-    SELECTED.get_or_init(|| {
+fn producer_inputs() -> (String, String, Value) {
     let (mut snapshot, keywords, mut input) = inputs().clone();
     let face = serde_json::from_str::<Value>(
         snapshot
@@ -226,11 +224,41 @@ fn producer_selection() -> &'static SelectedEffects {
     input["documents"].as_array_mut().unwrap().push(json!([
         "producer.yaml", "format: 1\nkind: effect_set\ncards:\n  producer:\n    status: complete\n    abilities: []\n"
     ]));
+    (snapshot, keywords, input)
+}
+
+fn selection_without_abilities(
+    (snapshot, keywords, mut input): (String, String, Value),
+    missing: &[&str],
+) -> SelectedEffects {
+    // Explicit omission keeps source-evidence fixtures independent of card migration progress.
+    input["authors"].as_array_mut().unwrap().retain(|author| {
+        !author["printings"].as_array().is_some_and(|printings| {
+            printings.iter().any(|printing| {
+                printing
+                    .as_str()
+                    .is_some_and(|number| missing.contains(&number))
+            })
+        }) && !author["card_no"]
+            .as_str()
+            .is_some_and(|number| missing.contains(&number))
+    });
+    Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap()
+}
+
+fn producer_selection() -> &'static SelectedEffects {
+    static SELECTED: OnceLock<SelectedEffects> = OnceLock::new();
+    SELECTED.get_or_init(|| {
+        let (snapshot, keywords, input) = producer_inputs();
         Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap()
     })
 }
 
 fn with_producer(initial: &Value, action: Action) -> Game {
+    with_selected_producer(initial, action, producer_selection())
+}
+
+fn with_selected_producer(initial: &Value, action: Action, selected: &SelectedEffects) -> Game {
     let mut initial = initial.clone();
     let seat = initial["turn"]["active"].as_str().unwrap().to_owned();
     initial["players"][&seat]["zones"]["field"]
@@ -238,7 +266,7 @@ fn with_producer(initial: &Value, action: Action) -> Game {
         .unwrap()
         .push(json!({"id":"producer","card":"producer"}));
     let mut game = Game::from_selected_effects(
-        producer_selection().clone(),
+        selected.clone(),
         &initial,
         &Value::Null,
         &Value::Null,

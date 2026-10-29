@@ -1,6 +1,26 @@
 use super::*;
 use std::time::Instant;
 
+const MISSING: &[&str] = &["BP06-042", "BP01-173", "BP01-170"];
+
+fn game(initial: &Value) -> Game {
+    static SELECTED: OnceLock<SelectedEffects> = OnceLock::new();
+    let selected = SELECTED.get_or_init(|| selection_without_abilities(inputs().clone(), MISSING));
+    Game::from_selected_effects(
+        selected.clone(),
+        initial,
+        &Value::Null,
+        &Value::Null,
+        "intentionally-unloaded",
+    )
+    .unwrap()
+}
+
+fn missing_producer_selection() -> &'static SelectedEffects {
+    static SELECTED: OnceLock<SelectedEffects> = OnceLock::new();
+    SELECTED.get_or_init(|| selection_without_abilities(producer_inputs(), MISSING))
+}
+
 fn views(game: &Game) -> [Value; 3] {
     [View::P1, View::P2, View::Referee].map(|view| game.projection(view).unwrap())
 }
@@ -57,7 +77,7 @@ fn unloaded_cemetery_movement_requires_replacement_source_evidence() {
             },
             reason: MoveReason::Put,
         };
-        let mut game = with_producer(&initial, action);
+        let mut game = with_selected_producer(&initial, action, missing_producer_selection());
         let error = failure(game.activate_internal_card(
             "producer",
             AbilityId(1),
