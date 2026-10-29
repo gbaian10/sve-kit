@@ -1,0 +1,23 @@
+cards:
+  BP02-032:
+    abilities:
+      - evolve_time:
+          do:
+            - search:
+                sel:
+                  kind: follower
+                  trait: 兵士
+                  who: self
+                  zone: deck
+                to: hand
+                upto: 2
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

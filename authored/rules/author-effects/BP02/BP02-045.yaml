@@ -1,0 +1,46 @@
+cards:
+  BP02-045:
+    abilities:
+      - covers:
+          - 1
+          - 2
+        line: 1
+        spell:
+          do:
+            - choice:
+                instead:
+                  - if:
+                      spellchain: 10
+                    upto: 3
+                options:
+                  - - damage:
+                        n: 3
+                        to: victim
+                  - - create:
+                        n: 1
+                        to: field
+                        token: 防御型ゴーレム
+                  - - draw:
+                        n: 1
+                upto: 2
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+              option: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+    token_sources:
+      - card: BP01-T09
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

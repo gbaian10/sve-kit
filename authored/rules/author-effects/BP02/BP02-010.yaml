@@ -1,0 +1,39 @@
+cards:
+  BP02-010:
+    abilities:
+      - fanfare:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - buff:
+                        hp: 2
+                        on: fairy
+                        power: 2
+                  - - search:
+                        n: 1
+                        sel:
+                          kind: follower
+                          trait: 妖精
+                          who: self
+                          zone: deck
+                        to: hand
+          targets:
+            - bind: fairy
+              from:
+                kind: follower
+                trait: 妖精
+                who: self
+                zone: field
+              n: 1
+              option: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

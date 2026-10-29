@@ -1,0 +1,60 @@
+cards:
+  BP02-076:
+    abilities:
+      - fanfare:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 3
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  trait: 吸血鬼
+                may: true
+                n: 1
+            - move:
+                ref: picked
+                result: taken
+                to: hand
+            - reveal:
+                bind: shown
+                ref: picked
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: taken
+                      view: before
+                  in: seen
+                to: deck
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - pp: 1
+              - act_self: true
+              - self_to_cemetery: true
+          do:
+            - create:
+                n: 1
+                to: field
+                token: フォレストバット
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+    token_sources:
+      - card: BP01-T15
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

@@ -1,0 +1,38 @@
+cards:
+  BP02-099:
+    abilities:
+      - fanfare:
+          do:
+            - create:
+                n: 1
+                to: field
+                token: ホーリーファルコン
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - pp: 2
+              - act_self: true
+              - self_to_cemetery: true
+          do:
+            - create:
+                n: 1
+                to: field
+                token: ホーリータイガー
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+    token_sources:
+      - card: BP01-T16
+        line: 1
+        section: 1
+      - card: BP01-T17
+        line: 2
+        section: 1
+format: 2
+kind: author_effect_set
