@@ -117,6 +117,13 @@ impl BodyContext<'_> {
             predicate: Box::new(super::selection::field_filter(
                 &super::selection::ObjectFilter {
                     kind: kind.as_ref(),
+                    trait_id: query.r#trait.as_deref(),
+                    class: query.class.as_deref(),
+                    not_class: query.not_class.as_deref(),
+                    token: query
+                        .token
+                        .or_else(|| query.not_token.map(|excluded| !excluded)),
+                    original_cost: [None, query.orig_cost_le, None],
                     name: query.name.as_deref(),
                     contains: query.name_contains.as_deref(),
                     ..super::selection::ObjectFilter::default()

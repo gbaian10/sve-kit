@@ -147,6 +147,8 @@ impl BodyContext<'_> {
             || choice.from.name_contains.is_some()
             || choice.from.other
             || choice.from.has_numeric_filter()
+            || choice.from.class.is_some()
+            || choice.from.not_class.is_some()
             || self.targets.contains_key(&choice.bind)
             || self.searches.contains_key(&choice.bind)
             || self.observations.contains_key(&choice.bind)
@@ -215,6 +217,9 @@ impl BodyContext<'_> {
 pub(super) struct ObjectFilter<'query> {
     pub kind: Option<&'query ast::SearchKind>,
     pub trait_id: Option<&'query str>,
+    pub class: Option<&'query str>,
+    pub not_class: Option<&'query str>,
+    pub token: Option<bool>,
     pub name: Option<&'query str>,
     pub contains: Option<&'query str>,
     pub cost: [Option<u64>; 3],
@@ -227,11 +232,28 @@ impl<'query> From<&'query ast::TargetQuery> for ObjectFilter<'query> {
         Self {
             kind: query.kind.as_ref(),
             trait_id: query.r#trait.as_deref(),
+            class: query.class.as_deref(),
+            not_class: query.not_class.as_deref(),
+            token: None,
             name: query.name.as_deref(),
             contains: query.name_contains.as_deref(),
             cost: [query.cost_eq, query.cost_le, query.cost_ge],
             original_cost: [query.orig_cost_eq, query.orig_cost_le, query.orig_cost_ge],
             hp_at_most: query.hp_le,
+        }
+    }
+}
+
+impl<'query> From<&'query ast::PublicQuery> for ObjectFilter<'query> {
+    fn from(query: &'query ast::PublicQuery) -> Self {
+        Self {
+            kind: query.kind.as_ref(),
+            trait_id: query.r#trait.as_deref(),
+            name: query.name.as_deref(),
+            class: query.class.as_deref(),
+            not_class: query.not_class.as_deref(),
+            token: query.token,
+            ..Self::default()
         }
     }
 }
@@ -256,6 +278,35 @@ pub(super) fn field_filter(
                 name: super::Expr::Literal(super::super::CardName(contains.to_owned())),
             },
         )));
+    }
+    for (class, negate) in [(filter.class, false), (filter.not_class, true)] {
+        if let Some(class) = class {
+            let predicate = super::Expr::Compute(Box::new(super::Predicate::ClassEquals {
+                left: super::Expr::Live(Box::new(super::super::ClassRead::Class {
+                    object: object.clone(),
+                    view: CharacteristicView::Effective,
+                })),
+                right: super::Expr::Literal(super::super::Info::Present(super::super::ClassId(
+                    class.to_owned(),
+                ))),
+            }));
+            predicates.push(if negate {
+                super::Expr::Compute(Box::new(super::Predicate::Not { predicate }))
+            } else {
+                predicate
+            });
+        }
+    }
+    if let Some(token) = filter.token {
+        let predicate = super::Expr::Live(Box::new(super::super::BoolRead::State {
+            object: object.clone(),
+            property: super::super::BooleanState::TokenStatus,
+        }));
+        predicates.push(if token {
+            predicate
+        } else {
+            super::Expr::Compute(Box::new(super::Predicate::Not { predicate }))
+        });
     }
     for (view, limits) in [
         (CharacteristicView::Effective, filter.cost),

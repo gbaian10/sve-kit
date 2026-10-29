@@ -138,3 +138,25 @@ fn keyword_grant_does_not_follow_a_recipient_into_a_new_field_generation() {
         json!([])
     );
 }
+
+#[test]
+fn public_filter_grant_does_not_authorize_hidden_subjects() {
+    for hidden_zone in [ZoneKind::Hand, ZoneKind::Deck] {
+        let mut step = granted(KeywordId::Rush, DurationEnd::NoTemporalExpiry {});
+        if let Node::Instruction { instruction } = &mut step.node
+            && let Action::Grant { subjects, .. } = &mut instruction.action
+        {
+            *subjects = zone(hidden_zone, 1);
+        }
+        let mut game = game(1, 0);
+        let before = game.projection(View::Referee).unwrap();
+        let error = game
+            .execute_internal(&checked(vec![step]), &source("synthetic"), context(1))
+            .unwrap_err();
+        assert!(
+            matches!(error, sve_engine::EngineFailure::Unsupported(reason)
+            if reason.contains("private observation outside an authorized selector spine"))
+        );
+        assert_eq!(game.projection(View::Referee).unwrap(), before);
+    }
+}

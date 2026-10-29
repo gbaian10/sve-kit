@@ -1,12 +1,11 @@
 use super::{
     Allocator, Binding, Cardinality, LoweringError, Nat, PlayerRef, PlayerRelation, PlayerSet,
-    Selector, TextQuantifier, ZoneKind, ast, numeric, search, unsupported,
+    Selector, TextQuantifier, ZoneKind, ast, numeric, unsupported,
 };
 use crate::ir::{
-    Action, Bool, ChoiceDomain, Decision, DecisionId, DecisionKind, Disjointness, ExecutionRef,
-    Expr, InputMode, MoveDestination, MoveReason, MoveSpec, ObjectRef, OwnerZone, PlaySlot,
-    Posture, ScopeId, SelectionConstraint, SelectionGroup, SelectionSnapshot, SelectionView,
-    Visibility, ZoneRef,
+    Action, ChoiceDomain, Decision, DecisionId, DecisionKind, Disjointness, ExecutionRef,
+    InputMode, MoveDestination, MoveReason, MoveSpec, OwnerZone, PlaySlot, Posture, ScopeId,
+    SelectionConstraint, SelectionGroup, SelectionSnapshot, SelectionView, Visibility, ZoneRef,
 };
 
 #[derive(Clone, Copy)]
@@ -53,7 +52,10 @@ pub(super) fn lower(
         zone,
         view: SelectionView::Current {},
         binding: candidate,
-        predicate: Box::new(material_filter(&material.sel, candidate)),
+        predicate: Box::new(super::selection::field_filter(
+            &super::selection::ObjectFilter::from(&material.sel),
+            candidate,
+        )),
     };
     if material.sel.other {
         selector = Selector::Difference {
@@ -96,52 +98,6 @@ pub(super) fn lower(
             visibility: Visibility::Public {},
         },
     ))
-}
-
-fn material_filter(query: &ast::PublicQuery, candidate: Binding<ObjectRef>) -> Expr<Bool> {
-    use crate::ir::{
-        BoolRead, BooleanState, CharacteristicView, ClassId, ClassRead, Info, ObjectOperand,
-        ObjectView, Predicate,
-    };
-    let view = ObjectView::Current {
-        object: Box::new(ObjectOperand::Bound { binding: candidate }),
-    };
-    let base = search::object_filter(
-        query.kind.as_ref(),
-        query.r#trait.as_deref(),
-        query.name.as_deref(),
-        candidate,
-    );
-    let mut predicates = if base == Expr::Literal(Bool(true)) {
-        vec![]
-    } else {
-        vec![base]
-    };
-    if let Some(class) = &query.class {
-        predicates.push(Expr::Compute(Box::new(Predicate::ClassEquals {
-            left: Expr::Live(Box::new(ClassRead::Class {
-                object: view.clone(),
-                view: CharacteristicView::Effective,
-            })),
-            right: Expr::Literal(Info::Present(ClassId(class.clone()))),
-        })));
-    }
-    if let Some(token) = query.token {
-        let state = Expr::Live(Box::new(BoolRead::State {
-            object: view,
-            property: BooleanState::TokenStatus,
-        }));
-        predicates.push(if token {
-            state
-        } else {
-            Expr::Compute(Box::new(Predicate::Not { predicate: state }))
-        });
-    }
-    if predicates.is_empty() {
-        Expr::Literal(Bool(true))
-    } else {
-        Expr::Compute(Box::new(Predicate::And { predicates }))
-    }
 }
 
 const fn material_action(objects: Selector, operation: Operation) -> Action {

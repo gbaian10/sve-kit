@@ -251,10 +251,7 @@ impl BodyContext<'_> {
         query: &ast::PublicQuery,
         path: &str,
     ) -> Result<Expr<Bool>, LoweringError> {
-        if query.class.is_some()
-            || query.token.is_some()
-            || !matches!(query.zone, ast::PublicZone::Field)
-        {
+        if !matches!(query.zone, ast::PublicZone::Field) {
             return Err(unsupported(path));
         }
         let binding = Binding::new(self.allocator.id(path)?, self.card_allocator.scope(path)?);

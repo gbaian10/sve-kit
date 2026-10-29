@@ -120,6 +120,7 @@ pub(super) fn query(
 ) -> Result<Selector, LoweringError> {
     if value.other
         || value.class.is_some()
+        || value.not_class.is_some()
         || value.token.is_some()
         || matches!(value.zone, ast::PublicZone::Ex)
     {
@@ -153,10 +154,8 @@ pub(super) fn public_query(value: &ast::PublicQuery, binding: Binding<ObjectRef>
         },
         view: SelectionView::Current {},
         binding,
-        predicate: Box::new(super::search::object_filter(
-            value.kind.as_ref(),
-            value.r#trait.as_deref(),
-            value.name.as_deref(),
+        predicate: Box::new(super::selection::field_filter(
+            &super::selection::ObjectFilter::from(value),
             binding,
         )),
     }

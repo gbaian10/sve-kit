@@ -526,6 +526,12 @@ pub(super) struct ObjectQuery {
     pub who: Side,
     pub zone: Zone,
     pub kind: Option<Follower>,
+    pub r#trait: Option<String>,
+    pub class: Option<String>,
+    pub not_class: Option<String>,
+    pub token: Option<bool>,
+    pub not_token: Option<bool>,
+    pub orig_cost_le: Option<u64>,
     pub name: Option<String>,
     pub name_contains: Option<String>,
     #[serde(default)]
@@ -834,6 +840,8 @@ pub(super) struct TargetQuery {
     pub leader_or: bool,
     pub kind: Option<SearchKind>,
     pub r#trait: Option<String>,
+    pub class: Option<String>,
+    pub not_class: Option<String>,
     pub name: Option<String>,
     pub name_contains: Option<String>,
     #[serde(default)]
@@ -1188,6 +1196,7 @@ pub(super) struct PublicQuery {
     pub r#trait: Option<String>,
     pub name: Option<String>,
     pub class: Option<String>,
+    pub not_class: Option<String>,
     pub token: Option<bool>,
 }
 

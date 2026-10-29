@@ -2,11 +2,11 @@ use super::super::{DecisionToken, DecisionView, InputDomain, Slot, Wait, contain
 use super::{Execution, Game, Nat, ObjectRef, Result, invalid, player_id, unsupported};
 use crate::ir::effect_evolution;
 use crate::ir::{
-    Binding, CardKind, Cardinality, CharacteristicView, ChoiceDomain, Comparison, Decision,
-    DecisionKind, Declinable, Disjointness, Int, IntOperation, KindRead, MemberProjection,
-    NamesRead, NumberRead, ObjectOperand, ObjectProperty, ObjectReceipt, ObjectView, PlayerRef,
-    PlayerRelation, Predicate, ScopeId, SelectionConstraint, SelectionGroup, Selector, Stat,
-    TraitsRead, Visibility,
+    Binding, BoolRead, BooleanState, CardKind, Cardinality, CharacteristicView, ChoiceDomain,
+    ClassRead, Comparison, Decision, DecisionKind, Declinable, Disjointness, Info, Int,
+    IntOperation, KindRead, MemberProjection, NamesRead, NumberRead, ObjectOperand, ObjectProperty,
+    ObjectReceipt, ObjectView, PlayerRef, PlayerRelation, Predicate, ScopeId, SelectionConstraint,
+    SelectionGroup, Selector, Stat, TraitsRead, Visibility,
 };
 use crate::ir::{Bool, Expr, SelectionView, ZoneKind};
 use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
@@ -526,7 +526,18 @@ fn private_look_filter(selector: &Selector) -> Option<(Binding<ObjectRef>, &Expr
 fn check_predicate(value: &Expr<Bool>, candidate: Binding<ObjectRef>) -> Result<()> {
     match value {
         Expr::Literal(Bool(true)) => Ok(()),
+        Expr::Live(read) if matches!(read.as_ref(), BoolRead::State { object, property: BooleanState::TokenStatus } if candidate_view(object, candidate)) => {
+            Ok(())
+        }
         Expr::Compute(operation) => match operation.as_ref() {
+            Predicate::ClassEquals {
+                left: Expr::Live(read),
+                right: Expr::Literal(Info::Present(class)),
+            } if !class.0.is_empty()
+                && matches!(read.as_ref(), ClassRead::Class { object, view: CharacteristicView::Effective } if candidate_view(object, candidate)) =>
+            {
+                Ok(())
+            }
             Predicate::KindEquals {
                 left: Expr::Live(read),
                 right: Expr::Literal(_),
@@ -581,7 +592,25 @@ fn check_predicate(value: &Expr<Bool>, candidate: Binding<ObjectRef>) -> Result<
 pub(super) fn matches_candidate(game: &Game, id: &str, value: &Expr<Bool>) -> Result<bool> {
     match value {
         Expr::Literal(Bool(true)) => Ok(true),
+        Expr::Live(read)
+            if matches!(
+                read.as_ref(),
+                BoolRead::State {
+                    property: BooleanState::TokenStatus,
+                    ..
+                }
+            ) =>
+        {
+            Ok(game.object_type(id)?.contains("トークン"))
+        }
         Expr::Compute(operation) => match operation.as_ref() {
+            Predicate::ClassEquals {
+                right: Expr::Literal(Info::Present(class)),
+                ..
+            } => {
+                Ok(game.face(id)?.get("card_class").and_then(Value::as_str)
+                    == Some(class.0.as_str()))
+            }
             Predicate::KindEquals {
                 right: Expr::Literal(kind),
                 ..
