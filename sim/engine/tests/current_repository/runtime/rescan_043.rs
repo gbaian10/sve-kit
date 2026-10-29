@@ -137,6 +137,7 @@ fn evolution_fixture() -> &'static EvolutionFixture {
             ("rescan043-hinako", "ECP02-009"),
             ("rescan043-kotoka", "ECP02-068"),
             ("rescan043-chitose", "ECP02-054"),
+            ("play-targets-base", "BP20-047"),
         ] {
             let record = snapshot
                 .lines()
@@ -182,7 +183,7 @@ fn evolution_fixture() -> &'static EvolutionFixture {
     })
 }
 
-fn form_game(base: &str, form: &str, enemy: bool) -> Game {
+pub(super) fn form_game(base: &str, form: &str, enemy: bool) -> Game {
     let mut initial = position(base, "field");
     initial["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"form","card":form}]);
     if enemy {
