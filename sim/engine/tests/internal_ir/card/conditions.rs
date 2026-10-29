@@ -232,6 +232,8 @@ fn boolean_conditions_use_current_pp_and_unfiltered_hidden_counts_without_exposi
 fn conditions_reject_filtered_hidden_counts_and_non_numeric_damage_replacements() {
     for steps in [
         json!([{"if":{"cond":{"cmp":{"left":{"count":{"who":"opp","zone":"hand","kind":"follower"}},"op":"ge","right":1}},"then":[{"draw":{"n":1}}]}}]),
+        json!([{"draw":{"n":{"count":{"who":"self","zone":"hand","not_token":true}}}}]),
+        json!([{"draw":{"n":{"count":{"who":"self","zone":"deck","token":true}}}}]),
         json!([{"damage":{"to":{"leaders":"all"},"n":1,"instead":[{"if":{"cmp":{"left":1,"op":"eq","right":1}},"to":{"leader":"self"}}]}}]),
         json!([{"damage":{"to":{"leaders":"all"},"n":1,"instead":[
             {"if":{"cmp":{"left":1,"op":"eq","right":1}},"n":2},
@@ -426,10 +428,12 @@ fn name_contains_outside_a_candidate_selector_is_not_admitted() {
 }
 
 #[test]
-fn other_trait_field_condition_accepts_other_followers() {
+fn public_exists_condition_accepts_public_zones_and_other_followers() {
     for query in [
         json!({"who":"self","zone":"field","kind":"follower","trait":"魔法使い"}),
         json!({"who":"self","zone":"field","kind":"follower","trait":"魔法使い","other":true}),
+        json!({"who":"self","zone":"ex","kind":"follower","trait":"魔法使い","other":true}),
+        json!({"who":"opp","zone":"cemetery","kind":"follower","other":true}),
     ] {
         lowerer()
             .lower_with_printed_costs(
@@ -444,10 +448,8 @@ fn other_trait_field_condition_accepts_other_followers() {
 }
 
 #[test]
-fn other_trait_field_condition_rejects_nonfield_queries_and_unsupported_filters() {
+fn public_exists_condition_rejects_private_zones_and_unsupported_filters() {
     for query in [
-        json!({"who":"self","zone":"ex","kind":"follower","trait":"魔法使い","other":true}),
-        json!({"who":"opp","zone":"cemetery","kind":"follower","other":true}),
         json!({"who":"self","zone":"hand","kind":"follower","other":true}),
         json!({"who":"self","zone":"field","not_trait":"魔法使い","other":true}),
         json!({"who":"self","zone":"field","hp_le":3,"other":true}),
@@ -482,51 +484,123 @@ fn other_field_condition_accepts_admitted_class_and_token_filters() {
 }
 
 #[test]
-fn filtered_cemetery_count_numbers_drive_draw_life_damage_and_stats() {
-    let count =
-        json!({"count":{"who":"self","zone":"cemetery","kind":"follower","name_contains":"unit-"}});
-    let mut candidate = move_success_tree(&json!([
-        {"life":{"who":"self","delta":count}},
-        {"draw":{"n":count}},
-        {"damage":{"to":{"leader":"opp"},"n":count}},
-        {"buff":{"on":{"who":"opp","zone":"field","kind":"follower"},"power":count}}
-    ]));
-    candidate["cards"]["unit-spell"]["abilities"][0]["spell"]
-        .as_object_mut()
-        .unwrap()
-        .remove("targets");
-    let programs = lowerer()
-        .lower_with_printed_costs(
-            &candidate,
-            &BTreeMap::from([("unit-spell".to_owned(), Nat(1))]),
+fn filtered_public_count_numbers_drive_draw_life_damage_and_stats() {
+    for zone in ["cemetery", "ex"] {
+        let count =
+            json!({"count":{"who":"self","zone":zone,"kind":"follower","name_contains":"unit-"}});
+        let mut candidate = move_success_tree(&json!([
+            {"life":{"who":"self","delta":count}},
+            {"draw":{"n":count}},
+            {"damage":{"to":{"leader":"opp"},"n":count}},
+            {"buff":{"on":{"who":"opp","zone":"field","kind":"follower"},"power":count}}
+        ]));
+        candidate["cards"]["unit-spell"]["abilities"][0]["spell"]
+            .as_object_mut()
+            .unwrap()
+            .remove("targets");
+        let programs = lowerer()
+            .lower_with_printed_costs(
+                &candidate,
+                &BTreeMap::from([("unit-spell".to_owned(), Nat(1))]),
+            )
+            .unwrap();
+        let mut initial = setup(
+            1,
+            json!([{"id":"d1","card":"unit-follower"},{"id":"d2","card":"unit-follower"},{"id":"d3","card":"unit-follower"}]),
+        );
+        initial["players"]["P1"]["leader"]["life"] = json!(10_u8);
+        initial["players"]["P1"]["zones"][zone] = json!([
+            {"id":"g1","card":"unit-follower"},{"id":"g2","card":"unit-follower"},{"id":"nonmatch","card":"unit-amulet"}
+        ]);
+        let mut game = Game::new(
+            catalog(),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "filtered-numbers",
         )
         .unwrap();
-    let mut initial = setup(
-        1,
-        json!([{"id":"d1","card":"unit-follower"},{"id":"d2","card":"unit-follower"},{"id":"d3","card":"unit-follower"}]),
+        game.load_internal_card("unit-spell", &programs["unit-spell"])
+            .unwrap();
+        game.load_internal_card("unit-follower", &card(vec![]))
+            .unwrap();
+        game.load_internal_card("unit-amulet", &card(vec![]))
+            .unwrap();
+        resolved(game.play_internal_card("s", PlayerId { seat: 1 }).unwrap());
+        let state = game.projection(View::Referee).unwrap();
+        assert_eq!(state["P1"]["leader"]["life"], 12_u8);
+        assert_eq!(state["P2"]["leader"]["life"], 18_u8);
+        assert_eq!(state["P1"]["hand"], json!(["d1", "d2"]));
+        assert_eq!(state["objects"]["f"]["power"], 4_u8);
+    }
+}
+
+#[test]
+fn public_token_counts_filter_identity_owner_and_zone() {
+    let (snapshot, keywords, document) = catalog_documents(&json!("1"));
+    let snapshot = snapshot
+        .lines()
+        .map(|line| {
+            let mut row: Value = serde_json::from_str(line).unwrap();
+            if row["number"] == "unit-amulet" {
+                row["faces"][0]["card_type"] = json!("フォロワー・トークン");
+                row["faces"][0]["power"] = json!("2");
+                row["faces"][0]["hp"] = json!("3");
+            }
+            row.to_string()
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
+    let catalog = Arc::new(
+        Catalog::from_documents(&snapshot, &keywords, &[("unit.yaml".into(), document)]).unwrap(),
     );
-    initial["players"]["P1"]["leader"]["life"] = json!(10_u8);
-    initial["players"]["P1"]["zones"]["cemetery"] = json!([
-        {"id":"g1","card":"unit-follower"},{"id":"g2","card":"unit-follower"},{"id":"nonmatch","card":"unit-amulet"}
-    ]);
-    let mut game = Game::new(
-        catalog(),
-        &initial,
-        &Value::Null,
-        &Value::Null,
-        "filtered-numbers",
-    )
-    .unwrap();
-    game.load_internal_card("unit-spell", &programs["unit-spell"])
-        .unwrap();
-    game.load_internal_card("unit-follower", &card(vec![]))
-        .unwrap();
-    game.load_internal_card("unit-amulet", &card(vec![]))
-        .unwrap();
-    resolved(game.play_internal_card("s", PlayerId { seat: 1 }).unwrap());
-    let state = game.projection(View::Referee).unwrap();
-    assert_eq!(state["P1"]["leader"]["life"], 12_u8);
-    assert_eq!(state["P2"]["leader"]["life"], 18_u8);
-    assert_eq!(state["P1"]["hand"], json!(["d1", "d2"]));
-    assert_eq!(state["objects"]["f"]["power"], 4_u8);
+    for zone in ["field", "ex"] {
+        for token in [false, true] {
+            let mut count = json!({"count":{"who":"self","zone":zone,"kind":"follower"}});
+            count["count"][if token { "token" } else { "not_token" }] = json!(true);
+            let mut candidate = move_success_tree(&json!([{"life":{"who":"self","delta":count}}]));
+            candidate["cards"]["unit-spell"]["abilities"][0]["spell"]
+                .as_object_mut()
+                .unwrap()
+                .remove("targets");
+            let programs = lowerer()
+                .lower_with_printed_costs(
+                    &candidate,
+                    &BTreeMap::from([("unit-spell".to_owned(), Nat(1))]),
+                )
+                .unwrap();
+            let mut initial = setup(1, json!([]));
+            initial["players"]["P1"]["leader"]["life"] = json!(10_u8);
+            initial["players"]["P1"]["zones"][zone] = json!([
+                {"id":"token-one","card":"unit-amulet"},
+                {"id":"token-two","card":"unit-amulet"},
+                {"id":"ordinary","card":"unit-follower"}
+            ]);
+            let other_zone = if zone == "field" { "ex" } else { "field" };
+            initial["players"]["P1"]["zones"][other_zone] =
+                json!([{"id":"other-zone","card":"unit-amulet"}]);
+            initial["players"]["P2"]["zones"][zone] = json!([
+                {"id":"opponent-one","card":"unit-amulet"},
+                {"id":"opponent-two","card":"unit-amulet"}
+            ]);
+            let mut game = Game::new(
+                Arc::clone(&catalog),
+                &initial,
+                &Value::Null,
+                &Value::Null,
+                "public-token-count",
+            )
+            .unwrap();
+            game.load_internal_card("unit-spell", &programs["unit-spell"])
+                .unwrap();
+            for number in ["unit-follower", "unit-amulet"] {
+                game.load_internal_card(number, &card(vec![])).unwrap();
+            }
+            resolved(game.play_internal_card("s", PlayerId { seat: 1 }).unwrap());
+            assert_eq!(
+                game.projection(View::Referee).unwrap()["P1"]["leader"]["life"],
+                if token { 12_u8 } else { 11_u8 }
+            );
+        }
+    }
 }

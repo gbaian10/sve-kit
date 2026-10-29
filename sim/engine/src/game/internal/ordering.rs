@@ -128,7 +128,7 @@ pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
             subjects: selector, ..
         } = &mut instruction.action
     {
-        mask_public_field_predicate(selector);
+        mask_public_predicate(selector);
     }
     if let Node::Instruction { instruction } = &mut inspected
         && (super::movement::observed_move(&instruction.action)
@@ -219,16 +219,16 @@ fn mask_public_selectors(inspected: &mut Node) -> Result<()> {
     match inspected {
         Node::Capture {
             capture: Capture::Boolean { value, .. },
-        } => mask_public_field_condition(value),
+        } => mask_public_condition(value),
         Node::Capture {
             capture: Capture::Integer { value, .. },
-        } => mask_public_field_number(value),
+        } => mask_public_number(value),
         Node::Instruction { instruction } => match &mut instruction.action {
             Action::Draw { count: amount, .. }
             | Action::Damage {
                 amount: DamageAmount::Uniform { amount },
                 ..
-            } => mask_public_field_number(amount),
+            } => mask_public_number(amount),
             Action::Life { change, .. } => mask_public_number_change(change),
             Action::Modify { patch, .. } => mask_public_number_patch(patch),
             _ => {}
@@ -256,7 +256,7 @@ fn mask_public_selectors(inspected: &mut Node) -> Result<()> {
 
 fn mask_public_number_change(change: &mut NumericChange) {
     let (NumericChange::Add { amount } | NumericChange::Set { amount }) = change;
-    mask_public_field_number(amount);
+    mask_public_number(amount);
 }
 
 fn mask_public_number_patch(patch: &mut CharacteristicPatch) {
@@ -271,26 +271,26 @@ fn mask_public_number_patch(patch: &mut CharacteristicPatch) {
     }
 }
 
-fn mask_public_field_condition(condition: &mut Expr<Bool>) {
+fn mask_public_condition(condition: &mut Expr<Bool>) {
     if let Expr::Compute(operation) = condition {
         match operation.as_mut() {
-            Predicate::Exists { objects } => mask_public_field_predicate(objects),
+            Predicate::Exists { objects } => mask_public_predicate(objects),
             Predicate::CompareInt { left, right, .. } => {
-                mask_public_field_number(left);
-                mask_public_field_number(right);
+                mask_public_number(left);
+                mask_public_number(right);
             }
             Predicate::And { predicates } | Predicate::Or { predicates } => {
                 for predicate in predicates {
-                    mask_public_field_condition(predicate);
+                    mask_public_condition(predicate);
                 }
             }
-            Predicate::Not { predicate } => mask_public_field_condition(predicate),
+            Predicate::Not { predicate } => mask_public_condition(predicate),
             _ => {}
         }
     }
 }
 
-fn mask_public_field_number(number: &mut Expr<Int>) {
+fn mask_public_number(number: &mut Expr<Int>) {
     if let Expr::Compute(operation) = number {
         match operation.as_mut() {
             IntOperation::FromNat { value } => {
@@ -304,7 +304,7 @@ fn mask_public_field_number(number: &mut Expr<Int>) {
             }
             IntOperation::Arithmetic { arguments, .. } => {
                 for argument in arguments {
-                    mask_public_field_number(argument);
+                    mask_public_number(argument);
                 }
             }
             _ => {}
@@ -312,24 +312,16 @@ fn mask_public_field_number(number: &mut Expr<Int>) {
     }
 }
 
-fn mask_public_field_predicate(selector: &mut Selector) {
+fn mask_public_predicate(selector: &mut Selector) {
     match selector {
         Selector::Difference { input, except }
             if matches!(except.as_ref(), Selector::Objects { objects }
                 if matches!(objects.as_slice(), [ObjectOperand::SourceHolder {}])) =>
         {
-            mask_public_field_predicate(input);
+            mask_public_predicate(input);
         }
-        selector
-            if matches!(
-                selector,
-                Selector::Zone {
-                    zone: ZoneKind::Field,
-                    ..
-                }
-            ) && super::card::selection::field_selector(selector).is_ok() =>
-        {
-            // Only this public candidate grammar is evaluated per object by the field authority.
+        selector if super::card::selection::public_zone_selector(selector).is_ok() => {
+            // Only this checked grammar is evaluated per object by the public-zone authority.
             if let Selector::Zone { predicate, .. } = selector {
                 **predicate = Expr::Literal(Bool(true));
             }
