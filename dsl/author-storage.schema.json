@@ -1465,6 +1465,40 @@
           "token": {
             "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/TokenIdentity"
           },
+          "rule_sections": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "section": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "face": {
+                  "oneOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "enum": [
+                        "front",
+                        "back"
+                      ]
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "section"
+              ]
+            }
+          },
           "token_sources": {
             "type": "array",
             "minItems": 1,
