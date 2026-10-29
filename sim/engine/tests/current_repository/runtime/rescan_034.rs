@@ -5,7 +5,14 @@ fn evolve(base: &str, form: &str, cost: u8) {
     initial["players"]["P1"]["zones"]["field"] = json!([{"id":"source","card":base}]);
     initial["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"form","card":form}]);
     initial["players"]["P1"]["pp"]["current"] = json!(10_i32);
-    let mut game = game(&initial);
+    let mut game = Game::from_selected_effects(
+        selection_with_rules().clone(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "printed-collaboration-evolution",
+    )
+    .unwrap();
     let step = game
         .internal_rule_action(
             &json!({"do":"evolve","source":"source","evolve_card":"form","pay":{"pp":cost}}),
