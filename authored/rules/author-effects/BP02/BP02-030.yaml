@@ -1,0 +1,22 @@
+cards:
+  BP02-030:
+    abilities:
+      - activate:
+          cost:
+            pp: 3
+          do:
+            - grant:
+                keywords:
+                  - storm
+                  - bane
+                on: this
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set
