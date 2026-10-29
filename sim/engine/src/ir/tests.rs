@@ -86,7 +86,7 @@ fn bp08_body() -> Program {
         players: controller_set(),
         zone: ZoneKind::Deck,
         view: SelectionView::Current {},
-        binding: Binding::new(1, ScopeId(1)),
+        binding: Binding::new(2, ScopeId(1)),
         predicate: Box::new(Expr::Literal(Bool(true))),
     };
     let count = Expr::Compute(Box::new(IntOperation::Arithmetic {
@@ -132,7 +132,7 @@ fn bp08() -> Located<CardProgram> {
                 }
             }
         }
-        let event = Binding::new(2, ScopeId(1));
+        let event = Binding::new(1, ScopeId(1));
         ability.node.trigger = Some(source_trigger(EventPattern::EnterField {
             binding: event,
             predicate: Expr::Compute(Box::new(Predicate::ObjectEquals {

@@ -81,6 +81,9 @@ mod second;
 #[path = "card/entry.rs"]
 mod entry;
 
+#[path = "card/entry_method.rs"]
+mod entry_method;
+
 #[path = "card/amulet.rs"]
 mod amulet;
 

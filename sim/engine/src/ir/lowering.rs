@@ -409,6 +409,9 @@ impl Allocator {
         let triggered_play = play::trigger_play_spec(entry, body, keyword, trigger_choice, path)?;
         let optional =
             context.optional_payment(body, &source, &ability_source, &format!("{path}/{head}"))?;
+        if entry.fanfare.is_some() {
+            context.entry_event = Some(Binding::new(context.allocator.id(path)?, scope));
+        }
         if entry.lastword.is_some() {
             context.leave_event = Some(Binding::new(context.allocator.id(path)?, scope));
         }
@@ -694,6 +697,7 @@ fn lowered_subscription(
 }
 
 struct BodyContext<'definitions> {
+    entry_event: Option<Binding<super::EnterFieldEvent>>,
     leave_event: Option<Binding<super::LeaveFieldEvent>>,
     scope: ScopeId,
     local_payment: Option<(String, ReceiptId)>,
@@ -722,6 +726,7 @@ impl<'definitions> BodyContext<'definitions> {
     ) -> Self {
         Self {
             leave_event: None,
+            entry_event: None,
             scope,
             definition: AbilityId(scope.0),
             payment_result: if entry.spell.is_some() {
@@ -755,8 +760,12 @@ impl<'definitions> BodyContext<'definitions> {
         body: &ast::Body,
         path: &str,
     ) -> Result<TriggerSpec, LoweringError> {
-        let event_id = match self.leave_event {
-            Some(event) => event.key().1,
+        let event_id = match self
+            .leave_event
+            .map(Binding::key)
+            .or_else(|| self.entry_event.map(Binding::key))
+        {
+            Some((_, id)) => id,
             None => self.allocator.id(path)?,
         };
         let mut trigger = lowered_trigger(entry, keyword, event_id, self.scope, path)?;
