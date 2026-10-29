@@ -4,7 +4,11 @@ use super::{
     SourceSpan, invalid, unsupported,
 };
 use crate::game::string;
-use crate::ir::{Control, Int, PlayerRef, Resource, ResourceOperation};
+use crate::ir::{
+    Bool, Control, Int, PlayerRef, PlayerRelation, Predicate, Resource, ResourceOperation,
+    SelectionView, Selector, TextQuantifier, ZoneKind,
+};
+use crate::ir::{PreconditionKind, PreconditionReason};
 use serde_json::{Value, json};
 
 pub(super) const fn intrinsic(ability: &Ability) -> bool {
@@ -40,6 +44,70 @@ pub(super) fn cost(ability: &Ability) -> Result<i64> {
     Ok(*value)
 }
 
+fn qualification(ability: &Ability) -> Result<Option<&Expr<Bool>>> {
+    let CostSpec::Ordered { steps } = &ability
+        .play
+        .as_ref()
+        .ok_or_else(|| invalid("missing evolution play"))?
+        .costs
+    else {
+        return Err(unsupported("evolution costs"));
+    };
+    let [reveal, pp] = steps.as_slice() else {
+        return Err(unsupported("evolution cost projection"));
+    };
+    if pp.instruction.precondition.is_some() {
+        return Err(unsupported("evolution PP precondition"));
+    }
+    let Some(condition) = &reveal.instruction.precondition else {
+        return Ok(None);
+    };
+    if condition.kind != PreconditionKind::CardTextPrerequisite
+        || condition.protects != reveal.instruction.id
+        || condition.reason != (PreconditionReason::CardText {})
+    {
+        return Err(unsupported("evolution qualification guard"));
+    }
+    let Expr::Compute(operation) = &condition.predicate else {
+        return Err(unsupported("evolution qualification"));
+    };
+    let Predicate::Exists {
+        objects:
+            selector @ Selector::Zone {
+                players,
+                zone: ZoneKind::Field,
+                view: SelectionView::Current {},
+                predicate,
+                ..
+            },
+    } = operation.as_ref()
+    else {
+        return Err(unsupported("evolution public field qualification"));
+    };
+    if players.relation != PlayerRelation::SelfPlayer
+        || players.relative_to != (PlayerRef::Controller {})
+        || players.cardinality.minimum.0 != 0
+        || players.cardinality.maximum.is_some()
+        || players.text_quantifier != TextQuantifier::Implicit
+    {
+        return Err(unsupported("evolution qualification controller"));
+    }
+    super::selection::field_selector(selector)?;
+    Ok(Some(predicate))
+}
+
+fn usable(game: &Game, holder: &str, ability: &Ability) -> Result<bool> {
+    let Some(predicate) = qualification(ability)? else {
+        return Ok(true);
+    };
+    for id in game.zone_ids(&game.object(holder)?.controller, "field") {
+        if super::selection::matches_candidate(game, &id, predicate)? {
+            return Ok(true);
+        }
+    }
+    Ok(false)
+}
+
 fn span(game: &Game, source: &SourceSpan, expected: &SourceSpan) -> Result<()> {
     if source.owner != expected.owner
         || source.field != expected.field
@@ -57,6 +125,7 @@ fn span(game: &Game, source: &SourceSpan, expected: &SourceSpan) -> Result<()> {
 
 pub(super) fn check(game: &Game, ability: &Located<Ability>) -> Result<()> {
     cost(&ability.node)?;
+    qualification(&ability.node)?;
     let body = ability
         .node
         .body
@@ -146,6 +215,9 @@ impl Game {
         let [entry] = entries.as_slice() else {
             return Ok(false);
         };
+        if !usable(self, holder, &entry.node)? {
+            return Ok(false);
+        }
         let amount = cost(&entry.node)?;
         // The fixed well-formed projection proves exactly this name-bound, ordinary rule entry.
         let code = json!({"kind":"evolve","costs":[{"op":"pp","amount":amount}],"body":{"op":"evolve","subjects":"self"}});

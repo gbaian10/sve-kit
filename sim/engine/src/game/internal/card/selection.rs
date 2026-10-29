@@ -320,7 +320,7 @@ fn check_predicate(value: &Expr<Bool>, candidate: Binding<ObjectRef>) -> Result<
     }
 }
 
-fn matches_candidate(game: &Game, id: &str, value: &Expr<Bool>) -> Result<bool> {
+pub(super) fn matches_candidate(game: &Game, id: &str, value: &Expr<Bool>) -> Result<bool> {
     match value {
         Expr::Literal(Bool(true)) => Ok(true),
         Expr::Compute(operation) => match operation.as_ref() {

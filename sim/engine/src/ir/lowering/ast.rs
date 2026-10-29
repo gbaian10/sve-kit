@@ -872,6 +872,7 @@ pub(super) enum PhasePlayer {
 #[serde(deny_unknown_fields)]
 pub(super) struct Evolution {
     pub cost: EvolutionCost,
+    pub usable_if: Option<Condition>,
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]

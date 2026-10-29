@@ -449,3 +449,119 @@ fn super_evolve_pending_is_kind_checked_and_controller_orders_both_facets() {
         assert!(game.internal_pending_choice().unwrap().is_none());
     }
 }
+
+#[test]
+fn commander_evolution_condition_lowers_public_field_qualification() {
+    let mut tree = fanfare::expanded::tree().clone();
+    tree["cards"]["synthetic-evolution"]["abilities"][0]["evolve"]["usable_if"] =
+        json!({"exists":{"who":"self","zone":"field","trait":"指揮官"}});
+    lowerer().lower(&tree).unwrap();
+}
+
+fn conditional_evolution(query: &Value) -> WellFormedCardProgram {
+    let mut tree = fanfare::expanded::tree().clone();
+    tree["cards"]["synthetic-evolution"]["abilities"][0]["evolve"] =
+        json!({"cost":{"pp":0},"usable_if":{"exists":query}});
+    let lowered = lowerer().lower(&tree).unwrap();
+    card(vec![relabel(
+        lowered["synthetic-evolution"].card().abilities[0].clone(),
+        "unit-follower",
+        1,
+    )])
+}
+
+#[test]
+fn commander_evolution_guard_checks_the_current_field_before_any_cost_or_reveal() {
+    for seat in [1, 2] {
+        for matched in [false, true] {
+            let query = if matched {
+                json!({"who":"self","zone":"field","kind":"follower"})
+            } else {
+                json!({"who":"self","zone":"field","trait":"指揮官"})
+            };
+            let mut game = position(seat, &conditional_evolution(&query), &card(vec![]));
+            let before = game.projection(View::Referee).unwrap();
+            let result = game.internal_rule_action(
+                &json!({"do":"evolve","source":"s","evolve_card":"e","pay":{"pp":0}}),
+            );
+            if matched {
+                assert_eq!(
+                    result.unwrap().outcome,
+                    "resolved",
+                    "the admitted public condition allows evolution"
+                );
+                assert_eq!(
+                    game.projection(View::Referee).unwrap()["objects"]["s"]["power"],
+                    4,
+                    "the actual form is installed"
+                );
+            } else {
+                let refused = result.unwrap();
+                assert_eq!(
+                    refused.outcome, "cannot-evolve",
+                    "an unmet printed qualification refuses the action"
+                );
+                assert!(
+                    refused.events.is_empty(),
+                    "the failed qualification reveals nothing"
+                );
+                assert_eq!(
+                    game.projection(View::Referee).unwrap(),
+                    before,
+                    "a failed qualification cannot reveal, pay or evolve"
+                );
+            }
+        }
+    }
+}
+
+#[test]
+fn commander_evolution_qualification_rejects_other_players_and_hidden_zones() {
+    for query in [
+        json!({"who":"opp","zone":"field","trait":"指揮官"}),
+        json!({"who":"self","zone":"hand","trait":"指揮官"}),
+    ] {
+        let mut tree = fanfare::expanded::tree().clone();
+        tree["cards"]["synthetic-evolution"]["abilities"][0]["evolve"]["usable_if"] =
+            json!({"exists":query});
+        assert!(
+            lowerer().lower(&tree).is_err(),
+            "this intrinsic subset only reads the controller's public field"
+        );
+    }
+}
+
+#[test]
+fn commander_evolution_admission_rejects_a_guard_on_the_payment_instruction() {
+    let mut candidate =
+        conditional_evolution(&json!({"who":"self","zone":"field","kind":"follower"}))
+            .card()
+            .clone();
+    let CostSpec::Ordered { steps } = &mut candidate.abilities[0].node.play.as_mut().unwrap().costs
+    else {
+        panic!("fixed ordered costs");
+    };
+    let mut guard = steps[0].instruction.precondition.take().unwrap();
+    guard.protects = steps[1].instruction.id;
+    steps[1].instruction.precondition = Some(guard);
+    assert!(
+        WellFormedCardProgram::check(candidate).is_err(),
+        "a guard on payment cannot be silently ignored or turn a required cost into an optional one"
+    );
+}
+
+#[test]
+fn commander_evolution_keeps_both_printed_evolution_definitions() {
+    let mut tree = fanfare::expanded::tree().clone();
+    let abilities = &mut tree["cards"]["synthetic-evolution"]["abilities"];
+    let mut second = abilities[0].clone();
+    second["line"] = json!(2);
+    second["evolve"] = json!({"cost":{"pp":0},"usable_if":{"exists":{"who":"self","zone":"field","trait":"指揮官"}}});
+    abilities.as_array_mut().unwrap().push(second);
+    let programs = lowerer().lower(&tree).unwrap();
+    assert_eq!(
+        programs["synthetic-evolution"].card().abilities.len(),
+        2,
+        "ordinary and conditional intrinsic abilities retain distinct scopes"
+    );
+}

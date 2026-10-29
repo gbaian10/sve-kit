@@ -10,6 +10,7 @@ use crate::ir::{
     SelectionConstraint, SelectionGroup, SelectionSnapshot, SelectionView, Selector,
     TextQuantifier, Visibility, ZoneKind,
 };
+use crate::ir::{Precondition, PreconditionKind, PreconditionReason};
 
 const fn one() -> Cardinality {
     Cardinality {
@@ -33,10 +34,10 @@ fn names(object: ObjectOperand) -> Expr<Vec<CardName>> {
     }))
 }
 
-fn face(scope: ScopeId, candidate_scope: ScopeId) -> Decision {
+fn face(scope: ScopeId, candidate_scope: ScopeId, id: u64) -> Decision {
     let candidate = Binding::new(3, candidate_scope);
     Decision {
-        id: DecisionId(1),
+        id: DecisionId(id),
         captures: vec![],
         actor: PlayerRef::Controller {},
         visibility: Visibility::Only {
@@ -133,6 +134,36 @@ fn costs(
     })
 }
 
+fn qualification(
+    head: &ast::Evolution,
+    scope: ScopeId,
+    protects: InstructionId,
+    path: &str,
+) -> Result<Option<Precondition>, LoweringError> {
+    let Some(condition) = &head.usable_if else {
+        return Ok(None);
+    };
+    let ast::Condition::Exists(query) = condition else {
+        return Err(unsupported(path));
+    };
+    if !matches!(query.who, ast::Side::Controller)
+        || !matches!(query.zone, ast::PublicZone::Field)
+        || query.other
+        || query.class.is_some()
+        || query.token.is_some()
+    {
+        return Err(unsupported(path));
+    }
+    Ok(Some(Precondition {
+        kind: PreconditionKind::CardTextPrerequisite,
+        protects,
+        reason: PreconditionReason::CardText {},
+        predicate: Expr::Compute(Box::new(Predicate::Exists {
+            objects: super::costs::public_query(query, Binding::new(4, scope)),
+        })),
+    }))
+}
+
 pub(super) fn lower(
     allocator: &mut Allocator,
     key: &super::CardCoordinates<'_>,
@@ -165,11 +196,15 @@ pub(super) fn lower(
         },
     };
     let candidate_scope = ScopeId(scope.0.checked_add(1).ok_or_else(|| unsupported(path))?);
-    let parameter = face(scope, candidate_scope);
+    let parameter = face(scope, candidate_scope, allocator.id(path)?);
     let selection = Binding::new(1, scope);
     let inner_scope = ScopeId(scope.0.checked_add(2).ok_or_else(|| unsupported(path))?);
     let element = Binding::new(1, inner_scope);
-    let costs = costs(allocator, selection, pp, &origin, path)?;
+    let mut costs = costs(allocator, selection, pp, &origin, path)?;
+    if let CostSpec::Ordered { steps } = &mut costs {
+        let reveal = steps.first_mut().ok_or_else(|| unsupported(path))?;
+        reveal.instruction.precondition = qualification(head, scope, reveal.instruction.id, path)?;
+    }
     let evolve = instruction(
         Action::Evolve {
             subject: ObjectOperand::SourceHolder {},
