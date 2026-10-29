@@ -1,0 +1,37 @@
+cards:
+  BP05-007:
+    abilities:
+      - keywords:
+          - quick
+        line: 1
+      - line: 2
+        spell:
+          do:
+            - move:
+                ref: fairies
+                result: moved
+                to: ex
+            - if:
+                cond:
+                  did: moved
+                then:
+                  - life:
+                      delta: 2
+                      who: self
+          targets:
+            - bind: fairies
+              from:
+                kind: follower
+                trait: 妖精
+                who: self
+                zone: field
+              upto: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-29"
+format: 2
+kind: author_effect_set

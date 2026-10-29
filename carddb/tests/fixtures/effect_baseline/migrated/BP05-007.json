@@ -1,0 +1,43 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "static",
+      "body": {
+        "op": "macro",
+        "name": "quick"
+      }
+    },
+    {
+      "line": 2,
+      "kind": "spell",
+      "body": {
+        "op": "if_done",
+        "attempt": {
+          "op": "move",
+          "subjects": "target.1",
+          "to": "ex"
+        },
+        "then": {
+          "op": "modify",
+          "subjects": "self.leader",
+          "hp": 2
+        }
+      },
+      "targets": [
+        {
+          "key": "1",
+          "select": {
+            "side": "self",
+            "zone": "field",
+            "type": "follower",
+            "trait": "妖精"
+          },
+          "min": 0,
+          "max": 2
+        }
+      ]
+    }
+  ]
+}
