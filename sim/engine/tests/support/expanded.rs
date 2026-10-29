@@ -64,7 +64,8 @@ print(json.dumps({'tree': first, 'evidence': [
         .arg(root.join("sim/engine/tests/fixtures/lowering/bp01-118.yaml"))
         .arg(root.join("sim/engine/tests/fixtures/lowering/numeric.yaml"))
         .arg(root.join("sim/engine/tests/fixtures/lowering/search.yaml"))
-        .arg(root.join("sim/engine/tests/fixtures/lowering/activated.yaml"));
+        .arg(root.join("sim/engine/tests/fixtures/lowering/activated.yaml"))
+        .arg(root.join("sim/engine/tests/fixtures/lowering/discard-all.yaml"));
     if spell {
         command.arg(root.join("sim/engine/tests/fixtures/lowering/spell.yaml"));
     }

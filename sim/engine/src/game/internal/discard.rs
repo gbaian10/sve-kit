@@ -19,10 +19,47 @@ pub(super) struct HandWait {
 }
 
 pub(super) fn check_action(action: &Action) -> Result<()> {
-    if matches!(action, Action::Discard { .. }) {
-        bounds(action)?;
+    if let Action::Discard { mode, .. } = action {
+        match mode {
+            DiscardMode::Chosen { .. } => {
+                bounds(action)?;
+            }
+            DiscardMode::All { .. } => {
+                eligible(action)?;
+            }
+            _ => return Err(unsupported("self hand discard mode")),
+        }
     }
     Ok(())
+}
+
+fn eligible(action: &Action) -> Result<&Selector> {
+    let Action::Discard {
+        player: PlayerRef::Controller {},
+        mode: DiscardMode::All { eligible },
+    } = action
+    else {
+        return Err(unsupported("self all-hand discard"));
+    };
+    let Selector::Zone {
+        players,
+        zone: ZoneKind::Hand,
+        view: SelectionView::Current {},
+        predicate,
+        ..
+    } = eligible
+    else {
+        return Err(unsupported("direct current hand discard"));
+    };
+    if players.relative_to != (PlayerRef::Controller {})
+        || players.relation != PlayerRelation::SelfPlayer
+        || players.cardinality.minimum != Nat(1)
+        || players.cardinality.maximum != Some(Nat(1))
+        || **predicate != Expr::Literal(Bool(true))
+    {
+        return Err(unsupported("unfiltered own hand discard"));
+    }
+    Ok(eligible)
 }
 
 fn bounds(action: &Action) -> Result<Cardinality> {
@@ -131,6 +168,27 @@ impl Game {
         execution: &mut Execution,
         instruction: Box<Instruction>,
     ) -> Result<()> {
+        if matches!(
+            &instruction.action,
+            Action::Discard {
+                mode: DiscardMode::All { .. },
+                ..
+            }
+        ) {
+            eligible(&instruction.action)?;
+            let player = execution.context.controller;
+            let seat = seat_name(player)?;
+            let members = self
+                .zone_ids(seat, "hand")
+                .into_iter()
+                .map(|id| execution.reference(self, &id))
+                .collect::<Result<Vec<_>>>()?;
+            let outcome = self.internal_discard_members(execution, &members)?;
+            execution
+                .receipts
+                .insert(instruction.receipt, InstructionOutcome::Discard(outcome));
+            return Ok(());
+        }
         let mut count = bounds(&instruction.action)?;
         let player = execution.context.controller;
         let seat = seat_name(player)?;

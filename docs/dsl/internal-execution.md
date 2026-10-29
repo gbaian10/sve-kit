@@ -572,7 +572,8 @@ placement 或額外進場效果，精確零張亦未開放。
 
 本文 `discard: {who: self, n: N}` 接受固定正整數 N；降低為自己目前 Hand、
 無篩選、單組與精確印刷張數的 Discard(Chosen)。結算才列出當前手牌候選，
-不足時降低最低量以盡可能執行；空域與唯一候選仍詢問。
+不足時降低最低量以盡可能執行；空域與唯一候選仍詢問。`all: true` 則降低為
+Discard(All)，執行時一次棄置當下自己手牌的全部成員，不逐張詢問。
 
 沿用 actor 專屬的物件問句與 token-local handle，沒有新增 wire 欄位。
 對手不取得手牌候選，Referee 仍可檢視權威；actor／token／張數／重複／外來 handle／目前

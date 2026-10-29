@@ -71,6 +71,30 @@ pub(super) fn fragment_setup(
 }
 
 #[test]
+fn discard_all_lowering_requires_the_exclusive_true_variant() {
+    let tree = expanded::tree();
+    let cards = lowerer().lower(tree).unwrap();
+    assert!(cards.contains_key("BP02-052"));
+
+    let mut false_all = tree.clone();
+    false_all["cards"]["BP02-052"]["abilities"][0]["fanfare"]["do"][0]["discard"]["all"] =
+        json!(false);
+    assert_eq!(
+        lowerer().lower(&false_all).unwrap_err().code,
+        "invalid_expanded",
+        "all:false is not a discard mode"
+    );
+
+    let mut mixed_count = tree.clone();
+    mixed_count["cards"]["BP02-052"]["abilities"][0]["fanfare"]["do"][0]["discard"]["n"] = json!(1);
+    assert_eq!(
+        lowerer().lower(&mixed_count).unwrap_err().code,
+        "invalid_expanded",
+        "count and all are mutually exclusive"
+    );
+}
+
+#[test]
 fn bp03_002_lowered_search_runs_through_whole_card_pending() {
     let cards = lowerer().lower(expanded::tree()).unwrap();
     let mut game = fragment_position(1, "BP03-002", 5, json!([{"id":"d0","card":"BP03-009"}]));

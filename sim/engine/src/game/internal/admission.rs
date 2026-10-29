@@ -441,6 +441,8 @@ fn supported(code: &str) -> bool {
             | "action.discard"
             | "shape.DiscardMode.Chosen"
             | "discard.chosen"
+            | "shape.DiscardMode.All"
+            | "discard.all"
             | "internal.ZoneKind.Hand"
             | "shape.Action.Reveal"
             | "action.reveal"

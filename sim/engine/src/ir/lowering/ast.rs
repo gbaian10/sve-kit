@@ -272,7 +272,8 @@ pub(super) struct ResourceIncrease {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct Discard {
-    pub n: u64,
+    pub n: Option<u64>,
+    pub all: Option<bool>,
     #[serde(rename = "who")]
     pub _who: Option<SelfPlayer>,
     pub random: Option<bool>,
