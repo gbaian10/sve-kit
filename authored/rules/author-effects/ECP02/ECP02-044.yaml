@@ -1,0 +1,44 @@
+format: 2
+kind: author_effect_set
+cards:
+  ECP02-044:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-30"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        auto:
+          "on":
+            phase:
+              whose: self
+              which: end
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: cemetery
+                        trait: キュート
+                    op: ge
+                    right: 5
+                then:
+                  - buff:
+                      "on": ally
+                      hp: 2
+          targets:
+            - bind: ally
+              from:
+                who: self
+                zone: field
+                kind: follower
+              n: 1

@@ -1,0 +1,48 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP13-032:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-30"
+    abilities:
+      - line: 1
+        keywords:
+          - ward
+      - line: 2
+        auto:
+          "on":
+            phase:
+              whose: self
+              which: end
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: cemetery
+                        trait: レヴィオン
+                    op: ge
+                    right: 5
+                then:
+                  - life:
+                      who: self
+                      delta: 1
+      - line: 3
+        fanfare:
+          do:
+            - draw:
+                n: 1
+          cost:
+            discard:
+              sel:
+                who: self
+                zone: hand
+                trait: レヴィオン
+              n: 1

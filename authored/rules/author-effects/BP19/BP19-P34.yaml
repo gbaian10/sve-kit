@@ -1,0 +1,60 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP19-P34:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-30"
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: cemetery
+                        kind: follower
+                        trait: 八獄
+                    op: ge
+                    right: 5
+                then:
+                  - buff:
+                      "on": this
+                      power: 2
+                      hp: 2
+                  - grant:
+                      "on": this
+                      keywords:
+                        - rush
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: cemetery
+                        kind: follower
+                        trait: 八獄
+                    op: ge
+                    right: 10
+                then:
+                  - grant:
+                      "on": this
+                      keywords:
+                        - assail
+                        - bane
+      - line: 2
+        lastword:
+          do:
+            - draw:
+                n: 1
+    token:
+      name: 多頭の実験体
+      template: true
