@@ -187,3 +187,81 @@ fn bp04_065_aliases_evolve_from_the_real_base_and_deal_two_before_combat() {
         );
     }
 }
+
+#[test]
+fn crossover_spells_keep_class_matching_with_a_real_cemetery_observer_without_title_rules() {
+    for (spell, token, drawn, life, matches_class) in [
+        ("CP02-068", false, 3_u8, 18_u8, true),
+        ("CP02-T02", true, 1_u8, 19_u8, false),
+    ] {
+        let mut initial = draw_position();
+        initial["players"]["P1"]["leader"]["life"] = json!(18_u8);
+        initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"spell","card":spell}]);
+        initial["players"]["P1"]["zones"]["cemetery"] = json!([{"id":"phoenix","card":"BP04-064"}]);
+        initial["players"]["P1"]["zones"]["deck"] = json!([
+            {"id":"d1","card":"BP01-037"}, {"id":"d2","card":"BP01-037"},
+            {"id":"d3","card":"BP01-037"}, {"id":"d4","card":"BP01-037"}
+        ]);
+        // Ordinary spell play never required a title binding, even with a cemetery observer loaded.
+        let mut game = super::game(&initial);
+        resolved(game.play_internal_card("spell", actor()).unwrap());
+        game.resume_internal_card().unwrap();
+        assert_eq!(
+            game.internal_pending_choice().unwrap().is_some(),
+            matches_class,
+            "the Dragon spell triggers Star Phoenix but the neutral token does not"
+        );
+        if matches_class {
+            let CardPlay::Awaiting(payment) = trigger(&mut game, "BP04-064") else {
+                panic!("the real observer requires its printed return payment")
+            };
+            assert!(
+                matches!(payment.domain, InputDomain::OptionalCost),
+                "Star Phoenix declares its own one PP payment"
+            );
+            resolved(
+                game.answer_internal_card(payment.actor, payment.token, Answer::OptionalCost(true))
+                    .unwrap(),
+            );
+            game.resume_internal_card().unwrap();
+        }
+        let state = game.projection(View::Referee).unwrap();
+        assert_eq!(
+            state["P1"]["hand"],
+            json!((1..=drawn).map(|n| format!("d{n}")).collect::<Vec<_>>()),
+            "the crossover spell keeps its own draw effect"
+        );
+        assert_eq!(
+            state["P1"]["leader"]["life"], life,
+            "the magic-item token keeps its heal effect"
+        );
+        assert_eq!(
+            state["P1"]["pp"]["current"],
+            if matches_class { 5_u8 } else { 6_u8 },
+            "the spell pays four PP and only a matching observer pays one more"
+        );
+        assert_eq!(
+            state["P1"]["field"],
+            if matches_class {
+                json!(["phoenix"])
+            } else {
+                json!([])
+            },
+            "the paid matching observer returns while a nonmatching one stays in cemetery"
+        );
+        assert_eq!(
+            state["P1"]["cemetery"],
+            if token {
+                json!(["phoenix"])
+            } else {
+                json!(["spell"])
+            },
+            "normal spells enter cemetery and tokens cease while only matching observers return"
+        );
+        assert_eq!(
+            state["objects"]["spell"].is_null(),
+            token,
+            "token cleanup still follows the ordinary spell path"
+        );
+    }
+}

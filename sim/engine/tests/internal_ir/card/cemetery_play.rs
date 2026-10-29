@@ -76,6 +76,80 @@ fn pay(game: &mut Game, play: CardPlay, accepted: bool) -> CardPlay {
 }
 
 #[test]
+fn cemetery_play_matches_class_without_requiring_the_spells_title_registry() {
+    let (snapshot, registry, document) = catalog_documents(&json!("1"));
+    let titled_snapshot = snapshot
+        .lines()
+        .map(|line| {
+            let mut entry: Value = serde_json::from_str(line).unwrap();
+            if entry["number"] == "unit-spell" {
+                entry["faces"][0]["title"] = json!("Unregistered synthetic title");
+            }
+            entry.to_string()
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
+    let catalog = Arc::new(
+        Catalog::from_documents(
+            &titled_snapshot,
+            &registry,
+            &[("unit.yaml".into(), document)],
+        )
+        .unwrap(),
+    );
+    for observer_present in [false, true] {
+        let mut initial = initial(2);
+        if !observer_present {
+            initial["players"]["P1"]["zones"]["cemetery"] = json!([]);
+        }
+        let programs = lowerer().lower(&tree()).unwrap();
+        let mut game = Game::new(
+            Arc::clone(&catalog),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "cemetery-play-title",
+        )
+        .unwrap();
+        game.load_internal_card("unit-follower", &programs["unit-follower"])
+            .unwrap();
+        game.load_internal_card("unit-spell", &card(vec![play::spell(vec![])]))
+            .unwrap();
+        play(&mut game);
+        assert_eq!(
+            game.internal_pending_choice().unwrap().is_some(),
+            observer_present,
+            "class-based Play subscription does not depend on an unrelated title registry"
+        );
+        if observer_present {
+            let pending = fire(&mut game);
+            resolved(pay(&mut game, pending, true));
+            game.resume_internal_card().unwrap();
+        }
+        let state = game.projection(View::Referee).unwrap();
+        assert_eq!(
+            state["P1"]["cemetery"],
+            json!(["s"]),
+            "the spell resolves normally"
+        );
+        assert_eq!(
+            state["P1"]["field"],
+            if observer_present {
+                json!(["phoenix"])
+            } else {
+                json!([])
+            },
+            "the matching observer returns after its own payment"
+        );
+        assert_eq!(
+            state["P1"]["pp"]["current"],
+            u8::from(!observer_present),
+            "only the spell and any declared return payment consume PP"
+        );
+    }
+}
+
+#[test]
 fn cemetery_play_returns_the_observer_after_a_committed_spell_and_head_payment() {
     let mut game = game(&initial(2), &tree(), vec![]);
     play(&mut game);

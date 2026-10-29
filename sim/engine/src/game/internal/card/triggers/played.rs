@@ -7,8 +7,8 @@ use crate::game::internal::Execution;
 use crate::ir::events::played::filter;
 use crate::ir::optional_payment;
 use crate::ir::{
-    Action, CardKind, CostSpec, MoveDestination, MoveReason, Node, ObjectOperand, PlayEvent,
-    PlaySubject, PlayerRef, RuntimeReceiptId, RuntimeZoneRef, Selector,
+    Action, CostSpec, MoveDestination, MoveReason, Node, ObjectOperand, PlayEvent, PlaySubject,
+    PlayerRef, RuntimeReceiptId, RuntimeZoneRef, Selector,
 };
 
 pub(super) fn check_header(ability: &Ability) -> Result<bool> {
@@ -70,10 +70,17 @@ impl Game {
         if actor != player_id(self.active())? {
             return Ok(());
         }
-        let characters = self.internal_characteristics(&execution.context.source)?;
-        if characters.kind != CardKind::Spell {
+        if !matches!(
+            self.object_type(&execution.context.source)?,
+            "スペル" | "スペル・トークン" | "スペル・アドバンス"
+        ) {
             return Ok(());
         }
+        // This subscription reads only class; a full snapshot would require unrelated title bindings.
+        let class = self.face(&execution.context.source)?["card_class"]
+            .as_str()
+            .ok_or_else(|| invalid("missing played card class"))?
+            .to_owned();
         let mut matched = Vec::new();
         for holder in self.zone_ids(super::super::seat_name(actor)?, "cemetery") {
             let (card, _) = self.internal_effective_print(&holder)?;
@@ -84,7 +91,7 @@ impl Game {
             }
             for ability in self.internal_printed_abilities(&holder)? {
                 if let Some(plan) = filter(&ability.node)
-                    && characters.class == Some(plan.class)
+                    && class == plan.class.0
                 {
                     matched.push((holder.clone(), ability));
                 }
