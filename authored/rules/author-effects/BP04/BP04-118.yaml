@@ -1,0 +1,21 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP04-118:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-29"
+    abilities:
+      - attack_time:
+          do:
+            - damage:
+                n: 5
+                to:
+                  who: opp
+                  zone: field
+                  kind: follower
+        line: 1
