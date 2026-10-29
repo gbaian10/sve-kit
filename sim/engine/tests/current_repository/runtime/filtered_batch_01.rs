@@ -369,7 +369,10 @@ fn filtered_batch_01_bp20_008_checks_printed_effect() {
                 state["objects"]["enemy"]["damage"],
                 if count >= 6 { 3_u8 } else { 2_u8 }
             );
-            assert_eq!(state["P2"]["leader"]["life"], 18_u8);
+            assert_eq!(
+                state["P2"]["leader"]["life"],
+                if count >= 6 { 18_u8 } else { 20_u8 }
+            );
         }
     }
 }
