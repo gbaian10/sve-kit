@@ -3,8 +3,9 @@ use crate::ir::{
     Ability, AbilityKind, AbilityOrigin, Action, Binding, CardName, Cardinality, ChoiceDomain,
     Control, CostSpec, Decision, DecisionKind, Disjointness, EvolutionMode, ExecutionRef, Expr,
     InputMode, InstructionContext, Int, KeywordId, NamesRead, Nat, Node, ObjectOperand, ObjectView,
-    PlaySlot, PlayerRef, PlayerRelation, PlayerSet, Predicate, Resource, ResourceOperation,
-    SelectionSnapshot, SelectionView, Selector, TextQuantifier, Visibility, ZoneKind,
+    PlaySlot, PlayerRef, PlayerRelation, PlayerSet, PreconditionKind, PreconditionReason,
+    Predicate, Resource, ResourceOperation, SelectionSnapshot, SelectionView, Selector,
+    TextQuantifier, Visibility, ZoneKind,
 };
 
 #[expect(
@@ -184,14 +185,24 @@ impl Checker {
             return self.reject();
         }
         for (index, cost) in steps.iter().enumerate() {
-            if cost.materials.is_some()
-                || cost.instruction.precondition.is_some()
-                || cost.instruction.actor != (PlayerRef::Controller {})
-            {
+            if cost.materials.is_some() || cost.instruction.actor != (PlayerRef::Controller {}) {
                 return self.reject();
             }
             self.at(&index.to_string(), |checker| {
-                checker.instruction_in(&cost.instruction, InstructionContext::Cost, false)
+                if let Some(guard) = &cost.instruction.precondition {
+                    if index != 0
+                        || guard.kind != PreconditionKind::CardTextPrerequisite
+                        || guard.protects != cost.instruction.id
+                        || guard.reason != (PreconditionReason::CardText {})
+                    {
+                        return checker.reject();
+                    }
+                    checker.at("precondition", |checker| checker.boolean(&guard.predicate))?;
+                }
+                // An intrinsic qualification gates the entire play before its unconditional reveal.
+                let mut instruction = cost.instruction.clone();
+                instruction.precondition = None;
+                checker.instruction_in(&instruction, InstructionContext::Cost, false)
             })?;
         }
         Ok(())

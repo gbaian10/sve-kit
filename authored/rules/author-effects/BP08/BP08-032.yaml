@@ -1,0 +1,25 @@
+cards:
+  BP08-032:
+    abilities:
+      - evolve:
+          cost:
+            pp: 2
+        line: 1
+      - evolve:
+          cost:
+            pp: 0
+          usable_if:
+            exists:
+              trait: 指揮官
+              who: self
+              zone: field
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-29"
+format: 2
+kind: author_effect_set
