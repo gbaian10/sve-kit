@@ -1,0 +1,29 @@
+cards:
+  BP10-012:
+    abilities:
+      - keywords:
+          - rush
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  combo: 3
+                then:
+                  - search:
+                      n: 1
+                      sel:
+                        name: クラッシュインセクト
+                        who: self
+                        zone: deck
+                      to: hand
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

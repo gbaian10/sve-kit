@@ -1,0 +1,26 @@
+cards:
+  BP10-013:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - fanfare:
+          do:
+            - search:
+                n: 1
+                sel:
+                  trait: アルカナ
+                  who: self
+                  zone: deck
+                to: ex
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set
