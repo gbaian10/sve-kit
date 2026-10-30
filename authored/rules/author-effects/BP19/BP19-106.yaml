@@ -1,0 +1,30 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP19-106:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-31"
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - search:
+                sel:
+                  any_of:
+                    - who: self
+                      zone: deck
+                      kind: follower
+                      trait: 獣
+                      orig_cost_le: 1
+                    - who: self
+                      zone: deck
+                      kind: amulet
+                      trait: 獣
+                      orig_cost_le: 1
+                to: field
+                n: 1
