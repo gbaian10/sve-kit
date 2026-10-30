@@ -1,0 +1,51 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP16-064:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-30"
+    abilities:
+      - line: 1
+        activate:
+          cost:
+            steps:
+              - act_self: true
+              - self_to_cemetery: true
+          do:
+            - create:
+                token: オルカ
+                to: field
+                n: 1
+      - line: 2
+        activate:
+          cost:
+            steps:
+              - pp: 1
+              - act_self: true
+              - self_to_cemetery: true
+          usable_if:
+            exists:
+              who: self
+              zone: field
+              kind: follower
+              trait: 海洋
+          do:
+            - damage:
+                to: enemy
+                n: 4
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP09-T12

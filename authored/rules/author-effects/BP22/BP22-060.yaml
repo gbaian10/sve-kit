@@ -1,0 +1,25 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP22-060:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-30"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 4
+      - line: 2
+        evolve:
+          cost:
+            pp: 1
+          usable_if:
+            exists:
+              who: self
+              zone: field
+              name: 金色の威信・リュミオール

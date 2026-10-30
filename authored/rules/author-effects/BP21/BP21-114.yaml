@@ -1,0 +1,64 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP21-114:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-30"
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - look:
+                bind: seen
+                top:
+                  who: self
+                  n: 3
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  trait: 学院
+                n: 1
+                may: true
+            - move:
+                ref: picked
+                to: hand
+                result: picked_to_hand
+            - reveal:
+                ref: picked
+                bind: revealed
+            - move:
+                ref:
+                  in: seen
+                  except:
+                    in:
+                      objects_of: picked_to_hand
+                      view: before
+                to: deck
+                position: bottom
+                order: chooser
+      - line: 2
+        activate:
+          cost:
+            steps:
+              - act_self: true
+              - self_to_cemetery: true
+          usable_if:
+            cmp:
+              left:
+                count:
+                  who: self
+                  zone: field
+                  kind: follower
+                  trait: 学院
+              op: ge
+              right: 2
+          do:
+            - life:
+                who: self
+                delta: 1

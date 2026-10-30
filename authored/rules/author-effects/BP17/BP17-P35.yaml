@@ -1,0 +1,40 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP17-P35:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-30"
+    token:
+      name: ルナの人形
+      template: true
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - move:
+                top:
+                  who: self
+                  n: 2
+                to: cemetery
+      - line: 2
+        activate:
+          cost:
+            steps:
+              - act_self: true
+              - self_to_cemetery: true
+          usable_if:
+            cmp:
+              left:
+                count:
+                  who: self
+                  zone: cemetery
+              op: ge
+              right: 10
+          do:
+            - draw:
+                n: 1
