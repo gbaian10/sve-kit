@@ -1,0 +1,38 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP13-115:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-31"
+    abilities:
+      - line: 1
+        auto:
+          "on":
+            evolved:
+              who: self
+              sel:
+                kind: follower
+          do:
+            - grant:
+                on: this
+                keywords:
+                  - rush
+      - line: 2
+        fanfare:
+          targets:
+            - bind: returned
+              from:
+                who: self
+                zone: cemetery
+                kind: follower
+                has_evolve: true
+              n: 1
+          do:
+            - move:
+                ref: returned
+                to: hand
