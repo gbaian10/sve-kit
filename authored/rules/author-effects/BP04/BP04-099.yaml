@@ -1,0 +1,33 @@
+cards:
+  BP04-099:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - fanfare:
+          do:
+            - damage:
+                n: 2
+                to:
+                  kind: follower
+                  other: true
+                  who: all
+                  zone: field
+            - buff:
+                on:
+                  kind: follower
+                  other: true
+                  who: self
+                  zone: field
+                power: 2
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set
