@@ -1,0 +1,24 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP13-062:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-30"
+    abilities:
+      - line: 1
+        evolve_time:
+          do:
+            - search:
+                sel:
+                  who: self
+                  zone: deck
+                  kind: follower
+                  trait: 武闘竜人
+                  orig_cost_le: 3
+                n: 1
+                to: field
