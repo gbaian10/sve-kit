@@ -1,0 +1,37 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP15-073:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-30"
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - create:
+                token: ドラゴン
+                n: 1
+                to: ex
+                result: created
+            - if:
+                cond:
+                  awakened: true
+                then:
+                  - apply:
+                      "on":
+                        follow: created
+                      effect:
+                        cost_mod:
+                          when_playing:
+                            in: affected
+                          delta: -2
+                      until: turn
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP13-T10
