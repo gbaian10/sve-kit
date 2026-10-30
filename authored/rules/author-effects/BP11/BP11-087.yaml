@@ -1,0 +1,43 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP11-087:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-30"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        keywords:
+          - ward
+      - line: 3
+        fanfare:
+          do:
+            - damage:
+                to: enemy
+                n: 3
+            - if:
+                cond:
+                  exists:
+                    who: self
+                    zone: ex
+                    trait: 荒野
+                then:
+                  - damage:
+                      to:
+                        leaders: opponents
+                      n: 2
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              upto: 2

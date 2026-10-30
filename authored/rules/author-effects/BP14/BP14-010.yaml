@@ -1,0 +1,36 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP14-010:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-30"
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - create:
+                token: 操り人形
+                n: 1
+                to: ex
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: ex
+                    op: ge
+                    right: 3
+                then:
+                  - life:
+                      who: self
+                      delta: 1
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP14-T08
