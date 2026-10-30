@@ -1,0 +1,45 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP17-078:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-30"
+    abilities:
+      - line: 1
+        evolve_time:
+          do:
+            - search:
+                sel:
+                  who: self
+                  zone: deck
+                  name: マンマル2号
+                n: 1
+                to: field
+      - line: 2
+        super_evolve_time:
+          targets:
+            - bind: recovered
+              from:
+                who: self
+                zone: cemetery
+                trait: 機械
+              n: 1
+          do:
+            - move:
+                ref: recovered
+                to: ex
+                result: recovered_ex
+            - apply:
+                "on":
+                  follow: recovered_ex
+                effect:
+                  cost_mod:
+                    when_playing:
+                      in: affected
+                    delta: -3
+                until: turn
