@@ -1,0 +1,30 @@
+cards:
+  BP05-088:
+    abilities:
+      - auto:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - discard:
+                        all: true
+                        who: self
+                    - draw:
+                        n: 4
+                  - - pp:
+                        delta: 4
+                        who: self
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

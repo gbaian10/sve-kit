@@ -1,0 +1,36 @@
+cards:
+  BP05-035:
+    abilities:
+      - evolve:
+          cost:
+            pp: 2
+        line: 1
+      - fanfare:
+          cost:
+            discard:
+              n: 1
+              sel:
+                trait: 魔法使い
+                who: self
+                zone: hand
+          do:
+            - damage:
+                n: 9
+                to: victim
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set
