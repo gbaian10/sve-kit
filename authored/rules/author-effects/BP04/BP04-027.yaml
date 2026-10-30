@@ -1,0 +1,33 @@
+cards:
+  BP04-027:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - damage:
+                n:
+                  at: selection
+                  selection: victim
+                  value:
+                    power_of: victim
+                to:
+                  kind: follower
+                  who: opp
+                  zone: field
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                trait: 指揮官
+                who: self
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

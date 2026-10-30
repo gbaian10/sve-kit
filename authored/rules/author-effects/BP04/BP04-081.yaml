@@ -1,0 +1,25 @@
+cards:
+  BP04-081:
+    abilities:
+      - keywords:
+          - storm
+        line: 1
+      - evolve_time:
+          do:
+            - if:
+                cond:
+                  crimson: true
+                then:
+                  - life:
+                      delta: 5
+                      who: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

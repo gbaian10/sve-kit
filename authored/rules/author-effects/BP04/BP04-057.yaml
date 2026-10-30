@@ -1,0 +1,44 @@
+cards:
+  BP04-057:
+    abilities:
+      - auto:
+          do:
+            - if:
+                cond:
+                  awakened: true
+                else:
+                  - life:
+                      delta: 1
+                      who: self
+                then:
+                  - life:
+                      delta: 2
+                      who: self
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  awakened: true
+                then:
+                  - buff:
+                      hp: 1
+                      on: this
+                      power: 1
+                  - pp_max:
+                      delta: 1
+                      who: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

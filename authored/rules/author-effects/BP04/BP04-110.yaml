@@ -1,0 +1,27 @@
+cards:
+  BP04-110:
+    abilities:
+      - fanfare:
+          cost:
+            act:
+              n: 2
+              sel:
+                kind: amulet
+                who: self
+                zone: field
+          do:
+            - draw:
+                n: 2
+            - discard:
+                n: 1
+                who: self
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

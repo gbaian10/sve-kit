@@ -1,0 +1,40 @@
+cards:
+  BP04-012:
+    abilities:
+      - fanfare:
+          do:
+            - damage:
+                n: 1
+                to:
+                  leaders: opponents
+            - damage:
+                n: 1
+                to:
+                  kind: follower
+                  who: opp
+                  zone: field
+        line: 1
+        scope: 1
+      - lastword:
+          do:
+            - damage:
+                n: 1
+                to:
+                  leaders: opponents
+            - damage:
+                n: 1
+                to:
+                  kind: follower
+                  who: opp
+                  zone: field
+        line: 1
+        scope: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

@@ -1,0 +1,43 @@
+cards:
+  BP04-030:
+    abilities:
+      - line: 1
+        play:
+          cost_delta:
+            delta: -2
+            if:
+              exists:
+                kind: follower
+                name: プリンセス・ジュリエット
+                who: self
+                zone: field
+      - keywords:
+          - ward
+        line: 2
+      - auto:
+          do:
+            - if:
+                cond:
+                  exists:
+                    kind: follower
+                    name: プリンセス・ジュリエット
+                    who: self
+                    zone: field
+                then:
+                  - life:
+                      delta: 2
+                      who: self
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

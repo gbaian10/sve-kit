@@ -1,0 +1,61 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "static",
+      "body": {
+        "op": "macro",
+        "name": "storm"
+      }
+    },
+    {
+      "line": 2,
+      "kind": "trigger",
+      "body": {
+        "op": "if",
+        "condition": {
+          "fn": "ge",
+          "args": [
+            {
+              "read": "self.combo"
+            },
+            3
+          ]
+        },
+        "then": {
+          "op": "modify",
+          "subjects": "self",
+          "power": {
+            "if": {
+              "fn": "ge",
+              "args": [
+                {
+                  "read": "self.combo"
+                },
+                5
+              ]
+            },
+            "then": 3,
+            "else": 1
+          },
+          "hp": {
+            "if": {
+              "fn": "ge",
+              "args": [
+                {
+                  "read": "self.combo"
+                },
+                5
+              ]
+            },
+            "then": 3,
+            "else": 1
+          }
+        }
+      },
+      "event": "evolve",
+      "subject": "self"
+    }
+  ]
+}

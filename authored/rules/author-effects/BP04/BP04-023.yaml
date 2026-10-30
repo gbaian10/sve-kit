@@ -1,0 +1,31 @@
+cards:
+  BP04-023:
+    abilities:
+      - line: 1
+        play:
+          cost_delta:
+            delta: -2
+            if:
+              cmp:
+                left:
+                  count:
+                    who: opp
+                    zone: field
+                op: ge
+                right: 3
+      - evolve:
+          cost:
+            pp: 1
+        line: 2
+      - keywords:
+          - assail
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set
