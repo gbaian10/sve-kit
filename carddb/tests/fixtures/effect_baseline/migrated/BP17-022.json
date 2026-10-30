@@ -1,0 +1,48 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "name": "intimidate",
+        "op": "macro"
+      },
+      "kind": "static",
+      "line": 1
+    },
+    {
+      "body": {
+        "amount": {
+          "else": 1,
+          "if": {
+            "args": [
+              {
+                "read": "self.entered_from"
+              },
+              "hand"
+            ],
+            "fn": "ne"
+          },
+          "then": 3
+        },
+        "op": "damage",
+        "subjects": "target.1"
+      },
+      "event": "enter",
+      "kind": "trigger",
+      "line": 2,
+      "subject": "self",
+      "targets": [
+        {
+          "key": "1",
+          "max": 1,
+          "min": 1,
+          "select": {
+            "side": "opponent",
+            "type": "follower",
+            "zone": "field"
+          }
+        }
+      ]
+    }
+  ],
+  "status": "complete"
+}

@@ -1,0 +1,38 @@
+cards:
+  BP17-022:
+    abilities:
+      - keywords:
+          - intimidate
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  entered_from:
+                    from: hand
+                    ref: this
+                else:
+                  - damage:
+                      n: 3
+                      to: victim
+                then:
+                  - damage:
+                      n: 1
+                      to: victim
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set
