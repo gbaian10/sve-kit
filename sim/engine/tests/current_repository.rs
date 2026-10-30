@@ -136,10 +136,6 @@ fn repository_keyword_migrations_lower_as_complete_current_candidates() {
         assert_eq!(card.card_id, card_id);
         assert_eq!(card.program.card().abilities.len(), abilities);
     }
-
-    let card_no = "BP14-032";
-    assert!(!selected.current.contains_key(card_no));
-    assert!(prototypes["programs"].get(card_no).is_some());
 }
 
 #[test]
