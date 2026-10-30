@@ -1,0 +1,46 @@
+cards:
+  BP09-027:
+    abilities:
+      - keywords:
+          - rush
+        line: 1
+      - attack_time:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: ナイト
+        line: 2
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  exists:
+                    kind: follower
+                    name: 黒の女王・マグナス
+                    who: self
+                    zone: field
+                else:
+                  - create:
+                      n: 1
+                      to: field
+                      token: ナイト
+                then:
+                  - create:
+                      n: 2
+                      to: field
+                      token: ナイト
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+    token_sources:
+      - card: BP17-T11
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

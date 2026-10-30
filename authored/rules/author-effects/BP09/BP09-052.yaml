@@ -1,0 +1,38 @@
+cards:
+  BP09-052:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - auto:
+          do:
+            - damage:
+                n: 5
+                to:
+                  kind: follower
+                  other: true
+                  who: all
+                  zone: field
+            - draw:
+                n: 1
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 2
+      - fanfare:
+          do:
+            - discard:
+                all: true
+                who: self
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

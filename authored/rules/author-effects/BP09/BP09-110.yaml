@@ -1,0 +1,43 @@
+cards:
+  BP09-110:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - fanfare:
+          do:
+            - act:
+                ref: victim
+            - apply:
+                effect:
+                  cannot:
+                    during:
+                      cause: rule
+                      phase: start
+                      who: opp
+                    on: affected
+                    what: stand
+                on: victim
+                until:
+                  next_phase:
+                    edge: end
+                    phase: start
+                    who: opp
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              upto: 2
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

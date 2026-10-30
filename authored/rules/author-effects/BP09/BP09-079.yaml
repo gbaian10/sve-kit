@@ -1,0 +1,34 @@
+cards:
+  BP09-079:
+    abilities:
+      - fanfare:
+          do:
+            - search:
+                n: 1
+                sel:
+                  kind: follower
+                  trait: 獣
+                  who: self
+                  zone: deck
+                to: hand
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - self_to_cemetery: true
+          do:
+            - damage:
+                n: 1
+                to:
+                  leaders: all
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

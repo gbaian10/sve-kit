@@ -1,0 +1,36 @@
+cards:
+  BP09-091:
+    abilities:
+      - keywords:
+          - storm
+          - ward
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        kind: amulet
+                        who: self
+                        zone: field
+                    op: ge
+                    right: 2
+                then:
+                  - buff:
+                      on: this
+                      power: 2
+                  - life:
+                      delta: 2
+                      who: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

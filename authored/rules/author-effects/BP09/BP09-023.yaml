@@ -1,0 +1,30 @@
+cards:
+  BP09-023:
+    abilities:
+      - line: 1
+        play:
+          cost_delta:
+            delta: -1
+            if:
+              exists:
+                kind: follower
+                name: イノセントプリンセス・プリム
+                who: self
+                zone: field
+      - fanfare:
+          do:
+            - draw:
+                n: 2
+            - discard:
+                n: 2
+                who: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set
