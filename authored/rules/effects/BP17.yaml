@@ -53,37 +53,6 @@ cards:
               to: field
         event: enter
         subject: self
-  BP17-022:
-    status: complete
-    abilities:
-      - line: 1
-        kind: static
-        body:
-          op: macro
-          name: intimidate
-      - line: 2
-        kind: trigger
-        body:
-          op: damage
-          subjects: target.1
-          amount:
-            if:
-              fn: ne
-              args:
-                - read: self.entered_from
-                - hand
-            then: 3
-            else: 1
-        event: enter
-        subject: self
-        targets:
-          - key: "1"
-            select:
-              side: opponent
-              zone: field
-              type: follower
-            min: 1
-            max: 1
   BP17-030:
     status: complete
     abilities:
