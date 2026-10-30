@@ -227,7 +227,7 @@ fn producer_inputs() -> (String, String, Value) {
     (snapshot, keywords, input)
 }
 
-fn selection_without_abilities(
+pub(super) fn selection_without_abilities(
     (snapshot, keywords, mut input): (String, String, Value),
     missing: &[&str],
 ) -> SelectedEffects {
