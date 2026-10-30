@@ -1,0 +1,37 @@
+cards:
+  BP10-118:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - destroy: chosen
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        trait: 堕天使
+                        who: self
+                        zone: cemetery
+                    op: ge
+                    right: 1
+                then:
+                  - life:
+                      delta: 2
+                      who: self
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              upto: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

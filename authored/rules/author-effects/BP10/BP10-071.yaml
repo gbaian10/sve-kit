@@ -1,0 +1,47 @@
+cards:
+  BP10-071:
+    abilities:
+      - fanfare:
+          do:
+            - damage:
+                n: 2
+                to: chosen
+            - buff:
+                hp: 1
+                on: this
+                power: 1
+            - grant:
+                keywords:
+                  - rush
+                on: this
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                other: true
+                who: self
+                zone: field
+              n: 1
+        line: 1
+      - activate:
+          cost:
+            pp: 3
+          do:
+            - buff:
+                hp: 1
+                on: this
+                power: 1
+            - grant:
+                keywords:
+                  - assail
+                on: this
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set
