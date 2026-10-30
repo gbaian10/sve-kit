@@ -144,3 +144,15 @@
     border: 0;
   }
 }
+
+/* The right filter scrollport continues beside the footer, including when its text wraps. */
+[data-app-frame]:has(aside[data-edge="right"]) > footer {
+  --filter-track: 320px;
+
+  width: calc(100% - var(--filter-track) - 1.5rem);
+  margin-right: calc(var(--filter-track) + 1.5rem);
+}
+
+[data-app-frame]:has(aside[data-edge="right"] > button[aria-expanded="false"]) > footer {
+  --filter-track: 56px;
+}
