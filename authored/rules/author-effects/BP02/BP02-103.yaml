@@ -1,0 +1,26 @@
+cards:
+  BP02-103:
+    abilities:
+      - evolve_time:
+          do:
+            - move:
+                ref: returned
+                to: hand
+          targets:
+            - bind: returned
+              from:
+                class: ビショップ
+                kind: follower
+                who: self
+                zone: cemetery
+              n: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

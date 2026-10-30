@@ -1,0 +1,40 @@
+cards:
+  BP03-111:
+    abilities:
+      - fanfare:
+          do:
+            - damage:
+                n: 2
+                to: target
+          targets:
+            - bind: target
+              from:
+                kind: follower
+                leader_or: true
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - lastword:
+          do:
+            - move:
+                ref: returned
+                to: hand
+          targets:
+            - bind: returned
+              from:
+                cost_le: 3
+                trait: 堕天使
+                who: self
+                zone: cemetery
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set
