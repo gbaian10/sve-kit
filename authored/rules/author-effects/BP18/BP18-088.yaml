@@ -1,0 +1,34 @@
+cards:
+  BP18-088:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - damage:
+                instead:
+                  - if:
+                      cmp:
+                        left:
+                          count:
+                            orig_cost_eq: 2
+                            who: self
+                            zone: cemetery
+                        op: ge
+                        right: 10
+                    n: 2
+                n: 1
+                to:
+                  any_of:
+                    - leader: opp
+                    - kind: follower
+                      who: opp
+                      zone: field
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

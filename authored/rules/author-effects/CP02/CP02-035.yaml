@@ -1,0 +1,35 @@
+cards:
+  CP02-035:
+    abilities:
+      - activate:
+          cost:
+            act_self: true
+          do:
+            - damage:
+                instead:
+                  - if:
+                      cmp:
+                        left:
+                          distinct_orig_costs:
+                            who: self
+                            zone: cemetery
+                        op: ge
+                        right: 9
+                    n: 7
+                n: 3
+                to:
+                  any_of:
+                    - leader: opp
+                    - kind: follower
+                      who: opp
+                      zone: field
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set
