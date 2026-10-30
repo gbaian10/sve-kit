@@ -1,0 +1,52 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP15-006:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-31"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        auto:
+          "on":
+            moved:
+              from:
+                who: self
+                zone: field
+              to: cemetery
+              sel:
+                kind: follower
+                token: true
+              during:
+                turn: self
+          do:
+            - buff:
+                "on": enemy
+                power: -1
+                hp: -1
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+      - line: 3
+        fanfare:
+          do:
+            - create:
+                token: 操り人形
+                n: 1
+                to: ex
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP14-T08
