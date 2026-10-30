@@ -1,0 +1,44 @@
+cards:
+  BP15-017:
+    abilities:
+      - fanfare:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: フェアリーウィスプ
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - banish:
+                  n: 1
+                  sel:
+                    who: self
+                    zone: ex
+          do:
+            - move:
+                ref: chosen
+                to: hand
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+    token_sources:
+      - card: BP01-T02
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

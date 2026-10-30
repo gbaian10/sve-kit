@@ -1,0 +1,27 @@
+cards:
+  BP15-009:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - move:
+                ref: chosen
+                result: returned
+                to: field
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                name_contains: アマツ
+                who: self
+                zone: cemetery
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

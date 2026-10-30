@@ -1,0 +1,35 @@
+cards:
+  BP15-P30:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: opp
+                        zone: cemetery
+                    op: ge
+                    right: 10
+                else:
+                  - life:
+                      delta: 1
+                      who: self
+                then:
+                  - life:
+                      delta: 2
+                      who: self
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+    token:
+      name: 黄金の杯
+      template: true
+format: 2
+kind: author_effect_set

@@ -1,0 +1,42 @@
+cards:
+  BP15-P29:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - damage:
+                n: 2
+                to: chosen
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: opp
+                        zone: cemetery
+                    op: ge
+                    right: 10
+                then:
+                  - damage:
+                      n: 2
+                      to:
+                        leaders: opponents
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+    token:
+      name: 黄金の小剣
+      template: true
+format: 2
+kind: author_effect_set

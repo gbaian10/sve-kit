@@ -1,0 +1,36 @@
+cards:
+  BP15-PR13:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - damage:
+                n: 1
+                to:
+                  kind: follower
+                  who: all
+                  zone: field
+            - if:
+                cond:
+                  awakened: true
+                then:
+                  - grant:
+                      keywords:
+                        - storm
+                      on:
+                        kind: follower
+                        name: 烈絶の侮蔑・ガルミーユ
+                        who: self
+                        zone: field
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+    token:
+      name: 烈絶の滅牙
+      template: true
+format: 2
+kind: author_effect_set

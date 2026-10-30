@@ -1,0 +1,47 @@
+cards:
+  BP15-094:
+    abilities:
+      - evolve:
+          cost:
+            pp: 3
+        line: 1
+      - keywords:
+          - ward
+        line: 2
+      - auto:
+          do:
+            - life:
+                delta: 2
+                who: self
+          on:
+            phase:
+              which: main
+              whose: opp
+        line: 3
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        kind: follower
+                        who: opp
+                        zone: field
+                    op: ge
+                    right: 3
+                then:
+                  - create:
+                      n: 1
+                      to: ex
+                      token: 絶望の奔流
+        line: 4
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

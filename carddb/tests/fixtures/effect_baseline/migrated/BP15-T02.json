@@ -1,0 +1,29 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "spell",
+      "body": {
+        "op": "modify",
+        "subjects": "self.leader",
+        "hp": {
+          "if": {
+            "fn": "ge",
+            "args": [
+              {
+                "count": {
+                  "zone": "cemetery",
+                  "side": "opponent"
+                }
+              },
+              10
+            ]
+          },
+          "then": 2,
+          "else": 1
+        }
+      }
+    }
+  ]
+}

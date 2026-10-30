@@ -1,0 +1,46 @@
+cards:
+  BP15-112:
+    abilities:
+      - fanfare:
+          cost:
+            discard:
+              n: 3
+              sel:
+                who: self
+                zone: hand
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: 絶大の証明
+        line: 1
+      - activate:
+          cost:
+            banish:
+              n: 1
+              sel:
+                name: 唯我の絶傑・マゼルベイン
+                who: self
+                zone: cemetery
+          do:
+            - damage:
+                n: 2
+                to:
+                  leaders: opponents
+            - draw:
+                n: 2
+          per_turn: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+    token_sources:
+      - card: BP15-PR17
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set
