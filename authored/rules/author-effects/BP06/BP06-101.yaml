@@ -1,0 +1,25 @@
+cards:
+  BP06-101:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - lastword:
+          do:
+            - search:
+                n: 1
+                sel:
+                  name: 聖杖の司祭
+                  who: self
+                  zone: deck
+                to: hand
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set
