@@ -1275,6 +1275,8 @@ pub(super) enum Condition {
 
     Crimson(bool),
     Combo(u64),
+    Spellchain(u64),
+    Necro(u64),
     Did(String),
     Paid(PaidReceipt),
     Cmp(BodyComparison),

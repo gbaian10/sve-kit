@@ -60,6 +60,60 @@ impl BodyContext<'_> {
         Ok(predicate)
     }
 
+    fn frozen_population(
+        &mut self,
+        threshold: u64,
+        spells: bool,
+        path: &str,
+    ) -> Result<Expr<Bool>, LoweringError> {
+        let count = ast::Number::Count {
+            count: ast::CountQuery {
+                who: ast::LeaderSide::Controller,
+                zone: ast::CountZone::Cemetery,
+                kind: spells.then_some(ast::SearchKind::Spell),
+                r#trait: None,
+                name: None,
+                name_contains: None,
+                orig_cost_eq: None,
+                token: None,
+                not_token: None,
+            },
+        };
+        Ok(Expr::Compute(Box::new(Predicate::CompareInt {
+            left: self.resolution_count(&count, path, &mut BTreeSet::new())?,
+            comparison: Comparison::GreaterEqual,
+            right: Expr::Literal(Int(
+                i64::try_from(threshold).map_err(|_private| unsupported(path))?
+            )),
+        })))
+    }
+
+    fn leader_life_condition(
+        &mut self,
+        threshold: &ast::PlayerThreshold,
+        path: &str,
+    ) -> Result<Predicate, LoweringError> {
+        let (comparison, amount) = match (threshold.eq, threshold.le, threshold.ge) {
+            (Some(amount), None, None) => (Comparison::Equal, amount),
+            (None, Some(amount), None) => (Comparison::LessEqual, amount),
+            (None, None, Some(amount)) => (Comparison::GreaterEqual, amount),
+            _ => return Err(unsupported(path)),
+        };
+        Ok(Predicate::CompareInt {
+            left: self.number(
+                &ast::Number::LeaderLife {
+                    leader_life: threshold.who,
+                },
+                path,
+                &mut BTreeSet::new(),
+            )?,
+            comparison,
+            right: Expr::Literal(Int(
+                i64::try_from(amount).map_err(|_private| unsupported(path))?
+            )),
+        })
+    }
+
     pub(super) fn condition(
         &mut self,
         value: &ast::Condition,
@@ -71,6 +125,12 @@ impl BodyContext<'_> {
             ast::Condition::EnteredBy(condition) => self.entered_by(condition, path)?,
             ast::Condition::PlayedFrom(condition) => self.played_from(condition, path)?,
             ast::Condition::Combo(threshold) => return Self::combo(*threshold, path),
+            ast::Condition::Spellchain(threshold) => {
+                return self.frozen_population(*threshold, true, path);
+            }
+            ast::Condition::Necro(threshold) => {
+                return self.frozen_population(*threshold, false, path);
+            }
             ast::Condition::Exists(query) => return self.public_exists(query, path),
             ast::Condition::Awakened(true) => Predicate::CompareInt {
                 left: Expr::Live(Box::new(IntRead::PlayerResource {
@@ -80,27 +140,7 @@ impl BodyContext<'_> {
                 comparison: Comparison::GreaterEqual,
                 right: Expr::Literal(Int(7)),
             },
-            ast::Condition::LeaderLife(threshold) => {
-                let (comparison, amount) = match (threshold.eq, threshold.le, threshold.ge) {
-                    (Some(amount), None, None) => (Comparison::Equal, amount),
-                    (None, Some(amount), None) => (Comparison::LessEqual, amount),
-                    (None, None, Some(amount)) => (Comparison::GreaterEqual, amount),
-                    _ => return Err(unsupported(path)),
-                };
-                Predicate::CompareInt {
-                    left: self.number(
-                        &ast::Number::LeaderLife {
-                            leader_life: threshold.who,
-                        },
-                        path,
-                        &mut BTreeSet::new(),
-                    )?,
-                    comparison,
-                    right: Expr::Literal(Int(
-                        i64::try_from(amount).map_err(|_private| unsupported(path))?
-                    )),
-                }
-            }
+            ast::Condition::LeaderLife(threshold) => self.leader_life_condition(threshold, path)?,
 
             ast::Condition::Crimson(true) => {
                 return Ok(Expr::Live(Box::new(super::super::BoolRead::Crimson {

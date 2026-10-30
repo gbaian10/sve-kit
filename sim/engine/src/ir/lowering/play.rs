@@ -471,7 +471,10 @@ impl BodyContext<'_> {
                 definition: self.definition,
                 payment_result: None,
                 local_payment: self.local_payment.clone(),
-                allocator: Allocator::default(),
+                allocator: Allocator {
+                    next: self.allocator.next,
+                    ..Allocator::default()
+                },
                 card_allocator: self.card_allocator,
                 definitions: self.definitions,
                 searches: BTreeMap::new(),
@@ -480,7 +483,7 @@ impl BodyContext<'_> {
                 targets: BTreeMap::new(),
                 recipient_targets: BTreeMap::new(),
                 parameters: vec![],
-                resolution_scope: scope,
+                resolution_scope: self.resolution_scope,
                 resolution_captures: vec![],
                 formal_play: false,
                 mode_targets: BTreeMap::new(),
@@ -496,6 +499,9 @@ impl BodyContext<'_> {
                 source,
                 ability_source,
             )?;
+            self.allocator.next = context.allocator.next;
+            self.resolution_captures
+                .append(&mut context.resolution_captures);
             modes.push(Mode {
                 id: ModeId(mode_id),
                 parameters: context.parameters,

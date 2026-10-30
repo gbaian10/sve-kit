@@ -96,8 +96,7 @@ impl BodyContext<'_> {
         path: &str,
         active: &mut BTreeSet<String>,
     ) -> Result<Expr<Int>, LoweringError> {
-        if !self.formal_play
-            || !matches!(value, ast::Number::Count { count } if matches!(count.zone, ast::CountZone::Cemetery))
+        if !matches!(value, ast::Number::Count { count } if matches!(count.zone, ast::CountZone::Cemetery))
         {
             return Err(unsupported(path));
         }
