@@ -1,0 +1,40 @@
+cards:
+  BP15-056:
+    abilities:
+      - line: 1
+        play:
+          cost_delta:
+            delta: -6
+            if:
+              cmp:
+                left:
+                  distinct_orig_costs:
+                    who: self
+                    zone: cemetery
+                op: ge
+                right: 6
+      - keywords:
+          - storm
+        line: 2
+      - fanfare:
+          do:
+            - damage:
+                n: 3
+                to: target
+          targets:
+            - bind: target
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              upto: 2
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set
