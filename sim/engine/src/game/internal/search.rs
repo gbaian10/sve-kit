@@ -6,14 +6,14 @@ use super::{
 };
 use crate::ir::printed_keywords;
 use crate::ir::{
-    AbilitiesRead, AbilityPredicate, AbilityReference, Action, Binding, Bool, BoolRead,
-    BooleanState, CardKind, CardName, Cardinality, CharacteristicView, ClassRead, Comparison,
-    DecisionId, Expr, Info, Instruction, Int, IntOperation, KindRead, MoveDestination, MoveMethod,
-    MoveResult, MoveSpec, NamesRead, Nat, NumberRead, ObjectOperand, ObjectProperty, ObjectRef,
-    ObjectView, OwnerZone, PlayerId, PlayerRelation, Predicate, Requirement, Requirements,
-    RuntimeObjectView, RuntimeZoneRef, SearchDestination, SearchOutcome, SearchPartition,
-    SearchPartitionAnswer, SearchSelectionAnswer, SelectionView, Selector, SnapshotId, Stat,
-    TraitsRead, ZoneKind, ZoneRef,
+    AbilitiesRead, AbilityOrigin, AbilityPredicate, AbilityReference, Action, Binding, Bool,
+    BoolRead, BooleanState, CardKind, CardName, Cardinality, CharacteristicView, ClassRead,
+    Comparison, DecisionId, Expr, Info, Instruction, Int, IntOperation, KeywordId, KindRead,
+    MoveDestination, MoveMethod, MoveResult, MoveSpec, NamesRead, Nat, NumberRead, ObjectOperand,
+    ObjectProperty, ObjectRef, ObjectView, OwnerZone, PlayerId, PlayerRelation, Predicate,
+    Requirement, Requirements, RuntimeObjectView, RuntimeZoneRef, SearchDestination, SearchOutcome,
+    SearchPartition, SearchPartitionAnswer, SearchSelectionAnswer, SelectionView, Selector,
+    SnapshotId, Stat, TraitsRead, ZoneKind, ZoneRef,
 };
 use alloc::collections::{BTreeSet, VecDeque};
 use serde_json::{Value, json};
@@ -229,7 +229,7 @@ fn numeric_filter(read: &IntOperation, candidate: Binding<ObjectRef>) -> bool {
     } if candidate_view(object, candidate))
 }
 
-fn keyword_filter(
+pub(super) fn keyword_filter(
     abilities: &Expr<Vec<AbilityReference>>,
     predicate: &AbilityPredicate,
     candidate: Binding<ObjectRef>,
@@ -241,7 +241,8 @@ fn keyword_filter(
         && predicate.except.is_empty()
         && predicate.holder.is_none()
         && predicate.origin.is_none()
-        && predicate.keyword.and_then(super::grant::keyword).is_some()
+        && (predicate.keyword == Some(KeywordId::Evolution)
+            || predicate.keyword.and_then(super::grant::keyword).is_some())
 }
 
 fn candidate_view(view: &ObjectView, candidate: Binding<ObjectRef>) -> bool {
@@ -404,6 +405,7 @@ pub(super) fn private_requirement(code: &str) -> bool {
             | "shape.KindRead.Kind"
             | "read.kind"
             | "internal.CharacteristicView.Original"
+            | "internal.KeywordId.Evolution"
             | "internal.CardKind.Follower"
             | "internal.CardKind.Spell"
             | "internal.CardKind.Amulet"
@@ -494,7 +496,7 @@ fn matches_number(
     Ok(super::values::compare(actual, comparison, amount))
 }
 
-fn matches_keyword(game: &Game, id: &str, predicate: &AbilityPredicate) -> Result<bool> {
+pub(super) fn matches_keyword(game: &Game, id: &str, predicate: &AbilityPredicate) -> Result<bool> {
     let keyword = predicate
         .keyword
         .ok_or_else(|| unsupported("search keyword"))?;
@@ -502,7 +504,17 @@ fn matches_keyword(game: &Game, id: &str, predicate: &AbilityPredicate) -> Resul
     Ok(game
         .internal_characteristic_abilities(id)?
         .iter()
-        .any(|ability| printed_keywords::card_declaration(&ability.node) == Some(keyword)))
+        .any(|ability| {
+            printed_keywords::card_declaration(&ability.node) == Some(keyword)
+                || (keyword == KeywordId::Evolution
+                    && matches!(
+                        ability.node.source.origin,
+                        AbilityOrigin::Keyword {
+                            keyword: KeywordId::Evolution,
+                            ..
+                        }
+                    ))
+        }))
 }
 
 pub(super) fn matches_candidate(game: &Game, id: &str, expression: &Expr<Bool>) -> Result<bool> {

@@ -145,6 +145,7 @@ impl BodyContext<'_> {
             || choice.from.r#trait.is_some()
             || choice.from.name.is_some()
             || choice.from.name_contains.is_some()
+            || choice.from.has_evolve.is_some()
             || choice.from.other
             || choice.from.has_numeric_filter()
             || choice.from.class.is_some()
@@ -228,12 +229,14 @@ pub(super) struct ObjectFilter<'query> {
     pub hp_at_most: Option<u64>,
     pub power_at_most: Option<u64>,
     pub keyword: Option<super::super::KeywordId>,
+    pub has_evolve: bool,
 }
 
 impl<'query> From<&'query ast::TargetQuery> for ObjectFilter<'query> {
     fn from(query: &'query ast::TargetQuery) -> Self {
         Self {
             kind: query.kind.as_ref(),
+            has_evolve: query.has_evolve.is_some(),
             trait_id: query.r#trait.as_deref(),
             all_traits: &[],
             class: query.class.as_deref(),
@@ -282,6 +285,7 @@ impl<'query> From<&'query ast::SearchQuery> for ObjectFilter<'query> {
     fn from(query: &'query ast::SearchQuery) -> Self {
         Self {
             kind: query.kind.as_ref(),
+            has_evolve: query.has_evolve.is_some(),
             trait_id: query.r#trait.as_deref(),
             all_traits: &query.traits_all,
             class: query.class.as_deref(),
@@ -353,7 +357,11 @@ pub(super) fn field_filter(
         });
     }
     predicates.extend(numeric_limits(filter, &object));
-    if let Some(keyword) = filter.keyword {
+    for keyword in filter.keyword.into_iter().chain(
+        filter
+            .has_evolve
+            .then_some(super::super::KeywordId::Evolution),
+    ) {
         predicates.push(super::Expr::Compute(Box::new(
             super::Predicate::HasAbility {
                 abilities: super::Expr::Live(Box::new(super::super::AbilitiesRead::Abilities {
