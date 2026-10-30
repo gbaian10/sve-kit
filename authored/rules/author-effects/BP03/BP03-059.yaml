@@ -1,0 +1,30 @@
+cards:
+  BP03-059:
+    abilities:
+      - activate:
+          cost:
+            act_self: true
+          do:
+            - if:
+                cond:
+                  awakened: true
+                else:
+                  - buff:
+                      hp: 0
+                      on: this
+                      power: 5
+                then:
+                  - buff:
+                      hp: 0
+                      on: this
+                      power: 10
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set
