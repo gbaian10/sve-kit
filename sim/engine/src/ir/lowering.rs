@@ -745,6 +745,9 @@ fn lowered_subscription(
                 predicate: super::events::timing::leave_predicate(event, entry.during.is_some()),
             })
         }
+        ast::PhaseSubscription::Evolved(entry) => {
+            evolution::subscription(entry, event_id, scope, path)
+        }
         ast::PhaseSubscription::Moved(_) | ast::PhaseSubscription::PlacedEx(_) => {
             movement::subscription(on, event_id, scope, path)
         }

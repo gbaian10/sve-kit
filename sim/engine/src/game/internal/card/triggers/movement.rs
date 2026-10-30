@@ -5,11 +5,11 @@ use super::{
     PendingOccurrence, Result, RuntimeZoneRef, SnapshotId, SourceInformation, TriggerAggregation,
     TriggerCondition, ZoneKind, invalid, optional_payment, player_id, unsupported,
 };
-use crate::ir::events::movement::{MovementFields, MovementFilter};
+use crate::ir::events::subject::{SubjectFields, SubjectFilter};
 use crate::ir::{EnterExEvent, EntryOrigin, PlayerId};
 use alloc::collections::BTreeMap;
 
-fn filter(ability: &Ability) -> Option<MovementFilter> {
+fn filter(ability: &Ability) -> Option<SubjectFilter> {
     if !matches!(ability.source.origin, AbilityOrigin::Printed { .. }) {
         return None;
     }
@@ -18,10 +18,10 @@ fn filter(ability: &Ability) -> Option<MovementFilter> {
     };
     match pattern {
         EventPattern::LeaveField { binding, predicate } => {
-            MovementFilter::parse(MovementFields::Leave(*binding), predicate)
+            SubjectFilter::parse(SubjectFields::Leave(*binding), predicate)
         }
         EventPattern::EnterEx { binding, predicate } => {
-            MovementFilter::parse(MovementFields::Ex(*binding), predicate)
+            SubjectFilter::parse(SubjectFields::Ex(*binding), predicate)
         }
         _ => None,
     }

@@ -1,32 +1,49 @@
-//! Movement subscriptions use immutable event information and one closed predicate plan.
+//! Public event subscriptions share one closed plan over the committed event subject.
 use crate::ir::{
     Binding, Bool, BoolRead, BooleanState, CardKind, CardName, Characteristics,
-    CharacteristicsFields, EnterExEvent, Expr, KindFrozen, LeaveFieldEvent, NamesFrozen,
-    ObjectFrozen, ObjectRef, ObjectView, PlayerFrozen, PlayerId, PlayerRead, PlayerRef, Predicate,
-    Role, SnapshotFields, TraitId, TraitsFrozen, ZoneFrozen, ZoneKind, ZoneOperation,
+    CharacteristicsFields, EnterExEvent, EvolveEvent, Expr, KindFrozen, LeaveFieldEvent,
+    NamesFrozen, ObjectFrozen, ObjectOperand, ObjectRef, ObjectView, PlayerFrozen, PlayerId,
+    PlayerRead, PlayerRef, Predicate, Role, SnapshotFields, TraitId, TraitsFrozen, ZoneFrozen,
+    ZoneKind, ZoneOperation,
 };
 
 #[derive(Clone, Copy)]
-pub(crate) enum MovementFields {
+pub(crate) enum SubjectFields {
+    Evolve(Binding<EvolveEvent>),
     Leave(Binding<LeaveFieldEvent>),
     Ex(Binding<EnterExEvent>),
 }
 
-impl MovementFields {
+impl SubjectFields {
     fn object(self) -> Expr<ObjectRef> {
         Expr::Frozen(Box::new(match self {
             Self::Leave(event) => ObjectFrozen::LeaveFieldObjectBefore { event },
+            Self::Evolve(event) => ObjectFrozen::EvolveSubject { event },
             Self::Ex(event) => ObjectFrozen::EnterExObject { event },
         }))
     }
     fn controller(self) -> Expr<PlayerRef> {
-        Expr::Frozen(Box::new(match self {
-            Self::Leave(event) => PlayerFrozen::LeaveFieldController { event },
-            Self::Ex(event) => PlayerFrozen::EnterExController { event },
-        }))
+        match self {
+            Self::Leave(event) => {
+                Expr::Frozen(Box::new(PlayerFrozen::LeaveFieldController { event }))
+            }
+            Self::Ex(event) => Expr::Frozen(Box::new(PlayerFrozen::EnterExController { event })),
+            // Evolution keeps its field generation; the bridge tests this role at commit.
+            Self::Evolve(_) => Expr::Live(Box::new(PlayerRead::Role {
+                object: ObjectView::Current {
+                    object: Box::new(ObjectOperand::FromExpression {
+                        value: Box::new(self.object()),
+                    }),
+                },
+                role: Role::Controller,
+            })),
+        }
     }
     fn kind(self) -> Expr<CardKind> {
         Expr::Frozen(Box::new(match self {
+            Self::Evolve(event) => KindFrozen::Characters {
+                characters: Expr::Frozen(Box::new(CharacteristicsFields::EvolveAfter { event })),
+            },
             Self::Leave(event) => KindFrozen::Snapshot {
                 object: Expr::Frozen(Box::new(SnapshotFields::LeaveFieldLki { event })),
             },
@@ -39,6 +56,9 @@ impl MovementFields {
     }
     fn traits(self) -> Expr<Vec<TraitId>> {
         Expr::Frozen(Box::new(match self {
+            Self::Evolve(event) => TraitsFrozen::Characters {
+                characters: Expr::Frozen(Box::new(CharacteristicsFields::EvolveAfter { event })),
+            },
             Self::Leave(event) => TraitsFrozen::Snapshot {
                 object: Expr::Frozen(Box::new(SnapshotFields::LeaveFieldLki { event })),
             },
@@ -51,6 +71,9 @@ impl MovementFields {
     }
     fn names(self) -> Expr<Vec<CardName>> {
         Expr::Frozen(Box::new(match self {
+            Self::Evolve(event) => NamesFrozen::Characters {
+                characters: Expr::Frozen(Box::new(CharacteristicsFields::EvolveAfter { event })),
+            },
             Self::Leave(event) => NamesFrozen::Snapshot {
                 object: Expr::Frozen(Box::new(SnapshotFields::LeaveFieldLki { event })),
             },
@@ -98,7 +121,7 @@ impl MovementFields {
 }
 
 #[derive(Clone, Debug, Default)]
-pub(crate) struct MovementFilter {
+pub(crate) struct SubjectFilter {
     pub(crate) own: Option<bool>,
     pub(crate) itself: Option<bool>,
     pub(crate) kind: Option<CardKind>,
@@ -108,8 +131,8 @@ pub(crate) struct MovementFilter {
     pub(crate) token: Option<bool>,
 }
 
-impl MovementFilter {
-    pub(crate) fn predicate(&self, fields: MovementFields) -> Expr<Bool> {
+impl SubjectFilter {
+    pub(crate) fn predicate(&self, fields: SubjectFields) -> Expr<Bool> {
         let mut predicates = fields.destination().into_iter().collect::<Vec<_>>();
         if let Some(positive) = self.itself {
             let predicate = Expr::Compute(Box::new(Predicate::ObjectEquals {
@@ -166,7 +189,7 @@ impl MovementFilter {
         Expr::Compute(Box::new(Predicate::And { predicates }))
     }
 
-    pub(crate) fn parse(fields: MovementFields, expression: &Expr<Bool>) -> Option<Self> {
+    pub(crate) fn parse(fields: SubjectFields, expression: &Expr<Bool>) -> Option<Self> {
         let Expr::Compute(root) = expression else {
             return None;
         };

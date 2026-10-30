@@ -1,6 +1,6 @@
 //! Printed movement headers share the immutable event filter plan.
 use super::{Binding, EventPattern, LoweringError, ScopeId, ast, unsupported};
-use crate::ir::events::movement::{MovementFields, MovementFilter};
+use crate::ir::events::subject::{SubjectFields, SubjectFilter};
 use crate::ir::{CardKind, CardName, TraitId};
 
 pub(super) fn subscription(
@@ -26,7 +26,7 @@ pub(super) fn subscription(
                     entry.sel.as_ref(),
                     entry.during.is_some(),
                 )
-                .predicate(MovementFields::Leave(event)),
+                .predicate(SubjectFields::Leave(event)),
             })
         }
         ast::PhaseSubscription::PlacedEx(entry) => {
@@ -49,10 +49,11 @@ pub(super) fn subscription(
                     entry.sel.as_ref(),
                     entry.during.is_some(),
                 )
-                .predicate(MovementFields::Ex(event)),
+                .predicate(SubjectFields::Ex(event)),
             })
         }
-        ast::PhaseSubscription::Played(_)
+        ast::PhaseSubscription::Evolved(_)
+        | ast::PhaseSubscription::Played(_)
         | ast::PhaseSubscription::Phase(_)
         | ast::PhaseSubscription::EnterField(_)
         | ast::PhaseSubscription::LeaveField(_)
@@ -65,8 +66,8 @@ fn movement_filter(
     itself: bool,
     subject: Option<&ast::MovementSubject>,
     own_turn: bool,
-) -> MovementFilter {
-    MovementFilter {
+) -> SubjectFilter {
+    SubjectFilter {
         own,
         itself: if itself {
             Some(true)

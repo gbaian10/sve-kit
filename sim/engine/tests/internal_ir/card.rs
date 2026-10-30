@@ -1,6 +1,9 @@
 use super::*;
 use second::lowerer;
 
+#[path = "card/event_evolved.rs"]
+mod event_evolved;
+
 #[path = "card/frozen_zone.rs"]
 mod frozen_zone;
 

@@ -26,7 +26,9 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
     let Some(trigger) = &ability.trigger else {
         return Ok(false);
     };
-    let admitted = if let Some(valid) = second_header(ability) {
+    let admitted = if super::evolution::observer_filter(ability).is_some() {
+        true
+    } else if let Some(valid) = second_header(ability) {
         valid
     } else {
         match (&ability.source.origin, &trigger.on) {

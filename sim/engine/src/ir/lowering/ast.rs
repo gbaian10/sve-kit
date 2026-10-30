@@ -1090,6 +1090,8 @@ pub(super) struct Auto {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) enum PhaseSubscription {
+    #[serde(rename = "evolved")]
+    Evolved(EvolvedSubscription),
     #[serde(rename = "played")]
     Played(PlayedSubscription),
     #[serde(rename = "phase")]
@@ -1570,4 +1572,13 @@ pub(super) struct MovementSubject {
 #[serde(rename_all = "snake_case")]
 pub(super) enum CemeteryDestination {
     Cemetery,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct EvolvedSubscription {
+    pub who: Option<EntryPlayer>,
+    #[serde(rename = "ref")]
+    pub reference: Option<This>,
+    pub sel: Option<MovementSubject>,
 }
