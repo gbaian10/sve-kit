@@ -7,13 +7,13 @@ use super::{
 use crate::ir::printed_keywords;
 use crate::ir::{
     AbilitiesRead, AbilityPredicate, AbilityReference, Action, Binding, Bool, BoolRead,
-    BooleanState, CardKind, Cardinality, CharacteristicView, ClassRead, Comparison, Expr, Info,
-    Instruction, Int, IntOperation, KindRead, MoveDestination, MoveMethod, MoveResult, MoveSpec,
-    NamesRead, Nat, NumberRead, ObjectOperand, ObjectProperty, ObjectRef, ObjectView, OwnerZone,
-    PlayerId, PlayerRelation, Predicate, Requirement, Requirements, RuntimeObjectView,
-    RuntimeZoneRef, SearchDestination, SearchOutcome, SearchPartition, SearchPartitionAnswer,
-    SearchSelectionAnswer, SelectionView, Selector, SnapshotId, Stat, TraitsRead, ZoneKind,
-    ZoneRef,
+    BooleanState, CardKind, CardName, Cardinality, CharacteristicView, ClassRead, Comparison,
+    DecisionId, Expr, Info, Instruction, Int, IntOperation, KindRead, MoveDestination, MoveMethod,
+    MoveResult, MoveSpec, NamesRead, Nat, NumberRead, ObjectOperand, ObjectProperty, ObjectRef,
+    ObjectView, OwnerZone, PlayerId, PlayerRelation, Predicate, Requirement, Requirements,
+    RuntimeObjectView, RuntimeZoneRef, SearchDestination, SearchOutcome, SearchPartition,
+    SearchPartitionAnswer, SearchSelectionAnswer, SelectionView, Selector, SnapshotId, Stat,
+    TraitsRead, ZoneKind, ZoneRef,
 };
 use alloc::collections::{BTreeSet, VecDeque};
 use serde_json::{Value, json};
@@ -67,6 +67,7 @@ struct PartitionContinuation {
     remaining: Vec<ObjectRef>,
     destinations: VecDeque<SearchPartition>,
     next_handle: u64,
+    capacity_remainder: Option<MoveDestination>,
 }
 
 #[derive(Clone, Debug)]
@@ -122,12 +123,15 @@ pub(super) fn check_predicate(value: &Expr<Bool>, candidate: Binding<ObjectRef>)
                 abilities,
                 predicate,
             } if keyword_filter(abilities, predicate, candidate) => Ok(true),
+            Predicate::NameContains {
+                object,
+                name: Expr::Literal(name),
+            } if candidate_view(object, candidate) && !name.0.is_empty() => Ok(true),
             Predicate::NamesIntersect {
                 left: Expr::Live(read),
-                right: Expr::Literal(names),
+                right,
             } if matches!(read.as_ref(), NamesRead::Names { object } if candidate_view(object, candidate))
-                && !names.is_empty()
-                && names.iter().all(|name| !name.0.is_empty()) =>
+                && search_names(right) =>
             {
                 Ok(true)
             }
@@ -158,6 +162,64 @@ pub(super) fn check_predicate(value: &Expr<Bool>, candidate: Binding<ObjectRef>)
         },
         _ => Err(unsupported("search predicate")),
     }
+}
+
+fn search_names(names: &Expr<Vec<CardName>>) -> bool {
+    match names {
+        Expr::Literal(names) => !names.is_empty() && names.iter().all(|name| !name.0.is_empty()),
+        Expr::Live(read) => matches!(
+            read.as_ref(),
+            NamesRead::Names {
+                object: ObjectView::SourceInformation {}
+            }
+        ),
+        _ => false,
+    }
+}
+
+// Freeze the checked source through its existing authority before consulting hidden candidates.
+fn freeze_source_names(
+    game: &Game,
+    execution: &Execution,
+    value: &Expr<Bool>,
+) -> Result<Expr<Bool>> {
+    let Expr::Compute(operation) = value else {
+        return Ok(value.clone());
+    };
+    let operation = match operation.as_ref() {
+        Predicate::NamesIntersect {
+            left,
+            right: Expr::Live(read),
+        } if matches!(
+            read.as_ref(),
+            NamesRead::Names {
+                object: ObjectView::SourceInformation {}
+            }
+        ) =>
+        {
+            Predicate::NamesIntersect {
+                left: left.clone(),
+                right: Expr::Literal(execution.source_names(game)?),
+            }
+        }
+        Predicate::Not { predicate } => Predicate::Not {
+            predicate: freeze_source_names(game, execution, predicate)?,
+        },
+        Predicate::And { predicates } => Predicate::And {
+            predicates: predicates
+                .iter()
+                .map(|p| freeze_source_names(game, execution, p))
+                .collect::<Result<_>>()?,
+        },
+        Predicate::Or { predicates } => Predicate::Or {
+            predicates: predicates
+                .iter()
+                .map(|p| freeze_source_names(game, execution, p))
+                .collect::<Result<_>>()?,
+        },
+        other => other.clone(),
+    };
+    Ok(Expr::Compute(Box::new(operation)))
 }
 
 fn numeric_filter(read: &IntOperation, candidate: Binding<ObjectRef>) -> bool {
@@ -200,7 +262,10 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
     else {
         return Ok(());
     };
-    let conditional = check_predicate(filter, *candidate)?;
+    let conditional = check_predicate(filter, *candidate)?
+        || groups
+            .as_ref()
+            .is_some_and(|g| g.distinct_by == Some(ObjectProperty::Names));
     if let Some(groups) = groups {
         if !groups.aggregate_bounds.is_empty()
             || !matches!(groups.distinct_by, None | Some(ObjectProperty::Names))
@@ -429,6 +494,17 @@ fn matches_number(
     Ok(super::values::compare(actual, comparison, amount))
 }
 
+fn matches_keyword(game: &Game, id: &str, predicate: &AbilityPredicate) -> Result<bool> {
+    let keyword = predicate
+        .keyword
+        .ok_or_else(|| unsupported("search keyword"))?;
+    game.require_internal_abilities(id, "search keyword")?;
+    Ok(game
+        .internal_characteristic_abilities(id)?
+        .iter()
+        .any(|ability| printed_keywords::card_declaration(&ability.node) == Some(keyword)))
+}
+
 pub(super) fn matches_candidate(game: &Game, id: &str, expression: &Expr<Bool>) -> Result<bool> {
     match expression {
         Expr::Literal(Bool(true)) => Ok(true),
@@ -459,18 +535,11 @@ pub(super) fn matches_candidate(game: &Game, id: &str, expression: &Expr<Bool>) 
                     right: Expr::Literal(Int(amount)),
                     comparison,
                 } => matches_number(game, id, read, *comparison, *amount),
-                Predicate::HasAbility { predicate, .. } => {
-                    let keyword = predicate
-                        .keyword
-                        .ok_or_else(|| unsupported("search keyword"))?;
-                    game.require_internal_abilities(id, "search keyword")?;
-                    Ok(game
-                        .internal_characteristic_abilities(id)?
-                        .iter()
-                        .any(|ability| {
-                            printed_keywords::card_declaration(&ability.node) == Some(keyword)
-                        }))
-                }
+                Predicate::HasAbility { predicate, .. } => matches_keyword(game, id, predicate),
+                Predicate::NameContains {
+                    name: Expr::Literal(name),
+                    ..
+                } => Ok(game.card_name(id)?.contains(&name.0)),
                 Predicate::NamesIntersect {
                     right: Expr::Literal(names),
                     ..
@@ -565,41 +634,25 @@ impl Game {
         }
         let seat = seat_name(player)?;
         let deck = self.internal_known_deck(seat)?;
-        let capacity_zone = match destination {
-            Some(SearchDestination::Single { movement }) => {
-                let zone = self
-                    .internal_search_destination(execution, &movement.to, player)?
-                    .1;
-                matches!(zone, ZoneKind::Ex | ZoneKind::Field).then_some(zone)
-            }
-            Some(SearchDestination::Partition { .. }) => None,
-            Some(SearchDestination::OptionalSelfReplacement { movement, .. }) => {
+        match destination {
+            Some(
+                SearchDestination::Single { movement }
+                | SearchDestination::OptionalSelfReplacement { movement, .. },
+            ) => {
                 self.internal_search_destination(execution, &movement.to, player)?;
-                None
             }
+            Some(SearchDestination::Partition { .. }) => {}
             _ => return Err(unsupported("search destination")),
-        };
-        // A missing capacity protocol must not be replaced by asking the searcher to find fewer cards.
-        if let Some(zone) = capacity_zone {
-            let available = 5_i64
-                .saturating_sub(self.zone_count(seat, zone_name(zone)?))
-                .max(0);
-            let upper = bounds(*cardinality, deck.len(), false)?
-                .maximum
-                .unwrap_or(Nat(0))
-                .0;
-            if available > 0 && upper > u64::try_from(available).map_err(invalid)? {
-                return Err(unsupported("search needs a capacity selection"));
-            }
         }
         let conditional = check_predicate(filter, *candidate)? || groups.is_some();
+        let filter = freeze_source_names(self, execution, filter)?;
         let mut members = Vec::new();
         for id in &deck {
             let object = self.object(id)?;
             if object.owner != seat || object.controller != seat || object.zone != "deck" {
                 return Err(unsupported("search deck membership"));
             }
-            if matches_candidate(self, id, filter)? {
+            if matches_candidate(self, id, &filter)? {
                 members.push(execution.reference(self, id)?);
             }
         }
@@ -624,10 +677,11 @@ impl Game {
                 let Selector::Zone { predicate, .. } = &group.selector else {
                     return Err(unsupported("search group"));
                 };
+                let predicate = freeze_source_names(self, execution, predicate)?;
                 let mut domain = Vec::new();
                 let mut handles = Vec::new();
                 for (index, &object) in members.iter().enumerate() {
-                    if matches_candidate(self, execution.object_id(object)?, predicate)? {
+                    if matches_candidate(self, execution.object_id(object)?, &predicate)? {
                         domain.push(object);
                         handles.push(u64::try_from(index).map_err(invalid)?);
                     }
@@ -819,6 +873,25 @@ impl Game {
                 destination: Some(SearchDestination::Single { movement }),
                 ..
             } => {
+                if let Some(partition) = self.internal_search_capacity(
+                    execution,
+                    &movement.to,
+                    wait.player,
+                    found.len(),
+                )? {
+                    return self.internal_search_partition(
+                        execution,
+                        PartitionContinuation {
+                            instruction: wait.instruction.clone(),
+                            player: wait.player,
+                            outcome,
+                            remaining: found,
+                            destinations: VecDeque::from([partition]),
+                            next_handle: u64::try_from(wait.domain.cards.len()).map_err(invalid)?,
+                            capacity_remainder: Some(movement.to.clone()),
+                        },
+                    );
+                }
                 let moved =
                     self.internal_search_move(execution, &found, &movement.to, wait.player)?;
                 self.internal_search_finish(
@@ -840,6 +913,7 @@ impl Game {
                     remaining: found,
                     destinations: destinations.clone().into(),
                     next_handle: u64::try_from(wait.domain.cards.len()).map_err(invalid)?,
+                    capacity_remainder: None,
                 },
             ),
             Action::Search {
@@ -850,6 +924,59 @@ impl Game {
             }
             _ => Err(unsupported("search movement continuation")),
         }
+    }
+
+    fn internal_search_capacity(
+        &self,
+        execution: &Execution,
+        to: &MoveDestination,
+        player: PlayerId,
+        count: usize,
+    ) -> Result<Option<SearchPartition>> {
+        let (zone, kind) = self.internal_search_destination(execution, to, player)?;
+        if !matches!(kind, ZoneKind::Ex | ZoneKind::Field) {
+            return Ok(None);
+        }
+        let free = usize::try_from(
+            5_i64
+                .saturating_sub(self.zone_count(seat_name(player)?, zone))
+                .max(0),
+        )
+        .map_err(invalid)?;
+        if free == 0 || count <= free {
+            return Ok(None);
+        }
+        let available = Nat(u64::try_from(free).map_err(invalid)?);
+        Ok(Some(SearchPartition {
+            decision: DecisionId(0),
+            zone: to.clone(),
+            cardinality: Cardinality {
+                minimum: available,
+                maximum: Some(available),
+            },
+        }))
+    }
+
+    fn internal_search_failed(
+        &self,
+        execution: &Execution,
+        found: &[ObjectRef],
+        to: &MoveDestination,
+        player: PlayerId,
+    ) -> Result<Vec<MoveResult>> {
+        let (_, kind) = self.internal_search_destination(execution, to, player)?;
+        Ok(found
+            .iter()
+            .map(|&before| MoveResult {
+                before,
+                after: None,
+                requested_to: RuntimeZoneRef { player, kind },
+                requested_position: None,
+                actual_to: None,
+                actual_position: None,
+                replacements: Vec::new(),
+            })
+            .collect())
     }
 
     fn internal_search_finish(
@@ -913,6 +1040,17 @@ impl Game {
                 InputDomain::SearchPartition(domain),
                 Wait::SearchPartition(wait),
             );
+        }
+        if let Some(to) = &continuation.capacity_remainder {
+            continuation
+                .outcome
+                .moved
+                .extend(self.internal_search_failed(
+                    execution,
+                    &continuation.remaining,
+                    to,
+                    continuation.player,
+                )?);
         }
         self.internal_search_finish(
             execution,
@@ -1046,18 +1184,7 @@ impl Game {
         let (zone, kind) = self.internal_search_destination(execution, to, player)?;
         let seat = seat_name(player)?;
         if matches!(kind, ZoneKind::Ex | ZoneKind::Field) && self.zone_count(seat, zone) >= 5 {
-            return Ok(found
-                .iter()
-                .map(|&before| MoveResult {
-                    before,
-                    after: None,
-                    requested_to: RuntimeZoneRef { player, kind },
-                    requested_position: None,
-                    actual_to: None,
-                    actual_position: None,
-                    replacements: Vec::new(),
-                })
-                .collect());
+            return self.internal_search_failed(execution, found, to, player);
         }
         if kind == ZoneKind::Field {
             for &before in found {

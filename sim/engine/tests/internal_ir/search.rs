@@ -1066,3 +1066,117 @@ fn search_stats_information_or_zero_uses_zero_for_nonfollowers() {
         json!(["s", "spell"])
     );
 }
+
+#[test]
+fn search_name_predicates_reject_unsealed_source_holder_reads() {
+    let predicate = Expr::Compute(Box::new(Predicate::NamesIntersect {
+        left: Expr::Live(Box::new(NamesRead::Names {
+            object: ObjectView::Current {
+                object: Box::new(ObjectOperand::Bound {
+                    binding: Binding::new(1, ScopeId(2)),
+                }),
+            },
+        })),
+        right: Expr::Live(Box::new(NamesRead::Names {
+            object: ObjectView::Current {
+                object: Box::new(ObjectOperand::SourceHolder {}),
+            },
+        })),
+    }));
+    let mut game = game(1, 2);
+    let before = exact_authority(&game);
+    let result = game.execute_internal(
+        &checked(vec![search(predicate, cardinality(1, 1), hand())]),
+        &source("synthetic"),
+        context(1),
+    );
+    assert!(
+        matches!(result, Err(EngineFailure::Unsupported(_))),
+        "private names require a candidate or the sealed source-information proof"
+    );
+    assert!(
+        exact_authority(&game) == before,
+        "rejection preserves private bindings and authority"
+    );
+}
+
+#[test]
+fn search_partial_ex_capacity_retains_found_receipt_and_rejects_foreign_handles() {
+    let mut state = setup(
+        1,
+        json!([{"id":"a","card":"unit-follower"},{"id":"b","card":"unit-follower"}]),
+    );
+    state["players"]["P1"]["zones"]["ex"] = json!(
+        (0_u8..4)
+            .map(|i| json!({"id":format!("x{i}"),"card":"unit-follower"}))
+            .collect::<Vec<_>>()
+    );
+    let mut game = Game::new(
+        catalog(),
+        &state,
+        &Value::Null,
+        &Value::Null,
+        "capacity-receipt",
+    )
+    .unwrap();
+    execute(
+        &mut game,
+        1,
+        search(conditional(), cardinality(2, 2), shared(ZoneKind::Ex)),
+    );
+    let pending = answer(&mut game, 1, SearchAnswer::Ungrouped(vec![0, 1]));
+    assert!(
+        !pending.complete,
+        "capacity remains a separate input after finding"
+    );
+    let question = game.internal_decision(View::P1).unwrap();
+    let InputDomain::SearchPartition(domain) = &question.domain else {
+        panic!("capacity input")
+    };
+    assert_eq!(domain.cards.len(), 2);
+    assert_eq!(domain.cardinality, cardinality(1, 1));
+    for (actor, handles) in [
+        (1, vec![0]),
+        (1, vec![domain.cards[0].handle, domain.cards[1].handle]),
+        (2, vec![domain.cards[0].handle]),
+    ] {
+        let before = exact_authority(&game);
+        assert!(
+            game.answer_internal(
+                PlayerId { seat: actor },
+                question.token,
+                Answer::SearchPartition(handles)
+            )
+            .is_err(),
+            "old handles, overcapacity and wrong actors are rejected"
+        );
+        assert!(
+            exact_authority(&game) == before,
+            "invalid capacity answers preserve every binding and permission"
+        );
+    }
+    let result = game
+        .answer_internal(
+            question.actor,
+            question.token,
+            Answer::SearchPartition(vec![domain.cards[1].handle]),
+        )
+        .unwrap();
+    assert!(result.complete, "one allocation completes the search");
+    let receipt = outcome(&result);
+    assert_eq!(receipt.found.len(), 2);
+    assert_eq!(receipt.revealed, receipt.found);
+    assert_eq!(receipt.moved.len(), 2);
+    assert_eq!(
+        receipt
+            .moved
+            .iter()
+            .filter(|movement| movement.after.is_some())
+            .count(),
+        1
+    );
+    assert_eq!(shuffles(&result), 1);
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["deck_count"], 1);
+    assert_eq!(state["P1"]["ex_count"], 5);
+}

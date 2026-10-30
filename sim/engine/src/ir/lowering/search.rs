@@ -32,6 +32,30 @@ fn view(binding: Binding<ObjectRef>) -> ObjectView {
 }
 
 fn filter(
+    selector: &ast::SearchSelector,
+    candidate: Binding<ObjectRef>,
+    path: &str,
+) -> Result<Expr<Bool>, LoweringError> {
+    match selector {
+        ast::SearchSelector::Query(query) => query_filter(query, candidate, path),
+        ast::SearchSelector::Union { any_of } if !any_of.is_empty() => {
+            let predicates = any_of
+                .iter()
+                .map(|query| query_filter(query, candidate, path))
+                .collect::<Result<Vec<_>, _>>()?;
+            if predicates
+                .iter()
+                .any(|predicate| matches!(predicate, Expr::Literal(_)))
+            {
+                return Err(unsupported(path));
+            }
+            Ok(Expr::Compute(Box::new(Predicate::Or { predicates })))
+        }
+        ast::SearchSelector::Union { .. } => Err(unsupported(path)),
+    }
+}
+
+fn query_filter(
     query: &ast::SearchQuery,
     candidate: Binding<ObjectRef>,
     path: &str,
@@ -54,7 +78,26 @@ fn filter(
         }
         _ => return Err(unsupported(path)),
     };
-    Ok(super::selection::field_filter(&filter, candidate))
+    let predicate = super::selection::field_filter(&filter, candidate);
+    if !query.not_same_name_as_this {
+        return Ok(predicate);
+    }
+    let same_name = Expr::Compute(Box::new(Predicate::NamesIntersect {
+        left: Expr::Live(Box::new(NamesRead::Names {
+            object: view(candidate),
+        })),
+        right: Expr::Live(Box::new(NamesRead::Names {
+            object: ObjectView::SourceInformation {},
+        })),
+    }));
+    Ok(Expr::Compute(Box::new(Predicate::And {
+        predicates: vec![
+            predicate,
+            Expr::Compute(Box::new(Predicate::Not {
+                predicate: same_name,
+            })),
+        ],
+    })))
 }
 
 pub(super) fn object_filter(
@@ -168,6 +211,38 @@ impl BodyContext<'_> {
         }
         Ok(())
     }
+    fn distinct_search_group(
+        &mut self,
+        cardinality: Cardinality,
+        path: &str,
+    ) -> Result<SelectionConstraint, LoweringError> {
+        let binding = Binding::new(1, self.card_allocator.scope(path)?);
+        Ok(SelectionConstraint {
+            groups: vec![SelectionGroup {
+                selector: Selector::Zone {
+                    players: PlayerSet {
+                        relation: PlayerRelation::SelfPlayer,
+                        relative_to: PlayerRef::Controller {},
+                        cardinality: Cardinality {
+                            minimum: Nat(1),
+                            maximum: Some(Nat(1)),
+                        },
+                        text_quantifier: TextQuantifier::Implicit,
+                    },
+                    zone: ZoneKind::Deck,
+                    view: SelectionView::Current {},
+                    binding,
+                    predicate: Box::new(Expr::Literal(Bool(true))),
+                },
+                cardinality,
+            }],
+            cardinality,
+            distinct_by: Some(ObjectProperty::Names),
+            disjoint: Disjointness::Disjoint,
+            aggregate_bounds: vec![],
+        })
+    }
+
     pub(super) fn search(
         &mut self,
         search: &ast::Search,
@@ -175,14 +250,17 @@ impl BodyContext<'_> {
     ) -> Result<Action, LoweringError> {
         let candidate = Binding::new(1, self.card_allocator.scope(path)?);
         let (filter, cardinality, groups) = if let Some(query) = &search.sel {
+            let predicate = filter(query, candidate, path)?;
+            let cardinality = quantity(search.n, search.upto, path)?;
             if search.distinct_by.is_some() {
-                return Err(unsupported(path));
+                (
+                    predicate,
+                    cardinality,
+                    Some(self.distinct_search_group(cardinality, path)?),
+                )
+            } else {
+                (predicate, cardinality, None)
             }
-            (
-                filter(query, candidate, path)?,
-                quantity(search.n, search.upto, path)?,
-                None,
-            )
         } else if let Some(groups) = &search.groups {
             let mut lowered = Vec::new();
             let mut minimum = 0_u64;
