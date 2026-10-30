@@ -1,0 +1,36 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP03-029:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-31"
+    abilities:
+      - line: 1
+        evolve_time:
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: enemy
+                n: 2
+                instead:
+                  - if:
+                      cmp:
+                        left:
+                          count:
+                            who: self
+                            zone: cemetery
+                            trait: ヒーロー
+                        op: ge
+                        right: 2
+                    n: 4
