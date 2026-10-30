@@ -1,0 +1,53 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP04-040:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-31"
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - if:
+                cond:
+                  spellchain: 30
+                then:
+                  - damage:
+                      to:
+                        any_of:
+                          - leaders: opponents
+                          - who: opp
+                            zone: field
+                            kind: follower
+                      n: 30
+                else:
+                  - if:
+                      cond:
+                        spellchain: 20
+                      then:
+                        - damage:
+                            to:
+                              any_of:
+                                - leaders: opponents
+                                - who: opp
+                                  zone: field
+                                  kind: follower
+                            n: 10
+                      else:
+                        - if:
+                            cond:
+                              spellchain: 10
+                            then:
+                              - damage:
+                                  to:
+                                    any_of:
+                                      - leaders: opponents
+                                      - who: opp
+                                        zone: field
+                                        kind: follower
+                                  n: 5
