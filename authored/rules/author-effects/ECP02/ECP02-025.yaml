@@ -1,0 +1,43 @@
+format: 2
+kind: author_effect_set
+cards:
+  ECP02-025:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-31"
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - search:
+                sel:
+                  who: self
+                  zone: deck
+                  kind: follower
+                  name_contains: 神谷奈緒
+                to: hand
+                n: 1
+      - line: 2
+        activate:
+          cost:
+            steps:
+              - act_self: true
+              - self_to_cemetery: true
+          targets:
+            - bind: chosen
+              from:
+                who: self
+                zone: field
+                kind: follower
+                trait: クール
+              n: 1
+          do:
+            - grant:
+                "on": chosen
+                keywords:
+                  - rush
+                  - assail
