@@ -1,0 +1,38 @@
+cards:
+  BP08-062:
+    abilities:
+      - auto:
+          do:
+            - draw:
+                n: 2
+          on:
+            damaged:
+              during:
+                turn: self
+              recipient: this
+          per_turn: 1
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  awakened: true
+                then:
+                  - buff:
+                      hp: 1
+                      on: this
+                      power: 1
+                  - grant:
+                      keywords:
+                        - rush
+                      on: this
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

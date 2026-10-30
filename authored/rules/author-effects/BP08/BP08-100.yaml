@@ -1,0 +1,36 @@
+cards:
+  BP08-100:
+    abilities:
+      - evolve_time:
+          do:
+            - create:
+                n: 1
+                to: field
+                token: ホーリータイガー
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        kind: amulet
+                        who: self
+                        zone: field
+                    op: ge
+                    right: 2
+                then:
+                  - draw:
+                      n: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+    token_sources:
+      - card: BP01-T17
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

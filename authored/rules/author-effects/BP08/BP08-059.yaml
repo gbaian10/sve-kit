@@ -1,0 +1,31 @@
+cards:
+  BP08-059:
+    abilities:
+      - evolve:
+          cost:
+            pp: 3
+        line: 1
+      - keywords:
+          - ward
+        line: 2
+      - auto:
+          do:
+            - buff:
+                hp: 1
+                on: this
+            - life:
+                delta: 1
+                who: self
+          on:
+            damaged:
+              recipient: this
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

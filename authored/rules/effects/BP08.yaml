@@ -19,26 +19,6 @@ cards:
               side: self
               zone: ex
     status: complete
-  BP08-034:
-    abilities:
-      - body:
-          hp: 2
-          keywords:
-            - rush
-          op: modify
-          power: 3
-          subjects: target.1
-        kind: spell
-        line: 1
-        targets:
-          - key: "1"
-            max: 1
-            min: 1
-            select:
-              side: self
-              type: follower
-              zone: field
-    status: complete
   BP08-080:
     abilities:
       - body:

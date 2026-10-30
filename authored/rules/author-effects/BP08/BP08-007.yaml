@@ -1,0 +1,32 @@
+cards:
+  BP08-007:
+    abilities:
+      - keywords:
+          - storm
+        line: 1
+      - attack_time:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        kind: follower
+                        who: self
+                        zone: field
+                    op: ge
+                    right: 3
+                then:
+                  - buff:
+                      on: this
+                      power: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set
