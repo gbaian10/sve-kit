@@ -28,3 +28,9 @@ inside a parameter loop when only the position changes.
 Pure lowering tests reuse `lowerer()` in their test module. The current-selection
 and historical-regression catalogs remain separate fixtures: restoring historical
 prototype programs must never change the current-card selection.
+
+For games built from an accepted current selection, `Game` debug output includes
+mutable authority state and the addresses of shared immutable definitions. This
+keeps rollback comparisons small as the repository selection grows. Ordinary
+games retain full definitions so save round trips remain comparable. Inspect an
+individual catalog or candidate directly when its full definition is needed.

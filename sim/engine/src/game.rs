@@ -39,6 +39,7 @@ mod view;
 
 use alloc::collections::{BTreeMap, BTreeSet};
 use alloc::sync::Arc;
+use core::fmt;
 
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
@@ -231,7 +232,7 @@ struct State {
 }
 
 /// A cloneable game. Only this type resolves effects, creates prompts and hides private state.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Game {
     catalog: Arc<Catalog>,
     state: State,
@@ -260,6 +261,26 @@ pub struct Game {
         serialize_with = "internal::serialize_cards"
     )]
     card_runtime: internal::CardRuntime,
+}
+
+impl fmt::Debug for Game {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut debug = f.debug_struct("Game");
+        // Selected catalogs are immutable and shared; ordinary games also support save round trips.
+        if self.card_runtime.uses_selection() {
+            debug.field("catalog", &Arc::as_ptr(&self.catalog));
+        } else {
+            debug.field("catalog", &self.catalog);
+        }
+        debug
+            .field("state", &self.state)
+            .field("emitted", &self.emitted)
+            .field("node", &self.node)
+            .field("typed", &self.typed)
+            .field("prepared", &self.prepared)
+            .field("card_runtime", &self.card_runtime)
+            .finish()
+    }
 }
 
 const ZONES: [&str; 14] = [

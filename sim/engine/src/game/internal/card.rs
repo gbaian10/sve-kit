@@ -158,6 +158,10 @@ impl CardRuntime {
                 })
         })
     }
+    pub(in crate::game) const fn uses_selection(&self) -> bool {
+        self.selected
+    }
+
     pub(in crate::game) fn is_empty(&self) -> bool {
         self.definitions.cards.is_empty() && !self.selected
     }
