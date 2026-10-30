@@ -1,0 +1,39 @@
+cards:
+  BP04-031:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - search:
+                        n: 1
+                        sel:
+                          kind: follower
+                          trait: 円卓
+                          who: self
+                          zone: deck
+                        to: hand
+                  - - buff:
+                        hp: 2
+                        on: chosen
+                        power: 1
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                trait: 円卓
+                who: self
+                zone: field
+              n: 1
+              option: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

@@ -1,0 +1,42 @@
+cards:
+  BP04-129:
+    abilities:
+      - fanfare:
+          do:
+            - buff:
+                hp: -3
+                on: victim
+                power: -3
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+        scope: 1
+      - lastword:
+          do:
+            - buff:
+                hp: -3
+                on: victim
+                power: -3
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+        scope: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

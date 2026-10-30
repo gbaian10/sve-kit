@@ -1,0 +1,35 @@
+cards:
+  BP04-011:
+    abilities:
+      - keywords:
+          - storm
+        line: 1
+      - evolve_time:
+          do:
+            - if:
+                cond:
+                  combo: 5
+                else:
+                  - if:
+                      cond:
+                        combo: 3
+                      then:
+                        - buff:
+                            hp: 1
+                            on: this
+                            power: 1
+                then:
+                  - buff:
+                      hp: 3
+                      on: this
+                      power: 3
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

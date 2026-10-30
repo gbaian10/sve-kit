@@ -1,0 +1,35 @@
+cards:
+  BP04-074:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - fanfare:
+          do:
+            - create:
+                n: 1
+                result: made
+                to: field
+                token: オルカ
+            - if:
+                cond:
+                  awakened: true
+                then:
+                  - grant:
+                      keywords:
+                        - storm
+                      on: made
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+    token_sources:
+      - card: BP02-T05
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

@@ -1,0 +1,37 @@
+cards:
+  BP04-097:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - create:
+                n: 1
+                result: made
+                to: field
+                token: 毒蛇
+            - if:
+                cond:
+                  exists:
+                    kind: follower
+                    trait: ゴルゴーン
+                    who: self
+                    zone: field
+                then:
+                  - grant:
+                      keywords:
+                        - rush
+                        - assail
+                      on: made
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+    token_sources:
+      - card: BP04-T01
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

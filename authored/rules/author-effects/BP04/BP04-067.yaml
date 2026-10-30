@@ -1,0 +1,43 @@
+cards:
+  BP04-067:
+    abilities:
+      - keywords:
+          - quick
+        line: 1
+      - covers:
+          - 2
+          - 3
+        line: 2
+        spell:
+          do:
+            - if:
+                cond:
+                  paid:
+                    receipt: extra
+                else:
+                  - banish: enemy
+                then:
+                  - banish:
+                      ref:
+                        kind: follower
+                        who: opp
+                        zone: field
+          optional_cost:
+            pp: 5
+            result: extra
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

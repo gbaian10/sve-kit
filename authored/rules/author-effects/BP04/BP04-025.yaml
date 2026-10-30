@@ -1,0 +1,30 @@
+cards:
+  BP04-025:
+    abilities:
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        kind: follower
+                        who: self
+                        zone: field
+                    op: ge
+                    right: 4
+                then:
+                  - buff:
+                      hp: 1
+                      on: this
+                      power: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set
