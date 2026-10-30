@@ -1,0 +1,41 @@
+cards:
+  BP22-048:
+    abilities:
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      distinct_orig_costs:
+                        who: self
+                        zone: cemetery
+                    op: ge
+                    right: 6
+                then:
+                  - damage:
+                      n: 3
+                      to: target
+                  - life:
+                      delta: 3
+                      who: self
+                  - pp:
+                      delta: 3
+                      who: self
+          targets:
+            - bind: target
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set
