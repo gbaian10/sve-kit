@@ -1408,3 +1408,21 @@ fn filtered_counts_reject_hidden_card_characteristics() {
         }
     }
 }
+
+#[test]
+fn evolve_counts_reject_opponents_and_hidden_zone_face_filters() {
+    for query in [
+        json!({"who":"opp","zone":"evolve_deck","kind":"evolve_follower","face_up":true}),
+        json!({"who":"self","zone":"hand","face_up":true}),
+        json!({"who":"self","zone":"deck","face_up":false}),
+    ] {
+        let mut tree = expanded::tree().clone();
+        tree["cards"]["BP08-038"]["abilities"][0]["fanfare"]["do"] = json!([
+            {"draw":{"n":{"count":query}}}
+        ]);
+        assert_eq!(
+            lowerer().lower(&tree).unwrap_err().code,
+            "unsupported_construct"
+        );
+    }
+}

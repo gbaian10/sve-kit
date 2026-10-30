@@ -217,6 +217,7 @@ impl BodyContext<'_> {
 
 #[derive(Default)]
 pub(super) struct ObjectFilter<'query> {
+    pub face_up: Option<bool>,
     pub kind: Option<&'query ast::SearchKind>,
     pub trait_id: Option<&'query str>,
     pub all_traits: &'query [String],
@@ -271,6 +272,7 @@ impl<'query> From<&'query ast::PublicQuery> for ObjectFilter<'query> {
 impl<'query> From<&'query ast::CountQuery> for ObjectFilter<'query> {
     fn from(query: &'query ast::CountQuery) -> Self {
         Self {
+            face_up: query.face_up,
             kind: query.kind.as_ref(),
             trait_id: query.r#trait.as_deref(),
             name: query.name.as_deref(),
@@ -346,16 +348,21 @@ pub(super) fn field_filter(
             });
         }
     }
-    if let Some(token) = filter.token {
-        let predicate = super::Expr::Live(Box::new(super::super::BoolRead::State {
-            object: object.clone(),
-            property: super::super::BooleanState::TokenStatus,
-        }));
-        predicates.push(if token {
-            predicate
-        } else {
-            super::Expr::Compute(Box::new(super::Predicate::Not { predicate }))
-        });
+    for (expected, property) in [
+        (filter.token, super::super::BooleanState::TokenStatus),
+        (filter.face_up, super::super::BooleanState::FaceUp),
+    ] {
+        if let Some(expected) = expected {
+            let predicate = super::Expr::Live(Box::new(super::super::BoolRead::State {
+                object: object.clone(),
+                property,
+            }));
+            predicates.push(if expected {
+                predicate
+            } else {
+                super::Expr::Compute(Box::new(super::Predicate::Not { predicate }))
+            });
+        }
     }
     predicates.extend(numeric_limits(filter, &object));
     for keyword in filter.keyword.into_iter().chain(

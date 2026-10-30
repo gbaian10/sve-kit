@@ -304,6 +304,7 @@ pub(super) fn subscription(
                 ast::SearchKind::Follower => CardKind::Follower,
                 ast::SearchKind::Spell => CardKind::Spell,
                 ast::SearchKind::Amulet => CardKind::Amulet,
+                ast::SearchKind::EvolveFollower => CardKind::EvolveFollower,
             }),
         trait_id: entry
             .sel

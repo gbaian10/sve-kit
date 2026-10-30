@@ -83,6 +83,7 @@ fn movement_filter(
                 ast::SearchKind::Follower => CardKind::Follower,
                 ast::SearchKind::Spell => CardKind::Spell,
                 ast::SearchKind::Amulet => CardKind::Amulet,
+                ast::SearchKind::EvolveFollower => CardKind::EvolveFollower,
             }),
         trait_id: subject
             .and_then(|sel| sel.trait_id.as_ref())

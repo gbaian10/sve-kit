@@ -701,6 +701,7 @@ pub(super) struct SearchPower {
 #[derive(Clone, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum SearchKind {
+    EvolveFollower,
     Follower,
     Spell,
     Amulet,
@@ -1034,6 +1035,7 @@ pub(super) enum SelectedStat {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct CountQuery {
+    pub face_up: Option<bool>,
     pub who: LeaderSide,
     pub zone: CountZone,
     pub kind: Option<SearchKind>,
@@ -1048,6 +1050,7 @@ pub(super) struct CountQuery {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum CountZone {
+    EvolveDeck,
     Field,
     Ex,
     Deck,
