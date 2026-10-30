@@ -68,6 +68,7 @@ impl BodyContext<'_> {
     ) -> Result<Expr<Bool>, LoweringError> {
         let count = ast::Number::Count {
             count: ast::CountQuery {
+                has_evolve: None,
                 who: ast::LeaderSide::Controller,
                 zone: ast::CountZone::Cemetery,
                 kind: spells.then_some(ast::SearchKind::Spell),

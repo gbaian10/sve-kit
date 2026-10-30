@@ -574,6 +574,10 @@ fn check_predicate(value: &Expr<Bool>, candidate: Binding<ObjectRef>) -> Result<
             {
                 Ok(())
             }
+            Predicate::HasAbility {
+                abilities,
+                predicate,
+            } if super::super::search::evolve_filter(abilities, predicate, candidate) => Ok(()),
             Predicate::CompareInt {
                 left: Expr::Compute(left),
                 comparison: Comparison::Equal | Comparison::LessEqual | Comparison::GreaterEqual,
@@ -644,6 +648,11 @@ pub(super) fn matches_candidate(game: &Game, id: &str, value: &Expr<Bool>) -> Re
                 .any(|actual| actual.contains(&name.0))),
             Predicate::HasTrait { trait_id, .. } => {
                 Ok(characteristics(game, id)?.traits.contains(&trait_id.0))
+            }
+            Predicate::HasAbility { predicate, .. }
+                if super::super::search::is_evolve_predicate(predicate) =>
+            {
+                super::super::search::matches_evolve(game, id)
             }
             Predicate::CompareInt {
                 left: Expr::Compute(left),

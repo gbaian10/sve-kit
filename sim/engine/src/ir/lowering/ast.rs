@@ -1,8 +1,25 @@
 use crate::ir::ZoneKind;
 use alloc::collections::BTreeMap;
 use serde::Deserialize;
-use serde::de::IgnoredAny;
+use serde::Deserializer;
+use serde::de::{Error as _, IgnoredAny};
 use serde_json::Value;
+
+#[derive(Clone, Copy)]
+pub(super) struct TrueFlag;
+
+impl<'de> Deserialize<'de> for TrueFlag {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        if bool::deserialize(deserializer)? {
+            Ok(Self)
+        } else {
+            Err(D::Error::custom("expected true"))
+        }
+    }
+}
 
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -656,6 +673,7 @@ pub(super) enum SearchSelector {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct SearchQuery {
+    pub has_evolve: Option<TrueFlag>,
     pub who: SelfPlayer,
     pub zone: DeckZone,
     pub kind: Option<SearchKind>,
@@ -873,6 +891,7 @@ pub(super) struct ChooseGroup {
 #[derive(Clone, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct TargetQuery {
+    pub has_evolve: Option<TrueFlag>,
     #[serde(rename = "in")]
     pub observation: Option<String>,
     pub who: Option<Side>,
@@ -1030,6 +1049,7 @@ pub(super) enum SelectedStat {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct CountQuery {
+    pub has_evolve: Option<TrueFlag>,
     pub who: LeaderSide,
     pub zone: CountZone,
     pub kind: Option<SearchKind>,
@@ -1248,6 +1268,7 @@ pub(super) enum PublicNumber {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct PublicQuery {
+    pub has_evolve: Option<TrueFlag>,
     #[serde(default)]
     pub other: bool,
     pub who: Side,

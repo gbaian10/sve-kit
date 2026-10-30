@@ -149,6 +149,7 @@ impl BodyContext<'_> {
             || choice.from.has_numeric_filter()
             || choice.from.class.is_some()
             || choice.from.not_class.is_some()
+            || choice.from.has_evolve.is_some()
             || self.targets.contains_key(&choice.bind)
             || self.searches.contains(&choice.bind)
             || self.observations.contains_key(&choice.bind)
@@ -215,6 +216,7 @@ impl BodyContext<'_> {
 
 #[derive(Default)]
 pub(super) struct ObjectFilter<'query> {
+    pub has_evolve: bool,
     pub kind: Option<&'query ast::SearchKind>,
     pub trait_id: Option<&'query str>,
     pub all_traits: &'query [String],
@@ -233,6 +235,7 @@ pub(super) struct ObjectFilter<'query> {
 impl<'query> From<&'query ast::TargetQuery> for ObjectFilter<'query> {
     fn from(query: &'query ast::TargetQuery) -> Self {
         Self {
+            has_evolve: query.has_evolve.is_some(),
             kind: query.kind.as_ref(),
             trait_id: query.r#trait.as_deref(),
             all_traits: &[],
@@ -252,6 +255,7 @@ impl<'query> From<&'query ast::TargetQuery> for ObjectFilter<'query> {
 impl<'query> From<&'query ast::PublicQuery> for ObjectFilter<'query> {
     fn from(query: &'query ast::PublicQuery) -> Self {
         Self {
+            has_evolve: query.has_evolve.is_some(),
             kind: query.kind.as_ref(),
             trait_id: query.r#trait.as_deref(),
             name: query.name.as_deref(),
@@ -267,6 +271,7 @@ impl<'query> From<&'query ast::PublicQuery> for ObjectFilter<'query> {
 impl<'query> From<&'query ast::CountQuery> for ObjectFilter<'query> {
     fn from(query: &'query ast::CountQuery) -> Self {
         Self {
+            has_evolve: query.has_evolve.is_some(),
             kind: query.kind.as_ref(),
             trait_id: query.r#trait.as_deref(),
             name: query.name.as_deref(),
@@ -281,6 +286,7 @@ impl<'query> From<&'query ast::CountQuery> for ObjectFilter<'query> {
 impl<'query> From<&'query ast::SearchQuery> for ObjectFilter<'query> {
     fn from(query: &'query ast::SearchQuery) -> Self {
         Self {
+            has_evolve: query.has_evolve.is_some(),
             kind: query.kind.as_ref(),
             trait_id: query.r#trait.as_deref(),
             all_traits: &query.traits_all,
@@ -353,22 +359,15 @@ pub(super) fn field_filter(
         });
     }
     predicates.extend(numeric_limits(filter, &object));
+    if filter.has_evolve {
+        predicates.push(ability_filter(
+            &object,
+            super::super::KeywordId::Evolution,
+            Some(super::super::AbilityKind::Activated),
+        ));
+    }
     if let Some(keyword) = filter.keyword {
-        predicates.push(super::Expr::Compute(Box::new(
-            super::Predicate::HasAbility {
-                abilities: super::Expr::Live(Box::new(super::super::AbilitiesRead::Abilities {
-                    object: object.clone(),
-                    view: CharacteristicView::Effective,
-                })),
-                predicate: Box::new(super::super::AbilityPredicate {
-                    kind: None,
-                    keyword: Some(keyword),
-                    except: vec![],
-                    holder: None,
-                    origin: None,
-                }),
-            },
-        )));
+        predicates.push(ability_filter(&object, keyword, None));
     }
     if let Some(limit) = filter.hp_at_most {
         predicates.push(number_limit(
@@ -386,6 +385,26 @@ pub(super) fn field_filter(
         [_] => predicates.swap_remove(0),
         _ => super::Expr::Compute(Box::new(super::Predicate::And { predicates })),
     }
+}
+
+fn ability_filter(
+    object: &super::ObjectView,
+    keyword: super::super::KeywordId,
+    kind: Option<super::super::AbilityKind>,
+) -> super::Expr<super::Bool> {
+    super::Expr::Compute(Box::new(super::Predicate::HasAbility {
+        abilities: super::Expr::Live(Box::new(super::super::AbilitiesRead::Abilities {
+            object: object.clone(),
+            view: super::super::CharacteristicView::Effective,
+        })),
+        predicate: Box::new(super::super::AbilityPredicate {
+            kind,
+            keyword: Some(keyword),
+            except: vec![],
+            holder: None,
+            origin: None,
+        }),
+    }))
 }
 
 fn numeric_limits(

@@ -6,14 +6,14 @@ use super::{
 };
 use crate::ir::printed_keywords;
 use crate::ir::{
-    AbilitiesRead, AbilityPredicate, AbilityReference, Action, Binding, Bool, BoolRead,
-    BooleanState, CardKind, CardName, Cardinality, CharacteristicView, ClassRead, Comparison,
-    DecisionId, Expr, Info, Instruction, Int, IntOperation, KindRead, MoveDestination, MoveMethod,
-    MoveResult, MoveSpec, NamesRead, Nat, NumberRead, ObjectOperand, ObjectProperty, ObjectRef,
-    ObjectView, OwnerZone, PlayerId, PlayerRelation, Predicate, Requirement, Requirements,
-    RuntimeObjectView, RuntimeZoneRef, SearchDestination, SearchOutcome, SearchPartition,
-    SearchPartitionAnswer, SearchSelectionAnswer, SelectionView, Selector, SnapshotId, Stat,
-    TraitsRead, ZoneKind, ZoneRef,
+    AbilitiesRead, AbilityKind, AbilityOrigin, AbilityPredicate, AbilityReference, Action, Binding,
+    Bool, BoolRead, BooleanState, CardKind, CardName, Cardinality, CharacteristicView, ClassRead,
+    Comparison, DecisionId, Expr, Info, Instruction, Int, IntOperation, KeywordId, KindRead,
+    MoveDestination, MoveMethod, MoveResult, MoveSpec, NamesRead, Nat, NumberRead, ObjectOperand,
+    ObjectProperty, ObjectRef, ObjectView, OwnerZone, PlayerId, PlayerRelation, Predicate,
+    Requirement, Requirements, RuntimeObjectView, RuntimeZoneRef, SearchDestination, SearchOutcome,
+    SearchPartition, SearchPartitionAnswer, SearchSelectionAnswer, SelectionView, Selector,
+    SnapshotId, Stat, TraitsRead, ZoneKind, ZoneRef,
 };
 use alloc::collections::{BTreeSet, VecDeque};
 use serde_json::{Value, json};
@@ -122,7 +122,11 @@ pub(super) fn check_predicate(value: &Expr<Bool>, candidate: Binding<ObjectRef>)
             Predicate::HasAbility {
                 abilities,
                 predicate,
-            } if keyword_filter(abilities, predicate, candidate) => Ok(true),
+            } if keyword_filter(abilities, predicate, candidate)
+                || evolve_filter(abilities, predicate, candidate) =>
+            {
+                Ok(true)
+            }
             Predicate::NameContains {
                 object,
                 name: Expr::Literal(name),
@@ -242,6 +246,38 @@ fn keyword_filter(
         && predicate.holder.is_none()
         && predicate.origin.is_none()
         && predicate.keyword.and_then(super::grant::keyword).is_some()
+}
+
+pub(super) fn evolve_filter(
+    abilities: &Expr<Vec<AbilityReference>>,
+    predicate: &AbilityPredicate,
+    candidate: Binding<ObjectRef>,
+) -> bool {
+    matches!(abilities, Expr::Live(read)
+        if matches!(read.as_ref(), AbilitiesRead::Abilities { object, view: CharacteristicView::Effective }
+            if candidate_view(object, candidate)))
+        && is_evolve_predicate(predicate)
+        && predicate.except.is_empty()
+        && predicate.holder.is_none()
+        && predicate.origin.is_none()
+}
+
+pub(super) fn is_evolve_predicate(predicate: &AbilityPredicate) -> bool {
+    predicate.kind == Some(AbilityKind::Activated)
+        && predicate.keyword == Some(KeywordId::Evolution)
+}
+
+pub(super) fn matches_evolve(game: &Game, id: &str) -> Result<bool> {
+    game.require_internal_abilities(id, "printed evolution ability")?;
+    Ok(game
+        .internal_characteristic_abilities(id)?
+        .iter()
+        .any(|ability| {
+            ability.node.kind == AbilityKind::Activated
+                && matches!(&ability.node.source.origin,
+                AbilityOrigin::Keyword { keyword: KeywordId::Evolution, origin }
+                if matches!(origin.as_ref(), AbilityOrigin::Printed { .. }))
+        }))
 }
 
 fn candidate_view(view: &ObjectView, candidate: Binding<ObjectRef>) -> bool {
@@ -443,6 +479,34 @@ pub(super) fn keyword_requirement(
     })
 }
 
+pub(super) fn evolve_requirement(requirements: &Requirements, requirement: &Requirement) -> bool {
+    let (suffix, sibling, sibling_code) = match requirement.capability.code {
+        "internal.AbilityKind.Activated" => (
+            "/predicate/kind",
+            "/predicate/keyword",
+            "internal.KeywordId.Evolution",
+        ),
+        "internal.KeywordId.Evolution" => (
+            "/predicate/keyword",
+            "/predicate/kind",
+            "internal.AbilityKind.Activated",
+        ),
+        _ => return false,
+    };
+    requirement.locations.iter().all(|location| {
+        location.ir_path.strip_suffix(suffix).is_some_and(|base| {
+            let has = |code: &str, path: &str| {
+                requirements.required.iter().any(|other| {
+                    other.capability.code == code
+                        && other.locations.iter().any(|at| at.ir_path == path)
+                })
+            };
+            has("shape.Predicate.HasAbility", base)
+                && has(sibling_code, &format!("{base}{sibling}"))
+        })
+    })
+}
+
 fn bounds(printed: Cardinality, available: usize, conditional: bool) -> Result<Cardinality> {
     let available = u64::try_from(available).map_err(invalid)?;
     Ok(Cardinality {
@@ -535,6 +599,9 @@ pub(super) fn matches_candidate(game: &Game, id: &str, expression: &Expr<Bool>) 
                     right: Expr::Literal(Int(amount)),
                     comparison,
                 } => matches_number(game, id, read, *comparison, *amount),
+                Predicate::HasAbility { predicate, .. } if is_evolve_predicate(predicate) => {
+                    matches_evolve(game, id)
+                }
                 Predicate::HasAbility { predicate, .. } => matches_keyword(game, id, predicate),
                 Predicate::NameContains {
                     name: Expr::Literal(name),

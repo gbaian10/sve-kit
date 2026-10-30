@@ -341,7 +341,9 @@ impl Checker {
             return self.reject();
         };
         if self.event_capture()
-            || predicate.kind.is_some()
+            || (predicate.kind.is_some()
+                && !(predicate.kind == Some(super::super::AbilityKind::Activated)
+                    && predicate.keyword == Some(super::super::KeywordId::Evolution)))
             || predicate.keyword.is_none()
             || !predicate.except.is_empty()
             || predicate.holder.is_some()
