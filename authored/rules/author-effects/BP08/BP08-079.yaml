@@ -1,0 +1,27 @@
+cards:
+  BP08-079:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - life:
+                delta: 2
+                who: self
+            - if:
+                cond:
+                  crimson: true
+                else:
+                  - draw:
+                      n: 1
+                then:
+                  - draw:
+                      n: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

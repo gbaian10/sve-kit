@@ -1,0 +1,29 @@
+cards:
+  BP08-102:
+    abilities:
+      - fanfare:
+          do:
+            - create:
+                n: 1
+                to: field
+                token: ホーリータイガー
+        line: 1
+      - lastword:
+          do:
+            - life:
+                delta: 2
+                who: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+    token_sources:
+      - card: BP01-T17
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

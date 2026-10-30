@@ -1,0 +1,26 @@
+cards:
+  BP08-031:
+    abilities:
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  exists:
+                    trait: 指揮官
+                    who: self
+                    zone: field
+                then:
+                  - damage:
+                      n: 2
+                      to:
+                        leaders: opponents
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

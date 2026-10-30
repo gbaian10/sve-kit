@@ -1,0 +1,35 @@
+cards:
+  BP08-112:
+    abilities:
+      - keywords:
+          - rush
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: opp
+                        zone: field
+                    op: ge
+                    right: 3
+                then:
+                  - buff:
+                      on: this
+                      power: 1
+                  - grant:
+                      keywords:
+                        - assail
+                      on: this
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

@@ -1,0 +1,44 @@
+cards:
+  BP08-046:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - fanfare:
+          do:
+            - draw:
+                n: 3
+            - discard:
+                n: 2
+                who: self
+        line: 2
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - discard:
+                  n: 1
+                  sel:
+                    who: self
+                    zone: hand
+          do:
+            - damage:
+                n: 6
+                to: victim
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

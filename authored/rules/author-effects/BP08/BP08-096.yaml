@@ -1,0 +1,37 @@
+cards:
+  BP08-096:
+    abilities:
+      - line: 1
+        play:
+          cost_delta:
+            delta: -2
+            if:
+              exists:
+                kind: follower
+                name: 安息の絶傑・マーウィン
+                who: self
+                zone: field
+      - line: 2
+        spell:
+          do:
+            - buff:
+                hp: 2
+                on: victim
+            - draw:
+                n: 1
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                who: self
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set
