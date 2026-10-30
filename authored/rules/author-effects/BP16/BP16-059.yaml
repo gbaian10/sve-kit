@@ -1,0 +1,31 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP16-059:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-30"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+          usable_if:
+            awakened: true
+      - line: 2
+        fanfare:
+          do:
+            - if:
+                cond:
+                  exists:
+                    who: self
+                    zone: field
+                    trait: 乗物
+                then:
+                  - pp_max:
+                      who: self
+                      delta: 1
