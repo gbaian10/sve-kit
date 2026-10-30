@@ -6,6 +6,7 @@ use crate::ir::WellFormedCardProgram;
 use crate::ir::lowering::{CurrentCardProgram, ExpandedLowerer};
 use alloc::collections::{BTreeMap, BTreeSet};
 use alloc::sync::Arc;
+use core::{fmt, ptr::from_ref};
 use serde::Deserialize;
 use serde_json::Value;
 use std::sync::OnceLock;
@@ -26,10 +27,28 @@ pub struct SelectedEffects {
     runtime: Arc<OnceLock<Result<Arc<RuntimeCards>>>>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Default)]
 pub(crate) struct RuntimeCards {
     pub(crate) cards: BTreeMap<String, Arc<WellFormedCardProgram>>,
     pub(crate) current: BTreeMap<String, Arc<CurrentCard>>,
+}
+
+impl fmt::Debug for RuntimeCards {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if self.current.is_empty() {
+            return f
+                .debug_struct("RuntimeCards")
+                .field("cards", &self.cards)
+                .field("current", &self.current)
+                .finish();
+        }
+        // Immutable definitions share an address; expanding their trees dominates rollback diagnostics.
+        f.debug_struct("RuntimeCards")
+            .field("address", &from_ref(self))
+            .field("cards", &self.cards.len())
+            .field("current", &self.current.len())
+            .finish_non_exhaustive()
+    }
 }
 
 impl SelectedEffects {
