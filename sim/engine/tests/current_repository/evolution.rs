@@ -1,5 +1,7 @@
 use super::runtime::setup;
 use super::*;
+use std::sync::OnceLock;
+use sve_engine::catalog::SelectedEffects;
 use sve_engine::game::internal::InputDomain;
 use sve_engine::game::{Game, Step, View};
 use sve_engine::ir::{AbilityId, PlayerId};
@@ -24,6 +26,14 @@ fn evolve(game: &mut Game, pay: &Value) -> Step {
         "do":"evolve","source":"base","evolve_card":"resource","pay":pay
     }))
     .unwrap()
+}
+
+fn unloaded_selection() -> &'static SelectedEffects {
+    static SELECTED: OnceLock<SelectedEffects> = OnceLock::new();
+    SELECTED.get_or_init(|| {
+        // Source-evidence failures must remain explicit when repository admission grows.
+        runtime::selection_without_abilities(inputs().clone(), &["BP03-061", "BP01-042"])
+    })
 }
 
 fn selected_game(initial: &Value, card: &str) -> Game {
@@ -572,13 +582,20 @@ fn current_evolution_rejects_wrong_owner_name_and_unpayable_cost_atomically() {
 fn ordinary_unloaded_cards_have_no_evolution_resource_ability_exemption() {
     for card in ["BP03-061", "BP01-042"] {
         assert!(
-            !selection().current.contains_key(card),
-            "{card} must remain an unloaded sample"
+            !unloaded_selection().current.contains_key(card),
+            "{card} is absent from the explicit source-evidence fixture"
         );
         let mut initial = initial("BP01-110", "BP01-111", "P1");
         initial["players"]["P1"]["zones"]["field"] = json!([]);
         initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"unloaded","card":card}]);
-        let mut game = game(&initial);
+        let mut game = Game::from_selected_effects(
+            unloaded_selection().clone(),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "explicit-unloaded-resource-source",
+        )
+        .unwrap();
         let before = views(&game);
         let error = game
             .internal_rule_action(&json!({"do":"end-phase"}))
