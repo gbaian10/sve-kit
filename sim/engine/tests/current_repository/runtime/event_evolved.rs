@@ -41,7 +41,7 @@ fn position(card: &str, side: &str) -> Value {
     value
 }
 
-fn initial_game(card: &str, side: &str) -> Game {
+pub(super) fn initial_game(card: &str, side: &str) -> Game {
     let mut game = Game::from_selected_effects(
         selected().clone(),
         &position(card, side),
@@ -59,7 +59,7 @@ fn initial_game(card: &str, side: &str) -> Game {
     game
 }
 
-fn evolved(card: &str, side: &str) -> Game {
+pub(super) fn evolved(card: &str, side: &str) -> Game {
     let mut game = initial_game(card, side);
     let result = game
         .internal_rule_action(
@@ -76,7 +76,7 @@ fn evolved(card: &str, side: &str) -> Game {
     game
 }
 
-fn resolve_observer(game: &mut Game, card: &str, expected: bool) {
+pub(super) fn resolve_observer(game: &mut Game, card: &str, expected: bool) {
     let question = game.internal_pending_choice().unwrap();
     if !expected {
         assert!(
