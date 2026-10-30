@@ -1,0 +1,32 @@
+cards:
+  BP06-077:
+    abilities:
+      - keywords:
+          - storm
+          - bane
+        line: 1
+      - evolve_time:
+          do:
+            - grant:
+                keywords:
+                  - storm
+                on: victim
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                other: true
+                trait: 妖怪
+                who: self
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

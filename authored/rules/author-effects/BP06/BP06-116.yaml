@@ -1,0 +1,42 @@
+cards:
+  BP06-116:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - damage:
+                n:
+                  at: selection
+                  selection: victim
+                  value:
+                    power_of: victim
+                to: ally
+            - damage:
+                n:
+                  at: selection
+                  selection: ally
+                  value:
+                    power_of: ally
+                to: victim
+          targets:
+            - bind: ally
+              from:
+                kind: follower
+                who: self
+                zone: field
+              n: 1
+            - bind: victim
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

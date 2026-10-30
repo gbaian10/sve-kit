@@ -1,0 +1,31 @@
+cards:
+  BP06-067:
+    abilities:
+      - fanfare:
+          do:
+            - damage:
+                distribute: true
+                distribute_at: play
+                instead:
+                  - if:
+                      awakened: true
+                    n: 4
+                n: 2
+                to: victim
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              upto: 2
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set
