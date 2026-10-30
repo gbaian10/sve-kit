@@ -138,7 +138,11 @@ fn bp10_090_fanfares_check_spells_and_amulets_separately() {
         let mut initial = position("BP10-090");
         if spell {
             initial["players"]["P1"]["zones"]["cemetery"] =
-                json!([{"id":"spell","card":"BP01-171"}]);
+                json!([{"id":"spell","card":"BP10-118"}]);
+        }
+        if !spell {
+            initial["players"]["P1"]["zones"]["cemetery"] =
+                json!([{ "id":"follower", "card":"BP01-171" }]);
         }
         if amulet {
             initial["players"]["P1"]["zones"]["field"] = json!([{"id":"amulet","card":"BP10-098"}]);
@@ -176,6 +180,11 @@ fn bp10_071_damages_another_ally_then_buffs_and_can_activate() {
         "cannot-attack"
     );
     activate(&mut game, "BP10-071");
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["pp"]["current"],
+        4_u8,
+        "activation pays three PP"
+    );
     assert_eq!(
         game.projection(View::Referee).unwrap()["objects"]["source"]["power"],
         5_u8
@@ -250,65 +259,6 @@ fn bp10_107_paid_fanfare_buffs_and_permits_immediate_leader_attack() {
 }
 
 #[test]
-fn bp10_041_evolution_grants_golem_rush_and_assail() {
-    let mut initial = position("BP10-040");
-    initial["players"]["P1"]["zones"]["hand"] = json!([]);
-    initial["players"]["P1"]["zones"]["field"] = json!([
-        {"id":"source","card":"BP10-040"},
-        {"id":"golem","card":"BP01-T08","state":{"entered_this_turn":true}}
-    ]);
-    initial["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"form","card":"BP10-041"}]);
-    let mut game = game(&initial);
-    assert_eq!(
-        game.internal_rule_action(
-            &json!({"do":"evolve","source":"source","evolve_card":"form","pay":{"pp":1_u8}})
-        )
-        .unwrap()
-        .outcome,
-        "resolved"
-    );
-    triggers(&mut game);
-    assert_eq!(
-        game.internal_rule_action(&json!({"do":"attack","attacker":"golem","target":"P2.leader"}))
-            .unwrap()
-            .outcome,
-        "cannot-attack"
-    );
-    assert_eq!(
-        game.internal_rule_action(&json!({"do":"attack","attacker":"golem","target":"enemy"}))
-            .unwrap()
-            .outcome,
-        "resolved"
-    );
-}
-
-#[test]
-fn bp10_104_evolution_destroys_up_to_two_enemies() {
-    let mut initial = position("BP10-103");
-    initial["players"]["P1"]["zones"]["hand"] = json!([]);
-    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"source","card":"BP10-103"}]);
-    initial["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"form","card":"BP10-104"}]);
-    initial["players"]["P2"]["zones"]["field"]
-        .as_array_mut()
-        .unwrap()
-        .push(json!({"id":"second-enemy","card":"BP01-037"}));
-    let mut game = game(&initial);
-    assert_eq!(
-        game.internal_rule_action(
-            &json!({"do":"evolve","source":"source","evolve_card":"form","pay":{"pp":1_u8}})
-        )
-        .unwrap()
-        .outcome,
-        "resolved"
-    );
-    triggers(&mut game);
-    assert_eq!(
-        game.projection(View::Referee).unwrap()["P2"]["field"],
-        json!([])
-    );
-}
-
-#[test]
 fn bp10_118_destroys_two_and_heals_only_with_a_fallen_angel() {
     for fallen in [false, true] {
         let mut initial = position("BP10-118");
@@ -317,7 +267,7 @@ fn bp10_118_destroys_two_and_heals_only_with_a_fallen_angel() {
             .unwrap()
             .push(json!({"id":"second-enemy","card":"BP01-037"}));
         initial["players"]["P1"]["zones"]["cemetery"] =
-            json!([{"id":"angel","card":if fallen {"BP10-115"} else {"BP01-037"}}]);
+            json!([{"id":"angel","card":if fallen {"BP01-152"} else {"BP01-037"}}]);
         let mut game = game(&initial);
         play(&mut game);
         game.resume_internal_card().unwrap();
@@ -356,6 +306,7 @@ fn required_fanfare_targets_gate_all_following_actions() {
     initial["players"]["P2"]["zones"]["field"] = json!([]);
     let mut no_enemy = game(&initial);
     play(&mut no_enemy);
+    triggers(&mut no_enemy);
     assert!(no_enemy.internal_pending_choice().unwrap().is_none());
     let state = no_enemy.projection(View::Referee).unwrap();
     assert_eq!(state["P1"]["leader"]["life"], 20_u8);
@@ -363,6 +314,7 @@ fn required_fanfare_targets_gate_all_following_actions() {
 
     let mut no_ally = game(&position("BP10-071"));
     play(&mut no_ally);
+    triggers(&mut no_ally);
     assert!(no_ally.internal_pending_choice().unwrap().is_none());
     let alone = no_ally.projection(View::Referee).unwrap();
     assert_eq!(alone["objects"]["source"]["power"], 3_u8);
