@@ -1,0 +1,55 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP16-095:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-31"
+    abilities:
+      - line: 1
+        auto:
+          "on":
+            phase:
+              which: end
+              whose: self
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: field
+                        kind: amulet
+                    op: ge
+                    right: 2
+                then:
+                  - life:
+                      who: self
+                      delta: 2
+      - line: 2
+        evolve_time:
+          do:
+            - search:
+                sel:
+                  who: self
+                  zone: deck
+                  kind: amulet
+                  orig_cost_le: 3
+                to: field
+                n: 1
+      - line: 3
+        super_evolve_time:
+          do:
+            - search:
+                sel:
+                  who: self
+                  zone: deck
+                  kind: amulet
+                  orig_cost_le: 5
+                to: field
+                n: 1
