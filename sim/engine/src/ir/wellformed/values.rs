@@ -5,11 +5,12 @@ use super::{
     PlayerRef, PlayerRelation, PlayerSet, Predicate, SelectionView, Selector, WellFormedReason,
 };
 use crate::ir::{
-    BoolFrozen, CaptureTime, CharacteristicView, ExecutionRef, NumberRead, PaymentReference,
+    AbilitiesRead, AbilityPredicate, AbilityReference, BoolFrozen, CaptureTime, CharacteristicView,
+    ExecutionRef, NumberRead, PaymentReference,
 };
 use crate::ir::{
     CardKind, CardName, ClassRead, EventSnapshotPolicy, Info, KindRead, MemberProjection,
-    MovementReceipt, NamesRead, ObjectFrozen, TraitsRead,
+    MovementReceipt, NamesRead, ObjectFrozen, TraitId, TraitsRead,
 };
 
 #[expect(
@@ -292,23 +293,11 @@ impl Checker {
                 self.selector(objects)?;
                 self.candidate(*binding, predicate)
             }
-            Predicate::HasTrait { traits, .. } => match traits {
-                Expr::Literal(_) => Ok(()),
-                Expr::Live(read) if !self.event_capture() => {
-                    let TraitsRead::Traits { object, view } = read.as_ref();
-                    if !matches!(
-                        view,
-                        CharacteristicView::Original | CharacteristicView::Effective
-                    ) {
-                        return self.reject();
-                    }
-                    self.view(object)
-                }
-                Expr::Frozen(_) => self.projection(traits),
-                Expr::Live(_) | Expr::Captured(_) | Expr::Bound(_) | Expr::Compute(_) => {
-                    self.reject()
-                }
-            },
+            Predicate::HasAbility {
+                abilities,
+                predicate,
+            } => self.keyword_ability(abilities, predicate),
+            Predicate::HasTrait { traits, .. } => self.traits(traits),
             Predicate::NameContains {
                 object,
                 name: Expr::Literal(_),
@@ -340,6 +329,51 @@ impl Checker {
             | Predicate::MoveSucceeded { .. }
             | Predicate::ObjectEquals { .. } => self.event_predicate(expression),
             _ => self.reject(),
+        }
+    }
+
+    fn keyword_ability(
+        &self,
+        abilities: &Expr<Vec<AbilityReference>>,
+        predicate: &AbilityPredicate,
+    ) -> Checked {
+        let Expr::Live(read) = abilities else {
+            return self.reject();
+        };
+        if self.event_capture()
+            || predicate.kind.is_some()
+            || predicate.keyword.is_none()
+            || !predicate.except.is_empty()
+            || predicate.holder.is_some()
+            || predicate.origin.is_some()
+        {
+            return self.reject();
+        }
+        let AbilitiesRead::Abilities { object, view } = read.as_ref();
+        if !matches!(
+            view,
+            CharacteristicView::Original | CharacteristicView::Effective
+        ) {
+            return self.reject();
+        }
+        self.view(object)
+    }
+
+    fn traits(&self, traits: &Expr<Vec<TraitId>>) -> Checked {
+        match traits {
+            Expr::Literal(_) => Ok(()),
+            Expr::Live(read) if !self.event_capture() => {
+                let TraitsRead::Traits { object, view } = read.as_ref();
+                if !matches!(
+                    view,
+                    CharacteristicView::Original | CharacteristicView::Effective
+                ) {
+                    return self.reject();
+                }
+                self.view(object)
+            }
+            Expr::Frozen(_) => self.projection(traits),
+            Expr::Live(_) | Expr::Captured(_) | Expr::Bound(_) | Expr::Compute(_) => self.reject(),
         }
     }
 

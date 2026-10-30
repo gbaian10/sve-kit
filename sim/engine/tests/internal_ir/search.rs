@@ -974,3 +974,54 @@ pub(super) mod partition;
 
 #[path = "search/replacement.rs"]
 mod replacement;
+#[test]
+fn search_numeric_and_keyword_filters_reject_source_reads_before_private_population() {
+    let holder = ObjectView::Current {
+        object: Box::new(ObjectOperand::SourceHolder {}),
+    };
+    let predicates = [
+        Expr::Compute(Box::new(Predicate::CompareInt {
+            left: Expr::Compute(Box::new(IntOperation::InformationOrZero {
+                information: NumberRead::Stats {
+                    object: holder.clone(),
+                    view: CharacteristicView::Effective,
+                    property: Stat::Attack,
+                },
+            })),
+            comparison: Comparison::LessEqual,
+            right: Expr::Literal(Int(3)),
+        })),
+        Expr::Compute(Box::new(Predicate::HasAbility {
+            abilities: Expr::Live(Box::new(AbilitiesRead::Abilities {
+                object: holder,
+                view: CharacteristicView::Effective,
+            })),
+            predicate: Box::new(AbilityPredicate {
+                kind: None,
+                keyword: Some(KeywordId::Storm),
+                except: vec![],
+                holder: None,
+                origin: None,
+            }),
+        })),
+    ];
+    for predicate in predicates {
+        let mut game = game(1, 10);
+        let before = serde_json::to_value(&game).unwrap();
+        let failure = game
+            .execute_internal(
+                &checked(vec![search(predicate, cardinality(1, 1), hand())]),
+                &source("synthetic"),
+                context(1),
+            )
+            .unwrap_err();
+        assert!(
+            matches!(failure, EngineFailure::Unsupported(_)),
+            "private search may read only its authenticated candidate"
+        );
+        assert!(
+            serde_json::to_value(&game).unwrap() == before,
+            "a rejected private filter preserves all state and authority"
+        );
+    }
+}

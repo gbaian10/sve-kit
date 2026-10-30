@@ -4,13 +4,16 @@ use super::{
     Execution, Fact, Game, InputDomain, InstructionOutcome, OrderCard, Result, Wait, contains,
     invalid, seat_name, unsupported,
 };
+use crate::ir::printed_keywords;
 use crate::ir::{
-    Action, Binding, Bool, BoolRead, BooleanState, CardKind, Cardinality, CharacteristicView,
-    ClassRead, Expr, Info, Instruction, Int, IntOperation, KindRead, MoveDestination, MoveMethod,
-    MoveResult, MoveSpec, NamesRead, Nat, NumberRead, ObjectOperand, ObjectProperty, ObjectRef,
-    ObjectView, OwnerZone, PlayerId, PlayerRelation, Predicate, RuntimeObjectView, RuntimeZoneRef,
-    SearchDestination, SearchOutcome, SearchPartition, SearchPartitionAnswer,
-    SearchSelectionAnswer, SelectionView, Selector, SnapshotId, TraitsRead, ZoneKind, ZoneRef,
+    AbilitiesRead, AbilityPredicate, AbilityReference, Action, Binding, Bool, BoolRead,
+    BooleanState, CardKind, Cardinality, CharacteristicView, ClassRead, Comparison, Expr, Info,
+    Instruction, Int, IntOperation, KindRead, MoveDestination, MoveMethod, MoveResult, MoveSpec,
+    NamesRead, Nat, NumberRead, ObjectOperand, ObjectProperty, ObjectRef, ObjectView, OwnerZone,
+    PlayerId, PlayerRelation, Predicate, Requirement, Requirements, RuntimeObjectView,
+    RuntimeZoneRef, SearchDestination, SearchOutcome, SearchPartition, SearchPartitionAnswer,
+    SearchSelectionAnswer, SelectionView, Selector, SnapshotId, Stat, TraitsRead, ZoneKind,
+    ZoneRef,
 };
 use alloc::collections::{BTreeSet, VecDeque};
 use serde_json::{Value, json};
@@ -114,11 +117,11 @@ pub(super) fn check_predicate(value: &Expr<Bool>, candidate: Binding<ObjectRef>)
                 left: Expr::Compute(read),
                 right: Expr::Literal(Int(amount)),
                 ..
-            } if *amount >= 0
-                && matches!(read.as_ref(), IntOperation::InformationOrZero { information: NumberRead::Cost { object, view: CharacteristicView::Original } } if candidate_view(object, candidate)) =>
-            {
-                Ok(true)
-            }
+            } if *amount >= 0 && numeric_filter(read, candidate) => Ok(true),
+            Predicate::HasAbility {
+                abilities,
+                predicate,
+            } if keyword_filter(abilities, predicate, candidate) => Ok(true),
             Predicate::NamesIntersect {
                 left: Expr::Live(read),
                 right: Expr::Literal(names),
@@ -155,6 +158,28 @@ pub(super) fn check_predicate(value: &Expr<Bool>, candidate: Binding<ObjectRef>)
         },
         _ => Err(unsupported("search predicate")),
     }
+}
+
+fn numeric_filter(read: &IntOperation, candidate: Binding<ObjectRef>) -> bool {
+    matches!(read, IntOperation::InformationOrZero { information:
+        NumberRead::Cost { object, view: CharacteristicView::Original | CharacteristicView::Effective }
+        | NumberRead::Stats { object, view: CharacteristicView::Effective, property: Stat::Attack }
+    } if candidate_view(object, candidate))
+}
+
+fn keyword_filter(
+    abilities: &Expr<Vec<AbilityReference>>,
+    predicate: &AbilityPredicate,
+    candidate: Binding<ObjectRef>,
+) -> bool {
+    matches!(abilities, Expr::Live(read)
+        if matches!(read.as_ref(), AbilitiesRead::Abilities { object, view: CharacteristicView::Effective }
+            if candidate_view(object, candidate)))
+        && predicate.kind.is_none()
+        && predicate.except.is_empty()
+        && predicate.holder.is_none()
+        && predicate.origin.is_none()
+        && predicate.keyword.and_then(super::grant::keyword).is_some()
 }
 
 fn candidate_view(view: &ObjectView, candidate: Binding<ObjectRef>) -> bool {
@@ -293,6 +318,10 @@ pub(super) fn private_requirement(code: &str) -> bool {
             | "shape.NamesRead.Names"
             | "read.name"
             | "shape.ObjectOperand.Bound"
+            | "shape.Predicate.HasAbility"
+            | "predicate.has-ability"
+            | "shape.AbilitiesRead.Abilities"
+            | "read.abilities"
             | "shape.Predicate.HasTrait"
             | "predicate.has-trait"
             | "shape.TraitsRead.Traits"
@@ -320,6 +349,35 @@ pub(super) fn private_requirement(code: &str) -> bool {
     )
 }
 
+// Keyword identifiers are also used by grants; only their Search-owned locations are private reads.
+pub(super) fn keyword_requirement(
+    requirements: &Requirements,
+    requirement: &Requirement,
+    origins: &BTreeSet<String>,
+) -> bool {
+    if !matches!(
+        requirement.capability.code,
+        "internal.KeywordId.Ward"
+            | "internal.KeywordId.Aura"
+            | "internal.KeywordId.Storm"
+            | "internal.KeywordId.Rush"
+            | "internal.KeywordId.Bane"
+            | "internal.KeywordId.Intimidate"
+            | "internal.KeywordId.Assail"
+    ) {
+        return false;
+    }
+    requirement.locations.iter().all(|location| {
+        origins.contains(&location.ir_path)
+            || requirements
+                .required
+                .iter()
+                .filter(|owner| owner.capability.code == "shape.Action.Search")
+                .flat_map(|owner| &owner.locations)
+                .any(|owner| location.ir_path.starts_with(&format!("{}/", owner.ir_path)))
+    })
+}
+
 fn bounds(printed: Cardinality, available: usize, conditional: bool) -> Result<Cardinality> {
     let available = u64::try_from(available).map_err(invalid)?;
     Ok(Cardinality {
@@ -332,6 +390,42 @@ fn bounds(printed: Cardinality, available: usize, conditional: bool) -> Result<C
             .maximum
             .map_or(available, |n| n.0.min(available)))),
     })
+}
+
+fn matches_number(
+    game: &Game,
+    id: &str,
+    read: &IntOperation,
+    comparison: Comparison,
+    amount: i64,
+) -> Result<bool> {
+    let IntOperation::InformationOrZero { information } = read else {
+        return Err(unsupported("search number operation"));
+    };
+    let actual = match information {
+        NumberRead::Cost {
+            view: CharacteristicView::Original,
+            ..
+        } => super::cost::printed_cost(&game.internal_cost_print(id)?["cost"])?,
+        NumberRead::Cost {
+            view: CharacteristicView::Effective,
+            ..
+        } => game.internal_effective_cost(id)?,
+        NumberRead::Stats {
+            view: CharacteristicView::Effective,
+            property: Stat::Attack,
+            ..
+        } => {
+            if !game.object_type(id)?.contains("フォロワー") {
+                return Ok(false);
+            }
+            game.object(id)?.state["power"]
+                .as_i64()
+                .ok_or_else(|| invalid("search candidate power"))?
+        }
+        _ => return Err(unsupported("search numeric characteristic")),
+    };
+    Ok(super::values::compare(actual, comparison, amount))
 }
 
 pub(super) fn matches_candidate(game: &Game, id: &str, expression: &Expr<Bool>) -> Result<bool> {
@@ -360,12 +454,21 @@ pub(super) fn matches_candidate(game: &Game, id: &str, expression: &Expr<Bool>) 
                 } => Ok(game.face(id)?.get("card_class").and_then(Value::as_str)
                     == Some(class.0.as_str())),
                 Predicate::CompareInt {
+                    left: Expr::Compute(read),
                     right: Expr::Literal(Int(amount)),
                     comparison,
-                    ..
-                } => {
-                    let cost = super::cost::printed_cost(&game.internal_cost_print(id)?["cost"])?;
-                    Ok(super::values::compare(cost, *comparison, *amount))
+                } => matches_number(game, id, read, *comparison, *amount),
+                Predicate::HasAbility { predicate, .. } => {
+                    let keyword = predicate
+                        .keyword
+                        .ok_or_else(|| unsupported("search keyword"))?;
+                    game.require_internal_abilities(id, "search keyword")?;
+                    Ok(game
+                        .internal_characteristic_abilities(id)?
+                        .iter()
+                        .any(|ability| {
+                            printed_keywords::card_declaration(&ability.node) == Some(keyword)
+                        }))
                 }
                 Predicate::NamesIntersect {
                     right: Expr::Literal(names),
