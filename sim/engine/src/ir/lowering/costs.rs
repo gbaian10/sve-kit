@@ -118,12 +118,7 @@ pub(super) fn query(
     allocator: &mut Allocator,
     path: &str,
 ) -> Result<Selector, LoweringError> {
-    if value.other
-        || value.class.is_some()
-        || value.not_class.is_some()
-        || value.token.is_some()
-        || matches!(value.zone, ast::PublicZone::Ex)
-    {
+    if value.other || value.class.is_some() || value.not_class.is_some() || value.token.is_some() {
         return Err(unsupported(path));
     }
     Ok(public_query(

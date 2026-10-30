@@ -602,6 +602,10 @@ fn cemetery_evolution_lowering_rejects_wider_counts_and_nonliteral_bounds() {
         ("zone", json!("deck")),
         ("kind", json!("spell")),
         ("trait", json!("integration-filter")),
+        ("name", json!("unit-follower")),
+        ("name_contains", json!("unit-")),
+        ("token", json!(true)),
+        ("not_token", json!(true)),
         (
             "orig_cost_eq",
             json!({"resource":{"who":"self","kind":"pp"}}),

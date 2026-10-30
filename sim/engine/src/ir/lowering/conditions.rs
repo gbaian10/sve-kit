@@ -21,7 +21,7 @@ impl BodyContext<'_> {
             ast::Condition::EnteredBy(condition) => self.entered_by(condition, path)?,
             ast::Condition::PlayedFrom(condition) => self.played_from(condition, path)?,
             ast::Condition::Combo(threshold) => return Self::combo(*threshold, path),
-            ast::Condition::Exists(query) => return self.field_exists(query, path),
+            ast::Condition::Exists(query) => return self.public_exists(query, path),
             ast::Condition::Awakened(true) => Predicate::CompareInt {
                 left: Expr::Live(Box::new(IntRead::PlayerResource {
                     player: PlayerRef::Controller {},
@@ -246,14 +246,11 @@ impl BodyContext<'_> {
         })))
     }
 
-    fn field_exists(
+    fn public_exists(
         &mut self,
         query: &ast::PublicQuery,
         path: &str,
     ) -> Result<Expr<Bool>, LoweringError> {
-        if !matches!(query.zone, ast::PublicZone::Field) {
-            return Err(unsupported(path));
-        }
         let binding = Binding::new(self.allocator.id(path)?, self.card_allocator.scope(path)?);
         let mut objects = super::costs::public_query(query, binding);
         if query.other {
@@ -344,45 +341,27 @@ impl BodyContext<'_> {
             || count.r#trait.is_some()
             || count.name.is_some()
             || count.name_contains.is_some()
-            || count.orig_cost_eq.is_some();
+            || count.orig_cost_eq.is_some()
+            || count.token.is_some()
+            || count.not_token.is_some();
+        if !matches!(
+            (count.token, count.not_token),
+            (None | Some(true), None) | (None, Some(true))
+        ) {
+            return Err(unsupported(path));
+        }
         if matches!(count.zone, ast::CountZone::Hand | ast::CountZone::Deck) && filtered {
             return Err(unsupported(path));
         }
         let binding = Binding::new(self.allocator.id(path)?, self.scope);
-        let mut predicates = vec![super::search::object_filter(
-            count.kind.as_ref(),
-            count.r#trait.as_deref(),
-            count.name.as_deref(),
-            binding,
-        )];
-        let object = super::super::ObjectView::Current {
-            object: Box::new(super::super::ObjectOperand::Bound { binding }),
-        };
-        if let Some(name) = &count.name_contains {
-            predicates.push(Expr::Compute(Box::new(Predicate::NameContains {
-                object: object.clone(),
-                name: Expr::Literal(super::super::CardName(name.clone())),
-            })));
+        if count
+            .orig_cost_eq
+            .is_some_and(|cost| i64::try_from(cost).is_err())
+        {
+            return Err(unsupported(path));
         }
-        if let Some(cost) = count.orig_cost_eq {
-            predicates.push(Expr::Compute(Box::new(Predicate::CompareInt {
-                left: Expr::Compute(Box::new(IntOperation::InformationOrZero {
-                    information: super::super::NumberRead::Cost {
-                        object,
-                        view: super::super::CharacteristicView::Original,
-                    },
-                })),
-                comparison: Comparison::Equal,
-                right: Expr::Literal(Int(
-                    i64::try_from(cost).map_err(|_private| unsupported(path))?
-                )),
-            })));
-        }
-        let predicate = if predicates.len() == 1 {
-            predicates.remove(0)
-        } else {
-            Expr::Compute(Box::new(Predicate::And { predicates }))
-        };
+        let predicate =
+            super::selection::field_filter(&super::selection::ObjectFilter::from(count), binding);
         Ok(Expr::Compute(Box::new(IntOperation::FromNat {
             value: Expr::Live(Box::new(NatRead::ZoneCount {
                 selector: Selector::Zone {
@@ -400,6 +379,7 @@ impl BodyContext<'_> {
                     },
                     zone: match count.zone {
                         ast::CountZone::Field => ZoneKind::Field,
+                        ast::CountZone::Ex => ZoneKind::Ex,
                         ast::CountZone::Deck => ZoneKind::Deck,
                         ast::CountZone::Hand => ZoneKind::Hand,
                         ast::CountZone::Cemetery => ZoneKind::Cemetery,

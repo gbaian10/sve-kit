@@ -1,9 +1,9 @@
 use super::{Execution, Game, Result, WellFormedCardProgram, invalid, unsupported};
-use crate::game::internal::{search, values::compare};
+use crate::game::internal::values::compare;
 use crate::ir::{AbilityOrigin, AbilityQualification, AbilitySource, CostSpec, ObjectOperand};
 use crate::ir::{
-    Bool, CostChange, Expr, Int, IntOperation, Nat, NatRead, PlayerRef, Predicate, SelectionView,
-    Selector, SourceSpan, ZoneKind,
+    Bool, CostChange, Expr, Int, IntOperation, Nat, NatRead, PlayerRef, Predicate, Selector,
+    SourceSpan,
 };
 use alloc::collections::BTreeSet;
 
@@ -157,21 +157,7 @@ fn check_count(value: &Expr<Nat>) -> Result<()> {
 }
 
 fn check_objects(objects: &Selector) -> Result<()> {
-    let Selector::Zone {
-        players,
-        zone: ZoneKind::Field | ZoneKind::Cemetery,
-        view: SelectionView::Current {},
-        binding,
-        predicate,
-    } = objects
-    else {
-        return Err(unsupported("play cost public query"));
-    };
-    if players.relative_to != (PlayerRef::Controller {}) {
-        return Err(unsupported("play cost query player"));
-    }
-    search::check_predicate(predicate, *binding)?;
-    Ok(())
+    super::selection::public_zone_selector(objects)
 }
 
 #[expect(
@@ -326,31 +312,5 @@ fn count(game: &Game, execution: &Execution, value: &Expr<Nat>) -> Result<u64> {
 }
 
 fn object_count(game: &Game, execution: &Execution, objects: &Selector) -> Result<u64> {
-    let Selector::Zone {
-        players,
-        zone,
-        predicate,
-        ..
-    } = objects
-    else {
-        return Err(unsupported("play cost public query"));
-    };
-    let mut count = 0_u64;
-    for player in execution.players(game, players)? {
-        for id in game.zone_ids(
-            super::seat_name(player)?,
-            match zone {
-                ZoneKind::Field => "field",
-                ZoneKind::Cemetery => "cemetery",
-                _ => return Err(unsupported("play cost public query")),
-            },
-        ) {
-            if search::matches_candidate(game, &id, predicate)? {
-                count = count
-                    .checked_add(1)
-                    .ok_or_else(|| invalid("play cost count overflow"))?;
-            }
-        }
-    }
-    Ok(count)
+    u64::try_from(execution.public_zone_objects(game, objects)?.len()).map_err(invalid)
 }

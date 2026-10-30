@@ -197,6 +197,10 @@ fn qualification(
             && matches!(count.zone, ast::CountZone::Cemetery)
             && count.kind.is_none()
             && count.r#trait.is_none()
+            && count.name.is_none()
+            && count.name_contains.is_none()
+            && count.token.is_none()
+            && count.not_token.is_none()
             && *minimum >= 0 =>
         {
             let cost = count

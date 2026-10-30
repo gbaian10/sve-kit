@@ -473,7 +473,7 @@ pub(in crate::game::internal) fn field_selector(selector: &Selector) -> Result<(
 pub(in crate::game::internal) fn public_zone_selector(selector: &Selector) -> Result<()> {
     match selector {
         Selector::Zone {
-            zone: ZoneKind::Field | ZoneKind::Cemetery,
+            zone: ZoneKind::Field | ZoneKind::Ex | ZoneKind::Cemetery,
             view: SelectionView::Current {},
             predicate,
             binding,

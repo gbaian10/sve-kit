@@ -988,12 +988,15 @@ pub(super) struct CountQuery {
     pub name: Option<String>,
     pub name_contains: Option<String>,
     pub orig_cost_eq: Option<u64>,
+    pub token: Option<bool>,
+    pub not_token: Option<bool>,
 }
 
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum CountZone {
     Field,
+    Ex,
     Deck,
     Hand,
     Cemetery,
@@ -1195,6 +1198,7 @@ pub(super) struct PublicQuery {
     pub kind: Option<SearchKind>,
     pub r#trait: Option<String>,
     pub name: Option<String>,
+    pub name_contains: Option<String>,
     pub class: Option<String>,
     pub not_class: Option<String>,
     pub token: Option<bool>,

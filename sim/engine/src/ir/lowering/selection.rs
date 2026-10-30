@@ -250,9 +250,24 @@ impl<'query> From<&'query ast::PublicQuery> for ObjectFilter<'query> {
             kind: query.kind.as_ref(),
             trait_id: query.r#trait.as_deref(),
             name: query.name.as_deref(),
+            contains: query.name_contains.as_deref(),
             class: query.class.as_deref(),
             not_class: query.not_class.as_deref(),
             token: query.token,
+            ..Self::default()
+        }
+    }
+}
+
+impl<'query> From<&'query ast::CountQuery> for ObjectFilter<'query> {
+    fn from(query: &'query ast::CountQuery) -> Self {
+        Self {
+            kind: query.kind.as_ref(),
+            trait_id: query.r#trait.as_deref(),
+            name: query.name.as_deref(),
+            contains: query.name_contains.as_deref(),
+            token: query.token.or_else(|| query.not_token.map(|token| !token)),
+            original_cost: [query.orig_cost_eq, None, None],
             ..Self::default()
         }
     }

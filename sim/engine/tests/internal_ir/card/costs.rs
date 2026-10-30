@@ -107,3 +107,48 @@ fn explicit_cemetery_intervals_use_payment_state_and_keep_independent_deltas() {
         8
     );
 }
+
+#[test]
+fn ex_count_cost_uses_own_matching_public_cards() {
+    for present in [false, true] {
+        let mut tree = fanfare::expanded::tree().clone();
+        let mut entry = tree["cards"]["BP08-038"]["abilities"][0].clone();
+        entry.as_object_mut().unwrap().remove("fanfare");
+        entry["play"] = json!({"cost_delta":{"if":{"cmp":{"left":{"count":{"who":"self","zone":"ex","kind":"spell","name_contains":"unit-"}},"op":"ge","right":2_u8}},"delta":-2_i8}});
+        let mut seed = tree["cards"]["BP08-038"].clone();
+        seed["abilities"] = json!([entry]);
+        tree["cards"] = json!({"unit-follower":seed});
+        let programs = lowerer().lower(&tree).unwrap();
+        let mut initial = setup(1, json!([]));
+        initial["players"]["P1"]["pp"] = json!({"current":10_u8,"max":10_u8});
+        initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"s","card":"unit-follower"}]);
+        initial["players"]["P1"]["zones"]["ex"] =
+            json!([{"id":"wrong-kind","card":"unit-follower"}]);
+        initial["players"]["P2"]["zones"]["ex"] = json!([{"id":"opponent-one","card":"unit-spell"},{"id":"opponent-two","card":"unit-spell"}]);
+        if present {
+            for i in 0..2_u8 {
+                initial["players"]["P1"]["zones"]["ex"]
+                    .as_array_mut()
+                    .unwrap()
+                    .push(json!({"id":format!("matching-{i}"),"card":"unit-spell"}));
+            }
+        }
+        let mut game = Game::new(
+            catalog_with_cost(&json!("3")),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "ex-cost",
+        )
+        .unwrap();
+        game.load_internal_card("unit-follower", &programs["unit-follower"])
+            .unwrap();
+        game.load_internal_card("unit-spell", &card(vec![]))
+            .unwrap();
+        game.play_internal_card("s", PlayerId { seat: 1 }).unwrap();
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["P1"]["pp"]["current"],
+            if present { 9_u8 } else { 7_u8 }
+        );
+    }
+}

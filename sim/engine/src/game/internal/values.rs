@@ -162,7 +162,7 @@ impl Execution {
                 self.public_field_objects(game, selector)?
             }
             Selector::Zone {
-                zone: ZoneKind::Cemetery,
+                zone: ZoneKind::Ex | ZoneKind::Cemetery,
                 view: SelectionView::Current {},
                 ..
             } if super::card::selection::public_zone_selector(selector).is_ok() => {
