@@ -1,0 +1,31 @@
+cards:
+  BP06-076:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - keywords:
+          - bane
+        line: 2
+      - fanfare:
+          cost:
+            banish:
+              n: 2
+              sel:
+                trait: 妖怪
+                who: self
+                zone: cemetery
+          do:
+            - evolve:
+                ref: this
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

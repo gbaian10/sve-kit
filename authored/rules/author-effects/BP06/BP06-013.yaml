@@ -1,0 +1,35 @@
+cards:
+  BP06-013:
+    abilities:
+      - fanfare:
+          cost:
+            discard:
+              n: 1
+              sel:
+                trait: 狩人
+                who: self
+                zone: hand
+          do:
+            - damage:
+                n: 1
+                to: victim
+            - draw:
+                n: 1
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                leader_or: true
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set
