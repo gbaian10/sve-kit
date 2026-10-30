@@ -1,5 +1,6 @@
 use super::runtime::setup;
 use super::*;
+use sve_engine::game::internal::InputDomain;
 use sve_engine::game::{Game, Step, View};
 use sve_engine::ir::{AbilityId, PlayerId};
 
@@ -218,24 +219,39 @@ fn run_cases(cases: &[EvolutionCase]) {
             assert_eq!(step.outcome, "resolved", "{base} evolution resolves");
             check_events(&step, seat, pay["sep"] == 1_u8);
             check_views(&game, seat, base, resource, *stats, *remaining);
-            // Printed abilities are not authored here: later actions stop, never skip them.
+            // Evolution must retain the pending printed abilities after paying its resource cost.
             assert_eq!(
                 game.legal().unwrap(),
                 Vec::<Value>::new(),
                 "{base} resource ability remains pending, so no further action is legal"
             );
-            assert!(
-                matches!(game.internal_pending_choice(), Err(EngineFailure::Unsupported(reason))
-                if reason.contains("printed abilities are not admitted")),
-                "{base} resource printed ability stops at the unsupported boundary"
-            );
-            assert!(
-                matches!(
-                    game.internal_rule_action(&json!({"do":"end-phase"})),
-                    Err(EngineFailure::Unsupported(_))
-                ),
-                "{base} cannot continue while its resource ability is unadmitted"
-            );
+            if resource == "BP19-002" {
+                let question = game.internal_pending_choice().unwrap().unwrap();
+                assert!(
+                    matches!(&question.domain, InputDomain::Pending(options)
+                    if options.iter().any(|option| option.card == resource && option.line == 2)),
+                    "the admitted Magachiyo resource offers its ordinary evolution ability"
+                );
+                assert_eq!(
+                    matches!(&question.domain, InputDomain::Pending(options)
+                    if options.iter().any(|option| option.card == resource && option.line == 3)),
+                    pay["sep"] == 1_u8,
+                    "only super evolution offers the other Eight Prisons Storm ability"
+                );
+            } else {
+                assert!(
+                    matches!(game.internal_pending_choice(), Err(EngineFailure::Unsupported(reason))
+                    if reason.contains("printed abilities are not admitted")),
+                    "{base} resource printed ability stops at the unsupported boundary"
+                );
+                assert!(
+                    matches!(
+                        game.internal_rule_action(&json!({"do":"end-phase"})),
+                        Err(EngineFailure::Unsupported(_))
+                    ),
+                    "{base} cannot continue while its resource ability is unadmitted"
+                );
+            }
         }
     }
 }

@@ -1,0 +1,40 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP07-070:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-30"
+    abilities:
+      - line: 1
+        keywords:
+          - storm
+      - line: 2
+        activate:
+          cost:
+            steps:
+              - pp: 2
+              - banish:
+                  sel:
+                    who: self
+                    zone: cemetery
+                    name: ファースト・ワン
+                  n: 1
+          per_turn: 1
+          do:
+            - buff:
+                "on": &id001
+                  who: self
+                  zone: field
+                  kind: follower
+                  trait: 機械
+                power: 2
+                hp: 2
+            - grant:
+                "on": *id001
+                keywords:
+                  - rush
