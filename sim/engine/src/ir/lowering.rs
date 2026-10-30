@@ -12,6 +12,7 @@ mod grant;
 mod hand_payment;
 mod keywords;
 mod material;
+mod movement;
 mod numeric;
 mod optional_payment;
 mod ordering;
@@ -743,6 +744,9 @@ fn lowered_subscription(
                 binding: event,
                 predicate: super::events::timing::leave_predicate(event, entry.during.is_some()),
             })
+        }
+        ast::PhaseSubscription::Moved(_) | ast::PhaseSubscription::PlacedEx(_) => {
+            movement::subscription(on, event_id, scope, path)
         }
         ast::PhaseSubscription::Damage(entry) => {
             let event = Binding::new(event_id, scope);

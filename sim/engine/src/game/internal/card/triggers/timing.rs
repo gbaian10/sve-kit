@@ -94,6 +94,7 @@ pub(super) fn public_event(event: &Event, position: u64) -> Result<String> {
                 event.characters.names
             ))
         }
+        Event::EnterEx { .. } => Ok(format!("EnterEx while source at field slot {position}")),
         Event::Play { .. } => Ok(format!("Play while source at cemetery slot {position}")),
         Event::Attack { event } => Ok(format!(
             "Attack {} from field slot {position}",

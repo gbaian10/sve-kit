@@ -1098,6 +1098,10 @@ pub(super) enum PhaseSubscription {
     EnterField(EntrySubscription),
     #[serde(rename = "left_field")]
     LeaveField(LeaveSubscription),
+    #[serde(rename = "moved")]
+    Moved(MoveSubscription),
+    #[serde(rename = "placed_ex")]
+    PlacedEx(ExSubscription),
     #[serde(rename = "damaged")]
     Damage(DamageSubscription),
 }
@@ -1513,4 +1517,57 @@ impl Auto {
                 _ => false,
             }
     }
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct MoveSubscription {
+    pub from: MoveOrigin,
+    #[serde(rename = "to")]
+    pub _to: CemeteryDestination,
+    #[serde(rename = "ref")]
+    pub reference: Option<This>,
+    pub sel: Option<MovementSubject>,
+    pub during: Option<During>,
+}
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum MoveOrigin {
+    Zone(FieldOrigin),
+    Owned {
+        who: EntryPlayer,
+        #[serde(rename = "zone")]
+        _zone: FieldOrigin,
+    },
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum FieldOrigin {
+    Field,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct ExSubscription {
+    pub who: Option<EntryPlayer>,
+    #[serde(rename = "ref")]
+    pub reference: Option<This>,
+    pub sel: Option<MovementSubject>,
+    pub during: Option<During>,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct MovementSubject {
+    pub kind: Option<SearchKind>,
+    #[serde(rename = "trait")]
+    pub trait_id: Option<String>,
+    pub name: Option<String>,
+    pub token: Option<bool>,
+    pub not_token: Option<bool>,
+    pub other: Option<bool>,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum CemeteryDestination {
+    Cemetery,
 }

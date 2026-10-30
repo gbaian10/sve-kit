@@ -6,7 +6,7 @@ use super::{
 };
 use crate::ir::{
     AbilitiesRead, AbilityPredicate, AbilityReference, BoolFrozen, CaptureTime, CharacteristicView,
-    ExecutionRef, NumberRead, PaymentReference,
+    ExecutionRef, NumberRead, PaymentReference, PlayerRead,
 };
 use crate::ir::{
     CardKind, CardName, ClassRead, EventSnapshotPolicy, Info, KindRead, MemberProjection,
@@ -420,6 +420,10 @@ impl Checker {
             PlayerRef::Controller {} | PlayerRef::Owner {} | PlayerRef::Active {} => Ok(()),
             PlayerRef::Bound { binding } => self.reference(*binding, BindingKind::Value),
             PlayerRef::RequireOne { players } => self.players(players),
+            // Snapshot roles retain their event-time identity even when control later changes.
+            PlayerRef::FromExpression { value } if matches!(value.as_ref(), Expr::Live(read) if matches!(read.as_ref(), PlayerRead::Role { object: ObjectView::Snapshot { .. }, .. })) => {
+                self.player_value(value)
+            }
             // A Live role can change mid-resolution, so it cannot name a stable audience or actor.
             PlayerRef::FromExpression { value } if matches!(**value, Expr::Live(_)) => {
                 self.reject()
