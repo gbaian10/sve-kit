@@ -284,6 +284,8 @@ impl<'query> From<&'query ast::SearchQuery> for ObjectFilter<'query> {
             kind: query.kind.as_ref(),
             trait_id: query.r#trait.as_deref(),
             all_traits: &query.traits_all,
+            class: query.class.as_deref(),
+            contains: query.name_contains.as_deref(),
             name: query.name.as_deref(),
             cost: [query.cost_eq, query.cost_le, query.cost_ge],
             original_cost: [query.orig_cost_eq, query.orig_cost_le, query.orig_cost_ge],

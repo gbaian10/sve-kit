@@ -2,7 +2,7 @@
 
 use super::{Execution, Game, Result, invalid, unsupported};
 use crate::ir::{
-    CharacteristicView, NumberRead, ObjectRef, ObjectView, Requirement, Requirements,
+    CardName, CharacteristicView, NumberRead, ObjectRef, ObjectView, Requirement, Requirements,
     RuntimeAbilitySource, RuntimeObjectView, SnapshotId, Stat,
 };
 
@@ -18,6 +18,7 @@ pub(super) struct SourceSnapshot {
     view: RuntimeObjectView,
     original: [i64; 3],
     effective: [i64; 3],
+    names: Vec<CardName>,
 }
 
 /// Original is a private read elsewhere; only a checked source's own number read is exempt.
@@ -84,6 +85,10 @@ impl Execution {
             )
     }
 
+    pub(super) fn source_names(&self, game: &Game) -> Result<Vec<CardName>> {
+        self.source_snapshot(game).map(|snapshot| snapshot.names)
+    }
+
     pub(super) fn source_before_move(
         &self,
         game: &Game,
@@ -98,7 +103,7 @@ impl Execution {
         self.source_snapshot(game).map(Some)
     }
 
-    pub(super) const fn seal_source_departure(&mut self, snapshot: Option<SourceSnapshot>) {
+    pub(super) fn seal_source_departure(&mut self, snapshot: Option<SourceSnapshot>) {
         if let Some(information) = &mut self.source_information {
             information.seal(snapshot);
         }
@@ -225,7 +230,7 @@ impl SourceInformation {
         Ok(snapshot)
     }
 
-    pub(super) const fn seal(&mut self, snapshot: Option<SourceSnapshot>) {
+    pub(super) fn seal(&mut self, snapshot: Option<SourceSnapshot>) {
         if self.departed.is_none()
             && let Some(snapshot) = snapshot
         {
@@ -293,6 +298,7 @@ impl Game {
             },
             original,
             effective,
+            names: vec![CardName(self.card_name(id)?)],
         })
     }
 }

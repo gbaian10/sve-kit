@@ -623,7 +623,7 @@ pub(super) enum Affected {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct Search {
-    pub sel: Option<SearchQuery>,
+    pub sel: Option<SearchSelector>,
     pub n: Option<u64>,
     pub upto: Option<u64>,
     pub groups: Option<Vec<SearchGroup>>,
@@ -641,9 +641,16 @@ pub(super) enum Names {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct SearchGroup {
-    pub sel: SearchQuery,
+    pub sel: SearchSelector,
     pub n: Option<u64>,
     pub upto: Option<u64>,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum SearchSelector {
+    Query(Box<SearchQuery>),
+    Union { any_of: Vec<SearchQuery> },
 }
 
 #[derive(Deserialize)]
@@ -656,6 +663,10 @@ pub(super) struct SearchQuery {
     #[serde(default)]
     pub traits_all: Vec<String>,
     pub name: Option<String>,
+    pub class: Option<String>,
+    pub name_contains: Option<String>,
+    #[serde(default)]
+    pub not_same_name_as_this: bool,
     pub keyword: Option<String>,
     #[serde(rename = "as")]
     pub alias: Option<String>,

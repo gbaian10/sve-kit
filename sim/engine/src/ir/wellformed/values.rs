@@ -382,7 +382,7 @@ impl Checker {
             Expr::Literal(_) => Ok(()),
             Expr::Live(read) if !self.event_capture() => {
                 let NamesRead::Names { object } = read.as_ref();
-                self.view(object)
+                self.information_view(object)
             }
             Expr::Frozen(_) => self.projection(expression),
             Expr::Live(_) | Expr::Captured(_) | Expr::Bound(_) | Expr::Compute(_) => self.reject(),

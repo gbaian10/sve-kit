@@ -1,4 +1,5 @@
 use super::*;
+use sve_engine::game::internal::{InputDomain, SearchAnswer};
 
 pub(super) fn source_read(
     object: &ObjectView,
@@ -245,4 +246,81 @@ fn source_information_requires_whole_ability_proof_and_rejects_forged_lki() {
         matches!(&error, sve_engine::EngineFailure::Unsupported(message)
         if message.contains("play-time source information"))
     );
+}
+
+#[test]
+fn source_name_search_uses_sealed_information_after_body_departure() {
+    let filter = Expr::Compute(Box::new(Predicate::Not {
+        predicate: Expr::Compute(Box::new(Predicate::NamesIntersect {
+            left: Expr::Live(Box::new(NamesRead::Names {
+                object: ObjectView::Current {
+                    object: Box::new(ObjectOperand::Bound {
+                        binding: Binding::new(1, ScopeId(2)),
+                    }),
+                },
+            })),
+            right: Expr::Live(Box::new(NamesRead::Names {
+                object: ObjectView::SourceInformation {},
+            })),
+        })),
+    }));
+    let search = search::search(filter, search::cardinality(1, 1), search::hand());
+    let program = card(vec![ability(
+        1,
+        vec![
+            movement::put(
+                2,
+                Selector::Objects {
+                    objects: vec![ObjectOperand::SourceHolder {}],
+                },
+                OwnerZone::Cemetery,
+            ),
+            search,
+        ],
+    )]);
+    let mut state = setup(
+        1,
+        json!([{"id":"same","card":"unit-follower"},{"id":"other","card":"unit-spell"}]),
+    );
+    state["players"]["P1"]["zones"]["hand"] = json!([]);
+    state["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
+    let mut game = Game::new(
+        catalog(),
+        &state,
+        &Value::Null,
+        &Value::Null,
+        "source-names-lki",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &program).unwrap();
+    game.load_internal_card("unit-spell", &card(vec![]))
+        .unwrap();
+    let play = game
+        .activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
+        .unwrap();
+    let CardPlay::Awaiting(question) = play else {
+        panic!("search input")
+    };
+    let InputDomain::Search(domain) = &question.domain else {
+        panic!("search domain")
+    };
+    assert_eq!(
+        domain
+            .cards
+            .iter()
+            .map(|card| card.card.as_str())
+            .collect::<Vec<_>>(),
+        ["unit-spell"]
+    );
+    let play = game
+        .answer_internal_card(
+            question.actor,
+            question.token,
+            Answer::Search(SearchAnswer::Ungrouped(vec![domain.cards[0].handle])),
+        )
+        .unwrap();
+    resolved(play);
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["cemetery"], json!(["s"]));
+    assert_eq!(state["P1"]["hand"], json!(["other"]));
 }
