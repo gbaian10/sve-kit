@@ -1,0 +1,45 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "static",
+      "body": {
+        "op": "macro",
+        "name": "quick"
+      }
+    },
+    {
+      "line": 2,
+      "kind": "spell",
+      "body": {
+        "op": "seq",
+        "steps": [
+          {
+            "op": "damage",
+            "subjects": "target.1",
+            "amount": 2
+          },
+          {
+            "op": "create",
+            "name": "黄金の杯",
+            "count": 1,
+            "to": "ex"
+          }
+        ]
+      },
+      "targets": [
+        {
+          "key": "1",
+          "select": {
+            "zone": "field",
+            "side": "opponent",
+            "type": "follower"
+          },
+          "min": 1,
+          "max": 1
+        }
+      ]
+    }
+  ]
+}
