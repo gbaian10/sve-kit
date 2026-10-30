@@ -118,10 +118,6 @@ pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
         | Action::Move {
             objects: selector, ..
         }
-        | Action::Damage {
-            recipients: RecipientSet::Objects { objects: selector },
-            ..
-        }
         | Action::Posture {
             objects: selector, ..
         }
@@ -228,11 +224,15 @@ fn mask_public_selectors(inspected: &mut Node) -> Result<()> {
             capture: Capture::Integer { value, .. },
         } => mask_public_number(value),
         Node::Instruction { instruction } => match &mut instruction.action {
-            Action::Draw { count: amount, .. }
-            | Action::Damage {
-                amount: DamageAmount::Uniform { amount },
-                ..
-            } => mask_public_number(amount),
+            Action::Draw { count: amount, .. } => mask_public_number(amount),
+            Action::Damage {
+                amount, recipients, ..
+            } => {
+                if let DamageAmount::Uniform { amount } = amount {
+                    mask_public_number(amount);
+                }
+                mask_public_recipients(recipients);
+            }
             Action::Life { change, .. } => mask_public_number_change(change),
             Action::Modify { patch, .. } => mask_public_number_patch(patch),
             _ => {}
@@ -335,6 +335,18 @@ fn mask_public_natural(value: &mut Expr<Nat>) {
     if super::card::selection::public_zone_selector(selector).is_ok() {
         // These reads observe only the grammar checked by the public-zone authority.
         *value = Expr::Literal(Nat(0));
+    }
+}
+
+fn mask_public_recipients(recipients: &mut RecipientSet) {
+    match recipients {
+        RecipientSet::Objects { objects } => mask_public_predicate(objects),
+        RecipientSet::Union { sets } => {
+            for set in sets {
+                mask_public_recipients(set);
+            }
+        }
+        _ => {}
     }
 }
 

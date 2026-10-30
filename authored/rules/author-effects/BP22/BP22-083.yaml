@@ -1,0 +1,34 @@
+cards:
+  BP22-083:
+    abilities:
+      - evolve_time:
+          do:
+            - damage:
+                instead:
+                  - if:
+                      cmp:
+                        left:
+                          count:
+                            trait: 吸血鬼
+                            who: self
+                            zone: cemetery
+                        op: ge
+                        right: 5
+                    n: 4
+                n: 2
+                to:
+                  any_of:
+                    - leader: opp
+                    - kind: follower
+                      who: opp
+                      zone: field
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

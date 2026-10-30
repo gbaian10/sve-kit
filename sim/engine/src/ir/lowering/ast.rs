@@ -822,6 +822,7 @@ pub(super) struct DamageInstead {
 #[derive(Deserialize)]
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum Recipients {
+    Union { any_of: Vec<Self> },
     Field(ObjectQuery),
     Leader { leader: LeaderSide },
     LeaderOf { leader_of: String },
