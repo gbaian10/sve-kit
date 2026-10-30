@@ -203,6 +203,7 @@ impl BodyContext<'_> {
             || target.from.leader_or
             || target.from.other
             || target.from.r#trait.is_none()
+            || target.from.has_evolve.is_some()
             || target.from.has_numeric_filter()
             || target.from.class.is_some()
             || target.from.not_class.is_some()
@@ -277,6 +278,7 @@ impl BodyContext<'_> {
     ) -> Result<(ChoiceDomain, Cardinality), LoweringError> {
         if target.distinct_by.is_some()
             || target.from.r#trait.is_some()
+            || target.from.has_evolve.is_some()
             || target.from.has_numeric_filter()
             || target.from.class.is_some()
             || target.from.not_class.is_some()
@@ -719,7 +721,8 @@ const fn target_players(side: &ast::Side) -> PlayerSet {
 
 fn recipient_players(query: &ast::TargetQuery, path: &str) -> Result<PlayerSet, LoweringError> {
     let players = if let Some(leader) = query.leader {
-        if query.who.is_some()
+        if query.has_evolve.is_some()
+            || query.who.is_some()
             || query.zone.is_some()
             || query.kind.is_some()
             || query.leader_or
@@ -740,7 +743,12 @@ fn recipient_players(query: &ast::TargetQuery, path: &str) -> Result<PlayerSet, 
             text_quantifier: TextQuantifier::Implicit,
         }
     } else if let Some(leaders) = &query.leaders {
-        if query.who.is_some() || query.zone.is_some() || query.kind.is_some() || query.leader_or {
+        if query.has_evolve.is_some()
+            || query.who.is_some()
+            || query.zone.is_some()
+            || query.kind.is_some()
+            || query.leader_or
+        {
             return Err(unsupported(path));
         }
         target_players(match leaders {

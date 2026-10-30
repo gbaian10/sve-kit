@@ -677,6 +677,7 @@ pub(super) struct SearchQuery {
     pub orig_cost_eq: Option<u64>,
     pub orig_cost_le: Option<u64>,
     pub orig_cost_ge: Option<u64>,
+    pub has_evolve: Option<True>,
 }
 
 #[derive(Deserialize)]
@@ -896,6 +897,7 @@ pub(super) struct TargetQuery {
     pub orig_cost_le: Option<u64>,
     pub orig_cost_ge: Option<u64>,
     pub hp_le: Option<u64>,
+    pub has_evolve: Option<True>,
 }
 
 impl TargetQuery {
@@ -1581,4 +1583,20 @@ pub(super) struct EvolvedSubscription {
     #[serde(rename = "ref")]
     pub reference: Option<This>,
     pub sel: Option<MovementSubject>,
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(try_from = "bool")]
+pub(super) struct True;
+
+impl TryFrom<bool> for True {
+    type Error = &'static str;
+
+    fn try_from(value: bool) -> Result<Self, Self::Error> {
+        if value {
+            Ok(Self)
+        } else {
+            Err("expected true")
+        }
+    }
 }

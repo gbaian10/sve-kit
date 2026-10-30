@@ -539,6 +539,10 @@ fn check_predicate(value: &Expr<Bool>, candidate: Binding<ObjectRef>) -> Result<
             Ok(())
         }
         Expr::Compute(operation) => match operation.as_ref() {
+            Predicate::HasAbility {
+                abilities,
+                predicate,
+            } if super::super::search::keyword_filter(abilities, predicate, candidate) => Ok(()),
             Predicate::ClassEquals {
                 left: Expr::Live(read),
                 right: Expr::Literal(Info::Present(class)),
@@ -613,6 +617,9 @@ pub(super) fn matches_candidate(game: &Game, id: &str, value: &Expr<Bool>) -> Re
             Ok(game.object_type(id)?.contains("トークン"))
         }
         Expr::Compute(operation) => match operation.as_ref() {
+            Predicate::HasAbility { predicate, .. } => {
+                super::super::search::matches_keyword(game, id, predicate)
+            }
             Predicate::ClassEquals {
                 right: Expr::Literal(Info::Present(class)),
                 ..
