@@ -1,0 +1,41 @@
+cards:
+  BP15-092:
+    abilities:
+      - fanfare:
+          cost:
+            to_cemetery:
+              n: 1
+              sel:
+                kind: follower
+                other: true
+                who: self
+                zone: field
+          do:
+            - destroy: chosen
+            - life:
+                delta: 1
+                who: self
+            - move:
+                to: cemetery
+                top:
+                  n: 2
+                  who: self
+            - draw:
+                n: 1
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

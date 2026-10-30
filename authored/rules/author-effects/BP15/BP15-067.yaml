@@ -1,0 +1,44 @@
+cards:
+  BP15-067:
+    abilities:
+      - auto:
+          do:
+            - damage:
+                n: 3
+                to: chosen
+          on:
+            damaged:
+              during:
+                turn: self
+              kind: ability
+              recipient: this
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - evolve_time:
+          do:
+            - damage:
+                n: 1
+                to: chosen
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                who: self
+                zone: field
+              upto: 2
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

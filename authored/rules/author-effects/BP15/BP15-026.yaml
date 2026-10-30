@@ -1,0 +1,36 @@
+cards:
+  BP15-026:
+    abilities:
+      - keywords:
+          - quick
+        line: 1
+      - line: 2
+        spell:
+          do:
+            - damage:
+                n: 2
+                to: chosen
+            - create:
+                n: 1
+                to: ex
+                token: 黄金の杯
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+    token_sources:
+      - card: BP15-P30
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

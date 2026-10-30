@@ -1,0 +1,34 @@
+cards:
+  BP15-055:
+    abilities:
+      - line: 1
+        play:
+          cost_delta:
+            delta: -2
+            if:
+              cmp:
+                left:
+                  count:
+                    kind: follower
+                    trait: 魔法使い
+                    who: self
+                    zone: field
+                op: ge
+                right: 2
+      - fanfare:
+          do:
+            - draw:
+                n: 1
+            - discard:
+                n: 1
+                who: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

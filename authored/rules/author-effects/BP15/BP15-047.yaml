@@ -1,0 +1,28 @@
+cards:
+  BP15-047:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  not:
+                    entered_from:
+                      from: hand
+                      ref: this
+                then:
+                  - evolve:
+                      ref: this
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

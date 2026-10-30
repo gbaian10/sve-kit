@@ -1,0 +1,57 @@
+cards:
+  BP15-072:
+    abilities:
+      - auto:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 1
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  trait: 絶傑
+                may: true
+                n: 1
+            - move:
+                ref: picked
+                result: taken
+                to: hand
+            - reveal:
+                bind: revealed
+                ref: picked
+          on:
+            damaged:
+              during:
+                turn: self
+              kind: ability
+              recipient: this
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  awakened: true
+                then:
+                  - damage:
+                      n: 1
+                      to: chosen
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                who: self
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

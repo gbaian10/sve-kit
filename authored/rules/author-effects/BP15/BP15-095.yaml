@@ -1,0 +1,34 @@
+cards:
+  BP15-095:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - auto:
+          do:
+            - life:
+                delta: 2
+                who: self
+          on:
+            phase:
+              which: main
+              whose: opp
+        line: 2
+      - evolve_time:
+          do:
+            - destroy:
+                ref:
+                  kind: follower
+                  other: true
+                  who: all
+                  zone: field
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

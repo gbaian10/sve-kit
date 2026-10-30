@@ -1,49 +1,6 @@
 format: 1
 kind: effect_set
 cards:
-  EBD04-004:
-    status: complete
-    abilities:
-      - line: 1
-        kind: evolve
-        body:
-          op: evolve
-          subjects: self
-        costs:
-          - op: pp
-            amount: 3
-      - line: 2
-        kind: static
-        body:
-          op: macro
-          name: guard
-      - line: 3
-        kind: trigger
-        body:
-          op: modify
-          subjects: self.leader
-          hp: 2
-        event: main_start
-        side: opponent
-      - line: 4
-        kind: trigger
-        body:
-          op: if
-          condition:
-            fn: ge
-            args:
-              - count:
-                  zone: field
-                  side: opponent
-                  type: follower
-              - 3
-          then:
-            op: create
-            name: 絶望の奔流
-            count: 1
-            to: ex
-        event: enter
-        subject: self
   EBD04-012:
     status: complete
     abilities:
