@@ -1,0 +1,30 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP18-T06:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-31"
+    abilities:
+      - line: 1
+        auto:
+          "on":
+            moved:
+              from:
+                who: self
+                zone: field
+              to: cemetery
+              sel:
+                name: ドラゴンバスター・イアン
+          do:
+            - damage:
+                to:
+                  leaders: opponents
+                n: 5
+    token:
+      name: ジェラシードラゴン・アデール
+      template: true

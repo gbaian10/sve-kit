@@ -1,0 +1,26 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP18-069:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-31"
+    abilities:
+      - line: 1
+        keywords:
+          - ward
+      - line: 2
+        evolve_time:
+          do:
+            - create:
+                token: ジェラシードラゴン・アデール
+                n: 1
+                to: field
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP18-T06
