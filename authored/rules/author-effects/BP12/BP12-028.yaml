@@ -1,0 +1,39 @@
+cards:
+  BP12-028:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - if:
+                cond:
+                  all:
+                    - cmp:
+                        left:
+                          count:
+                            kind: follower
+                            trait: 指揮官
+                            who: self
+                            zone: field
+                        op: ge
+                        right: 1
+                    - cmp:
+                        left:
+                          count:
+                            kind: follower
+                            trait: 兵士
+                            who: self
+                            zone: field
+                        op: ge
+                        right: 1
+                then:
+                  - draw:
+                      n: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

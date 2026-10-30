@@ -1,0 +1,40 @@
+cards:
+  BP12-102:
+    abilities:
+      - fanfare:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: ホーリータイガー
+        line: 1
+      - activate:
+          cost:
+            act_self: true
+          do:
+            - grant:
+                keywords:
+                  - storm
+                on: chosen
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                name: ホーリータイガー
+                who: self
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+    token_sources:
+      - card: BP01-T17
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

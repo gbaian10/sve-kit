@@ -1,0 +1,35 @@
+cards:
+  BP12-086:
+    abilities:
+      - evolve:
+          cost:
+            pp: 2
+        line: 1
+      - fanfare:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: リペアモード
+            - if:
+                cond:
+                  entered_by:
+                    by: ability
+                    ref: this
+                then:
+                  - evolve:
+                      ref: this
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+    token_sources:
+      - card: BP07-T02
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set
