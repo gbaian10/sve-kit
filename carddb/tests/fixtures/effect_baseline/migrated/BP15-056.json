@@ -1,0 +1,59 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "static",
+      "body": {
+        "op": "adjust_cost",
+        "subjects": "self",
+        "amount": -6,
+        "condition": {
+          "fn": "ge",
+          "args": [
+            {
+              "fn": "distinct",
+              "args": [
+                {
+                  "read": "self.cemetery.cost"
+                }
+              ]
+            },
+            6
+          ]
+        }
+      }
+    },
+    {
+      "line": 2,
+      "kind": "static",
+      "body": {
+        "op": "macro",
+        "name": "storm"
+      }
+    },
+    {
+      "line": 3,
+      "kind": "trigger",
+      "body": {
+        "op": "damage",
+        "subjects": "target.1",
+        "amount": 3
+      },
+      "event": "enter",
+      "subject": "self",
+      "targets": [
+        {
+          "key": "1",
+          "select": {
+            "side": "opponent",
+            "zone": "field",
+            "type": "follower"
+          },
+          "min": 0,
+          "max": 2
+        }
+      ]
+    }
+  ]
+}

@@ -96,8 +96,26 @@ impl BodyContext<'_> {
         path: &str,
         active: &mut BTreeSet<String>,
     ) -> Result<Expr<Int>, LoweringError> {
-        if !matches!(value, ast::Number::Count { count } if matches!(count.zone, ast::CountZone::Cemetery))
-        {
+        let cemetery = match value {
+            ast::Number::Count { count } => matches!(count.zone, ast::CountZone::Cemetery),
+            ast::Number::DistinctNames {
+                distinct_names: query,
+            }
+            | ast::Number::DistinctOriginalCosts {
+                distinct_orig_costs: query,
+            } => {
+                matches!(query.zone, ast::PublicZone::Cemetery)
+            }
+            ast::Number::Literal(_)
+            | ast::Number::Alias(_)
+            | ast::Number::HistoryCount { .. }
+            | ast::Number::LeaderLife { .. }
+            | ast::Number::Minus { .. }
+            | ast::Number::Resource { .. }
+            | ast::Number::Resolution { .. }
+            | ast::Number::Selection { .. } => false,
+        };
+        if !cemetery {
             return Err(unsupported(path));
         }
         let previous = self.scope;

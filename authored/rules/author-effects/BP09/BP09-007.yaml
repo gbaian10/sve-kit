@@ -1,0 +1,49 @@
+cards:
+  BP09-007:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - damage:
+                instead:
+                  - if:
+                      cmp:
+                        left:
+                          distinct_names:
+                            class: エルフ
+                            kind: spell
+                            who: self
+                            zone: cemetery
+                        op: ge
+                        right: 5
+                    n: 5
+                n: 3
+                to:
+                  kind: follower
+                  who: opp
+                  zone: field
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      distinct_names:
+                        class: エルフ
+                        kind: spell
+                        who: self
+                        zone: cemetery
+                    op: ge
+                    right: 5
+                then:
+                  - damage:
+                      n: 2
+                      to:
+                        leader: opp
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

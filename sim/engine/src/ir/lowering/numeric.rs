@@ -15,6 +15,35 @@ pub(super) fn holder() -> Selector {
     }
 }
 
+pub(super) fn aggregate_count(
+    selector: Selector,
+    property: Option<super::super::ObjectProperty>,
+) -> Expr<Int> {
+    let value = match property {
+        Some(property) => Expr::Compute(Box::new(super::super::NatOperation::DistinctCount {
+            objects: selector,
+            property,
+        })),
+        None => Expr::Live(Box::new(super::NatRead::ZoneCount { selector })),
+    };
+    Expr::Compute(Box::new(super::IntOperation::FromNat { value }))
+}
+
+pub(super) fn distinct_count(
+    query: &ast::PublicQuery,
+    property: super::super::ObjectProperty,
+    binding: Binding<ObjectRef>,
+    path: &str,
+) -> Result<Expr<Int>, LoweringError> {
+    if query.other {
+        return Err(unsupported(path));
+    }
+    Ok(aggregate_count(
+        super::costs::public_query(query, binding),
+        Some(property),
+    ))
+}
+
 pub(super) fn resource_increase(
     value: &ast::ResourceIncrease,
     resource: Resource,

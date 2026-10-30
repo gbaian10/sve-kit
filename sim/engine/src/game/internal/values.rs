@@ -11,8 +11,8 @@ use crate::ir::{
     ExecutionRef, HistoryCount, PaymentReference, SpellCountTime, ValueEquality,
 };
 use crate::ir::{
-    FollowPermission, MemberProjection, MovementEvent, MovementReceipt, ObjectReceipt, ObjectView,
-    PlayerRead, ReceiptId, Role, SelectionView,
+    FollowPermission, MemberProjection, MovementEvent, MovementReceipt, ObjectProperty,
+    ObjectReceipt, ObjectView, PlayerRead, ReceiptId, Role, SelectionView,
 };
 use alloc::collections::BTreeSet;
 use core::convert::identity;
@@ -578,6 +578,33 @@ impl Execution {
                     self.objects(game, objects)?.len(),
                 )
                 .map_err(invalid)?)),
+                NatOperation::DistinctCount { objects, property } => {
+                    let members = self.public_zone_objects(game, objects)?;
+                    let count = match property {
+                        ObjectProperty::Names => {
+                            let mut names = BTreeSet::new();
+                            for member in members {
+                                names.extend(game.card_names(self.object_id(member)?)?);
+                            }
+                            names.len()
+                        }
+                        ObjectProperty::Cost => {
+                            let mut costs = BTreeSet::new();
+                            for member in members {
+                                let printed = game.internal_cost_print(self.object_id(member)?)?;
+                                let cost = printed
+                                    .get("cost")
+                                    .ok_or_else(|| invalid("missing printed cost"))?;
+                                if !cost.is_null() && cost.as_str() != Some("-") {
+                                    costs.insert(super::cost::printed_cost(cost)?);
+                                }
+                            }
+                            costs.len()
+                        }
+                        _ => return Err(unsupported("distinct count property")),
+                    };
+                    Ok(Nat(u64::try_from(count).map_err(invalid)?))
+                }
                 NatOperation::CheckedInt { value } => Ok(Nat(u64::try_from(
                     self.integer(game, value)?.0,
                 )
@@ -594,7 +621,7 @@ impl Execution {
                         else_value
                     },
                 ),
-                _ => Err(unsupported("natural operation")),
+                NatOperation::ReceiptActualSum { .. } => Err(unsupported("natural operation")),
             },
         }
     }

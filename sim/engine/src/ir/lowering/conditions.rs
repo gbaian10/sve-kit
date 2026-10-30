@@ -407,6 +407,20 @@ impl BodyContext<'_> {
                 })))
             }
             ast::Number::Count { count } => self.zone_count(count, path),
+            ast::Number::DistinctNames { distinct_names } => super::numeric::distinct_count(
+                distinct_names,
+                super::super::ObjectProperty::Names,
+                Binding::new(self.allocator.id(path)?, self.scope),
+                path,
+            ),
+            ast::Number::DistinctOriginalCosts {
+                distinct_orig_costs,
+            } => super::numeric::distinct_count(
+                distinct_orig_costs,
+                super::super::ObjectProperty::Cost,
+                Binding::new(self.allocator.id(path)?, self.scope),
+                path,
+            ),
             ast::Number::Resource { resource } => {
                 Ok(Expr::Live(Box::new(IntRead::PlayerResource {
                     player: match resource.who {
@@ -452,33 +466,32 @@ impl BodyContext<'_> {
         }
         let predicate =
             super::selection::field_filter(&super::selection::ObjectFilter::from(count), binding);
-        Ok(Expr::Compute(Box::new(IntOperation::FromNat {
-            value: Expr::Live(Box::new(NatRead::ZoneCount {
-                selector: Selector::Zone {
-                    players: PlayerSet {
-                        relation: match count.who {
-                            ast::LeaderSide::Controller => PlayerRelation::SelfPlayer,
-                            ast::LeaderSide::Opponent => PlayerRelation::Opponents,
-                        },
-                        relative_to: PlayerRef::Controller {},
-                        cardinality: Cardinality {
-                            minimum: Nat(1),
-                            maximum: Some(Nat(1)),
-                        },
-                        text_quantifier: TextQuantifier::Implicit,
+        Ok(super::numeric::aggregate_count(
+            Selector::Zone {
+                players: PlayerSet {
+                    relation: match count.who {
+                        ast::LeaderSide::Controller => PlayerRelation::SelfPlayer,
+                        ast::LeaderSide::Opponent => PlayerRelation::Opponents,
                     },
-                    zone: match count.zone {
-                        ast::CountZone::Field => ZoneKind::Field,
-                        ast::CountZone::Ex => ZoneKind::Ex,
-                        ast::CountZone::Deck => ZoneKind::Deck,
-                        ast::CountZone::Hand => ZoneKind::Hand,
-                        ast::CountZone::Cemetery => ZoneKind::Cemetery,
+                    relative_to: PlayerRef::Controller {},
+                    cardinality: Cardinality {
+                        minimum: Nat(1),
+                        maximum: Some(Nat(1)),
                     },
-                    view: SelectionView::Current {},
-                    binding,
-                    predicate: Box::new(predicate),
+                    text_quantifier: TextQuantifier::Implicit,
                 },
-            })),
-        })))
+                zone: match count.zone {
+                    ast::CountZone::Field => ZoneKind::Field,
+                    ast::CountZone::Ex => ZoneKind::Ex,
+                    ast::CountZone::Deck => ZoneKind::Deck,
+                    ast::CountZone::Hand => ZoneKind::Hand,
+                    ast::CountZone::Cemetery => ZoneKind::Cemetery,
+                },
+                view: SelectionView::Current {},
+                binding,
+                predicate: Box::new(predicate),
+            },
+            None,
+        ))
     }
 }
