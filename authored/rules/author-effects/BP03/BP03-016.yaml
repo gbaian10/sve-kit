@@ -1,0 +1,27 @@
+cards:
+  BP03-016:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - move:
+                ref: victim
+                to: hand
+            - life:
+                delta: 1
+                who: self
+          targets:
+            - bind: victim
+              from:
+                who: self
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

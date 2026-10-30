@@ -1,0 +1,31 @@
+cards:
+  BP03-077:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - lastword:
+          do:
+            - life:
+                delta: 2
+                who: self
+        line: 2
+      - activate:
+          cost:
+            leader_life: 2
+          do:
+            - grant:
+                keywords:
+                  - bane
+                on: this
+          per_turn: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

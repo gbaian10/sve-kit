@@ -1,0 +1,32 @@
+cards:
+  BP03-095:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - evolve_time:
+          do:
+            - search:
+                n: 1
+                sel:
+                  as: candidate
+                  kind: follower
+                  where:
+                    cmp:
+                      left:
+                        power_of: candidate
+                      op: le
+                      right: 2
+                  who: self
+                  zone: deck
+                to: hand
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

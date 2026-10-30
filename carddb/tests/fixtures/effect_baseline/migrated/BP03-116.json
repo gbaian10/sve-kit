@@ -1,0 +1,37 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "trigger",
+      "body": {
+        "op": "seq",
+        "steps": [
+          {
+            "op": "damage",
+            "subjects": {
+              "side": "both",
+              "zone": "field",
+              "type": "follower"
+            },
+            "amount": 5
+          },
+          {
+            "op": "damage",
+            "subjects": "opponent.leader",
+            "amount": 3
+          },
+          {
+            "op": "discard",
+            "subjects": {
+              "side": "self",
+              "zone": "hand"
+            }
+          }
+        ]
+      },
+      "event": "evolve",
+      "subject": "self"
+    }
+  ]
+}

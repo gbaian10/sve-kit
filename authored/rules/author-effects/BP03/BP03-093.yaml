@@ -1,0 +1,39 @@
+cards:
+  BP03-093:
+    abilities:
+      - fanfare:
+          do:
+            - life:
+                delta: 2
+                who: self
+            - buff:
+                hp: 2
+                on:
+                  kind: follower
+                  other: true
+                  who: self
+                  zone: field
+                power: 0
+        line: 1
+      - lastword:
+          do:
+            - life:
+                delta: 2
+                who: self
+            - buff:
+                hp: 2
+                on:
+                  kind: follower
+                  who: self
+                  zone: field
+                power: 0
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

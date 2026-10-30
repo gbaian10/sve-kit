@@ -1,0 +1,43 @@
+cards:
+  BP03-096:
+    abilities:
+      - fanfare:
+          do:
+            - search:
+                n: 1
+                sel:
+                  trait: 童話
+                  who: self
+                  zone: deck
+                to: hand
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - pp: 1
+              - act_self: true
+              - self_to_cemetery: true
+          do:
+            - grant:
+                keywords:
+                  - rush
+                  - assail
+                on: victim
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                trait: 童話
+                who: self
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

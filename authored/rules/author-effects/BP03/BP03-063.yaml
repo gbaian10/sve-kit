@@ -1,0 +1,31 @@
+cards:
+  BP03-063:
+    abilities:
+      - keywords:
+          - assail
+          - ward
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  awakened: true
+                then:
+                  - buff:
+                      hp: 0
+                      on: this
+                      power: 4
+                  - grant:
+                      keywords:
+                        - rush
+                      on: this
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

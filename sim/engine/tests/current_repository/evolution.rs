@@ -219,6 +219,13 @@ fn run_cases(cases: &[EvolutionCase]) {
             assert_eq!(step.outcome, "resolved", "{base} evolution resolves");
             check_events(&step, seat, pay["sep"] == 1_u8);
             check_views(&game, seat, base, resource, *stats, *remaining);
+            if resource != "BP19-002" && selection().current.contains_key(resource) {
+                assert!(
+                    game.internal_pending_choice().is_ok(),
+                    "{resource} has admitted printed abilities after evolution"
+                );
+                continue;
+            }
             // Evolution must retain the pending printed abilities after paying its resource cost.
             assert_eq!(
                 game.legal().unwrap(),
@@ -563,7 +570,11 @@ fn current_evolution_rejects_wrong_owner_name_and_unpayable_cost_atomically() {
 
 #[test]
 fn ordinary_unloaded_cards_have_no_evolution_resource_ability_exemption() {
-    for card in ["BP03-116", "BP01-042"] {
+    for card in ["BP03-061", "BP01-042"] {
+        assert!(
+            !selection().current.contains_key(card),
+            "{card} must remain an unloaded sample"
+        );
         let mut initial = initial("BP01-110", "BP01-111", "P1");
         initial["players"]["P1"]["zones"]["field"] = json!([]);
         initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"unloaded","card":card}]);
