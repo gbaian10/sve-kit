@@ -39,6 +39,10 @@ fn selected() -> &'static SelectedEffects {
 }
 
 pub(super) fn move_material(from: ZoneKind, to: OwnerZone) -> Action {
+    move_named(from, to, "movement material")
+}
+
+pub(super) fn move_named(from: ZoneKind, to: OwnerZone, name: &str) -> Action {
     let mut action = movement(to);
     let Action::Move { objects, .. } = &mut action else {
         panic!("movement producer")
@@ -56,7 +60,7 @@ pub(super) fn move_material(from: ZoneKind, to: OwnerZone) -> Action {
                 object: Box::new(ObjectOperand::Bound { binding: *binding }),
             },
         })),
-        right: Expr::Literal(vec![CardName("movement material".into())]),
+        right: Expr::Literal(vec![CardName(name.into())]),
     }));
     action
 }
