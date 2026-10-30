@@ -1,0 +1,23 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP15-015:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-30"
+    abilities:
+      - line: 1
+        evolve_time:
+          do:
+            - search:
+                sel:
+                  who: self
+                  zone: deck
+                  kind: follower
+                  name_contains: エズディア
+                to: hand
+                n: 1
