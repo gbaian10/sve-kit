@@ -1,0 +1,56 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP22-081:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-31"
+    abilities:
+      - line: 1
+        keywords:
+          - storm
+      - line: 2
+        auto:
+          "on":
+            moved:
+              from:
+                who: self
+                zone: field
+              to: cemetery
+              sel:
+                kind: follower
+                trait: ゴブリン
+              during:
+                turn: self
+          do:
+            - damage:
+                to:
+                  leaders: opponents
+                n: 1
+            - life:
+                who: self
+                delta: 1
+      - line: 3
+        fanfare:
+          cost:
+            to_cemetery:
+              sel:
+                who: self
+                zone: field
+                kind: follower
+                trait: ゴブリン
+                other: true
+              n: 1
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - destroy: enemy
