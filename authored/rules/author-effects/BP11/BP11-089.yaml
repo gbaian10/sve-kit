@@ -1,0 +1,44 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP11-089:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-30"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        keywords:
+          - ward
+      - line: 3
+        fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      minus:
+                        - count:
+                            who: self
+                            zone: field
+                            kind: amulet
+                        - minus:
+                            - 0
+                            - count:
+                                who: self
+                                zone: ex
+                                kind: amulet
+                    op: ge
+                    right: 2
+                then:
+                  - damage:
+                      to:
+                        leaders: opponents
+                      n: 2
