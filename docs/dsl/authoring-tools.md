@@ -117,6 +117,8 @@ ignored:
 
 墓場的自身回場訂閱可寫 `auto: {zone: cemetery, on: {played: {who: self, sel: {kind: spell, class: ドラゴン}, during: {turn: self}}}, cost: {pp: 1}, do: [{move: {ref: this, to: field}}]}`。只在自己回合、自己適正打出指定職業法術時擷取當時已在墓場的來源；該法術本文才送墓的來源不補觸發。多張來源各自待機、各自宣告及支付 PP；拒付或不足費用不回場，滿場時付款後沒有成功移動。此准入只接必需頭付款與單一步驟自身回場，其他區域、任意目標回場及一般事件欄位讀取仍維持原邊界。
 
+自己墓場的卡可放在 `targets`，例如 `from: {who: self, zone: cemetery, kind: follower, trait: 竜族}`；共用正式目標程序在付款前固定候選與宣告，沒有必需目標時不能付款。結算本文用 `move: {ref: returned, to: hand}` 回收。不能用本文的 `choose` 代替正式目標，否則會把本次付款才送墓的卡納入候選。這個目標入口不擴充回場的種類或容量選擇能力。
+
 公開場上物件移至 EX 的 `move` 可用 `result: moved`，後續 `if: {cond: {did: moved}, then: [...]}` 只在至少一個成員實際移動成功時執行；選零或目的 EX 已滿不算成功，搬兩張也只執行一次後句。這個子集只接受已綁定的 Move 收據名稱，不接受其他結果種類、過濾條件或前向／分支外引用；一般 EX 搬移的部分容量選擇仍明確拒絕並還原，不因此擴充容量決策。
 
 動態數量另接受本次 `destroy: {ref: ..., result: broken}` 的成功回條：`n: {count: {in: {objects_of: broken, view: before}, as: victim, where: {cmp: {left: {player: {master_of: victim}}, op: eq, right: {player: p}}}}}`。只計本次實際從場上被破壞者，按離場前控制者區分，包含隨後消去的 token；破壞失敗不計數，不按目前區域或擁有者重新計算。
