@@ -1,0 +1,55 @@
+cards:
+  BP10-090:
+    abilities:
+      - keywords:
+          - rush
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        kind: spell
+                        who: self
+                        zone: cemetery
+                    op: ge
+                    right: 1
+                then:
+                  - destroy: chosen
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        kind: amulet
+                        who: self
+                        zone: field
+                    op: ge
+                    right: 1
+                then:
+                  - damage:
+                      n: 5
+                      to:
+                        leaders: opponents
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

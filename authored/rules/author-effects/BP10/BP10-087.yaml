@@ -1,0 +1,29 @@
+cards:
+  BP10-087:
+    abilities:
+      - evolve_time:
+          do:
+            - if:
+                cond:
+                  crimson: true
+                then:
+                  - damage:
+                      n: 3
+                      to: chosen
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set
