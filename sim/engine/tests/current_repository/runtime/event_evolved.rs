@@ -27,7 +27,7 @@ fn selected() -> &'static SelectedEffects {
     })
 }
 
-fn position(card: &str, side: &str) -> Value {
+pub(super) fn position(card: &str, side: &str) -> Value {
     let mut value = draw_position();
     value["turn"]["active"] = json!(side);
     value["players"][side]["pp"] = json!({"current":10_u8,"max":10_u8});
@@ -42,9 +42,13 @@ fn position(card: &str, side: &str) -> Value {
 }
 
 pub(super) fn initial_game(card: &str, side: &str) -> Game {
+    from_position(&position(card, side))
+}
+
+pub(super) fn from_position(value: &Value) -> Game {
     let mut game = Game::from_selected_effects(
         selected().clone(),
-        &position(card, side),
+        value,
         &Value::Null,
         &Value::Null,
         "printed-evolution-observer",
