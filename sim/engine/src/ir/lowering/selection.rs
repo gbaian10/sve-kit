@@ -150,7 +150,7 @@ impl BodyContext<'_> {
             || choice.from.class.is_some()
             || choice.from.not_class.is_some()
             || self.targets.contains_key(&choice.bind)
-            || self.searches.contains_key(&choice.bind)
+            || self.searches.contains(&choice.bind)
             || self.observations.contains_key(&choice.bind)
         {
             return Err(unsupported(path));

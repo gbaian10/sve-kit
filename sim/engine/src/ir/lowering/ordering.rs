@@ -19,6 +19,20 @@ impl BodyContext<'_> {
         receipt: ReceiptId,
         path: &str,
     ) -> Result<(), LoweringError> {
+        if let ast::Step::Move(value) = step
+            && matches!(value.to, ast::Destination::Ex)
+            && let Some(name) = &value.result
+        {
+            self.ex_outputs.insert(
+                name.clone(),
+                Selector::MoveAfter {
+                    receipt: MovementReceipt::Move {
+                        receipt: ReceiptReference::new(receipt),
+                    },
+                    permission: super::super::FollowPermission::SameEffectExplicitReference {},
+                },
+            );
+        }
         let saved = match step {
             ast::Step::Destroy(ast::ObjectAction::Long {
                 result: Some(name), ..
@@ -88,7 +102,7 @@ impl BodyContext<'_> {
         };
         if let Some((name, saved_receipt)) = saved
             && (self.targets.contains_key(name)
-                || self.searches.contains_key(name)
+                || self.searches.contains(name)
                 || self
                     .observations
                     .insert(name.clone(), saved_receipt)

@@ -130,19 +130,24 @@ impl BodyContext<'_> {
     ) -> Result<(), LoweringError> {
         if let ast::Step::Search(search) = step
             && let Some(name) = &search.result
-            && self
-                .searches
-                .insert(
-                    name.clone(),
-                    (
-                        receipt,
-                        matches!(
-                            search.to,
-                            ast::SearchDestination::Single(ast::SearchZone::Ex)
-                        ),
-                    ),
-                )
-                .is_some()
+            && matches!(
+                search.to,
+                ast::SearchDestination::Single(ast::SearchZone::Ex)
+            )
+        {
+            self.ex_outputs.insert(
+                name.clone(),
+                Selector::MoveAfter {
+                    receipt: MovementReceipt::Search {
+                        receipt: ReceiptReference::new(receipt),
+                    },
+                    permission: FollowPermission::SameEffectExplicitReference {},
+                },
+            );
+        }
+        if let ast::Step::Search(search) = step
+            && let Some(name) = &search.result
+            && !self.searches.insert(name.clone())
         {
             return Err(unsupported(path));
         }
@@ -322,19 +327,15 @@ impl BodyContext<'_> {
         let ast::Objects::Follow { follow } = &installation.on else {
             return Err(unsupported(path));
         };
-        let Some((receipt, true)) = self.searches.get(follow) else {
-            return Err(unsupported(path));
-        };
+        let objects = self
+            .ex_outputs
+            .get(follow)
+            .cloned()
+            .ok_or_else(|| unsupported(path))?;
         let ast::Affected::Affected = modifier.when_playing.subjects;
         if modifier.delta > 0 || !matches!(installation.until, Some(ast::Until::Turn)) {
             return Err(unsupported(path));
         }
-        let objects = Selector::MoveAfter {
-            receipt: MovementReceipt::Search {
-                receipt: ReceiptReference::new(*receipt),
-            },
-            permission: FollowPermission::SameEffectExplicitReference {},
-        };
         let affected = Binding::new(1, self.card_allocator.scope(path)?);
         let duration = numeric::duration(installation.until.as_ref(), path)?;
         Ok(Action::InstallEffect {

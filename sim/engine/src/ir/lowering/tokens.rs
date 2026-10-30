@@ -27,11 +27,17 @@ impl BodyContext<'_> {
         }
         let output = Binding::new(self.allocator.id(path)?, self.scope);
         if let Some(name) = value.result.as_ref().or(value.bind.as_ref())
-            && (self.searches.contains_key(name)
+            && (self.searches.contains(name)
                 || self.observations.contains_key(name)
                 || self.targets.insert(name.clone(), output).is_some())
         {
             return Err(unsupported(path));
+        }
+        if kind == ZoneKind::Ex
+            && let Some(name) = value.result.as_ref().or(value.bind.as_ref())
+        {
+            self.ex_outputs
+                .insert(name.clone(), Selector::Bound { reference: output });
         }
         Ok(Action::Token {
             tokens: vec![TokenSpec {
@@ -135,7 +141,7 @@ impl BodyContext<'_> {
         ) || self.players.contains_key(&each.binding)
             || self.targets.contains_key(&each.binding)
             || self.observations.contains_key(&each.binding)
-            || self.searches.contains_key(&each.binding)
+            || self.searches.contains(&each.binding)
             || create.by.as_ref() != Some(&each.binding)
             || create.result.is_some()
             || create.bind.is_some()
