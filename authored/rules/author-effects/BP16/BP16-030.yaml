@@ -1,0 +1,25 @@
+cards:
+  BP16-030:
+    abilities:
+      - keywords:
+          - storm
+        line: 1
+      - lastword:
+          do:
+            - search:
+                n: 1
+                sel:
+                  name: 魔煌のトリックスター・ラスティ
+                  who: self
+                  zone: deck
+                to: hand
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

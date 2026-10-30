@@ -1,0 +1,36 @@
+cards:
+  BP16-056:
+    abilities:
+      - keywords:
+          - storm
+          - intimidate
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      resource:
+                        kind: pp_max
+                        who: self
+                    op: eq
+                    right: 10
+                then:
+                  - buff:
+                      on: this
+                      power: 1
+                  - grant:
+                      keywords:
+                        - aura
+                      on: this
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set
