@@ -653,7 +653,37 @@ pub(super) struct SearchQuery {
     pub zone: DeckZone,
     pub kind: Option<SearchKind>,
     pub r#trait: Option<String>,
+    #[serde(default)]
+    pub traits_all: Vec<String>,
     pub name: Option<String>,
+    pub keyword: Option<String>,
+    #[serde(rename = "as")]
+    pub alias: Option<String>,
+    pub r#where: Option<SearchWhere>,
+    pub cost_eq: Option<u64>,
+    pub cost_le: Option<u64>,
+    pub cost_ge: Option<u64>,
+    pub orig_cost_eq: Option<u64>,
+    pub orig_cost_le: Option<u64>,
+    pub orig_cost_ge: Option<u64>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct SearchWhere {
+    pub cmp: SearchPowerComparison,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct SearchPowerComparison {
+    pub left: SearchPower,
+    pub op: Comparison,
+    pub right: u64,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct SearchPower {
+    pub power_of: String,
 }
 
 #[derive(Clone, Deserialize)]

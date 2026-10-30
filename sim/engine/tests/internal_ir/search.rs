@@ -974,3 +974,95 @@ pub(super) mod partition;
 
 #[path = "search/replacement.rs"]
 mod replacement;
+#[test]
+fn search_numeric_and_keyword_filters_reject_source_reads_before_private_population() {
+    let holder = ObjectView::Current {
+        object: Box::new(ObjectOperand::SourceHolder {}),
+    };
+    let predicates = [
+        Expr::Compute(Box::new(Predicate::CompareInt {
+            left: Expr::Compute(Box::new(IntOperation::InformationOrZero {
+                information: NumberRead::Stats {
+                    object: holder.clone(),
+                    view: CharacteristicView::Effective,
+                    property: Stat::Attack,
+                },
+            })),
+            comparison: Comparison::LessEqual,
+            right: Expr::Literal(Int(3)),
+        })),
+        Expr::Compute(Box::new(Predicate::HasAbility {
+            abilities: Expr::Live(Box::new(AbilitiesRead::Abilities {
+                object: holder,
+                view: CharacteristicView::Effective,
+            })),
+            predicate: Box::new(AbilityPredicate {
+                kind: None,
+                keyword: Some(KeywordId::Storm),
+                except: vec![],
+                holder: None,
+                origin: None,
+            }),
+        })),
+    ];
+    for predicate in predicates {
+        let mut game = game(1, 10);
+        let before = serde_json::to_value(&game).unwrap();
+        let failure = game
+            .execute_internal(
+                &checked(vec![search(predicate, cardinality(1, 1), hand())]),
+                &source("synthetic"),
+                context(1),
+            )
+            .unwrap_err();
+        assert!(
+            matches!(failure, EngineFailure::Unsupported(_)),
+            "private search may read only its authenticated candidate"
+        );
+        assert!(
+            serde_json::to_value(&game).unwrap() == before,
+            "a rejected private filter preserves all state and authority"
+        );
+    }
+}
+
+#[test]
+fn search_stats_information_or_zero_uses_zero_for_nonfollowers() {
+    let position = setup(
+        1,
+        json!([
+            {"id":"spell","card":"unit-spell"},
+            {"id":"follower","card":"unit-follower","state":{"power":4_u8}}
+        ]),
+    );
+    let mut game = Game::new(
+        catalog(),
+        &position,
+        &Value::Null,
+        &Value::Null,
+        "search-stat-information",
+    )
+    .unwrap();
+    let predicate = Expr::Compute(Box::new(Predicate::CompareInt {
+        left: Expr::Compute(Box::new(IntOperation::InformationOrZero {
+            information: NumberRead::Stats {
+                object: ObjectView::Current {
+                    object: Box::new(ObjectOperand::Bound {
+                        binding: Binding::new(1, ScopeId(2)),
+                    }),
+                },
+                view: CharacteristicView::Effective,
+                property: Stat::Attack,
+            },
+        })),
+        comparison: Comparison::Equal,
+        right: Expr::Literal(Int(0)),
+    }));
+    execute(&mut game, 1, search(predicate, cardinality(1, 1), hand()));
+    let result = answer(&mut game, 1, SearchAnswer::Ungrouped(vec![0]));
+    assert_eq!(outcome(&result).found.len(), 1);
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["hand"],
+        json!(["s", "spell"])
+    );
+}

@@ -234,6 +234,7 @@ fn check_requirements(
                         .locations
                         .iter()
                         .all(|location| origins.contains(&location.ir_path)))
+                    || super::search::keyword_requirement(&requirements, requirement, origins)
                     || super::search::private_requirement(requirement.capability.code))
         })
         .collect::<Vec<_>>();

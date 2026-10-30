@@ -75,6 +75,21 @@ impl Game {
         &self,
         holder: &str,
     ) -> Result<Vec<Located<Ability>>> {
+        let field = self.object(holder)?.zone == "field";
+        Ok(self
+            .internal_characteristic_abilities(holder)?
+            .into_iter()
+            .filter(|ability| {
+                super::printed_keywords::card_declaration(&ability.node).is_none() || field
+            })
+            .collect())
+    }
+
+    // A card can have a printed keyword while its zone prevents that keyword from acting.
+    pub(in crate::game::internal) fn internal_characteristic_abilities(
+        &self,
+        holder: &str,
+    ) -> Result<Vec<Located<Ability>>> {
         let object = self.object(holder)?;
         if self.card_runtime.is_empty() {
             if object.state["silenced"] != true {
@@ -110,8 +125,7 @@ impl Game {
                 printed_origin(&ability.node.source.origin).is_ok_and(|(printed, _)| {
                     self.printed_face_ordinal(&card, printed)
                         .is_ok_and(|ordinal| ordinal == face)
-                }) && (super::printed_keywords::card_declaration(&ability.node).is_none()
-                    || object.zone == "field")
+                })
             })
             .cloned()
             .collect())

@@ -217,6 +217,7 @@ impl BodyContext<'_> {
 pub(super) struct ObjectFilter<'query> {
     pub kind: Option<&'query ast::SearchKind>,
     pub trait_id: Option<&'query str>,
+    pub all_traits: &'query [String],
     pub class: Option<&'query str>,
     pub not_class: Option<&'query str>,
     pub token: Option<bool>,
@@ -225,6 +226,8 @@ pub(super) struct ObjectFilter<'query> {
     pub cost: [Option<u64>; 3],
     pub original_cost: [Option<u64>; 3],
     pub hp_at_most: Option<u64>,
+    pub power_at_most: Option<u64>,
+    pub keyword: Option<super::super::KeywordId>,
 }
 
 impl<'query> From<&'query ast::TargetQuery> for ObjectFilter<'query> {
@@ -232,6 +235,7 @@ impl<'query> From<&'query ast::TargetQuery> for ObjectFilter<'query> {
         Self {
             kind: query.kind.as_ref(),
             trait_id: query.r#trait.as_deref(),
+            all_traits: &[],
             class: query.class.as_deref(),
             not_class: query.not_class.as_deref(),
             token: None,
@@ -240,6 +244,7 @@ impl<'query> From<&'query ast::TargetQuery> for ObjectFilter<'query> {
             cost: [query.cost_eq, query.cost_le, query.cost_ge],
             original_cost: [query.orig_cost_eq, query.orig_cost_le, query.orig_cost_ge],
             hp_at_most: query.hp_le,
+            ..Self::default()
         }
     }
 }
@@ -273,6 +278,20 @@ impl<'query> From<&'query ast::CountQuery> for ObjectFilter<'query> {
     }
 }
 
+impl<'query> From<&'query ast::SearchQuery> for ObjectFilter<'query> {
+    fn from(query: &'query ast::SearchQuery) -> Self {
+        Self {
+            kind: query.kind.as_ref(),
+            trait_id: query.r#trait.as_deref(),
+            all_traits: &query.traits_all,
+            name: query.name.as_deref(),
+            cost: [query.cost_eq, query.cost_le, query.cost_ge],
+            original_cost: [query.orig_cost_eq, query.orig_cost_le, query.orig_cost_ge],
+            ..Self::default()
+        }
+    }
+}
+
 pub(super) fn field_filter(
     filter: &ObjectFilter<'_>,
     candidate: super::Binding<super::super::ObjectRef>,
@@ -285,6 +304,14 @@ pub(super) fn field_filter(
     let mut predicates = Vec::new();
     if !matches!(base, super::Expr::Literal(super::Bool(true))) {
         predicates.push(base);
+    }
+    for trait_id in filter.all_traits {
+        predicates.push(super::search::object_filter(
+            None,
+            Some(trait_id),
+            None,
+            candidate,
+        ));
     }
     if let Some(contains) = filter.contains {
         predicates.push(super::Expr::Compute(Box::new(
@@ -323,6 +350,48 @@ pub(super) fn field_filter(
             super::Expr::Compute(Box::new(super::Predicate::Not { predicate }))
         });
     }
+    predicates.extend(numeric_limits(filter, &object));
+    if let Some(keyword) = filter.keyword {
+        predicates.push(super::Expr::Compute(Box::new(
+            super::Predicate::HasAbility {
+                abilities: super::Expr::Live(Box::new(super::super::AbilitiesRead::Abilities {
+                    object: object.clone(),
+                    view: CharacteristicView::Effective,
+                })),
+                predicate: Box::new(super::super::AbilityPredicate {
+                    kind: None,
+                    keyword: Some(keyword),
+                    except: vec![],
+                    holder: None,
+                    origin: None,
+                }),
+            },
+        )));
+    }
+    if let Some(limit) = filter.hp_at_most {
+        predicates.push(number_limit(
+            NumberRead::Stats {
+                object,
+                view: CharacteristicView::Effective,
+                property: super::super::Stat::Life,
+            },
+            Comparison::LessEqual,
+            limit,
+        ));
+    }
+    match predicates.as_mut_slice() {
+        [] => super::Expr::Literal(super::Bool(true)),
+        [_] => predicates.swap_remove(0),
+        _ => super::Expr::Compute(Box::new(super::Predicate::And { predicates })),
+    }
+}
+
+fn numeric_limits(
+    filter: &ObjectFilter<'_>,
+    object: &super::ObjectView,
+) -> Vec<super::Expr<super::Bool>> {
+    use super::super::{CharacteristicView, Comparison, NumberRead};
+    let mut predicates = Vec::new();
     for (view, limits) in [
         (CharacteristicView::Effective, filter.cost),
         (CharacteristicView::Original, filter.original_cost),
@@ -344,22 +413,18 @@ pub(super) fn field_filter(
             }
         }
     }
-    if let Some(limit) = filter.hp_at_most {
+    if let Some(limit) = filter.power_at_most {
         predicates.push(number_limit(
             NumberRead::Stats {
-                object,
+                object: object.clone(),
                 view: CharacteristicView::Effective,
-                property: super::super::Stat::Life,
+                property: super::super::Stat::Attack,
             },
             Comparison::LessEqual,
             limit,
         ));
     }
-    match predicates.as_mut_slice() {
-        [] => super::Expr::Literal(super::Bool(true)),
-        [_] => predicates.swap_remove(0),
-        _ => super::Expr::Compute(Box::new(super::Predicate::And { predicates })),
-    }
+    predicates
 }
 
 fn number_limit(

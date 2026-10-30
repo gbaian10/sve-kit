@@ -31,15 +31,30 @@ fn view(binding: Binding<ObjectRef>) -> ObjectView {
     }
 }
 
-fn filter(query: &ast::SearchQuery, candidate: Binding<ObjectRef>) -> Expr<Bool> {
+fn filter(
+    query: &ast::SearchQuery,
+    candidate: Binding<ObjectRef>,
+    path: &str,
+) -> Result<Expr<Bool>, LoweringError> {
     let ast::SelfPlayer::Controller = query.who;
     let ast::DeckZone::Deck = query.zone;
-    object_filter(
-        query.kind.as_ref(),
-        query.r#trait.as_deref(),
-        query.name.as_deref(),
-        candidate,
-    )
+    let mut filter = super::selection::ObjectFilter::from(query);
+    if let Some(keyword) = &query.keyword {
+        filter.keyword =
+            Some(super::keywords::keyword_id(keyword).ok_or_else(|| unsupported(path))?);
+    }
+    filter.power_at_most = match (&query.alias, &query.r#where) {
+        (None, None) => None,
+        (Some(alias), Some(condition))
+            if !alias.is_empty()
+                && condition.cmp.left.power_of == *alias
+                && matches!(condition.cmp.op, ast::Comparison::Le) =>
+        {
+            Some(condition.cmp.right)
+        }
+        _ => return Err(unsupported(path)),
+    };
+    Ok(super::selection::field_filter(&filter, candidate))
 }
 
 pub(super) fn object_filter(
@@ -164,7 +179,7 @@ impl BodyContext<'_> {
                 return Err(unsupported(path));
             }
             (
-                filter(query, candidate),
+                filter(query, candidate, path)?,
                 quantity(search.n, search.upto, path)?,
                 None,
             )
@@ -181,7 +196,7 @@ impl BodyContext<'_> {
                     .checked_add(cardinality.maximum.ok_or_else(|| unsupported(path))?.0)
                     .ok_or_else(|| unsupported(path))?;
                 let binding = Binding::new(1, self.card_allocator.scope(path)?);
-                let predicate = filter(&group.sel, binding);
+                let predicate = filter(&group.sel, binding, path)?;
                 if matches!(predicate, Expr::Literal(_)) {
                     return Err(unsupported(path));
                 }
