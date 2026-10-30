@@ -1,0 +1,49 @@
+cards:
+  DSD01a-015:
+    abilities:
+      - fanfare:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - create:
+                        n: 1
+                        to: ex
+                        token: マナリアの魔弾
+                  - - if:
+                        cond:
+                          cmp:
+                            left:
+                              count:
+                                trait: 学院
+                                who: self
+                                zone: cemetery
+                            op: ge
+                            right: 5
+                        then:
+                          - move:
+                              ref: returned
+                              to: hand
+          targets:
+            - bind: returned
+              from:
+                kind: spell
+                trait: 学院
+                who: self
+                zone: cemetery
+              n: 1
+              option: 2
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-10-30"
+    token_sources:
+      - card: DSD01a-T01
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set
