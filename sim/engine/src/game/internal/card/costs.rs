@@ -2,8 +2,8 @@ use super::{Execution, Game, Result, WellFormedCardProgram, invalid, unsupported
 use crate::game::internal::values::compare;
 use crate::ir::{AbilityOrigin, AbilityQualification, AbilitySource, CostSpec, ObjectOperand};
 use crate::ir::{
-    Bool, CostChange, Expr, Int, IntOperation, Nat, NatRead, PlayerRef, Predicate, Selector,
-    SourceSpan,
+    Bool, CostChange, Expr, Int, IntOperation, Nat, NatOperation, NatRead, ObjectProperty,
+    PlayerRef, Predicate, Selector, SourceSpan,
 };
 use alloc::collections::BTreeSet;
 
@@ -150,6 +150,13 @@ fn check_count(value: &Expr<Nat>) -> Result<()> {
         Expr::Literal(_) => Ok(()),
         Expr::Live(read) => match read.as_ref() {
             NatRead::ZoneCount { selector } => check_objects(selector),
+            _ => Err(unsupported("play cost public count")),
+        },
+        Expr::Compute(operation) => match operation.as_ref() {
+            NatOperation::DistinctCount {
+                objects,
+                property: ObjectProperty::Names | ObjectProperty::Cost,
+            } => check_objects(objects),
             _ => Err(unsupported("play cost public count")),
         },
         _ => Err(unsupported("play cost public count")),
@@ -301,14 +308,7 @@ fn condition_value(game: &Game, execution: &Execution, condition: &Expr<Bool>) -
 }
 
 fn count(game: &Game, execution: &Execution, value: &Expr<Nat>) -> Result<u64> {
-    match value {
-        Expr::Literal(Nat(value)) => Ok(*value),
-        Expr::Live(read) => match read.as_ref() {
-            NatRead::ZoneCount { selector } => object_count(game, execution, selector),
-            _ => Err(unsupported("play cost public count")),
-        },
-        _ => Err(unsupported("play cost public count")),
-    }
+    execution.natural(game, value).map(|Nat(amount)| amount)
 }
 
 fn object_count(game: &Game, execution: &Execution, objects: &Selector) -> Result<u64> {

@@ -954,6 +954,12 @@ pub(super) enum Number {
     Count {
         count: CountQuery,
     },
+    DistinctNames {
+        distinct_names: PublicQuery,
+    },
+    DistinctOriginalCosts {
+        distinct_orig_costs: PublicQuery,
+    },
     Resource {
         resource: ResourceQuery,
     },
@@ -1217,6 +1223,8 @@ pub(super) enum Comparison {
 pub(super) enum PublicNumber {
     Literal(i64),
     Count { count: PublicQuery },
+    DistinctNames { distinct_names: PublicQuery },
+    DistinctOriginalCosts { distinct_orig_costs: PublicQuery },
 }
 
 #[derive(Deserialize)]

@@ -1,7 +1,7 @@
 use super::{
-    Allocator, Binding, Bool, Cardinality, Expr, Int, IntOperation, Located, LoweringError, Nat,
-    NatRead, PlayerRef, PlayerRelation, PlayerSet, Predicate, ScopeId, SelectionView, Selector,
-    TextQuantifier, ZoneKind, ast, decode, source_span, unsupported,
+    Allocator, Binding, Bool, Cardinality, Expr, Int, Located, LoweringError, Nat, PlayerRef,
+    PlayerRelation, PlayerSet, Predicate, ScopeId, SelectionView, Selector, TextQuantifier,
+    ZoneKind, ast, decode, source_span, unsupported,
 };
 use crate::ir::{Comparison, CostChange, ObjectRef, PlayCostModifier};
 
@@ -93,12 +93,24 @@ fn condition(
             left: match &value.left {
                 ast::PublicNumber::Literal(amount) => Expr::Literal(Int(*amount)),
                 ast::PublicNumber::Count { count } => {
-                    Expr::Compute(Box::new(IntOperation::FromNat {
-                        value: Expr::Live(Box::new(NatRead::ZoneCount {
-                            selector: query(count, allocator, path)?,
-                        })),
-                    }))
+                    super::numeric::aggregate_count(query(count, allocator, path)?, None)
                 }
+                ast::PublicNumber::DistinctNames { distinct_names } => {
+                    super::numeric::distinct_count(
+                        distinct_names,
+                        super::super::ObjectProperty::Names,
+                        Binding::new(allocator.id(path)?, ScopeId(0)),
+                        path,
+                    )?
+                }
+                ast::PublicNumber::DistinctOriginalCosts {
+                    distinct_orig_costs,
+                } => super::numeric::distinct_count(
+                    distinct_orig_costs,
+                    super::super::ObjectProperty::Cost,
+                    Binding::new(allocator.id(path)?, ScopeId(0)),
+                    path,
+                )?,
             },
             comparison: match value.op {
                 ast::Comparison::Eq => Comparison::Equal,

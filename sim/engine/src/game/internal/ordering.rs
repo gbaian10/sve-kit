@@ -11,7 +11,7 @@ use crate::ir::{
     RecipientSet, Requirements, ResultMember, ResultMemberId, RuntimeObjectView, ScopeId, Selector,
     SnapshotId, SourceSpan, StepwiseMode, Visibility, ZoneKind,
 };
-use crate::ir::{CharacteristicPatch, DamageAmount, NumericChange};
+use crate::ir::{CharacteristicPatch, DamageAmount, NatOperation, NumericChange, ObjectProperty};
 use alloc::collections::BTreeSet;
 
 /// Printed information attached to a handle valid only with its decision token.
@@ -297,14 +297,15 @@ fn mask_public_condition(condition: &mut Expr<Bool>) {
 fn mask_public_number(number: &mut Expr<Int>) {
     if let Expr::Compute(operation) = number {
         match operation.as_mut() {
-            IntOperation::FromNat { value } => {
-                if let Expr::Live(read) = value
-                    && let NatRead::ZoneCount { selector } = read.as_mut()
-                    && super::card::selection::public_zone_selector(selector).is_ok()
-                    && let Selector::Zone { predicate, .. } = selector
-                {
-                    **predicate = Expr::Literal(Bool(true));
-                }
+            IntOperation::FromNat { value } => mask_public_natural(value),
+            IntOperation::Conditional {
+                condition,
+                then_value,
+                else_value,
+            } => {
+                mask_public_condition(condition);
+                mask_public_number(then_value);
+                mask_public_number(else_value);
             }
             IntOperation::Arithmetic { arguments, .. } => {
                 for argument in arguments {
@@ -313,6 +314,27 @@ fn mask_public_number(number: &mut Expr<Int>) {
             }
             _ => {}
         }
+    }
+}
+
+fn mask_public_natural(value: &mut Expr<Nat>) {
+    let selector = match value {
+        Expr::Live(read) => match read.as_mut() {
+            NatRead::ZoneCount { selector } => selector,
+            _ => return,
+        },
+        Expr::Compute(operation) => match operation.as_mut() {
+            NatOperation::DistinctCount {
+                objects,
+                property: ObjectProperty::Names | ObjectProperty::Cost,
+            } => objects,
+            _ => return,
+        },
+        _ => return,
+    };
+    if super::card::selection::public_zone_selector(selector).is_ok() {
+        // These reads observe only the grammar checked by the public-zone authority.
+        *value = Expr::Literal(Nat(0));
     }
 }
 

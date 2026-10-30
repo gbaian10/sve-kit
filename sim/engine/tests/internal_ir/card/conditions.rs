@@ -604,3 +604,66 @@ fn public_token_counts_filter_identity_owner_and_zone() {
         }
     }
 }
+
+#[test]
+fn distinct_counts_never_authorize_hidden_zone_observations() {
+    for zone in [ZoneKind::Hand, ZoneKind::Deck] {
+        for property in [ObjectProperty::Names, ObjectProperty::Cost] {
+            let amount = Expr::Compute(Box::new(IntOperation::FromNat {
+                value: Expr::Compute(Box::new(NatOperation::DistinctCount {
+                    objects: Selector::Zone {
+                        players: PlayerSet {
+                            relation: PlayerRelation::Opponents,
+                            relative_to: PlayerRef::Controller {},
+                            cardinality: Cardinality {
+                                minimum: Nat(1),
+                                maximum: Some(Nat(1)),
+                            },
+                            text_quantifier: TextQuantifier::Implicit,
+                        },
+                        zone,
+                        view: SelectionView::Current {},
+                        binding: Binding::new(99, ScopeId(1)),
+                        predicate: Box::new(Expr::Literal(Bool(true))),
+                    },
+                    property,
+                })),
+            }));
+            for conditional in [false, true] {
+                let value = if conditional {
+                    Expr::Compute(Box::new(IntOperation::Conditional {
+                        condition: Expr::Compute(Box::new(Predicate::CompareInt {
+                            left: amount.clone(),
+                            comparison: Comparison::GreaterEqual,
+                            right: Expr::Literal(Int(1)),
+                        })),
+                        then_value: Expr::Literal(Int(1)),
+                        else_value: Expr::Literal(Int(0)),
+                    }))
+                } else {
+                    amount.clone()
+                };
+                let program = card(vec![ability(
+                    1,
+                    vec![instruction(
+                        1,
+                        Action::Life {
+                            player: PlayerRef::Controller {},
+                            change: NumericChange::Add { amount: value },
+                        },
+                    )],
+                )]);
+                let mut game = Game::new(
+                    catalog(),
+                    &setup(1, json!([])),
+                    &Value::Null,
+                    &Value::Null,
+                    "private-distinct",
+                )
+                .unwrap();
+                game.load_internal_card("unit-follower", &program)
+                    .unwrap_err();
+            }
+        }
+    }
+}
