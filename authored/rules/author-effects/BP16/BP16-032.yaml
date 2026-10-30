@@ -1,0 +1,29 @@
+cards:
+  BP16-032:
+    abilities:
+      - keywords:
+          - storm
+        line: 1
+      - evolve_time:
+          do:
+            - damage:
+                n: 1
+                to: chosen
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                leader_or: true
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

@@ -1,0 +1,32 @@
+cards:
+  BP16-086:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - destroy: enemy
+            - destroy: ally
+            - draw:
+                n: 1
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+            - bind: ally
+              from:
+                kind: follower
+                who: self
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set
