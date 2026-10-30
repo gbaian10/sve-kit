@@ -1,0 +1,48 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP03-081:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-31"
+    abilities:
+      - line: 1
+        auto:
+          "on":
+            moved:
+              from:
+                who: opp
+                zone: field
+              to: cemetery
+              sel:
+                kind: follower
+              during:
+                turn: self
+          do:
+            - draw:
+                n: 1
+            - discard:
+                who: self
+                n: 1
+          per_turn: 1
+      - line: 2
+        fanfare:
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - if:
+                cond:
+                  awakened: true
+                then:
+                  - damage:
+                      to: enemy
+                      n: 2
