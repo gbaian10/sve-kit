@@ -24,7 +24,7 @@ impl Game {
         face: usize,
     ) -> Result<Option<EvolutionPlan>> {
         let form = self.object(form)?;
-        let interested = self.card_runtime.cards.get(&form.card).is_some_and(|program| program.card().abilities.iter().any(|a| {
+        let interested = self.card_runtime.definitions.cards.get(&form.card).is_some_and(|program| program.card().abilities.iter().any(|a| {
             matches!(&a.node.trigger, Some(trigger) if matches!(&trigger.on, TriggerCondition::Event {pattern:EventPattern::Evolve {..}}))
                 && super::printed_origin(&a.node.source.origin).is_ok_and(|(printed,_)| self.printed_face_ordinal(&form.card, printed).is_ok_and(|ordinal| ordinal==face))
         }));

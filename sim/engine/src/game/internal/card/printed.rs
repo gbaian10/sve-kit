@@ -99,7 +99,7 @@ impl Game {
         }
         self.require_internal_abilities(holder, "printed ability set")?;
         let (card, face) = self.internal_effective_print(holder)?;
-        let Some(program) = self.card_runtime.cards.get(&card) else {
+        let Some(program) = self.card_runtime.definitions.cards.get(&card) else {
             let printed = self.catalog.face(&card, face)?;
             if printed["text"].as_str() == Some("")
                 && printed["sections"].as_array().is_some_and(Vec::is_empty)

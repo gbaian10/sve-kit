@@ -251,7 +251,7 @@ impl Game {
 
     fn printed_departures(&self, object: &Object, to: &str) -> Result<Vec<Located<Ability>>> {
         let abilities = self.internal_printed_abilities(&object.id)?;
-        if !self.card_runtime.cards.values().any(|program| {
+        if !self.card_runtime.definitions.cards.values().any(|program| {
             program.card().abilities.iter().any(|a| {
                 matches!(
                     a.node.trigger.as_ref().map(|t| &t.on),

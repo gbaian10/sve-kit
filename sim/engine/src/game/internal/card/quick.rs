@@ -155,6 +155,7 @@ impl Game {
         let object = self.object(holder)?;
         Ok(self
             .card_runtime
+            .definitions
             .cards
             .get(&object.card)
             .is_some_and(|card| {

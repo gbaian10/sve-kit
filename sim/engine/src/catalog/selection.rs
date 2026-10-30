@@ -1,11 +1,14 @@
 //! Internal batch selection; current programs remain candidates pending runtime admission.
 
+use super::current::CurrentCard;
 use super::{Catalog, EngineFailure, EngineIdentityInput, Result, invalid};
+use crate::ir::WellFormedCardProgram;
 use crate::ir::lowering::{CurrentCardProgram, ExpandedLowerer};
 use alloc::collections::{BTreeMap, BTreeSet};
 use alloc::sync::Arc;
 use serde::Deserialize;
 use serde_json::Value;
+use std::sync::OnceLock;
 
 /// Disjoint prototype programs and complete, current-source checked D0 candidates.
 #[derive(Clone, Debug)]
@@ -20,9 +23,23 @@ pub struct SelectedEffects {
     pub current: BTreeMap<String, Arc<CurrentCardProgram>>,
     accepted: BTreeMap<String, Arc<CurrentCardProgram>>,
     accepted_prototypes: Arc<Catalog>,
+    runtime: Arc<OnceLock<Result<Arc<RuntimeCards>>>>,
+}
+
+#[derive(Clone, Debug, Default)]
+pub(crate) struct RuntimeCards {
+    pub(crate) cards: BTreeMap<String, Arc<WellFormedCardProgram>>,
+    pub(crate) current: BTreeMap<String, Arc<CurrentCard>>,
 }
 
 impl SelectedEffects {
+    pub(crate) fn runtime_cards(
+        &self,
+        prepare: impl FnOnce() -> Result<Arc<RuntimeCards>>,
+    ) -> Result<Arc<RuntimeCards>> {
+        self.runtime.get_or_init(prepare).clone()
+    }
+
     pub(crate) fn check_runtime(&self) -> Result<()> {
         if !Arc::ptr_eq(&self.prototypes, &self.accepted_prototypes)
             || self.current.len() != self.accepted.len()
@@ -131,6 +148,7 @@ pub(super) fn select(
     }
     let prototypes = Arc::new(prototypes);
     Ok(SelectedEffects {
+        runtime: Arc::default(),
         accepted_prototypes: Arc::clone(&prototypes),
         prototypes,
         accepted: current.clone(),

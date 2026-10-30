@@ -513,6 +513,42 @@ fn ordinary_destroy_uses_owner_cemetery_lastword_lki_and_simultaneous_leader_dam
 }
 
 #[test]
+fn games_sharing_a_selection_keep_added_programs_and_positions_independent() {
+    let initial = setup("P1", "P1", [20, 20]);
+    let mut banish = with_producer(&initial, movement(OwnerZone::Banish));
+    let mut bounce = with_producer(&initial, movement(OwnerZone::Hand));
+    let untouched = bounce.projection(View::Referee).unwrap();
+
+    activate(&mut banish, "P1");
+    banish.resume_internal_card().unwrap();
+    assert!(
+        bounce.projection(View::Referee).unwrap() == untouched,
+        "the other game keeps its original position"
+    );
+    assert!(
+        banish.projection(View::Referee).unwrap()["P1"]["banish"]
+            .as_array()
+            .unwrap()
+            .contains(&json!("departing"))
+    );
+
+    activate(&mut bounce, "P1");
+    bounce.resume_internal_card().unwrap();
+    assert!(
+        bounce.projection(View::Referee).unwrap()["P1"]["hand"]
+            .as_array()
+            .unwrap()
+            .contains(&json!("departing"))
+    );
+    assert!(
+        banish.projection(View::Referee).unwrap()["P1"]["banish"]
+            .as_array()
+            .unwrap()
+            .contains(&json!("departing"))
+    );
+}
+
+#[test]
 fn banish_bounce_and_non_field_cemetery_moves_do_not_trigger_lastword() {
     // CR 5.7.1 defines banishment as movement to the owner's banish zone.
     // CR 12.5.1/.3 requires a field -> cemetery departure, independent of method.
@@ -610,6 +646,7 @@ fn construct(selected: SelectedEffects, seed: &str) -> String {
 fn current_admission_rejects_foreign_snapshot_and_program() {
     let (snapshot, keywords, input) = inputs();
     let mut cleared = Catalog::from_current_selection(snapshot, keywords, input).unwrap();
+    assert_eq!(construct(cleared.clone(), "warm-cleared"), "");
     cleared.current.clear();
     assert!(
         construct(cleared, "changed").contains("current selection changed after acceptance"),
@@ -617,6 +654,7 @@ fn current_admission_rejects_foreign_snapshot_and_program() {
     );
     // The prototype closure is part of the accepted selection, even when its content is equal.
     let mut replaced = Catalog::from_current_selection(snapshot, keywords, input).unwrap();
+    assert_eq!(construct(replaced.clone(), "warm-replaced"), "");
     replaced.prototypes = Catalog::from_current_selection(snapshot, keywords, input)
         .unwrap()
         .prototypes;

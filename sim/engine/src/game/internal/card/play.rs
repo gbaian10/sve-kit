@@ -576,6 +576,7 @@ impl Game {
         let object = self.object(holder)?.clone();
         let card = self
             .card_runtime
+            .definitions
             .cards
             .get(&object.card)
             .ok_or_else(|| invalid("card is not loaded"))?;
