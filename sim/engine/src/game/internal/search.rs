@@ -164,7 +164,7 @@ pub(super) fn check_predicate(value: &Expr<Bool>, candidate: Binding<ObjectRef>)
     }
 }
 
-fn search_names(names: &Expr<Vec<CardName>>) -> bool {
+pub(in crate::game::internal) fn search_names(names: &Expr<Vec<CardName>>) -> bool {
     match names {
         Expr::Literal(names) => !names.is_empty() && names.iter().all(|name| !name.0.is_empty()),
         Expr::Live(read) => matches!(
@@ -178,7 +178,7 @@ fn search_names(names: &Expr<Vec<CardName>>) -> bool {
 }
 
 // Freeze the checked source through its existing authority before consulting hidden candidates.
-fn freeze_source_names(
+pub(in crate::game::internal) fn freeze_source_names(
     game: &Game,
     execution: &Execution,
     value: &Expr<Bool>,

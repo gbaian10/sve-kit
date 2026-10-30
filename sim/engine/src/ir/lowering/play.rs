@@ -95,6 +95,9 @@ impl BodyContext<'_> {
         if target.from.observation.is_some() {
             return self.observed_object_choice(target, path, resolution);
         }
+        if target.from.not_same_name_as_this {
+            return Err(unsupported(path));
+        }
         if matches!(target.from.zone, Some(ast::TargetZone::Cemetery))
             && (target.from.leader_or || !matches!(target.from.who, Some(ast::Side::Controller)))
         {
@@ -202,9 +205,8 @@ impl BodyContext<'_> {
             || target.from.leaders.is_some()
             || target.from.leader_or
             || target.from.other
-            || target.from.r#trait.is_none()
             || target.from.has_evolve.is_some()
-            || target.from.has_numeric_filter()
+            || target.from.hp_le.is_some()
             || target.from.class.is_some()
             || target.from.not_class.is_some()
             || target.distinct_by.is_some()
@@ -240,16 +242,22 @@ impl BodyContext<'_> {
         }
         self.observed_targets.insert(target.bind.clone());
         let candidate = Binding::new(1, self.card_allocator.scope(path)?);
+        let predicate = super::selection::field_filter(
+            &super::selection::ObjectFilter::from(&target.from),
+            candidate,
+        );
+        let predicate = if target.from.not_same_name_as_this {
+            super::search::exclude_source_name(predicate, candidate)
+        } else {
+            predicate
+        };
         let selector = Selector::Filter {
             input: Box::new(Selector::ReceiptMembers {
                 receipt,
                 projection: MemberProjection::Before,
             }),
             binding: candidate,
-            predicate: Box::new(super::selection::field_filter(
-                &super::selection::ObjectFilter::from(&target.from),
-                candidate,
-            )),
+            predicate: Box::new(predicate),
         };
         Ok((
             ChoiceDomain::Objects {

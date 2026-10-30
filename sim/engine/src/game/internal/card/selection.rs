@@ -2,11 +2,11 @@ use super::super::{DecisionToken, DecisionView, InputDomain, Slot, Wait, contain
 use super::{Execution, Game, Nat, ObjectRef, Result, invalid, player_id, unsupported};
 use crate::ir::effect_evolution;
 use crate::ir::{
-    Binding, BoolRead, BooleanState, CardKind, Cardinality, CharacteristicView, ChoiceDomain,
-    ClassRead, Comparison, Decision, DecisionKind, Declinable, Disjointness, Info, Int,
-    IntOperation, KindRead, MemberProjection, NamesRead, NumberRead, ObjectOperand, ObjectProperty,
-    ObjectReceipt, ObjectView, PlayerRef, PlayerRelation, Predicate, ScopeId, SelectionConstraint,
-    SelectionGroup, Selector, Stat, TraitsRead, Visibility,
+    Binding, BoolRead, BooleanState, CardKind, CardName, Cardinality, CharacteristicView,
+    ChoiceDomain, ClassRead, Comparison, Decision, DecisionKind, Declinable, Disjointness, Info,
+    Int, IntOperation, KindRead, MemberProjection, NamesRead, NumberRead, ObjectOperand,
+    ObjectProperty, ObjectReceipt, ObjectView, PlayerRef, PlayerRelation, Predicate, ScopeId,
+    SelectionConstraint, SelectionGroup, Selector, Stat, TraitsRead, Visibility,
 };
 use crate::ir::{Bool, Expr, SelectionView, ZoneKind};
 use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
@@ -361,7 +361,7 @@ fn target_selector(selector: &Selector) -> Result<()> {
         } if players.relative_to == (PlayerRef::Controller {})
             && players.relation == PlayerRelation::SelfPlayer =>
         {
-            check_predicate(predicate, *binding)
+            check_predicate(predicate, *binding, false)
         }
         Selector::Difference { input, except } if matches!(except.as_ref(), Selector::Objects { objects } if objects == &[ObjectOperand::SourceHolder {}]) => {
             target_selector(input)
@@ -418,7 +418,7 @@ pub(in crate::game::internal) fn check_resolution(decision: &Decision) -> Result
             }
             let (binding, predicate) = private_look_filter(&group.selector)
                 .ok_or_else(|| unsupported("private observed group selector"))?;
-            check_predicate(predicate, binding)?;
+            check_predicate(predicate, binding, true)?;
         }
         return Ok(());
     }
@@ -431,7 +431,7 @@ pub(in crate::game::internal) fn check_resolution(decision: &Decision) -> Result
             binding,
             predicate,
         } if players.relative_to == (PlayerRef::Controller {}) => {
-            check_predicate(predicate, *binding)?;
+            check_predicate(predicate, *binding, false)?;
         }
         selector => target_selector(selector)?,
     }
@@ -463,7 +463,7 @@ pub(in crate::game::internal) fn field_selector(selector: &Selector) -> Result<(
             binding,
             players,
         } if players.relative_to == (PlayerRef::Controller {}) => {
-            check_predicate(predicate, *binding)
+            check_predicate(predicate, *binding, false)
         }
         Selector::Difference { input, except } if matches!(except.as_ref(), Selector::Objects { objects } if objects == &[ObjectOperand::SourceHolder {}]) => {
             field_selector(input)
@@ -488,7 +488,7 @@ pub(in crate::game::internal) fn public_zone_selector(selector: &Selector) -> Re
             binding,
             players,
         } if players.relative_to == (PlayerRef::Controller {}) => {
-            check_predicate(predicate, *binding)
+            check_predicate(predicate, *binding, false)
         }
         _ => Err(unsupported("public count selector")),
     }
@@ -532,7 +532,16 @@ fn private_look_filter(selector: &Selector) -> Option<(Binding<ObjectRef>, &Expr
     .then_some((*binding, predicate))
 }
 
-fn check_predicate(value: &Expr<Bool>, candidate: Binding<ObjectRef>) -> Result<()> {
+fn permitted_names(value: &Expr<Vec<CardName>>, allow_source_names: bool) -> bool {
+    (allow_source_names || matches!(value, Expr::Literal(_)))
+        && super::super::search::search_names(value)
+}
+
+fn check_predicate(
+    value: &Expr<Bool>,
+    candidate: Binding<ObjectRef>,
+    allow_source_names: bool,
+) -> Result<()> {
     match value {
         Expr::Literal(Bool(true)) => Ok(()),
         Expr::Live(read) if matches!(read.as_ref(), BoolRead::State { object, property: BooleanState::TokenStatus } if candidate_view(object, candidate)) => {
@@ -559,9 +568,8 @@ fn check_predicate(value: &Expr<Bool>, candidate: Binding<ObjectRef>) -> Result<
             }
             Predicate::NamesIntersect {
                 left: Expr::Live(read),
-                right: Expr::Literal(names),
-            } if !names.is_empty()
-                && names.iter().all(|name| !name.0.is_empty())
+                right,
+            } if permitted_names(right, allow_source_names)
                 && matches!(read.as_ref(), NamesRead::Names { object } if candidate_view(object, candidate)) =>
             {
                 Ok(())
@@ -589,11 +597,13 @@ fn check_predicate(value: &Expr<Bool>, candidate: Binding<ObjectRef>) -> Result<
                 if !predicates.is_empty() =>
             {
                 for predicate in predicates {
-                    check_predicate(predicate, candidate)?;
+                    check_predicate(predicate, candidate, allow_source_names)?;
                 }
                 Ok(())
             }
-            Predicate::Not { predicate } => check_predicate(predicate, candidate),
+            Predicate::Not { predicate } => {
+                check_predicate(predicate, candidate, allow_source_names)
+            }
             _ => Err(unsupported(
                 "unstable or unsupported field target predicate",
             )),
@@ -1084,7 +1094,7 @@ impl Execution {
                     ZoneKind::Cemetery => "cemetery",
                     _ => return Err(unsupported("public target zone")),
                 };
-                check_predicate(predicate, *binding)?;
+                check_predicate(predicate, *binding, false)?;
                 let mut members = Vec::new();
                 for player in self.players(game, players)? {
                     for id in game.zone_ids(super::super::seat_name(player)?, zone) {
@@ -1107,10 +1117,16 @@ impl Execution {
                 binding,
                 predicate,
             } => {
-                check_predicate(predicate, *binding)?;
+                let private_look = private_look_filter(selector).is_some();
+                check_predicate(predicate, *binding, private_look)?;
+                let predicate = if private_look {
+                    super::super::search::freeze_source_names(game, self, predicate)?
+                } else {
+                    predicate.as_ref().clone()
+                };
                 let mut filtered = Vec::new();
                 for member in self.public_target_objects(game, input, allow_resolution_zones)? {
-                    if matches_candidate(game, self.object_id(member)?, predicate)? {
+                    if matches_candidate(game, self.object_id(member)?, &predicate)? {
                         filtered.push(member);
                     }
                 }

@@ -610,3 +610,6 @@ mod selection_captures;
 mod effect_evolution;
 #[path = "card/play_restrictions.rs"]
 mod play_restrictions;
+
+#[path = "card/look_cost.rs"]
+mod look_cost;

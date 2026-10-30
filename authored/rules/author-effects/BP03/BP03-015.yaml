@@ -1,0 +1,44 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP03-015:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-31"
+    abilities:
+      - line: 1
+        evolve_time:
+          do:
+            - look:
+                top:
+                  who: self
+                  n: 4
+                bind: seen
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  cost_eq: 1
+                n: 1
+                may: true
+            - move:
+                ref: picked
+                to: hand
+                result: picked_move
+            - reveal:
+                ref: picked
+                bind: shown
+            - move:
+                ref:
+                  in: seen
+                  except:
+                    in:
+                      objects_of: picked_move
+                      view: before
+                to: deck
+                position: bottom
+                order: chooser
