@@ -628,6 +628,59 @@ fn bp03_064_excludes_armed_followers_and_non_armed_spells_then_orders_all_four()
 }
 
 #[test]
+fn bp03_095_normal_evolution_searches_only_followers_with_power_at_most_two() {
+    let mut initial = position("BP03-094");
+    initial["players"]["P1"]["zones"]["evolve_deck"] =
+        json!([{"id":"form","card":"BP03-095"}]);
+    initial["players"]["P1"]["zones"]["deck"] = json!([
+        {"id":"too-strong","card":"BP01-158"},
+        {"id":"spell","card":"BP01-007"},
+        {"id":"good","card":"BP01-171"}
+    ]);
+    let mut game = game(&initial);
+    play(&mut game, "source");
+    finish_checks(&mut game);
+    evolve(&mut game, 2);
+    let pending = game.internal_pending_choice().unwrap().unwrap();
+    let InputDomain::Pending(options) = &pending.domain else {
+        panic!("evolution ability")
+    };
+    assert_eq!(options.len(), 1);
+    let CardPlay::Awaiting(question) = game
+        .answer_internal_card(
+            pending.actor,
+            pending.token,
+            Answer::Pending(options[0].handle),
+        )
+        .unwrap()
+    else {
+        panic!("filtered deck search")
+    };
+    let InputDomain::Search(domain) = &question.domain else {
+        panic!("deck search domain")
+    };
+    assert_eq!(
+        domain.cards.iter().map(|card| card.card.as_str()).collect::<Vec<_>>(),
+        vec!["BP01-171"],
+        "the power-two follower qualifies, while a stronger follower and a spell do not"
+    );
+    let step = game
+        .answer_internal_card(
+            question.actor,
+            question.token,
+            Answer::Search(SearchAnswer::Ungrouped(vec![domain.cards[0].handle])),
+        )
+        .unwrap();
+    finish(&mut game, step);
+    finish_checks(&mut game);
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["hand"], json!(["good"]));
+    assert_eq!(state["P1"]["deck_count"], 2_u8);
+    assert_eq!(state["P1"]["pp"]["current"], 7_u8);
+    assert_eq!(state["objects"]["source"]["power"], 2_u8);
+}
+
+#[test]
 fn bp03_065_normal_evolution_damages_only_the_opposing_leader() {
     let mut game = game(&evolution("BP03-064", "BP03-065"));
     evolve(&mut game, 1);
