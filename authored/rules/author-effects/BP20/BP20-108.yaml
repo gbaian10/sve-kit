@@ -1,0 +1,40 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP20-108:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-30"
+    abilities:
+      - line: 1
+        keywords:
+          - storm
+      - line: 2
+        attack_time:
+          do:
+            - draw:
+                n: 1
+      - line: 3
+        fanfare:
+          cost:
+            pp: 2
+          do:
+            - search:
+                sel:
+                  who: self
+                  zone: deck
+                  kind: follower
+                  keyword: storm
+                  as: candidate
+                  where:
+                    cmp:
+                      left:
+                        power_of: candidate
+                      op: le
+                      right: 3
+                n: 1
+                to: field
