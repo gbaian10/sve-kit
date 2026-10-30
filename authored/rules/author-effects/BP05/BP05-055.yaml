@@ -1,0 +1,32 @@
+cards:
+  BP05-055:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - auto:
+          do:
+            - buff:
+                on: this
+                power: 1
+            - grant:
+                keywords:
+                  - storm
+                on: this
+          on:
+            damaged:
+              during:
+                turn: self
+              kind: ability
+              recipient: this
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

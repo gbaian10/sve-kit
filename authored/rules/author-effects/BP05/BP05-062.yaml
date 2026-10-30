@@ -1,0 +1,31 @@
+cards:
+  BP05-062:
+    abilities:
+      - attack_time:
+          do:
+            - stand: this
+          per_turn: 1
+        line: 1
+      - fanfare:
+          cost:
+            discard:
+              n: 1
+              sel:
+                who: self
+                zone: hand
+          do:
+            - grant:
+                keywords:
+                  - rush
+                  - aura
+                on: this
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

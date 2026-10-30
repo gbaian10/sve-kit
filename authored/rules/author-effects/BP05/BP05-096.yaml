@@ -1,0 +1,40 @@
+cards:
+  BP05-096:
+    abilities:
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: hand
+                    op: ge
+                    right: 5
+                then:
+                  - pp:
+                      delta: 2
+                      who: self
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: hand
+                    op: le
+                    right: 5
+                then:
+                  - draw:
+                      n: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set
