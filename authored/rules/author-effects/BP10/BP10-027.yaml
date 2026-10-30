@@ -1,0 +1,39 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP10-027:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-31"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 2
+      - line: 2
+        keywords:
+          - rush
+      - line: 3
+        fanfare:
+          do:
+            - search:
+                sel:
+                  who: self
+                  zone: deck
+                  kind: follower
+                  trait: ヒーロー
+                  orig_cost_le: 3
+                to: field
+                upto: 2
+                distinct_by: name
+          cost:
+            discard:
+              sel:
+                who: self
+                zone: hand
+                trait: ヒーロー
+              n: 2
