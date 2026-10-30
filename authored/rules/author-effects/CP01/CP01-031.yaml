@@ -1,0 +1,43 @@
+cards:
+  CP01-031:
+    abilities:
+      - keywords:
+          - quick
+        line: 1
+      - line: 2
+        spell:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        trait: ウマ娘
+                        who: self
+                        zone: field
+                    op: ge
+                    right: 1
+                else:
+                  - damage:
+                      n: 3
+                      to: chosen
+                then:
+                  - damage:
+                      n: 4
+                      to: chosen
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set
