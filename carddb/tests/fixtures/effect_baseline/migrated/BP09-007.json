@@ -1,0 +1,59 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "spell",
+      "body": {
+        "op": "seq",
+        "steps": [
+          {
+            "op": "damage",
+            "subjects": {
+              "side": "opponent",
+              "zone": "field",
+              "type": "follower"
+            },
+            "amount": {
+              "if": {
+                "fn": "ge",
+                "args": [
+                  {
+                    "fn": "distinct",
+                    "args": [
+                      {
+                        "values": {
+                          "side": "self",
+                          "zone": "cemetery",
+                          "type": "spell",
+                          "where": {
+                            "fn": "eq",
+                            "args": [
+                              {
+                                "read": "item.class"
+                              },
+                              "エルフ"
+                            ]
+                          }
+                        },
+                        "field": "name"
+                      }
+                    ]
+                  },
+                  5
+                ]
+              },
+              "then": 5,
+              "else": 3
+            }
+          },
+          {
+            "op": "damage",
+            "subjects": "opponent.leader",
+            "amount": 2
+          }
+        ]
+      }
+    }
+  ]
+}
