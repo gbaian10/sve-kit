@@ -1,0 +1,49 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP08-054:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-luna
+          date: "2026-10-31"
+    abilities:
+      - line: 1
+        keywords:
+          - storm
+      - line: 2
+        attack_time:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: evolve_deck
+                        kind: follower
+                        face_up: true
+                    op: ge
+                    right: 5
+                then:
+                  - life:
+                      who: self
+                      delta: 3
+                  - if:
+                      cond:
+                        cmp:
+                          left:
+                            count:
+                              who: self
+                              zone: evolve_deck
+                              kind: follower
+                              face_up: true
+                          op: ge
+                          right: 8
+                      then:
+                        - damage:
+                            to:
+                              leaders: opponents
+                            n: 3

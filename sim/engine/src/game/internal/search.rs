@@ -402,6 +402,7 @@ pub(super) fn private_requirement(code: &str) -> bool {
             | "shape.BoolRead.State"
             | "read.state"
             | "internal.BooleanState.TokenStatus"
+            | "internal.BooleanState.FaceUp"
             | "shape.KindRead.Kind"
             | "read.kind"
             | "internal.CharacteristicView.Original"

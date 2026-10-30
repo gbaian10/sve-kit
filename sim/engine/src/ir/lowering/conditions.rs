@@ -70,6 +70,7 @@ impl BodyContext<'_> {
             count: ast::CountQuery {
                 who: ast::LeaderSide::Controller,
                 zone: ast::CountZone::Cemetery,
+                face_up: None,
                 kind: spells.then_some(ast::SearchKind::Spell),
                 r#trait: None,
                 name: None,
@@ -442,6 +443,7 @@ impl BodyContext<'_> {
         path: &str,
     ) -> Result<Expr<Int>, LoweringError> {
         let filtered = count.kind.is_some()
+            || count.face_up.is_some()
             || count.r#trait.is_some()
             || count.name.is_some()
             || count.name_contains.is_some()
@@ -455,6 +457,23 @@ impl BodyContext<'_> {
             return Err(unsupported(path));
         }
         if matches!(count.zone, ast::CountZone::Hand | ast::CountZone::Deck) && filtered {
+            return Err(unsupported(path));
+        }
+        if matches!(count.zone, ast::CountZone::EvolveDeck)
+            && matches!(count.who, ast::LeaderSide::Opponent)
+        {
+            return Err(unsupported(path));
+        }
+        if matches!(count.zone, ast::CountZone::EvolveDeck)
+            && (!matches!(&count.kind, Some(ast::SearchKind::Follower))
+                || count.face_up != Some(true)
+                || count.r#trait.is_some()
+                || count.name.is_some()
+                || count.name_contains.is_some()
+                || count.orig_cost_eq.is_some()
+                || count.token.is_some()
+                || count.not_token.is_some())
+        {
             return Err(unsupported(path));
         }
         let binding = Binding::new(self.allocator.id(path)?, self.scope);
@@ -486,6 +505,7 @@ impl BodyContext<'_> {
                     ast::CountZone::Deck => ZoneKind::Deck,
                     ast::CountZone::Hand => ZoneKind::Hand,
                     ast::CountZone::Cemetery => ZoneKind::Cemetery,
+                    ast::CountZone::EvolveDeck => ZoneKind::Evolve,
                 },
                 view: SelectionView::Current {},
                 binding,

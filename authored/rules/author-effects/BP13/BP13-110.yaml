@@ -1,0 +1,41 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP13-110:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-luna
+          date: "2026-10-31"
+    abilities:
+      - line: 1
+        fanfare:
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: evolve_deck
+                        kind: follower
+                        face_up: true
+                    op: ge
+                    right: 3
+                then:
+                  - damage:
+                      to: enemy
+                      n: 5
+                  - damage:
+                      to:
+                        leader: opp
+                      n: 3

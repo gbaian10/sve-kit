@@ -223,6 +223,7 @@ pub(super) struct ObjectFilter<'query> {
     pub class: Option<&'query str>,
     pub not_class: Option<&'query str>,
     pub token: Option<bool>,
+    pub face_up: Option<bool>,
     pub name: Option<&'query str>,
     pub contains: Option<&'query str>,
     pub cost: [Option<u64>; 3],
@@ -276,6 +277,7 @@ impl<'query> From<&'query ast::CountQuery> for ObjectFilter<'query> {
             name: query.name.as_deref(),
             contains: query.name_contains.as_deref(),
             token: query.token.or_else(|| query.not_token.map(|token| !token)),
+            face_up: query.face_up,
             original_cost: [query.orig_cost_eq, None, None],
             ..Self::default()
         }
@@ -328,35 +330,8 @@ pub(super) fn field_filter(
             },
         )));
     }
-    for (class, negate) in [(filter.class, false), (filter.not_class, true)] {
-        if let Some(class) = class {
-            let predicate = super::Expr::Compute(Box::new(super::Predicate::ClassEquals {
-                left: super::Expr::Live(Box::new(super::super::ClassRead::Class {
-                    object: object.clone(),
-                    view: CharacteristicView::Effective,
-                })),
-                right: super::Expr::Literal(super::super::Info::Present(super::super::ClassId(
-                    class.to_owned(),
-                ))),
-            }));
-            predicates.push(if negate {
-                super::Expr::Compute(Box::new(super::Predicate::Not { predicate }))
-            } else {
-                predicate
-            });
-        }
-    }
-    if let Some(token) = filter.token {
-        let predicate = super::Expr::Live(Box::new(super::super::BoolRead::State {
-            object: object.clone(),
-            property: super::super::BooleanState::TokenStatus,
-        }));
-        predicates.push(if token {
-            predicate
-        } else {
-            super::Expr::Compute(Box::new(super::Predicate::Not { predicate }))
-        });
-    }
+    predicates.extend(class_filters(filter, &object));
+    predicates.extend(state_filters(filter, &object));
     predicates.extend(numeric_limits(filter, &object));
     for keyword in filter.keyword.into_iter().chain(
         filter
@@ -395,6 +370,58 @@ pub(super) fn field_filter(
         [_] => predicates.swap_remove(0),
         _ => super::Expr::Compute(Box::new(super::Predicate::And { predicates })),
     }
+}
+
+fn class_filters(
+    filter: &ObjectFilter<'_>,
+    object: &super::ObjectView,
+) -> Vec<super::Expr<super::Bool>> {
+    use super::super::CharacteristicView;
+    [(filter.class, false), (filter.not_class, true)]
+        .into_iter()
+        .filter_map(|(class, negate)| {
+            let class = class?;
+            let predicate = super::Expr::Compute(Box::new(super::Predicate::ClassEquals {
+                left: super::Expr::Live(Box::new(super::super::ClassRead::Class {
+                    object: object.clone(),
+                    view: CharacteristicView::Effective,
+                })),
+                right: super::Expr::Literal(super::super::Info::Present(super::super::ClassId(
+                    class.to_owned(),
+                ))),
+            }));
+            Some(if negate {
+                super::Expr::Compute(Box::new(super::Predicate::Not { predicate }))
+            } else {
+                predicate
+            })
+        })
+        .collect()
+}
+
+fn state_filters(
+    filter: &ObjectFilter<'_>,
+    object: &super::ObjectView,
+) -> Vec<super::Expr<super::Bool>> {
+    [
+        (filter.token, super::super::BooleanState::TokenStatus),
+        (filter.face_up, super::super::BooleanState::FaceUp),
+    ]
+    .into_iter()
+    .filter_map(|(value, property)| {
+        value.map(|value| {
+            let predicate = super::Expr::Live(Box::new(super::super::BoolRead::State {
+                object: object.clone(),
+                property,
+            }));
+            if value {
+                predicate
+            } else {
+                super::Expr::Compute(Box::new(super::Predicate::Not { predicate }))
+            }
+        })
+    })
+    .collect()
 }
 
 fn numeric_limits(

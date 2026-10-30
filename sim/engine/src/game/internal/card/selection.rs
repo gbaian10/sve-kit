@@ -544,171 +544,190 @@ fn check_predicate(
 ) -> Result<()> {
     match value {
         Expr::Literal(Bool(true)) => Ok(()),
-        Expr::Live(read) if matches!(read.as_ref(), BoolRead::State { object, property: BooleanState::TokenStatus } if candidate_view(object, candidate)) => {
-            Ok(())
+        Expr::Live(read) => check_live_predicate(read, candidate),
+        Expr::Compute(operation) => {
+            check_computed_predicate(operation, candidate, allow_source_names)
         }
-        Expr::Compute(operation) => match operation.as_ref() {
-            Predicate::HasAbility {
-                abilities,
-                predicate,
-            } if super::super::search::keyword_filter(abilities, predicate, candidate) => Ok(()),
-            Predicate::ClassEquals {
-                left: Expr::Live(read),
-                right: Expr::Literal(Info::Present(class)),
-            } if !class.0.is_empty()
-                && matches!(read.as_ref(), ClassRead::Class { object, view: CharacteristicView::Effective } if candidate_view(object, candidate)) =>
-            {
-                Ok(())
-            }
-            Predicate::KindEquals {
-                left: Expr::Live(read),
-                right: Expr::Literal(_),
-            } if matches!(read.as_ref(), KindRead::Kind { object, view: CharacteristicView::Effective } if candidate_view(object, candidate)) => {
-                Ok(())
-            }
-            Predicate::NamesIntersect {
-                left: Expr::Live(read),
-                right,
-            } if permitted_names(right, allow_source_names)
-                && matches!(read.as_ref(), NamesRead::Names { object } if candidate_view(object, candidate)) =>
-            {
-                Ok(())
-            }
-            Predicate::NameContains {
-                object,
-                name: Expr::Literal(name),
-            } if !name.0.is_empty() && candidate_view(object, candidate) => Ok(()),
-            Predicate::HasTrait {
-                traits: Expr::Live(read),
-                trait_id,
-            } if !trait_id.0.is_empty()
-                && matches!(read.as_ref(), TraitsRead::Traits { object, view: CharacteristicView::Effective } if candidate_view(object, candidate)) =>
-            {
-                Ok(())
-            }
-            Predicate::CompareInt {
-                left: Expr::Compute(left),
-                comparison: Comparison::Equal | Comparison::LessEqual | Comparison::GreaterEqual,
-                right: Expr::Literal(Int(_)),
-            } if matches!(left.as_ref(), IntOperation::InformationOrZero { information } if candidate_number(information, candidate)) => {
-                Ok(())
-            }
-            Predicate::And { predicates } | Predicate::Or { predicates }
-                if !predicates.is_empty() =>
-            {
-                for predicate in predicates {
-                    check_predicate(predicate, candidate, allow_source_names)?;
-                }
-                Ok(())
-            }
-            Predicate::Not { predicate } => {
-                check_predicate(predicate, candidate, allow_source_names)
-            }
-            _ => Err(unsupported(
-                "unstable or unsupported field target predicate",
-            )),
-        },
         _ => Err(unsupported("field target predicate")),
     }
 }
 
-pub(super) fn matches_candidate(game: &Game, id: &str, value: &Expr<Bool>) -> Result<bool> {
+fn check_live_predicate(read: &BoolRead, candidate: Binding<ObjectRef>) -> Result<()> {
+    match read {
+        BoolRead::State {
+            object,
+            property: BooleanState::TokenStatus | BooleanState::FaceUp,
+        } if candidate_view(object, candidate) => Ok(()),
+        _ => Err(unsupported("field target predicate")),
+    }
+}
+
+fn check_computed_predicate(
+    operation: &Predicate,
+    candidate: Binding<ObjectRef>,
+    allow_source_names: bool,
+) -> Result<()> {
+    match operation {
+        Predicate::HasAbility {
+            abilities,
+            predicate,
+        } if super::super::search::keyword_filter(abilities, predicate, candidate) => Ok(()),
+        Predicate::ClassEquals {
+            left: Expr::Live(read),
+            right: Expr::Literal(Info::Present(class)),
+        } if !class.0.is_empty()
+            && matches!(read.as_ref(), ClassRead::Class { object, view: CharacteristicView::Effective } if candidate_view(object, candidate)) =>
+        {
+            Ok(())
+        }
+        Predicate::KindEquals {
+            left: Expr::Live(read),
+            right: Expr::Literal(_),
+        } if matches!(read.as_ref(), KindRead::Kind { object, view: CharacteristicView::Effective } if candidate_view(object, candidate)) => {
+            Ok(())
+        }
+        Predicate::NamesIntersect {
+            left: Expr::Live(read),
+            right,
+        } if permitted_names(right, allow_source_names)
+            && matches!(read.as_ref(), NamesRead::Names { object } if candidate_view(object, candidate)) =>
+        {
+            Ok(())
+        }
+        Predicate::NameContains {
+            object,
+            name: Expr::Literal(name),
+        } if !name.0.is_empty() && candidate_view(object, candidate) => Ok(()),
+        Predicate::HasTrait {
+            traits: Expr::Live(read),
+            trait_id,
+        } if !trait_id.0.is_empty()
+            && matches!(read.as_ref(), TraitsRead::Traits { object, view: CharacteristicView::Effective } if candidate_view(object, candidate)) =>
+        {
+            Ok(())
+        }
+        Predicate::CompareInt {
+            left: Expr::Compute(left),
+            comparison: Comparison::Equal | Comparison::LessEqual | Comparison::GreaterEqual,
+            right: Expr::Literal(Int(_)),
+        } if matches!(left.as_ref(), IntOperation::InformationOrZero { information } if candidate_number(information, candidate)) => {
+            Ok(())
+        }
+        Predicate::And { predicates } | Predicate::Or { predicates } if !predicates.is_empty() => {
+            for predicate in predicates {
+                check_predicate(predicate, candidate, allow_source_names)?;
+            }
+            Ok(())
+        }
+        Predicate::Not { predicate } => check_predicate(predicate, candidate, allow_source_names),
+        _ => Err(unsupported(
+            "unstable or unsupported field target predicate",
+        )),
+    }
+}
+
+pub(in crate::game::internal) fn matches_candidate(
+    game: &Game,
+    id: &str,
+    value: &Expr<Bool>,
+) -> Result<bool> {
     match value {
         Expr::Literal(Bool(true)) => Ok(true),
-        Expr::Live(read)
-            if matches!(
-                read.as_ref(),
-                BoolRead::State {
-                    property: BooleanState::TokenStatus,
-                    ..
-                }
-            ) =>
-        {
-            Ok(game.object_type(id)?.contains("トークン"))
-        }
-        Expr::Compute(operation) => match operation.as_ref() {
-            Predicate::HasAbility { predicate, .. } => {
-                super::super::search::matches_keyword(game, id, predicate)
-            }
-            Predicate::ClassEquals {
-                right: Expr::Literal(Info::Present(class)),
+        Expr::Live(read) => match read.as_ref() {
+            BoolRead::State {
+                property: BooleanState::TokenStatus,
                 ..
-            } => {
-                Ok(game.face(id)?.get("card_class").and_then(Value::as_str)
-                    == Some(class.0.as_str()))
-            }
-            Predicate::KindEquals {
-                right: Expr::Literal(kind),
+            } => Ok(game.object_type(id)?.contains("トークン")),
+            BoolRead::State {
+                property: BooleanState::FaceUp,
                 ..
-            } => Ok(game.object_type(id)?.contains(match kind {
-                CardKind::Follower => "フォロワー",
-                CardKind::Spell => "スペル",
-                CardKind::Amulet => "アミュレット",
-            })),
-            Predicate::NamesIntersect {
-                right: Expr::Literal(names),
-                ..
-            } => Ok(game
-                .card_names(id)?
-                .iter()
-                .any(|actual| names.iter().any(|name| &name.0 == actual))),
-            Predicate::NameContains {
-                name: Expr::Literal(name),
-                ..
-            } => Ok(game
-                .card_names(id)?
-                .iter()
-                .any(|actual| actual.contains(&name.0))),
-            Predicate::HasTrait { trait_id, .. } => {
-                Ok(characteristics(game, id)?.traits.contains(&trait_id.0))
-            }
-            Predicate::CompareInt {
-                left: Expr::Compute(left),
-                comparison,
-                right: Expr::Literal(Int(limit)),
-            } => {
-                let IntOperation::InformationOrZero { information } = left.as_ref() else {
-                    return Err(unsupported("field target number"));
-                };
-                let actual = match information {
-                    NumberRead::Cost {
-                        view: CharacteristicView::Original,
-                        ..
-                    } => super::super::cost::printed_cost(&game.internal_cost_print(id)?["cost"])?,
-                    NumberRead::Cost {
-                        view: CharacteristicView::Effective,
-                        ..
-                    } => game.internal_effective_cost(id)?,
-                    NumberRead::Stats {
-                        view: CharacteristicView::Effective,
-                        property,
-                        ..
-                    } => {
-                        if game.object(id)?.zone != "field"
-                            || !game.object_type(id)?.contains("フォロワー")
-                        {
-                            return Ok(false);
-                        }
-                        game.internal_numeric_stat(id, *property)?
-                    }
-                    _ => return Err(unsupported("field target characteristic")),
-                };
-                Ok(super::super::values::compare(actual, *comparison, *limit))
-            }
-            Predicate::And { predicates } | Predicate::Or { predicates } => {
-                let values = predicates
-                    .iter()
-                    .map(|predicate| matches_candidate(game, id, predicate))
-                    .collect::<Result<Vec<_>>>()?;
-                Ok(if matches!(operation.as_ref(), Predicate::And { .. }) {
-                    values.iter().all(|matched| *matched)
-                } else {
-                    values.iter().any(|matched| *matched)
-                })
-            }
-            Predicate::Not { predicate } => Ok(!matches_candidate(game, id, predicate)?),
+            } => Ok(game.object(id)?.state["face_up"] == true),
             _ => Err(unsupported("field target predicate evaluation")),
         },
+        Expr::Compute(operation) => matches_candidate_predicate(game, id, operation),
+        _ => Err(unsupported("field target predicate evaluation")),
+    }
+}
+
+fn matches_candidate_predicate(game: &Game, id: &str, operation: &Predicate) -> Result<bool> {
+    match operation {
+        Predicate::HasAbility { predicate, .. } => {
+            super::super::search::matches_keyword(game, id, predicate)
+        }
+        Predicate::ClassEquals {
+            right: Expr::Literal(Info::Present(class)),
+            ..
+        } => Ok(game.face(id)?.get("card_class").and_then(Value::as_str) == Some(class.0.as_str())),
+        Predicate::KindEquals {
+            right: Expr::Literal(kind),
+            ..
+        } => Ok(game.object_type(id)?.contains(match kind {
+            CardKind::Follower => "フォロワー",
+            CardKind::Spell => "スペル",
+            CardKind::Amulet => "アミュレット",
+        })),
+        Predicate::NamesIntersect {
+            right: Expr::Literal(names),
+            ..
+        } => Ok(game
+            .card_names(id)?
+            .iter()
+            .any(|actual| names.iter().any(|name| &name.0 == actual))),
+        Predicate::NameContains {
+            name: Expr::Literal(name),
+            ..
+        } => Ok(game
+            .card_names(id)?
+            .iter()
+            .any(|actual| actual.contains(&name.0))),
+        Predicate::HasTrait { trait_id, .. } => {
+            Ok(characteristics(game, id)?.traits.contains(&trait_id.0))
+        }
+        Predicate::CompareInt {
+            left: Expr::Compute(left),
+            comparison,
+            right: Expr::Literal(Int(limit)),
+        } => {
+            let IntOperation::InformationOrZero { information } = left.as_ref() else {
+                return Err(unsupported("field target number"));
+            };
+            let actual = match information {
+                NumberRead::Cost {
+                    view: CharacteristicView::Original,
+                    ..
+                } => super::super::cost::printed_cost(&game.internal_cost_print(id)?["cost"])?,
+                NumberRead::Cost {
+                    view: CharacteristicView::Effective,
+                    ..
+                } => game.internal_effective_cost(id)?,
+                NumberRead::Stats {
+                    view: CharacteristicView::Effective,
+                    property,
+                    ..
+                } => {
+                    if game.object(id)?.zone != "field"
+                        || !game.object_type(id)?.contains("フォロワー")
+                    {
+                        return Ok(false);
+                    }
+                    game.internal_numeric_stat(id, *property)?
+                }
+                _ => return Err(unsupported("field target characteristic")),
+            };
+            Ok(super::super::values::compare(actual, *comparison, *limit))
+        }
+        Predicate::And { predicates } | Predicate::Or { predicates } => {
+            let values = predicates
+                .iter()
+                .map(|predicate| matches_candidate(game, id, predicate))
+                .collect::<Result<Vec<_>>>()?;
+            Ok(if matches!(operation, Predicate::And { .. }) {
+                values.iter().all(|matched| *matched)
+            } else {
+                values.iter().any(|matched| *matched)
+            })
+        }
+        Predicate::Not { predicate } => Ok(!matches_candidate(game, id, predicate)?),
         _ => Err(unsupported("field target predicate evaluation")),
     }
 }

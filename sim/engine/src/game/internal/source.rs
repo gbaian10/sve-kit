@@ -43,23 +43,77 @@ pub(super) fn source_original(requirements: &Requirements, requirement: &Require
 
 // A scalar count does not grant authority to select hidden objects in other contexts.
 pub(super) fn count_zone(requirements: &Requirements, requirement: &Requirement) -> bool {
-    matches!(
-        requirement.capability.code,
-        "internal.ZoneKind.Hand" | "internal.ZoneKind.Deck"
-    ) && requirement.locations.iter().all(|location| {
-        location
-            .ir_path
-            .strip_suffix("/selector/zone")
-            .is_some_and(|read| {
-                requirements.required.iter().any(|other| {
-                    other.capability.code == "read.zone-count"
-                        && other
-                            .locations
-                            .iter()
-                            .any(|count_location| count_location.ir_path == read)
-                })
+    let at = |code: &str, path: &str| {
+        requirements.required.iter().any(|other| {
+            other.capability.code == code
+                && other
+                    .locations
+                    .iter()
+                    .any(|location| location.ir_path == path)
+        })
+    };
+    let count_at = |selector: &str| {
+        selector
+            .strip_suffix("/selector")
+            .is_some_and(|read| at("read.zone-count", read))
+    };
+    match requirement.capability.code {
+        "internal.ZoneKind.Hand" | "internal.ZoneKind.Deck" => {
+            requirement.locations.iter().all(|location| {
+                location
+                    .ir_path
+                    .strip_suffix("/selector/zone")
+                    .is_some_and(|read| at("read.zone-count", read))
             })
-    })
+        }
+        "internal.ZoneKind.Evolve" => requirement.locations.iter().all(|location| {
+            location
+                .ir_path
+                .strip_suffix("/zone")
+                .is_some_and(|selector| {
+                    count_at(selector)
+                        && at(
+                            "internal.PlayerRelation.SelfPlayer",
+                            &format!("{selector}/players/relation"),
+                        )
+                })
+        }),
+        "shape.BoolRead.State" | "read.state" | "internal.BooleanState.FaceUp" => {
+            requirement.locations.iter().all(|location| {
+                let read = location
+                    .ir_path
+                    .strip_suffix("/property")
+                    .unwrap_or(&location.ir_path);
+                let property = format!("{read}/property");
+                read.rsplit_once("/predicate/")
+                    .is_some_and(|(selector, _)| {
+                        at("internal.BooleanState.FaceUp", &property)
+                            && at("internal.ZoneKind.Evolve", &format!("{selector}/zone"))
+                            && count_at(selector)
+                            && at(
+                                "internal.PlayerRelation.SelfPlayer",
+                                &format!("{selector}/players/relation"),
+                            )
+                    })
+            })
+        }
+        code if super::search::private_requirement(code) => {
+            requirement.locations.iter().all(|location| {
+                location
+                    .ir_path
+                    .split_once("/predicate/")
+                    .is_some_and(|(selector, _)| {
+                        at("internal.ZoneKind.Evolve", &format!("{selector}/zone"))
+                            && count_at(selector)
+                            && at(
+                                "internal.PlayerRelation.SelfPlayer",
+                                &format!("{selector}/players/relation"),
+                            )
+                    })
+            })
+        }
+        _ => false,
+    }
 }
 
 #[expect(

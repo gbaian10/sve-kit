@@ -1,0 +1,54 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP15-004:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-luna
+          date: "2026-10-31"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        auto:
+          "on":
+            evolved:
+              who: self
+              sel:
+                kind: follower
+          do:
+            - damage:
+                to:
+                  leaders: opponents
+                n: 1
+            - damage:
+                to:
+                  who: opp
+                  zone: field
+                  kind: follower
+                n: 2
+            - life:
+                who: self
+                delta: 1
+      - line: 3
+        fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: evolve_deck
+                        kind: follower
+                        face_up: true
+                    op: ge
+                    right: 3
+                then:
+                  - evolve:
+                      ref: this

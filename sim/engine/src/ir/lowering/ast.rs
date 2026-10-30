@@ -1036,6 +1036,7 @@ pub(super) enum SelectedStat {
 pub(super) struct CountQuery {
     pub who: LeaderSide,
     pub zone: CountZone,
+    pub face_up: Option<bool>,
     pub kind: Option<SearchKind>,
     pub r#trait: Option<String>,
     pub name: Option<String>,
@@ -1053,6 +1054,7 @@ pub(super) enum CountZone {
     Deck,
     Hand,
     Cemetery,
+    EvolveDeck,
 }
 
 #[derive(Deserialize)]

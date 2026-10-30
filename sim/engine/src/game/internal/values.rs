@@ -526,6 +526,37 @@ impl Execution {
                         })?;
                 Ok(Nat(count))
             }
+            NatRead::ZoneCount {
+                selector:
+                    Selector::Zone {
+                        players,
+                        zone: ZoneKind::Evolve,
+                        view: SelectionView::Current {},
+                        predicate,
+                        ..
+                    },
+            } => {
+                if players.relation != PlayerRelation::SelfPlayer
+                    || players.relative_to != (PlayerRef::Controller {})
+                {
+                    return Err(unsupported("evolve deck count player"));
+                }
+                let count =
+                    self.players(game, players)?
+                        .into_iter()
+                        .try_fold(0_u64, |count, player| {
+                            let ids = game.zone_ids(seat_name(player)?, "evolve_deck");
+                            ids.into_iter().try_fold(count, |count, id| {
+                                let matched = super::card::selection::matches_candidate(
+                                    game, &id, predicate,
+                                )?;
+                                count
+                                    .checked_add(u64::from(matched))
+                                    .ok_or_else(|| invalid("zone count overflow"))
+                            })
+                        })?;
+                Ok(Nat(count))
+            }
             NatRead::ZoneCount { selector } => Ok(Nat(u64::try_from(
                 self.objects(game, selector)?.len(),
             )
