@@ -68,6 +68,7 @@ impl BodyContext<'_> {
     ) -> Result<Expr<Bool>, LoweringError> {
         let count = ast::Number::Count {
             count: ast::CountQuery {
+                face_up: None,
                 who: ast::LeaderSide::Controller,
                 zone: ast::CountZone::Cemetery,
                 kind: spells.then_some(ast::SearchKind::Spell),
@@ -441,7 +442,8 @@ impl BodyContext<'_> {
         count: &ast::CountQuery,
         path: &str,
     ) -> Result<Expr<Int>, LoweringError> {
-        let filtered = count.kind.is_some()
+        let filtered = count.face_up.is_some()
+            || count.kind.is_some()
             || count.r#trait.is_some()
             || count.name.is_some()
             || count.name_contains.is_some()
@@ -455,6 +457,11 @@ impl BodyContext<'_> {
             return Err(unsupported(path));
         }
         if matches!(count.zone, ast::CountZone::Hand | ast::CountZone::Deck) && filtered {
+            return Err(unsupported(path));
+        }
+        if matches!(count.zone, ast::CountZone::EvolveDeck)
+            && !matches!(count.who, ast::LeaderSide::Controller)
+        {
             return Err(unsupported(path));
         }
         let binding = Binding::new(self.allocator.id(path)?, self.scope);
@@ -483,6 +490,7 @@ impl BodyContext<'_> {
                 zone: match count.zone {
                     ast::CountZone::Field => ZoneKind::Field,
                     ast::CountZone::Ex => ZoneKind::Ex,
+                    ast::CountZone::EvolveDeck => ZoneKind::Evolve,
                     ast::CountZone::Deck => ZoneKind::Deck,
                     ast::CountZone::Hand => ZoneKind::Hand,
                     ast::CountZone::Cemetery => ZoneKind::Cemetery,

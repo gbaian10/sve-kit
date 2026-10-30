@@ -586,6 +586,7 @@ pub(super) fn matches_candidate(game: &Game, id: &str, expression: &Expr<Bool>) 
                         CardKind::Follower => "フォロワー",
                         CardKind::Spell => "スペル",
                         CardKind::Amulet => "アミュレット",
+                        CardKind::EvolveFollower => "フォロワー・エボルヴ",
                     }))
                 }
                 Predicate::Not { predicate } => Ok(!matches_candidate(game, id, predicate)?),

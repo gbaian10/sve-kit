@@ -124,6 +124,7 @@ pub(super) fn object_filter(
                 ast::SearchKind::Follower => CardKind::Follower,
                 ast::SearchKind::Spell => CardKind::Spell,
                 ast::SearchKind::Amulet => CardKind::Amulet,
+                ast::SearchKind::EvolveFollower => CardKind::EvolveFollower,
             }),
         })));
     }

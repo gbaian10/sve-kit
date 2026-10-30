@@ -482,12 +482,14 @@ pub(in crate::game::internal) fn field_selector(selector: &Selector) -> Result<(
 pub(in crate::game::internal) fn public_zone_selector(selector: &Selector) -> Result<()> {
     match selector {
         Selector::Zone {
-            zone: ZoneKind::Field | ZoneKind::Ex | ZoneKind::Cemetery,
+            zone: zone @ (ZoneKind::Field | ZoneKind::Ex | ZoneKind::Cemetery | ZoneKind::Evolve),
             view: SelectionView::Current {},
             predicate,
             binding,
             players,
-        } if players.relative_to == (PlayerRef::Controller {}) => {
+        } if players.relative_to == (PlayerRef::Controller {})
+            && (*zone != ZoneKind::Evolve || players.relation == PlayerRelation::SelfPlayer) =>
+        {
             check_predicate(predicate, *binding, false)
         }
         _ => Err(unsupported("public count selector")),
@@ -544,7 +546,7 @@ fn check_predicate(
 ) -> Result<()> {
     match value {
         Expr::Literal(Bool(true)) => Ok(()),
-        Expr::Live(read) if matches!(read.as_ref(), BoolRead::State { object, property: BooleanState::TokenStatus } if candidate_view(object, candidate)) => {
+        Expr::Live(read) if matches!(read.as_ref(), BoolRead::State { object, property: BooleanState::TokenStatus | BooleanState::FaceUp } if candidate_view(object, candidate)) => {
             Ok(())
         }
         Expr::Compute(operation) => match operation.as_ref() {
@@ -612,20 +614,24 @@ fn check_predicate(
     }
 }
 
+fn matches_state(game: &Game, id: &str, read: &BoolRead) -> Result<bool> {
+    match read {
+        BoolRead::State {
+            property: BooleanState::FaceUp,
+            ..
+        } => Ok(game.object(id)?.state["face_up"] == true),
+        BoolRead::State {
+            property: BooleanState::TokenStatus,
+            ..
+        } => Ok(game.object_type(id)?.contains("トークン")),
+        _ => Err(unsupported("field target state filter")),
+    }
+}
+
 pub(super) fn matches_candidate(game: &Game, id: &str, value: &Expr<Bool>) -> Result<bool> {
     match value {
         Expr::Literal(Bool(true)) => Ok(true),
-        Expr::Live(read)
-            if matches!(
-                read.as_ref(),
-                BoolRead::State {
-                    property: BooleanState::TokenStatus,
-                    ..
-                }
-            ) =>
-        {
-            Ok(game.object_type(id)?.contains("トークン"))
-        }
+        Expr::Live(read) => matches_state(game, id, read),
         Expr::Compute(operation) => match operation.as_ref() {
             Predicate::HasAbility { predicate, .. } => {
                 super::super::search::matches_keyword(game, id, predicate)
@@ -644,6 +650,7 @@ pub(super) fn matches_candidate(game: &Game, id: &str, value: &Expr<Bool>) -> Re
                 CardKind::Follower => "フォロワー",
                 CardKind::Spell => "スペル",
                 CardKind::Amulet => "アミュレット",
+                CardKind::EvolveFollower => "フォロワー・エボルヴ",
             })),
             Predicate::NamesIntersect {
                 right: Expr::Literal(names),
@@ -1091,6 +1098,12 @@ impl Execution {
                 let zone = match zone {
                     ZoneKind::Field => "field",
                     ZoneKind::Ex if allow_resolution_zones => "ex",
+                    ZoneKind::Evolve
+                        if allow_resolution_zones
+                            && players.relation == PlayerRelation::SelfPlayer =>
+                    {
+                        "evolve_deck"
+                    }
                     ZoneKind::Cemetery => "cemetery",
                     _ => return Err(unsupported("public target zone")),
                 };
