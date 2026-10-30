@@ -1,0 +1,33 @@
+cards:
+  BP13-P29:
+    abilities:
+      - keywords:
+          - rush
+          - ward
+        line: 1
+      - auto:
+          do:
+            - banish: this
+          on:
+            phase:
+              which: main
+              whose: self
+        line: 2
+      - fanfare:
+          do:
+            - life:
+                delta: 2
+                who: self
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+    token:
+      name: アンの大英霊
+      template: true
+format: 2
+kind: author_effect_set

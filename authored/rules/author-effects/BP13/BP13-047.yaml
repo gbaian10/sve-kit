@@ -1,0 +1,45 @@
+cards:
+  BP13-047:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        kind: follower
+                        trait: 魔法使い
+                        who: self
+                        zone: field
+                    op: ge
+                    right: 2
+                else:
+                  - damage:
+                      n: 2
+                      to: chosen
+                then:
+                  - damage:
+                      n: 4
+                      to: chosen
+            - damage:
+                n: 1
+                to:
+                  leaders: opponents
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set
