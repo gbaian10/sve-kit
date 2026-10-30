@@ -1,0 +1,52 @@
+cards:
+  BP14-097:
+    abilities:
+      - fanfare:
+          cost:
+            banish:
+              n: 1
+              sel:
+                who: self
+                zone: ex
+          do:
+            - move:
+                ref: chosen
+                to: ex
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - pp: 2
+              - banish:
+                  n: 1
+                  sel:
+                    who: self
+                    zone: ex
+          do:
+            - move:
+                ref: chosen
+                to: ex
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

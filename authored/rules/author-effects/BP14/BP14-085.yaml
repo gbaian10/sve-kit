@@ -1,0 +1,42 @@
+cards:
+  BP14-085:
+    abilities:
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: hand
+                    op: le
+                    right: 2
+                then:
+                  - buff:
+                      on: this
+                      power: 1
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: hand
+                    op: eq
+                    right: 0
+                then:
+                  - grant:
+                      keywords:
+                        - storm
+                      on: this
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set
