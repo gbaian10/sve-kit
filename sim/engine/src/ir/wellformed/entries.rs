@@ -310,7 +310,7 @@ impl Checker {
                         checker.play_decision(decision, &ability.source.controller)
                     })?;
                 }
-                checker.at("costs", |checker| checker.costs(&play.costs))?;
+                checker.at("costs", |checker| checker.play_costs(&play.costs))?;
                 Ok(())
             })?;
         }

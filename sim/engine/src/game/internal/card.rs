@@ -5,7 +5,6 @@ use super::{
 };
 use crate::catalog::SelectedEffects;
 use crate::catalog::current::CurrentCard;
-use crate::ir::ChoiceDomain;
 use crate::ir::effect_evolution::projection;
 use crate::ir::events::played::filter;
 use crate::ir::play_restrictions::card_restriction;
@@ -18,6 +17,7 @@ use crate::ir::{
     QuantityUnit, Resource, ResourceOperation, RuleId, RuntimeAbilitySource, Selector, SourceSpan,
     StepwiseMode, WellFormedCardProgram, ZoneKind,
 };
+use crate::ir::{Bool, ChoiceDomain, PreconditionKind, PreconditionReason};
 use crate::ir::{ConsumptionPoint, LimitSpec, ModeUse};
 use crate::ir::{TurnId, printed_keywords};
 use crate::{Result, invalid};
@@ -348,7 +348,7 @@ impl Game {
                 continue;
             }
             if matches!(ability.kind, AbilityKind::Activated | AbilityKind::Spell) {
-                check_costs(ability)?;
+                check_costs(ability, &located.source)?;
             }
             let body = ability
                 .body
@@ -505,6 +505,21 @@ impl Game {
         })
     }
 
+    pub(super) fn internal_use_prerequisite(
+        &self,
+        execution: &Execution,
+        costs: &CostSpec,
+    ) -> Result<()> {
+        if let Some(predicate) = qualification(costs)?
+            && !execution.boolean(self, predicate)?.0
+        {
+            return Err(crate::EngineFailure::IllegalPlay(
+                "card-text use prerequisite is false".into(),
+            ));
+        }
+        Ok(())
+    }
+
     pub(super) fn internal_card_payment(
         &mut self,
         execution: &mut Execution,
@@ -514,6 +529,7 @@ impl Game {
         let CostSpec::Ordered { steps } = costs else {
             return Err(unsupported("whole-card cost alternatives"));
         };
+        self.internal_use_prerequisite(execution, costs)?;
         for step in steps {
             let (quantity, subjects) = match &step.instruction.action {
                 Action::Discard { .. } => {
@@ -704,7 +720,27 @@ fn check_header(ability: &Ability) -> Result<()> {
     Ok(())
 }
 
-fn check_costs(ability: &Ability) -> Result<()> {
+fn qualification(costs: &CostSpec) -> Result<Option<&Expr<Bool>>> {
+    let CostSpec::Ordered { steps } = costs else {
+        return Err(unsupported("whole-card cost alternatives"));
+    };
+    let mut predicate = None;
+    for (index, step) in steps.iter().enumerate() {
+        if let Some(guard) = &step.instruction.precondition {
+            if index != 0
+                || guard.kind != PreconditionKind::CardTextPrerequisite
+                || guard.protects != step.instruction.id
+                || guard.reason != (PreconditionReason::CardText {})
+            {
+                return Err(unsupported("whole-card use prerequisite"));
+            }
+            predicate = Some(&guard.predicate);
+        }
+    }
+    Ok(predicate)
+}
+
+fn check_costs(ability: &Ability, source: &SourceSpan) -> Result<()> {
     let play = ability
         .play
         .as_ref()
@@ -712,6 +748,9 @@ fn check_costs(ability: &Ability) -> Result<()> {
     let CostSpec::Ordered { steps } = &play.costs else {
         return Err(unsupported("whole-card cost alternatives"));
     };
+    if let Some(predicate) = qualification(&play.costs)? {
+        super::ordering::check_condition(predicate, source)?;
+    }
     if is_printed_quick(ability)
         && steps
             .iter()
@@ -732,7 +771,6 @@ fn check_costs(ability: &Ability) -> Result<()> {
         let instruction = &step.instruction;
         if step.materials.is_some()
             || instruction.context != InstructionContext::Cost
-            || instruction.precondition.is_some()
             || instruction.source != ability.source
             || instruction.actor != (PlayerRef::Controller {})
         {

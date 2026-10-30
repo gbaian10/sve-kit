@@ -1,0 +1,36 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP09-065:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-30"
+    abilities:
+      - line: 1
+        activate:
+          cost:
+            act_self: true
+          usable_if:
+            cmp:
+              left:
+                count:
+                  who: self
+                  zone: field
+                  trait: 武闘竜人
+              op: ge
+              right: 3
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: enemy
+                n: 3

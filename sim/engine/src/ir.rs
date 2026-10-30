@@ -123,7 +123,6 @@ mod capabilities;
 pub(crate) mod effect_evolution;
 mod effects;
 pub(crate) mod events;
-pub(crate) mod evolution_cemetery;
 mod flow;
 pub(crate) mod history_turn;
 pub mod lowering;

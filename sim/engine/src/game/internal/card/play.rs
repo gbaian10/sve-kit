@@ -427,6 +427,15 @@ impl Game {
             .as_ref()
             .ok_or_else(|| invalid("missing Quick PlaySpec"))?;
         execution.spell = spell;
+        if super::qualification(&play.costs)?.is_some() {
+            let source = probe.internal_card_source(holder, ability.id, actor)?;
+            execution.bind_source(&probe, source)?;
+            match probe.internal_use_prerequisite(&execution, &play.costs) {
+                Ok(()) => {}
+                Err(crate::EngineFailure::IllegalPlay(_)) => return Ok(false),
+                Err(error) => return Err(error),
+            }
+        }
         execution.captures(&probe, &play.captures)?;
         let CostSpec::Ordered { steps } = &play.costs else {
             return Err(unsupported("Quick costs"));
@@ -639,6 +648,7 @@ impl Game {
         execution.bind_source(self, source)?;
         execution.spell = spell;
         if let Some(play) = &ability.play {
+            self.internal_use_prerequisite(&execution, &play.costs)?;
             execution.captures(self, &play.captures)?;
         }
         self.run_card_play(execution, ability)

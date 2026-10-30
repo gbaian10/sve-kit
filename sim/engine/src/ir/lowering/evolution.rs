@@ -11,7 +11,6 @@ use crate::ir::{
     SelectionConstraint, SelectionGroup, SelectionSnapshot, SelectionView, Selector,
     TextQuantifier, Visibility, ZoneKind,
 };
-use crate::ir::{Precondition, PreconditionKind, PreconditionReason};
 
 #[expect(
     clippy::multiple_inherent_impl,
@@ -166,71 +165,6 @@ fn costs(
     })
 }
 
-fn qualification(
-    head: &ast::Evolution,
-    scope: ScopeId,
-    protects: InstructionId,
-    path: &str,
-) -> Result<Option<Precondition>, LoweringError> {
-    let Some(condition) = &head.usable_if else {
-        return Ok(None);
-    };
-    let predicate = match condition {
-        ast::Condition::Exists(query) => {
-            if !matches!(query.who, ast::Side::Controller)
-                || !matches!(query.zone, ast::PublicZone::Field)
-                || query.other
-                || query.class.is_some()
-                || query.token.is_some()
-            {
-                return Err(unsupported(path));
-            }
-            Expr::Compute(Box::new(Predicate::Exists {
-                objects: super::costs::public_query(query, Binding::new(4, scope)),
-            }))
-        }
-        ast::Condition::Cmp(ast::BodyComparison {
-            left: ast::Number::Count { count },
-            op: ast::Comparison::Ge,
-            right: ast::Number::Literal(minimum),
-        }) if matches!(count.who, ast::LeaderSide::Controller)
-            && matches!(count.zone, ast::CountZone::Cemetery)
-            && count.kind.is_none()
-            && count.r#trait.is_none()
-            && count.name.is_none()
-            && count.name_contains.is_none()
-            && count.token.is_none()
-            && count.not_token.is_none()
-            && *minimum >= 0 =>
-        {
-            let cost = count
-                .orig_cost_eq
-                .and_then(|n| i64::try_from(n).ok())
-                .ok_or_else(|| unsupported(path))?;
-            super::super::evolution_cemetery::predicate(cost, *minimum, Binding::new(4, scope))
-        }
-        ast::Condition::EnteredFrom(_)
-        | ast::Condition::Did(_)
-        | ast::Condition::PlayedFrom(_)
-        | ast::Condition::EnteredBy(_)
-        | ast::Condition::Awakened(_)
-        | ast::Condition::LeaderLife(_)
-        | ast::Condition::Crimson(_)
-        | ast::Condition::Combo(_)
-        | ast::Condition::Paid(_)
-        | ast::Condition::Cmp(_)
-        | ast::Condition::All(_)
-        | ast::Condition::Any(_)
-        | ast::Condition::Not(_) => return Err(unsupported(path)),
-    };
-    Ok(Some(Precondition {
-        kind: PreconditionKind::CardTextPrerequisite,
-        protects,
-        reason: PreconditionReason::CardText {},
-        predicate,
-    }))
-}
-
 pub(super) fn lower(
     allocator: &mut Allocator,
     key: &super::CardCoordinates<'_>,
@@ -268,9 +202,13 @@ pub(super) fn lower(
     let inner_scope = ScopeId(scope.0.checked_add(2).ok_or_else(|| unsupported(path))?);
     let element = Binding::new(1, inner_scope);
     let mut costs = costs(allocator, selection, pp, &origin, path)?;
-    if let CostSpec::Ordered { steps } = &mut costs {
-        let reveal = steps.first_mut().ok_or_else(|| unsupported(path))?;
-        reveal.instruction.precondition = qualification(head, scope, reveal.instruction.id, path)?;
+    if let Some(condition) = &head.usable_if {
+        let body = ast::Body::default();
+        let mut context = super::BodyContext::new(entry, scope, &body, None, allocator);
+        // The intrinsic face parameter reserves local bindings 1 through 3.
+        context.allocator.next = 3;
+        let predicate = context.qualification(condition, &source, path)?;
+        super::conditions::qualify_costs(&mut costs, Some(predicate), path)?;
     }
     let evolve = instruction(
         Action::Evolve {

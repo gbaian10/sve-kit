@@ -134,6 +134,7 @@ pub(super) struct Activate {
     pub quick: Option<bool>,
     pub zone: Option<ActivationZones>,
     pub cost: Cost,
+    pub usable_if: Option<Condition>,
     #[serde(flatten)]
     pub body: Body,
 }
@@ -194,7 +195,7 @@ pub(super) struct Ports {
     pub _exports: Empty,
 }
 
-#[derive(Deserialize)]
+#[derive(Default, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct Body {
     #[serde(rename = "cost")]

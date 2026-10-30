@@ -321,3 +321,58 @@ fn quick_admission_keeps_exact_permission_and_rejects_a_quick_spell_body_origin(
         .unwrap_err();
     assert_eq!(before, exact_authority(&game));
 }
+
+#[test]
+fn quick_options_exclude_false_use_prerequisites_before_offering_payment() {
+    for allowed in [false, true] {
+        let mut activated =
+            payment::paid_ability(vec![payment::pp(1), payment::act()], vec![draw(1, 0)]);
+        let CostSpec::Ordered { steps } = &mut activated.node.play.as_mut().unwrap().costs else {
+            panic!("ordered quick costs")
+        };
+        steps[0].instruction.precondition = Some(Precondition {
+            kind: PreconditionKind::CardTextPrerequisite,
+            protects: steps[0].instruction.id,
+            reason: PreconditionReason::CardText {},
+            predicate: Expr::Compute(Box::new(Predicate::CompareInt {
+                left: Expr::Live(Box::new(IntRead::PlayerResource {
+                    player: PlayerRef::Controller {},
+                    property: PlayerResource::Life,
+                })),
+                comparison: Comparison::GreaterEqual,
+                right: Expr::Literal(Int(if allowed { 19 } else { 21 })),
+            })),
+        });
+        let follower = card(vec![quick_activated(activated)]);
+        let mut game = board(&card(vec![]), &follower, true);
+        game.internal_rule_action(&json!({"do":"end-phase"}))
+            .unwrap();
+        let q = question(&mut game);
+        let InputDomain::Quick { options, .. } = &q.domain else {
+            panic!("quick window")
+        };
+        assert_eq!(
+            options.len(),
+            usize::from(allowed),
+            "only a usable ability is offered"
+        );
+        let before = game.projection(View::Referee).unwrap();
+        assert_eq!(before["P2"]["pp"]["current"], 2_u8, "preflight pays no PP");
+        assert_eq!(
+            before["objects"]["b"]["acted"], false,
+            "preflight does not act the source"
+        );
+        if allowed {
+            resolved(choose(&mut game, &q, Some(options[0].handle)));
+            let after = game.projection(View::Referee).unwrap();
+            assert_eq!(
+                after["P2"]["pp"]["current"], 1_u8,
+                "the chosen legal ability pays once"
+            );
+            assert_eq!(
+                after["objects"]["b"]["acted"], true,
+                "the chosen source acts"
+            );
+        }
+    }
+}
