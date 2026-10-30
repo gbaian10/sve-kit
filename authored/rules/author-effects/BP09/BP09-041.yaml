@@ -1,0 +1,41 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP09-041:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-30"
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - damage:
+                to:
+                  who: opp
+                  zone: field
+                  kind: follower
+                n: 1
+            - if:
+                cond:
+                  spellchain: 10
+                then:
+                  - damage:
+                      to:
+                        who: opp
+                        zone: field
+                        kind: follower
+                      n: 1
+            - if:
+                cond:
+                  spellchain: 15
+                then:
+                  - damage:
+                      to:
+                        who: opp
+                        zone: field
+                        kind: follower
+                      n: 1

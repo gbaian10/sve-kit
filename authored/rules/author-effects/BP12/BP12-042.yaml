@@ -1,0 +1,26 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP12-042:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-30"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        fanfare:
+          do:
+            - if:
+                cond:
+                  spellchain: 5
+                then:
+                  - pp:
+                      who: self
+                      delta: 2
