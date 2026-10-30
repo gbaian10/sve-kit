@@ -1,0 +1,36 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP17-106:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-30"
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - create:
+                token: リペアモード
+                n: 1
+                to: ex
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: ex
+                        trait: 機械
+                    op: ge
+                    right: 3
+                then:
+                  - draw:
+                      n: 1
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP17-T18

@@ -1,0 +1,29 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP22-008:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-30"
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - damage:
+                to: enemy
+                n:
+                  count:
+                    who: self
+                    zone: ex
+                    trait: 妖精
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1

@@ -1,0 +1,32 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP22-058:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-30"
+    abilities:
+      - line: 1
+        keywords:
+          - storm
+      - line: 2
+        fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: ex
+                        trait: ドラゴニュート
+                    op: ge
+                    right: 2
+                then:
+                  - pp:
+                      who: self
+                      delta: 2

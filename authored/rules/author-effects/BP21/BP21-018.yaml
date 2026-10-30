@@ -1,0 +1,55 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP21-018:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-30"
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - create:
+                token: フェアリー
+                n: 1
+                to: field
+      - line: 2
+        activate:
+          do:
+            - damage:
+                to: enemy
+                n:
+                  minus:
+                    - count:
+                        who: self
+                        zone: field
+                        kind: follower
+                        trait: 妖精
+                        token: true
+                    - minus:
+                        - 0
+                        - count:
+                            who: self
+                            zone: ex
+                            kind: follower
+                            trait: 妖精
+                            token: true
+          cost:
+            steps:
+              - act_self: true
+              - self_to_cemetery: true
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP21-T11
