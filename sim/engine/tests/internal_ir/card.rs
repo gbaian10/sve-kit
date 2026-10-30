@@ -35,6 +35,9 @@ mod exchange;
 #[path = "card/costs.rs"]
 mod play_costs;
 
+#[path = "card/cost_history.rs"]
+mod cost_history;
+
 #[path = "card/payment.rs"]
 mod payment;
 

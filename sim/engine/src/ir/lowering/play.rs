@@ -122,7 +122,7 @@ impl BodyContext<'_> {
         }
         let binding = Binding::new(self.allocator.id(path)?, self.scope);
         if self.definitions.contains_key(&target.bind)
-            || self.searches.contains_key(&target.bind)
+            || self.searches.contains(&target.bind)
             || self.observations.contains_key(&target.bind)
             || self.targets.insert(target.bind.clone(), binding).is_some()
         {
@@ -210,7 +210,7 @@ impl BodyContext<'_> {
             || self.recipient_targets.contains_key(&target.bind)
             || self.targets.contains_key(&target.bind)
             || self.definitions.contains_key(&target.bind)
-            || self.searches.contains_key(&target.bind)
+            || self.searches.contains(&target.bind)
         {
             return Err(unsupported(path));
         }
@@ -283,7 +283,7 @@ impl BodyContext<'_> {
             || self.recipient_targets.contains_key(&target.bind)
             || self.targets.contains_key(&target.bind)
             || self.definitions.contains_key(&target.bind)
-            || self.searches.contains_key(&target.bind)
+            || self.searches.contains(&target.bind)
             || self.observations.contains_key(&target.bind)
         {
             return Err(unsupported(path));
@@ -475,7 +475,8 @@ impl BodyContext<'_> {
                 },
                 card_allocator: self.card_allocator,
                 definitions: self.definitions,
-                searches: BTreeMap::new(),
+                searches: BTreeSet::new(),
+                ex_outputs: BTreeMap::new(),
                 observations: BTreeMap::new(),
                 observed_targets: BTreeSet::new(),
                 targets: BTreeMap::new(),

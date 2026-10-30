@@ -38,11 +38,13 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
         } = effect.as_ref()
     {
         let InstallationSubjects::Objects {
-            objects: Selector::MoveAfter { .. },
+            objects: Selector::MoveAfter { .. } | Selector::Bound { .. },
             affected,
         } = subjects
         else {
-            return Err(unsupported("cost modifier needs successful movement After"));
+            return Err(unsupported(
+                "cost modifier needs successful movement or creation",
+            ));
         };
         if *capture != InstallationTime::InstructionStart
             || selected
