@@ -1,0 +1,54 @@
+cards:
+  CP01-044:
+    abilities:
+      - auto:
+          do:
+            - damage:
+                n: 4
+                to: chosen
+          on:
+            phase:
+              which: main
+              whose: self
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                leader_or: true
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        trait: ウマ娘
+                        who: self
+                        zone: field
+                    op: ge
+                    right: 2
+                then:
+                  - damage:
+                      n: 4
+                      to: chosen
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

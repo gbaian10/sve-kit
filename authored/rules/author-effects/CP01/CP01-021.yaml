@@ -1,0 +1,58 @@
+cards:
+  CP01-021:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - look:
+                        bind: seen
+                        top:
+                          n: 2
+                          who: self
+                    - choose:
+                        bind: picked
+                        from:
+                          in: seen
+                          trait: ウマ娘
+                        may: true
+                        n: 1
+                    - move:
+                        ref: picked
+                        result: taken
+                        to: hand
+                    - reveal:
+                        bind: shown
+                        ref: picked
+                    - move:
+                        order: chooser
+                        position: bottom
+                        ref:
+                          except:
+                            in:
+                              objects_of: taken
+                              view: before
+                          in: seen
+                        to: deck
+                  - - choose:
+                        bind: chosen
+                        from:
+                          kind: follower
+                          trait: BNW
+                          who: self
+                          zone: cemetery
+                        n: 1
+                    - move:
+                        ref: chosen
+                        to: hand
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

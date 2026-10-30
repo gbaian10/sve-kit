@@ -1,0 +1,30 @@
+cards:
+  CP01-084:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - fanfare:
+          do:
+            - buff:
+                hp: 2
+                on: chosen
+                power: 1
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                trait: ウマ娘
+                who: self
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set
