@@ -1,6 +1,9 @@
 use super::*;
 use second::lowerer;
 
+#[path = "card/frozen_zone.rs"]
+mod frozen_zone;
+
 #[path = "card/ability_condition.rs"]
 mod ability_condition;
 

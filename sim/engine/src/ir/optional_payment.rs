@@ -1,8 +1,8 @@
 //! One optional payment declared before targets and committed before play.
 use super::{
-    Ability, Bool, Comparison, Control, CostSpec, Expr, Int, IntRead, Located, Node,
+    Ability, Bool, Capture, CaptureTime, Comparison, Control, CostSpec, Expr, Int, IntRead, Node,
     PaymentOptionality, PaymentTime, PlaySpec, PlayerRef, PlayerResource, Predicate, Program,
-    ReceiptId,
+    ReceiptId, ScopeId,
 };
 
 pub(crate) fn declaration(body: &Program) -> Option<(&CostSpec, ReceiptId)> {
@@ -57,32 +57,49 @@ pub(crate) fn trigger_play(ability: &Ability) -> bool {
 }
 
 fn declared_choice(body: &Program) -> bool {
-    match body.steps.as_slice() {
-        [
-            Located {
-                node:
-                    Node::Control {
-                        control: Control::Mode { .. },
-                    },
-                ..
-            },
-        ] => true,
-        [
-            Located {
-                node:
-                    Node::Control {
-                        control:
-                            Control::If {
-                                condition,
-                                then_body,
-                                else_body: None,
-                            },
-                    },
-                ..
-            },
-        ] => public_mode_guard(condition) && declared_choice(then_body),
-        _ => false,
+    // Read-only resolution captures precede the sole declared choice, never extra effects.
+    let mut steps = body
+        .steps
+        .iter()
+        .skip_while(|step| resolution_capture(&step.node, body.scope));
+    let Some(step) = steps.next() else {
+        return false;
+    };
+    if steps.next().is_some() {
+        return false;
     }
+    match &step.node {
+        Node::Control {
+            control: Control::Mode { .. },
+        } => true,
+        Node::Control {
+            control:
+                Control::If {
+                    condition,
+                    then_body,
+                    else_body: None,
+                },
+        } => public_mode_guard(condition) && declared_choice(then_body),
+        Node::Instruction { .. }
+        | Node::Control { .. }
+        | Node::Capture { .. }
+        | Node::Decision { .. } => false,
+    }
+}
+
+fn resolution_capture(node: &Node, scope: ScopeId) -> bool {
+    let Node::Capture { capture } = node else {
+        return false;
+    };
+    let (Capture::Integer { at, .. }
+    | Capture::Natural { at, .. }
+    | Capture::Boolean { at, .. }
+    | Capture::Objects { at, .. }
+    | Capture::Player { at, .. }) = capture
+    else {
+        return false;
+    };
+    *at == CaptureTime::AtResolution { scope }
 }
 
 pub(crate) fn public_mode_guard(condition: &Expr<Bool>) -> bool {
