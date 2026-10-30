@@ -1,0 +1,32 @@
+cards:
+  BP14-083:
+    abilities:
+      - evolve_time:
+          do:
+            - damage:
+                n: 4
+                to: chosen
+            - damage:
+                n: 4
+                to:
+                  leaders: opponents
+            - discard:
+                n: 1
+                who: self
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

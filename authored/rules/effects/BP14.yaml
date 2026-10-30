@@ -261,14 +261,6 @@ cards:
                 subjects: self
         event: enter
         subject: self
-  BP14-032:
-    status: complete
-    abilities:
-      - line: 1
-        kind: static
-        body:
-          op: macro
-          name: storm
   BP14-034:
     status: complete
     abilities:
@@ -599,41 +591,6 @@ cards:
           name: 水銀の断絶
           count: 1
           to: ex
-        event: enter
-        subject: self
-  BP14-P20:
-    status: complete
-    abilities:
-      - line: 1
-        kind: trigger
-        body:
-          op: if
-          condition:
-            fn: le
-            args:
-              - count:
-                  side: self
-                  zone: hand
-              - 2
-          then:
-            op: seq
-            steps:
-              - op: modify
-                subjects: self
-                power: 1
-              - op: if
-                condition:
-                  fn: eq
-                  args:
-                    - count:
-                        side: self
-                        zone: hand
-                    - 0
-                then:
-                  op: modify
-                  subjects: self
-                  keywords:
-                    - storm
         event: enter
         subject: self
   BP14-T02:

@@ -1,0 +1,58 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "trigger",
+      "body": {
+        "op": "if",
+        "condition": {
+          "fn": "le",
+          "args": [
+            {
+              "count": {
+                "side": "self",
+                "zone": "hand"
+              }
+            },
+            2
+          ]
+        },
+        "then": {
+          "op": "seq",
+          "steps": [
+            {
+              "op": "modify",
+              "subjects": "self",
+              "power": 1
+            },
+            {
+              "op": "if",
+              "condition": {
+                "fn": "eq",
+                "args": [
+                  {
+                    "count": {
+                      "side": "self",
+                      "zone": "hand"
+                    }
+                  },
+                  0
+                ]
+              },
+              "then": {
+                "op": "modify",
+                "subjects": "self",
+                "keywords": [
+                  "storm"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "event": "enter",
+      "subject": "self"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+cards:
+  BP14-051:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - draw:
+                n: 2
+            - damage:
+                n:
+                  count:
+                    who: self
+                    zone: hand
+                to:
+                  kind: follower
+                  who: opp
+                  zone: field
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set
