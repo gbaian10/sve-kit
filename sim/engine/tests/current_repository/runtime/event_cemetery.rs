@@ -38,7 +38,7 @@ fn selected() -> &'static SelectedEffects {
     })
 }
 
-fn move_material(from: ZoneKind, to: OwnerZone) -> Action {
+pub(super) fn move_material(from: ZoneKind, to: OwnerZone) -> Action {
     let mut action = movement(to);
     let Action::Move { objects, .. } = &mut action else {
         panic!("movement producer")
@@ -61,7 +61,7 @@ fn move_material(from: ZoneKind, to: OwnerZone) -> Action {
     action
 }
 
-fn position(card: &str, active: &str, material: &str, side: &str, zone: &str) -> Value {
+pub(super) fn position(card: &str, active: &str, material: &str, side: &str, zone: &str) -> Value {
     let mut value = draw_position();
     value["turn"]["active"] = json!(active);
     value["players"]["P1"]["zones"]["field"] = json!([{"id":"source","card":card}]);
@@ -77,7 +77,7 @@ fn position(card: &str, active: &str, material: &str, side: &str, zone: &str) ->
     value
 }
 
-fn prepared(value: &Value, action: Action) -> Game {
+pub(super) fn prepared(value: &Value, action: Action) -> Game {
     let mut game = with_selected_producer(value, action, selected());
     let empty = WellFormedCardProgram::check(CardProgram {
         abilities: vec![],
@@ -96,13 +96,13 @@ fn prepared(value: &Value, action: Action) -> Game {
     game
 }
 
-fn finish_checks(game: &mut Game) {
+pub(super) fn finish_checks(game: &mut Game) {
     while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
         game.resume_internal_card().unwrap();
     }
 }
 
-fn resolve_event(game: &mut Game, number: &str, count: usize) {
+pub(super) fn resolve_event(game: &mut Game, number: &str, count: usize) {
     let question = game.internal_pending_choice().unwrap();
     if count == 0 {
         assert!(question.is_none(), "the counterexample does not subscribe");
