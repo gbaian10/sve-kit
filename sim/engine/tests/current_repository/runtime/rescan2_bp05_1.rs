@@ -562,3 +562,80 @@ fn bp05_096_at_five_cards_recovers_pp_and_draws_without_rechecking_the_first_cla
         );
     }
 }
+
+fn remove_source(game: &mut Game, card: &str) {
+    let CardPlay::Awaiting(q) = game.play_internal_card("removal", actor()).unwrap() else {
+        panic!("Soul Conversion target")
+    };
+    let InputDomain::Targets(d) = &q.domain else {
+        panic!("own follower")
+    };
+    let h = d
+        .members
+        .iter()
+        .find(|m| m.card.as_deref() == Some(card))
+        .unwrap()
+        .handle;
+    let step = game
+        .answer_internal_card(q.actor, q.token, Answer::Targets(vec![h]))
+        .unwrap();
+    finish(game, step);
+    finish_checks(game);
+}
+
+#[test]
+fn bp05_015_its_real_evolved_lastword_can_select_and_return_its_own_base_card() {
+    let mut initial = evolution("BP05-014", "BP05-015");
+    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"removal","card":"BP01-116"}]);
+    let mut game = game(&initial);
+    evolve(&mut game, 1);
+    finish_checks(&mut game);
+    remove_source(&mut game, "BP05-014");
+    trigger(&mut game);
+    let state = game.projection(View::Referee).unwrap();
+    assert!(
+        state["P1"]["hand"]
+            .as_array()
+            .unwrap()
+            .contains(&json!("source")),
+        "Lastword returns the real unevolved base to hand"
+    );
+    assert!(
+        !state["P1"]["cemetery"]
+            .as_array()
+            .unwrap()
+            .contains(&json!("source")),
+        "the returned base no longer remains in cemetery"
+    );
+    assert_eq!(
+        state["P1"]["evolve_deck"],
+        json!(["form"]),
+        "the evolution form returns to its own deck"
+    );
+}
+#[test]
+fn bp05_084_without_a_named_cemetery_card_still_destroys_the_enemy_and_damages_its_own_leader() {
+    let initial = position("BP05-084");
+    let mut game = game(&initial);
+    play(&mut game, "source");
+    finish_checks(&mut game);
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(
+        state["P2"]["cemetery"],
+        json!(["enemy"]),
+        "the formally selected enemy is destroyed"
+    );
+    assert_eq!(
+        state["P1"]["leader"]["life"], 18_u8,
+        "the spell damages its own leader by two"
+    );
+    assert_eq!(
+        state["P1"]["hand"],
+        json!([]),
+        "Q746 permits playing without a named card to return"
+    );
+    assert_eq!(
+        state["P1"]["pp"]["current"], 7_u8,
+        "the printed spell cost is paid"
+    );
+}
