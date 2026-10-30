@@ -1,0 +1,42 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP17-065:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-30"
+    abilities:
+      - line: 1
+        keywords:
+          - ward
+      - line: 2
+        fanfare:
+          do:
+            - if:
+                cond:
+                  paid:
+                    receipt: extra
+                then:
+                  - draw:
+                      n: 2
+                  - if:
+                      cond:
+                        played_from:
+                          ref: this
+                          from: ex
+                      then:
+                        - pp:
+                            who: self
+                            delta: 3
+          optional_cost:
+            discard:
+              n: 1
+              sel:
+                who: self
+                zone: hand
+                trait: 海洋
+            result: extra
