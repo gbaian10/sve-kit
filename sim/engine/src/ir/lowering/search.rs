@@ -115,6 +115,7 @@ pub(super) fn object_filter(
             })),
             right: Expr::Literal(match kind {
                 ast::SearchKind::Follower => CardKind::Follower,
+                ast::SearchKind::EvolveFollower => CardKind::EvolveFollower,
                 ast::SearchKind::Spell => CardKind::Spell,
                 ast::SearchKind::Amulet => CardKind::Amulet,
             }),

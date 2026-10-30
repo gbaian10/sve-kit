@@ -77,6 +77,7 @@ impl BodyContext<'_> {
                 orig_cost_eq: None,
                 token: None,
                 not_token: None,
+                face_up: None,
             },
         };
         Ok(Expr::Compute(Box::new(Predicate::CompareInt {
@@ -447,7 +448,21 @@ impl BodyContext<'_> {
             || count.name_contains.is_some()
             || count.orig_cost_eq.is_some()
             || count.token.is_some()
-            || count.not_token.is_some();
+            || count.not_token.is_some()
+            || count.face_up.is_some();
+        if matches!(count.zone, ast::CountZone::EvolveDeck)
+            && (!matches!(count.who, ast::LeaderSide::Controller)
+                || count.face_up != Some(true)
+                || !matches!(count.kind, Some(ast::SearchKind::EvolveFollower))
+                || count.r#trait.is_some()
+                || count.name.is_some()
+                || count.name_contains.is_some()
+                || count.orig_cost_eq.is_some()
+                || count.token.is_some()
+                || count.not_token.is_some())
+        {
+            return Err(unsupported(path));
+        }
         if !matches!(
             (count.token, count.not_token),
             (None | Some(true), None) | (None, Some(true))
@@ -481,6 +496,7 @@ impl BodyContext<'_> {
                     text_quantifier: TextQuantifier::Implicit,
                 },
                 zone: match count.zone {
+                    ast::CountZone::EvolveDeck => ZoneKind::Evolve,
                     ast::CountZone::Field => ZoneKind::Field,
                     ast::CountZone::Ex => ZoneKind::Ex,
                     ast::CountZone::Deck => ZoneKind::Deck,

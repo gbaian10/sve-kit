@@ -332,8 +332,10 @@ fn mask_public_natural(value: &mut Expr<Nat>) {
         },
         _ => return,
     };
-    if super::card::selection::public_zone_selector(selector).is_ok() {
-        // These reads observe only the grammar checked by the public-zone authority.
+    if super::card::selection::public_zone_selector(selector).is_ok()
+        || super::card::selection::evolve_count_selector(selector).is_ok()
+    {
+        // These scalar reads use only a selector checked by its authority.
         *value = Expr::Literal(Nat(0));
     }
 }

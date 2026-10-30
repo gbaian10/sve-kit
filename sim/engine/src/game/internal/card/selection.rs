@@ -494,6 +494,39 @@ pub(in crate::game::internal) fn public_zone_selector(selector: &Selector) -> Re
     }
 }
 
+pub(in crate::game::internal) fn evolve_count_selector(selector: &Selector) -> Result<()> {
+    match selector {
+        Selector::Zone {
+            zone: ZoneKind::Evolve,
+            view: SelectionView::Current {},
+            predicate,
+            binding,
+            players,
+        } if players.relative_to == (PlayerRef::Controller {})
+            && players.relation == PlayerRelation::SelfPlayer =>
+        {
+            check_predicate(predicate, *binding)?;
+            if !requires_face_up(predicate, *binding) {
+                return Err(unsupported("evolve count requires face-up cards"));
+            }
+            Ok(())
+        }
+        _ => Err(unsupported("evolve count selector")),
+    }
+}
+
+fn requires_face_up(value: &Expr<Bool>, candidate: Binding<ObjectRef>) -> bool {
+    match value {
+        Expr::Live(read) => {
+            matches!(read.as_ref(), BoolRead::State { object, property: BooleanState::FaceUp } if candidate_view(object, candidate))
+        }
+        Expr::Compute(operation) => {
+            matches!(operation.as_ref(), Predicate::And { predicates } if predicates.iter().any(|part| requires_face_up(part, candidate)))
+        }
+        _ => false,
+    }
+}
+
 fn candidate_view(view: &ObjectView, candidate: Binding<ObjectRef>) -> bool {
     matches!(view, ObjectView::Current { object } if matches!(object.as_ref(), ObjectOperand::Bound { binding } if *binding == candidate))
 }
@@ -535,7 +568,7 @@ fn private_look_filter(selector: &Selector) -> Option<(Binding<ObjectRef>, &Expr
 fn check_predicate(value: &Expr<Bool>, candidate: Binding<ObjectRef>) -> Result<()> {
     match value {
         Expr::Literal(Bool(true)) => Ok(()),
-        Expr::Live(read) if matches!(read.as_ref(), BoolRead::State { object, property: BooleanState::TokenStatus } if candidate_view(object, candidate)) => {
+        Expr::Live(read) if matches!(read.as_ref(), BoolRead::State { object, property: BooleanState::TokenStatus | BooleanState::FaceUp } if candidate_view(object, candidate)) => {
             Ok(())
         }
         Expr::Compute(operation) => match operation.as_ref() {
@@ -605,17 +638,17 @@ fn check_predicate(value: &Expr<Bool>, candidate: Binding<ObjectRef>) -> Result<
 pub(super) fn matches_candidate(game: &Game, id: &str, value: &Expr<Bool>) -> Result<bool> {
     match value {
         Expr::Literal(Bool(true)) => Ok(true),
-        Expr::Live(read)
-            if matches!(
-                read.as_ref(),
-                BoolRead::State {
-                    property: BooleanState::TokenStatus,
-                    ..
-                }
-            ) =>
-        {
-            Ok(game.object_type(id)?.contains("トークン"))
-        }
+        Expr::Live(read) => match read.as_ref() {
+            BoolRead::State {
+                property: BooleanState::TokenStatus,
+                ..
+            } => Ok(game.object_type(id)?.contains("トークン")),
+            BoolRead::State {
+                property: BooleanState::FaceUp,
+                ..
+            } => Ok(game.object(id)?.state["face_up"] == true),
+            _ => Err(unsupported("field target predicate evaluation")),
+        },
         Expr::Compute(operation) => match operation.as_ref() {
             Predicate::HasAbility { predicate, .. } => {
                 super::super::search::matches_keyword(game, id, predicate)
@@ -632,6 +665,7 @@ pub(super) fn matches_candidate(game: &Game, id: &str, value: &Expr<Bool>) -> Re
                 ..
             } => Ok(game.object_type(id)?.contains(match kind {
                 CardKind::Follower => "フォロワー",
+                CardKind::EvolveFollower => "フォロワー・エボルヴ",
                 CardKind::Spell => "スペル",
                 CardKind::Amulet => "アミュレット",
             })),
@@ -1082,6 +1116,7 @@ impl Execution {
                     ZoneKind::Field => "field",
                     ZoneKind::Ex if allow_resolution_zones => "ex",
                     ZoneKind::Cemetery => "cemetery",
+                    ZoneKind::Evolve if allow_resolution_zones => "evolve_deck",
                     _ => return Err(unsupported("public target zone")),
                 };
                 check_predicate(predicate, *binding)?;

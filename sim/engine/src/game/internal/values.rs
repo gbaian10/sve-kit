@@ -526,6 +526,19 @@ impl Execution {
                         })?;
                 Ok(Nat(count))
             }
+            NatRead::ZoneCount {
+                selector:
+                    selector @ Selector::Zone {
+                        zone: ZoneKind::Evolve,
+                        ..
+                    },
+            } => {
+                super::card::selection::evolve_count_selector(selector)?;
+                Ok(Nat(u64::try_from(
+                    self.public_zone_objects(game, selector)?.len(),
+                )
+                .map_err(invalid)?))
+            }
             NatRead::ZoneCount { selector } => Ok(Nat(u64::try_from(
                 self.objects(game, selector)?.len(),
             )

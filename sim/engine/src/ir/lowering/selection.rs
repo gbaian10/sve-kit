@@ -222,6 +222,7 @@ pub(super) struct ObjectFilter<'query> {
     pub class: Option<&'query str>,
     pub not_class: Option<&'query str>,
     pub token: Option<bool>,
+    pub face_up: Option<bool>,
     pub name: Option<&'query str>,
     pub contains: Option<&'query str>,
     pub cost: [Option<u64>; 3],
@@ -275,6 +276,7 @@ impl<'query> From<&'query ast::CountQuery> for ObjectFilter<'query> {
             name: query.name.as_deref(),
             contains: query.name_contains.as_deref(),
             token: query.token.or_else(|| query.not_token.map(|token| !token)),
+            face_up: query.face_up,
             original_cost: [query.orig_cost_eq, None, None],
             ..Self::default()
         }
@@ -295,6 +297,22 @@ impl<'query> From<&'query ast::SearchQuery> for ObjectFilter<'query> {
             original_cost: [query.orig_cost_eq, query.orig_cost_le, query.orig_cost_ge],
             ..Self::default()
         }
+    }
+}
+
+fn state_filter(
+    object: &super::ObjectView,
+    property: super::super::BooleanState,
+    expected: bool,
+) -> super::Expr<super::Bool> {
+    let predicate = super::Expr::Live(Box::new(super::super::BoolRead::State {
+        object: object.clone(),
+        property,
+    }));
+    if expected {
+        predicate
+    } else {
+        super::Expr::Compute(Box::new(super::Predicate::Not { predicate }))
     }
 }
 
@@ -345,16 +363,13 @@ pub(super) fn field_filter(
             });
         }
     }
-    if let Some(token) = filter.token {
-        let predicate = super::Expr::Live(Box::new(super::super::BoolRead::State {
-            object: object.clone(),
-            property: super::super::BooleanState::TokenStatus,
-        }));
-        predicates.push(if token {
-            predicate
-        } else {
-            super::Expr::Compute(Box::new(super::Predicate::Not { predicate }))
-        });
+    for (condition, property) in [
+        (filter.face_up, super::super::BooleanState::FaceUp),
+        (filter.token, super::super::BooleanState::TokenStatus),
+    ] {
+        if let Some(expected) = condition {
+            predicates.push(state_filter(&object, property, expected));
+        }
     }
     predicates.extend(numeric_limits(filter, &object));
     for keyword in filter.keyword.into_iter().chain(

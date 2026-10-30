@@ -232,6 +232,7 @@ names!(
 );
 tags!(CardKind {
     Follower,
+    EvolveFollower,
     Spell,
     Amulet
 });

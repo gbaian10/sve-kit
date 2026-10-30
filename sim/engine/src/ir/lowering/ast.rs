@@ -702,6 +702,7 @@ pub(super) struct SearchPower {
 #[serde(rename_all = "snake_case")]
 pub(super) enum SearchKind {
     Follower,
+    EvolveFollower,
     Spell,
     Amulet,
 }
@@ -1041,11 +1042,13 @@ pub(super) struct CountQuery {
     pub orig_cost_eq: Option<u64>,
     pub token: Option<bool>,
     pub not_token: Option<bool>,
+    pub face_up: Option<bool>,
 }
 
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum CountZone {
+    EvolveDeck,
     Field,
     Ex,
     Deck,

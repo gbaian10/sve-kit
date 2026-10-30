@@ -1,0 +1,28 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP11-022:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-terra
+          date: "2026-10-31"
+    abilities:
+      - line: 1
+        keywords:
+          - assail
+      - line: 2
+        auto:
+          "on":
+            phase:
+              which: end
+              whose: self
+          do:
+            - buff:
+                "on": this
+                hp: 2
+            - life:
+                who: self
+                delta: 2

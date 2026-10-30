@@ -402,6 +402,9 @@ pub(super) fn private_requirement(code: &str) -> bool {
             | "shape.BoolRead.State"
             | "read.state"
             | "internal.BooleanState.TokenStatus"
+            | "internal.BooleanState.FaceUp"
+            | "internal.CardKind.EvolveFollower"
+            | "internal.ZoneKind.Evolve"
             | "shape.KindRead.Kind"
             | "read.kind"
             | "internal.CharacteristicView.Original"
@@ -584,6 +587,7 @@ pub(super) fn matches_candidate(game: &Game, id: &str, expression: &Expr<Bool>) 
                     };
                     Ok(kind_name.contains(match kind {
                         CardKind::Follower => "フォロワー",
+                        CardKind::EvolveFollower => "フォロワー・エボルヴ",
                         CardKind::Spell => "スペル",
                         CardKind::Amulet => "アミュレット",
                     }))

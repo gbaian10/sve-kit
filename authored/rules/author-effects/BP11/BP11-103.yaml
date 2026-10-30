@@ -1,0 +1,17 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP11-103:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-terra
+          date: "2026-10-31"
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - evolve:
+                ref: this

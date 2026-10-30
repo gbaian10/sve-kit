@@ -1408,3 +1408,29 @@ fn filtered_counts_reject_hidden_card_characteristics() {
         }
     }
 }
+
+#[test]
+fn evolve_deck_count_rejects_opponent() {
+    let mut tree = expanded::tree().clone();
+    tree["cards"]["BP08-038"]["abilities"][0]["fanfare"]["do"] = json!([
+        {"draw":{"n":{"count":{"who":"opp","zone":"evolve_deck","kind":"evolve_follower","face_up":true}}}}
+    ]);
+    assert_eq!(
+        lowerer().lower(&tree).unwrap_err().code,
+        "unsupported_construct"
+    );
+    for query in [
+        json!({"who":"self","zone":"evolve_deck","kind":"evolve_follower"}),
+        json!({"who":"self","zone":"evolve_deck","kind":"evolve_follower","face_up":false}),
+        json!({"who":"self","zone":"evolve_deck","kind":"follower","face_up":true}),
+        json!({"who":"self","zone":"evolve_deck","kind":"evolve_follower","face_up":true,"name":"example"}),
+    ] {
+        tree["cards"]["BP08-038"]["abilities"][0]["fanfare"]["do"] = json!([
+            {"draw":{"n":{"count":query}}}
+        ]);
+        assert_eq!(
+            lowerer().lower(&tree).unwrap_err().code,
+            "unsupported_construct"
+        );
+    }
+}
