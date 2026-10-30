@@ -1,0 +1,42 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP16-070:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-31"
+    abilities:
+      - line: 1
+        auto:
+          "on":
+            moved:
+              from:
+                who: self
+                zone: field
+              to: cemetery
+              sel:
+                name: ドラゴンの卵
+          do:
+            - create:
+                token: ベビーファイアドレイク
+                n: 1
+                to: field
+          per_turn: 1
+      - line: 2
+        evolve_time:
+          do:
+            - search:
+                sel:
+                  who: self
+                  zone: deck
+                  name: ドラゴンの卵
+                n: 1
+                to: field
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP16-T03
