@@ -416,12 +416,13 @@ fn matches_number(
             property: Stat::Attack,
             ..
         } => {
-            if !game.object_type(id)?.contains("フォロワー") {
-                return Ok(false);
+            if game.object_type(id)?.contains("フォロワー") {
+                game.object(id)?.state["power"]
+                    .as_i64()
+                    .ok_or_else(|| invalid("search candidate power"))?
+            } else {
+                0
             }
-            game.object(id)?.state["power"]
-                .as_i64()
-                .ok_or_else(|| invalid("search candidate power"))?
         }
         _ => return Err(unsupported("search numeric characteristic")),
     };

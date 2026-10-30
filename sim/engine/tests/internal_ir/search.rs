@@ -1025,3 +1025,44 @@ fn search_numeric_and_keyword_filters_reject_source_reads_before_private_populat
         );
     }
 }
+
+#[test]
+fn search_stats_information_or_zero_uses_zero_for_nonfollowers() {
+    let position = setup(
+        1,
+        json!([
+            {"id":"spell","card":"unit-spell"},
+            {"id":"follower","card":"unit-follower","state":{"power":4_u8}}
+        ]),
+    );
+    let mut game = Game::new(
+        catalog(),
+        &position,
+        &Value::Null,
+        &Value::Null,
+        "search-stat-information",
+    )
+    .unwrap();
+    let predicate = Expr::Compute(Box::new(Predicate::CompareInt {
+        left: Expr::Compute(Box::new(IntOperation::InformationOrZero {
+            information: NumberRead::Stats {
+                object: ObjectView::Current {
+                    object: Box::new(ObjectOperand::Bound {
+                        binding: Binding::new(1, ScopeId(2)),
+                    }),
+                },
+                view: CharacteristicView::Effective,
+                property: Stat::Attack,
+            },
+        })),
+        comparison: Comparison::Equal,
+        right: Expr::Literal(Int(0)),
+    }));
+    execute(&mut game, 1, search(predicate, cardinality(1, 1), hand()));
+    let result = answer(&mut game, 1, SearchAnswer::Ungrouped(vec![0]));
+    assert_eq!(outcome(&result).found.len(), 1);
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["hand"],
+        json!(["spell"])
+    );
+}
