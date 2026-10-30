@@ -1,0 +1,29 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP18-126:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-31"
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - search:
+                sel:
+                  who: self
+                  zone: deck
+                  trait: 区役所
+                  not_same_name_as_this: true
+                to: hand
+                n: 1
+          cost:
+            discard:
+              sel:
+                who: self
+                zone: hand
+              n: 1
