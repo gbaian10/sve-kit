@@ -3,8 +3,7 @@ use super::{
     Context, Execution, Fact, Game, InstructionOutcome, Progress, admission, int, player_id,
     seat_name, unsupported,
 };
-use crate::catalog::SelectedEffects;
-use crate::catalog::current::CurrentCard;
+use crate::catalog::{RuntimeCards, SelectedEffects};
 use crate::ir::effect_evolution::projection;
 use crate::ir::events::played::filter;
 use crate::ir::play_restrictions::card_restriction;
@@ -75,8 +74,7 @@ pub struct Activation {
 #[derive(Clone, Debug, Default)]
 pub(in crate::game) struct CardRuntime {
     selected: bool,
-    cards: BTreeMap<String, WellFormedCardProgram>,
-    current: BTreeMap<String, Arc<CurrentCard>>,
+    definitions: Arc<RuntimeCards>,
     resources: BTreeMap<String, String>,
     unadmitted: BTreeSet<String>,
     instances: BTreeMap<(String, u64, String, usize, AbilityId), AbilityInstanceId>,
@@ -144,7 +142,7 @@ impl CardRuntime {
     }
 
     pub(in crate::game) fn requires_typed_play(&self) -> bool {
-        self.cards.values().any(|card| {
+        self.definitions.cards.values().any(|card| {
             !card.card().card_play_costs.is_empty()
                 || card
                     .card()
@@ -161,15 +159,15 @@ impl CardRuntime {
         })
     }
     pub(in crate::game) fn is_empty(&self) -> bool {
-        self.cards.is_empty() && !self.selected
+        self.definitions.cards.is_empty() && !self.selected
     }
 
     pub(in crate::game) fn is_loaded(&self, card: &str) -> bool {
-        self.cards.contains_key(card)
+        self.definitions.cards.contains_key(card)
     }
 
     pub(super) fn has_definition(&self, card: &str) -> bool {
-        self.cards.contains_key(card) || self.current.contains_key(card)
+        self.definitions.cards.contains_key(card) || self.definitions.current.contains_key(card)
     }
 }
 
@@ -192,6 +190,10 @@ impl Game {
     ///
     /// # Errors
     /// Rejects snapshot/source mismatches and any unsupported whole card without returning a game.
+    #[expect(
+        clippy::needless_pass_by_value,
+        reason = "Keep the owned selection API used by existing scenario fixtures."
+    )]
     pub fn from_selected_effects(
         selected: SelectedEffects,
         setup: &serde_json::Value,
@@ -200,21 +202,7 @@ impl Game {
         seed: &str,
     ) -> Result<Self> {
         selected.check_runtime()?;
-        let catalog = selected.prototypes;
-        let mut current = BTreeMap::new();
-        let mut representatives = BTreeMap::new();
-        for (number, candidate) in selected.current {
-            let card = if let Some(card) = representatives.get(&candidate.card_id) {
-                Arc::clone(card)
-            } else {
-                let card = Arc::new(catalog.resolve_current(Arc::clone(&candidate))?);
-                representatives.insert(candidate.card_id.clone(), Arc::clone(&card));
-                card
-            };
-            catalog.check_current_printing(&number, &card)?;
-            current.insert(number, card);
-        }
-        let mut game = Self::new(catalog, setup, facts, random, seed)?;
+        let mut game = Self::new(Arc::clone(&selected.prototypes), setup, facts, random, seed)?;
         if game.state.objects.values().any(|object| {
             game.catalog
                 .rejected
@@ -228,29 +216,51 @@ impl Game {
             return Err(unsupported("a selected card has an unresolved ruling"));
         }
         game.card_runtime.selected = true;
-        game.card_runtime.current = current;
+        // Admission depends on the accepted definitions, not the initial position.
+        game.card_runtime.definitions =
+            selected.runtime_cards(|| game.prepare_current_cards(&selected))?;
         game.admit_evolution_resources()?;
-        let cards = game
+        Ok(game)
+    }
+
+    fn prepare_current_cards(&mut self, selected: &SelectedEffects) -> Result<Arc<RuntimeCards>> {
+        let mut definitions = RuntimeCards::default();
+        let mut representatives = BTreeMap::new();
+        for (number, candidate) in &selected.current {
+            let card = if let Some(card) = representatives.get(&candidate.card_id) {
+                Arc::clone(card)
+            } else {
+                let card = Arc::new(self.catalog.resolve_current(Arc::clone(candidate))?);
+                representatives.insert(candidate.card_id.clone(), Arc::clone(&card));
+                card
+            };
+            self.catalog.check_current_printing(number, &card)?;
+            definitions.current.insert(number.clone(), card);
+        }
+        self.card_runtime.definitions = Arc::new(definitions);
+        let cards = self
             .card_runtime
+            .definitions
             .current
             .iter()
             .map(|(number, card)| (number.clone(), Arc::clone(card)))
             .collect::<Vec<_>>();
         for (number, card) in cards {
-            game.load_internal_card(&number, &card.candidate.program)?;
+            self.load_internal_card(&number, &card.candidate.program)?;
         }
-        Ok(game)
+        Ok(Arc::clone(&self.card_runtime.definitions))
     }
 
     fn printed_face_ordinal(&self, card: &str, face: &FaceId) -> Result<usize> {
         self.card_runtime
+            .definitions
             .current
             .get(card)
             .map_or_else(|| face_ordinal(face), |current| current.ordinal(face))
     }
 
     fn printed_face_id(&self, card: &str, ordinal: usize) -> Result<FaceId> {
-        self.card_runtime.current.get(card).map_or_else(
+        self.card_runtime.definitions.current.get(card).map_or_else(
             || Ok(FaceId(ordinal.to_string())),
             |current| current.face(ordinal),
         )
@@ -263,7 +273,7 @@ impl Game {
         face: &str,
         line: u64,
     ) -> Result<()> {
-        if let Some(current) = self.card_runtime.current.get(card) {
+        if let Some(current) = self.card_runtime.definitions.current.get(card) {
             if source.face != face || u64::from(source.line) != line {
                 return Err(invalid("current printed source coordinate mismatch"));
             }
@@ -288,7 +298,7 @@ impl Game {
         costs::check(self, card_no, card)?;
         optional::check_card(card)?;
         material::check_card(card)?;
-        if self.card_runtime.cards.contains_key(card_no)
+        if self.card_runtime.definitions.cards.contains_key(card_no)
             || self.typed.is_some()
             || !self.prepared.is_empty()
             || self.card_runtime.checkpoint.is_some()
@@ -297,7 +307,7 @@ impl Game {
         {
             return Err(invalid("duplicate card or busy internal card loader"));
         }
-        match self.card_runtime.current.get(card_no) {
+        match self.card_runtime.definitions.current.get(card_no) {
             Some(current) if card != &current.candidate.program => {
                 return Err(invalid("card differs from accepted current selection"));
             }
@@ -363,7 +373,9 @@ impl Game {
             )?;
             play::check(ability, &located.source)?;
         }
-        self.card_runtime.cards.insert(card_no.into(), card.clone());
+        Arc::make_mut(&mut self.card_runtime.definitions)
+            .cards
+            .insert(card_no.into(), Arc::new(card.clone()));
         Ok(())
     }
 

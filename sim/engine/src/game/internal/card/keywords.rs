@@ -175,6 +175,7 @@ pub(super) fn check(
     }
     let current = game
         .card_runtime
+        .definitions
         .current
         .get(card)
         .ok_or_else(|| unsupported("printed keyword requires current declaration proof"))?;

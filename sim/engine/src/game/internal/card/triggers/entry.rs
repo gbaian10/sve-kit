@@ -132,7 +132,7 @@ impl Game {
         frame: &Frame,
     ) -> Result<()> {
         if previous.is_empty()
-            || !self.card_runtime.cards.values().any(|program| {
+            || !self.card_runtime.definitions.cards.values().any(|program| {
                 program
                     .card()
                     .abilities

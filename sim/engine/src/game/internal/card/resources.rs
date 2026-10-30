@@ -9,7 +9,12 @@ use crate::game::string;
 impl Game {
     pub(super) fn admit_evolution_resources(&mut self) -> Result<()> {
         for object in self.state.objects.values() {
-            if object.zone != "evolve_deck" || self.card_runtime.current.contains_key(&object.card)
+            if object.zone != "evolve_deck"
+                || self
+                    .card_runtime
+                    .definitions
+                    .current
+                    .contains_key(&object.card)
             {
                 continue;
             }

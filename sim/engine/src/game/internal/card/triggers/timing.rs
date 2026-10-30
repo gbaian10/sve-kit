@@ -242,7 +242,7 @@ impl Game {
         frame: &Frame,
         before: SnapshotId,
     ) -> Result<()> {
-        if !self.card_runtime.cards.values().any(|program| {
+        if !self.card_runtime.definitions.cards.values().any(|program| {
             program.card().abilities.iter().any(|a| {
                 matches!(
                     a.node.trigger.as_ref().map(|t| &t.on),

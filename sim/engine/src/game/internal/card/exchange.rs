@@ -111,6 +111,7 @@ impl Game {
         let object = self.object(&execution.context.source)?;
         let card = self
             .card_runtime
+            .definitions
             .cards
             .get(&object.card)
             .ok_or_else(|| invalid("unloaded card"))?;
@@ -131,7 +132,7 @@ impl Game {
             return Err(unsupported("exchange Quick payment"));
         }
         // A definition that can consume payment facts is unsafe even when its holder is hidden.
-        for definition in self.card_runtime.cards.values() {
+        for definition in self.card_runtime.definitions.cards.values() {
             for ability in &definition.card().abilities {
                 if ability.node.trigger.as_ref().is_some_and(|trigger| {
                     !matches!(

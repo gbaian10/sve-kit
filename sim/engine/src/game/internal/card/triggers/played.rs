@@ -129,7 +129,7 @@ impl Game {
         execution: &Execution,
         costs: &CostSpec,
     ) -> Result<()> {
-        if !self.card_runtime.cards.values().any(|program| {
+        if !self.card_runtime.definitions.cards.values().any(|program| {
             program
                 .card()
                 .abilities
