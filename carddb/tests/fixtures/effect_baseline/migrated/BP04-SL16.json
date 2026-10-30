@@ -1,0 +1,62 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "evolve",
+      "body": {
+        "op": "evolve",
+        "subjects": "self"
+      },
+      "costs": [
+        {
+          "op": "pp",
+          "amount": 3
+        }
+      ]
+    },
+    {
+      "line": 2,
+      "kind": "trigger",
+      "body": {
+        "op": "damage",
+        "subjects": "target.1",
+        "amount": {
+          "if": {
+            "fn": "and",
+            "args": [
+              {
+                "read": "self.is_active"
+              },
+              {
+                "fn": "gt",
+                "args": [
+                  {
+                    "read": "self.turn.leader_hp_decreased"
+                  },
+                  0
+                ]
+              }
+            ]
+          },
+          "then": 8,
+          "else": 4
+        }
+      },
+      "event": "enter",
+      "subject": "self",
+      "targets": [
+        {
+          "key": "1",
+          "select": {
+            "side": "opponent",
+            "zone": "field",
+            "type": "follower"
+          },
+          "min": 1,
+          "max": 1
+        }
+      ]
+    }
+  ]
+}
