@@ -24,7 +24,7 @@ fn position(seat: &str, source: &str, material: &str, count: usize, life: u8) ->
     initial
 }
 
-fn assert_batch(game: &Game, result: &Activation, seat: &str, life: u8, amount: u8) {
+fn assert_batch(game: &mut Game, result: &Activation, seat: &str, life: u8, amount: u8) {
     let opponent = if seat == "P1" { "P2" } else { "P1" };
     let quantities = result
         .progress
@@ -85,12 +85,18 @@ fn assert_batch(game: &Game, result: &Activation, seat: &str, life: u8, amount: 
         "Friendly followers are outside the recipients"
     );
     if life == 1 {
-        assert_eq!(
+        assert_ne!(
             state["game"]["ended"], true,
+            "the full damage batch precedes the pending check timing"
+        );
+        game.resume_internal_card().unwrap();
+        let after_check = game.projection(View::Referee).unwrap();
+        assert_eq!(
+            after_check["game"]["ended"], true,
             "leader defeat is checked after the joint damage application"
         );
         assert_eq!(
-            state["game"]["winner"], seat,
+            after_check["game"]["winner"], seat,
             "Lethal damage awards the batch controller the win"
         );
     }
@@ -112,7 +118,13 @@ fn bp18_088_same_damage_batch_hits_followers_even_when_leader_damage_is_lethal()
                         )
                         .unwrap(),
                     );
-                    assert_batch(&game, &result, seat, life, if count == 10 { 2 } else { 1 });
+                    assert_batch(
+                        &mut game,
+                        &result,
+                        seat,
+                        life,
+                        if count == 10 { 2 } else { 1 },
+                    );
                 }
             }
         }
@@ -146,7 +158,13 @@ fn bp22_083_vampire_count_changes_the_whole_leader_and_follower_damage_batch() {
                     )
                     .unwrap(),
                 );
-                assert_batch(&game, &result, "P1", life, if count == 5 { 4 } else { 2 });
+                assert_batch(
+                    &mut game,
+                    &result,
+                    "P1",
+                    life,
+                    if count == 5 { 4 } else { 2 },
+                );
             }
         }
     }
@@ -184,7 +202,13 @@ fn cp02_035_nine_original_costs_change_one_joint_batch_and_act_the_source() {
                     game.activate_internal_card("source", ability, PlayerId { seat: 1 })
                         .unwrap(),
                 );
-                assert_batch(&game, &result, "P1", life, if count == 9 { 7 } else { 3 });
+                assert_batch(
+                    &mut game,
+                    &result,
+                    "P1",
+                    life,
+                    if count == 9 { 7 } else { 3 },
+                );
                 assert_eq!(
                     game.projection(View::Referee).unwrap()["objects"]["source"]["acted"],
                     true
