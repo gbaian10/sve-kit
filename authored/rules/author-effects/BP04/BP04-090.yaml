@@ -1,0 +1,39 @@
+cards:
+  BP04-090:
+    abilities:
+      - fanfare:
+          do:
+            - move:
+                to: cemetery
+                top:
+                  n: 2
+                  who: self
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - pp: 2
+              - act_self: true
+              - self_to_cemetery: true
+          do:
+            - move:
+                ref: victim
+                to: hand
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                trait: 死者
+                who: self
+                zone: cemetery
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set
