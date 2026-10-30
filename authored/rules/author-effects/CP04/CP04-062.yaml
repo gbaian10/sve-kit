@@ -1,0 +1,43 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP04-062:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-30"
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - pp_max:
+                        who: self
+                        delta: 1
+                    - life:
+                        who: self
+                        delta: 1
+                  - - if:
+                        cond:
+                          cmp:
+                            left:
+                              resource:
+                                who: self
+                                kind: pp_max
+                            op: eq
+                            right: 10
+                        then:
+                          - search:
+                              sel:
+                                who: self
+                                zone: deck
+                                kind: follower
+                                trait: プリコネ
+                                orig_cost_eq: 2
+                              n: 1
+                              to: field
