@@ -23,14 +23,11 @@ cards:
           do:
             - if:
                 cond:
-                  cmp:
-                    left:
-                      count:
-                        trait: ウマ娘
-                        who: self
-                        zone: field
-                    op: ge
-                    right: 2
+                  exists:
+                    other: true
+                    trait: ウマ娘
+                    who: self
+                    zone: field
                 then:
                   - damage:
                       n: 4
