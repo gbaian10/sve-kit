@@ -1,0 +1,23 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP01-036:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-30"
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - search:
+                sel:
+                  who: self
+                  zone: deck
+                  kind: follower
+                  class: ロイヤル
+                to: hand
+                n: 1
