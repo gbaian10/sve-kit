@@ -1,0 +1,29 @@
+cards:
+  BP07-067:
+    abilities:
+      - activate:
+          cost:
+            steps:
+              - pp: 2
+              - self_to_cemetery: true
+          do:
+            - damage:
+                n: 3
+                to:
+                  kind: follower
+                  who: all
+                  zone: field
+            - damage:
+                n: 3
+                to:
+                  leader: self
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

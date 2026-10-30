@@ -1,0 +1,27 @@
+cards:
+  BP07-029:
+    abilities:
+      - fanfare:
+          cost:
+            act:
+              n: 1
+              sel:
+                kind: amulet
+                name: ナテラの大樹
+                who: self
+                zone: field
+          do:
+            - grant:
+                keywords:
+                  - storm
+                on: this
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

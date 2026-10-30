@@ -1,0 +1,35 @@
+cards:
+  BP07-017:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - if:
+                cond:
+                  combo: 3
+                else:
+                  - create:
+                      n: 1
+                      to: ex
+                      token: ナテラの大樹
+                then:
+                  - create:
+                      n: 2
+                      to: ex
+                      token: ナテラの大樹
+                  - life:
+                      delta: 2
+                      who: self
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+    token_sources:
+      - card: BP07-T03
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set
