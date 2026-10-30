@@ -13,8 +13,7 @@ cards:
       - line: 1
         attack_time:
           do:
-            - &id001
-              damage:
+            - damage:
                 to:
                   any_of:
                     - leaders: opponents
@@ -25,7 +24,14 @@ cards:
       - line: 2
         fanfare:
           do:
-            - *id001
+            - damage:
+                to:
+                  any_of:
+                    - leaders: opponents
+                    - who: opp
+                      zone: field
+                      kind: follower
+                n: 2
             - if:
                 cond:
                   necro: 20
