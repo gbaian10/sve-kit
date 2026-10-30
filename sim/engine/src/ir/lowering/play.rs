@@ -328,13 +328,12 @@ impl BodyContext<'_> {
         ))
     }
 
-    pub(super) fn damage(
+    fn recipients(
         &mut self,
-        damage: &ast::Damage,
-        source: &SourceSpan,
+        recipients: &ast::Recipients,
         path: &str,
-    ) -> Result<Action, LoweringError> {
-        let recipients = match &damage.to {
+    ) -> Result<RecipientSet, LoweringError> {
+        Ok(match recipients {
             ast::Recipients::Field(query) => RecipientSet::Objects {
                 objects: self.objects(&ast::Objects::Zone(query.clone()), path)?,
             },
@@ -378,7 +377,22 @@ impl BodyContext<'_> {
                     reference: *self.targets.get(name).ok_or_else(|| unsupported(path))?,
                 },
             },
-        };
+            ast::Recipients::Union { any_of } => RecipientSet::Union {
+                sets: any_of
+                    .iter()
+                    .map(|set| self.recipients(set, path))
+                    .collect::<Result<Vec<_>, _>>()?,
+            },
+        })
+    }
+
+    pub(super) fn damage(
+        &mut self,
+        damage: &ast::Damage,
+        source: &SourceSpan,
+        path: &str,
+    ) -> Result<Action, LoweringError> {
+        let recipients = self.recipients(&damage.to, path)?;
         let mut value = self.number(&damage.n, path, &mut BTreeSet::new())?;
         if let Some(replacements) = &damage.instead {
             let [replacement] = replacements.as_slice() else {
