@@ -1,5 +1,4 @@
 use super::{BindingKind, Checked, Checker, TypeId, WellFormedReason};
-use crate::ir::AggregateBound;
 use crate::ir::{
     Action, CaptureTime, Cardinality, ChoiceDomain, CostSpec, CounterOperation, Decision,
     DecisionKind, Declinable, DiscardMode, Disjointness, ExecutionRef, InputMode,
@@ -8,8 +7,10 @@ use crate::ir::{
     Posture, Program, ReceiptId, RoleCardinality, RuleProcedure, SelectionConstraint,
     SelectionView, Selector, TargetRoleSpec, Visibility, ZoneKind, ZoneRef,
 };
+use crate::ir::{AggregateBound, PreconditionKind, PreconditionReason};
 use crate::ir::{Expr, Int, NumericChange, ObjectReceipt, ObjectReceiptList, ResourceOperation};
 use alloc::collections::BTreeSet;
+use core::iter::once;
 
 #[expect(
     clippy::multiple_inherent_impl,
@@ -554,6 +555,35 @@ impl Checker {
             .receipts
             .insert(receipt, TypeId::of::<PaymentResult>());
         Ok(())
+    }
+
+    pub(super) fn play_costs(&mut self, costs: &CostSpec) -> Checked {
+        let CostSpec::Ordered { steps } = costs else {
+            return self.costs(costs);
+        };
+        let Some((first, remaining)) = steps.split_first() else {
+            return self.costs(costs);
+        };
+        let Some(guard) = &first.instruction.precondition else {
+            return self.costs(costs);
+        };
+        if guard.kind != PreconditionKind::CardTextPrerequisite
+            || guard.protects != first.instruction.id
+            || guard.reason != (PreconditionReason::CardText {})
+        {
+            return Err(self.error(WellFormedReason::PreconditionTiming));
+        }
+        self.at("0/precondition", |checker| {
+            checker.boolean(&guard.predicate)
+        })?;
+        // A use prerequisite gates the whole play; generic payment steps stay unconditional.
+        let mut unconditional = first.clone();
+        unconditional.instruction.precondition = None;
+        self.costs(&CostSpec::Ordered {
+            steps: once(unconditional)
+                .chain(remaining.iter().cloned())
+                .collect(),
+        })
     }
 
     pub(super) fn costs(&mut self, costs: &CostSpec) -> Checked {

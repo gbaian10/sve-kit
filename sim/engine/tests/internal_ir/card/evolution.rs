@@ -594,18 +594,11 @@ fn cemetery_evolution_counts_all_card_types_by_original_cost_and_controller() {
 }
 
 #[test]
-fn cemetery_evolution_lowering_rejects_wider_counts_and_nonliteral_bounds() {
+fn cemetery_evolution_lowering_rejects_hidden_filters_and_invalid_cost_syntax() {
     let mut cases = vec![];
     for (key, value) in [
-        ("who", json!("opp")),
         ("zone", json!("hand")),
         ("zone", json!("deck")),
-        ("kind", json!("spell")),
-        ("trait", json!("integration-filter")),
-        ("name", json!("unit-follower")),
-        ("name_contains", json!("unit-")),
-        ("token", json!(true)),
-        ("not_token", json!(true)),
         (
             "orig_cost_eq",
             json!({"resource":{"who":"self","kind":"pp"}}),
@@ -622,9 +615,6 @@ fn cemetery_evolution_lowering_rejects_wider_counts_and_nonliteral_bounds() {
         condition["cmp"]["left"]["count"][key] = value;
         cases.push(condition);
     }
-    let mut nonliteral = cemetery_condition();
-    nonliteral["cmp"]["right"] = json!({"resource":{"who":"self","kind":"pp"}});
-    cases.push(nonliteral);
     for condition in cases {
         let mut tree = fanfare::expanded::tree().clone();
         tree["cards"]["synthetic-evolution"]["abilities"][0]["evolve"]["usable_if"] = condition;
@@ -647,12 +637,12 @@ fn qualification_game() -> Game {
 }
 
 #[test]
-fn cemetery_evolution_admission_rejects_other_views_owners_and_read_shapes() {
+fn cemetery_evolution_admission_rejects_filtered_private_zone_reads() {
     let base = cemetery_program(&cemetery_condition());
     qualification_game()
         .load_internal_card("unit-follower", &base)
         .unwrap();
-    for change in 0..8 {
+    for hidden in [ZoneKind::Hand, ZoneKind::Deck] {
         let mut candidate = base.card().clone();
         let CostSpec::Ordered { steps } =
             &mut candidate.abilities[0].node.play.as_mut().unwrap().costs
@@ -670,18 +660,11 @@ fn cemetery_evolution_admission_rejects_other_views_owners_and_read_shapes() {
         };
         let Predicate::CompareInt {
             left: Expr::Compute(count),
-            comparison,
-            right,
+            ..
         } = operation.as_mut()
         else {
             panic!("count comparison")
         };
-        if change == 0 {
-            *comparison = Comparison::LessEqual;
-        }
-        if change == 1 {
-            *right = Expr::Literal(Int(-1));
-        }
         let IntOperation::FromNat {
             value: Expr::Live(read),
         } = count.as_mut()
@@ -689,55 +672,29 @@ fn cemetery_evolution_admission_rejects_other_views_owners_and_read_shapes() {
             panic!("count conversion")
         };
         let NatRead::ZoneCount {
-            selector:
-                Selector::Zone {
-                    players,
-                    zone,
-                    predicate,
-                    ..
-                },
+            selector: Selector::Zone { zone, .. },
         } = read.as_mut()
         else {
-            panic!("cemetery selector")
+            panic!("public selector")
         };
-        if change == 2 {
-            players.relation = PlayerRelation::Opponents;
-        }
-        if change == 3 {
-            *zone = ZoneKind::Hand;
-        }
-        if change == 4 {
-            players.cardinality.minimum = Nat(0);
-        }
-        let Expr::Compute(filter) = predicate.as_mut() else {
-            panic!("cost filter")
-        };
-        let Predicate::CompareInt {
-            left: Expr::Compute(information),
-            comparison,
-            ..
-        } = filter.as_mut()
-        else {
-            panic!("cost comparison")
-        };
-        if change == 5 {
-            *comparison = Comparison::GreaterEqual;
-        }
-        let IntOperation::InformationOrZero {
-            information: NumberRead::Cost { object, view },
-        } = information.as_mut()
-        else {
-            panic!("original cost")
-        };
-        if change == 6 {
-            *view = CharacteristicView::Effective;
-        }
-        if change == 7 {
-            *object = ObjectView::Current {
-                object: Box::new(ObjectOperand::SourceHolder {}),
-            };
-        }
+        *zone = hidden;
         assert_cemetery_qualification_rejected(candidate);
+    }
+}
+
+#[test]
+fn evolution_qualification_uses_the_shared_public_condition_grammar() {
+    for condition in [
+        json!({"awakened":true}),
+        json!({"cmp":{"left":{"count":{"who":"self","zone":"cemetery","name":"unit-spell"}},"op":"ge","right":1}}),
+        json!({"cmp":{"left":{"count":{"who":"self","zone":"ex","name_contains":"unit","token":true}},"op":"ge","right":1}}),
+        json!({"cmp":{"left":{"count":{"who":"self","zone":"cemetery","not_token":true}},"op":"ge","right":1}}),
+        json!({"exists":{"who":"opp","zone":"field","trait":"指揮官"}}),
+        json!({"cmp":{"left":{"count":{"who":"opp","zone":"cemetery","kind":"spell"}},"op":"ge","right":{"resource":{"who":"self","kind":"pp"}}}}),
+    ] {
+        let mut tree = fanfare::expanded::tree().clone();
+        tree["cards"]["synthetic-evolution"]["abilities"][0]["evolve"]["usable_if"] = condition;
+        lowerer().lower(&tree).unwrap();
     }
 }
 
@@ -814,17 +771,15 @@ fn commander_evolution_guard_checks_the_current_field_before_any_cost_or_reveal(
 }
 
 #[test]
-fn commander_evolution_qualification_rejects_other_players_and_hidden_zones() {
-    for query in [
-        json!({"who":"opp","zone":"field","trait":"指揮官"}),
-        json!({"who":"self","zone":"hand","trait":"指揮官"}),
-    ] {
+fn commander_evolution_qualification_rejects_hidden_zones() {
+    for zone in ["hand", "deck"] {
+        let query = json!({"who":"self","zone":zone,"trait":"指揮官"});
         let mut tree = fanfare::expanded::tree().clone();
         tree["cards"]["synthetic-evolution"]["abilities"][0]["evolve"]["usable_if"] =
             json!({"exists":query});
         assert!(
             lowerer().lower(&tree).is_err(),
-            "this intrinsic subset only reads the controller's public field"
+            "an intrinsic qualification cannot inspect private filtered cards"
         );
     }
 }

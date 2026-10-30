@@ -1,6 +1,9 @@
 use super::*;
 use second::lowerer;
 
+#[path = "card/ability_condition.rs"]
+mod ability_condition;
+
 #[path = "card/evolution_linked_movement.rs"]
 mod evolution_linked_movement;
 

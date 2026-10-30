@@ -33,6 +33,21 @@ pub(super) struct OrderWait {
     deck: Vec<String>,
 }
 
+pub(super) fn check_condition(condition: &Expr<Bool>, source: &SourceSpan) -> Result<()> {
+    check_node(
+        &Node::Capture {
+            capture: Capture::Boolean {
+                at: CaptureTime::AtResolution { scope: ScopeId(0) },
+                value: condition.clone(),
+                into: CaptureRef {
+                    binding: Binding::new(0, ScopeId(0)),
+                },
+            },
+        },
+        source,
+    )
+}
+
 #[expect(
     clippy::too_many_lines,
     reason = "The contextual private-read guard checks the complete local node."
@@ -43,18 +58,7 @@ pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
     // Control bodies are checked individually; their guards still need the same restriction.
     if let Node::Control { control } = node {
         if let Control::If { condition, .. } = control {
-            return check_node(
-                &Node::Capture {
-                    capture: Capture::Boolean {
-                        at: CaptureTime::AtResolution { scope: ScopeId(0) },
-                        value: condition.clone(),
-                        into: CaptureRef {
-                            binding: Binding::new(0, ScopeId(0)),
-                        },
-                    },
-                },
-                source,
-            );
+            return check_condition(condition, source);
         }
         return Ok(());
     }

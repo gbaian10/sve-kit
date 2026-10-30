@@ -1,15 +1,65 @@
-use super::super::{Comparison, IntRead, PlayerResource};
+use super::super::{
+    Comparison, CostSpec, IntRead, PlayerResource, Precondition, PreconditionKind,
+    PreconditionReason,
+};
 use super::{
     Arithmetic, BTreeSet, Binding, BodyContext, Bool, Cardinality, Expr, FaceId, Int, IntOperation,
     LoweringError, Nat, NatRead, PlayerRef, PlayerRelation, PlayerSet, Predicate, SelectionView,
     Selector, SourceSpan, TextQuantifier, ZoneKind, ast, unsupported,
 };
 
+pub(super) fn qualify_costs(
+    costs: &mut CostSpec,
+    predicate: Option<Expr<Bool>>,
+    path: &str,
+) -> Result<(), LoweringError> {
+    let Some(predicate) = predicate else {
+        return Ok(());
+    };
+    let CostSpec::Ordered { steps } = costs else {
+        return Err(unsupported(path));
+    };
+    let first = steps.first_mut().ok_or_else(|| unsupported(path))?;
+    first.instruction.precondition = Some(Precondition {
+        kind: PreconditionKind::CardTextPrerequisite,
+        protects: first.instruction.id,
+        reason: PreconditionReason::CardText {},
+        predicate,
+    });
+    Ok(())
+}
+
 #[expect(
     clippy::multiple_inherent_impl,
     reason = "Body expressions share the ability binding and definition environment."
 )]
 impl BodyContext<'_> {
+    pub(super) fn activation_qualification(
+        &mut self,
+        activated: Option<&ast::Activate>,
+        source: &SourceSpan,
+        path: &str,
+    ) -> Result<Option<Expr<Bool>>, LoweringError> {
+        activated
+            .and_then(|head| head.usable_if.as_ref())
+            .map(|condition| self.qualification(condition, source, path))
+            .transpose()
+    }
+
+    pub(super) fn qualification(
+        &mut self,
+        condition: &ast::Condition,
+        source: &SourceSpan,
+        path: &str,
+    ) -> Result<Expr<Bool>, LoweringError> {
+        let predicate = self.condition(condition, source, path)?;
+        // A use prerequisite cannot depend on a later resolution capture or choice.
+        if !self.resolution_captures.is_empty() {
+            return Err(unsupported(path));
+        }
+        Ok(predicate)
+    }
+
     pub(super) fn condition(
         &mut self,
         value: &ast::Condition,

@@ -1,15 +1,10 @@
 //! Only a checked intrinsic evolution projection may enter the shared rule procedure.
 use super::{
-    Ability, AbilityOrigin, Action, CostSpec, Expr, Game, KeywordId, Located, Node, Result,
-    SourceSpan, invalid, unsupported,
+    Ability, AbilityOrigin, Action, CostSpec, Expr, Game, Generation, KeywordId, Located, Node,
+    Result, SourceSpan, invalid, unsupported,
 };
 use crate::game::string;
-use crate::ir::evolution_cemetery;
-use crate::ir::{
-    Bool, Control, Int, PlayerRef, PlayerRelation, Predicate, Resource, ResourceOperation,
-    SelectionView, Selector, TextQuantifier, ZoneKind,
-};
-use crate::ir::{PreconditionKind, PreconditionReason};
+use crate::ir::{Bool, Control, Int, PlayerRef, Resource, ResourceOperation};
 use serde_json::{Value, json};
 
 pub(super) const fn intrinsic(ability: &Ability) -> bool {
@@ -45,94 +40,31 @@ pub(super) fn cost(ability: &Ability) -> Result<i64> {
     Ok(*value)
 }
 
-enum Qualification<'ability> {
-    Field(&'ability Expr<Bool>),
-    Cemetery { cost: i64, minimum: i64 },
-}
-
-fn qualification(ability: &Ability) -> Result<Option<Qualification<'_>>> {
-    let CostSpec::Ordered { steps } = &ability
+fn qualification(ability: &Ability) -> Result<Option<&Expr<Bool>>> {
+    let play = ability
         .play
         .as_ref()
-        .ok_or_else(|| invalid("missing evolution play"))?
-        .costs
-    else {
-        return Err(unsupported("evolution costs"));
-    };
-    let [reveal, pp] = steps.as_slice() else {
-        return Err(unsupported("evolution cost projection"));
-    };
-    if pp.instruction.precondition.is_some() {
-        return Err(unsupported("evolution PP precondition"));
-    }
-    let Some(condition) = &reveal.instruction.precondition else {
-        return Ok(None);
-    };
-    if condition.kind != PreconditionKind::CardTextPrerequisite
-        || condition.protects != reveal.instruction.id
-        || condition.reason != (PreconditionReason::CardText {})
-    {
-        return Err(unsupported("evolution qualification guard"));
-    }
-    if let Some((cost, minimum)) = evolution_cemetery::parameters(&condition.predicate) {
-        return Ok(Some(Qualification::Cemetery { cost, minimum }));
-    }
-    let Expr::Compute(operation) = &condition.predicate else {
-        return Err(unsupported("evolution qualification"));
-    };
-    let Predicate::Exists {
-        objects:
-            selector @ Selector::Zone {
-                players,
-                zone: ZoneKind::Field,
-                view: SelectionView::Current {},
-                predicate,
-                ..
-            },
-    } = operation.as_ref()
-    else {
-        return Err(unsupported("evolution public field qualification"));
-    };
-    if players.relation != PlayerRelation::SelfPlayer
-        || players.relative_to != (PlayerRef::Controller {})
-        || players.cardinality.minimum.0 != 0
-        || players.cardinality.maximum.is_some()
-        || players.text_quantifier != TextQuantifier::Implicit
-    {
-        return Err(unsupported("evolution qualification controller"));
-    }
-    super::selection::field_selector(selector)?;
-    Ok(Some(Qualification::Field(predicate)))
+        .ok_or_else(|| invalid("missing evolution play"))?;
+    super::qualification(&play.costs)
 }
 
 fn usable(game: &Game, holder: &str, ability: &Ability) -> Result<bool> {
-    let Some(qualification) = qualification(ability)? else {
+    let Some(predicate) = qualification(ability)? else {
         return Ok(true);
     };
-    let controller = &game.object(holder)?.controller;
-    match qualification {
-        Qualification::Field(predicate) => {
-            for id in game.zone_ids(controller, "field") {
-                if super::selection::matches_candidate(game, &id, predicate)? {
-                    return Ok(true);
-                }
-            }
-            Ok(false)
-        }
-        Qualification::Cemetery { cost, minimum } => {
-            let mut count = 0_i64;
-            for id in game.zone_ids(controller, "cemetery") {
-                if super::super::cost::printed_cost(&game.internal_cost_print(&id)?["cost"])?
-                    == cost
-                {
-                    count = count
-                        .checked_add(1)
-                        .ok_or_else(|| invalid("cemetery count overflow"))?;
-                }
-            }
-            Ok(count >= minimum)
-        }
-    }
+    let object = game.object(holder)?;
+    let controller = super::player_id(&object.controller)?;
+    let context = super::Context {
+        source: holder.into(),
+        generation: Generation(object.generation),
+        controller,
+    };
+    // A legality probe must not allocate clocks or ability instances in the real game.
+    let mut probe = game.clone();
+    let mut execution = probe.new_card_execution(context)?;
+    let source = probe.internal_card_source(holder, ability.id, controller)?;
+    execution.bind_source(&probe, source)?;
+    Ok(execution.boolean(&probe, predicate)?.0)
 }
 
 fn span(game: &Game, source: &SourceSpan, expected: &SourceSpan) -> Result<()> {
@@ -152,7 +84,9 @@ fn span(game: &Game, source: &SourceSpan, expected: &SourceSpan) -> Result<()> {
 
 pub(super) fn check(game: &Game, ability: &Located<Ability>) -> Result<()> {
     cost(&ability.node)?;
-    qualification(&ability.node)?;
+    if let Some(predicate) = qualification(&ability.node)? {
+        super::super::ordering::check_condition(predicate, &ability.source)?;
+    }
     let body = ability
         .node
         .body

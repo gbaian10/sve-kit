@@ -431,6 +431,7 @@ impl Allocator {
         let source = source_span(key, path, entry)?;
         let ability_source = ability_source(&source, keyword);
         let mut context = BodyContext::new(entry, scope, body, payment_result, self);
+        let guard = context.activation_qualification(entry.activate.as_ref(), &source, path)?;
         let trigger_choice = context.prepare_parameters(
             body,
             path,
@@ -491,6 +492,7 @@ impl Allocator {
             (AbilityKind::Triggered, triggered_play, Some(trigger))
         };
         if let Some(play) = &mut play {
+            conditions::qualify_costs(&mut play.costs, guard, path)?;
             context.parameters.append(&mut play.parameters);
             play.parameters = context.parameters;
             if entry.activate.is_some() {
@@ -881,11 +883,16 @@ impl<'definitions> BodyContext<'definitions> {
         path: &str,
         triggered: bool,
     ) -> Result<bool, LoweringError> {
+        let reserved = self.allocator.next;
         for value in body.define.values() {
             self.number(value, path, &mut BTreeSet::new())?;
         }
         self.resolution_captures.clear();
-        self.allocator = Allocator::default();
+        // Qualification candidates must stay distinct from later formal target bindings.
+        self.allocator = Allocator {
+            next: reserved,
+            ..Allocator::default()
+        };
         let trigger_choice = body.optional_cost.is_none()
             && body.head_cost.is_none()
             && play::trigger_choice(body, triggered, path)?;
