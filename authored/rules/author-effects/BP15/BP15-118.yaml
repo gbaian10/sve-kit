@@ -1,0 +1,58 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP15-118:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-31"
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: evolve_deck
+                        kind: evolve_follower
+                        face_up: true
+                    op: ge
+                    right: 3
+                then:
+                  - damage:
+                      to: enemy
+                      n: 4
+                else:
+                  - damage:
+                      to: enemy
+                      n: 2
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: evolve_deck
+                        kind: evolve_follower
+                        face_up: true
+                    op: ge
+                    right: 5
+                then:
+                  - draw:
+                      n: 1
+            - pp:
+                who: self
+                delta: 1
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
