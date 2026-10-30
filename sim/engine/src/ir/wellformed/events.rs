@@ -1,6 +1,7 @@
 use crate::ir::events::played::PlayedFilter;
+use crate::ir::events::subject::{SubjectFields, SubjectFilter};
 use crate::ir::history_turn::played_by;
-use crate::ir::{DamageRecipient, PlayEvent};
+use crate::ir::{DamageRecipient, EvolveEvent, PlayEvent};
 use crate::ir::{ZoneFrozen, ZoneKind, ZoneOperation, ZoneRef};
 macro_rules! projected_equality {
     ($checker:expr, $equality:expr; $($variant:ident),+ $(,)?) => {
@@ -357,6 +358,25 @@ impl Checker {
         self.local_value(plan.card, &Expr::Literal(Bool(true)))
     }
 
+    fn evolution_header(
+        &mut self,
+        binding: Binding<EvolveEvent>,
+        predicate: &Expr<Bool>,
+        view: Option<EventSnapshotPolicy>,
+        triggering: bool,
+    ) -> Option<Checked> {
+        // The bridge consumes this closed header at commit, without granting body object reads.
+        if !triggering
+            || view != Some(EventSnapshotPolicy::AfterEntry)
+            || SubjectFilter::parse(SubjectFields::Evolve(binding), predicate).is_none()
+        {
+            return None;
+        }
+        Some(self.define(binding, BindingKind::Value).map(|()| {
+            self.env.trigger_events.insert(binding.key());
+        }))
+    }
+
     pub(super) fn event_pattern(
         &mut self,
         pattern: &EventPattern,
@@ -433,9 +453,9 @@ impl Checker {
             EventPattern::CounterChange { binding, predicate } => {
                 event!(binding, predicate, EventSnapshotPolicy::AfterEntry)
             }
-            EventPattern::Evolve { binding, predicate } => {
-                event!(binding, predicate, EventSnapshotPolicy::AfterEntry)
-            }
+            EventPattern::Evolve { binding, predicate } => self
+                .evolution_header(*binding, predicate, view, triggering)
+                .unwrap_or_else(|| event!(binding, predicate, EventSnapshotPolicy::AfterEntry)),
             EventPattern::Attack { binding, predicate } => {
                 event!(binding, predicate, EventSnapshotPolicy::AfterEntry)
             }

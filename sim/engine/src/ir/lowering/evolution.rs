@@ -1,6 +1,7 @@
 //! Intrinsic evolution is a fixed play projection, not a general Evolve body permission.
 use super::{Allocator, LoweringError, ast, source_span, unsupported};
 use crate::ir::effect_evolution;
+use crate::ir::events::subject::{SubjectFields, SubjectFilter};
 use crate::ir::{
     Ability, AbilityId, AbilityKind, AbilityOrigin, AbilityQualification, AbilitySource, Action,
     Binding, CardName, Cardinality, ChoiceDomain, Control, CostSpec, CostStep, Decision,
@@ -11,6 +12,7 @@ use crate::ir::{
     SelectionConstraint, SelectionGroup, SelectionSnapshot, SelectionView, Selector,
     TextQuantifier, Visibility, ZoneKind,
 };
+use crate::ir::{CardKind, EventPattern, TraitId};
 
 #[expect(
     clippy::multiple_inherent_impl,
@@ -267,5 +269,56 @@ pub(super) fn lower(
                 }],
             }),
         },
+    })
+}
+
+pub(super) fn subscription(
+    entry: &ast::EvolvedSubscription,
+    event_id: u64,
+    scope: ScopeId,
+    path: &str,
+) -> Result<EventPattern, LoweringError> {
+    if entry
+        .sel
+        .as_ref()
+        .is_some_and(|sel| sel.token.is_some() || sel.not_token.is_some())
+    {
+        return Err(unsupported(path));
+    }
+    let event = Binding::new(event_id, scope);
+    let filter = SubjectFilter {
+        own: entry
+            .who
+            .as_ref()
+            .map(|who| matches!(who, ast::EntryPlayer::Controller)),
+        itself: if entry.reference.is_some() {
+            Some(true)
+        } else {
+            entry.sel.as_ref().and_then(|sel| sel.other).map(|_| false)
+        },
+        kind: entry
+            .sel
+            .as_ref()
+            .and_then(|sel| sel.kind.as_ref())
+            .map(|kind| match kind {
+                ast::SearchKind::Follower => CardKind::Follower,
+                ast::SearchKind::Spell => CardKind::Spell,
+                ast::SearchKind::Amulet => CardKind::Amulet,
+            }),
+        trait_id: entry
+            .sel
+            .as_ref()
+            .and_then(|sel| sel.trait_id.as_ref())
+            .map(|id| TraitId(id.clone())),
+        name: entry
+            .sel
+            .as_ref()
+            .and_then(|sel| sel.name.as_ref())
+            .map(|name| CardName(name.clone())),
+        ..SubjectFilter::default()
+    };
+    Ok(EventPattern::Evolve {
+        binding: event,
+        predicate: filter.predicate(SubjectFields::Evolve(event)),
     })
 }

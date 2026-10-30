@@ -585,3 +585,59 @@ fn a_snapshot_player_role_is_stable_but_requires_its_declared_event() {
         WellFormedReason::UnsupportedShape,
     );
 }
+
+#[test]
+fn an_evolution_header_does_not_grant_current_event_object_reads_to_its_body() {
+    use crate::ir::events::subject::{SubjectFields, SubjectFilter};
+    let event = Binding::new(1, ScopeId(1));
+    let predicate = SubjectFilter {
+        own: Some(true),
+        kind: Some(CardKind::Follower),
+        ..SubjectFilter::default()
+    }
+    .predicate(SubjectFields::Evolve(event));
+    let make = |steps| {
+        event_card(
+            EventPattern::Evolve {
+                binding: event,
+                predicate: predicate.clone(),
+            },
+            EventSnapshotPolicy::AfterEntry,
+            steps,
+        )
+    };
+    accept_card(make(vec![]));
+    reject_card(
+        make(vec![instruction(
+            Action::Posture {
+                objects: Selector::Objects {
+                    objects: vec![ObjectOperand::FromExpression {
+                        value: Box::new(Expr::Frozen(Box::new(ObjectFrozen::EvolveSubject {
+                            event,
+                        }))),
+                    }],
+                },
+                posture: Posture::Acted,
+            },
+            2,
+            "synthetic",
+        )]),
+        WellFormedReason::UnsupportedShape,
+    );
+    let wrong = SubjectFilter {
+        own: Some(true),
+        ..SubjectFilter::default()
+    }
+    .predicate(SubjectFields::Evolve(Binding::new(2, ScopeId(1))));
+    reject_card(
+        event_card(
+            EventPattern::Evolve {
+                binding: event,
+                predicate: wrong,
+            },
+            EventSnapshotPolicy::AfterEntry,
+            vec![],
+        ),
+        WellFormedReason::UnsupportedShape,
+    );
+}
