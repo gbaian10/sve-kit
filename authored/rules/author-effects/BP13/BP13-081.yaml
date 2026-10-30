@@ -1,0 +1,39 @@
+cards:
+  BP13-081:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - damage:
+                n: 4
+                to: chosen
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: cemetery
+                    op: ge
+                    right: 20
+                then:
+                  - damage:
+                      n: 4
+                      to:
+                        leaders: opponents
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

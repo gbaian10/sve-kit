@@ -1,0 +1,45 @@
+cards:
+  BP13-098:
+    abilities:
+      - covers:
+          - 1
+          - 2
+        line: 1
+        spell:
+          do:
+            - if:
+                cond:
+                  paid:
+                    receipt: sacrificed
+                else:
+                  - damage:
+                      n: 3
+                      to: chosen
+                then:
+                  - damage:
+                      n: 5
+                      to: chosen
+          optional_cost:
+            result: sacrificed
+            to_cemetery:
+              n: 1
+              sel:
+                kind: amulet
+                who: self
+                zone: field
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set
