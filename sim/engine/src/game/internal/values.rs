@@ -592,6 +592,7 @@ impl Execution {
                 )
                 .map_err(invalid)?)),
                 NatOperation::DistinctCount { objects, property } => {
+                    super::card::selection::public_zone_selector(objects)?;
                     let members = self.public_zone_objects(game, objects)?;
                     let count = match property {
                         ObjectProperty::Names => {

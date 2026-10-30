@@ -404,7 +404,6 @@ pub(super) fn private_requirement(code: &str) -> bool {
             | "internal.BooleanState.TokenStatus"
             | "internal.BooleanState.FaceUp"
             | "internal.CardKind.EvolveFollower"
-            | "internal.ZoneKind.Evolve"
             | "shape.KindRead.Kind"
             | "read.kind"
             | "internal.CharacteristicView.Original"

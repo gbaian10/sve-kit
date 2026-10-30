@@ -318,6 +318,8 @@ fn mask_public_number(number: &mut Expr<Int>) {
 }
 
 fn mask_public_natural(value: &mut Expr<Nat>) {
+    let evolve_zone_count =
+        matches!(value, Expr::Live(read) if matches!(read.as_ref(), NatRead::ZoneCount { .. }));
     let selector = match value {
         Expr::Live(read) => match read.as_mut() {
             NatRead::ZoneCount { selector } => selector,
@@ -333,7 +335,7 @@ fn mask_public_natural(value: &mut Expr<Nat>) {
         _ => return,
     };
     if super::card::selection::public_zone_selector(selector).is_ok()
-        || super::card::selection::evolve_count_selector(selector).is_ok()
+        || (evolve_zone_count && super::card::selection::evolve_count_selector(selector).is_ok())
     {
         // These scalar reads use only a selector checked by its authority.
         *value = Expr::Literal(Nat(0));

@@ -690,6 +690,7 @@ fn supported(code: &str) -> bool {
             | "internal.ZoneKind.Field"
             | "internal.ZoneKind.Ex"
             | "internal.ZoneKind.Cemetery"
+            | "internal.ZoneKind.Evolve"
             | "internal.ZoneKind.Banish"
             | "internal.PlayerRelation.SelfPlayer"
             | "internal.PlayerRelation.Opponents"

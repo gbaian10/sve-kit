@@ -58,6 +58,40 @@ fn restore_frozen_programs(documents: &mut Vec<(String, String)>, root: &Path) {
         assert!(replaced.is_none(), "{number} is still a current prototype");
         *text = serde_json::to_string(&document).expect("document JSON");
     }
+    restore_legacy_bp15_118(documents);
+}
+
+#[expect(
+    clippy::expect_used,
+    reason = "Historical scenarios require their original prototype program."
+)]
+fn restore_legacy_bp15_118(documents: &mut [(String, String)]) {
+    let (_, text) = documents
+        .iter_mut()
+        .find(|(name, _)| {
+            Path::new(name)
+                .file_stem()
+                .is_some_and(|stem| stem == "BP15")
+        })
+        .expect("historical BP15 prototype document");
+    let mut document: Value = serde_saphyr::from_str(text).expect("prototype document");
+    let program = serde_json::json!({
+        "status":"complete",
+        "abilities":[{"line":1_u8, "kind":"spell", "body":{"op":"seq", "steps":[
+            {"op":"damage", "subjects":"target.1", "amount":{
+                "if":{"fn":"ge", "args":[{"count":{"side":"self", "zone":"evolve_deck", "type":"follower", "where":{"read":"item.face_up"}}},3_u8]},
+                "then":4_u8, "else":2_u8}},
+            {"op":"if", "condition":{"fn":"ge", "args":[{"count":{"side":"self", "zone":"evolve_deck", "type":"follower", "where":{"read":"item.face_up"}}},5_u8]},
+                "then":{"op":"seq", "steps":[{"op":"draw", "count":1_u8},{"op":"recover_pp", "amount":1_u8}]}}
+        ]}, "targets":[{"key":"1", "select":{"side":"opponent", "zone":"field", "type":"follower"}, "min":1_u8, "max":1_u8}]}]
+    });
+    let replaced = document
+        .get_mut("cards")
+        .and_then(Value::as_object_mut)
+        .expect("cards map")
+        .insert("BP15-118".to_owned(), program);
+    assert!(replaced.is_none(), "BP15-118 is still a current prototype");
+    *text = serde_json::to_string(&document).expect("document JSON");
 }
 
 /// Selected prototype documents with their original line layout, plus the shared inputs.
