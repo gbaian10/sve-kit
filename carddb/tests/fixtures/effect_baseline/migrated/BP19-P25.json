@@ -1,0 +1,65 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "trigger",
+      "body": {
+        "op": "choice",
+        "min": 1,
+        "max": 1,
+        "modes": [
+          {
+            "op": "if",
+            "condition": {
+              "fn": "ge",
+              "args": [
+                {
+                  "at": "resolution-start",
+                  "value": {
+                    "count": {
+                      "side": "self",
+                      "zone": "cemetery"
+                    }
+                  }
+                },
+                10
+              ]
+            },
+            "then": {
+              "op": "damage",
+              "subjects": "target.1",
+              "amount": 2
+            }
+          },
+          {
+            "op": "move",
+            "subjects": {
+              "side": "self",
+              "zone": "deck",
+              "top": 1
+            },
+            "to": "cemetery"
+          }
+        ]
+      },
+      "event": "field_to_cemetery",
+      "subject": "self",
+      "targets": [
+        {
+          "key": "1",
+          "select": {
+            "side": "opponent",
+            "zone": "field",
+            "type": "follower"
+          },
+          "min": 1,
+          "max": 1,
+          "modes": [
+            1
+          ]
+        }
+      ]
+    }
+  ]
+}

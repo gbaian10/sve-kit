@@ -1,0 +1,29 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP17-P32:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-10-30"
+    token:
+      name: アルティメット・マジック
+      template: true
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - if:
+                cond:
+                  spellchain: 10
+                then:
+                  - damage:
+                      to:
+                        leaders: opponents
+                      n: 7
+                  - life:
+                      who: self
+                      delta: 7
