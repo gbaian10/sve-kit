@@ -34,7 +34,8 @@ export function FilterSidebar({
       aria-label={t("filters.panel")}
       data-edge={edge}
       className={cn(
-        "sticky top-13 z-40 flex h-[calc(100dvh-3.25rem)] min-w-0 flex-col gap-4 overflow-y-auto py-3 pr-1",
+        // Let the scroll area extend past the results grid when the page footer enters view.
+        "sticky top-13 z-40 -mb-[calc(100dvh-3.25rem)] flex h-[calc(100dvh-3.25rem)] min-w-0 flex-col gap-4 overflow-y-auto py-3 pr-1",
         edge === "right" && "order-last",
       )}
     >

@@ -949,7 +949,10 @@ export function CardsPage() {
       <div
         className={
           sidebar
-            ? cn("grid items-start gap-6", sidebarGridClass(sidebarEdge, sidebarCollapsed))
+            ? cn(
+                "grid min-h-[calc(100dvh-3.25rem)] items-start gap-6",
+                sidebarGridClass(sidebarEdge, sidebarCollapsed),
+              )
             : "flex flex-col gap-3"
         }
       >
