@@ -1,0 +1,43 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "trigger",
+      "body": {
+        "op": "search",
+        "select": {
+          "zone": "deck",
+          "side": "self",
+          "trait": "機械",
+          "type": "follower",
+          "where": {
+            "fn": "le",
+            "args": [
+              {
+                "read": "item.cost"
+              },
+              3
+            ]
+          }
+        },
+        "min": 0,
+        "max": 1,
+        "to": "field"
+      },
+      "event": "enter",
+      "subject": "self"
+    },
+    {
+      "line": 2,
+      "kind": "trigger",
+      "body": {
+        "op": "modify",
+        "subjects": "self.leader",
+        "hp": 2
+      },
+      "event": "field_to_cemetery",
+      "subject": "self"
+    }
+  ]
+}
