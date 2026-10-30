@@ -1,0 +1,39 @@
+cards:
+  BP06-100:
+    abilities:
+      - fanfare:
+          do:
+            - create:
+                n: 1
+                to: field
+                token: ホーリーファルコン
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - to_cemetery:
+                  n: 1
+                  sel:
+                    kind: amulet
+                    who: self
+                    zone: field
+          do:
+            - create:
+                n: 1
+                to: field
+                token: ホーリーファルコン
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+    token_sources:
+      - card: BP01-T16
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set
