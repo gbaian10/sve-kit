@@ -1,0 +1,41 @@
+cards:
+  BP11-085:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - act:
+                ref: chosen
+            - apply:
+                effect:
+                  cannot:
+                    during:
+                      cause: rule
+                      phase: start
+                      who: opp
+                    on: affected
+                    what: stand
+                on: chosen
+                until:
+                  next_phase:
+                    edge: end
+                    phase: start
+                    who: opp
+            - draw:
+                n: 1
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

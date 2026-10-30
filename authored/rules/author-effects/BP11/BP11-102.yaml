@@ -1,0 +1,30 @@
+cards:
+  BP11-102:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - destroy: chosen
+            - create:
+                n: 1
+                to: field
+                token: ホーリーファルコン
+          targets:
+            - bind: chosen
+              from:
+                who: self
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+    token_sources:
+      - card: BP01-T16
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

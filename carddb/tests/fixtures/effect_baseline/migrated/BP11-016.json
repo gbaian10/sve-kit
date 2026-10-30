@@ -1,0 +1,38 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "spell",
+      "body": {
+        "op": "damage",
+        "subjects": "target.1",
+        "amount": {
+          "if": {
+            "fn": "ge",
+            "args": [
+              {
+                "read": "self.combo"
+              },
+              3
+            ]
+          },
+          "then": 5,
+          "else": 3
+        }
+      },
+      "targets": [
+        {
+          "key": "1",
+          "select": {
+            "side": "opponent",
+            "zone": "field",
+            "type": "follower"
+          },
+          "min": 1,
+          "max": 1
+        }
+      ]
+    }
+  ]
+}

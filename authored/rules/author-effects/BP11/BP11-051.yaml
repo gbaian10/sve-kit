@@ -1,0 +1,44 @@
+cards:
+  BP11-051:
+    abilities:
+      - keywords:
+          - quick
+        line: 1
+      - line: 2
+        spell:
+          do:
+            - damage:
+                n: 5
+                to: chosen
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        kind: follower
+                        trait: 魔法使い
+                        who: self
+                        zone: field
+                    op: ge
+                    right: 2
+                then:
+                  - damage:
+                      n: 2
+                      to:
+                        leaders: opponents
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

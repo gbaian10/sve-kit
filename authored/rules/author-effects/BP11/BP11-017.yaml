@@ -1,0 +1,33 @@
+cards:
+  BP11-017:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - move:
+                ref: returned
+                to: hand
+            - create:
+                n: 1
+                to: ex
+                token: 操り人形
+          targets:
+            - bind: returned
+              from:
+                trait: 人形
+                who: self
+                zone: cemetery
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+    token_sources:
+      - card: BP05-T03
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

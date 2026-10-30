@@ -1,0 +1,68 @@
+cards:
+  BP11-107:
+    abilities:
+      - fanfare:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 5
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  trait: ゴブリン
+                may: true
+                n: 1
+            - move:
+                ref: picked
+                result: taken
+                to: hand
+            - reveal:
+                bind: revealed
+                ref: picked
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: taken
+                      view: before
+                  in: seen
+                to: deck
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - banish:
+                  n: 3
+                  sel:
+                    trait: ゴブリン
+                    who: self
+                    zone: cemetery
+          do:
+            - destroy: chosen
+            - damage:
+                n: 3
+                to:
+                  leaders: opponents
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

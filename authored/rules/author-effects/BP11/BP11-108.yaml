@@ -1,0 +1,38 @@
+cards:
+  BP11-108:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - search:
+                        n: 1
+                        sel:
+                          trait: 魔王
+                          who: self
+                          zone: deck
+                        to: hand
+                  - - destroy: chosen
+                    - damage:
+                        n: 3
+                        to:
+                          leader: self
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+              option: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set
