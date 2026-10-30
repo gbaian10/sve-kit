@@ -197,6 +197,19 @@ impl BodyContext<'_> {
         Ok(shared_put(self.objects(objects, path)?, ZoneKind::Field))
     }
 
+    pub(super) fn banish(
+        &mut self,
+        value: &ast::BanishAction,
+        path: &str,
+    ) -> Result<Action, LoweringError> {
+        Ok(Action::Banish {
+            objects: match value {
+                ast::BanishAction::Top { top } => deck_slice(top, path)?,
+                ast::BanishAction::Objects(objects) => self.action_objects(objects, path)?,
+            },
+        })
+    }
+
     pub(super) fn observed_move(
         &mut self,
         value: &ast::Move,
@@ -209,7 +222,7 @@ impl BodyContext<'_> {
             return self.field_entry_move(value, path);
         }
         if let Some(top) = &value.top {
-            return top_to_cemetery(value, top, path);
+            return top_move(value, top, path);
         }
         if let Some(ast::MoveObjects::Field(objects)) = &value.r#ref {
             if value.position.is_some()
@@ -346,15 +359,15 @@ impl BodyContext<'_> {
     }
 }
 
-fn top_to_cemetery(
-    value: &ast::Move,
-    top: &ast::DeckTop,
-    path: &str,
-) -> Result<Action, LoweringError> {
+fn top_move(value: &ast::Move, top: &ast::DeckTop, path: &str) -> Result<Action, LoweringError> {
+    let zone = match value.to {
+        ast::Destination::Cemetery => OwnerZone::Cemetery,
+        ast::Destination::Ex => OwnerZone::Ex,
+        ast::Destination::Field | ast::Destination::Deck | ast::Destination::Hand => {
+            return Err(unsupported(path));
+        }
+    };
     if value.r#ref.is_some()
-        || top.n == 0
-        || !matches!(top.who, ast::SelfPlayer::Controller)
-        || !matches!(value.to, ast::Destination::Cemetery)
         || value.position.is_some()
         || value.order.is_some()
         || value.result.is_some()
@@ -362,25 +375,30 @@ fn top_to_cemetery(
         return Err(unsupported(path));
     }
     Ok(Action::Move {
-        objects: Selector::Ordered {
-            zone: super::super::ZoneRef {
-                player: PlayerRef::Controller {},
-                kind: ZoneKind::Deck,
-            },
-            start: Position::Top {},
-            count: super::Expr::Literal(Nat(top.n)),
-            direction: super::super::SliceDirection::Forward,
-        },
+        objects: deck_slice(top, path)?,
         movement: MoveSpec {
-            to: MoveDestination::Owners {
-                zone: OwnerZone::Cemetery,
-            },
+            to: MoveDestination::Owners { zone },
             initial_posture: None,
             entry_effects: vec![],
             position: None,
             order: None,
         },
         reason: MoveReason::Put,
+    })
+}
+
+fn deck_slice(top: &ast::DeckTop, path: &str) -> Result<Selector, LoweringError> {
+    if top.n == 0 || !matches!(top.who, ast::SelfPlayer::Controller) {
+        return Err(unsupported(path));
+    }
+    Ok(Selector::Ordered {
+        zone: super::super::ZoneRef {
+            player: PlayerRef::Controller {},
+            kind: ZoneKind::Deck,
+        },
+        start: Position::Top {},
+        count: super::Expr::Literal(Nat(top.n)),
+        direction: super::super::SliceDirection::Forward,
     })
 }
 

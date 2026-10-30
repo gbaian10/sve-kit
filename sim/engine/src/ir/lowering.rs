@@ -1049,9 +1049,7 @@ impl<'definitions> BodyContext<'definitions> {
                     }
                 },
             }),
-            ast::Step::Banish(value) => Ok(Action::Banish {
-                objects: self.action_objects(value, path)?,
-            }),
+            ast::Step::Banish(value) => self.banish(value, path),
             ast::Step::Act(value) | ast::Step::Stand(value) => Ok(Action::Posture {
                 objects: self.action_objects(value, path)?,
                 posture: if matches!(step, ast::Step::Act(_)) {

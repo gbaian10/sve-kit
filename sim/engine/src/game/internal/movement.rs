@@ -33,9 +33,10 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
         Action::Move {
             objects: Selector::Ordered { .. },
             ..
-        } if deck_top(action).is_none() => {
-            Err(unsupported("fixed own-deck top movement to cemetery"))
         }
+        | Action::Banish {
+            objects: Selector::Ordered { .. },
+        } if deck_top(action).is_none() => Err(unsupported("fixed own-deck top movement")),
         Action::Move {
             objects,
             movement,
@@ -125,28 +126,35 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
 }
 
 pub(super) fn deck_top(action: &Action) -> Option<u64> {
-    match action {
+    let objects = match action {
+        Action::Banish { objects } => objects,
         Action::Move {
-            objects:
-                Selector::Ordered {
-                    zone,
-                    start: Position::Top {},
-                    count: Expr::Literal(Nat(count)),
-                    direction: SliceDirection::Forward,
-                },
+            objects,
             movement,
             reason: MoveReason::Put,
-        } if *count > 0
-            && zone.kind == ZoneKind::Deck
-            && zone.player == (PlayerRef::Controller {})
-            && movement.to
-                == (MoveDestination::Owners {
-                    zone: OwnerZone::Cemetery,
-                })
-            && movement.position.is_none()
+        } if matches!(
+            movement.to,
+            MoveDestination::Owners {
+                zone: OwnerZone::Cemetery | OwnerZone::Ex
+            }
+        ) && movement.position.is_none()
             && movement.order.is_none()
             && movement.initial_posture.is_none()
             && movement.entry_effects.is_empty() =>
+        {
+            objects
+        }
+        _ => return None,
+    };
+    match objects {
+        Selector::Ordered {
+            zone,
+            start: Position::Top {},
+            count: Expr::Literal(Nat(count)),
+            direction: SliceDirection::Forward,
+        } if *count > 0
+            && zone.kind == ZoneKind::Deck
+            && zone.player == (PlayerRef::Controller {}) =>
         {
             Some(*count)
         }
@@ -374,7 +382,15 @@ impl Game {
         instruction: &Instruction,
         objects: &Selector,
     ) -> Result<()> {
-        let members = execution.objects(self, objects)?;
+        let members = if let Some(count) = deck_top(&instruction.action) {
+            self.deck_top_members(execution, count)?
+        } else {
+            let members = execution.objects(self, objects)?;
+            for member in &members {
+                public_zone(&self.object(execution.object_id(*member)?)?.zone)?;
+            }
+            members
+        };
         let (moves, successful) = self.internal_move_members(
             execution,
             &members,
@@ -424,11 +440,7 @@ impl Game {
         };
         let top_count = deck_top(&instruction.action);
         let members = if let Some(count) = top_count {
-            self.zone_ids(super::seat_name(execution.context.controller)?, "deck")
-                .iter()
-                .take(usize::try_from(count).map_err(invalid)?)
-                .map(|id| execution.reference(self, id))
-                .collect::<Result<Vec<_>>>()?
+            self.deck_top_members(execution, count)?
         } else {
             execution.objects(self, objects)?
         };
@@ -436,7 +448,7 @@ impl Game {
             let object = self.object(execution.object_id(member)?)?;
             if object.generation == member.generation.0 {
                 let actor = super::seat_name(execution.context.controller)?;
-                let private_observed_hand = kind == ZoneKind::Hand
+                let private_observed_move = matches!(kind, ZoneKind::Hand | ZoneKind::Ex)
                     && object.zone == "deck"
                     && object.owner == actor
                     && object.controller == actor
@@ -448,7 +460,7 @@ impl Game {
                     && execution.is_private_look_target(objects, member);
                 if kind == ZoneKind::Hand
                     && !matches!(object.zone.as_str(), "field" | "cemetery")
-                    && !private_observed_hand
+                    && !private_observed_move
                 {
                     return Err(unsupported(
                         "only public field or cemetery departures to hand",
@@ -461,12 +473,14 @@ impl Game {
                     && execution.ability.is_some()
                     && self.object_type(&object.id)? == "スペル";
                 if kind == ZoneKind::Ex
+                    && top_count.is_none()
+                    && !private_observed_move
                     && !resolving_source
                     && !matches!(object.zone.as_str(), "field" | "cemetery" | "ex")
                 {
                     return Err(unsupported("public field or cemetery movement to EX"));
                 }
-                if top_count.is_none() && !resolving_source && !private_observed_hand {
+                if top_count.is_none() && !resolving_source && !private_observed_move {
                     public_zone(&object.zone)?;
                 }
             }
@@ -486,6 +500,21 @@ impl Game {
         };
         execution.receipts.insert(instruction.receipt, outcome);
         Ok(())
+    }
+
+    fn deck_top_members(&self, execution: &Execution, count: u64) -> Result<Vec<ObjectRef>> {
+        let seat = super::seat_name(execution.context.controller)?;
+        self.zone_ids(seat, "deck")
+            .iter()
+            .take(usize::try_from(count).map_err(invalid)?)
+            .map(|id| {
+                let object = self.object(id)?;
+                if object.zone != "deck" || object.owner != seat || object.controller != seat {
+                    return Err(unsupported("own-deck top ownership"));
+                }
+                execution.reference(self, id)
+            })
+            .collect()
     }
 
     fn field_entry_has_room(
@@ -878,7 +907,7 @@ fn movement_origin(zone: &str, method: MoveMethod, destination: &str) -> Result<
         ("evolve_deck", MoveMethod::Put, "field") => Ok(ZoneKind::Evolve),
         ("resolution", MoveMethod::Put, "ex") => Ok(ZoneKind::Resolution),
         ("hand", MoveMethod::Discard, "cemetery") => Ok(ZoneKind::Hand),
-        ("deck", MoveMethod::Put, _) => Ok(ZoneKind::Deck),
+        ("deck", MoveMethod::Put | MoveMethod::Banish, _) => Ok(ZoneKind::Deck),
         (zone, _, _) => public_zone(zone),
     }
 }
