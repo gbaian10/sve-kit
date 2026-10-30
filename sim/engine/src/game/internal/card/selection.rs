@@ -347,7 +347,27 @@ fn target_bounds(constraint: &SelectionConstraint, group: &SelectionGroup) -> Ca
 }
 
 pub(super) fn check(constraint: &SelectionConstraint) -> Result<()> {
-    field_selector(&target_group(constraint)?.selector)
+    target_selector(&target_group(constraint)?.selector)
+}
+
+fn target_selector(selector: &Selector) -> Result<()> {
+    match selector {
+        Selector::Zone {
+            zone: ZoneKind::Cemetery,
+            view: SelectionView::Current {},
+            players,
+            binding,
+            predicate,
+        } if players.relative_to == (PlayerRef::Controller {})
+            && players.relation == PlayerRelation::SelfPlayer =>
+        {
+            check_predicate(predicate, *binding)
+        }
+        Selector::Difference { input, except } if matches!(except.as_ref(), Selector::Objects { objects } if objects == &[ObjectOperand::SourceHolder {}]) => {
+            target_selector(input)
+        }
+        selector => field_selector(selector),
+    }
 }
 
 pub(in crate::game::internal) fn check_resolution(decision: &Decision) -> Result<()> {
@@ -413,18 +433,7 @@ pub(in crate::game::internal) fn check_resolution(decision: &Decision) -> Result
         } if players.relative_to == (PlayerRef::Controller {}) => {
             check_predicate(predicate, *binding)?;
         }
-        Selector::Zone {
-            zone: ZoneKind::Cemetery,
-            view: SelectionView::Current {},
-            players,
-            binding,
-            predicate,
-        } if players.relative_to == (PlayerRef::Controller {})
-            && players.relation == PlayerRelation::SelfPlayer =>
-        {
-            check_predicate(predicate, *binding)?;
-        }
-        selector => field_selector(selector)?,
+        selector => target_selector(selector)?,
     }
     let selector = match &group.selector {
         Selector::Difference { input, .. } => input.as_ref(),
@@ -797,6 +806,7 @@ impl Game {
                     private_observed_deck(self, id, actor_seat, observed_deck);
                 if !(private_observation
                     || object.zone == "field"
+                    || object.zone == "cemetery"
                     || (evolution && object.zone == "evolve_deck")
                     || (allow_resolution_zones
                         && matches!(object.zone.as_str(), "ex" | "cemetery")))
@@ -1064,7 +1074,7 @@ impl Execution {
                 let zone = match zone {
                     ZoneKind::Field => "field",
                     ZoneKind::Ex if allow_resolution_zones => "ex",
-                    ZoneKind::Cemetery if allow_resolution_zones => "cemetery",
+                    ZoneKind::Cemetery => "cemetery",
                     _ => return Err(unsupported("public target zone")),
                 };
                 check_predicate(predicate, *binding)?;

@@ -96,9 +96,7 @@ impl BodyContext<'_> {
             return self.observed_object_choice(target, path, resolution);
         }
         if matches!(target.from.zone, Some(ast::TargetZone::Cemetery))
-            && (!resolution
-                || target.from.leader_or
-                || !matches!(target.from.who, Some(ast::Side::Controller)))
+            && (target.from.leader_or || !matches!(target.from.who, Some(ast::Side::Controller)))
         {
             return Err(unsupported(path));
         }
