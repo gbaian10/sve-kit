@@ -1,0 +1,28 @@
+cards:
+  BP12-100:
+    abilities:
+      - keywords:
+          - rush
+        line: 1
+      - lastword:
+          cost:
+            pp: 1
+          do:
+            - create:
+                n: 1
+                to: field
+                token: ホーリーファルコン
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+    token_sources:
+      - card: BP01-T16
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

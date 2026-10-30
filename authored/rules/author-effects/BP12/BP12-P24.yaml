@@ -1,0 +1,37 @@
+cards:
+  BP12-P24:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - move:
+                        ref: chosen
+                        to: hand
+                  - - life:
+                        delta: 4
+                        who: self
+                  - - draw:
+                        n: 2
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                who: all
+                zone: field
+              n: 1
+              option: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+    token:
+      name: カーバンクルの煌めき
+      template: true
+format: 2
+kind: author_effect_set

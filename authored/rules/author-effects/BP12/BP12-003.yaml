@@ -1,0 +1,31 @@
+cards:
+  BP12-003:
+    abilities:
+      - evolve_time:
+          do:
+            - damage:
+                distribute: true
+                distribute_at: play
+                instead:
+                  - if:
+                      combo: 3
+                    n: 4
+                n: 2
+                to: chosen
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              upto: 2
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

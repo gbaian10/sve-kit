@@ -1,0 +1,28 @@
+cards:
+  BP12-032:
+    abilities:
+      - keywords:
+          - bane
+        line: 1
+      - activate:
+          cost:
+            pp: 4
+          do:
+            - buff:
+                hp: 2
+                on: this
+                power: 2
+            - grant:
+                keywords:
+                  - storm
+                on: this
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

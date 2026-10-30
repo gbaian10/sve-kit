@@ -1,0 +1,38 @@
+cards:
+  BP12-087:
+    abilities:
+      - evolve_time:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - damage:
+                        n:
+                          count:
+                            kind: follower
+                            trait: 機械
+                            who: self
+                            zone: field
+                        to: chosen
+                  - - grant:
+                        keywords:
+                          - storm
+                        on: this
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+              option: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set
