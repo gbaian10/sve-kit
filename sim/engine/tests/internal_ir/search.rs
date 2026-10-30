@@ -1063,6 +1063,6 @@ fn search_stats_information_or_zero_uses_zero_for_nonfollowers() {
     assert_eq!(outcome(&result).found.len(), 1);
     assert_eq!(
         game.projection(View::Referee).unwrap()["P1"]["hand"],
-        json!(["spell"])
+        json!(["s", "spell"])
     );
 }
