@@ -890,6 +890,8 @@ pub(super) struct TargetQuery {
     pub name_contains: Option<String>,
     #[serde(default)]
     pub other: bool,
+    #[serde(default)]
+    pub not_same_name_as_this: bool,
     pub cost_eq: Option<u64>,
     pub cost_le: Option<u64>,
     pub cost_ge: Option<u64>,

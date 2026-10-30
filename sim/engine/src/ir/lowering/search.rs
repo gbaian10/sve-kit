@@ -82,6 +82,13 @@ fn query_filter(
     if !query.not_same_name_as_this {
         return Ok(predicate);
     }
+    Ok(exclude_source_name(predicate, candidate))
+}
+
+pub(super) fn exclude_source_name(
+    predicate: Expr<Bool>,
+    candidate: Binding<ObjectRef>,
+) -> Expr<Bool> {
     let same_name = Expr::Compute(Box::new(Predicate::NamesIntersect {
         left: Expr::Live(Box::new(NamesRead::Names {
             object: view(candidate),
@@ -90,14 +97,14 @@ fn query_filter(
             object: ObjectView::SourceInformation {},
         })),
     }));
-    Ok(Expr::Compute(Box::new(Predicate::And {
+    Expr::Compute(Box::new(Predicate::And {
         predicates: vec![
             predicate,
             Expr::Compute(Box::new(Predicate::Not {
                 predicate: same_name,
             })),
         ],
-    })))
+    }))
 }
 
 pub(super) fn object_filter(

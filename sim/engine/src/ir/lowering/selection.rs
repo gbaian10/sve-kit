@@ -146,6 +146,7 @@ impl BodyContext<'_> {
             || choice.from.name.is_some()
             || choice.from.name_contains.is_some()
             || choice.from.has_evolve.is_some()
+            || choice.from.not_same_name_as_this
             || choice.from.other
             || choice.from.has_numeric_filter()
             || choice.from.class.is_some()
