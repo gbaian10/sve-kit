@@ -368,3 +368,33 @@ fn repository_selection_rejects_stale_anchors_without_prototype_fallback() {
     assert!(matches!(&failure, EngineFailure::Unsupported(reason)
         if reason == "current card rejected: BP10-122: stale_anchor"));
 }
+
+#[test]
+fn search_shape_union_lowers_filtered_branches_and_rejects_empty_or_unrestricted_ones() {
+    let input = &inputs().2;
+    let lowerer = lowerer();
+    let mut candidate = b4(input).clone();
+    let search = &mut candidate["tree"]["cards"]["BP06-048"]["faces"][BP06_048_FACE]["abilities"]
+        [0]["lastword"]["do"][0]["search"];
+    search["sel"] = json!({"any_of":[
+        {"who":"self","zone":"deck","kind":"follower","name_contains":"式神"},
+        {"who":"self","zone":"deck","kind":"amulet","orig_cost_le":1_i32}
+    ]});
+    assert!(
+        lowerer.lower_current(&candidate).is_ok(),
+        "both filtered branches lower through the current author handoff"
+    );
+    for selector in [
+        json!({"any_of":[]}),
+        json!({"any_of":[{"who":"self","zone":"deck"}]}),
+        json!({"any_of":[{"who":"opponent","zone":"deck","kind":"follower"}]}),
+    ] {
+        let mut rejected = candidate.clone();
+        rejected["tree"]["cards"]["BP06-048"]["faces"][BP06_048_FACE]["abilities"][0]["lastword"]
+            ["do"][0]["search"]["sel"] = selector;
+        assert!(
+            lowerer.lower_current(&rejected).is_err(),
+            "each branch keeps its private-deck and filtered-domain restrictions"
+        );
+    }
+}

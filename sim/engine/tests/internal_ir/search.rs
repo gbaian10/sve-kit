@@ -1180,3 +1180,67 @@ fn search_partial_ex_capacity_retains_found_receipt_and_rejects_foreign_handles(
     assert_eq!(state["P1"]["deck_count"], 1);
     assert_eq!(state["P1"]["ex_count"], 5);
 }
+
+#[test]
+fn search_union_of_names_moves_a_follower_or_amulet_to_the_field() {
+    for selected_name in ["unit-follower", "unit-amulet"] {
+        let state = setup(
+            1,
+            json!([
+                {"id":"follower","card":"unit-follower"},
+                {"id":"amulet","card":"unit-amulet"},
+                {"id":"spell","card":"unit-spell"}
+            ]),
+        );
+        let mut game =
+            Game::new(catalog(), &state, &Value::Null, &Value::Null, "union-entry").unwrap();
+        let empty = WellFormedCardProgram::check(CardProgram {
+            abilities: vec![],
+            card_play_costs: vec![],
+        })
+        .unwrap();
+        for number in ["unit-follower", "unit-amulet", "unit-spell"] {
+            game.load_internal_card(number, &empty).unwrap();
+        }
+        let binding = Binding::new(1, ScopeId(2));
+        let filter = Expr::Compute(Box::new(Predicate::Or {
+            predicates: vec![name(binding, "unit-follower"), name(binding, "unit-amulet")],
+        }));
+        execute(
+            &mut game,
+            1,
+            search(filter, cardinality(1, 1), shared(ZoneKind::Field)),
+        );
+        let question = game.internal_decision(View::P1).unwrap();
+        let InputDomain::Search(domain) = &question.domain else {
+            panic!("search domain")
+        };
+        assert_eq!(
+            domain.cards.len(),
+            2,
+            "both union branches match and the spell is excluded"
+        );
+        let handle = domain
+            .cards
+            .iter()
+            .find(|card| card.card == selected_name)
+            .unwrap()
+            .handle;
+        let result = answer(&mut game, 1, SearchAnswer::Ungrouped(vec![handle]));
+        assert!(
+            result.complete,
+            "a supported ordinary card enters the field"
+        );
+        assert_eq!(
+            outcome(&result)
+                .moved
+                .iter()
+                .filter(|movement| movement.after.is_some())
+                .count(),
+            1
+        );
+        assert_eq!(shuffles(&result), 1);
+        let state = game.projection(View::Referee).unwrap();
+        assert_eq!(state["P1"]["field"].as_array().unwrap().len(), 1);
+    }
+}
