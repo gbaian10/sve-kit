@@ -1,0 +1,32 @@
+cards:
+  BP07-061:
+    abilities:
+      - evolve_time:
+          do:
+            - damage:
+                n: 3
+                to: victim
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - lastword:
+          do:
+            - create:
+                n: 1
+                to: field
+                token: ナテラの大樹
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

@@ -52,28 +52,6 @@ cards:
             subjects: self
           - op: act
             subjects: cost.1
-  BP07-076:
-    status: complete
-    abilities:
-      - line: 1
-        kind: evolve
-        body:
-          op: evolve
-          subjects: self
-        costs:
-          - op: pp
-            amount: 1
-      - line: 2
-        kind: trigger
-        body:
-          op: move
-          subjects:
-            zone: deck
-            side: self
-            top: 2
-          to: cemetery
-        event: enter
-        subject: self
   BP07-P06:
     status: complete
     abilities:

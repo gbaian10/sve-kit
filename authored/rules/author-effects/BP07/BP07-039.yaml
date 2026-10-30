@@ -1,0 +1,28 @@
+cards:
+  BP07-039:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - fanfare:
+          cost:
+            discard:
+              n: 1
+              sel:
+                kind: spell
+                who: self
+                zone: hand
+          do:
+            - draw:
+                n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set
