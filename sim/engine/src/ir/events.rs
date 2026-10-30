@@ -1,4 +1,5 @@
 pub(crate) mod entry;
+pub(crate) mod movement;
 pub(crate) mod played;
 pub(crate) mod timing;
 use super::{

@@ -4,6 +4,9 @@ use second::lowerer;
 #[path = "card/frozen_zone.rs"]
 mod frozen_zone;
 
+#[path = "card/event_cemetery.rs"]
+mod event_cemetery;
+
 #[path = "card/ability_condition.rs"]
 mod ability_condition;
 

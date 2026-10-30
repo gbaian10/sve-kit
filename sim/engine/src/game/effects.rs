@@ -726,6 +726,16 @@ impl Game {
             .map(|plan| self.object(&plan.previous.id).cloned())
             .collect::<Result<Vec<_>>>()?;
         pending.extend(self.collect_triggers("ex_enter", &ex_entered, &frame.cause)?);
+        let ex_previous = plans
+            .iter()
+            .filter(|plan| {
+                plan.changed
+                    && plan.destination == "ex"
+                    && (plan.previous.zone != "ex" || plan.previous.controller != plan.controller)
+            })
+            .map(|plan| plan.previous.clone())
+            .collect::<Vec<_>>();
+        self.internal_ex_events(&ex_previous, typed_entry_before, frame)?;
         self.enqueue(pending);
         for (object, _) in &entered {
             self.initialize_entry_counters(&object.id, frame)?;

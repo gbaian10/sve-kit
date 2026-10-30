@@ -537,3 +537,51 @@ fn a_live_player_role_cannot_name_a_private_audience_across_a_control_change() {
         )],
     ));
 }
+
+#[test]
+fn a_snapshot_player_role_is_stable_but_requires_its_declared_event() {
+    let predicate = |object| {
+        Expr::Compute(Box::new(Predicate::ZoneEquals {
+            left: Expr::Frozen(Box::new(ZoneFrozen::LeaveFieldTo {
+                event: Binding::new(1, ScopeId(1)),
+            })),
+            right: Expr::Compute(Box::new(ZoneOperation::OfPlayer {
+                player: PlayerRef::FromExpression {
+                    value: Box::new(Expr::Live(Box::new(PlayerRead::Role {
+                        object,
+                        role: Role::Owner,
+                    }))),
+                },
+                kind: ZoneKind::Cemetery,
+            })),
+        }))
+    };
+    let snapshot = |id| ObjectView::Snapshot {
+        value: Box::new(Expr::Frozen(Box::new(SnapshotFields::LeaveFieldLki {
+            event: Binding::new(id, ScopeId(1)),
+        }))),
+    };
+    accept_card(event_card(
+        leave(predicate(snapshot(1))),
+        EventSnapshotPolicy::BeforeExit,
+        vec![],
+    ));
+    reject_card(
+        event_card(
+            leave(predicate(snapshot(2))),
+            EventSnapshotPolicy::BeforeExit,
+            vec![],
+        ),
+        WellFormedReason::UnavailableBinding,
+    );
+    reject_card(
+        event_card(
+            leave(predicate(ObjectView::Current {
+                object: Box::new(ObjectOperand::SourceHolder {}),
+            })),
+            EventSnapshotPolicy::BeforeExit,
+            vec![],
+        ),
+        WellFormedReason::UnsupportedShape,
+    );
+}

@@ -181,7 +181,8 @@ impl Game {
         &mut self,
         holder: &str,
     ) -> Result<Characteristics> {
-        self.event_characteristics(holder, false)
+        let printed_only = self.object(holder)?.zone == "ex";
+        self.event_characteristics(holder, printed_only)
     }
 
     pub(in crate::game::internal) fn internal_hand_characteristics(
@@ -194,7 +195,11 @@ impl Game {
         self.event_characteristics(holder, true)
     }
 
-    fn event_characteristics(&mut self, holder: &str, hand: bool) -> Result<Characteristics> {
+    fn event_characteristics(
+        &mut self,
+        holder: &str,
+        printed_only: bool,
+    ) -> Result<Characteristics> {
         self.require_internal_abilities(holder, "event characteristics and LKI abilities")?;
         let object = self.object(holder)?.clone();
         let (card, face) = self.internal_effective_print(holder)?;
@@ -232,8 +237,8 @@ impl Game {
                 definition: source.definition,
             });
         }
-        let (attack, life) = if kind == CardKind::Follower && hand {
-            // Hand stat patches are not admitted; event snapshots retain the printed values.
+        let (attack, life) = if kind == CardKind::Follower && printed_only {
+            // Hand and EX stat patches are not admitted; snapshots retain printed values.
             (
                 Info::Present(Int(text(&printed["power"])?.parse().map_err(invalid)?)),
                 Info::Present(Int(text(&printed["hp"])?.parse().map_err(invalid)?)),

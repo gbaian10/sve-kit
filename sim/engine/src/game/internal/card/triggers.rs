@@ -21,6 +21,7 @@ use alloc::collections::BTreeMap;
 mod entry;
 pub(in crate::game::internal) mod entry_operand;
 mod evolution;
+mod movement;
 mod played;
 mod quota;
 mod timing;
@@ -85,7 +86,8 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
     ) {
         return super::fanfare::check_header(ability);
     }
-    if entry::check_header(ability)?
+    if movement::check_header(ability)?
+        || entry::check_header(ability)?
         || timing::check_header(ability)?
         || played::check_header(ability)?
     {
@@ -312,6 +314,11 @@ impl Game {
             }
         }
         for id in ids {
+            let observed = self.movement_departures(id, destinations, before, frame)?;
+            let observed_header = observed.first().map(|pending| pending.header.clone());
+            for pending in observed {
+                plan.departures.push((pending, self.object(id)?.clone()));
+            }
             let object = self.object(id)?.clone();
             let Some(destination) = destinations.get(id).map(String::as_str) else {
                 continue;
@@ -337,16 +344,20 @@ impl Game {
             let cause = self.departure_cause(id, frame)?;
             let holder = self.internal_card_source(id, definition, actor)?;
             let snapshot = self.information_snapshot(holder.holder)?.at(before);
-            let header = self.pending_header(
-                effect_source.map_or(player_id(self.active())?, |source| source.controller),
-                cause,
-                if matches!(cause, Cause::Rule { .. }) {
-                    None
-                } else {
-                    effect_source
-                },
-                snapshot.view().snapshot,
-            )?;
+            let header = if let Some(header) = observed_header {
+                header
+            } else {
+                self.pending_header(
+                    effect_source.map_or(player_id(self.active())?, |source| source.controller),
+                    cause,
+                    if matches!(cause, Cause::Rule { .. }) {
+                        None
+                    } else {
+                        effect_source
+                    },
+                    snapshot.view().snapshot,
+                )?
+            };
             for ability in abilities {
                 let source = self.internal_card_source(id, ability.node.id, actor)?;
                 let mut information = SourceInformation::current(self, source)?;
@@ -557,7 +568,7 @@ impl Game {
             if pending.header.after.0 < pending.header.before.0
                 || pending.leave.is_some_and(|leave| {
                     leave.lki.snapshot != pending.header.before
-                        || leave.object_before != pending.source.holder
+                        || leave.object_before != leave.lki.object
                 })
             {
                 return Err(invalid("pending event and source proof disagree"));
