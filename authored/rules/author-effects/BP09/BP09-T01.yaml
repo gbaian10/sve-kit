@@ -1,0 +1,32 @@
+cards:
+  BP09-T01:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - damage:
+                n: 4
+                to: victim
+            - damage:
+                n: 2
+                to:
+                  leader_of: victim
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+    token:
+      name: 刹那の劇薬
+      template: true
+format: 2
+kind: author_effect_set

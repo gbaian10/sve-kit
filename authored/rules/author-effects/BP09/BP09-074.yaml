@@ -1,0 +1,36 @@
+cards:
+  BP09-074:
+    abilities:
+      - fanfare:
+          do:
+            - damage:
+                n: 4
+                to: victim
+            - damage:
+                n: 4
+                to:
+                  leader_of: victim
+            - if:
+                cond:
+                  crimson: true
+                then:
+                  - pp:
+                      delta: 3
+                      who: self
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set

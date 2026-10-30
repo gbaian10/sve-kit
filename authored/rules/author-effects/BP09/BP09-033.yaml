@@ -1,0 +1,26 @@
+cards:
+  BP09-033:
+    abilities:
+      - fanfare:
+          cost:
+            discard:
+              n: 3
+              sel:
+                who: self
+                zone: hand
+          do:
+            - draw:
+                n: 3
+            - pp:
+                delta: 2
+                who: self
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-30"
+format: 2
+kind: author_effect_set
