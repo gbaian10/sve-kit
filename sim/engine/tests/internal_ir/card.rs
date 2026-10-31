@@ -245,7 +245,7 @@ fn whole_card_activation_fixes_instance_and_distinct_executions_both_seats() {
         assert_eq!(first.source.definition, AbilityId(1));
         assert_eq!(first.source.holder.generation, Generation(0));
         assert!(
-            matches!(first.progress.facts.as_slice(), [Fact::AbilityPlayed { execution: play, source }, Fact::Damage(_), Fact::AbilityResolved { execution: resolve, source: resolved }] if *play == first.execution && play == resolve && *source == first.source && source == resolved)
+            matches!(first.progress.facts.as_slice(), [Fact::AbilityPlayed { execution: play, source, .. }, Fact::Damage(_), Fact::AbilityResolved { execution: resolve, source: resolved }] if *play == first.execution && play == resolve && *source == first.source && source == resolved)
         );
         assert_eq!(game.internal_card_stage(), Some(ResumeStage::CheckTiming));
         game.digest().unwrap_err();

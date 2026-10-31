@@ -283,7 +283,7 @@ fn bp01_118_author_yaml_reaches_authority_fanfare_once_after_entry() {
         assert_eq!(result.source.controller, PlayerId { seat });
         assert_eq!(result.progress.facts.len(), 4);
         assert!(
-            matches!(result.progress.facts.first(), Some(Fact::AbilityPlayed { source, execution }) if *source == result.source && *execution == result.execution)
+            matches!(result.progress.facts.first(), Some(Fact::AbilityPlayed { source, execution, .. }) if *source == result.source && *execution == result.execution)
         );
         assert!(
             matches!(result.progress.facts.last(), Some(Fact::AbilityResolved { source, execution }) if *source == result.source && *execution == result.execution)

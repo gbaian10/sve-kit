@@ -41,6 +41,7 @@ pub use current::{
     PrintedKeyword, PrintedKeywordsObligation,
 };
 
+use super::AbilityQualification::{Ordinary, UnionBurst};
 use alloc::collections::{BTreeMap, BTreeSet};
 use serde::de::DeserializeOwned;
 use serde_json::{Value, json};
@@ -509,7 +510,7 @@ impl Allocator {
                 scope,
                 source: ability_source,
                 kind,
-                qualification: AbilityQualification::Ordinary,
+                qualification: body.ub.as_ref().map_or(Ordinary, |_| UnionBurst),
                 active_zones,
                 event_captures: vec![],
                 play,

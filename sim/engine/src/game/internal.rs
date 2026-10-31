@@ -7,8 +7,8 @@
 
 use super::{Frame, Game, View, int, string};
 use crate::ir::{
-    Action, ActionPattern, Arithmetic, Binding, Bool, Capture, CaptureRef, CardQuantityOutcome,
-    Cardinality, ChoiceDomain, Comparison, Control, DamageEvent, DamageFlags,
+    AbilityQualification, Action, ActionPattern, Arithmetic, Binding, Bool, Capture, CaptureRef,
+    CardQuantityOutcome, Cardinality, ChoiceDomain, Comparison, Control, DamageEvent, DamageFlags,
     DamageQuantityOutcome, DamageRecipient, Decision, DecisionId, DecisionKind, Declinable,
     DestroyOutcome, DrawEvent, Effect, EffectId, EntryMethod, EntryOrigin, ExecutionId, Expr,
     Generation, InstallationSubjects, Instruction, InstructionContext, Int, IntFrozen,
@@ -315,6 +315,8 @@ pub enum Fact {
         execution: ExecutionId,
         /// Fixed holder generation, instance and controller.
         source: RuntimeAbilitySource,
+        /// Qualification of this proper play, recorded once before its body.
+        qualification: AbilityQualification,
     },
     /// Body and end-of-resolution cleanup completed, before check timing.
     AbilityResolved {

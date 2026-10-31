@@ -8,8 +8,8 @@ use crate::game::legal::subsets;
 use crate::ir::optional_payment;
 use crate::ir::quick::is_printed_quick;
 use crate::ir::{
-    Action, Bool, Cardinality, LimitSpec, ModeUse, ObjectRef, PlaySpec, PlayerRef, RecipientSet,
-    SelectionSnapshot, Selector, TurnId,
+    AbilityQualification, Action, Bool, Cardinality, LimitSpec, ModeUse, ObjectRef, PlaySpec,
+    PlayerRef, RecipientSet, SelectionSnapshot, Selector, TurnId,
 };
 use crate::ir::{
     ChoiceDomain, Control, CostSpec, Decision, DecisionId, DecisionKind, ExecutionRef, InputMode,
@@ -92,6 +92,7 @@ impl PlayMode {
 
 #[derive(Clone, Debug)]
 pub(in crate::game::internal) struct PlayState {
+    qualification: AbilityQualification,
     snapshot: Option<Box<Game>>,
     pub(in crate::game::internal) snapshot_id: SnapshotId,
     modes: VecDeque<PlayMode>,
@@ -741,6 +742,7 @@ impl Game {
             costs: CostSpec::Ordered { steps: Vec::new() },
         });
         execution.play = Some(PlayState {
+            qualification: ability.qualification,
             snapshot: None,
             snapshot_id: SnapshotId(self.state.ir_epoch),
             modes: groups.clone().into(),
@@ -1031,6 +1033,7 @@ impl Game {
             Fact::AbilityPlayed {
                 execution: execution.id,
                 source,
+                qualification: play.qualification,
             }
         });
         if execution.spell {
@@ -1318,6 +1321,7 @@ impl Game {
     pub(super) fn run_field_play(&mut self, mut execution: Execution) -> Result<CardPlay> {
         execution.field_entry = true;
         execution.play = Some(PlayState {
+            qualification: AbilityQualification::Ordinary,
             snapshot: None,
             snapshot_id: SnapshotId(self.state.ir_epoch),
             modes: VecDeque::new(),
