@@ -271,7 +271,12 @@ impl Checker {
             return Err(self.error(WellFormedReason::InvalidEntry));
         }
         self.play_header(ability)?;
-        if ability.qualification != AbilityQualification::Ordinary {
+        if ability.qualification == AbilityQualification::UnionBurst
+            && !matches!(
+                ability.kind,
+                AbilityKind::Triggered | AbilityKind::Activated
+            )
+        {
             return self.reject();
         }
         self.at("source", |checker| checker.ability_source(&ability.source))?;

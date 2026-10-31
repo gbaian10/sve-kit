@@ -2,8 +2,9 @@
 use super::{Ability, Game, Located, Result, invalid, player_id, printed_origin};
 use crate::EngineFailure;
 use crate::ir::{
-    AssociationId, CardKind, CardName, Characteristics, ClassId, EvolutionState, Generation, Info,
-    Int, ObjectRef, RuntimeAbilityReference, Stat, TitleId, TraitId,
+    AbilityQualification, AssociationId, CardKind, CardName, Characteristics, ClassId,
+    EvolutionState, Generation, Info, Int, ObjectRef, RuntimeAbilityReference, Stat, TitleId,
+    TraitId,
 };
 use serde_json::Value;
 
@@ -75,12 +76,21 @@ impl Game {
         &self,
         holder: &str,
     ) -> Result<Vec<Located<Ability>>> {
-        let field = self.object(holder)?.zone == "field";
+        let object = self.object(holder)?;
+        let field = object.zone == "field";
+        let player = self.player(&object.controller)?;
+        let ub_enabled = player.construction == "title"
+            && self
+                .catalog
+                .rule_bindings
+                .capability(&player.title_code, "ub_enabled");
         Ok(self
             .internal_characteristic_abilities(holder)?
             .into_iter()
             .filter(|ability| {
-                super::printed_keywords::card_declaration(&ability.node).is_none() || field
+                (super::printed_keywords::card_declaration(&ability.node).is_none() || field)
+                    && (ability.node.qualification != AbilityQualification::UnionBurst
+                        || ub_enabled)
             })
             .collect())
     }

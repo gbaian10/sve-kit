@@ -198,6 +198,7 @@ pub(super) struct Ports {
 #[derive(Default, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct Body {
+    pub ub: Option<True>,
     #[serde(rename = "cost")]
     pub head_cost: Option<Cost>,
     pub optional_cost: Option<BodyOptionalCost>,

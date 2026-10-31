@@ -100,7 +100,7 @@ fn full_payment_precedes_play_and_body_both_seats() {
             }
         );
         assert!(
-            matches!(result.progress.facts.as_slice(), [Fact::Posture(event), Fact::AbilityPlayed { execution, source }, Fact::Draw(_), Fact::AbilityResolved { execution: resolved, .. }]
+            matches!(result.progress.facts.as_slice(), [Fact::Posture(event), Fact::AbilityPlayed { execution, source, .. }, Fact::Draw(_), Fact::AbilityResolved { execution: resolved, .. }]
             if event.object == result.source.holder && event.before == Posture::Standing && event.after == Posture::Acted
             && *source == result.source && *execution == result.execution && execution == resolved)
         );

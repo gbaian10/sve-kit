@@ -1,6 +1,6 @@
 use super::{Execution, Game, Result, WellFormedCardProgram, invalid, unsupported};
 use crate::game::internal::values::compare;
-use crate::ir::{AbilityOrigin, AbilityQualification, AbilitySource, CostSpec, ObjectOperand};
+use crate::ir::{AbilityOrigin, AbilitySource, CostSpec, ObjectOperand};
 use crate::ir::{
     Bool, CostChange, Expr, Int, IntOperation, Nat, NatOperation, NatRead, ObjectProperty,
     PlayerRef, Predicate, Selector, SourceSpan,
@@ -46,14 +46,6 @@ pub(super) fn check(game: &Game, card_no: &str, card: &WellFormedCardProgram) ->
                     invalid("incomplete exchange source"),
                     &exchange.source,
                 ));
-            }
-            if card
-                .card()
-                .abilities
-                .iter()
-                .any(|ability| ability.node.qualification != AbilityQualification::Ordinary)
-            {
-                return Err(unsupported("exchange requires ordinary card play"));
             }
             game.check_card_source(
                 &exchange.source,
