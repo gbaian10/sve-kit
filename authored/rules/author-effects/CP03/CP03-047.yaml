@@ -1,0 +1,29 @@
+cards:
+  CP03-047:
+    abilities:
+      - keywords:
+          - ward
+          - twin_drive
+        line: 1
+      - evolve_time:
+          do:
+            - damage:
+                n: 4
+                to: victim
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-10-31"
+format: 2
+kind: author_effect_set

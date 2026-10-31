@@ -1,0 +1,31 @@
+cards:
+  CP03-026:
+    abilities:
+      - keywords:
+          - twin_drive
+        line: 1
+      - evolve_time:
+          do:
+            - buff:
+                hp: 2
+                on: allies
+                power: 2
+          targets:
+            - bind: allies
+              from:
+                kind: follower
+                other: true
+                trait: ロイヤルパラディン
+                who: self
+                zone: field
+              upto: 2
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-10-31"
+format: 2
+kind: author_effect_set
