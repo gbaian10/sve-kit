@@ -1,0 +1,33 @@
+cards:
+  CP01-036:
+    abilities:
+      - line: 1
+        use: meal_entry.v1
+      - fanfare:
+          cost:
+            discard:
+              n: 1
+              sel:
+                who: self
+                zone: hand
+          do:
+            - damage:
+                n: 4
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-31"
+format: 2
+kind: author_effect_set

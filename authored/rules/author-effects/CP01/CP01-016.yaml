@@ -1,0 +1,35 @@
+cards:
+  CP01-016:
+    abilities:
+      - line: 1
+        use: meal_entry.v1
+      - keywords:
+          - bane
+          - ward
+          - aura
+        line: 2
+      - activate:
+          cost:
+            act_self: true
+          do:
+            - damage:
+                n: 5
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                leader_or: true
+                who: opp
+                zone: field
+              n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-31"
+format: 2
+kind: author_effect_set
