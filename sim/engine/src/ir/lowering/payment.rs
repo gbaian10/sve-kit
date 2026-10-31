@@ -30,6 +30,10 @@ pub(super) fn lower_one(
     lower_operations(context, from_ref(operation), source, path)
 }
 
+#[expect(
+    clippy::too_many_lines,
+    reason = "Ordered payment and material declarations share one cost boundary."
+)]
 fn lower_operations(
     context: &mut BodyContext<'_>,
     operations: &[ast::CostOperation],
@@ -48,6 +52,33 @@ fn lower_operations(
     let mut parameters = Vec::new();
     for operation in operations {
         let action = match operation {
+            ast::CostOperation::Lesson(amount) => {
+                let material = ast::Material {
+                    n: *amount,
+                    sel: ast::PublicQuery {
+                        other: false,
+                        who: ast::Side::Controller,
+                        zone: ast::PublicZone::Ex,
+                        kind: None,
+                        r#trait: None,
+                        name: Some("魔法のアイテム".to_owned()),
+                        name_contains: None,
+                        class: None,
+                        not_class: None,
+                        token: None,
+                    },
+                };
+                let (action, decision) = super::material::lower(
+                    context.card_allocator,
+                    &mut context.allocator,
+                    context.scope,
+                    &material,
+                    super::material::Operation::Banish,
+                    path,
+                )?;
+                parameters.push(decision);
+                action
+            }
             ast::CostOperation::ToCemetery(value)
             | ast::CostOperation::ReturnToHand(value)
             | ast::CostOperation::Banish(value)
@@ -142,6 +173,7 @@ fn material_operation(
         ast::CostOperation::Act(_) => Ok(super::material::Operation::Act),
         ast::CostOperation::ToEx(_) => Ok(super::material::Operation::Ex),
         ast::CostOperation::Pp(_)
+        | ast::CostOperation::Lesson(_)
         | ast::CostOperation::LeaderLife(_)
         | ast::CostOperation::Discard(_)
         | ast::CostOperation::ActSelf(_)
