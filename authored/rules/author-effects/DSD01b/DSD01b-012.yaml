@@ -1,0 +1,27 @@
+format: 2
+kind: author_effect_set
+cards:
+  DSD01b-012:
+    abilities:
+      - line: 1
+        keywords:
+          - bane
+      - line: 2
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - storm
+          while:
+            exists:
+              who: self
+              zone: field
+              other: true
+              trait: 武闘竜人
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-10-31"

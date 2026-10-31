@@ -1,0 +1,40 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP04-089:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - grant:
+                "on":
+                  who: self
+                  zone: field
+                  name: 毒牙の姫・メドゥーサ
+                keywords:
+                  - aura
+            - grant:
+                "on":
+                  who: self
+                  zone: field
+                  name: ステンノ
+                keywords:
+                  - aura
+      - line: 2
+        fanfare:
+          do:
+            - create:
+                token: 毒蛇
+                n: 1
+                to: ex
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP04-T01
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-10-31"

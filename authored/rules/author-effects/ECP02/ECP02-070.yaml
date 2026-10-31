@@ -1,0 +1,43 @@
+format: 2
+kind: author_effect_set
+cards:
+  ECP02-070:
+    abilities:
+      - line: 1
+        keywords:
+          - rush
+      - line: 2
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - assail
+                  - bane
+          while:
+            cmp:
+              left:
+                count:
+                  who: self
+                  zone: cemetery
+                  trait: パッション
+              op: ge
+              right: 5
+      - line: 3
+        fanfare:
+          do:
+            - draw:
+                n: 1
+          cost:
+            discard:
+              sel:
+                who: self
+                zone: hand
+                trait: パッション
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-10-31"

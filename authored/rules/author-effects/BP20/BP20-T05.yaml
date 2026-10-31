@@ -1,0 +1,33 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP20-T05:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-10-31"
+    abilities:
+      - line: 1
+        activate:
+          zone: ex
+          cost:
+            pp: 0
+          per_turn: 1
+          targets:
+            - bind: omen
+              from:
+                who: self
+                zone: field
+                kind: follower
+                trait: 絶傑
+              n: 1
+          do:
+            - damage:
+                to: omen
+                n: 1
+    token:
+      name: クレスト 烈絶の顕現・ガルミーユ
+      template: true
