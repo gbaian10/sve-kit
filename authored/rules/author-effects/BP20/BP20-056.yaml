@@ -1,0 +1,51 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP20-056:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - storm
+          while:
+            awakened: true
+      - line: 2
+        auto:
+          "on":
+            damaged:
+              recipient: this
+              kind: ability
+              during:
+                turn: self
+          per_turn: 1
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: enemy
+                n: 2
+      - line: 3
+        fanfare:
+          do:
+            - create:
+                token: クレスト 烈絶の顕現・ガルミーユ
+                n: 1
+                to: ex
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP20-T05
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-10-31"

@@ -1,0 +1,31 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP03-097:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - storm
+          while:
+            cmp:
+              left:
+                count:
+                  who: self
+                  zone: cemetery
+                  trait: シャドウパラディン
+              op: ge
+              right: 10
+    ignored:
+      - section: 1
+        line: 1
+        reason: reminder
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-10-31"

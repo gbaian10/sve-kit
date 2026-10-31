@@ -1,0 +1,42 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP20-072:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - ward
+                "on":
+                  who: self
+                  zone: field
+                  name: オルカ
+      - line: 2
+        fanfare:
+          do:
+            - if:
+                cond:
+                  awakened: true
+                then:
+                  - create:
+                      token: オルカ
+                      n: 3
+                      to: field
+                else:
+                  - create:
+                      token: オルカ
+                      n: 1
+                      to: field
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP02-T05
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-10-31"

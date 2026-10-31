@@ -1,0 +1,51 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP03-089:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - rush
+                  - bane
+          while:
+            cmp:
+              left:
+                count:
+                  who: self
+                  zone: cemetery
+                  trait: シャドウパラディン
+              op: ge
+              right: 10
+      - line: 2
+        attack_time:
+          do:
+            - if:
+                cond:
+                  exists:
+                    who: self
+                    zone: cemetery
+                    kind: follower
+                    name_contains: ブラスター
+                then:
+                  - damage:
+                      to:
+                        leaders: opponents
+                      n: 2
+      - line: 3
+        fanfare:
+          do:
+            - move:
+                top:
+                  who: self
+                  n: 1
+                to: cemetery
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-10-31"

@@ -508,30 +508,6 @@ cards:
           trait: 財宝
           zone: any
     status: complete
-  BP20-P64:
-    abilities:
-      - active_zones:
-          - ex
-        body:
-          amount: 1
-          op: damage
-          subjects: target.1
-        costs:
-          - amount: 0
-            op: pp
-        kind: activated
-        limit: 1
-        line: 1
-        targets:
-          - key: "1"
-            max: 1
-            min: 1
-            select:
-              side: self
-              trait: 絶傑
-              type: follower
-              zone: field
-    status: complete
   BP20-P65:
     abilities:
       - active_zones:
