@@ -1,15 +1,19 @@
 //! Public event subscriptions share one closed plan over the committed event subject.
 use crate::ir::{
     Binding, Bool, BoolRead, BooleanState, CardKind, CardName, Characteristics,
-    CharacteristicsFields, EnterExEvent, EvolveEvent, Expr, KindFrozen, LeaveFieldEvent,
-    NamesFrozen, ObjectFrozen, ObjectOperand, ObjectRef, ObjectView, PlayerFrozen, PlayerId,
-    PlayerRead, PlayerRef, Predicate, Role, SnapshotFields, TraitId, TraitsFrozen, ZoneFrozen,
-    ZoneKind, ZoneOperation,
+    CharacteristicsFields, ClassFrozen, ClassId, DestroyEvent, EnterExEvent, EnterFieldEvent,
+    EventSnapshotPolicy, EvolveEvent, Expr, Info, KindFrozen, LeaveFieldEvent, NamesFrozen,
+    ObjectFrozen, ObjectOperand, ObjectRef, ObjectView, PlayerFrozen, PlayerId, PlayerRead,
+    PlayerRef, Predicate, Role, SnapshotFields, TraitId, TraitsFrozen, ZoneFrozen, ZoneKind,
+    ZoneOperation,
 };
 
 #[derive(Clone, Copy)]
 pub(crate) enum SubjectFields {
+    Entry(Binding<EnterFieldEvent>),
+    Destroy(Binding<DestroyEvent>),
     Evolve(Binding<EvolveEvent>),
+    Cemetery(Binding<LeaveFieldEvent>),
     Leave(Binding<LeaveFieldEvent>),
     Ex(Binding<EnterExEvent>),
 }
@@ -17,15 +21,25 @@ pub(crate) enum SubjectFields {
 impl SubjectFields {
     fn object(self) -> Expr<ObjectRef> {
         Expr::Frozen(Box::new(match self {
-            Self::Leave(event) => ObjectFrozen::LeaveFieldObjectBefore { event },
+            Self::Cemetery(event) | Self::Leave(event) => {
+                ObjectFrozen::LeaveFieldObjectBefore { event }
+            }
+            Self::Entry(event) => ObjectFrozen::EnterFieldObject { event },
+            Self::Destroy(event) => ObjectFrozen::DestroyObjectBefore { event },
             Self::Evolve(event) => ObjectFrozen::EvolveSubject { event },
             Self::Ex(event) => ObjectFrozen::EnterExObject { event },
         }))
     }
     fn controller(self) -> Expr<PlayerRef> {
         match self {
-            Self::Leave(event) => {
+            Self::Cemetery(event) | Self::Leave(event) => {
                 Expr::Frozen(Box::new(PlayerFrozen::LeaveFieldController { event }))
+            }
+            Self::Entry(event) => {
+                Expr::Frozen(Box::new(PlayerFrozen::EnterFieldController { event }))
+            }
+            Self::Destroy(event) => {
+                Expr::Frozen(Box::new(PlayerFrozen::DestroyController { event }))
             }
             Self::Ex(event) => Expr::Frozen(Box::new(PlayerFrozen::EnterExController { event })),
             // Evolution keeps its field generation; the bridge tests this role at commit.
@@ -41,10 +55,20 @@ impl SubjectFields {
     }
     fn kind(self) -> Expr<CardKind> {
         Expr::Frozen(Box::new(match self {
+            Self::Entry(event) => KindFrozen::Characters {
+                characters: Expr::Frozen(Box::new(CharacteristicsFields::EnterFieldCharacters {
+                    event,
+                })),
+            },
+            Self::Destroy(event) => KindFrozen::Characters {
+                characters: Expr::Frozen(Box::new(CharacteristicsFields::DestroyCharacters {
+                    event,
+                })),
+            },
             Self::Evolve(event) => KindFrozen::Characters {
                 characters: Expr::Frozen(Box::new(CharacteristicsFields::EvolveAfter { event })),
             },
-            Self::Leave(event) => KindFrozen::Snapshot {
+            Self::Cemetery(event) | Self::Leave(event) => KindFrozen::Snapshot {
                 object: Expr::Frozen(Box::new(SnapshotFields::LeaveFieldLki { event })),
             },
             Self::Ex(event) => KindFrozen::Characters {
@@ -56,10 +80,20 @@ impl SubjectFields {
     }
     fn traits(self) -> Expr<Vec<TraitId>> {
         Expr::Frozen(Box::new(match self {
+            Self::Entry(event) => TraitsFrozen::Characters {
+                characters: Expr::Frozen(Box::new(CharacteristicsFields::EnterFieldCharacters {
+                    event,
+                })),
+            },
+            Self::Destroy(event) => TraitsFrozen::Characters {
+                characters: Expr::Frozen(Box::new(CharacteristicsFields::DestroyCharacters {
+                    event,
+                })),
+            },
             Self::Evolve(event) => TraitsFrozen::Characters {
                 characters: Expr::Frozen(Box::new(CharacteristicsFields::EvolveAfter { event })),
             },
-            Self::Leave(event) => TraitsFrozen::Snapshot {
+            Self::Cemetery(event) | Self::Leave(event) => TraitsFrozen::Snapshot {
                 object: Expr::Frozen(Box::new(SnapshotFields::LeaveFieldLki { event })),
             },
             Self::Ex(event) => TraitsFrozen::Characters {
@@ -71,10 +105,20 @@ impl SubjectFields {
     }
     fn names(self) -> Expr<Vec<CardName>> {
         Expr::Frozen(Box::new(match self {
+            Self::Entry(event) => NamesFrozen::Characters {
+                characters: Expr::Frozen(Box::new(CharacteristicsFields::EnterFieldCharacters {
+                    event,
+                })),
+            },
+            Self::Destroy(event) => NamesFrozen::Characters {
+                characters: Expr::Frozen(Box::new(CharacteristicsFields::DestroyCharacters {
+                    event,
+                })),
+            },
             Self::Evolve(event) => NamesFrozen::Characters {
                 characters: Expr::Frozen(Box::new(CharacteristicsFields::EvolveAfter { event })),
             },
-            Self::Leave(event) => NamesFrozen::Snapshot {
+            Self::Cemetery(event) | Self::Leave(event) => NamesFrozen::Snapshot {
                 object: Expr::Frozen(Box::new(SnapshotFields::LeaveFieldLki { event })),
             },
             Self::Ex(event) => NamesFrozen::Characters {
@@ -84,21 +128,61 @@ impl SubjectFields {
             },
         }))
     }
-    fn token(self) -> Option<Expr<Bool>> {
-        let Self::Leave(event) = self else {
-            return None;
+    fn class(self) -> Expr<Info<ClassId>> {
+        let field = match self {
+            Self::Cemetery(event) | Self::Leave(event) => ClassFrozen::Snapshot {
+                object: Expr::Frozen(Box::new(SnapshotFields::LeaveFieldLki { event })),
+            },
+            Self::Entry(event) => ClassFrozen::Characters {
+                characters: Expr::Frozen(Box::new(CharacteristicsFields::EnterFieldCharacters {
+                    event,
+                })),
+            },
+            Self::Destroy(event) => ClassFrozen::Characters {
+                characters: Expr::Frozen(Box::new(CharacteristicsFields::DestroyCharacters {
+                    event,
+                })),
+            },
+            Self::Ex(event) => ClassFrozen::Characters {
+                characters: Expr::Frozen(Box::new(CharacteristicsFields::EnterExCharacters {
+                    event,
+                })),
+            },
+            Self::Evolve(event) => ClassFrozen::Characters {
+                characters: Expr::Frozen(Box::new(CharacteristicsFields::EvolveAfter { event })),
+            },
         };
-        Some(Expr::Live(Box::new(BoolRead::State {
-            object: ObjectView::Snapshot {
+        Expr::Frozen(Box::new(field))
+    }
+    fn token(self) -> Option<Expr<Bool>> {
+        let object = match self {
+            Self::Cemetery(event) | Self::Leave(event) => ObjectView::Snapshot {
                 value: Box::new(Expr::Frozen(Box::new(SnapshotFields::LeaveFieldLki {
                     event,
                 }))),
             },
+            Self::Entry(_) => ObjectView::Current {
+                object: Box::new(ObjectOperand::FromExpression {
+                    value: Box::new(self.object()),
+                }),
+            },
+            Self::Destroy(_) | Self::Evolve(_) | Self::Ex(_) => return None,
+        };
+        Some(Expr::Live(Box::new(BoolRead::State {
+            object,
             property: BooleanState::TokenStatus,
         })))
     }
+    pub(crate) const fn view(self) -> EventSnapshotPolicy {
+        match self {
+            Self::Cemetery(_) | Self::Leave(_) | Self::Destroy(_) => {
+                EventSnapshotPolicy::BeforeExit
+            }
+            Self::Entry(_) | Self::Evolve(_) | Self::Ex(_) => EventSnapshotPolicy::AfterEntry,
+        }
+    }
     fn destination(self) -> Option<Expr<Bool>> {
-        let Self::Leave(event) = self else {
+        let Self::Cemetery(event) = self else {
             return None;
         };
         Some(Expr::Compute(Box::new(Predicate::ZoneEquals {
@@ -127,6 +211,7 @@ pub(crate) struct SubjectFilter {
     pub(crate) kind: Option<CardKind>,
     pub(crate) trait_id: Option<TraitId>,
     pub(crate) name: Option<CardName>,
+    pub(crate) class: Option<ClassId>,
     pub(crate) own_turn: bool,
     pub(crate) token: Option<bool>,
 }
@@ -173,6 +258,12 @@ impl SubjectFilter {
                 right: Expr::Literal(vec![name.clone()]),
             })));
         }
+        if let Some(class) = &self.class {
+            predicates.push(Expr::Compute(Box::new(Predicate::ClassEquals {
+                left: fields.class(),
+                right: Expr::Literal(Info::Present(class.clone())),
+            })));
+        }
         if let (Some(positive), Some(predicate)) = (self.token, fields.token()) {
             predicates.push(if positive {
                 predicate
@@ -190,6 +281,16 @@ impl SubjectFilter {
     }
 
     pub(crate) fn parse(fields: SubjectFields, expression: &Expr<Bool>) -> Option<Self> {
+        let itself = Expr::Compute(Box::new(Predicate::ObjectEquals {
+            left: fields.object(),
+            right: Expr::Frozen(Box::new(ObjectFrozen::SourceHolder {})),
+        }));
+        if matches!(fields, SubjectFields::Entry(_)) && *expression == itself {
+            return Some(Self {
+                itself: Some(true),
+                ..Self::default()
+            });
+        }
         let Expr::Compute(root) = expression else {
             return None;
         };
@@ -197,10 +298,6 @@ impl SubjectFilter {
             return None;
         };
         let mut plan = Self::default();
-        let itself = Expr::Compute(Box::new(Predicate::ObjectEquals {
-            left: fields.object(),
-            right: Expr::Frozen(Box::new(ObjectFrozen::SourceHolder {})),
-        }));
         for part in predicates {
             if fields.destination().as_ref() == Some(part) {
                 continue;
@@ -246,6 +343,15 @@ impl SubjectFilter {
                     return None;
                 }
                 plan.trait_id = Some(trait_id.clone());
+            } else if let Predicate::ClassEquals {
+                left,
+                right: Expr::Literal(Info::Present(class)),
+            } = predicate.as_ref()
+            {
+                if *left != fields.class() {
+                    return None;
+                }
+                plan.class = Some(class.clone());
             } else if let Predicate::NamesIntersect {
                 left,
                 right: Expr::Literal(names),
@@ -285,6 +391,10 @@ impl SubjectFilter {
                 .name
                 .as_ref()
                 .is_none_or(|name| characters.names.contains(name))
+            && self
+                .class
+                .as_ref()
+                .is_none_or(|class| characters.class.as_ref() == Some(class))
             && (!self.own_turn || active == observer_controller)
     }
 }

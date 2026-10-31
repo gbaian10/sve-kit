@@ -6,7 +6,7 @@ use super::{
     TriggerCondition, ZoneKind, invalid, optional_payment, player_id, unsupported,
 };
 use crate::ir::events::subject::{SubjectFields, SubjectFilter};
-use crate::ir::{EnterExEvent, EntryOrigin, PlayerId};
+use crate::ir::{DestroyEvent, EnterExEvent, EntryOrigin, PlayerId};
 use alloc::collections::BTreeMap;
 
 fn filter(ability: &Ability) -> Option<SubjectFilter> {
@@ -18,7 +18,11 @@ fn filter(ability: &Ability) -> Option<SubjectFilter> {
     };
     match pattern {
         EventPattern::LeaveField { binding, predicate } => {
-            SubjectFilter::parse(SubjectFields::Leave(*binding), predicate)
+            SubjectFilter::parse(SubjectFields::Cemetery(*binding), predicate)
+                .or_else(|| SubjectFilter::parse(SubjectFields::Leave(*binding), predicate))
+        }
+        EventPattern::Destroy { binding, predicate } => {
+            SubjectFilter::parse(SubjectFields::Destroy(*binding), predicate)
         }
         EventPattern::EnterEx { binding, predicate } => {
             SubjectFilter::parse(SubjectFields::Ex(*binding), predicate)
@@ -42,7 +46,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
             != if matches!(
                 trigger.on,
                 TriggerCondition::Event {
-                    pattern: EventPattern::LeaveField { .. }
+                    pattern: EventPattern::LeaveField { .. } | EventPattern::Destroy { .. }
                 }
             ) {
                 EventSnapshotPolicy::BeforeExit
@@ -59,11 +63,11 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
     Ok(true)
 }
 
-fn matches_kind(ability: &Ability, exit: bool) -> bool {
+pub(super) fn matches_kind(ability: &Ability, exit: bool) -> bool {
     matches!(
         ability.trigger.as_ref().map(|trigger| &trigger.on),
         Some(TriggerCondition::Event {
-            pattern: EventPattern::LeaveField { .. }
+            pattern: EventPattern::LeaveField { .. } | EventPattern::Destroy { .. }
         })
     ) == exit
         && filter(ability).is_some()
@@ -144,16 +148,43 @@ impl Game {
             .collect()
     }
 
+    fn departure_destination(
+        &self,
+        previous: &Object,
+        destination: &str,
+        side: Option<&str>,
+        frame: &Frame,
+    ) -> Result<RuntimeZoneRef> {
+        let kind = match destination {
+            "cemetery" => ZoneKind::Cemetery,
+            "hand" => ZoneKind::Hand,
+            "deck" => ZoneKind::Deck,
+            "banish" => ZoneKind::Banish,
+            "ex" => ZoneKind::Ex,
+            "evolve_deck" => ZoneKind::Evolve,
+            _ => return Err(unsupported("departure destination")),
+        };
+        let to_player =
+            player_id(&self.placement_controller(previous, destination, side, frame)?)?;
+        Ok(RuntimeZoneRef {
+            player: to_player,
+            kind,
+        })
+    }
+
     pub(super) fn movement_departures(
         &mut self,
         id: &str,
         destinations: &BTreeMap<String, String>,
         before: SnapshotId,
+        side: Option<&str>,
         frame: &Frame,
     ) -> Result<Vec<PendingOccurrence>> {
         let previous = self.object(id)?.clone();
-        if previous.zone != "field" || destinations.get(id).map(String::as_str) != Some("cemetery")
-        {
+        let Some(destination) = destinations.get(id).map(String::as_str) else {
+            return Ok(Vec::new());
+        };
+        if previous.zone != "field" || destination == "field" {
             return Ok(Vec::new());
         }
         let observers = self.movement_observers(true)?;
@@ -171,6 +202,34 @@ impl Game {
         for (holder, abilities) in observers {
             let actor = player_id(&self.object(&holder)?.controller)?;
             for ability in abilities {
+                let on = &ability
+                    .node
+                    .trigger
+                    .as_ref()
+                    .ok_or_else(|| invalid("missing departure trigger"))?
+                    .on;
+                let destroyed = matches!(
+                    on,
+                    TriggerCondition::Event {
+                        pattern: EventPattern::Destroy { .. }
+                    }
+                );
+                let marked_destroyed = frame
+                    .values
+                    .get("destroyed_subjects")
+                    .and_then(serde_json::Value::as_array)
+                    .is_some_and(|ids| ids.iter().any(|value| value.as_str() == Some(id)));
+                if destroyed && (destination != "cemetery" || !marked_destroyed) {
+                    continue;
+                }
+                if let TriggerCondition::Event {
+                    pattern: EventPattern::LeaveField { binding, predicate },
+                } = on
+                    && SubjectFilter::parse(SubjectFields::Cemetery(*binding), predicate).is_some()
+                    && destination != "cemetery"
+                {
+                    continue;
+                }
                 let plan =
                     filter(&ability.node).ok_or_else(|| invalid("missing movement filter"))?;
                 if !plan.matches(&characters, holder == id, actor, controller, active, token) {
@@ -195,19 +254,26 @@ impl Game {
                     object_before: object,
                     controller,
                     lki,
-                    to: RuntimeZoneRef {
-                        player: player_id(&previous.owner)?,
-                        kind: ZoneKind::Cemetery,
-                    },
+                    to: self.departure_destination(&previous, destination, side, frame)?,
                 };
-                candidates.push(self.new_pending(
+                let mut pending = self.new_pending(
                     &holder,
                     source,
                     ability,
                     information,
                     header,
-                    Some(leave),
-                )?);
+                    if destroyed { None } else { Some(leave) },
+                )?;
+                if destroyed {
+                    pending.timing = Some(EventPayload::Destroy {
+                        event: DestroyEvent {
+                            object_before: object,
+                            characters: characters.clone(),
+                            controller,
+                        },
+                    });
+                }
+                candidates.push(pending);
             }
         }
         Ok(candidates)

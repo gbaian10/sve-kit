@@ -5,9 +5,9 @@ use super::{
     ZoneKind, invalid, player_id, unsupported,
 };
 use crate::game::{Frame, Object};
-use crate::ir::events::entry::EntryFilter;
+use crate::ir::LimitSpec;
+use crate::ir::events::subject::{SubjectFields, SubjectFilter};
 use crate::ir::optional_payment;
-use crate::ir::{CardKind, Characteristics, LimitSpec};
 use crate::ir::{EnterFieldEvent, EntryMethod, EntryOrigin, ExecutionId};
 
 pub(super) fn check_header(ability: &Ability) -> Result<bool> {
@@ -31,21 +31,21 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
         || trigger
             .limit
             .is_some_and(|limit| limit != LimitSpec::once_per_turn())
-        || EntryFilter::parse(*binding, predicate).is_none()
+        || SubjectFilter::parse(SubjectFields::Entry(*binding), predicate).is_none()
     {
         return Err(unsupported("printed per-fact entry header"));
     }
     Ok(true)
 }
 
-fn filter(ability: &Ability) -> Option<EntryFilter> {
+fn filter(ability: &Ability) -> Option<SubjectFilter> {
     let TriggerCondition::Event {
         pattern: EventPattern::EnterField { binding, predicate },
     } = &ability.trigger.as_ref()?.on
     else {
         return None;
     };
-    EntryFilter::parse(*binding, predicate)
+    SubjectFilter::parse(SubjectFields::Entry(*binding), predicate)
 }
 
 fn entry_origin(game: &Game, previous: &Object) -> Result<EntryOrigin> {
@@ -74,26 +74,6 @@ fn entry_origin(game: &Game, previous: &Object) -> Result<EntryOrigin> {
         _ => Err(unsupported("unadmitted entry origin")),
     }?;
     Ok(EntryOrigin::Zone { zone })
-}
-
-fn matches(
-    plan: &EntryFilter,
-    entered: (PlayerId, &Characteristics),
-    same: bool,
-    controller: PlayerId,
-    active: PlayerId,
-) -> bool {
-    let (entry_controller, characters) = entered;
-    plan.itself.is_none_or(|itself| itself == same)
-        && plan
-            .own
-            .is_none_or(|own| own == (entry_controller == controller))
-        && (!plan.follower || characters.kind == CardKind::Follower)
-        && plan
-            .trait_id
-            .as_ref()
-            .is_none_or(|trait_id| characters.traits.contains(trait_id))
-        && (!plan.own_turn || active == controller)
 }
 
 fn entry_cause(frame: &Frame) -> Result<(Cause, PlayerId, EntryMethod)> {
@@ -177,12 +157,13 @@ impl Game {
                 for ability in abilities {
                     let plan =
                         filter(&ability.node).ok_or_else(|| invalid("missing entry filter"))?;
-                    if matches(
-                        &plan,
-                        (entry_controller, &characters),
+                    if plan.matches(
+                        &characters,
                         *holder == old.id,
                         controller,
+                        entry_controller,
                         active,
+                        self.object_type(&old.id)?.contains("トークン"),
                     ) {
                         matched.push((holder, ability, controller));
                     }
