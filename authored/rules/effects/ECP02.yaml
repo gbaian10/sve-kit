@@ -139,37 +139,6 @@ cards:
                     to: cemetery
         event: evolve
         subject: self
-  ECP02-SL28:
-    status: complete
-    abilities:
-      - line: 1
-        kind: evolve
-        body:
-          op: evolve
-          subjects: self
-        costs:
-          - op: pp
-            amount: 1
-      - line: 2
-        kind: trigger
-        body:
-          op: modify
-          subjects: target.1
-          power: -1
-          hp: -1
-        event: enter
-        subject: self
-        targets:
-          - key: "1"
-            select:
-              side: opponent
-              zone: field
-              type: follower
-            min: 1
-            max: 1
-        costs:
-          - op: lesson
-            count: 1
   ECP02-SL29:
     status: complete
     abilities:

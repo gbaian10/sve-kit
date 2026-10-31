@@ -1,0 +1,49 @@
+cards:
+  ECP02-SP09:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - fanfare:
+          do:
+            - destroy: victim
+            - if:
+                cond:
+                  necro: 5
+                then:
+                  - life:
+                      delta: 3
+                      who: self
+            - if:
+                cond:
+                  necro: 10
+                then:
+                  - damage:
+                      n: 3
+                      to:
+                        leaders: opponents
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+      - activate:
+          cost:
+            lesson: 1
+          do:
+            - draw:
+                n: 1
+          per_turn: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-sol
+            who: Codex
+          date: "2026-10-31"
+format: 2
+kind: author_effect_set
