@@ -342,7 +342,10 @@ impl Game {
         if ((card_type.contains("トークン") || card_type.contains("アドバンス"))
             && !matches!(
                 card_type,
-                "フォロワー・アドバンス" | "フォロワー・トークン" | "アミュレット・トークン"
+                "フォロワー・アドバンス"
+                    | "フォロワー・トークン"
+                    | "アミュレット・トークン"
+                    | "スペル・トークン"
             ))
             || previous
                 .state
@@ -362,8 +365,10 @@ impl Game {
             && !matches!(zone, "field" | "ex" | "resolution" | "evolve_deck")
         {
             Some("evolve_deck")
-        } else if matches!(card_type, "フォロワー・トークン" | "アミュレット・トークン")
-            && !matches!(zone, "field" | "ex" | "resolution")
+        } else if matches!(
+            card_type,
+            "フォロワー・トークン" | "アミュレット・トークン" | "スペル・トークン"
+        ) && !matches!(zone, "field" | "ex" | "resolution")
         {
             Some("void")
         } else {

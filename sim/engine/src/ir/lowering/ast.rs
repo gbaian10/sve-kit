@@ -176,6 +176,7 @@ pub(super) enum Cost {
 #[serde(rename_all = "snake_case")]
 pub(super) enum CostOperation {
     Pp(u64),
+    Lesson(u64),
     LeaderLife(u64),
     ToCemetery(Material),
     ReturnToHand(Material),

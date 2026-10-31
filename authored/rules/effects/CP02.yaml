@@ -60,37 +60,6 @@ cards:
               position: bottom
         event: enter
         subject: self
-  CP02-003:
-    status: complete
-    abilities:
-      - line: 1
-        kind: trigger
-        body:
-          op: damage
-          subjects: target.1
-          amount: 2
-        event: attack
-        subject: self
-        targets:
-          - key: "1"
-            select:
-              zone: field
-              side: opponent
-              type: follower
-            min: 1
-            max: 1
-      - line: 2
-        kind: activated
-        body:
-          op: modify
-          subjects: self
-          keywords:
-            - storm
-        costs:
-          - op: pp
-            amount: 1
-          - op: lesson
-            count: 1
   CP02-007:
     status: complete
     abilities:
