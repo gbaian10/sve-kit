@@ -1,0 +1,55 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP20-060:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-31"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        fanfare:
+          cost:
+            discard:
+              sel:
+                who: self
+                zone: hand
+                trait: 海洋
+              n: 1
+          do:
+            - look:
+                top:
+                  who: self
+                  n: 2
+                bind: seen
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  trait: 海洋
+                n: 1
+                may: true
+            - move:
+                ref: picked
+                to: ex
+                result: picked_move
+            - move:
+                ref:
+                  in: seen
+                  except:
+                    in:
+                      objects_of: picked_move
+                      view: before
+                to: deck
+                position: bottom
+                order: chooser
+            - life:
+                who: self
+                delta: 1
