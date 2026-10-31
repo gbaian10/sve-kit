@@ -1,0 +1,29 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP07-080:
+    abilities:
+      - line: 1
+        keywords:
+          - assail
+          - bane
+      - line: 2
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - rush
+          while:
+            exists:
+              who: self
+              zone: field
+              other: true
+              kind: follower
+              trait: 機械
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-10-31"
