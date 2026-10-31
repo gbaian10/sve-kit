@@ -1,0 +1,25 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP04-115:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-31"
+    abilities:
+      - line: 1
+        auto:
+          on:
+            enter_field:
+              who: self
+              sel:
+                kind: amulet
+                other: true
+          per_turn: 1
+          do:
+            - life:
+                who: self
+                delta: 1
