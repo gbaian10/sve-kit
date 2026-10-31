@@ -1,0 +1,40 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP04-020:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-31"
+    abilities:
+      - line: 1
+        evolve_time:
+          do:
+            - damage:
+                to: enemy
+                n: 4
+          ub: true
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+      - line: 1
+        section: 1
+        keywords:
+          - ward
+      - line: 2
+        super_evolve_time:
+          do:
+            - damage:
+                to:
+                  leaders: opponents
+                n: 4
+        section: 1
+    rule_sections:
+      - section: 1

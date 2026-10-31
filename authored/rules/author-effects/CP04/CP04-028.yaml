@@ -1,0 +1,32 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP04-028:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-31"
+    abilities:
+      - line: 1
+        attack_time:
+          do:
+            - damage:
+                to: enemy
+                n: 2
+          ub: true
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+      - line: 1
+        section: 1
+        keywords:
+          - storm
+    rule_sections:
+      - section: 1
