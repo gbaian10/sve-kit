@@ -1,0 +1,64 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP04-074:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-31"
+    abilities:
+      - line: 1
+        activate:
+          do:
+            - damage:
+                to: enemy
+                n: 3
+            - life:
+                who: self
+                delta: 3
+          ub: true
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          cost:
+            steps:
+              - act_self: true
+              - banish:
+                  sel:
+                    who: self
+                    zone: cemetery
+                  n: 5
+      - line: 1
+        evolve_time:
+          do:
+            - search:
+                sel:
+                  who: self
+                  zone: deck
+                  trait: プリコネ
+                n: 1
+                to: cemetery
+        section: 1
+      - line: 2
+        super_evolve_time:
+          do:
+            - damage:
+                to: enemy
+                n: 5
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+        section: 1
+    rule_sections:
+      - section: 1
