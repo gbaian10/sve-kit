@@ -1,0 +1,59 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "activated",
+      "body": {
+        "op": "damage",
+        "subjects": "target.1",
+        "amount": 3
+      },
+      "ub": true,
+      "costs": [
+        {
+          "op": "act",
+          "subjects": "self"
+        }
+      ],
+      "targets": [
+        {
+          "key": "1",
+          "select": {
+            "zone": "field",
+            "side": "opponent",
+            "type": "follower"
+          },
+          "min": 1,
+          "max": 1
+        }
+      ]
+    },
+    {
+      "line": 1,
+      "kind": "trigger",
+      "body": {
+        "op": "seq",
+        "steps": [
+          {
+            "op": "select",
+            "select": {
+              "zone": "hand",
+              "side": "self"
+            },
+            "min": 1,
+            "max": 1,
+            "bind": "discarded"
+          },
+          {
+            "op": "discard",
+            "subjects": "discarded"
+          }
+        ]
+      },
+      "event": "enter",
+      "subject": "self",
+      "section": 0
+    }
+  ]
+}
