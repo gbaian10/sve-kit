@@ -40,6 +40,7 @@ mod play_restrictions;
 mod printed;
 pub(super) mod quick;
 mod resources;
+mod static_keywords;
 pub(in crate::game::internal) mod triggers;
 pub use triggers::{PendingOption, QuotaDomain, QuotaSelection};
 pub(super) mod play;
@@ -352,6 +353,10 @@ impl Game {
                 if ordinal != 0 {
                     return Err(unsupported("play restriction requires base face"));
                 }
+                continue;
+            }
+            if static_keywords::is_static(ability) {
+                static_keywords::check(located)?;
                 continue;
             }
             if is_printed_quick(ability) && ordinal != 0 {
@@ -693,7 +698,8 @@ fn activation_type(kind: &str, zones: &[ZoneKind]) -> bool {
 }
 
 fn check_header(ability: &Ability) -> Result<()> {
-    if card_permission(ability)
+    if static_keywords::is_static(ability)
+        || card_permission(ability)
         || printed_keywords::card_declaration(ability).is_some()
         || card_restriction(ability).is_some()
     {

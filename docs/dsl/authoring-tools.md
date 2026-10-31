@@ -61,6 +61,8 @@ records:
 
 `admission` 可放卡、本體或用途，值為 `light | shared`；用途優先於本體，本體優先於卡。只要任一層明示 admission，該卡走直接作者入口，其餘未標用途保留為共用語義責任。未標 admission 的既有卡維持來源重建路徑，亦不需要錨點。共用整理與審查見[常見效果作者流程](common-family-authoring.md)。
 
+基本關鍵字的持續授予使用 `static: {while: {awakened: true}, effects: [{grant: {keywords: [storm]}}]}`；省略 `on` 表示自身，省略 `while` 表示無額外條件。`grant.on` 可用目前場上的公開篩選，例如 `{who: self, zone: field, name: オルカ, token: true}`。沿用七種基本關鍵字，場上來源失去能力或離場時不再授予；條件與受影響對象每次查詢都依目前狀態重算，包含稍後入場的對象，不會改寫印刷關鍵字或既有授予效果。此入口只接受場上持續能力；一般能力定義授予與其他持續修正仍依各自的 runtime 准入範圍。
+
 整卡 DSL 在索引中以永久 CardId 登錄一個代表卡號。current 選用依身分登錄展開同 CardId 的所有官方 JP 印刷卡號，共用代表卡的程式及來源定位；卡面仍讀各印刷的快照資料。不從卡號字串推測別名，也不為別名另登索引或保留原型程式。未解決的裁定同時阻擋這些別名。
 
 實體 token 使用同一主檔、具名本體及行覆蓋入口。卡片層的 `token: {name: 操り人形, template: true}` 指定規則名稱與同名 token 的代表印刷；`template` 預設為 false，省略整個 `token` 時使用快照卡名。同名 token 有多個已選用程式時須恰有一個代表。卡面、數值與型別仍來自快照，`token` 只能標在單面的 token 卡上；印刷的突進、守護等以 `keywords` 宣告，與一般從者共用 lowering 與執行規則。

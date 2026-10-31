@@ -1,6 +1,9 @@
 use super::*;
 use second::lowerer;
 
+#[path = "card/static_keywords.rs"]
+mod static_keywords;
+
 #[path = "card/event_evolved.rs"]
 mod event_evolved;
 

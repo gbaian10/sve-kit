@@ -19,6 +19,7 @@ mod ordering;
 mod payment;
 mod play;
 mod play_restrictions;
+mod static_keywords;
 
 mod posture;
 mod quick;
@@ -375,6 +376,16 @@ impl Allocator {
         index: usize,
         abilities: &mut Vec<Located<Ability>>,
     ) -> Result<bool, LoweringError> {
+        if entry.r#static.is_some() {
+            abilities.push(static_keywords::lower(
+                self,
+                key,
+                path,
+                entry,
+                entry_scope(index, path)?,
+            )?);
+            return Ok(true);
+        }
         if let Some(play) = &entry.play {
             if let Some(condition) = &play.cannot_if {
                 abilities.push(play_restrictions::lower(

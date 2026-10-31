@@ -640,6 +640,16 @@ impl Checker {
                 for (index, granted) in abilities.iter().enumerate() {
                     self.at(&format!("abilities/{index}"), |checker| match granted {
                         GrantedAbility::Definition { ability } => checker.ability(ability),
+                        GrantedAbility::Keyword {
+                            keyword:
+                                KeywordId::Ward
+                                | KeywordId::Aura
+                                | KeywordId::Storm
+                                | KeywordId::Rush
+                                | KeywordId::Bane
+                                | KeywordId::Intimidate
+                                | KeywordId::Assail,
+                        } => Ok(()),
                         GrantedAbility::Keyword { .. } => checker.reject(),
                     })?;
                 }

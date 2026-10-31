@@ -8,8 +8,8 @@ use crate::game::legal::subsets;
 use crate::ir::optional_payment;
 use crate::ir::quick::is_printed_quick;
 use crate::ir::{
-    AbilityQualification, Action, Bool, Cardinality, LimitSpec, ModeUse, ObjectRef, PlaySpec,
-    PlayerRef, RecipientSet, SelectionSnapshot, Selector, TurnId,
+    AbilityQualification, Action, Bool, Cardinality, LimitSpec, ModeUse, ObjectId, ObjectRef,
+    PlaySpec, PlayerRef, RecipientSet, SelectionSnapshot, Selector, TurnId,
 };
 use crate::ir::{
     ChoiceDomain, Control, CostSpec, Decision, DecisionId, DecisionKind, ExecutionRef, InputMode,
@@ -691,11 +691,20 @@ impl Game {
             .ir_play_clock
             .checked_add(1)
             .ok_or_else(|| invalid("proper play time exhausted"))?;
+        let ids = self.internal_identities()?;
+        self.card_execution(context, ids)
+    }
+
+    pub(in crate::game::internal) fn card_execution(
+        &self,
+        context: Context,
+        ids: BTreeMap<ObjectId, String>,
+    ) -> Result<Execution> {
         Ok(Execution {
             context,
             id: ExecutionId(self.state.ir_epoch),
             timestamp: self.state.ir_play_clock,
-            ids: self.internal_identities()?,
+            ids,
             todo: VecDeque::new(),
             slots: BTreeMap::new(),
             receipts: BTreeMap::new(),
