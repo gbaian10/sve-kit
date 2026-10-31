@@ -74,7 +74,7 @@ pub(super) fn check_entry(
     exchange: bool,
     path: &str,
 ) -> Result<(), LoweringError> {
-    if entry.evolve.is_some() || entry.keywords.is_some() {
+    if entry.evolve.is_some() || entry.feed.is_some() || entry.keywords.is_some() {
         return Ok(());
     }
     let (body, _, _) = super::ability_body(entry, path)?;

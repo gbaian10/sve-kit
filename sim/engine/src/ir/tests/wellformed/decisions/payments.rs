@@ -23,6 +23,25 @@ fn resource(id: u64, amount: i64) -> CostStep {
 }
 
 #[test]
+fn meal_resources_can_be_paid_but_race_events_cannot_be_costs() {
+    let mut meal = resource(1, 0);
+    meal.instruction.action = Action::MealRace {
+        subject: ObjectOperand::SourceHolder {},
+        operation: MealRaceOperation::Meal,
+        amount: Expr::Literal(Nat(1)),
+        resource_links: vec![],
+    };
+    accept(body(1, vec![pay(vec![meal.clone()], body(2, vec![]))]));
+    if let Action::MealRace { operation, .. } = &mut meal.instruction.action {
+        *operation = MealRaceOperation::Race;
+    }
+    reject(
+        body(1, vec![pay(vec![meal], body(2, vec![]))]),
+        WellFormedReason::UnsupportedShape,
+    );
+}
+
+#[test]
 fn zero_payment_and_every_alternative_are_checked() {
     accept(body(1, vec![pay(vec![], body(2, vec![]))]));
     accept(body(1, vec![pay(vec![resource(1, 0)], body(2, vec![]))]));

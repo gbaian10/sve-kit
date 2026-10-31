@@ -22,7 +22,7 @@ use crate::ir::{
 };
 use crate::ir::{
     AssociationId, BanishOutcome, DiscardEvent, DiscardOutcome, EvolveEvent, FaceId, PaymentResult,
-    QuickWindow,
+    QuickWindow, RaceEvent,
 };
 use crate::{EngineFailure, Result, invalid};
 use alloc::collections::{BTreeMap, VecDeque};
@@ -124,6 +124,13 @@ pub struct DecisionView {
 /// First-slice input shapes.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum InputDomain {
+    /// Select meal resources and optionally substitute one EP for one PP.
+    MealPayment {
+        /// Private, question-scoped resource choices.
+        materials: TargetDomain,
+        /// Whether one EP may replace one PP in this payment.
+        ep_allowed: bool,
+    },
     /// CR 12.8.2: enter standing, then optionally act before continuing the rule procedure.
     WardEntry {
         /// Printed identity known to the entering controller, without a hidden object ID.
@@ -185,6 +192,13 @@ pub enum InputDomain {
 /// Internal answer, checked against actor and the entire decision token.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Answer {
+    /// Answer the current meal payment without exposing physical resource identities.
+    MealPayment {
+        /// Resource handles valid only for the current question.
+        materials: Vec<u64>,
+        /// Replace exactly one PP with one EP.
+        use_ep: bool,
+    },
     /// Accept or decline only the current Ward entry posture choice.
     WardEntry(bool),
     /// One Quick action handle, or an explicit Pass (`None`).
@@ -293,6 +307,8 @@ pub struct Progress {
 /// First-slice physical facts, sharing the prototype mutation and causal pipeline.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Fact {
+    /// One race fact, independent of the number of meal resources paid.
+    Raced(RaceEvent),
     /// Effect-driven evolution; it does not count as playing an evolution ability.
     Evolved(Box<EvolveEvent>),
     /// A card actually discarded from the actor's hand.
@@ -369,6 +385,7 @@ enum Slot {
 
 #[derive(Clone, Debug)]
 enum Wait {
+    MealPayment(card::meal::MealWait),
     Discard(discard::HandWait),
     CostDiscard(discard::HandWait),
     WardEntry(ObjectRef),
@@ -668,6 +685,16 @@ impl Game {
                 return Err(invalid("wrong actor or stale internal answer"));
             }
             match (wait, answer) {
+                (Wait::MealPayment(wait), Answer::MealPayment { materials, use_ep }) => {
+                    let payment = wait.validate(&materials, use_ep)?;
+                    rollback = execution.origin.take();
+                    execution
+                        .play
+                        .as_mut()
+                        .and_then(|play| play.meal.as_mut())
+                        .ok_or_else(|| invalid("missing meal payment"))?
+                        .selected = Some(payment);
+                }
                 (Wait::CostDiscard(wait), Answer::CostMaterials(handles)) => {
                     let members = wait.validate(self, &execution, &handles)?;
                     rollback = execution.origin.take();
@@ -886,6 +913,7 @@ impl Game {
                 InputDomain::TokenCapacity { choices } => json!({"kind":"token-capacity","choices":choices}),
                 InputDomain::Modes { modes, cardinality, count } => json!({"kind":"modes","modes":modes.iter().map(|id| id.0).collect::<Vec<_>>(),"minimum":cardinality.minimum.0,"maximum":cardinality.maximum.map(|n| n.0),"count":count.0}),
                 InputDomain::Pending(options) => json!({"kind":"pending","options":options.iter().map(|option| json!({"handle":option.handle,"card":option.card,"line":option.line,"event":option.event})).collect::<Vec<_>>()}),
+                InputDomain::MealPayment { materials, ep_allowed } => { let mut packet = card::selection::packet(&materials); packet["kind"] = json!("meal-payment"); packet["ep_allowed"] = json!(ep_allowed); packet },
                 InputDomain::OptionalCost => json!({"kind":"optional-cost","options":["accept","decline"]}),
                 InputDomain::CostMaterials(domain) => { let mut packet = card::selection::packet(&domain); packet["kind"] = json!("cost-materials"); packet },
                 InputDomain::BeforeDraw => json!({"kind":"before-draw"}),
@@ -967,8 +995,12 @@ impl Game {
             }
             for object in self.state.objects.values() {
                 if self.card_runtime.is_loaded(&object.card)
-                    && (!super::list(&object.state["keywords"]).is_empty()
-                        || !super::list(&object.state["links"]["出走"]).is_empty())
+                    && !self.internal_meal_links_valid(&object.id)?
+                {
+                    return Err(unsupported("current holder carries unadmitted meal links"));
+                }
+                if self.card_runtime.is_loaded(&object.card)
+                    && !super::list(&object.state["keywords"]).is_empty()
                 {
                     return Err(unsupported("current holder carries prototype keywords"));
                 }
@@ -1209,6 +1241,7 @@ impl Game {
             .checked_add(1)
             .ok_or_else(|| invalid("IR epoch exhausted"))?;
         match &instruction.action {
+            Action::MealRace { .. } => self.internal_race(execution, &instruction)?,
             Action::Evolve { .. } => self.internal_effect_evolve(execution, &instruction)?,
             Action::Token { .. } => self.internal_tokens(execution, &instruction)?,
             Action::Resource { .. } => self.internal_resource(execution, &instruction)?,

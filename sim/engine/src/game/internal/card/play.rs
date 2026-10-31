@@ -93,6 +93,7 @@ impl PlayMode {
 #[derive(Clone, Debug)]
 pub(in crate::game::internal) struct PlayState {
     qualification: AbilityQualification,
+    pub(in crate::game::internal) meal: Option<super::meal::MealState>,
     snapshot: Option<Box<Game>>,
     pub(in crate::game::internal) snapshot_id: SnapshotId,
     modes: VecDeque<PlayMode>,
@@ -748,6 +749,7 @@ impl Game {
         ability: Ability,
     ) -> Result<CardPlay> {
         let conditional = conditional_play_modes(&ability);
+        let meal = super::meal::payment(&ability)?;
         let mut body = ability.body.ok_or_else(|| invalid("missing body"))?;
         let optional = super::optional::take(&mut body);
         let groups = collect_modes(&body, conditional)?;
@@ -759,6 +761,7 @@ impl Game {
         });
         execution.play = Some(PlayState {
             qualification: ability.qualification,
+            meal,
             snapshot: None,
             snapshot_id: SnapshotId(self.state.ir_epoch),
             modes: groups.clone().into(),
@@ -880,6 +883,7 @@ impl Game {
             return Ok(());
         };
         if self.internal_optional_decision(execution, &play)?
+            || self.internal_meal_question(execution, &play)?
             || self.internal_exchange_decision(execution, &play)?
             || self.internal_play_modes(execution, &mut play)?
         {
@@ -981,7 +985,9 @@ impl Game {
     fn finish_play_payment(&mut self, execution: &mut Execution, play: PlayState) -> Result<()> {
         let previous = self.card_runtime.active_source;
         self.card_runtime.active_source = execution.ability;
-        let payment = if play.exchange.is_some() || execution.field_entry {
+        let payment = if play.meal.is_some() {
+            self.internal_meal_payment(execution, &play)
+        } else if play.exchange.is_some() || execution.field_entry {
             self.internal_exchange_payment(execution, &play)
         } else {
             self.internal_card_payment(execution, &play.costs, execution.spell)
@@ -1344,6 +1350,7 @@ impl Game {
         execution.field_entry = true;
         execution.play = Some(PlayState {
             qualification: AbilityQualification::Ordinary,
+            meal: None,
             snapshot: None,
             snapshot_id: SnapshotId(self.state.ir_epoch),
             modes: VecDeque::new(),

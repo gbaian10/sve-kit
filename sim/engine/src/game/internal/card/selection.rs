@@ -1,5 +1,6 @@
 use super::super::{DecisionToken, DecisionView, InputDomain, Slot, Wait, contains};
 use super::{Execution, Game, Nat, ObjectRef, Result, invalid, player_id, unsupported};
+use crate::game::list;
 use crate::ir::effect_evolution;
 use crate::ir::{
     Binding, BoolRead, BooleanState, CardKind, CardName, Cardinality, CharacteristicView,
@@ -546,7 +547,7 @@ fn check_predicate(
 ) -> Result<()> {
     match value {
         Expr::Literal(Bool(true)) => Ok(()),
-        Expr::Live(read) if matches!(read.as_ref(), BoolRead::State { object, property: BooleanState::TokenStatus | BooleanState::FaceUp } if candidate_view(object, candidate)) => {
+        Expr::Live(read) if matches!(read.as_ref(), BoolRead::State { object, property: BooleanState::TokenStatus | BooleanState::FaceUp | BooleanState::Racing } if candidate_view(object, candidate)) => {
             Ok(())
         }
         Expr::Compute(operation) => match operation.as_ref() {
@@ -616,6 +617,15 @@ fn check_predicate(
 
 fn matches_state(game: &Game, id: &str, read: &BoolRead) -> Result<bool> {
     match read {
+        BoolRead::State {
+            property: BooleanState::Racing,
+            ..
+        } => {
+            let object = game.object(id)?;
+            Ok(object.zone == "field"
+                && object.state["racing"] == true
+                && !list(&object.state["links"]["出走"]).is_empty())
+        }
         BoolRead::State {
             property: BooleanState::FaceUp,
             ..

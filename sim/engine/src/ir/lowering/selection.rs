@@ -218,6 +218,7 @@ impl BodyContext<'_> {
 #[derive(Default)]
 pub(super) struct ObjectFilter<'query> {
     pub face_up: Option<bool>,
+    pub racing: Option<bool>,
     pub kind: Option<&'query ast::SearchKind>,
     pub trait_id: Option<&'query str>,
     pub all_traits: &'query [String],
@@ -257,6 +258,7 @@ impl<'query> From<&'query ast::TargetQuery> for ObjectFilter<'query> {
 impl<'query> From<&'query ast::PublicQuery> for ObjectFilter<'query> {
     fn from(query: &'query ast::PublicQuery) -> Self {
         Self {
+            racing: query.racing,
             kind: query.kind.as_ref(),
             trait_id: query.r#trait.as_deref(),
             name: query.name.as_deref(),
@@ -351,6 +353,7 @@ pub(super) fn field_filter(
     for (expected, property) in [
         (filter.token, super::super::BooleanState::TokenStatus),
         (filter.face_up, super::super::BooleanState::FaceUp),
+        (filter.racing, super::super::BooleanState::Racing),
     ] {
         if let Some(expected) = expected {
             let predicate = super::Expr::Live(Box::new(super::super::BoolRead::State {

@@ -459,6 +459,9 @@ impl Checker {
             EventPattern::Attack { binding, predicate } => {
                 event!(binding, predicate, EventSnapshotPolicy::AfterEntry)
             }
+            EventPattern::Race { binding, predicate } => {
+                event!(binding, predicate, EventSnapshotPolicy::AfterEntry)
+            }
             EventPattern::Phase { binding, predicate } => {
                 event!(binding, predicate, EventSnapshotPolicy::AfterEntry)
             }
@@ -473,7 +476,6 @@ impl Checker {
             | EventPattern::Draw { .. }
             | EventPattern::Banish { .. }
             | EventPattern::Posture { .. }
-            | EventPattern::Race { .. }
             | EventPattern::DriveGained { .. }
             | EventPattern::DriveTrigger { .. }
             | EventPattern::UbActivated { .. }

@@ -24,6 +24,7 @@ mod evolution;
 mod movement;
 mod played;
 mod quota;
+mod race;
 mod timing;
 pub(in crate::game::internal) use quota::Admission;
 pub use quota::{QuotaDomain, QuotaSelection};

@@ -110,6 +110,7 @@ fn source_paths(
                             | KeywordId::OnAttack
                             | KeywordId::OnEvolve
                             | KeywordId::OnSuperEvolve
+                            | KeywordId::OnRace
                             | KeywordId::Quick,
                         ..
                     }
@@ -222,6 +223,7 @@ fn check_requirements(
                             | "internal.KeywordId.OnAttack"
                             | "internal.KeywordId.OnEvolve"
                             | "internal.KeywordId.OnSuperEvolve"
+                            | "internal.KeywordId.OnRace"
                             | "internal.KeywordId.Quick"
                             | "internal.KeywordId.Ward"
                             | "internal.KeywordId.Aura"
@@ -501,6 +503,9 @@ fn supported(code: &str) -> bool {
     matches!(
         code,
         "shape.Control.Pay"
+            | "shape.Action.MealRace"
+            | "action.meal-race"
+            | "internal.MealRaceOperation.Race"
             | "control.pay"
             | "internal.PaymentTime.PlayParameter"
             | "internal.PaymentOptionality.Optional"
@@ -693,6 +698,7 @@ fn supported(code: &str) -> bool {
             | "internal.ZoneKind.Ex"
             | "internal.ZoneKind.Evolve"
             | "internal.BooleanState.FaceUp"
+            | "internal.BooleanState.Racing"
             | "internal.CardKind.EvolveFollower"
             | "shape.BoolRead.State"
             | "read.state"

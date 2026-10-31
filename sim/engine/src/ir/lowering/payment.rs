@@ -66,6 +66,7 @@ fn lower_operations(
                         class: None,
                         not_class: None,
                         token: None,
+                        racing: None,
                     },
                 };
                 let (action, decision) = super::material::lower(

@@ -12,6 +12,7 @@ mod grant;
 mod hand_payment;
 mod keywords;
 mod material;
+mod meal;
 mod movement;
 mod numeric;
 mod optional_payment;
@@ -436,6 +437,9 @@ impl Allocator {
         if entry.evolve.is_some() {
             return evolution::lower(self, key, path, entry, scope);
         }
+        if entry.feed.is_some() {
+            return meal::lower(self, key, path, entry, scope);
+        }
         if let Some(keywords) = &entry.keywords {
             return quick::lower(key, path, entry, scope, keywords);
         }
@@ -468,10 +472,12 @@ impl Allocator {
             program.steps.insert(0, payment.node);
             context.parameters.extend(payment.parameters);
         }
+        if body.per_turn.is_some_and(|maximum| {
+            entry.spell.is_some() || (entry.activate.is_some() && !matches!(maximum, 1 | 2))
+        }) {
+            return Err(unsupported(path));
+        }
         let (kind, mut play, trigger) = if entry.spell.is_some() {
-            if body.per_turn.is_some() {
-                return Err(unsupported(path));
-            }
             let cost = printed_cost.ok_or_else(|| unsupported(path))?;
             (
                 AbilityKind::Spell,
@@ -484,12 +490,6 @@ impl Allocator {
                 None,
             )
         } else if let Some(activated) = &entry.activate {
-            if body
-                .per_turn
-                .is_some_and(|maximum| !matches!(maximum, 1 | 2))
-            {
-                return Err(unsupported(path));
-            }
             (
                 AbilityKind::Activated,
                 Some(payment::lower(
@@ -609,6 +609,9 @@ fn ability_body<'entry>(
     entry: &'entry ast::Ability,
     path: &str,
 ) -> Result<(&'entry ast::Body, &'static str, Option<KeywordId>), LoweringError> {
+    if let Some(body) = &entry.race_time {
+        return Ok((body, "race_time", Some(KeywordId::OnRace)));
+    }
     if let Some(body) = &entry.super_evolve_time {
         return Ok((body, "super_evolve_time", Some(KeywordId::OnSuperEvolve)));
     }
@@ -657,7 +660,16 @@ fn lowered_trigger(
     Ok(if keyword == Some(KeywordId::Lastword) {
         TriggerSpec::lastword(Binding::new(event_id, scope))
     } else {
-        let pattern = if keyword == Some(KeywordId::OnAttack) {
+        let pattern = if keyword == Some(KeywordId::OnRace) {
+            let event = Binding::new(event_id, scope);
+            EventPattern::Race {
+                binding: event,
+                predicate: Expr::Compute(Box::new(Predicate::ObjectEquals {
+                    left: Expr::Frozen(Box::new(ObjectFrozen::RaceSubject { event })),
+                    right: Expr::Frozen(Box::new(ObjectFrozen::SourceHolder {})),
+                })),
+            }
+        } else if keyword == Some(KeywordId::OnAttack) {
             let event = Binding::new(event_id, scope);
             EventPattern::Attack {
                 binding: event,
@@ -1052,6 +1064,10 @@ impl<'definitions> BodyContext<'definitions> {
         span: &SourceSpan,
     ) -> Result<Action, LoweringError> {
         match step {
+            ast::Step::Race(value) => Ok(meal::action(
+                value.n.unwrap_or(1),
+                super::MealRaceOperation::Race,
+            )),
             ast::Step::Choice(_)
             | ast::Step::Either(_)
             | ast::Step::Choose(_)

@@ -11,10 +11,10 @@ use crate::ir::quick::{card_permission, is_printed_quick};
 use crate::ir::{
     Ability, AbilityId, AbilityInstanceId, AbilityKind, AbilityOrigin, AbilitySource, Action,
     AssociationId, Control, CostSpec, DamageAmount, ExecutionId, Expr, FaceId, Generation,
-    InstructionContext, Int, KeywordId, Located, MoveDestination, MoveReason, Nat, Node,
-    NumericChange, ObjectOperand, ObjectRef, OwnerZone, PlayerId, PlayerRef, Posture, Quantity,
-    QuantityUnit, Resource, ResourceOperation, RuleId, RuntimeAbilitySource, Selector, SourceSpan,
-    StepwiseMode, WellFormedCardProgram, ZoneKind,
+    InstructionContext, Int, KeywordId, Located, MealRaceOperation, MoveDestination, MoveReason,
+    Nat, Node, NumericChange, ObjectOperand, ObjectRef, OwnerZone, PlayerId, PlayerRef, Posture,
+    Quantity, QuantityUnit, Resource, ResourceOperation, RuleId, RuntimeAbilitySource, Selector,
+    SourceSpan, StepwiseMode, WellFormedCardProgram, ZoneKind,
 };
 use crate::ir::{Bool, ChoiceDomain, PreconditionKind, PreconditionReason};
 use crate::ir::{ConsumptionPoint, LimitSpec, ModeUse};
@@ -35,6 +35,7 @@ mod fanfare;
 pub(super) mod hand_payment;
 mod keywords;
 pub(super) mod material;
+pub(in crate::game::internal) mod meal;
 pub(super) mod optional;
 mod play_restrictions;
 mod printed;
@@ -152,6 +153,7 @@ impl CardRuntime {
                     .any(|a| is_printed_quick(&a.node) || card_restriction(&a.node).is_some())
                 || card.card().abilities.iter().any(|ability| {
                     evolution::intrinsic(&ability.node)
+                        || meal::intrinsic(&ability.node)
                         || matches!(
                             ability.node.kind,
                             AbilityKind::Spell | AbilityKind::Triggered
@@ -366,6 +368,10 @@ impl Game {
                 evolution::check(self, located)?;
                 continue;
             }
+            if meal::intrinsic(ability) {
+                meal::check(located)?;
+                continue;
+            }
             if matches!(ability.kind, AbilityKind::Activated | AbilityKind::Spell) {
                 check_costs(ability, &located.source)?;
             }
@@ -487,6 +493,9 @@ impl Game {
         self.internal_context(&context)?;
         self.check_internal_resources()?;
         let source = self.internal_card_source(holder, definition, actor)?;
+        if meal::intrinsic(&ability.node) {
+            self.check_meal_available(holder)?;
+        }
         if let Some(limit) = ability.node.play.as_ref().and_then(|play| play.limit)
             && !self.card_runtime.quota_available(
                 source.instance,
@@ -723,7 +732,7 @@ fn check_header(ability: &Ability) -> Result<()> {
     {
         return Err(unsupported("whole-card ability header"));
     }
-    if evolution::intrinsic(ability) {
+    if evolution::intrinsic(ability) || meal::intrinsic(ability) {
         return Ok(());
     }
     if ability.kind == AbilityKind::Triggered {
@@ -870,6 +879,8 @@ fn printed_origin(origin: &AbilityOrigin) -> Result<(&FaceId, &Nat)> {
                 | KeywordId::OnEvolve
                 | KeywordId::OnSuperEvolve
                 | KeywordId::Evolution
+                | KeywordId::Meal
+                | KeywordId::OnRace
                 | KeywordId::Quick
                 | KeywordId::Ward
                 | KeywordId::Aura
@@ -975,6 +986,10 @@ fn check_nodes(
                         | Action::Search { .. }
                         | Action::Token { .. }
                         | Action::Order { .. }
+                        | Action::MealRace {
+                            operation: MealRaceOperation::Race,
+                            ..
+                        }
                 ) {
                     return Err(unsupported("whole-card synchronous action"));
                 }

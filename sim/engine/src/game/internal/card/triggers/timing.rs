@@ -6,7 +6,6 @@ use super::{
 };
 use crate::game::Frame;
 use crate::game::{Step, int, string};
-use crate::ir::EntryOrigin;
 use crate::ir::ExecutionId;
 use crate::ir::LimitSpec;
 use crate::ir::optional_payment;
@@ -15,6 +14,7 @@ use crate::ir::{
     RuntimeDamageRecipient,
 };
 use crate::ir::{DamageEvent, DamageFlags, PositiveInt, RuntimeObjectView};
+use crate::ir::{EntryOrigin, Expr, ObjectFrozen, Predicate};
 use core::num::NonZeroU64;
 use serde_json::Value;
 
@@ -32,6 +32,24 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
         valid
     } else {
         match (&ability.source.origin, &trigger.on) {
+            (
+                AbilityOrigin::Keyword {
+                    keyword: KeywordId::OnRace,
+                    origin,
+                },
+                TriggerCondition::Event {
+                    pattern: EventPattern::Race { binding, predicate },
+                },
+            ) => {
+                matches!(origin.as_ref(), AbilityOrigin::Printed { .. })
+                    && *predicate
+                        == Expr::Compute(Box::new(Predicate::ObjectEquals {
+                            left: Expr::Frozen(Box::new(ObjectFrozen::RaceSubject {
+                                event: *binding,
+                            })),
+                            right: Expr::Frozen(Box::new(ObjectFrozen::SourceHolder {})),
+                        }))
+            }
             (
                 AbilityOrigin::Keyword {
                     keyword: KeywordId::OnAttack,
@@ -86,6 +104,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
 
 pub(super) fn public_event(event: &Event, position: u64) -> Result<String> {
     match event {
+        Event::Race { event } => Ok(format!("Race {} at field slot {position}", event.ordinal.0)),
         Event::EnterField { event } => {
             let origin = match event.from {
                 EntryOrigin::Zone { zone } => format!("from {zone:?}"),

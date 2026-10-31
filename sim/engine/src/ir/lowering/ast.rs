@@ -65,6 +65,8 @@ pub(super) struct Ability {
     pub evolve_time: Option<Body>,
     pub super_evolve_time: Option<Body>,
     pub evolve: Option<Evolution>,
+    pub feed: Option<Feed>,
+    pub race_time: Option<Body>,
     pub activate: Option<Activate>,
     pub spell: Option<Body>,
     pub play: Option<PlayCosts>,
@@ -217,6 +219,7 @@ pub(super) struct Body {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum Step {
+    Race(Race),
     Evolve(EffectEvolution),
     If(Conditional),
     EachPlayer(EachPlayer),
@@ -244,6 +247,21 @@ pub(super) enum Step {
     Reveal(Reveal),
     Move(Move),
     Create(Create),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Feed {
+    pub times: Option<u64>,
+    pub cost: EvolutionCost,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Race {
+    #[serde(rename = "ref")]
+    pub _reference: This,
+    pub n: Option<u64>,
 }
 
 #[derive(Deserialize)]
@@ -1292,6 +1310,7 @@ pub(super) enum PublicNumber {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct PublicQuery {
+    pub racing: Option<bool>,
     #[serde(default)]
     pub other: bool,
     pub who: Side,
