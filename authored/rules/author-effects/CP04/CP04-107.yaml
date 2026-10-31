@@ -1,0 +1,25 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP04-107:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-31"
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - act:
+                ref: enemy
+          ub: true
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1

@@ -13,3 +13,23 @@ records:
           model: Codex gpt-6.1-sol
           who: Codex
         date: "2026-10-29"
+  - id: ub.evolve-damage-all-opposing-followers
+    admission: shared
+    params:
+      n: Nat
+    written_by:
+      - actor:
+          who: Codex
+          model: gpt-6.1-sol
+        date: "2026-10-31"
+    body:
+      evolve_time:
+        ub: true
+        do:
+          - damage:
+              to:
+                who: opp
+                zone: field
+                kind: follower
+              n:
+                param: n
