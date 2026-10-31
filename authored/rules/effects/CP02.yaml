@@ -139,59 +139,6 @@ cards:
           - op: lesson
             count: 1
         limit: 1
-  CP02-SL16:
-    status: complete
-    abilities:
-      - line: 1
-        kind: static
-        body:
-          op: macro
-          name: guard
-      - line: 2
-        kind: trigger
-        body:
-          op: if
-          condition:
-            fn: le
-            args:
-              - read: self.leader.life
-              - 5
-          then:
-            op: seq
-            steps:
-              - op: modify
-                subjects: self.leader
-                hp: 5
-              - op: draw
-                count: 1
-        event: end
-      - line: 3
-        kind: trigger
-        body:
-          op: banish
-          subjects: target.1
-        event: enter
-        subject: self
-        targets:
-          - key: "1"
-            select:
-              side: opponent
-              zone: field
-              type: follower
-            min: 1
-            max: 1
-      - line: 4
-        kind: activated
-        body:
-          op: modify
-          subjects: self
-          keywords:
-            - aura
-        costs:
-          - op: pp
-            amount: 1
-          - op: lesson
-            count: 1
   CP02-T01:
     token_template: true
     status: complete

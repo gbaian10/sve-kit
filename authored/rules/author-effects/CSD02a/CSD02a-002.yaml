@@ -1,0 +1,55 @@
+cards:
+  CSD02a-002:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - fanfare:
+          define:
+            X:
+              minus:
+                - 0
+                - count:
+                    kind: follower
+                    trait: キュート
+                    who: self
+                    zone: field
+          do:
+            - buff:
+                hp: X
+                on: victim
+                power: X
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+      - activate:
+          cost:
+            lesson: 1
+          do:
+            - buff:
+                hp: -1
+                on: victim
+                power: -1
+          per_turn: 1
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-sol
+            who: Codex
+          date: "2026-10-31"
+format: 2
+kind: author_effect_set

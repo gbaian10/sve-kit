@@ -1,0 +1,46 @@
+cards:
+  CP02-069:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - fanfare:
+          do:
+            - damage:
+                n: 2
+                to: victim
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+      - activate:
+          cost:
+            steps:
+              - pp: 1
+              - lesson: 2
+          do:
+            - damage:
+                n: 2
+                to: victim
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              upto: 2
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-sol
+            who: Codex
+          date: "2026-10-31"
+format: 2
+kind: author_effect_set
