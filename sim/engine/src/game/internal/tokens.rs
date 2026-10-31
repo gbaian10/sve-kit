@@ -1,8 +1,12 @@
+mod capacity;
 mod dynamic;
+
+pub(super) use capacity::CapacityWait;
 
 pub(super) use dynamic::check_each;
 
 use super::{Execution, Game, InstructionOutcome, Result, Slot, invalid, seat_name, unsupported};
+use crate::game::tokens::{prints_for_names, token_combinations};
 use crate::ir::{
     Action, Control, Expr, Instruction, Located, Nat, Node, PlayerRef, Posture, Program, ReceiptId,
     Requirement, TokenDestination, TokenOutcome, TokenSpec, ZoneKind, ZoneRef,
@@ -14,7 +18,7 @@ pub(super) struct Creation {
     ids: Vec<String>,
 }
 
-fn specification(action: &Action) -> Option<(&TokenSpec, &ZoneRef)> {
+fn specification(action: &Action) -> Option<(&[TokenSpec], &ZoneRef)> {
     let Action::Token {
         tokens,
         destination: TokenDestination::Single {
@@ -28,9 +32,9 @@ fn specification(action: &Action) -> Option<(&TokenSpec, &ZoneRef)> {
     else {
         return None;
     };
-    let [token] = tokens.as_slice() else {
+    if tokens.is_empty() {
         return None;
-    };
+    }
     if !matches!(
         zone.player,
         PlayerRef::Controller {} | PlayerRef::Bound { .. }
@@ -39,22 +43,23 @@ fn specification(action: &Action) -> Option<(&TokenSpec, &ZoneRef)> {
     {
         return None;
     }
-    match &token.name {
-        Expr::Literal(name)
-            if name.0 == token.template.0
-                && (matches!(token.count, Expr::Literal(_))
-                    || dynamic::projection(&token.count).is_some()) =>
-        {
-            Some((token, zone))
-        }
-        _ => None,
-    }
+    tokens
+        .iter()
+        .all(|token| match &token.name {
+            Expr::Literal(name) => {
+                name.0 == token.template.0
+                    && (matches!(token.count, Expr::Literal(_))
+                        || dynamic::projection(&token.count).is_some())
+            }
+            _ => false,
+        })
+        .then_some((tokens, zone))
 }
 
 pub(super) fn check_action(action: &Action) -> Result<()> {
     if matches!(action, Action::Token { .. }) && specification(action).is_none() {
         return Err(unsupported(
-            "single-name token creation with an admitted count and destination",
+            "token creation with admitted counts and destination",
         ));
     }
     Ok(())
@@ -62,20 +67,22 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
 
 pub(super) fn check_catalog(game: &Game, action: &Action) -> Result<()> {
     check_action(action)?;
-    if let Some((token, zone)) = specification(action) {
-        let card = game.catalog.token_print(&token.template.0)?;
-        if zone.kind == ZoneKind::Field
-            && !matches!(
-                game.catalog.face(&card, 0)?["card_type"].as_str(),
-                Some("フォロワー・トークン" | "アミュレット・トークン")
-            )
-        {
-            return Err(unsupported(
-                "field creation requires a follower or amulet token",
-            ));
-        }
-        if !game.card_runtime.has_definition(&card) {
-            return Err(unsupported("created token requires an admitted whole card"));
+    if let Some((tokens, zone)) = specification(action) {
+        for token in tokens {
+            let card = game.catalog.token_print(&token.template.0)?;
+            if zone.kind == ZoneKind::Field
+                && !matches!(
+                    game.catalog.face(&card, 0)?["card_type"].as_str(),
+                    Some("フォロワー・トークン" | "アミュレット・トークン")
+                )
+            {
+                return Err(unsupported(
+                    "field creation requires a follower or amulet token",
+                ));
+            }
+            if !game.card_runtime.has_definition(&card) {
+                return Err(unsupported("created token requires an admitted whole card"));
+            }
         }
     }
     Ok(())
@@ -93,8 +100,14 @@ impl Game {
     ) -> Result<()> {
         let (_, destination) = specification(&instruction.action)
             .ok_or_else(|| unsupported("token creation shape"))?;
-        let ids = Self::saved_creation(execution, instruction.receipt)?
-            .map_or_else(|| self.allocate_tokens(execution, instruction), Ok)?;
+        let ids = if let Some(ids) = Self::saved_creation(execution, instruction.receipt)? {
+            ids
+        } else {
+            let Some(ids) = self.allocate_tokens(execution, instruction)? else {
+                return Ok(());
+            };
+            ids
+        };
         self.commit_tokens(
             execution,
             instruction,
@@ -138,19 +151,22 @@ impl Game {
         let previous = self.card_runtime.active_source;
         self.card_runtime.active_source = execution.ability;
         let result = (|| {
-            let ids = if let Some(ids) = Self::saved_creation(execution, instruction.receipt)? {
-                ids
-            } else {
-                let mut members = execution.players(self, players)?;
-                let active = super::player_id(self.active())?;
-                members.sort_by_key(|member| *member != active);
-                let mut ids = Vec::new();
-                for member in members {
-                    execution.slots.insert(player.key(), Slot::Player(member));
-                    ids.extend(self.allocate_tokens(execution, instruction)?);
-                }
-                ids
-            };
+            let ids =
+                if let Some(ids) = Self::saved_creation(execution, instruction.receipt)? {
+                    ids
+                } else {
+                    let mut members = execution.players(self, players)?;
+                    let active = super::player_id(self.active())?;
+                    members.sort_by_key(|member| *member != active);
+                    let mut ids = Vec::new();
+                    for member in members {
+                        execution.slots.insert(player.key(), Slot::Player(member));
+                        ids.extend(self.allocate_tokens(execution, instruction)?.ok_or_else(
+                            || invalid("single-template player stage requested capacity input"),
+                        )?);
+                    }
+                    ids
+                };
             self.commit_tokens(
                 execution,
                 instruction,
@@ -183,30 +199,60 @@ impl Game {
 
     fn allocate_tokens(
         &mut self,
-        execution: &Execution,
+        execution: &mut Execution,
         instruction: &Instruction,
-    ) -> Result<Vec<String>> {
-        let (token, destination) = specification(&instruction.action)
+    ) -> Result<Option<Vec<String>>> {
+        let (tokens, destination) = specification(&instruction.action)
             .ok_or_else(|| unsupported("token creation shape"))?;
-        let count = dynamic::count(execution, self, &token.count)?;
-        let card = self.catalog.token_print(&token.template.0)?;
-        if !self.card_runtime.is_loaded(&card) {
-            return Err(unsupported("created token requires an admitted whole card"));
-        }
-        let seat = seat_name(execution.player(self, &destination.player)?)?;
+        let destination = destination.clone();
+        let actor = execution.player(self, &destination.player)?;
+        let seat = seat_name(actor)?;
         let zone = if destination.kind == ZoneKind::Field {
             "field"
         } else {
             "ex"
         };
-        let available = u64::try_from(5_i64.saturating_sub(self.zone_count(seat, zone)).max(0))
-            .map_err(invalid)?;
-        let requested = vec![card; usize::try_from(count.min(available)).map_err(invalid)?];
+        let available = self.token_capacity(seat, zone)?;
+        let mut requested = Vec::new();
+        for token in tokens {
+            let count = dynamic::count(execution, self, &token.count)?;
+            let card = self.catalog.token_print(&token.template.0)?;
+            if !self.card_runtime.is_loaded(&card) {
+                return Err(unsupported("created token requires an admitted whole card"));
+            }
+            // At most five identical names can contribute to any capacity-limited combination.
+            requested.extend(vec![card; usize::try_from(count.min(5)).map_err(invalid)?]);
+        }
         let prints = self.unique_crest_creations(&requested, zone, seat)?;
-        prints
-            .iter()
-            .map(|_| self.new_named_object(&token.template.0, seat))
-            .collect()
+        let selected = if prints.len() > available {
+            let names = prints
+                .iter()
+                .map(|card| self.token_name(card))
+                .collect::<Result<Vec<_>>>()?;
+            let choices = token_combinations(&names, available)?;
+            if choices.len() > 1 {
+                self.internal_token_capacity_wait(
+                    execution,
+                    CapacityWait {
+                        instruction: instruction.clone(),
+                        prints,
+                        names,
+                        choices,
+                        zone: destination,
+                        actor,
+                        available,
+                    },
+                )?;
+                return Ok(None);
+            }
+            let chosen = choices
+                .first()
+                .ok_or_else(|| invalid("missing token capacity result"))?;
+            prints_for_names(&prints, &names, chosen)?
+        } else {
+            prints
+        };
+        self.internal_create_prints(&selected, seat).map(Some)
     }
 
     fn commit_tokens(
@@ -281,12 +327,14 @@ fn collect_paths(program: &Program, prefix: &str, accepted: &mut Paths) {
         let path = format!("{prefix}/steps/{index}");
         match &step.node {
             Node::Instruction { instruction } => {
-                if let Some((token, _)) = specification(&instruction.action)
-                    && dynamic::projection(&token.count).is_some()
-                {
-                    accepted
-                        .counts
-                        .push(format!("{path}/instruction/action/tokens/0/count"));
+                if let Some((tokens, _)) = specification(&instruction.action) {
+                    for (token_index, token) in tokens.iter().enumerate() {
+                        if dynamic::projection(&token.count).is_some() {
+                            accepted.counts.push(format!(
+                                "{path}/instruction/action/tokens/{token_index}/count"
+                            ));
+                        }
+                    }
                 }
             }
             Node::Control {
@@ -297,6 +345,17 @@ fn collect_paths(program: &Program, prefix: &str, accepted: &mut Paths) {
                     collect_paths(
                         &stage.body,
                         &format!("{path}/control/stages/{stage_index}/body"),
+                        accepted,
+                    );
+                }
+            }
+            Node::Control {
+                control: Control::Mode { modes, .. },
+            } => {
+                for (mode_index, mode) in modes.iter().enumerate() {
+                    collect_paths(
+                        &mode.body,
+                        &format!("{path}/control/modes/{mode_index}/body"),
                         accepted,
                     );
                 }
@@ -354,9 +413,11 @@ pub(super) fn requirement(requirement: &Requirement, paths: &Paths) -> bool {
 pub(super) fn mask_count(node: &mut Node) {
     if let Node::Instruction { instruction } = node
         && let Action::Token { tokens, .. } = &mut instruction.action
-        && let [token] = tokens.as_mut_slice()
-        && dynamic::projection(&token.count).is_some()
     {
-        token.count = Expr::Literal(Nat(0));
+        for token in tokens {
+            if dynamic::projection(&token.count).is_some() {
+                token.count = Expr::Literal(Nat(0));
+            }
+        }
     }
 }

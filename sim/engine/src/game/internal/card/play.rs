@@ -375,6 +375,13 @@ fn collect_modes(program: &Program, conditional: bool) -> Result<Vec<PlayMode>> 
                 });
             }
             Node::Control {
+                control:
+                    Control::Mode {
+                        choice_kind: ModeChoiceKind::ResolutionAlternative,
+                        ..
+                    },
+            } => {}
+            Node::Control {
                 control: Control::Mode { .. },
             } => return Err(unsupported("play mode timing")),
             _ => {}
@@ -1267,7 +1274,13 @@ fn selected_body(
     for mut located in program.steps {
         match located.node {
             Node::Control {
-                control: Control::Mode { modes, chosen, .. },
+                control:
+                    Control::Mode {
+                        modes,
+                        chosen,
+                        choice_kind: ModeChoiceKind::ChoiceKeyword,
+                        ..
+                    },
             } => {
                 let chosen = choices
                     .get(&chosen.id)

@@ -110,7 +110,8 @@ pub(super) fn finish(game: &mut Game, mut play: CardPlay) -> CardPlay {
                     Answer::CostMaterials(handles)
                 }
             }
-            InputDomain::Quick { .. }
+            InputDomain::TokenCapacity { .. }
+            | InputDomain::Quick { .. }
             | InputDomain::BeforeDraw
             | InputDomain::Pending(_)
             | InputDomain::TriggerQuota(_)

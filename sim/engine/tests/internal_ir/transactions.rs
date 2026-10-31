@@ -79,7 +79,8 @@ fn response(question: &DecisionView) -> Answer {
         InputDomain::SearchPartition(domain) => {
             Answer::SearchPartition(vec![domain.cards[0].handle])
         }
-        InputDomain::WardEntry { .. }
+        InputDomain::TokenCapacity { .. }
+        | InputDomain::WardEntry { .. }
         | InputDomain::Integer(_)
         | InputDomain::SearchReplacement
         | InputDomain::Targets(_)

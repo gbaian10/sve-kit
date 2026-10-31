@@ -47,7 +47,8 @@ fn finish(game: &mut Game, mut play: CardPlay) -> CardPlay {
                     .map(|member| member.handle)
                     .collect(),
             ),
-            InputDomain::Quick { .. }
+            InputDomain::TokenCapacity { .. }
+            | InputDomain::Quick { .. }
             | InputDomain::OptionalCost
             | InputDomain::CostMaterials(_)
             | InputDomain::BeforeDraw
@@ -102,15 +103,16 @@ fn enter_and_trigger(game: &mut Game, card: &str) {
 #[test]
 fn title_anchor_is_in_the_snapshot_and_rules_bound_selection() {
     assert!(inputs().0.lines().any(|line| {
-        serde_json::from_str::<Value>(line)
-            .is_ok_and(|card| card["number"] == "ECP02-001")
+        serde_json::from_str::<Value>(line).is_ok_and(|card| card["number"] == "ECP02-001")
     }));
     let catalog = serde_json::to_value(&*selection_with_rules().prototypes).unwrap();
-    assert!(catalog["rule_bindings"]["titles"]["idolmaster_cinderella_girls"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .any(|capability| capability == "opening_ex_resource"));
+    assert!(
+        catalog["rule_bindings"]["titles"]["idolmaster_cinderella_girls"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|capability| capability == "opening_ex_resource")
+    );
 }
 
 #[test]
@@ -131,7 +133,9 @@ fn cp02_018_and_printed_alias_heal_draw_and_have_ward() {
             json!([{"id":"ward","card":card,"state":{"acted":true}}]);
         assert_eq!(
             make_game(&ward_position)
-                .internal_rule_action(&json!({"do":"attack","attacker":"attacker","target":"P2.leader"}))
+                .internal_rule_action(
+                    &json!({"do":"attack","attacker":"attacker","target":"P2.leader"})
+                )
                 .unwrap()
                 .outcome,
             "cannot-attack"
@@ -155,8 +159,7 @@ fn cp02_076_and_printed_alias_damage_own_leader_and_draw() {
 fn cp02_077_and_printed_alias_damage_selected_enemy_follower() {
     for card in ["CP02-077", "CP02-P62"] {
         let mut initial = position(card, 20);
-        initial["players"]["P2"]["zones"]["field"] =
-            json!([{"id":"enemy","card":"BP01-037"}]);
+        initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"BP01-037"}]);
         let mut game = make_game(&initial);
         enter_and_trigger(&mut game, card);
         let state = game.projection(View::Referee).unwrap();

@@ -1006,6 +1006,10 @@ impl<'definitions> BodyContext<'definitions> {
                 continue;
             }
             // The ability entry admits one top-level group; mode bodies reject nested choices.
+            if let ast::Step::Either(either) = step {
+                steps.push(self.either(either, &step_path, source, ability_source)?);
+                continue;
+            }
             if let ast::Step::Choice(choice) = step {
                 steps.push(self.choice(choice, &step_path, source, ability_source)?);
                 continue;
@@ -1049,6 +1053,7 @@ impl<'definitions> BodyContext<'definitions> {
     ) -> Result<Action, LoweringError> {
         match step {
             ast::Step::Choice(_)
+            | ast::Step::Either(_)
             | ast::Step::Choose(_)
             | ast::Step::If(_)
             | ast::Step::EachPlayer(_)

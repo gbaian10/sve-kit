@@ -12,8 +12,8 @@ use crate::ir::{
     DamageQuantityOutcome, DamageRecipient, Decision, DecisionId, DecisionKind, Declinable,
     DestroyOutcome, DrawEvent, Effect, EffectId, EntryMethod, EntryOrigin, ExecutionId, Expr,
     Generation, InstallationSubjects, Instruction, InstructionContext, Int, IntFrozen,
-    IntOperation, IntRead, LifeChangeEvent, Located, LookOutcome, MeasuredReceipt, ModeId,
-    MoveOutcome, Nat, NatFrozen, NatOperation, NatRead, Node, ObjectFrozen, ObjectId,
+    IntOperation, IntRead, LifeChangeEvent, Located, LookOutcome, MeasuredReceipt, ModeChoiceKind,
+    ModeId, MoveOutcome, Nat, NatFrozen, NatOperation, NatRead, Node, ObjectFrozen, ObjectId,
     ObjectOperand, ObjectRef, OrderOutcome, PlayerId, PlayerRef, PlayerRelation, PlayerResource,
     PlayerSet, PositiveInt, PostureEvent, Predicate, Program, Quantity, ReceiptId, ReceiptLocation,
     RecipientSet, Requirements, ResolvedRecipients, RuntimeAbilitySource, RuntimeDamageRecipient,
@@ -34,6 +34,7 @@ use serde_json::{Value, json};
 
 mod admission;
 mod allocation;
+mod alternatives;
 mod card;
 mod cost;
 mod discard;
@@ -165,6 +166,11 @@ pub enum InputDomain {
     SearchReplacement,
     /// Public field candidates and strict play-time cardinality.
     Targets(TargetDomain),
+    /// Public name combinations offered before any token object exists; handles are indices.
+    TokenCapacity {
+        /// Complete legal combinations, preserving printed token order.
+        choices: Vec<Vec<String>>,
+    },
     /// Printed mode identifiers and the evaluated count limit.
     Modes {
         /// Printed identifiers in resolution order.
@@ -207,6 +213,8 @@ pub enum Answer {
     SearchReplacement(SearchReplacementAnswer),
     /// Token-scoped target handles.
     Targets(Vec<u64>),
+    /// One token-scoped public name combination handle.
+    TokenCapacity(u64),
     /// Unique printed mode identifiers; resolution always follows printed order.
     Modes(Vec<ModeId>),
 }
@@ -374,6 +382,8 @@ enum Wait {
     RecipientTargets(card::recipient_targets::RecipientWait),
     ResolutionTargets(card::selection::TargetWait),
     Modes(card::play::ModeWait),
+    Alternative(alternatives::AlternativeWait),
+    TokenCapacity(Box<tokens::CapacityWait>),
     Distribution(allocation::DistributionWait),
     Order(ordering::OrderWait),
     Search(search::SearchWait),
@@ -716,6 +726,16 @@ impl Game {
                     rollback = execution.origin.take();
                     execution.bind_targets(&wait, objects);
                 }
+                (Wait::Alternative(wait), Answer::Modes(modes)) => {
+                    let body = wait.validate(&modes)?;
+                    rollback = execution.origin.take();
+                    execution.prepend(body);
+                }
+                (Wait::TokenCapacity(wait), Answer::TokenCapacity(handle)) => {
+                    let prints = wait.validate(handle)?;
+                    rollback = execution.origin.take();
+                    self.internal_token_capacity_answer(&mut execution, &wait, &prints)?;
+                }
                 (Wait::Modes(wait), Answer::Modes(modes)) => {
                     if !wait.chosen.accepts_answer(wait.count, &modes) {
                         return Err(invalid("invalid mode selection"));
@@ -863,6 +883,7 @@ impl Game {
                 InputDomain::Quick { window, options } => card::quick::packet(window, &options),
                 InputDomain::TriggerQuota(domain) => json!({"kind":"trigger-quota","candidates":domain.candidates.iter().map(|option| json!({"handle":option.handle,"card":option.card,"line":option.line,"event":option.event})).collect::<Vec<_>>(),"earlier":domain.earlier.iter().map(|selection| json!({"actor":selection.actor.seat,"card":selection.occurrence.card,"line":selection.occurrence.line,"event":selection.occurrence.event})).collect::<Vec<_>>()}),
                 InputDomain::Targets(domain) => card::selection::packet(&domain),
+                InputDomain::TokenCapacity { choices } => json!({"kind":"token-capacity","choices":choices}),
                 InputDomain::Modes { modes, cardinality, count } => json!({"kind":"modes","modes":modes.iter().map(|id| id.0).collect::<Vec<_>>(),"minimum":cardinality.minimum.0,"maximum":cardinality.maximum.map(|n| n.0),"count":count.0}),
                 InputDomain::Pending(options) => json!({"kind":"pending","options":options.iter().map(|option| json!({"handle":option.handle,"card":option.card,"line":option.line,"event":option.event})).collect::<Vec<_>>()}),
                 InputDomain::OptionalCost => json!({"kind":"optional-cost","options":["accept","decline"]}),
@@ -1031,6 +1052,13 @@ impl Game {
                 return Ok(());
             };
             match node {
+                Node::Control {
+                    control:
+                        control @ Control::Mode {
+                            choice_kind: ModeChoiceKind::ResolutionAlternative,
+                            ..
+                        },
+                } => self.internal_alternative(execution, control)?,
                 Node::Control {
                     control: control @ Control::EachPlayer { .. },
                 } => self.internal_player_tokens(execution, &control)?,

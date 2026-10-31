@@ -10,7 +10,7 @@ use crate::{EngineFailure, Result, invalid};
 
 /// Contract 35: a token not yet created is chosen by its rules name (9.1.2.3), so
 /// choices list names in card-text order and identical names collapse.
-fn token_choices(names: &[String], count: usize) -> Result<Vec<Value>> {
+pub(super) fn token_combinations(names: &[String], count: usize) -> Result<Vec<Vec<String>>> {
     let mut sets = BTreeSet::from([Vec::<usize>::new()]);
     for index in 0..names.len() {
         let mut additions = Vec::new();
@@ -38,14 +38,18 @@ fn token_choices(names: &[String], count: usize) -> Result<Vec<Value>> {
         let mut multiset = chosen.clone();
         multiset.sort();
         if seen.insert(multiset) {
-            choices.push(json!({"do":"resolve-choice","select":chosen}));
+            choices.push(chosen);
         }
     }
     Ok(choices)
 }
 
 /// Maps chosen names back to the earliest unused print of each name, in text order.
-fn prints_for_names(prints: &[String], names: &[String], chosen: &[String]) -> Result<Vec<String>> {
+pub(super) fn prints_for_names(
+    prints: &[String],
+    names: &[String],
+    chosen: &[String],
+) -> Result<Vec<String>> {
     let mut used = BTreeSet::new();
     for name in chosen {
         let index = names
@@ -76,7 +80,12 @@ impl Game {
         self.new_token_object(&template.card_no, template.face_ordinal, controller)
     }
 
-    fn new_token_object(&mut self, card: &str, face: usize, controller: &str) -> Result<String> {
+    pub(super) fn new_token_object(
+        &mut self,
+        card: &str,
+        face: usize,
+        controller: &str,
+    ) -> Result<String> {
         let printed = self.catalog.face(card, face)?;
         let state = json!({"power":scalar(&printed["power"]),"hp":scalar(&printed["hp"]),"max_hp":scalar(&printed["hp"]),"acted":false,"evolved":false,"entered_this_turn":false,"face":face,"damage":0_i64,"counters":{},"keywords":[],"silenced":false,"stats_increased_this_turn":false});
         let id = loop {
@@ -133,7 +142,10 @@ impl Game {
                     .iter()
                     .map(|card| self.token_name(card))
                     .collect::<Result<Vec<_>>>()?;
-                let choices = token_choices(&names, available)?;
+                let choices = token_combinations(&names, available)?
+                    .into_iter()
+                    .map(|names| json!({"do":"resolve-choice","select":names}))
+                    .collect();
                 self.prompt(
                     frame,
                     choices,
@@ -200,7 +212,7 @@ impl Game {
         Ok(())
     }
 
-    fn token_name(&self, card: &str) -> Result<String> {
+    pub(super) fn token_name(&self, card: &str) -> Result<String> {
         self.catalog.rules_label(card, 0)
     }
 

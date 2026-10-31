@@ -476,8 +476,57 @@ impl BodyContext<'_> {
         if self.mode_targets.keys().any(|id| *id == 0 || *id > maximum) {
             return Err(unsupported(path));
         }
+        self.modes(
+            ModeShape {
+                options: &choice.options,
+                count,
+                cardinality,
+                exclude: choice.exclude_chosen.is_some(),
+                kind: ModeChoiceKind::ChoiceKeyword,
+            },
+            path,
+            source,
+            ability_source,
+        )
+    }
+
+    pub(super) fn either(
+        &mut self,
+        either: &ast::Either,
+        path: &str,
+        source: &SourceSpan,
+        ability_source: &AbilitySource,
+    ) -> Result<Located<Node>, LoweringError> {
+        if either.options.len() < 2 || either.bind.is_some() {
+            return Err(unsupported(path));
+        }
+        self.modes(
+            ModeShape {
+                options: &either.options,
+                count: Expr::Literal(Nat(1)),
+                cardinality: Cardinality {
+                    minimum: Nat(1),
+                    maximum: Some(Nat(1)),
+                },
+                exclude: false,
+                kind: ModeChoiceKind::ResolutionAlternative,
+            },
+            path,
+            source,
+            ability_source,
+        )
+    }
+
+    fn modes(
+        &mut self,
+        shape: ModeShape<'_>,
+        path: &str,
+        source: &SourceSpan,
+        ability_source: &AbilitySource,
+    ) -> Result<Located<Node>, LoweringError> {
+        let resolution = shape.kind == ModeChoiceKind::ResolutionAlternative;
         let mut modes = Vec::new();
-        for (index, steps) in choice.options.iter().enumerate() {
+        for (index, steps) in shape.options.iter().enumerate() {
             let mode_id = u64::try_from(index)
                 .ok()
                 .and_then(|i| i.checked_add(1))
@@ -511,14 +560,28 @@ impl BodyContext<'_> {
                 formal_play: false,
                 mode_targets: BTreeMap::new(),
             };
-            if let Some(targets) = self.mode_targets.get(&mode_id) {
+            if resolution {
+                context.payment_result.clone_from(&self.payment_result);
+                context.searches.clone_from(&self.searches);
+                context.ex_outputs.clone_from(&self.ex_outputs);
+                context.observations.clone_from(&self.observations);
+                context.observed_targets.clone_from(&self.observed_targets);
+                context.targets.clone_from(&self.targets);
+                context
+                    .recipient_targets
+                    .clone_from(&self.recipient_targets);
+            }
+            if !resolution && let Some(targets) = self.mode_targets.get(&mode_id) {
                 for target in targets {
                     context.target(target, path)?;
                 }
             }
             let body = context.steps(
                 steps,
-                &format!("{path}/choice/options/{index}"),
+                &format!(
+                    "{path}/{}/options/{index}",
+                    if resolution { "either" } else { "choice" }
+                ),
                 source,
                 ability_source,
             )?;
@@ -532,24 +595,11 @@ impl BodyContext<'_> {
             });
         }
         let id = self.card_allocator.id(path)?;
-        let chosen = ModeDecision {
-            id: DecisionId(id),
-            actor: PlayerRef::Controller {},
-            domain: ChoiceDomain::Modes {
-                modes: modes.iter().map(|mode| mode.id).collect(),
-                cardinality,
-                binding: Binding::new(self.allocator.id(path)?, self.scope),
-                exclude_used: choice
-                    .exclude_chosen
-                    .as_ref()
-                    .map(|_| super::super::ModeExclusion::CurrentTurnAbilityInstance),
-            },
-            kind: ModeDecisionKind::PlayParameter {
-                play_scope: ExecutionRef::Current {},
-                input: InputMode::Inline,
-            },
-            visibility: Visibility::Public {},
-        };
+        let chosen = shape.decision(
+            id,
+            Binding::new(self.allocator.id(path)?, self.scope),
+            &modes,
+        );
         let mut source = source.clone();
         path.clone_into(&mut source.author_path);
         Ok(Located {
@@ -557,12 +607,48 @@ impl BodyContext<'_> {
             node: Node::Control {
                 control: Control::Mode {
                     modes,
-                    count,
+                    count: shape.count,
                     chosen,
-                    choice_kind: ModeChoiceKind::ChoiceKeyword,
+                    choice_kind: shape.kind,
                 },
             },
         })
+    }
+}
+
+struct ModeShape<'options> {
+    options: &'options [Vec<ast::Step>],
+    count: Expr<Nat>,
+    cardinality: Cardinality,
+    exclude: bool,
+    kind: ModeChoiceKind,
+}
+
+impl ModeShape<'_> {
+    fn decision(&self, id: u64, binding: Binding<Vec<ModeId>>, modes: &[Mode]) -> ModeDecision {
+        ModeDecision {
+            id: DecisionId(id),
+            actor: PlayerRef::Controller {},
+            domain: ChoiceDomain::Modes {
+                modes: modes.iter().map(|mode| mode.id).collect(),
+                cardinality: self.cardinality,
+                binding,
+                exclude_used: self
+                    .exclude
+                    .then_some(super::super::ModeExclusion::CurrentTurnAbilityInstance),
+            },
+            kind: if self.kind == ModeChoiceKind::ResolutionAlternative {
+                ModeDecisionKind::ResolutionChoice {
+                    cardinality: self.cardinality,
+                }
+            } else {
+                ModeDecisionKind::PlayParameter {
+                    play_scope: ExecutionRef::Current {},
+                    input: InputMode::Inline,
+                }
+            },
+            visibility: Visibility::Public {},
+        }
     }
 }
 
@@ -665,6 +751,7 @@ fn contains_choice(steps: &[ast::Step]) -> bool {
                     .is_some_and(|else_steps| contains_choice(else_steps))
         }
         ast::Step::Evolve(_)
+        | ast::Step::Either(_)
         | ast::Step::Choose(_)
         | ast::Step::Draw(_)
         | ast::Step::Pp(_)
