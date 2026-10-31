@@ -1,0 +1,36 @@
+cards:
+  CP02-SP01a:
+    abilities:
+      - attack_time:
+          do:
+            - damage:
+                n: 2
+                to: victim
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - pp: 1
+              - lesson: 1
+          do:
+            - grant:
+                keywords:
+                  - storm
+                on: this
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-sol
+            who: Codex
+          date: "2026-10-31"
+format: 2
+kind: author_effect_set

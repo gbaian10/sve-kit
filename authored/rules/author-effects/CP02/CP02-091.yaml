@@ -1,0 +1,34 @@
+cards:
+  CP02-091:
+    abilities:
+      - keywords:
+          - rush
+          - assail
+        line: 1
+      - attack_time:
+          do:
+            - damage:
+                n: 2
+                to:
+                  leaders: opponents
+        line: 2
+      - activate:
+          cost:
+            steps:
+              - pp: 2
+              - lesson: 1
+          do:
+            - grant:
+                keywords:
+                  - storm
+                on: this
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6-sol
+            who: Codex
+          date: "2026-10-31"
+format: 2
+kind: author_effect_set
