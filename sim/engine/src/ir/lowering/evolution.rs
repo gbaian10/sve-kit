@@ -281,7 +281,7 @@ pub(super) fn subscription(
     if entry
         .sel
         .as_ref()
-        .is_some_and(|sel| sel.token.is_some() || sel.not_token.is_some())
+        .is_some_and(|sel| sel.token.is_some() || sel.not_token.is_some() || sel.class.is_some())
     {
         return Err(unsupported(path));
     }

@@ -45,6 +45,10 @@ impl Game {
             return Ok(false);
         }
         let group = self.group();
+        let destroyed_subjects = destroyed
+            .iter()
+            .map(|(id, _)| id.clone())
+            .collect::<Vec<_>>();
         for (id, rule) in destroyed {
             self.emit(
                 json!({"kind":"破壊","object":id}),
@@ -57,6 +61,9 @@ impl Game {
             ..Frame::default()
         };
         frame.values.insert("movement_rules".into(), rules);
+        frame
+            .values
+            .insert("destroyed_subjects".into(), json!(destroyed_subjects));
         let ids = previous
             .iter()
             .map(|object| object.id.clone())

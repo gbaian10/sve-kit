@@ -273,6 +273,9 @@ impl Game {
                 if is_lastword(&a.node) {
                     return to == "cemetery";
                 }
+                if movement::matches_kind(&a.node, true) {
+                    return false;
+                }
                 let Some(TriggerSpec {
                     on:
                         TriggerCondition::Event {
@@ -292,6 +295,7 @@ impl Game {
         &mut self,
         ids: &[String],
         destinations: &BTreeMap<String, String>,
+        side: Option<&str>,
         frame: &Frame,
     ) -> Result<DeparturePlan> {
         let mut plan = DeparturePlan {
@@ -315,7 +319,7 @@ impl Game {
             }
         }
         for id in ids {
-            let observed = self.movement_departures(id, destinations, before, frame)?;
+            let observed = self.movement_departures(id, destinations, before, side, frame)?;
             let observed_header = observed.first().map(|pending| pending.header.clone());
             for pending in observed {
                 plan.departures.push((pending, self.object(id)?.clone()));

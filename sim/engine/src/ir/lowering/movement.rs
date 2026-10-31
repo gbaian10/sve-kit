@@ -1,7 +1,7 @@
 //! Printed movement headers share the immutable event filter plan.
 use super::{Binding, EventPattern, LoweringError, ScopeId, ast, unsupported};
 use crate::ir::events::subject::{SubjectFields, SubjectFilter};
-use crate::ir::{CardKind, CardName, TraitId};
+use crate::ir::{CardKind, CardName, ClassId, TraitId};
 
 pub(super) fn subscription(
     on: &ast::PhaseSubscription,
@@ -26,7 +26,7 @@ pub(super) fn subscription(
                     entry.sel.as_ref(),
                     entry.during.is_some(),
                 )
-                .predicate(SubjectFields::Leave(event)),
+                .predicate(SubjectFields::Cemetery(event)),
             })
         }
         ast::PhaseSubscription::PlacedEx(entry) => {
@@ -52,16 +52,54 @@ pub(super) fn subscription(
                 .predicate(SubjectFields::Ex(event)),
             })
         }
+        ast::PhaseSubscription::LeaveField(entry) => {
+            let event = Binding::new(event_id, scope);
+            Ok(EventPattern::LeaveField {
+                binding: event,
+                predicate: movement_filter(
+                    entry
+                        .who
+                        .as_ref()
+                        .map(|who| matches!(who, ast::EntryPlayer::Controller)),
+                    entry.reference.is_some(),
+                    entry.sel.as_ref(),
+                    entry.during.is_some(),
+                )
+                .predicate(SubjectFields::Leave(event)),
+            })
+        }
+        ast::PhaseSubscription::Destroyed(entry) => {
+            if entry
+                .sel
+                .as_ref()
+                .is_some_and(|sel| sel.token.is_some() || sel.not_token.is_some())
+            {
+                return Err(unsupported(path));
+            }
+            let event = Binding::new(event_id, scope);
+            Ok(EventPattern::Destroy {
+                binding: event,
+                predicate: movement_filter(
+                    entry
+                        .who
+                        .as_ref()
+                        .map(|who| matches!(who, ast::EntryPlayer::Controller)),
+                    entry.reference.is_some(),
+                    entry.sel.as_ref(),
+                    entry.during.is_some(),
+                )
+                .predicate(SubjectFields::Destroy(event)),
+            })
+        }
         ast::PhaseSubscription::Evolved(_)
         | ast::PhaseSubscription::Played(_)
         | ast::PhaseSubscription::Phase(_)
         | ast::PhaseSubscription::EnterField(_)
-        | ast::PhaseSubscription::LeaveField(_)
         | ast::PhaseSubscription::Damage(_) => Err(unsupported(path)),
     }
 }
 
-fn movement_filter(
+pub(super) fn movement_filter(
     own: Option<bool>,
     itself: bool,
     subject: Option<&ast::MovementSubject>,
@@ -91,6 +129,9 @@ fn movement_filter(
         name: subject
             .and_then(|sel| sel.name.as_ref())
             .map(|name| CardName(name.clone())),
+        class: subject
+            .and_then(|sel| sel.class.as_ref())
+            .map(|class| ClassId(class.clone())),
         token: subject.and_then(|sel| sel.token.or_else(|| sel.not_token.map(|value| !value))),
         own_turn,
     }

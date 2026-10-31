@@ -1162,6 +1162,8 @@ pub(super) enum PhaseSubscription {
     EnterField(EntrySubscription),
     #[serde(rename = "left_field")]
     LeaveField(LeaveSubscription),
+    #[serde(rename = "destroyed")]
+    Destroyed(LeaveSubscription),
     #[serde(rename = "moved")]
     Moved(MoveSubscription),
     #[serde(rename = "placed_ex")]
@@ -1210,7 +1212,7 @@ pub(super) struct EntrySubscription {
     #[serde(rename = "ref")]
     pub reference: Option<This>,
     pub who: Option<EntryPlayer>,
-    pub sel: Option<EntrySubject>,
+    pub sel: Option<MovementSubject>,
     pub during: Option<During>,
 }
 #[derive(Deserialize)]
@@ -1229,14 +1231,6 @@ pub(super) enum EntryPlayer {
 #[serde(deny_unknown_fields)]
 pub(super) struct During {
     pub turn: SelfPlayer,
-}
-#[derive(Deserialize)]
-#[serde(deny_unknown_fields)]
-pub(super) struct EntrySubject {
-    #[serde(rename = "kind")]
-    pub _kind: Follower,
-    #[serde(rename = "trait")]
-    pub trait_id: Option<String>,
 }
 #[derive(Clone, Deserialize)]
 pub(super) enum Follower {
@@ -1465,7 +1459,9 @@ pub(super) struct PaidReceipt {
 #[serde(deny_unknown_fields)]
 pub(super) struct LeaveSubscription {
     #[serde(rename = "ref")]
-    pub _reference: This,
+    pub reference: Option<This>,
+    pub who: Option<EntryPlayer>,
+    pub sel: Option<MovementSubject>,
     pub during: Option<During>,
 }
 #[derive(Deserialize)]
@@ -1622,6 +1618,7 @@ pub(super) struct ExSubscription {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct MovementSubject {
+    pub class: Option<String>,
     pub kind: Option<SearchKind>,
     #[serde(rename = "trait")]
     pub trait_id: Option<String>,

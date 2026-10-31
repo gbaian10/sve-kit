@@ -1,0 +1,41 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP14-067:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-31"
+    abilities:
+      - line: 1
+        keywords:
+          - ward
+      - line: 2
+        auto:
+          on:
+            enter_field:
+              who: self
+              sel:
+                kind: follower
+                class: ドラゴン
+                token: true
+          do:
+            - life:
+                who: self
+                delta: 2
+      - line: 3
+        fanfare:
+          cost:
+            pp: 4
+          do:
+            - create:
+                token: ドラゴン
+                to: field
+                n: 1
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP01-T11

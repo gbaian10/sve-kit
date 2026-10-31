@@ -794,6 +794,9 @@ impl Game {
             .collect::<Vec<_>>();
         let departing_source = execution.source_before_move(self, &ids)?;
         let mut frame = execution.frame();
+        if method == MoveMethod::Destroy {
+            frame.values.insert("destroyed_subjects".into(), json!(ids));
+        }
         if owner_ex {
             frame.values.insert("owner_destination".into(), json!(true));
         }

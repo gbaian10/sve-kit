@@ -1,0 +1,23 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "trigger",
+      "body": {
+        "op": "modify",
+        "subjects": "self.leader",
+        "hp": 1
+      },
+      "event": "enter",
+      "subject": {
+        "side": "self",
+        "zone": "field",
+        "type": "amulet",
+        "other": true
+      },
+      "limit": 1,
+      "limit_at": "trigger"
+    }
+  ]
+}

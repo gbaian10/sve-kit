@@ -1,7 +1,7 @@
 use crate::ir::events::played::PlayedFilter;
 use crate::ir::events::subject::{SubjectFields, SubjectFilter};
 use crate::ir::history_turn::played_by;
-use crate::ir::{DamageRecipient, EvolveEvent, PlayEvent};
+use crate::ir::{DamageRecipient, PlayEvent};
 use crate::ir::{ZoneFrozen, ZoneKind, ZoneOperation, ZoneRef};
 macro_rules! projected_equality {
     ($checker:expr, $equality:expr; $($variant:ident),+ $(,)?) => {
@@ -358,23 +358,124 @@ impl Checker {
         self.local_value(plan.card, &Expr::Literal(Bool(true)))
     }
 
-    fn evolution_header(
+    fn subject_header<T>(
         &mut self,
-        binding: Binding<EvolveEvent>,
+        binding: Binding<T>,
+        fields: SubjectFields,
         predicate: &Expr<Bool>,
         view: Option<EventSnapshotPolicy>,
         triggering: bool,
-    ) -> Option<Checked> {
+    ) -> Option<Checked>
+    where
+        T: 'static,
+    {
         // The bridge consumes this closed header at commit, without granting body object reads.
         if !triggering
-            || view != Some(EventSnapshotPolicy::AfterEntry)
-            || SubjectFilter::parse(SubjectFields::Evolve(binding), predicate).is_none()
+            || view != Some(fields.view())
+            || SubjectFilter::parse(fields, predicate).is_none()
         {
             return None;
         }
         Some(self.define(binding, BindingKind::Value).map(|()| {
             self.env.trigger_events.insert(binding.key());
         }))
+    }
+
+    fn subject_pattern(
+        &mut self,
+        pattern: &EventPattern,
+        view: Option<EventSnapshotPolicy>,
+        triggering: bool,
+    ) -> Option<Checked> {
+        match pattern {
+            EventPattern::EnterField { binding, predicate } => self.subject_header(
+                *binding,
+                SubjectFields::Entry(*binding),
+                predicate,
+                view,
+                triggering,
+            ),
+            EventPattern::EnterEx { binding, predicate } => self.subject_header(
+                *binding,
+                SubjectFields::Ex(*binding),
+                predicate,
+                view,
+                triggering,
+            ),
+            EventPattern::Destroy { binding, predicate } => self.subject_header(
+                *binding,
+                SubjectFields::Destroy(*binding),
+                predicate,
+                view,
+                triggering,
+            ),
+            EventPattern::Evolve { binding, predicate } => self.subject_header(
+                *binding,
+                SubjectFields::Evolve(*binding),
+                predicate,
+                view,
+                triggering,
+            ),
+            EventPattern::LeaveField { binding, predicate } => self
+                .subject_header(
+                    *binding,
+                    SubjectFields::Cemetery(*binding),
+                    predicate,
+                    view,
+                    triggering,
+                )
+                .or_else(|| {
+                    self.subject_header(
+                        *binding,
+                        SubjectFields::Leave(*binding),
+                        predicate,
+                        view,
+                        triggering,
+                    )
+                }),
+            EventPattern::EarthRitePayment { .. }
+            | EventPattern::Play { .. }
+            | EventPattern::Targeted { .. }
+            | EventPattern::Resolve { .. }
+            | EventPattern::Payment { .. }
+            | EventPattern::Move { .. }
+            | EventPattern::Draw { .. }
+            | EventPattern::Discard { .. }
+            | EventPattern::Banish { .. }
+            | EventPattern::Damage { .. }
+            | EventPattern::StatChange { .. }
+            | EventPattern::LifeChange { .. }
+            | EventPattern::CounterChange { .. }
+            | EventPattern::Posture { .. }
+            | EventPattern::Attack { .. }
+            | EventPattern::Phase { .. }
+            | EventPattern::Race { .. }
+            | EventPattern::DriveGained { .. }
+            | EventPattern::DriveTrigger { .. }
+            | EventPattern::UbActivated { .. }
+            | EventPattern::Fused { .. }
+            | EventPattern::Equip { .. }
+            | EventPattern::Dice { .. }
+            | EventPattern::DriveChecked { .. }
+            | EventPattern::AnyOf { .. } => None,
+        }
+    }
+
+    fn event_alternatives(
+        &mut self,
+        patterns: &[EventPattern],
+        view: Option<EventSnapshotPolicy>,
+        triggering: bool,
+    ) -> Checked {
+        if patterns.is_empty() {
+            return self.reject();
+        }
+        for (index, alternative) in patterns.iter().enumerate() {
+            self.at(&format!("patterns/{index}"), |checker| {
+                checker.isolated(|checker| checker.event_pattern(alternative, view, triggering))
+            })?;
+        }
+        Ok(())
     }
 
     pub(super) fn event_pattern(
@@ -395,20 +496,11 @@ impl Checker {
                 self.at("predicate", |checker| checker.boolean($predicate))
             }};
         }
+        if let Some(checked) = self.subject_pattern(pattern, view, triggering) {
+            return checked;
+        }
         match pattern {
-            EventPattern::AnyOf { patterns } => {
-                if patterns.is_empty() {
-                    return self.reject();
-                }
-                for (index, alternative) in patterns.iter().enumerate() {
-                    self.at(&format!("patterns/{index}"), |checker| {
-                        checker.isolated(|checker| {
-                            checker.event_pattern(alternative, view, triggering)
-                        })
-                    })?;
-                }
-                Ok(())
-            }
+            EventPattern::AnyOf { patterns } => self.event_alternatives(patterns, view, triggering),
             EventPattern::EarthRitePayment {
                 event,
                 component,
@@ -453,9 +545,9 @@ impl Checker {
             EventPattern::CounterChange { binding, predicate } => {
                 event!(binding, predicate, EventSnapshotPolicy::AfterEntry)
             }
-            EventPattern::Evolve { binding, predicate } => self
-                .evolution_header(*binding, predicate, view, triggering)
-                .unwrap_or_else(|| event!(binding, predicate, EventSnapshotPolicy::AfterEntry)),
+            EventPattern::Evolve { binding, predicate } => {
+                event!(binding, predicate, EventSnapshotPolicy::AfterEntry)
+            }
             EventPattern::Attack { binding, predicate } => {
                 event!(binding, predicate, EventSnapshotPolicy::AfterEntry)
             }

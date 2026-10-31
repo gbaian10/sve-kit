@@ -613,7 +613,8 @@ impl Game {
         let mut entered = Vec::new();
         let mut erased = Vec::new();
         let mut advances = Vec::new();
-        let typed_departures = self.internal_before_departures(&movable, &destinations, frame)?;
+        let typed_departures =
+            self.internal_before_departures(&movable, &destinations, side, frame)?;
         let plans = self.place_zone_batch(&movable, &destinations, side, position, frame)?;
         for plan in &plans {
             if !plan.changed {
@@ -769,7 +770,11 @@ impl Game {
                 group,
             );
         }
-        self.move_objects(&actual, "cemetery", None, None, frame)?;
+        let mut movement = frame.clone();
+        movement
+            .values
+            .insert("destroyed_subjects".into(), json!(actual));
+        self.move_objects(&actual, "cemetery", None, None, &movement)?;
         Ok(())
     }
 

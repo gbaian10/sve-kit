@@ -1,4 +1,3 @@
-pub(crate) mod entry;
 pub(crate) mod played;
 pub(crate) mod subject;
 pub(crate) mod timing;

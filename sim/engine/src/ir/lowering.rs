@@ -545,7 +545,7 @@ fn head_events(entry: &ast::Ability) -> HeadEvents {
         self_entry: entry.fanfare.is_some()
             || matches!(on, Some(ast::PhaseSubscription::EnterField(event)) if event.reference.is_some()),
         self_departure: entry.lastword.is_some()
-            || matches!(on, Some(ast::PhaseSubscription::LeaveField(_))),
+            || matches!(on, Some(ast::PhaseSubscription::LeaveField(event)) if event.reference.is_some()),
         departure_to_cemetery: entry.lastword.is_some(),
     }
 }
@@ -704,7 +704,10 @@ fn lowered_trigger(
             active_zones: active_zones(entry, path)?,
             view: if matches!(pattern, EventPattern::Play { .. }) {
                 EventSnapshotPolicy::AtReveal
-            } else if matches!(pattern, EventPattern::LeaveField { .. }) {
+            } else if matches!(
+                pattern,
+                EventPattern::LeaveField { .. } | EventPattern::Destroy { .. }
+            ) {
                 EventSnapshotPolicy::BeforeExit
             } else {
                 EventSnapshotPolicy::AfterEntry
@@ -762,18 +765,21 @@ fn lowered_subscription(
                 ),
             })
         }
-        ast::PhaseSubscription::LeaveField(entry) => {
+        ast::PhaseSubscription::LeaveField(entry)
+            if entry.reference.is_some() && entry.who.is_none() && entry.sel.is_none() =>
+        {
             let event = Binding::new(event_id, scope);
             Ok(EventPattern::LeaveField {
                 binding: event,
                 predicate: super::events::timing::leave_predicate(event, entry.during.is_some()),
             })
         }
+        ast::PhaseSubscription::LeaveField(_)
+        | ast::PhaseSubscription::Destroyed(_)
+        | ast::PhaseSubscription::Moved(_)
+        | ast::PhaseSubscription::PlacedEx(_) => movement::subscription(on, event_id, scope, path),
         ast::PhaseSubscription::Evolved(entry) => {
             evolution::subscription(entry, event_id, scope, path)
-        }
-        ast::PhaseSubscription::Moved(_) | ast::PhaseSubscription::PlacedEx(_) => {
-            movement::subscription(on, event_id, scope, path)
         }
         ast::PhaseSubscription::Damage(entry) => {
             let event = Binding::new(event_id, scope);
@@ -790,29 +796,19 @@ fn lowered_subscription(
             })
         }
         ast::PhaseSubscription::EnterField(entry) => {
-            let itself = entry.reference.as_ref().map(|_| true);
-            let own = entry
-                .who
-                .as_ref()
-                .map(|side| matches!(side, ast::EntryPlayer::Controller));
-            if itself.is_none() && (own.is_none() || entry.sel.is_none()) {
-                return Err(unsupported(path));
-            }
-            let filter = super::events::entry::EntryFilter {
-                own,
-                itself,
-                follower: entry.sel.is_some(),
-                trait_id: entry
-                    .sel
-                    .as_ref()
-                    .and_then(|sel| sel.trait_id.as_ref())
-                    .map(|id| super::TraitId(id.clone())),
-                own_turn: entry.during.is_some(),
-            };
             let event = Binding::new(event_id, scope);
             Ok(EventPattern::EnterField {
                 binding: event,
-                predicate: filter.predicate(event),
+                predicate: movement::movement_filter(
+                    entry
+                        .who
+                        .as_ref()
+                        .map(|side| matches!(side, ast::EntryPlayer::Controller)),
+                    entry.reference.is_some(),
+                    entry.sel.as_ref(),
+                    entry.during.is_some(),
+                )
+                .predicate(super::events::subject::SubjectFields::Entry(event)),
             })
         }
     }
