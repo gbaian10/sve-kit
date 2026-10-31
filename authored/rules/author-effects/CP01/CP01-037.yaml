@@ -1,0 +1,28 @@
+cards:
+  CP01-037:
+    abilities:
+      - line: 1
+        use: meal_entry.v1
+      - fanfare:
+          do:
+            - damage:
+                n: 5
+                to:
+                  any_of:
+                    - leaders: opponents
+                    - kind: follower
+                      who: opp
+                      zone: field
+            - discard:
+                all: true
+                who: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-31"
+format: 2
+kind: author_effect_set

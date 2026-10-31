@@ -1,0 +1,36 @@
+cards:
+  CP01-034:
+    abilities:
+      - keywords:
+          - quick
+        line: 1
+      - line: 2
+        spell:
+          do:
+            - damage:
+                instead:
+                  - if:
+                      exists:
+                        kind: follower
+                        racing: true
+                        who: self
+                        zone: field
+                    n: 3
+                n: 2
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-31"
+format: 2
+kind: author_effect_set

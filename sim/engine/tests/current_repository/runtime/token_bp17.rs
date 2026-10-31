@@ -59,7 +59,8 @@ fn finish(game: &mut Game, mut play: CardPlay, choose_ward: bool) {
                 Answer::TokenCapacity(handle)
             }
             InputDomain::WardEntry { .. } => Answer::WardEntry(true),
-            InputDomain::Quick { .. }
+            InputDomain::DriveTrigger { .. }
+            | InputDomain::Quick { .. }
             | InputDomain::OptionalCost
             | InputDomain::CostMaterials(_)
             | InputDomain::BeforeDraw

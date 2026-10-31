@@ -1,0 +1,21 @@
+cards:
+  CP01-001:
+    abilities:
+      - evolve:
+          cost:
+            pp: 2
+        line: 1
+      - line: 2
+        use: meal_entry.v1
+      - keywords:
+          - storm
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-31"
+format: 2
+kind: author_effect_set
