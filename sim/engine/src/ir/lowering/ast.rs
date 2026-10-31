@@ -227,7 +227,7 @@ pub(super) enum Step {
     Life(Life),
     SetLife(SetLife),
     Destroy(ObjectAction),
-    Banish(ObjectAction),
+    Banish(BanishAction),
     Act(ObjectAction),
     Stand(ObjectAction),
     Buff(Modify),
@@ -450,6 +450,13 @@ pub(super) enum Placement {
 pub(super) enum Chooser {
     #[serde(rename = "chooser")]
     Chooser,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum BanishAction {
+    Top { top: DeckTop },
+    Objects(ObjectAction),
 }
 
 #[derive(Deserialize)]

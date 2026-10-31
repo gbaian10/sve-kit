@@ -107,7 +107,7 @@ pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
 
     if let Node::Instruction { instruction } = &mut inspected
         && super::movement::deck_top(&instruction.action).is_some()
-        && let Action::Move { objects, .. } = &mut instruction.action
+        && let Action::Move { objects, .. } | Action::Banish { objects } = &mut instruction.action
     {
         // Only this checked slice is authorized; instruction metadata keeps its private-read guard.
         *objects = Selector::Objects { objects: vec![] };
