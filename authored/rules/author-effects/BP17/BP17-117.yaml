@@ -1,0 +1,41 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP17-117:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-31"
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - look:
+                top:
+                  who: self
+                  n: 1
+                bind: seen
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  trait: 自然
+                n: 1
+                may: true
+            - move:
+                ref: picked
+                to: hand
+            - reveal:
+                ref: picked
+                bind: shown
+            - create:
+                token: ナテラの大樹
+                n: 1
+                to: ex
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP17-T19
