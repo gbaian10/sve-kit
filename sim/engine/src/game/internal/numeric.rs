@@ -11,8 +11,8 @@ use crate::ir::{
     Action, Bool, CharacteristicPatch, CommitId, ContinuousLayer, Control, Duration, DurationEnd,
     Effect, EffectId, EffectReference, EffectTarget, ExecutionId, ExecutionRef, Expr,
     InstallationSubjects, Instruction, Int, Interval, Node, NonEmpty, NumericChange, ObjectOperand,
-    Program, RuntimeHolder, Selector, Stat, StatChangeEvent, StatChangeReason, StatDelta,
-    StatOperation, TimeAnchor, TimestampBasis, ZoneKind,
+    ObjectRef, Program, RuntimeHolder, Selector, Stat, StatChangeEvent, StatChangeReason,
+    StatDelta, StatOperation, TimeAnchor, TimestampBasis, ZoneKind,
 };
 use core::iter::once;
 use serde::{Deserialize, Serialize};
@@ -472,7 +472,16 @@ impl Game {
         execution: &mut Execution,
         instruction: &Instruction,
     ) -> Result<()> {
-        self.internal_modify_options(execution, instruction, true, true)
+        self.internal_modify_options(execution, instruction, true, true, None)
+    }
+
+    pub(super) fn internal_modify_chosen(
+        &mut self,
+        execution: &mut Execution,
+        instruction: &Instruction,
+        subjects: Vec<ObjectRef>,
+    ) -> Result<()> {
+        self.internal_modify_options(execution, instruction, true, true, Some(subjects))
     }
 
     pub(super) fn internal_install_continuous(
@@ -503,7 +512,7 @@ impl Game {
             source: EffectReference::CurrentInstallation {},
         };
         let enabled = !matches!(condition, Some(Expr::Literal(Bool(false))));
-        self.internal_modify_options(execution, &lowered, false, enabled)?;
+        self.internal_modify_options(execution, &lowered, false, enabled, None)?;
         let Some(InstructionOutcome::Modified { subjects, .. }) =
             execution.receipts.remove(&instruction.receipt)
         else {
@@ -525,6 +534,7 @@ impl Game {
         instruction: &Instruction,
         emit: bool,
         enabled: bool,
+        chosen: Option<Vec<ObjectRef>>,
     ) -> Result<()> {
         let Action::Modify {
             subjects,
@@ -535,7 +545,10 @@ impl Game {
         else {
             return Err(unsupported("numeric action"));
         };
-        let subjects = execution.objects(self, subjects)?;
+        let subjects = match chosen {
+            Some(members) => members,
+            None => execution.objects(self, subjects)?,
+        };
         let (attack, life) = changes(execution, self, patch)?;
         let end = EffectEnd::at(self, execution, &expires.end)?;
         let effect = EffectId(self.state.next_ir_effect);

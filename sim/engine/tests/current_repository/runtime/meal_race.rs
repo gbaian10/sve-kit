@@ -114,7 +114,8 @@ pub(super) fn settle(game: &mut Game) {
                         .unwrap_or_default(),
                 ),
                 InputDomain::OptionalCost => Answer::OptionalCost(false),
-                InputDomain::TokenCapacity { .. }
+                InputDomain::DriveTrigger { .. }
+                | InputDomain::TokenCapacity { .. }
                 | InputDomain::MealPayment { .. }
                 | InputDomain::WardEntry { .. }
                 | InputDomain::Quick { .. }

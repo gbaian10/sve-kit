@@ -377,7 +377,11 @@ impl Game {
         }
         let keys = self.keywords(id)?;
         let leader = target.ends_with(".leader");
-        if self.restricted(id, "attack")? || (leader && self.restricted(id, "attack_leader")?) {
+        if self.restricted(id, "attack")?
+            || (leader
+                && (self.restricted(id, "attack_leader")?
+                    || self.internal_leader_attack_locked(id)?))
+        {
             return Ok(false);
         }
         if object.state["entered_this_turn"] == true

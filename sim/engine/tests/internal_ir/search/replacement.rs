@@ -471,6 +471,7 @@ fn optional_replacement_can_follow_and_precede_distribution() {
                     }
                     InputDomain::TokenCapacity { .. }
                     | InputDomain::MealPayment { .. }
+                    | InputDomain::DriveTrigger { .. }
                     | InputDomain::WardEntry { .. }
                     | InputDomain::BeforeDraw
                     | InputDomain::Integer(_)
