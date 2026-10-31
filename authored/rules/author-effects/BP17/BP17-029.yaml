@@ -1,0 +1,35 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP17-029:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-31"
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - create:
+                token:
+                  - シールドガーディアン
+                  - ナイト
+                to: field
+                n: 1
+            - create:
+                token: スティールナイト
+                to: ex
+                n: 1
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP17-T13
+      - section: 1
+        line: 2
+        card: BP17-T11
+      - section: 1
+        line: 3
+        card: BP17-T12
