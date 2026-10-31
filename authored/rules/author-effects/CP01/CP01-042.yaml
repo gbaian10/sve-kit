@@ -1,0 +1,53 @@
+cards:
+  CP01-042:
+    abilities:
+      - line: 1
+        use: meal_entry.v1
+      - feed:
+          cost:
+            pp: 2
+          times: 2
+        line: 2
+      - feed:
+          cost:
+            pp: 3
+          times: 3
+        line: 3
+      - line: 4
+        race_time:
+          do:
+            - buff:
+                hp: 1
+                on: this
+                power: 2
+      - attack_time:
+          do:
+            - damage:
+                n: 3
+                to:
+                  kind: follower
+                  who: opp
+                  zone: field
+        line: 5
+      - fanfare:
+          cost:
+            discard:
+              n: 2
+              sel:
+                who: self
+                zone: hand
+          do:
+            - grant:
+                keywords:
+                  - storm
+                on: this
+        line: 6
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-31"
+format: 2
+kind: author_effect_set

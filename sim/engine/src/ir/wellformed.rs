@@ -672,6 +672,19 @@ impl Checker {
                 self.player(player)?;
                 self.integer(amount)
             }
+            Action::MealRace {
+                subject,
+                amount,
+                resource_links,
+                ..
+            } => {
+                self.object(subject)?;
+                self.natural(amount)?;
+                for object in resource_links {
+                    self.object(object)?;
+                }
+                Ok(())
+            }
             Action::Evolve {
                 subject,
                 form,

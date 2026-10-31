@@ -2,10 +2,10 @@ use super::{BindingKind, Checked, Checker, TypeId, WellFormedReason};
 use crate::ir::{
     Action, CaptureTime, Cardinality, ChoiceDomain, CostSpec, CounterOperation, Decision,
     DecisionKind, Declinable, DiscardMode, Disjointness, ExecutionRef, InputMode,
-    InstructionContext, MemberProjection, MoveDestination, MoveReason, Nat, Node, ObjectOperand,
-    OwnerZone, PaymentOptionality, PaymentResult, PaymentTime, PlaySlot, PlayerRef, PlayerRelation,
-    Posture, Program, ReceiptId, RoleCardinality, RuleProcedure, SelectionConstraint,
-    SelectionView, Selector, TargetRoleSpec, Visibility, ZoneKind, ZoneRef,
+    InstructionContext, MealRaceOperation, MemberProjection, MoveDestination, MoveReason, Nat,
+    Node, ObjectOperand, OwnerZone, PaymentOptionality, PaymentResult, PaymentTime, PlaySlot,
+    PlayerRef, PlayerRelation, Posture, Program, ReceiptId, RoleCardinality, RuleProcedure,
+    SelectionConstraint, SelectionView, Selector, TargetRoleSpec, Visibility, ZoneKind, ZoneRef,
 };
 use crate::ir::{AggregateBound, PreconditionKind, PreconditionReason};
 use crate::ir::{Expr, Int, NumericChange, ObjectReceipt, ObjectReceiptList, ResourceOperation};
@@ -609,6 +609,7 @@ impl Checker {
                         }
                         let valid = matches!(&step.instruction.action,
                             Action::Discard { .. }
+                            | Action::MealRace { operation: MealRaceOperation::Meal, .. }
                             | Action::Counter { operation: CounterOperation::Remove {}, .. }
                             | Action::Posture { posture: Posture::Acted, .. })
                             || matches!(&step.instruction.action, Action::Resource { operation: ResourceOperation::Pay, amount: Expr::Literal(Int(value)), .. } if *value >= 0)

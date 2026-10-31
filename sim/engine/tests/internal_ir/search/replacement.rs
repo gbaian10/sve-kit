@@ -470,6 +470,7 @@ fn optional_replacement_can_follow_and_precede_distribution() {
                         Answer::SearchReplacement(SearchReplacementAnswer::Original)
                     }
                     InputDomain::TokenCapacity { .. }
+                    | InputDomain::MealPayment { .. }
                     | InputDomain::WardEntry { .. }
                     | InputDomain::BeforeDraw
                     | InputDomain::Integer(_)

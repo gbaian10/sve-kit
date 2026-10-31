@@ -1,6 +1,7 @@
 //! Current printed keyword authority and the CR 12.8.2 optional entry procedure.
 use super::super::{DecisionId, Execution, InputDomain, ObjectRef, Wait, grant, player_id};
 use super::{Ability, Game, KeywordId, Located, Result, invalid, unsupported};
+use crate::game::list;
 use crate::ir::lowering::PrintedKeyword;
 use crate::ir::{Posture, PostureEvent, SourceSpan, printed_keywords};
 use alloc::collections::BTreeSet;
@@ -26,6 +27,16 @@ impl Game {
             return Ok(None);
         }
         let mut keywords = BTreeSet::new();
+        if object.zone == "field"
+            && object.state["racing"] == true
+            && list(&object.state["links"]["出走"]).iter().any(|resource| {
+                resource
+                    .as_str()
+                    .is_some_and(|id| self.object(id).is_ok_and(|linked| linked.zone == "race"))
+            })
+        {
+            keywords.insert("rush".into());
+        }
         for ability in self.internal_printed_abilities(holder)? {
             if let Some(keyword) =
                 printed_keywords::card_declaration(&ability.node).and_then(grant::keyword)

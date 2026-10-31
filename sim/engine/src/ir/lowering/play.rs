@@ -750,7 +750,8 @@ fn contains_choice(steps: &[ast::Step]) -> bool {
                     .as_ref()
                     .is_some_and(|else_steps| contains_choice(else_steps))
         }
-        ast::Step::Evolve(_)
+        ast::Step::Race(_)
+        | ast::Step::Evolve(_)
         | ast::Step::Either(_)
         | ast::Step::Choose(_)
         | ast::Step::Draw(_)

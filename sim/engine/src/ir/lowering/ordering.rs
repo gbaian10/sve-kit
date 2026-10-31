@@ -78,6 +78,7 @@ impl BodyContext<'_> {
             }
             ast::Step::Reveal(_)
             | ast::Step::EachPlayer(_)
+            | ast::Step::Race(_)
             | ast::Step::Evolve(_)
             | ast::Step::If(_)
             | ast::Step::Choose(_)

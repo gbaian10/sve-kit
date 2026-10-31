@@ -1,4 +1,4 @@
-//! Physical evolution resources carry snapshot information, never prototype programs.
+//! Physical evolution and meal resources carry snapshot information, never prototype programs.
 use super::{Game, Result, invalid};
 use crate::game::string;
 
@@ -18,8 +18,11 @@ impl Game {
             {
                 continue;
             }
+            // Role admission cannot query abilities whose resource role is still being checked.
             let face = self.catalog.face(&object.card, 0)?;
-            if !string(&face["card_type"]).contains("エボルヴ") {
+            if !string(&face["card_type"]).contains("エボルヴ")
+                && !self.single_rules_name_matches_role(&object.id, "meal_item")?
+            {
                 return Err(invalid("evolution resource must have printed Evolve type"));
             }
             self.card_runtime
@@ -38,6 +41,7 @@ impl Game {
             return Err(invalid("evolution resource identity or face changed"));
         }
         match object.zone.as_str() {
+            "race" if self.single_rules_name_matches_role(holder, "meal_item")? => Ok(true),
             "evolve_deck" => Ok(true),
             "evolution" => {
                 let bases = self

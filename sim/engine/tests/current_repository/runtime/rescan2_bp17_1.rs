@@ -37,6 +37,7 @@ fn finish(game: &mut Game, mut step: CardPlay, mode: u64, accept: bool) {
                 }
             }
             InputDomain::TokenCapacity { .. }
+            | InputDomain::MealPayment { .. }
             | InputDomain::Quick { .. }
             | InputDomain::BeforeDraw
             | InputDomain::Pending(_)
