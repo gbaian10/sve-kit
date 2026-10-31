@@ -1,5 +1,6 @@
 use crate::ir::ZoneKind;
 use alloc::collections::BTreeMap;
+use core::slice::from_ref;
 use serde::Deserialize;
 use serde::de::IgnoredAny;
 use serde_json::Value;
@@ -220,6 +221,7 @@ pub(super) enum Step {
     If(Conditional),
     EachPlayer(EachPlayer),
     Choice(Choice),
+    Either(Either),
     Choose(Choose),
     Draw(Draw),
     Pp(ResourceIncrease),
@@ -254,12 +256,28 @@ pub(super) struct EffectEvolution {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct Create {
-    pub token: String,
+    pub token: CreateToken,
     pub to: CreateZone,
     pub n: Option<TokenCount>,
     pub result: Option<String>,
     pub bind: Option<String>,
     pub by: Option<String>,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged)]
+pub(super) enum CreateToken {
+    One(String),
+    Many(Vec<String>),
+}
+
+impl CreateToken {
+    pub(super) fn names(&self) -> &[String] {
+        match self {
+            Self::One(name) => from_ref(name),
+            Self::Many(names) => names,
+        }
+    }
 }
 
 #[derive(Deserialize)]
@@ -947,6 +965,15 @@ pub(super) struct Choice {
     pub options: Vec<Vec<Step>>,
     #[serde(rename = "who")]
     pub _who: Option<SelfPlayer>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Either {
+    pub options: Vec<Vec<Step>>,
+    #[serde(rename = "who")]
+    pub _who: Option<SelfPlayer>,
+    pub bind: Option<String>,
 }
 
 #[derive(Clone, Deserialize)]

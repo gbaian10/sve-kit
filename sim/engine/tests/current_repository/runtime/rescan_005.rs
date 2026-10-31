@@ -34,7 +34,8 @@ fn finish(game: &mut Game, mut play: CardPlay) -> CardPlay {
                 assert!(!domain.members.is_empty(), "the effect has a legal target");
                 Answer::Targets(vec![domain.members[0].handle])
             }
-            InputDomain::Quick { .. }
+            InputDomain::TokenCapacity { .. }
+            | InputDomain::Quick { .. }
             | InputDomain::OptionalCost
             | InputDomain::CostMaterials(_)
             | InputDomain::BeforeDraw
@@ -201,11 +202,9 @@ fn bp02_t06_rush_attacks_a_follower_the_turn_it_enters() {
     let mut game = game(&initial);
 
     assert_eq!(
-        game.internal_rule_action(
-            &json!({"do":"attack","attacker":"dragon","target":"P2.leader"})
-        )
-        .unwrap()
-        .outcome,
+        game.internal_rule_action(&json!({"do":"attack","attacker":"dragon","target":"P2.leader"}))
+            .unwrap()
+            .outcome,
         "cannot-attack",
         "Rush does not permit attacking a leader on entry"
     );

@@ -696,3 +696,450 @@ fn amulet_token_play_and_activation_use_ex_and_reject_a_hand_origin() {
 
 #[path = "token_creation/dynamic.rs"]
 mod dynamic;
+
+fn mixed_selection(steps: Value, ward: bool) -> SelectedEffects {
+    let (mut snapshot, _, mut input) = selection(1);
+    *input.pointer_mut("/authors/0/input/tree/cards/creator/faces/f:11111111111111111111111111111111/abilities/0/spell/do").unwrap() = steps;
+    let (second, template) = author(
+        "second",
+        "44444444444444444444444444444444",
+        "フォロワー・トークン",
+        if ward {
+            vec![json!({"keywords":["ward"]})]
+        } else {
+            vec![]
+        },
+    );
+    snapshot.push_str(&second.to_string());
+    snapshot.push('\n');
+    input
+        .get_mut("authors")
+        .and_then(Value::as_array_mut)
+        .unwrap()
+        .push(template);
+    Catalog::from_current_selection(
+        &snapshot,
+        include_str!("../../../authored/rules/keywords.yaml"),
+        &input,
+    )
+    .unwrap()
+}
+
+#[expect(
+    clippy::panic,
+    reason = "Only a completed synthetic creation has receipts."
+)]
+fn token_receipts(play: &CardPlay) -> usize {
+    let CardPlay::Resolved(result) = play else {
+        panic!("creation must resolve");
+    };
+    result
+        .progress
+        .receipts
+        .values()
+        .filter_map(|outcome| {
+            if let InstructionOutcome::Token(value) = outcome {
+                Some(value.created.len())
+            } else {
+                None
+            }
+        })
+        .sum()
+}
+
+#[expect(
+    clippy::panic,
+    reason = "The synthetic capacity case requires its exact question."
+)]
+fn choose_second_at_capacity(game: &mut Game, play: CardPlay) -> CardPlay {
+    let CardPlay::Awaiting(question) = play else {
+        panic!("mixed capacity must ask which name fits");
+    };
+    let InputDomain::TokenCapacity { choices } = &question.domain else {
+        panic!("capacity uses names, not objects");
+    };
+    assert_eq!(
+        choices.len(),
+        2,
+        "identical copies must not duplicate name combinations"
+    );
+    let handle = u64::try_from(
+        choices
+            .iter()
+            .position(|names| names == &["second"])
+            .unwrap(),
+    )
+    .unwrap();
+    let before = game.projection(View::Referee).unwrap();
+    assert_eq!(
+        before
+            .get("objects")
+            .and_then(Value::as_object)
+            .unwrap()
+            .len(),
+        5,
+        "no token exists before the capacity answer"
+    );
+    assert!(
+        game.answer_internal_card(
+            PlayerId { seat: 2 },
+            question.token,
+            Answer::TokenCapacity(handle)
+        )
+        .is_err(),
+        "another player cannot answer"
+    );
+    assert!(
+        game.answer_internal_card(
+            question.actor,
+            question.token,
+            Answer::TokenCapacity(u64::MAX)
+        )
+        .is_err(),
+        "out-of-domain handles fail atomically"
+    );
+    assert_eq!(
+        game.projection(View::Referee).unwrap(),
+        before,
+        "invalid answers preserve the exact question and state"
+    );
+    let resumed = game
+        .answer_internal_card(
+            question.actor,
+            question.token,
+            Answer::TokenCapacity(handle),
+        )
+        .unwrap();
+    assert!(
+        game.answer_internal_card(
+            question.actor,
+            question.token,
+            Answer::TokenCapacity(handle)
+        )
+        .is_err(),
+        "the consumed question cannot create again"
+    );
+    resumed
+}
+
+#[test]
+fn mixed_capacity_chooses_names_before_allocating_and_binds_only_arrivals() {
+    for zone in ["field", "ex"] {
+        for occupied in [0_usize, 4, 5] {
+            let mut steps = vec![
+                json!({"create":{"token":["token","second"],"n":2_u8,"to":zone,"result":"made"}}),
+            ];
+            if zone == "field" {
+                steps.push(json!({"act":{"ref":"made"}}));
+            }
+            let selected = mixed_selection(json!(steps), false);
+            let mut initial = initial(occupied);
+            if zone == "field" {
+                initial["players"]["P1"]["zones"]["field"] =
+                    initial["players"]["P1"]["zones"]["ex"].take();
+                initial["players"]["P1"]["zones"]["ex"] = json!([]);
+            }
+            let mut game = Game::from_selected_effects(
+                selected,
+                &initial,
+                &Value::Null,
+                &Value::Null,
+                "mixed-capacity",
+            )
+            .unwrap();
+            let mut play = game
+                .play_internal_card("creator", PlayerId { seat: 1 })
+                .unwrap();
+            if occupied == 4 {
+                play = choose_second_at_capacity(&mut game, play);
+            }
+            let expected = 4.min(5 - occupied);
+            assert_eq!(
+                token_receipts(&play),
+                expected,
+                "receipts count actual arrivals"
+            );
+            let view = game.projection(View::Referee).unwrap();
+            assert_eq!(
+                view["P1"][zone].as_array().unwrap().len(),
+                occupied + expected,
+                "destination capacity is respected"
+            );
+            let arrivals = view["objects"]
+                .as_object()
+                .unwrap()
+                .iter()
+                .filter(|(id, _)| id.starts_with("new-"))
+                .collect::<Vec<_>>();
+            assert_eq!(
+                arrivals.len(),
+                expected,
+                "discarded alternatives never allocate objects"
+            );
+            for (_, arrival) in arrivals {
+                assert_eq!(
+                    arrival["acted"],
+                    zone == "field",
+                    "the field result binds only successfully created members"
+                );
+                if occupied == 4 {
+                    assert_eq!(
+                        arrival["card"], "second",
+                        "capacity may choose the later printed name"
+                    );
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn mixed_capacity_then_ward_resumes_the_same_batch_once() {
+    let selected = mixed_selection(
+        json!([
+            {"create":{"token":["token","second"],"n":2_u8,"to":"field"}}
+        ]),
+        true,
+    );
+    let mut state = initial(4);
+    state["players"]["P1"]["zones"]["field"] = state["players"]["P1"]["zones"]["ex"].take();
+    state["players"]["P1"]["zones"]["ex"] = json!([]);
+    let mut game =
+        Game::from_selected_effects(selected, &state, &Value::Null, &Value::Null, "mixed-ward")
+            .unwrap();
+    let CardPlay::Awaiting(capacity) = game
+        .play_internal_card("creator", PlayerId { seat: 1 })
+        .unwrap()
+    else {
+        panic!("capacity precedes Ward");
+    };
+    let InputDomain::TokenCapacity { choices } = capacity.domain else {
+        panic!("name combinations");
+    };
+    let handle = u64::try_from(
+        choices
+            .iter()
+            .position(|names| names == &["second"])
+            .unwrap(),
+    )
+    .unwrap();
+    let CardPlay::Awaiting(ward) = game
+        .answer_internal_card(
+            capacity.actor,
+            capacity.token,
+            Answer::TokenCapacity(handle),
+        )
+        .unwrap()
+    else {
+        panic!("chosen Ward token asks its entry posture");
+    };
+    assert!(
+        matches!(ward.domain, InputDomain::WardEntry { .. }),
+        "Ward is a separate rule procedure"
+    );
+    let before = game.projection(View::Referee).unwrap();
+    assert!(
+        game.answer_internal_card(
+            capacity.actor,
+            capacity.token,
+            Answer::TokenCapacity(handle)
+        )
+        .is_err(),
+        "old capacity coordinate cannot answer Ward"
+    );
+    assert_eq!(
+        game.projection(View::Referee).unwrap(),
+        before,
+        "stale answers do not allocate a second token"
+    );
+    let play = game
+        .answer_internal_card(ward.actor, ward.token, Answer::WardEntry(true))
+        .unwrap();
+    assert_eq!(
+        token_receipts(&play),
+        1,
+        "Ward resumes the original one-member batch"
+    );
+    let view = game.projection(View::Referee).unwrap();
+    assert_eq!(
+        view["P1"]["field"].as_array().unwrap().len(),
+        5,
+        "the chosen token moves exactly once"
+    );
+}
+
+#[test]
+fn either_selects_at_resolution_after_payment_and_sequential_choices_have_new_epochs() {
+    let branch = json!({"either":{"options":[
+        [{"create":{"token":"token","to":"ex"}}],
+        [{"create":{"token":"second","n":2_u8,"to":"ex"}}]
+    ]}});
+    let selected = mixed_selection(json!([branch, branch]), false);
+    let mut game = Game::from_selected_effects(
+        selected,
+        &initial(0),
+        &Value::Null,
+        &Value::Null,
+        "resolution-alternatives",
+    )
+    .unwrap();
+    let mut play = game
+        .play_internal_card("creator", PlayerId { seat: 1 })
+        .unwrap();
+    let mut previous = None;
+    for pick in [1_usize, 0] {
+        let CardPlay::Awaiting(question) = play else {
+            panic!("each either resolves separately");
+        };
+        let InputDomain::Modes { modes, count, .. } = &question.domain else {
+            panic!("resolution alternatives use the existing mode domain");
+        };
+        assert_eq!(count.0, 1, "exactly one printed alternative");
+        let view = game.projection(View::Referee).unwrap();
+        assert_eq!(
+            view["P1"]["pp"]["current"], 9_i32,
+            "spell payment occurs before a resolution choice"
+        );
+        assert!(
+            view["P1"]["hand"].as_array().unwrap().is_empty(),
+            "the spell has already been played"
+        );
+        if let Some(token) = previous {
+            assert_ne!(
+                question.token, token,
+                "sequential decisions have distinct coordinates"
+            );
+            assert!(
+                game.answer_internal_card(question.actor, token, Answer::Modes(vec![modes[pick]]))
+                    .is_err(),
+                "an earlier alternative cannot answer the next"
+            );
+        }
+        assert!(
+            game.answer_internal_card(question.actor, question.token, Answer::Modes(vec![]))
+                .is_err(),
+            "required alternative cannot be declined"
+        );
+        assert!(
+            game.answer_internal_card(question.actor, question.token, Answer::Modes(modes.clone()))
+                .is_err(),
+            "multiple alternatives cannot be combined"
+        );
+        assert_eq!(
+            game.projection(View::Referee).unwrap(),
+            view,
+            "invalid alternatives leave the state intact"
+        );
+        previous = Some(question.token);
+        play = game
+            .answer_internal_card(
+                question.actor,
+                question.token,
+                Answer::Modes(vec![modes[pick]]),
+            )
+            .unwrap();
+    }
+    assert_eq!(
+        token_receipts(&play),
+        3,
+        "only the selected two-plus-one tokens are created"
+    );
+    let view = game.projection(View::Referee).unwrap();
+    let cards = view["P1"]["ex"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|id| {
+            view["objects"][id.as_str().unwrap()]["card"]
+                .as_str()
+                .unwrap()
+        })
+        .collect::<Vec<_>>();
+    assert_eq!(
+        cards,
+        ["second", "second", "token"],
+        "resolution order follows each selected branch"
+    );
+}
+
+#[test]
+fn mixed_creation_checks_every_token_definition_and_rejects_empty_lists() {
+    for names in [json!([]), json!(["token", "missing"])] {
+        let (snapshot, keywords, mut input) = selection(1);
+        *input.pointer_mut("/authors/0/input/tree/cards/creator/faces/f:11111111111111111111111111111111/abilities/0/spell/do/0/create/token").unwrap() = names;
+        let loaded =
+            Catalog::from_current_selection(&snapshot, &keywords, &input).and_then(|selected| {
+                Game::from_selected_effects(
+                    selected,
+                    &initial(0),
+                    &Value::Null,
+                    &Value::Null,
+                    "invalid-mixed",
+                )
+            });
+        assert!(
+            loaded.is_err(),
+            "empty or incomplete mixed templates remain closed"
+        );
+    }
+}
+
+#[test]
+fn resolution_alternative_can_use_an_earlier_created_set_without_leaking_branch_locals() {
+    let selected = mixed_selection(
+        json!([
+            {"create":{"token":"token","to":"field","result":"earlier"}},
+            {"either":{"options":[[{"act":{"ref":"earlier"}}],[{"create":{"token":"second","to":"ex","result":"branch_only"}}]]}},
+            {"stand":{"ref":"earlier"}}
+        ]),
+        false,
+    );
+    let mut game = Game::from_selected_effects(
+        selected,
+        &initial(0),
+        &Value::Null,
+        &Value::Null,
+        "resolution-local",
+    )
+    .unwrap();
+    let CardPlay::Awaiting(question) = game
+        .play_internal_card("creator", PlayerId { seat: 1 })
+        .unwrap()
+    else {
+        panic!("earlier creation precedes the resolution alternative");
+    };
+    let InputDomain::Modes { modes, .. } = &question.domain else {
+        panic!("resolution modes");
+    };
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["field"]
+            .as_array()
+            .unwrap()
+            .len(),
+        1,
+        "the outer created set already exists"
+    );
+    assert!(
+        matches!(
+            game.answer_internal_card(
+                question.actor,
+                question.token,
+                Answer::Modes(vec![modes[0]])
+            )
+            .unwrap(),
+            CardPlay::Resolved(_)
+        ),
+        "the whole spell resolves after the selected branch"
+    );
+    let view = game.projection(View::Referee).unwrap();
+    let id = view["P1"]["field"][0].as_str().unwrap();
+    assert_eq!(
+        view["objects"][id]["acted"], false,
+        "the original binding survives the branch and is stood afterwards"
+    );
+    assert_eq!(
+        view["P1"]["ex"],
+        json!([]),
+        "the unselected branch creates nothing"
+    );
+}

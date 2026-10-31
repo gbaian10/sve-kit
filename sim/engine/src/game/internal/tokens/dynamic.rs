@@ -131,8 +131,11 @@ pub(crate) fn check_each(control: &Control) -> Result<()> {
     let Node::Instruction { instruction } = &step.node else {
         return Err(unsupported("token instruction stage"));
     };
-    let Some((token, zone)) = super::specification(&instruction.action) else {
+    let Some((tokens, zone)) = super::specification(&instruction.action) else {
         return Err(unsupported("player token shape"));
+    };
+    let [token] = tokens else {
+        return Err(unsupported("single-template player token stage"));
     };
     if zone.player != (PlayerRef::Bound { binding: *player })
         || instruction.actor != zone.player

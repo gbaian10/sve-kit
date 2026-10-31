@@ -36,7 +36,8 @@ fn finish(game: &mut Game, mut step: CardPlay, mode: u64, accept: bool) {
                     Answer::CostMaterials(handles)
                 }
             }
-            InputDomain::Quick { .. }
+            InputDomain::TokenCapacity { .. }
+            | InputDomain::Quick { .. }
             | InputDomain::BeforeDraw
             | InputDomain::Pending(_)
             | InputDomain::TriggerQuota(_)

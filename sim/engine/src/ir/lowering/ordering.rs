@@ -82,6 +82,7 @@ impl BodyContext<'_> {
             | ast::Step::If(_)
             | ast::Step::Choose(_)
             | ast::Step::Choice(_)
+            | ast::Step::Either(_)
             | ast::Step::Draw(_)
             | ast::Step::Pp(_)
             | ast::Step::Discard(_)

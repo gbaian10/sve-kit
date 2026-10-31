@@ -284,6 +284,8 @@ fn play_requirement(code: &str) -> bool {
             | "shape.ChoiceDomain.Modes"
             | "shape.ModeDecisionKind.PlayParameter"
             | "internal.ModeChoiceKind.ChoiceKeyword"
+            | "internal.ModeChoiceKind.ResolutionAlternative"
+            | "shape.ModeDecisionKind.ResolutionChoice"
             | "internal.ModeExclusion.CurrentTurnAbilityInstance"
     )
 }

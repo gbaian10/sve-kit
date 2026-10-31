@@ -39,12 +39,22 @@ impl BodyContext<'_> {
             self.ex_outputs
                 .insert(name.clone(), Selector::Bound { reference: output });
         }
+        let names = value.token.names();
+        if names.is_empty() || names.iter().any(String::is_empty) {
+            return Err(unsupported(path));
+        }
+        let tokens = names
+            .iter()
+            .map(|name| {
+                Ok(TokenSpec {
+                    template: TokenTemplateId(name.clone()),
+                    name: Expr::Literal(CardName(name.clone())),
+                    count: self.token_count(value.n.as_ref(), path)?,
+                })
+            })
+            .collect::<Result<Vec<_>, LoweringError>>()?;
         Ok(Action::Token {
-            tokens: vec![TokenSpec {
-                template: TokenTemplateId(value.token.clone()),
-                name: Expr::Literal(CardName(value.token.clone())),
-                count: self.token_count(value.n.as_ref(), path)?,
-            }],
+            tokens,
             destination: TokenDestination::Single {
                 zone: Expr::Literal(ZoneRef {
                     player: self.token_player(value.by.as_deref().unwrap_or("self"), path)?,
