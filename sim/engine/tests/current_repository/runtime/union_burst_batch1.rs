@@ -20,7 +20,19 @@ fn fixture() -> &'static Fixture {
         let template = expanded::tree()["cards"]["synthetic-evolution"].clone();
         let mut tree = expanded::tree().clone();
         let mut loaded = Vec::new();
-        for number in ["CP04-006", "CP04-010", "CP04-014", "CP04-020", "CP04-028", "CP04-050", "CP04-068", "CP04-082",] {
+        for number in [
+            "CP04-006",
+            "CP04-010",
+            "CP04-014",
+            "CP04-020",
+            "CP04-028",
+            "CP04-050",
+            "CP04-068",
+            "CP04-082",
+            "CP04-110",
+            "CP04-117",
+            "PCS01-005",
+        ] {
             let form = rows.iter().find(|row| row["number"] == number).unwrap();
             let name = format!("ub-base-{number}");
             let face = json!({"name":form["faces"][0]["name"],"card_type":"フォロワー","card_class":"ニュートラル","cost":"1","power":"1","hp":"1","traits":[],"text":null,"sections":[]});
@@ -155,8 +167,17 @@ pub(super) fn evolve(card: &str, mut initial: Value) -> Game {
 fn evolution_representative(card: &str) -> &str {
     let identity = &selection_with_rules().current[card].card_id;
     for representative in [
-        "CP04-006", "CP04-010", "CP04-014", "CP04-020", "CP04-028", "CP04-050", "CP04-068",
+        "CP04-006",
+        "CP04-010",
+        "CP04-014",
+        "CP04-020",
+        "CP04-028",
+        "CP04-050",
+        "CP04-068",
         "CP04-082",
+        "CP04-110",
+        "CP04-117",
+        "PCS01-005",
     ] {
         if &selection_with_rules().current[representative].card_id == identity {
             return representative;

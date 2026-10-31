@@ -11,12 +11,6 @@ cards:
           date: "2026-10-31"
     abilities:
       - line: 1
-        evolve_time:
-          do:
-            - damage:
-                to:
-                  who: opp
-                  zone: field
-                  kind: follower
-                n: 1
-          ub: true
+        use: ub.evolve-damage-all-opposing-followers
+        params:
+          n: 1
