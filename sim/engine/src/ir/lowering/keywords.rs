@@ -2,7 +2,7 @@ use super::{
     Ability, AbilityId, Allocator, CardCoordinates, KeywordId, Located, LoweringError, ast,
     source_span, unsupported,
 };
-use crate::ir::{FaceId, Nat, printed_keywords};
+use crate::ir::{FaceId, InstructionId, Nat, printed_keywords};
 
 pub(super) fn lower(
     allocator: &mut Allocator,
@@ -23,13 +23,23 @@ pub(super) fn lower(
             source.author_path = format!("{path}/keywords/{index}");
             let scope = allocator.scope(path)?;
             let keyword = keyword_id(keyword).ok_or_else(|| unsupported(path))?;
-            let node = printed_keywords::definition(
-                keyword,
-                FaceId(source.face.clone()),
-                Nat(u64::from(source.line)),
-                AbilityId(scope.0),
-                scope,
-            )
+            let node = if matches!(keyword, KeywordId::SingleDrive | KeywordId::TwinDrive) {
+                printed_keywords::drive_definition(
+                    keyword,
+                    AbilityId(scope.0),
+                    scope,
+                    InstructionId(allocator.id(path)?),
+                    &source,
+                )
+            } else {
+                printed_keywords::definition(
+                    keyword,
+                    FaceId(source.face.clone()),
+                    Nat(u64::from(source.line)),
+                    AbilityId(scope.0),
+                    scope,
+                )
+            }
             .ok_or_else(|| unsupported(path))?;
             Ok(Located { node, source })
         })
@@ -45,6 +55,8 @@ pub(super) fn keyword_id(keyword: &str) -> Option<KeywordId> {
         "bane" => Some(KeywordId::Bane),
         "intimidate" => Some(KeywordId::Intimidate),
         "assail" => Some(KeywordId::Assail),
+        "single_drive" => Some(KeywordId::SingleDrive),
+        "twin_drive" => Some(KeywordId::TwinDrive),
         _ => None,
     }
 }

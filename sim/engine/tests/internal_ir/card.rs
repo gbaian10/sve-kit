@@ -520,6 +520,8 @@ fn multiple_supported_abilities_keep_distinct_instances_and_effect_producers() {
                     | Fact::LifeChange(_)
                     | Fact::Damage(_)
                     | Fact::Movement(_)
+                    | Fact::DriveTrigger(_)
+                    | Fact::DriveChecked(_)
                     | Fact::Posture(_) => None,
                 })
                 .collect::<Vec<_>>()

@@ -81,6 +81,7 @@ fn response(question: &DecisionView) -> Answer {
         }
         InputDomain::TokenCapacity { .. }
         | InputDomain::MealPayment { .. }
+        | InputDomain::DriveTrigger { .. }
         | InputDomain::WardEntry { .. }
         | InputDomain::Integer(_)
         | InputDomain::SearchReplacement

@@ -3,8 +3,8 @@
 use super::{Execution, Fact, Game, InstructionOutcome, Result, invalid, unsupported};
 use crate::ir::{
     Action, ActionPattern, Bool, DurationEnd, Edge, Effect, Expr, InstallationSubjects,
-    InstallationTime, Instruction, PermissionSubject, Phase, Polarity, Posture, PostureEvent,
-    Selector, StandScope, TimeAnchor,
+    InstallationTime, Instruction, ObjectRef, PermissionSubject, Phase, Polarity, Posture,
+    PostureEvent, Selector, StandScope, TimeAnchor,
 };
 use serde::{Deserialize, Serialize};
 
@@ -70,6 +70,16 @@ impl Game {
         posture: Posture,
     ) -> Result<()> {
         let members = execution.objects(self, objects)?;
+        self.internal_posture_members(execution, instruction, members, posture)
+    }
+
+    pub(super) fn internal_posture_members(
+        &mut self,
+        execution: &mut Execution,
+        instruction: &Instruction,
+        members: Vec<ObjectRef>,
+        posture: Posture,
+    ) -> Result<()> {
         let acted = posture == Posture::Acted;
         let mut planned = Vec::new();
         for member in members {

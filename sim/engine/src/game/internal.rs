@@ -10,15 +10,16 @@ use crate::ir::{
     AbilityQualification, Action, ActionPattern, Arithmetic, Binding, Bool, Capture, CaptureRef,
     CardQuantityOutcome, Cardinality, ChoiceDomain, Comparison, Control, DamageEvent, DamageFlags,
     DamageQuantityOutcome, DamageRecipient, Decision, DecisionId, DecisionKind, Declinable,
-    DestroyOutcome, DrawEvent, Effect, EffectId, EntryMethod, EntryOrigin, ExecutionId, Expr,
-    Generation, InstallationSubjects, Instruction, InstructionContext, Int, IntFrozen,
-    IntOperation, IntRead, LifeChangeEvent, Located, LookOutcome, MeasuredReceipt, ModeChoiceKind,
-    ModeId, MoveOutcome, Nat, NatFrozen, NatOperation, NatRead, Node, ObjectFrozen, ObjectId,
-    ObjectOperand, ObjectRef, OrderOutcome, PlayerId, PlayerRef, PlayerRelation, PlayerResource,
-    PlayerSet, PositiveInt, PostureEvent, Predicate, Program, Quantity, ReceiptId, ReceiptLocation,
-    RecipientSet, Requirements, ResolvedRecipients, RuntimeAbilitySource, RuntimeDamageRecipient,
-    ScopeId, SearchOutcome, SearchReplacementAnswer, Selector, SourceSpan, StepwiseAnswer,
-    StepwiseMode, TokenOutcome, Visibility, WellFormedProgram, ZoneKind,
+    DestroyOutcome, DrawEvent, DriveCheckedEvent, DriveTriggerEvent, Effect, EffectId, EntryMethod,
+    EntryOrigin, ExecutionId, Expr, Generation, InstallationSubjects, Instruction,
+    InstructionContext, Int, IntFrozen, IntOperation, IntRead, LifeChangeEvent, Located,
+    LookOutcome, MeasuredReceipt, ModeChoiceKind, ModeId, MoveOutcome, Nat, NatFrozen,
+    NatOperation, NatRead, Node, ObjectFrozen, ObjectId, ObjectOperand, ObjectRef, OrderOutcome,
+    PlayerId, PlayerRef, PlayerRelation, PlayerResource, PlayerSet, PositiveInt, PostureEvent,
+    Predicate, Program, Quantity, ReceiptId, ReceiptLocation, RecipientSet, Requirements,
+    ResolvedRecipients, RuntimeAbilitySource, RuntimeDamageRecipient, ScopeId, SearchOutcome,
+    SearchReplacementAnswer, Selector, SourceSpan, StepwiseAnswer, StepwiseMode, TokenOutcome,
+    TriggerIcon, Visibility, WellFormedProgram, ZoneKind,
 };
 use crate::ir::{
     AssociationId, BanishOutcome, DiscardEvent, DiscardOutcome, EvolveEvent, FaceId, PaymentResult,
@@ -38,7 +39,9 @@ mod alternatives;
 mod card;
 mod cost;
 mod discard;
+mod drive;
 mod duration;
+pub(in crate::game) use drive::LeaderAttackLock;
 mod grant;
 mod history_turn;
 mod life;
@@ -163,6 +166,13 @@ pub enum InputDomain {
     Integer(Cardinality),
     /// Token-scoped handles and printed information, visible only to the chooser.
     Order(Vec<OrderCard>),
+    /// Optional public trigger icon and token-local follower designations.
+    DriveTrigger {
+        /// Verified icon on the revealed card.
+        icon: TriggerIcon,
+        /// Only controller field followers, without physical identities.
+        targets: Vec<OrderCard>,
+    },
     /// One complete search selection, including all printed groups.
     Search(SearchDomain),
     /// One printed destination allocation from the frozen remaining found set.
@@ -217,6 +227,13 @@ pub enum Answer {
     Integer(Nat),
     /// Complete permutation of this question's handles, in top-to-bottom order.
     Order(Vec<u64>),
+    /// Accept the revealed icon and optionally designate one eligible follower.
+    DriveTrigger {
+        /// Whether to execute the complete icon procedure.
+        accept: bool,
+        /// Token-local follower handle, only for Critical or Stand.
+        target: Option<u64>,
+    },
     /// Token-scoped handles; never physical object references.
     Search(SearchAnswer),
     /// Fresh handles for the current destination allocation only.
@@ -282,6 +299,8 @@ pub enum InstructionOutcome {
     Look(LookOutcome),
     /// Successful same-deck ordering; never a cross-zone movement.
     Order(OrderOutcome),
+    /// Complete checks in printed order, after each icon and final movement.
+    DriveChecks(Vec<DriveCheckedEvent>),
     /// Frozen generations receiving one numeric effect instance.
     Modified {
         /// Allocated only when at least one current subject receives the effect.
@@ -309,6 +328,10 @@ pub struct Progress {
 pub enum Fact {
     /// One race fact, independent of the number of meal resources paid.
     Raced(RaceEvent),
+    /// Accepted trigger effect, before the revealed card leaves the trigger zone.
+    DriveTrigger(Box<DriveTriggerEvent>),
+    /// One completed Drive check and its actual destination.
+    DriveChecked(Box<DriveCheckedEvent>),
     /// Effect-driven evolution; it does not count as playing an evolution ability.
     Evolved(Box<EvolveEvent>),
     /// A card actually discarded from the actor's hand.
@@ -403,6 +426,7 @@ enum Wait {
     TokenCapacity(Box<tokens::CapacityWait>),
     Distribution(allocation::DistributionWait),
     Order(ordering::OrderWait),
+    Drive(Box<drive::DriveWait>),
     Search(search::SearchWait),
     SearchPartition(search::PartitionWait),
     SearchReplacement(search::ReplacementWait),
@@ -783,6 +807,10 @@ impl Game {
                         wait.producer_decision(),
                     )?;
                 }
+                (Wait::Drive(wait), Answer::DriveTrigger { accept, target }) => {
+                    let selected = wait.validate(accept, target)?;
+                    self.internal_drive_answer(&mut execution, *wait, accept, selected)?;
+                }
                 (Wait::Order(wait), Answer::Order(handles)) => {
                     let ordered = wait.validate(&handles)?;
                     rollback = execution.origin.take();
@@ -918,6 +946,7 @@ impl Game {
                 InputDomain::CostMaterials(domain) => { let mut packet = card::selection::packet(&domain); packet["kind"] = json!("cost-materials"); packet },
                 InputDomain::BeforeDraw => json!({"kind":"before-draw"}),
                 InputDomain::Integer(bounds) => json!({"kind":"integer","minimum":bounds.minimum.0,"maximum":bounds.maximum.map(|value| value.0)}),
+                InputDomain::DriveTrigger {icon, targets} => json!({"kind":"drive-trigger","icon":drive::icon_name(icon),"targets":targets.iter().map(|card| json!({"handle":card.handle,"card":card.card,"name":card.name})).collect::<Vec<_>>()}),
                 InputDomain::Order(cards) => json!({"kind":"order","cards":cards.iter().map(|card| json!({"handle":card.handle,"card":card.card,"name":card.name})).collect::<Vec<_>>()}),
                 InputDomain::Search(domain) => search::packet(&domain),
                 InputDomain::SearchPartition(domain) => json!({"kind":"search-partition","cards":domain.cards.iter().map(|card| json!({"handle":card.handle,"card":card.card,"name":card.name})).collect::<Vec<_>>(),"minimum":domain.cardinality.minimum.0,"maximum":domain.cardinality.maximum.map(|value| value.0)}),
@@ -1254,6 +1283,7 @@ impl Game {
             }
             Action::Look { .. } => self.internal_look(execution, &instruction)?,
             Action::Order { .. } => self.internal_order(execution, instruction)?,
+            Action::DriveCheck { .. } => self.internal_drive(execution, instruction)?,
             Action::Draw {
                 player,
                 count,

@@ -69,6 +69,8 @@ fn changes(progress: &Progress) -> Vec<&StatChangeFact> {
             | Fact::CardPlayed { .. }
             | Fact::CardResolved { .. }
             | Fact::AbilityPlayed { .. }
+            | Fact::DriveTrigger(_)
+            | Fact::DriveChecked(_)
             | Fact::AbilityResolved { .. } => None,
         })
         .collect()

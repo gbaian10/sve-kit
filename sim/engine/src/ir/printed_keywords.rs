@@ -191,6 +191,99 @@ pub(crate) fn card_declaration(ability: &Ability) -> Option<KeywordId> {
     let AbilityOrigin::Printed { face, line } = origin.as_ref() else {
         return None;
     };
-    (definition(*keyword, face.clone(), *line, ability.id, ability.scope).as_ref() == Some(ability))
-        .then_some(*keyword)
+    let expected = if matches!(keyword, KeywordId::SingleDrive | KeywordId::TwinDrive) {
+        let step = ability.body.as_ref()?.steps.first()?;
+        let super::Node::Instruction { instruction } = &step.node else {
+            return None;
+        };
+        drive_definition(
+            *keyword,
+            ability.id,
+            ability.scope,
+            instruction.id,
+            &step.source,
+        )
+    } else {
+        definition(*keyword, face.clone(), *line, ability.id, ability.scope)
+    };
+    (expected.as_ref() == Some(ability)).then_some(*keyword)
+}
+
+/// Expand the complete printed Drive rule into the ordinary attack subscription.
+#[expect(
+    clippy::wildcard_enum_match_arm,
+    reason = "Only the complete printed Single and Twin Drive definitions are expanded here."
+)]
+pub(crate) fn drive_definition(
+    keyword: KeywordId,
+    id: AbilityId,
+    scope: ScopeId,
+    instruction: super::InstructionId,
+    span: &super::SourceSpan,
+) -> Option<Ability> {
+    use super::{
+        Action, EventPattern, EventSnapshotPolicy, Instruction, InstructionContext, Located, Node,
+        Program, ReceiptId, TriggerAggregation, TriggerCondition, TriggerSpec,
+    };
+    let repetitions = match keyword {
+        KeywordId::SingleDrive => Nat(1),
+        KeywordId::TwinDrive => Nat(2),
+        _ => return None,
+    };
+    let source = AbilitySource {
+        holder: ObjectOperand::SourceHolder {},
+        origin: AbilityOrigin::Keyword {
+            keyword,
+            origin: Box::new(AbilityOrigin::Printed {
+                face: FaceId(span.face.clone()),
+                line: Nat(u64::from(span.line)),
+            }),
+        },
+        controller: PlayerRef::Controller {},
+    };
+    let event = Binding::new(0, scope);
+    Some(Ability {
+        id,
+        scope,
+        source: source.clone(),
+        kind: AbilityKind::Triggered,
+        qualification: AbilityQualification::Ordinary,
+        active_zones: vec![ZoneKind::Field],
+        event_captures: vec![],
+        play: None,
+        trigger: Some(TriggerSpec {
+            active_zones: vec![ZoneKind::Field],
+            view: EventSnapshotPolicy::AfterEntry,
+            on: TriggerCondition::Event {
+                pattern: EventPattern::Attack {
+                    binding: event,
+                    predicate: super::events::timing::attack_predicate(event),
+                },
+            },
+            limit: None,
+            aggregation: TriggerAggregation::PerFact {},
+        }),
+        body: Some(Program {
+            scope,
+            steps: vec![Located {
+                source: span.clone(),
+                node: Node::Instruction {
+                    instruction: Box::new(Instruction {
+                        id: instruction,
+                        actor: PlayerRef::Controller {},
+                        source: source.clone(),
+                        precondition: None,
+                        context: InstructionContext::Effect,
+                        receipt: ReceiptId(instruction.0),
+                        action: Action::DriveCheck {
+                            player: PlayerRef::Controller {},
+                            repetitions,
+                            source,
+                        },
+                    }),
+                },
+            }],
+        }),
+        declarations: vec![],
+    })
 }

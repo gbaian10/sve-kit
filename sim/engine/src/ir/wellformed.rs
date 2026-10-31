@@ -577,6 +577,10 @@ impl Checker {
     )]
     fn action(&mut self, action: &Action, instruction_actor: &PlayerRef) -> Checked {
         match action {
+            Action::DriveCheck { player, source, .. } => {
+                self.player(player)?;
+                self.ability_source(source)
+            }
             Action::Draw {
                 player,
                 count,

@@ -38,9 +38,13 @@ impl Game {
             keywords.insert("rush".into());
         }
         for ability in self.internal_printed_abilities(holder)? {
-            if let Some(keyword) =
-                printed_keywords::card_declaration(&ability.node).and_then(grant::keyword)
-            {
+            if let Some(keyword) = printed_keywords::card_declaration(&ability.node).and_then(
+                |keyword| match keyword {
+                    KeywordId::SingleDrive => Some("single_drive"),
+                    KeywordId::TwinDrive => Some("twin_drive"),
+                    _ => grant::keyword(keyword),
+                },
+            ) {
                 keywords.insert(keyword.into());
             }
         }
@@ -197,6 +201,15 @@ pub(super) fn check(
     ) {
         return Err(unsupported("printed keyword requires a follower face"));
     }
+    if matches!(keyword, KeywordId::SingleDrive | KeywordId::TwinDrive)
+        && located
+            .node
+            .body
+            .as_ref()
+            .is_none_or(|body| body.steps.iter().any(|step| step.source != located.source))
+    {
+        return Err(invalid("Drive declaration source mismatch"));
+    }
     let current = game
         .card_runtime
         .definitions
@@ -220,6 +233,8 @@ pub(super) fn check(
                     | (PrintedKeyword::Bane, KeywordId::Bane)
                     | (PrintedKeyword::Intimidate, KeywordId::Intimidate)
                     | (PrintedKeyword::Assail, KeywordId::Assail)
+                    | (PrintedKeyword::SingleDrive, KeywordId::SingleDrive)
+                    | (PrintedKeyword::TwinDrive, KeywordId::TwinDrive)
             )
         })
         .ok_or_else(|| invalid("foreign printed keyword"))?;

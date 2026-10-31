@@ -124,6 +124,10 @@ pub enum PrintedKeyword {
     Intimidate,
     /// Printed Assail.
     Assail,
+    /// Printed single Drive check on attack.
+    SingleDrive,
+    /// Printed two sequential Drive checks on attack.
+    TwinDrive,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Deserialize, Serialize)]
