@@ -33,6 +33,7 @@ impl Game {
                 keywords.insert(keyword.into());
             }
         }
+        keywords.extend(self.internal_static_keywords(holder)?);
         Ok(Some(keywords))
     }
 
@@ -58,6 +59,18 @@ impl Game {
         let arrived = prospective.object_mut(holder)?;
         arrived.zone = "field".into();
         arrived.state = state;
+        // Continuous selectors must see the same prospective zone membership as printed Ward.
+        for player in prospective.state.players.values_mut() {
+            for zone in player.zones.values_mut() {
+                zone.retain(|id| id.as_str() != Some(holder));
+            }
+        }
+        prospective
+            .player_mut(&previous.controller)?
+            .zones
+            .entry("field".into())
+            .or_default()
+            .push(json!(holder));
         if prospective.object(holder)?.state["acted"] == true
             || !prospective.keywords(holder)?.contains("guard")
         {

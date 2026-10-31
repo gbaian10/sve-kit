@@ -68,6 +68,7 @@ pub(super) struct Ability {
     pub spell: Option<Body>,
     pub play: Option<PlayCosts>,
     pub keywords: Option<Vec<String>>,
+    pub r#static: Option<Static>,
 }
 
 #[derive(Deserialize)]
@@ -1612,4 +1613,25 @@ impl TryFrom<bool> for True {
             Err("expected true")
         }
     }
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Static {
+    pub effects: Vec<StaticEffect>,
+    pub r#while: Option<Condition>,
+    pub zone: Option<ActivationZones>,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum StaticEffect {
+    Grant(StaticGrant),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct StaticGrant {
+    pub on: Option<Objects>,
+    pub keywords: Vec<String>,
 }
