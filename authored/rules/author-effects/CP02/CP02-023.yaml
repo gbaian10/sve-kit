@@ -1,0 +1,20 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP02-023:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-10-31"
+    abilities:
+      - line: 1
+        evolve:
+          cost: { pp: 1 }
+      - line: 2
+        fanfare:
+          cost: { lesson: 1 }
+          do:
+            - life: { who: self, delta: 1 }
