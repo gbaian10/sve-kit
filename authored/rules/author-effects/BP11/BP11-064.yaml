@@ -1,0 +1,39 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP11-064:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - storm
+          while:
+            cmp:
+              left:
+                count:
+                  who: self
+                  zone: cemetery
+                  trait: 海洋
+              op: ge
+              right: 5
+      - line: 2
+        evolve_time:
+          do:
+            - draw:
+                n: 2
+          cost:
+            discard:
+              n: 1
+              sel:
+                who: self
+                zone: hand
+                trait: 海洋
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-10-31"

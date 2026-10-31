@@ -1,0 +1,38 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP10-023:
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - rush
+                "on":
+                  who: self
+                  zone: field
+                  token: true
+                  class: ロイヤル
+      - line: 3
+        fanfare:
+          do:
+            - create:
+                token: スティールナイト
+                n: 1
+                to: field
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP17-T12
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-10-31"

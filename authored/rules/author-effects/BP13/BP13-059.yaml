@@ -1,0 +1,40 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP13-059:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - rush
+          while:
+            exists:
+              who: self
+              zone: field
+              kind: amulet
+      - line: 2
+        fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: field
+                        trait: 武闘竜人
+                    op: ge
+                    right: 3
+                then:
+                  - pp_max:
+                      who: self
+                      delta: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-10-31"

@@ -1,0 +1,35 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP18-072:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - assail
+          while:
+            exists:
+              who: self
+              zone: field
+              other: true
+              kind: follower
+              trait: 武闘竜人
+      - line: 2
+        auto:
+          "on":
+            phase:
+              whose: self
+              which: end
+          do:
+            - move:
+                ref: this
+                to: hand
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-10-31"

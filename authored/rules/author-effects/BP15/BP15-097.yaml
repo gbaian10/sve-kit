@@ -1,0 +1,43 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP15-097:
+    abilities:
+      - line: 1
+        keywords:
+          - ward
+      - line: 2
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - storm
+          while:
+            cmp:
+              left:
+                count:
+                  who: self
+                  zone: field
+              op: ge
+              right: 3
+      - line: 3
+        fanfare:
+          do:
+            - buff:
+                "on": victim
+                power: -1
+                hp: -1
+          targets:
+            - bind: victim
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-10-31"

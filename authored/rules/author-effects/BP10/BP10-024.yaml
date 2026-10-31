@@ -1,0 +1,37 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP10-024:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - rush
+                "on":
+                  who: self
+                  zone: field
+                  token: true
+                  class: ロイヤル
+      - line: 2
+        evolve_time:
+          do:
+            - create:
+                token: スティールナイト
+                n: 1
+                to: field
+            - buff:
+                "on":
+                  who: self
+                  zone: field
+                  name: スティールナイト
+                power: 1
+                hp: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-10-31"

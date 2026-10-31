@@ -1,0 +1,37 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP15-076:
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - storm
+          while:
+            crimson: true
+      - line: 3
+        fanfare:
+          do:
+            - if:
+                cond:
+                  leader_life:
+                    who: self
+                    eq: 7
+                then:
+                  - buff:
+                      "on": this
+                      power: 2
+                      hp: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-10-31"

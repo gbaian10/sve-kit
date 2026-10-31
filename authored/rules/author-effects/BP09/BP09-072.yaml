@@ -1,0 +1,38 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP09-072:
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - rush
+                  - assail
+                "on":
+                  who: self
+                  zone: field
+                  name: フォレストバット
+      - line: 3
+        fanfare:
+          do:
+            - create:
+                token: フォレストバット
+                n: 2
+                to: field
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP01-T15
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-10-31"

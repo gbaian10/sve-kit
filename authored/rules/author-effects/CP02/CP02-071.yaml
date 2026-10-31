@@ -1,0 +1,30 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP02-071:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - storm
+                  - bane
+          while:
+            leader_life:
+              who: self
+              le: 10
+      - line: 2
+        fanfare:
+          do:
+            - damage:
+                to:
+                  leader: self
+                n: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-10-31"
