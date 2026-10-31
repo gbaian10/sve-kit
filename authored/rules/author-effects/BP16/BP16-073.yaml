@@ -1,0 +1,23 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP16-073:
+    abilities:
+      - line: 1
+        keywords:
+          - rush
+      - line: 2
+        static:
+          while:
+            awakened: true
+          effects:
+            - grant:
+                keywords:
+                  - storm
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-10-31"

@@ -1,0 +1,33 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP02-056:
+    abilities:
+      - line: 1
+        keywords:
+          - ward
+      - line: 2
+        static:
+          effects:
+            - grant:
+                "on":
+                  who: self
+                  zone: field
+                  name: オルカ
+                  token: true
+                keywords:
+                  - storm
+      - line: 3
+        evolve_time:
+          do:
+            - create:
+                token: オルカ
+                n: 1
+                to: field
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-10-31"
