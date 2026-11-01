@@ -433,12 +433,15 @@ impl RuleBindings {
                 {
                     return Err(invalid("resource template is not a token"));
                 }
-                projection
+                // Current candidates share token identity; game construction still admits every body.
+                if projection
                     .catalog
-                    .program(&face.card_no)
-                    .map_err(|_private_error| {
-                        invalid("resource template program is not executable")
-                    })?;
+                    .token_definitions
+                    .get(&face.card_no)
+                    .is_none_or(|token| !token.complete)
+                {
+                    return Err(invalid("resource template program is not executable"));
+                }
                 if !labels.contains(
                     &projection
                         .catalog
