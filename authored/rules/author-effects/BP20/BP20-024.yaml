@@ -1,0 +1,60 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP20-024:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        auto:
+          "on":
+            moved:
+              from:
+                who: opp
+                zone: field
+              to: cemetery
+              sel:
+                kind: follower
+          do:
+            - either:
+                options:
+                  - - create:
+                        token: 黄金の小剣
+                        to: ex
+                        n: 1
+                  - - create:
+                        token: 黄金の杯
+                        to: ex
+                        n: 1
+                  - - create:
+                        token: 黄金の靴
+                        to: ex
+                        n: 1
+      - line: 2
+        evolve_time:
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: enemy
+                n: 5
+            - player_effect:
+                who: self
+                effect:
+                  cost_mod:
+                    when_playing:
+                      who: self
+                      trait: 財宝
+                    delta: -2
+                    next_only: true
+                until: turn

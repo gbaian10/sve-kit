@@ -1,0 +1,50 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "amount": -2,
+        "op": "adjust_cost",
+        "subjects": {
+          "side": "self",
+          "trait": "妖怪",
+          "type": "follower",
+          "zone": "any"
+        }
+      },
+      "kind": "static",
+      "line": 1
+    },
+    {
+      "body": {
+        "amount": 1,
+        "kind": "any",
+        "op": "replace_damage",
+        "sources": {
+          "side": "self",
+          "trait": "妖怪",
+          "type": "follower",
+          "zone": "field"
+        }
+      },
+      "kind": "static",
+      "line": 2
+    },
+    {
+      "body": {
+        "op": "modify",
+        "power": 1,
+        "subjects": "self"
+      },
+      "event": "leave",
+      "kind": "trigger",
+      "line": 3,
+      "subject": {
+        "side": "self",
+        "trait": "妖怪",
+        "type": "follower",
+        "zone": "field"
+      }
+    }
+  ],
+  "status": "complete"
+}

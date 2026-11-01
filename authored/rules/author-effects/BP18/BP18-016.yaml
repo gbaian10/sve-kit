@@ -1,0 +1,50 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP18-016:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        auto:
+          "on":
+            played:
+              who: self
+              sel:
+                kind: spell
+          per_turn: 1
+          targets:
+            - bind: ally
+              from:
+                who: self
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - buff:
+                "on": ally
+                power: 1
+                hp: 1
+            - grant:
+                "on": ally
+                keywords:
+                  - rush
+      - line: 2
+        fanfare:
+          do:
+            - player_effect:
+                who: self
+                effect:
+                  cost_mod:
+                    when_playing:
+                      who: self
+                      kind: spell
+                      orig_cost_le: 1
+                    delta: -1
+                    next_only: true
+                until: turn

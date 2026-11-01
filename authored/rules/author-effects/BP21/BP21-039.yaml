@@ -1,0 +1,55 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP21-039:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        evolve_time:
+          do:
+            - create:
+                token: アンの大英霊
+                to: field
+                n: 1
+                result: made
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: cemetery
+                        trait: 学院
+                    op: ge
+                    right: 10
+                then:
+                  - grant:
+                      "on": made
+                      keywords:
+                        - assail
+      - line: 2
+        super_evolve_time:
+          do:
+            - search:
+                sel:
+                  who: self
+                  zone: deck
+                  name: アンの大魔法
+                n: 1
+                to: hand
+            - player_effect:
+                who: self
+                effect:
+                  cost_mod:
+                    when_playing:
+                      who: self
+                      name: アンの大魔法
+                    delta: -5
+                    next_only: true
+                until: turn

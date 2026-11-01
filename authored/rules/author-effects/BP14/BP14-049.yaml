@@ -1,0 +1,40 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP14-049:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - player_effect:
+                who: self
+                effect:
+                  cost_mod:
+                    when_playing:
+                      any_of:
+                        - who: self
+                          trait: 宴楽
+                          orig_cost_le: 3
+                        - who: self
+                          trait: 魔法使い
+                          orig_cost_le: 3
+                    delta: -3
+                    next_only: true
+                until: turn
+            - if:
+                cond:
+                  exists:
+                    who: self
+                    zone: field
+                    name: 真理の大文豪・ユキシマ
+                then:
+                  - life:
+                      who: self
+                      delta: 2

@@ -1,0 +1,59 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP19-045:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - damage:
+                to:
+                  who: opp
+                  zone: field
+                  kind: follower
+                n: 2
+            - look:
+                bind: seen
+                top:
+                  who: self
+                  n: 3
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  trait: 魔法使い
+                n: 1
+                may: true
+            - move:
+                ref: picked
+                to: hand
+                result: picked_to_hand
+            - reveal:
+                bind: revealed
+                ref: picked
+            - move:
+                ref:
+                  in: seen
+                  except:
+                    in:
+                      objects_of: picked_to_hand
+                      view: before
+                to: cemetery
+            - player_effect:
+                who: self
+                until: turn
+                effect:
+                  cost_mod:
+                    when_playing:
+                      who: self
+                      trait: 魔法使い
+                      orig_cost_le: 3
+                    delta: -3
+                    next_only: true

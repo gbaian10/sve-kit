@@ -1,0 +1,44 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP22-030:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - create:
+                token:
+                  - スティールナイト
+                  - シールドガーディアン
+                  - ナイト
+                to: ex
+                n: 1
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: ex
+                    op: eq
+                    right: 5
+                then:
+                  - player_effect:
+                      who: self
+                      effect:
+                        cost_mod:
+                          when_playing:
+                            who: self
+                            kind: follower
+                            token: true
+                            class: ロイヤル
+                          delta: -2
+                          next_only: true
+                      until: turn

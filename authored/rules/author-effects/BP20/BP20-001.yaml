@@ -1,0 +1,63 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP20-001:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - search:
+                sel:
+                  who: self
+                  zone: deck
+                  kind: spell
+                  orig_cost_le: 2
+                  traits_all:
+                    - 絶傑
+                    - 狩人
+                n: 1
+                to: hand
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: cemetery
+                        trait: 狩人
+                    op: ge
+                    right: 6
+                then:
+                  - create:
+                      token: 絶命の痛撃
+                      to: ex
+                      n: 1
+      - line: 2
+        activate:
+          cost:
+            pp: 0
+          per_turn: 1
+          do:
+            - player_effect:
+                who: self
+                effect:
+                  cost_mod:
+                    when_playing:
+                      who: self
+                      traits_all:
+                        - 絶傑
+                        - 狩人
+                    delta: -2
+                    next_only: true
+                until: turn
+    token_sources:
+      - card: BP20-T12
+        section: 1
+        line: 1

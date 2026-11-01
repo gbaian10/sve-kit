@@ -1,0 +1,48 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP19-011:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        auto:
+          "on":
+            evolved:
+              who: self
+              sel:
+                kind: follower
+                trait: 八獄
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - if:
+                cond:
+                  combo: 3
+                then:
+                  - damage:
+                      to: enemy
+                      n: 3
+      - line: 2
+        fanfare:
+          do:
+            - player_effect:
+                who: self
+                effect:
+                  cost_mod:
+                    when_playing:
+                      who: self
+                      trait: 八獄
+                    delta: -1
+                    next_only: true
+                until: turn

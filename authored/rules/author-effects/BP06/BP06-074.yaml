@@ -1,0 +1,43 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP06-074:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - cost_mod:
+                when_playing:
+                  who: self
+                  kind: follower
+                  trait: 妖怪
+                delta: -2
+      - line: 2
+        static:
+          effects:
+            - damage_mod:
+                source:
+                  who: self
+                  zone: field
+                  kind: follower
+                  trait: 妖怪
+                delta: 1
+      - line: 3
+        auto:
+          "on":
+            left_field:
+              who: self
+              sel:
+                kind: follower
+                trait: 妖怪
+          do:
+            - buff:
+                "on": this
+                power: 1
