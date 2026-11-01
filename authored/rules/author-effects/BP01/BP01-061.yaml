@@ -1,0 +1,33 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP01-061:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-11-01"
+    abilities:
+      - line: 1
+        play:
+          cost_delta:
+            - if:
+                spellchain: 15
+              delta: -9
+            - if:
+                all:
+                  - spellchain: 10
+                  - not:
+                      spellchain: 15
+              delta: -6
+            - if:
+                all:
+                  - spellchain: 5
+                  - not:
+                      spellchain: 10
+              delta: -3
+      - line: 2
+        keywords:
+          - rush
