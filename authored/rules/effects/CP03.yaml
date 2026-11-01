@@ -299,28 +299,6 @@ cards:
               type: follower
             min: 0
             max: 1
-  CP03-018:
-    status: complete
-    abilities:
-      - line: 1
-        kind: static
-        body:
-          op: macro
-          name: guard
-      - line: 2
-        kind: trigger
-        body:
-          op: if
-          condition:
-            fn: ge
-            args:
-              - read: self.turn.trait_attacks.アクアフォース
-              - 3
-          then:
-            op: modify
-            subjects: self.leader
-            hp: 2
-        event: end
   CP03-021:
     status: complete
     abilities:
