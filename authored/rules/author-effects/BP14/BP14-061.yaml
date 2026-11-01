@@ -1,0 +1,41 @@
+cards:
+  BP14-061:
+    abilities:
+      - evolve_time:
+          do:
+            - damage:
+                n: 2
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - activate:
+          cost:
+            counter:
+              holders: 1
+              n: 2
+              name: 神湯カウンター
+              on:
+                name: 竜山温泉
+                who: self
+                zone: field
+          do:
+            - draw:
+                n: 1
+                who: self
+          per_turn: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

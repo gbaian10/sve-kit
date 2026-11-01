@@ -1,0 +1,44 @@
+cards:
+  BP18-022:
+    abilities:
+      - fanfare:
+          do:
+            - draw:
+                n: 1
+                who: self
+        line: 1
+      - activate:
+          cost:
+            counter:
+              holders: 1
+              n: 10
+              name: ギガカウンター
+              on:
+                name: ギガブレード
+                who: self
+                zone: field
+          do:
+            - damage:
+                n: 5
+                to:
+                  kind: follower
+                  who: opp
+                  zone: field
+            - buff:
+                hp: 2
+                on: this
+                power: 2
+            - grant:
+                keywords:
+                  - storm
+                on: this
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
