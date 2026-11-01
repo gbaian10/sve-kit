@@ -425,6 +425,27 @@ impl Checker {
         })
     }
 
+    fn change_pattern(
+        &mut self,
+        pattern: &EventPattern,
+        view: Option<EventSnapshotPolicy>,
+        triggering: bool,
+    ) -> Option<Checked> {
+        if let EventPattern::StatChange { binding, predicate } = pattern {
+            return self.stat_header(*binding, predicate, view, triggering);
+        }
+        let EventPattern::Posture { binding, predicate } = pattern else {
+            return None;
+        };
+        self.committed_header(
+            *binding,
+            EventSnapshotPolicy::AfterEntry,
+            PostureFilter::parse(*binding, predicate).is_some(),
+            view,
+            triggering,
+        )
+    }
+
     fn subject_pattern(
         &mut self,
         pattern: &EventPattern,
@@ -432,16 +453,6 @@ impl Checker {
         triggering: bool,
     ) -> Option<Checked> {
         match pattern {
-            EventPattern::StatChange { binding, predicate } => {
-                self.stat_header(*binding, predicate, view, triggering)
-            }
-            EventPattern::Posture { binding, predicate } => self.committed_header(
-                *binding,
-                EventSnapshotPolicy::AfterEntry,
-                PostureFilter::parse(*binding, predicate).is_some(),
-                view,
-                triggering,
-            ),
             EventPattern::Attack { binding, predicate } => self.committed_header(
                 *binding,
                 EventSnapshotPolicy::AfterEntry,
@@ -526,6 +537,8 @@ impl Checker {
             | EventPattern::Draw { .. }
             | EventPattern::Discard { .. }
             | EventPattern::Banish { .. }
+            | EventPattern::StatChange { .. }
+            | EventPattern::Posture { .. }
             | EventPattern::CounterChange { .. }
             | EventPattern::Phase { .. }
             | EventPattern::Race { .. }
@@ -575,7 +588,10 @@ impl Checker {
                 self.at("predicate", |checker| checker.boolean($predicate))
             }};
         }
-        if let Some(checked) = self.subject_pattern(pattern, view, triggering) {
+        if let Some(checked) = self
+            .change_pattern(pattern, view, triggering)
+            .or_else(|| self.subject_pattern(pattern, view, triggering))
+        {
             return checked;
         }
         match pattern {

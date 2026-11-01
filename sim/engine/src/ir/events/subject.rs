@@ -350,6 +350,7 @@ impl SubjectFields {
             Self::Cemetery(event) => (event, ZoneKind::Cemetery),
             Self::Hand(event) => (event, ZoneKind::Hand),
             Self::Attack(_)
+            | Self::Posture(_)
             | Self::DamageSource(_)
             | Self::Played { .. }
             | Self::Entry(_)
