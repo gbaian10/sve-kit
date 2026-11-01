@@ -18,8 +18,8 @@ clone the returned selection when constructing a game.
 Tests that change source evidence or catalog contents must clone `inputs()` before
 editing. Build related variants with `repository::select()` or
 `repository::select_with_rules()` so identical, fully checked author inputs share
-immutable candidates across variants. Every variant still validates its own
-snapshot, prototype documents, token closure and rule bindings. Only candidate cache lookup and insertion hold a lock;
+immutable candidates and exact snapshot records across variants. Every variant still validates its own
+snapshot, prototype documents, token closure and rule bindings. Only cache lookup and insertion hold a lock;
 variant preparation and game positions can run in parallel.
 Keep pointer-identity
 rejection tests independent too: a fresh equivalent catalog is intentionally a

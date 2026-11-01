@@ -447,3 +447,66 @@ fn current_loader_shares_exact_candidates_and_rechecks_changed_inputs() {
     ));
     loader.select(snapshot, keywords, &handoff).unwrap();
 }
+
+#[test]
+fn current_loader_preserves_snapshot_facts_and_validation_across_selections() {
+    use std::sync::Barrier;
+    use std::thread;
+    use sve_engine::catalog::CurrentSelectionLoader;
+
+    let first_card = json!({"number":"unit","faces":[{
+        "name":"Original","class":"ニュートラル","type":"フォロワー",
+        "cost":"1","power":"1","hp":"3","traits":[],"text":null,"sections":[]
+    }]});
+    let mut changed_card = first_card.clone();
+    changed_card["faces"][0]["name"] = json!("Changed");
+    changed_card["faces"][0]["cost"] = json!("9");
+    let first_snapshot = first_card.to_string();
+    let changed_snapshot = changed_card.to_string();
+    let keywords = "format: 1\nkind: keyword_registry\nkeywords: {}";
+    let handoff = json!({"documents":[],"authors":[]});
+    let loader = CurrentSelectionLoader::new().unwrap();
+    let barrier = Barrier::new(2);
+    let select = |snapshot| {
+        barrier.wait();
+        loader.select(snapshot, keywords, &handoff).unwrap()
+    };
+    let (first, changed) = thread::scope(|scope| {
+        let first = scope.spawn(|| select(&first_snapshot));
+        let changed = scope.spawn(|| select(&changed_snapshot));
+        (first.join().unwrap(), changed.join().unwrap())
+    });
+    let first_wire = serde_json::to_value(&first.prototypes).unwrap();
+    assert_eq!(first_wire["cards"]["unit"], first_card);
+    assert_eq!(
+        serde_json::to_value(&changed.prototypes).unwrap()["cards"]["unit"],
+        changed_card
+    );
+    let repeated = loader.select(&first_snapshot, keywords, &handoff).unwrap();
+    assert_eq!(
+        serde_json::to_value(&repeated.prototypes).unwrap(),
+        first_wire
+    );
+    let restored: Catalog = serde_json::from_value(first_wire.clone()).unwrap();
+    assert_eq!(serde_json::to_value(restored).unwrap(), first_wire);
+    let independent = Catalog::from_documents(&first_snapshot, keywords, &[]).unwrap();
+    assert_eq!(serde_json::to_value(independent).unwrap(), first_wire);
+
+    let duplicate = format!("{first_snapshot}\n{first_snapshot}");
+    assert!(matches!(loader.select(&duplicate, keywords, &handoff),
+        Err(EngineFailure::Invalid(reason)) if reason == "duplicate snapshot card: unit"));
+    assert!(matches!(
+        loader.select(r#"{"number":"unit","faces":false}"#, keywords, &handoff),
+        Err(EngineFailure::Invalid(_))
+    ));
+    assert!(matches!(
+        loader.select(
+            &first_snapshot,
+            "format: 2\nkind: keyword_registry\nkeywords: {}",
+            &handoff
+        ),
+        Err(EngineFailure::Invalid(_))
+    ));
+    loader.select(&first_snapshot, keywords, &handoff).unwrap();
+    assert_eq!(serde_json::to_value(&first.prototypes).unwrap(), first_wire);
+}

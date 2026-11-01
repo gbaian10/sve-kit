@@ -1,7 +1,7 @@
 //! Internal batch selection; current programs remain candidates pending runtime admission.
 
 use super::current::CurrentCard;
-use super::{Catalog, EngineFailure, EngineIdentityInput, Result, invalid};
+use super::{Card, Catalog, EngineFailure, EngineIdentityInput, Result, invalid};
 use crate::ir::WellFormedCardProgram;
 use crate::ir::lowering::{CurrentCardProgram, ExpandedLowerer};
 use alloc::collections::{BTreeMap, BTreeSet};
@@ -74,16 +74,18 @@ impl SelectedEffects {
     }
 }
 
-/// Reusable compiler for related current selections.
+/// Reusable loader for related current selections.
 ///
-/// Exact author inputs share immutable lowered candidates. Snapshot, prototype,
-/// token and rule checks still run for every selection. Drop the loader when the
-/// related selections are no longer needed to release its cached candidates.
+/// Exact snapshot records and author inputs share immutable facts and candidates.
+/// Snapshot closure, prototype, token and rule checks still run for every selection.
+/// Drop the loader when the related selections are no longer needed to release
+/// its cached facts and candidates.
 /// Selection preparation runs concurrently; only cache access holds a lock.
 #[derive(Debug)]
 pub struct CurrentSelectionLoader {
     lowerer: ExpandedLowerer,
     candidates: Mutex<BTreeMap<String, Arc<CurrentCardProgram>>>,
+    snapshot_cards: Mutex<BTreeMap<String, Arc<Card>>>,
 }
 
 impl CurrentSelectionLoader {
@@ -95,6 +97,7 @@ impl CurrentSelectionLoader {
         Ok(Self {
             lowerer: ExpandedLowerer::new().map_err(invalid)?,
             candidates: Mutex::default(),
+            snapshot_cards: Mutex::default(),
         })
     }
 
@@ -103,9 +106,14 @@ impl CurrentSelectionLoader {
     /// # Errors
     /// Rejects the same invalid selections as [`Catalog::from_current_selection`].
     pub fn select(&self, snapshot: &str, keywords: &str, input: &Value) -> Result<SelectedEffects> {
-        select_using(snapshot, keywords, input, None, |candidate| {
-            self.compile(candidate)
-        })
+        select_using(
+            snapshot,
+            keywords,
+            input,
+            None,
+            |candidate| self.compile(candidate),
+            |line| self.read_card(line),
+        )
     }
 
     /// Select current candidates and bind the exact snapshot's rules.
@@ -126,7 +134,25 @@ impl CurrentSelectionLoader {
             input,
             Some((rules, identity)),
             |candidate| self.compile(candidate),
+            |line| self.read_card(line),
         )
+    }
+
+    fn read_card(&self, line: &str) -> Result<Arc<Card>> {
+        // A printing number alone cannot identify changed facts in related snapshots.
+        let cached = self
+            .snapshot_cards
+            .lock()
+            .map_err(invalid)?
+            .get(line)
+            .cloned();
+        if let Some(card) = cached {
+            return Ok(card);
+        }
+        let card = Catalog::read_snapshot_card(line)?;
+        let key = line.to_owned();
+        let mut cards = self.snapshot_cards.lock().map_err(invalid)?;
+        Ok(Arc::clone(cards.entry(key).or_insert(card)))
     }
 
     fn compile(&self, input: &Value) -> Result<Arc<CurrentCardProgram>> {
@@ -150,9 +176,14 @@ pub(super) fn select(
     rules: Option<(&str, &EngineIdentityInput)>,
 ) -> Result<SelectedEffects> {
     let lowerer = ExpandedLowerer::new().map_err(invalid)?;
-    select_using(snapshot, keywords, handoff, rules, |input| {
-        lowerer.lower_current(input).map(Arc::new).map_err(invalid)
-    })
+    select_using(
+        snapshot,
+        keywords,
+        handoff,
+        rules,
+        |input| lowerer.lower_current(input).map(Arc::new).map_err(invalid),
+        Catalog::read_snapshot_card,
+    )
 }
 
 #[derive(Deserialize)]
@@ -189,10 +220,12 @@ fn select_using(
     handoff: &Value,
     rules: Option<(&str, &EngineIdentityInput)>,
     mut compile: impl FnMut(&Value) -> Result<Arc<CurrentCardProgram>>,
+    read_card: impl FnMut(&str) -> Result<Arc<Card>>,
 ) -> Result<SelectedEffects> {
     let selection: Selection = serde_json::from_value(handoff.clone())
         .map_err(|_private| invalid("invalid current selection"))?;
-    let mut prototypes = Catalog::read_documents(snapshot, keywords, &selection.documents)?;
+    let mut prototypes =
+        Catalog::read_documents_using(snapshot, keywords, &selection.documents, read_card)?;
     let mut current = BTreeMap::new();
     let mut identities = BTreeSet::new();
     for author in selection.authors {
