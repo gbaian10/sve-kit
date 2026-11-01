@@ -1,0 +1,39 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP09-077:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        evolve_time:
+          do:
+            - choose:
+                bind: strongest
+                by: opp
+                from:
+                  who: opp
+                  zone: field
+                  kind: follower
+                  where:
+                    cmp:
+                      left:
+                        power_of: item
+                      op: eq
+                      right:
+                        agg:
+                          of:
+                            who: opp
+                            zone: field
+                            kind: follower
+                          attr: power
+                          fn: max
+                n: 1
+            - move:
+                ref: strongest
+                to: cemetery

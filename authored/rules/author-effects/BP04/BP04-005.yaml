@@ -1,0 +1,41 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP04-005:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-01"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 4
+      - line: 2
+        keywords:
+          - storm
+      - line: 3
+        fanfare:
+          do:
+            - choose:
+                bind: returned
+                from:
+                  who: self
+                  zone: field
+                any: true
+            - move:
+                ref: returned
+                to: hand
+            - buff:
+                "on": this
+                power:
+                  count:
+                    who: self
+                    zone: hand
+                hp:
+                  count:
+                    who: self
+                    zone: hand

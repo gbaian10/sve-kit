@@ -406,6 +406,7 @@ impl Checker {
             return Ok(());
         };
         match selector {
+            Selector::Extremum { input, .. } => self.selection_visibility(input),
             Selector::SearchFound { found } => {
                 self.visible_object(self.env.access.get(&found.key()))
             }
@@ -517,6 +518,7 @@ impl Checker {
             | Selector::ReceiptMembers { .. }
             | Selector::MoveAfter { .. }
             | Selector::Intersection { .. }
+            | Selector::Extremum { .. }
             | Selector::Ordered { .. }
             | Selector::SearchFound { .. }
             | Selector::SearchRevealed { .. }

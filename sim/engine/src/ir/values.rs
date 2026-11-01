@@ -379,6 +379,7 @@ variants!(Selector {
     ReceiptMembers { receipt: ObjectReceipt, projection: MemberProjection } => ["read.receipt.members"],
     MoveAfter { receipt: MovementReceipt, permission: FollowPermission } => ["reference.follow-generation", "receipt.move-after"],
     Zone { players: PlayerSet, zone: ZoneKind, view: SelectionView, binding: Binding<ObjectRef>, predicate: Box<Expr<Bool>> } => ["selector.zone"],
+    Extremum { input: Box<Selector>, property: NumericProperty, kind: ExtremumKind } => ["selector.extremum"],
     Filter { input: Box<Selector>, binding: Binding<ObjectRef>, predicate: Box<Expr<Bool>> } => ["selector.filter"],
     Union { sets: Vec<Selector> } => ["selector.union"],
     Intersection { sets: Vec<Selector> } => ["selector.intersection"],
@@ -478,7 +479,13 @@ variants!(Predicate {
 });
 variants!(NameOperation { UniqueName { object: ObjectView } => ["value.unique-name"] });
 variants!(ZoneOperation { OfPlayer { player: PlayerRef, kind: ZoneKind } => [] });
-tags!(NumericProperty { Cost, Attack, Life });
+tags!(NumericProperty {
+    Cost,
+    OriginalCost,
+    Attack,
+    Life
+});
+tags!(ExtremumKind { Minimum, Maximum });
 variants!(NumberRead {
     Cost { object: ObjectView, view: CharacteristicView } => ["read.cost"],
     Stats { object: ObjectView, property: Stat, view: CharacteristicView } => ["read.stats"]

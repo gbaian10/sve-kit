@@ -1,0 +1,33 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP12-078:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-01"
+    abilities:
+      - line: 1
+        fanfare:
+          cost:
+            banish:
+              sel:
+                who: self
+                zone: cemetery
+              n: 6
+          targets:
+            - bind: victims
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              any: true
+          do:
+            - damage:
+                to: victims
+                n: 6
+                distribute: true
+                distribute_at: play

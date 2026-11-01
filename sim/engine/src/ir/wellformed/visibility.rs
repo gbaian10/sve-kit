@@ -175,6 +175,7 @@ impl Checker {
             | Selector::Union { .. }
             | Selector::Intersection { .. }
             | Selector::Difference { .. }
+            | Selector::Extremum { .. }
             | Selector::Ordered { .. }
             | Selector::Objects { .. }
             | Selector::SearchFound { .. }

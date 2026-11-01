@@ -6,8 +6,8 @@ use super::{
 };
 use crate::ir::{
     Action, Bool, Cardinality, DecisionId, DiscardEvent, DiscardMode, DiscardOutcome, Disjointness,
-    Expr, Instruction, MoveMethod, Nat, ObjectRef, PlayerRef, PlayerRelation, ReceiptId,
-    SelectionView, Selector, ZoneKind,
+    Expr, Instruction, MoveMethod, Nat, ObjectRef, PlayerRelation, ReceiptId, SelectionView,
+    Selector, ZoneKind,
 };
 use alloc::collections::BTreeSet;
 
@@ -35,7 +35,7 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
 
 fn eligible(action: &Action) -> Result<&Selector> {
     let Action::Discard {
-        player: PlayerRef::Controller {},
+        player,
         mode: DiscardMode::All { eligible },
     } = action
     else {
@@ -51,7 +51,7 @@ fn eligible(action: &Action) -> Result<&Selector> {
     else {
         return Err(unsupported("direct current hand discard"));
     };
-    if players.relative_to != (PlayerRef::Controller {})
+    if players.relative_to != *player
         || players.relation != PlayerRelation::SelfPlayer
         || players.cardinality.minimum != Nat(1)
         || players.cardinality.maximum != Some(Nat(1))
@@ -64,7 +64,7 @@ fn eligible(action: &Action) -> Result<&Selector> {
 
 fn bounds(action: &Action) -> Result<Cardinality> {
     let Action::Discard {
-        player: PlayerRef::Controller {},
+        player,
         mode: DiscardMode::Chosen { constraint },
     } = action
     else {
@@ -93,7 +93,7 @@ fn bounds(action: &Action) -> Result<Cardinality> {
     else {
         return Err(unsupported("direct current hand discard"));
     };
-    if players.relative_to != (PlayerRef::Controller {})
+    if players.relative_to != *player
         || players.relation != PlayerRelation::SelfPlayer
         || players.cardinality.minimum != Nat(1)
         || players.cardinality.maximum != Some(Nat(1))
@@ -148,7 +148,7 @@ impl HandWait {
         ) {
             return Err(invalid("discard cardinality"));
         }
-        let seat = seat_name(execution.context.controller)?;
+        let seat = seat_name(execution.player(game, &self.instruction.actor)?)?;
         let mut unique = BTreeSet::new();
         handles
             .iter()
@@ -192,7 +192,7 @@ impl Game {
             }
         ) {
             eligible(&instruction.action)?;
-            let player = execution.context.controller;
+            let player = execution.player(self, &instruction.actor)?;
             let seat = seat_name(player)?;
             let members = self
                 .zone_ids(seat, "hand")
@@ -206,7 +206,7 @@ impl Game {
             return Ok(());
         }
         let mut count = bounds(&instruction.action)?;
-        let player = execution.context.controller;
+        let player = execution.player(self, &instruction.actor)?;
         let seat = seat_name(player)?;
         let mut members = Vec::new();
         let mut candidates = Vec::new();
@@ -266,7 +266,11 @@ impl Game {
         let mut snapshots = Vec::new();
         for &member in members {
             let id = execution.object_id(member)?.to_owned();
-            snapshots.push((member, self.internal_hand_characteristics(&id)?));
+            snapshots.push((
+                member,
+                super::player_id(&self.object(&id)?.controller)?,
+                self.internal_hand_characteristics(&id)?,
+            ));
         }
         let (moves, successful) = self.internal_move_members(
             execution,
@@ -276,7 +280,7 @@ impl Game {
             MoveMethod::Discard,
             false,
         )?;
-        for (before, characters) in snapshots {
+        for (before, player, characters) in snapshots {
             if let Some(actual_to) = moves
                 .iter()
                 .find(|movement| movement.before == before && movement.after.is_some())
@@ -285,7 +289,7 @@ impl Game {
                 execution
                     .facts
                     .push(super::Fact::Discard(Box::new(DiscardEvent {
-                        player: execution.context.controller,
+                        player,
                         card_before: before,
                         characters,
                         actual_to,

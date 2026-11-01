@@ -557,6 +557,7 @@ impl BodyContext<'_> {
             ast::Number::ReceiptCount { count } => self.receipt_count(count, path),
             ast::Number::CountOf { count_of } => self.count_of(count_of, path),
             ast::Number::Literal(value) => Ok(Expr::Literal(Int(*value))),
+            ast::Number::Aggregate { agg } => self.aggregate(agg, path),
             ast::Number::Resolution { at, value } => {
                 let ast::ResolutionTime::Resolution = at;
                 self.resolution_count(value, path, active)

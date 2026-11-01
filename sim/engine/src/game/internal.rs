@@ -35,6 +35,7 @@ use serde::{Serialize as _, Serializer};
 use serde_json::{Value, json};
 
 mod admission;
+mod aggregates;
 mod allocation;
 mod damage;
 pub use damage::ReplacementOption;

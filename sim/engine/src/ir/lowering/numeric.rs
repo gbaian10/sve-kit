@@ -175,14 +175,15 @@ impl BodyContext<'_> {
                 binding,
             )),
         };
-        Ok(if query.other {
+        let objects = if query.other {
             Selector::Difference {
                 input: Box::new(objects),
                 except: Box::new(holder()),
             }
         } else {
             objects
-        })
+        };
+        self.extremum_query(query, objects, path)
     }
 
     pub(super) fn action_objects(

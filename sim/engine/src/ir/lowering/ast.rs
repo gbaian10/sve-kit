@@ -426,7 +426,7 @@ pub(super) struct TokenPlayerComparison {
     pub right: TokenPlayer,
 }
 
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum EqualOnly {
     Eq,
@@ -476,8 +476,7 @@ pub(super) struct ResourceIncrease {
 pub(super) struct Discard {
     pub n: Option<u64>,
     pub all: Option<bool>,
-    #[serde(rename = "who")]
-    pub _who: Option<SelfPlayer>,
+    pub who: Option<LeaderSide>,
     pub random: Option<bool>,
 }
 
@@ -571,7 +570,7 @@ pub(super) enum Chooser {
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum BanishAction {
     Top { top: DeckTop },
-    Objects(ObjectAction),
+    Objects(Box<ObjectAction>),
 }
 
 #[derive(Deserialize)]
@@ -650,6 +649,9 @@ pub(super) enum Objects {
 #[derive(Clone, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct ObjectQuery {
+    #[serde(rename = "as")]
+    pub alias: Option<String>,
+    pub r#where: Option<Box<QueryExtremumWhere>>,
     pub who: Side,
     pub zone: Zone,
     pub kind: Option<Follower>,
@@ -665,7 +667,7 @@ pub(super) struct ObjectQuery {
     pub other: bool,
 }
 
-#[derive(Clone, Deserialize)]
+#[derive(Clone, Deserialize, PartialEq, Eq)]
 pub(super) enum Side {
     #[serde(rename = "self")]
     Controller,
@@ -881,7 +883,7 @@ pub(super) struct SearchPower {
     pub power_of: String,
 }
 
-#[derive(Clone, Deserialize)]
+#[derive(Clone, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum SearchKind {
     EvolveFollower,
@@ -1024,6 +1026,8 @@ pub(super) enum AtPlay {
 #[derive(Clone, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct Target {
+    #[serde(default)]
+    pub any: bool,
     pub option: Option<u64>,
     pub bind: String,
     pub from: TargetQuery,
@@ -1035,6 +1039,8 @@ pub(super) struct Target {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct Choose {
+    #[serde(default)]
+    pub any: bool,
     pub bind: String,
     pub from: TargetQuery,
     pub groups: Option<Vec<ChooseGroup>>,
@@ -1044,8 +1050,7 @@ pub(super) struct Choose {
     pub may: Option<bool>,
     pub reveal: Option<bool>,
     pub order: Option<bool>,
-    #[serde(rename = "by")]
-    pub _by: Option<SelfPlayer>,
+    pub by: Option<LeaderSide>,
 }
 
 #[derive(Deserialize)]
@@ -1058,6 +1063,9 @@ pub(super) struct ChooseGroup {
 #[derive(Clone, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct TargetQuery {
+    #[serde(rename = "as")]
+    pub alias: Option<String>,
+    pub r#where: Option<Box<QueryExtremumWhere>>,
     #[serde(rename = "in")]
     pub observation: Option<String>,
     pub who: Option<Side>,
@@ -1092,7 +1100,7 @@ pub(super) struct TargetQuery {
     pub has_evolve: Option<True>,
 }
 
-#[derive(Clone, Copy, Deserialize)]
+#[derive(Clone, Copy, Deserialize, PartialEq, Eq)]
 #[serde(try_from = "String")]
 pub(super) struct FilterKeyword(pub super::super::KeywordId);
 
@@ -1117,17 +1125,19 @@ impl TryFrom<String> for FilterKeyword {
 
 impl TargetQuery {
     pub(super) fn has_numeric_filter(&self) -> bool {
-        [
-            self.cost_eq,
-            self.cost_le,
-            self.cost_ge,
-            self.orig_cost_eq,
-            self.orig_cost_le,
-            self.orig_cost_ge,
-            self.hp_le,
-        ]
-        .into_iter()
-        .any(|limit| limit.is_some())
+        self.alias.is_some()
+            || self.r#where.is_some()
+            || [
+                self.cost_eq,
+                self.cost_le,
+                self.cost_ge,
+                self.orig_cost_eq,
+                self.orig_cost_le,
+                self.orig_cost_ge,
+                self.hp_le,
+            ]
+            .into_iter()
+            .any(|limit| limit.is_some())
     }
 }
 
@@ -1212,6 +1222,9 @@ pub(super) enum Number {
     },
     CountOf {
         count_of: String,
+    },
+    Aggregate {
+        agg: Aggregate,
     },
     DistinctNames {
         distinct_names: PublicQuery,
@@ -1554,7 +1567,7 @@ pub(super) enum PublicNumber {
     DistinctOriginalCosts { distinct_orig_costs: PublicQuery },
 }
 
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize, PartialEq, Eq)]
 #[serde(deny_unknown_fields)]
 pub(super) struct PublicQuery {
     pub racing: Option<bool>,
@@ -1602,7 +1615,7 @@ pub(super) struct SelectedQuery {
     pub acted: Option<bool>,
 }
 
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum PublicZone {
     Field,
@@ -1977,7 +1990,7 @@ pub(super) struct StaticGrant {
 pub(super) enum Cannot {
     Stand(CannotStand),
     DealDamage(CannotDealDamage),
-    Attack(CannotAttack),
+    Attack(Box<CannotAttack>),
 }
 
 #[derive(Deserialize)]
@@ -2009,6 +2022,60 @@ pub(super) enum PreventionKind {
     Any,
     Combat,
     Ability,
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Aggregate {
+    pub of: PublicQuery,
+    pub attr: AggregateAttribute,
+    #[serde(rename = "fn")]
+    pub function: AggregateFunction,
+}
+#[derive(Clone, Copy, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum AggregateAttribute {
+    Cost,
+    OrigCost,
+    Power,
+    Hp,
+}
+#[derive(Clone, Copy, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum AggregateFunction {
+    Sum,
+    Min,
+    Max,
+}
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct QueryExtremumWhere {
+    pub cmp: QueryExtremumComparison,
+}
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct QueryExtremumComparison {
+    pub left: QueryStat,
+    pub op: EqualOnly,
+    pub right: QueryAggregate,
+}
+#[derive(Clone, Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum QueryAggregate {
+    Inline { agg: Box<Aggregate> },
+    Bound { bound: String },
+}
+#[derive(Clone, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum QueryStat {
+    #[serde(rename = "cost_of")]
+    Cost(String),
+    #[serde(rename = "orig_cost_of")]
+    OriginalCost(String),
+    #[serde(rename = "power_of")]
+    Attack(String),
+    #[serde(rename = "hp_of")]
+    Life(String),
 }
 
 #[derive(Deserialize)]

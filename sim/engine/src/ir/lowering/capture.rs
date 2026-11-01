@@ -128,6 +128,7 @@ impl BodyContext<'_> {
             | ast::Number::OriginalCost { .. }
             | ast::Number::Literal(_)
             | ast::Number::Alias(_)
+            | ast::Number::Aggregate { .. }
             | ast::Number::HistoryCount { .. }
             | ast::Number::ReceiptCount { .. }
             | ast::Number::CountOf { .. }
