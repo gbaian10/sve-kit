@@ -1,4 +1,4 @@
-//! Derive the small prevention subset needed by legacy scenarios from accepted current data.
+//! Derive a closed damage-replacement subset for historical scenarios from current data.
 //! This creates no baseline and never qualifies a current program for production execution.
 
 use serde_json::{Value, json};
@@ -29,6 +29,9 @@ fn prevention(head: &Value, line: u64) -> Option<Vec<Value>> {
         .as_array()?
         .iter()
         .map(|effect| {
+            if only_keys(effect, &["damage_cap"]) {
+                return damage_cap(effect.get("damage_cap")?, line);
+            }
             if !only_keys(effect, &["prevent"]) {
                 return None;
             }
@@ -95,15 +98,33 @@ fn fanfare(head: &Value, line: u64) -> Option<Value> {
     )
 }
 
+fn damage_cap(shape: &Value, line: u64) -> Option<Value> {
+    if !only_keys(shape, &["on", "threshold", "set"])
+        || shape.get("on").is_some_and(|on| on != "this")
+    {
+        return None;
+    }
+    let threshold = shape.get("threshold")?.as_u64()?;
+    let amount = shape.get("set")?.as_u64()?;
+    if threshold <= amount || threshold > i64::MAX.unsigned_abs() {
+        return None;
+    }
+    Some(json!({"kind":"static","line":line,"body":{
+        "op":"replace_damage","subjects":"self","kind":"any","set":amount,
+        "condition":{"fn":"ge","args":[{"read":"damage.amount"},threshold]}
+    }}))
+}
+
 fn keywords(head: &Value, line: u64) -> Option<Vec<Value>> {
     head.as_array()?
         .iter()
         .map(|keyword| {
             let name = match keyword.as_str()? {
                 "ward" => "guard",
+                name @ ("rush" | "storm" | "aura" | "bane" | "assail" | "intimidate") => name,
                 _ => return None,
             };
-            Some(json!({"kind":"static", "line":line, "body":{"op":"macro", "name":name}}))
+            Some(json!({"kind":"static","line":line,"body":{"op":"macro","name":name}}))
         })
         .collect()
 }
@@ -138,7 +159,7 @@ pub(super) fn program(card: &Value) -> Option<Value> {
     }
     let entries = faces.values().next()?.get("abilities")?.as_array()?;
     let mut abilities = Vec::new();
-    let mut has_prevention = false;
+    let mut has_replacement = false;
     for entry in entries {
         let line = entry.get("line")?.as_u64()?;
         if entry
@@ -166,7 +187,7 @@ pub(super) fn program(card: &Value) -> Option<Value> {
                 return None;
             }
             abilities.extend(declarations);
-            has_prevention = true;
+            has_replacement = true;
         } else if only_keys(
             entry,
             &[
@@ -207,12 +228,47 @@ pub(super) fn program(card: &Value) -> Option<Value> {
             return None;
         }
     }
-    has_prevention.then(|| json!({"status":"complete", "abilities":abilities}))
+    has_replacement.then(|| json!({"status":"complete", "abilities":abilities}))
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn cap_card() -> Value {
+        json!({"faces":{"base":{"abilities":[
+            {"line":1_u8,"keywords":["rush","ward"]},
+            {"line":2_u8,"static":{"effects":[{"damage_cap":{"threshold":4_u8,"set":3_u8}}]}}
+        ]}}})
+    }
+
+    #[test]
+    fn a_complete_cap_preserves_keywords_and_each_event_threshold() {
+        let output = program(&cap_card()).unwrap();
+        assert_eq!(output["abilities"][0]["body"]["name"], "rush");
+        assert_eq!(output["abilities"][1]["body"]["name"], "guard");
+        assert_eq!(
+            output["abilities"][2]["body"],
+            json!({
+                "op":"replace_damage","subjects":"self","kind":"any","set":3_u8,
+                "condition":{"fn":"ge","args":[{"read":"damage.amount"},4_u8]}
+            })
+        );
+    }
+
+    #[test]
+    fn unknown_cap_fields_or_keywords_reject_the_whole_card() {
+        let mut input = cap_card();
+        input["faces"]["base"]["abilities"][1]["static"]["effects"][0]["damage_cap"]["next_only"] =
+            json!(true);
+        assert!(program(&input).is_none(), "a limit cannot be lost");
+        let mut keyword_input = cap_card();
+        keyword_input["faces"]["base"]["abilities"][0]["keywords"] = json!(["drain"]);
+        assert!(
+            program(&keyword_input).is_none(),
+            "a triggered keyword cannot be lost"
+        );
+    }
 
     #[test]
     fn source_metadata_and_empty_ports_preserve_supported_prevention() {
