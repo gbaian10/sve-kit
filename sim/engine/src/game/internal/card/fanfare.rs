@@ -60,8 +60,9 @@ impl Game {
         let kind = self.object_type(holder)?;
         if !matches!(
             kind,
-            "フォロワー" | "アミュレット" | "アミュレット・トークン"
-        ) || (kind == "アミュレット・トークン" && object.zone != "ex")
+            "フォロワー" | "フォロワー・トークン" | "アミュレット" | "アミュレット・トークン"
+        ) || (matches!(kind, "フォロワー・トークン" | "アミュレット・トークン")
+            && object.zone != "ex")
         {
             return Err(unsupported("supported field card play holder"));
         }

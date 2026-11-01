@@ -1,0 +1,30 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP10-022:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-01"
+    abilities:
+      - line: 1
+        evolve_time:
+          do:
+            - search:
+                sel:
+                  who: self
+                  zone: deck
+                  name: 武器商人・エルネスタ
+                n: 1
+                to: field
+            - create:
+                token: ターミナルウェポン
+                to: ex
+                n: 1
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP10-T01
