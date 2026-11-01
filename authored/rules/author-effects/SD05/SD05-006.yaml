@@ -1,0 +1,40 @@
+cards:
+  SD05-006:
+    abilities:
+      - covers:
+          - 1
+          - 2
+        line: 1
+        spell:
+          do:
+            - create:
+                n: 2
+                to: field
+                token: フォレストバット
+            - damage:
+                n:
+                  count:
+                    name: フォレストバット
+                    who: self
+                    zone: field
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-01"
+    token_sources:
+      - card: SD05-T02
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set
