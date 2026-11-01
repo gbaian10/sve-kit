@@ -1,0 +1,20 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP04-094:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-11-01"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            banish:
+              n: 2
+              sel:
+                who: self
+                zone: cemetery

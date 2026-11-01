@@ -1,0 +1,47 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP19-090:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-11-01"
+    abilities:
+      - line: 1
+        spell:
+          targets:
+            - option: 1
+              bind: victim
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - choice:
+                upto: 2
+                options:
+                  - - pay:
+                        cost:
+                          pp: 1
+                        do:
+                          - damage:
+                              n: 2
+                              to: victim
+                          - damage:
+                              n: 1
+                              to:
+                                leader: self
+                  - - pay:
+                        cost:
+                          pp: 1
+                        do:
+                          - damage:
+                              n: 1
+                              to:
+                                leader: self
+                          - draw:
+                              n: 1

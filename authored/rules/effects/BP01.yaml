@@ -98,23 +98,6 @@ cards:
         line: 3
     review: 依 Q189／Q190：補 EX 的第二段與登錄下次結束延遲的第三段各保留印刷行號，延遲不依來源仍在場。
     status: complete
-  BP01-105:
-    abilities:
-      - body:
-          op: evolve
-          subjects: self
-        costs:
-          - hp: -3
-            op: modify
-            subjects: self.leader
-        kind: evolve
-        line: 1
-      - body:
-          name: bane
-          op: macro
-        kind: static
-        line: 2
-    status: complete
   BP01-115:
     abilities:
       - body:
