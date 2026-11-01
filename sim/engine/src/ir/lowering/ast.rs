@@ -1719,8 +1719,7 @@ impl Auto {
 #[serde(deny_unknown_fields)]
 pub(super) struct MoveSubscription {
     pub from: MoveOrigin,
-    #[serde(rename = "to")]
-    pub _to: CemeteryDestination,
+    pub to: DepartureDestination,
     #[serde(rename = "ref")]
     pub reference: Option<This>,
     pub sel: Option<MovementSubject>,
@@ -1765,8 +1764,9 @@ pub(super) struct MovementSubject {
 
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub(super) enum CemeteryDestination {
+pub(super) enum DepartureDestination {
     Cemetery,
+    Hand,
 }
 
 #[derive(Deserialize)]

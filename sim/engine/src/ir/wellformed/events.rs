@@ -468,6 +468,15 @@ impl Checker {
                 .or_else(|| {
                     self.subject_header(
                         *binding,
+                        SubjectFields::Hand(*binding),
+                        predicate,
+                        view,
+                        triggering,
+                    )
+                })
+                .or_else(|| {
+                    self.subject_header(
+                        *binding,
                         SubjectFields::Leave(*binding),
                         predicate,
                         view,

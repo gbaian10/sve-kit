@@ -21,6 +21,7 @@ pub(crate) enum SubjectFields {
     Destroy(Binding<DestroyEvent>),
     Evolve(Binding<EvolveEvent>),
     Cemetery(Binding<LeaveFieldEvent>),
+    Hand(Binding<LeaveFieldEvent>),
     Leave(Binding<LeaveFieldEvent>),
     Ex(Binding<EnterExEvent>),
 }
@@ -54,7 +55,7 @@ impl SubjectFields {
             Self::DamageSource(event) => ObjectFrozen::SnapshotObject {
                 snapshot: Expr::Frozen(Box::new(SnapshotFields::DamageSource { event })),
             },
-            Self::Cemetery(event) | Self::Leave(event) => {
+            Self::Cemetery(event) | Self::Hand(event) | Self::Leave(event) => {
                 ObjectFrozen::LeaveFieldObjectBefore { event }
             }
             Self::Played { card, .. } => return Expr::Bound(card),
@@ -73,7 +74,7 @@ impl SubjectFields {
             Self::Played { event, .. } => {
                 Expr::Frozen(Box::new(PlayerFrozen::PlayController { event }))
             }
-            Self::Cemetery(event) | Self::Leave(event) => {
+            Self::Cemetery(event) | Self::Hand(event) | Self::Leave(event) => {
                 Expr::Frozen(Box::new(PlayerFrozen::LeaveFieldController { event }))
             }
             Self::Entry(event) => {
@@ -124,9 +125,11 @@ impl SubjectFields {
             Self::Evolve(event) => KindFrozen::Characters {
                 characters: Expr::Frozen(Box::new(CharacteristicsFields::EvolveAfter { event })),
             },
-            Self::Cemetery(event) | Self::Leave(event) => KindFrozen::Snapshot {
-                object: Expr::Frozen(Box::new(SnapshotFields::LeaveFieldLki { event })),
-            },
+            Self::Cemetery(event) | Self::Hand(event) | Self::Leave(event) => {
+                KindFrozen::Snapshot {
+                    object: Expr::Frozen(Box::new(SnapshotFields::LeaveFieldLki { event })),
+                }
+            }
             Self::Ex(event) => KindFrozen::Characters {
                 characters: Expr::Frozen(Box::new(CharacteristicsFields::EnterExCharacters {
                     event,
@@ -164,9 +167,11 @@ impl SubjectFields {
             Self::Evolve(event) => TraitsFrozen::Characters {
                 characters: Expr::Frozen(Box::new(CharacteristicsFields::EvolveAfter { event })),
             },
-            Self::Cemetery(event) | Self::Leave(event) => TraitsFrozen::Snapshot {
-                object: Expr::Frozen(Box::new(SnapshotFields::LeaveFieldLki { event })),
-            },
+            Self::Cemetery(event) | Self::Hand(event) | Self::Leave(event) => {
+                TraitsFrozen::Snapshot {
+                    object: Expr::Frozen(Box::new(SnapshotFields::LeaveFieldLki { event })),
+                }
+            }
             Self::Ex(event) => TraitsFrozen::Characters {
                 characters: Expr::Frozen(Box::new(CharacteristicsFields::EnterExCharacters {
                     event,
@@ -202,9 +207,11 @@ impl SubjectFields {
             Self::Evolve(event) => NamesFrozen::Characters {
                 characters: Expr::Frozen(Box::new(CharacteristicsFields::EvolveAfter { event })),
             },
-            Self::Cemetery(event) | Self::Leave(event) => NamesFrozen::Snapshot {
-                object: Expr::Frozen(Box::new(SnapshotFields::LeaveFieldLki { event })),
-            },
+            Self::Cemetery(event) | Self::Hand(event) | Self::Leave(event) => {
+                NamesFrozen::Snapshot {
+                    object: Expr::Frozen(Box::new(SnapshotFields::LeaveFieldLki { event })),
+                }
+            }
             Self::Ex(event) => NamesFrozen::Characters {
                 characters: Expr::Frozen(Box::new(CharacteristicsFields::EnterExCharacters {
                     event,
@@ -229,9 +236,11 @@ impl SubjectFields {
                     view: CharacteristicView::Effective,
                 }));
             }
-            Self::Cemetery(event) | Self::Leave(event) => ClassFrozen::Snapshot {
-                object: Expr::Frozen(Box::new(SnapshotFields::LeaveFieldLki { event })),
-            },
+            Self::Cemetery(event) | Self::Hand(event) | Self::Leave(event) => {
+                ClassFrozen::Snapshot {
+                    object: Expr::Frozen(Box::new(SnapshotFields::LeaveFieldLki { event })),
+                }
+            }
             Self::Entry(event) => ClassFrozen::Characters {
                 characters: Expr::Frozen(Box::new(CharacteristicsFields::EnterFieldCharacters {
                     event,
@@ -262,11 +271,13 @@ impl SubjectFields {
                 }))),
             },
             Self::Played { event, card } => played_view(event, card),
-            Self::Cemetery(event) | Self::Leave(event) => ObjectView::Snapshot {
-                value: Box::new(Expr::Frozen(Box::new(SnapshotFields::LeaveFieldLki {
-                    event,
-                }))),
-            },
+            Self::Cemetery(event) | Self::Hand(event) | Self::Leave(event) => {
+                ObjectView::Snapshot {
+                    value: Box::new(Expr::Frozen(Box::new(SnapshotFields::LeaveFieldLki {
+                        event,
+                    }))),
+                }
+            }
             Self::Entry(_) => ObjectView::Current {
                 object: Box::new(ObjectOperand::FromExpression {
                     value: Box::new(self.object()),
@@ -282,7 +293,7 @@ impl SubjectFields {
     pub(crate) const fn view(self) -> EventSnapshotPolicy {
         match self {
             Self::Played { .. } => EventSnapshotPolicy::AtReveal,
-            Self::Cemetery(_) | Self::Leave(_) | Self::Destroy(_) => {
+            Self::Cemetery(_) | Self::Hand(_) | Self::Leave(_) | Self::Destroy(_) => {
                 EventSnapshotPolicy::BeforeExit
             }
             Self::Attack(_)
@@ -293,8 +304,17 @@ impl SubjectFields {
         }
     }
     fn destination(self) -> Option<Expr<Bool>> {
-        let Self::Cemetery(event) = self else {
-            return None;
+        let (event, kind) = match self {
+            Self::Cemetery(event) => (event, ZoneKind::Cemetery),
+            Self::Hand(event) => (event, ZoneKind::Hand),
+            Self::Attack(_)
+            | Self::DamageSource(_)
+            | Self::Played { .. }
+            | Self::Entry(_)
+            | Self::Destroy(_)
+            | Self::Evolve(_)
+            | Self::Leave(_)
+            | Self::Ex(_) => return None,
         };
         Some(Expr::Compute(Box::new(Predicate::ZoneEquals {
             left: Expr::Frozen(Box::new(ZoneFrozen::LeaveFieldTo { event })),
@@ -309,7 +329,7 @@ impl SubjectFields {
                         role: Role::Owner,
                     }))),
                 },
-                kind: ZoneKind::Cemetery,
+                kind,
             })),
         })))
     }
