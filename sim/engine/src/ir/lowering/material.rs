@@ -42,11 +42,31 @@ pub(super) fn lower(
     if matches!(operation, Operation::Act | Operation::Ex) && zone != ZoneKind::Field {
         return Err(unsupported(path));
     }
+    let (objects, decision) = choice(allocator, bindings, scope, &material.sel, material.n, path)?;
+    Ok((material_action(objects, operation), decision))
+}
+
+pub(super) fn choice(
+    allocator: &mut Allocator,
+    bindings: &mut Allocator,
+    scope: ScopeId,
+    query: &ast::PublicQuery,
+    count: u64,
+    path: &str,
+) -> Result<(Selector, Decision), LoweringError> {
+    if count == 0 || !matches!(query.who, ast::Side::Controller | ast::Side::All) {
+        return Err(unsupported(path));
+    }
+    let zone = match query.zone {
+        ast::PublicZone::Field => ZoneKind::Field,
+        ast::PublicZone::Ex => ZoneKind::Ex,
+        ast::PublicZone::Cemetery => ZoneKind::Cemetery,
+    };
     let binding = Binding::new(bindings.id(path)?, scope);
     let candidate = Binding::new(allocator.id(path)?, allocator.scope(path)?);
     let mut selector = Selector::Zone {
         players: PlayerSet {
-            relation: if matches!(material.sel.who, ast::Side::All) {
+            relation: if matches!(query.who, ast::Side::All) {
                 PlayerRelation::All
             } else {
                 PlayerRelation::SelfPlayer
@@ -54,7 +74,7 @@ pub(super) fn lower(
             relative_to: PlayerRef::Controller {},
             cardinality: Cardinality {
                 minimum: Nat(1),
-                maximum: Some(Nat(if matches!(material.sel.who, ast::Side::All) {
+                maximum: Some(Nat(if matches!(query.who, ast::Side::All) {
                     2
                 } else {
                     1
@@ -66,24 +86,23 @@ pub(super) fn lower(
         view: SelectionView::Current {},
         binding: candidate,
         predicate: Box::new(super::selection::field_filter(
-            &super::selection::ObjectFilter::from(&material.sel),
+            &super::selection::ObjectFilter::from(query),
             candidate,
         )),
     };
-    if material.sel.other {
+    if query.other {
         selector = Selector::Difference {
             input: Box::new(selector),
             except: Box::new(numeric::holder()),
         };
     }
     let cardinality = Cardinality {
-        minimum: Nat(material.n),
-        maximum: Some(Nat(material.n)),
+        minimum: Nat(count),
+        maximum: Some(Nat(count)),
     };
     let objects = Selector::Bound { reference: binding };
-    let action = material_action(objects, operation);
     Ok((
-        action,
+        objects,
         Decision {
             id: DecisionId(allocator.id(path)?),
             captures: vec![],

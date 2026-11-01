@@ -1,5 +1,5 @@
-use super::{Action, Expr, LoweringError, Nat, ObjectOperand, ast, unsupported};
-use crate::ir::{CounterKind, CounterOperation, Holder};
+use super::{Action, BodyContext, Expr, LoweringError, Nat, ObjectOperand, ast, unsupported};
+use crate::ir::{CounterKind, CounterOperation, Decision, Holder, Selector};
 
 pub(super) const fn holder() -> Holder {
     Holder::Object {
@@ -27,22 +27,108 @@ pub(super) fn change(
     })
 }
 
-pub(super) fn cost(value: &ast::CounterCost, path: &str) -> Result<Action, LoweringError> {
-    let ast::This::This = value.on;
+pub(super) fn cost(
+    context: &mut BodyContext<'_>,
+    value: &ast::CounterCost,
+    path: &str,
+) -> Result<(Action, Option<Decision>), LoweringError> {
+    use crate::ir::ChoiceDomain;
     i64::try_from(value.n).map_err(|_private| unsupported(path))?;
-    Ok(Action::Counter {
-        holder: holder(),
-        kind: CounterKind(value.name.clone()),
-        operation: CounterOperation::Remove {},
-        amount: Expr::Literal(Nat(value.n)),
-    })
+    let (holder, parameter) = match &value.on {
+        ast::CounterCostHolder::This(_) if value.holders.is_none() => (holder(), None),
+        ast::CounterCostHolder::Selected(query)
+            if value.holders == Some(1)
+                && matches!(query.who, ast::Side::Controller)
+                && matches!(query.zone, ast::PublicZone::Field | ast::PublicZone::Ex) =>
+        {
+            let (_, mut decision) = super::material::choice(
+                context.card_allocator,
+                &mut context.allocator,
+                context.scope,
+                query,
+                1,
+                path,
+            )?;
+            let ChoiceDomain::Objects {
+                binding,
+                constraint,
+                ..
+            } = &mut decision.domain
+            else {
+                return Err(unsupported(path));
+            };
+            let selected = *binding;
+            for group in &mut constraint.groups {
+                require_counter(&mut group.selector, &value.name, value.n, path)?;
+            }
+            (
+                Holder::Object {
+                    object: ObjectOperand::Selected {
+                        selection: selected,
+                    },
+                },
+                Some(decision),
+            )
+        }
+        ast::CounterCostHolder::This(_) | ast::CounterCostHolder::Selected(_) => {
+            return Err(unsupported(path));
+        }
+    };
+    Ok((
+        Action::Counter {
+            holder,
+            kind: CounterKind(value.name.clone()),
+            operation: CounterOperation::Remove {},
+            amount: Expr::Literal(Nat(value.n)),
+        },
+        parameter,
+    ))
+}
+
+#[expect(
+    clippy::wildcard_enum_match_arm,
+    reason = "Only the material builder's Zone and Difference shapes receive a counter guard."
+)]
+fn require_counter(
+    selector: &mut Selector,
+    name: &str,
+    amount: u64,
+    path: &str,
+) -> Result<(), LoweringError> {
+    use crate::ir::{Comparison, Int, IntOperation, NatRead, Predicate, Selector};
+    match selector {
+        Selector::Zone {
+            binding, predicate, ..
+        } => {
+            let enough = Expr::Compute(Box::new(Predicate::CompareInt {
+                left: Expr::Compute(Box::new(IntOperation::FromNat {
+                    value: Expr::Live(Box::new(NatRead::Counter {
+                        holder: Holder::Object {
+                            object: ObjectOperand::Bound { binding: *binding },
+                        },
+                        kind: CounterKind(name.to_owned()),
+                    })),
+                })),
+                comparison: Comparison::GreaterEqual,
+                right: Expr::Literal(Int(
+                    i64::try_from(amount).map_err(|_private| unsupported(path))?
+                )),
+            }));
+            **predicate = Expr::Compute(Box::new(Predicate::And {
+                predicates: vec![(**predicate).clone(), enough],
+            }));
+            Ok(())
+        }
+        Selector::Difference { input, .. } => require_counter(input, name, amount, path),
+        _ => Err(unsupported(path)),
+    }
 }
 
 #[expect(
     clippy::multiple_inherent_impl,
     reason = "Counter lowering shares the ability binding environment."
 )]
-impl super::BodyContext<'_> {
+impl BodyContext<'_> {
     pub(super) fn counter_step(
         &mut self,
         value: &ast::CounterChange,

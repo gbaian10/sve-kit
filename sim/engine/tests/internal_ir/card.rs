@@ -642,6 +642,9 @@ mod look_cost;
 #[path = "card/query_conditions.rs"]
 mod query_conditions;
 
+#[path = "card/counter_costs.rs"]
+mod counter_costs;
+
 #[path = "card/counters.rs"]
 mod counters;
 #[path = "card/number_count.rs"]

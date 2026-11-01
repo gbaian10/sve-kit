@@ -7,9 +7,9 @@
 
 use super::{Execution, Game, InstructionOutcome, Result, invalid, unsupported};
 use crate::ir::{
-    Action, Binding, Control, CounterChangeEvent, CounterKind, CounterOperation, Expr, Holder,
-    Instruction, Int, Nat, ObjectOperand, ObjectRef, Quantity, QuantityUnit, RuntimeHolder,
-    Selector,
+    Action, Binding, ChoiceDomain, Control, CounterChangeEvent, CounterKind, CounterOperation,
+    Expr, Holder, Instruction, Int, IntOperation, Nat, NatRead, ObjectOperand, ObjectRef, PlaySpec,
+    PlayerRef, PlayerRelation, Quantity, QuantityUnit, RuntimeHolder, Selector, ZoneKind,
 };
 use serde_json::json;
 
@@ -23,7 +23,9 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
         && (!matches!(
             holder,
             Holder::Object {
-                object: ObjectOperand::SourceHolder {} | ObjectOperand::Bound { .. }
+                object: ObjectOperand::SourceHolder {}
+                    | ObjectOperand::Bound { .. }
+                    | ObjectOperand::Selected { .. }
             }
         ) || !matches!(
             operation,
@@ -41,7 +43,7 @@ pub(super) fn is_cost(action: &Action) -> bool {
         Action::Counter {
             operation: CounterOperation::Remove {},
             holder: Holder::Object {
-                object: ObjectOperand::SourceHolder {}
+                object: ObjectOperand::SourceHolder {} | ObjectOperand::Selected { .. }
             },
             ..
         }
@@ -55,20 +57,33 @@ pub(super) fn is_cost(action: &Action) -> bool {
 impl Execution {
     pub(super) fn counter(&self, game: &Game, holder: &Holder, kind: &CounterKind) -> Result<Nat> {
         let Holder::Object { object: operand } = holder else {
-            return Err(unsupported("source counter read"));
+            return Err(unsupported("object counter read"));
         };
         if !matches!(
             operand,
-            ObjectOperand::SourceHolder {} | ObjectOperand::Bound { .. }
+            ObjectOperand::SourceHolder {}
+                | ObjectOperand::Bound { .. }
+                | ObjectOperand::Selected { .. }
         ) {
             return Err(unsupported("counter read holder"));
         }
         let reference = self.object(game, operand)?;
-        let object = game.object(self.object_id(reference)?)?;
-        if object.generation != reference.generation.0 {
+        let id = self.object_id(reference)?;
+        if game.object(id)?.generation != reference.generation.0 {
             return Err(unsupported("stale counter holder requires a snapshot"));
         }
-        let key = game.catalog.keyword_id(&kind.0);
+        game.card_counter(id, kind)
+    }
+}
+
+#[expect(
+    clippy::multiple_inherent_impl,
+    reason = "Selection predicates and instructions share the authoritative counter read."
+)]
+impl Game {
+    pub(super) fn card_counter(&self, id: &str, kind: &CounterKind) -> Result<Nat> {
+        let object = self.object(id)?;
+        let key = self.catalog.keyword_id(&kind.0);
         let value = object
             .state
             .get("counters")
@@ -241,4 +256,55 @@ fn check_selector(selector: &Selector) -> Result<()> {
         }
         _ => Err(unsupported("public Field or EX counter selector")),
     }
+}
+
+pub(super) fn selected_cost(action: &Action) -> Option<Binding<Selector>> {
+    match action {
+        Action::Counter {
+            holder:
+                Holder::Object {
+                    object: ObjectOperand::Selected { selection },
+                },
+            operation: CounterOperation::Remove {},
+            ..
+        } if check_action(action).is_ok() => Some(*selection),
+        _ => None,
+    }
+}
+
+pub(super) fn check_cost(action: &Action, play: &PlaySpec) -> bool {
+    if !is_cost(action) {
+        return false;
+    }
+    let Some(selected) = selected_cost(action) else {
+        return true;
+    };
+    play.parameters.iter().any(|decision| {
+        super::card::material::check_parameter(decision).is_ok()
+            && matches!(&decision.domain, ChoiceDomain::Objects { binding, constraint, .. }
+                if *binding == selected && constraint.cardinality.minimum == Nat(1)
+                    && constraint.groups.first().is_some_and(|group| own_pool(&group.selector)))
+    })
+}
+
+fn own_pool(selector: &Selector) -> bool {
+    match selector {
+        Selector::Zone {
+            players,
+            zone: ZoneKind::Field | ZoneKind::Ex,
+            ..
+        } => {
+            players.relation == PlayerRelation::SelfPlayer
+                && players.relative_to == (PlayerRef::Controller {})
+        }
+        Selector::Difference { input, .. } => own_pool(input),
+        _ => false,
+    }
+}
+
+pub(super) fn candidate_read(read: &IntOperation, candidate: Binding<ObjectRef>) -> bool {
+    matches!(read, IntOperation::FromNat { value: Expr::Live(value) }
+        if matches!(value.as_ref(), NatRead::Counter {
+            holder: Holder::Object { object: ObjectOperand::Bound { binding } }, kind
+        } if *binding == candidate && !kind.0.is_empty()))
 }

@@ -287,6 +287,8 @@ fn play_requirement(code: &str) -> bool {
         code,
         "shape.Control.EachObject"
             | "control.each-object"
+            | "shape.ObjectOperand.Selected"
+            | "reference.selected-object"
             | "shape.NatRead.Counter"
             | "read.counter"
             | "shape.Holder.Object"

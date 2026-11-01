@@ -842,6 +842,13 @@ fn check_costs(ability: &Ability, source: &SourceSpan) -> Result<()> {
     if discards > 1 || (discards > 0 && is_printed_quick(ability)) {
         return Err(unsupported("one non-Quick hand cost group"));
     }
+    if is_printed_quick(ability)
+        && steps
+            .iter()
+            .any(|step| super::counters::selected_cost(&step.instruction.action).is_some())
+    {
+        return Err(unsupported("non-self counter Quick quote"));
+    }
     for step in steps {
         let instruction = &step.instruction;
         if step.materials.is_some()
@@ -887,7 +894,7 @@ fn check_costs(ability: &Ability, source: &SourceSpan) -> Result<()> {
                     && movement.initial_posture.is_none()
                     && movement.entry_effects.is_empty()
             }
-            Action::Counter { .. } => super::counters::is_cost(&instruction.action),
+            Action::Counter { .. } => super::counters::check_cost(&instruction.action, play),
             Action::Discard { .. } => hand_payment::check_cost(&instruction.action),
             action => material::check_cost(action, play),
         };

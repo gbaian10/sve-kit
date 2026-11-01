@@ -9,11 +9,11 @@ use crate::ir::{
     AbilitiesRead, AbilityOrigin, AbilityPredicate, AbilityReference, Action, Binding, Bool,
     BoolRead, BooleanState, CardKind, CardName, Cardinality, CharacteristicView, ClassRead,
     Comparison, DecisionId, Expr, Info, Instruction, Int, IntOperation, KeywordId, KindRead,
-    MoveDestination, MoveMethod, MoveResult, MoveSpec, NamesRead, Nat, NumberRead, ObjectOperand,
-    ObjectProperty, ObjectRef, ObjectView, OwnerZone, PlayerId, PlayerRelation, Predicate,
-    Requirement, Requirements, RuntimeObjectView, RuntimeZoneRef, SearchDestination, SearchOutcome,
-    SearchPartition, SearchPartitionAnswer, SearchSelectionAnswer, SelectionView, Selector,
-    SnapshotId, Stat, TraitsRead, ZoneKind, ZoneRef,
+    MoveDestination, MoveMethod, MoveResult, MoveSpec, NamesRead, Nat, NatRead, NumberRead,
+    ObjectOperand, ObjectProperty, ObjectRef, ObjectView, OwnerZone, PlayerId, PlayerRelation,
+    Predicate, Requirement, Requirements, RuntimeObjectView, RuntimeZoneRef, SearchDestination,
+    SearchOutcome, SearchPartition, SearchPartitionAnswer, SearchSelectionAnswer, SelectionView,
+    Selector, SnapshotId, Stat, TraitsRead, ZoneKind, ZoneRef,
 };
 use alloc::collections::{BTreeSet, VecDeque};
 use serde_json::{Value, json};
@@ -223,7 +223,8 @@ pub(in crate::game::internal) fn freeze_source_names(
 }
 
 fn numeric_filter(read: &IntOperation, candidate: Binding<ObjectRef>) -> bool {
-    matches!(read, IntOperation::InformationOrZero { information:
+    super::counters::candidate_read(read, candidate)
+        || matches!(read, IntOperation::InformationOrZero { information:
         NumberRead::Cost { object, view: CharacteristicView::Original | CharacteristicView::Effective }
         | NumberRead::Stats { object, view: CharacteristicView::Effective, property: Stat::Attack }
     } if candidate_view(object, candidate))
@@ -485,6 +486,14 @@ fn matches_number(
     comparison: Comparison,
     amount: i64,
 ) -> Result<bool> {
+    if let IntOperation::FromNat {
+        value: Expr::Live(value),
+    } = read
+        && let NatRead::Counter { kind, .. } = value.as_ref()
+    {
+        let actual = i64::try_from(game.card_counter(id, kind)?.0).map_err(invalid)?;
+        return Ok(super::values::compare(actual, comparison, amount));
+    }
     let IntOperation::InformationOrZero { information } = read else {
         return Err(unsupported("search number operation"));
     };

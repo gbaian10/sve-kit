@@ -275,9 +275,17 @@ pub(super) struct Transform {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct CounterCost {
-    pub on: This,
+    pub on: CounterCostHolder,
+    pub holders: Option<u64>,
     pub name: String,
     pub n: u64,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged)]
+pub(super) enum CounterCostHolder {
+    This(This),
+    Selected(Box<PublicQuery>),
 }
 
 #[derive(Deserialize)]

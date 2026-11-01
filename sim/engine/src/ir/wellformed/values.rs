@@ -480,6 +480,12 @@ impl Checker {
 
     pub(super) fn object(&self, object: &ObjectOperand) -> Checked {
         match object {
+            ObjectOperand::Selected { selection } => {
+                self.reference(*selection, BindingKind::Value)?;
+                self.selection_visibility(&Selector::Bound {
+                    reference: *selection,
+                })
+            }
             ObjectOperand::SourceHolder {} => Ok(()),
             ObjectOperand::Bound { binding } => {
                 self.reference(*binding, BindingKind::Value)?;

@@ -110,7 +110,7 @@ fn zone(selector: &Selector) -> Result<ZoneKind> {
     }
 }
 
-pub(super) fn check_parameter(decision: &Decision) -> Result<()> {
+pub(in crate::game::internal) fn check_parameter(decision: &Decision) -> Result<()> {
     let ChoiceDomain::Objects {
         constraint,
         target_roles: None,
