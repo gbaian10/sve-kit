@@ -42,26 +42,33 @@ pub(crate) fn selection_with_rules() -> &'static SelectedEffects {
     static SELECTED: OnceLock<SelectedEffects> = OnceLock::new();
     SELECTED.get_or_init(|| {
         let (snapshot, keywords, input) = inputs();
-        let rules_source = read_to_string(
-            PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-                .join("../../authored/rules/engine/index.yaml"),
-        )
-        .unwrap();
-        let mut rules_document: Value = serde_saphyr::from_str(&rules_source).unwrap();
-        // Batch upgrades change snapshot bytes without changing these rule capabilities.
-        *rules_document
-            .pointer_mut("/input/snapshot_sha256")
-            .unwrap() = Value::String(rule_fixtures::hash(snapshot.as_bytes()));
-        let bound_rules = serde_json::to_string(&rules_document).unwrap();
-        Catalog::from_current_selection_with_rules(
-            snapshot,
-            keywords,
-            input,
-            &bound_rules,
-            &EngineIdentityInput::LegacyJp,
-        )
-        .unwrap()
+        selection_with_rules_from(snapshot, keywords, input)
     })
+}
+
+pub(crate) fn selection_with_rules_from(
+    snapshot: &str,
+    keywords: &str,
+    input: &Value,
+) -> SelectedEffects {
+    let rules_source = read_to_string(
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../authored/rules/engine/index.yaml"),
+    )
+    .unwrap();
+    let mut rules_document: Value = serde_saphyr::from_str(&rules_source).unwrap();
+    // Batch upgrades change snapshot bytes without changing these rule capabilities.
+    *rules_document
+        .pointer_mut("/input/snapshot_sha256")
+        .unwrap() = Value::String(rule_fixtures::hash(snapshot.as_bytes()));
+    let bound_rules = serde_json::to_string(&rules_document).unwrap();
+    Catalog::from_current_selection_with_rules(
+        snapshot,
+        keywords,
+        input,
+        &bound_rules,
+        &EngineIdentityInput::LegacyJp,
+    )
+    .unwrap()
 }
 
 pub(crate) fn lowerer() -> &'static ExpandedLowerer {

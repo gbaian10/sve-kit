@@ -35,7 +35,7 @@ fn selected() -> &'static SelectedEffects {
                 format!("{number}.yaml"),format!("format: 1\nkind: effect_set\ncards:\n  {number}:\n    status: complete\n    abilities: []\n")
             ]));
         }
-        Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap()
+        repository::selection_with_rules_from(&snapshot, &keywords, &input)
     })
 }
 
@@ -98,7 +98,8 @@ pub(super) fn prepared(value: &Value, action: Action) -> Game {
     ] {
         game.load_internal_card(number, &empty).unwrap();
     }
-    game.load_internal_card("played-spell", &spell_material()).unwrap();
+    game.load_internal_card("played-spell", &spell_material())
+        .unwrap();
     game
 }
 
