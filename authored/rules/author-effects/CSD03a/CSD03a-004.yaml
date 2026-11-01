@@ -1,0 +1,40 @@
+cards:
+  CSD03a-004:
+    abilities:
+      - keywords:
+          - single_drive
+        line: 1
+      - evolve_time:
+          define:
+            X:
+              count:
+                kind: follower
+                trait: ロイヤルパラディン
+                who: self
+                zone: field
+          do:
+            - damage:
+                n:
+                  minus:
+                    - X
+                    - minus:
+                        - 0
+                        - X
+                to: victim
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-10-31"
+format: 2
+kind: author_effect_set

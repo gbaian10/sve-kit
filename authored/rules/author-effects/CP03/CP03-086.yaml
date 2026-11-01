@@ -1,0 +1,27 @@
+cards:
+  CP03-086:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - keywords:
+          - single_drive
+        line: 2
+      - fanfare:
+          do:
+            - move:
+                to: cemetery
+                top:
+                  n: 2
+                  who: self
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-10-31"
+format: 2
+kind: author_effect_set

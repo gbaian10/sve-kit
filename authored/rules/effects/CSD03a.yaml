@@ -1,33 +1,6 @@
 format: 1
 kind: effect_set
 cards:
-  CSD03a-003:
-    status: complete
-    abilities:
-      - line: 1
-        kind: evolve
-        body:
-          op: evolve
-          subjects: self
-        costs:
-          - op: pp
-            amount: 1
-      - line: 2
-        kind: static
-        body:
-          op: macro
-          name: single_drive
-      - line: 3
-        kind: trigger
-        body:
-          op: if
-          condition:
-            read: self.entered_by_effect
-          then:
-            op: evolve
-            subjects: self
-        event: enter
-        subject: self
   CSD03a-006:
     status: complete
     abilities:
