@@ -366,10 +366,31 @@ class CollectionFilterFields(CountFilterFields, _CollectionScope):
     pass
 
 
-@with_config(SELECTION_CONFIG)
+@with_config(
+    ConfigDict(
+        extra="forbid",
+        strict=True,
+        regex_engine="python-re",
+        serialize_by_alias=True,
+        json_schema_extra={
+            **FILTER_CONSTRAINTS,
+            "dependentRequired": {"as": ["where"]},
+            "if": {"properties": {"zone": {"const": "banish"}}, "required": ["zone"]},
+            "then": {
+                "properties": {"who": {}, "zone": {}},
+                "additionalProperties": False,
+            },
+        },
+    )
+)
 class CountObjectsFields(CollectionFilterFields):
     who: PlayerRef | PlayerSet | ParamRef
-    zone: Zone | Annotated[tuple[Zone, ...], Field(min_length=1)] | ParamRef
+    zone: (
+        Zone
+        | Annotated[tuple[Zone, ...], Field(min_length=1)]
+        | ParamRef
+        | Literal["banish"]
+    )
 
 
 @with_config(SELECTION_CONFIG)
@@ -383,7 +404,14 @@ class CollectionInFields(CollectionFilterFields, _InSource):
     pass
 
 
-type CountObjects = Annotated[CountObjectsFields, AfterValidator(_validate_selection)]
+def _validate_count[T: Mapping[str, object]](value: T) -> T:
+    _validate_selection(value)
+    if value.get("zone") == "banish" and value.keys() - {"who", "zone"}:
+        raise ValueError("Banish counts expose only cardinality")
+    return value
+
+
+type CountObjects = Annotated[CountObjectsFields, AfterValidator(_validate_count)]
 type CollectionObjects = Annotated[
     CollectionObjectsFields, AfterValidator(_validate_selection)
 ]

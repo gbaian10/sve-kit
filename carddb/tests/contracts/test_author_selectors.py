@@ -63,6 +63,30 @@ def _check(name: str, value: JsonValue, *, accepted: bool) -> None:
             ADAPTERS[name].validate_json(json.dumps(value))
 
 
+def test_banish_counts_expose_cardinality_without_object_or_attribute_access() -> None:
+    schemas = NODES["$defs"]
+    for name in (COUNTED, OBJECTS, "A.collection"):
+        validator = Draft202012Validator({"$ref": f"#/$defs/{name}", "$defs": schemas})
+        value: dict[str, JsonValue] = {"who": "self", "zone": "banish"}
+        accepted = name == COUNTED
+        _check(name, value, accepted=accepted)
+        assert validator.is_valid(value) == accepted
+    forbidden: tuple[dict[str, JsonValue], ...] = (
+        {"kind": "follower"},
+        {"keyword": "ward"},
+        {"face_up": True},
+        {"other": True},
+        {"where": {"standing": "item"}},
+        {"except": {"in": "chosen"}},
+        {"zone": ["field", "banish"]},
+    )
+    validator = Draft202012Validator({"$ref": f"#/$defs/{COUNTED}", "$defs": schemas})
+    for extra in forbidden:
+        query: dict[str, JsonValue] = {"who": "self", "zone": "banish", **extra}
+        _check(COUNTED, query, accepted=False)
+        assert not validator.is_valid(query)
+
+
 @pytest.mark.parametrize(("name", "value"), QUERY_CASES)
 def test_query_variants_round_trip(name: str, value: JsonValue) -> None:
     _check(name, value, accepted=True)
