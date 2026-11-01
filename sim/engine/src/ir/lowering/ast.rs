@@ -283,7 +283,7 @@ pub(super) struct CounterCost {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct CounterChange {
-    pub on: This,
+    pub on: Objects,
     pub name: String,
     pub delta: i64,
 }

@@ -6,7 +6,7 @@ use super::{
 use crate::ir::prevention;
 use crate::ir::{
     Action, Binding, Bool, Capture, CaptureRef, CaptureTime, Cardinality, ChoiceDomain, Control,
-    Expr, InstallationSubjects, Instruction, Int, IntOperation, Located, LookOutcome,
+    Expr, Holder, InstallationSubjects, Instruction, Int, IntOperation, Located, LookOutcome,
     MemberProjection, MoveDestination, Nat, NatRead, Node, ObjectOperand, ObjectReceipt, ObjectRef,
     OrderAnswer, OrderOutcome, OwnerZone, PlayerId, PlayerRef, PlayerRelation, Position, Predicate,
     Program, ReceiptLocation, RecipientSet, Requirements, ResultMember, ResultMemberId,
@@ -247,6 +247,13 @@ fn mask_public_selectors(inspected: &mut Node) -> Result<()> {
         } => mask_public_number(value),
         Node::Instruction { instruction } => match &mut instruction.action {
             Action::Draw { count: amount, .. } => mask_public_number(amount),
+            Action::Counter {
+                holder: Holder::Object { object },
+                ..
+            } if matches!(object, ObjectOperand::Bound { .. }) => {
+                // The checked object binding does not grant private reads in other operands.
+                *object = ObjectOperand::SourceHolder {};
+            }
             Action::Damage {
                 amount, recipients, ..
             } => {

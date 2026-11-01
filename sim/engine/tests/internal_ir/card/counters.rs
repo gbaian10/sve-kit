@@ -105,3 +105,51 @@ fn overflow_and_stale_source_counter_reads_reject_atomically() {
         assert_eq!(exact_authority(&game), before);
     }
 }
+
+#[test]
+fn batch_counter_overflow_rolls_back_earlier_holders() {
+    let binding = Binding::new(1, ScopeId(2));
+    let mut action = change(CounterOperation::Add {}, 1);
+    if let Action::Counter { holder, .. } = &mut action {
+        *holder = Holder::Object {
+            object: ObjectOperand::Bound { binding },
+        };
+    }
+    let program = card(vec![ability(
+        1,
+        vec![Located {
+            source: source("unit-follower"),
+            node: Node::Control {
+                control: Control::EachObject {
+                    input: zone(ZoneKind::Field, 90),
+                    binding,
+                    order: None,
+                    body: body(2, vec![instruction(1, action)]),
+                },
+            },
+        }],
+    )]);
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P1"]["zones"]["field"] = json!([
+        {"id":"s","card":"unit-follower","state":{"counters":{"test":1}}},
+        {"id":"overflow","card":"unit-follower","state":{"counters":{"test":i64::MAX}}}
+    ]);
+    initial["players"]["P2"]["zones"]["field"] = json!([]);
+    let mut game = Game::new(
+        catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "counter-overflow",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &program).unwrap();
+    let before = exact_authority(&game);
+    game.activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
+        .unwrap_err();
+    assert!(
+        exact_authority(&game) == before,
+        "overflow restores all holders"
+    );
+}

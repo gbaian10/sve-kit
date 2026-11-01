@@ -133,7 +133,7 @@ fn locate_steps(steps: &mut [Located<Node>], span: &SourceSpan, origin: &Ability
         match &mut step.node {
             Node::Instruction { instruction } => instruction.source = origin.clone(),
             Node::Control {
-                control: Control::Sequence { body },
+                control: Control::Sequence { body } | Control::EachObject { body, .. },
             } => locate_steps(&mut body.steps, span, origin),
             Node::Control {
                 control:

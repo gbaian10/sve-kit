@@ -1062,6 +1062,12 @@ impl<'definitions> BodyContext<'definitions> {
         let mut steps = Vec::new();
         for (index, step) in author_steps.iter().enumerate() {
             let step_path = format!("{path}/{index}");
+            if let ast::Step::Counter(value) = step
+                && !matches!(value.on, ast::Objects::This(_))
+            {
+                steps.push(self.counter_step(value, &step_path, source, ability_source)?);
+                continue;
+            }
             if let ast::Step::Optional(optional) = step {
                 steps.push(self.optional(optional, &step_path, source, ability_source)?);
                 continue;
@@ -1163,7 +1169,7 @@ impl<'definitions> BodyContext<'definitions> {
         span: &SourceSpan,
     ) -> Result<Action, LoweringError> {
         match step {
-            ast::Step::Counter(value) => counters::change(value, path),
+            ast::Step::Counter(value) => counters::change(value, counters::holder(), path),
             ast::Step::Race(value) => Ok(meal::action(
                 value.n.unwrap_or(1),
                 super::MealRaceOperation::Race,
