@@ -1,0 +1,28 @@
+format: 2
+kind: author_effect_set
+cards:
+  PR-006:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6-sol
+          date: "2026-11-01"
+    abilities:
+      - line: 1
+        evolve_time:
+          do:
+            - create:
+                token:
+                  - スティールナイト
+                  - ナイト
+                to: field
+                n: 1
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP17-T12
+      - section: 1
+        line: 2
+        card: BP17-T11
