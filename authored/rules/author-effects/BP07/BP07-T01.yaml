@@ -1,0 +1,38 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP07-T01:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-01"
+    token:
+      name: プロダクトマシーン
+      template: true
+    abilities:
+      - line: 1
+        activate:
+          cost:
+            steps:
+              - act_self: true
+              - to_cemetery:
+                  sel:
+                    who: all
+                    zone: field
+                    kind: follower
+                    trait: 機械
+                  n: 3
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: enemy
+                n: 5
