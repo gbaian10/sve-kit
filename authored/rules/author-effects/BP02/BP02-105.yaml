@@ -1,0 +1,27 @@
+cards:
+  BP02-105:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - fanfare:
+          do:
+            - buff:
+                hp:
+                  count:
+                    keyword: ward
+                    kind: follower
+                    other: true
+                    who: self
+                    zone: field
+                on: this
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-01"
+format: 2
+kind: author_effect_set
