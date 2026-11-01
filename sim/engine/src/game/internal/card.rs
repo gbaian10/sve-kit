@@ -38,6 +38,7 @@ pub(super) mod material;
 pub(in crate::game::internal) mod meal;
 pub(super) mod optional;
 mod play_restrictions;
+pub(super) mod prevention;
 mod printed;
 pub(super) mod quick;
 mod resources;
@@ -359,6 +360,10 @@ impl Game {
             }
             if static_keywords::is_static(ability) {
                 static_keywords::check(located)?;
+                continue;
+            }
+            if prevention::is_static(ability) {
+                prevention::check(located)?;
                 continue;
             }
             if is_printed_quick(ability) && ordinal != 0 {
@@ -708,6 +713,7 @@ fn activation_type(kind: &str, zones: &[ZoneKind]) -> bool {
 
 fn check_header(ability: &Ability) -> Result<()> {
     if static_keywords::is_static(ability)
+        || prevention::is_static(ability)
         || card_permission(ability)
         || printed_keywords::card_declaration(ability).is_some()
         || card_restriction(ability).is_some()

@@ -1,0 +1,29 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP05-108:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - prevent:
+                "on":
+                  leader: self
+                kind: ability
+      - line: 2
+        activate:
+          quick: true
+          cost:
+            act_self: true
+          do:
+            - damage:
+                to:
+                  leaders: opponents
+                n: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-10-31"

@@ -331,7 +331,8 @@ variants!(PlayerRef {
     FromExpression { value: Box<Expr<PlayerRef>> } => [],
     Controller {} => [], Owner {} => [], Active {} => [],
     Bound { binding: Binding<PlayerRef> } => [],
-    RequireOne { players: Box<PlayerSet> } => ["player.require-one"]
+    RequireOne { players: Box<PlayerSet> } => ["player.require-one"],
+    ProposedDamageRecipient {} => ["player.proposed-damage-recipient"]
 });
 variants!(ObjectView {
     Snapshot { value: Box<Expr<RuntimeObjectView>> } => ["reference.snapshot"],

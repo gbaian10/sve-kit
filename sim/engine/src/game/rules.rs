@@ -288,8 +288,13 @@ impl Game {
 
     pub(super) fn pending_frame(&self, pending: &Pending, decision: &Value) -> Result<Frame> {
         let mut frame = self.start_frame(&pending.source, pending.reference.clone(), decision)?;
+        // A pending occurrence must not borrow a later incarnation of its source.
+        frame.source_generation = None;
         frame.controller.clone_from(&pending.controller);
         if let Some(context) = &pending.context {
+            if context.source == pending.source {
+                frame.source_generation = context.source_generation;
+            }
             frame.bindings.clone_from(&context.bindings);
             for (id, attributes) in &context.captured {
                 if id == &context.source {
@@ -740,10 +745,10 @@ impl Game {
                 let mut frame = self.start_frame(source, Value::Null, &flow["decision"])?;
                 frame.cause = flow["cause"].clone();
                 let mut hits = vec![
-                    json!({"source":source,"target":target,"amount":self.object(source)?.state["power"],"battle":true,"attack":true}),
+                    json!({"source":source,"source_generation":self.object(source)?.generation,"target":target,"amount":self.object(source)?.state["power"],"battle":true,"attack":true}),
                 ];
                 if !target.ends_with(".leader") {
-                    hits.push(json!({"source":target,"target":source,"amount":self.object(target)?.state["power"],"battle":true}));
+                    hits.push(json!({"source":target,"source_generation":self.object(target)?.generation,"target":source,"amount":self.object(target)?.state["power"],"battle":true}));
                     if self.keywords(source)?.contains("bane") {
                         self.object_mut(target)?.state["bane_damaged"] = json!(true);
                     }
@@ -830,11 +835,13 @@ impl Game {
         self.internal_numeric_end_turn(turn)?;
         self.internal_keywords_end_turn(turn);
         self.internal_drive_end_turn(turn);
+        self.internal_preventions_end_turn(turn);
         self.expire_effects()?;
         let seat = self.next_scheduled_player()?;
         self.state.turn["active"] = json!(seat);
         self.state.schedule.begin()?;
         self.internal_numeric_begin_turn()?;
+        self.internal_preventions_begin_turn()?;
         self.state.turn["phase"] = json!("start");
         self.state.flow = json!({"kind":"main"});
         self.state.turn["elapsed_turns"][&seat] =

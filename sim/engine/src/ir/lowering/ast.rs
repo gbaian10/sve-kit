@@ -615,7 +615,8 @@ pub(super) struct Apply {
 pub(super) enum InstalledEffect {
     Stat(ConstantStats),
     CostMod(CostModifier),
-    Cannot(CannotStand),
+    Cannot(Cannot),
+    Prevent(Prevent),
 }
 
 #[derive(Deserialize)]
@@ -1671,6 +1672,7 @@ pub(super) struct Static {
 #[serde(rename_all = "snake_case")]
 pub(super) enum StaticEffect {
     Grant(StaticGrant),
+    Prevent(Prevent),
 }
 
 #[derive(Deserialize)]
@@ -1678,4 +1680,42 @@ pub(super) enum StaticEffect {
 pub(super) struct StaticGrant {
     pub on: Option<Objects>,
     pub keywords: Vec<String>,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged)]
+pub(super) enum Cannot {
+    Stand(CannotStand),
+    DealDamage(CannotDealDamage),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct CannotDealDamage {
+    #[serde(rename = "what")]
+    pub _what: DealDamageAction,
+    pub on: Option<Objects>,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum DealDamageAction {
+    DealDamage,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Prevent {
+    pub on: Option<Recipients>,
+    pub kind: PreventionKind,
+    pub source: Option<Objects>,
+    pub next_only: Option<bool>,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum PreventionKind {
+    Any,
+    Combat,
+    Ability,
 }

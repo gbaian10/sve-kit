@@ -108,6 +108,7 @@ impl Game {
         self.internal_play_move(&holder, "field", &frame)?;
         self.internal_ward_entry_posture(execution, played)?;
         self.internal_numeric_end_resolution(execution.id)?;
+        self.internal_preventions_end_resolution(execution.id);
         let resolve_group = self.group();
         self.emit(
             json!({"kind":"解決","object":holder}),

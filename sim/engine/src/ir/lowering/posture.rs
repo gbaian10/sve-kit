@@ -22,7 +22,8 @@ impl BodyContext<'_> {
         installation: &ast::Apply,
         path: &str,
     ) -> Result<Action, LoweringError> {
-        let ast::InstalledEffect::Cannot(restriction) = &installation.effect else {
+        let ast::InstalledEffect::Cannot(ast::Cannot::Stand(restriction)) = &installation.effect
+        else {
             return Err(unsupported(path));
         };
         let Some(ast::Until::NextPhase { next_phase }) = &installation.until else {

@@ -231,8 +231,15 @@ impl BodyContext<'_> {
         source: &AbilitySource,
         path: &str,
     ) -> Result<Action, LoweringError> {
-        if matches!(installation.effect, ast::InstalledEffect::Cannot(_)) {
-            return self.no_stand(installation, path);
+        match &installation.effect {
+            ast::InstalledEffect::Cannot(ast::Cannot::Stand(_)) => {
+                return self.no_stand(installation, path);
+            }
+            ast::InstalledEffect::Cannot(ast::Cannot::DealDamage(_))
+            | ast::InstalledEffect::Prevent(_) => {
+                return self.prevent_apply(installation, source, path);
+            }
+            ast::InstalledEffect::Stat(_) | ast::InstalledEffect::CostMod(_) => {}
         }
         let ast::InstalledEffect::Stat(statistics) = &installation.effect else {
             return self.discount(installation, path);

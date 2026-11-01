@@ -3,13 +3,15 @@
 use super::{
     Execution, Game, InputDomain, InstructionOutcome, Result, Wait, invalid, seat_name, unsupported,
 };
+use crate::ir::prevention;
 use crate::ir::{
     Action, Binding, Bool, Capture, CaptureRef, CaptureTime, Cardinality, ChoiceDomain, Control,
-    Expr, Instruction, Int, IntOperation, Located, LookOutcome, MemberProjection, MoveDestination,
-    Nat, NatRead, Node, ObjectOperand, ObjectReceipt, ObjectRef, OrderAnswer, OrderOutcome,
-    OwnerZone, PlayerId, PlayerRef, PlayerRelation, Position, Predicate, Program, ReceiptLocation,
-    RecipientSet, Requirements, ResultMember, ResultMemberId, RuntimeObjectView, ScopeId, Selector,
-    SnapshotId, SourceSpan, StepwiseMode, Visibility, ZoneKind,
+    Expr, InstallationSubjects, Instruction, Int, IntOperation, Located, LookOutcome,
+    MemberProjection, MoveDestination, Nat, NatRead, Node, ObjectOperand, ObjectReceipt, ObjectRef,
+    OrderAnswer, OrderOutcome, OwnerZone, PlayerId, PlayerRef, PlayerRelation, Position, Predicate,
+    Program, ReceiptLocation, RecipientSet, Requirements, ResultMember, ResultMemberId,
+    RuntimeObjectView, ScopeId, Selector, SnapshotId, SourceSpan, StepwiseMode, Visibility,
+    ZoneKind,
 };
 use crate::ir::{CharacteristicPatch, DamageAmount, NatOperation, NumericChange, ObjectProperty};
 use alloc::collections::BTreeSet;
@@ -89,6 +91,7 @@ pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
         }
     }
     let mut inspected = node.clone();
+    mask_prevention(&mut inspected)?;
     mask_discard(&mut inspected)?;
     if let Node::Instruction { instruction } = &mut inspected
         && let Action::Reveal { objects } = &instruction.action
@@ -192,6 +195,23 @@ pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
                 return Err(unsupported("order placement"));
             }
             _ => {}
+        }
+    }
+    Ok(())
+}
+
+fn mask_prevention(inspected: &mut Node) -> Result<()> {
+    if let Node::Instruction { instruction } = inspected {
+        let closed = matches!(&instruction.action,
+            Action::InstallEffect { effect, .. } if prevention::projection(effect).is_some());
+        super::card::prevention::mask_pattern(&mut instruction.action, &instruction.source)?;
+        if closed
+            && let Action::InstallEffect {
+                subjects: InstallationSubjects::Objects { objects, .. },
+                ..
+            } = &mut instruction.action
+        {
+            mask_public_predicate(objects);
         }
     }
     Ok(())

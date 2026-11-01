@@ -1,8 +1,8 @@
 //! Historical regression catalogue from carddb's temporary public-input projection.
 //!
 //! Cards migrated to author 1.0 leave the prototype set, but the shared scenarios still
-//! pin their original behaviour. This catalogue restores each migrated card's frozen
-//! prototype AST for those scenarios only; it is never a current-selection result and
+//! pin their original behaviour. This catalogue restores existing frozen prototypes,
+//! or derives the closed prevention subset from current authors, for those scenarios only; it is never a current-selection result and
 //! grants no runtime qualification (see `current_repository.rs` for the real selection).
 
 use alloc::collections::{BTreeMap, BTreeSet};
@@ -15,6 +15,8 @@ use std::sync::OnceLock;
 use serde_json::Value;
 use sve_engine::catalog::{Catalog, EngineIdentityInput};
 
+#[path = "historical_prevention.rs"]
+mod historical_prevention;
 #[path = "repository.rs"]
 mod repository;
 #[path = "rule_fixtures.rs"]
@@ -121,6 +123,46 @@ fn passive_material_kind(kind: Option<&str>) -> bool {
 
 #[expect(
     clippy::expect_used,
+    reason = "Historical documents have already passed selection validation."
+)]
+fn prototype_numbers(documents: &[(String, String)]) -> BTreeSet<String> {
+    documents
+        .iter()
+        .flat_map(|(_, text)| {
+            let document: Value = serde_saphyr::from_str(text).expect("historical document");
+            document
+                .get("cards")
+                .and_then(Value::as_object)
+                .expect("historical cards")
+                .keys()
+                .cloned()
+                .collect::<Vec<_>>()
+        })
+        .collect()
+}
+
+fn include_current_prevention(documents: &mut Vec<(String, String)>) {
+    let existing = prototype_numbers(documents);
+    let mut cards = serde_json::Map::new();
+    for (number, current) in &repository::selection().current {
+        if !existing.contains(number)
+            && let Some(program) = current
+                .expanded
+                .get("cards")
+                .and_then(|expanded_cards| expanded_cards.get(&current.card_no))
+                .and_then(historical_prevention::program)
+        {
+            cards.insert(number.clone(), program);
+        }
+    }
+    documents.push((
+        "historical/current-prevention.yaml".into(),
+        serde_json::json!({"format":1_u8, "kind":"effect_set", "cards":cards}).to_string(),
+    ));
+}
+
+#[expect(
+    clippy::expect_used,
     reason = "Historical passive token fixtures use the checked current author identity."
 )]
 fn include_passive_current_tokens(
@@ -165,19 +207,7 @@ fn include_passive_current_tokens(
             );
         }
     }
-    let existing: BTreeSet<String> = documents
-        .iter()
-        .flat_map(|(_, text)| {
-            let document: Value = serde_saphyr::from_str(text).expect("historical document");
-            document
-                .get("cards")
-                .and_then(Value::as_object)
-                .expect("historical cards")
-                .keys()
-                .cloned()
-                .collect::<Vec<_>>()
-        })
-        .collect();
+    let existing = prototype_numbers(documents);
     let mut by_identity: BTreeMap<String, serde_json::Map<String, Value>> = BTreeMap::new();
     let mut historical = BTreeSet::new();
     for pack in read_dir(root.join("authored/registry/printing")).expect("printing registry") {
@@ -247,6 +277,7 @@ pub(crate) fn historical_regression_catalog() -> Arc<Catalog> {
     Arc::clone(CATALOG.get_or_init(|| {
         let (snapshot, keywords, mut documents, root) = selected_prototypes();
         restore_frozen_programs(&mut documents, &root);
+        include_current_prevention(&mut documents);
         let (_, _, input) = repository::inputs();
         include_passive_current_tokens(&mut documents, input, &root, snapshot);
         Arc::new(build(snapshot, keywords, &documents, &root))
