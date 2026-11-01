@@ -1,0 +1,28 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "op": "evolve",
+        "subjects": "self"
+      },
+      "costs": [
+        {
+          "hp": -3,
+          "op": "modify",
+          "subjects": "self.leader"
+        }
+      ],
+      "kind": "evolve",
+      "line": 1
+    },
+    {
+      "body": {
+        "name": "bane",
+        "op": "macro"
+      },
+      "kind": "static",
+      "line": 2
+    }
+  ],
+  "status": "complete"
+}
