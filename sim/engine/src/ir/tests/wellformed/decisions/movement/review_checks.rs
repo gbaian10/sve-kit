@@ -105,7 +105,8 @@ fn search_actor_and_installation_subject_regions_are_explicit() {
             affected: Binding::new(1, ScopeId(1001)),
         };
     }
-    reject_action(body(1, vec![players]), WellFormedReason::UnsupportedShape);
+    // Player installations do not introduce the affected object binding.
+    reject_action(body(1, vec![players]), WellFormedReason::UnavailableBinding);
 }
 
 fn search_condition(predicate: Expr<Bool>, destination_condition: bool) -> Located<Node> {

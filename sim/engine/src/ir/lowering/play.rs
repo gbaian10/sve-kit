@@ -826,6 +826,7 @@ fn contains_choice(steps: &[ast::Step]) -> bool {
         | ast::Step::Grant(_)
         | ast::Step::SetStat(_)
         | ast::Step::Apply(_)
+        | ast::Step::PlayerEffect(_)
         | ast::Step::Search(_)
         | ast::Step::Look(_)
         | ast::Step::Reveal(_)

@@ -38,6 +38,7 @@ mod keywords;
 pub(super) mod material;
 pub(in crate::game::internal) mod meal;
 pub(super) mod optional;
+pub(super) mod other_costs;
 mod play_restrictions;
 pub(super) mod prevention;
 mod printed;
@@ -99,6 +100,7 @@ pub(in crate::game) struct CardRuntime {
     pub(in crate::game::internal) active_source: Option<RuntimeAbilitySource>,
     pub(in crate::game::internal) quick: Option<quick::Question>,
     pub(in crate::game::internal) quick_start: bool,
+    pub(in crate::game::internal) other_costs: Vec<other_costs::InstalledCost>,
 }
 
 impl CardRuntime {
@@ -149,29 +151,31 @@ impl CardRuntime {
     }
 
     pub(in crate::game) fn requires_typed_play(&self) -> bool {
-        self.definitions.cards.values().any(|card| {
-            !card.card().card_play_costs.is_empty()
-                || card
-                    .card()
-                    .abilities
-                    .iter()
-                    .any(|a| is_printed_quick(&a.node) || card_restriction(&a.node).is_some())
-                || card.card().abilities.iter().any(|ability| {
-                    evolution::intrinsic(&ability.node)
-                        || meal::intrinsic(&ability.node)
-                        || matches!(
-                            ability.node.kind,
-                            AbilityKind::Spell | AbilityKind::Triggered
-                        )
-                })
-        })
+        !self.other_costs.is_empty()
+            || self.definitions.cards.values().any(|card| {
+                !card.card().card_play_costs.is_empty()
+                    || card.card().abilities.iter().any(|a| {
+                        is_printed_quick(&a.node)
+                            || card_restriction(&a.node).is_some()
+                            || other_costs::is_static(&a.node)
+                    })
+                    || card.card().abilities.iter().any(|ability| {
+                        evolution::intrinsic(&ability.node)
+                            || meal::intrinsic(&ability.node)
+                            || matches!(
+                                ability.node.kind,
+                                AbilityKind::Spell | AbilityKind::Triggered
+                            )
+                    })
+            })
     }
     pub(in crate::game) const fn uses_selection(&self) -> bool {
         self.selected
     }
 
     pub(in crate::game) fn is_empty(&self) -> bool {
-        self.definitions.cards.is_empty() && !self.selected
+        // Active installed IR must never be omitted as an empty, saveable runtime.
+        self.definitions.cards.is_empty() && !self.selected && self.other_costs.is_empty()
     }
 
     pub(in crate::game) fn is_loaded(&self, card: &str) -> bool {
@@ -359,16 +363,7 @@ impl Game {
             if play_restrictions::check(located, ordinal)? {
                 continue;
             }
-            if attack_restrictions::is_static(ability) {
-                attack_restrictions::check(located)?;
-                continue;
-            }
-            if static_keywords::is_static(ability) {
-                static_keywords::check(located)?;
-                continue;
-            }
-            if prevention::is_static(ability) {
-                prevention::check(located)?;
+            if check_static(located)? {
                 continue;
             }
             if is_printed_quick(ability) && ordinal != 0 {
@@ -732,8 +727,30 @@ fn activation_type(kind: &str, zones: &[ZoneKind]) -> bool {
     }
 }
 
+fn check_static(located: &Located<Ability>) -> Result<bool> {
+    let ability = &located.node;
+    if attack_restrictions::is_static(ability) {
+        attack_restrictions::check(located)?;
+        return Ok(true);
+    }
+    if other_costs::is_static(ability) {
+        other_costs::check(located)?;
+        return Ok(true);
+    }
+    if static_keywords::is_static(ability) {
+        static_keywords::check(located)?;
+        return Ok(true);
+    }
+    if prevention::is_static(ability) {
+        prevention::check(located)?;
+        return Ok(true);
+    }
+    Ok(false)
+}
+
 fn check_header(ability: &Ability) -> Result<()> {
-    if attack_restrictions::is_static(ability)
+    if other_costs::is_static(ability)
+        || attack_restrictions::is_static(ability)
         || static_keywords::is_static(ability)
         || prevention::is_static(ability)
         || card_permission(ability)

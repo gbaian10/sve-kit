@@ -1457,3 +1457,43 @@ fn printed_drain_does_not_expand_search_keyword_admission() {
         "printed Drain does not add an unproven search consumer"
     );
 }
+
+#[test]
+fn player_cost_lowering_preserves_shared_next_use_and_rejects_unimplemented_shapes() {
+    let mut tree = expanded::tree().clone();
+    let mut entry = tree["cards"]["BP08-038"]["abilities"][0].clone();
+    entry["fanfare"] = json!({"do":[{"player_effect":{"who":"self","until":"turn","effect":{"cost_mod":{"when_playing":{"who":"self","trait":"学院"},"delta":-2_i64,"next_only":true}}}}]});
+    tree["cards"] =
+        json!({"synthetic":{"meta":tree["cards"]["BP08-038"]["meta"],"abilities":[entry]}});
+    let cards = lowerer().lower(&tree).unwrap();
+    let Node::Instruction { instruction } = &cards["synthetic"].card().abilities[0]
+        .node
+        .body
+        .as_ref()
+        .unwrap()
+        .steps[0]
+        .node
+    else {
+        panic!("cost installation");
+    };
+    let Action::InstallEffect {
+        subjects: InstallationSubjects::Players { .. },
+        duration,
+        ..
+    } = &instruction.action
+    else {
+        panic!("player installation");
+    };
+    assert_eq!(duration.usage.as_ref().unwrap().count, Nat(1));
+    assert!(matches!(
+        duration.usage.as_ref().unwrap().scope,
+        UsageScope::SharedPlayer {
+            effect: EffectReference::CurrentInstallation {},
+            ..
+        }
+    ));
+    let modifier = "/cards/synthetic/abilities/0/fanfare/do/0/player_effect/effect/cost_mod";
+    *tree.pointer_mut(modifier).unwrap() =
+        json!({"when_playing":{"who":"self","zone":"deck"},"delta":-2_i64});
+    lowerer().lower(&tree).unwrap_err();
+}

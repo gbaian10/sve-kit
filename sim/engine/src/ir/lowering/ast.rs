@@ -257,6 +257,7 @@ pub(super) enum Step {
     Grant(Grant),
     SetStat(Modify),
     Apply(Apply),
+    PlayerEffect(PlayerEffect),
     Search(Search),
     Look(Look),
     Reveal(Reveal),
@@ -738,8 +739,55 @@ pub(super) struct EvolutionCostModifier {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct CostModifier {
-    pub when_playing: AffectedCondition,
-    pub delta: i64,
+    pub when_playing: Playing,
+    pub delta: Option<i64>,
+    pub set: Option<i64>,
+    pub next_only: Option<bool>,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum Playing {
+    Affected(AffectedCondition),
+    Union { any_of: Vec<PlayingQuery> },
+    Query(PlayingQuery),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct PlayingQuery {
+    pub who: Side,
+    pub zone: Option<PlayingZones>,
+    pub kind: Option<SearchKind>,
+    pub r#trait: Option<String>,
+    #[serde(default)]
+    pub traits_all: Vec<String>,
+    pub class: Option<String>,
+    pub name: Option<String>,
+    pub orig_cost_le: Option<u64>,
+    pub token: Option<bool>,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum PlayingZones {
+    One(PlayingZone),
+    Many(Vec<PlayingZone>),
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum PlayingZone {
+    Hand,
+    Ex,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct PlayerEffect {
+    pub who: Side,
+    pub effect: InstalledEffect,
+    pub until: Option<Until>,
 }
 
 #[derive(Deserialize)]
@@ -1909,6 +1957,7 @@ pub(super) struct Static {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum StaticEffect {
+    CostMod(CostModifier),
     Grant(StaticGrant),
     Cannot(Cannot),
     Prevent(Prevent),

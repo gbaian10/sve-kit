@@ -1071,6 +1071,11 @@ impl Game {
     }
 
     fn finish_play_payment(&mut self, execution: &mut Execution, play: PlayState) -> Result<()> {
+        let consumed = if execution.spell || execution.field_entry {
+            self.internal_matching_player_costs(execution)?
+        } else {
+            vec![]
+        };
         let previous = self.card_runtime.active_source;
         self.card_runtime.active_source = execution.ability;
         let payment = if play.meal.is_some() {
@@ -1085,6 +1090,7 @@ impl Game {
         let payment = payment.and_then(|()| self.internal_optional_payment(execution, &play));
         self.card_runtime.active_source = previous;
         payment?;
+        self.internal_consume_player_costs(&consumed);
         if execution.field_entry {
             return Ok(());
         }

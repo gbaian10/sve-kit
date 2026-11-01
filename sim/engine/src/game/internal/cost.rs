@@ -57,6 +57,9 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
             usage,
         } = effect.as_ref()
     {
+        if matches!(subjects, InstallationSubjects::Players { .. }) {
+            return super::card::other_costs::check_install(action);
+        }
         let InstallationSubjects::Objects { objects, affected } = subjects else {
             return Err(unsupported("cost modifier subjects"));
         };
@@ -170,6 +173,33 @@ impl Game {
         self.installed_cost_with(id, base, CostKind::Play, None)
     }
 
+    pub(in crate::game::internal) fn internal_installed_play_parts(
+        &self,
+        id: &str,
+        mut base: i64,
+        mut delta: i64,
+    ) -> Result<(i64, i64)> {
+        let generation = self.object(id)?.generation;
+        if let Some(state) = self
+            .state
+            .ir_cost
+            .get(id)
+            .filter(|state| state.generation == generation)
+        {
+            for effect in state.effects.iter().filter(|effect| !effect.evolution) {
+                match effect.change {
+                    Change::Set(amount) => base = amount,
+                    Change::Delta(amount) => {
+                        delta = delta
+                            .checked_add(amount)
+                            .ok_or_else(|| invalid("play cost overflow"))?;
+                    }
+                }
+            }
+        }
+        Ok((base, delta))
+    }
+
     pub(in crate::game) fn internal_installed_evolution_cost(
         &self,
         id: &str,
@@ -216,6 +246,15 @@ impl Game {
         execution: &mut Execution,
         instruction: &Instruction,
     ) -> Result<()> {
+        if matches!(
+            &instruction.action,
+            Action::InstallEffect {
+                subjects: InstallationSubjects::Players { .. },
+                ..
+            }
+        ) {
+            return self.internal_install_player_cost(execution, instruction);
+        }
         let Action::InstallEffect {
             subjects: InstallationSubjects::Objects { objects, .. },
             effect,
@@ -341,6 +380,7 @@ impl Game {
     }
 
     pub(super) fn internal_cost_end_turn(&mut self, turn: u64) {
+        self.internal_player_cost_end_turn(turn);
         self.internal_cost_cleanup();
         self.state.ir_cost.retain(|_, state| {
             state

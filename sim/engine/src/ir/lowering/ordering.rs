@@ -111,6 +111,7 @@ impl BodyContext<'_> {
             | ast::Step::Grant(_)
             | ast::Step::SetStat(_)
             | ast::Step::Apply(_)
+            | ast::Step::PlayerEffect(_)
             | ast::Step::Create(_) => None,
         };
         if let Some((name, saved_receipt)) = saved

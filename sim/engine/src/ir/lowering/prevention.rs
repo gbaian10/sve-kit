@@ -287,7 +287,9 @@ pub(super) fn lower(
                     },
                 )
             }
-            ast::StaticEffect::Grant(_) | ast::StaticEffect::Cannot(_) => {
+            ast::StaticEffect::Grant(_)
+            | ast::StaticEffect::Cannot(_)
+            | ast::StaticEffect::CostMod(_) => {
                 return Err(unsupported(path));
             }
         };

@@ -97,6 +97,7 @@ pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
     let mut inspected = node.clone();
     mask_prevention(&mut inspected)?;
     mask_discard(&mut inspected)?;
+    mask_player_cost_filter(&mut inspected)?;
     if let Node::Instruction { instruction } = &mut inspected
         && let Action::Reveal { objects } = &instruction.action
     {
@@ -199,6 +200,27 @@ pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
                 return Err(unsupported("order placement"));
             }
             _ => {}
+        }
+    }
+    Ok(())
+}
+
+fn mask_player_cost_filter(inspected: &mut Node) -> Result<()> {
+    if let Node::Instruction { instruction } = inspected
+        && matches!(
+            &instruction.action,
+            Action::InstallEffect {
+                subjects: InstallationSubjects::Players { .. },
+                ..
+            }
+        )
+    {
+        super::card::other_costs::check_install(&instruction.action)?;
+        if let Action::InstallEffect { effect, .. } = &mut instruction.action
+            && let Effect::CostModifier { subjects, .. } = effect.as_mut()
+        {
+            // This checked filter reads only the played card, never enumerates a private zone.
+            *subjects = Selector::Objects { objects: vec![] };
         }
     }
     Ok(())

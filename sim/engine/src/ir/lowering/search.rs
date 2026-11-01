@@ -477,8 +477,18 @@ impl BodyContext<'_> {
             .get(follow)
             .cloned()
             .ok_or_else(|| unsupported(path))?;
-        let ast::Affected::Affected = modifier.when_playing.subjects;
-        if modifier.delta > 0 || !matches!(installation.until, Some(ast::Until::Turn)) {
+        let ast::Playing::Affected(filter) = &modifier.when_playing else {
+            return Err(unsupported(path));
+        };
+        let ast::Affected::Affected = filter.subjects;
+        let Some(delta) = modifier.delta else {
+            return Err(unsupported(path));
+        };
+        if delta > 0
+            || modifier.set.is_some()
+            || modifier.next_only.is_some()
+            || !matches!(installation.until, Some(ast::Until::Turn))
+        {
             return Err(unsupported(path));
         }
         let affected = Binding::new(1, self.card_allocator.scope(path)?);
@@ -492,7 +502,7 @@ impl BodyContext<'_> {
                     reference: affected,
                 },
                 change: CostChange::Delta {
-                    amount: Expr::Literal(Int(modifier.delta)),
+                    amount: Expr::Literal(Int(delta)),
                 },
                 duration: duration.clone(),
                 usage: None,
