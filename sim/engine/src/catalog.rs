@@ -6,6 +6,7 @@
 )]
 
 use alloc::collections::{BTreeMap, BTreeSet};
+use alloc::sync::Arc;
 use core::iter::once;
 use jsonschema::validator_for;
 use std::fs::{read_dir, read_to_string};
@@ -46,7 +47,7 @@ pub(crate) struct TokenDefinition {
 /// Shared immutable catalogue, serializable into a self-contained server save.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Catalog {
-    pub(crate) cards: BTreeMap<String, Card>,
+    pub(crate) cards: BTreeMap<String, Arc<Card>>,
     pub(crate) programs: BTreeMap<String, Value>,
     pub(crate) keywords: BTreeMap<String, Value>,
     pub(crate) token_definitions: BTreeMap<String, TokenDefinition>,
@@ -191,9 +192,22 @@ impl Catalog {
         keywords: &str,
         documents: &[(String, String)],
     ) -> Result<Self> {
+        Self::read_documents_using(snapshot, keywords, documents, Self::read_snapshot_card)
+    }
+
+    fn read_snapshot_card(line: &str) -> Result<Arc<Card>> {
+        serde_json::from_str(line).map(Arc::new).map_err(invalid)
+    }
+
+    fn read_documents_using(
+        snapshot: &str,
+        keywords: &str,
+        documents: &[(String, String)],
+        mut read_card: impl FnMut(&str) -> Result<Arc<Card>>,
+    ) -> Result<Self> {
         let mut catalog = Self::default();
         for line in snapshot.lines() {
-            let card: Card = serde_json::from_str(line).map_err(invalid)?;
+            let card = read_card(line)?;
             let key = card.number.clone();
             if catalog.cards.insert(key.clone(), card).is_some() {
                 return Err(EngineFailure::Invalid(format!(
