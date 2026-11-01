@@ -203,6 +203,17 @@ pub(crate) fn card_declaration(ability: &Ability) -> Option<KeywordId> {
             instruction.id,
             &step.source,
         )
+    } else if *keyword == KeywordId::Drain {
+        let step = ability.body.as_ref()?.steps.first()?;
+        let super::Node::Instruction { instruction } = &step.node else {
+            return None;
+        };
+        Some(drain_definition(
+            ability.id,
+            ability.scope,
+            instruction.id,
+            &step.source,
+        ))
     } else {
         definition(*keyword, face.clone(), *line, ability.id, ability.scope)
     };
@@ -286,4 +297,75 @@ pub(crate) fn drive_definition(
         }),
         declarations: vec![],
     })
+}
+
+/// CR 12.13.2 installs one ordinary damage subscription and recovers the actual amount.
+pub(crate) fn drain_definition(
+    id: AbilityId,
+    scope: ScopeId,
+    instruction: super::InstructionId,
+    span: &super::SourceSpan,
+) -> Ability {
+    use super::{
+        Action, EventPattern, EventSnapshotPolicy, Instruction, InstructionContext, IntFrozen,
+        Located, Node, NumericChange, Program, ReceiptId, TriggerAggregation, TriggerCondition,
+        TriggerSpec,
+    };
+    let source = AbilitySource {
+        holder: ObjectOperand::SourceHolder {},
+        origin: AbilityOrigin::Keyword {
+            keyword: KeywordId::Drain,
+            origin: Box::new(AbilityOrigin::Printed {
+                face: FaceId(span.face.clone()),
+                line: Nat(u64::from(span.line)),
+            }),
+        },
+        controller: PlayerRef::Controller {},
+    };
+    let event = Binding::new(0, scope);
+    Ability {
+        id,
+        scope,
+        source: source.clone(),
+        kind: AbilityKind::Triggered,
+        qualification: AbilityQualification::Ordinary,
+        active_zones: vec![ZoneKind::Field],
+        event_captures: vec![],
+        play: None,
+        trigger: Some(TriggerSpec {
+            active_zones: vec![ZoneKind::Field],
+            view: EventSnapshotPolicy::AfterEntry,
+            on: TriggerCondition::Event {
+                pattern: EventPattern::Damage {
+                    binding: event,
+                    predicate: super::events::timing::drain_predicate(event),
+                },
+            },
+            limit: None,
+            aggregation: TriggerAggregation::PerFact {},
+        }),
+        body: Some(Program {
+            scope,
+            steps: vec![Located {
+                source: span.clone(),
+                node: Node::Instruction {
+                    instruction: Box::new(Instruction {
+                        id: instruction,
+                        actor: PlayerRef::Controller {},
+                        source,
+                        precondition: None,
+                        context: InstructionContext::Effect,
+                        receipt: ReceiptId(instruction.0),
+                        action: Action::Life {
+                            player: PlayerRef::Controller {},
+                            change: NumericChange::Add {
+                                amount: Expr::Frozen(Box::new(IntFrozen::DamageAmount { event })),
+                            },
+                        },
+                    }),
+                },
+            }],
+        }),
+        declarations: vec![],
+    }
 }

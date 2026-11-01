@@ -31,6 +31,13 @@ pub(super) fn lower(
                     InstructionId(allocator.id(path)?),
                     &source,
                 )
+            } else if keyword == KeywordId::Drain {
+                Some(printed_keywords::drain_definition(
+                    AbilityId(scope.0),
+                    scope,
+                    InstructionId(allocator.id(path)?),
+                    &source,
+                ))
             } else {
                 printed_keywords::definition(
                     keyword,
@@ -53,10 +60,26 @@ pub(super) fn keyword_id(keyword: &str) -> Option<KeywordId> {
         "storm" => Some(KeywordId::Storm),
         "rush" => Some(KeywordId::Rush),
         "bane" => Some(KeywordId::Bane),
+        "drain" => Some(KeywordId::Drain),
         "intimidate" => Some(KeywordId::Intimidate),
         "assail" => Some(KeywordId::Assail),
         "single_drive" => Some(KeywordId::SingleDrive),
         "twin_drive" => Some(KeywordId::TwinDrive),
         _ => None,
     }
+}
+
+pub(super) fn basic_keyword_id(name: &str) -> Option<KeywordId> {
+    let keyword = keyword_id(name)?;
+    matches!(
+        keyword,
+        KeywordId::Ward
+            | KeywordId::Aura
+            | KeywordId::Storm
+            | KeywordId::Rush
+            | KeywordId::Bane
+            | KeywordId::Intimidate
+            | KeywordId::Assail
+    )
+    .then_some(keyword)
 }

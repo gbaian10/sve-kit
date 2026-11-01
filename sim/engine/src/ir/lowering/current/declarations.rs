@@ -120,6 +120,8 @@ pub enum PrintedKeyword {
     Rush,
     /// Printed Bane.
     Bane,
+    /// Printed Drain.
+    Drain,
     /// Printed Intimidate.
     Intimidate,
     /// Printed Assail.

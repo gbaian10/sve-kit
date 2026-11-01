@@ -9,6 +9,7 @@ use crate::game::{Step, int, string};
 use crate::ir::ExecutionId;
 use crate::ir::LimitSpec;
 use crate::ir::optional_payment;
+use crate::ir::printed_keywords;
 use crate::ir::{
     AttackEvent, Edge, EventPayload as Event, Generation, Nat, ObjectRef, PhaseEvent, PlayerRef,
     RuntimeDamageRecipient,
@@ -254,10 +255,62 @@ impl Game {
         self.internal_admit_pending(pending)
     }
 
-    #[expect(
-        clippy::too_many_lines,
-        reason = "Actual hits and their authority cause commit at one damage boundary."
-    )]
+    fn combat_damage_event(&mut self, hit: &Value, before: SnapshotId) -> Result<DamageEvent> {
+        let source = string(&hit["source"]);
+        let recipient = if let Some(seat) = string(&hit["target"]).strip_suffix(".leader") {
+            RuntimeDamageRecipient::Leader {
+                player: player_id(seat)?,
+            }
+        } else {
+            RuntimeDamageRecipient::Object {
+                object: self.internal_current_reference(string(&hit["target"]))?,
+            }
+        };
+        Ok(DamageEvent {
+            source: RuntimeObjectView {
+                object: self.internal_current_reference(source)?,
+                snapshot: before,
+            },
+            recipient,
+            amount: PositiveInt(
+                NonZeroU64::new(u64::try_from(int(&hit["amount"])).map_err(invalid)?)
+                    .ok_or_else(|| invalid("nonpositive actual damage"))?,
+            ),
+            flags: if hit["attack"] == true {
+                DamageFlags::AttackCombat
+            } else {
+                DamageFlags::Combat
+            },
+            controller: player_id(&self.object(source)?.controller)?,
+        })
+    }
+
+    fn drain_occurrence(
+        &mut self,
+        hit: &Value,
+        before: SnapshotId,
+    ) -> Result<Option<PendingOccurrence>> {
+        if hit["attack"] != true {
+            return Ok(None);
+        }
+        let source = string(&hit["source"]);
+        let Some(ability) = self.timing_abilities(source)?.into_iter().find(|ability| {
+            printed_keywords::card_declaration(&ability.node) == Some(KeywordId::Drain)
+        }) else {
+            return Ok(None);
+        };
+        let event = self.combat_damage_event(hit, before)?;
+        let rule = self.rule_id("8.4.9")?;
+        let header = self.pending_header(
+            player_id(self.active())?,
+            Cause::Rule { rule },
+            None,
+            before,
+        )?;
+        self.timing_occurrence(source, ability, &header, Event::Damage { event })
+            .map(Some)
+    }
+
     pub(in crate::game) fn internal_damage_events(
         &mut self,
         hits: &[Value],
@@ -279,6 +332,9 @@ impl Game {
         }
         let mut pending = Vec::new();
         for (index, hit) in hits.iter().enumerate() {
+            if let Some(occurrence) = self.drain_occurrence(hit, before)? {
+                pending.push(occurrence);
+            }
             let holder = string(&hit["target"]);
             if holder.ends_with(".leader") {
                 continue;
@@ -292,26 +348,7 @@ impl Game {
                 if hit["battle"] != true {
                     return Err(unsupported("unadmitted damage producer"));
                 }
-                let source = string(&hit["source"]);
-                DamageEvent {
-                    source: RuntimeObjectView {
-                        object: self.internal_current_reference(source)?,
-                        snapshot: before,
-                    },
-                    recipient: RuntimeDamageRecipient::Object {
-                        object: self.internal_current_reference(holder)?,
-                    },
-                    amount: PositiveInt(
-                        NonZeroU64::new(u64::try_from(int(&hit["amount"])).map_err(invalid)?)
-                            .ok_or_else(|| invalid("nonpositive actual damage"))?,
-                    ),
-                    flags: if hit["attack"] == true {
-                        DamageFlags::AttackCombat
-                    } else {
-                        DamageFlags::Combat
-                    },
-                    controller: player_id(&self.object(source)?.controller)?,
-                }
+                self.combat_damage_event(hit, before)?
             };
             let active = player_id(self.active())?;
             let abilities = self

@@ -116,7 +116,12 @@ impl Game {
         let mut pending = Vec::new();
         for hit in hits {
             let source = string(&hit["source"]);
-            if hit["attack"] != true || !self.keywords(source)?.contains("drain") {
+            if hit["attack"] != true
+                || self
+                    .card_runtime
+                    .is_loaded(&self.information_source(source)?.card)
+                || !self.keywords(source)?.contains("drain")
+            {
                 continue;
             }
             let mut reference = self.keyword_reference(source, "drain")?;
