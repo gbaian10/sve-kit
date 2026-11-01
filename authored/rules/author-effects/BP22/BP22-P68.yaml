@@ -1,0 +1,30 @@
+cards:
+  BP22-P68:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - grant:
+                keywords:
+                  - storm
+                on: chosen
+          targets:
+            - bind: chosen
+              from:
+                keyword: ward
+                kind: follower
+                who: self
+                zone: field
+              upto: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-01"
+    token:
+      name: 聖女の号令
+      template: true
+format: 2
+kind: author_effect_set

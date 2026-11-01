@@ -1,0 +1,45 @@
+cards:
+  BP15-P31:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: opp
+                        zone: cemetery
+                    op: ge
+                    right: 10
+                else:
+                  - grant:
+                      keywords:
+                        - rush
+                      on: victim
+                then:
+                  - grant:
+                      keywords:
+                        - storm
+                      on: victim
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                trait: 盗賊
+                who: self
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-01"
+    token:
+      name: 黄金の靴
+      template: true
+format: 2
+kind: author_effect_set

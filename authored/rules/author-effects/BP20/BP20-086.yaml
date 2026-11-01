@@ -1,0 +1,79 @@
+cards:
+  BP20-086:
+    abilities:
+      - fanfare:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 3
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  class: ナイトメア
+                  in: seen
+                  trait: 絶傑
+                may: true
+                n: 1
+            - move:
+                ref: picked
+                result: moved
+                to: hand
+            - reveal:
+                bind: shown
+                ref: picked
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: moved
+                      view: before
+                  in: seen
+                to: deck
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - pp: 1
+              - act_self: true
+              - self_to_cemetery: true
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - grant:
+                        keywords:
+                          - rush
+                        on: rush_target
+                  - - grant:
+                        keywords:
+                          - assail
+                        on: assail_target
+          targets:
+            - bind: rush_target
+              from:
+                kind: follower
+                who: self
+                zone: field
+              n: 1
+              option: 1
+            - bind: assail_target
+              from:
+                kind: follower
+                who: self
+                zone: field
+              n: 1
+              option: 2
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-01"
+format: 2
+kind: author_effect_set
