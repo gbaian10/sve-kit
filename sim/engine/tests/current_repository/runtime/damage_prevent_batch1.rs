@@ -48,7 +48,8 @@ fn finish(game: &mut Game, mut play: CardPlay, mode: usize, optional: bool) -> C
             | InputDomain::Search(_)
             | InputDomain::SearchPartition(_)
             | InputDomain::Distribution(_)
-            | InputDomain::SearchReplacement => panic!("unexpected card decision"),
+            | InputDomain::SearchReplacement
+            | InputDomain::DamageReplacements(_) => panic!("unexpected card decision"),
         };
         play = game
             .answer_internal_card(question.actor, question.token, answer)

@@ -1,6 +1,11 @@
 format: 1
 kind: effects_index
 records:
+  - card_id: c:5f1dfa24c1f456c49d3b6e90ea888d2f
+    file: rules/author-effects/BP03/BP03-004.yaml
+    kind: author_effect_set
+    record_key: BP03-004
+    scope: shared
   - card_id: c:c1c9636f874d5e50a7cdcce3637c964b
     file: rules/author-effects/BP03/BP03-007.yaml
     kind: author_effect_set
@@ -20,6 +25,11 @@ records:
     file: rules/author-effects/BP03/BP03-016.yaml
     kind: author_effect_set
     record_key: BP03-016
+    scope: shared
+  - card_id: c:c07493eda0145801b3e6e0a81cf1938d
+    file: rules/author-effects/BP03/BP03-022.yaml
+    kind: author_effect_set
+    record_key: BP03-022
     scope: shared
   - card_id: c:4fd7065ef2ec5eb7ac2e3e3e4aa2a51a
     file: rules/author-effects/BP03/BP03-023.yaml

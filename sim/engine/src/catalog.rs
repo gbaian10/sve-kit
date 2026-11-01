@@ -462,7 +462,7 @@ impl Catalog {
         }
     }
 
-    fn keyword_id(&self, name: &str) -> String {
+    pub(crate) fn keyword_id(&self, name: &str) -> String {
         self.keywords
             .iter()
             .find(|(_, value)| {

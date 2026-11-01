@@ -267,7 +267,14 @@ fn check_requirements(
 fn play_requirement(code: &str) -> bool {
     matches!(
         code,
-        "shape.PaymentReference.CardPlay"
+        "shape.NatRead.Counter"
+            | "read.counter"
+            | "shape.Holder.Object"
+            | "shape.Action.Counter"
+            | "action.counter"
+            | "shape.CounterOperation.Add"
+            | "shape.CounterOperation.Remove"
+            | "shape.PaymentReference.CardPlay"
             | "internal.OwnerZone.Ex"
             | "shape.ObjectOperand.FollowEventMove"
             | "shape.MovementEvent.LeaveField"
@@ -320,6 +327,7 @@ fn check_action(action: &Action, source: &AbilitySource) -> Result<()> {
     super::tokens::check_action(action)?;
     super::movement::check_action(action)?;
     super::resource::check_action(action)?;
+    super::counters::check_action(action)?;
     super::discard::check_action(action)?;
     super::numeric::check_action(action)?;
     super::grant::check_action(action)
