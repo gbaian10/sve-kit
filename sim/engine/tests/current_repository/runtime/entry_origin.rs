@@ -108,7 +108,7 @@ fn evolved_sofia_all_printings_search_the_real_amulet_and_cap_damage_after_evolu
             panic!("the searched amulet's fanfare")
         };
         assert!(
-            matches!(q.domain, InputDomain::Targets(_)),
+            matches!(entry_question.domain, InputDomain::Targets(_)),
             "the searched real amulet offers up to two followers"
         );
         resolved(
