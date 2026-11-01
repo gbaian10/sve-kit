@@ -749,20 +749,32 @@ impl Execution {
                 },
                 _ => return Err(unsupported("predicate")),
             })),
-            Expr::Live(read) => match read.as_ref() {
-                BoolRead::Crimson { player } => {
-                    let seat = seat_name(self.player(game, player)?)?;
-                    Ok(Bool(
-                        game.active() == seat
-                            && game
-                                .state
-                                .counters
-                                .get(&format!("{seat}.leader_hp_decreased"))
-                                .is_some_and(|count| *count > 0),
-                    ))
-                }
-                _ => Err(unsupported("boolean expression")),
-            },
+            Expr::Live(read) => self.live_boolean(game, read),
+        }
+    }
+
+    fn live_boolean(&self, game: &Game, read: &BoolRead) -> Result<Bool> {
+        match read {
+            BoolRead::CardPlayOrigin {
+                zone,
+                execution: ExecutionRef::Current {},
+            } if self.spell || self.field_entry => Ok(Bool(
+                self.play_origin
+                    .ok_or_else(|| invalid("missing card play origin"))?
+                    == *zone,
+            )),
+            BoolRead::Crimson { player } => {
+                let seat = seat_name(self.player(game, player)?)?;
+                Ok(Bool(
+                    game.active() == seat
+                        && game
+                            .state
+                            .counters
+                            .get(&format!("{seat}.leader_hp_decreased"))
+                            .is_some_and(|count| *count > 0),
+                ))
+            }
+            _ => Err(unsupported("boolean expression")),
         }
     }
 

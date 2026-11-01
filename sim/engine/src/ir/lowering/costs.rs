@@ -35,9 +35,7 @@ pub(super) fn lower(
             } else {
                 format!("{path}/play/{field}")
             };
-            let (amount, condition) = if let Some(amount) = value.as_i64() {
-                (amount, None)
-            } else {
+            let (amount, condition) = if value.get("if").is_some() {
                 let change: ast::ConditionalChange = decode(value.clone(), &path)?;
                 let ((false, Some(amount), None) | (true, None, Some(amount))) =
                     (set, change.delta, change.set)
@@ -45,13 +43,23 @@ pub(super) fn lower(
                     return Err(unsupported(&path));
                 };
                 (amount, Some(condition(&change.r#if, allocator, &path)?))
+            } else {
+                (decode::<ast::Number>(value.clone(), &path)?, None)
             };
-            if (set && amount < 0) || (!set && amount > 0) {
+            if set && !matches!(amount, ast::Number::Literal(amount) if amount >= 0) {
+                return Err(unsupported(&path));
+            }
+            let body = ast::Body::default();
+            let mut context = super::BodyContext::new(entry, ScopeId(0), &body, None, allocator);
+            context.definitions = &play.define;
+            context.allocator.next = context.card_allocator.next;
+            let amount = context.number(&amount, &path, &mut super::BTreeSet::new())?;
+            context.card_allocator.next = context.card_allocator.next.max(context.allocator.next);
+            if !context.resolution_captures.is_empty() {
                 return Err(unsupported(&path));
             }
             let mut source = source.clone();
             source.author_path = path;
-            let amount = Expr::Literal(Int(amount));
             modifiers.push(Located {
                 source,
                 node: PlayCostModifier {
@@ -137,6 +145,19 @@ fn condition(
         }
         ast::CostCondition::Awakened(false) | ast::CostCondition::Crimson(false) => {
             return Err(unsupported(path));
+        }
+        ast::CostCondition::InZone(location) => {
+            if location.r#ref != "this" {
+                return Err(unsupported(path));
+            }
+            return Ok(Expr::Live(Box::new(BoolRead::CardPlayOrigin {
+                execution: super::super::ExecutionRef::Current {},
+                zone: match location.zone.as_str() {
+                    "hand" => ZoneKind::Hand,
+                    "ex" => ZoneKind::Ex,
+                    _ => return Err(unsupported(path)),
+                },
+            })));
         }
         ast::CostCondition::All(items) | ast::CostCondition::Any(items) => {
             let predicates = items

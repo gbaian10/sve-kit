@@ -43,6 +43,9 @@ mod cemetery_choice;
 #[path = "card/exchange.rs"]
 mod exchange;
 
+#[path = "card/variable_cost.rs"]
+mod variable_cost;
+
 #[path = "card/costs.rs"]
 mod play_costs;
 

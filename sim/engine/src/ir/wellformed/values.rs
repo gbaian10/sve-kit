@@ -205,9 +205,13 @@ impl Checker {
                 BoolRead::Awakening { player }
                 | BoolRead::Crimson { player }
                 | BoolRead::OwnTurn { player } => self.player(player),
+                BoolRead::CardPlayOrigin {
+                    execution: ExecutionRef::Current {},
+                    ..
+                } => Ok(()),
                 BoolRead::State { object, .. } => self.view(object),
                 BoolRead::HistoryExists { query } => self.history(query),
-                BoolRead::LegalAttack { .. } => self.reject(),
+                BoolRead::CardPlayOrigin { .. } | BoolRead::LegalAttack { .. } => self.reject(),
             },
             Expr::Frozen(read) => match read.as_ref() {
                 BoolFrozen::PaymentComplete {

@@ -14,7 +14,7 @@ use crate::ir::{
 use crate::ir::{
     ChoiceDomain, Control, CostSpec, Decision, DecisionId, DecisionKind, ExecutionRef, InputMode,
     Mode, ModeChoiceKind, ModeDecision, ModeDecisionKind, ModeId, NumericChange, PlaySlot, Program,
-    ScopeId, SnapshotId, Visibility,
+    ScopeId, SnapshotId, Visibility, ZoneKind,
 };
 use alloc::collections::{BTreeMap, VecDeque};
 use core::slice::from_ref;
@@ -726,6 +726,15 @@ impl Game {
         context: Context,
         ids: BTreeMap<ObjectId, String>,
     ) -> Result<Execution> {
+        let play_origin =
+            self.state
+                .objects
+                .get(&context.source)
+                .and_then(|object| match object.zone.as_str() {
+                    "hand" => Some(ZoneKind::Hand),
+                    "ex" => Some(ZoneKind::Ex),
+                    _ => None,
+                });
         Ok(Execution {
             context,
             id: ExecutionId(self.state.ir_epoch),
@@ -753,6 +762,7 @@ impl Game {
             play: None,
             spell: false,
             field_entry: false,
+            play_origin,
             card_payment: None,
             trigger_occurrence: None,
             play_counts: self.internal_play_counts()?,

@@ -1,5 +1,7 @@
 use super::{Execution, Game, Result, WellFormedCardProgram, invalid, unsupported};
-use crate::ir::{AbilityOrigin, AbilitySource, CostSpec, ObjectOperand};
+use crate::ir::{
+    AbilityOrigin, AbilitySource, Arithmetic, CostSpec, ExecutionRef, ObjectOperand, ZoneKind,
+};
 use crate::ir::{
     Bool, BoolRead, CostChange, Expr, Int, IntOperation, IntRead, Nat, NatOperation, NatRead,
     ObjectProperty, PlayerRef, PlayerResource, Predicate, Selector, SourceSpan,
@@ -86,6 +88,11 @@ pub(super) fn check(game: &Game, card_no: &str, card: &WellFormedCardProgram) ->
                     &face.node.face.0,
                     u64::from(modifier.source.line),
                 )?;
+                match &modifier.node.change {
+                    CostChange::Delta { amount } | CostChange::Set { amount } => {
+                        check_integer(amount)?;
+                    }
+                }
                 if let Some(condition) = &modifier.node.condition {
                     check_condition(condition)?;
                 }
@@ -105,6 +112,9 @@ fn check_condition(condition: &Expr<Bool>) -> Result<()> {
                 read.as_ref(),
                 BoolRead::Crimson {
                     player: PlayerRef::Controller {}
+                } | BoolRead::CardPlayOrigin {
+                    execution: ExecutionRef::Current {},
+                    zone: ZoneKind::Hand | ZoneKind::Ex
                 }
             ) =>
         {
@@ -151,6 +161,15 @@ fn check_integer(value: &Expr<Int>) -> Result<()> {
         Expr::Literal(_) => Ok(()),
         Expr::Compute(operation) => match operation.as_ref() {
             IntOperation::FromNat { value: count } => check_count(count),
+            IntOperation::Arithmetic {
+                operation: Arithmetic::Subtract,
+                arguments,
+            } => {
+                for argument in arguments {
+                    check_integer(argument)?;
+                }
+                Ok(())
+            }
             _ => Err(unsupported("play cost count operand")),
         },
         _ => Err(unsupported("play cost count operand")),
@@ -238,17 +257,15 @@ impl Game {
                     continue;
                 }
                 match &modifier.node.change {
-                    CostChange::Delta {
-                        amount: Expr::Literal(Int(amount)),
-                    } => {
+                    CostChange::Delta { amount } => {
                         delta = delta
-                            .checked_add(*amount)
+                            .checked_add(execution.integer(self, amount)?.0)
                             .ok_or_else(|| invalid("play cost overflow"))?;
                     }
                     CostChange::Set {
                         amount: Expr::Literal(Int(amount)),
                     } => base = *amount,
-                    _ => return Err(unsupported("play cost change")),
+                    CostChange::Set { .. } => return Err(unsupported("play cost change")),
                 }
             }
         }
