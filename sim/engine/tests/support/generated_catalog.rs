@@ -272,9 +272,9 @@ fn include_passive_current_tokens(
     dead_code,
     reason = "Included by several test crates; only the rejection test needs it."
 )]
-pub(crate) fn current_prototype_catalog() -> Catalog {
-    let (snapshot, keywords, documents, root) = selected_prototypes();
-    build(snapshot, keywords, &documents, &root)
+pub(crate) fn current_prototype_catalog() -> Arc<Catalog> {
+    // Rule resources can migrate while prototype rejection diagnostics keep their original lines.
+    Arc::clone(&repository::selection_with_rules().prototypes)
 }
 
 pub(crate) fn historical_regression_catalog() -> Arc<Catalog> {
