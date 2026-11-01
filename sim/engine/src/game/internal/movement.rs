@@ -6,11 +6,12 @@ use super::{
 use crate::game::Object;
 use crate::ir::{
     Action, ActionPattern, BanishOutcome, Bool, Cause, CausePattern, DestroyOutcome, DurationEnd,
-    Effect, EffectSource, Expr, Generation, Instruction, MoveDestination, MoveMethod, MoveOutcome,
-    MoveReason, MoveResult, MoveSpec, MovementReceipt, Nat, Node, ObjectOperand, ObjectReceipt,
-    ObjectRef, OwnerZone, PlayerId, PlayerRef, PlayerRelation, Polarity, Position, ReceiptId,
-    ReceiptLocation, ResultMember, ResultMemberId, RuntimeObjectView, RuntimeZoneRef,
-    SelectionView, Selector, SliceDirection, SnapshotId, TimeAnchor, ZoneKind,
+    Effect, EffectSource, Expr, Generation, Instruction, MemberProjection, MoveDestination,
+    MoveMethod, MoveOutcome, MoveReason, MoveResult, MoveSpec, MovementReceipt, Nat, Node,
+    ObjectOperand, ObjectReceipt, ObjectRef, OwnerZone, PlayerId, PlayerRef, PlayerRelation,
+    Polarity, Position, ReceiptId, ReceiptLocation, ResultMember, ResultMemberId,
+    RuntimeObjectView, RuntimeZoneRef, SelectionView, Selector, SliceDirection, SnapshotId,
+    TimeAnchor, ZoneKind,
 };
 use alloc::collections::BTreeMap;
 use serde_json::json;
@@ -44,7 +45,7 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
             movement,
             reason,
         } if observed_move(action) => {
-            if !observation_spine(objects)
+            if !observation_spine(objects, false)
                 || *reason != MoveReason::Put
                 || movement.position.is_some()
                 || movement.order.is_some()
@@ -185,19 +186,26 @@ pub(super) fn observed_move(action: &Action) -> bool {
         if matches!(&movement.to, MoveDestination::Shared { zone }
             if zone.player == (PlayerRef::Controller {}) && zone.kind == ZoneKind::Ex)
             || (movement.to == (MoveDestination::Owners { zone: OwnerZone::Cemetery })
-                && observation_spine(objects)))
+                && observation_spine(objects, false)))
 }
 
-fn observation_spine(selector: &Selector) -> bool {
+fn observation_spine(selector: &Selector, remainder: bool) -> bool {
     match selector {
         Selector::ReceiptMembers {
             receipt: ObjectReceipt::Look { .. },
             ..
         } => true,
+        Selector::ReceiptMembers {
+            receipt:
+                ObjectReceipt::Movement {
+                    receipt: MovementReceipt::Move { .. },
+                },
+            projection: MemberProjection::Before,
+        } => remainder,
         Selector::Difference { input, except } => {
-            observation_spine(input) && observation_spine(except)
+            observation_spine(input, remainder) && observation_spine(except, true)
         }
-        Selector::Union { sets } => sets.iter().all(observation_spine),
+        Selector::Union { sets } => sets.iter().all(|set| observation_spine(set, remainder)),
         _ => false,
     }
 }
@@ -585,9 +593,12 @@ impl Game {
         {
             if members.len() == 1
                 && incoming == 1
-                && matches!(objects,
+                && (matches!(objects,
                 Selector::Objects { objects } if matches!(objects.as_slice(),
                     [ObjectOperand::FollowEventMove { .. } | ObjectOperand::SourceHolder {}]))
+                    || members
+                        .first()
+                        .is_some_and(|member| execution.is_private_look_target(objects, *member)))
             {
                 return Ok(false);
             }

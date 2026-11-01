@@ -20,6 +20,28 @@ fn observed(filter: &Value) -> Value {
 }
 
 #[test]
+fn observed_remainders_reject_foreign_receipts_and_movement_receipts_as_the_input() {
+    for foreign in [true, false] {
+        let mut steps = json!([
+            {"look":{"top":{"who":"self","n":2},"bind":"seen"}},
+            {"choose":{"bind":"picked","from":{"in":"seen"},"n":1,"may":true}},
+            {"move":{"ref":"picked","to":"hand","result":"moved"}},
+            {"move":{"ref":{"in":"seen","except":{"in":{"objects_of":"moved","view":"before"}}},"to":"cemetery"}}
+        ]);
+        lowerer().lower(&tree(&steps)).unwrap();
+        if foreign {
+            steps[2] = json!({"destroy":{"ref":"this","result":"moved"}});
+        } else {
+            steps[3]["move"]["ref"] = json!({"in":{"objects_of":"moved","view":"before"}});
+        }
+        assert!(
+            lowerer().lower(&tree(&steps)).is_err(),
+            "only a Look input and a successful Move exclusion authorize the remainder"
+        );
+    }
+}
+
+#[test]
 fn observation_filters_lower_class_not_class_and_basic_keywords_through_the_shared_filter() {
     for filter in [
         json!({"in":"seen","class":"ドラゴン"}),
