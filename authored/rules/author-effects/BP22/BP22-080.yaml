@@ -1,0 +1,47 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP22-080:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        keywords:
+          - rush
+      - line: 2
+        attack_time:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: cemetery
+                        name: ゾンビドッグ
+                    op: eq
+                    right: 2
+                then:
+                  - buff:
+                      "on": this
+                      power: 2
+                      hp: 2
+            - damage:
+                to:
+                  leaders: opponents
+                n: 2
+      - line: 3
+        lastword:
+          do:
+            - search:
+                sel:
+                  who: self
+                  zone: deck
+                  name: ゾンビドッグ
+                n: 1
+                to: ex

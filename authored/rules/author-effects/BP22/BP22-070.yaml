@@ -1,0 +1,27 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP22-070:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        keywords:
+          - rush
+      - line: 2
+        lastword:
+          cost:
+            pp: 2
+          do:
+            - search:
+                sel:
+                  who: self
+                  zone: deck
+                  name: 堅殻のドラゴスネーク
+                n: 1
+                to: field
