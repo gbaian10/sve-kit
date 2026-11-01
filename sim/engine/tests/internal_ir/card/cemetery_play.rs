@@ -332,13 +332,12 @@ fn cemetery_play_insufficient_pp_cancels_and_full_field_records_no_success() {
 
 #[test]
 fn cemetery_play_keeps_other_zones_and_auto_headers_closed() {
-    for change in 0_u8..4 {
+    for change in [0_u8, 1, 3] {
         let mut tree = tree();
         let auto = &mut tree["cards"]["unit-follower"]["abilities"][0]["auto"];
         match change {
             0 => auto["zone"] = json!("ex"),
             1 => auto["on"]["played"]["during"]["turn"] = json!("opp"),
-            2 => auto["on"]["played"]["sel"]["kind"] = json!("follower"),
             _ => {
                 auto["do"][0]["move"]["ref"] =
                     json!({"who":"self","zone":"field","kind":"follower"});
@@ -547,5 +546,106 @@ fn cemetery_body_admits_independent_effects_but_rejects_live_holder_operations()
         .unwrap();
         game.load_internal_card("unit-follower", &program["unit-follower"])
             .unwrap_err();
+    }
+}
+
+#[test]
+fn cemetery_play_observes_a_proper_follower_play_before_its_new_copy_enters() {
+    let mut tree = tree();
+    tree["cards"]["unit-follower"]["abilities"][0]["auto"]["on"]["played"]["sel"]["kind"] =
+        json!("follower");
+    let mut initial = initial(10);
+    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"f","card":"unit-follower"}]);
+    let mut game = game(&initial, &tree, vec![]);
+    let result = game.play_internal_card("f", PlayerId { seat: 1 }).unwrap();
+    assert!(
+        matches!(result, CardPlay::Entered(_)),
+        "the real follower commit must finish before its observer resolves"
+    );
+    if game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+        game.resume_internal_card().unwrap();
+    }
+    let pending = game.internal_pending_choice().unwrap().unwrap();
+    let InputDomain::Pending(options) = &pending.domain else {
+        panic!("cemetery observer");
+    };
+    assert_eq!(
+        options.len(),
+        1,
+        "only the preexisting cemetery source observes this play"
+    );
+    let result = fire(&mut game);
+    resolved(pay(&mut game, result, true));
+    game.resume_internal_card().unwrap();
+    let state = game.projection(View::Referee).unwrap();
+    assert!(
+        state["P1"]["field"]
+            .as_array()
+            .unwrap()
+            .contains(&json!("f")),
+        "the played follower remains on the field"
+    );
+    assert!(
+        state["P1"]["field"]
+            .as_array()
+            .unwrap()
+            .contains(&json!("phoenix")),
+        "the cemetery observer returns after paying its own cost"
+    );
+}
+
+#[test]
+fn field_play_filters_match_opponents_name_class_and_token_status_with_one_turn_quota() {
+    let (snapshot, _, _) = catalog_documents(&json!("1"));
+    let name = snapshot
+        .lines()
+        .map(|line| serde_json::from_str::<Value>(line).unwrap())
+        .find(|entry| entry["number"] == "unit-spell")
+        .unwrap()["faces"][0]["name"]
+        .as_str()
+        .unwrap()
+        .to_owned();
+    for (wanted, token, expected) in [
+        (name.as_str(), false, true),
+        ("unmatched spell", false, false),
+        (name.as_str(), true, false),
+    ] {
+        let mut tree = tree();
+        let auto = &mut tree["cards"]["unit-follower"]["abilities"][0]["auto"];
+        auto["zone"] = json!("field");
+        auto.as_object_mut().unwrap().remove("cost");
+        let mut selector = json!({"kind":"spell","class":"ニュートラル","name":wanted});
+        selector[if token { "token" } else { "not_token" }] = json!(true);
+        auto["on"] = json!({"played":{"who":"opp","sel":selector}});
+        auto["per_turn"] = json!(1_u8);
+        auto["do"] = json!([{"life":{"who":"self","delta":1_u8}}]);
+        let mut initial = initial(10);
+        initial["turn"]["active"] = json!("P2");
+        initial["players"]["P1"]["leader"]["life"] = json!(10_u8);
+        initial["players"]["P1"]["zones"]["cemetery"] = json!([]);
+        initial["players"]["P1"]["zones"]["field"] =
+            json!([{"id":"phoenix","card":"unit-follower"}]);
+        initial["players"]["P1"]["zones"]["hand"] = json!([]);
+        initial["players"]["P2"]["pp"] = json!({"current":10_u8,"max":10_u8});
+        initial["players"]["P2"]["zones"]["hand"] =
+            json!([{"id":"s","card":"unit-spell"},{"id":"s2","card":"unit-spell"}]);
+        let mut game = game(&initial, &tree, vec![]);
+        for (id, first) in [("s", true), ("s2", false)] {
+            resolved(game.play_internal_card(id, PlayerId { seat: 2 }).unwrap());
+            game.resume_internal_card().unwrap();
+            assert_eq!(
+                game.internal_pending_choice().unwrap().is_some(),
+                expected && first,
+                "name and token filters narrow the actual opponent spell, and the same source consumes its quota once"
+            );
+            if expected && first {
+                resolved(fire(&mut game));
+                game.resume_internal_card().unwrap();
+            }
+        }
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["P1"]["leader"]["life"],
+            10_u8 + u8::from(expected)
+        );
     }
 }
