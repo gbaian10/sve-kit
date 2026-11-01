@@ -281,7 +281,7 @@ impl Game {
                         self.internal_numeric_stat(id, Stat::Attack)?,
                         self.internal_numeric_stat(id, Stat::Life)?,
                     ),
-                    "cemetery" if self.object_type(id)? == "フォロワー" => {
+                    "hand" | "ex" | "cemetery" if self.object_type(id)? == "フォロワー" => {
                         (power, life, power, life)
                     }
                     _ => return Err(unsupported("off-field follower source information")),

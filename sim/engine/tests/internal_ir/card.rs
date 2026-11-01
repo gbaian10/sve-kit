@@ -3,6 +3,9 @@ use super::*;
 mod event_combat_life;
 use second::lowerer;
 
+#[path = "card/activation_zones.rs"]
+mod activation_zones;
+
 #[path = "card/static_keywords.rs"]
 mod static_keywords;
 

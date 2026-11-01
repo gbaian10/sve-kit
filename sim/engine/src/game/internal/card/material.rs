@@ -3,12 +3,14 @@ use super::{Execution, Game, Result, invalid, player_id, seat_name, unsupported}
 use crate::game::internal::{
     DecisionToken, DecisionView, DistributionMember, InputDomain, Slot, Wait, search,
 };
+use crate::ir::quick::card_permission;
 use crate::ir::{
-    AbilityOrigin, Action, Binding, Cardinality, ChoiceDomain, CostSpec, Decision, DecisionKind,
-    Disjointness, ExecutionRef, InputMode, Instruction, Int, KeywordId, MoveDestination,
-    MoveMethod, MoveReason, Nat, ObjectOperand, ObjectRef, OwnerZone, PlaySlot, PlaySpec,
-    PlayerRef, PlayerRelation, Posture, PostureEvent, Quantity, QuantityUnit, SelectionSnapshot,
-    SelectionView, Selector, Visibility, WellFormedCardProgram, ZoneKind, ZoneRef,
+    AbilityKind, AbilityOrigin, Action, Binding, Cardinality, ChoiceDomain, CostSpec, Decision,
+    DecisionKind, Disjointness, ExecutionRef, InputMode, Instruction, Int, KeywordId,
+    MoveDestination, MoveMethod, MoveReason, Nat, ObjectOperand, ObjectRef, OwnerZone, PlaySlot,
+    PlaySpec, PlayerRef, PlayerRelation, Posture, PostureEvent, Quantity, QuantityUnit,
+    SelectionSnapshot, SelectionView, Selector, Visibility, WellFormedCardProgram, ZoneKind,
+    ZoneRef,
 };
 use alloc::collections::BTreeSet;
 
@@ -173,6 +175,11 @@ pub(super) fn check_cost(action: &Action, play: &PlaySpec) -> bool {
     let Some(objects) = cost_objects(action) else {
         return false;
     };
+    if matches!(action, Action::Banish { .. })
+        && matches!(objects, Selector::Objects { objects } if objects == &[ObjectOperand::SourceHolder {}])
+    {
+        return true;
+    }
     let Selector::Bound { reference } = objects else {
         return false;
     };
@@ -418,24 +425,25 @@ pub(super) fn posture_parameter(costs: &CostSpec, decision: &Decision) -> bool {
 }
 
 pub(super) fn check_card(card: &WellFormedCardProgram) -> Result<()> {
-    let material = card.card().abilities.iter().any(|ability| {
-        ability
-            .node
-            .play
-            .as_ref()
-            .is_some_and(|play| play.parameters.iter().any(is_parameter))
-    });
-    if material
-        && card.card().abilities.iter().any(|ability| {
-            matches!(
-                ability.node.source.origin,
-                AbilityOrigin::Keyword {
-                    keyword: KeywordId::Quick,
-                    ..
-                }
-            )
-        })
-    {
+    let quick_spell = card
+        .card()
+        .abilities
+        .iter()
+        .any(|ability| card_permission(&ability.node));
+    if card.card().abilities.iter().any(|ability| {
+        (matches!(
+            ability.node.source.origin,
+            AbilityOrigin::Keyword {
+                keyword: KeywordId::Quick,
+                ..
+            }
+        ) || (quick_spell && ability.node.kind == AbilityKind::Spell))
+            && ability
+                .node
+                .play
+                .as_ref()
+                .is_some_and(|play| play.parameters.iter().any(is_parameter))
+    }) {
         return Err(unsupported("material fee Quick preflight"));
     }
     for ability in &card.card().abilities {
