@@ -5,14 +5,14 @@ use super::{
     TriggerAggregation, TriggerCondition, TurnId, ZoneKind, invalid, player_id, unsupported,
 };
 use crate::game::Frame;
+use crate::game::internal::grant;
 use crate::game::{Step, int, string};
 use crate::ir::ExecutionId;
 use crate::ir::LimitSpec;
 use crate::ir::optional_payment;
-use crate::ir::printed_keywords;
 use crate::ir::{
-    AttackEvent, Edge, EventPayload as Event, Generation, Nat, ObjectRef, PhaseEvent, PlayerRef,
-    RuntimeDamageRecipient,
+    AttackEvent, Edge, EventPayload as Event, Generation, Nat, ObjectRef, PhaseEvent, PlayerId,
+    PlayerRef, RuntimeDamageRecipient,
 };
 use crate::ir::{DamageEvent, DamageFlags, PositiveInt, RuntimeObjectView};
 use crate::ir::{EntryOrigin, Expr, ObjectFrozen, Predicate};
@@ -20,7 +20,7 @@ use core::num::NonZeroU64;
 use serde_json::Value;
 
 use crate::ir::events::timing::{
-    DamageFilter, attack_predicate, evolve_predicate, opponent, phase_predicate, second_header,
+    attack_predicate, evolve_predicate, opponent, phase_predicate, second_header,
 };
 
 pub(super) fn check_header(ability: &Ability) -> Result<bool> {
@@ -131,6 +131,10 @@ pub(super) fn public_event(event: &Event, position: u64) -> Result<String> {
             "Evolve {:?} from field slot {position}",
             event.kind
         )),
+        Event::LifeChange { event } => Ok(format!(
+            "LifeChange {} player {} at field slot {position}",
+            event.delta.0, event.subject.seat
+        )),
         Event::Damage { event } => Ok(format!(
             "Damage {} at field slot {position}",
             event.amount.0.get()
@@ -195,64 +199,126 @@ impl Game {
 
     pub(in crate::game) fn internal_attack_event(
         &mut self,
-        holder: &str,
+        attacker: &str,
         target: &str,
         before: SnapshotId,
     ) -> Result<()> {
-        let abilities = self
-            .timing_abilities(holder)?
-            .into_iter()
-            .filter(|a| {
-                matches!(
-                    a.node.trigger.as_ref().map(|t| &t.on),
-                    Some(TriggerCondition::Event {
-                        pattern: EventPattern::Attack { .. }
-                    })
-                )
-            })
-            .collect::<Vec<_>>();
-        if abilities.is_empty() {
+        use crate::ir::events::attack::filter;
+        if !self.card_runtime.definitions.cards.values().any(|program| {
+            program
+                .card()
+                .abilities
+                .iter()
+                .any(|ability| filter(&ability.node).is_some())
+        }) {
             return Ok(());
         }
-        let actor = player_id(&self.object(holder)?.controller)?;
-        let source = self.internal_card_source(
-            holder,
-            abilities
-                .first()
-                .ok_or_else(|| invalid("missing attacker ability"))?
-                .node
-                .id,
-            actor,
-        )?;
+        let actor = player_id(&self.object(attacker)?.controller)?;
+        let active = player_id(self.active())?;
+        let observers = self.attack_observers(attacker, actor, active)?;
+        if observers.is_empty() {
+            return Ok(());
+        }
         let target = if let Some(seat) = target.strip_suffix(".leader") {
             RuntimeDamageRecipient::Leader {
                 player: player_id(seat)?,
             }
         } else {
-            let generation = self.object(target)?.generation;
-            self.internal_object_reference(target, generation)?
+            self.internal_object_reference(target, self.object(target)?.generation)?
         };
         let event = AttackEvent {
-            attacker: source.holder,
+            attacker: self.internal_current_reference(attacker)?,
             target,
             controller: actor,
             ordinal: Nat(
-                u64::try_from(int(&self.object(holder)?.state["attacks_this_turn"]))
+                u64::try_from(int(&self.object(attacker)?.state["attacks_this_turn"]))
                     .map_err(invalid)?,
             ),
         };
         let header =
             self.pending_header(actor, Cause::PlayerAction { player: actor }, None, before)?;
         let mut pending = Vec::new();
-        for ability in abilities {
+        for (holder, ability) in observers {
             pending.push(self.timing_occurrence(
-                holder,
+                &holder,
                 ability,
                 &header,
                 Event::Attack { event },
             )?);
         }
         self.internal_admit_pending(pending)
+    }
+
+    fn attack_observers(
+        &self,
+        attacker: &str,
+        actor: PlayerId,
+        active: PlayerId,
+    ) -> Result<Vec<(String, Located<Ability>)>> {
+        use crate::ir::Stat;
+        use crate::ir::events::attack::filter;
+        let mut observers = Vec::new();
+        let information = self.event_subject_information(attacker)?;
+        let mut keywords = None;
+        let mut power = None;
+        for holder in self.field_ids() {
+            self.require_internal_abilities(&holder, "field attack observer")?;
+            let controller = player_id(&self.object(&holder)?.controller)?;
+            for ability in self.timing_abilities(&holder)? {
+                let Some(plan) = filter(&ability.node) else {
+                    continue;
+                };
+                if ability.node.active_zones != [ZoneKind::Field]
+                    || plan
+                        .own_turn
+                        .is_some_and(|own| own != (controller == active))
+                {
+                    continue;
+                }
+                if !plan.subject.matches_information(
+                    &information.borrowed(),
+                    holder == attacker,
+                    controller,
+                    actor,
+                    active,
+                    information.token,
+                ) {
+                    continue;
+                }
+                if !plan.keywords_any.is_empty() {
+                    if keywords.is_none() {
+                        keywords = Some(self.keywords(attacker)?);
+                    }
+                    let actual = keywords
+                        .as_ref()
+                        .ok_or_else(|| invalid("missing attack keywords"))?;
+                    if !plan.keywords_any.iter().any(|keyword| {
+                        (match keyword {
+                            KeywordId::SingleDrive => Some("single_drive"),
+                            KeywordId::TwinDrive => Some("twin_drive"),
+                            _ => grant::keyword(*keyword),
+                        })
+                        .is_some_and(|name| actual.contains(name))
+                    }) {
+                        continue;
+                    }
+                }
+                if let Some(minimum) = plan.power_at_least {
+                    let actual = if let Some(power) = power {
+                        power
+                    } else {
+                        let actual = self.internal_numeric_stat(attacker, Stat::Attack)?;
+                        power = Some(actual);
+                        actual
+                    };
+                    if actual < minimum.0 {
+                        continue;
+                    }
+                }
+                observers.push((holder.clone(), ability));
+            }
+        }
+        Ok(observers)
     }
 
     fn combat_damage_event(&mut self, hit: &Value, before: SnapshotId) -> Result<DamageEvent> {
@@ -276,39 +342,15 @@ impl Game {
                 NonZeroU64::new(u64::try_from(int(&hit["amount"])).map_err(invalid)?)
                     .ok_or_else(|| invalid("nonpositive actual damage"))?,
             ),
-            flags: if hit["attack"] == true {
+            flags: if string(&hit["target"]).ends_with(".leader") {
+                DamageFlags::Attack
+            } else if hit["attack"] == true {
                 DamageFlags::AttackCombat
             } else {
                 DamageFlags::Combat
             },
             controller: player_id(&self.object(source)?.controller)?,
         })
-    }
-
-    fn drain_occurrence(
-        &mut self,
-        hit: &Value,
-        before: SnapshotId,
-    ) -> Result<Option<PendingOccurrence>> {
-        if hit["attack"] != true {
-            return Ok(None);
-        }
-        let source = string(&hit["source"]);
-        let Some(ability) = self.timing_abilities(source)?.into_iter().find(|ability| {
-            printed_keywords::card_declaration(&ability.node) == Some(KeywordId::Drain)
-        }) else {
-            return Ok(None);
-        };
-        let event = self.combat_damage_event(hit, before)?;
-        let rule = self.rule_id("8.4.9")?;
-        let header = self.pending_header(
-            player_id(self.active())?,
-            Cause::Rule { rule },
-            None,
-            before,
-        )?;
-        self.timing_occurrence(source, ability, &header, Event::Damage { event })
-            .map(Some)
     }
 
     pub(in crate::game) fn internal_damage_events(
@@ -319,9 +361,9 @@ impl Game {
         before: SnapshotId,
     ) -> Result<()> {
         if !self.card_runtime.definitions.cards.values().any(|program| {
-            program.card().abilities.iter().any(|a| {
+            program.card().abilities.iter().any(|ability| {
                 matches!(
-                    a.node.trigger.as_ref().map(|t| &t.on),
+                    ability.node.trigger.as_ref().map(|trigger| &trigger.on),
                     Some(TriggerCondition::Event {
                         pattern: EventPattern::Damage { .. }
                     })
@@ -330,16 +372,10 @@ impl Game {
         }) {
             return Ok(());
         }
+        let active = player_id(self.active())?;
         let mut pending = Vec::new();
         for (index, hit) in hits.iter().enumerate() {
-            if let Some(occurrence) = self.drain_occurrence(hit, before)? {
-                pending.push(occurrence);
-            }
-            let holder = string(&hit["target"]);
-            if holder.ends_with(".leader") {
-                continue;
-            }
-            let controller = player_id(&self.object(holder)?.controller)?;
+            let recipient_id = string(&hit["target"]);
             let event = if let Some(facts) = facts {
                 *facts
                     .get(index)
@@ -350,37 +386,21 @@ impl Game {
                 }
                 self.combat_damage_event(hit, before)?
             };
-            let active = player_id(self.active())?;
-            let abilities = self
-                .timing_abilities(holder)?
-                .into_iter()
-                .filter(|ability| {
-                    let Some(trigger) = &ability.node.trigger else {
-                        return false;
-                    };
-                    let TriggerCondition::Event {
-                        pattern: EventPattern::Damage { binding, predicate },
-                    } = &trigger.on
-                    else {
-                        return false;
-                    };
-                    DamageFilter::parse(*binding, predicate).is_some_and(|filter| {
-                        (!filter.ability || event.flags == DamageFlags::Ability)
-                            && filter
-                                .own_turn
-                                .is_none_or(|own| own == (controller == active))
-                    })
-                })
-                .collect::<Vec<_>>();
-            if abilities.is_empty() {
-                continue;
-            }
-            if event.recipient
-                != (RuntimeDamageRecipient::Object {
-                    object: self.internal_current_reference(holder)?,
-                })
-            {
+            let committed_recipient = if let Some(seat) = recipient_id.strip_suffix(".leader") {
+                RuntimeDamageRecipient::Leader {
+                    player: player_id(seat)?,
+                }
+            } else {
+                RuntimeDamageRecipient::Object {
+                    object: self.internal_current_reference(recipient_id)?,
+                }
+            };
+            if event.recipient != committed_recipient {
                 return Err(invalid("damage recipient proof mismatch"));
+            }
+            let observers = self.damage_observers(hit, event, active)?;
+            if observers.is_empty() {
+                continue;
             }
             let (cause, actor, source) = if facts.is_some() {
                 let execution = frame.cause["effect"]["execution"]
@@ -391,7 +411,7 @@ impl Game {
                     Cause::Effect {
                         execution: ExecutionId(execution),
                     },
-                    source.map_or(event.controller, |s| s.controller),
+                    source.map_or(event.controller, |source| source.controller),
                     source,
                 )
             } else {
@@ -404,12 +424,205 @@ impl Game {
                 )
             };
             let header = self.pending_header(actor, cause, source, before)?;
-            for ability in abilities {
+            for (holder, ability) in observers {
                 pending.push(self.timing_occurrence(
-                    holder,
+                    &holder,
                     ability,
                     &header,
                     Event::Damage { event },
+                )?);
+            }
+        }
+        self.internal_admit_pending(pending)
+    }
+
+    fn damage_observers(
+        &mut self,
+        hit: &Value,
+        event: DamageEvent,
+        active: PlayerId,
+    ) -> Result<Vec<(String, Located<Ability>)>> {
+        use crate::ir::events::damage::{DamageFilter, RecipientFilter};
+        let mut observers = Vec::new();
+        let mut subject = None;
+        for holder in self.field_ids() {
+            self.require_internal_abilities(&holder, "field damage observer")?;
+            let controller = player_id(&self.object(&holder)?.controller)?;
+            for ability in self.timing_abilities(&holder)? {
+                let Some(trigger) = &ability.node.trigger else {
+                    continue;
+                };
+                if trigger.active_zones != [ZoneKind::Field] {
+                    continue;
+                }
+                let TriggerCondition::Event {
+                    pattern: EventPattern::Damage { binding, predicate },
+                } = &trigger.on
+                else {
+                    continue;
+                };
+                let Some(plan) = DamageFilter::parse(*binding, predicate) else {
+                    continue;
+                };
+                if plan.kind.is_some_and(|kind| !kind.matches(event.flags))
+                    || plan
+                        .own_turn
+                        .is_some_and(|own| own != (controller == active))
+                {
+                    continue;
+                }
+                let holder_reference = self.internal_current_reference(&holder)?;
+                let recipient_matches = match plan.recipient {
+                    None => true,
+                    Some(RecipientFilter::SourceHolder) => {
+                        event.recipient
+                            == (RuntimeDamageRecipient::Object {
+                                object: holder_reference,
+                            })
+                    }
+                    Some(RecipientFilter::Leader(own)) => match event.recipient {
+                        RuntimeDamageRecipient::Leader { player } => {
+                            own.is_none_or(|own| own == (controller == player))
+                        }
+                        RuntimeDamageRecipient::Object { .. } => false,
+                    },
+                };
+                if !recipient_matches {
+                    continue;
+                }
+                if let Some(filter) = &plan.dealt {
+                    let source_id = string(&hit["source"]);
+                    if self
+                        .internal_identities()?
+                        .get(&event.source.object.id)
+                        .is_none_or(|id| id != source_id)
+                    {
+                        return Err(invalid("damage source identity mismatch"));
+                    }
+                    if (filter.kind.is_some()
+                        || filter.trait_id.is_some()
+                        || filter.name.is_some()
+                        || filter.class.is_some())
+                        && self.internal_current_reference(source_id)? != event.source.object
+                    {
+                        return Err(unsupported("departed damage subject characteristics"));
+                    }
+                    if subject.is_none() {
+                        subject = Some(self.event_subject_information(source_id)?);
+                    }
+                    let information = subject
+                        .as_ref()
+                        .ok_or_else(|| invalid("missing damage source information"))?;
+                    if !filter.matches_information(
+                        &information.borrowed(),
+                        holder_reference == event.source.object,
+                        controller,
+                        event.controller,
+                        active,
+                        information.token,
+                    ) {
+                        continue;
+                    }
+                }
+                observers.push((holder.clone(), ability));
+            }
+        }
+        Ok(observers)
+    }
+
+    pub(in crate::game) fn internal_life_change_events(
+        &mut self,
+        changes: &[(String, i64, i64)],
+        cause: &Value,
+        battle: bool,
+        snapshot: SnapshotId,
+    ) -> Result<()> {
+        use crate::ir::events::life::LifeFilter;
+        use crate::ir::{Int, LifeChangeEvent};
+        if !self.card_runtime.definitions.cards.values().any(|program| {
+            program.card().abilities.iter().any(|ability| {
+                matches!(
+                    ability.node.trigger.as_ref().map(|trigger| &trigger.on),
+                    Some(TriggerCondition::Event {
+                        pattern: EventPattern::LifeChange { .. }
+                    })
+                )
+            })
+        }) {
+            return Ok(());
+        }
+        let active = player_id(self.active())?;
+        let mut pending = Vec::new();
+        for (seat, before, after) in changes {
+            let delta = after
+                .checked_sub(*before)
+                .ok_or_else(|| invalid("life delta overflow"))?;
+            if delta == 0 {
+                continue;
+            }
+            let event = LifeChangeEvent {
+                subject: player_id(seat)?,
+                before: Int(*before),
+                after: Int(*after),
+                delta: Int(delta),
+            };
+            let mut observers = Vec::new();
+            for holder in self.field_ids() {
+                self.require_internal_abilities(&holder, "field life observer")?;
+                let controller = player_id(&self.object(&holder)?.controller)?;
+                for ability in self.timing_abilities(&holder)? {
+                    let Some(trigger) = &ability.node.trigger else {
+                        continue;
+                    };
+                    if trigger.active_zones != [ZoneKind::Field] {
+                        continue;
+                    }
+                    let TriggerCondition::Event {
+                        pattern: EventPattern::LifeChange { binding, predicate },
+                    } = &trigger.on
+                    else {
+                        continue;
+                    };
+                    if LifeFilter::parse(*binding, predicate)
+                        .is_some_and(|filter| filter.matches(event, controller, active))
+                    {
+                        observers.push((holder.clone(), ability));
+                    }
+                }
+            }
+            if observers.is_empty() {
+                continue;
+            }
+            let source = if battle {
+                None
+            } else {
+                self.card_runtime.active_source
+            };
+            let (authority, actor) = if let Some(execution) = cause["effect"]["execution"].as_u64()
+            {
+                (
+                    Cause::Effect {
+                        execution: ExecutionId(execution),
+                    },
+                    source.map_or(event.subject, |source| source.controller),
+                )
+            } else if battle {
+                (
+                    Cause::Rule {
+                        rule: self.rule_id("8.4.9")?,
+                    },
+                    active,
+                )
+            } else {
+                return Err(unsupported("unadmitted life change producer"));
+            };
+            let header = self.pending_header(actor, authority, source, snapshot)?;
+            for (holder, ability) in observers {
+                pending.push(self.timing_occurrence(
+                    &holder,
+                    ability,
+                    &header,
+                    Event::LifeChange { event },
                 )?);
             }
         }
@@ -515,6 +728,7 @@ pub(super) fn is_timing(ability: &Ability) -> bool {
                 | EventPattern::Phase { .. }
                 | EventPattern::Evolve { .. }
                 | EventPattern::Damage { .. }
+                | EventPattern::LifeChange { .. }
         })
     )
 }

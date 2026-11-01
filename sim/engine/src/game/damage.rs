@@ -168,7 +168,12 @@ impl Game {
         }
         self.internal_damage_events(actual, facts, frame, at)?;
         self.enqueue(pending);
-        self.life_change_triggers(&life_changes, &frame.cause)?;
+        self.life_change_triggers(
+            &life_changes,
+            &frame.cause,
+            !actual.is_empty() && actual.iter().all(|hit| hit["battle"] == true),
+            at,
+        )?;
         Ok(())
     }
 

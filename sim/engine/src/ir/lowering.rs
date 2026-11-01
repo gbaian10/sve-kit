@@ -2,6 +2,7 @@
 
 mod ast;
 mod capture;
+mod combat;
 mod conditions;
 mod costs;
 mod counters;
@@ -793,20 +794,10 @@ fn lowered_subscription(
         ast::PhaseSubscription::Evolved(entry) => {
             evolution::subscription(entry, event_id, scope, path)
         }
-        ast::PhaseSubscription::Damage(entry) => {
-            let event = Binding::new(event_id, scope);
-            let filter = super::events::timing::DamageFilter {
-                ability: entry.kind.is_some(),
-                own_turn: entry
-                    .during
-                    .as_ref()
-                    .map(|during| matches!(during.turn, ast::EntryPlayer::Controller)),
-            };
-            Ok(EventPattern::Damage {
-                binding: event,
-                predicate: filter.predicate(event),
-            })
-        }
+        ast::PhaseSubscription::Attacked(entry) => combat::attack(entry, event_id, scope, path),
+        ast::PhaseSubscription::Dealt(entry) => combat::dealt(entry, event_id, scope, path),
+        ast::PhaseSubscription::LifeChanged(entry) => Ok(combat::life(entry, event_id, scope)),
+        ast::PhaseSubscription::Damage(entry) => Ok(combat::damaged(entry, event_id, scope)),
         ast::PhaseSubscription::EnterField(entry) => {
             let event = Binding::new(event_id, scope);
             Ok(EventPattern::EnterField {

@@ -1,7 +1,9 @@
+use super::attack::AttackFilter;
+use super::damage::DamageFilter;
+use super::life::LifeFilter;
 use crate::ir::{
-    Ability, AbilityOrigin, DamageEvent, DamageFlags, DamageFlagsFields, DamageRecipient,
-    EventPattern, EvolutionState, EvolutionStateFields, KeywordId, LeaveFieldEvent, ObjectOperand,
-    RecipientFields, Selector, TriggerCondition,
+    Ability, AbilityOrigin, DamageEvent, EventPattern, EvolutionState, EvolutionStateFields,
+    KeywordId, LeaveFieldEvent, TriggerCondition,
 };
 use crate::ir::{
     AttackEvent, Binding, Bool, Cardinality, Edge, EdgeFields, EvolveEvent, Expr, Nat,
@@ -75,7 +77,7 @@ pub(crate) fn super_evolve_predicate(event: Binding<EvolveEvent>) -> Expr<Bool> 
     }))
 }
 
-fn turn_predicate(own: bool) -> Expr<Bool> {
+pub(super) fn turn_predicate(own: bool) -> Expr<Bool> {
     Expr::Compute(Box::new(Predicate::PlayerEquals {
         left: Expr::Literal(PlayerRef::Active {}),
         right: Expr::Literal(if own {
@@ -104,48 +106,6 @@ pub(crate) fn leave_filter(
     [false, true]
         .into_iter()
         .find(|own| *predicate == leave_predicate(event, *own))
-}
-
-#[derive(Clone, Copy)]
-pub(crate) struct DamageFilter {
-    pub(crate) ability: bool,
-    pub(crate) own_turn: Option<bool>,
-}
-impl DamageFilter {
-    pub(crate) fn predicate(self, event: Binding<DamageEvent>) -> Expr<Bool> {
-        let mut predicates = vec![Expr::Compute(Box::new(Predicate::RecipientIsFollower {
-            recipient: DamageRecipient::FromExpression {
-                value: Box::new(Expr::Frozen(Box::new(RecipientFields::DamageRecipient {
-                    event,
-                }))),
-            },
-            objects: Selector::Objects {
-                objects: vec![ObjectOperand::SourceHolder {}],
-            },
-        }))];
-        if self.ability {
-            predicates.push(Expr::Compute(Box::new(Predicate::Equal {
-                operands: Box::new(ValueEquality::DamageFlags {
-                    left: Expr::Frozen(Box::new(DamageFlagsFields::DamageFlags { event })),
-                    right: Expr::Literal(DamageFlags::Ability),
-                }),
-            })));
-        }
-        if let Some(own) = self.own_turn {
-            predicates.push(turn_predicate(own));
-        }
-        Expr::Compute(Box::new(Predicate::And { predicates }))
-    }
-    pub(crate) fn parse(event: Binding<DamageEvent>, predicate: &Expr<Bool>) -> Option<Self> {
-        [false, true]
-            .into_iter()
-            .flat_map(|ability| {
-                [None, Some(false), Some(true)]
-                    .into_iter()
-                    .map(move |own_turn| Self { ability, own_turn })
-            })
-            .find(|filter| *predicate == filter.predicate(event))
-    }
 }
 
 pub(crate) fn second_header(ability: &Ability) -> Option<bool> {
@@ -183,6 +143,12 @@ pub(crate) fn second_header(ability: &Ability) -> Option<bool> {
         (AbilityOrigin::Printed { .. }, EventPattern::LeaveField { binding, predicate }) => {
             Some(leave_filter(*binding, predicate).is_some())
         }
+        (AbilityOrigin::Printed { .. }, EventPattern::Attack { binding, predicate }) => {
+            Some(AttackFilter::parse(*binding, predicate).is_some())
+        }
+        (AbilityOrigin::Printed { .. }, EventPattern::LifeChange { binding, predicate }) => {
+            Some(LifeFilter::parse(*binding, predicate).is_some())
+        }
         (AbilityOrigin::Printed { .. }, EventPattern::Damage { binding, predicate }) => {
             Some(DamageFilter::parse(*binding, predicate).is_some())
         }
@@ -198,21 +164,14 @@ pub(crate) fn second_header(ability: &Ability) -> Option<bool> {
 }
 
 pub(crate) fn drain_predicate(event: Binding<DamageEvent>) -> Expr<Bool> {
-    use crate::ir::{ObjectFrozen, SnapshotFields};
-    Expr::Compute(Box::new(Predicate::And {
-        predicates: vec![
-            Expr::Compute(Box::new(Predicate::ObjectEquals {
-                left: Expr::Frozen(Box::new(ObjectFrozen::SnapshotObject {
-                    snapshot: Expr::Frozen(Box::new(SnapshotFields::DamageSource { event })),
-                })),
-                right: Expr::Frozen(Box::new(ObjectFrozen::SourceHolder {})),
-            })),
-            Expr::Compute(Box::new(Predicate::Equal {
-                operands: Box::new(ValueEquality::DamageFlags {
-                    left: Expr::Frozen(Box::new(DamageFlagsFields::DamageFlags { event })),
-                    right: Expr::Literal(DamageFlags::AttackCombat),
-                }),
-            })),
-        ],
-    }))
+    DamageFilter {
+        dealt: Some(super::subject::SubjectFilter {
+            itself: Some(true),
+            ..super::subject::SubjectFilter::default()
+        }),
+        recipient: None,
+        kind: Some(super::damage::DamageKind::Attack),
+        own_turn: None,
+    }
+    .predicate(event)
 }

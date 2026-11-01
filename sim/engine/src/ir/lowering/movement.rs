@@ -95,7 +95,10 @@ pub(super) fn subscription(
         | ast::PhaseSubscription::Played(_)
         | ast::PhaseSubscription::Phase(_)
         | ast::PhaseSubscription::EnterField(_)
-        | ast::PhaseSubscription::Damage(_) => Err(unsupported(path)),
+        | ast::PhaseSubscription::Damage(_)
+        | ast::PhaseSubscription::Attacked(_)
+        | ast::PhaseSubscription::Dealt(_)
+        | ast::PhaseSubscription::LifeChanged(_) => Err(unsupported(path)),
     }
 }
 

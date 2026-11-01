@@ -1,0 +1,50 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP03-098:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-01"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        keywords:
+          - ward
+      - line: 3
+        auto:
+          on:
+            attacked:
+              who: self
+              sel:
+                kind: follower
+                other: true
+                as: attacker
+                where:
+                  any:
+                    - exists:
+                        in: attacker
+                        keyword: storm
+                    - exists:
+                        in: attacker
+                        keyword: ward
+          do:
+            - damage:
+                n: 1
+                to:
+                  leaders: opponents
+      - line: 4
+        activate:
+          cost:
+            pp: 2
+          do:
+            - grant:
+                on: this
+                keywords:
+                  - storm

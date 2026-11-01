@@ -1,0 +1,27 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP02-095:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-01"
+    abilities:
+      - line: 1
+        auto:
+          on:
+            life_changed:
+              who: self
+              direction: up
+          do:
+            - buff:
+                on:
+                  who: self
+                  zone: field
+                  kind: follower
+                power: 1
+                hp: 1
+          per_turn: 1

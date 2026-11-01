@@ -5,12 +5,11 @@ use super::{
 };
 use crate::game::internal::Execution;
 use crate::ir::events::played::filter;
-use crate::ir::events::subject::SubjectInformation;
 use crate::ir::optional_payment;
 use crate::ir::{
-    Action, CardKind, CardName, ClassId, Control, LimitSpec, Located, MoveDestination, MoveReason,
-    Node, ObjectOperand, PlayEvent, PlaySubject, PlayerId, PlayerRef, Program, ReceiptId,
-    Requirements, RuntimeReceiptId, RuntimeZoneRef, Selector, TraitId,
+    Action, Control, LimitSpec, Located, MoveDestination, MoveReason, Node, ObjectOperand,
+    PlayEvent, PlaySubject, PlayerId, PlayerRef, Program, ReceiptId, Requirements,
+    RuntimeReceiptId, RuntimeZoneRef, Selector,
 };
 
 use alloc::collections::BTreeSet;
@@ -122,70 +121,20 @@ fn field_return_paths(program: &Program, prefix: &str, paths: &mut BTreeSet<Stri
     }
 }
 
-struct PlayedInformation {
-    kind: CardKind,
-    token: bool,
-    class: ClassId,
-    traits: Vec<TraitId>,
-    names: Vec<CardName>,
-}
+use super::subject::EventSubjectInformation;
 
 #[expect(
     clippy::multiple_inherent_impl,
-    reason = "The card play commit boundary owns observer admission."
+    reason = "Card play commits share observer admission."
 )]
 impl Game {
-    // No admitted hand/EX modifier changes class or traits; this subset avoids unrelated title bindings.
-    fn played_information(&self, source: &str) -> Result<PlayedInformation> {
-        let kind = match self.object_type(source)? {
-            kind if kind.contains("フォロワー") => CardKind::Follower,
-            "スペル" | "スペル・トークン" | "スペル・アドバンス" => {
-                CardKind::Spell
-            }
-            "アミュレット" | "アミュレット・トークン" => CardKind::Amulet,
-            _ => return Err(unsupported("played card kind")),
-        };
-        let token = self.object_type(source)?.contains("トークン");
-        let face = self.face(source)?;
-        let class = ClassId(
-            face["card_class"]
-                .as_str()
-                .ok_or_else(|| invalid("missing played class"))?
-                .into(),
-        );
-        let traits = face["traits"]
-            .as_array()
-            .ok_or_else(|| invalid("missing played traits"))?
-            .iter()
-            .map(|value| {
-                value
-                    .as_str()
-                    .map(|text| TraitId(text.into()))
-                    .ok_or_else(|| invalid("invalid played trait"))
-            })
-            .collect::<Result<Vec<_>>>()?;
-        let names = self.card_names(source)?.into_iter().map(CardName).collect();
-        Ok(PlayedInformation {
-            kind,
-            token,
-            class,
-            traits,
-            names,
-        })
-    }
-
     fn played_observers(
         &self,
         source: &str,
-        info: &PlayedInformation,
+        info: &EventSubjectInformation,
         actor: PlayerId,
     ) -> Result<Vec<(String, Located<Ability>)>> {
-        let subject = SubjectInformation {
-            kind: info.kind,
-            class: Some(&info.class),
-            traits: &info.traits,
-            names: &info.names,
-        };
+        let subject = info.borrowed();
         let active = player_id(self.active())?;
         let mut observers = self.field_ids();
         observers.extend(self.zone_ids("P1", "cemetery"));
@@ -243,7 +192,7 @@ impl Game {
         }
         let actor = execution.context.controller;
         let source = &execution.context.source;
-        let info = self.played_information(source)?;
+        let info = self.event_subject_information(source)?;
         let matched = self.played_observers(source, &info, actor)?;
         if matched.is_empty() {
             return Ok(());

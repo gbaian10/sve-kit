@@ -73,6 +73,16 @@ records:
 
 場上或墓場來源的 `auto.on.played` 沿用共用事件主體篩選；`who` 可省略或指定 `self | opp`，`sel` 可篩 `kind`、`trait`、`name`、`class`、`other`、`token | not_token`，`during: {turn: self}` 限自己回合。事件以適正打出成功為準，包含已支援的從者、護符、法術及護符／法術 token；付款失敗、效果直接放場與生成 token 不產生打出事件。場上觀測者必須在成功時已位於場上，新打出的卡不倒算自身這次打出；墓場來源同樣在法術本文或入場前擷取，不能事後補觸發。正式目標、付款及每回合一次限制沿用共用觸發流程。
 
+場上來源的 `auto.on.attacked` 沿用共用事件主體篩選，`who` 可指定 `self | opp`；`sel` 可篩種類、類型、名稱、職業、token 與 `other`，另可用 `keyword` 篩有效關鍵字。`sel.as` 配合 `where` 可檢查該攻擊者的有效攻擊力下限，或用 `any` 組合關鍵字 `exists`；條件在真正宣告攻擊時判斷，先產生待機能力，結算後才進入 Quick。`this` 仍指能力來源，`as` 的事件主體目前只供標頭條件使用，本文尚不能拿它強化本次攻擊者。
+
+`auto.on.dealt_damage` 以同一筆實際傷害的來源套用事件主體篩選；`auto.on.damaged.recipient` 可指定 `this` 或 `{leader: self | opp}`。兩者的 `kind` 可省略或指定 `ability | attack | combat`，`during` 可限制回合；先處理禁止／防止，再以實際正傷害判斷，全防止與零傷害沒有事件。對領袖的攻擊傷害屬 `attack`，不屬 `combat`；從者交戰中攻擊方造成的傷害同時符合兩者，反擊方符合 `combat`（[Q282](https://shadowverse-evolve.com/cardlist/?cardno=BP02-020)）。傷害來源與受傷者各自篩選，正式目標、付款與每回合一次限制沿用共同待機流程。
+
+`auto.on.life_changed` 可用 `who: self | opp`、`direction: up | down` 與 `during` 篩選領袖生命實際變更；省略條件即不限制。加減或設定生命都按變更前後的實際差額產生事件，差額為零不產生事件；生命不封頂於 20。生命支付與傷害造成的減少亦經同一變更入口，但直接加減生命不是傷害，不會因此觸發 `damaged`。這些事件頭保留既有每回合一次 consumer，尚未擴充任意多次 quota。
+
+觸發頭的 `cost.act_self` 與 `cost.self_to_cemetery` 目前尚未通過執行端准入，不能以同名物件代替持有者付款，也不能移除費用代替。
+
+這三種事件頭尚不接受 schema 中的 `by`；`dealt_damage` 也尚不接受 `zone`。未支援的欄位會在載入時拒絕，不會忽略篩選條件。
+
 `ub: true` 是觸發／起動能力的獨立標記，沿用該能力原有時機、正式目標、付款與本文。能力控制者必須使用作品構築，且作品規則綁定含 `ub_enabled`；職業構築、交叉構築及其他作品下，UB 能力在所有區域無效。同卡未帶 UB 的能力仍有效。適正打出後在既有 `AbilityPlayed` 事實記錄 `UnionBurst` 資格，目標不足、拒付或付款失敗不記錄；本文沒有成功改變狀態仍算一次適正打出。此入口尚未新增 UB 歷史查詢、UB 發動訂閱或免原費用發動其他 UB 的 consumer，不能據此准入那些本文。
 
 謝幕可用 `cost` 宣告頭付款（例如 `cost: {pp: 2}`），沿用接受／拒絕與不足資源不發動的付款流程；目標在付款前宣告。

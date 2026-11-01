@@ -1,3 +1,6 @@
+use crate::ir::events::attack::AttackFilter;
+use crate::ir::events::damage::DamageFilter;
+use crate::ir::events::life::LifeFilter;
 use crate::ir::events::played::PlayedFilter;
 use crate::ir::events::subject::{SubjectFields, SubjectFilter};
 use crate::ir::history_turn::played_by;
@@ -358,6 +361,26 @@ impl Checker {
         self.local_value(plan.card, &Expr::Literal(Bool(true)))
     }
 
+    fn committed_header<T>(
+        &mut self,
+        binding: Binding<T>,
+        policy: EventSnapshotPolicy,
+        accepted: bool,
+        view: Option<EventSnapshotPolicy>,
+        triggering: bool,
+    ) -> Option<Checked>
+    where
+        T: 'static,
+    {
+        // The bridge consumes this closed header at commit, without granting body object reads.
+        if !triggering || view != Some(policy) || !accepted {
+            return None;
+        }
+        Some(self.define(binding, BindingKind::Value).map(|()| {
+            self.env.trigger_events.insert(binding.key());
+        }))
+    }
+
     fn subject_header<T>(
         &mut self,
         binding: Binding<T>,
@@ -369,16 +392,13 @@ impl Checker {
     where
         T: 'static,
     {
-        // The bridge consumes this closed header at commit, without granting body object reads.
-        if !triggering
-            || view != Some(fields.view())
-            || SubjectFilter::parse(fields, predicate).is_none()
-        {
-            return None;
-        }
-        Some(self.define(binding, BindingKind::Value).map(|()| {
-            self.env.trigger_events.insert(binding.key());
-        }))
+        self.committed_header(
+            binding,
+            fields.view(),
+            SubjectFilter::parse(fields, predicate).is_some(),
+            view,
+            triggering,
+        )
     }
 
     fn subject_pattern(
@@ -388,6 +408,27 @@ impl Checker {
         triggering: bool,
     ) -> Option<Checked> {
         match pattern {
+            EventPattern::Attack { binding, predicate } => self.committed_header(
+                *binding,
+                EventSnapshotPolicy::AfterEntry,
+                AttackFilter::parse(*binding, predicate).is_some(),
+                view,
+                triggering,
+            ),
+            EventPattern::Damage { binding, predicate } => self.committed_header(
+                *binding,
+                EventSnapshotPolicy::AfterEntry,
+                DamageFilter::parse(*binding, predicate).is_some(),
+                view,
+                triggering,
+            ),
+            EventPattern::LifeChange { binding, predicate } => self.committed_header(
+                *binding,
+                EventSnapshotPolicy::AfterEntry,
+                LifeFilter::parse(*binding, predicate).is_some(),
+                view,
+                triggering,
+            ),
             EventPattern::EnterField { binding, predicate } => self.subject_header(
                 *binding,
                 SubjectFields::Entry(*binding),
@@ -442,12 +483,9 @@ impl Checker {
             | EventPattern::Draw { .. }
             | EventPattern::Discard { .. }
             | EventPattern::Banish { .. }
-            | EventPattern::Damage { .. }
             | EventPattern::StatChange { .. }
-            | EventPattern::LifeChange { .. }
             | EventPattern::CounterChange { .. }
             | EventPattern::Posture { .. }
-            | EventPattern::Attack { .. }
             | EventPattern::Phase { .. }
             | EventPattern::Race { .. }
             | EventPattern::DriveGained { .. }

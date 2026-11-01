@@ -35,6 +35,25 @@ fn selected() -> &'static SelectedEffects {
                 format!("{number}.yaml"),format!("format: 1\nkind: effect_set\ncards:\n  {number}:\n    status: complete\n    abilities: []\n")
             ]));
         }
+        for (number, power, traits) in [
+            ("combat-high", "4", json!(["妖精", "狩人", "ドラゴニュート", "武闘竜人"])),
+            ("combat-low", "3", json!(["妖精", "狩人", "ドラゴニュート", "武闘竜人"])),
+            ("combat-other", "4", json!(["反例"])),
+        ] {
+            let mut material = face.clone();
+            material["name"] = json!("combat material");
+            material["text"] = Value::Null;
+            material["sections"] = json!([]);
+            material["card_type"] = json!("フォロワー");
+            material["traits"] = traits;
+            material["power"] = json!(power);
+            material["hp"] = json!("20");
+            snapshot.push_str(&json!({"number":number,"faces":[material]}).to_string());
+            snapshot.push('\n');
+            input["documents"].as_array_mut().unwrap().push(json!([
+                format!("{number}.yaml"),format!("format: 1\nkind: effect_set\ncards:\n  {number}:\n    status: complete\n    abilities: []\n")
+            ]));
+        }
         repository::selection_with_rules_from(&snapshot, &keywords, &input)
     })
 }
@@ -90,6 +109,9 @@ pub(super) fn prepared(value: &Value, action: Action) -> Game {
     })
     .unwrap();
     for number in [
+        "combat-high",
+        "combat-low",
+        "combat-other",
         "movement-unit",
         "movement-other",
         "movement-token",

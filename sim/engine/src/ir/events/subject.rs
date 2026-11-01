@@ -1,15 +1,18 @@
 //! Public event subscriptions share one closed plan over the committed event subject.
 use crate::ir::{
-    Binding, Bool, BoolRead, BooleanState, CardKind, CardName, CharacteristicView, Characteristics,
-    CharacteristicsFields, ClassFrozen, ClassId, ClassRead, DestroyEvent, EnterExEvent,
-    EnterFieldEvent, EventContext, EventSnapshotPolicy, EvolveEvent, Expr, Info, KindFrozen,
-    KindRead, LeaveFieldEvent, NamesFrozen, NamesRead, ObjectFrozen, ObjectOperand, ObjectRef,
-    ObjectView, PlayEvent, PlayerFrozen, PlayerId, PlayerRead, PlayerRef, Predicate, Role,
-    SnapshotFields, TraitId, TraitsFrozen, TraitsRead, ZoneFrozen, ZoneKind, ZoneOperation,
+    AttackEvent, Binding, Bool, BoolRead, BooleanState, CardKind, CardName, CharacteristicView,
+    Characteristics, CharacteristicsFields, ClassFrozen, ClassId, ClassRead, DamageEvent,
+    DestroyEvent, EnterExEvent, EnterFieldEvent, EventContext, EventSnapshotPolicy, EvolveEvent,
+    Expr, Info, KindFrozen, KindRead, LeaveFieldEvent, NamesFrozen, NamesRead, ObjectFrozen,
+    ObjectOperand, ObjectRef, ObjectView, PlayEvent, PlayerFrozen, PlayerId, PlayerRead, PlayerRef,
+    Predicate, Role, SnapshotFields, TraitId, TraitsFrozen, TraitsRead, ZoneFrozen, ZoneKind,
+    ZoneOperation,
 };
 
 #[derive(Clone, Copy)]
 pub(crate) enum SubjectFields {
+    Attack(Binding<AttackEvent>),
+    DamageSource(Binding<DamageEvent>),
     Played {
         event: Binding<PlayEvent>,
         card: Binding<ObjectRef>,
@@ -32,9 +35,25 @@ fn played_view(event: Binding<PlayEvent>, card: Binding<ObjectRef>) -> ObjectVie
     }
 }
 
+pub(super) fn attack_view(event: Binding<AttackEvent>) -> ObjectView {
+    ObjectView::EventSnapshot {
+        object: Box::new(ObjectOperand::FromExpression {
+            value: Box::new(Expr::Frozen(Box::new(ObjectFrozen::AttackAttacker {
+                event,
+            }))),
+        }),
+        event: EventContext::Attack { event },
+        policy: EventSnapshotPolicy::AfterEntry,
+    }
+}
+
 impl SubjectFields {
     fn object(self) -> Expr<ObjectRef> {
         Expr::Frozen(Box::new(match self {
+            Self::Attack(event) => ObjectFrozen::AttackAttacker { event },
+            Self::DamageSource(event) => ObjectFrozen::SnapshotObject {
+                snapshot: Expr::Frozen(Box::new(SnapshotFields::DamageSource { event })),
+            },
             Self::Cemetery(event) | Self::Leave(event) => {
                 ObjectFrozen::LeaveFieldObjectBefore { event }
             }
@@ -47,6 +66,10 @@ impl SubjectFields {
     }
     fn controller(self) -> Expr<PlayerRef> {
         match self {
+            Self::Attack(event) => Expr::Frozen(Box::new(PlayerFrozen::AttackController { event })),
+            Self::DamageSource(event) => {
+                Expr::Frozen(Box::new(PlayerFrozen::DamageController { event }))
+            }
             Self::Played { event, .. } => {
                 Expr::Frozen(Box::new(PlayerFrozen::PlayController { event }))
             }
@@ -73,6 +96,15 @@ impl SubjectFields {
     }
     fn kind(self) -> Expr<CardKind> {
         Expr::Frozen(Box::new(match self {
+            Self::Attack(event) => {
+                return Expr::Live(Box::new(KindRead::Kind {
+                    object: attack_view(event),
+                    view: CharacteristicView::Effective,
+                }));
+            }
+            Self::DamageSource(event) => KindFrozen::Snapshot {
+                object: Expr::Frozen(Box::new(SnapshotFields::DamageSource { event })),
+            },
             Self::Played { event, card } => {
                 return Expr::Live(Box::new(KindRead::Kind {
                     object: played_view(event, card),
@@ -104,6 +136,15 @@ impl SubjectFields {
     }
     fn traits(self) -> Expr<Vec<TraitId>> {
         Expr::Frozen(Box::new(match self {
+            Self::Attack(event) => {
+                return Expr::Live(Box::new(TraitsRead::Traits {
+                    object: attack_view(event),
+                    view: CharacteristicView::Effective,
+                }));
+            }
+            Self::DamageSource(event) => TraitsFrozen::Snapshot {
+                object: Expr::Frozen(Box::new(SnapshotFields::DamageSource { event })),
+            },
             Self::Played { event, card } => {
                 return Expr::Live(Box::new(TraitsRead::Traits {
                     object: played_view(event, card),
@@ -135,6 +176,14 @@ impl SubjectFields {
     }
     fn names(self) -> Expr<Vec<CardName>> {
         Expr::Frozen(Box::new(match self {
+            Self::Attack(event) => {
+                return Expr::Live(Box::new(NamesRead::Names {
+                    object: attack_view(event),
+                }));
+            }
+            Self::DamageSource(event) => NamesFrozen::Snapshot {
+                object: Expr::Frozen(Box::new(SnapshotFields::DamageSource { event })),
+            },
             Self::Played { event, card } => {
                 return Expr::Live(Box::new(NamesRead::Names {
                     object: played_view(event, card),
@@ -165,6 +214,15 @@ impl SubjectFields {
     }
     fn class(self) -> Expr<Info<ClassId>> {
         let field = match self {
+            Self::Attack(event) => {
+                return Expr::Live(Box::new(ClassRead::Class {
+                    object: attack_view(event),
+                    view: CharacteristicView::Effective,
+                }));
+            }
+            Self::DamageSource(event) => ClassFrozen::Snapshot {
+                object: Expr::Frozen(Box::new(SnapshotFields::DamageSource { event })),
+            },
             Self::Played { event, card } => {
                 return Expr::Live(Box::new(ClassRead::Class {
                     object: played_view(event, card),
@@ -197,6 +255,12 @@ impl SubjectFields {
     }
     fn token(self) -> Option<Expr<Bool>> {
         let object = match self {
+            Self::Attack(event) => attack_view(event),
+            Self::DamageSource(event) => ObjectView::Snapshot {
+                value: Box::new(Expr::Frozen(Box::new(SnapshotFields::DamageSource {
+                    event,
+                }))),
+            },
             Self::Played { event, card } => played_view(event, card),
             Self::Cemetery(event) | Self::Leave(event) => ObjectView::Snapshot {
                 value: Box::new(Expr::Frozen(Box::new(SnapshotFields::LeaveFieldLki {
@@ -221,7 +285,11 @@ impl SubjectFields {
             Self::Cemetery(_) | Self::Leave(_) | Self::Destroy(_) => {
                 EventSnapshotPolicy::BeforeExit
             }
-            Self::Entry(_) | Self::Evolve(_) | Self::Ex(_) => EventSnapshotPolicy::AfterEntry,
+            Self::Attack(_)
+            | Self::DamageSource(_)
+            | Self::Entry(_)
+            | Self::Evolve(_)
+            | Self::Ex(_) => EventSnapshotPolicy::AfterEntry,
         }
     }
     fn destination(self) -> Option<Expr<Bool>> {
