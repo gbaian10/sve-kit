@@ -9,9 +9,9 @@ use sve_engine::catalog::EngineIdentityInput;
 use sve_engine::game::internal::{DecisionView, InputDomain, SearchAnswer};
 
 fn ex_catalog() -> Arc<Catalog> {
-    let snapshot=[("unit-spell","スペル"),("unit-follower","フォロワー"),("lesson","スペル・トークン")].iter().map(|(number,kind)|json!({"number":number,"faces":[{"name":number,"card_class":"ニュートラル","card_type":kind,"cost":"1","power":"2","hp":"3","traits":[],"text":null,"sections":[]}]}).to_string()).collect::<Vec<_>>().join("\n");
+    let snapshot=[("unit-spell","スペル"),("unit-follower","フォロワー"),("unit-amulet","アミュレット"),("lesson","スペル・トークン")].iter().map(|(number,kind)|json!({"number":number,"faces":[{"name":number,"card_class":"ニュートラル","card_type":kind,"cost":"1","power":if *kind=="アミュレット" {"-"} else {"2"},"hp":if *kind=="アミュレット" {"-"} else {"3"},"traits":[],"text":null,"sections":[]}]}).to_string()).collect::<Vec<_>>().join("\n");
     let document=json!({"format":1,"kind":"effect_set","cards":{
-        "unit-spell":{"status":"complete","abilities":[]},"unit-follower":{"status":"complete","abilities":[]},"lesson":{"status":"complete","abilities":[]}
+        "unit-spell":{"status":"complete","abilities":[]},"unit-follower":{"status":"complete","abilities":[]},"unit-amulet":{"status":"complete","abilities":[]},"lesson":{"status":"complete","abilities":[]}
     }}).to_string();
     let rules = rule_fixtures::rules(
         &snapshot,
@@ -406,7 +406,7 @@ fn ex_choice_accepts_public_cards_and_rejects_nonfield_damage() {
 }
 
 #[test]
-fn formal_targets_still_reject_ex_at_admission() {
+fn formal_targets_admit_and_select_public_ex_cards_before_payment() {
     let mut target = play::target(10, 1, 1, 1);
     let ChoiceDomain::Objects { constraint, .. } = &mut target.domain else {
         panic!("object domain");
@@ -417,19 +417,54 @@ fn formal_targets_still_reject_ex_at_admission() {
     *zone = ZoneKind::Ex;
     let mut ability = play::spell(vec![]);
     ability.node.play.as_mut().unwrap().parameters = vec![target];
-    let initial = setup(1, json!([]));
-    let mut game = Game::new(catalog(), &initial, &Value::Null, &Value::Null, "formal-ex").unwrap();
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P2"]["zones"]["ex"] = json!([{"id":"ex-card","card":"unit-follower"}]);
+    let mut game = Game::new(
+        ex_catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "formal-ex",
+    )
+    .unwrap();
+    game.load_internal_card("unit-spell", &card(vec![ability]))
+        .unwrap();
+    game.load_internal_card("unit-follower", &card(vec![]))
+        .unwrap();
+    let question = awaiting(game.play_internal_card("s", PlayerId { seat: 1 }).unwrap());
+    let InputDomain::Targets(domain) = &question.domain else {
+        panic!("formal EX target");
+    };
+    assert_eq!(domain.members.len(), 1);
+    let member = domain.members.first().unwrap();
+    assert_eq!(member.player.seat, 2);
+    assert_eq!(member.card.as_deref(), Some("unit-follower"));
     let before = game.projection(View::Referee).unwrap();
-    assert!(matches!(
-        game.load_internal_card("unit-spell", &card(vec![ability])),
-        Err(sve_engine::EngineFailure::Unsupported(reason))
-            if reason.contains("public field target selector")
-    ));
+    assert_eq!(before["P1"]["pp"]["current"], 2_u8);
+    game.answer_internal_card(
+        question.actor,
+        question.token,
+        Answer::Targets(vec![u64::MAX]),
+    )
+    .unwrap_err();
     assert_eq!(game.projection(View::Referee).unwrap(), before);
+    resolved(
+        game.answer_internal_card(
+            question.actor,
+            question.token,
+            Answer::Targets(vec![member.handle]),
+        )
+        .unwrap(),
+    );
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["pp"]["current"], 1_u8);
+    assert_eq!(state["P1"]["cemetery"], json!(["s"]));
+    assert_eq!(state["P2"]["ex"], json!(["ex-card"]));
+    assert_eq!(state["P2"]["field"], json!(["f"]));
 }
 
 #[test]
-fn formal_targets_still_reject_ex_source_objects() {
+fn formal_targets_can_select_their_ex_source_holder() {
     let mut target = play::target(10, 1, 1, 1);
     let ChoiceDomain::Objects { constraint, .. } = &mut target.domain else {
         panic!("object domain");
@@ -448,7 +483,7 @@ fn formal_targets_still_reject_ex_source_objects() {
     initial["players"]["P2"]["zones"]["field"] = json!([]);
     initial["players"]["P1"]["pp"] = json!({"current":4,"max":4});
     let mut game = Game::new(
-        catalog(),
+        ex_catalog(),
         &initial,
         &Value::Null,
         &Value::Null,
@@ -457,13 +492,32 @@ fn formal_targets_still_reject_ex_source_objects() {
     .unwrap();
     game.load_internal_card("unit-amulet", &card(vec![ability]))
         .unwrap();
-    let before = game.projection(View::Referee).unwrap();
-    assert!(matches!(
-        game.activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 }),
-        Err(sve_engine::EngineFailure::Unsupported(reason))
-            if reason.contains("current public field object or EX card")
-    ));
-    assert_eq!(game.projection(View::Referee).unwrap(), before);
+    let question = awaiting(
+        game.activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
+            .unwrap(),
+    );
+    let InputDomain::Targets(domain) = &question.domain else {
+        panic!("formal EX source target");
+    };
+    assert_eq!(domain.members.len(), 1);
+    let member = domain.members.first().unwrap();
+    assert_eq!(member.player.seat, 1);
+    assert_eq!(member.card.as_deref(), Some("unit-amulet"));
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["pp"]["current"],
+        4_u8
+    );
+    resolved(
+        game.answer_internal_card(
+            question.actor,
+            question.token,
+            Answer::Targets(vec![member.handle]),
+        )
+        .unwrap(),
+    );
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["pp"]["current"], 3_u8);
+    assert_eq!(state["P1"]["ex"], json!(["s"]));
 }
 
 #[test]
