@@ -1,0 +1,29 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP05-070:
+    admission: light
+    meta:
+      written_by:
+        - actor: { who: Codex, model: gpt-6.1-sol }
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        evolve: { cost: { pp: 1 } }
+      - line: 2
+        static:
+          effects:
+            - cost_mod:
+                when_playing: { who: opp, kind: spell }
+                delta: 1
+      - line: 3
+        fanfare:
+          targets:
+            - bind: enemy
+              from: { who: opp, zone: field, kind: follower, orig_cost_le: 3 }
+              n: 1
+          do:
+            - if:
+                cond: { necro: 10 }
+                then:
+                  - destroy: enemy

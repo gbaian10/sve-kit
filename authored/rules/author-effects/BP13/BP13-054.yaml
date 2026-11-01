@@ -1,0 +1,25 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP13-054:
+    admission: light
+    meta:
+      written_by:
+        - actor: { who: Codex, model: gpt-6.1-sol }
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        evolve: { cost: { pp: 4 } }
+      - line: 2
+        keywords: [rush]
+      - line: 3
+        fanfare:
+          do:
+            - player_effect:
+                who: self
+                effect:
+                  cost_mod:
+                    when_playing: { who: self, trait: 武闘竜人 }
+                    delta: -3
+                    next_only: true
+                until: turn

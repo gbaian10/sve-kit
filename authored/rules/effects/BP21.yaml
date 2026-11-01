@@ -281,36 +281,6 @@ cards:
               type: follower
             min: 1
             max: 1
-  BP21-PR11:
-    status: complete
-    abilities:
-      - line: 1
-        kind: evolve
-        body:
-          op: evolve
-          subjects: self
-        costs:
-          - op: pp
-            amount: 4
-      - line: 2
-        kind: static
-        body:
-          op: macro
-          name: rush
-      - line: 3
-        kind: trigger
-        body:
-          op: adjust_cost
-          subjects:
-            zone: any
-            side: self
-            trait: 武闘竜人
-          amount: -3
-          until: end-of-turn
-          uses: 1
-          consume_on: play
-        event: enter
-        subject: self
   BP21-SL08:
     status: complete
     abilities:

@@ -1,0 +1,45 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "op": "evolve",
+        "subjects": "self"
+      },
+      "costs": [
+        {
+          "amount": 4,
+          "op": "pp"
+        }
+      ],
+      "kind": "evolve",
+      "line": 1
+    },
+    {
+      "body": {
+        "name": "rush",
+        "op": "macro"
+      },
+      "kind": "static",
+      "line": 2
+    },
+    {
+      "body": {
+        "amount": -3,
+        "consume_on": "play",
+        "op": "adjust_cost",
+        "subjects": {
+          "side": "self",
+          "trait": "武闘竜人",
+          "zone": "any"
+        },
+        "until": "end-of-turn",
+        "uses": 1
+      },
+      "event": "enter",
+      "kind": "trigger",
+      "line": 3,
+      "subject": "self"
+    }
+  ],
+  "status": "complete"
+}
