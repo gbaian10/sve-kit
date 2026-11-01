@@ -1,0 +1,35 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP18-062:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-01"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        auto:
+          on:
+            attacked:
+              who: self
+              sel:
+                kind: follower
+                trait: 武闘竜人
+                as: attacker
+                where:
+                  cmp:
+                    left:
+                      power_of: attacker
+                    op: ge
+                    right: 4
+          do:
+            - life:
+                who: self
+                delta: 1
