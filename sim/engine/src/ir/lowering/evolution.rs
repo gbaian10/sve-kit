@@ -6,11 +6,10 @@ use crate::ir::{
     Ability, AbilityId, AbilityKind, AbilityOrigin, AbilityQualification, AbilitySource, Action,
     Binding, CardName, Cardinality, ChoiceDomain, Control, CostSpec, CostStep, Decision,
     DecisionId, DecisionKind, Disjointness, EvolutionCardRef, EvolutionMode, ExecutionRef, Expr,
-    FaceId, InputMode, Instruction, InstructionContext, InstructionId, Int, KeywordId, Located,
+    FaceId, InputMode, Instruction, InstructionContext, InstructionId, KeywordId, Located,
     NamesRead, Nat, Node, ObjectOperand, ObjectView, PlaySlot, PlaySpec, PlayerRef, PlayerRelation,
-    PlayerSet, Predicate, Program, ReceiptId, Resource, ResourceOperation, ScopeId,
-    SelectionConstraint, SelectionGroup, SelectionSnapshot, SelectionView, Selector,
-    TextQuantifier, Visibility, ZoneKind,
+    PlayerSet, Predicate, Program, ReceiptId, ScopeId, SelectionConstraint, SelectionGroup,
+    SelectionSnapshot, SelectionView, Selector, TextQuantifier, Visibility, ZoneKind,
 };
 use crate::ir::{CardKind, EventPattern, TraitId};
 
@@ -125,55 +124,11 @@ fn instruction(
     }
 }
 
-fn costs(
-    allocator: &mut Allocator,
-    selection: Binding<Selector>,
-    pp: i64,
-    source: &AbilitySource,
-    path: &str,
-) -> Result<CostSpec, LoweringError> {
-    let reveal = instruction(
-        Action::Reveal {
-            objects: Selector::Bound {
-                reference: selection,
-            },
-        },
-        allocator.id(path)?,
-        source,
-        InstructionContext::Cost,
-    );
-    let pay = instruction(
-        Action::Resource {
-            player: PlayerRef::Controller {},
-            resource: Resource::PpCurrent,
-            operation: ResourceOperation::Pay,
-            amount: Expr::Literal(Int(pp)),
-        },
-        allocator.id(path)?,
-        source,
-        InstructionContext::Cost,
-    );
-    Ok(CostSpec::Ordered {
-        steps: vec![
-            CostStep {
-                instruction: Box::new(reveal),
-                materials: None,
-            },
-            CostStep {
-                instruction: Box::new(pay),
-                materials: None,
-            },
-        ],
-    })
-}
-
-pub(super) fn lower(
-    allocator: &mut Allocator,
+fn intrinsic_origin(
     key: &super::CardCoordinates<'_>,
     path: &str,
     entry: &ast::Ability,
-    scope: ScopeId,
-) -> Result<Located<Ability>, LoweringError> {
+) -> Result<(super::SourceSpan, AbilitySource), LoweringError> {
     if entry.fanfare.is_some()
         || entry.lastword.is_some()
         || entry.attack_time.is_some()
@@ -184,8 +139,6 @@ pub(super) fn lower(
     {
         return Err(unsupported(path));
     }
-    let head = entry.evolve.as_ref().ok_or_else(|| unsupported(path))?;
-    let pp = i64::try_from(head.cost.pp).map_err(|_private| unsupported(path))?;
     let source = source_span(key, path, entry)?;
     let origin = AbilitySource {
         holder: ObjectOperand::SourceHolder {},
@@ -198,20 +151,55 @@ pub(super) fn lower(
             }),
         },
     };
+    Ok((source, origin))
+}
+
+pub(super) fn lower(
+    allocator: &mut Allocator,
+    key: &super::CardCoordinates<'_>,
+    path: &str,
+    entry: &ast::Ability,
+    scope: ScopeId,
+) -> Result<Located<Ability>, LoweringError> {
+    let (source, origin) = intrinsic_origin(key, path, entry)?;
+    let head = entry.evolve.as_ref().ok_or_else(|| unsupported(path))?;
     let candidate_scope = ScopeId(scope.0.checked_add(1).ok_or_else(|| unsupported(path))?);
     let parameter = face(scope, candidate_scope, allocator.id(path)?);
     let selection = Binding::new(1, scope);
     let inner_scope = ScopeId(scope.0.checked_add(2).ok_or_else(|| unsupported(path))?);
     let element = Binding::new(1, inner_scope);
-    let mut costs = costs(allocator, selection, pp, &origin, path)?;
-    if let Some(condition) = &head.usable_if {
-        let body = ast::Body::default();
-        let mut context = super::BodyContext::new(entry, scope, &body, None, allocator);
-        // The intrinsic face parameter reserves local bindings 1 through 3.
-        context.allocator.next = 3;
-        let predicate = context.qualification(condition, &source, path)?;
-        super::conditions::qualify_costs(&mut costs, Some(predicate), path)?;
-    }
+    let body = ast::Body::default();
+    let mut context = super::BodyContext::new(entry, scope, &body, None, allocator);
+    // Face selection reserves local bindings 1 through 3.
+    context.allocator.next = 3;
+    let mut payment = super::payment::lower(&mut context, &head.cost, &origin, path)?;
+    let predicate = head
+        .usable_if
+        .as_ref()
+        .map(|condition| context.qualification(condition, &source, path))
+        .transpose()?;
+    let reveal = instruction(
+        Action::Reveal {
+            objects: Selector::Bound {
+                reference: selection,
+            },
+        },
+        context.card_allocator.id(path)?,
+        &origin,
+        InstructionContext::Cost,
+    );
+    let CostSpec::Ordered { steps } = &mut payment.costs else {
+        return Err(unsupported(path));
+    };
+    steps.insert(
+        0,
+        CostStep {
+            instruction: Box::new(reveal),
+            materials: None,
+        },
+    );
+    super::conditions::qualify_costs(&mut payment.costs, predicate, path)?;
+    payment.parameters.insert(0, parameter);
     let evolve = instruction(
         Action::Evolve {
             subject: ObjectOperand::SourceHolder {},
@@ -241,8 +229,8 @@ pub(super) fn lower(
             play: Some(PlaySpec {
                 limit: None,
                 captures: vec![],
-                parameters: vec![parameter],
-                costs,
+                parameters: payment.parameters,
+                costs: payment.costs,
             }),
             body: Some(Program {
                 scope,

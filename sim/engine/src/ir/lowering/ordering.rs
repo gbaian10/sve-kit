@@ -79,6 +79,7 @@ impl BodyContext<'_> {
             ast::Step::Counter(_)
             | ast::Step::Reveal(_)
             | ast::Step::Optional(_)
+            | ast::Step::Pay(_)
             | ast::Step::EachPlayer(_)
             | ast::Step::Race(_)
             | ast::Step::Evolve(_)

@@ -640,3 +640,6 @@ mod counters;
 mod number_count;
 #[path = "card/observation_filters.rs"]
 mod observation_filters;
+
+#[path = "card/declaration_costs.rs"]
+mod declaration_costs;

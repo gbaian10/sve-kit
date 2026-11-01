@@ -25,19 +25,20 @@ pub(super) fn cost(ability: &Ability) -> Result<i64> {
     let CostSpec::Ordered { steps } = &play.costs else {
         return Err(unsupported("evolution costs"));
     };
-    let [_, pp] = steps.as_slice() else {
-        return Err(unsupported("evolution cost projection"));
-    };
-    let Action::Resource {
-        player: PlayerRef::Controller {},
-        resource: Resource::PpCurrent,
-        operation: ResourceOperation::Pay,
-        amount: Expr::Literal(Int(value)),
-    } = &pp.instruction.action
-    else {
-        return Err(unsupported("evolution PP projection"));
-    };
-    Ok(*value)
+    steps
+        .iter()
+        .skip(1)
+        .try_fold(0_i64, |sum, step| match &step.instruction.action {
+            Action::Resource {
+                player: PlayerRef::Controller {},
+                resource: Resource::PpCurrent,
+                operation: ResourceOperation::Pay,
+                amount: Expr::Literal(Int(value)),
+            } => sum
+                .checked_add(*value)
+                .ok_or_else(|| invalid("evolution cost overflow")),
+            _ => Ok(sum),
+        })
 }
 
 fn qualification(ability: &Ability) -> Result<Option<&Expr<Bool>>> {
@@ -84,6 +85,25 @@ fn span(game: &Game, source: &SourceSpan, expected: &SourceSpan) -> Result<()> {
 
 pub(super) fn check(game: &Game, ability: &Located<Ability>) -> Result<()> {
     cost(&ability.node)?;
+    if ability
+        .node
+        .play
+        .as_ref()
+        .is_some_and(|play| play.parameters.len() > 2)
+    {
+        return Err(unsupported("one evolution material parameter"));
+    }
+    let mut candidate = ability.node.clone();
+    let candidate_play = candidate
+        .play
+        .as_mut()
+        .ok_or_else(|| invalid("missing evolution play"))?;
+    let CostSpec::Ordered { steps: payments } = &mut candidate_play.costs else {
+        return Err(unsupported("evolution costs"));
+    };
+    payments.remove(0);
+    candidate_play.parameters.remove(0);
+    super::check_costs(&candidate, &ability.source)?;
     if let Some(predicate) = qualification(&ability.node)? {
         super::super::ordering::check_condition(predicate, &ability.source)?;
     }
@@ -136,6 +156,87 @@ pub(super) fn check(game: &Game, ability: &Located<Ability>) -> Result<()> {
     reason = "The intrinsic proof delegates to the existing validated rule procedure."
 )]
 impl Game {
+    pub(in crate::game) fn internal_evolution_payment(
+        &mut self,
+        ability: &Ability,
+        decision: &Value,
+    ) -> Result<bool> {
+        let mut play = ability
+            .play
+            .clone()
+            .ok_or_else(|| invalid("evolution play"))?;
+        play.parameters.remove(0);
+        let CostSpec::Ordered { steps } = &mut play.costs else {
+            return Err(unsupported("evolution costs"));
+        };
+        steps.remove(0);
+        steps.retain(|step| {
+            !matches!(
+                step.instruction.action,
+                Action::Resource {
+                    resource: Resource::PpCurrent,
+                    operation: ResourceOperation::Pay,
+                    ..
+                }
+            )
+        });
+        if steps.is_empty() {
+            return Ok(true);
+        }
+        let mut probe = self.clone();
+        let holder = string(&decision["source"]);
+        let object = self.object(holder)?;
+        let controller = super::player_id(&object.controller)?;
+        let mut execution = probe.new_card_execution(super::Context {
+            source: holder.into(),
+            generation: Generation(object.generation),
+            controller,
+        })?;
+        let origin = probe.internal_card_source(holder, ability.id, controller)?;
+        execution.bind_source(&probe, origin)?;
+        probe.card_runtime.active_source = Some(origin);
+        let attempt = (|| {
+            for parameter in &play.parameters {
+                probe.internal_material_parameter(
+                    &mut execution,
+                    parameter,
+                    super::material::posture_parameter(&play.costs, parameter),
+                )?;
+                let Some((_, super::super::Wait::MaterialParameter(wait))) =
+                    execution.waiting.take()
+                else {
+                    return Err(invalid("evolution material input"));
+                };
+                let ids = inline_ids(&decision["costs"]["materials"])?;
+                if ids.iter().any(|id| id == holder) {
+                    return Err(crate::EngineFailure::IllegalPlay(
+                        "evolution cost moved its source".into(),
+                    ));
+                }
+                wait.inline_bind(&mut execution, &ids)?;
+            }
+            if probe.internal_hand_cost_materials(&mut execution, &play.costs)? {
+                let Some((_, super::super::Wait::CostDiscard(wait))) = execution.waiting.take()
+                else {
+                    return Err(invalid("evolution hand input"));
+                };
+                let ids = inline_ids(&decision["costs"]["discard"])?;
+                let members = wait.inline_members(&probe, &execution, &ids)?;
+                execution.cost_discards.insert(wait.receipt(), members);
+            }
+            probe.internal_card_payment(&mut execution, &play.costs, false)
+        })();
+        match attempt {
+            Ok(()) => {
+                probe.card_runtime.active_source = self.card_runtime.active_source;
+                *self = probe;
+                Ok(true)
+            }
+            Err(crate::EngineFailure::IllegalPlay(_)) => Ok(false),
+            Err(error) => Err(error),
+        }
+    }
+
     pub(in crate::game) fn internal_evolve_action(&mut self, decision: &Value) -> Result<bool> {
         let holder = string(&decision["source"]);
         let object = self.object(holder)?;
@@ -182,6 +283,22 @@ impl Game {
         let amount = cost(&entry.node)?;
         // The fixed well-formed projection proves exactly this name-bound, ordinary rule entry.
         let code = json!({"kind":"evolve","costs":[{"op":"pp","amount":amount}],"body":{"op":"evolve","subjects":"self"}});
-        self.evolve_with_code(decision, &code, true)
+        self.evolve_with_code(decision, &code, Some(&entry.node))
     }
+}
+
+fn inline_ids(value: &Value) -> Result<Vec<String>> {
+    value
+        .as_array()
+        .ok_or_else(|| {
+            crate::EngineFailure::IllegalPlay("missing evolution cost materials".into())
+        })?
+        .iter()
+        .map(|value| {
+            value
+                .as_str()
+                .map(str::to_owned)
+                .ok_or_else(|| invalid("cost material ID"))
+        })
+        .collect()
 }

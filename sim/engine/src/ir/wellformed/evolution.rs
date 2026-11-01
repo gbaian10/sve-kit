@@ -2,10 +2,9 @@ use super::{BindingKind, Checked, Checker, WellFormedError, WellFormedReason};
 use crate::ir::{
     Ability, AbilityKind, AbilityOrigin, Action, Binding, CardName, Cardinality, ChoiceDomain,
     Control, CostSpec, Decision, DecisionKind, Disjointness, EvolutionMode, ExecutionRef, Expr,
-    InputMode, InstructionContext, Int, KeywordId, NamesRead, Nat, Node, ObjectOperand, ObjectView,
+    InputMode, InstructionContext, KeywordId, NamesRead, Nat, Node, ObjectOperand, ObjectView,
     PlaySlot, PlayerRef, PlayerRelation, PlayerSet, PreconditionKind, PreconditionReason,
-    Predicate, Resource, ResourceOperation, SelectionSnapshot, SelectionView, Selector,
-    TextQuantifier, Visibility, ZoneKind,
+    Predicate, SelectionSnapshot, SelectionView, Selector, TextQuantifier, Visibility, ZoneKind,
 };
 use crate::ir::{ObjectRef, Program, effect_evolution};
 
@@ -30,13 +29,27 @@ impl Checker {
         {
             return self.reject();
         }
-        let [face] = play.parameters.as_slice() else {
+        let Some((face, _)) = play.parameters.split_first() else {
             return self.reject();
         };
         self.play_entry = Some(self.env.clone());
         let selection = self.at("play/parameters/0", |checker| {
             checker.evolution_face(face, false)
         })?;
+        for (index, material) in play.parameters.iter().enumerate().skip(1) {
+            if !matches!(
+                material.kind,
+                DecisionKind::PlayParameter {
+                    slot: PlaySlot::CostMaterials,
+                    ..
+                }
+            ) {
+                return self.reject();
+            }
+            self.at(&format!("play/parameters/{index}"), |checker| {
+                checker.play_decision(material, &PlayerRef::Controller {})
+            })?;
+        }
         self.at("play/costs", |checker| {
             checker.evolution_costs(&play.costs, selection)
         })?;
@@ -190,7 +203,7 @@ impl Checker {
         let CostSpec::Ordered { steps } = costs else {
             return self.reject();
         };
-        let [reveal, pp] = steps.as_slice() else {
+        let Some((reveal, payments)) = steps.split_first() else {
             return self.reject();
         };
         if reveal.instruction.action
@@ -199,17 +212,10 @@ impl Checker {
                     reference: selection,
                 },
             })
-            || !matches!(&pp.instruction.action,
-            Action::Resource {
-                player: PlayerRef::Controller {},
-                resource: Resource::PpCurrent,
-                operation: ResourceOperation::Pay,
-                amount: Expr::Literal(Int(value)),
-            } if *value >= 0)
         {
             return self.reject();
         }
-        for (index, cost) in steps.iter().enumerate() {
+        for (index, cost) in steps.iter().take(1).enumerate() {
             if cost.materials.is_some() || cost.instruction.actor != (PlayerRef::Controller {}) {
                 return self.reject();
             }
@@ -230,6 +236,11 @@ impl Checker {
                 checker.instruction_in(&instruction, InstructionContext::Cost, false)
             })?;
         }
+        self.at("payments", |checker| {
+            checker.costs(&CostSpec::Ordered {
+                steps: payments.to_vec(),
+            })
+        })?;
         Ok(())
     }
 }

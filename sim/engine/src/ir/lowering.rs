@@ -1078,6 +1078,7 @@ impl<'definitions> BodyContext<'definitions> {
             )),
             ast::Step::Choice(_)
             | ast::Step::Optional(_)
+            | ast::Step::Pay(_)
             | ast::Step::Either(_)
             | ast::Step::Choose(_)
             | ast::Step::If(_)

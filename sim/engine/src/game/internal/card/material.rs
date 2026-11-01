@@ -22,6 +22,15 @@ pub(in crate::game::internal) struct MaterialWait {
     field: bool,
 }
 impl MaterialWait {
+    pub(super) fn inline_bind(&self, execution: &mut Execution, ids: &[String]) -> Result<()> {
+        let handles = execution.inline_material_handles(&self.members, ids)?;
+        let members = self.validate(&handles).map_err(|_error| {
+            crate::EngineFailure::IllegalPlay("invalid evolution material selection".into())
+        })?;
+        self.bind(execution, members);
+        Ok(())
+    }
+
     pub(in crate::game::internal) fn validate(&self, handles: &[u64]) -> Result<Vec<ObjectRef>> {
         if handles.len() != self.count {
             return Err(invalid("material cardinality"));

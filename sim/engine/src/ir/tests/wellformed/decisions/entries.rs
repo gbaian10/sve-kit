@@ -348,16 +348,19 @@ fn mode_group(at: SpellCountTime, necro: bool) -> Located<Node> {
     control(Control::Mode {
         modes: vec![
             Mode {
+                costs: CostSpec::Ordered { steps: vec![] },
                 id: ModeId(1),
                 parameters: vec![],
                 body: body(2, vec![draw(1, Expr::Literal(Int(1)))]),
             },
             Mode {
+                costs: CostSpec::Ordered { steps: vec![] },
                 id: ModeId(2),
                 parameters: vec![],
                 body: body(3, vec![]),
             },
             Mode {
+                costs: CostSpec::Ordered { steps: vec![] },
                 id: ModeId(3),
                 parameters: vec![],
                 body: body(4, vec![]),

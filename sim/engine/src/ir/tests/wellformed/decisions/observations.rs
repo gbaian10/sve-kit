@@ -505,6 +505,7 @@ fn looping_containers(flipped: bool) -> Vec<Located<Node>> {
         }),
         control(Control::Mode {
             modes: vec![Mode {
+                costs: CostSpec::Ordered { steps: vec![] },
                 id: ModeId(1),
                 parameters: vec![],
                 body: body(20, nested_flip(flipped)),
@@ -767,6 +768,7 @@ fn a_play_capture_cannot_regain_evidence_revoked_before_a_mode_body() {
     let make = |prefix: Vec<Located<Node>>| {
         let mode = control(Control::Mode {
             modes: vec![Mode {
+                costs: CostSpec::Ordered { steps: vec![] },
                 id: ModeId(1),
                 parameters: vec![],
                 body: body(2, vec![public_choice(9, 2, selection.clone())]),

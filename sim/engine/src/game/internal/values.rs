@@ -668,6 +668,27 @@ impl Execution {
         }
     }
 
+    pub(in crate::game::internal) fn inline_material_handles(
+        &self,
+        members: &[ObjectRef],
+        ids: &[String],
+    ) -> Result<Vec<u64>> {
+        ids.iter()
+            .map(|id| {
+                let index = members
+                    .iter()
+                    .position(|member| {
+                        self.object_id(*member)
+                            .is_ok_and(|candidate| candidate == id)
+                    })
+                    .ok_or_else(|| {
+                        crate::EngineFailure::IllegalPlay("foreign cost material".into())
+                    })?;
+                u64::try_from(index).map_err(invalid)
+            })
+            .collect()
+    }
+
     pub(super) fn boolean(&self, game: &Game, expr: &Expr<Bool>) -> Result<Bool> {
         match expr {
             Expr::Literal(value) => Ok(*value),
