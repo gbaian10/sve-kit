@@ -421,6 +421,32 @@ fn e_b7_004_current_evolution_uses_the_accepted_resource_path() {
 }
 
 #[test]
+fn super_evolution_with_a_change_observer_keeps_the_resource_admission_boundary() {
+    let mut initial = initial("BP01-171", "BP01-172", "P1");
+    initial["players"]["P1"]["zones"]["field"]
+        .as_array_mut()
+        .unwrap()
+        .push(json!({"id":"observer","card":"BP21-P68"}));
+    let selected = runtime::selection_without_abilities(inputs().clone(), &["BP01-172"]);
+    assert!(!selected.current.contains_key("BP01-172"));
+    let mut game = Game::from_selected_effects(
+        selected,
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "change-observer-resource-boundary",
+    )
+    .unwrap();
+    let step = evolve(&mut game, &json!({"pp":4_u8,"sep":1_u8}));
+    assert_eq!(step.outcome, "resolved");
+    assert!(
+        matches!(game.internal_pending_choice(), Err(EngineFailure::Unsupported(reason))
+            if reason.contains("printed abilities are not admitted")),
+        "the unadmitted resource still blocks at its existing printed-ability boundary"
+    );
+}
+
+#[test]
 fn bp18_058_keeps_the_permanent_card_id_shared_with_the_bp18_sl13_printing() {
     // The authored registry maps both printings to this one permanent card; it counts once.
     let selected = selection().clone();

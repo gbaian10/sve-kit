@@ -94,7 +94,10 @@ pub(super) fn subscription(
                 .predicate(SubjectFields::Destroy(event)),
             })
         }
-        ast::PhaseSubscription::Evolved(_)
+        ast::PhaseSubscription::Acted(_)
+        | ast::PhaseSubscription::Stood(_)
+        | ast::PhaseSubscription::StatChanged(_)
+        | ast::PhaseSubscription::Evolved(_)
         | ast::PhaseSubscription::Played(_)
         | ast::PhaseSubscription::Phase(_)
         | ast::PhaseSubscription::EnterField(_)

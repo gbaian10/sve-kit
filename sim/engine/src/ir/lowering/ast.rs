@@ -1298,6 +1298,12 @@ pub(super) enum PhaseSubscription {
     Dealt(DealtSubscription),
     #[serde(rename = "life_changed")]
     LifeChanged(LifeSubscription),
+    #[serde(rename = "acted")]
+    Acted(PostureSubscription),
+    #[serde(rename = "stood")]
+    Stood(PostureSubscription),
+    #[serde(rename = "stat_changed")]
+    StatChanged(StatSubscription),
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -2000,4 +2006,33 @@ pub(super) enum AttackAction {
 #[serde(deny_unknown_fields)]
 pub(super) struct AttackTurnInterval {
     pub who: StandPlayer,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct PostureSubscription {
+    #[serde(rename = "ref")]
+    pub reference: Option<This>,
+    pub who: Option<EntryPlayer>,
+    pub sel: Option<MovementSubject>,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct StatSubscription {
+    #[serde(rename = "ref")]
+    pub reference: Option<This>,
+    pub stat: Option<ChangeStats>,
+    pub direction: Option<LifeDirection>,
+}
+#[derive(Deserialize)]
+#[serde(untagged)]
+pub(super) enum ChangeStats {
+    One(ChangeStat),
+    Many(Vec<ChangeStat>),
+}
+#[derive(Clone, Copy, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum ChangeStat {
+    Power,
+    Hp,
 }

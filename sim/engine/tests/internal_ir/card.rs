@@ -20,6 +20,8 @@ mod frozen_zone;
 
 #[path = "card/event_cemetery.rs"]
 mod event_cemetery;
+#[path = "card/event_changes.rs"]
+mod event_changes;
 
 #[path = "card/ability_condition.rs"]
 mod ability_condition;

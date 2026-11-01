@@ -1,0 +1,35 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP09-108:
+    abilities:
+      - line: 1
+        keywords:
+          - ward
+      - line: 2
+        auto:
+          "on":
+            acted:
+              ref: this
+          do:
+            - if:
+                cond:
+                  exists:
+                    who: self
+                    zone: field
+                    name: ツクヨミ
+                then:
+                  - life:
+                      who: self
+                      delta: 2
+                else:
+                  - life:
+                      who: self
+                      delta: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-11-02"

@@ -3,6 +3,7 @@
     reason = "Validated JSON uses total read indexing; writes target constructed objects."
 )]
 use super::{Frame, Game, Object, int, list, scalar, string};
+use crate::ir::SnapshotId;
 use crate::{Result, invalid};
 use alloc::collections::{BTreeMap, BTreeSet};
 use core::slice::from_ref;
@@ -63,6 +64,7 @@ impl Game {
         acted: bool,
         cause: &Value,
     ) -> Result<Vec<String>> {
+        let before = SnapshotId(self.state.ir_epoch);
         let group = self.group();
         let mut changed = Vec::new();
         for id in ids {
@@ -76,6 +78,7 @@ impl Game {
                 );
             }
         }
+        self.internal_posture_events(&changed, acted, cause, before)?;
         let pending =
             self.collect_triggers(if acted { "act" } else { "stand" }, &changed, cause)?;
         self.enqueue(pending);

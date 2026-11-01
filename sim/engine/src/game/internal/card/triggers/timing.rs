@@ -122,6 +122,11 @@ pub(super) fn public_event(event: &Event, position: u64) -> Result<String> {
             ))
         }
         Event::EnterEx { .. } => Ok(format!("EnterEx while source at field slot {position}")),
+        Event::StatChange { .. } => Ok(format!("StatChange at field slot {position}")),
+        Event::Posture { event } => Ok(format!(
+            "Posture {:?} at field slot {position}",
+            event.after
+        )),
         Event::Destroy { .. } => Ok(format!("Destroy while source at field slot {position}")),
         Event::Play { .. } => Ok(format!("Play while source at slot {position}")),
         Event::Attack { event } => Ok(format!(

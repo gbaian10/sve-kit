@@ -664,6 +664,7 @@ fn lowered_trigger(
     keyword: Option<KeywordId>,
     event_id: u64,
     subject_id: u64,
+    facet_id: u64,
     scope: ScopeId,
     path: &str,
 ) -> Result<TriggerSpec, LoweringError> {
@@ -699,7 +700,7 @@ fn lowered_trigger(
                 },
             }
         } else if let Some(auto) = &entry.auto {
-            lowered_subscription(&auto.on, event_id, subject_id, scope, path)?
+            lowered_subscription(&auto.on, event_id, subject_id, facet_id, scope, path)?
         } else {
             let event = Binding::new(event_id, scope);
             EventPattern::EnterField {
@@ -733,6 +734,7 @@ fn lowered_subscription(
     on: &ast::PhaseSubscription,
     event_id: u64,
     subject_id: u64,
+    facet_id: u64,
     scope: ScopeId,
     path: &str,
 ) -> Result<EventPattern, LoweringError> {
@@ -796,6 +798,11 @@ fn lowered_subscription(
         | ast::PhaseSubscription::Destroyed(_)
         | ast::PhaseSubscription::Moved(_)
         | ast::PhaseSubscription::PlacedEx(_) => movement::subscription(on, event_id, scope, path),
+        ast::PhaseSubscription::Acted(_)
+        | ast::PhaseSubscription::Stood(_)
+        | ast::PhaseSubscription::StatChanged(_) => {
+            lowered_change(on, event_id, subject_id, facet_id, scope, path)
+        }
         ast::PhaseSubscription::Evolved(entry) => {
             evolution::subscription(entry, event_id, scope, path)
         }
@@ -819,6 +826,84 @@ fn lowered_subscription(
                 .predicate(super::events::subject::SubjectFields::Entry(event)),
             })
         }
+    }
+}
+
+fn lowered_change(
+    on: &ast::PhaseSubscription,
+    event_id: u64,
+    subject_id: u64,
+    facet_id: u64,
+    scope: ScopeId,
+    path: &str,
+) -> Result<EventPattern, LoweringError> {
+    match on {
+        ast::PhaseSubscription::Acted(entry) | ast::PhaseSubscription::Stood(entry) => {
+            let event = Binding::new(event_id, scope);
+            Ok(EventPattern::Posture {
+                binding: event,
+                predicate: super::events::change::PostureFilter {
+                    subject: movement::movement_filter(
+                        entry
+                            .who
+                            .as_ref()
+                            .map(|who| matches!(who, ast::EntryPlayer::Controller)),
+                        entry.reference.is_some(),
+                        entry.sel.as_ref(),
+                        false,
+                    ),
+                    after: if matches!(on, ast::PhaseSubscription::Acted(_)) {
+                        super::Posture::Acted
+                    } else {
+                        super::Posture::Standing
+                    },
+                }
+                .predicate(event),
+            })
+        }
+        ast::PhaseSubscription::StatChanged(entry) => {
+            let event = Binding::new(event_id, scope);
+            let properties = match &entry.stat {
+                None => vec![super::Stat::Attack, super::Stat::Life],
+                Some(ast::ChangeStats::One(stat)) => vec![match stat {
+                    ast::ChangeStat::Power => super::Stat::Attack,
+                    ast::ChangeStat::Hp => super::Stat::Life,
+                }],
+                Some(ast::ChangeStats::Many(stats)) => stats
+                    .iter()
+                    .map(|stat| match stat {
+                        ast::ChangeStat::Power => super::Stat::Attack,
+                        ast::ChangeStat::Hp => super::Stat::Life,
+                    })
+                    .collect(),
+            };
+            Ok(EventPattern::StatChange {
+                binding: event,
+                predicate: super::events::change::StatFilter {
+                    itself: entry.reference.is_some(),
+                    properties,
+                    up: entry
+                        .direction
+                        .as_ref()
+                        .map(|direction| matches!(direction, ast::LifeDirection::Up)),
+                    subject: Binding::new(subject_id, scope),
+                    facet: Binding::new(facet_id, scope),
+                }
+                .predicate(event),
+            })
+        }
+        ast::PhaseSubscription::Evolved(_)
+        | ast::PhaseSubscription::Played(_)
+        | ast::PhaseSubscription::Phase(_)
+        | ast::PhaseSubscription::EnterField(_)
+        | ast::PhaseSubscription::LeaveField(_)
+        | ast::PhaseSubscription::Destroyed(_)
+        | ast::PhaseSubscription::Moved(_)
+        | ast::PhaseSubscription::PlacedEx(_)
+        | ast::PhaseSubscription::Damage(_)
+        | ast::PhaseSubscription::Attacked(_)
+        | ast::PhaseSubscription::Dealt(_)
+        | ast::PhaseSubscription::LifeChanged(_) => Err(unsupported(path)),
     }
 }
 
@@ -906,7 +991,10 @@ impl<'definitions> BodyContext<'definitions> {
             None => self.allocator.id(path)?,
         };
         let subject_id = self.allocator.id(&format!("{path}/played-card"))?;
-        let mut trigger = lowered_trigger(entry, keyword, event_id, subject_id, self.scope, path)?;
+        let facet_id = self.allocator.id(path)?;
+        let mut trigger = lowered_trigger(
+            entry, keyword, event_id, subject_id, facet_id, self.scope, path,
+        )?;
         if body.per_turn.is_some_and(|maximum| maximum != 1) {
             return Err(unsupported(path));
         }

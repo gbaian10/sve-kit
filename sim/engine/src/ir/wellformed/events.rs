@@ -1,10 +1,11 @@
 use crate::ir::events::attack::AttackFilter;
+use crate::ir::events::change::{PostureFilter, StatFilter};
 use crate::ir::events::damage::DamageFilter;
 use crate::ir::events::life::LifeFilter;
 use crate::ir::events::played::PlayedFilter;
 use crate::ir::events::subject::{SubjectFields, SubjectFilter};
 use crate::ir::history_turn::played_by;
-use crate::ir::{DamageRecipient, PlayEvent};
+use crate::ir::{DamageRecipient, PlayEvent, StatChangeEvent};
 use crate::ir::{ZoneFrozen, ZoneKind, ZoneOperation, ZoneRef};
 macro_rules! projected_equality {
     ($checker:expr, $equality:expr; $($variant:ident),+ $(,)?) => {
@@ -401,6 +402,50 @@ impl Checker {
         )
     }
 
+    fn stat_header(
+        &mut self,
+        binding: Binding<StatChangeEvent>,
+        predicate: &Expr<Bool>,
+        view: Option<EventSnapshotPolicy>,
+        triggering: bool,
+    ) -> Option<Checked> {
+        let plan = StatFilter::parse(binding, predicate)?;
+        self.committed_header(
+            binding,
+            EventSnapshotPolicy::AfterEntry,
+            true,
+            view,
+            triggering,
+        )
+        .map(|checked| {
+            checked?;
+            // Canonical alternatives share one facet binder; validate it once.
+            self.local_value(plan.subject, &Expr::Literal(Bool(true)))?;
+            self.local_value(plan.facet, &Expr::Literal(Bool(true)))
+        })
+    }
+
+    fn change_pattern(
+        &mut self,
+        pattern: &EventPattern,
+        view: Option<EventSnapshotPolicy>,
+        triggering: bool,
+    ) -> Option<Checked> {
+        if let EventPattern::StatChange { binding, predicate } = pattern {
+            return self.stat_header(*binding, predicate, view, triggering);
+        }
+        let EventPattern::Posture { binding, predicate } = pattern else {
+            return None;
+        };
+        self.committed_header(
+            *binding,
+            EventSnapshotPolicy::AfterEntry,
+            PostureFilter::parse(*binding, predicate).is_some(),
+            view,
+            triggering,
+        )
+    }
+
     fn subject_pattern(
         &mut self,
         pattern: &EventPattern,
@@ -493,8 +538,8 @@ impl Checker {
             | EventPattern::Discard { .. }
             | EventPattern::Banish { .. }
             | EventPattern::StatChange { .. }
-            | EventPattern::CounterChange { .. }
             | EventPattern::Posture { .. }
+            | EventPattern::CounterChange { .. }
             | EventPattern::Phase { .. }
             | EventPattern::Race { .. }
             | EventPattern::DriveGained { .. }
@@ -543,7 +588,10 @@ impl Checker {
                 self.at("predicate", |checker| checker.boolean($predicate))
             }};
         }
-        if let Some(checked) = self.subject_pattern(pattern, view, triggering) {
+        if let Some(checked) = self
+            .change_pattern(pattern, view, triggering)
+            .or_else(|| self.subject_pattern(pattern, view, triggering))
+        {
             return checked;
         }
         match pattern {

@@ -1,0 +1,27 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP21-P68:
+    abilities:
+      - line: 1
+        keywords:
+          - ward
+      - line: 2
+        auto:
+          "on":
+            stat_changed:
+              ref: this
+              stat: power
+              direction: up
+          do:
+            - grant:
+                "on": this
+                keywords:
+                  - rush
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-11-02"

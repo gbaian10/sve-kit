@@ -1,0 +1,56 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP04-102:
+    abilities:
+      - line: 1
+        auto:
+          "on":
+            acted:
+              ref: this
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+                leader_or: true
+              n: 1
+          do:
+            - damage:
+                to: enemy
+                n: 1
+      - line: 2
+        fanfare:
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: enemy
+                n: 3
+      - line: 3
+        lastword:
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+                leader_or: true
+              n: 1
+          do:
+            - damage:
+                to: enemy
+                n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-11-02"
