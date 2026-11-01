@@ -1,0 +1,85 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP18-023:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-01"
+    abilities:
+      - line: 1
+        keywords:
+          - rush
+      - line: 2
+        fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: cemetery
+                        kind: follower
+                        class: ロイヤル
+                    op: ge
+                    right: 5
+                then:
+                  - draw:
+                      who: self
+                      n: 1
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: cemetery
+                        kind: follower
+                        class: ロイヤル
+                    op: ge
+                    right: 10
+                then:
+                  - grant:
+                      "on": this
+                      keywords:
+                        - storm
+            - life:
+                who: self
+                delta: 2
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: cemetery
+                        kind: follower
+                        class: ロイヤル
+                    op: ge
+                    right: 15
+                then:
+                  - grant:
+                      "on": this
+                      keywords:
+                        - intimidate
+                        - aura
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: cemetery
+                        kind: follower
+                        class: ロイヤル
+                    op: ge
+                    right: 20
+                then:
+                  - buff:
+                      "on": this
+                      power: 7
+                      hp: 7

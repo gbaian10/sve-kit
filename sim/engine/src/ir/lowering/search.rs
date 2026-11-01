@@ -113,11 +113,20 @@ pub(super) fn object_filter(
     name: Option<&str>,
     candidate: Binding<ObjectRef>,
 ) -> Expr<Bool> {
+    view_filter(kind, trait_id, name, view(candidate))
+}
+
+pub(super) fn view_filter(
+    kind: Option<&ast::SearchKind>,
+    trait_id: Option<&str>,
+    name: Option<&str>,
+    object: ObjectView,
+) -> Expr<Bool> {
     let mut predicates = Vec::new();
     if let Some(kind) = kind {
         predicates.push(Expr::Compute(Box::new(Predicate::KindEquals {
             left: Expr::Live(Box::new(KindRead::Kind {
-                object: view(candidate),
+                object: object.clone(),
                 view: CharacteristicView::Effective,
             })),
             right: Expr::Literal(match kind {
@@ -131,7 +140,7 @@ pub(super) fn object_filter(
     if let Some(trait_id) = trait_id {
         predicates.push(Expr::Compute(Box::new(Predicate::HasTrait {
             traits: Expr::Live(Box::new(TraitsRead::Traits {
-                object: view(candidate),
+                object: object.clone(),
                 view: CharacteristicView::Effective,
             })),
             trait_id: TraitId(trait_id.to_owned()),
@@ -139,9 +148,7 @@ pub(super) fn object_filter(
     }
     if let Some(name) = name {
         predicates.push(Expr::Compute(Box::new(Predicate::NamesIntersect {
-            left: Expr::Live(Box::new(NamesRead::Names {
-                object: view(candidate),
-            })),
+            left: Expr::Live(Box::new(NamesRead::Names { object })),
             right: Expr::Literal(vec![CardName(name.to_owned())]),
         })));
     }

@@ -642,10 +642,12 @@ impl Game {
                 ),
                 _ => return Err(unsupported("whole-card cost step")),
             };
-            execution.receipts.insert(
-                step.instruction.receipt,
-                InstructionOutcome::Payment { quantity, subjects },
-            );
+            if !matches!(step.instruction.action, Action::Discard { .. }) {
+                execution.receipts.insert(
+                    step.instruction.receipt,
+                    InstructionOutcome::Payment { quantity, subjects },
+                );
+            }
         }
         Ok(())
     }

@@ -222,7 +222,14 @@ fn mask_prevention(inspected: &mut Node) -> Result<()> {
 fn check_private_requirements(requirements: &Requirements, private_spine: bool) -> Result<()> {
     for requirement in &requirements.required {
         let code = requirement.capability.code;
-        if (!private_spine && code == "shape.ObjectReceipt.Look")
+        // Only a validated receipt predicate may erase its local snapshot capabilities.
+        if matches!(
+            code,
+            "shape.Predicate.ReceiptAny"
+                | "read.receipt.member-any"
+                | "shape.ObjectView.Snapshot"
+                | "reference.snapshot"
+        ) || (!private_spine && code == "shape.ObjectReceipt.Look")
             || (matches!(code, "internal.ZoneKind.Deck" | "internal.ZoneKind.Hand")
                 && !super::source::count_zone(requirements, requirement))
             || (super::search::private_requirement(code)
@@ -316,6 +323,14 @@ fn mask_public_condition(condition: &mut Expr<Bool>) {
     if let Expr::Compute(operation) = condition {
         match operation.as_mut() {
             Predicate::Exists { objects } => mask_public_predicate(objects),
+            Predicate::ReceiptAny {
+                receipt,
+                projection,
+                member,
+                predicate,
+            } if super::receipt_counts::check(receipt, *projection, *member, predicate).is_ok() => {
+                *condition = Expr::Literal(Bool(false));
+            }
             Predicate::CompareInt { left, right, .. } => {
                 mask_public_number(left);
                 mask_public_number(right);

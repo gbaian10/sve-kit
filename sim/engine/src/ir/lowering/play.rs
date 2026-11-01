@@ -557,6 +557,7 @@ impl BodyContext<'_> {
                 ex_outputs: BTreeMap::new(),
                 ex_targets: BTreeSet::new(),
                 observations: BTreeMap::new(),
+                single_discards: BTreeSet::new(),
                 observed_targets: BTreeSet::new(),
                 targets: BTreeMap::new(),
                 recipient_targets: BTreeMap::new(),
@@ -572,6 +573,7 @@ impl BodyContext<'_> {
                 context.ex_outputs.clone_from(&self.ex_outputs);
                 context.ex_targets.clone_from(&self.ex_targets);
                 context.observations.clone_from(&self.observations);
+                context.single_discards.clone_from(&self.single_discards);
                 context.observed_targets.clone_from(&self.observed_targets);
                 context.targets.clone_from(&self.targets);
                 context

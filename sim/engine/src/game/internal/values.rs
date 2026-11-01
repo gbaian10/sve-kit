@@ -506,6 +506,13 @@ impl Execution {
 
     fn live_natural(&self, game: &Game, read: &NatRead) -> Result<Nat> {
         match read {
+            NatRead::TurnOrdinal { player } => {
+                let seat = seat_name(self.player(game, player)?)?;
+                game.state.turn["elapsed_turns"][seat]
+                    .as_u64()
+                    .map(Nat)
+                    .ok_or_else(|| invalid("missing player turn ordinal"))
+            }
             NatRead::Counter { holder, kind } => self.counter(game, holder, kind),
             NatRead::Combo { player, execution } => {
                 super::history_turn::combo(self, game, player, *execution)
@@ -769,19 +776,17 @@ impl Execution {
                     *comparison,
                     self.natural(game, right)?.0,
                 ),
+                Predicate::ReceiptAny {
+                    receipt,
+                    projection,
+                    member,
+                    predicate,
+                } => super::receipt_counts::any(self, receipt, *projection, *member, predicate)?,
                 Predicate::Exists { objects } => !self.objects(game, objects)?.is_empty(),
                 Predicate::PlayerEquals { left, right } => {
                     self.player_value(game, left)? == self.player_value(game, right)?
                 }
-                Predicate::Equal { operands } => match operands.as_ref() {
-                    ValueEquality::EntryMethod { left, right } => {
-                        self.entered_method(left)? == self.entered_method(right)?
-                    }
-                    ValueEquality::EntryOrigin { left, right } => {
-                        self.entered_origin(left)? == self.entered_origin(right)?
-                    }
-                    _ => return Err(unsupported("equality domain")),
-                },
+                Predicate::Equal { operands } => self.event_equality(operands)?,
                 _ => return Err(unsupported("predicate")),
             })),
             Expr::Live(read) => self.live_boolean(game, read),
@@ -810,6 +815,18 @@ impl Execution {
                 ))
             }
             _ => Err(unsupported("boolean expression")),
+        }
+    }
+
+    fn event_equality(&self, operands: &ValueEquality) -> Result<bool> {
+        match operands {
+            ValueEquality::EntryMethod { left, right } => {
+                Ok(self.entered_method(left)? == self.entered_method(right)?)
+            }
+            ValueEquality::EntryOrigin { left, right } => {
+                Ok(self.entered_origin(left)? == self.entered_origin(right)?)
+            }
+            _ => Err(unsupported("equality domain")),
         }
     }
 

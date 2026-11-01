@@ -10,7 +10,7 @@ use crate::ir::{
 };
 use crate::ir::{
     CardKind, CardName, ClassRead, EventSnapshotPolicy, Info, KindRead, MemberProjection,
-    MovementReceipt, NamesRead, ObjectFrozen, TraitId, TraitsRead,
+    MovementReceipt, NamesRead, ObjectFrozen, RuntimeObjectView, TraitId, TraitsRead,
 };
 
 #[expect(
@@ -250,16 +250,7 @@ impl Checker {
             Predicate::ClassEquals {
                 left: Expr::Live(read),
                 right: Expr::Literal(Info::Present(_)),
-            } if !self.event_capture() => {
-                let ClassRead::Class { object, view } = read.as_ref();
-                if !matches!(
-                    view,
-                    CharacteristicView::Original | CharacteristicView::Effective
-                ) {
-                    return self.reject();
-                }
-                self.view(object)
-            }
+            } if !self.event_capture() => self.class_predicate(read),
             Predicate::And { predicates } | Predicate::Or { predicates } => {
                 for predicate in predicates {
                     self.boolean(predicate)?;
@@ -317,6 +308,12 @@ impl Checker {
                 self.names(left)?;
                 self.names(right)
             }
+            Predicate::ReceiptAny {
+                receipt,
+                projection,
+                member,
+                predicate,
+            } => self.receipt_member_condition(receipt, *projection, *member, predicate),
             Predicate::SearchFoundAny {
                 found,
                 object,
@@ -341,6 +338,17 @@ impl Checker {
             | Predicate::ObjectEquals { .. } => self.event_predicate(expression),
             _ => self.reject(),
         }
+    }
+
+    fn class_predicate(&self, read: &ClassRead) -> Checked {
+        let ClassRead::Class { object, view } = read;
+        if !matches!(
+            view,
+            CharacteristicView::Original | CharacteristicView::Effective
+        ) {
+            return self.reject();
+        }
+        self.view(object)
     }
 
     fn keyword_ability(
@@ -626,6 +634,26 @@ impl Checker {
             }
             Selector::Zone { .. } | Selector::Relation { .. } => self.reject(),
         }
+    }
+
+    fn receipt_member_condition(
+        &mut self,
+        receipt: &ObjectReceipt,
+        projection: MemberProjection,
+        member: Binding<RuntimeObjectView>,
+        predicate: &Expr<Bool>,
+    ) -> Checked {
+        let selector = Selector::ReceiptMembers {
+            receipt: receipt.clone(),
+            projection,
+        };
+        self.selector(&selector)?;
+        self.selection_visibility(&selector)?;
+        let access = self.infer_access(|checker| checker.selection_visibility(&selector));
+        self.isolated(|checker| {
+            checker.save_access(member.key(), access);
+            checker.local_value(member, predicate)
+        })
     }
 
     fn selector_receipt(&self, receipt: &ObjectReceipt, projection: MemberProjection) -> Checked {

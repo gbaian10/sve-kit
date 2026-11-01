@@ -1151,6 +1151,12 @@ pub(super) enum Number {
     Count {
         count: CountQuery,
     },
+    ReceiptCount {
+        count: ReceiptCountQuery,
+    },
+    CountOf {
+        count_of: String,
+    },
     DistinctNames {
         distinct_names: PublicQuery,
     },
@@ -1159,6 +1165,9 @@ pub(super) enum Number {
     },
     Resource {
         resource: ResourceQuery,
+    },
+    TurnOrdinal {
+        turn_number: TurnNumberQuery,
     },
     Resolution {
         at: ResolutionTime,
@@ -1256,6 +1265,14 @@ pub(super) struct ResourceQuery {
 pub(super) enum PpResource {
     Pp,
     PpMax,
+    Ep,
+    Sep,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct TurnNumberQuery {
+    pub who: LeaderSide,
 }
 
 #[derive(Deserialize)]
@@ -1439,7 +1456,7 @@ pub(super) struct CostComparison {
     pub right: i64,
 }
 
-#[derive(Deserialize)]
+#[derive(Clone, Copy, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum Comparison {
     Eq,
@@ -1717,8 +1734,12 @@ pub(super) struct BodyOptionalCost {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct HandMaterial {
+    pub result: Option<String>,
     pub sel: HandQuery,
-    pub n: u64,
+    pub n: Option<u64>,
+    pub upto: Option<u64>,
+    #[serde(default)]
+    pub any: bool,
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -1907,6 +1928,24 @@ pub(super) enum PreventionKind {
     Any,
     Combat,
     Ability,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct ReceiptCountQuery {
+    pub r#in: BeforeObjects,
+    pub kind: Option<SearchKind>,
+    pub r#trait: Option<String>,
+    pub class: Option<String>,
+    pub name: Option<String>,
+    pub name_contains: Option<String>,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct BeforeObjects {
+    pub objects_of: String,
+    #[serde(rename = "view")]
+    pub _view: Before,
 }
 
 #[derive(Deserialize)]

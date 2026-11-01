@@ -220,6 +220,12 @@ impl Execution {
                     _ => return Err(invalid("missing search receipt")),
                 }
             }
+            MovementReceipt::Discard { receipt } => {
+                match self.receipts.get(local_id(receipt.location())?) {
+                    Some(InstructionOutcome::Discard(outcome)) => &outcome.moves,
+                    _ => return Err(invalid("missing discard receipt")),
+                }
+            }
             MovementReceipt::Destroy { receipt } => {
                 match self.receipts.get(local_id(receipt.location())?) {
                     Some(InstructionOutcome::Destroy(outcome)) => &outcome.moves,

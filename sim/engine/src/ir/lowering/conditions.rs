@@ -168,18 +168,7 @@ impl BodyContext<'_> {
             ast::Condition::Not(item) => Predicate::Not {
                 predicate: self.condition(item, source, path)?,
             },
-            ast::Condition::Cmp(value) => Predicate::CompareInt {
-                left: self.number(&value.left, path, &mut BTreeSet::new())?,
-                comparison: match value.op {
-                    ast::Comparison::Eq => Comparison::Equal,
-                    ast::Comparison::Ne => Comparison::NotEqual,
-                    ast::Comparison::Lt => Comparison::Less,
-                    ast::Comparison::Le => Comparison::LessEqual,
-                    ast::Comparison::Gt => Comparison::Greater,
-                    ast::Comparison::Ge => Comparison::GreaterEqual,
-                },
-                right: self.number(&value.right, path, &mut BTreeSet::new())?,
-            },
+            ast::Condition::Cmp(value) => return self.comparison_condition(value, path),
             ast::Condition::Did(name) => return self.move_success(name, path),
             ast::Condition::Paid(paid) => {
                 if let Some((name, receipt)) = &self.local_payment {
@@ -210,6 +199,45 @@ impl BodyContext<'_> {
                     },
                 )));
             }
+        })))
+    }
+
+    fn comparison_condition(
+        &mut self,
+        value: &ast::BodyComparison,
+        path: &str,
+    ) -> Result<Expr<Bool>, LoweringError> {
+        if let (ast::Number::ReceiptCount { count }, ast::Number::Literal(threshold)) =
+            (&value.left, &value.right)
+        {
+            let exists = matches!(
+                (value.op, *threshold),
+                (ast::Comparison::Ge, 1) | (ast::Comparison::Gt | ast::Comparison::Ne, 0)
+            );
+            let absent = matches!(
+                (value.op, *threshold),
+                (ast::Comparison::Lt, 1) | (ast::Comparison::Le | ast::Comparison::Eq, 0)
+            );
+            if exists || absent {
+                let predicate = self.receipt_any(count, path)?;
+                return Ok(if exists {
+                    predicate
+                } else {
+                    Expr::Compute(Box::new(Predicate::Not { predicate }))
+                });
+            }
+        }
+        Ok(Expr::Compute(Box::new(Predicate::CompareInt {
+            left: self.number(&value.left, path, &mut BTreeSet::new())?,
+            comparison: match value.op {
+                ast::Comparison::Eq => Comparison::Equal,
+                ast::Comparison::Ne => Comparison::NotEqual,
+                ast::Comparison::Lt => Comparison::Less,
+                ast::Comparison::Le => Comparison::LessEqual,
+                ast::Comparison::Gt => Comparison::Greater,
+                ast::Comparison::Ge => Comparison::GreaterEqual,
+            },
+            right: self.number(&value.right, path, &mut BTreeSet::new())?,
         })))
     }
 
@@ -408,6 +436,8 @@ impl BodyContext<'_> {
                 CharacteristicView::Original,
             )),
             ast::Number::HistoryCount { history_count } => self.played_count(history_count, path),
+            ast::Number::ReceiptCount { count } => self.receipt_count(count, path),
+            ast::Number::CountOf { count_of } => self.count_of(count_of, path),
             ast::Number::Literal(value) => Ok(Expr::Literal(Int(*value))),
             ast::Number::Resolution { at, value } => {
                 let ast::ResolutionTime::Resolution = at;
@@ -467,6 +497,7 @@ impl BodyContext<'_> {
                 Binding::new(self.allocator.id(path)?, self.scope),
                 path,
             ),
+            ast::Number::TurnOrdinal { turn_number } => Ok(turn_ordinal(turn_number.who)),
             ast::Number::Resource { resource } => {
                 Ok(Expr::Live(Box::new(IntRead::PlayerResource {
                     player: match resource.who {
@@ -476,6 +507,8 @@ impl BodyContext<'_> {
                     property: match resource.kind {
                         ast::PpResource::Pp => PlayerResource::PpCurrent,
                         ast::PpResource::PpMax => PlayerResource::PpMaximum,
+                        ast::PpResource::Ep => PlayerResource::Ep,
+                        ast::PpResource::Sep => PlayerResource::Sep,
                     },
                 })))
             }
@@ -594,6 +627,17 @@ fn counter_number(counter: &ast::CounterRead) -> Expr<Int> {
         value: Expr::Live(Box::new(NatRead::Counter {
             holder: super::counters::holder(),
             kind: super::super::CounterKind(counter.name.clone()),
+        })),
+    }))
+}
+
+fn turn_ordinal(who: ast::LeaderSide) -> Expr<Int> {
+    Expr::Compute(Box::new(IntOperation::FromNat {
+        value: Expr::Live(Box::new(NatRead::TurnOrdinal {
+            player: match who {
+                ast::LeaderSide::Controller => PlayerRef::Controller {},
+                ast::LeaderSide::Opponent => super::super::events::timing::opponent(),
+            },
         })),
     }))
 }

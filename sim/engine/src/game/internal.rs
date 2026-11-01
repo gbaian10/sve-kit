@@ -45,6 +45,7 @@ mod discard;
 mod drive;
 mod duration;
 pub(in crate::game) use card::attack_restrictions::AttackLock;
+mod receipt_counts;
 pub(in crate::game) use drive::LeaderAttackLock;
 mod grant;
 mod history_turn;

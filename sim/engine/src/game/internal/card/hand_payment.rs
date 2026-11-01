@@ -2,7 +2,8 @@
 use super::play::PlayState;
 use super::{Execution, Game, Result, invalid, seat_name, unsupported};
 use crate::game::internal::{
-    DecisionId, DistributionMember, InputDomain, Wait, discard::HandWait, search,
+    DecisionId, DistributionMember, InputDomain, InstructionOutcome, Wait, contains,
+    discard::HandWait, search,
 };
 use crate::ir::{
     Action, Bool, Cardinality, CostSpec, DiscardMode, Disjointness, Expr, Instruction, Int, Nat,
@@ -22,14 +23,12 @@ fn selection(action: &Action) -> Result<&SelectionConstraint> {
         return Err(unsupported("one hand cost group"));
     };
     let count = constraint.cardinality;
-    if count.minimum.0 == 0
-        || count.maximum != Some(count.minimum)
-        || group.cardinality != count
+    if group.cardinality != count
         || constraint.disjoint != Disjointness::Disjoint
         || constraint.distinct_by.is_some()
         || !constraint.aggregate_bounds.is_empty()
     {
-        return Err(unsupported("fixed hand cost count"));
+        return Err(unsupported("hand cost cardinality"));
     }
     let Selector::Zone {
         players,
@@ -186,7 +185,10 @@ impl Game {
                 .cost_discards
                 .remove(&instruction.receipt)
                 .ok_or_else(|| invalid("missing hand cost selection"))?;
-            if u64::try_from(members.len()).map_err(invalid)? != constraint.cardinality.minimum.0 {
+            if !contains(
+                constraint.cardinality,
+                Nat(u64::try_from(members.len()).map_err(invalid)?),
+            ) {
                 return Err(invalid("incomplete hand cost selection"));
             }
             members
@@ -215,6 +217,9 @@ impl Game {
                 "incomplete hand cost payment".into(),
             ));
         }
+        execution
+            .receipts
+            .insert(instruction.receipt, InstructionOutcome::Discard(outcome));
         Ok((
             Quantity {
                 amount: Int(i64::try_from(members.len()).map_err(invalid)?),

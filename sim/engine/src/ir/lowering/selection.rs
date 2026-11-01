@@ -413,11 +413,19 @@ pub(super) fn field_filter(
     filter: &ObjectFilter<'_>,
     candidate: super::Binding<super::super::ObjectRef>,
 ) -> super::Expr<super::Bool> {
-    use super::super::{CharacteristicView, Comparison, NumberRead};
     let object = super::ObjectView::Current {
         object: Box::new(super::ObjectOperand::Bound { binding: candidate }),
     };
-    let base = super::search::object_filter(filter.kind, filter.trait_id, filter.name, candidate);
+    view_filter(filter, object)
+}
+
+pub(super) fn view_filter(
+    filter: &ObjectFilter<'_>,
+    object: super::ObjectView,
+) -> super::Expr<super::Bool> {
+    use super::super::{CharacteristicView, Comparison, NumberRead};
+    let base =
+        super::search::view_filter(filter.kind, filter.trait_id, filter.name, object.clone());
     let mut predicates = Vec::new();
     if !matches!(base, super::Expr::Literal(super::Bool(true))) {
         predicates.push(base);
@@ -440,11 +448,11 @@ pub(super) fn field_filter(
         )));
     }
     for trait_id in filter.all_traits {
-        predicates.push(super::search::object_filter(
+        predicates.push(super::search::view_filter(
             None,
             Some(trait_id),
             None,
-            candidate,
+            object.clone(),
         ));
     }
     if let Some(contains) = filter.contains {
