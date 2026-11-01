@@ -1,0 +1,42 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP11-066:
+    abilities:
+      - line: 1
+        keywords:
+          - ward
+      - line: 2
+        fanfare:
+          do:
+            - life:
+                who: self
+                delta: 5
+            - draw:
+                n: 2
+      - line: 3
+        activate:
+          zone: hand
+          cost:
+            steps:
+              - pp: 2
+              - discard:
+                  ref: this
+              - discard:
+                  n: 1
+                  sel:
+                    who: self
+                    zone: hand
+                    class: ドラゴン
+                    orig_cost_ge: 7
+          do:
+            - life:
+                who: self
+                delta: 5
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-02"

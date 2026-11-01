@@ -1,0 +1,48 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP15-019:
+    abilities:
+      - line: 1
+        keywords:
+          - storm
+      - line: 2
+        fanfare:
+          do:
+            - create:
+                n: 2
+                to: ex
+                token: フェアリーウィスプ
+      - line: 3
+        activate:
+          zone: hand
+          cost:
+            steps:
+              - pp: 1
+              - discard:
+                  ref: this
+          do:
+            - move:
+                ref: t
+                to: hand
+            - create:
+                n: 1
+                to: ex
+                token: フェアリーウィスプ
+          targets:
+            - bind: t
+              from:
+                who: self
+                zone: field
+              n: 1
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP01-T02
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-02"

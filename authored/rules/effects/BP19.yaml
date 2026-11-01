@@ -1,58 +1,6 @@
 format: 1
 kind: effect_set
 cards:
-  BP19-007:
-    status: complete
-    abilities:
-      - line: 1
-        kind: static
-        body:
-          op: macro
-          name: guard
-      - line: 2
-        kind: trigger
-        body:
-          op: damage
-          subjects: opponent.leader
-          amount: 3
-        event: enter
-        subject: self
-        keyword: fanfare
-      - line: 2
-        kind: trigger
-        body:
-          op: damage
-          subjects: opponent.leader
-          amount: 3
-        event: field_to_cemetery
-        subject: self
-        keyword: last_words
-      - line: 3
-        kind: activated
-        body:
-          op: seq
-          steps:
-            - op: destroy
-              subjects: target.1
-            - op: damage
-              subjects: opponent.leader
-              amount: 1
-            - op: draw
-              count: 1
-        active_zones:
-          - hand
-        targets:
-          - key: "1"
-            select:
-              side: self
-              zone: field
-              type: follower
-              trait: 八獄
-            min: 1
-            max: 1
-        costs:
-          - op: discard
-            subjects: self
   BP19-009:
     status: complete
     abilities:

@@ -1,0 +1,40 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP13-114:
+    abilities:
+      - line: 1
+        keywords:
+          - ward
+      - line: 2
+        fanfare:
+          do:
+            - life:
+                who: self
+                delta: 7
+      - line: 3
+        activate:
+          zone: hand
+          cost:
+            steps:
+              - pp: 4
+              - discard:
+                  ref: this
+          do:
+            - destroy:
+                ref: t
+          targets:
+            - bind: t
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          quick: true
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-02"
