@@ -1,0 +1,31 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP02-083:
+    admission: light
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        static:
+          effects:
+            - cannot:
+                what: attack
+      - line: 3
+        auto:
+          "on":
+            phase:
+              which: end
+              whose: self
+          do:
+            - life:
+                who: self
+                delta: 1
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-01"
