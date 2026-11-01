@@ -139,6 +139,18 @@ impl Execution {
                     _ => Err(invalid("object binding requires one member")),
                 }
             }
+            ObjectOperand::Selected { selection }
+                if self.targets.contains_key(&selection.key()) =>
+            {
+                self.selected_object(game, *selection)
+            }
+            ObjectOperand::Selected { selection } => {
+                let members = self.object_slot(*selection)?;
+                match members.as_slice() {
+                    [reference] => Ok(*reference),
+                    _ => Err(invalid("selected operand requires one object")),
+                }
+            }
             ObjectOperand::SourceHolder {} => {
                 let mut reference = self.reference(game, &self.context.source)?;
                 reference.generation = self.context.generation;
