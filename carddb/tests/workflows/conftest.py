@@ -129,8 +129,20 @@ def authoring_inventory(tmp_path_factory: pytest.TempPathFactory) -> Path:
         ("BP10", ("BP10-020",)),
     ):
         prototype = read_tree(REPO / f"authored/rules/effects/{owner}.yaml")
+        current_cards = object_value(prototype["cards"])
+        # Migrated cards keep their old program only in the historical fixtures.
         prototype["cards"] = {
-            number: object_value(prototype["cards"])[number] for number in prototypes
+            number: current_cards[number]
+            if number in current_cards
+            else object_value(
+                parse(
+                    (
+                        REPO
+                        / f"carddb/tests/fixtures/effect_baseline/migrated/{number}.json"
+                    ).read_bytes()
+                )
+            )
+            for number in prototypes
         }
         target = root / f"rules/effects/{owner}.yaml"
         target.parent.mkdir(parents=True, exist_ok=True)
