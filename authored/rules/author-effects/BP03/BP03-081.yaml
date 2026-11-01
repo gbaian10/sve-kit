@@ -1,0 +1,38 @@
+cards:
+  BP03-081:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - auto:
+          do:
+            - if:
+                cond:
+                  crimson: true
+                then:
+                  - choose:
+                      bind: enemy
+                      from:
+                        kind: follower
+                        leader_or: true
+                        who: opp
+                        zone: field
+                      n: 1
+                  - damage:
+                      n: 3
+                      to: enemy
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
