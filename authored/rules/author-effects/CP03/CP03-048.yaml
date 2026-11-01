@@ -1,0 +1,46 @@
+cards:
+  CP03-048:
+    abilities:
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: banish
+                    op: ge
+                    right: 5
+                then:
+                  - grant:
+                      keywords:
+                        - storm
+                      on: this
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - banish_self: true
+          do:
+            - damage:
+                n: 3
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
