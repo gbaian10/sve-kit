@@ -1,0 +1,26 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP04-107:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        evolve_time:
+          targets:
+            - bind: amulet
+              from:
+                who: self
+                zone: cemetery
+                kind: amulet
+              n: 1
+          do:
+            - move:
+                ref: amulet
+                to: field
+                result: returned

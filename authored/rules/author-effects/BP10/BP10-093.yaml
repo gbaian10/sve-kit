@@ -1,0 +1,28 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP10-093:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        keywords: [ward]
+      - line: 2
+        static:
+          effects:
+            - damage_cap:
+                on: { who: self, zone: field, kind: follower }
+                threshold: 4
+                set: 3
+      - line: 3
+        evolve_time:
+          do:
+            - search:
+                sel: { who: self, zone: deck, name: 虚脱の剛腕 }
+                n: 1
+                to: field
