@@ -1,0 +1,43 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP06-104:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        auto:
+          "on":
+            phase:
+              whose: self
+              which: end
+          targets:
+            - bind: enemy
+              from:
+                leader: opp
+              n: 1
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      resource:
+                        who: self
+                        kind: pp
+                    op: ge
+                    right: 2
+                then:
+                  - damage:
+                      n: 1
+                      to: enemy
+      - line: 2
+        evolve_time:
+          do:
+            - pp:
+                who: self
+                delta: 2
