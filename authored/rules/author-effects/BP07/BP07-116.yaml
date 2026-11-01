@@ -1,0 +1,37 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP07-116:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - either:
+                options:
+                  - - create:
+                        token: プロダクトマシーン
+                        to: ex
+                        n: 1
+                  - - create:
+                        token: リペアモード
+                        to: ex
+                        n: 1
+      - line: 2
+        lastword:
+          cost:
+            discard:
+              sel:
+                who: self
+                zone: hand
+                trait: 機械
+              n: 1
+          do:
+            - draw:
+                n: 1

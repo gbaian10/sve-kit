@@ -1,0 +1,45 @@
+format: 2
+kind: author_effect_set
+cards:
+  ECP02-016:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - look:
+                bind: seen
+                top:
+                  who: self
+                  n: 1
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  trait: クール
+                n: 1
+                may: true
+            - move:
+                ref: picked
+                to: hand
+                result: picked_to_hand
+            - reveal:
+                ref: picked
+                bind: revealed
+      - line: 2
+        lastword:
+          do:
+            - create:
+                token: 魔法のアイテム
+                to: ex
+                n: 1
+    token_sources:
+      - section: 1
+        line: 1
+        card: CP02-T01

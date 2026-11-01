@@ -1,0 +1,38 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP17-048:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - look:
+                bind: seen
+                top:
+                  who: self
+                  n: 1
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  trait: 機械
+                n: 1
+                may: true
+            - move:
+                ref: picked
+                to: ex
+            - create:
+                token: プロダクトマシーン
+                to: ex
+                n: 1
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP17-T17

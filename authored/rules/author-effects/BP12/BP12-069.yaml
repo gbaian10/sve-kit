@@ -1,0 +1,39 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP12-069:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        fanfare:
+          do:
+            - either:
+                options:
+                  - - create:
+                        token: プロダクトマシーン
+                        to: field
+                        n: 1
+                  - - create:
+                        token: フォレストバット
+                        to: field
+                        n: 1
+            - either:
+                options:
+                  - - create:
+                        token: プロダクトマシーン
+                        to: ex
+                        n: 1
+                  - - create:
+                        token: フォレストバット
+                        to: ex
+                        n: 1
