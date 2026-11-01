@@ -646,6 +646,22 @@ impl Game {
             execution.objects(self, objects)?
         };
         let seat = super::seat_name(execution.context.controller)?;
+        if matches!(objects, Selector::Objects { objects }
+            if objects == &[ObjectOperand::SourceHolder {}])
+        {
+            for &member in &members {
+                let object = self.object(execution.object_id(member)?)?;
+                if object.zone == "ex"
+                    && object.state["counters"]
+                        .as_object()
+                        .is_some_and(|counters| {
+                            counters.values().any(|count| count.as_i64() != Some(0))
+                        })
+                {
+                    return Err(unsupported("EX source counter carry into Field"));
+                }
+            }
+        }
         if !self.field_entry_has_room(execution, &members, objects, seat)? {
             let before = *members
                 .first()

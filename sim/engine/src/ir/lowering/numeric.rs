@@ -129,7 +129,13 @@ impl BodyContext<'_> {
                     .map(|reference| Selector::Bound { reference })
                     .ok_or_else(|| unsupported(path));
             }
-            ast::Objects::Follow { .. } => return Err(unsupported(path)),
+            ast::Objects::Follow { follow } => {
+                return self
+                    .ex_outputs
+                    .get(follow)
+                    .cloned()
+                    .ok_or_else(|| unsupported(path));
+            }
             ast::Objects::Zone(query) => query,
         };
         let binding: Binding<ObjectRef> = Binding::new(self.allocator.id(path)?, self.scope);

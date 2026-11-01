@@ -555,7 +555,8 @@ impl Allocator {
             context.leave_event = Some(Binding::new(context.allocator.id(path)?, scope));
         }
         context.departure_to_cemetery = events.departure_to_cemetery;
-        context.cemetery_return = active_zones == [ZoneKind::Cemetery];
+        context.source_can_enter_field =
+            matches!(active_zones.as_slice(), [ZoneKind::Cemetery | ZoneKind::Ex]);
         let activated_play = entry
             .activate
             .as_ref()
@@ -985,11 +986,18 @@ fn lowered_change(
     }
 }
 
+#[derive(Clone, Copy)]
+enum CounterReadView {
+    Current,
+    SourceInformation,
+}
+
 struct BodyContext<'definitions> {
     subject_event: Option<SubjectFields>,
     source_use: &'definitions ast::SourceUse,
+    counter_read_view: CounterReadView,
     entry_event: Option<Binding<super::EnterFieldEvent>>,
-    cemetery_return: bool,
+    source_can_enter_field: bool,
     departure_to_cemetery: bool,
     leave_event: Option<Binding<super::LeaveFieldEvent>>,
     scope: ScopeId,
@@ -1025,9 +1033,10 @@ impl<'definitions> BodyContext<'definitions> {
         Self {
             subject_event: None,
             source_use: &entry.sources[0],
+            counter_read_view: CounterReadView::Current,
             leave_event: None,
             entry_event: None,
-            cemetery_return: false,
+            source_can_enter_field: false,
             departure_to_cemetery: false,
             scope,
             definition: AbilityId(scope.0),
@@ -1147,7 +1156,11 @@ impl<'definitions> BodyContext<'definitions> {
         source: &SourceSpan,
         ability_source: &AbilitySource,
     ) -> Result<Program, LoweringError> {
-        let mut program = self.steps(&body.steps, &format!("{path}/do"), source, ability_source)?;
+        let previous_counter_view = self.counter_read_view;
+        self.counter_read_view = CounterReadView::SourceInformation;
+        let lowered = self.steps(&body.steps, &format!("{path}/do"), source, ability_source);
+        self.counter_read_view = previous_counter_view;
+        let mut program = lowered?;
         program.steps.splice(
             0..0,
             self.resolution_captures.drain(..).map(|capture| Located {

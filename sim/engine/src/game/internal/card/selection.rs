@@ -305,6 +305,23 @@ pub(super) fn check(constraint: &SelectionConstraint) -> Result<()> {
 
 fn target_selector(selector: &Selector) -> Result<()> {
     match selector {
+        Selector::Union { sets }
+            if sets.len() == 2
+                && sets.iter().all(|set| {
+                    matches!(
+                        set,
+                        Selector::Zone {
+                            zone: ZoneKind::Field | ZoneKind::Ex,
+                            ..
+                        }
+                    )
+                }) =>
+        {
+            for set in sets {
+                public_zone_selector(set)?;
+            }
+            Ok(())
+        }
         Selector::Zone {
             zone: ZoneKind::Ex, ..
         } => public_zone_selector(selector),

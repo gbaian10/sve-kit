@@ -192,7 +192,7 @@ impl BodyContext<'_> {
             Some(event) => ObjectOperand::FollowEventMove {
                 event: MovementEvent::LeaveField { event },
             },
-            None if self.cemetery_return => ObjectOperand::SourceHolder {},
+            None if self.source_can_enter_field => ObjectOperand::SourceHolder {},
             None => return Err(unsupported(path)),
         };
         Ok(Action::Move {

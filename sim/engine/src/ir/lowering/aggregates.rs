@@ -82,8 +82,10 @@ impl BodyContext<'_> {
         if query.alias.is_none() && query.r#where.is_none() {
             return Ok(input);
         }
-        if !matches!(query.zone, Some(ast::TargetZone::Field))
-            || query.observation.is_some()
+        if !matches!(
+            query.zone,
+            Some(ast::TargetZone::Single(ast::TargetSingleZone::Field))
+        ) || query.observation.is_some()
             || query.leader.is_some()
             || query.leaders.is_some()
             || query.leader_or

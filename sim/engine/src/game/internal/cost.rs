@@ -350,7 +350,7 @@ impl Game {
             .ok_or_else(|| invalid("play generation exhausted"))?;
         if !object.state["counters"]
             .as_object()
-            .is_none_or(serde_json::Map::is_empty)
+            .is_none_or(|counters| counters.values().all(|count| count.as_i64() == Some(0)))
             || self.state.ir_numeric.contains_key(holder)
         {
             return Err(unsupported("unimplemented play carry"));

@@ -1156,8 +1156,15 @@ impl TargetQuery {
 }
 
 #[derive(Clone, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(untagged)]
 pub(super) enum TargetZone {
+    Single(TargetSingleZone),
+    PublicPair(Vec<TargetSingleZone>),
+}
+
+#[derive(Clone, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum TargetSingleZone {
     Field,
     Ex,
     Cemetery,

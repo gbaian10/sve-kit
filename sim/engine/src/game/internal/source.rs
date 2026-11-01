@@ -2,9 +2,11 @@
 
 use super::{Execution, Game, Result, invalid, unsupported};
 use crate::ir::{
-    CardName, CharacteristicView, NumberRead, ObjectRef, ObjectView, Requirement, Requirements,
-    RuntimeAbilitySource, RuntimeObjectView, SnapshotId, Stat,
+    CardName, CharacteristicView, CounterKind, Nat, NumberRead, ObjectRef, ObjectView, Requirement,
+    Requirements, RuntimeAbilitySource, RuntimeObjectView, SnapshotId, Stat,
 };
+use alloc::collections::BTreeMap;
+use serde_json::Value;
 
 #[derive(Clone, Debug)]
 pub(super) struct SourceInformation {
@@ -19,6 +21,7 @@ pub(super) struct SourceSnapshot {
     original: [i64; 3],
     effective: [i64; 3],
     names: Vec<CardName>,
+    counters: BTreeMap<String, Nat>,
 }
 
 /// Original is a private read elsewhere; only a checked source's own number read is exempt.
@@ -83,6 +86,12 @@ impl Execution {
                 self.ability
                     .ok_or_else(|| invalid("missing ability source"))?,
             )
+    }
+
+    pub(super) fn source_counter(&self, game: &Game, kind: &CounterKind) -> Result<Nat> {
+        let snapshot = self.source_snapshot(game)?;
+        let key = game.catalog.keyword_id(&kind.0);
+        Ok(snapshot.counters.get(&key).copied().unwrap_or(Nat(0)))
     }
 
     pub(super) fn source_names(&self, game: &Game) -> Result<Vec<CardName>> {
@@ -305,6 +314,21 @@ impl Game {
             original,
             effective,
             names: vec![CardName(self.card_name(id)?)],
+            counters: current
+                .state
+                .get("counters")
+                .and_then(Value::as_object)
+                .map(|counters| {
+                    counters
+                        .keys()
+                        .map(|kind| {
+                            self.card_counter(id, &CounterKind(kind.clone()))
+                                .map(|count| (kind.clone(), count))
+                        })
+                        .collect::<Result<_>>()
+                })
+                .transpose()?
+                .unwrap_or_default(),
         })
     }
 }
