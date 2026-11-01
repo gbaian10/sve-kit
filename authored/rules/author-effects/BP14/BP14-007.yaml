@@ -1,0 +1,45 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP14-007:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        play:
+          cost_delta:
+            if:
+              in_zone:
+                ref: this
+                zone: ex
+            delta: -1
+      - line: 2
+        play:
+          cost_delta:
+            if:
+              exists:
+                who: self
+                zone: field
+                name: 化かし女将・ホズミ
+            delta: -1
+      - line: 3
+        spell:
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - move:
+                ref: enemy
+                to: hand
+            - life:
+                who: self
+                delta: 1
