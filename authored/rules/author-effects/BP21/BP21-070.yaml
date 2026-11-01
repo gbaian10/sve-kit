@@ -1,0 +1,32 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP21-070:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-01"
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - damage:
+                to:
+                  who: opp
+                  zone: field
+                  kind: follower
+                n: 6
+      - line: 2
+        activate:
+          zone: hand
+          cost:
+            steps:
+              - pp: 1
+              - discard:
+                  ref: this
+          do:
+            - draw:
+                n: 1

@@ -1,0 +1,41 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP10-101:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-01"
+    abilities:
+      - line: 1
+        fanfare:
+          targets:
+            - bind: t
+              from:
+                who: self
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - buff:
+                "on": t
+                hp: 4
+            - life:
+                who: self
+                delta: 4
+      - line: 2
+        activate:
+          zone: hand
+          quick: true
+          cost:
+            steps:
+              - pp: 1
+              - discard:
+                  ref: this
+          do:
+            - life:
+                who: self
+                delta: 2

@@ -1,0 +1,55 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP11-075:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-01"
+    rule_sections:
+      - section: 1
+    abilities:
+      - line: 1
+        activate:
+          zone: cemetery
+          cost:
+            steps:
+              - banish_self: true
+              - banish:
+                  sel:
+                    who: self
+                    zone: cemetery
+                    name: カオスルーラー・アイシィレンドリング
+                  n: 1
+          targets:
+            - bind: t
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - act:
+                ref: t
+      - section: 1
+        line: 1
+        keywords:
+          - quick
+      - section: 1
+        line: 2
+        spell:
+          targets:
+            - bind: t
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - buff:
+                "on": t
+                power: -2
+                hp: -2
