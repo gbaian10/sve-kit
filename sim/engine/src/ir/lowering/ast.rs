@@ -1553,20 +1553,11 @@ pub(super) struct Grant {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct PlayedSubscription {
-    pub who: SelfPlayer,
-    pub sel: PlayedSubject,
-    pub during: During,
-}
-#[derive(Deserialize)]
-#[serde(deny_unknown_fields)]
-pub(super) struct PlayedSubject {
-    pub kind: PlayedSpell,
-    pub class: String,
-}
-#[derive(Deserialize)]
-pub(super) enum PlayedSpell {
-    #[serde(rename = "spell")]
-    Spell,
+    pub who: Option<EntryPlayer>,
+    #[serde(default)]
+    pub sel: Option<MovementSubject>,
+    #[serde(default)]
+    pub during: Option<During>,
 }
 impl Auto {
     pub(super) const fn cemetery_play(&self) -> bool {

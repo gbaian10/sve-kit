@@ -1,0 +1,23 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP05-046:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-01"
+    abilities:
+      - line: 1
+        auto:
+          on:
+            played:
+              who: self
+              sel:
+                trait: 魔法使い
+          do:
+            - life:
+                who: self
+                delta: 1

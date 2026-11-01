@@ -6,8 +6,8 @@ use super::{
 use crate::ir::LimitSpec;
 use crate::ir::optional_payment;
 use crate::ir::{
-    EventPattern, EventSnapshotPolicy, KeywordId, ObjectFrozen, Predicate, TriggerAggregation,
-    TriggerCondition,
+    EventPattern, EventSnapshotPolicy, KeywordId, ObjectFrozen, Predicate, ReceiptId,
+    TriggerAggregation, TriggerCondition,
 };
 
 pub(super) fn check_header(ability: &Ability) -> Result<()> {
@@ -98,6 +98,7 @@ impl Game {
             controller: actor,
         });
         self.bump(&format!("{seat}.cards_played"), 1);
+        self.internal_played_card_events(execution, ReceiptId(0))?;
         let group = self.group();
         let event = self.emit(
             json!({"kind":"プレイ","object":holder}),

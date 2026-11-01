@@ -729,8 +729,8 @@ fn check_header(ability: &Ability) -> Result<()> {
         && ability.active_zones == [ZoneKind::Ex]
         && matches!(ability.source.origin, AbilityOrigin::Printed { .. });
     let ex_trigger = triggers::ex_phase(ability);
-    let cemetery_trigger = filter(ability).is_some();
-    if (ability.active_zones != [zones] && !ex_activation && !ex_trigger && !cemetery_trigger)
+    let played_trigger = filter(ability).is_some();
+    if (ability.active_zones != [zones] && !ex_activation && !ex_trigger && !played_trigger)
         || ability.source.holder != (ObjectOperand::SourceHolder {})
         || ability.source.controller != (PlayerRef::Controller {})
         || !ability.event_captures.is_empty()

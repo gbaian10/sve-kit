@@ -1,108 +1,61 @@
-//! Cemetery observers match the committed card before its body changes any zone.
+//! Played subscriptions narrow the committed card through the common subject plan.
+use super::subject::{SubjectFields, SubjectFilter};
 use crate::ir::{
-    Ability, AbilityOrigin, Binding, Bool, CardKind, CharacteristicView, ClassId, ClassRead,
-    EventContext, EventPattern, EventSnapshotPolicy, Expr, Info, KindRead, ObjectOperand,
-    ObjectRef, ObjectView, PlayEvent, PlaySubjectFields, PlayerFrozen, PlayerRef, Predicate,
-    TriggerCondition, ZoneKind,
+    Ability, AbilityOrigin, Binding, Bool, EventPattern, Expr, ObjectRef, PlayEvent,
+    PlaySubjectFields, Predicate, TriggerCondition, ZoneKind,
 };
 
 #[derive(Clone, Debug)]
 pub(crate) struct PlayedFilter {
-    pub(crate) class: ClassId,
+    pub(crate) subject: SubjectFilter,
     pub(crate) card: Binding<ObjectRef>,
 }
 
 impl PlayedFilter {
     pub(crate) fn predicate(&self, event: Binding<PlayEvent>) -> Expr<Bool> {
-        let card = self.card;
-        let object = ObjectView::EventSnapshot {
-            object: Box::new(ObjectOperand::FromExpression {
-                value: Box::new(Expr::Bound(card)),
+        Expr::Compute(Box::new(Predicate::PlayedCard {
+            subject: Expr::Frozen(Box::new(PlaySubjectFields::PlaySubject { event })),
+            card: self.card,
+            predicate: self.subject.predicate(SubjectFields::Played {
+                event,
+                card: self.card,
             }),
-            event: EventContext::Play { event },
-            policy: EventSnapshotPolicy::AtReveal,
-        };
-        Expr::Compute(Box::new(Predicate::And {
-            predicates: vec![
-                Expr::Compute(Box::new(Predicate::PlayerEquals {
-                    left: Expr::Frozen(Box::new(PlayerFrozen::PlayController { event })),
-                    right: Expr::Literal(PlayerRef::Controller {}),
-                })),
-                Expr::Compute(Box::new(Predicate::PlayerEquals {
-                    left: Expr::Literal(PlayerRef::Active {}),
-                    right: Expr::Literal(PlayerRef::Controller {}),
-                })),
-                Expr::Compute(Box::new(Predicate::PlayedCard {
-                    subject: Expr::Frozen(Box::new(PlaySubjectFields::PlaySubject { event })),
-                    card,
-                    predicate: Expr::Compute(Box::new(Predicate::And {
-                        predicates: vec![
-                            Expr::Compute(Box::new(Predicate::KindEquals {
-                                left: Expr::Live(Box::new(KindRead::Kind {
-                                    object: object.clone(),
-                                    view: CharacteristicView::Effective,
-                                })),
-                                right: Expr::Literal(CardKind::Spell),
-                            })),
-                            Expr::Compute(Box::new(Predicate::ClassEquals {
-                                left: Expr::Live(Box::new(ClassRead::Class {
-                                    object,
-                                    view: CharacteristicView::Effective,
-                                })),
-                                right: Expr::Literal(Info::Present(self.class.clone())),
-                            })),
-                        ],
-                    })),
-                })),
-            ],
         }))
     }
 
     pub(crate) fn parse(event: Binding<PlayEvent>, expression: &Expr<Bool>) -> Option<Self> {
-        let Expr::Compute(outer) = expression else {
-            return None;
-        };
-        let Predicate::And { predicates } = outer.as_ref() else {
-            return None;
-        };
-        let [_, _, Expr::Compute(subject)] = predicates.as_slice() else {
+        let Expr::Compute(predicate) = expression else {
             return None;
         };
         let Predicate::PlayedCard {
-            card,
-            predicate: Expr::Compute(filter),
-            ..
-        } = subject.as_ref()
+            card, predicate, ..
+        } = predicate.as_ref()
         else {
             return None;
         };
-        let Predicate::And {
-            predicates: card_predicates,
-        } = filter.as_ref()
-        else {
+        let subject =
+            SubjectFilter::parse(SubjectFields::Played { event, card: *card }, predicate)?;
+        if subject
+            .class
+            .as_ref()
+            .is_some_and(|class| class.0.is_empty())
+        {
             return None;
-        };
-        let [_, Expr::Compute(class)] = card_predicates.as_slice() else {
-            return None;
-        };
-        let Predicate::ClassEquals {
-            right: Expr::Literal(Info::Present(class)),
-            ..
-        } = class.as_ref()
-        else {
-            return None;
-        };
+        }
         let plan = Self {
-            class: class.clone(),
+            subject,
             card: *card,
         };
-        (!class.0.is_empty() && *expression == plan.predicate(event)).then_some(plan)
+        (*expression == plan.predicate(event)).then_some(plan)
     }
 }
 
 pub(crate) fn filter(ability: &Ability) -> Option<PlayedFilter> {
     if !matches!(ability.source.origin, AbilityOrigin::Printed { .. })
-        || ability.active_zones != [ZoneKind::Cemetery]
+        || !matches!(
+            ability.active_zones.as_slice(),
+            [ZoneKind::Field | ZoneKind::Cemetery]
+        )
     {
         return None;
     }
@@ -113,6 +66,6 @@ pub(crate) fn filter(ability: &Ability) -> Option<PlayedFilter> {
     else {
         return None;
     };
-    (trigger.active_zones == [ZoneKind::Cemetery]).then_some(())?;
+    (trigger.active_zones == ability.active_zones).then_some(())?;
     PlayedFilter::parse(*binding, predicate)
 }

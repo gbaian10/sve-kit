@@ -19,13 +19,14 @@ fn selected() -> &'static SelectedEffects {
         for (number, kind, traits) in [("movement-unit", "フォロワー", json!(["乗物"])),
             ("movement-other", "フォロワー", json!(["反例"])),
             ("movement-token", "フォロワー・トークン", json!(["乗物"])),
-            ("movement-enemy", "フォロワー", json!(["反例"])), ("movement-amulet", "アミュレット", json!(["乗物"]))] {
+            ("movement-enemy", "フォロワー", json!(["反例"])), ("movement-amulet", "アミュレット", json!(["乗物"])), ("played-spell", "スペル", json!(["アルカナ", "魔法使い"]))] {
             let mut material = face.clone();
             material["name"] = json!(if number == "movement-enemy" {"movement enemy"} else {"movement material"});
             material["text"] = Value::Null;
             material["sections"] = json!([]);
             material["card_type"] = json!(kind);
             material["traits"] = traits;
+            if number == "played-spell" { material["cost"] = json!("1"); }
             material["power"] = json!(if kind.contains("フォロワー") {"10"} else {"-"});
             material["hp"] = json!(if kind.contains("フォロワー") {"20"} else {"-"});
             snapshot.push_str(&json!({"number":number,"faces":[material]}).to_string());
@@ -97,7 +98,39 @@ pub(super) fn prepared(value: &Value, action: Action) -> Game {
     ] {
         game.load_internal_card(number, &empty).unwrap();
     }
+    game.load_internal_card("played-spell", &spell_material()).unwrap();
     game
+}
+
+// A synthetic spell supplies a real paid card-play boundary without admitting another official card.
+fn spell_material() -> WellFormedCardProgram {
+    let mut card = producer_steps(vec![]).card().clone();
+    let located = card.abilities.first_mut().unwrap();
+    located.source.card_id = "played-spell".into();
+    located.source.card_no = "played-spell".into();
+    let ability = &mut located.node;
+    ability.kind = AbilityKind::Spell;
+    ability.active_zones = vec![ZoneKind::Resolution];
+    ability.play.as_mut().unwrap().costs = CostSpec::Ordered {
+        steps: vec![CostStep {
+            instruction: Box::new(Instruction {
+                id: InstructionId(1),
+                receipt: ReceiptId(1),
+                actor: PlayerRef::Controller {},
+                source: ability.source.clone(),
+                precondition: None,
+                context: InstructionContext::Cost,
+                action: Action::Resource {
+                    player: PlayerRef::Controller {},
+                    resource: Resource::PpCurrent,
+                    operation: ResourceOperation::Pay,
+                    amount: Expr::Literal(Int(1)),
+                },
+            }),
+            materials: None,
+        }],
+    };
+    WellFormedCardProgram::check(card).unwrap()
 }
 
 pub(super) fn finish_checks(game: &mut Game) {

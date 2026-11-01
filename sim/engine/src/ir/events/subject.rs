@@ -1,15 +1,19 @@
 //! Public event subscriptions share one closed plan over the committed event subject.
 use crate::ir::{
-    Binding, Bool, BoolRead, BooleanState, CardKind, CardName, Characteristics,
-    CharacteristicsFields, ClassFrozen, ClassId, DestroyEvent, EnterExEvent, EnterFieldEvent,
-    EventSnapshotPolicy, EvolveEvent, Expr, Info, KindFrozen, LeaveFieldEvent, NamesFrozen,
-    ObjectFrozen, ObjectOperand, ObjectRef, ObjectView, PlayerFrozen, PlayerId, PlayerRead,
-    PlayerRef, Predicate, Role, SnapshotFields, TraitId, TraitsFrozen, ZoneFrozen, ZoneKind,
-    ZoneOperation,
+    Binding, Bool, BoolRead, BooleanState, CardKind, CardName, CharacteristicView, Characteristics,
+    CharacteristicsFields, ClassFrozen, ClassId, ClassRead, DestroyEvent, EnterExEvent,
+    EnterFieldEvent, EventContext, EventSnapshotPolicy, EvolveEvent, Expr, Info, KindFrozen,
+    KindRead, LeaveFieldEvent, NamesFrozen, NamesRead, ObjectFrozen, ObjectOperand, ObjectRef,
+    ObjectView, PlayEvent, PlayerFrozen, PlayerId, PlayerRead, PlayerRef, Predicate, Role,
+    SnapshotFields, TraitId, TraitsFrozen, TraitsRead, ZoneFrozen, ZoneKind, ZoneOperation,
 };
 
 #[derive(Clone, Copy)]
 pub(crate) enum SubjectFields {
+    Played {
+        event: Binding<PlayEvent>,
+        card: Binding<ObjectRef>,
+    },
     Entry(Binding<EnterFieldEvent>),
     Destroy(Binding<DestroyEvent>),
     Evolve(Binding<EvolveEvent>),
@@ -18,12 +22,23 @@ pub(crate) enum SubjectFields {
     Ex(Binding<EnterExEvent>),
 }
 
+fn played_view(event: Binding<PlayEvent>, card: Binding<ObjectRef>) -> ObjectView {
+    ObjectView::EventSnapshot {
+        object: Box::new(ObjectOperand::FromExpression {
+            value: Box::new(Expr::Bound(card)),
+        }),
+        event: EventContext::Play { event },
+        policy: EventSnapshotPolicy::AtReveal,
+    }
+}
+
 impl SubjectFields {
     fn object(self) -> Expr<ObjectRef> {
         Expr::Frozen(Box::new(match self {
             Self::Cemetery(event) | Self::Leave(event) => {
                 ObjectFrozen::LeaveFieldObjectBefore { event }
             }
+            Self::Played { card, .. } => return Expr::Bound(card),
             Self::Entry(event) => ObjectFrozen::EnterFieldObject { event },
             Self::Destroy(event) => ObjectFrozen::DestroyObjectBefore { event },
             Self::Evolve(event) => ObjectFrozen::EvolveSubject { event },
@@ -32,6 +47,9 @@ impl SubjectFields {
     }
     fn controller(self) -> Expr<PlayerRef> {
         match self {
+            Self::Played { event, .. } => {
+                Expr::Frozen(Box::new(PlayerFrozen::PlayController { event }))
+            }
             Self::Cemetery(event) | Self::Leave(event) => {
                 Expr::Frozen(Box::new(PlayerFrozen::LeaveFieldController { event }))
             }
@@ -55,6 +73,12 @@ impl SubjectFields {
     }
     fn kind(self) -> Expr<CardKind> {
         Expr::Frozen(Box::new(match self {
+            Self::Played { event, card } => {
+                return Expr::Live(Box::new(KindRead::Kind {
+                    object: played_view(event, card),
+                    view: CharacteristicView::Effective,
+                }));
+            }
             Self::Entry(event) => KindFrozen::Characters {
                 characters: Expr::Frozen(Box::new(CharacteristicsFields::EnterFieldCharacters {
                     event,
@@ -80,6 +104,12 @@ impl SubjectFields {
     }
     fn traits(self) -> Expr<Vec<TraitId>> {
         Expr::Frozen(Box::new(match self {
+            Self::Played { event, card } => {
+                return Expr::Live(Box::new(TraitsRead::Traits {
+                    object: played_view(event, card),
+                    view: CharacteristicView::Effective,
+                }));
+            }
             Self::Entry(event) => TraitsFrozen::Characters {
                 characters: Expr::Frozen(Box::new(CharacteristicsFields::EnterFieldCharacters {
                     event,
@@ -105,6 +135,11 @@ impl SubjectFields {
     }
     fn names(self) -> Expr<Vec<CardName>> {
         Expr::Frozen(Box::new(match self {
+            Self::Played { event, card } => {
+                return Expr::Live(Box::new(NamesRead::Names {
+                    object: played_view(event, card),
+                }));
+            }
             Self::Entry(event) => NamesFrozen::Characters {
                 characters: Expr::Frozen(Box::new(CharacteristicsFields::EnterFieldCharacters {
                     event,
@@ -130,6 +165,12 @@ impl SubjectFields {
     }
     fn class(self) -> Expr<Info<ClassId>> {
         let field = match self {
+            Self::Played { event, card } => {
+                return Expr::Live(Box::new(ClassRead::Class {
+                    object: played_view(event, card),
+                    view: CharacteristicView::Effective,
+                }));
+            }
             Self::Cemetery(event) | Self::Leave(event) => ClassFrozen::Snapshot {
                 object: Expr::Frozen(Box::new(SnapshotFields::LeaveFieldLki { event })),
             },
@@ -156,6 +197,7 @@ impl SubjectFields {
     }
     fn token(self) -> Option<Expr<Bool>> {
         let object = match self {
+            Self::Played { event, card } => played_view(event, card),
             Self::Cemetery(event) | Self::Leave(event) => ObjectView::Snapshot {
                 value: Box::new(Expr::Frozen(Box::new(SnapshotFields::LeaveFieldLki {
                     event,
@@ -175,6 +217,7 @@ impl SubjectFields {
     }
     pub(crate) const fn view(self) -> EventSnapshotPolicy {
         match self {
+            Self::Played { .. } => EventSnapshotPolicy::AtReveal,
             Self::Cemetery(_) | Self::Leave(_) | Self::Destroy(_) => {
                 EventSnapshotPolicy::BeforeExit
             }
@@ -202,6 +245,13 @@ impl SubjectFields {
             })),
         })))
     }
+}
+
+pub(crate) struct SubjectInformation<'subject> {
+    pub(crate) kind: CardKind,
+    pub(crate) traits: &'subject [TraitId],
+    pub(crate) names: &'subject [CardName],
+    pub(crate) class: Option<&'subject ClassId>,
 }
 
 #[derive(Clone, Debug, Default)]
@@ -377,6 +427,30 @@ impl SubjectFilter {
         active: PlayerId,
         token: bool,
     ) -> bool {
+        self.matches_information(
+            &SubjectInformation {
+                kind: characters.kind,
+                traits: &characters.traits,
+                names: &characters.names,
+                class: characters.class.as_ref(),
+            },
+            same,
+            observer_controller,
+            subject_controller,
+            active,
+            token,
+        )
+    }
+
+    pub(crate) fn matches_information(
+        &self,
+        characters: &SubjectInformation<'_>,
+        same: bool,
+        observer_controller: PlayerId,
+        subject_controller: PlayerId,
+        active: PlayerId,
+        token: bool,
+    ) -> bool {
         self.token.is_none_or(|expected| expected == token)
             && self.itself.is_none_or(|itself| itself == same)
             && self
@@ -394,7 +468,7 @@ impl SubjectFilter {
             && self
                 .class
                 .as_ref()
-                .is_none_or(|class| characters.class.as_ref() == Some(class))
+                .is_none_or(|class| characters.class == Some(class))
             && (!self.own_turn || active == observer_controller)
     }
 }

@@ -1,15 +1,16 @@
-//! Play admission captures cemetery observers before the Spell body can move them.
+//! Committed card plays capture current observers before entry or Spell body effects.
 use super::{
     Ability, AbilityKind, Cause, EventPayload, EventSnapshotPolicy, Game, Result, SnapshotId,
     TriggerAggregation, ZoneKind, invalid, player_id, unsupported,
 };
 use crate::game::internal::Execution;
 use crate::ir::events::played::filter;
+use crate::ir::events::subject::SubjectInformation;
 use crate::ir::optional_payment;
 use crate::ir::{
-    Action, Control, CostSpec, Located, MoveDestination, MoveReason, Node, ObjectOperand,
-    PlayEvent, PlaySubject, PlayerRef, Program, Requirements, RuntimeReceiptId, RuntimeZoneRef,
-    Selector,
+    Action, CardKind, CardName, ClassId, Control, LimitSpec, Located, MoveDestination, MoveReason,
+    Node, ObjectOperand, PlayEvent, PlaySubject, PlayerId, PlayerRef, Program, ReceiptId,
+    Requirements, RuntimeReceiptId, RuntimeZoneRef, Selector, TraitId,
 };
 
 use alloc::collections::BTreeSet;
@@ -25,11 +26,13 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
     if ability.kind != AbilityKind::Triggered
         || !optional_payment::trigger_play(ability)
         || trigger.view != EventSnapshotPolicy::AtReveal
-        || !cemetery_body(ability)
-        || trigger.limit.is_some()
+        || (ability.active_zones == [ZoneKind::Cemetery] && !cemetery_body(ability))
+        || trigger
+            .limit
+            .is_some_and(|limit| limit != LimitSpec::once_per_turn())
         || trigger.aggregation != (TriggerAggregation::PerFact {})
     {
-        return Err(unsupported("printed cemetery per-fact card Play header"));
+        return Err(unsupported("printed per-fact card Play header"));
     }
     Ok(true)
 }
@@ -119,15 +122,112 @@ fn field_return_paths(program: &Program, prefix: &str, paths: &mut BTreeSet<Stri
     }
 }
 
+struct PlayedInformation {
+    kind: CardKind,
+    token: bool,
+    class: ClassId,
+    traits: Vec<TraitId>,
+    names: Vec<CardName>,
+}
+
 #[expect(
     clippy::multiple_inherent_impl,
-    reason = "The card play commit boundary owns cemetery trigger admission."
+    reason = "The card play commit boundary owns observer admission."
 )]
 impl Game {
+    // No admitted hand/EX modifier changes class or traits; this subset avoids unrelated title bindings.
+    fn played_information(&self, source: &str) -> Result<PlayedInformation> {
+        let kind = match self.object_type(source)? {
+            kind if kind.contains("フォロワー") => CardKind::Follower,
+            "スペル" | "スペル・トークン" | "スペル・アドバンス" => {
+                CardKind::Spell
+            }
+            "アミュレット" | "アミュレット・トークン" => CardKind::Amulet,
+            _ => return Err(unsupported("played card kind")),
+        };
+        let token = self.object_type(source)?.contains("トークン");
+        let face = self.face(source)?;
+        let class = ClassId(
+            face["card_class"]
+                .as_str()
+                .ok_or_else(|| invalid("missing played class"))?
+                .into(),
+        );
+        let traits = face["traits"]
+            .as_array()
+            .ok_or_else(|| invalid("missing played traits"))?
+            .iter()
+            .map(|value| {
+                value
+                    .as_str()
+                    .map(|text| TraitId(text.into()))
+                    .ok_or_else(|| invalid("invalid played trait"))
+            })
+            .collect::<Result<Vec<_>>>()?;
+        let names = self.card_names(source)?.into_iter().map(CardName).collect();
+        Ok(PlayedInformation {
+            kind,
+            token,
+            class,
+            traits,
+            names,
+        })
+    }
+
+    fn played_observers(
+        &self,
+        source: &str,
+        info: &PlayedInformation,
+        actor: PlayerId,
+    ) -> Result<Vec<(String, Located<Ability>)>> {
+        let subject = SubjectInformation {
+            kind: info.kind,
+            class: Some(&info.class),
+            traits: &info.traits,
+            names: &info.names,
+        };
+        let active = player_id(self.active())?;
+        let mut observers = self.field_ids();
+        observers.extend(self.zone_ids("P1", "cemetery"));
+        observers.extend(self.zone_ids("P2", "cemetery"));
+        let mut matched = Vec::new();
+        for holder in observers {
+            let zone = if self.object(&holder)?.zone == "field" {
+                ZoneKind::Field
+            } else {
+                ZoneKind::Cemetery
+            };
+            let (card, _) = self.internal_effective_print(&holder)?;
+            if !self.card_runtime.is_loaded(&card) {
+                if zone == ZoneKind::Field {
+                    self.require_internal_abilities(&holder, "field Play observer")?;
+                }
+                continue;
+            }
+            let controller = player_id(&self.object(&holder)?.controller)?;
+            for ability in self.internal_printed_abilities(&holder)? {
+                if ability.node.active_zones == [zone]
+                    && let Some(plan) = filter(&ability.node)
+                    && plan.subject.matches_information(
+                        &subject,
+                        holder == source,
+                        controller,
+                        actor,
+                        active,
+                        info.token,
+                    )
+                {
+                    matched.push((holder.clone(), ability));
+                }
+            }
+        }
+        Ok(matched)
+    }
+
     pub(in crate::game::internal) fn internal_played_card_events(
         &mut self,
         execution: &Execution,
-        costs: &CostSpec,
+        cost: ReceiptId,
     ) -> Result<()> {
         if !self.card_runtime.definitions.cards.values().any(|program| {
             program
@@ -138,54 +238,24 @@ impl Game {
         }) {
             return Ok(());
         }
+        if !execution.receipts.contains_key(&cost) {
+            return Err(invalid("missing committed card payment"));
+        }
         let actor = execution.context.controller;
-        if actor != player_id(self.active())? {
-            return Ok(());
-        }
-        if !matches!(
-            self.object_type(&execution.context.source)?,
-            "スペル" | "スペル・トークン" | "スペル・アドバンス"
-        ) {
-            return Ok(());
-        }
-        // This subscription reads only class; a full snapshot would require unrelated title bindings.
-        let class = self.face(&execution.context.source)?["card_class"]
-            .as_str()
-            .ok_or_else(|| invalid("missing played card class"))?
-            .to_owned();
-        let mut matched = Vec::new();
-        for holder in self.zone_ids(super::super::seat_name(actor)?, "cemetery") {
-            let (card, _) = self.internal_effective_print(&holder)?;
-            if !self.card_runtime.is_loaded(&card)
-                || player_id(&self.object(&holder)?.controller)? != actor
-            {
-                continue;
-            }
-            for ability in self.internal_printed_abilities(&holder)? {
-                if let Some(plan) = filter(&ability.node)
-                    && class == plan.class.0
-                {
-                    matched.push((holder.clone(), ability));
-                }
-            }
-        }
+        let source = &execution.context.source;
+        let info = self.played_information(source)?;
+        let matched = self.played_observers(source, &info, actor)?;
         if matched.is_empty() {
             return Ok(());
         }
-        let CostSpec::Ordered { steps } = costs else {
-            return Err(unsupported("card play costs"));
-        };
-        let intrinsic = steps
-            .first()
-            .ok_or_else(|| invalid("missing intrinsic Spell payment"))?;
-        let from = match self.object(&execution.context.source)?.state["entered_from"].as_str() {
+        let from = match self.object(source)?.state["entered_from"].as_str() {
             Some("hand") => ZoneKind::Hand,
             Some("ex") => ZoneKind::Ex,
             _ => return Err(unsupported("card Play origin")),
         };
         let event = PlayEvent {
             subject: PlaySubject::Card {
-                object: self.internal_current_reference(&execution.context.source)?,
+                object: self.internal_current_reference(source)?,
             },
             controller: actor,
             origin_zone: RuntimeZoneRef {
@@ -194,7 +264,7 @@ impl Game {
             },
             cost: RuntimeReceiptId {
                 execution: execution.id,
-                slot: intrinsic.instruction.receipt,
+                slot: cost,
             },
         };
         let header = self.pending_header(
