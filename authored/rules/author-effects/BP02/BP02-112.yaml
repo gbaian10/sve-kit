@@ -1,0 +1,34 @@
+cards:
+  BP02-112:
+    abilities:
+      - keywords:
+          - quick
+        line: 1
+      - line: 2
+        spell:
+          do:
+            - damage:
+                instead:
+                  - if:
+                      exists:
+                        in: victim
+                        kind: evolve_follower
+                    n: 4
+                n: 3
+                to: victim
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-01"
+format: 2
+kind: author_effect_set

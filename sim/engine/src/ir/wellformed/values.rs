@@ -6,7 +6,7 @@ use super::{
 };
 use crate::ir::{
     AbilitiesRead, AbilityPredicate, AbilityReference, BoolFrozen, CaptureTime, CharacteristicView,
-    ExecutionRef, NumberRead, PaymentReference, PlayerRead,
+    ExecutionRef, NumberRead, PaymentReference, PlayerRead, PostureRead,
 };
 use crate::ir::{
     CardKind, CardName, ClassRead, EventSnapshotPolicy, Info, KindRead, MemberProjection,
@@ -272,6 +272,13 @@ impl Checker {
                 self.natural(right)
             }
             Predicate::Exists { objects } => self.selector(objects),
+            Predicate::PostureEquals {
+                left: Expr::Live(read),
+                right: Expr::Literal(_),
+            } if !self.event_capture() => {
+                let PostureRead::Posture { object } = read.as_ref();
+                self.view(object)
+            }
             Predicate::KindEquals { left, right } => {
                 self.card_kind(left)?;
                 self.card_kind(right)

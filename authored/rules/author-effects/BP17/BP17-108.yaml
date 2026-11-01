@@ -1,0 +1,40 @@
+cards:
+  BP17-108:
+    abilities:
+      - line: 1
+        play:
+          cost_delta:
+            delta: -1
+            if:
+              exists:
+                kind: follower
+                name_contains: マーロン
+                who: self
+                zone: field
+      - line: 2
+        spell:
+          do:
+            - damage:
+                n:
+                  count:
+                    kind: follower
+                    trait: 信仰
+                    who: self
+                    zone: field
+                to: victim
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-01"
+format: 2
+kind: author_effect_set

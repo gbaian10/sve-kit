@@ -619,3 +619,6 @@ mod play_restrictions;
 
 #[path = "card/look_cost.rs"]
 mod look_cost;
+
+#[path = "card/query_conditions.rs"]
+mod query_conditions;

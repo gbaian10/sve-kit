@@ -452,7 +452,7 @@ fn public_exists_condition_rejects_private_zones_and_unsupported_filters() {
     for query in [
         json!({"who":"self","zone":"hand","kind":"follower","other":true}),
         json!({"who":"self","zone":"field","not_trait":"魔法使い","other":true}),
-        json!({"who":"self","zone":"field","hp_le":3,"other":true}),
+        json!({"who":"self","zone":"field","power_ge":3,"other":true}),
     ] {
         lowerer()
             .lower_with_printed_costs(

@@ -171,7 +171,7 @@ impl ActivationZone {
 #[derive(Deserialize)]
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum Cost {
-    Short(CostOperation),
+    Short(Box<CostOperation>),
     Ordered { steps: Vec<CostOperation> },
 }
 
@@ -1317,6 +1317,36 @@ pub(super) struct PublicQuery {
     pub class: Option<String>,
     pub not_class: Option<String>,
     pub token: Option<bool>,
+    pub orig_cost_eq: Option<u64>,
+    pub orig_cost_le: Option<u64>,
+    pub orig_cost_ge: Option<u64>,
+    pub cost_eq: Option<u64>,
+    pub cost_le: Option<u64>,
+    pub cost_ge: Option<u64>,
+    pub hp_le: Option<u64>,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged)]
+pub(super) enum ExistsQuery {
+    Public(PublicQuery),
+    Selected(SelectedQuery),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct SelectedQuery {
+    #[serde(rename = "in")]
+    pub reference: String,
+    pub kind: Option<SearchKind>,
+    pub class: Option<String>,
+    pub not_class: Option<String>,
+    pub r#trait: Option<String>,
+    #[serde(default)]
+    pub traits_all: Vec<String>,
+    pub name: Option<String>,
+    pub name_contains: Option<String>,
+    pub acted: Option<bool>,
 }
 
 #[derive(Deserialize)]
@@ -1383,7 +1413,7 @@ pub(super) enum Condition {
     EnteredFrom(EntryOriginCondition),
     EnteredBy(EntryCondition),
     PlayedFrom(PlayedFromCondition),
-    Exists(PublicQuery),
+    Exists(Box<ExistsQuery>),
     Awakened(bool),
     LeaderLife(PlayerThreshold),
 
@@ -1393,7 +1423,7 @@ pub(super) enum Condition {
     Necro(u64),
     Did(String),
     Paid(PaidReceipt),
-    Cmp(BodyComparison),
+    Cmp(Box<BodyComparison>),
     All(Vec<Self>),
     Any(Vec<Self>),
     Not(Box<Self>),

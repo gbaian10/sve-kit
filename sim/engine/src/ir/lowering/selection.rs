@@ -219,6 +219,7 @@ impl BodyContext<'_> {
 pub(super) struct ObjectFilter<'query> {
     pub face_up: Option<bool>,
     pub racing: Option<bool>,
+    pub acted: Option<bool>,
     pub kind: Option<&'query ast::SearchKind>,
     pub trait_id: Option<&'query str>,
     pub all_traits: &'query [String],
@@ -266,6 +267,25 @@ impl<'query> From<&'query ast::PublicQuery> for ObjectFilter<'query> {
             class: query.class.as_deref(),
             not_class: query.not_class.as_deref(),
             token: query.token,
+            cost: [query.cost_eq, query.cost_le, query.cost_ge],
+            original_cost: [query.orig_cost_eq, query.orig_cost_le, query.orig_cost_ge],
+            hp_at_most: query.hp_le,
+            ..Self::default()
+        }
+    }
+}
+
+impl<'query> From<&'query ast::SelectedQuery> for ObjectFilter<'query> {
+    fn from(query: &'query ast::SelectedQuery) -> Self {
+        Self {
+            kind: query.kind.as_ref(),
+            trait_id: query.r#trait.as_deref(),
+            all_traits: &query.traits_all,
+            class: query.class.as_deref(),
+            not_class: query.not_class.as_deref(),
+            name: query.name.as_deref(),
+            contains: query.name_contains.as_deref(),
+            acted: query.acted,
             ..Self::default()
         }
     }
@@ -350,23 +370,7 @@ pub(super) fn field_filter(
             });
         }
     }
-    for (expected, property) in [
-        (filter.token, super::super::BooleanState::TokenStatus),
-        (filter.face_up, super::super::BooleanState::FaceUp),
-        (filter.racing, super::super::BooleanState::Racing),
-    ] {
-        if let Some(expected) = expected {
-            let predicate = super::Expr::Live(Box::new(super::super::BoolRead::State {
-                object: object.clone(),
-                property,
-            }));
-            predicates.push(if expected {
-                predicate
-            } else {
-                super::Expr::Compute(Box::new(super::Predicate::Not { predicate }))
-            });
-        }
-    }
+    predicates.extend(state_filters(filter, &object));
     predicates.extend(numeric_limits(filter, &object));
     for keyword in filter.keyword.into_iter().chain(
         filter
@@ -405,6 +409,45 @@ pub(super) fn field_filter(
         [_] => predicates.swap_remove(0),
         _ => super::Expr::Compute(Box::new(super::Predicate::And { predicates })),
     }
+}
+
+fn state_filters(
+    filter: &ObjectFilter<'_>,
+    object: &super::ObjectView,
+) -> Vec<super::Expr<super::Bool>> {
+    let mut predicates = Vec::new();
+    for (expected, property) in [
+        (filter.token, super::super::BooleanState::TokenStatus),
+        (filter.face_up, super::super::BooleanState::FaceUp),
+        (filter.racing, super::super::BooleanState::Racing),
+    ] {
+        if let Some(expected) = expected {
+            let predicate = super::Expr::Live(Box::new(super::super::BoolRead::State {
+                object: object.clone(),
+                property,
+            }));
+            predicates.push(if expected {
+                predicate
+            } else {
+                super::Expr::Compute(Box::new(super::Predicate::Not { predicate }))
+            });
+        }
+    }
+    if let Some(acted) = filter.acted {
+        predicates.push(super::Expr::Compute(Box::new(
+            super::Predicate::PostureEquals {
+                left: super::Expr::Live(Box::new(super::super::PostureRead::Posture {
+                    object: object.clone(),
+                })),
+                right: super::Expr::Literal(if acted {
+                    super::super::Posture::Acted
+                } else {
+                    super::super::Posture::Standing
+                }),
+            },
+        )));
+    }
+    predicates
 }
 
 fn numeric_limits(

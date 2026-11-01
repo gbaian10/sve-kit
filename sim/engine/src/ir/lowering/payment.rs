@@ -15,7 +15,7 @@ pub(super) fn lower(
     path: &str,
 ) -> Result<PlaySpec, LoweringError> {
     let operations = match cost {
-        ast::Cost::Short(operation) => from_ref(operation),
+        ast::Cost::Short(operation) => from_ref(operation.as_ref()),
         ast::Cost::Ordered { steps } => steps.as_slice(),
     };
     lower_operations(context, operations, source, path)
@@ -63,6 +63,13 @@ fn lower_operations(
                         r#trait: None,
                         name: Some("魔法のアイテム".to_owned()),
                         name_contains: None,
+                        cost_eq: None,
+                        cost_le: None,
+                        cost_ge: None,
+                        orig_cost_eq: None,
+                        orig_cost_le: None,
+                        orig_cost_ge: None,
+                        hp_le: None,
                         class: None,
                         not_class: None,
                         token: None,

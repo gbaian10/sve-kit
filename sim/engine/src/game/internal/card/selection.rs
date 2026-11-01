@@ -6,8 +6,9 @@ use crate::ir::{
     Binding, BoolRead, BooleanState, CardKind, CardName, Cardinality, CharacteristicView,
     ChoiceDomain, ClassRead, Comparison, Decision, DecisionKind, Declinable, Disjointness, Info,
     Int, IntOperation, KindRead, MemberProjection, NamesRead, NumberRead, ObjectOperand,
-    ObjectProperty, ObjectReceipt, ObjectView, PlayerRef, PlayerRelation, Predicate, ScopeId,
-    SelectionConstraint, SelectionGroup, Selector, Stat, TraitsRead, Visibility,
+    ObjectProperty, ObjectReceipt, ObjectView, PlayerRef, PlayerRelation, Posture, PostureRead,
+    Predicate, ScopeId, SelectionConstraint, SelectionGroup, Selector, Stat, TraitsRead,
+    Visibility,
 };
 use crate::ir::{Bool, Expr, SelectionView, ZoneKind};
 use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
@@ -482,6 +483,13 @@ pub(in crate::game::internal) fn field_selector(selector: &Selector) -> Result<(
 
 pub(in crate::game::internal) fn public_zone_selector(selector: &Selector) -> Result<()> {
     match selector {
+        Selector::Filter {
+            input,
+            binding,
+            predicate,
+        } if matches!(input.as_ref(), Selector::Bound { .. }) => {
+            check_predicate(predicate, *binding, false)
+        }
         Selector::Zone {
             zone: zone @ (ZoneKind::Field | ZoneKind::Ex | ZoneKind::Cemetery | ZoneKind::Evolve),
             view: SelectionView::Current {},
@@ -551,51 +559,6 @@ fn check_predicate(
             Ok(())
         }
         Expr::Compute(operation) => match operation.as_ref() {
-            Predicate::HasAbility {
-                abilities,
-                predicate,
-            } if super::super::search::keyword_filter(abilities, predicate, candidate) => Ok(()),
-            Predicate::ClassEquals {
-                left: Expr::Live(read),
-                right: Expr::Literal(Info::Present(class)),
-            } if !class.0.is_empty()
-                && matches!(read.as_ref(), ClassRead::Class { object, view: CharacteristicView::Effective } if candidate_view(object, candidate)) =>
-            {
-                Ok(())
-            }
-            Predicate::KindEquals {
-                left: Expr::Live(read),
-                right: Expr::Literal(_),
-            } if matches!(read.as_ref(), KindRead::Kind { object, view: CharacteristicView::Effective } if candidate_view(object, candidate)) => {
-                Ok(())
-            }
-            Predicate::NamesIntersect {
-                left: Expr::Live(read),
-                right,
-            } if permitted_names(right, allow_source_names)
-                && matches!(read.as_ref(), NamesRead::Names { object } if candidate_view(object, candidate)) =>
-            {
-                Ok(())
-            }
-            Predicate::NameContains {
-                object,
-                name: Expr::Literal(name),
-            } if !name.0.is_empty() && candidate_view(object, candidate) => Ok(()),
-            Predicate::HasTrait {
-                traits: Expr::Live(read),
-                trait_id,
-            } if !trait_id.0.is_empty()
-                && matches!(read.as_ref(), TraitsRead::Traits { object, view: CharacteristicView::Effective } if candidate_view(object, candidate)) =>
-            {
-                Ok(())
-            }
-            Predicate::CompareInt {
-                left: Expr::Compute(left),
-                comparison: Comparison::Equal | Comparison::LessEqual | Comparison::GreaterEqual,
-                right: Expr::Literal(Int(_)),
-            } if matches!(left.as_ref(), IntOperation::InformationOrZero { information } if candidate_number(information, candidate)) => {
-                Ok(())
-            }
             Predicate::And { predicates } | Predicate::Or { predicates }
                 if !predicates.is_empty() =>
             {
@@ -607,11 +570,72 @@ fn check_predicate(
             Predicate::Not { predicate } => {
                 check_predicate(predicate, candidate, allow_source_names)
             }
-            _ => Err(unsupported(
-                "unstable or unsupported field target predicate",
-            )),
+            _ => check_atomic_predicate(operation, candidate, allow_source_names),
         },
         _ => Err(unsupported("field target predicate")),
+    }
+}
+
+fn check_atomic_predicate(
+    operation: &Predicate,
+    candidate: Binding<ObjectRef>,
+    allow_source_names: bool,
+) -> Result<()> {
+    match operation {
+        Predicate::PostureEquals {
+            left: Expr::Live(read),
+            right: Expr::Literal(_),
+        } if matches!(read.as_ref(), PostureRead::Posture { object } if candidate_view(object, candidate)) => {
+            Ok(())
+        }
+        Predicate::HasAbility {
+            abilities,
+            predicate,
+        } if super::super::search::keyword_filter(abilities, predicate, candidate) => Ok(()),
+        Predicate::ClassEquals {
+            left: Expr::Live(read),
+            right: Expr::Literal(Info::Present(class)),
+        } if !class.0.is_empty()
+            && matches!(read.as_ref(), ClassRead::Class { object, view: CharacteristicView::Effective } if candidate_view(object, candidate)) =>
+        {
+            Ok(())
+        }
+        Predicate::KindEquals {
+            left: Expr::Live(read),
+            right: Expr::Literal(_),
+        } if matches!(read.as_ref(), KindRead::Kind { object, view: CharacteristicView::Effective } if candidate_view(object, candidate)) => {
+            Ok(())
+        }
+        Predicate::NamesIntersect {
+            left: Expr::Live(read),
+            right,
+        } if permitted_names(right, allow_source_names)
+            && matches!(read.as_ref(), NamesRead::Names { object } if candidate_view(object, candidate)) =>
+        {
+            Ok(())
+        }
+        Predicate::NameContains {
+            object,
+            name: Expr::Literal(name),
+        } if !name.0.is_empty() && candidate_view(object, candidate) => Ok(()),
+        Predicate::HasTrait {
+            traits: Expr::Live(read),
+            trait_id,
+        } if !trait_id.0.is_empty()
+            && matches!(read.as_ref(), TraitsRead::Traits { object, view: CharacteristicView::Effective } if candidate_view(object, candidate)) =>
+        {
+            Ok(())
+        }
+        Predicate::CompareInt {
+            left: Expr::Compute(left),
+            comparison: Comparison::Equal | Comparison::LessEqual | Comparison::GreaterEqual,
+            right: Expr::Literal(Int(_)),
+        } if matches!(left.as_ref(), IntOperation::InformationOrZero { information } if candidate_number(information, candidate)) => {
+            Ok(())
+        }
+        _ => Err(unsupported(
+            "unstable or unsupported field target predicate",
+        )),
     }
 }
 
@@ -643,6 +667,15 @@ pub(super) fn matches_candidate(game: &Game, id: &str, value: &Expr<Bool>) -> Re
         Expr::Literal(Bool(true)) => Ok(true),
         Expr::Live(read) => matches_state(game, id, read),
         Expr::Compute(operation) => match operation.as_ref() {
+            Predicate::PostureEquals {
+                right: Expr::Literal(posture),
+                ..
+            } => {
+                let object = game.object(id)?;
+                Ok(object.zone == "field"
+                    && object.state["acted"].as_bool().unwrap_or(false)
+                        == (*posture == Posture::Acted))
+            }
             Predicate::HasAbility { predicate, .. } => {
                 super::super::search::matches_keyword(game, id, predicate)
             }
@@ -1091,7 +1124,7 @@ impl Execution {
         self.public_target_objects(game, selector, true)
     }
 
-    fn public_target_objects(
+    pub(in crate::game::internal) fn public_target_objects(
         &self,
         game: &Game,
         selector: &Selector,
@@ -1149,6 +1182,19 @@ impl Execution {
                 };
                 let mut filtered = Vec::new();
                 for member in self.public_target_objects(game, input, allow_resolution_zones)? {
+                    if !private_look
+                        && game.object(self.object_id(member)?)?.generation != member.generation.0
+                    {
+                        continue;
+                    }
+                    if !private_look
+                        && !matches!(
+                            game.object(self.object_id(member)?)?.zone.as_str(),
+                            "field" | "ex" | "cemetery"
+                        )
+                    {
+                        return Err(unsupported("selected condition requires public objects"));
+                    }
                     if matches_candidate(game, self.object_id(member)?, &predicate)? {
                         filtered.push(member);
                     }
