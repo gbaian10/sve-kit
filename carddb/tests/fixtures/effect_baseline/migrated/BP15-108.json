@@ -1,0 +1,39 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "amount": {
+          "read": "self.power"
+        },
+        "op": "damage",
+        "subjects": {
+          "side": "opponent",
+          "type": "follower",
+          "zone": "field"
+        }
+      },
+      "event": "main_start",
+      "kind": "trigger",
+      "line": 1,
+      "side": "opponent"
+    },
+    {
+      "body": {
+        "op": "modify",
+        "power": 2,
+        "subjects": "self"
+      },
+      "costs": [
+        {
+          "amount": 2,
+          "op": "pp"
+        }
+      ],
+      "event": "enter",
+      "kind": "trigger",
+      "line": 2,
+      "subject": "self"
+    }
+  ],
+  "status": "complete"
+}
