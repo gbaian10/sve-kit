@@ -1,0 +1,40 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP18-008:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-11-01"
+    abilities:
+      - line: 1
+        play:
+          cost_delta:
+            minus:
+              - 0
+              - count:
+                  who: self
+                  zone: evolve_deck
+                  face_up: true
+                  kind: evolve_follower
+                  trait: 透京
+      - line: 2
+        spell:
+          targets:
+            - bind: victim
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                n: 5
+                to: victim
+            - damage:
+                n: 1
+                to:
+                  leader_of: victim
