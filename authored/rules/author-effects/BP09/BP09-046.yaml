@@ -1,0 +1,27 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP09-046:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-01"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        fanfare:
+          do:
+            - look:
+                bind: seen
+                top: { who: self, n: 1 }
+            - optional:
+                do:
+                  - move:
+                      ref: { in: seen }
+                      to: cemetery
