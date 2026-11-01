@@ -9,6 +9,15 @@ use crate::ir::events::change::{PostureFilter, StatFilter};
 use crate::ir::{ExecutionId, ObjectRef, PlayerId, RuntimeHolder};
 use serde_json::Value;
 
+fn subscribes(ability: &Ability) -> bool {
+    matches!(
+        ability.trigger.as_ref().map(|trigger| &trigger.on),
+        Some(TriggerCondition::Event {
+            pattern: EventPattern::Posture { .. } | EventPattern::StatChange { .. }
+        })
+    )
+}
+
 pub(super) fn check_header(ability: &Ability) -> Result<bool> {
     let Some(trigger) = &ability.trigger else {
         return Ok(false);
@@ -88,14 +97,11 @@ impl Game {
     ) -> Result<()> {
         if events.is_empty()
             || !self.card_runtime.definitions.cards.values().any(|program| {
-                program.card().abilities.iter().any(|ability| {
-                    matches!(
-                        ability.node.trigger.as_ref().map(|trigger| &trigger.on),
-                        Some(TriggerCondition::Event {
-                            pattern: EventPattern::Posture { .. } | EventPattern::StatChange { .. }
-                        })
-                    )
-                })
+                program
+                    .card()
+                    .abilities
+                    .iter()
+                    .any(|ability| subscribes(&ability.node))
             })
         {
             return Ok(());
@@ -152,6 +158,23 @@ impl Game {
     ) -> Result<Vec<(String, super::Located<Ability>)>> {
         let mut observers = Vec::new();
         for holder in self.field_ids() {
+            let (card, _) = self.internal_effective_print(&holder)?;
+            // Unadmitted evolution prints retain their existing pending-ability boundary.
+            if !self
+                .card_runtime
+                .definitions
+                .cards
+                .get(&card)
+                .is_some_and(|program| {
+                    program
+                        .card()
+                        .abilities
+                        .iter()
+                        .any(|ability| subscribes(&ability.node))
+                })
+            {
+                continue;
+            }
             let actor = player_id(&self.object(&holder)?.controller)?;
             let source = self.internal_current_reference(&holder)?;
             for ability in self.internal_printed_abilities(&holder)? {
