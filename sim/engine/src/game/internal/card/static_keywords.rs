@@ -151,7 +151,7 @@ impl Game {
     ) -> Result<Vec<(KeywordId, grant::GrantOrigin)>> {
         let recipient = self.object(holder)?;
         let mut keywords = Vec::new();
-        if recipient.zone != "field" || recipient.state["silenced"] == true {
+        if recipient.zone != "field" {
             return Ok(keywords);
         }
         for source in self.field_ids() {

@@ -142,11 +142,7 @@ impl Game {
             .state
             .ir_keywords
             .get(holder)
-            .filter(|state| {
-                object.zone == "field"
-                    && state.generation == object.generation
-                    && object.state["silenced"] != true
-            })
+            .filter(|state| object.zone == "field" && state.generation == object.generation)
             .into_iter()
             .flat_map(|state| &state.grants)
             .flat_map(|grant| grant.keywords.iter().cloned())
@@ -158,8 +154,18 @@ impl Game {
         holder: &str,
         ability: AbilityId,
     ) -> Result<KeywordProvider> {
-        let object = self.object(holder)?;
+        let generation = self.object(holder)?.generation;
         let (card, _) = self.internal_effective_print(holder)?;
+        self.keyword_provider_at(holder, generation, card, ability)
+    }
+
+    fn keyword_provider_at(
+        &self,
+        holder: &str,
+        generation: u64,
+        card: String,
+        ability: AbilityId,
+    ) -> Result<KeywordProvider> {
         let span = self
             .card_runtime
             .definitions
@@ -176,7 +182,7 @@ impl Game {
             .ok_or_else(|| invalid("keyword grant provider definition"))?;
         Ok(KeywordProvider {
             holder: holder.into(),
-            generation: object.generation,
+            generation,
             card,
             span,
             ability: ability.0,
@@ -200,7 +206,7 @@ impl Game {
 
     pub(super) fn internal_drain_grant(&self, holder: &str) -> Result<Option<GrantOrigin>> {
         let object = self.object(holder)?;
-        if object.zone != "field" || object.state["silenced"] == true {
+        if object.zone != "field" {
             return Ok(None);
         }
         if let Some(grant) = self
@@ -265,27 +271,12 @@ impl Game {
                 (*instance == authority.instance).then_some(card.clone())
             })
             .ok_or_else(|| invalid("keyword grant provider instance"))?;
-        let span = self
-            .card_runtime
-            .definitions
-            .cards
-            .get(&provider_card)
-            .and_then(|program| {
-                program
-                    .card()
-                    .abilities
-                    .iter()
-                    .find(|a| a.node.id == authority.definition)
-            })
-            .map(|ability| ability.source.clone())
-            .ok_or_else(|| invalid("keyword grant provider definition"))?;
-        Ok(KeywordProvider {
-            holder: execution.context.source.clone(),
-            generation: authority.holder.generation.0,
-            card: provider_card,
-            span,
-            ability: authority.definition.0,
-        })
+        self.keyword_provider_at(
+            &execution.context.source,
+            authority.holder.generation.0,
+            provider_card,
+            authority.definition,
+        )
     }
 
     pub(super) fn internal_grant(

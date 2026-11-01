@@ -236,6 +236,21 @@ fn bp16_089_creates_bats_and_grants_one_bat_rush_stats_and_drain() {
         assert_eq!(view["objects"]["source"]["acted"], true);
         assert_eq!(view["objects"]["source"]["keywords"], json!([]));
         attack(&mut game, bat, "enemy");
+        if lethal {
+            let after = game.projection(View::Referee).unwrap();
+            assert!(
+                !after["P1"]["field"]
+                    .as_array()
+                    .unwrap()
+                    .contains(&json!(bat))
+            );
+            assert!(
+                !after["P1"]["cemetery"]
+                    .as_array()
+                    .unwrap()
+                    .contains(&json!(bat))
+            );
+        }
         heal(&mut game, "BP16-089", 10, 2);
     }
 }
@@ -497,7 +512,8 @@ fn bp19_056_all_printings_pay_two_ex_cards_for_storm_and_drain_and_cannot_replay
             .play_internal_card("source", PlayerId { seat: 1 })
             .unwrap_err();
         assert!(
-            matches!(error, EngineFailure::Unsupported(reason) if reason == "card play holder, permission or timing")
+            matches!(&error, EngineFailure::Unsupported(reason) if reason == "internal D1 does not support card play holder, permission or timing"),
+            "EX play must be rejected by its printed restriction: {error:?}"
         );
     }
 }

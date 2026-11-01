@@ -61,10 +61,18 @@ fn grant_program(mut abilities: Vec<Located<Ability>>) -> WellFormedCardProgram 
 }
 
 fn position(program: &WellFormedCardProgram) -> Game {
+    position_with_silence(program, false, false)
+}
+
+fn position_with_silence(
+    program: &WellFormedCardProgram,
+    provider_silenced: bool,
+    recipient_silenced: bool,
+) -> Game {
     let mut initial = setup(1, json!([]));
     initial["players"]["P1"]["zones"]["hand"] = json!([]);
     initial["players"]["P1"]["zones"]["field"] = json!([
-        {"id":"s","card":"unit-amulet"}, {"id":"ally","card":"unit-follower"}, {"id":"second","card":"unit-follower"}
+        {"id":"s","card":"unit-amulet","state":{"silenced":provider_silenced}}, {"id":"ally","card":"unit-follower","state":{"silenced":recipient_silenced}}, {"id":"second","card":"unit-follower"}
     ]);
     let mut game = Game::new(
         static_keywords::keyword_catalog(),
@@ -282,5 +290,49 @@ fn turn_limited_drain_expires_at_the_actual_turn_boundary() {
     assert_eq!(
         game.projection(View::Referee).unwrap()["objects"]["ally"]["keywords"],
         json!([])
+    );
+}
+
+#[test]
+fn silencing_the_provider_removes_continuous_drain() {
+    let mut game = position_with_silence(&grant_program(vec![aura()]), true, false);
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["objects"]["ally"]["keywords"],
+        json!([])
+    );
+    strike(&mut game, "ally");
+    assert!(game.internal_pending_choice().unwrap().is_none());
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["leader"]["life"],
+        20_u8
+    );
+}
+
+#[test]
+fn a_later_grant_restores_drain_and_basic_keywords_after_printed_ability_loss() {
+    let mut applied = grant(DurationEnd::NoTemporalExpiry {});
+    if let Node::Instruction { instruction } = &mut applied.node
+        && let Action::Grant { abilities, .. } = &mut instruction.action
+    {
+        abilities.push(GrantedAbility::Keyword {
+            keyword: KeywordId::Rush,
+        });
+    }
+    let mut game =
+        position_with_silence(&grant_program(vec![ability(1, vec![applied])]), false, true);
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["objects"]["ally"]["keywords"],
+        json!([])
+    );
+    activate_grant(&mut game);
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["objects"]["ally"]["keywords"],
+        json!(["ドレイン", "突進"])
+    );
+    strike(&mut game, "ally");
+    heal(&mut game);
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["leader"]["life"],
+        22_u8
     );
 }
