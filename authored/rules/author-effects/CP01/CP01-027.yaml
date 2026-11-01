@@ -1,0 +1,37 @@
+cards:
+  CP01-027:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - line: 2
+        use: meal_entry.v1
+      - auto:
+          do:
+            - buff:
+                hp: -1
+                on: enemy
+                power: -1
+          on:
+            played:
+              sel:
+                kind: spell
+              who: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

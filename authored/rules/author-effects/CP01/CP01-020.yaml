@@ -1,0 +1,31 @@
+cards:
+  CP01-020:
+    abilities:
+      - line: 1
+        use: meal_entry.v1
+      - keywords:
+          - rush
+        line: 2
+      - fanfare:
+          cost:
+            pp: 3
+          do:
+            - search:
+                n: 1
+                sel:
+                  kind: follower
+                  orig_cost_eq: 3
+                  trait: ウマ娘
+                  who: self
+                  zone: deck
+                to: field
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

@@ -1,0 +1,41 @@
+cards:
+  CP01-072:
+    abilities:
+      - line: 1
+        use: meal_entry.v1
+      - auto:
+          do:
+            - grant:
+                keywords:
+                  - storm
+                on: this
+          on:
+            left_field:
+              sel:
+                kind: follower
+                trait: メジロ家
+              who: self
+        line: 2
+        scope: 1
+      - auto:
+          do:
+            - grant:
+                keywords:
+                  - storm
+                on: this
+          on:
+            left_field:
+              sel:
+                kind: amulet
+              who: self
+        line: 2
+        scope: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
