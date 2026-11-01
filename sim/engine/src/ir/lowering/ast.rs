@@ -153,6 +153,7 @@ pub(super) enum ActivationZones {
 #[derive(Clone, Copy, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum ActivationZone {
+    Hand,
     Cemetery,
     Field,
     Ex,
@@ -161,6 +162,7 @@ pub(super) enum ActivationZone {
 impl ActivationZone {
     pub(super) const fn kind(self) -> ZoneKind {
         match self {
+            Self::Hand => ZoneKind::Hand,
             Self::Cemetery => ZoneKind::Cemetery,
             Self::Field => ZoneKind::Field,
             Self::Ex => ZoneKind::Ex,
@@ -187,9 +189,17 @@ pub(super) enum CostOperation {
     ToEx(Material),
     Banish(Material),
     Act(Material),
-    Discard(HandMaterial),
+    Discard(DiscardCost),
+    BanishSelf(bool),
     ActSelf(bool),
     SelfToCemetery(bool),
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum DiscardCost {
+    Material(Box<HandMaterial>),
+    Reference { r#ref: String },
 }
 
 #[derive(Deserialize)]

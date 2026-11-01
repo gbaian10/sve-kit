@@ -620,7 +620,10 @@ impl Checker {
                             if objects == &[ObjectOperand::SourceHolder {}]
                                 && movement.to == (MoveDestination::Owners { zone: OwnerZone::Cemetery })
                                 && movement.position.is_none() && movement.order.is_none()
-                                && movement.initial_posture.is_none() && movement.entry_effects.is_empty());
+                                && movement.initial_posture.is_none() && movement.entry_effects.is_empty())
+                            || matches!(&step.instruction.action,
+                                Action::Banish { objects: Selector::Objects { objects } }
+                                    if objects == &[ObjectOperand::SourceHolder {}]);
                         let selected_move = matches!(&step.instruction.action,
                             Action::Move { objects: Selector::Bound { .. }, movement, reason: MoveReason::Put }
                                 if (matches!(movement.to, MoveDestination::Owners { zone: OwnerZone::Cemetery | OwnerZone::Hand })

@@ -10,11 +10,11 @@ use crate::ir::play_restrictions::card_restriction;
 use crate::ir::quick::{card_permission, is_printed_quick};
 use crate::ir::{
     Ability, AbilityId, AbilityInstanceId, AbilityKind, AbilityOrigin, AbilitySource, Action,
-    AssociationId, Control, CostSpec, DamageAmount, ExecutionId, Expr, FaceId, Generation,
-    InstructionContext, Int, KeywordId, Located, MealRaceOperation, MoveDestination, MoveReason,
-    Nat, Node, NumericChange, ObjectOperand, ObjectRef, OwnerZone, PlayerId, PlayerRef, Posture,
-    Quantity, QuantityUnit, Resource, ResourceOperation, RuleId, RuntimeAbilitySource, Selector,
-    SourceSpan, StepwiseMode, WellFormedCardProgram, ZoneKind,
+    AssociationId, Control, CostSpec, DamageAmount, DiscardMode, ExecutionId, Expr, FaceId,
+    Generation, InstructionContext, Int, KeywordId, Located, MealRaceOperation, MoveDestination,
+    MoveReason, Nat, Node, NumericChange, ObjectOperand, ObjectRef, OwnerZone, PlayerId, PlayerRef,
+    Posture, Quantity, QuantityUnit, Resource, ResourceOperation, RuleId, RuntimeAbilitySource,
+    Selector, SourceSpan, StepwiseMode, WellFormedCardProgram, ZoneKind,
 };
 use crate::ir::{Bool, ChoiceDomain, PreconditionKind, PreconditionReason};
 use crate::ir::{ConsumptionPoint, LimitSpec, ModeUse};
@@ -404,7 +404,7 @@ impl Game {
         Ok(())
     }
 
-    /// Activate a loaded, printed, field ability at the active player's main timing.
+    /// Activate a loaded, printed ability in its effective zone at the active player's main timing.
     /// Holder generation, origin, instance and execution are derived by authority.
     ///
     /// # Errors
@@ -479,7 +479,10 @@ impl Game {
         if ability.node.kind != AbilityKind::Activated
             || !matches!(
                 (object.zone.as_str(), ability.node.active_zones.as_slice()),
-                ("field", [ZoneKind::Field]) | ("ex", [ZoneKind::Ex])
+                ("field", [ZoneKind::Field])
+                    | ("ex", [ZoneKind::Ex])
+                    | ("hand", [ZoneKind::Hand])
+                    | ("cemetery", [ZoneKind::Cemetery])
             )
             || object.controller != seat
             || !self.internal_play_timing(actor, is_printed_quick(&ability.node))
@@ -716,6 +719,9 @@ fn activation_type(kind: &str, zones: &[ZoneKind]) -> bool {
                 | "アミュレット"
                 | "アミュレット・トークン"
         ),
+        [ZoneKind::Hand | ZoneKind::Cemetery] => {
+            matches!(kind, "フォロワー" | "スペル" | "アミュレット")
+        }
         [ZoneKind::Ex] => matches!(
             kind,
             "クレスト・トークン" | "スペル・トークン" | "アミュレット・トークン" | "アミュレット"
@@ -739,12 +745,16 @@ fn check_header(ability: &Ability) -> Result<()> {
     } else {
         ZoneKind::Field
     };
-    let ex_activation = ability.kind == AbilityKind::Activated
-        && ability.active_zones == [ZoneKind::Ex]
-        && matches!(ability.source.origin, AbilityOrigin::Printed { .. });
+    let zone_activation = ability.kind == AbilityKind::Activated
+        && matches!(
+            ability.active_zones.as_slice(),
+            [ZoneKind::Ex | ZoneKind::Hand | ZoneKind::Cemetery]
+        )
+        && (matches!(ability.source.origin, AbilityOrigin::Printed { .. })
+            || is_printed_quick(ability));
     let ex_trigger = triggers::ex_phase(ability);
     let played_trigger = filter(ability).is_some();
-    if (ability.active_zones != [zones] && !ex_activation && !ex_trigger && !played_trigger)
+    if (ability.active_zones != [zones] && !zone_activation && !ex_trigger && !played_trigger)
         || ability.source.holder != (ObjectOperand::SourceHolder {})
         || ability.source.controller != (PlayerRef::Controller {})
         || !ability.event_captures.is_empty()
@@ -803,17 +813,29 @@ fn check_costs(ability: &Ability, source: &SourceSpan) -> Result<()> {
         super::ordering::check_condition(predicate, source)?;
     }
     if is_printed_quick(ability)
-        && steps
-            .iter()
-            .rev()
-            .skip(1)
-            .any(|step| matches!(step.instruction.action, Action::Move { .. }))
+        && steps.iter().rev().skip(1).any(|step| {
+            matches!(
+                step.instruction.action,
+                Action::Move { .. }
+                    | Action::Banish {
+                        objects: Selector::Objects { .. }
+                    }
+            ) || hand_payment::source_discard(&step.instruction.action)
+        })
     {
         return Err(unsupported("Quick source movement must finish payment"));
     }
     let discards = steps
         .iter()
-        .filter(|step| matches!(step.instruction.action, Action::Discard { .. }))
+        .filter(|step| {
+            matches!(
+                step.instruction.action,
+                Action::Discard {
+                    mode: DiscardMode::Chosen { .. },
+                    ..
+                }
+            )
+        })
         .count();
     if discards > 1 || (discards > 0 && is_printed_quick(ability)) {
         return Err(unsupported("one non-Quick hand cost group"));
@@ -844,6 +866,9 @@ fn check_costs(ability: &Ability, source: &SourceSpan) -> Result<()> {
             Action::Posture {
                 objects: Selector::Objects { objects },
                 posture: Posture::Acted,
+            }
+            | Action::Banish {
+                objects: Selector::Objects { objects },
             } => objects == &[ObjectOperand::SourceHolder {}],
             Action::Move {
                 objects: Selector::Objects { objects },

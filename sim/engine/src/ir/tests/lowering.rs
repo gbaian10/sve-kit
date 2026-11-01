@@ -1312,24 +1312,29 @@ fn leader_targets_and_leader_follower_targets_keep_recipient_bindings() {
 }
 
 #[test]
-fn activated_zones_preserve_ex_and_reject_unimplemented_combinations() {
+fn activated_zones_preserve_effective_zones_and_reject_combinations() {
     let lowerer = lowerer();
-    for zone in [json!("field"), json!(["field"]), json!("ex"), json!(["ex"])] {
+    for (zone, expected) in [
+        (json!("field"), ZoneKind::Field),
+        (json!(["field"]), ZoneKind::Field),
+        (json!("ex"), ZoneKind::Ex),
+        (json!(["ex"]), ZoneKind::Ex),
+        (json!("hand"), ZoneKind::Hand),
+        (json!(["hand"]), ZoneKind::Hand),
+        (json!("cemetery"), ZoneKind::Cemetery),
+        (json!(["cemetery"]), ZoneKind::Cemetery),
+    ] {
         let mut tree = expanded::tree().clone();
         tree["cards"]["BP01-041"]["abilities"][0]["activate"]["zone"] = zone.clone();
         let cards = lowerer.lower(&tree).unwrap();
-        let expected = if zone == json!("ex") || zone == json!(["ex"]) {
-            ZoneKind::Ex
-        } else {
-            ZoneKind::Field
-        };
         assert_eq!(
             cards["BP01-041"].card().abilities[0].node.active_zones,
             [expected]
         );
     }
     for zone in [
-        json!("hand"),
+        json!("deck"),
+        json!(["hand", "cemetery"]),
         json!(["field", "ex"]),
         json!([]),
         json!(["ex", "ex"]),

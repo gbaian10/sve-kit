@@ -5,9 +5,9 @@ use crate::game::internal::{
     DecisionId, DistributionMember, InputDomain, Wait, discard::HandWait, search,
 };
 use crate::ir::{
-    Action, Cardinality, CostSpec, DiscardMode, Disjointness, Instruction, Int, Nat, ObjectRef,
-    PlayerRef, PlayerRelation, Quantity, QuantityUnit, SelectionConstraint, SelectionView,
-    Selector, ZoneKind,
+    Action, Bool, Cardinality, CostSpec, DiscardMode, Disjointness, Expr, Instruction, Int, Nat,
+    ObjectOperand, ObjectRef, PlayerRef, PlayerRelation, Quantity, QuantityUnit,
+    SelectionConstraint, SelectionView, Selector, ZoneKind,
 };
 
 fn selection(action: &Action) -> Result<&SelectionConstraint> {
@@ -55,8 +55,28 @@ fn selection(action: &Action) -> Result<&SelectionConstraint> {
     Ok(constraint)
 }
 
+pub(super) fn source_discard(action: &Action) -> bool {
+    let Action::Discard {
+        player: PlayerRef::Controller {},
+        mode: DiscardMode::All {
+            eligible: Selector::Intersection { sets },
+        },
+    } = action
+    else {
+        return false;
+    };
+    matches!(sets.as_slice(), [
+        Selector::Zone { players, zone: ZoneKind::Hand, view: SelectionView::Current {}, predicate, .. },
+        Selector::Objects { objects },
+    ] if players.relation == PlayerRelation::SelfPlayer
+        && players.relative_to == (PlayerRef::Controller {})
+        && players.cardinality == (Cardinality { minimum: Nat(1), maximum: Some(Nat(1)) })
+        && **predicate == Expr::Literal(Bool(true))
+        && objects == &[ObjectOperand::SourceHolder {}])
+}
+
 pub(super) fn check_cost(action: &Action) -> bool {
-    selection(action).is_ok()
+    source_discard(action) || selection(action).is_ok()
 }
 
 #[expect(
@@ -91,6 +111,7 @@ impl Game {
         for step in steps {
             let instruction = &step.instruction;
             if !matches!(instruction.action, Action::Discard { .. })
+                || source_discard(&instruction.action)
                 || execution.cost_discards.contains_key(&instruction.receipt)
             {
                 continue;
@@ -103,10 +124,16 @@ impl Game {
             let Selector::Zone { predicate, .. } = &group.selector else {
                 return Err(unsupported("hand cost selector"));
             };
+            let source_reserved = steps
+                .iter()
+                .any(|cost| source_discard(&cost.instruction.action));
             let seat = seat_name(execution.context.controller)?;
             let mut members = vec![];
             let mut candidates = vec![];
             for id in self.zone_ids(seat, "hand") {
+                if source_reserved && id == execution.context.source {
+                    continue;
+                }
                 let object = self.object(&id)?;
                 if object.owner != seat || object.controller != seat {
                     return Err(unsupported("foreign hand owner"));
@@ -151,14 +178,19 @@ impl Game {
         execution: &mut Execution,
         instruction: &Instruction,
     ) -> Result<(Quantity, Vec<ObjectRef>)> {
-        let constraint = selection(&instruction.action)?;
-        let members = execution
-            .cost_discards
-            .remove(&instruction.receipt)
-            .ok_or_else(|| invalid("missing hand cost selection"))?;
-        if u64::try_from(members.len()).map_err(invalid)? != constraint.cardinality.minimum.0 {
-            return Err(invalid("incomplete hand cost selection"));
-        }
+        let members = if source_discard(&instruction.action) {
+            vec![execution.object(self, &ObjectOperand::SourceHolder {})?]
+        } else {
+            let constraint = selection(&instruction.action)?;
+            let members = execution
+                .cost_discards
+                .remove(&instruction.receipt)
+                .ok_or_else(|| invalid("missing hand cost selection"))?;
+            if u64::try_from(members.len()).map_err(invalid)? != constraint.cardinality.minimum.0 {
+                return Err(invalid("incomplete hand cost selection"));
+            }
+            members
+        };
         let seat = seat_name(execution.context.controller)?;
         for member in &members {
             let object = self.object(execution.object_id(*member)?)?;

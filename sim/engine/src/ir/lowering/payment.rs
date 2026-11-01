@@ -42,7 +42,12 @@ fn lower_operations(
 ) -> Result<PlaySpec, LoweringError> {
     if operations
         .iter()
-        .filter(|op| matches!(op, ast::CostOperation::Discard(_)))
+        .filter(|op| {
+            matches!(
+                op,
+                ast::CostOperation::Discard(ast::DiscardCost::Material(_))
+            )
+        })
         .count()
         > 1
     {
@@ -106,7 +111,20 @@ fn lower_operations(
                 parameters.push(decision);
                 action
             }
-            ast::CostOperation::Discard(material) => {
+            ast::CostOperation::Discard(ast::DiscardCost::Reference { r#ref: name })
+                if name == "this" =>
+            {
+                Action::Discard {
+                    player: PlayerRef::Controller {},
+                    mode: super::super::DiscardMode::All {
+                        eligible: super::hand_payment::source(context.card_allocator, path)?,
+                    },
+                }
+            }
+            ast::CostOperation::BanishSelf(true) => Action::Banish {
+                objects: numeric::holder(),
+            },
+            ast::CostOperation::Discard(ast::DiscardCost::Material(material)) => {
                 super::hand_payment::lower(context.card_allocator, material, path)?
             }
             ast::CostOperation::Pp(amount) => Action::Resource {
@@ -143,7 +161,10 @@ fn lower_operations(
                 },
                 reason: MoveReason::Put,
             },
-            ast::CostOperation::ActSelf(false) | ast::CostOperation::SelfToCemetery(false) => {
+            ast::CostOperation::Discard(ast::DiscardCost::Reference { .. })
+            | ast::CostOperation::BanishSelf(false)
+            | ast::CostOperation::ActSelf(false)
+            | ast::CostOperation::SelfToCemetery(false) => {
                 return Err(unsupported(path));
             }
         };
@@ -186,6 +207,7 @@ fn material_operation(
         | ast::CostOperation::Pp(_)
         | ast::CostOperation::Lesson(_)
         | ast::CostOperation::LeaderLife(_)
+        | ast::CostOperation::BanishSelf(_)
         | ast::CostOperation::Discard(_)
         | ast::CostOperation::ActSelf(_)
         | ast::CostOperation::SelfToCemetery(_) => Err(unsupported(path)),

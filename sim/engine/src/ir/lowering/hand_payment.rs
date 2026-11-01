@@ -7,6 +7,29 @@ use crate::ir::{
     SelectionView, Selector,
 };
 
+pub(super) fn source(allocator: &mut Allocator, path: &str) -> Result<Selector, LoweringError> {
+    Ok(Selector::Intersection {
+        sets: vec![
+            Selector::Zone {
+                players: PlayerSet {
+                    relation: PlayerRelation::SelfPlayer,
+                    relative_to: PlayerRef::Controller {},
+                    cardinality: Cardinality {
+                        minimum: Nat(1),
+                        maximum: Some(Nat(1)),
+                    },
+                    text_quantifier: TextQuantifier::Implicit,
+                },
+                zone: ZoneKind::Hand,
+                view: SelectionView::Current {},
+                binding: Binding::new(allocator.id(path)?, allocator.scope(path)?),
+                predicate: Box::new(Expr::Literal(Bool(true))),
+            },
+            super::numeric::holder(),
+        ],
+    })
+}
+
 pub(super) fn lower(
     allocator: &mut Allocator,
     material: &ast::HandMaterial,

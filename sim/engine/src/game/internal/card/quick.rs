@@ -5,7 +5,7 @@ use super::{
     seat_name, unsupported,
 };
 use crate::ir::quick::{card_permission, is_printed_quick};
-use crate::ir::{AbilityId, Cardinality, Nat, TextQuantifier};
+use crate::ir::{AbilityId, Cardinality, Nat, TextQuantifier, ZoneKind};
 use crate::ir::{
     CardProgram, ChoiceDomain, Decision, DecisionId, DecisionKind, ExecutionId, PlayerRef,
     PlayerRelation, PlayerSet, Procedure, QuickWindow, Visibility, WellFormedProcedure,
@@ -226,7 +226,12 @@ impl Game {
                 } else {
                     ability.kind == AbilityKind::Activated
                         && is_printed_quick(ability)
-                        && object.zone == "field"
+                        && matches!(
+                            (object.zone.as_str(), ability.active_zones.as_slice()),
+                            ("field", [ZoneKind::Field])
+                                | ("hand", [ZoneKind::Hand])
+                                | ("cemetery", [ZoneKind::Cemetery])
+                        )
                         && self.object_type(holder)? == "フォロワー"
                 };
                 if !eligible || !self.internal_quick_preflight(holder, ability, actor, spell)? {

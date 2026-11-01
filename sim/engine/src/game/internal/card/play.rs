@@ -8,8 +8,8 @@ use crate::game::legal::subsets;
 use crate::ir::optional_payment;
 use crate::ir::quick::is_printed_quick;
 use crate::ir::{
-    AbilityQualification, Action, Bool, Cardinality, LimitSpec, ModeUse, ObjectId, ObjectRef,
-    PlaySpec, PlayerRef, RecipientSet, SelectionSnapshot, Selector, TurnId,
+    AbilityQualification, Action, Bool, Cardinality, LimitSpec, ModeUse, ObjectId, ObjectOperand,
+    ObjectRef, PlaySpec, PlayerRef, RecipientSet, SelectionSnapshot, Selector, TurnId,
 };
 use crate::ir::{
     ChoiceDomain, Control, CostSpec, Decision, DecisionId, DecisionKind, ExecutionRef, InputMode,
@@ -446,7 +446,28 @@ impl Game {
             }
         }
         execution.captures(&probe, &play.captures)?;
-        let CostSpec::Ordered { steps } = &play.costs else {
+        if !self.quick_costs_available(holder, &execution, &play.costs, actor, spell)? {
+            return Ok(false);
+        }
+        let groups = collect_modes(
+            ability
+                .body
+                .as_ref()
+                .ok_or_else(|| invalid("missing Quick body"))?,
+            false,
+        )?;
+        self.quick_mode_plan(&execution, &groups, play.parameters.clone().into())
+    }
+
+    fn quick_costs_available(
+        &self,
+        holder: &str,
+        execution: &Execution,
+        costs: &CostSpec,
+        actor: PlayerId,
+        spell: bool,
+    ) -> Result<bool> {
+        let CostSpec::Ordered { steps } = costs else {
             return Err(unsupported("Quick costs"));
         };
         let mut pp = int(&self.player(seat_name(actor)?)?.pp["current"]);
@@ -460,7 +481,7 @@ impl Game {
                     ..
                 } => {
                     let amount = if spell {
-                        self.internal_quote_card_cost(&execution)?
+                        self.internal_quote_card_cost(execution)?
                     } else {
                         *amount
                     };
@@ -508,18 +529,29 @@ impl Game {
                         return Ok(false);
                     }
                 }
+                Action::Discard { .. }
+                    if super::hand_payment::source_discard(&step.instruction.action) =>
+                {
+                    let object = self.object(holder)?;
+                    if object.zone != "hand" || object.owner != seat_name(actor)? {
+                        return Ok(false);
+                    }
+                }
+                Action::Banish {
+                    objects: Selector::Objects { objects },
+                } if objects == &[ObjectOperand::SourceHolder {}] => {
+                    let object = self.object(holder)?;
+                    if !matches!(object.zone.as_str(), "field" | "ex" | "cemetery")
+                        || object.owner != seat_name(actor)?
+                    {
+                        return Ok(false);
+                    }
+                }
                 Action::Move { .. } => {}
                 _ => return Err(unsupported("Quick cost proof")),
             }
         }
-        let groups = collect_modes(
-            ability
-                .body
-                .as_ref()
-                .ok_or_else(|| invalid("missing Quick body"))?,
-            false,
-        )?;
-        self.quick_mode_plan(&execution, &groups, play.parameters.clone().into())
+        Ok(true)
     }
 
     fn quick_mode_plan(

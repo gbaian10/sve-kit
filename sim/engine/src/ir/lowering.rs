@@ -571,12 +571,14 @@ fn active_zones(entry: &ast::Ability, path: &str) -> Result<Vec<ZoneKind>, Lower
         None => vec![ZoneKind::Field],
     };
     if entry.activate.is_some()
-        && (!matches!(zones.as_slice(), [ZoneKind::Field | ZoneKind::Ex])
-            || (zones == [ZoneKind::Ex]
-                && entry
-                    .activate
-                    .as_ref()
-                    .is_some_and(|head| head.quick == Some(true))))
+        && (!matches!(
+            zones.as_slice(),
+            [ZoneKind::Field | ZoneKind::Ex | ZoneKind::Hand | ZoneKind::Cemetery]
+        ) || (zones == [ZoneKind::Ex]
+            && entry
+                .activate
+                .as_ref()
+                .is_some_and(|head| head.quick == Some(true))))
     {
         return Err(unsupported(path));
     }
