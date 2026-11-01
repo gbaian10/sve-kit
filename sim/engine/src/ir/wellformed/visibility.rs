@@ -186,7 +186,8 @@ impl Checker {
     pub(super) fn movement_input_access(&self, action: &Action) -> Option<Visibility> {
         if let Action::Move { objects, .. }
         | Action::Destroy { objects }
-        | Action::Banish { objects } = action
+        | Action::Banish { objects }
+        | Action::Transform { objects, .. } = action
         {
             self.infer_access(|checker| checker.selector(objects))
         } else {

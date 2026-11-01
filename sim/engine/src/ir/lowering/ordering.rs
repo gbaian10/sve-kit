@@ -97,6 +97,7 @@ impl BodyContext<'_> {
             | ast::Step::SetLife(_)
             | ast::Step::Destroy(_)
             | ast::Step::Banish(_)
+            | ast::Step::Transform(_)
             | ast::Step::Act(_)
             | ast::Step::Stand(_)
             | ast::Step::Buff(_)

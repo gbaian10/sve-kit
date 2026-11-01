@@ -1,0 +1,28 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP02-061:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        fanfare:
+          targets:
+            - bind: changed
+              from:
+                who: all
+                zone: ex
+              n: 1
+          do:
+            - transform:
+                ref: changed
+                into: ドラゴン
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP01-T11

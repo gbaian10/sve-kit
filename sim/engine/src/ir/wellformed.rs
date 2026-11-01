@@ -619,6 +619,11 @@ impl Checker {
             | Action::Reveal { objects }
             | Action::FlipDown { objects }
             | Action::Posture { objects, .. } => self.selector(objects),
+            Action::Transform {
+                objects,
+                into: super::TokenAllocation::Single { .. },
+                entry_effects,
+            } if entry_effects.is_empty() => self.selector(objects),
             Action::Dice {
                 operation: DiceOperation::Roll {},
                 result,
@@ -903,6 +908,7 @@ const fn outcome(action: &Action) -> TypeId {
         Action::Move { .. } => TypeId::of::<super::MoveOutcome>(),
         Action::Destroy { .. } => TypeId::of::<super::DestroyOutcome>(),
         Action::Banish { .. } => TypeId::of::<super::BanishOutcome>(),
+        Action::Transform { .. } => TypeId::of::<super::TransformOutcome>(),
         Action::Search { .. } => TypeId::of::<super::SearchOutcome>(),
         Action::Order { .. } => TypeId::of::<super::OrderOutcome>(),
         Action::InstallEffect { .. }
@@ -912,7 +918,6 @@ const fn outcome(action: &Action) -> TypeId {
         | Action::RevealUntil { .. }
         | Action::Shuffle { .. }
         | Action::Evolve { .. }
-        | Action::Transform { .. }
         | Action::FlipUp { .. }
         | Action::Posture { .. }
         | Action::Resource { .. }

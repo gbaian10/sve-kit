@@ -31,6 +31,7 @@ mod quick;
 mod search;
 mod selection;
 mod tokens;
+mod transform;
 
 use super::{
     Ability, AbilityId, AbilityKind, AbilityOrigin, AbilityQualification, AbilitySource, Action,
@@ -922,6 +923,7 @@ struct BodyContext<'definitions> {
     players: BTreeMap<String, Binding<PlayerRef>>,
     searches: BTreeSet<String>,
     ex_outputs: BTreeMap<String, Selector>,
+    ex_targets: BTreeSet<String>,
     observations: BTreeMap<String, super::ObjectReceipt>,
     observed_targets: BTreeSet<String>,
     targets: BTreeMap<String, Binding<Selector>>,
@@ -958,6 +960,7 @@ impl<'definitions> BodyContext<'definitions> {
             players: BTreeMap::new(),
             searches: BTreeSet::new(),
             ex_outputs: BTreeMap::new(),
+            ex_targets: BTreeSet::new(),
             observations: BTreeMap::new(),
             observed_targets: BTreeSet::new(),
             targets: BTreeMap::new(),
@@ -1182,6 +1185,7 @@ impl<'definitions> BodyContext<'definitions> {
                 },
             }),
             ast::Step::Banish(value) => self.banish(value, path),
+            ast::Step::Transform(value) => self.transform(value, path),
             ast::Step::Act(value) | ast::Step::Stand(value) => Ok(Action::Posture {
                 objects: self.action_objects(value, path)?,
                 posture: if matches!(step, ast::Step::Act(_)) {

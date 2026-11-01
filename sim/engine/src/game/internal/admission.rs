@@ -344,6 +344,7 @@ fn check_action(action: &Action, source: &AbilitySource) -> Result<()> {
     }
     super::search::check_action(action)?;
     super::tokens::check_action(action)?;
+    super::transform::check_action(action)?;
     super::movement::check_action(action)?;
     super::resource::check_action(action)?;
     super::counters::check_action(action)?;
@@ -597,6 +598,9 @@ fn supported(code: &str) -> bool {
             | "action.destroy"
             | "shape.Action.Life"
             | "action.life"
+            | "shape.Action.Transform"
+            | "action.transform"
+            | "shape.TokenAllocation.Single"
             | "shape.Action.Banish"
             | "action.banish"
             | "shape.Action.Posture"

@@ -1,6 +1,6 @@
 use super::super::{Execution, Game, InputDomain, Result, Wait, invalid, seat_name};
 use crate::game::tokens::prints_for_names;
-use crate::ir::{DecisionId, Instruction, Node, PlayerId, ZoneKind, ZoneRef};
+use crate::ir::{DecisionId, Instruction, Node, PlayerId, ZoneKind};
 
 #[derive(Clone, Debug)]
 pub(in crate::game::internal) struct CapacityWait {
@@ -8,7 +8,7 @@ pub(in crate::game::internal) struct CapacityWait {
     pub(super) prints: Vec<String>,
     pub(super) names: Vec<String>,
     pub(super) choices: Vec<Vec<String>>,
-    pub(super) zone: ZoneRef,
+    pub(super) zone: ZoneKind,
     pub(super) actor: PlayerId,
     pub(super) available: usize,
 }
@@ -52,7 +52,7 @@ impl Game {
         prints: &[String],
     ) -> Result<()> {
         let seat = seat_name(wait.actor)?;
-        let zone = if wait.zone.kind == ZoneKind::Field {
+        let zone = if wait.zone == ZoneKind::Field {
             "field"
         } else {
             "ex"
@@ -64,7 +64,7 @@ impl Game {
         self.commit_tokens(
             execution,
             &wait.instruction,
-            wait.zone.kind,
+            wait.zone,
             ids,
             Node::Instruction {
                 instruction: Box::new(wait.instruction.clone()),

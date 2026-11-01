@@ -18,8 +18,8 @@ use crate::ir::{
     PlayerId, PlayerRef, PlayerRelation, PlayerResource, PlayerSet, PostureEvent, Predicate,
     Program, Quantity, ReceiptId, ReceiptLocation, RecipientSet, Requirements, ResolvedRecipients,
     RuntimeAbilitySource, RuntimeDamageRecipient, ScopeId, SearchOutcome, SearchReplacementAnswer,
-    Selector, SourceSpan, StepwiseAnswer, StepwiseMode, TokenOutcome, TriggerIcon, Visibility,
-    WellFormedProgram, ZoneKind,
+    Selector, SourceSpan, StepwiseAnswer, StepwiseMode, TokenOutcome, TransformOutcome,
+    TriggerIcon, Visibility, WellFormedProgram, ZoneKind,
 };
 use crate::ir::{
     AssociationId, BanishOutcome, DiscardEvent, DiscardOutcome, EvolveEvent, FaceId, PaymentResult,
@@ -58,6 +58,7 @@ mod reveal;
 mod search;
 mod terminal;
 mod tokens;
+mod transform;
 pub use terminal::Terminal;
 
 mod source;
@@ -285,6 +286,8 @@ pub enum InstructionOutcome {
     ExchangePayment(PaymentResult),
     /// One complete banishment with its original and resulting generations.
     Banish(BanishOutcome),
+    /// Original banished generations and freshly allocated replacement tokens.
+    Transform(TransformOutcome),
     /// One completely paid cost step; incomplete payment aborts the entire activation.
     Payment {
         /// Equal requested and actual quantity for a successful step.
@@ -1388,6 +1391,7 @@ impl Game {
                 self.internal_move(execution, &instruction, objects, None)?;
             }
             Action::Banish { objects } => self.internal_banish(execution, &instruction, objects)?,
+            Action::Transform { .. } => self.internal_transform(execution, &instruction)?,
             Action::Posture { objects, posture } => {
                 self.internal_posture(execution, &instruction, objects, *posture)?;
             }

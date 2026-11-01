@@ -1005,3 +1005,60 @@ fn card_play_costs_check_their_own_entry_and_keep_rejection_sources() {
             .contains("card_play_costs/0/modifiers/0/condition")
     );
 }
+
+#[test]
+fn single_transform_checks_bindings_and_keeps_allocated_variants_closed() {
+    let single = |objects| Action::Transform {
+        objects,
+        into: TokenAllocation::Single {
+            template: TokenTemplateId("synthetic".into()),
+        },
+        entry_effects: vec![],
+    };
+    accept(body(
+        1,
+        vec![instruction(
+            single(Selector::Objects {
+                objects: vec![ObjectOperand::SourceHolder {}],
+            }),
+            1,
+            "synthetic",
+        )],
+    ));
+    reject(
+        body(
+            1,
+            vec![instruction(
+                single(Selector::Bound {
+                    reference: Binding::new(99, ScopeId(1)),
+                }),
+                1,
+                "synthetic",
+            )],
+        ),
+        WellFormedReason::UnavailableBinding,
+    );
+    reject(
+        body(
+            1,
+            vec![instruction(
+                Action::Transform {
+                    objects: Selector::Objects {
+                        objects: vec![ObjectOperand::SourceHolder {}],
+                    },
+                    into: TokenAllocation::EachExactlyOnce {
+                        templates: vec![TokenTemplateId("synthetic".into())],
+                        total: Expr::Literal(Nat(1)),
+                        counts: Binding::new(99, ScopeId(1)),
+                        actor: PlayerRef::Controller {},
+                        decision: DecisionId(1),
+                    },
+                    entry_effects: vec![],
+                },
+                1,
+                "synthetic",
+            )],
+        ),
+        WellFormedReason::UnsupportedShape,
+    );
+}
