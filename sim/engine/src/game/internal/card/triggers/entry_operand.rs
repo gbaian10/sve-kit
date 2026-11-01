@@ -50,7 +50,7 @@ pub(in crate::game::internal) fn paths(
                 _ => {}
             },
             Node::Control {
-                control: Control::Sequence { body },
+                control: Control::Sequence { body } | Control::May { body, .. },
             } => paths(body, &format!("{path}/control/body"), event, allowed),
             Node::Control {
                 control:
@@ -93,7 +93,7 @@ pub(in crate::game::internal) fn mask_origin(
                         mask_origin(body, event);
                     }
                 }
-                Control::Sequence { body } => mask_origin(body, event),
+                Control::Sequence { body } | Control::May { body, .. } => mask_origin(body, event),
                 Control::Mode { modes, .. } => {
                     for mode in modes {
                         mask_origin(&mut mode.body, event);

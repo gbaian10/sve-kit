@@ -724,7 +724,7 @@ fn quantity(
 /// Only one top-level mode group is admitted; other instructions stay in the body.
 pub(super) fn choice_body(body: &ast::Body, path: &str) -> Result<bool, LoweringError> {
     if body.steps.iter().any(|step| matches!(step, ast::Step::If(branch)
-        if contains_choice(&branch.then) || branch.r#else.as_ref().is_some_and(|steps| contains_choice(steps)))) {
+        if contains_choice(&branch.then) || branch.r#else.as_ref().is_some_and(|continuation| contains_choice(continuation)))) {
         return Err(unsupported(path));
     }
     match body
@@ -742,6 +742,13 @@ pub(super) fn choice_body(body: &ast::Body, path: &str) -> Result<bool, Lowering
 fn contains_choice(steps: &[ast::Step]) -> bool {
     steps.iter().any(|step| match step {
         ast::Step::Choice(_) => true,
+        ast::Step::Optional(optional) => {
+            contains_choice(&optional.steps)
+                || optional
+                    .then
+                    .as_ref()
+                    .is_some_and(|continuation| contains_choice(continuation))
+        }
         ast::Step::EachPlayer(each) => each.stages.iter().any(|stage| contains_choice(stage)),
         ast::Step::If(branch) => {
             contains_choice(&branch.then)

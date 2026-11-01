@@ -6,7 +6,7 @@
 use super::*;
 use crate::rule_fixtures;
 use sve_engine::catalog::EngineIdentityInput;
-use sve_engine::game::internal::{DecisionView, InputDomain};
+use sve_engine::game::internal::{DecisionView, InputDomain, SearchAnswer};
 
 fn ex_catalog() -> Arc<Catalog> {
     let snapshot=[("unit-spell","スペル"),("unit-follower","フォロワー"),("lesson","スペル・トークン")].iter().map(|(number,kind)|json!({"number":number,"faces":[{"name":number,"card_class":"ニュートラル","card_type":kind,"cost":"1","power":"2","hp":"3","traits":[],"text":null,"sections":[]}]}).to_string()).collect::<Vec<_>>().join("\n");
@@ -464,4 +464,192 @@ fn formal_targets_still_reject_ex_source_objects() {
             if reason.contains("current public field object or EX card")
     ));
     assert_eq!(game.projection(View::Referee).unwrap(), before);
+}
+
+#[test]
+fn optional_body_can_choose_targets_but_cannot_export_a_conditional_binding() {
+    let mut input = tree(
+        &json!({"bind":"outer","from":{"who":"opp","zone":"field","kind":"follower"},"upto":1}),
+        &json!({"optional":{"do":[
+            {"choose":{"bind":"inner","from":{"who":"opp","zone":"field","kind":"follower"},"upto":1}},
+            {"damage":{"to":"inner","n":1}}
+        ]}}),
+    );
+    lowerer().lower(&input).unwrap();
+    input["cards"]["unit-follower"]["abilities"][0]["activate"]["do"]
+        .as_array_mut()
+        .unwrap()
+        .push(json!({"damage":{"to":"inner","n":1}}));
+    assert!(
+        lowerer().lower(&input).is_err(),
+        "declined optional body cannot provide an outer binding"
+    );
+}
+
+#[test]
+fn optional_resolution_skips_or_runs_nested_target_and_alternative_decisions() {
+    let mut input = tree(
+        &json!({"bind":"outer","from":{"who":"opp","zone":"field","kind":"follower"},"upto":1}),
+        &json!({"optional":{"do":[
+            {"choose":{"bind":"inner","from":{"who":"opp","zone":"field","kind":"follower"},"n":1}}
+        ],"then":[
+            {"either":{"options":[
+                [{"damage":{"to":"inner","n":1}}],
+                [{"damage":{"to":"inner","n":2}}]
+            ]}}
+        ]}}),
+    );
+    input["cards"]["unit-follower"]["abilities"][0]["activate"]["do"]
+        .as_array_mut()
+        .unwrap()
+        .remove(0);
+    let programs = lowerer().lower(&input).unwrap();
+    for accept in [false, true] {
+        let mut initial = setup(1, json!([]));
+        initial["players"]["P1"]["zones"]["hand"] = json!([]);
+        initial["players"]["P1"]["pp"] = json!({"current":10,"max":10});
+        initial["players"]["P1"]["zones"]["field"] =
+            json!([{"id":"source","card":"unit-follower"}]);
+        initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"unit-follower"}]);
+        let mut game = Game::new(
+            catalog(),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "nested-optional",
+        )
+        .unwrap();
+        game.load_internal_card("unit-follower", &programs["unit-follower"])
+            .unwrap();
+        let choice = awaiting(
+            game.activate_internal_card("source", AbilityId(1), PlayerId { seat: 1 })
+                .unwrap(),
+        );
+        let mut play = game
+            .answer_internal_card(
+                choice.actor,
+                choice.token,
+                Answer::Integer(Nat(u64::from(accept))),
+            )
+            .unwrap();
+        if accept {
+            let question = awaiting(play);
+            let InputDomain::Targets(domain) = question.domain else {
+                panic!("inner target")
+            };
+            assert_eq!(domain.members.len(), 1);
+            let modes = awaiting(
+                game.answer_internal_card(
+                    question.actor,
+                    question.token,
+                    Answer::Targets(vec![domain.members[0].handle]),
+                )
+                .unwrap(),
+            );
+            play = game
+                .answer_internal_card(modes.actor, modes.token, Answer::Modes(vec![ModeId(2)]))
+                .unwrap();
+        }
+        assert!(matches!(play, CardPlay::Resolved(_)));
+        assert!(game.internal_decision(View::Referee).is_none());
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["objects"]["enemy"]["damage"],
+            u8::from(accept) * 2
+        );
+    }
+}
+
+#[test]
+fn optional_search_is_asked_only_after_acceptance_and_keeps_the_outer_continuation() {
+    let mut input = tree(
+        &json!({"bind":"unused","from":{"who":"opp","zone":"field","kind":"follower"},"upto":1}),
+        &json!({"optional":{"do":[{"search":{"sel":{"who":"self","zone":"deck","kind":"follower"},"n":1,"to":"hand"}}]}}),
+    );
+    let steps = input["cards"]["unit-follower"]["abilities"][0]["activate"]["do"]
+        .as_array_mut()
+        .unwrap();
+    steps.remove(0);
+    steps.push(json!({"life":{"who":"self","delta":1}}));
+    let programs = lowerer().lower(&input).unwrap();
+    for accept in [false, true] {
+        let mut initial = setup(1, json!([]));
+        initial["players"]["P1"]["zones"]["hand"] = json!([]);
+        initial["players"]["P1"]["leader"]["life"] = json!(10);
+        initial["players"]["P1"]["pp"] = json!({"current":10,"max":10});
+        initial["players"]["P1"]["zones"]["field"] =
+            json!([{"id":"source","card":"unit-follower"}]);
+        initial["players"]["P1"]["zones"]["deck"] = json!([{"id":"found","card":"unit-follower"}]);
+        let mut game = Game::new(
+            catalog(),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "optional-search",
+        )
+        .unwrap();
+        game.load_internal_card("unit-follower", &programs["unit-follower"])
+            .unwrap();
+        let choice = awaiting(
+            game.activate_internal_card("source", AbilityId(1), PlayerId { seat: 1 })
+                .unwrap(),
+        );
+        let mut play = game
+            .answer_internal_card(
+                choice.actor,
+                choice.token,
+                Answer::Integer(Nat(u64::from(accept))),
+            )
+            .unwrap();
+        if accept {
+            let search = awaiting(play);
+            assert!(matches!(search.domain, InputDomain::Search(_)));
+            assert_eq!(
+                game.projection(View::Referee).unwrap()["P1"]["leader"]["life"],
+                10
+            );
+            play = game
+                .answer_internal_card(
+                    search.actor,
+                    search.token,
+                    Answer::Search(SearchAnswer::Ungrouped(vec![0])),
+                )
+                .unwrap();
+        }
+        assert!(matches!(play, CardPlay::Resolved(_)));
+        let state = game.projection(View::Referee).unwrap();
+        assert_eq!(state["P1"]["leader"]["life"], 11);
+        assert_eq!(
+            state["P1"]["hand"],
+            if accept { json!(["found"]) } else { json!([]) }
+        );
+        assert_eq!(state["P1"]["pp"]["current"], 9);
+    }
+}
+
+#[test]
+fn optional_can_move_an_inherited_look_receipt_but_cannot_invent_one() {
+    let mut document = tree(
+        &json!({"bind":"target","from":{"who":"opp","zone":"field","kind":"follower"},"upto":1}),
+        &json!({"life":{"who":"self","delta":1}}),
+    );
+    document["cards"]["unit-follower"]["abilities"][0]["activate"]["do"] = json!([
+        {"look":{"top":{"who":"self","n":1},"bind":"seen"}},
+        {"optional":{"do":[{"move":{"ref":{"in":"seen"},"to":"cemetery"}}]}}
+    ]);
+    lowerer().lower(&document).unwrap();
+    let mut foreign = document.clone();
+    foreign["cards"]["unit-follower"]["abilities"][0]["activate"]["do"] = json!([
+        {"destroy":{"ref":{"who":"opp","zone":"field","kind":"follower"},"result":"moved"}},
+        {"optional":{"do":[{"move":{"ref":{"in":{"objects_of":"moved","view":"before"}},"to":"cemetery"}}]}}
+    ]);
+    let mut producer_only = foreign.clone();
+    producer_only["cards"]["unit-follower"]["abilities"][0]["activate"]["do"]
+        .as_array_mut()
+        .unwrap()
+        .pop();
+    lowerer().lower(&producer_only).unwrap();
+    lowerer().lower(&foreign).unwrap_err();
+    document["cards"]["unit-follower"]["abilities"][0]["activate"]["do"][1]["optional"]["do"][0]
+        ["move"]["ref"]["in"] = json!("unseen");
+    lowerer().lower(&document).unwrap_err();
 }

@@ -145,7 +145,7 @@ fn collect_patches<'program>(
                 _ => {}
             },
             Node::Control {
-                control: Control::Sequence { body },
+                control: Control::Sequence { body } | Control::May { body, .. },
             } => collect_patches(body, patches),
             Node::Control {
                 control:

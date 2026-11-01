@@ -47,6 +47,7 @@ fn finish(game: &mut Game, mut play: CardPlay, mode: usize, optional: bool) -> C
             | InputDomain::DriveTrigger { .. }
             | InputDomain::Search(_)
             | InputDomain::SearchPartition(_)
+            | InputDomain::DamageReplacements(_)
             | InputDomain::Distribution(_)
             | InputDomain::SearchReplacement
             | InputDomain::DamageReplacements(_) => panic!("unexpected card decision"),

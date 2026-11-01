@@ -78,6 +78,7 @@ impl BodyContext<'_> {
             }
             ast::Step::Counter(_)
             | ast::Step::Reveal(_)
+            | ast::Step::Optional(_)
             | ast::Step::EachPlayer(_)
             | ast::Step::Race(_)
             | ast::Step::Evolve(_)
@@ -257,25 +258,22 @@ impl BodyContext<'_> {
                 },
                 _ => self.objects(objects, path)?,
             };
-            return Ok(Action::Move {
-                objects,
-                movement: MoveSpec {
-                    to: MoveDestination::Owners { zone },
-                    initial_posture: None,
-                    entry_effects: vec![],
-                    position: None,
-                    order: None,
-                },
-                reason: MoveReason::Put,
-            });
+            return Ok(owner_put(objects, zone));
         }
         let Some(ast::MoveObjects::Observed(observed)) = &value.r#ref else {
             return Err(unsupported(path));
         };
-        let cards = self.observed(observed, matches!(value.to, ast::Destination::Ex), path)?;
+        let cards = self.observed(
+            observed,
+            matches!(value.to, ast::Destination::Ex | ast::Destination::Cemetery),
+            path,
+        )?;
         match value.to {
             ast::Destination::Ex if value.position.is_none() && value.order.is_none() => {
                 Ok(shared_put(cards, ZoneKind::Ex))
+            }
+            ast::Destination::Cemetery if value.position.is_none() && value.order.is_none() => {
+                Ok(owner_put(cards, OwnerZone::Cemetery))
             }
             ast::Destination::Deck if value.order.is_some() => {
                 let position = match value.position {
@@ -415,6 +413,20 @@ const fn shared_put(objects: Selector, kind: ZoneKind) -> Action {
                     kind,
                 },
             },
+            initial_posture: None,
+            entry_effects: vec![],
+            position: None,
+            order: None,
+        },
+        reason: MoveReason::Put,
+    }
+}
+
+const fn owner_put(objects: Selector, zone: OwnerZone) -> Action {
+    Action::Move {
+        objects,
+        movement: MoveSpec {
+            to: MoveDestination::Owners { zone },
             initial_posture: None,
             entry_effects: vec![],
             position: None,

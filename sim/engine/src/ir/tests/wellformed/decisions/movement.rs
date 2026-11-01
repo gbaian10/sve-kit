@@ -223,7 +223,7 @@ fn search_filter_and_continuation_are_disjoint_even_for_unexecuted_branches() {
 }
 
 #[test]
-fn search_validates_every_destination_and_rejects_unsupported_choice_regions() {
+fn search_validates_every_destination_and_rejects_invalid_groups() {
     let valid_destination = Some(SearchDestination::Partition {
         destinations: vec![
             SearchPartition {
@@ -284,6 +284,10 @@ fn search_validates_every_destination_and_rejects_unsupported_choice_regions() {
         *groups = Some(constraint(objects()));
     }
     reject(body(1, vec![groups]), WellFormedReason::UnsupportedShape);
+}
+
+#[test]
+fn may_accepts_search_but_still_checks_its_destination_and_groups() {
     let mut choice = choose(1, 2);
     choice.kind = DecisionKind::ResolutionChoice {
         may: Declinable::MayDecline,
@@ -291,22 +295,38 @@ fn search_validates_every_destination_and_rejects_unsupported_choice_regions() {
         precondition: None,
     };
     choice.domain = ChoiceDomain::Compound { domains: vec![] };
-    let choice_error = reject(
+    let optional = |search| {
         body(
             1,
             vec![control(Control::May {
-                choice,
-                body: body(2, vec![search()]),
+                choice: choice.clone(),
+                body: body(2, vec![search]),
                 receipt: ReceiptId(3),
             })],
-        ),
-        WellFormedReason::UnsupportedShape,
+        )
+    };
+    accept(optional(search()));
+    let mut invalid_destination = search();
+    if let Action::Search { destination, .. } = action(&mut invalid_destination) {
+        *destination = Some(SearchDestination::Single {
+            movement: MoveSpec {
+                to: shared(ZoneKind::Cemetery),
+                initial_posture: None,
+                entry_effects: vec![],
+                position: None,
+                order: None,
+            },
+        });
+    }
+    reject(
+        optional(invalid_destination),
+        WellFormedReason::InvalidMovement,
     );
-    assert!(
-        choice_error
-            .ir_path
-            .ends_with("/control/body/steps/0/instruction/action")
-    );
+    let mut invalid_groups = search();
+    if let Action::Search { groups, .. } = action(&mut invalid_groups) {
+        *groups = Some(constraint(objects()));
+    }
+    reject(optional(invalid_groups), WellFormedReason::UnsupportedShape);
 }
 
 #[test]

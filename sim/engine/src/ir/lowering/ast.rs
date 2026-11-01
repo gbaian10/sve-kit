@@ -221,6 +221,7 @@ pub(super) struct Body {
 #[serde(rename_all = "snake_case")]
 pub(super) enum Step {
     Counter(CounterChange),
+    Optional(Optional),
     Race(Race),
     Evolve(EffectEvolution),
     If(Conditional),
@@ -272,6 +273,16 @@ pub(super) struct CounterChange {
 pub(super) struct CounterRead {
     pub on: This,
     pub name: String,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Optional {
+    #[serde(rename = "do")]
+    pub steps: Vec<Step>,
+    #[serde(rename = "who")]
+    pub _who: Option<SelfPlayer>,
+    pub then: Option<Vec<Step>>,
 }
 
 #[derive(Deserialize)]

@@ -6,6 +6,79 @@ use super::{BodyContext, Located, LoweringError, Node, PlayerRef, SourceSpan, as
     reason = "Resolution choices share the ability's object binding environment."
 )]
 impl BodyContext<'_> {
+    pub(super) fn optional(
+        &mut self,
+        optional: &ast::Optional,
+        path: &str,
+        source: &SourceSpan,
+        ability_source: &super::AbilitySource,
+    ) -> Result<Located<Node>, LoweringError> {
+        let parent = self.scope;
+        let targets = self.targets.clone();
+        let recipients = self.recipient_targets.clone();
+        let observations = self.observations.clone();
+        let observed_targets = self.observed_targets.clone();
+        let searches = self.searches.clone();
+        let outputs = self.ex_outputs.clone();
+        self.scope = self.card_allocator.scope(path)?;
+        let binding = super::Binding::new(self.allocator.id(path)?, self.scope);
+        let mut body = self.steps(
+            &optional.steps,
+            &format!("{path}/optional/do"),
+            source,
+            ability_source,
+        )?;
+        if let Some(continuation) = &optional.then {
+            body.steps.extend(
+                self.steps(
+                    continuation,
+                    &format!("{path}/optional/then"),
+                    source,
+                    ability_source,
+                )?
+                .steps,
+            );
+        }
+        self.scope = parent;
+        self.targets = targets;
+        self.recipient_targets = recipients;
+        self.observations = observations;
+        self.observed_targets = observed_targets;
+        self.searches = searches;
+        self.ex_outputs = outputs;
+        let bounds = super::Cardinality {
+            minimum: super::Nat(0),
+            maximum: Some(super::Nat(1)),
+        };
+        let id = self.card_allocator.id(path)?;
+        let mut located = source.clone();
+        path.clone_into(&mut located.author_path);
+        Ok(Located {
+            source: located,
+            node: Node::Control {
+                control: super::super::Control::May {
+                    body,
+                    receipt: super::ReceiptId(id),
+                    choice: Decision {
+                        id: DecisionId(id),
+                        captures: vec![],
+                        actor: PlayerRef::Controller {},
+                        domain: super::super::ChoiceDomain::Integer {
+                            cardinality: bounds,
+                            binding,
+                        },
+                        kind: DecisionKind::ResolutionChoice {
+                            may: Declinable::MayDecline,
+                            cardinality: bounds,
+                            precondition: None,
+                        },
+                        visibility: Visibility::Public {},
+                    },
+                },
+            },
+        })
+    }
+
     pub(super) fn choose(
         &mut self,
         choice: &ast::Choose,

@@ -150,7 +150,6 @@ impl Checker {
                 checker.decision_header(choice)?;
                 checker.answer(choice, Some(cardinality))
             })?;
-            checker.env.choices = false;
             checker.at("body", |checker| checker.program(body))
         })?;
         self.produce(receipt, TypeId::of::<super::OpaqueOutcome>())

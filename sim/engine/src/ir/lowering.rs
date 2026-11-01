@@ -975,6 +975,10 @@ impl<'definitions> BodyContext<'definitions> {
         let mut steps = Vec::new();
         for (index, step) in author_steps.iter().enumerate() {
             let step_path = format!("{path}/{index}");
+            if let ast::Step::Optional(optional) = step {
+                steps.push(self.optional(optional, &step_path, source, ability_source)?);
+                continue;
+            }
             if let ast::Step::EachPlayer(each) = step {
                 let node = self.each_player(each, &step_path, source, ability_source)?;
                 let mut located = source.clone();
@@ -1078,6 +1082,7 @@ impl<'definitions> BodyContext<'definitions> {
                 super::MealRaceOperation::Race,
             )),
             ast::Step::Choice(_)
+            | ast::Step::Optional(_)
             | ast::Step::Either(_)
             | ast::Step::Choose(_)
             | ast::Step::If(_)

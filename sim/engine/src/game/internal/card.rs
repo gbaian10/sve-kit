@@ -940,6 +940,10 @@ fn check_nested_nodes(
             }
         }
         Control::Sequence { body } => check_nodes(game, &body.steps, source, origin)?,
+        control @ Control::May { body, .. } => {
+            super::alternatives::check_may(control)?;
+            check_nodes(game, &body.steps, source, origin)?;
+        }
         Control::If {
             then_body,
             else_body,
@@ -1026,6 +1030,7 @@ fn check_nodes(
             Node::Control {
                 control:
                     control @ (Control::EachPlayer { .. }
+                    | Control::May { .. }
                     | Control::Sequence { .. }
                     | Control::If { .. }),
             } => check_nested_nodes(game, control, source, ability_source)?,

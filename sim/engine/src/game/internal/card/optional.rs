@@ -96,7 +96,7 @@ pub(super) fn check_body(program: &Program, root: bool) -> Result<()> {
                 check_control(control)?;
             }
             Node::Control {
-                control: Control::Sequence { body },
+                control: Control::Sequence { body } | Control::May { body, .. },
             } => check_body(body, false)?,
             Node::Control {
                 control:
