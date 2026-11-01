@@ -384,11 +384,13 @@ fn choice_keyword_precedes_targets_and_only_selected_modes_need_current_targets(
         control: Control::Mode {
             modes: vec![
                 Mode {
+                    costs: CostSpec::Ordered { steps: vec![] },
                     id: ModeId(1),
                     parameters: vec![target(10, 2, 1, 1)],
                     body: body(2, vec![damage(1, selected(10, 2), 2)]),
                 },
                 Mode {
+                    costs: CostSpec::Ordered { steps: vec![] },
                     id: ModeId(2),
                     parameters: vec![],
                     body: body(3, vec![draw(2, 1)]),
@@ -869,6 +871,7 @@ fn literal_choice(exact: bool, excluded: bool, targets: bool) -> Located<Node> {
         control: Control::Mode {
             modes: vec![
                 Mode {
+                    costs: CostSpec::Ordered { steps: vec![] },
                     id: ModeId(1),
                     parameters: if targets {
                         vec![target(10, 2, 1, 1)]
@@ -878,6 +881,7 @@ fn literal_choice(exact: bool, excluded: bool, targets: bool) -> Located<Node> {
                     body: body(2, vec![draw(1, 0)]),
                 },
                 Mode {
+                    costs: CostSpec::Ordered { steps: vec![] },
                     id: ModeId(2),
                     parameters: vec![],
                     body: body(3, vec![draw(2, 0)]),

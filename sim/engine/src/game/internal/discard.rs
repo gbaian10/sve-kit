@@ -120,6 +120,22 @@ impl HandWait {
         self.instruction.receipt
     }
 
+    pub(super) fn inline_members(
+        &self,
+        game: &Game,
+        execution: &Execution,
+        ids: &[String],
+    ) -> Result<Vec<ObjectRef>> {
+        self.validate(
+            game,
+            execution,
+            &execution.inline_material_handles(&self.members, ids)?,
+        )
+        .map_err(|_error| {
+            crate::EngineFailure::IllegalPlay("invalid evolution discard selection".into())
+        })
+    }
+
     pub(super) fn validate(
         &self,
         game: &Game,

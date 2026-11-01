@@ -2,8 +2,8 @@ use super::super::{
     ChoiceDomain, Comparison, Control, CostSpec, DamageRecipient, Decision, DecisionId,
     DecisionKind, Disjointness, ExecutionRef, InputMode, MemberProjection, Mode, ModeChoiceKind,
     ModeDecision, ModeDecisionKind, ModeId, NatFrozen, NatOperation, ObjectProperty, ObjectReceipt,
-    PlaySlot, PlaySpec, Predicate, SelectionConstraint, SelectionGroup, SelectionSnapshot,
-    SpellCountTime, Visibility,
+    PlaySlot, PlaySpec, Predicate, Resource, SelectionConstraint, SelectionGroup,
+    SelectionSnapshot, SpellCountTime, Visibility,
 };
 use super::{
     AbilitySource, Action, Allocator, BTreeMap, BTreeSet, BatchPolicy, Binding, BodyContext,
@@ -575,6 +575,8 @@ impl BodyContext<'_> {
                     context.target(target, path)?;
                 }
             }
+            let (steps, costs) =
+                mode_payment(&mut context, steps, resolution, ability_source, path)?;
             let body = context.steps(
                 steps,
                 &format!(
@@ -588,6 +590,7 @@ impl BodyContext<'_> {
             self.resolution_captures
                 .append(&mut context.resolution_captures);
             modes.push(Mode {
+                costs,
                 id: ModeId(mode_id),
                 parameters: context.parameters,
                 body,
@@ -612,6 +615,39 @@ impl BodyContext<'_> {
                 },
             },
         })
+    }
+}
+
+fn mode_payment<'steps>(
+    context: &mut BodyContext<'_>,
+    steps: &'steps [ast::Step],
+    resolution: bool,
+    ability_source: &AbilitySource,
+    path: &str,
+) -> Result<(&'steps [ast::Step], CostSpec), LoweringError> {
+    match steps {
+        [ast::Step::Pay(payment)] if !resolution => {
+            let paid = super::payment::lower(context, &payment.cost, ability_source, path)?;
+            let CostSpec::Ordered { steps: charges } = &paid.costs else {
+                return Err(unsupported(path));
+            };
+            if !paid.parameters.is_empty()
+                || charges.iter().any(|charge| {
+                    !matches!(
+                        charge.instruction.action,
+                        Action::Resource {
+                            resource: Resource::PpCurrent,
+                            ..
+                        }
+                    )
+                })
+            {
+                return Err(unsupported(path));
+            }
+            context.parameters.extend(paid.parameters);
+            Ok((payment.steps.as_slice(), paid.costs))
+        }
+        _ => Ok((steps, CostSpec::Ordered { steps: vec![] })),
     }
 }
 
@@ -741,6 +777,7 @@ pub(super) fn choice_body(body: &ast::Body, path: &str) -> Result<bool, Lowering
 fn contains_choice(steps: &[ast::Step]) -> bool {
     steps.iter().any(|step| match step {
         ast::Step::Choice(_) => true,
+        ast::Step::Pay(payment) => contains_choice(&payment.steps),
         ast::Step::Optional(optional) => {
             contains_choice(&optional.steps)
                 || optional

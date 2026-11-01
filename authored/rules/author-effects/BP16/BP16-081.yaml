@@ -1,0 +1,56 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP16-081:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-11-01"
+    abilities:
+      - line: 1
+        fanfare:
+          targets:
+            - option: 1
+              bind: victim
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - choice:
+                upto: 3
+                options:
+                  - - pay:
+                        cost:
+                          pp: 1
+                        do:
+                          - destroy:
+                              ref: victim
+                  - - pay:
+                        cost:
+                          pp: 1
+                        do:
+                          - buff:
+                              "on": this
+                              power: 2
+                              hp: 2
+                          - grant:
+                              "on": this
+                              keywords:
+                                - ward
+                  - - pay:
+                        cost:
+                          pp: 1
+                        do:
+                          - buff:
+                              "on": this
+                              power: 1
+                              hp: 1
+                          - draw:
+                              n: 2
+                          - discard:
+                              n: 1

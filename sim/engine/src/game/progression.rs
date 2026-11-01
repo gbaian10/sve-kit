@@ -7,6 +7,7 @@ use serde_json::{Value, json};
 
 use super::costs::CostKind;
 use super::{Frame, Game, int, list, scalar, string};
+use crate::ir::Ability;
 use crate::{EngineFailure, Result, invalid};
 
 #[expect(
@@ -255,14 +256,14 @@ impl Game {
             };
             code
         };
-        self.evolve_with_code(decision, &code, false)
+        self.evolve_with_code(decision, &code, None)
     }
 
     pub(in crate::game) fn evolve_with_code(
         &mut self,
         decision: &Value,
         code: &Value,
-        reveal_resource: bool,
+        intrinsic: Option<&Ability>,
     ) -> Result<bool> {
         let source = string(&decision["source"]);
         let evolve = string(&decision["evolve_card"]);
@@ -302,7 +303,12 @@ impl Game {
             return Ok(false);
         }
         self.numeric_evolution_allowed(source, true)?;
-        if reveal_resource {
+        if let Some(ability) = intrinsic
+            && !self.internal_evolution_payment(ability, decision)?
+        {
+            return Ok(false);
+        }
+        if intrinsic.is_some() {
             self.reveal(&[evolve.into()], "all", &frame, false);
         }
         self.consume_cost_adjustments(source, CostKind::Evolution)?;

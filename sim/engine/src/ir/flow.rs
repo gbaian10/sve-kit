@@ -193,6 +193,7 @@ variants!(Control {
 });
 record!(Mode {
     id: ModeId,
+    costs: CostSpec,
     parameters: Vec<Decision>,
     body: Program
 });

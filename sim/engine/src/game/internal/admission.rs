@@ -190,6 +190,20 @@ fn source_paths(
                 control: Control::Mode { modes, .. },
             } => {
                 for (mode_index, mode) in modes.iter().enumerate() {
+                    if let CostSpec::Ordered { steps } = &mode.costs {
+                        for (cost_index, cost_step) in steps.iter().enumerate() {
+                            if cost_step.instruction.source == *origin {
+                                keyword_source_paths(
+                                    &cost_step.instruction.action,
+                                    &format!(
+                                        "{path}/control/modes/{mode_index}/costs/steps/{cost_index}"
+                                    ),
+                                    origin,
+                                    paths,
+                                );
+                            }
+                        }
+                    }
                     source_paths(
                         &mode.body,
                         &format!("{path}/control/modes/{mode_index}/body"),

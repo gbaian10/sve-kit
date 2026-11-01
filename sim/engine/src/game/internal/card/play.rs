@@ -14,7 +14,7 @@ use crate::ir::{
 use crate::ir::{
     ChoiceDomain, Control, CostSpec, Decision, DecisionId, DecisionKind, ExecutionRef, InputMode,
     Mode, ModeChoiceKind, ModeDecision, ModeDecisionKind, ModeId, NumericChange, PlaySlot, Program,
-    ScopeId, SnapshotId, Visibility, ZoneKind,
+    Resource, ResourceOperation, ScopeId, SnapshotId, Visibility, ZoneKind,
 };
 use alloc::collections::{BTreeMap, VecDeque};
 use core::slice::from_ref;
@@ -103,6 +103,7 @@ pub(in crate::game::internal) struct PlayState {
     pub(super) exchange: Option<super::exchange::ExchangeState>,
     pub(super) optional: Option<super::optional::OptionalState>,
     pub(super) costs: CostSpec,
+    mode_costs: CostSpec,
     limit: Option<LimitSpec>,
     body: Program,
     restart: Option<SelectionOrigin>,
@@ -126,6 +127,13 @@ impl PlayState {
                 for mode in &group.modes {
                     if chosen.contains(&mode.id) {
                         self.parameters.extend(mode.parameters.clone());
+                        let CostSpec::Ordered { steps } = &mode.costs else {
+                            return Err(unsupported("mode cost alternatives"));
+                        };
+                        let CostSpec::Ordered { steps: selected } = &mut self.mode_costs else {
+                            return Err(unsupported("selected mode costs"));
+                        };
+                        selected.extend(steps.clone());
                     }
                 }
             }
@@ -208,6 +216,24 @@ pub(super) fn check(ability: &Ability, source: &SourceSpan) -> Result<()> {
     let mut parameters = play.parameters.clone();
     for group in &groups {
         parameters.extend(group.parameters()?);
+        for mode in &group.modes {
+            let CostSpec::Ordered { steps } = &mode.costs else {
+                return Err(unsupported("mode cost alternatives"));
+            };
+            if steps.iter().any(|step| !matches!(&step.instruction.action,
+                Action::Resource { player: PlayerRef::Controller {}, resource: Resource::PpCurrent,
+                    operation: ResourceOperation::Pay, amount: Expr::Literal(Int(amount)) } if *amount >= 0)) {
+                return Err(unsupported("mode PP payment"));
+            }
+            let mut candidate = ability.clone();
+            let definition = candidate
+                .play
+                .as_mut()
+                .ok_or_else(|| invalid("mode play"))?;
+            definition.costs = mode.costs.clone();
+            definition.parameters.clone_from(&mode.parameters);
+            super::check_costs(&candidate, source)?;
+        }
     }
     check_parameters(&parameters)?;
     let mut steps = play
@@ -835,6 +861,7 @@ impl Game {
             },
             optional,
             costs: play.costs,
+            mode_costs: CostSpec::Ordered { steps: vec![] },
             limit: play.limit,
             body,
             restart: None,
@@ -1052,6 +1079,8 @@ impl Game {
         } else {
             self.internal_card_payment(execution, &play.costs, execution.spell)
         };
+        let payment =
+            payment.and_then(|()| self.internal_card_payment(execution, &play.mode_costs, false));
         let payment = payment.and_then(|()| self.internal_optional_payment(execution, &play));
         self.card_runtime.active_source = previous;
         payment?;
@@ -1171,7 +1200,8 @@ impl Game {
             let turn = TurnId(self.state.schedule.current()?);
             let mut legal = Vec::new();
             for mode in &group.modes {
-                if self.internal_mode_targets_feasible(execution, &mode.parameters)?
+                if self.internal_mode_affordable(execution, play, &mode.costs)?
+                    && self.internal_mode_targets_feasible(execution, &mode.parameters)?
                     && (exclude_used.is_none()
                         || !self.card_runtime.mode_uses.iter().any(|used| {
                             used.ability_instance == source.instance
@@ -1216,6 +1246,34 @@ impl Game {
             return Ok(true);
         }
         Ok(false)
+    }
+
+    fn internal_mode_affordable(
+        &self,
+        execution: &Execution,
+        play: &PlayState,
+        costs: &CostSpec,
+    ) -> Result<bool> {
+        let CostSpec::Ordered { steps } = costs else {
+            return Err(unsupported("mode costs"));
+        };
+        if steps.is_empty() {
+            return Ok(true);
+        }
+        if play.exchange.is_some() {
+            return Err(unsupported("exchange with mode costs"));
+        }
+        let mut probe = self.clone();
+        let mut execution = execution.clone();
+        probe.card_runtime.active_source = execution.ability;
+        let spell = execution.spell;
+        let paid = probe.internal_card_payment(&mut execution, &play.costs, spell);
+        let paid = paid.and_then(|()| probe.internal_card_payment(&mut execution, costs, false));
+        match paid {
+            Ok(()) => Ok(true),
+            Err(crate::EngineFailure::IllegalPlay(_)) => Ok(false),
+            Err(error) => Err(error),
+        }
     }
 
     fn internal_play_affordable(&self, execution: &Execution, play: &PlayState) -> Result<bool> {
@@ -1428,6 +1486,7 @@ impl Game {
             exchange: self.internal_exchange(&execution)?,
             optional: None,
             costs: CostSpec::Ordered { steps: vec![] },
+            mode_costs: CostSpec::Ordered { steps: vec![] },
             limit: None,
             body: Program {
                 scope: ScopeId(0),

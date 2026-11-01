@@ -191,3 +191,7 @@ check 成功代表來源定位、行覆蓋與 DSL 結構通過；Rust lowering�
 傷害的 `to: {any_of: [{leader: opp}, {who: opp, zone: field, kind: follower}]}` 可把領袖與從者放進同一次傷害的受傷者集合。它沿用既有 `RecipientSet::Union` 與去重規則，只有一個傷害動作及數量回條；傷害替代條件對同批所有受傷者生效。
 
 進化 PP 費用修改可用 `apply: {on: this, effect: {evolve_cost_mod: {on: affected, set: 0}}, until: turn}`，或以 `delta: -1` 取代 `set`；兩者擇一，設定值不得為負。省略期限時持續至該物件世代結束，也可選既有公開場上對象。修改共用費用效果狀態，作用於實際規則進化的 PP 費用，最後以 0 為下限；不改卡片的打出費用，也不修改已離場後重新入場的世代。
+
+正式 `choice.options` 的模式可用單一 `pay: {cost: {pp: 1}, do: [...]}` 包住本文；目前接線接受固定 PP，不接受結算中的 `either` 或任意位置的 `pay`。先選模式及其正式目標，再把選中模式的費用沿既有付款程序支付，全部付款成功才執行本文；印刷卡片費用只計算一次。多選模式的費用加總，不足時整次宣告回退，沒有選中的模式不付款。
+
+印刷 `evolve.cost` 與起動能力共用 `Cost` 語法，例如 `{leader_life: 3}`、`{discard: {n: 1, sel: {who: self, zone: hand}}}`、`{banish: {n: 2, sel: {who: self, zone: cemetery}}}`。同名進化卡、進化次數、PP／EP／SEP 與超進化時點仍由原規則程序檢查，費用成功後才揭露及安裝進化卡。規則動作的材料使用既有 `costs` 輸入容器，公開材料為 `costs.materials`、手牌丟棄為 `costs.discard`，值為物件 ID 陣列；每項仍經正式材料候選與嚴格數量驗證，不能以目標選取代替付款。

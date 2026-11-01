@@ -471,62 +471,6 @@ cards:
           amount: 1
         event: evolve
         subject: self
-  BP19-090:
-    status: complete
-    abilities:
-      - line: 1
-        kind: spell
-        body:
-          op: choice
-          min: 1
-          max: 2
-          modes:
-            - op: if
-              condition:
-                read: paid.mode_1
-              then:
-                op: seq
-                steps:
-                  - op: damage
-                    subjects: target.1
-                    amount: 2
-                  - op: damage
-                    subjects: self.leader
-                    amount: 1
-            - op: if
-              condition:
-                read: paid.mode_2
-              then:
-                op: seq
-                steps:
-                  - op: damage
-                    subjects: self.leader
-                    amount: 1
-                  - op: draw
-                    count: 1
-        targets:
-          - key: "1"
-            select:
-              side: opponent
-              zone: field
-              type: follower
-            min: 1
-            max: 1
-            modes:
-              - 1
-        additional_costs:
-          - key: mode_1
-            modes:
-              - 1
-            costs:
-              - op: pp
-                amount: 1
-          - key: mode_2
-            modes:
-              - 2
-            costs:
-              - op: pp
-                amount: 1
   BP19-P21:
     status: complete
     review:

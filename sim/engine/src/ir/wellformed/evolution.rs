@@ -30,13 +30,27 @@ impl Checker {
         {
             return self.reject();
         }
-        let [face] = play.parameters.as_slice() else {
+        let Some((face, _)) = play.parameters.split_first() else {
             return self.reject();
         };
         self.play_entry = Some(self.env.clone());
         let selection = self.at("play/parameters/0", |checker| {
             checker.evolution_face(face, false)
         })?;
+        for (index, material) in play.parameters.iter().enumerate().skip(1) {
+            if !matches!(
+                material.kind,
+                DecisionKind::PlayParameter {
+                    slot: PlaySlot::CostMaterials,
+                    ..
+                }
+            ) {
+                return self.reject();
+            }
+            self.at(&format!("play/parameters/{index}"), |checker| {
+                checker.play_decision(material, &PlayerRef::Controller {})
+            })?;
+        }
         self.at("play/costs", |checker| {
             checker.evolution_costs(&play.costs, selection)
         })?;
@@ -190,7 +204,7 @@ impl Checker {
         let CostSpec::Ordered { steps } = costs else {
             return self.reject();
         };
-        let [reveal, pp] = steps.as_slice() else {
+        let Some((reveal, payments)) = steps.split_first() else {
             return self.reject();
         };
         if reveal.instruction.action
@@ -199,17 +213,10 @@ impl Checker {
                     reference: selection,
                 },
             })
-            || !matches!(&pp.instruction.action,
-            Action::Resource {
-                player: PlayerRef::Controller {},
-                resource: Resource::PpCurrent,
-                operation: ResourceOperation::Pay,
-                amount: Expr::Literal(Int(value)),
-            } if *value >= 0)
         {
             return self.reject();
         }
-        for (index, cost) in steps.iter().enumerate() {
+        for (index, cost) in steps.iter().take(1).enumerate() {
             if cost.materials.is_some() || cost.instruction.actor != (PlayerRef::Controller {}) {
                 return self.reject();
             }
@@ -230,6 +237,24 @@ impl Checker {
                 checker.instruction_in(&instruction, InstructionContext::Cost, false)
             })?;
         }
+        // EP and SEP remain resources of the rule procedure, not printed payment instructions.
+        if payments.iter().any(|cost| {
+            matches!(cost.instruction.action, Action::Resource { .. })
+                && !matches!(&cost.instruction.action,
+                    Action::Resource {
+                        player: PlayerRef::Controller {},
+                        resource: Resource::PpCurrent,
+                        operation: ResourceOperation::Pay,
+                        amount: Expr::Literal(Int(amount)),
+                    } if *amount >= 0)
+        }) {
+            return self.reject();
+        }
+        self.at("payments", |checker| {
+            checker.costs(&CostSpec::Ordered {
+                steps: payments.to_vec(),
+            })
+        })?;
         Ok(())
     }
 }

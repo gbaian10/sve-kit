@@ -1,7 +1,7 @@
 use super::{BindingKind, Checked, Checker, WellFormedReason};
 use crate::ir::optional_payment;
 use crate::ir::{
-    Bool, Cardinality, ChoiceDomain, Control, Expr, Mode, ModeChoiceKind, ModeDecision,
+    Bool, Cardinality, ChoiceDomain, Control, CostSpec, Expr, Mode, ModeChoiceKind, ModeDecision,
     ModeDecisionKind, Nat, NatFrozen, NatOperation, Node, PlayerRef, Predicate, Program,
     SpellCountTime, Visibility,
 };
@@ -135,6 +135,12 @@ impl Checker {
                         checker.play_decision(decision, controller)
                     })?;
                 }
+                if kind == ModeChoiceKind::ResolutionAlternative
+                    && mode.costs != (CostSpec::Ordered { steps: vec![] })
+                {
+                    return Err(checker.error(WellFormedReason::DecisionTiming));
+                }
+                checker.at("costs", |checker| checker.costs(&mode.costs))?;
                 // Resolution locals may be read by the selected body, never by play-time inputs.
                 checker.env.inherit_values(&original);
                 checker.at("body", |checker| checker.program(&mode.body))

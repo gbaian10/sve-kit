@@ -230,6 +230,7 @@ pub(super) struct Body {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum Step {
+    Pay(ModePayment),
     Counter(CounterChange),
     Optional(Optional),
     Race(Race),
@@ -283,6 +284,16 @@ pub(super) struct CounterChange {
 pub(super) struct CounterRead {
     pub on: This,
     pub name: String,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct ModePayment {
+    pub cost: Cost,
+    #[serde(rename = "do")]
+    pub steps: Vec<Step>,
+    #[serde(rename = "who")]
+    pub _who: Option<SelfPlayer>,
 }
 
 #[derive(Deserialize)]
@@ -1309,7 +1320,7 @@ pub(super) enum PhasePlayer {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct Evolution {
-    pub cost: EvolutionCost,
+    pub cost: Cost,
     pub usable_if: Option<Condition>,
 }
 #[derive(Deserialize)]
