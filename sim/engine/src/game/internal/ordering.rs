@@ -13,7 +13,9 @@ use crate::ir::{
     RuntimeObjectView, ScopeId, Selector, SnapshotId, SourceSpan, StepwiseMode, Visibility,
     ZoneKind,
 };
-use crate::ir::{CharacteristicPatch, DamageAmount, NatOperation, NumericChange, ObjectProperty};
+use crate::ir::{
+    CharacteristicPatch, DamageAmount, Effect, NatOperation, NumericChange, ObjectProperty,
+};
 use alloc::collections::BTreeSet;
 
 /// Printed information attached to a handle valid only with its decision token.
@@ -252,6 +254,14 @@ fn mask_public_selectors(inspected: &mut Node) -> Result<()> {
                     mask_public_number(amount);
                 }
                 mask_public_recipients(recipients);
+            }
+            Action::InstallEffect {
+                subjects: InstallationSubjects::Objects { objects, .. },
+                effect,
+                ..
+            } if matches!(effect.as_ref(), Effect::CostModifier { .. }) => {
+                // Only checked public predicates are masked; Play's MoveAfter remains unchanged.
+                mask_public_predicate(objects);
             }
             Action::Life { change, .. } => mask_public_number_change(change),
             Action::Modify { patch, .. } => mask_public_number_patch(patch),

@@ -219,7 +219,9 @@ impl Game {
             "スペル" | "スペル・トークン" | "スペル・アドバンス" => {
                 CardKind::Spell
             }
-            "アミュレット" | "アミュレット・トークン" => CardKind::Amulet,
+            "アミュレット" | "アミュレット・トークン" | "アミュレット・エボルヴ" => {
+                CardKind::Amulet
+            }
             _ => return Err(EngineFailure::Unsupported("event card kind".into())),
         };
         let traits = printed["traits"]

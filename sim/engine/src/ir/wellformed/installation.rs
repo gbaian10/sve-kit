@@ -99,6 +99,7 @@ impl Checker {
                 change,
                 duration: inner,
                 usage: None,
+                ..
             } if *subjects == targets && inner == duration => match change {
                 CostChange::Set {
                     amount: Expr::Literal(amount),

@@ -655,6 +655,7 @@ pub(super) struct Apply {
 pub(super) enum InstalledEffect {
     Stat(ConstantStats),
     CostMod(CostModifier),
+    EvolveCostMod(EvolutionCostModifier),
     Cannot(Cannot),
     Prevent(Prevent),
 }
@@ -685,6 +686,14 @@ pub(super) struct StandDuring {
 #[serde(rename_all = "snake_case")]
 pub(super) enum RuleCause {
     Rule,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct EvolutionCostModifier {
+    pub on: Affected,
+    pub delta: Option<i64>,
+    pub set: Option<i64>,
 }
 
 #[derive(Deserialize)]

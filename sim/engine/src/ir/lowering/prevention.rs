@@ -194,6 +194,7 @@ impl BodyContext<'_> {
             }
             ast::InstalledEffect::Stat(_)
             | ast::InstalledEffect::CostMod(_)
+            | ast::InstalledEffect::EvolveCostMod(_)
             | ast::InstalledEffect::Cannot(ast::Cannot::Stand(_) | ast::Cannot::Attack(_)) => {
                 return Err(unsupported(path));
             }

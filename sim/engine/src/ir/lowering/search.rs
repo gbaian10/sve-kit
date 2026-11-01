@@ -1,9 +1,9 @@
 use super::super::{
-    CardKind, CardName, CharacteristicView, Comparison, CostChange, DecisionId, Disjointness,
-    Effect, FollowPermission, InstallationSubjects, InstallationTime, KindRead, MoveDestination,
-    MoveSpec, MovementReceipt, NamesRead, NumberRead, ObjectProperty, ObjectRef, OwnerZone,
-    ReceiptReference, SearchContinuation, SearchDestination, SearchFound, SearchPartition,
-    SelectionConstraint, SelectionGroup, TraitId, TraitsRead, ZoneRef,
+    CardKind, CardName, CharacteristicView, Comparison, CostChange, CostKind, DecisionId,
+    Disjointness, Effect, FollowPermission, InstallationSubjects, InstallationTime, KindRead,
+    MoveDestination, MoveSpec, MovementReceipt, NamesRead, NumberRead, ObjectProperty, ObjectRef,
+    OwnerZone, ReceiptReference, SearchContinuation, SearchDestination, SearchFound,
+    SearchPartition, SelectionConstraint, SelectionGroup, TraitId, TraitsRead, ZoneRef,
 };
 use super::{
     Action, Binding, BodyContext, Bool, Cardinality, Expr, Int, IntOperation, LoweringError, Nat,
@@ -417,6 +417,43 @@ impl BodyContext<'_> {
         }
     }
 
+    pub(super) fn evolution_discount(
+        &mut self,
+        installation: &ast::Apply,
+        path: &str,
+    ) -> Result<Action, LoweringError> {
+        let ast::InstalledEffect::EvolveCostMod(modifier) = &installation.effect else {
+            return Err(unsupported(path));
+        };
+        let ast::Affected::Affected = modifier.on;
+        let change = match (modifier.delta, modifier.set) {
+            (Some(delta), None) => CostChange::Delta {
+                amount: Expr::Literal(Int(delta)),
+            },
+            (None, Some(set)) if set >= 0 => CostChange::Set {
+                amount: Expr::Literal(Int(set)),
+            },
+            _ => return Err(unsupported(path)),
+        };
+        let objects = self.objects(&installation.on, path)?;
+        let affected = Binding::new(1, self.card_allocator.scope(path)?);
+        let duration = numeric::duration(installation.until.as_ref(), path)?;
+        Ok(Action::InstallEffect {
+            subjects: InstallationSubjects::Objects { objects, affected },
+            capture: InstallationTime::InstructionStart,
+            effect: Box::new(Effect::CostModifier {
+                kind: CostKind::Evolution,
+                subjects: Selector::Bound {
+                    reference: affected,
+                },
+                change,
+                duration: duration.clone(),
+                usage: None,
+            }),
+            duration,
+        })
+    }
+
     pub(super) fn discount(
         &mut self,
         installation: &ast::Apply,
@@ -443,6 +480,7 @@ impl BodyContext<'_> {
             subjects: InstallationSubjects::Objects { objects, affected },
             capture: InstallationTime::InstructionStart,
             effect: Box::new(Effect::CostModifier {
+                kind: CostKind::Play,
                 subjects: Selector::Bound {
                     reference: affected,
                 },

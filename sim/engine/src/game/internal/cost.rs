@@ -2,7 +2,7 @@ use super::duration::EffectEnd;
 use super::{Execution, Game, InstructionOutcome, Result, invalid, unsupported};
 use crate::game::Frame;
 use crate::ir::{
-    Action, CostChange, DurationEnd, Effect, EffectId, Expr, InstallationSubjects,
+    Action, CostChange, CostKind, DurationEnd, Effect, EffectId, Expr, InstallationSubjects,
     InstallationTime, Instruction, Int, Selector, TimeAnchor,
 };
 use serde::{Deserialize, Serialize};
@@ -19,8 +19,27 @@ struct CostModifier {
     effect: u64,
     execution: u64,
     timestamp: u64,
-    delta: i64,
+    evolution: bool,
+    change: Change,
     end: EffectEnd,
+}
+
+#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+enum Change {
+    Delta(i64),
+    Set(i64),
+}
+
+fn fixed_change(change: &CostChange) -> Result<Change> {
+    match change {
+        CostChange::Delta {
+            amount: Expr::Literal(Int(amount)),
+        } => Ok(Change::Delta(*amount)),
+        CostChange::Set {
+            amount: Expr::Literal(Int(amount)),
+        } if *amount >= 0 => Ok(Change::Set(*amount)),
+        _ => Err(unsupported("installed fixed cost change")),
+    }
 }
 
 pub(super) fn check_action(action: &Action) -> Result<()> {
@@ -31,32 +50,47 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
         duration,
     } = action
         && let Effect::CostModifier {
+            kind,
             subjects: selected,
             change,
             duration: inner,
             usage,
         } = effect.as_ref()
     {
-        let InstallationSubjects::Objects {
-            objects: Selector::MoveAfter { .. } | Selector::Bound { .. },
-            affected,
-        } = subjects
-        else {
-            return Err(unsupported(
-                "cost modifier needs successful movement or creation",
-            ));
+        let InstallationSubjects::Objects { objects, affected } = subjects else {
+            return Err(unsupported("cost modifier subjects"));
         };
-        if *capture != InstallationTime::InstructionStart
+        let supported = match kind {
+            CostKind::Play => {
+                matches!(objects, Selector::MoveAfter { .. } | Selector::Bound { .. })
+                    && matches!(change, CostChange::Delta { amount: Expr::Literal(Int(amount)) } if *amount <= 0)
+                    && duration.end == (DurationEnd::CurrentTurnEnd {})
+            }
+            CostKind::Evolution => {
+                (matches!(objects, Selector::Objects { .. } | Selector::Bound { .. })
+                    || super::card::selection::public_zone_selector(objects).is_ok())
+                    && (matches!(
+                        change,
+                        CostChange::Delta {
+                            amount: Expr::Literal(_)
+                        }
+                    ) || matches!(change, CostChange::Set { amount: Expr::Literal(Int(amount)) } if *amount >= 0))
+                    && matches!(
+                        duration.end,
+                        DurationEnd::CurrentTurnEnd {} | DurationEnd::NoTemporalExpiry {}
+                    )
+            }
+        };
+        if !supported
+            || *capture != InstallationTime::InstructionStart
             || selected
                 != &(Selector::Bound {
                     reference: *affected,
                 })
-            || !matches!(change, CostChange::Delta { amount: Expr::Literal(Int(amount)) } if *amount <= 0)
             || inner != duration
             || usage.is_some()
             || duration.usage.is_some()
             || !duration.intervals.is_empty()
-            || duration.end != (DurationEnd::CurrentTurnEnd {})
             || duration.anchor != (TimeAnchor::Installation {})
         {
             return Err(unsupported("cost modifier shape or duration"));
@@ -99,7 +133,7 @@ impl Game {
 
     pub(in crate::game) fn internal_cost_layered(&self, id: &str) -> bool {
         self.state.ir_cost.get(id).is_some_and(|state| {
-            !state.effects.is_empty()
+            state.effects.iter().any(|effect| !effect.evolution)
                 && self
                     .state
                     .objects
@@ -133,17 +167,48 @@ impl Game {
     }
 
     pub(in crate::game) fn internal_installed_play_cost(&self, id: &str, base: i64) -> Result<i64> {
-        let object = self.object(id)?;
-        self.state
+        self.installed_cost_with(id, base, CostKind::Play, None)
+    }
+
+    pub(in crate::game) fn internal_installed_evolution_cost(
+        &self,
+        id: &str,
+        base: i64,
+    ) -> Result<i64> {
+        self.installed_cost_with(id, base, CostKind::Evolution, None)
+    }
+
+    fn installed_cost_with(
+        &self,
+        id: &str,
+        mut base: i64,
+        kind: CostKind,
+        extra: Option<&CostChange>,
+    ) -> Result<i64> {
+        let generation = self.object(id)?.generation;
+        let changes = self
+            .state
             .ir_cost
             .get(id)
-            .filter(|state| state.generation == object.generation)
-            .map_or(Ok(base), |state| {
-                state.effects.iter().try_fold(base, |cost, effect| {
-                    cost.checked_add(effect.delta)
-                        .ok_or_else(|| invalid("play cost overflow"))
-                })
-            })
+            .filter(|state| state.generation == generation)
+            .into_iter()
+            .flat_map(|state| state.effects.iter())
+            .filter(|effect| effect.evolution == (kind == CostKind::Evolution))
+            .map(|effect| effect.change)
+            .chain(extra.map(fixed_change).transpose()?);
+        let mut delta = 0_i64;
+        for change in changes {
+            match change {
+                Change::Delta(amount) => {
+                    delta = delta
+                        .checked_add(amount)
+                        .ok_or_else(|| invalid("cost overflow"))?;
+                }
+                Change::Set(amount) => base = amount,
+            }
+        }
+        base.checked_add(delta)
+            .ok_or_else(|| invalid("cost overflow"))
     }
 
     pub(super) fn internal_install_cost(
@@ -160,14 +225,7 @@ impl Game {
         else {
             return Err(unsupported("cost installation"));
         };
-        let Effect::CostModifier {
-            change:
-                CostChange::Delta {
-                    amount: Expr::Literal(Int(delta)),
-                },
-            ..
-        } = effect.as_ref()
-        else {
+        let Effect::CostModifier { kind, change, .. } = effect.as_ref() else {
             return Err(unsupported("cost change"));
         };
         let end = EffectEnd::at(self, execution, &duration.end)?;
@@ -178,12 +236,16 @@ impl Game {
             if object.generation != reference.generation.0 {
                 continue;
             }
-            if object.zone != "ex" {
-                return Err(unsupported("cost modifier successful EX After"));
+            if object.zone
+                != if *kind == CostKind::Play {
+                    "ex"
+                } else {
+                    "field"
+                }
+            {
+                return Err(unsupported("cost modifier target zone"));
             }
-            self.internal_installed_play_cost(id, 0)?
-                .checked_add(*delta)
-                .ok_or_else(|| invalid("play cost overflow"))?;
+            self.installed_cost_with(id, 0, *kind, Some(change))?;
             subjects.push((id.to_owned(), reference));
         }
         let installed = EffectId(self.state.next_ir_effect);
@@ -213,7 +275,8 @@ impl Game {
                 effect: installed.0,
                 execution: execution.id.0,
                 timestamp: execution.timestamp,
-                delta: *delta,
+                evolution: *kind == CostKind::Evolution,
+                change: fixed_change(change)?,
                 end,
             });
         }

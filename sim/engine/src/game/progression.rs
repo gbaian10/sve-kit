@@ -227,7 +227,8 @@ impl Game {
                 self.number(&cost["amount"], frame)
                     .map(|amount| sum.saturating_add(amount.max(0)))
             })?;
-        self.adjusted_pp_cost(&frame.source, base, frame, CostKind::Evolve)
+        let base = self.adjusted_pp_cost(&frame.source, base, frame, CostKind::Evolution)?;
+        self.internal_installed_evolution_cost(&frame.source, base)
             .map(|cost| cost.max(0))
     }
 
@@ -304,7 +305,7 @@ impl Game {
         if reveal_resource {
             self.reveal(&[evolve.into()], "all", &frame, false);
         }
-        self.consume_cost_adjustments(source, CostKind::Evolve)?;
+        self.consume_cost_adjustments(source, CostKind::Evolution)?;
         self.pay_costs(&non_pp, &mut frame)?;
         if self.object(source)?.zone != "field" {
             return Err(EngineFailure::Unsupported(

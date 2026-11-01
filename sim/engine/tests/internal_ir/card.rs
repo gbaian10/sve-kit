@@ -101,6 +101,9 @@ mod quick;
 #[path = "card/public_material.rs"]
 mod public_material;
 
+#[path = "card/evolution_cost_mod.rs"]
+mod evolution_cost_mod;
+
 #[path = "card/evolution.rs"]
 mod evolution;
 

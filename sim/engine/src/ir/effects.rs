@@ -13,7 +13,7 @@ variants!(Effect {
     Permission { subject: PermissionSubject, action: ActionPattern, polarity: Polarity, condition: Expr<Bool>, duration: Duration, rule: RuleId } => ["effect.permission"],
     RuleModifier { modifier: RuleModifier, condition: Expr<Bool>, duration: Duration, source: AbilitySource } => ["effect.rule-modifier"],
     DeckRule { scope: DeckRuleScope, basis: DeckBasis, constraint: DeckConstraint, setup_steps: Vec<RuleProcedure>, visibility: Visibility, rule: RuleId } => ["effect.deck-rule"],
-    CostModifier { subjects: Selector, change: CostChange, duration: Duration, usage: Option<UsageScope> } => ["effect.cost-modifier"]
+    CostModifier { kind: CostKind, subjects: Selector, change: CostChange, duration: Duration, usage: Option<UsageScope> } => ["effect.cost-modifier"]
 });
 variants!(EffectTarget { Dynamic { selector: Selector } => [], Captured { objects: CaptureRef<Selector> } => [] });
 tags!(ContinuousLayer {
@@ -49,6 +49,7 @@ record!(UseLimit {
     scope: UsageScope
 });
 variants!(UsageScope { PerObject { object: ObjectOperand } => [], SharedPlayer { player: PlayerRef, effect: EffectReference } => ["usage.shared-player"] });
+tags!(CostKind { Play, Evolution });
 variants!(CostChange { Delta { amount: Expr<Int> } => ["effect.cost-delta"], Set { amount: Expr<Int> } => ["effect.cost-set"] });
 tags!(ReplacementScope { SelfOnly, General });
 variants!(ProposedEventPattern {
