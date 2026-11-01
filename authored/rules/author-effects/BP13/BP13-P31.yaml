@@ -1,0 +1,55 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP13-P31:
+    admission: light
+    token:
+      name: 紅の牙
+      template: true
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - damage:
+                to:
+                  leader: self
+                n: 1
+            - damage:
+                to:
+                  who: opp
+                  zone: field
+                  kind: follower
+                n: 1
+            - buff:
+                "on": &id001
+                  who: self
+                  zone: field
+                  kind: follower
+                  name: 永劫の吸血鬼・アルザード
+                power: 1
+            - grant:
+                "on": *id001
+                keywords:
+                  - drain
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: evolve_deck
+                        face_up: true
+                        name: 永劫の吸血鬼・アルザード
+                    op: eq
+                    right: 3
+                then:
+                  - buff:
+                      "on": *id001
+                      power: 3
+                      hp: 3
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-02"

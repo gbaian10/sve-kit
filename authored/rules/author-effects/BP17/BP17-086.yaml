@@ -1,0 +1,23 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP17-086:
+    admission: light
+    abilities:
+      - line: 1
+        evolve_time:
+          do:
+            - if:
+                cond:
+                  crimson: true
+                then:
+                  - grant:
+                      "on": this
+                      keywords:
+                        - drain
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-02"

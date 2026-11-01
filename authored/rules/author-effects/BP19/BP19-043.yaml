@@ -1,0 +1,44 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP19-043:
+    admission: light
+    abilities:
+      - line: 1
+        evolve_time:
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: enemy
+                n: 3
+      - line: 2
+        activate:
+          cost:
+            act_self: true
+          targets:
+            - bind: ally
+              from:
+                who: self
+                zone: field
+                kind: follower
+                names:
+                  - 没頭の実験体
+                  - 多頭の実験体
+              n: 1
+          do:
+            - grant:
+                "on": ally
+                keywords:
+                  - drain
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-02"

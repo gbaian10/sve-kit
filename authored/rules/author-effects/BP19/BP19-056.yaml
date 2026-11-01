@@ -1,0 +1,39 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP19-056:
+    admission: light
+    abilities:
+      - line: 1
+        play:
+          cannot_if:
+            in_zone:
+              ref: this
+              zone: ex
+      - line: 2
+        fanfare:
+          cost:
+            to_cemetery:
+              sel:
+                who: self
+                zone: ex
+                trait: 八獄
+              n: 2
+          do:
+            - grant:
+                "on": this
+                keywords:
+                  - storm
+                  - drain
+      - line: 3
+        lastword:
+          do:
+            - move:
+                ref: this
+                to: ex
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-02"
