@@ -1,0 +1,68 @@
+cards:
+  BP18-T09:
+    abilities:
+      - auto:
+          do:
+            - counter:
+                delta: 1
+                name: 呪いカウンター
+                on: this
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      counter:
+                        name: 呪いカウンター
+                        on: this
+                    op: eq
+                    right: 1
+                then:
+                  - damage:
+                      n: 1
+                      to:
+                        leader: self
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      counter:
+                        name: 呪いカウンター
+                        on: this
+                    op: eq
+                    right: 2
+                then:
+                  - discard:
+                      n: 1
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      counter:
+                        name: 呪いカウンター
+                        on: this
+                    op: eq
+                    right: 3
+                then:
+                  - discard:
+                      n: 1
+                  - damage:
+                      n: 3
+                      to:
+                        leader: self
+                  - move:
+                      ref: this
+                      to: cemetery
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-01"
+format: 2
+kind: author_effect_set

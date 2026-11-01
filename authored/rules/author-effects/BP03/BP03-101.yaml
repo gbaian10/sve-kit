@@ -1,0 +1,45 @@
+cards:
+  BP03-101:
+    abilities:
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  not:
+                    entered_from:
+                      from: hand
+                      ref: this
+                then:
+                  - counter:
+                      delta: 1
+                      name: 童話カウンター
+                      on: this
+        line: 1
+      - activate:
+          cost:
+            counter:
+              n: 1
+              name: 童話カウンター
+              on: this
+          do:
+            - damage:
+                n: 2
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                leader_or: true
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-01"
+format: 2
+kind: author_effect_set
