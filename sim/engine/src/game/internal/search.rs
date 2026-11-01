@@ -443,6 +443,16 @@ pub(super) fn keyword_requirement(
             || requirements
                 .required
                 .iter()
+                .filter(|owner| owner.capability.code == "read.zone-count")
+                .flat_map(|owner| &owner.locations)
+                .any(|owner| {
+                    location
+                        .ir_path
+                        .starts_with(&format!("{}/selector/", owner.ir_path))
+                })
+            || requirements
+                .required
+                .iter()
                 .filter(|owner| {
                     matches!(
                         owner.capability.code,

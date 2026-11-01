@@ -1,6 +1,6 @@
 use super::super::{
-    Comparison, CostSpec, IntRead, PlayerResource, Precondition, PreconditionKind,
-    PreconditionReason,
+    CharacteristicView, Comparison, CostSpec, IntRead, NumberRead, ObjectView, PlayerResource,
+    Precondition, PreconditionKind, PreconditionReason, Stat,
 };
 use super::{
     Arithmetic, BTreeSet, Binding, BodyContext, Bool, Cardinality, Expr, FaceId, Int, IntOperation,
@@ -94,6 +94,9 @@ impl BodyContext<'_> {
         let count = ast::Number::Count {
             count: ast::CountQuery {
                 face_up: None,
+                class: None,
+                not_class: None,
+                other: false,
                 who: ast::Side::Controller,
                 zone: ast::CountZone::Cemetery,
                 kind: spells.then_some(ast::SearchKind::Spell),
@@ -383,15 +386,25 @@ impl BodyContext<'_> {
         active: &mut BTreeSet<String>,
     ) -> Result<Expr<Int>, LoweringError> {
         match value {
-            ast::Number::Counter { counter } => {
-                let ast::This::This = counter.on;
-                Ok(Expr::Compute(Box::new(IntOperation::FromNat {
-                    value: Expr::Live(Box::new(NatRead::Counter {
-                        holder: super::counters::holder(),
-                        kind: super::super::CounterKind(counter.name.clone()),
-                    })),
-                })))
+            ast::Number::Counter { counter } => Ok(counter_number(counter)),
+            ast::Number::Power { power_of } => Ok(this_number(
+                power_of,
+                Some(Stat::Attack),
+                CharacteristicView::Effective,
+            )),
+            ast::Number::Life { hp_of } => Ok(this_number(
+                hp_of,
+                Some(Stat::Life),
+                CharacteristicView::Effective,
+            )),
+            ast::Number::Cost { cost_of } => {
+                Ok(this_number(cost_of, None, CharacteristicView::Effective))
             }
+            ast::Number::OriginalCost { orig_cost_of } => Ok(this_number(
+                orig_cost_of,
+                None,
+                CharacteristicView::Original,
+            )),
             ast::Number::HistoryCount { history_count } => self.played_count(history_count, path),
             ast::Number::Literal(value) => Ok(Expr::Literal(Int(*value))),
             ast::Number::Resolution { at, value } => {
@@ -472,8 +485,11 @@ impl BodyContext<'_> {
         count: &ast::CountQuery,
         path: &str,
     ) -> Result<Expr<Int>, LoweringError> {
-        let filtered = count.keyword.is_some()
-            || count.face_up.is_some()
+        let filtered = count.face_up.is_some()
+            || count.class.is_some()
+            || count.not_class.is_some()
+            || count.keyword.is_some()
+            || count.other
             || count.kind.is_some()
             || count.r#trait.is_some()
             || count.name.is_some()
@@ -487,7 +503,11 @@ impl BodyContext<'_> {
         ) {
             return Err(unsupported(path));
         }
-        if matches!(count.zone, ast::CountZone::Hand | ast::CountZone::Deck) && filtered {
+        if matches!(
+            count.zone,
+            ast::CountZone::Hand | ast::CountZone::Deck | ast::CountZone::Banish
+        ) && filtered
+        {
             return Err(unsupported(path));
         }
         if matches!(count.zone, ast::CountZone::EvolveDeck)
@@ -504,39 +524,74 @@ impl BodyContext<'_> {
         }
         let predicate =
             super::selection::field_filter(&super::selection::ObjectFilter::from(count), binding);
-        Ok(super::numeric::aggregate_count(
-            Selector::Zone {
-                players: PlayerSet {
-                    relation: match count.who {
-                        ast::Side::Controller => PlayerRelation::SelfPlayer,
-                        ast::Side::Opponent => PlayerRelation::Opponents,
-                        ast::Side::All => PlayerRelation::All,
-                    },
-                    relative_to: PlayerRef::Controller {},
-                    cardinality: Cardinality {
-                        minimum: Nat(u64::from(!matches!(count.who, ast::Side::All))),
-                        maximum: matches!(count.who, ast::Side::Controller | ast::Side::Opponent)
-                            .then_some(Nat(1)),
-                    },
-                    text_quantifier: if matches!(count.who, ast::Side::All) {
-                        TextQuantifier::All
-                    } else {
-                        TextQuantifier::Implicit
-                    },
+        let selector = Selector::Zone {
+            players: PlayerSet {
+                relation: match count.who {
+                    ast::Side::Controller => PlayerRelation::SelfPlayer,
+                    ast::Side::Opponent => PlayerRelation::Opponents,
+                    ast::Side::All => PlayerRelation::All,
                 },
-                zone: match count.zone {
-                    ast::CountZone::Field => ZoneKind::Field,
-                    ast::CountZone::Ex => ZoneKind::Ex,
-                    ast::CountZone::EvolveDeck => ZoneKind::Evolve,
-                    ast::CountZone::Deck => ZoneKind::Deck,
-                    ast::CountZone::Hand => ZoneKind::Hand,
-                    ast::CountZone::Cemetery => ZoneKind::Cemetery,
+                relative_to: PlayerRef::Controller {},
+                cardinality: Cardinality {
+                    minimum: Nat(u64::from(!matches!(count.who, ast::Side::All))),
+                    maximum: matches!(count.who, ast::Side::Controller | ast::Side::Opponent)
+                        .then_some(Nat(1)),
                 },
-                view: SelectionView::Current {},
-                binding,
-                predicate: Box::new(predicate),
+                text_quantifier: if matches!(count.who, ast::Side::All) {
+                    TextQuantifier::All
+                } else {
+                    TextQuantifier::Implicit
+                },
             },
-            None,
-        ))
+            zone: match count.zone {
+                ast::CountZone::Field => ZoneKind::Field,
+                ast::CountZone::Ex => ZoneKind::Ex,
+                ast::CountZone::EvolveDeck => ZoneKind::Evolve,
+                ast::CountZone::Deck => ZoneKind::Deck,
+                ast::CountZone::Hand => ZoneKind::Hand,
+                ast::CountZone::Cemetery => ZoneKind::Cemetery,
+                ast::CountZone::Banish => ZoneKind::Banish,
+            },
+            view: SelectionView::Current {},
+            binding,
+            predicate: Box::new(predicate),
+        };
+        let selector = if count.other {
+            Selector::Difference {
+                input: Box::new(selector),
+                except: Box::new(super::numeric::holder()),
+            }
+        } else {
+            selector
+        };
+        Ok(super::numeric::aggregate_count(selector, None))
     }
+}
+
+fn this_number(
+    reference: &ast::This,
+    property: Option<Stat>,
+    view: CharacteristicView,
+) -> Expr<Int> {
+    let ast::This::This = reference;
+    let object = ObjectView::SourceInformation {};
+    let information = match property {
+        Some(property) => NumberRead::Stats {
+            object,
+            property,
+            view,
+        },
+        None => NumberRead::Cost { object, view },
+    };
+    Expr::Compute(Box::new(IntOperation::InformationOrZero { information }))
+}
+
+fn counter_number(counter: &ast::CounterRead) -> Expr<Int> {
+    let ast::This::This = counter.on;
+    Expr::Compute(Box::new(IntOperation::FromNat {
+        value: Expr::Live(Box::new(NatRead::Counter {
+            holder: super::counters::holder(),
+            kind: super::super::CounterKind(counter.name.clone()),
+        })),
+    }))
 }

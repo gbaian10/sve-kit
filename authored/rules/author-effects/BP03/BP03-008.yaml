@@ -1,0 +1,30 @@
+cards:
+  BP03-008:
+    abilities:
+      - attack_time:
+          do:
+            - buff:
+                on: this
+                power: 1
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      power_of: this
+                    op: ge
+                    right: 5
+                then:
+                  - damage:
+                      n: 2
+                      to:
+                        leaders: opponents
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-01"
+format: 2
+kind: author_effect_set

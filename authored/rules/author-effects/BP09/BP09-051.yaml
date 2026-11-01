@@ -1,0 +1,28 @@
+cards:
+  BP09-051:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - damage:
+                n:
+                  count:
+                    class: ウィッチ
+                    kind: follower
+                    who: self
+                    zone: field
+                to:
+                  any_of:
+                    - leaders: opponents
+                    - kind: follower
+                      who: opp
+                      zone: field
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-01"
+format: 2
+kind: author_effect_set

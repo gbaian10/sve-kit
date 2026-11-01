@@ -509,7 +509,7 @@ impl Execution {
                 selector:
                     Selector::Zone {
                         players,
-                        zone: zone @ (ZoneKind::Hand | ZoneKind::Deck),
+                        zone: zone @ (ZoneKind::Hand | ZoneKind::Deck | ZoneKind::Banish),
                         view: SelectionView::Current {},
                         predicate,
                         ..
@@ -520,8 +520,10 @@ impl Execution {
                 }
                 let zone = if *zone == ZoneKind::Hand {
                     "hand"
-                } else {
+                } else if *zone == ZoneKind::Deck {
                     "deck"
+                } else {
+                    "banish"
                 };
                 let count =
                     self.players(game, players)?
