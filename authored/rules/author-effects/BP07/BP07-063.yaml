@@ -1,0 +1,25 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP07-063:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-01"
+    abilities:
+      - line: 1
+        auto:
+          on:
+            attacked:
+              who: self
+              sel:
+                kind: follower
+                trait: ドラゴニュート
+          do:
+            - damage:
+                n: 2
+                to:
+                  leaders: opponents

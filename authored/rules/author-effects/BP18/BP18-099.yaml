@@ -1,0 +1,47 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP18-099:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-01"
+    abilities:
+      - line: 1
+        auto:
+          on:
+            life_changed:
+              who: self
+              direction: up
+          do:
+            - damage:
+                n: 2
+                to: chosen
+          targets:
+            - bind: chosen
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+      - line: 2
+        activate:
+          cost:
+            pp: 0
+          per_turn: 1
+          do:
+            - damage:
+                n:
+                  count:
+                    who: self
+                    zone: field
+                    kind: follower
+                    trait: 透京
+                to:
+                  leaders: opponents
+            - life:
+                who: self
+                delta: 1

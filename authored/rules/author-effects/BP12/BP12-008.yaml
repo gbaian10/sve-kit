@@ -1,0 +1,36 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP12-008:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-01"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        auto:
+          on:
+            attacked:
+              who: self
+              sel:
+                kind: follower
+                trait: 狩人
+                other: true
+          do:
+            - damage:
+                n: 3
+                to: chosen
+          targets:
+            - bind: chosen
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
