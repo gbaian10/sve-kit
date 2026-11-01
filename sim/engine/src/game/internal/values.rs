@@ -518,7 +518,13 @@ impl Execution {
                 if **predicate != Expr::Literal(Bool(true)) {
                     return Err(unsupported("filtered hidden zone count"));
                 }
-                let zone = zone_name(*zone)?;
+                let zone = if *zone == ZoneKind::Hand {
+                    "hand"
+                } else if *zone == ZoneKind::Deck {
+                    "deck"
+                } else {
+                    "banish"
+                };
                 let count =
                     self.players(game, players)?
                         .into_iter()

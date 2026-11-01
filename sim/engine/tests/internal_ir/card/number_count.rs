@@ -264,3 +264,59 @@ fn excluding_source_from_a_count_never_authorizes_hidden_keyword_reads() {
         assert_eq!(exact_authority(&game), before);
     }
 }
+
+#[test]
+fn scalar_hand_and_deck_counts_use_each_players_current_population() {
+    let count = |who: &str, zone: &str| json!({"count":{"who":who,"zone":zone}});
+    let program = lowered(&json!({"cost":{"pp":0},"do":[
+        {"damage":{"to":{"leaders":"opponents"},"n":count("self","hand")}},
+        {"damage":{"to":{"leaders":"opponents"},"n":count("self","deck")}},
+        {"damage":{"to":{"leaders":"opponents"},"n":count("opp","hand")}},
+        {"damage":{"to":{"leaders":"opponents"},"n":count("opp","deck")}},
+        {"draw":{"n":1_u8}},
+        {"damage":{"to":{"leaders":"opponents"},"n":count("self","hand")}},
+        {"damage":{"to":{"leaders":"opponents"},"n":count("self","deck")}}
+    ]}));
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
+    for (player, zone, n) in [
+        ("P1", "hand", 2_usize),
+        ("P1", "deck", 3),
+        ("P2", "hand", 4),
+        ("P2", "deck", 5),
+    ] {
+        initial["players"][player]["zones"][zone] = json!(
+            (0..n)
+                .map(|i| json!({"id":format!("{player}-{zone}-{i}"),"card":"unit-spell"}))
+                .collect::<Vec<_>>()
+        );
+    }
+    let mut game = Game::new(
+        catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "scalar-hand-deck",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &program).unwrap();
+    game.load_internal_card("unit-spell", &card(vec![]))
+        .unwrap();
+    let result = activate(&mut game, 1);
+    let amounts = result
+        .progress
+        .facts
+        .iter()
+        .filter_map(|fact| {
+            if let Fact::Damage(hit) = fact {
+                Some(hit.amount.0.get())
+            } else {
+                None
+            }
+        })
+        .collect::<Vec<_>>();
+    assert_eq!(amounts, [2_u64, 3, 4, 5, 3, 2]);
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P2"]["leader"]["life"], 1_u8);
+    assert_eq!(state["P1"]["hand"].as_array().unwrap().len(), 3_usize);
+}
