@@ -171,6 +171,11 @@ impl Execution {
             } if super::card::selection::public_zone_selector(selector).is_ok() => {
                 self.public_zone_objects(game, selector)?
             }
+            Selector::Filter { .. }
+                if super::card::selection::public_zone_selector(selector).is_ok() =>
+            {
+                self.public_target_objects(game, selector, false)?
+            }
             Selector::Objects { objects } => objects
                 .iter()
                 .map(|object| self.object(game, object))

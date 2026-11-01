@@ -380,7 +380,8 @@ fn mask_public_predicate(selector: &mut Selector) {
         }
         selector if super::card::selection::public_zone_selector(selector).is_ok() => {
             // Only this checked grammar is evaluated per object by the public-zone authority.
-            if let Selector::Zone { predicate, .. } = selector {
+            if let Selector::Zone { predicate, .. } | Selector::Filter { predicate, .. } = selector
+            {
                 **predicate = Expr::Literal(Bool(true));
             }
         }

@@ -483,7 +483,7 @@ impl Allocator {
                 AbilityKind::Spell,
                 Some(payment::lower(
                     &mut context,
-                    &ast::Cost::Short(ast::CostOperation::Pp(cost.0)),
+                    &ast::Cost::Short(Box::new(ast::CostOperation::Pp(cost.0))),
                     &ability_source,
                     path,
                 )?),

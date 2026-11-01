@@ -339,10 +339,31 @@ impl BodyContext<'_> {
 
     fn public_exists(
         &mut self,
-        query: &ast::PublicQuery,
+        query: &ast::ExistsQuery,
         path: &str,
     ) -> Result<Expr<Bool>, LoweringError> {
         let binding = Binding::new(self.allocator.id(path)?, self.card_allocator.scope(path)?);
+        let ast::ExistsQuery::Public(query) = query else {
+            let ast::ExistsQuery::Selected(query) = query else {
+                return Err(unsupported(path));
+            };
+            let reference = self
+                .targets
+                .get(&query.reference)
+                .copied()
+                .filter(|_| !self.observed_targets.contains(&query.reference))
+                .ok_or_else(|| unsupported(path))?;
+            return Ok(Expr::Compute(Box::new(Predicate::Exists {
+                objects: Selector::Filter {
+                    input: Box::new(Selector::Bound { reference }),
+                    binding,
+                    predicate: Box::new(super::selection::field_filter(
+                        &super::selection::ObjectFilter::from(query),
+                        binding,
+                    )),
+                },
+            })));
+        };
         let mut objects = super::costs::public_query(query, binding);
         if query.other {
             objects = Selector::Difference {
