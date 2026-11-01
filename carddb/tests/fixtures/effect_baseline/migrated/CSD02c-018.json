@@ -1,0 +1,40 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "name": "rush",
+        "op": "macro"
+      },
+      "kind": "static",
+      "line": 1
+    },
+    {
+      "body": {
+        "name": "guard",
+        "op": "macro"
+      },
+      "kind": "static",
+      "line": 1
+    },
+    {
+      "body": {
+        "condition": {
+          "args": [
+            {
+              "read": "damage.amount"
+            },
+            4
+          ],
+          "fn": "ge"
+        },
+        "kind": "any",
+        "op": "replace_damage",
+        "set": 3,
+        "subjects": "self"
+      },
+      "kind": "static",
+      "line": 2
+    }
+  ],
+  "status": "complete"
+}
