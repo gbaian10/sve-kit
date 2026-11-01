@@ -13,7 +13,7 @@ use super::{
 use core::mem::replace;
 
 /// Publishable source coordinates only; never a filesystem path or card text.
-#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, serde::Serialize, serde::Deserialize)]
 pub struct SourceSpan {
     /// Snapshot card identifier.
     pub card_id: String,

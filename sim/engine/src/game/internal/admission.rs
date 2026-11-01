@@ -262,6 +262,7 @@ fn check_requirements(
                             | "internal.KeywordId.Storm"
                             | "internal.KeywordId.Rush"
                             | "internal.KeywordId.Bane"
+                            | "internal.KeywordId.Drain"
                             | "internal.KeywordId.Intimidate"
                             | "internal.KeywordId.Assail"
                     ) && requirement

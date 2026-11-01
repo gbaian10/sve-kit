@@ -48,7 +48,10 @@ fn basic_keyword_grants_are_effective_and_other_keywords_stay_closed() {
     }
     let bad = ability(
         1,
-        vec![granted(KeywordId::Drain, DurationEnd::NoTemporalExpiry {})],
+        vec![granted(
+            KeywordId::TwinDrive,
+            DurationEnd::NoTemporalExpiry {},
+        )],
     );
     let error = WellFormedCardProgram::check(CardProgram {
         abilities: vec![bad],

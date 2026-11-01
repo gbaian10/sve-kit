@@ -217,6 +217,9 @@ impl BodyContext<'_> {
             || !matches!(&choice.from.kind, Some(ast::SearchKind::Follower))
             || choice.from.keyword.is_some()
             || choice.from.r#trait.is_some()
+            || !choice.from.traits_all.is_empty()
+            || choice.from.token.is_some()
+            || !choice.from.names.is_empty()
             || choice.from.name.is_some()
             || choice.from.name_contains.is_some()
             || choice.from.has_evolve.is_some()
@@ -301,6 +304,7 @@ pub(super) struct ObjectFilter<'query> {
     pub not_class: Option<&'query str>,
     pub token: Option<bool>,
     pub name: Option<&'query str>,
+    pub names: &'query [String],
     pub contains: Option<&'query str>,
     pub cost: [Option<u64>; 3],
     pub original_cost: [Option<u64>; 3],
@@ -317,11 +321,12 @@ impl<'query> From<&'query ast::TargetQuery> for ObjectFilter<'query> {
             keyword: query.keyword.map(|keyword| keyword.0),
             has_evolve: query.has_evolve.is_some(),
             trait_id: query.r#trait.as_deref(),
-            all_traits: &[],
+            all_traits: &query.traits_all,
             class: query.class.as_deref(),
             not_class: query.not_class.as_deref(),
-            token: None,
+            token: query.token,
             name: query.name.as_deref(),
+            names: &query.names,
             contains: query.name_contains.as_deref(),
             cost: [query.cost_eq, query.cost_le, query.cost_ge],
             original_cost: [query.orig_cost_eq, query.orig_cost_le, query.orig_cost_ge],
@@ -414,6 +419,23 @@ pub(super) fn field_filter(
     let mut predicates = Vec::new();
     if !matches!(base, super::Expr::Literal(super::Bool(true))) {
         predicates.push(base);
+    }
+    if !filter.names.is_empty() {
+        predicates.push(super::Expr::Compute(Box::new(
+            super::Predicate::NamesIntersect {
+                left: super::Expr::Live(Box::new(super::super::NamesRead::Names {
+                    object: object.clone(),
+                })),
+                right: super::Expr::Literal(
+                    filter
+                        .names
+                        .iter()
+                        .cloned()
+                        .map(super::super::CardName)
+                        .collect(),
+                ),
+            },
+        )));
     }
     for trait_id in filter.all_traits {
         predicates.push(super::search::object_filter(

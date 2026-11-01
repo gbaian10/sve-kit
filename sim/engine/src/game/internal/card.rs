@@ -78,15 +78,18 @@ pub struct Activation {
 #[derive(Clone, Debug, Default)]
 pub(in crate::game) struct CardRuntime {
     selected: bool,
-    definitions: Arc<RuntimeCards>,
+    pub(in crate::game::internal) definitions: Arc<RuntimeCards>,
     resources: BTreeMap<String, String>,
     unadmitted: BTreeSet<String>,
-    instances: BTreeMap<(String, u64, String, usize, AbilityId), AbilityInstanceId>,
+    pub(in crate::game::internal) instances:
+        BTreeMap<(String, u64, String, usize, AbilityId), AbilityInstanceId>,
+    pub(in crate::game::internal) keyword_instances:
+        BTreeMap<(String, u64, super::grant::GrantOrigin), AbilityInstanceId>,
     links: BTreeMap<(u64, u64, u64, u64), AssociationId>,
     quotas: BTreeMap<(AbilityInstanceId, ConsumptionPoint), (TurnId, u64)>,
     mode_uses: Vec<ModeUse>,
     admission: Option<triggers::Admission>,
-    next_instance: u64,
+    pub(in crate::game::internal) next_instance: u64,
     entry_result: Option<CardEntry>,
     pub(in crate::game) checkpoint: Option<ExecutionId>,
     pending: Vec<triggers::PendingOccurrence>,

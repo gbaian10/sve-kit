@@ -561,6 +561,19 @@ fn private_look_can_make_disjoint_cost_choices_move_them_to_field_and_order_the_
     ]);
     let lowerer = lowerer();
     lowerer.lower(&tree).unwrap();
+    for (name, value) in [
+        ("traits_all", json!(["ドラゴニュート"])),
+        ("token", json!(true)),
+        ("names", json!(["candidate"])),
+    ] {
+        let mut filtered = tree.clone();
+        filtered["cards"]["BP08-055"]["abilities"][0]["fanfare"]["do"][1]["choose"]["from"][name] =
+            value;
+        assert_eq!(
+            lowerer.lower(&filtered).unwrap_err().code,
+            "unsupported_construct"
+        );
+    }
 
     let mut whole_deck = tree;
     *whole_deck

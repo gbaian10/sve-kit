@@ -45,7 +45,7 @@ pub(super) fn lower(
             .keywords
             .iter()
             .map(|name| {
-                keywords::basic_keyword_id(name)
+                keywords::grantable_keyword_id(name)
                     .map(|keyword| GrantedAbility::Keyword { keyword })
                     .ok_or_else(|| unsupported(path))
             })

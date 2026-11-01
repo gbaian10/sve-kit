@@ -1,0 +1,29 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP15-085:
+    admission: light
+    abilities:
+      - line: 1
+        evolve_time:
+          targets:
+            - bind: ally
+              from:
+                who: self
+                zone: field
+                kind: follower
+                traits_all:
+                  - 絶傑
+                  - 魔界
+              n: 1
+          do:
+            - grant:
+                "on": ally
+                keywords:
+                  - drain
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-02"

@@ -171,7 +171,7 @@ fn static_grants_reject_keywords_without_a_runtime_consumer() {
             .next()
             .unwrap()["abilities"]
     };
-    abilities[1]["static"]["effects"][0]["grant"]["keywords"] = json!(["drain"]);
+    abilities[1]["static"]["effects"][0]["grant"]["keywords"] = json!(["single_drive"]);
     match lowerer().lower_current(&candidate) {
         Err(error) => assert_eq!(error.code, "unsupported_construct"),
         Ok(_) => panic!("an unsupported static keyword was admitted"),
