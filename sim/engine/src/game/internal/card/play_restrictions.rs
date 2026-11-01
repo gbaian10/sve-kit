@@ -1,6 +1,17 @@
-use super::{Game, PlayerId, Result, player_id};
-use crate::ir::ZoneKind;
-use crate::ir::play_restrictions::{Restriction, card_restriction};
+use super::{Ability, Context, Game, Generation, Located, PlayerId, Result, unsupported};
+use crate::ir::play_restrictions::card_restriction;
+use crate::ir::{Expr, ZoneKind};
+
+pub(super) fn check(located: &Located<Ability>, ordinal: usize) -> Result<bool> {
+    let Some(predicate) = card_restriction(&located.node) else {
+        return Ok(false);
+    };
+    if ordinal != 0 {
+        return Err(unsupported("play restriction requires base face"));
+    }
+    super::super::ordering::check_condition(predicate, &located.source)?;
+    Ok(true)
+}
 
 #[expect(
     clippy::multiple_inherent_impl,
@@ -20,13 +31,25 @@ impl Game {
                 "ex" => ability.active_zones.contains(&ZoneKind::Ex),
                 _ => false,
             };
-            if in_zone
-                && match card_restriction(ability) {
-                    Some(Restriction::FromEx) => true,
-                    Some(Restriction::OwnTurn) => player_id(self.active())? == actor,
-                    None => false,
+            let Some(predicate) = card_restriction(ability).filter(|_| in_zone) else {
+                continue;
+            };
+            if let Expr::Literal(value) = predicate {
+                if value.0 {
+                    return Ok(true);
                 }
-            {
+                continue;
+            }
+            // Legality probes must leave allocation clocks and ability instances untouched.
+            let mut probe = self.clone();
+            let mut execution = probe.new_card_execution(Context {
+                source: holder.into(),
+                generation: Generation(object.generation),
+                controller: actor,
+            })?;
+            let source = probe.internal_card_source(holder, ability.id, actor)?;
+            execution.bind_source(&probe, source)?;
+            if execution.boolean(&probe, predicate)?.0 {
                 return Ok(true);
             }
         }

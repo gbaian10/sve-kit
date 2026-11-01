@@ -1,0 +1,39 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP12-111:
+    abilities:
+      - line: 1
+        play:
+          cannot_if:
+            cmp:
+              left:
+                count:
+                  who: self
+                  zone: field
+                  kind: follower
+                  trait: ゴブリン
+              op: le
+              right: 2
+      - line: 2
+        spell:
+          targets:
+            - bind: victim
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - destroy: victim
+            - damage:
+                to:
+                  leader_of: victim
+                n: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-02"

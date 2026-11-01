@@ -1375,8 +1375,15 @@ pub(super) struct PlayCosts {
 }
 
 #[derive(Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(untagged)]
 pub(super) enum PlayRestriction {
+    Named(NamedPlayRestriction),
+    Condition(Condition),
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum NamedPlayRestriction {
     MyTurn(bool),
     InZone(PlayRestrictionZone),
 }

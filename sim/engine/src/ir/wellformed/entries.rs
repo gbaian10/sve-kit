@@ -333,10 +333,19 @@ impl Checker {
             self.at("body/steps", |checker| checker.program_steps(body))?;
         }
         self.card_payment_body = previous_payment;
+        self.ability_declarations(ability)
+    }
+
+    fn ability_declarations(&mut self, ability: &Ability) -> Checked {
         for (index, effect) in ability.declarations.iter().enumerate() {
-            // Only complete named printed declarations bypass the generic permission gate.
+            if let Some(predicate) = super::super::play_restrictions::card_restriction(ability) {
+                self.at(&format!("declarations/{index}/condition"), |checker| {
+                    checker.boolean(predicate)
+                })?;
+                continue;
+            }
+            // Complete printed declarations bypass only the generic permission gate.
             if super::super::quick::card_permission(ability)
-                || super::super::play_restrictions::card_restriction(ability).is_some()
                 || super::super::printed_keywords::card_declaration(ability).is_some()
             {
                 continue;

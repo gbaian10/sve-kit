@@ -1,0 +1,47 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP16-021:
+    abilities:
+      - line: 1
+        keywords:
+          - storm
+      - line: 2
+        fanfare:
+          targets:
+            - bind: ally
+              from:
+                who: self
+                zone: field
+                kind: follower
+                trait: レヴィオン
+                other: true
+              n: 1
+          do:
+            - buff:
+                "on": ally
+                power: 1
+      - line: 3
+        activate:
+          cost:
+            pp: 3
+          usable_if:
+            cmp:
+              left:
+                count:
+                  who: self
+                  zone: cemetery
+                  kind: follower
+                  class: ロイヤル
+              op: ge
+              right: 10
+          per_turn: 1
+          do:
+            - stand: this
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-02"

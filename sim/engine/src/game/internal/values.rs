@@ -761,6 +761,9 @@ impl Execution {
                     self.natural(game, right)?.0,
                 ),
                 Predicate::Exists { objects } => !self.objects(game, objects)?.is_empty(),
+                Predicate::PlayerEquals { left, right } => {
+                    self.player_value(game, left)? == self.player_value(game, right)?
+                }
                 Predicate::Equal { operands } => match operands.as_ref() {
                     ValueEquality::EntryMethod { left, right } => {
                         self.entered_method(left)? == self.entered_method(right)?
