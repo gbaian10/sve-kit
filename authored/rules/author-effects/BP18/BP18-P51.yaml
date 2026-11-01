@@ -1,0 +1,28 @@
+cards:
+  BP18-P51:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - counter:
+                delta: 3
+                name: ギガカウンター
+                on:
+                  name: ギガブレード
+                  who: self
+                  zone: field
+            - draw:
+                n: 2
+                who: self
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+    token:
+      name: アンリミテッドサーチ
+      template: true
+format: 2
+kind: author_effect_set

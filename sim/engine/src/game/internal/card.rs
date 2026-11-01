@@ -1056,6 +1056,12 @@ fn check_nodes(
                 optional::check_costs(costs, ability_source)?;
                 check_nodes(game, &on_paid.steps, source, ability_source)?;
             }
+            Node::Control {
+                control: control @ Control::EachObject { body, .. },
+            } if super::counters::iteration(control).is_some() => {
+                super::counters::check_iteration(control)?;
+                check_nodes(game, &body.steps, source, ability_source)?;
+            }
             Node::Control { control } if projection(control).is_some() => {
                 let projection =
                     projection(control).ok_or_else(|| invalid("missing evolution projection"))?;

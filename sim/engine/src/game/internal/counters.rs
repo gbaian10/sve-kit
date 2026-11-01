@@ -1,4 +1,4 @@
-//! Fixed card counters share the object's authoritative counter map.
+//! Card counters share the object's authoritative counter map.
 
 #![expect(
     clippy::indexing_slicing,
@@ -7,8 +7,9 @@
 
 use super::{Execution, Game, InstructionOutcome, Result, invalid, unsupported};
 use crate::ir::{
-    Action, CounterChangeEvent, CounterKind, CounterOperation, Expr, Holder, Instruction, Int, Nat,
-    ObjectOperand, Quantity, QuantityUnit, RuntimeHolder,
+    Action, Binding, Control, CounterChangeEvent, CounterKind, CounterOperation, Expr, Holder,
+    Instruction, Int, Nat, ObjectOperand, ObjectRef, Quantity, QuantityUnit, RuntimeHolder,
+    Selector,
 };
 use serde_json::json;
 
@@ -22,14 +23,14 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
         && (!matches!(
             holder,
             Holder::Object {
-                object: ObjectOperand::SourceHolder {}
+                object: ObjectOperand::SourceHolder {} | ObjectOperand::Bound { .. }
             }
         ) || !matches!(
             operation,
             CounterOperation::Add {} | CounterOperation::Remove {}
         ) || !matches!(amount, Expr::Literal(Nat(n)) if i64::try_from(*n).is_ok()))
     {
-        return Err(unsupported("fixed source counter change"));
+        return Err(unsupported("object counter change"));
     }
     Ok(())
 }
@@ -39,6 +40,9 @@ pub(super) fn is_cost(action: &Action) -> bool {
         action,
         Action::Counter {
             operation: CounterOperation::Remove {},
+            holder: Holder::Object {
+                object: ObjectOperand::SourceHolder {}
+            },
             ..
         }
     ) && check_action(action).is_ok()
@@ -46,17 +50,20 @@ pub(super) fn is_cost(action: &Action) -> bool {
 
 #[expect(
     clippy::multiple_inherent_impl,
-    reason = "Counter reads use the same fixed source generation as changes."
+    reason = "Counter reads retain the referenced object generation."
 )]
 impl Execution {
     pub(super) fn counter(&self, game: &Game, holder: &Holder, kind: &CounterKind) -> Result<Nat> {
-        let Holder::Object {
-            object: ObjectOperand::SourceHolder {},
-        } = holder
-        else {
+        let Holder::Object { object: operand } = holder else {
             return Err(unsupported("source counter read"));
         };
-        let reference = self.object(game, &ObjectOperand::SourceHolder {})?;
+        if !matches!(
+            operand,
+            ObjectOperand::SourceHolder {} | ObjectOperand::Bound { .. }
+        ) {
+            return Err(unsupported("counter read holder"));
+        }
+        let reference = self.object(game, operand)?;
         let object = game.object(self.object_id(reference)?)?;
         if object.generation != reference.generation.0 {
             return Err(unsupported("stale counter holder requires a snapshot"));
@@ -78,7 +85,7 @@ impl Execution {
 
 #[expect(
     clippy::multiple_inherent_impl,
-    reason = "Counter costs and effects mutate one authoritative object."
+    reason = "Counter costs and effects mutate the authoritative object counter map."
 )]
 impl Game {
     pub(super) fn internal_counter(
@@ -98,7 +105,10 @@ impl Game {
             return Err(unsupported("fixed counter amount"));
         };
         let before = execution.counter(self, holder, kind)?;
-        let reference = execution.object(self, &ObjectOperand::SourceHolder {})?;
+        let Holder::Object { object } = holder else {
+            return Err(unsupported("object counter holder"));
+        };
+        let reference = execution.object(self, object)?;
         let id = execution.object_id(reference)?.to_owned();
         if !matches!(self.object(&id)?.zone.as_str(), "field" | "ex") {
             return Err(unsupported("counter holder must be in Field or EX"));
@@ -147,5 +157,88 @@ impl Game {
             amount: Int(delta.saturating_abs()),
             unit: QuantityUnit::Counters,
         })
+    }
+}
+
+/// Only a single non-suspending counter instruction is admitted in this loop.
+pub(super) fn iteration(
+    control: &Control,
+) -> Option<(&Selector, Binding<ObjectRef>, &Instruction)> {
+    use crate::ir::Node;
+    let Control::EachObject {
+        input,
+        binding,
+        body,
+        order: None,
+    } = control
+    else {
+        return None;
+    };
+    let [step] = body.steps.as_slice() else {
+        return None;
+    };
+    let Node::Instruction { instruction } = &step.node else {
+        return None;
+    };
+    if !matches!(&instruction.action, Action::Counter {
+        holder: Holder::Object { object: ObjectOperand::Bound { binding: holder } }, ..
+    } if holder == binding)
+    {
+        return None;
+    }
+    Some((input, *binding, instruction))
+}
+
+#[expect(
+    clippy::multiple_inherent_impl,
+    reason = "Object iteration delegates to the shared counter instruction."
+)]
+impl Game {
+    pub(super) fn internal_counter_iteration(
+        &mut self,
+        execution: &mut Execution,
+        control: &Control,
+    ) -> Result<()> {
+        let (input, binding, instruction) =
+            iteration(control).ok_or_else(|| unsupported("counter iteration"))?;
+        for reference in execution.objects(self, input)? {
+            execution.slots.insert(
+                binding.key(),
+                super::Slot::Objects {
+                    members: vec![reference],
+                    on_field_at_capture: false,
+                },
+            );
+            self.internal_instruction(execution, Box::new(instruction.clone()))?;
+        }
+        execution.slots.remove(&binding.key());
+        Ok(())
+    }
+}
+
+pub(super) fn check_iteration(control: &Control) -> Result<()> {
+    let (input, _, _) = iteration(control).ok_or_else(|| unsupported("counter iteration"))?;
+    check_selector(input)
+}
+
+fn check_selector(selector: &Selector) -> Result<()> {
+    use crate::ir::ZoneKind;
+    match selector {
+        Selector::Bound { .. } => Ok(()),
+        Selector::Zone {
+            zone: ZoneKind::Field | ZoneKind::Ex,
+            ..
+        } => super::card::selection::public_zone_selector(selector),
+        Selector::Difference { input, .. } => {
+            super::card::selection::public_zone_selector(selector)?;
+            check_selector(input)
+        }
+        Selector::Union { sets } => {
+            for set in sets {
+                check_selector(set)?;
+            }
+            Ok(())
+        }
+        _ => Err(unsupported("public Field or EX counter selector")),
     }
 }

@@ -1196,9 +1196,7 @@ impl Game {
                 }
                 Node::Control {
                     control: control @ Control::EachObject { .. },
-                } => {
-                    self.internal_effect_evolution_iteration(execution, control)?;
-                }
+                } => self.internal_object_iteration(execution, control)?,
                 Node::Capture { capture } => execution.capture(self, &capture)?,
                 Node::Decision { decision } => self.internal_decision_step(execution, &decision)?,
                 Node::Instruction { instruction } => {
@@ -1213,6 +1211,18 @@ impl Game {
         }
         self.internal_reveal_expiry(execution, false);
         Ok(())
+    }
+
+    fn internal_object_iteration(
+        &mut self,
+        execution: &mut Execution,
+        control: Control,
+    ) -> Result<()> {
+        if counters::iteration(&control).is_some() {
+            self.internal_counter_iteration(execution, &control)
+        } else {
+            self.internal_effect_evolution_iteration(execution, control)
+        }
     }
 
     fn internal_decision_step(

@@ -166,7 +166,10 @@ fn source_paths(
                 }
             }
             Node::Control {
-                control: Control::Sequence { body } | Control::May { body, .. },
+                control:
+                    Control::Sequence { body }
+                    | Control::May { body, .. }
+                    | Control::EachObject { body, .. },
             } => source_paths(body, &format!("{path}/control/body"), origin, paths),
             Node::Control {
                 control:
@@ -282,7 +285,9 @@ fn check_requirements(
 fn play_requirement(code: &str) -> bool {
     matches!(
         code,
-        "shape.NatRead.Counter"
+        "shape.Control.EachObject"
+            | "control.each-object"
+            | "shape.NatRead.Counter"
             | "read.counter"
             | "shape.Holder.Object"
             | "shape.Action.Counter"
@@ -385,6 +390,12 @@ fn check_program(program: &Program, source: &SourceSpan, card: bool) -> Result<(
                 if steps.len() != 1 {
                     return Err(unsupported("one optional cost"));
                 }
+            }
+            Node::Control {
+                control: control @ Control::EachObject { body, .. },
+            } if card && super::counters::iteration(control).is_some() => {
+                super::counters::check_iteration(control)?;
+                check_program(body, source, card)?;
             }
             Node::Control {
                 control: control @ Control::EachPlayer { stages, .. },

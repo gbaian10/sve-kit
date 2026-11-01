@@ -130,6 +130,15 @@ impl Execution {
                     .ok_or_else(|| unsupported("missing triggering movement authority"))?;
                 Ok(*after)
             }
+            ObjectOperand::Bound { binding } => {
+                let Some(Slot::Objects { members, .. }) = self.slots.get(&binding.key()) else {
+                    return Err(invalid("missing object binding producer"));
+                };
+                match members.as_slice() {
+                    [reference] => Ok(*reference),
+                    _ => Err(invalid("object binding requires one member")),
+                }
+            }
             ObjectOperand::SourceHolder {} => {
                 let mut reference = self.reference(game, &self.context.source)?;
                 reference.generation = self.context.generation;
