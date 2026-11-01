@@ -1,0 +1,36 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP03-120:
+    admission: light
+    abilities:
+      - line: 1
+        fanfare:
+          targets:
+            - bind: ally
+              from:
+                who: self
+                zone: field
+                kind: follower
+                trait: ヴァンガード
+              n: 1
+          do:
+            - stand: ally
+            - apply:
+                "on": ally
+                effect:
+                  cannot:
+                    what: attack
+                    target:
+                      leaders: opponents
+                until: turn
+    ignored:
+      - section: 1
+        line: 1
+        reason: reminder
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-01"

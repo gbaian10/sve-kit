@@ -1,0 +1,37 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP16-009:
+    admission: light
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        keywords:
+          - ward
+      - line: 3
+        fanfare:
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - apply:
+                "on": enemy
+                effect:
+                  cannot:
+                    what: attack
+                until:
+                  during_next_turn:
+                    who: opp
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-01"
