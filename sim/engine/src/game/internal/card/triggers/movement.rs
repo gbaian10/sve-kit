@@ -19,6 +19,7 @@ fn filter(ability: &Ability) -> Option<SubjectFilter> {
     match pattern {
         EventPattern::LeaveField { binding, predicate } => {
             SubjectFilter::parse(SubjectFields::Cemetery(*binding), predicate)
+                .or_else(|| SubjectFilter::parse(SubjectFields::Hand(*binding), predicate))
                 .or_else(|| SubjectFilter::parse(SubjectFields::Leave(*binding), predicate))
         }
         EventPattern::Destroy { binding, predicate } => {
@@ -29,6 +30,23 @@ fn filter(ability: &Ability) -> Option<SubjectFilter> {
         }
         _ => None,
     }
+}
+
+fn destination_matches(on: &TriggerCondition, destination: &str) -> bool {
+    let TriggerCondition::Event {
+        pattern: EventPattern::LeaveField { binding, predicate },
+    } = on
+    else {
+        return true;
+    };
+    [
+        (SubjectFields::Cemetery(*binding), "cemetery"),
+        (SubjectFields::Hand(*binding), "hand"),
+    ]
+    .into_iter()
+    .all(|(fields, expected)| {
+        SubjectFilter::parse(fields, predicate).is_none() || destination == expected
+    })
 }
 
 pub(super) fn check_header(ability: &Ability) -> Result<bool> {
@@ -222,12 +240,7 @@ impl Game {
                 if destroyed && (destination != "cemetery" || !marked_destroyed) {
                     continue;
                 }
-                if let TriggerCondition::Event {
-                    pattern: EventPattern::LeaveField { binding, predicate },
-                } = on
-                    && SubjectFilter::parse(SubjectFields::Cemetery(*binding), predicate).is_some()
-                    && destination != "cemetery"
-                {
+                if !destination_matches(on, destination) {
                     continue;
                 }
                 let plan =

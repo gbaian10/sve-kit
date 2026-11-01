@@ -26,7 +26,10 @@ pub(super) fn subscription(
                     entry.sel.as_ref(),
                     entry.during.is_some(),
                 )
-                .predicate(SubjectFields::Cemetery(event)),
+                .predicate(match entry.to {
+                    ast::DepartureDestination::Cemetery => SubjectFields::Cemetery(event),
+                    ast::DepartureDestination::Hand => SubjectFields::Hand(event),
+                }),
             })
         }
         ast::PhaseSubscription::PlacedEx(entry) => {
