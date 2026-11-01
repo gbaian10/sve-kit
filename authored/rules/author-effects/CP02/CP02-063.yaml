@@ -1,0 +1,25 @@
+cards:
+  CP02-063:
+    abilities:
+      - fanfare:
+          do:
+            - damage:
+                n:
+                  count:
+                    kind: follower
+                    other: true
+                    trait: デレマス
+                    who: self
+                    zone: field
+                to:
+                  leaders: opponents
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
