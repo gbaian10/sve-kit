@@ -1,0 +1,60 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP18-064:
+    abilities:
+      - line: 1
+        keywords:
+          - ward
+      - line: 2
+        auto:
+          "on":
+            phase:
+              whose: self
+              which: end
+          targets:
+            - bind: t
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: t
+                n: 5
+            - life:
+                who: self
+                delta: 1
+      - line: 3
+        fanfare:
+          targets:
+            - bind: t
+              from:
+                who: self
+                zone: cemetery
+                name: オラクルドラゴン
+              upto: 2
+          do:
+            - move:
+                ref: t
+                to: field
+                result: returned
+      - line: 4
+        activate:
+          zone: hand
+          cost:
+            steps:
+              - pp: 2
+              - discard:
+                  ref: this
+          do:
+            - draw:
+                n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-02"

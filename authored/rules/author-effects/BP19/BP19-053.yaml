@@ -1,0 +1,44 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP19-053:
+    abilities:
+      - line: 1
+        keywords:
+          - storm
+      - line: 2
+        fanfare:
+          targets:
+            - bind: t
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: t
+                n: 4
+      - line: 3
+        activate:
+          zone: hand
+          cost:
+            steps:
+              - pp: 1
+              - discard:
+                  ref: this
+          do:
+            - search:
+                sel:
+                  who: self
+                  zone: deck
+                  name: 魔女の大釜
+                n: 1
+                to: field
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-02"

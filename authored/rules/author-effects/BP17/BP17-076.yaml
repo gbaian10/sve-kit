@@ -1,0 +1,62 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP17-076:
+    abilities:
+      - line: 1
+        attack_time:
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: enemy
+                n:
+                  count:
+                    who: self
+                    zone: field
+                    kind: follower
+                    trait: 機械
+                    other: true
+      - line: 2
+        fanfare:
+          do:
+            - create:
+                token: プロダクトマシーン
+                to: field
+                n: 1
+      - line: 3
+        activate:
+          cost:
+            pp: 0
+          per_turn: 1
+          usable_if:
+            cmp:
+              left:
+                count:
+                  who: self
+                  zone: field
+                  kind: follower
+                  trait: 機械
+              op: eq
+              right: 5
+          do:
+            - buff:
+                "on": this
+                power: 1
+                hp: 1
+            - grant:
+                "on": this
+                keywords:
+                  - storm
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-02"

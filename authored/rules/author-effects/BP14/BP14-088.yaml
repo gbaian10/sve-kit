@@ -1,0 +1,46 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP14-088:
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        fanfare:
+          do:
+            - create:
+                n: 1
+                to: field
+                token: 招来の狐
+      - line: 3
+        activate:
+          zone: cemetery
+          cost:
+            steps:
+              - pp: 2
+              - banish_self: true
+          do:
+            - create:
+                n: 1
+                to: field
+                token: 招来の狐
+            - buff:
+                "on":
+                  who: self
+                  zone: field
+                  name: 招来の狐
+                power: 2
+                hp: 1
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP14-T06
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-02"
