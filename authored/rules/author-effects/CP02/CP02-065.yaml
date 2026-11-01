@@ -1,0 +1,29 @@
+cards:
+  CP02-065:
+    abilities:
+      - fanfare:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - destroy: enemy
+                  - - draw:
+                        n: 1
+          targets:
+            - bind: enemy
+              from:
+                kind: amulet
+                who: opp
+                zone: field
+              n: 1
+              option: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
