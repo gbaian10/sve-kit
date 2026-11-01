@@ -52,6 +52,7 @@ fn lower_operations(
     let mut parameters = Vec::new();
     for operation in operations {
         let action = match operation {
+            ast::CostOperation::Counter(value) => super::counters::cost(value, path)?,
             ast::CostOperation::Lesson(amount) => {
                 let material = ast::Material {
                     n: *amount,
@@ -180,7 +181,8 @@ fn material_operation(
         ast::CostOperation::Banish(_) => Ok(super::material::Operation::Banish),
         ast::CostOperation::Act(_) => Ok(super::material::Operation::Act),
         ast::CostOperation::ToEx(_) => Ok(super::material::Operation::Ex),
-        ast::CostOperation::Pp(_)
+        ast::CostOperation::Counter(_)
+        | ast::CostOperation::Pp(_)
         | ast::CostOperation::Lesson(_)
         | ast::CostOperation::LeaderLife(_)
         | ast::CostOperation::Discard(_)

@@ -497,6 +497,7 @@ impl Execution {
 
     fn live_natural(&self, game: &Game, read: &NatRead) -> Result<Nat> {
         match read {
+            NatRead::Counter { holder, kind } => self.counter(game, holder, kind),
             NatRead::Combo { player, execution } => {
                 super::history_turn::combo(self, game, player, *execution)
             }

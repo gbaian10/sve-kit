@@ -106,7 +106,8 @@ impl BodyContext<'_> {
             } => {
                 matches!(query.zone, ast::PublicZone::Cemetery)
             }
-            ast::Number::Literal(_)
+            ast::Number::Counter { .. }
+            | ast::Number::Literal(_)
             | ast::Number::Alias(_)
             | ast::Number::HistoryCount { .. }
             | ast::Number::LeaderLife { .. }

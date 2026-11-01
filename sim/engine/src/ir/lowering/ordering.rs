@@ -76,7 +76,8 @@ impl BodyContext<'_> {
                 }
                 return self.search_result(step, receipt, path);
             }
-            ast::Step::Reveal(_)
+            ast::Step::Counter(_)
+            | ast::Step::Reveal(_)
             | ast::Step::EachPlayer(_)
             | ast::Step::Race(_)
             | ast::Step::Evolve(_)

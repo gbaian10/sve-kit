@@ -452,6 +452,7 @@ impl Game {
         let mut pp = int(&self.player(seat_name(actor)?)?.pp["current"]);
         let mut life = int(&self.player(seat_name(actor)?)?.leader["life"]);
         let mut standing = self.object(holder)?.state["acted"] == false;
+        let mut counters = BTreeMap::new();
         for step in steps {
             match &step.instruction.action {
                 Action::Resource {
@@ -469,6 +470,23 @@ impl Game {
                     pp = pp
                         .checked_sub(amount)
                         .ok_or_else(|| invalid("PP quote overflow"))?;
+                }
+                Action::Counter {
+                    holder: counter_holder,
+                    kind,
+                    amount: Expr::Literal(amount),
+                    ..
+                } => {
+                    let key = self.catalog.keyword_id(&kind.0);
+                    let count = counters
+                        .entry(key)
+                        .or_insert(execution.counter(self, counter_holder, kind)?.0);
+                    if *count < amount.0 {
+                        return Ok(false);
+                    }
+                    *count = count
+                        .checked_sub(amount.0)
+                        .ok_or_else(|| invalid("counter quote overflow"))?;
                 }
                 Action::Posture { .. } => {
                     if !standing {

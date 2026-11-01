@@ -567,6 +567,10 @@ impl Game {
         self.internal_use_prerequisite(execution, costs)?;
         for step in steps {
             let (quantity, subjects) = match &step.instruction.action {
+                Action::Counter { .. } => (
+                    self.internal_counter(execution, &step.instruction, true)?,
+                    Vec::new(),
+                ),
                 Action::Discard { .. } => {
                     self.internal_hand_cost_payment(execution, &step.instruction)?
                 }
@@ -846,6 +850,7 @@ fn check_costs(ability: &Ability, source: &SourceSpan) -> Result<()> {
                     && movement.initial_posture.is_none()
                     && movement.entry_effects.is_empty()
             }
+            Action::Counter { .. } => super::counters::is_cost(&instruction.action),
             Action::Discard { .. } => hand_payment::check_cost(&instruction.action),
             action => material::check_cost(action, play),
         };
@@ -982,6 +987,7 @@ fn check_nodes(
                         amount: DamageAmount::Uniform { .. } | DamageAmount::Allocation { .. },
                         ..
                     } | Action::Resource { .. }
+                        | Action::Counter { .. }
                         | Action::Discard { .. }
                         | Action::Reveal { .. }
                         | Action::Move { .. }

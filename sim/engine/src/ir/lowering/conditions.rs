@@ -383,6 +383,15 @@ impl BodyContext<'_> {
         active: &mut BTreeSet<String>,
     ) -> Result<Expr<Int>, LoweringError> {
         match value {
+            ast::Number::Counter { counter } => {
+                let ast::This::This = counter.on;
+                Ok(Expr::Compute(Box::new(IntOperation::FromNat {
+                    value: Expr::Live(Box::new(NatRead::Counter {
+                        holder: super::counters::holder(),
+                        kind: super::super::CounterKind(counter.name.clone()),
+                    })),
+                })))
+            }
             ast::Number::HistoryCount { history_count } => self.played_count(history_count, path),
             ast::Number::Literal(value) => Ok(Expr::Literal(Int(*value))),
             ast::Number::Resolution { at, value } => {

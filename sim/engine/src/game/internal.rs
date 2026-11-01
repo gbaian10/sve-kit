@@ -8,10 +8,10 @@
 use super::{Frame, Game, View, int, string};
 use crate::ir::{
     AbilityQualification, Action, ActionPattern, Arithmetic, Binding, Bool, Capture, CaptureRef,
-    CardQuantityOutcome, Cardinality, ChoiceDomain, Comparison, Control, DamageEvent,
-    DamageQuantityOutcome, DamageRecipient, Decision, DecisionId, DecisionKind, Declinable,
-    DestroyOutcome, DrawEvent, DriveCheckedEvent, DriveTriggerEvent, Effect, EffectId, EntryMethod,
-    EntryOrigin, ExecutionId, Expr, Generation, InstallationSubjects, Instruction,
+    CardQuantityOutcome, Cardinality, ChoiceDomain, Comparison, Control, CounterChangeEvent,
+    DamageEvent, DamageQuantityOutcome, DamageRecipient, Decision, DecisionId, DecisionKind,
+    Declinable, DestroyOutcome, DrawEvent, DriveCheckedEvent, DriveTriggerEvent, Effect, EffectId,
+    EntryMethod, EntryOrigin, ExecutionId, Expr, Generation, InstallationSubjects, Instruction,
     InstructionContext, Int, IntFrozen, IntOperation, IntRead, LifeChangeEvent, Located,
     LookOutcome, MeasuredReceipt, ModeChoiceKind, ModeId, MoveOutcome, Nat, NatFrozen,
     NatOperation, NatRead, Node, ObjectFrozen, ObjectId, ObjectOperand, ObjectRef, OrderOutcome,
@@ -40,6 +40,7 @@ pub use damage::ReplacementOption;
 mod alternatives;
 mod card;
 mod cost;
+mod counters;
 mod discard;
 mod drive;
 mod duration;
@@ -258,6 +259,8 @@ pub enum Answer {
 /// Typed instruction outcomes retained only by the authority.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum InstructionOutcome {
+    /// Actual before/after counter values, including an unchanged result.
+    Counter(CounterChangeEvent),
     /// One effect-driven ordinary evolution and its live physical association.
     Evolution {
         /// The public before/after evolution fact.
@@ -1287,6 +1290,9 @@ impl Game {
             Action::Evolve { .. } => self.internal_effect_evolve(execution, &instruction)?,
             Action::Token { .. } => self.internal_tokens(execution, &instruction)?,
             Action::Resource { .. } => self.internal_resource(execution, &instruction)?,
+            Action::Counter { .. } => {
+                self.internal_counter(execution, &instruction, false)?;
+            }
             Action::Discard { .. } => self.internal_discard_wait(execution, instruction)?,
             Action::Life { .. } => self.internal_life(execution, &instruction)?,
             Action::Modify { .. } => self.internal_modify(execution, &instruction)?,

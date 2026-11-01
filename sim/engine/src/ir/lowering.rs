@@ -4,6 +4,7 @@ mod ast;
 mod capture;
 mod conditions;
 mod costs;
+mod counters;
 mod current;
 mod discard;
 mod evolution;
@@ -1071,6 +1072,7 @@ impl<'definitions> BodyContext<'definitions> {
         span: &SourceSpan,
     ) -> Result<Action, LoweringError> {
         match step {
+            ast::Step::Counter(value) => counters::change(value, path),
             ast::Step::Race(value) => Ok(meal::action(
                 value.n.unwrap_or(1),
                 super::MealRaceOperation::Race,

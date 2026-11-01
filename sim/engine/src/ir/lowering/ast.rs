@@ -180,6 +180,7 @@ pub(super) enum Cost {
 pub(super) enum CostOperation {
     Pp(u64),
     Lesson(u64),
+    Counter(CounterCost),
     LeaderLife(u64),
     ToCemetery(Material),
     ReturnToHand(Material),
@@ -219,6 +220,7 @@ pub(super) struct Body {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum Step {
+    Counter(CounterChange),
     Race(Race),
     Evolve(EffectEvolution),
     If(Conditional),
@@ -247,6 +249,29 @@ pub(super) enum Step {
     Reveal(Reveal),
     Move(Move),
     Create(Create),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct CounterCost {
+    pub on: This,
+    pub name: String,
+    pub n: u64,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct CounterChange {
+    pub on: This,
+    pub name: String,
+    pub delta: i64,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct CounterRead {
+    pub on: This,
+    pub name: String,
 }
 
 #[derive(Deserialize)]
@@ -1014,6 +1039,9 @@ pub(super) enum LeaderSide {
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum Number {
     Literal(i64),
+    Counter {
+        counter: CounterRead,
+    },
     Alias(String),
     HistoryCount {
         history_count: PlayedHistory,
